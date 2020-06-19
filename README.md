@@ -17,3 +17,16 @@ To attract more web developers we plan to build a JavaScript DSL for TEAL with T
 ## Development
 
 The project development is open and you can observer a progress through [Pivotal tracker board](https://www.pivotaltracker.com/n/projects/2452320).
+
+## Working with monorepo
+
+We use **yarn workspaces** to manage all sub packages. here is a list of commands which are helpful in a development workflow
+
+* `yarn workspaces info`
+* `yarn workspaces list`
+* `yarn workspaces <package-name> <command>`, eg: `yarn workspaces mypkg1 run build` or  `yarn workspaces mypkg1 run add --dev react`
+* `yarn add algosdk` -- will add `algosdk` to all sub projects (workspaces)
+
+`yarn` does not add dependencies to node_modules directories in either of your packages  –  only at the root level, i.e., yarn hoists all dependencies to the root level. yarn leverages symlinks to point to the different packages. Thereby, yarn includes the dependencies only once in the project.
+
+You have to utilize yarn workspaces’ `noHoist` feature to use otherwise incompatible 3rd party dependencies working in the Mono-Repo environment.

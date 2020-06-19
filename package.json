@@ -1,0 +1,32 @@
+{
+  "name": "algorand-builder",
+  "version": "0.0.1",
+  "description": "Framework to automate development of Algorand Assets and Smart Contracts.",
+  "repository": "https://github.com/scale-it/algorand-builder.git",
+  "author": "Robert Zaremba <https://github.com/robert-zaremba>",
+  "license": "Apache License 2.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=12.16.0",
+    "yarn": ">=1.22.4"
+  },
+  "scripts": {
+    "cleanup": "./cleanup.sh",
+    "build": "yarn workspaces foreach run build",
+    "watch": "tsc --build --watch packages/*/src",
+    "test": "yarn workspaces foreach run test",
+    "lint": "yarn workspaces foreach -p run lint",
+    "lint:fix": "yarn workspaces foreach -p run lint:fix"
+  },
+  "devDependencies": {
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^14.0.13",
+    "chai": "^4.2.0",
+    "eslint-plugin-simple-import-sort": "^5.0.3",
+    "mocha": "^8.0.1",
+    "typescript": "^3.9.5"
+  }
+}
