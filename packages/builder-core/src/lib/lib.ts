@@ -1,3 +1,6 @@
 
-export default class Library {
+export class Library {
+  hi(name: string) {
+    return 'name'
+  }
 }

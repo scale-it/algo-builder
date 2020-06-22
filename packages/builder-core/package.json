@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "author": "SEE package.json from PROJECT ROOT",
   "contributors": "SEE package.json from PROJECT ROOT",
-  "license": "SEE package.json from PROJECT ROOT",
+  "license": "Apache-2.0",
   "repository": "SEE package.json from PROJECT ROOT",
-  "main": "build/lib/lib.ts",
+  "main": "build/lib/lib.js",
   "types": "build/lib/lib.d.ts",
   "description": "",
   "keywords": [
