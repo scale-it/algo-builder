@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "outDir": "../build/",
-    "rootDirs": ["."],
-    "composite": true
-  },
-  "include": ["./**/*.ts"],
-  "exclude": []
-}
