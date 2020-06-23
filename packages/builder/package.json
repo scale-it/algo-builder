@@ -1,5 +1,5 @@
 {
-  "name": "builder-core",
+  "name": "@scale-it/builder",
   "version": "0.0.1",
   "author": "SEE package.json from PROJECT ROOT",
   "contributors": "SEE package.json from PROJECT ROOT",
