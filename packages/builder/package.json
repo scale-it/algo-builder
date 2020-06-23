@@ -1,0 +1,59 @@
+{
+  "name": "@scale-it/builder",
+  "version": "0.0.1",
+  "author": "SEE package.json from PROJECT ROOT",
+  "contributors": "SEE package.json from PROJECT ROOT",
+  "license": "Apache-2.0",
+  "repository": "SEE package.json from PROJECT ROOT",
+  "main": "build/lib/lib.js",
+  "types": "build/lib/lib.d.ts",
+  "description": "",
+  "keywords": [
+    "smart-contracts",
+    "buidler",
+    "blockchain",
+    "dapps",
+    "javascript",
+    "tooling",
+    "task-runner"
+  ],
+  "bin": {
+    "buidler": "build/cli/cli.js"
+  },
+  "engines": {
+    "node": ">=8.2.0"
+  },
+  "scripts": {
+    "lint:fix": "npm run lint -- --fix",
+    "lint": "npm run lint",
+    "test": "node ../../node_modules/mocha/bin/mocha",
+    "coverage": "node ../../node_modules/nyc/bin/nyc.js ../../node_modules/mocha/bin/mocha",
+    "build": "node ../../node_modules/typescript/bin/tsc --build .",
+    "clean": "node ../../node_modules/rimraf/bin.js builtin-tasks internal *.d.ts *.map *.js tsconfig.tsbuildinfo build"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.0",
+    "chai": "^4.2.0",
+    "time-require": "^0.1.2",
+    "cross-env": "5.0.5",
+    "source-map-support": "^0.5.13"
+  },
+  "dependencies": {
+  },
+  "nyc": {
+    "extension": [
+      ".ts"
+    ],
+    "exclude": [
+      "build",
+      "test",
+      "coverage",
+      ".nyc_output"
+    ],
+    "reporter": [
+      "text",
+      "lcovonly"
+    ],
+    "all": true
+  }
+}

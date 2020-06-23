@@ -8,15 +8,15 @@
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "module": "esnext",
+    "module": "commonjs",
     "resolveJsonModule": true,
-    "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
     "noImplicitReturns": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true,
-    "baseUrl": "src"
+    "baseUrl": "src",
+    "declaration": true
   },
   "include": [
     "src",
@@ -26,9 +26,6 @@
     "node_modules",
     "build",
     "./scripts",
-    "webpack",
-    "jest",
-    "./src/setupTests.ts",
-    "**/*.private.tsx*"
+    "webpack"
   ]
 }
