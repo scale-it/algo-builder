@@ -30,7 +30,7 @@
     "coverage": "node ../../node_modules/nyc/bin/nyc.js ../../node_modules/mocha/bin/mocha",
     "build": "node ../../node_modules/typescript/bin/tsc --build .",
     "clean": "node ../../node_modules/rimraf/bin.js builtin-tasks internal *.d.ts *.map *.js tsconfig.tsbuildinfo build",
-    "algob": "node ./build/cli/cli.js"
+    "algob": "node ./build/internal/cli/cli.js"
   },
   "devDependencies": {
     "@types/chai": "^4.2.0",
