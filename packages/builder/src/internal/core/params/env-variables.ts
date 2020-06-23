@@ -6,7 +6,7 @@ import { unsafeObjectKeys } from "../../util/unsafe";
 import { BuidlerError } from "../errors";
 import { ERRORS } from "../errors-list";
 
-const BUIDLER_ENV_ARGUMENT_PREFIX = "ALGORAND_BUILDER_";
+const BUIDLER_ENV_ARGUMENT_PREFIX = "BUIDLER_";
 
 export function paramNameToEnvVariable(paramName: string): string {
   // We create it starting from the result of ArgumentsParser.paramNameToCLA

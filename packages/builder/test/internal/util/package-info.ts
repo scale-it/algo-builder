@@ -16,7 +16,7 @@ describe("package-info", () => {
   });
 
   it("should give the right package root", async () => {
-    const root = await fsExtra.realpath(path.join(__dirname, "..", ".."));
+    const root = await fsExtra.realpath(path.join(__dirname, "..", "..", ".."));
     assert.equal(await getPackageRoot(), root);
   });
 });

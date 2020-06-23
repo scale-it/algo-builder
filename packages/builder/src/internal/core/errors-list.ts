@@ -1,5 +1,5 @@
 
-export const ERROR_PREFIX = "ABDLR";
+export const ERROR_PREFIX = "BDLR";
 
 export interface ErrorDescriptor {
   number: number;

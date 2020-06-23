@@ -284,17 +284,17 @@ export type ActionType<ArgsT extends TaskArguments> = (
   runSuper: RunSuperFunction<ArgsT>
 ) => Promise<any>;
 
-export interface EthereumProvider extends EventEmitter {
-  send(method: string, params?: any[]): Promise<any>;
-}
+//export interface EthereumProvider extends EventEmitter {
+//  send(method: string, params?: any[]): Promise<any>;
+//}
 
-// This alias is here for backwards compatibility
-export type IEthereumProvider = EthereumProvider;
+//// This alias is here for backwards compatibility
+//export type IEthereumProvider = EthereumProvider;
 
 export interface Network {
   name: string;
   config: NetworkConfig;
-  provider: EthereumProvider;
+  //provider: EthereumProvider;
 }
 
 export interface BuidlerRuntimeEnvironment {
@@ -302,8 +302,8 @@ export interface BuidlerRuntimeEnvironment {
   readonly buidlerArguments: BuidlerArguments;
   readonly tasks: TasksMap;
   readonly run: RunTaskFunction;
-  readonly network: Network;
-  readonly ethereum: EthereumProvider; // DEPRECATED: Use network.provider
+  //readonly network: Network;
+  //readonly ethereum: EthereumProvider; // DEPRECATED: Use network.provider
 }
 
 export interface Artifact {
