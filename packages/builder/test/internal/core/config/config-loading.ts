@@ -19,6 +19,8 @@ describe("config loading", function () {
     useEnvironment();
 
     it("should load the default config if none is given", function () {
+      const a: any = this.env.config
+      assert.equal ("this.env.config", a)
       assert.isDefined(this.env.config.networks.localhost);
       assert.deepEqual(this.env.config.networks.localhost.accounts, [
         "0xa95f9e3e7ae4e4865c5968828fe7c03fffa8a9f3bb52d36d26243f4c868ee166",

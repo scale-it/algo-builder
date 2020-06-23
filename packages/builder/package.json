@@ -41,7 +41,6 @@
     "@types/semver": "^7.2.0",
     "@types/sinon": "^9.0.4",
     "chai": "^4.2.0",
-    "time-require": "^0.1.2",
     "cross-env": "5.0.5",
     "source-map-support": "^0.5.13",
     "time-require": "^0.1.2"
@@ -49,6 +48,7 @@
   "dependencies": {
     "debug": "^4.1.1",
     "deepmerge": "^4.2.2",
+    "enquirer": "^2.3.5",
     "find-up": "^4.1.0",
     "fs-extra": "^9.0.1",
     "glob": "^7.1.6",
