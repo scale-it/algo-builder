@@ -5,8 +5,8 @@
   "contributors": "SEE package.json from PROJECT ROOT",
   "license": "Apache-2.0",
   "repository": "SEE package.json from PROJECT ROOT",
-  "main": "build/lib/lib.js",
-  "types": "build/lib/lib.d.ts",
+  "main": "build/internal/lib/lib.js",
+  "types": "build/internal/lib/lib.d.ts",
   "description": "",
   "keywords": [
     "smart-contracts",
@@ -18,7 +18,7 @@
     "task-runner"
   ],
   "bin": {
-    "buidler": "build/cli/cli.js"
+    "algob": "build/internal/cli/cli.js"
   },
   "engines": {
     "node": ">=8.2.0"
@@ -29,16 +29,35 @@
     "test": "node ../../node_modules/mocha/bin/mocha",
     "coverage": "node ../../node_modules/nyc/bin/nyc.js ../../node_modules/mocha/bin/mocha",
     "build": "node ../../node_modules/typescript/bin/tsc --build .",
-    "clean": "node ../../node_modules/rimraf/bin.js builtin-tasks internal *.d.ts *.map *.js tsconfig.tsbuildinfo build"
+    "clean": "node ../../node_modules/rimraf/bin.js builtin-tasks internal *.d.ts *.map *.js tsconfig.tsbuildinfo build",
+    "algob": "node ./build/internal/cli/cli.js"
   },
   "devDependencies": {
     "@types/chai": "^4.2.0",
+    "@types/debug": "^4.1.5",
+    "@types/deepmerge": "^2.2.0",
+    "@types/fs-extra": "^9.0.1",
+    "@types/glob": "^7.1.2",
+    "@types/semver": "^7.2.0",
+    "@types/sinon": "^9.0.4",
     "chai": "^4.2.0",
-    "time-require": "^0.1.2",
     "cross-env": "5.0.5",
-    "source-map-support": "^0.5.13"
+    "source-map-support": "^0.5.13",
+    "time-require": "^0.1.2"
   },
   "dependencies": {
+    "@types/node": "^14.0.13",
+    "debug": "^4.1.1",
+    "deepmerge": "^4.2.2",
+    "enquirer": "^2.3.5",
+    "find-up": "^4.1.0",
+    "fp-ts": "^2.6.6",
+    "fs-extra": "^9.0.1",
+    "glob": "^7.1.6",
+    "io-ts": "^2.2.6",
+    "semver": "^7.3.2",
+    "sinon": "^9.0.2",
+    "ts-essentials": "^7.0.0"
   },
   "nyc": {
     "extension": [
