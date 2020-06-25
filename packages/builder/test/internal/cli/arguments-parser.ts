@@ -8,7 +8,7 @@ import {
   int,
   string,
 } from "../../../src/internal/core/params/argument-types";
-import { BUIDLER_PARAM_DEFINITIONS } from "../../../src/internal/core/params/builder-params";
+import { BUILDER_PARAM_DEFINITIONS } from "../../../src/internal/core/params/builder-params";
 import {
   OverriddenTaskDefinition,
   SimpleTaskDefinition,
@@ -92,14 +92,14 @@ describe("ArgumentsParser", () => {
     assert.isTrue(
       argumentsParser["_isCLAParamName"](
         "--show-stack-traces",
-        BUIDLER_PARAM_DEFINITIONS
+        BUILDER_PARAM_DEFINITIONS
       )
     );
     assert.isFalse(
-      argumentsParser["_isCLAParamName"]("sarasa", BUIDLER_PARAM_DEFINITIONS)
+      argumentsParser["_isCLAParamName"]("sarasa", BUILDER_PARAM_DEFINITIONS)
     );
     assert.isFalse(
-      argumentsParser["_isCLAParamName"]("--sarasa", BUIDLER_PARAM_DEFINITIONS)
+      argumentsParser["_isCLAParamName"]("--sarasa", BUILDER_PARAM_DEFINITIONS)
     );
   });
 
@@ -118,7 +118,7 @@ describe("ArgumentsParser", () => {
         taskName,
         unparsedCLAs,
       } = argumentsParser.parseBuilderArguments(
-        BUIDLER_PARAM_DEFINITIONS,
+        BUILDER_PARAM_DEFINITIONS,
         envArgs,
         rawCLAs
       );
@@ -144,7 +144,7 @@ describe("ArgumentsParser", () => {
         taskName,
         unparsedCLAs,
       } = argumentsParser.parseBuilderArguments(
-        BUIDLER_PARAM_DEFINITIONS,
+        BUILDER_PARAM_DEFINITIONS,
         envArgs,
         rawCLAs
       );
@@ -168,7 +168,7 @@ describe("ArgumentsParser", () => {
       expectBuilderError(
         () =>
           argumentsParser.parseBuilderArguments(
-            BUIDLER_PARAM_DEFINITIONS,
+            BUILDER_PARAM_DEFINITIONS,
             envArgs,
             rawCLAs
           ),
@@ -190,7 +190,7 @@ describe("ArgumentsParser", () => {
         argumentsParser["_parseArgumentAt"](
           rawCLAs,
           0,
-          BUIDLER_PARAM_DEFINITIONS,
+          BUILDER_PARAM_DEFINITIONS,
           builderArguments
         )
       );
@@ -200,7 +200,7 @@ describe("ArgumentsParser", () => {
         argumentsParser["_parseArgumentAt"](
           rawCLAs,
           1,
-          BUIDLER_PARAM_DEFINITIONS,
+          BUILDER_PARAM_DEFINITIONS,
           builderArguments
         )
       );
@@ -217,7 +217,7 @@ describe("ArgumentsParser", () => {
       expectBuilderError(
         () =>
           argumentsParser.parseBuilderArguments(
-            BUIDLER_PARAM_DEFINITIONS,
+            BUILDER_PARAM_DEFINITIONS,
             envArgs,
             rawCLAs
           ),
@@ -237,7 +237,7 @@ describe("ArgumentsParser", () => {
       expectBuilderError(
         () =>
           argumentsParser.parseBuilderArguments(
-            BUIDLER_PARAM_DEFINITIONS,
+            BUILDER_PARAM_DEFINITIONS,
             envArgs,
             rawCLAs
           ),
@@ -247,7 +247,7 @@ describe("ArgumentsParser", () => {
 
     it("should only add non-present arguments", () => {
       const builderArguments = argumentsParser["_addBuilderDefaultArguments"](
-        BUIDLER_PARAM_DEFINITIONS,
+        BUILDER_PARAM_DEFINITIONS,
         envArgs,
         {
           showStackTraces: true,

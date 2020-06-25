@@ -79,13 +79,13 @@ export interface ProjectPaths {
   tests: string;
 }
 
-type EVMVersion = string;
+//type EVMVersion = string;
 
-export interface SolcConfig {
-  version: string;
-  optimizer: SolcOptimizerConfig;
-  evmVersion?: EVMVersion;
-}
+//export interface SolcConfig {
+//  version: string;
+//  optimizer: SolcOptimizerConfig;
+//  //evmVersion?: EVMVersion;
+//}
 
 export interface SolcOptimizerConfig {
   enabled: boolean;
@@ -100,7 +100,7 @@ export interface BuilderConfig {
   defaultNetwork?: string;
   networks?: Networks;
   paths?: StrictOmit<Partial<ProjectPaths>, "configFile">;
-  solc?: DeepPartial<SolcConfig>;
+  //solc?: DeepPartial<SolcConfig>;
   mocha?: Mocha.MochaOptions;
   analytics?: Partial<AnalyticsConfig>;
 }
@@ -109,7 +109,7 @@ export interface ResolvedBuilderConfig extends BuilderConfig {
   defaultNetwork: string;
   paths: ProjectPaths;
   networks: Networks;
-  solc: SolcConfig;
+  //solc: SolcConfig;
   analytics: AnalyticsConfig;
 }
 
@@ -120,7 +120,7 @@ export interface SolcInput {
     metadata: { useLiteralContent: boolean };
     optimizer: SolcOptimizerConfig;
     outputSelection: { "*": { "": string[]; "*": string[] } };
-    evmVersion?: string;
+    //evmVersion?: string;
   };
   sources: { [p: string]: { content: string } };
   language: string;

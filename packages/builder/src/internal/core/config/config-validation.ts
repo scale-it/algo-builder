@@ -3,8 +3,8 @@ import { Context, getFunctionName, ValidationError } from "io-ts/lib";
 import { Reporter } from "io-ts/lib/Reporter";
 
 import {
-  BUIDLEREVM_NETWORK_NAME,
-  BUIDLEREVM_SUPPORTED_HARDFORKS,
+  BUILDEREVM_NETWORK_NAME,
+  BUILDEREVM_SUPPORTED_HARDFORKS,
 } from "../../constants";
 import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
@@ -189,14 +189,14 @@ export function getValidationErrors(config: any): string[] {
 
   // These can't be validated with io-ts
   if (config !== undefined && typeof config.networks === "object") {
-    const builderNetwork = config.networks[BUIDLEREVM_NETWORK_NAME];
+    const builderNetwork = config.networks[BUILDEREVM_NETWORK_NAME];
     if (builderNetwork !== undefined) {
       if (
         builderNetwork.hardfork !== undefined &&
-        !BUIDLEREVM_SUPPORTED_HARDFORKS.includes(builderNetwork.hardfork)
+        !BUILDEREVM_SUPPORTED_HARDFORKS.includes(builderNetwork.hardfork)
       ) {
         errors.push(
-          `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME}.hardfork is not supported. Use one of ${BUIDLEREVM_SUPPORTED_HARDFORKS.join(
+          `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME}.hardfork is not supported. Use one of ${BUILDEREVM_SUPPORTED_HARDFORKS.join(
             ", "
           )}`
         );
@@ -208,7 +208,7 @@ export function getValidationErrors(config: any): string[] {
       ) {
         errors.push(
           getErrorMessage(
-            `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME}.allowUnlimitedContractSize`,
+            `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME}.allowUnlimitedContractSize`,
             builderNetwork.allowUnlimitedContractSize,
             "boolean | undefined"
           )
@@ -221,7 +221,7 @@ export function getValidationErrors(config: any): string[] {
       ) {
         errors.push(
           getErrorMessage(
-            `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME}.initialDate`,
+            `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME}.initialDate`,
             builderNetwork.initialDate,
             "string | undefined"
           )
@@ -234,7 +234,7 @@ export function getValidationErrors(config: any): string[] {
       ) {
         errors.push(
           getErrorMessage(
-            `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME}.throwOnTransactionFailures`,
+            `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME}.throwOnTransactionFailures`,
             builderNetwork.throwOnTransactionFailures,
             "boolean | undefined"
           )
@@ -247,7 +247,7 @@ export function getValidationErrors(config: any): string[] {
       ) {
         errors.push(
           getErrorMessage(
-            `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME}.throwOnCallFailures`,
+            `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME}.throwOnCallFailures`,
             builderNetwork.throwOnCallFailures,
             "boolean | undefined"
           )
@@ -256,7 +256,7 @@ export function getValidationErrors(config: any): string[] {
 
       if (builderNetwork.url !== undefined) {
         errors.push(
-          `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME} can't have an url`
+          `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME} can't have an url`
         );
       }
 
@@ -266,7 +266,7 @@ export function getValidationErrors(config: any): string[] {
       ) {
         errors.push(
           getErrorMessage(
-            `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME}.blockGasLimit`,
+            `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME}.blockGasLimit`,
             builderNetwork.blockGasLimit,
             "number | undefined"
           )
@@ -279,7 +279,7 @@ export function getValidationErrors(config: any): string[] {
       ) {
         errors.push(
           getErrorMessage(
-            `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME}.chainId`,
+            `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME}.chainId`,
             builderNetwork.chainId,
             "number | undefined"
           )
@@ -292,7 +292,7 @@ export function getValidationErrors(config: any): string[] {
       ) {
         errors.push(
           getErrorMessage(
-            `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME}.loggingEnabled`,
+            `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME}.loggingEnabled`,
             builderNetwork.loggingEnabled,
             "boolean | undefined"
           )
@@ -305,7 +305,7 @@ export function getValidationErrors(config: any): string[] {
             if (typeof account.privateKey !== "string") {
               errors.push(
                 getErrorMessage(
-                  `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME}.accounts[].privateKey`,
+                  `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME}.accounts[].privateKey`,
                   account.privateKey,
                   "string"
                 )
@@ -315,7 +315,7 @@ export function getValidationErrors(config: any): string[] {
             if (typeof account.balance !== "string") {
               errors.push(
                 getErrorMessage(
-                  `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME}.accounts[].balance`,
+                  `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME}.accounts[].balance`,
                   account.balance,
                   "string"
                 )
@@ -325,7 +325,7 @@ export function getValidationErrors(config: any): string[] {
         } else {
           errors.push(
             getErrorMessage(
-              `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME}.accounts`,
+              `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME}.accounts`,
               builderNetwork.accounts,
               "[{privateKey: string, balance: string}] | undefined"
             )
@@ -337,7 +337,7 @@ export function getValidationErrors(config: any): string[] {
     for (const [networkName, netConfig] of Object.entries<any>(
       config.networks
     )) {
-      if (networkName === BUIDLEREVM_NETWORK_NAME) {
+      if (networkName === BUILDEREVM_NETWORK_NAME) {
         continue;
       }
 

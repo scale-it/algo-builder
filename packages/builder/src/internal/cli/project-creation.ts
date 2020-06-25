@@ -3,14 +3,14 @@ import fsExtra from "fs-extra";
 import os from "os";
 import path from "path";
 
-import { BUIDLER_NAME } from "../constants";
+import { BUILDER_NAME } from "../constants";
 import { ExecutionMode, getExecutionMode } from "../core/execution-mode";
 import { getPackageJson, getPackageRoot } from "../util/package-info";
 
 import { emoji } from "./emoji";
 
 const CREATE_SAMPLE_PROJECT_ACTION = "Create a sample project";
-const CREATE_EMPTY_BUIDLER_CONFIG_ACTION = "Create an empty builder.config.js";
+const CREATE_EMPTY_BUILDER_CONFIG_ACTION = "Create an empty builder.config.js";
 
 const SAMPLE_PROJECT_DEPENDENCIES = [
   "@nomiclabs/builder-waffle",
@@ -37,7 +37,7 @@ async function printWelcomeMessage() {
 
   console.log(
     chalk.cyan(
-      `${emoji("👷 ")}Welcome to ${BUIDLER_NAME} v${packageJson.version}${emoji(
+      `${emoji("👷 ")}Welcome to ${BUILDER_NAME} v${packageJson.version}${emoji(
         " 👷‍"
       )}‍\n`
     )

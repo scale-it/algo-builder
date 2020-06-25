@@ -162,31 +162,31 @@ describe("SimpleTaskDefinition", () => {
       function testClashWith(name: string) {
         expectBuilderError(
           () => taskDefinition.addParam(name),
-          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_BUIDLER_PARAM
+          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_BUILDER_PARAM
         );
         expectBuilderError(
           () => taskDefinition.addOptionalParam(name),
-          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_BUIDLER_PARAM
+          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_BUILDER_PARAM
         );
         expectBuilderError(
           () => taskDefinition.addFlag(name),
-          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_BUIDLER_PARAM
+          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_BUILDER_PARAM
         );
         expectBuilderError(
           () => taskDefinition.addPositionalParam(name),
-          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_BUIDLER_PARAM
+          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_BUILDER_PARAM
         );
         expectBuilderError(
           () => taskDefinition.addOptionalPositionalParam(name),
-          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_BUIDLER_PARAM
+          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_BUILDER_PARAM
         );
         expectBuilderError(
           () => taskDefinition.addVariadicPositionalParam(name),
-          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_BUIDLER_PARAM
+          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_BUILDER_PARAM
         );
         expectBuilderError(
           () => taskDefinition.addOptionalVariadicPositionalParam(name),
-          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_BUIDLER_PARAM
+          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_BUILDER_PARAM
         );
       }
 

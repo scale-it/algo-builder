@@ -1,6 +1,6 @@
 import { assert } from "chai";
 
-import { BUIDLEREVM_NETWORK_NAME } from "../../../../src/internal/constants";
+import { BUILDEREVM_NETWORK_NAME } from "../../../../src/internal/constants";
 import {
   getValidationErrors,
   validateConfig,
@@ -262,7 +262,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUIDLEREVM_NETWORK_NAME]: 123,
+                  [BUILDEREVM_NETWORK_NAME]: 123,
                 },
               }),
             ERRORS.GENERAL.INVALID_CONFIG
@@ -272,7 +272,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUIDLEREVM_NETWORK_NAME]: {
+                  [BUILDEREVM_NETWORK_NAME]: {
                     chainId: "asd",
                   },
                 },
@@ -284,7 +284,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUIDLEREVM_NETWORK_NAME]: {
+                  [BUILDEREVM_NETWORK_NAME]: {
                     hardfork: "not-supported",
                   },
                 },
@@ -296,7 +296,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUIDLEREVM_NETWORK_NAME]: {
+                  [BUILDEREVM_NETWORK_NAME]: {
                     throwOnCallFailures: "a",
                   },
                 },
@@ -308,7 +308,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUIDLEREVM_NETWORK_NAME]: {
+                  [BUILDEREVM_NETWORK_NAME]: {
                     throwOnTransactionFailures: "a",
                   },
                 },
@@ -320,7 +320,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUIDLEREVM_NETWORK_NAME]: {
+                  [BUILDEREVM_NETWORK_NAME]: {
                     from: 123,
                   },
                 },
@@ -332,7 +332,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUIDLEREVM_NETWORK_NAME]: {
+                  [BUILDEREVM_NETWORK_NAME]: {
                     gas: "asdasd",
                   },
                 },
@@ -344,7 +344,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUIDLEREVM_NETWORK_NAME]: {
+                  [BUILDEREVM_NETWORK_NAME]: {
                     gasPrice: "6789",
                   },
                 },
@@ -356,7 +356,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUIDLEREVM_NETWORK_NAME]: {
+                  [BUILDEREVM_NETWORK_NAME]: {
                     gasMultiplier: "123",
                   },
                 },
@@ -368,7 +368,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUIDLEREVM_NETWORK_NAME]: {
+                  [BUILDEREVM_NETWORK_NAME]: {
                     blockGasLimit: "asd",
                   },
                 },
@@ -380,7 +380,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUIDLEREVM_NETWORK_NAME]: {
+                  [BUILDEREVM_NETWORK_NAME]: {
                     accounts: 123,
                   },
                 },
@@ -392,7 +392,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUIDLEREVM_NETWORK_NAME]: {
+                  [BUILDEREVM_NETWORK_NAME]: {
                     accounts: [{}],
                   },
                 },
@@ -404,7 +404,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUIDLEREVM_NETWORK_NAME]: {
+                  [BUILDEREVM_NETWORK_NAME]: {
                     accounts: [{ privateKey: "" }],
                   },
                 },
@@ -416,7 +416,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUIDLEREVM_NETWORK_NAME]: {
+                  [BUILDEREVM_NETWORK_NAME]: {
                     accounts: [{ balance: "" }],
                   },
                 },
@@ -428,7 +428,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUIDLEREVM_NETWORK_NAME]: {
+                  [BUILDEREVM_NETWORK_NAME]: {
                     accounts: [{ privateKey: 123 }],
                   },
                 },
@@ -440,7 +440,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUIDLEREVM_NETWORK_NAME]: {
+                  [BUILDEREVM_NETWORK_NAME]: {
                     accounts: [{ balance: 213 }],
                   },
                 },
@@ -452,7 +452,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUIDLEREVM_NETWORK_NAME]: {
+                  [BUILDEREVM_NETWORK_NAME]: {
                     loggingEnabled: 123,
                   },
                 },
@@ -464,7 +464,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUIDLEREVM_NETWORK_NAME]: {
+                  [BUILDEREVM_NETWORK_NAME]: {
                     loggingEnabled: "a",
                   },
                 },
@@ -477,7 +477,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUIDLEREVM_NETWORK_NAME]: {
+                  [BUILDEREVM_NETWORK_NAME]: {
                     allowUnlimitedContractSize: "a",
                   },
                 },
@@ -490,7 +490,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUIDLEREVM_NETWORK_NAME]: {
+                  [BUILDEREVM_NETWORK_NAME]: {
                     initialDate: 123,
                   },
                 },
@@ -516,7 +516,7 @@ describe("Config validation", function () {
 
           it("Shouldn't fail if no url is set for builder network", function () {
             const errors = getValidationErrors({
-              networks: { [BUIDLEREVM_NETWORK_NAME]: {} },
+              networks: { [BUILDEREVM_NETWORK_NAME]: {} },
             });
             assert.isEmpty(errors);
           });
@@ -893,7 +893,7 @@ describe("Config validation", function () {
             gasMultiplier: 123,
             url: "",
           },
-          [BUIDLEREVM_NETWORK_NAME]: {
+          [BUILDEREVM_NETWORK_NAME]: {
             gas: 678,
             gasPrice: 123,
             blockGasLimit: 8000,
@@ -960,7 +960,7 @@ describe("Config validation", function () {
           localhost: {
             asd: 1232,
           },
-          [BUIDLEREVM_NETWORK_NAME]: {
+          [BUILDEREVM_NETWORK_NAME]: {
             asdasd: "123",
           },
         },

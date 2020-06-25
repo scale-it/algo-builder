@@ -6,12 +6,12 @@ import "source-map-support/register";
 
 import { TASK_HELP } from "../../builtin-tasks/task-names";
 import { TaskArguments } from "../../types";
-import { BUIDLER_NAME } from "../constants";
+import { BUILDER_NAME } from "../constants";
 import { BuilderContext } from "../context";
 import { loadConfigAndTasks } from "../core/config/config-loading";
 import { BuilderError, BuilderPluginError } from "../core/errors";
 import { ERRORS, getErrorCode } from "../core/errors-list";
-import { BUIDLER_PARAM_DEFINITIONS } from "../core/params/builder-params";
+import { BUILDER_PARAM_DEFINITIONS } from "../core/params/builder-params";
 import { getEnvBuilderArguments } from "../core/params/env-variables";
 import { isCwdInsideProject } from "../core/project-structure";
 import { Environment } from "../core/runtime-environment";
@@ -51,7 +51,7 @@ async function main() {
     ensureValidNodeVersion(packageJson);
 
     const envVariableArguments = getEnvBuilderArguments(
-      BUIDLER_PARAM_DEFINITIONS,
+      BUILDER_PARAM_DEFINITIONS,
       process.env
     );
 
@@ -62,7 +62,7 @@ async function main() {
       taskName: parsedTaskName,
       unparsedCLAs,
     } = argumentsParser.parseBuilderArguments(
-      BUIDLER_PARAM_DEFINITIONS,
+      BUILDER_PARAM_DEFINITIONS,
       envVariableArguments,
       process.argv.slice(2)
     );
@@ -196,11 +196,11 @@ async function main() {
         )}`;
 
         console.error(
-          `For more info go to ${link} or run ${BUIDLER_NAME} with --show-stack-traces`
+          `For more info go to ${link} or run ${BUILDER_NAME} with --show-stack-traces`
         );
       } else {
         console.error(
-          `For more info run ${BUIDLER_NAME} with --show-stack-traces`
+          `For more info run ${BUILDER_NAME} with --show-stack-traces`
         );
       }
     }

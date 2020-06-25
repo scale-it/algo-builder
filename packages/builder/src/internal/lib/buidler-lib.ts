@@ -5,7 +5,7 @@ import { BuilderContext } from "../context";
 import { loadConfigAndTasks } from "../core/config/config-loading";
 import { BuilderError } from "../core/errors";
 import { ERRORS } from "../core/errors-list";
-import { BUIDLER_PARAM_DEFINITIONS } from "../core/params/builder-params";
+import { BUILDER_PARAM_DEFINITIONS } from "../core/params/builder-params";
 import { getEnvBuilderArguments } from "../core/params/env-variables";
 import { Environment } from "../core/runtime-environment";
 
@@ -26,7 +26,7 @@ if (BuilderContext.isCreated()) {
   ctx = BuilderContext.createBuilderContext();
 
   const builderArguments = getEnvBuilderArguments(
-    BUIDLER_PARAM_DEFINITIONS,
+    BUILDER_PARAM_DEFINITIONS,
     process.env
   );
 

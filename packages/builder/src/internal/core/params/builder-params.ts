@@ -2,7 +2,7 @@ import { BuilderParamDefinitions } from "../../../types";
 
 import * as types from "./argument-types";
 
-export const BUIDLER_PARAM_DEFINITIONS: BuilderParamDefinitions = {
+export const BUILDER_PARAM_DEFINITIONS: BuilderParamDefinitions = {
   network: {
     name: "network",
     defaultValue: undefined,
