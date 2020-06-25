@@ -12,8 +12,8 @@ const TS_CONFIG_FILENAME = "buidler.config.ts";
 
 export function isCwdInsideProject() {
   return (
-    findUp.sync(JS_CONFIG_FILENAME) !== null ||
-    (isTypescriptSupported() && findUp.sync(TS_CONFIG_FILENAME) !== null)
+    Boolean(findUp.sync(JS_CONFIG_FILENAME)) ||
+      isTypescriptSupported() && Boolean(findUp.sync(TS_CONFIG_FILENAME))
   );
 }
 
@@ -31,11 +31,4 @@ export function getUserConfigPath(): string | undefined {
   }
 
   return pathToConfigFile;
-}
-
-export async function getRecommendedGitIgnore() {
-  const packageRoot = await getPackageRoot();
-  const gitIgnorePath = path.join(packageRoot, "recommended-gitignore.txt");
-
-  return fsExtra.readFile(gitIgnorePath, "utf-8");
 }

@@ -58,7 +58,7 @@ export function success(): string[] {
 }
 
 export const DotPathReporter: Reporter<string[]> = {
-  report: (validation) => validation.fold(failure, success),
+  report: (validation: any) => validation.fold(failure, success),
 };
 
 function optional<TypeT, OutputT>(
@@ -356,7 +356,7 @@ export function getValidationErrors(config: any): string[] {
       }
 
       const netConfigResult = HttpNetworkConfig.decode(netConfig);
-      if (netConfigResult.isLeft()) {
+      if ((netConfigResult as any).isLeft()) {
         errors.push(
           getErrorMessage(
             `BuidlerConfig.networks.${networkName}`,
@@ -377,7 +377,7 @@ export function getValidationErrors(config: any): string[] {
 
   const result = BuidlerConfig.decode(config);
 
-  if (result.isRight()) {
+  if ((result as any).isRight()) {
     return errors;
   }
 

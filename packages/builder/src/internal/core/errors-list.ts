@@ -37,6 +37,7 @@ export const ERRORS: {
       message: "You are not inside a Buidler project.",
       title: "You are not inside a Buidler project",
       description: `You are trying to run Buidler outside of a Buidler project.
+
 You can learn hoy to use Buidler by reading the [Getting Started guide](./README.md).`,
     },
     INVALID_NODE_VERSION: {
@@ -45,6 +46,7 @@ You can learn hoy to use Buidler by reading the [Getting Started guide](./README
         "Buidler doesn't support your Node.js version. It should be %requirement%.",
       title: "Unsupported Node.js",
       description: `Buidler doesn't support your Node.js version.
+
 Please upgrade your version of Node.js and try again.`,
     },
     UNSUPPORTED_OPERATION: {
@@ -52,7 +54,77 @@ Please upgrade your version of Node.js and try again.`,
       message: "%operation% is not supported in Buidler.",
       title: "Unsupported operation",
       description: `You are tying to perform an unsupported operation.
+
 Unless you are creating a task or plugin, this is probably a bug.
+
+Please [report it](https://github.com/nomiclabs/buidler/issues/new) to help us improve Buidler.`,
+    },
+    CONTEXT_ALREADY_CREATED: {
+      number: 4,
+      message: "BuidlerContext is already created.",
+      title: "Buidler was already initialized",
+      description: `Buidler initialization was executed twice. This is a bug.
+
+Please [report it](https://github.com/nomiclabs/buidler/issues/new) to help us improve Buidler.`,
+    },
+    CONTEXT_NOT_CREATED: {
+      number: 5,
+      message: "BuidlerContext is not created.",
+      title: "Buidler wasn't initialized",
+      description: `Buidler initialization failed. This is a bug.
+
+Please [report it](https://github.com/nomiclabs/buidler/issues/new) to help us improve Buidler.`,
+    },
+    CONTEXT_BRE_NOT_DEFINED: {
+      number: 6,
+      message:
+        "Buidler Runtime Environment is not defined in the BuidlerContext.",
+      title: "Buidler Runtime Environment not created",
+      description: `Buidler initialization failed. This is a bug.
+
+Please [report it](https://github.com/nomiclabs/buidler/issues/new) to help us improve Buidler.`,
+    },
+    CONTEXT_BRE_ALREADY_DEFINED: {
+      number: 7,
+      message:
+        "Buidler Runtime Environment is already defined in the BuidlerContext",
+      title: "Tried to create the Buidler Runtime Environment twice",
+      description: `The Buidler initialization process was executed twice. This is a bug.
+
+Please [report it](https://github.com/nomiclabs/buidler/issues/new) to help us improve Buidler.`,
+    },
+    INVALID_CONFIG: {
+      number: 8,
+      message: `There's one or more errors in your config file:
+
+%errors%
+
+To learn more about Buidler's configuration, please go to https://buidler.dev/config/`,
+      title: "Invalid Buidler config",
+      description: `You have one or more errors in your config file.
+
+Check the error message for details, or go to [documentation](https://buidler.dev/config/) to learn more.`,
+    },
+    LIB_IMPORTED_FROM_THE_CONFIG: {
+      number: 9,
+      message: `Error while loading Buidler's configuration.
+You probably imported @nomiclabs/buidler instead of @nomiclabs/buidler/config`,
+      title: "Failed to load config file",
+      description: `There was an error while loading your config file.
+
+The most common source of errors is trying to import \`@nomiclabs/buidler\` instead of \`@nomiclabs/buidler/config\`.
+
+Please make sure your config file is correct.`,
+    },
+    USER_CONFIG_MODIFIED: {
+      number: 10,
+      message: `Error while loading Buidler's configuration.
+You or one of your plugins is trying to modify the userConfig.%path% value from a config extender`,
+      title: "Attempted to modify the user's config",
+      description: `An attempt to modify the user's config was made.
+
+This is probably a bug in one of your plugins.
+
 Please [report it](https://github.com/nomiclabs/buidler/issues/new) to help us improve Buidler.`,
     },
     USER_CONFIG_DOES_NOT_EXIST: {

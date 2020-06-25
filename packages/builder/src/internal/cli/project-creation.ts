@@ -5,14 +5,12 @@ import path from "path";
 
 import { BUIDLER_NAME } from "../constants";
 import { ExecutionMode, getExecutionMode } from "../core/execution-mode";
-import { getRecommendedGitIgnore } from "../core/project-structure";
 import { getPackageJson, getPackageRoot } from "../util/package-info";
 
 import { emoji } from "./emoji";
 
 const CREATE_SAMPLE_PROJECT_ACTION = "Create a sample project";
 const CREATE_EMPTY_BUIDLER_CONFIG_ACTION = "Create an empty buidler.config.js";
-const QUIT_ACTION = "Quit";
 
 const SAMPLE_PROJECT_DEPENDENCIES = [
   "@nomiclabs/buidler-waffle",
@@ -34,20 +32,6 @@ async function removeTempFilesIfPresent(projectRoot: string) {
   await removeProjectDirIfPresent(projectRoot, "artifacts");
 }
 
-function printAsciiLogo() {
-  console.log(chalk.blue(`888               d8b      888 888`));
-  console.log(chalk.blue(`888               Y8P      888 888`));
-  console.log(chalk.blue("888                        888 888"));
-  console.log(
-    chalk.blue("88888b.  888  888 888  .d88888 888  .d88b.  888d888")
-  );
-  console.log(chalk.blue('888 "88b 888  888 888 d88" 888 888 d8P  Y8b 888P"'));
-  console.log(chalk.blue("888  888 888  888 888 888  888 888 88888888 888"));
-  console.log(chalk.blue("888 d88P Y88b 888 888 Y88b 888 888 Y8b.     888"));
-  console.log(chalk.blue(`88888P"   "Y88888 888  "Y88888 888  "Y8888  888`));
-  console.log("");
-}
-
 async function printWelcomeMessage() {
   const packageJson = await getPackageJson();
 
@@ -64,44 +48,14 @@ async function copySampleProject(projectRoot: string) {
   const packageRoot = await getPackageRoot();
 
   await fsExtra.ensureDir(projectRoot);
+  console.log(chalk.greenBright("Generating a new project in " + path.join(packageRoot, projectRoot)))
+
   await fsExtra.copy(path.join(packageRoot, "sample-project"), projectRoot);
 
   // This is just in case we have been using the sample project for dev/testing
   await removeTempFilesIfPresent(projectRoot);
 
   await fsExtra.remove(path.join(projectRoot, "LICENSE.md"));
-}
-
-async function addGitIgnore(projectRoot: string) {
-  const gitIgnorePath = path.join(projectRoot, ".gitignore");
-
-  let content = await getRecommendedGitIgnore();
-
-  if (await fsExtra.pathExists(gitIgnorePath)) {
-    const existingContent = await fsExtra.readFile(gitIgnorePath, "utf-8");
-    content = `${existingContent}
-${content}`;
-  }
-
-  await fsExtra.writeFile(gitIgnorePath, content);
-}
-
-async function addGitAttributes(projectRoot: string) {
-  const gitAttributesPath = path.join(projectRoot, ".gitattributes");
-  let content = "*.sol linguist-language=Solidity";
-
-  if (await fsExtra.pathExists(gitAttributesPath)) {
-    const existingContent = await fsExtra.readFile(gitAttributesPath, "utf-8");
-
-    if (existingContent.includes(content)) {
-      return;
-    }
-
-    content = `${existingContent}
-${content}`;
-  }
-
-  await fsExtra.writeFile(gitAttributesPath, content);
 }
 
 function printSuggestedCommands() {
@@ -138,73 +92,16 @@ async function writeEmptyBuidlerConfig() {
 }
 
 async function getAction() {
-  // MM: replaced method
-  return CREATE_EMPTY_BUIDLER_CONFIG_ACTION;
+  // MM: method was removed
+  return CREATE_SAMPLE_PROJECT_ACTION;
 }
 
-export async function createProject() {
-  const { default: enquirer } = await import("enquirer");
-  printAsciiLogo();
-
+export async function createProject(projectRoot: string) {
   await printWelcomeMessage();
 
   const action = await getAction();
 
-  if (action === QUIT_ACTION) {
-    return;
-  }
-
-  if (action === CREATE_EMPTY_BUIDLER_CONFIG_ACTION) {
-    await writeEmptyBuidlerConfig();
-    console.log(
-      `${emoji("✨ ")}${chalk.cyan(`Config file created`)}${emoji(" ✨")}`
-    );
-    return;
-  }
-
-  let responses: {
-    projectRoot: string;
-    shouldAddGitIgnore: boolean;
-    shouldAddGitAttributes: boolean;
-  };
-
-  try {
-    responses = await enquirer.prompt([
-      {
-        name: "projectRoot",
-        type: "input",
-        initial: process.cwd(),
-        message: "Buidler project root:",
-      },
-      createConfirmationPrompt(
-        "shouldAddGitIgnore",
-        "Do you want to add a .gitignore?"
-      ),
-      createConfirmationPrompt(
-        "shouldAddGitAttributes",
-        "Do you want to add a .gitattributes to enable Soldity highlighting on GitHub?"
-      ),
-    ]);
-  } catch (e) {
-    if (e === "") {
-      return;
-    }
-
-    // tslint:disable-next-line only-buidler-error
-    throw e;
-  }
-
-  const { projectRoot, shouldAddGitIgnore, shouldAddGitAttributes } = responses;
-
   await copySampleProject(projectRoot);
-
-  if (shouldAddGitIgnore) {
-    await addGitIgnore(projectRoot);
-  }
-
-  if (shouldAddGitAttributes) {
-    await addGitAttributes(projectRoot);
-  }
 
   let shouldShowInstallationInstructions = true;
 

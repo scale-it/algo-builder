@@ -82,7 +82,7 @@ async function main() {
       !isCwdInsideProject() &&
       process.stdout.isTTY === true
     ) {
-      await createProject();
+      await createProject("project");
       return;
     }
 
