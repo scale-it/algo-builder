@@ -2,10 +2,7 @@ import * as t from "io-ts";
 import { Context, getFunctionName, ValidationError } from "io-ts/lib";
 import { Reporter } from "io-ts/lib/Reporter";
 
-import {
-  BUILDEREVM_NETWORK_NAME,
-  BUILDEREVM_SUPPORTED_HARDFORKS,
-} from "../../constants";
+import { BUILDEREVM_NETWORK_NAME } from "../../constants";
 import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
 
@@ -25,7 +22,7 @@ function stringify(v: any): string {
 function getContextPath(context: Context): string {
   const keysPath = context
     .slice(1)
-    .map((c) => c.key)
+    .map((c: any) => c.key)
     .join(".");
 
   return `${context[0].type.name}.${keysPath}`;
@@ -68,8 +65,8 @@ function optional<TypeT, OutputT>(
   return new t.Type(
     name,
     (u: unknown): u is TypeT | undefined => u === undefined || codec.is(u),
-    (u, c) => (u === undefined ? t.success(u) : codec.validate(u, c)),
-    (a) => (a === undefined ? undefined : codec.encode(a))
+    (u: any, c: any) => (u === undefined ? t.success(u) : codec.validate(u, c)),
+    (a: any) => (a === undefined ? undefined : codec.encode(a))
   );
 }
 
@@ -191,16 +188,7 @@ export function getValidationErrors(config: any): string[] {
   if (config !== undefined && typeof config.networks === "object") {
     const builderNetwork = config.networks[BUILDEREVM_NETWORK_NAME];
     if (builderNetwork !== undefined) {
-      if (
-        builderNetwork.hardfork !== undefined &&
-        !BUILDEREVM_SUPPORTED_HARDFORKS.includes(builderNetwork.hardfork)
-      ) {
-        errors.push(
-          `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME}.hardfork is not supported. Use one of ${BUILDEREVM_SUPPORTED_HARDFORKS.join(
-            ", "
-          )}`
-        );
-      }
+      // TODO: MM validate network config vars here
 
       if (
         builderNetwork.allowUnlimitedContractSize !== undefined &&
