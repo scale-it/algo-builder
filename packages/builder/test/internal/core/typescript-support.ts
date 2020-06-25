@@ -3,7 +3,7 @@ import fsExtra from "fs-extra";
 
 import { TASK_TEST_GET_TEST_FILES } from "../../../src/builtin-tasks/task-names";
 import { isTypescriptSupported } from "../../../src/internal/core/typescript-support";
-import { resetBuidlerContext } from "../../../src/internal/reset";
+import { resetBuilderContext } from "../../../src/internal/reset";
 import { useEnvironment } from "../../helpers/environment";
 import { useFixtureProject } from "../../helpers/project";
 
@@ -21,15 +21,15 @@ import { useFixtureProject } from "../../helpers/project";
 //      }
 //
 //      assert.throws(
-//        () => require("../../../src/internal/lib/buidler-lib"),
+//        () => require("../../../src/internal/lib/builder-lib"),
 //        "TS7006"
 //      );
 //
-//      resetBuidlerContext();
+//      resetBuilderContext();
 //    });
 //  });
 //
-//  describe("buidler.config.ts", function () {
+//  describe("builder.config.ts", function () {
 //    useFixtureProject("typescript-project");
 //    useEnvironment();
 //

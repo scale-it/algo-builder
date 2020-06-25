@@ -1,9 +1,9 @@
 import ProcessEnv = NodeJS.ProcessEnv;
 
-import { BuidlerArguments, BuidlerParamDefinitions } from "../../../types";
+import { BuilderArguments, BuilderParamDefinitions } from "../../../types";
 import { ArgumentsParser } from "../../cli/arguments-parser";
 import { unsafeObjectKeys } from "../../util/unsafe";
-import { BuidlerError } from "../errors";
+import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
 
 const BUIDLER_ENV_ARGUMENT_PREFIX = "BUIDLER_";
@@ -18,11 +18,11 @@ export function paramNameToEnvVariable(paramName: string): string {
 }
 
 export function getEnvVariablesMap(
-  buidlerArguments: BuidlerArguments
+  builderArguments: BuilderArguments
 ): { [envVar: string]: string } {
   const values: { [envVar: string]: string } = {};
 
-  for (const [name, value] of Object.entries(buidlerArguments)) {
+  for (const [name, value] of Object.entries(builderArguments)) {
     if (value === undefined) {
       continue;
     }
@@ -33,10 +33,10 @@ export function getEnvVariablesMap(
   return values;
 }
 
-export function getEnvBuidlerArguments(
-  paramDefinitions: BuidlerParamDefinitions,
+export function getEnvBuilderArguments(
+  paramDefinitions: BuilderParamDefinitions,
   envVariables: ProcessEnv
-): BuidlerArguments {
+): BuilderArguments {
   const envArgs: any = {};
 
   for (const paramName of unsafeObjectKeys(paramDefinitions)) {
@@ -48,7 +48,7 @@ export function getEnvBuidlerArguments(
       try {
         envArgs[paramName] = definition.type.parse(paramName, rawValue);
       } catch (error) {
-        throw new BuidlerError(
+        throw new BuilderError(
           ERRORS.ARGUMENTS.INVALID_ENV_VAR_VALUE,
           {
             varName: envVarName,
@@ -65,5 +65,5 @@ export function getEnvBuidlerArguments(
   delete envArgs.config;
 
   // TODO: This is a little type-unsafe, but we know we have all the needed arguments
-  return envArgs as BuidlerArguments;
+  return envArgs as BuilderArguments;
 }

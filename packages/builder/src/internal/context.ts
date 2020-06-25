@@ -1,60 +1,60 @@
-import { BuidlerRuntimeEnvironment, ConfigExtender } from "../types";
+import { BuilderRuntimeEnvironment, ConfigExtender } from "../types";
 
 import { ExtenderManager } from "./core/config/extenders";
-import { BuidlerError } from "./core/errors";
+import { BuilderError } from "./core/errors";
 import { ERRORS } from "./core/errors-list";
 import { TasksDSL } from "./core/tasks/dsl";
 
-export type GlobalWithBuidlerContext = NodeJS.Global & {
-  __buidlerContext: BuidlerContext;
+export type GlobalWithBuilderContext = NodeJS.Global & {
+  __builderContext: BuilderContext;
 };
 
-export class BuidlerContext {
+export class BuilderContext {
   public static isCreated(): boolean {
-    const globalWithBuidlerContext = global as unknown as GlobalWithBuidlerContext;
-    return globalWithBuidlerContext.__buidlerContext !== undefined;
+    const globalWithBuilderContext = global as unknown as GlobalWithBuilderContext;
+    return globalWithBuilderContext.__builderContext !== undefined;
   }
 
-  public static createBuidlerContext(): BuidlerContext {
+  public static createBuilderContext(): BuilderContext {
     if (this.isCreated()) {
-      throw new BuidlerError(ERRORS.GENERAL.CONTEXT_ALREADY_CREATED);
+      throw new BuilderError(ERRORS.GENERAL.CONTEXT_ALREADY_CREATED);
     }
-    const globalWithBuidlerContext = global as unknown as GlobalWithBuidlerContext;
-    const ctx = new BuidlerContext();
-    globalWithBuidlerContext.__buidlerContext = ctx;
+    const globalWithBuilderContext = global as unknown as GlobalWithBuilderContext;
+    const ctx = new BuilderContext();
+    globalWithBuilderContext.__builderContext = ctx;
     return ctx;
   }
 
-  public static getBuidlerContext(): BuidlerContext {
-    const globalWithBuidlerContext = global as unknown as GlobalWithBuidlerContext;
-    const ctx = globalWithBuidlerContext.__buidlerContext;
+  public static getBuilderContext(): BuilderContext {
+    const globalWithBuilderContext = global as unknown as GlobalWithBuilderContext;
+    const ctx = globalWithBuilderContext.__builderContext;
     if (ctx === undefined) {
-      throw new BuidlerError(ERRORS.GENERAL.CONTEXT_NOT_CREATED);
+      throw new BuilderError(ERRORS.GENERAL.CONTEXT_NOT_CREATED);
     }
     return ctx;
   }
 
-  public static deleteBuidlerContext() {
+  public static deleteBuilderContext() {
     const globalAsAny = global as any;
-    globalAsAny.__buidlerContext = undefined;
+    globalAsAny.__builderContext = undefined;
   }
 
   public readonly tasksDSL = new TasksDSL();
   public readonly extendersManager = new ExtenderManager();
-  public environment?: BuidlerRuntimeEnvironment;
+  public environment?: BuilderRuntimeEnvironment;
   public readonly loadedPlugins: string[] = [];
   public readonly configExtenders: ConfigExtender[] = [];
 
-  public setBuidlerRuntimeEnvironment(env: BuidlerRuntimeEnvironment) {
+  public setBuilderRuntimeEnvironment(env: BuilderRuntimeEnvironment) {
     if (this.environment !== undefined) {
-      throw new BuidlerError(ERRORS.GENERAL.CONTEXT_BRE_ALREADY_DEFINED);
+      throw new BuilderError(ERRORS.GENERAL.CONTEXT_BRE_ALREADY_DEFINED);
     }
     this.environment = env;
   }
 
-  public getBuidlerRuntimeEnvironment(): BuidlerRuntimeEnvironment {
+  public getBuilderRuntimeEnvironment(): BuilderRuntimeEnvironment {
     if (this.environment === undefined) {
-      throw new BuidlerError(ERRORS.GENERAL.CONTEXT_BRE_NOT_DEFINED);
+      throw new BuilderError(ERRORS.GENERAL.CONTEXT_BRE_NOT_DEFINED);
     }
     return this.environment;
   }

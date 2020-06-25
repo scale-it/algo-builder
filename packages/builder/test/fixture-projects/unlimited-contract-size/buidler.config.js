@@ -1,6 +1,6 @@
 module.exports = {
   networks: {
-    buidlerevm: {
+    builderevm: {
       allowUnlimitedContractSize: true,
     },
   },

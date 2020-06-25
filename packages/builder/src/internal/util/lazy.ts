@@ -1,6 +1,6 @@
 import util from "util";
 
-import { BuidlerError } from "../core/errors";
+import { BuilderError } from "../core/errors";
 import { ERRORS } from "../core/errors-list";
 
 /**
@@ -41,13 +41,13 @@ export function lazyObject<T extends object>(objectCreator: () => T): T {
     }),
     (object) => {
       if (object instanceof Function) {
-        throw new BuidlerError(ERRORS.GENERAL.UNSUPPORTED_OPERATION, {
+        throw new BuilderError(ERRORS.GENERAL.UNSUPPORTED_OPERATION, {
           operation: "Creating lazy functions or classes with lazyObject",
         });
       }
 
       if (typeof object !== "object" || object === null) {
-        throw new BuidlerError(ERRORS.GENERAL.UNSUPPORTED_OPERATION, {
+        throw new BuilderError(ERRORS.GENERAL.UNSUPPORTED_OPERATION, {
           operation: "Using lazyObject with anything other than objects",
         });
       }
@@ -71,7 +71,7 @@ export function lazyFunction<T extends Function>(functionCreator: () => T): T {
     },
     (object) => {
       if (!(object instanceof Function)) {
-        throw new BuidlerError(ERRORS.GENERAL.UNSUPPORTED_OPERATION, {
+        throw new BuilderError(ERRORS.GENERAL.UNSUPPORTED_OPERATION, {
           operation:
             "Using lazyFunction with anything other than functions or classes",
         });
@@ -108,7 +108,7 @@ function createLazyProxy<ActualT extends GuardT, GuardT extends object>(
       // Using a null prototype seems to tirgger a V8 bug, so we forbid it
       // See: https://github.com/nodejs/node/issues/29730
       if (Object.getPrototypeOf(target) === null) {
-        throw new BuidlerError(ERRORS.GENERAL.UNSUPPORTED_OPERATION, {
+        throw new BuilderError(ERRORS.GENERAL.UNSUPPORTED_OPERATION, {
           operation:
             "Using lazyFunction or lazyObject to construct objects/functions with prototype null",
         });

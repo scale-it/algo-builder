@@ -4,11 +4,11 @@ import path from "path";
 
 import { getPackageRoot } from "../util/package-info";
 
-import { BuidlerError } from "./errors";
+import { BuilderError } from "./errors";
 import { ERRORS } from "./errors-list";
 import { isTypescriptSupported } from "./typescript-support";
-const JS_CONFIG_FILENAME = "buidler.config.js";
-const TS_CONFIG_FILENAME = "buidler.config.ts";
+const JS_CONFIG_FILENAME = "builder.config.js";
+const TS_CONFIG_FILENAME = "builder.config.ts";
 
 export function isCwdInsideProject() {
   return (
@@ -27,7 +27,7 @@ export function getUserConfigPath(): string | undefined {
 
   const pathToConfigFile = findUp.sync(JS_CONFIG_FILENAME);
   if (pathToConfigFile === null) {
-    throw new BuidlerError(ERRORS.GENERAL.NOT_INSIDE_PROJECT);
+    throw new BuilderError(ERRORS.GENERAL.NOT_INSIDE_PROJECT);
   }
 
   return pathToConfigFile;

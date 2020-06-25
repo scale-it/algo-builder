@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import fsExtra from "fs-extra";
 
-import { BuidlerError } from "../errors";
+import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
 
 /**
@@ -14,13 +14,13 @@ export interface ArgumentType<T> {
   name: string;
 
   /**
-   * Parses strValue. This function MUST throw BDLR301 if it
+   * Parses strValue. This function MUST throw ALGORAND_BUILDER301 if it
    * can parse the given value.
    *
    * @param argName argument's name - used for context in case of error.
    * @param strValue argument's string value to be parsed.
    *
-   * @throws BDLR301 if an invalid value is given.
+   * @throws ALGORAND_BUILDER301 if an invalid value is given.
    * @returns the parsed value.
    */
   parse(argName: string, strValue: string): T;
@@ -31,7 +31,7 @@ export interface ArgumentType<T> {
    * @param argName {string} argument's name - used for context in case of error.
    * @param argumentValue - value to be validated
    *
-   * @throws BDLR301 if value is not of type <t>
+   * @throws ALGORAND_BUILDER301 if value is not of type <t>
    */
   validate?(argName: string, argumentValue: any): void;
 }
@@ -50,13 +50,13 @@ export const string: ArgumentType<string> = {
    * @param argName {string} argument's name - used for context in case of error.
    * @param value {any} argument's value to validate.
    *
-   * @throws BDLR301 if value is not of type "string"
+   * @throws ALGORAND_BUILDER301 if value is not of type "string"
    */
   validate: (argName: string, value: any): void => {
     const isString = typeof value === "string";
 
     if (!isString) {
-      throw new BuidlerError(ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE, {
+      throw new BuilderError(ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE, {
         value,
         name: argName,
         type: string.name,
@@ -69,7 +69,7 @@ export const string: ArgumentType<string> = {
  * Boolean type.
  *
  * Accepts only 'true' or 'false' (case-insensitive).
- * @throws BDLR301
+ * @throws ALGORAND_BUILDER301
  */
 export const boolean: ArgumentType<boolean> = {
   name: "boolean",
@@ -81,7 +81,7 @@ export const boolean: ArgumentType<boolean> = {
       return false;
     }
 
-    throw new BuidlerError(ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE, {
+    throw new BuilderError(ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE, {
       value: strValue,
       name: argName,
       type: "boolean",
@@ -93,13 +93,13 @@ export const boolean: ArgumentType<boolean> = {
    * @param argName {string} argument's name - used for context in case of error.
    * @param value {any} argument's value to validate.
    *
-   * @throws BDLR301 if value is not of type "boolean"
+   * @throws ALGORAND_BUILDER301 if value is not of type "boolean"
    */
   validate: (argName: string, value: any): void => {
     const isBoolean = typeof value === "boolean";
 
     if (!isBoolean) {
-      throw new BuidlerError(ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE, {
+      throw new BuilderError(ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE, {
         value,
         name: argName,
         type: boolean.name,
@@ -111,7 +111,7 @@ export const boolean: ArgumentType<boolean> = {
 /**
  * Int type.
  * Accepts either a decimal string integer or hexadecimal string integer.
- * @throws BDLR301
+ * @throws ALGORAND_BUILDER301
  */
 export const int: ArgumentType<number> = {
   name: "int",
@@ -123,7 +123,7 @@ export const int: ArgumentType<number> = {
       strValue.match(decimalPattern) === null &&
       strValue.match(hexPattern) === null
     ) {
-      throw new BuidlerError(ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE, {
+      throw new BuilderError(ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE, {
         value: strValue,
         name: argName,
         type: int.name,
@@ -138,12 +138,12 @@ export const int: ArgumentType<number> = {
    * @param argName {string} argument's name - used for context in case of error.
    * @param value {any} argument's value to validate.
    *
-   * @throws BDLR301 if value is not of type "int"
+   * @throws ALGORAND_BUILDER301 if value is not of type "int"
    */
   validate: (argName: string, value: any): void => {
     const isInt = Number.isInteger(value);
     if (!isInt) {
-      throw new BuidlerError(ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE, {
+      throw new BuilderError(ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE, {
         value,
         name: argName,
         type: int.name,
@@ -155,7 +155,7 @@ export const int: ArgumentType<number> = {
 /**
  * Float type.
  * Accepts either a decimal string number or hexadecimal string number.
- * @throws BDLR301
+ * @throws ALGORAND_BUILDER301
  */
 export const float: ArgumentType<number> = {
   name: "float",
@@ -167,7 +167,7 @@ export const float: ArgumentType<number> = {
       strValue.match(decimalPattern) === null &&
       strValue.match(hexPattern) === null
     ) {
-      throw new BuidlerError(ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE, {
+      throw new BuilderError(ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE, {
         value: strValue,
         name: argName,
         type: float.name,
@@ -183,13 +183,13 @@ export const float: ArgumentType<number> = {
    * @param argName {string} argument's name - used for context in case of error.
    * @param value {any} argument's value to validate.
    *
-   * @throws BDLR301 if value is not of type "number"
+   * @throws ALGORAND_BUILDER301 if value is not of type "number"
    */
   validate: (argName: string, value: any): void => {
     const isFloatOrInteger = typeof value === "number" && !isNaN(value);
 
     if (!isFloatOrInteger) {
-      throw new BuidlerError(ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE, {
+      throw new BuilderError(ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE, {
         value,
         name: argName,
         type: float.name,
@@ -201,7 +201,7 @@ export const float: ArgumentType<number> = {
 /**
  * Input file type.
  * Accepts a path to a readable file..
- * @throws BDLR302
+ * @throws ALGORAND_BUILDER302
  */
 export const inputFile: ArgumentType<string> = {
   name: "inputFile",
@@ -211,12 +211,12 @@ export const inputFile: ArgumentType<string> = {
       const stats = fs.lstatSync(strValue);
 
       if (stats.isDirectory()) {
-        // This is caught and encapsulated in a buidler error.
-        // tslint:disable-next-line only-buidler-error
+        // This is caught and encapsulated in a builder error.
+        // tslint:disable-next-line only-builder-error
         throw new Error(`${strValue} is a directory, not a file`);
       }
     } catch (error) {
-      throw new BuidlerError(
+      throw new BuilderError(
         ERRORS.ARGUMENTS.INVALID_INPUT_FILE,
         {
           name: argName,
@@ -235,14 +235,14 @@ export const inputFile: ArgumentType<string> = {
    * @param argName {string} argument's name - used for context in case of error.
    * @param value {any} argument's value to validate.
    *
-   * @throws BDLR301 if value is not of type "inputFile"
+   * @throws ALGORAND_BUILDER301 if value is not of type "inputFile"
    */
   validate: (argName: string, value: any): void => {
     try {
       inputFile.parse(argName, value);
     } catch (error) {
       // the input value is considered invalid, throw error.
-      throw new BuidlerError(
+      throw new BuilderError(
         ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE,
         {
           value,
@@ -261,7 +261,7 @@ export const json: ArgumentType<any> = {
     try {
       return JSON.parse(strValue);
     } catch (error) {
-      throw new BuidlerError(
+      throw new BuilderError(
         ERRORS.ARGUMENTS.INVALID_JSON_ARGUMENT,
         {
           param: argName,
@@ -278,11 +278,11 @@ export const json: ArgumentType<any> = {
    * @param argName {string} argument's name - used for context in case of error.
    * @param value {any} argument's value to validate.
    *
-   * @throws BDLR301 if value is not of type "json"
+   * @throws ALGORAND_BUILDER301 if value is not of type "json"
    */
   validate: (argName: string, value: any): void => {
     if (value === undefined) {
-      throw new BuidlerError(ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE, {
+      throw new BuilderError(ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE, {
         value,
         name: argName,
         type: json.name,

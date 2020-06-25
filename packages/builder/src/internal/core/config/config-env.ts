@@ -5,7 +5,7 @@ import {
   EnvironmentExtender,
   TaskArguments,
 } from "../../../types";
-import { BuidlerContext } from "../../context";
+import { BuilderContext } from "../../context";
 import * as argumentTypes from "../params/argument-types";
 import { usePlugin as usePluginImplementation } from "../plugins";
 
@@ -25,7 +25,7 @@ export function task<ArgsT extends TaskArguments>(
   descriptionOrAction?: string | ActionType<ArgsT>,
   action?: ActionType<ArgsT>
 ): ConfigurableTaskDefinition {
-  const ctx = BuidlerContext.getBuidlerContext();
+  const ctx = BuilderContext.getBuilderContext();
   const dsl = ctx.tasksDSL;
 
   if (descriptionOrAction === undefined) {
@@ -55,7 +55,7 @@ export function internalTask<ArgsT extends TaskArguments>(
   descriptionOrAction?: string | ActionType<ArgsT>,
   action?: ActionType<ArgsT>
 ): ConfigurableTaskDefinition {
-  const ctx = BuidlerContext.getBuidlerContext();
+  const ctx = BuilderContext.getBuilderContext();
   const dsl = ctx.tasksDSL;
 
   if (descriptionOrAction === undefined) {
@@ -73,27 +73,27 @@ export const types = argumentTypes;
 
 /**
  * Register an environment extender what will be run after the
- * Buidler Runtime Environment is initialized.
+ * Builder Runtime Environment is initialized.
  *
- * @param extender A function that receives the Buidler Runtime
+ * @param extender A function that receives the Builder Runtime
  * Environment.
  */
 export function extendEnvironment(extender: EnvironmentExtender) {
-  const ctx = BuidlerContext.getBuidlerContext();
+  const ctx = BuilderContext.getBuilderContext();
   const extenderManager = ctx.extendersManager;
   extenderManager.add(extender);
 }
 
 export function extendConfig(extender: ConfigExtender) {
-  const ctx = BuidlerContext.getBuidlerContext();
+  const ctx = BuilderContext.getBuilderContext();
   ctx.configExtenders.push(extender);
 }
 
 /**
- * Loads a Buidler plugin
+ * Loads a Builder plugin
  * @param pluginName The plugin name.
  */
 export function usePlugin(pluginName: string) {
-  const ctx = BuidlerContext.getBuidlerContext();
+  const ctx = BuilderContext.getBuilderContext();
   usePluginImplementation(ctx, pluginName);
 }

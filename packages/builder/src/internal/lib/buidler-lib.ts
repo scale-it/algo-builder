@@ -1,55 +1,55 @@
 import debug from "debug";
 
-import { BuidlerRuntimeEnvironment } from "../../types";
-import { BuidlerContext } from "../context";
+import { BuilderRuntimeEnvironment } from "../../types";
+import { BuilderContext } from "../context";
 import { loadConfigAndTasks } from "../core/config/config-loading";
-import { BuidlerError } from "../core/errors";
+import { BuilderError } from "../core/errors";
 import { ERRORS } from "../core/errors-list";
-import { BUIDLER_PARAM_DEFINITIONS } from "../core/params/buidler-params";
-import { getEnvBuidlerArguments } from "../core/params/env-variables";
+import { BUIDLER_PARAM_DEFINITIONS } from "../core/params/builder-params";
+import { getEnvBuilderArguments } from "../core/params/env-variables";
 import { Environment } from "../core/runtime-environment";
 
-let ctx: BuidlerContext;
-let env: BuidlerRuntimeEnvironment;
+let ctx: BuilderContext;
+let env: BuilderRuntimeEnvironment;
 
-if (BuidlerContext.isCreated()) {
-  ctx = BuidlerContext.getBuidlerContext();
+if (BuilderContext.isCreated()) {
+  ctx = BuilderContext.getBuilderContext();
 
   // The most probable reason for this to happen is that this file was imported
   // from the config file
   if (ctx.environment === undefined) {
-    throw new BuidlerError(ERRORS.GENERAL.LIB_IMPORTED_FROM_THE_CONFIG);
+    throw new BuilderError(ERRORS.GENERAL.LIB_IMPORTED_FROM_THE_CONFIG);
   }
 
   env = ctx.environment;
 } else {
-  ctx = BuidlerContext.createBuidlerContext();
+  ctx = BuilderContext.createBuilderContext();
 
-  const buidlerArguments = getEnvBuidlerArguments(
+  const builderArguments = getEnvBuilderArguments(
     BUIDLER_PARAM_DEFINITIONS,
     process.env
   );
 
-  if (buidlerArguments.verbose) {
-    debug.enable("buidler*");
+  if (builderArguments.verbose) {
+    debug.enable("builder*");
   }
 
-  const config = loadConfigAndTasks(buidlerArguments);
+  const config = loadConfigAndTasks(builderArguments);
 
   // TODO: This is here for backwards compatibility.
   // There are very few projects using this.
-  if (buidlerArguments.network === undefined) {
-    buidlerArguments.network = config.defaultNetwork;
+  if (builderArguments.network === undefined) {
+    builderArguments.network = config.defaultNetwork;
   }
 
   env = new Environment(
     config,
-    buidlerArguments,
+    builderArguments,
     ctx.tasksDSL.getTaskDefinitions(),
     ctx.extendersManager.getExtenders()
   );
 
-  ctx.setBuidlerRuntimeEnvironment(env);
+  ctx.setBuilderRuntimeEnvironment(env);
 }
 
 export = env;

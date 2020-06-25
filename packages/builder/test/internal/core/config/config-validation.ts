@@ -6,12 +6,12 @@ import {
   validateConfig,
 } from "../../../../src/internal/core/config/config-validation";
 import { ERRORS } from "../../../../src/internal/core/errors-list";
-import { expectBuidlerError } from "../../../helpers/errors";
+import { expectBuilderError } from "../../../helpers/errors";
 
 describe("Config validation", function () {
   describe("default network config", function () {
     it("Should fail if the wrong type is used", function () {
-      expectBuidlerError(
+      expectBuilderError(
         () => validateConfig({ defaultNetwork: 123 }),
         ERRORS.GENERAL.INVALID_CONFIG
       );
@@ -58,32 +58,32 @@ describe("Config validation", function () {
     };
 
     it("Should fail with invalid types", function () {
-      expectBuidlerError(
+      expectBuilderError(
         () => validateConfig(invalidSolcType),
         ERRORS.GENERAL.INVALID_CONFIG
       );
 
-      expectBuidlerError(
+      expectBuilderError(
         () => validateConfig(invalidVersionType),
         ERRORS.GENERAL.INVALID_CONFIG
       );
 
-      expectBuidlerError(
+      expectBuilderError(
         () => validateConfig(invalidOptimizerType),
         ERRORS.GENERAL.INVALID_CONFIG
       );
 
-      expectBuidlerError(
+      expectBuilderError(
         () => validateConfig(invalidOptimizerEnabledType),
         ERRORS.GENERAL.INVALID_CONFIG
       );
 
-      expectBuidlerError(
+      expectBuilderError(
         () => validateConfig(invalidOptimizerRunsType),
         ERRORS.GENERAL.INVALID_CONFIG
       );
 
-      expectBuidlerError(
+      expectBuilderError(
         () => validateConfig(invalidEvmVersionType),
         ERRORS.GENERAL.INVALID_CONFIG
       );
@@ -165,32 +165,32 @@ describe("Config validation", function () {
     };
 
     it("Should fail with invalid types", function () {
-      expectBuidlerError(
+      expectBuilderError(
         () => validateConfig(invalidPathsType),
         ERRORS.GENERAL.INVALID_CONFIG
       );
 
-      expectBuidlerError(
+      expectBuilderError(
         () => validateConfig(invalidCacheType),
         ERRORS.GENERAL.INVALID_CONFIG
       );
 
-      expectBuidlerError(
+      expectBuilderError(
         () => validateConfig(invalidArtifactsType),
         ERRORS.GENERAL.INVALID_CONFIG
       );
 
-      expectBuidlerError(
+      expectBuilderError(
         () => validateConfig(invalidRootType),
         ERRORS.GENERAL.INVALID_CONFIG
       );
 
-      expectBuidlerError(
+      expectBuilderError(
         () => validateConfig(invalidSourcesType),
         ERRORS.GENERAL.INVALID_CONFIG
       );
 
-      expectBuidlerError(
+      expectBuilderError(
         () => validateConfig(invalidTestsType),
         ERRORS.GENERAL.INVALID_CONFIG
       );
@@ -239,12 +239,12 @@ describe("Config validation", function () {
     describe("Invalid types", function () {
       describe("Networks object", function () {
         it("Should fail with invalid types", function () {
-          expectBuidlerError(
+          expectBuilderError(
             () => validateConfig({ networks: 123 }),
             ERRORS.GENERAL.INVALID_CONFIG
           );
 
-          expectBuidlerError(
+          expectBuilderError(
             () =>
               validateConfig({
                 networks: {
@@ -256,9 +256,9 @@ describe("Config validation", function () {
         });
       });
 
-      describe("BuidlerEVM network config", function () {
+      describe("BuilderEVM network config", function () {
         it("Should fail with invalid types", function () {
-          expectBuidlerError(
+          expectBuilderError(
             () =>
               validateConfig({
                 networks: {
@@ -268,7 +268,7 @@ describe("Config validation", function () {
             ERRORS.GENERAL.INVALID_CONFIG
           );
 
-          expectBuidlerError(
+          expectBuilderError(
             () =>
               validateConfig({
                 networks: {
@@ -280,7 +280,7 @@ describe("Config validation", function () {
             ERRORS.GENERAL.INVALID_CONFIG
           );
 
-          expectBuidlerError(
+          expectBuilderError(
             () =>
               validateConfig({
                 networks: {
@@ -292,7 +292,7 @@ describe("Config validation", function () {
             ERRORS.GENERAL.INVALID_CONFIG
           );
 
-          expectBuidlerError(
+          expectBuilderError(
             () =>
               validateConfig({
                 networks: {
@@ -304,7 +304,7 @@ describe("Config validation", function () {
             ERRORS.GENERAL.INVALID_CONFIG
           );
 
-          expectBuidlerError(
+          expectBuilderError(
             () =>
               validateConfig({
                 networks: {
@@ -316,7 +316,7 @@ describe("Config validation", function () {
             ERRORS.GENERAL.INVALID_CONFIG
           );
 
-          expectBuidlerError(
+          expectBuilderError(
             () =>
               validateConfig({
                 networks: {
@@ -328,7 +328,7 @@ describe("Config validation", function () {
             ERRORS.GENERAL.INVALID_CONFIG
           );
 
-          expectBuidlerError(
+          expectBuilderError(
             () =>
               validateConfig({
                 networks: {
@@ -340,7 +340,7 @@ describe("Config validation", function () {
             ERRORS.GENERAL.INVALID_CONFIG
           );
 
-          expectBuidlerError(
+          expectBuilderError(
             () =>
               validateConfig({
                 networks: {
@@ -352,7 +352,7 @@ describe("Config validation", function () {
             ERRORS.GENERAL.INVALID_CONFIG
           );
 
-          expectBuidlerError(
+          expectBuilderError(
             () =>
               validateConfig({
                 networks: {
@@ -364,7 +364,7 @@ describe("Config validation", function () {
             ERRORS.GENERAL.INVALID_CONFIG
           );
 
-          expectBuidlerError(
+          expectBuilderError(
             () =>
               validateConfig({
                 networks: {
@@ -376,7 +376,7 @@ describe("Config validation", function () {
             ERRORS.GENERAL.INVALID_CONFIG
           );
 
-          expectBuidlerError(
+          expectBuilderError(
             () =>
               validateConfig({
                 networks: {
@@ -388,7 +388,7 @@ describe("Config validation", function () {
             ERRORS.GENERAL.INVALID_CONFIG
           );
 
-          expectBuidlerError(
+          expectBuilderError(
             () =>
               validateConfig({
                 networks: {
@@ -400,7 +400,7 @@ describe("Config validation", function () {
             ERRORS.GENERAL.INVALID_CONFIG
           );
 
-          expectBuidlerError(
+          expectBuilderError(
             () =>
               validateConfig({
                 networks: {
@@ -412,7 +412,7 @@ describe("Config validation", function () {
             ERRORS.GENERAL.INVALID_CONFIG
           );
 
-          expectBuidlerError(
+          expectBuilderError(
             () =>
               validateConfig({
                 networks: {
@@ -424,7 +424,7 @@ describe("Config validation", function () {
             ERRORS.GENERAL.INVALID_CONFIG
           );
 
-          expectBuidlerError(
+          expectBuilderError(
             () =>
               validateConfig({
                 networks: {
@@ -436,7 +436,7 @@ describe("Config validation", function () {
             ERRORS.GENERAL.INVALID_CONFIG
           );
 
-          expectBuidlerError(
+          expectBuilderError(
             () =>
               validateConfig({
                 networks: {
@@ -448,7 +448,7 @@ describe("Config validation", function () {
             ERRORS.GENERAL.INVALID_CONFIG
           );
 
-          expectBuidlerError(
+          expectBuilderError(
             () =>
               validateConfig({
                 networks: {
@@ -460,7 +460,7 @@ describe("Config validation", function () {
             ERRORS.GENERAL.INVALID_CONFIG
           );
 
-          expectBuidlerError(
+          expectBuilderError(
             () =>
               validateConfig({
                 networks: {
@@ -473,7 +473,7 @@ describe("Config validation", function () {
           );
 
           // Non boolean allowUnlimitedContractSize
-          expectBuidlerError(
+          expectBuilderError(
             () =>
               validateConfig({
                 networks: {
@@ -486,7 +486,7 @@ describe("Config validation", function () {
           );
 
           // Non string initialDate
-          expectBuidlerError(
+          expectBuilderError(
             () =>
               validateConfig({
                 networks: {
@@ -503,7 +503,7 @@ describe("Config validation", function () {
       describe("HTTP network config", function () {
         describe("Url field", function () {
           it("Should fail if no url is set for custom networks", function () {
-            expectBuidlerError(
+            expectBuilderError(
               () => validateConfig({ networks: { custom: {} } }),
               ERRORS.GENERAL.INVALID_CONFIG
             );
@@ -514,7 +514,7 @@ describe("Config validation", function () {
             assert.isEmpty(errors);
           });
 
-          it("Shouldn't fail if no url is set for buidler network", function () {
+          it("Shouldn't fail if no url is set for builder network", function () {
             const errors = getValidationErrors({
               networks: { [BUIDLEREVM_NETWORK_NAME]: {} },
             });
@@ -550,7 +550,7 @@ describe("Config validation", function () {
           });
 
           it("Should reject other types", function () {
-            expectBuidlerError(
+            expectBuilderError(
               () =>
                 validateConfig({
                   networks: {
@@ -563,7 +563,7 @@ describe("Config validation", function () {
               ERRORS.GENERAL.INVALID_CONFIG
             );
 
-            expectBuidlerError(
+            expectBuilderError(
               () =>
                 validateConfig({
                   networks: {
@@ -578,7 +578,7 @@ describe("Config validation", function () {
           });
 
           it("Should reject non-string values", function () {
-            expectBuidlerError(
+            expectBuilderError(
               () =>
                 validateConfig({
                   networks: {
@@ -594,7 +594,7 @@ describe("Config validation", function () {
               ERRORS.GENERAL.INVALID_CONFIG
             );
 
-            expectBuidlerError(
+            expectBuilderError(
               () =>
                 validateConfig({
                   networks: {
@@ -614,7 +614,7 @@ describe("Config validation", function () {
 
         describe("Accounts field", function () {
           it("Shouldn't work with invalid types", function () {
-            expectBuidlerError(
+            expectBuilderError(
               () =>
                 validateConfig({
                   networks: {
@@ -627,7 +627,7 @@ describe("Config validation", function () {
               ERRORS.GENERAL.INVALID_CONFIG
             );
 
-            expectBuidlerError(
+            expectBuilderError(
               () =>
                 validateConfig({
                   networks: {
@@ -640,7 +640,7 @@ describe("Config validation", function () {
               ERRORS.GENERAL.INVALID_CONFIG
             );
 
-            expectBuidlerError(
+            expectBuilderError(
               () =>
                 validateConfig({
                   networks: {
@@ -656,7 +656,7 @@ describe("Config validation", function () {
 
           describe("HDAccounstConfig", function () {
             it("Should fail with invalid types", function () {
-              expectBuidlerError(
+              expectBuilderError(
                 () =>
                   validateConfig({
                     networks: {
@@ -671,7 +671,7 @@ describe("Config validation", function () {
                 ERRORS.GENERAL.INVALID_CONFIG
               );
 
-              expectBuidlerError(
+              expectBuilderError(
                 () =>
                   validateConfig({
                     networks: {
@@ -686,7 +686,7 @@ describe("Config validation", function () {
                 ERRORS.GENERAL.INVALID_CONFIG
               );
 
-              expectBuidlerError(
+              expectBuilderError(
                 () =>
                   validateConfig({
                     networks: {
@@ -701,7 +701,7 @@ describe("Config validation", function () {
                 ERRORS.GENERAL.INVALID_CONFIG
               );
 
-              expectBuidlerError(
+              expectBuilderError(
                 () =>
                   validateConfig({
                     networks: {
@@ -720,7 +720,7 @@ describe("Config validation", function () {
 
           describe("OtherAccountsConfig", function () {
             it("Should fail with invalid types", function () {
-              expectBuidlerError(
+              expectBuilderError(
                 () =>
                   validateConfig({
                     networks: {
@@ -739,7 +739,7 @@ describe("Config validation", function () {
 
           describe("List of private keys", function () {
             it("Shouldn't work with invalid types", function () {
-              expectBuidlerError(
+              expectBuilderError(
                 () =>
                   validateConfig({
                     networks: {
@@ -769,7 +769,7 @@ describe("Config validation", function () {
             });
 
             it("Shouldn't work with other strings", function () {
-              expectBuidlerError(
+              expectBuilderError(
                 () =>
                   validateConfig({
                     networks: {
@@ -787,7 +787,7 @@ describe("Config validation", function () {
 
         describe("Other fields", function () {
           it("Shouldn't accept invalid types", function () {
-            expectBuidlerError(
+            expectBuilderError(
               () =>
                 validateConfig({
                   networks: {
@@ -800,7 +800,7 @@ describe("Config validation", function () {
               ERRORS.GENERAL.INVALID_CONFIG
             );
 
-            expectBuidlerError(
+            expectBuilderError(
               () =>
                 validateConfig({
                   networks: {
@@ -813,7 +813,7 @@ describe("Config validation", function () {
               ERRORS.GENERAL.INVALID_CONFIG
             );
 
-            expectBuidlerError(
+            expectBuilderError(
               () =>
                 validateConfig({
                   networks: {
@@ -826,7 +826,7 @@ describe("Config validation", function () {
               ERRORS.GENERAL.INVALID_CONFIG
             );
 
-            expectBuidlerError(
+            expectBuilderError(
               () =>
                 validateConfig({
                   networks: {
@@ -839,7 +839,7 @@ describe("Config validation", function () {
               ERRORS.GENERAL.INVALID_CONFIG
             );
 
-            expectBuidlerError(
+            expectBuilderError(
               () =>
                 validateConfig({
                   networks: {
@@ -852,7 +852,7 @@ describe("Config validation", function () {
               ERRORS.GENERAL.INVALID_CONFIG
             );
 
-            expectBuidlerError(
+            expectBuilderError(
               () =>
                 validateConfig({
                   networks: {

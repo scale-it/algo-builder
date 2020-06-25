@@ -2,13 +2,13 @@ import debug from "debug";
 import * as path from "path";
 import * as semver from "semver";
 
-import { BuidlerContext } from "../context";
+import { BuilderContext } from "../context";
 
-import { BuidlerError } from "./errors";
+import { BuilderError } from "./errors";
 import { ERRORS } from "./errors-list";
 import { ExecutionMode, getExecutionMode } from "./execution-mode";
 
-const log = debug("buidler:core:plugins");
+const log = debug("builder:core:plugins");
 
 interface PackageJson {
   name: string;
@@ -21,12 +21,12 @@ interface PackageJson {
 /**
  * Validates a plugin dependencies and loads it.
  * @param pluginName - The plugin name
- * @param buidlerContext - The BuidlerContext
+ * @param builderContext - The BuilderContext
  * @param from - Where to resolve plugins and dependencies from. Only for
  * testing purposes.
  */
 export function usePlugin(
-  buidlerContext: BuidlerContext,
+  builderContext: BuilderContext,
   pluginName: string,
   from?: string
 ) {
@@ -34,18 +34,18 @@ export function usePlugin(
 
   // We have a special case for `ExecutionMode.EXECUTION_MODE_LINKED`
   //
-  // If Buidler is linked, a require without `from` would be executed in the
-  // context of Buidler, and not find any plugin (linked or not). We workaround
+  // If Builder is linked, a require without `from` would be executed in the
+  // context of Builder, and not find any plugin (linked or not). We workaround
   // this by using the CWD here.
   //
-  // This is not ideal, but the only reason to link Buidler is testing.
+  // This is not ideal, but the only reason to link Builder is testing.
   if (
     from === undefined &&
     getExecutionMode() === ExecutionMode.EXECUTION_MODE_LINKED
   ) {
     from = process.cwd();
 
-    log("Buidler is linked, searching for plugin starting from CWD", from);
+    log("Builder is linked, searching for plugin starting from CWD", from);
   }
 
   let globalFlag = "";
@@ -53,7 +53,7 @@ export function usePlugin(
   if (getExecutionMode() === ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION) {
     globalFlag = " --global";
     globalWarning =
-      "You are using a global installation of Buidler. Plugins and their dependencies must also be global.\n";
+      "You are using a global installation of Builder. Plugins and their dependencies must also be global.\n";
   }
 
   const pluginPackageJson = readPackageJson(pluginName, from);
@@ -61,7 +61,7 @@ export function usePlugin(
   if (pluginPackageJson === undefined) {
     const installExtraFlags = globalFlag;
 
-    throw new BuidlerError(ERRORS.PLUGINS.NOT_INSTALLED, {
+    throw new BuilderError(ERRORS.PLUGINS.NOT_INSTALLED, {
       plugin: pluginName,
       extraMessage: globalWarning,
       extraFlags: installExtraFlags,
@@ -71,7 +71,7 @@ export function usePlugin(
   // We use the package.json's version of the name, as it is normalized.
   pluginName = pluginPackageJson.name;
 
-  if (buidlerContext.loadedPlugins.includes(pluginName)) {
+  if (builderContext.loadedPlugins.includes(pluginName)) {
     return;
   }
 
@@ -88,7 +88,7 @@ export function usePlugin(
       }
 
       if (dependencyPackageJson === undefined) {
-        throw new BuidlerError(ERRORS.PLUGINS.MISSING_DEPENDENCY, {
+        throw new BuilderError(ERRORS.PLUGINS.MISSING_DEPENDENCY, {
           plugin: pluginName,
           dependency: dependencyName,
           extraMessage: globalWarning,
@@ -104,7 +104,7 @@ export function usePlugin(
           includePrerelease: true,
         })
       ) {
-        throw new BuidlerError(ERRORS.PLUGINS.DEPENDENCY_VERSION_MISMATCH, {
+        throw new BuilderError(ERRORS.PLUGINS.DEPENDENCY_VERSION_MISMATCH, {
           plugin: pluginName,
           dependency: dependencyName,
           extraMessage: globalWarning,
@@ -120,7 +120,7 @@ export function usePlugin(
   const pluginPath = require.resolve(pluginName, options);
   loadPluginFile(pluginPath);
 
-  buidlerContext.setPluginAsLoaded(pluginName);
+  builderContext.setPluginAsLoaded(pluginName);
 }
 
 export function loadPluginFile(absolutePluginFilePath: string) {

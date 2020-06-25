@@ -1,14 +1,14 @@
-import { BuidlerConfig, BuidlerNetworkConfig } from "../../../types";
+import { BuilderConfig, BuilderNetworkConfig } from "../../../types";
 import { BUIDLEREVM_NETWORK_NAME } from "../../constants";
 
 export const DEFAULT_SOLC_VERSION = "0.5.15";
 export const BUIDLEREVM_DEFAULT_GAS_PRICE = 8e9;
 
-const DEFAULT_BUIDLER_NETWORK_CONFIG: BuidlerNetworkConfig = {
+const DEFAULT_BUIDLER_NETWORK_CONFIG: BuilderNetworkConfig = {
   accounts: [],
 };
 
-const defaultConfig: BuidlerConfig = {
+const defaultConfig: BuilderConfig = {
   defaultNetwork: BUIDLEREVM_NETWORK_NAME,
   solc: {
     version: DEFAULT_SOLC_VERSION,

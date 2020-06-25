@@ -8,21 +8,21 @@ import {
   int,
   string,
 } from "../../../src/internal/core/params/argument-types";
-import { BUIDLER_PARAM_DEFINITIONS } from "../../../src/internal/core/params/buidler-params";
+import { BUIDLER_PARAM_DEFINITIONS } from "../../../src/internal/core/params/builder-params";
 import {
   OverriddenTaskDefinition,
   SimpleTaskDefinition,
 } from "../../../src/internal/core/tasks/task-definitions";
 import {
-  BuidlerArguments,
+  BuilderArguments,
   TaskArguments,
   TaskDefinition,
 } from "../../../src/types";
-import { expectBuidlerError } from "../../helpers/errors";
+import { expectBuilderError } from "../../helpers/errors";
 
 describe("ArgumentsParser", () => {
   let argumentsParser: ArgumentsParser;
-  let envArgs: BuidlerArguments;
+  let envArgs: BuilderArguments;
   let taskDefinition: TaskDefinition;
   let overridenTaskDefinition: OverriddenTaskDefinition;
 
@@ -58,17 +58,17 @@ describe("ArgumentsParser", () => {
   });
 
   it("Should throw if a param name CLA isn't all lowercase", () => {
-    expectBuidlerError(
+    expectBuilderError(
       () => ArgumentsParser.cLAToParamName("--showStackTraces"),
       ERRORS.ARGUMENTS.PARAM_NAME_INVALID_CASING
     );
 
-    expectBuidlerError(
+    expectBuilderError(
       () => ArgumentsParser.cLAToParamName("--showstackTraces"),
       ERRORS.ARGUMENTS.PARAM_NAME_INVALID_CASING
     );
 
-    expectBuidlerError(
+    expectBuilderError(
       () => ArgumentsParser.cLAToParamName("--show-stack-Traces"),
       ERRORS.ARGUMENTS.PARAM_NAME_INVALID_CASING
     );
@@ -103,8 +103,8 @@ describe("ArgumentsParser", () => {
     );
   });
 
-  describe("buidler arguments", () => {
-    it("should parse buidler arguments with task", () => {
+  describe("builder arguments", () => {
+    it("should parse builder arguments with task", () => {
       const rawCLAs: string[] = [
         "--show-stack-traces",
         "--network",
@@ -114,23 +114,23 @@ describe("ArgumentsParser", () => {
       ];
 
       const {
-        buidlerArguments,
+        builderArguments,
         taskName,
         unparsedCLAs,
-      } = argumentsParser.parseBuidlerArguments(
+      } = argumentsParser.parseBuilderArguments(
         BUIDLER_PARAM_DEFINITIONS,
         envArgs,
         rawCLAs
       );
       assert.equal(taskName, "compile");
-      assert.equal(buidlerArguments.showStackTraces, true);
-      assert.equal(buidlerArguments.network, "local");
-      assert.equal(buidlerArguments.emoji, false);
+      assert.equal(builderArguments.showStackTraces, true);
+      assert.equal(builderArguments.network, "local");
+      assert.equal(builderArguments.emoji, false);
       assert.equal(unparsedCLAs.length, 1);
       assert.equal("--task-param", unparsedCLAs[0]);
     });
 
-    it("should parse buidler arguments after taskname", () => {
+    it("should parse builder arguments after taskname", () => {
       const rawCLAs: string[] = [
         "compile",
         "--task-param",
@@ -140,18 +140,18 @@ describe("ArgumentsParser", () => {
       ];
 
       const {
-        buidlerArguments,
+        builderArguments,
         taskName,
         unparsedCLAs,
-      } = argumentsParser.parseBuidlerArguments(
+      } = argumentsParser.parseBuilderArguments(
         BUIDLER_PARAM_DEFINITIONS,
         envArgs,
         rawCLAs
       );
       assert.equal(taskName, "compile");
-      assert.equal(buidlerArguments.showStackTraces, true);
-      assert.equal(buidlerArguments.network, "local");
-      assert.equal(buidlerArguments.emoji, false);
+      assert.equal(builderArguments.showStackTraces, true);
+      assert.equal(builderArguments.network, "local");
+      assert.equal(builderArguments.emoji, false);
       assert.equal(unparsedCLAs.length, 1);
       assert.equal("--task-param", unparsedCLAs[0]);
     });
@@ -165,9 +165,9 @@ describe("ArgumentsParser", () => {
         "local",
       ];
 
-      expectBuidlerError(
+      expectBuilderError(
         () =>
-          argumentsParser.parseBuidlerArguments(
+          argumentsParser.parseBuilderArguments(
             BUIDLER_PARAM_DEFINITIONS,
             envArgs,
             rawCLAs
@@ -176,7 +176,7 @@ describe("ArgumentsParser", () => {
       );
     });
 
-    it("should parse a buidler argument", () => {
+    it("should parse a builder argument", () => {
       const rawCLAs: string[] = [
         "--show-stack-traces",
         "--network",
@@ -184,39 +184,39 @@ describe("ArgumentsParser", () => {
         "compile",
       ];
 
-      const buidlerArguments: TaskArguments = {};
+      const builderArguments: TaskArguments = {};
       assert.equal(
         0,
         argumentsParser["_parseArgumentAt"](
           rawCLAs,
           0,
           BUIDLER_PARAM_DEFINITIONS,
-          buidlerArguments
+          builderArguments
         )
       );
-      assert.equal(buidlerArguments.showStackTraces, true);
+      assert.equal(builderArguments.showStackTraces, true);
       assert.equal(
         2,
         argumentsParser["_parseArgumentAt"](
           rawCLAs,
           1,
           BUIDLER_PARAM_DEFINITIONS,
-          buidlerArguments
+          builderArguments
         )
       );
-      assert.equal(buidlerArguments.network, "local");
+      assert.equal(builderArguments.network, "local");
     });
 
-    it("should fail trying to parse buidler with invalid argument", () => {
+    it("should fail trying to parse builder with invalid argument", () => {
       const rawCLAs: string[] = [
         "--show-stack-traces",
         "--network",
         "local",
         "--invalid-param",
       ];
-      expectBuidlerError(
+      expectBuilderError(
         () =>
-          argumentsParser.parseBuidlerArguments(
+          argumentsParser.parseBuilderArguments(
             BUIDLER_PARAM_DEFINITIONS,
             envArgs,
             rawCLAs
@@ -234,9 +234,9 @@ describe("ArgumentsParser", () => {
         "local",
         "compile",
       ];
-      expectBuidlerError(
+      expectBuilderError(
         () =>
-          argumentsParser.parseBuidlerArguments(
+          argumentsParser.parseBuilderArguments(
             BUIDLER_PARAM_DEFINITIONS,
             envArgs,
             rawCLAs
@@ -246,7 +246,7 @@ describe("ArgumentsParser", () => {
     });
 
     it("should only add non-present arguments", () => {
-      const buidlerArguments = argumentsParser["_addBuidlerDefaultArguments"](
+      const builderArguments = argumentsParser["_addBuilderDefaultArguments"](
         BUIDLER_PARAM_DEFINITIONS,
         envArgs,
         {
@@ -254,8 +254,8 @@ describe("ArgumentsParser", () => {
         }
       );
 
-      assert.isTrue(buidlerArguments.showStackTraces);
-      assert.isFalse(buidlerArguments.emoji);
+      assert.isTrue(builderArguments.showStackTraces);
+      assert.isFalse(builderArguments.emoji);
     });
   });
 
@@ -327,7 +327,7 @@ describe("ArgumentsParser", () => {
 
     it("should fail when passing invalid parameter", () => {
       const rawCLAs: string[] = ["--invalid-parameter", "not_valid"];
-      expectBuidlerError(() => {
+      expectBuilderError(() => {
         argumentsParser.parseTaskArguments(taskDefinition, rawCLAs);
       }, ERRORS.ARGUMENTS.UNRECOGNIZED_PARAM_NAME);
     });
@@ -339,7 +339,7 @@ describe("ArgumentsParser", () => {
         "a variadic params"
       );
 
-      expectBuidlerError(() => {
+      expectBuilderError(() => {
         argumentsParser.parseTaskArguments(taskDefinition, rawCLAs);
       }, ERRORS.ARGUMENTS.MISSING_POSITIONAL_ARG);
     });
@@ -349,7 +349,7 @@ describe("ArgumentsParser", () => {
       const definition = new SimpleTaskDefinition("compile", true);
       definition.addParam("param", "just a param");
       definition.addParam("bleep", "useless param", 1602, int, true);
-      expectBuidlerError(() => {
+      expectBuilderError(() => {
         argumentsParser.parseTaskArguments(definition, rawCLAs);
       }, ERRORS.ARGUMENTS.MISSING_TASK_ARGUMENT);
     });
@@ -359,14 +359,14 @@ describe("ArgumentsParser", () => {
       const definition = new SimpleTaskDefinition("compile", true);
       definition.addParam("param", "just a param");
       definition.addParam("bleep", "useless param", 1602, int, true);
-      expectBuidlerError(() => {
+      expectBuilderError(() => {
         argumentsParser.parseTaskArguments(definition, rawCLAs);
       }, ERRORS.ARGUMENTS.MISSING_TASK_ARGUMENT);
     });
 
     it("should fail when passing unneeded arguments", () => {
       const rawCLAs: string[] = ["more", "arguments"];
-      expectBuidlerError(() => {
+      expectBuilderError(() => {
         argumentsParser.parseTaskArguments(taskDefinition, rawCLAs);
       }, ERRORS.ARGUMENTS.UNRECOGNIZED_POSITIONAL_ARG);
     });
@@ -396,7 +396,7 @@ describe("ArgumentsParser", () => {
         .addOptionalParam("b", "A boolean", true, boolean)
         .setAction(async () => {});
 
-      expectBuidlerError(
+      expectBuilderError(
         () => argumentsParser.parseTaskArguments(taskDefinition, rawCLAs),
         ERRORS.ARGUMENTS.MISSING_TASK_ARGUMENT
       );

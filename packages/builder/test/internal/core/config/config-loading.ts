@@ -2,12 +2,12 @@ import { assert } from "chai";
 import path from "path";
 
 import { TASK_CLEAN } from "../../../../src/builtin-tasks/task-names";
-import { BuidlerContext } from "../../../../src/internal/context";
+import { BuilderContext } from "../../../../src/internal/context";
 import { loadConfigAndTasks } from "../../../../src/internal/core/config/config-loading";
 import { ERRORS } from "../../../../src/internal/core/errors-list";
-import { resetBuidlerContext } from "../../../../src/internal/reset";
+import { resetBuilderContext } from "../../../../src/internal/reset";
 import { useEnvironment } from "../../../helpers/environment";
-import { expectBuidlerError } from "../../../helpers/errors";
+import { expectBuilderError } from "../../../helpers/errors";
 import {
   getFixtureProjectPath,
   useFixtureProject,
@@ -33,15 +33,15 @@ describe("config loading", function () {
       useFixtureProject("invalid-config");
 
       beforeEach(function () {
-        BuidlerContext.createBuidlerContext();
+        BuilderContext.createBuilderContext();
       });
 
       afterEach(function () {
-        resetBuidlerContext();
+        resetBuilderContext();
       });
 
       it("Should throw the right error", function () {
-        expectBuidlerError(
+        expectBuilderError(
           () => loadConfigAndTasks(),
           ERRORS.GENERAL.INVALID_CONFIG
         );
@@ -53,11 +53,11 @@ describe("config loading", function () {
     useFixtureProject("custom-config-file");
 
     beforeEach(function () {
-      BuidlerContext.createBuidlerContext();
+      BuilderContext.createBuilderContext();
     });
 
     afterEach(function () {
-      resetBuidlerContext();
+      resetBuilderContext();
     });
 
     it("should accept a relative path from the CWD", function () {
@@ -106,13 +106,13 @@ describe("config loading", function () {
     useFixtureProject("config-project");
 
     afterEach(function () {
-      resetBuidlerContext();
+      resetBuilderContext();
     });
 
     it("should remove everything from global state after loading", function () {
       const globalAsAny: any = global;
 
-      BuidlerContext.createBuidlerContext();
+      BuilderContext.createBuilderContext();
       loadConfigAndTasks();
 
       assert.isUndefined(globalAsAny.internalTask);
@@ -121,9 +121,9 @@ describe("config loading", function () {
       assert.isUndefined(globalAsAny.extendEnvironment);
       assert.isUndefined(globalAsAny.usePlugin);
 
-      resetBuidlerContext();
+      resetBuilderContext();
 
-      BuidlerContext.createBuidlerContext();
+      BuilderContext.createBuilderContext();
       loadConfigAndTasks();
 
       assert.isUndefined(globalAsAny.internalTask);
@@ -131,7 +131,7 @@ describe("config loading", function () {
       assert.isUndefined(globalAsAny.types);
       assert.isUndefined(globalAsAny.extendEnvironment);
       assert.isUndefined(globalAsAny.usePlugin);
-      resetBuidlerContext();
+      resetBuilderContext();
     });
   });
 
@@ -139,15 +139,15 @@ describe("config loading", function () {
     useFixtureProject("config-imports-lib-project");
 
     beforeEach(function () {
-      BuidlerContext.createBuidlerContext();
+      BuilderContext.createBuilderContext();
     });
 
     afterEach(function () {
-      resetBuidlerContext();
+      resetBuilderContext();
     });
 
     it("should accept a relative path from the CWD", function () {
-      expectBuidlerError(
+      expectBuilderError(
         () => loadConfigAndTasks(),
         ERRORS.GENERAL.LIB_IMPORTED_FROM_THE_CONFIG
       );

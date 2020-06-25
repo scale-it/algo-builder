@@ -7,12 +7,12 @@ import "source-map-support/register";
 import { TASK_HELP } from "../../builtin-tasks/task-names";
 import { TaskArguments } from "../../types";
 import { BUIDLER_NAME } from "../constants";
-import { BuidlerContext } from "../context";
+import { BuilderContext } from "../context";
 import { loadConfigAndTasks } from "../core/config/config-loading";
-import { BuidlerError, BuidlerPluginError } from "../core/errors";
+import { BuilderError, BuilderPluginError } from "../core/errors";
 import { ERRORS, getErrorCode } from "../core/errors-list";
-import { BUIDLER_PARAM_DEFINITIONS } from "../core/params/buidler-params";
-import { getEnvBuidlerArguments } from "../core/params/env-variables";
+import { BUIDLER_PARAM_DEFINITIONS } from "../core/params/builder-params";
+import { getEnvBuilderArguments } from "../core/params/env-variables";
 import { isCwdInsideProject } from "../core/project-structure";
 import { Environment } from "../core/runtime-environment";
 import { loadTsNodeIfPresent } from "../core/typescript-support";
@@ -23,7 +23,7 @@ import { ArgumentsParser } from "./arguments-parser";
 import { enableEmoji } from "./emoji";
 import { createProject } from "./project-creation";
 
-const log = debug("buidler:core:cli");
+const log = debug("builder:core:cli");
 
 //const ANALYTICS_SLOW_TASK_THRESHOLD = 300;
 
@@ -34,7 +34,7 @@ async function printVersionMessage(packageJson: PackageJson) {
 function ensureValidNodeVersion(packageJson: PackageJson) {
   const requirement = packageJson.engines.node;
   if (!semver.satisfies(process.version, requirement)) {
-    throw new BuidlerError(ERRORS.GENERAL.INVALID_NODE_VERSION, {
+    throw new BuilderError(ERRORS.GENERAL.INVALID_NODE_VERSION, {
       requirement,
     });
   }
@@ -50,7 +50,7 @@ async function main() {
 
     ensureValidNodeVersion(packageJson);
 
-    const envVariableArguments = getEnvBuidlerArguments(
+    const envVariableArguments = getEnvBuilderArguments(
       BUIDLER_PARAM_DEFINITIONS,
       process.env
     );
@@ -58,27 +58,27 @@ async function main() {
     const argumentsParser = new ArgumentsParser();
 
     const {
-      buidlerArguments,
+      builderArguments,
       taskName: parsedTaskName,
       unparsedCLAs,
-    } = argumentsParser.parseBuidlerArguments(
+    } = argumentsParser.parseBuilderArguments(
       BUIDLER_PARAM_DEFINITIONS,
       envVariableArguments,
       process.argv.slice(2)
     );
 
-    if (buidlerArguments.verbose) {
-      debug.enable("buidler*");
+    if (builderArguments.verbose) {
+      debug.enable("builder*");
     }
 
-    //if (buidlerArguments.emoji) {
+    //if (builderArguments.emoji) {
     //  enableEmoji();
     //}
 
-    showStackTraces = buidlerArguments.showStackTraces;
+    showStackTraces = builderArguments.showStackTraces;
 
     if (
-      buidlerArguments.config === undefined &&
+      builderArguments.config === undefined &&
       !isCwdInsideProject() &&
       process.stdout.isTTY === true
     ) {
@@ -87,15 +87,15 @@ async function main() {
     }
 
     // --version is a special case
-    if (buidlerArguments.version) {
+    if (builderArguments.version) {
       await printVersionMessage(packageJson);
       return;
     }
 
     loadTsNodeIfPresent();
 
-    const ctx = BuidlerContext.createBuidlerContext();
-    const config = loadConfigAndTasks(buidlerArguments);
+    const ctx = BuilderContext.createBuilderContext();
+    const config = loadConfigAndTasks(builderArguments);
 
     //const analytics = await Analytics.getInstance(
     //  config.paths.root,
@@ -113,14 +113,14 @@ async function main() {
     let taskArguments: TaskArguments;
 
     // --help is a also special case
-    if (buidlerArguments.help && taskName !== TASK_HELP) {
+    if (builderArguments.help && taskName !== TASK_HELP) {
       taskArguments = { task: taskName };
       taskName = TASK_HELP;
     } else {
       const taskDefinition = taskDefinitions[taskName];
 
       if (taskDefinition === undefined) {
-        throw new BuidlerError(ERRORS.ARGUMENTS.UNRECOGNIZED_TASK, {
+        throw new BuilderError(ERRORS.ARGUMENTS.UNRECOGNIZED_TASK, {
           task: taskName,
         });
       }
@@ -133,18 +133,18 @@ async function main() {
 
     // TODO: This is here for backwards compatibility
     // There are very few projects using this.
-    if (buidlerArguments.network === undefined) {
-      buidlerArguments.network = config.defaultNetwork;
+    if (builderArguments.network === undefined) {
+      builderArguments.network = config.defaultNetwork;
     }
 
     const env = new Environment(
       config,
-      buidlerArguments,
+      builderArguments,
       taskDefinitions,
       envExtenders
     );
 
-    ctx.setBuidlerRuntimeEnvironment(env);
+    ctx.setBuilderRuntimeEnvironment(env);
 
     const timestampBeforeRun = new Date().getTime();
 
@@ -159,15 +159,15 @@ async function main() {
     //} else {
     //  abortAnalytics();
     //}
-    log(`Killing Buidler after successfully running task ${taskName}`);
+    log(`Killing Builder after successfully running task ${taskName}`);
   } catch (error) {
-    let isBuidlerError = false;
+    let isBuilderError = false;
 
-    if (BuidlerError.isBuidlerError(error)) {
-      isBuidlerError = true;
+    if (BuilderError.isBuilderError(error)) {
+      isBuilderError = true;
       console.error(chalk.red(`Error ${error.message}`));
-    } else if (BuidlerPluginError.isBuidlerPluginError(error)) {
-      isBuidlerError = true;
+    } else if (BuilderPluginError.isBuilderPluginError(error)) {
+      isBuilderError = true;
       console.error(
         chalk.red(`Error in plugin ${error.pluginName}: ${error.message}`)
       );
@@ -184,14 +184,14 @@ async function main() {
     if (showStackTraces) {
       console.error(error.stack);
     } else {
-      if (!isBuidlerError) {
+      if (!isBuilderError) {
         console.error(
-          `If you think this is a bug in Buidler, please report it here: https://buidler.dev/reportbug`
+          `If you think this is a bug in Builder, please report it here: https://builder.dev/reportbug`
         );
       }
 
-      if (BuidlerError.isBuidlerError(error)) {
-        const link = `https://buidler.dev/${getErrorCode(
+      if (BuilderError.isBuilderError(error)) {
+        const link = `https://builder.dev/${getErrorCode(
           error.errorDescriptor
         )}`;
 

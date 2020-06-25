@@ -1,3 +1,3 @@
-if (buidlerArguments.network !== "custom") {
+if (builderArguments.network !== "custom") {
   process.exit(1);
 }

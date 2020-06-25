@@ -1,8 +1,8 @@
-import { BuidlerParamDefinitions } from "../../../types";
+import { BuilderParamDefinitions } from "../../../types";
 
 import * as types from "./argument-types";
 
-export const BUIDLER_PARAM_DEFINITIONS: BuidlerParamDefinitions = {
+export const BUIDLER_PARAM_DEFINITIONS: BuilderParamDefinitions = {
   network: {
     name: "network",
     defaultValue: undefined,
@@ -24,7 +24,7 @@ export const BUIDLER_PARAM_DEFINITIONS: BuidlerParamDefinitions = {
   version: {
     name: "version",
     defaultValue: false,
-    description: "Shows buidler's version.",
+    description: "Shows builder's version.",
     type: types.boolean,
     isFlag: true,
     isOptional: true,
@@ -51,7 +51,7 @@ export const BUIDLER_PARAM_DEFINITIONS: BuidlerParamDefinitions = {
   config: {
     name: "config",
     defaultValue: undefined,
-    description: "A Buidler config file.",
+    description: "A Builder config file.",
     type: types.inputFile,
     isFlag: false,
     isOptional: true,
@@ -60,7 +60,7 @@ export const BUIDLER_PARAM_DEFINITIONS: BuidlerParamDefinitions = {
   verbose: {
     name: "verbose",
     defaultValue: false,
-    description: "Enables Buidler verbose logging",
+    description: "Enables Builder verbose logging",
     type: types.boolean,
     isFlag: true,
     isOptional: true,
@@ -69,7 +69,7 @@ export const BUIDLER_PARAM_DEFINITIONS: BuidlerParamDefinitions = {
   maxMemory: {
     name: "maxMemory",
     defaultValue: undefined,
-    description: "The maximum amount of memory that Buidler can use.",
+    description: "The maximum amount of memory that Builder can use.",
     type: types.int,
     isOptional: true,
     isFlag: false,

@@ -10,13 +10,13 @@ import { getPackageJson, getPackageRoot } from "../util/package-info";
 import { emoji } from "./emoji";
 
 const CREATE_SAMPLE_PROJECT_ACTION = "Create a sample project";
-const CREATE_EMPTY_BUIDLER_CONFIG_ACTION = "Create an empty buidler.config.js";
+const CREATE_EMPTY_BUIDLER_CONFIG_ACTION = "Create an empty builder.config.js";
 
 const SAMPLE_PROJECT_DEPENDENCIES = [
-  "@nomiclabs/buidler-waffle",
+  "@nomiclabs/builder-waffle",
   "ethereum-waffle",
   "chai",
-  "@nomiclabs/buidler-ethers",
+  "@nomiclabs/builder-ethers",
   "ethers",
 ];
 
@@ -71,12 +71,12 @@ function printSuggestedCommands() {
       : "npx ";
 
   console.log(`Try running some of the following tasks:`);
-  console.log(`  ${npx}buidler accounts`);
-  console.log(`  ${npx}buidler compile`);
-  console.log(`  ${npx}buidler test`);
-  console.log(`  ${npx}buidler node`);
+  console.log(`  ${npx}builder accounts`);
+  console.log(`  ${npx}builder compile`);
+  console.log(`  ${npx}builder test`);
+  console.log(`  ${npx}builder node`);
   console.log(`  node scripts/sample-script.js`);
-  console.log(`  ${npx}buidler help`);
+  console.log(`  ${npx}builder help`);
 }
 
 async function printTrufflePluginInstallationInstructions() {
@@ -89,9 +89,9 @@ async function printTrufflePluginInstallationInstructions() {
   console.log(`  ${cmd.join(" ")}`);
 }
 
-async function writeEmptyBuidlerConfig() {
+async function writeEmptyBuilderConfig() {
   return fsExtra.writeFile(
-    "buidler.config.js",
+    "builder.config.js",
     "module.exports = {};\n",
     "utf-8"
   );
@@ -239,7 +239,7 @@ async function confirmTrufflePluginInstallation(): Promise<boolean> {
       return false;
     }
 
-    // tslint:disable-next-line only-buidler-error
+    // tslint:disable-next-line only-builder-error
     throw e;
   }
 

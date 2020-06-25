@@ -1,7 +1,7 @@
 import { HelpPrinter } from "../internal/cli/help-printer";
 import { BUIDLER_EXECUTABLE_NAME, BUIDLER_NAME } from "../internal/constants";
 import { task } from "../internal/core/config/config-env";
-import { BUIDLER_PARAM_DEFINITIONS } from "../internal/core/params/buidler-params";
+import { BUIDLER_PARAM_DEFINITIONS } from "../internal/core/params/builder-params";
 import { getPackageJson } from "../internal/util/package-info";
 
 import { TASK_HELP } from "./task-names";

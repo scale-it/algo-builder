@@ -15,13 +15,13 @@ interface CommonNetworkConfig {
   //gasMultiplier?: number;
 }
 
-interface BuidlerNetworkAccount {
+interface BuilderNetworkAccount {
   privateKey: string;
   balance: string;
 }
 
-export interface BuidlerNetworkConfig extends CommonNetworkConfig {
-  accounts?: BuidlerNetworkAccount[];
+export interface BuilderNetworkConfig extends CommonNetworkConfig {
+  accounts?: BuilderNetworkAccount[];
   //blockGasLimit?: number;
   //hardfork?: string;
   throwOnTransactionFailures?: boolean;
@@ -55,7 +55,7 @@ export interface HttpNetworkConfig extends CommonNetworkConfig {
   accounts?: NetworkConfigAccounts;
 }
 
-export type NetworkConfig = BuidlerNetworkConfig | HttpNetworkConfig;
+export type NetworkConfig = BuilderNetworkConfig | HttpNetworkConfig;
 
 export interface Networks {
   [networkName: string]: NetworkConfig;
@@ -64,7 +64,7 @@ export interface Networks {
 /**
  * The project paths:
  * * root: the project's root.
- * * configFile: the buidler's config filepath.
+ * * configFile: the builder's config filepath.
  * * cache: project's cache directory.
  * * artifacts: artifact's directory.
  * * sources: project's sources directory.
@@ -96,7 +96,7 @@ export interface AnalyticsConfig {
   enabled: boolean;
 }
 
-export interface BuidlerConfig {
+export interface BuilderConfig {
   defaultNetwork?: string;
   networks?: Networks;
   paths?: StrictOmit<Partial<ProjectPaths>, "configFile">;
@@ -105,7 +105,7 @@ export interface BuidlerConfig {
   analytics?: Partial<AnalyticsConfig>;
 }
 
-export interface ResolvedBuidlerConfig extends BuidlerConfig {
+export interface ResolvedBuilderConfig extends BuilderConfig {
   defaultNetwork: string;
   paths: ProjectPaths;
   networks: Networks;
@@ -127,14 +127,14 @@ export interface SolcInput {
 }
 
 /**
- * A function that receives a BuidlerRuntimeEnvironment and
+ * A function that receives a BuilderRuntimeEnvironment and
  * modify its properties or add new ones.
  */
-export type EnvironmentExtender = (env: BuidlerRuntimeEnvironment) => void;
+export type EnvironmentExtender = (env: BuilderRuntimeEnvironment) => void;
 
 export type ConfigExtender = (
-  config: ResolvedBuidlerConfig,
-  userConfig: DeepReadonly<BuidlerConfig>
+  config: ResolvedBuilderConfig,
+  userConfig: DeepReadonly<BuilderConfig>
 ) => void;
 
 export interface TasksMap {
@@ -214,15 +214,15 @@ export interface ParamDefinitionsMap {
 }
 
 /**
- * Buidler arguments:
+ * Builder arguments:
  * * network: the network to be used.
  * * showStackTraces: flag to show stack traces.
- * * version: flag to show buidler's version.
- * * help: flag to show buidler's help message.
+ * * version: flag to show builder's version.
+ * * help: flag to show builder's help message.
  * * emoji:
- * * config: used to specify buidler's config file.
+ * * config: used to specify builder's config file.
  */
-export interface BuidlerArguments {
+export interface BuilderArguments {
   network?: string;
   showStackTraces: boolean;
   version: boolean;
@@ -233,9 +233,9 @@ export interface BuidlerArguments {
   maxMemory?: number;
 }
 
-export type BuidlerParamDefinitions = {
-  [param in keyof Required<BuidlerArguments>]: OptionalParamDefinition<
-    BuidlerArguments[param]
+export type BuilderParamDefinitions = {
+  [param in keyof Required<BuilderArguments>]: OptionalParamDefinition<
+    BuilderArguments[param]
   >;
 };
 
@@ -280,7 +280,7 @@ export interface RunSuperFunction<ArgT extends TaskArguments> {
 
 export type ActionType<ArgsT extends TaskArguments> = (
   taskArgs: ArgsT,
-  env: BuidlerRuntimeEnvironment,
+  env: BuilderRuntimeEnvironment,
   runSuper: RunSuperFunction<ArgsT>
 ) => Promise<any>;
 
@@ -297,9 +297,9 @@ export interface Network {
   //provider: EthereumProvider;
 }
 
-export interface BuidlerRuntimeEnvironment {
-  readonly config: ResolvedBuidlerConfig;
-  readonly buidlerArguments: BuidlerArguments;
+export interface BuilderRuntimeEnvironment {
+  readonly config: ResolvedBuilderConfig;
+  readonly builderArguments: BuilderArguments;
   readonly tasks: TasksMap;
   readonly run: RunTaskFunction;
   //readonly network: Network;

@@ -6,7 +6,7 @@ import {
   BUIDLEREVM_NETWORK_NAME,
   BUIDLEREVM_SUPPORTED_HARDFORKS,
 } from "../../constants";
-import { BuidlerError } from "../errors";
+import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
 
 function stringify(v: any): string {
@@ -75,19 +75,19 @@ function optional<TypeT, OutputT>(
 
 // IMPORTANT: This t.types MUST be kept in sync with the actual types.
 
-const BuidlerNetworkAccount = t.type({
+const BuilderNetworkAccount = t.type({
   privateKey: t.string,
   balance: t.string,
 });
 
-const BuidlerNetworkConfig = t.type({
+const BuilderNetworkConfig = t.type({
   hardfork: optional(t.string),
   chainId: optional(t.number),
   from: optional(t.string),
   gas: optional(t.union([t.literal("auto"), t.number])),
   gasPrice: optional(t.union([t.literal("auto"), t.number])),
   gasMultiplier: optional(t.number),
-  accounts: optional(t.array(BuidlerNetworkAccount)),
+  accounts: optional(t.array(BuilderNetworkAccount)),
   blockGasLimit: optional(t.number),
   throwOnTransactionFailures: optional(t.boolean),
   throwOnCallFailures: optional(t.boolean),
@@ -127,7 +127,7 @@ const HttpNetworkConfig = t.type({
   httpHeaders: optional(HttpHeaders),
 });
 
-const NetworkConfig = t.union([BuidlerNetworkConfig, HttpNetworkConfig]);
+const NetworkConfig = t.union([BuilderNetworkConfig, HttpNetworkConfig]);
 
 const Networks = t.record(t.string, NetworkConfig);
 
@@ -156,7 +156,7 @@ const AnalyticsConfig = t.type({
   enabled: optional(t.boolean),
 });
 
-const BuidlerConfig = t.type(
+const BuilderConfig = t.type(
   {
     defaultNetwork: optional(t.string),
     networks: optional(Networks),
@@ -164,11 +164,11 @@ const BuidlerConfig = t.type(
     solc: optional(SolcConfig),
     analytics: optional(AnalyticsConfig),
   },
-  "BuidlerConfig"
+  "BuilderConfig"
 );
 
 /**
- * Validates the config, throwing a BuidlerError if invalid.
+ * Validates the config, throwing a BuilderError if invalid.
  * @param config
  */
 export function validateConfig(config: any) {
@@ -181,7 +181,7 @@ export function validateConfig(config: any) {
   let errorList = errors.join("\n  * ");
   errorList = `  * ${errorList}`;
 
-  throw new BuidlerError(ERRORS.GENERAL.INVALID_CONFIG, { errors: errorList });
+  throw new BuilderError(ERRORS.GENERAL.INVALID_CONFIG, { errors: errorList });
 }
 
 export function getValidationErrors(config: any): string[] {
@@ -189,123 +189,123 @@ export function getValidationErrors(config: any): string[] {
 
   // These can't be validated with io-ts
   if (config !== undefined && typeof config.networks === "object") {
-    const buidlerNetwork = config.networks[BUIDLEREVM_NETWORK_NAME];
-    if (buidlerNetwork !== undefined) {
+    const builderNetwork = config.networks[BUIDLEREVM_NETWORK_NAME];
+    if (builderNetwork !== undefined) {
       if (
-        buidlerNetwork.hardfork !== undefined &&
-        !BUIDLEREVM_SUPPORTED_HARDFORKS.includes(buidlerNetwork.hardfork)
+        builderNetwork.hardfork !== undefined &&
+        !BUIDLEREVM_SUPPORTED_HARDFORKS.includes(builderNetwork.hardfork)
       ) {
         errors.push(
-          `BuidlerConfig.networks.${BUIDLEREVM_NETWORK_NAME}.hardfork is not supported. Use one of ${BUIDLEREVM_SUPPORTED_HARDFORKS.join(
+          `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME}.hardfork is not supported. Use one of ${BUIDLEREVM_SUPPORTED_HARDFORKS.join(
             ", "
           )}`
         );
       }
 
       if (
-        buidlerNetwork.allowUnlimitedContractSize !== undefined &&
-        typeof buidlerNetwork.allowUnlimitedContractSize !== "boolean"
+        builderNetwork.allowUnlimitedContractSize !== undefined &&
+        typeof builderNetwork.allowUnlimitedContractSize !== "boolean"
       ) {
         errors.push(
           getErrorMessage(
-            `BuidlerConfig.networks.${BUIDLEREVM_NETWORK_NAME}.allowUnlimitedContractSize`,
-            buidlerNetwork.allowUnlimitedContractSize,
+            `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME}.allowUnlimitedContractSize`,
+            builderNetwork.allowUnlimitedContractSize,
             "boolean | undefined"
           )
         );
       }
 
       if (
-        buidlerNetwork.initialDate !== undefined &&
-        typeof buidlerNetwork.initialDate !== "string"
+        builderNetwork.initialDate !== undefined &&
+        typeof builderNetwork.initialDate !== "string"
       ) {
         errors.push(
           getErrorMessage(
-            `BuidlerConfig.networks.${BUIDLEREVM_NETWORK_NAME}.initialDate`,
-            buidlerNetwork.initialDate,
+            `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME}.initialDate`,
+            builderNetwork.initialDate,
             "string | undefined"
           )
         );
       }
 
       if (
-        buidlerNetwork.throwOnTransactionFailures !== undefined &&
-        typeof buidlerNetwork.throwOnTransactionFailures !== "boolean"
+        builderNetwork.throwOnTransactionFailures !== undefined &&
+        typeof builderNetwork.throwOnTransactionFailures !== "boolean"
       ) {
         errors.push(
           getErrorMessage(
-            `BuidlerConfig.networks.${BUIDLEREVM_NETWORK_NAME}.throwOnTransactionFailures`,
-            buidlerNetwork.throwOnTransactionFailures,
+            `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME}.throwOnTransactionFailures`,
+            builderNetwork.throwOnTransactionFailures,
             "boolean | undefined"
           )
         );
       }
 
       if (
-        buidlerNetwork.throwOnCallFailures !== undefined &&
-        typeof buidlerNetwork.throwOnCallFailures !== "boolean"
+        builderNetwork.throwOnCallFailures !== undefined &&
+        typeof builderNetwork.throwOnCallFailures !== "boolean"
       ) {
         errors.push(
           getErrorMessage(
-            `BuidlerConfig.networks.${BUIDLEREVM_NETWORK_NAME}.throwOnCallFailures`,
-            buidlerNetwork.throwOnCallFailures,
+            `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME}.throwOnCallFailures`,
+            builderNetwork.throwOnCallFailures,
             "boolean | undefined"
           )
         );
       }
 
-      if (buidlerNetwork.url !== undefined) {
+      if (builderNetwork.url !== undefined) {
         errors.push(
-          `BuidlerConfig.networks.${BUIDLEREVM_NETWORK_NAME} can't have an url`
+          `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME} can't have an url`
         );
       }
 
       if (
-        buidlerNetwork.blockGasLimit !== undefined &&
-        typeof buidlerNetwork.blockGasLimit !== "number"
+        builderNetwork.blockGasLimit !== undefined &&
+        typeof builderNetwork.blockGasLimit !== "number"
       ) {
         errors.push(
           getErrorMessage(
-            `BuidlerConfig.networks.${BUIDLEREVM_NETWORK_NAME}.blockGasLimit`,
-            buidlerNetwork.blockGasLimit,
+            `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME}.blockGasLimit`,
+            builderNetwork.blockGasLimit,
             "number | undefined"
           )
         );
       }
 
       if (
-        buidlerNetwork.chainId !== undefined &&
-        typeof buidlerNetwork.chainId !== "number"
+        builderNetwork.chainId !== undefined &&
+        typeof builderNetwork.chainId !== "number"
       ) {
         errors.push(
           getErrorMessage(
-            `BuidlerConfig.networks.${BUIDLEREVM_NETWORK_NAME}.chainId`,
-            buidlerNetwork.chainId,
+            `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME}.chainId`,
+            builderNetwork.chainId,
             "number | undefined"
           )
         );
       }
 
       if (
-        buidlerNetwork.loggingEnabled !== undefined &&
-        typeof buidlerNetwork.loggingEnabled !== "boolean"
+        builderNetwork.loggingEnabled !== undefined &&
+        typeof builderNetwork.loggingEnabled !== "boolean"
       ) {
         errors.push(
           getErrorMessage(
-            `BuidlerConfig.networks.${BUIDLEREVM_NETWORK_NAME}.loggingEnabled`,
-            buidlerNetwork.loggingEnabled,
+            `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME}.loggingEnabled`,
+            builderNetwork.loggingEnabled,
             "boolean | undefined"
           )
         );
       }
 
-      if (buidlerNetwork.accounts !== undefined) {
-        if (Array.isArray(buidlerNetwork.accounts)) {
-          for (const account of buidlerNetwork.accounts) {
+      if (builderNetwork.accounts !== undefined) {
+        if (Array.isArray(builderNetwork.accounts)) {
+          for (const account of builderNetwork.accounts) {
             if (typeof account.privateKey !== "string") {
               errors.push(
                 getErrorMessage(
-                  `BuidlerConfig.networks.${BUIDLEREVM_NETWORK_NAME}.accounts[].privateKey`,
+                  `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME}.accounts[].privateKey`,
                   account.privateKey,
                   "string"
                 )
@@ -315,7 +315,7 @@ export function getValidationErrors(config: any): string[] {
             if (typeof account.balance !== "string") {
               errors.push(
                 getErrorMessage(
-                  `BuidlerConfig.networks.${BUIDLEREVM_NETWORK_NAME}.accounts[].balance`,
+                  `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME}.accounts[].balance`,
                   account.balance,
                   "string"
                 )
@@ -325,8 +325,8 @@ export function getValidationErrors(config: any): string[] {
         } else {
           errors.push(
             getErrorMessage(
-              `BuidlerConfig.networks.${BUIDLEREVM_NETWORK_NAME}.accounts`,
-              buidlerNetwork.accounts,
+              `BuilderConfig.networks.${BUIDLEREVM_NETWORK_NAME}.accounts`,
+              builderNetwork.accounts,
               "[{privateKey: string, balance: string}] | undefined"
             )
           );
@@ -348,7 +348,7 @@ export function getValidationErrors(config: any): string[] {
       if (typeof netConfig.url !== "string") {
         errors.push(
           getErrorMessage(
-            `BuidlerConfig.networks.${networkName}.url`,
+            `BuilderConfig.networks.${networkName}.url`,
             netConfig.url,
             "string"
           )
@@ -359,7 +359,7 @@ export function getValidationErrors(config: any): string[] {
       if ((netConfigResult as any).isLeft()) {
         errors.push(
           getErrorMessage(
-            `BuidlerConfig.networks.${networkName}`,
+            `BuilderConfig.networks.${networkName}`,
             netConfig,
             "HttpNetworkConfig"
           )
@@ -369,13 +369,13 @@ export function getValidationErrors(config: any): string[] {
   }
 
   // io-ts can get confused if there are errors that it can't understand.
-  // Especially around BuidlerEVM's config. It will treat it as an HTTPConfig,
+  // Especially around BuilderEVM's config. It will treat it as an HTTPConfig,
   // and may give a loot of errors.
   if (errors.length > 0) {
     return errors;
   }
 
-  const result = BuidlerConfig.decode(config);
+  const result = BuilderConfig.decode(config);
 
   if ((result as any).isRight()) {
     return errors;

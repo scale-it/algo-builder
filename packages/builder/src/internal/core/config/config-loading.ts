@@ -1,14 +1,14 @@
 import path from "path";
 
-import { BuidlerArguments, ResolvedBuidlerConfig } from "../../../types";
-import { BuidlerContext } from "../../context";
+import { BuilderArguments, ResolvedBuilderConfig } from "../../../types";
+import { BuilderContext } from "../../context";
 import { loadPluginFile } from "../plugins";
 import { getUserConfigPath } from "../project-structure";
 
 import { resolveConfig } from "./config-resolution";
 import { validateConfig } from "./config-validation";
 
-import { BuidlerError } from "../errors";
+import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
 
 function importCsjOrEsModule(filePath: string): any {
@@ -17,10 +17,10 @@ function importCsjOrEsModule(filePath: string): any {
 }
 
 export function loadConfigAndTasks(
-  buidlerArguments?: Partial<BuidlerArguments>
-): ResolvedBuidlerConfig {
+  builderArguments?: Partial<BuilderArguments>
+): ResolvedBuilderConfig {
   let configPath =
-    buidlerArguments !== undefined ? buidlerArguments.config : undefined;
+    builderArguments !== undefined ? builderArguments.config : undefined;
 
   if (configPath === undefined) {
     configPath = getUserConfigPath();
@@ -32,7 +32,7 @@ export function loadConfigAndTasks(
   }
 
   if (!configPath) {
-    throw new BuidlerError(ERRORS.GENERAL.USER_CONFIG_DOES_NOT_EXIST)
+    throw new BuilderError(ERRORS.GENERAL.USER_CONFIG_DOES_NOT_EXIST)
   }
 
   // Before loading the builtin tasks, the default and user's config we expose
@@ -58,7 +58,7 @@ export function loadConfigAndTasks(
     configPath,
     defaultConfig,
     userConfig,
-    BuidlerContext.getBuidlerContext().configExtenders
+    BuilderContext.getBuilderContext().configExtenders
   );
 
   return resolved;
