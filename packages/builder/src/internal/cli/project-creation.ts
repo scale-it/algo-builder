@@ -9,9 +9,6 @@ import { getPackageJson, getPackageRoot } from "../util/package-info";
 
 import { emoji } from "./emoji";
 
-const CREATE_SAMPLE_PROJECT_ACTION = "Create a sample project";
-const CREATE_EMPTY_BUILDER_CONFIG_ACTION = "Create an empty builder.config.js";
-
 const SAMPLE_PROJECT_DEPENDENCIES = [
   "@nomiclabs/builder-waffle",
   "ethereum-waffle",
@@ -27,11 +24,6 @@ async function removeProjectDirIfPresent(projectRoot: string, dirName: string) {
   }
 }
 
-async function removeTempFilesIfPresent(projectRoot: string) {
-  await removeProjectDirIfPresent(projectRoot, "cache");
-  await removeProjectDirIfPresent(projectRoot, "artifacts");
-}
-
 async function printWelcomeMessage() {
   const packageJson = await getPackageJson();
 
@@ -44,24 +36,18 @@ async function printWelcomeMessage() {
   );
 }
 
-async function copySampleProject(projectRoot: string) {
+async function copySampleProject() {
   const packageRoot = await getPackageRoot();
 
-  if (await fsExtra.pathExistsSync(projectRoot)) {
-    const err = "Directory " + path.join(packageRoot, projectRoot) + " already exists."
-    console.log(chalk.red(err))
-    throw err
-  }
+  const sampleProjDir = path.join(packageRoot, "sample-project")
 
-  await fsExtra.ensureDir(projectRoot);
-  console.log(chalk.greenBright("Generating a new project in " + path.join(packageRoot, projectRoot) + "."))
+  console.log(chalk.greenBright("Initializing new workspace in " + process.cwd() + "."))
 
-  await fsExtra.copy(path.join(packageRoot, "sample-project"), projectRoot);
-
-  // This is just in case we have been using the sample project for dev/testing
-  await removeTempFilesIfPresent(projectRoot);
-
-  await fsExtra.remove(path.join(projectRoot, "LICENSE.md"));
+  await fsExtra.copy(sampleProjDir, process.cwd(), {
+    // User doesn't choose the directory so overwrite should be avoided
+    overwrite: false,
+    errorOnExist: true
+  })
 }
 
 function printSuggestedCommands() {
@@ -97,17 +83,10 @@ async function writeEmptyBuilderConfig() {
   );
 }
 
-async function getAction() {
-  // MM: method was removed
-  return CREATE_SAMPLE_PROJECT_ACTION;
-}
-
-export async function createProject(projectRoot: string) {
+export async function createProject() {
   await printWelcomeMessage();
 
-  const action = await getAction();
-
-  await copySampleProject(projectRoot);
+  await copySampleProject();
 
   let shouldShowInstallationInstructions = true;
 
