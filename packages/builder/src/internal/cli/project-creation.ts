@@ -48,7 +48,7 @@ async function copySampleProject(projectRoot: string) {
   const packageRoot = await getPackageRoot();
 
   if (await fsExtra.pathExistsSync(projectRoot)) {
-    const err = "Directory " + path.join(packageRoot, projectRoot) + "already exists."
+    const err = "Directory " + path.join(packageRoot, projectRoot) + " already exists."
     console.log(chalk.red(err))
     throw err
   }

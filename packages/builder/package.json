@@ -2,7 +2,6 @@
   "name": "@scale-it/builder",
   "version": "0.0.1",
   "author": "SEE package.json from PROJECT ROOT",
-  "contributors": "SEE package.json from PROJECT ROOT",
   "license": "Apache-2.0",
   "repository": "SEE package.json from PROJECT ROOT",
   "main": "build/internal/lib/lib.js",
@@ -10,8 +9,8 @@
   "description": "",
   "keywords": [
     "smart-contracts",
-    "buidler",
     "blockchain",
+    "builder",
     "dapps",
     "javascript",
     "tooling",
