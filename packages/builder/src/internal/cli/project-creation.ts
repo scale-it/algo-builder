@@ -47,8 +47,14 @@ async function printWelcomeMessage() {
 async function copySampleProject(projectRoot: string) {
   const packageRoot = await getPackageRoot();
 
+  if (await fsExtra.pathExistsSync(projectRoot)) {
+    const err = "Directory " + path.join(packageRoot, projectRoot) + "already exists."
+    console.log(chalk.red(err))
+    throw err
+  }
+
   await fsExtra.ensureDir(projectRoot);
-  console.log(chalk.greenBright("Generating a new project in " + path.join(packageRoot, projectRoot)))
+  console.log(chalk.greenBright("Generating a new project in " + path.join(packageRoot, projectRoot) + "."))
 
   await fsExtra.copy(path.join(packageRoot, "sample-project"), projectRoot);
 
