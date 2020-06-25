@@ -5,8 +5,8 @@
   "contributors": "SEE package.json from PROJECT ROOT",
   "license": "Apache-2.0",
   "repository": "SEE package.json from PROJECT ROOT",
-  "main": "build/internal/lib/builder-lib.js",
-  "types": "build/internal/lib/builder-lib.d.ts",
+  "main": "build/internal/lib/lib.js",
+  "types": "build/internal/lib/lib.d.ts",
   "description": "",
   "keywords": [
     "smart-contracts",
