@@ -1,1 +1,3 @@
-console.log("This file is used by plugin to determine if it's inside of a project. Could be buidler.config.ts too")
+module.exports = {
+  sampleVariable: "0.6.8",
+};

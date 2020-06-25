@@ -18,15 +18,16 @@ export function isCwdInsideProject() {
 }
 
 export function getUserConfigPath(): string | undefined {
-  if (isTypescriptSupported()) {
-    const tsConfigPath = findUp.sync(TS_CONFIG_FILENAME);
-    if (tsConfigPath !== null) {
+  const tsConfigPath = findUp.sync(TS_CONFIG_FILENAME);
+  if (tsConfigPath) {
+    if (isTypescriptSupported()) {
       return tsConfigPath;
     }
+    throw "TypeScript config was found but TypeScript is not supported."
   }
 
   const pathToConfigFile = findUp.sync(JS_CONFIG_FILENAME);
-  if (pathToConfigFile === null) {
+  if (!pathToConfigFile) {
     throw new BuilderError(ERRORS.GENERAL.NOT_INSIDE_PROJECT);
   }
 

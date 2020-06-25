@@ -1,4 +1,6 @@
 import * as t from "io-ts";
+import { pipe } from "fp-ts/lib/pipeable";
+import { isRight, fold, isLeft } from "fp-ts/lib/Either";
 import { Context, getFunctionName, ValidationError } from "io-ts/lib";
 import { Reporter } from "io-ts/lib/Reporter";
 
@@ -55,7 +57,7 @@ export function success(): string[] {
 }
 
 export const DotPathReporter: Reporter<string[]> = {
-  report: (validation: any) => validation.fold(failure, success),
+  report: (validation: any) => pipe(validation, fold(failure, success)) ,
 };
 
 function optional<TypeT, OutputT>(
@@ -138,16 +140,16 @@ const ProjectPaths = t.type({
 
 const EVMVersion = t.string;
 
-const SolcOptimizerConfig = t.type({
-  enabled: optional(t.boolean),
-  runs: optional(t.number),
-});
+//const SolcOptimizerConfig = t.type({
+//  enabled: optional(t.boolean),
+//  runs: optional(t.number),
+//});
 
-const SolcConfig = t.type({
-  version: optional(t.string),
-  optimizer: optional(SolcOptimizerConfig),
-  evmVersion: optional(EVMVersion),
-});
+//const SolcConfig = t.type({
+//  version: optional(t.string),
+//  optimizer: optional(SolcOptimizerConfig),
+//  evmVersion: optional(EVMVersion),
+//});
 
 const AnalyticsConfig = t.type({
   enabled: optional(t.boolean),
@@ -155,11 +157,12 @@ const AnalyticsConfig = t.type({
 
 const BuilderConfig = t.type(
   {
+    sampleVariable: optional(t.string),
     defaultNetwork: optional(t.string),
     networks: optional(Networks),
     paths: optional(ProjectPaths),
-    solc: optional(SolcConfig),
-    analytics: optional(AnalyticsConfig),
+    //solc: optional(SolcConfig),
+    //analytics: optional(AnalyticsConfig),
   },
   "BuilderConfig"
 );
@@ -344,7 +347,7 @@ export function getValidationErrors(config: any): string[] {
       }
 
       const netConfigResult = HttpNetworkConfig.decode(netConfig);
-      if ((netConfigResult as any).isLeft()) {
+      if (isLeft(netConfigResult)) {
         errors.push(
           getErrorMessage(
             `BuilderConfig.networks.${networkName}`,
@@ -365,7 +368,7 @@ export function getValidationErrors(config: any): string[] {
 
   const result = BuilderConfig.decode(config);
 
-  if ((result as any).isRight()) {
+  if (isRight(result)) {
     return errors;
   }
 
