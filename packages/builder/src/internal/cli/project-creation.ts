@@ -10,11 +10,7 @@ import { getPackageJson, getPackageRoot } from "../util/package-info";
 import { emoji } from "./emoji";
 
 const SAMPLE_PROJECT_DEPENDENCIES = [
-  "@nomiclabs/builder-waffle",
-  "ethereum-waffle",
   "chai",
-  "@nomiclabs/builder-ethers",
-  "ethers",
 ];
 
 async function removeProjectDirIfPresent(projectRoot: string, dirName: string) {
