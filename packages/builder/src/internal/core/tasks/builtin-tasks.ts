@@ -4,7 +4,7 @@ import { loadPluginFile } from "../plugins";
 
 export default function () {
   loadPluginFile(
-    path.join(__dirname, "..", "..", "..", "builtin-tasks", "develop")
+    path.join(__dirname, "..", "..", "..", "builtin-tasks", "console")
   );
 
   loadPluginFile(

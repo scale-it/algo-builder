@@ -6,12 +6,12 @@ import * as semver from "semver";
 import { task } from "../internal/core/config/config-env";
 import { runScriptWithBuilder } from "../internal/util/scripts-runner";
 
-import { TASK_DEVELOP } from "./task-names";
+import { TASK_CONSOLE } from "./task-names";
 
 export default function () {
-  const log = debug("builder:core:tasks:develop");
+  const log = debug("builder:core:tasks:console");
 
-  task(TASK_DEVELOP, "Opens builder develop console")
+  task(TASK_CONSOLE, "Opens builder console")
     .addFlag("noCompile", "Don't compile before running this task")
     .setAction(
       async (
@@ -25,7 +25,7 @@ export default function () {
         await fsExtra.ensureDir(config.paths.cache);
         const historyFile = path.join(
           config.paths.cache,
-          "develop-history.txt"
+          "console-history.txt"
         );
 
         const nodeArgs = [];
