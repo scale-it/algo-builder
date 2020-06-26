@@ -1,5 +1,5 @@
 {
-  "name": "@scale-it/builder",
+  "name": "algorand-builder",
   "version": "0.0.1",
   "author": "SEE package.json from PROJECT ROOT",
   "license": "Apache-2.0",
@@ -23,12 +23,12 @@
     "node": ">=8.2.0"
   },
   "scripts": {
-    "lint:fix": "npm run lint -- --fix",
-    "lint": "npm run lint",
-    "test": "node ../../node_modules/mocha/bin/mocha",
-    "coverage": "node ../../node_modules/nyc/bin/nyc.js ../../node_modules/mocha/bin/mocha",
-    "build": "node ../../node_modules/typescript/bin/tsc --build .",
-    "clean": "node ../../node_modules/rimraf/bin.js builtin-tasks internal *.d.ts *.map *.js tsconfig.tsbuildinfo build",
+    "lint:fix": "lint --fix",
+    "lint": "lint",
+    "test": "mocha",
+    "coverage": "nyc.js ../../node_modules/mocha/bin/mocha",
+    "build": "tsc --build .",
+    "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.tsbuildinfo build",
     "algob": "node ./build/internal/cli/cli.js"
   },
   "devDependencies": {
@@ -39,13 +39,13 @@
     "@types/glob": "^7.1.2",
     "@types/semver": "^7.2.0",
     "@types/sinon": "^9.0.4",
+    "@types/node": "^14.0.13",
     "chai": "^4.2.0",
     "cross-env": "5.0.5",
     "source-map-support": "^0.5.13",
     "time-require": "^0.1.2"
   },
   "dependencies": {
-    "@types/node": "^14.0.13",
     "debug": "^4.1.1",
     "deepmerge": "^4.2.2",
     "enquirer": "^2.3.5",
