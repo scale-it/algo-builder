@@ -2,7 +2,7 @@
   "name": "algorand-builder",
   "version": "0.0.1",
   "author": "SEE package.json from PROJECT ROOT",
-  "license": "Apache-2.0",
+  "license": "SEE LICENSE IN LICENSE",
   "repository": "SEE package.json from PROJECT ROOT",
   "main": "build/internal/lib/lib.js",
   "types": "build/internal/lib/lib.d.ts",
