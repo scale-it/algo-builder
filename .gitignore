@@ -105,4 +105,4 @@ dist
 
 # Built sources
 packages/**/build/
-packages/builder/cache/
+packages/builder/project/

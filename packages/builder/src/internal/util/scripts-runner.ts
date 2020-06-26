@@ -100,13 +100,9 @@ export function resolveBuilderRegisterPath() {
 
   const builderCoreBaseDir = path.join(__dirname, "..", "..");
 
-  const builderCoreCompiledDir = isCompiledInstallation
-    ? builderCoreBaseDir
-    : path.join(builderCoreBaseDir, "..");
-
   const builderCoreRegisterCompiledPath = path.join(
-    builderCoreCompiledDir,
-    "build/register"
+    builderCoreBaseDir,
+    "register"
   );
 
   return builderCoreRegisterCompiledPath;
