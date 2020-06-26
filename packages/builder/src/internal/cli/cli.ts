@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// -*- mode: typescript -*- // https://github.com/syl20bnr/spacemacs/issues/13715
 import chalk from "chalk";
 import debug from "debug";
 import semver from "semver";

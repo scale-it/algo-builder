@@ -29,7 +29,7 @@
     "coverage": "nyc.js ../../node_modules/mocha/bin/mocha",
     "build": "tsc --build .",
     "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.tsbuildinfo build",
-    "algob": "node ./build/internal/cli/cli.js"
+    "algob": "mkdir -p project && cd project && node ../build/internal/cli/cli.js"
   },
   "devDependencies": {
     "@types/chai": "^4.2.0",
