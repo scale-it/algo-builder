@@ -18,6 +18,10 @@ export default function () {
         { noCompile }: { noCompile: boolean },
         { config, run, builderArguments }
       ) => {
+        if (!config.paths) {
+          return
+        }
+
         //if (!noCompile) {
         //  await run("compile");
         //}

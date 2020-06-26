@@ -33,24 +33,24 @@ function mergeUserAndDefaultConfigs(
  * @returns the resolved config
  */
 export function resolveConfig(
-  userConfigPath: string,
+  userConfigPath: string | undefined,
   defaultConfig: BuilderConfig,
   userConfig: BuilderConfig,
   configExtenders: ConfigExtender[]
 ): ResolvedBuilderConfig {
   userConfig = deepFreezeUserConfig(userConfig);
 
-  const config = mergeUserAndDefaultConfigs(defaultConfig, userConfig);
+  const config: Partial<ResolvedBuilderConfig> = mergeUserAndDefaultConfigs(defaultConfig, userConfig);
 
-  const paths = resolveProjectPaths(userConfigPath, userConfig.paths);
+  const paths = userConfigPath ? resolveProjectPaths(userConfigPath, userConfig.paths) : undefined;
 
-  const resolved = {
+  const resolved: ResolvedBuilderConfig = {
     ...config,
     paths,
     networks: config.networks!,
     //solc: config.solc!,
     defaultNetwork: config.defaultNetwork!,
-    analytics: config.analytics!,
+    //analytics: config.analytics!,
   };
 
   for (const extender of configExtenders) {

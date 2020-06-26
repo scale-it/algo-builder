@@ -102,29 +102,29 @@ export interface BuilderConfig {
   paths?: StrictOmit<Partial<ProjectPaths>, "configFile">;
   //solc?: DeepPartial<SolcConfig>;
   mocha?: Mocha.MochaOptions;
-  analytics?: Partial<AnalyticsConfig>;
+  //analytics?: Partial<AnalyticsConfig>;
 }
 
 export interface ResolvedBuilderConfig extends BuilderConfig {
   defaultNetwork: string;
-  paths: ProjectPaths;
+  paths?: ProjectPaths;
   networks: Networks;
   //solc: SolcConfig;
-  analytics: AnalyticsConfig;
+  //analytics: AnalyticsConfig;
 }
 
 // End config types
 
-export interface SolcInput {
-  settings: {
-    metadata: { useLiteralContent: boolean };
-    optimizer: SolcOptimizerConfig;
-    outputSelection: { "*": { "": string[]; "*": string[] } };
-    //evmVersion?: string;
-  };
-  sources: { [p: string]: { content: string } };
-  language: string;
-}
+//export interface SolcInput {
+//  settings: {
+//    metadata: { useLiteralContent: boolean };
+//    optimizer: SolcOptimizerConfig;
+//    outputSelection: { "*": { "": string[]; "*": string[] } };
+//    //evmVersion?: string;
+//  };
+//  sources: { [p: string]: { content: string } };
+//  language: string;
+//}
 
 /**
  * A function that receives a BuilderRuntimeEnvironment and

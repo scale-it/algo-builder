@@ -5,7 +5,7 @@ import debug from "debug";
 import semver from "semver";
 import "source-map-support/register";
 
-import { TASK_HELP } from "../../builtin-tasks/task-names";
+import { TASK_HELP, TASK_INIT } from "../../builtin-tasks/task-names";
 import { TaskArguments } from "../../types";
 import { BUILDER_NAME } from "../constants";
 import { BuilderContext } from "../context";
@@ -78,18 +78,20 @@ async function main() {
 
     showStackTraces = builderArguments.showStackTraces;
 
-    if (
-      builderArguments.config === undefined &&
-      !isCwdInsideProject() &&
-      process.stdout.isTTY === true
-    ) {
-      await createProject();
-      return;
-    }
-
     // --version is a special case
     if (builderArguments.version) {
       await printVersionMessage(packageJson);
+      return;
+    }
+
+    let taskName = parsedTaskName || TASK_HELP;
+
+    // Being inside of a project is non-mandatory for help and init
+    if ((taskName !== TASK_HELP && taskName !== TASK_INIT && !builderArguments.help) &&
+      !isCwdInsideProject()) {
+      throw new BuilderError(ERRORS.GENERAL.NOT_INSIDE_PROJECT, {
+        task: taskName,
+      });
       return;
     }
 
@@ -105,8 +107,6 @@ async function main() {
 
     const envExtenders = ctx.extendersManager.getExtenders();
     const taskDefinitions = ctx.tasksDSL.getTaskDefinitions();
-
-    let taskName = parsedTaskName !== undefined ? parsedTaskName : "help";
 
     //// tslint:disable-next-line: prefer-const
     //let [abortAnalytics, hitPromise] = await analytics.sendTaskHit(taskName);

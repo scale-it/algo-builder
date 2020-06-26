@@ -126,13 +126,6 @@ You or one of your plugins is trying to modify the userConfig.%path% value from 
 This is probably a bug in one of your plugins.
 
 Please [report it](https://github.com/nomiclabs/builder/issues/new) to help us improve Builder.`,
-    },
-    USER_CONFIG_DOES_NOT_EXIST: {
-      number: 10,
-      message: `Error while loading Builder's configuration.
-Configuration does not exist (MM)`,
-      title: "Configuration does not exist",
-      description: `Configuration does not exist`,
     }
   },
   NETWORK: {
@@ -406,7 +399,7 @@ Please double check your arguments.`,
     },
     UNRECOGNIZED_TASK: {
       number: 303,
-      message: "Unrecognized task %task%",
+      message: "Unrecognized task %task%. Try running help task to get a list of possible tasks.",
       title: "Unrecognized task",
       description: `Tried to run a non-existent task.
 Please double check the name of the task you are trying to run.`,

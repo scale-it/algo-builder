@@ -17,7 +17,9 @@ export function resetBuilderContext() {
         globalAsAny[key] = undefined;
       }
       // unload config file too.
-      unloadModule(ctx.environment.config.paths.configFile);
+      if (ctx.environment.config.paths) {
+        unloadModule(ctx.environment.config.paths.configFile);
+      }
     } else {
       // We may get here if loading the config has thrown, so be unload it
       let configPath: string | undefined;

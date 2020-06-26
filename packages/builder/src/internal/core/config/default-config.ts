@@ -1,9 +1,6 @@
 import { BuilderConfig, BuilderNetworkConfig } from "../../../types";
 import { BUILDEREVM_NETWORK_NAME } from "../../constants";
 
-export const DEFAULT_SOLC_VERSION = "0.5.15";
-export const BUILDEREVM_DEFAULT_GAS_PRICE = 8e9;
-
 const DEFAULT_BUILDER_NETWORK_CONFIG: BuilderNetworkConfig = {
   accounts: [],
 };
@@ -23,9 +20,9 @@ const defaultConfig: BuilderConfig = {
       url: "http://127.0.0.1:8545",
     },
   },
-  analytics: {
-    enabled: true,
-  },
+  //analytics: {
+  //  enabled: true,
+  //},
   mocha: {
     timeout: 20000,
   },
