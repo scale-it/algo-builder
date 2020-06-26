@@ -3,15 +3,11 @@ import path from "path";
 import { loadPluginFile } from "../plugins";
 
 export default function () {
-  loadPluginFile(
-    path.join(__dirname, "..", "..", "..", "builtin-tasks", "console")
-  );
+  ["console", "help", "clean"]
+    .forEach(taskName => {
+      loadPluginFile(
+        path.join(__dirname, "..", "..", "..", "builtin-tasks", taskName)
+      );
+    })
 
-  loadPluginFile(
-    path.join(__dirname, "..", "..", "..", "builtin-tasks", "help")
-  );
-
-  loadPluginFile(
-    path.join(__dirname, "..", "..", "..", "builtin-tasks", "clean")
-  );
 }
