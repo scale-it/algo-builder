@@ -31,10 +31,6 @@ export function loadConfigAndTasks(
     }
   }
 
-  if (!configPath) {
-    throw new BuilderError(ERRORS.GENERAL.USER_CONFIG_DOES_NOT_EXIST)
-  }
-
   // Before loading the builtin tasks, the default and user's config we expose
   // the config env in the global object.
   const configEnv = require("./config-env");
@@ -48,7 +44,7 @@ export function loadConfigAndTasks(
   loadPluginFile(path.join(__dirname, "..", "tasks", "builtin-tasks"));
 
   const defaultConfig = importCsjOrEsModule("./default-config");
-  const userConfig = importCsjOrEsModule(configPath);
+  const userConfig = configPath ? importCsjOrEsModule(configPath) : defaultConfig;
   validateConfig(userConfig);
 
   // To avoid bad practices we remove the previously exported stuff

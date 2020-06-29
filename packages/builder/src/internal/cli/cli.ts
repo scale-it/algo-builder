@@ -5,13 +5,13 @@ import debug from "debug";
 import semver from "semver";
 import "source-map-support/register";
 
-import { TASK_HELP } from "../../builtin-tasks/task-names";
+import { TASK_HELP, TASK_INIT } from "../../builtin-tasks/task-names";
 import { TaskArguments } from "../../types";
 import { BUILDER_NAME } from "../constants";
 import { BuilderContext } from "../context";
 import { loadConfigAndTasks } from "../core/config/config-loading";
 import { BuilderError, BuilderPluginError } from "../core/errors";
-import { ERRORS, getErrorCode } from "../core/errors-list";
+import { ERRORS } from "../core/errors-list";
 import { BUILDER_PARAM_DEFINITIONS } from "../core/params/builder-params";
 import { getEnvBuilderArguments } from "../core/params/env-variables";
 import { isCwdInsideProject } from "../core/project-structure";
@@ -78,18 +78,20 @@ async function main() {
 
     showStackTraces = builderArguments.showStackTraces;
 
-    if (
-      builderArguments.config === undefined &&
-      !isCwdInsideProject() &&
-      process.stdout.isTTY === true
-    ) {
-      await createProject();
-      return;
-    }
-
     // --version is a special case
     if (builderArguments.version) {
       await printVersionMessage(packageJson);
+      return;
+    }
+
+    let taskName = parsedTaskName || TASK_HELP;
+
+    // Being inside of a project is non-mandatory for help and init
+    if ((taskName !== TASK_HELP && taskName !== TASK_INIT && !builderArguments.help) &&
+      !isCwdInsideProject()) {
+      throw new BuilderError(ERRORS.GENERAL.NOT_INSIDE_PROJECT, {
+        task: taskName,
+      });
       return;
     }
 
@@ -105,8 +107,6 @@ async function main() {
 
     const envExtenders = ctx.extendersManager.getExtenders();
     const taskDefinitions = ctx.tasksDSL.getTaskDefinitions();
-
-    let taskName = parsedTaskName !== undefined ? parsedTaskName : "help";
 
     //// tslint:disable-next-line: prefer-const
     //let [abortAnalytics, hitPromise] = await analytics.sendTaskHit(taskName);
@@ -185,25 +185,14 @@ async function main() {
     if (showStackTraces) {
       console.error(error.stack);
     } else {
-      if (!isBuilderError) {
-        console.error(
-          `If you think this is a bug in Builder, please report it here: https://builder.dev/reportbug`
-        );
-      }
+      //if (!isBuilderError) {
+      //  console.error(
+      //    `If you think this is a bug in Builder, please report it here: https://builder.dev/reportbug`
+      //  );
+      //}
 
-      if (BuilderError.isBuilderError(error)) {
-        const link = `https://builder.dev/${getErrorCode(
-          error.errorDescriptor
-        )}`;
+      console.error(`For more info run ${BUILDER_NAME} with --show-stack-traces or add --help to display task-specific help.`);
 
-        console.error(
-          `For more info go to ${link} or run ${BUILDER_NAME} with --show-stack-traces`
-        );
-      } else {
-        console.error(
-          `For more info run ${BUILDER_NAME} with --show-stack-traces`
-        );
-      }
     }
 
     process.exit(1);

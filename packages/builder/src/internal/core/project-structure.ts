@@ -26,10 +26,5 @@ export function getUserConfigPath(): string | undefined {
     throw "TypeScript config was found but TypeScript is not supported."
   }
 
-  const pathToConfigFile = findUp.sync(JS_CONFIG_FILENAME);
-  if (!pathToConfigFile) {
-    throw new BuilderError(ERRORS.GENERAL.NOT_INSIDE_PROJECT);
-  }
-
-  return pathToConfigFile;
+  return findUp.sync(JS_CONFIG_FILENAME);
 }

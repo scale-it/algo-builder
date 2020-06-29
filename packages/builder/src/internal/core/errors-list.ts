@@ -1,5 +1,5 @@
 
-export const ERROR_PREFIX = "ALGORAND_BUILDER";
+export const ERROR_PREFIX = "ABLDR";
 
 export interface ErrorDescriptor {
   number: number;
@@ -127,13 +127,12 @@ This is probably a bug in one of your plugins.
 
 Please [report it](https://github.com/nomiclabs/builder/issues/new) to help us improve Builder.`,
     },
-    USER_CONFIG_DOES_NOT_EXIST: {
-      number: 10,
-      message: `Error while loading Builder's configuration.
-Configuration does not exist (MM)`,
-      title: "Configuration does not exist",
-      description: `Configuration does not exist`,
-    }
+    INIT_INSIDE_PROJECT: {
+      number: 11,
+      message: "Builder project file was detected: '%clashingFile%'. Move the file or use an empty directory.",
+      title: "Directory contains a builder file",
+      description: `You are trying to run Builder in a directory that contains builder project file.`,
+    },
   },
   NETWORK: {
     CONFIG_NOT_FOUND: {
@@ -406,7 +405,7 @@ Please double check your arguments.`,
     },
     UNRECOGNIZED_TASK: {
       number: 303,
-      message: "Unrecognized task %task%",
+      message: "Unrecognized task %task%. Try running help task to get a list of possible tasks.",
       title: "Unrecognized task",
       description: `Tried to run a non-existent task.
 Please double check the name of the task you are trying to run.`,

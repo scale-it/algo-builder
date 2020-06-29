@@ -7,6 +7,9 @@ import { BUILDER_NAME } from "../constants";
 import { ExecutionMode, getExecutionMode } from "../core/execution-mode";
 import { getPackageJson, getPackageRoot } from "../util/package-info";
 
+import { BuilderError } from "../core/errors";
+import { ERRORS } from "../core/errors-list"
+
 import { emoji } from "./emoji";
 
 const SAMPLE_PROJECT_DEPENDENCIES = [
@@ -32,17 +35,31 @@ async function printWelcomeMessage() {
   );
 }
 
-async function copySampleProject() {
+async function copySampleProject(location: string) {
   const packageRoot = await getPackageRoot();
 
   const sampleProjDir = path.join(packageRoot, "sample-project")
 
   console.log(chalk.greenBright("Initializing new workspace in " + process.cwd() + "."))
 
-  await fsExtra.copy(sampleProjDir, process.cwd(), {
+  return await fsExtra.copySync(sampleProjDir, location, {
     // User doesn't choose the directory so overwrite should be avoided
     overwrite: false,
-    errorOnExist: true
+    filter: (src: string, dest: string) => {
+      const relPath = path.relative(process.cwd(), dest)
+      if (relPath === '') {
+        return true
+      }
+      if (path.basename(dest) === ".gitkeep") {
+        return false
+      }
+      if (fsExtra.pathExistsSync(dest)) {
+        throw new BuilderError(ERRORS.GENERAL.INIT_INSIDE_PROJECT, {
+          clashingFile: relPath
+        });
+      }
+      return true
+    }
   })
 }
 
@@ -79,10 +96,10 @@ async function writeEmptyBuilderConfig() {
   );
 }
 
-export async function createProject() {
+export async function createProject(location: string) {
   await printWelcomeMessage();
 
-  await copySampleProject();
+  await copySampleProject(location);
 
   let shouldShowInstallationInstructions = true;
 
