@@ -1,25 +1,14 @@
 import * as t from "io-ts";
 import { pipe } from "fp-ts/lib/pipeable";
 import { isRight, fold, isLeft } from "fp-ts/lib/Either";
-import { Context, getFunctionName, ValidationError } from "io-ts/lib";
+import { Context, ValidationError } from "io-ts/lib";
 import { Reporter } from "io-ts/lib/Reporter";
 
 import { BUILDEREVM_NETWORK_NAME } from "../../constants";
 import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
-
-function stringify(v: any): string {
-  if (typeof v === "function") {
-    return getFunctionName(v);
-  }
-  if (typeof v === "number" && !isFinite(v)) {
-    if (isNaN(v)) {
-      return "NaN";
-    }
-    return v > 0 ? "Infinity" : "-Infinity";
-  }
-  return JSON.stringify(v);
-}
+import { AlgoDevChainConfig } from "../../../types";
+import CfgErrors, {mkErrorMessage} from "./config-errors";
 
 function getContextPath(context: Context): string {
   const keysPath = context
@@ -35,18 +24,13 @@ function getMessage(e: ValidationError): string {
 
   return e.message !== undefined
     ? e.message
-    : getErrorMessage(
+    : mkErrorMessage(
         getContextPath(e.context),
         e.value,
         lastContext.type.name
       );
 }
 
-function getErrorMessage(path: string, value: any, expectedType: string) {
-  return `Invalid value ${stringify(
-    value
-  )} for ${path} - Expected a value of type ${expectedType}.`;
-}
 
 export function failure(es: ValidationError[]): string[] {
   return es.map(getMessage);
@@ -74,24 +58,12 @@ function optional<TypeT, OutputT>(
 
 // IMPORTANT: This t.types MUST be kept in sync with the actual types.
 
-const BuilderNetworkAccount = t.type({
-  privateKey: t.string,
-  balance: t.string,
-});
-
-const BuilderNetworkConfig = t.type({
-  hardfork: optional(t.string),
-  chainId: optional(t.number),
-  from: optional(t.string),
-  gas: optional(t.union([t.literal("auto"), t.number])),
-  gasPrice: optional(t.union([t.literal("auto"), t.number])),
-  gasMultiplier: optional(t.number),
-  accounts: optional(t.array(BuilderNetworkAccount)),
-  blockGasLimit: optional(t.number),
+const AlgoDevChainConfig = t.type({
+  // accounts: optional(t.array(todo)),
+  chainName: optional(t.number),
   throwOnTransactionFailures: optional(t.boolean),
   throwOnCallFailures: optional(t.boolean),
   loggingEnabled: optional(t.boolean),
-  allowUnlimitedContractSize: optional(t.boolean),
   initialDate: optional(t.string),
 });
 
@@ -102,31 +74,22 @@ const HDAccountsConfig = t.type({
   path: optional(t.string),
 });
 
-const OtherAccountsConfig = t.type({
-  type: t.string,
-});
-
-const NetworkConfigAccounts = t.union([
-  t.literal("remote"),
+const NetworkAccounts = t.union([
   t.array(t.string),
   HDAccountsConfig,
-  OtherAccountsConfig,
 ]);
 
 const HttpHeaders = t.record(t.string, t.string, "httpHeaders");
 
 const HttpNetworkConfig = t.type({
-  chainId: optional(t.number),
-  from: optional(t.string),
-  gas: optional(t.union([t.literal("auto"), t.number])),
-  gasPrice: optional(t.union([t.literal("auto"), t.number])),
-  gasMultiplier: optional(t.number),
+  chainName: optional(t.string),
   url: optional(t.string),
-  accounts: optional(NetworkConfigAccounts),
+  accounts: optional(NetworkAccounts),
   httpHeaders: optional(HttpHeaders),
+  // from: optional(t.string),
 });
 
-const NetworkConfig = t.union([BuilderNetworkConfig, HttpNetworkConfig]);
+const NetworkConfig = t.union([AlgoDevChainConfig, HttpNetworkConfig]);
 
 const Networks = t.record(t.string, NetworkConfig);
 
@@ -138,33 +101,13 @@ const ProjectPaths = t.type({
   tests: optional(t.string),
 });
 
-const EVMVersion = t.string;
 
-//const SolcOptimizerConfig = t.type({
-//  enabled: optional(t.boolean),
-//  runs: optional(t.number),
-//});
-
-//const SolcConfig = t.type({
-//  version: optional(t.string),
-//  optimizer: optional(SolcOptimizerConfig),
-//  evmVersion: optional(EVMVersion),
-//});
-
-const AnalyticsConfig = t.type({
-  enabled: optional(t.boolean),
-});
-
-const BuilderConfig = t.type(
+const Config = t.type(
   {
-    sampleVariable: optional(t.string),
-    defaultNetwork: optional(t.string),
     networks: optional(Networks),
     paths: optional(ProjectPaths),
-    //solc: optional(SolcConfig),
-    //analytics: optional(AnalyticsConfig),
   },
-  "BuilderConfig"
+  "AlgobConfig"
 );
 
 /**
@@ -174,187 +117,32 @@ const BuilderConfig = t.type(
 export function validateConfig(config: any) {
   const errors = getValidationErrors(config);
 
-  if (errors.length === 0) {
+  if (errors.isEmpty()) {
     return;
   }
 
-  let errorList = errors.join("\n  * ");
-  errorList = `  * ${errorList}`;
-
+  const errorList = `  * ${errors.toString()}`;
   throw new BuilderError(ERRORS.GENERAL.INVALID_CONFIG, { errors: errorList });
 }
 
-export function getValidationErrors(config: any): string[] {
-  const errors = [];
+export function getValidationErrors(config: any): CfgErrors {
+  const errors = new CfgErrors();
 
   // These can't be validated with io-ts
   if (config !== undefined && typeof config.networks === "object") {
-    const builderNetwork = config.networks[BUILDEREVM_NETWORK_NAME];
-    if (builderNetwork !== undefined) {
-      // TODO: MM validate network config vars here
-
-      if (
-        builderNetwork.allowUnlimitedContractSize !== undefined &&
-        typeof builderNetwork.allowUnlimitedContractSize !== "boolean"
-      ) {
-        errors.push(
-          getErrorMessage(
-            `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME}.allowUnlimitedContractSize`,
-            builderNetwork.allowUnlimitedContractSize,
-            "boolean | undefined"
-          )
-        );
-      }
-
-      if (
-        builderNetwork.initialDate !== undefined &&
-        typeof builderNetwork.initialDate !== "string"
-      ) {
-        errors.push(
-          getErrorMessage(
-            `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME}.initialDate`,
-            builderNetwork.initialDate,
-            "string | undefined"
-          )
-        );
-      }
-
-      if (
-        builderNetwork.throwOnTransactionFailures !== undefined &&
-        typeof builderNetwork.throwOnTransactionFailures !== "boolean"
-      ) {
-        errors.push(
-          getErrorMessage(
-            `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME}.throwOnTransactionFailures`,
-            builderNetwork.throwOnTransactionFailures,
-            "boolean | undefined"
-          )
-        );
-      }
-
-      if (
-        builderNetwork.throwOnCallFailures !== undefined &&
-        typeof builderNetwork.throwOnCallFailures !== "boolean"
-      ) {
-        errors.push(
-          getErrorMessage(
-            `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME}.throwOnCallFailures`,
-            builderNetwork.throwOnCallFailures,
-            "boolean | undefined"
-          )
-        );
-      }
-
-      if (builderNetwork.url !== undefined) {
-        errors.push(
-          `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME} can't have an url`
-        );
-      }
-
-      if (
-        builderNetwork.blockGasLimit !== undefined &&
-        typeof builderNetwork.blockGasLimit !== "number"
-      ) {
-        errors.push(
-          getErrorMessage(
-            `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME}.blockGasLimit`,
-            builderNetwork.blockGasLimit,
-            "number | undefined"
-          )
-        );
-      }
-
-      if (
-        builderNetwork.chainId !== undefined &&
-        typeof builderNetwork.chainId !== "number"
-      ) {
-        errors.push(
-          getErrorMessage(
-            `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME}.chainId`,
-            builderNetwork.chainId,
-            "number | undefined"
-          )
-        );
-      }
-
-      if (
-        builderNetwork.loggingEnabled !== undefined &&
-        typeof builderNetwork.loggingEnabled !== "boolean"
-      ) {
-        errors.push(
-          getErrorMessage(
-            `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME}.loggingEnabled`,
-            builderNetwork.loggingEnabled,
-            "boolean | undefined"
-          )
-        );
-      }
-
-      if (builderNetwork.accounts !== undefined) {
-        if (Array.isArray(builderNetwork.accounts)) {
-          for (const account of builderNetwork.accounts) {
-            if (typeof account.privateKey !== "string") {
-              errors.push(
-                getErrorMessage(
-                  `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME}.accounts[].privateKey`,
-                  account.privateKey,
-                  "string"
-                )
-              );
-            }
-
-            if (typeof account.balance !== "string") {
-              errors.push(
-                getErrorMessage(
-                  `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME}.accounts[].balance`,
-                  account.balance,
-                  "string"
-                )
-              );
-            }
-          }
-        } else {
-          errors.push(
-            getErrorMessage(
-              `BuilderConfig.networks.${BUILDEREVM_NETWORK_NAME}.accounts`,
-              builderNetwork.accounts,
-              "[{privateKey: string, balance: string}] | undefined"
-            )
-          );
-        }
-      }
+    const ancfg = config.networks[BUILDEREVM_NETWORK_NAME];
+    if ( ancfg !== undefined) {
+      validateAlgoDevChainConfig(ancfg, errors);
     }
 
-    for (const [networkName, netConfig] of Object.entries<any>(
-      config.networks
-    )) {
-      if (networkName === BUILDEREVM_NETWORK_NAME) {
-        continue;
+    for (const [net, ncfg] of Object.entries<any>(config.networks)) {
+      if (typeof ncfg.url !== "string" || ncfg.url == ""){
+        errors.push(net, "url", ncfg.url, "string");
       }
 
-      if (networkName === "localhost" && netConfig.url === undefined) {
-        continue;
-      }
-
-      if (typeof netConfig.url !== "string") {
-        errors.push(
-          getErrorMessage(
-            `BuilderConfig.networks.${networkName}.url`,
-            netConfig.url,
-            "string"
-          )
-        );
-      }
-
-      const netConfigResult = HttpNetworkConfig.decode(netConfig);
+      const netConfigResult = HttpNetworkConfig.decode(ncfg);
       if (isLeft(netConfigResult)) {
-        errors.push(
-          getErrorMessage(
-            `BuilderConfig.networks.${networkName}`,
-            netConfig,
-            "HttpNetworkConfig"
-          )
-        );
+        errors.push(net, "", ncfg, "HttpNetworkConfig");
       }
     }
   }
@@ -362,16 +150,58 @@ export function getValidationErrors(config: any): string[] {
   // io-ts can get confused if there are errors that it can't understand.
   // Especially around BuilderEVM's config. It will treat it as an HTTPConfig,
   // and may give a loot of errors.
-  if (errors.length > 0) {
+  if (errors.isEmpty()) {
     return errors;
   }
 
-  const result = BuilderConfig.decode(config);
+  const result = Config.decode(config);
 
   if (isRight(result)) {
     return errors;
   }
 
-  const ioTsErrors = DotPathReporter.report(result);
-  return [...errors, ...ioTsErrors];
+  errors.concatenate(DotPathReporter.report(result));
+  return errors
+}
+
+
+function validateAlgoDevChainConfig(ncfg: AlgoDevChainConfig, errors: CfgErrors) {
+  if (
+    ncfg.initialDate !== undefined &&
+    typeof ncfg.initialDate !== "string"
+  )
+    errors.push(BUILDEREVM_NETWORK_NAME, "initialDate", ncfg.initialDate, "string | undefined");
+
+  if (
+    ncfg.throwOnTransactionFailures !== undefined &&
+    typeof ncfg.throwOnTransactionFailures !== "boolean"
+  )
+    errors.push(BUILDEREVM_NETWORK_NAME, "throwOnTransactionFailures", ncfg.throwOnTransactionFailures, "boolean | undefined");
+
+  if (
+    ncfg.throwOnCallFailures !== undefined &&
+    typeof ncfg.throwOnCallFailures !== "boolean"
+  )
+    errors.push(BUILDEREVM_NETWORK_NAME, "throwOnCallFailures", ncfg.throwOnCallFailures, "boolean | undefined");
+
+  if ((ncfg as any).url !== undefined) {
+    errors.push(BUILDEREVM_NETWORK_NAME, "url", (ncfg as any).url, "null (forbidden)");
+  }
+
+  if (
+    ncfg.chainName !== undefined &&
+    typeof ncfg.chainName !== "string"
+  )
+    errors.push(BUILDEREVM_NETWORK_NAME, "chainName", ncfg.chainName, "string | undefined");
+
+  if (
+    ncfg.loggingEnabled !== undefined &&
+    typeof ncfg.loggingEnabled !== "boolean"
+  )
+    errors.push(BUILDEREVM_NETWORK_NAME, "loggingEnabled", ncfg.loggingEnabled, "boolean | undefined");
+}
+
+export function validateConfigAccount() {
+  // TODO
+  // if (Array.isArray(ncfg.accounts)) {
 }

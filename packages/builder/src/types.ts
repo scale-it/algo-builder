@@ -7,30 +7,6 @@ import * as types from "./internal/core/params/argument-types";
 
 // IMPORTANT: This t.types MUST be kept in sync with the actual types.
 
-interface CommonNetworkConfig {
-  //chainId?: number;
-  //from?: string;
-  //gas?: "auto" | number;
-  //gasPrice?: "auto" | number;
-  //gasMultiplier?: number;
-}
-
-interface BuilderNetworkAccount {
-  privateKey: string;
-  balance: string;
-}
-
-export interface BuilderNetworkConfig extends CommonNetworkConfig {
-  accounts?: BuilderNetworkAccount[];
-  //blockGasLimit?: number;
-  //hardfork?: string;
-  throwOnTransactionFailures?: boolean;
-  throwOnCallFailures?: boolean;
-  //loggingEnabled?: boolean;
-  //allowUnlimitedContractSize?: boolean;
-  //initialDate?: string;
-}
-
 export interface HDAccountsConfig {
   mnemonic: string;
   initialIndex?: number;
@@ -38,24 +14,30 @@ export interface HDAccountsConfig {
   path?: string;
 }
 
-export interface OtherAccountsConfig {
-  type: string;
+export type NetworkAccounts =
+  | string[]
+  | HDAccountsConfig;
+
+interface CommonNetworkConfig {
+  accounts?: NetworkAccounts;
+  chainName?: string;
+  //from?: string;
+  // TODO: timeout?: number;
 }
 
-export type NetworkConfigAccounts =
-  | "remote"
-  | string[]
-  | HDAccountsConfig
-  | OtherAccountsConfig;
+export interface AlgoDevChainConfig extends CommonNetworkConfig {
+  throwOnTransactionFailures?: boolean;
+  throwOnCallFailures?: boolean;
+  loggingEnabled?: boolean;
+  initialDate?: string;
+}
 
 export interface HttpNetworkConfig extends CommonNetworkConfig {
   url?: string;
-  timeout?: number;
   httpHeaders?: { [name: string]: string };
-  accounts?: NetworkConfigAccounts;
 }
 
-export type NetworkConfig = BuilderNetworkConfig | HttpNetworkConfig;
+export type NetworkConfig = AlgoDevChainConfig | HttpNetworkConfig;
 
 export interface Networks {
   [networkName: string]: NetworkConfig;
@@ -79,30 +61,15 @@ export interface ProjectPaths {
   tests: string;
 }
 
-export interface SolcOptimizerConfig {
-  enabled: boolean;
-  runs: number;
-}
-
-export interface AnalyticsConfig {
-  enabled: boolean;
-}
-
 export interface BuilderConfig {
-  defaultNetwork?: string;
   networks?: Networks;
   paths?: StrictOmit<Partial<ProjectPaths>, "configFile">;
-  //solc?: DeepPartial<SolcConfig>;
   mocha?: Mocha.MochaOptions;
-  //analytics?: Partial<AnalyticsConfig>;
 }
 
 export interface ResolvedBuilderConfig extends BuilderConfig {
-  defaultNetwork: string;
   paths?: ProjectPaths;
   networks: Networks;
-  //solc: SolcConfig;
-  //analytics: AnalyticsConfig;
 }
 
 // End config types
@@ -196,22 +163,19 @@ export interface ParamDefinitionsMap {
 
 /**
  * Builder arguments:
- * * network: the network to be used.
+ * * network: the network to be used (default="default").
  * * showStackTraces: flag to show stack traces.
  * * version: flag to show builder's version.
  * * help: flag to show builder's help message.
- * * emoji:
  * * config: used to specify builder's config file.
  */
 export interface BuilderArguments {
-  network?: string;
+  network: string;
   showStackTraces: boolean;
   version: boolean;
   help: boolean;
-  emoji: boolean;
   config?: string;
   verbose: boolean;
-  maxMemory?: number;
 }
 
 export type BuilderParamDefinitions = {
@@ -265,17 +229,11 @@ export type ActionType<ArgsT extends TaskArguments> = (
   runSuper: RunSuperFunction<ArgsT>
 ) => Promise<any>;
 
-//export interface EthereumProvider extends EventEmitter {
-//  send(method: string, params?: any[]): Promise<any>;
-//}
-
-//// This alias is here for backwards compatibility
-//export type IEthereumProvider = EthereumProvider;
 
 export interface Network {
   name: string;
   config: NetworkConfig;
-  //provider: EthereumProvider;
+  //provider:
 }
 
 export interface BuilderRuntimeEnvironment {

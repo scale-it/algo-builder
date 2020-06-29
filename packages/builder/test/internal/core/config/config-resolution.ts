@@ -4,7 +4,6 @@ import * as path from "path";
 import { BuilderContext } from "../../../../src/internal/context";
 import { loadConfigAndTasks } from "../../../../src/internal/core/config/config-loading";
 import { resolveProjectPaths } from "../../../../src/internal/core/config/config-resolution";
-import { DEFAULT_SOLC_VERSION } from "../../../../src/internal/core/config/default-config";
 import { resetBuilderContext } from "../../../../src/internal/reset";
 import { BuilderNetworkConfig, HttpNetworkConfig } from "../../../../src/types";
 import { useFixtureProject } from "../../../helpers/project";
@@ -24,10 +23,7 @@ describe("Config resolution", () => {
 
       it("should return the default config", () => {
         const config = loadConfigAndTasks();
-        assert.equal(config.solc.version, DEFAULT_SOLC_VERSION);
         assert.containsAllKeys(config.networks, ["localhost"]);
-        assert.isUndefined(config.solc.evmVersion);
-        assert.equal(config.defaultNetwork, "builderevm");
 
         const builderEvmConfig: BuilderNetworkConfig = config.networks
           .builderevm as BuilderNetworkConfig;
@@ -43,14 +39,11 @@ describe("Config resolution", () => {
       it("should return the config merged ", () => {
         const config = loadConfigAndTasks();
 
-        assert.equal(config.solc.version, DEFAULT_SOLC_VERSION);
         assert.containsAllKeys(config.networks, ["localhost", "custom"]);
-        assert.equal(config.defaultNetwork, "custom");
       });
 
       it("should return the config merged ", () => {
         const config = loadConfigAndTasks();
-        assert.equal(config.solc.version, DEFAULT_SOLC_VERSION);
         assert.containsAllKeys(config.networks, ["localhost", "custom"]);
         assert.equal(
           (config.networks.localhost as HttpNetworkConfig).url,

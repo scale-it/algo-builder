@@ -10,8 +10,6 @@ import { getPackageJson, getPackageRoot } from "../util/package-info";
 import { BuilderError } from "../core/errors";
 import { ERRORS } from "../core/errors-list"
 
-import { emoji } from "./emoji";
-
 const SAMPLE_PROJECT_DEPENDENCIES = [
   "chai",
 ];
@@ -27,12 +25,7 @@ async function printWelcomeMessage() {
   const packageJson = await getPackageJson();
 
   console.log(
-    chalk.cyan(
-      `${emoji("👷 ")}Welcome to ${BUILDER_NAME} v${packageJson.version}${emoji(
-        " 👷‍"
-      )}‍\n`
-    )
-  );
+    chalk.cyan(`Welcome to ${BUILDER_NAME} v${packageJson.version}`));
 }
 
 async function copySampleProject(location: string) {
@@ -133,11 +126,7 @@ export async function createProject(location: string) {
     await printTrufflePluginInstallationInstructions();
   }
 
-  console.log(
-    `\n${emoji("✨ ")}${chalk.cyan("Project created")}${emoji(" ✨")}`
-  );
-
-  console.log(``);
+  console.log("\n✨ ", chalk.cyan("Project created"), " ✨\n");
 
   printSuggestedCommands();
 }
