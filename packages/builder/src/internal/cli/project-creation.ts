@@ -35,14 +35,14 @@ async function printWelcomeMessage() {
   );
 }
 
-async function copySampleProject() {
+async function copySampleProject(location: string) {
   const packageRoot = await getPackageRoot();
 
   const sampleProjDir = path.join(packageRoot, "sample-project")
 
   console.log(chalk.greenBright("Initializing new workspace in " + process.cwd() + "."))
 
-  return await fsExtra.copySync(sampleProjDir, process.cwd(), {
+  return await fsExtra.copySync(sampleProjDir, location, {
     // User doesn't choose the directory so overwrite should be avoided
     overwrite: false,
     filter: (src: string, dest: string) => {
@@ -96,10 +96,10 @@ async function writeEmptyBuilderConfig() {
   );
 }
 
-export async function createProject() {
+export async function createProject(location: string) {
   await printWelcomeMessage();
 
-  await copySampleProject();
+  await copySampleProject(location);
 
   let shouldShowInstallationInstructions = true;
 

@@ -191,7 +191,7 @@ async function main() {
       //  );
       //}
 
-      console.error(`For more info run ${BUILDER_NAME} with --show-stack-traces`);
+      console.error(`For more info run ${BUILDER_NAME} with --show-stack-traces or add --help to display task-specific help.`);
 
     }
 
