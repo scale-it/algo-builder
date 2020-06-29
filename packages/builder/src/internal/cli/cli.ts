@@ -11,7 +11,7 @@ import { BUILDER_NAME } from "../constants";
 import { BuilderContext } from "../context";
 import { loadConfigAndTasks } from "../core/config/config-loading";
 import { BuilderError, BuilderPluginError } from "../core/errors";
-import { ERRORS, getErrorCode } from "../core/errors-list";
+import { ERRORS } from "../core/errors-list";
 import { BUILDER_PARAM_DEFINITIONS } from "../core/params/builder-params";
 import { getEnvBuilderArguments } from "../core/params/env-variables";
 import { isCwdInsideProject } from "../core/project-structure";
@@ -185,25 +185,14 @@ async function main() {
     if (showStackTraces) {
       console.error(error.stack);
     } else {
-      if (!isBuilderError) {
-        console.error(
-          `If you think this is a bug in Builder, please report it here: https://builder.dev/reportbug`
-        );
-      }
+      //if (!isBuilderError) {
+      //  console.error(
+      //    `If you think this is a bug in Builder, please report it here: https://builder.dev/reportbug`
+      //  );
+      //}
 
-      if (BuilderError.isBuilderError(error)) {
-        const link = `https://builder.dev/${getErrorCode(
-          error.errorDescriptor
-        )}`;
+      console.error(`For more info run ${BUILDER_NAME} with --show-stack-traces`);
 
-        console.error(
-          `For more info go to ${link} or run ${BUILDER_NAME} with --show-stack-traces`
-        );
-      } else {
-        console.error(
-          `For more info run ${BUILDER_NAME} with --show-stack-traces`
-        );
-      }
     }
 
     process.exit(1);

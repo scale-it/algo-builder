@@ -7,6 +7,9 @@ import { BUILDER_NAME } from "../constants";
 import { ExecutionMode, getExecutionMode } from "../core/execution-mode";
 import { getPackageJson, getPackageRoot } from "../util/package-info";
 
+import { BuilderError } from "../core/errors";
+import { ERRORS } from "../core/errors-list"
+
 import { emoji } from "./emoji";
 
 const SAMPLE_PROJECT_DEPENDENCIES = [
@@ -39,10 +42,21 @@ async function copySampleProject() {
 
   console.log(chalk.greenBright("Initializing new workspace in " + process.cwd() + "."))
 
-  await fsExtra.copy(sampleProjDir, process.cwd(), {
+  return await fsExtra.copySync(sampleProjDir, process.cwd(), {
     // User doesn't choose the directory so overwrite should be avoided
     overwrite: false,
-    errorOnExist: true
+    filter: (src: string, dest: string) => {
+      const relPath = path.relative(process.cwd(), dest)
+      if (relPath === '') {
+        return true
+      }
+      if (fsExtra.pathExistsSync(dest)) {
+        throw new BuilderError(ERRORS.GENERAL.INIT_INSIDE_PROJECT, {
+          clashingFile: relPath
+        });
+      }
+      return true
+    }
   })
 }
 

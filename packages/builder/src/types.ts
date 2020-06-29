@@ -79,14 +79,6 @@ export interface ProjectPaths {
   tests: string;
 }
 
-//type EVMVersion = string;
-
-//export interface SolcConfig {
-//  version: string;
-//  optimizer: SolcOptimizerConfig;
-//  //evmVersion?: EVMVersion;
-//}
-
 export interface SolcOptimizerConfig {
   enabled: boolean;
   runs: number;
@@ -114,17 +106,6 @@ export interface ResolvedBuilderConfig extends BuilderConfig {
 }
 
 // End config types
-
-//export interface SolcInput {
-//  settings: {
-//    metadata: { useLiteralContent: boolean };
-//    optimizer: SolcOptimizerConfig;
-//    outputSelection: { "*": { "": string[]; "*": string[] } };
-//    //evmVersion?: string;
-//  };
-//  sources: { [p: string]: { content: string } };
-//  language: string;
-//}
 
 /**
  * A function that receives a BuilderRuntimeEnvironment and

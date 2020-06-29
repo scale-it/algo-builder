@@ -9,7 +9,7 @@ import { createProject } from "../internal/cli/project-creation";
 export default function () {
   task(
     TASK_INIT,
-    "Initializes a new project in a current directory",
+    "Initializes a new project in the current directory",
     async (_, { config }) => {
       await createProject();
     }

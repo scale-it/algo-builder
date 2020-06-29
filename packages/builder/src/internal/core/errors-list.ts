@@ -1,5 +1,5 @@
 
-export const ERROR_PREFIX = "ALGORAND_BUILDER";
+export const ERROR_PREFIX = "ABLDR";
 
 export interface ErrorDescriptor {
   number: number;
@@ -126,7 +126,13 @@ You or one of your plugins is trying to modify the userConfig.%path% value from 
 This is probably a bug in one of your plugins.
 
 Please [report it](https://github.com/nomiclabs/builder/issues/new) to help us improve Builder.`,
-    }
+    },
+    INIT_INSIDE_PROJECT: {
+      number: 11,
+      message: "Builder project file was detected: '%clashingFile%'. Move the file or use an empty directory.",
+      title: "Directory contains a builder file",
+      description: `You are trying to run Builder in a directory that contains builder project file.`,
+    },
   },
   NETWORK: {
     CONFIG_NOT_FOUND: {
