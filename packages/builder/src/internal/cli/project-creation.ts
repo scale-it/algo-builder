@@ -50,6 +50,9 @@ async function copySampleProject() {
       if (relPath === '') {
         return true
       }
+      if (path.basename(dest) === ".gitkeep") {
+        return false
+      }
       if (fsExtra.pathExistsSync(dest)) {
         throw new BuilderError(ERRORS.GENERAL.INIT_INSIDE_PROJECT, {
           clashingFile: relPath
