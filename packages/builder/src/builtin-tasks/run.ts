@@ -45,14 +45,16 @@ export default function () {
           );
         } catch (error) {
           throw "err 2"
-          //throw new BuilderError(
-          //  ERRORS.BUILTIN_TASKS.RUN_SCRIPT_ERROR,
-          //  {
-          //    script,
-          //    error: error.message,
-          //  },
-          //  error
-          //);
+          /*
+          throw new BuilderError(
+            ERRORS.BUILTIN_TASKS.RUN_SCRIPT_ERROR,
+            {
+              script,
+              error: error.message,
+            },
+            error
+          );
+          */
         }
       }
     );
