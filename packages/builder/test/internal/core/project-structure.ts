@@ -4,7 +4,6 @@ import path from "path";
 
 import { ERRORS } from "../../../src/internal/core/errors-list";
 import {
-  getRecommendedGitIgnore,
   getUserConfigPath,
   isCwdInsideProject,
 } from "../../../src/internal/core/project-structure";
