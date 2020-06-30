@@ -7,7 +7,9 @@ import {
   TASK_INIT,
   TASK_CONSOLE,
   TASK_HELP,
-  TASK_TEST_GET_TEST_FILES
+  TASK_TEST_GET_TEST_FILES,
+  TASK_TEST_EXAMPLE,
+  TASK_TEST_EXAMPLE2
 } from "../../../../src/builtin-tasks/task-names";
 import { BuilderContext } from "../../../../src/internal/context";
 import { loadConfigAndTasks } from "../../../../src/internal/core/config/config-loading";
@@ -111,8 +113,8 @@ describe("config loading", function () {
         TASK_CONSOLE,
         TASK_HELP,
         TASK_TEST_GET_TEST_FILES,
-        "example",
-        "example2"
+        TASK_TEST_EXAMPLE,
+        TASK_TEST_EXAMPLE2
       ]);
     });
 
