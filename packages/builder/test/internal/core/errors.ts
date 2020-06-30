@@ -49,7 +49,7 @@ describe("BuilderError", () => {
 
     it("should format the error code to 4 digits", () => {
       const error = new BuilderError(mockErrorDescriptor);
-      assert.equal(error.message.substr(0, 9), "ALGORAND_BUILDER123: ");
+      assert.equal(error.message.substr(0, 10), "ABLDR123: ");
 
       assert.equal(
         new BuilderError({
@@ -57,15 +57,15 @@ describe("BuilderError", () => {
           message: "",
           title: "Title",
           description: "Description",
-        }).message.substr(0, 7),
+        }).message.substr(0, 8),
 
-        "ALGORAND_BUILDER1: "
+        "ABLDR1: "
       );
     });
 
     it("should have the right error message", () => {
       const error = new BuilderError(mockErrorDescriptor);
-      assert.equal(error.message, `ALGORAND_BUILDER123: ${mockErrorDescriptor.message}`);
+      assert.equal(error.message, `ABLDR123: ${mockErrorDescriptor.message}`);
     });
 
     it("should format the error message with the template params", () => {
@@ -78,7 +78,7 @@ describe("BuilderError", () => {
         },
         { a: "a", b: "b", c: 123 }
       );
-      assert.equal(error.message, "ALGORAND_BUILDER12: a b 123");
+      assert.equal(error.message, "ABLDR12: a b 123");
     });
 
     it("shouldn't have a parent", () => {
@@ -109,7 +109,7 @@ describe("BuilderError", () => {
         { a: "a", b: "b", c: 123 },
         new Error()
       );
-      assert.equal(error.message, "ALGORAND_BUILDER12: a b 123");
+      assert.equal(error.message, "ABLDR12: a b 123");
     });
 
     it("Should work with instanceof", () => {
