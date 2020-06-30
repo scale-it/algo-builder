@@ -31,11 +31,8 @@ describe("project structure", () => {
   });
 
   describe("getUserConfigPath", () => {
-    it("should throw if cwd is not inside a project", () => {
-      expectBuilderError(
-        () => getUserConfigPath(),
-        ERRORS.GENERAL.NOT_INSIDE_PROJECT
-      );
+    it("should be undefined if not inside a project", () => {
+      assert.isUndefined(getUserConfigPath());
     });
 
     describe("Inside a project", () => {
@@ -68,16 +65,5 @@ describe("project structure", () => {
         assert.equal(getUserConfigPath(), configPath);
       });
     });
-  });
-});
-
-describe("getRecommendedGitIgnore", () => {
-  it("Should return the one from this repo", async () => {
-    const content = await fsExtra.readFile(
-      path.join(__dirname, "..", "..", "..", "recommended-gitignore.txt"),
-      "utf-8"
-    );
-
-    assert.equal(await getRecommendedGitIgnore(), content);
   });
 });
