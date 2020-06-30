@@ -33,7 +33,6 @@ describe("ArgumentsParser", () => {
       showStackTraces: false,
       version: false,
       help: false,
-      emoji: false,
       verbose: false,
     };
     taskDefinition = new SimpleTaskDefinition("compile", true)
@@ -125,7 +124,6 @@ describe("ArgumentsParser", () => {
       assert.equal(taskName, "compile");
       assert.equal(runtimeArgs.showStackTraces, true);
       assert.equal(runtimeArgs.network, "local");
-      assert.equal(runtimeArgs.emoji, false);
       assert.equal(unparsedCLAs.length, 1);
       assert.equal("--task-param", unparsedCLAs[0]);
     });
@@ -151,7 +149,6 @@ describe("ArgumentsParser", () => {
       assert.equal(taskName, "compile");
       assert.equal(runtimeArgs.showStackTraces, true);
       assert.equal(runtimeArgs.network, "local");
-      assert.equal(runtimeArgs.emoji, false);
       assert.equal(unparsedCLAs.length, 1);
       assert.equal("--task-param", unparsedCLAs[0]);
     });
@@ -255,7 +252,6 @@ describe("ArgumentsParser", () => {
       );
 
       assert.isTrue(runtimeArgs.showStackTraces);
-      assert.isFalse(runtimeArgs.emoji);
     });
   });
 

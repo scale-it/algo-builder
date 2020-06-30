@@ -197,7 +197,6 @@ describe("SimpleTaskDefinition", () => {
           showStackTraces: true,
           network: "",
           version: false,
-          emoji: false,
           help: false,
           verbose: false,
         };

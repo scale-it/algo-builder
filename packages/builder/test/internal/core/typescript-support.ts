@@ -36,7 +36,7 @@ describe("Typescript support", function () {
     useEnvironment();
 
     it("Should load the config", function () {
-      assert.isDefined(this.env.config.networks.network);
+      assert.isDefined(this.env.config.networks.default.chainName);
     });
   });
 

@@ -23,6 +23,7 @@ export const ERROR_RANGES = {
     title: "Task definition errors",
   },
   ARGUMENTS: { min: 300, max: 399, title: "Arguments related errors" },
+  BUILTIN_TASKS: { min: 600, max: 699, title: "Built-in tasks errors" },
   PLUGINS: { min: 800, max: 899, title: "Plugin system errors" }
 };
 
@@ -442,6 +443,16 @@ Please double check how you invoked algob.`,
       description: `You tried to run a task with an invalid JSON parameter.
 Please double check how you invoked algob or run your task.`,
     },
+  },
+  BUILTIN_TASKS: {
+    RUN_FILE_NOT_FOUND: {
+      number: 601,
+      message: "Script %script% doesn't exist.",
+      title: "Script doesn't exist",
+      description: `Tried to use \`buidler run\` to execut a non-existing script.
+
+Please double check your script's path`,
+    }
   },
   PLUGINS: {
     NOT_INSTALLED: {

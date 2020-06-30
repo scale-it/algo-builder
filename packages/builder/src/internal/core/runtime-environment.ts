@@ -26,7 +26,7 @@ export class Environment implements AlgobRuntimeEnv {
     "_runTaskDefinition",
   ];
 
-  //public network: Network;
+  public network: Network;
 
   private readonly _extenders: EnvironmentExtender[];
 
@@ -62,8 +62,12 @@ export class Environment implements AlgobRuntimeEnv {
     // this.provider .... -- creation goes here
 
     this._extenders = extenders;
+    this.network = {
+      name: runtimeArgs.network,
+      config: networkConfig
+    }
 
-    //extenders.forEach((extender) => extender(this));
+    extenders.forEach((extender) => extender(this));
   }
 
   /**

@@ -241,7 +241,7 @@ export interface AlgobRuntimeEnv {
   readonly runtimeArgs: RuntimeArgs;
   readonly tasks: TasksMap;
   readonly run: RunTaskFunction;
-  //readonly network: Network;
+  readonly network: Network;
   //readonly ethereum: EthereumProvider; // DEPRECATED: Use network.provider
 }
 
