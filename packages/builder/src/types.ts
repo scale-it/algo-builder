@@ -61,13 +61,13 @@ export interface ProjectPaths {
   tests: string;
 }
 
-export interface BuilderConfig {
+export interface AlgobConfig {
   networks?: Networks;
   paths?: StrictOmit<Partial<ProjectPaths>, "configFile">;
   mocha?: Mocha.MochaOptions;
 }
 
-export interface ResolvedBuilderConfig extends BuilderConfig {
+export interface ResolvedAlgobConfig extends AlgobConfig {
   paths?: ProjectPaths;
   networks: Networks;
 }
@@ -75,14 +75,14 @@ export interface ResolvedBuilderConfig extends BuilderConfig {
 // End config types
 
 /**
- * A function that receives a BuilderRuntimeEnvironment and
+ * A function that receives a AlgobRuntimeEnv and
  * modify its properties or add new ones.
  */
-export type EnvironmentExtender = (env: BuilderRuntimeEnvironment) => void;
+export type EnvironmentExtender = (env: AlgobRuntimeEnv) => void;
 
 export type ConfigExtender = (
-  config: ResolvedBuilderConfig,
-  userConfig: DeepReadonly<BuilderConfig>
+  config: ResolvedAlgobConfig,
+  userConfig: DeepReadonly<AlgobConfig>
 ) => void;
 
 export interface TasksMap {
@@ -162,14 +162,14 @@ export interface ParamDefinitionsMap {
 }
 
 /**
- * Builder arguments:
+ * Algob arguments:
  * * network: the network to be used (default="default").
  * * showStackTraces: flag to show stack traces.
  * * version: flag to show builder's version.
  * * help: flag to show builder's help message.
  * * config: used to specify builder's config file.
  */
-export interface BuilderArguments {
+export interface RuntimeArgs {
   network: string;
   showStackTraces: boolean;
   version: boolean;
@@ -178,9 +178,9 @@ export interface BuilderArguments {
   verbose: boolean;
 }
 
-export type BuilderParamDefinitions = {
-  [param in keyof Required<BuilderArguments>]: OptionalParamDefinition<
-    BuilderArguments[param]
+export type AlgobParamDefinitions = {
+  [param in keyof Required<RuntimeArgs>]: OptionalParamDefinition<
+    RuntimeArgs[param]
   >;
 };
 
@@ -225,7 +225,7 @@ export interface RunSuperFunction<ArgT extends TaskArguments> {
 
 export type ActionType<ArgsT extends TaskArguments> = (
   taskArgs: ArgsT,
-  env: BuilderRuntimeEnvironment,
+  env: AlgobRuntimeEnv,
   runSuper: RunSuperFunction<ArgsT>
 ) => Promise<any>;
 
@@ -236,9 +236,9 @@ export interface Network {
   //provider:
 }
 
-export interface BuilderRuntimeEnvironment {
-  readonly config: ResolvedBuilderConfig;
-  readonly builderArguments: BuilderArguments;
+export interface AlgobRuntimeEnv {
+  readonly config: ResolvedAlgobConfig;
+  readonly runtimeArgs: RuntimeArgs;
   readonly tasks: TasksMap;
   readonly run: RunTaskFunction;
   //readonly network: Network;

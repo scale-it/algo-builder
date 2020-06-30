@@ -8,7 +8,7 @@ import {
 import { BuilderError } from "../errors";
 import { ErrorDescriptor, ERRORS } from "../errors-list";
 import * as types from "../params/argument-types";
-import { BUILDER_PARAM_DEFINITIONS } from "../params/builder-params";
+import { ALGOB_PARAM_DEFINITIONS } from "../params/builder-params";
 
 /**
  * This class creates a task definition, which consists of:
@@ -433,9 +433,9 @@ export class SimpleTaskDefinition implements TaskDefinition {
       });
     }
 
-    if (Object.keys(BUILDER_PARAM_DEFINITIONS).includes(name)) {
+    if (Object.keys(ALGOB_PARAM_DEFINITIONS).includes(name)) {
       throw new BuilderError(
-        ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_BUILDER_PARAM,
+        ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_ALGOB_PARAM,
         {
           paramName: name,
           taskName: this.name,

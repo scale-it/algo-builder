@@ -7,13 +7,13 @@ import "source-map-support/register";
 
 import { TASK_HELP, TASK_INIT } from "../../builtin-tasks/task-names";
 import { TaskArguments } from "../../types";
-import { BUILDER_NAME } from "../constants";
+import { ALGOB_NAME } from "../constants";
 import { BuilderContext } from "../context";
 import { loadConfigAndTasks } from "../core/config/config-loading";
 import { BuilderError, BuilderPluginError } from "../core/errors";
 import { ERRORS } from "../core/errors-list";
-import { BUILDER_PARAM_DEFINITIONS } from "../core/params/builder-params";
-import { getEnvBuilderArguments } from "../core/params/env-variables";
+import { ALGOB_PARAM_DEFINITIONS } from "../core/params/builder-params";
+import { getEnvRuntimeArgs } from "../core/params/env-variables";
 import { isCwdInsideProject } from "../core/project-structure";
 import { Environment } from "../core/runtime-environment";
 import { loadTsNodeIfPresent } from "../core/typescript-support";
@@ -50,31 +50,31 @@ async function main() {
 
     ensureValidNodeVersion(packageJson);
 
-    const envVariableArguments = getEnvBuilderArguments(
-      BUILDER_PARAM_DEFINITIONS,
+    const envVariableArguments = getEnvRuntimeArgs(
+      ALGOB_PARAM_DEFINITIONS,
       process.env
     );
 
     const argumentsParser = new ArgumentsParser();
 
     const {
-      builderArguments,
+      runtimeArgs,
       taskName: parsedTaskName,
       unparsedCLAs,
-    } = argumentsParser.parseBuilderArguments(
-      BUILDER_PARAM_DEFINITIONS,
+    } = argumentsParser.parseRuntimeArgs(
+      ALGOB_PARAM_DEFINITIONS,
       envVariableArguments,
       process.argv.slice(2)
     );
 
-    if (builderArguments.verbose) {
+    if (runtimeArgs.verbose) {
       debug.enable("builder*");
     }
 
-    showStackTraces = builderArguments.showStackTraces;
+    showStackTraces = runtimeArgs.showStackTraces;
 
     // --version is a special case
-    if (builderArguments.version) {
+    if (runtimeArgs.version) {
       await printVersionMessage(packageJson);
       return;
     }
@@ -82,7 +82,7 @@ async function main() {
     let taskName = parsedTaskName || TASK_HELP;
 
     // Being inside of a project is non-mandatory for help and init
-    if ((taskName !== TASK_HELP && taskName !== TASK_INIT && !builderArguments.help) &&
+    if ((taskName !== TASK_HELP && taskName !== TASK_INIT && !runtimeArgs.help) &&
       !isCwdInsideProject()) {
       throw new BuilderError(ERRORS.GENERAL.NOT_INSIDE_PROJECT, {
         task: taskName,
@@ -93,7 +93,7 @@ async function main() {
     loadTsNodeIfPresent();
 
     const ctx = BuilderContext.createBuilderContext();
-    const config = loadConfigAndTasks(builderArguments);
+    const config = loadConfigAndTasks(runtimeArgs);
 
     //const analytics = await Analytics.getInstance(
     //  config.paths.root,
@@ -109,7 +109,7 @@ async function main() {
     let taskArguments: TaskArguments;
 
     // --help is a also special case
-    if (builderArguments.help && taskName !== TASK_HELP) {
+    if (runtimeArgs.help && taskName !== TASK_HELP) {
       taskArguments = { task: taskName };
       taskName = TASK_HELP;
     } else {
@@ -127,19 +127,19 @@ async function main() {
       );
     }
 
-    if (!builderArguments.network) {
+    if (!runtimeArgs.network) {
       // TODO:RZ
       throw new Error("INTERNAL ERROR. Default network should be registered in `register.ts` module")
     }
 
     const env = new Environment(
       config,
-      builderArguments,
+      runtimeArgs,
       taskDefinitions,
       envExtenders
     );
 
-    ctx.setBuilderRuntimeEnvironment(env);
+    ctx.setAlgobRuntimeEnv(env);
 
     const timestampBeforeRun = new Date().getTime();
 
@@ -185,7 +185,7 @@ async function main() {
       //  );
       //}
 
-      console.error(`For more info run ${BUILDER_NAME} with --show-stack-traces or add --help to display task-specific help.`);
+      console.error(`For more info run ${ALGOB_NAME} with --show-stack-traces or add --help to display task-specific help.`);
 
     }
 

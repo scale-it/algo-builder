@@ -1,16 +1,16 @@
 import debug from "debug";
 
-import { BuilderRuntimeEnvironment } from "../../types";
+import { AlgobRuntimeEnv } from "../../types";
 import { BuilderContext } from "../context";
 import { loadConfigAndTasks } from "../core/config/config-loading";
 import { BuilderError } from "../core/errors";
 import { ERRORS } from "../core/errors-list";
-import { BUILDER_PARAM_DEFINITIONS } from "../core/params/builder-params";
-import { getEnvBuilderArguments } from "../core/params/env-variables";
+import { ALGOB_PARAM_DEFINITIONS } from "../core/params/builder-params";
+import { getEnvRuntimeArgs } from "../core/params/env-variables";
 import { Environment } from "../core/runtime-environment";
 
 let ctx: BuilderContext;
-let env: BuilderRuntimeEnvironment;
+let env: AlgobRuntimeEnv;
 
 if (BuilderContext.isCreated()) {
   ctx = BuilderContext.getBuilderContext();
@@ -25,30 +25,30 @@ if (BuilderContext.isCreated()) {
 } else {
   ctx = BuilderContext.createBuilderContext();
 
-  const builderArguments = getEnvBuilderArguments(
-    BUILDER_PARAM_DEFINITIONS,
+  const runtimeArgs = getEnvRuntimeArgs(
+    ALGOB_PARAM_DEFINITIONS,
     process.env
   );
 
-  if (builderArguments.verbose) {
+  if (runtimeArgs.verbose) {
     debug.enable("builder*");
   }
 
-  const config = loadConfigAndTasks(builderArguments);
+  const config = loadConfigAndTasks(runtimeArgs);
 
-  if (!builderArguments.network) {
+  if (!runtimeArgs.network) {
     // TODO:RZ
     throw new Error("INTERNAL ERROR. Default network should be registered in `register.ts` module")
   }
 
   env = new Environment(
     config,
-    builderArguments,
+    runtimeArgs,
     ctx.tasksDSL.getTaskDefinitions(),
     ctx.extendersManager.getExtenders()
   );
 
-  ctx.setBuilderRuntimeEnvironment(env);
+  ctx.setAlgobRuntimeEnv(env);
 }
 
 export = env;

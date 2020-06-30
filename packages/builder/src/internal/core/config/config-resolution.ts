@@ -3,19 +3,19 @@ import * as fs from "fs";
 import path from "path";
 
 import {
-  BuilderConfig,
+  AlgobConfig,
   ConfigExtender,
   ProjectPaths,
-  ResolvedBuilderConfig,
+  ResolvedAlgobConfig,
 } from "../../../types";
 import { fromEntries } from "../../util/lang";
 import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
 
 function mergeUserAndDefaultConfigs(
-  defaultConfig: BuilderConfig,
-  userConfig: BuilderConfig
-): Partial<ResolvedBuilderConfig> {
+  defaultConfig: AlgobConfig,
+  userConfig: AlgobConfig
+): Partial<ResolvedAlgobConfig> {
   return deepmerge(defaultConfig, userConfig, {
     arrayMerge: (destination: any[], source: any[]) => source,
   }) as any;
@@ -34,17 +34,17 @@ function mergeUserAndDefaultConfigs(
  */
 export function resolveConfig(
   userConfigPath: string | undefined,
-  defaultConfig: BuilderConfig,
-  userConfig: BuilderConfig,
+  defaultConfig: AlgobConfig,
+  userConfig: AlgobConfig,
   configExtenders: ConfigExtender[]
-): ResolvedBuilderConfig {
+): ResolvedAlgobConfig {
   userConfig = deepFreezeUserConfig(userConfig);
 
-  const config: Partial<ResolvedBuilderConfig> = mergeUserAndDefaultConfigs(defaultConfig, userConfig);
+  const config: Partial<ResolvedAlgobConfig> = mergeUserAndDefaultConfigs(defaultConfig, userConfig);
 
   const paths = userConfigPath ? resolveProjectPaths(userConfigPath, userConfig.paths) : undefined;
 
-  const resolved: ResolvedBuilderConfig = {
+  const resolved: ResolvedAlgobConfig = {
     ...config,
     paths,
     networks: config.networks!,

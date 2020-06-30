@@ -4,7 +4,7 @@ import * as path from "path";
 import * as semver from "semver";
 
 import { task } from "../internal/core/config/config-env";
-import { runScriptWithBuilder } from "../internal/util/scripts-runner";
+import { runScriptWithAlgob } from "../internal/util/scripts-runner";
 
 import { TASK_CONSOLE } from "./task-names";
 
@@ -16,7 +16,7 @@ export default function () {
     .setAction(
       async (
         { noCompile }: { noCompile: boolean },
-        { config, run, builderArguments }
+        { config, run, runtimeArgs }
       ) => {
         if (!config.paths) {
           return
@@ -42,7 +42,7 @@ export default function () {
         );
 
         // Running the script "" is like running `node`, so this starts the repl
-        await runScriptWithBuilder(builderArguments, "", [], nodeArgs, {
+        await runScriptWithAlgob(runtimeArgs, "", [], nodeArgs, {
           NODE_REPL_HISTORY: historyFile,
         });
       }

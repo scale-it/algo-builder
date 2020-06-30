@@ -1,7 +1,7 @@
 import debug from "debug";
 import path from "path";
 
-import { BuilderArguments } from "../../types";
+import { RuntimeArgs } from "../../types";
 import { ExecutionMode, getExecutionMode } from "../core/execution-mode";
 import { getEnvVariablesMap } from "../core/params/env-variables";
 
@@ -39,8 +39,8 @@ export async function runScript(
   });
 }
 
-export async function runScriptWithBuilder(
-  builderArguments: BuilderArguments,
+export async function runScriptWithAlgob(
+  runtimeArgs: RuntimeArgs,
   scriptPath: string,
   scriptArgs: string[] = [],
   extraNodeArgs: string[] = [],
@@ -55,7 +55,7 @@ export async function runScriptWithBuilder(
     scriptArgs,
     [...extraNodeArgs, "--require", builderRegisterPath],
     {
-      ...getEnvVariablesMap(builderArguments),
+      ...getEnvVariablesMap(runtimeArgs),
       ...extraEnvVars,
     }
   );

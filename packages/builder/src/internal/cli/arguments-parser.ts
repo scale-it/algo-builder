@@ -1,6 +1,6 @@
 import {
-  BuilderArguments,
-  BuilderParamDefinitions,
+  RuntimeArgs,
+  AlgobParamDefinitions,
   ParamDefinition,
   ParamDefinitionsMap,
   TaskArguments,
@@ -40,16 +40,16 @@ export class ArgumentsParser {
     );
   }
 
-  public parseBuilderArguments(
-    builderParamDefinitions: BuilderParamDefinitions,
-    envVariableArguments: BuilderArguments,
+  public parseRuntimeArgs(
+    algobParamDefs: AlgobParamDefinitions,
+    envVariableArguments: RuntimeArgs,
     rawCLAs: string[]
   ): {
-    builderArguments: BuilderArguments;
+    runtimeArgs: RuntimeArgs;
     taskName?: string;
     unparsedCLAs: string[];
   } {
-    const builderArguments: Partial<BuilderArguments> = {};
+    const runtimeArgs: Partial<RuntimeArgs> = {};
     let taskName: string | undefined;
     const unparsedCLAs: string[] = [];
 
@@ -62,7 +62,7 @@ export class ArgumentsParser {
           continue;
         }
 
-        if (!this._isCLAParamName(arg, builderParamDefinitions)) {
+        if (!this._isCLAParamName(arg, algobParamDefs)) {
           throw new BuilderError(
             ERRORS.ARGUMENTS.UNRECOGNIZED_COMMAND_LINE_ARG,
             { argument: arg }
@@ -72,11 +72,11 @@ export class ArgumentsParser {
         i = this._parseArgumentAt(
           rawCLAs,
           i,
-          builderParamDefinitions,
-          builderArguments
+          algobParamDefs,
+          runtimeArgs
         );
       } else {
-        if (!this._isCLAParamName(arg, builderParamDefinitions)) {
+        if (!this._isCLAParamName(arg, algobParamDefs)) {
           unparsedCLAs.push(arg);
           continue;
         }
@@ -84,17 +84,17 @@ export class ArgumentsParser {
         i = this._parseArgumentAt(
           rawCLAs,
           i,
-          builderParamDefinitions,
-          builderArguments
+          algobParamDefs,
+          runtimeArgs
         );
       }
     }
 
     return {
-      builderArguments: this._addBuilderDefaultArguments(
-        builderParamDefinitions,
+      runtimeArgs: this._addBuilderDefaultArguments(
+        algobParamDefs,
         envVariableArguments,
-        builderArguments
+        runtimeArgs
       ),
       taskName,
       unparsedCLAs,
@@ -153,13 +153,13 @@ export class ArgumentsParser {
   }
 
   private _addBuilderDefaultArguments(
-    builderParamDefinitions: BuilderParamDefinitions,
-    envVariableArguments: BuilderArguments,
-    builderArguments: Partial<BuilderArguments>
-  ): BuilderArguments {
+    algobParamDefs: AlgobParamDefinitions,
+    envVariableArguments: RuntimeArgs,
+    runtimeArgs: Partial<RuntimeArgs>
+  ): RuntimeArgs {
     return {
       ...envVariableArguments,
-      ...builderArguments,
+      ...runtimeArgs,
     };
   }
 

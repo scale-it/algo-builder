@@ -8,7 +8,7 @@ import {
 } from "../../../../src/internal/core/tasks/task-definitions";
 import { unsafeObjectKeys } from "../../../../src/internal/util/unsafe";
 import {
-  BuilderArguments,
+  RuntimeArgs,
   ParamDefinition,
   TaskDefinition,
 } from "../../../../src/types";
@@ -162,38 +162,38 @@ describe("SimpleTaskDefinition", () => {
       function testClashWith(name: string) {
         expectBuilderError(
           () => taskDefinition.addParam(name),
-          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_BUILDER_PARAM
+          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_ALGOB_PARAM
         );
         expectBuilderError(
           () => taskDefinition.addOptionalParam(name),
-          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_BUILDER_PARAM
+          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_ALGOB_PARAM
         );
         expectBuilderError(
           () => taskDefinition.addFlag(name),
-          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_BUILDER_PARAM
+          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_ALGOB_PARAM
         );
         expectBuilderError(
           () => taskDefinition.addPositionalParam(name),
-          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_BUILDER_PARAM
+          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_ALGOB_PARAM
         );
         expectBuilderError(
           () => taskDefinition.addOptionalPositionalParam(name),
-          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_BUILDER_PARAM
+          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_ALGOB_PARAM
         );
         expectBuilderError(
           () => taskDefinition.addVariadicPositionalParam(name),
-          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_BUILDER_PARAM
+          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_ALGOB_PARAM
         );
         expectBuilderError(
           () => taskDefinition.addOptionalVariadicPositionalParam(name),
-          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_BUILDER_PARAM
+          ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_ALGOB_PARAM
         );
       }
 
       it("Should throw if a param clashes", () => {
         // This is constructed to force a type error here if a Builder arg is
         // added and not tested.
-        const builderArgs: BuilderArguments = {
+        const builderArgs: RuntimeArgs = {
           showStackTraces: true,
           network: "",
           version: false,

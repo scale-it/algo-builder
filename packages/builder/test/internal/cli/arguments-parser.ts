@@ -8,13 +8,13 @@ import {
   int,
   string,
 } from "../../../src/internal/core/params/argument-types";
-import { BUILDER_PARAM_DEFINITIONS } from "../../../src/internal/core/params/builder-params";
+import { ALGOB_PARAM_DEFINITIONS } from "../../../src/internal/core/params/builder-params";
 import {
   OverriddenTaskDefinition,
   SimpleTaskDefinition,
 } from "../../../src/internal/core/tasks/task-definitions";
 import {
-  BuilderArguments,
+  RuntimeArgs,
   TaskArguments,
   TaskDefinition,
 } from "../../../src/types";
@@ -22,7 +22,7 @@ import { expectBuilderError } from "../../helpers/errors";
 
 describe("ArgumentsParser", () => {
   let argumentsParser: ArgumentsParser;
-  let envArgs: BuilderArguments;
+  let envArgs: RuntimeArgs;
   let taskDefinition: TaskDefinition;
   let overridenTaskDefinition: OverriddenTaskDefinition;
 
@@ -92,14 +92,14 @@ describe("ArgumentsParser", () => {
     assert.isTrue(
       argumentsParser["_isCLAParamName"](
         "--show-stack-traces",
-        BUILDER_PARAM_DEFINITIONS
+        ALGOB_PARAM_DEFINITIONS
       )
     );
     assert.isFalse(
-      argumentsParser["_isCLAParamName"]("sarasa", BUILDER_PARAM_DEFINITIONS)
+      argumentsParser["_isCLAParamName"]("sarasa", ALGOB_PARAM_DEFINITIONS)
     );
     assert.isFalse(
-      argumentsParser["_isCLAParamName"]("--sarasa", BUILDER_PARAM_DEFINITIONS)
+      argumentsParser["_isCLAParamName"]("--sarasa", ALGOB_PARAM_DEFINITIONS)
     );
   });
 
@@ -114,18 +114,18 @@ describe("ArgumentsParser", () => {
       ];
 
       const {
-        builderArguments,
+        runtimeArgs,
         taskName,
         unparsedCLAs,
-      } = argumentsParser.parseBuilderArguments(
-        BUILDER_PARAM_DEFINITIONS,
+      } = argumentsParser.parseRuntimeArgs(
+        ALGOB_PARAM_DEFINITIONS,
         envArgs,
         rawCLAs
       );
       assert.equal(taskName, "compile");
-      assert.equal(builderArguments.showStackTraces, true);
-      assert.equal(builderArguments.network, "local");
-      assert.equal(builderArguments.emoji, false);
+      assert.equal(runtimeArgs.showStackTraces, true);
+      assert.equal(runtimeArgs.network, "local");
+      assert.equal(runtimeArgs.emoji, false);
       assert.equal(unparsedCLAs.length, 1);
       assert.equal("--task-param", unparsedCLAs[0]);
     });
@@ -140,18 +140,18 @@ describe("ArgumentsParser", () => {
       ];
 
       const {
-        builderArguments,
+        runtimeArgs,
         taskName,
         unparsedCLAs,
-      } = argumentsParser.parseBuilderArguments(
-        BUILDER_PARAM_DEFINITIONS,
+      } = argumentsParser.parseRuntimeArgs(
+        ALGOB_PARAM_DEFINITIONS,
         envArgs,
         rawCLAs
       );
       assert.equal(taskName, "compile");
-      assert.equal(builderArguments.showStackTraces, true);
-      assert.equal(builderArguments.network, "local");
-      assert.equal(builderArguments.emoji, false);
+      assert.equal(runtimeArgs.showStackTraces, true);
+      assert.equal(runtimeArgs.network, "local");
+      assert.equal(runtimeArgs.emoji, false);
       assert.equal(unparsedCLAs.length, 1);
       assert.equal("--task-param", unparsedCLAs[0]);
     });
@@ -167,8 +167,8 @@ describe("ArgumentsParser", () => {
 
       expectBuilderError(
         () =>
-          argumentsParser.parseBuilderArguments(
-            BUILDER_PARAM_DEFINITIONS,
+          argumentsParser.parseRuntimeArgs(
+            ALGOB_PARAM_DEFINITIONS,
             envArgs,
             rawCLAs
           ),
@@ -184,27 +184,27 @@ describe("ArgumentsParser", () => {
         "compile",
       ];
 
-      const builderArguments: TaskArguments = {};
+      const runtimeArgs: TaskArguments = {};
       assert.equal(
         0,
         argumentsParser["_parseArgumentAt"](
           rawCLAs,
           0,
-          BUILDER_PARAM_DEFINITIONS,
-          builderArguments
+          ALGOB_PARAM_DEFINITIONS,
+          runtimeArgs
         )
       );
-      assert.equal(builderArguments.showStackTraces, true);
+      assert.equal(runtimeArgs.showStackTraces, true);
       assert.equal(
         2,
         argumentsParser["_parseArgumentAt"](
           rawCLAs,
           1,
-          BUILDER_PARAM_DEFINITIONS,
-          builderArguments
+          ALGOB_PARAM_DEFINITIONS,
+          runtimeArgs
         )
       );
-      assert.equal(builderArguments.network, "local");
+      assert.equal(runtimeArgs.network, "local");
     });
 
     it("should fail trying to parse builder with invalid argument", () => {
@@ -216,8 +216,8 @@ describe("ArgumentsParser", () => {
       ];
       expectBuilderError(
         () =>
-          argumentsParser.parseBuilderArguments(
-            BUILDER_PARAM_DEFINITIONS,
+          argumentsParser.parseRuntimeArgs(
+            ALGOB_PARAM_DEFINITIONS,
             envArgs,
             rawCLAs
           ),
@@ -236,8 +236,8 @@ describe("ArgumentsParser", () => {
       ];
       expectBuilderError(
         () =>
-          argumentsParser.parseBuilderArguments(
-            BUILDER_PARAM_DEFINITIONS,
+          argumentsParser.parseRuntimeArgs(
+            ALGOB_PARAM_DEFINITIONS,
             envArgs,
             rawCLAs
           ),
@@ -246,16 +246,16 @@ describe("ArgumentsParser", () => {
     });
 
     it("should only add non-present arguments", () => {
-      const builderArguments = argumentsParser["_addBuilderDefaultArguments"](
-        BUILDER_PARAM_DEFINITIONS,
+      const runtimeArgs = argumentsParser["_addBuilderDefaultArguments"](
+        ALGOB_PARAM_DEFINITIONS,
         envArgs,
         {
           showStackTraces: true,
         }
       );
 
-      assert.isTrue(builderArguments.showStackTraces);
-      assert.isFalse(builderArguments.emoji);
+      assert.isTrue(runtimeArgs.showStackTraces);
+      assert.isFalse(runtimeArgs.emoji);
     });
   });
 

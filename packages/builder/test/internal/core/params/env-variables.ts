@@ -1,9 +1,9 @@
 import { assert } from "chai";
 
 import { ERRORS } from "../../../../src/internal/core/errors-list";
-import { BUILDER_PARAM_DEFINITIONS } from "../../../../src/internal/core/params/builder-params";
+import { ALGOB_PARAM_DEFINITIONS } from "../../../../src/internal/core/params/builder-params";
 import {
-  getEnvBuilderArguments,
+  getEnvRuntimeArgs,
   getEnvVariablesMap,
   paramNameToEnvVariable,
 } from "../../../../src/internal/core/params/env-variables";
@@ -30,21 +30,21 @@ describe("paramNameToEnvVariable", () => {
 
 describe("Env vars arguments parsing", () => {
   it("Should use the default values if arguments are not defined", () => {
-    const args = getEnvBuilderArguments(BUILDER_PARAM_DEFINITIONS, {
+    const args = getEnvRuntimeArgs(ALGOB_PARAM_DEFINITIONS, {
       IRRELEVANT_ENV_VAR: "123",
     });
-    assert.equal(args.help, BUILDER_PARAM_DEFINITIONS.help.defaultValue);
-    assert.equal(args.network, BUILDER_PARAM_DEFINITIONS.network.defaultValue);
-    assert.equal(args.emoji, BUILDER_PARAM_DEFINITIONS.emoji.defaultValue);
+    assert.equal(args.help, ALGOB_PARAM_DEFINITIONS.help.defaultValue);
+    assert.equal(args.network, ALGOB_PARAM_DEFINITIONS.network.defaultValue);
+    assert.equal(args.emoji, ALGOB_PARAM_DEFINITIONS.emoji.defaultValue);
     assert.equal(
       args.showStackTraces,
-      BUILDER_PARAM_DEFINITIONS.showStackTraces.defaultValue
+      ALGOB_PARAM_DEFINITIONS.showStackTraces.defaultValue
     );
-    assert.equal(args.version, BUILDER_PARAM_DEFINITIONS.version.defaultValue);
+    assert.equal(args.version, ALGOB_PARAM_DEFINITIONS.version.defaultValue);
   });
 
   it("Should accept values", () => {
-    const args = getEnvBuilderArguments(BUILDER_PARAM_DEFINITIONS, {
+    const args = getEnvRuntimeArgs(ALGOB_PARAM_DEFINITIONS, {
       IRRELEVANT_ENV_VAR: "123",
       BUILDER_NETWORK: "asd",
       BUILDER_SHOW_STACK_TRACES: "true",
@@ -65,7 +65,7 @@ describe("Env vars arguments parsing", () => {
   it("should throw if an invalid value is passed", () => {
     expectBuilderError(
       () =>
-        getEnvBuilderArguments(BUILDER_PARAM_DEFINITIONS, {
+        getEnvRuntimeArgs(ALGOB_PARAM_DEFINITIONS, {
           BUILDER_HELP: "123",
         }),
       ERRORS.ARGUMENTS.INVALID_ENV_VAR_VALUE

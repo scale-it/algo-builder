@@ -1,5 +1,5 @@
 import {
-  BuilderParamDefinitions,
+  AlgobParamDefinitions,
   ParamDefinition,
   ParamDefinitionsMap,
   TasksMap,
@@ -14,7 +14,7 @@ export class HelpPrinter {
     private readonly _programName: string,
     private readonly _executableName: string,
     private readonly _version: string,
-    private readonly _builderParamDefinitions: BuilderParamDefinitions,
+    private readonly _algobParamDefs: AlgobParamDefinitions,
     private readonly _tasks: TasksMap
   ) {}
 
@@ -27,7 +27,7 @@ export class HelpPrinter {
 
     console.log("GLOBAL OPTIONS:\n");
 
-    this._printParamDetails(this._builderParamDefinitions);
+    this._printParamDetails(this._algobParamDefs);
 
     console.log("\n\nAVAILABLE TASKS:\n");
 

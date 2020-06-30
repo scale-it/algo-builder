@@ -1,7 +1,7 @@
 import { HelpPrinter } from "../internal/cli/help-printer";
-import { BUILDER_EXECUTABLE_NAME, BUILDER_NAME } from "../internal/constants";
+import { ALGOB_BIN_NAME, ALGOB_NAME } from "../internal/constants";
 import { task } from "../internal/core/config/config-env";
-import { BUILDER_PARAM_DEFINITIONS } from "../internal/core/params/builder-params";
+import { ALGOB_PARAM_DEFINITIONS } from "../internal/core/params/builder-params";
 import { getPackageJson } from "../internal/util/package-info";
 
 import { TASK_HELP } from "./task-names";
@@ -16,10 +16,10 @@ export default function () {
       const packageJson = await getPackageJson();
 
       const helpPrinter = new HelpPrinter(
-        BUILDER_NAME,
-        BUILDER_EXECUTABLE_NAME,
+        ALGOB_NAME,
+        ALGOB_BIN_NAME,
         packageJson.version,
-        BUILDER_PARAM_DEFINITIONS,
+        ALGOB_PARAM_DEFINITIONS,
         tasks
       );
 

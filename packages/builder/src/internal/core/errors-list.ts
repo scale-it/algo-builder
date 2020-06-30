@@ -245,7 +245,7 @@ Please double check your task definitions.`,
 
 Please double check your task definitions.`,
     },
-    PARAM_CLASHES_WITH_BUILDER_PARAM: {
+    PARAM_CLASHES_WITH_ALGOB_PARAM: {
       number: 202,
       message:
         "Could not set param %paramName% for task %taskName% because its name is used as a param for algob.",
