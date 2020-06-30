@@ -1,3 +1,4 @@
+
 import { getFunctionName } from "io-ts/lib";
 
 function stringify(v: any): string {
@@ -18,7 +19,6 @@ export function mkErrorMessage(path: string, value: any, expectedType: string) {
 value
 )} for ${path} - Expected a value of type ${expectedType}.`;
 }
-
 
 export default class CfgErrors {
   errors: string[] = [];

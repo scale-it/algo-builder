@@ -131,7 +131,7 @@ export function getValidationErrors(config: any): CfgErrors {
   // These can't be validated with io-ts
   if (config !== undefined && typeof config.networks === "object") {
     const ancfg = config.networks[ALGOB_CHAIN_NAME];
-    if ( ancfg !== undefined) {
+    if (ancfg !== undefined) {
       validateAlgobChainCfg(ancfg, errors);
     }
 
@@ -150,7 +150,7 @@ export function getValidationErrors(config: any): CfgErrors {
   // io-ts can get confused if there are errors that it can't understand.
   // Especially around BuilderEVM's config. It will treat it as an HTTPConfig,
   // and may give a loot of errors.
-  if (errors.isEmpty()) {
+  if (!errors.isEmpty()) {
     return errors;
   }
 

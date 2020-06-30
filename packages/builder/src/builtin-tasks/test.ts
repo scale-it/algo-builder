@@ -43,5 +43,4 @@ export default function () {
 
       return [...jsFiles, ...tsFiles];
     });
-
 }
