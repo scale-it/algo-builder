@@ -8,7 +8,6 @@ import {
 import { useEnvironment } from "../../helpers/environment";
 import { useFixtureProject } from "../../helpers/project";
 
-/* TODO: uncomment when adding proper `run` support
 describe("Scripts runner", function () {
   useFixtureProject("project-with-scripts");
 
@@ -137,4 +136,3 @@ describe("Scripts runner", function () {
     });
   });
 });
-*/

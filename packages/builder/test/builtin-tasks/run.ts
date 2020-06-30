@@ -6,7 +6,6 @@ import { useEnvironment } from "../helpers/environment";
 import { expectBuilderErrorAsync } from "../helpers/errors";
 import { useFixtureProject } from "../helpers/project";
 
-/*
 describe("run task", function () {
   useFixtureProject("project-with-scripts");
   useEnvironment();
@@ -87,4 +86,3 @@ describe("run task", function () {
     (process as any).exitCode = undefined;
   });
 });
-*/
