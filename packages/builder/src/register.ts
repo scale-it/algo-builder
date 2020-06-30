@@ -2,8 +2,8 @@ import debug from "debug";
 
 import { BuilderContext } from "./internal/context";
 import { loadConfigAndTasks } from "./internal/core/config/config-loading";
-import { BUILDER_PARAM_DEFINITIONS } from "./internal/core/params/builder-params";
-import { getEnvBuilderArguments } from "./internal/core/params/env-variables";
+import { ALGOB_PARAM_DEFINITIONS } from "./internal/core/params/builder-params";
+import { getEnvRuntimeArgs } from "./internal/core/params/env-variables";
 import { Environment } from "./internal/core/runtime-environment";
 import { loadTsNodeIfPresent } from "./internal/core/typescript-support";
 import {
@@ -23,29 +23,29 @@ if (!BuilderContext.isCreated()) {
 
   loadTsNodeIfPresent();
 
-  const builderArguments = getEnvBuilderArguments(
-    BUILDER_PARAM_DEFINITIONS,
+  const runtimeArgs = getEnvRuntimeArgs(
+    ALGOB_PARAM_DEFINITIONS,
     process.env
   );
 
-  if (builderArguments.verbose) {
+  if (runtimeArgs.verbose) {
     debug.enable("builder*");
   }
 
-  const config = loadConfigAndTasks(builderArguments);
+  const config = loadConfigAndTasks(runtimeArgs);
 
-  if (!builderArguments.network) {
-    builderArguments.network = "default";
+  if (!runtimeArgs.network) {
+    runtimeArgs.network = "default";
   }
 
   const env = new Environment(
     config,
-    builderArguments,
+    runtimeArgs,
     ctx.tasksDSL.getTaskDefinitions(),
     ctx.extendersManager.getExtenders()
   );
 
-  ctx.setBuilderRuntimeEnvironment(env);
+  ctx.setAlgobRuntimeEnv(env);
 
   env.injectToGlobal();
 }

@@ -1,12 +1,12 @@
 import debug from "debug";
 
 import {
-  BuilderArguments,
-  BuilderRuntimeEnvironment,
+  RuntimeArgs,
+  AlgobRuntimeEnv,
   EnvironmentExtender,
   Network,
   ParamDefinition,
-  ResolvedBuilderConfig,
+  ResolvedAlgobConfig,
   RunSuperFunction,
   RunTaskFunction,
   TaskArguments,
@@ -20,7 +20,7 @@ import { OverriddenTaskDefinition } from "./tasks/task-definitions";
 
 const log = debug("builder:core:bre");
 
-export class Environment implements BuilderRuntimeEnvironment {
+export class Environment implements AlgobRuntimeEnv {
   private static readonly _BLACKLISTED_PROPERTIES: string[] = [
     "injectToGlobal",
     "_runTaskDefinition",
@@ -38,23 +38,23 @@ export class Environment implements BuilderRuntimeEnvironment {
    * of the requires in the builder's config file and its plugins.
    *
    * @param config The builder's config object.
-   * @param builderArguments The parsed builder's arguments.
+   * @param runtimeArgs The parsed builder's arguments.
    * @param tasks A map of tasks.
    * @param extenders A list of extenders.
    */
   constructor(
-    public readonly config: ResolvedBuilderConfig,
-    public readonly builderArguments: BuilderArguments,
+    public readonly config: ResolvedAlgobConfig,
+    public readonly runtimeArgs: RuntimeArgs,
     public readonly tasks: TasksMap,
     extenders: EnvironmentExtender[] = []
   ) {
-    log("Creating BuilderRuntimeEnvironment");
+    log("Creating AlgobRuntimeEnv");
 
-    const networkConfig = config.networks[builderArguments.network];
+    const networkConfig = config.networks[runtimeArgs.network];
 
     if (networkConfig === undefined) {
       throw new BuilderError(ERRORS.NETWORK.CONFIG_NOT_FOUND, {
-        network: builderArguments.network,
+        network: runtimeArgs.network,
       });
     }
 

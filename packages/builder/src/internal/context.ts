@@ -1,4 +1,4 @@
-import { BuilderRuntimeEnvironment, ConfigExtender } from "../types";
+import { AlgobRuntimeEnv, ConfigExtender } from "../types";
 
 import { ExtenderManager } from "./core/config/extenders";
 import { BuilderError } from "./core/errors";
@@ -41,18 +41,18 @@ export class BuilderContext {
 
   public readonly tasksDSL = new TasksDSL();
   public readonly extendersManager = new ExtenderManager();
-  public environment?: BuilderRuntimeEnvironment;
+  public environment?: AlgobRuntimeEnv;
   public readonly loadedPlugins: string[] = [];
   public readonly configExtenders: ConfigExtender[] = [];
 
-  public setBuilderRuntimeEnvironment(env: BuilderRuntimeEnvironment) {
+  public setAlgobRuntimeEnv(env: AlgobRuntimeEnv) {
     if (this.environment !== undefined) {
       throw new BuilderError(ERRORS.GENERAL.CONTEXT_BRE_ALREADY_DEFINED);
     }
     this.environment = env;
   }
 
-  public getBuilderRuntimeEnvironment(): BuilderRuntimeEnvironment {
+  public getAlgobRuntimeEnv(): AlgobRuntimeEnv {
     if (this.environment === undefined) {
       throw new BuilderError(ERRORS.GENERAL.CONTEXT_BRE_NOT_DEFINED);
     }

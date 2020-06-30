@@ -1,9 +1,9 @@
 import { resetBuilderContext } from "../../src/internal/reset";
-import { BuilderRuntimeEnvironment } from "../../src/types";
+import { AlgobRuntimeEnv } from "../../src/types";
 
 declare module "mocha" {
   interface Context {
-    env: BuilderRuntimeEnvironment;
+    env: AlgobRuntimeEnv;
   }
 }
 

@@ -3,7 +3,7 @@ import fsExtra from "fs-extra";
 import os from "os";
 import path from "path";
 
-import { BUILDER_NAME } from "../constants";
+import { ALGOB_NAME } from "../constants";
 import { ExecutionMode, getExecutionMode } from "../core/execution-mode";
 import { getPackageJson, getPackageRoot } from "../util/package-info";
 
@@ -25,7 +25,7 @@ async function printWelcomeMessage() {
   const packageJson = await getPackageJson();
 
   console.log(
-    chalk.cyan(`Welcome to ${BUILDER_NAME} v${packageJson.version}`));
+    chalk.cyan(`Welcome to ${ALGOB_NAME} v${packageJson.version}`));
 }
 
 async function copySampleProject(location: string) {
@@ -81,7 +81,7 @@ async function printTrufflePluginInstallationInstructions() {
   console.log(`  ${cmd.join(" ")}`);
 }
 
-async function writeEmptyBuilderConfig() {
+async function writeEmptyAlgobConfig() {
   return fsExtra.writeFile(
     "builder.config.js",
     "module.exports = {};\n",

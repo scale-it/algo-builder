@@ -4,7 +4,7 @@ import fsExtra from "fs-extra";
 import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
-import { runScriptWithBuilder } from "../internal/util/scripts-runner";
+import { runScriptWithAlgob } from "../internal/util/scripts-runner";
 
 import {
   //TASK_COMPILE,
@@ -23,7 +23,7 @@ export default function () {
     .setAction(
       async (
         { script, noCompile }: { script: string; noCompile: boolean },
-        { run, builderArguments }
+        { run, runtimeArgs }
       ) => {
         if (!(await fsExtra.pathExists(script))) {
           throw "err"
@@ -39,8 +39,8 @@ export default function () {
         log(`Running script ${script} in a subprocess so we can wait for it to complete`);
 
         try {
-          process.exitCode = await runScriptWithBuilder(
-            builderArguments,
+          process.exitCode = await runScriptWithAlgob(
+            runtimeArgs,
             script
           );
         } catch (error) {

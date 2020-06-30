@@ -1,8 +1,8 @@
-import { BuilderParamDefinitions } from "../../../types";
+import { AlgobParamDefinitions } from "../../../types";
 
 import * as types from "./argument-types";
 
-export const BUILDER_PARAM_DEFINITIONS: BuilderParamDefinitions = {
+export const ALGOB_PARAM_DEFINITIONS: AlgobParamDefinitions = {
   network: {
     name: "network",
     defaultValue: "default",

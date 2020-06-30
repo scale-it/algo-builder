@@ -1,6 +1,6 @@
 import path from "path";
 
-import { BuilderArguments, ResolvedBuilderConfig } from "../../../types";
+import { RuntimeArgs, ResolvedAlgobConfig } from "../../../types";
 import { BuilderContext } from "../../context";
 import { loadPluginFile } from "../plugins";
 import { getUserConfigPath } from "../project-structure";
@@ -17,10 +17,10 @@ function importCsjOrEsModule(filePath: string): any {
 }
 
 export function loadConfigAndTasks(
-  builderArguments?: Partial<BuilderArguments>
-): ResolvedBuilderConfig {
+  runtimeArgs?: Partial<RuntimeArgs>
+): ResolvedAlgobConfig {
   let configPath =
-    builderArguments !== undefined ? builderArguments.config : undefined;
+    runtimeArgs !== undefined ? runtimeArgs.config : undefined;
 
   if (configPath === undefined) {
     configPath = getUserConfigPath();

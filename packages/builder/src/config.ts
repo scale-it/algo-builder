@@ -1,2 +1,2 @@
 export * from "./internal/core/config/config-env";
-export { BuilderConfig } from "./types";
+export { AlgobConfig } from "./types";

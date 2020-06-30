@@ -1,6 +1,6 @@
 import ProcessEnv = NodeJS.ProcessEnv;
 
-import { BuilderArguments, BuilderParamDefinitions } from "../../../types";
+import { RuntimeArgs, AlgobParamDefinitions } from "../../../types";
 import { ArgumentsParser } from "../../cli/arguments-parser";
 import { unsafeObjectKeys } from "../../util/unsafe";
 import { BuilderError } from "../errors";
@@ -18,11 +18,11 @@ export function paramNameToEnvVariable(paramName: string): string {
 }
 
 export function getEnvVariablesMap(
-  builderArguments: BuilderArguments
+  runtimeArgs: RuntimeArgs
 ): { [envVar: string]: string } {
   const values: { [envVar: string]: string } = {};
 
-  for (const [name, value] of Object.entries(builderArguments)) {
+  for (const [name, value] of Object.entries(runtimeArgs)) {
     if (value === undefined) {
       continue;
     }
@@ -33,10 +33,10 @@ export function getEnvVariablesMap(
   return values;
 }
 
-export function getEnvBuilderArguments(
-  paramDefinitions: BuilderParamDefinitions,
+export function getEnvRuntimeArgs(
+  paramDefinitions: AlgobParamDefinitions,
   envVariables: ProcessEnv
-): BuilderArguments {
+): RuntimeArgs {
   const envArgs: any = {};
 
   for (const paramName of unsafeObjectKeys(paramDefinitions)) {
@@ -65,5 +65,5 @@ export function getEnvBuilderArguments(
   delete envArgs.config;
 
   // TODO: This is a little type-unsafe, but we know we have all the needed arguments
-  return envArgs as BuilderArguments;
+  return envArgs as RuntimeArgs;
 }

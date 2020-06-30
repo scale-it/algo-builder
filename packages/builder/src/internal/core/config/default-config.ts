@@ -1,4 +1,4 @@
-import { BuilderConfig, HttpNetworkConfig } from "../../../types";
+import { AlgobConfig, HttpNetworkConfig } from "../../../types";
 
 const DEFAULT_NETWORK_CONFIG: HttpNetworkConfig = {
   // accounts: [],
@@ -6,7 +6,7 @@ const DEFAULT_NETWORK_CONFIG: HttpNetworkConfig = {
   url: "localhost:8080"
 };
 
-const defaultConfig: BuilderConfig = {
+const defaultConfig: AlgobConfig = {
   networks: {
     default: DEFAULT_NETWORK_CONFIG,
   },
