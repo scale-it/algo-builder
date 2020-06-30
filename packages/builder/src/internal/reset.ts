@@ -40,7 +40,7 @@ export function resetBuilderContext() {
   // Unload all the builder's entry-points.
   unloadModule("../register");
   unloadModule("./cli/cli");
-  unloadModule("./lib/builder-lib");
+  unloadModule("./lib/lib");
 }
 
 function unloadModule(path: string) {

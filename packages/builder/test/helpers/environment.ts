@@ -9,7 +9,7 @@ declare module "mocha" {
 
 export function useEnvironment() {
   beforeEach("Load environment", function () {
-    this.env = require("../../src/internal/lib/builder-lib");
+    this.env = require("../../src/internal/lib/lib");
   });
 
   afterEach("reset builder context", function () {

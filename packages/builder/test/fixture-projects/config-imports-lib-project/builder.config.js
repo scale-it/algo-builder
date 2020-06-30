@@ -1,3 +1,3 @@
-require("../../../src/internal/lib/builder-lib");
+require("../../../src/internal/lib/lib");
 
 module.exports = {};
