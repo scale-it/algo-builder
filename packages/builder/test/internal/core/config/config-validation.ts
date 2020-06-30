@@ -7,6 +7,7 @@ import {
 } from "../../../../src/internal/core/config/config-validation";
 import { ERRORS } from "../../../../src/internal/core/errors-list";
 import { expectBuilderError } from "../../../helpers/errors";
+import CfgErrors from "../../../../src/internal/core/config/config-errors";
 
 describe("Config validation", function () {
   describe("default network config", function () {
@@ -53,7 +54,7 @@ describe("Config validation", function () {
       },
     };
 
-    it("Should fail with invalid types", function () {
+    it("Should fail with invalid types (paths)", function () {
       expectBuilderError(
         () => validateConfig(invalidPathsType),
         ERRORS.GENERAL.INVALID_CONFIG
@@ -90,13 +91,13 @@ describe("Config validation", function () {
         paths: {},
       });
 
-      assert.isEmpty(errors);
+      assert.isTrue(errors.isEmpty());
     });
 
     it("Shouldn't fail without a paths config", function () {
       const errors = getValidationErrors({});
 
-      assert.isEmpty(errors);
+      assert.isTrue(errors.isEmpty());
     });
 
     it("Shouldn't fail with valid paths configs", function () {
@@ -110,7 +111,7 @@ describe("Config validation", function () {
         },
       });
 
-      assert.isEmpty(errors);
+      assert.isTrue(errors.isEmpty());
     });
 
     it("Shouldn't fail with unrecognized params", function () {
@@ -120,14 +121,14 @@ describe("Config validation", function () {
         },
       });
 
-      assert.isEmpty(errors);
+      assert.isTrue(errors.isEmpty());
     });
   });
 
   describe("networks config", function () {
     describe("Invalid types", function () {
       describe("Networks object", function () {
-        it("Should fail with invalid types", function () {
+        it("Should fail with invalid types (networks)", function () {
           expectBuilderError(
             () => validateConfig({ networks: 123 }),
             ERRORS.GENERAL.INVALID_CONFIG
@@ -400,14 +401,14 @@ describe("Config validation", function () {
 
           it("Shouldn't fail if no url is set for localhost network", function () {
             const errors = getValidationErrors({ networks: { localhost: {} } });
-            assert.isEmpty(errors);
+            assert.isTrue(errors.isEmpty());
           });
 
           it("Shouldn't fail if no url is set for builder network", function () {
             const errors = getValidationErrors({
               networks: { [ALGOB_CHAIN_NAME]: {} },
             });
-            assert.isEmpty(errors);
+            assert.isTrue(errors.isEmpty());
           });
         });
 
@@ -420,7 +421,7 @@ describe("Config validation", function () {
                 },
               },
             });
-            assert.isEmpty(errors);
+            assert.isTrue(errors.isEmpty());
           });
 
           it("Should accept a mapping of strings to strings", function () {
@@ -435,7 +436,7 @@ describe("Config validation", function () {
                 },
               },
             });
-            assert.isEmpty(errors);
+            assert.isTrue(errors.isEmpty());
           });
 
           it("Should reject other types", function () {
@@ -645,7 +646,7 @@ describe("Config validation", function () {
 
           describe("Remote accounts", function () {
             it("Should work with accounts: remote", function () {
-              assert.isEmpty(
+              assert.isTrue(
                 getValidationErrors({
                   networks: {
                     asd: {
@@ -653,7 +654,7 @@ describe("Config validation", function () {
                       url: "",
                     },
                   },
-                })
+                }).isEmpty()
               );
             });
 
@@ -762,13 +763,13 @@ describe("Config validation", function () {
         networks: {},
       });
 
-      assert.isEmpty(errors);
+      assert.isTrue(errors.isEmpty());
     });
 
     it("Shouldn't fail without a networks config", function () {
       const errors = getValidationErrors({});
 
-      assert.isEmpty(errors);
+      assert.isTrue(errors.isEmpty());
     });
 
     it("Shouldn't fail with valid networks configs", function () {
@@ -820,7 +821,7 @@ describe("Config validation", function () {
         },
       });
 
-      assert.deepEqual(errors, []);
+      assert.deepEqual(errors.errors, []);
 
       assert.deepEqual(
         getValidationErrors({
@@ -838,7 +839,7 @@ describe("Config validation", function () {
             asd: 123,
             url: "",
           },
-        }),
+        }).errors,
         []
       );
     });
@@ -855,7 +856,7 @@ describe("Config validation", function () {
         },
       });
 
-      assert.isEmpty(errors);
+      assert.isTrue(errors.isEmpty());
     });
   });
 });
