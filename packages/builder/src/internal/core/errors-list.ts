@@ -34,64 +34,64 @@ export const ERRORS: {
   GENERAL: {
     NOT_INSIDE_PROJECT: {
       number: 1,
-      message: "You are not inside a Builder project.",
-      title: "You are not inside a Builder project",
-      description: `You are trying to run Builder outside of a Builder project.
+      message: "You are not inside an algob project.",
+      title: "You are not inside an algob project",
+      description: `You are trying to run algob outside of an algob project.
 
-You can learn hoy to use Builder by reading the [Getting Started guide](./README.md).`,
+You can learn hoy to use algob by reading the [Getting Started guide](./README.md).`,
     },
     INVALID_NODE_VERSION: {
       number: 2,
       message:
-        "Builder doesn't support your Node.js version. It should be %requirement%.",
+        "algob doesn't support your Node.js version. It should be %requirement%.",
       title: "Unsupported Node.js",
-      description: `Builder doesn't support your Node.js version.
+      description: `algob doesn't support your Node.js version.
 
 Please upgrade your version of Node.js and try again.`,
     },
     UNSUPPORTED_OPERATION: {
       number: 3,
-      message: "%operation% is not supported in Builder.",
+      message: "%operation% is not supported in algob.",
       title: "Unsupported operation",
       description: `You are tying to perform an unsupported operation.
 
 Unless you are creating a task or plugin, this is probably a bug.
 
-Please [report it](https://github.com/nomiclabs/builder/issues/new) to help us improve Builder.`,
+Please [report it](https://github.com/nomiclabs/builder/issues/new) to help us improve algob.`,
     },
     CONTEXT_ALREADY_CREATED: {
       number: 4,
-      message: "BuilderContext is already created.",
-      title: "Builder was already initialized",
-      description: `Builder initialization was executed twice. This is a bug.
+      message: "algobContext is already created.",
+      title: "algob was already initialized",
+      description: `algob initialization was executed twice. This is a bug.
 
-Please [report it](https://github.com/nomiclabs/builder/issues/new) to help us improve Builder.`,
+Please [report it](https://github.com/nomiclabs/builder/issues/new) to help us improve algob.`,
     },
     CONTEXT_NOT_CREATED: {
       number: 5,
-      message: "BuilderContext is not created.",
-      title: "Builder wasn't initialized",
-      description: `Builder initialization failed. This is a bug.
+      message: "algobContext is not created.",
+      title: "algob wasn't initialized",
+      description: `algob initialization failed. This is a bug.
 
-Please [report it](https://github.com/nomiclabs/builder/issues/new) to help us improve Builder.`,
+Please [report it](https://github.com/nomiclabs/builder/issues/new) to help us improve algob.`,
     },
     CONTEXT_BRE_NOT_DEFINED: {
       number: 6,
       message:
-        "Builder Runtime Environment is not defined in the BuilderContext.",
-      title: "Builder Runtime Environment not created",
-      description: `Builder initialization failed. This is a bug.
+        "algob Runtime Environment is not defined in the algobContext.",
+      title: "algob Runtime Environment not created",
+      description: `algob initialization failed. This is a bug.
 
-Please [report it](https://github.com/nomiclabs/builder/issues/new) to help us improve Builder.`,
+Please [report it](https://github.com/nomiclabs/builder/issues/new) to help us improve algob.`,
     },
     CONTEXT_BRE_ALREADY_DEFINED: {
       number: 7,
       message:
-        "Builder Runtime Environment is already defined in the BuilderContext",
-      title: "Tried to create the Builder Runtime Environment twice",
-      description: `The Builder initialization process was executed twice. This is a bug.
+        "algob Runtime Environment is already defined in the algobContext",
+      title: "Tried to create the algob Runtime Environment twice",
+      description: `The algob initialization process was executed twice. This is a bug.
 
-Please [report it](https://github.com/nomiclabs/builder/issues/new) to help us improve Builder.`,
+Please [report it](https://github.com/nomiclabs/builder/issues/new) to help us improve algob.`,
     },
     INVALID_CONFIG: {
       number: 8,
@@ -99,15 +99,15 @@ Please [report it](https://github.com/nomiclabs/builder/issues/new) to help us i
 
 %errors%
 
-To learn more about Builder's configuration, please go to https://builder.dev/config/`,
-      title: "Invalid Builder config",
+To learn more about algob's configuration, please go to https://builder.dev/config/`,
+      title: "Invalid algob config",
       description: `You have one or more errors in your config file.
 
 Check the error message for details, or go to [documentation](https://builder.dev/config/) to learn more.`,
     },
     LIB_IMPORTED_FROM_THE_CONFIG: {
       number: 9,
-      message: `Error while loading Builder's configuration.
+      message: `Error while loading algob's configuration.
 You probably imported @nomiclabs/builder instead of @nomiclabs/builder/config`,
       title: "Failed to load config file",
       description: `There was an error while loading your config file.
@@ -118,14 +118,14 @@ Please make sure your config file is correct.`,
     },
     USER_CONFIG_MODIFIED: {
       number: 10,
-      message: `Error while loading Builder's configuration.
+      message: `Error while loading algob's configuration.
 You or one of your plugins is trying to modify the userConfig.%path% value from a config extender`,
       title: "Attempted to modify the user's config",
       description: `An attempt to modify the user's config was made.
 
 This is probably a bug in one of your plugins.
 
-Please [report it](https://github.com/nomiclabs/builder/issues/new) to help us improve Builder.`,
+Please [report it](https://github.com/nomiclabs/builder/issues/new) to help us improve algob.`,
     },
     INIT_INSIDE_PROJECT: {
       number: 11,
@@ -139,46 +139,18 @@ Please [report it](https://github.com/nomiclabs/builder/issues/new) to help us i
       number: 100,
       message: "Network %network% doesn't exist",
       title: "Selected network doesn't exist",
-      description: `You are trying to run Builder with a non-existent network.
+      description: `You are trying to run algob with a non-existent network.
 
 Read the [documentation](https://builder.dev/config/#networks-configuration) to learn how to define custom networks.`,
     },
-    INVALID_GLOBAL_CHAIN_ID: {
+    INVALID_GLOBAL_CHAIN_NAME: {
       number: 101,
       message:
-        "Builder was set to use chain id %configChainId%, but connected to a chain with id %connectionChainId%.",
+        "algob was set to use chain_name %configChainName%, but connected to a chain with name %connectionChainName%.",
       title: "Connected to the wrong network",
-      description: `Your config specifies a chain id for the network you are trying to used, but Builder detected anotherone.
+      description: `Your config specifies a chain for the network you are trying to used, but algob detected anotherone.
 
 Please make sure you are setting your config correctly.`,
-    },
-    /* DEPRECATED: This error only happened because of a misconception in Builder */
-    DEPRECATED_INVALID_TX_CHAIN_ID: {
-      number: 102,
-      message:
-        "Trying to send a tx with chain id %txChainId%, but Builder is connected to a chain with id %chainId%.",
-      title: "Incorrectly send chainId in a transaction",
-      description: `Builder sent the \`chainId\` field in a transaction.
-
-Please [report it](https://github.com/nomiclabs/builder/issues/new) to help us improve Builder.`,
-    },
-    ETHSIGN_MISSING_DATA_PARAM: {
-      number: 103,
-      message: 'Missing "data" param when calling eth_sign.',
-      title: "Missing `data` param when calling eth_sign.",
-      description: `You called \`eth_sign\` with incorrect parameters.
-
-Please check that you are sending a \`data\` parameter.`,
-    },
-    NOT_LOCAL_ACCOUNT: {
-      number: 104,
-      message:
-        "Account %account% is not managed by the node you are connected to.",
-      title: "Unrecognized account",
-      description: `You are trying to send a transaction or sign some data with an
-account not managed by your Ethereum node nor Builder.
-
-Please double check your accounts and the \`from\` parameter in your RPC calls.`,
     },
     MISSING_TX_PARAM_TO_SIGN_LOCALLY: {
       number: 105,
@@ -189,14 +161,14 @@ account, and some parameters are missing.
 
 Please double check your transactions' parameters.`,
     },
-    NO_REMOTE_ACCOUNT_AVAILABLE: {
+    NO_KMD_ACCOUNT_AVAILABLE: {
       number: 106,
       message:
-        "No local account was set and there are accounts in the remote node.",
-      title: "No remote accounts available",
-      description: `No local account was set and there are accounts in the remote node.
+        "No local account was set and there are accounts in the KMD.",
+      title: "No KMD accounts available",
+      description: `No local account was set and there are accounts in the KMD.
 
-Please make sure that your Ethereum node has unlocked accounts.`,
+Please make sure that your KMD has unlocked accounts.`,
     },
     INVALID_HD_PATH: {
       number: 107,
@@ -276,9 +248,9 @@ Please double check your task definitions.`,
     PARAM_CLASHES_WITH_BUILDER_PARAM: {
       number: 202,
       message:
-        "Could not set param %paramName% for task %taskName% because its name is used as a param for Builder.",
-      title: "Builder and task param names clash",
-      description: `Could not add a param to your task because its name is used as a param for Builder.
+        "Could not set param %paramName% for task %taskName% because its name is used as a param for algob.",
+      title: "algob and task param names clash",
+      description: `Could not add a param to your task because its name is used as a param for algob.
 
 Please double check your task definitions.`,
     },
@@ -384,14 +356,14 @@ Please double check your task definitions.`,
       number: 300,
       message: "Invalid environment variable %varName%'s value: %value%",
       title: "Invalid environment variable value",
-      description: `You are setting one of Builder arguments using an environment variable, but it has an incorrect value.
+      description: `You are setting one of algob arguments using an environment variable, but it has an incorrect value.
 Please double check your environment variables.`,
     },
     INVALID_VALUE_FOR_TYPE: {
       number: 301,
       message: "Invalid value %value% for argument %name% of type %type%",
       title: "Invalid argument type",
-      description: `One of your Builder or task's arguments has an invalid type.
+      description: `One of your algob or task's arguments has an invalid type.
 Please double check your arguments.`,
     },
     INVALID_INPUT_FILE: {
@@ -415,60 +387,60 @@ Please double check the name of the task you are trying to run.`,
       message:
         "Unrecognised command line argument %argument%.\nNote that task arguments must come after the task name.",
       title: "Unrecognized command line argument",
-      description: `Builder couldn't recognize one of your command line arguments.
+      description: `algob couldn't recognize one of your command line arguments.
 
 This may be because you are writing it before the task name. It should come after it.
-Please double check how you invoked Builder.`,
+Please double check how you invoked algob.`,
     },
     UNRECOGNIZED_PARAM_NAME: {
       number: 305,
       message: "Unrecognized param %param%",
       title: "Unrecognized param",
-      description: `Builder couldn't recognize one of your tasks' parameters.
+      description: `algob couldn't recognize one of your tasks' parameters.
 
-Please double check how you invoked Builder or run your task.`,
+Please double check how you invoked algob or run your task.`,
     },
     MISSING_TASK_ARGUMENT: {
       number: 306,
       message: "Missing task argument %param%",
       title: "Missing task argument",
       description: `You tried to run a task, but one of its required arguments was missing.
-Please double check how you invoked Builder or run your task.`,
+Please double check how you invoked algob or run your task.`,
     },
     MISSING_POSITIONAL_ARG: {
       number: 307,
       message: "Missing positional argument %param%",
       title: "Missing task positional argument",
       description: `You tried to run a task, but one of its required arguments was missing.
-Please double check how you invoked Builder or run your task.`,
+Please double check how you invoked algob or run your task.`,
     },
     UNRECOGNIZED_POSITIONAL_ARG: {
       number: 308,
       message: "Unrecognized positional argument %argument%",
       title: "Unrecognized task positional argument",
       description: `You tried to run a task with more positional arguments than needed.
-Please double check how you invoked Builder or run your task.`,
+Please double check how you invoked algob or run your task.`,
     },
     REPEATED_PARAM: {
       number: 309,
       message: "Repeated parameter %param%",
       title: "Repeated task parameter",
       description: `You tried to run a task with a repeated parameter.
-Please double check how you invoked Builder or run your task.`,
+Please double check how you invoked algob or run your task.`,
     },
     PARAM_NAME_INVALID_CASING: {
       number: 310,
       message: "Invalid param %param%. Command line params must be lowercase.",
       title: "Invalid casing in command line parameter",
       description: `You tried to run builder with a parameter with invalid casing. They must be lowercase.
-Please double check how you invoked Builder.`,
+Please double check how you invoked algob.`,
     },
     INVALID_JSON_ARGUMENT: {
       number: 311,
       message: "Error parsing JSON value for argument %param%: %error%",
       title: "Invalid JSON parameter",
       description: `You tried to run a task with an invalid JSON parameter.
-Please double check how you invoked Builder or run your task.`,
+Please double check how you invoked algob or run your task.`,
     },
   },
   PLUGINS: {
@@ -479,7 +451,7 @@ Please double check how you invoked Builder or run your task.`,
       title: "Plugin not installed",
       description: `You are trying to use a plugin that hasn't been installed.
 
-Please follow Builder's instructions to resolve this.`,
+Please follow algob's instructions to resolve this.`,
     },
     MISSING_DEPENDENCY: {
       number: 801,
@@ -488,7 +460,7 @@ Please follow Builder's instructions to resolve this.`,
       title: "Plugin dependencies not installed",
       description: `You are trying to use a plugin with unmet dependencies.
 
-Please follow Builder's instructions to resolve this.`,
+Please follow algob's instructions to resolve this.`,
     },
     DEPENDENCY_VERSION_MISMATCH: {
       number: 802,
@@ -498,7 +470,7 @@ If you have installed %dependency% yourself, please reinstall it with a valid ve
       title: "Plugin dependencies's version mismatch",
       description: `You are trying to use a plugin that requires a different version of one of its dependencies.
 
-Please follow Builder's instructions to resolve this.`,
+Please follow algob's instructions to resolve this.`,
     },
     OLD_STYLE_IMPORT_DETECTED: {
       number: 803,

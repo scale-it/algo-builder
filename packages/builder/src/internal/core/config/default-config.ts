@@ -1,24 +1,14 @@
-import { BuilderConfig, BuilderNetworkConfig } from "../../../types";
-import { BUILDEREVM_NETWORK_NAME } from "../../constants";
+import { BuilderConfig, HttpNetworkConfig } from "../../../types";
 
-const DEFAULT_BUILDER_NETWORK_CONFIG: BuilderNetworkConfig = {
-  accounts: [],
+const DEFAULT_NETWORK_CONFIG: HttpNetworkConfig = {
+  // accounts: [],
+  chainName: "devnet",
+  url: "localhost:8080"
 };
 
 const defaultConfig: BuilderConfig = {
-  defaultNetwork: BUILDEREVM_NETWORK_NAME,
-  //solc: {
-  //  version: DEFAULT_SOLC_VERSION,
-  //  optimizer: {
-  //    enabled: false,
-  //    runs: 200,
-  //  },
-  //},
   networks: {
-    [BUILDEREVM_NETWORK_NAME]: DEFAULT_BUILDER_NETWORK_CONFIG,
-    localhost: {
-      url: "http://127.0.0.1:8545",
-    },
+    default: DEFAULT_NETWORK_CONFIG,
   },
   //analytics: {
   //  enabled: true,

@@ -4,7 +4,6 @@ import {
   BuilderArguments,
   BuilderRuntimeEnvironment,
   EnvironmentExtender,
-  //EthereumProvider,
   Network,
   ParamDefinition,
   ResolvedBuilderConfig,
@@ -14,11 +13,9 @@ import {
   TaskDefinition,
   TasksMap,
 } from "../../types";
-import { lazyObject } from "../util/lazy";
 
 import { BuilderError } from "./errors";
 import { ERRORS } from "./errors-list";
-//import { createProvider } from "./providers/construction";
 import { OverriddenTaskDefinition } from "./tasks/task-definitions";
 
 const log = debug("builder:core:bre");
@@ -28,11 +25,6 @@ export class Environment implements BuilderRuntimeEnvironment {
     "injectToGlobal",
     "_runTaskDefinition",
   ];
-
-  ///**
-  // * An EIP1193 Ethereum provider.
-  // */
-  //public ethereum: EthereumProvider;
 
   //public network: Network;
 
@@ -58,37 +50,17 @@ export class Environment implements BuilderRuntimeEnvironment {
   ) {
     log("Creating BuilderRuntimeEnvironment");
 
-    const networkName =
-      builderArguments.network !== undefined
-        ? builderArguments.network
-        : config.defaultNetwork;
-
-    const networkConfig = config.networks[networkName];
+    const networkConfig = config.networks[builderArguments.network];
 
     if (networkConfig === undefined) {
       throw new BuilderError(ERRORS.NETWORK.CONFIG_NOT_FOUND, {
-        network: networkName,
+        network: builderArguments.network,
       });
     }
 
     log("Runtime environment NOOP (MM)");
-    //const provider = lazyObject(() => {
-    //  log(`Creating provider for network ${networkName}`);
-    //  return createProvider(
-    //    networkName,
-    //    networkConfig,
-    //    config.solc.version,
-    //    config.paths
-    //  );
-    //});
+    // this.provider .... -- creation goes here
 
-    //this.network = {
-    //  name: networkName,
-    //  config: config.networks[networkName],
-    //  provider,
-    //};
-
-    //this.ethereum = provider;
     this._extenders = extenders;
 
     //extenders.forEach((extender) => extender(this));

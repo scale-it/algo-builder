@@ -36,10 +36,9 @@ if (BuilderContext.isCreated()) {
 
   const config = loadConfigAndTasks(builderArguments);
 
-  // TODO: This is here for backwards compatibility.
-  // There are very few projects using this.
-  if (builderArguments.network === undefined) {
-    builderArguments.network = config.defaultNetwork;
+  if (!builderArguments.network) {
+    // TODO:RZ
+    throw new Error("INTERNAL ERROR. Default network should be registered in `register.ts` module")
   }
 
   env = new Environment(

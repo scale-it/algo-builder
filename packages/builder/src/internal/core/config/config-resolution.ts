@@ -48,9 +48,6 @@ export function resolveConfig(
     ...config,
     paths,
     networks: config.networks!,
-    //solc: config.solc!,
-    defaultNetwork: config.defaultNetwork!,
-    //analytics: config.analytics!,
   };
 
   for (const extender of configExtenders) {

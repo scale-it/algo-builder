@@ -21,7 +21,6 @@ import { getPackageJson, PackageJson } from "../util/package-info";
 
 //import { Analytics } from "./analytics";
 import { ArgumentsParser } from "./arguments-parser";
-import { enableEmoji } from "./emoji";
 import { createProject } from "./project-creation";
 
 const log = debug("builder:core:cli");
@@ -71,10 +70,6 @@ async function main() {
     if (builderArguments.verbose) {
       debug.enable("builder*");
     }
-
-    //if (builderArguments.emoji) {
-    //  enableEmoji();
-    //}
 
     showStackTraces = builderArguments.showStackTraces;
 
@@ -132,10 +127,9 @@ async function main() {
       );
     }
 
-    // TODO: This is here for backwards compatibility
-    // There are very few projects using this.
-    if (builderArguments.network === undefined) {
-      builderArguments.network = config.defaultNetwork;
+    if (!builderArguments.network) {
+      // TODO:RZ
+      throw new Error("INTERNAL ERROR. Default network should be registered in `register.ts` module")
     }
 
     const env = new Environment(

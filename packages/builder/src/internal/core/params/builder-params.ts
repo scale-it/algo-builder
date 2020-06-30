@@ -5,7 +5,7 @@ import * as types from "./argument-types";
 export const BUILDER_PARAM_DEFINITIONS: BuilderParamDefinitions = {
   network: {
     name: "network",
-    defaultValue: undefined,
+    defaultValue: "default",
     description: "The network to connect to.",
     type: types.string,
     isOptional: true,
@@ -24,7 +24,7 @@ export const BUILDER_PARAM_DEFINITIONS: BuilderParamDefinitions = {
   version: {
     name: "version",
     defaultValue: false,
-    description: "Shows builder's version.",
+    description: "Shows version and exit.",
     type: types.boolean,
     isFlag: true,
     isOptional: true,
@@ -39,19 +39,10 @@ export const BUILDER_PARAM_DEFINITIONS: BuilderParamDefinitions = {
     isOptional: true,
     isVariadic: false,
   },
-  emoji: {
-    name: "emoji",
-    defaultValue: process.platform === "darwin",
-    description: "Use emoji in messages.",
-    type: types.boolean,
-    isFlag: true,
-    isOptional: true,
-    isVariadic: false,
-  },
   config: {
     name: "config",
     defaultValue: undefined,
-    description: "A Builder config file.",
+    description: "Path to algob config file.",
     type: types.inputFile,
     isFlag: false,
     isOptional: true,
@@ -60,19 +51,10 @@ export const BUILDER_PARAM_DEFINITIONS: BuilderParamDefinitions = {
   verbose: {
     name: "verbose",
     defaultValue: false,
-    description: "Enables Builder verbose logging",
+    description: "Enables verbose logging",
     type: types.boolean,
     isFlag: true,
     isOptional: true,
     isVariadic: false,
-  },
-  maxMemory: {
-    name: "maxMemory",
-    defaultValue: undefined,
-    description: "The maximum amount of memory that Builder can use.",
-    type: types.int,
-    isOptional: true,
-    isFlag: false,
-    isVariadic: false,
-  },
+  }
 };
