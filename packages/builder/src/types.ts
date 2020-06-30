@@ -25,7 +25,7 @@ interface CommonNetworkConfig {
   // TODO: timeout?: number;
 }
 
-export interface AlgoDevChainConfig extends CommonNetworkConfig {
+export interface AlgobChainCfg extends CommonNetworkConfig {
   throwOnTransactionFailures?: boolean;
   throwOnCallFailures?: boolean;
   loggingEnabled?: boolean;
@@ -37,7 +37,7 @@ export interface HttpNetworkConfig extends CommonNetworkConfig {
   httpHeaders?: { [name: string]: string };
 }
 
-export type NetworkConfig = AlgoDevChainConfig | HttpNetworkConfig;
+export type NetworkConfig = AlgobChainCfg | HttpNetworkConfig;
 
 export interface Networks {
   [networkName: string]: NetworkConfig;
