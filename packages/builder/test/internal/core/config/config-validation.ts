@@ -1,6 +1,6 @@
 import { assert } from "chai";
 
-import { BUILDEREVM_NETWORK_NAME } from "../../../../src/internal/constants";
+import { ALGOB_CHAIN_NAME } from "../../../../src/internal/constants";
 import {
   getValidationErrors,
   validateConfig,
@@ -151,7 +151,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUILDEREVM_NETWORK_NAME]: 123,
+                  [ALGOB_CHAIN_NAME]: 123,
                 },
               }),
             ERRORS.GENERAL.INVALID_CONFIG
@@ -161,7 +161,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUILDEREVM_NETWORK_NAME]: {
+                  [ALGOB_CHAIN_NAME]: {
                     chainId: "asd",
                   },
                 },
@@ -173,7 +173,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUILDEREVM_NETWORK_NAME]: {
+                  [ALGOB_CHAIN_NAME]: {
                     hardfork: "not-supported",
                   },
                 },
@@ -185,7 +185,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUILDEREVM_NETWORK_NAME]: {
+                  [ALGOB_CHAIN_NAME]: {
                     throwOnCallFailures: "a",
                   },
                 },
@@ -197,7 +197,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUILDEREVM_NETWORK_NAME]: {
+                  [ALGOB_CHAIN_NAME]: {
                     throwOnTransactionFailures: "a",
                   },
                 },
@@ -209,7 +209,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUILDEREVM_NETWORK_NAME]: {
+                  [ALGOB_CHAIN_NAME]: {
                     from: 123,
                   },
                 },
@@ -221,7 +221,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUILDEREVM_NETWORK_NAME]: {
+                  [ALGOB_CHAIN_NAME]: {
                     gas: "asdasd",
                   },
                 },
@@ -233,7 +233,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUILDEREVM_NETWORK_NAME]: {
+                  [ALGOB_CHAIN_NAME]: {
                     gasPrice: "6789",
                   },
                 },
@@ -245,7 +245,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUILDEREVM_NETWORK_NAME]: {
+                  [ALGOB_CHAIN_NAME]: {
                     gasMultiplier: "123",
                   },
                 },
@@ -257,7 +257,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUILDEREVM_NETWORK_NAME]: {
+                  [ALGOB_CHAIN_NAME]: {
                     blockGasLimit: "asd",
                   },
                 },
@@ -269,7 +269,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUILDEREVM_NETWORK_NAME]: {
+                  [ALGOB_CHAIN_NAME]: {
                     accounts: 123,
                   },
                 },
@@ -281,7 +281,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUILDEREVM_NETWORK_NAME]: {
+                  [ALGOB_CHAIN_NAME]: {
                     accounts: [{}],
                   },
                 },
@@ -293,7 +293,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUILDEREVM_NETWORK_NAME]: {
+                  [ALGOB_CHAIN_NAME]: {
                     accounts: [{ privateKey: "" }],
                   },
                 },
@@ -305,7 +305,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUILDEREVM_NETWORK_NAME]: {
+                  [ALGOB_CHAIN_NAME]: {
                     accounts: [{ balance: "" }],
                   },
                 },
@@ -317,7 +317,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUILDEREVM_NETWORK_NAME]: {
+                  [ALGOB_CHAIN_NAME]: {
                     accounts: [{ privateKey: 123 }],
                   },
                 },
@@ -329,7 +329,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUILDEREVM_NETWORK_NAME]: {
+                  [ALGOB_CHAIN_NAME]: {
                     accounts: [{ balance: 213 }],
                   },
                 },
@@ -341,7 +341,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUILDEREVM_NETWORK_NAME]: {
+                  [ALGOB_CHAIN_NAME]: {
                     loggingEnabled: 123,
                   },
                 },
@@ -353,7 +353,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUILDEREVM_NETWORK_NAME]: {
+                  [ALGOB_CHAIN_NAME]: {
                     loggingEnabled: "a",
                   },
                 },
@@ -366,7 +366,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUILDEREVM_NETWORK_NAME]: {
+                  [ALGOB_CHAIN_NAME]: {
                     allowUnlimitedContractSize: "a",
                   },
                 },
@@ -379,7 +379,7 @@ describe("Config validation", function () {
             () =>
               validateConfig({
                 networks: {
-                  [BUILDEREVM_NETWORK_NAME]: {
+                  [ALGOB_CHAIN_NAME]: {
                     initialDate: 123,
                   },
                 },
@@ -405,7 +405,7 @@ describe("Config validation", function () {
 
           it("Shouldn't fail if no url is set for builder network", function () {
             const errors = getValidationErrors({
-              networks: { [BUILDEREVM_NETWORK_NAME]: {} },
+              networks: { [ALGOB_CHAIN_NAME]: {} },
             });
             assert.isEmpty(errors);
           });
@@ -782,7 +782,7 @@ describe("Config validation", function () {
             gasMultiplier: 123,
             url: "",
           },
-          [BUILDEREVM_NETWORK_NAME]: {
+          [ALGOB_CHAIN_NAME]: {
             gas: 678,
             gasPrice: 123,
             blockGasLimit: 8000,
@@ -849,7 +849,7 @@ describe("Config validation", function () {
           localhost: {
             asd: 1232,
           },
-          [BUILDEREVM_NETWORK_NAME]: {
+          [ALGOB_CHAIN_NAME]: {
             asdasd: "123",
           },
         },

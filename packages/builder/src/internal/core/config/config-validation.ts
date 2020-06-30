@@ -4,10 +4,10 @@ import { isRight, fold, isLeft } from "fp-ts/lib/Either";
 import { Context, ValidationError } from "io-ts/lib";
 import { Reporter } from "io-ts/lib/Reporter";
 
-import { BUILDEREVM_NETWORK_NAME } from "../../constants";
+import { ALGOB_CHAIN_NAME } from "../../constants";
 import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
-import { AlgoDevChainConfig } from "../../../types";
+import { AlgobChainCfg } from "../../../types";
 import CfgErrors, {mkErrorMessage} from "./config-errors";
 
 function getContextPath(context: Context): string {
@@ -58,7 +58,7 @@ function optional<TypeT, OutputT>(
 
 // IMPORTANT: This t.types MUST be kept in sync with the actual types.
 
-const AlgoDevChainConfig = t.type({
+const AlgobChainCfg = t.type({
   // accounts: optional(t.array(todo)),
   chainName: optional(t.number),
   throwOnTransactionFailures: optional(t.boolean),
@@ -89,7 +89,7 @@ const HttpNetworkConfig = t.type({
   // from: optional(t.string),
 });
 
-const NetworkConfig = t.union([AlgoDevChainConfig, HttpNetworkConfig]);
+const NetworkConfig = t.union([AlgobChainCfg, HttpNetworkConfig]);
 
 const Networks = t.record(t.string, NetworkConfig);
 
@@ -130,9 +130,9 @@ export function getValidationErrors(config: any): CfgErrors {
 
   // These can't be validated with io-ts
   if (config !== undefined && typeof config.networks === "object") {
-    const ancfg = config.networks[BUILDEREVM_NETWORK_NAME];
+    const ancfg = config.networks[ALGOB_CHAIN_NAME];
     if ( ancfg !== undefined) {
-      validateAlgoDevChainConfig(ancfg, errors);
+      validateAlgobChainCfg(ancfg, errors);
     }
 
     for (const [net, ncfg] of Object.entries<any>(config.networks)) {
@@ -165,40 +165,40 @@ export function getValidationErrors(config: any): CfgErrors {
 }
 
 
-function validateAlgoDevChainConfig(ncfg: AlgoDevChainConfig, errors: CfgErrors) {
+function validateAlgobChainCfg(ncfg: AlgobChainCfg, errors: CfgErrors) {
   if (
     ncfg.initialDate !== undefined &&
     typeof ncfg.initialDate !== "string"
   )
-    errors.push(BUILDEREVM_NETWORK_NAME, "initialDate", ncfg.initialDate, "string | undefined");
+    errors.push(ALGOB_CHAIN_NAME, "initialDate", ncfg.initialDate, "string | undefined");
 
   if (
     ncfg.throwOnTransactionFailures !== undefined &&
     typeof ncfg.throwOnTransactionFailures !== "boolean"
   )
-    errors.push(BUILDEREVM_NETWORK_NAME, "throwOnTransactionFailures", ncfg.throwOnTransactionFailures, "boolean | undefined");
+    errors.push(ALGOB_CHAIN_NAME, "throwOnTransactionFailures", ncfg.throwOnTransactionFailures, "boolean | undefined");
 
   if (
     ncfg.throwOnCallFailures !== undefined &&
     typeof ncfg.throwOnCallFailures !== "boolean"
   )
-    errors.push(BUILDEREVM_NETWORK_NAME, "throwOnCallFailures", ncfg.throwOnCallFailures, "boolean | undefined");
+    errors.push(ALGOB_CHAIN_NAME, "throwOnCallFailures", ncfg.throwOnCallFailures, "boolean | undefined");
 
   if ((ncfg as any).url !== undefined) {
-    errors.push(BUILDEREVM_NETWORK_NAME, "url", (ncfg as any).url, "null (forbidden)");
+    errors.push(ALGOB_CHAIN_NAME, "url", (ncfg as any).url, "null (forbidden)");
   }
 
   if (
     ncfg.chainName !== undefined &&
     typeof ncfg.chainName !== "string"
   )
-    errors.push(BUILDEREVM_NETWORK_NAME, "chainName", ncfg.chainName, "string | undefined");
+    errors.push(ALGOB_CHAIN_NAME, "chainName", ncfg.chainName, "string | undefined");
 
   if (
     ncfg.loggingEnabled !== undefined &&
     typeof ncfg.loggingEnabled !== "boolean"
   )
-    errors.push(BUILDEREVM_NETWORK_NAME, "loggingEnabled", ncfg.loggingEnabled, "boolean | undefined");
+    errors.push(ALGOB_CHAIN_NAME, "loggingEnabled", ncfg.loggingEnabled, "boolean | undefined");
 }
 
 export function validateConfigAccount() {

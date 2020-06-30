@@ -5,7 +5,7 @@ import { BuilderContext } from "../../../../src/internal/context";
 import { loadConfigAndTasks } from "../../../../src/internal/core/config/config-loading";
 import { resolveProjectPaths } from "../../../../src/internal/core/config/config-resolution";
 import { resetBuilderContext } from "../../../../src/internal/reset";
-import { BuilderNetworkConfig, HttpNetworkConfig } from "../../../../src/types";
+import { AlgobChainCfg, HttpNetworkConfig } from "../../../../src/types";
 import { useFixtureProject } from "../../../helpers/project";
 
 describe("Config resolution", () => {
@@ -25,8 +25,8 @@ describe("Config resolution", () => {
         const config = loadConfigAndTasks();
         assert.containsAllKeys(config.networks, ["localhost"]);
 
-        const builderEvmConfig: BuilderNetworkConfig = config.networks
-          .builderevm as BuilderNetworkConfig;
+        const builderEvmConfig: AlgobChainCfg = config.networks
+          .builderevm as AlgobChainCfg;
 
         assert.equal(builderEvmConfig.throwOnTransactionFailures, true);
         assert.equal(builderEvmConfig.throwOnCallFailures, true);
