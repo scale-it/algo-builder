@@ -28,6 +28,7 @@
     "test": "mocha",
     "coverage": "nyc.js ../../node_modules/mocha/bin/mocha",
     "build": "tsc --build .",
+    "build:watch": "tsc -w -p .",
     "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.tsbuildinfo build",
     "algob": "mkdir -p project && cd project && node ../build/internal/cli/cli.js"
   },
