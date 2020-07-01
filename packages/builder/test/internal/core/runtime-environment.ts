@@ -24,19 +24,19 @@ import { useFixtureProject } from "../../helpers/project";
 describe("Environment", () => {
   const config: ResolvedAlgobConfig = {
     networks: {
-      local: {
-        chainName: "local-net",
-        url: "localhost:8080"
+      localNet: {
+        chainName: "local-chain-name",
+        url: "local-net:8080"
       },
       default: {
-        chainName: "default-net",
-        url: "localhost:8080"
+        chainName: "default-chain-name",
+        url: "default-net:8080"
       }
     }
   };
 
   const args: RuntimeArgs = {
-    network: "local",
+    network: "localNet",
     showStackTraces: false,
     version: false,
     help: false,
@@ -108,8 +108,7 @@ describe("Environment", () => {
     it("should create an environment", () => {
       assert.deepEqual(env.config, config);
       assert.isDefined(env.tasks);
-      //assert.isDefined(env.ethereum);
-      //assert.isDefined(env.network);
+      assert.isDefined(env.network);
     });
 
     it("should run a task correctly", async () => {
@@ -294,8 +293,8 @@ describe("Environment", () => {
 
     it("Should define the network field correctly", () => {
       assert.isDefined(env.network);
-      assert.equal(env.network.name, "local");
-      assert.equal(env.network.config, config.networks.local);
+      assert.equal(env.network.name, "localNet");
+      assert.equal(env.network.config, config.networks.localNet);
     });
 
     it("Should throw if the chosen network doesn't exist", () => {

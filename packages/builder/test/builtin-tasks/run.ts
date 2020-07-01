@@ -28,6 +28,7 @@ describe("run task", function () {
     (process as any).exitCode = undefined;
   });
 
+  /* TODO:MM compile before running the task
   it("Should compile before running", async function () {
     if (await fsExtra.pathExists("cache")) {
       await fsExtra.remove("cache");
@@ -67,6 +68,7 @@ describe("run task", function () {
 
     assert.isFalse(await fsExtra.pathExists("artifacts"));
   });
+  */
 
   it("Should return the script's status code on success", async function () {
     await this.env.run("run", {

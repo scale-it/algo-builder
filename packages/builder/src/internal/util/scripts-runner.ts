@@ -30,10 +30,10 @@ export async function runScript(
       env: { ...process.env, ...extraEnvVars },
     });
 
-    childProcess.once("close", (status) => {
-      log(`Script ${scriptPath} exited with status code ${status}`);
+    childProcess.once("close", (code: number) => {
+      log(`Script ${scriptPath} exited with status code ${code}`);
 
-      resolve(status);
+      resolve(code);
     });
     childProcess.once("error", reject);
   });
@@ -98,11 +98,11 @@ export function resolveBuilderRegisterPath() {
     ExecutionMode.EXECUTION_MODE_LINKED,
   ].includes(executionMode);
 
-  const builderCoreBaseDir = path.join(__dirname, "..", "..");
+  const builderCoreBaseDir = path.join(__dirname, "..", "..", "..");
 
   const builderCoreRegisterCompiledPath = path.join(
     builderCoreBaseDir,
-    "register"
+    "build/register.js"
   );
 
   return builderCoreRegisterCompiledPath;

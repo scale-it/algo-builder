@@ -26,15 +26,15 @@ export default function () {
         { run, runtimeArgs }
       ) => {
         if (!(await fsExtra.pathExists(script))) {
-          throw "err"
-          //throw new BuilderError(ERRORS.BUILTIN_TASKS.RUN_FILE_NOT_FOUND, {
-          //  script,
-          //});
+          throw new BuilderError(ERRORS.BUILTIN_TASKS.RUN_FILE_NOT_FOUND, {
+            script,
+          });
         }
 
-        //if (!noCompile) {
-        //  await run(TASK_COMPILE);
-        //}
+        if (!noCompile) {
+          throw new Error("MM: compilation is not possible")
+          //await run(TASK_COMPILE);
+        }
 
         log(`Running script ${script} in a subprocess so we can wait for it to complete`);
 
@@ -44,8 +44,6 @@ export default function () {
             script
           );
         } catch (error) {
-          throw "err 2"
-          /*
           throw new BuilderError(
             ERRORS.BUILTIN_TASKS.RUN_SCRIPT_ERROR,
             {
@@ -54,7 +52,6 @@ export default function () {
             },
             error
           );
-          */
         }
       }
     );
