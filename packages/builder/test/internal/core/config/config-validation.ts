@@ -7,96 +7,34 @@ import {
 } from "../../../../src/internal/core/config/config-validation";
 import { ERRORS } from "../../../../src/internal/core/errors-list";
 import { expectBuilderError } from "../../../helpers/errors";
-import CfgErrors from "../../../../src/internal/core/config/config-errors";
 
 describe("Config validation", function () {
-  describe("default network config", function () {
-    it("Should fail if the wrong type is used", function () {
-      expectBuilderError(
-        () => validateConfig({ defaultNetwork: 123 }),
-        ERRORS.GENERAL.INVALID_CONFIG
-      );
-    });
-  });
-
   describe("paths config", function () {
-    const invalidPathsType = {
-      paths: 123,
-    };
 
-    const invalidCacheType = {
-      paths: {
-        cache: 123,
-      },
-    };
-
-    const invalidArtifactsType = {
-      paths: {
-        artifacts: 123,
-      },
-    };
-
-    const invalidSourcesType = {
-      paths: {
-        sources: 123,
-      },
-    };
-
-    const invalidTestsType = {
-      paths: {
-        tests: 123,
-      },
-    };
-
-    const invalidRootType = {
-      paths: {
-        root: 123,
-      },
-    };
+    const invalidPaths = [
+      {paths: 123},  // invalid path type
+      {paths: {cache: 123}},
+      {paths: {artifacts: 123}},
+      {paths: {sources: 123}},
+      {paths: {tests: 123}},
+      {paths: {root: 123}},
+    ]
 
     it("Should fail with invalid types (paths)", function () {
-      expectBuilderError(
-        () => validateConfig(invalidPathsType),
-        ERRORS.GENERAL.INVALID_CONFIG
-      );
-
-      expectBuilderError(
-        () => validateConfig(invalidCacheType),
-        ERRORS.GENERAL.INVALID_CONFIG
-      );
-
-      expectBuilderError(
-        () => validateConfig(invalidArtifactsType),
-        ERRORS.GENERAL.INVALID_CONFIG
-      );
-
-      expectBuilderError(
-        () => validateConfig(invalidRootType),
-        ERRORS.GENERAL.INVALID_CONFIG
-      );
-
-      expectBuilderError(
-        () => validateConfig(invalidSourcesType),
-        ERRORS.GENERAL.INVALID_CONFIG
-      );
-
-      expectBuilderError(
-        () => validateConfig(invalidTestsType),
-        ERRORS.GENERAL.INVALID_CONFIG
-      );
+      for (let cfg of invalidPaths) {
+        expectBuilderError(
+          () => validateConfig(cfg),
+          ERRORS.GENERAL.INVALID_CONFIG,
+          undefined,
+          JSON.stringify(cfg));
+      }
     });
 
     it("Shouldn't fail with an empty paths config", function () {
-      const errors = getValidationErrors({
-        paths: {},
-      });
-
+      let errors = getValidationErrors({paths: {}});
       assert.isTrue(errors.isEmpty());
-    });
 
-    it("Shouldn't fail without a paths config", function () {
-      const errors = getValidationErrors({});
-
+      errors = getValidationErrors({});
       assert.isTrue(errors.isEmpty());
     });
 
@@ -146,7 +84,7 @@ describe("Config validation", function () {
         });
       });
 
-      describe("Builder's network config", function () {
+      describe("Algob Chain network config", function () {
         it("Should fail with invalid types", function () {
           expectBuilderError(
             () =>
@@ -163,19 +101,7 @@ describe("Config validation", function () {
               validateConfig({
                 networks: {
                   [ALGOB_CHAIN_NAME]: {
-                    chainId: "asd",
-                  },
-                },
-              }),
-            ERRORS.GENERAL.INVALID_CONFIG
-          );
-
-          expectBuilderError(
-            () =>
-              validateConfig({
-                networks: {
-                  [ALGOB_CHAIN_NAME]: {
-                    hardfork: "not-supported",
+                    chainName: 123,
                   },
                 },
               }),
@@ -211,138 +137,6 @@ describe("Config validation", function () {
               validateConfig({
                 networks: {
                   [ALGOB_CHAIN_NAME]: {
-                    from: 123,
-                  },
-                },
-              }),
-            ERRORS.GENERAL.INVALID_CONFIG
-          );
-
-          expectBuilderError(
-            () =>
-              validateConfig({
-                networks: {
-                  [ALGOB_CHAIN_NAME]: {
-                    gas: "asdasd",
-                  },
-                },
-              }),
-            ERRORS.GENERAL.INVALID_CONFIG
-          );
-
-          expectBuilderError(
-            () =>
-              validateConfig({
-                networks: {
-                  [ALGOB_CHAIN_NAME]: {
-                    gasPrice: "6789",
-                  },
-                },
-              }),
-            ERRORS.GENERAL.INVALID_CONFIG
-          );
-
-          expectBuilderError(
-            () =>
-              validateConfig({
-                networks: {
-                  [ALGOB_CHAIN_NAME]: {
-                    gasMultiplier: "123",
-                  },
-                },
-              }),
-            ERRORS.GENERAL.INVALID_CONFIG
-          );
-
-          expectBuilderError(
-            () =>
-              validateConfig({
-                networks: {
-                  [ALGOB_CHAIN_NAME]: {
-                    blockGasLimit: "asd",
-                  },
-                },
-              }),
-            ERRORS.GENERAL.INVALID_CONFIG
-          );
-
-          expectBuilderError(
-            () =>
-              validateConfig({
-                networks: {
-                  [ALGOB_CHAIN_NAME]: {
-                    accounts: 123,
-                  },
-                },
-              }),
-            ERRORS.GENERAL.INVALID_CONFIG
-          );
-
-          expectBuilderError(
-            () =>
-              validateConfig({
-                networks: {
-                  [ALGOB_CHAIN_NAME]: {
-                    accounts: [{}],
-                  },
-                },
-              }),
-            ERRORS.GENERAL.INVALID_CONFIG
-          );
-
-          expectBuilderError(
-            () =>
-              validateConfig({
-                networks: {
-                  [ALGOB_CHAIN_NAME]: {
-                    accounts: [{ privateKey: "" }],
-                  },
-                },
-              }),
-            ERRORS.GENERAL.INVALID_CONFIG
-          );
-
-          expectBuilderError(
-            () =>
-              validateConfig({
-                networks: {
-                  [ALGOB_CHAIN_NAME]: {
-                    accounts: [{ balance: "" }],
-                  },
-                },
-              }),
-            ERRORS.GENERAL.INVALID_CONFIG
-          );
-
-          expectBuilderError(
-            () =>
-              validateConfig({
-                networks: {
-                  [ALGOB_CHAIN_NAME]: {
-                    accounts: [{ privateKey: 123 }],
-                  },
-                },
-              }),
-            ERRORS.GENERAL.INVALID_CONFIG
-          );
-
-          expectBuilderError(
-            () =>
-              validateConfig({
-                networks: {
-                  [ALGOB_CHAIN_NAME]: {
-                    accounts: [{ balance: 213 }],
-                  },
-                },
-              }),
-            ERRORS.GENERAL.INVALID_CONFIG
-          );
-
-          expectBuilderError(
-            () =>
-              validateConfig({
-                networks: {
-                  [ALGOB_CHAIN_NAME]: {
                     loggingEnabled: 123,
                   },
                 },
@@ -356,19 +150,6 @@ describe("Config validation", function () {
                 networks: {
                   [ALGOB_CHAIN_NAME]: {
                     loggingEnabled: "a",
-                  },
-                },
-              }),
-            ERRORS.GENERAL.INVALID_CONFIG
-          );
-
-          // Non boolean allowUnlimitedContractSize
-          expectBuilderError(
-            () =>
-              validateConfig({
-                networks: {
-                  [ALGOB_CHAIN_NAME]: {
-                    allowUnlimitedContractSize: "a",
                   },
                 },
               }),
@@ -399,16 +180,11 @@ describe("Config validation", function () {
             );
           });
 
-          it("Shouldn't fail if no url is set for localhost network", function () {
-            const errors = getValidationErrors({ networks: { localhost: {} } });
-            assert.isTrue(errors.isEmpty());
-          });
-
-          it("Shouldn't fail if no url is set for builder network", function () {
+          it("Shouldn't fail if no url is set for algob-chain network", function () {
             const errors = getValidationErrors({
               networks: { [ALGOB_CHAIN_NAME]: {} },
             });
-            assert.isTrue(errors.isEmpty());
+            assert.isTrue(errors.isEmpty(), errors.toString());
           });
         });
 
@@ -644,35 +420,6 @@ describe("Config validation", function () {
             });
           });
 
-          describe("Remote accounts", function () {
-            it("Should work with accounts: remote", function () {
-              assert.isTrue(
-                getValidationErrors({
-                  networks: {
-                    asd: {
-                      accounts: "remote",
-                      url: "",
-                    },
-                  },
-                }).isEmpty()
-              );
-            });
-
-            it("Shouldn't work with other strings", function () {
-              expectBuilderError(
-                () =>
-                  validateConfig({
-                    networks: {
-                      asd: {
-                        accounts: "asd",
-                        url: "",
-                      },
-                    },
-                  }),
-                ERRORS.GENERAL.INVALID_CONFIG
-              );
-            });
-          });
         });
 
         describe("Other fields", function () {
@@ -682,7 +429,7 @@ describe("Config validation", function () {
                 validateConfig({
                   networks: {
                     asd: {
-                      chainId: "",
+                      chainName: "",
                       url: "",
                     },
                   },
@@ -696,45 +443,6 @@ describe("Config validation", function () {
                   networks: {
                     asd: {
                       from: 123,
-                      url: "",
-                    },
-                  },
-                }),
-              ERRORS.GENERAL.INVALID_CONFIG
-            );
-
-            expectBuilderError(
-              () =>
-                validateConfig({
-                  networks: {
-                    asd: {
-                      gas: "asdsad",
-                      url: "",
-                    },
-                  },
-                }),
-              ERRORS.GENERAL.INVALID_CONFIG
-            );
-
-            expectBuilderError(
-              () =>
-                validateConfig({
-                  networks: {
-                    asd: {
-                      gasPrice: "asdsad",
-                      url: "",
-                    },
-                  },
-                }),
-              ERRORS.GENERAL.INVALID_CONFIG
-            );
-
-            expectBuilderError(
-              () =>
-                validateConfig({
-                  networks: {
-                    asd: {
-                      gasMultiplier: "asdsad",
                       url: "",
                     },
                   },
@@ -776,47 +484,15 @@ describe("Config validation", function () {
       const errors = getValidationErrors({
         networks: {
           commonThings: {
-            chainId: 1,
+            chainName: "testnet",
             from: "0x0001",
-            gas: "auto",
-            gasPrice: "auto",
-            gasMultiplier: 123,
-            url: "",
+            url: "purestake.com:80",
           },
           [ALGOB_CHAIN_NAME]: {
-            gas: 678,
-            gasPrice: 123,
-            blockGasLimit: 8000,
-            accounts: [{ privateKey: "asd", balance: "123" }],
+            // accounts: [{ privateKey: "asd", balance: "123" }],
           },
           localhost: {
-            gas: 678,
-            gasPrice: 123,
-            url: "",
-          },
-          withRemoteAccounts: {
-            accounts: "remote",
-            url: "",
-          },
-          withPrivateKeys: {
-            accounts: ["0x0", "0x1"],
-            url: "",
-          },
-          withHdKeys: {
-            accounts: {
-              mnemonic: "asd asd asd",
-              initialIndex: 0,
-              count: 123,
-              path: "m/123",
-            },
-            url: "",
-          },
-          withOtherTypeOfAccounts: {
-            accounts: {
-              type: "ledger",
-              asd: 12,
-            },
-            url: "",
+            url: "localhost:8080",
           },
         },
       });
@@ -829,15 +505,10 @@ describe("Config validation", function () {
             custom: {
               url: "http://localhost:8545",
             },
-            localhost: {
-              accounts: [
-                "0xa95f9e3e7ae4e4865c5968828fe7c03fffa8a9f3bb52d36d26243f4c868ee166",
-              ],
-            },
           },
           unknown: {
             asd: 123,
-            url: "",
+            url: "localhost:8080",
           },
         }).errors,
         []
@@ -848,6 +519,7 @@ describe("Config validation", function () {
       const errors = getValidationErrors({
         networks: {
           localhost: {
+            url: "localhost:8080",
             asd: 1232,
           },
           [ALGOB_CHAIN_NAME]: {

@@ -5,31 +5,31 @@ import { ErrorDescriptor } from "../../src/internal/core/errors-list";
 
 export async function expectErrorAsync(
   f: () => Promise<any>,
-  errorMessage?: string | RegExp
+  matchMessage?: string | RegExp
 ) {
   const noError = new AssertionError("Async error expected but not thrown");
   const notExactMatch = new AssertionError(
-    `Async error should have had message "${errorMessage}" but got "`
+    `Async error should have had message "${matchMessage}" but got "`
   );
 
   const notRegexpMatch = new AssertionError(
-    `Async error should have matched regex ${errorMessage} but got "`
+    `Async error should have matched regex ${matchMessage} but got "`
   );
 
   try {
     await f();
   } catch (err) {
-    if (errorMessage === undefined) {
+    if (matchMessage === undefined) {
       return;
     }
 
-    if (typeof errorMessage === "string") {
-      if (err.message !== errorMessage) {
+    if (typeof matchMessage === "string") {
+      if (err.message !== matchMessage) {
         notExactMatch.message += `${err.message}"`;
         throw notExactMatch;
       }
     } else {
-      if (errorMessage.exec(err.message) === null) {
+      if (matchMessage.exec(err.message) === null) {
         notRegexpMatch.message += `${err.message}"`;
         throw notRegexpMatch;
       }
@@ -44,28 +44,24 @@ export async function expectErrorAsync(
 export function expectBuilderError(
   f: () => any,
   errorDescriptor: ErrorDescriptor,
-  errorMessage?: string | RegExp
+  matchMessage?: string | RegExp,
+  errorMessage?: string
 ) {
   try {
     f();
   } catch (error) {
-    assert.instanceOf(error, BuilderError);
-    assert.equal(error.number, errorDescriptor.number);
-    assert.notInclude(
-      error.message,
-      "%s",
-      "BuilderError has old-style format tag"
-    );
+    assert.instanceOf(error, BuilderError, errorMessage);
+    assert.equal(error.number, errorDescriptor.number, errorMessage);
     assert.notMatch(
       error.message,
       /%[a-zA-Z][a-zA-Z0-9]*%/,
       "BuilderError has an non-replaced variable tag"
     );
 
-    if (typeof errorMessage === "string") {
-      assert.include(error.message, errorMessage);
-    } else if (errorMessage !== undefined) {
-      assert.match(error.message, errorMessage);
+    if (typeof matchMessage === "string") {
+      assert.include(error.message, matchMessage, errorMessage);
+    } else if (matchMessage !== undefined) {
+      assert.match(error.message, matchMessage, errorMessage);
     }
 
     return;
@@ -79,7 +75,7 @@ export function expectBuilderError(
 export async function expectBuilderErrorAsync(
   f: () => Promise<any>,
   errorDescriptor: ErrorDescriptor,
-  errorMessage?: string | RegExp
+  matchMessage?: string | RegExp
 ) {
   // We create the error here to capture the stack trace before the await.
   // This makes things easier, at least as long as we don't have async stack
@@ -89,11 +85,11 @@ export async function expectBuilderErrorAsync(
   );
 
   const notExactMatch = new AssertionError(
-    `BuilderError was correct, but should have include "${errorMessage}" but got "`
+    `BuilderError was correct, but should have include "${matchMessage}" but got "`
   );
 
   const notRegexpMatch = new AssertionError(
-    `BuilderError was correct, but should have matched regex ${errorMessage} but got "`
+    `BuilderError was correct, but should have matched regex ${matchMessage} but got "`
   );
 
   try {
@@ -101,25 +97,20 @@ export async function expectBuilderErrorAsync(
   } catch (error) {
     assert.instanceOf(error, BuilderError);
     assert.equal(error.number, errorDescriptor.number);
-    assert.notInclude(
-      error.message,
-      "%s",
-      "BuilderError has old-style format tag"
-    );
     assert.notMatch(
       error.message,
       /%[a-zA-Z][a-zA-Z0-9]*%/,
       "BuilderError has an non-replaced variable tag"
     );
 
-    if (errorMessage !== undefined) {
-      if (typeof errorMessage === "string") {
-        if (!error.message.includes(errorMessage)) {
+    if (matchMessage !== undefined) {
+      if (typeof matchMessage === "string") {
+        if (!error.message.includes(matchMessage)) {
           notExactMatch.message += `${error.message}`;
           throw notExactMatch;
         }
       } else {
-        if (errorMessage.exec(error.message) === null) {
+        if (matchMessage.exec(error.message) === null) {
           notRegexpMatch.message += `${error.message}`;
           throw notRegexpMatch;
         }
