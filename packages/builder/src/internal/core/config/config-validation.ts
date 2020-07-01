@@ -130,12 +130,12 @@ export function getValidationErrors(config: any): CfgErrors {
 
   // These can't be validated with io-ts
   if (config !== undefined && typeof config.networks === "object") {
-    const ancfg = config.networks[ALGOB_CHAIN_NAME];
-    if (ancfg !== undefined) {
-      validateAlgobChainCfg(ancfg, errors);
-    }
-
     for (const [net, ncfg] of Object.entries<any>(config.networks)) {
+      if (net === ALGOB_CHAIN_NAME) {
+        validateAlgobChainCfg(ncfg, errors);
+        continue;
+      }
+
       if (typeof ncfg.url !== "string" || ncfg.url == ""){
         errors.push(net, "url", ncfg.url, "string");
       }
@@ -148,8 +148,7 @@ export function getValidationErrors(config: any): CfgErrors {
   }
 
   // io-ts can get confused if there are errors that it can't understand.
-  // Especially around algob network config. It will treat it as an HTTPConfig,
-  // and may give a loot of errors.
+  // It will treat networks as an HTTPConfig and may give a loot of errors.
   if (!errors.isEmpty()) {
     return errors;
   }

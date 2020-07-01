@@ -7,6 +7,7 @@ import { resolveProjectPaths } from "../../../../src/internal/core/config/config
 import { resetBuilderContext } from "../../../../src/internal/reset";
 import { AlgobChainCfg, HttpNetworkConfig } from "../../../../src/types";
 import { useFixtureProject } from "../../../helpers/project";
+import { ALGOB_CHAIN_NAME } from "../../../../src/internal/constants";
 
 describe("Config resolution", () => {
   beforeEach(() => {
@@ -23,13 +24,11 @@ describe("Config resolution", () => {
 
       it("should return the default config", () => {
         const config = loadConfigAndTasks();
-        assert.containsAllKeys(config.networks, ["localhost"]);
+        assert.containsAllKeys(config.networks, ["default", ALGOB_CHAIN_NAME]);
 
-        const algobChainCfg: AlgobChainCfg = config.networks
-          .builderevm as AlgobChainCfg;
-
-        assert.equal(algobChainCfg.throwOnTransactionFailures, true);
-        assert.equal(algobChainCfg.throwOnCallFailures, true);
+        const algobChainCfg = config.networks[ALGOB_CHAIN_NAME] as AlgobChainCfg;
+        assert.isTrue(algobChainCfg.throwOnTransactionFailures);
+        assert.isTrue(algobChainCfg.throwOnCallFailures);
       });
     });
 
@@ -47,7 +46,7 @@ describe("Config resolution", () => {
         assert.containsAllKeys(config.networks, ["localhost", "custom"]);
         assert.equal(
           (config.networks.localhost as HttpNetworkConfig).url,
-          "http://127.0.0.1:8545"
+          "http://127.0.0.1:8080"
         );
         assert.deepEqual(config.networks.localhost.accounts, [
           "0xa95f9e3e7ae4e4865c5968828fe7c03fffa8a9f3bb52d36d26243f4c868ee166",
