@@ -25,7 +25,7 @@ async function printWelcomeMessage() {
   const packageJson = await getPackageJson();
 
   console.log(
-    chalk.cyan(`Welcome to ${ALGOB_NAME} v${packageJson.version}`));
+    chalk.cyan(`★ Welcome to ${ALGOB_NAME} v${packageJson.version}`));
 }
 
 async function copySampleProject(location: string) {
@@ -126,7 +126,7 @@ export async function createProject(location: string) {
     await printTrufflePluginInstallationInstructions();
   }
 
-  console.log("\n✨ ", chalk.cyan("Project created"), " ✨\n");
+  console.log("\n★ ", chalk.cyan("Project created"), " ★\n");
 
   printSuggestedCommands();
 }
