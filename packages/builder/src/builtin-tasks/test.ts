@@ -1,10 +1,8 @@
 import chalk from "chalk";
 import path from "path";
 
-//import { BUIDLEREVM_NETWORK_NAME } from "../internal/constants";
 import { internalTask, task } from "../internal/core/config/config-env";
 import { isTypescriptSupported } from "../internal/core/typescript-support";
-//import { glob } from "../internal/util/glob";
 import { pluralize } from "../internal/util/strings";
 
 import util from "util";
