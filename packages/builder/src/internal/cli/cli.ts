@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 // -*- mode: typescript -*- // https://github.com/syl20bnr/spacemacs/issues/13715
+import "source-map-support/register";
+
 import chalk from "chalk";
 import debug from "debug";
 import semver from "semver";
-import "source-map-support/register";
 
 import { TASK_HELP, TASK_INIT } from "../../builtin-tasks/task-names";
 import { TaskArguments } from "../../types";
@@ -18,7 +19,6 @@ import { isCwdInsideProject } from "../core/project-structure";
 import { Environment } from "../core/runtime-environment";
 import { loadTsNodeIfPresent } from "../core/typescript-support";
 import { getPackageJson, PackageJson } from "../util/package-info";
-
 //import { Analytics } from "./analytics";
 import { ArgumentsParser } from "./arguments-parser";
 import { createProject } from "./project-creation";

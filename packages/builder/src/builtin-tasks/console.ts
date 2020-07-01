@@ -5,7 +5,6 @@ import * as semver from "semver";
 
 import { task } from "../internal/core/config/config-env";
 import { runScriptWithAlgob } from "../internal/util/scripts-runner";
-
 import { TASK_CONSOLE } from "./task-names";
 
 export default function () {

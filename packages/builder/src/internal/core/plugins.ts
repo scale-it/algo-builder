@@ -3,7 +3,6 @@ import * as path from "path";
 import * as semver from "semver";
 
 import { BuilderContext } from "../context";
-
 import { BuilderError } from "./errors";
 import { ERRORS } from "./errors-list";
 import { ExecutionMode, getExecutionMode } from "./execution-mode";

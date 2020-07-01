@@ -3,7 +3,6 @@ import fsExtra from "fs-extra";
 import path from "path";
 
 import { getPackageRoot } from "../util/package-info";
-
 import { BuilderError } from "./errors";
 import { ERRORS } from "./errors-list";
 import { isTypescriptSupported } from "./typescript-support";

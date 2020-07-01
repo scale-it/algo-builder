@@ -1,11 +1,10 @@
 import chalk from "chalk";
 import path from "path";
+import util from "util";
 
 import { internalTask, task } from "../internal/core/config/config-env";
 import { isTypescriptSupported } from "../internal/core/typescript-support";
 import { pluralize } from "../internal/util/strings";
-
-import util from "util";
 
 export async function glob(pattern: string): Promise<string[]> {
   const { default: globModule } = await import("glob");

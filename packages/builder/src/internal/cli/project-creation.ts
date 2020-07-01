@@ -4,11 +4,10 @@ import os from "os";
 import path from "path";
 
 import { ALGOB_NAME } from "../constants";
-import { ExecutionMode, getExecutionMode } from "../core/execution-mode";
-import { getPackageJson, getPackageRoot } from "../util/package-info";
-
 import { BuilderError } from "../core/errors";
 import { ERRORS } from "../core/errors-list"
+import { ExecutionMode, getExecutionMode } from "../core/execution-mode";
+import { getPackageJson, getPackageRoot } from "../util/package-info";
 
 const SAMPLE_PROJECT_DEPENDENCIES = [
   "chai",

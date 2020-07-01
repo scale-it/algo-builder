@@ -1,5 +1,4 @@
 import { AlgobRuntimeEnv, ConfigExtender } from "../types";
-
 import { ExtenderManager } from "./core/config/extenders";
 import { BuilderError } from "./core/errors";
 import { ERRORS } from "./core/errors-list";

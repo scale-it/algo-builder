@@ -1,7 +1,6 @@
 
 import { getClosestCallerPackage } from "../util/caller-package";
 import { replaceAll } from "../util/strings";
-
 import { ErrorDescriptor, ERRORS, getErrorCode } from "./errors-list";
 
 // For an explanation about these classes constructors go to:

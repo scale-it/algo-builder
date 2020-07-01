@@ -6,7 +6,6 @@ import {
 } from "../../types";
 import { BuilderError } from "../core/errors";
 import { ERRORS } from "../core/errors-list";
-
 import { ArgumentsParser } from "./arguments-parser";
 
 export class HelpPrinter {

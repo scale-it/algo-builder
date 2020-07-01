@@ -1,8 +1,8 @@
 import {
-  RuntimeArgs,
   AlgobParamDefinitions,
   ParamDefinition,
   ParamDefinitionsMap,
+  RuntimeArgs,
   TaskArguments,
   TaskDefinition,
 } from "../../types";

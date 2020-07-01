@@ -1,13 +1,13 @@
-import * as t from "io-ts";
+import { fold, isLeft,isRight } from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/pipeable";
-import { isRight, fold, isLeft } from "fp-ts/lib/Either";
+import * as t from "io-ts";
 import { Context, ValidationError } from "io-ts/lib";
 import { Reporter } from "io-ts/lib/Reporter";
 
+import { AlgobChainCfg } from "../../../types";
 import { ALGOB_CHAIN_NAME } from "../../constants";
 import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
-import { AlgobChainCfg } from "../../../types";
 import CfgErrors, {mkErrorMessage} from "./config-errors";
 
 function getContextPath(context: Context): string {
@@ -46,7 +46,7 @@ export const DotPathReporter: Reporter<string[]> = {
 
 function optional<TypeT, OutputT>(
   codec: t.Type<TypeT, OutputT, unknown>,
-  name: string = `${codec.name} | undefined`
+  name = `${codec.name} | undefined`
 ): t.Type<TypeT | undefined, OutputT | undefined, unknown> {
   return new t.Type(
     name,

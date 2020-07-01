@@ -1,15 +1,13 @@
 import path from "path";
 
-import { RuntimeArgs, ResolvedAlgobConfig } from "../../../types";
+import { ResolvedAlgobConfig,RuntimeArgs } from "../../../types";
 import { BuilderContext } from "../../context";
-import { loadPluginFile } from "../plugins";
-import { getUserConfigPath } from "../project-structure";
-
-import { resolveConfig } from "./config-resolution";
-import { validateConfig } from "./config-validation";
-
 import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
+import { loadPluginFile } from "../plugins";
+import { getUserConfigPath } from "../project-structure";
+import { resolveConfig } from "./config-resolution";
+import { validateConfig } from "./config-validation";
 
 function importCsjOrEsModule(filePath: string): any {
   const imported = require(filePath);

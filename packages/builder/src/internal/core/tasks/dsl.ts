@@ -4,7 +4,6 @@ import {
   TaskDefinition,
   TasksMap,
 } from "../../../types";
-
 import {
   OverriddenTaskDefinition,
   SimpleTaskDefinition,

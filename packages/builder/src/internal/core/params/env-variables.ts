@@ -1,6 +1,6 @@
 import ProcessEnv = NodeJS.ProcessEnv;
 
-import { RuntimeArgs, AlgobParamDefinitions } from "../../../types";
+import { AlgobParamDefinitions,RuntimeArgs } from "../../../types";
 import { ArgumentsParser } from "../../cli/arguments-parser";
 import { unsafeObjectKeys } from "../../util/unsafe";
 import { BuilderError } from "../errors";

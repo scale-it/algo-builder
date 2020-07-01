@@ -1,5 +1,4 @@
 import { AlgobParamDefinitions } from "../../../types";
-
 import * as types from "./argument-types";
 
 export const ALGOB_PARAM_DEFINITIONS: AlgobParamDefinitions = {

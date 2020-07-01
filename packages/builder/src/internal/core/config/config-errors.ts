@@ -31,7 +31,7 @@ export default class CfgErrors {
   }
 
   public concatenate(errors: string[]) {
-    for (let e of errors)
+    for (const e of errors)
       this.errors.push(e);
   }
 

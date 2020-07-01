@@ -1,7 +1,6 @@
 import fsExtra from "fs-extra";
 
 import { task } from "../internal/core/config/config-env";
-
 import { TASK_CLEAN } from "./task-names";
 
 export default function () {

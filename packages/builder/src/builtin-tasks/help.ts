@@ -3,7 +3,6 @@ import { ALGOB_BIN_NAME, ALGOB_NAME } from "../internal/constants";
 import { task } from "../internal/core/config/config-env";
 import { ALGOB_PARAM_DEFINITIONS } from "../internal/core/params/builder-params";
 import { getPackageJson } from "../internal/util/package-info";
-
 import { TASK_HELP } from "./task-names";
 
 export default function () {
