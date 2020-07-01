@@ -146,7 +146,7 @@ describe("Config validation", function () {
         });
       });
 
-      describe("BuilderEVM network config", function () {
+      describe("Builder's network config", function () {
         it("Should fail with invalid types", function () {
           expectBuilderError(
             () =>

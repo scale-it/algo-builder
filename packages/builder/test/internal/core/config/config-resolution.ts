@@ -25,11 +25,11 @@ describe("Config resolution", () => {
         const config = loadConfigAndTasks();
         assert.containsAllKeys(config.networks, ["localhost"]);
 
-        const builderEvmConfig: AlgobChainCfg = config.networks
+        const algobChainCfg: AlgobChainCfg = config.networks
           .builderevm as AlgobChainCfg;
 
-        assert.equal(builderEvmConfig.throwOnTransactionFailures, true);
-        assert.equal(builderEvmConfig.throwOnCallFailures, true);
+        assert.equal(algobChainCfg.throwOnTransactionFailures, true);
+        assert.equal(algobChainCfg.throwOnCallFailures, true);
       });
     });
 
