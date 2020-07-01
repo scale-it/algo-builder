@@ -8,10 +8,6 @@ describe("Builder lib", () => {
   useFixtureProject("config-project");
   useEnvironment();
 
-  before(() => {
-    process.env.BUILDER_NETWORK = "localhost";
-  });
-
   it("should load environment", function () {
     assert.isDefined(this.env.config!.networks!.custom);
   });

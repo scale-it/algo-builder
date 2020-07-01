@@ -452,6 +452,14 @@ Please double check how you invoked algob or run your task.`,
       description: `Tried to use \`buidler run\` to execut a non-existing script.
 
 Please double check your script's path`,
+    },
+    RUN_SCRIPT_ERROR: {
+      number: 602,
+      message: "Error running script {%script%}: %error%",
+      title: "Error running script",
+      description: `Running a script resulted in an error.
+
+Please check Buidler's output for more details.`,
     }
   },
   PLUGINS: {

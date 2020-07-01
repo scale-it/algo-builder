@@ -1,3 +1,3 @@
-if (global.config === undefined || global.config.solc === undefined) {
+if (global.config === undefined || global.network === undefined) {
   process.exit(123123);
 }
