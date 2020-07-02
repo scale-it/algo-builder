@@ -78,13 +78,13 @@ export const types = argumentTypes;
  * @param extender A function that receives the Builder Runtime
  * Environment.
  */
-export function extendEnvironment(extender: EnvironmentExtender) {
+export function extendEnvironment(extender: EnvironmentExtender) : void {
   const ctx = BuilderContext.getBuilderContext();
   const extenderManager = ctx.extendersManager;
   extenderManager.add(extender);
 }
 
-export function extendConfig(extender: ConfigExtender) {
+export function extendConfig(extender: ConfigExtender) : void {
   const ctx = BuilderContext.getBuilderContext();
   ctx.configExtenders.push(extender);
 }
@@ -93,7 +93,7 @@ export function extendConfig(extender: ConfigExtender) {
  * Loads a Builder plugin
  * @param pluginName The plugin name.
  */
-export function usePlugin(pluginName: string) {
+export function usePlugin(pluginName: string) : void {
   const ctx = BuilderContext.getBuilderContext();
   usePluginImplementation(ctx, pluginName);
 }

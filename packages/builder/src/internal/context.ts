@@ -33,9 +33,8 @@ export class BuilderContext {
     return ctx;
   }
 
-  public static deleteBuilderContext() {
-    const globalAsAny = global as any;
-    globalAsAny.__builderContext = undefined;
+  public static deleteBuilderContext() : void {
+    (global as any).__builderContext = undefined;  // eslint-disable-line @typescript-eslint/no-explicit-any
   }
 
   public readonly tasksDSL = new TasksDSL();
@@ -44,7 +43,7 @@ export class BuilderContext {
   public readonly loadedPlugins: string[] = [];
   public readonly configExtenders: ConfigExtender[] = [];
 
-  public setAlgobRuntimeEnv(env: AlgobRuntimeEnv) {
+  public setAlgobRuntimeEnv(env: AlgobRuntimeEnv) : void {
     if (this.environment !== undefined) {
       throw new BuilderError(ERRORS.GENERAL.CONTEXT_BRE_ALREADY_DEFINED);
     }
@@ -58,7 +57,7 @@ export class BuilderContext {
     return this.environment;
   }
 
-  public setPluginAsLoaded(pluginName: string) {
+  public setPluginAsLoaded(pluginName: string) : void {
     this.loadedPlugins.push(pluginName);
   }
 }

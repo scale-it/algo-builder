@@ -1,6 +1,7 @@
 import {
   AlgobParamDefinitions,
   ParamDefinition,
+  ParamDefinitionAny,
   ParamDefinitionsMap,
   TasksMap,
 } from "../../types";
@@ -17,7 +18,7 @@ export class HelpPrinter {
     private readonly _tasks: TasksMap
   ) {}
 
-  public printGlobalHelp(includeInternalTasks = false) {
+  public printGlobalHelp(includeInternalTasks = false) : void {
     console.log(`${this._programName} version ${this._version}\n`);
 
     console.log(
@@ -54,7 +55,7 @@ export class HelpPrinter {
     );
   }
 
-  public printTaskHelp(taskName: string) {
+  public printTaskHelp(taskName: string) : void {
     const taskDefinition = this._tasks[taskName];
 
     if (taskDefinition === undefined) {
@@ -134,7 +135,7 @@ export class HelpPrinter {
   }
 
   private _getPositionalParamsList(
-    positionalParamDefinitions: Array<ParamDefinition<any>>
+    positionalParamDefinitions: Array<ParamDefinitionAny>
   ) {
     let paramsList = "";
 
@@ -191,7 +192,7 @@ export class HelpPrinter {
   }
 
   private _printPositionalParamDetails(
-    positionalParamDefinitions: Array<ParamDefinition<any>>
+    positionalParamDefinitions: Array<ParamDefinitionAny>
   ) {
     const paramsNameLength = positionalParamDefinitions
       .map((d) => d.name.length)

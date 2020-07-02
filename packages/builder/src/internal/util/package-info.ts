@@ -2,12 +2,14 @@ import findup from "find-up";
 import fsExtra from "fs-extra";
 import path from "path";
 
-async function getPackageJsonPath(): Promise<string> {
-  return findClosestPackageJson(__filename)!;
+function getPackageJsonPath(): string | null {
+  return findClosestPackageJson(__filename);
 }
 
-export async function getPackageRoot(): Promise<string> {
-  const packageJsonPath = await getPackageJsonPath();
+export function getPackageRoot(): string {
+  const packageJsonPath = getPackageJsonPath();
+  if(packageJsonPath === null)
+    throw Error("Can't find package root. File `package.json` doesn't exist in the project.")
 
   return path.dirname(packageJsonPath);
 }

@@ -1,13 +1,14 @@
 
+import type { AnyMap } from "../../types";
 import { getClosestCallerPackage } from "../util/caller-package";
 import { replaceAll } from "../util/strings";
-import { ErrorDescriptor, ERRORS, getErrorCode } from "./errors-list";
+import { ErrorDescriptor, /* ERRORS, */ getErrorCode } from "./errors-list";
 
 // For an explanation about these classes constructors go to:
 // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
 
 export class BuilderError extends Error {
-  public static isBuilderError(other: any): other is BuilderError {
+  public static isBuilderError(other: any): other is BuilderError { // eslint-disable-line
     return (
       other !== undefined && other !== null && other._isBuilderError === true
     );
@@ -21,7 +22,7 @@ export class BuilderError extends Error {
 
   constructor(
     errorDescriptor: ErrorDescriptor,
-    messageArguments: { [p: string]: any } = {},
+    messageArguments: AnyMap = {},
     parentError?: Error
   ) {
     const prefix = `${getErrorCode(errorDescriptor)}: `;
@@ -48,7 +49,7 @@ export class BuilderError extends Error {
  * This class is used to throw errors from builder plugins.
  */
 export class BuilderPluginError extends Error {
-  public static isBuilderPluginError(other: any): other is BuilderPluginError {
+  public static isBuilderPluginError(other: any): other is BuilderPluginError { // eslint-disable-line
     return (
       other !== undefined &&
       other !== null &&
@@ -57,7 +58,7 @@ export class BuilderPluginError extends Error {
   }
 
   public readonly parent?: Error;
-  public readonly pluginName: string;
+  public readonly pluginName?: string;
 
   private readonly _isBuilderPluginError: boolean;
 
@@ -92,7 +93,7 @@ export class BuilderPluginError extends Error {
       this.parent = parent;
     } else {
       super(pluginNameOrMessage);
-      this.pluginName = getClosestCallerPackage()!;
+      this.pluginName = getClosestCallerPackage();
       this.parent = messageOrParent;
     }
 
@@ -118,14 +119,14 @@ export class BuilderPluginError extends Error {
  */
 export function applyErrorMessageTemplate(
   template: string,
-  values: { [templateVar: string]: any }
+  values: { [templateVar: string]: any } // eslint-disable-line @typescript-eslint/no-explicit-any
 ): string {
   return _applyErrorMessageTemplate(template, values, false);
 }
 
 function _applyErrorMessageTemplate(
   template: string,
-  values: { [templateVar: string]: any },
+  values: { [templateVar: string]: any }, // eslint-disable-line @typescript-eslint/no-explicit-any
   isRecursiveCall: boolean
 ): string {
   //if (!isRecursiveCall) {

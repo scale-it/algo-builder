@@ -3,7 +3,7 @@ import fsExtra from "fs-extra";
 import { task } from "../internal/core/config/config-env";
 import { TASK_CLEAN } from "./task-names";
 
-export default function () {
+export default function () : void {
   task(
     TASK_CLEAN,
     "Clears the cache and deletes all artifacts",

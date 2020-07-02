@@ -10,7 +10,7 @@ import {
   TASK_RUN
 } from "./task-names";
 
-export default function () {
+export default function () : void {
   const log = debug("builder:core:tasks:run");
 
   task(TASK_RUN, "Runs a user-defined script after compiling the project")

@@ -33,7 +33,7 @@ export interface ArgumentType<T> {
    *
    * @throws ALGORAND_BUILDER301 if value is not of type <t>
    */
-  validate?(argName: string, argumentValue: any): void;
+  validate?(argName: string, argumentValue: any): void;  // eslint-disable-line
 }
 
 /**
@@ -52,7 +52,7 @@ export const string: ArgumentType<string> = {
    *
    * @throws ALGORAND_BUILDER301 if value is not of type "string"
    */
-  validate: (argName: string, value: any): void => {
+  validate: (argName: string, value: any): void => {  // eslint-disable-line
     const isString = typeof value === "string";
 
     if (!isString) {
@@ -95,7 +95,7 @@ export const boolean: ArgumentType<boolean> = {
    *
    * @throws ALGORAND_BUILDER301 if value is not of type "boolean"
    */
-  validate: (argName: string, value: any): void => {
+  validate: (argName: string, value: any): void => { // eslint-disable-line @typescript-eslint/no-explicit-any
     const isBoolean = typeof value === "boolean";
 
     if (!isBoolean) {
@@ -140,7 +140,7 @@ export const int: ArgumentType<number> = {
    *
    * @throws ALGORAND_BUILDER301 if value is not of type "int"
    */
-  validate: (argName: string, value: any): void => {
+  validate: (argName: string, value: any): void => {  // eslint-disable-line
     const isInt = Number.isInteger(value);
     if (!isInt) {
       throw new BuilderError(ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE, {
@@ -185,7 +185,7 @@ export const float: ArgumentType<number> = {
    *
    * @throws ALGORAND_BUILDER301 if value is not of type "number"
    */
-  validate: (argName: string, value: any): void => {
+  validate: (argName: string, value: any): void => {  // eslint-disable-line
     const isFloatOrInteger = typeof value === "number" && !isNaN(value);
 
     if (!isFloatOrInteger) {
@@ -237,7 +237,7 @@ export const inputFile: ArgumentType<string> = {
    *
    * @throws ALGORAND_BUILDER301 if value is not of type "inputFile"
    */
-  validate: (argName: string, value: any): void => {
+  validate: (argName: string, value: any): void => {  // eslint-disable-line
     try {
       inputFile.parse(argName, value);
     } catch (error) {
@@ -255,9 +255,9 @@ export const inputFile: ArgumentType<string> = {
   },
 };
 
-export const json: ArgumentType<any> = {
+export const json: ArgumentType<any> = {  // eslint-disable-line
   name: "json",
-  parse(argName: string, strValue: string): any {
+  parse(argName: string, strValue: string): void {
     try {
       return JSON.parse(strValue);
     } catch (error) {
@@ -280,7 +280,7 @@ export const json: ArgumentType<any> = {
    *
    * @throws ALGORAND_BUILDER301 if value is not of type "json"
    */
-  validate: (argName: string, value: any): void => {
+  validate: (argName: string, value: any): void => { // eslint-disable-line @typescript-eslint/no-explicit-any
     if (value === undefined) {
       throw new BuilderError(ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE, {
         value,

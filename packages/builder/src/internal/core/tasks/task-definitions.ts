@@ -1,6 +1,6 @@
 import {
   ActionType,
-  ParamDefinition,
+  ParamDefinitionAny,
   ParamDefinitionsMap,
   TaskArguments,
   TaskDefinition,
@@ -19,11 +19,11 @@ import { ALGOB_PARAM_DEFINITIONS } from "../params/builder-params";
  *
  */
 export class SimpleTaskDefinition implements TaskDefinition {
-  get description() {
+  get description() : (string | undefined) {
     return this._description;
   }
   public readonly paramDefinitions: ParamDefinitionsMap = {};
-  public readonly positionalParamDefinitions: Array<ParamDefinition<any>> = [];
+  public readonly positionalParamDefinitions: Array<ParamDefinitionAny> = [];
   public action: ActionType<TaskArguments>;
 
   private _positionalParamNames: Set<string>;
@@ -57,7 +57,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
    * Sets the task's description.
    * @param description The description.
    */
-  public setDescription(description: string) {
+  public setDescription(description: string) : this {
     this._description = description;
     return this;
   }
@@ -66,7 +66,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
    * Sets the task's action.
    * @param action The action.
    */
-  public setAction<ArgsT extends TaskArguments>(action: ActionType<ArgsT>) {
+  public setAction<ArgsT extends TaskArguments>(action: ActionType<ArgsT>) : this {
     // TODO: There's probably something bad here. See types.ts for more info.
     this.action = action;
     return this;
@@ -171,7 +171,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
    * @param name the parameter's name.
    * @param description the parameter's description.
    */
-  public addFlag(name: string, description?: string) {
+  public addFlag(name: string, description?: string) : this {
     this._validateParamNameCasing(name);
     this._validateNameNotUsed(name);
 
@@ -391,7 +391,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
    *
    * @param definition the param's definition
    */
-  private _addPositionalParamDefinition(definition: ParamDefinition<any>) {
+  private _addPositionalParamDefinition(definition: ParamDefinitionAny) {
     if (definition.isVariadic) {
       this._hasVariadicParam = true;
     }
@@ -493,7 +493,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
   }
 
   private _validateNoDefaultValueForMandatoryParam(
-    defaultValue: any | undefined,
+    defaultValue: any | undefined,  // eslint-disable-line @typescript-eslint/no-explicit-any
     isOptional: boolean,
     name: string
   ) {
@@ -508,7 +508,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
     }
   }
 
-  private _isStringArray(values: any): values is string[] {
+  private _isStringArray(values: any): values is string[] {  // eslint-disable-line @typescript-eslint/no-explicit-any
     return Array.isArray(values) && values.every((v) => typeof v === "string");
   }
 }
@@ -534,7 +534,7 @@ export class OverriddenTaskDefinition implements TaskDefinition {
     this.parentTaskDefinition = parentTaskDefinition;
   }
 
-  public setDescription(description: string) {
+  public setDescription(description: string): this{
     this._description = description;
     return this;
   }
@@ -543,7 +543,7 @@ export class OverriddenTaskDefinition implements TaskDefinition {
    * Overrides the parent task's action.
    * @param action the action.
    */
-  public setAction<ArgsT extends TaskArguments>(action: ActionType<ArgsT>) {
+  public setAction<ArgsT extends TaskArguments>(action: ActionType<ArgsT>): this {
     // TODO: There's probably something bad here. See types.ts for more info.
     this._action = action;
     return this;
@@ -552,7 +552,7 @@ export class OverriddenTaskDefinition implements TaskDefinition {
   /**
    * Retrieves the parent task's name.
    */
-  get name() {
+  get name() : string {
     return this.parentTaskDefinition.name;
   }
 
@@ -560,19 +560,19 @@ export class OverriddenTaskDefinition implements TaskDefinition {
    * Retrieves, if defined, the description of the overriden task,
    * otherwise retrieves the description of the parent task.
    */
-  get description() {
+  get description() : string {
     if (this._description !== undefined) {
       return this._description;
     }
 
-    return this.parentTaskDefinition.description;
+    return this.parentTaskDefinition.description || "";
   }
 
   /**
    * Retrieves, if defined, the action of the overriden task,
    * otherwise retrieves the action of the parent task.
    */
-  get action() {
+  get action(): ActionType<TaskArguments> {
     if (this._action !== undefined) {
       return this._action;
     }
@@ -583,14 +583,14 @@ export class OverriddenTaskDefinition implements TaskDefinition {
   /**
    * Retrieves the parent task's param definitions.
    */
-  get paramDefinitions() {
+  get paramDefinitions(): ParamDefinitionsMap {
     return this.parentTaskDefinition.paramDefinitions;
   }
 
   /**
    * Retrieves the parent task's positional param definitions.
    */
-  get positionalParamDefinitions() {
+  get positionalParamDefinitions(): ParamDefinitionAny[] {
     return this.parentTaskDefinition.positionalParamDefinitions;
   }
 
@@ -644,6 +644,8 @@ export class OverriddenTaskDefinition implements TaskDefinition {
       ERRORS.TASK_DEFINITIONS.OVERRIDE_NO_POSITIONAL_PARAMS
     );
   }
+
+  /* eslint-disable sonarjs/no-identical-functions */
 
   /**
    * Overriden tasks can't add new parameters.

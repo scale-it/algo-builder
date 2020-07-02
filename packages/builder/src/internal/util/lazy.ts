@@ -30,7 +30,7 @@ import { ERRORS } from "../core/errors-list";
  *    const Eth = lazyFunction<typeof EthT>(() => require("web3x/eth").Eth);
  */
 
-export function lazyObject<T extends object>(objectCreator: () => T): T {
+export function lazyObject<T extends object>(objectCreator: () => T): T { // eslint-disable-line
   return createLazyProxy(
     objectCreator,
     (getRealTarget) => ({
@@ -56,13 +56,13 @@ export function lazyObject<T extends object>(objectCreator: () => T): T {
 }
 
 // tslint:disable-next-line ban-types
-export function lazyFunction<T extends Function>(functionCreator: () => T): T {
+export function lazyFunction<T extends Function>(functionCreator: () => T): T { // eslint-disable-line
   return createLazyProxy(
     functionCreator,
     (getRealTarget) => {
-      function dummyTarget() {}
+      function dummyTarget() {}  // eslint-disable-line @typescript-eslint/no-empty-function
 
-      (dummyTarget as any)[util.inspect.custom] = function () {
+      (dummyTarget as any)[util.inspect.custom] = function () {  // eslint-disable-line @typescript-eslint/no-explicit-any
         const realTarget = getRealTarget();
         return util.inspect(realTarget);
       };
@@ -80,15 +80,15 @@ export function lazyFunction<T extends Function>(functionCreator: () => T): T {
   );
 }
 
-function createLazyProxy<ActualT extends GuardT, GuardT extends object>(
+function createLazyProxy<ActualT extends GuardT, GuardT extends object>( // eslint-disable-line
   targetCreator: () => ActualT,
   dummyTargetCreator: (getRealTarget: () => ActualT) => GuardT,
-  validator: (target: any) => void
+  validator: (target: any) => void  // eslint-disable-line @typescript-eslint/no-explicit-any
 ): ActualT {
   let realTarget: ActualT | undefined;
 
   // tslint:disable-next-line
-  const dummyTarget: ActualT = dummyTargetCreator(getRealTarget) as any;
+  const dummyTarget: ActualT = dummyTargetCreator(getRealTarget) as any;  // eslint-disable-line @typescript-eslint/no-explicit-any
 
   function getRealTarget(): ActualT {
     if (realTarget === undefined) {
@@ -99,8 +99,8 @@ function createLazyProxy<ActualT extends GuardT, GuardT extends object>(
       // invariant violations
       const properties = Object.getOwnPropertyNames(target);
       for (const property of properties) {
-        const descriptor = Object.getOwnPropertyDescriptor(target, property)!;
-        Object.defineProperty(dummyTarget, property, descriptor);
+        const descriptor = Object.getOwnPropertyDescriptor(target, property);
+        Object.defineProperty(dummyTarget, property, descriptor!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
       }
 
       Object.setPrototypeOf(dummyTarget, Object.getPrototypeOf(target));
@@ -215,14 +215,14 @@ function createLazyProxy<ActualT extends GuardT, GuardT extends object>(
 
   if (dummyTarget instanceof Function) {
     // If dummy target is a function, the actual target must be a function too.
-    handler.apply = (target, thisArg: any, argArray?: any) => {
+    handler.apply = (target, thisArg: any, argArray?: any) => {  // eslint-disable-line @typescript-eslint/no-explicit-any
       // tslint:disable-next-line ban-types
-      return Reflect.apply(getRealTarget() as Function, thisArg, argArray);
+      return Reflect.apply(getRealTarget() as Function, thisArg, argArray);  // eslint-disable-line
     };
 
-    handler.construct = (target, argArray: any, newTarget?: any) => {
+    handler.construct = (target, argArray: any, newTarget?: any) => {  // eslint-disable-line @typescript-eslint/no-explicit-any
       // tslint:disable-next-line ban-types
-      return Reflect.construct(getRealTarget() as Function, argArray);
+      return Reflect.construct(getRealTarget() as Function, argArray);  // eslint-disable-line
     };
   }
 

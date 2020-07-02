@@ -15,7 +15,7 @@ function getBuilderNodeModules() {
 
 let cachedIsTypescriptSupported: boolean | undefined;
 
-export function isTypescriptSupported() {
+export function isTypescriptSupported(): boolean {
   if (cachedIsTypescriptSupported === undefined) {
     const executionMode = getExecutionMode();
     if (executionMode === ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION) {
@@ -42,7 +42,7 @@ export function isTypescriptSupported() {
   return cachedIsTypescriptSupported;
 }
 
-export function loadTsNodeIfPresent() {
+export function loadTsNodeIfPresent(): void {
   if (isTypescriptSupported()) {
     // See: https://github.com/nomiclabs/builder/issues/265
     if (process.env.TS_NODE_FILES === undefined) {

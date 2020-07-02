@@ -3,11 +3,12 @@ module.exports = {
     node: true,
     es6: true,
   },
-  plugins: ["simple-import-sort"],
+  plugins: ["simple-import-sort", "sonarjs"],
   extends: [
-    "eslint:recommended",
+    // "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
+    "plugin:sonarjs/recommended"
   ],
   parserOptions: {
     project: "./tsconfig.json",
@@ -23,6 +24,9 @@ module.exports = {
     "simple-import-sort/sort": "warn",
     "max-classes-per-file": 0,
 
-    "no-underscore-dangle": 0
+    "no-underscore-dangle": 0,
+    "@typescript-eslint/no-unused-vars": ["warn", { "vars": "all", "args": "none", "ignoreRestSiblings": false, "varsIgnorePattern": "_" }],
+
+    "sonarjs/cognitive-complexity": ["error", 16]
   }
 }

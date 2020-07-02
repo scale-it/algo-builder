@@ -3,6 +3,7 @@ import fsExtra from "fs-extra";
 import os from "os";
 import path from "path";
 
+import type { PromiseAny } from "../../types"
 import { ALGOB_NAME } from "../constants";
 import { BuilderError } from "../core/errors";
 import { ERRORS } from "../core/errors-list"
@@ -13,6 +14,7 @@ const SAMPLE_PROJECT_DEPENDENCIES = [
   "chai",
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function removeProjectDirIfPresent(projectRoot: string, dirName: string) {
   const dirPath = path.join(projectRoot, dirName);
   if (await fsExtra.pathExists(dirPath)) {
@@ -27,14 +29,14 @@ async function printWelcomeMessage() {
     chalk.cyan(`★ Welcome to ${ALGOB_NAME} v${packageJson.version}`));
 }
 
-async function copySampleProject(location: string) {
-  const packageRoot = await getPackageRoot();
+function copySampleProject(location: string) {
+  const packageRoot = getPackageRoot();
 
   const sampleProjDir = path.join(packageRoot, "sample-project")
 
   console.log(chalk.greenBright("Initializing new workspace in " + process.cwd() + "."))
 
-  return await fsExtra.copySync(sampleProjDir, location, {
+  return fsExtra.copySync(sampleProjDir, location, {
     // User doesn't choose the directory so overwrite should be avoided
     overwrite: false,
     filter: (src: string, dest: string) => {
@@ -80,15 +82,7 @@ async function printTrufflePluginInstallationInstructions() {
   console.log(`  ${cmd.join(" ")}`);
 }
 
-async function writeEmptyAlgobConfig() {
-  return fsExtra.writeFile(
-    "builder.config.js",
-    "module.exports = {};\n",
-    "utf-8"
-  );
-}
-
-export async function createProject(location: string) {
+export async function createProject(location: string): PromiseAny {
   await printWelcomeMessage();
 
   await copySampleProject(location);
@@ -152,7 +146,7 @@ function createConfirmationPrompt(name: string, message: string) {
       return input;
     },
     format(): string {
-      const that = this as any;
+      const that = this as any;  // eslint-disable-line @typescript-eslint/no-explicit-any
       const value = that.value === true ? "y" : "n";
 
       if (that.state.submitted === true) {
@@ -235,7 +229,7 @@ async function installDependencies(
   console.log(`${packageManager} ${args.join(" ")}`);
 
   const childProcess = spawn(packageManager, args, {
-    stdio: "inherit" as any, // There's an error in the TS definition of ForkOptions
+    stdio: "inherit" as any,  // eslint-disable-line @typescript-eslint/no-explicit-any
   });
 
   return new Promise<boolean>((resolve, reject) => {

@@ -1,10 +1,10 @@
 import debug from "debug";
 
-import {
+import type {
   AlgobRuntimeEnv,
   EnvironmentExtender,
   Network,
-  ParamDefinition,
+  ParamDefinitionAny,
   ResolvedAlgobConfig,
   RunSuperFunction,
   RunTaskFunction,
@@ -107,9 +107,8 @@ export class Environment implements AlgobRuntimeEnv {
   public injectToGlobal(
     blacklist: string[] = Environment._BLACKLISTED_PROPERTIES
   ): () => void {
-    const globalAsAny = global as any;
-
-    const previousValues: { [name: string]: any } = {};
+    const globalAsAny = global as any;  // eslint-disable-line @typescript-eslint/no-explicit-any
+    const previousValues: { [name: string]: any } = {};   // eslint-disable-line @typescript-eslint/no-explicit-any
 
     for (const [key, value] of Object.entries(this)) {
       if (blacklist.includes(key)) {
@@ -121,7 +120,7 @@ export class Environment implements AlgobRuntimeEnv {
     }
 
     return () => {
-      for (const [key, _] of Object.entries(this)) {
+      for (const [key, ] of Object.entries(this)) {
         if (blacklist.includes(key)) {
           continue;
         }
@@ -135,7 +134,7 @@ export class Environment implements AlgobRuntimeEnv {
     taskDefinition: TaskDefinition,
     taskArguments: TaskArguments
   ) {
-    let runSuperFunction: any;
+    let runSuperFunction: any;  // eslint-disable-line
 
     if (taskDefinition instanceof OverriddenTaskDefinition) {
       runSuperFunction = async (
@@ -162,8 +161,8 @@ export class Environment implements AlgobRuntimeEnv {
 
     const runSuper: RunSuperFunction<TaskArguments> = runSuperFunction;
 
-    const globalAsAny = global as any;
-    const previousRunSuper: any = globalAsAny.runSuper;
+    const globalAsAny = global as any;  // eslint-disable-line @typescript-eslint/no-explicit-any
+    const previousRunSuper = globalAsAny.runSuper;
     globalAsAny.runSuper = runSuper;
 
     const uninjectFromGlobal = this.injectToGlobal();
@@ -236,9 +235,7 @@ export class Environment implements AlgobRuntimeEnv {
     }
 
     // append the rest of arguments that where not in the task param definitions
-    const resolvedTaskArguments = { ...taskArguments, ...resolvedValues };
-
-    return resolvedTaskArguments;
+    return { ...taskArguments, ...resolvedValues };
   }
 
   /**
@@ -249,10 +246,10 @@ export class Environment implements AlgobRuntimeEnv {
    * @private
    */
   private _resolveArgument(
-    paramDefinition: ParamDefinition<any>,
-    argumentValue: any
+    paramDefinition: ParamDefinitionAny,
+    argumentValue: any  // eslint-disable-line @typescript-eslint/no-explicit-any
   ) {
-    const { name, isOptional, defaultValue, type } = paramDefinition;
+    const { name, isOptional, defaultValue } = paramDefinition;
 
     if (argumentValue === undefined) {
       if (isOptional) {
@@ -281,8 +278,8 @@ export class Environment implements AlgobRuntimeEnv {
    * @throws ALGORAND_BUILDER301 if value is not valid for the param type
    */
   private _checkTypeValidation(
-    paramDefinition: ParamDefinition<any>,
-    argumentValue: any
+    paramDefinition: ParamDefinitionAny,
+    argumentValue: any  // eslint-disable-line @typescript-eslint/no-explicit-any
   ) {
     const { name: paramName, type, isVariadic } = paramDefinition;
     if (type === undefined || type.validate === undefined) {

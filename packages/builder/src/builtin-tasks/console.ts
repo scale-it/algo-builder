@@ -7,15 +7,16 @@ import { task } from "../internal/core/config/config-env";
 import { runScriptWithAlgob } from "../internal/util/scripts-runner";
 import { TASK_CONSOLE } from "./task-names";
 
-export default function () {
+export default function () : void {
   const log = debug("builder:core:tasks:console");
 
   task(TASK_CONSOLE, "Opens builder console")
     .addFlag("noCompile", "Don't compile before running this task")
     .setAction(
       async (
-        { noCompile }: { noCompile: boolean },
-        { config, run, runtimeArgs }
+        { noCompile }: { noCompile: boolean }, // eslint-disable-line
+        { config, run, runtimeArgs }           // eslint-disable-line
+
       ) => {
         if (!config.paths) {
           return

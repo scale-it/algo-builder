@@ -1,10 +1,8 @@
-import chalk from "chalk";
 import path from "path";
 import util from "util";
 
-import { internalTask, task } from "../internal/core/config/config-env";
+import { internalTask } from "../internal/core/config/config-env";
 import { isTypescriptSupported } from "../internal/core/typescript-support";
-import { pluralize } from "../internal/util/strings";
 
 export async function glob(pattern: string): Promise<string[]> {
   const { default: globModule } = await import("glob");
@@ -15,7 +13,7 @@ import {
   TASK_TEST_GET_TEST_FILES,
 } from "./task-names";
 
-export default function () {
+export default function () : void {
   internalTask(TASK_TEST_GET_TEST_FILES)
     .addOptionalVariadicPositionalParam(
       "testFiles",

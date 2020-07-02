@@ -4,7 +4,7 @@ import * as t from "io-ts";
 import { Context, ValidationError } from "io-ts/lib";
 import { Reporter } from "io-ts/lib/Reporter";
 
-import { AlgobChainCfg } from "../../../types";
+import { AlgobChainCfg, Networks } from "../../../types";
 import { ALGOB_CHAIN_NAME } from "../../constants";
 import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
@@ -13,7 +13,7 @@ import CfgErrors, {mkErrorMessage} from "./config-errors";
 function getContextPath(context: Context): string {
   const keysPath = context
     .slice(1)
-    .map((c: any) => c.key)
+    .map((c) => c.key)
     .join(".");
 
   return `${context[0].type.name}.${keysPath}`;
@@ -41,6 +41,7 @@ export function success(): string[] {
 }
 
 export const DotPathReporter: Reporter<string[]> = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   report: (validation: any) => pipe(validation, fold(failure, success)) ,
 };
 
@@ -51,8 +52,8 @@ function optional<TypeT, OutputT>(
   return new t.Type(
     name,
     (u: unknown): u is TypeT | undefined => u === undefined || codec.is(u),
-    (u: any, c: any) => (u === undefined ? t.success(u) : codec.validate(u, c)),
-    (a: any) => (a === undefined ? undefined : codec.encode(a))
+    (u: any, c: any) => (u === undefined ? t.success(u) : codec.validate(u, c)), // eslint-disable-line @typescript-eslint/no-explicit-any
+    (a: any) => (a === undefined ? undefined : codec.encode(a))  // eslint-disable-line @typescript-eslint/no-explicit-any
   );
 }
 
@@ -114,7 +115,7 @@ const Config = t.type(
  * Validates the config, throwing a BuilderError if invalid.
  * @param config
  */
-export function validateConfig(config: any) {
+export function validateConfig(config: any) { // eslint-disable-line
   const errors = getValidationErrors(config);
 
   if (errors.isEmpty()) {
@@ -125,12 +126,12 @@ export function validateConfig(config: any) {
   throw new BuilderError(ERRORS.GENERAL.INVALID_CONFIG, { errors: errorList });
 }
 
-export function getValidationErrors(config: any): CfgErrors {
+export function getValidationErrors(config: any): CfgErrors {  // eslint-disable-line
   const errors = new CfgErrors();
 
   // These can't be validated with io-ts
   if (config !== undefined && typeof config.networks === "object") {
-    for (const [net, ncfg] of Object.entries<any>(config.networks)) {
+    for (const [net, ncfg] of Object.entries<Networks>(config.networks)) {
       if (net === ALGOB_CHAIN_NAME) {
         validateAlgobChainCfg(ncfg, errors);
         continue;
@@ -165,6 +166,7 @@ export function getValidationErrors(config: any): CfgErrors {
 
 
 function validateAlgobChainCfg(ncfg: AlgobChainCfg, errors: CfgErrors) {
+  const tBoolOpt = "boolean | undefined";
   if (
     ncfg.initialDate !== undefined &&
     typeof ncfg.initialDate !== "string"
@@ -175,16 +177,17 @@ function validateAlgobChainCfg(ncfg: AlgobChainCfg, errors: CfgErrors) {
     ncfg.throwOnTransactionFailures !== undefined &&
     typeof ncfg.throwOnTransactionFailures !== "boolean"
   )
-    errors.push(ALGOB_CHAIN_NAME, "throwOnTransactionFailures", ncfg.throwOnTransactionFailures, "boolean | undefined");
+    errors.push(ALGOB_CHAIN_NAME, "throwOnTransactionFailures", ncfg.throwOnTransactionFailures, tBoolOpt);
 
   if (
     ncfg.throwOnCallFailures !== undefined &&
     typeof ncfg.throwOnCallFailures !== "boolean"
   )
-    errors.push(ALGOB_CHAIN_NAME, "throwOnCallFailures", ncfg.throwOnCallFailures, "boolean | undefined");
+    errors.push(ALGOB_CHAIN_NAME, "throwOnCallFailures", ncfg.throwOnCallFailures, tBoolOpt);
 
-  if ((ncfg as any).url !== undefined) {
-    errors.push(ALGOB_CHAIN_NAME, "url", (ncfg as any).url, "null (forbidden)");
+  const url = (ncfg as any).url // eslint-disable-line @typescript-eslint/no-explicit-any
+  if (url !== undefined) {
+    errors.push(ALGOB_CHAIN_NAME, "url", url, "null (forbidden)");
   }
 
   if (
@@ -197,10 +200,10 @@ function validateAlgobChainCfg(ncfg: AlgobChainCfg, errors: CfgErrors) {
     ncfg.loggingEnabled !== undefined &&
     typeof ncfg.loggingEnabled !== "boolean"
   )
-    errors.push(ALGOB_CHAIN_NAME, "loggingEnabled", ncfg.loggingEnabled, "boolean | undefined");
+    errors.push(ALGOB_CHAIN_NAME, "loggingEnabled", ncfg.loggingEnabled, tBoolOpt);
 }
 
-export function validateConfigAccount() {
+export function validateConfigAccount() : void{
   // TODO
   // if (Array.isArray(ncfg.accounts)) {
 }

@@ -14,11 +14,11 @@ export function getClosestCallerPackage(): string | undefined {
   Error.prepareStackTrace = (e, s) => s;
 
   const error = new Error();
-  const stack: NodeJS.CallSite[] = error.stack as any;
+  const stack: NodeJS.CallSite[] = error.stack as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   Error.prepareStackTrace = previousPrepareStackTrace;
 
-  const currentPackage = findClosestPackageJson(__filename)!;
+  const currentPackage = findClosestPackageJson(__filename);
 
   for (const callSite of stack) {
     const fileName = callSite.getFileName();
@@ -33,7 +33,7 @@ export function getClosestCallerPackage(): string | undefined {
         return undefined;
       }
 
-      return require(callerPackage).name;
+      return require(callerPackage).name;  // eslint-disable-line @typescript-eslint/no-var-requires
     }
   }
 

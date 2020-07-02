@@ -2,12 +2,13 @@ import deepmerge from "deepmerge";
 import * as fs from "fs";
 import path from "path";
 
-import {
+import type {
   AlgobConfig,
   ConfigExtender,
   ProjectPaths,
   ResolvedAlgobConfig,
-} from "../../../types";
+  StrMap,
+  UserPaths} from "../../../types";
 import { fromEntries } from "../../util/lang";
 import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
@@ -17,8 +18,8 @@ function mergeUserAndDefaultConfigs(
   userConfig: AlgobConfig
 ): Partial<ResolvedAlgobConfig> {
   return deepmerge(defaultConfig, userConfig, {
-    arrayMerge: (destination: any[], source: any[]) => source,
-  }) as any;
+    arrayMerge: (destination: any[], source: any[]) => source,  // eslint-disable-line @typescript-eslint/no-explicit-any
+  }) as Partial<ResolvedAlgobConfig>;
 }
 
 /**
@@ -47,7 +48,7 @@ export function resolveConfig(
   const resolved: ResolvedAlgobConfig = {
     ...config,
     paths,
-    networks: config.networks!,
+    networks: config.networks || {},
   };
 
   for (const extender of configExtenders) {
@@ -82,14 +83,14 @@ function resolvePathFrom(
  */
 export function resolveProjectPaths(
   userConfigPath: string,
-  userPaths: any = {}
+  userPaths : UserPaths = {}
 ): ProjectPaths {
   const configFile = fs.realpathSync(userConfigPath);
   const configDir = path.dirname(configFile);
 
   const root = resolvePathFrom(configDir, "", userPaths.root);
 
-  const otherPathsEntries = Object.entries<string>(userPaths).map<
+  const otherPathsEntries = Object.entries<string>(userPaths as StrMap).map<
     [string, string]
   >(([name, value]) => [name, resolvePathFrom(root, value)]);
 
@@ -107,7 +108,7 @@ export function resolveProjectPaths(
 }
 
 function deepFreezeUserConfig(
-  config: any,
+  config: any,  // eslint-disable-line @typescript-eslint/no-explicit-any
   propertyPath: Array<string | number | symbol> = []
 ) {
   if (typeof config !== "object" || config === null) {
@@ -115,6 +116,7 @@ function deepFreezeUserConfig(
   }
 
   return new Proxy(config, {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     get(target: any, property: string | number | symbol, receiver: any): any {
       return deepFreezeUserConfig(Reflect.get(target, property, receiver), [
         ...propertyPath,
@@ -134,5 +136,6 @@ function deepFreezeUserConfig(
           .join("."),
       });
     },
+    /* eslint-enable @typescript-eslint/no-explicit-any */
   });
 }

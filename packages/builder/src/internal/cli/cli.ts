@@ -21,8 +21,6 @@ import { loadTsNodeIfPresent } from "../core/typescript-support";
 import { getPackageJson, PackageJson } from "../util/package-info";
 //import { Analytics } from "./analytics";
 import { ArgumentsParser } from "./arguments-parser";
-import { createProject } from "./project-creation";
-
 const log = debug("builder:core:cli");
 
 //const ANALYTICS_SLOW_TASK_THRESHOLD = 300;
@@ -40,6 +38,7 @@ function ensureValidNodeVersion(packageJson: PackageJson) {
   }
 }
 
+/* eslint-disable sonarjs/cognitive-complexity */
 async function main() {
   // We first accept this argument anywhere, so we know if the user wants
   // stack traces before really parsing the arguments.
@@ -52,11 +51,9 @@ async function main() {
 
     const envVariableArguments = getEnvRuntimeArgs(
       ALGOB_PARAM_DEFINITIONS,
-      process.env
-    );
+      process.env);
 
     const argumentsParser = new ArgumentsParser();
-
     const {
       runtimeArgs,
       taskName: parsedTaskName,
@@ -141,28 +138,21 @@ async function main() {
 
     ctx.setAlgobRuntimeEnv(env);
 
-    const timestampBeforeRun = new Date().getTime();
+    const tBeforeRun = new Date().getTime();  // eslint-disable-line @typescript-eslint/no-unused-vars
 
-    await env.run(taskName, taskArguments);
+    await env.run(taskName, taskArguments);  // eslint-disable-line @typescript-eslint/no-unused-vars
 
-    const timestampAfterRun = new Date().getTime();
-    //if (
-    //  timestampAfterRun - timestampBeforeRun >
-    //  ANALYTICS_SLOW_TASK_THRESHOLD
-    //) {
+    const tAfterRun = new Date().getTime();  // eslint-disable-line @typescript-eslint/no-unused-vars
+    //if (tAfterRun - tBeforeRun > ANALYTICS_SLOW_TASK_THRESHOLD) {
     //  await hitPromise;
     //} else {
     //  abortAnalytics();
     //}
     log(`Killing Builder after successfully running task ${taskName}`);
   } catch (error) {
-    let isBuilderError = false;
-
     if (BuilderError.isBuilderError(error)) {
-      isBuilderError = true;
       console.error(chalk.red(`Error ${error.message}`));
     } else if (BuilderPluginError.isBuilderPluginError(error)) {
-      isBuilderError = true;
       console.error(
         chalk.red(`Error in plugin ${error.pluginName}: ${error.message}`)
       );
@@ -176,18 +166,10 @@ async function main() {
 
     console.log("");
 
-    if (showStackTraces) {
+    if (showStackTraces)
       console.error(error.stack);
-    } else {
-      //if (!isBuilderError) {
-      //  console.error(
-      //    `If you think this is a bug in Builder, please report it here: https://builder.dev/reportbug`
-      //  );
-      //}
-
+    else
       console.error(`For more info run ${ALGOB_NAME} with --show-stack-traces or add --help to display task-specific help.`);
-
-    }
 
     process.exit(1);
   }

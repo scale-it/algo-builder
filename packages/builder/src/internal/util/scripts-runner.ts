@@ -25,7 +25,7 @@ export async function runScript(
     ];
 
     const childProcess = fork(scriptPath, scriptArgs, {
-      stdio: "inherit" as any, // There's an error in the TS definition of ForkOptions
+      stdio: "inherit",
       execArgv: nodeArgs,
       env: { ...process.env, ...extraEnvVars },
     });
@@ -90,22 +90,13 @@ function withFixedInspectArg(argv: string[]) {
  * Ensure builder/register source file path is resolved to compiled JS file
  * instead of TS source file, so we don't need to run ts-node unnecessarily.
  */
-export function resolveBuilderRegisterPath() {
-  const executionMode = getExecutionMode();
-  const isCompiledInstallation = [
-    ExecutionMode.EXECUTION_MODE_LOCAL_INSTALLATION,
-    ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION,
-    ExecutionMode.EXECUTION_MODE_LINKED,
-  ].includes(executionMode);
-
+export function resolveBuilderRegisterPath(): string {
   const builderCoreBaseDir = path.join(__dirname, "..", "..", "..");
 
-  const builderCoreRegisterCompiledPath = path.join(
+  return path.join(
     builderCoreBaseDir,
     "build/register.js"
   );
-
-  return builderCoreRegisterCompiledPath;
 }
 
 function getTsNodeArgsIfNeeded(scriptPath: string) {

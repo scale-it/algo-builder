@@ -8,10 +8,10 @@ import { BuilderContext } from "./context";
 import { getUserConfigPath } from "./core/project-structure";
 //import { globSync } from "./util/glob";
 
-export function resetBuilderContext() {
+export function resetBuilderContext(): void {
   if (BuilderContext.isCreated()) {
     const ctx = BuilderContext.getBuilderContext();
-    const globalAsAny = global as any;
+    const globalAsAny = global as any; // eslint-disable-line @typescript-eslint/no-explicit-any
     if (ctx.environment !== undefined) {
       for (const key of Object.keys(ctx.environment)) {
         globalAsAny[key] = undefined;
