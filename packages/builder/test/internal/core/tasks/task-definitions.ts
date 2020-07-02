@@ -813,7 +813,7 @@ describe("OverriddenTaskDefinition", () => {
     });
 
     it("should return the parent's description", () => {
-      assert.equal(overriddenTask.description, parentTask.description);
+      assert.equal(overriddenTask.description, parentTask.description || "");
     });
 
     it("should return the parent's param definitions", () => {
@@ -838,7 +838,7 @@ describe("OverriddenTaskDefinition", () => {
       assert.equal(overriddenAgain.isInternal, false);
       assert.equal(overriddenAgain.name, parentTask.name);
       assert.equal(overriddenAgain.action, parentTask.action);
-      assert.equal(overriddenAgain.description, parentTask.description);
+      assert.equal(overriddenAgain.description, parentTask.description || "");
       assert.equal(
         overriddenAgain.paramDefinitions,
         parentTask.paramDefinitions
@@ -873,7 +873,7 @@ describe("OverriddenTaskDefinition", () => {
     });
 
     it("should return overridden descriptions", () => {
-      assert.equal(overriddenTask.description, parentTask.description);
+      assert.equal(overriddenTask.description, parentTask.description || "");
 
       overriddenTask.setDescription("d2");
       assert.equal(overriddenTask.description, "d2");

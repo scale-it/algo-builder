@@ -185,7 +185,7 @@ function validateAlgobChainCfg(ncfg: AlgobChainCfg, errors: CfgErrors) {
   )
     errors.push(ALGOB_CHAIN_NAME, "throwOnCallFailures", ncfg.throwOnCallFailures, tBoolOpt);
 
-  const url = (ncfg as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+  const url = (ncfg as any).url // eslint-disable-line @typescript-eslint/no-explicit-any
   if (url !== undefined) {
     errors.push(ALGOB_CHAIN_NAME, "url", url, "null (forbidden)");
   }

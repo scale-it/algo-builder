@@ -5,7 +5,7 @@ import { BuilderContext } from "../../../../src/internal/context";
 import { loadConfigAndTasks } from "../../../../src/internal/core/config/config-loading";
 import { resolveProjectPaths } from "../../../../src/internal/core/config/config-resolution";
 import { resetBuilderContext } from "../../../../src/internal/reset";
-import { AlgobChainCfg, HttpNetworkConfig } from "../../../../src/types";
+import { AlgobChainCfg, HttpNetworkConfig, UserPaths } from "../../../../src/types";
 import { useFixtureProject } from "../../../helpers/project";
 import { ALGOB_CHAIN_NAME } from "../../../../src/internal/constants";
 
@@ -61,19 +61,19 @@ describe("Config resolution", () => {
   });
 
   describe("Paths resolution", () => {
+    let cfg = { configFile: "asd" } as UserPaths;
     it("Doesn't override paths.configFile", () => {
-      const paths = resolveProjectPaths(__filename, { configFile: "asd" });
+      const paths = resolveProjectPaths(__filename, cfg);
       assert.equal(paths.configFile, __filename);
     });
 
     it("Should return absolute paths", () => {
-      const paths = resolveProjectPaths(__filename, { asd: "asd" });
+      const paths = resolveProjectPaths(__filename, cfg);
       Object.values(paths).forEach((p) => assert.isTrue(path.isAbsolute(p)));
     });
 
     it("Should use absolute paths 'as is'", () => {
       const paths = resolveProjectPaths(__filename, {
-        asd: "/asd",
         root: "/root",
         sources: "/c",
         artifacts: "/a",
@@ -82,7 +82,6 @@ describe("Config resolution", () => {
       });
 
       assert.equal(paths.root, "/root");
-      assert.equal((paths as any).asd, "/asd");
       assert.equal(paths.sources, "/c");
       assert.equal(paths.artifacts, "/a");
       assert.equal(paths.cache, "/ca");
@@ -100,7 +99,6 @@ describe("Config resolution", () => {
     it("Should resolve the rest relative to the root", () => {
       const paths = resolveProjectPaths(__filename, {
         root: "blah",
-        asdf: "asd",
         sources: "c",
         artifacts: "a",
         cache: "ca",
@@ -109,7 +107,6 @@ describe("Config resolution", () => {
 
       const root = path.join(__dirname, "blah");
       assert.equal(paths.root, root);
-      assert.equal((paths as any).asdf, path.join(root, "asd"));
       assert.equal(paths.sources, path.join(root, "c"));
       assert.equal(paths.artifacts, path.join(root, "a"));
       assert.equal(paths.cache, path.join(root, "ca"));
