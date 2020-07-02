@@ -152,7 +152,3 @@ export function readPackageJson(
     return undefined;
   }
 }
-
-export function ensurePluginLoadedWithUsePlugin() : void {
-  // No-op. Only here for backwards compatibility
-}

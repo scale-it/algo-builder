@@ -256,7 +256,8 @@ async function npmInstallCmd(): Promise<string[]> {
     const cmd = ["yarn"];
     if (isGlobal)
       cmd.push("global");
-    return ["add", "--dev", ...SAMPLE_PROJECT_DEPENDENCIES];
+    cmd.push("add", "--dev", ...SAMPLE_PROJECT_DEPENDENCIES);
+    return cmd
   }
 
   const npmInstall = ["npm", "install"];
