@@ -2,7 +2,7 @@ import path from "path";
 import util from "util";
 
 import { internalTask } from "../internal/core/config/config-env";
-import { isTypescriptSupported } from "../internal/core/typescript-support";
+import { AlgobRuntimeEnv } from "../types";
 
 export async function glob(pattern: string): Promise<string[]> {
   const { default: globModule } = await import("glob");
@@ -20,22 +20,16 @@ export default function () : void {
       "An optional list of files to test",
       []
     )
-    .setAction(async ({ testFiles }: { testFiles: string[] }, { config }) => {
-      if (testFiles.length !== 0) {
-        return testFiles;
-      }
-      if (!config.paths) {
-        throw new Error("unexpected non-project execution")
-      }
+    .setAction(runTests);
+}
 
-      const jsFiles = await glob(path.join(config.paths.tests, "**/*.js"));
+async function runTests({ testFiles }: { testFiles: string[] }, { config }: AlgobRuntimeEnv) {
+  if (testFiles.length !== 0) {
+    return testFiles;
+  }
+  if (!config.paths) {
+    throw new Error("unexpected non-project execution")
+  }
 
-      if (!isTypescriptSupported()) {
-        return jsFiles;
-      }
-
-      const tsFiles = await glob(path.join(config.paths.tests, "**/*.ts"));
-
-      return [...jsFiles, ...tsFiles];
-    });
+  return glob(path.join(config.paths.tests, "**/*.js"));
 }
