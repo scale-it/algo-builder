@@ -1,7 +1,7 @@
 
 import { getFunctionName } from "io-ts/lib";
 
-function stringify(v: any): string {
+function stringify(v: any): string {  // eslint-disable-line @typescript-eslint/no-explicit-any
   if (typeof v === "function") {
     return getFunctionName(v);
   }
@@ -14,7 +14,7 @@ function stringify(v: any): string {
   return JSON.stringify(v);
 }
 
-export function mkErrorMessage(path: string, value: any, expectedType: string) {
+export function mkErrorMessage(path: string, value: any, expectedType: string) {  // eslint-disable-line
   return `Invalid value ${stringify(
 value
 )} for ${path} - Expected a value of type ${expectedType}.`;
@@ -23,14 +23,14 @@ value
 export default class CfgErrors {
   errors: string[] = [];
 
-  public push(net: string, field: string, val: any, expectedType: string) {
+  public push(net: string, field: string, val: any, expectedType: string) {  // eslint-disable-line
     this.errors.push(mkErrorMessage(
       `config.networks.${net}.${field}`,
       val,
       expectedType))
   }
 
-  public concatenate(errors: string[]) {
+  public concatenate(errors: string[]) : void{
     for (const e of errors)
       this.errors.push(e);
   }

@@ -1,5 +1,4 @@
-import { EventEmitter } from "events";
-import { DeepPartial, DeepReadonly, StrictOmit } from "ts-essentials";
+import { DeepReadonly, StrictOmit } from "ts-essentials";
 
 import * as types from "./internal/core/params/argument-types";
 
@@ -61,9 +60,11 @@ export interface ProjectPaths {
   tests: string;
 }
 
+export type UserPaths = StrictOmit<Partial<ProjectPaths>, "configFile">;
+
 export interface AlgobConfig {
   networks?: Networks;
-  paths?: StrictOmit<Partial<ProjectPaths>, "configFile">;
+  paths?: UserPaths;
   mocha?: Mocha.MochaOptions;
 }
 
@@ -152,13 +153,15 @@ export interface ParamDefinition<T> {
   isVariadic: boolean;
 }
 
+export type ParamDefinitionAny = ParamDefinition<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+
 export interface OptionalParamDefinition<T> extends ParamDefinition<T> {
   defaultValue: T;
   isOptional: true;
 }
 
 export interface ParamDefinitionsMap {
-  [paramName: string]: ParamDefinition<any>;
+  [paramName: string]: ParamDefinitionAny;
 }
 
 /**
@@ -194,7 +197,7 @@ export interface TaskDefinition extends ConfigurableTaskDefinition {
   // params, and that's not clear.
   readonly paramDefinitions: ParamDefinitionsMap;
 
-  readonly positionalParamDefinitions: Array<ParamDefinition<any>>;
+  readonly positionalParamDefinitions: Array<ParamDefinitionAny>;
 }
 
 /**
@@ -211,15 +214,15 @@ export interface TaskDefinition extends ConfigurableTaskDefinition {
  * ...but then, we couldn't narrow the actual argument value's type in compile time,
  * thus we have no other option than forcing it to be just 'any'.
  */
-export type TaskArguments = any;
+export type TaskArguments = any;  // eslint-disable-line @typescript-eslint/no-explicit-any
 
 export type RunTaskFunction = (
   name: string,
   taskArguments?: TaskArguments
-) => Promise<any>;
+) => PromiseAny;
 
 export interface RunSuperFunction<ArgT extends TaskArguments> {
-  (taskArguments?: ArgT): Promise<any>;
+  (taskArguments?: ArgT): PromiseAny;
   isDefined: boolean;
 }
 
@@ -227,8 +230,7 @@ export type ActionType<ArgsT extends TaskArguments> = (
   taskArgs: ArgsT,
   env: AlgobRuntimeEnv,
   runSuper: RunSuperFunction<ArgsT>
-) => Promise<any>;
-
+) => PromiseAny;
 
 export interface Network {
   name: string;
@@ -247,7 +249,7 @@ export interface AlgobRuntimeEnv {
 
 export interface Artifact {
   contractName: string;
-  abi: any;
+  abi: any;  // eslint-disable-line @typescript-eslint/no-explicit-any
   bytecode: string; // "0x"-prefixed hex string
   deployedBytecode: string; // "0x"-prefixed hex string
   linkReferences: LinkReferences;
@@ -259,5 +261,19 @@ export interface LinkReferences {
     [libraryName: string]: Array<{ length: number; start: number }>;
   };
 }
+
+
+// ************************
+//     helper types
+
+export interface StrMap {
+  [key: string]: string
+}
+
+export interface AnyMap {
+  [key: string]: any  // eslint-disable-line @typescript-eslint/no-explicit-any
+}
+
+export type PromiseAny = Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 //  LocalWords:  configFile

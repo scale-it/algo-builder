@@ -5,7 +5,7 @@ module.exports = {
   },
   plugins: ["simple-import-sort"],
   extends: [
-    "eslint:recommended",
+    // "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
   ],
@@ -23,6 +23,7 @@ module.exports = {
     "simple-import-sort/sort": "warn",
     "max-classes-per-file": 0,
 
-    "no-underscore-dangle": 0
+    "no-underscore-dangle": 0,
+    "@typescript-eslint/no-unused-vars": ["warn", { "vars": "all", "args": "none", "ignoreRestSiblings": false, "varsIgnorePattern": "_" }]
   }
 }

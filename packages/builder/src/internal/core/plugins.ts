@@ -28,7 +28,7 @@ export function usePlugin(
   builderContext: BuilderContext,
   pluginName: string,
   from?: string
-) {
+) : void {
   log("Loading plugin %s", pluginName);
 
   // We have a special case for `ExecutionMode.EXECUTION_MODE_LINKED`
@@ -122,9 +122,9 @@ export function usePlugin(
   builderContext.setPluginAsLoaded(pluginName);
 }
 
-export function loadPluginFile(absolutePluginFilePath: string) {
+export function loadPluginFile(absolutePluginFilePath: string) : void {
   log("Loading plugin file %s", absolutePluginFilePath);
-  const imported = require(absolutePluginFilePath);
+  const imported = require(absolutePluginFilePath); // eslint-disable-line @typescript-eslint/no-var-requires
   const plugin = imported.default !== undefined ? imported.default : imported;
   if (typeof plugin === "function") {
     plugin();
@@ -148,6 +148,6 @@ export function readPackageJson(
   }
 }
 
-export function ensurePluginLoadedWithUsePlugin() {
+export function ensurePluginLoadedWithUsePlugin() : void {
   // No-op. Only here for backwards compatibility
 }

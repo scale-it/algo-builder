@@ -232,7 +232,7 @@ export class ArgumentsParser {
 
   private _parsePositionalParamArgs(
     rawPositionalParamArgs: string[],
-    positionalParamDefinitions: Array<ParamDefinition<any>>
+    positionalParamDefinitions: Array<ParamDefinition<any>> // eslint-disable-line @typescript-eslint/no-explicit-any
   ): TaskArguments {
     const args: TaskArguments = {};
 

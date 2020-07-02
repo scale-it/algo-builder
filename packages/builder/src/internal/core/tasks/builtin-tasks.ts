@@ -10,7 +10,7 @@ import {
 } from "../../../builtin-tasks/task-names"
 import { loadPluginFile } from "../plugins";
 
-export default function () {
+export default function () : void{
   [
     TASK_HELP,
     TASK_CONSOLE,

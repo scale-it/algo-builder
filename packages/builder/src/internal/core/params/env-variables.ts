@@ -37,7 +37,7 @@ export function getEnvRuntimeArgs(
   paramDefinitions: AlgobParamDefinitions,
   envVariables: ProcessEnv
 ): RuntimeArgs {
-  const envArgs: any = {};
+  const envArgs: any = {};  // eslint-disable-line
 
   for (const paramName of unsafeObjectKeys(paramDefinitions)) {
     const definition = paramDefinitions[paramName];

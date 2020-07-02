@@ -3,7 +3,7 @@ import { EnvironmentExtender } from "../../../types";
 export class ExtenderManager {
   private readonly _extenders: EnvironmentExtender[] = [];
 
-  public add(extender: EnvironmentExtender) {
+  public add(extender: EnvironmentExtender) : void {
     this._extenders.push(extender);
   }
 

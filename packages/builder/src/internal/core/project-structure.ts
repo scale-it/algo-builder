@@ -1,15 +1,10 @@
 import findUp from "find-up";
-import fsExtra from "fs-extra";
-import path from "path";
 
-import { getPackageRoot } from "../util/package-info";
-import { BuilderError } from "./errors";
-import { ERRORS } from "./errors-list";
 import { isTypescriptSupported } from "./typescript-support";
 const JS_CONFIG_FILENAME = "builder.config.js";
 const TS_CONFIG_FILENAME = "builder.config.ts";
 
-export function isCwdInsideProject() {
+export function isCwdInsideProject() : boolean {
   return (
     Boolean(findUp.sync(JS_CONFIG_FILENAME)) ||
       isTypescriptSupported() && Boolean(findUp.sync(TS_CONFIG_FILENAME))

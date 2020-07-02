@@ -5,7 +5,7 @@ import { ALGOB_PARAM_DEFINITIONS } from "../internal/core/params/builder-params"
 import { getPackageJson } from "../internal/util/package-info";
 import { TASK_HELP } from "./task-names";
 
-export default function () {
+export default function () :void {
   task(TASK_HELP, "Prints this message")
     .addOptionalPositionalParam(
       "task",
