@@ -100,7 +100,6 @@ async function main() {
     const envExtenders = ctx.extendersManager.getExtenders();
     const taskDefinitions = ctx.tasksDSL.getTaskDefinitions();
 
-    //// tslint:disable-next-line: prefer-const
     //let [abortAnalytics, hitPromise] = await analytics.sendTaskHit(taskName);
 
     let taskArguments: TaskArguments;
@@ -140,7 +139,7 @@ async function main() {
 
     const tBeforeRun = new Date().getTime();  // eslint-disable-line @typescript-eslint/no-unused-vars
 
-    await env.run(taskName, taskArguments);  // eslint-disable-line @typescript-eslint/no-unused-vars
+    await env.run(taskName, taskArguments);
 
     const tAfterRun = new Date().getTime();  // eslint-disable-line @typescript-eslint/no-unused-vars
     //if (tAfterRun - tBeforeRun > ANALYTICS_SLOW_TASK_THRESHOLD) {
@@ -148,7 +147,7 @@ async function main() {
     //} else {
     //  abortAnalytics();
     //}
-    log(`Killing Builder after successfully running task ${taskName}`);
+    log(`Quitting algob after successfully running task ${taskName}`);
   } catch (error) {
     if (BuilderError.isBuilderError(error)) {
       console.error(chalk.red(`Error ${error.message}`));

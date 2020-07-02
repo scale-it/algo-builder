@@ -1,8 +1,9 @@
 import { HelpPrinter } from "../internal/cli/help-printer";
-import { ALGOB_BIN_NAME, ALGOB_NAME } from "../internal/constants";
+import { ALGOB_NAME } from "../internal/constants";
 import { task } from "../internal/core/config/config-env";
 import { ALGOB_PARAM_DEFINITIONS } from "../internal/core/params/builder-params";
 import { getPackageJson } from "../internal/util/package-info";
+import { AlgobRuntimeEnv } from "../types";
 import { TASK_HELP } from "./task-names";
 
 export default function () :void {
@@ -11,22 +12,22 @@ export default function () :void {
       "task",
       "An optional task to print more info about"
     )
-    .setAction(async ({ task: taskName }: { task?: string }, { tasks }) => {
-      const packageJson = await getPackageJson();
+    .setAction(help);
+}
 
-      const helpPrinter = new HelpPrinter(
-        ALGOB_NAME,
-        ALGOB_BIN_NAME,
-        packageJson.version,
-        ALGOB_PARAM_DEFINITIONS,
-        tasks
-      );
+async function help({task: taskName}: { task?: string }, env: AlgobRuntimeEnv) {
+  const packageJson = await getPackageJson();
+  const helpPrinter = new HelpPrinter(
+    ALGOB_NAME,
+    packageJson.version,
+    ALGOB_PARAM_DEFINITIONS,
+    env.tasks
+  );
 
-      if (taskName !== undefined) {
-        helpPrinter.printTaskHelp(taskName);
-        return;
-      }
+  if (taskName !== undefined) {
+    helpPrinter.printTaskHelp(taskName);
+    return;
+  }
 
-      helpPrinter.printGlobalHelp();
-    });
+  helpPrinter.printGlobalHelp();
 }

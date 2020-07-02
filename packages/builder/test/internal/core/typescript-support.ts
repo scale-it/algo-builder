@@ -31,7 +31,7 @@ describe("Typescript support", function () {
     });
   });
 
-  describe("builder.config.ts", function () {
+  describe("algob.config.js", function () {
     useFixtureProject("typescript-project");
     useEnvironment();
 

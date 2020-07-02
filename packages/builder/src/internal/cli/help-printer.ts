@@ -12,7 +12,6 @@ import { ArgumentsParser } from "./arguments-parser";
 export class HelpPrinter {
   constructor(
     private readonly _programName: string,
-    private readonly _executableName: string,
     private readonly _version: string,
     private readonly _algobParamDefs: AlgobParamDefinitions,
     private readonly _tasks: TasksMap
@@ -22,7 +21,7 @@ export class HelpPrinter {
     console.log(`${this._programName} version ${this._version}\n`);
 
     console.log(
-      `Usage: ${this._executableName} [GLOBAL OPTIONS] <TASK> [TASK OPTIONS]\n`
+      `Usage: ${this._programName} [GLOBAL OPTIONS] <TASK> [TASK OPTIONS]\n`
     );
 
     console.log("GLOBAL OPTIONS:\n");
@@ -51,7 +50,7 @@ export class HelpPrinter {
     console.log("");
 
     console.log(
-      `To get help for a specific task run: npx ${this._executableName} help [task]\n`
+      `To get help for a specific task run: npx ${this._programName} help [task]\n`
     );
   }
 
@@ -79,7 +78,7 @@ export class HelpPrinter {
     );
 
     console.log(
-      `Usage: ${this._executableName} [GLOBAL OPTIONS] ${name}${paramsList}${positionalParamsList}\n`
+      `Usage: ${this._programName} [GLOBAL OPTIONS] ${name}${paramsList}${positionalParamsList}\n`
     );
 
     if (Object.keys(paramDefinitions).length > 0) {
@@ -100,7 +99,7 @@ export class HelpPrinter {
 
     console.log(`${name}: ${description}\n`);
 
-    console.log(`For global options help run: ${this._executableName} help\n`);
+    console.log(`For global options help run: ${this._programName} help\n`);
   }
 
   private _getParamValueDescription<T>(paramDefinition: ParamDefinition<T>) {

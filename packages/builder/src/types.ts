@@ -244,7 +244,6 @@ export interface AlgobRuntimeEnv {
   readonly tasks: TasksMap;
   readonly run: RunTaskFunction;
   readonly network: Network;
-  //readonly ethereum: EthereumProvider; // DEPRECATED: Use network.provider
 }
 
 export interface Artifact {
