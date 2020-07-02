@@ -9,7 +9,6 @@ import {
   TASK_HELP,
   TASK_TEST_GET_TEST_FILES,
   TASK_TEST_EXAMPLE,
-  TASK_TEST_EXAMPLE2
 } from "../../../../src/builtin-tasks/task-names";
 import { BuilderContext } from "../../../../src/internal/context";
 import { loadConfigAndTasks } from "../../../../src/internal/core/config/config-loading";
@@ -114,12 +113,11 @@ describe("config loading", function () {
         TASK_HELP,
         TASK_TEST_GET_TEST_FILES,
         TASK_TEST_EXAMPLE,
-        TASK_TEST_EXAMPLE2
       ]);
     });
 
     it("Should load custom tasks", function () {
-      assert.containsAllKeys(this.env.tasks, ["example", "example2"]);
+      assert.containsAllKeys(this.env.tasks, ["example"]);
     });
   });
 

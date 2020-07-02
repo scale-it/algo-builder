@@ -5,11 +5,20 @@ The config is used to list available algorand networks and instructions how to c
 
 A network object can specify following entries:
 
-+ `host` (required, default `none`)
-+ `port` (required, default `"8080"`)
++ `host` (string, required, can be with http or https prefix)
++ `port` (number, required)
 + `token` (required, default `none`)
-+ `postHeader` -- HTTP header attached to every raw transaction request (optional, default `none`)
++ `httpHeaders` -- HTTP headers attached to every raw transaction request (optional, default `none`)
 
+A special network named `algobchain` can specify the `AlgobChain` configuration:
+
+```
+  accounts?: NetworkAccounts;
+  throwOnTransactionFailures?: boolean;
+  throwOnCallFailures?: boolean;
+  loggingEnabled?: boolean;
+  initialDate?: string;
+```
 
 ## Example
 
@@ -18,8 +27,8 @@ A network object can specify following entries:
 const {devnet} = require("algorand-builder/config")
 
 var mydevnet = {
-     host: "127.0.0.1",
-     port: "8080",
+     host: "http://127.0.0.1",
+     port: 8080,
      token: "abc",
 }
 
@@ -39,7 +48,7 @@ module.exports = {
       host: "127.0.0.1",
       port: 9545,
       token: {'X-API-Key': 'YOUR API KEY HERE'},
-      postHeader: {'content-type' : 'application/x-binary'}
+      httpHeaders: {'content-type' : 'application/x-binary'}
     }
   },
 

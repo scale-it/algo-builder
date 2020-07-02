@@ -1,27 +1,15 @@
 import path from "path";
 
-import {
-  TASK_CLEAN,
-  TASK_CONSOLE,
-  TASK_HELP,
-  TASK_INIT,
-  TASK_RUN,
-  TASKS_TEST
-} from "../../../builtin-tasks/task-names"
+import * as tasks from "../../../builtin-tasks/task-names"
 import { loadPluginFile } from "../plugins";
 
 export default function () : void{
-  [
-    TASK_HELP,
-    TASK_CONSOLE,
-    TASK_CLEAN,
-    TASK_INIT,
-    TASK_RUN,
-    TASKS_TEST
-  ].forEach(taskName => {
-    loadPluginFile(
-      path.join(__dirname, "..", "..", "..", "builtin-tasks", taskName)
-    );
-  })
+  const ts = new Map(Object.entries(tasks));
+  ts.delete('TASK_TEST_EXAMPLE');
+  ts.delete('TASK_TEST_GET_TEST_FILES');
 
+  const basedir = path.join(__dirname, "..", "..", "..", "builtin-tasks");
+  for (const t of ts) {
+    loadPluginFile(path.join(basedir, t[1]));
+  }
 }

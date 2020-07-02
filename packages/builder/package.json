@@ -49,6 +49,7 @@
     "time-require": "^0.1.2"
   },
   "dependencies": {
+    "algosdk": "^1.6.2",
     "debug": "^4.1.1",
     "deepmerge": "^4.2.2",
     "enquirer": "^2.3.5",

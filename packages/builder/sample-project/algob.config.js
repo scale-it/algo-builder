@@ -1,7 +1,9 @@
 module.exports = {
   networks: {
     localhost: {
-      url: "https://localhost:8080"
+      host: "http://localhost",
+      port: 8080,
+      token: "$ALGORAND_DATA/algod.token"
     }
   }
 };

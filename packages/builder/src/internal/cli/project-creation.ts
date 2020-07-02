@@ -118,7 +118,7 @@ export async function createProject(location: string): PromiseAny {
     await printPluginInstallationInstructions();
   }
 
-  console.log("\n★ ", chalk.cyan("Project created"), " ★\n");
+  console.log("\n★", chalk.cyan("Project created"), "★\n");
 
   printSuggestedCommands();
 }

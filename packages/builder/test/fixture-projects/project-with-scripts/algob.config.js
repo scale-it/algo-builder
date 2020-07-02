@@ -1,7 +1,8 @@
 module.exports = {
   networks: {
     custom: {
-      url: "asd",
+      host: "example.com",
+      token: "somefaketoken"
     },
   },
 };
