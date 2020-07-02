@@ -166,6 +166,7 @@ export function getValidationErrors(config: any): CfgErrors {  // eslint-disable
 
 
 function validateAlgobChainCfg(ncfg: AlgobChainCfg, errors: CfgErrors) {
+  const tBoolOpt = "boolean | undefined";
   if (
     ncfg.initialDate !== undefined &&
     typeof ncfg.initialDate !== "string"
@@ -176,13 +177,13 @@ function validateAlgobChainCfg(ncfg: AlgobChainCfg, errors: CfgErrors) {
     ncfg.throwOnTransactionFailures !== undefined &&
     typeof ncfg.throwOnTransactionFailures !== "boolean"
   )
-    errors.push(ALGOB_CHAIN_NAME, "throwOnTransactionFailures", ncfg.throwOnTransactionFailures, "boolean | undefined");
+    errors.push(ALGOB_CHAIN_NAME, "throwOnTransactionFailures", ncfg.throwOnTransactionFailures, tBoolOpt);
 
   if (
     ncfg.throwOnCallFailures !== undefined &&
     typeof ncfg.throwOnCallFailures !== "boolean"
   )
-    errors.push(ALGOB_CHAIN_NAME, "throwOnCallFailures", ncfg.throwOnCallFailures, "boolean | undefined");
+    errors.push(ALGOB_CHAIN_NAME, "throwOnCallFailures", ncfg.throwOnCallFailures, tBoolOpt);
 
   const url = (ncfg as any) // eslint-disable-line @typescript-eslint/no-explicit-any
   if (url !== undefined) {
@@ -199,7 +200,7 @@ function validateAlgobChainCfg(ncfg: AlgobChainCfg, errors: CfgErrors) {
     ncfg.loggingEnabled !== undefined &&
     typeof ncfg.loggingEnabled !== "boolean"
   )
-    errors.push(ALGOB_CHAIN_NAME, "loggingEnabled", ncfg.loggingEnabled, "boolean | undefined");
+    errors.push(ALGOB_CHAIN_NAME, "loggingEnabled", ncfg.loggingEnabled, tBoolOpt);
 }
 
 export function validateConfigAccount() : void{

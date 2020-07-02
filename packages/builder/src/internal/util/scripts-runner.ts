@@ -93,12 +93,10 @@ function withFixedInspectArg(argv: string[]) {
 export function resolveBuilderRegisterPath(): string {
   const builderCoreBaseDir = path.join(__dirname, "..", "..", "..");
 
-  const builderCoreRegisterCompiledPath = path.join(
+  return path.join(
     builderCoreBaseDir,
     "build/register.js"
   );
-
-  return builderCoreRegisterCompiledPath;
 }
 
 function getTsNodeArgsIfNeeded(scriptPath: string) {

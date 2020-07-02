@@ -46,12 +46,10 @@ export function loadConfigAndTasks(
   // To avoid bad practices we remove the previously exported stuff
   Object.keys(configEnv).forEach((key) => (globalAsAny[key] = undefined));
 
-  const resolved = resolveConfig(
+  return resolveConfig(
     configPath,
     defaultConfig,
     userConfig,
     BuilderContext.getBuilderContext().configExtenders
   );
-
-  return resolved;
 }

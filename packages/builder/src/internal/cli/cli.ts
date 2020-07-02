@@ -38,6 +38,7 @@ function ensureValidNodeVersion(packageJson: PackageJson) {
   }
 }
 
+/* eslint-disable sonarjs/cognitive-complexity */
 async function main() {
   // We first accept this argument anywhere, so we know if the user wants
   // stack traces before really parsing the arguments.
@@ -50,11 +51,9 @@ async function main() {
 
     const envVariableArguments = getEnvRuntimeArgs(
       ALGOB_PARAM_DEFINITIONS,
-      process.env
-    );
+      process.env);
 
     const argumentsParser = new ArgumentsParser();
-
     const {
       runtimeArgs,
       taskName: parsedTaskName,

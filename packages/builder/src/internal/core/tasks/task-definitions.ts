@@ -645,6 +645,8 @@ export class OverriddenTaskDefinition implements TaskDefinition {
     );
   }
 
+  /* eslint-disable sonarjs/no-identical-functions */
+
   /**
    * Overriden tasks can't add new parameters.
    */

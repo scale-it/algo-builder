@@ -2,6 +2,7 @@ import debug from "debug";
 import * as path from "path";
 import * as semver from "semver";
 
+import { StrMap } from "../../types"
 import { BuilderContext } from "../context";
 import { BuilderError } from "./errors";
 import { ERRORS } from "./errors-list";
@@ -75,12 +76,22 @@ export function usePlugin(
   }
 
   if (pluginPackageJson.peerDependencies !== undefined) {
-    for (const [dependencyName, versionSpec] of Object.entries(
-      pluginPackageJson.peerDependencies
-    )) {
+    checkPeerDependencies(pluginPackageJson.peerDependencies,
+                          pluginName, from, globalFlag, globalWarning)
+  }
+
+  const options = from !== undefined ? { paths: [from] } : undefined;
+  const pluginPath = require.resolve(pluginName, options);
+  loadPluginFile(pluginPath);
+
+  builderContext.setPluginAsLoaded(pluginName);
+}
+
+function checkPeerDependencies(deps: StrMap, pluginName: string, from: string | undefined, flag: string, warning: string): void {
+  for (const [dependencyName, versionSpec] of Object.entries(deps)) {
       const dependencyPackageJson = readPackageJson(dependencyName, from);
 
-      let installExtraFlags = globalFlag;
+      let installExtraFlags = flag;
 
       if (versionSpec.match(/^[0-9]/) !== null) {
         installExtraFlags += " --save-exact";
@@ -90,7 +101,7 @@ export function usePlugin(
         throw new BuilderError(ERRORS.PLUGINS.MISSING_DEPENDENCY, {
           plugin: pluginName,
           dependency: dependencyName,
-          extraMessage: globalWarning,
+          extraMessage: warning,
           extraFlags: installExtraFlags,
           versionSpec,
         });
@@ -106,21 +117,15 @@ export function usePlugin(
         throw new BuilderError(ERRORS.PLUGINS.DEPENDENCY_VERSION_MISMATCH, {
           plugin: pluginName,
           dependency: dependencyName,
-          extraMessage: globalWarning,
+          extraMessage: warning,
           extraFlags: installExtraFlags,
           versionSpec,
           installedVersion,
         });
       }
     }
-  }
-
-  const options = from !== undefined ? { paths: [from] } : undefined;
-  const pluginPath = require.resolve(pluginName, options);
-  loadPluginFile(pluginPath);
-
-  builderContext.setPluginAsLoaded(pluginName);
 }
+
 
 export function loadPluginFile(absolutePluginFilePath: string) : void {
   log("Loading plugin file %s", absolutePluginFilePath);

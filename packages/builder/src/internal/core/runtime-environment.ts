@@ -235,9 +235,7 @@ export class Environment implements AlgobRuntimeEnv {
     }
 
     // append the rest of arguments that where not in the task param definitions
-    const resolvedTaskArguments = { ...taskArguments, ...resolvedValues };
-
-    return resolvedTaskArguments;
+    return { ...taskArguments, ...resolvedValues };
   }
 
   /**
