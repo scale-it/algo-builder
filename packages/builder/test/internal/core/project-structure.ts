@@ -2,7 +2,7 @@ import { assert } from "chai";
 import * as fsExtra from "fs-extra";
 import path from "path";
 
-import { ERRORS } from "../../../src/internal/core/errors-list";
+import { JS_CONFIG_FILENAME } from "../../../src/internal/core/project-structure";
 import {
   getUserConfigPath,
   isCwdInsideProject,
@@ -52,7 +52,7 @@ describe("project structure", () => {
         );
 
         configPath = await fsExtra.realpath(
-          path.join(pathToFixtureRoot, "builder.config.js")
+          path.join(pathToFixtureRoot, JS_CONFIG_FILENAME)
         );
       });
 

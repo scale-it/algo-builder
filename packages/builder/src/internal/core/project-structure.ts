@@ -1,8 +1,8 @@
 import findUp from "find-up";
 
 import { isTypescriptSupported } from "./typescript-support";
-const JS_CONFIG_FILENAME = "builder.config.js";
-const TS_CONFIG_FILENAME = "builder.config.ts";
+export const JS_CONFIG_FILENAME = "algob.config.js";
+export const TS_CONFIG_FILENAME = "algob.config.ts";
 
 export function isCwdInsideProject() : boolean {
   return (

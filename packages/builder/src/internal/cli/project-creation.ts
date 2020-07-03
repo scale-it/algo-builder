@@ -31,7 +31,6 @@ async function printWelcomeMessage() {
 
 function copySampleProject(location: string) {
   const packageRoot = getPackageRoot();
-
   const sampleProjDir = path.join(packageRoot, "sample-project")
 
   console.log(chalk.greenBright("Initializing new workspace in " + process.cwd() + "."))
@@ -64,20 +63,20 @@ function printSuggestedCommands() {
       : "npx ";
 
   console.log(`Try running some of the following tasks:`);
-  console.log(`  ${npx}builder accounts`);
-  console.log(`  ${npx}builder compile`);
-  console.log(`  ${npx}builder test`);
-  console.log(`  ${npx}builder node`);
+  console.log(`  ${npx}${ALGOB_NAME} accounts`);
+  console.log(`  ${npx}${ALGOB_NAME} compile`);
+  console.log(`  ${npx}${ALGOB_NAME} test`);
+  console.log(`  ${npx}${ALGOB_NAME} node`);
   console.log(`  node scripts/sample-script.js`);
-  console.log(`  ${npx}builder help`);
+  console.log(`  ${npx}${ALGOB_NAME} help`);
 }
 
-async function printTrufflePluginInstallationInstructions() {
+async function printPluginInstallationInstructions() {
   console.log(
     `You need to install these dependencies to run the sample project:`
   );
 
-  const cmd = await getRecommendedDependenciesInstallationCommand();
+  const cmd = await npmInstallCmd();
 
   console.log(`  ${cmd.join(" ")}`);
 }
@@ -85,11 +84,11 @@ async function printTrufflePluginInstallationInstructions() {
 export async function createProject(location: string): PromiseAny {
   await printWelcomeMessage();
 
-  await copySampleProject(location);
+  copySampleProject(location);
 
   let shouldShowInstallationInstructions = true;
 
-  if (await canInstallTrufflePlugin()) {
+  if (await canInstallPlugin()) {
     const installedRecommendedDeps = SAMPLE_PROJECT_DEPENDENCIES.filter(
       isInstalled
     );
@@ -99,7 +98,7 @@ export async function createProject(location: string): PromiseAny {
     ) {
       shouldShowInstallationInstructions = false;
     } else if (installedRecommendedDeps.length === 0) {
-      const shouldInstall = await confirmTrufflePluginInstallation();
+      const shouldInstall = await confirmPluginInstallation();
       if (shouldInstall) {
         const installed = await installRecommendedDependencies();
 
@@ -116,7 +115,7 @@ export async function createProject(location: string): PromiseAny {
 
   if (shouldShowInstallationInstructions) {
     console.log(``);
-    await printTrufflePluginInstallationInstructions();
+    await printPluginInstallationInstructions();
   }
 
   console.log("\n★ ", chalk.cyan("Project created"), " ★\n");
@@ -158,7 +157,7 @@ function createConfirmationPrompt(name: string, message: string) {
   };
 }
 
-async function canInstallTrufflePlugin() {
+async function canInstallPlugin() {
   return (
     (await fsExtra.pathExists("package.json")) &&
     (getExecutionMode() === ExecutionMode.EXECUTION_MODE_LOCAL_INSTALLATION ||
@@ -170,7 +169,6 @@ async function canInstallTrufflePlugin() {
 
 function isInstalled(dep: string) {
   const packageJson = fsExtra.readJSONSync("package.json");
-
   const allDependencies = {
     ...packageJson.dependencies,
     ...packageJson.devDependencies,
@@ -186,11 +184,11 @@ async function isYarnProject() {
 
 async function installRecommendedDependencies() {
   console.log("");
-  const installCmd = await getRecommendedDependenciesInstallationCommand();
+  const installCmd = await npmInstallCmd();
   return installDependencies(installCmd[0], installCmd.slice(1));
 }
 
-async function confirmTrufflePluginInstallation(): Promise<boolean> {
+async function confirmPluginInstallation(): Promise<boolean> {
   const { default: enquirer } = await import("enquirer");
 
   let responses: {
@@ -213,7 +211,6 @@ async function confirmTrufflePluginInstallation(): Promise<boolean> {
       return false;
     }
 
-    // tslint:disable-next-line only-builder-error
     throw e;
   }
 
@@ -251,21 +248,21 @@ async function installDependencies(
   });
 }
 
-async function getRecommendedDependenciesInstallationCommand(): Promise<
-  string[]
-> {
+async function npmInstallCmd(): Promise<string[]> {
   const isGlobal =
     getExecutionMode() === ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION;
 
-  if (!isGlobal && (await isYarnProject())) {
-    return ["yarn", "add", "--dev", ...SAMPLE_PROJECT_DEPENDENCIES];
+  if (await isYarnProject()) {
+    const cmd = ["yarn"];
+    if (isGlobal)
+      cmd.push("global");
+    cmd.push("add", "--dev", ...SAMPLE_PROJECT_DEPENDENCIES);
+    return cmd
   }
 
   const npmInstall = ["npm", "install"];
-
-  if (isGlobal) {
+  if (isGlobal)
     npmInstall.push("--global");
-  }
 
   return [...npmInstall, "--save-dev", ...SAMPLE_PROJECT_DEPENDENCIES];
 }
