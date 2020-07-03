@@ -76,17 +76,6 @@ async function main() {
       return;
     }
 
-    let taskName = parsedTaskName || TASK_HELP;
-
-    // Being inside of a project is non-mandatory for help and init
-    if ((taskName !== TASK_HELP && taskName !== TASK_INIT && !runtimeArgs.help) &&
-      !isCwdInsideProject()) {
-      throw new BuilderError(ERRORS.GENERAL.NOT_INSIDE_PROJECT, {
-        task: taskName,
-      });
-      return;
-    }
-
     loadTsNodeIfPresent();
 
     const ctx = BuilderContext.createBuilderContext();
@@ -103,23 +92,31 @@ async function main() {
     //// tslint:disable-next-line: prefer-const
     //let [abortAnalytics, hitPromise] = await analytics.sendTaskHit(taskName);
 
-    let taskArguments: TaskArguments;
+    let taskName = parsedTaskName || TASK_HELP;
+
+    if (!taskDefinitions[taskName]) {
+      throw new BuilderError(ERRORS.ARGUMENTS.UNRECOGNIZED_TASK, {
+        task: taskName,
+      });
+    }
+
+    // Being inside of a project is non-mandatory for help and init
+    if ((taskName !== TASK_HELP && taskName !== TASK_INIT && !runtimeArgs.help) &&
+      !isCwdInsideProject()) {
+      throw new BuilderError(ERRORS.GENERAL.NOT_INSIDE_PROJECT, {
+        task: taskName,
+      });
+      return;
+    }
 
     // --help is a also special case
+    let taskArguments: TaskArguments;
     if (runtimeArgs.help && taskName !== TASK_HELP) {
       taskArguments = { task: taskName };
       taskName = TASK_HELP;
     } else {
-      const taskDefinition = taskDefinitions[taskName];
-
-      if (taskDefinition === undefined) {
-        throw new BuilderError(ERRORS.ARGUMENTS.UNRECOGNIZED_TASK, {
-          task: taskName,
-        });
-      }
-
       taskArguments = argumentsParser.parseTaskArguments(
-        taskDefinition,
+        taskDefinitions[taskName],
         unparsedCLAs
       );
     }
