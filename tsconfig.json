@@ -15,10 +15,7 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true,
-    "baseUrl": "src",
-    "declaration": true,
-
-    "typeRoots": ["./node_modules/@types", "./@types"]
+    "declaration": true
   },
   "exclude": [
     "**/node_modules",
