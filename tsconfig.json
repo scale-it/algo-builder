@@ -16,16 +16,12 @@
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true,
     "baseUrl": "src",
-    "declaration": true
+    "declaration": true,
+
+    "typeRoots": ["./node_modules/@types", "./@types"]
   },
-  "include": [
-    "src",
-    "types"
-  ],
   "exclude": [
-    "node_modules",
-    "build",
-    "./scripts",
-    "webpack"
+    "**/node_modules",
+    "**/webpack"
   ]
 }
