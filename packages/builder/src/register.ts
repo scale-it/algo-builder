@@ -5,14 +5,12 @@ import { loadConfigAndTasks } from "./internal/core/config/config-loading";
 import { ALGOB_PARAM_DEFINITIONS } from "./internal/core/params/builder-params";
 import { getEnvRuntimeArgs } from "./internal/core/params/env-variables";
 import { Environment } from "./internal/core/runtime-environment";
-import { loadTsNodeIfPresent } from "./internal/core/typescript-support";
 import {
   disableReplWriterShowProxy,
   isNodeCalledWithoutAScript,
 } from "./internal/util/console";
 
 if (!BuilderContext.isCreated()) {
-  // tslint:disable-next-line no-var-requires
   require("source-map-support/register");
 
   const ctx = BuilderContext.createBuilderContext();
@@ -20,8 +18,6 @@ if (!BuilderContext.isCreated()) {
   if (isNodeCalledWithoutAScript()) {
     disableReplWriterShowProxy();
   }
-
-  loadTsNodeIfPresent();
 
   const runtimeArgs = getEnvRuntimeArgs(
     ALGOB_PARAM_DEFINITIONS,

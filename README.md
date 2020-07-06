@@ -14,6 +14,20 @@ Algorand builder is an trustworthy framework for Algorand dapps (Decentralized A
 To attract more web developers we plan to build a JavaScript DSL for TEAL with TypeScript bindings (for TEAL inputs). Furthermore we would like to collaborate with SDKs teams to improve the overall development experience and make it ready for enterprise projects. Finally we want to collaborate with Algorand Wallet team to ensure a smooth wallet integration.
 
 
+# Usage
+
+
+## Working with TypeScript projects
+
+You can use `algob` within a TS project. Write your scripts and migrations as you would like. But then, to run it you firstly need to compile the project to JS.
+
+TODO: provide a project template for TS projects. [task](https://www.pivotaltracker.com/n/projects/2452320).
+
+TIPS:
+
++ Use `tsc --watch` to update the build in a realtime while you develop the project
+
+
 ## Development
 
 The project development is open and you can observer a progress through [Pivotal tracker board](https://www.pivotaltracker.com/n/projects/2452320).

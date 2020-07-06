@@ -17,7 +17,6 @@ import { ALGOB_PARAM_DEFINITIONS } from "../core/params/builder-params";
 import { getEnvRuntimeArgs } from "../core/params/env-variables";
 import { isCwdInsideProject } from "../core/project-structure";
 import { Environment } from "../core/runtime-environment";
-import { loadTsNodeIfPresent } from "../core/typescript-support";
 import { getPackageJson, PackageJson } from "../util/package-info";
 //import { Analytics } from "./analytics";
 import { ArgumentsParser } from "./arguments-parser";
@@ -76,8 +75,6 @@ async function main() {
       return;
     }
 
-    loadTsNodeIfPresent();
-
     const ctx = BuilderContext.createBuilderContext();
     const config = loadConfigAndTasks(runtimeArgs);
 
@@ -92,7 +89,6 @@ async function main() {
     //let [abortAnalytics, hitPromise] = await analytics.sendTaskHit(taskName);
 
     let taskName = parsedTaskName || TASK_HELP;
-
     if (!taskDefinitions[taskName]) {
       throw new BuilderError(ERRORS.ARGUMENTS.UNRECOGNIZED_TASK, {
         task: taskName,
