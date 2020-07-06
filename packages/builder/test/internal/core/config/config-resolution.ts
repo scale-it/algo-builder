@@ -44,10 +44,9 @@ describe("Config resolution", () => {
       it("should return the config merged ", () => {
         const config = loadConfigAndTasks();
         assert.containsAllKeys(config.networks, ["localhost", "custom"]);
-        assert.equal(
-          (config.networks.localhost as HttpNetworkConfig).url,
-          "http://127.0.0.1:8080"
-        );
+        const ncfg = config.networks.localhost as HttpNetworkConfig;
+        assert.equal(ncfg.host, "http://127.0.0.1");
+        assert.equal(ncfg.port, 8080);
         assert.deepEqual(config.networks.localhost.accounts, [
           "0xa95f9e3e7ae4e4865c5968828fe7c03fffa8a9f3bb52d36d26243f4c868ee166",
         ]);

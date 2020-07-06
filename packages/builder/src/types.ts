@@ -32,7 +32,9 @@ export interface AlgobChainCfg extends CommonNetworkConfig {
 }
 
 export interface HttpNetworkConfig extends CommonNetworkConfig {
-  url?: string;
+  host: string; // with optional http o https prefix
+  port: number;
+  token: string;
   httpHeaders?: { [name: string]: string };
 }
 

@@ -26,11 +26,13 @@ describe("Environment", () => {
     networks: {
       localNet: {
         chainName: "local-chain-name",
-        url: "local-net:8080"
+        host: "local-net",
+        port: 8080
       },
       default: {
         chainName: "default-chain-name",
-        url: "default-net:8080"
+        host: "default-net:8080",
+        port: 8080
       }
     }
   };
@@ -50,7 +52,7 @@ describe("Environment", () => {
   beforeEach(() => {
     const ctx = BuilderContext.createBuilderContext();
     dsl = ctx.tasksDSL;
-    dsl.task("example", async (ret) => {
+    dsl.task("example", async (_ret) => {
       return 27;
     });
 

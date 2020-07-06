@@ -1,8 +1,10 @@
-extendConfig((config, userConfig) => {
+import { extendConfig } from "../../../src/internal/core/config/config-env";
+
+extendConfig((config, _userConfig) => {
   config.values = [1];
 });
 
-extendConfig((config, userConfig) => {
+extendConfig((config, _userConfig) => {
   config.values.push(2);
 });
 

@@ -17,7 +17,7 @@
     "task-runner"
   ],
   "bin": {
-    "algob": "build/internal/cli/cli.js"
+    "algob": "build/src/internal/cli/cli.js"
   },
   "engines": {
     "node": ">=8.2.0"
@@ -31,7 +31,7 @@
     "build": "tsc --build .",
     "build:watch": "tsc -w -p .",
     "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.tsbuildinfo build",
-    "algob:test": "mkdir -p project-test && cd project-test && node ../build/internal/cli/cli.js"
+    "algob:test": "mkdir -p project-test && cd project-test && node ../build/src/internal/cli/cli.js"
   },
   "devDependencies": {
     "@types/chai": "^4.2.0",
@@ -46,9 +46,11 @@
     "cross-env": "5.0.5",
     "glob": "^7.1.6",
     "source-map-support": "^0.5.13",
+    "sinon": "^9.0.2",
     "time-require": "^0.1.2"
   },
   "dependencies": {
+    "algosdk": "^1.6.2",
     "debug": "^4.1.1",
     "deepmerge": "^4.2.2",
     "enquirer": "^2.3.5",
@@ -58,7 +60,6 @@
     "glob": "^7.1.6",
     "io-ts": "^2.2.6",
     "semver": "^7.3.2",
-    "sinon": "^9.0.2",
     "ts-essentials": "^7.0.0"
   },
   "nyc": {

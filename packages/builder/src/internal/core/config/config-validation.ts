@@ -4,7 +4,7 @@ import * as t from "io-ts";
 import { Context, ValidationError } from "io-ts/lib";
 import { Reporter } from "io-ts/lib/Reporter";
 
-import { AlgobChainCfg, Networks } from "../../../types";
+import type { AlgobChainCfg, HttpNetworkConfig, NetworkConfig } from "../../../types";
 import { ALGOB_CHAIN_NAME } from "../../constants";
 import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
@@ -59,15 +59,6 @@ function optional<TypeT, OutputT>(
 
 // IMPORTANT: This t.types MUST be kept in sync with the actual types.
 
-const AlgobChainCfg = t.type({
-  // accounts: optional(t.array(todo)),
-  chainName: optional(t.number),
-  throwOnTransactionFailures: optional(t.boolean),
-  throwOnCallFailures: optional(t.boolean),
-  loggingEnabled: optional(t.boolean),
-  initialDate: optional(t.string),
-});
-
 const HDAccountsConfig = t.type({
   mnemonic: t.string,
   initialIndex: optional(t.number),
@@ -80,19 +71,30 @@ const NetworkAccounts = t.union([
   HDAccountsConfig,
 ]);
 
-const HttpHeaders = t.record(t.string, t.string, "httpHeaders");
-
-const HttpNetworkConfig = t.type({
+const AlgobChainType = t.type({
+  // accounts: optional(t.array(todo)),
   chainName: optional(t.string),
-  url: optional(t.string),
-  accounts: optional(NetworkAccounts),
-  httpHeaders: optional(HttpHeaders),
-  // from: optional(t.string),
+  throwOnTransactionFailures: optional(t.boolean),
+  throwOnCallFailures: optional(t.boolean),
+  loggingEnabled: optional(t.boolean),
+  initialDate: optional(t.string),
 });
 
-const NetworkConfig = t.union([AlgobChainCfg, HttpNetworkConfig]);
+const HttpHeaders = t.record(t.string, t.string, "httpHeaders");
 
-const Networks = t.record(t.string, NetworkConfig);
+const HttpNetworkType = t.type({
+  accounts: optional(NetworkAccounts),
+  chainName: optional(t.string),
+  // from: optional(t.string),
+  host: optional(t.string),
+  port: optional(t.number),
+  token: optional(t.string),
+  httpHeaders: optional(HttpHeaders),
+});
+
+const NetworkType = t.union([AlgobChainType, HttpNetworkType]);
+
+const NetworksType = t.record(t.string, NetworkType);
 
 const ProjectPaths = t.type({
   root: optional(t.string),
@@ -105,7 +107,7 @@ const ProjectPaths = t.type({
 
 const Config = t.type(
   {
-    networks: optional(Networks),
+    networks: optional(NetworksType),
     paths: optional(ProjectPaths),
   },
   "AlgobConfig"
@@ -131,19 +133,25 @@ export function getValidationErrors(config: any): CfgErrors {  // eslint-disable
 
   // These can't be validated with io-ts
   if (config !== undefined && typeof config.networks === "object") {
-    for (const [net, ncfg] of Object.entries<Networks>(config.networks)) {
+    for (const [net, ncfg] of Object.entries<NetworkConfig>(config.networks)) {
       if (net === ALGOB_CHAIN_NAME) {
         validateAlgobChainCfg(ncfg, errors);
         continue;
       }
-
-      if (typeof ncfg.url !== "string" || ncfg.url == ""){
-        errors.push(net, "url", ncfg.url, "string");
+      // ONLY AlgobChain network can be of type AlgobChainCfg
+      const hcfg = ncfg as HttpNetworkConfig;
+      const host = hcfg.host;
+      if (typeof host !== "string" || host == "" || !validateHostname(host)){
+        errors.push(net, "host", host, "hostname string (eg: http://example.com)");
+      }
+      const token = hcfg.token;
+      if (typeof token !== "string" || token.length < 10){
+        errors.push(net, "token", token, "string");
       }
 
-      const netConfigResult = HttpNetworkConfig.decode(ncfg);
+      const netConfigResult = HttpNetworkType.decode(hcfg);
       if (isLeft(netConfigResult)) {
-        errors.push(net, "", ncfg, "HttpNetworkConfig");
+        errors.push(net, "", hcfg, "HttpNetworkConfig");
       }
     }
   }
@@ -185,9 +193,9 @@ function validateAlgobChainCfg(ncfg: AlgobChainCfg, errors: CfgErrors) {
   )
     errors.push(ALGOB_CHAIN_NAME, "throwOnCallFailures", ncfg.throwOnCallFailures, tBoolOpt);
 
-  const url = (ncfg as any).url // eslint-disable-line @typescript-eslint/no-explicit-any
-  if (url !== undefined) {
-    errors.push(ALGOB_CHAIN_NAME, "url", url, "null (forbidden)");
+  const host = (ncfg as HttpNetworkConfig).host
+  if (host !== undefined) {
+    errors.push(ALGOB_CHAIN_NAME, "host", host, "null (forbidden)");
   }
 
   if (
@@ -206,4 +214,15 @@ function validateAlgobChainCfg(ncfg: AlgobChainCfg, errors: CfgErrors) {
 export function validateConfigAccount() : void{
   // TODO
   // if (Array.isArray(ncfg.accounts)) {
+}
+
+
+// this comes from https://stackoverflow.com/questions/5717093
+const hostPattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+  '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+  '(localhost)|'+ // localhost
+  '((\\d{1,3}\\.){3}\\d{1,3}))'); // OR ip (v4) address
+
+function validateHostname(str: string): boolean {
+  return !!hostPattern.test(str);
 }

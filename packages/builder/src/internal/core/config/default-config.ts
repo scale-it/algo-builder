@@ -4,7 +4,9 @@ import { ALGOB_CHAIN_NAME } from "../../constants";
 const DEFAULT_NETWORK_CONFIG: HttpNetworkConfig = {
   // accounts: [],
   chainName: "devnet",
-  url: "https://localhost:8080"
+  host: "http://localhost",
+  port: 8080,
+  token: "TODO--token-from-devnet"
 };
 
 const defaultConfig: AlgobConfig = {

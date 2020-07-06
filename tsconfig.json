@@ -15,17 +15,10 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true,
-    "baseUrl": "src",
     "declaration": true
   },
-  "include": [
-    "src",
-    "types"
-  ],
   "exclude": [
-    "node_modules",
-    "build",
-    "./scripts",
-    "webpack"
+    "**/node_modules",
+    "**/webpack"
   ]
 }

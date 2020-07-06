@@ -1,3 +1,6 @@
+# private notes
+private[_-]*
+
 # Logs
 logs
 *.log

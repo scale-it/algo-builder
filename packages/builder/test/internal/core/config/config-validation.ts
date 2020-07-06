@@ -172,15 +172,15 @@ describe("Config validation", function () {
       });
 
       describe("HTTP network config", function () {
-        describe("Url field", function () {
-          it("Should fail if no url is set for custom networks", function () {
+        describe("Host field", function () {
+          it("Should fail if no host is set for custom networks", function () {
             expectBuilderError(
               () => validateConfig({ networks: { custom: {} } }),
               ERRORS.GENERAL.INVALID_CONFIG
             );
           });
 
-          it("Shouldn't fail if no url is set for algob-chain network", function () {
+          it("Shouldn't fail if no host is set for algob-chain network", function () {
             const errors = getValidationErrors({
               networks: { [ALGOB_CHAIN_NAME]: {} },
             });
@@ -188,12 +188,55 @@ describe("Config validation", function () {
           });
         });
 
+        describe("port", function () {
+          it("Should be optional", function () {
+            const errors = getValidationErrors({
+              networks: {
+                custom: {
+                  host: "http://localhost",
+                  token: "somefaketoken",
+                },
+              },
+            });
+            assert.isEmpty(errors.errors);
+          });
+
+          it("Should fail if not a number ", function () {
+            const errors = getValidationErrors({
+              networks: {
+                custom: {
+                  host: "http://localhost",
+                  port: "1234",
+                  token: "somefaketoken",
+                },
+              },
+            });
+            assert.isNotEmpty(errors.toString());
+            assert.match(errors.toString(), /Expected a value of type HttpNetworkConfig/);
+          });
+        })
+
+        describe("token", function () {
+          it("Is required", function () {
+            const errors = getValidationErrors({
+              networks: {
+                custom: {
+                  host: "http://localhost",
+                },
+              },
+            });
+            assert.match(errors.toString(), /config.networks.custom.token - Expected a value of type string/);
+          });
+        })
+
+
         describe("HttpHeaders", function () {
           it("Should be optional", function () {
             const errors = getValidationErrors({
               networks: {
                 custom: {
-                  url: "http://localhost",
+                  host: "http://localhost",
+                  token: "somefaketoken",
                 },
               },
             });
@@ -204,7 +247,9 @@ describe("Config validation", function () {
             const errors = getValidationErrors({
               networks: {
                 custom: {
-                  url: "http://localhost",
+                  host: "http://localhost",
+                  port: 123,
+                  token: "somefaketoken",
                   httpHeaders: {
                     a: "asd",
                     b: "a",
@@ -212,7 +257,7 @@ describe("Config validation", function () {
                 },
               },
             });
-            assert.isTrue(errors.isEmpty());
+            assert.isTrue(errors.isEmpty(), JSON.stringify(errors));
           });
 
           it("Should reject other types", function () {
@@ -221,7 +266,7 @@ describe("Config validation", function () {
                 validateConfig({
                   networks: {
                     custom: {
-                      url: "http://localhost",
+                      host: "http://localhost",
                       httpHeaders: 123,
                     },
                   },
@@ -234,7 +279,7 @@ describe("Config validation", function () {
                 validateConfig({
                   networks: {
                     custom: {
-                      url: "http://localhost",
+                      host: "http://localhost",
                       httpHeaders: "123",
                     },
                   },
@@ -249,7 +294,7 @@ describe("Config validation", function () {
                 validateConfig({
                   networks: {
                     custom: {
-                      url: "http://localhost",
+                      host: "http://localhost",
                       httpHeaders: {
                         a: "a",
                         b: 123,
@@ -265,7 +310,7 @@ describe("Config validation", function () {
                 validateConfig({
                   networks: {
                     custom: {
-                      url: "http://localhost",
+                      host: "http://localhost",
                       httpHeaders: {
                         a: "a",
                         b: false,
@@ -286,7 +331,7 @@ describe("Config validation", function () {
                   networks: {
                     asd: {
                       accounts: 123,
-                      url: "",
+                      host: "",
                     },
                   },
                 }),
@@ -299,7 +344,7 @@ describe("Config validation", function () {
                   networks: {
                     asd: {
                       accounts: {},
-                      url: "",
+                      host: "",
                     },
                   },
                 }),
@@ -312,7 +357,7 @@ describe("Config validation", function () {
                   networks: {
                     asd: {
                       accounts: { asd: 123 },
-                      url: "",
+                      host: "",
                     },
                   },
                 }),
@@ -330,7 +375,7 @@ describe("Config validation", function () {
                         accounts: {
                           mnemonic: 123,
                         },
-                        url: "",
+                        host: "",
                       },
                     },
                   }),
@@ -345,7 +390,7 @@ describe("Config validation", function () {
                         accounts: {
                           initialIndex: "asd",
                         },
-                        url: "",
+                        host: "",
                       },
                     },
                   }),
@@ -360,7 +405,7 @@ describe("Config validation", function () {
                         accounts: {
                           count: "asd",
                         },
-                        url: "",
+                        host: "",
                       },
                     },
                   }),
@@ -375,7 +420,7 @@ describe("Config validation", function () {
                         accounts: {
                           path: 123,
                         },
-                        url: "",
+                        host: "",
                       },
                     },
                   }),
@@ -394,7 +439,7 @@ describe("Config validation", function () {
                         accounts: {
                           type: 123,
                         },
-                        url: "",
+                        host: "",
                       },
                     },
                   }),
@@ -411,7 +456,7 @@ describe("Config validation", function () {
                     networks: {
                       asd: {
                         accounts: [123],
-                        url: "",
+                        host: "",
                       },
                     },
                   }),
@@ -430,7 +475,7 @@ describe("Config validation", function () {
                   networks: {
                     asd: {
                       chainName: "",
-                      url: "",
+                      host: "",
                     },
                   },
                 }),
@@ -443,7 +488,7 @@ describe("Config validation", function () {
                   networks: {
                     asd: {
                       from: 123,
-                      url: "",
+                      host: "",
                     },
                   },
                 }),
@@ -455,7 +500,7 @@ describe("Config validation", function () {
                 validateConfig({
                   networks: {
                     asd: {
-                      url: false,
+                      host: false,
                     },
                   },
                 }),
@@ -481,45 +526,53 @@ describe("Config validation", function () {
     });
 
     it("Shouldn't fail with valid networks configs", function () {
-      const errors = getValidationErrors({
+      let errors = getValidationErrors({
         networks: {
           commonThings: {
             chainName: "testnet",
             from: "0x0001",
-            url: "purestake.com:80",
+            host: "purestake.com",
+            port: 80,
+            token: "somefaketoken"
           },
           [ALGOB_CHAIN_NAME]: {
             // accounts: [{ privateKey: "asd", balance: "123" }],
           },
           localhost: {
-            url: "localhost:8080",
+            host: "localhost",
+            port: 8080,
+            token: "somefaketoken"
           },
         },
       });
 
-      assert.deepEqual(errors.errors, []);
 
-      assert.deepEqual(
-        getValidationErrors({
-          networks: {
-            custom: {
-              url: "http://localhost:8545",
-            },
+      assert.isEmpty(errors.errors, errors.toString());
+
+      errors = getValidationErrors({
+        networks: {
+          custom: {
+            host: "http://localhost:8123",
+            port: 8123,
+            token: "somefaketoken"
           },
-          unknown: {
-            asd: 123,
-            url: "localhost:8080",
-          },
-        }).errors,
-        []
-      );
+        },
+        unknown: {
+          asd: 123,
+          host: "localhost",
+          port: 8080,
+          token: "somefaketoken"
+        }});
+      assert.isEmpty(errors.errors, errors.toString());
     });
 
     it("Shouldn't fail with unrecognized params", function () {
       const errors = getValidationErrors({
         networks: {
           localhost: {
-            url: "localhost:8080",
+            host: "localhost",
+            port: 8080,
+            token: "somefaketoken",
             asd: 1232,
           },
           [ALGOB_CHAIN_NAME]: {
@@ -528,7 +581,7 @@ describe("Config validation", function () {
         },
       });
 
-      assert.isTrue(errors.isEmpty());
+      assert.isTrue(errors.isEmpty(), errors.toString());
     });
   });
 });
