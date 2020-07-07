@@ -31,7 +31,7 @@
     "build": "tsc --build .",
     "build:watch": "tsc -w -p .",
     "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.tsbuildinfo build",
-    "algob:test": "mkdir -p project-test && cd project-test && node ../build/src/internal/cli/cli.js"
+    "algob:test": "mkdir -p project-test && cd project-test && node ../build/internal/cli/cli.js"
   },
   "devDependencies": {
     "@types/chai": "^4.2.0",
