@@ -1,7 +1,7 @@
-import _fs from "fs";
-import YAML from "yaml";
+import * as _fs from "fs";
 const fsp = _fs.promises;
-import path from "path";
+import YAML from "yaml";
+import * as path from "path";
 
 import { task } from "../internal/core/config/config-env";
 import * as types from "../internal/core/params/argument-types";
