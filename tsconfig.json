@@ -7,7 +7,6 @@
     "experimentalDecorators": true,
     "esModuleInterop": true,
     "allowJs": true,
-    "allowSyntheticDefaultImports": true,
     "module": "commonjs",
     "resolveJsonModule": true,
     "noImplicitReturns": true,
