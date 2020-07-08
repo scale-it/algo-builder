@@ -1,5 +1,5 @@
 import debug from "debug";
-import path from "path";
+import * as path from "path";
 
 import { RuntimeArgs } from "../../types";
 import { ExecutionMode, getExecutionMode } from "../core/execution-mode";

@@ -1,4 +1,4 @@
-import path from "path";
+import * as path from "path";
 
 import * as tasks from "../../../builtin-tasks/task-names"
 import { loadPluginFile } from "../plugins";

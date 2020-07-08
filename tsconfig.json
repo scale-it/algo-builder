@@ -5,12 +5,10 @@
       "esnext"
     ],
     "experimentalDecorators": true,
-    "allowJs": true,
-    "skipLibCheck": true,
     "esModuleInterop": true,
+    "allowJs": true,
     "module": "commonjs",
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
     "noImplicitReturns": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,

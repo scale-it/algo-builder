@@ -1,6 +1,6 @@
 import debug from "debug";
-import findUp from "find-up";
-import path from "path";
+import * as findUp from "find-up";
+import * as path from "path";
 
 const log = debug("builder:core:execution-mode");
 

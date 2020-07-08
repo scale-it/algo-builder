@@ -1,5 +1,5 @@
-import findup from "find-up";
-import path from "path";
+import * as findup from "find-up";
+import * as path from "path";
 
 function findClosestPackageJson(file: string): string | null {
   return findup.sync("package.json", { cwd: path.dirname(file) }) || null;

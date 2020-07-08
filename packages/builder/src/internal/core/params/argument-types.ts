@@ -1,5 +1,4 @@
 import * as fs from "fs";
-import fsExtra from "fs-extra";
 
 import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
@@ -207,7 +206,7 @@ export const inputFile: ArgumentType<string> = {
   name: "inputFile",
   parse(argName: string, strValue: string): string {
     try {
-      fs.accessSync(strValue, fsExtra.constants.R_OK);
+      fs.accessSync(strValue, fs.constants.R_OK);
       const stats = fs.lstatSync(strValue);
 
       if (stats.isDirectory()) {
