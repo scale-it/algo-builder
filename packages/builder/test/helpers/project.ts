@@ -1,4 +1,5 @@
 import * as fsExtra from "fs-extra";
+import * as fs from "fs";
 import path from "path";
 
 /**
@@ -11,11 +12,8 @@ export function useFixtureProject(projectName: string) {
   let projectPath: string;
   let prevWorkingDir: string;
 
-  before(async () => {
-    projectPath = await getFixtureProjectPath(projectName);
-  });
-
   before(() => {
+    projectPath = getFixtureProjectPath(projectName);
     prevWorkingDir = process.cwd();
     process.chdir(projectPath);
   });
@@ -25,18 +23,34 @@ export function useFixtureProject(projectName: string) {
   });
 }
 
-export async function getFixtureProjectPath(
+export function getFixtureProjectPath(
   projectName: string
-): Promise<string> {
+): string {
   const projectPath = path.join(
     __dirname,
     "..",
     "fixture-projects",
     projectName
   );
-  if (!(await fsExtra.pathExists(projectPath))) {
+  if (!fs.existsSync(projectPath)) {
     throw new Error(`Fixture project ${projectName} doesn't exist`);
   }
 
-  return fsExtra.realpath(projectPath);
+  return fs.realpathSync(projectPath);
+}
+
+/**
+ * Creates a fresh copy of a fixture project, and uses it for test (as `useFixtureProject`).
+ * The copied project name is `projecName + "-tmp"`. If it already exists an exception
+ * is thrown.
+ */
+export function useFixtureProjectCopy(srcProjectName: string) {
+  const project = srcProjectName + "-tmp";
+  const srcProjectPath = getFixtureProjectPath(srcProjectName);
+  const projectPath = path.join(srcProjectPath, "..", project);
+
+  fsExtra.copySync(srcProjectPath, projectPath);
+  useFixtureProject(project);
+
+  after(() => fsExtra.removeSync(projectPath));
 }

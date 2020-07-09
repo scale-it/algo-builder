@@ -5,9 +5,10 @@ import * as path from "path";
 
 import { task } from "../internal/core/config/config-env";
 import * as types from "../internal/core/params/argument-types";
-import { assertAllDirs,ASSETS_DIR } from "../internal/core/project-structure"
+import { assertAllDirs, ASSETS_DIR } from "../internal/core/project-structure"
 import { AlgobRuntimeEnv, TaskArguments } from "../types";
 import { TASK_GEN_ACCOUNTS } from "./task-names";
+import { BuilderError, ERRORS } from "../internal/core/errors";
 
 const algosdk = require("algosdk");  // eslint-disable-line @typescript-eslint/no-var-requires
 
@@ -15,15 +16,25 @@ export default function (): void {
   task(TASK_GEN_ACCOUNTS, "Generates custom accounts (not safe for production use)")
     .addPositionalParam("n", "number of accounts to generate", undefined, types.int, false)
     .addFlag("force", "overwride generated accounts if the file already exists")
-    .setAction(genAccounts);
+    .setAction(mkAccounts);
 }
 
-const filename = path.join(ASSETS_DIR, "accounts_generated.yaml");
+export function getFilename(): string { return path.join(ASSETS_DIR, "accounts_generated.yaml"); }
 
-async function genAccounts(taskArgs: TaskArguments, env: AlgobRuntimeEnv) {
+export async function mkAccounts(taskArgs: TaskArguments, env: AlgobRuntimeEnv) {
+  const filename = getFilename();
   const n = taskArgs.n as number;
-  console.debug("GENERATING", n, "ACCOUNTS to ", filename);
+  if (n <= 0) {
+    throw new BuilderError(ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE, {
+      value: n,
+      name: 'n'});
+  }
+  console.info("GENERATING", n, "ACCOUNTS to ", filename);
+  const accounts = genAccounts(n);
+  return writeToFile(YAML.stringify(accounts), taskArgs.force as boolean, filename);
+}
 
+export function genAccounts(n: number): Acc[] {
   const accounts: Acc[] = [];
   for (let i=0; i<n; ++i){
     const a = algosdk.generateAccount();
@@ -31,20 +42,20 @@ async function genAccounts(taskArgs: TaskArguments, env: AlgobRuntimeEnv) {
       addr: a.addr,
       mnemonic: algosdk.secretKeyToMnemonic(a.sk)});
   }
-  return writeToFile(YAML.stringify(accounts), taskArgs.force as boolean);
+  return accounts;
 }
 
-interface Acc {
+export interface Acc {
   addr: string;
   mnemonic: string;
 }
 
-async function writeToFile(content: string, force: boolean) {
+async function writeToFile(content: string, force: boolean, filename: string) {
   await assertAllDirs();
   try {
     await fsp.access(filename, _fs.constants.F_OK);
     if(!force){
-      console.error("File", filename, "already exists. Aborging. Use --force flag if you want to overwrite it");
+      console.error("File", filename, "already exists. Aborting. Use --force flag if you want to overwrite it");
       return
     }
   } catch(e){}

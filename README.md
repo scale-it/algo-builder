@@ -14,6 +14,10 @@ Algorand builder is an trustworthy framework for Algorand dapps (Decentralized A
 To attract more web developers we plan to build a JavaScript DSL for TEAL with TypeScript bindings (for TEAL inputs). Furthermore we would like to collaborate with SDKs teams to improve the overall development experience and make it ready for enterprise projects. Finally we want to collaborate with Algorand Wallet team to ensure a smooth wallet integration.
 
 
+## Requirements
+
++ Node 12+
+
 # Usage
 
 
