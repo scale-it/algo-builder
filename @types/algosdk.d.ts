@@ -4,7 +4,7 @@ declare module 'algosdk' {
   export class Algod {
     constructor(token: string, baseServer: string, port: number, headers?: object);
 
-    status(): Promise<any>;
+    status(): Promise<NodeStatus>;
   }
 
   export class Algodv2 {

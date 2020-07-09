@@ -361,6 +361,13 @@ Please double check your task definitions.`,
 Please double check your environment variables.`,
     },
     INVALID_VALUE_FOR_TYPE: {
+      number: 320,
+      message: "Invalid value %value% for argument %name% of type positive_integer",
+      title: "Invalid argument value",
+      description: `One of your algob or task's arguments has an invalid value.
+Please double check your arguments.`,
+    },
+    INVALID_POSITIVE_INT: {
       number: 301,
       message: "Invalid value %value% for argument %name% of type %type%",
       title: "Invalid argument type",

@@ -2,7 +2,9 @@
 import type { AnyMap } from "../../types";
 import { getClosestCallerPackage } from "../util/caller-package";
 import { replaceAll } from "../util/strings";
-import { ErrorDescriptor, /* ERRORS, */ getErrorCode } from "./errors-list";
+import { ErrorDescriptor, ERRORS, getErrorCode } from "./errors-list";
+
+export { ERRORS };  // re-export errors-list
 
 // For an explanation about these classes constructors go to:
 // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work

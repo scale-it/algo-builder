@@ -82,15 +82,14 @@ describe("config loading", function () {
       );
     });
 
-    it("should accept an absolute path", async function () {
-      const fixtureDir = await getFixtureProjectPath("custom-config-file");
+    it("should accept an absolute path", function () {
+      const fixtureDir = getFixtureProjectPath("custom-config-file");
       const config = loadConfigAndTasks({
         config: path.join(fixtureDir, "config.js"),
       });
 
       if (!config.paths) {
         assert.fail("Project was not loaded")
-        return
       }
 
       assert.equal(
