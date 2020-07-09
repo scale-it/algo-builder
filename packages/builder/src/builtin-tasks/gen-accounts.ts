@@ -1,14 +1,14 @@
 import * as _fs from "fs";
 const fsp = _fs.promises;
-import YAML from "yaml";
 import * as path from "path";
+import YAML from "yaml";
 
 import { task } from "../internal/core/config/config-env";
+import { BuilderError, ERRORS } from "../internal/core/errors";
 import * as types from "../internal/core/params/argument-types";
 import { assertAllDirs, ASSETS_DIR } from "../internal/core/project-structure"
 import { AlgobRuntimeEnv, TaskArguments } from "../types";
 import { TASK_GEN_ACCOUNTS } from "./task-names";
-import { BuilderError, ERRORS } from "../internal/core/errors";
 
 const algosdk = require("algosdk");  // eslint-disable-line @typescript-eslint/no-var-requires
 
@@ -21,7 +21,7 @@ export default function (): void {
 
 export function getFilename(): string { return path.join(ASSETS_DIR, "accounts_generated.yaml"); }
 
-export async function mkAccounts(taskArgs: TaskArguments, env: AlgobRuntimeEnv) {
+export async function mkAccounts(taskArgs: TaskArguments, env: AlgobRuntimeEnv): Promise<void> {
   const filename = getFilename();
   const n = taskArgs.n as number;
   if (n <= 0) {
