@@ -3,11 +3,7 @@ import util from "util";
 
 import { internalTask } from "../internal/core/config/config-env";
 import { AlgobRuntimeEnv } from "../types";
-
-export async function glob(pattern: string): Promise<string[]> {
-  const { default: globModule } = await import("glob");
-  return util.promisify(globModule)(pattern, { realpath: true });
-}
+import { glob } from "./util";
 
 import {
   TASK_TEST_GET_TEST_FILES,

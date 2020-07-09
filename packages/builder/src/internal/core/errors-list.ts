@@ -456,7 +456,7 @@ Please double check how you invoked algob or run your task.`,
       number: 601,
       message: "Script %script% doesn't exist.",
       title: "Script doesn't exist",
-      description: `Tried to use \`buidler run\` to execut a non-existing script.
+      description: `Tried to use \`algob run\` to execute a non-existing script.
 
 Please double check your script's path`,
     },
@@ -466,8 +466,24 @@ Please double check your script's path`,
       title: "Error running script",
       description: `Running a script resulted in an error.
 
-Please check Buidler's output for more details.`,
-    }
+Please check Builder's output for more details.`,
+    },
+    MIGRATE_DIRECTORY_NOT_FOUND: {
+      number: 603,
+      message: "Script directory %directory% doesn't exist.",
+      title: "Scripts directory doesn't exist",
+      description: `Tried to use \`algob migrate\` with nonexistent scripts directory: %directory%.
+
+Please check your directory`,
+    },
+    MIGRATE_NO_FILES_FOUND: {
+      number: 604,
+      message: "Script directory %directory% doesn't have any script files.",
+      title: "Scripts don't exist",
+      description: `Tried to use \`algob migrate\` with no scripts in directory %directory%.
+
+Please double check your script's path`,
+    },
   },
   PLUGINS: {
     NOT_INSTALLED: {
