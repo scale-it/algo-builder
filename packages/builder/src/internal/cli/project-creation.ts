@@ -113,12 +113,12 @@ export async function createProject(location: string): PromiseAny {
     }
   }
 
-  if (shouldShowInstallationInstructions) {
-    console.log(``);
-    await printPluginInstallationInstructions();
-  }
-
   console.log("\n★", chalk.cyan("Project created"), "★\n");
+
+  if (shouldShowInstallationInstructions) {
+    await printPluginInstallationInstructions();
+    console.log(``);
+  }
 
   printSuggestedCommands();
 }
