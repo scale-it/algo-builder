@@ -34,7 +34,7 @@ export default function () : void {
           });
         }
 
-        const scriptNames = await glob(path.join(directory, "*.js"), {})
+        const scriptNames = (await glob(path.join(directory, "*.js"), {})).sort()
 
         if (scriptNames.length == 0) {
           throw new BuilderError(ERRORS.BUILTIN_TASKS.MIGRATE_NO_FILES_FOUND, {
