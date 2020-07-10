@@ -7,19 +7,15 @@ declare module "mocha" {
   }
 }
 
-export function useEnvironmentWithBeforeEach(beforeEachFn?: (algobRuntimeEnv: AlgobRuntimeEnv) => PromiseAny) {
+export function useEnvironment(beforeEachFn?: (algobRuntimeEnv: AlgobRuntimeEnv) => PromiseAny) {
   beforeEach("Load environment", async function () {
     this.env = require("../../src/internal/lib/lib");
     if (beforeEachFn) {
-      await beforeEachFn(this.env)
+      return beforeEachFn(this.env)
     }
   });
 
   afterEach("reset builder context", function () {
     resetBuilderContext();
   });
-}
-
-export function useEnvironment() {
-  useEnvironmentWithBeforeEach()
 }

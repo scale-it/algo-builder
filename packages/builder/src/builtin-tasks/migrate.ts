@@ -14,7 +14,6 @@ import { runSingleScript } from "./run";
 
 type TaskArguments = {
   directory: string;
-  noCompile: boolean
 }
 
 export async function getSortedScriptsNoGlob(
@@ -29,7 +28,7 @@ export function getSortedScripts(directory: string): Promise<string[]> {
 }
 
 async function doMigrate(
-  { directory, noCompile }: TaskArguments,
+  { directory }: TaskArguments,
   { run, runtimeArgs }: AlgobRuntimeEnv
 ) {
   const log = debug("builder:core:tasks:migrate");
@@ -45,11 +44,6 @@ async function doMigrate(
     throw new BuilderError(ERRORS.BUILTIN_TASKS.SCRIPTS_NO_FILES_FOUND, {
       directory,
     });
-  }
-
-  if (!noCompile) {
-    throw new Error("MM: compilation is not possible")
-    //await run(TASK_COMPILE);
   }
 
   for(let i = 0; i < scriptNames.length; i++){
@@ -72,6 +66,5 @@ export default function () : void {
       "A directory that contains js files to be run within builder's environment",
       "scripts"
     )
-    .addFlag("noCompile", "Don't compile before running this task")
     .setAction(doMigrate);
 }

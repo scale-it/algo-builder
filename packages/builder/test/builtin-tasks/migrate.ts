@@ -4,7 +4,7 @@ import fs from "fs";
 import sinon from "sinon"
 
 import { ERRORS } from "../../src/internal/core/errors-list";
-import { useEnvironmentWithBeforeEach } from "../helpers/environment";
+import { useEnvironment } from "../helpers/environment";
 import { expectBuilderErrorAsync } from "../helpers/errors";
 import { useFixtureProject } from "../helpers/project";
 import { TASK_CLEAN, TASK_MIGRATE } from "../../src/builtin-tasks/task-names";
@@ -15,8 +15,8 @@ const outputFile = "output.txt"
 
 describe("Migration task", function () {
   useFixtureProject("scripts-dir");
-  useEnvironmentWithBeforeEach(async (algobEnv: AlgobRuntimeEnv) => {
-    await algobEnv.run(TASK_CLEAN, {});
+  useEnvironment((algobEnv: AlgobRuntimeEnv) => {
+    return algobEnv.run(TASK_CLEAN, {});
   });
 
   beforeEach(function () {

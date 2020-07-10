@@ -39,21 +39,15 @@ export default function () : void {
       "script",
       "A js file to be run within builder's environment"
     )
-    .addFlag("noCompile", "Don't compile before running this task")
     .setAction(
       async (
-        { script, noCompile }: { script: string; noCompile: boolean },
+        { script }: { script: string; },
         { run, runtimeArgs }
       ) => {
         if (!(await fsExtra.pathExists(script))) {
           throw new BuilderError(ERRORS.BUILTIN_TASKS.RUN_FILE_NOT_FOUND, {
             script,
           });
-        }
-
-        if (!noCompile) {
-          throw new Error("MM: compilation is not possible")
-          //await run(TASK_COMPILE);
         }
 
         await runSingleScript(runtimeArgs, script, log)
