@@ -27,11 +27,11 @@ async function loadScriptsFromDir(directory: string): Promise<string[]> {
   return await getSortedScripts(path.join(directory, "*.js"))
 }
 
-async function doMigrate(
+async function doDeploy(
   { fileNames }: TaskArguments,
   { run, runtimeArgs }: AlgobRuntimeEnv
 ) {
-  const log = debug("builder:core:tasks:migrate");
+  const log = debug("builder:core:tasks:deploy");
 
   const scriptNames = fileNames.length == 0
     ? await loadScriptsFromDir(scriptsDirectory)
@@ -62,5 +62,5 @@ export default function () : void {
       "A directory that contains js files to be run within builder's environment",
       []
     )
-    .setAction(doMigrate);
+    .setAction(doDeploy);
 }
