@@ -61,7 +61,6 @@ scripts directory: script 2 executed
     );
   });
 
-  // TODO:MM assert error
   it("Should short-circuit and return failed script's status code", async function () {
     await expectBuilderErrorAsync(
       () =>
