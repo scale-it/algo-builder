@@ -24,7 +24,7 @@ async function loadScriptsFromDir(directory: string): Promise<string[]> {
       directory,
     });
   }
-  return await getSortedScripts(path.join(directory, "*.js"))
+  return getSortedScripts(path.join(directory, "*.js"))
 }
 
 async function doDeploy(
@@ -33,11 +33,11 @@ async function doDeploy(
 ) {
   const log = debug("builder:core:tasks:deploy");
 
-  const scriptNames = fileNames.length == 0
+  const scriptNames = fileNames.length === 0
     ? await loadScriptsFromDir(scriptsDirectory)
     : fileNames
 
-  if (scriptNames.length == 0) {
+  if (scriptNames.length === 0) {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.SCRIPTS_NO_FILES_FOUND, {
       directory: scriptsDirectory,
     });
