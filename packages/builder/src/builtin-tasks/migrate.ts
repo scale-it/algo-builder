@@ -8,23 +8,12 @@ import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { runScriptWithAlgob } from "../internal/util/scripts-runner";
 import { TASK_MIGRATE } from "./task-names";
-import { glob } from "./util";
+import { getSortedScripts } from "./util";
 import { RuntimeArgs, AlgobRuntimeEnv } from "../types";
 import { runSingleScript } from "./run";
 
 type TaskArguments = {
   directory: string;
-}
-
-export async function getSortedScriptsNoGlob(
-  directory: string,
-  globFn: (pattern: string, params?: any) => Promise<string[]>
-): Promise<string[]> {
-  return (await globFn(directory, {})).sort()
-}
-
-export function getSortedScripts(directory: string): Promise<string[]> {
-  return getSortedScriptsNoGlob(directory, glob)
 }
 
 async function doMigrate(

@@ -1,7 +1,7 @@
 import { assert } from "chai";
 import * as fsExtra from "fs-extra";
 import fs from "fs";
-import sinon from "sinon"
+import sinon from "sinon";
 
 import { ERRORS } from "../../src/internal/core/errors-list";
 import { useEnvironment } from "../helpers/environment";
@@ -9,7 +9,6 @@ import { expectBuilderErrorAsync } from "../helpers/errors";
 import { useFixtureProject } from "../helpers/project";
 import { TASK_CLEAN, TASK_MIGRATE } from "../../src/builtin-tasks/task-names";
 import { AlgobRuntimeEnv } from "../../src/types";
-import { getSortedScriptsNoGlob } from "../../src/builtin-tasks/migrate"
 
 const outputFile = "output.txt"
 
@@ -76,12 +75,3 @@ failing scripts: script 2 failed
   });
 
 });
-
-describe("Migration script loading", function () {
-  it("Should sort scripts", async function () {
-    const globStub = sinon.stub().returns(["q", "e", "w",  "a"])
-    const sortedScripts = await getSortedScriptsNoGlob("directory", globStub)
-    assert.deepEqual(sortedScripts, ["a", "e", "q", "w"])
-    assert.deepEqual(globStub.getCall(0).args, [ "directory", {} ])
-  });
-})
