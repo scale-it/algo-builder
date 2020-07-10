@@ -1,6 +1,7 @@
 import { assert } from "chai";
 import * as fsExtra from "fs-extra";
 import fs from "fs";
+import sinon from "sinon"
 
 import { ERRORS } from "../../src/internal/core/errors-list";
 import { useEnvironmentWithBeforeEach } from "../helpers/environment";
@@ -8,10 +9,11 @@ import { expectBuilderErrorAsync } from "../helpers/errors";
 import { useFixtureProject } from "../helpers/project";
 import { TASK_CLEAN, TASK_MIGRATE } from "../../src/builtin-tasks/task-names";
 import { AlgobRuntimeEnv } from "../../src/types";
+import { getSortedScriptsNoGlob } from "../../src/builtin-tasks/migrate"
 
 const outputFile = "output.txt"
 
-describe("migration task", function () {
+describe("Migration task", function () {
   useFixtureProject("scripts-dir");
   useEnvironmentWithBeforeEach(async (algobEnv: AlgobRuntimeEnv) => {
     await algobEnv.run(TASK_CLEAN, {});
@@ -32,7 +34,6 @@ describe("migration task", function () {
     const scriptOutput = fs.readFileSync(outputFile).toString()
     assert.equal(scriptOutput, `scripts directory: script 1 executed
 scripts directory: script 2 executed
-scripts directory: script 3 executed
 `);
   });
 
@@ -48,7 +49,7 @@ scripts directory: script 3 executed
     await expectBuilderErrorAsync(
       () =>
         this.env.run(TASK_MIGRATE, { directory: "empty-dir", noCompile: true }),
-      ERRORS.BUILTIN_TASKS.MIGRATE_NO_FILES_FOUND
+      ERRORS.BUILTIN_TASKS.SCRIPTS_NO_FILES_FOUND
     );
   });
 
@@ -56,12 +57,17 @@ scripts directory: script 3 executed
     await expectBuilderErrorAsync(
       () =>
         this.env.run(TASK_MIGRATE, { directory: "nonexistent-dir", noCompile: true }),
-      ERRORS.BUILTIN_TASKS.MIGRATE_DIRECTORY_NOT_FOUND
+      ERRORS.BUILTIN_TASKS.SCRIPTS_DIRECTORY_NOT_FOUND
     );
   });
 
+  // TODO:MM assert error
   it("Should short-circuit and return failed script's status code", async function () {
-    await this.env.run(TASK_MIGRATE, { directory: "failing-dir", noCompile: true });
+    await expectBuilderErrorAsync(
+      () =>
+        this.env.run(TASK_MIGRATE, { directory: "failing-dir", noCompile: true }),
+      ERRORS.BUILTIN_TASKS.DEPLOY_ERROR
+    );
     const scriptOutput = fs.readFileSync(outputFile).toString()
     assert.equal(scriptOutput, `failing scripts: script 1 executed
 failing scripts: script 2 failed
@@ -71,3 +77,12 @@ failing scripts: script 2 failed
   });
 
 });
+
+describe("Migration script loading", function () {
+  it("Should sort scripts", async function () {
+    const globStub = sinon.stub().returns(["q", "e", "w",  "a"])
+    const sortedScripts = await getSortedScriptsNoGlob("directory", globStub)
+    assert.deepEqual(sortedScripts, ["a", "e", "q", "w"])
+    assert.deepEqual(globStub.getCall(0).args, [ "directory", {} ])
+  });
+})

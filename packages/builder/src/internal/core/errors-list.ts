@@ -468,7 +468,7 @@ Please double check your script's path`,
 
 Please check Builder's output for more details.`,
     },
-    MIGRATE_DIRECTORY_NOT_FOUND: {
+    SCRIPTS_DIRECTORY_NOT_FOUND: {
       number: 603,
       message: "Script directory %directory% doesn't exist.",
       title: "Scripts directory doesn't exist",
@@ -476,13 +476,21 @@ Please check Builder's output for more details.`,
 
 Please check your directory`,
     },
-    MIGRATE_NO_FILES_FOUND: {
+    SCRIPTS_NO_FILES_FOUND: {
       number: 604,
       message: "Script directory %directory% doesn't have any script files.",
       title: "Scripts don't exist",
       description: `Tried to use \`algob migrate\` with no scripts in directory %directory%.
 
 Please double check your script's path`,
+    },
+    DEPLOY_ERROR: {
+      number: 605,
+      message: "Error. Deployment script {%script%} returned an error status: %errorStatus%",
+      title: "Error running deployment script",
+      description: `Running of a deployment script resulted in an error.
+
+Please check algob output for more details.`,
     },
   },
   PLUGINS: {
