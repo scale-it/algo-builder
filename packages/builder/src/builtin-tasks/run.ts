@@ -9,8 +9,8 @@ import { TASK_RUN } from "./task-names";
 import { RuntimeArgs } from "../types";
 
 export async function runSingleScript(runtimeArgs: RuntimeArgs,
-                               scriptFileName: string,
-                               log: (...args: any[]) => any): Promise<number> {
+                                      scriptFileName: string,
+                                      log: (...args: any[]) => any): Promise<number> {
   log(`Running script ${scriptFileName} in a subprocess so we can wait for it to complete`);
   try {
     const exitCode = await runScriptWithAlgob(

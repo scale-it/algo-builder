@@ -7,31 +7,39 @@ import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { runScriptWithAlgob } from "../internal/util/scripts-runner";
-import { TASK_MIGRATE } from "./task-names";
+import { TASK_DEPLOY } from "./task-names";
 import { getSortedScripts } from "./util";
 import { RuntimeArgs, AlgobRuntimeEnv } from "../types";
 import { runSingleScript } from "./run";
 
 type TaskArguments = {
-  directory: string;
+  fileNames: string[];
 }
 
-async function doMigrate(
-  { directory }: TaskArguments,
-  { run, runtimeArgs }: AlgobRuntimeEnv
-) {
-  const log = debug("builder:core:tasks:migrate");
+const scriptsDirectory = "scripts";
+
+async function loadScriptsFromDir(directory: string): Promise<string[]> {
   if (!fs.existsSync(directory)) {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.SCRIPTS_DIRECTORY_NOT_FOUND, {
       directory,
     });
   }
+  return await getSortedScripts(path.join(directory, "*.js"))
+}
 
-  const scriptNames = await getSortedScripts(path.join(directory, "*.js"))
+async function doMigrate(
+  { fileNames }: TaskArguments,
+  { run, runtimeArgs }: AlgobRuntimeEnv
+) {
+  const log = debug("builder:core:tasks:migrate");
+
+  const scriptNames = fileNames.length == 0
+    ? await loadScriptsFromDir(scriptsDirectory)
+    : fileNames
 
   if (scriptNames.length == 0) {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.SCRIPTS_NO_FILES_FOUND, {
-      directory,
+      directory: scriptsDirectory,
     });
   }
 
@@ -47,13 +55,12 @@ async function doMigrate(
   }
 }
 
-
 export default function () : void {
-  task(TASK_MIGRATE, "Compiles and runs user-defined scripts from scripts directory")
-    .addPositionalParam(
-      "directory",
+  task(TASK_DEPLOY, "Compiles and runs user-defined scripts from scripts directory")
+    .addOptionalVariadicPositionalParam(
+      "fileNames",
       "A directory that contains js files to be run within builder's environment",
-      "scripts"
+      []
     )
     .setAction(doMigrate);
 }
