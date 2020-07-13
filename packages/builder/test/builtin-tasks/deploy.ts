@@ -4,37 +4,19 @@ import fs from "fs";
 import sinon from "sinon";
 
 import { ERRORS } from "../../src/internal/core/errors-list";
-import { useEnvironment } from "../helpers/environment";
 import { expectBuilderErrorAsync } from "../helpers/errors";
-import { useFixtureProject } from "../helpers/project";
+import { useCleanFixtureProject, testFixtureOutputFile } from "../helpers/project";
 import { TASK_CLEAN, TASK_DEPLOY } from "../../src/builtin-tasks/task-names";
 import { AlgobRuntimeEnv } from "../../src/types";
 
-const outputFile = "output.txt"
-
-function setupCleanFixtureProject(projectName: string) {
-  useFixtureProject(projectName);
-  useEnvironment((algobEnv: AlgobRuntimeEnv) => {
-    return algobEnv.run(TASK_CLEAN, {});
-  });
-
-  beforeEach(function () {
-    try {
-      fs.unlinkSync(outputFile)
-    } catch (err) {
-      // ignored
-    }
-  })
-}
-
 describe("Deploy task", function () {
-  setupCleanFixtureProject("scripts-dir")
+  useCleanFixtureProject("scripts-dir")
 
   it("Should execute the tasks", async function () {
     await this.env.run(TASK_DEPLOY, { noCompile: true });
     assert.equal(process.exitCode, 0);
     (process as any).exitCode = undefined;
-    const scriptOutput = fs.readFileSync(outputFile).toString()
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
     assert.equal(scriptOutput, `scripts directory: script 1 executed
 scripts directory: script 2 executed
 `);
@@ -42,7 +24,7 @@ scripts directory: script 2 executed
 
   it("Should allow to specify scripts, preserving order", async function () {
     await this.env.run(TASK_DEPLOY, { fileNames: ["other-scripts/1.js", "scripts/2.js", "scripts/1.js"] });
-    const scriptOutput = fs.readFileSync(outputFile).toString()
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
     assert.equal(scriptOutput, `other scripts directory: script 1 executed
 scripts directory: script 2 executed
 scripts directory: script 1 executed
@@ -55,9 +37,9 @@ scripts directory: script 1 executed
     await expectBuilderErrorAsync(
       () =>
         this.env.run(TASK_DEPLOY, { fileNames: ["other-scripts/1.js", "failing.js", "scripts/1.js"] }),
-      ERRORS.BUILTIN_TASKS.DEPLOY_ERROR
+      ERRORS.BUILTIN_TASKS.EXECUTION_ERROR
     );
-    const scriptOutput = fs.readFileSync(outputFile).toString()
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
     assert.equal(scriptOutput, `other scripts directory: script 1 executed
 failing scripts: script failed
 `);
@@ -68,7 +50,7 @@ failing scripts: script failed
 });
 
 describe("Deploy task: empty scripts dir", function () {
-  setupCleanFixtureProject("scripts-dir-empty")
+  useCleanFixtureProject("scripts-dir-empty")
 
   it("Should complain about no scripts", async function () {
     await expectBuilderErrorAsync(
@@ -80,7 +62,7 @@ describe("Deploy task: empty scripts dir", function () {
 });
 
 describe("Deploy task: no scripts dir", function () {
-  setupCleanFixtureProject("scripts-dir-none")
+  useCleanFixtureProject("scripts-dir-none")
 
   it("Should complain about nonexistent directory", async function () {
     await expectBuilderErrorAsync(

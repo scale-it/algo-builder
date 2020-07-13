@@ -6,24 +6,28 @@ import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { runScriptWithAlgob } from "../internal/util/scripts-runner";
 import { TASK_RUN } from "./task-names";
-import { RuntimeArgs } from "../types";
+import { RuntimeArgs, AlgobRuntimeEnv } from "../types";
 
-export async function runSingleScript(runtimeArgs: RuntimeArgs,
-                                      scriptFileName: string,
-                                      log: (...args: any[]) => any): Promise<number> {
-  log(`Running script ${scriptFileName} in a subprocess so we can wait for it to complete`);
+type Input = {
+  scripts: string[]
+}
+
+function filterNonExistent(scripts: string[]): string[] {
+  return scripts.filter(script => !fsExtra.pathExistsSync(script))
+}
+
+export function runSingleScript(runtimeArgs: RuntimeArgs,
+                                scriptLocation: string): Promise<number> {
   try {
-    const exitCode = await runScriptWithAlgob(
+    return runScriptWithAlgob(
       runtimeArgs,
-      scriptFileName
+      scriptLocation
     );
-    process.exitCode = exitCode
-    return exitCode
   } catch (error) {
     throw new BuilderError(
-      ERRORS.BUILTIN_TASKS.RUN_SCRIPT_ERROR,
+      ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR,
       {
-        script: scriptFileName,
+        script: scriptLocation,
         error: error.message,
       },
       error
@@ -31,26 +35,46 @@ export async function runSingleScript(runtimeArgs: RuntimeArgs,
   }
 }
 
-export default function () : void {
+export async function runMultipleScripts(runtimeArgs: RuntimeArgs,
+                                         scriptNames: string[],
+                                         log: (...args: any[]) => any) {
+  for (let i = 0; i < scriptNames.length; i++) {
+    const scriptLocation = scriptNames[i]
+    log(
+      "Running script ${scriptLocation} in a subprocess so we can wait for it to complete"
+    );
+    const exitCode = await runSingleScript(runtimeArgs, scriptLocation)
+    process.exitCode = exitCode
+    if (exitCode !== 0) {
+      throw new BuilderError(ERRORS.BUILTIN_TASKS.EXECUTION_ERROR, {
+        script: scriptLocation,
+        errorStatus: exitCode,
+      });
+    }
+  }
+}
+
+async function doRun (
+  { scripts }: Input,
+  { run, runtimeArgs }: AlgobRuntimeEnv
+) {
   const log = debug("builder:core:tasks:run");
 
+  const nonExistent = filterNonExistent(scripts)
+  if (nonExistent.length !== 0) {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND, {
+      scripts: nonExistent,
+    });
+  }
+
+  await runMultipleScripts(runtimeArgs, scripts, log)
+}
+
+export default function () : void {
   task(TASK_RUN, "Runs a user-defined script after compiling the project")
-    .addPositionalParam(
-      "script",
+    .addVariadicPositionalParam(
+      "scripts",
       "A js file to be run within builder's environment"
     )
-    .setAction(
-      async (
-        { script }: { script: string; },
-        { run, runtimeArgs }
-      ) => {
-        if (!(await fsExtra.pathExists(script))) {
-          throw new BuilderError(ERRORS.BUILTIN_TASKS.RUN_FILE_NOT_FOUND, {
-            script,
-          });
-        }
-
-        await runSingleScript(runtimeArgs, script, log)
-      }
-    );
+    .setAction(doRun);
 }
