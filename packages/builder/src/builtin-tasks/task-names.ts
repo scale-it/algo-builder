@@ -7,8 +7,7 @@ export const TASK_GEN_ACCOUNTS = "gen-accounts";
 export const TASK_INIT = "init";
 export const TASK_NODE_INFO = "node-info";
 export const TASK_RUN = "run";
-
-
+export const TASK_DEPLOY = "deploy";
 
 // tasks for testing
 export const TASK_TEST_GET_TEST_FILES = "test:get-test-files";

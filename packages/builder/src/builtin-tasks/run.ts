@@ -5,10 +5,31 @@ import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { runScriptWithAlgob } from "../internal/util/scripts-runner";
-import {
-  //TASK_COMPILE,
-  TASK_RUN
-} from "./task-names";
+import { TASK_RUN } from "./task-names";
+import { RuntimeArgs } from "../types";
+
+export async function runSingleScript(runtimeArgs: RuntimeArgs,
+                                      scriptFileName: string,
+                                      log: (...args: any[]) => any): Promise<number> {
+  log(`Running script ${scriptFileName} in a subprocess so we can wait for it to complete`);
+  try {
+    const exitCode = await runScriptWithAlgob(
+      runtimeArgs,
+      scriptFileName
+    );
+    process.exitCode = exitCode
+    return exitCode
+  } catch (error) {
+    throw new BuilderError(
+      ERRORS.BUILTIN_TASKS.RUN_SCRIPT_ERROR,
+      {
+        script: scriptFileName,
+        error: error.message,
+      },
+      error
+    );
+  }
+}
 
 export default function () : void {
   const log = debug("builder:core:tasks:run");
@@ -18,10 +39,9 @@ export default function () : void {
       "script",
       "A js file to be run within builder's environment"
     )
-    .addFlag("noCompile", "Don't compile before running this task")
     .setAction(
       async (
-        { script, noCompile }: { script: string; noCompile: boolean },
+        { script }: { script: string; },
         { run, runtimeArgs }
       ) => {
         if (!(await fsExtra.pathExists(script))) {
@@ -30,28 +50,7 @@ export default function () : void {
           });
         }
 
-        if (!noCompile) {
-          throw new Error("MM: compilation is not possible")
-          //await run(TASK_COMPILE);
-        }
-
-        log(`Running script ${script} in a subprocess so we can wait for it to complete`);
-
-        try {
-          process.exitCode = await runScriptWithAlgob(
-            runtimeArgs,
-            script
-          );
-        } catch (error) {
-          throw new BuilderError(
-            ERRORS.BUILTIN_TASKS.RUN_SCRIPT_ERROR,
-            {
-              script,
-              error: error.message,
-            },
-            error
-          );
-        }
+        await runSingleScript(runtimeArgs, script, log)
       }
     );
 }

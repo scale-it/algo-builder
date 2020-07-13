@@ -5,6 +5,7 @@ import { ERRORS } from "../../src/internal/core/errors-list";
 import { useEnvironment } from "../helpers/environment";
 import { expectBuilderErrorAsync } from "../helpers/errors";
 import { useFixtureProject } from "../helpers/project";
+import { TASK_RUN } from "../../src/builtin-tasks/task-names";
 
 describe("run task", function () {
   useFixtureProject("project-with-scripts");
@@ -13,13 +14,13 @@ describe("run task", function () {
   it("Should fail if a script doesn't exist", async function () {
     await expectBuilderErrorAsync(
       () =>
-        this.env.run("run", { script: "./does-not-exist", noCompile: true }),
+        this.env.run(TASK_RUN, { script: "./does-not-exist", noCompile: true }),
       ERRORS.BUILTIN_TASKS.RUN_FILE_NOT_FOUND
     );
   });
 
   it("Should run the scripts to completion", async function () {
-    await this.env.run("run", {
+    await this.env.run(TASK_RUN, {
       script: "./async-script.js",
       noCompile: true,
     });
@@ -38,7 +39,7 @@ describe("run task", function () {
       await fsExtra.remove("artifacts");
     }
 
-    await this.env.run("run", {
+    await this.env.run(TASK_RUN, {
       script: "./successful-script.js",
     });
     assert.equal(process.exitCode, 0);
@@ -59,7 +60,7 @@ describe("run task", function () {
       await fsExtra.remove("artifacts");
     }
 
-    await this.env.run("run", {
+    await this.env.run(TASK_RUN, {
       script: "./successful-script.js",
       noCompile: true,
     });
@@ -71,7 +72,7 @@ describe("run task", function () {
   */
 
   it("Should return the script's status code on success", async function () {
-    await this.env.run("run", {
+    await this.env.run(TASK_RUN, {
       script: "./successful-script.js",
       noCompile: true,
     });
@@ -80,7 +81,7 @@ describe("run task", function () {
   });
 
   it("Should return the script's status code on failure", async function () {
-    await this.env.run("run", {
+    await this.env.run(TASK_RUN, {
       script: "./failing-script.js",
       noCompile: true,
     });

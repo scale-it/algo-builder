@@ -1,5 +1,5 @@
 import { resetBuilderContext } from "../../src/internal/reset";
-import { AlgobRuntimeEnv } from "../../src/types";
+import { AlgobRuntimeEnv, PromiseAny } from "../../src/types";
 
 declare module "mocha" {
   interface Context {
@@ -7,9 +7,12 @@ declare module "mocha" {
   }
 }
 
-export function useEnvironment() {
-  beforeEach("Load environment", function () {
+export function useEnvironment(beforeEachFn?: (algobRuntimeEnv: AlgobRuntimeEnv) => PromiseAny) {
+  beforeEach("Load environment", async function () {
     this.env = require("../../src/internal/lib/lib");
+    if (beforeEachFn) {
+      return beforeEachFn(this.env)
+    }
   });
 
   afterEach("reset builder context", function () {
