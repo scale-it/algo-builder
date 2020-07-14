@@ -24,6 +24,13 @@ export class ArgumentsParser {
     );
   }
 
+  public static shortParamNameToCLA(paramName?: string): string {
+    if (paramName) {
+      return ArgumentsParser.SHORT_PARAM_PREFIX + paramName;
+    }
+    return ""
+  }
+
   public static cLAToParamName(cLA: string): string {
     if (cLA.toLowerCase() !== cLA) {
       throw new BuilderError(ERRORS.ARGUMENTS.PARAM_NAME_INVALID_CASING, {

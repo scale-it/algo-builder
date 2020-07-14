@@ -147,6 +147,7 @@ export interface ConfigurableTaskDefinition {
 
 export interface ParamDefinition<T> {
   name: string;
+  shortName?: string;
   defaultValue?: T;
   type: types.ArgumentType<T>;
   description?: string;
@@ -190,7 +191,7 @@ export type AlgobParamDefinitions = {
 };
 
 export type AlgobShortParamSubstitutions = {
-  [name: string]: keyof AlgobParamDefinitions
+  [name: string]: string
 }
 
 export interface TaskDefinition extends ConfigurableTaskDefinition {

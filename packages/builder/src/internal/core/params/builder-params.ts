@@ -1,4 +1,4 @@
-import { AlgobParamDefinitions, AlgobShortParamSubstitutions } from "../../../types";
+import { AlgobParamDefinitions, AlgobShortParamSubstitutions, ParamDefinition } from "../../../types";
 import * as types from "./argument-types";
 
 export const ALGOB_PARAM_DEFINITIONS: AlgobParamDefinitions = {
@@ -31,6 +31,7 @@ export const ALGOB_PARAM_DEFINITIONS: AlgobParamDefinitions = {
   },
   help: {
     name: "help",
+    shortName: "h",
     defaultValue: false,
     description: "Shows this message, or a task's help if its name is provided",
     type: types.boolean,
@@ -58,6 +59,13 @@ export const ALGOB_PARAM_DEFINITIONS: AlgobParamDefinitions = {
   }
 };
 
-export const ALGOB_SHORT_PARAM_SUBSTITUTIONS: AlgobShortParamSubstitutions = {
-  h: "help"
-}
+// reverse lookup map for short parameters
+export const ALGOB_SHORT_PARAM_SUBSTITUTIONS: AlgobShortParamSubstitutions =
+  Object.entries(ALGOB_PARAM_DEFINITIONS)
+    .reduce((out: Record<string, string>, kv: [string, ParamDefinition<any>]) => {
+      const [name, value] = kv;
+      if (value.shortName) {
+        out[value.shortName] = name;
+      }
+      return out
+    }, {});
