@@ -42,9 +42,9 @@ export class ArgumentsParser {
     );
   }
 
-  private _substituteShortParam(arg: string, algobShortParamSubs: AlgobShortParamSubstitutions): string {
+  private _substituteShortParam(arg: string, shortParamSubs: AlgobShortParamSubstitutions): string {
     if (this._hasShortParamNameFormat(arg)) {
-      const substitution = algobShortParamSubs[arg.substr(1)]
+      const substitution = shortParamSubs[arg.substr(1)]
       if (substitution) {
         return ArgumentsParser.PARAM_PREFIX + substitution;
       }
@@ -53,8 +53,8 @@ export class ArgumentsParser {
   }
 
   public parseRuntimeArgs(
-    algobParamDefs: AlgobParamDefinitions,
-    algobShortParamSubs: AlgobShortParamSubstitutions,
+    paramDefs: AlgobParamDefinitions,
+    shortParamSubs: AlgobShortParamSubstitutions,
     envVariableArguments: RuntimeArgs,
     rawCLAs: string[]
   ): {
@@ -67,7 +67,7 @@ export class ArgumentsParser {
     const unparsedCLAs: string[] = [];
 
     for (let i = 0; i < rawCLAs.length; i++) {
-      rawCLAs[i] = this._substituteShortParam(rawCLAs[i], algobShortParamSubs);
+      rawCLAs[i] = this._substituteShortParam(rawCLAs[i], shortParamSubs);
       const arg = rawCLAs[i];
 
       if (taskName === undefined) {
@@ -76,14 +76,14 @@ export class ArgumentsParser {
           continue;
         }
 
-        if (!this._isCLAParamName(arg, algobParamDefs)) {
+        if (!this._isCLAParamName(arg, paramDefs)) {
           throw new BuilderError(
             ERRORS.ARGUMENTS.UNRECOGNIZED_COMMAND_LINE_ARG,
             { argument: arg }
           );
         }
       } else {
-        if (!this._isCLAParamName(arg, algobParamDefs)) {
+        if (!this._isCLAParamName(arg, paramDefs)) {
           unparsedCLAs.push(arg);
           continue;
         }
@@ -92,14 +92,14 @@ export class ArgumentsParser {
       i = this._parseArgumentAt(
         rawCLAs,
         i,
-        algobParamDefs,
+        paramDefs,
         runtimeArgs
       );
     }
 
     return {
       runtimeArgs: this._addBuilderDefaultArguments(
-        algobParamDefs,
+        paramDefs,
         envVariableArguments,
         runtimeArgs
       ),
@@ -160,7 +160,7 @@ export class ArgumentsParser {
   }
 
   private _addBuilderDefaultArguments(
-    algobParamDefs: AlgobParamDefinitions,
+    paramDefs: AlgobParamDefinitions,
     envVariableArguments: RuntimeArgs,
     runtimeArgs: Partial<RuntimeArgs>
   ): RuntimeArgs {
