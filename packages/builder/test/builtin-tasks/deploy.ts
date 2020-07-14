@@ -1,16 +1,23 @@
 import { assert } from "chai";
-import * as fsExtra from "fs-extra";
-import fs from "fs";
-import sinon from "sinon";
+import * as fs from "fs";
 
 import { ERRORS } from "../../src/internal/core/errors-list";
 import { expectBuilderErrorAsync } from "../helpers/errors";
 import { useCleanFixtureProject, testFixtureOutputFile } from "../helpers/project";
-import { TASK_CLEAN, TASK_DEPLOY } from "../../src/builtin-tasks/task-names";
-import { AlgobRuntimeEnv } from "../../src/types";
+import { TASK_DEPLOY } from "../../src/builtin-tasks/task-names";
+import { loadFilenames } from "../../src/builtin-tasks/deploy";
 
 describe("Deploy task", function () {
   useCleanFixtureProject("scripts-dir")
+
+  it("Should load scripts in the right order", function(){
+    const ls = loadFilenames("scripts");
+    let e = ls[0];
+    for (let i = 1; i<ls.length; ++i) {
+      assert.isTrue(e <= ls[i], `Array '${ls}' is expected to be sorted`);
+      e = ls[i];
+    }
+  });
 
   it("Should execute the tasks", async function () {
     await this.env.run(TASK_DEPLOY, { noCompile: true });

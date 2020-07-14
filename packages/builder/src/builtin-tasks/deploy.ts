@@ -1,5 +1,6 @@
 import debug from "debug";
 import fs from "fs";
+import glob from "glob";
 import path from "path";
 
 import { task } from "../internal/core/config/config-env";
@@ -8,31 +9,29 @@ import { ERRORS } from "../internal/core/errors-list";
 import { AlgobRuntimeEnv } from "../types";
 import { runMultipleScripts } from "./run";
 import { TASK_DEPLOY } from "./task-names";
-import { getSortedScripts } from "./util";
 
-type TaskArguments = {
+export interface TaskArgs {
   fileNames: string[];
 }
 
 const scriptsDirectory = "scripts";
 
-async function loadScriptsFromDir(directory: string): Promise<string[]> {
+export function loadFilenames(directory: string): string[] {
   if (!fs.existsSync(directory)) {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.SCRIPTS_DIRECTORY_NOT_FOUND, {
       directory,
     });
   }
-  return getSortedScripts(path.join(directory, "*.js"))
+
+  const files = glob.sync(path.join(directory, "*.js"));
+  return files.sort();
 }
 
-async function doDeploy(
-  { fileNames }: TaskArguments,
-  { run, runtimeArgs }: AlgobRuntimeEnv
-) {
+function doDeploy({ fileNames }: TaskArgs, { runtimeArgs }: AlgobRuntimeEnv): Promise<void> {
   const log = debug("builder:core:tasks:deploy");
 
   const scriptNames = fileNames.length === 0
-    ? await loadScriptsFromDir(scriptsDirectory)
+    ? loadFilenames(scriptsDirectory)
     : fileNames
 
   if (scriptNames.length === 0) {
@@ -41,7 +40,7 @@ async function doDeploy(
     });
   }
 
-  await runMultipleScripts(runtimeArgs, scriptNames, log)
+  return runMultipleScripts(runtimeArgs, scriptNames, log)
 }
 
 export default function () : void {
