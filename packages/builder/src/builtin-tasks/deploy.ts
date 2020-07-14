@@ -10,7 +10,7 @@ import { runScriptWithAlgob } from "../internal/util/scripts-runner";
 import { TASK_DEPLOY } from "./task-names";
 import { getSortedScripts } from "./util";
 import { RuntimeArgs, AlgobRuntimeEnv } from "../types";
-import { runSingleScript } from "./run";
+import { runMultipleScripts } from "./run";
 
 type TaskArguments = {
   fileNames: string[];
@@ -43,16 +43,7 @@ async function doDeploy(
     });
   }
 
-  for(let i = 0; i < scriptNames.length; i++){
-    const scriptFileName = scriptNames[i]
-    const exitCode = await runSingleScript(runtimeArgs, scriptFileName, log)
-    if (exitCode !== 0) {
-      throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOY_ERROR, {
-        script: scriptFileName,
-        errorStatus: exitCode,
-      });
-    }
-  }
+  await runMultipleScripts(runtimeArgs, scriptNames, log)
 }
 
 export default function () : void {

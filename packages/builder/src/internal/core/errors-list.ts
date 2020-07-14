@@ -452,21 +452,21 @@ Please double check how you invoked algob or run your task.`,
     },
   },
   BUILTIN_TASKS: {
-    RUN_FILE_NOT_FOUND: {
+    RUN_FILES_NOT_FOUND: {
       number: 601,
-      message: "Script %script% doesn't exist.",
-      title: "Script doesn't exist",
-      description: `Tried to use \`algob run\` to execute a non-existing script.
+      message: "Scripts don't exist: %scripts%.",
+      title: "Scripts don't exist.",
+      description: `Tried to use \`algob run\` to execute a non-existing script(s).
 
 Please double check your script's path`,
     },
-    RUN_SCRIPT_ERROR: {
+    SCRIPT_EXECUTION_ERROR: {
       number: 602,
-      message: "Error running script {%script%}: %error%",
-      title: "Error running script",
-      description: `Running a script resulted in an error.
+      message: "Error while executing script '%script%': %error%",
+      title: "Error executing a script",
+      description: `Script execution resulted in an error.
 
-Please check Builder's output for more details.`,
+Please check algob output for more details.`,
     },
     SCRIPTS_DIRECTORY_NOT_FOUND: {
       number: 603,
@@ -484,11 +484,11 @@ Please check your directory`,
 
 Please double check your script's path`,
     },
-    DEPLOY_ERROR: {
+    EXECUTION_ERROR: {
       number: 605,
-      message: "Error. Deployment script {%script%} returned an error status: %errorStatus%",
-      title: "Error running deployment script",
-      description: `Running of a deployment script resulted in an error.
+      message: "Error. Process of '%script%' returned an error status code: %errorStatus%",
+      title: "Error status code while executing a script",
+      description: `Script process returned an error status code.
 
 Please check algob output for more details.`,
     },
