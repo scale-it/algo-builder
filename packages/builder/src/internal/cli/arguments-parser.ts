@@ -5,12 +5,14 @@ import {
   RuntimeArgs,
   TaskArguments,
   TaskDefinition,
+  AlgobShortParamSubstitutions,
 } from "../../types";
 import { BuilderError } from "../core/errors";
 import { ERRORS } from "../core/errors-list";
 
 export class ArgumentsParser {
   public static readonly PARAM_PREFIX = "--";
+  public static readonly SHORT_PARAM_PREFIX = "-";
 
   public static paramNameToCLA(paramName: string): string {
     return (
@@ -40,8 +42,19 @@ export class ArgumentsParser {
     );
   }
 
+  private _substituteShortParam(arg: string, algobShortParamSubs: AlgobShortParamSubstitutions): string {
+    if (this._hasShortParamNameFormat(arg)) {
+      const substitution = algobShortParamSubs[arg.substr(1)]
+      if (substitution) {
+        return ArgumentsParser.PARAM_PREFIX + substitution;
+      }
+    }
+    return arg;
+  }
+
   public parseRuntimeArgs(
     algobParamDefs: AlgobParamDefinitions,
+    algobShortParamSubs: AlgobShortParamSubstitutions,
     envVariableArguments: RuntimeArgs,
     rawCLAs: string[]
   ): {
@@ -54,7 +67,8 @@ export class ArgumentsParser {
     const unparsedCLAs: string[] = [];
 
     for (let i = 0; i < rawCLAs.length; i++) {
-      const arg = rawCLAs[i];
+      const arg = this._substituteShortParam(rawCLAs[i], algobShortParamSubs);
+      rawCLAs[i] = arg;
 
       if (taskName === undefined) {
         if (!this._hasCLAParamNameFormat(arg)) {
@@ -68,26 +82,19 @@ export class ArgumentsParser {
             { argument: arg }
           );
         }
-
-        i = this._parseArgumentAt(
-          rawCLAs,
-          i,
-          algobParamDefs,
-          runtimeArgs
-        );
       } else {
         if (!this._isCLAParamName(arg, algobParamDefs)) {
           unparsedCLAs.push(arg);
           continue;
         }
-
-        i = this._parseArgumentAt(
-          rawCLAs,
-          i,
-          algobParamDefs,
-          runtimeArgs
-        );
       }
+
+      i = this._parseArgumentAt(
+        rawCLAs,
+        i,
+        algobParamDefs,
+        runtimeArgs
+      );
     }
 
     return {
@@ -194,6 +201,10 @@ export class ArgumentsParser {
 
   private _hasCLAParamNameFormat(str: string) {
     return str.startsWith(ArgumentsParser.PARAM_PREFIX);
+  }
+
+  private _hasShortParamNameFormat(str: string) {
+    return str.startsWith(ArgumentsParser.SHORT_PARAM_PREFIX) && str.length === 2;
   }
 
   private _parseArgumentAt(

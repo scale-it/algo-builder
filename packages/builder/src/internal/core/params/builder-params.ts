@@ -1,4 +1,4 @@
-import { AlgobParamDefinitions } from "../../../types";
+import { AlgobParamDefinitions, AlgobShortParamSubstitutions } from "../../../types";
 import * as types from "./argument-types";
 
 export const ALGOB_PARAM_DEFINITIONS: AlgobParamDefinitions = {
@@ -57,3 +57,7 @@ export const ALGOB_PARAM_DEFINITIONS: AlgobParamDefinitions = {
     isVariadic: false,
   }
 };
+
+export const ALGOB_SHORT_PARAM_SUBSTITUTIONS: AlgobShortParamSubstitutions = {
+  h: "help"
+}

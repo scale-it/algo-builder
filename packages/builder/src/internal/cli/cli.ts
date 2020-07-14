@@ -13,7 +13,10 @@ import { BuilderContext } from "../context";
 import { loadConfigAndTasks } from "../core/config/config-loading";
 import { BuilderError, BuilderPluginError } from "../core/errors";
 import { ERRORS } from "../core/errors-list";
-import { ALGOB_PARAM_DEFINITIONS } from "../core/params/builder-params";
+import {
+  ALGOB_PARAM_DEFINITIONS,
+  ALGOB_SHORT_PARAM_SUBSTITUTIONS
+} from "../core/params/builder-params";
 import { getEnvRuntimeArgs } from "../core/params/env-variables";
 import { isCwdInsideProject } from "../core/project-structure";
 import { Environment } from "../core/runtime-environment";
@@ -59,6 +62,7 @@ async function main() {
       unparsedCLAs,
     } = argumentsParser.parseRuntimeArgs(
       ALGOB_PARAM_DEFINITIONS,
+      ALGOB_SHORT_PARAM_SUBSTITUTIONS,
       envVariableArguments,
       process.argv.slice(2)
     );

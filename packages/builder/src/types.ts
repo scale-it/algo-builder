@@ -189,6 +189,10 @@ export type AlgobParamDefinitions = {
   >;
 };
 
+export type AlgobShortParamSubstitutions = {
+  [name: string]: keyof AlgobParamDefinitions
+}
+
 export interface TaskDefinition extends ConfigurableTaskDefinition {
   readonly name: string;
   readonly description?: string;
