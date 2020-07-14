@@ -1,5 +1,4 @@
 import path from "path";
-import util from "util";
 
 import { internalTask } from "../internal/core/config/config-env";
 import { AlgobRuntimeEnv } from "../types";
