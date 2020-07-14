@@ -37,7 +37,7 @@ export function runSingleScript(runtimeArgs: RuntimeArgs,
 
 export async function runMultipleScripts(runtimeArgs: RuntimeArgs,
                                          scriptNames: string[],
-                                         log: (...args: unknown[]) => unknown): Promise<unknown> {
+                                         log: (...args: unknown[]) => unknown): Promise<void> {
   for (let i = 0; i < scriptNames.length; i++) {
     const scriptLocation = scriptNames[i]
     log(
