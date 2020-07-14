@@ -3,11 +3,10 @@ import util from "util";
 
 import { internalTask } from "../internal/core/config/config-env";
 import { AlgobRuntimeEnv } from "../types";
-import { glob } from "./util";
-
 import {
   TASK_TEST_GET_TEST_FILES,
 } from "./task-names";
+import { glob } from "./util";
 
 export default function () : void {
   internalTask(TASK_TEST_GET_TEST_FILES)

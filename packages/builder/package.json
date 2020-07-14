@@ -34,6 +34,7 @@
     "algob:test": "mkdir -p project-test && cd project-test && node ../build/internal/cli/cli.js"
   },
   "devDependencies": {
+    "@types/algosdk": "^0.0.1",
     "@types/chai": "^4.2.0",
     "@types/debug": "^4.1.5",
     "@types/deepmerge": "^2.2.0",

@@ -1,0 +1,14 @@
+{
+  "name": "@types/algosdk",
+  "version": "0.0.1",
+  "description": "Algorand SDK TypeScript Declaration File",
+  "main": "",
+  "typings": "index.d.ts",
+  "repository": "https://github.com/scale-it/algorand-builder.git",
+  "author": "SEE package.json from PROJECT ROOT",
+  "license": "MIT",
+  "scripts": {
+    "lint": "echo no linting",
+    "lint:fix": "echo no linting"
+  }
+}

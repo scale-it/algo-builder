@@ -1,5 +1,6 @@
 import * as _fs from "fs";
 const fsp = _fs.promises;
+import algosdk from "algosdk";
 import * as path from "path";
 import YAML from "yaml";
 
@@ -9,8 +10,6 @@ import * as types from "../internal/core/params/argument-types";
 import { assertAllDirs, ASSETS_DIR } from "../internal/core/project-structure"
 import { AlgobRuntimeEnv, TaskArguments } from "../types";
 import { TASK_GEN_ACCOUNTS } from "./task-names";
-
-const algosdk = require("algosdk");  // eslint-disable-line @typescript-eslint/no-var-requires
 
 export default function (): void {
   task(TASK_GEN_ACCOUNTS, "Generates custom accounts (not safe for production use)")
