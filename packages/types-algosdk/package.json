@@ -8,7 +8,8 @@
   "author": "SEE package.json from PROJECT ROOT",
   "license": "MIT",
   "scripts": {
-    "lint": "echo no linting",
-    "lint:fix": "echo no linting"
+    "lint": "echo ok",
+    "lint:fix": "echo ok",
+    "test": "echo ok"
   }
 }

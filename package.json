@@ -52,13 +52,13 @@
     "typescript": "^3.9.5"
   },
   "lint-staged": {
-    ".*src.*{ts,js}": [
+    "**/src/**/*.{ts,js}": [
       "eslint --format stylish --fix"
     ]
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn workspaces -p run lint-staged",
+      "pre-commit": "yarn lint-staged",
       "pre-push": "yarn test"
     }
   }
