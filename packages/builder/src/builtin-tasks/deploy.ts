@@ -1,13 +1,11 @@
 import debug from "debug";
 import fs from "fs";
-import fsExtra from "fs-extra";
 import path from "path";
 
 import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
-import { runScriptWithAlgob } from "../internal/util/scripts-runner";
-import { AlgobRuntimeEnv,RuntimeArgs } from "../types";
+import { AlgobRuntimeEnv } from "../types";
 import { runMultipleScripts } from "./run";
 import { TASK_DEPLOY } from "./task-names";
 import { getSortedScripts } from "./util";
