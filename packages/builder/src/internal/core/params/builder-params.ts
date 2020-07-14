@@ -62,7 +62,7 @@ export const ALGOB_PARAM_DEFINITIONS: AlgobParamDefinitions = {
 // reverse lookup map for short parameters
 export const ALGOB_SHORT_PARAM_SUBSTITUTIONS: AlgobShortParamSubstitutions =
   Object.entries(ALGOB_PARAM_DEFINITIONS)
-    .reduce((out: Record<string, string>, kv: [string, ParamDefinition<any>]) => {
+    .reduce((out: Record<string, string>, kv: [string, ParamDefinition<unknown>]) => {
       const [name, value] = kv;
       if (value.shortName) {
         out[value.shortName] = name;

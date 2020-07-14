@@ -1,11 +1,11 @@
 import {
   AlgobParamDefinitions,
+  AlgobShortParamSubstitutions,
   ParamDefinition,
   ParamDefinitionsMap,
   RuntimeArgs,
   TaskArguments,
   TaskDefinition,
-  AlgobShortParamSubstitutions,
 } from "../../types";
 import { BuilderError } from "../core/errors";
 import { ERRORS } from "../core/errors-list";

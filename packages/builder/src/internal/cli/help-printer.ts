@@ -179,7 +179,7 @@ export class HelpPrinter {
         shortName,
       } = paramDefinitions[name];
 
-      let paddedShortName = ArgumentsParser.shortParamNameToCLA(shortName)
+      const paddedShortName = ArgumentsParser.shortParamNameToCLA(shortName)
         .padEnd(shortParamsNameLength) + (shortName ? "," : " ");
 
       let msg = `  ${paddedShortName} `;
