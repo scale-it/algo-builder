@@ -67,8 +67,8 @@ export class ArgumentsParser {
     const unparsedCLAs: string[] = [];
 
     for (let i = 0; i < rawCLAs.length; i++) {
-      const arg = this._substituteShortParam(rawCLAs[i], algobShortParamSubs);
-      rawCLAs[i] = arg;
+      rawCLAs[i] = this._substituteShortParam(rawCLAs[i], algobShortParamSubs);
+      const arg = rawCLAs[i];
 
       if (taskName === undefined) {
         if (!this._hasCLAParamNameFormat(arg)) {
