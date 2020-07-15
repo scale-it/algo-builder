@@ -29,6 +29,7 @@ module.exports = {
     "@typescript-eslint/quotes": "off",
     "@typescript-eslint/no-dynamic-delete": "off",
     "@typescript-eslint/strict-boolean-expressions": "off",
+    "max-len": ["error", { "code": 110, "ignoreTrailingComments": true, "ignoreUrls": true, "ignoreStrings": true, "ignoreTemplateLiterals": true}],
 
     "sonarjs/cognitive-complexity": ["error", 16]
   }

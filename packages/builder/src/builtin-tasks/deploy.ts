@@ -28,7 +28,8 @@ export function loadFilenames (directory: string): string[] {
   return files.sort(cmpStr);
 }
 
-async function doDeploy ({ fileNames }: TaskArgs, { runtimeArgs }: AlgobRuntimeEnv): Promise<void> {
+async function doDeploy ({ fileNames }: TaskArgs, { runtimeArgs }: AlgobRuntimeEnv
+): Promise<void> {
   const log = debug("builder:core:tasks:deploy");
 
   const scriptNames = fileNames.length === 0

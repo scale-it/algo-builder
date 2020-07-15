@@ -87,7 +87,8 @@ export function usePlugin (
   builderContext.setPluginAsLoaded(pluginName);
 }
 
-function checkPeerDependencies (deps: StrMap, pluginName: string, from: string | undefined, flag: string, warning: string): void {
+function checkPeerDependencies (deps: StrMap, pluginName: string,
+  from: string | undefined, flag: string, warning: string): void {
   for (const [dependencyName, versionSpec] of Object.entries(deps)) {
     const dependencyPackageJson = readPackageJson(dependencyName, from);
 

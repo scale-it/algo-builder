@@ -44,8 +44,9 @@ export function resolveConfig (
 
   const config: Partial<ResolvedAlgobConfig> = mergeUserAndDefaultConfigs(defaultConfig, userConfig);
 
-  const paths = userConfigPath !== undefined ? resolveProjectPaths(userConfigPath, userConfig.paths) : undefined;
-
+  const paths = userConfigPath !== undefined
+    ? resolveProjectPaths(userConfigPath, userConfig.paths)
+    : undefined;
   const resolved: ResolvedAlgobConfig = {
     ...config,
     paths,

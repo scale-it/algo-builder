@@ -83,7 +83,8 @@ export class SimpleTaskDefinition implements TaskDefinition {
    * @param description The parameter's description.
    * @param defaultValue A default value. This must be `undefined` if `isOptional` is `true`.
    * @param type The param's `ArgumentType`. It will parse and validate the user's input.
-   * @param isOptional `true` if the parameter is optional. It's default value is `true` if `defaultValue` is not `undefined`.
+   * @param isOptional `true` if the parameter is optional.
+       It's default value is `true` if `defaultValue` is not `undefined`.
    */
   public addParam<T>(
     name: string,
@@ -202,7 +203,8 @@ export class SimpleTaskDefinition implements TaskDefinition {
    * @param description The parameter's description.
    * @param defaultValue A default value. This must be `undefined` if `isOptional` is `true`.
    * @param type The param's `ArgumentType`. It will parse and validate the user's input.
-   * @param isOptional `true` if the parameter is optional. It's default value is `true` if `defaultValue` is not `undefined`.
+   * @param isOptional `true` if the parameter is optional. It's default value is `true`
+       if `defaultValue` is not `undefined`.
    */
   public addPositionalParam<T>(
     name: string,
@@ -293,7 +295,8 @@ export class SimpleTaskDefinition implements TaskDefinition {
    * @param description The parameter's description.
    * @param defaultValue A default value. This must be `undefined` if `isOptional` is `true`.
    * @param type The param's `ArgumentType`. It will parse and validate the user's input.
-   * @param isOptional `true` if the parameter is optional. It's default value is `true` if `defaultValue` is not `undefined`.
+   * @param isOptional `true` if the parameter is optional.
+       It's default value is `true` if `defaultValue` is not `undefined`.
    */
   public addVariadicPositionalParam<T>(
     name: string,
