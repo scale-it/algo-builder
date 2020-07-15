@@ -8,7 +8,10 @@ import {
   int,
   string,
 } from "../../../src/internal/core/params/argument-types";
-import { ALGOB_PARAM_DEFINITIONS } from "../../../src/internal/core/params/builder-params";
+import {
+  ALGOB_PARAM_DEFINITIONS,
+  ALGOB_SHORT_PARAM_SUBSTITUTIONS
+} from "../../../src/internal/core/params/builder-params";
 import {
   OverriddenTaskDefinition,
   SimpleTaskDefinition,
@@ -118,6 +121,7 @@ describe("ArgumentsParser", () => {
         unparsedCLAs,
       } = argumentsParser.parseRuntimeArgs(
         ALGOB_PARAM_DEFINITIONS,
+        ALGOB_SHORT_PARAM_SUBSTITUTIONS,
         envArgs,
         rawCLAs
       );
@@ -143,6 +147,7 @@ describe("ArgumentsParser", () => {
         unparsedCLAs,
       } = argumentsParser.parseRuntimeArgs(
         ALGOB_PARAM_DEFINITIONS,
+        ALGOB_SHORT_PARAM_SUBSTITUTIONS,
         envArgs,
         rawCLAs
       );
@@ -166,6 +171,7 @@ describe("ArgumentsParser", () => {
         () =>
           argumentsParser.parseRuntimeArgs(
             ALGOB_PARAM_DEFINITIONS,
+            ALGOB_SHORT_PARAM_SUBSTITUTIONS,
             envArgs,
             rawCLAs
           ),
@@ -215,6 +221,7 @@ describe("ArgumentsParser", () => {
         () =>
           argumentsParser.parseRuntimeArgs(
             ALGOB_PARAM_DEFINITIONS,
+            ALGOB_SHORT_PARAM_SUBSTITUTIONS,
             envArgs,
             rawCLAs
           ),
@@ -235,6 +242,7 @@ describe("ArgumentsParser", () => {
         () =>
           argumentsParser.parseRuntimeArgs(
             ALGOB_PARAM_DEFINITIONS,
+            ALGOB_SHORT_PARAM_SUBSTITUTIONS,
             envArgs,
             rawCLAs
           ),
