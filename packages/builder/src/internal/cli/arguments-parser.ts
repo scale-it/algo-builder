@@ -1,5 +1,6 @@
 import {
   AlgobParamDefinitions,
+  AlgobShortParamSubstitutions,
   ParamDefinition,
   ParamDefinitionsMap,
   RuntimeArgs,
@@ -11,6 +12,7 @@ import { ERRORS } from "../core/errors-list";
 
 export class ArgumentsParser {
   public static readonly PARAM_PREFIX = "--";
+  public static readonly SHORT_PARAM_PREFIX = "-";
 
   public static paramNameToCLA(paramName: string): string {
     return (
@@ -20,6 +22,13 @@ export class ArgumentsParser {
         .map((s) => s.toLowerCase())
         .join("-")
     );
+  }
+
+  public static shortParamNameToCLA(paramName?: string): string {
+    if (paramName) {
+      return ArgumentsParser.SHORT_PARAM_PREFIX + paramName;
+    }
+    return ""
   }
 
   public static cLAToParamName(cLA: string): string {
@@ -40,8 +49,19 @@ export class ArgumentsParser {
     );
   }
 
+  private _substituteShortParam(arg: string, shortParamSubs: AlgobShortParamSubstitutions): string {
+    if (this._hasShortParamNameFormat(arg)) {
+      const substitution = shortParamSubs[arg.substr(1)]
+      if (substitution) {
+        return ArgumentsParser.PARAM_PREFIX + substitution;
+      }
+    }
+    return arg;
+  }
+
   public parseRuntimeArgs(
-    algobParamDefs: AlgobParamDefinitions,
+    paramDefs: AlgobParamDefinitions,
+    shortParamSubs: AlgobShortParamSubstitutions,
     envVariableArguments: RuntimeArgs,
     rawCLAs: string[]
   ): {
@@ -54,6 +74,7 @@ export class ArgumentsParser {
     const unparsedCLAs: string[] = [];
 
     for (let i = 0; i < rawCLAs.length; i++) {
+      rawCLAs[i] = this._substituteShortParam(rawCLAs[i], shortParamSubs);
       const arg = rawCLAs[i];
 
       if (taskName === undefined) {
@@ -62,37 +83,30 @@ export class ArgumentsParser {
           continue;
         }
 
-        if (!this._isCLAParamName(arg, algobParamDefs)) {
+        if (!this._isCLAParamName(arg, paramDefs)) {
           throw new BuilderError(
             ERRORS.ARGUMENTS.UNRECOGNIZED_COMMAND_LINE_ARG,
             { argument: arg }
           );
         }
-
-        i = this._parseArgumentAt(
-          rawCLAs,
-          i,
-          algobParamDefs,
-          runtimeArgs
-        );
       } else {
-        if (!this._isCLAParamName(arg, algobParamDefs)) {
+        if (!this._isCLAParamName(arg, paramDefs)) {
           unparsedCLAs.push(arg);
           continue;
         }
-
-        i = this._parseArgumentAt(
-          rawCLAs,
-          i,
-          algobParamDefs,
-          runtimeArgs
-        );
       }
+
+      i = this._parseArgumentAt(
+        rawCLAs,
+        i,
+        paramDefs,
+        runtimeArgs
+      );
     }
 
     return {
       runtimeArgs: this._addBuilderDefaultArguments(
-        algobParamDefs,
+        paramDefs,
         envVariableArguments,
         runtimeArgs
       ),
@@ -153,7 +167,7 @@ export class ArgumentsParser {
   }
 
   private _addBuilderDefaultArguments(
-    algobParamDefs: AlgobParamDefinitions,
+    paramDefs: AlgobParamDefinitions,
     envVariableArguments: RuntimeArgs,
     runtimeArgs: Partial<RuntimeArgs>
   ): RuntimeArgs {
@@ -194,6 +208,10 @@ export class ArgumentsParser {
 
   private _hasCLAParamNameFormat(str: string) {
     return str.startsWith(ArgumentsParser.PARAM_PREFIX);
+  }
+
+  private _hasShortParamNameFormat(str: string) {
+    return str.startsWith(ArgumentsParser.SHORT_PARAM_PREFIX) && str.length === 2;
   }
 
   private _parseArgumentAt(

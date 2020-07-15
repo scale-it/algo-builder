@@ -162,6 +162,10 @@ export class HelpPrinter {
   }
 
   private _printParamDetails(paramDefinitions: ParamDefinitionsMap) {
+    const shortParamsNameLength = Object.values(paramDefinitions)
+      .map((n) => ArgumentsParser.shortParamNameToCLA(n.shortName).length)
+      .reduce((a, b) => Math.max(a, b), 0);
+
     const paramsNameLength = Object.keys(paramDefinitions)
       .map((n) => ArgumentsParser.paramNameToCLA(n).length)
       .reduce((a, b) => Math.max(a, b), 0);
@@ -172,9 +176,15 @@ export class HelpPrinter {
         defaultValue,
         isOptional,
         isFlag,
+        shortName,
       } = paramDefinitions[name];
 
-      let msg = `  ${ArgumentsParser.paramNameToCLA(name).padEnd(
+      const paddedShortName = ArgumentsParser.shortParamNameToCLA(shortName)
+        .padEnd(shortParamsNameLength) + (shortName ? "," : " ");
+
+      let msg = `  ${paddedShortName} `;
+
+      msg += `${ArgumentsParser.paramNameToCLA(name).padEnd(
         paramsNameLength
       )}\t`;
 

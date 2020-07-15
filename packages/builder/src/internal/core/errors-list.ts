@@ -393,7 +393,7 @@ Please double check the name of the task you are trying to run.`,
     UNRECOGNIZED_COMMAND_LINE_ARG: {
       number: 304,
       message:
-        "Unrecognised command line argument %argument%.\nNote that task arguments must come after the task name.",
+        "Unrecognized command line argument %argument%.\nNote that task arguments must come after the task name.",
       title: "Unrecognized command line argument",
       description: `algob couldn't recognize one of your command line arguments.
 
