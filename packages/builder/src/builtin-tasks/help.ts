@@ -6,7 +6,7 @@ import { getPackageJson } from "../internal/util/package-info";
 import { AlgobRuntimeEnv } from "../types";
 import { TASK_HELP } from "./task-names";
 
-export default function () :void {
+export default function (): void {
   task(TASK_HELP, "Prints this message")
     .addOptionalPositionalParam(
       "task",
@@ -15,7 +15,7 @@ export default function () :void {
     .setAction(help);
 }
 
-async function help({task: taskName}: { task?: string }, env: AlgobRuntimeEnv) {
+async function help ({ task: taskName }: { task?: string }, env: AlgobRuntimeEnv): Promise<void> {
   const packageJson = await getPackageJson();
   const helpPrinter = new HelpPrinter(
     ALGOB_NAME,

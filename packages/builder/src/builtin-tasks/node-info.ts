@@ -8,7 +8,7 @@ export default function (): void {
     .setAction(nodeInfo);
 }
 
-async function nodeInfo(_taskArgs: TaskArguments, env: AlgobRuntimeEnv) {
+async function nodeInfo (_taskArgs: TaskArguments, env: AlgobRuntimeEnv): Promise<void> {
   const n = env.network;
   const algocl = createClient(n);
   const st = await algocl.status().do();

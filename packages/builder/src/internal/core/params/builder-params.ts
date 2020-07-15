@@ -9,7 +9,7 @@ export const ALGOB_PARAM_DEFINITIONS: AlgobParamDefinitions = {
     type: types.string,
     isOptional: true,
     isFlag: false,
-    isVariadic: false,
+    isVariadic: false
   },
   showStackTraces: {
     name: "showStackTraces",
@@ -18,7 +18,7 @@ export const ALGOB_PARAM_DEFINITIONS: AlgobParamDefinitions = {
     type: types.boolean,
     isFlag: true,
     isOptional: true,
-    isVariadic: false,
+    isVariadic: false
   },
   version: {
     name: "version",
@@ -27,7 +27,7 @@ export const ALGOB_PARAM_DEFINITIONS: AlgobParamDefinitions = {
     type: types.boolean,
     isFlag: true,
     isOptional: true,
-    isVariadic: false,
+    isVariadic: false
   },
   help: {
     name: "help",
@@ -37,7 +37,7 @@ export const ALGOB_PARAM_DEFINITIONS: AlgobParamDefinitions = {
     type: types.boolean,
     isFlag: true,
     isOptional: true,
-    isVariadic: false,
+    isVariadic: false
   },
   config: {
     name: "config",
@@ -46,7 +46,7 @@ export const ALGOB_PARAM_DEFINITIONS: AlgobParamDefinitions = {
     type: types.inputFile,
     isFlag: false,
     isOptional: true,
-    isVariadic: false,
+    isVariadic: false
   },
   verbose: {
     name: "verbose",
@@ -55,7 +55,7 @@ export const ALGOB_PARAM_DEFINITIONS: AlgobParamDefinitions = {
     type: types.boolean,
     isFlag: true,
     isOptional: true,
-    isVariadic: false,
+    isVariadic: false
   }
 };
 
@@ -67,5 +67,5 @@ export const ALGOB_SHORT_PARAM_SUBSTITUTIONS: AlgobShortParamSubstitutions =
       if (value.shortName) {
         out[value.shortName] = name;
       }
-      return out
+      return out;
     }, {});

@@ -34,21 +34,21 @@ export function lazyObject<T extends object>(objectCreator: () => T): T { // esl
   return createLazyProxy(
     objectCreator,
     (getRealTarget) => ({
-      [util.inspect.custom]() {
+      [util.inspect.custom] () {
         const realTarget = getRealTarget();
         return util.inspect(realTarget);
-      },
+      }
     }),
     (object) => {
       if (object instanceof Function) {
         throw new BuilderError(ERRORS.GENERAL.UNSUPPORTED_OPERATION, {
-          operation: "Creating lazy functions or classes with lazyObject",
+          operation: "Creating lazy functions or classes with lazyObject"
         });
       }
 
       if (typeof object !== "object" || object === null) {
         throw new BuilderError(ERRORS.GENERAL.UNSUPPORTED_OPERATION, {
-          operation: "Using lazyObject with anything other than objects",
+          operation: "Using lazyObject with anything other than objects"
         });
       }
     }
@@ -60,9 +60,9 @@ export function lazyFunction<T extends Function>(functionCreator: () => T): T { 
   return createLazyProxy(
     functionCreator,
     (getRealTarget) => {
-      function dummyTarget() {}  // eslint-disable-line @typescript-eslint/no-empty-function
+      function dummyTarget (): void {}
 
-      (dummyTarget as any)[util.inspect.custom] = function () {  // eslint-disable-line @typescript-eslint/no-explicit-any
+      (dummyTarget as any)[util.inspect.custom] = function () { // eslint-disable-line @typescript-eslint/no-explicit-any
         const realTarget = getRealTarget();
         return util.inspect(realTarget);
       };
@@ -73,7 +73,7 @@ export function lazyFunction<T extends Function>(functionCreator: () => T): T { 
       if (!(object instanceof Function)) {
         throw new BuilderError(ERRORS.GENERAL.UNSUPPORTED_OPERATION, {
           operation:
-            "Using lazyFunction with anything other than functions or classes",
+            "Using lazyFunction with anything other than functions or classes"
         });
       }
     }
@@ -83,14 +83,14 @@ export function lazyFunction<T extends Function>(functionCreator: () => T): T { 
 function createLazyProxy<ActualT extends GuardT, GuardT extends object>( // eslint-disable-line
   targetCreator: () => ActualT,
   dummyTargetCreator: (getRealTarget: () => ActualT) => GuardT,
-  validator: (target: any) => void  // eslint-disable-line @typescript-eslint/no-explicit-any
+  validator: (target: any) => void // eslint-disable-line @typescript-eslint/no-explicit-any
 ): ActualT {
   let realTarget: ActualT | undefined;
 
   // tslint:disable-next-line
-  const dummyTarget: ActualT = dummyTargetCreator(getRealTarget) as any;  // eslint-disable-line @typescript-eslint/no-explicit-any
+  const dummyTarget: ActualT = dummyTargetCreator(getRealTarget) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-  function getRealTarget(): ActualT {
+  function getRealTarget (): ActualT {
     if (realTarget === undefined) {
       const target = targetCreator();
       validator(target);
@@ -110,7 +110,7 @@ function createLazyProxy<ActualT extends GuardT, GuardT extends object>( // esli
       if (Object.getPrototypeOf(target) === null) {
         throw new BuilderError(ERRORS.GENERAL.UNSUPPORTED_OPERATION, {
           operation:
-            "Using lazyFunction or lazyObject to construct objects/functions with prototype null",
+            "Using lazyFunction or lazyObject to construct objects/functions with prototype null"
         });
       }
 
@@ -125,17 +125,17 @@ function createLazyProxy<ActualT extends GuardT, GuardT extends object>( // esli
   }
 
   const handler: ProxyHandler<ActualT> = {
-    defineProperty(target, property, descriptor) {
+    defineProperty (target, property, descriptor) {
       Reflect.defineProperty(dummyTarget, property, descriptor);
       return Reflect.defineProperty(getRealTarget(), property, descriptor);
     },
 
-    deleteProperty(target, property) {
+    deleteProperty (target, property) {
       Reflect.deleteProperty(dummyTarget, property);
       return Reflect.deleteProperty(getRealTarget(), property);
     },
 
-    get(target, property, receiver) {
+    get (target, property, receiver) {
       // We have this short-circuit logic here to avoid a cyclic require when
       // loading Web3.js.
       //
@@ -158,8 +158,7 @@ function createLazyProxy<ActualT extends GuardT, GuardT extends object>( // esli
       // `require`s that we can't control and will trigger the same bug.
       const stack = new Error().stack;
       if (
-        stack !== undefined &&
-        stack.includes("givenProvider.js") &&
+        stack?.includes("givenProvider.js") &&
         realTarget === undefined
       ) {
         return undefined;
@@ -168,7 +167,7 @@ function createLazyProxy<ActualT extends GuardT, GuardT extends object>( // esli
       return Reflect.get(getRealTarget(), property, receiver);
     },
 
-    getOwnPropertyDescriptor(target, property) {
+    getOwnPropertyDescriptor (target, property) {
       const descriptor = Reflect.getOwnPropertyDescriptor(
         getRealTarget(),
         property
@@ -181,46 +180,46 @@ function createLazyProxy<ActualT extends GuardT, GuardT extends object>( // esli
       return descriptor;
     },
 
-    getPrototypeOf(target) {
+    getPrototypeOf (target) {
       return Reflect.getPrototypeOf(getRealTarget());
     },
 
-    has(target, property) {
+    has (target, property) {
       return Reflect.has(getRealTarget(), property);
     },
 
-    isExtensible(target) {
+    isExtensible (target) {
       return Reflect.isExtensible(getRealTarget());
     },
 
-    ownKeys(target) {
+    ownKeys (target) {
       return Reflect.ownKeys(getRealTarget());
     },
 
-    preventExtensions(target) {
+    preventExtensions (target) {
       Object.preventExtensions(dummyTarget);
       return Reflect.preventExtensions(getRealTarget());
     },
 
-    set(target, property, value, receiver) {
+    set (target, property, value, receiver) {
       Reflect.set(dummyTarget, property, value, receiver);
       return Reflect.set(getRealTarget(), property, value, receiver);
     },
 
-    setPrototypeOf(target, prototype) {
+    setPrototypeOf (target, prototype) {
       Reflect.setPrototypeOf(dummyTarget, prototype);
       return Reflect.setPrototypeOf(getRealTarget(), prototype);
-    },
+    }
   };
 
   if (dummyTarget instanceof Function) {
     // If dummy target is a function, the actual target must be a function too.
-    handler.apply = (target, thisArg: any, argArray?: any) => {  // eslint-disable-line @typescript-eslint/no-explicit-any
+    handler.apply = (target, thisArg: any, argArray?: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
       // tslint:disable-next-line ban-types
       return Reflect.apply(getRealTarget() as Function, thisArg, argArray);  // eslint-disable-line
     };
 
-    handler.construct = (target, argArray: any, newTarget?: any) => {  // eslint-disable-line @typescript-eslint/no-explicit-any
+    handler.construct = (target, argArray: any, newTarget?: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
       // tslint:disable-next-line ban-types
       return Reflect.construct(getRealTarget() as Function, argArray);  // eslint-disable-line
     };

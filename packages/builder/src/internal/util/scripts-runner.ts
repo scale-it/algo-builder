@@ -7,7 +7,7 @@ import { getEnvVariablesMap } from "../core/params/env-variables";
 
 const log = debug("builder:core:scripts-runner");
 
-export async function runScript(
+export async function runScript (
   scriptPath: string,
   scriptArgs: string[] = [],
   extraNodeArgs: string[] = [],
@@ -15,19 +15,19 @@ export async function runScript(
 ): Promise<number> {
   const { fork } = await import("child_process");
 
-  return new Promise((resolve, reject) => {
+  return await new Promise((resolve, reject) => {
     const processExecArgv = withFixedInspectArg(process.execArgv);
 
     const nodeArgs = [
       ...processExecArgv,
       ...getTsNodeArgsIfNeeded(scriptPath),
-      ...extraNodeArgs,
+      ...extraNodeArgs
     ];
 
     const childProcess = fork(scriptPath, scriptArgs, {
       stdio: "inherit",
       execArgv: nodeArgs,
-      env: { ...process.env, ...extraEnvVars },
+      env: { ...process.env, ...extraEnvVars }
     });
 
     childProcess.once("close", (code: number) => {
@@ -39,7 +39,7 @@ export async function runScript(
   });
 }
 
-export async function runScriptWithAlgob(
+export async function runScriptWithAlgob (
   runtimeArgs: RuntimeArgs,
   scriptPath: string,
   scriptArgs: string[] = [],
@@ -50,13 +50,13 @@ export async function runScriptWithAlgob(
 
   const builderRegisterPath = resolveBuilderRegisterPath();
 
-  return runScript(
+  return await runScript(
     scriptPath,
     scriptArgs,
     [...extraNodeArgs, "--require", builderRegisterPath],
     {
       ...getEnvVariablesMap(runtimeArgs),
-      ...extraEnvVars,
+      ...extraEnvVars
     }
   );
 }
@@ -76,8 +76,8 @@ export async function runScriptWithAlgob(
  * This way, we can properly use the debugger for this process AND for the executed
  * script itself - even if it's compiled using ts-node.
  */
-function withFixedInspectArg(argv: string[]) {
-  const fixIfInspectArg = (arg: string) => {
+function withFixedInspectArg (argv: string[]): string[] {
+  const fixIfInspectArg = (arg: string): string => {
     if (arg.toLowerCase().includes("--inspect-brk=")) {
       return "--inspect";
     }
@@ -90,7 +90,7 @@ function withFixedInspectArg(argv: string[]) {
  * Ensure builder/register source file path is resolved to compiled JS file
  * instead of TS source file, so we don't need to run ts-node unnecessarily.
  */
-export function resolveBuilderRegisterPath(): string {
+export function resolveBuilderRegisterPath (): string {
   const builderCoreBaseDir = path.join(__dirname, "..", "..", "..");
 
   return path.join(
@@ -99,7 +99,7 @@ export function resolveBuilderRegisterPath(): string {
   );
 }
 
-function getTsNodeArgsIfNeeded(scriptPath: string) {
+function getTsNodeArgsIfNeeded (scriptPath: string): string[] {
   if (getExecutionMode() !== ExecutionMode.EXECUTION_MODE_TS_NODE_TESTS) {
     return [];
   }

@@ -7,7 +7,7 @@ import { task } from "../internal/core/config/config-env";
 import { runScriptWithAlgob } from "../internal/util/scripts-runner";
 import { TASK_CONSOLE } from "./task-names";
 
-export default function () : void {
+export default function (): void {
   const log = debug("builder:core:tasks:console");
 
   task(TASK_CONSOLE, "Opens builder console")
@@ -18,13 +18,13 @@ export default function () : void {
         { config, run, runtimeArgs }           // eslint-disable-line
 
       ) => {
-        if (!config.paths) {
-          return
+        if (config.paths == null) {
+          return;
         }
 
-        //if (!noCompile) {
+        // if (!noCompile) {
         //  await run("compile");
-        //}
+        // }
 
         await fsExtra.ensureDir(config.paths.cache);
         const historyFile = path.join(
@@ -43,7 +43,7 @@ export default function () : void {
 
         // Running the script "" is like running `node`, so this starts the repl
         await runScriptWithAlgob(runtimeArgs, "", [], nodeArgs, {
-          NODE_REPL_HISTORY: historyFile,
+          NODE_REPL_HISTORY: historyFile
         });
       }
     );

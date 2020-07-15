@@ -3,7 +3,7 @@ import {
   ConfigExtender,
   ConfigurableTaskDefinition,
   EnvironmentExtender,
-  TaskArguments,
+  TaskArguments
 } from "../../../types";
 import { BuilderContext } from "../../context";
 import * as argumentTypes from "../params/argument-types";
@@ -20,7 +20,7 @@ export function task<ArgsT extends TaskArguments>(
   action: ActionType<ArgsT>
 ): ConfigurableTaskDefinition;
 
-export function task<ArgsT extends TaskArguments>(
+export function task<ArgsT extends TaskArguments> (
   name: string,
   descriptionOrAction?: string | ActionType<ArgsT>,
   action?: ActionType<ArgsT>
@@ -50,7 +50,7 @@ export function internalTask<ArgsT extends TaskArguments>(
   action: ActionType<ArgsT>
 ): ConfigurableTaskDefinition;
 
-export function internalTask<ArgsT extends TaskArguments>(
+export function internalTask<ArgsT extends TaskArguments> (
   name: string,
   descriptionOrAction?: string | ActionType<ArgsT>,
   action?: ActionType<ArgsT>
@@ -78,13 +78,13 @@ export const types = argumentTypes;
  * @param extender A function that receives the Builder Runtime
  * Environment.
  */
-export function extendEnvironment(extender: EnvironmentExtender) : void {
+export function extendEnvironment (extender: EnvironmentExtender): void {
   const ctx = BuilderContext.getBuilderContext();
   const extenderManager = ctx.extendersManager;
   extenderManager.add(extender);
 }
 
-export function extendConfig(extender: ConfigExtender) : void {
+export function extendConfig (extender: ConfigExtender): void {
   const ctx = BuilderContext.getBuilderContext();
   ctx.configExtenders.push(extender);
 }
@@ -93,7 +93,7 @@ export function extendConfig(extender: ConfigExtender) : void {
  * Loads a Builder plugin
  * @param pluginName The plugin name.
  */
-export function usePlugin(pluginName: string) : void {
+export function usePlugin (pluginName: string): void {
   const ctx = BuilderContext.getBuilderContext();
   usePluginImplementation(ctx, pluginName);
 }

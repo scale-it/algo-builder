@@ -1,23 +1,26 @@
+import { cmpStr } from "../../lib/comparators";
 import {
   AlgobParamDefinitions,
   ParamDefinition,
   ParamDefinitionAny,
   ParamDefinitionsMap,
-  TasksMap,
+  TasksMap
 } from "../../types";
 import { BuilderError } from "../core/errors";
 import { ERRORS } from "../core/errors-list";
 import { ArgumentsParser } from "./arguments-parser";
 
+const getMax = (a: number, b: number): number => Math.max(a, b);
+
 export class HelpPrinter {
-  constructor(
+  constructor (
     private readonly _programName: string,
     private readonly _version: string,
     private readonly _algobParamDefs: AlgobParamDefinitions,
     private readonly _tasks: TasksMap
   ) {}
 
-  public printGlobalHelp(includeInternalTasks = false) : void {
+  public printGlobalHelp (includeInternalTasks = false): void {
     console.log(`${this._programName} version ${this._version}\n`);
 
     console.log(
@@ -41,7 +44,7 @@ export class HelpPrinter {
       .map((n) => n.length)
       .reduce((a, b) => Math.max(a, b), 0);
 
-    for (const name of Object.keys(tasksToShow).sort()) {
+    for (const name of Object.keys(tasksToShow).sort(cmpStr)) {
       const { description = "" } = this._tasks[name];
 
       console.log(`  ${name.padEnd(nameLength)}\t${description}`);
@@ -54,12 +57,12 @@ export class HelpPrinter {
     );
   }
 
-  public printTaskHelp(taskName: string) : void {
+  public printTaskHelp (taskName: string): void {
     const taskDefinition = this._tasks[taskName];
 
     if (taskDefinition === undefined) {
       throw new BuilderError(ERRORS.ARGUMENTS.UNRECOGNIZED_TASK, {
-        task: taskName,
+        task: taskName
       });
     }
 
@@ -67,7 +70,7 @@ export class HelpPrinter {
       description = "",
       name,
       paramDefinitions,
-      positionalParamDefinitions,
+      positionalParamDefinitions
     } = taskDefinition;
 
     console.log(`${this._programName} version ${this._version}\n`);
@@ -102,14 +105,14 @@ export class HelpPrinter {
     console.log(`For global options help run: ${this._programName} help\n`);
   }
 
-  private _getParamValueDescription<T>(paramDefinition: ParamDefinition<T>) {
+  private _getParamValueDescription<T>(paramDefinition: ParamDefinition<T>): string {
     return `<${paramDefinition.type.name.toUpperCase()}>`;
   }
 
-  private _getParamsList(paramDefinitions: ParamDefinitionsMap) {
+  private _getParamsList (paramDefinitions: ParamDefinitionsMap): string {
     let paramsList = "";
 
-    for (const name of Object.keys(paramDefinitions).sort()) {
+    for (const name of Object.keys(paramDefinitions).sort(cmpStr)) {
       const definition = paramDefinitions[name];
       const { defaultValue, isFlag } = definition;
 
@@ -133,9 +136,9 @@ export class HelpPrinter {
     return paramsList;
   }
 
-  private _getPositionalParamsList(
-    positionalParamDefinitions: Array<ParamDefinitionAny>
-  ) {
+  private _getPositionalParamsList (
+    positionalParamDefinitions: ParamDefinitionAny[]
+  ): string {
     let paramsList = "";
 
     for (const definition of positionalParamDefinitions) {
@@ -161,22 +164,21 @@ export class HelpPrinter {
     return paramsList;
   }
 
-  private _printParamDetails(paramDefinitions: ParamDefinitionsMap) {
+  private _printParamDetails (paramDefinitions: ParamDefinitionsMap): void {
     const shortParamsNameLength = Object.values(paramDefinitions)
       .map((n) => ArgumentsParser.shortParamNameToCLA(n.shortName).length)
-      .reduce((a, b) => Math.max(a, b), 0);
-
+      .reduce(getMax, 0);
     const paramsNameLength = Object.keys(paramDefinitions)
       .map((n) => ArgumentsParser.paramNameToCLA(n).length)
-      .reduce((a, b) => Math.max(a, b), 0);
+      .reduce(getMax, 0);
 
-    for (const name of Object.keys(paramDefinitions).sort()) {
+    for (const name of Object.keys(paramDefinitions).sort(cmpStr)) {
       const {
         description,
         defaultValue,
         isOptional,
         isFlag,
-        shortName,
+        shortName
       } = paramDefinitions[name];
 
       const paddedShortName = ArgumentsParser.shortParamNameToCLA(shortName)
@@ -200,9 +202,9 @@ export class HelpPrinter {
     }
   }
 
-  private _printPositionalParamDetails(
-    positionalParamDefinitions: Array<ParamDefinitionAny>
-  ) {
+  private _printPositionalParamDetails (
+    positionalParamDefinitions: ParamDefinitionAny[]
+  ): void {
     const paramsNameLength = positionalParamDefinitions
       .map((d) => d.name.length)
       .reduce((a, b) => Math.max(a, b), 0);

@@ -4,7 +4,7 @@ import { getClosestCallerPackage } from "../util/caller-package";
 import { replaceAll } from "../util/strings";
 import { ErrorDescriptor, ERRORS, getErrorCode } from "./errors-list";
 
-export { ERRORS };  // re-export errors-list
+export { ERRORS }; // re-export errors-list
 
 // For an explanation about these classes constructors go to:
 // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
@@ -22,7 +22,7 @@ export class BuilderError extends Error {
 
   private readonly _isBuilderError: boolean;
 
-  constructor(
+  constructor (
     errorDescriptor: ErrorDescriptor,
     messageArguments: AnyMap = {},
     parentError?: Error
@@ -84,7 +84,7 @@ export class BuilderPluginError extends Error {
    */
   public constructor(message: string, parent?: Error);
 
-  public constructor(
+  public constructor (
     pluginNameOrMessage: string,
     messageOrParent?: string | Error,
     parent?: Error
@@ -119,19 +119,19 @@ export class BuilderPluginError extends Error {
  * @param template The template string.
  * @param values A map of variable names to their values.
  */
-export function applyErrorMessageTemplate(
+export function applyErrorMessageTemplate (
   template: string,
   values: { [templateVar: string]: any } // eslint-disable-line @typescript-eslint/no-explicit-any
 ): string {
   return _applyErrorMessageTemplate(template, values, false);
 }
 
-function _applyErrorMessageTemplate(
+function _applyErrorMessageTemplate (
   template: string,
   values: { [templateVar: string]: any }, // eslint-disable-line @typescript-eslint/no-explicit-any
   isRecursiveCall: boolean
 ): string {
-  //if (!isRecursiveCall) {
+  // if (!isRecursiveCall) {
   //  for (const variableName of Object.keys(values)) {
   //    if (variableName.match(/^[a-zA-Z][a-zA-Z0-9]*$/) === null) {
   //      throw new BuilderError(ERRORS.INTERNAL.TEMPLATE_INVALID_VARIABLE_NAME, {
@@ -147,7 +147,7 @@ function _applyErrorMessageTemplate(
   //      });
   //    }
   //  }
-  //}
+  // }
 
   if (template.includes("%%")) {
     return template
@@ -173,12 +173,12 @@ function _applyErrorMessageTemplate(
 
     const variableTag = `%${variableName}%`;
 
-    //if (value.match(/%([a-zA-Z][a-zA-Z0-9]*)?%/) !== null) {
+    // if (value.match(/%([a-zA-Z][a-zA-Z0-9]*)?%/) !== null) {
     //  throw new BuilderError(
     //    ERRORS.INTERNAL.TEMPLATE_VALUE_CONTAINS_VARIABLE_TAG,
     //    { variable: variableName }
     //  );
-    //}
+    // }
 
     template = replaceAll(template, variableTag, value);
   }

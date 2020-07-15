@@ -6,9 +6,9 @@
  */
 import { BuilderContext } from "./context";
 import { getUserConfigPath } from "./core/project-structure";
-//import { globSync } from "./util/glob";
+// import { globSync } from "./util/glob";
 
-export function resetBuilderContext(): void {
+export function resetBuilderContext (): void {
   if (BuilderContext.isCreated()) {
     const ctx = BuilderContext.getBuilderContext();
     const globalAsAny = global as any; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -17,7 +17,7 @@ export function resetBuilderContext(): void {
         globalAsAny[key] = undefined;
       }
       // unload config file too.
-      if (ctx.environment.config.paths) {
+      if (ctx.environment.config.paths != null) {
         unloadModule(ctx.environment.config.paths.configFile);
       }
     } else {
@@ -43,7 +43,7 @@ export function resetBuilderContext(): void {
   unloadModule("./lib/lib");
 }
 
-function unloadModule(path: string) {
+function unloadModule (path: string): void {
   try {
     delete require.cache[require.resolve(path)];
   } catch (err) {

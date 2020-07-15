@@ -19,7 +19,7 @@ export enum ExecutionMode {
 
 const workingDirectoryOnLoad = process.cwd();
 
-export function getExecutionMode(): ExecutionMode {
+export function getExecutionMode (): ExecutionMode {
   const isInstalled = __filename.includes("node_modules");
 
   if (!isInstalled) {
@@ -33,7 +33,7 @@ export function getExecutionMode(): ExecutionMode {
   }
 
   try {
-    if (require("is-installed-globally")) {
+    if (require("is-installed-globally") == null) {
       return ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION;
     }
   } catch (error) {
@@ -58,7 +58,7 @@ export function getExecutionMode(): ExecutionMode {
  * directory that contains the `node_module` with the installation, this will
  * fail and return `false`.
  */
-function alternativeIsLocalInstallation(): boolean {
+function alternativeIsLocalInstallation (): boolean {
   let cwd = workingDirectoryOnLoad;
 
   while (true) {

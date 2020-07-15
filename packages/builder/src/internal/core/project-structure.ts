@@ -7,25 +7,25 @@ export const JS_CONFIG_FILENAME = "algob.config.js";
 
 export const ASSETS_DIR = "assets";
 
-export function isCwdInsideProject(): boolean {
+export function isCwdInsideProject (): boolean {
   return Boolean(findUp.sync(JS_CONFIG_FILENAME));
 }
 
-export function getUserConfigPath(): string | undefined {
+export function getUserConfigPath (): string | undefined {
   return findUp.sync(JS_CONFIG_FILENAME);
 }
 
-export async function assertAllDirs(): Promise<void> {
-  const tasks = []
+export async function assertAllDirs (): Promise<void> {
+  const tasks = [];
   for (const d of [ASSETS_DIR]) {
     tasks.push(assertDir(d));
   }
   await Promise.all(tasks);
 }
 
-async function assertDir(dirname: string) {
+async function assertDir (dirname: string): Promise<void> {
   try {
-    await fsp.access(dirname, fs.constants.F_OK)
+    await fsp.access(dirname, fs.constants.F_OK);
   } catch (e) {
     fs.mkdirSync(dirname);
   }

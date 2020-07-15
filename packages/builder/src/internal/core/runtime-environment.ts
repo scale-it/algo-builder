@@ -11,7 +11,7 @@ import type {
   RuntimeArgs,
   TaskArguments,
   TaskDefinition,
-  TasksMap,
+  TasksMap
 } from "../../types";
 import { BuilderError } from "./errors";
 import { ERRORS } from "./errors-list";
@@ -22,7 +22,7 @@ const log = debug("builder:core:bre");
 export class Environment implements AlgobRuntimeEnv {
   private static readonly _BLACKLISTED_PROPERTIES: string[] = [
     "injectToGlobal",
-    "_runTaskDefinition",
+    "_runTaskDefinition"
   ];
 
   public network: Network;
@@ -41,7 +41,7 @@ export class Environment implements AlgobRuntimeEnv {
    * @param tasks A map of tasks.
    * @param extenders A list of extenders.
    */
-  constructor(
+  constructor (
     public readonly config: ResolvedAlgobConfig,
     public readonly runtimeArgs: RuntimeArgs,
     public readonly tasks: TasksMap,
@@ -53,7 +53,7 @@ export class Environment implements AlgobRuntimeEnv {
 
     if (networkConfig === undefined) {
       throw new BuilderError(ERRORS.NETWORK.CONFIG_NOT_FOUND, {
-        network: runtimeArgs.network,
+        network: runtimeArgs.network
       });
     }
 
@@ -64,7 +64,7 @@ export class Environment implements AlgobRuntimeEnv {
     this.network = {
       name: runtimeArgs.network,
       config: networkConfig
-    }
+    };
 
     extenders.forEach((extender) => extender(this));
   }
@@ -85,7 +85,7 @@ export class Environment implements AlgobRuntimeEnv {
 
     if (taskDefinition === undefined) {
       throw new BuilderError(ERRORS.ARGUMENTS.UNRECOGNIZED_TASK, {
-        task: name,
+        task: name
       });
     }
 
@@ -94,7 +94,7 @@ export class Environment implements AlgobRuntimeEnv {
       taskArguments
     );
 
-    return this._runTaskDefinition(taskDefinition, resolvedTaskArguments);
+    return await this._runTaskDefinition(taskDefinition, resolvedTaskArguments);
   };
 
   /**
@@ -104,11 +104,11 @@ export class Environment implements AlgobRuntimeEnv {
    *
    * @returns a function that restores the previous environment.
    */
-  public injectToGlobal(
+  public injectToGlobal (
     blacklist: string[] = Environment._BLACKLISTED_PROPERTIES
   ): () => void {
-    const globalAsAny = global as any;  // eslint-disable-line @typescript-eslint/no-explicit-any
-    const previousValues: { [name: string]: any } = {};   // eslint-disable-line @typescript-eslint/no-explicit-any
+    const globalAsAny = global as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    const previousValues: { [name: string]: any } = {}; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     for (const [key, value] of Object.entries(this)) {
       if (blacklist.includes(key)) {
@@ -120,7 +120,7 @@ export class Environment implements AlgobRuntimeEnv {
     }
 
     return () => {
-      for (const [key, ] of Object.entries(this)) {
+      for (const [key] of Object.entries(this)) {
         if (blacklist.includes(key)) {
           continue;
         }
@@ -130,10 +130,10 @@ export class Environment implements AlgobRuntimeEnv {
     };
   }
 
-  private async _runTaskDefinition(
+  private async _runTaskDefinition (
     taskDefinition: TaskDefinition,
     taskArguments: TaskArguments
-  ) {
+  ): Promise<void> {
     let runSuperFunction: any;  // eslint-disable-line
 
     if (taskDefinition instanceof OverriddenTaskDefinition) {
@@ -142,7 +142,7 @@ export class Environment implements AlgobRuntimeEnv {
       ) => {
         log("Running %s's super", taskDefinition.name);
 
-        return this._runTaskDefinition(
+        return await this._runTaskDefinition(
           taskDefinition.parentTaskDefinition,
           _taskArguments
         );
@@ -152,7 +152,7 @@ export class Environment implements AlgobRuntimeEnv {
     } else {
       runSuperFunction = async () => {
         throw new BuilderError(ERRORS.TASK_DEFINITIONS.RUNSUPER_NOT_AVAILABLE, {
-          taskName: taskDefinition.name,
+          taskName: taskDefinition.name
         });
       };
 
@@ -161,7 +161,7 @@ export class Environment implements AlgobRuntimeEnv {
 
     const runSuper: RunSuperFunction<TaskArguments> = runSuperFunction;
 
-    const globalAsAny = global as any;  // eslint-disable-line @typescript-eslint/no-explicit-any
+    const globalAsAny = global as any; // eslint-disable-line @typescript-eslint/no-explicit-any
     const previousRunSuper = globalAsAny.runSuper;
     globalAsAny.runSuper = runSuper;
 
@@ -188,7 +188,7 @@ export class Environment implements AlgobRuntimeEnv {
    * @param taskArguments
    * @returns resolvedTaskArguments
    */
-  private _resolveValidTaskArguments(
+  private _resolveValidTaskArguments (
     taskDefinition: TaskDefinition,
     taskArguments: TaskArguments
   ): TaskArguments {
@@ -199,12 +199,12 @@ export class Environment implements AlgobRuntimeEnv {
     // gather all task param definitions
     const allTaskParamDefinitions = [
       ...nonPositionalParamDefinitions,
-      ...positionalParamDefinitions,
+      ...positionalParamDefinitions
     ];
 
     const initResolvedArguments: {
-      errors: BuilderError[];
-      values: TaskArguments;
+      errors: BuilderError[]
+      values: TaskArguments
     } = { errors: [], values: {} };
 
     const resolvedArguments = allTaskParamDefinitions.reduce(
@@ -245,10 +245,10 @@ export class Environment implements AlgobRuntimeEnv {
    * @param argumentValue
    * @private
    */
-  private _resolveArgument(
+  private _resolveArgument (
     paramDefinition: ParamDefinitionAny,
-    argumentValue: any  // eslint-disable-line @typescript-eslint/no-explicit-any
-  ) {
+    argumentValue: any // eslint-disable-line @typescript-eslint/no-explicit-any
+  ): any { // eslint-disable-line @typescript-eslint/no-explicit-any
     const { name, isOptional, defaultValue } = paramDefinition;
 
     if (argumentValue === undefined) {
@@ -259,7 +259,7 @@ export class Environment implements AlgobRuntimeEnv {
 
       // undefined & mandatory argument -> error
       throw new BuilderError(ERRORS.ARGUMENTS.MISSING_TASK_ARGUMENT, {
-        param: name,
+        param: name
       });
     }
 
@@ -277,10 +277,10 @@ export class Environment implements AlgobRuntimeEnv {
    * @private
    * @throws ALGORAND_BUILDER301 if value is not valid for the param type
    */
-  private _checkTypeValidation(
+  private _checkTypeValidation (
     paramDefinition: ParamDefinitionAny,
-    argumentValue: any  // eslint-disable-line @typescript-eslint/no-explicit-any
-  ) {
+    argumentValue: any // eslint-disable-line @typescript-eslint/no-explicit-any
+  ): void {
     const { name: paramName, type, isVariadic } = paramDefinition;
     if (type === undefined || type.validate === undefined) {
       // no type or no validate() method defined, just skip validation.

@@ -2,11 +2,11 @@ import {
   ActionType,
   TaskArguments,
   TaskDefinition,
-  TasksMap,
+  TasksMap
 } from "../../../types";
 import {
   OverriddenTaskDefinition,
-  SimpleTaskDefinition,
+  SimpleTaskDefinition
 } from "./task-definitions";
 
 /**
@@ -101,7 +101,7 @@ export class TasksDSL {
    *
    * @returns The tasks container.
    */
-  public getTaskDefinitions(): TasksMap {
+  public getTaskDefinitions (): TasksMap {
     return this._tasks;
   }
 
@@ -110,7 +110,7 @@ export class TasksDSL {
     descriptionOrAction?: string | ActionType<ArgT>,
     action?: ActionType<ArgT>,
     isInternal?: boolean
-  ) {
+  ): TaskDefinition {
     const parentTaskDefinition = this._tasks[name];
 
     let taskDefinition: TaskDefinition;

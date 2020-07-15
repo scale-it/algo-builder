@@ -1,4 +1,4 @@
-export function isNodeCalledWithoutAScript(): boolean {
+export function isNodeCalledWithoutAScript (): boolean {
   const script = process.argv[1];
   return script === undefined || script.trim() === "";
 }
@@ -8,14 +8,14 @@ export function isNodeCalledWithoutAScript(): boolean {
  * of actually inspecting them. This makes all our lazy loading efforts wicked,
  * so we disable it ni buidler/register.
  */
-export function disableReplWriterShowProxy(): void {
+export function disableReplWriterShowProxy (): void {
   const repl = require("repl"); // eslint-disable-line @typescript-eslint/no-var-requires
 
-  if (repl.writer.options) {
+  if (repl.writer.options != null) {
     Object.defineProperty(repl.writer.options, "showProxy", {
       value: false,
       writable: false,
-      configurable: false,
+      configurable: false
     });
   }
 }

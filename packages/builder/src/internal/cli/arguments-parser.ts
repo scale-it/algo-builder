@@ -5,7 +5,7 @@ import {
   ParamDefinitionsMap,
   RuntimeArgs,
   TaskArguments,
-  TaskDefinition,
+  TaskDefinition
 } from "../../types";
 import { BuilderError } from "../core/errors";
 import { ERRORS } from "../core/errors-list";
@@ -14,7 +14,7 @@ export class ArgumentsParser {
   public static readonly PARAM_PREFIX = "--";
   public static readonly SHORT_PARAM_PREFIX = "-";
 
-  public static paramNameToCLA(paramName: string): string {
+  public static paramNameToCLA (paramName: string): string {
     return (
       ArgumentsParser.PARAM_PREFIX +
       paramName
@@ -24,17 +24,17 @@ export class ArgumentsParser {
     );
   }
 
-  public static shortParamNameToCLA(paramName?: string): string {
+  public static shortParamNameToCLA (paramName?: string): string {
     if (paramName) {
       return ArgumentsParser.SHORT_PARAM_PREFIX + paramName;
     }
-    return ""
+    return "";
   }
 
-  public static cLAToParamName(cLA: string): string {
+  public static cLAToParamName (cLA: string): string {
     if (cLA.toLowerCase() !== cLA) {
       throw new BuilderError(ERRORS.ARGUMENTS.PARAM_NAME_INVALID_CASING, {
-        param: cLA,
+        param: cLA
       });
     }
 
@@ -49,9 +49,9 @@ export class ArgumentsParser {
     );
   }
 
-  private _substituteShortParam(arg: string, shortParamSubs: AlgobShortParamSubstitutions): string {
+  private _substituteShortParam (arg: string, shortParamSubs: AlgobShortParamSubstitutions): string {
     if (this._hasShortParamNameFormat(arg)) {
-      const substitution = shortParamSubs[arg.substr(1)]
+      const substitution = shortParamSubs[arg.substr(1)];
       if (substitution) {
         return ArgumentsParser.PARAM_PREFIX + substitution;
       }
@@ -59,16 +59,16 @@ export class ArgumentsParser {
     return arg;
   }
 
-  public parseRuntimeArgs(
+  public parseRuntimeArgs (
     paramDefs: AlgobParamDefinitions,
     shortParamSubs: AlgobShortParamSubstitutions,
     envVariableArguments: RuntimeArgs,
     rawCLAs: string[]
   ): {
-    runtimeArgs: RuntimeArgs;
-    taskName?: string;
-    unparsedCLAs: string[];
-  } {
+      runtimeArgs: RuntimeArgs
+      taskName?: string
+      unparsedCLAs: string[]
+    } {
     const runtimeArgs: Partial<RuntimeArgs> = {};
     let taskName: string | undefined;
     const unparsedCLAs: string[] = [];
@@ -111,17 +111,17 @@ export class ArgumentsParser {
         runtimeArgs
       ),
       taskName,
-      unparsedCLAs,
+      unparsedCLAs
     };
   }
 
-  public parseTaskArguments(
+  public parseTaskArguments (
     taskDefinition: TaskDefinition,
     rawCLAs: string[]
   ): TaskArguments {
     const {
       paramArguments,
-      rawPositionalArguments,
+      rawPositionalArguments
     } = this._parseTaskParamArguments(taskDefinition, rawCLAs);
 
     const positionalArguments = this._parsePositionalParamArgs(
@@ -132,10 +132,10 @@ export class ArgumentsParser {
     return { ...paramArguments, ...positionalArguments };
   }
 
-  private _parseTaskParamArguments(
+  private _parseTaskParamArguments (
     taskDefinition: TaskDefinition,
     rawCLAs: string[]
-  ) {
+  ): {paramArguments: object, rawPositionalArguments: string[]} {
     const paramArguments = {};
     const rawPositionalArguments: string[] = [];
 
@@ -149,7 +149,7 @@ export class ArgumentsParser {
 
       if (!this._isCLAParamName(arg, taskDefinition.paramDefinitions)) {
         throw new BuilderError(ERRORS.ARGUMENTS.UNRECOGNIZED_PARAM_NAME, {
-          param: arg,
+          param: arg
         });
       }
 
@@ -166,21 +166,21 @@ export class ArgumentsParser {
     return { paramArguments, rawPositionalArguments };
   }
 
-  private _addBuilderDefaultArguments(
+  private _addBuilderDefaultArguments (
     paramDefs: AlgobParamDefinitions,
     envVariableArguments: RuntimeArgs,
     runtimeArgs: Partial<RuntimeArgs>
   ): RuntimeArgs {
     return {
       ...envVariableArguments,
-      ...runtimeArgs,
+      ...runtimeArgs
     };
   }
 
-  private _addTaskDefaultArguments(
+  private _addTaskDefaultArguments (
     taskDefinition: TaskDefinition,
     taskArguments: TaskArguments
-  ) {
+  ): void {
     for (const paramName of Object.keys(taskDefinition.paramDefinitions)) {
       const definition = taskDefinition.paramDefinitions[paramName];
 
@@ -189,7 +189,7 @@ export class ArgumentsParser {
       }
       if (!definition.isOptional) {
         throw new BuilderError(ERRORS.ARGUMENTS.MISSING_TASK_ARGUMENT, {
-          param: ArgumentsParser.paramNameToCLA(paramName),
+          param: ArgumentsParser.paramNameToCLA(paramName)
         });
       }
 
@@ -197,7 +197,7 @@ export class ArgumentsParser {
     }
   }
 
-  private _isCLAParamName(str: string, paramDefinitions: ParamDefinitionsMap) {
+  private _isCLAParamName (str: string, paramDefinitions: ParamDefinitionsMap): boolean {
     if (!this._hasCLAParamNameFormat(str)) {
       return false;
     }
@@ -206,27 +206,27 @@ export class ArgumentsParser {
     return paramDefinitions[name] !== undefined;
   }
 
-  private _hasCLAParamNameFormat(str: string) {
+  private _hasCLAParamNameFormat (str: string): boolean {
     return str.startsWith(ArgumentsParser.PARAM_PREFIX);
   }
 
-  private _hasShortParamNameFormat(str: string) {
+  private _hasShortParamNameFormat (str: string): boolean {
     return str.startsWith(ArgumentsParser.SHORT_PARAM_PREFIX) && str.length === 2;
   }
 
-  private _parseArgumentAt(
+  private _parseArgumentAt (
     rawCLAs: string[],
     index: number,
     paramDefinitions: ParamDefinitionsMap,
     parsedArguments: TaskArguments
-  ) {
+  ): number {
     const claArg = rawCLAs[index];
     const paramName = ArgumentsParser.cLAToParamName(claArg);
     const definition = paramDefinitions[paramName];
 
     if (parsedArguments[paramName] !== undefined) {
       throw new BuilderError(ERRORS.ARGUMENTS.REPEATED_PARAM, {
-        param: claArg,
+        param: claArg
       });
     }
 
@@ -238,7 +238,7 @@ export class ArgumentsParser {
 
       if (value === undefined) {
         throw new BuilderError(ERRORS.ARGUMENTS.MISSING_TASK_ARGUMENT, {
-          param: ArgumentsParser.paramNameToCLA(paramName),
+          param: ArgumentsParser.paramNameToCLA(paramName)
         });
       }
 
@@ -248,7 +248,7 @@ export class ArgumentsParser {
     return index;
   }
 
-  private _parsePositionalParamArgs(
+  private _parsePositionalParamArgs (
     rawPositionalParamArgs: string[],
     positionalParamDefinitions: Array<ParamDefinition<any>> // eslint-disable-line @typescript-eslint/no-explicit-any
   ): TaskArguments {
@@ -262,7 +262,7 @@ export class ArgumentsParser {
       if (rawArg === undefined) {
         if (!definition.isOptional) {
           throw new BuilderError(ERRORS.ARGUMENTS.MISSING_POSITIONAL_ARG, {
-            param: definition.name,
+            param: definition.name
           });
         }
 
@@ -276,18 +276,15 @@ export class ArgumentsParser {
       }
     }
 
-    const lastDefinition =
-      positionalParamDefinitions[positionalParamDefinitions.length - 1];
-
     const hasVariadicParam =
-      lastDefinition !== undefined && lastDefinition.isVariadic;
+      positionalParamDefinitions[positionalParamDefinitions.length - 1]?.isVariadic; ;
 
     if (
       !hasVariadicParam &&
       rawPositionalParamArgs.length > positionalParamDefinitions.length
     ) {
       throw new BuilderError(ERRORS.ARGUMENTS.UNRECOGNIZED_POSITIONAL_ARG, {
-        argument: rawPositionalParamArgs[positionalParamDefinitions.length],
+        argument: rawPositionalParamArgs[positionalParamDefinitions.length]
       });
     }
 

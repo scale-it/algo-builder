@@ -36,9 +36,9 @@ if (BuilderContext.isCreated()) {
 
   const config = loadConfigAndTasks(runtimeArgs);
 
-  if (!runtimeArgs.network) {
+  if (runtimeArgs.network == null) {
     // TODO:RZ
-    throw new Error("INTERNAL ERROR. Default network should be registered in `register.ts` module")
+    throw new Error("INTERNAL ERROR. Default network should be registered in `register.ts` module");
   }
 
   env = new Environment(
