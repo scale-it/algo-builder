@@ -5,9 +5,7 @@ module.exports = {
   },
   plugins: ["simple-import-sort", "sonarjs"],
   extends: [
-    // "eslint:recommended",
-    "plugin:@typescript-eslint/eslint-recommended",
-    "plugin:@typescript-eslint/recommended",
+    "standard-with-typescript",
     "plugin:sonarjs/recommended"
   ],
   parserOptions: {
@@ -26,6 +24,11 @@ module.exports = {
 
     "no-underscore-dangle": 0,
     "@typescript-eslint/no-unused-vars": ["warn", { "vars": "all", "args": "none", "ignoreRestSiblings": false, "varsIgnorePattern": "_" }],
+
+    "@typescript-eslint/semi": ["error", "always"],
+    "@typescript-eslint/quotes": "off",
+    "@typescript-eslint/no-dynamic-delete": "off",
+    "@typescript-eslint/strict-boolean-expressions": "off",
 
     "sonarjs/cognitive-complexity": ["error", 16]
   }

@@ -1,14 +1,14 @@
 import * as findup from "find-up";
 import * as path from "path";
 
-function findClosestPackageJson(file: string): string | null {
-  return findup.sync("package.json", { cwd: path.dirname(file) }) || null;
+function findClosestPackageJson (file: string): string | null {
+  return findup.sync("package.json", { cwd: path.dirname(file) }) ?? null;
 }
 
 /**
  * Returns the name of the closest package in the callstack that isn't this.
  */
-export function getClosestCallerPackage(): string | undefined {
+export function getClosestCallerPackage (): string | undefined {
   const previousPrepareStackTrace = Error.prepareStackTrace;
 
   Error.prepareStackTrace = (e, s) => s;
@@ -33,7 +33,7 @@ export function getClosestCallerPackage(): string | undefined {
         return undefined;
       }
 
-      return require(callerPackage).name;  // eslint-disable-line @typescript-eslint/no-var-requires
+      return require(callerPackage).name; // eslint-disable-line @typescript-eslint/no-var-requires
     }
   }
 

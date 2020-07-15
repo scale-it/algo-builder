@@ -1,7 +1,7 @@
 
 import { getFunctionName } from "io-ts/lib";
 
-function stringify(v: any): string {  // eslint-disable-line @typescript-eslint/no-explicit-any
+function stringify (v: any): string { // eslint-disable-line @typescript-eslint/no-explicit-any
   if (typeof v === "function") {
     return getFunctionName(v);
   }
@@ -27,19 +27,18 @@ export default class CfgErrors {
     this.errors.push(mkErrorMessage(
       `config.networks.${net}.${field}`,
       val,
-      expectedType))
+      expectedType));
   }
 
-  public concatenate(errors: string[]) : void{
-    for (const e of errors)
-      this.errors.push(e);
+  public concatenate (errors: string[]): void{
+    for (const e of errors) { this.errors.push(e); }
   }
 
-  public isEmpty() : boolean {
-    return this.errors.length == 0
+  public isEmpty (): boolean {
+    return this.errors.length === 0;
   }
 
-  public toString() : string {
+  public toString (): string {
     return this.errors.join("\n  * ");
   }
 }

@@ -3,60 +3,60 @@ import fsExtra from "fs-extra";
 import os from "os";
 import path from "path";
 
-import type { PromiseAny } from "../../types"
+import type { PromiseAny } from "../../types";
 import { ALGOB_NAME } from "../constants";
 import { BuilderError } from "../core/errors";
-import { ERRORS } from "../core/errors-list"
+import { ERRORS } from "../core/errors-list";
 import { ExecutionMode, getExecutionMode } from "../core/execution-mode";
 import { getPackageJson, getPackageRoot } from "../util/package-info";
 
 const SAMPLE_PROJECT_DEPENDENCIES = [
-  "chai",
+  "chai"
 ];
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function removeProjectDirIfPresent(projectRoot: string, dirName: string) {
+async function removeProjectDirIfPresent (projectRoot: string, dirName: string): Promise<void> {
   const dirPath = path.join(projectRoot, dirName);
   if (await fsExtra.pathExists(dirPath)) {
     await fsExtra.remove(dirPath);
   }
 }
 
-async function printWelcomeMessage() {
+async function printWelcomeMessage (): Promise<void> {
   const packageJson = await getPackageJson();
 
   console.log(
     chalk.cyan(`★ Welcome to ${ALGOB_NAME} v${packageJson.version}`));
 }
 
-function copySampleProject(location: string) {
+function copySampleProject (location: string): void {
   const packageRoot = getPackageRoot();
-  const sampleProjDir = path.join(packageRoot, "sample-project")
+  const sampleProjDir = path.join(packageRoot, "sample-project");
 
-  console.log(chalk.greenBright("Initializing new workspace in " + process.cwd() + "."))
+  console.log(chalk.greenBright("Initializing new workspace in " + process.cwd() + "."));
 
-  return fsExtra.copySync(sampleProjDir, location, {
+  fsExtra.copySync(sampleProjDir, location, {
     // User doesn't choose the directory so overwrite should be avoided
     overwrite: false,
     filter: (src: string, dest: string) => {
-      const relPath = path.relative(process.cwd(), dest)
+      const relPath = path.relative(process.cwd(), dest);
       if (relPath === '') {
-        return true
+        return true;
       }
       if (path.basename(dest) === ".gitkeep") {
-        return false
+        return false;
       }
       if (fsExtra.pathExistsSync(dest)) {
         throw new BuilderError(ERRORS.GENERAL.INIT_INSIDE_PROJECT, {
           clashingFile: relPath
         });
       }
-      return true
+      return true;
     }
-  })
+  });
 }
 
-function printSuggestedCommands() {
+function printSuggestedCommands (): void {
   const npx =
     getExecutionMode() === ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION
       ? ""
@@ -71,7 +71,7 @@ function printSuggestedCommands() {
   console.log(`  ${npx}${ALGOB_NAME} help`);
 }
 
-async function printPluginInstallationInstructions() {
+async function printPluginInstallationInstructions (): Promise<void> {
   console.log(
     `You need to install these dependencies to run the sample project:`
   );
@@ -81,7 +81,7 @@ async function printPluginInstallationInstructions() {
   console.log(`  ${cmd.join(" ")}`);
 }
 
-export async function createProject(location: string): PromiseAny {
+export async function createProject (location: string): PromiseAny {
   await printWelcomeMessage();
 
   copySampleProject(location);
@@ -123,29 +123,29 @@ export async function createProject(location: string): PromiseAny {
   printSuggestedCommands();
 }
 
-function createConfirmationPrompt(name: string, message: string) {
+function createConfirmationPrompt (name: string, message: string) { // eslint-disable-line @typescript-eslint/explicit-function-return-type
   return {
     type: "confirm",
     name,
     message,
     initial: "y",
     default: "(Y/n)",
-    isTrue(input: string | boolean) {
+    isTrue (input: string | boolean) {
       if (typeof input === "string") {
         return input.toLowerCase() === "y";
       }
 
       return input;
     },
-    isFalse(input: string | boolean) {
+    isFalse (input: string | boolean) {
       if (typeof input === "string") {
         return input.toLowerCase() === "n";
       }
 
       return input;
     },
-    format(): string {
-      const that = this as any;  // eslint-disable-line @typescript-eslint/no-explicit-any
+    format (): string {
+      const that = this as any; // eslint-disable-line @typescript-eslint/no-explicit-any
       const value = that.value === true ? "y" : "n";
 
       if (that.state.submitted === true) {
@@ -153,11 +153,11 @@ function createConfirmationPrompt(name: string, message: string) {
       }
 
       return value;
-    },
+    }
   };
 }
 
-async function canInstallPlugin() {
+async function canInstallPlugin (): Promise<boolean> {
   return (
     (await fsExtra.pathExists("package.json")) &&
     (getExecutionMode() === ExecutionMode.EXECUTION_MODE_LOCAL_INSTALLATION ||
@@ -167,35 +167,35 @@ async function canInstallPlugin() {
   );
 }
 
-function isInstalled(dep: string) {
+function isInstalled (dep: string): boolean {
   const packageJson = fsExtra.readJSONSync("package.json");
   const allDependencies = {
     ...packageJson.dependencies,
     ...packageJson.devDependencies,
-    ...packageJson.optionalDependencies,
+    ...packageJson.optionalDependencies
   };
 
   return dep in allDependencies;
 }
 
-async function isYarnProject() {
-  return fsExtra.pathExists("yarn.lock");
+function isYarnProject (): boolean {
+  return fsExtra.pathExistsSync("yarn.lock");
 }
 
-async function installRecommendedDependencies() {
+async function installRecommendedDependencies (): Promise<boolean> {
   console.log("");
   const installCmd = await npmInstallCmd();
-  return installDependencies(installCmd[0], installCmd.slice(1));
+  return await installDependencies(installCmd[0], installCmd.slice(1));
 }
 
-async function confirmPluginInstallation(): Promise<boolean> {
+async function confirmPluginInstallation (): Promise<boolean> {
   const { default: enquirer } = await import("enquirer");
 
   let responses: {
-    shouldInstallPlugin: boolean;
+    shouldInstallPlugin: boolean
   };
 
-  const packageManager = (await isYarnProject()) ? "yarn" : "npm";
+  const packageManager = isYarnProject() ? "yarn" : "npm";
 
   try {
     responses = await enquirer.prompt([
@@ -204,7 +204,7 @@ async function confirmPluginInstallation(): Promise<boolean> {
         `Do you want to install the sample project's dependencies with ${packageManager} (${SAMPLE_PROJECT_DEPENDENCIES.join(
           " "
         )})?`
-      ),
+      )
     ]);
   } catch (e) {
     if (e === "") {
@@ -214,10 +214,10 @@ async function confirmPluginInstallation(): Promise<boolean> {
     throw e;
   }
 
-  return responses.shouldInstallPlugin === true;
+  return responses.shouldInstallPlugin;
 }
 
-async function installDependencies(
+async function installDependencies (
   packageManager: string,
   args: string[]
 ): Promise<boolean> {
@@ -226,10 +226,10 @@ async function installDependencies(
   console.log(`${packageManager} ${args.join(" ")}`);
 
   const childProcess = spawn(packageManager, args, {
-    stdio: "inherit" as any,  // eslint-disable-line @typescript-eslint/no-explicit-any
+    stdio: "inherit" as any // eslint-disable-line @typescript-eslint/no-explicit-any
   });
 
-  return new Promise<boolean>((resolve, reject) => {
+  return await new Promise<boolean>((resolve, reject) => {
     childProcess.once("close", (status) => {
       childProcess.removeAllListeners("error");
 
@@ -238,31 +238,29 @@ async function installDependencies(
         return;
       }
 
-      reject(false);
+      reject(new Error("script process returned not 0 status"));
     });
 
     childProcess.once("error", (status) => {
       childProcess.removeAllListeners("close");
-      reject(false);
+      reject(new Error("script process returned not 0 status"));
     });
   });
 }
 
-async function npmInstallCmd(): Promise<string[]> {
+async function npmInstallCmd (): Promise<string[]> {
   const isGlobal =
     getExecutionMode() === ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION;
 
-  if (await isYarnProject()) {
+  if (isYarnProject()) {
     const cmd = ["yarn"];
-    if (isGlobal)
-      cmd.push("global");
+    if (isGlobal) { cmd.push("global"); }
     cmd.push("add", "--dev", ...SAMPLE_PROJECT_DEPENDENCIES);
-    return cmd
+    return cmd;
   }
 
   const npmInstall = ["npm", "install"];
-  if (isGlobal)
-    npmInstall.push("--global");
+  if (isGlobal) { npmInstall.push("--global"); }
 
   return [...npmInstall, "--save-dev", ...SAMPLE_PROJECT_DEPENDENCIES];
 }

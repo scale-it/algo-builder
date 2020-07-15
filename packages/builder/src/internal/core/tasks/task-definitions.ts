@@ -3,7 +3,7 @@ import {
   ParamDefinitionAny,
   ParamDefinitionsMap,
   TaskArguments,
-  TaskDefinition,
+  TaskDefinition
 } from "../../../types";
 import { BuilderError } from "../errors";
 import { ErrorDescriptor, ERRORS } from "../errors-list";
@@ -19,14 +19,15 @@ import { ALGOB_PARAM_DEFINITIONS } from "../params/builder-params";
  *
  */
 export class SimpleTaskDefinition implements TaskDefinition {
-  get description() : (string | undefined) {
+  get description (): (string | undefined) {
     return this._description;
   }
+
   public readonly paramDefinitions: ParamDefinitionsMap = {};
-  public readonly positionalParamDefinitions: Array<ParamDefinitionAny> = [];
+  public readonly positionalParamDefinitions: ParamDefinitionAny[] = [];
   public action: ActionType<TaskArguments>;
 
-  private _positionalParamNames: Set<string>;
+  private readonly _positionalParamNames: Set<string>;
   private _hasVariadicParam: boolean;
   private _hasOptionalPositionalParam: boolean;
   private _description?: string;
@@ -39,7 +40,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
    * @param name The task's name.
    * @param isInternal `true` if the task is internal, `false` otherwise.
    */
-  constructor(
+  constructor (
     public readonly name: string,
     public readonly isInternal: boolean = false
   ) {
@@ -48,7 +49,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
     this._hasOptionalPositionalParam = false;
     this.action = () => {
       throw new BuilderError(ERRORS.TASK_DEFINITIONS.ACTION_NOT_SET, {
-        taskName: name,
+        taskName: name
       });
     };
   }
@@ -57,7 +58,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
    * Sets the task's description.
    * @param description The description.
    */
-  public setDescription(description: string) : this {
+  public setDescription (description: string): this {
     this._description = description;
     return this;
   }
@@ -66,7 +67,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
    * Sets the task's action.
    * @param action The action.
    */
-  public setAction<ArgsT extends TaskArguments>(action: ActionType<ArgsT>) : this {
+  public setAction<ArgsT extends TaskArguments>(action: ActionType<ArgsT>): this {
     // TODO: There's probably something bad here. See types.ts for more info.
     this.action = action;
     return this;
@@ -107,7 +108,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
           ERRORS.TASK_DEFINITIONS.DEFAULT_VALUE_WRONG_TYPE,
           {
             paramName: name,
-            taskName: this.name,
+            taskName: this.name
           }
         );
       }
@@ -136,7 +137,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
       description,
       isOptional,
       isFlag: false,
-      isVariadic: false,
+      isVariadic: false
     };
 
     return this;
@@ -171,7 +172,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
    * @param name the parameter's name.
    * @param description the parameter's description.
    */
-  public addFlag(name: string, description?: string) : this {
+  public addFlag (name: string, description?: string): this {
     this._validateParamNameCasing(name);
     this._validateNameNotUsed(name);
 
@@ -182,7 +183,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
       description,
       isFlag: true,
       isOptional: true,
-      isVariadic: false,
+      isVariadic: false
     };
 
     return this;
@@ -226,7 +227,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
           ERRORS.TASK_DEFINITIONS.DEFAULT_VALUE_WRONG_TYPE,
           {
             paramName: name,
-            taskName: this.name,
+            taskName: this.name
           }
         );
       }
@@ -257,7 +258,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
       description,
       isVariadic: false,
       isOptional,
-      isFlag: false,
+      isFlag: false
     };
 
     this._addPositionalParamDefinition(definition);
@@ -321,7 +322,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
           ERRORS.TASK_DEFINITIONS.DEFAULT_VALUE_WRONG_TYPE,
           {
             paramName: name,
-            taskName: this.name,
+            taskName: this.name
           }
         );
       }
@@ -352,7 +353,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
       description,
       isVariadic: true,
       isOptional,
-      isFlag: false,
+      isFlag: false
     };
 
     this._addPositionalParamDefinition(definition);
@@ -391,7 +392,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
    *
    * @param definition the param's definition
    */
-  private _addPositionalParamDefinition(definition: ParamDefinitionAny) {
+  private _addPositionalParamDefinition (definition: ParamDefinitionAny): void {
     if (definition.isVariadic) {
       this._hasVariadicParam = true;
     }
@@ -409,11 +410,11 @@ export class SimpleTaskDefinition implements TaskDefinition {
    * @param name the param's name.
    * @throws ALGORAND_BUILDER200
    */
-  private _validateNotAfterVariadicParam(name: string) {
+  private _validateNotAfterVariadicParam (name: string): void {
     if (this._hasVariadicParam) {
       throw new BuilderError(ERRORS.TASK_DEFINITIONS.PARAM_AFTER_VARIADIC, {
         paramName: name,
-        taskName: this.name,
+        taskName: this.name
       });
     }
   }
@@ -425,11 +426,11 @@ export class SimpleTaskDefinition implements TaskDefinition {
    * @throws ALGORAND_BUILDER201 if `name` is already used as a param.
    * @throws ALGORAND_BUILDER202 if `name` is already used as a param by Builder
    */
-  private _validateNameNotUsed(name: string) {
+  private _validateNameNotUsed (name: string): void {
     if (this._hasParamDefined(name)) {
       throw new BuilderError(ERRORS.TASK_DEFINITIONS.PARAM_ALREADY_DEFINED, {
         paramName: name,
-        taskName: this.name,
+        taskName: this.name
       });
     }
 
@@ -438,7 +439,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
         ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_ALGOB_PARAM,
         {
           paramName: name,
-          taskName: this.name,
+          taskName: this.name
         }
       );
     }
@@ -448,7 +449,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
    * Checks if the given name is already used.
    * @param name the param's name.
    */
-  private _hasParamDefined(name: string) {
+  private _hasParamDefined (name: string): boolean {
     return (
       this.paramDefinitions[name] !== undefined ||
       this._positionalParamNames.has(name)
@@ -463,22 +464,22 @@ export class SimpleTaskDefinition implements TaskDefinition {
    *
    * @throws ALGORAND_BUILDER203 if validation fail
    */
-  private _validateNoMandatoryParamAfterOptionalOnes(
+  private _validateNoMandatoryParamAfterOptionalOnes (
     name: string,
     isOptional: boolean
-  ) {
+  ): void {
     if (!isOptional && this._hasOptionalPositionalParam) {
       throw new BuilderError(
         ERRORS.TASK_DEFINITIONS.MANDATORY_PARAM_AFTER_OPTIONAL,
         {
           paramName: name,
-          taskName: this.name,
+          taskName: this.name
         }
       );
     }
   }
 
-  private _validateParamNameCasing(name: string) {
+  private _validateParamNameCasing (name: string): void {
     const pattern = /^[a-z]+([a-zA-Z0-9])*$/;
     const match = name.match(pattern);
     if (match === null) {
@@ -486,29 +487,29 @@ export class SimpleTaskDefinition implements TaskDefinition {
         ERRORS.TASK_DEFINITIONS.INVALID_PARAM_NAME_CASING,
         {
           paramName: name,
-          taskName: this.name,
+          taskName: this.name
         }
       );
     }
   }
 
-  private _validateNoDefaultValueForMandatoryParam(
-    defaultValue: any | undefined,  // eslint-disable-line @typescript-eslint/no-explicit-any
+  private _validateNoDefaultValueForMandatoryParam (
+    defaultValue: any | undefined, // eslint-disable-line @typescript-eslint/no-explicit-any
     isOptional: boolean,
     name: string
-  ) {
+  ): void {
     if (defaultValue !== undefined && !isOptional) {
       throw new BuilderError(
         ERRORS.TASK_DEFINITIONS.DEFAULT_IN_MANDATORY_PARAM,
         {
           paramName: name,
-          taskName: this.name,
+          taskName: this.name
         }
       );
     }
   }
 
-  private _isStringArray(values: any): values is string[] {  // eslint-disable-line @typescript-eslint/no-explicit-any
+  private _isStringArray (values: any): values is string[] { // eslint-disable-line @typescript-eslint/no-explicit-any
     return Array.isArray(values) && values.every((v) => typeof v === "string");
   }
 }
@@ -526,7 +527,7 @@ export class OverriddenTaskDefinition implements TaskDefinition {
   private _description?: string;
   private _action?: ActionType<TaskArguments>;
 
-  constructor(
+  constructor (
     public readonly parentTaskDefinition: TaskDefinition,
     public readonly isInternal: boolean = false
   ) {
@@ -534,7 +535,7 @@ export class OverriddenTaskDefinition implements TaskDefinition {
     this.parentTaskDefinition = parentTaskDefinition;
   }
 
-  public setDescription(description: string): this{
+  public setDescription (description: string): this{
     this._description = description;
     return this;
   }
@@ -552,7 +553,7 @@ export class OverriddenTaskDefinition implements TaskDefinition {
   /**
    * Retrieves the parent task's name.
    */
-  get name() : string {
+  get name (): string {
     return this.parentTaskDefinition.name;
   }
 
@@ -560,19 +561,19 @@ export class OverriddenTaskDefinition implements TaskDefinition {
    * Retrieves, if defined, the description of the overriden task,
    * otherwise retrieves the description of the parent task.
    */
-  get description() : string {
+  get description (): string {
     if (this._description !== undefined) {
       return this._description;
     }
 
-    return this.parentTaskDefinition.description || "";
+    return this.parentTaskDefinition.description ?? "";
   }
 
   /**
    * Retrieves, if defined, the action of the overriden task,
    * otherwise retrieves the action of the parent task.
    */
-  get action(): ActionType<TaskArguments> {
+  get action (): ActionType<TaskArguments> {
     if (this._action !== undefined) {
       return this._action;
     }
@@ -583,14 +584,14 @@ export class OverriddenTaskDefinition implements TaskDefinition {
   /**
    * Retrieves the parent task's param definitions.
    */
-  get paramDefinitions(): ParamDefinitionsMap {
+  get paramDefinitions (): ParamDefinitionsMap {
     return this.parentTaskDefinition.paramDefinitions;
   }
 
   /**
    * Retrieves the parent task's positional param definitions.
    */
-  get positionalParamDefinitions(): ParamDefinitionAny[] {
+  get positionalParamDefinitions (): ParamDefinitionAny[] {
     return this.parentTaskDefinition.positionalParamDefinitions;
   }
 
@@ -695,14 +696,14 @@ export class OverriddenTaskDefinition implements TaskDefinition {
    * @throws ALGORAND_BUILDER201 if param name was already defined in any parent task.
    * @throws ALGORAND_BUILDER209 if param name is not in camelCase.
    */
-  public addFlag(name: string, description?: string): this {
+  public addFlag (name: string, description?: string): this {
     this.parentTaskDefinition.addFlag(name, description);
     return this;
   }
 
-  private _throwNoParamsOverrideError(errorDescriptor: ErrorDescriptor): never {
+  private _throwNoParamsOverrideError (errorDescriptor: ErrorDescriptor): never {
     throw new BuilderError(errorDescriptor, {
-      taskName: this.name,
+      taskName: this.name
     });
   }
 }

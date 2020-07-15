@@ -18,12 +18,12 @@ const defaultConfig: AlgobConfig = {
       throwOnCallFailures: true
     }
   },
-  //analytics: {
+  // analytics: {
   //  enabled: true,
-  //},
+  // },
   mocha: {
-    timeout: 20000,
-  },
+    timeout: 20000
+  }
 };
 
 export default defaultConfig;

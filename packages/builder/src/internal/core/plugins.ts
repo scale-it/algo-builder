@@ -2,7 +2,7 @@ import debug from "debug";
 import * as path from "path";
 import * as semver from "semver";
 
-import { StrMap } from "../../types"
+import { StrMap } from "../../types";
 import { BuilderContext } from "../context";
 import { BuilderError } from "./errors";
 import { ERRORS } from "./errors-list";
@@ -11,11 +11,11 @@ import { ExecutionMode, getExecutionMode } from "./execution-mode";
 const log = debug("builder:core:plugins");
 
 interface PackageJson {
-  name: string;
-  version: string;
+  name: string
+  version: string
   peerDependencies: {
-    [name: string]: string;
-  };
+    [name: string]: string
+  }
 }
 
 /**
@@ -25,11 +25,11 @@ interface PackageJson {
  * @param from - Where to resolve plugins and dependencies from. Only for
  * testing purposes.
  */
-export function usePlugin(
+export function usePlugin (
   builderContext: BuilderContext,
   pluginName: string,
   from?: string
-) : void {
+): void {
   log("Loading plugin %s", pluginName);
 
   // We have a special case for `ExecutionMode.EXECUTION_MODE_LINKED`
@@ -64,7 +64,7 @@ export function usePlugin(
     throw new BuilderError(ERRORS.PLUGINS.NOT_INSTALLED, {
       plugin: pluginName,
       extraMessage: globalWarning,
-      extraFlags: installExtraFlags,
+      extraFlags: installExtraFlags
     });
   }
 
@@ -77,7 +77,7 @@ export function usePlugin(
 
   if (pluginPackageJson.peerDependencies !== undefined) {
     checkPeerDependencies(pluginPackageJson.peerDependencies,
-                          pluginName, from, globalFlag, globalWarning)
+      pluginName, from, globalFlag, globalWarning);
   }
 
   const options = from !== undefined ? { paths: [from] } : undefined;
@@ -87,47 +87,46 @@ export function usePlugin(
   builderContext.setPluginAsLoaded(pluginName);
 }
 
-function checkPeerDependencies(deps: StrMap, pluginName: string, from: string | undefined, flag: string, warning: string): void {
+function checkPeerDependencies (deps: StrMap, pluginName: string, from: string | undefined, flag: string, warning: string): void {
   for (const [dependencyName, versionSpec] of Object.entries(deps)) {
-      const dependencyPackageJson = readPackageJson(dependencyName, from);
+    const dependencyPackageJson = readPackageJson(dependencyName, from);
 
-      let installExtraFlags = flag;
+    let installExtraFlags = flag;
 
-      if (versionSpec.match(/^[0-9]/) !== null) {
-        installExtraFlags += " --save-exact";
-      }
-
-      if (dependencyPackageJson === undefined) {
-        throw new BuilderError(ERRORS.PLUGINS.MISSING_DEPENDENCY, {
-          plugin: pluginName,
-          dependency: dependencyName,
-          extraMessage: warning,
-          extraFlags: installExtraFlags,
-          versionSpec,
-        });
-      }
-
-      const installedVersion = dependencyPackageJson.version;
-
-      if (
-        !semver.satisfies(installedVersion, versionSpec, {
-          includePrerelease: true,
-        })
-      ) {
-        throw new BuilderError(ERRORS.PLUGINS.DEPENDENCY_VERSION_MISMATCH, {
-          plugin: pluginName,
-          dependency: dependencyName,
-          extraMessage: warning,
-          extraFlags: installExtraFlags,
-          versionSpec,
-          installedVersion,
-        });
-      }
+    if (versionSpec.match(/^[0-9]/) !== null) {
+      installExtraFlags += " --save-exact";
     }
+
+    if (dependencyPackageJson === undefined) {
+      throw new BuilderError(ERRORS.PLUGINS.MISSING_DEPENDENCY, {
+        plugin: pluginName,
+        dependency: dependencyName,
+        extraMessage: warning,
+        extraFlags: installExtraFlags,
+        versionSpec
+      });
+    }
+
+    const installedVersion = dependencyPackageJson.version;
+
+    if (
+      !semver.satisfies(installedVersion, versionSpec, {
+        includePrerelease: true
+      })
+    ) {
+      throw new BuilderError(ERRORS.PLUGINS.DEPENDENCY_VERSION_MISMATCH, {
+        plugin: pluginName,
+        dependency: dependencyName,
+        extraMessage: warning,
+        extraFlags: installExtraFlags,
+        versionSpec,
+        installedVersion
+      });
+    }
+  }
 }
 
-
-export function loadPluginFile(absolutePluginFilePath: string) : void {
+export function loadPluginFile (absolutePluginFilePath: string): void {
   log("Loading plugin file %s", absolutePluginFilePath);
   const imported = require(absolutePluginFilePath); // eslint-disable-line @typescript-eslint/no-var-requires
   const plugin = imported.default !== undefined ? imported.default : imported;
@@ -136,7 +135,7 @@ export function loadPluginFile(absolutePluginFilePath: string) : void {
   }
 }
 
-export function readPackageJson(
+export function readPackageJson (
   packageName: string,
   from?: string
 ): PackageJson | undefined {

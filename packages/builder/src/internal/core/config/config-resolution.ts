@@ -8,17 +8,18 @@ import type {
   ProjectPaths,
   ResolvedAlgobConfig,
   StrMap,
-  UserPaths} from "../../../types";
+  UserPaths
+} from "../../../types";
 import { fromEntries } from "../../util/lang";
 import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
 
-function mergeUserAndDefaultConfigs(
+function mergeUserAndDefaultConfigs (
   defaultConfig: AlgobConfig,
   userConfig: AlgobConfig
 ): Partial<ResolvedAlgobConfig> {
   return deepmerge(defaultConfig, userConfig, {
-    arrayMerge: (destination: any[], source: any[]) => source,  // eslint-disable-line @typescript-eslint/no-explicit-any
+    arrayMerge: (destination: any[], source: any[]) => source // eslint-disable-line @typescript-eslint/no-explicit-any
   }) as Partial<ResolvedAlgobConfig>;
 }
 
@@ -33,7 +34,7 @@ function mergeUserAndDefaultConfigs(
  *
  * @returns the resolved config
  */
-export function resolveConfig(
+export function resolveConfig (
   userConfigPath: string | undefined,
   defaultConfig: AlgobConfig,
   userConfig: AlgobConfig,
@@ -43,12 +44,12 @@ export function resolveConfig(
 
   const config: Partial<ResolvedAlgobConfig> = mergeUserAndDefaultConfigs(defaultConfig, userConfig);
 
-  const paths = userConfigPath ? resolveProjectPaths(userConfigPath, userConfig.paths) : undefined;
+  const paths = userConfigPath !== undefined ? resolveProjectPaths(userConfigPath, userConfig.paths) : undefined;
 
   const resolved: ResolvedAlgobConfig = {
     ...config,
     paths,
-    networks: config.networks || {},
+    networks: config.networks ?? {}
   };
 
   for (const extender of configExtenders) {
@@ -58,11 +59,11 @@ export function resolveConfig(
   return resolved;
 }
 
-function resolvePathFrom(
+function resolvePathFrom (
   from: string,
   defaultPath: string,
   relativeOrAbsolutePath: string = defaultPath
-) {
+): string {
   if (path.isAbsolute(relativeOrAbsolutePath)) {
     return relativeOrAbsolutePath;
   }
@@ -81,9 +82,9 @@ function resolvePathFrom(
  *    - If the root path is relative, it's resolved from paths.configFile's dir.
  *    - If any other path is relative, it's resolved from paths.root.
  */
-export function resolveProjectPaths(
+export function resolveProjectPaths (
   userConfigPath: string,
-  userPaths : UserPaths = {}
+  userPaths: UserPaths = {}
 ): ProjectPaths {
   const configFile = fs.realpathSync(userConfigPath);
   const configDir = path.dirname(configFile);
@@ -91,7 +92,7 @@ export function resolveProjectPaths(
   const root = resolvePathFrom(configDir, "", userPaths.root);
 
   const otherPathsEntries = Object.entries<string>(userPaths as StrMap).map<
-    [string, string]
+  [string, string]
   >(([name, value]) => [name, resolvePathFrom(root, value)]);
 
   const otherPaths = fromEntries(otherPathsEntries);
@@ -103,28 +104,28 @@ export function resolveProjectPaths(
     sources: resolvePathFrom(root, "contracts", userPaths.sources),
     cache: resolvePathFrom(root, "cache", userPaths.cache),
     artifacts: resolvePathFrom(root, "artifacts", userPaths.artifacts),
-    tests: resolvePathFrom(root, "test", userPaths.tests),
+    tests: resolvePathFrom(root, "test", userPaths.tests)
   };
 }
 
-function deepFreezeUserConfig(
-  config: any,  // eslint-disable-line @typescript-eslint/no-explicit-any
+function deepFreezeUserConfig (
+  config: any, // eslint-disable-line @typescript-eslint/no-explicit-any
   propertyPath: Array<string | number | symbol> = []
-) {
+): any { // eslint-disable-line @typescript-eslint/no-explicit-any
   if (typeof config !== "object" || config === null) {
     return config;
   }
 
   return new Proxy(config, {
     /* eslint-disable @typescript-eslint/no-explicit-any */
-    get(target: any, property: string | number | symbol, receiver: any): any {
+    get (target: any, property: string | number | symbol, receiver: any): any {
       return deepFreezeUserConfig(Reflect.get(target, property, receiver), [
         ...propertyPath,
-        property,
+        property
       ]);
     },
 
-    set(
+    set (
       target: any,
       property: string | number | symbol,
       value: any,
@@ -133,9 +134,9 @@ function deepFreezeUserConfig(
       throw new BuilderError(ERRORS.GENERAL.USER_CONFIG_MODIFIED, {
         path: [...propertyPath, property]
           .map((pathPart) => pathPart.toString())
-          .join("."),
+          .join(".")
       });
-    },
+    }
     /* eslint-enable @typescript-eslint/no-explicit-any */
   });
 }

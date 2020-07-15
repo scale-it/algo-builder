@@ -1,14 +1,14 @@
-import ProcessEnv = NodeJS.ProcessEnv;
-
-import { AlgobParamDefinitions,RuntimeArgs } from "../../../types";
+import { AlgobParamDefinitions, RuntimeArgs } from "../../../types";
 import { ArgumentsParser } from "../../cli/arguments-parser";
 import { unsafeObjectKeys } from "../../util/unsafe";
 import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
 
+import ProcessEnv = NodeJS.ProcessEnv;
+
 const BUILDER_ENV_ARGUMENT_PREFIX = "BUILDER_";
 
-export function paramNameToEnvVariable(paramName: string): string {
+export function paramNameToEnvVariable (paramName: string): string {
   // We create it starting from the result of ArgumentsParser.paramNameToCLA
   // so it's easier to explain and understand their equivalences.
   return ArgumentsParser.paramNameToCLA(paramName)
@@ -17,7 +17,7 @@ export function paramNameToEnvVariable(paramName: string): string {
     .toUpperCase();
 }
 
-export function getEnvVariablesMap(
+export function getEnvVariablesMap (
   runtimeArgs: RuntimeArgs
 ): { [envVar: string]: string } {
   const values: { [envVar: string]: string } = {};
@@ -33,7 +33,7 @@ export function getEnvVariablesMap(
   return values;
 }
 
-export function getEnvRuntimeArgs(
+export function getEnvRuntimeArgs (
   paramDefinitions: AlgobParamDefinitions,
   envVariables: ProcessEnv
 ): RuntimeArgs {
@@ -52,7 +52,7 @@ export function getEnvRuntimeArgs(
           ERRORS.ARGUMENTS.INVALID_ENV_VAR_VALUE,
           {
             varName: envVarName,
-            value: rawValue,
+            value: rawValue
           },
           error
         );

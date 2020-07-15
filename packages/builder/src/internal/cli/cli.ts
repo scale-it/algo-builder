@@ -21,27 +21,27 @@ import { getEnvRuntimeArgs } from "../core/params/env-variables";
 import { isCwdInsideProject } from "../core/project-structure";
 import { Environment } from "../core/runtime-environment";
 import { getPackageJson, PackageJson } from "../util/package-info";
-//import { Analytics } from "./analytics";
+// import { Analytics } from "./analytics";
 import { ArgumentsParser } from "./arguments-parser";
 const log = debug("builder:core:cli");
 
-//const ANALYTICS_SLOW_TASK_THRESHOLD = 300;
+// const ANALYTICS_SLOW_TASK_THRESHOLD = 300;
 
-async function printVersionMessage(packageJson: PackageJson) {
+async function printVersionMessage (packageJson: PackageJson): Promise<void> {
   console.log(packageJson.version);
 }
 
-function ensureValidNodeVersion(packageJson: PackageJson) {
+function ensureValidNodeVersion (packageJson: PackageJson): void {
   const requirement = packageJson.engines.node;
   if (!semver.satisfies(process.version, requirement)) {
     throw new BuilderError(ERRORS.GENERAL.INVALID_NODE_VERSION, {
-      requirement,
+      requirement
     });
   }
 }
 
 /* eslint-disable sonarjs/cognitive-complexity */
-async function main() {
+async function main (): Promise<void> {
   // We first accept this argument anywhere, so we know if the user wants
   // stack traces before really parsing the arguments.
   let showStackTraces = process.argv.includes("--show-stack-traces");
@@ -59,7 +59,7 @@ async function main() {
     const {
       runtimeArgs,
       taskName: parsedTaskName,
-      unparsedCLAs,
+      unparsedCLAs
     } = argumentsParser.parseRuntimeArgs(
       ALGOB_PARAM_DEFINITIONS,
       ALGOB_SHORT_PARAM_SUBSTITUTIONS,
@@ -82,20 +82,20 @@ async function main() {
     const ctx = BuilderContext.createBuilderContext();
     const config = loadConfigAndTasks(runtimeArgs);
 
-    //const analytics = await Analytics.getInstance(
+    // const analytics = await Analytics.getInstance(
     //  config.paths.root,
     //  config.analytics.enabled
-    //);
+    // );
 
     const envExtenders = ctx.extendersManager.getExtenders();
     const taskDefinitions = ctx.tasksDSL.getTaskDefinitions();
 
-    //let [abortAnalytics, hitPromise] = await analytics.sendTaskHit(taskName);
+    // let [abortAnalytics, hitPromise] = await analytics.sendTaskHit(taskName);
 
-    let taskName = parsedTaskName || TASK_HELP;
-    if (!taskDefinitions[taskName]) {
+    let taskName = parsedTaskName ?? TASK_HELP;
+    if (taskDefinitions[taskName] == null) {
       throw new BuilderError(ERRORS.ARGUMENTS.UNRECOGNIZED_TASK, {
-        task: taskName,
+        task: taskName
       });
     }
 
@@ -103,9 +103,8 @@ async function main() {
     if ((taskName !== TASK_HELP && taskName !== TASK_INIT && !runtimeArgs.help) &&
       !isCwdInsideProject()) {
       throw new BuilderError(ERRORS.GENERAL.NOT_INSIDE_PROJECT, {
-        task: taskName,
+        task: taskName
       });
-      return;
     }
 
     // --help is a also special case
@@ -120,9 +119,9 @@ async function main() {
       );
     }
 
-    if (!runtimeArgs.network) {
+    if (runtimeArgs.network == null) {
       // TODO:RZ
-      throw new Error("INTERNAL ERROR. Default network should be registered in `register.ts` module")
+      throw new Error("INTERNAL ERROR. Default network should be registered in `register.ts` module");
     }
 
     const env = new Environment(
@@ -134,23 +133,23 @@ async function main() {
 
     ctx.setAlgobRuntimeEnv(env);
 
-    const tBeforeRun = new Date().getTime();  // eslint-disable-line @typescript-eslint/no-unused-vars
+    const tBeforeRun = new Date().getTime(); // eslint-disable-line @typescript-eslint/no-unused-vars
 
     await env.run(taskName, taskArguments);
 
-    const tAfterRun = new Date().getTime();  // eslint-disable-line @typescript-eslint/no-unused-vars
-    //if (tAfterRun - tBeforeRun > ANALYTICS_SLOW_TASK_THRESHOLD) {
+    const tAfterRun = new Date().getTime(); // eslint-disable-line @typescript-eslint/no-unused-vars
+    // if (tAfterRun - tBeforeRun > ANALYTICS_SLOW_TASK_THRESHOLD) {
     //  await hitPromise;
-    //} else {
+    // } else {
     //  abortAnalytics();
-    //}
+    // }
     log(`Quitting algob after successfully running task ${taskName}`);
   } catch (error) {
     if (BuilderError.isBuilderError(error)) {
       console.error(chalk.red(`Error ${error.message}`));
     } else if (BuilderPluginError.isBuilderPluginError(error)) {
       console.error(
-        chalk.red(`Error in plugin ${error.pluginName}: ${error.message}`)
+        chalk.red(`Error in plugin ${error.pluginName ?? ""}: ${error.message}`)
       );
     } else if (error instanceof Error) {
       console.error(chalk.red("An unexpected error occurred:"));
@@ -162,10 +161,7 @@ async function main() {
 
     console.log("");
 
-    if (showStackTraces)
-      console.error(error.stack);
-    else
-      console.error(`For more info run ${ALGOB_NAME} with --show-stack-traces or add --help to display task-specific help.`);
+    if (showStackTraces) { console.error(error.stack); } else { console.error(`For more info run ${ALGOB_NAME} with --show-stack-traces or add --help to display task-specific help.`); }
 
     process.exit(1);
   }

@@ -7,10 +7,10 @@ import * as types from "./internal/core/params/argument-types";
 // IMPORTANT: This t.types MUST be kept in sync with the actual types.
 
 export interface HDAccountsConfig {
-  mnemonic: string;
-  initialIndex?: number;
-  count?: number;
-  path?: string;
+  mnemonic: string
+  initialIndex?: number
+  count?: number
+  path?: string
 }
 
 export type NetworkAccounts =
@@ -18,30 +18,30 @@ export type NetworkAccounts =
   | HDAccountsConfig;
 
 interface CommonNetworkConfig {
-  accounts?: NetworkAccounts;
-  chainName?: string;
-  //from?: string;
+  accounts?: NetworkAccounts
+  chainName?: string
+  // from?: string;
   // TODO: timeout?: number;
 }
 
 export interface AlgobChainCfg extends CommonNetworkConfig {
-  throwOnTransactionFailures?: boolean;
-  throwOnCallFailures?: boolean;
-  loggingEnabled?: boolean;
-  initialDate?: string;
+  throwOnTransactionFailures?: boolean
+  throwOnCallFailures?: boolean
+  loggingEnabled?: boolean
+  initialDate?: string
 }
 
 export interface HttpNetworkConfig extends CommonNetworkConfig {
-  host: string; // with optional http o https prefix
-  port: number;
-  token: string;
-  httpHeaders?: { [name: string]: string };
+  host: string // with optional http o https prefix
+  port: number
+  token: string
+  httpHeaders?: { [name: string]: string }
 }
 
 export type NetworkConfig = AlgobChainCfg | HttpNetworkConfig;
 
 export interface Networks {
-  [networkName: string]: NetworkConfig;
+  [networkName: string]: NetworkConfig
 }
 
 /**
@@ -54,25 +54,25 @@ export interface Networks {
  * * tests: project's tests directory.
  */
 export interface ProjectPaths {
-  root: string;
-  configFile: string;
-  cache: string;
-  artifacts: string;
-  sources: string;
-  tests: string;
+  root: string
+  configFile: string
+  cache: string
+  artifacts: string
+  sources: string
+  tests: string
 }
 
 export type UserPaths = StrictOmit<Partial<ProjectPaths>, "configFile">;
 
 export interface AlgobConfig {
-  networks?: Networks;
-  paths?: UserPaths;
-  mocha?: Mocha.MochaOptions;
+  networks?: Networks
+  paths?: UserPaths
+  mocha?: Mocha.MochaOptions
 }
 
 export interface ResolvedAlgobConfig extends AlgobConfig {
-  paths?: ProjectPaths;
-  networks: Networks;
+  paths?: ProjectPaths
+  networks: Networks
 }
 
 // End config types
@@ -89,82 +89,82 @@ export type ConfigExtender = (
 ) => void;
 
 export interface TasksMap {
-  [name: string]: TaskDefinition;
+  [name: string]: TaskDefinition
 }
 
 export interface ConfigurableTaskDefinition {
-  setDescription(description: string): this;
+  setDescription: (description: string) => this
 
-  setAction(action: ActionType<TaskArguments>): this;
+  setAction: (action: ActionType<TaskArguments>) => this
 
-  addParam<T>(
+  addParam: <T>(
     name: string,
     description?: string,
     defaultValue?: T,
     type?: types.ArgumentType<T>,
     isOptional?: boolean
-  ): this;
+  ) => this
 
-  addOptionalParam<T>(
+  addOptionalParam: <T>(
     name: string,
     description?: string,
     defaultValue?: T,
     type?: types.ArgumentType<T>
-  ): this;
+  ) => this
 
-  addPositionalParam<T>(
+  addPositionalParam: <T>(
     name: string,
     description?: string,
     defaultValue?: T,
     type?: types.ArgumentType<T>,
     isOptional?: boolean
-  ): this;
+  ) => this
 
-  addOptionalPositionalParam<T>(
+  addOptionalPositionalParam: <T>(
     name: string,
     description?: string,
     defaultValue?: T,
     type?: types.ArgumentType<T>
-  ): this;
+  ) => this
 
-  addVariadicPositionalParam<T>(
+  addVariadicPositionalParam: <T>(
     name: string,
     description?: string,
     defaultValue?: T[],
     type?: types.ArgumentType<T>,
     isOptional?: boolean
-  ): this;
+  ) => this
 
-  addOptionalVariadicPositionalParam<T>(
+  addOptionalVariadicPositionalParam: <T>(
     name: string,
     description?: string,
     defaultValue?: T[],
     type?: types.ArgumentType<T>
-  ): this;
+  ) => this
 
-  addFlag(name: string, description?: string): this;
+  addFlag: (name: string, description?: string) => this
 }
 
 export interface ParamDefinition<T> {
-  name: string;
-  shortName?: string;
-  defaultValue?: T;
-  type: types.ArgumentType<T>;
-  description?: string;
-  isOptional: boolean;
-  isFlag: boolean;
-  isVariadic: boolean;
+  name: string
+  shortName?: string
+  defaultValue?: T
+  type: types.ArgumentType<T>
+  description?: string
+  isOptional: boolean
+  isFlag: boolean
+  isVariadic: boolean
 }
 
 export type ParamDefinitionAny = ParamDefinition<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 export interface OptionalParamDefinition<T> extends ParamDefinition<T> {
-  defaultValue: T;
-  isOptional: true;
+  defaultValue: T
+  isOptional: true
 }
 
 export interface ParamDefinitionsMap {
-  [paramName: string]: ParamDefinitionAny;
+  [paramName: string]: ParamDefinitionAny
 }
 
 /**
@@ -176,35 +176,35 @@ export interface ParamDefinitionsMap {
  * * config: used to specify builder's config file.
  */
 export interface RuntimeArgs {
-  network: string;
-  showStackTraces: boolean;
-  version: boolean;
-  help: boolean;
-  config?: string;
-  verbose: boolean;
+  network: string
+  showStackTraces: boolean
+  version: boolean
+  help: boolean
+  config?: string
+  verbose: boolean
 }
 
 export type AlgobParamDefinitions = {
   [param in keyof Required<RuntimeArgs>]: OptionalParamDefinition<
-    RuntimeArgs[param]
+  RuntimeArgs[param]
   >;
 };
 
-export type AlgobShortParamSubstitutions = {
+export interface AlgobShortParamSubstitutions {
   [name: string]: string
-}
+};
 
 export interface TaskDefinition extends ConfigurableTaskDefinition {
-  readonly name: string;
-  readonly description?: string;
-  readonly action: ActionType<TaskArguments>;
-  readonly isInternal: boolean;
+  readonly name: string
+  readonly description?: string
+  readonly action: ActionType<TaskArguments>
+  readonly isInternal: boolean
 
   // TODO: Rename this to something better. It doesn't include the positional
   // params, and that's not clear.
-  readonly paramDefinitions: ParamDefinitionsMap;
+  readonly paramDefinitions: ParamDefinitionsMap
 
-  readonly positionalParamDefinitions: Array<ParamDefinitionAny>;
+  readonly positionalParamDefinitions: ParamDefinitionAny[]
 }
 
 /**
@@ -221,7 +221,7 @@ export interface TaskDefinition extends ConfigurableTaskDefinition {
  * ...but then, we couldn't narrow the actual argument value's type in compile time,
  * thus we have no other option than forcing it to be just 'any'.
  */
-export type TaskArguments = any;  // eslint-disable-line @typescript-eslint/no-explicit-any
+export type TaskArguments = any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 export type RunTaskFunction = (
   name: string,
@@ -229,8 +229,8 @@ export type RunTaskFunction = (
 ) => PromiseAny;
 
 export interface RunSuperFunction<ArgT extends TaskArguments> {
-  (taskArguments?: ArgT): PromiseAny;
-  isDefined: boolean;
+  (taskArguments?: ArgT): PromiseAny
+  isDefined: boolean
 }
 
 export type ActionType<ArgsT extends TaskArguments> = (
@@ -240,34 +240,33 @@ export type ActionType<ArgsT extends TaskArguments> = (
 ) => PromiseAny;
 
 export interface Network {
-  name: string;
-  config: NetworkConfig;
-  //provider:
+  name: string
+  config: NetworkConfig
+  // provider:
 }
 
 export interface AlgobRuntimeEnv {
-  readonly config: ResolvedAlgobConfig;
-  readonly runtimeArgs: RuntimeArgs;
-  readonly tasks: TasksMap;
-  readonly run: RunTaskFunction;
-  readonly network: Network;
+  readonly config: ResolvedAlgobConfig
+  readonly runtimeArgs: RuntimeArgs
+  readonly tasks: TasksMap
+  readonly run: RunTaskFunction
+  readonly network: Network
 }
 
 export interface Artifact {
-  contractName: string;
-  abi: any;  // eslint-disable-line @typescript-eslint/no-explicit-any
-  bytecode: string; // "0x"-prefixed hex string
-  deployedBytecode: string; // "0x"-prefixed hex string
-  linkReferences: LinkReferences;
-  deployedLinkReferences: LinkReferences;
+  contractName: string
+  abi: any // eslint-disable-line @typescript-eslint/no-explicit-any
+  bytecode: string // "0x"-prefixed hex string
+  deployedBytecode: string // "0x"-prefixed hex string
+  linkReferences: LinkReferences
+  deployedLinkReferences: LinkReferences
 }
 
 export interface LinkReferences {
   [libraryFileName: string]: {
-    [libraryName: string]: Array<{ length: number; start: number }>;
-  };
+    [libraryName: string]: Array<{ length: number, start: number }>
+  }
 }
-
 
 // ************************
 //     helper types
@@ -277,7 +276,7 @@ export interface StrMap {
 }
 
 export interface AnyMap {
-  [key: string]: any  // eslint-disable-line @typescript-eslint/no-explicit-any
+  [key: string]: any // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export type PromiseAny = Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any

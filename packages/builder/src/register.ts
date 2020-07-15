@@ -7,7 +7,7 @@ import { getEnvRuntimeArgs } from "./internal/core/params/env-variables";
 import { Environment } from "./internal/core/runtime-environment";
 import {
   disableReplWriterShowProxy,
-  isNodeCalledWithoutAScript,
+  isNodeCalledWithoutAScript
 } from "./internal/util/console";
 
 if (!BuilderContext.isCreated()) {
