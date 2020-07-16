@@ -1,6 +1,6 @@
 import { AlgobRuntimeEnv, PromiseAny } from "../../src/types";
 
-export function mkAlgoEnv(): AlgobRuntimeEnv {
+export function mkAlgobEnv(): AlgobRuntimeEnv {
   return {
     config: {
       networks: {}
