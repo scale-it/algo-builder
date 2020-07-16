@@ -136,7 +136,7 @@ Please [report it](https://github.com/scale-it/algorand-builder/issues/new) to h
     },
     NO_DEFAULT_EXPORT_IN_SCRIPT: {
       number: 12,
-      message: "Error. '%script%' doesn't export a default method.",
+      message: "Error. '%script%' doesn't have an exported default method.",
       title: "No exported default method",
       description: `Script doesn't export a default method.
 
@@ -502,9 +502,9 @@ Please double check your script's path`
     },
     SCRIPT_NON_ZERO_RETURN_STATUS: {
       number: 605,
-      message: "Error. Process of '%script%' returned an error status code: %errorStatus%",
-      title: "Error status code while executing a script",
-      description: `Script process returned an error status code.
+      message: "Error. Default method of '%script%' returned an error status code: %errorStatus%",
+      title: "Script returned an error status",
+      description: `Script returned an error status code.
 
 Please check algob output for more details.`
     }
