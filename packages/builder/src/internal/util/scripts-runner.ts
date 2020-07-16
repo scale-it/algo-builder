@@ -51,13 +51,13 @@ export async function runScript (
     relativeScriptPath,
     runtimeArgs
   );
-  process.exitCode = exitCode;
   if (exitCode !== 0) {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.SCRIPT_NON_ZERO_RETURN_STATUS, {
       script: relativeScriptPath,
       errorStatus: exitCode
     });
   }
+  process.exitCode = exitCode;
 }
 
 /**
