@@ -1,12 +1,11 @@
 import debug from "debug";
-import fsExtra from "fs-extra";
 
 import { task } from "../internal/core/config/config-env";
 import { AlgobRuntimeEnv } from "../types";
 import { TASK_CONSOLE } from "./task-names";
 
 export default function (): void {
-  const log = debug("builder:core:tasks:console");
+  //const log = debug("builder:core:tasks:console");
 
   task(TASK_CONSOLE, "Opens builder console")
     .addFlag("noCompile", "Don't compile before running this task")
@@ -15,10 +14,12 @@ export default function (): void {
         { noCompile }: { noCompile: boolean },
         runtimeEnv: AlgobRuntimeEnv
       ) => {
+        /*
         if (!runtimeEnv.config.paths) {
           return;
         }
         const paths = runtimeEnv.config.paths;
+        */
 
         // TODO: After refactoring script loading workflow the REPL
         // has to be started by reusing the current process
