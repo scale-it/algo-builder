@@ -4,10 +4,11 @@ import * as path from "path";
 import * as semver from "semver";
 
 import { task } from "../internal/core/config/config-env";
-import { runScriptWithAlgob } from "../internal/util/scripts-runner";
+import { runScript } from "../internal/util/scripts-runner";
 import { TASK_CONSOLE } from "./task-names";
+import { AlgobRuntimeEnv } from "../../src/types";
 
-export default function (): void {
+export default function () : void {
   const log = debug("builder:core:tasks:console");
 
   task(TASK_CONSOLE, "Opens builder console")
@@ -15,20 +16,20 @@ export default function (): void {
     .setAction(
       async (
         { noCompile }: { noCompile: boolean }, // eslint-disable-line
-        { config, run, runtimeArgs }           // eslint-disable-line
-
+        runtimeEnv: AlgobRuntimeEnv            // eslint-disable-line
       ) => {
-        if (config.paths == null) {
-          return;
+        if (!runtimeEnv.config.paths) {
+          return
         }
+        const paths = runtimeEnv.config.paths
 
-        // if (!noCompile) {
+        //if (!noCompile) {
         //  await run("compile");
-        // }
+        //}
 
-        await fsExtra.ensureDir(config.paths.cache);
+        await fsExtra.ensureDir(paths.cache);
         const historyFile = path.join(
-          config.paths.cache,
+          paths.cache,
           "console-history.txt"
         );
 
@@ -41,10 +42,10 @@ export default function (): void {
           `Creating a Node REPL subprocess with Builder's register so we can set some Node's flags`
         );
 
-        // Running the script "" is like running `node`, so this starts the repl
-        await runScriptWithAlgob(runtimeArgs, "", [], nodeArgs, {
-          NODE_REPL_HISTORY: historyFile
-        });
+        //// Running the script "" is like running `node`, so this starts the repl
+        //await runScriptWithAlgob(runtimeArgs, "", [], nodeArgs, {
+        //  NODE_REPL_HISTORY: historyFile,
+        //});
       }
     );
 }

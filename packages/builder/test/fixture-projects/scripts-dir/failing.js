@@ -1,3 +1,7 @@
+
 const fs = require('fs')
-fs.appendFileSync("output.txt", "failing scripts: script failed\n");
-process.exit(123);
+
+export default async function (runtimeEnv, deployer, accounts) {
+  fs.appendFileSync("output.txt", "failing script: script executed\n");
+  return 123;
+}

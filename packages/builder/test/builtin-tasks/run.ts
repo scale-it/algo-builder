@@ -14,9 +14,9 @@ describe("run task", function () {
 
   it("Should fail if a script doesn't exist", async function () {
     await expectBuilderErrorAsync(
-      () =>
-        this.env.run(TASK_RUN, { scripts: ["./does-not-exist"] }),
-      ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND
+      () => this.env.run(TASK_RUN, { scripts: ["./does-not-exist"] }),
+      ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND,
+      "./does-not-exist"
     );
   });
 
@@ -96,15 +96,8 @@ scripts directory: script 1 executed
     await expectBuilderErrorAsync(
       () =>
         this.env.run(TASK_RUN, { scripts: ["scripts/1.js", "scripts/2.js", "scripts/3.js"] }),
-      ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND
-    );
-  });
-
-  it("Should short-circuit on bad exit code and display remaining scripts", async function () {
-    await expectBuilderErrorAsync(
-      () =>
-        this.env.run(TASK_RUN, { scripts: ["scripts/1.js", "failing.js", "scripts/2.js", "scripts/3.js"] }),
-      ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND
+      ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND,
+      "scripts/3.js"
     );
   });
 
@@ -112,15 +105,15 @@ scripts directory: script 1 executed
     await expectBuilderErrorAsync(
       () =>
         this.env.run(TASK_RUN, { scripts: ["other-scripts/1.js", "failing.js", "scripts/1.js"] }),
-      ERRORS.BUILTIN_TASKS.EXECUTION_ERROR
+      ERRORS.BUILTIN_TASKS.SCRIPT_NON_ZERO_RETURN_STATUS,
+      "failing.js"
     );
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
     assert.equal(scriptOutput, `other scripts directory: script 1 executed
-failing scripts: script failed
+failing script: script executed
 `);
     assert.notEqual(process.exitCode, 0);
     (process as any).exitCode = undefined;
   });
 
 });
-

@@ -1,8 +1,6 @@
-if (
-  process.argv.length !== 5 ||
-  process.argv[2] !== "a" ||
-  process.argv[3] !== "b" ||
-  process.argv[4] !== "c"
-) {
-  process.exit(12);
+
+const fs = require("fs");
+
+export default async function (runtimeEnv, deployer, accounts) {
+  fs.appendFileSync("output.txt", runtimeEnv.network.name);
 }

@@ -44,11 +44,12 @@ scripts directory: script 1 executed
     await expectBuilderErrorAsync(
       () =>
         this.env.run(TASK_DEPLOY, { fileNames: ["other-scripts/1.js", "failing.js", "scripts/1.js"] }),
-      ERRORS.BUILTIN_TASKS.EXECUTION_ERROR
+      ERRORS.BUILTIN_TASKS.SCRIPT_NON_ZERO_RETURN_STATUS,
+      "failing.js"
     );
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
     assert.equal(scriptOutput, `other scripts directory: script 1 executed
-failing scripts: script failed
+failing script: script executed
 `);
     assert.equal(process.exitCode, 123);
     (process as any).exitCode = undefined;
