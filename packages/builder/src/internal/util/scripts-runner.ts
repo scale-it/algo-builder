@@ -1,17 +1,15 @@
 import debug from "debug";
 import * as path from "path";
 
-import { RuntimeArgs, AlgobRuntimeEnv } from "../../types";
-import { ExecutionMode, getExecutionMode } from "../core/execution-mode";
-import { getEnvVariablesMap } from "../core/params/env-variables";
-import { BuilderError, ERRORS } from "../../../src/internal/core/errors";
+import { BuilderError, ERRORS } from "../../internal/core/errors";
+import { AlgobRuntimeEnv } from "../../types";
 
 const log = debug("builder:core:scripts-runner");
 
-async function loadScript(relativeScriptPath: string): Promise<any> {
-  const absoluteScriptPath = path.join(process.cwd(), relativeScriptPath)
+async function loadScript (relativeScriptPath: string): Promise<any> {
+  const absoluteScriptPath = path.join(process.cwd(), relativeScriptPath);
   try {
-    return await require(absoluteScriptPath)
+    return require(absoluteScriptPath);
   } catch (err) {
     throw new BuilderError(ERRORS.GENERAL.SCRIPT_LOAD_ERROR, {
       script: absoluteScriptPath
@@ -19,11 +17,11 @@ async function loadScript(relativeScriptPath: string): Promise<any> {
   }
 }
 
-export async function loadAndRunScript(
+export async function loadAndRunScript (
   relativeScriptPath: string,
   runtimeArgs: AlgobRuntimeEnv
 ): Promise<number> {
-  const requiredScript = await loadScript(relativeScriptPath)
+  const requiredScript = await loadScript(relativeScriptPath);
   if (!requiredScript.default) {
     throw new BuilderError(ERRORS.GENERAL.NO_DEFAULT_EXPORT_IN_SCRIPT, {
       script: relativeScriptPath
@@ -36,14 +34,14 @@ export async function loadAndRunScript(
       ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR,
       {
         script: relativeScriptPath,
-        error: error.message,
+        error: error.message
       },
       error
     );
   }
 }
 
-export async function runScript(
+export async function runScript (
   relativeScriptPath: string,
   runtimeArgs: AlgobRuntimeEnv
 ): Promise<any> {
@@ -53,11 +51,11 @@ export async function runScript(
     relativeScriptPath,
     runtimeArgs
   );
-  process.exitCode = exitCode
+  process.exitCode = exitCode;
   if (exitCode !== 0) {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.SCRIPT_NON_ZERO_RETURN_STATUS, {
       script: relativeScriptPath,
-      errorStatus: exitCode,
+      errorStatus: exitCode
     });
   }
 }
@@ -66,7 +64,7 @@ export async function runScript(
  * Ensure builder/register source file path is resolved to compiled JS file
  * instead of TS source file, so we don't need to run ts-node unnecessarily.
  */
-export function resolveBuilderRegisterPath(): string {
+export function resolveBuilderRegisterPath (): string {
   const builderCoreBaseDir = path.join(__dirname, "..", "..", "..");
 
   return path.join(
