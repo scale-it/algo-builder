@@ -21,8 +21,6 @@ describe("Deploy task", function () {
 
   it("Should execute the tasks", async function () {
     await this.env.run(TASK_DEPLOY, { noCompile: true });
-    assert.equal(process.exitCode, 0);
-    (process as any).exitCode = undefined;
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
     assert.equal(scriptOutput, `scripts directory: script 1 executed
 scripts directory: script 2 executed
@@ -36,22 +34,17 @@ scripts directory: script 2 executed
 scripts directory: script 2 executed
 scripts directory: script 1 executed
 `);
-    assert.equal(process.exitCode, 0);
-    (process as any).exitCode = undefined;
   });
 
   it("Should short-circuit and return failed script's status code", async function () {
     await expectBuilderErrorAsync(
       () =>
         this.env.run(TASK_DEPLOY, { fileNames: ["other-scripts/1.js", "failing.js", "scripts/1.js"] }),
-      ERRORS.BUILTIN_TASKS.EXECUTION_ERROR
+      ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR,
+      "failing.js"
     );
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
-    assert.equal(scriptOutput, `other scripts directory: script 1 executed
-failing scripts: script failed
-`);
-    assert.equal(process.exitCode, 123);
-    (process as any).exitCode = undefined;
+    assert.equal(scriptOutput, "other scripts directory: script 1 executed\n");
   });
 
 });

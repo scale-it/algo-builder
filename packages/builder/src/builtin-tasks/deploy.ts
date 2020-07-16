@@ -28,8 +28,7 @@ export function loadFilenames (directory: string): string[] {
   return files.sort(cmpStr);
 }
 
-async function doDeploy ({ fileNames }: TaskArgs, { runtimeArgs }: AlgobRuntimeEnv
-): Promise<void> {
+async function doDeploy ({ fileNames }: TaskArgs, runtimeEnv: AlgobRuntimeEnv): Promise<void> {
   const log = debug("builder:core:tasks:deploy");
 
   const scriptNames = fileNames.length === 0
@@ -42,7 +41,7 @@ async function doDeploy ({ fileNames }: TaskArgs, { runtimeArgs }: AlgobRuntimeE
     });
   }
 
-  return await runMultipleScripts(runtimeArgs, scriptNames, log);
+  return await runMultipleScripts(runtimeEnv, scriptNames, log);
 }
 
 export default function (): void {

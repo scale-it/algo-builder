@@ -1,5 +1,4 @@
-setTimeout(() => {
-  if (global.config === undefined || global.network === undefined) {
-    process.exit(123);
-  }
-}, 100);
+
+export default function (runtimeEnv, deployer, accounts) {
+  return new Promise(resolve => setTimeout(resolve, 100));
+}

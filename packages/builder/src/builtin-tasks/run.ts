@@ -4,55 +4,37 @@ import fsExtra from "fs-extra";
 import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
-import { runScriptWithAlgob } from "../internal/util/scripts-runner";
-import { AlgobRuntimeEnv, RuntimeArgs } from "../types";
+import { runScript } from "../internal/util/scripts-runner";
+import { AlgobRuntimeEnv } from "../types";
 import { TASK_RUN } from "./task-names";
 
 interface Input {
   scripts: string[]
-};
+}
 
 function filterNonExistent (scripts: string[]): string[] {
   return scripts.filter(script => !fsExtra.pathExistsSync(script));
 }
 
-export async function runSingleScript (runtimeArgs: RuntimeArgs,
-  scriptLocation: string): Promise<number> {
-  try {
-    return await runScriptWithAlgob(
-      runtimeArgs,
-      scriptLocation
-    );
-  } catch (error) {
-    throw new BuilderError(
-      ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR,
-      {
-        script: scriptLocation,
-        error: error.message
-      },
-      error
-    );
-  }
-}
-
-export async function runMultipleScripts (runtimeArgs: RuntimeArgs,
+export async function runMultipleScripts (runtimeEnv: AlgobRuntimeEnv,
   scriptNames: string[],
   log: (...args: unknown[]) => unknown): Promise<void> {
   for (let i = 0; i < scriptNames.length; i++) {
     const scriptLocation = scriptNames[i];
-    log(`Running script ${scriptLocation} in a subprocess so we can wait for it to complete`);
-    const exitCode = await runSingleScript(runtimeArgs, scriptLocation);
-    process.exitCode = exitCode;
-    if (exitCode !== 0) {
-      throw new BuilderError(ERRORS.BUILTIN_TASKS.EXECUTION_ERROR, {
-        script: scriptLocation,
-        errorStatus: exitCode
-      });
-    }
+    log(
+      `Running script ${scriptLocation} in a subprocess so we can wait for it to complete`
+    );
+    await runScript(
+      scriptLocation,
+      runtimeEnv
+    );
   }
 }
 
-async function doRun ({ scripts }: Input, renv: AlgobRuntimeEnv): Promise<void> {
+async function doRun (
+  { scripts }: Input,
+  runtimeEnv: AlgobRuntimeEnv
+): Promise<any> {
   const log = debug("builder:core:tasks:run");
 
   const nonExistent = filterNonExistent(scripts);
@@ -62,7 +44,7 @@ async function doRun ({ scripts }: Input, renv: AlgobRuntimeEnv): Promise<void> 
     });
   }
 
-  await runMultipleScripts(renv.runtimeArgs, scripts, log);
+  return await runMultipleScripts(runtimeEnv, scripts, log);
 }
 
 export default function (): void {

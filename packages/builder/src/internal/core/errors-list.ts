@@ -133,6 +133,22 @@ Please [report it](https://github.com/scale-it/algorand-builder/issues/new) to h
       message: "Builder project file was detected: '%clashingFile%'. Move the file or use an empty directory.",
       title: "Directory contains a builder file",
       description: `You are trying to run Builder in a directory that contains builder project file.`
+    },
+    NO_DEFAULT_EXPORT_IN_SCRIPT: {
+      number: 12,
+      message: "Error. '%script%' doesn't have an exported default function.",
+      title: "No exported default function",
+      description: `Script doesn't export a default function.
+
+Please check algob output for more details.`
+    },
+    SCRIPT_LOAD_ERROR: {
+      number: 13,
+      message: "Error. Script '%script%' failed during load.",
+      title: "Script can't load",
+      description: `Script failed during load.
+
+Please check algob output for more details.`
     }
   },
   NETWORK: {
@@ -483,14 +499,6 @@ Please check your directory`
       description: `Tried to use \`algob migrate\` with no scripts in directory %directory%.
 
 Please double check your script's path`
-    },
-    EXECUTION_ERROR: {
-      number: 605,
-      message: "Error. Process of '%script%' returned an error status code: %errorStatus%",
-      title: "Error status code while executing a script",
-      description: `Script process returned an error status code.
-
-Please check algob output for more details.`
     }
   },
   PLUGINS: {

@@ -1,138 +1,66 @@
 import { assert } from "chai";
+import fs from "fs";
 
 import {
   resolveBuilderRegisterPath,
-  runScript,
-  runScriptWithAlgob,
+  runScript
 } from "../../../src/internal/util/scripts-runner";
 import { useEnvironment } from "../../helpers/environment";
-import { useFixtureProject } from "../../helpers/project";
+import { useFixtureProject, useCleanFixtureProject, testFixtureOutputFile } from "../../helpers/project";
+import { AlgobRuntimeEnv, PromiseAny, Network } from "../../../src/types";
+import { expectBuilderErrorAsync } from "../../helpers/errors";
+import { mkAlgobEnv } from "../../helpers/params";
+import { ERRORS } from "../../../src/internal/core/errors-list"
 
 describe("Scripts runner", function () {
-  useFixtureProject("project-with-scripts");
+  useCleanFixtureProject("project-with-scripts");
 
   it("Should pass params to the script", async function () {
-    const [
-      statusCodeWithScriptParams,
-      statusCodeWithNoParams,
-    ] = await Promise.all([
-      runScript("./params-script.js", ["a", "b", "c"]),
-      runScript("./params-script.js"),
-    ]);
-
-    assert.equal(statusCodeWithScriptParams, 0);
-
-    // We check here that the script is correctly testing this:
-    assert.notEqual(statusCodeWithNoParams, 0);
+    await runScript("./params-script.js", mkAlgobEnv())
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
+    assert.equal(scriptOutput, "network name");
   });
 
   it("Should run the script to completion", async function () {
     const before = new Date();
-    await runScript("./async-script.js");
+    await runScript("./async-script.js", mkAlgobEnv());
     const after = new Date();
-
     assert.isAtLeast(after.getTime() - before.getTime(), 100);
   });
 
-  it("Should resolve to the status code of the script run", async function () {
-    const builderRegisterPath = resolveBuilderRegisterPath();
-
-    const extraNodeArgs = ["--require", builderRegisterPath];
-    const scriptArgs: string[] = [];
-
-    const runScriptCases = [
-      {
-        scriptPath: "./async-script.js",
-        extraNodeArgs,
-        expectedStatusCode: 0,
-      },
-      {
-        scriptPath: "./failing-script.js",
-        expectedStatusCode: 123,
-      },
-      {
-        scriptPath: "./successful-script.js",
-        extraNodeArgs,
-        expectedStatusCode: 0,
-      },
-    ];
-
-    const runScriptTestResults = await Promise.all(
-      runScriptCases.map(
-        async ({ scriptPath, extraNodeArgs: _extraNodeArgs }) => {
-          const statusCode =
-            _extraNodeArgs === undefined
-              ? await runScript(scriptPath)
-              : await runScript(scriptPath, scriptArgs, _extraNodeArgs);
-          return { scriptPath, statusCode };
-        }
-      )
+  it("Exception shouldn't crash the whole app", async function () {
+    await expectBuilderErrorAsync(
+      () => runScript("./failing-script.js", mkAlgobEnv()),
+      ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR,
+      "./failing-script.js"
     );
-
-    const expectedResults = runScriptCases.map(
-      ({ expectedStatusCode, scriptPath }) => ({
-        scriptPath,
-        statusCode: expectedStatusCode,
-      })
-    );
-
-    assert.deepEqual(runScriptTestResults, expectedResults);
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
+    assert.equal(scriptOutput, "failing script: before exception");
   });
 
-  it("Should pass env variables to the script", async function () {
-    const [statusCodeWithEnvVars, statusCodeWithNoEnvArgs] = await Promise.all([
-      runScript("./env-var-script.js", [], [], {
-        TEST_ENV_VAR: "test",
-      }),
-      runScript("./env-var-script.js"),
-    ]);
-
-    assert.equal(
-      statusCodeWithEnvVars,
-      0,
-      "Status code with env vars should be 0"
+  it("Nonexistent default method should throw an exception", async function () {
+    await expectBuilderErrorAsync(
+      () => runScript("./no-default-method-script.js", mkAlgobEnv()),
+      ERRORS.GENERAL.NO_DEFAULT_EXPORT_IN_SCRIPT,
+      "./no-default-method-script.js"
     );
-
-    assert.notEqual(
-      statusCodeWithNoEnvArgs,
-      0,
-      "Status code with no env vars should not be 0"
-    );
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
+    assert.equal(scriptOutput, "script with no default method has been loaded");
   });
 
-  describe("runWithBuilder", function () {
-    useEnvironment();
-
-    it("Should load builder/register successfully", async function () {
-      const [
-        statusCodeWithBuilder,
-        statusCodeWithoutBuilder,
-      ] = await Promise.all([
-        runScriptWithAlgob(
-          this.env.runtimeArgs,
-          "./successful-script.js"
-        ),
-        runScript("./successful-script.js"),
-      ]);
-
-      assert.equal(statusCodeWithBuilder, 0);
-
-      // We check here that the script is correctly testing this:
-      assert.notEqual(statusCodeWithoutBuilder, 0);
-    });
-
-    it("Should forward all the builder arguments", async function () {
-      // This is only for testing purposes, as we can't set a builder argument
-      // as the CLA does, and env variables always get forwarded to child
-      // processes
-      this.env.runtimeArgs.network = "custom";
-
-      const statusCode = await runScriptWithAlgob(
-        this.env.runtimeArgs,
-        "./assert-builder-arguments.js"
-      );
-
-      assert.equal(statusCode, 0);
-    });
+  it("Should wrap error of require", async function () {
+    await expectBuilderErrorAsync(
+      () => runScript("./failing-script-load.js", mkAlgobEnv()),
+      ERRORS.GENERAL.SCRIPT_LOAD_ERROR,
+      "/project-with-scripts/failing-script-load.js"
+    );
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
+    assert.equal(scriptOutput, "failing load script executed\n");
   });
+
+  it("Should ignore return value", async function () {
+    const out = await runScript("./successful-script-return-status.js", mkAlgobEnv())
+    assert.equal(out, undefined);
+  });
+
 });
