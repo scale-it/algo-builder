@@ -499,14 +499,6 @@ Please check your directory`
       description: `Tried to use \`algob migrate\` with no scripts in directory %directory%.
 
 Please double check your script's path`
-    },
-    SCRIPT_NON_ZERO_RETURN_STATUS: {
-      number: 605,
-      message: "Error. Default function of '%script%' returned an error status code: %errorStatus%",
-      title: "Script returned an error status",
-      description: `Script returned an error status code.
-
-Please check algob output for more details.`
     }
   },
   PLUGINS: {

@@ -17,10 +17,11 @@ async function loadScript (relativeScriptPath: string): Promise<any> {
   }
 }
 
-export async function loadAndRunScript (
+export async function runScript (
   relativeScriptPath: string,
   runtimeArgs: AlgobRuntimeEnv
-): Promise<number> {
+): Promise<void> {
+  log(`Running ${relativeScriptPath}.default()`);
   const requiredScript = await loadScript(relativeScriptPath);
   if (!requiredScript.default) {
     throw new BuilderError(ERRORS.GENERAL.NO_DEFAULT_EXPORT_IN_SCRIPT, {
@@ -28,7 +29,7 @@ export async function loadAndRunScript (
     });
   }
   try {
-    return await requiredScript.default(runtimeArgs) || 0;
+    await requiredScript.default(runtimeArgs);
   } catch (error) {
     throw new BuilderError(
       ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR,
@@ -39,25 +40,6 @@ export async function loadAndRunScript (
       error
     );
   }
-}
-
-export async function runScript (
-  relativeScriptPath: string,
-  runtimeArgs: AlgobRuntimeEnv
-): Promise<any> {
-  log(`Running ${relativeScriptPath}.default()`);
-
-  const exitCode = await loadAndRunScript(
-    relativeScriptPath,
-    runtimeArgs
-  );
-  if (exitCode !== 0) {
-    throw new BuilderError(ERRORS.BUILTIN_TASKS.SCRIPT_NON_ZERO_RETURN_STATUS, {
-      script: relativeScriptPath,
-      errorStatus: exitCode
-    });
-  }
-  process.exitCode = exitCode;
 }
 
 /**

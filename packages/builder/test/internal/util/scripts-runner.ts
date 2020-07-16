@@ -3,8 +3,7 @@ import fs from "fs";
 
 import {
   resolveBuilderRegisterPath,
-  runScript,
-  loadAndRunScript
+  runScript
 } from "../../../src/internal/util/scripts-runner";
 import { useEnvironment } from "../../helpers/environment";
 import { useFixtureProject, useCleanFixtureProject, testFixtureOutputFile } from "../../helpers/project";
@@ -49,39 +48,6 @@ describe("Scripts runner", function () {
     assert.equal(scriptOutput, "script with no default method has been loaded");
   });
 
-  it("Should resolve to the status code of the script run", async function () {
-    const scriptArgs = mkAlgobEnv();
-
-    const runScriptCases = [
-      {
-        scriptPath: "./async-script.js",
-        expectedStatusCode: 0,
-      },
-      {
-        scriptPath: "./failing-status-script.js",
-        expectedStatusCode: 123,
-      }
-    ];
-
-    const runScriptTestResults = await Promise.all(
-      runScriptCases.map(
-        async ({ scriptPath }) => {
-          const statusCode = await loadAndRunScript(scriptPath, scriptArgs)
-          return { scriptPath, statusCode };
-        }
-      )
-    );
-
-    const expectedResults = runScriptCases.map(
-      ({ expectedStatusCode, scriptPath }) => ({
-        scriptPath,
-        statusCode: expectedStatusCode,
-      })
-    );
-
-    assert.deepEqual(runScriptTestResults, expectedResults);
-  });
-
   it("Should wrap error of require", async function () {
     await expectBuilderErrorAsync(
       () => runScript("./failing-script-load.js", mkAlgobEnv()),
@@ -90,6 +56,11 @@ describe("Scripts runner", function () {
     );
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
     assert.equal(scriptOutput, "failing load script executed\n");
+  });
+
+  it("Should ignore return value", async function () {
+    const out = await runScript("./successful-script-return-status.js", mkAlgobEnv())
+    assert.equal(out, undefined);
   });
 
 });
