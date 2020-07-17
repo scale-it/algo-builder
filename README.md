@@ -26,6 +26,12 @@ In algob, scripts are JS files stored in the `scripts` directory. They are used 
 
 Please see the [architecture document](https://paper.dropbox.com/doc/Algorand-builder-architecture--A3aVSVEt3HIRGIiCnTMbn64DAg-Vcdp0XNngizChyUWvFXfs#:uid=213683005476107006060621) to see how the scripts are organized and working.
 
+### Script exception
+
+Scripts can be executed in two ways:
+- `algob run` -- Runs provided scripts by not saving any script state snapshots.
+- `algob deploy` -- Conditionally runs scripts by checking whether previous runs succeeded. Checkpoints can be overridden by using `--force` to run the scripts.
+
 ## Working with TypeScript projects
 
 You can use `algob` within a TS project. Write your scripts and migrations as you would like. But then, to run it you firstly need to compile the project to JS.
