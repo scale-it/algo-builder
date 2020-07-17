@@ -36,6 +36,12 @@ scripts directory: script 1 executed
 `);
   });
 
+  it("Should allow to specify scripts, single script", async function () {
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js"] });
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
+    assert.equal(scriptOutput, `scripts directory: script 1 executed\n`);
+  });
+
   it("Should short-circuit and return failed script's status code", async function () {
     await expectBuilderErrorAsync(
       () =>
@@ -45,6 +51,25 @@ scripts directory: script 1 executed
     );
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
     assert.equal(scriptOutput, "other scripts directory: script 1 executed\n");
+  });
+
+  it("Should not execute executed scripts the second time", async function () {
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js"] });
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/2.js", "scripts/1.js"] });
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
+    assert.equal(scriptOutput, `scripts directory: script 1 executed
+scripts directory: script 2 executed
+`);
+  });
+
+  it("Should not execute executed scripts the second time", async function () {
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js"] });
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/2.js", "scripts/1.js"], force: true });
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
+    assert.equal(scriptOutput, `scripts directory: script 1 executed
+scripts directory: script 2 executed
+scripts directory: script 1 executed
+`);
   });
 
 });

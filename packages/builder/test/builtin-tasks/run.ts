@@ -8,7 +8,7 @@ import { expectBuilderErrorAsync } from "../helpers/errors";
 import { useFixtureProject, useCleanFixtureProject, testFixtureOutputFile } from "../helpers/project";
 import { TASK_RUN } from "../../src/builtin-tasks/task-names";
 
-describe("run task", function () {
+describe("Run task", function () {
   useFixtureProject("project-with-scripts");
   useEnvironment();
 
@@ -65,7 +65,7 @@ describe("run task", function () {
 
 });
 
-describe("run task", function () {
+describe("Run task + clean", function () {
   useCleanFixtureProject("scripts-dir");
   useEnvironment();
 
@@ -95,6 +95,22 @@ scripts directory: script 1 executed
     );
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
     assert.equal(scriptOutput, "other scripts directory: script 1 executed\n");
+  });
+
+  it("Should allow to rerun successful scripts twice", async function () {
+    await this.env.run(TASK_RUN, { scripts: ["scripts/2.js", "scripts/1.js"] });
+    await this.env.run(TASK_RUN, { scripts: ["scripts/1.js", "scripts/2.js"] });
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
+    assert.equal(scriptOutput, `scripts directory: script 2 executed
+scripts directory: script 1 executed
+scripts directory: script 1 executed
+scripts directory: script 2 executed
+`);
+  });
+
+  it("Should not create a snapshot", async function () {
+    await this.env.run(TASK_RUN, { scripts: ["scripts/2.js"] });
+    assert.isFalse(fs.existsSync("artifacts/scripts/2.js"))
   });
 
 });

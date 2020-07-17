@@ -12,7 +12,8 @@ import { runMultipleScripts } from "./run";
 import { TASK_DEPLOY } from "./task-names";
 
 export interface TaskArgs {
-  fileNames: string[]
+  fileNames: string[],
+  force: boolean
 }
 
 const scriptsDirectory = "scripts";
@@ -28,7 +29,7 @@ export function loadFilenames (directory: string): string[] {
   return files.sort(cmpStr);
 }
 
-async function doDeploy ({ fileNames }: TaskArgs, runtimeEnv: AlgobRuntimeEnv): Promise<void> {
+async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntimeEnv): Promise<void> {
   const log = debug("builder:core:tasks:deploy");
 
   const scriptNames = fileNames.length === 0
@@ -41,11 +42,12 @@ async function doDeploy ({ fileNames }: TaskArgs, runtimeEnv: AlgobRuntimeEnv): 
     });
   }
 
-  return await runMultipleScripts(runtimeEnv, scriptNames, log);
+  return await runMultipleScripts(runtimeEnv, scriptNames, log, true, force);
 }
 
 export default function (): void {
   task(TASK_DEPLOY, "Compiles and runs user-defined scripts from scripts directory")
+    .addFlag("force", "Run the scripts even if checkpoint state already exist (Danger: it will overwrite them).")
     .addOptionalVariadicPositionalParam(
       "fileNames",
       "A directory that contains js files to be run within builder's environment",

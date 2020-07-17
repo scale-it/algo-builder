@@ -207,6 +207,14 @@ export interface TaskDefinition extends ConfigurableTaskDefinition {
   readonly positionalParamDefinitions: ParamDefinitionAny[]
 }
 
+export type ScriptCheckpoint = {
+  [network: string]: ScriptNetCheckpoint
+}
+
+export type ScriptNetCheckpoint = {
+  timestamp: number
+}
+
 /**
  * @type TaskArguments {object-like} - the input arguments for a task.
  *
