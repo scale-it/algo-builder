@@ -144,7 +144,7 @@ Please check algob output for more details.`
     },
     SCRIPT_LOAD_ERROR: {
       number: 13,
-      message: "Error. Script '%script%' failed during load.",
+      message: "Error. Script '%script%' failed during load: %error%",
       title: "Script can't load",
       description: `Script failed during load.
 

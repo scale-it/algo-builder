@@ -12,7 +12,8 @@ async function loadScript (relativeScriptPath: string): Promise<any> {
     return require(absoluteScriptPath);
   } catch (err) {
     throw new BuilderError(ERRORS.GENERAL.SCRIPT_LOAD_ERROR, {
-      script: absoluteScriptPath
+      script: absoluteScriptPath,
+      error: err.message
     });
   }
 }

@@ -1,4 +1,6 @@
 
-export default async function (runtimeEnv, deployer, accounts) {
+async function run(runtimeEnv, deployer, accounts) {
   throw new Error("failing script")
 }
+
+module.exports = { default: run }
