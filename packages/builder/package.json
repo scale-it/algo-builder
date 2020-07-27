@@ -46,7 +46,6 @@
     "chai": "^4.2.0",
     "cross-env": "5.0.5",
     "glob": "^7.1.6",
-    "source-map-support": "^0.5.13",
     "sinon": "^9.0.2",
     "time-require": "^0.1.2"
   },
@@ -54,7 +53,7 @@
     "algosdk": "^1.6.2",
     "debug": "^4.1.1",
     "deepmerge": "^4.2.2",
-    "enquirer": "^2.3.5",
+    "enquirer": "^2.3.6",
     "find-up": "^4.1.0",
     "fp-ts": "^2.6.6",
     "fs-extra": "^9.0.1",
