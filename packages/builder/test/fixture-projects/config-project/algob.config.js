@@ -1,3 +1,10 @@
+import { mkAccounts } from "algob";
+
+let accounts = mkAccounts([{
+  addr: "KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY",
+  mnemonic: "call boy rubber fashion arch day capable one sweet skate outside purse six early learn tuition eagle love breeze pizza loud today popular able divide"
+}]);
+
 
 task('example2', 'example task', async (_ret) => 28)
 
@@ -14,8 +21,8 @@ module.exports = {
       host: 'http://127.0.0.1',
       port: 8080,
       token: 'somefaketoken',
-      accounts: ['0xa95f9e3e7ae4e4865c5968828fe7c03fffa8a9f3bb52d36d26243f4c868ee166']
-    }
+      accounts: accounts
+    },
   },
   unknown: { asd: 123 }
 }

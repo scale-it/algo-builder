@@ -25,11 +25,13 @@ describe("Environment", () => {
   const config: ResolvedAlgobConfig = {
     networks: {
       localNet: {
+        accounts: [],
         chainName: "local-chain-name",
         host: "local-net",
         port: 8080
       },
       default: {
+        accounts: [],
         chainName: "default-chain-name",
         host: "default-net:8080",
         port: 8080
@@ -263,7 +265,7 @@ describe("Environment", () => {
     });
 
     it("should run overridden task correctly", async () => {
-      dsl.task("example", "description", async (ret) => {
+      dsl.task("example", "description", async (_ret) => {
         return 28;
       });
       tasks = dsl.getTaskDefinitions();

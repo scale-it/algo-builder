@@ -20,6 +20,7 @@ import {
   getFixtureProjectPath,
   useFixtureProject
 } from "../../../helpers/project";
+import { account1 } from "./fixtures-account";
 
 describe("config loading", function () {
   describe("default config path", function () {
@@ -30,9 +31,7 @@ describe("config loading", function () {
       const a: any = this.env.config;
       assert.equal(this.env.config, a);
       assert.isDefined(this.env.config.networks.localhost);
-      assert.deepEqual(this.env.config.networks.localhost.accounts, [
-        "0xa95f9e3e7ae4e4865c5968828fe7c03fffa8a9f3bb52d36d26243f4c868ee166"
-      ]);
+      assert.deepEqual(this.env.config.networks.localhost.accounts, [account1]);
     });
   });
 
@@ -73,7 +72,6 @@ describe("config loading", function () {
 
       if (!config.paths) {
         assert.fail("Project was not loaded");
-        return;
       }
 
       assert.equal(
@@ -90,7 +88,6 @@ describe("config loading", function () {
 
       if (!config.paths) {
         assert.fail("Project was not loaded");
-        return;
       }
 
       assert.equal(

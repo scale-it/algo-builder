@@ -4,6 +4,7 @@ import * as t from "io-ts";
 import { Context, ValidationError } from "io-ts/lib";
 import { Reporter } from "io-ts/lib/Reporter";
 
+// import { Account } from "algosdk";
 import type { AlgobChainCfg, HttpNetworkConfig, NetworkConfig } from "../../../types";
 import { ALGOB_CHAIN_NAME } from "../../constants";
 import { BuilderError } from "../errors";
@@ -58,20 +59,13 @@ function optional<TypeT, OutputT> (
 
 // IMPORTANT: This t.types MUST be kept in sync with the actual types.
 
-const HDAccountsConfig = t.type({
-  mnemonic: t.string,
-  initialIndex: optional(t.number),
-  count: optional(t.number),
-  path: optional(t.string)
+const AccountType = t.type({
+  addr: t.string,
+  sk: t.string
 });
 
-const NetworkAccounts = t.union([
-  t.array(t.string),
-  HDAccountsConfig
-]);
-
 const AlgobChainType = t.type({
-  // accounts: optional(t.array(todo)),
+  accounts: optional(t.array(AccountType)),
   chainName: optional(t.string),
   throwOnTransactionFailures: optional(t.boolean),
   throwOnCallFailures: optional(t.boolean),
@@ -82,7 +76,7 @@ const AlgobChainType = t.type({
 const HttpHeaders = t.record(t.string, t.string, "httpHeaders");
 
 const HttpNetworkType = t.type({
-  accounts: optional(NetworkAccounts),
+  accounts: optional(t.array(AccountType)),
   chainName: optional(t.string),
   // from: optional(t.string),
   host: optional(t.string),
@@ -201,11 +195,6 @@ function validateAlgobChainCfg (ncfg: AlgobChainCfg, errors: CfgErrors): void {
     ncfg.loggingEnabled !== undefined &&
     typeof ncfg.loggingEnabled !== "boolean"
   ) { errors.push(ALGOB_CHAIN_NAME, "loggingEnabled", ncfg.loggingEnabled, tBoolOpt); }
-}
-
-export function validateConfigAccount (): void{
-  // TODO
-  // if (Array.isArray(ncfg.accounts)) {
 }
 
 // this comes from https://stackoverflow.com/questions/5717093

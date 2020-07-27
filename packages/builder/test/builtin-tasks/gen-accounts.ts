@@ -1,20 +1,12 @@
 import { assert } from "chai";
 import * as fs from "fs";
 import YAML from "yaml";
+import { Account } from "algosdk";
 
-import { Acc, genAccounts, getFilename, mkAccounts } from "../../src/builtin-tasks/gen-accounts";
+import { genAccounts, getFilename, mkAccounts } from "../../src/builtin-tasks/gen-accounts";
 import { ASSETS_DIR } from "../../src/internal/core/project-structure";
 import { mkAlgobEnv } from "../helpers/params";
 import { useFixtureProjectCopy } from "../helpers/project";
-
-// function assertCleanBehavior() {
-//   it("Should delete the folders if present", async function () {
-//     await this.env.run(TASK_CLEAN);
-
-//     assert.isFalse(fs.existsSync("./cache"));
-//     assert.isFalse(fs.existsSync("./artifacts"));
-//   });
-// }
 
 describe("Gen-accounts task", () => {
   useFixtureProjectCopy("default-config-project");
@@ -30,7 +22,7 @@ describe("Gen-accounts task", () => {
     }
   });
 
-  describe("accounts_generated.yaml flow", () => {
+  describe("accounts_generated.yaml flow", ()=>{
     it("Should fail when n is negative or 0", async () => {
       try {
         await mkAccounts({ n: 0 }, mkAlgobEnv());
@@ -49,7 +41,7 @@ describe("Gen-accounts task", () => {
         "assets directory shouldn't be created when task params are invalid");
     });
 
-    let accounts: Acc[] = [];
+    let accounts: Account[] = [];
     const filename = getFilename();
 
     it("should create a directory and a file", async () => {
@@ -66,13 +58,13 @@ describe("Gen-accounts task", () => {
 
       await mkAccounts({ n }, mkAlgobEnv());
       let content = fs.readFileSync(filename, 'utf8');
-      let accounts2 = YAML.parse(content) as Acc[];
+      let accounts2 = YAML.parse(content) as Account[];
       assert.deepEqual(accounts, accounts2);
 
       // now with --force flag
       await mkAccounts({ force: true, n }, mkAlgobEnv());
       content = fs.readFileSync(filename, 'utf8');
-      accounts2 = YAML.parse(content) as Acc[];
+      accounts2 = YAML.parse(content) as Account[];
       assert.notDeepEqual(accounts2, accounts);
     });
   });
