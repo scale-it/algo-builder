@@ -5,9 +5,9 @@ import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { runScript } from "../internal/util/scripts-runner";
+import { checkRelativePaths } from "../lib/files";
 import { AlgobRuntimeEnv } from "../types";
 import { TASK_RUN } from "./task-names";
-import { checkRelativePaths } from "../lib/files";
 
 interface Input {
   scripts: string[]

@@ -8,13 +8,13 @@ import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { runScript } from "../internal/util/scripts-runner";
 import { cmpStr } from "../lib/comparators";
+import { checkRelativePaths } from "../lib/files";
 import {
   AlgobDeployerImpl,
   loadCheckpoint,
   persistCheckpoint,
   scriptsDirectory
 } from "../lib/script-checkpoints";
-import { checkRelativePaths } from "../lib/files";
 import { AlgobDeployer, AlgobRuntimeEnv, ScriptCheckpoint } from "../types";
 import { runMultipleScripts } from "./run";
 import { TASK_DEPLOY } from "./task-names";
