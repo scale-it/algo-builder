@@ -2,8 +2,8 @@ name: PR tests
 on: push
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: node
     steps:
       - name: Execute tests
-        run: echo hi && exit 0
+        run: yarn && yarn test
 
