@@ -1,0 +1,9 @@
+name: PR tests
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Execute tests
+        run: echo hi && exit 0
+
