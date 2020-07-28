@@ -1,5 +1,5 @@
 
-function run(runtimeEnv, deployer, accounts) {
+function run(runtimeEnv, accounts, deployer) {
   console.log("Sample script has been executed!")
 }
 

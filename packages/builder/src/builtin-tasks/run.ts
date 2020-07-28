@@ -5,11 +5,6 @@ import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { runScript } from "../internal/util/scripts-runner";
-import {
-  appendEnv,
-  loadCheckpoint,
-  persistCheckpoint
-} from "../internal/util/script-checkpoints";
 import { AlgobRuntimeEnv } from "../types";
 import { TASK_RUN } from "./task-names";
 
@@ -22,29 +17,14 @@ function filterNonExistent (scripts: string[]): string[] {
 }
 
 export async function runMultipleScripts (runtimeEnv: AlgobRuntimeEnv,
-                                          scriptNames: string[],
-                                          log: (...args: unknown[]) => unknown,
-                                          persistSnapshots: boolean,
-                                          forceRun: boolean): Promise<void> {
+  scriptNames: string[],
+  runScriptFn: (
+    relativeScriptPath: string,
+    runtimeEnv: AlgobRuntimeEnv
+  ) => Promise<void>): Promise<void> {
   for (let i = 0; i < scriptNames.length; i++) {
     const scriptLocation = scriptNames[i];
-    const currentCP = loadCheckpoint(scriptLocation)
-    if (!forceRun && persistSnapshots && currentCP[runtimeEnv.network.name]) {
-      log(`Skipping: Checkpoint exists for script ${scriptLocation}`);
-      continue;
-    }
-    log(`Running script ${scriptLocation}`);
-    await runScript(
-      scriptLocation,
-      runtimeEnv
-    );
-    if (persistSnapshots) {
-      persistCheckpoint(
-        scriptLocation,
-        appendEnv(
-          currentCP,
-          runtimeEnv))
-    }
+    await runScriptFn(scriptLocation, runtimeEnv);
   }
 }
 
@@ -61,7 +41,13 @@ async function doRun (
     });
   }
 
-  return await runMultipleScripts(runtimeEnv, scripts, log, false, false);
+  return await runMultipleScripts(runtimeEnv, scripts, async (
+    relativeScriptPath: string,
+    runtimeEnv: AlgobRuntimeEnv
+  ) => {
+    log(`Running script ${relativeScriptPath}`);
+    await runScript(relativeScriptPath, runtimeEnv);
+  });
 }
 
 export default function (): void {

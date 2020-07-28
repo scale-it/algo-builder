@@ -1,5 +1,5 @@
 
-function run(runtimeEnv, deployer, accounts) {
+function run(runtimeEnv, accounts, deployer) {
   return new Promise(resolve => setTimeout(resolve, 100));
 }
 

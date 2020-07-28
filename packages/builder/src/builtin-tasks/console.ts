@@ -1,11 +1,11 @@
-import debug from "debug";
+// import debug from "debug";
 
 import { task } from "../internal/core/config/config-env";
 import { AlgobRuntimeEnv } from "../types";
 import { TASK_CONSOLE } from "./task-names";
 
 export default function (): void {
-  //const log = debug("builder:core:tasks:console");
+  // const log = debug("builder:core:tasks:console");
 
   task(TASK_CONSOLE, "Opens builder console")
     .addFlag("noCompile", "Don't compile before running this task")

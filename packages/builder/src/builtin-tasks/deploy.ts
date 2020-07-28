@@ -6,13 +6,20 @@ import path from "path";
 import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
+import { runScript } from "../internal/util/scripts-runner";
 import { cmpStr } from "../lib/comparators";
-import { AlgobRuntimeEnv } from "../types";
+import {
+  AlgobDeployerImpl,
+  appendEnv,
+  loadCheckpoint,
+  persistCheckpoint
+} from "../lib/script-checkpoints";
+import { AlgobDeployer, AlgobRuntimeEnv, ScriptCheckpoint } from "../types";
 import { runMultipleScripts } from "./run";
 import { TASK_DEPLOY } from "./task-names";
 
 export interface TaskArgs {
-  fileNames: string[],
+  fileNames: string[]
   force: boolean
 }
 
@@ -42,7 +49,29 @@ async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntim
     });
   }
 
-  return await runMultipleScripts(runtimeEnv, scriptNames, log, true, force);
+  const deployer: AlgobDeployer = new AlgobDeployerImpl(runtimeEnv);
+
+  return await runMultipleScripts(runtimeEnv, scriptNames, async (
+    relativeScriptPath: string,
+    runtimeEnv: AlgobRuntimeEnv
+  ) => {
+    const currentCP: ScriptCheckpoint = loadCheckpoint(relativeScriptPath);
+    if (!force && currentCP[runtimeEnv.network.name]) {
+      log(`Skipping: Checkpoint exists for script ${relativeScriptPath}`);
+      return;
+    }
+    log(`Running script ${relativeScriptPath}`);
+    await runScript(
+      relativeScriptPath,
+      runtimeEnv,
+      deployer
+    );
+    persistCheckpoint(
+      relativeScriptPath,
+      appendEnv(
+        currentCP,
+        runtimeEnv));
+  });
 }
 
 export default function (): void {

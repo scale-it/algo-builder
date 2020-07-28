@@ -207,13 +207,14 @@ export interface TaskDefinition extends ConfigurableTaskDefinition {
   readonly positionalParamDefinitions: ParamDefinitionAny[]
 }
 
-export type ScriptCheckpoint = {
+export interface ScriptCheckpoint {
   [network: string]: ScriptNetCheckpoint
-}
+};
 
-export type ScriptNetCheckpoint = {
+export interface ScriptNetCheckpoint {
   timestamp: number
-}
+  metadata: {[key: string]: string}
+};
 
 /**
  * @type TaskArguments {object-like} - the input arguments for a task.
@@ -274,6 +275,14 @@ export interface LinkReferences {
   [libraryFileName: string]: {
     [libraryName: string]: Array<{ length: number, start: number }>
   }
+}
+
+export interface AlgobDeployer {
+  putMetadata: (key: string, value: string) => void
+  getMetadata: (key: string) => string | undefined
+  appendCheckpoints: (cp: ScriptCheckpoint) => void
+  checkpoint: ScriptNetCheckpoint
+  checkpoints: ScriptCheckpoint
 }
 
 // ************************

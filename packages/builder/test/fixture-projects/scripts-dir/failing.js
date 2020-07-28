@@ -1,5 +1,5 @@
 
-async function run(runtimeEnv, deployer, accounts) {
+async function run(runtimeEnv, accounts, deployer) {
   throw new Error("failing script")
 }
 
