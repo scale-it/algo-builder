@@ -280,7 +280,7 @@ export interface LinkReferences {
 export interface AlgobDeployer {
   putMetadata: (key: string, value: string) => void
   getMetadata: (key: string) => string | undefined
-  appendCheckpoints: (cp: ScriptCheckpoint) => void
+  appendCheckpoints: (cp: ScriptCheckpoint) => AlgobDeployer
   checkpoint: ScriptNetCheckpoint
   checkpoints: ScriptCheckpoint
 }

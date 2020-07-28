@@ -38,8 +38,7 @@ export async function runScript (
     );
   } catch (error) {
     throw new BuilderError(
-      ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR,
-      {
+      ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR, {
         script: relativeScriptPath,
         error: error.message
       },

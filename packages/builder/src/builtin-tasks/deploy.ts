@@ -10,7 +10,6 @@ import { runScript } from "../internal/util/scripts-runner";
 import { cmpStr } from "../lib/comparators";
 import {
   AlgobDeployerImpl,
-  appendEnv,
   loadCheckpoint,
   persistCheckpoint
 } from "../lib/script-checkpoints";
@@ -64,13 +63,9 @@ async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntim
     await runScript(
       relativeScriptPath,
       runtimeEnv,
-      deployer
+      deployer.appendCheckpoints(currentCP)
     );
-    persistCheckpoint(
-      relativeScriptPath,
-      appendEnv(
-        currentCP,
-        runtimeEnv));
+    persistCheckpoint(relativeScriptPath, deployer.checkpoints);
   });
 }
 

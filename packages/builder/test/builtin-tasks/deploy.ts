@@ -6,6 +6,7 @@ import { expectBuilderErrorAsync } from "../helpers/errors";
 import { useCleanFixtureProject, testFixtureOutputFile } from "../helpers/project";
 import { TASK_DEPLOY } from "../../src/builtin-tasks/task-names";
 import { loadFilenames } from "../../src/builtin-tasks/deploy";
+import { loadCheckpoint } from "../../src/lib/script-checkpoints";
 
 describe("Deploy task", function () {
   useCleanFixtureProject("scripts-dir")
@@ -25,6 +26,16 @@ describe("Deploy task", function () {
     assert.equal(scriptOutput, `scripts directory: script 1 executed
 scripts directory: script 2 executed
 `);
+  });
+
+  it("Should persist Deployer's metadata from all tasks", async function () {
+    await this.env.run(TASK_DEPLOY, { noCompile: true });
+    const persistedSnapshot = loadCheckpoint("./scripts/2.js")
+    assert.deepEqual(persistedSnapshot["default"].metadata, {
+      "script 1 key": "script 1 value",
+      "script 2 key": "script 2 value"
+    });
+    assert.isAtMost(persistedSnapshot["default"].timestamp, +new Date());
   });
 
   it("Should allow to specify scripts, preserving order", async function () {

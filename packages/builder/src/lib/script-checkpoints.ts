@@ -95,9 +95,10 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     return this.checkpoint.metadata[key];
   }
 
-  appendCheckpoints (loaded: ScriptCheckpoint): void {
+  appendCheckpoints (loaded: ScriptCheckpoint): AlgobDeployerImpl {
     this.checkpoints = mergeCheckpoints(
       this.checkpoints,
       loaded);
+    return this;
   }
 }
