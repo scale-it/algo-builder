@@ -2,8 +2,13 @@ name: PR tests
 on: push
 jobs:
   test:
-    runs-on: node
+    runs-on: ubuntu-latest
     steps:
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '12'
+      - name: Install dependencies
+        run: yarn install
       - name: Execute tests
-        run: yarn && yarn test
+        run: yarn test
 
