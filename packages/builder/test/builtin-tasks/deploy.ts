@@ -39,12 +39,21 @@ scripts directory: script 2 executed
   });
 
   it("Should allow to specify scripts, preserving order", async function () {
-    await this.env.run(TASK_DEPLOY, { fileNames: ["other-scripts/1.js", "scripts/2.js", "scripts/1.js"] });
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/other-scripts/1.js", "scripts/2.js", "scripts/1.js"] });
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
     assert.equal(scriptOutput, `other scripts directory: script 1 executed
 scripts directory: script 2 executed
 scripts directory: script 1 executed
 `);
+  });
+
+  it("Should not allow scripts outside of scripts dir", async function () {
+    await expectBuilderErrorAsync(
+      () =>
+        this.env.run(TASK_DEPLOY, { fileNames: ["1.js", "scripts/2.js", "scripts/1.js"] }),
+      ERRORS.BUILTIN_TASKS.SCRIPTS_OUTSIDE_SCRIPTS_DIRECTORY,
+      "1.js"
+    );
   });
 
   it("Should allow to specify scripts, single script", async function () {
@@ -56,9 +65,9 @@ scripts directory: script 1 executed
   it("Should short-circuit and return failed script's status code", async function () {
     await expectBuilderErrorAsync(
       () =>
-        this.env.run(TASK_DEPLOY, { fileNames: ["other-scripts/1.js", "failing.js", "scripts/1.js"] }),
+        this.env.run(TASK_DEPLOY, { fileNames: ["scripts/other-scripts/1.js", "scripts/other-scripts/failing.js", "scripts/1.js"] }),
       ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR,
-      "failing.js"
+      "scripts/other-scripts/failing.js"
     );
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
     assert.equal(scriptOutput, "other scripts directory: script 1 executed\n");

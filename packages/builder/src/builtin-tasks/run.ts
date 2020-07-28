@@ -7,6 +7,7 @@ import { ERRORS } from "../internal/core/errors-list";
 import { runScript } from "../internal/util/scripts-runner";
 import { AlgobRuntimeEnv } from "../types";
 import { TASK_RUN } from "./task-names";
+import { checkRelativePaths } from "../lib/files";
 
 interface Input {
   scripts: string[]
@@ -41,7 +42,7 @@ async function doRun (
     });
   }
 
-  return await runMultipleScripts(runtimeEnv, scripts, async (
+  return await runMultipleScripts(runtimeEnv, checkRelativePaths(scripts), async (
     relativeScriptPath: string,
     runtimeEnv: AlgobRuntimeEnv
   ) => {

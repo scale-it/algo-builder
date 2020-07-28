@@ -5,6 +5,7 @@ import YAML from "yaml";
 
 import { AlgobDeployer, AlgobRuntimeEnv, ScriptCheckpoint, ScriptNetCheckpoint } from "../types";
 
+export const scriptsDirectory = "scripts";
 const artifactsPath = "artifacts";
 
 export function toCheckpointFileName (scriptName: string): string {
