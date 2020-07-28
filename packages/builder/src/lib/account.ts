@@ -10,23 +10,23 @@ export function mkAccounts (input: AccountDef[]): Account[] {
   const accounts: Account[] = [];
   for (const i of input) {
     if ((i as HDAccount).path) {
-      throw new BuilderError(ERRORS.ACCOUNT.HD_ACCOUNT, {});
+      throw new BuilderError(ERRORS.ACCOUNT.HD_ACCOUNT, { path: (i as HDAccount).path });
     } else if ((i as Account).sk) {
       accounts.push(i as Account);
     } else {
-      const ia = i as MnemonicAccount;
-      const a = parseMnemonic(ia.mnemonic);
-      if (a.addr !== ia.addr && ia.addr !== "") {
-        throw new BuilderError(ERRORS.ACCOUNT.MNEMONIC_ADDR_MISSMATCH,
-          { addr: ia.addr, mnemonic: ia.mnemonic });
-      }
-      accounts.push({
-        addr: a.addr,
-        sk: a.sk
-      });
+      accounts.push(fromMnemonic(i as MnemonicAccount));
     }
   }
   return accounts;
+}
+
+function fromMnemonic (ia: MnemonicAccount): Account {
+  const a = parseMnemonic(ia.mnemonic);
+  if (a.addr !== ia.addr && ia.addr !== "") {
+    throw new BuilderError(ERRORS.ACCOUNT.MNEMONIC_ADDR_MISSMATCH,
+      { addr: ia.addr, mnemonic: ia.mnemonic });
+  }
+  return { addr: a.addr, sk: a.sk };
 }
 
 function parseMnemonic (mnemonic: string): Account {

@@ -565,7 +565,7 @@ const accountErrors = {
   },
   HD_ACCOUNT: {
     number: 402,
-    message: `HD accounts is not yet supported`,
+    message: `HD accounts is not yet supported. Account path: %path%`,
     title: "HD accounts is not yet supported",
     description: ""
   }

@@ -8,7 +8,7 @@ import { resolveProjectPaths } from "../../../../src/internal/core/config/config
 import { resetBuilderContext } from "../../../../src/internal/reset";
 import { AlgobChainCfg, HttpNetworkConfig, UserPaths } from "../../../../src/types";
 import { useFixtureProject } from "../../../helpers/project";
-import { account1 } from "./fixtures-account";
+import { account1 } from "../../../mocks/account";
 
 describe("Config resolution", () => {
   beforeEach(() => {

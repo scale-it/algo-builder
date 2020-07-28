@@ -5,7 +5,7 @@
   "main": "",
   "typings": "index.d.ts",
   "repository": "https://github.com/scale-it/algorand-builder.git",
-  "author": "SEE package.json from PROJECT ROOT",
+  "author": "SEE package.json in PROJECT ROOT",
   "license": "MIT",
   "scripts": {
     "lint": "echo ok",

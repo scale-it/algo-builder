@@ -20,7 +20,7 @@ import {
   getFixtureProjectPath,
   useFixtureProject
 } from "../../../helpers/project";
-import { account1 } from "./fixtures-account";
+import { account1 } from "../../../mocks/account";
 
 describe("config loading", function () {
   describe("default config path", function () {

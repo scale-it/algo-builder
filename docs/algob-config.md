@@ -5,7 +5,7 @@ The config is used to list available algorand networks and instructions how to c
 
 A network object can specify following entries:
 
-+ `accounts_file` -- a file with a list of accounts (string, optional)
++ `accounts` - list of `algosdk.Account` objects (required)
 + `host` (string, required, can be with http or https prefix)
 + `port` (number, required)
 + `token` (required, default `none`)
