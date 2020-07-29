@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "sonarjs/no-duplicate-string": "off"
+  }
+}

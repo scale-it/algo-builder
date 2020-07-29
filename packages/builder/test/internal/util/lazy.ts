@@ -72,14 +72,14 @@ describe("lazy module", () => {
     });
 
     it("doesn't support classes", () => {
-      const obj = lazyObject(() => class {}) as any;
+      const obj = lazyObject(() => class {}) as any; // eslint-disable-line @typescript-eslint/no-extraneous-class
 
       expectBuilderError(
         () => (obj.asd = 123),
         ERRORS.GENERAL.UNSUPPORTED_OPERATION
       );
       expectBuilderError(() => obj.asd, ERRORS.GENERAL.UNSUPPORTED_OPERATION);
-      assert.throws(() => new obj(), "obj is not a constructor");
+      assert.throws(() => new obj(), "obj is not a constructor"); // eslint-disable-line new-cap
     });
 
     it("doesn't support functions", () => {
@@ -131,20 +131,6 @@ describe("lazy module", () => {
       assert.equal(Object.getPrototypeOf(obj), proto);
     });
 
-    it("should trap has correctly", () => {
-      const proto = { a: 1 };
-      const obj = lazyObject(() => {
-        const v = Object.create(proto);
-        v.b = 1;
-
-        return v;
-      });
-
-      assert.isTrue("a" in obj);
-      assert.isTrue("b" in obj);
-      assert.isFalse("c" in obj);
-    });
-
     it("should trap isExtensible correctly", () => {
       const obj = lazyObject(() => {
         const v = {};
@@ -159,7 +145,7 @@ describe("lazy module", () => {
       assert.isTrue(Object.isExtensible(obj2));
     });
 
-    it("should trap ownKeys correctly", () => {
+    describe("Lazy object with a property", () => {
       const proto = { a: 1 };
       const obj = lazyObject(() => {
         const v = Object.create(proto);
@@ -168,9 +154,17 @@ describe("lazy module", () => {
         return v;
       });
 
-      obj.c = 123;
+      it("should trap has correctly", () => {
+        assert.isTrue("a" in obj);
+        assert.isTrue("b" in obj);
+        assert.isFalse("c" in obj);
+      });
 
-      assert.deepEqual(Object.getOwnPropertyNames(obj), ["b", "c"]);
+      it("should trap ownKeys correctly", () => {
+        obj.c = 123;
+
+        assert.deepEqual(Object.getOwnPropertyNames(obj), ["b", "c"]);
+      });
     });
 
     it("should trap preventExtensions correctly", () => {
@@ -226,6 +220,6 @@ describe("lazy import", () => {
         }
     );
 
-    assert.deepEqual(new lazyC(), { a: 1, b: 2 });
+    assert.deepEqual(new lazyC(), { a: 1, b: 2 }); // eslint-disable-line new-cap
   });
 });

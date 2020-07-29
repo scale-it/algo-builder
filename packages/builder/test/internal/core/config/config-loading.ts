@@ -90,6 +90,7 @@ describe("config loading", function () {
 
       if (!config.paths) {
         assert.fail("Project was not loaded");
+        return;
       }
 
       assert.equal(

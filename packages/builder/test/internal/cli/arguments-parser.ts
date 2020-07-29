@@ -2,7 +2,7 @@
 import { assert } from "chai";
 
 import { ArgumentsParser } from "../../../src/internal/cli/arguments-parser";
-import { ERRORS } from "../../../src/internal/core/errors-list";
+import { ErrorDescriptor, ERRORS } from "../../../src/internal/core/errors-list";
 import {
   boolean,
   int,
@@ -22,6 +22,23 @@ import {
   TaskDefinition
 } from "../../../src/types";
 import { expectBuilderError } from "../../helpers/errors";
+
+function parseAndExpectBuilderError (
+  argumentsParser: ArgumentsParser,
+  envArgs: RuntimeArgs,
+  rawCLAs: string[],
+  errorDescriptor: ErrorDescriptor): void {
+  expectBuilderError(
+    () =>
+      argumentsParser.parseRuntimeArgs(
+        ALGOB_PARAM_DEFINITIONS,
+        ALGOB_SHORT_PARAM_SUBSTITUTIONS,
+        envArgs,
+        rawCLAs
+      ),
+    errorDescriptor
+  );
+}
 
 describe("ArgumentsParser", () => {
   let argumentsParser: ArgumentsParser;
@@ -166,17 +183,11 @@ describe("ArgumentsParser", () => {
         "--network",
         "local"
       ];
-
-      expectBuilderError(
-        () =>
-          argumentsParser.parseRuntimeArgs(
-            ALGOB_PARAM_DEFINITIONS,
-            ALGOB_SHORT_PARAM_SUBSTITUTIONS,
-            envArgs,
-            rawCLAs
-          ),
-        ERRORS.ARGUMENTS.UNRECOGNIZED_COMMAND_LINE_ARG
-      );
+      parseAndExpectBuilderError(
+        argumentsParser,
+        envArgs,
+        rawCLAs,
+        ERRORS.ARGUMENTS.UNRECOGNIZED_COMMAND_LINE_ARG);
     });
 
     it("should parse a builder argument", () => {
@@ -217,16 +228,11 @@ describe("ArgumentsParser", () => {
         "local",
         "--invalid-param"
       ];
-      expectBuilderError(
-        () =>
-          argumentsParser.parseRuntimeArgs(
-            ALGOB_PARAM_DEFINITIONS,
-            ALGOB_SHORT_PARAM_SUBSTITUTIONS,
-            envArgs,
-            rawCLAs
-          ),
-        ERRORS.ARGUMENTS.UNRECOGNIZED_COMMAND_LINE_ARG
-      );
+      parseAndExpectBuilderError(
+        argumentsParser,
+        envArgs,
+        rawCLAs,
+        ERRORS.ARGUMENTS.UNRECOGNIZED_COMMAND_LINE_ARG);
     });
 
     it("should fail trying to parse a repeated argument", () => {
@@ -238,16 +244,11 @@ describe("ArgumentsParser", () => {
         "local",
         "compile"
       ];
-      expectBuilderError(
-        () =>
-          argumentsParser.parseRuntimeArgs(
-            ALGOB_PARAM_DEFINITIONS,
-            ALGOB_SHORT_PARAM_SUBSTITUTIONS,
-            envArgs,
-            rawCLAs
-          ),
-        ERRORS.ARGUMENTS.REPEATED_PARAM
-      );
+      parseAndExpectBuilderError(
+        argumentsParser,
+        envArgs,
+        rawCLAs,
+        ERRORS.ARGUMENTS.REPEATED_PARAM);
     });
 
     it("should only add non-present arguments", () => {
@@ -266,7 +267,8 @@ describe("ArgumentsParser", () => {
   describe("tasks arguments", () => {
     it("should parse tasks arguments", () => {
       const rawCLAs: string[] = ["--param", "testing", "--bleep", "1337"];
-      const { paramArguments, rawPositionalArguments } = argumentsParser._parseTaskParamArguments(taskDefinition, rawCLAs);
+      const { paramArguments, rawPositionalArguments } =
+        argumentsParser._parseTaskParamArguments(taskDefinition, rawCLAs);
       assert.deepEqual(paramArguments, { param: "testing", bleep: 1337 });
       assert.equal(rawPositionalArguments.length, 0);
     });
@@ -281,7 +283,8 @@ describe("ArgumentsParser", () => {
         "optValue"
       ];
 
-      const { paramArguments, rawPositionalArguments } = argumentsParser._parseTaskParamArguments(overridenTaskDefinition, rawCLAs);
+      const { paramArguments, rawPositionalArguments } =
+        argumentsParser._parseTaskParamArguments(overridenTaskDefinition, rawCLAs);
       assert.deepEqual(paramArguments, {
         strParam: "testing",
         aFlag: true,
@@ -326,48 +329,38 @@ describe("ArgumentsParser", () => {
     });
 
     it("should fail when passing invalid parameter", () => {
-      const rawCLAs: string[] = ["--invalid-parameter", "not_valid"];
       expectBuilderError(() => {
-        argumentsParser.parseTaskArguments(taskDefinition, rawCLAs);
+        argumentsParser.parseTaskArguments(
+          taskDefinition,
+          ["--invalid-parameter", "not_valid"]);
       }, ERRORS.ARGUMENTS.UNRECOGNIZED_PARAM_NAME);
     });
 
     it("should fail to parse task without non optional variadic arguments", () => {
-      const rawCLAs: string[] = ["--param", "testing", "--bleep", "1337"];
       taskDefinition.addVariadicPositionalParam(
         "variadic",
         "a variadic params"
       );
 
       expectBuilderError(() => {
-        argumentsParser.parseTaskArguments(taskDefinition, rawCLAs);
+        argumentsParser.parseTaskArguments(
+          taskDefinition,
+          ["--param", "testing", "--bleep", "1337"]);
       }, ERRORS.ARGUMENTS.MISSING_POSITIONAL_ARG);
     });
 
     it("should fail to parse task without non optional argument", () => {
-      const rawCLAs: string[] = [];
       const definition = new SimpleTaskDefinition("compile", true);
       definition.addParam("param", "just a param");
       definition.addParam("bleep", "useless param", 1602, int, true);
       expectBuilderError(() => {
-        argumentsParser.parseTaskArguments(definition, rawCLAs);
-      }, ERRORS.ARGUMENTS.MISSING_TASK_ARGUMENT);
-    });
-
-    it("should fail trying to parse unrecognized positional argument", () => {
-      const rawCLAs: string[] = [];
-      const definition = new SimpleTaskDefinition("compile", true);
-      definition.addParam("param", "just a param");
-      definition.addParam("bleep", "useless param", 1602, int, true);
-      expectBuilderError(() => {
-        argumentsParser.parseTaskArguments(definition, rawCLAs);
+        argumentsParser.parseTaskArguments(definition, []);
       }, ERRORS.ARGUMENTS.MISSING_TASK_ARGUMENT);
     });
 
     it("should fail when passing unneeded arguments", () => {
-      const rawCLAs: string[] = ["more", "arguments"];
       expectBuilderError(() => {
-        argumentsParser.parseTaskArguments(taskDefinition, rawCLAs);
+        argumentsParser.parseTaskArguments(taskDefinition, ["more", "arguments"]);
       }, ERRORS.ARGUMENTS.UNRECOGNIZED_POSITIONAL_ARG);
     });
 

@@ -7,7 +7,9 @@ declare module "mocha" {
   }
 }
 
-export function useEnvironment (beforeEachFn?: (algobRuntimeEnv: AlgobRuntimeEnv) => PromiseAny) {
+export function useEnvironment (
+  beforeEachFn?: (algobRuntimeEnv: AlgobRuntimeEnv) => PromiseAny
+): void {
   beforeEach("Load environment", async function () {
     this.env = require("../../src/internal/lib/lib");
     if (beforeEachFn) {

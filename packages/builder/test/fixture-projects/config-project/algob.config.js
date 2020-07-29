@@ -1,7 +1,7 @@
 
-task('example2', 'example task', async (_ret) => 28);
+task('example2', 'example task', async (_ret) => 28)
 
-task('example', 'example task', async (__, { run }) => run('example2'));
+task('example', 'example task', async (__, { run }) => run('example2'))
 
 module.exports = {
   networks: {

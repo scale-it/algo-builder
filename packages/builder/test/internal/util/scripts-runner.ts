@@ -3,14 +3,11 @@ import fs from "fs";
 
 import { ERRORS } from "../../../src/internal/core/errors-list";
 import {
-  resolveBuilderRegisterPath,
   runScript
 } from "../../../src/internal/util/scripts-runner";
-import { AlgobRuntimeEnv, Network, PromiseAny } from "../../../src/types";
-import { useEnvironment } from "../../helpers/environment";
 import { expectBuilderErrorAsync } from "../../helpers/errors";
 import { mkAlgobEnv } from "../../helpers/params";
-import { testFixtureOutputFile, useCleanFixtureProject, useFixtureProject } from "../../helpers/project";
+import { testFixtureOutputFile, useCleanFixtureProject } from "../../helpers/project";
 
 describe("Scripts runner", function () {
   useCleanFixtureProject("project-with-scripts");
@@ -30,7 +27,7 @@ describe("Scripts runner", function () {
 
   it("Exception shouldn't crash the whole app", async function () {
     await expectBuilderErrorAsync(
-      () => runScript("./scripts/failing-script.js", mkAlgobEnv()),
+      async () => await runScript("./scripts/failing-script.js", mkAlgobEnv()),
       ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR,
       "./scripts/failing-script.js"
     );
@@ -40,7 +37,7 @@ describe("Scripts runner", function () {
 
   it("Nonexistent default method should throw an exception", async function () {
     await expectBuilderErrorAsync(
-      () => runScript("./scripts/no-default-method-script.js", mkAlgobEnv()),
+      async () => await runScript("./scripts/no-default-method-script.js", mkAlgobEnv()),
       ERRORS.GENERAL.NO_DEFAULT_EXPORT_IN_SCRIPT,
       "./scripts/no-default-method-script.js"
     );
@@ -50,7 +47,7 @@ describe("Scripts runner", function () {
 
   it("Should wrap error of require", async function () {
     await expectBuilderErrorAsync(
-      () => runScript("./scripts/failing-script-load.js", mkAlgobEnv()),
+      async () => await runScript("./scripts/failing-script-load.js", mkAlgobEnv()),
       ERRORS.GENERAL.SCRIPT_LOAD_ERROR,
       "/project-with-scripts/scripts/failing-script-load.js"
     );

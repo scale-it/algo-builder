@@ -60,15 +60,11 @@ describe("Config resolution", () => {
   });
 
   describe("Paths resolution", () => {
-    const cfg = { configFile: "asd" } as UserPaths;
-    it("Doesn't override paths.configFile", () => {
-      const paths = resolveProjectPaths(__filename, cfg);
-      assert.equal(paths.configFile, __filename);
-    });
-
+    const cfg: UserPaths = {};
     it("Should return absolute paths", () => {
       const paths = resolveProjectPaths(__filename, cfg);
-      Object.values(paths).forEach((p) => assert.isTrue(path.isAbsolute(p)));
+      const pathVals: string[] = Object.values(paths);
+      pathVals.forEach((p) => assert.isTrue(path.isAbsolute(p)));
     });
 
     it("Should use absolute paths 'as is'", () => {

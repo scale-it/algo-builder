@@ -15,7 +15,7 @@ export function mkAlgobEnv (networkName?: string): AlgobRuntimeEnv {
     tasks: {},
     run: async (name, args): PromiseAny => "nothing",
     network: {
-      name: networkName || "network name",
+      name: networkName === undefined ? "network name" : networkName,
       config: {
         host: "network host",
         port: 1,

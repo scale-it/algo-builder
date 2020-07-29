@@ -4,18 +4,18 @@ import {
   callFromNestedModule as topCallFromNestedModule
 } from "../top-caller-package-tester";
 
-export function call () {
+export function call (): string | undefined {
   return getClosestCallerPackage();
 }
 
-export function callFromNestedModule () {
+export function callFromNestedModule (): string | undefined {
   return call();
 }
 
-export function callFromTopModule () {
+export function callFromTopModule (): string | undefined {
   return callFromTop();
 }
 
-export function indirectlyCallFromNestedpModule () {
+export function indirectlyCallFromNestedpModule (): string | undefined {
   return topCallFromNestedModule();
 }

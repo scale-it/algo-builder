@@ -8,7 +8,7 @@ declare module "mocha" {
   }
 }
 
-async function getEmptyTmpDir (nameHint: string) {
+async function getEmptyTmpDir (nameHint: string): Promise<string> {
   const tmpDirContainer = os.tmpdir();
   const tmpDir = path.join(tmpDirContainer, `builder-tests-${nameHint}`);
   await fsExtra.ensureDir(tmpDir);
@@ -17,7 +17,7 @@ async function getEmptyTmpDir (nameHint: string) {
   return tmpDir;
 }
 
-export function useTmpDir (nameHint: string) {
+export function useTmpDir (nameHint: string): void {
   nameHint = nameHint.replace(/\s+/, "-");
 
   beforeEach("Creating tmp dir", async function () {

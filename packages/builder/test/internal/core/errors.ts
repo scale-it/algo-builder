@@ -1,7 +1,7 @@
 import { assert } from "chai";
 
 import {
-  applyErrorMessageTemplate,
+  // applyErrorMessageTemplate,
   BuilderError,
   BuilderPluginError
 } from "../../../src/internal/core/errors";
@@ -11,7 +11,7 @@ import {
   ERRORS
 } from "../../../src/internal/core/errors-list";
 import { unsafeObjectKeys } from "../../../src/internal/util/unsafe";
-import { expectBuilderError } from "../../helpers/errors";
+// import { expectBuilderError } from "../../helpers/errors";
 
 const mockErrorDescriptor: ErrorDescriptor = {
   number: 123,
@@ -58,7 +58,6 @@ describe("BuilderError", () => {
           title: "Title",
           description: "Description"
         }).message.substr(0, 8),
-
         "ABLDR1: "
       );
     });
@@ -121,7 +120,7 @@ describe("BuilderError", () => {
 });
 
 describe("Error ranges", () => {
-  function inRange (n: number, min: number, max: number) {
+  function inRange (n: number, min: number, max: number): boolean {
     return n >= min && n <= max;
   }
 

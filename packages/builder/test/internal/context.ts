@@ -7,7 +7,7 @@ import { useEnvironment } from "../helpers/environment";
 import { expectBuilderError } from "../helpers/errors";
 import { useFixtureProject } from "../helpers/project";
 
-describe("Builder context", async function () {
+describe("Builder context", function () {
   describe("no context", () => {
     it("context is not defined", async function () {
       assert.isFalse(BuilderContext.isCreated());
@@ -21,7 +21,7 @@ describe("Builder context", async function () {
     });
   });
 
-  describe("create context but no environment", async function () {
+  describe("create context but no environment", function () {
     afterEach("reset context", function () {
       resetBuilderContext();
     });
@@ -63,7 +63,7 @@ describe("Builder context", async function () {
     });
   });
 
-  describe("environment creates context", async function () {
+  describe("environment creates context", function () {
     useFixtureProject("config-project");
     useEnvironment();
     it("should create context and set BRE into context", async function () {

@@ -15,7 +15,7 @@ describe("Deploy task", function () {
     const ls = loadFilenames("scripts");
     let e = ls[0];
     for (let i = 1; i < ls.length; ++i) {
-      assert.isTrue(e <= ls[i], `Array '${ls}' is expected to be sorted`);
+      assert.isTrue(e <= ls[i], `Array '${ls.toString()}' is expected to be sorted`);
       e = ls[i];
     }
   });
@@ -49,8 +49,8 @@ scripts directory: script 1 executed
 
   it("Should not allow scripts outside of scripts dir", async function () {
     await expectBuilderErrorAsync(
-      () =>
-        this.env.run(TASK_DEPLOY, { fileNames: ["1.js", "scripts/2.js", "scripts/1.js"] }),
+      async () =>
+        await this.env.run(TASK_DEPLOY, { fileNames: ["1.js", "scripts/2.js", "scripts/1.js"] }),
       ERRORS.BUILTIN_TASKS.SCRIPTS_OUTSIDE_SCRIPTS_DIRECTORY,
       "1.js"
     );
@@ -64,8 +64,8 @@ scripts directory: script 1 executed
 
   it("Should short-circuit and return failed script's status code", async function () {
     await expectBuilderErrorAsync(
-      () =>
-        this.env.run(TASK_DEPLOY, { fileNames: ["scripts/other-scripts/1.js", "scripts/other-scripts/failing.js", "scripts/1.js"] }),
+      async () =>
+        await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/other-scripts/1.js", "scripts/other-scripts/failing.js", "scripts/1.js"] }),
       ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR,
       "scripts/other-scripts/failing.js"
     );
@@ -98,8 +98,8 @@ describe("Deploy task: empty scripts dir", function () {
 
   it("Should complain about no scripts", async function () {
     await expectBuilderErrorAsync(
-      () =>
-        this.env.run(TASK_DEPLOY, {}),
+      async () =>
+        await this.env.run(TASK_DEPLOY, {}),
       ERRORS.BUILTIN_TASKS.SCRIPTS_NO_FILES_FOUND
     );
   });
@@ -110,8 +110,8 @@ describe("Deploy task: no scripts dir", function () {
 
   it("Should complain about nonexistent directory", async function () {
     await expectBuilderErrorAsync(
-      () =>
-        this.env.run(TASK_DEPLOY, { directory: "nonexistent-dir" }),
+      async () =>
+        await this.env.run(TASK_DEPLOY, { directory: "nonexistent-dir" }),
       ERRORS.BUILTIN_TASKS.SCRIPTS_DIRECTORY_NOT_FOUND
     );
   });

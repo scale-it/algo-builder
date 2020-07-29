@@ -49,7 +49,7 @@ export class ArgumentsParser {
     );
   }
 
-  private _substituteShortParam (arg: string, shortParamSubs: AlgobShortParamSubstitutions): string {
+  _substituteShortParam (arg: string, shortParamSubs: AlgobShortParamSubstitutions): string {
     if (this._hasShortParamNameFormat(arg)) {
       const substitution = shortParamSubs[arg.substr(1)];
       if (substitution) {
@@ -132,7 +132,7 @@ export class ArgumentsParser {
     return { ...paramArguments, ...positionalArguments };
   }
 
-  private _parseTaskParamArguments (
+  _parseTaskParamArguments (
     taskDefinition: TaskDefinition,
     rawCLAs: string[]
   ): {paramArguments: object, rawPositionalArguments: string[]} {
@@ -166,7 +166,7 @@ export class ArgumentsParser {
     return { paramArguments, rawPositionalArguments };
   }
 
-  private _addBuilderDefaultArguments (
+  _addBuilderDefaultArguments (
     paramDefs: AlgobParamDefinitions,
     envVariableArguments: RuntimeArgs,
     runtimeArgs: Partial<RuntimeArgs>
@@ -177,7 +177,7 @@ export class ArgumentsParser {
     };
   }
 
-  private _addTaskDefaultArguments (
+  _addTaskDefaultArguments (
     taskDefinition: TaskDefinition,
     taskArguments: TaskArguments
   ): void {
@@ -197,7 +197,7 @@ export class ArgumentsParser {
     }
   }
 
-  private _isCLAParamName (str: string, paramDefinitions: ParamDefinitionsMap): boolean {
+  _isCLAParamName (str: string, paramDefinitions: ParamDefinitionsMap): boolean {
     if (!this._hasCLAParamNameFormat(str)) {
       return false;
     }
@@ -206,15 +206,15 @@ export class ArgumentsParser {
     return paramDefinitions[name] !== undefined;
   }
 
-  private _hasCLAParamNameFormat (str: string): boolean {
+  _hasCLAParamNameFormat (str: string): boolean {
     return str.startsWith(ArgumentsParser.PARAM_PREFIX);
   }
 
-  private _hasShortParamNameFormat (str: string): boolean {
+  _hasShortParamNameFormat (str: string): boolean {
     return str.startsWith(ArgumentsParser.SHORT_PARAM_PREFIX) && str.length === 2;
   }
 
-  private _parseArgumentAt (
+  _parseArgumentAt (
     rawCLAs: string[],
     index: number,
     paramDefinitions: ParamDefinitionsMap,
@@ -248,7 +248,7 @@ export class ArgumentsParser {
     return index;
   }
 
-  private _parsePositionalParamArgs (
+  _parsePositionalParamArgs (
     rawPositionalParamArgs: string[],
     positionalParamDefinitions: Array<ParamDefinition<any>> // eslint-disable-line @typescript-eslint/no-explicit-any
   ): TaskArguments {

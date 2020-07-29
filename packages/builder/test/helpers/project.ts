@@ -14,7 +14,7 @@ export const testFixtureOutputFile = "output.txt";
  *
  * @param projectName The base name of the folder with the project to use.
  */
-export function useFixtureProject (projectName: string) {
+export function useFixtureProject (projectName: string): void {
   let projectPath: string;
   let prevWorkingDir: string;
 
@@ -50,7 +50,7 @@ export function getFixtureProjectPath (
  * The copied project name is `projecName + "-tmp"`. If it already exists an exception
  * is thrown.
  */
-export function useFixtureProjectCopy (srcProjectName: string) {
+export function useFixtureProjectCopy (srcProjectName: string): void {
   const project = srcProjectName + "-tmp";
   const srcProjectPath = getFixtureProjectPath(srcProjectName);
   const projectPath = path.join(srcProjectPath, "..", project);
@@ -65,10 +65,10 @@ export function useFixtureProjectCopy (srcProjectName: string) {
  * Allows tests to interact with a clean fixture project.
  * Allows to inspect the output file after running the test by cleaning before running.
  */
-export function useCleanFixtureProject (projectName: string) {
+export function useCleanFixtureProject (projectName: string): void {
   useFixtureProject(projectName);
-  useEnvironment((algobEnv: AlgobRuntimeEnv) => {
-    return algobEnv.run(TASK_CLEAN, {});
+  useEnvironment(async (algobEnv: AlgobRuntimeEnv) => {
+    return await algobEnv.run(TASK_CLEAN, {});
   });
 
   beforeEach(function () {

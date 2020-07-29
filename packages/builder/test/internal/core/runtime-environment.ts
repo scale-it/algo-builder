@@ -207,7 +207,7 @@ describe("Environment", () => {
         const expectTaskRunsSuccesfully = async (
           taskNameToRun: string,
           taskArguments: any
-        ) => {
+        ): Promise<void> => {
           const argsString = JSON.stringify(taskArguments);
           try {
             await env.run(taskNameToRun, taskArguments);
@@ -216,7 +216,7 @@ describe("Environment", () => {
               error,
               undefined,
               `Should not throw error task ${taskNameToRun} with args ${argsString}. Error message: ${
-                error.message || error
+                String(error.message || error)
               }`
             );
           }
@@ -225,7 +225,7 @@ describe("Environment", () => {
         const expectTaskRunsWithError = async (
           taskNameToRun: string,
           taskArguments: any
-        ) => {
+        ): Promise<void> => {
           await expectBuilderErrorAsync(async () => {
             await env.run(taskNameToRun, taskArguments);
             console.error(
@@ -275,7 +275,7 @@ describe("Environment", () => {
       dsl.task(
         "with-subtask",
         "description",
-        async ({}, { run, config: theConfig, network }, runSuper: any) => {
+        async (taskName, { run, config: theConfig, network }, runSuper: any): Promise<void> => {
           const globalAsAny = global as any;
           assert.equal(globalAsAny.config, theConfig);
           assert.isDefined(globalAsAny.config);
