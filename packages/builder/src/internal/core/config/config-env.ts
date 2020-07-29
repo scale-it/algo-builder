@@ -9,13 +9,13 @@ import { BuilderContext } from "../../context";
 import * as argumentTypes from "../params/argument-types";
 import { usePlugin as usePluginImplementation } from "../plugins";
 
-export function task<ArgsT extends TaskArguments>(
+export function task<ArgsT extends TaskArguments> (
   name: string,
   description?: string,
   action?: ActionType<ArgsT>
 ): ConfigurableTaskDefinition;
 
-export function task<ArgsT extends TaskArguments>(
+export function task<ArgsT extends TaskArguments> (
   name: string,
   action: ActionType<ArgsT>
 ): ConfigurableTaskDefinition;
@@ -39,13 +39,13 @@ export function task<ArgsT extends TaskArguments> (
   return dsl.task(name, descriptionOrAction, action);
 }
 
-export function internalTask<ArgsT extends TaskArguments>(
+export function internalTask<ArgsT extends TaskArguments> (
   name: string,
   description?: string,
   action?: ActionType<ArgsT>
 ): ConfigurableTaskDefinition;
 
-export function internalTask<ArgsT extends TaskArguments>(
+export function internalTask<ArgsT extends TaskArguments> (
   name: string,
   action: ActionType<ArgsT>
 ): ConfigurableTaskDefinition;

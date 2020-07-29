@@ -71,7 +71,7 @@ export class BuilderPluginError extends Error {
    * @param message An error message that will be shown to the user.
    * @param parent The error that causes this error to be thrown.
    */
-  public constructor(pluginName: string, message: string, parent?: Error);
+  public constructor (pluginName: string, message: string, parent?: Error);
 
   /**
    * A DEPRECATED constructor that automatically obtains the caller package and
@@ -82,7 +82,7 @@ export class BuilderPluginError extends Error {
    * @param message An error message that will be shown to the user.
    * @param parent The error that causes this error to be thrown.
    */
-  public constructor(message: string, parent?: Error);
+  public constructor (message: string, parent?: Error);
 
   public constructor (
     pluginNameOrMessage: string,
