@@ -7,10 +7,14 @@ jobs:
       - uses: actions/setup-node@v2-beta
         with:
           node-version: '12'
-      - name: Print dir
-        run: pwd && ls
+      - name: Print directory
+        run: pwd
+      - name: Run ls
+        run: ls
       - name: Install dependencies
         run: yarn install
       - name: Execute tests
         run: yarn test
+      - name: Execute tests
+        run: cd .. && yarn test
 
