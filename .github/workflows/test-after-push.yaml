@@ -1,4 +1,4 @@
-name: PR tests
+name: Run tests on push
 on: push
 jobs:
   test:
@@ -6,15 +6,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-      - uses: actions/setup-node@v2-beta
+      - name: Setup Node
+        uses: actions/setup-node@v2-beta
         with:
           node-version: '12'
-      - name: Print directory
-        run: pwd
-      - name: Run ls
-        run: ls
       - name: Install dependencies
         run: yarn install
-      - name: Execute tests no cd
+      - name: Execute lint
+        run: yarn lint
+      - name: Execute tests
         run: yarn test
 
