@@ -144,7 +144,7 @@ Please check algob output for more details.`
     },
     SCRIPT_LOAD_ERROR: {
       number: 13,
-      message: "Error. Script '%script%' failed during load.",
+      message: "Error. Script '%script%' failed during load: %error%",
       title: "Script can't load",
       description: `Script failed during load.
 
@@ -499,6 +499,14 @@ Please check your directory`
       description: `Tried to use \`algob migrate\` with no scripts in directory %directory%.
 
 Please double check your script's path`
+    },
+    SCRIPTS_OUTSIDE_SCRIPTS_DIRECTORY: {
+      number: 605,
+      message: "Attempted to execute a script outside scripts directory: %scripts%.",
+      title: "Script is outside `scripts`",
+      description: `Tried to run scripts that was outside scripts directory %scripts%.
+
+Please double check your command parameters`
     }
   },
   PLUGINS: {

@@ -14,7 +14,7 @@ const fsp = _fs.promises;
 export default function (): void {
   task(TASK_GEN_ACCOUNTS, "Generates custom accounts (not safe for production use)")
     .addPositionalParam("n", "number of accounts to generate", undefined, types.int, false)
-    .addFlag("force", "overwride generated accounts if the file already exists")
+    .addFlag("force", "Overwrite generated accounts if the file already exists")
     .setAction(mkAccounts);
 }
 

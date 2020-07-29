@@ -1,6 +1,6 @@
 
 function run(runtimeEnv, accounts, deployer) {
-  console.log("Sample script has been executed!")
+  return new Promise(resolve => setTimeout(resolve, 100));
 }
 
 module.exports = { default: run }

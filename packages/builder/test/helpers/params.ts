@@ -1,6 +1,6 @@
 import { AlgobRuntimeEnv, PromiseAny } from "../../src/types";
 
-export function mkAlgobEnv(): AlgobRuntimeEnv {
+export function mkAlgobEnv(networkName?: string): AlgobRuntimeEnv {
   return {
     config: {
       networks: {}
@@ -15,7 +15,7 @@ export function mkAlgobEnv(): AlgobRuntimeEnv {
     tasks: {},
     run: async (name, args): PromiseAny => "nothing",
     network: {
-      name: "network name",
+      name: networkName || "network name",
       config: {
         host: "network host",
         port: 1,

@@ -2,7 +2,7 @@ import debug from "debug";
 import * as path from "path";
 
 import { BuilderError, ERRORS } from "../../internal/core/errors";
-import { AlgobRuntimeEnv } from "../../types";
+import { AlgobDeployer, AlgobRuntimeEnv } from "../../types";
 
 const log = debug("builder:core:scripts-runner");
 
@@ -12,14 +12,16 @@ async function loadScript (relativeScriptPath: string): Promise<any> {
     return require(absoluteScriptPath);
   } catch (err) {
     throw new BuilderError(ERRORS.GENERAL.SCRIPT_LOAD_ERROR, {
-      script: absoluteScriptPath
+      script: absoluteScriptPath,
+      error: err.message
     });
   }
 }
 
 export async function runScript (
   relativeScriptPath: string,
-  runtimeArgs: AlgobRuntimeEnv
+  runtimeEnv: AlgobRuntimeEnv,
+  maybeDeployer?: AlgobDeployer
 ): Promise<void> {
   log(`Running ${relativeScriptPath}.default()`);
   const requiredScript = await loadScript(relativeScriptPath);
@@ -29,11 +31,14 @@ export async function runScript (
     });
   }
   try {
-    await requiredScript.default(runtimeArgs);
+    await requiredScript.default(
+      runtimeEnv,
+      runtimeEnv.network.config.accounts,
+      maybeDeployer
+    );
   } catch (error) {
     throw new BuilderError(
-      ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR,
-      {
+      ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR, {
         script: relativeScriptPath,
         error: error.message
       },

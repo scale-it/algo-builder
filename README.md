@@ -20,11 +20,7 @@ To attract more web developers we plan to build a JavaScript DSL for TEAL with T
 
 # Usage
 
-## Scripts
-
-In algob, scripts are JS files stored in the `scripts` directory. They are used to manage migrations and deployments.
-
-Please see the [architecture document](https://paper.dropbox.com/doc/Algorand-builder-architecture--A3aVSVEt3HIRGIiCnTMbn64DAg-Vcdp0XNngizChyUWvFXfs#:uid=213683005476107006060621) to see how the scripts are organized and working.
+See [user script documentation](docs/user-script-execution.md) for info about custom scripts and migrations.
 
 ## Working with TypeScript projects
 
@@ -35,7 +31,6 @@ TODO: provide a project template for TS projects. [task](https://www.pivotaltrac
 TIPS:
 
 + Use `tsc --watch` to update the build in a realtime while you develop the project
-
 
 # Contributing
 

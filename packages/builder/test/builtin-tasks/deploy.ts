@@ -6,6 +6,7 @@ import { expectBuilderErrorAsync } from "../helpers/errors";
 import { useCleanFixtureProject, testFixtureOutputFile } from "../helpers/project";
 import { TASK_DEPLOY } from "../../src/builtin-tasks/task-names";
 import { loadFilenames } from "../../src/builtin-tasks/deploy";
+import { loadCheckpoint } from "../../src/lib/script-checkpoints";
 
 describe("Deploy task", function () {
   useCleanFixtureProject("scripts-dir")
@@ -27,8 +28,18 @@ scripts directory: script 2 executed
 `);
   });
 
+  it("Should persist Deployer's metadata from all tasks", async function () {
+    await this.env.run(TASK_DEPLOY, { noCompile: true });
+    const persistedSnapshot = loadCheckpoint("./scripts/2.js")
+    assert.deepEqual(persistedSnapshot["default"].metadata, {
+      "script 1 key": "script 1 value",
+      "script 2 key": "script 2 value"
+    });
+    assert.isAtMost(persistedSnapshot["default"].timestamp, +new Date());
+  });
+
   it("Should allow to specify scripts, preserving order", async function () {
-    await this.env.run(TASK_DEPLOY, { fileNames: ["other-scripts/1.js", "scripts/2.js", "scripts/1.js"] });
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/other-scripts/1.js", "scripts/2.js", "scripts/1.js"] });
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
     assert.equal(scriptOutput, `other scripts directory: script 1 executed
 scripts directory: script 2 executed
@@ -36,15 +47,49 @@ scripts directory: script 1 executed
 `);
   });
 
+  it("Should not allow scripts outside of scripts dir", async function () {
+    await expectBuilderErrorAsync(
+      () =>
+        this.env.run(TASK_DEPLOY, { fileNames: ["1.js", "scripts/2.js", "scripts/1.js"] }),
+      ERRORS.BUILTIN_TASKS.SCRIPTS_OUTSIDE_SCRIPTS_DIRECTORY,
+      "1.js"
+    );
+  });
+
+  it("Should allow to specify scripts, single script", async function () {
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js"] });
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
+    assert.equal(scriptOutput, `scripts directory: script 1 executed\n`);
+  });
+
   it("Should short-circuit and return failed script's status code", async function () {
     await expectBuilderErrorAsync(
       () =>
-        this.env.run(TASK_DEPLOY, { fileNames: ["other-scripts/1.js", "failing.js", "scripts/1.js"] }),
+        this.env.run(TASK_DEPLOY, { fileNames: ["scripts/other-scripts/1.js", "scripts/other-scripts/failing.js", "scripts/1.js"] }),
       ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR,
-      "failing.js"
+      "scripts/other-scripts/failing.js"
     );
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
     assert.equal(scriptOutput, "other scripts directory: script 1 executed\n");
+  });
+
+  it("Should not execute executed scripts the second time", async function () {
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js"] });
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/2.js", "scripts/1.js"] });
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
+    assert.equal(scriptOutput, `scripts directory: script 1 executed
+scripts directory: script 2 executed
+`);
+  });
+
+  it("Should not execute executed scripts the second time", async function () {
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js"] });
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/2.js", "scripts/1.js"], force: true });
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
+    assert.equal(scriptOutput, `scripts directory: script 1 executed
+scripts directory: script 2 executed
+scripts directory: script 1 executed
+`);
   });
 
 });
