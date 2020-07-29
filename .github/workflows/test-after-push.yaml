@@ -13,8 +13,8 @@ jobs:
         run: ls
       - name: Install dependencies
         run: yarn install
-      - name: Execute tests
-        run: yarn test
-      - name: Execute tests
+      - name: Execute tests with cd
         run: cd .. && yarn test
+      - name: Execute tests no cd
+        run: yarn test
 
