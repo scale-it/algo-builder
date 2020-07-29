@@ -63,11 +63,11 @@ export function persistCheckpoint (scriptName: string, checkpoint: ScriptCheckpo
 }
 
 export function loadCheckpoint (scriptName: string): ScriptCheckpoint {
-  const scriptPath = toCheckpointFileName(scriptName);
-  if (!fs.existsSync(scriptPath)) {
+  const checkpointPath = toCheckpointFileName(scriptName);
+  if (!fs.existsSync(checkpointPath)) {
     return {};
   }
-  return YAML.parse(fs.readFileSync(scriptPath).toString());
+  return YAML.parse(fs.readFileSync(checkpointPath).toString());
 }
 
 export class AlgobDeployerImpl implements AlgobDeployer {
