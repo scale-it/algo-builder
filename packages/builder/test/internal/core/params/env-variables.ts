@@ -5,7 +5,7 @@ import { ALGOB_PARAM_DEFINITIONS } from "../../../../src/internal/core/params/bu
 import {
   getEnvRuntimeArgs,
   getEnvVariablesMap,
-  paramNameToEnvVariable,
+  paramNameToEnvVariable
 } from "../../../../src/internal/core/params/env-variables";
 import { expectBuilderError } from "../../../helpers/errors";
 
@@ -31,7 +31,7 @@ describe("paramNameToEnvVariable", () => {
 describe("Env vars arguments parsing", () => {
   it("Should use the default values if arguments are not defined", () => {
     const args = getEnvRuntimeArgs(ALGOB_PARAM_DEFINITIONS, {
-      IRRELEVANT_ENV_VAR: "123",
+      IRRELEVANT_ENV_VAR: "123"
     });
     assert.equal(args.help, ALGOB_PARAM_DEFINITIONS.help.defaultValue);
     assert.equal(args.network, ALGOB_PARAM_DEFINITIONS.network.defaultValue);
@@ -48,7 +48,7 @@ describe("Env vars arguments parsing", () => {
       BUILDER_NETWORK: "asd",
       BUILDER_SHOW_STACK_TRACES: "true",
       BUILDER_VERSION: "true",
-      BUILDER_HELP: "true",
+      BUILDER_HELP: "true"
     });
 
     assert.equal(args.network, "asd");
@@ -63,7 +63,7 @@ describe("Env vars arguments parsing", () => {
     expectBuilderError(
       () =>
         getEnvRuntimeArgs(ALGOB_PARAM_DEFINITIONS, {
-          BUILDER_HELP: "123",
+          BUILDER_HELP: "123"
         }),
       ERRORS.ARGUMENTS.INVALID_ENV_VAR_VALUE
     );
@@ -79,14 +79,14 @@ describe("getEnvVariablesMap", () => {
         showStackTraces: true,
         version: false,
         verbose: true,
-        config: undefined, // config is optional
+        config: undefined // config is optional
       }),
       {
         BUILDER_NETWORK: "asd",
         BUILDER_HELP: "true",
         BUILDER_SHOW_STACK_TRACES: "true",
         BUILDER_VERSION: "false",
-        BUILDER_VERBOSE: "true",
+        BUILDER_VERBOSE: "true"
       }
     );
   });

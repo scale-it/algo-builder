@@ -6,7 +6,7 @@ import { ERRORS } from "../../../src/internal/core/errors-list";
 import {
   boolean,
   int,
-  string,
+  string
 } from "../../../src/internal/core/params/argument-types";
 import {
   ALGOB_PARAM_DEFINITIONS,
@@ -14,12 +14,12 @@ import {
 } from "../../../src/internal/core/params/builder-params";
 import {
   OverriddenTaskDefinition,
-  SimpleTaskDefinition,
+  SimpleTaskDefinition
 } from "../../../src/internal/core/tasks/task-definitions";
 import {
   RuntimeArgs,
   TaskArguments,
-  TaskDefinition,
+  TaskDefinition
 } from "../../../src/types";
 import { expectBuilderError } from "../../helpers/errors";
 
@@ -36,7 +36,7 @@ describe("ArgumentsParser", () => {
       showStackTraces: false,
       version: false,
       help: false,
-      verbose: false,
+      verbose: false
     };
     taskDefinition = new SimpleTaskDefinition("compile", true)
       .addParam("param", "just a param", "a default value", string)
@@ -86,22 +86,22 @@ describe("ArgumentsParser", () => {
   });
 
   it("should detect param name format", () => {
-    assert.isTrue(argumentsParser["_hasCLAParamNameFormat"]("--run"));
-    assert.isFalse(argumentsParser["_hasCLAParamNameFormat"]("run"));
+    assert.isTrue(argumentsParser._hasCLAParamNameFormat("--run"));
+    assert.isFalse(argumentsParser._hasCLAParamNameFormat("run"));
   });
 
   it("should detect parameter names", () => {
     assert.isTrue(
-      argumentsParser["_isCLAParamName"](
+      argumentsParser._isCLAParamName(
         "--show-stack-traces",
         ALGOB_PARAM_DEFINITIONS
       )
     );
     assert.isFalse(
-      argumentsParser["_isCLAParamName"]("sarasa", ALGOB_PARAM_DEFINITIONS)
+      argumentsParser._isCLAParamName("sarasa", ALGOB_PARAM_DEFINITIONS)
     );
     assert.isFalse(
-      argumentsParser["_isCLAParamName"]("--sarasa", ALGOB_PARAM_DEFINITIONS)
+      argumentsParser._isCLAParamName("--sarasa", ALGOB_PARAM_DEFINITIONS)
     );
   });
 
@@ -112,13 +112,13 @@ describe("ArgumentsParser", () => {
         "--network",
         "local",
         "compile",
-        "--task-param",
+        "--task-param"
       ];
 
       const {
         runtimeArgs,
         taskName,
-        unparsedCLAs,
+        unparsedCLAs
       } = argumentsParser.parseRuntimeArgs(
         ALGOB_PARAM_DEFINITIONS,
         ALGOB_SHORT_PARAM_SUBSTITUTIONS,
@@ -138,13 +138,13 @@ describe("ArgumentsParser", () => {
         "--task-param",
         "--show-stack-traces",
         "--network",
-        "local",
+        "local"
       ];
 
       const {
         runtimeArgs,
         taskName,
-        unparsedCLAs,
+        unparsedCLAs
       } = argumentsParser.parseRuntimeArgs(
         ALGOB_PARAM_DEFINITIONS,
         ALGOB_SHORT_PARAM_SUBSTITUTIONS,
@@ -164,7 +164,7 @@ describe("ArgumentsParser", () => {
         "compile",
         "--show-stack-traces",
         "--network",
-        "local",
+        "local"
       ];
 
       expectBuilderError(
@@ -184,13 +184,13 @@ describe("ArgumentsParser", () => {
         "--show-stack-traces",
         "--network",
         "local",
-        "compile",
+        "compile"
       ];
 
       const runtimeArgs: TaskArguments = {};
       assert.equal(
         0,
-        argumentsParser["_parseArgumentAt"](
+        argumentsParser._parseArgumentAt(
           rawCLAs,
           0,
           ALGOB_PARAM_DEFINITIONS,
@@ -200,7 +200,7 @@ describe("ArgumentsParser", () => {
       assert.equal(runtimeArgs.showStackTraces, true);
       assert.equal(
         2,
-        argumentsParser["_parseArgumentAt"](
+        argumentsParser._parseArgumentAt(
           rawCLAs,
           1,
           ALGOB_PARAM_DEFINITIONS,
@@ -215,7 +215,7 @@ describe("ArgumentsParser", () => {
         "--show-stack-traces",
         "--network",
         "local",
-        "--invalid-param",
+        "--invalid-param"
       ];
       expectBuilderError(
         () =>
@@ -236,7 +236,7 @@ describe("ArgumentsParser", () => {
         "local",
         "--network",
         "local",
-        "compile",
+        "compile"
       ];
       expectBuilderError(
         () =>
@@ -251,11 +251,11 @@ describe("ArgumentsParser", () => {
     });
 
     it("should only add non-present arguments", () => {
-      const runtimeArgs = argumentsParser["_addBuilderDefaultArguments"](
+      const runtimeArgs = argumentsParser._addBuilderDefaultArguments(
         ALGOB_PARAM_DEFINITIONS,
         envArgs,
         {
-          showStackTraces: true,
+          showStackTraces: true
         }
       );
 
@@ -266,9 +266,7 @@ describe("ArgumentsParser", () => {
   describe("tasks arguments", () => {
     it("should parse tasks arguments", () => {
       const rawCLAs: string[] = ["--param", "testing", "--bleep", "1337"];
-      const { paramArguments, rawPositionalArguments } = argumentsParser[
-        "_parseTaskParamArguments"
-      ](taskDefinition, rawCLAs);
+      const { paramArguments, rawPositionalArguments } = argumentsParser._parseTaskParamArguments(taskDefinition, rawCLAs);
       assert.deepEqual(paramArguments, { param: "testing", bleep: 1337 });
       assert.equal(rawPositionalArguments.length, 0);
     });
@@ -280,17 +278,15 @@ describe("ArgumentsParser", () => {
         "--a-flag",
         "--overridden-flag",
         "--overridden-opt-param",
-        "optValue",
+        "optValue"
       ];
 
-      const { paramArguments, rawPositionalArguments } = argumentsParser[
-        "_parseTaskParamArguments"
-      ](overridenTaskDefinition, rawCLAs);
+      const { paramArguments, rawPositionalArguments } = argumentsParser._parseTaskParamArguments(overridenTaskDefinition, rawCLAs);
       assert.deepEqual(paramArguments, {
         strParam: "testing",
         aFlag: true,
         overriddenFlag: true,
-        overriddenOptParam: "optValue",
+        overriddenOptParam: "optValue"
       });
       assert.equal(rawPositionalArguments.length, 0);
     });
@@ -304,7 +300,7 @@ describe("ArgumentsParser", () => {
       );
 
       const rawPositionalArguments = ["16", "02"];
-      const positionalArguments = argumentsParser["_parsePositionalParamArgs"](
+      const positionalArguments = argumentsParser._parsePositionalParamArgs(
         rawPositionalArguments,
         taskDefinition.positionalParamDefinitions
       );
@@ -321,7 +317,7 @@ describe("ArgumentsParser", () => {
 
       const rawPositionalArguments: string[] = [];
       // tslint:disable-next-line:no-string-literal
-      const positionalArguments = argumentsParser["_parsePositionalParamArgs"](
+      const positionalArguments = argumentsParser._parsePositionalParamArgs(
         rawPositionalArguments,
         taskDefinition.positionalParamDefinitions
       );
@@ -381,7 +377,7 @@ describe("ArgumentsParser", () => {
         "testing",
         "--bleep",
         "1337",
-        "foobar",
+        "foobar"
       ];
       taskDefinition.addPositionalParam("positional", "a posititon param");
 
@@ -389,7 +385,7 @@ describe("ArgumentsParser", () => {
       assert.deepEqual(args, {
         param: "testing",
         bleep: 1337,
-        positional: "foobar",
+        positional: "foobar"
       });
     });
 

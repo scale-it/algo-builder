@@ -5,7 +5,7 @@ function implicitAny(a: any) { // eslint-disable-line
 export default {
   networks: {
     network: {
-      host: "",
-    },
-  },
+      host: ""
+    }
+  }
 };

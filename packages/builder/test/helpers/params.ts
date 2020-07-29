@@ -1,6 +1,6 @@
 import { AlgobRuntimeEnv, PromiseAny } from "../../src/types";
 
-export function mkAlgobEnv(networkName?: string): AlgobRuntimeEnv {
+export function mkAlgobEnv (networkName?: string): AlgobRuntimeEnv {
   return {
     config: {
       networks: {}
@@ -22,5 +22,5 @@ export function mkAlgobEnv(networkName?: string): AlgobRuntimeEnv {
         token: "network token"
       }
     }
-  }
+  };
 }

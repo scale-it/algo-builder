@@ -3,7 +3,7 @@ import { assert, AssertionError, expect } from "chai";
 import { BuilderError } from "../../src/internal/core/errors";
 import { ErrorDescriptor } from "../../src/internal/core/errors-list";
 
-export async function expectErrorAsync(
+export async function expectErrorAsync (
   f: () => Promise<any>,
   matchMessage?: string | RegExp
 ) {
@@ -41,7 +41,7 @@ export async function expectErrorAsync(
   throw noError;
 }
 
-export function expectBuilderError(
+export function expectBuilderError (
   f: () => any,
   errorDescriptor: ErrorDescriptor,
   matchMessage?: string | RegExp,
@@ -72,7 +72,7 @@ export function expectBuilderError(
   );
 }
 
-export async function expectBuilderErrorAsync(
+export async function expectBuilderErrorAsync (
   f: () => Promise<any>,
   errorDescriptor: ErrorDescriptor,
   matchMessage?: string | RegExp

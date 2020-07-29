@@ -3,12 +3,12 @@ import { assert } from "chai";
 import {
   applyErrorMessageTemplate,
   BuilderError,
-  BuilderPluginError,
+  BuilderPluginError
 } from "../../../src/internal/core/errors";
 import {
   ERROR_RANGES,
   ErrorDescriptor,
-  ERRORS,
+  ERRORS
 } from "../../../src/internal/core/errors-list";
 import { unsafeObjectKeys } from "../../../src/internal/util/unsafe";
 import { expectBuilderError } from "../../helpers/errors";
@@ -17,7 +17,7 @@ const mockErrorDescriptor: ErrorDescriptor = {
   number: 123,
   message: "error message",
   title: "Mock error",
-  description: "This is a mock error",
+  description: "This is a mock error"
 };
 
 describe("BuilderError", () => {
@@ -56,7 +56,7 @@ describe("BuilderError", () => {
           number: 1,
           message: "",
           title: "Title",
-          description: "Description",
+          description: "Description"
         }).message.substr(0, 8),
 
         "ABLDR1: "
@@ -74,7 +74,7 @@ describe("BuilderError", () => {
           number: 12,
           message: "%a% %b% %c%",
           title: "Title",
-          description: "Description",
+          description: "Description"
         },
         { a: "a", b: "b", c: 123 }
       );
@@ -104,7 +104,7 @@ describe("BuilderError", () => {
           number: 12,
           message: "%a% %b% %c%",
           title: "Title",
-          description: "Description",
+          description: "Description"
         },
         { a: "a", b: "b", c: 123 },
         new Error()
@@ -121,7 +121,7 @@ describe("BuilderError", () => {
 });
 
 describe("Error ranges", () => {
-  function inRange(n: number, min: number, max: number) {
+  function inRange (n: number, min: number, max: number) {
     return n >= min && n <= max;
   }
 
@@ -303,7 +303,7 @@ describe("BuilderPluginError", () => {
   });
 });
 
-//describe("applyErrorMessageTemplate", () => {
+// describe("applyErrorMessageTemplate", () => {
 //  describe("Variable names", () => {
 //    it("Should reject invalid variable names", () => {
 //      expectBuilderError(
@@ -459,4 +459,4 @@ describe("BuilderPluginError", () => {
 //      });
 //    });
 //  });
-//});
+// });

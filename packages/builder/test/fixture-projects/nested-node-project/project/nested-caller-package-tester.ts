@@ -1,21 +1,21 @@
 import { getClosestCallerPackage } from "../../../../src/internal/util/caller-package";
 import {
   call as callFromTop,
-  callFromNestedModule as topCallFromNestedModule,
+  callFromNestedModule as topCallFromNestedModule
 } from "../top-caller-package-tester";
 
-export function call() {
+export function call () {
   return getClosestCallerPackage();
 }
 
-export function callFromNestedModule() {
+export function callFromNestedModule () {
   return call();
 }
 
-export function callFromTopModule() {
+export function callFromTopModule () {
   return callFromTop();
 }
 
-export function indirectlyCallFromNestedpModule() {
+export function indirectlyCallFromNestedpModule () {
   return topCallFromNestedModule();
 }

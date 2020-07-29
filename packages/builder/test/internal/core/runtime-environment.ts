@@ -9,15 +9,15 @@ import { Environment } from "../../../src/internal/core/runtime-environment";
 import { TasksDSL } from "../../../src/internal/core/tasks/dsl";
 import { resetBuilderContext } from "../../../src/internal/reset";
 import {
-  RuntimeArgs,
   AlgobRuntimeEnv,
   ParamDefinition,
   ResolvedAlgobConfig,
-  TasksMap,
+  RuntimeArgs,
+  TasksMap
 } from "../../../src/types";
 import {
   expectBuilderError,
-  expectBuilderErrorAsync,
+  expectBuilderErrorAsync
 } from "../../helpers/errors";
 import { useFixtureProject } from "../../helpers/project";
 
@@ -42,7 +42,7 @@ describe("Environment", () => {
     showStackTraces: false,
     version: false,
     help: false,
-    verbose: false,
+    verbose: false
   };
 
   let tasks: TasksMap;
@@ -130,7 +130,7 @@ describe("Environment", () => {
 
         // task runs with required param present
         const taskResult = await env.run(taskName, {
-          [requiredParamName]: "some value",
+          [requiredParamName]: "some value"
         });
         assert.isDefined(taskResult);
 
@@ -156,12 +156,12 @@ describe("Environment", () => {
         assert.notEqual(defaultValue, paramValue);
 
         const taskMinimalArgs = {
-          positionalRequiredStringParam: "a string value",
+          positionalRequiredStringParam: "a string value"
         };
 
         const taskArgumentsSpecified = {
           ...taskMinimalArgs,
-          [optParamName]: paramValue,
+          [optParamName]: paramValue
         };
 
         // setup task action spy
@@ -176,7 +176,7 @@ describe("Environment", () => {
         // assertions
         const [
           taskWithSpecifiedArgsCall,
-          taskWithDefaultArgsCall,
+          taskWithDefaultArgsCall
         ] = taskActionSpy.getCalls();
 
         assert.equal(
@@ -201,7 +201,7 @@ describe("Environment", () => {
           optFloatParam: { valid: 1.2, invalid: NaN },
           optStringParam: { valid: "a string", invalid: 123 },
           optFileParam: { valid: __filename, invalid: __dirname },
-          variadicOptStrParam: { valid: ["a", "b"], invalid: ["a", 1] },
+          variadicOptStrParam: { valid: ["a", "b"], invalid: ["a", 1] }
         };
 
         const expectTaskRunsSuccesfully = async (

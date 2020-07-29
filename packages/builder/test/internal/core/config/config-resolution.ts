@@ -1,13 +1,13 @@
 import { assert } from "chai";
 import * as path from "path";
 
+import { ALGOB_CHAIN_NAME } from "../../../../src/internal/constants";
 import { BuilderContext } from "../../../../src/internal/context";
 import { loadConfigAndTasks } from "../../../../src/internal/core/config/config-loading";
 import { resolveProjectPaths } from "../../../../src/internal/core/config/config-resolution";
 import { resetBuilderContext } from "../../../../src/internal/reset";
 import { AlgobChainCfg, HttpNetworkConfig, UserPaths } from "../../../../src/types";
 import { useFixtureProject } from "../../../helpers/project";
-import { ALGOB_CHAIN_NAME } from "../../../../src/internal/constants";
 
 describe("Config resolution", () => {
   beforeEach(() => {
@@ -48,7 +48,7 @@ describe("Config resolution", () => {
         assert.equal(ncfg.host, "http://127.0.0.1");
         assert.equal(ncfg.port, 8080);
         assert.deepEqual(config.networks.localhost.accounts, [
-          "0xa95f9e3e7ae4e4865c5968828fe7c03fffa8a9f3bb52d36d26243f4c868ee166",
+          "0xa95f9e3e7ae4e4865c5968828fe7c03fffa8a9f3bb52d36d26243f4c868ee166"
         ]);
       });
 
@@ -60,7 +60,7 @@ describe("Config resolution", () => {
   });
 
   describe("Paths resolution", () => {
-    let cfg = { configFile: "asd" } as UserPaths;
+    const cfg = { configFile: "asd" } as UserPaths;
     it("Doesn't override paths.configFile", () => {
       const paths = resolveProjectPaths(__filename, cfg);
       assert.equal(paths.configFile, __filename);
@@ -77,7 +77,7 @@ describe("Config resolution", () => {
         sources: "/c",
         artifacts: "/a",
         cache: "/ca",
-        tests: "/t",
+        tests: "/t"
       });
 
       assert.equal(paths.root, "/root");
@@ -89,7 +89,7 @@ describe("Config resolution", () => {
 
     it("Should resolve the root relative to the configFile", () => {
       const paths = resolveProjectPaths(__filename, {
-        root: "blah",
+        root: "blah"
       });
 
       assert.equal(paths.root, path.join(__dirname, "blah"));
@@ -101,7 +101,7 @@ describe("Config resolution", () => {
         sources: "c",
         artifacts: "a",
         cache: "ca",
-        tests: "t",
+        tests: "t"
       });
 
       const root = path.join(__dirname, "blah");

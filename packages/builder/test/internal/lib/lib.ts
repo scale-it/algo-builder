@@ -9,7 +9,7 @@ describe("Builder lib", () => {
   useEnvironment();
 
   it("should load environment", function () {
-    assert.isDefined(this.env.config!.networks!.custom);
+    assert.isDefined(this.env.config.networks.custom);
   });
 
   it("should load task user defined task", async function () {

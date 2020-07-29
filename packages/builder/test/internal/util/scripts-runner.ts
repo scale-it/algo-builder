@@ -1,23 +1,23 @@
 import { assert } from "chai";
 import fs from "fs";
 
+import { ERRORS } from "../../../src/internal/core/errors-list";
 import {
   resolveBuilderRegisterPath,
   runScript
 } from "../../../src/internal/util/scripts-runner";
+import { AlgobRuntimeEnv, Network, PromiseAny } from "../../../src/types";
 import { useEnvironment } from "../../helpers/environment";
-import { useFixtureProject, useCleanFixtureProject, testFixtureOutputFile } from "../../helpers/project";
-import { AlgobRuntimeEnv, PromiseAny, Network } from "../../../src/types";
 import { expectBuilderErrorAsync } from "../../helpers/errors";
 import { mkAlgobEnv } from "../../helpers/params";
-import { ERRORS } from "../../../src/internal/core/errors-list"
+import { testFixtureOutputFile, useCleanFixtureProject, useFixtureProject } from "../../helpers/project";
 
 describe("Scripts runner", function () {
   useCleanFixtureProject("project-with-scripts");
 
   it("Should pass params to the script", async function () {
-    await runScript("./scripts/params-script.js", mkAlgobEnv())
-    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
+    await runScript("./scripts/params-script.js", mkAlgobEnv());
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, "network name");
   });
 
@@ -34,7 +34,7 @@ describe("Scripts runner", function () {
       ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR,
       "./scripts/failing-script.js"
     );
-    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, "failing script: before exception");
   });
 
@@ -44,7 +44,7 @@ describe("Scripts runner", function () {
       ERRORS.GENERAL.NO_DEFAULT_EXPORT_IN_SCRIPT,
       "./scripts/no-default-method-script.js"
     );
-    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, "script with no default method has been loaded");
   });
 
@@ -54,13 +54,12 @@ describe("Scripts runner", function () {
       ERRORS.GENERAL.SCRIPT_LOAD_ERROR,
       "/project-with-scripts/scripts/failing-script-load.js"
     );
-    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, "failing load script executed\n");
   });
 
   it("Should ignore return value", async function () {
-    const out = await runScript("./scripts/successful-script-return-status.js", mkAlgobEnv())
+    const out = await runScript("./scripts/successful-script-return-status.js", mkAlgobEnv());
     assert.equal(out, undefined);
   });
-
 });

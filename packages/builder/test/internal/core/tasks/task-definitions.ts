@@ -4,28 +4,28 @@ import { ERRORS } from "../../../../src/internal/core/errors-list";
 import * as types from "../../../../src/internal/core/params/argument-types";
 import {
   OverriddenTaskDefinition,
-  SimpleTaskDefinition,
+  SimpleTaskDefinition
 } from "../../../../src/internal/core/tasks/task-definitions";
 import { unsafeObjectKeys } from "../../../../src/internal/util/unsafe";
 import {
-  RuntimeArgs,
   ParamDefinition,
-  TaskDefinition,
+  RuntimeArgs,
+  TaskDefinition
 } from "../../../../src/types";
 import { expectBuilderError } from "../../../helpers/errors";
 
-function expectThrowParamAlreadyDefinedError(f: () => any) {
+function expectThrowParamAlreadyDefinedError (f: () => any) {
   expectBuilderError(f, ERRORS.TASK_DEFINITIONS.PARAM_ALREADY_DEFINED);
 }
 
-function getLastPositionalParam(taskDefinition: TaskDefinition) {
+function getLastPositionalParam (taskDefinition: TaskDefinition) {
   assert.isNotEmpty(taskDefinition.positionalParamDefinitions);
   return taskDefinition.positionalParamDefinitions[
     taskDefinition.positionalParamDefinitions.length - 1
   ];
 }
 
-function assertParamDefinition(
+function assertParamDefinition (
   actual: ParamDefinition<any>,
   expected: Partial<ParamDefinition<any>>
 ) {
@@ -159,7 +159,7 @@ describe("SimpleTaskDefinition", () => {
     });
 
     describe("param name clashes with Builder's ones", () => {
-      function testClashWith(name: string) {
+      function testClashWith (name: string) {
         expectBuilderError(
           () => taskDefinition.addParam(name),
           ERRORS.TASK_DEFINITIONS.PARAM_CLASHES_WITH_ALGOB_PARAM
@@ -198,7 +198,7 @@ describe("SimpleTaskDefinition", () => {
           network: "",
           version: false,
           help: false,
-          verbose: false,
+          verbose: false
         };
 
         Object.keys(builderArgs).forEach((name) => testClashWith(name));
@@ -376,7 +376,7 @@ describe("SimpleTaskDefinition", () => {
           type: types.int,
           isOptional: true,
           isVariadic: false,
-          isFlag: false,
+          isFlag: false
         });
       });
 
@@ -384,7 +384,7 @@ describe("SimpleTaskDefinition", () => {
         taskDefinition.addParam("p", "desc", 123, types.int);
         assertParamDefinition(taskDefinition.paramDefinitions.p, {
           defaultValue: 123,
-          isOptional: true,
+          isOptional: true
         });
       });
 
@@ -392,7 +392,7 @@ describe("SimpleTaskDefinition", () => {
         taskDefinition.addParam("p", "desc", undefined, types.int, true);
         assertParamDefinition(taskDefinition.paramDefinitions.p, {
           defaultValue: undefined,
-          isOptional: true,
+          isOptional: true
         });
       });
 
@@ -426,7 +426,7 @@ describe("SimpleTaskDefinition", () => {
           type: types.int,
           isOptional: true,
           isVariadic: false,
-          isFlag: false,
+          isFlag: false
         });
       });
 
@@ -434,7 +434,7 @@ describe("SimpleTaskDefinition", () => {
         taskDefinition.addOptionalParam("p", "desc", undefined);
         assertParamDefinition(taskDefinition.paramDefinitions.p, {
           defaultValue: undefined,
-          isOptional: true,
+          isOptional: true
         });
       });
 
@@ -462,7 +462,7 @@ describe("SimpleTaskDefinition", () => {
           type: types.boolean,
           isOptional: true,
           isVariadic: false,
-          isFlag: true,
+          isFlag: true
         });
       });
     });
@@ -482,7 +482,7 @@ describe("SimpleTaskDefinition", () => {
           type: types.int,
           isOptional: true,
           isVariadic: false,
-          isFlag: false,
+          isFlag: false
         });
       });
 
@@ -497,7 +497,7 @@ describe("SimpleTaskDefinition", () => {
 
         assertParamDefinition(getLastPositionalParam(taskDefinition), {
           defaultValue: undefined,
-          isOptional: true,
+          isOptional: true
         });
       });
 
@@ -533,7 +533,7 @@ describe("SimpleTaskDefinition", () => {
 
         assertParamDefinition(getLastPositionalParam(taskDefinition), {
           defaultValue: "A",
-          isOptional: true,
+          isOptional: true
         });
       });
     });
@@ -553,7 +553,7 @@ describe("SimpleTaskDefinition", () => {
           type: types.int,
           isOptional: true,
           isVariadic: false,
-          isFlag: false,
+          isFlag: false
         });
       });
 
@@ -567,7 +567,7 @@ describe("SimpleTaskDefinition", () => {
 
         assertParamDefinition(getLastPositionalParam(taskDefinition), {
           defaultValue: undefined,
-          isOptional: true,
+          isOptional: true
         });
       });
 
@@ -607,7 +607,7 @@ describe("SimpleTaskDefinition", () => {
           type: types.int,
           isOptional: true,
           isVariadic: true,
-          isFlag: false,
+          isFlag: false
         });
       });
 
@@ -622,7 +622,7 @@ describe("SimpleTaskDefinition", () => {
 
         assertParamDefinition(getLastPositionalParam(taskDefinition), {
           defaultValue: [123],
-          isVariadic: true,
+          isVariadic: true
         });
       });
 
@@ -638,7 +638,7 @@ describe("SimpleTaskDefinition", () => {
         assertParamDefinition(getLastPositionalParam(taskDefinition), {
           defaultValue: undefined,
           isOptional: true,
-          isVariadic: true,
+          isVariadic: true
         });
       });
 
@@ -692,7 +692,7 @@ describe("SimpleTaskDefinition", () => {
         assertParamDefinition(getLastPositionalParam(taskDefinition), {
           defaultValue: ["A"],
           isOptional: true,
-          isVariadic: true,
+          isVariadic: true
         });
       });
     });
@@ -718,7 +718,7 @@ describe("SimpleTaskDefinition", () => {
           type: types.int,
           isOptional: true,
           isVariadic: true,
-          isFlag: false,
+          isFlag: false
         });
       });
 
@@ -732,7 +732,7 @@ describe("SimpleTaskDefinition", () => {
 
         assertParamDefinition(getLastPositionalParam(taskDefinition), {
           defaultValue: [123],
-          isVariadic: true,
+          isVariadic: true
         });
       });
 
@@ -747,7 +747,7 @@ describe("SimpleTaskDefinition", () => {
         assertParamDefinition(getLastPositionalParam(taskDefinition), {
           defaultValue: undefined,
           isOptional: true,
-          isVariadic: true,
+          isVariadic: true
         });
       });
 
@@ -767,7 +767,7 @@ describe("SimpleTaskDefinition", () => {
         expectBuilderError(
           () =>
             taskDefinition.addOptionalVariadicPositionalParam("p", "desc", [
-              123,
+              123
             ]),
           ERRORS.TASK_DEFINITIONS.DEFAULT_VALUE_WRONG_TYPE
         );
@@ -900,7 +900,7 @@ describe("OverriddenTaskDefinition", () => {
         type: types.boolean,
         isOptional: true,
         isVariadic: false,
-        isFlag: true,
+        isFlag: true
       });
     });
 
