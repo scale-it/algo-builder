@@ -20,11 +20,11 @@ To attract more web developers we plan to build a JavaScript DSL for TEAL with T
 
 # Usage
 
-See [user script documentation](docs/user-script-execution.md) for info about custom scripts and migrations.
+See [user script documentation](docs/user-script-execution.md) for info about custom scripts and deployments.
 
 ## Working with TypeScript projects
 
-You can use `algob` within a TS project. Write your scripts and migrations as you would like. But then, to run it you firstly need to compile the project to JS.
+You can use `algob` within a TS project. Write your scripts and do deployments as you would like. But then, to run it you firstly need to compile the project to JS.
 
 TODO: provide a project template for TS projects. [task](https://www.pivotaltracker.com/n/projects/2452320).
 

@@ -40,7 +40,10 @@ export function expectBuilderError (
   errorMessage?: string
 ): void {
   try {
-    f();
+    const returnValue = f();
+    if (returnValue instanceof Promise) {
+      throw new Error("Please use expectBuilderErrorAsync() when working with async code");
+    }
   } catch (error) {
     assert.instanceOf(error, BuilderError, errorMessage);
     assert.equal(error.number, errorDescriptor.number, errorMessage);

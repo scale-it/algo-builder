@@ -6,8 +6,7 @@ import { scriptsDirectory } from "../lib/script-checkpoints";
 
 export function checkRelativePaths (scriptNames: string[]): string[] {
   const nonScriptPaths = [];
-  for (let i = 0; i < scriptNames.length; i++) {
-    const scriptName = scriptNames[i];
+  for (const scriptName of scriptNames) {
     if (!path.relative(".", scriptName).startsWith(scriptsDirectory)) {
       nonScriptPaths.push(scriptName);
     }
