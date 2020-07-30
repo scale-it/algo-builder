@@ -7,6 +7,12 @@ import {
 } from "../../../../src/internal/core/config/config-validation";
 import { ERRORS } from "../../../../src/internal/core/errors-list";
 import { expectBuilderError } from "../../../helpers/errors";
+import { account1 } from "../../../mocks/account";
+
+const accountStatic = {
+  addr: 'UDF7DS5QXECBUEDF3GZVHHLXDRJOVTGR7EORYGDBPJ2FNB5D5T636QMWZY',
+  sk: new Uint8Array([28,  45,  45,  15,  70, 188,  57, 228,  18,  21,  42, 228,  33, 187, 222, 162,  89,  15,  22,  52, 143, 171, 182,  17, 168, 238,  96, 177,  12, 163, 243, 231, 160, 203, 241, 203, 176, 185,   4,  26,  16, 101, 217, 179, 83, 157, 119,  28,  82, 234, 204, 209, 249,  29,  28, 24,  97, 122, 116,  86, 135, 163, 236, 253])
+}
 
 describe("Config validation", function () {
   describe("paths config", function () {
@@ -526,6 +532,7 @@ describe("Config validation", function () {
       let errors = getValidationErrors({
         networks: {
           commonThings: {
+            accounts: [],
             chainName: "testnet",
             from: "0x0001",
             host: "purestake.com",
@@ -533,9 +540,10 @@ describe("Config validation", function () {
             token: "somefaketoken"
           },
           [ALGOB_CHAIN_NAME]: {
-            // accounts: [{ privateKey: "asd", balance: "123" }],
+            accounts: [account1],
           },
           localhost: {
+            accounts: [accountStatic],
             host: "localhost",
             port: 8080,
             token: "somefaketoken"

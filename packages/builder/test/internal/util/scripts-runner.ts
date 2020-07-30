@@ -15,7 +15,7 @@ describe("Scripts runner", function () {
   it("Should pass params to the script", async function () {
     await runScript("./scripts/params-script.js", mkAlgobEnv());
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
-    assert.equal(scriptOutput, "network name");
+    assert.equal(scriptOutput, "network1");
   });
 
   it("Should run the script to completion", async function () {

@@ -1,3 +1,4 @@
+import type { Account } from "algosdk";
 import { DeepReadonly, StrictOmit } from "ts-essentials";
 
 import * as types from "./internal/core/params/argument-types";
@@ -6,19 +7,25 @@ import * as types from "./internal/core/params/argument-types";
 
 // IMPORTANT: This t.types MUST be kept in sync with the actual types.
 
-export interface HDAccountsConfig {
+export interface HDAccount {
   mnemonic: string
   initialIndex?: number
   count?: number
-  path?: string
+  path: string
 }
 
-export type NetworkAccounts =
-  | string[]
-  | HDAccountsConfig;
+export interface MnemonicAccount {
+  addr: string
+  mnemonic: string
+}
+
+export type AccountDef =
+  | MnemonicAccount
+  | HDAccount
+  | Account;
 
 interface CommonNetworkConfig {
-  accounts?: NetworkAccounts
+  accounts: Account[]
   chainName?: string
   // from?: string;
   // TODO: timeout?: number;

@@ -1,10 +1,9 @@
 {
   "name": "algorand-builder",
   "version": "0.0.1",
-  "author": "SEE package.json from PROJECT ROOT",
+  "author": "SEE package.json in PROJECT ROOT",
   "license": "SEE LICENSE IN LICENSE",
-  "repository": "SEE package.json from PROJECT ROOT",
-  "main": "build/internal/lib/lib.js",
+  "repository": "SEE package.json in PROJECT ROOT",
   "types": "build/internal/lib/lib.d.ts",
   "description": "",
   "keywords": [
@@ -16,6 +15,7 @@
     "tooling",
     "task-runner"
   ],
+  "main": "build/index.js",
   "bin": {
     "algob": "build/src/internal/cli/cli.js"
   },
