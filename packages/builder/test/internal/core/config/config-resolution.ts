@@ -9,6 +9,7 @@ import { resetBuilderContext } from "../../../../src/internal/reset";
 import { AlgobChainCfg, HttpNetworkConfig, UserPaths } from "../../../../src/types";
 import { useFixtureProject } from "../../../helpers/project";
 import { account1 } from "../../../mocks/account";
+import { assertAccountsEqual } from "../../../helpers/assert-methods";
 
 describe("Config resolution", () => {
   beforeEach(() => {
@@ -25,7 +26,7 @@ describe("Config resolution", () => {
 
       it("should return the default config", () => {
         const config = loadConfigAndTasks();
-        assert.containsAllKeys(config.networks, ["default", ALGOB_CHAIN_NAME]);
+        assert.containsAllKeys(config.networks, [ALGOB_CHAIN_NAME]);
 
         const algobChainCfg = config.networks[ALGOB_CHAIN_NAME] as AlgobChainCfg;
         assert.isTrue(algobChainCfg.throwOnTransactionFailures);
@@ -48,7 +49,7 @@ describe("Config resolution", () => {
         const ncfg = config.networks.localhost as HttpNetworkConfig;
         assert.equal(ncfg.host, "http://127.0.0.1");
         assert.equal(ncfg.port, 8080);
-        assert.deepEqual(config.networks.localhost.accounts, [account1]);
+        assertAccountsEqual(config.networks.localhost.accounts, [account1]);
       });
 
       it("should keep any unknown field", () => {

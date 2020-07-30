@@ -5,10 +5,9 @@
 // }]);
 
 let accounts = [{
-  addr: 'UDF7DS5QXECBUEDF3GZVHHLXDRJOVTGR7EORYGDBPJ2FNB5D5T636QMWZY',
-  sk: new Uint8Array([28,  45,  45,  15,  70, 188,  57, 228,  18,  21,  42, 228,  33, 187, 222, 162,  89,  15,  22,  52, 143, 171, 182,  17, 168, 238,  96, 177,  12, 163, 243, 231, 160, 203, 241, 203, 176, 185,   4,  26,  16, 101, 217, 179, 83, 157, 119,  28,  82, 234, 204, 209, 249,  29,  28, 24,  97, 122, 116,  86, 135, 163, 236, 253])
+  addr: "KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY",
+  sk: new Uint8Array([3, 169, 134, 121,  53, 133,   5, 224,  60, 164, 154, 221, 134,  50,  59, 233, 234, 228,  20, 217,  47, 234, 40,  26,  33,  55,  90,  26,  66, 141,   7,  85,  81, 88, 241, 118,  22, 102, 228,  46, 242, 255, 165, 169, 111,  58,  67, 114,  39, 179, 239,   0, 237,  28,  42, 0, 154,   0,  73,  27, 226,  74, 204, 187])
 }]
-
 
 task('example2', 'example task', async (_ret) => 28)
 task('example', 'example task', async (__, { run }) => run('example2'))
@@ -18,7 +17,7 @@ module.exports = {
     custom: {
       host: 'http://localhost',
       port: 8081,
-      token: 'somefaketoken'
+      token: 'somefaketoken',
       accounts: accounts
     },
     localhost: {

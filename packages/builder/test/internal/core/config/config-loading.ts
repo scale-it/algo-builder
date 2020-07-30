@@ -16,6 +16,7 @@ import { ERRORS } from "../../../../src/internal/core/errors-list";
 import { resetBuilderContext } from "../../../../src/internal/reset";
 import { useEnvironment } from "../../../helpers/environment";
 import { expectBuilderError } from "../../../helpers/errors";
+import { assertAccountsEqual } from "../../../helpers/assert-methods";
 import {
   getFixtureProjectPath,
   useFixtureProject
@@ -28,10 +29,9 @@ describe("config loading", function () {
     useEnvironment();
 
     it("should load the default config if none is given", function () {
-      const a: any = this.env.config;
-      assert.equal(this.env.config, a);
-      assert.isDefined(this.env.config.networks.localhost);
-      assert.deepEqual(this.env.config.networks.localhost.accounts, [account1]);
+      const a: any = this.env.config.networks;
+      assert.isDefined(a.localhost);
+      assertAccountsEqual(a.localhost.accounts, [account1]);
     });
   });
 

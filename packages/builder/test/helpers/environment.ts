@@ -19,9 +19,8 @@ declare module "mocha" {
 }
 
 let ctx: BuilderContext;
-let env: AlgobRuntimeEnv;
 
-const defaultNetCfg: HttpNetworkConfig = {
+export const defaultNetCfg: HttpNetworkConfig = {
   accounts: [account1],
   host: "localhost",
   port: 8080,
@@ -45,9 +44,6 @@ export function useEnvironment (
 }
 
 export function getEnv(defaultNetworkCfg?: NetworkConfig): AlgobRuntimeEnv {
-  if (env !== undefined) {
-    return env;
-  }
 
   if (BuilderContext.isCreated()) {
     ctx = BuilderContext.getBuilderContext();
@@ -58,38 +54,38 @@ export function getEnv(defaultNetworkCfg?: NetworkConfig): AlgobRuntimeEnv {
       throw new BuilderError(ERRORS.GENERAL.LIB_IMPORTED_FROM_THE_CONFIG);
     }
 
-    env = ctx.environment;
-  } else {
-    ctx = BuilderContext.createBuilderContext();
-
-    const runtimeArgs = getEnvRuntimeArgs(
-      ALGOB_PARAM_DEFINITIONS,
-      process.env
-    );
-
-    if (runtimeArgs.verbose) {
-      debug.enable("builder*");
-    }
-
-    const config = loadConfigAndTasks(runtimeArgs);
-
-    if (runtimeArgs.network == null) {
-      // TODO:RZ
-      throw new Error("INTERNAL ERROR. Default network should be registered in `register.ts` module");
-    }
-
-    if (defaultNetworkCfg !== undefined) {
-      config.networks.default = defaultNetworkCfg
-    }
-
-    env = new Environment(
-      config,
-      runtimeArgs,
-      ctx.tasksDSL.getTaskDefinitions(),
-      ctx.extendersManager.getExtenders()
-    );
-
-    ctx.setAlgobRuntimeEnv(env);
+    return ctx.environment;
   }
+
+
+  ctx = BuilderContext.createBuilderContext();
+  const runtimeArgs = getEnvRuntimeArgs(
+    ALGOB_PARAM_DEFINITIONS,
+    process.env
+  );
+
+  if (runtimeArgs.verbose) {
+    debug.enable("builder*");
+  }
+
+  const config = loadConfigAndTasks(runtimeArgs);
+
+  if (runtimeArgs.network == null) {
+    // TODO:RZ
+    throw new Error("INTERNAL ERROR. Default network should be registered in `register.ts` module");
+  }
+
+  if (defaultNetworkCfg !== undefined) {
+    config.networks.default = defaultNetworkCfg
+  }
+
+  let env = new Environment(
+    config,
+    runtimeArgs,
+    ctx.tasksDSL.getTaskDefinitions(),
+    ctx.extendersManager.getExtenders()
+  );
+  ctx.setAlgobRuntimeEnv(env);
+
   return env;
 }
