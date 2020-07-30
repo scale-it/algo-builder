@@ -13,12 +13,12 @@ describe("From entries", () => {
       fromEntries([
         ["a", 1],
         ["b", true],
-        ["c", o],
+        ["c", o]
       ]),
       {
         a: 1,
         b: true,
-        c: o,
+        c: o
       }
     );
   });
@@ -28,11 +28,11 @@ describe("From entries", () => {
       fromEntries([
         ["a", 1],
         ["b", 2],
-        ["a", 3],
+        ["a", 3]
       ]),
       {
         a: 3,
-        b: 2,
+        b: 2
       }
     );
   });

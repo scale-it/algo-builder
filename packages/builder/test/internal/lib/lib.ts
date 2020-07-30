@@ -9,7 +9,7 @@ describe("Builder lib", () => {
   useEnvironment();
 
   it("should load environment", function () {
-    assert.isDefined(this.env.config!.networks!.custom);
+    assert.isDefined(this.env.config.networks.custom);
   });
 
   it("should load task user defined task", async function () {
@@ -18,12 +18,12 @@ describe("Builder lib", () => {
   });
 
   it("should reuse global state", async function () {
-    let environment = require("../../../src/internal/lib/lib");
+    let environment = require("../../../src/internal/lib/lib"); // eslint-disable-line @typescript-eslint/no-var-requires
     assert.isTrue(this.env === environment);
 
     resetBuilderContext();
 
-    environment = require("../../../src/internal/lib/lib");
+    environment = require("../../../src/internal/lib/lib"); // eslint-disable-line @typescript-eslint/no-var-requires
     assert.equal(await environment.run("example"), 28);
     assert.isFalse(this.env === environment);
   });

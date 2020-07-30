@@ -1,52 +1,44 @@
-import { assert, AssertionError, expect } from "chai";
+import { assert, AssertionError } from "chai";
 
 import { BuilderError } from "../../src/internal/core/errors";
 import { ErrorDescriptor } from "../../src/internal/core/errors-list";
 
-export async function expectErrorAsync(
+export async function expectErrorAsync (
   f: () => Promise<any>,
   matchMessage?: string | RegExp
-) {
-  const noError = new AssertionError("Async error expected but not thrown");
-  const notExactMatch = new AssertionError(
-    `Async error should have had message "${matchMessage}" but got "`
-  );
-
-  const notRegexpMatch = new AssertionError(
-    `Async error should have matched regex ${matchMessage} but got "`
-  );
-
+): Promise<void> {
+  const noError = new AssertionError("Async error was expected but no error was thrown");
+  const message = `Async error should have had message "${String(matchMessage)}" but got "`;
+  const notExactMatch = new AssertionError(message);
+  const notRegexpMatch = new AssertionError(message);
   try {
     await f();
   } catch (err) {
     if (matchMessage === undefined) {
       return;
     }
-
     if (typeof matchMessage === "string") {
       if (err.message !== matchMessage) {
-        notExactMatch.message += `${err.message}"`;
-        throw notExactMatch;
+        notExactMatch.message += `${String(err.message)}"`;
+        throw notExactMatch; // eslint-disable-line @typescript-eslint/no-throw-literal
       }
     } else {
       if (matchMessage.exec(err.message) === null) {
-        notRegexpMatch.message += `${err.message}"`;
-        throw notRegexpMatch;
+        notRegexpMatch.message += `${String(err.message)}"`;
+        throw notRegexpMatch; // eslint-disable-line @typescript-eslint/no-throw-literal
       }
     }
-
     return;
   }
-
-  throw noError;
+  throw noError; // eslint-disable-line @typescript-eslint/no-throw-literal
 }
 
-export function expectBuilderError(
+export function expectBuilderError (
   f: () => any,
   errorDescriptor: ErrorDescriptor,
   matchMessage?: string | RegExp,
   errorMessage?: string
-) {
+): void {
   try {
     f();
   } catch (error) {
@@ -66,17 +58,16 @@ export function expectBuilderError(
 
     return;
   }
-
-  throw new AssertionError(
+  throw new AssertionError( // eslint-disable-line @typescript-eslint/no-throw-literal
     `BuilderError number ${errorDescriptor.number} expected, but no Error was thrown`
   );
 }
 
-export async function expectBuilderErrorAsync(
+export async function expectBuilderErrorAsync (
   f: () => Promise<any>,
   errorDescriptor: ErrorDescriptor,
   matchMessage?: string | RegExp
-) {
+): Promise<void> {
   // We create the error here to capture the stack trace before the await.
   // This makes things easier, at least as long as we don't have async stack
   // traces. This may change in the near-ish future.
@@ -84,12 +75,13 @@ export async function expectBuilderErrorAsync(
     `BuilderError number ${errorDescriptor.number} expected, but no Error was thrown`
   );
 
+  const match = String(matchMessage);
   const notExactMatch = new AssertionError(
-    `BuilderError was correct, but should have include "${matchMessage}" but got "`
+    `BuilderError was correct, but should have include "${match}" but got "`
   );
 
   const notRegexpMatch = new AssertionError(
-    `BuilderError was correct, but should have matched regex ${matchMessage} but got "`
+    `BuilderError was correct, but should have matched regex ${match} but got "`
   );
 
   try {
@@ -106,13 +98,13 @@ export async function expectBuilderErrorAsync(
     if (matchMessage !== undefined) {
       if (typeof matchMessage === "string") {
         if (!error.message.includes(matchMessage)) {
-          notExactMatch.message += `${error.message}`;
-          throw notExactMatch;
+          notExactMatch.message += `${String(error.message)}`;
+          throw notExactMatch; // eslint-disable-line @typescript-eslint/no-throw-literal
         }
       } else {
         if (matchMessage.exec(error.message) === null) {
-          notRegexpMatch.message += `${error.message}`;
-          throw notRegexpMatch;
+          notRegexpMatch.message += `${String(error.message)}`;
+          throw notRegexpMatch; // eslint-disable-line @typescript-eslint/no-throw-literal
         }
       }
     }
@@ -120,5 +112,5 @@ export async function expectBuilderErrorAsync(
     return;
   }
 
-  throw error;
+  throw error; // eslint-disable-line @typescript-eslint/no-throw-literal
 }

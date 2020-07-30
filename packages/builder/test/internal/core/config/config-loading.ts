@@ -3,12 +3,12 @@ import path from "path";
 
 import {
   TASK_CLEAN,
-  TASK_RUN,
-  TASK_INIT,
   TASK_CONSOLE,
   TASK_HELP,
-  TASK_TEST_GET_TEST_FILES,
+  TASK_INIT,
+  TASK_RUN,
   TASK_TEST_EXAMPLE,
+  TASK_TEST_GET_TEST_FILES
 } from "../../../../src/builtin-tasks/task-names";
 import { BuilderContext } from "../../../../src/internal/context";
 import { loadConfigAndTasks } from "../../../../src/internal/core/config/config-loading";
@@ -18,7 +18,7 @@ import { useEnvironment } from "../../../helpers/environment";
 import { expectBuilderError } from "../../../helpers/errors";
 import {
   getFixtureProjectPath,
-  useFixtureProject,
+  useFixtureProject
 } from "../../../helpers/project";
 
 describe("config loading", function () {
@@ -27,11 +27,11 @@ describe("config loading", function () {
     useEnvironment();
 
     it("should load the default config if none is given", function () {
-      const a: any = this.env.config
-      assert.equal (this.env.config, a)
+      const a: any = this.env.config;
+      assert.equal(this.env.config, a);
       assert.isDefined(this.env.config.networks.localhost);
       assert.deepEqual(this.env.config.networks.localhost.accounts, [
-        "0xa95f9e3e7ae4e4865c5968828fe7c03fffa8a9f3bb52d36d26243f4c868ee166",
+        "0xa95f9e3e7ae4e4865c5968828fe7c03fffa8a9f3bb52d36d26243f4c868ee166"
       ]);
     });
   });
@@ -72,8 +72,8 @@ describe("config loading", function () {
       const config = loadConfigAndTasks({ config: "config.js" });
 
       if (!config.paths) {
-        assert.fail("Project was not loaded")
-        return
+        assert.fail("Project was not loaded");
+        return;
       }
 
       assert.equal(
@@ -85,11 +85,12 @@ describe("config loading", function () {
     it("should accept an absolute path", function () {
       const fixtureDir = getFixtureProjectPath("custom-config-file");
       const config = loadConfigAndTasks({
-        config: path.join(fixtureDir, "config.js"),
+        config: path.join(fixtureDir, "config.js")
       });
 
       if (!config.paths) {
-        assert.fail("Project was not loaded")
+        assert.fail("Project was not loaded");
+        return;
       }
 
       assert.equal(
@@ -111,7 +112,7 @@ describe("config loading", function () {
         TASK_CONSOLE,
         TASK_HELP,
         TASK_TEST_GET_TEST_FILES,
-        TASK_TEST_EXAMPLE,
+        TASK_TEST_EXAMPLE
       ]);
     });
 

@@ -1,12 +1,12 @@
-import * as fsExtra from "fs-extra";
 import * as fs from "fs";
+import * as fsExtra from "fs-extra";
 import path from "path";
 
-import { useEnvironment } from "./environment";
 import { TASK_CLEAN } from "../../src/builtin-tasks/task-names";
 import { AlgobRuntimeEnv } from "../../src/types";
+import { useEnvironment } from "./environment";
 
-export const testFixtureOutputFile = "output.txt"
+export const testFixtureOutputFile = "output.txt";
 
 /**
  * This helper adds mocha hooks to run the tests inside one of the projects
@@ -14,7 +14,7 @@ export const testFixtureOutputFile = "output.txt"
  *
  * @param projectName The base name of the folder with the project to use.
  */
-export function useFixtureProject(projectName: string) {
+export function useFixtureProject (projectName: string): void {
   let projectPath: string;
   let prevWorkingDir: string;
 
@@ -29,7 +29,7 @@ export function useFixtureProject(projectName: string) {
   });
 }
 
-export function getFixtureProjectPath(
+export function getFixtureProjectPath (
   projectName: string
 ): string {
   const projectPath = path.join(
@@ -50,7 +50,7 @@ export function getFixtureProjectPath(
  * The copied project name is `projecName + "-tmp"`. If it already exists an exception
  * is thrown.
  */
-export function useFixtureProjectCopy(srcProjectName: string) {
+export function useFixtureProjectCopy (srcProjectName: string): void {
   const project = srcProjectName + "-tmp";
   const srcProjectPath = getFixtureProjectPath(srcProjectName);
   const projectPath = path.join(srcProjectPath, "..", project);
@@ -65,17 +65,17 @@ export function useFixtureProjectCopy(srcProjectName: string) {
  * Allows tests to interact with a clean fixture project.
  * Allows to inspect the output file after running the test by cleaning before running.
  */
-export function useCleanFixtureProject(projectName: string) {
+export function useCleanFixtureProject (projectName: string): void {
   useFixtureProject(projectName);
-  useEnvironment((algobEnv: AlgobRuntimeEnv) => {
-    return algobEnv.run(TASK_CLEAN, {});
+  useEnvironment(async (algobEnv: AlgobRuntimeEnv) => {
+    return await algobEnv.run(TASK_CLEAN, {});
   });
 
   beforeEach(function () {
     try {
-      fs.unlinkSync(testFixtureOutputFile)
+      fs.unlinkSync(testFixtureOutputFile);
     } catch (err) {
       // ignored
     }
-  })
+  });
 }

@@ -6,7 +6,7 @@ import { ERRORS } from "../../../src/internal/core/errors-list";
 import {
   loadPluginFile,
   readPackageJson,
-  usePlugin,
+  usePlugin
 } from "../../../src/internal/core/plugins";
 import { expectBuilderError } from "../../helpers/errors";
 
@@ -20,10 +20,13 @@ describe("plugin system", function () {
   );
 
   describe("readPackageJson", function () {
-    function assertPackageLoaded(packageName: string, version: string) {
+    function assertPackageLoaded (packageName: string, version: string): void {
       const packageJson = readPackageJson(packageName, FIXTURE_PROJECT_PATH);
       assert.isDefined(packageJson);
-      assert.equal(packageJson!.version, version);
+      if (!packageJson) {
+        return;
+      }
+      assert.equal(packageJson.version, version);
     }
 
     it("Should find packages from a given project", function () {

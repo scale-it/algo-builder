@@ -1,23 +1,20 @@
 import { assert } from "chai";
 import fs from "fs";
 
+import { ERRORS } from "../../../src/internal/core/errors-list";
 import {
-  resolveBuilderRegisterPath,
   runScript
 } from "../../../src/internal/util/scripts-runner";
-import { useEnvironment } from "../../helpers/environment";
-import { useFixtureProject, useCleanFixtureProject, testFixtureOutputFile } from "../../helpers/project";
-import { AlgobRuntimeEnv, PromiseAny, Network } from "../../../src/types";
 import { expectBuilderErrorAsync } from "../../helpers/errors";
 import { mkAlgobEnv } from "../../helpers/params";
-import { ERRORS } from "../../../src/internal/core/errors-list"
+import { testFixtureOutputFile, useCleanFixtureProject } from "../../helpers/project";
 
 describe("Scripts runner", function () {
   useCleanFixtureProject("project-with-scripts");
 
   it("Should pass params to the script", async function () {
-    await runScript("./scripts/params-script.js", mkAlgobEnv())
-    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
+    await runScript("./scripts/params-script.js", mkAlgobEnv());
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, "network name");
   });
 
@@ -30,37 +27,36 @@ describe("Scripts runner", function () {
 
   it("Exception shouldn't crash the whole app", async function () {
     await expectBuilderErrorAsync(
-      () => runScript("./scripts/failing-script.js", mkAlgobEnv()),
+      async () => await runScript("./scripts/failing-script.js", mkAlgobEnv()),
       ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR,
       "./scripts/failing-script.js"
     );
-    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, "failing script: before exception");
   });
 
   it("Nonexistent default method should throw an exception", async function () {
     await expectBuilderErrorAsync(
-      () => runScript("./scripts/no-default-method-script.js", mkAlgobEnv()),
+      async () => await runScript("./scripts/no-default-method-script.js", mkAlgobEnv()),
       ERRORS.GENERAL.NO_DEFAULT_EXPORT_IN_SCRIPT,
       "./scripts/no-default-method-script.js"
     );
-    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, "script with no default method has been loaded");
   });
 
   it("Should wrap error of require", async function () {
     await expectBuilderErrorAsync(
-      () => runScript("./scripts/failing-script-load.js", mkAlgobEnv()),
+      async () => await runScript("./scripts/failing-script-load.js", mkAlgobEnv()),
       ERRORS.GENERAL.SCRIPT_LOAD_ERROR,
       "/project-with-scripts/scripts/failing-script-load.js"
     );
-    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString()
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, "failing load script executed\n");
   });
 
   it("Should ignore return value", async function () {
-    const out = await runScript("./scripts/successful-script-return-status.js", mkAlgobEnv())
+    const out = await runScript("./scripts/successful-script-return-status.js", mkAlgobEnv());
     assert.equal(out, undefined);
   });
-
 });

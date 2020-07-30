@@ -1,11 +1,11 @@
-import { extendConfig } from "../../../src/internal/core/config/config-env";
+import { extendConfig } from '../../../src/internal/core/config/config-env'
 
 extendConfig((config, _userConfig) => {
-  config.values = [1];
-});
+  config.values = [1]
+})
 
 extendConfig((config, _userConfig) => {
-  config.values.push(2);
-});
+  config.values.push(2)
+})
 
-module.exports = {};
+module.exports = {}

@@ -7,15 +7,11 @@ import { ERRORS } from "../../../../src/internal/core/errors-list";
 import * as types from "../../../../src/internal/core/params/argument-types";
 import { expectBuilderError } from "../../../helpers/errors";
 
-function a(f: () => any) {
-  expectBuilderError(f, ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE);
-}
-
 describe("argumentTypes", () => {
   it("should set the right name to all the argument types", () => {
     for (const typeName of Object.keys(types)) {
       const argumentTypesMap: {
-        [name: string]: types.ArgumentType<any>;
+        [name: string]: types.ArgumentType<any>
       } = types;
       assert.equal(argumentTypesMap[typeName].name, typeName);
     }
@@ -294,13 +290,18 @@ describe("argumentTypes", () => {
     });
 
     it("Should accept anything except undefined as valid", () => {
-      assert.doesNotThrow(() => types.json.validate!("json", 1));
-      assert.doesNotThrow(() => types.json.validate!("json", "asd"));
-      assert.doesNotThrow(() => types.json.validate!("json", [1]));
-      assert.doesNotThrow(() => types.json.validate!("json", { a: 123 }));
-      assert.doesNotThrow(() => types.json.validate!("json", null));
+      const validate = types.json.validate;
+      if (validate === undefined) {
+        assert.fail("types.json.validate must exist");
+        return;
+      }
+      assert.doesNotThrow(() => validate("json", 1));
+      assert.doesNotThrow(() => validate("json", "asd"));
+      assert.doesNotThrow(() => validate("json", [1]));
+      assert.doesNotThrow(() => validate("json", { a: 123 }));
+      assert.doesNotThrow(() => validate("json", null));
 
-      assert.throws(() => types.json.validate!("json", undefined));
+      assert.throws(() => validate("json", undefined));
     });
   });
 });

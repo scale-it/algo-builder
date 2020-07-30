@@ -4,7 +4,7 @@ import path from "path";
 
 import {
   getPackageJson,
-  getPackageRoot,
+  getPackageRoot
 } from "../../../src/internal/util/package-info";
 
 describe("package-info", () => {

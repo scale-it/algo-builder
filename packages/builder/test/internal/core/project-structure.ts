@@ -2,12 +2,11 @@ import { assert } from "chai";
 import * as fsExtra from "fs-extra";
 import path from "path";
 
-import { JS_CONFIG_FILENAME } from "../../../src/internal/core/project-structure";
 import {
   getUserConfigPath,
   isCwdInsideProject,
+  JS_CONFIG_FILENAME
 } from "../../../src/internal/core/project-structure";
-import { expectBuilderError } from "../../helpers/errors";
 import { useFixtureProject } from "../../helpers/project";
 
 describe("project structure", () => {
