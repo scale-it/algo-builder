@@ -13,7 +13,7 @@ import {
   RuntimeArgs,
   TaskDefinition
 } from "../../../../src/types";
-import { expectBuilderError } from "../../../helpers/errors";
+import { expectBuilderError, expectBuilderErrorAsync } from "../../../helpers/errors";
 
 function expectThrowParamAlreadyDefinedError (f: () => any): void {
   expectBuilderError(f, ERRORS.TASK_DEFINITIONS.PARAM_ALREADY_DEFINED);
@@ -65,8 +65,8 @@ describe("SimpleTaskDefinition", () => {
       assert.isUndefined(taskDefinition.description);
     });
 
-    it("starts with an action that throws", () => {
-      expectBuilderError(
+    it("starts with an action that throws", async () => {
+      await expectBuilderErrorAsync(
         async () => await taskDefinition.action({}, {} as any, runSuperNop),
         ERRORS.TASK_DEFINITIONS.ACTION_NOT_SET
       );

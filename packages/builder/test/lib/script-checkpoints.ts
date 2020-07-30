@@ -27,6 +27,7 @@ describe("Checkpoint", () => {
     const afterTimestamp = +new Date();
     assert.isAtLeast(netCheckpoint.timestamp, beforeTimestamp);
     assert.isAtMost(netCheckpoint.timestamp, afterTimestamp);
+    netCheckpoint.timestamp = 12345;
     assert.deepEqual(netCheckpoint, {
       timestamp: 12345,
       metadata: {}
