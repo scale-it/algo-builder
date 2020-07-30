@@ -1,7 +1,7 @@
 import { assert } from "chai";
 
 import { resetBuilderContext } from "../../src/internal/reset";
-import { useEnvironment, defaultNetCfg } from "./environment";
+import { defaultNetCfg, useEnvironment } from "./environment";
 import { useFixtureProject } from "./project";
 
 describe("Builder lib", () => {
@@ -18,7 +18,7 @@ describe("Builder lib", () => {
   });
 
   it("should reuse global state", async function () {
-    // eslint-disable @typescript-eslint/no-var-requires
+    /* eslint-disable @typescript-eslint/no-var-requires */
     let environment = require("./environment").getEnv(defaultNetCfg);
     assert.isTrue(this.env === environment);
 

@@ -1,7 +1,7 @@
+import { Account } from "algosdk";
 import { assert } from "chai";
 import * as fs from "fs";
 import YAML from "yaml";
-import { Account } from "algosdk";
 
 import { genAccounts, getFilename, mkAccounts } from "../../src/builtin-tasks/gen-accounts";
 import { ASSETS_DIR } from "../../src/internal/core/project-structure";
@@ -22,7 +22,7 @@ describe("Gen-accounts task", () => {
     }
   });
 
-  describe("accounts_generated.yaml flow", ()=>{
+  describe("accounts_generated.yaml flow", () => {
     it("Should fail when n is negative or 0", async () => {
       try {
         await mkAccounts({ n: 0 }, mkAlgobEnv());

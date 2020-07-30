@@ -1,5 +1,5 @@
-const { getEnv } = require("../../helpers/environment");
+const { getEnv } = require('../../helpers/environment')
 
-getEnv();
+getEnv()
 
 module.exports = {}

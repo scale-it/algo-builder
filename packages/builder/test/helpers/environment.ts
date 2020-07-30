@@ -1,9 +1,5 @@
 import debug from "debug";
 
-import { resetBuilderContext } from "../../src/internal/reset";
-import { AlgobRuntimeEnv, PromiseAny, HttpNetworkConfig, NetworkConfig } from "../../src/types";
-import { account1 } from "../mocks/account";
-
 import { BuilderContext } from "../../src/internal/context";
 import { loadConfigAndTasks } from "../../src/internal/core/config/config-loading";
 import { BuilderError } from "../../src/internal/core/errors";
@@ -11,6 +7,9 @@ import { ERRORS } from "../../src/internal/core/errors-list";
 import { ALGOB_PARAM_DEFINITIONS } from "../../src/internal/core/params/builder-params";
 import { getEnvRuntimeArgs } from "../../src/internal/core/params/env-variables";
 import { Environment } from "../../src/internal/core/runtime-environment";
+import { resetBuilderContext } from "../../src/internal/reset";
+import { AlgobRuntimeEnv, HttpNetworkConfig, NetworkConfig, PromiseAny } from "../../src/types";
+import { account1 } from "../mocks/account";
 
 declare module "mocha" {
   interface Context {
@@ -25,12 +24,11 @@ export const defaultNetCfg: HttpNetworkConfig = {
   host: "localhost",
   port: 8080,
   token: "some secret value"
-}
+};
 
 export function useEnvironment (
   beforeEachFn?: (algobRuntimeEnv: AlgobRuntimeEnv) => PromiseAny
 ): void {
-
   beforeEach("Load environment", async function () {
     this.env = getEnv(defaultNetCfg);
     if (beforeEachFn) {
@@ -43,8 +41,7 @@ export function useEnvironment (
   });
 }
 
-export function getEnv(defaultNetworkCfg?: NetworkConfig): AlgobRuntimeEnv {
-
+export function getEnv (defaultNetworkCfg?: NetworkConfig): AlgobRuntimeEnv {
   if (BuilderContext.isCreated()) {
     ctx = BuilderContext.getBuilderContext();
 
@@ -56,7 +53,6 @@ export function getEnv(defaultNetworkCfg?: NetworkConfig): AlgobRuntimeEnv {
 
     return ctx.environment;
   }
-
 
   ctx = BuilderContext.createBuilderContext();
   const runtimeArgs = getEnvRuntimeArgs(
@@ -76,10 +72,10 @@ export function getEnv(defaultNetworkCfg?: NetworkConfig): AlgobRuntimeEnv {
   }
 
   if (defaultNetworkCfg !== undefined) {
-    config.networks.default = defaultNetworkCfg
+    config.networks.default = defaultNetworkCfg;
   }
 
-  let env = new Environment(
+  const env = new Environment(
     config,
     runtimeArgs,
     ctx.tasksDSL.getTaskDefinitions(),

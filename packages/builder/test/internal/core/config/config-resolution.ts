@@ -7,9 +7,9 @@ import { loadConfigAndTasks } from "../../../../src/internal/core/config/config-
 import { resolveProjectPaths } from "../../../../src/internal/core/config/config-resolution";
 import { resetBuilderContext } from "../../../../src/internal/reset";
 import { AlgobChainCfg, HttpNetworkConfig, UserPaths } from "../../../../src/types";
+import { assertAccountsEqual } from "../../../helpers/assert-methods";
 import { useFixtureProject } from "../../../helpers/project";
 import { account1 } from "../../../mocks/account";
-import { assertAccountsEqual } from "../../../helpers/assert-methods";
 
 describe("Config resolution", () => {
   beforeEach(() => {

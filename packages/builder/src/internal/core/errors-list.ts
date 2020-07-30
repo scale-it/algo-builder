@@ -499,7 +499,7 @@ Please check your directory`
     description: `Tried to use \`algob migrate\` with no scripts in directory %directory%.
 
 Please double check your script's path`
-    },
+  },
   SCRIPTS_OUTSIDE_SCRIPTS_DIRECTORY: {
     number: 605,
     message: "Attempted to execute a script outside scripts directory: %scripts%.",
