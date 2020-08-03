@@ -13,9 +13,10 @@ import {
   AlgobDeployerImpl,
   loadCheckpoint,
   persistCheckpoint,
-  scriptsDirectory
+  scriptsDirectory,
+  CheckpointDataImpl
 } from "../lib/script-checkpoints";
-import { AlgobDeployer, AlgobRuntimeEnv, ScriptCheckpoint } from "../types";
+import { AlgobDeployer, AlgobRuntimeEnv, ScriptCheckpoints, CheckpointData } from "../types";
 import { runMultipleScripts } from "./run";
 import { TASK_DEPLOY } from "./task-names";
 
@@ -48,22 +49,24 @@ async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntim
     });
   }
 
-  const deployer: AlgobDeployer = new AlgobDeployerImpl(runtimeEnv);
+  const cpData: CheckpointData = new CheckpointDataImpl()
+  const deployer: AlgobDeployer = new AlgobDeployerImpl(runtimeEnv, cpData);
 
   return await runMultipleScripts(runtimeEnv, scriptNames, async (
     relativeScriptPath: string,
     runtimeEnv: AlgobRuntimeEnv
   ) => {
-    const currentCP: ScriptCheckpoint = loadCheckpoint(relativeScriptPath);
+    const currentCP: ScriptCheckpoints = loadCheckpoint(relativeScriptPath);
     if (!force && currentCP[runtimeEnv.network.name]) {
       log(`Skipping: Checkpoint exists for script ${relativeScriptPath}`);
       return;
     }
     log(`Running script ${relativeScriptPath}`);
+    cpData.mergeCheckpoints(currentCP)
     await runScript(
       relativeScriptPath,
       runtimeEnv,
-      deployer.appendCheckpoints(currentCP)
+      deployer
     );
     persistCheckpoint(relativeScriptPath, deployer.checkpoints);
   });

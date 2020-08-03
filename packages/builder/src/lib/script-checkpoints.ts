@@ -3,7 +3,15 @@ import * as fs from "fs";
 import path from "path";
 import YAML from "yaml";
 
-import { AlgobDeployer, AlgobRuntimeEnv, ScriptCheckpoint, ScriptNetCheckpoint } from "../types";
+import {
+  AlgobDeployer,
+  AlgobRuntimeEnv,
+  ScriptCheckpoints,
+  ScriptNetCheckpoint,
+  NetworkAccounts,
+  CheckpointData
+} from "../types";
+import { DeepReadonly } from "ts-essentials";
 
 export const scriptsDirectory = "scripts";
 const artifactsPath = "artifacts";
@@ -12,35 +20,33 @@ export function toCheckpointFileName (scriptName: string): string {
   return path.join(artifactsPath, scriptName + ".cp.yaml");
 }
 
-export function appendToCheckpoint (
-  prev: ScriptCheckpoint,
-  networkName: string,
-  append: ScriptNetCheckpoint
-): ScriptCheckpoint {
-  if (prev[networkName]) {
-    prev[networkName].timestamp = append.timestamp;
-    prev[networkName].metadata = Object.assign({}, prev[networkName].metadata, append.metadata);
-    return prev;
+export class CheckpointDataImpl implements CheckpointData {
+	checkpoints: ScriptCheckpoints = {};
+	deployedAssets = {};
+
+  appendToCheckpoint (networkName: string, append: ScriptNetCheckpoint): CheckpointData {
+    if (this.checkpoints[networkName]) {
+      this.checkpoints[networkName].timestamp = append.timestamp;
+      this.checkpoints[networkName].metadata = Object.assign(
+        {},
+        this.checkpoints[networkName].metadata, append.metadata
+      );
+      return this;
+    }
+    this.checkpoints[networkName] = append;
+    return this;
   }
-  prev[networkName] = append;
-  return prev;
-}
 
-export function mergeCheckpoints (
-  prev: ScriptCheckpoint,
-  curr: ScriptCheckpoint
-): ScriptCheckpoint {
-  const keys: string[] = Object.keys(curr);
-  return keys.reduce((out: ScriptCheckpoint, key: string) => {
-    return appendToCheckpoint(out, key, curr[key]);
-  }, prev);
-}
+  mergeCheckpoints (curr: ScriptCheckpoints): CheckpointData {
+    const keys: string[] = Object.keys(curr);
+    return keys.reduce((out: CheckpointData, key: string) => {
+      return this.appendToCheckpoint(key, curr[key]);
+    }, this);
+  }
 
-export function appendEnv (
-  prev: ScriptCheckpoint,
-  runtimeEnv: AlgobRuntimeEnv
-): ScriptCheckpoint {
-  return appendToCheckpoint(prev, runtimeEnv.network.name, createNetCheckpoint());
+  appendEnv (runtimeEnv: AlgobRuntimeEnv): CheckpointData {
+    return this.appendToCheckpoint(runtimeEnv.network.name, createNetCheckpoint());
+  }
 }
 
 export function createNetCheckpoint (metadata?: {[key: string]: string}): ScriptNetCheckpoint {
@@ -50,7 +56,7 @@ export function createNetCheckpoint (metadata?: {[key: string]: string}): Script
   };
 }
 
-export function persistCheckpoint (scriptName: string, checkpoint: ScriptCheckpoint): void {
+export function persistCheckpoint (scriptName: string, checkpoint: ScriptCheckpoints): void {
   const scriptPath = toCheckpointFileName(scriptName);
   const scriptDir = path.dirname(scriptPath);
   if (!fs.existsSync(scriptDir)) {
@@ -62,7 +68,7 @@ export function persistCheckpoint (scriptName: string, checkpoint: ScriptCheckpo
   );
 }
 
-export function loadCheckpoint (scriptName: string): ScriptCheckpoint {
+export function loadCheckpoint (scriptName: string): ScriptCheckpoints {
   const checkpointPath = toCheckpointFileName(scriptName);
   if (!fs.existsSync(checkpointPath)) {
     return {};
@@ -72,20 +78,27 @@ export function loadCheckpoint (scriptName: string): ScriptCheckpoint {
 
 export class AlgobDeployerImpl implements AlgobDeployer {
   private readonly runtimeEnv: AlgobRuntimeEnv;
-  checkpoints: ScriptCheckpoint;
+  private readonly cpData: CheckpointData;
 
-  constructor (runtimeEnv: AlgobRuntimeEnv) {
+  constructor (runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointData) {
     this.runtimeEnv = runtimeEnv;
-    this.checkpoints = {};
-    this.checkpoints = appendEnv({}, runtimeEnv);
+    this.cpData = cpData.appendEnv(runtimeEnv);
   }
 
-  get networkName (): string {
+  get networkName(): string {
     return this.runtimeEnv.network.name;
+  }
+
+  get accounts(): NetworkAccounts | undefined {
+    return this.runtimeEnv.network.config.accounts;
   }
 
   get checkpoint (): ScriptNetCheckpoint {
     return this.checkpoints[this.networkName];
+  }
+
+	get checkpoints(): ScriptCheckpoints {
+    return this.cpData.checkpoints
   }
 
   putMetadata (key: string, value: string): void {
@@ -96,10 +109,13 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     return this.checkpoint.metadata[key];
   }
 
-  appendCheckpoints (loaded: ScriptCheckpoint): AlgobDeployerImpl {
-    this.checkpoints = mergeCheckpoints(
-      this.checkpoints,
-      loaded);
-    return this;
+  containsAsset(name: string): boolean {
+    return false;
+  }
+
+	deployASA (name: string, source: string, account: string): void {
+  }
+
+	deployASC (name: string, source: string, account: string): void {
   }
 }

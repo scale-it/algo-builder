@@ -214,15 +214,6 @@ export interface TaskDefinition extends ConfigurableTaskDefinition {
   readonly positionalParamDefinitions: ParamDefinitionAny[]
 }
 
-export interface ScriptCheckpoint {
-  [network: string]: ScriptNetCheckpoint
-};
-
-export interface ScriptNetCheckpoint {
-  timestamp: number
-  metadata: {[key: string]: string}
-};
-
 /**
  * @type TaskArguments {object-like} - the input arguments for a task.
  *
@@ -284,12 +275,40 @@ export interface LinkReferences {
   }
 }
 
+export interface CheckpointData {
+  checkpoints: ScriptCheckpoints
+  deployedAssets: {[assetName: string]: string} // asset name -> script name
+
+  appendToCheckpoint(networkName: string, append: ScriptNetCheckpoint): CheckpointData
+  mergeCheckpoints(curr: ScriptCheckpoints): CheckpointData
+  appendEnv(runtimeEnv: AlgobRuntimeEnv): CheckpointData
+};
+
+export interface ScriptCheckpoints {
+  [network: string]: ScriptNetCheckpoint
+};
+
+export interface ScriptNetCheckpoint {
+  timestamp: number
+  metadata: {[key: string]: string}
+};
+
+export interface ASAInfo {
+}
+
+export interface ASCInfo {
+}
+
 export interface AlgobDeployer {
-  putMetadata: (key: string, value: string) => void
-  getMetadata: (key: string) => string | undefined
-  appendCheckpoints: (cp: ScriptCheckpoint) => AlgobDeployer
+  networkName: string
+  accounts: NetworkAccounts | undefined
   checkpoint: ScriptNetCheckpoint
-  checkpoints: ScriptCheckpoint
+  checkpoints: ScriptCheckpoints
+  putMetadata(key: string, value: string): void
+  getMetadata(key: string): string | undefined
+  //appendCheckpoints(cp: ScriptCheckpoints): AlgobDeployer
+  deployASA(name: string, source: string, account: string): void
+  deployASC(name: string, source: string, account: string): void
 }
 
 // ************************

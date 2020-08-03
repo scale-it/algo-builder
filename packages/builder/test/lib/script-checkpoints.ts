@@ -3,15 +3,13 @@ import * as fs from "fs";
 
 import {
   AlgobDeployerImpl,
-  appendEnv,
-  appendToCheckpoint,
   createNetCheckpoint,
   loadCheckpoint,
-  mergeCheckpoints,
   persistCheckpoint,
-  toCheckpointFileName
+  toCheckpointFileName,
+  CheckpointDataImpl
 } from "../../src/lib/script-checkpoints";
-import { ScriptCheckpoint, ScriptNetCheckpoint } from "../../src/types";
+import { ScriptCheckpoints, ScriptNetCheckpoint } from "../../src/types";
 import { mkAlgobEnv } from "../helpers/params";
 
 function cleanupMutableData (netCheckpoint: ScriptNetCheckpoint, n: number): ScriptNetCheckpoint {
@@ -35,8 +33,9 @@ describe("Checkpoint", () => {
   });
 
   it("Should append to a checkpoint map", async () => {
+    const cpData = new CheckpointDataImpl()
     const netCheckpoint = cleanupMutableData(createNetCheckpoint(), 34251);
-    const checkpoint = appendToCheckpoint({}, "network213", netCheckpoint);
+    const checkpoint = cpData.appendToCheckpoint("network213", netCheckpoint).checkpoints;
     assert.deepEqual(checkpoint, {
       network213: {
         timestamp: 34251,
@@ -44,8 +43,8 @@ describe("Checkpoint", () => {
       }
     });
     const netCheckpoint2 = cleanupMutableData(createNetCheckpoint(), 539);
-    const checkpoint2 = appendToCheckpoint(checkpoint, "network5352", netCheckpoint2);
-    assert.deepEqual(checkpoint2, {
+    const checkpoint2 = cpData.appendToCheckpoint("network5352", netCheckpoint2);
+    assert.deepEqual(cpData.checkpoints, {
       network213: {
         timestamp: 34251,
         metadata: {}
@@ -58,17 +57,18 @@ describe("Checkpoint", () => {
   });
 
   it("Should replace in checkpoint map", async () => {
+    const cpData = new CheckpointDataImpl()
     const netCheckpoint = cleanupMutableData(createNetCheckpoint(), 34251);
-    const checkpoint = appendToCheckpoint({}, "network525", netCheckpoint);
-    assert.deepEqual(checkpoint, {
+    const checkpoint = cpData.appendToCheckpoint("network525", netCheckpoint);
+    assert.deepEqual(cpData.checkpoints, {
       network525: {
         timestamp: 34251,
         metadata: {}
       }
     });
     const netCheckpoint2 = cleanupMutableData(createNetCheckpoint(), 539);
-    const checkpoint2 = appendToCheckpoint(checkpoint, "network525", netCheckpoint2);
-    assert.deepEqual(checkpoint2, {
+    const checkpoint2 = cpData.appendToCheckpoint("network525", netCheckpoint2);
+    assert.deepEqual(cpData.checkpoints, {
       network525: {
         timestamp: 539,
         metadata: {}
@@ -77,12 +77,13 @@ describe("Checkpoint", () => {
   });
 
   it("Should merge metadata maps", async () => {
+    const cpData = new CheckpointDataImpl()
     const netCheckpoint = cleanupMutableData(createNetCheckpoint({
       key: "data",
       key3: "data3"
     }), 34251);
-    const checkpoint = appendToCheckpoint({}, "network12345", netCheckpoint);
-    assert.deepEqual(checkpoint, {
+    const checkpoint = cpData.appendToCheckpoint("network12345", netCheckpoint);
+    assert.deepEqual(cpData.checkpoints, {
       network12345: {
         timestamp: 34251,
         metadata: {
@@ -95,8 +96,8 @@ describe("Checkpoint", () => {
       key: "updated data",
       key2: "data2"
     }), 125154251);
-    const checkpoint2 = appendToCheckpoint(checkpoint, "network12345", netCheckpoint2);
-    assert.deepEqual(checkpoint2, {
+    const checkpoint2 = cpData.appendToCheckpoint("network12345", netCheckpoint2);
+    assert.deepEqual(cpData.checkpoints, {
       network12345: {
         timestamp: 125154251,
         metadata: {
@@ -114,7 +115,7 @@ describe("Checkpoint", () => {
   });
 
   it("Should capture config", async () => {
-    const cp = appendEnv({}, mkAlgobEnv("myNetworkName"));
+    const cp = new CheckpointDataImpl().appendEnv(mkAlgobEnv("myNetworkName")).checkpoints
     assert.isNotNull(cp.myNetworkName);
     cp.myNetworkName = cleanupMutableData(cp.myNetworkName, 951);
     assert.deepEqual(cp, {
@@ -126,11 +127,11 @@ describe("Checkpoint", () => {
   });
 
   it("Should capture config two calls", async () => {
-    const cp = appendEnv(
-      appendEnv(
-        {},
-        mkAlgobEnv("myNetworkName")),
-      mkAlgobEnv("myNetworkName2"));
+    const cpData = new CheckpointDataImpl()
+    const cp = cpData
+      .appendEnv(mkAlgobEnv("myNetworkName"))
+      .appendEnv(mkAlgobEnv("myNetworkName2"))
+      .checkpoints;
     assert.isNotNull(cp.myNetworkName);
     cp.myNetworkName = cleanupMutableData(cp.myNetworkName, 531);
     cp.myNetworkName2 = cleanupMutableData(cp.myNetworkName2, 201);
@@ -152,19 +153,22 @@ describe("Checkpoint", () => {
   });
 
   it("Should merge checkpoints", async () => {
-    const cp1: ScriptCheckpoint = {
+    const cp1: ScriptCheckpoints = {
       network1: {
         timestamp: 1,
         metadata: { "key 1": "data 1" }
       }
     };
-    const cp2: ScriptCheckpoint = {
+    const cp2: ScriptCheckpoints = {
       network2: {
         timestamp: 2,
         metadata: { "key 2": "data 2" }
       }
     };
-    const cp = mergeCheckpoints(cp1, cp2);
+    const cp = new CheckpointDataImpl()
+      .mergeCheckpoints(cp1)
+      .mergeCheckpoints(cp2)
+      .checkpoints;
     assert.deepEqual(cp, {
       network1: {
         timestamp: 1,
@@ -178,19 +182,22 @@ describe("Checkpoint", () => {
   });
 
   it("Should deeply merge the checkpoints", async () => {
-    const cp1: ScriptCheckpoint = {
+    const cp1: ScriptCheckpoints = {
       network1: {
         timestamp: 1,
         metadata: { "key 1": "data 1" }
       }
     };
-    const cp2: ScriptCheckpoint = {
+    const cp2: ScriptCheckpoints = {
       network1: {
         timestamp: 2,
         metadata: {}
       }
     };
-    const cp = mergeCheckpoints(cp1, cp2);
+    const cp = new CheckpointDataImpl()
+      .mergeCheckpoints(cp1)
+      .mergeCheckpoints(cp2)
+      .checkpoints;
     assert.deepEqual(cp, {
       network1: {
         timestamp: 2,
@@ -210,10 +217,10 @@ describe("Checkpoint with cleanup", () => {
   });
 
   it("Should persist and load the checkpoint", async () => {
-    const origCP = appendToCheckpoint(
-      {},
-      "network124",
-      createNetCheckpoint());
+    const cpData = new CheckpointDataImpl()
+    const origCP = cpData
+      .appendToCheckpoint("network124", createNetCheckpoint())
+      .checkpoints;
     persistCheckpoint("script-1.js", origCP);
     const loadedCP = loadCheckpoint("script-1.js");
     assert.deepEqual(loadedCP, origCP);
@@ -222,7 +229,9 @@ describe("Checkpoint with cleanup", () => {
 
 describe("AlgobDeployer", () => {
   it("Should ensure metadata existence for network", async () => {
-    const deployer = new AlgobDeployerImpl(mkAlgobEnv("network 123"));
+    const deployer = new AlgobDeployerImpl(
+      mkAlgobEnv("network 123"),
+      new CheckpointDataImpl());
     assert.deepEqual(cleanupMutableData(deployer.checkpoint, 12345), {
       timestamp: 12345,
       metadata: {}
@@ -230,21 +239,25 @@ describe("AlgobDeployer", () => {
   });
 
   it("Should hold metadata of a network", async () => {
-    const deployer = new AlgobDeployerImpl(mkAlgobEnv("network 123"));
+    const deployer = new AlgobDeployerImpl(
+      mkAlgobEnv("network 123"),
+      new CheckpointDataImpl());
     deployer.putMetadata("existent", "existent value");
     assert.isUndefined(deployer.getMetadata("nonexistent"));
     assert.equal(deployer.getMetadata("existent"), "existent value");
   });
 
   it("Should allow to override metadata of a network", async () => {
-    const deployer = new AlgobDeployerImpl(mkAlgobEnv("network 123"));
+    const deployer = new AlgobDeployerImpl(
+      mkAlgobEnv("network 123"),
+      new CheckpointDataImpl());
     deployer.putMetadata("existent", "existent value");
     deployer.putMetadata("existent", "existent value 2");
     assert.equal(deployer.getMetadata("existent"), "existent value 2");
   });
 
   it("Should set given data into checkpoint with timestamp", async () => {
-    const deployer = new AlgobDeployerImpl(mkAlgobEnv("network 123"));
+    const deployer = new AlgobDeployerImpl(mkAlgobEnv("network 123"), new CheckpointDataImpl());
     deployer.putMetadata("key 1", "val 1");
     deployer.putMetadata("key 2", "val 2");
     const cleanCP = cleanupMutableData(deployer.checkpoint, 12345);
@@ -258,21 +271,24 @@ describe("AlgobDeployer", () => {
   });
 
   it("Should append freshly loaded checkpoint values", async () => {
-    const cp1: ScriptCheckpoint = {
+    const cp1: ScriptCheckpoints = {
       network1: {
         timestamp: 1,
         metadata: { "key 1": "data 1" }
       }
     };
-    const cp2: ScriptCheckpoint = {
+    const cp2: ScriptCheckpoints = {
       network2: {
         timestamp: 2,
         metadata: { "key 2": "data 2" }
       }
     };
-    const deployer = new AlgobDeployerImpl(mkAlgobEnv("network1"));
-    deployer.appendCheckpoints(cp1);
-    deployer.appendCheckpoints(cp2);
+    const cpData = new CheckpointDataImpl()
+    const deployer = new AlgobDeployerImpl(
+      mkAlgobEnv("network1"),
+      cpData);
+    cpData.mergeCheckpoints(cp1);
+    cpData.mergeCheckpoints(cp2);
     assert.deepEqual(deployer.checkpoints, {
       network1: {
         timestamp: 1,
