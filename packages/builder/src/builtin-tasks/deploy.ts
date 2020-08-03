@@ -11,12 +11,12 @@ import { cmpStr } from "../lib/comparators";
 import { checkRelativePaths } from "../lib/files";
 import {
   AlgobDeployerImpl,
+  CheckpointDataImpl,
   loadCheckpoint,
   persistCheckpoint,
-  scriptsDirectory,
-  CheckpointDataImpl
+  scriptsDirectory
 } from "../lib/script-checkpoints";
-import { AlgobDeployer, AlgobRuntimeEnv, ScriptCheckpoints, CheckpointData } from "../types";
+import { AlgobDeployer, AlgobRuntimeEnv, CheckpointData, ScriptCheckpoints } from "../types";
 import { runMultipleScripts } from "./run";
 import { TASK_DEPLOY } from "./task-names";
 
@@ -37,7 +37,7 @@ export function loadFilenames (directory: string): string[] {
 }
 
 async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntimeEnv): Promise<void> {
-  const debugTag = "builder:core:tasks:deploy"
+  const debugTag = "builder:core:tasks:deploy";
   const log = debug(debugTag);
 
   const scriptNames = fileNames.length === 0

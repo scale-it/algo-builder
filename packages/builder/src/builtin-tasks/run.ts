@@ -6,16 +6,16 @@ import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { runScript } from "../internal/util/scripts-runner";
 import { checkRelativePaths } from "../lib/files";
-import { AlgobRuntimeEnv, CheckpointData, ScriptCheckpoints, AlgobDeployer } from "../types";
-import { TASK_RUN } from "./task-names";
 import {
   AlgobDeployerImpl,
+  AlgobDeployerReadOnlyImpl,
+  CheckpointDataImpl,
   loadCheckpoint,
   persistCheckpoint,
-  scriptsDirectory,
-  CheckpointDataImpl,
-  AlgobDeployerReadOnlyImpl
+  scriptsDirectory
 } from "../lib/script-checkpoints";
+import { AlgobDeployer, AlgobRuntimeEnv, CheckpointData, ScriptCheckpoints } from "../types";
+import { TASK_RUN } from "./task-names";
 
 interface Input {
   scripts: string[]
@@ -33,7 +33,7 @@ export async function runMultipleScripts (
   logTag: string,
   wrapDeployer: (orig: AlgobDeployer) => AlgobDeployer): Promise<void> {
   const log = debug(logTag);
-  const cpData: CheckpointData = new CheckpointDataImpl()
+  const cpData: CheckpointData = new CheckpointDataImpl();
   const deployer: AlgobDeployer = wrapDeployer(new AlgobDeployerImpl(runtimeEnv, cpData));
   for (let i = 0; i < scriptNames.length; i++) {
     const relativeScriptPath = scriptNames[i];
@@ -43,13 +43,13 @@ export async function runMultipleScripts (
       return;
     }
     log(`Running script ${relativeScriptPath}`);
-    cpData.mergeCheckpoints(currentCP)
+    cpData.mergeCheckpoints(currentCP);
     await runScript(
       relativeScriptPath,
       runtimeEnv,
       deployer
     );
-    onSuccessFn(cpData, relativeScriptPath)
+    onSuccessFn(cpData, relativeScriptPath);
   }
 }
 
@@ -57,7 +57,7 @@ async function doRun (
   { scripts }: Input,
   runtimeEnv: AlgobRuntimeEnv
 ): Promise<any> {
-  const debugTag = "builder:core:tasks:run"
+  const debugTag = "builder:core:tasks:run";
   const log = debug(debugTag);
 
   const nonExistent = filterNonExistent(scripts);

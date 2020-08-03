@@ -516,12 +516,12 @@ Please double check your command parameters`
 Deployer data editing only allowed during 'deploy'.
 Use 'deployer.isDeploy' to check if editing is allowed.
 `
-    }
-  }
-const pluginErrors = {
-  NOT_INSTALLED: {
-    number: 800,
-    message: `Plugin %plugin% is not installed.
+    },
+  },
+  PLUGINS: {
+    NOT_INSTALLED: {
+      number: 800,
+      message: `Plugin %plugin% is not installed.
 %extraMessage%Please run: npm install --save-dev%extraFlags% %plugin%`,
     title: "Plugin not installed",
     description: `You are trying to use a plugin that hasn't been installed.

@@ -275,25 +275,33 @@ export interface LinkReferences {
   }
 }
 
-export interface DeployedAssetInfo {
+export interface AssetScriptInfo {
   deployerScript: string
+}
+
+type AccountAddress = string;
+
+export interface DeployedAssetInfo {
+  creator: AccountAddress
 }
 
 export interface ASAInfo extends DeployedAssetInfo {
 }
-
 export interface ASCInfo extends DeployedAssetInfo {
 }
+
+export type DeployedASAInfo = ASAInfo & AssetScriptInfo;
+export type DeployedASCInfo = ASCInfo & AssetScriptInfo;
 
 export interface CheckpointData {
   checkpoints: ScriptCheckpoints
 
-  deployedASA: {[assetName: string]: ASAInfo}
-  deployedASC: {[assetName: string]: ASCInfo}
+  deployedASA: {[assetName: string]: DeployedASAInfo}
+  deployedASC: {[assetName: string]: DeployedASCInfo}
 
-  appendToCheckpoint(networkName: string, append: ScriptNetCheckpoint): CheckpointData
-  mergeCheckpoints(curr: ScriptCheckpoints): CheckpointData
-  appendEnv(runtimeEnv: AlgobRuntimeEnv): CheckpointData
+  appendToCheckpoint: (networkName: string, append: ScriptNetCheckpoint) => CheckpointData
+  mergeCheckpoints: (curr: ScriptCheckpoints) => CheckpointData
+  appendEnv: (runtimeEnv: AlgobRuntimeEnv) => CheckpointData
 };
 
 export interface ScriptCheckpoints {
@@ -303,15 +311,18 @@ export interface ScriptCheckpoints {
 export interface ScriptNetCheckpoint {
   timestamp: number
   metadata: {[key: string]: string}
+  asa: {[name: string]: ASAInfo}
+  asc: {[name: string]: ASCInfo}
 };
 
 export interface AlgobDeployer {
   isWriteable: boolean
-  accounts: AccountDef[]
-  putMetadata(key: string, value: string): void
-  getMetadata(key: string): string | undefined
-  deployASA(name: string, source: string, account: string): void
-  deployASC(name: string, source: string, account: string): void
+  accounts: NetworkAccounts | undefined
+  putMetadata: (key: string, value: string) => void
+  getMetadata: (key: string) => string | undefined
+  deployASA: (name: string, source: string, account: string) => Promise<ASAInfo>
+  deployASC: (name: string, source: string, account: string) => Promise<ASCInfo>
+  containsAsset: (name: string) => boolean
 }
 
 // ************************

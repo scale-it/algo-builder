@@ -1,21 +1,23 @@
 
 import * as fs from "fs";
 import path from "path";
+import { DeepReadonly } from "ts-essentials";
 import YAML from "yaml";
 
+import { BuilderError } from "../internal/core/errors";
+import { ERRORS } from "../internal/core/errors-list";
 import {
   AlgobDeployer,
   AlgobRuntimeEnv,
-  ScriptCheckpoints,
-  ScriptNetCheckpoint,
-  AccountDef,
-  CheckpointData,
   ASAInfo,
-  ASCInfo
+  ASCInfo,
+  CheckpointData,
+  DeployedASAInfo,
+  DeployedASCInfo,
+  NetworkAccounts,
+  ScriptCheckpoints,
+  ScriptNetCheckpoint
 } from "../types";
-import { DeepReadonly } from "ts-essentials";
-import { BuilderError } from "../internal/core/errors";
-import { ERRORS } from "../internal/core/errors-list";
 
 export const scriptsDirectory = "scripts";
 const artifactsPath = "artifacts";
@@ -24,10 +26,34 @@ export function toCheckpointFileName (scriptName: string): string {
   return path.join(artifactsPath, scriptName + ".cp.yaml");
 }
 
+export function registerASA (cp: ScriptNetCheckpoint, name: string, creator: string): ScriptNetCheckpoint {
+  cp.asa[name] = { creator: creator }
+  return cp
+}
+
+export function registerASC (cp: ScriptNetCheckpoint, name: string, creator: string): ScriptNetCheckpoint {
+  cp.asc[name] = { creator: creator }
+  return cp
+}
+
+export class ScriptNetCheckpointImpl implements ScriptNetCheckpoint {
+  timestamp: number;
+  metadata: { [key: string]: string };
+  asa: { [name: string]: ASAInfo };
+  asc: { [name: string]: ASCInfo };
+
+  constructor (metadata?: {[key: string]: string}) {
+    this.timestamp = +new Date();
+    this.metadata = (metadata === undefined ? {} : metadata);
+    this.asa = {};
+    this.asc = {};
+  }
+}
+
 export class CheckpointDataImpl implements CheckpointData {
-	checkpoints: ScriptCheckpoints = {};
-	deployedASA: { [assetName: string]: ASAInfo } = {};
-	deployedASC: { [assetName: string]: ASCInfo } = {};
+  checkpoints: ScriptCheckpoints = {};
+  deployedASA: { [assetName: string]: DeployedASAInfo } = {};
+  deployedASC: { [assetName: string]: DeployedASCInfo } = {};
 
   appendToCheckpoint (networkName: string, append: ScriptNetCheckpoint): CheckpointData {
     if (this.checkpoints[networkName]) {
@@ -50,15 +76,8 @@ export class CheckpointDataImpl implements CheckpointData {
   }
 
   appendEnv (runtimeEnv: AlgobRuntimeEnv): CheckpointData {
-    return this.appendToCheckpoint(runtimeEnv.network.name, createNetCheckpoint());
+    return this.appendToCheckpoint(runtimeEnv.network.name, new ScriptNetCheckpointImpl());
   }
-}
-
-export function createNetCheckpoint (metadata?: {[key: string]: string}): ScriptNetCheckpoint {
-  return {
-    timestamp: +new Date(),
-    metadata: metadata === undefined ? {} : metadata
-  };
 }
 
 export function persistCheckpoint (scriptName: string, checkpoint: ScriptCheckpoints): void {
@@ -93,11 +112,12 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   get accounts(): AccountDef[] | undefined {
     return this.runtimeEnv.network.config.accounts;
   }
-	get isWriteable() {
-    return true
+
+  get isWriteable () {
+    return true;
   }
 
-  private get networkName(): string {
+  private get networkName (): string {
     return this.runtimeEnv.network.name;
   }
 
@@ -113,47 +133,59 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     return this.checkpoint.metadata[key];
   }
 
-  containsAsset(name: string): boolean {
+  containsAsset (name: string): boolean {
     return false;
   }
 
-	deployASA (name: string, source: string, account: string): void {
+  async deployASA (name: string, source: string, account: string): Promise<ASAInfo> {
+    registerASA(this.checkpoint, name, account + "-get-address")
+    return this.checkpoint.asa[name]
   }
 
-	deployASC (name: string, source: string, account: string): void {
+  async deployASC (name: string, source: string, account: string): Promise<ASCInfo> {
+    registerASC(this.checkpoint, name, account + "-get-address")
+    return this.checkpoint.asc[name]
   }
-
 }
 
 export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
   private readonly _internal: AlgobDeployer;
 
-  constructor(deployer: AlgobDeployer) {
-    this._internal = deployer
+  constructor (deployer: AlgobDeployer) {
+    this._internal = deployer;
   }
 
-	get accounts() {
-    return this._internal.accounts
+  get accounts () {
+    return this._internal.accounts;
   }
-	get isWriteable() {
-    return false
+
+  get isWriteable () {
+    return false;
   }
-	putMetadata(key: string, value: string): void {
-		throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      "methodName": "putMetadata"
+
+  putMetadata (key: string, value: string): void {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "putMetadata"
     });
-	}
-	getMetadata(key: string): string | undefined {
-    return this._internal.getMetadata(key)
-	}
-	deployASA(name: string, source: string, account: string): void {
-		throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      "methodName": "deployASA"
+  }
+
+  getMetadata (key: string): string | undefined {
+    return this._internal.getMetadata(key);
+  }
+
+  async deployASA (name: string, source: string, account: string): Promise<ASAInfo> {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "deployASA"
     });
-	}
-	deployASC(name: string, source: string, account: string): void {
-		throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      "methodName": "deployASC"
+  }
+
+  async deployASC (name: string, source: string, account: string): Promise<ASCInfo> {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "deployASC"
     });
-	}
+  }
+
+  containsAsset (name: string): boolean {
+    return this._internal.containsAsset(name);
+  }
 }

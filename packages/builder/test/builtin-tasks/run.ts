@@ -2,12 +2,12 @@ import { assert } from "chai";
 import fs from "fs";
 
 // import * as fsExtra from "fs-extra";
-import { TASK_RUN, TASK_DEPLOY } from "../../src/builtin-tasks/task-names";
+import { TASK_DEPLOY, TASK_RUN } from "../../src/builtin-tasks/task-names";
 import { ERRORS } from "../../src/internal/core/errors-list";
+import { loadCheckpoint } from "../../src/lib/script-checkpoints";
 import { useEnvironment } from "../helpers/environment";
 import { expectBuilderErrorAsync } from "../helpers/errors";
 import { testFixtureOutputFile, useCleanFixtureProject, useFixtureProject } from "../helpers/project";
-import { loadCheckpoint } from "../../src/lib/script-checkpoints";
 
 describe("Run task", function () {
   useFixtureProject("project-with-scripts");
@@ -178,7 +178,4 @@ scripts directory: script 1 executed
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, "deployASC script\n");
   });
-
-
-
 });
