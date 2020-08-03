@@ -9,7 +9,9 @@ import {
   ScriptCheckpoints,
   ScriptNetCheckpoint,
   NetworkAccounts,
-  CheckpointData
+  CheckpointData,
+  ASAInfo,
+  ASCInfo
 } from "../types";
 import { DeepReadonly } from "ts-essentials";
 
@@ -22,7 +24,8 @@ export function toCheckpointFileName (scriptName: string): string {
 
 export class CheckpointDataImpl implements CheckpointData {
 	checkpoints: ScriptCheckpoints = {};
-	deployedAssets = {};
+	deployedASA: { [assetName: string]: ASAInfo } = {};
+	deployedASC: { [assetName: string]: ASCInfo } = {};
 
   appendToCheckpoint (networkName: string, append: ScriptNetCheckpoint): CheckpointData {
     if (this.checkpoints[networkName]) {
@@ -85,20 +88,16 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     this.cpData = cpData.appendEnv(runtimeEnv);
   }
 
-  get networkName(): string {
-    return this.runtimeEnv.network.name;
-  }
-
   get accounts(): NetworkAccounts | undefined {
     return this.runtimeEnv.network.config.accounts;
   }
 
-  get checkpoint (): ScriptNetCheckpoint {
-    return this.checkpoints[this.networkName];
+  private get networkName(): string {
+    return this.runtimeEnv.network.name;
   }
 
-	get checkpoints(): ScriptCheckpoints {
-    return this.cpData.checkpoints
+  private get checkpoint (): ScriptNetCheckpoint {
+    return this.cpData.checkpoints[this.networkName];
   }
 
   putMetadata (key: string, value: string): void {

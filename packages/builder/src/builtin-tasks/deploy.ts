@@ -68,7 +68,7 @@ async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntim
       runtimeEnv,
       deployer
     );
-    persistCheckpoint(relativeScriptPath, deployer.checkpoints);
+    persistCheckpoint(relativeScriptPath, cpData.checkpoints);
   });
 }
 

@@ -275,9 +275,21 @@ export interface LinkReferences {
   }
 }
 
+export interface DeployedAssetInfo {
+  deployerScript: string
+}
+
+export interface ASAInfo extends DeployedAssetInfo {
+}
+
+export interface ASCInfo extends DeployedAssetInfo {
+}
+
 export interface CheckpointData {
   checkpoints: ScriptCheckpoints
-  deployedAssets: {[assetName: string]: string} // asset name -> script name
+
+  deployedASA: {[assetName: string]: ASAInfo}
+  deployedASC: {[assetName: string]: ASCInfo}
 
   appendToCheckpoint(networkName: string, append: ScriptNetCheckpoint): CheckpointData
   mergeCheckpoints(curr: ScriptCheckpoints): CheckpointData
@@ -293,20 +305,10 @@ export interface ScriptNetCheckpoint {
   metadata: {[key: string]: string}
 };
 
-export interface ASAInfo {
-}
-
-export interface ASCInfo {
-}
-
 export interface AlgobDeployer {
-  networkName: string
   accounts: NetworkAccounts | undefined
-  checkpoint: ScriptNetCheckpoint
-  checkpoints: ScriptCheckpoints
   putMetadata(key: string, value: string): void
   getMetadata(key: string): string | undefined
-  //appendCheckpoints(cp: ScriptCheckpoints): AlgobDeployer
   deployASA(name: string, source: string, account: string): void
   deployASC(name: string, source: string, account: string): void
 }
