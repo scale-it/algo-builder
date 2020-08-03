@@ -37,7 +37,8 @@ export function loadFilenames (directory: string): string[] {
 }
 
 async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntimeEnv): Promise<void> {
-  const log = debug("builder:core:tasks:deploy");
+  const debugTag = "builder:core:tasks:deploy"
+  const log = debug(debugTag);
 
   const scriptNames = fileNames.length === 0
     ? loadFilenames(scriptsDirectory)
@@ -49,27 +50,16 @@ async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntim
     });
   }
 
-  const cpData: CheckpointData = new CheckpointDataImpl()
-  const deployer: AlgobDeployer = new AlgobDeployerImpl(runtimeEnv, cpData);
-
-  return await runMultipleScripts(runtimeEnv, scriptNames, async (
-    relativeScriptPath: string,
-    runtimeEnv: AlgobRuntimeEnv
-  ) => {
-    const currentCP: ScriptCheckpoints = loadCheckpoint(relativeScriptPath);
-    if (!force && currentCP[runtimeEnv.network.name]) {
-      log(`Skipping: Checkpoint exists for script ${relativeScriptPath}`);
-      return;
-    }
-    log(`Running script ${relativeScriptPath}`);
-    cpData.mergeCheckpoints(currentCP)
-    await runScript(
-      relativeScriptPath,
-      runtimeEnv,
-      deployer
-    );
-    persistCheckpoint(relativeScriptPath, cpData.checkpoints);
-  });
+  return await runMultipleScripts(
+    runtimeEnv,
+    scriptNames,
+    (cpData: CheckpointData, relativeScriptPath: string) => {
+      persistCheckpoint(relativeScriptPath, cpData.checkpoints);
+    },
+    force,
+    debugTag,
+    (orig: AlgobDeployer) => orig
+  );
 }
 
 export default function (): void {

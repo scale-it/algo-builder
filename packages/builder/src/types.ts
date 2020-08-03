@@ -306,7 +306,8 @@ export interface ScriptNetCheckpoint {
 };
 
 export interface AlgobDeployer {
-  accounts: NetworkAccounts | undefined
+  isWriteable: boolean
+  accounts: AccountDef[]
   putMetadata(key: string, value: string): void
   getMetadata(key: string): string | undefined
   deployASA(name: string, source: string, account: string): void

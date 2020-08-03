@@ -8,12 +8,14 @@ import {
   AlgobRuntimeEnv,
   ScriptCheckpoints,
   ScriptNetCheckpoint,
-  NetworkAccounts,
+  AccountDef,
   CheckpointData,
   ASAInfo,
   ASCInfo
 } from "../types";
 import { DeepReadonly } from "ts-essentials";
+import { BuilderError } from "../internal/core/errors";
+import { ERRORS } from "../internal/core/errors-list";
 
 export const scriptsDirectory = "scripts";
 const artifactsPath = "artifacts";
@@ -88,8 +90,11 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     this.cpData = cpData.appendEnv(runtimeEnv);
   }
 
-  get accounts(): NetworkAccounts | undefined {
+  get accounts(): AccountDef[] | undefined {
     return this.runtimeEnv.network.config.accounts;
+  }
+	get isWriteable() {
+    return true
   }
 
   private get networkName(): string {
@@ -117,4 +122,38 @@ export class AlgobDeployerImpl implements AlgobDeployer {
 
 	deployASC (name: string, source: string, account: string): void {
   }
+
+}
+
+export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
+  private readonly _internal: AlgobDeployer;
+
+  constructor(deployer: AlgobDeployer) {
+    this._internal = deployer
+  }
+
+	get accounts() {
+    return this._internal.accounts
+  }
+	get isWriteable() {
+    return false
+  }
+	putMetadata(key: string, value: string): void {
+		throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      "methodName": "putMetadata"
+    });
+	}
+	getMetadata(key: string): string | undefined {
+    return this._internal.getMetadata(key)
+	}
+	deployASA(name: string, source: string, account: string): void {
+		throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      "methodName": "deployASA"
+    });
+	}
+	deployASC(name: string, source: string, account: string): void {
+		throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      "methodName": "deployASC"
+    });
+	}
 }

@@ -6,8 +6,16 @@ import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { runScript } from "../internal/util/scripts-runner";
 import { checkRelativePaths } from "../lib/files";
-import { AlgobRuntimeEnv } from "../types";
+import { AlgobRuntimeEnv, CheckpointData, ScriptCheckpoints, AlgobDeployer } from "../types";
 import { TASK_RUN } from "./task-names";
+import {
+  AlgobDeployerImpl,
+  loadCheckpoint,
+  persistCheckpoint,
+  scriptsDirectory,
+  CheckpointDataImpl,
+  AlgobDeployerReadOnlyImpl
+} from "../lib/script-checkpoints";
 
 interface Input {
   scripts: string[]
@@ -17,15 +25,31 @@ function filterNonExistent (scripts: string[]): string[] {
   return scripts.filter(script => !fsExtra.pathExistsSync(script));
 }
 
-export async function runMultipleScripts (runtimeEnv: AlgobRuntimeEnv,
+export async function runMultipleScripts (
+  runtimeEnv: AlgobRuntimeEnv,
   scriptNames: string[],
-  runScriptFn: (
-    relativeScriptPath: string,
-    runtimeEnv: AlgobRuntimeEnv
-  ) => Promise<void>): Promise<void> {
+  onSuccessFn: (cpData: CheckpointData, relativeScriptPath: string) => void,
+  force: boolean,
+  logTag: string,
+  wrapDeployer: (orig: AlgobDeployer) => AlgobDeployer): Promise<void> {
+  const log = debug(logTag);
+  const cpData: CheckpointData = new CheckpointDataImpl()
+  const deployer: AlgobDeployer = wrapDeployer(new AlgobDeployerImpl(runtimeEnv, cpData));
   for (let i = 0; i < scriptNames.length; i++) {
-    const scriptLocation = scriptNames[i];
-    await runScriptFn(scriptLocation, runtimeEnv);
+    const relativeScriptPath = scriptNames[i];
+    const currentCP: ScriptCheckpoints = loadCheckpoint(relativeScriptPath);
+    if (!force && currentCP[runtimeEnv.network.name]) {
+      log(`Skipping: Checkpoint exists for script ${relativeScriptPath}`);
+      return;
+    }
+    log(`Running script ${relativeScriptPath}`);
+    cpData.mergeCheckpoints(currentCP)
+    await runScript(
+      relativeScriptPath,
+      runtimeEnv,
+      deployer
+    );
+    onSuccessFn(cpData, relativeScriptPath)
   }
 }
 
@@ -33,7 +57,8 @@ async function doRun (
   { scripts }: Input,
   runtimeEnv: AlgobRuntimeEnv
 ): Promise<any> {
-  const log = debug("builder:core:tasks:run");
+  const debugTag = "builder:core:tasks:run"
+  const log = debug(debugTag);
 
   const nonExistent = filterNonExistent(scripts);
   if (nonExistent.length !== 0) {
@@ -42,13 +67,14 @@ async function doRun (
     });
   }
 
-  return await runMultipleScripts(runtimeEnv, checkRelativePaths(scripts), async (
-    relativeScriptPath: string,
-    runtimeEnv: AlgobRuntimeEnv
-  ) => {
-    log(`Running script ${relativeScriptPath}`);
-    await runScript(relativeScriptPath, runtimeEnv);
-  });
+  return await runMultipleScripts(
+    runtimeEnv,
+    checkRelativePaths(scripts),
+    (cpData: CheckpointData, relativeScriptPath: string) => {},
+    true,
+    debugTag,
+    (orig: AlgobDeployer) => new AlgobDeployerReadOnlyImpl(orig)
+  );
 }
 
 export default function (): void {

@@ -507,9 +507,17 @@ Please double check your script's path`
     description: `Tried to run scripts that was outside scripts directory %scripts%.
 
 Please double check your command parameters`
+    },
+    DEPLOYER_EDIT_OUTSIDE_DEPLOY: {
+      number: 606,
+      message: "Script tried to edit Deployer data using '%methodName%' outside 'deploy' action",
+      title: "Deployer editing allowed only during 'deploy'.",
+      description: `Script tried to edit Deployer data using '%methodName%' method.
+Deployer data editing only allowed during 'deploy'.
+Use 'deployer.isDeploy' to check if editing is allowed.
+`
+    }
   }
-};
-
 const pluginErrors = {
   NOT_INSTALLED: {
     number: 800,
