@@ -12,7 +12,7 @@ import {
   ASAInfo,
   ASCInfo,
   CheckpointData,
-  NetworkAccounts,
+  AccountDef,
   ScriptCheckpoints,
   ScriptNetCheckpoint
 } from "../types";
