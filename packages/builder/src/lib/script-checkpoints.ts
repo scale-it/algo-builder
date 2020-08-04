@@ -56,15 +56,29 @@ export class CheckpointDataImpl implements CheckpointData {
   deployedASC: { [assetName: string]: DeployedASCInfo } = {};
 
   appendToCheckpoint (networkName: string, append: ScriptNetCheckpoint): CheckpointData {
-    if (this.checkpoints[networkName]) {
-      this.checkpoints[networkName].timestamp = append.timestamp;
-      this.checkpoints[networkName].metadata = Object.assign(
-        {},
-        this.checkpoints[networkName].metadata, append.metadata
-      );
+    const cp = this.checkpoints[networkName]
+    if (!cp) {
+      this.checkpoints[networkName] = append;
       return this;
     }
-    this.checkpoints[networkName] = append;
+    cp.timestamp = append.timestamp;
+    cp.metadata = Object.assign(
+      {}, cp.metadata, append.metadata
+    );
+    const allAssetNames = Object.keys(append.asa).concat(Object.keys(append.asc))
+    for (const assetName of allAssetNames) {
+      if (cp.asa[assetName] || cp.asc[assetName]) {
+        throw new BuilderError(
+          ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
+          { assetName: assetName });
+      }
+    }
+    cp.asa = Object.assign(
+      {}, cp.asa, append.asa
+    );
+    cp.asc = Object.assign(
+      {}, cp.asc, append.asc
+    );
     return this;
   }
 

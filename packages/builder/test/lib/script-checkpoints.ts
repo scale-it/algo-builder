@@ -13,6 +13,8 @@ import {
 } from "../../src/lib/script-checkpoints";
 import { ScriptCheckpoints, ScriptNetCheckpoint } from "../../src/types";
 import { mkAlgobEnv } from "../helpers/params";
+import { expectBuilderError } from "../helpers/errors";
+import { ERRORS } from "../../src/internal/core/errors-list";
 
 function cleanupMutableData (netCheckpoint: ScriptNetCheckpoint, n: number): ScriptNetCheckpoint {
   assert.isNotNull(netCheckpoint.timestamp);
@@ -96,7 +98,9 @@ describe("Checkpoint", () => {
       key: "data",
       key3: "data3"
     }), 34251);
-    const checkpoint = cpData.appendToCheckpoint("network12345", netCheckpoint);
+    registerASA(netCheckpoint, "asa1", "123")
+    registerASC(netCheckpoint, "asc1", "536")
+    cpData.appendToCheckpoint("network12345", netCheckpoint);
     assert.deepEqual(cpData.checkpoints, {
       network12345: {
         timestamp: 34251,
@@ -104,14 +108,14 @@ describe("Checkpoint", () => {
           key: "data",
           key3: "data3"
         },
-        asa: {},
-        asc: {}
+        asa: {"asa1": {creator: "123"}},
+        asc: {"asc1": {creator: "536"}}
       }
     });
-    const netCheckpoint2: ScriptNetCheckpoint = cleanupMutableData(new ScriptNetCheckpointImpl({
+    const netCheckpoint2: ScriptNetCheckpoint = registerASA(cleanupMutableData(new ScriptNetCheckpointImpl({
       key: "updated data",
       key2: "data2"
-    }), 125154251);
+    }), 125154251), "my asa 2", "creator");
     const checkpoint2 = cpData.appendToCheckpoint("network12345", netCheckpoint2);
     assert.deepEqual(cpData.checkpoints, {
       network12345: {
@@ -121,10 +125,45 @@ describe("Checkpoint", () => {
           key2: "data2",
           key3: "data3"
         },
-        asa: {},
-        asc: {}
+        asa: {"asa1": {creator: "123"},
+              "my asa 2": {creator: "creator"}},
+        asc: {"asc1": {creator: "536"}}
       }
     });
+  });
+
+  it("Should crash if duplicate asa or asc name is detected", async () => {
+    const cpData = new CheckpointDataImpl();
+    const cp1: ScriptNetCheckpoint = cleanupMutableData(new ScriptNetCheckpointImpl({
+      key: "data",
+      key3: "data3"
+    }), 34251);
+    registerASA(cp1, "asa1", "123")
+    cpData.appendToCheckpoint("network12345", cp1)
+    const cp2: ScriptNetCheckpoint = cleanupMutableData(new ScriptNetCheckpointImpl(), 53521);
+    registerASA(cp2, "asa1", "36506")
+    expectBuilderError(
+      () => cpData.appendToCheckpoint("network12345", cp2),
+      ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
+      "asa1"
+    )
+  });
+
+  it("Should crash if duplicate ASC name is detected", async () => {
+    const cpData = new CheckpointDataImpl();
+    const cp1: ScriptNetCheckpoint = cleanupMutableData(new ScriptNetCheckpointImpl({
+      key: "data",
+      key3: "data3"
+    }), 34251);
+    registerASC(cp1, "asc1", "123")
+    cpData.appendToCheckpoint("network12345", cp1)
+    const cp2: ScriptNetCheckpoint = cleanupMutableData(new ScriptNetCheckpointImpl(), 53521);
+    registerASC(cp2, "asc1", "36506")
+    expectBuilderError(
+      () => cpData.appendToCheckpoint("network12345", cp2),
+      ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
+      "asc1"
+    )
   });
 
   it("Should produce a checkpoint file name from script name", async () => {

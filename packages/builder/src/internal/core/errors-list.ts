@@ -517,6 +517,16 @@ Deployer data editing only allowed during 'deploy'.
 Use 'deployer.isDeploy' to check if editing is allowed.
 `
     },
+    CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION: {
+      number: 606,
+      message: "Encountered a duplicate asset definition: %assetName%",
+      title: "Encountered a duplicate asset definition",
+      description: `Encountered a duplicate asset definition: %assetName%.
+Deploy script tried to create asset %assetName% again..
+
+Use 'deployer.isDeploy' to check if editing is allowed.
+`
+    }
   },
   PLUGINS: {
     NOT_INSTALLED: {
