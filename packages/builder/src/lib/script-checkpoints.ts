@@ -102,16 +102,6 @@ export class CheckpointDataImpl implements CheckpointData {
     return this
   }
 
-  //appendEnv (runtimeEnv: AlgobRuntimeEnv): CheckpointData {
-  //  this.visibleCP = appendToCheckpoint(
-  //    this.visibleCP, runtimeEnv.network.name, new ScriptNetCheckpointImpl());
-  //  this.globalCP = appendToCheckpoint(
-  //    this.globalCP, runtimeEnv.network.name, new ScriptNetCheckpointImpl());
-  //  this.strippedCP = appendToCheckpoint(
-  //    this.strippedCP, runtimeEnv.network.name, new ScriptNetCheckpointImpl());
-  //  return this
-  //}
-
   private _ensureNet(cp: ScriptCheckpoints, networkName: string): ScriptNetCheckpoint {
     if (!cp[networkName]) {
       cp[networkName] = new ScriptNetCheckpointImpl()
@@ -143,6 +133,12 @@ export class CheckpointDataImpl implements CheckpointData {
     registerASC(this._ensureNet(this.strippedCP, networkName), name, creator)
     registerASC(this._ensureNet(this.globalCP, networkName), name, creator)
     return this
+	}
+
+	isAssetDefined(networkName: string, name: string): boolean {
+    const netCP = this.globalCP[networkName]
+    return netCP !== undefined
+      && (netCP.asa[name] !== undefined || netCP.asc[name] !== undefined)
 	}
 }
 
@@ -195,10 +191,6 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     return this.cpData.getMetadata(this.networkName, key)
   }
 
-  containsAsset (name: string): boolean {
-    return false;
-  }
-
   async deployASA (name: string, source: string, account: string): Promise<ASAInfo> {
     this.cpData.registerASA(this.networkName, name, account + "-get-address")
     return this.cpData.visibleCP[this.networkName].asa[name]
@@ -208,6 +200,11 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     this.cpData.registerASC(this.networkName, name, account + "-get-address")
     return this.cpData.visibleCP[this.networkName].asc[name]
   }
+
+	isAssetDefined(name: string): boolean {
+    return this.cpData.isAssetDefined(this.networkName, name)
+	}
+
 }
 
 export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
@@ -247,7 +244,7 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
     });
   }
 
-  containsAsset (name: string): boolean {
-    return this._internal.containsAsset(name);
-  }
+	isAssetDefined(name: string): boolean {
+    return this._internal.isAssetDefined(name)
+	}
 }

@@ -556,6 +556,19 @@ describe("CheckpointDataImpl", () => {
 
   });
 
+  it("isAssetDefined should return true regardless of the asset type", () => {
+    const cpData = new CheckpointDataImpl()
+    assert.isFalse(cpData.isAssetDefined("network1", "ASA name"))
+    assert.isFalse(cpData.isAssetDefined("network1", "ASC name"))
+    cpData.registerASA("network1", "ASA name", "ASA creator 123")
+      .registerASC("network1", "ASC name", "ASC creator 951")
+    assert.isTrue(cpData.isAssetDefined("network1", "ASA name"))
+    assert.isTrue(cpData.isAssetDefined("network1", "ASC name"))
+    assert.isFalse(cpData.isAssetDefined("network1", "other name"))
+    assert.isFalse(cpData.isAssetDefined("other network", "ASA name"))
+    assert.isFalse(cpData.isAssetDefined("other network", "ASC name"))
+  })
+
 })
 
 describe("AlgobDeployer", () => {
@@ -673,6 +686,18 @@ describe("AlgobDeployer", () => {
         "timestamp": 515236
       }
     });
+  });
+
+  it("Should use getMetadata and isAssetDefined from CheckpointData", async () => {
+    const networkName = "network1"
+    const env = mkAlgobEnv(networkName)
+    const cpData = new CheckpointDataImpl()
+      .registerASA(networkName, "ASA name", "ASA creator 123")
+      .registerASC(networkName, "ASC name", "ASC creator 951")
+      .putMetadata(networkName, "k", "v")
+    const deployer = new AlgobDeployerImpl(env, cpData);
+    assert.isTrue(deployer.isAssetDefined("ASC name"))
+    assert.equal(deployer.getMetadata("k"), "v")
   });
 });
 

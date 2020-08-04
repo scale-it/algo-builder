@@ -300,6 +300,8 @@ export interface CheckpointData {
 
   registerASA(networkName: string, name: string, creator: string): CheckpointData
   registerASC(networkName: string, name: string, creator: string): CheckpointData
+
+  isAssetDefined (networkName: string, name: string): boolean
 };
 
 export interface ScriptCheckpoints {
@@ -315,12 +317,12 @@ export interface ScriptNetCheckpoint {
 
 export interface AlgobDeployer {
   isWriteable: boolean
-  accounts: NetworkAccounts | undefined
-  putMetadata: (key: string, value: string) => void
-  getMetadata: (key: string) => string | undefined
-  deployASA: (name: string, source: string, account: string) => Promise<ASAInfo>
-  deployASC: (name: string, source: string, account: string) => Promise<ASCInfo>
-  containsAsset: (name: string) => boolean
+  accounts: AccountDef[] | undefined
+  putMetadata (key: string, value: string): void
+  getMetadata (key: string): string | undefined
+  deployASA (name: string, source: string, account: string): Promise<ASAInfo>
+  deployASC(name: string, source: string, account: string): Promise<ASCInfo>
+  isAssetDefined (name: string): boolean
 }
 
 // ************************
