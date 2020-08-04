@@ -301,7 +301,7 @@ export interface CheckpointData {
   registerASA(networkName: string, name: string, creator: string): CheckpointData
   registerASC(networkName: string, name: string, creator: string): CheckpointData
 
-  isAssetDefined (networkName: string, name: string): boolean
+  isDefined (networkName: string, name: string): boolean
 };
 
 export interface ScriptCheckpoints {
@@ -322,7 +322,12 @@ export interface AlgobDeployer {
   getMetadata (key: string): string | undefined
   deployASA (name: string, source: string, account: string): Promise<ASAInfo>
   deployASC(name: string, source: string, account: string): Promise<ASCInfo>
-  isAssetDefined (name: string): boolean
+  /**
+    Returns true if ASA or ACS were deployed in any script.
+    Checks even for checkpoints out of from the execution
+    session which are not obtainable using get methods.
+  */
+  isDefined (name: string): boolean
 }
 
 // ************************

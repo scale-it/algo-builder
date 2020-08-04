@@ -12,7 +12,8 @@ import {
   CheckpointDataImpl,
   loadCheckpoint,
   persistCheckpoint,
-  scriptsDirectory
+  scriptsDirectory,
+  loadCheckpointsRecursive
 } from "../lib/script-checkpoints";
 import { AlgobDeployer, AlgobRuntimeEnv, CheckpointData, ScriptCheckpoints } from "../types";
 import { TASK_RUN } from "./task-names";
@@ -34,7 +35,7 @@ export async function runMultipleScripts (
   wrapDeployer: (orig: AlgobDeployer) => AlgobDeployer): Promise<void> {
 
   const log = debug(logTag);
-  const cpData: CheckpointData = new CheckpointDataImpl();
+  const cpData: CheckpointData = loadCheckpointsRecursive();
   const deployer: AlgobDeployer = wrapDeployer(new AlgobDeployerImpl(runtimeEnv, cpData));
 
   for (let i = 0; i < scriptNames.length; i++) {
@@ -46,7 +47,6 @@ export async function runMultipleScripts (
     }
     log(`Running script ${relativeScriptPath}`);
     cpData.merge(currentCP);
-    cpData.mergeToGlobal(currentCP);
     await runScript(
       relativeScriptPath,
       runtimeEnv,

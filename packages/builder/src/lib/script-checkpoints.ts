@@ -19,9 +19,10 @@ import {
 
 export const scriptsDirectory = "scripts";
 const artifactsPath = "artifacts";
+const checkpointFileSuffix = ".cp.yaml";
 
 export function toCheckpointFileName (scriptName: string): string {
-  return path.join(artifactsPath, scriptName + ".cp.yaml");
+  return path.join(artifactsPath, scriptName + checkpointFileSuffix);
 }
 
 export function registerASA (
@@ -135,7 +136,7 @@ export class CheckpointDataImpl implements CheckpointData {
     return this
 	}
 
-	isAssetDefined(networkName: string, name: string): boolean {
+	isDefined(networkName: string, name: string): boolean {
     const netCP = this.globalCP[networkName]
     return netCP !== undefined
       && (netCP.asa[name] !== undefined || netCP.asc[name] !== undefined)
@@ -145,21 +146,56 @@ export class CheckpointDataImpl implements CheckpointData {
 export function persistCheckpoint (scriptName: string, checkpoint: ScriptCheckpoints): void {
   const scriptPath = toCheckpointFileName(scriptName);
   const scriptDir = path.dirname(scriptPath);
-  if (!fs.existsSync(scriptDir)) {
-    fs.mkdirSync(scriptDir, { recursive: true });
-  }
+  fs.mkdirSync(scriptDir, { recursive: true });
   fs.writeFileSync(
     scriptPath,
     YAML.stringify(checkpoint)
   );
 }
 
-export function loadCheckpoint (scriptName: string): ScriptCheckpoints {
-  const checkpointPath = toCheckpointFileName(scriptName);
-  if (!fs.existsSync(checkpointPath)) {
+export function loadCheckpointNoSuffix (checkpointPath: string): ScriptCheckpoints {
+  // Try-catch is the way:
+  // https://nodejs.org/docs/latest/api/fs.html#fs_fs_stat_path_options_callback
+  // Instead, user code should open/read/write the file directly and
+  // handle the error raised if the file is not available
+  try {
+    return YAML.parse(fs.readFileSync(checkpointPath).toString());
+  } catch (e) {
     return {};
   }
-  return YAML.parse(fs.readFileSync(checkpointPath).toString());
+}
+
+export function loadCheckpoint (scriptName: string): ScriptCheckpoints {
+  return loadCheckpointNoSuffix(toCheckpointFileName(scriptName))
+}
+
+function walk (directoryName: string): string[] {
+  var list: string[] = []
+  fs.readdirSync(directoryName).forEach(file => {
+    var fullPath = path.join(directoryName, file);
+    const f = fs.statSync(fullPath);
+    if (f.isDirectory()) {
+      list = list.concat(walk(fullPath));
+    } else {
+      list.push(fullPath)
+    }
+  });
+  return list
+};
+
+function findCheckpointsRecursive(): string[] {
+  const checkpointsPath = path.join(".", artifactsPath, scriptsDirectory)
+  fs.mkdirSync(checkpointsPath, { recursive: true });
+  return walk(checkpointsPath)
+    .filter(filename => filename.endsWith(checkpointFileSuffix))
+}
+
+export function loadCheckpointsRecursive (): CheckpointData {
+  return findCheckpointsRecursive().reduce(
+    (out: CheckpointData, filename: string) => {
+      return out.mergeToGlobal(loadCheckpointNoSuffix(filename))
+    },
+    new CheckpointDataImpl())
 }
 
 export class AlgobDeployerImpl implements AlgobDeployer {
@@ -201,8 +237,8 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     return this.cpData.visibleCP[this.networkName].asc[name]
   }
 
-	isAssetDefined(name: string): boolean {
-    return this.cpData.isAssetDefined(this.networkName, name)
+	isDefined(name: string): boolean {
+    return this.cpData.isDefined(this.networkName, name)
 	}
 
 }
@@ -244,7 +280,7 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
     });
   }
 
-	isAssetDefined(name: string): boolean {
-    return this._internal.isAssetDefined(name)
+	isDefined(name: string): boolean {
+    return this._internal.isDefined(name)
 	}
 }
