@@ -275,14 +275,11 @@ export interface LinkReferences {
   }
 }
 
-export interface AssetScriptInfo {
-  deployerScript: string
-}
-
 type AccountAddress = string;
 
 export interface DeployedAssetInfo {
   creator: AccountAddress
+  // nice to have: Deployment script name
 }
 
 export interface ASAInfo extends DeployedAssetInfo {
@@ -290,18 +287,19 @@ export interface ASAInfo extends DeployedAssetInfo {
 export interface ASCInfo extends DeployedAssetInfo {
 }
 
-export type DeployedASAInfo = ASAInfo & AssetScriptInfo;
-export type DeployedASCInfo = ASCInfo & AssetScriptInfo;
-
 export interface CheckpointData {
-  checkpoints: ScriptCheckpoints
+  visibleCP: ScriptCheckpoints
+  strippedCP: ScriptCheckpoints
+  globalCP: ScriptCheckpoints
 
-  deployedASA: {[assetName: string]: DeployedASAInfo}
-  deployedASC: {[assetName: string]: DeployedASCInfo}
+  merge(curr: ScriptCheckpoints): CheckpointData
+  mergeToGlobal(curr: ScriptCheckpoints): CheckpointData
 
-  appendToCheckpoint: (networkName: string, append: ScriptNetCheckpoint) => CheckpointData
-  mergeCheckpoints: (curr: ScriptCheckpoints) => CheckpointData
-  appendEnv: (runtimeEnv: AlgobRuntimeEnv) => CheckpointData
+  putMetadata (networkName: string, key: string, value: string): CheckpointData
+  getMetadata (networkName: string, key: string): string | undefined
+
+  registerASA(networkName: string, name: string, creator: string): CheckpointData
+  registerASC(networkName: string, name: string, creator: string): CheckpointData
 };
 
 export interface ScriptCheckpoints {

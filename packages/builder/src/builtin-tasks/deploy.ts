@@ -54,7 +54,7 @@ async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntim
     runtimeEnv,
     scriptNames,
     (cpData: CheckpointData, relativeScriptPath: string) => {
-      persistCheckpoint(relativeScriptPath, cpData.checkpoints);
+      persistCheckpoint(relativeScriptPath, cpData.strippedCP);
     },
     force,
     debugTag,

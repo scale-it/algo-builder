@@ -32,9 +32,11 @@ export async function runMultipleScripts (
   force: boolean,
   logTag: string,
   wrapDeployer: (orig: AlgobDeployer) => AlgobDeployer): Promise<void> {
+
   const log = debug(logTag);
   const cpData: CheckpointData = new CheckpointDataImpl();
   const deployer: AlgobDeployer = wrapDeployer(new AlgobDeployerImpl(runtimeEnv, cpData));
+
   for (let i = 0; i < scriptNames.length; i++) {
     const relativeScriptPath = scriptNames[i];
     const currentCP: ScriptCheckpoints = loadCheckpoint(relativeScriptPath);
@@ -43,7 +45,8 @@ export async function runMultipleScripts (
       return;
     }
     log(`Running script ${relativeScriptPath}`);
-    cpData.mergeCheckpoints(currentCP);
+    cpData.merge(currentCP);
+    cpData.mergeToGlobal(currentCP);
     await runScript(
       relativeScriptPath,
       runtimeEnv,

@@ -28,14 +28,19 @@ scripts directory: script 2 executed
 `);
   });
 
-  it("Should persist Deployer's metadata from all tasks", async function () {
+  it("Should persist Deployer's metadata from all tasks in separate checkpoints", async function () {
     await this.env.run(TASK_DEPLOY, { noCompile: true });
-    const persistedSnapshot = loadCheckpoint("./scripts/2.js");
-    assert.deepEqual(persistedSnapshot.default.metadata, {
+    const snapshot1 = loadCheckpoint("./scripts/1.js");
+    assert.deepEqual(snapshot1.default.metadata, {
       "script 1 key": "script 1 value",
+    });
+    assert.isAtMost(snapshot1.default.timestamp, +new Date());
+    const snapshot2 = loadCheckpoint("./scripts/2.js");
+    assert.deepEqual(snapshot2.default.metadata, {
       "script 2 key": "script 2 value"
     });
-    assert.isAtMost(persistedSnapshot.default.timestamp, +new Date());
+    assert.isAtMost(snapshot2.default.timestamp, +new Date());
+    assert.isAtMost(snapshot1.default.timestamp, snapshot2.default.timestamp);
   });
 
   it("Should allow to specify scripts, preserving order", async function () {

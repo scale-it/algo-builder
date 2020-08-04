@@ -9,9 +9,10 @@ import {
   ScriptNetCheckpointImpl,
   toCheckpointFileName,
   registerASA,
-  registerASC
+  registerASC,
+  appendToCheckpoint
 } from "../../src/lib/script-checkpoints";
-import { ScriptCheckpoints, ScriptNetCheckpoint } from "../../src/types";
+import { ScriptCheckpoints, ScriptNetCheckpoint, CheckpointData } from "../../src/types";
 import { mkAlgobEnv } from "../helpers/params";
 import { expectBuilderError } from "../helpers/errors";
 import { ERRORS } from "../../src/internal/core/errors-list";
@@ -39,9 +40,9 @@ describe("Checkpoint", () => {
   });
 
   it("Should append to a checkpoint map", async () => {
-    const cpData = new CheckpointDataImpl();
+    const checkpoints: ScriptCheckpoints = {};
     const netCheckpoint: ScriptNetCheckpoint = cleanupMutableData(new ScriptNetCheckpointImpl(), 34251);
-    const checkpoint = cpData.appendToCheckpoint("network213", netCheckpoint).checkpoints;
+    const checkpoint = appendToCheckpoint(checkpoints, "network213", netCheckpoint);
     assert.deepEqual(checkpoint, {
       network213: {
         timestamp: 34251,
@@ -51,8 +52,8 @@ describe("Checkpoint", () => {
       }
     });
     const netCheckpoint2: ScriptNetCheckpoint = cleanupMutableData(new ScriptNetCheckpointImpl(), 539);
-    const checkpoint2 = cpData.appendToCheckpoint("network5352", netCheckpoint2);
-    assert.deepEqual(cpData.checkpoints, {
+    const checkpoint2 = appendToCheckpoint(checkpoints, "network5352", netCheckpoint2);
+    assert.deepEqual(checkpoints, {
       network213: {
         timestamp: 34251,
         metadata: {},
@@ -69,10 +70,10 @@ describe("Checkpoint", () => {
   });
 
   it("Should replace in checkpoint map", async () => {
-    const cpData = new CheckpointDataImpl();
+    const checkpoints: ScriptCheckpoints = {};
     const netCheckpoint: ScriptNetCheckpoint = cleanupMutableData(new ScriptNetCheckpointImpl(), 34251);
-    const checkpoint = cpData.appendToCheckpoint("network525", netCheckpoint);
-    assert.deepEqual(cpData.checkpoints, {
+    const checkpoint = appendToCheckpoint(checkpoints, "network525", netCheckpoint);
+    assert.deepEqual(checkpoints, {
       network525: {
         timestamp: 34251,
         metadata: {},
@@ -81,8 +82,8 @@ describe("Checkpoint", () => {
       }
     });
     const netCheckpoint2: ScriptNetCheckpoint = cleanupMutableData(new ScriptNetCheckpointImpl(), 539);
-    const checkpoint2 = cpData.appendToCheckpoint("network525", netCheckpoint2);
-    assert.deepEqual(cpData.checkpoints, {
+    const checkpoint2 = appendToCheckpoint(checkpoints, "network525", netCheckpoint2);
+    assert.deepEqual(checkpoints, {
       network525: {
         timestamp: 539,
         metadata: {},
@@ -93,15 +94,15 @@ describe("Checkpoint", () => {
   });
 
   it("Should merge metadata maps", async () => {
-    const cpData = new CheckpointDataImpl();
+    const checkpoints: ScriptCheckpoints = {};
     const netCheckpoint: ScriptNetCheckpoint = cleanupMutableData(new ScriptNetCheckpointImpl({
       key: "data",
       key3: "data3"
     }), 34251);
     registerASA(netCheckpoint, "asa1", "123")
     registerASC(netCheckpoint, "asc1", "536")
-    cpData.appendToCheckpoint("network12345", netCheckpoint);
-    assert.deepEqual(cpData.checkpoints, {
+    appendToCheckpoint(checkpoints, "network12345", netCheckpoint);
+    assert.deepEqual(checkpoints, {
       network12345: {
         timestamp: 34251,
         metadata: {
@@ -116,8 +117,8 @@ describe("Checkpoint", () => {
       key: "updated data",
       key2: "data2"
     }), 125154251), "my asa 2", "creator");
-    const checkpoint2 = cpData.appendToCheckpoint("network12345", netCheckpoint2);
-    assert.deepEqual(cpData.checkpoints, {
+    const checkpoint2 = appendToCheckpoint(checkpoints, "network12345", netCheckpoint2);
+    assert.deepEqual(checkpoints, {
       network12345: {
         timestamp: 125154251,
         metadata: {
@@ -133,34 +134,34 @@ describe("Checkpoint", () => {
   });
 
   it("Should crash if duplicate asa or asc name is detected", async () => {
-    const cpData = new CheckpointDataImpl();
+    const checkpoints: ScriptCheckpoints = {};
     const cp1: ScriptNetCheckpoint = cleanupMutableData(new ScriptNetCheckpointImpl({
       key: "data",
       key3: "data3"
     }), 34251);
     registerASA(cp1, "asa1", "123")
-    cpData.appendToCheckpoint("network12345", cp1)
+    appendToCheckpoint(checkpoints, "network12345", cp1)
     const cp2: ScriptNetCheckpoint = cleanupMutableData(new ScriptNetCheckpointImpl(), 53521);
     registerASA(cp2, "asa1", "36506")
     expectBuilderError(
-      () => cpData.appendToCheckpoint("network12345", cp2),
+      () => appendToCheckpoint(checkpoints, "network12345", cp2),
       ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
       "asa1"
     )
   });
 
   it("Should crash if duplicate ASC name is detected", async () => {
-    const cpData = new CheckpointDataImpl();
+    const checkpoints: ScriptCheckpoints = {};
     const cp1: ScriptNetCheckpoint = cleanupMutableData(new ScriptNetCheckpointImpl({
       key: "data",
       key3: "data3"
     }), 34251);
     registerASC(cp1, "asc1", "123")
-    cpData.appendToCheckpoint("network12345", cp1)
+    appendToCheckpoint(checkpoints, "network12345", cp1)
     const cp2: ScriptNetCheckpoint = cleanupMutableData(new ScriptNetCheckpointImpl(), 53521);
     registerASC(cp2, "asc1", "36506")
     expectBuilderError(
-      () => cpData.appendToCheckpoint("network12345", cp2),
+      () => appendToCheckpoint(checkpoints, "network12345", cp2),
       ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
       "asc1"
     )
@@ -171,116 +172,10 @@ describe("Checkpoint", () => {
     assert.equal(checkpointFileName, "artifacts/script-1.js.cp.yaml");
   });
 
-  it("Should capture config", async () => {
-    const cp = new CheckpointDataImpl().appendEnv(mkAlgobEnv("myNetworkName")).checkpoints;
-    assert.isNotNull(cp.myNetworkName);
-    cp.myNetworkName = cleanupMutableData(cp.myNetworkName, 951);
-    assert.deepEqual(cp, {
-      myNetworkName: {
-        timestamp: 951,
-        metadata: {},
-        asa: {},
-        asc: {}
-      }
-    });
-  });
-
-  it("Should capture config two calls", async () => {
-    const cpData = new CheckpointDataImpl();
-    const cp = cpData
-      .appendEnv(mkAlgobEnv("myNetworkName"))
-      .appendEnv(mkAlgobEnv("myNetworkName2"))
-      .checkpoints;
-    assert.isNotNull(cp.myNetworkName);
-    cp.myNetworkName = cleanupMutableData(cp.myNetworkName, 531);
-    cp.myNetworkName2 = cleanupMutableData(cp.myNetworkName2, 201);
-    assert.deepEqual(cp, {
-      myNetworkName: {
-        timestamp: 531,
-        metadata: {},
-        asa: {},
-        asc: {}
-      },
-      myNetworkName2: {
-        timestamp: 201,
-        metadata: {},
-        asa: {},
-        asc: {}
-      }
-    });
-  });
 
   it("Should default to empty cp if loading nonexistent file", async () => {
     const loadedCP = loadCheckpoint("nonexistent");
     assert.deepEqual(loadedCP, {});
-  });
-
-  it("Should merge checkpoints", async () => {
-    const cp1: ScriptCheckpoints = {
-      network1: {
-        timestamp: 1,
-        metadata: { "key 1": "data 1" },
-        asa: {},
-        asc: {}
-      }
-    };
-    const cp2: ScriptCheckpoints = {
-      network2: {
-        timestamp: 2,
-        metadata: { "key 2": "data 2" },
-        asa: {},
-        asc: {}
-      }
-    };
-    const cp = new CheckpointDataImpl()
-      .mergeCheckpoints(cp1)
-      .mergeCheckpoints(cp2)
-      .checkpoints;
-    assert.deepEqual(cp, {
-      network1: {
-        timestamp: 1,
-        metadata: { "key 1": "data 1" },
-        asa: {},
-        asc: {}
-      },
-      network2: {
-        timestamp: 2,
-        metadata: { "key 2": "data 2" },
-        asa: {},
-        asc: {}
-      }
-    });
-  });
-
-  it("Should deeply merge the checkpoints", async () => {
-    const cp1: ScriptCheckpoints = {
-      network1: {
-        timestamp: 1,
-        metadata: { "key 1": "data 1" },
-        asa: {},
-        asc: {}
-      }
-    };
-    const cp2: ScriptCheckpoints = {
-      network1: {
-        timestamp: 2,
-        metadata: {},
-        asa: {},
-        asc: {}
-      }
-    };
-    const cp = new CheckpointDataImpl()
-      .mergeCheckpoints(cp1)
-      .mergeCheckpoints(cp2)
-      .checkpoints;
-    assert.deepEqual(cp, {
-      network1: {
-        timestamp: 2,
-        metadata: { "key 1": "data 1" },
-        asa: {},
-        asc: {}
-      }
-    });
   });
 
   it("Should allow registration of an asset", async () => {
@@ -317,54 +212,389 @@ describe("Checkpoint with cleanup", () => {
   });
 
   it("Should persist and load the checkpoint", async () => {
-    const cpData = new CheckpointDataImpl();
-    const origCP = cpData
-      .appendToCheckpoint("network124", new ScriptNetCheckpointImpl())
-      .checkpoints;
+    const origCP = appendToCheckpoint({
+      "hi": {
+        timestamp: 123,
+        metadata: {},
+        asa: {},
+        asc: {}
+      }
+    }, "network124", new ScriptNetCheckpointImpl());
     persistCheckpoint("script-1.js", origCP);
     const loadedCP = loadCheckpoint("script-1.js");
     assert.deepEqual(loadedCP, origCP);
   });
+
+  it("Should persist empty checkpoint as empty file", async () => {
+    const cpData = new CheckpointDataImpl();
+    persistCheckpoint("script-1.js", {});
+    const loadedCP = loadCheckpoint("script-1.js");
+    assert.deepEqual(loadedCP, {});
+  });
 });
+
+describe("CheckpointDataImpl", () => {
+  it("Should allow to set metadata", async () => {
+    const cp = new CheckpointDataImpl()
+      .putMetadata("myNetworkName", "key", "data")
+      .visibleCP
+    assert.isNotNull(cp.myNetworkName);
+    cp.myNetworkName = cleanupMutableData(cp.myNetworkName, 951);
+    assert.deepEqual(cp, {
+      myNetworkName: {
+        timestamp: 951,
+        metadata: {"key": "data"},
+        asa: {},
+        asc: {}
+      }
+    });
+  });
+
+  it("Should allow to set metadata two networks", async () => {
+    const cpData = new CheckpointDataImpl();
+    const cp = cpData
+      .putMetadata("myNetworkName", "key", "data")
+      .putMetadata("myNetworkName2", "key2", "data2")
+      .visibleCP;
+    assert.isNotNull(cp.myNetworkName);
+    cp.myNetworkName = cleanupMutableData(cp.myNetworkName, 531);
+    cp.myNetworkName2 = cleanupMutableData(cp.myNetworkName2, 201);
+    assert.deepEqual(cp, {
+      myNetworkName: {
+        timestamp: 531,
+        metadata: {"key": "data"},
+        asa: {},
+        asc: {}
+      },
+      myNetworkName2: {
+        timestamp: 201,
+        metadata: {"key2": "data2"},
+        asa: {},
+        asc: {}
+      }
+    });
+  });
+
+  it("Should allow placing state; one network", () => {
+    const cpData = new CheckpointDataImpl()
+      .registerASA("network1", "ASA name", "ASA creator 123")
+      .putMetadata("network1", "metadata key", "metadata value")
+    cpData.visibleCP.network1.timestamp = 123
+    assert.deepEqual(cpData.visibleCP as ScriptCheckpoints, {
+      network1: {
+        timestamp: 123,
+        metadata: {"metadata key": "metadata value"},
+        asa: {"ASA name": { creator: "ASA creator 123" }},
+        asc: {}
+      }
+    });
+  })
+
+  it("Should allow placing state; two networks", () => {
+    const cpData = new CheckpointDataImpl()
+      .registerASC("network1", "ASC name", "ASC creator 951")
+      .putMetadata("net 0195", "1241 key", "345 value")
+    cpData.visibleCP.network1.timestamp = 123
+    cpData.visibleCP["net 0195"].timestamp = 123
+    assert.deepEqual(cpData.visibleCP as ScriptCheckpoints, {
+      network1: {
+        timestamp: 123,
+        metadata: {},
+        asa: {},
+        asc: {"ASC name": { creator: "ASC creator 951" }}
+      },
+      "net 0195": {
+        timestamp: 123,
+        metadata: {"1241 key": "345 value"},
+        asa: {},
+        asc: {}
+      }
+    });
+  })
+
+  it("Should merge checkpoints", async () => {
+    const cp1: ScriptCheckpoints = {
+      network1: {
+        timestamp: 1,
+        metadata: { "key 1": "data 1" },
+        asa: {},
+        asc: {}
+      }
+    };
+    const cp2: ScriptCheckpoints = {
+      network2: {
+        timestamp: 2,
+        metadata: { "key 2": "data 2" },
+        asa: {},
+        asc: {}
+      }
+    };
+    const cp = new CheckpointDataImpl()
+      .merge(cp1)
+      .merge(cp2)
+      .visibleCP;
+    assert.deepEqual(cp, {
+      network1: {
+        timestamp: 1,
+        metadata: { "key 1": "data 1" },
+        asa: {},
+        asc: {}
+      },
+      network2: {
+        timestamp: 2,
+        metadata: { "key 2": "data 2" },
+        asa: {},
+        asc: {}
+      }
+    });
+  });
+
+  it("Should deeply merge the checkpoints", async () => {
+    const cp1: ScriptCheckpoints = {
+      network1: {
+        timestamp: 1,
+        metadata: { "key 1": "data 1" },
+        asa: {},
+        asc: {}
+      }
+    };
+    const cp2: ScriptCheckpoints = {
+      network1: {
+        timestamp: 2,
+        metadata: {},
+        asa: { "asa key": { creator : "asa creator" } },
+        asc: {}
+      }
+    };
+    const cpData = new CheckpointDataImpl()
+      .merge(cp1)
+      .merge(cp2)
+    cpData.visibleCP.network1.timestamp = 124
+    cpData.strippedCP.network1.timestamp = 124
+    cpData.globalCP.network1.timestamp = 124
+    assert.deepEqual(cpData.visibleCP, {
+      network1: {
+        timestamp: 124,
+        metadata: { "key 1": "data 1" },
+        asa: { "asa key": { creator : "asa creator" } },
+        asc: {}
+      }
+    });
+    assert.deepEqual(cpData.strippedCP, {
+      network1: {
+        timestamp: 124,
+        metadata: {},
+        asa: { "asa key": { creator : "asa creator" } },
+        asc: {}
+      }
+    });
+    assert.deepEqual(cpData.globalCP, {
+      network1: {
+        timestamp: 124,
+        metadata: { "key 1": "data 1" },
+        asa: { "asa key": { creator : "asa creator" } },
+        asc: {}
+      }
+    });
+  });
+
+  it("Should deeply merge global checkpoints", async () => {
+    const cp1: ScriptCheckpoints = {
+      network1: {
+        timestamp: 1,
+        metadata: { "key 1": "data 1" },
+        asa: {},
+        asc: { "ASA key": { creator : "ASA creator" } }
+      }
+    };
+    const cp2: ScriptCheckpoints = {
+      network1: {
+        timestamp: 2,
+        metadata: {},
+        asa: {},
+        asc: {}
+      }
+    };
+    const cp3: ScriptCheckpoints = {
+      network1: {
+        timestamp: 8,
+        metadata: {},
+        asa: {},
+        asc: {"ASC key": { creator : "ASC creator" }}
+      }
+    };
+    const cpData = new CheckpointDataImpl()
+      .mergeToGlobal(cp1)
+      .mergeToGlobal(cp2)
+      .merge(cp3)
+    assert.deepEqual(cpData.globalCP, {
+      network1: {
+        timestamp: 8,
+        metadata: { "key 1": "data 1" },
+        asa: {},
+        asc: {
+          "ASA key": { creator : "ASA creator" },
+          "ASC key": { creator : "ASC creator" }
+        }
+      }
+    });
+    cpData.visibleCP.network1.timestamp = 124
+    assert.deepEqual(cpData.visibleCP, {
+      "network1": {
+        "asa": {},
+        "asc": {"ASC key": { creator : "ASC creator" }},
+        "metadata": {},
+        "timestamp": 124
+      }
+    });
+    cpData.strippedCP.network1.timestamp = 124
+    assert.deepEqual(cpData.strippedCP, {
+      "network1": {
+        "asa": {},
+        "asc": {"ASC key": { creator : "ASC creator" }},
+        "metadata": {},
+        "timestamp": 124
+      }
+    });
+  });
+
+  describe("CheckpointDataImpl with sample data", () => {
+    const cp1: ScriptCheckpoints = {
+      network1: {
+        timestamp: 1,
+        metadata: { "key 1": "data 1" },
+        asa: {},
+        asc: {}
+      }
+    };
+    const cp2: ScriptCheckpoints = {
+      network4: {
+        timestamp: 4,
+        metadata: {"metadata 4 key": "metadata value"},
+        asa: {},
+        asc: {}
+      }
+    };
+    const cpData = new CheckpointDataImpl()
+      .merge(cp1)
+      .mergeToGlobal(cp2)
+      .putMetadata("network1", "metadata key", "metadata value")
+      .putMetadata("net 0195", "1241 key", "345 value")
+      .registerASA("network1", "ASA name", "ASA creator 123")
+      .registerASC("network1", "ASC name", "ASC creator 951")
+    cpData.globalCP.network1.timestamp = 1111
+    cpData.globalCP.network4.timestamp = 4
+    cpData.globalCP["net 0195"].timestamp = 195
+
+    cpData.visibleCP.network1.timestamp = 1111
+    assert.isUndefined(cpData.visibleCP.network4)
+    cpData.visibleCP["net 0195"].timestamp = 195
+
+    cpData.strippedCP.network1.timestamp = 1111
+    assert.isUndefined(cpData.strippedCP.network4)
+    cpData.strippedCP["net 0195"].timestamp = 195
+
+    it("Should contain factory methods for ASA anc ASC asset registration", () => {
+      assert.deepEqual(cpData.globalCP, {
+        network1: {
+          timestamp: 1111,
+          metadata: { "key 1": "data 1",
+                      "metadata key": "metadata value" },
+          asa: {"ASA name": { creator : "ASA creator 123" }},
+          asc: {"ASC name": { creator : "ASC creator 951" }}
+        },
+        network4: {
+          timestamp: 4,
+          metadata: {"metadata 4 key": "metadata value"},
+          asa: {},
+          asc: {}
+        },
+        "net 0195": {
+          timestamp: 195,
+          metadata: {"1241 key": "345 value"},
+          asa: {},
+          asc: {}
+        }
+      });
+      assert.deepEqual(cpData.visibleCP, {
+        network1: {
+          timestamp: 1111,
+          metadata: { "key 1": "data 1" ,
+                      "metadata key": "metadata value" },
+          asa: {"ASA name": { creator : "ASA creator 123" }},
+          asc: {"ASC name": { creator : "ASC creator 951" }}
+        },
+        "net 0195": {
+          timestamp: 195,
+          metadata: {"1241 key": "345 value"},
+          asa: {},
+          asc: {}
+        }
+      });
+      assert.deepEqual(cpData.strippedCP, {
+        network1: {
+          timestamp: 1111,
+          metadata: { "key 1": "data 1",
+                      "metadata key": "metadata value" },
+          asa: {"ASA name": { creator : "ASA creator 123" }},
+          asc: {"ASC name": { creator : "ASC creator 951" }}
+        },
+        "net 0195": {
+          timestamp: 195,
+          metadata: {"1241 key": "345 value"},
+          asa: {},
+          asc: {}
+        }
+      });
+    })
+
+    it("Should return metadata for specified network", () => {
+      assert.equal(cpData.getMetadata("network1", "hi"), undefined);
+      assert.equal(cpData.getMetadata("network1", "metadata key"), "metadata value");
+      assert.equal(cpData.getMetadata("network4", "metadata key"), undefined);
+    })
+
+  });
+
+})
 
 describe("AlgobDeployer", () => {
   it("Should ensure metadata existence for network", async () => {
-    const cpData = new CheckpointDataImpl();
+    const cpData = new CheckpointDataImpl().putMetadata("network 123", "k", "v");
     const deployer = new AlgobDeployerImpl(
       mkAlgobEnv("network 123"),
       cpData);
-    assert.deepEqual(cleanupMutableData(cpData.checkpoints["network 123"], 12345), {
+    assert.deepEqual(cleanupMutableData(cpData.visibleCP["network 123"], 12345), {
       timestamp: 12345,
-      metadata: {},
+      metadata: {"k": "v"},
       asa: {},
       asc: {}
     });
   });
 
   it("Should hold metadata of a network", async () => {
-    const deployer = new AlgobDeployerImpl(
-      mkAlgobEnv("network 123"),
-      new CheckpointDataImpl());
+    const env = mkAlgobEnv("network 123")
+    const deployer = new AlgobDeployerImpl(env, new CheckpointDataImpl());
     deployer.putMetadata("existent", "existent value");
     assert.isUndefined(deployer.getMetadata("nonexistent"));
     assert.equal(deployer.getMetadata("existent"), "existent value");
   });
 
   it("Should allow to override metadata of a network", async () => {
-    const deployer = new AlgobDeployerImpl(
-      mkAlgobEnv("network 123"),
-      new CheckpointDataImpl());
+    const env = mkAlgobEnv("network 123")
+    const deployer = new AlgobDeployerImpl(env, new CheckpointDataImpl());
     deployer.putMetadata("existent", "existent value");
     deployer.putMetadata("existent", "existent value 2");
     assert.equal(deployer.getMetadata("existent"), "existent value 2");
   });
 
   it("Should set given data into checkpoint with timestamp", async () => {
+    const env = mkAlgobEnv("network 123")
     const cpData = new CheckpointDataImpl();
-    const deployer = new AlgobDeployerImpl(mkAlgobEnv("network 123"), cpData);
+    const deployer = new AlgobDeployerImpl(env, cpData);
     deployer.putMetadata("key 1", "val 1");
     deployer.putMetadata("key 2", "val 2");
-    const cleanCP = cleanupMutableData(cpData.checkpoints["network 123"], 12345);
+    const cleanCP = cleanupMutableData(cpData.visibleCP["network 123"], 12345);
     assert.deepEqual(cleanCP, {
       timestamp: 12345,
       metadata: {
@@ -397,9 +627,9 @@ describe("AlgobDeployer", () => {
     const deployer = new AlgobDeployerImpl(
       mkAlgobEnv("network1"),
       cpData);
-    cpData.mergeCheckpoints(cp1);
-    cpData.mergeCheckpoints(cp2);
-    assert.deepEqual(cpData.checkpoints, {
+    cpData.merge(cp1);
+    cpData.merge(cp2);
+    assert.deepEqual(cpData.visibleCP, {
       network1: {
         timestamp: 1,
         metadata: { "key 1": "data 1" },
@@ -416,8 +646,9 @@ describe("AlgobDeployer", () => {
   });
 
   it("Should save info to checkpoint after asset deployment", async () => {
+    const env = mkAlgobEnv("network1")
     const cpData = new CheckpointDataImpl();
-    const deployer = new AlgobDeployerImpl(mkAlgobEnv("network1"), cpData);
+    const deployer = new AlgobDeployerImpl(env, cpData);
 
     const asaInfo = await deployer.deployASA("MY_ASA", "My brand new ASA", "addr-1")
     assert.deepEqual(asaInfo, { creator: "addr-1-get-address" });
@@ -425,8 +656,8 @@ describe("AlgobDeployer", () => {
     const ascInfo = await deployer.deployASC("MY_ASC", "My brand new ASC", "addr-2")
     assert.deepEqual(ascInfo, { creator: "addr-2-get-address" });
 
-    cpData.checkpoints["network1"].timestamp = 515236
-    assert.deepEqual(cpData.checkpoints, {
+    cpData.visibleCP["network1"].timestamp = 515236
+    assert.deepEqual(cpData.visibleCP, {
       "network1": {
         "asa": {
           "MY_ASA": {
