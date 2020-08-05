@@ -3,6 +3,7 @@ import * as fs from "fs";
 import path from "path";
 import { DeepReadonly } from "ts-essentials";
 import YAML from "yaml";
+import deepEqual from "deep-equal";
 
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
@@ -64,7 +65,8 @@ export function appendToCheckpoint (
   );
   const allAssetNames = Object.keys(append.asa).concat(Object.keys(append.asc))
   for (const assetName of allAssetNames) {
-    if (orig.asa[assetName] || orig.asc[assetName]) {
+    if ((orig.asa[assetName] && !deepEqual(orig.asa[assetName], append.asa[assetName]))
+      || (orig.asc[assetName] && !deepEqual(orig.asc[assetName], append.asc[assetName]))) {
       throw new BuilderError(
         ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
         { assetName: assetName });

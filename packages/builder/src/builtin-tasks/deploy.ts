@@ -14,7 +14,8 @@ import {
   CheckpointDataImpl,
   loadCheckpoint,
   persistCheckpoint,
-  scriptsDirectory
+  scriptsDirectory,
+  toCheckpointFileName
 } from "../lib/script-checkpoints";
 import { AlgobDeployer, AlgobRuntimeEnv, CheckpointData, ScriptCheckpoints } from "../types";
 import { runMultipleScripts } from "./run";
@@ -36,6 +37,16 @@ export function loadFilenames (directory: string): string[] {
   return files.sort(cmpStr);
 }
 
+function clearCheckpointFiles(scriptNames: string[]) {
+  for (const scriptName of scriptNames) {
+    try {
+      fs.unlinkSync(toCheckpointFileName(scriptName))
+    } catch (e) {
+      // ignored
+    }
+  }
+}
+
 async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntimeEnv): Promise<void> {
   const debugTag = "builder:core:tasks:deploy";
   const log = debug(debugTag);
@@ -48,6 +59,10 @@ async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntim
     throw new BuilderError(ERRORS.BUILTIN_TASKS.SCRIPTS_NO_FILES_FOUND, {
       directory: scriptsDirectory
     });
+  }
+
+  if (force) {
+    clearCheckpointFiles(scriptNames)
   }
 
   return await runMultipleScripts(

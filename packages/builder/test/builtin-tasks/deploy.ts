@@ -4,7 +4,11 @@ import * as fs from "fs";
 import { loadFilenames } from "../../src/builtin-tasks/deploy";
 import { TASK_DEPLOY } from "../../src/builtin-tasks/task-names";
 import { ERRORS } from "../../src/internal/core/errors-list";
-import { loadCheckpoint, loadCheckpointsRecursive } from "../../src/lib/script-checkpoints";
+import {
+  loadCheckpoint,
+  loadCheckpointsRecursive,
+  toCheckpointFileName
+} from "../../src/lib/script-checkpoints";
 import { expectBuilderErrorAsync } from "../helpers/errors";
 import { testFixtureOutputFile, useCleanFixtureProject } from "../helpers/project";
 
@@ -128,6 +132,27 @@ ASC from second defined: false`);
     assert.equal(scriptOutputAfter, `ASA from first defined: true
 ASC from second defined: true`);
   });
+
+  it("Deployer --force should allow to rewrite existing assets 1", async function () {
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js"] });
+    await this.env.run(TASK_DEPLOY, {
+      fileNames: ["scripts/1.js", "scripts/nested/query.js"],
+      force: true });
+    const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
+    assert.equal(scriptOutputAfter, `ASA from first defined: true
+ASC from second defined: false`);
+  });
+
+  it("Deployer --force should allow to rewrite existing assets 2", async function () {
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js", "scripts/2.js"] });
+    await this.env.run(TASK_DEPLOY, {
+      fileNames: ["scripts/1.js", "scripts/2.js", "scripts/nested/query.js"],
+      force: true });
+    const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
+    assert.equal(scriptOutputAfter, `ASA from first defined: true
+ASC from second defined: true`);
+  });
+
 });
 
 describe("Deploy task: empty scripts dir", function () {
