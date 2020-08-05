@@ -14,7 +14,7 @@ import {
 } from "../../src/lib/script-checkpoints";
 import { ScriptCheckpoints, ScriptNetCheckpoint, CheckpointData } from "../../src/types";
 import { mkAlgobEnv } from "../helpers/params";
-import { expectBuilderError } from "../helpers/errors";
+import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { ERRORS } from "../../src/internal/core/errors-list";
 
 function cleanupMutableData (netCheckpoint: ScriptNetCheckpoint, n: number): ScriptNetCheckpoint {
@@ -571,7 +571,7 @@ describe("CheckpointDataImpl", () => {
 
 })
 
-describe("AlgobDeployer", () => {
+describe("AlgobDeployerImpl", () => {
   it("Should ensure metadata existence for network", async () => {
     const cpData = new CheckpointDataImpl().putMetadata("network 123", "k", "v");
     const deployer = new AlgobDeployerImpl(
@@ -591,14 +591,6 @@ describe("AlgobDeployer", () => {
     deployer.putMetadata("existent", "existent value");
     assert.isUndefined(deployer.getMetadata("nonexistent"));
     assert.equal(deployer.getMetadata("existent"), "existent value");
-  });
-
-  it("Should allow to override metadata of a network", async () => {
-    const env = mkAlgobEnv("network 123")
-    const deployer = new AlgobDeployerImpl(env, new CheckpointDataImpl());
-    deployer.putMetadata("existent", "existent value");
-    deployer.putMetadata("existent", "existent value 2");
-    assert.equal(deployer.getMetadata("existent"), "existent value 2");
   });
 
   it("Should set given data into checkpoint with timestamp", async () => {
@@ -699,6 +691,49 @@ describe("AlgobDeployer", () => {
     assert.isTrue(deployer.isDefined("ASC name"))
     assert.equal(deployer.getMetadata("k"), "v")
   });
+
+  it("Should ignore same metadata of the same network", async () => {
+    const env = mkAlgobEnv("network 123")
+    const deployer = new AlgobDeployerImpl(env, new CheckpointDataImpl());
+    deployer.putMetadata("existent", "existent value");
+    deployer.putMetadata("existent", "existent value");
+    assert.equal(deployer.getMetadata("existent"), "existent value");
+  });
+
+  it("Should crash when same metadata key is set second time & different value", async () => {
+    const cpData = new CheckpointDataImpl()
+    const deployer = new AlgobDeployerImpl(mkAlgobEnv("network 123"), cpData);
+    deployer.putMetadata("metadata_key", "orig_value");
+    expectBuilderError(
+      () => deployer.putMetadata("metadata_key", "new_value"),
+      ERRORS.BUILTIN_TASKS.DEPLOYER_METADATA_ALREADY_PRESENT,
+      "metadata_key"
+    )
+  });
+
+  it("Should crash when same ASA name is tried to deploy to second time", async () => {
+    const cpData = new CheckpointDataImpl()
+    const deployer = new AlgobDeployerImpl(mkAlgobEnv("network 123"), cpData);
+    deployer.deployASA("ASA_key", "orig_value", "deployer");
+    await expectBuilderErrorAsync(
+      async () => deployer.deployASA("ASA_key", "new_value", "deployer"),
+      ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT,
+      "ASA_key"
+    )
+  });
+
+  it("Should crash when same ASC name is tried to deploy to second time", async () => {
+    const cpData = new CheckpointDataImpl()
+    const deployer = new AlgobDeployerImpl(mkAlgobEnv("network 123"), cpData);
+    deployer.deployASC("ASC_key", "orig_value", "deployer");
+    await expectBuilderErrorAsync(
+      async () => deployer.deployASC("ASC_key", "new_value", "deployer"),
+      ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT,
+      "ASC_key"
+    )
+  });
+
+
 });
 
 //  LocalWords:  cp

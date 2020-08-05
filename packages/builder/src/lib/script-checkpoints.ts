@@ -198,6 +198,7 @@ export function loadCheckpointsRecursive (): CheckpointData {
     new CheckpointDataImpl())
 }
 
+// This class is what user interacts with in deploy task
 export class AlgobDeployerImpl implements AlgobDeployer {
   private readonly runtimeEnv: AlgobRuntimeEnv;
   private readonly cpData: CheckpointData;
@@ -207,7 +208,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     this.cpData = cpData;
   }
 
-  get accounts(): AccountDef[] | undefined {
+  get accounts(): AccountDef[] {
     return this.runtimeEnv.network.config.accounts;
   }
 
@@ -220,6 +221,15 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   }
 
   putMetadata (key: string, value: string): void {
+    if (this.cpData.getMetadata(this.networkName, key) === value) {
+      return
+    }
+    if (this.cpData.getMetadata(this.networkName, key)) {
+      throw new BuilderError(
+        ERRORS.BUILTIN_TASKS.DEPLOYER_METADATA_ALREADY_PRESENT, {
+          "metadataKey": key
+        })
+    }
     this.cpData.putMetadata(this.networkName, key, value)
   }
 
@@ -227,12 +237,23 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     return this.cpData.getMetadata(this.networkName, key)
   }
 
+  private assertNoAsset(name: string) {
+    if (this.isDefined(name)) {
+      throw new BuilderError(
+        ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT, {
+          "assetName": name
+        })
+    }
+  }
+
   async deployASA (name: string, source: string, account: string): Promise<ASAInfo> {
+    this.assertNoAsset(name)
     this.cpData.registerASA(this.networkName, name, account + "-get-address")
     return this.cpData.visibleCP[this.networkName].asa[name]
   }
 
   async deployASC (name: string, source: string, account: string): Promise<ASCInfo> {
+    this.assertNoAsset(name)
     this.cpData.registerASC(this.networkName, name, account + "-get-address")
     return this.cpData.visibleCP[this.networkName].asc[name]
   }
@@ -243,6 +264,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
 
 }
 
+// This class is what user interacts with in run task
 export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
   private readonly _internal: AlgobDeployer;
 

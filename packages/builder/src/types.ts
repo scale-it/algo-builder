@@ -326,8 +326,9 @@ export interface ScriptNetCheckpoint {
 };
 
 export interface AlgobDeployer {
+  // Allows user to know whether it's possible to mutate this instance
   isWriteable: boolean
-  accounts: AccountDef[] | undefined
+  accounts: AccountDef[]
   putMetadata (key: string, value: string): void
   getMetadata (key: string): string | undefined
   deployASA (name: string, source: string, account: string): Promise<ASAInfo>
