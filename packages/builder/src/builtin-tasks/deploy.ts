@@ -1,4 +1,3 @@
-import debug from "debug";
 import fs from "fs";
 import glob from "glob";
 import path from "path";
@@ -6,18 +5,14 @@ import path from "path";
 import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
-import { runScript } from "../internal/util/scripts-runner";
 import { cmpStr } from "../lib/comparators";
 import { checkRelativePaths } from "../lib/files";
 import {
-  AlgobDeployerImpl,
-  CheckpointDataImpl,
-  loadCheckpoint,
   persistCheckpoint,
   scriptsDirectory,
   toCheckpointFileName
 } from "../lib/script-checkpoints";
-import { AlgobDeployer, AlgobRuntimeEnv, CheckpointData, ScriptCheckpoints } from "../types";
+import { AlgobDeployer, AlgobRuntimeEnv, CheckpointData } from "../types";
 import { runMultipleScripts } from "./run";
 import { TASK_DEPLOY } from "./task-names";
 
@@ -37,10 +32,10 @@ export function loadFilenames (directory: string): string[] {
   return files.sort(cmpStr);
 }
 
-function clearCheckpointFiles(scriptNames: string[]) {
+function clearCheckpointFiles (scriptNames: string[]): void {
   for (const scriptName of scriptNames) {
     try {
-      fs.unlinkSync(toCheckpointFileName(scriptName))
+      fs.unlinkSync(toCheckpointFileName(scriptName));
     } catch (e) {
       // ignored
     }
@@ -48,8 +43,7 @@ function clearCheckpointFiles(scriptNames: string[]) {
 }
 
 async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntimeEnv): Promise<void> {
-  const debugTag = "builder:core:tasks:deploy";
-  const log = debug(debugTag);
+  const logDebugTag = "builder:core:tasks:deploy";
 
   const scriptNames = fileNames.length === 0
     ? loadFilenames(scriptsDirectory)
@@ -62,7 +56,7 @@ async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntim
   }
 
   if (force) {
-    clearCheckpointFiles(scriptNames)
+    clearCheckpointFiles(scriptNames);
   }
 
   return await runMultipleScripts(
@@ -72,7 +66,7 @@ async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntim
       persistCheckpoint(relativeScriptPath, cpData.strippedCP);
     },
     force,
-    debugTag,
+    logDebugTag,
     (orig: AlgobDeployer) => orig
   );
 }

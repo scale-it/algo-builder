@@ -9,10 +9,7 @@ import { checkRelativePaths } from "../lib/files";
 import {
   AlgobDeployerImpl,
   AlgobDeployerReadOnlyImpl,
-  CheckpointDataImpl,
   loadCheckpoint,
-  persistCheckpoint,
-  scriptsDirectory,
   loadCheckpointsRecursive
 } from "../lib/script-checkpoints";
 import { AlgobDeployer, AlgobRuntimeEnv, CheckpointData, ScriptCheckpoints } from "../types";
@@ -33,7 +30,6 @@ export async function runMultipleScripts (
   force: boolean,
   logTag: string,
   wrapDeployer: (orig: AlgobDeployer) => AlgobDeployer): Promise<void> {
-
   const log = debug(logTag);
   const cpData: CheckpointData = loadCheckpointsRecursive();
   const deployer: AlgobDeployer = wrapDeployer(new AlgobDeployerImpl(runtimeEnv, cpData));
@@ -60,8 +56,7 @@ async function doRun (
   { scripts }: Input,
   runtimeEnv: AlgobRuntimeEnv
 ): Promise<any> {
-  const debugTag = "builder:core:tasks:run";
-  const log = debug(debugTag);
+  const logDebugTag = "builder:core:tasks:run";
 
   const nonExistent = filterNonExistent(scripts);
   if (nonExistent.length !== 0) {
@@ -75,7 +70,7 @@ async function doRun (
     checkRelativePaths(scripts),
     (cpData: CheckpointData, relativeScriptPath: string) => {},
     true,
-    debugTag,
+    logDebugTag,
     (orig: AlgobDeployer) => new AlgobDeployerReadOnlyImpl(orig)
   );
 }

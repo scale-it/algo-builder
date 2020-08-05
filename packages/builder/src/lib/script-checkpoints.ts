@@ -1,19 +1,18 @@
 
+import deepEqual from "deep-equal";
 import * as fs from "fs";
 import path from "path";
-import { DeepReadonly } from "ts-essentials";
 import YAML from "yaml";
-import deepEqual from "deep-equal";
 
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import {
+  AccountDef,
   AlgobDeployer,
   AlgobRuntimeEnv,
   ASAInfo,
   ASCInfo,
   CheckpointData,
-  AccountDef,
   ScriptCheckpoints,
   ScriptNetCheckpoint
 } from "../types";
@@ -28,14 +27,14 @@ export function toCheckpointFileName (scriptName: string): string {
 
 export function registerASA (
   cp: ScriptNetCheckpoint, name: string, creator: string): ScriptNetCheckpoint {
-  cp.asa[name] = { creator: creator }
-  return cp
+  cp.asa[name] = { creator: creator };
+  return cp;
 }
 
 export function registerASC (
   cp: ScriptNetCheckpoint, name: string, creator: string): ScriptNetCheckpoint {
-  cp.asc[name] = { creator: creator }
-  return cp
+  cp.asc[name] = { creator: creator };
+  return cp;
 }
 
 export class ScriptNetCheckpointImpl implements ScriptNetCheckpoint {
@@ -54,7 +53,7 @@ export class ScriptNetCheckpointImpl implements ScriptNetCheckpoint {
 
 export function appendToCheckpoint (
   checkpoints: ScriptCheckpoints, networkName: string, append: ScriptNetCheckpoint): ScriptCheckpoints {
-  const orig = checkpoints[networkName]
+  const orig = checkpoints[networkName];
   if (!orig) {
     checkpoints[networkName] = Object.assign({}, append);
     return checkpoints;
@@ -63,10 +62,10 @@ export function appendToCheckpoint (
   orig.metadata = Object.assign(
     {}, orig.metadata, append.metadata
   );
-  const allAssetNames = Object.keys(append.asa).concat(Object.keys(append.asc))
+  const allAssetNames = Object.keys(append.asa).concat(Object.keys(append.asc));
   for (const assetName of allAssetNames) {
-    if ((orig.asa[assetName] && !deepEqual(orig.asa[assetName], append.asa[assetName]))
-      || (orig.asc[assetName] && !deepEqual(orig.asc[assetName], append.asc[assetName]))) {
+    if ((orig.asa[assetName] && !deepEqual(orig.asa[assetName], append.asa[assetName])) ||
+      (orig.asc[assetName] && !deepEqual(orig.asc[assetName], append.asc[assetName]))) {
       throw new BuilderError(
         ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
         { assetName: assetName });
@@ -82,11 +81,11 @@ export function appendToCheckpoint (
 }
 
 export class CheckpointDataImpl implements CheckpointData {
-	strippedCP: ScriptCheckpoints = {};
+  strippedCP: ScriptCheckpoints = {};
   visibleCP: ScriptCheckpoints = {};
-	globalCP: ScriptCheckpoints = {};
+  globalCP: ScriptCheckpoints = {};
 
-  private _mergeTo(target: ScriptCheckpoints, cp: ScriptCheckpoints) {
+  private _mergeTo (target: ScriptCheckpoints, cp: ScriptCheckpoints): ScriptCheckpoints {
     const keys: string[] = Object.keys(cp);
     return keys.reduce((out: ScriptCheckpoints, key: string) => {
       return appendToCheckpoint(out, key, cp[key]);
@@ -94,55 +93,57 @@ export class CheckpointDataImpl implements CheckpointData {
   }
 
   merge (cp: ScriptCheckpoints): CheckpointData {
-    this.strippedCP = cp
-    this.visibleCP = this._mergeTo(this.visibleCP, cp)
-    this.mergeToGlobal(cp)
-    return this
+    this.strippedCP = cp;
+    this.visibleCP = this._mergeTo(this.visibleCP, cp);
+    this.mergeToGlobal(cp);
+    return this;
   }
 
   mergeToGlobal (cp: ScriptCheckpoints): CheckpointData {
-    this.globalCP = this._mergeTo(this.globalCP, cp)
-    return this
+    this.globalCP = this._mergeTo(this.globalCP, cp);
+    return this;
   }
 
-  private _ensureNet(cp: ScriptCheckpoints, networkName: string): ScriptNetCheckpoint {
+  private _ensureNet (cp: ScriptCheckpoints, networkName: string): ScriptNetCheckpoint {
     if (!cp[networkName]) {
-      cp[networkName] = new ScriptNetCheckpointImpl()
+      cp[networkName] = new ScriptNetCheckpointImpl();
     }
-    return cp[networkName]
+    return cp[networkName];
   }
 
-	putMetadata(networkName: string, key: string, value: string): CheckpointData {
-    this._ensureNet(this.globalCP, networkName).metadata[key] = value
-    this._ensureNet(this.strippedCP, networkName).metadata[key] = value
-    this._ensureNet(this.visibleCP, networkName).metadata[key] = value
-    return this
-	}
-	getMetadata(networkName: string, key: string): string | undefined {
+  putMetadata (networkName: string, key: string, value: string): CheckpointData {
+    this._ensureNet(this.globalCP, networkName).metadata[key] = value;
+    this._ensureNet(this.strippedCP, networkName).metadata[key] = value;
+    this._ensureNet(this.visibleCP, networkName).metadata[key] = value;
+    return this;
+  }
+
+  getMetadata (networkName: string, key: string): string | undefined {
     if (this.visibleCP[networkName]) {
       return this.visibleCP[networkName].metadata[key];
     }
-    return
-	}
+    return undefined;
+  }
 
-	registerASA(networkName: string, name: string, creator: string): CheckpointData {
-    registerASA(this._ensureNet(this.visibleCP, networkName), name, creator)
-    registerASA(this._ensureNet(this.strippedCP, networkName), name, creator)
-    registerASA(this._ensureNet(this.globalCP, networkName), name, creator)
-    return this
-	}
-	registerASC(networkName: string, name: string, creator: string): CheckpointData {
-    registerASC(this._ensureNet(this.visibleCP, networkName), name, creator)
-    registerASC(this._ensureNet(this.strippedCP, networkName), name, creator)
-    registerASC(this._ensureNet(this.globalCP, networkName), name, creator)
-    return this
-	}
+  registerASA (networkName: string, name: string, creator: string): CheckpointData {
+    registerASA(this._ensureNet(this.visibleCP, networkName), name, creator);
+    registerASA(this._ensureNet(this.strippedCP, networkName), name, creator);
+    registerASA(this._ensureNet(this.globalCP, networkName), name, creator);
+    return this;
+  }
 
-	isDefined(networkName: string, name: string): boolean {
-    const netCP = this.globalCP[networkName]
-    return netCP !== undefined
-      && (netCP.asa[name] !== undefined || netCP.asc[name] !== undefined)
-	}
+  registerASC (networkName: string, name: string, creator: string): CheckpointData {
+    registerASC(this._ensureNet(this.visibleCP, networkName), name, creator);
+    registerASC(this._ensureNet(this.strippedCP, networkName), name, creator);
+    registerASC(this._ensureNet(this.globalCP, networkName), name, creator);
+    return this;
+  }
+
+  isDefined (networkName: string, name: string): boolean {
+    const netCP = this.globalCP[networkName];
+    return netCP !== undefined &&
+      (netCP.asa[name] !== undefined || netCP.asc[name] !== undefined);
+  }
 }
 
 export function persistCheckpoint (scriptName: string, checkpoint: ScriptCheckpoints): void {
@@ -168,36 +169,36 @@ export function loadCheckpointNoSuffix (checkpointPath: string): ScriptCheckpoin
 }
 
 export function loadCheckpoint (scriptName: string): ScriptCheckpoints {
-  return loadCheckpointNoSuffix(toCheckpointFileName(scriptName))
+  return loadCheckpointNoSuffix(toCheckpointFileName(scriptName));
 }
 
 function walk (directoryName: string): string[] {
-  var list: string[] = []
+  var list: string[] = [];
   fs.readdirSync(directoryName).forEach(file => {
     var fullPath = path.join(directoryName, file);
     const f = fs.statSync(fullPath);
     if (f.isDirectory()) {
       list = list.concat(walk(fullPath));
     } else {
-      list.push(fullPath)
+      list.push(fullPath);
     }
   });
-  return list
+  return list;
 };
 
-function findCheckpointsRecursive(): string[] {
-  const checkpointsPath = path.join(".", artifactsPath, scriptsDirectory)
+function findCheckpointsRecursive (): string[] {
+  const checkpointsPath = path.join(".", artifactsPath, scriptsDirectory);
   fs.mkdirSync(checkpointsPath, { recursive: true });
   return walk(checkpointsPath)
-    .filter(filename => filename.endsWith(checkpointFileSuffix))
+    .filter(filename => filename.endsWith(checkpointFileSuffix));
 }
 
 export function loadCheckpointsRecursive (): CheckpointData {
   return findCheckpointsRecursive().reduce(
     (out: CheckpointData, filename: string) => {
-      return out.mergeToGlobal(loadCheckpointNoSuffix(filename))
+      return out.mergeToGlobal(loadCheckpointNoSuffix(filename));
     },
-    new CheckpointDataImpl())
+    new CheckpointDataImpl());
 }
 
 // This class is what user interacts with in deploy task
@@ -210,11 +211,11 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     this.cpData = cpData;
   }
 
-  get accounts(): AccountDef[] {
+  get accounts (): AccountDef[] {
     return this.runtimeEnv.network.config.accounts;
   }
 
-  get isWriteable () {
+  get isWriteable (): boolean {
     return true;
   }
 
@@ -224,46 +225,45 @@ export class AlgobDeployerImpl implements AlgobDeployer {
 
   putMetadata (key: string, value: string): void {
     if (this.cpData.getMetadata(this.networkName, key) === value) {
-      return
+      return;
     }
     if (this.cpData.getMetadata(this.networkName, key)) {
       throw new BuilderError(
         ERRORS.BUILTIN_TASKS.DEPLOYER_METADATA_ALREADY_PRESENT, {
-          "metadataKey": key
-        })
+          metadataKey: key
+        });
     }
-    this.cpData.putMetadata(this.networkName, key, value)
+    this.cpData.putMetadata(this.networkName, key, value);
   }
 
   getMetadata (key: string): string | undefined {
-    return this.cpData.getMetadata(this.networkName, key)
+    return this.cpData.getMetadata(this.networkName, key);
   }
 
-  private assertNoAsset(name: string) {
+  private assertNoAsset (name: string): void {
     if (this.isDefined(name)) {
       throw new BuilderError(
         ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT, {
-          "assetName": name
-        })
+          assetName: name
+        });
     }
   }
 
   async deployASA (name: string, source: string, account: string): Promise<ASAInfo> {
-    this.assertNoAsset(name)
-    this.cpData.registerASA(this.networkName, name, account + "-get-address")
-    return this.cpData.visibleCP[this.networkName].asa[name]
+    this.assertNoAsset(name);
+    this.cpData.registerASA(this.networkName, name, account + "-get-address");
+    return this.cpData.visibleCP[this.networkName].asa[name];
   }
 
   async deployASC (name: string, source: string, account: string): Promise<ASCInfo> {
-    this.assertNoAsset(name)
-    this.cpData.registerASC(this.networkName, name, account + "-get-address")
-    return this.cpData.visibleCP[this.networkName].asc[name]
+    this.assertNoAsset(name);
+    this.cpData.registerASC(this.networkName, name, account + "-get-address");
+    return this.cpData.visibleCP[this.networkName].asc[name];
   }
 
-	isDefined(name: string): boolean {
-    return this.cpData.isDefined(this.networkName, name)
-	}
-
+  isDefined (name: string): boolean {
+    return this.cpData.isDefined(this.networkName, name);
+  }
 }
 
 // This class is what user interacts with in run task
@@ -274,11 +274,11 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
     this._internal = deployer;
   }
 
-  get accounts () {
+  get accounts (): AccountDef[] {
     return this._internal.accounts;
   }
 
-  get isWriteable () {
+  get isWriteable (): boolean {
     return false;
   }
 
@@ -304,7 +304,7 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
     });
   }
 
-	isDefined(name: string): boolean {
-    return this._internal.isDefined(name)
-	}
+  isDefined (name: string): boolean {
+    return this._internal.isDefined(name);
+  }
 }

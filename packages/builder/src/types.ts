@@ -302,16 +302,16 @@ export interface CheckpointData {
   // This allows to prevent asset name clashes between scripts.
   globalCP: ScriptCheckpoints
 
-  merge(curr: ScriptCheckpoints): CheckpointData
-  mergeToGlobal(curr: ScriptCheckpoints): CheckpointData
+  merge: (curr: ScriptCheckpoints) => CheckpointData
+  mergeToGlobal: (curr: ScriptCheckpoints) => CheckpointData
 
-  putMetadata (networkName: string, key: string, value: string): CheckpointData
-  getMetadata (networkName: string, key: string): string | undefined
+  putMetadata: (networkName: string, key: string, value: string) => CheckpointData
+  getMetadata: (networkName: string, key: string) => string | undefined
 
-  registerASA(networkName: string, name: string, creator: string): CheckpointData
-  registerASC(networkName: string, name: string, creator: string): CheckpointData
+  registerASA: (networkName: string, name: string, creator: string) => CheckpointData
+  registerASC: (networkName: string, name: string, creator: string) => CheckpointData
 
-  isDefined (networkName: string, name: string): boolean
+  isDefined: (networkName: string, name: string) => boolean
 };
 
 export interface ScriptCheckpoints {
@@ -329,16 +329,16 @@ export interface AlgobDeployer {
   // Allows user to know whether it's possible to mutate this instance
   isWriteable: boolean
   accounts: AccountDef[]
-  putMetadata (key: string, value: string): void
-  getMetadata (key: string): string | undefined
-  deployASA (name: string, source: string, account: string): Promise<ASAInfo>
-  deployASC(name: string, source: string, account: string): Promise<ASCInfo>
+  putMetadata: (key: string, value: string) => void
+  getMetadata: (key: string) => string | undefined
+  deployASA: (name: string, source: string, account: string) => Promise<ASAInfo>
+  deployASC: (name: string, source: string, account: string) => Promise<ASCInfo>
   /**
     Returns true if ASA or ACS were deployed in any script.
     Checks even for checkpoints out of from the execution
     session which are not obtainable using get methods.
   */
-  isDefined (name: string): boolean
+  isDefined: (name: string) => boolean
 }
 
 // ************************
