@@ -104,7 +104,7 @@ export async function runMultipleScripts (
     }
     if (!force && cpData.networkExistsInCurrentCP(runtimeEnv.network.name)) {
       log(`Skipping: Checkpoint exists for script ${relativeScriptPath}`);
-      continue;
+      return;
     }
     log(`Running script ${relativeScriptPath}`);
     await runScript(
