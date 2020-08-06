@@ -16,5 +16,5 @@ export function checkRelativePaths (scriptNames: string[]): string[] {
       scripts: nonScriptPaths
     });
   }
-  return scriptNames.map(n => path.relative(".", n))
+  return scriptNames.map(n => path.relative(".", n));
 }

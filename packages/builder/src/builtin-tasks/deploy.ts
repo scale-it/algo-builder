@@ -12,7 +12,7 @@ import {
   scriptsDirectory,
   toCheckpointFileName
 } from "../lib/script-checkpoints";
-import { AlgobDeployer, AlgobRuntimeEnv, CheckpointRepo } from "../types";
+import { AlgobRuntimeEnv, CheckpointRepo } from "../types";
 import { runMultipleScripts, runMultipleScriptsOneByOne } from "./run";
 import { TASK_DEPLOY } from "./task-names";
 
@@ -28,7 +28,7 @@ export function loadFilenames (directory: string): string[] {
     });
   }
 
-  return glob.sync(path.join(directory, "*.js"));
+  return glob.sync(path.join(directory, "*.js")).sort(cmpStr);
 }
 
 function clearCheckpointFiles (scriptNames: string[]): void {
@@ -39,7 +39,7 @@ function clearCheckpointFiles (scriptNames: string[]): void {
     } catch (e) {
       // ignored
     }
-  })
+  });
 }
 
 async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntimeEnv): Promise<void> {
@@ -59,9 +59,9 @@ async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntim
     clearCheckpointFiles(scriptNames);
   }
 
-  const onSuccessFn = (cpData: CheckpointRepo, relativeScriptPath: string) => {
+  const onSuccessFn = (cpData: CheckpointRepo, relativeScriptPath: string): void => {
     persistCheckpoint(relativeScriptPath, cpData.strippedCP);
-  }
+  };
 
   if (fileNames.length === 0) {
     return await runMultipleScriptsOneByOne(

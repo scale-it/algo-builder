@@ -1,6 +1,7 @@
 import { assert } from "chai";
 import fs from "fs";
 
+import { splitAfter } from "../../src/builtin-tasks/run";
 // import * as fsExtra from "fs-extra";
 import { TASK_DEPLOY, TASK_RUN } from "../../src/builtin-tasks/task-names";
 import { ERRORS } from "../../src/internal/core/errors-list";
@@ -8,7 +9,6 @@ import { loadCheckpoint } from "../../src/lib/script-checkpoints";
 import { useEnvironment } from "../helpers/environment";
 import { expectBuilderErrorAsync } from "../helpers/errors";
 import { testFixtureOutputFile, useCleanFixtureProject, useFixtureProject } from "../helpers/project";
-import { splitAfter } from "../../src/builtin-tasks/run";
 
 describe("Run task", function () {
   useFixtureProject("project-with-scripts");
@@ -183,15 +183,14 @@ scripts directory: script 1 executed
 
 describe("splitAfter", function () {
   it("Should split an array into tuple", async function () {
-    const orig = ["a", "b", "c"]
-    const out = splitAfter(orig, "b")
+    const orig = ["a", "b", "c"];
+    const out = splitAfter(orig, "b");
     assert.deepEqual([out, orig], [["a", "b"], ["c"]]);
   });
 
   it("Should return original array when no item is found", async function () {
-    const orig = ["a", "b", "c"]
-    const out = splitAfter(orig, "d")
+    const orig = ["a", "b", "c"];
+    const out = splitAfter(orig, "d");
     assert.deepEqual([out, orig], [["a", "b", "c"], []]);
   });
-
-})
+});

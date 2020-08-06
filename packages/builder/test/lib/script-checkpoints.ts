@@ -5,15 +5,15 @@ import { ERRORS } from "../../src/internal/core/errors-list";
 import {
   AlgobDeployerImpl,
   appendToCheckpoint,
+  CheckpointImpl,
   CheckpointRepoImpl,
   loadCheckpoint,
   persistCheckpoint,
   registerASA,
   registerASC,
-  CheckpointImpl,
   toCheckpointFileName
 } from "../../src/lib/script-checkpoints";
-import { Checkpoints, Checkpoint } from "../../src/types";
+import { Checkpoint, Checkpoints } from "../../src/types";
 import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkAlgobEnv } from "../helpers/params";
 

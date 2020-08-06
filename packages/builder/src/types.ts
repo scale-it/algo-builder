@@ -302,17 +302,17 @@ export interface CheckpointRepo {
   // This allows to prevent asset name clashes between scripts.
   allCPs: Checkpoints
 
-  merge(curr: Checkpoints): CheckpointRepo
-  mergeToGlobal(curr: Checkpoints): CheckpointRepo
+  merge: (curr: Checkpoints) => CheckpointRepo
+  mergeToGlobal: (curr: Checkpoints) => CheckpointRepo
 
-  putMetadata(networkName: string, key: string, value: string): CheckpointRepo
-  getMetadata(networkName: string, key: string): string | undefined
+  putMetadata: (networkName: string, key: string, value: string) => CheckpointRepo
+  getMetadata: (networkName: string, key: string) => string | undefined
 
-  registerASA(networkName: string, name: string, creator: string): CheckpointRepo
-  registerASC(networkName: string, name: string, creator: string): CheckpointRepo
+  registerASA: (networkName: string, name: string, creator: string) => CheckpointRepo
+  registerASC: (networkName: string, name: string, creator: string) => CheckpointRepo
 
-  isDefined(networkName: string, name: string): boolean
-  networkExistsInCurrentCP(networkName: string): boolean
+  isDefined: (networkName: string, name: string) => boolean
+  networkExistsInCurrentCP: (networkName: string) => boolean
 };
 
 export interface Checkpoints {

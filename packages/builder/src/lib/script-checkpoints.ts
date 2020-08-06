@@ -12,9 +12,9 @@ import {
   AlgobRuntimeEnv,
   ASAInfo,
   ASCInfo,
+  Checkpoint,
   CheckpointRepo,
-  Checkpoints,
-  Checkpoint
+  Checkpoints
 } from "../types";
 
 export const scriptsDirectory = "scripts";
@@ -145,9 +145,9 @@ export class CheckpointRepoImpl implements CheckpointRepo {
       (netCP.asa[name] !== undefined || netCP.asc[name] !== undefined);
   }
 
-	networkExistsInCurrentCP(networkName: string): boolean {
-    return Boolean(this.strippedCP[networkName])
-	}
+  networkExistsInCurrentCP (networkName: string): boolean {
+    return Boolean(this.strippedCP[networkName]);
+  }
 }
 
 export function persistCheckpoint (scriptName: string, checkpoint: Checkpoints): void {
@@ -202,10 +202,10 @@ function lsFiles (directoryName: string): string[] {
   return list;
 };
 
-function ensureCheckpointsPath(): string {
+function ensureCheckpointsPath (): string {
   const checkpointsPath = path.join(".", artifactsPath, scriptsDirectory);
   fs.mkdirSync(checkpointsPath, { recursive: true });
-  return checkpointsPath
+  return checkpointsPath;
 }
 
 function findCheckpointsRecursive (): string[] {

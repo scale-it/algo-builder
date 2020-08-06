@@ -129,7 +129,6 @@ ASC from second defined: false`);
     assert.equal(scriptOutputAfter, `ASA from first defined: true
 ASC from second defined: true`);
   });
-
 });
 
 describe("Deploy task: inter-script checkpoint state", function () {
@@ -170,7 +169,7 @@ script3: META from third defined: third-ok
 
   it("should load previous state when run has read-only set to true", async function () {
     await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js"] });
-    fs.unlinkSync(testFixtureOutputFile)
+    fs.unlinkSync(testFixtureOutputFile);
     await this.env.run(TASK_RUN, { scripts: ["scripts/2.js"] });
     const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputAfter, `script2: META from first defined: first-ok
@@ -180,7 +179,7 @@ script2: META from third defined: undefined\n`);
 
   it("should load previous state when run has read-only set to true", async function () {
     await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js", "scripts/2.js"] });
-    fs.unlinkSync(testFixtureOutputFile)
+    fs.unlinkSync(testFixtureOutputFile);
     await this.env.run(TASK_RUN, { scripts: ["scripts/2.js"] });
     const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputAfter, `script2: META from first defined: first-ok
@@ -189,7 +188,7 @@ script2: META from third defined: undefined\n`);
   });
 
   it("should not sort script names before execution", async function () {
-    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/2.js", "scripts/3.js" , "scripts/1.js"] });
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/2.js", "scripts/3.js", "scripts/1.js"] });
     const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputAfter, `script2: META from first defined: undefined
 script2: META from second defined: second-ok
@@ -204,8 +203,7 @@ script1: META from third defined: third-ok
   });
 
   it("should normalize paths", async function () {
-    await this.env.run(TASK_DEPLOY, {
-      fileNames: ["scripts/../scripts/1.js", "./scripts/2.js", "./scripts/../scripts/3.js"] });
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/../scripts/1.js", "./scripts/2.js", "./scripts/../scripts/3.js"] });
     const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputAfter, `script1: META from first defined: first-ok
 script1: META from second defined: undefined
