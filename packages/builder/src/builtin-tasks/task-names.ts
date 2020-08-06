@@ -8,6 +8,7 @@ export const TASK_INIT = "init";
 export const TASK_NODE_INFO = "node-info";
 export const TASK_RUN = "run";
 export const TASK_DEPLOY = "deploy";
+export const TASK_COMPILE = "compile";
 
 // tasks for testing
 export const TASK_TEST_GET_TEST_FILES = "test:get-test-files";
