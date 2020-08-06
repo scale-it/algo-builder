@@ -14,7 +14,7 @@ import {
   loadCheckpointsRecursive,
   lsScriptsDir
 } from "../lib/script-checkpoints";
-import { AlgobDeployer, AlgobRuntimeEnv, CheckpointData, ScriptCheckpoints } from "../types";
+import { AlgobDeployer, AlgobRuntimeEnv, CheckpointRepo, Checkpoints } from "../types";
 import { TASK_RUN } from "./task-names";
 import { cmpStr } from "../lib/comparators";
 
@@ -28,7 +28,7 @@ function filterNonExistent (scripts: string[]): string[] {
 
 function mkDeployer(
   runtimeEnv: AlgobRuntimeEnv,
-  cpData: CheckpointData,
+  cpData: CheckpointRepo,
   allowWrite: boolean
 ): AlgobDeployer {
   const deployer = new AlgobDeployerImpl(runtimeEnv, cpData)
@@ -53,11 +53,11 @@ export function splitAfter(
   return scriptsFromScriptsDir.splice(0, scriptsFromScriptsDir.length)
 }
 
-function loadCheckpointsIntoCPData(cpData: CheckpointData, scriptPaths: string[]): CheckpointData {
+function loadCheckpointsIntoCPData(cpData: CheckpointRepo, scriptPaths: string[]): CheckpointRepo {
   return scriptPaths
     .map(loadCheckpoint)
     .reduce(
-      (out: CheckpointData, checkpoints: ScriptCheckpoints) => out.merge(checkpoints),
+      (out: CheckpointRepo, checkpoints: Checkpoints) => out.merge(checkpoints),
       cpData)
 }
 
@@ -68,7 +68,7 @@ function loadCheckpointsIntoCPData(cpData: CheckpointData, scriptPaths: string[]
 export async function runMultipleScriptsOneByOne(
   runtimeEnv: AlgobRuntimeEnv,
   scriptNames: string[],
-  onSuccessFn: (cpData: CheckpointData, relativeScriptPath: string) => void,
+  onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
   force: boolean,
   logDebugTag: string,
   allowWrite: boolean): Promise<void> {
@@ -87,12 +87,12 @@ export async function runMultipleScriptsOneByOne(
 export async function runMultipleScripts (
   runtimeEnv: AlgobRuntimeEnv,
   scriptNames: string[],
-  onSuccessFn: (cpData: CheckpointData, relativeScriptPath: string) => void,
+  onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
   force: boolean,
   logTag: string,
   allowWrite: boolean): Promise<void> {
   const log = debug(logTag);
-  const cpData: CheckpointData = loadCheckpointsRecursive();
+  const cpData: CheckpointRepo = loadCheckpointsRecursive();
   const deployer: AlgobDeployer = mkDeployer(runtimeEnv, cpData, allowWrite)
 
   const scriptsFromScriptsDir: string[] = lsScriptsDir()
@@ -134,7 +134,7 @@ async function doRun (
   await runMultipleScriptsOneByOne(
     runtimeEnv,
     checkRelativePaths(scripts),
-    (cpData: CheckpointData, relativeScriptPath: string) => {},
+    (cpData: CheckpointRepo, relativeScriptPath: string) => {},
     true,
     logDebugTag,
     false

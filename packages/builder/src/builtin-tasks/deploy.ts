@@ -12,7 +12,7 @@ import {
   scriptsDirectory,
   toCheckpointFileName
 } from "../lib/script-checkpoints";
-import { AlgobDeployer, AlgobRuntimeEnv, CheckpointData } from "../types";
+import { AlgobDeployer, AlgobRuntimeEnv, CheckpointRepo } from "../types";
 import { runMultipleScripts, runMultipleScriptsOneByOne } from "./run";
 import { TASK_DEPLOY } from "./task-names";
 
@@ -59,7 +59,7 @@ async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntim
     clearCheckpointFiles(scriptNames);
   }
 
-  const onSuccessFn = (cpData: CheckpointData, relativeScriptPath: string) => {
+  const onSuccessFn = (cpData: CheckpointRepo, relativeScriptPath: string) => {
     persistCheckpoint(relativeScriptPath, cpData.strippedCP);
   }
 
