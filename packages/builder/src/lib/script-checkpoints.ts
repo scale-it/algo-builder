@@ -12,9 +12,9 @@ import {
   AlgobRuntimeEnv,
   ASAInfo,
   ASCInfo,
-  CheckpointData,
-  ScriptCheckpoints,
-  ScriptNetCheckpoint
+  CheckpointRepo,
+  Checkpoints,
+  Checkpoint
 } from "../types";
 
 export const scriptsDirectory = "scripts";
@@ -26,18 +26,18 @@ export function toCheckpointFileName (scriptName: string): string {
 }
 
 export function registerASA (
-  cp: ScriptNetCheckpoint, name: string, creator: string): ScriptNetCheckpoint {
+  cp: Checkpoint, name: string, creator: string): Checkpoint {
   cp.asa[name] = { creator: creator };
   return cp;
 }
 
 export function registerASC (
-  cp: ScriptNetCheckpoint, name: string, creator: string): ScriptNetCheckpoint {
+  cp: Checkpoint, name: string, creator: string): Checkpoint {
   cp.asc[name] = { creator: creator };
   return cp;
 }
 
-export class ScriptNetCheckpointImpl implements ScriptNetCheckpoint {
+export class CheckpointImpl implements Checkpoint {
   timestamp: number;
   metadata: { [key: string]: string };
   asa: { [name: string]: ASAInfo };
@@ -52,7 +52,7 @@ export class ScriptNetCheckpointImpl implements ScriptNetCheckpoint {
 }
 
 export function appendToCheckpoint (
-  checkpoints: ScriptCheckpoints, networkName: string, append: ScriptNetCheckpoint): ScriptCheckpoints {
+  checkpoints: Checkpoints, networkName: string, append: Checkpoint): Checkpoints {
   const orig = checkpoints[networkName];
   if (!orig) {
     checkpoints[networkName] = Object.assign({}, append);
@@ -80,67 +80,67 @@ export function appendToCheckpoint (
   return checkpoints;
 }
 
-export class CheckpointDataImpl implements CheckpointData {
-  strippedCP: ScriptCheckpoints = {};
-  visibleCP: ScriptCheckpoints = {};
-  globalCP: ScriptCheckpoints = {};
+export class CheckpointRepoImpl implements CheckpointRepo {
+  strippedCP: Checkpoints = {};
+  precedingCP: Checkpoints = {};
+  allCPs: Checkpoints = {};
 
-  private _mergeTo (target: ScriptCheckpoints, cp: ScriptCheckpoints): ScriptCheckpoints {
+  private _mergeTo (target: Checkpoints, cp: Checkpoints): Checkpoints {
     const keys: string[] = Object.keys(cp);
-    return keys.reduce((out: ScriptCheckpoints, key: string) => {
+    return keys.reduce((out: Checkpoints, key: string) => {
       return appendToCheckpoint(out, key, cp[key]);
     }, target);
   }
 
-  merge (cp: ScriptCheckpoints): CheckpointData {
+  merge (cp: Checkpoints): CheckpointRepo {
     this.strippedCP = cp;
-    this.visibleCP = this._mergeTo(this.visibleCP, cp);
+    this.precedingCP = this._mergeTo(this.precedingCP, cp);
     this.mergeToGlobal(cp);
     return this;
   }
 
-  mergeToGlobal (cp: ScriptCheckpoints): CheckpointData {
-    this.globalCP = this._mergeTo(this.globalCP, cp);
+  mergeToGlobal (cp: Checkpoints): CheckpointRepo {
+    this.allCPs = this._mergeTo(this.allCPs, cp);
     return this;
   }
 
-  private _ensureNet (cp: ScriptCheckpoints, networkName: string): ScriptNetCheckpoint {
+  private _ensureNet (cp: Checkpoints, networkName: string): Checkpoint {
     if (!cp[networkName]) {
-      cp[networkName] = new ScriptNetCheckpointImpl();
+      cp[networkName] = new CheckpointImpl();
     }
     return cp[networkName];
   }
 
-  putMetadata (networkName: string, key: string, value: string): CheckpointData {
-    this._ensureNet(this.globalCP, networkName).metadata[key] = value;
+  putMetadata (networkName: string, key: string, value: string): CheckpointRepo {
+    this._ensureNet(this.allCPs, networkName).metadata[key] = value;
     this._ensureNet(this.strippedCP, networkName).metadata[key] = value;
-    this._ensureNet(this.visibleCP, networkName).metadata[key] = value;
+    this._ensureNet(this.precedingCP, networkName).metadata[key] = value;
     return this;
   }
 
   getMetadata (networkName: string, key: string): string | undefined {
-    if (this.visibleCP[networkName]) {
-      return this.visibleCP[networkName].metadata[key];
+    if (this.precedingCP[networkName]) {
+      return this.precedingCP[networkName].metadata[key];
     }
     return undefined;
   }
 
-  registerASA (networkName: string, name: string, creator: string): CheckpointData {
-    registerASA(this._ensureNet(this.visibleCP, networkName), name, creator);
+  registerASA (networkName: string, name: string, creator: string): CheckpointRepo {
+    registerASA(this._ensureNet(this.precedingCP, networkName), name, creator);
     registerASA(this._ensureNet(this.strippedCP, networkName), name, creator);
-    registerASA(this._ensureNet(this.globalCP, networkName), name, creator);
+    registerASA(this._ensureNet(this.allCPs, networkName), name, creator);
     return this;
   }
 
-  registerASC (networkName: string, name: string, creator: string): CheckpointData {
-    registerASC(this._ensureNet(this.visibleCP, networkName), name, creator);
+  registerASC (networkName: string, name: string, creator: string): CheckpointRepo {
+    registerASC(this._ensureNet(this.precedingCP, networkName), name, creator);
     registerASC(this._ensureNet(this.strippedCP, networkName), name, creator);
-    registerASC(this._ensureNet(this.globalCP, networkName), name, creator);
+    registerASC(this._ensureNet(this.allCPs, networkName), name, creator);
     return this;
   }
 
   isDefined (networkName: string, name: string): boolean {
-    const netCP = this.globalCP[networkName];
+    const netCP = this.allCPs[networkName];
     return netCP !== undefined &&
       (netCP.asa[name] !== undefined || netCP.asc[name] !== undefined);
   }
@@ -150,7 +150,7 @@ export class CheckpointDataImpl implements CheckpointData {
 	}
 }
 
-export function persistCheckpoint (scriptName: string, checkpoint: ScriptCheckpoints): void {
+export function persistCheckpoint (scriptName: string, checkpoint: Checkpoints): void {
   const scriptPath = toCheckpointFileName(scriptName);
   const scriptDir = path.dirname(scriptPath);
   fs.mkdirSync(scriptDir, { recursive: true });
@@ -160,7 +160,7 @@ export function persistCheckpoint (scriptName: string, checkpoint: ScriptCheckpo
   );
 }
 
-export function loadCheckpointNoSuffix (checkpointPath: string): ScriptCheckpoints {
+export function loadCheckpointNoSuffix (checkpointPath: string): Checkpoints {
   // Try-catch is the way:
   // https://nodejs.org/docs/latest/api/fs.html#fs_fs_stat_path_options_callback
   // Instead, user code should open/read/write the file directly and
@@ -172,7 +172,7 @@ export function loadCheckpointNoSuffix (checkpointPath: string): ScriptCheckpoin
   }
 }
 
-export function loadCheckpoint (scriptName: string): ScriptCheckpoints {
+export function loadCheckpoint (scriptName: string): Checkpoints {
   return loadCheckpointNoSuffix(toCheckpointFileName(scriptName));
 }
 
@@ -217,20 +217,20 @@ export function lsScriptsDir (): string[] {
   return lsFiles(scriptsDirectory);
 }
 
-export function loadCheckpointsRecursive (): CheckpointData {
+export function loadCheckpointsRecursive (): CheckpointRepo {
   return findCheckpointsRecursive().reduce(
-    (out: CheckpointData, filename: string) => {
+    (out: CheckpointRepo, filename: string) => {
       return out.mergeToGlobal(loadCheckpointNoSuffix(filename));
     },
-    new CheckpointDataImpl());
+    new CheckpointRepoImpl());
 }
 
 // This class is what user interacts with in deploy task
 export class AlgobDeployerImpl implements AlgobDeployer {
   private readonly runtimeEnv: AlgobRuntimeEnv;
-  private readonly cpData: CheckpointData;
+  private readonly cpData: CheckpointRepo;
 
-  constructor (runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointData) {
+  constructor (runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointRepo) {
     this.runtimeEnv = runtimeEnv;
     this.cpData = cpData;
   }
@@ -276,13 +276,13 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   async deployASA (name: string, source: string, account: string): Promise<ASAInfo> {
     this.assertNoAsset(name);
     this.cpData.registerASA(this.networkName, name, account + "-get-address");
-    return this.cpData.visibleCP[this.networkName].asa[name];
+    return this.cpData.precedingCP[this.networkName].asa[name];
   }
 
   async deployASC (name: string, source: string, account: string): Promise<ASCInfo> {
     this.assertNoAsset(name);
     this.cpData.registerASC(this.networkName, name, account + "-get-address");
-    return this.cpData.visibleCP[this.networkName].asc[name];
+    return this.cpData.precedingCP[this.networkName].asc[name];
   }
 
   isDefined (name: string): boolean {

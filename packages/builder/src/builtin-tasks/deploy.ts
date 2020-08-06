@@ -32,13 +32,14 @@ export function loadFilenames (directory: string): string[] {
 }
 
 function clearCheckpointFiles (scriptNames: string[]): void {
-  for (const scriptName of scriptNames) {
+  scriptNames.forEach(scriptName => {
     try {
+      // fs.unlink deletes the file
       fs.unlinkSync(toCheckpointFileName(scriptName));
     } catch (e) {
       // ignored
     }
-  }
+  })
 }
 
 async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntimeEnv): Promise<void> {
