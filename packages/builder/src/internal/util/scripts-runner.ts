@@ -37,6 +37,9 @@ export async function runScript (
       maybeDeployer
     );
   } catch (error) {
+    if (error instanceof BuilderError) {
+      throw error;
+    }
     throw new BuilderError(
       ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR, {
         script: relativeScriptPath,

@@ -507,6 +507,42 @@ Please double check your script's path`
     description: `Tried to run scripts that was outside scripts directory %scripts%.
 
 Please double check your command parameters`
+  },
+  DEPLOYER_EDIT_OUTSIDE_DEPLOY: {
+    number: 606,
+    message: "Script tried to edit Deployer data using '%methodName%' outside 'deploy' action",
+    title: "Deployer editing allowed only during 'deploy'.",
+    description: `Script tried to edit Deployer data using '%methodName%' method.
+Deployer data editing only allowed during 'deploy'.
+Use 'deployer.isWriteable' to check if editing is allowed.
+`
+  },
+  CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION: {
+    number: 607,
+    message: "Encountered a duplicate asset definition: %assetName%",
+    title: "Encountered a duplicate asset definition",
+    description: `Encountered a duplicate asset definition: %assetName%.
+
+Checkpoint files were edited by hand or an internal error occurred.
+`
+  },
+  DEPLOYER_METADATA_ALREADY_PRESENT: {
+    number: 608,
+    message: "Metadata key is already set: %metadataKey%",
+    title: "Metadata already present",
+    description: `Metadata already present: %metadataKey%. Resetting is not allowed.
+
+Use 'deployer.getMetadata(key)' to check the current value.
+`
+  },
+  DEPLOYER_ASSET_ALREADY_PRESENT: {
+    number: 609,
+    message: "Asset name is already used: %assetName%",
+    title: "Asset name is already used",
+    description: `Asset name is already used: %metadataKey%. Resetting is not allowed.
+
+Use 'deployer.isDefined(name)' to check if the name is already used.
+`
   }
 };
 

@@ -2,7 +2,7 @@ import { assert } from "chai";
 import * as fs from "fs";
 
 import { loadFilenames } from "../../src/builtin-tasks/deploy";
-import { TASK_DEPLOY } from "../../src/builtin-tasks/task-names";
+import { TASK_DEPLOY, TASK_RUN } from "../../src/builtin-tasks/task-names";
 import { ERRORS } from "../../src/internal/core/errors-list";
 import { loadCheckpoint } from "../../src/lib/script-checkpoints";
 import { expectBuilderErrorAsync } from "../helpers/errors";
@@ -20,7 +20,7 @@ describe("Deploy task", function () {
     }
   });
 
-  it("Should execute the tasks", async function () {
+  it("Should execute the deploy task", async function () {
     await this.env.run(TASK_DEPLOY, { noCompile: true });
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, `scripts directory: script 1 executed
@@ -28,23 +28,19 @@ scripts directory: script 2 executed
 `);
   });
 
-  it("Should persist Deployer's metadata from all tasks", async function () {
+  it("Should persist Deployer's metadata from all tasks in separate checkpoints", async function () {
     await this.env.run(TASK_DEPLOY, { noCompile: true });
-    const persistedSnapshot = loadCheckpoint("./scripts/2.js");
-    assert.deepEqual(persistedSnapshot.default.metadata, {
-      "script 1 key": "script 1 value",
+    const snapshot1 = loadCheckpoint("./scripts/1.js");
+    assert.deepEqual(snapshot1.default.metadata, {
+      "script 1 key": "script 1 value"
+    });
+    assert.isAtMost(snapshot1.default.timestamp, +new Date());
+    const snapshot2 = loadCheckpoint("./scripts/2.js");
+    assert.deepEqual(snapshot2.default.metadata, {
       "script 2 key": "script 2 value"
     });
-    assert.isAtMost(persistedSnapshot.default.timestamp, +new Date());
-  });
-
-  it("Should allow to specify scripts, preserving order", async function () {
-    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/other-scripts/1.js", "scripts/2.js", "scripts/1.js"] });
-    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
-    assert.equal(scriptOutput, `other scripts directory: script 1 executed
-scripts directory: script 2 executed
-scripts directory: script 1 executed
-`);
+    assert.isAtMost(snapshot2.default.timestamp, +new Date());
+    assert.isAtMost(snapshot1.default.timestamp, snapshot2.default.timestamp);
   });
 
   it("Should not allow scripts outside of scripts dir", async function () {
@@ -62,17 +58,6 @@ scripts directory: script 1 executed
     assert.equal(scriptOutput, `scripts directory: script 1 executed\n`);
   });
 
-  it("Should short-circuit and return failed script's status code", async function () {
-    await expectBuilderErrorAsync(
-      async () =>
-        await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/other-scripts/1.js", "scripts/other-scripts/failing.js", "scripts/1.js"] }),
-      ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR,
-      "scripts/other-scripts/failing.js"
-    );
-    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
-    assert.equal(scriptOutput, "other scripts directory: script 1 executed\n");
-  });
-
   it("Should not execute executed scripts the second time", async function () {
     await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js"] });
     await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/2.js", "scripts/1.js"] });
@@ -82,13 +67,153 @@ scripts directory: script 2 executed
 `);
   });
 
-  it("Should not execute executed scripts the second time", async function () {
+  it("Should execute executed scripts the second time with --force", async function () {
     await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js"] });
     await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/2.js", "scripts/1.js"], force: true });
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, `scripts directory: script 1 executed
 scripts directory: script 2 executed
 scripts directory: script 1 executed
+`);
+  });
+});
+
+describe("Deploy task: nested state files", function () {
+  useCleanFixtureProject("scripts-dir-recursive-cp");
+
+  it("Deployer should accumulate state during the run 1", async function () {
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js", "scripts/nested/query.js"] });
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
+    assert.equal(scriptOutput, `ASA from first defined: true
+ASC from second defined: false`);
+  });
+
+  it("Deployer should accumulate state during the run 2", async function () {
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js", "scripts/2.js", "scripts/nested/query.js"] });
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
+    assert.equal(scriptOutput, `ASA from first defined: true
+ASC from second defined: true`);
+  });
+
+  it("Deployer should load deployed assets before running scripts; should not show them", async function () {
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/nested/query.js"] });
+    const scriptOutputBefore = fs.readFileSync(testFixtureOutputFile).toString();
+    assert.equal(scriptOutputBefore, `ASA from first defined: false
+ASC from second defined: false`);
+    fs.unlinkSync(testFixtureOutputFile);
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js", "scripts/2.js"] });
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/nested/query.js"] });
+    const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
+    assert.equal(scriptOutputAfter, `ASA from first defined: true
+ASC from second defined: true`);
+  });
+
+  it("Deployer --force should allow to rewrite existing assets; one script", async function () {
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js"] });
+    await this.env.run(TASK_DEPLOY, {
+      fileNames: ["scripts/1.js", "scripts/nested/query.js"],
+      force: true
+    });
+    const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
+    assert.equal(scriptOutputAfter, `ASA from first defined: true
+ASC from second defined: false`);
+  });
+
+  it("Deployer --force should allow to rewrite existing assets; two scripts", async function () {
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js", "scripts/2.js"] });
+    await this.env.run(TASK_DEPLOY, {
+      fileNames: ["scripts/1.js", "scripts/2.js", "scripts/nested/query.js"],
+      force: true
+    });
+    const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
+    assert.equal(scriptOutputAfter, `ASA from first defined: true
+ASC from second defined: true`);
+  });
+});
+
+describe("Deploy task: inter-script checkpoint state", function () {
+  useCleanFixtureProject("scripts-dir-cp-state");
+
+  it("should load previous state", async function () {
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js"] });
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/2.js"] });
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/3.js"] });
+    const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
+    assert.equal(scriptOutputAfter, `script1: META from first defined: first-ok
+script1: META from second defined: undefined
+script1: META from third defined: undefined
+script2: META from first defined: first-ok
+script2: META from second defined: second-ok
+script2: META from third defined: undefined
+script3: META from first defined: first-ok
+script3: META from second defined: second-ok
+script3: META from third defined: third-ok
+`);
+  });
+
+  it("should load previous state; multiple intermediate scripts", async function () {
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js", "scripts/2.js"] });
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/3.js"] });
+    const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
+    assert.equal(scriptOutputAfter, `script1: META from first defined: first-ok
+script1: META from second defined: undefined
+script1: META from third defined: undefined
+script2: META from first defined: first-ok
+script2: META from second defined: second-ok
+script2: META from third defined: undefined
+script3: META from first defined: first-ok
+script3: META from second defined: second-ok
+script3: META from third defined: third-ok
+`);
+  });
+
+  it("should load previous state when run has read-only set to true", async function () {
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js"] });
+    fs.unlinkSync(testFixtureOutputFile);
+    await this.env.run(TASK_RUN, { scripts: ["scripts/2.js"] });
+    const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
+    assert.equal(scriptOutputAfter, `script2: META from first defined: first-ok
+script2: META from second defined: undefined
+script2: META from third defined: undefined\n`);
+  });
+
+  it("should load previous state when run has read-only set to true", async function () {
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js", "scripts/2.js"] });
+    fs.unlinkSync(testFixtureOutputFile);
+    await this.env.run(TASK_RUN, { scripts: ["scripts/2.js"] });
+    const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
+    assert.equal(scriptOutputAfter, `script2: META from first defined: first-ok
+script2: META from second defined: second-ok
+script2: META from third defined: undefined\n`);
+  });
+
+  it("should not sort script names before execution", async function () {
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/2.js", "scripts/3.js", "scripts/1.js"] });
+    const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
+    assert.equal(scriptOutputAfter, `script2: META from first defined: undefined
+script2: META from second defined: second-ok
+script2: META from third defined: undefined
+script3: META from first defined: undefined
+script3: META from second defined: second-ok
+script3: META from third defined: third-ok
+script1: META from first defined: first-ok
+script1: META from second defined: second-ok
+script1: META from third defined: third-ok
+`);
+  });
+
+  it("should normalize paths", async function () {
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/../scripts/1.js", "./scripts/2.js", "./scripts/../scripts/3.js"] });
+    const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
+    assert.equal(scriptOutputAfter, `script1: META from first defined: first-ok
+script1: META from second defined: undefined
+script1: META from third defined: undefined
+script2: META from first defined: first-ok
+script2: META from second defined: second-ok
+script2: META from third defined: undefined
+script3: META from first defined: first-ok
+script3: META from second defined: second-ok
+script3: META from third defined: third-ok
 `);
   });
 });

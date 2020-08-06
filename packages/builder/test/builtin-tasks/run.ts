@@ -1,9 +1,11 @@
 import { assert } from "chai";
 import fs from "fs";
 
+import { splitAfter } from "../../src/builtin-tasks/run";
 // import * as fsExtra from "fs-extra";
-import { TASK_RUN } from "../../src/builtin-tasks/task-names";
+import { TASK_DEPLOY, TASK_RUN } from "../../src/builtin-tasks/task-names";
 import { ERRORS } from "../../src/internal/core/errors-list";
+import { loadCheckpoint } from "../../src/lib/script-checkpoints";
 import { useEnvironment } from "../helpers/environment";
 import { expectBuilderErrorAsync } from "../helpers/errors";
 import { testFixtureOutputFile, useCleanFixtureProject, useFixtureProject } from "../helpers/project";
@@ -107,6 +109,15 @@ scripts directory: script 2 executed
 `);
   });
 
+  it("Should allow script rerun a deployed script", async function () {
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js"] });
+    await this.env.run(TASK_RUN, { scripts: ["scripts/1.js"] });
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
+    assert.equal(scriptOutput, `scripts directory: script 1 executed
+scripts directory: script 1 executed
+`);
+  });
+
   it("Should not create a snapshot", async function () {
     await this.env.run(TASK_RUN, { scripts: ["scripts/2.js"] });
     assert.isFalse(fs.existsSync("artifacts/scripts/2.js"));
@@ -119,5 +130,67 @@ scripts directory: script 2 executed
       ERRORS.BUILTIN_TASKS.SCRIPTS_OUTSIDE_SCRIPTS_DIRECTORY,
       "1.js"
     );
+  });
+
+  it("Should not save metadata", async function () {
+    await this.env.run(TASK_RUN, { scripts: ["scripts/1.js"] });
+    const persistedSnapshot = loadCheckpoint("./scripts/1.js");
+    assert.deepEqual(persistedSnapshot, {});
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
+    assert.equal(scriptOutput, `scripts directory: script 1 executed
+`);
+  });
+
+  it("Should crash on trying to edit metadata", async function () {
+    await expectBuilderErrorAsync(
+      async () =>
+        await this.env.run(TASK_RUN, { scripts: ["scripts/other-scripts/put-metadata.js"] }),
+      ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY,
+      "putMetadata"
+    );
+    const persistedSnapshot = loadCheckpoint("scripts/other-scripts/put-metadata.js");
+    assert.deepEqual(persistedSnapshot, {});
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
+    assert.equal(scriptOutput, "put metadata script\n");
+  });
+
+  it("Should crash on deployASA", async function () {
+    await expectBuilderErrorAsync(
+      async () =>
+        await this.env.run(TASK_RUN, { scripts: ["scripts/other-scripts/deploy-asa.js"] }),
+      ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY,
+      "deployASA"
+    );
+    const persistedSnapshot = loadCheckpoint("scripts/other-scripts/deploy-asa.js");
+    assert.deepEqual(persistedSnapshot, {});
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
+    assert.equal(scriptOutput, "deployASA script\n");
+  });
+
+  it("Should crash on deployASC", async function () {
+    await expectBuilderErrorAsync(
+      async () =>
+        await this.env.run(TASK_RUN, { scripts: ["scripts/other-scripts/deploy-asc.js"] }),
+      ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY,
+      "deployASC"
+    );
+    const persistedSnapshot = loadCheckpoint("scripts/other-scripts/deploy-asc.js");
+    assert.deepEqual(persistedSnapshot, {});
+    const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
+    assert.equal(scriptOutput, "deployASC script\n");
+  });
+});
+
+describe("splitAfter", function () {
+  it("Should split an array into tuple", async function () {
+    const orig = ["a", "b", "c"];
+    const out = splitAfter(orig, "b");
+    assert.deepEqual([out, orig], [["a", "b"], ["c"]]);
+  });
+
+  it("Should return original array when no item is found", async function () {
+    const orig = ["a", "b", "c"];
+    const out = splitAfter(orig, "d");
+    assert.deepEqual([out, orig], [["a", "b", "c"], []]);
   });
 });
