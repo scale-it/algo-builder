@@ -43,7 +43,7 @@ function clearCheckpointFiles (scriptNames: string[]): void {
 }
 
 async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntimeEnv): Promise<void> {
-  const logDebugTag = "builder:core:tasks:deploy";
+  const logDebugTag = "algob:tasks:deploy";
 
   const scriptNames = fileNames.length === 0
     ? loadFilenames(scriptsDirectory)

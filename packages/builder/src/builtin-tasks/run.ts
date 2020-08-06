@@ -120,7 +120,7 @@ async function doRun (
   { scripts }: Input,
   runtimeEnv: AlgobRuntimeEnv
 ): Promise<any> {
-  const logDebugTag = "builder:core:tasks:run";
+  const logDebugTag = "algob:tasks:run";
 
   const nonExistent = filterNonExistent(scripts);
   if (nonExistent.length !== 0) {
