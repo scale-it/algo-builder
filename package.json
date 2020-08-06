@@ -57,10 +57,7 @@
     "typescript": "^3.9.5"
   },
   "lint-staged": {
-    "**/src/**/*.{ts,js}": [
-      "eslint --format stylish --fix"
-    ],
-    "**/test/**/*.{ts,js}": [
+    "**/{src,test}/**/*.{ts,js}": [
       "eslint --format stylish --fix"
     ]
   },
