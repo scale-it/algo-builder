@@ -13,6 +13,11 @@ declare module 'algosdk' {
     status(): Action<any>;
   }
 
+  interface Account {
+    addr: string;
+    sk: Uint8Array
+  }
+
   export function Indexer(...args: any[]): any;
 
   export function Kmd(token: any, baseServer: any, port: any): any;
@@ -29,7 +34,7 @@ declare module 'algosdk' {
 
   export function encodeObj(o: any): any;
 
-  export function generateAccount(): any;
+  export function generateAccount(): Account;
 
   export function isValidAddress(addr: any): any;
 
@@ -65,19 +70,19 @@ declare module 'algosdk' {
 
   export function makePaymentTxnWithSuggestedParams(from: any, to: any, amount: any, closeRemainderTo: any, note: any, suggestedParams: any): any;
 
-  export function masterDerivationKeyToMnemonic(mdk: any): any;
+  export function masterDerivationKeyToMnemonic(mdk: any): string;
 
   export function mergeMultisigTransactions(multisigTxnBlobs: any): any;
 
   export function microalgosToAlgos(microalgos: any): any;
 
-  export function mnemonicToMasterDerivationKey(mn: any): any;
+  export function mnemonicToMasterDerivationKey(mn: string): any;
 
-  export function mnemonicToSecretKey(mn: any): any;
+  export function mnemonicToSecretKey(mn: string): Account;
 
   export function multisigAddress({version, threshold, addrs}: any): any;
 
-  export function secretKeyToMnemonic(sk: any): any;
+  export function secretKeyToMnemonic(sk: Uint8Array): string;
 
   export function signBid(bid: any, sk: any): any;
 

@@ -5,6 +5,7 @@ The config is used to list available algorand networks and instructions how to c
 
 A network object can specify following entries:
 
++ `accounts` - list of `algosdk.Account` objects (required)
 + `host` (string, required, can be with http or https prefix)
 + `port` (number, required)
 + `token` (required, default `none`)
@@ -13,12 +14,14 @@ A network object can specify following entries:
 A special network named `algobchain` can specify the `AlgobChain` configuration:
 
 ```
-  accounts?: NetworkAccounts;
+  accounts_file?: string;
   throwOnTransactionFailures?: boolean;
   throwOnCallFailures?: boolean;
   loggingEnabled?: boolean;
   initialDate?: string;
 ```
+
+
 
 ## Example
 

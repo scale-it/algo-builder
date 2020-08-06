@@ -7,7 +7,7 @@ import { task } from "../internal/core/config/config-env";
 import { BuilderError, ERRORS } from "../internal/core/errors";
 import * as types from "../internal/core/params/argument-types";
 import { assertAllDirs, ASSETS_DIR } from "../internal/core/project-structure";
-import { AlgobRuntimeEnv, TaskArguments } from "../types";
+import { AlgobRuntimeEnv, MnemonicAccount, TaskArguments } from "../types";
 import { TASK_GEN_ACCOUNTS } from "./task-names";
 const fsp = _fs.promises;
 
@@ -20,7 +20,7 @@ export default function (): void {
 
 export function getFilename (): string { return path.join(ASSETS_DIR, "accounts_generated.yaml"); }
 
-export async function mkAccounts (taskArgs: TaskArguments, env: AlgobRuntimeEnv): Promise<void> {
+export async function mkAccounts (taskArgs: TaskArguments, _env: AlgobRuntimeEnv): Promise<void> {
   const filename = getFilename();
   const n = taskArgs.n as number;
   if (n <= 0) {
@@ -34,8 +34,8 @@ export async function mkAccounts (taskArgs: TaskArguments, env: AlgobRuntimeEnv)
   return await writeToFile(YAML.stringify(accounts), taskArgs.force as boolean, filename);
 }
 
-export function genAccounts (n: number): Acc[] {
-  const accounts: Acc[] = [];
+export function genAccounts (n: number): MnemonicAccount[] {
+  const accounts: MnemonicAccount[] = [];
   for (let i = 0; i < n; ++i) {
     const a = algosdk.generateAccount();
     accounts.push({
@@ -44,11 +44,6 @@ export function genAccounts (n: number): Acc[] {
     });
   }
   return accounts;
-}
-
-export interface Acc {
-  addr: string
-  mnemonic: string
 }
 
 async function writeToFile (content: string, force: boolean, filename: string): Promise<void> {
