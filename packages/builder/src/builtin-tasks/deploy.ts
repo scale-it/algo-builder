@@ -13,7 +13,7 @@ import {
   toCheckpointFileName
 } from "../lib/script-checkpoints";
 import { AlgobDeployer, AlgobRuntimeEnv, CheckpointData } from "../types";
-import { runMultipleScripts } from "./run";
+import { runMultipleScripts, runMultipleScriptsOneByOne } from "./run";
 import { TASK_DEPLOY } from "./task-names";
 
 export interface TaskArgs {
@@ -58,16 +58,29 @@ async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntim
     clearCheckpointFiles(scriptNames);
   }
 
-  return await runMultipleScripts(
-    runtimeEnv,
-    scriptNames,
-    (cpData: CheckpointData, relativeScriptPath: string) => {
-      persistCheckpoint(relativeScriptPath, cpData.strippedCP);
-    },
-    force,
-    logDebugTag,
-    true
-  );
+  const onSuccessFn = (cpData: CheckpointData, relativeScriptPath: string) => {
+    persistCheckpoint(relativeScriptPath, cpData.strippedCP);
+  }
+
+  if (fileNames.length === 0) {
+    return await runMultipleScriptsOneByOne(
+      runtimeEnv,
+      scriptNames,
+      onSuccessFn,
+      force,
+      logDebugTag,
+      true
+    );
+  } else {
+    return await runMultipleScripts(
+      runtimeEnv,
+      scriptNames,
+      onSuccessFn,
+      force,
+      logDebugTag,
+      true
+    );
+  }
 }
 
 export default function (): void {

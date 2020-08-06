@@ -61,6 +61,29 @@ function loadCheckpointsIntoCPData(cpData: CheckpointData, scriptPaths: string[]
       cpData)
 }
 
+// TODO: Reduce file IO:
+// Function only accepts sorted scripts -- only this way it loads the state correctly.
+// Optimization: Split the scripts into sorted array chunks and run those chunks
+// This will save some disk reads because sub-arrays will be sorted
+export async function runMultipleScriptsOneByOne(
+  runtimeEnv: AlgobRuntimeEnv,
+  scriptNames: string[],
+  onSuccessFn: (cpData: CheckpointData, relativeScriptPath: string) => void,
+  force: boolean,
+  logDebugTag: string,
+  allowWrite: boolean): Promise<void> {
+  for (const script of scriptNames) {
+    await runMultipleScripts(
+      runtimeEnv,
+      [script],
+      onSuccessFn,
+      force,
+      logDebugTag,
+      allowWrite
+    );
+  }
+}
+
 export async function runMultipleScripts (
   runtimeEnv: AlgobRuntimeEnv,
   scriptNames: string[],
@@ -73,10 +96,9 @@ export async function runMultipleScripts (
   const deployer: AlgobDeployer = mkDeployer(runtimeEnv, cpData, allowWrite)
 
   const scriptsFromScriptsDir: string[] = lsScriptsDir()
-  const sortedScriptNames = scriptNames.map(n => path.relative(".", n)).sort(cmpStr)
 
-  for (let i = 0; i < sortedScriptNames.length; i++) {
-    const relativeScriptPath = sortedScriptNames[i];
+  for (let i = 0; i < scriptNames.length; i++) {
+    const relativeScriptPath = scriptNames[i];
     const prevScripts = splitAfter(scriptsFromScriptsDir, relativeScriptPath)
     loadCheckpointsIntoCPData(cpData, prevScripts)
     if (prevScripts[prevScripts.length-1] !== relativeScriptPath) {
@@ -109,23 +131,14 @@ async function doRun (
     });
   }
 
-  const onSuccessFn = (cpData: CheckpointData, relativeScriptPath: string) => {}
-  const relativePathOnlyScripts = checkRelativePaths(scripts)
-
-  // TODO: Reduce file IO:
-  // Scripts have to be sorted to run them through the function.
-  // Split the scripts into sorted array chunks and run those chunks
-  // This will save some disk reads
-  for (const script of relativePathOnlyScripts) {
-    await runMultipleScripts(
-      runtimeEnv,
-      [script],
-      onSuccessFn,
-      true,
-      logDebugTag,
-      false
-    );
-  }
+  await runMultipleScriptsOneByOne(
+    runtimeEnv,
+    checkRelativePaths(scripts),
+    (cpData: CheckpointData, relativeScriptPath: string) => {},
+    true,
+    logDebugTag,
+    false
+  );
 }
 
 export default function (): void {

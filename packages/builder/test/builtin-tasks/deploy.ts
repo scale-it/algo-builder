@@ -72,8 +72,8 @@ scripts directory: script 2 executed
     await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/2.js", "scripts/1.js"], force: true });
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, `scripts directory: script 1 executed
-scripts directory: script 1 executed
 scripts directory: script 2 executed
+scripts directory: script 1 executed
 `);
   });
 });
@@ -148,7 +148,8 @@ script2: META from second defined: second-ok
 script2: META from third defined: undefined
 script3: META from first defined: first-ok
 script3: META from second defined: second-ok
-script3: META from third defined: third-ok`);
+script3: META from third defined: third-ok
+`);
   });
 
   it("should load previous state; multiple intermediate scripts", async function () {
@@ -163,7 +164,8 @@ script2: META from second defined: second-ok
 script2: META from third defined: undefined
 script3: META from first defined: first-ok
 script3: META from second defined: second-ok
-script3: META from third defined: third-ok`);
+script3: META from third defined: third-ok
+`);
   });
 
   it("should load previous state when run has read-only set to true", async function () {
@@ -186,23 +188,20 @@ script2: META from second defined: second-ok
 script2: META from third defined: undefined\n`);
   });
 
-  it("should sort script names before execution", async function () {
+  it("should not sort script names before execution", async function () {
     await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/2.js", "scripts/3.js" , "scripts/1.js"] });
     const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
-    assert.equal(scriptOutputAfter, `script1: META from first defined: first-ok
-script1: META from second defined: undefined
-script1: META from third defined: undefined
-script2: META from first defined: first-ok
+    assert.equal(scriptOutputAfter, `script2: META from first defined: undefined
 script2: META from second defined: second-ok
 script2: META from third defined: undefined
-script3: META from first defined: first-ok
+script3: META from first defined: undefined
 script3: META from second defined: second-ok
-script3: META from third defined: third-ok`);
+script3: META from third defined: third-ok
+script1: META from first defined: first-ok
+script1: META from second defined: second-ok
+script1: META from third defined: third-ok
+`);
   });
-
-  // custom operand sort check -- simple
-
-  // custom operand sort check -- script directory sorted first
 
   it("should normalize paths", async function () {
     await this.env.run(TASK_DEPLOY, {
@@ -216,7 +215,8 @@ script2: META from second defined: second-ok
 script2: META from third defined: undefined
 script3: META from first defined: first-ok
 script3: META from second defined: second-ok
-script3: META from third defined: third-ok`);
+script3: META from third defined: third-ok
+`);
   });
 });
 

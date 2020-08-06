@@ -12,7 +12,7 @@ async function run (runtimeEnv, accounts, deployer) {
     'script3: META from second defined: ' + deployer.getMetadata('META from second') + '\n')
   fs.appendFileSync(
     'output.txt',
-    'script3: META from third defined: ' + deployer.getMetadata('META from third'))
+    'script3: META from third defined: ' + deployer.getMetadata('META from third') + '\n')
 }
 
 module.exports = { default: run }
