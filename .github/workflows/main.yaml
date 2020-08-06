@@ -1,4 +1,5 @@
 # https://docs.github.com/en/actions/configuring-and-managing-workflows/configuring-a-workflow
+# starters: https://github.com/actions/starter-workflows/blob/main/ci/node.js.yml
 
 name: Run tests on push
 
@@ -20,9 +21,19 @@ jobs:
         uses: actions/setup-node@v2-beta
         with:
           node-version: '12'
+      - name: Cache Node.js modules
+        uses: actions/cache@v2
+        with:
+          # npm cache files are stored in `~/.npm` on Linux/macOS
+          path: ~/.npm
+          key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-node-
+            ${{ runner.OS }}-
       - name: Install dependencies
         run: yarn install
       - name: Execute lint
         run: yarn lint
+      - run: yarn build
       - name: Execute tests
         run: yarn test
