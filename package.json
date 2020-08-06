@@ -59,6 +59,9 @@
   "lint-staged": {
     "**/src/**/*.{ts,js}": [
       "eslint --format stylish --fix"
+    ],
+    "**/test/**/*.{ts,js}": [
+      "eslint --format stylish --fix"
     ]
   },
   "husky": {
