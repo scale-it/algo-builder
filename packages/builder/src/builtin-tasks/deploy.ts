@@ -28,8 +28,7 @@ export function loadFilenames (directory: string): string[] {
     });
   }
 
-  const files = glob.sync(path.join(directory, "*.js"));
-  return files.sort(cmpStr);
+  return glob.sync(path.join(directory, "*.js"));
 }
 
 function clearCheckpointFiles (scriptNames: string[]): void {
@@ -67,7 +66,7 @@ async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntim
     },
     force,
     logDebugTag,
-    (orig: AlgobDeployer) => orig
+    true
   );
 }
 

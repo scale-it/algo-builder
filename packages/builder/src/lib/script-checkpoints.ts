@@ -144,6 +144,10 @@ export class CheckpointDataImpl implements CheckpointData {
     return netCP !== undefined &&
       (netCP.asa[name] !== undefined || netCP.asc[name] !== undefined);
   }
+
+	networkExistsInCurrentCP(networkName: string): boolean {
+    return Boolean(this.strippedCP[networkName])
+	}
 }
 
 export function persistCheckpoint (scriptName: string, checkpoint: ScriptCheckpoints): void {
@@ -172,13 +176,13 @@ export function loadCheckpoint (scriptName: string): ScriptCheckpoints {
   return loadCheckpointNoSuffix(toCheckpointFileName(scriptName));
 }
 
-function walk (directoryName: string): string[] {
+function lsTreeWalk (directoryName: string): string[] {
   var list: string[] = [];
   fs.readdirSync(directoryName).forEach(file => {
     var fullPath = path.join(directoryName, file);
     const f = fs.statSync(fullPath);
     if (f.isDirectory()) {
-      list = list.concat(walk(fullPath));
+      list = list.concat(lsTreeWalk(fullPath));
     } else {
       list.push(fullPath);
     }
@@ -186,11 +190,31 @@ function walk (directoryName: string): string[] {
   return list;
 };
 
-function findCheckpointsRecursive (): string[] {
+function lsFiles (directoryName: string): string[] {
+  var list: string[] = [];
+  fs.readdirSync(directoryName).forEach(file => {
+    var fullPath = path.join(directoryName, file);
+    const f = fs.statSync(fullPath);
+    if (f.isFile()) {
+      list.push(fullPath);
+    }
+  });
+  return list;
+};
+
+function ensureCheckpointsPath(): string {
   const checkpointsPath = path.join(".", artifactsPath, scriptsDirectory);
   fs.mkdirSync(checkpointsPath, { recursive: true });
-  return walk(checkpointsPath)
+  return checkpointsPath
+}
+
+function findCheckpointsRecursive (): string[] {
+  return lsTreeWalk(ensureCheckpointsPath())
     .filter(filename => filename.endsWith(checkpointFileSuffix));
+}
+
+export function lsScriptsDir (): string[] {
+  return lsFiles(scriptsDirectory);
 }
 
 export function loadCheckpointsRecursive (): CheckpointData {
