@@ -47,14 +47,14 @@ export class Environment implements AlgobRuntimeEnv {
     public readonly runtimeArgs: RuntimeArgs,
     public readonly tasks: TasksMap,
     extenders: EnvironmentExtender[] = [],
-    networkRequired: boolean
+    networkRequired: boolean = true
   ) {
     log("Creating AlgobRuntimeEnv");
 
     const ncfg = config.networks[runtimeArgs.network];
     // network configuration is required for all tasks except few setup tasks
     if (!ncfg && networkRequired) {
-      console.log(">>>> here")
+      console.log(">>>> here");
       throw new BuilderError(ERRORS.NETWORK.CONFIG_NOT_FOUND, {
         network: runtimeArgs.network
       });
