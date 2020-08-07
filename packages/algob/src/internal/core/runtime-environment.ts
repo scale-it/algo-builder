@@ -40,18 +40,21 @@ export class Environment implements AlgobRuntimeEnv {
    * @param runtimeArgs The parsed algob's arguments.
    * @param tasks A map of tasks.
    * @param extenders A list of extenders.
+   * @param networkRequired if true it will assert that a requested network is defined.
    */
   constructor (
     public readonly config: ResolvedAlgobConfig,
     public readonly runtimeArgs: RuntimeArgs,
     public readonly tasks: TasksMap,
-    extenders: EnvironmentExtender[] = []
+    extenders: EnvironmentExtender[] = [],
+    networkRequired: boolean
   ) {
     log("Creating AlgobRuntimeEnv");
 
-    const networkConfig = config.networks[runtimeArgs.network];
-
-    if (networkConfig === undefined) {
+    const ncfg = config.networks[runtimeArgs.network];
+    // network configuration is required for all tasks except few setup tasks
+    if (!ncfg && networkRequired) {
+      console.log(">>>> here")
       throw new BuilderError(ERRORS.NETWORK.CONFIG_NOT_FOUND, {
         network: runtimeArgs.network
       });
@@ -63,7 +66,7 @@ export class Environment implements AlgobRuntimeEnv {
     this._extenders = extenders;
     this.network = {
       name: runtimeArgs.network,
-      config: networkConfig
+      config: ncfg
     };
 
     extenders.forEach((extender) => extender(this));

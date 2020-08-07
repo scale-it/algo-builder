@@ -79,8 +79,8 @@ export function getEnv (defaultNetworkCfg?: NetworkConfig): AlgobRuntimeEnv {
     config,
     runtimeArgs,
     ctx.tasksDSL.getTaskDefinitions(),
-    ctx.extendersManager.getExtenders()
-  );
+    ctx.extendersManager.getExtenders(),
+    true);
   ctx.setAlgobRuntimeEnv(env);
 
   return env;

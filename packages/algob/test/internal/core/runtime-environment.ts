@@ -102,7 +102,7 @@ describe("Environment", () => {
 
     tasks = ctx.tasksDSL.getTaskDefinitions();
 
-    env = new Environment(config, args, tasks);
+    env = new Environment(config, args, tasks, [], true);
     ctx.setAlgobRuntimeEnv(env);
   });
 
@@ -269,7 +269,7 @@ describe("Environment", () => {
         return 28;
       });
       tasks = dsl.getTaskDefinitions();
-      const localEnv = new Environment(config, args, tasks);
+      const localEnv = new Environment(config, args, tasks, [], true);
       assert.equal(await localEnv.run("example"), 28);
     });
 
@@ -308,7 +308,8 @@ describe("Environment", () => {
           config,
           { ...args, network: "NOPE" },
           tasks,
-          ctx.extendersManager.getExtenders()
+          ctx.extendersManager.getExtenders(),
+          true
         );
       }, ERRORS.NETWORK.CONFIG_NOT_FOUND);
     });
@@ -341,7 +342,8 @@ describe("Environment", () => {
         config,
         args,
         tasks,
-        ctx.extendersManager.getExtenders()
+        ctx.extendersManager.getExtenders(),
+        true
       );
       assert.equal((env as any).__test_key, "a value");
       assert.equal((env as any).__test_bleep(2), 4);
