@@ -100,15 +100,7 @@ async function main (): Promise<void> {
         task: taskName
       });
     }
-
-    // Being inside of a project is non-mandatory for help and init
-    if ((taskName !== TASK_HELP && taskName !== TASK_INIT && !runtimeArgs.help) &&
-      !isCwdInsideProject()) {
-      throw new BuilderError(ERRORS.GENERAL.NOT_INSIDE_PROJECT, {
-        task: taskName
-      });
-    }
-
+    const origTaskName = taskName;
 
     // --help is a also special case
     let taskArguments: TaskArguments;
@@ -127,9 +119,7 @@ async function main (): Promise<void> {
 
     // Being inside of a project is non-mandatory for help and init
     if (!isSetup && !isCwdInsideProject()) {
-      throw new BuilderError(ERRORS.GENERAL.NOT_INSIDE_PROJECT, {
-        task: taskName
-      });
+      throw new BuilderError(ERRORS.GENERAL.NOT_INSIDE_PROJECT, {task: origTaskName});
     }
 
     const env = new Environment(
