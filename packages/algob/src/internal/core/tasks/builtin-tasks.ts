@@ -17,6 +17,5 @@ export default function (): void{
 // checks if the task name is not a setup kind of task
 export function isSetupTask (taskName: string): boolean {
   return taskName === tasks.TASK_HELP ||
-    taskName === tasks.TASK_CLEAN ||
     taskName === tasks.TASK_INIT;
 }

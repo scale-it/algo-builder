@@ -84,11 +84,6 @@ async function main (): Promise<void> {
     const ctx = BuilderContext.createBuilderContext();
     const config = loadConfigAndTasks(runtimeArgs);
 
-    let taskName = parsedTaskName ?? TASK_HELP;
-    if (runtimeArgs.help && taskName !== TASK_HELP) {
-      taskName = TASK_HELP;
-    }
-
     // const analytics = await Analytics.getInstance(
     //  config.paths.root,
     //  config.analytics.enabled
@@ -99,16 +94,19 @@ async function main (): Promise<void> {
 
     // let [abortAnalytics, hitPromise] = await analytics.sendTaskHit(taskName);
 
+    let taskName = parsedTaskName ?? TASK_HELP;
     if (taskDefinitions[taskName] == null) {
       throw new BuilderError(ERRORS.ARGUMENTS.UNRECOGNIZED_TASK, {
         task: taskName
       });
     }
+    const origTaskName = taskName;
 
     // --help is a also special case
     let taskArguments: TaskArguments;
-    if (taskName !== TASK_HELP) {
+    if (runtimeArgs.help && taskName !== TASK_HELP) {
       taskArguments = { task: taskName };
+      taskName = TASK_HELP;
     } else {
       taskArguments = argumentsParser.parseTaskArguments(
         taskDefinitions[taskName],
@@ -116,12 +114,12 @@ async function main (): Promise<void> {
       );
     }
 
+    // we can't do it earlier because we above we need to check the special case with `--help`
     const isSetup = isSetupTask(taskName);
+
     // Being inside of a project is non-mandatory for help and init
     if (!isSetup && !isCwdInsideProject()) {
-      throw new BuilderError(ERRORS.GENERAL.NOT_INSIDE_PROJECT, {
-        task: taskName
-      });
+      throw new BuilderError(ERRORS.GENERAL.NOT_INSIDE_PROJECT, {task: origTaskName});
     }
 
     const env = new Environment(
