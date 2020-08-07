@@ -155,6 +155,8 @@ const networkErrors = {
     title: "Selected network doesn't exist",
     description: `You are trying to run algob with a non-existent network.
 
+Verify you config and either change a network with '--network' parameter or a make sure the '%network%' exists.
+
 Read the [documentation](https://github.com/scale-it/algorand-builder) to learn how to define custom networks.`
   },
   INVALID_GLOBAL_CHAIN_NAME: {

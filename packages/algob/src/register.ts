@@ -38,7 +38,8 @@ if (!BuilderContext.isCreated()) {
     config,
     runtimeArgs,
     ctx.tasksDSL.getTaskDefinitions(),
-    ctx.extendersManager.getExtenders()
+    ctx.extendersManager.getExtenders(),
+    false
   );
 
   ctx.setAlgobRuntimeEnv(env);

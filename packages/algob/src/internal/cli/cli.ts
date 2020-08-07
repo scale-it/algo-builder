@@ -20,9 +20,11 @@ import {
 import { getEnvRuntimeArgs } from "../core/params/env-variables";
 import { isCwdInsideProject } from "../core/project-structure";
 import { Environment } from "../core/runtime-environment";
+import { isSetupTask } from "../core/tasks/builtin-tasks";
 import { getPackageJson, PackageJson } from "../util/package-info";
 // import { Analytics } from "./analytics";
 import { ArgumentsParser } from "./arguments-parser";
+
 const log = debug("algob:core:cli");
 
 // const ANALYTICS_SLOW_TASK_THRESHOLD = 300;
@@ -82,6 +84,11 @@ async function main (): Promise<void> {
     const ctx = BuilderContext.createBuilderContext();
     const config = loadConfigAndTasks(runtimeArgs);
 
+    let taskName = parsedTaskName ?? TASK_HELP;
+    if (runtimeArgs.help && taskName !== TASK_HELP) {
+      taskName = TASK_HELP;
+    }
+
     // const analytics = await Analytics.getInstance(
     //  config.paths.root,
     //  config.analytics.enabled
@@ -92,26 +99,16 @@ async function main (): Promise<void> {
 
     // let [abortAnalytics, hitPromise] = await analytics.sendTaskHit(taskName);
 
-    let taskName = parsedTaskName ?? TASK_HELP;
     if (taskDefinitions[taskName] == null) {
       throw new BuilderError(ERRORS.ARGUMENTS.UNRECOGNIZED_TASK, {
         task: taskName
       });
     }
 
-    // Being inside of a project is non-mandatory for help and init
-    if ((taskName !== TASK_HELP && taskName !== TASK_INIT && !runtimeArgs.help) &&
-      !isCwdInsideProject()) {
-      throw new BuilderError(ERRORS.GENERAL.NOT_INSIDE_PROJECT, {
-        task: taskName
-      });
-    }
-
     // --help is a also special case
     let taskArguments: TaskArguments;
-    if (runtimeArgs.help && taskName !== TASK_HELP) {
+    if (taskName !== TASK_HELP) {
       taskArguments = { task: taskName };
-      taskName = TASK_HELP;
     } else {
       taskArguments = argumentsParser.parseTaskArguments(
         taskDefinitions[taskName],
@@ -119,25 +116,28 @@ async function main (): Promise<void> {
       );
     }
 
-    if (runtimeArgs.network == null) {
-      // TODO:RZ
-      throw new Error("INTERNAL ERROR. Default network should be registered in `register.ts` module");
+    const isSetup = isSetupTask(taskName);
+    // Being inside of a project is non-mandatory for help and init
+    if (!isSetup && !isCwdInsideProject()) {
+      throw new BuilderError(ERRORS.GENERAL.NOT_INSIDE_PROJECT, {
+        task: taskName
+      });
     }
 
     const env = new Environment(
       config,
       runtimeArgs,
       taskDefinitions,
-      envExtenders
-    );
+      envExtenders,
+      !isSetup);
 
     ctx.setAlgobRuntimeEnv(env);
 
-    const tBeforeRun = new Date().getTime(); // eslint-disable-line @typescript-eslint/no-unused-vars
+    // const tBeforeRun = new Date().getTime();
 
     await env.run(taskName, taskArguments);
 
-    const tAfterRun = new Date().getTime(); // eslint-disable-line @typescript-eslint/no-unused-vars
+    // const tAfterRun = new Date().getTime();
     // if (tAfterRun - tBeforeRun > ANALYTICS_SLOW_TASK_THRESHOLD) {
     //  await hitPromise;
     // } else {
@@ -152,7 +152,7 @@ async function main (): Promise<void> {
         chalk.red(`Error in plugin ${error.pluginName ?? ""}: ${error.message}`)
       );
     } else if (error instanceof Error) {
-      console.error(chalk.red("An unexpected error occurred:"));
+      console.error(chalk.red("An unexpected error occurred:"), error.message);
       showStackTraces = true;
     } else {
       console.error(chalk.red("An unexpected error occurred."));

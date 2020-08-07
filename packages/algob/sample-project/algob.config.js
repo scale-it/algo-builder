@@ -15,7 +15,7 @@ let accounts = [{
 let defaultCfg = {
   host: "http://localhost",
   port: 8080,
-  token: "$ALGORAND_DATA/algod.token",
+  token: "content_of/algorand-node-data/algod.token",
   accounts: accounts,
 };
 
