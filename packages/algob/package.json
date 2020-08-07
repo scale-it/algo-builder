@@ -1,0 +1,85 @@
+{
+  "name": "algob",
+  "version": "0.0.1",
+  "author": "SEE package.json in PROJECT ROOT",
+  "license": "SEE LICENSE IN LICENSE",
+  "repository": "SEE package.json in PROJECT ROOT",
+  "types": "build/internal/lib/lib.d.ts",
+  "description": "",
+  "keywords": [
+    "smart-contracts",
+    "blockchain",
+    "builder",
+    "algorand",
+    "dapps",
+    "javascript",
+    "tooling",
+    "task-runner"
+  ],
+  "main": "build/index.js",
+  "bin": {
+    "algob": "build/src/internal/cli/cli.js"
+  },
+  "engines": {
+    "node": ">=8.2.0"
+  },
+  "scripts": {
+    "lint": "eslint --ext .js,.ts src test",
+    "lint:fix": "eslint --fix --ext .js,.ts src test",
+    "lint:unix": "eslint --format unix --ext .js,.ts src test",
+    "test": "mocha",
+    "coverage": "nyc ../../node_modules/mocha/bin/mocha",
+    "build": "tsc --build .",
+    "build:watch": "tsc -w -p .",
+    "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.tsbuildinfo build",
+    "algob:test": "mkdir -p project-test && cd project-test && node ../build/internal/cli/cli.js"
+  },
+  "devDependencies": {
+    "@types/algosdk": "^0.0.1",
+    "@types/chai": "^4.2.0",
+    "@types/debug": "^4.1.5",
+    "@types/deep-equal": "^1.0.1",
+    "@types/deepmerge": "^2.2.0",
+    "@types/fs-extra": "^9.0.1",
+    "@types/glob": "^7.1.2",
+    "@types/node": "^14.0.13",
+    "@types/semver": "^7.2.0",
+    "@types/sinon": "^9.0.4",
+    "chai": "^4.2.0",
+    "cross-env": "5.0.5",
+    "glob": "^7.1.6",
+    "sinon": "^9.0.2",
+    "time-require": "^0.1.2"
+  },
+  "dependencies": {
+    "algosdk": "^1.6.2",
+    "debug": "^4.1.1",
+    "deep-equal": "^2.0.3",
+    "deepmerge": "^4.2.2",
+    "enquirer": "^2.3.6",
+    "find-up": "^4.1.0",
+    "fp-ts": "^2.6.6",
+    "fs-extra": "^9.0.1",
+    "glob": "^7.1.6",
+    "io-ts": "^2.2.6",
+    "semver": "^7.3.2",
+    "ts-essentials": "^7.0.0",
+    "yaml": "^1.10.0"
+  },
+  "nyc": {
+    "extension": [
+      ".ts"
+    ],
+    "exclude": [
+      "build",
+      "test",
+      "coverage",
+      ".nyc_output"
+    ],
+    "reporter": [
+      "text",
+      "lcovonly"
+    ],
+    "all": true
+  }
+}
