@@ -4,6 +4,7 @@ import * as t from "io-ts";
 import { Context, ValidationError } from "io-ts/lib";
 import { Reporter } from "io-ts/lib/Reporter";
 
+// import { Account } from "algosdk";
 import type { AlgobChainCfg, HttpNetworkConfig, NetworkConfig } from "../../../types";
 import { ALGOB_CHAIN_NAME } from "../../constants";
 import { BuilderError } from "../errors";
@@ -58,20 +59,14 @@ function optional<TypeT, OutputT> (
 
 // IMPORTANT: This t.types MUST be kept in sync with the actual types.
 
-const HDAccountsConfig = t.type({
-  mnemonic: t.string,
-  initialIndex: optional(t.number),
-  count: optional(t.number),
-  path: optional(t.string)
+const AccountType = t.type({
+  addr: t.string,
+  sk: t.unknown // TODO: unsure how to handle Uint8Array type here. Instead we are doing it
+  // in validation method below.
 });
 
-const NetworkAccounts = t.union([
-  t.array(t.string),
-  HDAccountsConfig
-]);
-
 const AlgobChainType = t.type({
-  // accounts: optional(t.array(todo)),
+  accounts: optional(t.array(AccountType)),
   chainName: optional(t.string),
   throwOnTransactionFailures: optional(t.boolean),
   throwOnCallFailures: optional(t.boolean),
@@ -82,7 +77,7 @@ const AlgobChainType = t.type({
 const HttpHeaders = t.record(t.string, t.string, "httpHeaders");
 
 const HttpNetworkType = t.type({
-  accounts: optional(NetworkAccounts),
+  accounts: optional(t.array(AccountType)),
   chainName: optional(t.string),
   // from: optional(t.string),
   host: optional(t.string),
@@ -132,11 +127,16 @@ export function getValidationErrors(config: any): CfgErrors {  // eslint-disable
   // These can't be validated with io-ts
   if (config !== undefined && typeof config.networks === "object") {
     for (const [net, ncfg] of Object.entries<NetworkConfig>(config.networks)) {
+      for (let i = 0; i < (ncfg.accounts || []).length; ++i) {
+        if (ncfg.accounts[i].sk) { validateAccountSK(ncfg.accounts[i].sk, net, i, errors); }
+      }
+
+      // ONLY AlgobChain network can be of type AlgobChainCfg
       if (net === ALGOB_CHAIN_NAME) {
         validateAlgobChainCfg(ncfg, errors);
         continue;
       }
-      // ONLY AlgobChain network can be of type AlgobChainCfg
+
       const hcfg = ncfg as HttpNetworkConfig;
       const host = hcfg.host;
       if (typeof host !== "string" || host === "" || !validateHostname(host)) {
@@ -203,11 +203,6 @@ function validateAlgobChainCfg (ncfg: AlgobChainCfg, errors: CfgErrors): void {
   ) { errors.push(ALGOB_CHAIN_NAME, "loggingEnabled", ncfg.loggingEnabled, tBoolOpt); }
 }
 
-export function validateConfigAccount (): void{
-  // TODO
-  // if (Array.isArray(ncfg.accounts)) {
-}
-
 // this comes from https://stackoverflow.com/questions/5717093
 const hostPattern = new RegExp('^(https?:\\/\\/)?' + // protocol
   '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
@@ -216,4 +211,10 @@ const hostPattern = new RegExp('^(https?:\\/\\/)?' + // protocol
 
 function validateHostname (str: string): boolean {
   return !!hostPattern.test(str);
+}
+
+function validateAccountSK (sk: any, net: string, idx: number, errors: CfgErrors): void { // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (!(sk instanceof Uint8Array)) {
+    errors.push(net, `accounts[${idx}].sk`, sk, "must be an instance of Uint8Array");
+  }
 }

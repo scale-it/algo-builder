@@ -13,10 +13,11 @@ export function mkAlgobEnv (networkName?: string): AlgobRuntimeEnv {
       verbose: false
     },
     tasks: {},
-    run: async (name, args): PromiseAny => "nothing",
+    run: async (_name, _args): PromiseAny => "nothing",
     network: {
-      name: networkName === undefined ? "network name" : networkName,
+      name: networkName === undefined ? "network1" : networkName,
       config: {
+        accounts: [],
         host: "network host",
         port: 1,
         token: "network token"

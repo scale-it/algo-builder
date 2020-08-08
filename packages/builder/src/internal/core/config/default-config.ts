@@ -1,22 +1,16 @@
-import { AlgobConfig, HttpNetworkConfig } from "../../../types";
+import type { AlgobChainCfg, AlgobConfig } from "../../../types";
 import { ALGOB_CHAIN_NAME } from "../../constants";
 
-const DEFAULT_NETWORK_CONFIG: HttpNetworkConfig = {
-  // accounts: [],
-  chainName: "devnet",
-  host: "http://localhost",
-  port: 8080,
-  token: "TODO--token-from-devnet"
+const cfg: AlgobChainCfg = {
+  accounts: [],
+  chainName: ALGOB_CHAIN_NAME,
+  throwOnTransactionFailures: true,
+  throwOnCallFailures: true
 };
 
 const defaultConfig: AlgobConfig = {
   networks: {
-    default: DEFAULT_NETWORK_CONFIG,
-    [ALGOB_CHAIN_NAME]: {
-      chainName: ALGOB_CHAIN_NAME,
-      throwOnTransactionFailures: true,
-      throwOnCallFailures: true
-    }
+    [ALGOB_CHAIN_NAME]: cfg
   },
   // analytics: {
   //  enabled: true,
