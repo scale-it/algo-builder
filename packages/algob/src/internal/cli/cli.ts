@@ -119,7 +119,7 @@ async function main (): Promise<void> {
 
     // Being inside of a project is non-mandatory for help and init
     if (!isSetup && !isCwdInsideProject()) {
-      throw new BuilderError(ERRORS.GENERAL.NOT_INSIDE_PROJECT, {task: origTaskName});
+      throw new BuilderError(ERRORS.GENERAL.NOT_INSIDE_PROJECT, { task: origTaskName });
     }
 
     const env = new Environment(
