@@ -5,6 +5,7 @@ import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { runScript } from "../internal/util/scripts-runner";
+import { checkAlgorandUnauthorized } from "../lib/exceptions";
 import { assertDirChildren } from "../lib/files";
 import {
   AlgobDeployerImpl,
@@ -90,6 +91,20 @@ export async function runMultipleScripts (
   force: boolean,
   logTag: string,
   allowWrite: boolean): Promise<void> {
+  try {
+    return await _runMultipleScripts(runtimeEnv, scriptNames, onSuccessFn, force, logTag, allowWrite);
+  } catch (e) {
+    if (!checkAlgorandUnauthorized(e, runtimeEnv.network)) { throw e; } else { throw new Error("Algorand Node: Unauthorized"); }
+  }
+}
+
+async function _runMultipleScripts (
+  runtimeEnv: AlgobRuntimeEnv,
+  scriptNames: string[],
+  onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
+  force: boolean,
+  logTag: string,
+  allowWrite: boolean): Promise<void> {
   const log = debug(logTag);
   const cpData: CheckpointRepo = loadCheckpointsRecursive();
   const deployer: AlgobDeployer = mkDeployer(runtimeEnv, cpData, allowWrite);
@@ -133,7 +148,7 @@ async function doRun (
   await runMultipleScriptsOneByOne(
     runtimeEnv,
     assertDirChildren(scriptsDirectory, scripts),
-    (cpData: CheckpointRepo, relativeScriptPath: string) => {},
+    (_cpData: CheckpointRepo, _relativeScriptPath: string) => {},
     true,
     logDebugTag,
     false
