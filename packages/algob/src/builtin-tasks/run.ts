@@ -94,7 +94,7 @@ export async function runMultipleScripts (
   try {
     return await _runMultipleScripts(runtimeEnv, scriptNames, onSuccessFn, force, logTag, allowWrite);
   } catch (e) {
-    if (!checkAlgorandUnauthorized(e, runtimeEnv.network)) { throw e; } else { throw new Error("Algorand Node: Unauthorized"); }
+    if (!checkAlgorandUnauthorized(e, runtimeEnv.network)) { throw e; }
   }
 }
 
