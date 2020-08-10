@@ -14,13 +14,41 @@ A network object can specify following entries:
 A special network named `algobchain` can specify the `AlgobChain` configuration:
 
 ```
-  accounts_file?: string;
-  throwOnTransactionFailures?: boolean;
-  throwOnCallFailures?: boolean;
-  loggingEnabled?: boolean;
-  initialDate?: string;
+accounts_file?: string;
+throwOnTransactionFailures?: boolean;
+throwOnCallFailures?: boolean;
+loggingEnabled?: boolean;
+initialDate?: string;
 ```
 
+
+## Accounts
+
+Each network configuration requires a list of accounts. These accounts are then available in scripts and in a console. An account can be constructed by:
+
+1. Initializing a native `algosdk.Account` object. Example:
+
+        const account = {
+          addr: 'UDF7DS5QXECBUEDF3GZVHHLXDRJOVTGR7EORYGDBPJ2FNB5D5T636QMWZY',
+          sk: new Uint8Array([28,  45,  45,  15,  70, 188,  57, 228,  18,  21,  42, 228,  33, 187, 222, 162,  89,  15,  22,  52, 143, 171, 182,  17, 168, 238,  96, 177,  12, 163, 243, 231, 160, 203, 241, 203, 176, 185,   4,  26,  16, 101, 217, 179, 83, 157, 119,  28,  82, 234, 204, 209, 249,  29,  28, 24,  97, 122, 116,  86, 135, 163, 236, 253]) }
+
+1. Loaded from a file (you can generate a test accounts using `gen-accounts` command). `algob` has to be available in your node_modules.
+
+        const { loadAccountsFromFileSync } = require("algob");
+        const accFromFile = loadAccountsFromFileSync("assets/accounts_generated.yaml");
+
+1. Created from a mnemonic string:
+
+        const { mkAccounts } = require("algob");
+        let accounts = mkAccounts([{
+          addr: "KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY",
+          mnemonic: "call boy rubber fashion arch day capable one sweet skate outside purse six early learn tuition eagle love breeze pizza loud today popular able divide"
+        }]);
+
+NOTE: don't use any of the accounts above. They are provided only as an example - everyone has an access to them!
+
+You can merge accounts in the config file (eg by using `concat` method on an `Array`).
+You can also construct different accounts for different networks.
 
 
 ## Example
