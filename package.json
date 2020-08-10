@@ -63,7 +63,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn lint-staged",
+      "pre-commit": "yarn workspaces run lint-staged",
       "pre-push": "yarn test"
     }
   }
