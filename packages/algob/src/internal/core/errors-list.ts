@@ -545,6 +545,14 @@ Use 'deployer.getMetadata(key)' to check the current value.
 
 Use 'deployer.isDefined(name)' to check if the name is already used.
 `
+  },
+  DEPLOY_SCRIPT_NON_DIRECT_CHILD: {
+    number: 610,
+    message: "Non-direct child scripts are not allowed in deploy: %scripts%.",
+    title: "Non-direct child scripts are not allowed in deploy",
+    description: `Non-direct child scripts are not allowed in deploy: %scripts%.
+
+Please double check your command parameters`
   }
 };
 

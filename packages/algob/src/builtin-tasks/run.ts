@@ -5,13 +5,14 @@ import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { runScript } from "../internal/util/scripts-runner";
-import { checkRelativePaths } from "../lib/files";
+import { assertDirChildren } from "../lib/files";
 import {
   AlgobDeployerImpl,
   AlgobDeployerReadOnlyImpl,
   loadCheckpoint,
   loadCheckpointsRecursive,
-  lsScriptsDir
+  lsScriptsDir,
+  scriptsDirectory
 } from "../lib/script-checkpoints";
 import { AlgobDeployer, AlgobRuntimeEnv, CheckpointRepo, Checkpoints } from "../types";
 import { TASK_RUN } from "./task-names";
@@ -131,7 +132,7 @@ async function doRun (
 
   await runMultipleScriptsOneByOne(
     runtimeEnv,
-    checkRelativePaths(scripts),
+    assertDirChildren(scriptsDirectory, scripts),
     (cpData: CheckpointRepo, relativeScriptPath: string) => {},
     true,
     logDebugTag,
