@@ -6,7 +6,7 @@ import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { cmpStr } from "../lib/comparators";
-import { checkRelativePaths } from "../lib/files";
+import { assertDirectDirChildren } from "../lib/files";
 import {
   persistCheckpoint,
   scriptsDirectory,
@@ -47,7 +47,7 @@ async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntim
 
   const scriptNames = fileNames.length === 0
     ? loadFilenames(scriptsDirectory)
-    : checkRelativePaths(fileNames);
+    : assertDirectDirChildren(scriptsDirectory, fileNames);
 
   if (scriptNames.length === 0) {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.SCRIPTS_NO_FILES_FOUND, {

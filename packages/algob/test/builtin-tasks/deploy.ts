@@ -47,7 +47,7 @@ scripts directory: script 2 executed
     await expectBuilderErrorAsync(
       async () =>
         await this.env.run(TASK_DEPLOY, { fileNames: ["1.js", "scripts/2.js", "scripts/1.js"] }),
-      ERRORS.BUILTIN_TASKS.SCRIPTS_OUTSIDE_SCRIPTS_DIRECTORY,
+      ERRORS.BUILTIN_TASKS.DEPLOY_SCRIPT_NON_DIRECT_CHILD,
       "1.js"
     );
   });
@@ -82,27 +82,35 @@ describe("Deploy task: nested state files", function () {
   useCleanFixtureProject("scripts-dir-recursive-cp");
 
   it("Deployer should accumulate state during the run 1", async function () {
-    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js", "scripts/nested/query.js"] });
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js", "scripts/query.js"] });
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, `ASA from first defined: true
 ASC from second defined: false`);
   });
 
+  it("Deployer should fail during nested execution", async function () {
+    await expectBuilderErrorAsync(
+      async () => await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js", "scripts/nested/nested.js"] }),
+      ERRORS.BUILTIN_TASKS.DEPLOY_SCRIPT_NON_DIRECT_CHILD,
+      "scripts/nested/nested.js");
+    assert.isFalse(fs.existsSync(testFixtureOutputFile));
+  });
+
   it("Deployer should accumulate state during the run 2", async function () {
-    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js", "scripts/2.js", "scripts/nested/query.js"] });
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js", "scripts/2.js", "scripts/query.js"] });
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, `ASA from first defined: true
 ASC from second defined: true`);
   });
 
   it("Deployer should load deployed assets before running scripts; should not show them", async function () {
-    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/nested/query.js"] });
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/query.js"] });
     const scriptOutputBefore = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputBefore, `ASA from first defined: false
 ASC from second defined: false`);
     fs.unlinkSync(testFixtureOutputFile);
     await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js", "scripts/2.js"] });
-    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/nested/query.js"] });
+    await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/query.js"] });
     const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputAfter, `ASA from first defined: true
 ASC from second defined: true`);
@@ -111,7 +119,7 @@ ASC from second defined: true`);
   it("Deployer --force should allow to rewrite existing assets; one script", async function () {
     await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js"] });
     await this.env.run(TASK_DEPLOY, {
-      fileNames: ["scripts/1.js", "scripts/nested/query.js"],
+      fileNames: ["scripts/1.js", "scripts/query.js"],
       force: true
     });
     const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
@@ -122,7 +130,7 @@ ASC from second defined: false`);
   it("Deployer --force should allow to rewrite existing assets; two scripts", async function () {
     await this.env.run(TASK_DEPLOY, { fileNames: ["scripts/1.js", "scripts/2.js"] });
     await this.env.run(TASK_DEPLOY, {
-      fileNames: ["scripts/1.js", "scripts/2.js", "scripts/nested/query.js"],
+      fileNames: ["scripts/1.js", "scripts/2.js", "scripts/query.js"],
       force: true
     });
     const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
