@@ -5,6 +5,7 @@ import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { runScript } from "../internal/util/scripts-runner";
+import { checkAlgorandUnauthorized } from "../lib/exceptions";
 import { assertDirChildren } from "../lib/files";
 import {
   AlgobDeployerImpl,
@@ -133,7 +134,7 @@ async function doRun (
   await runMultipleScriptsOneByOne(
     runtimeEnv,
     assertDirChildren(scriptsDirectory, scripts),
-    (cpData: CheckpointRepo, relativeScriptPath: string) => {},
+    (_cpData: CheckpointRepo, _relativeScriptPath: string) => {},
     true,
     logDebugTag,
     false
