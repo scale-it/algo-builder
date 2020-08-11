@@ -91,20 +91,6 @@ export async function runMultipleScripts (
   force: boolean,
   logTag: string,
   allowWrite: boolean): Promise<void> {
-  try {
-    return await _runMultipleScripts(runtimeEnv, scriptNames, onSuccessFn, force, logTag, allowWrite);
-  } catch (e) {
-    if (!checkAlgorandUnauthorized(e, runtimeEnv.network)) { throw e; }
-  }
-}
-
-async function _runMultipleScripts (
-  runtimeEnv: AlgobRuntimeEnv,
-  scriptNames: string[],
-  onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
-  force: boolean,
-  logTag: string,
-  allowWrite: boolean): Promise<void> {
   const log = debug(logTag);
   const cpData: CheckpointRepo = loadCheckpointsRecursive();
   const deployer: AlgobDeployer = mkDeployer(runtimeEnv, cpData, allowWrite);

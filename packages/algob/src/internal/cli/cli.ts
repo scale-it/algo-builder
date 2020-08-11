@@ -7,6 +7,7 @@ import debug from "debug";
 import semver from "semver";
 
 import { TASK_HELP, TASK_INIT } from "../../builtin-tasks/task-names";
+import { checkAlgorandUnauthorized } from "../../lib/exceptions";
 import { TaskArguments } from "../../types";
 import { ALGOB_NAME } from "../constants";
 import { BuilderContext } from "../context";
@@ -133,7 +134,11 @@ async function main (): Promise<void> {
 
     // const tBeforeRun = new Date().getTime();
 
-    await env.run(taskName, taskArguments);
+    try {
+      await env.run(taskName, taskArguments);
+    } catch (e) {
+      if (!checkAlgorandUnauthorized(e, env.network)) { throw e; }
+    }
 
     // const tAfterRun = new Date().getTime();
     // if (tAfterRun - tBeforeRun > ANALYTICS_SLOW_TASK_THRESHOLD) {
