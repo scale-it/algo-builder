@@ -8,13 +8,15 @@ import { runScript } from "../internal/util/scripts-runner";
 import { checkAlgorandUnauthorized } from "../lib/exceptions";
 import { assertDirChildren } from "../lib/files";
 import {
-  AlgobDeployerImpl,
-  AlgobDeployerReadOnlyImpl,
   loadCheckpoint,
   loadCheckpointsRecursive,
   lsScriptsDir,
   scriptsDirectory
 } from "../lib/script-checkpoints";
+import {
+  AlgobDeployerImpl,
+  AlgobDeployerReadOnlyImpl
+} from "../lib/deployer";
 import { AlgobDeployer, AlgobRuntimeEnv, CheckpointRepo, Checkpoints } from "../types";
 import { TASK_RUN } from "./task-names";
 
