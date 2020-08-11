@@ -37,10 +37,18 @@ function parseMnemonic (mnemonic: string): Account {
   }
 }
 
-// Loads accounts from `filename`. The file should be a YAML file with list of objects
-// which is either `HDAccount`, `MnemonicAccount` or an `Account`.
-export async function accountsFromFile (filename: string): Promise<Account[]> {
-  const content = await fs.promises.readFile(filename, 'utf8');
+function _loadAccounts (content: string): Account[] {
   const parsed = YAML.parse(content) as AccountDef[];
   return mkAccounts(parsed);
+}
+
+// Loads accounts from `filename`. The file should be a YAML file with list of objects
+// which is either `HDAccount`, `MnemonicAccount` or an `Account`.
+export async function loadAccountsFromFile (filename: string): Promise<Account[]> {
+  return _loadAccounts(await fs.promises.readFile(filename, 'utf8'));
+}
+
+// Same as `loadAccountsFromFile` but uses sync method instead of async
+export function loadAccountsFromFileSync (filename: string): Account[] {
+  return _loadAccounts(fs.readFileSync(filename, 'utf8'));
 }

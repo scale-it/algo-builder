@@ -1,3 +1,6 @@
-import { mkAccounts } from "./lib/account";
+import {
+  loadAccountsFromFile,
+  loadAccountsFromFileSync, mkAccounts
+} from "./lib/account";
 
-export { mkAccounts };
+export { mkAccounts, loadAccountsFromFile, loadAccountsFromFileSync };
