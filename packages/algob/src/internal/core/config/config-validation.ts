@@ -4,6 +4,7 @@ import * as t from "io-ts";
 import { Context, ValidationError } from "io-ts/lib";
 import { Reporter } from "io-ts/lib/Reporter";
 
+import { validateAccount } from "../../../lib/account";
 // import { Account } from "algosdk";
 import type { AlgobChainCfg, HttpNetworkConfig, NetworkConfig } from "../../../types";
 import { ALGOB_CHAIN_NAME } from "../../constants";
@@ -61,8 +62,10 @@ function optional<TypeT, OutputT> (
 
 const AccountType = t.type({
   addr: t.string,
-  sk: t.unknown // TODO: unsure how to handle Uint8Array type here. Instead we are doing it
-  // in validation method below.
+  // TODO: unsure how to handle Uint8Array type here. Instead we are doing it
+  // in the validation method below.
+  sk: t.unknown,
+  name: t.string
 });
 
 const AlgobChainType = t.type({
@@ -127,8 +130,13 @@ export function getValidationErrors(config: any): CfgErrors {  // eslint-disable
   // These can't be validated with io-ts
   if (config !== undefined && typeof config.networks === "object") {
     for (const [net, ncfg] of Object.entries<NetworkConfig>(config.networks)) {
+      const accountsMap = new Map<string, number>(); // {} as ([key: string]: number);
+      let j;
       for (let i = 0; i < (ncfg.accounts || []).length; ++i) {
-        if (ncfg.accounts[i].sk) { validateAccountSK(ncfg.accounts[i].sk, net, i, errors); }
+        const a = ncfg.accounts[i];
+        const p = errors.putter(net + ".accounts", i.toString());
+        validateAccount(a, p);
+        if ((j = accountsMap.get(a.name)) !== undefined) { p.push('name', `Account name ${a.name} already exists at index ${j}`, 'string'); } else { accountsMap.set(a.name, i); }
       }
 
       // ONLY AlgobChain network can be of type AlgobChainCfg
@@ -211,10 +219,4 @@ const hostPattern = new RegExp('^(https?:\\/\\/)?' + // protocol
 
 function validateHostname (str: string): boolean {
   return !!hostPattern.test(str);
-}
-
-function validateAccountSK (sk: any, net: string, idx: number, errors: CfgErrors): void { // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if (!(sk instanceof Uint8Array)) {
-    errors.push(net, `accounts[${idx}].sk`, sk, "must be an instance of Uint8Array");
-  }
 }

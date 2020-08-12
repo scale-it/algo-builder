@@ -22,10 +22,15 @@ value
 
 export default class CfgErrors {
   errors: string[] = [];
+  prefix: string;
+
+  constructor (prefix = "config.networks") {
+    this.prefix = prefix;
+  }
 
   public push(net: string, field: string, val: any, expectedType: string) {  // eslint-disable-line
     this.errors.push(mkErrorMessage(
-      `config.networks.${net}.${field}`,
+      `${this.prefix}.${net}.${field}`,
       val,
       expectedType));
   }
@@ -40,5 +45,30 @@ export default class CfgErrors {
 
   public toString (): string {
     return this.errors.join("\n  * ");
+  }
+
+  public putter (net: string, field: string): ErrorPutter {
+    return new ErrorPutter(this, net, field);
+  }
+}
+
+export class ErrorPutter {
+  errs: CfgErrors;
+  net: string;
+  field: string;
+  public isEmpty = true;
+
+  constructor (errs: CfgErrors, net: string, field: string) {
+    this.errs = errs;
+    this.net = net;
+    this.field = field;
+  }
+
+  // wraps CfgErrors.put and always returns false.
+  public push(field: string, val: any, expectedType: string): boolean { // eslint-disable-line
+    if (field === "") { field = this.field; } else { field = this.field + "." + field; }
+    this.errs.push(this.net, field, val, expectedType);
+    this.isEmpty = false;
+    return false;
   }
 }
