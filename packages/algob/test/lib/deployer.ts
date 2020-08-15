@@ -1,22 +1,12 @@
 import { assert } from "chai";
-import * as fs from "fs";
 
 import { ERRORS } from "../../src/internal/core/errors-list";
-import {
-  appendToCheckpoint,
-  CheckpointImpl,
-  CheckpointRepoImpl,
-  loadCheckpoint,
-  persistCheckpoint,
-  registerASA,
-  registerASC,
-  toCheckpointFileName
-} from "../../src/lib/script-checkpoints";
-import { cleanupMutableData } from "./script-checkpoints";
 import { AlgobDeployerImpl } from "../../src/lib/deployer";
-import { Checkpoint, Checkpoints } from "../../src/types";
+import { CheckpointRepoImpl } from "../../src/lib/script-checkpoints";
+import { Checkpoints } from "../../src/types";
 import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkAlgobEnv } from "../helpers/params";
+import { cleanupMutableData } from "./script-checkpoints";
 
 describe("AlgobDeployerImpl", () => {
   it("Should ensure metadata existence for network", async () => {

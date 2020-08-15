@@ -6,9 +6,7 @@ import {
   AlgobRuntimeEnv,
   ASAInfo,
   ASCInfo,
-  Checkpoint,
-  CheckpointRepo,
-  Checkpoints
+  CheckpointRepo
 } from "../types";
 
 // This class is what user interacts with in deploy task

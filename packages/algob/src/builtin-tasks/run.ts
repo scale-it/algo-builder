@@ -5,7 +5,10 @@ import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { runScript } from "../internal/util/scripts-runner";
-import { checkAlgorandUnauthorized } from "../lib/exceptions";
+import {
+  AlgobDeployerImpl,
+  AlgobDeployerReadOnlyImpl
+} from "../lib/deployer";
 import { assertDirChildren } from "../lib/files";
 import {
   loadCheckpoint,
@@ -13,10 +16,6 @@ import {
   lsScriptsDir,
   scriptsDirectory
 } from "../lib/script-checkpoints";
-import {
-  AlgobDeployerImpl,
-  AlgobDeployerReadOnlyImpl
-} from "../lib/deployer";
 import { AlgobDeployer, AlgobRuntimeEnv, CheckpointRepo, Checkpoints } from "../types";
 import { TASK_RUN } from "./task-names";
 

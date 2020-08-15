@@ -13,8 +13,7 @@ import {
   toCheckpointFileName
 } from "../../src/lib/script-checkpoints";
 import { Checkpoint, Checkpoints } from "../../src/types";
-import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
-import { mkAlgobEnv } from "../helpers/params";
+import { expectBuilderError } from "../helpers/errors";
 
 export function cleanupMutableData (netCheckpoint: Checkpoint, n: number): Checkpoint {
   assert.isNotNull(netCheckpoint.timestamp);
@@ -572,6 +571,5 @@ describe("CheckpointRepoImpl", () => {
     assert.isFalse(cpData.isDefined("other network", "ASC name"));
   });
 });
-
 
 //  LocalWords:  cp
