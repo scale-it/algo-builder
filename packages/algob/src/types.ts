@@ -1,7 +1,13 @@
-import type { Account as AccountSDK } from "algosdk";
+import type { Account } from "algosdk";
 import { DeepReadonly, StrictOmit } from "ts-essentials";
 
 import * as types from "./internal/core/params/argument-types";
+import {
+  AccountDefType,
+  ASADescriptionType,
+  HDAccountType,
+  MnemonicAccountType
+} from "./types-validated";
 
 // Begin config types
 
@@ -349,6 +355,7 @@ export interface AlgobDeployer {
   isDefined: (name: string) => boolean
 }
 
+export type ASADescription = ASADescriptionType;
 // ************************
 //     helper types
 
