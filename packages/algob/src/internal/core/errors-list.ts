@@ -629,10 +629,14 @@ const accountErrors = {
 const scriptErrors = {
   ASA_PARAM_PARSE_ERROR: {
     number: 900,
-    message: `Invalid ASA definition: %filename%\n\n%reason%`,
-    title: "Invalid ASA definition",
-    description: `Invalid ASA definition: %filename%
+    message: `Invalid ASA definition: '%filename%'.
+        Reason:
 
+%reason%`,
+    title: "Invalid ASA definition",
+    description: `Invalid ASA definition: '%filename%'.
+
+        Reason:
 %reason%
 
 Please check your ASA file`

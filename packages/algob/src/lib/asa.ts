@@ -5,6 +5,7 @@ import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { ASADescription } from "../types";
 import { ASADescriptionSchema } from "../types-validated";
+import { parseZodError } from "./validation-errors";
 
 export function parseASADef (obj: Object, filename: string): ASADescription {
   try {
@@ -16,7 +17,7 @@ export function parseASADef (obj: Object, filename: string): ASADescription {
   } catch (e) {
     if (e instanceof z.ZodError) {
       throw new BuilderError(ERRORS.SCRIPT.ASA_PARAM_PARSE_ERROR, {
-        reason: e.toString(), // eslint-disable-line @typescript-eslint/no-base-to-string
+        reason: parseZodError(e),
         filename: filename
       }, e);
     }
