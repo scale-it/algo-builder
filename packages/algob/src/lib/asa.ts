@@ -1,14 +1,10 @@
-// import fs from "fs";
+import fs from "fs";
 import * as z from 'zod';
 
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { ASADescription } from "../types";
 import { ASADescriptionSchema } from "../types-validated";
-
-export function loadASAFile (filename: string): any {
-  // fs.readFileSync()
-}
 
 export function parseASADef (obj: Object, filename: string): ASADescription {
   try {
@@ -26,4 +22,8 @@ export function parseASADef (obj: Object, filename: string): ASADescription {
     }
     throw e;
   }
+}
+
+export function loadASAFile (filename: string): ASADescription {
+  return parseASADef(fs.readFileSync(filename), filename);
 }
