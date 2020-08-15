@@ -15,8 +15,9 @@ export const MnemonicAccountSchema = z.object({
 export type MnemonicAccountType = z.infer<typeof MnemonicAccountSchema>;
 
 export const Uint8ArraySchema = z.instanceof(Uint8Array);
-// export const AlgoSDKAccountSchema = z.instanceof(Account); // TODO: Doesn't work
-// Must match `Account` from `algosdk`
+// Must match `Account` from `algosdk` to create it later.
+// This schema will match exact type so as all methods aren't serialized
+// in the start type it's not possible to directly use Account type.
 export const AlgoSDKAccountSchema = z.object({
   addr: z.string(),
   sk: Uint8ArraySchema
