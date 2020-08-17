@@ -2,12 +2,7 @@ import type { Account } from "algosdk";
 import { DeepReadonly, StrictOmit } from "ts-essentials";
 
 import * as types from "./internal/core/params/argument-types";
-import {
-  AccountDefType,
-  ASADescriptionType,
-  HDAccountType,
-  MnemonicAccountType
-} from "./types-validated";
+import { ASADescriptionType } from "./types-input";
 
 // Begin config types
 

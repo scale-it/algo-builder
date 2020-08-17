@@ -5,13 +5,6 @@ import { parseASADef } from "../../src/lib/asa";
 import { AccountDef, ASADescription } from "../../src/types";
 import { expectBuilderError } from "../helpers/errors";
 
-function mkAccount (name: string): AccountDef {
-  return {
-    addr: name,
-    sk: new Uint8Array([1, 2, 3])
-  };
-}
-
 describe("ASA parser", () => {
   it("Should validate correct obj", async () => {
     const valid: ASADescription = {
@@ -36,34 +29,22 @@ describe("ASA parser", () => {
       metadataHash: "metadataHash",
       note: "note",
       noteb64: "noteb64",
-      manager: mkAccount("manager"),
-      reserve: mkAccount("reserve"),
-      freeze: mkAccount("freeze"),
-      clawback: mkAccount("clawback")
+      manager: "manager",
+      reserve: "reserve",
+      freeze: "freeze",
+      clawback: "clawback"
     };
     const parsed = parseASADef(valid, "");
     assert.deepEqual(parsed, {
-      clawback: {
-        addr: "clawback",
-        sk: new Uint8Array([1, 2, 3])
-      },
+      clawback: "clawback",
       decimals: 12,
       defaultFrozen: true,
-      freeze: {
-        addr: "freeze",
-        sk: new Uint8Array([1, 2, 3])
-      },
-      manager: {
-        addr: "manager",
-        sk: new Uint8Array([1, 2, 3])
-      },
+      freeze: "freeze",
+      manager: "manager",
       metadataHash: "metadataHash",
       note: "note",
       noteb64: "noteb64",
-      reserve: {
-        addr: "reserve",
-        sk: new Uint8Array([1, 2, 3])
-      },
+      reserve: "reserve",
       total: 213,
       unitName: "unitName",
       url: "url"
