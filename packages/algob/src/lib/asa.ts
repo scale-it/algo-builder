@@ -3,9 +3,9 @@ import * as z from 'zod';
 
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
+import { parseZodError } from "../internal/core/validation-errors";
 import { ASADescription } from "../types";
 import { ASADescriptionSchema } from "../types-input";
-import { parseZodError } from "./validation-errors";
 
 export function parseASADef (obj: Object, filename: string): ASADescription {
   try {
