@@ -1,4 +1,4 @@
-import type { Account } from "algosdk";
+import type { Account as AccountSDK } from "algosdk";
 import { DeepReadonly, StrictOmit } from "ts-essentials";
 
 import * as types from "./internal/core/params/argument-types";
