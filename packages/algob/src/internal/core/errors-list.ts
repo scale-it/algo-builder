@@ -599,7 +599,7 @@ Please use \`usePlugin(npm-plugin-package)\` instead.`
 const accountErrors = {
   MNEMONIC_ADDR_MISSMATCH: {
     number: 400,
-    message: `Please use same address as the one specified in the mnemonic account (addr: "%addr%", mnemonic: "%mnemonic%").`,
+    message: `Please use same address as the one specified in the mnemonic account (name: "%name%", addr: "%addr%", mnemonic: "%mnemonic%").`,
     title: "Wrong address for specified mnemonic account",
     description: "Mnemonic account encodes secret key, public key and address. The address from mnemonic account must mach the address specified in the account definition"
   },
@@ -613,6 +613,12 @@ const accountErrors = {
     number: 402,
     message: `HD accounts is not yet supported. Account path: %path%`,
     title: "HD accounts is not yet supported",
+    description: ""
+  },
+  MALFORMED: {
+    number: 403,
+    message: `%errors%`,
+    title: "Some accounts are malformed or have missing fields",
     description: ""
   }
 

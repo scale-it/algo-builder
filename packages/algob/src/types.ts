@@ -1,4 +1,4 @@
-import type { Account } from "algosdk";
+import type { Account as AccountSDK } from "algosdk";
 import { DeepReadonly, StrictOmit } from "ts-essentials";
 
 import * as types from "./internal/core/params/argument-types";
@@ -6,6 +6,12 @@ import * as types from "./internal/core/params/argument-types";
 // Begin config types
 
 // IMPORTANT: This t.types MUST be kept in sync with the actual types.
+
+export interface Account extends AccountSDK {
+  // from AccountSDK: addr: string;
+  //                  sk: Uint8Array
+  name: string
+}
 
 export interface HDAccount {
   mnemonic: string
@@ -15,6 +21,7 @@ export interface HDAccount {
 }
 
 export interface MnemonicAccount {
+  name: string
   addr: string
   mnemonic: string
 }

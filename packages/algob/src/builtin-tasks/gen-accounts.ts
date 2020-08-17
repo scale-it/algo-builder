@@ -39,6 +39,7 @@ export function genAccounts (n: number): MnemonicAccount[] {
   for (let i = 0; i < n; ++i) {
     const a = algosdk.generateAccount();
     accounts.push({
+      name: "gen_" + i.toString(),
       addr: a.addr,
       mnemonic: algosdk.secretKeyToMnemonic(a.sk)
     });
