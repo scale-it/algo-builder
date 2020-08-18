@@ -1,4 +1,6 @@
+import fs from "fs";
 import path from "path";
+import YAML from "yaml";
 
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
@@ -28,4 +30,29 @@ export function assertDirectDirChildren (dir: string, scriptNames: string[]): st
     });
   }
   return normalized;
+}
+
+function readYAML (filePath: string): any {
+  return YAML.parse(fs.readFileSync(filePath).toString());
+}
+
+export function loadFromYamlFileSilent (filePath: string): any {
+  // Try-catch is the way:
+  // https://nodejs.org/docs/latest/api/fs.html#fs_fs_stat_path_options_callback
+  // Instead, user code should open/read/write the file directly and
+  // handle the error raised if the file is not available
+  try {
+    return readYAML(filePath);
+  } catch (e) {
+    return {};
+  }
+}
+
+export function loadFromYamlFileSilentWithMessage (filePath: string, messageIfNotPresent: string): any {
+  try {
+    return readYAML(filePath);
+  } catch (e) {
+    console.warn(messageIfNotPresent);
+    return {};
+  }
 }

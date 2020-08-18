@@ -3,7 +3,7 @@
 import algosdk from "algosdk";
 
 import { ALGOB_CHAIN_NAME } from "../internal/constants";
-import type { HttpNetworkConfig, Network } from "../types";
+import { HttpNetworkConfig, Network } from "../types";
 
 // @note: probably in the future we will remove this function and provide our own wrapper
 export function createClient (n: Network): algosdk.Algodv2 {

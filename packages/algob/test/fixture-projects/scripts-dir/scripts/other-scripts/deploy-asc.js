@@ -3,7 +3,7 @@ const fs = require('fs')
 
 async function run (runtimeEnv, accounts, deployer) {
   fs.appendFileSync('output.txt', 'deployASC script\n')
-  await deployer.deployASC('metadata key', 'metadata value')
+  await deployer.deployASC('metadata key', {}, 'metadata value')
   fs.appendFileSync('output.txt', 'deployASC script after\n')
 }
 

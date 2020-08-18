@@ -5,6 +5,8 @@ import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { runScript } from "../internal/util/scripts-runner";
+import { AlgoDeployClient, createDeployClient } from "../lib/algo-client";
+import { loadASAFile } from "../lib/asa";
 import {
   AlgobDeployerImpl,
   AlgobDeployerReadOnlyImpl
@@ -16,7 +18,7 @@ import {
   lsScriptsDir,
   scriptsDirectory
 } from "../lib/script-checkpoints";
-import { AlgobDeployer, AlgobRuntimeEnv, CheckpointRepo, Checkpoints } from "../types";
+import { AlgobDeployer, AlgobRuntimeEnv, CheckpointRepo } from "../types";
 import { TASK_RUN } from "./task-names";
 
 interface Input {
@@ -30,9 +32,14 @@ function filterNonExistent (scripts: string[]): string[] {
 function mkDeployer (
   runtimeEnv: AlgobRuntimeEnv,
   cpData: CheckpointRepo,
-  allowWrite: boolean
+  allowWrite: boolean,
+  algoClient: AlgoDeployClient
 ): AlgobDeployer {
-  const deployer = new AlgobDeployerImpl(runtimeEnv, cpData);
+  const deployer = new AlgobDeployerImpl(
+    runtimeEnv,
+    cpData,
+    loadASAFile(),
+    algoClient);
   if (allowWrite) {
     return deployer;
   }
@@ -72,7 +79,9 @@ export async function runMultipleScriptsOneByOne (
   onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
   force: boolean,
   logDebugTag: string,
-  allowWrite: boolean): Promise<void> {
+  allowWrite: boolean,
+  algoClient: AlgoDeployClient
+): Promise<void> {
   for (const script of scriptNames) {
     await runMultipleScripts(
       runtimeEnv,
@@ -80,7 +89,8 @@ export async function runMultipleScriptsOneByOne (
       onSuccessFn,
       force,
       logDebugTag,
-      allowWrite
+      allowWrite,
+      algoClient
     );
   }
 }
@@ -91,10 +101,12 @@ export async function runMultipleScripts (
   onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
   force: boolean,
   logTag: string,
-  allowWrite: boolean): Promise<void> {
+  allowWrite: boolean,
+  algoClient: AlgoDeployClient
+): Promise<void> {
   const log = debug(logTag);
   const cpData: CheckpointRepo = loadCheckpointsRecursive();
-  const deployer: AlgobDeployer = mkDeployer(runtimeEnv, cpData, allowWrite);
+  const deployer: AlgobDeployer = mkDeployer(runtimeEnv, cpData, allowWrite, algoClient);
 
   const scriptsFromScriptsDir: string[] = lsScriptsDir();
 
@@ -119,9 +131,10 @@ export async function runMultipleScripts (
   }
 }
 
-async function doRun (
+async function executeRunTask (
   { scripts }: Input,
-  runtimeEnv: AlgobRuntimeEnv
+  runtimeEnv: AlgobRuntimeEnv,
+  algoClient: AlgoDeployClient
 ): Promise<any> {
   const logDebugTag = "algob:tasks:run";
 
@@ -135,10 +148,11 @@ async function doRun (
   await runMultipleScriptsOneByOne(
     runtimeEnv,
     assertDirChildren(scriptsDirectory, scripts),
-    (_cpData: CheckpointRepo, _relativeScriptPath: string) => {},
+    (_cpData: CheckpointRepo, _relativeScriptPath: string) => { },
     true,
     logDebugTag,
-    false
+    false,
+    algoClient
   );
 }
 
@@ -148,5 +162,5 @@ export default function (): void {
       "scripts",
       "A js file to be run within algob's environment"
     )
-    .setAction(doRun);
+    .setAction((input, env) => executeRunTask(input, env, createDeployClient(env.network)));
 }

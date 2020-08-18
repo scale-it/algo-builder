@@ -1,0 +1,23 @@
+# minimum ASA definition (all optional fields omitted)
+minimumASA:
+  total: 1
+  decimals: 0
+minimumASA1:
+  total: 1
+  decimals: 0
+  unitName: "unitName"
+## whole ASA definition (contains all fields)
+allFieldASA:
+  total: 1
+  decimals: 0
+  defaultFrozen: true
+  unitName: "unitName"
+  url: "url"
+  # User may get "signature validation failed" from node if shorter hash is used.
+  metadataHash: "12312442142141241244444411111133"
+  note: "note"
+  noteb64: "noteb64"
+  manager: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"
+  reserve: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"
+  freeze: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"
+  clawback: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"

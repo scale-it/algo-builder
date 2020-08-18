@@ -1,4 +1,12 @@
-import { AlgobRuntimeEnv, PromiseAny } from "../../src/types";
+import { Account, AlgobRuntimeEnv, PromiseAny } from "../../src/types";
+
+function mkAcc (name: string): Account {
+  return {
+    name: "acc-name-" + name,
+    addr: "addr-" + name,
+    sk: new Uint8Array(Buffer.from("sk-" + name, 'utf16le'))
+  };
+}
 
 export function mkAlgobEnv (networkName?: string): AlgobRuntimeEnv {
   return {
@@ -17,7 +25,11 @@ export function mkAlgobEnv (networkName?: string): AlgobRuntimeEnv {
     network: {
       name: networkName === undefined ? "network1" : networkName,
       config: {
-        accounts: [],
+        accounts: [
+          mkAcc("1"),
+          mkAcc("2"),
+          mkAcc("3")
+        ],
         host: "network host",
         port: 1,
         token: "network token"

@@ -14,6 +14,7 @@ import {
   CheckpointRepo,
   Checkpoints
 } from "../types";
+import { loadFromYamlFileSilent } from "./files";
 
 export const scriptsDirectory = "scripts";
 const artifactsPath = "artifacts";
@@ -30,14 +31,14 @@ export function toScriptFileName (filename: string): string {
 }
 
 export function registerASA (
-  cp: Checkpoint, name: string, creator: string): Checkpoint {
-  cp.asa[name] = { creator: creator };
+  cp: Checkpoint, name: string, info: ASAInfo): Checkpoint {
+  cp.asa[name] = info;
   return cp;
 }
 
 export function registerASC (
-  cp: Checkpoint, name: string, creator: string): Checkpoint {
-  cp.asc[name] = { creator: creator };
+  cp: Checkpoint, name: string, info: ASCInfo): Checkpoint {
+  cp.asc[name] = info;
   return cp;
 }
 
@@ -146,17 +147,17 @@ export class CheckpointRepoImpl implements CheckpointRepo {
     return undefined;
   }
 
-  registerASA (networkName: string, name: string, creator: string): CheckpointRepo {
-    registerASA(this._ensureNet(this.precedingCP, networkName), name, creator);
-    registerASA(this._ensureNet(this.strippedCP, networkName), name, creator);
-    registerASA(this._ensureNet(this.allCPs, networkName), name, creator);
+  registerASA (networkName: string, name: string, info: ASAInfo): CheckpointRepo {
+    registerASA(this._ensureNet(this.precedingCP, networkName), name, info);
+    registerASA(this._ensureNet(this.strippedCP, networkName), name, info);
+    registerASA(this._ensureNet(this.allCPs, networkName), name, info);
     return this;
   }
 
-  registerASC (networkName: string, name: string, creator: string): CheckpointRepo {
-    registerASC(this._ensureNet(this.precedingCP, networkName), name, creator);
-    registerASC(this._ensureNet(this.strippedCP, networkName), name, creator);
-    registerASC(this._ensureNet(this.allCPs, networkName), name, creator);
+  registerASC (networkName: string, name: string, info: ASCInfo): CheckpointRepo {
+    registerASC(this._ensureNet(this.precedingCP, networkName), name, info);
+    registerASC(this._ensureNet(this.strippedCP, networkName), name, info);
+    registerASC(this._ensureNet(this.allCPs, networkName), name, info);
     return this;
   }
 
@@ -181,20 +182,8 @@ export function persistCheckpoint (scriptName: string, checkpoint: Checkpoints):
   );
 }
 
-export function loadCheckpointNoSuffix (checkpointPath: string): Checkpoints {
-  // Try-catch is the way:
-  // https://nodejs.org/docs/latest/api/fs.html#fs_fs_stat_path_options_callback
-  // Instead, user code should open/read/write the file directly and
-  // handle the error raised if the file is not available
-  try {
-    return YAML.parse(fs.readFileSync(checkpointPath).toString());
-  } catch (e) {
-    return {};
-  }
-}
-
 export function loadCheckpoint (scriptName: string): Checkpoints {
-  return loadCheckpointNoSuffix(toCheckpointFileName(scriptName));
+  return loadFromYamlFileSilent(toCheckpointFileName(scriptName));
 }
 
 function lsTreeWalk (directoryName: string): string[] {
@@ -241,7 +230,7 @@ export function lsScriptsDir (): string[] {
 export function loadCheckpointsRecursive (): CheckpointRepo {
   return findCheckpointsRecursive().reduce(
     (out: CheckpointRepo, filename: string) => {
-      return out.mergeToGlobal(loadCheckpointNoSuffix(filename), toScriptFileName(filename));
+      return out.mergeToGlobal(loadFromYamlFileSilent(filename), toScriptFileName(filename));
     },
     new CheckpointRepoImpl());
 }

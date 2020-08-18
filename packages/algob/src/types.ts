@@ -1,8 +1,9 @@
 import type { Account as AccountSDK } from "algosdk";
 import { DeepReadonly, StrictOmit } from "ts-essentials";
+import * as z from 'zod';
 
 import * as types from "./internal/core/params/argument-types";
-import { ASADefType } from "./types-input";
+import { ASADefSchema, ASADefsSchema } from "./types-input";
 
 // Begin config types
 
@@ -287,10 +288,12 @@ type AccountAddress = string;
 
 export interface DeployedAssetInfo {
   creator: AccountAddress
-  // nice to have: Deployment script name
+  txId: string
+  confirmedRound: number
 }
 
 export interface ASAInfo extends DeployedAssetInfo {
+  assetIndex: number
 }
 export interface ASCInfo extends DeployedAssetInfo {
 }
@@ -316,8 +319,8 @@ export interface CheckpointRepo {
   putMetadata: (networkName: string, key: string, value: string) => CheckpointRepo
   getMetadata: (networkName: string, key: string) => string | undefined
 
-  registerASA: (networkName: string, name: string, creator: string) => CheckpointRepo
-  registerASC: (networkName: string, name: string, creator: string) => CheckpointRepo
+  registerASA: (networkName: string, name: string, info: ASAInfo) => CheckpointRepo
+  registerASC: (networkName: string, name: string, info: ASCInfo) => CheckpointRepo
 
   isDefined: (networkName: string, name: string) => boolean
   networkExistsInCurrentCP: (networkName: string) => boolean
@@ -329,10 +332,21 @@ export interface Checkpoints {
 
 export interface Checkpoint {
   timestamp: number
-  metadata: {[key: string]: string}
-  asa: {[name: string]: ASAInfo}
-  asc: {[name: string]: ASCInfo}
+  metadata: { [key: string]: string }
+  asa: { [name: string]: ASAInfo }
+  asc: { [name: string]: ASCInfo }
 };
+
+export type ASADef = z.infer<typeof ASADefSchema>;
+export type ASADefs = z.infer<typeof ASADefsSchema>;
+
+export interface ASADeploymentFlags {
+  creator: Account
+  totalFee?: number
+  feePerByte?: number
+  firstValid?: number
+  validRounds?: number
+}
 
 export interface AssetScriptMap {
   [assetName: string]: string
@@ -341,20 +355,19 @@ export interface AssetScriptMap {
 export interface AlgobDeployer {
   // Allows user to know whether it's possible to mutate this instance
   isWriteable: boolean
-  accounts: AccountDef[]
+  accounts: Account[]
   putMetadata: (key: string, value: string) => void
   getMetadata: (key: string) => string | undefined
-  deployASA: (name: string, source: string, account: string) => Promise<ASAInfo>
-  deployASC: (name: string, source: string, account: string) => Promise<ASCInfo>
+  deployASA: (name: string, flags: ASADeploymentFlags) => Promise<ASAInfo>
+  deployASC: (name: string, source: string, account: Account) => Promise<ASCInfo>
   /**
-    Returns true if ASA or ACS were deployed in any script.
-    Checks even for checkpoints out of from the execution
-    session which are not obtainable using get methods.
+     Returns true if ASA or ACS were deployed in any script.
+     Checks even for checkpoints out of from the execution
+     session which are not obtainable using get methods.
   */
   isDefined: (name: string) => boolean
 }
 
-export type ASADef = ASADefType;
 // ************************
 //     Asset types
 
