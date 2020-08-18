@@ -18,21 +18,22 @@ import {
 } from "../lib/script-checkpoints";
 import { AlgobDeployer, AlgobRuntimeEnv, CheckpointRepo, Checkpoints } from "../types";
 import { TASK_RUN } from "./task-names";
+import { loadASAFile } from "../lib/asa"
 
 interface Input {
   scripts: string[]
 }
 
-function filterNonExistent (scripts: string[]): string[] {
+function filterNonExistent(scripts: string[]): string[] {
   return scripts.filter(script => !fsExtra.pathExistsSync(script));
 }
 
-function mkDeployer (
+function mkDeployer(
   runtimeEnv: AlgobRuntimeEnv,
   cpData: CheckpointRepo,
   allowWrite: boolean
 ): AlgobDeployer {
-  const deployer = new AlgobDeployerImpl(runtimeEnv, cpData);
+  const deployer = new AlgobDeployerImpl(runtimeEnv, cpData, loadASAFile());
   if (allowWrite) {
     return deployer;
   }
@@ -41,7 +42,7 @@ function mkDeployer (
 
 // returns all items before the current one and
 // mutates the original array to remove them
-export function splitAfter (
+export function splitAfter(
   scriptsFromScriptsDir: string[],
   splitAfterScript: string
 ): string[] {
@@ -54,7 +55,7 @@ export function splitAfter (
   return scriptsFromScriptsDir.splice(0, scriptsFromScriptsDir.length);
 }
 
-function loadCheckpointsIntoCPData (cpData: CheckpointRepo, scriptPaths: string[]): CheckpointRepo {
+function loadCheckpointsIntoCPData(cpData: CheckpointRepo, scriptPaths: string[]): CheckpointRepo {
   return scriptPaths
     .map(loadCheckpoint)
     .reduce(
@@ -66,7 +67,7 @@ function loadCheckpointsIntoCPData (cpData: CheckpointRepo, scriptPaths: string[
 // Function only accepts sorted scripts -- only this way it loads the state correctly.
 // Optimization: Split the scripts into sorted array chunks and run those chunks
 // This will save some disk reads because sub-arrays will be sorted
-export async function runMultipleScriptsOneByOne (
+export async function runMultipleScriptsOneByOne(
   runtimeEnv: AlgobRuntimeEnv,
   scriptNames: string[],
   onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
@@ -85,7 +86,7 @@ export async function runMultipleScriptsOneByOne (
   }
 }
 
-export async function runMultipleScripts (
+export async function runMultipleScripts(
   runtimeEnv: AlgobRuntimeEnv,
   scriptNames: string[],
   onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
@@ -119,7 +120,7 @@ export async function runMultipleScripts (
   }
 }
 
-async function doRun (
+async function doRun(
   { scripts }: Input,
   runtimeEnv: AlgobRuntimeEnv
 ): Promise<any> {
@@ -135,14 +136,14 @@ async function doRun (
   await runMultipleScriptsOneByOne(
     runtimeEnv,
     assertDirChildren(scriptsDirectory, scripts),
-    (_cpData: CheckpointRepo, _relativeScriptPath: string) => {},
+    (_cpData: CheckpointRepo, _relativeScriptPath: string) => { },
     true,
     logDebugTag,
     false
   );
 }
 
-export default function (): void {
+export default function(): void {
   task(TASK_RUN, "Runs a user-defined script after compiling the project")
     .addVariadicPositionalParam(
       "scripts",

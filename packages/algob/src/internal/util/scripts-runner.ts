@@ -18,10 +18,17 @@ async function loadScript (relativeScriptPath: string): Promise<any> {
   }
 }
 
+export async function runDeployASA (
+  relativeYamlPath: string,
+  runtimeEnv: AlgobRuntimeEnv,
+  deployer: AlgobDeployer): Promise<void> {
+  return
+}
+
 export async function runScript (
   relativeScriptPath: string,
   runtimeEnv: AlgobRuntimeEnv,
-  maybeDeployer?: AlgobDeployer
+  deployer: AlgobDeployer
 ): Promise<void> {
   log(`Running ${relativeScriptPath}.default()`);
   const requiredScript = await loadScript(relativeScriptPath);
@@ -34,7 +41,7 @@ export async function runScript (
     await requiredScript.default(
       runtimeEnv,
       runtimeEnv.network.config.accounts,
-      maybeDeployer
+      deployer
     );
   } catch (error) {
     if (error instanceof BuilderError) {
@@ -43,7 +50,7 @@ export async function runScript (
     throw new BuilderError(
       ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR, {
         script: relativeScriptPath,
-        error: error.message
+        message: error.message
       },
       error
     );

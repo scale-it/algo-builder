@@ -56,7 +56,7 @@ export function loadAccountsFromFileSync (filename: string): Account[] {
   return _loadAccounts(fs.readFileSync(filename, 'utf8'));
 }
 
-// retuns false if account validation doesn't pass
+// returns false if account validation doesn't pass
 export function validateAccount (a: Account, errs: ErrorPutter): boolean {
   if (a.addr === "") { errs.push("addr", "can't be empty", "string"); }
   if (!(a.sk && a.sk instanceof Uint8Array && a.sk.length === 64)) { errs.push("sk", "Must be an instance of Uint8Array(64)", 'Uint8Array'); }

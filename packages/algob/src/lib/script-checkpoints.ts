@@ -13,6 +13,7 @@ import {
   CheckpointRepo,
   Checkpoints
 } from "../types";
+import { loadFromYamlFile } from "./files";
 
 export const scriptsDirectory = "scripts";
 const artifactsPath = "artifacts";
@@ -158,15 +159,7 @@ export function persistCheckpoint (scriptName: string, checkpoint: Checkpoints):
 }
 
 export function loadCheckpointNoSuffix (checkpointPath: string): Checkpoints {
-  // Try-catch is the way:
-  // https://nodejs.org/docs/latest/api/fs.html#fs_fs_stat_path_options_callback
-  // Instead, user code should open/read/write the file directly and
-  // handle the error raised if the file is not available
-  try {
-    return YAML.parse(fs.readFileSync(checkpointPath).toString());
-  } catch (e) {
-    return {};
-  }
+  return loadFromYamlFile (checkpointPath)
 }
 
 export function loadCheckpoint (scriptName: string): Checkpoints {

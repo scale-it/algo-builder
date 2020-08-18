@@ -33,3 +33,6 @@ export const ASADefSchema = z.object({
     path: ['metadataHash']
   });
 export type ASADefType = z.infer<typeof ASADefSchema>;
+
+export const ASADefsSchema = z.record(ASADefSchema)
+export type ASADefsType = z.infer<typeof ASADefsSchema>;

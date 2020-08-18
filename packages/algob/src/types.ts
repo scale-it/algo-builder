@@ -2,7 +2,7 @@ import type { Account as AccountSDK } from "algosdk";
 import { DeepReadonly, StrictOmit } from "ts-essentials";
 
 import * as types from "./internal/core/params/argument-types";
-import { ASADefType } from "./types-input";
+import { ASADefType, ASADefsType } from "./types-input";
 
 // Begin config types
 
@@ -329,28 +329,34 @@ export interface Checkpoints {
 
 export interface Checkpoint {
   timestamp: number
-  metadata: {[key: string]: string}
-  asa: {[name: string]: ASAInfo}
-  asc: {[name: string]: ASCInfo}
+  metadata: { [key: string]: string }
+  asa: { [name: string]: ASAInfo }
+  asc: { [name: string]: ASCInfo }
 };
+
+export type ASADef = ASADefType;
+export type ASADefs = ASADefsType;
+
+export interface ASADeploymentFlags {
+}
 
 export interface AlgobDeployer {
   // Allows user to know whether it's possible to mutate this instance
   isWriteable: boolean
-  accounts: AccountDef[]
-  putMetadata: (key: string, value: string) => void
-  getMetadata: (key: string) => string | undefined
-  deployASA: (name: string, source: string, account: string) => Promise<ASAInfo>
-  deployASC: (name: string, source: string, account: string) => Promise<ASCInfo>
+  accounts: Account[]
+  putMetadata (key: string, value: string): void
+  getMetadata (key: string): string | undefined
+  deployASA (name: string, flags: ASADeploymentFlags, account: Account): Promise<ASAInfo>
+  deployASADirect (name: string, asaDef: ASADef, flags: ASADeploymentFlags, account: Account): Promise<ASAInfo>
+  deployASC (name: string, source: string, account: Account): Promise<ASCInfo>
   /**
-    Returns true if ASA or ACS were deployed in any script.
-    Checks even for checkpoints out of from the execution
-    session which are not obtainable using get methods.
+     Returns true if ASA or ACS were deployed in any script.
+     Checks even for checkpoints out of from the execution
+     session which are not obtainable using get methods.
   */
-  isDefined: (name: string) => boolean
+  isDefined (name: string): boolean
 }
 
-export type ASADef = ASADefType;
 // ************************
 //     Asset types
 

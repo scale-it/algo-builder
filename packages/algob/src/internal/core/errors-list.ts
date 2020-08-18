@@ -483,7 +483,7 @@ Please double check your script's path`
   },
   SCRIPT_EXECUTION_ERROR: {
     number: 602,
-    message: "Error while executing script '%script%': %error%",
+    message: "Error while executing script '%script%': %message%",
     title: "Error executing a script",
     description: `Script execution resulted in an error.
 
@@ -647,14 +647,28 @@ context=%ctx%`,
 const scriptErrors = {
   ASA_PARAM_PARSE_ERROR: {
     number: 900,
-    message: `Invalid ASA definition: '%filename%'.
+    message: `Invalid ASA definition.
         Reason:
+
+%reason%`,
+    title: "Invalid ASA definition",
+    description: `Invalid ASA definition.
+
+        Reason:
+%reason%
+
+Please check your ASA file`
+  },
+  ASA_PARAM_PARSE_ERROR_LOAD_FROM_FILE: {
+    number: 901,
+    message: `Invalid ASA definition: '%filename%'.
+Reason:
 
 %reason%`,
     title: "Invalid ASA definition",
     description: `Invalid ASA definition: '%filename%'.
 
-        Reason:
+Reason:
 %reason%
 
 Please check your ASA file`
