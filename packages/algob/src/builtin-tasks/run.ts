@@ -5,11 +5,12 @@ import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { runScript } from "../internal/util/scripts-runner";
-import { checkAlgorandUnauthorized } from "../lib/exceptions";
-import { assertDirChildren } from "../lib/files";
 import {
   AlgobDeployerImpl,
-  AlgobDeployerReadOnlyImpl,
+  AlgobDeployerReadOnlyImpl
+} from "../lib/deployer";
+import { assertDirChildren } from "../lib/files";
+import {
   loadCheckpoint,
   loadCheckpointsRecursive,
   lsScriptsDir,

@@ -26,7 +26,9 @@ export const ERROR_RANGES = {
   ACCOUNT: { min: 400, max: 410, title: "Account related errors" },
 
   BUILTIN_TASKS: { min: 600, max: 699, title: "Built-in tasks errors" },
-  PLUGINS: { min: 800, max: 899, title: "Plugin system errors" }
+  PLUGINS: { min: 800, max: 899, title: "Plugin system errors" },
+
+  SCRIPT: { min: 900, max: 999, title: "Script related errors" }
 };
 
 const generalErrors = {
@@ -624,6 +626,23 @@ const accountErrors = {
 
 };
 
+const scriptErrors = {
+  ASA_PARAM_PARSE_ERROR: {
+    number: 900,
+    message: `Invalid ASA definition: '%filename%'.
+        Reason:
+
+%reason%`,
+    title: "Invalid ASA definition",
+    description: `Invalid ASA definition: '%filename%'.
+
+        Reason:
+%reason%
+
+Please check your ASA file`
+  }
+};
+
 export const ERRORS: {
   [category in keyof typeof ERROR_RANGES]: {
     [errorName: string]: ErrorDescriptor
@@ -635,5 +654,6 @@ export const ERRORS: {
   ARGUMENTS: argumentErrors,
   ACCOUNT: accountErrors,
   BUILTIN_TASKS: taskErrors,
-  PLUGINS: pluginErrors
+  PLUGINS: pluginErrors,
+  SCRIPT: scriptErrors
 };

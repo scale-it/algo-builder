@@ -205,8 +205,8 @@ script3: META from first defined: undefined
 script3: META from second defined: second-ok
 script3: META from third defined: third-ok
 script1: META from first defined: first-ok
-script1: META from second defined: second-ok
-script1: META from third defined: third-ok
+script1: META from second defined: undefined
+script1: META from third defined: undefined
 `);
   });
 

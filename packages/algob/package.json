@@ -64,7 +64,8 @@
     "io-ts": "^2.2.6",
     "semver": "^7.3.2",
     "ts-essentials": "^7.0.0",
-    "yaml": "^1.10.0"
+    "yaml": "^1.10.0",
+    "zod": "^1.10.2"
   },
   "nyc": {
     "extension": [

@@ -45,9 +45,11 @@ function clearCheckpointFiles (scriptNames: string[]): void {
 async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntimeEnv): Promise<void> {
   const logDebugTag = "algob:tasks:deploy";
 
-  const scriptNames = fileNames.length === 0
-    ? loadFilenames(scriptsDirectory)
-    : assertDirectDirChildren(scriptsDirectory, fileNames);
+  const hasUserProvidedScripts = fileNames.length !== 0
+
+  const scriptNames = hasUserProvidedScripts
+    ? assertDirectDirChildren(scriptsDirectory, fileNames)
+    : loadFilenames(scriptsDirectory);
 
   if (scriptNames.length === 0) {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.SCRIPTS_NO_FILES_FOUND, {
@@ -63,7 +65,7 @@ async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntim
     persistCheckpoint(relativeScriptPath, cpData.strippedCP);
   };
 
-  if (fileNames.length === 0) {
+  if (hasUserProvidedScripts) {
     return await runMultipleScriptsOneByOne(
       runtimeEnv,
       scriptNames,
