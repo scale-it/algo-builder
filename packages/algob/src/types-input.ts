@@ -2,7 +2,7 @@ import * as z from 'zod';
 
 export const AddressSchema = z.string();
 
-export const ASADescriptionSchema = z.object({
+export const ASADefSchema = z.object({
   total: z.number(),
   decimals: z.number(),
   defaultFrozen: z.boolean().optional(),
@@ -32,4 +32,4 @@ export const ASADescriptionSchema = z.object({
     message: "Metadata Hash must not be longer than 32 bytes",
     path: ['metadataHash']
   });
-export type ASADescriptionType = z.infer<typeof ASADescriptionSchema>;
+export type ASADefType = z.infer<typeof ASADefSchema>;

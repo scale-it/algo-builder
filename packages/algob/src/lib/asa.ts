@@ -4,12 +4,12 @@ import * as z from 'zod';
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { parseZodError } from "../internal/core/validation-errors";
-import { ASADescription } from "../types";
-import { ASADescriptionSchema } from "../types-input";
+import { ASADef } from "../types";
+import { ASADefSchema } from "../types-input";
 
-export function parseASADef (obj: Object, filename: string): ASADescription {
+export function parseASADef (obj: Object, filename: string): ASADef {
   try {
-    const parsed = ASADescriptionSchema.parse(obj);
+    const parsed = ASADefSchema.parse(obj);
     if (parsed.defaultFrozen === undefined) {
       parsed.defaultFrozen = false;
     }
@@ -25,6 +25,6 @@ export function parseASADef (obj: Object, filename: string): ASADescription {
   }
 }
 
-export function loadASAFile (filename: string): ASADescription {
+export function loadASAFile (filename: string): ASADef {
   return parseASADef(fs.readFileSync(filename), filename);
 }

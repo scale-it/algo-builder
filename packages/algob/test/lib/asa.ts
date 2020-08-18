@@ -2,12 +2,12 @@ import { assert } from "chai";
 
 import { ERRORS } from "../../src/internal/core/errors-list";
 import { parseASADef } from "../../src/lib/asa";
-import { AccountDef, ASADescription } from "../../src/types";
+import { AccountDef, ASADef } from "../../src/types";
 import { expectBuilderError } from "../helpers/errors";
 
 describe("ASA parser", () => {
   it("Should validate correct obj", async () => {
-    const valid: ASADescription = {
+    const valid: ASADef = {
       total: 1,
       decimals: 0
     };
@@ -20,7 +20,7 @@ describe("ASA parser", () => {
   });
 
   it("Should validate all parameters", async () => {
-    const valid: ASADescription = {
+    const valid: ASADef = {
       total: 213,
       decimals: 12,
       defaultFrozen: true,

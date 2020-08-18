@@ -2,7 +2,7 @@ import type { Account as AccountSDK } from "algosdk";
 import { DeepReadonly, StrictOmit } from "ts-essentials";
 
 import * as types from "./internal/core/params/argument-types";
-import { ASADescriptionType } from "./types-input";
+import { ASADefType } from "./types-input";
 
 // Begin config types
 
@@ -350,7 +350,7 @@ export interface AlgobDeployer {
   isDefined: (name: string) => boolean
 }
 
-export type ASADescription = ASADescriptionType;
+export type ASADef = ASADefType;
 // ************************
 //     helper types
 
