@@ -23,7 +23,7 @@ import {
 import { AlgobDeployer, AlgobRuntimeEnv, CheckpointRepo, Checkpoints } from "../types";
 import { TASK_RUN } from "./task-names";
 import { loadASAFile } from "../lib/asa"
-
+import { createClient } from "../lib/driver";
 
 interface Input {
   scripts: string[]
@@ -40,7 +40,9 @@ function mkDeployer(
   allowWrite: boolean,
   algoDryRun: boolean
 ): AlgobDeployer {
-  const algoSDKWrapper = algoDryRun ? new AlgoSDKWrapperDryRunImpl() : new AlgoSDKWrapperImpl()
+  const algoSDKWrapper = algoDryRun
+    ? new AlgoSDKWrapperDryRunImpl()
+    : new AlgoSDKWrapperImpl(createClient(runtimeEnv.network))
   const deployer = new AlgobDeployerImpl(runtimeEnv, cpData, loadASAFile(), algoSDKWrapper);
   if (allowWrite) {
     return deployer;

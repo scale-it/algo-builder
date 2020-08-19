@@ -12,6 +12,8 @@ import {
   ASADefs
 } from "../types";
 import { loadASAFile } from "../lib/asa"
+import algosdk from "algosdk";
+import * as t from "./tx";
 
 export interface AlgoSDKWrapper {
   deployASA(name: string, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account): Promise<ASAInfo>
@@ -24,11 +26,15 @@ export class AlgoSDKWrapperDryRunImpl implements AlgoSDKWrapper {
 }
 
 export class AlgoSDKWrapperImpl implements AlgoSDKWrapper {
+  private readonly algoClient: algosdk.Algodv2;
 
-  constructor() {
+  constructor(algoClient: algosdk.Algodv2) {
+    this.algoClient = algoClient
   }
 
   async deployASA(name: string, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account): Promise<ASAInfo> {
+    const tx = t.makeAssetCreateTxn(asaDesc, flags, account)
+    console.log("tx:", tx)
     throw new Error("TODO:MM Not implemented")
   }
 }

@@ -40,7 +40,7 @@ export async function runScript (
   try {
     await requiredScript.default(
       runtimeEnv,
-      runtimeEnv.network.config.accounts,
+      deployer.accounts,
       deployer
     );
   } catch (error) {
