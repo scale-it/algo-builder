@@ -9,6 +9,7 @@ import {
   AlgobDeployerImpl,
   AlgobDeployerReadOnlyImpl
 } from "../lib/deployer";
+import { AlgoSDKDryRunWrapper } from "../lib/algo-sdk";
 import { assertDirChildren } from "../lib/files";
 import {
   loadCheckpoint,
@@ -20,8 +21,10 @@ import { AlgobDeployer, AlgobRuntimeEnv, CheckpointRepo, Checkpoints } from "../
 import { TASK_RUN } from "./task-names";
 import { loadASAFile } from "../lib/asa"
 
+
 interface Input {
   scripts: string[]
+  algoDryRun: boolean
 }
 
 function filterNonExistent(scripts: string[]): string[] {
@@ -31,9 +34,13 @@ function filterNonExistent(scripts: string[]): string[] {
 function mkDeployer(
   runtimeEnv: AlgobRuntimeEnv,
   cpData: CheckpointRepo,
-  allowWrite: boolean
+  allowWrite: boolean,
+  noAlgoSDKRun: boolean
 ): AlgobDeployer {
-  const deployer = new AlgobDeployerImpl(runtimeEnv, cpData, loadASAFile());
+  if (!noAlgoSDKRun) {
+    throw new Error("TODO:MM Not implememted")
+  }
+  const deployer = new AlgobDeployerImpl(runtimeEnv, cpData, loadASAFile(), new AlgoSDKDryRunWrapper());
   if (allowWrite) {
     return deployer;
   }
@@ -73,7 +80,8 @@ export async function runMultipleScriptsOneByOne(
   onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
   force: boolean,
   logDebugTag: string,
-  allowWrite: boolean): Promise<void> {
+  allowWrite: boolean,
+  noAlgoSDKRun: boolean): Promise<void> {
   for (const script of scriptNames) {
     await runMultipleScripts(
       runtimeEnv,
@@ -81,7 +89,8 @@ export async function runMultipleScriptsOneByOne(
       onSuccessFn,
       force,
       logDebugTag,
-      allowWrite
+      allowWrite,
+      noAlgoSDKRun
     );
   }
 }
@@ -92,10 +101,11 @@ export async function runMultipleScripts(
   onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
   force: boolean,
   logTag: string,
-  allowWrite: boolean): Promise<void> {
+  allowWrite: boolean,
+  noAlgoSDKRun: boolean): Promise<void> {
   const log = debug(logTag);
   const cpData: CheckpointRepo = loadCheckpointsRecursive();
-  const deployer: AlgobDeployer = mkDeployer(runtimeEnv, cpData, allowWrite);
+  const deployer: AlgobDeployer = mkDeployer(runtimeEnv, cpData, allowWrite, noAlgoSDKRun);
 
   const scriptsFromScriptsDir: string[] = lsScriptsDir();
 
@@ -121,7 +131,7 @@ export async function runMultipleScripts(
 }
 
 async function doRun(
-  { scripts }: Input,
+  { scripts, algoDryRun }: Input,
   runtimeEnv: AlgobRuntimeEnv
 ): Promise<any> {
   const logDebugTag = "algob:tasks:run";
@@ -139,7 +149,8 @@ async function doRun(
     (_cpData: CheckpointRepo, _relativeScriptPath: string) => { },
     true,
     logDebugTag,
-    false
+    false,
+    algoDryRun
   );
 }
 
@@ -149,5 +160,6 @@ export default function(): void {
       "scripts",
       "A js file to be run within algob's environment"
     )
+    .addHiddenFlag("algoDryRun", "Uses checkpoints but doesn't interact with a Node.")
     .setAction(doRun);
 }

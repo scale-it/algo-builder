@@ -12,20 +12,20 @@ import {
   ASADefs
 } from "../types";
 import { loadASAFile } from "../lib/asa"
-
-export interface SDKWrapper {
-}
+import { AlgoSDKWrapper } from "./algo-sdk"
 
 // This class is what user interacts with in deploy task
 export class AlgobDeployerImpl implements AlgobDeployer {
   private readonly runtimeEnv: AlgobRuntimeEnv;
   private readonly cpData: CheckpointRepo;
   private readonly loadedAsaDefs: ASADefs;
+  private readonly algoSDK: AlgoSDKWrapper;
 
-  constructor(runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointRepo, asaDefs: ASADefs, sdk?: SDKWrapper) {
+  constructor(runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointRepo, asaDefs: ASADefs, algoSdk: AlgoSDKWrapper) {
     this.runtimeEnv = runtimeEnv;
     this.cpData = cpData;
     this.loadedAsaDefs = asaDefs;
+    this.algoSDK = algoSdk
   }
 
   get accounts(): Account[] {
@@ -78,13 +78,14 @@ export class AlgobDeployerImpl implements AlgobDeployer {
 
   async deployASADirect(name: string, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account): Promise<ASAInfo> {
     this.assertNoAsset(name);
-    this.cpData.registerASA(this.networkName, name, account.addr + "-get-address");
+    const asaInfo = await this.algoSDK.deployASA(name, asaDesc, flags, account)
+    this.cpData.registerASA(this.networkName, name, asaInfo);
     return this.cpData.precedingCP[this.networkName].asa[name];
   }
 
   async deployASC(name: string, source: string, account: Account): Promise<ASCInfo> {
     this.assertNoAsset(name);
-    this.cpData.registerASC(this.networkName, name, account.addr + "-get-address");
+    this.cpData.registerASC(this.networkName, name, { creator: account.addr + "-get-address" });
     return this.cpData.precedingCP[this.networkName].asc[name];
   }
 

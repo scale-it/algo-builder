@@ -18,7 +18,8 @@ import { TASK_DEPLOY } from "./task-names";
 
 export interface TaskArgs {
   fileNames: string[]
-  force: boolean
+  force: boolean,
+  algoDryRun: boolean
 }
 
 export function loadFilenames (directory: string): string[] {
@@ -42,7 +43,7 @@ function clearCheckpointFiles (scriptNames: string[]): void {
   });
 }
 
-async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntimeEnv): Promise<void> {
+async function doDeploy ({ fileNames, force, algoDryRun }: TaskArgs, runtimeEnv: AlgobRuntimeEnv): Promise<void> {
   const logDebugTag = "algob:tasks:deploy";
 
   const hasUserProvidedScripts = fileNames.length !== 0;
@@ -72,7 +73,8 @@ async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntim
       onSuccessFn,
       force,
       logDebugTag,
-      true
+      true,
+      algoDryRun
     );
   } else {
     return await runMultipleScripts(
@@ -81,7 +83,8 @@ async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntim
       onSuccessFn,
       force,
       logDebugTag,
-      true
+      true,
+      algoDryRun
     );
   }
 }
@@ -89,6 +92,7 @@ async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntim
 export default function (): void {
   task(TASK_DEPLOY, "Compiles and runs user-defined scripts from scripts directory")
     .addFlag("force", "Run the scripts even if checkpoint state already exist (Danger: it will overwrite them).")
+    .addHiddenFlag("algoDryRun", "Creates checkpoints but doesn't interact with a Node.")
     .addOptionalVariadicPositionalParam(
       "fileNames",
       "A directory that contains js files to be run within algob's environment",

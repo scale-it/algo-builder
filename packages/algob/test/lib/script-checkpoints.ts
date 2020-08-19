@@ -97,8 +97,8 @@ describe("Checkpoint", () => {
       key: "data",
       key3: "data3"
     }), 34251);
-    registerASA(netCheckpoint, "asa1", "123");
-    registerASC(netCheckpoint, "asc1", "536");
+    registerASA(netCheckpoint, "asa1", { creator: "123" });
+    registerASC(netCheckpoint, "asc1", { creator: "536" });
     appendToCheckpoint(checkpoints, "network12345", netCheckpoint);
     assert.deepEqual(checkpoints, {
       network12345: {
@@ -114,7 +114,7 @@ describe("Checkpoint", () => {
     const netCheckpoint2: Checkpoint = registerASA(cleanupMutableData(new CheckpointImpl({
       key: "updated data",
       key2: "data2"
-    }), 125154251), "my asa 2", "creator");
+    }), 125154251), "my asa 2", { creator: "creator" });
     checkpoints = appendToCheckpoint(checkpoints, "network12345", netCheckpoint2);
     assert.deepEqual(checkpoints, {
       network12345: {
@@ -139,10 +139,10 @@ describe("Checkpoint", () => {
       key: "data",
       key3: "data3"
     }), 34251);
-    registerASA(cp1, "asa1", "123");
+    registerASA(cp1, "asa1", { creator: "123" });
     appendToCheckpoint(checkpoints, "network12345", cp1);
     const cp2: Checkpoint = cleanupMutableData(new CheckpointImpl(), 53521);
-    registerASA(cp2, "asa1", "36506");
+    registerASA(cp2, "asa1", { creator: "36506" });
     expectBuilderError(
       () => appendToCheckpoint(checkpoints, "network12345", cp2),
       ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
@@ -156,10 +156,10 @@ describe("Checkpoint", () => {
       key: "data",
       key3: "data3"
     }), 34251);
-    registerASC(cp1, "asc1", "123");
+    registerASC(cp1, "asc1", { creator: "123" });
     appendToCheckpoint(checkpoints, "network12345", cp1);
     const cp2: Checkpoint = cleanupMutableData(new CheckpointImpl(), 53521);
-    registerASC(cp2, "asc1", "36506");
+    registerASC(cp2, "asc1", { creator: "36506" });
     expectBuilderError(
       () => appendToCheckpoint(checkpoints, "network12345", cp2),
       ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
@@ -190,8 +190,9 @@ describe("Checkpoint", () => {
       registerASA(
         cp,
         "My ASA",
-        "ASA deployer address"),
-      "My ASC", "ASC deployer address");
+        { creator: "ASA deployer address" }),
+      "My ASC",
+      { creator: "ASC deployer address" });
     assert.deepEqual(cp, {
       timestamp: 12345,
       metadata: {},
@@ -274,7 +275,7 @@ describe("CheckpointRepoImpl", () => {
 
   it("Should allow placing state; one network", () => {
     const cpData = new CheckpointRepoImpl()
-      .registerASA("network1", "ASA name", "ASA creator 123")
+      .registerASA("network1", "ASA name", { creator: "ASA creator 123" })
       .putMetadata("network1", "metadata key", "metadata value");
     cpData.precedingCP.network1.timestamp = 123;
     assert.deepEqual(cpData.precedingCP, {
@@ -289,7 +290,7 @@ describe("CheckpointRepoImpl", () => {
 
   it("Should allow placing state; two networks", () => {
     const cpData = new CheckpointRepoImpl()
-      .registerASC("network1", "ASC name", "ASC creator 951")
+      .registerASC("network1", "ASC name", { creator: "ASC creator 951" })
       .putMetadata("net 0195", "1241 key", "345 value");
     cpData.precedingCP.network1.timestamp = 123;
     cpData.precedingCP["net 0195"].timestamp = 123;
@@ -477,8 +478,8 @@ describe("CheckpointRepoImpl", () => {
       .mergeToGlobal(cp2)
       .putMetadata("network1", "metadata key", "metadata value")
       .putMetadata("net 0195", "1241 key", "345 value")
-      .registerASA("network1", "ASA name", "ASA creator 123")
-      .registerASC("network1", "ASC name", "ASC creator 951");
+      .registerASA("network1", "ASA name", { creator: "ASA creator 123" })
+      .registerASC("network1", "ASC name", { creator: "ASC creator 951" });
     cpData.allCPs.network1.timestamp = 1111;
     cpData.allCPs.network4.timestamp = 4;
     cpData.allCPs["net 0195"].timestamp = 195;
@@ -562,8 +563,8 @@ describe("CheckpointRepoImpl", () => {
     const cpData = new CheckpointRepoImpl();
     assert.isFalse(cpData.isDefined("network1", "ASA name"));
     assert.isFalse(cpData.isDefined("network1", "ASC name"));
-    cpData.registerASA("network1", "ASA name", "ASA creator 123")
-      .registerASC("network1", "ASC name", "ASC creator 951");
+    cpData.registerASA("network1", "ASA name", { creator: "ASA creator 123" })
+      .registerASC("network1", "ASC name", { creator: "ASC creator 951" });
     assert.isTrue(cpData.isDefined("network1", "ASA name"));
     assert.isTrue(cpData.isDefined("network1", "ASC name"));
     assert.isFalse(cpData.isDefined("network1", "other name"));
