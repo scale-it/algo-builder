@@ -417,10 +417,9 @@ ajv@^6.10.0, ajv@^6.10.2:
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
-algosdk@^1.6.2:
-  version "1.6.2"
-  resolved "https://registry.yarnpkg.com/algosdk/-/algosdk-1.6.2.tgz#dc7b861a62bb40036a2744f69d2595318806fdd3"
-  integrity sha512-THz5I0x7h1tLo5rNbEtC9sZ+b5XBf+H3CCu5Kw2d2u9p84Rx6sEPsg9Ae+G1AfkiJoiMnr3+kSXXrkM5Lc0cMQ==
+"algosdk@github:algorand/js-algorand-sdk":
+  version "1.7.0"
+  resolved "https://codeload.github.com/algorand/js-algorand-sdk/tar.gz/3999aa43fc3d945b38419339c593bb5fd72e49c6"
   dependencies:
     "@msgpack/msgpack" "^1.9.0"
     hi-base32 "^0.5.0"
@@ -2340,6 +2339,11 @@ multiparty@^4.1.2:
     http-errors "~1.7.0"
     safe-buffer "5.1.2"
     uid-safe "2.1.5"
+
+murmurhash@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/murmurhash/-/murmurhash-1.0.0.tgz#d0e4556892317d984af632b6a88d5605beef26a7"
+  integrity sha512-u/NfpXS+viMWAupgU6IkwAVWkVnpvzS+D9bDxNuNRUoQ0BRMZ1DK/dPH6Qrknn7RxMHVQBpYBQQigUt7of6RiQ==
 
 nan@^2.2.1:
   version "2.14.1"

@@ -352,6 +352,17 @@ export interface AlgobDeployer {
 
 export type ASADef = ASADefType;
 // ************************
+//     Asset types
+
+export interface ASCCache {
+  filename: string
+  timestamp: number // compilation time (Unix time)
+  compiled: string // the compiled code
+  compiledHash: string // hash returned by the compiler
+  srcHash: number // source code hash
+}
+
+// ************************
 //     helper types
 
 export interface StrMap {

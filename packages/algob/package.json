@@ -52,7 +52,7 @@
     "time-require": "^0.1.2"
   },
   "dependencies": {
-    "algosdk": "^1.6.2",
+    "algosdk": "github:algorand/js-algorand-sdk",
     "debug": "^4.1.1",
     "deep-equal": "^2.0.3",
     "deepmerge": "^4.2.2",
@@ -62,6 +62,7 @@
     "fs-extra": "^9.0.1",
     "glob": "^7.1.6",
     "io-ts": "^2.2.6",
+    "murmurhash": "^1.0.0",
     "semver": "^7.3.2",
     "ts-essentials": "^7.0.0",
     "yaml": "^1.10.0",
