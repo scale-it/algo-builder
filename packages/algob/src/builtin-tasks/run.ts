@@ -9,7 +9,10 @@ import {
   AlgobDeployerImpl,
   AlgobDeployerReadOnlyImpl
 } from "../lib/deployer";
-import { AlgoSDKDryRunWrapper } from "../lib/algo-sdk";
+import {
+  AlgoSDKWrapperDryRunImpl,
+  AlgoSDKWrapperImpl
+} from "../lib/algo-sdk";
 import { assertDirChildren } from "../lib/files";
 import {
   loadCheckpoint,
@@ -35,12 +38,10 @@ function mkDeployer(
   runtimeEnv: AlgobRuntimeEnv,
   cpData: CheckpointRepo,
   allowWrite: boolean,
-  noAlgoSDKRun: boolean
+  algoDryRun: boolean
 ): AlgobDeployer {
-  if (!noAlgoSDKRun) {
-    throw new Error("TODO:MM Not implememted")
-  }
-  const deployer = new AlgobDeployerImpl(runtimeEnv, cpData, loadASAFile(), new AlgoSDKDryRunWrapper());
+  const algoSDKWrapper = algoDryRun ? new AlgoSDKWrapperDryRunImpl() : new AlgoSDKWrapperImpl()
+  const deployer = new AlgobDeployerImpl(runtimeEnv, cpData, loadASAFile(), algoSDKWrapper);
   if (allowWrite) {
     return deployer;
   }
@@ -81,7 +82,7 @@ export async function runMultipleScriptsOneByOne(
   force: boolean,
   logDebugTag: string,
   allowWrite: boolean,
-  noAlgoSDKRun: boolean): Promise<void> {
+  algoDryRun: boolean): Promise<void> {
   for (const script of scriptNames) {
     await runMultipleScripts(
       runtimeEnv,
@@ -90,7 +91,7 @@ export async function runMultipleScriptsOneByOne(
       force,
       logDebugTag,
       allowWrite,
-      noAlgoSDKRun
+      algoDryRun
     );
   }
 }
@@ -102,10 +103,10 @@ export async function runMultipleScripts(
   force: boolean,
   logTag: string,
   allowWrite: boolean,
-  noAlgoSDKRun: boolean): Promise<void> {
+  algoDryRun: boolean): Promise<void> {
   const log = debug(logTag);
   const cpData: CheckpointRepo = loadCheckpointsRecursive();
-  const deployer: AlgobDeployer = mkDeployer(runtimeEnv, cpData, allowWrite, noAlgoSDKRun);
+  const deployer: AlgobDeployer = mkDeployer(runtimeEnv, cpData, allowWrite, algoDryRun);
 
   const scriptsFromScriptsDir: string[] = lsScriptsDir();
 

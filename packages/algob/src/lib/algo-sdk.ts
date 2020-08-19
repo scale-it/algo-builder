@@ -17,9 +17,19 @@ export interface AlgoSDKWrapper {
   deployASA(name: string, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account): Promise<ASAInfo>
 }
 
-export class AlgoSDKDryRunWrapper implements AlgoSDKWrapper {
+export class AlgoSDKWrapperDryRunImpl implements AlgoSDKWrapper {
   async deployASA(name: string, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account): Promise<ASAInfo> {
     return { creator: account.addr + "-get-address" }
+  }
+}
+
+export class AlgoSDKWrapperImpl implements AlgoSDKWrapper {
+
+  constructor() {
+  }
+
+  async deployASA(name: string, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account): Promise<ASAInfo> {
+    throw new Error("TODO:MM Not implemented")
   }
 }
 
