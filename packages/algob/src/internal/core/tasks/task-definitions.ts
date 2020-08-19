@@ -163,6 +163,24 @@ export class SimpleTaskDefinition implements TaskDefinition {
     return this.addParam(name, description, defaultValue, type, true);
   }
 
+  private _addFlag (name: string, isHidden: boolean, description?: string): this {
+    this._validateParamNameCasing(name);
+    this._validateNameNotUsed(name);
+
+    this.paramDefinitions[name] = {
+      name,
+      defaultValue: false,
+      type: types.boolean,
+      description,
+      isFlag: true,
+      isOptional: true,
+      isVariadic: false,
+      isHidden: isHidden
+    };
+
+    return this;
+  }
+
   /**
    * Adds a boolean paramater or flag to the task's definition.
    *
@@ -174,20 +192,21 @@ export class SimpleTaskDefinition implements TaskDefinition {
    * @param description the parameter's description.
    */
   public addFlag (name: string, description?: string): this {
-    this._validateParamNameCasing(name);
-    this._validateNameNotUsed(name);
+    return this._addFlag(name, false, description)
+  }
 
-    this.paramDefinitions[name] = {
-      name,
-      defaultValue: false,
-      type: types.boolean,
-      description,
-      isFlag: true,
-      isOptional: true,
-      isVariadic: false
-    };
-
-    return this;
+  /**
+   * Adds a hidden boolean paramater or flag to the task's definition.
+   *
+   * Flags are params with default value set to `false`, and that don't expect
+   * values to be set in the CLI. A normal boolean param must be called with
+   * `--param true`, while a flag is called with `--flag`.
+   *
+   * @param name the parameter's name.
+   * @param description the parameter's description.
+   */
+  public addHiddenFlag (name: string, description?: string): this {
+    return this._addFlag(name, true, description)
   }
 
   /**
@@ -701,6 +720,16 @@ export class OverriddenTaskDefinition implements TaskDefinition {
    */
   public addFlag (name: string, description?: string): this {
     this.parentTaskDefinition.addFlag(name, description);
+    return this;
+  }
+
+  /**
+   * Add a hidden flag param to the overridden task.
+   * @throws ALGORAND_BUILDER201 if param name was already defined in any parent task.
+   * @throws ALGORAND_BUILDER209 if param name is not in camelCase.
+   */
+  public addHiddenFlag (name: string, description?: string): this {
+    this.parentTaskDefinition.addHiddenFlag(name, description);
     return this;
   }
 
