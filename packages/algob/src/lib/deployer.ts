@@ -20,12 +20,12 @@ export interface SDKWrapper {
 export class AlgobDeployerImpl implements AlgobDeployer {
   private readonly runtimeEnv: AlgobRuntimeEnv;
   private readonly cpData: CheckpointRepo;
-  private readonly asaDefs: ASADefs;
+  private readonly loadedAsaDefs: ASADefs;
 
   constructor(runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointRepo, asaDefs: ASADefs, sdk?: SDKWrapper) {
     this.runtimeEnv = runtimeEnv;
     this.cpData = cpData;
-    this.asaDefs = asaDefs;
+    this.loadedAsaDefs = asaDefs;
   }
 
   get accounts(): Account[] {
@@ -66,16 +66,14 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     }
   }
 
-  //async deployASA(name: string, flags: ASADeploymentFlags, account: Account): Promise<ASAInfo> {
-  //  const asa = validateASADef(unvalidated)
-  //  this.assertNoAsset(name);
-  //  this.cpData.registerASA(this.networkName, name, JSON.stringify(account));
-  //  return this.cpData.precedingCP[this.networkName].asa[name];
-  //}
-
   async deployASA(name: string, flags: ASADeploymentFlags, account: Account): Promise<ASAInfo> {
-    // TODO:MM check for NPE
-    return this.deployASADirect(name, this.asaDefs[name], flags, account)
+    if (this.loadedAsaDefs[name] === undefined) {
+      throw new BuilderError(
+        ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_DEF_NOT_FOUND, {
+          asaName: name
+        });
+    }
+    return this.deployASADirect(name, this.loadedAsaDefs[name], flags, account)
   }
 
   async deployASADirect(name: string, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account): Promise<ASAInfo> {

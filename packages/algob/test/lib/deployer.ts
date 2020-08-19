@@ -161,15 +161,13 @@ describe("AlgobDeployerImpl", () => {
   });
 
   it("Should crash when ASA for given name doesn't exist", async () => {
-    // TODO:MM
-    //const cpData = new CheckpointRepoImpl();
-    //const deployer = new AlgobDeployerImpl(mkAlgobEnv("network 123"), cpData, {});
-    //await deployer.deployASADirect("ASA_key", mkASA(), {}, deployer.accounts[0]);
-    //await expectBuilderErrorAsync(
-    //  async () => await deployer.deployASA("ASA_key", {}, deployer.accounts[0]),
-    //  ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT,
-    //  "ASA_key"
-    //);
+    const cpData = new CheckpointRepoImpl();
+    const deployer = new AlgobDeployerImpl(mkAlgobEnv("network 123"), cpData, {});
+    await expectBuilderErrorAsync(
+      async () => await deployer.deployASA("ASA_key", {}, deployer.accounts[0]),
+      ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_DEF_NOT_FOUND,
+      "ASA_key"
+    );
   });
 
   it("Should crash when same ASC name is tried to deploy to second time", async () => {

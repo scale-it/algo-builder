@@ -556,7 +556,16 @@ Use 'deployer.isDefined(name)' to check if the name is already used.
     description: `Non-direct child scripts are not allowed in deploy: %scripts%.
 
 Please double check your command parameters`
-  }
+  },
+  DEPLOYER_ASA_DEF_NOT_FOUND: {
+    number: 611,
+    message: "ASA definition not found: %asaName%",
+    title: "Asset definition not found",
+    description: `ASA definition not found: %asaName%.
+
+Make sure your 'asa.yaml' file contains this entry.
+`
+  },
 };
 
 const pluginErrors = {
