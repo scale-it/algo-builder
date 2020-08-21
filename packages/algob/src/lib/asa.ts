@@ -8,6 +8,7 @@ import { ASADef, ASADefs } from "../types";
 import { ASADefsSchema } from "../types-input";
 import { scriptsDirectory } from "./script-checkpoints";
 import { loadFromYamlFile } from "./files";
+import { ASSETS_DIR } from "../internal/core/project-structure"
 
 export function validateASADefs (obj: Object, filename?: string): ASADefs {
   try {
@@ -33,7 +34,7 @@ export function validateASADefs (obj: Object, filename?: string): ASADefs {
 }
 
 export function loadASAFile (): ASADefs {
-  const filename = path.join(scriptsDirectory, "asa.yaml");
+  const filename = path.join(ASSETS_DIR, "asa.yaml");
   return validateASADefs(
     loadFromYamlFile(filename),
     filename)
