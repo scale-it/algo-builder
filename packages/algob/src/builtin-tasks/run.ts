@@ -6,13 +6,15 @@ import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { runScript } from "../internal/util/scripts-runner";
 import {
-  AlgobDeployerImpl,
-  AlgobDeployerReadOnlyImpl
-} from "../lib/deployer";
-import {
   AlgoSDKWrapperDryRunImpl,
   AlgoSDKWrapperImpl
 } from "../lib/algo-sdk";
+import { loadASAFile } from "../lib/asa";
+import {
+  AlgobDeployerImpl,
+  AlgobDeployerReadOnlyImpl
+} from "../lib/deployer";
+import { createClient } from "../lib/driver";
 import { assertDirChildren } from "../lib/files";
 import {
   loadCheckpoint,
@@ -22,19 +24,17 @@ import {
 } from "../lib/script-checkpoints";
 import { AlgobDeployer, AlgobRuntimeEnv, CheckpointRepo, Checkpoints } from "../types";
 import { TASK_RUN } from "./task-names";
-import { loadASAFile } from "../lib/asa"
-import { createClient } from "../lib/driver";
 
 interface Input {
   scripts: string[]
   algoDryRun: boolean
 }
 
-function filterNonExistent(scripts: string[]): string[] {
+function filterNonExistent (scripts: string[]): string[] {
   return scripts.filter(script => !fsExtra.pathExistsSync(script));
 }
 
-function mkDeployer(
+function mkDeployer (
   runtimeEnv: AlgobRuntimeEnv,
   cpData: CheckpointRepo,
   allowWrite: boolean,
@@ -42,7 +42,7 @@ function mkDeployer(
 ): AlgobDeployer {
   const algoSDKWrapper = algoDryRun
     ? new AlgoSDKWrapperDryRunImpl()
-    : new AlgoSDKWrapperImpl(createClient(runtimeEnv.network))
+    : new AlgoSDKWrapperImpl(createClient(runtimeEnv.network));
   const deployer = new AlgobDeployerImpl(runtimeEnv, cpData, loadASAFile(), algoSDKWrapper);
   if (allowWrite) {
     return deployer;
@@ -52,7 +52,7 @@ function mkDeployer(
 
 // returns all items before the current one and
 // mutates the original array to remove them
-export function splitAfter(
+export function splitAfter (
   scriptsFromScriptsDir: string[],
   splitAfterScript: string
 ): string[] {
@@ -65,7 +65,7 @@ export function splitAfter(
   return scriptsFromScriptsDir.splice(0, scriptsFromScriptsDir.length);
 }
 
-function loadCheckpointsIntoCPData(cpData: CheckpointRepo, scriptPaths: string[]): CheckpointRepo {
+function loadCheckpointsIntoCPData (cpData: CheckpointRepo, scriptPaths: string[]): CheckpointRepo {
   return scriptPaths
     .map(loadCheckpoint)
     .reduce(
@@ -77,7 +77,7 @@ function loadCheckpointsIntoCPData(cpData: CheckpointRepo, scriptPaths: string[]
 // Function only accepts sorted scripts -- only this way it loads the state correctly.
 // Optimization: Split the scripts into sorted array chunks and run those chunks
 // This will save some disk reads because sub-arrays will be sorted
-export async function runMultipleScriptsOneByOne(
+export async function runMultipleScriptsOneByOne (
   runtimeEnv: AlgobRuntimeEnv,
   scriptNames: string[],
   onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
@@ -98,7 +98,7 @@ export async function runMultipleScriptsOneByOne(
   }
 }
 
-export async function runMultipleScripts(
+export async function runMultipleScripts (
   runtimeEnv: AlgobRuntimeEnv,
   scriptNames: string[],
   onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
@@ -133,7 +133,7 @@ export async function runMultipleScripts(
   }
 }
 
-async function doRun(
+async function doRun (
   { scripts, algoDryRun }: Input,
   runtimeEnv: AlgobRuntimeEnv
 ): Promise<any> {
@@ -157,7 +157,7 @@ async function doRun(
   );
 }
 
-export default function(): void {
+export default function (): void {
   task(TASK_RUN, "Runs a user-defined script after compiling the project")
     .addVariadicPositionalParam(
       "scripts",

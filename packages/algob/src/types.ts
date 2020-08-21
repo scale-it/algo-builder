@@ -2,7 +2,7 @@ import { Account as AccountSDK } from "algosdk";
 import { DeepReadonly, StrictOmit } from "ts-essentials";
 
 import * as types from "./internal/core/params/argument-types";
-import { ASADefType, ASADefsType } from "./types-input";
+import { ASADefsType, ASADefType } from "./types-input";
 
 // Begin config types
 
@@ -350,16 +350,16 @@ export interface AlgobDeployer {
   // Allows user to know whether it's possible to mutate this instance
   isWriteable: boolean
   accounts: Account[]
-  putMetadata (key: string, value: string): void
-  getMetadata (key: string): string | undefined
-  deployASA (name: string, flags: ASADeploymentFlags, account: Account): Promise<ASAInfo>
-  deployASC (name: string, source: string, account: Account): Promise<ASCInfo>
+  putMetadata: (key: string, value: string) => void
+  getMetadata: (key: string) => string | undefined
+  deployASA: (name: string, flags?: ASADeploymentFlags, account: Account) => Promise<ASAInfo>
+  deployASC: (name: string, source: string, account: Account) => Promise<ASCInfo>
   /**
      Returns true if ASA or ACS were deployed in any script.
      Checks even for checkpoints out of from the execution
      session which are not obtainable using get methods.
   */
-  isDefined (name: string): boolean
+  isDefined: (name: string) => boolean
 }
 
 // ************************

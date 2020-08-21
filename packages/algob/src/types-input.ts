@@ -34,5 +34,5 @@ export const ASADefSchema = z.object({
   });
 export type ASADefType = z.infer<typeof ASADefSchema>;
 
-export const ASADefsSchema = z.record(ASADefSchema)
+export const ASADefsSchema = z.record(ASADefSchema);
 export type ASADefsType = z.infer<typeof ASADefsSchema>;

@@ -1,5 +1,5 @@
-import path from "path";
 import fs from "fs";
+import path from "path";
 import YAML from "yaml";
 
 import { BuilderError } from "../internal/core/errors";

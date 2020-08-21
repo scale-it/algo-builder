@@ -159,7 +159,7 @@ export function persistCheckpoint (scriptName: string, checkpoint: Checkpoints):
 }
 
 export function loadCheckpointNoSuffix (checkpointPath: string): Checkpoints {
-  return loadFromYamlFile (checkpointPath)
+  return loadFromYamlFile(checkpointPath);
 }
 
 export function loadCheckpoint (scriptName: string): Checkpoints {

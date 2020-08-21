@@ -43,7 +43,7 @@ function ensureValidNodeVersion (packageJson: PackageJson): void {
   }
 }
 
-function printStackTraces(showStackTraces: boolean, error: BuilderError) {
+function printStackTraces (showStackTraces: boolean, error: BuilderError): void {
   if (showStackTraces) {
     console.error(error.stack);
     if (error.parent) {
@@ -175,7 +175,7 @@ async function main (): Promise<void> {
 
     console.log("");
 
-    printStackTraces(showStackTraces, error)
+    printStackTraces(showStackTraces, error);
 
     process.exit(1);
   }

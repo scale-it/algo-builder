@@ -1,19 +1,19 @@
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/internal/core/errors-list";
+import { AlgoSDKWrapperDryRunImpl } from "../../src/lib/algo-sdk";
 import { AlgobDeployerImpl } from "../../src/lib/deployer";
 import { CheckpointRepoImpl } from "../../src/lib/script-checkpoints";
-import { Checkpoints, ASADef } from "../../src/types";
+import { ASADef, Checkpoints } from "../../src/types";
 import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkAlgobEnv } from "../helpers/params";
 import { cleanupMutableData } from "./script-checkpoints";
-import { AlgoSDKWrapperDryRunImpl } from "../../src/lib/algo-sdk";
 
-function mkASA(): ASADef {
+function mkASA (): ASADef {
   return {
     total: 1,
     decimals: 1
-  }
+  };
 }
 
 describe("AlgobDeployerImpl", () => {
@@ -92,7 +92,7 @@ describe("AlgobDeployerImpl", () => {
   it("Should save info to checkpoint after asset deployment", async () => {
     const env = mkAlgobEnv("network1");
     const cpData = new CheckpointRepoImpl();
-    const deployer = new AlgobDeployerImpl(env, cpData, {"MY_ASA": mkASA()}, new AlgoSDKWrapperDryRunImpl());
+    const deployer = new AlgobDeployerImpl(env, cpData, { MY_ASA: mkASA() }, new AlgoSDKWrapperDryRunImpl());
 
     const asaInfo = await deployer.deployASA("MY_ASA", {}, deployer.accounts[0]);
     assert.deepEqual(asaInfo, { creator: "addr-1-get-address-dry-run", txId: "tx-id-dry-run", confirmedRound: -1, assetIndex: -1 });
@@ -157,7 +157,7 @@ describe("AlgobDeployerImpl", () => {
 
   it("Should crash when same ASA name is tried to deploy to second time", async () => {
     const cpData = new CheckpointRepoImpl();
-    const deployer = new AlgobDeployerImpl(mkAlgobEnv("network 123"), cpData, {"ASA_key": mkASA()}, new AlgoSDKWrapperDryRunImpl());
+    const deployer = new AlgobDeployerImpl(mkAlgobEnv("network 123"), cpData, { ASA_key: mkASA() }, new AlgoSDKWrapperDryRunImpl());
     await deployer.deployASA("ASA_key", {}, deployer.accounts[0]);
     await expectBuilderErrorAsync(
       async () => await deployer.deployASA("ASA_key", {}, deployer.accounts[0]),

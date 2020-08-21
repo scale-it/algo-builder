@@ -573,7 +573,7 @@ Make sure your 'asa.yaml' file contains this entry.
     description: `%errorType% error while interacting with chain (from '%script%'): %message%.
 
 Please check algob output for more details.`
-  },
+  }
 };
 
 const pluginErrors = {

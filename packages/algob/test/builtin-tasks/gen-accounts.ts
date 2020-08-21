@@ -69,4 +69,3 @@ describe("Gen-accounts task", () => {
     });
   });
 });
-

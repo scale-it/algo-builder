@@ -22,22 +22,22 @@ export async function runDeployASA (
   relativeYamlPath: string,
   runtimeEnv: AlgobRuntimeEnv,
   deployer: AlgobDeployer): Promise<void> {
-  return
+
 }
 
-function displayErr(error: Error | BuilderError | any, relativeScriptPath: string) {
+function displayErr (error: Error | BuilderError | any, relativeScriptPath: string): void {
   if (error instanceof BuilderError) {
     throw error;
   }
   // TX execution error
-  if (error.response && error.response.error) {
+  if (error?.response?.error !== undefined) {
     throw new BuilderError(
       ERRORS.BUILTIN_TASKS.SCRIPT_CHAIN_IO_ERROR, {
         script: relativeScriptPath,
         errorType: error.response.clientError
           ? "Client"
           : "Server",
-        message: error.response && error.response.body && error.response.body.message
+        message: error.response?.body?.message
           ? error.response.body.message
           : error.response.error.message
       },
@@ -72,7 +72,7 @@ export async function runScript (
       deployer
     );
   } catch (error) {
-    displayErr(error, relativeScriptPath)
+    displayErr(error, relativeScriptPath);
   }
 }
 

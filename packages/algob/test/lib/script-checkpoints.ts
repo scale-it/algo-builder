@@ -97,13 +97,17 @@ describe("Checkpoint", () => {
       key: "data",
       key3: "data3"
     }), 34251);
-    registerASA(netCheckpoint, "asa1", { creator: "123",
-                                         txId: "",
-                                         assetIndex: 0,
-                                         confirmedRound: 0 });
-    registerASC(netCheckpoint, "asc1", { creator: "536",
-                                         txId: "",
-                                         confirmedRound: 0 });
+    registerASA(netCheckpoint, "asa1", {
+      creator: "123",
+      txId: "",
+      assetIndex: 0,
+      confirmedRound: 0
+    });
+    registerASC(netCheckpoint, "asc1", {
+      creator: "536",
+      txId: "",
+      confirmedRound: 0
+    });
     appendToCheckpoint(checkpoints, "network12345", netCheckpoint);
     assert.deepEqual(checkpoints, {
       network12345: {
@@ -112,22 +116,32 @@ describe("Checkpoint", () => {
           key: "data",
           key3: "data3"
         },
-        asa: { asa1: { creator: "123",
-                       txId: "",
-                       assetIndex: 0,
-                       confirmedRound: 0 } },
-        asc: { asc1: { creator: "536",
-                       txId: "",
-                       confirmedRound: 0 } }
+        asa: {
+          asa1: {
+            creator: "123",
+            txId: "",
+            assetIndex: 0,
+            confirmedRound: 0
+          }
+        },
+        asc: {
+          asc1: {
+            creator: "536",
+            txId: "",
+            confirmedRound: 0
+          }
+        }
       }
     });
     const netCheckpoint2: Checkpoint = registerASA(cleanupMutableData(new CheckpointImpl({
       key: "updated data",
       key2: "data2"
-    }), 125154251), "my asa 2", { creator: "creator",
-                                  txId: "",
-                                  assetIndex: 0,
-                                  confirmedRound: 0 });
+    }), 125154251), "my asa 2", {
+      creator: "creator",
+      txId: "",
+      assetIndex: 0,
+      confirmedRound: 0
+    });
     checkpoints = appendToCheckpoint(checkpoints, "network12345", netCheckpoint2);
     assert.deepEqual(checkpoints, {
       network12345: {
@@ -138,18 +152,26 @@ describe("Checkpoint", () => {
           key3: "data3"
         },
         asa: {
-          asa1: { creator: "123",
-                  txId: "",
-                  assetIndex: 0,
-                  confirmedRound: 0 },
-          "my asa 2": { creator: "creator",
-                        txId: "",
-                        assetIndex: 0,
-                        confirmedRound: 0 }
+          asa1: {
+            creator: "123",
+            txId: "",
+            assetIndex: 0,
+            confirmedRound: 0
+          },
+          "my asa 2": {
+            creator: "creator",
+            txId: "",
+            assetIndex: 0,
+            confirmedRound: 0
+          }
         },
-        asc: { asc1: { creator: "536",
-                       txId: "",
-                       confirmedRound: 0 } }
+        asc: {
+          asc1: {
+            creator: "536",
+            txId: "",
+            confirmedRound: 0
+          }
+        }
       }
     });
   });
@@ -160,16 +182,20 @@ describe("Checkpoint", () => {
       key: "data",
       key3: "data3"
     }), 34251);
-    registerASA(cp1, "asa1", { creator: "123",
-                               txId: "",
-                               assetIndex: 0,
-                               confirmedRound: 0 });
+    registerASA(cp1, "asa1", {
+      creator: "123",
+      txId: "",
+      assetIndex: 0,
+      confirmedRound: 0
+    });
     appendToCheckpoint(checkpoints, "network12345", cp1);
     const cp2: Checkpoint = cleanupMutableData(new CheckpointImpl(), 53521);
-    registerASA(cp2, "asa1", { creator: "36506",
-                               txId: "",
-                               assetIndex: 0,
-                               confirmedRound: 0 });
+    registerASA(cp2, "asa1", {
+      creator: "36506",
+      txId: "",
+      assetIndex: 0,
+      confirmedRound: 0
+    });
     expectBuilderError(
       () => appendToCheckpoint(checkpoints, "network12345", cp2),
       ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
@@ -183,14 +209,18 @@ describe("Checkpoint", () => {
       key: "data",
       key3: "data3"
     }), 34251);
-    registerASC(cp1, "asc1", { creator: "123",
-                               txId: "",
-                               confirmedRound: 0 });
+    registerASC(cp1, "asc1", {
+      creator: "123",
+      txId: "",
+      confirmedRound: 0
+    });
     appendToCheckpoint(checkpoints, "network12345", cp1);
     const cp2: Checkpoint = cleanupMutableData(new CheckpointImpl(), 53521);
-    registerASC(cp2, "asc1", { creator: "36506",
-                               txId: "",
-                               confirmedRound: 0 });
+    registerASC(cp2, "asc1", {
+      creator: "36506",
+      txId: "",
+      confirmedRound: 0
+    });
     expectBuilderError(
       () => appendToCheckpoint(checkpoints, "network12345", cp2),
       ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
@@ -221,24 +251,36 @@ describe("Checkpoint", () => {
       registerASA(
         cp,
         "My ASA",
-        { creator: "ASA deployer address",
+        {
+          creator: "ASA deployer address",
           txId: "",
           assetIndex: 0,
-          confirmedRound: 0 }),
+          confirmedRound: 0
+        }),
       "My ASC",
-      { creator: "ASC deployer address",
+      {
+        creator: "ASC deployer address",
         txId: "",
-        confirmedRound: 0 });
+        confirmedRound: 0
+      });
     assert.deepEqual(cp, {
       timestamp: 12345,
       metadata: {},
-      asa: { "My ASA": { creator: "ASA deployer address",
-                         txId: "",
-                         assetIndex: 0,
-                         confirmedRound: 0 } },
-      asc: { "My ASC": { creator: "ASC deployer address",
-                         txId: "",
-                         confirmedRound: 0 } }
+      asa: {
+        "My ASA": {
+          creator: "ASA deployer address",
+          txId: "",
+          assetIndex: 0,
+          confirmedRound: 0
+        }
+      },
+      asc: {
+        "My ASC": {
+          creator: "ASC deployer address",
+          txId: "",
+          confirmedRound: 0
+        }
+      }
     });
   });
 });
@@ -316,20 +358,26 @@ describe("CheckpointRepoImpl", () => {
 
   it("Should allow placing state; one network", () => {
     const cpData = new CheckpointRepoImpl()
-      .registerASA("network1", "ASA name", { creator: "ASA creator 123",
-                                             txId: "",
-                                             assetIndex: 0,
-                                             confirmedRound: 0 })
+      .registerASA("network1", "ASA name", {
+        creator: "ASA creator 123",
+        txId: "",
+        assetIndex: 0,
+        confirmedRound: 0
+      })
       .putMetadata("network1", "metadata key", "metadata value");
     cpData.precedingCP.network1.timestamp = 123;
     assert.deepEqual(cpData.precedingCP, {
       network1: {
         timestamp: 123,
         metadata: { "metadata key": "metadata value" },
-        asa: { "ASA name": { creator: "ASA creator 123",
-                             txId: "",
-                             assetIndex: 0,
-                             confirmedRound: 0 } },
+        asa: {
+          "ASA name": {
+            creator: "ASA creator 123",
+            txId: "",
+            assetIndex: 0,
+            confirmedRound: 0
+          }
+        },
         asc: {}
       }
     });
@@ -337,9 +385,11 @@ describe("CheckpointRepoImpl", () => {
 
   it("Should allow placing state; two networks", () => {
     const cpData = new CheckpointRepoImpl()
-      .registerASC("network1", "ASC name", { creator: "ASC creator 951",
-                                             txId: "",
-                                             confirmedRound: 0 })
+      .registerASC("network1", "ASC name", {
+        creator: "ASC creator 951",
+        txId: "",
+        confirmedRound: 0
+      })
       .putMetadata("net 0195", "1241 key", "345 value");
     cpData.precedingCP.network1.timestamp = 123;
     cpData.precedingCP["net 0195"].timestamp = 123;
@@ -348,9 +398,13 @@ describe("CheckpointRepoImpl", () => {
         timestamp: 123,
         metadata: {},
         asa: {},
-        asc: { "ASC name": { creator: "ASC creator 951",
-                             txId: "",
-                             confirmedRound: 0 } }
+        asc: {
+          "ASC name": {
+            creator: "ASC creator 951",
+            txId: "",
+            confirmedRound: 0
+          }
+        }
       },
       "net 0195": {
         timestamp: 123,
@@ -411,10 +465,14 @@ describe("CheckpointRepoImpl", () => {
       network1: {
         timestamp: 2,
         metadata: {},
-        asa: { "asa key": { creator: "asa creator",
-                            txId: "",
-                            assetIndex: 0,
-                            confirmedRound: 0 } },
+        asa: {
+          "asa key": {
+            creator: "asa creator",
+            txId: "",
+            assetIndex: 0,
+            confirmedRound: 0
+          }
+        },
         asc: {}
       }
     };
@@ -428,10 +486,14 @@ describe("CheckpointRepoImpl", () => {
       network1: {
         timestamp: 124,
         metadata: { "key 1": "data 1" },
-        asa: { "asa key": { creator: "asa creator",
-                            txId: "",
-                            assetIndex: 0,
-                            confirmedRound: 0 } },
+        asa: {
+          "asa key": {
+            creator: "asa creator",
+            txId: "",
+            assetIndex: 0,
+            confirmedRound: 0
+          }
+        },
         asc: {}
       }
     });
@@ -439,10 +501,14 @@ describe("CheckpointRepoImpl", () => {
       network1: {
         timestamp: 124,
         metadata: {},
-        asa: { "asa key": { creator: "asa creator",
-                            txId: "",
-                            assetIndex: 0,
-                            confirmedRound: 0 } },
+        asa: {
+          "asa key": {
+            creator: "asa creator",
+            txId: "",
+            assetIndex: 0,
+            confirmedRound: 0
+          }
+        },
         asc: {}
       }
     });
@@ -450,10 +516,14 @@ describe("CheckpointRepoImpl", () => {
       network1: {
         timestamp: 124,
         metadata: { "key 1": "data 1" },
-        asa: { "asa key": { creator: "asa creator",
-                            txId: "",
-                            assetIndex: 0,
-                            confirmedRound: 0 } },
+        asa: {
+          "asa key": {
+            creator: "asa creator",
+            txId: "",
+            assetIndex: 0,
+            confirmedRound: 0
+          }
+        },
         asc: {}
       }
     });
@@ -465,9 +535,13 @@ describe("CheckpointRepoImpl", () => {
         timestamp: 1,
         metadata: { "key 1": "data 1" },
         asa: {},
-        asc: { "ASC key1": { creator: "ASC creator1",
-                            txId: "",
-                            confirmedRound: 0 } }
+        asc: {
+          "ASC key1": {
+            creator: "ASC creator1",
+            txId: "",
+            confirmedRound: 0
+          }
+        }
       }
     };
     const cp2: Checkpoints = {
@@ -483,9 +557,13 @@ describe("CheckpointRepoImpl", () => {
         timestamp: 8,
         metadata: {},
         asa: {},
-        asc: { "ASC key": { creator: "ASC creator",
-                            txId: "",
-                            confirmedRound: 0 } }
+        asc: {
+          "ASC key": {
+            creator: "ASC creator",
+            txId: "",
+            confirmedRound: 0
+          }
+        }
       }
     };
     const cpData = new CheckpointRepoImpl()
@@ -498,12 +576,16 @@ describe("CheckpointRepoImpl", () => {
         metadata: { "key 1": "data 1" },
         asa: {},
         asc: {
-          "ASC key": { creator: "ASC creator",
-                       txId: "",
-                       confirmedRound: 0 },
-          "ASC key1": { creator: "ASC creator1",
-                        txId: "",
-                        confirmedRound: 0 }
+          "ASC key": {
+            creator: "ASC creator",
+            txId: "",
+            confirmedRound: 0
+          },
+          "ASC key1": {
+            creator: "ASC creator1",
+            txId: "",
+            confirmedRound: 0
+          }
         }
       }
     });
@@ -511,9 +593,13 @@ describe("CheckpointRepoImpl", () => {
     assert.deepEqual(cpData.precedingCP, {
       network1: {
         asa: {},
-        asc: { "ASC key": { creator: "ASC creator",
-                             txId: "",
-                             confirmedRound: 0 } },
+        asc: {
+          "ASC key": {
+            creator: "ASC creator",
+            txId: "",
+            confirmedRound: 0
+          }
+        },
         metadata: {},
         timestamp: 124
       }
@@ -522,9 +608,13 @@ describe("CheckpointRepoImpl", () => {
     assert.deepEqual(cpData.strippedCP, {
       network1: {
         asa: {},
-        asc: { "ASC key": { creator: "ASC creator",
-                            txId: "",
-                            confirmedRound: 0 } },
+        asc: {
+          "ASC key": {
+            creator: "ASC creator",
+            txId: "",
+            confirmedRound: 0
+          }
+        },
         metadata: {},
         timestamp: 124
       }
@@ -553,13 +643,17 @@ describe("CheckpointRepoImpl", () => {
       .mergeToGlobal(cp2)
       .putMetadata("network1", "metadata key", "metadata value")
       .putMetadata("net 0195", "1241 key", "345 value")
-      .registerASA("network1", "ASA name", { creator: "ASA creator 123",
-                                             txId: "",
-                                             assetIndex: 0,
-                                             confirmedRound: 0 })
-      .registerASC("network1", "ASC name", { creator: "ASC creator 951",
-                                             txId: "",
-                                             confirmedRound: 0 });
+      .registerASA("network1", "ASA name", {
+        creator: "ASA creator 123",
+        txId: "",
+        assetIndex: 0,
+        confirmedRound: 0
+      })
+      .registerASC("network1", "ASC name", {
+        creator: "ASC creator 951",
+        txId: "",
+        confirmedRound: 0
+      });
     cpData.allCPs.network1.timestamp = 1111;
     cpData.allCPs.network4.timestamp = 4;
     cpData.allCPs["net 0195"].timestamp = 195;
@@ -580,13 +674,21 @@ describe("CheckpointRepoImpl", () => {
             "key 1": "data 1",
             "metadata key": "metadata value"
           },
-          asa: { "ASA name": { creator: "ASA creator 123",
-                               txId: "",
-                               assetIndex: 0,
-                               confirmedRound: 0 } },
-          asc: { "ASC name": { creator: "ASC creator 951",
-                               txId: "",
-                               confirmedRound: 0 } }
+          asa: {
+            "ASA name": {
+              creator: "ASA creator 123",
+              txId: "",
+              assetIndex: 0,
+              confirmedRound: 0
+            }
+          },
+          asc: {
+            "ASC name": {
+              creator: "ASC creator 951",
+              txId: "",
+              confirmedRound: 0
+            }
+          }
         },
         network4: {
           timestamp: 4,
@@ -608,13 +710,21 @@ describe("CheckpointRepoImpl", () => {
             "key 1": "data 1",
             "metadata key": "metadata value"
           },
-          asa: { "ASA name": { creator: "ASA creator 123",
-                               txId: "",
-                               assetIndex: 0,
-                               confirmedRound: 0 } },
-          asc: { "ASC name": { creator: "ASC creator 951",
-                               txId: "",
-                               confirmedRound: 0 } }
+          asa: {
+            "ASA name": {
+              creator: "ASA creator 123",
+              txId: "",
+              assetIndex: 0,
+              confirmedRound: 0
+            }
+          },
+          asc: {
+            "ASC name": {
+              creator: "ASC creator 951",
+              txId: "",
+              confirmedRound: 0
+            }
+          }
         },
         "net 0195": {
           timestamp: 195,
@@ -630,13 +740,21 @@ describe("CheckpointRepoImpl", () => {
             "key 1": "data 1",
             "metadata key": "metadata value"
           },
-          asa: { "ASA name": { creator: "ASA creator 123",
-                               txId: "",
-                               assetIndex: 0,
-                               confirmedRound: 0 } },
-          asc: { "ASC name": { creator: "ASC creator 951",
-                               txId: "",
-                               confirmedRound: 0 } }
+          asa: {
+            "ASA name": {
+              creator: "ASA creator 123",
+              txId: "",
+              assetIndex: 0,
+              confirmedRound: 0
+            }
+          },
+          asc: {
+            "ASC name": {
+              creator: "ASC creator 951",
+              txId: "",
+              confirmedRound: 0
+            }
+          }
         },
         "net 0195": {
           timestamp: 195,
@@ -658,13 +776,17 @@ describe("CheckpointRepoImpl", () => {
     const cpData = new CheckpointRepoImpl();
     assert.isFalse(cpData.isDefined("network1", "ASA name"));
     assert.isFalse(cpData.isDefined("network1", "ASC name"));
-    cpData.registerASA("network1", "ASA name", { creator: "ASA creator 123",
-                                                 txId: "",
-                                                 assetIndex: 0,
-                                                 confirmedRound: 0 })
-      .registerASC("network1", "ASC name", { creator: "ASC creator 951",
-                                             txId: "",
-                                             confirmedRound: 0 });
+    cpData.registerASA("network1", "ASA name", {
+      creator: "ASA creator 123",
+      txId: "",
+      assetIndex: 0,
+      confirmedRound: 0
+    })
+      .registerASC("network1", "ASC name", {
+        creator: "ASC creator 951",
+        txId: "",
+        confirmedRound: 0
+      });
     assert.isTrue(cpData.isDefined("network1", "ASA name"));
     assert.isTrue(cpData.isDefined("network1", "ASC name"));
     assert.isFalse(cpData.isDefined("network1", "other name"));

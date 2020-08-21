@@ -192,7 +192,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
    * @param description the parameter's description.
    */
   public addFlag (name: string, description?: string): this {
-    return this._addFlag(name, false, description)
+    return this._addFlag(name, false, description);
   }
 
   /**
@@ -206,7 +206,7 @@ export class SimpleTaskDefinition implements TaskDefinition {
    * @param description the parameter's description.
    */
   public addHiddenFlag (name: string, description?: string): this {
-    return this._addFlag(name, true, description)
+    return this._addFlag(name, true, description);
   }
 
   /**

@@ -18,7 +18,7 @@ import { TASK_DEPLOY } from "./task-names";
 
 export interface TaskArgs {
   fileNames: string[]
-  force: boolean,
+  force: boolean
   algoDryRun: boolean
 }
 
@@ -43,7 +43,9 @@ function clearCheckpointFiles (scriptNames: string[]): void {
   });
 }
 
-async function doDeploy ({ fileNames, force, algoDryRun }: TaskArgs, runtimeEnv: AlgobRuntimeEnv): Promise<void> {
+async function doDeploy (
+  { fileNames, force, algoDryRun }: TaskArgs, runtimeEnv: AlgobRuntimeEnv
+): Promise<void> {
   const logDebugTag = "algob:tasks:deploy";
 
   const hasUserProvidedScripts = fileNames.length !== 0;
