@@ -40,7 +40,6 @@ export function resolveConfig (
   userConfig: AlgobConfig,
   configExtenders: ConfigExtender[]
 ): ResolvedAlgobConfig {
-  userConfig = deepFreezeUserConfig(userConfig);
 
   const config: Partial<ResolvedAlgobConfig> = mergeUserAndDefaultConfigs(defaultConfig, userConfig);
 
@@ -107,37 +106,4 @@ export function resolveProjectPaths (
     artifacts: resolvePathFrom(root, "artifacts", userPaths.artifacts),
     tests: resolvePathFrom(root, "test", userPaths.tests)
   };
-}
-
-function deepFreezeUserConfig (
-  config: any, // eslint-disable-line @typescript-eslint/no-explicit-any
-  propertyPath: Array<string | number | symbol> = []
-): any { // eslint-disable-line @typescript-eslint/no-explicit-any
-  if (typeof config !== "object" || config === null) {
-    return config;
-  }
-
-  return new Proxy(config, {
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    get (target: any, property: string | number | symbol, receiver: any): any {
-      return deepFreezeUserConfig(Reflect.get(target, property, receiver), [
-        ...propertyPath,
-        property
-      ]);
-    },
-
-    set (
-      target: any,
-      property: string | number | symbol,
-      value: any,
-      receiver: any
-    ): boolean {
-      throw new BuilderError(ERRORS.GENERAL.USER_CONFIG_MODIFIED, {
-        path: [...propertyPath, property]
-          .map((pathPart) => pathPart.toString())
-          .join(".")
-      });
-    }
-    /* eslint-enable @typescript-eslint/no-explicit-any */
-  });
 }

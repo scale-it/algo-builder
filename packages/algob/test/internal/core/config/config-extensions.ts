@@ -39,16 +39,5 @@ describe("Config extensions", function () {
     afterEach(function () {
       resetBuilderContext();
     });
-
-    it("Should throw the right error when trying to modify the user config", function () {
-      expectBuilderError(
-        () => loadConfigAndTasks(),
-        ERRORS.GENERAL.USER_CONFIG_MODIFIED
-      );
-    });
-
-    it("Should have the right property path", function () {
-      assert.throws(() => loadConfigAndTasks(), "userConfig.networks.asd");
-    });
   });
 });
