@@ -353,7 +353,6 @@ export interface AlgobDeployer {
   putMetadata (key: string, value: string): void
   getMetadata (key: string): string | undefined
   deployASA (name: string, flags: ASADeploymentFlags, account: Account): Promise<ASAInfo>
-  deployASADirect (name: string, asaDef: ASADef, flags: ASADeploymentFlags, account: Account): Promise<ASAInfo>
   deployASC (name: string, source: string, account: Account): Promise<ASCInfo>
   /**
      Returns true if ASA or ACS were deployed in any script.

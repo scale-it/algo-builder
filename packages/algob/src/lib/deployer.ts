@@ -73,10 +73,10 @@ export class AlgobDeployerImpl implements AlgobDeployer {
           asaName: name
         });
     }
-    return this.deployASADirect(name, this.loadedAsaDefs[name], flags, account)
+    return this._deployASADirect(name, this.loadedAsaDefs[name], flags, account)
   }
 
-  async deployASADirect(name: string, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account): Promise<ASAInfo> {
+  async _deployASADirect(name: string, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account): Promise<ASAInfo> {
     this.assertNoAsset(name);
     const asaInfo = await this.algoSDK.deployASA(name, asaDesc, flags, account)
     this.cpData.registerASA(this.networkName, name, asaInfo);
@@ -125,12 +125,6 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
   }
 
   async deployASA(name: string, flags: ASADeploymentFlags, account: Account): Promise<ASAInfo> {
-    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      methodName: "deployASA"
-    });
-  }
-
-  async deployASADirect(name: string, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account): Promise<ASAInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployASA"
     });
