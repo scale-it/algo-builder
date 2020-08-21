@@ -343,7 +343,7 @@ export interface Checkpoint {
 export type ASADef = ASADefType;
 export type ASADefs = ASADefsType;
 
-export interface ASADeploymentFlags {
+export interface ASADeploymentFlags { // eslint-disable-line @typescript-eslint/no-empty-interface
 }
 
 export interface AlgobDeployer {

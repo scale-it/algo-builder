@@ -22,7 +22,6 @@ export async function runDeployASA (
   relativeYamlPath: string,
   runtimeEnv: AlgobRuntimeEnv,
   deployer: AlgobDeployer): Promise<void> {
-
 }
 
 function displayErr (error: Error | BuilderError | any, relativeScriptPath: string): void {
