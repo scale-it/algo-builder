@@ -5,15 +5,21 @@ import {
   ASADeploymentFlags
 } from "../types";
 
-export function makeAssetCreateTxn(asaDesc: ASADef, flags: ASADeploymentFlags, account: Account): string {
-  return algosdk.makeAssetCreateTxn(
+async function produceSuggestedParams(algoClient: algosdk.Algodv2): Promise<algosdk.SuggestedParams> {
+  let params = await algoClient.getTransactionParams().do();
+  // Private chains have an issue with firstRound
+  if (params.firstRound === 0) {
+    throw new Error("Ensure that your config points to a node and not to a whole network.")
+    //params.firstRound = 1
+  }
+  return params
+}
+
+export async function makeAssetCreateTxn(algoClient: algosdk.Algodv2, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account): Promise<algosdk.Transaction> {
+  // https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js#L104
+  return algosdk.makeAssetCreateTxnWithSuggestedParams(
     account.addr, // from
-    1, // fee TODO
-    1, // firstRound TODO
-    1, // lastRound TODO
     asaDesc.note, // note
-    "genesisHash", // genesisHash
-    "genesisID", // genesisID
     asaDesc.total, // total
     asaDesc.decimals, // decimals
     asaDesc.defaultFrozen, // defaultFrozen
@@ -24,6 +30,7 @@ export function makeAssetCreateTxn(asaDesc: ASADef, flags: ASADeploymentFlags, a
     asaDesc.unitName, // unitName
     asaDesc.unitName, // assetName
     asaDesc.url, // assetURL
-    asaDesc.metadataHash // assetMetadataHash
+    asaDesc.metadataHash, // assetMetadataHash
+    await produceSuggestedParams(algoClient)
   )
 }

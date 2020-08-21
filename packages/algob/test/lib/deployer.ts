@@ -95,22 +95,27 @@ describe("AlgobDeployerImpl", () => {
     const deployer = new AlgobDeployerImpl(env, cpData, {}, new AlgoSDKWrapperDryRunImpl());
 
     const asaInfo = await deployer.deployASADirect("MY_ASA", mkASA(), {}, deployer.accounts[0]);
-    assert.deepEqual(asaInfo, { creator: "addr-1-get-address" });
+    assert.deepEqual(asaInfo, { creator: "addr-1-get-address-dry-run", txId: "tx-id-dry-run", confirmedRound: -1, assetIndex: -1 });
 
     const ascInfo = await deployer.deployASC("MY_ASC", "My brand new ASC", deployer.accounts[1]);
-    assert.deepEqual(ascInfo, { creator: "addr-2-get-address" });
+    assert.deepEqual(ascInfo, { creator: "addr-2-get-address-dry-run", txId: "tx-id-dry-run", confirmedRound: -1 });
 
     cpData.precedingCP.network1.timestamp = 515236;
     assert.deepEqual(cpData.precedingCP, {
       network1: {
         asa: {
           MY_ASA: {
-            creator: "addr-1-get-address"
+            creator: "addr-1-get-address-dry-run",
+            txId: "tx-id-dry-run",
+            confirmedRound: -1,
+            assetIndex: -1
           }
         },
         asc: {
           MY_ASC: {
-            creator: "addr-2-get-address"
+            creator: "addr-2-get-address-dry-run",
+            txId: "tx-id-dry-run",
+            confirmedRound: -1
           }
         },
         metadata: {},
@@ -123,8 +128,8 @@ describe("AlgobDeployerImpl", () => {
     const networkName = "network1";
     const env = mkAlgobEnv(networkName);
     const cpData = new CheckpointRepoImpl()
-      .registerASA(networkName, "ASA name", { creator: "ASA creator 123" })
-      .registerASC(networkName, "ASC name", { creator: "ASC creator 951" })
+      .registerASA(networkName, "ASA name", { creator: "ASA creator 123", txId: "", confirmedRound: 0, assetIndex: 0 })
+      .registerASC(networkName, "ASC name", { creator: "ASC creator 951", txId: "", confirmedRound: 0 })
       .putMetadata(networkName, "k", "v");
     const deployer = new AlgobDeployerImpl(env, cpData, {}, new AlgoSDKWrapperDryRunImpl());
     assert.isTrue(deployer.isDefined("ASC name"));

@@ -566,6 +566,14 @@ Please double check your command parameters`
 Make sure your 'asa.yaml' file contains this entry.
 `
   },
+  SCRIPT_CHAIN_IO_ERROR: {
+    number: 612,
+    message: `%errorType% error while interacting with chain (from '%script%'): %message%`,
+    title: "Error calling chain API from script",
+    description: `%errorType% error while interacting with chain (from '%script%'): %message%.
+
+Please check algob output for more details.`
+  },
 };
 
 const pluginErrors = {

@@ -85,7 +85,11 @@ export class AlgobDeployerImpl implements AlgobDeployer {
 
   async deployASC(name: string, source: string, account: Account): Promise<ASCInfo> {
     this.assertNoAsset(name);
-    this.cpData.registerASC(this.networkName, name, { creator: account.addr + "-get-address" });
+    this.cpData.registerASC(this.networkName, name, {
+      creator: account.addr + "-get-address-dry-run",
+      txId: "tx-id-dry-run",
+      confirmedRound: -1
+    });
     return this.cpData.precedingCP[this.networkName].asc[name];
   }
 

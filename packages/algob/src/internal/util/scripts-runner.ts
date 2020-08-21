@@ -25,6 +25,34 @@ export async function runDeployASA (
   return
 }
 
+function displayErr(error: Error | BuilderError | any, relativeScriptPath: string) {
+  if (error instanceof BuilderError) {
+    throw error;
+  }
+  // TX execution error
+  if (error.response && error.response.error) {
+    throw new BuilderError(
+      ERRORS.BUILTIN_TASKS.SCRIPT_CHAIN_IO_ERROR, {
+        script: relativeScriptPath,
+        errorType: error.response.clientError
+          ? "Client"
+          : "Server",
+        message: error.response && error.response.body && error.response.body.message
+          ? error.response.body.message
+          : error.response.error.message
+      },
+      error.response.error
+    );
+  }
+  throw new BuilderError(
+    ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR, {
+      script: relativeScriptPath,
+      message: error.message
+    },
+    error
+  );
+}
+
 export async function runScript (
   relativeScriptPath: string,
   runtimeEnv: AlgobRuntimeEnv,
@@ -44,16 +72,7 @@ export async function runScript (
       deployer
     );
   } catch (error) {
-    if (error instanceof BuilderError) {
-      throw error;
-    }
-    throw new BuilderError(
-      ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR, {
-        script: relativeScriptPath,
-        message: error.message
-      },
-      error
-    );
+    displayErr(error, relativeScriptPath)
   }
 }
 

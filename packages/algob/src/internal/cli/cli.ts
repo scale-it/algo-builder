@@ -43,6 +43,17 @@ function ensureValidNodeVersion (packageJson: PackageJson): void {
   }
 }
 
+function printStackTraces(showStackTraces: boolean, error: BuilderError) {
+  if (showStackTraces) {
+    console.error(error.stack);
+    if (error.parent) {
+      console.error(error.parent);
+    }
+  } else {
+    console.error(`For more info run ${ALGOB_NAME} with --show-stack-traces or add --help to display task-specific help.`);
+  }
+}
+
 /* eslint-disable sonarjs/cognitive-complexity */
 async function main (): Promise<void> {
   // We first accept this argument anywhere, so we know if the user wants
@@ -164,7 +175,7 @@ async function main (): Promise<void> {
 
     console.log("");
 
-    if (showStackTraces && error) { console.error(error.stack); } else { console.error(`For more info run ${ALGOB_NAME} with --show-stack-traces or add --help to display task-specific help.`); }
+    printStackTraces(showStackTraces, error)
 
     process.exit(1);
   }

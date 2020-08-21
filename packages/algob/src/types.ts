@@ -290,10 +290,13 @@ type AccountAddress = string;
 
 export interface DeployedAssetInfo {
   creator: AccountAddress
+  txId: string
+  confirmedRound: number
   // nice to have: Deployment script name
 }
 
 export interface ASAInfo extends DeployedAssetInfo {
+  assetIndex: number
 }
 export interface ASCInfo extends DeployedAssetInfo {
 }
