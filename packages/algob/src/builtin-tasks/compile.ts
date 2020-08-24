@@ -7,6 +7,7 @@ import { task } from "../internal/core/config/config-env";
 import { parseAlgorandError } from "../internal/core/errors";
 import { assertDir, ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
 import { createClient } from "../lib/driver";
+import { timestampNow } from "../lib/time";
 import type { AlgobRuntimeEnv, ASCCache, Network } from "../types";
 import { TASK_COMPILE } from "./task-names";
 const murmurhash = require('murmurhash'); // eslint-disable-line @typescript-eslint/no-var-requires
@@ -42,7 +43,7 @@ export async function compile (force: boolean, op: CompileOp): Promise<void> {
       continue;
     }
     console.log("compiling", f);
-    c = await compileAndSave(op, new ASCCachePartial(f, teal, thash));
+    c = await op.compile(f, teal, thash);
     cache.set(f, c);
     const cacheFilename = path.join(CACHE_DIR, f + ".yaml");
     op.writeFile(cacheFilename, YAML.stringify(c));
@@ -56,8 +57,23 @@ class CompileOp {
     this.algocl = createClient(n);
   }
 
-  async compile (code: string): Promise<CompileOut> {
+  async callCompiler (code: string): Promise<CompileOut> {
     return await this.algocl.compile(code).do();
+  }
+
+  async compile (filename: string, tealCode: string, tealHash: number): Promise<ASCCache> {
+    try {
+      const co = await this.callCompiler(tealCode);
+      return {
+        filename: filename,
+        timestamp: timestampNow(),
+        compiled: co.result,
+        compiledHash: co.hash,
+        srcHash: tealHash
+      };
+    } catch (e) {
+      throw parseAlgorandError(e, { filename: filename });
+    }
   }
 
   writeFile (filename: string, content: string): void {
@@ -78,35 +94,4 @@ function readArtifacts (dir: string): Map<string, ASCCache> {
 function readTealAndHash (filename: string): [string, number] {
   const content = readFileSync(filename, 'utf8');
   return [content, murmurhash.v3(content)];
-}
-
-class ASCCachePartial {
-  filename: string;
-  tealCode: string;
-  tealHash: number;
-
-  constructor (filename: string, tealCode: string, tealHash: number) {
-    this.filename = filename;
-    this.tealCode = tealCode;
-    this.tealHash = tealHash;
-  }
-
-  mkASCCache (co: CompileOut): ASCCache {
-    return {
-      filename: this.filename,
-      timestamp: Math.floor(Date.now() / 1000),
-      compiled: co.result,
-      compiledHash: co.hash,
-      srcHash: this.tealHash
-    };
-  }
-}
-
-async function compileAndSave (op: CompileOp, ap: ASCCachePartial): Promise<ASCCache> {
-  try {
-    const co = await op.compile(ap.tealCode);
-    return ap.mkASCCache(co);
-  } catch (e) {
-    throw parseAlgorandError(e, { filename: ap.filename });
-  }
 }
