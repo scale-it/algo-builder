@@ -14,7 +14,7 @@ declare module 'algosdk' {
     compile (source: string): Action<CompileOut>;
     status(): Action<any>;
 
-    sendRawTransaction(rawSignedTxn: any): Action<TxResult>
+    sendRawTransaction(rawSignedTxn: TxnBytes): Action<TxResult>
     getTransactionParams(): Action<SuggestedParams>
     pendingTransactionInformation(txId: string): Action<PendingTransactionInformation>
     statusAfterBlock(lastround: number): Action<any>
@@ -66,7 +66,7 @@ declare module 'algosdk' {
     assetURL: string
     assetMetadataHash: string
 
-    freezeAccount: any
+    freezeAccount: string
     freezeState: any
     assetRevocationTarget: any
 
@@ -84,7 +84,7 @@ declare module 'algosdk' {
     appForeignApps: any
     appForeignAssets: any
     type: any
-    reKeyTo: any
+    reKeyTo: string
 
     signTxn(sk: Uint8Array): TxnBytes
   }
@@ -215,7 +215,7 @@ declare module 'algosdk' {
   }
 
   interface TxResult {
-    txId: any
+    txId: string
   }
 
   interface PendingTransactionInformation {
