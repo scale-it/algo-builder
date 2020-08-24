@@ -23,7 +23,8 @@ export const ERROR_RANGES = {
     title: "Task definition errors"
   },
   ARGUMENTS: { min: 300, max: 399, title: "Arguments related errors" },
-  ACCOUNT: { min: 400, max: 410, title: "Account related errors" },
+  ACCOUNT: { min: 400, max: 409, title: "Account related errors" },
+  ALGORAND: { min: 410, max: 420, title: "Algorand node related errors" },
 
   BUILTIN_TASKS: { min: 600, max: 699, title: "Built-in tasks errors" },
   PLUGINS: { min: 800, max: 899, title: "Plugin system errors" },
@@ -626,6 +627,23 @@ const accountErrors = {
 
 };
 
+const algorandNode = {
+  BAD_REQUEST: {
+    number: 410,
+    message: `status_code=%status%,
+%message%
+context=%ctx%`,
+    title: `Bad Request sent to an algorand node`,
+    description: ""
+  },
+  INTERNAL_ERROR: {
+    number: 411,
+    message: `status_code=%status%`,
+    title: `Internal Algorand node error`,
+    description: "The algorand node is not stable and encountered internal error"
+  }
+};
+
 const scriptErrors = {
   ASA_PARAM_PARSE_ERROR: {
     number: 900,
@@ -653,6 +671,7 @@ export const ERRORS: {
   TASK_DEFINITIONS: taskDefErrors,
   ARGUMENTS: argumentErrors,
   ACCOUNT: accountErrors,
+  ALGORAND: algorandNode,
   BUILTIN_TASKS: taskErrors,
   PLUGINS: pluginErrors,
   SCRIPT: scriptErrors

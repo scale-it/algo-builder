@@ -164,7 +164,7 @@ async function main (): Promise<void> {
 
     console.log("");
 
-    if (showStackTraces) { console.error(error.stack); } else { console.error(`For more info run ${ALGOB_NAME} with --show-stack-traces or add --help to display task-specific help.`); }
+    if (showStackTraces && error) { console.error(error.stack); } else { console.error(`For more info run ${ALGOB_NAME} with --show-stack-traces or add --help to display task-specific help.`); }
 
     process.exit(1);
   }

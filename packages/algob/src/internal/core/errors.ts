@@ -1,3 +1,4 @@
+import type { RequestError } from 'algosdk';
 
 import type { AnyMap } from "../../types";
 import { getClosestCallerPackage } from "../util/caller-package";
@@ -184,4 +185,15 @@ function _applyErrorMessageTemplate (
   }
 
   return template;
+}
+
+export function parseAlgorandError (e: RequestError, ctx: AnyMap): Error {
+  if (e?.statusCode !== undefined) {
+    if (e.statusCode >= 400 && e.statusCode < 500) {
+      return new BuilderError(ERRORS.ALGORAND.BAD_REQUEST,
+        { status: e.statusCode, message: e.text, ctx: JSON.stringify(ctx) });
+    }
+    return new BuilderError(ERRORS.ALGORAND.INTERNAL_ERROR, { status: e.statusCode }, e);
+  }
+  return e;
 }

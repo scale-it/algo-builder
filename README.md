@@ -24,13 +24,19 @@ The project specification is [published here](https://paper.dropbox.com/publishe
 + Connection to an Algorand node.
 
 
+## Algorand Node requirements
+
++ algod v2.1.3+
+
+Make sure that the node you are connecting to has a `"EnableDeveloperAPI": true` option set in the `<node_data>/config.json`. This is required to compile smart contracts using REST / SDK.
+
 # Usage
 
 See [user script documentation](docs/user-script-execution.md) for info about custom scripts and deployments.
 
-## Working with TypeScript projects
+## Using algob with a TypeScript project
 
-You can use `algob` within a TS project. Write your scripts and do deployments as you would like. But then, to run it you firstly need to compile the project to JS.
+You can use `algob` within a TS project. You can write your scripts and tests in TS. However to use them with `algob` you firstly need to compile the project to JS.
 
 TODO: provide a project template for TS projects. [task](https://www.pivotaltracker.com/n/projects/2452320).
 
