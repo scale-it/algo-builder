@@ -343,7 +343,8 @@ export interface Checkpoint {
 export type ASADef = ASADefType;
 export type ASADefs = ASADefsType;
 
-export interface ASADeploymentFlags { // eslint-disable-line @typescript-eslint/no-empty-interface
+export interface ASADeploymentFlags {
+  creator: Account
 }
 
 export interface AlgobDeployer {
@@ -352,7 +353,7 @@ export interface AlgobDeployer {
   accounts: Account[]
   putMetadata: (key: string, value: string) => void
   getMetadata: (key: string) => string | undefined
-  deployASA: (name: string, flags?: ASADeploymentFlags, account: Account) => Promise<ASAInfo>
+  deployASA: (name: string, flags: ASADeploymentFlags) => Promise<ASAInfo>
   deployASC: (name: string, source: string, account: Account) => Promise<ASCInfo>
   /**
      Returns true if ASA or ACS were deployed in any script.

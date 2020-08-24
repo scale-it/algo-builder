@@ -27,7 +27,7 @@ class FakeDeployer implements AlgobDeployer {
     return "metadata";
   };
 
-  async deployASA (name: string, flags: ASADeploymentFlags, account: AccountDef): Promise<ASAInfo> {
+  async deployASA (name: string, flags: ASADeploymentFlags): Promise<ASAInfo> {
     throw new Error("Not implemented");
   };
 

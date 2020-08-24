@@ -67,14 +67,14 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     }
   }
 
-  async deployASA (name: string, flags: ASADeploymentFlags, account: Account): Promise<ASAInfo> {
+  async deployASA (name: string, flags: ASADeploymentFlags): Promise<ASAInfo> {
     if (this.loadedAsaDefs[name] === undefined) {
       throw new BuilderError(
         ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_DEF_NOT_FOUND, {
           asaName: name
         });
     }
-    return await this._deployASADirect(name, this.loadedAsaDefs[name], flags, account);
+    return await this._deployASADirect(name, this.loadedAsaDefs[name], flags, flags.creator);
   }
 
   async _deployASADirect (
@@ -127,7 +127,7 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
     return this._internal.getMetadata(key);
   }
 
-  async deployASA (name: string, flags: ASADeploymentFlags, account: Account): Promise<ASAInfo> {
+  async deployASA (name: string, flags: ASADeploymentFlags): Promise<ASAInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployASA"
     });
