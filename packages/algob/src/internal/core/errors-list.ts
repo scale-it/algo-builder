@@ -23,7 +23,7 @@ export const ERROR_RANGES = {
     title: "Task definition errors"
   },
   ARGUMENTS: { min: 300, max: 399, title: "Arguments related errors" },
-  ACCOUNT: { min: 400, max: 410, title: "Account related errors" },
+  ACCOUNT: { min: 400, max: 409, title: "Account related errors" },
   ALGORAND: { min: 410, max: 420, title: "Algorand node related errors" },
 
   BUILTIN_TASKS: { min: 600, max: 699, title: "Built-in tasks errors" },
