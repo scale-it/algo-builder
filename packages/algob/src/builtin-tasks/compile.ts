@@ -4,6 +4,7 @@ import * as path from 'path';
 import YAML from "yaml";
 
 import { task } from "../internal/core/config/config-env";
+import { parseAlgorandError } from "../internal/core/errors";
 import { assertDir, ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
 import { createClient } from "../lib/driver";
 import type { AlgobRuntimeEnv, ASCCache, Network } from "../types";
@@ -24,10 +25,10 @@ export interface TaskArgs {
 
 async function _compile ({ force }: TaskArgs, env: AlgobRuntimeEnv): Promise<void> {
   const op = new CompileOp(env.network);
-  compile(force, op);
+  return await compile(force, op);
 }
 
-export async function compile(force: boolean, op: CompileOp): Promise<void> {
+export async function compile (force: boolean, op: CompileOp): Promise<void> {
   await assertDir(CACHE_DIR);
   const cache = readArtifacts(CACHE_DIR);
 
@@ -46,21 +47,20 @@ export async function compile(force: boolean, op: CompileOp): Promise<void> {
     const cacheFilename = path.join(CACHE_DIR, f + ".yaml");
     op.writeFile(cacheFilename, YAML.stringify(c));
   }
-
 }
 
 class CompileOp {
   algocl: Algodv2;
 
-  constructor(n: Network) {
+  constructor (n: Network) {
     this.algocl = createClient(n);
   }
 
-  compile (code: string): Promise<CompileOut>{
-    return this.algocl.compile(code).do();
+  async compile (code: string): Promise<CompileOut> {
+    return await this.algocl.compile(code).do();
   }
 
-  writeFile (filename: string, content: string){
+  writeFile (filename: string, content: string): void {
     writeFileSync(filename, content);
   }
 }
@@ -107,17 +107,6 @@ async function compileAndSave (op: CompileOp, ap: ASCCachePartial): Promise<ASCC
     const co = await op.compile(ap.tealCode);
     return ap.mkASCCache(co);
   } catch (e) {
-    if (e?.statusCode === 400) {
-      throw new ASCCompileError(e.body.message, ap.filename);
-    }
-    throw e;
-  }
-}
-
-class ASCCompileError extends Error {
-  filename: string;
-  constructor (msg: string, filename: string) {
-    super(msg);
-    this.filename = filename;
+    throw parseAlgorandError(e, { filename: ap.filename });
   }
 }

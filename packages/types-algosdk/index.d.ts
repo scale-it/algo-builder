@@ -127,6 +127,11 @@ declare module 'algosdk' {
     do (headers?: Record<string, unknown>): Promise<T>;
   }
 
+  interface RequestError extends Error {
+    statusCode?: number,
+    text: string,
+  }
+
   interface NodeStatus {
     catchpoint: string
     'catchpoint-acquired-blocks': number
