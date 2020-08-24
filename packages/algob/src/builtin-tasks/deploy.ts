@@ -94,7 +94,7 @@ async function doDeploy (
 export default function (): void {
   task(TASK_DEPLOY, "Compiles and runs user-defined scripts from scripts directory")
     .addFlag("force", "Run the scripts even if checkpoint state already exist (Danger: it will overwrite them).")
-    .addHiddenFlag("algoDryRun", "Creates checkpoints but doesn't interact with a Node.")
+    .addFlag("algoDryRun", "Creates checkpoints but doesn't interact with a Node.")
     .addOptionalVariadicPositionalParam(
       "fileNames",
       "A directory that contains js files to be run within algob's environment",

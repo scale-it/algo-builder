@@ -163,6 +163,6 @@ export default function (): void {
       "scripts",
       "A js file to be run within algob's environment"
     )
-    .addHiddenFlag("algoDryRun", "Uses checkpoints but doesn't interact with a Node.")
+    .addFlag("algoDryRun", "Uses checkpoints but doesn't interact with a Node.")
     .setAction(doRun);
 }

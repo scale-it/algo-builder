@@ -158,8 +158,6 @@ export interface ConfigurableTaskDefinition {
   ) => this
 
   addFlag: (name: string, description?: string) => this
-
-  addHiddenFlag: (name: string, description?: string) => this
 }
 
 export interface ParamDefinition<T> {
@@ -171,7 +169,6 @@ export interface ParamDefinition<T> {
   isOptional: boolean
   isFlag: boolean
   isVariadic: boolean
-  isHidden?: boolean
 }
 
 export type ParamDefinitionAny = ParamDefinition<any>; // eslint-disable-line @typescript-eslint/no-explicit-any

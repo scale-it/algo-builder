@@ -133,12 +133,6 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
     });
   }
 
-  async deployASAFromFile (source: string, account: Account): Promise<ASAInfo> {
-    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      methodName: "deployASAFromFile"
-    });
-  }
-
   async deployASC (name: string, source: string, account: Account): Promise<ASCInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployASC"
