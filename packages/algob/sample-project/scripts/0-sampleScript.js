@@ -2,7 +2,7 @@
 function run(runtimeEnv, accounts, deployer) {
   console.log("Sample script has been executed!")
   if (deployer.isWritable) {
-    deployer.deployASA("sampleASA", {}, deployer.accounts[0])
+    deployer.deployASA("minimumASA", {}, deployer.accounts[0])
   }
 }
 

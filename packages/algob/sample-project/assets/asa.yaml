@@ -1,3 +1,19 @@
-sampleASA:
+# minimum ASA definition (all optional fields omitted)
+minimumASA:
   total: 1
   decimals: 0
+## whole ASA definition (contains all fields)
+## TODO:MM: Make sure all fields are deployable to a node
+#allFieldASA:
+#  total: 1
+#  decimals: 0
+#  defaultFrozen: true,
+#  unitName: "unitName",
+#  url: "url",
+#  metadataHash: "metadataHash",
+#  note: "note",
+#  noteb64: "noteb64",
+#  manager: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
+#  reserve: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
+#  freeze: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
+#  clawback: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"
