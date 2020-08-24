@@ -47,7 +47,7 @@ function printErrRecur (error: BuilderError): void {
   console.error(error.stack);
   if (error.parent) {
     if (error.parent instanceof BuilderError) {
-      printErrRecur(error.parent)
+      printErrRecur(error.parent);
     } else {
       console.error(error.parent);
     }
@@ -56,7 +56,7 @@ function printErrRecur (error: BuilderError): void {
 
 function printStackTraces (showStackTraces: boolean, error: BuilderError): void {
   if (showStackTraces) {
-    printErrRecur(error)
+    printErrRecur(error);
   } else {
     console.error(`For more info run ${ALGOB_NAME} with --show-stack-traces or add --help to display task-specific help.`);
   }
