@@ -6,9 +6,11 @@ import YAML from "yaml";
 
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
+import { string } from "../internal/core/params/argument-types";
 import {
   ASAInfo,
   ASCInfo,
+  assetScriptMap,
   Checkpoint,
   CheckpointRepo,
   Checkpoints
@@ -81,23 +83,37 @@ export class CheckpointRepoImpl implements CheckpointRepo {
   strippedCP: Checkpoints = {};
   precedingCP: Checkpoints = {};
   allCPs: Checkpoints = {};
+  scriptMap: assetScriptMap = {};
 
-  private _mergeTo (target: Checkpoints, cp: Checkpoints): Checkpoints {
+  private _mergeTo (target: Checkpoints, cp: Checkpoints, scriptMap: assetScriptMap): Checkpoints {
     const keys: string[] = Object.keys(cp);
     return keys.reduce((out: Checkpoints, key: string) => {
       return appendToCheckpoint(out, key, cp[key]);
     }, target);
   }
 
-  merge (cp: Checkpoints): CheckpointRepo {
+  merge (cp: Checkpoints, scriptName: string): CheckpointRepo {
     this.strippedCP = cp;
-    this.precedingCP = this._mergeTo(this.precedingCP, cp);
-    this.mergeToGlobal(cp);
+    this.precedingCP = this._mergeTo(this.precedingCP, cp, this.scriptMap);
+    this.mergeToGlobal(cp, scriptName);
     return this;
   }
 
-  mergeToGlobal (cp: Checkpoints): CheckpointRepo {
-    this.allCPs = this._mergeTo(this.allCPs, cp);
+  mergeToGlobal (cp: Checkpoints, scriptName: string): CheckpointRepo {
+    this.allCPs = this._mergeTo(this.allCPs, cp, this.scriptMap);
+
+    const keys: string[] = Object.keys(cp);
+    for (let i = 0; i < keys.length; i++) {
+      const orig = cp[keys[i]];
+      const allAssetNames = Object.keys(orig.asa).concat(Object.keys(orig.asc));
+      for (const assetName of allAssetNames) {
+        if (!(this.scriptMap[assetName])) { this.scriptMap[assetName] = scriptName; } else {
+          throw new BuilderError(
+            ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
+            { scriptName: this.scriptMap[assetName] });
+        }
+      }
+    }
     return this;
   }
 
@@ -217,7 +233,7 @@ export function lsScriptsDir (): string[] {
 export function loadCheckpointsRecursive (): CheckpointRepo {
   return findCheckpointsRecursive().reduce(
     (out: CheckpointRepo, filename: string) => {
-      return out.mergeToGlobal(loadCheckpointNoSuffix(filename));
+      return out.mergeToGlobal(loadCheckpointNoSuffix(filename), filename);
     },
     new CheckpointRepoImpl());
 }

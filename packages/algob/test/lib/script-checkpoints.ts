@@ -327,8 +327,8 @@ describe("CheckpointRepoImpl", () => {
       }
     };
     const cp = new CheckpointRepoImpl()
-      .merge(cp1)
-      .merge(cp2)
+      .merge(cp1, "12")
+      .merge(cp2, "34")
       .precedingCP;
     assert.deepEqual(cp, {
       network1: {
@@ -364,8 +364,8 @@ describe("CheckpointRepoImpl", () => {
       }
     };
     const cpData = new CheckpointRepoImpl()
-      .merge(cp1)
-      .merge(cp2);
+      .merge(cp1, "12")
+      .merge(cp2, "34");
     cpData.precedingCP.network1.timestamp = 124;
     cpData.strippedCP.network1.timestamp = 124;
     cpData.allCPs.network1.timestamp = 124;
@@ -421,9 +421,9 @@ describe("CheckpointRepoImpl", () => {
       }
     };
     const cpData = new CheckpointRepoImpl()
-      .mergeToGlobal(cp1)
-      .mergeToGlobal(cp2)
-      .merge(cp3);
+      .mergeToGlobal(cp1, "12")
+      .mergeToGlobal(cp2, "23")
+      .merge(cp3, "34");
     assert.deepEqual(cpData.allCPs, {
       network1: {
         timestamp: 8,
@@ -473,8 +473,8 @@ describe("CheckpointRepoImpl", () => {
       }
     };
     const cpData = new CheckpointRepoImpl()
-      .merge(cp1)
-      .mergeToGlobal(cp2)
+      .merge(cp1, "12")
+      .mergeToGlobal(cp2, "23")
       .putMetadata("network1", "metadata key", "metadata value")
       .putMetadata("net 0195", "1241 key", "345 value")
       .registerASA("network1", "ASA name", "ASA creator 123")
