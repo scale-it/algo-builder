@@ -19,7 +19,6 @@ import { TASK_DEPLOY } from "./task-names";
 export interface TaskArgs {
   fileNames: string[]
   force: boolean
-  algoDryRun: boolean
 }
 
 export function loadFilenames (directory: string): string[] {
@@ -43,8 +42,10 @@ function clearCheckpointFiles (scriptNames: string[]): void {
   });
 }
 
-async function doDeploy (
-  { fileNames, force, algoDryRun }: TaskArgs, runtimeEnv: AlgobRuntimeEnv
+export async function executeDeployTask (
+  { fileNames, force }: TaskArgs,
+  runtimeEnv: AlgobRuntimeEnv,
+  algoDryRun: boolean
 ): Promise<void> {
   const logDebugTag = "algob:tasks:deploy";
 
@@ -94,11 +95,10 @@ async function doDeploy (
 export default function (): void {
   task(TASK_DEPLOY, "Compiles and runs user-defined scripts from scripts directory")
     .addFlag("force", "Run the scripts even if checkpoint state already exist (Danger: it will overwrite them).")
-    .addFlag("algoDryRun", "Creates checkpoints but doesn't interact with a Node.")
     .addOptionalVariadicPositionalParam(
       "fileNames",
       "A directory that contains js files to be run within algob's environment",
       []
     )
-    .setAction(doDeploy);
+    .setAction((input, env) => executeDeployTask(input, env, false));
 }

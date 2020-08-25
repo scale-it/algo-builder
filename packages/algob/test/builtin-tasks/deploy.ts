@@ -7,6 +7,13 @@ import { ERRORS } from "../../src/internal/core/errors-list";
 import { loadCheckpoint } from "../../src/lib/script-checkpoints";
 import { expectBuilderErrorAsync } from "../helpers/errors";
 import { testFixtureOutputFile, useCleanFixtureProject } from "../helpers/project";
+import { executeDeployTask as executeDeployTaskNoCLI, TaskArgs } from "../../src/builtin-tasks/deploy";
+import {
+  gatherArguments,
+  loadEnvironmentAndArgs
+} from "../../src/internal/cli/cli";
+import { RuntimeArgs, AlgobRuntimeEnv } from "../../src/types";
+import { ArgumentsParser } from "../../src/internal/cli/arguments-parser";
 
 describe("Deploy task", function () {
   useCleanFixtureProject("scripts-dir");
@@ -107,10 +114,10 @@ describe("Deploy task: nested state files", function () {
   useCleanFixtureProject("scripts-dir-recursive-cp");
 
   it("Deployer should accumulate state during the run 1", async function () {
-    await this.env.run(TASK_DEPLOY, {
+    await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js", "scripts/query.js"],
-      algoDryRun: true
-    });
+      force: false
+    }, this.env, true)
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, `ASA from first defined: true
 ASC from second defined: false`);
@@ -118,72 +125,70 @@ ASC from second defined: false`);
 
   it("Deployer should fail during nested execution", async function () {
     await expectBuilderErrorAsync(
-      async () => await this.env.run(TASK_DEPLOY, {
+      async () => await executeDeployTaskNoCLI({
         fileNames: ["scripts/1.js", "scripts/nested/nested.js"],
-        algoDryRun: true
-      }),
+        force: false
+      }, this.env, true),
       ERRORS.BUILTIN_TASKS.DEPLOY_SCRIPT_NON_DIRECT_CHILD,
       "scripts/nested/nested.js");
     assert.isFalse(fs.existsSync(testFixtureOutputFile));
   });
 
   it("Deployer should accumulate state during the run 2", async function () {
-    await this.env.run(TASK_DEPLOY, {
+    await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js", "scripts/2.js", "scripts/query.js"],
-      algoDryRun: true
-    });
+      force: false
+    }, this.env, true)
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, `ASA from first defined: true
 ASC from second defined: true`);
   });
 
   it("Deployer should load deployed assets before running scripts; should not show them", async function () {
-    await this.env.run(TASK_DEPLOY, {
+    await executeDeployTaskNoCLI({
       fileNames: ["scripts/query.js"],
-      algoDryRun: true
-    });
+      force: false
+    }, this.env, true)
     const scriptOutputBefore = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputBefore, `ASA from first defined: false
 ASC from second defined: false`);
     fs.unlinkSync(testFixtureOutputFile);
-    await this.env.run(TASK_DEPLOY, {
+    await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js", "scripts/2.js"],
-      algoDryRun: true
-    });
-    await this.env.run(TASK_DEPLOY, {
+      force: false
+    }, this.env, true)
+    await executeDeployTaskNoCLI({
       fileNames: ["scripts/query.js"],
-      algoDryRun: true
-    });
+      force: false
+    }, this.env, true)
     const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputAfter, `ASA from first defined: true
 ASC from second defined: true`);
   });
 
   it("Deployer --force should allow to rewrite existing assets; one script", async function () {
-    await this.env.run(TASK_DEPLOY, {
+    await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js"],
-      algoDryRun: true
-    });
-    await this.env.run(TASK_DEPLOY, {
+      force: false
+    }, this.env, true)
+    await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js", "scripts/query.js"],
-      force: true,
-      algoDryRun: true
-    });
+      force: false
+    }, this.env, true)
     const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputAfter, `ASA from first defined: true
 ASC from second defined: false`);
   });
 
   it("Deployer --force should allow to rewrite existing assets; two scripts", async function () {
-    await this.env.run(TASK_DEPLOY, {
+    await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js", "scripts/2.js"],
-      algoDryRun: true
-    });
-    await this.env.run(TASK_DEPLOY, {
+      force: false
+    }, this.env, true)
+    await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js", "scripts/2.js", "scripts/query.js"],
-      algoDryRun: true,
-      force: true
-    });
+      force: false
+    }, this.env, true)
     const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputAfter, `ASA from first defined: true
 ASC from second defined: true`);

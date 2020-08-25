@@ -319,8 +319,8 @@ export interface CheckpointRepo {
   putMetadata: (networkName: string, key: string, value: string) => CheckpointRepo
   getMetadata: (networkName: string, key: string) => string | undefined
 
-  registerASA: (networkName: string, name: string, creator: ASAInfo) => CheckpointRepo
-  registerASC: (networkName: string, name: string, creator: ASCInfo) => CheckpointRepo
+  registerASA: (networkName: string, name: string, info: ASAInfo) => CheckpointRepo
+  registerASC: (networkName: string, name: string, info: ASCInfo) => CheckpointRepo
 
   isDefined: (networkName: string, name: string) => boolean
   networkExistsInCurrentCP: (networkName: string) => boolean

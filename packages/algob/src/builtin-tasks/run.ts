@@ -6,9 +6,8 @@ import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { runScript } from "../internal/util/scripts-runner";
 import {
-  AlgoSDKWrapperDryRunImpl,
-  AlgoSDKWrapperImpl
-} from "../lib/algo-sdk";
+  AlgoSDKWrapperDryRunImpl} from "../lib/algo-sdk";
+import { AlgoSDKWrapperImpl } from "../lib/algo-sdk";
 import { loadASAFile } from "../lib/asa";
 import {
   AlgobDeployerImpl,
@@ -27,7 +26,6 @@ import { TASK_RUN } from "./task-names";
 
 interface Input {
   scripts: string[]
-  algoDryRun: boolean
 }
 
 function filterNonExistent (scripts: string[]): string[] {
@@ -84,7 +82,8 @@ export async function runMultipleScriptsOneByOne (
   force: boolean,
   logDebugTag: string,
   allowWrite: boolean,
-  algoDryRun: boolean): Promise<void> {
+  algoDryRun: boolean
+  ): Promise<void> {
   for (const script of scriptNames) {
     await runMultipleScripts(
       runtimeEnv,
@@ -105,10 +104,11 @@ export async function runMultipleScripts (
   force: boolean,
   logTag: string,
   allowWrite: boolean,
-  algoDryRun: boolean): Promise<void> {
+  algoDryRun: boolean
+): Promise<void> {
   const log = debug(logTag);
   const cpData: CheckpointRepo = loadCheckpointsRecursive();
-  const deployer: AlgobDeployer = mkDeployer(runtimeEnv, cpData, allowWrite, algoDryRun);
+  const deployer: AlgobDeployer = mkDeployer(runtimeEnv, cpData, allowWrite, algoDryRun)
 
   const scriptsFromScriptsDir: string[] = lsScriptsDir();
 
@@ -133,9 +133,10 @@ export async function runMultipleScripts (
   }
 }
 
-async function doRun (
-  { scripts, algoDryRun }: Input,
-  runtimeEnv: AlgobRuntimeEnv
+async function executeRunTask (
+  { scripts }: Input,
+  runtimeEnv: AlgobRuntimeEnv,
+  algoDryRun: boolean
 ): Promise<any> {
   const logDebugTag = "algob:tasks:run";
 
@@ -153,7 +154,7 @@ async function doRun (
     true,
     logDebugTag,
     false,
-    algoDryRun
+    algoDryRun || false
   );
 }
 
@@ -163,6 +164,5 @@ export default function (): void {
       "scripts",
       "A js file to be run within algob's environment"
     )
-    .addFlag("algoDryRun", "Uses checkpoints but doesn't interact with a Node.")
-    .setAction(doRun);
+    .setAction((input, env) => executeRunTask(input, env, false));
 }
