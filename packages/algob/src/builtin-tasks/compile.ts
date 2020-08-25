@@ -6,9 +6,10 @@ import YAML from "yaml";
 import { task } from "../internal/core/config/config-env";
 import { parseAlgorandError } from "../internal/core/errors";
 import { assertDir, ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
+import { cmpStr } from "../lib/comparators";
 import { createClient } from "../lib/driver";
 import { timestampNow } from "../lib/time";
-import type { AlgobRuntimeEnv, ASCCache, Network } from "../types";
+import type { AlgobRuntimeEnv, ASCCache } from "../types";
 import { TASK_COMPILE } from "./task-names";
 const murmurhash = require('murmurhash'); // eslint-disable-line @typescript-eslint/no-var-requires
 
@@ -25,7 +26,7 @@ export interface TaskArgs {
 }
 
 function _compile ({ force }: TaskArgs, env: AlgobRuntimeEnv): Promise<void> {
-  const op: CompileOp = new CompileOpImp(env.network);
+  const op = new CompileOp(createClient(env.network));
   return compile(force, op);
 }
 
@@ -33,7 +34,7 @@ export async function compile (force: boolean, op: CompileOp): Promise<void> {
   await assertDir(CACHE_DIR);
   const cache = readArtifacts(CACHE_DIR);
 
-  for (const f of readdirSync(ASSETS_DIR).sort()) {
+  for (const f of readdirSync(ASSETS_DIR).sort(cmpStr)) {
     if (!f.endsWith(tealExt)) { continue; }
 
     let c = cache.get(f);
@@ -50,16 +51,11 @@ export async function compile (force: boolean, op: CompileOp): Promise<void> {
   }
 }
 
-export interface CompileOp {
-  compile (filename: string, tealCode: string, tealHash: number): Promise<ASCCache>,
-  writeFile (filename: string, content: string): void
-}
-
-class CompileOpImp {
+export class CompileOp {
   algocl: Algodv2;
 
-  constructor (n: Network) {
-    this.algocl = createClient(n);
+  constructor (algocl: Algodv2) {
+    this.algocl = algocl;
   }
 
   callCompiler (code: string): Promise<CompileOut> {

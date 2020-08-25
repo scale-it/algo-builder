@@ -1,25 +1,26 @@
+import { Algodv2 } from "algosdk";
 import { assert } from "chai";
 import * as fs from "fs";
 import * as path from "path";
 
 import { compile, CompileOp } from "../../src/builtin-tasks/compile";
-import { mkAlgobEnv } from "../helpers/params";
-import { useFixtureProjectCopy } from "../helpers/project";
+import { ASSETS_DIR } from "../../src/internal/core/project-structure";
 import type { ASCCache } from "../../src/types";
-
+import { useFixtureProjectCopy } from "../helpers/project";
+const murmurhash = require('murmurhash'); // eslint-disable-line @typescript-eslint/no-var-requires
 
 interface CompileIn {
-  filename: string,
+  filename: string
   tealHash: number
 }
 
-class CompileOpMock {
+class CompileOpMock extends CompileOp {
   timestamp = 0;
   compiledFiles = [] as CompileIn[];
   writtenFiles = [] as string[];
 
   async compile (filename: string, _tealCode: string, tealHash: number): Promise<ASCCache> {
-    this.compiledFiles.push({filename, tealHash})
+    this.compiledFiles.push({ filename, tealHash });
     this.timestamp++;
     return {
       filename: filename,
@@ -30,39 +31,70 @@ class CompileOpMock {
     };
   }
 
-  writeFile (filename:string, _content: string): void {
+  writeFile (filename: string, _content: string): void {
     this.writtenFiles.push(filename);
+    super.writeFile(filename, _content);
   }
 }
 
 describe("Compile task", () => {
   useFixtureProjectCopy("default-config-project");
-  let op: CompileOp = new CompileOpMock();
+  const fakeAlgod: Algodv2 = {} as Algodv2;
+  const op = new CompileOpMock(fakeAlgod);
 
-  let cacheDir = path.join("artifacts", "cache");
+  const cacheDir = path.join("artifacts", "cache");
+  const f1 = "asc-fee-check.copy.teal";
+  const f2 = "asc-fee-check.teal";
+  const fhash = 2374470440; // murmur3 hash for f1 file
+
+  function resetAndCompile (force: boolean): Promise<void> {
+    op.compiledFiles = [];
+    op.writtenFiles = [];
+    return compile(force, op);
+  }
 
   it("on first run it should compile all .teal sources", async () => {
-    await compile(false, op);
-    const f1 = "asc-fee-check.teal";
-    const f2 = "asc-fee-check-copy.teal"
+    await resetAndCompile(false);
 
     assert.equal(op.timestamp, 2);
     assert.deepEqual(op.compiledFiles, [
-      {filename: f1, tealHash: 1},
-      {filename: f2, tealHash: 1}]);
-    assert.deepEqual(op.writtenFiles, [
-      path.join(cacheDir, f1 + ".yaml"), path.join(cacheDir, f2 + ".yaml"),
-    ])
+      { filename: f1, tealHash: fhash },
+      { filename: f2, tealHash: fhash }]);
+
+    const writtenFiles = [];
+    for (const fn of [f1, f2]) {
+      const fullF = path.join(cacheDir, fn + ".yaml");
+      writtenFiles.push(fullF);
+      assert.isTrue(fs.existsSync(fullF));
+    }
+    assert.deepEqual(op.writtenFiles, writtenFiles);
   });
 
-  it("shouldn't recompile when files didn't change", async()=>{
-    op.compiledFiles = [];
-    op.writtenFiles = [];
-    await compile(false, op);
+  it("shouldn't recompile when files didn't change", async () => {
+    await resetAndCompile(false);
 
     assert.equal(op.timestamp, 2);
     assert.lengthOf(op.compiledFiles, 0);
     assert.lengthOf(op.writtenFiles, 0);
-  })
+  });
 
+  it("should recompile only changed files", async () => {
+    const content = "// comment";
+    fs.writeFileSync(path.join(ASSETS_DIR, f2), content);
+    await resetAndCompile(false);
+
+    assert.equal(op.timestamp, 3);
+    assert.deepEqual(op.compiledFiles, [
+      { filename: f2, tealHash: murmurhash.v3(content) }]);
+    assert.deepEqual(op.writtenFiles, [
+      path.join(cacheDir, f2 + ".yaml")]);
+  });
+
+  it("should recompile all files when --force is used", async () => {
+    await resetAndCompile(true);
+
+    assert.equal(op.timestamp, 5);
+    assert.lengthOf(op.compiledFiles, 2);
+    assert.lengthOf(op.writtenFiles, 2);
+  });
 });
