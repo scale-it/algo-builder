@@ -6,11 +6,8 @@
 import { assert } from "chai";
 
 import { BuilderContext } from "../../../../src/internal/context";
-import { loadConfigAndTasks } from "../../../../src/internal/core/config/config-loading";
-import { ERRORS } from "../../../../src/internal/core/errors-list";
 import { resetBuilderContext } from "../../../../src/internal/reset";
 import { useEnvironment } from "../../../helpers/environment";
-import { expectBuilderError } from "../../../helpers/errors";
 import { useFixtureProject } from "../../../helpers/project";
 
 describe("Config extensions", function () {

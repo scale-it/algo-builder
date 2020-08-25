@@ -2,7 +2,7 @@ import { assert } from "chai";
 
 import { ERRORS } from "../../src/internal/core/errors-list";
 import { parseASADef } from "../../src/lib/asa";
-import { AccountDef, ASADef } from "../../src/types";
+import { ASADef } from "../../src/types";
 import { expectBuilderError } from "../helpers/errors";
 
 describe("ASA parser", () => {

@@ -45,7 +45,7 @@ function clearCheckpointFiles (scriptNames: string[]): void {
 async function doDeploy ({ fileNames, force }: TaskArgs, runtimeEnv: AlgobRuntimeEnv): Promise<void> {
   const logDebugTag = "algob:tasks:deploy";
 
-  const hasUserProvidedScripts = fileNames.length !== 0
+  const hasUserProvidedScripts = fileNames.length !== 0;
 
   const scriptNames = hasUserProvidedScripts
     ? assertDirectDirChildren(scriptsDirectory, fileNames)

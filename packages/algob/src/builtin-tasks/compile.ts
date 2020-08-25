@@ -24,9 +24,9 @@ export interface TaskArgs {
   force: boolean
 }
 
-async function _compile ({ force }: TaskArgs, env: AlgobRuntimeEnv): Promise<void> {
+function _compile ({ force }: TaskArgs, env: AlgobRuntimeEnv): Promise<void> {
   const op = new CompileOp(env.network);
-  return await compile(force, op);
+  return compile(force, op);
 }
 
 export async function compile (force: boolean, op: CompileOp): Promise<void> {

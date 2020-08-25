@@ -11,8 +11,6 @@ import type {
   UserPaths
 } from "../../../types";
 import { fromEntries } from "../../util/lang";
-import { BuilderError } from "../errors";
-import { ERRORS } from "../errors-list";
 
 function mergeUserAndDefaultConfigs (
   defaultConfig: AlgobConfig,
@@ -40,7 +38,6 @@ export function resolveConfig (
   userConfig: AlgobConfig,
   configExtenders: ConfigExtender[]
 ): ResolvedAlgobConfig {
-
   const config: Partial<ResolvedAlgobConfig> = mergeUserAndDefaultConfigs(defaultConfig, userConfig);
 
   const paths = userConfigPath !== undefined
