@@ -22,7 +22,7 @@ describe("Scripts runner", function () {
     const before = new Date();
     await runScript("./scripts/async-script.js", mkAlgobEnv());
     const after = new Date();
-    assert.isAtLeast(after.getTime() - before.getTime(), 100);
+    assert.isAtLeast(after.getTime() - before.getTime(), 20);
   });
 
   it("Exception shouldn't crash the whole app", async function () {
