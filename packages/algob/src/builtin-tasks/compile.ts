@@ -18,14 +18,14 @@ const tealExt = ".teal";
 export default function (): void {
   task(TASK_COMPILE, "Compile all TEAL smart contracts")
     .addFlag("force", "recompile even if the source file didn't change")
-    .setAction(_compile);
+    .setAction(compileTask);
 }
 
 export interface TaskArgs {
   force: boolean
 }
 
-function _compile ({ force }: TaskArgs, env: AlgobRuntimeEnv): Promise<void> {
+function compileTask ({ force }: TaskArgs, env: AlgobRuntimeEnv): Promise<void> {
   const op = new CompileOp(createClient(env.network));
   return compile(force, op);
 }
