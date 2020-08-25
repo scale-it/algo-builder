@@ -25,7 +25,7 @@ export interface TaskArgs {
 }
 
 function _compile ({ force }: TaskArgs, env: AlgobRuntimeEnv): Promise<void> {
-  const op = new CompileOp(env.network);
+  const op: CompileOp = new CompileOpImp(env.network);
   return compile(force, op);
 }
 
@@ -33,7 +33,7 @@ export async function compile (force: boolean, op: CompileOp): Promise<void> {
   await assertDir(CACHE_DIR);
   const cache = readArtifacts(CACHE_DIR);
 
-  for (const f of readdirSync(ASSETS_DIR)) {
+  for (const f of readdirSync(ASSETS_DIR).sort()) {
     if (!f.endsWith(tealExt)) { continue; }
 
     let c = cache.get(f);
@@ -50,15 +50,20 @@ export async function compile (force: boolean, op: CompileOp): Promise<void> {
   }
 }
 
-class CompileOp {
+export interface CompileOp {
+  compile (filename: string, tealCode: string, tealHash: number): Promise<ASCCache>,
+  writeFile (filename: string, content: string): void
+}
+
+class CompileOpImp {
   algocl: Algodv2;
 
   constructor (n: Network) {
     this.algocl = createClient(n);
   }
 
-  async callCompiler (code: string): Promise<CompileOut> {
-    return await this.algocl.compile(code).do();
+  callCompiler (code: string): Promise<CompileOut> {
+    return this.algocl.compile(code).do();
   }
 
   async compile (filename: string, tealCode: string, tealHash: number): Promise<ASCCache> {
