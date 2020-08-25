@@ -1,7 +1,7 @@
 
 import deepEqual from "deep-equal";
 import * as fs from "fs";
-import path from "path";
+import path, { normalize } from "path";
 import YAML from "yaml";
 
 import { BuilderError } from "../internal/core/errors";
@@ -102,15 +102,21 @@ export class CheckpointRepoImpl implements CheckpointRepo {
   mergeToGlobal (cp: Checkpoints, scriptName: string): CheckpointRepo {
     this.allCPs = this._mergeTo(this.allCPs, cp, this.scriptMap);
 
+    if (scriptName.charAt(0) === 'a') {
+      scriptName = scriptName.slice(10, scriptName.length - 8);
+    }
+
     const keys: string[] = Object.keys(cp);
     for (let i = 0; i < keys.length; i++) {
       const orig = cp[keys[i]];
       const allAssetNames = Object.keys(orig.asa).concat(Object.keys(orig.asc));
       for (const assetName of allAssetNames) {
         if (!(this.scriptMap[assetName])) { this.scriptMap[assetName] = scriptName; } else {
-          throw new BuilderError(
-            ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
-            { scriptName: this.scriptMap[assetName] });
+          if (this.scriptMap[assetName] !== scriptName) {
+            throw new BuilderError(
+              ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
+              { assetName: [this.scriptMap[assetName], scriptName] });
+          }
         }
       }
     }
