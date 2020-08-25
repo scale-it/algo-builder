@@ -55,17 +55,8 @@ export function splitAfter (
 }
 
 function loadCheckpointsIntoCPData (cpData: CheckpointRepo, scriptPaths: string[]): CheckpointRepo {
-  /* return scriptPaths
-  .map((filename) => [filename, loadCheckpoint])
-    // .map(loadCheckpoint)
-    .reduce(
-      (out: CheckpointRepo, checkpoints: Checkpoints) => out.merge(checkpoints),
-      cpData); */
-
-  for (let i = 0; i < scriptPaths.length; i++) {
-    const relativeScriptPath = scriptPaths[i];
-    // loadCheckpointsIntoCPData(cpData, prevScripts);
-    cpData.merge(loadCheckpoint(relativeScriptPath), relativeScriptPath);
+  for (const s of scriptPaths) {
+    cpData.merge(loadCheckpoint(s), s);
   }
   return cpData;
 }
