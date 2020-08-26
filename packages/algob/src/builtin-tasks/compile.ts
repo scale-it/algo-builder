@@ -6,9 +6,10 @@ import YAML from "yaml";
 import { task } from "../internal/core/config/config-env";
 import { parseAlgorandError } from "../internal/core/errors";
 import { assertDir, ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
+import { cmpStr } from "../lib/comparators";
 import { createClient } from "../lib/driver";
 import { timestampNow } from "../lib/time";
-import type { AlgobRuntimeEnv, ASCCache, Network } from "../types";
+import type { AlgobRuntimeEnv, ASCCache } from "../types";
 import { TASK_COMPILE } from "./task-names";
 const murmurhash = require('murmurhash'); // eslint-disable-line @typescript-eslint/no-var-requires
 
@@ -17,15 +18,15 @@ const tealExt = ".teal";
 export default function (): void {
   task(TASK_COMPILE, "Compile all TEAL smart contracts")
     .addFlag("force", "recompile even if the source file didn't change")
-    .setAction(_compile);
+    .setAction(compileTask);
 }
 
 export interface TaskArgs {
   force: boolean
 }
 
-function _compile ({ force }: TaskArgs, env: AlgobRuntimeEnv): Promise<void> {
-  const op = new CompileOp(env.network);
+function compileTask ({ force }: TaskArgs, env: AlgobRuntimeEnv): Promise<void> {
+  const op = new CompileOp(createClient(env.network));
   return compile(force, op);
 }
 
@@ -33,7 +34,7 @@ export async function compile (force: boolean, op: CompileOp): Promise<void> {
   await assertDir(CACHE_DIR);
   const cache = readArtifacts(CACHE_DIR);
 
-  for (const f of readdirSync(ASSETS_DIR)) {
+  for (const f of readdirSync(ASSETS_DIR).sort(cmpStr)) {
     if (!f.endsWith(tealExt)) { continue; }
 
     let c = cache.get(f);
@@ -50,15 +51,15 @@ export async function compile (force: boolean, op: CompileOp): Promise<void> {
   }
 }
 
-class CompileOp {
+export class CompileOp {
   algocl: Algodv2;
 
-  constructor (n: Network) {
-    this.algocl = createClient(n);
+  constructor (algocl: Algodv2) {
+    this.algocl = algocl;
   }
 
-  async callCompiler (code: string): Promise<CompileOut> {
-    return await this.algocl.compile(code).do();
+  callCompiler (code: string): Promise<CompileOut> {
+    return this.algocl.compile(code).do();
   }
 
   async compile (filename: string, tealCode: string, tealHash: number): Promise<ASCCache> {
