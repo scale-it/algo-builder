@@ -5,9 +5,7 @@ import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { runScript } from "../internal/util/scripts-runner";
-import {
-  AlgoSDKWrapperDryRunImpl} from "../lib/algo-sdk";
-import { AlgoSDKWrapperImpl } from "../lib/algo-sdk";
+import { AlgoSDKWrapperDryRunImpl, AlgoSDKWrapperImpl } from "../lib/algo-sdk";
 import { loadASAFile } from "../lib/asa";
 import {
   AlgobDeployerImpl,
@@ -83,7 +81,7 @@ export async function runMultipleScriptsOneByOne (
   logDebugTag: string,
   allowWrite: boolean,
   algoDryRun: boolean
-  ): Promise<void> {
+): Promise<void> {
   for (const script of scriptNames) {
     await runMultipleScripts(
       runtimeEnv,
@@ -108,7 +106,7 @@ export async function runMultipleScripts (
 ): Promise<void> {
   const log = debug(logTag);
   const cpData: CheckpointRepo = loadCheckpointsRecursive();
-  const deployer: AlgobDeployer = mkDeployer(runtimeEnv, cpData, allowWrite, algoDryRun)
+  const deployer: AlgobDeployer = mkDeployer(runtimeEnv, cpData, allowWrite, algoDryRun);
 
   const scriptsFromScriptsDir: string[] = lsScriptsDir();
 
@@ -164,5 +162,5 @@ export default function (): void {
       "scripts",
       "A js file to be run within algob's environment"
     )
-    .setAction((input, env) => executeRunTask(input, env, false));
+    .setAction(async (input, env) => await executeRunTask(input, env, false));
 }

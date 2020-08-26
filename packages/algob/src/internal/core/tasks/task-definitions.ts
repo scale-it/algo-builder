@@ -174,20 +174,20 @@ export class SimpleTaskDefinition implements TaskDefinition {
    * @param description the parameter's description.
    */
   public addFlag (name: string, description?: string): this {
-      this._validateParamNameCasing(name);
-      this._validateNameNotUsed(name);
+    this._validateParamNameCasing(name);
+    this._validateNameNotUsed(name);
 
-      this.paramDefinitions[name] = {
-          name,
-          defaultValue: false,
-          type: types.boolean,
-          description,
-          isFlag: true,
-          isOptional: true,
-          isVariadic: false,
-      };
+    this.paramDefinitions[name] = {
+      name,
+      defaultValue: false,
+      type: types.boolean,
+      description,
+      isFlag: true,
+      isOptional: true,
+      isVariadic: false
+    };
 
-      return this;
+    return this;
   }
 
   /**

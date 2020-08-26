@@ -8,7 +8,7 @@ import semver from "semver";
 
 import { TASK_HELP, TASK_INIT } from "../../builtin-tasks/task-names";
 import { checkAlgorandUnauthorized } from "../../lib/exceptions";
-import { TaskArguments, AlgobRuntimeEnv, RuntimeArgs } from "../../types";
+import { AlgobRuntimeEnv, RuntimeArgs, TaskArguments } from "../../types";
 import { ALGOB_NAME } from "../constants";
 import { BuilderContext } from "../context";
 import { loadConfigAndTasks } from "../core/config/config-loading";
@@ -63,21 +63,21 @@ function printStackTraces (showStackTraces: boolean, error: BuilderError): void 
 }
 
 interface EnvAndArgs {
-  env: AlgobRuntimeEnv,
-  taskName: string,
+  env: AlgobRuntimeEnv
+  taskName: string
   taskArguments: TaskArguments
 }
 
 interface RuntimeArgsAndPackageJson {
-  runtimeArgs: RuntimeArgs,
+  runtimeArgs: RuntimeArgs
   unparsedCLAs: string[]
-  maybeTaskName: string | undefined,
-  showStackTraces: boolean,
-  packageJson: PackageJson,
+  maybeTaskName: string | undefined
+  showStackTraces: boolean
+  packageJson: PackageJson
   argumentsParser: ArgumentsParser
 }
 
-export async function gatherArguments(): Promise<RuntimeArgsAndPackageJson>{
+export async function gatherArguments (): Promise<RuntimeArgsAndPackageJson> {
   // We first accept this argument anywhere, so we know if the user wants
   // stack traces before really parsing the arguments.
   let showStackTraces = process.argv.includes("--show-stack-traces");
@@ -115,13 +115,15 @@ export async function gatherArguments(): Promise<RuntimeArgsAndPackageJson>{
     showStackTraces: showStackTraces,
     packageJson: packageJson,
     argumentsParser: argumentsParser
-  }
+  };
 }
 
 export async function loadEnvironmentAndArgs (
-  maybeTaskName: string | undefined, runtimeArgs: RuntimeArgs, argumentsParser: ArgumentsParser, unparsedCLAs: string[]
+  maybeTaskName: string | undefined,
+  runtimeArgs: RuntimeArgs,
+  argumentsParser: ArgumentsParser,
+  unparsedCLAs: string[]
 ): Promise<EnvAndArgs> {
-
   const ctx = BuilderContext.createBuilderContext();
   const config = loadConfigAndTasks(runtimeArgs);
 
@@ -169,12 +171,11 @@ export async function loadEnvironmentAndArgs (
     env: env,
     taskName: taskName,
     taskArguments: taskArguments
-  }
+  };
 }
 
 /* eslint-disable sonarjs/cognitive-complexity */
 async function main (): Promise<void> {
-
   // const analytics = await Analytics.getInstance(
   //  config.paths.root,
   //  config.analytics.enabled
@@ -188,7 +189,7 @@ async function main (): Promise<void> {
       packageJson,
       maybeTaskName,
       argumentsParser
-    } = await gatherArguments()
+    } = await gatherArguments();
     showStackTraces = showStackTracesUpdate;
 
     // --version is a special case
@@ -203,7 +204,7 @@ async function main (): Promise<void> {
       taskArguments
     } = await loadEnvironmentAndArgs(
       maybeTaskName, runtimeArgs, argumentsParser, unparsedCLAs
-    )
+    );
 
     // let [abortAnalytics, hitPromise] = await analytics.sendTaskHit(taskName);
 

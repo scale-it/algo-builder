@@ -100,5 +100,5 @@ export default function (): void {
       "A directory that contains js files to be run within algob's environment",
       []
     )
-    .setAction((input, env) => executeDeployTask(input, env, false));
+    .setAction(async (input, env) => await executeDeployTask(input, env, false));
 }

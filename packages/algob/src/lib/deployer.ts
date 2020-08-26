@@ -73,8 +73,8 @@ export class AlgobDeployerImpl implements AlgobDeployer {
           asaName: name
         });
     }
-    const asaDef = this.loadedAsaDefs[name]
-    const creator = flags.creator
+    const asaDef = this.loadedAsaDefs[name];
+    const creator = flags.creator;
     this.assertNoAsset(name);
     const asaInfo = await this.algoSDK.deployASA(name, asaDef, flags, creator);
     this.cpData.registerASA(this.networkName, name, asaInfo);

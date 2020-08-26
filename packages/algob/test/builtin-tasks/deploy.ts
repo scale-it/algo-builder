@@ -1,19 +1,12 @@
 import { assert } from "chai";
 import * as fs from "fs";
 
-import { loadFilenames } from "../../src/builtin-tasks/deploy";
+import { executeDeployTask as executeDeployTaskNoCLI, loadFilenames } from "../../src/builtin-tasks/deploy";
 import { TASK_DEPLOY, TASK_RUN } from "../../src/builtin-tasks/task-names";
 import { ERRORS } from "../../src/internal/core/errors-list";
 import { loadCheckpoint } from "../../src/lib/script-checkpoints";
 import { expectBuilderErrorAsync } from "../helpers/errors";
 import { testFixtureOutputFile, useCleanFixtureProject } from "../helpers/project";
-import { executeDeployTask as executeDeployTaskNoCLI, TaskArgs } from "../../src/builtin-tasks/deploy";
-import {
-  gatherArguments,
-  loadEnvironmentAndArgs
-} from "../../src/internal/cli/cli";
-import { RuntimeArgs, AlgobRuntimeEnv } from "../../src/types";
-import { ArgumentsParser } from "../../src/internal/cli/arguments-parser";
 
 describe("Deploy task", function () {
   useCleanFixtureProject("scripts-dir");
@@ -117,7 +110,7 @@ describe("Deploy task: nested state files", function () {
     await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js", "scripts/query.js"],
       force: false
-    }, this.env, true)
+    }, this.env, true);
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, `ASA from first defined: true
 ASC from second defined: false`);
@@ -138,7 +131,7 @@ ASC from second defined: false`);
     await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js", "scripts/2.js", "scripts/query.js"],
       force: false
-    }, this.env, true)
+    }, this.env, true);
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, `ASA from first defined: true
 ASC from second defined: true`);
@@ -148,7 +141,7 @@ ASC from second defined: true`);
     await executeDeployTaskNoCLI({
       fileNames: ["scripts/query.js"],
       force: false
-    }, this.env, true)
+    }, this.env, true);
     const scriptOutputBefore = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputBefore, `ASA from first defined: false
 ASC from second defined: false`);
@@ -156,11 +149,11 @@ ASC from second defined: false`);
     await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js", "scripts/2.js"],
       force: false
-    }, this.env, true)
+    }, this.env, true);
     await executeDeployTaskNoCLI({
       fileNames: ["scripts/query.js"],
       force: false
-    }, this.env, true)
+    }, this.env, true);
     const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputAfter, `ASA from first defined: true
 ASC from second defined: true`);
@@ -170,11 +163,11 @@ ASC from second defined: true`);
     await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js"],
       force: false
-    }, this.env, true)
+    }, this.env, true);
     await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js", "scripts/query.js"],
       force: false
-    }, this.env, true)
+    }, this.env, true);
     const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputAfter, `ASA from first defined: true
 ASC from second defined: false`);
@@ -184,11 +177,11 @@ ASC from second defined: false`);
     await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js", "scripts/2.js"],
       force: false
-    }, this.env, true)
+    }, this.env, true);
     await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js", "scripts/2.js", "scripts/query.js"],
       force: false
-    }, this.env, true)
+    }, this.env, true);
     const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputAfter, `ASA from first defined: true
 ASC from second defined: true`);
