@@ -35,11 +35,17 @@ class CompileOpMock extends CompileOp {
     this.writtenFiles.push(filename);
     super.writeFile(filename, _content);
   }
+
+  resetAndCompile (force: boolean): Promise<void> {
+    this.compiledFiles = [];
+    this.writtenFiles = [];
+    return compile(force, this);
+  }
 }
 
 describe("Compile task", () => {
-  useFixtureProjectCopy("default-config-project");
-  const fakeAlgod: Algodv2 = {} as Algodv2;
+  useFixtureProjectCopy("config-project");
+  const fakeAlgod: Algodv2 = {} as Algodv2; // eslint-disable-line @typescript-eslint/consistent-type-assertions
   const op = new CompileOpMock(fakeAlgod);
 
   const cacheDir = path.join("artifacts", "cache");
@@ -47,14 +53,8 @@ describe("Compile task", () => {
   const f2 = "asc-fee-check.teal";
   const fhash = 2374470440; // murmur3 hash for f1 file
 
-  function resetAndCompile (force: boolean): Promise<void> {
-    op.compiledFiles = [];
-    op.writtenFiles = [];
-    return compile(force, op);
-  }
-
   it("on first run it should compile all .teal sources", async () => {
-    await resetAndCompile(false);
+    await op.resetAndCompile(false);
 
     assert.equal(op.timestamp, 2);
     assert.deepEqual(op.compiledFiles, [
@@ -71,7 +71,7 @@ describe("Compile task", () => {
   });
 
   it("shouldn't recompile when files didn't change", async () => {
-    await resetAndCompile(false);
+    await op.resetAndCompile(false);
 
     assert.equal(op.timestamp, 2);
     assert.lengthOf(op.compiledFiles, 0);
@@ -81,7 +81,7 @@ describe("Compile task", () => {
   it("should recompile only changed files", async () => {
     const content = "// comment";
     fs.writeFileSync(path.join(ASSETS_DIR, f2), content);
-    await resetAndCompile(false);
+    await op.resetAndCompile(false);
 
     assert.equal(op.timestamp, 3);
     assert.deepEqual(op.compiledFiles, [
@@ -91,7 +91,7 @@ describe("Compile task", () => {
   });
 
   it("should recompile all files when --force is used", async () => {
-    await resetAndCompile(true);
+    await op.resetAndCompile(true);
 
     assert.equal(op.timestamp, 5);
     assert.lengthOf(op.compiledFiles, 2);
