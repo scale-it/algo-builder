@@ -1,12 +1,11 @@
 
 import deepEqual from "deep-equal";
 import * as fs from "fs";
-import path, { normalize } from "path";
+import path from "path";
 import YAML from "yaml";
 
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
-import { string } from "../internal/core/params/argument-types";
 import {
   ASAInfo,
   ASCInfo,
@@ -107,8 +106,8 @@ export class CheckpointRepoImpl implements CheckpointRepo {
     }
 
     const keys: string[] = Object.keys(cp);
-    for (let i = 0; i < keys.length; i++) {
-      const orig = cp[keys[i]];
+    for (const k of keys) {
+      const orig = cp[k];
       const allAssetNames = Object.keys(orig.asa).concat(Object.keys(orig.asc));
       for (const assetName of allAssetNames) {
         if (!(this.scriptMap[assetName])) { this.scriptMap[assetName] = scriptName; } else {

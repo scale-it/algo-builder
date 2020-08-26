@@ -232,6 +232,32 @@ describe("Checkpoint with cleanup", () => {
 });
 
 describe("CheckpointRepoImpl", () => {
+  it('Should crash if duplication is detected between scripts', async () => {
+    const cp1: Checkpoints = {
+      network1: {
+        timestamp: 1,
+        metadata: { "key 1": "data 1" },
+        asa: { "ASA name": { creator: "ASA creator 123" } },
+        asc: {}
+      }
+    };
+    const cp2: Checkpoints = {
+      network2: {
+        timestamp: 2,
+        metadata: { "key 2": "data 2" },
+        asa: { "ASA name": { creator: "ASA creator 123" } },
+        asc: {}
+      }
+    };
+    const cp = new CheckpointRepoImpl()
+      .merge(cp1, "script1");
+    expectBuilderError(
+      () => cp.merge(cp2, "script2"),
+      ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
+      "script1,script2"
+    );
+  });
+
   it("Should allow to set metadata", async () => {
     const cp = new CheckpointRepoImpl()
       .putMetadata("myNetworkName", "key", "data")
