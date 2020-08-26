@@ -2,7 +2,8 @@ import { Account as AccountSDK } from "algosdk";
 import { DeepReadonly, StrictOmit } from "ts-essentials";
 
 import * as types from "./internal/core/params/argument-types";
-import { ASADefsType, ASADefType } from "./types-input";
+import { ASADefsSchema, ASADefSchema } from "./types-input";
+import * as z from 'zod';
 
 // Begin config types
 
@@ -289,7 +290,6 @@ export interface DeployedAssetInfo {
   creator: AccountAddress
   txId: string
   confirmedRound: number
-  // nice to have: Deployment script name
 }
 
 export interface ASAInfo extends DeployedAssetInfo {
@@ -337,11 +337,15 @@ export interface Checkpoint {
   asc: { [name: string]: ASCInfo }
 };
 
-export type ASADef = ASADefType;
-export type ASADefs = ASADefsType;
+export type ASADef = z.infer<typeof ASADefSchema>;
+export type ASADefs = z.infer<typeof ASADefsSchema>;
 
 export interface ASADeploymentFlags {
   creator: Account
+  totalFee?: number
+  feePerByte?: number
+  firstValid?: number
+  validRounds?: number
 }
 
 export interface AlgobDeployer {

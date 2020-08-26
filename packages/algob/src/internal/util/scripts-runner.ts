@@ -29,18 +29,18 @@ function displayErr (error: Error | BuilderError | any, relativeScriptPath: stri
     throw error;
   }
   // TX execution error
-  if (error?.response?.error !== undefined) {
+  if (error.body?.message !== undefined) {
     throw new BuilderError(
       ERRORS.BUILTIN_TASKS.SCRIPT_CHAIN_IO_ERROR, {
         script: relativeScriptPath,
-        errorType: error.response.clientError
+        errorType: error.clientError
           ? "Client"
           : "Server",
-        message: error.response?.body?.message
-          ? error.response.body.message
-          : error.response.error.message
+        message: error.body?.message
+          ? error.body.message
+          : error.error.message
       },
-      error.response.error
+      error.error
     );
   }
   throw new BuilderError(

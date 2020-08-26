@@ -2,6 +2,10 @@
 minimumASA:
   total: 1
   decimals: 0
+minimumASA1:
+  total: 1
+  decimals: 0
+  unitName: "unitName",
 ## whole ASA definition (contains all fields)
 ## TODO:MM: Make sure all fields are deployable to a node
 #allFieldASA:

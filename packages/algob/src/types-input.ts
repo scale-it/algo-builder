@@ -32,7 +32,5 @@ export const ASADefSchema = z.object({
     message: "Metadata Hash must not be longer than 32 bytes",
     path: ['metadataHash']
   });
-export type ASADefType = z.infer<typeof ASADefSchema>;
 
 export const ASADefsSchema = z.record(ASADefSchema);
-export type ASADefsType = z.infer<typeof ASADefsSchema>;
