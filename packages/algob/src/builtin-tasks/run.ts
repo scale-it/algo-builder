@@ -1,5 +1,4 @@
 import debug from "debug";
-import { constVoid } from "fp-ts/lib/function";
 import fsExtra from "fs-extra";
 
 import { task } from "../internal/core/config/config-env";

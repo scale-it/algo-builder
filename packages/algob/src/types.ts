@@ -334,7 +334,7 @@ export interface Checkpoint {
   asc: {[name: string]: ASCInfo}
 };
 
-export interface assetScriptMap {
+export interface AssetScriptMap {
   [assetName: string]: string
 }
 

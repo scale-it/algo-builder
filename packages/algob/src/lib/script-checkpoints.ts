@@ -9,7 +9,7 @@ import { ERRORS } from "../internal/core/errors-list";
 import {
   ASAInfo,
   ASCInfo,
-  assetScriptMap,
+  AssetScriptMap,
   Checkpoint,
   CheckpointRepo,
   Checkpoints
@@ -25,10 +25,7 @@ export function toCheckpointFileName (scriptName: string): string {
 
 export function toScriptFileName (filename: string): string {
   filename = filename.replace(artifactsPath + path.sep, '');
-  if (filename.endsWith(checkpointFileSuffix)) {
-    filename = filename.slice(0, -(checkpointFileSuffix.length));
-  }
-
+  filename = filename.slice(0, -(checkpointFileSuffix.length));
   return filename;
 }
 
@@ -91,9 +88,9 @@ export class CheckpointRepoImpl implements CheckpointRepo {
   strippedCP: Checkpoints = {};
   precedingCP: Checkpoints = {};
   allCPs: Checkpoints = {};
-  scriptMap: assetScriptMap = {};
+  scriptMap: AssetScriptMap = {};
 
-  private _mergeTo (target: Checkpoints, cp: Checkpoints, scriptMap: assetScriptMap): Checkpoints {
+  private _mergeTo (target: Checkpoints, cp: Checkpoints, scriptMap: AssetScriptMap): Checkpoints {
     const keys: string[] = Object.keys(cp);
     return keys.reduce((out: Checkpoints, key: string) => {
       return appendToCheckpoint(out, key, cp[key]);
