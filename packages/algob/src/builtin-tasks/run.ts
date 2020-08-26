@@ -55,10 +55,11 @@ export function splitAfter (
 }
 
 function loadCheckpointsIntoCPData (cpData: CheckpointRepo, scriptPaths: string[]): CheckpointRepo {
+  var checkpointData = cpData;
   for (const s of scriptPaths) {
-    cpData.merge(loadCheckpoint(s), s);
+    checkpointData = cpData.merge(loadCheckpoint(s), s);
   }
-  return cpData;
+  return checkpointData;
 }
 
 // TODO: Reduce file IO:
