@@ -10,7 +10,8 @@ import {
   persistCheckpoint,
   registerASA,
   registerASC,
-  toCheckpointFileName
+  toCheckpointFileName,
+  toScriptFileName
 } from "../../src/lib/script-checkpoints";
 import { Checkpoint, Checkpoints } from "../../src/types";
 import { expectBuilderError } from "../helpers/errors";
@@ -170,6 +171,11 @@ describe("Checkpoint", () => {
   it("Should produce a checkpoint file name from script name", async () => {
     const checkpointFileName = toCheckpointFileName("script-1.js");
     assert.equal(checkpointFileName, "artifacts/script-1.js.cp.yaml");
+  });
+
+  it("Should produce a script file name from checkpoint name", async () => {
+    const checkpointFileName = toScriptFileName("artifacts/script-1.js.cp.yaml.hi.cp.yaml");
+    assert.equal(checkpointFileName, "script-1.js.cp.yaml.hi");
   });
 
   it("Should default to empty cp if loading nonexistent file", async () => {

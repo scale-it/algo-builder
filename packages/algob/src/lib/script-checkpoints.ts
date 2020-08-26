@@ -23,9 +23,21 @@ export function toCheckpointFileName (scriptName: string): string {
   return path.join(artifactsPath, scriptName + checkpointFileSuffix);
 }
 
+export function reverseString (str: string): string {
+  var newString = "";
+  for (let i = str.length - 1; i >= 0; i--) {
+    newString += str[i];
+  }
+  return newString;
+}
+
 export function toScriptFileName (filename: string): string {
   filename = filename.replace(artifactsPath + path.sep, '');
-  filename = filename.replace(checkpointFileSuffix, '');
+
+  let temp = reverseString(filename);
+  temp = temp.replace(reverseString(checkpointFileSuffix), '');
+  filename = reverseString(temp);
+
   return filename;
 }
 
@@ -105,7 +117,6 @@ export class CheckpointRepoImpl implements CheckpointRepo {
   }
 
   mergeToGlobal (cp: Checkpoints, scriptName: string): CheckpointRepo {
-    this.allCPs = this._mergeTo(this.allCPs, cp, this.scriptMap);
     const keys: string[] = Object.keys(cp);
     for (const k of keys) {
       const orig = cp[k];
@@ -122,6 +133,7 @@ export class CheckpointRepoImpl implements CheckpointRepo {
         }
       }
     }
+    this.allCPs = this._mergeTo(this.allCPs, cp, this.scriptMap);
     return this;
   }
 
