@@ -23,6 +23,12 @@ export function toCheckpointFileName (scriptName: string): string {
   return path.join(artifactsPath, scriptName + checkpointFileSuffix);
 }
 
+export function toScriptFileName (filename: string): string {
+  filename = filename.replace(artifactsPath + path.sep, '');
+  filename = filename.replace(checkpointFileSuffix, '');
+  return filename;
+}
+
 export function registerASA (
   cp: Checkpoint, name: string, creator: string): Checkpoint {
   cp.asa[name] = { creator: creator };
@@ -100,17 +106,14 @@ export class CheckpointRepoImpl implements CheckpointRepo {
 
   mergeToGlobal (cp: Checkpoints, scriptName: string): CheckpointRepo {
     this.allCPs = this._mergeTo(this.allCPs, cp, this.scriptMap);
-
-    if (scriptName.charAt(0) === 'a') {
-      scriptName = scriptName.slice(10, scriptName.length - 8);
-    }
-
     const keys: string[] = Object.keys(cp);
     for (const k of keys) {
       const orig = cp[k];
       const allAssetNames = Object.keys(orig.asa).concat(Object.keys(orig.asc));
       for (const assetName of allAssetNames) {
-        if (!(this.scriptMap[assetName])) { this.scriptMap[assetName] = scriptName; } else {
+        if (!(this.scriptMap[assetName])) {
+          this.scriptMap[assetName] = scriptName;
+        } else {
           if (this.scriptMap[assetName] !== scriptName) {
             throw new BuilderError(
               ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
@@ -238,7 +241,7 @@ export function lsScriptsDir (): string[] {
 export function loadCheckpointsRecursive (): CheckpointRepo {
   return findCheckpointsRecursive().reduce(
     (out: CheckpointRepo, filename: string) => {
-      return out.mergeToGlobal(loadCheckpointNoSuffix(filename), filename);
+      return out.mergeToGlobal(loadCheckpointNoSuffix(filename), toScriptFileName(filename));
     },
     new CheckpointRepoImpl());
 }
