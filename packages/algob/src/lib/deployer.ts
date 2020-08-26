@@ -10,22 +10,22 @@ import {
   ASCInfo,
   CheckpointRepo
 } from "../types";
-import { AlgoSDKWrapper } from "./algo-sdk";
+import { AlgoDeployClient } from "./algo-client";
 
 // This class is what user interacts with in deploy task
 export class AlgobDeployerImpl implements AlgobDeployer {
   private readonly runtimeEnv: AlgobRuntimeEnv;
   private readonly cpData: CheckpointRepo;
   private readonly loadedAsaDefs: ASADefs;
-  private readonly algoSDK: AlgoSDKWrapper;
+  private readonly algoClient: AlgoDeployClient;
 
   constructor (
-    runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointRepo, asaDefs: ASADefs, algoSdk: AlgoSDKWrapper
+    runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointRepo, asaDefs: ASADefs, algoSdk: AlgoDeployClient
   ) {
     this.runtimeEnv = runtimeEnv;
     this.cpData = cpData;
     this.loadedAsaDefs = asaDefs;
-    this.algoSDK = algoSdk;
+    this.algoClient = algoSdk;
   }
 
   get accounts (): Account[] {
@@ -76,7 +76,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     const asaDef = this.loadedAsaDefs[name];
     const creator = flags.creator;
     this.assertNoAsset(name);
-    const asaInfo = await this.algoSDK.deployASA(name, asaDef, flags, creator);
+    const asaInfo = await this.algoClient.deployASA(name, asaDef, flags, creator);
     this.cpData.registerASA(this.networkName, name, asaInfo);
     return this.cpData.precedingCP[this.networkName].asa[name];
   }

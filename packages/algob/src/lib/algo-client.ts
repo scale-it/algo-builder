@@ -1,33 +1,26 @@
 import algosdk from "algosdk";
 
+import { createClient } from "../lib/driver";
 import {
   Account,
   ASADef,
   ASADeploymentFlags,
-  ASAInfo
+  ASAInfo,
+  Network
 } from "../types";
 import * as t from "./tx";
 
 const confirmedRound = "confirmed-round";
 
-export interface AlgoSDKWrapper {
+export function createDeployClient (network: Network): AlgoDeployClient {
+  return new AlgoClientImpl(createClient(network));
+}
+
+export interface AlgoDeployClient {
   deployASA: (name: string, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account) => Promise<ASAInfo>
 }
 
-export class AlgoSDKWrapperDryRunImpl implements AlgoSDKWrapper {
-  async deployASA (
-    name: string, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account
-  ): Promise<ASAInfo> {
-    return {
-      creator: account.addr + "-get-address-dry-run",
-      txId: "tx-id-dry-run",
-      assetIndex: -1,
-      confirmedRound: -1
-    };
-  }
-}
-
-export class AlgoSDKWrapperImpl implements AlgoSDKWrapper {
+export class AlgoClientImpl implements AlgoDeployClient {
   private readonly algoClient: algosdk.Algodv2;
 
   constructor (algoClient: algosdk.Algodv2) {
