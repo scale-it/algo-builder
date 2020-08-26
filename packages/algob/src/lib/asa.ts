@@ -7,7 +7,7 @@ import { ASSETS_DIR } from "../internal/core/project-structure";
 import { parseZodError } from "../internal/core/validation-errors";
 import { ASADefs } from "../types";
 import { ASADefsSchema } from "../types-input";
-import { loadFromYamlFile } from "./files";
+import { loadFromYamlFileSilent } from "./files";
 
 export function validateASADefs (obj: Object, filename?: string): ASADefs {
   try {
@@ -35,6 +35,6 @@ export function validateASADefs (obj: Object, filename?: string): ASADefs {
 export function loadASAFile (): ASADefs {
   const filename = path.join(ASSETS_DIR, "asa.yaml");
   return validateASADefs(
-    loadFromYamlFile(filename),
+    loadFromYamlFileSilent(filename),
     filename);
 }

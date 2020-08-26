@@ -191,9 +191,6 @@ export class SimpleTaskDefinition implements TaskDefinition {
   }
 
   /**
-   * Adds a hidden boolean paramater or flag to the task's definition.
-
-  /**
    * Adds a positional paramater to the task's definition.
    *
    * @remarks This will throw if the `name` is already used by this task or

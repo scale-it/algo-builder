@@ -13,7 +13,7 @@ import {
   CheckpointRepo,
   Checkpoints
 } from "../types";
-import { loadFromYamlFile } from "./files";
+import { loadFromYamlFileSilent } from "./files";
 
 export const scriptsDirectory = "scripts";
 const artifactsPath = "artifacts";
@@ -158,12 +158,8 @@ export function persistCheckpoint (scriptName: string, checkpoint: Checkpoints):
   );
 }
 
-export function loadCheckpointNoSuffix (checkpointPath: string): Checkpoints {
-  return loadFromYamlFile(checkpointPath);
-}
-
 export function loadCheckpoint (scriptName: string): Checkpoints {
-  return loadCheckpointNoSuffix(toCheckpointFileName(scriptName));
+  return loadFromYamlFileSilent(toCheckpointFileName(scriptName));
 }
 
 function lsTreeWalk (directoryName: string): string[] {
@@ -210,7 +206,7 @@ export function lsScriptsDir (): string[] {
 export function loadCheckpointsRecursive (): CheckpointRepo {
   return findCheckpointsRecursive().reduce(
     (out: CheckpointRepo, filename: string) => {
-      return out.mergeToGlobal(loadCheckpointNoSuffix(filename));
+      return out.mergeToGlobal(loadFromYamlFileSilent(filename));
     },
     new CheckpointRepoImpl());
 }

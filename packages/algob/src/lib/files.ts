@@ -32,7 +32,7 @@ export function assertDirectDirChildren (dir: string, scriptNames: string[]): st
   return normalized;
 }
 
-export function loadFromYamlFile (filePath: string): any {
+export function loadFromYamlFileSilent (filePath: string): any {
   // Try-catch is the way:
   // https://nodejs.org/docs/latest/api/fs.html#fs_fs_stat_path_options_callback
   // Instead, user code should open/read/write the file directly and

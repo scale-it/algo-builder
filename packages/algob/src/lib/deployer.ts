@@ -4,7 +4,6 @@ import {
   Account,
   AlgobDeployer,
   AlgobRuntimeEnv,
-  ASADef,
   ASADefs,
   ASADeploymentFlags,
   ASAInfo,
@@ -74,14 +73,10 @@ export class AlgobDeployerImpl implements AlgobDeployer {
           asaName: name
         });
     }
-    return await this._deployASADirect(name, this.loadedAsaDefs[name], flags, flags.creator);
-  }
-
-  async _deployASADirect (
-    name: string, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account
-  ): Promise<ASAInfo> {
+    const asaDef = this.loadedAsaDefs[name]
+    const creator = flags.creator
     this.assertNoAsset(name);
-    const asaInfo = await this.algoSDK.deployASA(name, asaDesc, flags, account);
+    const asaInfo = await this.algoSDK.deployASA(name, asaDef, flags, creator);
     this.cpData.registerASA(this.networkName, name, asaInfo);
     return this.cpData.precedingCP[this.networkName].asa[name];
   }
