@@ -63,8 +63,8 @@ describe("AlgobDeployerImpl", () => {
       }
     };
     const cpData = new CheckpointRepoImpl();
-    cpData.merge(cp1);
-    cpData.merge(cp2);
+    cpData.merge(cp1, "12s");
+    cpData.merge(cp2, "12s");
     assert.deepEqual(cpData.precedingCP, {
       network1: {
         timestamp: 1,

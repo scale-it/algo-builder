@@ -310,8 +310,8 @@ export interface CheckpointRepo {
   // This allows to prevent asset name clashes between scripts.
   allCPs: Checkpoints
 
-  merge: (curr: Checkpoints) => CheckpointRepo
-  mergeToGlobal: (curr: Checkpoints) => CheckpointRepo
+  merge: (curr: Checkpoints, scriptName: string) => CheckpointRepo
+  mergeToGlobal: (curr: Checkpoints, scriptName: string) => CheckpointRepo
 
   putMetadata: (networkName: string, key: string, value: string) => CheckpointRepo
   getMetadata: (networkName: string, key: string) => string | undefined
@@ -333,6 +333,10 @@ export interface Checkpoint {
   asa: {[name: string]: ASAInfo}
   asc: {[name: string]: ASCInfo}
 };
+
+export interface AssetScriptMap {
+  [assetName: string]: string
+}
 
 export interface AlgobDeployer {
   // Allows user to know whether it's possible to mutate this instance

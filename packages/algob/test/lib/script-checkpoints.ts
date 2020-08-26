@@ -10,7 +10,8 @@ import {
   persistCheckpoint,
   registerASA,
   registerASC,
-  toCheckpointFileName
+  toCheckpointFileName,
+  toScriptFileName
 } from "../../src/lib/script-checkpoints";
 import { Checkpoint, Checkpoints } from "../../src/types";
 import { expectBuilderError } from "../helpers/errors";
@@ -172,6 +173,11 @@ describe("Checkpoint", () => {
     assert.equal(checkpointFileName, "artifacts/script-1.js.cp.yaml");
   });
 
+  it("Should produce a script file name from checkpoint name", async () => {
+    const checkpointFileName = toScriptFileName("artifacts/script-1.js.cp.yaml.hi.cp.yaml");
+    assert.equal(checkpointFileName, "script-1.js.cp.yaml.hi");
+  });
+
   it("Should default to empty cp if loading nonexistent file", async () => {
     const loadedCP = loadCheckpoint("nonexistent");
     assert.deepEqual(loadedCP, {});
@@ -232,6 +238,32 @@ describe("Checkpoint with cleanup", () => {
 });
 
 describe("CheckpointRepoImpl", () => {
+  it('Should crash if duplication is detected between scripts', async () => {
+    const cp1: Checkpoints = {
+      network1: {
+        timestamp: 1,
+        metadata: { "key 1": "data 1" },
+        asa: { "ASA name": { creator: "ASA creator 123" } },
+        asc: {}
+      }
+    };
+    const cp2: Checkpoints = {
+      network2: {
+        timestamp: 2,
+        metadata: { "key 2": "data 2" },
+        asa: { "ASA name": { creator: "ASA creator 123" } },
+        asc: {}
+      }
+    };
+    const cp = new CheckpointRepoImpl()
+      .merge(cp1, "script1");
+    expectBuilderError(
+      () => cp.merge(cp2, "script2"),
+      ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
+      "script1,script2"
+    );
+  });
+
   it("Should allow to set metadata", async () => {
     const cp = new CheckpointRepoImpl()
       .putMetadata("myNetworkName", "key", "data")
@@ -327,8 +359,8 @@ describe("CheckpointRepoImpl", () => {
       }
     };
     const cp = new CheckpointRepoImpl()
-      .merge(cp1)
-      .merge(cp2)
+      .merge(cp1, "12")
+      .merge(cp2, "34")
       .precedingCP;
     assert.deepEqual(cp, {
       network1: {
@@ -364,8 +396,8 @@ describe("CheckpointRepoImpl", () => {
       }
     };
     const cpData = new CheckpointRepoImpl()
-      .merge(cp1)
-      .merge(cp2);
+      .merge(cp1, "12")
+      .merge(cp2, "34");
     cpData.precedingCP.network1.timestamp = 124;
     cpData.strippedCP.network1.timestamp = 124;
     cpData.allCPs.network1.timestamp = 124;
@@ -421,9 +453,9 @@ describe("CheckpointRepoImpl", () => {
       }
     };
     const cpData = new CheckpointRepoImpl()
-      .mergeToGlobal(cp1)
-      .mergeToGlobal(cp2)
-      .merge(cp3);
+      .mergeToGlobal(cp1, "12")
+      .mergeToGlobal(cp2, "23")
+      .merge(cp3, "34");
     assert.deepEqual(cpData.allCPs, {
       network1: {
         timestamp: 8,
@@ -473,8 +505,8 @@ describe("CheckpointRepoImpl", () => {
       }
     };
     const cpData = new CheckpointRepoImpl()
-      .merge(cp1)
-      .mergeToGlobal(cp2)
+      .merge(cp1, "12")
+      .mergeToGlobal(cp2, "23")
       .putMetadata("network1", "metadata key", "metadata value")
       .putMetadata("net 0195", "1241 key", "345 value")
       .registerASA("network1", "ASA name", "ASA creator 123")

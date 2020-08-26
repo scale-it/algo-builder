@@ -9,6 +9,7 @@ import { ERRORS } from "../internal/core/errors-list";
 import {
   ASAInfo,
   ASCInfo,
+  AssetScriptMap,
   Checkpoint,
   CheckpointRepo,
   Checkpoints
@@ -20,6 +21,12 @@ const checkpointFileSuffix = ".cp.yaml";
 
 export function toCheckpointFileName (scriptName: string): string {
   return path.join(artifactsPath, scriptName + checkpointFileSuffix);
+}
+
+export function toScriptFileName (filename: string): string {
+  filename = filename.replace(artifactsPath + path.sep, '');
+  filename = filename.slice(0, -(checkpointFileSuffix.length));
+  return filename;
 }
 
 export function registerASA (
@@ -81,23 +88,40 @@ export class CheckpointRepoImpl implements CheckpointRepo {
   strippedCP: Checkpoints = {};
   precedingCP: Checkpoints = {};
   allCPs: Checkpoints = {};
+  scriptMap: AssetScriptMap = {};
 
-  private _mergeTo (target: Checkpoints, cp: Checkpoints): Checkpoints {
+  private _mergeTo (target: Checkpoints, cp: Checkpoints, scriptMap: AssetScriptMap): Checkpoints {
     const keys: string[] = Object.keys(cp);
     return keys.reduce((out: Checkpoints, key: string) => {
       return appendToCheckpoint(out, key, cp[key]);
     }, target);
   }
 
-  merge (cp: Checkpoints): CheckpointRepo {
+  merge (cp: Checkpoints, scriptName: string): CheckpointRepo {
     this.strippedCP = cp;
-    this.precedingCP = this._mergeTo(this.precedingCP, cp);
-    this.mergeToGlobal(cp);
+    this.precedingCP = this._mergeTo(this.precedingCP, cp, this.scriptMap);
+    this.mergeToGlobal(cp, scriptName);
     return this;
   }
 
-  mergeToGlobal (cp: Checkpoints): CheckpointRepo {
-    this.allCPs = this._mergeTo(this.allCPs, cp);
+  mergeToGlobal (cp: Checkpoints, scriptName: string): CheckpointRepo {
+    const keys: string[] = Object.keys(cp);
+    for (const k of keys) {
+      const orig = cp[k];
+      const allAssetNames = Object.keys(orig.asa).concat(Object.keys(orig.asc));
+      for (const assetName of allAssetNames) {
+        if (!(this.scriptMap[assetName])) {
+          this.scriptMap[assetName] = scriptName;
+        } else {
+          if (this.scriptMap[assetName] !== scriptName) {
+            throw new BuilderError(
+              ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
+              { assetName: [this.scriptMap[assetName], scriptName] });
+          }
+        }
+      }
+    }
+    this.allCPs = this._mergeTo(this.allCPs, cp, this.scriptMap);
     return this;
   }
 
@@ -217,7 +241,7 @@ export function lsScriptsDir (): string[] {
 export function loadCheckpointsRecursive (): CheckpointRepo {
   return findCheckpointsRecursive().reduce(
     (out: CheckpointRepo, filename: string) => {
-      return out.mergeToGlobal(loadCheckpointNoSuffix(filename));
+      return out.mergeToGlobal(loadCheckpointNoSuffix(filename), toScriptFileName(filename));
     },
     new CheckpointRepoImpl());
 }

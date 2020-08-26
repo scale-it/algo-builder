@@ -55,11 +55,11 @@ export function splitAfter (
 }
 
 function loadCheckpointsIntoCPData (cpData: CheckpointRepo, scriptPaths: string[]): CheckpointRepo {
-  return scriptPaths
-    .map(loadCheckpoint)
-    .reduce(
-      (out: CheckpointRepo, checkpoints: Checkpoints) => out.merge(checkpoints),
-      cpData);
+  var checkpointData = cpData;
+  for (const s of scriptPaths) {
+    checkpointData = cpData.merge(loadCheckpoint(s), s);
+  }
+  return checkpointData;
 }
 
 // TODO: Reduce file IO:
@@ -103,7 +103,7 @@ export async function runMultipleScripts (
     const prevScripts = splitAfter(scriptsFromScriptsDir, relativeScriptPath);
     loadCheckpointsIntoCPData(cpData, prevScripts);
     if (prevScripts[prevScripts.length - 1] !== relativeScriptPath) {
-      cpData.merge(loadCheckpoint(relativeScriptPath));
+      cpData.merge(loadCheckpoint(relativeScriptPath), relativeScriptPath);
     }
     if (!force && cpData.networkExistsInCurrentCP(runtimeEnv.network.name)) {
       log(`Skipping: Checkpoint exists for script ${relativeScriptPath}`);
