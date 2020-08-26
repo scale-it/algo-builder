@@ -46,7 +46,7 @@ export class AlgoClientImpl implements AlgoDeployClient {
   async deployASA (
     name: string, asaDesc: ASADef, flags: ASADeploymentFlags
   ): Promise<ASAInfo> {
-    const tx = await t.makeAssetCreateTxn(this.algoClient, asaDesc, flags);
+    const tx = await t.makeAssetCreateTxn(name, this.algoClient, asaDesc, flags);
     const rawSignedTxn = tx.signTxn(flags.creator.sk);
     const txInfo = await this.algoClient.sendRawTransaction(rawSignedTxn).do();
     const txConfirmation = await this.waitForConfirmation(txInfo.txId);
