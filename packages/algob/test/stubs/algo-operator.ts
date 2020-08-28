@@ -1,10 +1,10 @@
 
 import { Algodv2 } from "algosdk";
 
-import { AlgoActions } from "../../src/lib/algo-actions";
+import { AlgoOperator } from "../../src/lib/algo-operator";
 import { Account, ASADef, ASADeploymentFlags, ASAInfo } from "../../src/types";
 
-export class AlgoActionsDryRunImpl implements AlgoActions {
+export class AlgoOperatorDryRunImpl implements AlgoOperator {
   get algodClient (): Algodv2 {
     throw new Error("Not implemented");
   };

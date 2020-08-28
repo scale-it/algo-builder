@@ -14,24 +14,24 @@ import {
   CheckpointRepo
 } from "../types";
 import { mkAccountIndex } from "./account";
-import { AlgoActions } from "./algo-actions";
+import { AlgoOperator } from "./algo-operator";
 
 // This class is what user interacts with in deploy task
 export class AlgobDeployerImpl implements AlgobDeployer {
   private readonly runtimeEnv: AlgobRuntimeEnv;
   private readonly cpData: CheckpointRepo;
   private readonly loadedAsaDefs: ASADefs;
-  private readonly algoActions: AlgoActions;
+  private readonly algoOp: AlgoOperator;
   readonly accounts: Account[];
   readonly accountsByName: Accounts;
 
   constructor (
-    runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointRepo, asaDefs: ASADefs, algoActions: AlgoActions
+    runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointRepo, asaDefs: ASADefs, algoOp: AlgoOperator
   ) {
     this.runtimeEnv = runtimeEnv;
     this.cpData = cpData;
     this.loadedAsaDefs = asaDefs;
-    this.algoActions = algoActions;
+    this.algoOp = algoOp;
     this.accounts = runtimeEnv.network.config.accounts;
     this.accountsByName = mkAccountIndex(runtimeEnv.network.config.accounts);
   }
@@ -80,7 +80,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     const asaDef = this.loadedAsaDefs[name];
     const creator = flags.creator;
     this.assertNoAsset(name);
-    const asaInfo = await this.algoActions.deployASA(name, asaDef, flags, creator);
+    const asaInfo = await this.algoOp.deployASA(name, asaDef, flags, creator);
     this.cpData.registerASA(this.networkName, name, asaInfo);
     return this.cpData.precedingCP[this.networkName].asa[name];
   }
@@ -100,11 +100,11 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   }
 
   get algodClient (): algosdk.Algodv2 {
-    return this.algoActions.algodClient;
+    return this.algoOp.algodClient;
   }
 
   async waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
-    return await this.algoActions.waitForConfirmation(txId);
+    return await this.algoOp.waitForConfirmation(txId);
   }
 }
 

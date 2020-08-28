@@ -5,7 +5,7 @@ import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { runScript } from "../internal/util/scripts-runner";
-import { AlgoActions, createAlgoActions } from "../lib/algo-actions";
+import { AlgoOperator, createAlgoOperator } from "../lib/algo-operator";
 import { loadASAFile } from "../lib/asa";
 import {
   AlgobDeployerImpl,
@@ -33,13 +33,13 @@ function mkDeployer (
   runtimeEnv: AlgobRuntimeEnv,
   cpData: CheckpointRepo,
   allowWrite: boolean,
-  algoActions: AlgoActions
+  algoOp: AlgoOperator
 ): AlgobDeployer {
   const deployer = new AlgobDeployerImpl(
     runtimeEnv,
     cpData,
     loadASAFile(),
-    algoActions);
+    algoOp);
   if (allowWrite) {
     return deployer;
   }
@@ -80,7 +80,7 @@ export async function runMultipleScriptsOneByOne (
   force: boolean,
   logDebugTag: string,
   allowWrite: boolean,
-  algoActions: AlgoActions
+  algoOp: AlgoOperator
 ): Promise<void> {
   for (const script of scriptNames) {
     await runMultipleScripts(
@@ -90,7 +90,7 @@ export async function runMultipleScriptsOneByOne (
       force,
       logDebugTag,
       allowWrite,
-      algoActions
+      algoOp
     );
   }
 }
@@ -102,11 +102,11 @@ export async function runMultipleScripts (
   force: boolean,
   logTag: string,
   allowWrite: boolean,
-  algoActions: AlgoActions
+  algoOp: AlgoOperator
 ): Promise<void> {
   const log = debug(logTag);
   const cpData: CheckpointRepo = loadCheckpointsRecursive();
-  const deployer: AlgobDeployer = mkDeployer(runtimeEnv, cpData, allowWrite, algoActions);
+  const deployer: AlgobDeployer = mkDeployer(runtimeEnv, cpData, allowWrite, algoOp);
 
   const scriptsFromScriptsDir: string[] = lsScriptsDir();
 
@@ -134,7 +134,7 @@ export async function runMultipleScripts (
 async function executeRunTask (
   { scripts }: Input,
   runtimeEnv: AlgobRuntimeEnv,
-  algoActions: AlgoActions
+  algoOp: AlgoOperator
 ): Promise<any> {
   const logDebugTag = "algob:tasks:run";
 
@@ -152,7 +152,7 @@ async function executeRunTask (
     true,
     logDebugTag,
     false,
-    algoActions
+    algoOp
   );
 }
 
@@ -162,5 +162,5 @@ export default function (): void {
       "scripts",
       "A js file to be run within algob's environment"
     )
-    .setAction((input, env) => executeRunTask(input, env, createAlgoActions(env.network)));
+    .setAction((input, env) => executeRunTask(input, env, createAlgoOperator(env.network)));
 }
