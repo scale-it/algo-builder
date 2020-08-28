@@ -329,13 +329,13 @@ export interface CheckpointRepo {
 
 export interface Checkpoints {
   [network: string]: Checkpoint
-};
+}
 
 export interface Checkpoint {
   timestamp: number
-  metadata: { [key: string]: string }
-  asa: { [name: string]: ASAInfo }
-  asc: { [name: string]: ASCInfo }
+  metadata: Map<string, string>
+  asa: Map<string, ASAInfo>
+  asc: Map<string, ASCInfo>
 };
 
 export type ASADef = z.infer<typeof ASADefSchema>;
@@ -370,6 +370,7 @@ export interface AlgobDeployer {
      session which are not obtainable using get methods.
   */
   isDefined: (name: string) => boolean
+  asa: Map<string, ASAInfo>
 
   // Not present in the spec:
   algodClient: algosdk.Algodv2

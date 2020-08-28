@@ -3,6 +3,7 @@ import * as algosdk from "algosdk";
 import { Account, AccountDef, AlgobDeployer, ASADeploymentFlags, ASAInfo, ASCInfo } from "../../src/types";
 
 export class FakeDeployer implements AlgobDeployer {
+  asa = new Map<string, ASAInfo>();
   isDeployMode = false;
   accounts = [];
   accountsByName = new Map<string, Account>();

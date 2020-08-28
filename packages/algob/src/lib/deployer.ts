@@ -82,21 +82,26 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     this.assertNoAsset(name);
     const asaInfo = await this.algoOp.deployASA(name, asaDef, flags, creator);
     this.cpData.registerASA(this.networkName, name, asaInfo);
-    return this.cpData.precedingCP[this.networkName].asa[name];
+    return asaInfo;
   }
 
   async deployASC (name: string, source: string, account: Account): Promise<ASCInfo> {
     this.assertNoAsset(name);
-    this.cpData.registerASC(this.networkName, name, {
+    const ascInfo = {
       creator: account.addr + "-get-address-dry-run",
       txId: "tx-id-dry-run",
       confirmedRound: -1
-    });
-    return this.cpData.precedingCP[this.networkName].asc[name];
+    };
+    this.cpData.registerASC(this.networkName, name, ascInfo);
+    return ascInfo;
   }
 
   isDefined (name: string): boolean {
     return this.cpData.isDefined(this.networkName, name);
+  }
+
+  get asa (): Map<string, ASAInfo> {
+    return this.cpData.precedingCP[this.networkName].asa;
   }
 
   get algodClient (): algosdk.Algodv2 {
@@ -152,6 +157,10 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
 
   isDefined (name: string): boolean {
     return this._internal.isDefined(name);
+  }
+
+  get asa (): Map<string, ASAInfo> {
+    return this._internal.asa;
   }
 
   get algodClient (): algosdk.Algodv2 {
