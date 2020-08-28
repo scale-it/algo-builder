@@ -96,8 +96,8 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     return this.cpData.isDefined(this.networkName, name);
   }
 
-  get algod() {
-    return this.algoClient.algod
+  get algodClient() {
+    return this.algoClient.algodClient
   }
 
   async waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
@@ -147,8 +147,8 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
     return this._internal.isDefined(name);
   }
 
-  get algod() {
-    return this._internal.algod
+  get algodClient() {
+    return this._internal.algodClient
   }
 
   async waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {

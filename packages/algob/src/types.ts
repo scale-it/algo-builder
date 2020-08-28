@@ -369,7 +369,7 @@ export interface AlgobDeployer {
   isDefined: (name: string) => boolean
 
   // Not present in the spec:
-  algod: algosdk.Algodv2
+  algodClient: algosdk.Algodv2
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
 }
 
