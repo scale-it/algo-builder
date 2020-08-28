@@ -4,6 +4,7 @@ import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import {
   Account,
+  Accounts,
   AlgobDeployer,
   AlgobRuntimeEnv,
   ASADefs,
@@ -12,6 +13,7 @@ import {
   ASCInfo,
   CheckpointRepo
 } from "../types";
+import { mkAccountIndex } from "./account";
 import { AlgoDeployClient } from "./algo-client";
 
 // This class is what user interacts with in deploy task
@@ -20,6 +22,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   private readonly cpData: CheckpointRepo;
   private readonly loadedAsaDefs: ASADefs;
   private readonly algoClient: AlgoDeployClient;
+  readonly accounts: Accounts;
 
   constructor (
     runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointRepo, asaDefs: ASADefs, algoClient: AlgoDeployClient
@@ -28,10 +31,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     this.cpData = cpData;
     this.loadedAsaDefs = asaDefs;
     this.algoClient = algoClient;
-  }
-
-  get accounts (): Account[] {
-    return this.runtimeEnv.network.config.accounts;
+    this.accounts = mkAccountIndex(runtimeEnv.network.config.accounts);
   }
 
   get isDeployMode (): boolean {
@@ -114,7 +114,7 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
     this._internal = deployer;
   }
 
-  get accounts (): Account[] {
+  get accounts (): Accounts {
     return this._internal.accounts;
   }
 
@@ -122,7 +122,7 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
     return false;
   }
 
-  putMetadata (key: string, value: string): void {
+  putMetadata (_key: string, _value: string): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "putMetadata"
     });
@@ -132,13 +132,13 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
     return this._internal.getMetadata(key);
   }
 
-  async deployASA (name: string, flags: ASADeploymentFlags): Promise<ASAInfo> {
+  async deployASA (_name: string, _flags: ASADeploymentFlags): Promise<ASAInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployASA"
     });
   }
 
-  async deployASC (name: string, source: string, account: Account): Promise<ASCInfo> {
+  async deployASC (_name: string, _source: string, _account: Account): Promise<ASCInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployASC"
     });

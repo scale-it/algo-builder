@@ -1,7 +1,7 @@
 
 async function run (runtimeEnv, accounts, deployer) {
   if (deployer.isDeployMode) {
-    await deployer.deployASA('ASA from nested', {}, deployer.accounts[0])
+    await deployer.deployASA('ASA from nested', {}, deployer.accounts['acc-name-1'])
   }
 }
 

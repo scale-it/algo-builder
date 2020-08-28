@@ -9,6 +9,7 @@ import {
 import { AlgobDeployerReadOnlyImpl } from "../../../src/lib/deployer";
 import {
   AccountDef,
+  Accounts,
   AlgobDeployer,
   ASADeploymentFlags,
   ASAInfo,
@@ -20,7 +21,7 @@ import { testFixtureOutputFile, useCleanFixtureProject } from "../../helpers/pro
 
 class FakeDeployer implements AlgobDeployer {
   isDeployMode = false;
-  accounts = [];
+  accounts = {};
   putMetadata (key: string, value: string): void {
   };
 

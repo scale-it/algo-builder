@@ -19,6 +19,7 @@ import {
   scriptsDirectory
 } from "../lib/script-checkpoints";
 import { AlgobDeployer, AlgobRuntimeEnv, CheckpointRepo } from "../types";
+import { mkAccountIndex } from "./../lib/account";
 import { TASK_RUN } from "./task-names";
 
 interface Input {

@@ -25,8 +25,8 @@ export interface AlgoDeployClient {
 export class AlgoClientImpl implements AlgoDeployClient {
   algodClient: algosdk.Algodv2;
 
-  constructor (algod: algosdk.Algodv2) {
-    this.algodClient = algod;
+  constructor (algocl: algosdk.Algodv2) {
+    this.algodClient = algocl;
   }
 
   // Source:

@@ -98,7 +98,6 @@ scripts directory: script 1 executed
 
 describe("Deploy task: nested state files", function () {
   useCleanFixtureProject("scripts-dir-recursive-cp");
-
   it("Deployer should accumulate state during the run 1", async function () {
     await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js", "scripts/query.js"],

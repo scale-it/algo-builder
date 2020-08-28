@@ -353,10 +353,14 @@ export interface AssetScriptMap {
   [assetName: string]: string
 }
 
+export interface Accounts {
+  [name: string]: Account
+}
+
 export interface AlgobDeployer {
   // Allows user to know whether it's possible to mutate this instance
   isDeployMode: boolean
-  accounts: Account[]
+  accounts: Accounts
   putMetadata: (key: string, value: string) => void
   getMetadata: (key: string) => string | undefined
   deployASA: (name: string, flags: ASADeploymentFlags) => Promise<ASAInfo>

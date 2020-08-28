@@ -94,10 +94,10 @@ describe("AlgobDeployerImpl", () => {
     const cpData = new CheckpointRepoImpl();
     const deployer = new AlgobDeployerImpl(env, cpData, { MY_ASA: mkASA() }, new AlgoClientDryRunImpl());
 
-    const asaInfo = await deployer.deployASA("MY_ASA", { creator: deployer.accounts[0] });
+    const asaInfo = await deployer.deployASA("MY_ASA", { creator: deployer.accounts["acc-name-1"] });
     assert.deepEqual(asaInfo, { creator: "addr-1-get-address-dry-run", txId: "tx-id-dry-run", confirmedRound: -1, assetIndex: -1 });
 
-    const ascInfo = await deployer.deployASC("MY_ASC", "My brand new ASC", deployer.accounts[1]);
+    const ascInfo = await deployer.deployASC("MY_ASC", "My brand new ASC", deployer.accounts["acc-name-2"]);
     assert.deepEqual(ascInfo, { creator: "addr-2-get-address-dry-run", txId: "tx-id-dry-run", confirmedRound: -1 });
 
     cpData.precedingCP.network1.timestamp = 515236;
@@ -158,9 +158,9 @@ describe("AlgobDeployerImpl", () => {
   it("Should crash when same ASA name is tried to deploy to second time", async () => {
     const cpData = new CheckpointRepoImpl();
     const deployer = new AlgobDeployerImpl(mkAlgobEnv("network 123"), cpData, { ASA_key: mkASA() }, new AlgoClientDryRunImpl());
-    await deployer.deployASA("ASA_key", { creator: deployer.accounts[0] });
+    await deployer.deployASA("ASA_key", { creator: deployer.accounts["acc-name-1"] });
     await expectBuilderErrorAsync(
-      async () => await deployer.deployASA("ASA_key", { creator: deployer.accounts[0] }),
+      async () => await deployer.deployASA("ASA_key", { creator: deployer.accounts["acc-name-1"] }),
       ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT,
       "ASA_key"
     );
@@ -170,7 +170,7 @@ describe("AlgobDeployerImpl", () => {
     const cpData = new CheckpointRepoImpl();
     const deployer = new AlgobDeployerImpl(mkAlgobEnv("network 123"), cpData, {}, new AlgoClientDryRunImpl());
     await expectBuilderErrorAsync(
-      async () => await deployer.deployASA("ASA_key", { creator: deployer.accounts[0] }),
+      async () => await deployer.deployASA("ASA_key", { creator: deployer.accounts["acc-name-1"] }),
       ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_DEF_NOT_FOUND,
       "ASA_key"
     );
@@ -179,9 +179,9 @@ describe("AlgobDeployerImpl", () => {
   it("Should crash when same ASC name is tried to deploy to second time", async () => {
     const cpData = new CheckpointRepoImpl();
     const deployer = new AlgobDeployerImpl(mkAlgobEnv("network 123"), cpData, {}, new AlgoClientDryRunImpl());
-    await deployer.deployASC("ASC_key", "orig_value", deployer.accounts[0]);
+    await deployer.deployASC("ASC_key", "orig_value", deployer.accounts["acc-name-1"]);
     await expectBuilderErrorAsync(
-      async () => await deployer.deployASC("ASC_key", "new_value", deployer.accounts[0]),
+      async () => await deployer.deployASC("ASC_key", "new_value", deployer.accounts["acc-name-1"]),
       ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT,
       "ASC_key"
     );
