@@ -18,7 +18,7 @@ import { mkAlgobEnv } from "../../helpers/params";
 import { testFixtureOutputFile, useCleanFixtureProject } from "../../helpers/project";
 
 class FakeDeployer implements AlgobDeployer {
-  isWriteable = false;
+  isDeployMode = false;
   accounts = [];
   putMetadata (key: string, value: string): void {
   };

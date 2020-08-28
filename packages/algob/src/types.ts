@@ -354,7 +354,7 @@ export interface AssetScriptMap {
 
 export interface AlgobDeployer {
   // Allows user to know whether it's possible to mutate this instance
-  isWriteable: boolean
+  isDeployMode: boolean
   accounts: Account[]
   putMetadata: (key: string, value: string) => void
   getMetadata: (key: string) => string | undefined

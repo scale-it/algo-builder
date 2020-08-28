@@ -1,6 +1,6 @@
 
 async function run (runtimeEnv, accounts, deployer) {
-  if (deployer.isWriteable) {
+  if (deployer.isDeployMode) {
     await deployer.deployASA('ASA from first', { creator: deployer.accounts[0] })
   }
 }

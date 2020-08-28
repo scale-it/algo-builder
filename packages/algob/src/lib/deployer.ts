@@ -32,7 +32,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     return this.runtimeEnv.network.config.accounts;
   }
 
-  get isWriteable (): boolean {
+  get isDeployMode (): boolean {
     return true;
   }
 
@@ -108,7 +108,7 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
     return this._internal.accounts;
   }
 
-  get isWriteable (): boolean {
+  get isDeployMode (): boolean {
     return false;
   }
 

@@ -519,7 +519,7 @@ Please double check your command parameters`
     title: "Deployer editing allowed only during 'deploy'.",
     description: `Script tried to edit Deployer data using '%methodName%' method.
 Deployer data editing only allowed during 'deploy'.
-Use 'deployer.isWriteable' to check if editing is allowed.
+Use 'deployer.isDeployMode' to check if editing is allowed.
 `
   },
   CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION: {
