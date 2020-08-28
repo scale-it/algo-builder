@@ -2,7 +2,7 @@
 const fs = require('fs')
 
 async function run (runtimeEnv, accounts, deployer) {
-  if (deployer.isWriteable) {
+  if (deployer.isDeployMode) {
     deployer.putMetadata('META from first', 'first-ok')
   }
   fs.appendFileSync(

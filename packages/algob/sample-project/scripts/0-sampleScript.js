@@ -1,11 +1,11 @@
 
 async function run(runtimeEnv, accounts, deployer) {
   console.log("Sample script has started execution!")
-  if (deployer.isWriteable) {
+  if (deployer.isDeployMode) {
     await deployer.deployASA("minimumASA", { creator: deployer.accounts[0] })
   }
   // deploy using feePerByte
-  if (deployer.isWriteable) {
+  if (deployer.isDeployMode) {
     await deployer.deployASA("minimumASA1", {
       creator: deployer.accounts[0],
       //totalFee: 1001,
@@ -14,7 +14,7 @@ async function run(runtimeEnv, accounts, deployer) {
       validRounds: 1002
     })
   }
-  if (deployer.isWriteable) {
+  if (deployer.isDeployMode) {
     await deployer.deployASA("allFieldASA", {
       creator: deployer.accounts[0],
       //totalFee: 1001,

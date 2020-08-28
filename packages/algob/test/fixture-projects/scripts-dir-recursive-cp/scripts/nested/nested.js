@@ -1,6 +1,6 @@
 
 async function run (runtimeEnv, accounts, deployer) {
-  if (deployer.isWriteable) {
+  if (deployer.isDeployMode) {
     await deployer.deployASA('ASA from nested', {}, deployer.accounts[0])
   }
 }
