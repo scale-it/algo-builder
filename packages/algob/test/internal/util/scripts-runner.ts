@@ -1,4 +1,3 @@
-import * as algosdk from "algosdk";
 import { assert } from "chai";
 import fs from "fs";
 
@@ -7,13 +6,6 @@ import {
   runScript
 } from "../../../src/internal/util/scripts-runner";
 import { AlgobDeployerReadOnlyImpl } from "../../../src/lib/deployer";
-import {
-  AccountDef,
-  AlgobDeployer,
-  ASADeploymentFlags,
-  ASAInfo,
-  ASCInfo
-} from "../../../src/types";
 import { expectBuilderErrorAsync } from "../../helpers/errors";
 import { mkAlgobEnv } from "../../helpers/params";
 import { testFixtureOutputFile, useCleanFixtureProject } from "../../helpers/project";
