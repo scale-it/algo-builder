@@ -44,7 +44,6 @@ function ensureValidNodeVersion (packageJson: PackageJson): void {
 }
 
 function printErrRecur (error: BuilderError): void {
-  console.error(error.stack);
   if (error.parent) {
     if (error.parent instanceof BuilderError) {
       printErrRecur(error.parent);
@@ -55,6 +54,7 @@ function printErrRecur (error: BuilderError): void {
 }
 
 function printStackTraces (showStackTraces: boolean, error: BuilderError): void {
+  if (error === undefined) { return; }
   if (showStackTraces) {
     printErrRecur(error);
   } else {

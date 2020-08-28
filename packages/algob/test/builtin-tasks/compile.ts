@@ -3,8 +3,9 @@ import { assert } from "chai";
 import * as fs from "fs";
 import * as path from "path";
 
-import { compile, CompileOp } from "../../src/builtin-tasks/compile";
+import { compile } from "../../src/builtin-tasks/compile";
 import { ASSETS_DIR } from "../../src/internal/core/project-structure";
+import { CompileOp } from "../../src/lib/compile";
 import type { ASCCache } from "../../src/types";
 import { useFixtureProjectCopy } from "../helpers/project";
 const murmurhash = require('murmurhash'); // eslint-disable-line @typescript-eslint/no-var-requires
