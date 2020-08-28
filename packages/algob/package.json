@@ -18,7 +18,7 @@
   ],
   "main": "build/index.js",
   "bin": {
-    "algob": "build/src/internal/cli/cli.js"
+    "algob": "build/internal/cli/cli.js"
   },
   "engines": {
     "node": ">=8.2.0"
