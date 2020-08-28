@@ -5,7 +5,7 @@ import YAML from "yaml";
 import CfgErrors, { ErrorPutter } from "../internal/core/config/config-errors";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
-import type { Account, AccountDef, HDAccount, MnemonicAccount } from "../types";
+import type { Account, AccountDef, Accounts, HDAccount, MnemonicAccount } from "../types";
 
 export function mkAccounts (input: AccountDef[]): Account[] {
   const accounts: Account[] = [];
@@ -36,7 +36,7 @@ function parseMnemonic (mnemonic: string): AccountSDK {
   try {
     return mnemonicToSecretKey(mnemonic);
   } catch (e) {
-    throw new BuilderError(ERRORS.ACCOUNT.WRONG_MNEMONIC, { errmsg: e.message });
+    throw new BuilderError(ERRORS.ACCOUNT.WRONG_MNEMONIC, { errmsg: e.message }, e.error);
   }
 }
 
@@ -62,4 +62,12 @@ export function validateAccount (a: Account, errs: ErrorPutter): boolean {
   if (!(a.sk && a.sk instanceof Uint8Array && a.sk.length === 64)) { errs.push("sk", "Must be an instance of Uint8Array(64)", 'Uint8Array'); }
   if (!(typeof a.name === 'string' && a.name !== "")) { errs.push("name", "can't be empty", 'string'); }
   return errs.isEmpty;
+}
+
+export function mkAccountIndex (accountList: Account[]): Accounts {
+  const out = new Map<string, Account>();
+  for (const a of accountList) {
+    out.set(a.name, a);
+  }
+  return out;
 }

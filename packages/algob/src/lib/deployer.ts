@@ -1,7 +1,10 @@
+import * as algosdk from "algosdk";
+
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import {
   Account,
+  Accounts,
   AlgobDeployer,
   AlgobRuntimeEnv,
   ASADefs,
@@ -10,26 +13,27 @@ import {
   ASCInfo,
   CheckpointRepo
 } from "../types";
-import { AlgoDeployClient } from "./algo-client";
+import { mkAccountIndex } from "./account";
+import { AlgoOperator } from "./algo-operator";
 
 // This class is what user interacts with in deploy task
 export class AlgobDeployerImpl implements AlgobDeployer {
   private readonly runtimeEnv: AlgobRuntimeEnv;
   private readonly cpData: CheckpointRepo;
   private readonly loadedAsaDefs: ASADefs;
-  private readonly algoClient: AlgoDeployClient;
+  private readonly algoOp: AlgoOperator;
+  readonly accounts: Account[];
+  readonly accountsByName: Accounts;
 
   constructor (
-    runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointRepo, asaDefs: ASADefs, algoSdk: AlgoDeployClient
+    runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointRepo, asaDefs: ASADefs, algoOp: AlgoOperator
   ) {
     this.runtimeEnv = runtimeEnv;
     this.cpData = cpData;
     this.loadedAsaDefs = asaDefs;
-    this.algoClient = algoSdk;
-  }
-
-  get accounts (): Account[] {
-    return this.runtimeEnv.network.config.accounts;
+    this.algoOp = algoOp;
+    this.accounts = runtimeEnv.network.config.accounts;
+    this.accountsByName = mkAccountIndex(runtimeEnv.network.config.accounts);
   }
 
   get isDeployMode (): boolean {
@@ -76,7 +80,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     const asaDef = this.loadedAsaDefs[name];
     const creator = flags.creator;
     this.assertNoAsset(name);
-    const asaInfo = await this.algoClient.deployASA(name, asaDef, flags, creator);
+    const asaInfo = await this.algoOp.deployASA(name, asaDef, flags, creator);
     this.cpData.registerASA(this.networkName, name, asaInfo);
     return this.cpData.precedingCP[this.networkName].asa[name];
   }
@@ -94,6 +98,14 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   isDefined (name: string): boolean {
     return this.cpData.isDefined(this.networkName, name);
   }
+
+  get algodClient (): algosdk.Algodv2 {
+    return this.algoOp.algodClient;
+  }
+
+  async waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
+    return await this.algoOp.waitForConfirmation(txId);
+  }
 }
 
 // This class is what user interacts with in run task
@@ -108,11 +120,15 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
     return this._internal.accounts;
   }
 
+  get accountsByName (): Accounts {
+    return this._internal.accountsByName;
+  }
+
   get isDeployMode (): boolean {
     return false;
   }
 
-  putMetadata (key: string, value: string): void {
+  putMetadata (_key: string, _value: string): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "putMetadata"
     });
@@ -122,13 +138,13 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
     return this._internal.getMetadata(key);
   }
 
-  async deployASA (name: string, flags: ASADeploymentFlags): Promise<ASAInfo> {
+  async deployASA (_name: string, _flags: ASADeploymentFlags): Promise<ASAInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployASA"
     });
   }
 
-  async deployASC (name: string, source: string, account: Account): Promise<ASCInfo> {
+  async deployASC (_name: string, _source: string, _account: Account): Promise<ASCInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployASC"
     });
@@ -136,5 +152,13 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
 
   isDefined (name: string): boolean {
     return this._internal.isDefined(name);
+  }
+
+  get algodClient (): algosdk.Algodv2 {
+    return this._internal.algodClient;
+  }
+
+  async waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
+    return await this._internal.waitForConfirmation(txId);
   }
 }

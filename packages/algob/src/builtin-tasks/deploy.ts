@@ -5,7 +5,7 @@ import path from "path";
 import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
-import { AlgoDeployClient, createDeployClient } from "../lib/algo-client";
+import { AlgoOperator, createAlgoOperator } from "../lib/algo-operator";
 import { cmpStr } from "../lib/comparators";
 import { assertDirectDirChildren } from "../lib/files";
 import {
@@ -46,7 +46,7 @@ function clearCheckpointFiles (scriptNames: string[]): void {
 export async function executeDeployTask (
   { fileNames, force }: TaskArgs,
   runtimeEnv: AlgobRuntimeEnv,
-  algoClient: AlgoDeployClient
+  algoOp: AlgoOperator
 ): Promise<void> {
   const logDebugTag = "algob:tasks:deploy";
 
@@ -78,7 +78,7 @@ export async function executeDeployTask (
       force,
       logDebugTag,
       true,
-      algoClient
+      algoOp
     );
   } else {
     return await runMultipleScripts(
@@ -88,7 +88,7 @@ export async function executeDeployTask (
       force,
       logDebugTag,
       true,
-      algoClient
+      algoOp
     );
   }
 }
@@ -101,5 +101,5 @@ export default function (): void {
       "A directory that contains js files to be run within algob's environment",
       []
     )
-    .setAction((input, env) => executeDeployTask(input, env, createDeployClient(env.network)));
+    .setAction((input, env) => executeDeployTask(input, env, createAlgoOperator(env.network)));
 }

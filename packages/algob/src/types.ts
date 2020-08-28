@@ -1,4 +1,5 @@
 import type { Account as AccountSDK } from "algosdk";
+import * as algosdk from "algosdk";
 import { DeepReadonly, StrictOmit } from "ts-essentials";
 import * as z from 'zod';
 
@@ -352,10 +353,13 @@ export interface AssetScriptMap {
   [assetName: string]: string
 }
 
+export type Accounts = Map<string, Account>;
+
 export interface AlgobDeployer {
   // Allows user to know whether it's possible to mutate this instance
   isDeployMode: boolean
   accounts: Account[]
+  accountsByName: Accounts
   putMetadata: (key: string, value: string) => void
   getMetadata: (key: string) => string | undefined
   deployASA: (name: string, flags: ASADeploymentFlags) => Promise<ASAInfo>
@@ -366,6 +370,10 @@ export interface AlgobDeployer {
      session which are not obtainable using get methods.
   */
   isDefined: (name: string) => boolean
+
+  // Not present in the spec:
+  algodClient: algosdk.Algodv2
+  waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
 }
 
 // ************************
