@@ -36,7 +36,7 @@ function parseMnemonic (mnemonic: string): AccountSDK {
   try {
     return mnemonicToSecretKey(mnemonic);
   } catch (e) {
-    throw new BuilderError(ERRORS.ACCOUNT.WRONG_MNEMONIC, { errmsg: e.message });
+    throw new BuilderError(ERRORS.ACCOUNT.WRONG_MNEMONIC, { errmsg: e.message }, e.error);
   }
 }
 
