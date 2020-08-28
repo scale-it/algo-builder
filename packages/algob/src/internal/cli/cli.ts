@@ -54,8 +54,7 @@ function printErrRecur (error: BuilderError): void {
 }
 
 function printStackTraces (showStackTraces: boolean, error: BuilderError): void {
-  if (error === undefined)
-    return
+  if (error === undefined) { return; }
   if (showStackTraces) {
     printErrRecur(error);
   } else {

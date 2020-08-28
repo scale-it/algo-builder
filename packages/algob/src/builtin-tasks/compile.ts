@@ -3,10 +3,10 @@ import { readdirSync } from 'fs';
 import { task } from "../internal/core/config/config-env";
 import { assertDir, ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
 import { cmpStr } from "../lib/comparators";
+import { CompileOp, tealExt } from "../lib/compile";
 import { createClient } from "../lib/driver";
 import type { AlgobRuntimeEnv } from "../types";
 import { TASK_COMPILE } from "./task-names";
-import {CompileOp, tealExt} from "../lib/compile";
 
 export default function (): void {
   task(TASK_COMPILE, "Compile all TEAL smart contracts")

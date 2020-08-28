@@ -3,11 +3,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 import YAML from "yaml";
 
-import type { ASCCache } from "../types";
 import { parseAlgorandError } from "../internal/core/errors";
-import { timestampNow } from "../lib/time";
-const murmurhash = require('murmurhash'); // eslint-disable-line @typescript-eslint/no-var-requires
 import { assertDir, ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
+import { timestampNow } from "../lib/time";
+import type { ASCCache } from "../types";
+const murmurhash = require('murmurhash'); // eslint-disable-line @typescript-eslint/no-var-requires
 
 export const tealExt = ".teal";
 
@@ -27,7 +27,7 @@ export class CompileOp {
   // @param force: if true it will force recompilation even if the cache is up to date.
   async ensureCompiled (filename: string, force: boolean): Promise<ASCCache> {
     if (!filename.endsWith(tealExt)) {
-      throw new Error(`filename "${filename}" must end with "${tealExt}"`) // TODO: convert to buildererror
+      throw new Error(`filename "${filename}" must end with "${tealExt}"`); // TODO: convert to buildererror
     }
 
     const [teal, thash] = this.readTealAndHash(path.join(ASSETS_DIR, filename));
@@ -51,12 +51,11 @@ export class CompileOp {
   async readArtifact (filename: string): Promise<ASCCache | undefined> {
     await assertDir(CACHE_DIR);
     try {
-      const p = path.join(CACHE_DIR, filename);
+      const p = path.join(CACHE_DIR, filename + ".yaml");
       return YAML.parse(await fs.promises.readFile(p, 'utf8')) as ASCCache;
     } catch (e) {
-      if (e?.errno == -2)
-        return undefined
-      throw e
+      if (e?.errno === -2) { return undefined; } // errno whene reading an unexisting file
+      throw e;
     }
   }
 
