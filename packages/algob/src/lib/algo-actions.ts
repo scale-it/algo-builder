@@ -12,7 +12,7 @@ import * as tx from "./tx";
 
 const confirmedRound = "confirmed-round";
 
-export function createDeployClient (network: Network): AlgoActions {
+export function createAlgoActions (network: Network): AlgoActions {
   return new AlgoActionsImpl(createClient(network));
 }
 

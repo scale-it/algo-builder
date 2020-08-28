@@ -9,7 +9,6 @@ import {
 import { AlgobDeployerReadOnlyImpl } from "../../../src/lib/deployer";
 import {
   AccountDef,
-  Accounts,
   AlgobDeployer,
   ASADeploymentFlags,
   ASAInfo,

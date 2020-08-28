@@ -7,7 +7,7 @@ import { ERRORS } from "../../src/internal/core/errors-list";
 import { loadCheckpoint } from "../../src/lib/script-checkpoints";
 import { expectBuilderErrorAsync } from "../helpers/errors";
 import { testFixtureOutputFile, useCleanFixtureProject } from "../helpers/project";
-import { AlgoClientDryRunImpl } from "../stubs/algo-client";
+import { AlgoActionsDryRunImpl } from "../stubs/algo-actions";
 
 describe("Deploy task", function () {
   useCleanFixtureProject("scripts-dir");
@@ -102,7 +102,7 @@ describe("Deploy task: nested state files", function () {
     await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js", "scripts/query.js"],
       force: false
-    }, this.env, new AlgoClientDryRunImpl());
+    }, this.env, new AlgoActionsDryRunImpl());
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, `ASA from first defined: true
 ASC from second defined: false`);
@@ -113,7 +113,7 @@ ASC from second defined: false`);
       async () => await executeDeployTaskNoCLI({
         fileNames: ["scripts/1.js", "scripts/nested/nested.js"],
         force: false
-      }, this.env, new AlgoClientDryRunImpl()),
+      }, this.env, new AlgoActionsDryRunImpl()),
       ERRORS.BUILTIN_TASKS.DEPLOY_SCRIPT_NON_DIRECT_CHILD,
       "scripts/nested/nested.js");
     assert.isFalse(fs.existsSync(testFixtureOutputFile));
@@ -123,7 +123,7 @@ ASC from second defined: false`);
     await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js", "scripts/2.js", "scripts/query.js"],
       force: false
-    }, this.env, new AlgoClientDryRunImpl());
+    }, this.env, new AlgoActionsDryRunImpl());
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, `ASA from first defined: true
 ASC from second defined: true`);
@@ -133,7 +133,7 @@ ASC from second defined: true`);
     await executeDeployTaskNoCLI({
       fileNames: ["scripts/query.js"],
       force: false
-    }, this.env, new AlgoClientDryRunImpl());
+    }, this.env, new AlgoActionsDryRunImpl());
     const scriptOutputBefore = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputBefore, `ASA from first defined: false
 ASC from second defined: false`);
@@ -141,11 +141,11 @@ ASC from second defined: false`);
     await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js", "scripts/2.js"],
       force: false
-    }, this.env, new AlgoClientDryRunImpl());
+    }, this.env, new AlgoActionsDryRunImpl());
     await executeDeployTaskNoCLI({
       fileNames: ["scripts/query.js"],
       force: false
-    }, this.env, new AlgoClientDryRunImpl());
+    }, this.env, new AlgoActionsDryRunImpl());
     const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputAfter, `ASA from first defined: true
 ASC from second defined: true`);
@@ -155,11 +155,11 @@ ASC from second defined: true`);
     await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js"],
       force: false
-    }, this.env, new AlgoClientDryRunImpl());
+    }, this.env, new AlgoActionsDryRunImpl());
     await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js", "scripts/query.js"],
       force: false
-    }, this.env, new AlgoClientDryRunImpl());
+    }, this.env, new AlgoActionsDryRunImpl());
     const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputAfter, `ASA from first defined: true
 ASC from second defined: false`);
@@ -169,11 +169,11 @@ ASC from second defined: false`);
     await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js", "scripts/2.js"],
       force: false
-    }, this.env, new AlgoClientDryRunImpl());
+    }, this.env, new AlgoActionsDryRunImpl());
     await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js", "scripts/2.js", "scripts/query.js"],
       force: false
-    }, this.env, new AlgoClientDryRunImpl());
+    }, this.env, new AlgoActionsDryRunImpl());
     const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputAfter, `ASA from first defined: true
 ASC from second defined: true`);

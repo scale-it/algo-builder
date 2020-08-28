@@ -5,7 +5,7 @@ import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { runScript } from "../internal/util/scripts-runner";
-import { AlgoDeployClient, createDeployClient } from "../lib/algo-client";
+import { AlgoActions, createAlgoActions } from "../lib/algo-actions";
 import { loadASAFile } from "../lib/asa";
 import {
   AlgobDeployerImpl,
@@ -19,7 +19,6 @@ import {
   scriptsDirectory
 } from "../lib/script-checkpoints";
 import { AlgobDeployer, AlgobRuntimeEnv, CheckpointRepo } from "../types";
-import { mkAccountIndex } from "./../lib/account";
 import { TASK_RUN } from "./task-names";
 
 interface Input {
@@ -34,13 +33,13 @@ function mkDeployer (
   runtimeEnv: AlgobRuntimeEnv,
   cpData: CheckpointRepo,
   allowWrite: boolean,
-  algoClient: AlgoDeployClient
+  algoActions: AlgoActions
 ): AlgobDeployer {
   const deployer = new AlgobDeployerImpl(
     runtimeEnv,
     cpData,
     loadASAFile(),
-    algoClient);
+    algoActions);
   if (allowWrite) {
     return deployer;
   }
@@ -81,7 +80,7 @@ export async function runMultipleScriptsOneByOne (
   force: boolean,
   logDebugTag: string,
   allowWrite: boolean,
-  algoClient: AlgoDeployClient
+  algoActions: AlgoActions
 ): Promise<void> {
   for (const script of scriptNames) {
     await runMultipleScripts(
@@ -91,7 +90,7 @@ export async function runMultipleScriptsOneByOne (
       force,
       logDebugTag,
       allowWrite,
-      algoClient
+      algoActions
     );
   }
 }
@@ -103,11 +102,11 @@ export async function runMultipleScripts (
   force: boolean,
   logTag: string,
   allowWrite: boolean,
-  algoClient: AlgoDeployClient
+  algoActions: AlgoActions
 ): Promise<void> {
   const log = debug(logTag);
   const cpData: CheckpointRepo = loadCheckpointsRecursive();
-  const deployer: AlgobDeployer = mkDeployer(runtimeEnv, cpData, allowWrite, algoClient);
+  const deployer: AlgobDeployer = mkDeployer(runtimeEnv, cpData, allowWrite, algoActions);
 
   const scriptsFromScriptsDir: string[] = lsScriptsDir();
 
@@ -135,7 +134,7 @@ export async function runMultipleScripts (
 async function executeRunTask (
   { scripts }: Input,
   runtimeEnv: AlgobRuntimeEnv,
-  algoClient: AlgoDeployClient
+  algoActions: AlgoActions
 ): Promise<any> {
   const logDebugTag = "algob:tasks:run";
 
@@ -153,7 +152,7 @@ async function executeRunTask (
     true,
     logDebugTag,
     false,
-    algoClient
+    algoActions
   );
 }
 
@@ -163,5 +162,5 @@ export default function (): void {
       "scripts",
       "A js file to be run within algob's environment"
     )
-    .setAction((input, env) => executeRunTask(input, env, createDeployClient(env.network)));
+    .setAction((input, env) => executeRunTask(input, env, createAlgoActions(env.network)));
 }

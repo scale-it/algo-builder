@@ -14,7 +14,7 @@ import {
   CheckpointRepo
 } from "../types";
 import { mkAccountIndex } from "./account";
-import { AlgoActions } from "./algo-client";
+import { AlgoActions } from "./algo-actions";
 
 // This class is what user interacts with in deploy task
 export class AlgobDeployerImpl implements AlgobDeployer {
