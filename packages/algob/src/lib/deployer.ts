@@ -22,7 +22,8 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   private readonly cpData: CheckpointRepo;
   private readonly loadedAsaDefs: ASADefs;
   private readonly algoActions: AlgoActions;
-  readonly accounts: Accounts;
+  readonly accounts: Account[];
+  readonly accountsByName: Accounts;
 
   constructor (
     runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointRepo, asaDefs: ASADefs, algoActions: AlgoActions
@@ -31,7 +32,8 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     this.cpData = cpData;
     this.loadedAsaDefs = asaDefs;
     this.algoActions = algoActions;
-    this.accounts = mkAccountIndex(runtimeEnv.network.config.accounts);
+    this.accounts = runtimeEnv.network.config.accounts;
+    this.accountsByName = mkAccountIndex(runtimeEnv.network.config.accounts);
   }
 
   get isDeployMode (): boolean {
@@ -114,8 +116,12 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
     this._internal = deployer;
   }
 
-  get accounts (): Accounts {
+  get accounts (): Account[] {
     return this._internal.accounts;
+  }
+
+  get accountsByName (): Accounts {
+    return this._internal.accountsByName;
   }
 
   get isDeployMode (): boolean {

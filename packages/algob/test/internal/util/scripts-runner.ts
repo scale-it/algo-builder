@@ -17,37 +17,7 @@ import {
 import { expectBuilderErrorAsync } from "../../helpers/errors";
 import { mkAlgobEnv } from "../../helpers/params";
 import { testFixtureOutputFile, useCleanFixtureProject } from "../../helpers/project";
-
-class FakeDeployer implements AlgobDeployer {
-  isDeployMode = false;
-  accounts = {};
-  putMetadata (key: string, value: string): void {
-  };
-
-  getMetadata (key: string): string | undefined {
-    return "metadata";
-  };
-
-  async deployASA (name: string, flags: ASADeploymentFlags): Promise<ASAInfo> {
-    throw new Error("Not implemented");
-  };
-
-  async deployASC (name: string, source: string, account: AccountDef): Promise<ASCInfo> {
-    throw new Error("Not implemented");
-  }
-
-  isDefined (name: string): boolean {
-    return false;
-  };
-
-  get algodClient (): algosdk.Algodv2 {
-    throw new Error("Not implemented");
-  };
-
-  waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
-    throw new Error("Not implemented");
-  }
-}
+import { FakeDeployer } from "../../mocks/deployer";
 
 describe("Scripts runner", function () {
   useCleanFixtureProject("project-with-scripts");

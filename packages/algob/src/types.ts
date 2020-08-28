@@ -360,7 +360,8 @@ export interface Accounts {
 export interface AlgobDeployer {
   // Allows user to know whether it's possible to mutate this instance
   isDeployMode: boolean
-  accounts: Accounts
+  accounts: Account[]
+  accountsByName: Accounts
   putMetadata: (key: string, value: string) => void
   getMetadata: (key: string) => string | undefined
   deployASA: (name: string, flags: ASADeploymentFlags) => Promise<ASAInfo>
