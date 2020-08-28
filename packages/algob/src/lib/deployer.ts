@@ -1,25 +1,34 @@
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import {
-  AccountDef,
+  Account,
   AlgobDeployer,
   AlgobRuntimeEnv,
+  ASADefs,
+  ASADeploymentFlags,
   ASAInfo,
   ASCInfo,
   CheckpointRepo
 } from "../types";
+import { AlgoDeployClient } from "./algo-client";
 
 // This class is what user interacts with in deploy task
 export class AlgobDeployerImpl implements AlgobDeployer {
   private readonly runtimeEnv: AlgobRuntimeEnv;
   private readonly cpData: CheckpointRepo;
+  private readonly loadedAsaDefs: ASADefs;
+  private readonly algoClient: AlgoDeployClient;
 
-  constructor (runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointRepo) {
+  constructor (
+    runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointRepo, asaDefs: ASADefs, algoSdk: AlgoDeployClient
+  ) {
     this.runtimeEnv = runtimeEnv;
     this.cpData = cpData;
+    this.loadedAsaDefs = asaDefs;
+    this.algoClient = algoSdk;
   }
 
-  get accounts (): AccountDef[] {
+  get accounts (): Account[] {
     return this.runtimeEnv.network.config.accounts;
   }
 
@@ -57,15 +66,28 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     }
   }
 
-  async deployASA (name: string, source: string, account: string): Promise<ASAInfo> {
+  async deployASA (name: string, flags: ASADeploymentFlags): Promise<ASAInfo> {
+    if (this.loadedAsaDefs[name] === undefined) {
+      throw new BuilderError(
+        ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_DEF_NOT_FOUND, {
+          asaName: name
+        });
+    }
+    const asaDef = this.loadedAsaDefs[name];
+    const creator = flags.creator;
     this.assertNoAsset(name);
-    this.cpData.registerASA(this.networkName, name, account + "-get-address");
+    const asaInfo = await this.algoClient.deployASA(name, asaDef, flags, creator);
+    this.cpData.registerASA(this.networkName, name, asaInfo);
     return this.cpData.precedingCP[this.networkName].asa[name];
   }
 
-  async deployASC (name: string, source: string, account: string): Promise<ASCInfo> {
+  async deployASC (name: string, source: string, account: Account): Promise<ASCInfo> {
     this.assertNoAsset(name);
-    this.cpData.registerASC(this.networkName, name, account + "-get-address");
+    this.cpData.registerASC(this.networkName, name, {
+      creator: account.addr + "-get-address-dry-run",
+      txId: "tx-id-dry-run",
+      confirmedRound: -1
+    });
     return this.cpData.precedingCP[this.networkName].asc[name];
   }
 
@@ -82,7 +104,7 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
     this._internal = deployer;
   }
 
-  get accounts (): AccountDef[] {
+  get accounts (): Account[] {
     return this._internal.accounts;
   }
 
@@ -100,13 +122,13 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
     return this._internal.getMetadata(key);
   }
 
-  async deployASA (name: string, source: string, account: string): Promise<ASAInfo> {
+  async deployASA (name: string, flags: ASADeploymentFlags): Promise<ASAInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployASA"
     });
   }
 
-  async deployASC (name: string, source: string, account: string): Promise<ASCInfo> {
+  async deployASC (name: string, source: string, account: Account): Promise<ASCInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployASC"
     });

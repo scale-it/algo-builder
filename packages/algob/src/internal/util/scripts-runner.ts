@@ -1,7 +1,7 @@
 import debug from "debug";
 import * as path from "path";
 
-import { BuilderError, ERRORS } from "../../internal/core/errors";
+import { BuilderError, ERRORS, parseAlgorandError } from "../../internal/core/errors";
 import { AlgobDeployer, AlgobRuntimeEnv } from "../../types";
 
 const log = debug("algob:core:scripts-runner");
@@ -18,10 +18,27 @@ async function loadScript (relativeScriptPath: string): Promise<any> {
   }
 }
 
+function displayErr (error: Error | BuilderError | any, relativeScriptPath: string): void {
+  if (error instanceof BuilderError) {
+    throw error;
+  }
+  const maybeWrappedError = parseAlgorandError(error, { scriptPath: relativeScriptPath });
+  if (maybeWrappedError instanceof BuilderError) {
+    throw maybeWrappedError;
+  }
+  throw new BuilderError(
+    ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR, {
+      script: relativeScriptPath,
+      message: error.message
+    },
+    error
+  );
+}
+
 export async function runScript (
   relativeScriptPath: string,
   runtimeEnv: AlgobRuntimeEnv,
-  maybeDeployer?: AlgobDeployer
+  deployer: AlgobDeployer
 ): Promise<void> {
   log(`Running ${relativeScriptPath}.default()`);
   const requiredScript = await loadScript(relativeScriptPath);
@@ -33,20 +50,11 @@ export async function runScript (
   try {
     await requiredScript.default(
       runtimeEnv,
-      runtimeEnv.network.config.accounts,
-      maybeDeployer
+      deployer.accounts,
+      deployer
     );
   } catch (error) {
-    if (error instanceof BuilderError) {
-      throw error;
-    }
-    throw new BuilderError(
-      ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR, {
-        script: relativeScriptPath,
-        error: error.message
-      },
-      error
-    );
+    displayErr(error, relativeScriptPath);
   }
 }
 

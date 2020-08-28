@@ -165,14 +165,15 @@ export class HelpPrinter {
   }
 
   private _printParamDetails (paramDefinitions: ParamDefinitionsMap): void {
-    const shortParamsNameLength = Object.values(paramDefinitions)
-      .map((n) => ArgumentsParser.shortParamNameToCLA(n.shortName).length)
+    const paramKeys = Object.keys(paramDefinitions);
+    const shortParamsNameLength = paramKeys
+      .map((n) => ArgumentsParser.shortParamNameToCLA(paramDefinitions[n].shortName).length)
       .reduce(getMax, 0);
-    const paramsNameLength = Object.keys(paramDefinitions)
+    const paramsNameLength = paramKeys
       .map((n) => ArgumentsParser.paramNameToCLA(n).length)
       .reduce(getMax, 0);
 
-    for (const name of Object.keys(paramDefinitions).sort(cmpStr)) {
+    for (const name of paramKeys.sort(cmpStr)) {
       const {
         description,
         defaultValue,

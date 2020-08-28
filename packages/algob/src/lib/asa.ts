@@ -1,30 +1,40 @@
-import fs from "fs";
+import path from "path";
 import * as z from 'zod';
 
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
+import { ASSETS_DIR } from "../internal/core/project-structure";
 import { parseZodError } from "../internal/core/validation-errors";
-import { ASADef } from "../types";
-import { ASADefSchema } from "../types-input";
+import { ASADefs } from "../types";
+import { ASADefsSchema } from "../types-input";
+import { loadFromYamlFileSilentWithMessage } from "./files";
 
-export function parseASADef (obj: Object, filename: string): ASADef {
+export function validateASADefs (obj: Object, filename?: string): ASADefs {
   try {
-    const parsed = ASADefSchema.parse(obj);
-    if (parsed.defaultFrozen === undefined) {
-      parsed.defaultFrozen = false;
-    }
+    const parsed = ASADefsSchema.parse(obj);
+    Object.keys(parsed).forEach(k => {
+      if (parsed[k].defaultFrozen === undefined) {
+        parsed[k].defaultFrozen = false;
+      }
+    });
     return parsed;
   } catch (e) {
     if (e instanceof z.ZodError) {
-      throw new BuilderError(ERRORS.SCRIPT.ASA_PARAM_PARSE_ERROR, {
-        reason: parseZodError(e),
-        filename: filename
-      }, e);
+      throw new BuilderError(
+        filename
+          ? ERRORS.SCRIPT.ASA_PARAM_PARSE_ERROR_LOAD_FROM_FILE
+          : ERRORS.SCRIPT.ASA_PARAM_PARSE_ERROR, {
+          reason: parseZodError(e),
+          filename: filename
+        }, e);
     }
     throw e;
   }
 }
 
-export function loadASAFile (filename: string): ASADef {
-  return parseASADef(fs.readFileSync(filename), filename);
+export function loadASAFile (): ASADefs {
+  const filename = path.join(ASSETS_DIR, "asa.yaml");
+  return validateASADefs(
+    loadFromYamlFileSilentWithMessage(filename, path.join(ASSETS_DIR, "asa.yaml") + " doesn't exist."),
+    filename);
 }

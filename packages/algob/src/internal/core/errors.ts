@@ -190,10 +190,15 @@ function _applyErrorMessageTemplate (
 export function parseAlgorandError (e: RequestError, ctx: AnyMap): Error {
   if (e?.statusCode !== undefined) {
     if (e.statusCode >= 400 && e.statusCode < 500) {
-      return new BuilderError(ERRORS.ALGORAND.BAD_REQUEST,
-        { status: e.statusCode, message: e.text, ctx: JSON.stringify(ctx) });
+      return new BuilderError(ERRORS.ALGORAND.BAD_REQUEST, {
+        status: e.statusCode,
+        message: e.body?.message ?? e.text,
+        ctx: JSON.stringify(ctx)
+      }, e.error);
     }
-    return new BuilderError(ERRORS.ALGORAND.INTERNAL_ERROR, { status: e.statusCode }, e);
+    return new BuilderError(ERRORS.ALGORAND.INTERNAL_ERROR, {
+      status: e.statusCode
+    }, e);
   }
   return e;
 }

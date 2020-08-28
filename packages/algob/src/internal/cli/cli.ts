@@ -8,7 +8,7 @@ import semver from "semver";
 
 import { TASK_HELP, TASK_INIT } from "../../builtin-tasks/task-names";
 import { checkAlgorandUnauthorized } from "../../lib/exceptions";
-import { TaskArguments } from "../../types";
+import { AlgobRuntimeEnv, RuntimeArgs, TaskArguments } from "../../types";
 import { ALGOB_NAME } from "../constants";
 import { BuilderContext } from "../context";
 import { loadConfigAndTasks } from "../core/config/config-loading";
@@ -43,38 +43,154 @@ function ensureValidNodeVersion (packageJson: PackageJson): void {
   }
 }
 
-/* eslint-disable sonarjs/cognitive-complexity */
-async function main (): Promise<void> {
+function printErrRecur (error: BuilderError): void {
+  console.error(error.stack);
+  if (error.parent) {
+    if (error.parent instanceof BuilderError) {
+      printErrRecur(error.parent);
+    } else {
+      console.error(error.parent);
+    }
+  }
+}
+
+function printStackTraces (showStackTraces: boolean, error: BuilderError): void {
+  if (showStackTraces) {
+    printErrRecur(error);
+  } else {
+    console.error(`For more info run ${ALGOB_NAME} with --show-stack-traces or add --help to display task-specific help.`);
+  }
+}
+
+interface EnvAndArgs {
+  env: AlgobRuntimeEnv
+  taskName: string
+  taskArguments: TaskArguments
+}
+
+interface RuntimeArgsAndPackageJson {
+  runtimeArgs: RuntimeArgs
+  unparsedCLAs: string[]
+  maybeTaskName: string | undefined
+  showStackTraces: boolean
+  packageJson: PackageJson
+  argumentsParser: ArgumentsParser
+}
+
+export async function gatherArguments (): Promise<RuntimeArgsAndPackageJson> {
   // We first accept this argument anywhere, so we know if the user wants
   // stack traces before really parsing the arguments.
   let showStackTraces = process.argv.includes("--show-stack-traces");
 
+  const packageJson = await getPackageJson();
+
+  ensureValidNodeVersion(packageJson);
+
+  const envVariableArguments = getEnvRuntimeArgs(
+    ALGOB_PARAM_DEFINITIONS,
+    process.env);
+
+  const argumentsParser = new ArgumentsParser();
+  const {
+    runtimeArgs,
+    taskName: maybeTaskName,
+    unparsedCLAs
+  } = argumentsParser.parseRuntimeArgs(
+    ALGOB_PARAM_DEFINITIONS,
+    ALGOB_SHORT_PARAM_SUBSTITUTIONS,
+    envVariableArguments,
+    process.argv.slice(2)
+  );
+
+  if (runtimeArgs.verbose) {
+    debug.enable("algob*");
+  }
+
+  showStackTraces = runtimeArgs.showStackTraces;
+
+  return {
+    runtimeArgs: runtimeArgs,
+    unparsedCLAs: unparsedCLAs,
+    maybeTaskName: maybeTaskName,
+    showStackTraces: showStackTraces,
+    packageJson: packageJson,
+    argumentsParser: argumentsParser
+  };
+}
+
+export async function loadEnvironmentAndArgs (
+  maybeTaskName: string | undefined,
+  runtimeArgs: RuntimeArgs,
+  argumentsParser: ArgumentsParser,
+  unparsedCLAs: string[]
+): Promise<EnvAndArgs> {
+  const ctx = BuilderContext.createBuilderContext();
+  const config = loadConfigAndTasks(runtimeArgs);
+
+  const envExtenders = ctx.extendersManager.getExtenders();
+  const taskDefinitions = ctx.tasksDSL.getTaskDefinitions();
+
+  let taskName = maybeTaskName ?? TASK_HELP;
+  if (taskDefinitions[taskName] == null) {
+    throw new BuilderError(ERRORS.ARGUMENTS.UNRECOGNIZED_TASK, {
+      task: taskName
+    });
+  }
+  const origTaskName = taskName;
+
+  // --help is a also special case
+  let taskArguments: TaskArguments;
+  if (runtimeArgs.help && taskName !== TASK_HELP) {
+    taskArguments = { task: taskName };
+    taskName = TASK_HELP;
+  } else {
+    taskArguments = argumentsParser.parseTaskArguments(
+      taskDefinitions[taskName],
+      unparsedCLAs
+    );
+  }
+
+  // we can't do it earlier because we above we need to check the special case with `--help`
+  const isSetup = isSetupTask(taskName);
+
+  // Being inside of a project is non-mandatory for help and init
+  if (!isSetup && !isCwdInsideProject()) {
+    throw new BuilderError(ERRORS.GENERAL.NOT_INSIDE_PROJECT, { task: origTaskName });
+  }
+
+  const env = new Environment(
+    config,
+    runtimeArgs,
+    taskDefinitions,
+    envExtenders,
+    !isSetup);
+
+  ctx.setAlgobRuntimeEnv(env);
+
+  return {
+    env: env,
+    taskName: taskName,
+    taskArguments: taskArguments
+  };
+}
+
+/* eslint-disable sonarjs/cognitive-complexity */
+async function main (): Promise<void> {
+  // const analytics = await Analytics.getInstance(
+  //  config.paths.root,
+  //  config.analytics.enabled
+  // );
+  var showStackTraces = false;
   try {
-    const packageJson = await getPackageJson();
-
-    ensureValidNodeVersion(packageJson);
-
-    const envVariableArguments = getEnvRuntimeArgs(
-      ALGOB_PARAM_DEFINITIONS,
-      process.env);
-
-    const argumentsParser = new ArgumentsParser();
     const {
       runtimeArgs,
-      taskName: parsedTaskName,
-      unparsedCLAs
-    } = argumentsParser.parseRuntimeArgs(
-      ALGOB_PARAM_DEFINITIONS,
-      ALGOB_SHORT_PARAM_SUBSTITUTIONS,
-      envVariableArguments,
-      process.argv.slice(2)
-    );
-
-    if (runtimeArgs.verbose) {
-      debug.enable("algob*");
-    }
-
-    showStackTraces = runtimeArgs.showStackTraces;
+      unparsedCLAs,
+      showStackTraces: showStackTracesUpdate,
+      packageJson,
+      maybeTaskName,
+      argumentsParser
+    } = await gatherArguments();
+    showStackTraces = showStackTracesUpdate;
 
     // --version is a special case
     if (runtimeArgs.version) {
@@ -82,55 +198,15 @@ async function main (): Promise<void> {
       return;
     }
 
-    const ctx = BuilderContext.createBuilderContext();
-    const config = loadConfigAndTasks(runtimeArgs);
-
-    // const analytics = await Analytics.getInstance(
-    //  config.paths.root,
-    //  config.analytics.enabled
-    // );
-
-    const envExtenders = ctx.extendersManager.getExtenders();
-    const taskDefinitions = ctx.tasksDSL.getTaskDefinitions();
+    const {
+      env,
+      taskName,
+      taskArguments
+    } = await loadEnvironmentAndArgs(
+      maybeTaskName, runtimeArgs, argumentsParser, unparsedCLAs
+    );
 
     // let [abortAnalytics, hitPromise] = await analytics.sendTaskHit(taskName);
-
-    let taskName = parsedTaskName ?? TASK_HELP;
-    if (taskDefinitions[taskName] == null) {
-      throw new BuilderError(ERRORS.ARGUMENTS.UNRECOGNIZED_TASK, {
-        task: taskName
-      });
-    }
-    const origTaskName = taskName;
-
-    // --help is a also special case
-    let taskArguments: TaskArguments;
-    if (runtimeArgs.help && taskName !== TASK_HELP) {
-      taskArguments = { task: taskName };
-      taskName = TASK_HELP;
-    } else {
-      taskArguments = argumentsParser.parseTaskArguments(
-        taskDefinitions[taskName],
-        unparsedCLAs
-      );
-    }
-
-    // we can't do it earlier because we above we need to check the special case with `--help`
-    const isSetup = isSetupTask(taskName);
-
-    // Being inside of a project is non-mandatory for help and init
-    if (!isSetup && !isCwdInsideProject()) {
-      throw new BuilderError(ERRORS.GENERAL.NOT_INSIDE_PROJECT, { task: origTaskName });
-    }
-
-    const env = new Environment(
-      config,
-      runtimeArgs,
-      taskDefinitions,
-      envExtenders,
-      !isSetup);
-
-    ctx.setAlgobRuntimeEnv(env);
 
     // const tBeforeRun = new Date().getTime();
 
@@ -164,7 +240,7 @@ async function main (): Promise<void> {
 
     console.log("");
 
-    if (showStackTraces && error) { console.error(error.stack); } else { console.error(`For more info run ${ALGOB_NAME} with --show-stack-traces or add --help to display task-specific help.`); }
+    printStackTraces(showStackTraces, error);
 
     process.exit(1);
   }
