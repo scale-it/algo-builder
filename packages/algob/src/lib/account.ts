@@ -65,10 +65,9 @@ export function validateAccount (a: Account, errs: ErrorPutter): boolean {
 }
 
 export function mkAccountIndex (accountList: Account[]): Accounts {
-  return accountList.reduce(
-    (out: Accounts, a: Account) => {
-      out[a.name] = a;
-      return out;
-    },
-    {});
+  const out = new Map<string, Account>();
+  for (const a of accountList) {
+    out.set(a.name, a);
+  }
+  return out;
 }

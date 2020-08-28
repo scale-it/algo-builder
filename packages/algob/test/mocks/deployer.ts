@@ -1,11 +1,11 @@
 import * as algosdk from "algosdk";
 
-import { AccountDef, AlgobDeployer, ASADeploymentFlags, ASAInfo, ASCInfo } from "../../src/types";
+import { Account, AccountDef, AlgobDeployer, ASADeploymentFlags, ASAInfo, ASCInfo } from "../../src/types";
 
 export class FakeDeployer implements AlgobDeployer {
   isDeployMode = false;
   accounts = [];
-  accountsByName = {};
+  accountsByName = new Map<string, Account>();
   putMetadata (key: string, value: string): void {
   };
 

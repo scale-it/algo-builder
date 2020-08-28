@@ -353,9 +353,7 @@ export interface AssetScriptMap {
   [assetName: string]: string
 }
 
-export interface Accounts {
-  [name: string]: Account
-}
+export type Accounts = Map<string, Account>;
 
 export interface AlgobDeployer {
   // Allows user to know whether it's possible to mutate this instance
