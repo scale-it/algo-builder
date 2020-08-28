@@ -16,7 +16,7 @@ declare module 'algosdk' {
 
     sendRawTransaction(rawSignedTxn: TxnBytes): Action<TxResult>
     getTransactionParams(): Action<SuggestedParams>
-    pendingTransactionInformation(txId: string): Action<PendingTransactionInformation>
+    pendingTransactionInformation(txId: string): Action<ConfirmedTxInfo>
     statusAfterBlock(lastround: number): Action<any>
   }
 
@@ -222,7 +222,7 @@ declare module 'algosdk' {
     txId: string
   }
 
-  interface PendingTransactionInformation {
+  interface ConfirmedTxInfo {
     'confirmed-round': number
     "asset-index": number
   }

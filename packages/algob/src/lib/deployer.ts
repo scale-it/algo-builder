@@ -1,3 +1,4 @@
+import * as algosdk from "algosdk"
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import {
@@ -20,12 +21,12 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   private readonly algoClient: AlgoDeployClient;
 
   constructor (
-    runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointRepo, asaDefs: ASADefs, algoSdk: AlgoDeployClient
+    runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointRepo, asaDefs: ASADefs, algoClient: AlgoDeployClient
   ) {
     this.runtimeEnv = runtimeEnv;
     this.cpData = cpData;
     this.loadedAsaDefs = asaDefs;
-    this.algoClient = algoSdk;
+    this.algoClient = algoClient;
   }
 
   get accounts (): Account[] {
@@ -94,6 +95,14 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   isDefined (name: string): boolean {
     return this.cpData.isDefined(this.networkName, name);
   }
+
+  get algod() {
+    return this.algoClient.algod
+  }
+
+  async waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
+    return this.algoClient.waitForConfirmation(txId)
+  }
 }
 
 // This class is what user interacts with in run task
@@ -136,5 +145,13 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
 
   isDefined (name: string): boolean {
     return this._internal.isDefined(name);
+  }
+
+  get algod() {
+    return this._internal.algod
+  }
+
+  async waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
+    return this._internal.waitForConfirmation(txId)
   }
 }

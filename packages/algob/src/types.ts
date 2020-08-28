@@ -1,4 +1,5 @@
 import type { Account as AccountSDK } from "algosdk";
+import * as algosdk from "algosdk";
 import { DeepReadonly, StrictOmit } from "ts-essentials";
 import * as z from 'zod';
 
@@ -366,6 +367,10 @@ export interface AlgobDeployer {
      session which are not obtainable using get methods.
   */
   isDefined: (name: string) => boolean
+
+  // Not present in the spec:
+  algod: algosdk.Algodv2
+  waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
 }
 
 // ************************

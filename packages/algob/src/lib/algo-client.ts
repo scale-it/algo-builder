@@ -17,29 +17,31 @@ export function createDeployClient (network: Network): AlgoDeployClient {
 }
 
 export interface AlgoDeployClient {
+  algod: algosdk.Algodv2
   deployASA: (name: string, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account) => Promise<ASAInfo>
+  waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
 }
 
 export class AlgoClientImpl implements AlgoDeployClient {
-  private readonly algoClient: algosdk.Algodv2;
+  algod: algosdk.Algodv2;
 
-  constructor (algoClient: algosdk.Algodv2) {
-    this.algoClient = algoClient;
+  constructor (algod: algosdk.Algodv2) {
+    this.algod = algod;
   }
 
   // Source:
   // https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js#L21
   // Function used to wait for a tx confirmation
-  async waitForConfirmation (txId: string): Promise<algosdk.PendingTransactionInformation> {
-    const response = await this.algoClient.status().do();
+  async waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
+    const response = await this.algod.status().do();
     let lastround = response["last-round"];
     while (true) {
-      const pendingInfo = await this.algoClient.pendingTransactionInformation(txId).do();
+      const pendingInfo = await this.algod.pendingTransactionInformation(txId).do();
       if (pendingInfo[confirmedRound] !== null && pendingInfo[confirmedRound] > 0) {
         return pendingInfo;
       }
       lastround++;
-      await this.algoClient.statusAfterBlock(lastround).do();
+      await this.algod.statusAfterBlock(lastround).do();
     }
   };
 
@@ -47,9 +49,9 @@ export class AlgoClientImpl implements AlgoDeployClient {
     name: string, asaDesc: ASADef, flags: ASADeploymentFlags
   ): Promise<ASAInfo> {
     console.log("Deploying ASA:", name);
-    const assetTX = await tx.makeAssetCreateTxn(name, this.algoClient, asaDesc, flags);
+    const assetTX = await tx.makeAssetCreateTxn(name, this.algod, asaDesc, flags);
     const rawSignedTxn = assetTX.signTxn(flags.creator.sk);
-    const txInfo = await this.algoClient.sendRawTransaction(rawSignedTxn).do();
+    const txInfo = await this.algod.sendRawTransaction(rawSignedTxn).do();
     const txConfirmation = await this.waitForConfirmation(txInfo.txId);
     return {
       creator: flags.creator.addr,
