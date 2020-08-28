@@ -12,17 +12,17 @@ import * as tx from "./tx";
 
 const confirmedRound = "confirmed-round";
 
-export function createDeployClient (network: Network): AlgoDeployClient {
-  return new AlgoClientImpl(createClient(network));
+export function createDeployClient (network: Network): AlgoActions {
+  return new AlgoActionsImpl(createClient(network));
 }
 
-export interface AlgoDeployClient {
+export interface AlgoActions {
   algodClient: algosdk.Algodv2
   deployASA: (name: string, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account) => Promise<ASAInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
 }
 
-export class AlgoClientImpl implements AlgoDeployClient {
+export class AlgoActionsImpl implements AlgoActions {
   algodClient: algosdk.Algodv2;
 
   constructor (algocl: algosdk.Algodv2) {

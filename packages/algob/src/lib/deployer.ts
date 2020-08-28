@@ -14,23 +14,23 @@ import {
   CheckpointRepo
 } from "../types";
 import { mkAccountIndex } from "./account";
-import { AlgoDeployClient } from "./algo-client";
+import { AlgoActions } from "./algo-client";
 
 // This class is what user interacts with in deploy task
 export class AlgobDeployerImpl implements AlgobDeployer {
   private readonly runtimeEnv: AlgobRuntimeEnv;
   private readonly cpData: CheckpointRepo;
   private readonly loadedAsaDefs: ASADefs;
-  private readonly algoClient: AlgoDeployClient;
+  private readonly algoActions: AlgoActions;
   readonly accounts: Accounts;
 
   constructor (
-    runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointRepo, asaDefs: ASADefs, algoClient: AlgoDeployClient
+    runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointRepo, asaDefs: ASADefs, algoActions: AlgoActions
   ) {
     this.runtimeEnv = runtimeEnv;
     this.cpData = cpData;
     this.loadedAsaDefs = asaDefs;
-    this.algoClient = algoClient;
+    this.algoActions = algoActions;
     this.accounts = mkAccountIndex(runtimeEnv.network.config.accounts);
   }
 
@@ -78,7 +78,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     const asaDef = this.loadedAsaDefs[name];
     const creator = flags.creator;
     this.assertNoAsset(name);
-    const asaInfo = await this.algoClient.deployASA(name, asaDef, flags, creator);
+    const asaInfo = await this.algoActions.deployASA(name, asaDef, flags, creator);
     this.cpData.registerASA(this.networkName, name, asaInfo);
     return this.cpData.precedingCP[this.networkName].asa[name];
   }
@@ -98,11 +98,11 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   }
 
   get algodClient (): algosdk.Algodv2 {
-    return this.algoClient.algodClient;
+    return this.algoActions.algodClient;
   }
 
   async waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
-    return await this.algoClient.waitForConfirmation(txId);
+    return await this.algoActions.waitForConfirmation(txId);
   }
 }
 
