@@ -1,4 +1,5 @@
-import * as algosdk from "algosdk"
+import * as algosdk from "algosdk";
+
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import {
@@ -96,12 +97,12 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     return this.cpData.isDefined(this.networkName, name);
   }
 
-  get algodClient() {
-    return this.algoClient.algodClient
+  get algodClient (): algosdk.Algodv2 {
+    return this.algoClient.algodClient;
   }
 
   async waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
-    return this.algoClient.waitForConfirmation(txId)
+    return await this.algoClient.waitForConfirmation(txId);
   }
 }
 
@@ -147,11 +148,11 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
     return this._internal.isDefined(name);
   }
 
-  get algodClient() {
-    return this._internal.algodClient
+  get algodClient (): algosdk.Algodv2 {
+    return this._internal.algodClient;
   }
 
   async waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
-    return this._internal.waitForConfirmation(txId)
+    return await this._internal.waitForConfirmation(txId);
   }
 }

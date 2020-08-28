@@ -1,3 +1,4 @@
+import * as algosdk from "algosdk";
 import { assert } from "chai";
 import fs from "fs";
 
@@ -38,6 +39,14 @@ class FakeDeployer implements AlgobDeployer {
   isDefined (name: string): boolean {
     return false;
   };
+
+  get algodClient (): algosdk.Algodv2 {
+    throw new Error("Not implemented");
+  };
+
+  waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
+    throw new Error("Not implemented");
+  }
 }
 
 describe("Scripts runner", function () {
