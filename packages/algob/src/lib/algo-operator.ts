@@ -1,4 +1,5 @@
 import algosdk from "algosdk";
+import { TextEncoder } from "util";
 
 import { createClient } from "../lib/driver";
 import {
@@ -11,6 +12,7 @@ import {
   ASCInfo,
   Network
 } from "../types";
+import { getSuggestedParamsWithUserDefaults } from "./asc";
 import { CompileOp } from "./compile";
 import * as tx from "./tx";
 
@@ -72,33 +74,33 @@ export class AlgoOperatorImpl implements AlgoOperator {
   async deployASC (programb64: string, scParams: object, flags: ASCDeploymentFlags
   ): Promise<ASCInfo> {
     const program = new Uint8Array(Buffer.from(programb64, "base64"));
-
+    const encoder = new TextEncoder();
     const lsig = algosdk.makeLogicSig(program, scParams);
 
-    const params = await this.algodClient.getTransactionParams().do();
-
-    console.log(params);
+    const params = await getSuggestedParamsWithUserDefaults(this.algodClient, flags);
 
     // ASC1 signed by funder
-    // lsig.sign(flags.funder.sk);
+    lsig.sign(flags.creator.sk);
     const funder = flags.creator.addr;
     const contractAddress = lsig.address();
     // const receiver = funder;
 
     // Fund smart contract
     console.log("Funding Contract:", contractAddress);
-    console.log(funder);
+
     const tran = algosdk.makePaymentTxnWithSuggestedParams(funder, contractAddress,
-      flags.microAlgo, flags.closeToRemainder, flags.note, params);
+      flags.microAlgo, flags.closeToRemainder,
+      flags.note ? encoder.encode(flags.note) : undefined,
+      params);
 
     const signedTxn = tran.signTxn(flags.creator.sk);
 
     const tranInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
 
     const confirmedTxn = await this.algodClient.pendingTransactionInformation(tranInfo.txId).do();
-    console.log("Transaction information: %o", confirmedTxn);
+    // console.log("Transaction information: %o", confirmedTxn);
 
-    const amount = 100;
+    /* const amount = 100;
 
     // Transaction made from smart contract account
     const txn = algosdk.makePaymentTxnWithSuggestedParams(contractAddress, funder,
@@ -107,13 +109,13 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const rawSignedTxn = algosdk.signLogicSigTransactionObject(txn, lsig);
     const txInfo = (await this.algodClient.sendRawTransaction(rawSignedTxn.blob).do());
     const txConfirmation = await this.waitForConfirmation(txInfo.txId);
-    console.log(txConfirmation);
+    console.log(txConfirmation); */
     return {
       creator: flags.creator.addr,
       contractAddress: contractAddress,
-      txId: txInfo.txId,
+      txId: tranInfo.txId,
       logicSignature: lsig,
-      confirmedRound: txConfirmation[confirmedRound]
+      confirmedRound: confirmedTxn[confirmedRound]
     };
   }
 

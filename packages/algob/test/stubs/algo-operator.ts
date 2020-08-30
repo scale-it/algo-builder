@@ -11,7 +11,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   get algodClient (): Algodv2 {
     const token = "adsadasd";
     const host = "127.0.0.1";
-    const port = 41917;
+    const port = 42981;
     return new algosdk.Algodv2(token, host, port);
   };
 
