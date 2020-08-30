@@ -32,7 +32,7 @@
     "build": "tsc --build .",
     "build:watch": "tsc -w -p .",
     "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.tsbuildinfo build",
-    "algob:test": "sh ./setup_test_project.sh"
+    "algob:dev": "sh ./setup_dev_project.sh"
   },
   "devDependencies": {
     "@types/algosdk": "^0.0.1",
