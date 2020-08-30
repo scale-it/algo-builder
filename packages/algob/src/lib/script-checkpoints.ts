@@ -32,27 +32,27 @@ export function toScriptFileName (filename: string): string {
 
 export function registerASA (
   cp: Checkpoint, name: string, info: ASAInfo): Checkpoint {
-  cp.asa[name] = info;
+  cp.asa.set(name, info);
   return cp;
 }
 
 export function registerASC (
   cp: Checkpoint, name: string, info: ASCInfo): Checkpoint {
-  cp.asc[name] = info;
+  cp.asc.set(name, info);
   return cp;
 }
 
 export class CheckpointImpl implements Checkpoint {
   timestamp: number;
-  metadata: { [key: string]: string };
-  asa: { [name: string]: ASAInfo };
-  asc: { [name: string]: ASCInfo };
+  metadata: Map<string, string>;
+  asa: Map<string, ASAInfo>;
+  asc: Map<string, ASCInfo>;
 
-  constructor (metadata?: {[key: string]: string}) {
+  constructor (metadata?: Map<string, string>) {
     this.timestamp = +new Date();
-    this.metadata = (metadata === undefined ? {} : metadata);
-    this.asa = {};
-    this.asc = {};
+    this.metadata = (metadata === undefined ? new Map<string, string>() : metadata);
+    this.asa = new Map<string, ASAInfo>();
+    this.asc = new Map<string, ASCInfo>();
   }
 }
 
@@ -64,24 +64,18 @@ export function appendToCheckpoint (
     return checkpoints;
   }
   orig.timestamp = append.timestamp;
-  orig.metadata = Object.assign(
-    {}, orig.metadata, append.metadata
-  );
-  const allAssetNames = Object.keys(append.asa).concat(Object.keys(append.asc));
+  orig.metadata = new Map([...orig.metadata, ...append.metadata]);
+  const allAssetNames = [...append.asa.keys(), ...append.asc.keys()];
   for (const assetName of allAssetNames) {
-    if ((orig.asa[assetName] && !deepEqual(orig.asa[assetName], append.asa[assetName])) ||
-      (orig.asc[assetName] && !deepEqual(orig.asc[assetName], append.asc[assetName]))) {
+    if ((orig.asa.get(assetName) && !deepEqual(orig.asa.get(assetName), append.asa.get(assetName))) ??
+      (orig.asc.get(assetName) && !deepEqual(orig.asc.get(assetName), append.asc.get(assetName)))) {
       throw new BuilderError(
         ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
         { assetName: assetName });
     }
   }
-  orig.asa = Object.assign(
-    {}, orig.asa, append.asa
-  );
-  orig.asc = Object.assign(
-    {}, orig.asc, append.asc
-  );
+  orig.asa = new Map([...orig.asa, ...append.asa]);
+  orig.asc = new Map([...orig.asc, ...append.asc]);
   return checkpoints;
 }
 
@@ -108,8 +102,8 @@ export class CheckpointRepoImpl implements CheckpointRepo {
   mergeToGlobal (cp: Checkpoints, scriptName: string): CheckpointRepo {
     const keys: string[] = Object.keys(cp);
     for (const k of keys) {
-      const orig = cp[k];
-      const allAssetNames = Object.keys(orig.asa).concat(Object.keys(orig.asc));
+      const current = cp[k];
+      const allAssetNames = [...current.asa.keys(), ...current.asc.keys()];
       for (const assetName of allAssetNames) {
         if (!(this.scriptMap[assetName])) {
           this.scriptMap[assetName] = scriptName;
@@ -134,15 +128,15 @@ export class CheckpointRepoImpl implements CheckpointRepo {
   }
 
   putMetadata (networkName: string, key: string, value: string): CheckpointRepo {
-    this._ensureNet(this.allCPs, networkName).metadata[key] = value;
-    this._ensureNet(this.strippedCP, networkName).metadata[key] = value;
-    this._ensureNet(this.precedingCP, networkName).metadata[key] = value;
+    this._ensureNet(this.allCPs, networkName).metadata.set(key, value);
+    this._ensureNet(this.strippedCP, networkName).metadata.set(key, value);
+    this._ensureNet(this.precedingCP, networkName).metadata.set(key, value);
     return this;
   }
 
   getMetadata (networkName: string, key: string): string | undefined {
     if (this.precedingCP[networkName]) {
-      return this.precedingCP[networkName].metadata[key];
+      return this.precedingCP[networkName].metadata.get(key);
     }
     return undefined;
   }
@@ -164,7 +158,7 @@ export class CheckpointRepoImpl implements CheckpointRepo {
   isDefined (networkName: string, name: string): boolean {
     const netCP = this.allCPs[networkName];
     return netCP !== undefined &&
-      (netCP.asa[name] !== undefined || netCP.asc[name] !== undefined);
+      (netCP.asa.get(name) !== undefined || netCP.asc.get(name) !== undefined);
   }
 
   networkExistsInCurrentCP (networkName: string): boolean {
@@ -182,8 +176,22 @@ export function persistCheckpoint (scriptName: string, checkpoint: Checkpoints):
   );
 }
 
+export function loadCheckpointByCPName (checkpointName: string): Checkpoints {
+  // Some structures are objects, some others are maps. Oh why.
+  const loaded = loadFromYamlFileSilent(checkpointName, { mapAsMap: true });
+  const obj: Checkpoints = {};
+  for (const [key, checkpointMap] of loaded) {
+    const cp: any = {};
+    for (const [cpKey, cpVal] of checkpointMap.entries()) {
+      cp[cpKey] = cpVal;
+    }
+    obj[key] = cp;
+  }
+  return obj;
+}
+
 export function loadCheckpoint (scriptName: string): Checkpoints {
-  return loadFromYamlFileSilent(toCheckpointFileName(scriptName));
+  return loadCheckpointByCPName(toCheckpointFileName(scriptName));
 }
 
 function lsTreeWalk (directoryName: string): string[] {
@@ -230,7 +238,7 @@ export function lsScriptsDir (): string[] {
 export function loadCheckpointsRecursive (): CheckpointRepo {
   return findCheckpointsRecursive().reduce(
     (out: CheckpointRepo, filename: string) => {
-      return out.mergeToGlobal(loadFromYamlFileSilent(filename), toScriptFileName(filename));
+      return out.mergeToGlobal(loadCheckpointByCPName(filename), toScriptFileName(filename));
     },
     new CheckpointRepoImpl());
 }

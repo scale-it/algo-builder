@@ -188,8 +188,7 @@ function _applyErrorMessageTemplate (
 }
 
 export function parseAlgorandError (e: RequestError, ctx: AnyMap): Error {
-  if (e === undefined)
-    return new BuilderError(ERRORS.NETWORK.NODE_IS_NOT_RUNNING);
+  if (e === undefined) { return new BuilderError(ERRORS.NETWORK.NODE_IS_NOT_RUNNING); }
 
   if (e?.statusCode !== undefined) {
     if (e.statusCode >= 400 && e.statusCode < 500) {

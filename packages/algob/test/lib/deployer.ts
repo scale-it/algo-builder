@@ -3,7 +3,7 @@ import { assert } from "chai";
 import { ERRORS } from "../../src/internal/core/errors-list";
 import { AlgobDeployerImpl } from "../../src/lib/deployer";
 import { CheckpointRepoImpl } from "../../src/lib/script-checkpoints";
-import { ASADef, Checkpoints } from "../../src/types";
+import { ASADef, ASAInfo, ASCInfo, Checkpoints } from "../../src/types";
 import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkAlgobEnv } from "../helpers/params";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
@@ -21,9 +21,9 @@ describe("AlgobDeployerImpl", () => {
     const cpData = new CheckpointRepoImpl().putMetadata("network 123", "k", "v");
     assert.deepEqual(cleanupMutableData(cpData.precedingCP["network 123"], 12345), {
       timestamp: 12345,
-      metadata: { k: "v" },
-      asa: {},
-      asc: {}
+      metadata: new Map([["k", "v"]]),
+      asa: new Map<string, ASAInfo>(),
+      asc: new Map<string, ASCInfo>()
     });
   });
 
@@ -44,12 +44,10 @@ describe("AlgobDeployerImpl", () => {
     const cleanCP = cleanupMutableData(cpData.precedingCP["network 123"], 12345);
     assert.deepEqual(cleanCP, {
       timestamp: 12345,
-      metadata: {
-        "key 1": "val 1",
-        "key 2": "val 2"
-      },
-      asa: {},
-      asc: {}
+      metadata: new Map([["key 1", "val 1"],
+        ["key 2", "val 2"]]),
+      asa: new Map<string, ASAInfo>(),
+      asc: new Map<string, ASCInfo>()
     });
   });
 
@@ -57,17 +55,17 @@ describe("AlgobDeployerImpl", () => {
     const cp1: Checkpoints = {
       network1: {
         timestamp: 1,
-        metadata: { "key 1": "data 1" },
-        asa: {},
-        asc: {}
+        metadata: new Map([["key 1", "data 1"]]),
+        asa: new Map<string, ASAInfo>(),
+        asc: new Map<string, ASCInfo>()
       }
     };
     const cp2: Checkpoints = {
       network2: {
         timestamp: 2,
-        metadata: { "key 2": "data 2" },
-        asa: {},
-        asc: {}
+        metadata: new Map([["key 2", "data 2"]]),
+        asa: new Map<string, ASAInfo>(),
+        asc: new Map<string, ASCInfo>()
       }
     };
     const cpData = new CheckpointRepoImpl();
@@ -76,15 +74,15 @@ describe("AlgobDeployerImpl", () => {
     assert.deepEqual(cpData.precedingCP, {
       network1: {
         timestamp: 1,
-        metadata: { "key 1": "data 1" },
-        asa: {},
-        asc: {}
+        metadata: new Map([["key 1", "data 1"]]),
+        asa: new Map<string, ASAInfo>(),
+        asc: new Map<string, ASCInfo>()
       },
       network2: {
         timestamp: 2,
-        metadata: { "key 2": "data 2" },
-        asa: {},
-        asc: {}
+        metadata: new Map([["key 2", "data 2"]]),
+        asa: new Map<string, ASAInfo>(),
+        asc: new Map<string, ASCInfo>()
       }
     });
   });
@@ -103,22 +101,18 @@ describe("AlgobDeployerImpl", () => {
     cpData.precedingCP.network1.timestamp = 515236;
     assert.deepEqual(cpData.precedingCP, {
       network1: {
-        asa: {
-          MY_ASA: {
-            creator: "addr-1-get-address-dry-run",
-            txId: "tx-id-dry-run",
-            confirmedRound: -1,
-            assetIndex: -1
-          }
-        },
-        asc: {
-          MY_ASC: {
-            creator: "addr-2-get-address-dry-run",
-            txId: "tx-id-dry-run",
-            confirmedRound: -1
-          }
-        },
-        metadata: {},
+        asa: new Map([["MY_ASA", {
+          creator: "addr-1-get-address-dry-run",
+          txId: "tx-id-dry-run",
+          confirmedRound: -1,
+          assetIndex: -1
+        }]]),
+        asc: new Map([["MY_ASC", {
+          creator: "addr-2-get-address-dry-run",
+          txId: "tx-id-dry-run",
+          confirmedRound: -1
+        }]]),
+        metadata: new Map<string, string>(),
         timestamp: 515236
       }
     });
