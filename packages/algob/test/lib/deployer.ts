@@ -97,8 +97,14 @@ describe("AlgobDeployerImpl", () => {
     const asaInfo = await deployer.deployASA("MY_ASA", { creator: deployer.accounts[0] });
     assert.deepEqual(asaInfo, { creator: "addr-1-get-address-dry-run", txId: "tx-id-dry-run", confirmedRound: -1, assetIndex: -1 });
 
-    const ascInfo = await deployer.deployASC("MY_ASC", "My brand new ASC", deployer.accounts[1]);
-    assert.deepEqual(ascInfo, { creator: "addr-2-get-address-dry-run", txId: "tx-id-dry-run", confirmedRound: -1 });
+    const ascInfo = await deployer.deployASC("MY_ASC", [], { creator: deployer.accounts[1], microAlgo: 1000 });
+    assert.deepEqual(ascInfo, {
+      creator: "addr-2-get-address-dry-run",
+      txId: "tx-id-dry-run",
+      confirmedRound: -1,
+      contractAddress: "dfssdfsd",
+      logicSignature: "12dsfdsdasd"
+    });
 
     cpData.precedingCP.network1.timestamp = 515236;
     assert.deepEqual(cpData.precedingCP, {
@@ -115,7 +121,9 @@ describe("AlgobDeployerImpl", () => {
           MY_ASC: {
             creator: "addr-2-get-address-dry-run",
             txId: "tx-id-dry-run",
-            confirmedRound: -1
+            confirmedRound: -1,
+            contractAddress: "dfssdfsd",
+            logicSignature: "12dsfdsdasd"
           }
         },
         metadata: {},
@@ -129,7 +137,7 @@ describe("AlgobDeployerImpl", () => {
     const env = mkAlgobEnv(networkName);
     const cpData = new CheckpointRepoImpl()
       .registerASA(networkName, "ASA name", { creator: "ASA creator 123", txId: "", confirmedRound: 0, assetIndex: 0 })
-      .registerASC(networkName, "ASC name", { creator: "ASC creator 951", txId: "", confirmedRound: 0 })
+      .registerASC(networkName, "ASC name", { creator: "ASC creator 951", txId: "", confirmedRound: 0, contractAddress: "addr-1", logicSignature: "sig-1" })
       .putMetadata(networkName, "k", "v");
     const deployer = new AlgobDeployerImpl(env, cpData, {}, new AlgoOperatorDryRunImpl());
     assert.isTrue(deployer.isDefined("ASC name"));
@@ -179,9 +187,9 @@ describe("AlgobDeployerImpl", () => {
   it("Should crash when same ASC name is tried to deploy to second time", async () => {
     const cpData = new CheckpointRepoImpl();
     const deployer = new AlgobDeployerImpl(mkAlgobEnv("network 123"), cpData, {}, new AlgoOperatorDryRunImpl());
-    await deployer.deployASC("ASC_key", "orig_value", deployer.accounts[0]);
+    await deployer.deployASC("ASC_key", [], { creator: deployer.accounts[1], microAlgo: 1000 });
     await expectBuilderErrorAsync(
-      async () => await deployer.deployASC("ASC_key", "new_value", deployer.accounts[0]),
+      async () => await deployer.deployASC("ASC_key", "new_value", { creator: deployer.accounts[1], microAlgo: 1000 }),
       ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT,
       "ASC_key"
     );

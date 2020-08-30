@@ -297,6 +297,8 @@ export interface ASAInfo extends DeployedAssetInfo {
   assetIndex: number
 }
 export interface ASCInfo extends DeployedAssetInfo {
+  contractAddress: string
+  logicSignature: string
 }
 
 export interface CheckpointRepo {
@@ -349,6 +351,18 @@ export interface ASADeploymentFlags {
   validRounds?: number
 }
 
+export interface ASCDeploymentFlags {
+  creator: Account
+  microAlgo: number
+  totalFee?: number
+  feePerByte?: number
+  firstValid?: number
+  validRounds?: number
+  closeToRemainder?: string
+  note?: string
+  lease?: string
+}
+
 export interface AssetScriptMap {
   [assetName: string]: string
 }
@@ -363,7 +377,7 @@ export interface AlgobDeployer {
   putMetadata: (key: string, value: string) => void
   getMetadata: (key: string) => string | undefined
   deployASA: (name: string, flags: ASADeploymentFlags) => Promise<ASAInfo>
-  deployASC: (name: string, source: string, account: Account) => Promise<ASCInfo>
+  deployASC: (name: string, sc_params: Object, flags: ASCDeploymentFlags) => Promise<ASCInfo>
   /**
      Returns true if ASA or ACS were deployed in any script.
      Checks even for checkpoints out of from the execution

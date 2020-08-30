@@ -10,6 +10,8 @@ import {
   ASADefs,
   ASADeploymentFlags,
   ASAInfo,
+  ASCCache,
+  ASCDeploymentFlags,
   ASCInfo,
   CheckpointRepo
 } from "../types";
@@ -22,6 +24,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   private readonly cpData: CheckpointRepo;
   private readonly loadedAsaDefs: ASADefs;
   private readonly algoOp: AlgoOperator;
+  // private readonly compileOp: CompileOp;
   readonly accounts: Account[];
   readonly accountsByName: Accounts;
 
@@ -32,6 +35,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     this.cpData = cpData;
     this.loadedAsaDefs = asaDefs;
     this.algoOp = algoOp;
+    // this.compileOp = new CompileOp(this.algoOp.algodClient);
     this.accounts = runtimeEnv.network.config.accounts;
     this.accountsByName = mkAccountIndex(runtimeEnv.network.config.accounts);
   }
@@ -85,13 +89,14 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     return this.cpData.precedingCP[this.networkName].asa[name];
   }
 
-  async deployASC (name: string, source: string, account: Account): Promise<ASCInfo> {
+  async deployASC (name: string, scParams: Object, flags: ASCDeploymentFlags): Promise<ASCInfo> {
+    const result: ASCCache = await this.algoOp.ensuredCompiled(name, false);
+    const programb64 = result.compiled;
+    const creator = flags.creator;
     this.assertNoAsset(name);
-    this.cpData.registerASC(this.networkName, name, {
-      creator: account.addr + "-get-address-dry-run",
-      txId: "tx-id-dry-run",
-      confirmedRound: -1
-    });
+    console.log("Deploying ASC:", name);
+    const ascInfo = await this.algoOp.deployASC(programb64, scParams, flags, creator);
+    this.cpData.registerASC(this.networkName, name, ascInfo);
     return this.cpData.precedingCP[this.networkName].asc[name];
   }
 
@@ -144,7 +149,7 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
     });
   }
 
-  async deployASC (_name: string, _source: string, _account: Account): Promise<ASCInfo> {
+  async deployASC (_name: string, scParams: Object, flags: ASCDeploymentFlags): Promise<ASCInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployASC"
     });
