@@ -180,7 +180,7 @@ export function loadCheckpointByCPName (checkpointName: string): Checkpoints {
   // Some structures are objects, some others are maps. Oh why.
   const loaded = loadFromYamlFileSilent(checkpointName, { mapAsMap: true });
   const obj: Checkpoints = {};
-  for (const [key, checkpointMap] of loaded.entries()) {
+  for (const [key, checkpointMap] of loaded) {
     const cp: any = {};
     for (const [cpKey, cpVal] of checkpointMap.entries()) {
       cp[cpKey] = cpVal;
