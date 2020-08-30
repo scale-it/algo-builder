@@ -6,7 +6,6 @@ import { TASK_DEPLOY, TASK_RUN } from "../../src/builtin-tasks/task-names";
 import { ERRORS } from "../../src/internal/core/errors-list";
 import { loadCheckpoint } from "../../src/lib/script-checkpoints";
 import { expectBuilderErrorAsync } from "../helpers/errors";
-import { toMap } from "../helpers/params";
 import { testFixtureOutputFile, useCleanFixtureProject } from "../helpers/project";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
@@ -37,14 +36,10 @@ scripts directory: script 2 executed
       noCompile: true
     });
     const snapshot1 = loadCheckpoint("./scripts/1.js");
-    assert.deepEqual(snapshot1.default.metadata, toMap({
-      "script 1 key": "script 1 value"
-    }));
+    assert.deepEqual(snapshot1.default.metadata, new Map([["script 1 key", "script 1 value"]]));
     assert.isAtMost(snapshot1.default.timestamp, +new Date());
     const snapshot2 = loadCheckpoint("./scripts/2.js");
-    assert.deepEqual(snapshot2.default.metadata, toMap({
-      "script 2 key": "script 2 value"
-    }));
+    assert.deepEqual(snapshot2.default.metadata, new Map([["script 2 key", "script 2 value"]]));
     assert.isAtMost(snapshot2.default.timestamp, +new Date());
     assert.isAtMost(snapshot1.default.timestamp, snapshot2.default.timestamp);
   });

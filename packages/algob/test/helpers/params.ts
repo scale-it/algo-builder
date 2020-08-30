@@ -37,10 +37,3 @@ export function mkAlgobEnv (networkName?: string): AlgobRuntimeEnv {
     }
   };
 }
-
-// http://xahlee.info/js/js_object_to_map_datatype.html
-export function toMap <T> (obj: {[name: string]: T}): Map<string, T> {
-  const mp = new Map();
-  Object.keys(obj).forEach(k => { mp.set(k, obj[k]); });
-  return mp;
-};

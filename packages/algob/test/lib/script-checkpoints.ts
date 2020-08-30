@@ -15,7 +15,6 @@ import {
 } from "../../src/lib/script-checkpoints";
 import { ASAInfo, ASCInfo, Checkpoint, Checkpoints } from "../../src/types";
 import { expectBuilderError } from "../helpers/errors";
-import { toMap } from "../helpers/params";
 
 export function cleanupMutableData (netCheckpoint: Checkpoint, n: number): Checkpoint {
   assert.isNotNull(netCheckpoint.timestamp);
@@ -95,10 +94,9 @@ describe("Checkpoint", () => {
 
   it("Should merge metadata maps", async () => {
     var checkpoints: Checkpoints = {};
-    const netCheckpoint: Checkpoint = cleanupMutableData(new CheckpointImpl(toMap({
-      key: "data",
-      key3: "data3"
-    })), 34251);
+    const netCheckpoint: Checkpoint = cleanupMutableData(
+      new CheckpointImpl(new Map([["key", "data"],
+        ["key3", "data3"]])), 34251);
     registerASA(netCheckpoint, "asa1", {
       creator: "123",
       txId: "",
@@ -114,76 +112,67 @@ describe("Checkpoint", () => {
     assert.deepEqual(checkpoints, {
       network12345: {
         timestamp: 34251,
-        metadata: toMap({
-          key: "data",
-          key3: "data3"
-        }),
-        asa: toMap({
-          asa1: {
-            creator: "123",
-            txId: "",
-            assetIndex: 0,
-            confirmedRound: 0
-          }
-        }),
-        asc: toMap({
-          asc1: {
-            creator: "536",
-            txId: "",
-            confirmedRound: 0
-          }
-        })
+        metadata: new Map([["key", "data"],
+          ["key3", "data3"]]),
+        asa: new Map([["asa1", {
+          creator: "123",
+          txId: "",
+          assetIndex: 0,
+          confirmedRound: 0
+        }]]),
+        asc: new Map([["asc1", {
+          creator: "536",
+          txId: "",
+          confirmedRound: 0
+        }]])
       }
     });
-    const netCheckpoint2: Checkpoint = registerASA(cleanupMutableData(new CheckpointImpl(toMap({
-      key: "updated data",
-      key2: "data2"
-    })), 125154251), "my asa 2", {
-      creator: "creator",
-      txId: "",
-      assetIndex: 0,
-      confirmedRound: 0
-    });
+    const netCheckpoint2: Checkpoint = registerASA(
+      cleanupMutableData(
+        new CheckpointImpl(new Map([["key", "updated data"],
+          ["key2", "data2"]])),
+        125154251),
+      "my asa 2", {
+        creator: "creator",
+        txId: "",
+        assetIndex: 0,
+        confirmedRound: 0
+      });
     checkpoints = appendToCheckpoint(checkpoints, "network12345", netCheckpoint2);
     assert.deepEqual(checkpoints, {
       network12345: {
         timestamp: 125154251,
-        metadata: toMap({
-          key: "updated data",
-          key2: "data2",
-          key3: "data3"
-        }),
-        asa: toMap({
-          asa1: {
+        metadata: new Map([["key", "updated data"],
+          ["key2", "data2"],
+          ["key3", "data3"]]),
+        asa: new Map([
+          ["asa1", {
             creator: "123",
             txId: "",
             assetIndex: 0,
             confirmedRound: 0
-          },
-          "my asa 2": {
+          }],
+          ["my asa 2", {
             creator: "creator",
             txId: "",
             assetIndex: 0,
             confirmedRound: 0
-          }
-        }),
-        asc: toMap({
-          asc1: {
-            creator: "536",
-            txId: "",
-            confirmedRound: 0
-          }
-        })
+          }]]),
+        asc: new Map([["asc1", {
+          creator: "536",
+          txId: "",
+          confirmedRound: 0
+        }]])
       }
     });
   });
 
   it("Should crash if duplicate asa or asc name is detected", async () => {
     const checkpoints: Checkpoints = {};
-    const cp1: Checkpoint = cleanupMutableData(new CheckpointImpl(toMap({
-      key: "data",
-      key3: "data3"
-    })), 34251);
+    const cp1: Checkpoint = cleanupMutableData(
+      new CheckpointImpl(new Map([["key", "data"],
+        ["key3", "data3"]])),
+      34251);
     registerASA(cp1, "asa1", {
       creator: "123",
       txId: "",
@@ -207,10 +196,9 @@ describe("Checkpoint", () => {
 
   it("Should crash if duplicate ASC name is detected", async () => {
     const checkpoints: Checkpoints = {};
-    const cp1: Checkpoint = cleanupMutableData(new CheckpointImpl(toMap({
-      key: "data",
-      key3: "data3"
-    })), 34251);
+    const cp1: Checkpoint = cleanupMutableData(
+      new CheckpointImpl(new Map([["key", "data"],
+        ["key3", "data3"]])), 34251);
     registerASC(cp1, "asc1", {
       creator: "123",
       txId: "",
@@ -273,21 +261,17 @@ describe("Checkpoint", () => {
     assert.deepEqual(cp, {
       timestamp: 12345,
       metadata: new Map<string, string>(),
-      asa: toMap({
-        "My ASA": {
-          creator: "ASA deployer address",
-          txId: "",
-          assetIndex: 0,
-          confirmedRound: 0
-        }
-      }),
-      asc: toMap({
-        "My ASC": {
-          creator: "ASC deployer address",
-          txId: "",
-          confirmedRound: 0
-        }
-      })
+      asa: new Map([["My ASA", {
+        creator: "ASA deployer address",
+        txId: "",
+        assetIndex: 0,
+        confirmedRound: 0
+      }]]),
+      asc: new Map([["My ASC", {
+        creator: "ASC deployer address",
+        txId: "",
+        confirmedRound: 0
+      }]])
     });
   });
 });
@@ -327,30 +311,26 @@ describe("CheckpointRepoImpl", () => {
     const cp1: Checkpoints = {
       network1: {
         timestamp: 1,
-        metadata: toMap({ "key 1": "data 1" }),
-        asa: toMap({
-          "ASA name": {
-            creator: "ASA creator 123",
-            txId: "",
-            assetIndex: 0,
-            confirmedRound: 0
-          }
-        }),
+        metadata: new Map([["key 1", "data 1"]]),
+        asa: new Map([["ASA name", {
+          creator: "ASA creator 123",
+          txId: "",
+          assetIndex: 0,
+          confirmedRound: 0
+        }]]),
         asc: new Map<string, ASCInfo>()
       }
     };
     const cp2: Checkpoints = {
       network2: {
         timestamp: 2,
-        metadata: toMap({ "key 2": "data 2" }),
-        asa: toMap({
-          "ASA name": {
-            creator: "ASA creator 123",
-            txId: "",
-            assetIndex: 0,
-            confirmedRound: 0
-          }
-        }),
+        metadata: new Map([["key 2", "data 2"]]),
+        asa: new Map([["ASA name", {
+          creator: "ASA creator 123",
+          txId: "",
+          assetIndex: 0,
+          confirmedRound: 0
+        }]]),
         asc: new Map<string, ASCInfo>()
       }
     };
@@ -372,7 +352,7 @@ describe("CheckpointRepoImpl", () => {
     assert.deepEqual(cp, {
       myNetworkName: {
         timestamp: 951,
-        metadata: toMap({ key: "data" }),
+        metadata: new Map([["key", "data"]]),
         asa: new Map<string, ASAInfo>(),
         asc: new Map<string, ASCInfo>()
       }
@@ -390,13 +370,13 @@ describe("CheckpointRepoImpl", () => {
     assert.deepEqual(cp, {
       myNetworkName: {
         timestamp: 531,
-        metadata: toMap({ key: "data" }),
+        metadata: new Map([["key", "data"]]),
         asa: new Map<string, ASAInfo>(),
         asc: new Map<string, ASCInfo>()
       },
       myNetworkName2: {
         timestamp: 201,
-        metadata: toMap({ key2: "data2" }),
+        metadata: new Map([["key2", "data2"]]),
         asa: new Map<string, ASAInfo>(),
         asc: new Map<string, ASCInfo>()
       }
@@ -416,15 +396,13 @@ describe("CheckpointRepoImpl", () => {
     assert.deepEqual(cpData.precedingCP, {
       network1: {
         timestamp: 123,
-        metadata: toMap({ "metadata key": "metadata value" }),
-        asa: toMap({
-          "ASA name": {
-            creator: "ASA creator 123",
-            txId: "",
-            assetIndex: 0,
-            confirmedRound: 0
-          }
-        }),
+        metadata: new Map([["metadata key", "metadata value"]]),
+        asa: new Map([["ASA name", {
+          creator: "ASA creator 123",
+          txId: "",
+          assetIndex: 0,
+          confirmedRound: 0
+        }]]),
         asc: new Map<string, ASCInfo>()
       }
     });
@@ -445,17 +423,15 @@ describe("CheckpointRepoImpl", () => {
         timestamp: 123,
         metadata: new Map<string, string>(),
         asa: new Map<string, ASAInfo>(),
-        asc: toMap({
-          "ASC name": {
-            creator: "ASC creator 951",
-            txId: "",
-            confirmedRound: 0
-          }
-        })
+        asc: new Map([["ASC name", {
+          creator: "ASC creator 951",
+          txId: "",
+          confirmedRound: 0
+        }]])
       },
       "net 0195": {
         timestamp: 123,
-        metadata: toMap({ "1241 key": "345 value" }),
+        metadata: new Map([["1241 key", "345 value"]]),
         asa: new Map<string, ASAInfo>(),
         asc: new Map<string, ASCInfo>()
       }
@@ -466,7 +442,7 @@ describe("CheckpointRepoImpl", () => {
     const cp1: Checkpoints = {
       network1: {
         timestamp: 1,
-        metadata: toMap({ "key 1": "data 1" }),
+        metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, ASAInfo>(),
         asc: new Map<string, ASCInfo>()
       }
@@ -474,7 +450,7 @@ describe("CheckpointRepoImpl", () => {
     const cp2: Checkpoints = {
       network2: {
         timestamp: 2,
-        metadata: toMap({ "key 2": "data 2" }),
+        metadata: new Map([["key 2", "data 2"]]),
         asa: new Map<string, ASAInfo>(),
         asc: new Map<string, ASCInfo>()
       }
@@ -486,13 +462,13 @@ describe("CheckpointRepoImpl", () => {
     assert.deepEqual(cp, {
       network1: {
         timestamp: 1,
-        metadata: toMap({ "key 1": "data 1" }),
+        metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, ASAInfo>(),
         asc: new Map<string, ASCInfo>()
       },
       network2: {
         timestamp: 2,
-        metadata: toMap({ "key 2": "data 2" }),
+        metadata: new Map([["key 2", "data 2"]]),
         asa: new Map<string, ASAInfo>(),
         asc: new Map<string, ASCInfo>()
       }
@@ -503,7 +479,7 @@ describe("CheckpointRepoImpl", () => {
     const cp1: Checkpoints = {
       network1: {
         timestamp: 1,
-        metadata: toMap({ "key 1": "data 1" }),
+        metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, ASAInfo>(),
         asc: new Map<string, ASCInfo>()
       }
@@ -512,14 +488,12 @@ describe("CheckpointRepoImpl", () => {
       network1: {
         timestamp: 2,
         metadata: new Map<string, string>(),
-        asa: toMap({
-          "asa key": {
-            creator: "asa creator",
-            txId: "",
-            assetIndex: 0,
-            confirmedRound: 0
-          }
-        }),
+        asa: new Map([["asa key", {
+          creator: "asa creator",
+          txId: "",
+          assetIndex: 0,
+          confirmedRound: 0
+        }]]),
         asc: new Map<string, ASCInfo>()
       }
     };
@@ -532,15 +506,13 @@ describe("CheckpointRepoImpl", () => {
     assert.deepEqual(cpData.precedingCP, {
       network1: {
         timestamp: 124,
-        metadata: toMap({ "key 1": "data 1" }),
-        asa: toMap({
-          "asa key": {
-            creator: "asa creator",
-            txId: "",
-            assetIndex: 0,
-            confirmedRound: 0
-          }
-        }),
+        metadata: new Map([["key 1", "data 1"]]),
+        asa: new Map([["asa key", {
+          creator: "asa creator",
+          txId: "",
+          assetIndex: 0,
+          confirmedRound: 0
+        }]]),
         asc: new Map<string, ASCInfo>()
       }
     });
@@ -548,29 +520,26 @@ describe("CheckpointRepoImpl", () => {
       network1: {
         timestamp: 124,
         metadata: new Map<string, string>(),
-        asa: toMap({
-          "asa key": {
-            creator: "asa creator",
-            txId: "",
-            assetIndex: 0,
-            confirmedRound: 0
-          }
-        }),
+        asa: new Map([["asa key", {
+          creator: "asa creator",
+          txId: "",
+          assetIndex: 0,
+          confirmedRound: 0
+        }
+        ]]),
         asc: new Map<string, ASCInfo>()
       }
     });
     assert.deepEqual(cpData.allCPs, {
       network1: {
         timestamp: 124,
-        metadata: toMap({ "key 1": "data 1" }),
-        asa: toMap({
-          "asa key": {
-            creator: "asa creator",
-            txId: "",
-            assetIndex: 0,
-            confirmedRound: 0
-          }
-        }),
+        metadata: new Map([["key 1", "data 1"]]),
+        asa: new Map([["asa key", {
+          creator: "asa creator",
+          txId: "",
+          assetIndex: 0,
+          confirmedRound: 0
+        }]]),
         asc: new Map<string, ASCInfo>()
       }
     });
@@ -580,15 +549,14 @@ describe("CheckpointRepoImpl", () => {
     const cp1: Checkpoints = {
       network1: {
         timestamp: 1,
-        metadata: toMap({ "key 1": "data 1" }),
+        metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, ASAInfo>(),
-        asc: toMap({
-          "ASC key1": {
-            creator: "ASC creator1",
-            txId: "",
-            confirmedRound: 0
-          }
-        })
+        asc: new Map([["ASC key1", {
+          creator: "ASC creator1",
+          txId: "",
+          confirmedRound: 0
+        }
+        ]])
       }
     };
     const cp2: Checkpoints = {
@@ -604,13 +572,12 @@ describe("CheckpointRepoImpl", () => {
         timestamp: 8,
         metadata: new Map<string, string>(),
         asa: new Map<string, ASAInfo>(),
-        asc: toMap({
-          "ASC key": {
-            creator: "ASC creator",
-            txId: "",
-            confirmedRound: 0
-          }
-        })
+        asc: new Map([["ASC key", {
+          creator: "ASC creator",
+          txId: "",
+          confirmedRound: 0
+        }
+        ]])
       }
     };
     const cpData = new CheckpointRepoImpl()
@@ -620,33 +587,29 @@ describe("CheckpointRepoImpl", () => {
     assert.deepEqual(cpData.allCPs, {
       network1: {
         timestamp: 8,
-        metadata: toMap({ "key 1": "data 1" }),
+        metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, ASAInfo>(),
-        asc: toMap({
-          "ASC key": {
-            creator: "ASC creator",
-            txId: "",
-            confirmedRound: 0
-          },
-          "ASC key1": {
-            creator: "ASC creator1",
-            txId: "",
-            confirmedRound: 0
-          }
-        })
+        asc: new Map([["ASC key", {
+          creator: "ASC creator",
+          txId: "",
+          confirmedRound: 0
+        }],
+        ["ASC key1", {
+          creator: "ASC creator1",
+          txId: "",
+          confirmedRound: 0
+        }]])
       }
     });
     cpData.precedingCP.network1.timestamp = 124;
     assert.deepEqual(cpData.precedingCP, {
       network1: {
         asa: new Map<string, ASAInfo>(),
-        asc: toMap({
-          "ASC key": {
-            creator: "ASC creator",
-            txId: "",
-            confirmedRound: 0
-          }
-        }),
+        asc: new Map([["ASC key", {
+          creator: "ASC creator",
+          txId: "",
+          confirmedRound: 0
+        }]]),
         metadata: new Map<string, string>(),
         timestamp: 124
       }
@@ -655,13 +618,11 @@ describe("CheckpointRepoImpl", () => {
     assert.deepEqual(cpData.strippedCP, {
       network1: {
         asa: new Map<string, ASAInfo>(),
-        asc: toMap({
-          "ASC key": {
-            creator: "ASC creator",
-            txId: "",
-            confirmedRound: 0
-          }
-        }),
+        asc: new Map([["ASC key", {
+          creator: "ASC creator",
+          txId: "",
+          confirmedRound: 0
+        }]]),
         metadata: new Map<string, string>(),
         timestamp: 124
       }
@@ -672,7 +633,7 @@ describe("CheckpointRepoImpl", () => {
     const cp1: Checkpoints = {
       network1: {
         timestamp: 1,
-        metadata: toMap({ "key 1": "data 1" }),
+        metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, ASAInfo>(),
         asc: new Map<string, ASCInfo>()
       }
@@ -680,7 +641,7 @@ describe("CheckpointRepoImpl", () => {
     const cp2: Checkpoints = {
       network4: {
         timestamp: 4,
-        metadata: toMap({ "metadata 4 key": "metadata value" }),
+        metadata: new Map([["metadata 4 key", "metadata value"]]),
         asa: new Map<string, ASAInfo>(),
         asc: new Map<string, ASCInfo>()
       }
@@ -717,35 +678,31 @@ describe("CheckpointRepoImpl", () => {
       assert.deepEqual(cpData.allCPs, {
         network1: {
           timestamp: 1111,
-          metadata: toMap({
-            "key 1": "data 1",
-            "metadata key": "metadata value"
-          }),
-          asa: toMap({
-            "ASA name": {
-              creator: "ASA creator 123",
-              txId: "",
-              assetIndex: 0,
-              confirmedRound: 0
-            }
-          }),
-          asc: toMap({
-            "ASC name": {
-              creator: "ASC creator 951",
-              txId: "",
-              confirmedRound: 0
-            }
-          })
+          metadata: new Map([["key 1", "data 1"],
+            ["metadata key", "metadata value"]]),
+          asa: new Map([["ASA name", {
+            creator: "ASA creator 123",
+            txId: "",
+            assetIndex: 0,
+            confirmedRound: 0
+          }
+          ]]),
+          asc: new Map([["ASC name", {
+            creator: "ASC creator 951",
+            txId: "",
+            confirmedRound: 0
+          }
+          ]])
         },
         network4: {
           timestamp: 4,
-          metadata: toMap({ "metadata 4 key": "metadata value" }),
+          metadata: new Map([["metadata 4 key", "metadata value"]]),
           asa: new Map<string, ASAInfo>(),
           asc: new Map<string, ASCInfo>()
         },
         "net 0195": {
           timestamp: 195,
-          metadata: toMap({ "1241 key": "345 value" }),
+          metadata: new Map([["1241 key", "345 value"]]),
           asa: new Map<string, ASAInfo>(),
           asc: new Map<string, ASCInfo>()
         }
@@ -753,29 +710,24 @@ describe("CheckpointRepoImpl", () => {
       assert.deepEqual(cpData.precedingCP, {
         network1: {
           timestamp: 1111,
-          metadata: toMap({
-            "key 1": "data 1",
-            "metadata key": "metadata value"
-          }),
-          asa: toMap({
-            "ASA name": {
-              creator: "ASA creator 123",
-              txId: "",
-              assetIndex: 0,
-              confirmedRound: 0
-            }
-          }),
-          asc: toMap({
-            "ASC name": {
-              creator: "ASC creator 951",
-              txId: "",
-              confirmedRound: 0
-            }
-          })
+          metadata: new Map([["key 1", "data 1"],
+            ["metadata key", "metadata value"]]),
+          asa: new Map([["ASA name", {
+            creator: "ASA creator 123",
+            txId: "",
+            assetIndex: 0,
+            confirmedRound: 0
+          }]]),
+          asc: new Map([["ASC name", {
+            creator: "ASC creator 951",
+            txId: "",
+            confirmedRound: 0
+          }
+          ]])
         },
         "net 0195": {
           timestamp: 195,
-          metadata: toMap({ "1241 key": "345 value" }),
+          metadata: new Map([["1241 key", "345 value"]]),
           asa: new Map<string, ASAInfo>(),
           asc: new Map<string, ASCInfo>()
         }
@@ -783,29 +735,23 @@ describe("CheckpointRepoImpl", () => {
       assert.deepEqual(cpData.strippedCP, {
         network1: {
           timestamp: 1111,
-          metadata: toMap({
-            "key 1": "data 1",
-            "metadata key": "metadata value"
-          }),
-          asa: toMap({
-            "ASA name": {
-              creator: "ASA creator 123",
-              txId: "",
-              assetIndex: 0,
-              confirmedRound: 0
-            }
-          }),
-          asc: toMap({
-            "ASC name": {
-              creator: "ASC creator 951",
-              txId: "",
-              confirmedRound: 0
-            }
-          })
+          metadata: new Map([["key 1", "data 1"],
+            ["metadata key", "metadata value"]]),
+          asa: new Map([["ASA name", {
+            creator: "ASA creator 123",
+            txId: "",
+            assetIndex: 0,
+            confirmedRound: 0
+          }]]),
+          asc: new Map([["ASC name", {
+            creator: "ASC creator 951",
+            txId: "",
+            confirmedRound: 0
+          }]])
         },
         "net 0195": {
           timestamp: 195,
-          metadata: toMap({ "1241 key": "345 value" }),
+          metadata: new Map([["1241 key", "345 value"]]),
           asa: new Map<string, ASAInfo>(),
           asc: new Map<string, ASCInfo>()
         }
