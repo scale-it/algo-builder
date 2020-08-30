@@ -176,18 +176,27 @@ export function persistCheckpoint (scriptName: string, checkpoint: Checkpoints):
   );
 }
 
+// http://xahlee.info/js/js_object_to_map_datatype.html
+export function toMap <T> (obj: {[name: string]: T}): Map<string, T> {
+  const mp = new Map();
+  Object.keys(obj).forEach(k => { mp.set(k, obj[k]); });
+  return mp;
+};
+
+function convertCPValsToMaps (cpWithObjects: Checkpoint): Checkpoint {
+  cpWithObjects.asa = toMap(cpWithObjects.asa as any);
+  cpWithObjects.asc = toMap(cpWithObjects.asc as any);
+  cpWithObjects.metadata = toMap(cpWithObjects.metadata as any);
+  return cpWithObjects;
+}
+
 export function loadCheckpointByCPName (checkpointName: string): Checkpoints {
   // Some structures are objects, some others are maps. Oh why.
-  const loaded = loadFromYamlFileSilent(checkpointName, { mapAsMap: true });
-  const obj: Checkpoints = {};
-  for (const [key, checkpointMap] of loaded) {
-    const cp: any = {};
-    for (const [cpKey, cpVal] of checkpointMap.entries()) {
-      cp[cpKey] = cpVal;
-    }
-    obj[key] = cp;
+  const checkpoints = loadFromYamlFileSilent(checkpointName, { mapAsMap: false });
+  for (const k of Object.keys(checkpoints)) {
+    convertCPValsToMaps(checkpoints[k]);
   }
-  return obj;
+  return checkpoints;
 }
 
 export function loadCheckpoint (scriptName: string): Checkpoints {

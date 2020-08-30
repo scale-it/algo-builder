@@ -180,4 +180,42 @@ describe("AlgobDeployerImpl", () => {
       "ASC_key"
     );
   });
+
+  it("Should return empty ASA map on no CP", async () => {
+    const cpData = new CheckpointRepoImpl();
+    const deployer = new AlgobDeployerImpl(mkAlgobEnv("network 123"), cpData, {}, new AlgoOperatorDryRunImpl());
+    assert.deepEqual(deployer.asa, new Map());
+  });
+
+  it("Should return empty ASA map on no CP; with ASA in other net", async () => {
+    const cpData = new CheckpointRepoImpl();
+    const deployer = new AlgobDeployerImpl(
+      mkAlgobEnv("network 123"),
+      cpData,
+      {},
+      new AlgoOperatorDryRunImpl());
+    cpData.registerASA("hi", "hi123", {
+      creator: "",
+      txId: "",
+      confirmedRound: 0,
+      assetIndex: 1337
+    });
+    assert.deepEqual(deployer.asa, new Map());
+  });
+
+  it("Should return correct ASA in ASA map", async () => {
+    const cpData = new CheckpointRepoImpl();
+    const deployer = new AlgobDeployerImpl(
+      mkAlgobEnv("network 123"),
+      cpData,
+      { ASA_key: mkASA() },
+      new AlgoOperatorDryRunImpl());
+    await deployer.deployASA("ASA_key", { creator: deployer.accounts[0] });
+    assert.deepEqual(deployer.asa, new Map([["ASA_key", {
+      creator: 'addr-1-get-address-dry-run',
+      txId: 'tx-id-dry-run',
+      assetIndex: -1,
+      confirmedRound: -1
+    }]]));
+  });
 });
