@@ -1,0 +1,10 @@
+default:
+  timestamp: 1598820148834
+  metadata: {}
+  asa:
+    tesla:
+      creator: WHVQXVVCQAD7WX3HHFKNVUL3MOANX3BYXXMEEJEJWOZNRXJNTN7LTNPSTY
+      txId: 4MZ4RG7A73LA7RLLZT4YPZWJS3DHYB6NEUYZM4S4IPEXWYVIFCGA
+      assetIndex: 176
+      confirmedRound: 59393
+  asc: {}

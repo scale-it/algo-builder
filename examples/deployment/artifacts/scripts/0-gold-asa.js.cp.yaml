@@ -1,0 +1,10 @@
+default:
+  timestamp: 1598818599290
+  metadata: {}
+  asa:
+    gold:
+      creator: M7VR2MGHI35EG2NMYOF3X337636PIOFVSP2HNIFUKAG7WW6BDWDCA3E2DA
+      txId: WDWLNPSLSUK3737TWUUQ7AVDJCBDDOPMK3YMHFBUHZ37B3Z46WSA
+      assetIndex: 171
+      confirmedRound: 59008
+  asc: {}
