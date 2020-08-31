@@ -106,7 +106,9 @@ describe("Checkpoint", () => {
     registerASC(netCheckpoint, "asc1", {
       creator: "536",
       txId: "",
-      confirmedRound: 0
+      confirmedRound: 0,
+      contractAddress: "addr-3",
+      logicSignature: "sig-1"
     });
     appendToCheckpoint(checkpoints, "network12345", netCheckpoint);
     assert.deepEqual(checkpoints, {
@@ -123,7 +125,9 @@ describe("Checkpoint", () => {
         asc: new Map([["asc1", {
           creator: "536",
           txId: "",
-          confirmedRound: 0
+          confirmedRound: 0,
+          contractAddress: "addr-3",
+          logicSignature: "sig-1"
         }]])
       }
     });
@@ -161,7 +165,9 @@ describe("Checkpoint", () => {
         asc: new Map([["asc1", {
           creator: "536",
           txId: "",
-          confirmedRound: 0
+          confirmedRound: 0,
+          contractAddress: "addr-3",
+          logicSignature: "sig-1"
         }]])
       }
     });
@@ -202,14 +208,18 @@ describe("Checkpoint", () => {
     registerASC(cp1, "asc1", {
       creator: "123",
       txId: "",
-      confirmedRound: 0
+      confirmedRound: 0,
+      contractAddress: "addr-3",
+      logicSignature: "sig-1"
     });
     appendToCheckpoint(checkpoints, "network12345", cp1);
     const cp2: Checkpoint = cleanupMutableData(new CheckpointImpl(), 53521);
     registerASC(cp2, "asc1", {
       creator: "36506",
       txId: "",
-      confirmedRound: 0
+      confirmedRound: 0,
+      contractAddress: "addr-3",
+      logicSignature: "sig-1"
     });
     expectBuilderError(
       () => appendToCheckpoint(checkpoints, "network12345", cp2),
@@ -256,7 +266,9 @@ describe("Checkpoint", () => {
       {
         creator: "ASC deployer address",
         txId: "",
-        confirmedRound: 0
+        confirmedRound: 0,
+        contractAddress: "addr-3",
+        logicSignature: "sig-1"
       });
     assert.deepEqual(cp, {
       timestamp: 12345,
@@ -270,7 +282,9 @@ describe("Checkpoint", () => {
       asc: new Map([["My ASC", {
         creator: "ASC deployer address",
         txId: "",
-        confirmedRound: 0
+        confirmedRound: 0,
+        contractAddress: "addr-3",
+        logicSignature: "sig-1"
       }]])
     });
   });
@@ -413,7 +427,9 @@ describe("CheckpointRepoImpl", () => {
       .registerASC("network1", "ASC name", {
         creator: "ASC creator 951",
         txId: "",
-        confirmedRound: 0
+        confirmedRound: 0,
+        contractAddress: "addr-3",
+        logicSignature: "sig-1"
       })
       .putMetadata("net 0195", "1241 key", "345 value");
     cpData.precedingCP.network1.timestamp = 123;
@@ -426,7 +442,9 @@ describe("CheckpointRepoImpl", () => {
         asc: new Map([["ASC name", {
           creator: "ASC creator 951",
           txId: "",
-          confirmedRound: 0
+          confirmedRound: 0,
+          contractAddress: "addr-3",
+          logicSignature: "sig-1"
         }]])
       },
       "net 0195": {
@@ -554,7 +572,9 @@ describe("CheckpointRepoImpl", () => {
         asc: new Map([["ASC key1", {
           creator: "ASC creator1",
           txId: "",
-          confirmedRound: 0
+          confirmedRound: 0,
+          contractAddress: "addr-3",
+          logicSignature: "sig-1"
         }
         ]])
       }
@@ -575,7 +595,9 @@ describe("CheckpointRepoImpl", () => {
         asc: new Map([["ASC key", {
           creator: "ASC creator",
           txId: "",
-          confirmedRound: 0
+          confirmedRound: 0,
+          contractAddress: "addr-3",
+          logicSignature: "sig-1"
         }
         ]])
       }
@@ -592,12 +614,16 @@ describe("CheckpointRepoImpl", () => {
         asc: new Map([["ASC key", {
           creator: "ASC creator",
           txId: "",
-          confirmedRound: 0
+          confirmedRound: 0,
+          contractAddress: "addr-3",
+          logicSignature: "sig-1"
         }],
         ["ASC key1", {
           creator: "ASC creator1",
           txId: "",
-          confirmedRound: 0
+          confirmedRound: 0,
+          contractAddress: "addr-3",
+          logicSignature: "sig-1"
         }]])
       }
     });
@@ -608,7 +634,9 @@ describe("CheckpointRepoImpl", () => {
         asc: new Map([["ASC key", {
           creator: "ASC creator",
           txId: "",
-          confirmedRound: 0
+          confirmedRound: 0,
+          contractAddress: "addr-3",
+          logicSignature: "sig-1"
         }]]),
         metadata: new Map<string, string>(),
         timestamp: 124
@@ -621,7 +649,9 @@ describe("CheckpointRepoImpl", () => {
         asc: new Map([["ASC key", {
           creator: "ASC creator",
           txId: "",
-          confirmedRound: 0
+          confirmedRound: 0,
+          contractAddress: "addr-3",
+          logicSignature: "sig-1"
         }]]),
         metadata: new Map<string, string>(),
         timestamp: 124
@@ -660,7 +690,9 @@ describe("CheckpointRepoImpl", () => {
       .registerASC("network1", "ASC name", {
         creator: "ASC creator 951",
         txId: "",
-        confirmedRound: 0
+        confirmedRound: 0,
+        contractAddress: "addr-3",
+        logicSignature: "sig-1"
       });
     cpData.allCPs.network1.timestamp = 1111;
     cpData.allCPs.network4.timestamp = 4;
@@ -690,7 +722,9 @@ describe("CheckpointRepoImpl", () => {
           asc: new Map([["ASC name", {
             creator: "ASC creator 951",
             txId: "",
-            confirmedRound: 0
+            confirmedRound: 0,
+            contractAddress: "addr-3",
+            logicSignature: "sig-1"
           }
           ]])
         },
@@ -721,7 +755,9 @@ describe("CheckpointRepoImpl", () => {
           asc: new Map([["ASC name", {
             creator: "ASC creator 951",
             txId: "",
-            confirmedRound: 0
+            confirmedRound: 0,
+            contractAddress: "addr-3",
+            logicSignature: "sig-1"
           }
           ]])
         },
@@ -735,6 +771,7 @@ describe("CheckpointRepoImpl", () => {
       assert.deepEqual(cpData.strippedCP, {
         network1: {
           timestamp: 1111,
+
           metadata: new Map([["key 1", "data 1"],
             ["metadata key", "metadata value"]]),
           asa: new Map([["ASA name", {
@@ -746,7 +783,9 @@ describe("CheckpointRepoImpl", () => {
           asc: new Map([["ASC name", {
             creator: "ASC creator 951",
             txId: "",
-            confirmedRound: 0
+            confirmedRound: 0,
+            contractAddress: "addr-3",
+            logicSignature: "sig-1"
           }]])
         },
         "net 0195": {
@@ -778,7 +817,9 @@ describe("CheckpointRepoImpl", () => {
       .registerASC("network1", "ASC name", {
         creator: "ASC creator 951",
         txId: "",
-        confirmedRound: 0
+        confirmedRound: 0,
+        contractAddress: "addr-3",
+        logicSignature: "sig-1"
       });
     assert.isTrue(cpData.isDefined("network1", "ASA name"));
     assert.isTrue(cpData.isDefined("network1", "ASC name"));

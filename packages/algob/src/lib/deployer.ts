@@ -10,7 +10,9 @@ import {
   ASADefs,
   ASADeploymentFlags,
   ASAInfo,
+  ASCDeploymentFlags,
   ASCInfo,
+  ASCPaymentFlags,
   CheckpointRepo
 } from "../types";
 import { mkAccountIndex } from "./account";
@@ -85,13 +87,11 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     return asaInfo;
   }
 
-  async deployASC (name: string, source: string, account: Account): Promise<ASCInfo> {
+  async deployASC (name: string, scParams: Object, flags: ASCDeploymentFlags,
+    payFlags: ASCPaymentFlags): Promise<ASCInfo> {
+    const creator = flags.funder;
     this.assertNoAsset(name);
-    const ascInfo = {
-      creator: account.addr + "-get-address-dry-run",
-      txId: "tx-id-dry-run",
-      confirmedRound: -1
-    };
+    const ascInfo = await this.algoOp.deployASC(name, scParams, flags, payFlags);
     this.cpData.registerASC(this.networkName, name, ascInfo);
     return ascInfo;
   }
@@ -149,7 +149,8 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
     });
   }
 
-  async deployASC (_name: string, _source: string, _account: Account): Promise<ASCInfo> {
+  async deployASC (_name: string, scParams: Object, flags: ASCDeploymentFlags,
+    payFlags: ASCPaymentFlags): Promise<ASCInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployASC"
     });

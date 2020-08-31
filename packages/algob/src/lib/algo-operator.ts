@@ -1,4 +1,5 @@
 import algosdk from "algosdk";
+import { TextEncoder } from "util";
 
 import { createClient } from "../lib/driver";
 import {
@@ -6,8 +7,13 @@ import {
   ASADef,
   ASADeploymentFlags,
   ASAInfo,
+  ASCCache,
+  ASCDeploymentFlags,
+  ASCInfo,
+  ASCPaymentFlags,
   Network
 } from "../types";
+import { CompileOp } from "./compile";
 import * as tx from "./tx";
 
 const confirmedRound = "confirmed-round";
@@ -19,14 +25,17 @@ export function createAlgoOperator (network: Network): AlgoOperator {
 export interface AlgoOperator {
   algodClient: algosdk.Algodv2
   deployASA: (name: string, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account) => Promise<ASAInfo>
+  deployASC: (programb64: string, scParams: object, flags: ASCDeploymentFlags, payFlags: ASCPaymentFlags,
+  ) => Promise<ASCInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
   algodClient: algosdk.Algodv2;
-
+  compileOp: CompileOp;
   constructor (algocl: algosdk.Algodv2) {
     this.algodClient = algocl;
+    this.compileOp = new CompileOp(this.algodClient);
   }
 
   // Source:
@@ -59,5 +68,46 @@ export class AlgoOperatorImpl implements AlgoOperator {
       assetIndex: txConfirmation["asset-index"],
       confirmedRound: txConfirmation[confirmedRound]
     };
+  }
+
+  async deployASC (name: string, scParams: object, flags: ASCDeploymentFlags, payFlags: ASCPaymentFlags
+  ): Promise<ASCInfo> {
+    console.log("Deploying ASC:", name);
+    const result: ASCCache = await this.ensureCompiled(name, false);
+    const programb64 = result.compiled;
+    const program = new Uint8Array(Buffer.from(programb64, "base64"));
+    const lsig = algosdk.makeLogicSig(program, scParams);
+
+    const params = await tx.getSuggestedParamsWithUserDefaults(this.algodClient, payFlags);
+
+    // ASC1 signed by funder
+    lsig.sign(flags.funder.sk);
+    const funder = flags.funder.addr;
+    const contractAddress = lsig.address();
+
+    // Fund smart contract
+    console.log("Funding Contract:", contractAddress);
+    const encoder = new TextEncoder();
+    const tran = algosdk.makePaymentTxnWithSuggestedParams(funder, contractAddress,
+      flags.fundingMicroAlgo, payFlags.closeToRemainder,
+      payFlags.note ? encoder.encode(payFlags.note) : undefined,
+      params);
+
+    const signedTxn = tran.signTxn(flags.funder.sk);
+
+    const tranInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
+
+    const confirmedTxn = await this.waitForConfirmation(tranInfo.txId);
+    return {
+      creator: flags.funder.addr,
+      contractAddress: contractAddress,
+      txId: tranInfo.txId,
+      logicSignature: lsig,
+      confirmedRound: confirmedTxn[confirmedRound]
+    };
+  }
+
+  private async ensureCompiled (name: string, force: boolean): Promise<ASCCache> {
+    return await this.compileOp.ensureCompiled(name, force);
   }
 }
