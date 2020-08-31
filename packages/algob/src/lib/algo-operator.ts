@@ -78,7 +78,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const program = new Uint8Array(Buffer.from(programb64, "base64"));
     const lsig = algosdk.makeLogicSig(program, scParams);
 
-    const params = await tx.getSuggestedParamsWithUserDefaultsASC(this.algodClient, payFlags);
+    const params = await tx.getSuggestedParamsWithUserDefaults(this.algodClient, payFlags);
 
     // ASC1 signed by funder
     lsig.sign(flags.funder.sk);

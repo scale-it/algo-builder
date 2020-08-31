@@ -344,6 +344,7 @@ export type ASADef = z.infer<typeof ASADefSchema>;
 export type ASADefs = z.infer<typeof ASADefsSchema>;
 
 export interface DeploymentFlags {
+  feePerByte?: number
   totalFee?: number
   firstValid?: number
   validRounds?: number
@@ -351,7 +352,6 @@ export interface DeploymentFlags {
 
 export interface ASADeploymentFlags extends DeploymentFlags {
   creator: Account
-  feePerByte?: number
 }
 
 export interface ASCPaymentFlags extends DeploymentFlags {

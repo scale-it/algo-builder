@@ -4,7 +4,6 @@ import { TextEncoder } from "util";
 import {
   ASADef,
   ASADeploymentFlags,
-  ASCPaymentFlags,
   DeploymentFlags
 } from "../types";
 
@@ -18,9 +17,12 @@ export async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.Sugges
   return params;
 }
 
-async function getSuggestedParamsWithUserDefaults (
+export async function getSuggestedParamsWithUserDefaults (
   algocl: tx.Algodv2, userDefaults: DeploymentFlags): Promise<tx.SuggestedParams> {
   const suggested = await getSuggestedParams(algocl);
+  suggested.flatFee = userDefaults.feePerByte === undefined
+    ? suggested.flatFee
+    : !userDefaults.feePerByte;
   suggested.fee = userDefaults.totalFee === undefined
     ? suggested.fee
     : userDefaults.totalFee;
@@ -31,20 +33,6 @@ async function getSuggestedParamsWithUserDefaults (
     ? suggested.lastRound
     : userDefaults.firstValid + userDefaults.validRounds;
   return suggested;
-}
-
-async function getSuggestedParamsWithUserDefaultsASA (
-  algocl: tx.Algodv2, userDefaults: ASADeploymentFlags): Promise<tx.SuggestedParams> {
-  const suggested = await getSuggestedParamsWithUserDefaults(algocl, userDefaults);
-  suggested.flatFee = userDefaults.feePerByte === undefined
-    ? suggested.flatFee
-    : !userDefaults.feePerByte;
-  return suggested;
-}
-
-export async function getSuggestedParamsWithUserDefaultsASC (
-  algocl: tx.Algodv2, userDefaults: ASCPaymentFlags): Promise<tx.SuggestedParams> {
-  return await getSuggestedParamsWithUserDefaults(algocl, userDefaults);
 }
 
 export async function makeAssetCreateTxn (
@@ -66,6 +54,6 @@ export async function makeAssetCreateTxn (
     name,
     asaDef.url,
     asaDef.metadataHash,
-    await getSuggestedParamsWithUserDefaultsASA(algocl, flags)
+    await getSuggestedParamsWithUserDefaults(algocl, flags)
   );
 }
