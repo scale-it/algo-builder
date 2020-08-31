@@ -363,7 +363,7 @@ export interface ASCPaymentFlags extends DeploymentFlags {
 
 export interface ASCDeploymentFlags {
   funder: Account
-  microAlgo: number
+  fundingMicroAlgo: number
 }
 
 export interface AssetScriptMap {
