@@ -184,7 +184,7 @@ describe("AlgobDeployerImpl", () => {
     const deployer = new AlgobDeployerImpl(mkAlgobEnv("network 123"), cpData, {}, new AlgoOperatorDryRunImpl());
     await deployer.deployASC("ASC_key", [], { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
     await expectBuilderErrorAsync(
-      async () => await deployer.deployASC("ASgit C_key", "new_value", { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {}),
+      async () => await deployer.deployASC("ASC_key", "new_value", { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {}),
       ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT,
       "ASC_key"
     );
