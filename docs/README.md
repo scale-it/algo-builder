@@ -1,7 +1,7 @@
 # Algorand Builder docs
 
 ## Help
-Help prints information about all top-level task:
+Help prints information about top-level tasks:
 ```
 algob help
 ```
@@ -16,7 +16,7 @@ algob -h deploy
 
 ## Project initialization
 To start using `algob` you must first create a project similar to what yarn and npm would do.
-To initialize a project you must run this command:
+It can be done using this command:
 ```
 algob init my-project
 ```
