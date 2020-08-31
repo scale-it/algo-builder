@@ -389,6 +389,7 @@ export interface AlgobDeployer {
   */
   isDefined: (name: string) => boolean
   asa: Map<string, ASAInfo>
+  asc: Map<string, ASCInfo>
 
   // Not present in the spec:
   algodClient: algosdk.Algodv2
