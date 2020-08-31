@@ -73,7 +73,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   async deployASC (name: string, scParams: object, flags: ASCDeploymentFlags, payFlags: ASCPaymentFlags
   ): Promise<ASCInfo> {
     console.log("Deploying ASC:", name);
-    const result: ASCCache = await this.ensuredCompiled(name, false);
+    const result: ASCCache = await this.ensureCompiled(name, false);
     const programb64 = result.compiled;
     const program = new Uint8Array(Buffer.from(programb64, "base64"));
     const lsig = algosdk.makeLogicSig(program, scParams);
@@ -107,7 +107,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     };
   }
 
-  private async ensuredCompiled (name: string, force: boolean): Promise<ASCCache> {
-    return await this.compileOp.ensureCompiled(name, false);
+  private async ensureCompiled (name: string, force: boolean): Promise<ASCCache> {
+    return await this.compileOp.ensureCompiled(name, force);
   }
 }
