@@ -28,7 +28,6 @@ export interface AlgoOperator {
   deployASC: (programb64: string, scParams: object, flags: ASCDeploymentFlags, payFlags: ASCPaymentFlags,
   ) => Promise<ASCInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
-  ensuredCompiled: (name: string, force: boolean) => Promise<ASCCache>
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -108,7 +107,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     };
   }
 
-  async ensuredCompiled (name: string, force: boolean): Promise<ASCCache> {
+  private async ensuredCompiled (name: string, force: boolean): Promise<ASCCache> {
     return await this.compileOp.ensureCompiled(name, false);
   }
 }
