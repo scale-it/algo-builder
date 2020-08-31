@@ -18,10 +18,9 @@ exports.printCreatedAsset = async function (deployer, account, assetid) {
 // Print specific account's ASA info.
 exports.printAssetHolding = async function (deployer, account, assetid) {
   let accountInfo = await deployer.algodClient.accountInformation(account).do();
-  for (idx = 0; idx < accountInfo['assets'].length; idx++) {
-    let scrutinizedAsset = accountInfo['assets'][idx];
-    if (scrutinizedAsset['asset-id'] == assetid) {
-      console.log("Asset Holding Info:", scrutinizedAsset, accountInfo);
+  for (const asset of accountInfo['assets']) {
+    if (asset['asset-id'] == assetid) {
+      console.log("Asset Holding Info:", asset, accountInfo);
       break;
     }
   }
@@ -50,7 +49,7 @@ exports.transferMicroAlgos = async function (deployer, fromAccount, toAccountAdd
   let signedTxn = txn.signTxn(fromAccount.sk);
   let txId = txn.txID().toString();
   const pendingTx = await deployer.algodClient.sendRawTransaction(signedTxn).do();
-  console.log("transferring algo (in micro algos):", {
+  console.log("Transferring algo (in micro algos):", {
     from: fromAccount.addr,
     to: receiver,
     amount: amountMicroAlgos,

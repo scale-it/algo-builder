@@ -19,7 +19,7 @@ async function run(runtimeEnv, accounts, deployer) {
   //await printAssetHolding(deployer.algodClient, johnAccount.addr, teslaAssetID);
 
   // print all at once
-  await printAssets(deployer.algodClient, johnAccount.addr)
+  await printAssets(deployer, johnAccount.addr)
 }
 
 module.exports = { default: run }
