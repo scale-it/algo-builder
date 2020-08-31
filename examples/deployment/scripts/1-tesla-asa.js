@@ -1,4 +1,3 @@
-const algosdk = require('algosdk');
 const {
   printCreatedAsset,
   printAssetHolding,
