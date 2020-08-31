@@ -9,16 +9,17 @@ const {
 } = require('../../src/asa-helpers');
 
 async function run(runtimeEnv, accounts, deployer) {
-  const goldAssetID = deployer.asa.get("gold").assetIndex
-  const teslaAssetID = deployer.asa.get("tesla").assetIndex
 
   const johnAccount = deployer.accountsByName.get("john-account");
 
   // print one by one
-  //await printAssetHolding(deployer, johnAccount.addr, goldAssetID);
-  //await printAssetHolding(deployer, johnAccount.addr, teslaAssetID);
+  //const goldAssetID = deployer.algodClient.asa.get("gold").assetIndex
+  //await printAssetHolding(deployer.algodClient, johnAccount.addr, goldAssetID);
+  //const teslaAssetID = deployer.algodClient.asa.get("tesla").assetIndex
+  //await printAssetHolding(deployer.algodClient, johnAccount.addr, teslaAssetID);
+
   // print all at once
-  await printAssets(deployer, johnAccount.addr)
+  await printAssets(deployer.algodClient, johnAccount.addr)
 }
 
 module.exports = { default: run }

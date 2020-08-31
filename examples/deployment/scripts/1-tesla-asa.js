@@ -6,7 +6,12 @@ const {
   asaOptIn,
   transferAsset
 } = require('../src/asa-helpers');
-
+/*
+  Create "tesla" Algorand Standard Asset (ASA)
+  Accounts are loaded from config
+  To use ASA accounts have to opt-in and owner is opt-in by default
+  john-account is transferred some funds to execute opt-in transaction
+*/
 async function run(runtimeEnv, accounts, deployer) {
   console.log("[tesla]: Script has started execution!")
 
