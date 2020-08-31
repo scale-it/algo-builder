@@ -89,7 +89,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     console.log("Funding Contract:", contractAddress);
     const encoder = new TextEncoder();
     const tran = algosdk.makePaymentTxnWithSuggestedParams(funder, contractAddress,
-      flags.microAlgo, payFlags.closeToRemainder,
+      flags.fundingMicroAlgo, payFlags.closeToRemainder,
       payFlags.note ? encoder.encode(payFlags.note) : undefined,
       params);
 

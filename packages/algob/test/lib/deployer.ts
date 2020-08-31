@@ -95,7 +95,7 @@ describe("AlgobDeployerImpl", () => {
     const asaInfo = await deployer.deployASA("MY_ASA", { creator: deployer.accounts[0] });
     assert.deepEqual(asaInfo, { creator: "addr-1-get-address-dry-run", txId: "tx-id-dry-run", confirmedRound: -1, assetIndex: -1 });
 
-    const ascInfo = await deployer.deployASC("MY_ASC", [], { funder: deployer.accounts[1], microAlgo: 1000 }, {});
+    const ascInfo = await deployer.deployASC("MY_ASC", [], { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
     assert.deepEqual(ascInfo, {
       creator: "addr-2-get-address-dry-run",
       txId: "tx-id-dry-run",
@@ -182,9 +182,9 @@ describe("AlgobDeployerImpl", () => {
   it("Should crash when same ASC name is tried to deploy to second time", async () => {
     const cpData = new CheckpointRepoImpl();
     const deployer = new AlgobDeployerImpl(mkAlgobEnv("network 123"), cpData, {}, new AlgoOperatorDryRunImpl());
-    await deployer.deployASC("ASC_key", [], { funder: deployer.accounts[1], microAlgo: 1000 }, {});
+    await deployer.deployASC("ASC_key", [], { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
     await expectBuilderErrorAsync(
-      async () => await deployer.deployASC("ASC_key", "new_value", { funder: deployer.accounts[1], microAlgo: 1000 }, {}),
+      async () => await deployer.deployASC("ASC_key", "new_value", { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {}),
       ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT,
       "ASC_key"
     );
