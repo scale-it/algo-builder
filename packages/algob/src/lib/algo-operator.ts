@@ -99,18 +99,6 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const tranInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
 
     const confirmedTxn = await this.waitForConfirmation(tranInfo.txId);
-    // console.log("Transaction information: %o", confirmedTxn);
-
-    /* const amount = 100;
-
-    // Transaction made from smart contract account
-    const txn = algosdk.makePaymentTxnWithSuggestedParams(contractAddress, funder,
-      amount, flags.closeToRemainder, flags.note, params);
-
-    const rawSignedTxn = algosdk.signLogicSigTransactionObject(txn, lsig);
-    const txInfo = (await this.algodClient.sendRawTransaction(rawSignedTxn.blob).do());
-    const txConfirmation = await this.waitForConfirmation(txInfo.txId);
-    console.log(txConfirmation); */
     return {
       creator: flags.funder.addr,
       contractAddress: contractAddress,
