@@ -34,11 +34,10 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   async deployASC (
-    name: string, scParams: Object, flags: ASCDeploymentFlags, payFlags: ASCPaymentFlags,
-    account: Account
+    name: string, scParams: Object, flags: ASCDeploymentFlags, payFlags: ASCPaymentFlags
   ): Promise<ASCInfo> {
     return {
-      creator: account.addr + "-get-address-dry-run",
+      creator: flags.funder.addr + "-get-address-dry-run",
       txId: "tx-id-dry-run",
       confirmedRound: -1,
       contractAddress: "dfssdfsd",

@@ -26,7 +26,7 @@ export interface AlgoOperator {
   algodClient: algosdk.Algodv2
   deployASA: (name: string, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account) => Promise<ASAInfo>
   deployASC: (programb64: string, scParams: object, flags: ASCDeploymentFlags, payFlags: ASCPaymentFlags,
-    account: Account) => Promise<ASCInfo>
+  ) => Promise<ASCInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
   ensuredCompiled: (name: string, force: boolean) => Promise<ASCCache>
 }
