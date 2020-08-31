@@ -1,5 +1,4 @@
 import tx from "algosdk";
-import { readonlyRecord } from "fp-ts/lib/ReadonlyRecord";
 import { TextEncoder } from "util";
 
 import {
