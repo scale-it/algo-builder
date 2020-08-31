@@ -12,7 +12,6 @@ import {
   ASCInfo,
   Network
 } from "../types";
-import { getSuggestedParamsWithUserDefaults } from "./asc";
 import { CompileOp } from "./compile";
 import * as tx from "./tx";
 
@@ -71,33 +70,33 @@ export class AlgoOperatorImpl implements AlgoOperator {
     };
   }
 
-  async deployASC (programb64: string, scParams: object, flags: ASCDeploymentFlags
+  async deployASC (name: string, scParams: object, flags: ASCDeploymentFlags
   ): Promise<ASCInfo> {
+    const result: ASCCache = await this.ensuredCompiled(name, false);
+    const programb64 = result.compiled;
     const program = new Uint8Array(Buffer.from(programb64, "base64"));
-    const encoder = new TextEncoder();
     const lsig = algosdk.makeLogicSig(program, scParams);
 
-    const params = await getSuggestedParamsWithUserDefaults(this.algodClient, flags);
+    const params = await tx.getSuggestedParamsWithUserDefaultsASC(this.algodClient, flags);
 
     // ASC1 signed by funder
-    lsig.sign(flags.creator.sk);
-    const funder = flags.creator.addr;
+    lsig.sign(flags.funder.sk);
+    const funder = flags.funder.addr;
     const contractAddress = lsig.address();
-    // const receiver = funder;
 
     // Fund smart contract
     console.log("Funding Contract:", contractAddress);
-
+    const encoder = new TextEncoder();
     const tran = algosdk.makePaymentTxnWithSuggestedParams(funder, contractAddress,
       flags.microAlgo, flags.closeToRemainder,
       flags.note ? encoder.encode(flags.note) : undefined,
       params);
 
-    const signedTxn = tran.signTxn(flags.creator.sk);
+    const signedTxn = tran.signTxn(flags.funder.sk);
 
     const tranInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
 
-    const confirmedTxn = await this.algodClient.pendingTransactionInformation(tranInfo.txId).do();
+    const confirmedTxn = await this.waitForConfirmation(tranInfo.txId);
     // console.log("Transaction information: %o", confirmedTxn);
 
     /* const amount = 100;
@@ -111,7 +110,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const txConfirmation = await this.waitForConfirmation(txInfo.txId);
     console.log(txConfirmation); */
     return {
-      creator: flags.creator.addr,
+      creator: flags.funder.addr,
       contractAddress: contractAddress,
       txId: tranInfo.txId,
       logicSignature: lsig,

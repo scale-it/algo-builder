@@ -3,10 +3,11 @@ import { TextEncoder } from "util";
 
 import {
   ASADef,
-  ASADeploymentFlags
+  ASADeploymentFlags,
+  ASCDeploymentFlags
 } from "../types";
 
-async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.SuggestedParams> {
+export async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.SuggestedParams> {
   const params = await algocl.getTransactionParams().do();
   // Private chains may have an issue with firstRound
   if (params.firstRound === 0) {
@@ -22,6 +23,21 @@ async function getSuggestedParamsWithUserDefaults (
   suggested.flatFee = userDefaults.feePerByte === undefined
     ? suggested.flatFee
     : !userDefaults.feePerByte;
+  suggested.fee = userDefaults.totalFee === undefined
+    ? suggested.fee
+    : userDefaults.totalFee;
+  suggested.firstRound = userDefaults.firstValid === undefined
+    ? suggested.firstRound
+    : userDefaults.firstValid;
+  suggested.lastRound = userDefaults.firstValid === undefined || userDefaults.validRounds === undefined
+    ? suggested.lastRound
+    : userDefaults.firstValid + userDefaults.validRounds;
+  return suggested;
+}
+
+export async function getSuggestedParamsWithUserDefaultsASC (
+  algocl: tx.Algodv2, userDefaults: ASCDeploymentFlags): Promise<tx.SuggestedParams> {
+  const suggested = await getSuggestedParams(algocl);
   suggested.fee = userDefaults.totalFee === undefined
     ? suggested.fee
     : userDefaults.totalFee;
