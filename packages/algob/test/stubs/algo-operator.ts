@@ -1,5 +1,5 @@
 
-import algosdk, { Algodv2 } from "algosdk";
+import { Algodv2 } from "algosdk";
 
 import { AlgoOperator } from "../../src/lib/algo-operator";
 import {
@@ -9,10 +9,7 @@ import {
 
 export class AlgoOperatorDryRunImpl implements AlgoOperator {
   get algodClient (): Algodv2 {
-    const token = "adsadasd";
-    const host = "127.0.0.1";
-    const port = 42981;
-    return new algosdk.Algodv2(token, host, port);
+    throw new Error("Not implemented");
   };
 
   waitForConfirmation (txId: string): Promise<import("algosdk").ConfirmedTxInfo> {
