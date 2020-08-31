@@ -45,7 +45,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     };
   }
 
-  async ensuredCompiled (name: string, force: boolean): Promise<ASCCache> {
+  async ensureCompiled (name: string, force: boolean): Promise<ASCCache> {
     return {
       filename: name,
       timestamp: 1010, // compilation time (Unix time)
