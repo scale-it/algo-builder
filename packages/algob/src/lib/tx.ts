@@ -1,10 +1,12 @@
 import tx from "algosdk";
+import { readonlyRecord } from "fp-ts/lib/ReadonlyRecord";
 import { TextEncoder } from "util";
 
 import {
   ASADef,
   ASADeploymentFlags,
-  ASCPaymentFlags
+  ASCPaymentFlags,
+  DeploymentFlags
 } from "../types";
 
 export async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.SuggestedParams> {
@@ -18,11 +20,8 @@ export async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.Sugges
 }
 
 async function getSuggestedParamsWithUserDefaults (
-  algocl: tx.Algodv2, userDefaults: ASADeploymentFlags): Promise<tx.SuggestedParams> {
+  algocl: tx.Algodv2, userDefaults: DeploymentFlags): Promise<tx.SuggestedParams> {
   const suggested = await getSuggestedParams(algocl);
-  suggested.flatFee = userDefaults.feePerByte === undefined
-    ? suggested.flatFee
-    : !userDefaults.feePerByte;
   suggested.fee = userDefaults.totalFee === undefined
     ? suggested.fee
     : userDefaults.totalFee;
@@ -35,19 +34,18 @@ async function getSuggestedParamsWithUserDefaults (
   return suggested;
 }
 
+async function getSuggestedParamsWithUserDefaultsASA (
+  algocl: tx.Algodv2, userDefaults: ASADeploymentFlags): Promise<tx.SuggestedParams> {
+  const suggested = await getSuggestedParamsWithUserDefaults(algocl, userDefaults);
+  suggested.flatFee = userDefaults.feePerByte === undefined
+    ? suggested.flatFee
+    : !userDefaults.feePerByte;
+  return suggested;
+}
+
 export async function getSuggestedParamsWithUserDefaultsASC (
   algocl: tx.Algodv2, userDefaults: ASCPaymentFlags): Promise<tx.SuggestedParams> {
-  const suggested = await getSuggestedParams(algocl);
-  suggested.fee = userDefaults.totalFee === undefined
-    ? suggested.fee
-    : userDefaults.totalFee;
-  suggested.firstRound = userDefaults.firstValid === undefined
-    ? suggested.firstRound
-    : userDefaults.firstValid;
-  suggested.lastRound = userDefaults.firstValid === undefined || userDefaults.validRounds === undefined
-    ? suggested.lastRound
-    : userDefaults.firstValid + userDefaults.validRounds;
-  return suggested;
+  return await getSuggestedParamsWithUserDefaults(algocl, userDefaults);
 }
 
 export async function makeAssetCreateTxn (
@@ -69,6 +67,6 @@ export async function makeAssetCreateTxn (
     name,
     asaDef.url,
     asaDef.metadataHash,
-    await getSuggestedParamsWithUserDefaults(algocl, flags)
+    await getSuggestedParamsWithUserDefaultsASA(algocl, flags)
   );
 }
