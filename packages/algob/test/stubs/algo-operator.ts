@@ -3,7 +3,14 @@ import { Algodv2 } from "algosdk";
 
 import { AlgoOperator } from "../../src/lib/algo-operator";
 import {
-  Account, ASADef, ASADeploymentFlags, ASAInfo, ASCCache, ASCDeploymentFlags, ASCInfo
+  Account,
+  ASADef,
+  ASADeploymentFlags,
+  ASAInfo,
+  ASCCache,
+  ASCDeploymentFlags,
+  ASCInfo,
+  ASCPaymentFlags
 } from "../../src/types";
 
 export class AlgoOperatorDryRunImpl implements AlgoOperator {
@@ -27,7 +34,8 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   async deployASC (
-    name: string, scParams: Object, flags: ASCDeploymentFlags, account: Account
+    name: string, scParams: Object, flags: ASCDeploymentFlags, payFlags: ASCPaymentFlags,
+    account: Account
   ): Promise<ASCInfo> {
     return {
       creator: account.addr + "-get-address-dry-run",

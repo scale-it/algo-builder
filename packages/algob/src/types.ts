@@ -343,23 +343,27 @@ export interface Checkpoint {
 export type ASADef = z.infer<typeof ASADefSchema>;
 export type ASADefs = z.infer<typeof ASADefsSchema>;
 
-export interface DeploymentFalgs {
+export interface DeploymentFlags {
   totalFee?: number
   firstValid?: number
   validRounds?: number
 }
 
-export interface ASADeploymentFlags extends DeploymentFalgs {
+export interface ASADeploymentFlags extends DeploymentFlags {
   creator: Account
   feePerByte?: number
 }
 
-export interface ASCDeploymentFlags extends DeploymentFalgs {
-  funder: Account
-  microAlgo: number
+export interface ASCPaymentFlags extends DeploymentFlags {
+  rawTxParamsAmt? : number
   closeToRemainder?: string
   note?: string
   lease?: string
+}
+
+export interface ASCDeploymentFlags {
+  funder: Account
+  microAlgo: number
 }
 
 export interface AssetScriptMap {
@@ -376,7 +380,8 @@ export interface AlgobDeployer {
   putMetadata: (key: string, value: string) => void
   getMetadata: (key: string) => string | undefined
   deployASA: (name: string, flags: ASADeploymentFlags) => Promise<ASAInfo>
-  deployASC: (name: string, scParams: Object, flags: ASCDeploymentFlags) => Promise<ASCInfo>
+  deployASC: (name: string, scParams: Object, flags: ASCDeploymentFlags,
+    payFlags: ASCPaymentFlags) => Promise<ASCInfo>
   /**
      Returns true if ASA or ACS were deployed in any script.
      Checks even for checkpoints out of from the execution

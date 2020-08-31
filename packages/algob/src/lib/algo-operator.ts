@@ -10,6 +10,7 @@ import {
   ASCCache,
   ASCDeploymentFlags,
   ASCInfo,
+  ASCPaymentFlags,
   Network
 } from "../types";
 import { CompileOp } from "./compile";
@@ -24,7 +25,7 @@ export function createAlgoOperator (network: Network): AlgoOperator {
 export interface AlgoOperator {
   algodClient: algosdk.Algodv2
   deployASA: (name: string, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account) => Promise<ASAInfo>
-  deployASC: (programb64: string, scParams: object, flags: ASCDeploymentFlags,
+  deployASC: (programb64: string, scParams: object, flags: ASCDeploymentFlags, payFlags: ASCPaymentFlags,
     account: Account) => Promise<ASCInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
   ensuredCompiled: (name: string, force: boolean) => Promise<ASCCache>
@@ -70,14 +71,15 @@ export class AlgoOperatorImpl implements AlgoOperator {
     };
   }
 
-  async deployASC (name: string, scParams: object, flags: ASCDeploymentFlags
+  async deployASC (name: string, scParams: object, flags: ASCDeploymentFlags, payFlags: ASCPaymentFlags
   ): Promise<ASCInfo> {
+    console.log("Deploying ASC:", name);
     const result: ASCCache = await this.ensuredCompiled(name, false);
     const programb64 = result.compiled;
     const program = new Uint8Array(Buffer.from(programb64, "base64"));
     const lsig = algosdk.makeLogicSig(program, scParams);
 
-    const params = await tx.getSuggestedParamsWithUserDefaultsASC(this.algodClient, flags);
+    const params = await tx.getSuggestedParamsWithUserDefaultsASC(this.algodClient, payFlags);
 
     // ASC1 signed by funder
     lsig.sign(flags.funder.sk);
@@ -88,8 +90,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
     console.log("Funding Contract:", contractAddress);
     const encoder = new TextEncoder();
     const tran = algosdk.makePaymentTxnWithSuggestedParams(funder, contractAddress,
-      flags.microAlgo, flags.closeToRemainder,
-      flags.note ? encoder.encode(flags.note) : undefined,
+      flags.microAlgo, payFlags.closeToRemainder,
+      payFlags.note ? encoder.encode(payFlags.note) : undefined,
       params);
 
     const signedTxn = tran.signTxn(flags.funder.sk);

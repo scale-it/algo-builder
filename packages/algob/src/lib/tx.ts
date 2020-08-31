@@ -4,7 +4,7 @@ import { TextEncoder } from "util";
 import {
   ASADef,
   ASADeploymentFlags,
-  ASCDeploymentFlags
+  ASCPaymentFlags
 } from "../types";
 
 export async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.SuggestedParams> {
@@ -36,7 +36,7 @@ async function getSuggestedParamsWithUserDefaults (
 }
 
 export async function getSuggestedParamsWithUserDefaultsASC (
-  algocl: tx.Algodv2, userDefaults: ASCDeploymentFlags): Promise<tx.SuggestedParams> {
+  algocl: tx.Algodv2, userDefaults: ASCPaymentFlags): Promise<tx.SuggestedParams> {
   const suggested = await getSuggestedParams(algocl);
   suggested.fee = userDefaults.totalFee === undefined
     ? suggested.fee
