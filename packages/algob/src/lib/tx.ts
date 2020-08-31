@@ -3,10 +3,11 @@ import { TextEncoder } from "util";
 
 import {
   ASADef,
-  ASADeploymentFlags
+  ASADeploymentFlags,
+  DeploymentFlags
 } from "../types";
 
-async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.SuggestedParams> {
+export async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.SuggestedParams> {
   const params = await algocl.getTransactionParams().do();
   // Private chains may have an issue with firstRound
   if (params.firstRound === 0) {
@@ -16,8 +17,8 @@ async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.SuggestedPara
   return params;
 }
 
-async function getSuggestedParamsWithUserDefaults (
-  algocl: tx.Algodv2, userDefaults: ASADeploymentFlags): Promise<tx.SuggestedParams> {
+export async function getSuggestedParamsWithUserDefaults (
+  algocl: tx.Algodv2, userDefaults: DeploymentFlags): Promise<tx.SuggestedParams> {
   const suggested = await getSuggestedParams(algocl);
   suggested.flatFee = userDefaults.feePerByte === undefined
     ? suggested.flatFee

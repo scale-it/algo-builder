@@ -1,6 +1,6 @@
 import * as algosdk from "algosdk";
 
-import { Account, AccountDef, AlgobDeployer, ASADeploymentFlags, ASAInfo, ASCInfo } from "../../src/types";
+import { Account, AlgobDeployer, ASADeploymentFlags, ASAInfo, ASCDeploymentFlags, ASCInfo } from "../../src/types";
 
 export class FakeDeployer implements AlgobDeployer {
   asa = new Map<string, ASAInfo>();
@@ -18,7 +18,7 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   };
 
-  async deployASC (name: string, source: string, account: AccountDef): Promise<ASCInfo> {
+  async deployASC (name: string, scParams: object, flags: ASCDeploymentFlags): Promise<ASCInfo> {
     throw new Error("Not implemented");
   }
 
