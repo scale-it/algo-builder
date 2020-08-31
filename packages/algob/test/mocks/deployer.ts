@@ -4,6 +4,7 @@ import { Account, AlgobDeployer, ASADeploymentFlags, ASAInfo, ASCDeploymentFlags
 
 export class FakeDeployer implements AlgobDeployer {
   asa = new Map<string, ASAInfo>();
+  asc = new Map<string, ASCInfo>();
   isDeployMode = false;
   accounts = [];
   accountsByName = new Map<string, Account>();

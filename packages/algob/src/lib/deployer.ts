@@ -104,6 +104,10 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     return this.cpData.precedingCP[this.networkName]?.asa ?? new Map();
   }
 
+  get asc (): Map<string, ASCInfo> {
+    return this.cpData.precedingCP[this.networkName]?.asc ?? new Map();
+  }
+
   get algodClient (): algosdk.Algodv2 {
     return this.algoOp.algodClient;
   }
@@ -162,6 +166,10 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
 
   get asa (): Map<string, ASAInfo> {
     return this._internal.asa;
+  }
+
+  get asc (): Map<string, ASCInfo> {
+    return this._internal.asc;
   }
 
   get algodClient (): algosdk.Algodv2 {
