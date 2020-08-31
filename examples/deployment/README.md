@@ -23,11 +23,5 @@ Use your editor to edit `algob.config.js`
 `algob deploy`
 `algob run scripts/query/john-balances.js`
 
-## Authors
-- robert-zaremba
-- Invertisment
-- amityadav0
-- as04
-
 ### Repository of this example (may be updated less often):
 https://github.com/Invertisment/algob-asa-deploy-opt-in
