@@ -415,9 +415,9 @@ ajv@^6.10.0, ajv@^6.10.2:
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
-"algosdk@github:algorand/js-algorand-sdk":
+"algosdk@github:algorand/js-algorand-sdk#v1.7.0-beta":
   version "1.7.0"
-  resolved "https://codeload.github.com/algorand/js-algorand-sdk/tar.gz/1f028bd190c03d895520dab578b84994723e7e74"
+  resolved "https://codeload.github.com/algorand/js-algorand-sdk/tar.gz/3999aa43fc3d945b38419339c593bb5fd72e49c6"
   dependencies:
     "@msgpack/msgpack" "^1.9.0"
     hi-base32 "^0.5.0"

@@ -50,7 +50,7 @@
     "time-require": "^0.1.2"
   },
   "dependencies": {
-    "algosdk": "github:algorand/js-algorand-sdk",
+    "algosdk": "github:algorand/js-algorand-sdk#v1.7.0-beta",
     "debug": "^4.1.1",
     "deep-equal": "^2.0.3",
     "deepmerge": "^4.2.2",
