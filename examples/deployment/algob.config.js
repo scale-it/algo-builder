@@ -27,10 +27,10 @@ let accounts = mkAccounts([
     // You should view your accounts and replace this with your own account.
     // Command to view account addresses (and their balances):
     // goal account list -d ~/.algorand-local/Node/
-    addr: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
+    addr: "HJ4ASRLQAR67AOUTSXOL7IPSMWSRB6BKS7W2FYXHUXBS3FA67WVN3ATRPU",
     // To export private mnemonic you may use this command (with you own account's address and data directory):
     // goal account export -a WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE -d ~/.algorand-local/Node/
-    mnemonic: "enforce drive foster uniform cradle tired win arrow wasp melt cattle chronic sport dinosaur announce shell correct shed amused dismiss mother jazz task above hospital"
+    mnemonic: "deputy bench minor usual lake guilt mind token dolphin parent edit around bulk egg glance tourist super caught divorce dinosaur shiver ankle cost absorb grocery"
   },
   // Following accounts are generated using `algob gen-accounts`.
   // Do not use these exact accounts in your own applications.
@@ -58,9 +58,9 @@ let accounts = mkAccounts([
 // accounts = accounts.concat(accFromFile);
 
 let defaultCfg = {
-  host: "http://localhost",
-  port: 46469,
-  token: "aade468d25a7aa48fec8082d6a847c48492066a2741f3731e613fdde086cd6e9",
+  host: "127.0.0.1",
+  port: 43103,
+  token: "11bca60d574ac896e2efbd454a2e7a06ab540002e14975f9f0e56abd61d8f5ab",
   accounts: accounts,
 };
 
