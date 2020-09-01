@@ -8,5 +8,8 @@
   },
   "dependencies": {
     "algosdk": "github:algorand/js-algorand-sdk#v1.7.0-beta"
+  },
+  "scripts": {
+    "algob": "algob"
   }
 }
