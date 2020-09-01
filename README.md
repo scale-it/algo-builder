@@ -3,7 +3,7 @@ Framework to automate development of Algorand Assets and Smart Contracts.
 
 ## Objectives
 
-Algorand builder is an trustworthy framework for Algorand dapps (Decentralized Applications). Main goal is to make shipping Algorand applications simple, efficient, and scalable. Think about it as a truffle suite for Algorand. The framework provides following functionality:
+Algorand builder is an trustworthy framework for Algorand dapps (Decentralized Applications). Its main goal is to make shipping Algorand applications simple, efficient, and scalable. Think about it as a Truffle suite for Algorand. The framework provides following functionality:
 
 + REPL (console Read-Eval-Print-Loop) to quickly and easily interact with Algorand Standard Assets and Smart Contracts
 + integrated testing framework,
@@ -43,6 +43,8 @@ TODO: provide a project template for TS projects. [task](https://www.pivotaltrac
 TIPS:
 
 + Use `tsc --watch` to update the build in a realtime while you develop the project
+
+Read more in [docs](docs/README.md)
 
 # Contributing
 
