@@ -11,11 +11,15 @@ async function run(runtimeEnv, accounts, deployer) {
 
     const logicSignature = deployer.asc.get("3-gold-asc.teal").logicSignature;
 
-    // WIll pass
-    await transferMicroAlgosContract(deployer, goldOwnerAccount, johnAccount, 99, logicSignature);
+    // ALGO transfer
 
-    // Gets rejected by logic
-    await transferMicroAlgosContract(deployer, goldOwnerAccount, johnAccount, 101, logicSignature);
+    // Will pass - As according to .teal logic, amount should be <= 100
+    // Transaction PASS
+    await transferMicroAlgosContract(deployer, goldOwnerAccount, johnAccount, 50, logicSignature);
+
+    // Gets rejected by logic - As according to .teal logic, amount should be <= 100
+    // Transaction FAIL
+    await transferMicroAlgosContract(deployer, goldOwnerAccount, johnAccount, 150, logicSignature);
 
   }
 }
