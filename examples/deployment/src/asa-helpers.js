@@ -38,8 +38,6 @@ exports.transferMicroAlgos = async function (deployer, fromAccount, toAccountAdd
 
   let params = await deployer.algodClient.getTransactionParams().do();
 
-  params.fee = 0;
-  params.flatFee = true;
   const receiver = toAccountAddr;
   let note = algosdk.encodeObj("ALGO PAID");
 
@@ -63,8 +61,6 @@ exports.transferMicroAlgosContract = async function (deployer, fromAccount, toAc
 
   let params = await deployer.algodClient.getTransactionParams().do();
 
-  params.fee = 0;
-  params.flatFee = true;
   const receiver = toAccountAddr.addr;
   let note = algosdk.encodeObj("ALGO PAID");
 
@@ -97,9 +93,6 @@ exports.asaOptIn = async function (deployer, optInAccount, assetID) {
   // We will account for changing transaction parameters
   // before every transaction in this example
   params = await deployer.algodClient.getTransactionParams().do();
-  //comment out the next two lines to use suggested fee
-  params.fee = 1000;
-  params.flatFee = true;
 
   let sender = optInAccount.addr;
   let recipient = sender
@@ -139,9 +132,6 @@ exports.transferAsset = async function (deployer, assetID, fromAccount, toAccoun
   // before every transaction in this example
 
   params = await deployer.algodClient.getTransactionParams().do();
-  //comment out the next two lines to use suggested fee
-  params.fee = 1000;
-  params.flatFee = true;
 
   sender = fromAccount;
   recipient = toAccountAddr;
