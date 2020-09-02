@@ -38,8 +38,6 @@ exports.transferMicroAlgos = async function (deployer, fromAccount, toAccountAdd
 
   let params = await deployer.algodClient.getTransactionParams().do();
 
-  params.fee = 0;
-  params.flatFee = true;
   const receiver = toAccountAddr;
   let note = algosdk.encodeObj("ALGO PAID");
 
@@ -58,6 +56,32 @@ exports.transferMicroAlgos = async function (deployer, fromAccount, toAccountAdd
   return await deployer.waitForConfirmation(pendingTx.txId)
 }
 
+// Transfer ALGO
+exports.transferMicroAlgosContract = async function (deployer, fromAccount, toAccountAddr, amountMicroAlgos, lsig) {
+
+  let params = await deployer.algodClient.getTransactionParams().do();
+
+  const receiver = toAccountAddr.addr;
+  let note = algosdk.encodeObj("ALGO PAID");
+
+  let txn = algosdk.makePaymentTxnWithSuggestedParams(
+    fromAccount.addr, receiver, amountMicroAlgos, undefined, note, params);
+
+  //let signedTxn = txn.signTxn(fromAccount.sk);
+  let signedTxn = algosdk.signLogicSigTransactionObject(txn, lsig);
+  let txId = txn.txID().toString();
+  console.log(txId);
+  const pendingTx = await deployer.algodClient.sendRawTransaction(signedTxn.blob).do();
+  console.log("Transferring algo (in micro algos):", {
+    from: fromAccount.addr,
+    to: receiver,
+    amount: amountMicroAlgos,
+    txid: pendingTx.txId
+  })
+  return await deployer.waitForConfirmation(pendingTx.txId)
+}
+
+
 exports.asaOptIn = async function (deployer, optInAccount, assetID) {
   // Opting in to an Asset:
   // Opting in to transact with the new asset
@@ -69,9 +93,6 @@ exports.asaOptIn = async function (deployer, optInAccount, assetID) {
   // We will account for changing transaction parameters
   // before every transaction in this example
   params = await deployer.algodClient.getTransactionParams().do();
-  //comment out the next two lines to use suggested fee
-  params.fee = 1000;
-  params.flatFee = true;
 
   let sender = optInAccount.addr;
   let recipient = sender
@@ -111,9 +132,6 @@ exports.transferAsset = async function (deployer, assetID, fromAccount, toAccoun
   // before every transaction in this example
 
   params = await deployer.algodClient.getTransactionParams().do();
-  //comment out the next two lines to use suggested fee
-  params.fee = 1000;
-  params.flatFee = true;
 
   sender = fromAccount;
   recipient = toAccountAddr;
