@@ -24,7 +24,7 @@ The project specification is [published here](https://paper.dropbox.com/publishe
 + Connection to an Algorand node.
 
 
-## Algorand Node requirements
+### Algorand Node requirements
 
 + algod v2.1.3+
 
@@ -33,6 +33,40 @@ Make sure that the node you are connecting to has a `"EnableDeveloperAPI": true`
 # Usage
 
 See [user script documentation](docs/user-script-execution.md) for info about custom scripts and deployments.
+
+
+## Quick start
+
+1. Create a new yarn/npm project:
+
+        mkdir my_new_project
+        cd my_new_project
+        yarn init
+
+1. Install algob in the project:
+
+        yarn add algob
+        yarn init .
+
+1. Check that it was installed correctly:
+
+        yarn run algob help
+
+1. Initalize algob workspace
+
+        yarn init .
+
+1. Update the `algob.config.js` file. Make sure you have an access to a running Algorand node (`algod`). Check Algorand instructions how to install and run it.
+    * set correct host address, port and token
+    * you can define multiple networks.
+
+1. Add assets and smart-contracts in the `assets` directory.
+1. Add deployment scripts in `scritps` directory.
+1. Run `yarn run algob deploy` to compile and deploy everything.
+1. To run `algob` on different network (by default the `default` network is used) use
+
+        yarn run algob --netowork <other_netowork_name>  <command>
+
 
 ## Using algob with a TypeScript project
 

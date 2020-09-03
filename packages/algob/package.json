@@ -1,6 +1,6 @@
 {
   "name": "algob",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "author": "SEE package.json in PROJECT ROOT",
   "license": "Apache-2.0",
   "repository": "https://github.com/scale-it/algorand-builder.git",
@@ -51,6 +51,7 @@
   },
   "dependencies": {
     "algosdk": "github:algorand/js-algorand-sdk#v1.7.0-beta",
+    "chalk": "^4.1.0",
     "debug": "^4.1.1",
     "deep-equal": "^2.0.3",
     "deepmerge": "^4.2.2",
@@ -62,6 +63,7 @@
     "io-ts": "^2.2.6",
     "murmurhash": "^1.0.0",
     "semver": "^7.3.2",
+    "source-map-support": "^0.5.19",
     "ts-essentials": "^7.0.0",
     "yaml": "^1.10.0",
     "zod": "^1.10.2"

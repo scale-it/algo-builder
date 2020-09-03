@@ -28,3 +28,12 @@ It's best to use a different directory to initialize test projects.
 Also, it my be helpful to link the binary:
 
     yarn link
+
+## Contributing
+
+When working on `algob`, we use CLI directly from the build directory using the following command:
+
+    yarn run algob:dev
+
+It will create a `project-dev` directory as a copy of the template project (`sample-project`).
+In that directory you should update the `config.algob.js`. The `algob:dev` command will run all `algob` in that directory.

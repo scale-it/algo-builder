@@ -90,7 +90,6 @@ export class AlgobDeployerImpl implements AlgobDeployer {
 
   async deployASC (name: string, scParams: Object, flags: ASCDeploymentFlags,
     payFlags: ASCPaymentFlags): Promise<ASCInfo> {
-    const creator = flags.funder;
     this.assertNoAsset(name);
     const ascInfo = await this.algoOp.deployASC(name, scParams, flags, payFlags);
     this.cpData.registerASC(this.networkName, name, ascInfo);
