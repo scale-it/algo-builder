@@ -12,7 +12,7 @@ const {
   To use ASA accounts have to opt-in and owner is opt-in by default
   john-account is transferred some funds to execute opt-in transaction
 */
-async function run(runtimeEnv, accounts, deployer) {
+async function run(runtimeEnv, deployer) {
   console.log("[gold]: Script has started execution!")
 
   const masterAccount = deployer.accountsByName.get("master-account")
