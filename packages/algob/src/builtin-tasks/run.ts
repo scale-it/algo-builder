@@ -119,7 +119,8 @@ export async function runMultipleScripts (
     }
     if (!force && cpData.networkExistsInCurrentCP(runtimeEnv.network.name)) {
       log(`Skipping: Checkpoint exists for script ${relativeScriptPath}`);
-      console.log(`Skipping: Checkpoint exists for script ${relativeScriptPath}`);
+      // '\x1b[33m%s\x1b[0m' this is used for setting the message color to yellow.
+      console.warn('\x1b[33m%s\x1b[0m', `Skipping: Checkpoint exists for script ${relativeScriptPath}`);
       continue;
     }
     log(`Running script ${relativeScriptPath}`);

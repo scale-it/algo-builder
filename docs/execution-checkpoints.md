@@ -19,7 +19,7 @@ Other deployer's methods can provide more information about currently visible as
 These fields provide a way to view ASA and ASC1 information that was saved in the currently visible checkpoints:
 ```
 deployer.asa
-deployer.asc (not implemented, yet)
+deployer.asc
 ```
 They return JS Maps where asset name (string) points to asset information (see `Checkpoint` type in [types.ts](https://github.com/scale-it/algorand-builder/blob/master/packages/algob/src/types.ts)).
 These maps shouldn't be edited by the script itself.
