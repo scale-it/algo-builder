@@ -2,8 +2,8 @@
   "name": "algob",
   "version": "0.0.1",
   "author": "SEE package.json in PROJECT ROOT",
-  "license": "SEE LICENSE IN LICENSE",
-  "repository": "SEE package.json in PROJECT ROOT",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/scale-it/algorand-builder.git",
   "types": "build/internal/lib/lib.d.ts",
   "description": "",
   "keywords": [
