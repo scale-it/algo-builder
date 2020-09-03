@@ -47,10 +47,11 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   }
 
   putMetadata (key: string, value: string): void {
-    if (this.cpData.getMetadata(this.networkName, key) === value) {
+    const found = this.cpData.getMetadata(this.networkName, key);
+    if (found === value) {
       return;
     }
-    if (this.cpData.getMetadata(this.networkName, key)) {
+    if (found) {
       throw new BuilderError(
         ERRORS.BUILTIN_TASKS.DEPLOYER_METADATA_ALREADY_PRESENT, {
           metadataKey: key

@@ -1,7 +1,7 @@
 
 const fs = require('fs')
 
-async function run (runtimeEnv, accounts, deployer) {
+async function run (runtimeEnv, deployer) {
   if (deployer.isDeployMode) {
     deployer.putMetadata('META from first', 'first-ok')
   }

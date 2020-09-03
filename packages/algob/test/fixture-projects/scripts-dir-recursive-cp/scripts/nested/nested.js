@@ -1,5 +1,5 @@
 
-async function run (runtimeEnv, accounts, deployer) {
+async function run (runtimeEnv, deployer) {
   if (deployer.isDeployMode) {
     await deployer.deployASA('ASA from nested', {}, deployer.accountsByName.get('acc-name-1'))
   }
