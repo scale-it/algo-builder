@@ -48,11 +48,7 @@ export async function runScript (
     });
   }
   try {
-    await requiredScript.default(
-      runtimeEnv,
-      deployer.accounts,
-      deployer
-    );
+    await requiredScript.default(runtimeEnv, deployer);
   } catch (error) {
     displayErr(error, relativeScriptPath);
   }

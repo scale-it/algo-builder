@@ -6,7 +6,7 @@ const {
   transferAsset
 } = require('../../src/asa-helpers');
 
-async function run(runtimeEnv, accounts, deployer) {
+async function run(runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get("master-account")
   const johnAccount = deployer.accountsByName.get("john-account");
 

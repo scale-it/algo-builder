@@ -1,5 +1,5 @@
 
-async function run(runtimeEnv, accounts, deployer) {
+async function run(runtimeEnv, deployer) {
   console.log("Sample script has started execution!")
   if (deployer.isDeployMode) {
     await deployer.deployASA("minimumASA", { creator: deployer.accounts[0] })

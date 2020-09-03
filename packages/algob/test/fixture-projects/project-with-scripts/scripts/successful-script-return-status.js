@@ -1,5 +1,5 @@
 
-async function run (runtimeEnv, accounts, deployer) {
+async function run (runtimeEnv, deployer) {
   return 1.5
 }
 

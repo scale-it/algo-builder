@@ -7,7 +7,7 @@ const {
   printAssets
 } = require('../../src/asa-helpers');
 
-async function run(runtimeEnv, accounts, deployer) {
+async function run(runtimeEnv, deployer) {
 
   const johnAccount = deployer.accountsByName.get("john-account");
 
