@@ -656,20 +656,6 @@ context=%ctx%`,
 const scriptErrors = {
   ASA_PARAM_PARSE_ERROR: {
     number: 900,
-    message: `Invalid ASA definition.
-        Reason:
-
-%reason%`,
-    title: "Invalid ASA definition",
-    description: `Invalid ASA definition.
-
-        Reason:
-%reason%
-
-Please check your ASA file`
-  },
-  ASA_PARAM_PARSE_ERROR_LOAD_FROM_FILE: {
-    number: 901,
     message: `Invalid ASA definition: '%filename%'.
 Reason:
 
@@ -681,6 +667,16 @@ Reason:
 %reason%
 
 Please check your ASA file`
+  },
+  ASA_PARAM_ERROR_NO_NAMED_OPT_IN_ACCOUNT: {
+    number: 901,
+    message: `Invalid ASA definition: '%filename%'.
+Opt-in account not found by name: %optInAccName%`,
+    title: "Invalid ASA definition",
+    description: `Invalid ASA definition: '%filename%'.
+Opt-in account not found by name: %optInAccName%
+
+Please check your ASA and config files`
   }
 };
 

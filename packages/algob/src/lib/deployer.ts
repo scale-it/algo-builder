@@ -27,14 +27,18 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   readonly accountsByName: Accounts;
 
   constructor (
-    runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointRepo, asaDefs: ASADefs, algoOp: AlgoOperator, accountsByName: Accounts
+    runtimeEnv: AlgobRuntimeEnv,
+    cpData: CheckpointRepo,
+    asaDefs: ASADefs,
+    algoOp: AlgoOperator,
+    accountsByName: Accounts
   ) {
     this.runtimeEnv = runtimeEnv;
     this.cpData = cpData;
     this.loadedAsaDefs = asaDefs;
     this.algoOp = algoOp;
     this.accounts = runtimeEnv.network.config.accounts;
-    this.accountsByName = accountsByName
+    this.accountsByName = accountsByName;
   }
 
   get isDeployMode (): boolean {
