@@ -14,7 +14,7 @@ import {
   toCheckpointFileName
 } from "../lib/script-checkpoints";
 import { AlgobRuntimeEnv, CheckpointRepo } from "../types";
-import { runMultipleScripts, runMultipleScriptsOneByOne } from "./run";
+import { runMultipleScripts } from "./run";
 import { TASK_DEPLOY } from "./task-names";
 
 export interface TaskArgs {
@@ -50,11 +50,9 @@ export async function executeDeployTask (
 ): Promise<void> {
   const logDebugTag = "algob:tasks:deploy";
 
-  const hasUserProvidedScripts = fileNames.length !== 0;
-
-  const scriptNames = hasUserProvidedScripts
-    ? assertDirectDirChildren(scriptsDirectory, fileNames)
-    : loadFilenames(scriptsDirectory);
+  const scriptNames = fileNames.length === 0
+    ? loadFilenames(scriptsDirectory)
+    : assertDirectDirChildren(scriptsDirectory, fileNames);
 
   if (scriptNames.length === 0) {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.SCRIPTS_NO_FILES_FOUND, {
@@ -70,27 +68,15 @@ export async function executeDeployTask (
     persistCheckpoint(relativeScriptPath, cpData.strippedCP);
   };
 
-  if (hasUserProvidedScripts) {
-    return await runMultipleScriptsOneByOne(
-      runtimeEnv,
-      scriptNames,
-      onSuccessFn,
-      force,
-      logDebugTag,
-      true,
-      algoOp
-    );
-  } else {
-    return await runMultipleScripts(
-      runtimeEnv,
-      scriptNames,
-      onSuccessFn,
-      force,
-      logDebugTag,
-      true,
-      algoOp
-    );
-  }
+  return await runMultipleScripts(
+    runtimeEnv,
+    scriptNames,
+    onSuccessFn,
+    force,
+    logDebugTag,
+    true,
+    algoOp
+  );
 }
 
 export default function (): void {

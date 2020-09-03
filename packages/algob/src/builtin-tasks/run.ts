@@ -4,9 +4,11 @@ import fsExtra from "fs-extra";
 import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
+import { partitionByFn } from "../internal/util/lists";
 import { runScript } from "../internal/util/scripts-runner";
 import { AlgoOperator, createAlgoOperator } from "../lib/algo-operator";
 import { loadASAFile } from "../lib/asa";
+import { cmpStr } from "../lib/comparators";
 import {
   AlgobDeployerImpl,
   AlgobDeployerReadOnlyImpl
@@ -69,11 +71,13 @@ function loadCheckpointsIntoCPData (cpData: CheckpointRepo, scriptPaths: string[
   return checkpointData;
 }
 
-// TODO: Reduce file IO:
-// Function only accepts sorted scripts -- only this way it loads the state correctly.
-// Optimization: Split the scripts into sorted array chunks and run those chunks
-// This will save some disk reads because sub-arrays will be sorted
-export async function runMultipleScriptsOneByOne (
+function batchScriptNames (unbatched: string[]): string[][] {
+  return partitionByFn(
+    (a: string, b: string) => cmpStr(a, b) === 1,
+    unbatched);
+}
+
+export async function runMultipleScripts (
   runtimeEnv: AlgobRuntimeEnv,
   scriptNames: string[],
   onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
@@ -82,10 +86,10 @@ export async function runMultipleScriptsOneByOne (
   allowWrite: boolean,
   algoOp: AlgoOperator
 ): Promise<void> {
-  for (const script of scriptNames) {
-    await runMultipleScripts(
+  for (const scriptsBatch of batchScriptNames(scriptNames)) {
+    await runScriptsBatch(
       runtimeEnv,
-      [script],
+      scriptsBatch,
       onSuccessFn,
       force,
       logDebugTag,
@@ -95,7 +99,8 @@ export async function runMultipleScriptsOneByOne (
   }
 }
 
-export async function runMultipleScripts (
+// Function only accepts sorted scripts -- only this way it loads the state correctly.
+async function runScriptsBatch (
   runtimeEnv: AlgobRuntimeEnv,
   scriptNames: string[],
   onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
@@ -147,7 +152,7 @@ async function executeRunTask (
     });
   }
 
-  await runMultipleScriptsOneByOne(
+  await runMultipleScripts(
     runtimeEnv,
     assertDirChildren(scriptsDirectory, scripts),
     (_cpData: CheckpointRepo, _relativeScriptPath: string) => { },
