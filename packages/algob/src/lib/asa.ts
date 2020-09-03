@@ -5,7 +5,7 @@ import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { ASSETS_DIR } from "../internal/core/project-structure";
 import { parseZodError } from "../internal/core/validation-errors";
-import { ASADefs } from "../types";
+import { ASADefs, Accounts } from "../types";
 import { ASADefsSchema } from "../types-input";
 import { loadFromYamlFileSilentWithMessage } from "./files";
 
@@ -32,7 +32,7 @@ export function validateASADefs (obj: Object, filename?: string): ASADefs {
   }
 }
 
-export function loadASAFile (): ASADefs {
+export function loadASAFile (accounts: Accounts): ASADefs {
   const filename = path.join(ASSETS_DIR, "asa.yaml");
   return validateASADefs(
     loadFromYamlFileSilentWithMessage(filename, path.join(ASSETS_DIR, "asa.yaml") + " doesn't exist."),

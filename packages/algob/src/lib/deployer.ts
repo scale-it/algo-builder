@@ -15,7 +15,6 @@ import {
   ASCPaymentFlags,
   CheckpointRepo
 } from "../types";
-import { mkAccountIndex } from "./account";
 import { AlgoOperator } from "./algo-operator";
 
 // This class is what user interacts with in deploy task
@@ -28,14 +27,14 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   readonly accountsByName: Accounts;
 
   constructor (
-    runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointRepo, asaDefs: ASADefs, algoOp: AlgoOperator
+    runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointRepo, asaDefs: ASADefs, algoOp: AlgoOperator, accountsByName: Accounts
   ) {
     this.runtimeEnv = runtimeEnv;
     this.cpData = cpData;
     this.loadedAsaDefs = asaDefs;
     this.algoOp = algoOp;
     this.accounts = runtimeEnv.network.config.accounts;
-    this.accountsByName = mkAccountIndex(runtimeEnv.network.config.accounts);
+    this.accountsByName = accountsByName
   }
 
   get isDeployMode (): boolean {

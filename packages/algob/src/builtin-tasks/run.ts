@@ -20,8 +20,9 @@ import {
   lsScriptsDir,
   scriptsDirectory
 } from "../lib/script-checkpoints";
-import { AlgobDeployer, AlgobRuntimeEnv, ASADefs, CheckpointRepo } from "../types";
+import { AlgobDeployer, AlgobRuntimeEnv, ASADefs, CheckpointRepo, Accounts } from "../types";
 import { TASK_RUN } from "./task-names";
+import { mkAccountIndex } from "../lib/account";
 
 interface Input {
   scripts: string[]
@@ -36,13 +37,15 @@ function mkDeployer (
   cpData: CheckpointRepo,
   allowWrite: boolean,
   algoOp: AlgoOperator,
-  asaDefs: ASADefs
+  asaDefs: ASADefs,
+  accounts: Accounts
 ): AlgobDeployer {
   const deployer = new AlgobDeployerImpl(
     runtimeEnv,
     cpData,
     asaDefs,
-    algoOp);
+    algoOp,
+    accounts);
   if (allowWrite) {
     return deployer;
   }
@@ -87,7 +90,8 @@ export async function runMultipleScripts (
   allowWrite: boolean,
   algoOp: AlgoOperator
 ): Promise<void> {
-  const asaDefs = loadASAFile();
+  const accounts = mkAccountIndex(runtimeEnv.network.config.accounts);
+  const asaDefs = loadASAFile(accounts);
   for (const scriptsBatch of batchScriptNames(scriptNames)) {
     await runScriptsBatch(
       runtimeEnv,
@@ -95,7 +99,7 @@ export async function runMultipleScripts (
       onSuccessFn,
       force,
       logDebugTag,
-      (cpData: CheckpointRepo) => mkDeployer(runtimeEnv, cpData, allowWrite, algoOp, asaDefs)
+      (cpData: CheckpointRepo) => mkDeployer(runtimeEnv, cpData, allowWrite, algoOp, asaDefs, accounts)
     );
   }
 }
