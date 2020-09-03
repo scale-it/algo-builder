@@ -20,7 +20,7 @@ import {
   lsScriptsDir,
   scriptsDirectory
 } from "../lib/script-checkpoints";
-import { AlgobDeployer, AlgobRuntimeEnv, CheckpointRepo } from "../types";
+import { AlgobDeployer, AlgobRuntimeEnv, ASADefs, CheckpointRepo } from "../types";
 import { TASK_RUN } from "./task-names";
 
 interface Input {
@@ -35,12 +35,13 @@ function mkDeployer (
   runtimeEnv: AlgobRuntimeEnv,
   cpData: CheckpointRepo,
   allowWrite: boolean,
-  algoOp: AlgoOperator
+  algoOp: AlgoOperator,
+  asaDefs: ASADefs
 ): AlgobDeployer {
   const deployer = new AlgobDeployerImpl(
     runtimeEnv,
     cpData,
-    loadASAFile(),
+    asaDefs,
     algoOp);
   if (allowWrite) {
     return deployer;
@@ -86,6 +87,7 @@ export async function runMultipleScripts (
   allowWrite: boolean,
   algoOp: AlgoOperator
 ): Promise<void> {
+  const asaDefs = loadASAFile();
   for (const scriptsBatch of batchScriptNames(scriptNames)) {
     await runScriptsBatch(
       runtimeEnv,
@@ -93,8 +95,7 @@ export async function runMultipleScripts (
       onSuccessFn,
       force,
       logDebugTag,
-      allowWrite,
-      algoOp
+      (cpData: CheckpointRepo) => mkDeployer(runtimeEnv, cpData, allowWrite, algoOp, asaDefs)
     );
   }
 }
@@ -105,13 +106,12 @@ async function runScriptsBatch (
   scriptNames: string[],
   onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
   force: boolean,
-  logTag: string,
-  allowWrite: boolean,
-  algoOp: AlgoOperator
+  logDebugTag: string,
+  mkDeployerFn: (cpData: CheckpointRepo) => AlgobDeployer
 ): Promise<void> {
-  const log = debug(logTag);
+  const log = debug(logDebugTag);
   const cpData: CheckpointRepo = loadCheckpointsRecursive();
-  const deployer: AlgobDeployer = mkDeployer(runtimeEnv, cpData, allowWrite, algoOp);
+  const deployer: AlgobDeployer = mkDeployerFn(cpData);
 
   const scriptsFromScriptsDir: string[] = lsScriptsDir();
 

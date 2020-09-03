@@ -7,10 +7,10 @@ function getLastSubchild<T> (ts: T[][]): T {
   return getLast(getLast(ts));
 }
 
-export function partitionByFn (
-  f: (s: string, s1: string) => boolean,
-  input: string[]
-): string[][] {
+export function partitionByFn<T> (
+  f: (s: T, s1: T) => boolean,
+  input: T[]
+): T[][] {
   if (input.length === 0) {
     return [];
   }
