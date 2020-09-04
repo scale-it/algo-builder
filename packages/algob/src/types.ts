@@ -391,7 +391,8 @@ export interface AlgobDeployer {
   asa: Map<string, ASAInfo>
   asc: Map<string, ASCInfo>
 
-  // Not present in the spec:
+  // These functions are exposed only for users.
+  // Put your logic into AlgoOperator if you need to interact with the chain.
   algodClient: algosdk.Algodv2
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
 }
