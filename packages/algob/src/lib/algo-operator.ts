@@ -14,6 +14,7 @@ import {
   Network
 } from "../types";
 import { CompileOp } from "./compile";
+import { writeTransaction } from "./files";
 import * as tx from "./tx";
 
 const confirmedRound = "confirmed-round";
@@ -57,11 +58,16 @@ export class AlgoOperatorImpl implements AlgoOperator {
   async deployASA (
     name: string, asaDesc: ASADef, flags: ASADeploymentFlags
   ): Promise<ASAInfo> {
-    console.log("Deploying ASA:", name);
+    const message = "Deploying ASA: " + name;
+    console.log(message);
+
     const assetTX = await tx.makeAssetCreateTxn(name, this.algodClient, asaDesc, flags);
     const rawSignedTxn = assetTX.signTxn(flags.creator.sk);
     const txInfo = await this.algodClient.sendRawTransaction(rawSignedTxn).do();
     const txConfirmation = await this.waitForConfirmation(txInfo.txId);
+
+    writeTransaction({ message, txConfirmation });
+
     return {
       creator: flags.creator.addr,
       txId: txInfo.txId,
@@ -72,7 +78,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
   async deployASC (name: string, scParams: object, flags: ASCDeploymentFlags, payFlags: ASCPaymentFlags
   ): Promise<ASCInfo> {
-    console.log("Deploying ASC:", name);
+    const message = "Deploying ASC: " + name;
+    console.log(message);
+
     const result: ASCCache = await this.ensureCompiled(name, false);
     const programb64 = result.compiled;
     const program = new Uint8Array(Buffer.from(programb64, "base64"));
@@ -98,6 +106,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const tranInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
 
     const confirmedTxn = await this.waitForConfirmation(tranInfo.txId);
+
+    writeTransaction({ message, confirmedTxn });
+
     return {
       creator: flags.funder.addr,
       contractAddress: contractAddress,
