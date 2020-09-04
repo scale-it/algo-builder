@@ -17,7 +17,7 @@ import {
 import { loadFromYamlFileSilent } from "./files";
 
 export const scriptsDirectory = "scripts";
-export const artifactsPath = "artifacts";
+const artifactsPath = "artifacts";
 const checkpointFileSuffix = ".cp.yaml";
 
 export function toCheckpointFileName (scriptName: string): string {

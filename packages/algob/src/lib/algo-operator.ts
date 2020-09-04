@@ -1,4 +1,5 @@
 import algosdk from "algosdk";
+import { Console } from "console";
 import { TextEncoder } from "util";
 
 import { createClient } from "../lib/driver";
@@ -14,7 +15,6 @@ import {
   Network
 } from "../types";
 import { CompileOp } from "./compile";
-import { writeTransaction } from "./files";
 import * as tx from "./tx";
 
 const confirmedRound = "confirmed-round";
@@ -65,9 +65,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const rawSignedTxn = assetTX.signTxn(flags.creator.sk);
     const txInfo = await this.algodClient.sendRawTransaction(rawSignedTxn).do();
     const txConfirmation = await this.waitForConfirmation(txInfo.txId);
-
-    writeTransaction({ message, txConfirmation });
-
+    console.log(txConfirmation);
     return {
       creator: flags.creator.addr,
       txId: txInfo.txId,
@@ -107,7 +105,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
     const confirmedTxn = await this.waitForConfirmation(tranInfo.txId);
 
-    writeTransaction({ message, confirmedTxn });
+    console.log(confirmedTxn);
 
     return {
       creator: flags.funder.addr,

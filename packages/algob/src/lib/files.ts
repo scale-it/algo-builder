@@ -4,7 +4,6 @@ import YAML from "yaml";
 
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
-import { artifactsPath } from "./script-checkpoints";
 
 function normalizePaths (mainPath: string, paths: string[]): string[] {
   return paths.map(n => path.relative(mainPath, n));
@@ -64,11 +63,4 @@ export function loadFromYamlFileSilentWithMessage (
     console.warn(messageIfNotPresent);
     return defaultYamlValue(options);
   }
-}
-
-export function writeTransaction (transactionConfirmation: Object): void {
-  fs.appendFileSync(
-    path.join(artifactsPath, "transactionInfo.txt"),
-    YAML.stringify(transactionConfirmation)
-  );
 }
