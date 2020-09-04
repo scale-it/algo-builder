@@ -81,49 +81,6 @@ exports.transferMicroAlgosContract = async function (deployer, fromAccount, toAc
   return await deployer.waitForConfirmation(pendingTx.txId)
 }
 
-
-exports.asaOptIn = async function (deployer, optInAccount, assetID) {
-  // Opting in to an Asset:
-  // Opting in to transact with the new asset
-  // Allow accounts that want recieve the new asset
-  // Have to opt in. To do this they send an asset transfer
-  // of the new asset to themselves
-
-  // First update changing transaction parameters
-  // We will account for changing transaction parameters
-  // before every transaction in this example
-  params = await deployer.algodClient.getTransactionParams().do();
-
-  let sender = optInAccount.addr;
-  let recipient = sender
-  // We set revocationTarget to undefined as
-  // This is not a clawback operation
-  let revocationTarget = undefined;
-  // CloseReaminerTo is set to undefined as
-  // we are not closing out an asset
-  let closeRemainderTo = undefined;
-  // We are sending 0 assets
-  const note = undefined;
-
-  // transferring 0 will enable future transfers
-  const amount = 0;
-
-  // signing and sending "txn" allows sender to begin accepting asset specified by creator and index
-  let opttxn = algosdk.makeAssetTransferTxnWithSuggestedParams(sender, recipient, closeRemainderTo, revocationTarget,
-    amount, note, assetID, params);
-
-  // Must be signed by the account wishing to opt in to the asset
-  rawSignedTxn = opttxn.signTxn(optInAccount.sk);
-  let opttx = (await deployer.algodClient.sendRawTransaction(rawSignedTxn).do());
-  console.log("ASA Opt-in:", {
-    forAccount: sender,
-    assetID: assetID,
-    txId: opttx.txId
-  })
-  // wait for transaction to be confirmed
-  return await deployer.waitForConfirmation(opttx.txId);
-}
-
 exports.transferAsset = async function (deployer, assetID, fromAccount, toAccountAddr, amount) {
   // Transfer New Asset:
 

@@ -18,8 +18,8 @@ async function run(runtimeEnv, deployer) {
   const elonMuskAccount = deployer.accountsByName.get("elon-musk-account");
   const johnAccount = deployer.accountsByName.get("john-account");
 
-  await transferMicroAlgos(deployer, masterAccount, elonMuskAccount.addr, 1000000)
-  await transferMicroAlgos(deployer, masterAccount, johnAccount.addr, 1000000)
+  await transferMicroAlgos(deployer, masterAccount, elonMuskAccount.addr, 101000)
+  await transferMicroAlgos(deployer, masterAccount, johnAccount.addr, 101000)
 
   const asaInfo = await deployer.deployASA("tesla", {
     creator: elonMuskAccount
@@ -32,8 +32,6 @@ async function run(runtimeEnv, deployer) {
 
   const assetID = asaInfo.assetIndex
   await printCreatedAsset(deployer, elonMuskAccount.addr, assetID);
-
-  await asaOptIn(deployer, johnAccount, assetID)
 
   //await printAssetHolding(deployer, elonMuskAccount.addr, assetID);
   //await printAssetHolding(deployer, johnAccount.addr, assetID);

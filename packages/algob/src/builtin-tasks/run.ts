@@ -6,6 +6,7 @@ import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { partitionByFn } from "../internal/util/lists";
 import { runScript } from "../internal/util/scripts-runner";
+import { mkAccountIndex } from "../lib/account";
 import { AlgoOperator, createAlgoOperator } from "../lib/algo-operator";
 import { loadASAFile } from "../lib/asa";
 import { cmpStr } from "../lib/comparators";
@@ -20,9 +21,8 @@ import {
   lsScriptsDir,
   scriptsDirectory
 } from "../lib/script-checkpoints";
-import { AlgobDeployer, AlgobRuntimeEnv, ASADefs, CheckpointRepo, Accounts } from "../types";
+import { Accounts, AlgobDeployer, AlgobRuntimeEnv, ASADefs, CheckpointRepo } from "../types";
 import { TASK_RUN } from "./task-names";
-import { mkAccountIndex } from "../lib/account";
 
 interface Input {
   scripts: string[]

@@ -7,7 +7,7 @@ import {
   DeploymentFlags
 } from "../types";
 
-export async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.SuggestedParams> {
+async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.SuggestedParams> {
   const params = await algocl.getTransactionParams().do();
   // Private chains may have an issue with firstRound
   if (params.firstRound === 0) {
@@ -18,7 +18,8 @@ export async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.Sugges
 }
 
 export async function getSuggestedParamsWithUserDefaults (
-  algocl: tx.Algodv2, userDefaults: DeploymentFlags): Promise<tx.SuggestedParams> {
+  algocl: tx.Algodv2, userDefaults: DeploymentFlags
+): Promise<tx.SuggestedParams> {
   const suggested = await getSuggestedParams(algocl);
   suggested.flatFee = userDefaults.feePerByte === undefined
     ? suggested.flatFee
@@ -35,9 +36,9 @@ export async function getSuggestedParamsWithUserDefaults (
   return suggested;
 }
 
-export async function makeAssetCreateTxn (
-  name: string, algocl: tx.Algodv2, asaDef: ASADef, flags: ASADeploymentFlags
-): Promise<tx.Transaction> {
+export function makeAssetCreateTxn (
+  name: string, asaDef: ASADef, flags: ASADeploymentFlags, txSuggestedParams: tx.SuggestedParams
+): tx.Transaction {
   const encoder = new TextEncoder();
   // https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js#L104
   return tx.makeAssetCreateTxnWithSuggestedParams(
@@ -54,6 +55,26 @@ export async function makeAssetCreateTxn (
     name,
     asaDef.url,
     asaDef.metadataHash,
-    await getSuggestedParamsWithUserDefaults(algocl, flags)
+    txSuggestedParams
   );
+}
+
+export function makeASAOptInTx (
+  addr: string,
+  assetID: number,
+  params: tx.SuggestedParams
+): tx.Transaction {
+  const closeRemainderTo = undefined;
+  const revocationTarget = undefined;
+  const amount = 0;
+  const note = undefined;
+  return tx.makeAssetTransferTxnWithSuggestedParams(
+    addr,
+    addr,
+    closeRemainderTo,
+    revocationTarget,
+    amount,
+    note,
+    assetID,
+    params);
 }

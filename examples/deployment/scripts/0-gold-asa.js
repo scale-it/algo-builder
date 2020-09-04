@@ -19,8 +19,8 @@ async function run(runtimeEnv, deployer) {
   const goldOwnerAccount = deployer.accountsByName.get("gold-owner-account");
   const johnAccount = deployer.accountsByName.get("john-account");
 
-  await transferMicroAlgos(deployer, masterAccount, goldOwnerAccount.addr, 1000000)
-  await transferMicroAlgos(deployer, masterAccount, johnAccount.addr, 1000000)
+  await transferMicroAlgos(deployer, masterAccount, goldOwnerAccount.addr, 101000)
+  await transferMicroAlgos(deployer, masterAccount, johnAccount.addr, 101000)
 
   const asaInfo = await deployer.deployASA("gold", {
     creator: goldOwnerAccount
@@ -33,8 +33,6 @@ async function run(runtimeEnv, deployer) {
 
   const assetID = asaInfo.assetIndex
   await printCreatedAsset(deployer, goldOwnerAccount.addr, assetID);
-
-  await asaOptIn(deployer, johnAccount, assetID)
 
   //await printAssetHolding(deployer, goldOwnerAccount.addr, assetID);
   //await printAssetHolding(deployer, johnAccount.addr, assetID);

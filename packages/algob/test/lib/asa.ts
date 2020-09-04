@@ -8,7 +8,7 @@ import { expectBuilderError } from "../helpers/errors";
 const namedAccount: Account = {
   name: "hi",
   addr: "addr",
-  sk: new Uint8Array(123)
+  sk: new Uint8Array(1)
 };
 
 describe("ASA parser", () => {

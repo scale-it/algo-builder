@@ -672,11 +672,32 @@ Please check your ASA file`
     number: 901,
     message: `Invalid ASA definition: '%filename%'.
 Opt-in account not found by name: %optInAccName%`,
-    title: "Invalid ASA definition",
+    title: "Opt-in account not found.",
     description: `Invalid ASA definition: '%filename%'.
 Opt-in account not found by name: %optInAccName%
 
 Please check your ASA and config files`
+  },
+  ASA_OPT_IN_ACCOUNT_INSUFFICIENT_BALANCE: {
+    number: 902,
+    message: `Account '%accountName%' has insufficient usable balance (%balance% out of %requiredBalance%) to opt-in to ASA '%asaName%'.`,
+    title: "Account has insufficient usable balance to opt-in to ASA.",
+    description: `Account '%accountName%' has insufficient usable balance (%balance% out of %requiredBalance%) to opt-in to ASA '%asaName%'.
+
+Please transfer more funds`
+  },
+  ASA_OPT_IN_ACCOUNT_NOT_FOUND: {
+    number: 903,
+    message: `Account with name '%accountName%' was not found.`,
+    title: "Account not found",
+    description: `Account with name '%accountName%' was not found.`
+  },
+  ASA_TRIED_TO_OPT_IN_CREATOR: {
+    number: 904,
+    message: `Account with name '%accountName%' is the creator of ASA. It's automatically opt-in.`,
+    title: "Account opt-in is not possible",
+    description: `Account with name '%accountName%' is the creator of ASA. It's automatically opt-in.
+Remove the account from the optInAccNames in asa.yaml`
   }
 };
 

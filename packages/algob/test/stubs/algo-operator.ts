@@ -3,7 +3,7 @@ import { Algodv2 } from "algosdk";
 
 import { AlgoOperator } from "../../src/lib/algo-operator";
 import {
-  Account,
+  Accounts,
   ASADef,
   ASADeploymentFlags,
   ASAInfo,
@@ -23,10 +23,10 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   async deployASA (
-    name: string, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account
+    name: string, asaDesc: ASADef, flags: ASADeploymentFlags, accounts: Accounts
   ): Promise<ASAInfo> {
     return {
-      creator: account.addr + "-get-address-dry-run",
+      creator: flags.creator.addr + "-get-address-dry-run",
       txId: "tx-id-dry-run",
       assetIndex: -1,
       confirmedRound: -1

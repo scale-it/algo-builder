@@ -18,6 +18,7 @@ declare module 'algosdk' {
     getTransactionParams(): Action<SuggestedParams>
     pendingTransactionInformation(txId: string): Action<ConfirmedTxInfo>
     statusAfterBlock(lastround: number): Action<any>
+    accountInformation(address: Address): Action<AccountInfo>
   }
 
   interface Account {
@@ -241,5 +242,30 @@ declare module 'algosdk' {
   }
 
   type TxnBytes = Uint8Array
+
+  type Address = string
+
+  interface AccountAssetInfo {
+    amount: number,
+    'asset-id': number,
+    creator: Address,
+    'is-frozen': false
+  }
+
+  interface AccountInfo {
+    address: string
+    assets: AccountAssetInfo[]
+    amount: number
+    "amount-without-pending-rewards": number
+    'pending-rewards': number
+    'reward-base': number
+    rewards: number
+    round: number
+    status: string
+    'apps-local-state': any
+    'apps-total-schema': any
+    'created-apps': any
+    'created-assets': any
+  }
 
 }
