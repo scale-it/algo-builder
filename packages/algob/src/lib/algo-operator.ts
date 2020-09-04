@@ -1,5 +1,4 @@
 import algosdk from "algosdk";
-import { Console } from "console";
 import { TextEncoder } from "util";
 
 import { createClient } from "../lib/driver";
