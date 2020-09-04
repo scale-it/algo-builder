@@ -25,20 +25,21 @@ goal network start -r ~/.algorand-local/
 goal node start -d ~/.algorand-local/Node/
 ```
 
-### Currently the example needs to be linked with algob:
-```
-git clone https://github.com/scale-it/algorand-builder/
-cd algorand-builder/packages/algob
-yarn
-yarn build
-yarn link
-cd ../../examples/deployment/
-yarn link algob
-algob help
-```
+### Add algob and start using it
 
-### Change your keys
-Use your editor to edit `algob.config.js`
+We need to add algob as the package dependency
+
+    yarn add algob
+
+After that, `algob` will be added to a local context. To use it we either access `algob` through `node_modules`, or through `yarn run`. We advice to use the latter one.
+
+The example is already initialized. So we don't need to run `yarn run algob init .`
+
+### Update config
+
+Open `algob.config.js` and update:
+
++ Update `master-account`. It must be an account with some ALGOs - it will be used for deployment and for activating / funding other accounts.
 
 ### Run
 ```
