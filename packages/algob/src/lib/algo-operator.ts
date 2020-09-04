@@ -57,8 +57,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   async deployASA (
     name: string, asaDesc: ASADef, flags: ASADeploymentFlags
   ): Promise<ASAInfo> {
-    const message = "Deploying ASA: " + name;
-    console.log(message);
+    console.log("Deploying ASA: ", name);
 
     const assetTX = await tx.makeAssetCreateTxn(name, this.algodClient, asaDesc, flags);
     const rawSignedTxn = assetTX.signTxn(flags.creator.sk);
@@ -75,8 +74,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
   async deployASC (name: string, scParams: object, flags: ASCDeploymentFlags, payFlags: ASCPaymentFlags
   ): Promise<ASCInfo> {
-    const message = "Deploying ASC: " + name;
-    console.log(message);
+    console.log("Deploying ASC: ", name);
 
     const result: ASCCache = await this.ensureCompiled(name, false);
     const programb64 = result.compiled;
