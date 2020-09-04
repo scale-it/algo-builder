@@ -129,7 +129,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       const accountInfo = await this.algodClient.accountInformation(account.addr).do();
       const requiredAmount = optInTxFee + ALGORAND_ASA_OWNERSHIP_COST;
       const usableAmount = this.getUsableAccBalance(accountInfo);
-      if (this.getUsableAccBalance(accountInfo) < requiredAmount) {
+      if (usableAmount < requiredAmount) {
         throw new BuilderError(
           ERRORS.SCRIPT.ASA_OPT_IN_ACCOUNT_INSUFFICIENT_BALANCE, {
             accountName: accName,
