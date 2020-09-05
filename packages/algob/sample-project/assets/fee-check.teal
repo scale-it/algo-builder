@@ -1,4 +1,4 @@
 // Check if the provided fee is at least 10,000 microalgos
 txn Fee
 int 10000
-<=
+>=
