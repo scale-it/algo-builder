@@ -4,10 +4,11 @@ import { TextEncoder } from "util";
 import {
   ASADef,
   ASADeploymentFlags,
-  DeploymentFlags
+  TxParams
 } from "../types";
+import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
 
-export async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.SuggestedParams> {
+async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.SuggestedParams> {
   const params = await algocl.getTransactionParams().do();
   // Private chains may have an issue with firstRound
   if (params.firstRound === 0) {
@@ -17,22 +18,19 @@ export async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.Sugges
   return params;
 }
 
-export async function getSuggestedParamsWithUserDefaults (
-  algocl: tx.Algodv2, userDefaults: DeploymentFlags): Promise<tx.SuggestedParams> {
-  const suggested = await getSuggestedParams(algocl);
-  suggested.flatFee = userDefaults.feePerByte === undefined
-    ? suggested.flatFee
-    : !userDefaults.feePerByte;
-  suggested.fee = userDefaults.totalFee === undefined
-    ? suggested.fee
-    : userDefaults.totalFee;
-  suggested.firstRound = userDefaults.firstValid === undefined
-    ? suggested.firstRound
-    : userDefaults.firstValid;
-  suggested.lastRound = userDefaults.firstValid === undefined || userDefaults.validRounds === undefined
-    ? suggested.lastRound
+export async function mkSuggestedParams (
+  algocl: tx.Algodv2, userDefaults: TxParams): Promise<tx.SuggestedParams> {
+  const s = await getSuggestedParams(algocl);
+
+  s.flatFee = userDefaults.totalFee !== undefined;
+  s.fee = userDefaults.totalFee ?? userDefaults.feePerByte ?? ALGORAND_MIN_TX_FEE;
+  if (s.flatFee) s.fee = Math.max(s.fee, ALGORAND_MIN_TX_FEE);
+
+  s.firstRound = userDefaults.firstValid ?? s.firstRound;
+  s.lastRound = userDefaults.firstValid === undefined || userDefaults.validRounds === undefined
+    ? s.lastRound
     : userDefaults.firstValid + userDefaults.validRounds;
-  return suggested;
+  return s;
 }
 
 export async function makeAssetCreateTxn (
@@ -54,6 +52,6 @@ export async function makeAssetCreateTxn (
     name,
     asaDef.url,
     asaDef.metadataHash,
-    await getSuggestedParamsWithUserDefaults(algocl, flags)
+    await mkSuggestedParams(algocl, flags)
   );
 }

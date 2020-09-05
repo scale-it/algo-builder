@@ -343,18 +343,22 @@ export interface Checkpoint {
 export type ASADef = z.infer<typeof ASADefSchema>;
 export type ASADefs = z.infer<typeof ASADefsSchema>;
 
-export interface DeploymentFlags {
+export interface TxParams {
+  // feePerByte or totalFee is used to set the appropriate transaction fee parameter.
+  // SDK expects`fee: number` and boolean `flatFee`. But the API expects only one parameter:
+  // `fee` Here we use feePerByte and totalFee - both as numberic parameters. We think that
+  // this is more explicit. If both are specified, totalFee takes precedence.
   feePerByte?: number
   totalFee?: number
   firstValid?: number
   validRounds?: number
 }
 
-export interface ASADeploymentFlags extends DeploymentFlags {
+export interface ASADeploymentFlags extends TxParams {
   creator: Account
 }
 
-export interface ASCPaymentFlags extends DeploymentFlags {
+export interface ASCPaymentFlags extends TxParams {
   rawTxParamsAmt? : number
   closeToRemainder?: string
   note?: string
