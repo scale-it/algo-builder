@@ -8,18 +8,18 @@ async function run(runtimeEnv, deployer) {
   if (deployer.isDeployMode) {
     await deployer.deployASA("minimumASA1", {
       creator: deployer.accounts[0],
-      //totalFee: 1001,
+      //totalFee: 10001,
       feePerByte: 10,
-      //firstValid: 10,
+      //firstValid: 2,
       validRounds: 1002
     })
   }
   if (deployer.isDeployMode) {
     await deployer.deployASA("allFieldASA", {
       creator: deployer.accounts[0],
-      //totalFee: 1001,
+      //totalFee: 10001,
       feePerByte: 10,
-      //firstValid: 10,
+      //firstValid: 2,
       validRounds: 1002
     })
   }

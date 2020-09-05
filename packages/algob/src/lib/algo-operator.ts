@@ -18,6 +18,8 @@ import * as tx from "./tx";
 
 const confirmedRound = "confirmed-round";
 
+export const ALGORAND_MIN_TX_FEE = 1000;
+
 export function createAlgoOperator (network: Network): AlgoOperator {
   return new AlgoOperatorImpl(createClient(network));
 }
@@ -81,7 +83,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const program = new Uint8Array(Buffer.from(programb64, "base64"));
     const lsig = algosdk.makeLogicSig(program, scParams);
 
-    const params = await tx.getSuggestedParamsWithUserDefaults(this.algodClient, payFlags);
+    const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
 
     // ASC1 signed by funder
     lsig.sign(flags.funder.sk);
