@@ -22,12 +22,14 @@ algob init my-project
 ```
 This will create a directory `my-project` and put multiple files into it.
 
+
 ## Configuration
 
 One of the most important files in the project is your configuration file: `algob.config.js`.
 It can contain multiple network configurations and configured accounts.
 
 Further information about the configuration can be found [here](/docs/algob-config.md).
+
 
 ## User script execution
 Tasks `algob run` and `algob deploy` can run user-defined code to interact with Algorand blockchain node.
