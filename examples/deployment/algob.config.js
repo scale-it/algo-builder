@@ -18,6 +18,8 @@
 //}]
 
 const { mkAccounts } = require("algob");
+const { loadKMDAddresses } = require("algob/src/lib/account");
+
 let accounts = mkAccounts([
   {
     name: "master-account",
@@ -51,6 +53,24 @@ let accounts = mkAccounts([
     mnemonic: "found empower message suit siege arrive dad reform museum cake evoke broom comfort fluid flower wheat gasp baby auction tuna sick case camera about flip"
   }
 ]);
+
+// KMD credentials
+let KMDConfig = {
+  host: "127.0.0.1",
+  port: 123,
+  token: "sfsd"
+}
+
+let wallet = {
+  name: "WALLET1",
+  password: "pass"
+}
+
+// load KMD Addresses from given wallet - (addr, secret key)
+let kmdAddresses = loadKMDAddresses(KMDConfig.host, KMDConfig.token, KMDConfig.port, 
+  wallet.name, wallet.password);
+
+console.log(kmdAddresses);
 
 // const { loadAccountsFromFileSync } = require("algob");
 // // Example: accounts loaded from a file:

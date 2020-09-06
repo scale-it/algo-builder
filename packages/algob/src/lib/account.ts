@@ -1,11 +1,11 @@
-import { Account as AccountSDK, mnemonicToSecretKey } from "algosdk";
+import { Account as AccountSDK, Kmd, mnemonicToSecretKey } from "algosdk";
 import * as fs from "fs";
 import YAML from "yaml";
 
 import CfgErrors, { ErrorPutter } from "../internal/core/config/config-errors";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
-import type { Account, AccountDef, Accounts, HDAccount, MnemonicAccount } from "../types";
+import type { Account, AccountDef, Accounts, HDAccount, MnemonicAccount, wallet } from "../types";
 
 export function mkAccounts (input: AccountDef[]): Account[] {
   const accounts: Account[] = [];
@@ -70,4 +70,28 @@ export function mkAccountIndex (accountList: Account[]): Accounts {
     out.set(a.name, a);
   }
   return out;
+}
+
+export async function loadKMDAddresses (host: string, token: string, port: number,
+  walletName: string, password: string): Promise<AccountSDK[]> {
+  const kmdclient = Kmd(token, host, port);
+  var walletid = null;
+  const wallets = (await kmdclient.listWallets()).wallets;
+  wallets.forEach(function (arrayItem: wallet) {
+    if (arrayItem.name === walletName) {
+      walletid = arrayItem.id;
+    }
+  });
+
+  const wallethandle = (await kmdclient.initWalletHandle(walletid, password)).wallet_handle_token;
+  const address = await kmdclient.listKeys(wallethandle);
+  const mkaccount: AccountSDK[] = [];
+  for (const addr of address.addresses) {
+    const accountKey = (await kmdclient.exportKey(wallethandle, password, addr));
+    mkaccount.push({ addr: addr, sk: accountKey.private_key });
+  }
+
+  console.log(mkaccount);
+
+  return mkaccount;
 }
