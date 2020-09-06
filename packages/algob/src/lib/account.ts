@@ -76,9 +76,7 @@ export async function loadKMDAddresses (host: string, token: string, port: numbe
   walletName: string, password: string): Promise<AccountSDK[]> {
   const kmdclient: Kmd = await new Kmd(token, host, port);
   let walletid = '';
-  console.log("OK");
   const wallets = (await kmdclient.listWallets()).wallets;
-  console.log("HEy", wallets);
   for (const arrayItem of wallets) {
     if (arrayItem.name === walletName) {
       walletid = arrayItem.id;
@@ -91,6 +89,5 @@ export async function loadKMDAddresses (host: string, token: string, port: numbe
     const accountKey = (await kmdclient.exportKey(wallethandle, password, addr));
     mkaccount.push({ addr: addr, sk: accountKey.private_key });
   }
-  await console.log(mkaccount);
   return mkaccount;
 }
