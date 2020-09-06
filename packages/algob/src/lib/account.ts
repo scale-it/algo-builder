@@ -74,15 +74,16 @@ export function mkAccountIndex (accountList: Account[]): Accounts {
 
 export async function loadKMDAddresses (host: string, token: string, port: number,
   walletName: string, password: string): Promise<AccountSDK[]> {
-  const kmdclient = Kmd(token, host, port);
-  var walletid = null;
+  const kmdclient: Kmd = await new Kmd(token, host, port);
+  let walletid = '';
+  console.log("OK");
   const wallets = (await kmdclient.listWallets()).wallets;
-  wallets.forEach(function (arrayItem: wallet) {
+  console.log("HEy", wallets);
+  for (const arrayItem of wallets) {
     if (arrayItem.name === walletName) {
       walletid = arrayItem.id;
     }
-  });
-
+  }
   const wallethandle = (await kmdclient.initWalletHandle(walletid, password)).wallet_handle_token;
   const address = await kmdclient.listKeys(wallethandle);
   const mkaccount: AccountSDK[] = [];
@@ -90,8 +91,6 @@ export async function loadKMDAddresses (host: string, token: string, port: numbe
     const accountKey = (await kmdclient.exportKey(wallethandle, password, addr));
     mkaccount.push({ addr: addr, sk: accountKey.private_key });
   }
-
-  console.log(mkaccount);
-
+  await console.log(mkaccount);
   return mkaccount;
 }

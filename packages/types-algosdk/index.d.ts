@@ -20,6 +20,42 @@ declare module 'algosdk' {
     statusAfterBlock(lastround: number): Action<any>
   }
 
+ class Kmd {
+    constructor(token: string, baseServer: string, port: number);
+    
+    versions(): Promise<any>;
+    listWallets(): Promise<wallet>;
+    initWalletHandle(walletid: string, password: string): Promise<walletHandle>
+    listKeys(wallet_handle_token: string): Promise<Keys>;
+    exportKey(wallet_handle_token: string, Password: string, address: string): 
+    Promise<privateKey>
+  }
+
+  interface wallet {
+    wallets: walletDetails[]
+  }
+
+  interface walletDetails {
+    driver_name: string,
+    driver_version: number,
+    id: string,
+    mnemonic_ux: boolean,
+    name: string, 
+    supported_txs: string[]
+  }
+
+  interface privateKey {
+    private_key: Uint8Array
+  }
+
+  interface Keys {
+    addresses: string[]
+  }
+
+  interface walletHandle {
+    wallet_handle_token: string
+  }
+
   interface Account {
     addr: string
     sk: Uint8Array
@@ -91,7 +127,7 @@ declare module 'algosdk' {
 
   export function Indexer (...args: any[]): any;
 
-  export function Kmd(token: any, baseServer: any, port: any): any;
+  //export function Kmd(token: any, baseServer: any, port: any): any;
 
   export function algosToMicroalgos (algos: any): any;
 
