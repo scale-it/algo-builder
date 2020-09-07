@@ -61,7 +61,7 @@ Each network configuration requires a list of accounts. These accounts are then 
           password: "testpassword"
         }
 
-        let kmdAddresses = loadKMDAddresses(KMDConfig.host, KMDConfig.token, KMDConfig.port, 
+        let kmdAddresses = await loadKMDAddresses(KMDConfig.host, KMDConfig.token, KMDConfig.port, 
           wallet.name, wallet.password);
         console.log(kmdAddresses);
 
