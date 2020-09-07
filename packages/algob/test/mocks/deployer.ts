@@ -35,7 +35,7 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   }
 
-  optInToASA (name: string, account: Account, flags: ASADeploymentFlags): Promise<void> {
+  optInToASA (name: string, accountName: string, flags: ASADeploymentFlags): Promise<void> {
     throw new Error("Not implemented");
   }
 }

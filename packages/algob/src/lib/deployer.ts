@@ -88,6 +88,17 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     return found;
   }
 
+  private _getAccount (name: string): Account {
+    const found = this.accountsByName.get(name);
+    if (!found) {
+      throw new BuilderError(
+        ERRORS.BUILTIN_TASKS.ACCOUNT_NOT_FOUND, {
+          assetName: name
+        });
+    }
+    return found;
+  }
+
   async deployASA (name: string, flags: ASADeploymentFlags): Promise<ASAInfo> {
     if (this.loadedAsaDefs[name] === undefined) {
       throw new BuilderError(
@@ -130,8 +141,12 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     return await this.algoOp.waitForConfirmation(txId);
   }
 
-  async optInToASA (name: string, account: Account, flags: DeploymentFlags): Promise<void> {
-    await this.algoOp.optInToASA(name, this._getASAInfo(name).assetIndex, account, flags);
+  async optInToASA (name: string, accountName: string, flags: DeploymentFlags): Promise<void> {
+    await this.algoOp.optInToASA(
+      name,
+      this._getASAInfo(name).assetIndex,
+      this._getAccount(accountName),
+      flags);
   }
 }
 
@@ -198,7 +213,7 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
     return await this._internal.waitForConfirmation(txId);
   }
 
-  optInToASA (name: string, account: Account, flags: ASADeploymentFlags): Promise<void> {
+  optInToASA (name: string, accountName: string, flags: ASADeploymentFlags): Promise<void> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "optInToASA"
     });

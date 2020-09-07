@@ -401,7 +401,7 @@ export interface AlgobDeployer {
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
 
   // Output of these functions is undefined. It's not known what to save to CP
-  optInToASA: (name: string, account: Account, flags: ASADeploymentFlags) => Promise<void>
+  optInToASA: (name: string, accountName: string, flags: ASADeploymentFlags) => Promise<void>
 }
 
 // ************************

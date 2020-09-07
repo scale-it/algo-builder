@@ -577,6 +577,15 @@ Assets are not visible by previous scripts.
 
 Use 'deployer.isDefined(name)' to check if the name is already used in any checkpoint.
 `
+  },
+  ACCOUNT_NOT_FOUND: {
+    number: 613,
+    message: "Account with given name is not found: %assetName%",
+    title: "Account with given name is not found",
+    description: `Account with given name is not found.
+
+Please check your config file.
+`
   }
 };
 
