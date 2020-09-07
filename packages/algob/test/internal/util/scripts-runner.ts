@@ -2,10 +2,10 @@ import { assert } from "chai";
 import fs from "fs";
 
 import { ERRORS } from "../../../src/internal/core/errors-list";
+import { AlgobDeployerReadOnlyImpl } from "../../../src/internal/deployer";
 import {
   runScript
 } from "../../../src/internal/util/scripts-runner";
-import { AlgobDeployerReadOnlyImpl } from "../../../src/lib/deployer";
 import { expectBuilderErrorAsync } from "../../helpers/errors";
 import { mkAlgobEnv } from "../../helpers/params";
 import { testFixtureOutputFile, useCleanFixtureProject } from "../../helpers/project";

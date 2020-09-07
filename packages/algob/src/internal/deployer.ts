@@ -1,7 +1,6 @@
 import * as algosdk from "algosdk";
 
-import { BuilderError } from "../internal/core/errors";
-import { ERRORS } from "../internal/core/errors-list";
+import { AlgoOperator } from "../lib/algo-operator";
 import {
   Account,
   Accounts,
@@ -16,7 +15,8 @@ import {
   CheckpointRepo,
   TxParams
 } from "../types";
-import { AlgoOperator } from "./algo-operator";
+import { BuilderError } from "./core/errors";
+import { ERRORS } from "./core/errors-list";
 
 // This class is what user interacts with in deploy task
 export class AlgobDeployerImpl implements AlgobDeployer {
