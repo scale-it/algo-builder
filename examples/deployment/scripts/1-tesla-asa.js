@@ -19,7 +19,6 @@ async function run(runtimeEnv, deployer) {
   const johnAccount = deployer.accountsByName.get("john-account");
 
   await transferMicroAlgos(deployer, masterAccount, elonMuskAccount.addr, 101000)
-  await transferMicroAlgos(deployer, masterAccount, johnAccount.addr, 101000)
 
   const asaInfo = await deployer.deployASA("tesla", {
     creator: elonMuskAccount
@@ -29,6 +28,15 @@ async function run(runtimeEnv, deployer) {
     //validRounds: 1002
   })
   console.log(asaInfo)
+
+  // Make sure you have enough ALGO tokens in the account.
+  await transferMicroAlgos(deployer, masterAccount, johnAccount.addr, 101000)
+  await deployer.optInToASA("tesla", "john-account", {
+    //totalFee: 1001,
+    //feePerByte: 10,
+    //firstValid: 10,
+    //validRounds: 1002
+  })
 
   const assetID = asaInfo.assetIndex
   await printCreatedAsset(deployer, elonMuskAccount.addr, assetID);
