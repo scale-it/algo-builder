@@ -29,8 +29,8 @@ Checkpoints support additional user's metadata persistence.
 This metadata is provided by the script itself by using `setMetadata`.
 Editing is only allowed in `algob deploy` task.
 ```
-deployer.getMetadata("metadata name")
-deployer.setMetadata("metadata name")
+deployer.getMetadata(key: string)
+deployer.putMetadata (key: string, value: string)
 ```
 
 The checkpoint files are only saved after a successful `deploy` task.
@@ -52,4 +52,3 @@ Currently it's possible to edit these files by hand but it may be decided to dis
 
 For more details on checkpoint parameters and their specific types please refer to `Checkpoint` type in [types.ts](https://github.com/scale-it/algorand-builder/blob/master/packages/algob/src/types.ts).
 Make sure that your local `algob` version matches the version from the link.
-

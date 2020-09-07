@@ -14,9 +14,11 @@ Algorand builder is an trustworthy framework for Algorand dapps (Decentralized A
 To attract more web developers we plan to build a JavaScript DSL for TEAL with TypeScript bindings (for TEAL inputs). Furthermore we would like to collaborate with SDKs teams to improve the overall development experience and make it ready for enterprise projects. Finally we want to collaborate with Algorand Wallet team to ensure a smooth wallet integration.
 
 
-### Specification
+### Documentation
 
 The project specification is [published here](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
+
+User documentation is available in [/docs](docs/README.md).
 
 ## Requirements
 
@@ -32,7 +34,6 @@ Make sure that the node you are connecting to has a `"EnableDeveloperAPI": true`
 
 # Usage
 
-See [user script documentation](docs/user-script-execution.md) for info about custom scripts and deployments.
 
 
 ## Quick start
@@ -43,29 +44,27 @@ See [user script documentation](docs/user-script-execution.md) for info about cu
         cd my_new_project
         yarn init
 
-1. Install algob in the project:
+1. Install algob in the project and initialize the workspace.
 
         yarn add algob
-        yarn init .
+        yarn run algob init .
+
+    The `init` command expects a directory where to initialize the workspace and creates sample project files there. Refer to [/docs/README](docs/README.md) for more information.
 
 1. Check that it was installed correctly:
 
         yarn run algob help
-
-1. Initalize algob workspace
-
-        yarn init .
 
 1. Update the `algob.config.js` file. Make sure you have an access to a running Algorand node (`algod`). Check Algorand instructions how to install and run it.
     * set correct host address, port and token
     * you can define multiple networks.
 
 1. Add assets and smart-contracts in the `assets` directory.
-1. Add deployment scripts in `scritps` directory.
+1. Add deployment scripts in `scripts` directory.
 1. Run `yarn run algob deploy` to compile and deploy everything.
 1. To run `algob` on different network (by default the `default` network is used) use
 
-        yarn run algob --netowork <other_netowork_name>  <command>
+        yarn run algob --network <other_network_name>  <command>
 
 
 ## Using algob with a TypeScript project

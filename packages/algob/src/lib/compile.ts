@@ -33,7 +33,8 @@ export class CompileOp {
     const [teal, thash] = this.readTealAndHash(path.join(ASSETS_DIR, filename));
     let a = await this.readArtifact(filename);
     if (!force && a !== undefined && a.srcHash === thash) {
-      console.log(`smart-contract source "${filename}" didn't change, skipping.`);
+      // '\x1b[33m%s\x1b[0m' for yellow color warning
+      console.warn('\x1b[33m%s\x1b[0m', `smart-contract source "${filename}" didn't change, skipping.`);
       return a;
     }
     console.log("compiling", filename);

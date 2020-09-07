@@ -14,7 +14,7 @@ import {
   ASCInfo,
   ASCPaymentFlags,
   CheckpointRepo,
-  DeploymentFlags
+  TxParams
 } from "../types";
 import { AlgoOperator } from "./algo-operator";
 
@@ -141,7 +141,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     return await this.algoOp.waitForConfirmation(txId);
   }
 
-  async optInToASA (name: string, accountName: string, flags: DeploymentFlags): Promise<void> {
+  async optInToASA (name: string, accountName: string, flags: TxParams): Promise<void> {
     await this.algoOp.optInToASA(
       name,
       this._getASAInfo(name).assetIndex,

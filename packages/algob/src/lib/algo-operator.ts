@@ -14,8 +14,8 @@ import {
   ASCDeploymentFlags,
   ASCInfo,
   ASCPaymentFlags,
-  DeploymentFlags,
-  Network
+  Network,
+  TxParams
 } from "../types";
 import { CompileOp } from "./compile";
 import * as tx from "./tx";
@@ -23,7 +23,7 @@ import * as tx from "./tx";
 const confirmedRound = "confirmed-round";
 
 // This was not exported in algosdk
-const ALGORAND_MIN_TX_FEE = 1000;
+export const ALGORAND_MIN_TX_FEE = 1000;
 // Extracted from interaction with Algorand node (100k microAlgos)
 const ALGORAND_ASA_OWNERSHIP_COST = 100000;
 
@@ -40,7 +40,7 @@ export interface AlgoOperator {
   ) => Promise<ASCInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
   optInToASA: (
-    asaName: string, assetIndex: number, account: Account, params: DeploymentFlags
+    asaName: string, assetIndex: number, account: Account, params: TxParams
   ) => Promise<void>
 }
 
@@ -105,9 +105,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
   }
 
   async optInToASA (
-    asaName: string, assetIndex: number, account: Account, flags: DeploymentFlags
+    asaName: string, assetIndex: number, account: Account, flags: TxParams
   ): Promise<void> {
-    const txParams = await tx.getSuggestedParamsWithUserDefaults(this.algodClient, flags);
+    const txParams = await tx.mkSuggestedParams(this.algodClient, flags);
     await this._optInToASA(asaName, assetIndex, account, txParams);
   }
 
@@ -159,7 +159,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts
   ): Promise<ASAInfo> {
     console.log("Deploying ASA:", name);
-    const txParams = await tx.getSuggestedParamsWithUserDefaults(this.algodClient, flags);
+    const txParams = await tx.mkSuggestedParams(this.algodClient, flags);
     const optInAccounts = await this.checkBalanceForASAOptInTx(
       name, txParams, asaDef, accounts, flags.creator);
     const assetTX = tx.makeAssetCreateTxn(name, asaDef, flags, txParams);
@@ -168,6 +168,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const txConfirmation = await this.waitForConfirmation(txInfo.txId);
     const assetIndex = txConfirmation["asset-index"];
     await this.optInToASAMultiple(name, assetIndex, optInAccounts, txParams);
+    console.log(txConfirmation);
     return {
       creator: flags.creator.addr,
       txId: txInfo.txId,
@@ -184,7 +185,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const program = new Uint8Array(Buffer.from(programb64, "base64"));
     const lsig = algosdk.makeLogicSig(program, scParams);
 
-    const txParams = await tx.getSuggestedParamsWithUserDefaults(this.algodClient, payFlags);
+    const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
 
     // ASC1 signed by funder
     lsig.sign(flags.funder.sk);
@@ -197,13 +198,16 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const tran = algosdk.makePaymentTxnWithSuggestedParams(funder, contractAddress,
       flags.fundingMicroAlgo, payFlags.closeToRemainder,
       payFlags.note ? encoder.encode(payFlags.note) : undefined,
-      txParams);
+      params);
 
     const signedTxn = tran.signTxn(flags.funder.sk);
 
     const tranInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
 
     const confirmedTxn = await this.waitForConfirmation(tranInfo.txId);
+
+    console.log(confirmedTxn);
+
     return {
       creator: flags.funder.addr,
       contractAddress: contractAddress,

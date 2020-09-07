@@ -12,7 +12,7 @@ import {
   ASCDeploymentFlags,
   ASCInfo,
   ASCPaymentFlags,
-  DeploymentFlags
+  TxParams
 } from "../../src/types";
 
 export class AlgoOperatorDryRunImpl implements AlgoOperator {
@@ -57,7 +57,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     };
   }
 
-  optInToASA (asaName: string, assetIndex: number, account: Account, params: DeploymentFlags): Promise<void> {
+  optInToASA (asaName: string, assetIndex: number, account: Account, params: TxParams): Promise<void> {
     throw new Error("Method not implemented.");
   }
 }
