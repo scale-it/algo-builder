@@ -125,7 +125,7 @@ export async function loadEnvironmentAndArgs (
   unparsedCLAs: string[]
 ): Promise<EnvAndArgs> {
   const ctx = BuilderContext.createBuilderContext();
-  const config = loadConfigAndTasks(runtimeArgs);
+  const config = await loadConfigAndTasks(runtimeArgs);
 
   const envExtenders = ctx.extendersManager.getExtenders();
   const taskDefinitions = ctx.tasksDSL.getTaskDefinitions();

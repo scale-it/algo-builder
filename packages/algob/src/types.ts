@@ -34,14 +34,10 @@ export type AccountDef =
   | HDAccount
   | Account;
 
-export interface wallet {
-  name: string
-  id: number
-}
-
 interface CommonNetworkConfig {
   accounts: Account[]
   chainName?: string
+  kmdAddresses?: Promise<AccountSDK[]>
   // from?: string;
   // TODO: timeout?: number;
 }

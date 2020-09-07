@@ -16,7 +16,7 @@ import { ERRORS } from "../../../../src/internal/core/errors-list";
 import { resetBuilderContext } from "../../../../src/internal/reset";
 import { assertAccountsEqual } from "../../../helpers/assert-methods";
 import { useEnvironment } from "../../../helpers/environment";
-import { expectBuilderError } from "../../../helpers/errors";
+import { expectBuilderErrorAsync } from "../../../helpers/errors";
 import {
   getFixtureProjectPath,
   useFixtureProject
@@ -48,10 +48,10 @@ describe("config loading", function () {
       });
 
       it("Should throw the right error", function () {
-        expectBuilderError(
+        expectBuilderErrorAsync(
           () => loadConfigAndTasks(),
           ERRORS.GENERAL.INVALID_CONFIG
-        );
+        ).catch((err) => console.log(err));
       });
     });
   });
@@ -68,32 +68,36 @@ describe("config loading", function () {
     });
 
     it("should accept a relative path from the CWD", function () {
-      const config = loadConfigAndTasks({ config: "config.js" });
+      (async () => {
+        const config = await loadConfigAndTasks({ config: "config.js" });
 
-      if (!config.paths) {
-        assert.fail("Project was not loaded");
-      }
+        if (!config.paths) {
+          assert.fail("Project was not loaded");
+        }
 
-      assert.equal(
-        config.paths.configFile,
-        path.normalize(path.join(process.cwd(), "config.js"))
-      );
+        assert.equal(
+          config.paths.configFile,
+          path.normalize(path.join(process.cwd(), "config.js"))
+        );
+      })().catch((err) => console.log(err));
     });
 
     it("should accept an absolute path", function () {
-      const fixtureDir = getFixtureProjectPath("custom-config-file");
-      const config = loadConfigAndTasks({
-        config: path.join(fixtureDir, "config.js")
-      });
+      (async () => {
+        const fixtureDir = getFixtureProjectPath("custom-config-file");
+        const config = await loadConfigAndTasks({
+          config: path.join(fixtureDir, "config.js")
+        });
 
-      if (!config.paths) {
-        assert.fail("Project was not loaded");
-      }
+        if (!config.paths) {
+          assert.fail("Project was not loaded");
+        }
 
-      assert.equal(
-        config.paths.configFile,
-        path.normalize(path.join(process.cwd(), "config.js"))
-      );
+        assert.equal(
+          config.paths.configFile,
+          path.normalize(path.join(process.cwd(), "config.js"))
+        );
+      })().catch((err) => console.log(err));
     });
   });
 
@@ -126,28 +130,30 @@ describe("config loading", function () {
     });
 
     it("should remove everything from global state after loading", function () {
-      const globalAsAny: any = global;
+      (async () => {
+        const globalAsAny: any = global;
 
-      BuilderContext.createBuilderContext();
-      loadConfigAndTasks();
+        BuilderContext.createBuilderContext();
+        await loadConfigAndTasks();
 
-      assert.isUndefined(globalAsAny.internalTask);
-      assert.isUndefined(globalAsAny.task);
-      assert.isUndefined(globalAsAny.types);
-      assert.isUndefined(globalAsAny.extendEnvironment);
-      assert.isUndefined(globalAsAny.usePlugin);
+        assert.isUndefined(globalAsAny.internalTask);
+        assert.isUndefined(globalAsAny.task);
+        assert.isUndefined(globalAsAny.types);
+        assert.isUndefined(globalAsAny.extendEnvironment);
+        assert.isUndefined(globalAsAny.usePlugin);
 
-      resetBuilderContext();
+        resetBuilderContext();
 
-      BuilderContext.createBuilderContext();
-      loadConfigAndTasks();
+        BuilderContext.createBuilderContext();
+        await loadConfigAndTasks();
 
-      assert.isUndefined(globalAsAny.internalTask);
-      assert.isUndefined(globalAsAny.task);
-      assert.isUndefined(globalAsAny.types);
-      assert.isUndefined(globalAsAny.extendEnvironment);
-      assert.isUndefined(globalAsAny.usePlugin);
-      resetBuilderContext();
+        assert.isUndefined(globalAsAny.internalTask);
+        assert.isUndefined(globalAsAny.task);
+        assert.isUndefined(globalAsAny.types);
+        assert.isUndefined(globalAsAny.extendEnvironment);
+        assert.isUndefined(globalAsAny.usePlugin);
+        resetBuilderContext();
+      })().catch((err) => console.log(err));
     });
   });
 
@@ -163,10 +169,10 @@ describe("config loading", function () {
     });
 
     it("should accept a relative path from the CWD", function () {
-      expectBuilderError(
+      expectBuilderErrorAsync(
         () => loadConfigAndTasks(),
         ERRORS.GENERAL.LIB_IMPORTED_FROM_THE_CONFIG
-      );
+      ).catch((err) => console.log(err)); ;
     });
   });
 });

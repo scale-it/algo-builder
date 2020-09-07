@@ -25,12 +25,14 @@ describe("Config resolution", () => {
       useFixtureProject("default-config-project");
 
       it("should return the default config", () => {
-        const config = loadConfigAndTasks();
-        assert.containsAllKeys(config.networks, [ALGOB_CHAIN_NAME]);
+        (async () => {
+          const config = await loadConfigAndTasks();
+          assert.containsAllKeys(config.networks, [ALGOB_CHAIN_NAME]);
 
-        const algobChainCfg = config.networks[ALGOB_CHAIN_NAME] as AlgobChainCfg;
-        assert.isTrue(algobChainCfg.throwOnTransactionFailures);
-        assert.isTrue(algobChainCfg.throwOnCallFailures);
+          const algobChainCfg = config.networks[ALGOB_CHAIN_NAME] as AlgobChainCfg;
+          assert.isTrue(algobChainCfg.throwOnTransactionFailures);
+          assert.isTrue(algobChainCfg.throwOnCallFailures);
+        })().catch((err) => console.log(err));
       });
     });
 
@@ -38,23 +40,29 @@ describe("Config resolution", () => {
       useFixtureProject("config-project");
 
       it("should return the config merged ", () => {
-        const config = loadConfigAndTasks();
+        (async () => {
+          const config = await loadConfigAndTasks();
 
-        assert.containsAllKeys(config.networks, ["localhost", "custom"]);
+          assert.containsAllKeys(config.networks, ["localhost", "custom"]);
+        })().catch((err) => console.log(err));
       });
 
       it("should return the config merged ", () => {
-        const config = loadConfigAndTasks();
-        assert.containsAllKeys(config.networks, ["localhost", "custom"]);
-        const ncfg = config.networks.localhost as HttpNetworkConfig;
-        assert.equal(ncfg.host, "http://127.0.0.1");
-        assert.equal(ncfg.port, 8080);
-        assertAccountsEqual(config.networks.localhost.accounts, [account1]);
+        (async () => {
+          const config = await loadConfigAndTasks();
+          assert.containsAllKeys(config.networks, ["localhost", "custom"]);
+          const ncfg = config.networks.localhost as HttpNetworkConfig;
+          assert.equal(ncfg.host, "http://127.0.0.1");
+          assert.equal(ncfg.port, 8080);
+          assertAccountsEqual(config.networks.localhost.accounts, [account1]);
+        })().catch((err) => console.log(err));
       });
 
       it("should keep any unknown field", () => {
-        const config = loadConfigAndTasks() as any;
-        assert.deepEqual(config.unknown, { asd: 123 });
+        (async () => {
+          const config = loadConfigAndTasks() as any;
+          assert.deepEqual(config.unknown, { asd: 123 });
+        })().catch((err) => console.log(err));
       });
     });
   });

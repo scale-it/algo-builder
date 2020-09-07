@@ -5,7 +5,7 @@ import YAML from "yaml";
 import CfgErrors, { ErrorPutter } from "../internal/core/config/config-errors";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
-import type { Account, AccountDef, Accounts, HDAccount, MnemonicAccount, wallet } from "../types";
+import type { Account, AccountDef, Accounts, HDAccount, MnemonicAccount } from "../types";
 
 export function mkAccounts (input: AccountDef[]): Account[] {
   const accounts: Account[] = [];

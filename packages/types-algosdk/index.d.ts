@@ -24,18 +24,18 @@ declare module 'algosdk' {
     constructor(token: string, baseServer: string, port: number);
     
     versions(): Promise<any>;
-    listWallets(): Promise<wallet>;
-    initWalletHandle(walletid: string, password: string): Promise<walletHandle>
-    listKeys(wallet_handle_token: string): Promise<Keys>;
+    listWallets(): Promise<WALLETS>;
+    initWalletHandle(walletid: string, password: string): Promise<WALLETHANDLE>
+    listKeys(wallet_handle_token: string): Promise<KEYS>;
     exportKey(wallet_handle_token: string, Password: string, address: string): 
-    Promise<privateKey>
+    Promise<PRIVATEKEY>
   }
 
-  interface wallet {
-    wallets: walletDetails[]
+  interface WALLETS {
+    wallets: WALLETDETAILS[]
   }
 
-  interface walletDetails {
+  interface WALLETDETAILS {
     driver_name: string,
     driver_version: number,
     id: string,
@@ -44,15 +44,15 @@ declare module 'algosdk' {
     supported_txs: string[]
   }
 
-  interface privateKey {
+  interface PRIVATEKEY {
     private_key: Uint8Array
   }
 
-  interface Keys {
+  interface KEYS {
     addresses: string[]
   }
 
-  interface walletHandle {
+  interface WALLETHANDLE {
     wallet_handle_token: string
   }
 
@@ -126,8 +126,6 @@ declare module 'algosdk' {
   }
 
   export function Indexer (...args: any[]): any;
-
-  //export function Kmd(token: any, baseServer: any, port: any): any;
 
   export function algosToMicroalgos (algos: any): any;
 
