@@ -34,4 +34,8 @@ export class FakeDeployer implements AlgobDeployer {
   waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
     throw new Error("Not implemented");
   }
+
+  optInToASA (name: string, account: Account, flags: ASADeploymentFlags): Promise<void> {
+    throw new Error("Not implemented");
+  }
 }

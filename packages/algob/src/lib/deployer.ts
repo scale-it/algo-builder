@@ -13,7 +13,8 @@ import {
   ASCDeploymentFlags,
   ASCInfo,
   ASCPaymentFlags,
-  CheckpointRepo
+  CheckpointRepo,
+  DeploymentFlags
 } from "../types";
 import { AlgoOperator } from "./algo-operator";
 
@@ -76,6 +77,17 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     }
   }
 
+  private _getASAInfo (name: string): ASAInfo {
+    const found = this.asa.get(name);
+    if (!found) {
+      throw new BuilderError(
+        ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_NOT_DEFINED, {
+          assetName: name
+        });
+    }
+    return found;
+  }
+
   async deployASA (name: string, flags: ASADeploymentFlags): Promise<ASAInfo> {
     if (this.loadedAsaDefs[name] === undefined) {
       throw new BuilderError(
@@ -116,6 +128,10 @@ export class AlgobDeployerImpl implements AlgobDeployer {
 
   async waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
     return await this.algoOp.waitForConfirmation(txId);
+  }
+
+  async optInToASA (name: string, account: Account, flags: DeploymentFlags): Promise<void> {
+    await this.algoOp.optInToASA(name, this._getASAInfo(name).assetIndex, account, flags);
   }
 }
 
@@ -180,5 +196,11 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
 
   async waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
     return await this._internal.waitForConfirmation(txId);
+  }
+
+  optInToASA (name: string, account: Account, flags: ASADeploymentFlags): Promise<void> {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "optInToASA"
+    });
   }
 }

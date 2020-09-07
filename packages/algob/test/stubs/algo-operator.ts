@@ -3,6 +3,7 @@ import { Algodv2 } from "algosdk";
 
 import { AlgoOperator } from "../../src/lib/algo-operator";
 import {
+  Account,
   Accounts,
   ASADef,
   ASADeploymentFlags,
@@ -10,7 +11,8 @@ import {
   ASCCache,
   ASCDeploymentFlags,
   ASCInfo,
-  ASCPaymentFlags
+  ASCPaymentFlags,
+  DeploymentFlags
 } from "../../src/types";
 
 export class AlgoOperatorDryRunImpl implements AlgoOperator {
@@ -53,5 +55,9 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
       compiledHash: "ASDF", // hash returned by the compiler
       srcHash: 123 // source code hash
     };
+  }
+
+  optInToASA (asaName: string, assetIndex: number, account: Account, params: DeploymentFlags): Promise<void> {
+    throw new Error("Method not implemented.");
   }
 }

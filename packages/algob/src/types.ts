@@ -380,8 +380,12 @@ export interface AlgobDeployer {
   putMetadata: (key: string, value: string) => void
   getMetadata: (key: string) => string | undefined
   deployASA: (name: string, flags: ASADeploymentFlags) => Promise<ASAInfo>
-  deployASC: (name: string, scParams: Object, flags: ASCDeploymentFlags,
-    payFlags: ASCPaymentFlags) => Promise<ASCInfo>
+  deployASC: (
+    name: string,
+    scParams: Object,
+    flags: ASCDeploymentFlags,
+    payFlags: ASCPaymentFlags
+  ) => Promise<ASCInfo>
   /**
      Returns true if ASA or ACS were deployed in any script.
      Checks even for checkpoints out of from the execution
@@ -395,6 +399,9 @@ export interface AlgobDeployer {
   // Put your logic into AlgoOperator if you need to interact with the chain.
   algodClient: algosdk.Algodv2
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
+
+  // Output of these functions is undefined. It's not known what to save to CP
+  optInToASA: (name: string, account: Account, flags: ASADeploymentFlags) => Promise<void>
 }
 
 // ************************

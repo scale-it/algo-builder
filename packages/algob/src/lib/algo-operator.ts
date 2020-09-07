@@ -14,6 +14,7 @@ import {
   ASCDeploymentFlags,
   ASCInfo,
   ASCPaymentFlags,
+  DeploymentFlags,
   Network
 } from "../types";
 import { CompileOp } from "./compile";
@@ -32,10 +33,15 @@ export function createAlgoOperator (network: Network): AlgoOperator {
 
 export interface AlgoOperator {
   algodClient: algosdk.Algodv2
-  deployASA: (name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts) => Promise<ASAInfo>
+  deployASA: (
+    name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts
+  ) => Promise<ASAInfo>
   deployASC: (programb64: string, scParams: object, flags: ASCDeploymentFlags, payFlags: ASCPaymentFlags,
   ) => Promise<ASCInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
+  optInToASA: (
+    asaName: string, assetIndex: number, account: Account, params: DeploymentFlags
+  ) => Promise<void>
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -88,7 +94,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     return rawSignedTxn.length;
   }
 
-  async optInToASA (
+  async _optInToASA (
     asaName: string, assetIndex: number, account: Account, params: algosdk.SuggestedParams
   ): Promise<void> {
     console.log(`ASA ${account.name} opt-in for for ASA ${asaName}`);
@@ -98,11 +104,18 @@ export class AlgoOperatorImpl implements AlgoOperator {
     await this.waitForConfirmation(txInfo.txId);
   }
 
+  async optInToASA (
+    asaName: string, assetIndex: number, account: Account, flags: DeploymentFlags
+  ): Promise<void> {
+    const txParams = await tx.getSuggestedParamsWithUserDefaults(this.algodClient, flags);
+    await this._optInToASA(asaName, assetIndex, account, txParams);
+  }
+
   async optInToASAMultiple (
     asaName: string, assetIndex: number, accounts: Account[], params: algosdk.SuggestedParams
   ): Promise<void> {
     for (const account of accounts) {
-      await this.optInToASA(asaName, assetIndex, account, params);
+      await this._optInToASA(asaName, assetIndex, account, params);
     }
   }
 

@@ -565,6 +565,18 @@ Please double check your command parameters`
 
 Make sure your 'asa.yaml' file contains this entry.
 `
+  },
+  DEPLOYER_ASA_NOT_DEFINED: {
+    number: 612,
+    message: "ASA is not defined: %assetName%",
+    title: "ASA is not defined",
+    description: `ASA is not defined: %assetName%.
+
+If you defined this ASA make sure that current script name is ascii-larger than the one that defined the ASA.
+Assets are not visible by previous scripts.
+
+Use 'deployer.isDefined(name)' to check if the name is already used in any checkpoint.
+`
   }
 };
 
