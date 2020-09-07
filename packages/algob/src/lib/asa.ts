@@ -24,7 +24,7 @@ function validateSingle (accounts: Accounts, filename: string, asaDef: ASADef): 
   }
 }
 
-function validateASADefsOneByOne (accounts: Accounts, asaDefs: ASADefs, filename: string): void {
+function validateParsedASADefs (accounts: Accounts, asaDefs: ASADefs, filename: string): void {
   for (const def of Object.values(asaDefs)) {
     validateSingle(accounts, filename, def);
   }
@@ -38,7 +38,7 @@ export function validateASADefs (obj: Object, accounts: Accounts, filename: stri
         parsed[k].defaultFrozen = false;
       }
     });
-    validateASADefsOneByOne(accounts, parsed, filename);
+    validateParsedASADefs(accounts, parsed, filename);
     return parsed;
   } catch (e) {
     if (e instanceof z.ZodError) {

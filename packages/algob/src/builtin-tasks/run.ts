@@ -75,10 +75,10 @@ function loadCheckpointsIntoCPData (cpData: CheckpointRepo, scriptPaths: string[
   return checkpointData;
 }
 
-function batchScriptNames (unbatched: string[]): string[][] {
+function partitionIntoSorted (unsorted: string[]): string[][] {
   return partitionByFn(
-    (a: string, b: string) => cmpStr(a, b) === 1,
-    unbatched);
+    (a: string, b: string) => cmpStr(a, b) === 1, // split when a > b
+    unsorted);
 }
 
 export async function runMultipleScripts (
@@ -92,20 +92,23 @@ export async function runMultipleScripts (
 ): Promise<void> {
   const accounts = mkAccountIndex(runtimeEnv.network.config.accounts);
   const asaDefs = loadASAFile(accounts);
-  for (const scriptsBatch of batchScriptNames(scriptNames)) {
-    await runScriptsBatch(
+  const mkDeployerFn =
+    (cpData: CheckpointRepo): AlgobDeployer =>
+      mkDeployer(runtimeEnv, cpData, allowWrite, algoOp, asaDefs, accounts);
+  for (const scripts of partitionIntoSorted(scriptNames)) {
+    await runSortedScripts(
       runtimeEnv,
-      scriptsBatch,
+      scripts,
       onSuccessFn,
       force,
       logDebugTag,
-      (cpData: CheckpointRepo) => mkDeployer(runtimeEnv, cpData, allowWrite, algoOp, asaDefs, accounts)
+      mkDeployerFn
     );
   }
 }
 
 // Function only accepts sorted scripts -- only this way it loads the state correctly.
-async function runScriptsBatch (
+async function runSortedScripts (
   runtimeEnv: AlgobRuntimeEnv,
   scriptNames: string[],
   onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,

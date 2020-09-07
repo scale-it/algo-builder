@@ -18,7 +18,7 @@ declare module 'algosdk' {
     getTransactionParams(): Action<SuggestedParams>
     pendingTransactionInformation(txId: string): Action<ConfirmedTxInfo>
     statusAfterBlock(lastround: number): Action<any>
-    accountInformation(address: Address): Action<AccountInfo>
+    accountInformation(address: string): Action<AccountInfo>
   }
 
   interface Account {
@@ -243,13 +243,11 @@ declare module 'algosdk' {
 
   type TxnBytes = Uint8Array
 
-  type Address = string
-
   interface AccountAssetInfo {
     amount: number,
     'asset-id': number,
-    creator: Address,
-    'is-frozen': false
+    creator: string,
+    'is-frozen': boolean
   }
 
   interface AccountInfo {

@@ -3,7 +3,9 @@ function getLast<T> (ts: T[]): T {
   return ts[ts.length - 1];
 }
 
-function getLastSubchild<T> (ts: T[][]): T {
+// Takes out the rightest child of a list
+// `[[a, b], [c, d]]` would produce `d`
+function getLastDeepChild<T> (ts: T[][]): T {
   return getLast(getLast(ts));
 }
 
@@ -16,7 +18,7 @@ export function partitionByFn<T> (
   }
   var out = [[input[0]]];
   for (const current of input.slice(1)) {
-    const last = getLastSubchild(out);
+    const last = getLastDeepChild(out);
     if (f(last, current)) {
       out.push([current]);
     } else {
