@@ -67,37 +67,33 @@ describe("config loading", function () {
       resetBuilderContext();
     });
 
-    it("should accept a relative path from the CWD", function () {
-      (async () => {
-        const config = await loadConfigAndTasks({ config: "config.js" });
+    it("should accept a relative path from the CWD", async function () {
+      const config = await loadConfigAndTasks({ config: "config.js" });
 
-        if (!config.paths) {
-          assert.fail("Project was not loaded");
-        }
+      if (!config.paths) {
+        assert.fail("Project was not loaded");
+      }
 
-        assert.equal(
-          config.paths.configFile,
-          path.normalize(path.join(process.cwd(), "config.js"))
-        );
-      })().catch((err) => console.log(err));
+      assert.equal(
+        config.paths.configFile,
+        path.normalize(path.join(process.cwd(), "config.js"))
+      );
     });
 
-    it("should accept an absolute path", function () {
-      (async () => {
-        const fixtureDir = getFixtureProjectPath("custom-config-file");
-        const config = await loadConfigAndTasks({
-          config: path.join(fixtureDir, "config.js")
-        });
+    it("should accept an absolute path", async function () {
+      const fixtureDir = getFixtureProjectPath("custom-config-file");
+      const config = await loadConfigAndTasks({
+        config: path.join(fixtureDir, "config.js")
+      });
 
-        if (!config.paths) {
-          assert.fail("Project was not loaded");
-        }
+      if (!config.paths) {
+        assert.fail("Project was not loaded");
+      }
 
-        assert.equal(
-          config.paths.configFile,
-          path.normalize(path.join(process.cwd(), "config.js"))
-        );
-      })().catch((err) => console.log(err));
+      assert.equal(
+        config.paths.configFile,
+        path.normalize(path.join(process.cwd(), "config.js"))
+      );
     });
   });
 
@@ -129,31 +125,29 @@ describe("config loading", function () {
       resetBuilderContext();
     });
 
-    it("should remove everything from global state after loading", function () {
-      (async () => {
-        const globalAsAny: any = global;
+    it("should remove everything from global state after loading", async function () {
+      const globalAsAny: any = global;
 
-        BuilderContext.createBuilderContext();
-        await loadConfigAndTasks();
+      BuilderContext.createBuilderContext();
+      await loadConfigAndTasks();
 
-        assert.isUndefined(globalAsAny.internalTask);
-        assert.isUndefined(globalAsAny.task);
-        assert.isUndefined(globalAsAny.types);
-        assert.isUndefined(globalAsAny.extendEnvironment);
-        assert.isUndefined(globalAsAny.usePlugin);
+      assert.isUndefined(globalAsAny.internalTask);
+      assert.isUndefined(globalAsAny.task);
+      assert.isUndefined(globalAsAny.types);
+      assert.isUndefined(globalAsAny.extendEnvironment);
+      assert.isUndefined(globalAsAny.usePlugin);
 
-        resetBuilderContext();
+      resetBuilderContext();
 
-        BuilderContext.createBuilderContext();
-        await loadConfigAndTasks();
+      BuilderContext.createBuilderContext();
+      await loadConfigAndTasks();
 
-        assert.isUndefined(globalAsAny.internalTask);
-        assert.isUndefined(globalAsAny.task);
-        assert.isUndefined(globalAsAny.types);
-        assert.isUndefined(globalAsAny.extendEnvironment);
-        assert.isUndefined(globalAsAny.usePlugin);
-        resetBuilderContext();
-      })().catch((err) => console.log(err));
+      assert.isUndefined(globalAsAny.internalTask);
+      assert.isUndefined(globalAsAny.task);
+      assert.isUndefined(globalAsAny.types);
+      assert.isUndefined(globalAsAny.extendEnvironment);
+      assert.isUndefined(globalAsAny.usePlugin);
+      resetBuilderContext();
     });
   });
 

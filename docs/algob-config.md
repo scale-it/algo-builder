@@ -50,19 +50,16 @@ Each network configuration requires a list of accounts. These accounts are then 
 1. Loaded from Key Management Daemon (KMD)
 
         // KMD credentials
-        let KMDConfig = {
+        let kmdconfig = {
           host: "127.0.0.1",
-          port: 12345,
-          token: "sfsdtoken"
+          port: 7833,
+          token: "09c2da31d3e3e96ed98ba22cc4d58a14184f1808f2b4f21e66c9d38f70ca7232",
+          walletname: "MyTestWallet1",
+          walletpassword: "testpassword"
         }
 
-        let wallet = {
-          name: "TESTWALLET",
-          password: "testpassword"
-        }
+        let kmdAddresses = await loadKMDAccounts(kmdconfig.host, kmdconfig.token, kmdconfig.port, kmdconfig.walletname, kmdconfig.walletpassword);
 
-        let kmdAddresses = await loadKMDAddresses(KMDConfig.host, KMDConfig.token, KMDConfig.port, 
-          wallet.name, wallet.password);
         console.log(kmdAddresses);
 
 NOTE: don't use any of the accounts above. They are provided only as an example - everyone has an access to them!

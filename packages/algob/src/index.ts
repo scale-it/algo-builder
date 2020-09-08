@@ -1,7 +1,7 @@
 import {
   loadAccountsFromFile,
-  loadAccountsFromFileSync, loadKMDAddresses,
+  loadAccountsFromFileSync, loadKMDAccounts,
   mkAccounts
 } from "./lib/account";
 
-export { mkAccounts, loadAccountsFromFile, loadAccountsFromFileSync, loadKMDAddresses };
+export { mkAccounts, loadAccountsFromFile, loadAccountsFromFileSync, loadKMDAccounts };

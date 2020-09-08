@@ -8,7 +8,7 @@
 //   addr: "KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY",
 //   mnemonic: "call boy rubber fashion arch day capable one sweet skate outside purse six early learn tuition eagle love breeze pizza loud today popular able divide"
 // }]);
-const { loadKMDAddresses } = require("algob");
+const { loadKMDAccounts } = require("algob");
 module.exports = (async function() {
 // Example: accounts constructed using the Account object
 let accounts = [{
@@ -21,30 +21,28 @@ let accounts = [{
 let kmdconfig = {
   host: "127.0.0.1",
   port: 7833,
-  token: "09c2da31d3e3e96ed98ba22cc4d58a14184f1808f2b4f21e66c9d38f70ca7232"
+  token: "09c2da31d3e3e96ed98ba22cc4d58a14184f1808f2b4f21e66c9d38f70ca7232",
+  walletname: "MyTestWallet1",
+  walletpassword: "testpassword"
 }
 
-let wallet = {
-  name: "MyTestWallet1",
-  password: "testpassword"
-}
 // const { loadAccountsFromFileSync } = require("algob");
 // // Example: accounts loaded from a file:
 // const accFromFile = loadAccountsFromFileSync("assets/accounts_generated.yaml");
 // accounts = accounts.concat(accFromFile);
-//console.log("OK");
 let defaultCfg = {
   host: "http://localhost",
   port: 8080,
   token: "content_of/algorand-node-data/algod.token",
   accounts: accounts,
-  kmdAddresses: await loadKMDAddresses(kmdconfig.host, kmdconfig.token, kmdconfig.port, 
-    wallet.name, wallet.password)
+  kmdConfig: kmdconfig,
+  kmdAddresses: await loadKMDAccounts(kmdconfig.host, kmdconfig.token, kmdconfig.port, 
+    kmdconfig.walletname, kmdconfig.walletpassword)
 };
 
   return {networks: {
     localhost: defaultCfg,
     default: defaultCfg
   }};
-  
+
 })();

@@ -24,45 +24,37 @@ describe("Config resolution", () => {
     describe("With default config", () => {
       useFixtureProject("default-config-project");
 
-      it("should return the default config", () => {
-        (async () => {
-          const config = await loadConfigAndTasks();
-          assert.containsAllKeys(config.networks, [ALGOB_CHAIN_NAME]);
+      it("should return the default config", async () => {
+        const config = await loadConfigAndTasks();
+        assert.containsAllKeys(config.networks, [ALGOB_CHAIN_NAME]);
 
-          const algobChainCfg = config.networks[ALGOB_CHAIN_NAME] as AlgobChainCfg;
-          assert.isTrue(algobChainCfg.throwOnTransactionFailures);
-          assert.isTrue(algobChainCfg.throwOnCallFailures);
-        })().catch((err) => console.log(err));
+        const algobChainCfg = config.networks[ALGOB_CHAIN_NAME] as AlgobChainCfg;
+        assert.isTrue(algobChainCfg.throwOnTransactionFailures);
+        assert.isTrue(algobChainCfg.throwOnCallFailures);
       });
     });
 
     describe("With custom config", () => {
       useFixtureProject("config-project");
 
-      it("should return the config merged ", () => {
-        (async () => {
-          const config = await loadConfigAndTasks();
+      it("should return the config merged ", async () => {
+        const config = await loadConfigAndTasks();
 
-          assert.containsAllKeys(config.networks, ["localhost", "custom"]);
-        })().catch((err) => console.log(err));
+        assert.containsAllKeys(config.networks, ["localhost", "custom"]);
       });
 
-      it("should return the config merged ", () => {
-        (async () => {
-          const config = await loadConfigAndTasks();
-          assert.containsAllKeys(config.networks, ["localhost", "custom"]);
-          const ncfg = config.networks.localhost as HttpNetworkConfig;
-          assert.equal(ncfg.host, "http://127.0.0.1");
-          assert.equal(ncfg.port, 8080);
-          assertAccountsEqual(config.networks.localhost.accounts, [account1]);
-        })().catch((err) => console.log(err));
+      it("should return the config merged ", async () => {
+        const config = await loadConfigAndTasks();
+        assert.containsAllKeys(config.networks, ["localhost", "custom"]);
+        const ncfg = config.networks.localhost as HttpNetworkConfig;
+        assert.equal(ncfg.host, "http://127.0.0.1");
+        assert.equal(ncfg.port, 8080);
+        assertAccountsEqual(config.networks.localhost.accounts, [account1]);
       });
 
-      it("should keep any unknown field", () => {
-        (async () => {
-          const config = loadConfigAndTasks() as any;
-          assert.deepEqual(config.unknown, { asd: 123 });
-        })().catch((err) => console.log(err));
+      it("should keep any unknown field", async () => {
+        const config = await loadConfigAndTasks() as any;
+        assert.deepEqual(config.unknown, { asd: 123 });
       });
     });
   });

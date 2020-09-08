@@ -38,6 +38,7 @@ interface CommonNetworkConfig {
   accounts: Account[]
   chainName?: string
   kmdAddresses?: Promise<AccountSDK[]>
+  kmdConfig?: KmdConfig
   // from?: string;
   // TODO: timeout?: number;
 }
@@ -60,6 +61,14 @@ export type NetworkConfig = AlgobChainCfg | HttpNetworkConfig;
 
 export interface Networks {
   [networkName: string]: NetworkConfig
+}
+
+export interface KmdConfig {
+  host: string
+  port: number
+  token: string
+  walletname: string
+  walletpassword: string
 }
 
 /**
