@@ -119,7 +119,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     }
   }
 
-  async checkBalanceForASAOptInTx (
+  async checkBalanceForOptInTx (
     name: string, params: algosdk.SuggestedParams, asaDef: ASADef, accounts: Accounts, creator: Account
   ): Promise<Account[]> {
     if (!asaDef.optInAccNames || asaDef.optInAccNames.length === 0) {
@@ -160,7 +160,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   ): Promise<ASAInfo> {
     console.log("Deploying ASA:", name);
     const txParams = await tx.mkSuggestedParams(this.algodClient, flags);
-    const optInAccounts = await this.checkBalanceForASAOptInTx(
+    const optInAccounts = await this.checkBalanceForOptInTx(
       name, txParams, asaDef, accounts, flags.creator);
     const assetTX = tx.makeAssetCreateTxn(name, asaDef, flags, txParams);
     const rawSignedTxn = assetTX.signTxn(flags.creator.sk);

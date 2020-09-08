@@ -75,6 +75,8 @@ function loadCheckpointsIntoCPData (cpData: CheckpointRepo, scriptPaths: string[
   return checkpointData;
 }
 
+/** Partitions an unsorted string list into sorted parts:
+    `[1 2 2 3 4 3 4 2 1]` returns `[[1 2 2 3 4] [3 4] [2] [1]]` */
 function partitionIntoSorted (unsorted: string[]): string[][] {
   return partitionByFn(
     (a: string, b: string) => cmpStr(a, b) === 1, // split when a > b
@@ -92,9 +94,6 @@ export async function runMultipleScripts (
 ): Promise<void> {
   const accounts = mkAccountIndex(runtimeEnv.network.config.accounts);
   const asaDefs = loadASAFile(accounts);
-  const mkDeployerFn =
-    (cpData: CheckpointRepo): AlgobDeployer =>
-      mkDeployer(runtimeEnv, cpData, allowWrite, algoOp, asaDefs, accounts);
   for (const scripts of partitionIntoSorted(scriptNames)) {
     await runSortedScripts(
       runtimeEnv,
@@ -102,7 +101,10 @@ export async function runMultipleScripts (
       onSuccessFn,
       force,
       logDebugTag,
-      mkDeployerFn
+      allowWrite,
+      algoOp,
+      asaDefs,
+      accounts
     );
   }
 }
@@ -114,16 +116,18 @@ async function runSortedScripts (
   onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
   force: boolean,
   logDebugTag: string,
-  mkDeployerFn: (cpData: CheckpointRepo) => AlgobDeployer
+  allowWrite: boolean,
+  algoOp: AlgoOperator,
+  asaDefs: ASADefs,
+  accounts: Accounts
 ): Promise<void> {
   const log = debug(logDebugTag);
   const cpData: CheckpointRepo = loadCheckpointsRecursive();
-  const deployer: AlgobDeployer = mkDeployerFn(cpData);
+  const deployer: AlgobDeployer = mkDeployer(runtimeEnv, cpData, allowWrite, algoOp, asaDefs, accounts);
 
   const scriptsFromScriptsDir: string[] = lsScriptsDir();
 
-  for (let i = 0; i < scriptNames.length; i++) {
-    const relativeScriptPath = scriptNames[i];
+  for (const relativeScriptPath of scriptNames) {
     const prevScripts = splitAfter(scriptsFromScriptsDir, relativeScriptPath);
     loadCheckpointsIntoCPData(cpData, prevScripts);
     if (prevScripts[prevScripts.length - 1] !== relativeScriptPath) {
