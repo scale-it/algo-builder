@@ -345,9 +345,10 @@ export type ASADefs = z.infer<typeof ASADefsSchema>;
 
 export interface TxParams {
   // feePerByte or totalFee is used to set the appropriate transaction fee parameter.
-  // SDK expects`fee: number` and boolean `flatFee`. But the API expects only one parameter:
-  // `fee` Here we use feePerByte and totalFee - both as numberic parameters. We think that
-  // this is more explicit. If both are specified, totalFee takes precedence.
+  // If both are set then totalFee takes precedence.
+  // NOTE: SDK expects`fee: number` and boolean `flatFee`. But the API expects only one
+  // on parameter: `fee`. Here, we define feePerByte and totalFee - both as numberic
+  // parameters. We think that this is more explicit.
   feePerByte?: number
   totalFee?: number
   firstValid?: number
