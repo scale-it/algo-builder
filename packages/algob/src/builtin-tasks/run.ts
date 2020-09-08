@@ -4,16 +4,16 @@ import fsExtra from "fs-extra";
 import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
+import {
+  AlgobDeployerImpl,
+  AlgobDeployerReadOnlyImpl
+} from "../internal/deployer";
 import { partitionByFn } from "../internal/util/lists";
 import { runScript } from "../internal/util/scripts-runner";
 import { mkAccountIndex } from "../lib/account";
 import { AlgoOperator, createAlgoOperator } from "../lib/algo-operator";
 import { loadASAFile } from "../lib/asa";
 import { cmpStr } from "../lib/comparators";
-import {
-  AlgobDeployerImpl,
-  AlgobDeployerReadOnlyImpl
-} from "../lib/deployer";
 import { assertDirChildren } from "../lib/files";
 import {
   loadCheckpoint,

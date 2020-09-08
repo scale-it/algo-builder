@@ -1,13 +1,13 @@
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/internal/core/errors-list";
-import { AlgobDeployerImpl } from "../../src/lib/deployer";
+import { AlgobDeployerImpl } from "../../src/internal/deployer";
 import { CheckpointRepoImpl } from "../../src/lib/script-checkpoints";
 import { ASADef, ASAInfo, ASCInfo, Checkpoints } from "../../src/types";
 import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkAlgobEnv } from "../helpers/params";
+import { cleanupMutableData } from "../lib/script-checkpoints";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
-import { cleanupMutableData } from "./script-checkpoints";
 
 function mkASA (): ASADef {
   return {
