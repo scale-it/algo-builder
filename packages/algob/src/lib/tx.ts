@@ -8,7 +8,7 @@ import {
 } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
 
-async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.SuggestedParams> {
+export async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.SuggestedParams> {
   const params = await algocl.getTransactionParams().do();
   // Private chains may have an issue with firstRound
   if (params.firstRound === 0) {
@@ -33,9 +33,9 @@ export async function mkSuggestedParams (
   return s;
 }
 
-export async function makeAssetCreateTxn (
-  name: string, algocl: tx.Algodv2, asaDef: ASADef, flags: ASADeploymentFlags
-): Promise<tx.Transaction> {
+export function makeAssetCreateTxn (
+  name: string, asaDef: ASADef, flags: ASADeploymentFlags, txSuggestedParams: tx.SuggestedParams
+): tx.Transaction {
   const encoder = new TextEncoder();
   // https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js#L104
   return tx.makeAssetCreateTxnWithSuggestedParams(
@@ -52,6 +52,26 @@ export async function makeAssetCreateTxn (
     name,
     asaDef.url,
     asaDef.metadataHash,
-    await mkSuggestedParams(algocl, flags)
+    txSuggestedParams
   );
+}
+
+export function makeASAOptInTx (
+  addr: string,
+  assetID: number,
+  params: tx.SuggestedParams
+): tx.Transaction {
+  const closeRemainderTo = undefined;
+  const revocationTarget = undefined;
+  const amount = 0;
+  const note = undefined;
+  return tx.makeAssetTransferTxnWithSuggestedParams(
+    addr,
+    addr,
+    closeRemainderTo,
+    revocationTarget,
+    amount,
+    note,
+    assetID,
+    params);
 }

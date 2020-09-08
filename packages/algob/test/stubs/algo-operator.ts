@@ -4,13 +4,15 @@ import { Algodv2 } from "algosdk";
 import { AlgoOperator } from "../../src/lib/algo-operator";
 import {
   Account,
+  Accounts,
   ASADef,
   ASADeploymentFlags,
   ASAInfo,
   ASCCache,
   ASCDeploymentFlags,
   ASCInfo,
-  ASCPaymentFlags
+  ASCPaymentFlags,
+  TxParams
 } from "../../src/types";
 
 export class AlgoOperatorDryRunImpl implements AlgoOperator {
@@ -23,10 +25,10 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   async deployASA (
-    name: string, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account
+    name: string, asaDesc: ASADef, flags: ASADeploymentFlags, accounts: Accounts
   ): Promise<ASAInfo> {
     return {
-      creator: account.addr + "-get-address-dry-run",
+      creator: flags.creator.addr + "-get-address-dry-run",
       txId: "tx-id-dry-run",
       assetIndex: -1,
       confirmedRound: -1
@@ -53,5 +55,9 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
       compiledHash: "ASDF", // hash returned by the compiler
       srcHash: 123 // source code hash
     };
+  }
+
+  optInToASA (asaName: string, assetIndex: number, account: Account, params: TxParams): Promise<void> {
+    throw new Error("Method not implemented.");
   }
 }

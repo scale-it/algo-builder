@@ -1,9 +1,12 @@
 import algosdk from "algosdk";
 import { TextEncoder } from "util";
 
+import { BuilderError } from "../internal/core/errors";
+import { ERRORS } from "../internal/core/errors-list";
 import { createClient } from "../lib/driver";
 import {
   Account,
+  Accounts,
   ASADef,
   ASADeploymentFlags,
   ASAInfo,
@@ -11,14 +14,18 @@ import {
   ASCDeploymentFlags,
   ASCInfo,
   ASCPaymentFlags,
-  Network
+  Network,
+  TxParams
 } from "../types";
 import { CompileOp } from "./compile";
 import * as tx from "./tx";
 
 const confirmedRound = "confirmed-round";
 
+// This was not exported in algosdk
 export const ALGORAND_MIN_TX_FEE = 1000;
+// Extracted from interaction with Algorand node (100k microAlgos)
+const ALGORAND_ASA_OWNERSHIP_COST = 100000;
 
 export function createAlgoOperator (network: Network): AlgoOperator {
   return new AlgoOperatorImpl(createClient(network));
@@ -26,10 +33,15 @@ export function createAlgoOperator (network: Network): AlgoOperator {
 
 export interface AlgoOperator {
   algodClient: algosdk.Algodv2
-  deployASA: (name: string, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account) => Promise<ASAInfo>
+  deployASA: (
+    name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts
+  ) => Promise<ASAInfo>
   deployASC: (programb64: string, scParams: object, flags: ASCDeploymentFlags, payFlags: ASCPaymentFlags,
   ) => Promise<ASCInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
+  optInToASA: (
+    asaName: string, assetIndex: number, account: Account, params: TxParams
+  ) => Promise<void>
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -56,28 +68,118 @@ export class AlgoOperatorImpl implements AlgoOperator {
     }
   };
 
-  async deployASA (
-    name: string, asaDesc: ASADef, flags: ASADeploymentFlags
-  ): Promise<ASAInfo> {
-    console.log("Deploying ASA: ", name);
+  getTxFee (params: algosdk.SuggestedParams, txSize: number): number {
+    if (params.flatFee) {
+      return Math.max(ALGORAND_MIN_TX_FEE, params.fee);
+    }
+    return Math.max(ALGORAND_MIN_TX_FEE, txSize);
+  }
 
-    const assetTX = await tx.makeAssetCreateTxn(name, this.algodClient, asaDesc, flags);
+  getUsableAccBalance (accoutInfo: algosdk.AccountInfo): number {
+    // Extracted from interacting with Algorand node:
+    // 7 opted-in assets require to have 800000 micro algos (frozen in account).
+    // 11 assets require 1200000.
+    return accoutInfo.amount - (accoutInfo.assets.length + 1) * ALGORAND_ASA_OWNERSHIP_COST;
+  }
+
+  getOptInTxSize (params: algosdk.SuggestedParams, accounts: Accounts): number {
+    const randomAccount = accounts.values().next().value;
+    // assetID can't be known before ASA creation
+    // it shouldn't be easy to find out the latest asset ID
+    // In original source code it's uint64:
+    // https://github.com/algorand/go-algorand/blob/1424855ad2b5f6755ff3feba7e419ee06f2493da/data/basics/userBalance.go#L278
+    const assetID = Number.MAX_SAFE_INTEGER; // not 64 bits but 55 bits should be enough
+    const sampleASAOptInTX = tx.makeASAOptInTx(randomAccount.addr, assetID, params);
+    const rawSignedTxn = sampleASAOptInTX.signTxn(randomAccount.sk);
+    return rawSignedTxn.length;
+  }
+
+  async _optInToASA (
+    asaName: string, assetIndex: number, account: Account, params: algosdk.SuggestedParams
+  ): Promise<void> {
+    console.log(`ASA ${account.name} opt-in for for ASA ${asaName}`);
+    const sampleASAOptInTX = tx.makeASAOptInTx(account.addr, assetIndex, params);
+    const rawSignedTxn = sampleASAOptInTX.signTxn(account.sk);
+    const txInfo = await this.algodClient.sendRawTransaction(rawSignedTxn).do();
+    await this.waitForConfirmation(txInfo.txId);
+  }
+
+  async optInToASA (
+    asaName: string, assetIndex: number, account: Account, flags: TxParams
+  ): Promise<void> {
+    const txParams = await tx.mkSuggestedParams(this.algodClient, flags);
+    await this._optInToASA(asaName, assetIndex, account, txParams);
+  }
+
+  async optInToASAMultiple (
+    asaName: string, assetIndex: number, accounts: Account[], params: algosdk.SuggestedParams
+  ): Promise<void> {
+    for (const account of accounts) {
+      await this._optInToASA(asaName, assetIndex, account, params);
+    }
+  }
+
+  async checkBalanceForOptInTx (
+    name: string, params: algosdk.SuggestedParams, asaDef: ASADef, accounts: Accounts, creator: Account
+  ): Promise<Account[]> {
+    if (!asaDef.optInAccNames || asaDef.optInAccNames.length === 0) {
+      return [];
+    }
+    const optInTxFee = this.getTxFee(params, this.getOptInTxSize(params, accounts));
+    const optInAccs = [];
+    for (const accName of asaDef.optInAccNames) {
+      const account = accounts.get(accName);
+      if (!account) {
+        throw new BuilderError(
+          ERRORS.SCRIPT.ASA_OPT_IN_ACCOUNT_NOT_FOUND, {
+            accountName: accName
+          });
+      }
+      optInAccs.push(account);
+      if (account.addr === creator.addr) {
+        throw new BuilderError(ERRORS.SCRIPT.ASA_TRIED_TO_OPT_IN_CREATOR);
+      }
+      const accountInfo = await this.algodClient.accountInformation(account.addr).do();
+      const requiredAmount = optInTxFee + ALGORAND_ASA_OWNERSHIP_COST;
+      const usableAmount = this.getUsableAccBalance(accountInfo);
+      if (usableAmount < requiredAmount) {
+        throw new BuilderError(
+          ERRORS.SCRIPT.ASA_OPT_IN_ACCOUNT_INSUFFICIENT_BALANCE, {
+            accountName: accName,
+            balance: usableAmount,
+            requiredBalance: requiredAmount,
+            asaName: name
+          });
+      }
+    }
+    return optInAccs;
+  }
+
+  async deployASA (
+    name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts
+  ): Promise<ASAInfo> {
+    console.log("Deploying ASA:", name);
+    const txParams = await tx.mkSuggestedParams(this.algodClient, flags);
+    const optInAccounts = await this.checkBalanceForOptInTx(
+      name, txParams, asaDef, accounts, flags.creator);
+    const assetTX = tx.makeAssetCreateTxn(name, asaDef, flags, txParams);
     const rawSignedTxn = assetTX.signTxn(flags.creator.sk);
     const txInfo = await this.algodClient.sendRawTransaction(rawSignedTxn).do();
     const txConfirmation = await this.waitForConfirmation(txInfo.txId);
+    const assetIndex = txConfirmation["asset-index"];
+    await this.optInToASAMultiple(name, assetIndex, optInAccounts, txParams);
     console.log(txConfirmation);
     return {
       creator: flags.creator.addr,
       txId: txInfo.txId,
-      assetIndex: txConfirmation["asset-index"],
+      assetIndex: assetIndex,
       confirmedRound: txConfirmation[confirmedRound]
     };
   }
 
   async deployASC (name: string, scParams: object, flags: ASCDeploymentFlags, payFlags: ASCPaymentFlags
   ): Promise<ASCInfo> {
-    console.log("Deploying ASC: ", name);
-
+    console.log("Deploying ASC:", name);
     const result: ASCCache = await this.ensureCompiled(name, false);
     const programb64 = result.compiled;
     const program = new Uint8Array(Buffer.from(programb64, "base64"));

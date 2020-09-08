@@ -13,9 +13,9 @@ import {
   ASCDeploymentFlags,
   ASCInfo,
   ASCPaymentFlags,
-  CheckpointRepo
+  CheckpointRepo,
+  TxParams
 } from "../types";
-import { mkAccountIndex } from "./account";
 import { AlgoOperator } from "./algo-operator";
 
 // This class is what user interacts with in deploy task
@@ -28,14 +28,18 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   readonly accountsByName: Accounts;
 
   constructor (
-    runtimeEnv: AlgobRuntimeEnv, cpData: CheckpointRepo, asaDefs: ASADefs, algoOp: AlgoOperator
+    runtimeEnv: AlgobRuntimeEnv,
+    cpData: CheckpointRepo,
+    asaDefs: ASADefs,
+    algoOp: AlgoOperator,
+    accountsByName: Accounts
   ) {
     this.runtimeEnv = runtimeEnv;
     this.cpData = cpData;
     this.loadedAsaDefs = asaDefs;
     this.algoOp = algoOp;
     this.accounts = runtimeEnv.network.config.accounts;
-    this.accountsByName = mkAccountIndex(runtimeEnv.network.config.accounts);
+    this.accountsByName = accountsByName;
   }
 
   get isDeployMode (): boolean {
@@ -73,6 +77,28 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     }
   }
 
+  private _getASAInfo (name: string): ASAInfo {
+    const found = this.asa.get(name);
+    if (!found) {
+      throw new BuilderError(
+        ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_NOT_DEFINED, {
+          assetName: name
+        });
+    }
+    return found;
+  }
+
+  private _getAccount (name: string): Account {
+    const found = this.accountsByName.get(name);
+    if (!found) {
+      throw new BuilderError(
+        ERRORS.BUILTIN_TASKS.ACCOUNT_NOT_FOUND, {
+          assetName: name
+        });
+    }
+    return found;
+  }
+
   async deployASA (name: string, flags: ASADeploymentFlags): Promise<ASAInfo> {
     if (this.loadedAsaDefs[name] === undefined) {
       throw new BuilderError(
@@ -80,10 +106,9 @@ export class AlgobDeployerImpl implements AlgobDeployer {
           asaName: name
         });
     }
-    const asaDef = this.loadedAsaDefs[name];
-    const creator = flags.creator;
     this.assertNoAsset(name);
-    const asaInfo = await this.algoOp.deployASA(name, asaDef, flags, creator);
+    const asaInfo = await this.algoOp.deployASA(
+      name, this.loadedAsaDefs[name], flags, this.accountsByName);
     this.cpData.registerASA(this.networkName, name, asaInfo);
     return asaInfo;
   }
@@ -114,6 +139,14 @@ export class AlgobDeployerImpl implements AlgobDeployer {
 
   async waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
     return await this.algoOp.waitForConfirmation(txId);
+  }
+
+  async optInToASA (name: string, accountName: string, flags: TxParams): Promise<void> {
+    await this.algoOp.optInToASA(
+      name,
+      this._getASAInfo(name).assetIndex,
+      this._getAccount(accountName),
+      flags);
   }
 }
 
@@ -178,5 +211,11 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
 
   async waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
     return await this._internal.waitForConfirmation(txId);
+  }
+
+  optInToASA (name: string, accountName: string, flags: ASADeploymentFlags): Promise<void> {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "optInToASA"
+    });
   }
 }
