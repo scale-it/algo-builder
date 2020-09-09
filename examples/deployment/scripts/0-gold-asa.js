@@ -19,13 +19,16 @@ async function run(runtimeEnv, deployer) {
   const goldOwnerAccount = deployer.accountsByName.get("gold-owner-account");
   const johnAccount = deployer.accountsByName.get("john-account");
 
-  await transferMicroAlgos(deployer, masterAccount, goldOwnerAccount.addr, 101000)
-  await transferMicroAlgos(deployer, masterAccount, johnAccount.addr, 101000)
+  // activate goldOwner and john accounts
+  let promises = [
+    transferMicroAlgos(deployer, masterAccount, goldOwnerAccount.addr, 401000),
+    transferMicroAlgos(deployer, masterAccount, johnAccount.addr, 401000)]
+  await Promise.all(promises)
 
   const asaInfo = await deployer.deployASA("gold", {
     creator: goldOwnerAccount
     //totalFee: 1001,
-    //feePerByte: 10,
+    //feePerByte: 100,
     //firstValid: 10,
     //validRounds: 1002
   })

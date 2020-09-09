@@ -27,7 +27,27 @@ goal node start -d ~/.algorand-local/Node/
 
 ### Add algob and start using it
 
-We need to add algob as the package dependency
+We need to add algob as the package dependency.
+
+### master branch
+
+If you are using a master branch, then we don't guarantee that the release `algob` package will work. In that case you should build and link the `algob` from this repository:
+
+```
+cd packages/algob
+yarn build
+yarn unlink
+yarn link
+```
+
+Then go to the example directory (`/example/deployment`) and run:
+
+    yarn link algob
+
+
+### release branch
+
+Using the release branch you should use the released `algob` package:
 
     yarn add algob
 
