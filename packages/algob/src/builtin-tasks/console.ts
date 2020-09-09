@@ -19,6 +19,19 @@ export default function (): void {
           return;
         }
         const paths = runtimeEnv.config.paths;
+
+        const nodeArgs = [];
+        if (semver.gte(process.version, "10.0.0")) {
+          nodeArgs.push("--experimental-repl-await");
+        }
+
+        log(
+          `Creating a Node REPL subprocess with Buidler's register so we can set some Node's flags`);
+
+        // Running the script "" is like running `node`, so this starts the repl
+        // await runScriptWithBuidler(buidlerArguments, "", [], nodeArgs, {
+        //   NODE_REPL_HISTORY: historyFile,
+        // });
         */
 
         // TODO: After refactoring script loading workflow the REPL
