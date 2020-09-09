@@ -22,16 +22,15 @@ declare module 'algosdk' {
 
  class Kmd {
     constructor(token: string, baseServer: string, port: number);
-    
+
     versions(): Promise<any>;
-    listWallets(): Promise<WALLETS>;
+    listWallets(): Promise<Wallets>;
     initWalletHandle(walletid: string, password: string): Promise<WALLETHANDLE>
-    listKeys(wallet_handle_token: string): Promise<KEYS>;
-    exportKey(wallet_handle_token: string, Password: string, address: string): 
-    Promise<PRIVATEKEY>
+    listKeys(wallet_handle_token: string): Promise<Keys>;
+    exportKey(wallet_handle_token: string, password: string, address: string): Promise<PRIVATEKEY>
   }
 
-  interface WALLETS {
+  interface Wallets {
     wallets: WALLETDETAILS[]
   }
 
@@ -40,7 +39,7 @@ declare module 'algosdk' {
     driver_version: number,
     id: string,
     mnemonic_ux: boolean,
-    name: string, 
+    name: string,
     supported_txs: string[]
   }
 
@@ -48,7 +47,7 @@ declare module 'algosdk' {
     private_key: Uint8Array
   }
 
-  interface KEYS {
+  interface Keys {
     addresses: string[]
   }
 

@@ -5,7 +5,7 @@ import YAML from "yaml";
 import CfgErrors, { ErrorPutter } from "../internal/core/config/config-errors";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
-import type { Account, AccountDef, Accounts, HDAccount, MnemonicAccount } from "../types";
+import type { Account, AccountDef, Accounts, HDAccount, MnemonicAccount, StrMap } from "../types";
 
 export function mkAccounts (input: AccountDef[]): Account[] {
   const accounts: Account[] = [];
@@ -72,22 +72,33 @@ export function mkAccountIndex (accountList: Account[]): Accounts {
   return out;
 }
 
-export async function loadKMDAccounts (host: string, token: string, port: number,
-  walletName: string, password: string): Promise<AccountSDK[]> {
-  const kmdclient: Kmd = await new Kmd(token, host, port);
-  let walletid = '';
-  const wallets = (await kmdclient.listWallets()).wallets;
-  for (const arrayItem of wallets) {
-    if (arrayItem.name === walletName) {
-      walletid = arrayItem.id;
+interface KmdConfig {
+  host: string
+  port: number
+  token: string
+  wallets: Array<{name: string, password: string}>
+}
+
+export async function loadKMDAccounts (cfg: KmdConfig): Promise<AccountSDK[]> {
+  const c = new Kmd(cfg.token, cfg.host, cfg.port);
+  const wallets = (await c.listWallets()).wallets;
+  const walletIDs: StrMap = {};
+  for (const w of wallets) walletIDs[w.name] = w.id;
+
+  const accounts: AccountSDK[] = [];
+  for (const w of cfg.wallets) {
+    const id = walletIDs[w.name];
+    if (id === undefined) {
+      console.warn("wallet id=", id, "doesn't exist in KDM");
+      continue;
+    }
+    const token = (await c.initWalletHandle(id, w.password)).wallet_handle_token;
+    const address = await c.listKeys(token);
+    for (const addr of address.addresses) {
+      const accountKey = (await kmdclient.exportKey(wallethandle, password, addr));
+      accounts.push({ addr: addr, sk: accountKey.private_key });
     }
   }
-  const wallethandle = (await kmdclient.initWalletHandle(walletid, password)).wallet_handle_token;
-  const address = await kmdclient.listKeys(wallethandle);
-  const accounts: AccountSDK[] = [];
-  for (const addr of address.addresses) {
-    const accountKey = (await kmdclient.exportKey(wallethandle, password, addr));
-    accounts.push({ addr: addr, sk: accountKey.private_key });
-  }
+
   return accounts;
 }

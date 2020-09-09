@@ -21,7 +21,7 @@ let accounts = [{
 let kmdconfig = {
   host: "127.0.0.1",
   port: 7833,
-  token: "09c2da31d3e3e96ed98ba22cc4d58a14184f1808f2b4f21e66c9d38f70ca7232",
+  token: "content_of/algorand-node-data/kmd-v*/kmd.token",
   walletname: "MyTestWallet1",
   walletpassword: "testpassword"
 }
@@ -36,7 +36,7 @@ let defaultCfg = {
   token: "content_of/algorand-node-data/algod.token",
   accounts: accounts,
   kmdConfig: kmdconfig,
-  kmdAddresses: await loadKMDAccounts(kmdconfig.host, kmdconfig.token, kmdconfig.port, 
+  kmdAddresses: await loadKMDAccounts(kmdconfig.host, kmdconfig.token, kmdconfig.port,
     kmdconfig.walletname, kmdconfig.walletpassword)
 };
 
