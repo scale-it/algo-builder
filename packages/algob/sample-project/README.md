@@ -19,6 +19,11 @@ To run the `sample-project`:
 
   - `yarn run algob deploy -f` 
 
+* Also to interact with your deployments you can create a script and run it using:
+
+  - `yarn run algob run file1`
+  - Don’t use algob run for deployments. This should be used only for auxiliary scripts, like ad-hock transactions (example: draining an account).
+
 In the `sample-project` folder you'll have following items:
 
 * `assets/`: Directory for assets and contracts files:
