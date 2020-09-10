@@ -36,11 +36,20 @@ export async function mkSuggestedParams (
 export function makeAssetCreateTxn (
   name: string, asaDef: ASADef, flags: ASADeploymentFlags, txSuggestedParams: tx.SuggestedParams
 ): tx.Transaction {
-  const encoder = new TextEncoder();
+  // If TxParams has noteb64 or note , it gets precedence
+  let note;
+  if (flags.noteb64 ?? flags.note) {
+    // TxParams note
+    note = encodeNote(flags.note, flags.noteb64);
+  } else if (asaDef.noteb64 ?? asaDef.note) {
+    // ASA definition note
+    note = encodeNote(asaDef.note, asaDef.noteb64);
+  }
+
   // https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js#L104
   return tx.makeAssetCreateTxnWithSuggestedParams(
     flags.creator.addr,
-    asaDef.note ? encoder.encode(asaDef.note) : undefined,
+    note,
     asaDef.total,
     asaDef.decimals,
     asaDef.defaultFrozen,
@@ -74,4 +83,9 @@ export function makeASAOptInTx (
     note,
     assetID,
     params);
+}
+
+export function encodeNote (note: string | undefined, noteb64: string| undefined): Uint8Array {
+  const encoder = new TextEncoder();
+  return noteb64 ? encoder.encode(noteb64) : encoder.encode(note);
 }

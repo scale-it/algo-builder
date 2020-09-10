@@ -353,17 +353,13 @@ export interface TxParams {
   totalFee?: number
   firstValid?: number
   validRounds?: number
+  lease?: string
+  note?: string
+  noteb64?: string
 }
 
 export interface ASADeploymentFlags extends TxParams {
   creator: Account
-}
-
-export interface ASCPaymentFlags extends TxParams {
-  rawTxParamsAmt? : number
-  closeToRemainder?: string
-  note?: string
-  lease?: string
 }
 
 export interface ASCDeploymentFlags {
@@ -389,7 +385,7 @@ export interface AlgobDeployer {
     name: string,
     scParams: Object,
     flags: ASCDeploymentFlags,
-    payFlags: ASCPaymentFlags
+    payFlags: TxParams
   ) => Promise<ASCInfo>
   /**
      Returns true if ASA or ACS were deployed in any script.

@@ -11,7 +11,6 @@ import {
   ASCCache,
   ASCDeploymentFlags,
   ASCInfo,
-  ASCPaymentFlags,
   TxParams
 } from "../../src/types";
 
@@ -36,7 +35,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   async deployASC (
-    name: string, scParams: Object, flags: ASCDeploymentFlags, payFlags: ASCPaymentFlags
+    name: string, scParams: Object, flags: ASCDeploymentFlags, payFlags: TxParams
   ): Promise<ASCInfo> {
     return {
       creator: flags.funder.addr + "-get-address-dry-run",
