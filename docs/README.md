@@ -22,6 +22,16 @@ algob init my-project
 ```
 This will create a directory `my-project` and put multiple files into it.
 
+In the `my-project` folder you'll have following items:
+* `assets/`: Directory for assets and contracts files
+* `scripts/`: Directory for scripts to deploy and run your assets and contracts
+* `tests/`: Directory for test files for testing your assets and contracts
+* `algob.config.js`: Algob configuration file
+
+A `sample-project` is provided for your reference. 
+
+Further information about the `sample-project` can be found [here](/packages/algob/sample-project/README.md)
+
 
 ## Configuration
 
