@@ -200,7 +200,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     // Load payFlags.note (ignored if payFlags.noteb64 is present)
     // undefined if none of them is present.
     const encoder = new TextEncoder();
-    const note = payFlags.noteb64 ? payFlags.noteb64
+    const note = payFlags.noteb64 ? encoder.encode(payFlags.noteb64)
       : (payFlags.note ? encoder.encode(payFlags.note) : undefined);
 
     const tran = algosdk.makePaymentTxnWithSuggestedParams(funder, contractAddress,

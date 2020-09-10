@@ -44,10 +44,10 @@ export function makeAssetCreateTxn (
   let note;
   if (flags.noteb64 ?? flags.note) {
     // TxParams note
-    note = flags.noteb64 ? flags.noteb64 : encoder.encode(flags.note);
+    note = flags.noteb64 ? encoder.encode(flags.noteb64) : encoder.encode(flags.note);
   } else {
     // ASA definition note
-    note = asaDef.noteb64 ? asaDef.noteb64
+    note = asaDef.noteb64 ? encoder.encode(asaDef.noteb64)
       : (asaDef.note ? encoder.encode(asaDef.note) : undefined);
   }
 
