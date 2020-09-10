@@ -1,5 +1,4 @@
 import algosdk from "algosdk";
-import { TextEncoder } from "util";
 
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
@@ -196,12 +195,11 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
     const closeToRemainder = undefined;
 
-    // LOAD Note
-    // Load payFlags.note (ignored if payFlags.noteb64 is present)
-    // undefined if none of them is present.
-    const encoder = new TextEncoder();
-    const note = payFlags.noteb64 ? encoder.encode(payFlags.noteb64)
-      : (payFlags.note ? encoder.encode(payFlags.note) : undefined);
+    // Load Note
+    let note;
+    if (payFlags.noteb64 ?? payFlags.note) {
+      note = tx.encodeNote(payFlags.note, payFlags.noteb64);
+    }
 
     const tran = algosdk.makePaymentTxnWithSuggestedParams(funder, contractAddress,
       flags.fundingMicroAlgo, closeToRemainder,
