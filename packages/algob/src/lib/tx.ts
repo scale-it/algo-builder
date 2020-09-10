@@ -36,11 +36,25 @@ export async function mkSuggestedParams (
 export function makeAssetCreateTxn (
   name: string, asaDef: ASADef, flags: ASADeploymentFlags, txSuggestedParams: tx.SuggestedParams
 ): tx.Transaction {
+  // Load Note
+  // Load payFlags.note (ignored if payFlags.noteb64 is present)
+  // undefined if none of them is present.
+  // If TxParams has noteb64 or note , it gets precedence
   const encoder = new TextEncoder();
+  let note;
+  if (flags.noteb64 ?? flags.note) {
+    // TxParams note
+    note = flags.noteb64 ? flags.noteb64 : encoder.encode(flags.note);
+  } else {
+    // ASA definition note
+    note = asaDef.noteb64 ? asaDef.noteb64
+      : (asaDef.note ? encoder.encode(asaDef.note) : undefined);
+  }
+
   // https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js#L104
   return tx.makeAssetCreateTxnWithSuggestedParams(
     flags.creator.addr,
-    asaDef.note ? encoder.encode(asaDef.note) : undefined,
+    note,
     asaDef.total,
     asaDef.decimals,
     asaDef.defaultFrozen,

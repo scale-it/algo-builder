@@ -13,7 +13,6 @@ import {
   ASCCache,
   ASCDeploymentFlags,
   ASCInfo,
-  ASCPaymentFlags,
   Network,
   TxParams
 } from "../types";
@@ -36,7 +35,7 @@ export interface AlgoOperator {
   deployASA: (
     name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts
   ) => Promise<ASAInfo>
-  deployASC: (programb64: string, scParams: object, flags: ASCDeploymentFlags, payFlags: ASCPaymentFlags,
+  deployASC: (programb64: string, scParams: object, flags: ASCDeploymentFlags, payFlags: TxParams,
   ) => Promise<ASCInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
   optInToASA: (
@@ -177,7 +176,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     };
   }
 
-  async deployASC (name: string, scParams: object, flags: ASCDeploymentFlags, payFlags: ASCPaymentFlags
+  async deployASC (name: string, scParams: object, flags: ASCDeploymentFlags, payFlags: TxParams
   ): Promise<ASCInfo> {
     console.log("Deploying ASC:", name);
     const result: ASCCache = await this.ensureCompiled(name, false);
@@ -194,10 +193,19 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
     // Fund smart contract
     console.log("Funding Contract:", contractAddress);
+
+    const closeToRemainder = undefined;
+
+    // LOAD Note
+    // Load payFlags.note (ignored if payFlags.noteb64 is present)
+    // undefined if none of them is present.
     const encoder = new TextEncoder();
+    const note = payFlags.noteb64 ? payFlags.noteb64
+      : (payFlags.note ? encoder.encode(payFlags.note) : undefined);
+
     const tran = algosdk.makePaymentTxnWithSuggestedParams(funder, contractAddress,
-      flags.fundingMicroAlgo, payFlags.closeToRemainder,
-      payFlags.note ? encoder.encode(payFlags.note) : undefined,
+      flags.fundingMicroAlgo, closeToRemainder,
+      note,
       params);
 
     const signedTxn = tran.signTxn(flags.funder.sk);

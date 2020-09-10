@@ -11,7 +11,6 @@ import {
   ASAInfo,
   ASCDeploymentFlags,
   ASCInfo,
-  ASCPaymentFlags,
   CheckpointRepo,
   TxParams
 } from "../types";
@@ -114,7 +113,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   }
 
   async deployASC (name: string, scParams: Object, flags: ASCDeploymentFlags,
-    payFlags: ASCPaymentFlags): Promise<ASCInfo> {
+    payFlags: TxParams): Promise<ASCInfo> {
     this.assertNoAsset(name);
     const ascInfo = await this.algoOp.deployASC(name, scParams, flags, payFlags);
     this.cpData.registerASC(this.networkName, name, ascInfo);
@@ -187,7 +186,7 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
   }
 
   async deployASC (_name: string, scParams: Object, flags: ASCDeploymentFlags,
-    payFlags: ASCPaymentFlags): Promise<ASCInfo> {
+    payFlags: TxParams): Promise<ASCInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployASC"
     });
