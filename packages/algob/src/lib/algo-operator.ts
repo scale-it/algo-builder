@@ -17,6 +17,7 @@ import {
 } from "../types";
 import { CompileOp } from "./compile";
 import * as tx from "./tx";
+import { TxWriterImpl } from "./tx-log-writer";
 
 const confirmedRound = "confirmed-round";
 
@@ -32,10 +33,10 @@ export function createAlgoOperator (network: Network): AlgoOperator {
 export interface AlgoOperator {
   algodClient: algosdk.Algodv2
   deployASA: (
-    name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts
+    name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, scriptName: string
   ) => Promise<ASAInfo>
   deployASC: (programb64: string, scParams: object, flags: ASCDeploymentFlags, payFlags: TxParams,
-  ) => Promise<ASCInfo>
+    scriptName: string) => Promise<ASCInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
   optInToASA: (
     asaName: string, assetIndex: number, account: Account, params: TxParams
@@ -45,9 +46,11 @@ export interface AlgoOperator {
 export class AlgoOperatorImpl implements AlgoOperator {
   algodClient: algosdk.Algodv2;
   compileOp: CompileOp;
+  txWriter: TxWriterImpl;
   constructor (algocl: algosdk.Algodv2) {
     this.algodClient = algocl;
     this.compileOp = new CompileOp(this.algodClient);
+    this.txWriter = new TxWriterImpl();
   }
 
   // Source:
@@ -154,9 +157,10 @@ export class AlgoOperatorImpl implements AlgoOperator {
   }
 
   async deployASA (
-    name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts
-  ): Promise<ASAInfo> {
-    console.log("Deploying ASA:", name);
+    name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts,
+    scriptName: string): Promise<ASAInfo> {
+    const message = 'Deploying ASA: ' + name;
+    console.log(message);
     const txParams = await tx.mkSuggestedParams(this.algodClient, flags);
     const optInAccounts = await this.checkBalanceForOptInTx(
       name, txParams, asaDef, accounts, flags.creator);
@@ -166,7 +170,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const txConfirmation = await this.waitForConfirmation(txInfo.txId);
     const assetIndex = txConfirmation["asset-index"];
     await this.optInToASAMultiple(name, assetIndex, optInAccounts, txParams);
-    console.log(txConfirmation);
+
+    this.txWriter.push(scriptName, message, txConfirmation);
     return {
       creator: flags.creator.addr,
       txId: txInfo.txId,
@@ -175,9 +180,10 @@ export class AlgoOperatorImpl implements AlgoOperator {
     };
   }
 
-  async deployASC (name: string, scParams: object, flags: ASCDeploymentFlags, payFlags: TxParams
-  ): Promise<ASCInfo> {
-    console.log("Deploying ASC:", name);
+  async deployASC (name: string, scParams: object, flags: ASCDeploymentFlags, payFlags: TxParams,
+    scriptName: string): Promise<ASCInfo> {
+    const message = 'Deploying ASC: ' + name;
+    console.log(message);
     const result: ASCCache = await this.ensureCompiled(name, false);
     const programb64 = result.compiled;
     const program = new Uint8Array(Buffer.from(programb64, "base64"));
@@ -212,7 +218,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
     const confirmedTxn = await this.waitForConfirmation(tranInfo.txId);
 
-    console.log(confirmedTxn);
+    this.txWriter.push(scriptName, message, confirmedTxn);
 
     return {
       creator: flags.funder.addr,

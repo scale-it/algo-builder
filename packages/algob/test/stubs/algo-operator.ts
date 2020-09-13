@@ -24,8 +24,8 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   async deployASA (
-    name: string, asaDesc: ASADef, flags: ASADeploymentFlags, accounts: Accounts
-  ): Promise<ASAInfo> {
+    name: string, asaDesc: ASADef, flags: ASADeploymentFlags, accounts: Accounts,
+    scriptName: string): Promise<ASAInfo> {
     return {
       creator: flags.creator.addr + "-get-address-dry-run",
       txId: "tx-id-dry-run",
@@ -35,8 +35,8 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   async deployASC (
-    name: string, scParams: Object, flags: ASCDeploymentFlags, payFlags: TxParams
-  ): Promise<ASCInfo> {
+    name: string, scParams: Object, flags: ASCDeploymentFlags, payFlags: TxParams,
+    scriptName: string): Promise<ASCInfo> {
     return {
       creator: flags.funder.addr + "-get-address-dry-run",
       txId: "tx-id-dry-run",

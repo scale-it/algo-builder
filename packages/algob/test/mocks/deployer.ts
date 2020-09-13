@@ -8,6 +8,16 @@ export class FakeDeployer implements AlgobDeployer {
   isDeployMode = false;
   accounts = [];
   accountsByName = new Map<string, Account>();
+  scriptName = '';
+
+  setScriptName (name: string): void {
+    this.scriptName = name;
+  }
+
+  log (msg: string, obj: any): void {
+    throw new Error("Not implemented");
+  }
+
   putMetadata (key: string, value: string): void {
   };
 

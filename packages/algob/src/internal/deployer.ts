@@ -1,6 +1,7 @@
 import * as algosdk from "algosdk";
 
 import { AlgoOperator } from "../lib/algo-operator";
+import { txWriter, TxWriterImpl } from "../lib/tx-log-writer";
 import {
   Account,
   Accounts,
@@ -23,15 +24,18 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   private readonly cpData: CheckpointRepo;
   private readonly loadedAsaDefs: ASADefs;
   private readonly algoOp: AlgoOperator;
+  private readonly txWriter: txWriter;
   readonly accounts: Account[];
   readonly accountsByName: Accounts;
+  scriptName: string;
 
   constructor (
     runtimeEnv: AlgobRuntimeEnv,
     cpData: CheckpointRepo,
     asaDefs: ASADefs,
     algoOp: AlgoOperator,
-    accountsByName: Accounts
+    accountsByName: Accounts,
+    name: string
   ) {
     this.runtimeEnv = runtimeEnv;
     this.cpData = cpData;
@@ -39,6 +43,8 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     this.algoOp = algoOp;
     this.accounts = runtimeEnv.network.config.accounts;
     this.accountsByName = accountsByName;
+    this.txWriter = new TxWriterImpl();
+    this.scriptName = name;
   }
 
   get isDeployMode (): boolean {
@@ -107,7 +113,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     }
     this.assertNoAsset(name);
     const asaInfo = await this.algoOp.deployASA(
-      name, this.loadedAsaDefs[name], flags, this.accountsByName);
+      name, this.loadedAsaDefs[name], flags, this.accountsByName, this.scriptName);
     this.cpData.registerASA(this.networkName, name, asaInfo);
     return asaInfo;
   }
@@ -115,7 +121,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   async deployASC (name: string, scParams: Object, flags: ASCDeploymentFlags,
     payFlags: TxParams): Promise<ASCInfo> {
     this.assertNoAsset(name);
-    const ascInfo = await this.algoOp.deployASC(name, scParams, flags, payFlags);
+    const ascInfo = await this.algoOp.deployASC(name, scParams, flags, payFlags, this.scriptName);
     this.cpData.registerASC(this.networkName, name, ascInfo);
     return ascInfo;
   }
@@ -147,14 +153,26 @@ export class AlgobDeployerImpl implements AlgobDeployer {
       this._getAccount(accountName),
       flags);
   }
+
+  setScriptName (name: string): void {
+    this.scriptName = name;
+  }
+
+  log (msg: string, obj: any): void {
+    this.txWriter.push(this.scriptName, msg, obj);
+  }
 }
 
 // This class is what user interacts with in run task
 export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
   private readonly _internal: AlgobDeployer;
+  private readonly txWriter: txWriter;
+  scriptName: string;
 
-  constructor (deployer: AlgobDeployer) {
+  constructor (deployer: AlgobDeployer, name: string) {
     this._internal = deployer;
+    this.txWriter = new TxWriterImpl();
+    this.scriptName = name;
   }
 
   get accounts (): Account[] {
@@ -216,5 +234,13 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "optInToASA"
     });
+  }
+
+  setScriptName (name: string): void {
+    this.scriptName = name;
+  }
+
+  log (msg: string, obj: any): void {
+    this.txWriter.push(this.scriptName, msg, obj);
   }
 }
