@@ -1,6 +1,14 @@
 # Algorand Builder docs
 
++ Installation: [main README](/README.md) file.
++ Project initialization → read below.
++ [PROJECT configuration](/docs/algob-config.md).
++ [Devnet](/infrastructure/README.md) creation.
++ [Script execution](/docs/user-script-execution.md).
++ [Script checkpoints](/docs/execution-checkpoints.md).
+
 ## Help
+
 Help prints information about top-level tasks:
 ```
 algob help
@@ -28,24 +36,10 @@ In the `my-project` folder you'll have following items:
 * `tests/`: Directory for test files for testing your assets and contracts
 * `algob.config.js`: Algob configuration file
 
-A `sample-project` is provided for your reference. 
+A `sample-project` is provided for your reference.
 
 Further information about the `sample-project` can be found [here](/packages/algob/sample-project/README.md)
 
-
-## Configuration
-
-One of the most important files in the project is your configuration file: `algob.config.js`.
-It can contain multiple network configurations and configured accounts.
-
-Further information about the configuration can be found [here](/docs/algob-config.md).
-
-
-## User script execution
-Tasks `algob run` and `algob deploy` can run user-defined code to interact with Algorand blockchain node.
-They do this by loading connection information from `algob.config.js` and executing incremental scripts found in `scripts/`.
-
-Script execution details can be found [here](/docs/user-script-execution.md).
 
 ### Checkpoints
 `algob` uses local file system files to version its state.

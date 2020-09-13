@@ -16,9 +16,10 @@ To attract more web developers we plan to build a JavaScript DSL for TEAL with T
 
 ### Documentation
 
+User documentation is available in [/docs](docs/README.md).
+
 The project specification is [published here](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
 
-User documentation is available in [/docs](docs/README.md).
 
 ## Requirements
 
@@ -35,8 +36,14 @@ Make sure that the node you are connecting to has a `"EnableDeveloperAPI": true`
 # Usage
 
 
-
 ## Quick start
+
+### Create a blockchain
+
++ Use [Devnet Quick Start](/infrastructure/README.md).
++ Or install a node with any other network.
+
+### Create an algob project
 
 1. Create a new yarn/npm project:
 
@@ -71,13 +78,10 @@ Make sure that the node you are connecting to has a `"EnableDeveloperAPI": true`
 
 You can use `algob` within a TS project. You can write your scripts and tests in TS. However to use them with `algob` you firstly need to compile the project to JS.
 
-TODO: provide a project template for TS projects. [task](https://www.pivotaltracker.com/n/projects/2452320).
+TIP: Use `tsc --watch` to update the build in a realtime while you develop the project
 
-TIPS:
+TODO: we are planning to provide a template for TS projects. [task](https://www.pivotaltracker.com/n/projects/2452320).
 
-+ Use `tsc --watch` to update the build in a realtime while you develop the project
-
-Read more in [docs](docs/README.md)
 
 # Contributing
 
