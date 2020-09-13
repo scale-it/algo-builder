@@ -8,6 +8,7 @@ export interface txWriter {
 
   timestamp: number
   push: (scriptPath: string, msg: string, obj: any) => void
+  ensureDirectoryExistence: (filePath: string) => boolean
 
 }
 
@@ -18,11 +19,25 @@ export class TxWriterImpl implements txWriter {
     this.timestamp = +new Date();
   }
 
+  ensureDirectoryExistence (filePath: string): boolean {
+    var dirname = path.dirname(filePath);
+    if (fs.existsSync(dirname)) {
+      return true;
+    }
+    this.ensureDirectoryExistence(dirname);
+    fs.mkdirSync(dirname);
+    return true;
+  }
+
   push (scriptPath: string, msg: string, obj: any): void {
     this.timestamp = +new Date();
 
+    const filePath = path.join(ARTIFACTS_DIR, scriptPath) + '.' +
+    (this.timestamp).toString() + '.log';
+
+    this.ensureDirectoryExistence(filePath);
     fs.appendFileSync(
-      path.join(ARTIFACTS_DIR, scriptPath) + '.' + (this.timestamp).toString() + '.log',
+      filePath,
       msg + YAML.stringify(obj)
     );
   }
