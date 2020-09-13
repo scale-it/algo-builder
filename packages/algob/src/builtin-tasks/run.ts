@@ -39,7 +39,7 @@ function mkDeployer (
   algoOp: AlgoOperator,
   asaDefs: ASADefs,
   accounts: Accounts,
-  name: string
+  scriptName: string
 ): AlgobDeployer {
   const deployer = new AlgobDeployerImpl(
     runtimeEnv,
@@ -47,11 +47,11 @@ function mkDeployer (
     asaDefs,
     algoOp,
     accounts,
-    name);
+    scriptName);
   if (allowWrite) {
     return deployer;
   }
-  return new AlgobDeployerReadOnlyImpl(deployer, name);
+  return new AlgobDeployerReadOnlyImpl(deployer, scriptName);
 }
 
 // returns all items before the current one and
