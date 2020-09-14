@@ -2,7 +2,7 @@ import { assert } from "chai";
 
 import { ERRORS } from "../../src/internal/core/errors-list";
 import { AlgobDeployerImpl } from "../../src/internal/deployer";
-import { txWriter, TxWriterImpl } from "../../src/internal/tx-log-writer";
+import { TxWriterImpl } from "../../src/internal/tx-log-writer";
 import { CheckpointRepoImpl } from "../../src/lib/script-checkpoints";
 import { ASADef, ASAInfo, ASCInfo, Checkpoints } from "../../src/types";
 import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
