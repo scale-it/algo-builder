@@ -40,9 +40,10 @@ export class TxWriterImpl implements txWriter {
     (this.timestamp).toString() + '.log';
 
     this.ensureDirectoryExistence(filePath);
-    fs.appendFileSync(
-      filePath,
-      msg + YAML.stringify(obj)
-    );
+    var map = new Map();
+    map.set(msg, obj);
+    YAML.defaultOptions.indent = 4;
+    var file = YAML.stringify(map);
+    fs.appendFileSync(filePath, file);
   }
 }
