@@ -1,7 +1,7 @@
 import * as algosdk from "algosdk";
 
+import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
-import { txWriter, TxWriterImpl } from "../lib/tx-log-writer";
 import {
   Account,
   Accounts,
@@ -27,7 +27,6 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   private readonly txWriter: txWriter;
   readonly accounts: Account[];
   readonly accountsByName: Accounts;
-  scriptName: string;
 
   constructor (
     runtimeEnv: AlgobRuntimeEnv,
@@ -35,7 +34,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     asaDefs: ASADefs,
     algoOp: AlgoOperator,
     accountsByName: Accounts,
-    name: string
+    txWriter: txWriter
   ) {
     this.runtimeEnv = runtimeEnv;
     this.cpData = cpData;
@@ -43,8 +42,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     this.algoOp = algoOp;
     this.accounts = runtimeEnv.network.config.accounts;
     this.accountsByName = accountsByName;
-    this.txWriter = new TxWriterImpl();
-    this.scriptName = name;
+    this.txWriter = txWriter;
   }
 
   get isDeployMode (): boolean {
@@ -113,7 +111,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
     }
     this.assertNoAsset(name);
     const asaInfo = await this.algoOp.deployASA(
-      name, this.loadedAsaDefs[name], flags, this.accountsByName, this.scriptName);
+      name, this.loadedAsaDefs[name], flags, this.accountsByName, this.txWriter);
     this.cpData.registerASA(this.networkName, name, asaInfo);
     return asaInfo;
   }
@@ -121,7 +119,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   async deployASC (name: string, scParams: Object, flags: ASCDeploymentFlags,
     payFlags: TxParams): Promise<ASCInfo> {
     this.assertNoAsset(name);
-    const ascInfo = await this.algoOp.deployASC(name, scParams, flags, payFlags, this.scriptName);
+    const ascInfo = await this.algoOp.deployASC(name, scParams, flags, payFlags, this.txWriter);
     this.cpData.registerASC(this.networkName, name, ascInfo);
     return ascInfo;
   }
@@ -154,12 +152,8 @@ export class AlgobDeployerImpl implements AlgobDeployer {
       flags);
   }
 
-  setScriptName (name: string): void {
-    this.scriptName = name;
-  }
-
   log (msg: string, obj: any): void {
-    this.txWriter.push(this.scriptName, msg, obj);
+    this.txWriter.push(msg, obj);
   }
 }
 
@@ -167,12 +161,10 @@ export class AlgobDeployerImpl implements AlgobDeployer {
 export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
   private readonly _internal: AlgobDeployer;
   private readonly txWriter: txWriter;
-  scriptName: string;
 
-  constructor (deployer: AlgobDeployer, name: string) {
+  constructor (deployer: AlgobDeployer, txWriter: txWriter) {
     this._internal = deployer;
-    this.txWriter = new TxWriterImpl();
-    this.scriptName = name;
+    this.txWriter = txWriter;
   }
 
   get accounts (): Account[] {
@@ -236,11 +228,7 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
     });
   }
 
-  setScriptName (name: string): void {
-    this.scriptName = name;
-  }
-
   log (msg: string, obj: any): void {
-    this.txWriter.push(this.scriptName, msg, obj);
+    this.txWriter.push(msg, obj);
   }
 }

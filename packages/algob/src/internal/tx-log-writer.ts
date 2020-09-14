@@ -2,37 +2,41 @@ import fs from "fs";
 import path from "path";
 import YAML from "yaml";
 
-import { ARTIFACTS_DIR } from "../internal/core/project-structure";
+import { ARTIFACTS_DIR } from "./core/project-structure";
 
 export interface txWriter {
-
   timestamp: number
-  push: (scriptPath: string, msg: string, obj: any) => void
-  ensureDirectoryExistence: (filePath: string) => boolean
-
+  scriptName: string
+  setScriptName: (scriptName: string) => void
+  push: (msg: string, obj: any) => void
+  ensureDirectoryExistence: (filePath: string) => void
 }
 
 export class TxWriterImpl implements txWriter {
   timestamp: number;
-
-  constructor () {
+  scriptName: string;
+  constructor (scriptName: string) {
     this.timestamp = +new Date();
+    this.scriptName = scriptName;
   }
 
-  ensureDirectoryExistence (filePath: string): boolean {
+  setScriptName (scriptName: string): void {
+    this.scriptName = scriptName;
+  }
+
+  ensureDirectoryExistence (filePath: string): void {
     var dirname = path.dirname(filePath);
     if (fs.existsSync(dirname)) {
-      return true;
+      return;
     }
     this.ensureDirectoryExistence(dirname);
     fs.mkdirSync(dirname);
-    return true;
   }
 
-  push (scriptPath: string, msg: string, obj: any): void {
+  push (msg: string, obj: any): void {
     this.timestamp = +new Date();
 
-    const filePath = path.join(ARTIFACTS_DIR, scriptPath) + '.' +
+    const filePath = path.join(ARTIFACTS_DIR, this.scriptName) + '.' +
     (this.timestamp).toString() + '.log';
 
     this.ensureDirectoryExistence(filePath);

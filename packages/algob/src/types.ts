@@ -378,7 +378,6 @@ export interface AlgobDeployer {
   isDeployMode: boolean
   accounts: Account[]
   accountsByName: Accounts
-  scriptName: string
   putMetadata: (key: string, value: string) => void
   getMetadata: (key: string) => string | undefined
   deployASA: (name: string, flags: ASADeploymentFlags) => Promise<ASAInfo>
@@ -407,9 +406,6 @@ export interface AlgobDeployer {
 
   // Log Transaction
   log: (msg: string, obj: any) => void
-
-  // Set Script Name
-  setScriptName: (name: string) => void
 }
 
 // ************************
