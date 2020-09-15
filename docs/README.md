@@ -2,12 +2,15 @@
 
 + Installation: [main README](/README.md) file.
 + Project initialization → read below.
-+ [PROJECT configuration](/docs/algob-config.md).
++ [Configuration](/docs/algob-config.md).
 + [Devnet](/infrastructure/README.md) creation.
 + [Script execution](/docs/user-script-execution.md).
-+ [Script checkpoints](/docs/execution-checkpoints.md).
++ [Script Checkpoints](/docs/execution-checkpoints.md).
++ [Script Logging](/docs/logs.md)
 + [API docs](https://scale-it.github.io/algorand-builder/)
-+ [Logs](/docs/logs.md)
+
+For more in-depth description you can look at the [project specification](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
+
 
 ## Help
 
