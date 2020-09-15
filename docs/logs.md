@@ -12,7 +12,9 @@ You can also use this in your interaction script.
 
 You can use this line in any of your scripts to log anything.
 
-* Log files are created in:  `artifacts/scripts/<script_path_and_name>-<timestamp>.log`
+Log files are stored in `artifacts/scripts/` folder.
+
+* Log files are created in given format:  `artifacts/scripts/<script_path_and_name>-<timestamp>.log` 
 * Log file structure:
     ``` 
     message content: 
