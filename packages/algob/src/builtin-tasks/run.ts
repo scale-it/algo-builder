@@ -8,6 +8,7 @@ import {
   AlgobDeployerImpl,
   AlgobDeployerReadOnlyImpl
 } from "../internal/deployer";
+import { txWriter, TxWriterImpl } from "../internal/tx-log-writer";
 import { partitionByFn } from "../internal/util/lists";
 import { runScript } from "../internal/util/scripts-runner";
 import { mkAccountIndex } from "../lib/account";
@@ -38,18 +39,20 @@ function mkDeployer (
   allowWrite: boolean,
   algoOp: AlgoOperator,
   asaDefs: ASADefs,
-  accounts: Accounts
+  accounts: Accounts,
+  txWriter: txWriter
 ): AlgobDeployer {
   const deployer = new AlgobDeployerImpl(
     runtimeEnv,
     cpData,
     asaDefs,
     algoOp,
-    accounts);
+    accounts,
+    txWriter);
   if (allowWrite) {
     return deployer;
   }
-  return new AlgobDeployerReadOnlyImpl(deployer);
+  return new AlgobDeployerReadOnlyImpl(deployer, txWriter);
 }
 
 // returns all items before the current one and
@@ -123,7 +126,15 @@ async function runSortedScripts (
 ): Promise<void> {
   const log = debug(logDebugTag);
   const cpData: CheckpointRepo = loadCheckpointsRecursive();
-  const deployer: AlgobDeployer = mkDeployer(runtimeEnv, cpData, allowWrite, algoOp, asaDefs, accounts);
+  const txWriter: txWriter = new TxWriterImpl('');
+  const deployer: AlgobDeployer = mkDeployer(
+    runtimeEnv,
+    cpData,
+    allowWrite,
+    algoOp,
+    asaDefs,
+    accounts,
+    txWriter);
 
   const scriptsFromScriptsDir: string[] = lsScriptsDir();
 
@@ -139,6 +150,7 @@ async function runSortedScripts (
       console.warn('\x1b[33m%s\x1b[0m', `Skipping: Checkpoint exists for script ${relativeScriptPath}`);
       continue;
     }
+    txWriter.setScriptName(relativeScriptPath);
     log(`Running script ${relativeScriptPath}`);
     await runScript(
       relativeScriptPath,

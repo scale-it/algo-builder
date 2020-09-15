@@ -403,6 +403,9 @@ export interface AlgobDeployer {
 
   // Output of these functions is undefined. It's not known what to save to CP
   optInToASA: (name: string, accountName: string, flags: ASADeploymentFlags) => Promise<void>
+
+  // Log Transaction
+  log: (msg: string, obj: any) => void
 }
 
 // ************************

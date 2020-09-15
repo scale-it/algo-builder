@@ -1,6 +1,7 @@
 
 import { Algodv2 } from "algosdk";
 
+import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";
 import {
   Account,
@@ -24,8 +25,8 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   async deployASA (
-    name: string, asaDesc: ASADef, flags: ASADeploymentFlags, accounts: Accounts
-  ): Promise<ASAInfo> {
+    name: string, asaDesc: ASADef, flags: ASADeploymentFlags, accounts: Accounts,
+    txWriter: txWriter): Promise<ASAInfo> {
     return {
       creator: flags.creator.addr + "-get-address-dry-run",
       txId: "tx-id-dry-run",
@@ -35,8 +36,8 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   async deployASC (
-    name: string, scParams: Object, flags: ASCDeploymentFlags, payFlags: TxParams
-  ): Promise<ASCInfo> {
+    name: string, scParams: Object, flags: ASCDeploymentFlags, payFlags: TxParams,
+    txWriter: txWriter): Promise<ASCInfo> {
     return {
       creator: flags.funder.addr + "-get-address-dry-run",
       txId: "tx-id-dry-run",
