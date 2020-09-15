@@ -7,6 +7,7 @@
 + [Script execution](/docs/user-script-execution.md).
 + [Script checkpoints](/docs/execution-checkpoints.md).
 + [API docs](https://scale-it.github.io/algorand-builder/)
++ [Logs](/docs/logs.md)
 
 ## Help
 
