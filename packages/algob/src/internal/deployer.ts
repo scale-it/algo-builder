@@ -2,6 +2,7 @@ import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
+import { persistCheckpoint } from "../lib/script-checkpoints";
 import {
   Account,
   Accounts,
@@ -110,16 +111,42 @@ export class AlgobDeployerImpl implements AlgobDeployer {
         });
     }
     this.assertNoAsset(name);
-    const asaInfo = await this.algoOp.deployASA(
-      name, this.loadedAsaDefs[name], flags, this.accountsByName, this.txWriter);
+    let asaInfo = {} as any;
+    try {
+      asaInfo = await this.algoOp.deployASA(
+        name, this.loadedAsaDefs[name], flags, this.accountsByName, this.txWriter);
+    } catch (error) {
+      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+      // throw
+    }
+
     this.cpData.registerASA(this.networkName, name, asaInfo);
+
+    try {
+      await this.algoOp.optInToASAMultiple(
+        name,
+        this.loadedAsaDefs[name],
+        flags,
+        this.accountsByName,
+        asaInfo.assetIndex);
+    } catch (error) {
+      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+      // throw
+    }
+
     return asaInfo;
   }
 
   async deployASC (name: string, scParams: Object, flags: ASCDeploymentFlags,
     payFlags: TxParams): Promise<ASCInfo> {
     this.assertNoAsset(name);
-    const ascInfo = await this.algoOp.deployASC(name, scParams, flags, payFlags, this.txWriter);
+    let ascInfo = {} as any;
+    try {
+      ascInfo = await this.algoOp.deployASC(name, scParams, flags, payFlags, this.txWriter);
+    } catch (error) {
+      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+      // throw
+    }
     this.cpData.registerASC(this.networkName, name, ascInfo);
     return ascInfo;
   }
