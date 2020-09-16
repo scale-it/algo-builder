@@ -121,7 +121,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
       persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
 
       console.log(error);
-      throw new Error();
+      throw error;
     }
 
     this.cpData.registerASA(this.networkName, name, asaInfo);
@@ -137,7 +137,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
       persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
 
       console.log(error);
-      throw new Error();
+      throw error;
     }
 
     return asaInfo;
@@ -153,7 +153,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
       persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
 
       console.log(error);
-      throw new Error();
+      throw error;
     }
     this.cpData.registerASC(this.networkName, name, ascInfo);
     return ascInfo;
