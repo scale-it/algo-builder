@@ -74,6 +74,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
 
   private assertNoAsset (name: string): void {
     if (this.isDefined(name)) {
+      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
       throw new BuilderError(
         ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT, {
           assetName: name
@@ -105,6 +106,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
 
   async deployASA (name: string, flags: ASADeploymentFlags): Promise<ASAInfo> {
     if (this.loadedAsaDefs[name] === undefined) {
+      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
       throw new BuilderError(
         ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_DEF_NOT_FOUND, {
           asaName: name
@@ -117,7 +119,9 @@ export class AlgobDeployerImpl implements AlgobDeployer {
         name, this.loadedAsaDefs[name], flags, this.accountsByName, this.txWriter);
     } catch (error) {
       persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
-      // throw
+
+      console.log(error);
+      throw new Error();
     }
 
     this.cpData.registerASA(this.networkName, name, asaInfo);
@@ -131,7 +135,9 @@ export class AlgobDeployerImpl implements AlgobDeployer {
         asaInfo.assetIndex);
     } catch (error) {
       persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
-      // throw
+
+      console.log(error);
+      throw new Error();
     }
 
     return asaInfo;
@@ -145,7 +151,9 @@ export class AlgobDeployerImpl implements AlgobDeployer {
       ascInfo = await this.algoOp.deployASC(name, scParams, flags, payFlags, this.txWriter);
     } catch (error) {
       persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
-      // throw
+
+      console.log(error);
+      throw new Error();
     }
     this.cpData.registerASC(this.networkName, name, ascInfo);
     return ascInfo;

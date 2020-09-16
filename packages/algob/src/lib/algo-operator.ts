@@ -123,7 +123,6 @@ export class AlgoOperatorImpl implements AlgoOperator {
       asaDef,
       accounts,
       flags.creator);
-
     for (const account of optInAccounts) {
       await this._optInToASA(asaName, assetIndex, account, txParams);
     }
