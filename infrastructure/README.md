@@ -21,6 +21,17 @@ If you want to create a local network by your own, you can use a private net [tu
 1. Then:
 
         cd infrastructure
+        make create-private
+
+1. Update the `node_data/PrimaryNode/config.json` file. Remember to keep `"EnableDeveloperAPI": true` if you want to be able to compile smart-contracts.
+1. Check the access token and network address. You will need them in your config file to correctly connect to a node.
+
+        cat node_data/PrimaryNode/algod.net
+        cat node_data/PrimaryNode/algod.token
+
+1. To stop and start again the chain use:
+
+        make stop-private
         make start-private
 
 
