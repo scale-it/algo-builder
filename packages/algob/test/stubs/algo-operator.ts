@@ -60,4 +60,10 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   optInToASA (asaName: string, assetIndex: number, account: Account, params: TxParams): Promise<void> {
     throw new Error("Method not implemented.");
   }
+
+  optInToASAMultiple (
+    asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, assetIndex: number
+  ): Promise<void> {
+    return Promise.resolve();
+  }
 }

@@ -2,6 +2,7 @@ import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
+import { persistCheckpoint } from "../lib/script-checkpoints";
 import {
   Account,
   Accounts,
@@ -73,6 +74,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
 
   private assertNoAsset (name: string): void {
     if (this.isDefined(name)) {
+      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
       throw new BuilderError(
         ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT, {
           assetName: name
@@ -104,22 +106,55 @@ export class AlgobDeployerImpl implements AlgobDeployer {
 
   async deployASA (name: string, flags: ASADeploymentFlags): Promise<ASAInfo> {
     if (this.loadedAsaDefs[name] === undefined) {
+      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
       throw new BuilderError(
         ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_DEF_NOT_FOUND, {
           asaName: name
         });
     }
     this.assertNoAsset(name);
-    const asaInfo = await this.algoOp.deployASA(
-      name, this.loadedAsaDefs[name], flags, this.accountsByName, this.txWriter);
+    let asaInfo = {} as any;
+    try {
+      asaInfo = await this.algoOp.deployASA(
+        name, this.loadedAsaDefs[name], flags, this.accountsByName, this.txWriter);
+    } catch (error) {
+      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+
+      console.log(error);
+      throw error;
+    }
+
     this.cpData.registerASA(this.networkName, name, asaInfo);
+
+    try {
+      await this.algoOp.optInToASAMultiple(
+        name,
+        this.loadedAsaDefs[name],
+        flags,
+        this.accountsByName,
+        asaInfo.assetIndex);
+    } catch (error) {
+      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+
+      console.log(error);
+      throw error;
+    }
+
     return asaInfo;
   }
 
   async deployASC (name: string, scParams: Object, flags: ASCDeploymentFlags,
     payFlags: TxParams): Promise<ASCInfo> {
     this.assertNoAsset(name);
-    const ascInfo = await this.algoOp.deployASC(name, scParams, flags, payFlags, this.txWriter);
+    let ascInfo = {} as any;
+    try {
+      ascInfo = await this.algoOp.deployASC(name, scParams, flags, payFlags, this.txWriter);
+    } catch (error) {
+      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+
+      console.log(error);
+      throw error;
+    }
     this.cpData.registerASC(this.networkName, name, ascInfo);
     return ascInfo;
   }

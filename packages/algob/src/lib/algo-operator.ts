@@ -41,6 +41,9 @@ export interface AlgoOperator {
   optInToASA: (
     asaName: string, assetIndex: number, account: Account, params: TxParams
   ) => Promise<void>
+  optInToASAMultiple: (
+    asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, assetIndex: number
+  ) => Promise<void>
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -111,10 +114,17 @@ export class AlgoOperatorImpl implements AlgoOperator {
   }
 
   async optInToASAMultiple (
-    asaName: string, assetIndex: number, accounts: Account[], params: algosdk.SuggestedParams
+    asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, assetIndex: number
   ): Promise<void> {
-    for (const account of accounts) {
-      await this._optInToASA(asaName, assetIndex, account, params);
+    const txParams = await tx.mkSuggestedParams(this.algodClient, flags);
+    const optInAccounts = await this.checkBalanceForOptInTx(
+      asaName,
+      txParams,
+      asaDef,
+      accounts,
+      flags.creator);
+    for (const account of optInAccounts) {
+      await this._optInToASA(asaName, assetIndex, account, txParams);
     }
   }
 
@@ -160,14 +170,11 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const message = 'Deploying ASA: ' + name;
     console.log(message);
     const txParams = await tx.mkSuggestedParams(this.algodClient, flags);
-    const optInAccounts = await this.checkBalanceForOptInTx(
-      name, txParams, asaDef, accounts, flags.creator);
     const assetTX = tx.makeAssetCreateTxn(name, asaDef, flags, txParams);
     const rawSignedTxn = assetTX.signTxn(flags.creator.sk);
     const txInfo = await this.algodClient.sendRawTransaction(rawSignedTxn).do();
     const txConfirmation = await this.waitForConfirmation(txInfo.txId);
     const assetIndex = txConfirmation["asset-index"];
-    await this.optInToASAMultiple(name, assetIndex, optInAccounts, txParams);
 
     txWriter.push(message, txConfirmation);
     return {
