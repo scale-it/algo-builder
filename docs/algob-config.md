@@ -47,7 +47,7 @@ Each network configuration requires a list of accounts. These accounts are then 
           mnemonic: "call boy rubber fashion arch day capable one sweet skate outside purse six early learn tuition eagle love breeze pizza loud today popular able divide"
         }]);
 
-1. Loaded from env variable ALGOB_ACCOUNTS
+1. Loaded from env variable `ALGOB_ACCOUNTS`
 
         const accounts = loadFromEnv();
         /**
@@ -55,7 +55,7 @@ Each network configuration requires a list of accounts. These accounts are then 
         *  the keys in env variable should be JSON string of the following structure: 
         * [{"name": "account_name", "menmonic": "mnemonic string"]} 
         */
-        
+
 NOTE: don't use any of the accounts above. They are provided only as an example - everyone has an access to them!
 
 You can merge accounts in the config file (eg by using `concat` method on an `Array`).
