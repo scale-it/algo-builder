@@ -1,6 +1,7 @@
 import {
   loadAccountsFromFile,
-  loadAccountsFromFileSync, loadFromEnv,
+  loadAccountsFromFileSync,
+  loadFromEnv,
   mkAccounts
 } from "./lib/account";
 

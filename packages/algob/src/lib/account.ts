@@ -1,5 +1,4 @@
 import { Account as AccountSDK, mnemonicToSecretKey } from "algosdk";
-import { cons } from "fp-ts/lib/ReadonlyArray";
 import * as fs from "fs";
 import YAML from "yaml";
 
