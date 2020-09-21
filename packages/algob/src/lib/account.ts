@@ -1,4 +1,5 @@
 import { Account as AccountSDK, mnemonicToSecretKey } from "algosdk";
+import { cons } from "fp-ts/lib/ReadonlyArray";
 import * as fs from "fs";
 import YAML from "yaml";
 
@@ -70,4 +71,18 @@ export function mkAccountIndex (accountList: Account[]): Accounts {
     out.set(a.name, a);
   }
   return out;
+}
+
+export function loadFromEnv (): Account[] {
+  var algobAccountsString = process.env.ALGOB_ACCOUNTS;
+  if (algobAccountsString) {
+    const algob = JSON.parse(algobAccountsString);
+    var algobAccounts: Account[] = [];
+    for (const account of algob) {
+      const accountSDK = parseMnemonic(account.mnemonic);
+      algobAccounts.push({ name: account.name, addr: accountSDK.addr, sk: accountSDK.sk });
+    }
+    return algobAccounts;
+  }
+  return [];
 }
