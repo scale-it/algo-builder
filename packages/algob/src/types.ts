@@ -16,6 +16,11 @@ export interface Account extends AccountSDK {
   name: string
 }
 
+export interface AlgobAccount {
+  name: string
+  mnemonic: string
+}
+
 export interface HDAccount {
   mnemonic: string
   initialIndex?: number

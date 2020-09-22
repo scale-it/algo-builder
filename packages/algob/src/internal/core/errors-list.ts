@@ -653,6 +653,12 @@ const accountErrors = {
     message: `%errors%`,
     title: "Some accounts are malformed or have missing fields",
     description: ""
+  },
+  FIELD_REQUIRED: {
+    number: 404,
+    message: `%errors%`,
+    title: "Field %field% is must be defined and not empty",
+    description: ""
   }
 
 };

@@ -22,6 +22,13 @@
 // const accFromFile = loadAccountsFromFileSync("assets/accounts_generated.yaml");
 // accounts = accounts.concat(accFromFile);
 
+// ## ACCOUNTS loaded from env variable ALGOB_ACCOUNTS
+// keys can be stored in `ALGOB_ACCOUNTS` env variable.
+// the keys in env variable should be JSON string of the following structure: 
+// [{"name": "account_name", "menmonic": "mnemonic string"]} 
+// process.env.ALGOB_ACCOUNTS = JSON.stringify([{"name": "master", 
+//  "mnemonic": "call boy rubber fashion arch day capable one sweet skate outside purse six early learn tuition eagle love breeze pizza loud today popular able divide"}]);
+// const accounts = loadFromEnv();
 
 // ## ACCOUNTS USING Secret Key ##
 let accounts = [{

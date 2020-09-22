@@ -1,6 +1,8 @@
 import {
   loadAccountsFromFile,
-  loadAccountsFromFileSync, mkAccounts
+  loadAccountsFromFileSync,
+  loadFromEnv,
+  mkAccounts
 } from "./lib/account";
 
-export { mkAccounts, loadAccountsFromFile, loadAccountsFromFileSync };
+export { mkAccounts, loadAccountsFromFile, loadAccountsFromFileSync, loadFromEnv };
