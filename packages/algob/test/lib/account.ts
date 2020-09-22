@@ -1,7 +1,7 @@
-import { generateAccount, secretKeyToMnemonic } from "algosdk";
+import { generateAccount, mnemonicToSecretKey, secretKeyToMnemonic } from "algosdk";
 import { assert } from "chai";
 
-import { mkAccounts } from "../../src/lib/account";
+import { loadFromEnv, mkAccounts } from "../../src/lib/account";
 import { Account, AccountDef } from "../../src/types";
 
 describe("Loading accounts", () => {
@@ -57,5 +57,15 @@ describe("Loading accounts", () => {
     // good accounts are OK
     input = [account1, { name: "gen_1", addr: "", mnemonic: secretKeyToMnemonic(gen.sk) }];
     assert.deepEqual(mkAccounts(input), [account1, gen]);
+  });
+
+  it("From ENV variable (ALGOB_ACCOUNTS) ", () => {
+    const goodMnemonic = "call boy rubber fashion arch day capable one sweet skate outside purse six early learn tuition eagle love breeze pizza loud today popular able divide";
+    process.env.ALGOB_ACCOUNTS = JSON.stringify([{ name: "master", mnemonic: goodMnemonic }]);
+    const accountSDK = mnemonicToSecretKey(goodMnemonic);
+    const accounts = [{ name: "master", addr: accountSDK.addr, sk: accountSDK.sk }];
+    const algobAccounts = loadFromEnv();
+    assert.deepEqual(algobAccounts, accounts, "Loaded accounts mismatch");
+    process.env.ALGOB_ACCOUNTS = undefined;
   });
 });

@@ -50,11 +50,10 @@ Each network configuration requires a list of accounts. These accounts are then 
 1. Loaded from env variable `ALGOB_ACCOUNTS`
 
         const accounts = loadFromEnv();
-        /**
-        * keys can be stored in `ALGOB_ACCOUNTS` env variable.
-        *  the keys in env variable should be JSON string of the following structure: 
-        * [{"name": "account_name", "menmonic": "mnemonic string"]} 
-        */
+
+Keys can be stored in `ALGOB_ACCOUNTS` env variable.
+The keys in env variable should be JSON string of the following structure: 
+  [{"name": "account_name", "menmonic": "mnemonic string"]} 
 
 NOTE: don't use any of the accounts above. They are provided only as an example - everyone has an access to them!
 
