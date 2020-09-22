@@ -79,22 +79,22 @@ describe("Loading accounts", () => {
 
     // fails when account name is empty
     process.env.ALGOB_ACCOUNTS = JSON.stringify([{ name: "", mnemonic: goodMnemonic }]);
-    var errmsg = 'ABLDR407: account name is empty in ' + JSON.stringify({ name: "", mnemonic: goodMnemonic });
+    var errmsg = 'ABLDR404: Field account name must be defined and not empty in ' + JSON.stringify({ name: "", mnemonic: goodMnemonic });
     assert.throws(() => loadFromEnv(), errmsg);
 
     // fails when account name is missing
     process.env.ALGOB_ACCOUNTS = JSON.stringify([{ mnemonic: goodMnemonic }]);
-    errmsg = 'ABLDR406: account name is missing in ' + JSON.stringify({ mnemonic: goodMnemonic });
+    errmsg = 'ABLDR404: Field account name must be defined and not empty in ' + JSON.stringify({ mnemonic: goodMnemonic });
     assert.throws(() => loadFromEnv(), errmsg);
 
     // fails when mnemonic string is empty
     process.env.ALGOB_ACCOUNTS = JSON.stringify([{ name: "master", mnemonic: emptyMnemonic }, { name: "master", mnemonic: goodMnemonic }]);
-    errmsg = 'ABLDR405: mnemonic string is empty in ' + JSON.stringify({ name: "master", mnemonic: emptyMnemonic });
+    errmsg = 'ABLDR404: Field mnemonic string must be defined and not empty in ' + JSON.stringify({ name: "master", mnemonic: emptyMnemonic });
     assert.throws(() => loadFromEnv(), errmsg);
 
     // fails when mnemonic string is missing
     process.env.ALGOB_ACCOUNTS = JSON.stringify([{ name: "master" }]);
-    errmsg = 'ABLDR404: mnemonic string is missing in ' + JSON.stringify({ name: "master" });
+    errmsg = 'ABLDR404: Field mnemonic string must be defined and not empty in ' + JSON.stringify({ name: "master" });
     assert.throws(() => loadFromEnv(), errmsg);
 
     // fails mnemonic string is bad

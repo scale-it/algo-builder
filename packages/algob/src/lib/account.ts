@@ -1,4 +1,5 @@
 import { Account as AccountSDK, mnemonicToSecretKey } from "algosdk";
+import { cons } from "fp-ts/lib/ReadonlyArray";
 import * as fs from "fs";
 import YAML from "yaml";
 
@@ -75,20 +76,20 @@ export function mkAccountIndex (accountList: Account[]): Accounts {
 function validateAlgobAccounts (algobAccounts: AlgobAccount[]): void {
   for (const account of algobAccounts) {
     if (account.name === undefined) {
-      throw new BuilderError(ERRORS.ACCOUNT.NAME_MISSING,
-        { errors: 'account name is missing in ' + JSON.stringify(account) });
+      throw new BuilderError(ERRORS.ACCOUNT.FIELD_REQUIRED,
+        { errors: 'Field account name must be defined and not empty in ' + JSON.stringify(account) });
     }
     if (account.mnemonic === undefined) {
-      throw new BuilderError(ERRORS.ACCOUNT.MNEMONIC_MISSING,
-        { errors: 'mnemonic string is missing in ' + JSON.stringify(account) });
+      throw new BuilderError(ERRORS.ACCOUNT.FIELD_REQUIRED,
+        { errors: 'Field mnemonic string must be defined and not empty in ' + JSON.stringify(account) });
     }
     if (account.name === "") {
-      throw new BuilderError(ERRORS.ACCOUNT.NAME_EMPTY,
-        { errors: 'account name is empty in ' + JSON.stringify(account) });
+      throw new BuilderError(ERRORS.ACCOUNT.FIELD_REQUIRED,
+        { errors: 'Field account name must be defined and not empty in ' + JSON.stringify(account) });
     }
     if (account.mnemonic === "") {
-      throw new BuilderError(ERRORS.ACCOUNT.MNEMONIC_EMPTY,
-        { errors: 'mnemonic string is empty in ' + JSON.stringify(account) });
+      throw new BuilderError(ERRORS.ACCOUNT.FIELD_REQUIRED,
+        { errors: 'Field mnemonic string must be defined and not empty in ' + JSON.stringify(account) });
     }
   }
 }
@@ -96,16 +97,15 @@ function validateAlgobAccounts (algobAccounts: AlgobAccount[]): void {
 export function loadFromEnv (): Account[] {
   var algobAccountsString = process.env.ALGOB_ACCOUNTS;
   if (algobAccountsString) {
-    var algob: AlgobAccount[] = [];
+    var accounts: AlgobAccount[] = [];
     try {
-      algob = JSON.parse(algobAccountsString);
+      accounts = JSON.parse(algobAccountsString);
     } catch (error) {
-      console.log(error);
-      throw error;
+      throw new BuilderError(ERRORS.ACCOUNT.MALFORMED, { errors: 'Some accounts are malformed or have missing fields' });
     }
-    validateAlgobAccounts(algob);
+    validateAlgobAccounts(accounts);
     var algobAccounts: Account[] = [];
-    for (const account of algob) {
+    for (const account of accounts) {
       try {
         const accountSDK = mnemonicToSecretKey(account.mnemonic);
         algobAccounts.push({ name: account.name, addr: accountSDK.addr, sk: accountSDK.sk });
