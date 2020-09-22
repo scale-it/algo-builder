@@ -5,7 +5,7 @@ import YAML from "yaml";
 import CfgErrors, { ErrorPutter } from "../internal/core/config/config-errors";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
-import type { Account, AccountDef, Accounts, HDAccount, MnemonicAccount } from "../types";
+import type { Account, AccountDef, Accounts, AlgobAccount, HDAccount, MnemonicAccount } from "../types";
 
 export function mkAccounts (input: AccountDef[]): Account[] {
   const accounts: Account[] = [];
@@ -72,14 +72,47 @@ export function mkAccountIndex (accountList: Account[]): Accounts {
   return out;
 }
 
+function validateAlgobAccounts (algobAccounts: AlgobAccount[]): void {
+  for (const account of algobAccounts) {
+    if (account.name === undefined) {
+      throw new BuilderError(ERRORS.ACCOUNT.NAME_MISSING,
+        { errors: 'account name is missing in ' + JSON.stringify(account) });
+    }
+    if (account.mnemonic === undefined) {
+      throw new BuilderError(ERRORS.ACCOUNT.MNEMONIC_MISSING,
+        { errors: 'mnemonic string is missing in ' + JSON.stringify(account) });
+    }
+    if (account.name === "") {
+      throw new BuilderError(ERRORS.ACCOUNT.NAME_EMPTY,
+        { errors: 'account name is empty in ' + JSON.stringify(account) });
+    }
+    if (account.mnemonic === "") {
+      throw new BuilderError(ERRORS.ACCOUNT.MNEMONIC_EMPTY,
+        { errors: 'mnemonic string is empty in ' + JSON.stringify(account) });
+    }
+  }
+}
+
 export function loadFromEnv (): Account[] {
   var algobAccountsString = process.env.ALGOB_ACCOUNTS;
   if (algobAccountsString) {
-    const algob = JSON.parse(algobAccountsString);
+    var algob: AlgobAccount[] = [];
+    try {
+      algob = JSON.parse(algobAccountsString);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+    validateAlgobAccounts(algob);
     var algobAccounts: Account[] = [];
     for (const account of algob) {
-      const accountSDK = parseMnemonic(account.mnemonic);
-      algobAccounts.push({ name: account.name, addr: accountSDK.addr, sk: accountSDK.sk });
+      try {
+        const accountSDK = mnemonicToSecretKey(account.mnemonic);
+        algobAccounts.push({ name: account.name, addr: accountSDK.addr, sk: accountSDK.sk });
+      } catch (error) {
+        throw new BuilderError(ERRORS.ACCOUNT.WRONG_MNEMONIC,
+          { errmsg: 'failed to decode mnemonic in ' + JSON.stringify(account) });
+      }
     }
     return algobAccounts;
   }

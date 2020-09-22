@@ -71,4 +71,35 @@ describe("Loading accounts", () => {
     algobAccounts = loadFromEnv();
     assert.deepEqual(algobAccounts, [], "Loaded accounts mismatch");
   });
+
+  it("ENV variables validate ALGOB_ACCOUNTS ", () => {
+    const goodMnemonic = "call boy rubber fashion arch day capable one sweet skate outside purse six early learn tuition eagle love breeze pizza loud today popular able divide";
+    const emptyMnemonic = "";
+    const badMnemonic = "arch day capable one sweet skate outside purse six early learn tuition eagle love breeze pizza loud today popular able divide";
+
+    // fails when account name is empty
+    process.env.ALGOB_ACCOUNTS = JSON.stringify([{ name: "", mnemonic: goodMnemonic }]);
+    var errmsg = 'ABLDR407: account name is empty in ' + JSON.stringify({ name: "", mnemonic: goodMnemonic });
+    assert.throws(() => loadFromEnv(), errmsg);
+
+    // fails when account name is missing
+    process.env.ALGOB_ACCOUNTS = JSON.stringify([{ mnemonic: goodMnemonic }]);
+    errmsg = 'ABLDR406: account name is missing in ' + JSON.stringify({ mnemonic: goodMnemonic });
+    assert.throws(() => loadFromEnv(), errmsg);
+
+    // fails when mnemonic string is empty
+    process.env.ALGOB_ACCOUNTS = JSON.stringify([{ name: "master", mnemonic: emptyMnemonic }, { name: "master", mnemonic: goodMnemonic }]);
+    errmsg = 'ABLDR405: mnemonic string is empty in ' + JSON.stringify({ name: "master", mnemonic: emptyMnemonic });
+    assert.throws(() => loadFromEnv(), errmsg);
+
+    // fails when mnemonic string is missing
+    process.env.ALGOB_ACCOUNTS = JSON.stringify([{ name: "master" }]);
+    errmsg = 'ABLDR404: mnemonic string is missing in ' + JSON.stringify({ name: "master" });
+    assert.throws(() => loadFromEnv(), errmsg);
+
+    // fails mnemonic string is bad
+    process.env.ALGOB_ACCOUNTS = JSON.stringify([{ name: "master", mnemonic: badMnemonic }]);
+    errmsg = 'ABLDR401: failed to decode mnemonic in ' + JSON.stringify({ name: "master", mnemonic: badMnemonic });
+    assert.throws(() => loadFromEnv(), errmsg);
+  });
 });

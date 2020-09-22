@@ -653,6 +653,30 @@ const accountErrors = {
     message: `%errors%`,
     title: "Some accounts are malformed or have missing fields",
     description: ""
+  },
+  MNEMONIC_MISSING: {
+    number: 404,
+    message: `%errors%`,
+    title: "Mnemonic string is missing",
+    description: ""
+  },
+  MNEMONIC_EMPTY: {
+    number: 405,
+    message: `%errors%`,
+    title: "Mnemonic string is empty",
+    description: ""
+  },
+  NAME_MISSING: {
+    number: 406,
+    message: `%errors%`,
+    title: "Account name is missing",
+    description: ""
+  },
+  NAME_EMPTY: {
+    number: 407,
+    message: `%errors%`,
+    title: "Account name is empty",
+    description: ""
   }
 
 };
