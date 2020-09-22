@@ -64,8 +64,11 @@ describe("Loading accounts", () => {
     process.env.ALGOB_ACCOUNTS = JSON.stringify([{ name: "master", mnemonic: goodMnemonic }]);
     const accountSDK = mnemonicToSecretKey(goodMnemonic);
     const accounts = [{ name: "master", addr: accountSDK.addr, sk: accountSDK.sk }];
-    const algobAccounts = loadFromEnv();
+    var algobAccounts = loadFromEnv();
     assert.deepEqual(algobAccounts, accounts, "Loaded accounts mismatch");
-    process.env.ALGOB_ACCOUNTS = undefined;
+
+    delete process.env.ALGOB_ACCOUNTS;
+    algobAccounts = loadFromEnv();
+    assert.deepEqual(algobAccounts, [], "Loaded accounts mismatch");
   });
 });
