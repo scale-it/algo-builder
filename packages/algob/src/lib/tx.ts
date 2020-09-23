@@ -1,6 +1,8 @@
+import type { Account as AccountSDK } from "algosdk";
 import tx from "algosdk";
 import { TextEncoder } from "util";
 
+import { AlgobDeployerImpl } from "../internal/deployer";
 import {
   ASADef,
   ASADeploymentFlags,
@@ -88,4 +90,72 @@ export function makeASAOptInTx (
 export function encodeNote (note: string | undefined, noteb64: string| undefined): Uint8Array {
   const encoder = new TextEncoder();
   return noteb64 ? encoder.encode(noteb64) : encoder.encode(note);
+}
+
+export async function transferMicroAlgos (
+  deployer: AlgobDeployerImpl,
+  from: AccountSDK,
+  to: string,
+  amountMicroAlgos: number,
+  param: TxParams
+): Promise<tx.ConfirmedTxInfo> {
+  const params = await mkSuggestedParams(deployer.algodClient, param);
+
+  const receiver = to;
+  let note;
+  if (param.noteb64 ?? param.note) {
+    note = encodeNote(param.note, param.noteb64);
+  } else {
+    note = undefined;
+  }
+
+  const txn = tx.makePaymentTxnWithSuggestedParams(
+    from.addr, receiver, amountMicroAlgos, undefined, note, params);
+
+  const signedTxn = txn.signTxn(from.sk);
+  const pendingTx = await deployer.algodClient.sendRawTransaction(signedTxn).do();
+  console.log("Transferring algo (in micro algos):", {
+    from: from.addr,
+    to: receiver,
+    amount: amountMicroAlgos,
+    txid: pendingTx.txId
+  });
+  return await deployer.waitForConfirmation(pendingTx.txId);
+}
+
+export async function transferAsset (
+  deployer: AlgobDeployerImpl,
+  assetId: number,
+  from: AccountSDK,
+  to: string,
+  amount: number
+): Promise<tx.ConfirmedTxInfo> {
+  const params = await deployer.algodClient.getTransactionParams().do();
+
+  const sender = from;
+  const recipient = to;
+  const revocationTarget = undefined;
+  const closeRemainderTo = undefined;
+  const note = undefined;
+
+  const xtxn = tx.makeAssetTransferTxnWithSuggestedParams(
+    sender.addr,
+    recipient,
+    closeRemainderTo,
+    revocationTarget,
+    amount,
+    note,
+    assetId,
+    params);
+
+  const rawSignedTxn = xtxn.signTxn(sender.sk);
+  const xtx = (await deployer.algodClient.sendRawTransaction(rawSignedTxn).do());
+  console.log("Transferring:", {
+    from: sender.addr,
+    to: recipient,
+    amount: amount,
+    assetID: assetId,
+    txId: xtx.txId
+  });
+  return await deployer.waitForConfirmation(xtx.txId);
 }

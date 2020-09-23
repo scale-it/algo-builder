@@ -1,10 +1,4 @@
-const {
-  printCreatedAsset,
-  printAssetHolding,
-  transferMicroAlgos,
-  asaOptIn,
-  transferAsset
-} = require('../../src/asa-helpers');
+const { transferMicroAlgos, transferAsset, balanceOf } = require("algob");
 
 async function run(runtimeEnv, deployer) {
   const teslaAssetID = deployer.asa.get("tesla").assetIndex
@@ -14,7 +8,7 @@ async function run(runtimeEnv, deployer) {
 
   await transferAsset(deployer, teslaAssetID, elonMuskAccount, johnAccount.addr, 1)
 
-  await printAssetHolding(deployer, johnAccount.addr, teslaAssetID);
+  await balanceOf(deployer, johnAccount.addr, teslaAssetID);
 }
 
 module.exports = { default: run }

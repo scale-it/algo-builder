@@ -1,11 +1,8 @@
 const {
   printCreatedAsset,
-  printAssetHolding,
-  transferMicroAlgos,
-  asaOptIn,
-  transferAsset
+  asaOptIn
 } = require('../src/asa-helpers');
-
+const { transferMicroAlgos, transferAsset, balanceOf } = require("algob");
 /*
   Create "gold" Algorand Standard Asset (ASA)
   Accounts are loaded from config
@@ -21,8 +18,8 @@ async function run(runtimeEnv, deployer) {
 
   // activate goldOwner and john accounts
   let promises = [
-    transferMicroAlgos(deployer, masterAccount, goldOwnerAccount.addr, 401000),
-    transferMicroAlgos(deployer, masterAccount, johnAccount.addr, 401000)]
+    transferMicroAlgos(deployer, masterAccount, goldOwnerAccount.addr, 401000000, {note: "ALGO PAID"}),
+    transferMicroAlgos(deployer, masterAccount, johnAccount.addr, 401000000, {note: "ALGO PAID"})]
   await Promise.all(promises)
 
   const asaInfo = await deployer.deployASA("gold", {
@@ -35,7 +32,7 @@ async function run(runtimeEnv, deployer) {
   console.log(asaInfo)
 
   const assetID = asaInfo.assetIndex
-  await printCreatedAsset(deployer, goldOwnerAccount.addr, assetID);
+  await balanceOf(deployer, goldOwnerAccount.addr, assetID);
 
   //await printAssetHolding(deployer, goldOwnerAccount.addr, assetID);
   //await printAssetHolding(deployer, johnAccount.addr, assetID);
