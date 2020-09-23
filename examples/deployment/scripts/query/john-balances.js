@@ -1,9 +1,6 @@
 const {
   printCreatedAsset,
-  printAssetHolding,
-  transferMicroAlgos,
   asaOptIn,
-  transferAsset,
   printAssets
 } = require('../../src/asa-helpers');
 

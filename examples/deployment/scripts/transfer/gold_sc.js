@@ -1,13 +1,14 @@
 const {
   transferMicroAlgosContract
-} = require('../src/asa-helpers');
+} = require('../../src/asa-helpers');
 
 async function run(runtimeEnv, deployer) {
 
   const goldOwnerAccount = deployer.accountsByName.get("gold-owner-account");
   const johnAccount = deployer.accountsByName.get("john-account");
 
-  const logicSignature = deployer.asc.get("3-gold-asc.teal").logicSignature;
+  const value = deployer.asc.get("3-gold-asc.teal");
+  const logicSignature = value.logicSignature;
 
   // ALGO transfer
 

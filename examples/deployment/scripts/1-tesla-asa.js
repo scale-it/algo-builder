@@ -1,10 +1,8 @@
 const {
   printCreatedAsset,
-  printAssetHolding,
-  transferMicroAlgos,
-  asaOptIn,
-  transferAsset
+  asaOptIn
 } = require('../src/asa-helpers');
+const { transferMicroAlgos, transferAsset, balanceOf } = require("algob");
 
 /*
   Create "tesla" Algorand Standard Asset (ASA)
@@ -20,7 +18,7 @@ async function run(runtimeEnv, deployer) {
   const johnAccount = deployer.accountsByName.get("john-account");
 
   // activate elonMusk account
-  await transferMicroAlgos(deployer, masterAccount, elonMuskAccount.addr, 401000)
+  await transferMicroAlgos(deployer, masterAccount, elonMuskAccount.addr, 401000000, {note: "ALGO PAID"})
 
   const asaInfo = await deployer.deployASA("tesla", {
     creator: elonMuskAccount})
@@ -29,7 +27,7 @@ async function run(runtimeEnv, deployer) {
   await deployer.optInToASA("tesla", "john-account", {})
 
   const assetID = asaInfo.assetIndex
-  await printCreatedAsset(deployer, elonMuskAccount.addr, assetID);
+  await balanceOf(deployer, elonMuskAccount.addr, assetID);
 
   //await printAssetHolding(deployer, elonMuskAccount.addr, assetID);
   //await printAssetHolding(deployer, johnAccount.addr, assetID);
