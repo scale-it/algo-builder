@@ -1,10 +1,5 @@
 
-import { getFunctionName } from "io-ts/lib";
-
 function stringify (v: any): string { // eslint-disable-line @typescript-eslint/no-explicit-any
-  if (typeof v === "function") {
-    return getFunctionName(v);
-  }
   if (typeof v === "number" && !isFinite(v)) {
     if (isNaN(v)) {
       return "NaN";
