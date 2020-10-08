@@ -104,7 +104,6 @@ export function getValidationErrors(config: any): CfgErrors {  // eslint-disable
       } 
       catch(e) {
         if (e instanceof z.ZodError) {
-          console.log(parseZodError(e));
           errors.concatenate([parseZodError(e)]);
         }
       }
