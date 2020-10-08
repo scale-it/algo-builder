@@ -236,7 +236,7 @@ describe("Config validation", function () {
               }
             });
             assert.isNotEmpty(errors.toString());
-            assert.match(errors.toString(), /Expected a value of type HttpNetworkConfig/);
+            assert.match(errors.toString(), /Expected number, received string/);
           });
         });
 
