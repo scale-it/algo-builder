@@ -14,11 +14,16 @@ import {
   ASCInfo,
   TxParams
 } from "../../src/types";
+import { CompileOp } from "../../src/lib/compile";
 
 export class AlgoOperatorDryRunImpl implements AlgoOperator {
   get algodClient (): Algodv2 {
     throw new Error("Not implemented");
   };
+
+  get compileOp (): CompileOp {
+    throw new Error("Not implemented");
+  }
 
   waitForConfirmation (txId: string): Promise<import("algosdk").ConfirmedTxInfo> {
     throw new Error("Not implemented");
