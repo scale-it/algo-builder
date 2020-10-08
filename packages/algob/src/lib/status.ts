@@ -1,7 +1,7 @@
-import { AlgobDeployerImpl } from "../internal/deployer";
+import { AlgobDeployerDeployMode } from "../internal/deployer";
 
 export async function balanceOf (
-  deployer: AlgobDeployerImpl,
+  deployer: AlgobDeployerDeployMode,
   account: string,
   assetid: number
 ): Promise<void> {

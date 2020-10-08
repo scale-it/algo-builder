@@ -20,7 +20,7 @@ import { BuilderError } from "./core/errors";
 import { ERRORS } from "./core/errors-list";
 
 // This class is what user interacts with in deploy task
-export class AlgobDeployerImpl implements AlgobDeployer {
+export class AlgobDeployerDeployMode implements AlgobDeployer {
   private readonly runtimeEnv: AlgobRuntimeEnv;
   private readonly cpData: CheckpointRepo;
   private readonly loadedAsaDefs: ASADefs;
@@ -193,7 +193,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
 }
 
 // This class is what user interacts with in run task
-export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
+export class AlgobDeployerRunMode implements AlgobDeployer {
   private readonly _internal: AlgobDeployer;
   private readonly txWriter: txWriter;
 
