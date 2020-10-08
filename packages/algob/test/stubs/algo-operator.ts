@@ -14,14 +14,13 @@ import {
   ASCInfo,
   TxParams
 } from "../../src/types";
-import { CompileOp } from "../../src/lib/compile";
 
 export class AlgoOperatorDryRunImpl implements AlgoOperator {
   get algodClient (): Algodv2 {
     throw new Error("Not implemented");
   };
 
-  get compileOp (): CompileOp {
+  getLogicSignature(): Promise<Object | undefined> {
     throw new Error("Not implemented");
   }
 

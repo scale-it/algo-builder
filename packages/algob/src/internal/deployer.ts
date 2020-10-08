@@ -192,13 +192,7 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   }
 
   async getLogicSignature (name: string, scParams: object): Promise<Object | undefined> {
-    const result = await this.algoOp.compileOp.readArtifact(name);
-    if(result === undefined)
-      return undefined;
-    const programb64 = result.compiled;
-    const program = new Uint8Array(Buffer.from(programb64, "base64"));
-    const lsig = algosdk.makeLogicSig(program, scParams);
-    return lsig;
+    return await this.algoOp.getLogicSignature(name, scParams);
   }
 }
 
