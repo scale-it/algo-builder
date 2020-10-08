@@ -99,7 +99,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   async _optInToASA (
     asaName: string, assetIndex: number, account: Account, params: algosdk.SuggestedParams
   ): Promise<void> {
-    console.log(`ASA ${account.name} opt-in for for ASA ${asaName}`);
+    console.log(`ASA ${account.name} opt-in for ASA ${asaName}`);
     const sampleASAOptInTX = tx.makeASAOptInTx(account.addr, assetIndex, params);
     const rawSignedTxn = sampleASAOptInTX.signTxn(account.sk);
     const txInfo = await this.algodClient.sendRawTransaction(rawSignedTxn).do();
