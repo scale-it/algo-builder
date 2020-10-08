@@ -1,6 +1,6 @@
 import * as algosdk from "algosdk";
 
-import { Account, AlgobDeployer, ASADeploymentFlags, ASAInfo, ASCCache, ASCDeploymentFlags, ASCInfo } from "../../src/types";
+import { Account, AlgobDeployer, ASADeploymentFlags, ASAInfo, ASCDeploymentFlags, ASCInfo } from "../../src/types";
 
 export class FakeDeployer implements AlgobDeployer {
   asa = new Map<string, ASAInfo>();
@@ -18,7 +18,7 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   }
 
-  getLogicSignature(name: string, scParams: object): Promise <ASCCache | undefined > {
+  getLogicSignature (name: string, scParams: object): Promise <Object | undefined > {
     throw new Error("Not implemented");
   }
 
