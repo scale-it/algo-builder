@@ -411,6 +411,9 @@ export interface AlgobDeployer {
 
   // Log Transaction
   log: (msg: string, obj: any) => void
+
+  // Get logic signature
+  getLogicSignature: (name: string, scParams: object) => Promise<Object | undefined> 
 }
 
 // ************************

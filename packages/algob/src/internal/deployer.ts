@@ -20,7 +20,7 @@ import { BuilderError } from "./core/errors";
 import { ERRORS } from "./core/errors-list";
 
 // This class is what user interacts with in deploy task
-export class AlgobDeployerImpl implements AlgobDeployer {
+export class AlgobDeployerDeployMode implements AlgobDeployer {
   private readonly runtimeEnv: AlgobRuntimeEnv;
   private readonly cpData: CheckpointRepo;
   private readonly loadedAsaDefs: ASADefs;
@@ -190,10 +190,20 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   log (msg: string, obj: any): void {
     this.txWriter.push(msg, obj);
   }
+
+  async getLogicSignature (name: string, scParams: object): Promise<Object | undefined> {
+    const result = await this.algoOp.compileOp.readArtifact(name);
+    if(result === undefined)
+      return undefined;
+    const programb64 = result.compiled;
+    const program = new Uint8Array(Buffer.from(programb64, "base64"));
+    const lsig = algosdk.makeLogicSig(program, scParams);
+    return lsig;
+  }
 }
 
 // This class is what user interacts with in run task
-export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
+export class AlgobDeployerRunMode implements AlgobDeployer {
   private readonly _internal: AlgobDeployer;
   private readonly txWriter: txWriter;
 
@@ -265,5 +275,9 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
 
   log (msg: string, obj: any): void {
     this.txWriter.push(msg, obj);
+  }
+
+  async getLogicSignature (name: string, scParams: object): Promise<Object | undefined> {
+    return await this._internal.getLogicSignature(name, scParams);
   }
 }

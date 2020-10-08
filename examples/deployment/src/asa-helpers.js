@@ -46,3 +46,27 @@ exports.transferMicroAlgosContract = async function (deployer, fromAccount, toAc
   })
   return await deployer.waitForConfirmation(pendingTx.txId)
 }
+
+// Transfer ASA
+exports.transferASAContract = async function (deployer, fromAccount, toAccount, amountMicroAlgos, assetID, lsig) {
+
+  let params = await deployer.algodClient.getTransactionParams().do();
+
+  const xtxn = algosdk.makeAssetTransferTxnWithSuggestedParams(
+    fromAccount.addr,
+    toAccount.addr,
+    undefined,
+    undefined,
+    amountMicroAlgos,
+    undefined,
+    assetID,
+    params);
+  
+    let rawSignedTxn = algosdk.signLogicSigTransactionObject(xtxn, lsig);
+  
+    // send raw LogicSigTransaction to network    
+    let tx1 = (await deployer.algodClient.sendRawTransaction(rawSignedTxn.blob).do());
+  
+    return await deployer.waitForConfirmation(tx1.txId);
+    
+}

@@ -32,6 +32,7 @@ export function createAlgoOperator (network: Network): AlgoOperator {
 
 export interface AlgoOperator {
   algodClient: algosdk.Algodv2
+  compileOp: CompileOp
   deployASA: (
     name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, txWriter: txWriter
   ) => Promise<ASAInfo>

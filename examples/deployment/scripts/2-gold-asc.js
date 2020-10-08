@@ -7,7 +7,7 @@ async function run(runtimeEnv, deployer) {
 
   await transferMicroAlgos(deployer, masterAccount, goldOwnerAccount.addr, 200000000, {note: "ALGO PAID"});
 
-  const ascInfo = await deployer.deployASC("3-gold-asc.teal", [],
+  const ascInfo = await deployer.deployASC("4-gold-asa.teal", [],
     {funder: goldOwnerAccount, fundingMicroAlgo: 101000 }, {}); // sending 0.101 Algo
 
   console.log(ascInfo);
