@@ -1,0 +1,30 @@
+// Accepts only if (transaction type is OPT-IN OR (transaction type is asset transfer, 
+// sender is goldOwnerAccount and asset transfer amount is less than equal to 1000 ))
+global GroupSize
+int 1
+==
+txn GroupIndex
+int 0
+==
+&&
+txn TypeEnum
+int 4
+==
+&&
+txn AssetAmount
+int 0
+==
+&&
+txn TypeEnum
+int 4
+==
+txn Sender
+addr M7VR2MGHI35EG2NMYOF3X337636PIOFVSP2HNIFUKAG7WW6BDWDCA3E2DA
+==
+&&
+txn AssetAmount
+int 1000
+<=
+&&
+||
+

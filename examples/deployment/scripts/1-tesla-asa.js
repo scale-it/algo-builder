@@ -1,7 +1,3 @@
-const {
-  printCreatedAsset,
-  asaOptIn
-} = require('../src/asa-helpers');
 const { transferMicroAlgos, transferAsset, balanceOf } = require("algob");
 
 /*
@@ -18,7 +14,7 @@ async function run(runtimeEnv, deployer) {
   const johnAccount = deployer.accountsByName.get("john-account");
 
   // activate elonMusk account
-  await transferMicroAlgos(deployer, masterAccount, elonMuskAccount.addr, 401000000, {note: "ALGO PAID"})
+  await transferMicroAlgos(deployer, masterAccount, elonMuskAccount.addr, 401000000, {note: "funding account"})
 
   const asaInfo = await deployer.deployASA("tesla", {
     creator: elonMuskAccount})

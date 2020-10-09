@@ -190,6 +190,10 @@ export class AlgobDeployerImpl implements AlgobDeployer {
   log (msg: string, obj: any): void {
     this.txWriter.push(msg, obj);
   }
+
+  async getLogicSignature (name: string, scParams: object): Promise<Object | undefined> {
+    return await this.algoOp.getLogicSignature(name, scParams);
+  }
 }
 
 // This class is what user interacts with in run task
@@ -265,5 +269,9 @@ export class AlgobDeployerReadOnlyImpl implements AlgobDeployer {
 
   log (msg: string, obj: any): void {
     this.txWriter.push(msg, obj);
+  }
+
+  async getLogicSignature (name: string, scParams: object): Promise<Object | undefined> {
+    return await this._internal.getLogicSignature(name, scParams);
   }
 }

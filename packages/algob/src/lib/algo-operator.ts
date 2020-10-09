@@ -44,6 +44,7 @@ export interface AlgoOperator {
   optInToASAMultiple: (
     asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, assetIndex: number
   ) => Promise<void>
+  getLogicSignature: (name: string, scParams: Object) => Promise<Object | undefined>
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -232,6 +233,16 @@ export class AlgoOperatorImpl implements AlgoOperator {
       logicSignature: lsig,
       confirmedRound: confirmedTxn[confirmedRound]
     };
+  }
+
+  async getLogicSignature(name: string, scParams: Object): Promise<Object | undefined> {
+    const result = await this.compileOp.readArtifact(name);
+    if(result === undefined)
+      return undefined;
+    const programb64 = result.compiled;
+    const program = new Uint8Array(Buffer.from(programb64, "base64"));
+    const lsig = algosdk.makeLogicSig(program, scParams);
+    return lsig;
   }
 
   private async ensureCompiled (name: string, force: boolean): Promise<ASCCache> {

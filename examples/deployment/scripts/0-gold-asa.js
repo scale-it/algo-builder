@@ -1,7 +1,3 @@
-const {
-  printCreatedAsset,
-  asaOptIn
-} = require('../src/asa-helpers');
 const { transferMicroAlgos, transferAsset, balanceOf } = require("algob");
 /*
   Create "gold" Algorand Standard Asset (ASA)
@@ -15,11 +11,12 @@ async function run(runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get("master-account")
   const goldOwnerAccount = deployer.accountsByName.get("gold-owner-account");
   const johnAccount = deployer.accountsByName.get("john-account");
-
+  const bobAccount = deployer.accountsByName.get("bob-account")
   // activate goldOwner and john accounts
   let promises = [
-    transferMicroAlgos(deployer, masterAccount, goldOwnerAccount.addr, 401000000, {note: "ALGO PAID"}),
-    transferMicroAlgos(deployer, masterAccount, johnAccount.addr, 401000000, {note: "ALGO PAID"})]
+    transferMicroAlgos(deployer, masterAccount, goldOwnerAccount.addr, 401000000, {note: "funding account"}),
+    transferMicroAlgos(deployer, masterAccount, johnAccount.addr, 401000000, {note: "funding account"}),
+    transferMicroAlgos(deployer, masterAccount, bobAccount.addr, 1000000, {note: "funding account"})]
   await Promise.all(promises)
 
   const asaInfo = await deployer.deployASA("gold", {
@@ -29,8 +26,8 @@ async function run(runtimeEnv, deployer) {
     //firstValid: 10,
     //validRounds: 1002
   })
-  console.log(asaInfo)
-
+  console.log(asaInfo) 
+  await deployer.optInToASA("gold", "bob-account", {});
   const assetID = asaInfo.assetIndex
   await balanceOf(deployer, goldOwnerAccount.addr, assetID);
 

@@ -18,6 +18,10 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   }
 
+  getLogicSignature (name: string, scParams: object): Promise <Object | undefined > {
+    throw new Error("Not implemented");
+  }
+
   putMetadata (key: string, value: string): void {
   };
 
