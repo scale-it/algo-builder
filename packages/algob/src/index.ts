@@ -4,8 +4,8 @@ import {
   loadFromEnv,
   mkAccounts
 } from "./lib/account";
-import { balanceOf } from "./lib/status";
-import { transferAsset, transferMicroAlgos } from "./lib/tx";
+import { balanceOf, printAssets } from "./lib/status";
+import { transferASALsig, transferAsset, transferMicroAlgos, transferMicroAlgosLsig } from "./lib/tx";
 
 export {
   mkAccounts,
@@ -14,5 +14,8 @@ export {
   loadFromEnv,
   transferAsset,
   transferMicroAlgos,
-  balanceOf
+  balanceOf,
+  printAssets,
+  transferASALsig,
+  transferMicroAlgosLsig
 };

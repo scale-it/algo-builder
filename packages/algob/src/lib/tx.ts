@@ -159,3 +159,58 @@ export async function transferAsset (
   });
   return await deployer.waitForConfirmation(xtx.txId);
 }
+
+export async function transferMicroAlgosLsig (
+  deployer: AlgobDeployerImpl,
+  fromAccount: AccountSDK,
+  toAccountAddr: string,
+  amountMicroAlgos: number,
+  lsig: Object): Promise<tx.ConfirmedTxInfo> {
+  const params = await deployer.algodClient.getTransactionParams().do();
+
+  const receiver = toAccountAddr;
+  const note = tx.encodeObj("ALGO PAID");
+
+  const txn = tx.makePaymentTxnWithSuggestedParams(
+    fromAccount.addr, receiver, amountMicroAlgos, undefined, note, params);
+
+  // let signedTxn = txn.signTxn(fromAccount.sk);
+  const signedTxn = tx.signLogicSigTransactionObject(txn, lsig);
+  const txId = txn.txID().toString();
+  console.log(txId);
+  const pendingTx = await deployer.algodClient.sendRawTransaction(signedTxn.blob).do();
+  console.log("Transferring algo (in micro algos):", {
+    from: fromAccount.addr,
+    to: receiver,
+    amount: amountMicroAlgos,
+    txid: pendingTx.txId
+  });
+  return await deployer.waitForConfirmation(pendingTx.txId);
+}
+
+export async function transferASALsig (
+  deployer: AlgobDeployerImpl,
+  fromAccount: AccountSDK,
+  toAccount: string,
+  amountMicroAlgos: number,
+  assetID: number,
+  lsig: Object): Promise<tx.ConfirmedTxInfo> {
+  const params = await deployer.algodClient.getTransactionParams().do();
+
+  const xtxn = tx.makeAssetTransferTxnWithSuggestedParams(
+    fromAccount.addr,
+    toAccount,
+    undefined,
+    undefined,
+    amountMicroAlgos,
+    undefined,
+    assetID,
+    params);
+
+  const rawSignedTxn = tx.signLogicSigTransactionObject(xtxn, lsig);
+
+  // send raw LogicSigTransaction to network
+  const tx1 = (await deployer.algodClient.sendRawTransaction(rawSignedTxn.blob).do());
+
+  return await deployer.waitForConfirmation(tx1.txId);
+}
