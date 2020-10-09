@@ -15,11 +15,12 @@ async function run(runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get("master-account")
   const goldOwnerAccount = deployer.accountsByName.get("gold-owner-account");
   const johnAccount = deployer.accountsByName.get("john-account");
-
+  const bobAccount = deployer.accountsByName.get("bob-account")
   // activate goldOwner and john accounts
   let promises = [
     transferMicroAlgos(deployer, masterAccount, goldOwnerAccount.addr, 401000000, {note: "ALGO PAID"}),
-    transferMicroAlgos(deployer, masterAccount, johnAccount.addr, 401000000, {note: "ALGO PAID"})]
+    transferMicroAlgos(deployer, masterAccount, johnAccount.addr, 401000000, {note: "ALGO PAID"}),
+    transferMicroAlgos(deployer, masterAccount, bobAccount.addr, 1000000, {note: "ALGO PAID"})]
   await Promise.all(promises)
 
   const asaInfo = await deployer.deployASA("gold", {
@@ -30,7 +31,8 @@ async function run(runtimeEnv, deployer) {
     //validRounds: 1002
   })
   console.log(asaInfo)
-
+  // OPT-IN for Bob Account   
+  await deployer.optInToASA("gold", "bob-account", {});
   const assetID = asaInfo.assetIndex
   await balanceOf(deployer, goldOwnerAccount.addr, assetID);
 
