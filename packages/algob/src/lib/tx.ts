@@ -92,6 +92,14 @@ export function encodeNote (note: string | undefined, noteb64: string| undefined
   return noteb64 ? encoder.encode(noteb64) : encoder.encode(note);
 }
 
+/**
+  * Description:
+  * This function is used to transfer Algos
+  * from one account to another using fromAccount secret key (for signing)
+
+  * Returns:
+  * Transaction details
+*/
 export async function transferMicroAlgos (
   deployer: AlgobDeployerImpl,
   from: AccountSDK,
@@ -122,6 +130,14 @@ export async function transferMicroAlgos (
   });
   return await deployer.waitForConfirmation(pendingTx.txId);
 }
+/**
+  * Description:
+  * This function is used to transfer ASA
+  * from one account to another using fromAccount secret key (for signing)
+
+  * Returns:
+  * Transaction details
+*/
 
 export async function transferAsset (
   deployer: AlgobDeployerImpl,
@@ -160,6 +176,15 @@ export async function transferAsset (
   return await deployer.waitForConfirmation(xtx.txId);
 }
 
+/**
+ * Description:
+ * This function is used to transfer Algos
+ * from one account to another using logic signature (for signing)
+
+ * Returns:
+ * Transaction details
+*/
+
 export async function transferMicroAlgosLsig (
   deployer: AlgobDeployerImpl,
   fromAccount: AccountSDK,
@@ -187,6 +212,15 @@ export async function transferMicroAlgosLsig (
   });
   return await deployer.waitForConfirmation(pendingTx.txId);
 }
+
+/**
+ * Description:
+ * This function is used to transfer Algorand Standard Assets (ASA)
+ * from one account to another using logic signature (for signing)
+
+ * Returns:
+ * Transaction details
+*/
 
 export async function transferASALsig (
   deployer: AlgobDeployerImpl,
