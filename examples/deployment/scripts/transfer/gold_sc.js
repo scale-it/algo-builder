@@ -5,7 +5,7 @@ async function run(runtimeEnv, deployer) {
   const johnAccount = deployer.accountsByName.get("john-account");
   const bobAccount = deployer.accountsByName.get("bob-account");
 
-  // Transactions for GOLD ASA contract : '4-gold-asa.teal'
+  // Transactions for GOLD ASA contract : '4-gold-asa.teal'  (Delegated Approval Mode)
   const lsig = await deployer.getLogicSignature("4-gold-asa.teal", []);
   const lsigJohn = lsig;
   lsigJohn.sign(johnAccount.sk);
@@ -34,8 +34,8 @@ async function run(runtimeEnv, deployer) {
     //console.error(e);
   }
 
-  // Transaction for ALGO - Contract : '3-gold-asc.teal'
-  const logicSignature = await deployer.getLogicSignature("3-gold-asc.teal", []);
+  // Transaction for ALGO - Contract : '3-gold-delegated-asc.teal'  (Delegated Approval Mode)
+  const logicSignature = await deployer.getLogicSignature("3-gold-delegated-asc.teal", []);
   logicSignature.sign(goldOwnerAccount.sk);
   // Will pass - As according to .teal logic, amount should be <= 100
   // Transaction PASS

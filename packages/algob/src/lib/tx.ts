@@ -215,6 +215,41 @@ export async function transferMicroAlgosLsig (
 
 /**
  * Description:
+ * This function is used to transfer Algos (in micro algos)
+ * from contract account address (using logic signature) to another account
+
+ * Returns:
+ * Transaction details
+*/
+
+export async function transferMicroAlgosContract (
+  deployer: AlgobDeployerImpl,
+  from: string,
+  to: string,
+  amountMicroAlgos: number,
+  lsig: Object): Promise<tx.ConfirmedTxInfo> {
+  const params = await deployer.algodClient.getTransactionParams().do();
+
+  const note = tx.encodeObj("ALGO PAID");
+
+  const txn = tx.makePaymentTxnWithSuggestedParams(
+    from, to, amountMicroAlgos, undefined, note, params);
+
+  const signedTxn = tx.signLogicSigTransactionObject(txn, lsig);
+  const txId = txn.txID().toString();
+  console.log(txId);
+  const pendingTx = await deployer.algodClient.sendRawTransaction(signedTxn.blob).do();
+  console.log("Transferring algo (in micro algos):", {
+    from: from,
+    to: to,
+    amount: amountMicroAlgos,
+    txid: pendingTx.txId
+  });
+  return await deployer.waitForConfirmation(pendingTx.txId);
+}
+
+/**
+ * Description:
  * This function is used to transfer Algorand Standard Assets (ASA)
  * from one account to another using logic signature (for signing)
 
