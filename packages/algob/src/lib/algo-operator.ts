@@ -189,16 +189,20 @@ export class AlgoOperatorImpl implements AlgoOperator {
   async deployASC (name: string, scParams: object, flags: ASCDeploymentFlags, payFlags: TxParams,
     txWriter: txWriter): Promise<ASCInfo> {
     const message = 'Deploying ASC: ' + name;
+    const mode = 'Mode: ' + flags.mode;
     console.log(message);
+    console.log(mode);
     const result: ASCCache = await this.ensureCompiled(name, false);
     const programb64 = result.compiled;
     const program = new Uint8Array(Buffer.from(programb64, "base64"));
     const lsig = algosdk.makeLogicSig(program, scParams);
-
     const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
 
-    // ASC1 signed by funder
-    lsig.sign(flags.funder.sk);
+    // ASC1 signed by funder if deployment mode is set to Delegated Approval
+    if (flags.mode === "Delegated Approval") {
+      lsig.sign(flags.funder.sk);
+    }
+
     const funder = flags.funder.addr;
     const contractAddress = lsig.address();
 
@@ -235,14 +239,12 @@ export class AlgoOperatorImpl implements AlgoOperator {
     };
   }
 
-  async getLogicSignature(name: string, scParams: Object): Promise<Object | undefined> {
+  async getLogicSignature (name: string, scParams: Object): Promise<Object | undefined> {
     const result = await this.compileOp.readArtifact(name);
-    if(result === undefined)
-      return undefined;
+    if (result === undefined) { return undefined; }
     const programb64 = result.compiled;
     const program = new Uint8Array(Buffer.from(programb64, "base64"));
-    const lsig = algosdk.makeLogicSig(program, scParams);
-    return lsig;
+    return algosdk.makeLogicSig(program, scParams);
   }
 
   private async ensureCompiled (name: string, force: boolean): Promise<ASCCache> {

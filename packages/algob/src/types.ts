@@ -370,6 +370,7 @@ export interface ASADeploymentFlags extends TxParams {
 export interface ASCDeploymentFlags {
   funder: Account
   fundingMicroAlgo: number
+  mode: string
 }
 
 export interface AssetScriptMap {
@@ -413,7 +414,7 @@ export interface AlgobDeployer {
   log: (msg: string, obj: any) => void
 
   // Get logic signature
-  getLogicSignature: (name: string, scParams: object) => Promise<Object | undefined> 
+  getLogicSignature: (name: string, scParams: object) => Promise<Object | undefined>
 }
 
 // ************************
