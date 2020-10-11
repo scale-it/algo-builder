@@ -1,7 +1,7 @@
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/internal/core/errors-list";
-import { AlgobDeployerImpl } from "../../src/internal/deployer";
+import { DeployerDeployMode } from "../../src/internal/deployer";
 import { TxWriterImpl } from "../../src/internal/tx-log-writer";
 import { CheckpointRepoImpl } from "../../src/lib/script-checkpoints";
 import { ASADef, ASAInfo, ASCInfo, Checkpoints } from "../../src/types";
@@ -17,7 +17,7 @@ function mkASA (): ASADef {
   };
 }
 
-describe("AlgobDeployerImpl", () => {
+describe("DeployerDeployMode", () => {
   it("Should ensure metadata existence for network", async () => {
     const cpData = new CheckpointRepoImpl().putMetadata("network 123", "k", "v");
     assert.deepEqual(cleanupMutableData(cpData.precedingCP["network 123"], 12345), {
@@ -30,7 +30,7 @@ describe("AlgobDeployerImpl", () => {
 
   it("Should hold metadata of a network", async () => {
     const env = mkAlgobEnv("network 123");
-    const deployer = new AlgobDeployerImpl(
+    const deployer = new DeployerDeployMode(
       env, new CheckpointRepoImpl(), {}, new AlgoOperatorDryRunImpl(), new Map(), new TxWriterImpl(''));
     deployer.putMetadata("existent", "existent value");
     assert.isUndefined(deployer.getMetadata("nonexistent"));
@@ -40,7 +40,7 @@ describe("AlgobDeployerImpl", () => {
   it("Should set given data into checkpoint with timestamp", async () => {
     const env = mkAlgobEnv("network 123");
     const cpData = new CheckpointRepoImpl();
-    const deployer = new AlgobDeployerImpl(
+    const deployer = new DeployerDeployMode(
       env, cpData, {}, new AlgoOperatorDryRunImpl(), new Map(), new TxWriterImpl(''));
     deployer.putMetadata("key 1", "val 1");
     deployer.putMetadata("key 2", "val 2");
@@ -93,7 +93,7 @@ describe("AlgobDeployerImpl", () => {
   it("Should save info to checkpoint after asset deployment", async () => {
     const env = mkAlgobEnv("network1");
     const cpData = new CheckpointRepoImpl();
-    const deployer = new AlgobDeployerImpl(
+    const deployer = new DeployerDeployMode(
       env, cpData, { MY_ASA: mkASA() }, new AlgoOperatorDryRunImpl(), new Map(), new TxWriterImpl(''));
 
     const asaInfo = await deployer.deployASA("MY_ASA", { creator: deployer.accounts[0] });
@@ -138,7 +138,7 @@ describe("AlgobDeployerImpl", () => {
       .registerASA(networkName, "ASA name", { creator: "ASA creator 123", txId: "", confirmedRound: 0, assetIndex: 0 })
       .registerASC(networkName, "ASC name", { creator: "ASC creator 951", txId: "", confirmedRound: 0, contractAddress: "addr-1", logicSignature: "sig-1" })
       .putMetadata(networkName, "k", "v");
-    const deployer = new AlgobDeployerImpl(
+    const deployer = new DeployerDeployMode(
       env, cpData, {}, new AlgoOperatorDryRunImpl(), new Map(), new TxWriterImpl(''));
     assert.isTrue(deployer.isDefined("ASC name"));
     assert.equal(deployer.getMetadata("k"), "v");
@@ -146,7 +146,7 @@ describe("AlgobDeployerImpl", () => {
 
   it("Should ignore same metadata of the same network", async () => {
     const env = mkAlgobEnv("network 123");
-    const deployer = new AlgobDeployerImpl(
+    const deployer = new DeployerDeployMode(
       env, new CheckpointRepoImpl(), {}, new AlgoOperatorDryRunImpl(), new Map(), new TxWriterImpl(''));
     deployer.putMetadata("existent", "existent value");
     deployer.putMetadata("existent", "existent value");
@@ -155,7 +155,7 @@ describe("AlgobDeployerImpl", () => {
 
   it("Should crash when same metadata key is set second time & different value", async () => {
     const cpData = new CheckpointRepoImpl();
-    const deployer = new AlgobDeployerImpl(
+    const deployer = new DeployerDeployMode(
       mkAlgobEnv("network 123"), cpData, {}, new AlgoOperatorDryRunImpl(), new Map(), new TxWriterImpl(''));
     deployer.putMetadata("metadata_key", "orig_value");
     expectBuilderError(
@@ -167,7 +167,7 @@ describe("AlgobDeployerImpl", () => {
 
   it("Should crash when same ASA name is tried to deploy to second time", async () => {
     const cpData = new CheckpointRepoImpl();
-    const deployer = new AlgobDeployerImpl(
+    const deployer = new DeployerDeployMode(
       mkAlgobEnv("network 123"), cpData, { ASA_key: mkASA() }, new AlgoOperatorDryRunImpl(), new Map(), new TxWriterImpl(''));
     await deployer.deployASA("ASA_key", { creator: deployer.accounts[0] });
     await expectBuilderErrorAsync(
@@ -179,7 +179,7 @@ describe("AlgobDeployerImpl", () => {
 
   it("Should crash when ASA for given name doesn't exist", async () => {
     const cpData = new CheckpointRepoImpl();
-    const deployer = new AlgobDeployerImpl(
+    const deployer = new DeployerDeployMode(
       mkAlgobEnv("network 123"), cpData, {}, new AlgoOperatorDryRunImpl(), new Map(), new TxWriterImpl(''));
     await expectBuilderErrorAsync(
       async () => await deployer.deployASA("ASA_key", { creator: deployer.accounts[0] }),
@@ -190,7 +190,7 @@ describe("AlgobDeployerImpl", () => {
 
   it("Should crash when same ASC name is tried to deploy to second time", async () => {
     const cpData = new CheckpointRepoImpl();
-    const deployer = new AlgobDeployerImpl(
+    const deployer = new DeployerDeployMode(
       mkAlgobEnv("network 123"), cpData, {}, new AlgoOperatorDryRunImpl(), new Map(), new TxWriterImpl(''));
     await deployer.deployASC("ASC_key", [], { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
     await expectBuilderErrorAsync(
@@ -202,14 +202,14 @@ describe("AlgobDeployerImpl", () => {
 
   it("Should return empty ASA map on no CP", async () => {
     const cpData = new CheckpointRepoImpl();
-    const deployer = new AlgobDeployerImpl(
+    const deployer = new DeployerDeployMode(
       mkAlgobEnv("network 123"), cpData, {}, new AlgoOperatorDryRunImpl(), new Map(), new TxWriterImpl(''));
     assert.deepEqual(deployer.asa, new Map());
   });
 
   it("Should return empty ASA map on no CP; with ASA in other net", async () => {
     const cpData = new CheckpointRepoImpl();
-    const deployer = new AlgobDeployerImpl(
+    const deployer = new DeployerDeployMode(
       mkAlgobEnv("network 123"),
       cpData,
       {},
@@ -225,7 +225,7 @@ describe("AlgobDeployerImpl", () => {
 
   it("Should return correct ASA in ASA map", async () => {
     const cpData = new CheckpointRepoImpl();
-    const deployer = new AlgobDeployerImpl(
+    const deployer = new DeployerDeployMode(
       mkAlgobEnv("network 123"),
       cpData,
       { ASA_key: mkASA() },

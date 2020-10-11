@@ -2,7 +2,7 @@ import { assert } from "chai";
 import fs from "fs";
 
 import { ERRORS } from "../../../src/internal/core/errors-list";
-import { AlgobDeployerReadOnlyImpl } from "../../../src/internal/deployer";
+import { DeployerRunMode } from "../../../src/internal/deployer";
 import { TxWriterImpl } from "../../../src/internal/tx-log-writer";
 import {
   runScript
@@ -16,21 +16,21 @@ describe("Scripts runner", function () {
   useCleanFixtureProject("project-with-scripts");
 
   it("Should pass params to the script", async function () {
-    await runScript("./scripts/params-script.js", mkAlgobEnv(), new AlgobDeployerReadOnlyImpl(new FakeDeployer(), new TxWriterImpl('')));
+    await runScript("./scripts/params-script.js", mkAlgobEnv(), new DeployerRunMode(new FakeDeployer(), new TxWriterImpl('')));
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, "network1");
   });
 
   it("Should run the script to completion", async function () {
     const before = new Date();
-    await runScript("./scripts/async-script.js", mkAlgobEnv(), new AlgobDeployerReadOnlyImpl(new FakeDeployer(), new TxWriterImpl('')));
+    await runScript("./scripts/async-script.js", mkAlgobEnv(), new DeployerRunMode(new FakeDeployer(), new TxWriterImpl('')));
     const after = new Date();
     assert.isAtLeast(after.getTime() - before.getTime(), 20);
   });
 
   it("Exception shouldn't crash the whole app", async function () {
     await expectBuilderErrorAsync(
-      async () => await runScript("./scripts/failing-script.js", mkAlgobEnv(), new AlgobDeployerReadOnlyImpl(new FakeDeployer(), new TxWriterImpl(''))),
+      async () => await runScript("./scripts/failing-script.js", mkAlgobEnv(), new DeployerRunMode(new FakeDeployer(), new TxWriterImpl(''))),
       ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR,
       "./scripts/failing-script.js"
     );
@@ -40,7 +40,7 @@ describe("Scripts runner", function () {
 
   it("Nonexistent default method should throw an exception", async function () {
     await expectBuilderErrorAsync(
-      async () => await runScript("./scripts/no-default-method-script.js", mkAlgobEnv(), new AlgobDeployerReadOnlyImpl(new FakeDeployer(), new TxWriterImpl(''))),
+      async () => await runScript("./scripts/no-default-method-script.js", mkAlgobEnv(), new DeployerRunMode(new FakeDeployer(), new TxWriterImpl(''))),
       ERRORS.GENERAL.NO_DEFAULT_EXPORT_IN_SCRIPT,
       "./scripts/no-default-method-script.js"
     );
@@ -50,7 +50,7 @@ describe("Scripts runner", function () {
 
   it("Should wrap error of require", async function () {
     await expectBuilderErrorAsync(
-      async () => await runScript("./scripts/failing-script-load.js", mkAlgobEnv(), new AlgobDeployerReadOnlyImpl(new FakeDeployer(), new TxWriterImpl(''))),
+      async () => await runScript("./scripts/failing-script-load.js", mkAlgobEnv(), new DeployerRunMode(new FakeDeployer(), new TxWriterImpl(''))),
       ERRORS.GENERAL.SCRIPT_LOAD_ERROR,
       "/project-with-scripts/scripts/failing-script-load.js"
     );
@@ -59,7 +59,7 @@ describe("Scripts runner", function () {
   });
 
   it("Should ignore return value", async function () {
-    const out = await runScript("./scripts/successful-script-return-status.js", mkAlgobEnv(), new AlgobDeployerReadOnlyImpl(new FakeDeployer(), new TxWriterImpl('')));
+    const out = await runScript("./scripts/successful-script-return-status.js", mkAlgobEnv(), new DeployerRunMode(new FakeDeployer(), new TxWriterImpl('')));
     assert.equal(out, undefined);
   });
 });
