@@ -1,4 +1,4 @@
-const { transferMicroAlgosContract } = require("algob");
+const { transferMicroAlgosLsig } = require("algob");
 
 async function run(runtimeEnv, deployer) {
   const johnAccount = deployer.accountsByName.get("john-account");
@@ -7,16 +7,15 @@ async function run(runtimeEnv, deployer) {
   // Transactions for Transaction for ALGO - Contract : '2-gold-contract-asc.teal'  (Contract Approval Mode)
   const lsig = await deployer.getLogicSignature("2-gold-contract-asc.teal", []);
   
-  // sender is contract account
-  const sender = lsig.address(); 
+  const sender = lsig.address(); // sender is contract account
 
   // Will pass - As according to .teal logic, amount should be >= 100 and receiver should be john
-  const details = await transferMicroAlgosContract(deployer, sender, johnAccount.addr, 200, lsig);
+  const details = await transferMicroAlgosLsig(deployer, sender, johnAccount.addr, 200, lsig);
   console.log(details);
   
   // Gets rejected by logic - As according to .teal logic, amount should be >= 100
   try {
-    await await transferMicroAlgosContract(deployer, sender, johnAccount.addr, 20, lsig);
+    await transferMicroAlgosLsig(deployer, sender, johnAccount.addr, 20, lsig);
   } catch (e) {
     console.log('Transaction Failed - rejected by logic');
     //console.error(e);
@@ -24,7 +23,7 @@ async function run(runtimeEnv, deployer) {
 
   // Transaction fail as Elon tried to receive instead of John
   try {
-    await await transferMicroAlgosContract(deployer, sender, elonMuskAccount.addr, 500, lsig);
+    await transferMicroAlgosLsig(deployer, sender, elonMuskAccount.addr, 500, lsig);
   } catch(e) {
     console.log('Transaction Failed - rejected by logic');
     //console.error(e);

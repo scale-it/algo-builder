@@ -39,13 +39,13 @@ async function run(runtimeEnv, deployer) {
   logicSignature.sign(goldOwnerAccount.sk);
   // Will pass - As according to .teal logic, amount should be <= 100
   // Transaction PASS
-  const tranDetails =  await transferMicroAlgosLsig(deployer, goldOwnerAccount, bobAccount.addr, 58, logicSignature);
+  const tranDetails =  await transferMicroAlgosLsig(deployer, goldOwnerAccount.addr, bobAccount.addr, 58, logicSignature);
   console.log(tranDetails);
 
   // Gets rejected by logic - As according to .teal logic, amount should be <= 100
   // Transaction FAIL
   try {
-    await transferMicroAlgosLsig(deployer, goldOwnerAccount, bobAccount.addr, 580, console.logicSignature);
+    await transferMicroAlgosLsig(deployer, goldOwnerAccount.addr, bobAccount.addr, 580, logicSignature);
   } catch(e) {
     console.log('Transaction Failed - rejected by logic')
     // Error

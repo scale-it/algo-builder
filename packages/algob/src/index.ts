@@ -5,7 +5,7 @@ import {
   mkAccounts
 } from "./lib/account";
 import { balanceOf, printAssets } from "./lib/status";
-import { transferASALsig, transferAsset, transferMicroAlgos, transferMicroAlgosLsig, transferMicroAlgosContract } from "./lib/tx";
+import { transferASALsig, transferAsset, transferMicroAlgos, transferMicroAlgosLsig } from "./lib/tx";
 
 export {
   mkAccounts,
@@ -17,6 +17,5 @@ export {
   balanceOf,
   printAssets,
   transferASALsig,
-  transferMicroAlgosLsig,
-  transferMicroAlgosContract
+  transferMicroAlgosLsig
 };
