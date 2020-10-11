@@ -5,8 +5,8 @@ import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import {
-  AlgobDeployerDeployMode,
-  AlgobDeployerRunMode
+  DeployerDeployMode,
+  DeployerRunMode
 } from "../internal/deployer";
 import { txWriter, TxWriterImpl } from "../internal/tx-log-writer";
 import { partitionByFn } from "../internal/util/lists";
@@ -42,7 +42,7 @@ function mkDeployer (
   accounts: Accounts,
   txWriter: txWriter
 ): AlgobDeployer {
-  const deployer = new AlgobDeployerDeployMode(
+  const deployer = new DeployerDeployMode(
     runtimeEnv,
     cpData,
     asaDefs,
@@ -52,7 +52,7 @@ function mkDeployer (
   if (allowWrite) {
     return deployer;
   }
-  return new AlgobDeployerRunMode(deployer, txWriter);
+  return new DeployerRunMode(deployer, txWriter);
 }
 
 // returns all items before the current one and

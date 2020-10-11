@@ -2,7 +2,7 @@ import type { Account as AccountSDK } from "algosdk";
 import tx from "algosdk";
 import { TextEncoder } from "util";
 
-import { AlgobDeployerDeployMode } from "../internal/deployer";
+import { DeployerDeployMode } from "../internal/deployer";
 import {
   ASADef,
   ASADeploymentFlags,
@@ -93,7 +93,7 @@ export function encodeNote (note: string | undefined, noteb64: string| undefined
 }
 
 export async function transferMicroAlgos (
-  deployer: AlgobDeployerDeployMode,
+  deployer: DeployerDeployMode,
   from: AccountSDK,
   to: string,
   amountMicroAlgos: number,
@@ -124,7 +124,7 @@ export async function transferMicroAlgos (
 }
 
 export async function transferAsset (
-  deployer: AlgobDeployerDeployMode,
+  deployer: DeployerDeployMode,
   assetId: number,
   from: AccountSDK,
   to: string,
