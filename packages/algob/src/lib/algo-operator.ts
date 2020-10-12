@@ -203,13 +203,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     console.log("Funding Contract:", contractAddress);
 
     const closeToRemainder = undefined;
-
-    // Load Note
-    let note;
-    if (payFlags.noteb64 ?? payFlags.note) {
-      note = tx.encodeNote(payFlags.note, payFlags.noteb64);
-    }
-
+    const note = tx.encodeNote(payFlags.note, payFlags.noteb64);
     const t = algosdk.makePaymentTxnWithSuggestedParams(flags.funder.addr, contractAddress,
       flags.fundingMicroAlgo, closeToRemainder,
       note,

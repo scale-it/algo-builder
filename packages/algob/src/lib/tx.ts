@@ -87,7 +87,8 @@ export function makeASAOptInTx (
     params);
 }
 
-export function encodeNote (note: string | undefined, noteb64: string| undefined): Uint8Array {
+export function encodeNote (note: string | undefined, noteb64: string| undefined): Uint8Array | undefined {
+  if (note === undefined && noteb64 === undefined) { return undefined; }
   const encoder = new TextEncoder();
   return noteb64 ? encoder.encode(noteb64) : encoder.encode(note);
 }
