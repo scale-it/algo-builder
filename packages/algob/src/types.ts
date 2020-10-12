@@ -413,7 +413,7 @@ export interface AlgobDeployer {
   log: (msg: string, obj: any) => void
 
   // Get logic signature
-  getLogicSignature: (name: string, scParams: object) => Promise<Object | undefined> 
+  getLogicSignature: (name: string, scParams: object) => Promise<Object | undefined>
 }
 
 // ************************

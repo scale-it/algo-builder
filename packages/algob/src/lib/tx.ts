@@ -210,7 +210,7 @@ export async function transferMicroAlgosLsig (
     amount: amountMicroAlgos,
     txid: pendingTx.txId
   });
-  return await deployer.waitForConfirmation(pendingTx.txId);
+  return deployer.waitForConfirmation(pendingTx.txId);
 }
 
 /**
@@ -246,5 +246,5 @@ export async function transferASALsig (
   // send raw LogicSigTransaction to network
   const tx1 = (await deployer.algodClient.sendRawTransaction(rawSignedTxn.blob).do());
 
-  return await deployer.waitForConfirmation(tx1.txId);
+  return deployer.waitForConfirmation(tx1.txId);
 }

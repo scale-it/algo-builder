@@ -20,7 +20,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     throw new Error("Not implemented");
   };
 
-  getLogicSignature(): Promise<Object | undefined> {
+  getLogicSignature (): Promise<Object | undefined> {
     throw new Error("Not implemented");
   }
 

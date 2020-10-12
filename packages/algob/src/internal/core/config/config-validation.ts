@@ -1,5 +1,4 @@
 import * as z from 'zod';
-import { parseZodError } from "../validation-errors";
 
 import { validateAccount } from "../../../lib/account";
 // import { Account } from "algosdk";
@@ -7,13 +6,14 @@ import type { AlgobChainCfg, HttpNetworkConfig, NetworkConfig } from "../../../t
 import { ALGOB_CHAIN_NAME } from "../../constants";
 import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
+import { parseZodError } from "../validation-errors";
 import CfgErrors from "./config-errors";
 
 const AccountType = z.object({
   addr: z.string(),
   sk: z.unknown(),
   name: z.string()
-}); 
+});
 
 const AlgobChainType = z.object({
   accounts: z.array(AccountType).optional(),
@@ -24,7 +24,7 @@ const AlgobChainType = z.object({
   initialDate: z.string().optional()
 }).nonstrict();
 
-const HttpHeaders = z.record(z.string())
+const HttpHeaders = z.record(z.string());
 
 const HttpNetworkType = z.object({
   accounts: z.array(AccountType).optional(),
@@ -38,7 +38,7 @@ const HttpNetworkType = z.object({
 
 const NetworkType = z.union([AlgobChainType, HttpNetworkType]);
 
-const NetworksType = z.record(NetworkType)
+const NetworksType = z.record(NetworkType);
 
 const ProjectPaths = z.object({
   root: z.string().optional(),
@@ -46,13 +46,13 @@ const ProjectPaths = z.object({
   artifacts: z.string().optional(),
   sources: z.string().optional(),
   tests: z.string().optional()
-}).nonstrict();;
+}).nonstrict(); ;
 
 const Config = z.object({
   networks: NetworksType.optional(),
   paths: ProjectPaths.optional()
-  }
-).nonstrict();;
+}
+).nonstrict(); ;
 
 /**
  * Validates the config, throwing a BuilderError if invalid.
@@ -101,8 +101,7 @@ export function getValidationErrors(config: any): CfgErrors {  // eslint-disable
 
       try {
         HttpNetworkType.parse(hcfg);
-      } 
-      catch(e) {
+      } catch (e) {
         if (e instanceof z.ZodError) {
           errors.concatenate([parseZodError(e)]);
         }
@@ -116,8 +115,7 @@ export function getValidationErrors(config: any): CfgErrors {  // eslint-disable
 
   try {
     Config.parse(config);
-  }
-  catch(e) {
+  } catch (e) {
     if (e instanceof z.ZodError) {
       errors.concatenate([parseZodError(e)]);
     }

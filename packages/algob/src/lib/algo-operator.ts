@@ -235,14 +235,12 @@ export class AlgoOperatorImpl implements AlgoOperator {
     };
   }
 
-  async getLogicSignature(name: string, scParams: Object): Promise<Object | undefined> {
+  async getLogicSignature (name: string, scParams: Object): Promise<Object | undefined> {
     const result = await this.compileOp.readArtifact(name);
-    if(result === undefined)
-      return undefined;
+    if (result === undefined) { return undefined; }
     const programb64 = result.compiled;
     const program = new Uint8Array(Buffer.from(programb64, "base64"));
-    const lsig = algosdk.makeLogicSig(program, scParams);
-    return lsig;
+    return algosdk.makeLogicSig(program, scParams);
   }
 
   private async ensureCompiled (name: string, force: boolean): Promise<ASCCache> {
