@@ -2,8 +2,8 @@ import type { Account as AccountSDK } from "algosdk";
 import tx from "algosdk";
 import { TextEncoder } from "util";
 
-import { DeployerDeployMode } from "../internal/deployer";
 import {
+  AlgobDeployer,
   ASADef,
   ASADeploymentFlags,
   TxParams
@@ -101,7 +101,7 @@ export function encodeNote (note: string | undefined, noteb64: string| undefined
   * Transaction details
 */
 export async function transferMicroAlgos (
-  deployer: DeployerDeployMode,
+  deployer: AlgobDeployer,
   from: AccountSDK,
   to: string,
   amountMicroAlgos: number,
@@ -140,7 +140,7 @@ export async function transferMicroAlgos (
 */
 
 export async function transferAsset (
-  deployer: DeployerDeployMode,
+  deployer: AlgobDeployer,
   assetId: number,
   from: AccountSDK,
   to: string,
@@ -186,7 +186,7 @@ export async function transferAsset (
 */
 
 export async function transferMicroAlgosLsig (
-  deployer: DeployerDeployMode,
+  deployer: AlgobDeployer,
   fromAccount: AccountSDK,
   toAccountAddr: string,
   amountMicroAlgos: number,
@@ -223,7 +223,7 @@ export async function transferMicroAlgosLsig (
 */
 
 export async function transferASALsig (
-  deployer: DeployerDeployMode,
+  deployer: AlgobDeployer,
   fromAccount: AccountSDK,
   toAccount: string,
   amountMicroAlgos: number,
