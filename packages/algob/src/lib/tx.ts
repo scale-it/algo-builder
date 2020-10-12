@@ -186,7 +186,7 @@ export async function transferAsset (
 */
 
 export async function transferMicroAlgosLsig (
-  deployer: AlgobDeployerImpl,
+  deployer: DeployerDeployMode,
   fromAccount: AccountSDK,
   toAccountAddr: string,
   amountMicroAlgos: number,
@@ -210,7 +210,7 @@ export async function transferMicroAlgosLsig (
     amount: amountMicroAlgos,
     txid: pendingTx.txId
   });
-  return deployer.waitForConfirmation(pendingTx.txId);
+  return await deployer.waitForConfirmation(pendingTx.txId);
 }
 
 /**
@@ -223,7 +223,7 @@ export async function transferMicroAlgosLsig (
 */
 
 export async function transferASALsig (
-  deployer: AlgobDeployerImpl,
+  deployer: DeployerDeployMode,
   fromAccount: AccountSDK,
   toAccount: string,
   amountMicroAlgos: number,
@@ -246,5 +246,5 @@ export async function transferASALsig (
   // send raw LogicSigTransaction to network
   const tx1 = (await deployer.algodClient.sendRawTransaction(rawSignedTxn.blob).do());
 
-  return deployer.waitForConfirmation(tx1.txId);
+  return await deployer.waitForConfirmation(tx1.txId);
 }

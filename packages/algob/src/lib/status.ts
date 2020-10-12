@@ -14,7 +14,7 @@ export async function balanceOf (
   }
 };
 
-export async function printAssets (deployer: AlgobDeployerImpl, account: string): Promise<void> {
+export async function printAssets (deployer: DeployerDeployMode, account: string): Promise<void> {
   const accountInfo = await deployer.algodClient.accountInformation(account).do();
   console.log("Asset Holding Info:", accountInfo.assets);
   console.log("Account's ALGO (microalgos):", accountInfo["amount-without-pending-rewards"]);
