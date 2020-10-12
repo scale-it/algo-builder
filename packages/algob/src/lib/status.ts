@@ -1,7 +1,7 @@
-import { DeployerDeployMode } from "../internal/deployer";
+import { AlgobDeployer } from "../types";
 
 export async function balanceOf (
-  deployer: DeployerDeployMode,
+  deployer: AlgobDeployer,
   account: string,
   assetid: number
 ): Promise<void> {
@@ -14,7 +14,7 @@ export async function balanceOf (
   }
 };
 
-export async function printAssets (deployer: AlgobDeployerImpl, account: string): Promise<void> {
+export async function printAssets (deployer: AlgobDeployer, account: string): Promise<void> {
   const accountInfo = await deployer.algodClient.accountInformation(account).do();
   console.log("Asset Holding Info:", accountInfo.assets);
   console.log("Account's ALGO (microalgos):", accountInfo["amount-without-pending-rewards"]);
