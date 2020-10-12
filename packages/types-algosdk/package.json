@@ -10,6 +10,7 @@
   "scripts": {
     "lint": "echo ok",
     "lint:fix": "echo ok",
+    "build": "tsc --build .",
     "test": "echo ok"
   }
 }

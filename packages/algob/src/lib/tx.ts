@@ -2,7 +2,7 @@ import type { Account as AccountSDK } from "algosdk";
 import tx from "algosdk";
 import { TextEncoder } from "util";
 
-import { AlgobDeployerImpl } from "../internal/deployer";
+import { DeployerDeployMode } from "../internal/deployer";
 import {
   ASADef,
   ASADeploymentFlags,
@@ -101,7 +101,7 @@ export function encodeNote (note: string | undefined, noteb64: string| undefined
   * Transaction details
 */
 export async function transferMicroAlgos (
-  deployer: AlgobDeployerImpl,
+  deployer: DeployerDeployMode,
   from: AccountSDK,
   to: string,
   amountMicroAlgos: number,
@@ -140,7 +140,7 @@ export async function transferMicroAlgos (
 */
 
 export async function transferAsset (
-  deployer: AlgobDeployerImpl,
+  deployer: DeployerDeployMode,
   assetId: number,
   from: AccountSDK,
   to: string,
@@ -209,7 +209,7 @@ export async function transferMicroAlgosLsig (
     amount: amountMicroAlgos,
     txid: pendingTx.txId
   });
-  return await deployer.waitForConfirmation(pendingTx.txId);
+  return deployer.waitForConfirmation(pendingTx.txId);
 }
 
 /**
@@ -245,5 +245,5 @@ export async function transferASALsig (
   // send raw LogicSigTransaction to network
   const tx1 = (await deployer.algodClient.sendRawTransaction(rawSignedTxn.blob).do());
 
-  return await deployer.waitForConfirmation(tx1.txId);
+  return deployer.waitForConfirmation(tx1.txId);
 }
