@@ -193,8 +193,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     console.log(message);
     console.log(mode);
     const result: ASCCache = await this.ensureCompiled(name, false);
-    const programb64 = result.compiled;
-    const program = new Uint8Array(Buffer.from(programb64, "base64"));
+    const program = new Uint8Array(Buffer.from(result.compiled, "base64"));
     const lsig = algosdk.makeLogicSig(program, scParams);
     const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
 
@@ -203,37 +202,27 @@ export class AlgoOperatorImpl implements AlgoOperator {
       lsig.sign(flags.funder.sk);
     }
 
-    const funder = flags.funder.addr;
     const contractAddress = lsig.address();
 
     // Fund smart contract
     console.log("Funding Contract:", contractAddress);
 
     const closeToRemainder = undefined;
-
-    // Load Note
-    let note;
-    if (payFlags.noteb64 ?? payFlags.note) {
-      note = tx.encodeNote(payFlags.note, payFlags.noteb64);
-    }
-
-    const tran = algosdk.makePaymentTxnWithSuggestedParams(funder, contractAddress,
+    const note = tx.encodeNote(payFlags.note, payFlags.noteb64);
+    const t = algosdk.makePaymentTxnWithSuggestedParams(flags.funder.addr, contractAddress,
       flags.fundingMicroAlgo, closeToRemainder,
       note,
       params);
-
-    const signedTxn = tran.signTxn(flags.funder.sk);
-
-    const tranInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
-
-    const confirmedTxn = await this.waitForConfirmation(tranInfo.txId);
+    const signedTxn = t.signTxn(flags.funder.sk);
+    const txInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
+    const confirmedTxn = await this.waitForConfirmation(txInfo.txId);
 
     txWriter.push(message, confirmedTxn);
 
     return {
       creator: flags.funder.addr,
       contractAddress: contractAddress,
-      txId: tranInfo.txId,
+      txId: txInfo.txId,
       logicSignature: lsig,
       confirmedRound: confirmedTxn[confirmedRound]
     };

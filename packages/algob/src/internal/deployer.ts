@@ -143,6 +143,8 @@ export class DeployerDeployMode implements AlgobDeployer {
     return asaInfo;
   }
 
+  // TODO: this function in fact doesn't deploy ASC, it only sends some algos to ASC.
+  // We should rename it.
   async deployASC (name: string, scParams: Object, flags: ASCDeploymentFlags,
     payFlags: TxParams): Promise<ASCInfo> {
     this.assertNoAsset(name);
