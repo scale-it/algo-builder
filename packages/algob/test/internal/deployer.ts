@@ -4,7 +4,7 @@ import { ERRORS } from "../../src/internal/core/errors-list";
 import { DeployerDeployMode } from "../../src/internal/deployer";
 import { TxWriterImpl } from "../../src/internal/tx-log-writer";
 import { CheckpointRepoImpl } from "../../src/lib/script-checkpoints";
-import { ASADef, ASAInfo, ASCInfo, Checkpoints } from "../../src/types";
+import { ASADef, ASAInfo, ASCInfo, Checkpoints, StatelessASCMode } from "../../src/types";
 import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkAlgobEnv } from "../helpers/params";
 import { cleanupMutableData } from "../lib/script-checkpoints";
@@ -99,7 +99,7 @@ describe("DeployerDeployMode", () => {
     const asaInfo = await deployer.deployASA("MY_ASA", { creator: deployer.accounts[0] });
     assert.deepEqual(asaInfo, { creator: "addr-1-get-address-dry-run", txId: "tx-id-dry-run", confirmedRound: -1, assetIndex: -1 });
 
-    const ascInfo = await deployer.deployASC("MY_ASC", [], { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
+    const ascInfo = await deployer.deployASC("MY_ASC", [], { funder: deployer.accounts[1], fundingMicroAlgo: 1000, mode: StatelessASCMode.DELEGATED_APPROVAL }, {});
     assert.deepEqual(ascInfo, {
       creator: "addr-2-get-address-dry-run",
       txId: "tx-id-dry-run",
@@ -192,9 +192,9 @@ describe("DeployerDeployMode", () => {
     const cpData = new CheckpointRepoImpl();
     const deployer = new DeployerDeployMode(
       mkAlgobEnv("network 123"), cpData, {}, new AlgoOperatorDryRunImpl(), new Map(), new TxWriterImpl(''));
-    await deployer.deployASC("ASC_key", [], { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
+    await deployer.deployASC("ASC_key", [], { funder: deployer.accounts[1], fundingMicroAlgo: 1000, mode: StatelessASCMode.DELEGATED_APPROVAL }, {});
     await expectBuilderErrorAsync(
-      async () => await deployer.deployASC("ASC_key", "new_value", { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {}),
+      async () => await deployer.deployASC("ASC_key", "new_value", { funder: deployer.accounts[1], fundingMicroAlgo: 1000, mode: StatelessASCMode.DELEGATED_APPROVAL }, {}),
       ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT,
       "ASC_key"
     );

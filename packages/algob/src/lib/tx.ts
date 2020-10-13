@@ -1,4 +1,4 @@
-import type { Account as AccountSDK } from "algosdk";
+import type { Account, Account as AccountSDK } from "algosdk";
 import tx from "algosdk";
 import { TextEncoder } from "util";
 
@@ -188,7 +188,7 @@ export async function transferAsset (
 
 export async function transferMicroAlgosLsig (
   deployer: AlgobDeployer,
-  fromAccount: AccountSDK,
+  fromAccount: Account,
   toAccountAddr: string,
   amountMicroAlgos: number,
   lsig: Object): Promise<tx.ConfirmedTxInfo> {
@@ -200,7 +200,6 @@ export async function transferMicroAlgosLsig (
   const txn = tx.makePaymentTxnWithSuggestedParams(
     fromAccount.addr, receiver, amountMicroAlgos, undefined, note, params);
 
-  // let signedTxn = txn.signTxn(fromAccount.sk);
   const signedTxn = tx.signLogicSigTransactionObject(txn, lsig);
   const txId = txn.txID().toString();
   console.log(txId);

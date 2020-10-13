@@ -14,6 +14,7 @@ import {
   ASCDeploymentFlags,
   ASCInfo,
   Network,
+  StatelessASCMode,
   TxParams
 } from "../types";
 import { CompileOp } from "./compile";
@@ -189,14 +190,19 @@ export class AlgoOperatorImpl implements AlgoOperator {
   async deployASC (name: string, scParams: object, flags: ASCDeploymentFlags, payFlags: TxParams,
     txWriter: txWriter): Promise<ASCInfo> {
     const message = 'Deploying ASC: ' + name;
+    const mode = 'Mode: ' + StatelessASCMode[flags.mode];
     console.log(message);
+    console.log(mode);
     const result: ASCCache = await this.ensureCompiled(name, false);
     const program = new Uint8Array(Buffer.from(result.compiled, "base64"));
     const lsig = algosdk.makeLogicSig(program, scParams);
     const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
 
-    // ASC1 signed by funder
-    lsig.sign(flags.funder.sk);
+    // ASC1 signed by funder if deployment mode is set to Delegated Approval
+    if (StatelessASCMode[flags.mode] === "DELEGATED_APPROVAL") {
+      lsig.sign(flags.funder.sk);
+    }
+
     const contractAddress = lsig.address();
 
     // Fund smart contract
