@@ -9,6 +9,7 @@ import {
   Accounts,
   ASADef,
   ASADeploymentFlags,
+  StatelessASCMode,
   ASAInfo,
   ASCCache,
   ASCDeploymentFlags,
@@ -198,7 +199,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
 
     // ASC1 signed by funder if deployment mode is set to Delegated Approval
-    if (flags.mode === "Delegated Approval") {
+    if (StatelessASCMode[flags.mode] === "DELEGATED_APPROVAL") {
       lsig.sign(flags.funder.sk);
     }
 

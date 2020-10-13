@@ -1,5 +1,6 @@
 const { transferMicroAlgos, transferAsset, balanceOf } = require("algob");
 
+
 async function run(runtimeEnv, deployer) {
 
   const masterAccount = deployer.accountsByName.get("master-account")
@@ -8,13 +9,13 @@ async function run(runtimeEnv, deployer) {
   await transferMicroAlgos(deployer, masterAccount, goldOwnerAccount.addr, 200000000, {note: "funding account"});
 
   const ascInfoGold = await deployer.deployASC("4-gold-asa.teal", [],
-    {funder: goldOwnerAccount, fundingMicroAlgo: 101000, mode: "Delegated Approval" }, {}); // sending 0.101 Algo
+    { funder: goldOwnerAccount, fundingMicroAlgo: 101000, mode: "DELEGATED_APPROVAL" }, {}); // sending 0.101 Algo
 
   const ascInfoAlgoDelegated = await deployer.deployASC("3-gold-delegated-asc.teal", [],
-    {funder: goldOwnerAccount, fundingMicroAlgo: 101000, mode: "Delegated Approval" }, {}); // sending 0.101 Algo
+    { funder: goldOwnerAccount, fundingMicroAlgo: 101000, mode: "DELEGATED_APPROVAL" }, {}); // sending 0.101 Algo
 
   const ascInfoAlgoContract = await deployer.deployASC("2-gold-contract-asc.teal", [],
-    {funder: goldOwnerAccount, fundingMicroAlgo: 101000, mode: "Contract Account" }, {});   // sending 0.101 Algo
+    { funder: goldOwnerAccount, fundingMicroAlgo: 101000, mode: "CONTRACT_ACCOUNT" }, {});   // sending 0.101 Algo
 
   console.log(ascInfoGold);
   console.log(ascInfoAlgoDelegated);
