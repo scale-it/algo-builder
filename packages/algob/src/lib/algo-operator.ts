@@ -9,12 +9,12 @@ import {
   Accounts,
   ASADef,
   ASADeploymentFlags,
-  StatelessASCMode,
   ASAInfo,
   ASCCache,
   ASCDeploymentFlags,
   ASCInfo,
   Network,
+  StatelessASCMode,
   TxParams
 } from "../types";
 import { CompileOp } from "./compile";
@@ -190,7 +190,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   async deployASC (name: string, scParams: object, flags: ASCDeploymentFlags, payFlags: TxParams,
     txWriter: txWriter): Promise<ASCInfo> {
     const message = 'Deploying ASC: ' + name;
-    const mode = 'Mode: ' + flags.mode;
+    const mode = 'Mode: ' + StatelessASCMode[flags.mode];
     console.log(message);
     console.log(mode);
     const result: ASCCache = await this.ensureCompiled(name, false);
