@@ -67,7 +67,6 @@ export function getEnv (defaultNetworkCfg?: NetworkConfig): AlgobRuntimeEnv {
   const config = loadConfigAndTasks(runtimeArgs);
 
   if (runtimeArgs.network == null) {
-    // TODO:RZ
     throw new Error("INTERNAL ERROR. Default network should be registered in `register.ts` module");
   }
 

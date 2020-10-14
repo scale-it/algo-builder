@@ -262,6 +262,30 @@ describe("ArgumentsParser", () => {
 
       assert.isTrue(runtimeArgs.showStackTraces);
     });
+
+    it("should not change network unless specified by user", () => {
+      const rawCLAs: string[] = [
+        "--show-stack-traces",
+        "compile",
+        "--task-param"
+      ];
+
+      const {
+        runtimeArgs,
+        taskName,
+        unparsedCLAs
+      } = argumentsParser.parseRuntimeArgs(
+        ALGOB_PARAM_DEFINITIONS,
+        ALGOB_SHORT_PARAM_SUBSTITUTIONS,
+        envArgs,
+        rawCLAs
+      );
+      assert.equal(taskName, "compile");
+      assert.equal(runtimeArgs.showStackTraces, true);
+      assert.equal(runtimeArgs.network, "test");
+      assert.equal(unparsedCLAs.length, 1);
+      assert.equal("--task-param", unparsedCLAs[0]);
+    });
   });
 
   describe("tasks arguments", () => {
