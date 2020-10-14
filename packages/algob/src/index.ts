@@ -6,7 +6,7 @@ import {
 } from "./lib/account";
 import { balanceOf, printAssets } from "./lib/status";
 import { transferASALsig, transferAsset, transferMicroAlgos, transferMicroAlgosLsig } from "./lib/tx";
-import { StatelessASCMode } from "./types";
+import { ASC1Mode } from "./types";
 
 export {
   mkAccounts,
@@ -19,5 +19,5 @@ export {
   printAssets,
   transferASALsig,
   transferMicroAlgosLsig,
-  StatelessASCMode
+  ASC1Mode
 };

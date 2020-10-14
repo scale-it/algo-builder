@@ -10,11 +10,11 @@ import {
   ASADef,
   ASADeploymentFlags,
   ASAInfo,
+  ASC1Mode,
   ASCCache,
   ASCDeploymentFlags,
   ASCInfo,
   Network,
-  StatelessASCMode,
   TxParams
 } from "../types";
 import { CompileOp } from "./compile";
@@ -190,7 +190,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   async deployASC (name: string, scParams: object, flags: ASCDeploymentFlags, payFlags: TxParams,
     txWriter: txWriter): Promise<ASCInfo> {
     const message = 'Deploying ASC: ' + name;
-    const mode = 'Mode: ' + StatelessASCMode[flags.mode];
+    const mode = 'Mode: ' + ASC1Mode[flags.mode];
     console.log(message);
     console.log(mode);
     const result: ASCCache = await this.ensureCompiled(name, false);
@@ -199,7 +199,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
 
     // ASC1 signed by funder if deployment mode is set to Delegated Approval
-    if (StatelessASCMode[flags.mode] === "DELEGATED_APPROVAL") {
+    if (ASC1Mode[flags.mode] === "DELEGATED_APPROVAL") {
       lsig.sign(flags.funder.sk);
     }
 
