@@ -367,7 +367,7 @@ export interface ASADeploymentFlags extends TxParams {
   creator: Account
 }
 
-export enum StatelessASCMode {
+export enum ASC1Mode {
   DELEGATED_APPROVAL,
   CONTRACT_ACCOUNT
 }
@@ -375,7 +375,7 @@ export enum StatelessASCMode {
 export interface ASCDeploymentFlags {
   funder: Account
   fundingMicroAlgo: number
-  mode: StatelessASCMode
+  mode: ASC1Mode
 }
 
 export interface AssetScriptMap {
