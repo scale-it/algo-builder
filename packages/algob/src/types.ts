@@ -429,6 +429,9 @@ export interface AlgobDeployer {
 
   // Log Transaction
   log: (msg: string, obj: any) => void
+
+  // Logic signature
+  getDelegatedLsig: (lsigName: string) => Object | undefined
 }
 
 // ************************

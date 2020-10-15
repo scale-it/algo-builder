@@ -20,7 +20,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     throw new Error("Not implemented");
   };
 
-  getLogicSignature (): Promise<Object | undefined> {
+  getDelegatedLsig (lsig: string): Object | undefined {
     throw new Error("Not implemented");
   }
 
@@ -45,7 +45,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     return {
       creator: flags.funder.addr + "-get-address-dry-run",
       contractAddress: "dfssdfsd",
-      logicSignature: "12dsfdsdasd"
+      logicSignature: new Uint8Array(1)
     };
   }
 

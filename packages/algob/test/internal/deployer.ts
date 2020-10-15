@@ -109,7 +109,7 @@ describe("DeployerDeployMode", () => {
     assert.deepEqual(lsigInfo, {
       creator: "addr-2-get-address-dry-run",
       contractAddress: "dfssdfsd",
-      logicSignature: "12dsfdsdasd"
+      logicSignature: new Uint8Array(1)
     });
 
     cpData.precedingCP.network1.timestamp = 515236;
@@ -127,7 +127,7 @@ describe("DeployerDeployMode", () => {
         lsig: new Map([["MY_SIG", {
           creator: "addr-2-get-address-dry-run",
           contractAddress: "dfssdfsd",
-          logicSignature: "12dsfdsdasd"
+          logicSignature: new Uint8Array(1)
         }]]),
         metadata: new Map<string, string>(),
         timestamp: 515236
@@ -141,7 +141,7 @@ describe("DeployerDeployMode", () => {
     const cpData = new CheckpointRepoImpl()
       .registerASA(networkName, "ASA name", { creator: "ASA creator 123", txId: "", confirmedRound: 0, assetIndex: 0 })
       .registerASC(networkName, "ASC name", { creator: "ASC creator 951", txId: "", confirmedRound: 0, contractAddress: "addr-1" })
-      .registerLsig(networkName, "Lsig name", { creator: "Lsig creator", contractAddress: "addr-1", logicSignature: "abcd" })
+      .registerLsig(networkName, "Lsig name", { creator: "Lsig creator", contractAddress: "addr-1", logicSignature: new Uint8Array(1) })
       .putMetadata(networkName, "k", "v");
     const deployer = new DeployerDeployMode(
       env, cpData, {}, new AlgoOperatorDryRunImpl(), new Map(), new TxWriterImpl(''));

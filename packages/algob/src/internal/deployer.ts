@@ -1,7 +1,6 @@
-import { encode } from "@msgpack/msgpack";
+/* eslint @typescript-eslint/no-var-requires: "off" */
+import { decode, encode } from "@msgpack/msgpack";
 import * as algosdk from "algosdk";
-// import logicsig = require("algosdk/src/logicsig");
-import logicsig from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
@@ -23,6 +22,7 @@ import {
 } from "../types";
 import { BuilderError } from "./core/errors";
 import { ERRORS } from "./core/errors-list";
+const logicsig = require("algosdk/src/logicsig");
 // This class is what user interacts with in deploy task
 export class DeployerDeployMode implements AlgobDeployer {
   private readonly runtimeEnv: AlgobRuntimeEnv;
@@ -233,7 +233,21 @@ export class DeployerDeployMode implements AlgobDeployer {
     this.txWriter.push(msg, obj);
   }
 
-  // getDelegatedLsig()
+  getDelegatedLsig (lsigName: string): Object | undefined {
+    const result = this.lsig.get(lsigName)?.logicSignature;
+    if (result === undefined) { return undefined; }
+    const lsig1 = decode(result);
+    const dummyProgram = new Uint8Array([
+      1, 32, 2, 1, 100, 38, 1, 32, 213, 3, 149,
+      22, 62, 136, 178, 191, 199, 92, 201, 183, 175, 213,
+      79, 155, 211, 71, 149, 158, 180, 205, 247, 164, 218,
+      202, 87, 77, 111, 133, 236, 77, 49, 16, 34, 18,
+      49, 7, 40, 18, 16, 49, 8, 35, 14, 16
+    ]);
+    const lsig = new logicsig.LogicSig(dummyProgram, []);
+    Object.assign(lsig, lsig1);
+    return lsig;
+  }
 }
 
 // This class is what user interacts with in run task
@@ -319,5 +333,9 @@ export class DeployerRunMode implements AlgobDeployer {
 
   log (msg: string, obj: any): void {
     this.txWriter.push(msg, obj);
+  }
+
+  getDelegatedLsig (lsigName: string): Object | undefined {
+    return this._internal.getDelegatedLsig(lsigName);
   }
 }
