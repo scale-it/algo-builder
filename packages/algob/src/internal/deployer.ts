@@ -1,10 +1,10 @@
-/* eslint @typescript-eslint/no-var-requires: "off" */
+
 import { decode, encode } from "@msgpack/msgpack";
 import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
-import { getLsig } from "../lib/lsig";
+import { getLsig, logicsig } from "../lib/lsig";
 import { persistCheckpoint } from "../lib/script-checkpoints";
 import {
   Account,
@@ -22,7 +22,7 @@ import {
 } from "../types";
 import { BuilderError } from "./core/errors";
 import { ERRORS } from "./core/errors-list";
-const logicsig = require("algosdk/src/logicsig");
+// const logicsig = require("algosdk/src/logicsig");
 // This class is what user interacts with in deploy task
 export class DeployerDeployMode implements AlgobDeployer {
   private readonly runtimeEnv: AlgobRuntimeEnv;

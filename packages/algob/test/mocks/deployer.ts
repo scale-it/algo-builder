@@ -19,6 +19,10 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   }
 
+  getDelegatedLsig (lsig: string): object | undefined {
+    throw new Error("Not implemented");
+  }
+
   putMetadata (key: string, value: string): void {
   };
 

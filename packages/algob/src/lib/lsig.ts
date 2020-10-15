@@ -1,8 +1,9 @@
+/* eslint @typescript-eslint/no-var-requires: "off" */
 import algosdk from "algosdk";
 
 import { ASCCache } from "../types";
 import { CompileOp } from "./compile";
-
+export const logicsig = require("algosdk/src/logicsig");
 /* export class LogicSig {
   tag: any;
   logic: any;
