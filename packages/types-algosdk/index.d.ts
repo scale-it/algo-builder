@@ -21,6 +21,16 @@ declare module 'algosdk' {
     accountInformation(address: string): Action<AccountInfo>
   }
 
+   
+   export class LogicSig {
+    constructor(program: Uint8Array, args: Object);
+
+    get_obj_for_encoding(): Action<Object>
+    from_obj_for_encoding(encoded: Object): Action<Object>
+    verify(publicKey: Uint8Array): boolean
+  }
+
+
   interface Account {
     addr: string
     sk: Uint8Array

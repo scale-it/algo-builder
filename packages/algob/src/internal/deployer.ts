@@ -1,5 +1,7 @@
 import { encode } from "@msgpack/msgpack";
 import * as algosdk from "algosdk";
+// import logicsig = require("algosdk/src/logicsig");
+import logicsig from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
@@ -21,7 +23,6 @@ import {
 } from "../types";
 import { BuilderError } from "./core/errors";
 import { ERRORS } from "./core/errors-list";
-
 // This class is what user interacts with in deploy task
 export class DeployerDeployMode implements AlgobDeployer {
   private readonly runtimeEnv: AlgobRuntimeEnv;
