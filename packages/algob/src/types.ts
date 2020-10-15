@@ -308,7 +308,7 @@ export interface ASCInfo extends DeployedAssetInfo {
 export interface LsigInfo {
   creator: AccountAddress
   contractAddress: string
-  logicSignature: string
+  logicSignature: Uint8Array
 }
 
 export interface CheckpointRepo {

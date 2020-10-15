@@ -1,3 +1,4 @@
+import { encode } from "@msgpack/msgpack";
 import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
@@ -183,7 +184,7 @@ export class DeployerDeployMode implements AlgobDeployer {
       lsigInfo = {
         creator: signer.addr,
         contractAddress: lsig.address(),
-        logicSignature: lsig
+        logicSignature: encode(lsig)
       };
     } catch (error) {
       persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);

@@ -1,3 +1,4 @@
+import { encode } from "@msgpack/msgpack";
 import algosdk from "algosdk";
 
 import { BuilderError } from "../internal/core/errors";
@@ -211,11 +212,10 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const confirmedTxn = await this.waitForConfirmation(txInfo.txId);
 
     txWriter.push("Funding Contract", confirmedTxn);
-
     return {
       creator: flags.funder.addr,
       contractAddress: contractAddress,
-      logicSignature: lsig
+      logicSignature: encode(lsig)
     };
   }
 
