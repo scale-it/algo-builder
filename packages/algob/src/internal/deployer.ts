@@ -2,6 +2,7 @@ import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
+import { getLsig } from "../lib/lsig";
 import { persistCheckpoint } from "../lib/script-checkpoints";
 import {
   Account,
@@ -11,9 +12,10 @@ import {
   ASADefs,
   ASADeploymentFlags,
   ASAInfo,
-  ASCDeploymentFlags,
   ASCInfo,
   CheckpointRepo,
+  FundASCFlags,
+  LsigInfo,
   TxParams
 } from "../types";
 import { BuilderError } from "./core/errors";
@@ -143,22 +145,54 @@ export class DeployerDeployMode implements AlgobDeployer {
     return asaInfo;
   }
 
-  // TODO: this function in fact doesn't deploy ASC, it only sends some algos to ASC.
-  // We should rename it.
-  async deployASC (name: string, scParams: Object, flags: ASCDeploymentFlags,
-    payFlags: TxParams): Promise<ASCInfo> {
+  /**
+   * Description - This function will send Algos to ASC account in "Contract Mode"
+   * @param name     - ASC name
+   * @param scParams - SC parameters
+   * @param flags    - Deployments flags (as per SPEC)
+   * @param payFlags - as per SPEC
+   */
+  async fundLsig (name: string, scParams: Object, flags: FundASCFlags,
+    payFlags: TxParams): Promise<LsigInfo> {
     this.assertNoAsset(name);
-    let ascInfo = {} as any;
+    let lsigInfo = {} as any;
     try {
-      ascInfo = await this.algoOp.deployASC(name, scParams, flags, payFlags, this.txWriter);
+      lsigInfo = await this.algoOp.fundLsig(name, scParams, flags, payFlags, this.txWriter);
     } catch (error) {
       persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
 
       console.log(error);
       throw error;
     }
-    this.cpData.registerASC(this.networkName, name, ascInfo);
-    return ascInfo;
+    this.cpData.registerLsig(this.networkName, name, lsigInfo);
+    return lsigInfo;
+  }
+
+  /**
+   * Description - This function will create logic signature for "delegated approval"
+   * @param name     - ASC name
+   * @param scParams - SC parameters
+   * @param signer   - signer
+   */
+  async delegatedLsig (name: string, scParams: Object, signer: Account): Promise<LsigInfo> {
+    this.assertNoAsset(name);
+    let lsigInfo = {} as any;
+    try {
+      const lsig = await getLsig(name, scParams, this.algoOp.algodClient);
+      lsig.sign(signer.sk);
+      lsigInfo = {
+        creator: signer.addr,
+        contractAddress: lsig.address(),
+        logicSignature: lsig
+      };
+    } catch (error) {
+      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+
+      console.log(error);
+      throw error;
+    }
+    this.cpData.registerLsig(this.networkName, name, lsigInfo);
+    return lsigInfo;
   }
 
   isDefined (name: string): boolean {
@@ -171,6 +205,10 @@ export class DeployerDeployMode implements AlgobDeployer {
 
   get asc (): Map<string, ASCInfo> {
     return this.cpData.precedingCP[this.networkName]?.asc ?? new Map();
+  }
+
+  get lsig (): Map<string, LsigInfo> {
+    return this.cpData.precedingCP[this.networkName]?.lsig ?? new Map();
   }
 
   get algodClient (): algosdk.Algodv2 {
@@ -193,9 +231,7 @@ export class DeployerDeployMode implements AlgobDeployer {
     this.txWriter.push(msg, obj);
   }
 
-  async getLogicSignature (name: string, scParams: object): Promise<Object | undefined> {
-    return await this.algoOp.getLogicSignature(name, scParams);
-  }
+  // getDelegatedLsig()
 }
 
 // This class is what user interacts with in run task
@@ -236,10 +272,16 @@ export class DeployerRunMode implements AlgobDeployer {
     });
   }
 
-  async deployASC (_name: string, scParams: Object, flags: ASCDeploymentFlags,
-    payFlags: TxParams): Promise<ASCInfo> {
+  async fundLsig (_name: string, scParams: Object, flags: FundASCFlags,
+    payFlags: TxParams): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      methodName: "deployASC"
+      methodName: "fundLsig"
+    });
+  }
+
+  async delegatedLsig (_name: string, scParams: Object, signer: Account): Promise<LsigInfo> {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "delegatedLsig"
     });
   }
 
@@ -253,6 +295,10 @@ export class DeployerRunMode implements AlgobDeployer {
 
   get asc (): Map<string, ASCInfo> {
     return this._internal.asc;
+  }
+
+  get lsig (): Map<string, LsigInfo> {
+    return this._internal.lsig;
   }
 
   get algodClient (): algosdk.Algodv2 {
@@ -271,9 +317,5 @@ export class DeployerRunMode implements AlgobDeployer {
 
   log (msg: string, obj: any): void {
     this.txWriter.push(msg, obj);
-  }
-
-  async getLogicSignature (name: string, scParams: object): Promise<Object | undefined> {
-    return await this._internal.getLogicSignature(name, scParams);
   }
 }

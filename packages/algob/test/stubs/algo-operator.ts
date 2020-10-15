@@ -10,8 +10,8 @@ import {
   ASADeploymentFlags,
   ASAInfo,
   ASCCache,
-  ASCDeploymentFlags,
-  ASCInfo,
+  FundASCFlags,
+  LsigInfo,
   TxParams
 } from "../../src/types";
 
@@ -39,13 +39,11 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     };
   }
 
-  async deployASC (
-    name: string, scParams: Object, flags: ASCDeploymentFlags, payFlags: TxParams,
-    txWriter: txWriter): Promise<ASCInfo> {
+  async fundLsig (
+    name: string, scParams: Object, flags: FundASCFlags, payFlags: TxParams,
+    txWriter: txWriter): Promise<LsigInfo> {
     return {
       creator: flags.funder.addr + "-get-address-dry-run",
-      txId: "tx-id-dry-run",
-      confirmedRound: -1,
       contractAddress: "dfssdfsd",
       logicSignature: "12dsfdsdasd"
     };

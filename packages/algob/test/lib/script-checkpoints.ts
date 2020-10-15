@@ -10,10 +10,11 @@ import {
   persistCheckpoint,
   registerASA,
   registerASC,
+  registerLsig,
   toCheckpointFileName,
   toScriptFileName
 } from "../../src/lib/script-checkpoints";
-import { ASAInfo, ASCInfo, Checkpoint, Checkpoints } from "../../src/types";
+import { ASAInfo, ASCInfo, Checkpoint, Checkpoints, LsigInfo } from "../../src/types";
 import { expectBuilderError } from "../helpers/errors";
 
 export function cleanupMutableData (netCheckpoint: Checkpoint, n: number): Checkpoint {
@@ -34,7 +35,8 @@ describe("Checkpoint", () => {
       timestamp: 12345,
       metadata: new Map<string, string>(),
       asa: new Map<string, ASAInfo>(),
-      asc: new Map<string, ASCInfo>()
+      asc: new Map<string, ASCInfo>(),
+      lsig: new Map<string, LsigInfo>()
     });
   });
 
@@ -47,7 +49,8 @@ describe("Checkpoint", () => {
         timestamp: 34251,
         metadata: new Map<string, string>(),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     });
     const netCheckpoint2: Checkpoint = cleanupMutableData(new CheckpointImpl(), 539);
@@ -57,13 +60,15 @@ describe("Checkpoint", () => {
         timestamp: 34251,
         metadata: new Map<string, string>(),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       },
       network5352: {
         timestamp: 539,
         metadata: new Map<string, string>(),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     });
   });
@@ -77,7 +82,8 @@ describe("Checkpoint", () => {
         timestamp: 34251,
         metadata: new Map<string, string>(),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     });
     const netCheckpoint2: Checkpoint = cleanupMutableData(new CheckpointImpl(), 539);
@@ -87,7 +93,8 @@ describe("Checkpoint", () => {
         timestamp: 539,
         metadata: new Map<string, string>(),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     });
   });
@@ -107,8 +114,12 @@ describe("Checkpoint", () => {
       creator: "536",
       txId: "",
       confirmedRound: 0,
+      contractAddress: "addr-3"
+    });
+    registerLsig(netCheckpoint, "lsig", {
+      creator: "536",
       contractAddress: "addr-3",
-      logicSignature: "sig-1"
+      logicSignature: "lsig"
     });
     appendToCheckpoint(checkpoints, "network12345", netCheckpoint);
     assert.deepEqual(checkpoints, {
@@ -126,8 +137,12 @@ describe("Checkpoint", () => {
           creator: "536",
           txId: "",
           confirmedRound: 0,
+          contractAddress: "addr-3"
+        }]]),
+        lsig: new Map([["lsig", {
+          creator: "536",
           contractAddress: "addr-3",
-          logicSignature: "sig-1"
+          logicSignature: "lsig"
         }]])
       }
     });
@@ -166,8 +181,12 @@ describe("Checkpoint", () => {
           creator: "536",
           txId: "",
           confirmedRound: 0,
+          contractAddress: "addr-3"
+        }]]),
+        lsig: new Map([["lsig", {
+          creator: "536",
           contractAddress: "addr-3",
-          logicSignature: "sig-1"
+          logicSignature: "lsig"
         }]])
       }
     });
@@ -199,7 +218,7 @@ describe("Checkpoint", () => {
       "asa1"
     );
   });
-
+  // add test
   it("Should crash if duplicate ASC name is detected", async () => {
     const checkpoints: Checkpoints = {};
     const cp1: Checkpoint = cleanupMutableData(
@@ -209,8 +228,7 @@ describe("Checkpoint", () => {
       creator: "123",
       txId: "",
       confirmedRound: 0,
-      contractAddress: "addr-3",
-      logicSignature: "sig-1"
+      contractAddress: "addr-3"
     });
     appendToCheckpoint(checkpoints, "network12345", cp1);
     const cp2: Checkpoint = cleanupMutableData(new CheckpointImpl(), 53521);
@@ -218,8 +236,7 @@ describe("Checkpoint", () => {
       creator: "36506",
       txId: "",
       confirmedRound: 0,
-      contractAddress: "addr-3",
-      logicSignature: "sig-1"
+      contractAddress: "addr-3"
     });
     expectBuilderError(
       () => appendToCheckpoint(checkpoints, "network12345", cp2),
@@ -250,7 +267,8 @@ describe("Checkpoint", () => {
       timestamp: 12345,
       metadata: new Map<string, string>(),
       asa: new Map<string, ASAInfo>(),
-      asc: new Map<string, ASCInfo>()
+      asc: new Map<string, ASCInfo>(),
+      lsig: new Map<string, LsigInfo>()
     });
     cp = registerASC(
       registerASA(
@@ -267,8 +285,7 @@ describe("Checkpoint", () => {
         creator: "ASC deployer address",
         txId: "",
         confirmedRound: 0,
-        contractAddress: "addr-3",
-        logicSignature: "sig-1"
+        contractAddress: "addr-3"
       });
     assert.deepEqual(cp, {
       timestamp: 12345,
@@ -283,9 +300,9 @@ describe("Checkpoint", () => {
         creator: "ASC deployer address",
         txId: "",
         confirmedRound: 0,
-        contractAddress: "addr-3",
-        logicSignature: "sig-1"
-      }]])
+        contractAddress: "addr-3"
+      }]]),
+      lsig: new Map()
     });
   });
 });
@@ -305,7 +322,8 @@ describe("Checkpoint with cleanup", () => {
         timestamp: 123,
         metadata: new Map<string, string>(),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     }, "network124", new CheckpointImpl());
     persistCheckpoint("script-1.js", origCP);
@@ -332,7 +350,8 @@ describe("CheckpointRepoImpl", () => {
           assetIndex: 0,
           confirmedRound: 0
         }]]),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     };
     const cp2: Checkpoints = {
@@ -345,7 +364,8 @@ describe("CheckpointRepoImpl", () => {
           assetIndex: 0,
           confirmedRound: 0
         }]]),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     };
     const cp = new CheckpointRepoImpl()
@@ -368,7 +388,8 @@ describe("CheckpointRepoImpl", () => {
         timestamp: 951,
         metadata: new Map([["key", "data"]]),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     });
   });
@@ -386,13 +407,15 @@ describe("CheckpointRepoImpl", () => {
         timestamp: 531,
         metadata: new Map([["key", "data"]]),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       },
       myNetworkName2: {
         timestamp: 201,
         metadata: new Map([["key2", "data2"]]),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     });
   });
@@ -417,7 +440,8 @@ describe("CheckpointRepoImpl", () => {
           assetIndex: 0,
           confirmedRound: 0
         }]]),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     });
   });
@@ -428,8 +452,7 @@ describe("CheckpointRepoImpl", () => {
         creator: "ASC creator 951",
         txId: "",
         confirmedRound: 0,
-        contractAddress: "addr-3",
-        logicSignature: "sig-1"
+        contractAddress: "addr-3"
       })
       .putMetadata("net 0195", "1241 key", "345 value");
     cpData.precedingCP.network1.timestamp = 123;
@@ -443,15 +466,16 @@ describe("CheckpointRepoImpl", () => {
           creator: "ASC creator 951",
           txId: "",
           confirmedRound: 0,
-          contractAddress: "addr-3",
-          logicSignature: "sig-1"
-        }]])
+          contractAddress: "addr-3"
+        }]]),
+        lsig: new Map<string, LsigInfo>()
       },
       "net 0195": {
         timestamp: 123,
         metadata: new Map([["1241 key", "345 value"]]),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     });
   });
@@ -462,7 +486,8 @@ describe("CheckpointRepoImpl", () => {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     };
     const cp2: Checkpoints = {
@@ -470,7 +495,8 @@ describe("CheckpointRepoImpl", () => {
         timestamp: 2,
         metadata: new Map([["key 2", "data 2"]]),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     };
     const cp = new CheckpointRepoImpl()
@@ -482,13 +508,15 @@ describe("CheckpointRepoImpl", () => {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       },
       network2: {
         timestamp: 2,
         metadata: new Map([["key 2", "data 2"]]),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     });
   });
@@ -499,7 +527,8 @@ describe("CheckpointRepoImpl", () => {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     };
     const cp2: Checkpoints = {
@@ -512,7 +541,8 @@ describe("CheckpointRepoImpl", () => {
           assetIndex: 0,
           confirmedRound: 0
         }]]),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     };
     const cpData = new CheckpointRepoImpl()
@@ -531,7 +561,8 @@ describe("CheckpointRepoImpl", () => {
           assetIndex: 0,
           confirmedRound: 0
         }]]),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     });
     assert.deepEqual(cpData.strippedCP, {
@@ -545,7 +576,8 @@ describe("CheckpointRepoImpl", () => {
           confirmedRound: 0
         }
         ]]),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     });
     assert.deepEqual(cpData.allCPs, {
@@ -558,7 +590,8 @@ describe("CheckpointRepoImpl", () => {
           assetIndex: 0,
           confirmedRound: 0
         }]]),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     });
   });
@@ -573,10 +606,10 @@ describe("CheckpointRepoImpl", () => {
           creator: "ASC creator1",
           txId: "",
           confirmedRound: 0,
-          contractAddress: "addr-3",
-          logicSignature: "sig-1"
+          contractAddress: "addr-3"
         }
-        ]])
+        ]]),
+        lsig: new Map<string, LsigInfo>()
       }
     };
     const cp2: Checkpoints = {
@@ -584,7 +617,8 @@ describe("CheckpointRepoImpl", () => {
         timestamp: 2,
         metadata: new Map<string, string>(),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     };
     const cp3: Checkpoints = {
@@ -596,10 +630,10 @@ describe("CheckpointRepoImpl", () => {
           creator: "ASC creator",
           txId: "",
           confirmedRound: 0,
-          contractAddress: "addr-3",
-          logicSignature: "sig-1"
+          contractAddress: "addr-3"
         }
-        ]])
+        ]]),
+        lsig: new Map<string, LsigInfo>()
       }
     };
     const cpData = new CheckpointRepoImpl()
@@ -615,16 +649,15 @@ describe("CheckpointRepoImpl", () => {
           creator: "ASC creator",
           txId: "",
           confirmedRound: 0,
-          contractAddress: "addr-3",
-          logicSignature: "sig-1"
+          contractAddress: "addr-3"
         }],
         ["ASC key1", {
           creator: "ASC creator1",
           txId: "",
           confirmedRound: 0,
-          contractAddress: "addr-3",
-          logicSignature: "sig-1"
-        }]])
+          contractAddress: "addr-3"
+        }]]),
+        lsig: new Map<string, LsigInfo>()
       }
     });
     cpData.precedingCP.network1.timestamp = 124;
@@ -635,9 +668,9 @@ describe("CheckpointRepoImpl", () => {
           creator: "ASC creator",
           txId: "",
           confirmedRound: 0,
-          contractAddress: "addr-3",
-          logicSignature: "sig-1"
+          contractAddress: "addr-3"
         }]]),
+        lsig: new Map<string, LsigInfo>(),
         metadata: new Map<string, string>(),
         timestamp: 124
       }
@@ -650,9 +683,9 @@ describe("CheckpointRepoImpl", () => {
           creator: "ASC creator",
           txId: "",
           confirmedRound: 0,
-          contractAddress: "addr-3",
-          logicSignature: "sig-1"
+          contractAddress: "addr-3"
         }]]),
+        lsig: new Map<string, LsigInfo>(),
         metadata: new Map<string, string>(),
         timestamp: 124
       }
@@ -665,7 +698,8 @@ describe("CheckpointRepoImpl", () => {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     };
     const cp2: Checkpoints = {
@@ -673,7 +707,8 @@ describe("CheckpointRepoImpl", () => {
         timestamp: 4,
         metadata: new Map([["metadata 4 key", "metadata value"]]),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     };
     const cpData = new CheckpointRepoImpl()
@@ -691,8 +726,7 @@ describe("CheckpointRepoImpl", () => {
         creator: "ASC creator 951",
         txId: "",
         confirmedRound: 0,
-        contractAddress: "addr-3",
-        logicSignature: "sig-1"
+        contractAddress: "addr-3"
       });
     cpData.allCPs.network1.timestamp = 1111;
     cpData.allCPs.network4.timestamp = 4;
@@ -723,22 +757,24 @@ describe("CheckpointRepoImpl", () => {
             creator: "ASC creator 951",
             txId: "",
             confirmedRound: 0,
-            contractAddress: "addr-3",
-            logicSignature: "sig-1"
+            contractAddress: "addr-3"
           }
-          ]])
+          ]]),
+          lsig: new Map<string, LsigInfo>()
         },
         network4: {
           timestamp: 4,
           metadata: new Map([["metadata 4 key", "metadata value"]]),
           asa: new Map<string, ASAInfo>(),
-          asc: new Map<string, ASCInfo>()
+          asc: new Map<string, ASCInfo>(),
+          lsig: new Map<string, LsigInfo>()
         },
         "net 0195": {
           timestamp: 195,
           metadata: new Map([["1241 key", "345 value"]]),
           asa: new Map<string, ASAInfo>(),
-          asc: new Map<string, ASCInfo>()
+          asc: new Map<string, ASCInfo>(),
+          lsig: new Map<string, LsigInfo>()
         }
       });
       assert.deepEqual(cpData.precedingCP, {
@@ -756,16 +792,17 @@ describe("CheckpointRepoImpl", () => {
             creator: "ASC creator 951",
             txId: "",
             confirmedRound: 0,
-            contractAddress: "addr-3",
-            logicSignature: "sig-1"
+            contractAddress: "addr-3"
           }
-          ]])
+          ]]),
+          lsig: new Map()
         },
         "net 0195": {
           timestamp: 195,
           metadata: new Map([["1241 key", "345 value"]]),
           asa: new Map<string, ASAInfo>(),
-          asc: new Map<string, ASCInfo>()
+          asc: new Map<string, ASCInfo>(),
+          lsig: new Map<string, LsigInfo>()
         }
       });
       assert.deepEqual(cpData.strippedCP, {
@@ -784,15 +821,16 @@ describe("CheckpointRepoImpl", () => {
             creator: "ASC creator 951",
             txId: "",
             confirmedRound: 0,
-            contractAddress: "addr-3",
-            logicSignature: "sig-1"
-          }]])
+            contractAddress: "addr-3"
+          }]]),
+          lsig: new Map()
         },
         "net 0195": {
           timestamp: 195,
           metadata: new Map([["1241 key", "345 value"]]),
           asa: new Map<string, ASAInfo>(),
-          asc: new Map<string, ASCInfo>()
+          asc: new Map<string, ASCInfo>(),
+          lsig: new Map<string, LsigInfo>()
         }
       });
     });
@@ -818,8 +856,7 @@ describe("CheckpointRepoImpl", () => {
         creator: "ASC creator 951",
         txId: "",
         confirmedRound: 0,
-        contractAddress: "addr-3",
-        logicSignature: "sig-1"
+        contractAddress: "addr-3"
       });
     assert.isTrue(cpData.isDefined("network1", "ASA name"));
     assert.isTrue(cpData.isDefined("network1", "ASC name"));

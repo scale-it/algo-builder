@@ -303,6 +303,11 @@ export interface ASAInfo extends DeployedAssetInfo {
 }
 export interface ASCInfo extends DeployedAssetInfo {
   contractAddress: string
+}
+
+export interface LsigInfo {
+  creator: AccountAddress
+  contractAddress: string
   logicSignature: string
 }
 
@@ -329,6 +334,7 @@ export interface CheckpointRepo {
 
   registerASA: (networkName: string, name: string, info: ASAInfo) => CheckpointRepo
   registerASC: (networkName: string, name: string, info: ASCInfo) => CheckpointRepo
+  registerLsig: (networkName: string, name: string, info: LsigInfo) => CheckpointRepo
 
   isDefined: (networkName: string, name: string) => boolean
   networkExistsInCurrentCP: (networkName: string) => boolean
@@ -343,6 +349,7 @@ export interface Checkpoint {
   metadata: Map<string, string>
   asa: Map<string, ASAInfo>
   asc: Map<string, ASCInfo>
+  lsig: Map<string, LsigInfo>
 };
 
 export type ASADef = z.infer<typeof ASADefSchema>;
@@ -372,10 +379,9 @@ export enum ASC1Mode {
   CONTRACT_ACCOUNT
 }
 
-export interface ASCDeploymentFlags {
+export interface FundASCFlags {
   funder: Account
   fundingMicroAlgo: number
-  mode: ASC1Mode
 }
 
 export interface AssetScriptMap {
@@ -392,12 +398,17 @@ export interface AlgobDeployer {
   putMetadata: (key: string, value: string) => void
   getMetadata: (key: string) => string | undefined
   deployASA: (name: string, flags: ASADeploymentFlags) => Promise<ASAInfo>
-  deployASC: (
+  fundLsig: (
     name: string,
     scParams: Object,
-    flags: ASCDeploymentFlags,
+    flags: FundASCFlags,
     payFlags: TxParams
-  ) => Promise<ASCInfo>
+  ) => Promise<LsigInfo>
+  delegatedLsig: (
+    name: string,
+    scParams: Object,
+    signer: Account
+  ) => Promise<LsigInfo>
   /**
      Returns true if ASA or ACS were deployed in any script.
      Checks even for checkpoints out of from the execution
@@ -406,6 +417,7 @@ export interface AlgobDeployer {
   isDefined: (name: string) => boolean
   asa: Map<string, ASAInfo>
   asc: Map<string, ASCInfo>
+  lsig: Map<string, LsigInfo>
 
   // These functions are exposed only for users.
   // Put your logic into AlgoOperator if you need to interact with the chain.
@@ -417,9 +429,6 @@ export interface AlgobDeployer {
 
   // Log Transaction
   log: (msg: string, obj: any) => void
-
-  // Get logic signature
-  getLogicSignature: (name: string, scParams: object) => Promise<Object | undefined>
 }
 
 // ************************

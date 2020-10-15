@@ -4,7 +4,7 @@ import { ERRORS } from "../../src/internal/core/errors-list";
 import { DeployerDeployMode } from "../../src/internal/deployer";
 import { TxWriterImpl } from "../../src/internal/tx-log-writer";
 import { CheckpointRepoImpl } from "../../src/lib/script-checkpoints";
-import { ASADef, ASAInfo, ASC1Mode, ASCInfo, Checkpoints } from "../../src/types";
+import { ASADef, ASAInfo, ASCInfo, Checkpoints, LsigInfo } from "../../src/types";
 import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkAlgobEnv } from "../helpers/params";
 import { cleanupMutableData } from "../lib/script-checkpoints";
@@ -24,7 +24,8 @@ describe("DeployerDeployMode", () => {
       timestamp: 12345,
       metadata: new Map([["k", "v"]]),
       asa: new Map<string, ASAInfo>(),
-      asc: new Map<string, ASCInfo>()
+      asc: new Map<string, ASCInfo>(),
+      lsig: new Map<string, LsigInfo>()
     });
   });
 
@@ -50,7 +51,8 @@ describe("DeployerDeployMode", () => {
       metadata: new Map([["key 1", "val 1"],
         ["key 2", "val 2"]]),
       asa: new Map<string, ASAInfo>(),
-      asc: new Map<string, ASCInfo>()
+      asc: new Map<string, ASCInfo>(),
+      lsig: new Map<string, LsigInfo>()
     });
   });
 
@@ -60,7 +62,8 @@ describe("DeployerDeployMode", () => {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     };
     const cp2: Checkpoints = {
@@ -68,7 +71,8 @@ describe("DeployerDeployMode", () => {
         timestamp: 2,
         metadata: new Map([["key 2", "data 2"]]),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     };
     const cpData = new CheckpointRepoImpl();
@@ -79,13 +83,15 @@ describe("DeployerDeployMode", () => {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       },
       network2: {
         timestamp: 2,
         metadata: new Map([["key 2", "data 2"]]),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>()
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>()
       }
     });
   });
@@ -99,16 +105,15 @@ describe("DeployerDeployMode", () => {
     const asaInfo = await deployer.deployASA("MY_ASA", { creator: deployer.accounts[0] });
     assert.deepEqual(asaInfo, { creator: "addr-1-get-address-dry-run", txId: "tx-id-dry-run", confirmedRound: -1, assetIndex: -1 });
 
-    const ascInfo = await deployer.deployASC("MY_ASC", [], { funder: deployer.accounts[1], fundingMicroAlgo: 1000, mode: ASC1Mode.DELEGATED_APPROVAL }, {});
-    assert.deepEqual(ascInfo, {
+    const lsigInfo = await deployer.fundLsig("MY_SIG", [], { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
+    assert.deepEqual(lsigInfo, {
       creator: "addr-2-get-address-dry-run",
-      txId: "tx-id-dry-run",
-      confirmedRound: -1,
       contractAddress: "dfssdfsd",
       logicSignature: "12dsfdsdasd"
     });
 
     cpData.precedingCP.network1.timestamp = 515236;
+    console.log(cpData.precedingCP);
     assert.deepEqual(cpData.precedingCP, {
       network1: {
 
@@ -118,10 +123,9 @@ describe("DeployerDeployMode", () => {
           confirmedRound: -1,
           assetIndex: -1
         }]]),
-        asc: new Map([["MY_ASC", {
+        asc: new Map(),
+        lsig: new Map([["MY_SIG", {
           creator: "addr-2-get-address-dry-run",
-          txId: "tx-id-dry-run",
-          confirmedRound: -1,
           contractAddress: "dfssdfsd",
           logicSignature: "12dsfdsdasd"
         }]]),
@@ -136,7 +140,8 @@ describe("DeployerDeployMode", () => {
     const env = mkAlgobEnv(networkName);
     const cpData = new CheckpointRepoImpl()
       .registerASA(networkName, "ASA name", { creator: "ASA creator 123", txId: "", confirmedRound: 0, assetIndex: 0 })
-      .registerASC(networkName, "ASC name", { creator: "ASC creator 951", txId: "", confirmedRound: 0, contractAddress: "addr-1", logicSignature: "sig-1" })
+      .registerASC(networkName, "ASC name", { creator: "ASC creator 951", txId: "", confirmedRound: 0, contractAddress: "addr-1" })
+      .registerLsig(networkName, "Lsig name", { creator: "Lsig creator", contractAddress: "addr-1", logicSignature: "abcd" })
       .putMetadata(networkName, "k", "v");
     const deployer = new DeployerDeployMode(
       env, cpData, {}, new AlgoOperatorDryRunImpl(), new Map(), new TxWriterImpl(''));
@@ -192,11 +197,11 @@ describe("DeployerDeployMode", () => {
     const cpData = new CheckpointRepoImpl();
     const deployer = new DeployerDeployMode(
       mkAlgobEnv("network 123"), cpData, {}, new AlgoOperatorDryRunImpl(), new Map(), new TxWriterImpl(''));
-    await deployer.deployASC("ASC_key", [], { funder: deployer.accounts[1], fundingMicroAlgo: 1000, mode: ASC1Mode.DELEGATED_APPROVAL }, {});
+    await deployer.fundLsig("Lsig", [], { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
     await expectBuilderErrorAsync(
-      async () => await deployer.deployASC("ASC_key", "new_value", { funder: deployer.accounts[1], fundingMicroAlgo: 1000, mode: ASC1Mode.DELEGATED_APPROVAL }, {}),
+      async () => await deployer.fundLsig("Lsig", "new_value", { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {}),
       ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT,
-      "ASC_key"
+      "Lsig"
     );
   });
 

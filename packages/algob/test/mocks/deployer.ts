@@ -1,10 +1,11 @@
 import * as algosdk from "algosdk";
 
-import { Account, AlgobDeployer, ASADeploymentFlags, ASAInfo, ASCDeploymentFlags, ASCInfo } from "../../src/types";
+import { Account, AlgobDeployer, ASADeploymentFlags, ASAInfo, ASCInfo, FundASCFlags, LsigInfo } from "../../src/types";
 
 export class FakeDeployer implements AlgobDeployer {
   asa = new Map<string, ASAInfo>();
   asc = new Map<string, ASCInfo>();
+  lsig = new Map<string, LsigInfo>();
   isDeployMode = false;
   accounts = [];
   accountsByName = new Map<string, Account>();
@@ -15,10 +16,6 @@ export class FakeDeployer implements AlgobDeployer {
   }
 
   log (msg: string, obj: any): void {
-    throw new Error("Not implemented");
-  }
-
-  getLogicSignature (name: string, scParams: object): Promise <Object | undefined > {
     throw new Error("Not implemented");
   }
 
@@ -33,7 +30,11 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   };
 
-  async deployASC (name: string, scParams: object, flags: ASCDeploymentFlags): Promise<ASCInfo> {
+  async fundLsig (name: string, scParams: object, flags: FundASCFlags): Promise<LsigInfo> {
+    throw new Error("Not implemented");
+  }
+
+  async delegatedLsig (name: string, scParams: object, signer: Account): Promise<LsigInfo> {
     throw new Error("Not implemented");
   }
 
