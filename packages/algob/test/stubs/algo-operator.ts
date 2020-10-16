@@ -45,7 +45,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     return {
       creator: flags.funder.addr + "-get-address-dry-run",
       contractAddress: "dfssdfsd",
-      logicSignature: new Uint8Array(1)
+      lsig: new Uint8Array(1)
     };
   }
 

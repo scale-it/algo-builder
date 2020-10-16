@@ -308,7 +308,7 @@ export interface ASCInfo extends DeployedAssetInfo {
 export interface LsigInfo {
   creator: AccountAddress
   contractAddress: string
-  logicSignature: Uint8Array
+  lsig: Uint8Array
 }
 
 export interface CheckpointRepo {
@@ -399,14 +399,14 @@ export interface AlgobDeployer {
   getMetadata: (key: string) => string | undefined
   deployASA: (name: string, flags: ASADeploymentFlags) => Promise<ASAInfo>
   fundLsig: (
-    name: string,
-    scParams: Object,
+    name: string, // ASC filename
+    scParams: Object, // Parameters
     flags: FundASCFlags,
     payFlags: TxParams
   ) => Promise<LsigInfo>
   delegatedLsig: (
-    name: string,
-    scParams: Object,
+    name: string, // ASC filename
+    scParams: Object, // Parameters
     signer: Account
   ) => Promise<LsigInfo>
   /**

@@ -1,4 +1,3 @@
-
 import { decode, encode } from "@msgpack/msgpack";
 import * as algosdk from "algosdk";
 
@@ -6,7 +5,7 @@ import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
 import { getLsig, logicsig } from "../lib/lsig";
 import { persistCheckpoint } from "../lib/script-checkpoints";
-import {
+import type {
   Account,
   Accounts,
   AlgobDeployer,
@@ -22,7 +21,6 @@ import {
 } from "../types";
 import { BuilderError } from "./core/errors";
 import { ERRORS } from "./core/errors-list";
-// const logicsig = require("algosdk/src/logicsig");
 // This class is what user interacts with in deploy task
 export class DeployerDeployMode implements AlgobDeployer {
   private readonly runtimeEnv: AlgobRuntimeEnv;
@@ -149,7 +147,7 @@ export class DeployerDeployMode implements AlgobDeployer {
 
   /**
    * Description - This function will send Algos to ASC account in "Contract Mode"
-   * @param name     - ASC name
+   * @param name     - ASC filename
    * @param scParams - SC parameters
    * @param flags    - Deployments flags (as per SPEC)
    * @param payFlags - as per SPEC
@@ -185,7 +183,7 @@ export class DeployerDeployMode implements AlgobDeployer {
       lsigInfo = {
         creator: signer.addr,
         contractAddress: lsig.address(),
-        logicSignature: encode(lsig)
+        lsig: encode(lsig)
       };
     } catch (error) {
       persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
@@ -233,17 +231,16 @@ export class DeployerDeployMode implements AlgobDeployer {
     this.txWriter.push(msg, obj);
   }
 
+  /**
+   *
+   * @param lsigName Description: loads and returns delegated logic signature from checkpoint
+   */
   getDelegatedLsig (lsigName: string): Object | undefined {
-    const result = this.lsig.get(lsigName)?.logicSignature;
+    const result = this.lsig.get(lsigName)?.lsig;
     if (result === undefined) { return undefined; }
     const lsig1 = decode(result);
-    const dummyProgram = new Uint8Array([
-      1, 32, 2, 1, 100, 38, 1, 32, 213, 3, 149,
-      22, 62, 136, 178, 191, 199, 92, 201, 183, 175, 213,
-      79, 155, 211, 71, 149, 158, 180, 205, 247, 164, 218,
-      202, 87, 77, 111, 133, 236, 77, 49, 16, 34, 18,
-      49, 7, 40, 18, 16, 49, 8, 35, 14, 16
-    ]);
+    const dummyProgram = new Uint8Array(56);
+    dummyProgram.fill(0);
     const lsig = new logicsig.LogicSig(dummyProgram, []);
     Object.assign(lsig, lsig1);
     return lsig;

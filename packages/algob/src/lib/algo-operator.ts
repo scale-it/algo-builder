@@ -187,6 +187,14 @@ export class AlgoOperatorImpl implements AlgoOperator {
     };
   }
 
+  /**
+   * Description - This function will send Algos to ASC account in "Contract Mode"
+   * @param name     - ASC filename
+   * @param scParams - SC parameters
+   * @param flags    - FundASC flags (as per SPEC)
+   * @param payFlags - as per SPEC
+   * @param txWriter - transaction log writer
+   */
   async fundLsig (
     name: string,
     scParams: Object,
@@ -196,10 +204,10 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const lsig = await getLsig(name, scParams, this.algodClient);
     const contractAddress = lsig.address();
 
-    console.log("Mode : Contract Mode");
     const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
-
-    console.log("Funding Contract: ", contractAddress);
+    let message = "Funding Contract: ";
+    message = message.concat(contractAddress);
+    console.log(message);
 
     const closeToRemainder = undefined;
     const note = tx.encodeNote(payFlags.note, payFlags.noteb64);
@@ -210,12 +218,13 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const signedTxn = t.signTxn(flags.funder.sk);
     const txInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
     const confirmedTxn = await this.waitForConfirmation(txInfo.txId);
-
-    txWriter.push("Funding Contract", confirmedTxn);
+    message = message.concat("\nLsig: " + name);
+    // message.concat(name);
+    txWriter.push(message, confirmedTxn);
     return {
       creator: flags.funder.addr,
       contractAddress: contractAddress,
-      logicSignature: encode(lsig)
+      lsig: encode(lsig)
     };
   }
 
