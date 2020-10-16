@@ -23,6 +23,16 @@ export function cleanupMutableData (netCheckpoint: Checkpoint, n: number): Check
   return netCheckpoint;
 }
 
+function createNetwork (timestamp: number): Checkpoint {
+  return {
+    timestamp: timestamp,
+    metadata: new Map<string, string>(),
+    asa: new Map<string, ASAInfo>(),
+    asc: new Map<string, ASCInfo>(),
+    lsig: new Map<string, LsigInfo>()
+  };
+}
+
 describe("Checkpoint", () => {
   it("Should create a network checkpoint", async () => {
     const beforeTimestamp = +new Date();
@@ -31,45 +41,19 @@ describe("Checkpoint", () => {
     assert.isAtLeast(netCheckpoint.timestamp, beforeTimestamp);
     assert.isAtMost(netCheckpoint.timestamp, afterTimestamp);
     netCheckpoint.timestamp = 12345;
-    assert.deepEqual(netCheckpoint, {
-      timestamp: 12345,
-      metadata: new Map<string, string>(),
-      asa: new Map<string, ASAInfo>(),
-      asc: new Map<string, ASCInfo>(),
-      lsig: new Map<string, LsigInfo>()
-    });
+    assert.deepEqual(netCheckpoint, createNetwork(12345));
   });
 
   it("Should append to a checkpoint map", async () => {
     var checkpoints: Checkpoints = {};
     const netCheckpoint: Checkpoint = cleanupMutableData(new CheckpointImpl(), 34251);
     const checkpoint = appendToCheckpoint(checkpoints, "network213", netCheckpoint);
-    assert.deepEqual(checkpoint, {
-      network213: {
-        timestamp: 34251,
-        metadata: new Map<string, string>(),
-        asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>(),
-        lsig: new Map<string, LsigInfo>()
-      }
-    });
+    assert.deepEqual(checkpoint, { network213: createNetwork(34251) });
     const netCheckpoint2: Checkpoint = cleanupMutableData(new CheckpointImpl(), 539);
     checkpoints = appendToCheckpoint(checkpoints, "network5352", netCheckpoint2);
     assert.deepEqual(checkpoints, {
-      network213: {
-        timestamp: 34251,
-        metadata: new Map<string, string>(),
-        asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>(),
-        lsig: new Map<string, LsigInfo>()
-      },
-      network5352: {
-        timestamp: 539,
-        metadata: new Map<string, string>(),
-        asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>(),
-        lsig: new Map<string, LsigInfo>()
-      }
+      network213: createNetwork(34251),
+      network5352: createNetwork(539)
     });
   });
 
@@ -78,24 +62,12 @@ describe("Checkpoint", () => {
     const netCheckpoint: Checkpoint = cleanupMutableData(new CheckpointImpl(), 34251);
     checkpoints = appendToCheckpoint(checkpoints, "network525", netCheckpoint);
     assert.deepEqual(checkpoints, {
-      network525: {
-        timestamp: 34251,
-        metadata: new Map<string, string>(),
-        asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>(),
-        lsig: new Map<string, LsigInfo>()
-      }
+      network525: createNetwork(34251)
     });
     const netCheckpoint2: Checkpoint = cleanupMutableData(new CheckpointImpl(), 539);
     checkpoints = appendToCheckpoint(checkpoints, "network525", netCheckpoint2);
     assert.deepEqual(checkpoints, {
-      network525: {
-        timestamp: 539,
-        metadata: new Map<string, string>(),
-        asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>(),
-        lsig: new Map<string, LsigInfo>()
-      }
+      network525: createNetwork(539)
     });
   });
 
@@ -263,13 +235,7 @@ describe("Checkpoint", () => {
   it("Should allow registration of an asset", async () => {
     var cp: CheckpointImpl = new CheckpointImpl();
     cp.timestamp = 12345;
-    assert.deepEqual(cp, {
-      timestamp: 12345,
-      metadata: new Map<string, string>(),
-      asa: new Map<string, ASAInfo>(),
-      asc: new Map<string, ASCInfo>(),
-      lsig: new Map<string, LsigInfo>()
-    });
+    assert.deepEqual(cp, createNetwork(12345));
     cp = registerASC(
       registerASA(
         cp,
@@ -318,13 +284,7 @@ describe("Checkpoint with cleanup", () => {
 
   it("Should persist and load the checkpoint", async () => {
     const origCP = appendToCheckpoint({
-      hi: {
-        timestamp: 123,
-        metadata: new Map<string, string>(),
-        asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>(),
-        lsig: new Map<string, LsigInfo>()
-      }
+      hi: createNetwork(123)
     }, "network124", new CheckpointImpl());
     persistCheckpoint("script-1.js", origCP);
     const loadedCP = loadCheckpoint("script-1.js");
@@ -613,13 +573,7 @@ describe("CheckpointRepoImpl", () => {
       }
     };
     const cp2: Checkpoints = {
-      network1: {
-        timestamp: 2,
-        metadata: new Map<string, string>(),
-        asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>(),
-        lsig: new Map<string, LsigInfo>()
-      }
+      network1: createNetwork(2)
     };
     const cp3: Checkpoints = {
       network1: {

@@ -169,7 +169,8 @@ export class DeployerDeployMode implements AlgobDeployer {
   }
 
   /**
-   * Description - This function will create logic signature for "delegated approval"
+   * Description - This function will create and sign a logic signature for "delegated approval".
+   * https://developer.algorand.org/docs/features/asc1/stateless/sdks/#account-delegation-sdk-usage
    * @param name     - ASC name
    * @param scParams - SC parameters
    * @param signer   - signer

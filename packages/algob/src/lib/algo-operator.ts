@@ -219,7 +219,6 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const txInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
     const confirmedTxn = await this.waitForConfirmation(txInfo.txId);
     message = message.concat("\nLsig: " + name);
-    // message.concat(name);
     txWriter.push(message, confirmedTxn);
     return {
       creator: flags.funder.addr,
