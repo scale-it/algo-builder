@@ -20,7 +20,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     throw new Error("Not implemented");
   };
 
-  getDelegatedMsig (): Promise<Object | undefined> {
+  loadDelegatedMsig (): Promise<Object | undefined> {
     throw new Error("Not implemented");
   }
 

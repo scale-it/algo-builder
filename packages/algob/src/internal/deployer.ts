@@ -247,8 +247,8 @@ export class DeployerDeployMode implements AlgobDeployer {
     return await getLsig(name, scParams, this.algoOp.algodClient);
   }
 
-  async getDelegatedMsig (name: string): Promise<Object | undefined> {
-    return await this.algoOp.getDelegatedMsig(name);
+  async loadDelegatedMsig (name: string): Promise<Object | undefined> {
+    return await this.algoOp.loadDelegatedMsig(name);
   }
 }
 
@@ -341,7 +341,7 @@ export class DeployerRunMode implements AlgobDeployer {
     return await this._internal.loadLsig(name, scParams);
   }
 
-  async getDelegatedMsig (name: string): Promise<Object | undefined> {
-    return await this._internal.getDelegatedMsig(name);
+  async loadDelegatedMsig (name: string): Promise<Object | undefined> {
+    return await this._internal.loadDelegatedMsig(name);
   }
 }

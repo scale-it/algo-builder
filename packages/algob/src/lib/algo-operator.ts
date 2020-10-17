@@ -46,7 +46,7 @@ export interface AlgoOperator {
   optInToASAMultiple: (
     asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, assetIndex: number
   ) => Promise<void>
-  getDelegatedMsig: (name: string) => Promise<Object | undefined>
+  loadDelegatedMsig: (name: string) => Promise<Object | undefined>
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -228,7 +228,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     };
   }
 
-  async getDelegatedMsig (name: string): Promise<Object | undefined> {
+  async loadDelegatedMsig (name: string): Promise<Object | undefined> {
     const Msig = await this.compileOp.readMsig(name);
     if (!Msig) return undefined;
     const parsedMsig = JSON.parse(Msig).msig;

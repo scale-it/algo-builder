@@ -430,7 +430,7 @@ export interface AlgobDeployer {
   log: (msg: string, obj: any) => void
 
   // extract msig from signed logic signature file
-  getDelegatedMsig: (name: string) => Promise<Object | undefined>
+  loadDelegatedMsig: (name: string) => Promise<Object | undefined>
 
   // get delegated Logic signature
   getDelegatedLsig: (lsigName: string) => Object | undefined
