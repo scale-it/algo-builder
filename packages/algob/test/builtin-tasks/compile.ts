@@ -28,7 +28,8 @@ class CompileOpMock extends CompileOp {
       timestamp: this.timestamp,
       compiled: "compiled",
       compiledHash: "compiledHash",
-      srcHash: tealHash
+      srcHash: tealHash,
+      toBytes: new Uint8Array(1)
     };
   }
 

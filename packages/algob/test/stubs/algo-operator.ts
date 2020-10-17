@@ -55,7 +55,8 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
       timestamp: 1010, // compilation time (Unix time)
       compiled: "ASDF", // the compiled code
       compiledHash: "ASDF", // hash returned by the compiler
-      srcHash: 123 // source code hash
+      srcHash: 123, // source code hash
+      toBytes: new Uint8Array(1) // compiled base64 in bytes
     };
   }
 

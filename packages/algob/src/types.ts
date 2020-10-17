@@ -445,6 +445,7 @@ export interface ASCCache {
   compiled: string // the compiled code
   compiledHash: string // hash returned by the compiler
   srcHash: number // source code hash
+  toBytes: Uint8Array // compiled base64 in bytes
 }
 
 // ************************
