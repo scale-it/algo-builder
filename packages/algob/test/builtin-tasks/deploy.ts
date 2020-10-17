@@ -122,7 +122,7 @@ Lsig from second defined: false`);
     }, this.env, new AlgoOperatorDryRunImpl());
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, `ASA from first defined: true
-Lsig from second defined: true`);
+Lsig from second defined: false`);
   });
 
   it("Deployer should load deployed assets before running scripts; should not show them", async function () {
@@ -144,7 +144,7 @@ Lsig from second defined: false`);
     }, this.env, new AlgoOperatorDryRunImpl());
     const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputAfter, `ASA from first defined: true
-Lsig from second defined: true`);
+Lsig from second defined: false`);
   });
 
   it("Deployer --force should allow to rewrite existing assets; one script", async function () {
@@ -172,7 +172,7 @@ Lsig from second defined: false`);
     }, this.env, new AlgoOperatorDryRunImpl());
     const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputAfter, `ASA from first defined: true
-Lsig from second defined: true`);
+Lsig from second defined: false`);
   });
 });
 

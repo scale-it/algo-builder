@@ -23,6 +23,10 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   }
 
+  async loadLsig (name: string, scParams: Object): Promise<Object> {
+    throw new Error("Not implemented");
+  }
+
   putMetadata (key: string, value: string): void {
   };
 
@@ -34,7 +38,7 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   };
 
-  async fundLsig (name: string, scParams: object, flags: FundASCFlags): Promise<LsigInfo> {
+  async fundLsig (name: string, scParams: object, flags: FundASCFlags): Promise<void> {
     throw new Error("Not implemented");
   }
 

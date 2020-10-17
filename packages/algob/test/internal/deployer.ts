@@ -105,13 +105,6 @@ describe("DeployerDeployMode", () => {
     const asaInfo = await deployer.deployASA("MY_ASA", { creator: deployer.accounts[0] });
     assert.deepEqual(asaInfo, { creator: "addr-1-get-address-dry-run", txId: "tx-id-dry-run", confirmedRound: -1, assetIndex: -1 });
 
-    const lsigInfo = await deployer.fundLsig("MY_SIG", [], { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
-    assert.deepEqual(lsigInfo, {
-      creator: "addr-2-get-address-dry-run",
-      contractAddress: "dfssdfsd",
-      lsig: new Uint8Array(1)
-    });
-
     cpData.precedingCP.network1.timestamp = 515236;
     console.log(cpData.precedingCP);
     assert.deepEqual(cpData.precedingCP, {
@@ -124,11 +117,7 @@ describe("DeployerDeployMode", () => {
           assetIndex: -1
         }]]),
         asc: new Map(),
-        lsig: new Map([["MY_SIG", {
-          creator: "addr-2-get-address-dry-run",
-          contractAddress: "dfssdfsd",
-          lsig: new Uint8Array(1)
-        }]]),
+        lsig: new Map(),
         metadata: new Map<string, string>(),
         timestamp: 515236
       }
@@ -193,17 +182,19 @@ describe("DeployerDeployMode", () => {
     );
   });
 
-  it("Should crash when same ASC name is tried to deploy to second time", async () => {
+  // Test for ASC (stateful smart contract)
+  /* it("Should crash when same ASC name is tried to deploy to second time", async () => {
     const cpData = new CheckpointRepoImpl();
     const deployer = new DeployerDeployMode(
       mkAlgobEnv("network 123"), cpData, {}, new AlgoOperatorDryRunImpl(), new Map(), new TxWriterImpl(''));
     await deployer.fundLsig("Lsig", [], { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
     await expectBuilderErrorAsync(
-      async () => await deployer.fundLsig("Lsig", "new_value", { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {}),
+      async () => await deployer.fundLsig("Lsig", "new_value",
+      { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {}),
       ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT,
       "Lsig"
     );
-  });
+  }); */
 
   it("Should return empty ASA map on no CP", async () => {
     const cpData = new CheckpointRepoImpl();
