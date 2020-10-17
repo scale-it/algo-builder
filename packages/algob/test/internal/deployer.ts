@@ -1,8 +1,10 @@
+import { decode, encode } from "@msgpack/msgpack";
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/internal/core/errors-list";
 import { DeployerDeployMode } from "../../src/internal/deployer";
 import { TxWriterImpl } from "../../src/internal/tx-log-writer";
+import { logicsig } from "../../src/lib/lsig";
 import { CheckpointRepoImpl } from "../../src/lib/script-checkpoints";
 import { ASADef, ASAInfo, ASCInfo, Checkpoints, LsigInfo } from "../../src/types";
 import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
@@ -124,6 +126,35 @@ describe("DeployerDeployMode", () => {
     });
   });
 
+  it("Should load delegated logic signature", async () => {
+    const env = mkAlgobEnv("network1");
+    const cpData = new CheckpointRepoImpl();
+    const deployer = new DeployerDeployMode(
+      env, cpData, { MY_ASA: mkASA() }, new AlgoOperatorDryRunImpl(), new Map(), new TxWriterImpl(''));
+
+    const dummyProgram = new Uint8Array(56);
+    dummyProgram.fill(0);
+    const logicSig = encode(new logicsig.LogicSig(dummyProgram, []));
+
+    const cp1: Checkpoints = {
+      network1: {
+        timestamp: 1,
+        metadata: new Map([["key 1", "data 1"]]),
+        asa: new Map<string, ASAInfo>(),
+        asc: new Map<string, ASCInfo>(),
+        lsig: new Map<string, LsigInfo>([["MY_LSIG", {
+          creator: "addr-1-get-address-dry-run",
+          contractAddress: "ASDFGDDSSS12A",
+          lsig: logicSig
+        }]])
+      }
+    };
+
+    cpData.merge(cp1, "12s");
+    const result = deployer.getDelegatedLsig("MY_LSIG");
+    assert.deepEqual(decode(logicSig), result);
+  });
+
   it("Should use getMetadata and isDefined from CheckpointData", async () => {
     const networkName = "network1";
     const env = mkAlgobEnv(networkName);
@@ -182,19 +213,12 @@ describe("DeployerDeployMode", () => {
     );
   });
 
-  // Test for ASC (stateful smart contract)
-  /* it("Should crash when same ASC name is tried to deploy to second time", async () => {
+  it("Should not crash when same ASC Contract Mode name is tried to fund second time", async () => {
     const cpData = new CheckpointRepoImpl();
     const deployer = new DeployerDeployMode(
       mkAlgobEnv("network 123"), cpData, {}, new AlgoOperatorDryRunImpl(), new Map(), new TxWriterImpl(''));
     await deployer.fundLsig("Lsig", [], { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
-    await expectBuilderErrorAsync(
-      async () => await deployer.fundLsig("Lsig", "new_value",
-      { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {}),
-      ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT,
-      "Lsig"
-    );
-  }); */
+  });
 
   it("Should return empty ASA map on no CP", async () => {
     const cpData = new CheckpointRepoImpl();
