@@ -417,7 +417,6 @@ export interface AlgobDeployer {
   isDefined: (name: string) => boolean
   asa: Map<string, ASAInfo>
   asc: Map<string, ASCInfo>
-  lsig: Map<string, LsigInfo>
 
   // These functions are exposed only for users.
   // Put your logic into AlgoOperator if you need to interact with the chain.

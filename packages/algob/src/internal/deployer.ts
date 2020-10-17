@@ -208,10 +208,6 @@ export class DeployerDeployMode implements AlgobDeployer {
     return this.cpData.precedingCP[this.networkName]?.asc ?? new Map();
   }
 
-  get lsig (): Map<string, LsigInfo> {
-    return this.cpData.precedingCP[this.networkName]?.lsig ?? new Map();
-  }
-
   get algodClient (): algosdk.Algodv2 {
     return this.algoOp.algodClient;
   }
@@ -237,7 +233,8 @@ export class DeployerDeployMode implements AlgobDeployer {
    * @param lsigName Description: loads and returns delegated logic signature from checkpoint
    */
   getDelegatedLsig (lsigName: string): Object | undefined {
-    const result = this.lsig.get(lsigName)?.lsig;
+    const resultMap = this.cpData.precedingCP[this.networkName]?.lsig ?? new Map(); ;
+    const result = resultMap.get(lsigName)?.lsig;
     if (result === undefined) { return undefined; }
     const lsig1 = decode(result);
     const dummyProgram = new Uint8Array(56);
@@ -309,10 +306,6 @@ export class DeployerRunMode implements AlgobDeployer {
 
   get asc (): Map<string, ASCInfo> {
     return this._internal.asc;
-  }
-
-  get lsig (): Map<string, LsigInfo> {
-    return this._internal.lsig;
   }
 
   get algodClient (): algosdk.Algodv2 {
