@@ -403,7 +403,7 @@ export interface AlgobDeployer {
     scParams: Object, // Parameters
     flags: FundASCFlags,
     payFlags: TxParams
-  ) => Promise<LsigInfo>
+  ) => void
   delegatedLsig: (
     name: string, // ASC filename
     scParams: Object, // Parameters
@@ -429,8 +429,11 @@ export interface AlgobDeployer {
   // Log Transaction
   log: (msg: string, obj: any) => void
 
-  // Logic signature
+  // get delegated Logic signature
   getDelegatedLsig: (lsigName: string) => Object | undefined
+
+  // load contract mode logic signature
+  loadLsig: (name: string, scParams: Object) => Promise<Object>
 }
 
 // ************************

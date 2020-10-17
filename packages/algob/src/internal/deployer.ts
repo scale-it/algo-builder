@@ -153,19 +153,13 @@ export class DeployerDeployMode implements AlgobDeployer {
    * @param payFlags - as per SPEC
    */
   async fundLsig (name: string, scParams: Object, flags: FundASCFlags,
-    payFlags: TxParams): Promise<LsigInfo> {
-    this.assertNoAsset(name);
-    let lsigInfo = {} as any;
+    payFlags: TxParams): Promise<void> {
     try {
-      lsigInfo = await this.algoOp.fundLsig(name, scParams, flags, payFlags, this.txWriter);
+      await this.algoOp.fundLsig(name, scParams, flags, payFlags, this.txWriter);
     } catch (error) {
-      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
-
       console.log(error);
       throw error;
     }
-    this.cpData.registerLsig(this.networkName, name, lsigInfo);
-    return lsigInfo;
   }
 
   /**
@@ -242,6 +236,15 @@ export class DeployerDeployMode implements AlgobDeployer {
     const lsig = new logicsig.LogicSig(dummyProgram, []);
     Object.assign(lsig, lsig1);
     return lsig;
+  }
+
+  /**
+   * Description : loads logic signature for contract mode
+   * @param name ASC name
+   * @param scParams parameters
+   */
+  async loadLsig (name: string, scParams: Object): Promise<Object> {
+    return await getLsig(name, scParams, this.algoOp.algodClient);
   }
 }
 
@@ -328,5 +331,9 @@ export class DeployerRunMode implements AlgobDeployer {
 
   getDelegatedLsig (lsigName: string): Object | undefined {
     return this._internal.getDelegatedLsig(lsigName);
+  }
+
+  async loadLsig (name: string, scParams: Object): Promise<Object> {
+    return await this._internal.loadLsig(name, scParams);
   }
 }
