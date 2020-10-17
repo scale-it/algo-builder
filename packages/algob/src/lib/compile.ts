@@ -10,6 +10,7 @@ import type { ASCCache } from "../types";
 const murmurhash = require('murmurhash'); // eslint-disable-line @typescript-eslint/no-var-requires
 
 export const tealExt = ".teal";
+const msigExt = ".multilsig";
 
 export class CompileOp {
   algocl: Algodv2;
@@ -76,6 +77,20 @@ export class CompileOp {
       };
     } catch (e) {
       throw parseAlgorandError(e, { filename: filename });
+    }
+  }
+
+  async readMsig (filename: string): Promise<string> {
+    if (!filename.endsWith(msigExt)) {
+      throw new Error(`filename "${filename}" must end with "${msigExt}"`); // TODO: convert to buildererror
+    }
+    try {
+      const p = path.join(ASSETS_DIR, filename);
+      const Msig = fs.readFileSync(p, 'utf8').split("LogicSig: ")[1];
+      return JSON.parse(JSON.stringify(Msig));
+    } catch (e) {
+      if (e?.errno === -2) { return ''; } // errno whene reading an unexisting file
+      throw e;
     }
   }
 
