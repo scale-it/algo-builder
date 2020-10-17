@@ -1,4 +1,5 @@
 import algosdk from "algosdk";
+import { decode } from 'hi-base32';
 
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
@@ -19,7 +20,6 @@ import {
 } from "../types";
 import { CompileOp } from "./compile";
 import * as tx from "./tx";
-
 const confirmedRound = "confirmed-round";
 
 // This was not exported in algosdk
@@ -46,6 +46,7 @@ export interface AlgoOperator {
     asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, assetIndex: number
   ) => Promise<void>
   getLogicSignature: (name: string, scParams: Object) => Promise<Object | undefined>
+  getDelegatedMsig: (name: string) => Promise<Object | undefined>
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -235,6 +236,22 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const programb64 = result.compiled;
     const program = new Uint8Array(Buffer.from(programb64, "base64"));
     return algosdk.makeLogicSig(program, scParams);
+  }
+
+  async getDelegatedMsig (name: string): Promise<Object | undefined> {
+    const Msig = await this.compileOp.readMsig(name);
+    if (!Msig) return undefined;
+    const parsedMsig = JSON.parse(Msig).msig;
+
+    // decoding multisigned logic signature
+    for (const acc of parsedMsig.subsig) {
+      const decoded = decode.asBytes(acc.pk);
+      acc.pk = new Uint8Array(decoded.slice(0, 32)); // decode public key
+      if (acc.s) { // decode if addr is signed
+        acc.s = new Uint8Array(Buffer.from(acc.s, 'base64'));
+      }
+    }
+    return parsedMsig;
   }
 
   private async ensureCompiled (name: string, force: boolean): Promise<ASCCache> {

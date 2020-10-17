@@ -196,6 +196,10 @@ export class DeployerDeployMode implements AlgobDeployer {
   async getLogicSignature (name: string, scParams: object): Promise<Object | undefined> {
     return await this.algoOp.getLogicSignature(name, scParams);
   }
+
+  async getDelegatedMsig (name: string): Promise<Object | undefined> {
+    return await this.algoOp.getDelegatedMsig(name);
+  }
 }
 
 // This class is what user interacts with in run task
@@ -275,5 +279,9 @@ export class DeployerRunMode implements AlgobDeployer {
 
   async getLogicSignature (name: string, scParams: object): Promise<Object | undefined> {
     return await this._internal.getLogicSignature(name, scParams);
+  }
+
+  async getDelegatedMsig (name: string): Promise<Object | undefined> {
+    return await this._internal.getDelegatedMsig(name);
   }
 }

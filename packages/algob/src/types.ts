@@ -420,6 +420,9 @@ export interface AlgobDeployer {
 
   // Get logic signature
   getLogicSignature: (name: string, scParams: object) => Promise<Object | undefined>
+
+  // extract msig from signed logic signature file
+  getDelegatedMsig: (name: string) => Promise<Object | undefined>
 }
 
 // ************************
