@@ -1,0 +1,33 @@
+// This file was created using goal by doing
+//   - create a new multisignature account (goal account multisig new ..)
+//   - create logic signature and sign the logic signature using `goal clerk multisig signprogram..`
+//   - output of Decompiling the logic signature is pasted in this file
+// reference: https://developer.algorand.org/docs/features/asc1/stateless/walkthrough/#creating-a-multi-signature-delegated-logic-sig
+// version 1
+intcblock 1 100
+txn TypeEnum
+intc_0
+==
+txn Amount
+intc_1
+<=
+&&
+LogicSig: {
+  "msig": {
+    "subsig": [
+      {
+        "pk": "STICGNGDJKFGSSHHXALD6VBEJ5XLWL7QK5UIGV3DE2ONEXNFB6ZSOMGP6Y",
+        "s": "9xBRPfMoE/RFjHT1KP+aWBrEIGfTLRwJWT+G18eMcj7/YXrrgb3xhQeIn4ubh5UfVVXCjadv6j8vGwLFl02yCg=="
+      },
+      {
+        "pk": "U6NEV736OHP7V7QHXKZFP6QAPE5PMYJOYIPWT2VZCWIMWGJS62ZK7XLKCE",
+        "s": "cnKNV7ZvKUMwOvLPNWxDlpxEi9pgQrFLcUXlecI2w1kT+kb2K/WR20v3GF8MDhEDLKO//O98l8cUGQvsLw8RBg=="
+      },
+      {
+        "pk": "Z2SFZ7X2RAKTU4JYGUYYE7LDIE6M7NYCMUQEAIKII4UDT5KYE4IJNZAGCU"
+      }
+    ],
+    "thr": 2,
+    "v": 1
+  }
+}
