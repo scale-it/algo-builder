@@ -303,7 +303,12 @@ export interface ASAInfo extends DeployedAssetInfo {
 }
 export interface ASCInfo extends DeployedAssetInfo {
   contractAddress: string
-  logicSignature: string
+}
+
+export interface LsigInfo {
+  creator: AccountAddress
+  contractAddress: string
+  lsig: Uint8Array
 }
 
 export interface CheckpointRepo {
@@ -329,6 +334,7 @@ export interface CheckpointRepo {
 
   registerASA: (networkName: string, name: string, info: ASAInfo) => CheckpointRepo
   registerASC: (networkName: string, name: string, info: ASCInfo) => CheckpointRepo
+  registerLsig: (networkName: string, name: string, info: LsigInfo) => CheckpointRepo
 
   isDefined: (networkName: string, name: string) => boolean
   networkExistsInCurrentCP: (networkName: string) => boolean
@@ -343,6 +349,7 @@ export interface Checkpoint {
   metadata: Map<string, string>
   asa: Map<string, ASAInfo>
   asc: Map<string, ASCInfo>
+  lsig: Map<string, LsigInfo>
 };
 
 export type ASADef = z.infer<typeof ASADefSchema>;
@@ -372,10 +379,9 @@ export enum ASC1Mode {
   CONTRACT_ACCOUNT
 }
 
-export interface ASCDeploymentFlags {
+export interface FundASCFlags {
   funder: Account
   fundingMicroAlgo: number
-  mode: ASC1Mode
 }
 
 export interface AssetScriptMap {
@@ -392,12 +398,17 @@ export interface AlgobDeployer {
   putMetadata: (key: string, value: string) => void
   getMetadata: (key: string) => string | undefined
   deployASA: (name: string, flags: ASADeploymentFlags) => Promise<ASAInfo>
-  deployASC: (
-    name: string,
-    scParams: Object,
-    flags: ASCDeploymentFlags,
+  fundLsig: (
+    name: string, // ASC filename
+    scParams: Object, // Parameters
+    flags: FundASCFlags,
     payFlags: TxParams
-  ) => Promise<ASCInfo>
+  ) => void
+  delegatedLsig: (
+    name: string, // ASC filename
+    scParams: Object, // Parameters
+    signer: Account
+  ) => Promise<LsigInfo>
   /**
      Returns true if ASA or ACS were deployed in any script.
      Checks even for checkpoints out of from the execution
@@ -418,8 +429,11 @@ export interface AlgobDeployer {
   // Log Transaction
   log: (msg: string, obj: any) => void
 
-  // Get logic signature
-  getLogicSignature: (name: string, scParams: object) => Promise<Object | undefined>
+  // get delegated Logic signature
+  getDelegatedLsig: (lsigName: string) => Object | undefined
+
+  // load contract mode logic signature
+  loadLsig: (name: string, scParams: Object) => Promise<Object>
 }
 
 // ************************
@@ -431,6 +445,7 @@ export interface ASCCache {
   compiled: string // the compiled code
   compiledHash: string // hash returned by the compiler
   srcHash: number // source code hash
+  toBytes: Uint8Array // compiled base64 in bytes
 }
 
 // ************************

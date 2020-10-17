@@ -1,19 +1,20 @@
+import { encode } from "@msgpack/msgpack";
 import algosdk from "algosdk";
 
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { txWriter } from "../internal/tx-log-writer";
 import { createClient } from "../lib/driver";
+import { getLsig } from "../lib/lsig";
 import {
   Account,
   Accounts,
   ASADef,
   ASADeploymentFlags,
   ASAInfo,
-  ASC1Mode,
   ASCCache,
-  ASCDeploymentFlags,
-  ASCInfo,
+  FundASCFlags,
+  LsigInfo,
   Network,
   TxParams
 } from "../types";
@@ -36,8 +37,8 @@ export interface AlgoOperator {
   deployASA: (
     name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, txWriter: txWriter
   ) => Promise<ASAInfo>
-  deployASC: (programb64: string, scParams: object, flags: ASCDeploymentFlags, payFlags: TxParams,
-    txWriter: txWriter) => Promise<ASCInfo>
+  fundLsig: (name: string, scParams: object, flags: FundASCFlags, payFlags: TxParams,
+    txWriter: txWriter) => Promise<LsigInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
   optInToASA: (
     asaName: string, assetIndex: number, account: Account, params: TxParams
@@ -45,7 +46,6 @@ export interface AlgoOperator {
   optInToASAMultiple: (
     asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, assetIndex: number
   ) => Promise<void>
-  getLogicSignature: (name: string, scParams: Object) => Promise<Object | undefined>
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -187,26 +187,27 @@ export class AlgoOperatorImpl implements AlgoOperator {
     };
   }
 
-  async deployASC (name: string, scParams: object, flags: ASCDeploymentFlags, payFlags: TxParams,
-    txWriter: txWriter): Promise<ASCInfo> {
-    const message = 'Deploying ASC: ' + name;
-    const mode = 'Mode: ' + ASC1Mode[flags.mode];
-    console.log(message);
-    console.log(mode);
-    const result: ASCCache = await this.ensureCompiled(name, false);
-    const program = new Uint8Array(Buffer.from(result.compiled, "base64"));
-    const lsig = algosdk.makeLogicSig(program, scParams);
-    const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
-
-    // ASC1 signed by funder if deployment mode is set to Delegated Approval
-    if (ASC1Mode[flags.mode] === "DELEGATED_APPROVAL") {
-      lsig.sign(flags.funder.sk);
-    }
-
+  /**
+   * Description - This function will send Algos to ASC account in "Contract Mode"
+   * @param name     - ASC filename
+   * @param scParams - SC parameters
+   * @param flags    - FundASC flags (as per SPEC)
+   * @param payFlags - as per SPEC
+   * @param txWriter - transaction log writer
+   */
+  async fundLsig (
+    name: string,
+    scParams: Object,
+    flags: FundASCFlags,
+    payFlags: TxParams,
+    txWriter: txWriter): Promise<LsigInfo> {
+    const lsig = await getLsig(name, scParams, this.algodClient);
     const contractAddress = lsig.address();
 
-    // Fund smart contract
-    console.log("Funding Contract:", contractAddress);
+    const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
+    let message = "Funding Contract: ";
+    message = message.concat(contractAddress);
+    console.log(message);
 
     const closeToRemainder = undefined;
     const note = tx.encodeNote(payFlags.note, payFlags.noteb64);
@@ -217,24 +218,13 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const signedTxn = t.signTxn(flags.funder.sk);
     const txInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
     const confirmedTxn = await this.waitForConfirmation(txInfo.txId);
-
+    message = message.concat("\nLsig: " + name);
     txWriter.push(message, confirmedTxn);
-
     return {
       creator: flags.funder.addr,
       contractAddress: contractAddress,
-      txId: txInfo.txId,
-      logicSignature: lsig,
-      confirmedRound: confirmedTxn[confirmedRound]
+      lsig: encode(lsig)
     };
-  }
-
-  async getLogicSignature (name: string, scParams: Object): Promise<Object | undefined> {
-    const result = await this.compileOp.readArtifact(name);
-    if (result === undefined) { return undefined; }
-    const programb64 = result.compiled;
-    const program = new Uint8Array(Buffer.from(programb64, "base64"));
-    return algosdk.makeLogicSig(program, scParams);
   }
 
   private async ensureCompiled (name: string, force: boolean): Promise<ASCCache> {

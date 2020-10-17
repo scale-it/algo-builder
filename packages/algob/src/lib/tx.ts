@@ -230,7 +230,6 @@ export async function transferASALsig (
   assetID: number,
   lsig: Object): Promise<tx.ConfirmedTxInfo> {
   const params = await deployer.algodClient.getTransactionParams().do();
-
   const xtxn = tx.makeAssetTransferTxnWithSuggestedParams(
     fromAccount.addr,
     toAccount,

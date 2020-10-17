@@ -72,7 +72,9 @@ export class CompileOp {
         timestamp: timestampNow(),
         compiled: co.result,
         compiledHash: co.hash,
-        srcHash: tealHash
+        srcHash: tealHash,
+        // compiled base64 converted into bytes
+        toBytes: new Uint8Array(Buffer.from(co.result, "base64"))
       };
     } catch (e) {
       throw parseAlgorandError(e, { filename: filename });

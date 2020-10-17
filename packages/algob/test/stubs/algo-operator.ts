@@ -10,8 +10,8 @@ import {
   ASADeploymentFlags,
   ASAInfo,
   ASCCache,
-  ASCDeploymentFlags,
-  ASCInfo,
+  FundASCFlags,
+  LsigInfo,
   TxParams
 } from "../../src/types";
 
@@ -20,7 +20,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     throw new Error("Not implemented");
   };
 
-  getLogicSignature (): Promise<Object | undefined> {
+  getDelegatedLsig (lsig: string): Object | undefined {
     throw new Error("Not implemented");
   }
 
@@ -39,15 +39,13 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     };
   }
 
-  async deployASC (
-    name: string, scParams: Object, flags: ASCDeploymentFlags, payFlags: TxParams,
-    txWriter: txWriter): Promise<ASCInfo> {
+  async fundLsig (
+    name: string, scParams: Object, flags: FundASCFlags, payFlags: TxParams,
+    txWriter: txWriter): Promise<LsigInfo> {
     return {
       creator: flags.funder.addr + "-get-address-dry-run",
-      txId: "tx-id-dry-run",
-      confirmedRound: -1,
       contractAddress: "dfssdfsd",
-      logicSignature: "12dsfdsdasd"
+      lsig: new Uint8Array(1)
     };
   }
 
@@ -57,7 +55,8 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
       timestamp: 1010, // compilation time (Unix time)
       compiled: "ASDF", // the compiled code
       compiledHash: "ASDF", // hash returned by the compiler
-      srcHash: 123 // source code hash
+      srcHash: 123, // source code hash
+      toBytes: new Uint8Array(1) // compiled base64 in bytes
     };
   }
 
