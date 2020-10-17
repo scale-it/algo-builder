@@ -101,7 +101,7 @@ describe("Deploy task: nested state files", function () {
     }, this.env, new AlgoOperatorDryRunImpl());
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, `ASA from first defined: true
-ASC from second defined: false`);
+Lsig from second defined: false`);
   });
 
   it("Deployer should fail during nested execution", async function () {
@@ -122,7 +122,7 @@ ASC from second defined: false`);
     }, this.env, new AlgoOperatorDryRunImpl());
     const scriptOutput = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutput, `ASA from first defined: true
-ASC from second defined: true`);
+Lsig from second defined: false`);
   });
 
   it("Deployer should load deployed assets before running scripts; should not show them", async function () {
@@ -132,7 +132,7 @@ ASC from second defined: true`);
     }, this.env, new AlgoOperatorDryRunImpl());
     const scriptOutputBefore = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputBefore, `ASA from first defined: false
-ASC from second defined: false`);
+Lsig from second defined: false`);
     fs.unlinkSync(testFixtureOutputFile);
     await executeDeployTaskNoCLI({
       fileNames: ["scripts/1.js", "scripts/2.js"],
@@ -144,7 +144,7 @@ ASC from second defined: false`);
     }, this.env, new AlgoOperatorDryRunImpl());
     const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputAfter, `ASA from first defined: true
-ASC from second defined: true`);
+Lsig from second defined: false`);
   });
 
   it("Deployer --force should allow to rewrite existing assets; one script", async function () {
@@ -158,7 +158,7 @@ ASC from second defined: true`);
     }, this.env, new AlgoOperatorDryRunImpl());
     const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputAfter, `ASA from first defined: true
-ASC from second defined: false`);
+Lsig from second defined: false`);
   });
 
   it("Deployer --force should allow to rewrite existing assets; two scripts", async function () {
@@ -172,7 +172,7 @@ ASC from second defined: false`);
     }, this.env, new AlgoOperatorDryRunImpl());
     const scriptOutputAfter = fs.readFileSync(testFixtureOutputFile).toString();
     assert.equal(scriptOutputAfter, `ASA from first defined: true
-ASC from second defined: true`);
+Lsig from second defined: false`);
   });
 });
 

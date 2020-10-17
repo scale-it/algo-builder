@@ -11,11 +11,8 @@ async function run(runtimeEnv, deployer) {
   const bobAccount = deployer.accountsByName.get("bob-account");
 
   // Transactions for GOLD ASA contract : '4-gold-asa.teal'  (Delegated Approval Mode)
-  const lsig = await deployer.getLogicSignature("4-gold-asa.teal", []);
-  const lsigJohn = lsig;
-  lsigJohn.sign(johnAccount.sk);
-  const lsigGoldOwner = lsig;
-  lsigGoldOwner.sign(goldOwnerAccount.sk);
+  const lsigGoldOwner = deployer.getDelegatedLsig('4-gold-asa.teal');
+  
   const assetID =  deployer.asa.get("gold").assetIndex;
   // Transaction PASS - As according to .teal logic, amount should be <= 1000
   await transferASA(deployer, goldOwnerAccount, johnAccount.addr, 500, assetID, lsigGoldOwner);
@@ -24,11 +21,10 @@ async function run(runtimeEnv, deployer) {
   await transferASA(deployer, goldOwnerAccount, johnAccount.addr, 1500, assetID, lsigGoldOwner);
 
   // Transaction FAIL as John tried to send instead of GoldOwner
-  await transferASA(deployer, johnAccount, bobAccount.addr, 100, assetID, lsigJohn);
+  await transferASA(deployer, johnAccount, bobAccount.addr, 100, assetID, lsigGoldOwner);
 
   // Transaction for ALGO - Contract : '3-gold-delegated-asc.teal'  (Delegated Approval Mode)
-  const logicSignature = await deployer.getLogicSignature("3-gold-delegated-asc.teal", []);
-  logicSignature.sign(goldOwnerAccount.sk);
+  const logicSignature = deployer.getDelegatedLsig('3-gold-delegated-asc.teal');
 
   // Transaction PASS - As according to .teal logic, amount should be <= 100
   await transferAlgo(deployer, goldOwnerAccount, bobAccount.addr, 58, logicSignature);
