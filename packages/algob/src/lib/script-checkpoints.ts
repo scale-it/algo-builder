@@ -45,7 +45,7 @@ export function registerASC (
 
 export function registerLsig (
   cp: Checkpoint, name: string, info: LsigInfo): Checkpoint {
-  cp.lsig.set(name, info);
+  cp.dLsig.set(name, info);
   return cp;
 }
 
@@ -54,14 +54,14 @@ export class CheckpointImpl implements Checkpoint {
   metadata: Map<string, string>;
   asa: Map<string, ASAInfo>;
   asc: Map<string, ASCInfo>;
-  lsig: Map<string, LsigInfo>;
+  dLsig: Map<string, LsigInfo>;
 
   constructor (metadata?: Map<string, string>) {
     this.timestamp = +new Date();
     this.metadata = (metadata === undefined ? new Map<string, string>() : metadata);
     this.asa = new Map<string, ASAInfo>();
     this.asc = new Map<string, ASCInfo>();
-    this.lsig = new Map<string, LsigInfo>();
+    this.dLsig = new Map<string, LsigInfo>();
   }
 }
 
@@ -85,7 +85,7 @@ export function appendToCheckpoint (
   }
   orig.asa = new Map([...orig.asa, ...append.asa]);
   orig.asc = new Map([...orig.asc, ...append.asc]);
-  orig.lsig = new Map([...orig.lsig, ...append.lsig]);
+  orig.dLsig = new Map([...orig.dLsig, ...append.dLsig]);
   return checkpoints;
 }
 
@@ -113,7 +113,7 @@ export class CheckpointRepoImpl implements CheckpointRepo {
     const keys: string[] = Object.keys(cp);
     for (const k of keys) {
       const current = cp[k];
-      const allAssetNames = [...current.asa.keys(), ...current.asc.keys(), ...current.lsig.keys()];
+      const allAssetNames = [...current.asa.keys(), ...current.asc.keys(), ...current.dLsig.keys()];
       for (const assetName of allAssetNames) {
         if (!(this.scriptMap[assetName])) {
           this.scriptMap[assetName] = scriptName;
@@ -176,7 +176,7 @@ export class CheckpointRepoImpl implements CheckpointRepo {
     const netCP = this.allCPs[networkName];
     return netCP !== undefined &&
       (netCP.asa.get(name) !== undefined || netCP.asc.get(name) !== undefined ||
-      netCP.lsig.get(name) !== undefined);
+      netCP.dLsig.get(name) !== undefined);
   }
 
   networkExistsInCurrentCP (networkName: string): boolean {
@@ -204,7 +204,7 @@ export function toMap <T> (obj: {[name: string]: T}): Map<string, T> {
 function convertCPValsToMaps (cpWithObjects: Checkpoint): Checkpoint {
   cpWithObjects.asa = toMap(cpWithObjects.asa as any);
   cpWithObjects.asc = toMap(cpWithObjects.asc as any);
-  cpWithObjects.lsig = toMap(cpWithObjects.lsig as any);
+  cpWithObjects.dLsig = toMap(cpWithObjects.dLsig as any);
   cpWithObjects.metadata = toMap(cpWithObjects.metadata as any);
   return cpWithObjects;
 }
