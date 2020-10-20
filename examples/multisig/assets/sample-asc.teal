@@ -1,4 +1,4 @@
-// Check if Transaction type is pay, Sender is owner of Gold and amount is <= 100
+// Check if Transaction type is pay, and Amount is <= 100
 txn TypeEnum
 int 1
 ==
