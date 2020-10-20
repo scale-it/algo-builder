@@ -73,13 +73,13 @@ export function mkAccountIndex (accountList: Account[]): Accounts {
 }
 
 // returns multisignature account address
-export function getmultisigAddress (version: number, threshold: number, accountList: Account[]): string {
+export function getmultisigAddress (version: number, threshold: number, accountList: Account[]): any {
   const mparams = {
     version: version,
     threshold: threshold,
     addrs: accountList
   };
-  return multisigAddress(mparams);
+  return [mparams, multisigAddress(mparams)];
 }
 
 function validateAlgobAccounts (algobAccounts: AlgobAccount[]): void {
