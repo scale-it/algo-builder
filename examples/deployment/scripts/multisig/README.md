@@ -9,15 +9,12 @@ Two examples are provided
 
 ## Usage
 
-```bash
-# examples/deployment
-yarn run algob run scripts/multisig/multisig_goal_sc.js #uses .mlsig from assets
-yarn run algob run scripts/multisig/multisig_sdk_sc.js
-```
+This example uses a multisig logic. Creating a multisig is an interactive process and currently `algob` only supports loading a multisig.
+To follow this example you have to firstly create a multisig.
 
-## Creating multisig file
+### Creating multisig file
 
-You can use goal to create multisig accounts, compile a TEAL program and sign it with an address. This will create a logic signature file which algob can load from assets/ and use in transactions). Example commands are provided below.
+You can use goal to create multisig accounts, compile a TEAL program and sign it with an address. This will create a logic signature file which `algob` can load from `/assets` and use in transactions. Example commands are provided below.
 
 Creating a multisig account (threshold: 2)
 ```bash
