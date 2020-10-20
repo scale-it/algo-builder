@@ -3,7 +3,6 @@ import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
-import { tealExt } from "../lib/compile";
 import { readMsigFromFile } from "../lib/files";
 import { decodeMsigObj, getLsig, logicsig } from "../lib/lsig";
 import { persistCheckpoint } from "../lib/script-checkpoints";
