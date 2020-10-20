@@ -42,7 +42,7 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   }
 
-  async delegatedLsig (name: string, scParams: object, signer: Account): Promise<LsigInfo> {
+  async mkDelegatedLsig (name: string, scParams: object, signer: Account): Promise<LsigInfo> {
     throw new Error("Not implemented");
   }
 

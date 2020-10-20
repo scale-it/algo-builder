@@ -349,7 +349,7 @@ export interface Checkpoint {
   metadata: Map<string, string>
   asa: Map<string, ASAInfo>
   asc: Map<string, ASCInfo>
-  lsig: Map<string, LsigInfo>
+  dLsig: Map<string, LsigInfo>
 };
 
 export type ASADef = z.infer<typeof ASADefSchema>;
@@ -404,7 +404,7 @@ export interface AlgobDeployer {
     flags: FundASCFlags,
     payFlags: TxParams
   ) => void
-  delegatedLsig: (
+  mkDelegatedLsig: (
     name: string, // ASC filename
     scParams: Object, // Parameters
     signer: Account

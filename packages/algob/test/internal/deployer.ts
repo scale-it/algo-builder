@@ -27,7 +27,7 @@ describe("DeployerDeployMode", () => {
       metadata: new Map([["k", "v"]]),
       asa: new Map<string, ASAInfo>(),
       asc: new Map<string, ASCInfo>(),
-      lsig: new Map<string, LsigInfo>()
+      dLsig: new Map<string, LsigInfo>()
     });
   });
 
@@ -54,7 +54,7 @@ describe("DeployerDeployMode", () => {
         ["key 2", "val 2"]]),
       asa: new Map<string, ASAInfo>(),
       asc: new Map<string, ASCInfo>(),
-      lsig: new Map<string, LsigInfo>()
+      dLsig: new Map<string, LsigInfo>()
     });
   });
 
@@ -65,7 +65,7 @@ describe("DeployerDeployMode", () => {
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, ASAInfo>(),
         asc: new Map<string, ASCInfo>(),
-        lsig: new Map<string, LsigInfo>()
+        dLsig: new Map<string, LsigInfo>()
       }
     };
     const cp2: Checkpoints = {
@@ -74,7 +74,7 @@ describe("DeployerDeployMode", () => {
         metadata: new Map([["key 2", "data 2"]]),
         asa: new Map<string, ASAInfo>(),
         asc: new Map<string, ASCInfo>(),
-        lsig: new Map<string, LsigInfo>()
+        dLsig: new Map<string, LsigInfo>()
       }
     };
     const cpData = new CheckpointRepoImpl();
@@ -86,14 +86,14 @@ describe("DeployerDeployMode", () => {
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, ASAInfo>(),
         asc: new Map<string, ASCInfo>(),
-        lsig: new Map<string, LsigInfo>()
+        dLsig: new Map<string, LsigInfo>()
       },
       network2: {
         timestamp: 2,
         metadata: new Map([["key 2", "data 2"]]),
         asa: new Map<string, ASAInfo>(),
         asc: new Map<string, ASCInfo>(),
-        lsig: new Map<string, LsigInfo>()
+        dLsig: new Map<string, LsigInfo>()
       }
     });
   });
@@ -119,7 +119,7 @@ describe("DeployerDeployMode", () => {
           assetIndex: -1
         }]]),
         asc: new Map(),
-        lsig: new Map(),
+        dLsig: new Map(),
         metadata: new Map<string, string>(),
         timestamp: 515236
       }
@@ -142,7 +142,7 @@ describe("DeployerDeployMode", () => {
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, ASAInfo>(),
         asc: new Map<string, ASCInfo>(),
-        lsig: new Map<string, LsigInfo>([["MY_LSIG", {
+        dLsig: new Map<string, LsigInfo>([["MY_LSIG", {
           creator: "addr-1-get-address-dry-run",
           contractAddress: "ASDFGDDSSS12A",
           lsig: logicSig

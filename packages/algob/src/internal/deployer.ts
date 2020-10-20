@@ -169,7 +169,7 @@ export class DeployerDeployMode implements AlgobDeployer {
    * @param scParams - SC parameters
    * @param signer   - signer
    */
-  async delegatedLsig (name: string, scParams: Object, signer: Account): Promise<LsigInfo> {
+  async mkDelegatedLsig (name: string, scParams: Object, signer: Account): Promise<LsigInfo> {
     this.assertNoAsset(name);
     let lsigInfo = {} as any;
     try {
@@ -227,7 +227,7 @@ export class DeployerDeployMode implements AlgobDeployer {
    * @param lsigName Description: loads and returns delegated logic signature from checkpoint
    */
   getDelegatedLsig (lsigName: string): Object | undefined {
-    const resultMap = this.cpData.precedingCP[this.networkName]?.lsig ?? new Map(); ;
+    const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map(); ;
     const result = resultMap.get(lsigName)?.lsig;
     if (result === undefined) { return undefined; }
     const lsig1 = decode(result);
@@ -293,7 +293,7 @@ export class DeployerRunMode implements AlgobDeployer {
     });
   }
 
-  async delegatedLsig (_name: string, scParams: Object, signer: Account): Promise<LsigInfo> {
+  async mkDelegatedLsig (_name: string, scParams: Object, signer: Account): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "delegatedLsig"
     });
