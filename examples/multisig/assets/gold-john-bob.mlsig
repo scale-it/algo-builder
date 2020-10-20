@@ -1,7 +1,7 @@
-// This file was created using goal by doing
-//   - create a new multisignature account (goal account multisig new ..)
-//   - create logic signature and sign the logic signature using `goal clerk multisig signprogram..`
-//   - output of Decompiling the logic signature is pasted in this file
+// This is a multi signed logic signature file signed by jold and john
+//   - a multi signature account with 3 addresses: gold, john and bob
+//   - output of disassembling the logic signature binary is pasted in this file using 'goal clerk compile -D /<path_to_mlsig>'
+//   - user can paste the output of custom mulisig file. algob can load and use it.
 // reference: https://developer.algorand.org/docs/features/asc1/stateless/walkthrough/#creating-a-multi-signature-delegated-logic-sig
 // version 1
 intcblock 1 100
