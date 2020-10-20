@@ -429,8 +429,8 @@ export interface AlgobDeployer {
   // Log Transaction
   log: (msg: string, obj: any) => void
 
-  // extract msig from signed logic signature file
-  loadDelegatedMsig: (name: string) => Promise<Object | undefined>
+  // extract multi signed logic signature file from assets/
+  loadMultiSig: (name: string, scParams: Object) => Promise<Object>
 
   // get delegated Logic signature
   getDelegatedLsig: (lsigName: string) => Object | undefined

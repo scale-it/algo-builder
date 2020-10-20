@@ -27,7 +27,7 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   }
 
-  loadDelegatedMsig (name: string): Promise<Object | undefined> {
+  loadMultiSig (name: string, scParams: Object): Promise<Object> {
     throw new Error("Not implemented");
   }
 

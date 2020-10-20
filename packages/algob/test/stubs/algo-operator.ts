@@ -1,4 +1,3 @@
-
 import { Algodv2 } from "algosdk";
 
 import { txWriter } from "../../src/internal/tx-log-writer";
@@ -19,10 +18,6 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   get algodClient (): Algodv2 {
     throw new Error("Not implemented");
   };
-
-  loadDelegatedMsig (): Promise<Object | undefined> {
-    throw new Error("Not implemented");
-  }
 
   getDelegatedLsig (lsig: string): Object | undefined {
     throw new Error("Not implemented");

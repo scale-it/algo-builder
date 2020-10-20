@@ -3,7 +3,9 @@ import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
-import { getLsig, logicsig } from "../lib/lsig";
+import { tealExt } from "../lib/compile";
+import { readMsigFromFile } from "../lib/files";
+import { decodeMsigObj, getLsig, logicsig } from "../lib/lsig";
 import { persistCheckpoint } from "../lib/script-checkpoints";
 import type {
   Account,
@@ -247,8 +249,19 @@ export class DeployerDeployMode implements AlgobDeployer {
     return await getLsig(name, scParams, this.algoOp.algodClient);
   }
 
-  async loadDelegatedMsig (name: string): Promise<Object | undefined> {
-    return await this.algoOp.loadDelegatedMsig(name);
+  /**
+   * Description : loads multisigned logic signature from .mlsig file
+   * @param {string} name filename
+   * @param {Object} scParams parameters
+   * @returns {Object} multi signed logic signature from assets/<file_name>.mlsig
+   */
+  async loadMultiSig (name: string, scParams: Object): Promise<Object> {
+    const [tealFile, Msig]: any = await readMsigFromFile(name); // Get tealFile name, Msig object from .mlsig
+    const lsig: any = await this.loadLsig(tealFile, scParams); // Load lsig from .teal (getting logic part from lsig)
+    const decodedMsig = await decodeMsigObj(Msig);
+    lsig.msig = {};
+    Object.assign(lsig.msig, decodedMsig); // Assign msig to logic signature i.e multisig delegation authority
+    return lsig;
   }
 }
 
@@ -341,7 +354,7 @@ export class DeployerRunMode implements AlgobDeployer {
     return await this._internal.loadLsig(name, scParams);
   }
 
-  async loadDelegatedMsig (name: string): Promise<Object | undefined> {
-    return await this._internal.loadDelegatedMsig(name);
+  async loadMultiSig (name: string, scParams: Object): Promise<Object> {
+    return await this._internal.loadMultiSig(name, scParams);
   }
 }
