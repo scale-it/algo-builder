@@ -73,7 +73,7 @@ export function mkAccountIndex (accountList: Account[]): Accounts {
 }
 
 // returns multisignature account address
-export function getMultisigAddress (version: number, threshold: number, accountList: Account[]): any {
+export function createMsigAddress (version: number, threshold: number, accountList: Account[]): any {
   const mparams = {
     version: version,
     threshold: threshold,

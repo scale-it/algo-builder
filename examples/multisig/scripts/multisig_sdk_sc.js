@@ -1,10 +1,10 @@
 /**
  * Description:
- * This file demonstrates the example to
+ * This script demonstrates how to
    - create a signed lsig using sdk and use that lsig to validate transactions
 */
 const { transferAlgo } = require("./common");
-const { transferMicroAlgos, getMultisigAddress } = require("algob");
+const { transferMicroAlgos, createMsigAddress } = require("algob");
 
 async function run(runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get("master-account");
@@ -14,7 +14,7 @@ async function run(runtimeEnv, deployer) {
 
   //Generate multi signature account hash 
   const addrs =  [goldOwnerAccount.addr, johnAccount.addr, bobAccount.addr]
-  const [mparams, multsigaddr] = getMultisigAddress(1, 2, addrs);   // passing (version, threshold, address list)
+  const [mparams, multsigaddr] = createMsigAddress(1, 2, addrs);   // passing (version, threshold, address list)
 
   //Get logic Signature
   const lsig = await deployer.loadLsig("sample-asc.teal", []);
@@ -25,10 +25,10 @@ async function run(runtimeEnv, deployer) {
   //Funding multisignature account
   await transferMicroAlgos(deployer, masterAccount, multsigaddr, 10000000, {note: "Funding multisig account"});
 
-  // Transaction PASS - As according to .teal logic, amount should be <= 100
+  // Transaction PASS - according to sample-asc.teal logic, amount should be <= 100
   await transferAlgo(deployer, { addr: multsigaddr }, bobAccount.addr, 58, lsig);
 
-  // Transaction FAIL - As according to .teal logic, amount should be <= 100
+  // Transaction FAIL - according to sample-asc.teal logic, amount should be <= 100
   await transferAlgo(deployer, { addr: multsigaddr }, bobAccount.addr, 580, lsig);
 }
 

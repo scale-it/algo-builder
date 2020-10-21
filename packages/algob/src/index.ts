@@ -1,5 +1,5 @@
 import {
-  getMultisigAddress,
+  createMsigAddress,
   loadAccountsFromFile,
   loadAccountsFromFileSync,
   loadFromEnv,
@@ -11,7 +11,7 @@ import { ASC1Mode } from "./types";
 
 export {
   mkAccounts,
-  getMultisigAddress,
+  createMsigAddress,
   loadAccountsFromFile,
   loadAccountsFromFileSync,
   loadFromEnv,
