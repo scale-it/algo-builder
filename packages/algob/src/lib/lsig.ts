@@ -29,10 +29,10 @@ export async function decodeMsigObj (msig: string): Promise<MultiSig> {
 
   // decoding multisigned logic signature
   for (const acc of parsedMsig.subsig) {
-    const decoded = decode.asBytes(acc.pk);
-    acc.pk = new Uint8Array(decoded.slice(0, 32)); // decode public key
-    if (acc.s) { // decode if addr is signed
-      acc.s = new Uint8Array(Buffer.from(acc.s, 'base64'));
+    const decoded = decode.asBytes(acc.pk); // decoding base32 string (public key)
+    acc.pk = new Uint8Array(decoded.slice(0, 32));
+    if (acc.s) {
+      acc.s = new Uint8Array(Buffer.from(acc.s, 'base64')); // decode base64 signature (signed pk)
     }
   }
   return parsedMsig;
