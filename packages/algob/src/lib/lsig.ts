@@ -2,7 +2,7 @@
 import algosdk from "algosdk";
 import { decode } from 'hi-base32';
 
-import { ASCCache } from "../types";
+import { ASCCache, LogicSig, MultiSig } from "../types";
 import { CompileOp } from "./compile";
 export const logicsig = require("algosdk/src/logicsig");
 
@@ -22,9 +22,9 @@ export async function getLsig (name: string, scParams: Object, algodClient: algo
 /**
  * Description: this function decodes msig object from logic signature
  * @param {string} msig : multisigned msig obj
- * @returns {Object} : decoded msig (object with decoded public keys and their signatures)
+ * @returns {LogicSig} : decoded msig (object with decoded public keys and their signatures)
  */
-export async function decodeMsigObj (msig: string): Promise<Object> {
+export async function decodeMsigObj (msig: string): Promise<MultiSig> {
   const parsedMsig = JSON.parse(msig).msig;
 
   // decoding multisigned logic signature

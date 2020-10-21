@@ -1,5 +1,7 @@
 import { decode, encode } from "@msgpack/msgpack";
 import * as algosdk from "algosdk";
+import { copySync } from "fs-extra";
+import { createNode } from "yaml";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
@@ -17,6 +19,7 @@ import type {
   ASCInfo,
   CheckpointRepo,
   FundASCFlags,
+  LogicSig,
   LsigInfo,
   TxParams
 } from "../types";
@@ -244,22 +247,22 @@ export class DeployerDeployMode implements AlgobDeployer {
    * @param name ASC name
    * @param scParams parameters
    */
-  async loadLsig (name: string, scParams: Object): Promise<Object> {
+  async loadLsig (name: string, scParams: Object): Promise<LogicSig> {
     return await getLsig(name, scParams, this.algoOp.algodClient);
   }
 
   /**
-   * Description : loads multisigned logic signature from .mlsig file
+   * Description : loads multisigned logic signature from .msig file
    * @param {string} name filename
    * @param {Object} scParams parameters
-   * @returns {Object} multi signed logic signature from assets/<file_name>.mlsig
+   * @returns {LogicSig} multi signed logic signature from assets/<file_name>.msig
    */
-  async loadMultiSig (name: string, scParams: Object): Promise<Object> {
-    const [tealFile, Msig]: any = await readMsigFromFile(name); // Get tealFile name, Msig object from .mlsig
-    const lsig: any = await this.loadLsig(tealFile, scParams); // Load lsig from .teal (getting logic part from lsig)
+  async loadMultiSig (name: string, scParams: Object): Promise<LogicSig> {
+    const [tealFile, Msig] = await readMsigFromFile(name) as string; // Get tealFile name, Msig object from .mlsig
+    const lsig = await this.loadLsig(tealFile, scParams); // Load lsig from .teal (getting logic part from lsig)
     const decodedMsig = await decodeMsigObj(Msig);
     lsig.msig = {};
-    Object.assign(lsig.msig, decodedMsig); // Assign msig to logic signature i.e multisig delegation authority
+    Object.assign(lsig.msig, decodedMsig);
     return lsig;
   }
 }
@@ -349,11 +352,11 @@ export class DeployerRunMode implements AlgobDeployer {
     return this._internal.getDelegatedLsig(lsigName);
   }
 
-  async loadLsig (name: string, scParams: Object): Promise<Object> {
+  async loadLsig (name: string, scParams: Object): Promise<LogicSig> {
     return await this._internal.loadLsig(name, scParams);
   }
 
-  async loadMultiSig (name: string, scParams: Object): Promise<Object> {
+  async loadMultiSig (name: string, scParams: Object): Promise<LogicSig> {
     return await this._internal.loadMultiSig(name, scParams);
   }
 }
