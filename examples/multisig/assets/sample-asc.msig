@@ -1,0 +1,33 @@
+// This logic is signed using `goal`:
+//   - a multisig is created with 3 addresses: gold, john and bob; threshold = 2
+//   - output of disassembling the logic signature binary is pasted in this file using 'goal clerk compile -D /<path_to_msig>'
+//   - user can paste the output of custom mulisig file. algob can load and use it.
+// reference: https://developer.algorand.org/docs/features/asc1/stateless/walkthrough/#creating-a-multi-signature-delegated-logic-sig
+// version 1
+intcblock 1 100
+txn TypeEnum
+intc_0
+==
+txn Amount
+intc_1
+<=
+&&
+LogicSig: {
+  "msig": {
+    "subsig": [
+      {
+        "pk": "M7VR2MGHI35EG2NMYOF3X337636PIOFVSP2HNIFUKAG7WW6BDWDCA3E2DA",
+        "s": "vEbfm3wp9ehSu45eMAyMj2fmMDTL2OPsgUS2ofcI53zgInTmEN2dpftt5mrFtLAUgyGTSMxLvAcgChqzSbWSDA=="
+      },
+      {
+        "pk": "2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA",
+        "s": "dtxIk/TpH1x5wQqZheEKCRINnbhwX/5/nBku6TShJh4ccfhXNEpHa136cYxAdafWKooa1j5ZVoxL/a2qSYd/Cw==" 
+      },
+      {
+        "pk": "2ILRL5YU3FZ4JDQZQVXEZUYKEWF7IEIGRRCPCMI36VKSGDMAS6FHSBXZDQ"
+      }
+    ],
+    "thr": 2,
+    "v": 1
+  }
+}

@@ -101,7 +101,7 @@ declare module 'algosdk' {
   export function assignGroupID (txns: any, from: any): any;
 
   export function computeGroupID (txns: any): any;
-
+  
   export function decodeObj (o: any): any;
 
   export function encodeObj (o: any): any;

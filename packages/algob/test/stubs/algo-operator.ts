@@ -1,4 +1,3 @@
-
 import { Algodv2 } from "algosdk";
 
 import { txWriter } from "../../src/internal/tx-log-writer";

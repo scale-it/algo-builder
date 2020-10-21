@@ -305,6 +305,19 @@ export interface ASCInfo extends DeployedAssetInfo {
   contractAddress: string
 }
 
+export interface MultiSig {
+  subsig: Object
+  thr: number
+  v: number
+}
+
+export interface LogicSig {
+  logic: Uint8Array
+  args: Object
+  sig: Object | undefined
+  msig: MultiSig | {}
+}
+
 export interface LsigInfo {
   creator: AccountAddress
   contractAddress: string
@@ -429,11 +442,14 @@ export interface AlgobDeployer {
   // Log Transaction
   log: (msg: string, obj: any) => void
 
+  // extract multi signed logic signature file from assets/
+  loadMultiSig: (name: string, scParams: Object) => Promise<LogicSig>
+
   // get delegated Logic signature
   getDelegatedLsig: (lsigName: string) => Object | undefined
 
   // load contract mode logic signature
-  loadLsig: (name: string, scParams: Object) => Promise<Object>
+  loadLsig: (name: string, scParams: Object) => Promise<LogicSig>
 }
 
 // ************************
