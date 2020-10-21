@@ -4,10 +4,6 @@ import YAML from "yaml";
 
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
-import { ASSETS_DIR } from "../internal/core/project-structure";
-
-const msigExt = ".msig";
-const tealExt = ".teal";
 
 function normalizePaths (mainPath: string, paths: string[]): string[] {
   return paths.map(n => path.relative(mainPath, n));
@@ -66,26 +62,5 @@ export function loadFromYamlFileSilentWithMessage (
   } catch (e) {
     console.warn(messageIfNotPresent);
     return defaultYamlValue(options);
-  }
-}
-
-export async function readMsigFromFile (filename: string): Promise<Object> {
-  if (!filename.endsWith(msigExt)) {
-    throw new Error(`filename "${filename}" must end with "${msigExt}"`);
-  }
-  try {
-    const p = path.join(ASSETS_DIR, filename);
-    const [tealCode, Msig] = fs.readFileSync(p, 'utf8').split("LogicSig: ");
-
-    // Extracting teal code from .msig and dumping to .teal to get logic signature
-    const tealFile = filename.split(msigExt)[0] + '-cache' + tealExt;
-    const tealPath = path.join(ASSETS_DIR, tealFile); // assets/<file_name>.teal
-    fs.writeFileSync(tealPath, tealCode); // Write logic code to file with .teal ext
-
-    // return msig object of logic signature to decode further
-    return [tealFile, Msig];
-  } catch (e) {
-    if (e?.errno === -2) { return ''; } // errno whene reading an unexisting file
-    throw e;
   }
 }

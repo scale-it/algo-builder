@@ -1,8 +1,7 @@
 /* eslint @typescript-eslint/no-var-requires: "off" */
 import algosdk from "algosdk";
-import { decode } from 'hi-base32';
 
-import { ASCCache, LogicSig, MultiSig } from "../types";
+import { ASCCache } from "../types";
 import { CompileOp } from "./compile";
 export const logicsig = require("algosdk/src/logicsig");
 
@@ -17,23 +16,4 @@ export async function getLsig (name: string, scParams: Object, algodClient: algo
   const result: ASCCache = await compileOp.ensureCompiled(name, false);
   const program = result.toBytes;
   return algosdk.makeLogicSig(program, scParams);
-}
-
-/**
- * Description: this function decodes msig object from logic signature
- * @param {string} msig : multisigned msig obj
- * @returns {LogicSig} : decoded msig (object with decoded public keys and their signatures)
- */
-export async function decodeMsigObj (msig: string): Promise<MultiSig> {
-  const parsedMsig = JSON.parse(msig).msig;
-
-  // decoding multisigned logic signature
-  for (const acc of parsedMsig.subsig) {
-    const decoded = decode.asBytes(acc.pk); // decoding base32 string (public key)
-    acc.pk = new Uint8Array(decoded.slice(0, 32));
-    if (acc.s) {
-      acc.s = new Uint8Array(Buffer.from(acc.s, 'base64')); // decode base64 signature (signed pk)
-    }
-  }
-  return parsedMsig;
 }
