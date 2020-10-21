@@ -1,7 +1,5 @@
 import { decode, encode } from "@msgpack/msgpack";
 import * as algosdk from "algosdk";
-import { copySync } from "fs-extra";
-import { createNode } from "yaml";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
