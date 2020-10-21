@@ -1,4 +1,4 @@
-import { Account as AccountSDK, mnemonicToSecretKey } from "algosdk";
+import { Account as AccountSDK, mnemonicToSecretKey, multisigAddress } from "algosdk";
 import * as fs from "fs";
 import YAML from "yaml";
 
@@ -70,6 +70,16 @@ export function mkAccountIndex (accountList: Account[]): Accounts {
     out.set(a.name, a);
   }
   return out;
+}
+
+// returns multisignature account address
+export function createMsigAddress (version: number, threshold: number, accountList: Account[]): any {
+  const mparams = {
+    version: version,
+    threshold: threshold,
+    addrs: accountList
+  };
+  return [mparams, multisigAddress(mparams)];
 }
 
 function validateAlgobAccounts (algobAccounts: AlgobAccount[]): void {

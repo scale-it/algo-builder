@@ -4,6 +4,7 @@ import * as algosdk from "algosdk";
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
 import { getLsig, logicsig } from "../lib/lsig";
+import { decodeMsigObj, readMsigFromFile } from "../lib/msig";
 import { persistCheckpoint } from "../lib/script-checkpoints";
 import type {
   Account,
@@ -16,6 +17,7 @@ import type {
   ASCInfo,
   CheckpointRepo,
   FundASCFlags,
+  LogicSig,
   LsigInfo,
   TxParams
 } from "../types";
@@ -243,8 +245,23 @@ export class DeployerDeployMode implements AlgobDeployer {
    * @param name ASC name
    * @param scParams parameters
    */
-  async loadLsig (name: string, scParams: Object): Promise<Object> {
+  async loadLsig (name: string, scParams: Object): Promise<LogicSig> {
     return await getLsig(name, scParams, this.algoOp.algodClient);
+  }
+
+  /**
+   * Description : loads multisigned logic signature from .msig file
+   * @param {string} name filename
+   * @param {Object} scParams parameters
+   * @returns {LogicSig} multi signed logic signature from assets/<file_name>.msig
+   */
+  async loadMultiSig (name: string, scParams: Object): Promise<LogicSig> {
+    const [tealFile, Msig] = await readMsigFromFile(name) as string; // Get tealFile name, Msig object from .mlsig
+    const lsig = await this.loadLsig(tealFile, scParams); // Load lsig from .teal (getting logic part from lsig)
+    const decodedMsig = await decodeMsigObj(Msig);
+    lsig.msig = {};
+    Object.assign(lsig.msig, decodedMsig);
+    return lsig;
   }
 }
 
@@ -333,7 +350,11 @@ export class DeployerRunMode implements AlgobDeployer {
     return this._internal.getDelegatedLsig(lsigName);
   }
 
-  async loadLsig (name: string, scParams: Object): Promise<Object> {
+  async loadLsig (name: string, scParams: Object): Promise<LogicSig> {
     return await this._internal.loadLsig(name, scParams);
+  }
+
+  async loadMultiSig (name: string, scParams: Object): Promise<LogicSig> {
+    return await this._internal.loadMultiSig(name, scParams);
   }
 }

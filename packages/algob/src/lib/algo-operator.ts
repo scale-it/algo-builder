@@ -20,7 +20,6 @@ import {
 } from "../types";
 import { CompileOp } from "./compile";
 import * as tx from "./tx";
-
 const confirmedRound = "confirmed-round";
 
 // This was not exported in algosdk

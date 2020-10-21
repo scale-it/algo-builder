@@ -1,6 +1,6 @@
 import * as algosdk from "algosdk";
 
-import { Account, AlgobDeployer, ASADeploymentFlags, ASAInfo, ASCInfo, FundASCFlags, LsigInfo } from "../../src/types";
+import { Account, AlgobDeployer, ASADeploymentFlags, ASAInfo, ASCInfo, FundASCFlags, LogicSig, LsigInfo } from "../../src/types";
 
 export class FakeDeployer implements AlgobDeployer {
   asa = new Map<string, ASAInfo>();
@@ -23,7 +23,11 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   }
 
-  async loadLsig (name: string, scParams: Object): Promise<Object> {
+  async loadLsig (name: string, scParams: Object): Promise<LogicSig> {
+    throw new Error("Not implemented");
+  }
+
+  loadMultiSig (name: string, scParams: Object): Promise<LogicSig> {
     throw new Error("Not implemented");
   }
 
