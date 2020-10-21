@@ -1,6 +1,6 @@
-// This is a multi signed logic signature file signed by jold and john
-//   - a multi signature account with 3 addresses: gold, john and bob
-//   - output of disassembling the logic signature binary is pasted in this file using 'goal clerk compile -D /<path_to_mlsig>'
+// This logic is signed using `goal`:
+//   - a multisig is created with 3 addresses: gold, john and bob; threshold = 2
+//   - output of disassembling the logic signature binary is pasted in this file using 'goal clerk compile -D /<path_to_msig>'
 //   - user can paste the output of custom mulisig file. algob can load and use it.
 // reference: https://developer.algorand.org/docs/features/asc1/stateless/walkthrough/#creating-a-multi-signature-delegated-logic-sig
 // version 1
