@@ -61,8 +61,7 @@
     "glob": "^7.1.6",
     "nyc": "^15.1.0",
     "sinon": "^9.0.2",
-    "time-require": "^0.1.2",
-    "ts-essentials": "7.0.0"
+    "time-require": "^0.1.2"
   },
   "dependencies": {
     "algosdk": "github:algorand/js-algorand-sdk#v1.7.0-beta",

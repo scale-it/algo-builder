@@ -1,6 +1,5 @@
 import type { Account as AccountSDK } from "algosdk";
 import * as algosdk from "algosdk";
-import { DeepReadonly, StrictOmit } from "ts-essentials";
 import * as z from 'zod';
 
 import * as types from "./internal/core/params/argument-types";
@@ -84,7 +83,7 @@ export interface ProjectPaths {
   tests: string
 }
 
-export type UserPaths = StrictOmit<Partial<ProjectPaths>, "configFile">;
+export type UserPaths = Omit<Partial<ProjectPaths>, "configFile">;
 
 export interface AlgobConfig {
   networks?: Networks
@@ -107,7 +106,7 @@ export type EnvironmentExtender = (env: AlgobRuntimeEnv) => void;
 
 export type ConfigExtender = (
   config: ResolvedAlgobConfig,
-  userConfig: DeepReadonly<AlgobConfig>
+  userConfig: Readonly<AlgobConfig>
 ) => void;
 
 export interface TasksMap {
