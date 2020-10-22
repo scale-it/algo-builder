@@ -3,7 +3,7 @@ import { decode } from 'hi-base32';
 import path from "path";
 
 import { ASSETS_DIR } from "../internal/core/project-structure";
-import { MultiSig } from "../types";
+import { LogicSig, MultiSig } from "../types";
 
 const msigExt = ".msig";
 
@@ -42,6 +42,25 @@ export async function readMsigFromFile (filename: string): Promise<MultiSig | un
     return await decodeMsigObj(Msig);
   } catch (e) {
     if (e?.errno === -2) { return undefined; } // errno whene reading an unexisting file
+    throw e;
+  }
+}
+
+/**
+ * Description: this function reads raw multisig from /assets/<filename>.msig
+ * and returns the base64 string
+ * @param {string} filename : filename [must have .msig ext]
+ * @returns {string} : base64 string
+ */
+export async function readBinaryMultiSig (filename: string): Promise<string> {
+  if (!filename.endsWith(msigExt)) {
+    throw new Error(`filename "${filename}" must end with "${msigExt}"`);
+  }
+  try {
+    const p = path.join(ASSETS_DIR, filename);
+    return fs.readFileSync(p, 'base64');
+  } catch (e) {
+    if (e?.errno === -2) { return ''; } // errno whene reading an unexisting file
     throw e;
   }
 }

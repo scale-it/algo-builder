@@ -311,6 +311,7 @@ export interface MultiSig {
 }
 
 export interface LogicSig {
+  l: Uint8Array
   logic: Uint8Array
   args: Object
   sig: Object | undefined
@@ -443,6 +444,9 @@ export interface AlgobDeployer {
 
   // extract multi signed logic signature file from assets/
   loadMultiSig: (name: string, scParams: Object) => Promise<LogicSig>
+
+  // load lsig from binary
+  loadBinaryMultiSig: (name: string, scParams: Object) => Promise<LogicSig>
 
   // get delegated Logic signature
   getDelegatedLsig: (lsigName: string) => Object | undefined

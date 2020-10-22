@@ -1,10 +1,13 @@
 import { decode, encode } from "@msgpack/msgpack";
 import * as algosdk from "algosdk";
+import fs from "fs";
+import path from "path";
 
+import { ASSETS_DIR } from "../internal/core/project-structure";
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
 import { getLsig, logicsig } from "../lib/lsig";
-import { readMsigFromFile } from "../lib/msig";
+import { readBinaryMultiSig, readMsigFromFile } from "../lib/msig";
 import { persistCheckpoint } from "../lib/script-checkpoints";
 import type {
   Account,
@@ -116,8 +119,28 @@ class DeployerBasicMode {
   async loadMultiSig (name: string, scParams: Object): Promise<LogicSig> {
     const lsig = await getLsig(name, scParams, this.algoOp.algodClient); // get lsig from .teal (getting logic part from lsig)
     const Msig = await readMsigFromFile(name); // Get decoded Msig object from .msig
-    lsig.msig = {};
-    Object.assign(lsig.msig, Msig);
+    Object.assign(lsig.msig = {}, Msig);
+    return lsig;
+  }
+
+  /**
+   * Description : loads multisigned logic signature from .msig file
+   * @param {string} name filename
+   * @returns {LogicSig} multi signed logic signature from assets/<file_name>.msig
+   */
+  async loadBinaryMultiSig (name: string): Promise<LogicSig> {
+    // get logic signature from file and decode it
+    const data = await readBinaryMultiSig(name);
+    const program = new Uint8Array(Buffer.from(data, 'base64'));
+    const logicSignature = decode(program) as LogicSig;
+
+    // dummy logic signature
+    const dummyProgram = new Uint8Array(56);
+    dummyProgram.fill(0);
+    const lsig = new logicsig.LogicSig(dummyProgram, []);
+
+    lsig.logic = logicSignature.l; // assign logic
+    Object.assign(lsig.msig = {}, logicSignature.msig); // assign signature
     return lsig;
   }
 }
