@@ -20,7 +20,8 @@ async function run(runtimeEnv, deployer) {
   // Transaction FAIL - As according to .teal logic, amount should be <= 1000
   await transferASA(deployer, goldOwnerAccount, johnAccount.addr, 1500, assetID, lsigGoldOwner);
 
-  // Transaction FAIL as John tried to send instead of GoldOwner
+  // Transaction FAIL as John tried to send instead of GoldOwner (logic signature validation failed)
+  // sender should be the delegator i.e account which signed the lsig (goldOwner in this case)
   await transferASA(deployer, johnAccount, bobAccount.addr, 100, assetID, lsigGoldOwner);
 
   // Transaction for ALGO - Contract : '3-gold-delegated-asc.teal'  (Delegated Approval Mode)
