@@ -3,7 +3,7 @@ import { readdirSync } from 'fs';
 import { task } from "../internal/core/config/config-env";
 import { assertDir, ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
 import { cmpStr } from "../lib/comparators";
-import { CompileOp, tealExt } from "../lib/compile";
+import { CompileOp, pyExt, tealExt } from "../lib/compile";
 import { createClient } from "../lib/driver";
 import type { AlgobRuntimeEnv } from "../types";
 import { TASK_COMPILE } from "./task-names";
@@ -27,7 +27,7 @@ export async function compile (force: boolean, op: CompileOp): Promise<void> {
   await assertDir(CACHE_DIR);
 
   for (const f of readdirSync(ASSETS_DIR).sort(cmpStr)) {
-    if (!f.endsWith(tealExt)) { continue; }
+    if (!f.endsWith(tealExt) && !f.endsWith(pyExt)) { continue; }
     await op.ensureCompiled(f, force);
   }
 }
