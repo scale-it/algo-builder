@@ -4,7 +4,7 @@ import * as algosdk from "algosdk";
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
 import { getLsig, logicsig } from "../lib/lsig";
-import { decodeMsigObj, readMsigFromFile } from "../lib/msig";
+import { readMsigFromFile } from "../lib/msig";
 import { persistCheckpoint } from "../lib/script-checkpoints";
 import type {
   Account,
@@ -114,11 +114,10 @@ class DeployerBasicMode {
    * @returns {LogicSig} multi signed logic signature from assets/<file_name>.msig
    */
   async loadMultiSig (name: string, scParams: Object): Promise<LogicSig> {
-    const [tealFile, Msig] = await readMsigFromFile(name) as string; // Get tealFile name, Msig object from .mlsig
-    const lsig = await this.loadLsig(tealFile, scParams); // Load lsig from .teal (getting logic part from lsig)
-    const decodedMsig = await decodeMsigObj(Msig);
+    const lsig = await getLsig(name, scParams, this.algoOp.algodClient); // get lsig from .teal (getting logic part from lsig)
+    const Msig = await readMsigFromFile(name); // Get decoded Msig object from .msig
     lsig.msig = {};
-    Object.assign(lsig.msig, decodedMsig);
+    Object.assign(lsig.msig, Msig);
     return lsig;
   }
 }

@@ -10,6 +10,7 @@ import type { ASCCache } from "../types";
 const murmurhash = require('murmurhash'); // eslint-disable-line @typescript-eslint/no-var-requires
 
 export const tealExt = ".teal";
+export const msigExt = ".msig";
 
 export class CompileOp {
   algocl: Algodv2;
@@ -26,8 +27,8 @@ export class CompileOp {
   //   MUST have a .teal extension
   // @param force: if true it will force recompilation even if the cache is up to date.
   async ensureCompiled (filename: string, force: boolean): Promise<ASCCache> {
-    if (!filename.endsWith(tealExt)) {
-      throw new Error(`filename "${filename}" must end with "${tealExt}"`); // TODO: convert to buildererror
+    if (!filename.endsWith(tealExt) && !filename.endsWith(msigExt)) {
+      throw new Error(`filename "${filename}" must end with "${tealExt}" or "${msigExt}"`); // TODO: convert to buildererror
     }
 
     const [teal, thash] = this.readTealAndHash(path.join(ASSETS_DIR, filename));
@@ -45,7 +46,12 @@ export class CompileOp {
   }
 
   readTealAndHash (filename: string): [string, number] {
-    const content = fs.readFileSync(filename, 'utf8');
+    let content = fs.readFileSync(filename, 'utf8');
+
+    // if ext is .msig teal content should be text above logicSig {refer - /assets/sample-asc.msig}
+    if (filename.endsWith(msigExt)) {
+      content = content.split("LogicSig: ")[0];
+    }
     return [content, murmurhash.v3(content)];
   }
 
