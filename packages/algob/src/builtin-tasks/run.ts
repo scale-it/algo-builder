@@ -42,17 +42,22 @@ function mkDeployer (
   accounts: Accounts,
   txWriter: txWriter
 ): AlgobDeployer {
-  const deployer = new DeployerDeployMode(
+  if (allowWrite) {
+    return new DeployerDeployMode(
+      runtimeEnv,
+      cpData,
+      asaDefs,
+      algoOp,
+      accounts,
+      txWriter);
+  }
+  return new DeployerRunMode(
     runtimeEnv,
     cpData,
     asaDefs,
     algoOp,
     accounts,
     txWriter);
-  if (allowWrite) {
-    return deployer;
-  }
-  return new DeployerRunMode(deployer, txWriter);
 }
 
 // returns all items before the current one and

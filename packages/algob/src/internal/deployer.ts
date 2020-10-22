@@ -23,13 +23,14 @@ import type {
 } from "../types";
 import { BuilderError } from "./core/errors";
 import { ERRORS } from "./core/errors-list";
-// This class is what user interacts with in deploy task
-export class DeployerDeployMode implements AlgobDeployer {
-  private readonly runtimeEnv: AlgobRuntimeEnv;
-  private readonly cpData: CheckpointRepo;
-  private readonly loadedAsaDefs: ASADefs;
-  private readonly algoOp: AlgoOperator;
-  private readonly txWriter: txWriter;
+
+// Base class for deployer Run Mode (read access) and Deploy Mode (read and write access)
+class DeployerBasicMode {
+  protected readonly runtimeEnv: AlgobRuntimeEnv;
+  protected readonly cpData: CheckpointRepo;
+  protected readonly loadedAsaDefs: ASADefs;
+  protected readonly algoOp: AlgoOperator;
+  protected readonly txWriter: txWriter;
   readonly accounts: Account[];
   readonly accountsByName: Accounts;
 
@@ -50,12 +51,82 @@ export class DeployerDeployMode implements AlgobDeployer {
     this.txWriter = txWriter;
   }
 
-  get isDeployMode (): boolean {
-    return true;
+  protected get networkName (): string {
+    return this.runtimeEnv.network.name;
   }
 
-  private get networkName (): string {
-    return this.runtimeEnv.network.name;
+  getMetadata (key: string): string | undefined {
+    return this.cpData.getMetadata(this.networkName, key);
+  }
+
+  isDefined (name: string): boolean {
+    return this.cpData.isDefined(this.networkName, name);
+  }
+
+  get asa (): Map<string, ASAInfo> {
+    return this.cpData.precedingCP[this.networkName]?.asa ?? new Map();
+  }
+
+  get asc (): Map<string, ASCInfo> {
+    return this.cpData.precedingCP[this.networkName]?.asc ?? new Map();
+  }
+
+  get algodClient (): algosdk.Algodv2 {
+    return this.algoOp.algodClient;
+  }
+
+  async waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
+    return await this.algoOp.waitForConfirmation(txId);
+  }
+
+  log (msg: string, obj: any): void {
+    this.txWriter.push(msg, obj);
+  }
+
+  /**
+   * @param lsigName Description: loads and returns delegated logic signature from checkpoint
+   */
+  getDelegatedLsig (lsigName: string): Object | undefined {
+    const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map(); ;
+    const result = resultMap.get(lsigName)?.lsig;
+    if (result === undefined) { return undefined; }
+    const lsig1 = decode(result);
+    const dummyProgram = new Uint8Array(56);
+    dummyProgram.fill(0);
+    const lsig = new logicsig.LogicSig(dummyProgram, []);
+    Object.assign(lsig, lsig1);
+    return lsig;
+  }
+
+  /**
+   * Description : loads logic signature for contract mode
+   * @param name ASC name
+   * @param scParams parameters
+   */
+  async loadLsig (name: string, scParams: Object): Promise<LogicSig> {
+    return await getLsig(name, scParams, this.algoOp.algodClient);
+  }
+
+  /**
+   * Description : loads multisigned logic signature from .msig file
+   * @param {string} name filename
+   * @param {Object} scParams parameters
+   * @returns {LogicSig} multi signed logic signature from assets/<file_name>.msig
+   */
+  async loadMultiSig (name: string, scParams: Object): Promise<LogicSig> {
+    const [tealFile, Msig] = await readMsigFromFile(name) as string; // Get tealFile name, Msig object from .mlsig
+    const lsig = await this.loadLsig(tealFile, scParams); // Load lsig from .teal (getting logic part from lsig)
+    const decodedMsig = await decodeMsigObj(Msig);
+    lsig.msig = {};
+    Object.assign(lsig.msig, decodedMsig);
+    return lsig;
+  }
+}
+
+// This class is what user interacts with in deploy task
+export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeployer {
+  get isDeployMode (): boolean {
+    return true;
   }
 
   putMetadata (key: string, value: string): void {
@@ -70,10 +141,6 @@ export class DeployerDeployMode implements AlgobDeployer {
         });
     }
     this.cpData.putMetadata(this.networkName, key, value);
-  }
-
-  getMetadata (key: string): string | undefined {
-    return this.cpData.getMetadata(this.networkName, key);
   }
 
   private assertNoAsset (name: string): void {
@@ -192,26 +259,6 @@ export class DeployerDeployMode implements AlgobDeployer {
     return lsigInfo;
   }
 
-  isDefined (name: string): boolean {
-    return this.cpData.isDefined(this.networkName, name);
-  }
-
-  get asa (): Map<string, ASAInfo> {
-    return this.cpData.precedingCP[this.networkName]?.asa ?? new Map();
-  }
-
-  get asc (): Map<string, ASCInfo> {
-    return this.cpData.precedingCP[this.networkName]?.asc ?? new Map();
-  }
-
-  get algodClient (): algosdk.Algodv2 {
-    return this.algoOp.algodClient;
-  }
-
-  async waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
-    return await this.algoOp.waitForConfirmation(txId);
-  }
-
   async optInToASA (name: string, accountName: string, flags: TxParams): Promise<void> {
     await this.algoOp.optInToASA(
       name,
@@ -219,70 +266,10 @@ export class DeployerDeployMode implements AlgobDeployer {
       this._getAccount(accountName),
       flags);
   }
-
-  log (msg: string, obj: any): void {
-    this.txWriter.push(msg, obj);
-  }
-
-  /**
-   *
-   * @param lsigName Description: loads and returns delegated logic signature from checkpoint
-   */
-  getDelegatedLsig (lsigName: string): Object | undefined {
-    const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map(); ;
-    const result = resultMap.get(lsigName)?.lsig;
-    if (result === undefined) { return undefined; }
-    const lsig1 = decode(result);
-    const dummyProgram = new Uint8Array(56);
-    dummyProgram.fill(0);
-    const lsig = new logicsig.LogicSig(dummyProgram, []);
-    Object.assign(lsig, lsig1);
-    return lsig;
-  }
-
-  /**
-   * Description : loads logic signature for contract mode
-   * @param name ASC name
-   * @param scParams parameters
-   */
-  async loadLsig (name: string, scParams: Object): Promise<LogicSig> {
-    return await getLsig(name, scParams, this.algoOp.algodClient);
-  }
-
-  /**
-   * Description : loads multisigned logic signature from .msig file
-   * @param {string} name filename
-   * @param {Object} scParams parameters
-   * @returns {LogicSig} multi signed logic signature from assets/<file_name>.msig
-   */
-  async loadMultiSig (name: string, scParams: Object): Promise<LogicSig> {
-    const [tealFile, Msig] = await readMsigFromFile(name) as string; // Get tealFile name, Msig object from .mlsig
-    const lsig = await this.loadLsig(tealFile, scParams); // Load lsig from .teal (getting logic part from lsig)
-    const decodedMsig = await decodeMsigObj(Msig);
-    lsig.msig = {};
-    Object.assign(lsig.msig, decodedMsig);
-    return lsig;
-  }
 }
 
 // This class is what user interacts with in run task
-export class DeployerRunMode implements AlgobDeployer {
-  private readonly _internal: AlgobDeployer;
-  private readonly txWriter: txWriter;
-
-  constructor (deployer: AlgobDeployer, txWriter: txWriter) {
-    this._internal = deployer;
-    this.txWriter = txWriter;
-  }
-
-  get accounts (): Account[] {
-    return this._internal.accounts;
-  }
-
-  get accountsByName (): Accounts {
-    return this._internal.accountsByName;
-  }
-
+export class DeployerRunMode extends DeployerBasicMode implements AlgobDeployer {
   get isDeployMode (): boolean {
     return false;
   }
@@ -291,10 +278,6 @@ export class DeployerRunMode implements AlgobDeployer {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "putMetadata"
     });
-  }
-
-  getMetadata (key: string): string | undefined {
-    return this._internal.getMetadata(key);
   }
 
   async deployASA (_name: string, _flags: ASADeploymentFlags): Promise<ASAInfo> {
@@ -316,45 +299,9 @@ export class DeployerRunMode implements AlgobDeployer {
     });
   }
 
-  isDefined (name: string): boolean {
-    return this._internal.isDefined(name);
-  }
-
-  get asa (): Map<string, ASAInfo> {
-    return this._internal.asa;
-  }
-
-  get asc (): Map<string, ASCInfo> {
-    return this._internal.asc;
-  }
-
-  get algodClient (): algosdk.Algodv2 {
-    return this._internal.algodClient;
-  }
-
-  async waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
-    return await this._internal.waitForConfirmation(txId);
-  }
-
   optInToASA (name: string, accountName: string, flags: ASADeploymentFlags): Promise<void> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "optInToASA"
     });
-  }
-
-  log (msg: string, obj: any): void {
-    this.txWriter.push(msg, obj);
-  }
-
-  getDelegatedLsig (lsigName: string): Object | undefined {
-    return this._internal.getDelegatedLsig(lsigName);
-  }
-
-  async loadLsig (name: string, scParams: Object): Promise<LogicSig> {
-    return await this._internal.loadLsig(name, scParams);
-  }
-
-  async loadMultiSig (name: string, scParams: Object): Promise<LogicSig> {
-    return await this._internal.loadMultiSig(name, scParams);
   }
 }
