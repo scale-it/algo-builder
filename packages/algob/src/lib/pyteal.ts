@@ -29,7 +29,7 @@ export function compilePyTeal (filename: string): string {
 
   if (subprocess.stderr) {
     console.error(subprocess.stderr);
-    throw Error(subprocess.stderr);
+    throw new Error(subprocess.stderr);
   }
   // output TEAL code
   return subprocess.stdout;
