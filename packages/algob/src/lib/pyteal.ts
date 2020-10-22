@@ -10,7 +10,7 @@ const pythonExt = ".py";
  * @param filename : python filename in assets folder
  */
 function runPythonScript (filename: string): SpawnSyncReturns<string> {
-  // used spawnSync instead of spawn, as it synchronous
+  // used spawnSync instead of spawn, as it is synchronous
   return spawnSync('python3', [
     path.join(ASSETS_DIR, filename)],
   { encoding: 'utf8' }
@@ -18,7 +18,7 @@ function runPythonScript (filename: string): SpawnSyncReturns<string> {
 }
 
 /**
- * Description: returns TEAL code from pyTeal compiler
+ * Description: returns TEAL code using pyTeal compiler
  * @param filename : python filename in assets folder
  */
 export function compilePyTeal (filename: string): string {
@@ -31,6 +31,6 @@ export function compilePyTeal (filename: string): string {
     console.error(subprocess.stderr);
     throw Error(subprocess.stderr);
   }
-  // output of script
+  // output TEAL code
   return subprocess.stdout;
 }
