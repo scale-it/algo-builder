@@ -24,7 +24,7 @@ export class CompileOp {
   // Will throw an exception if the source file doesn't exists.
   // @param filename: name of the TEAL code in `/assets` directory.
   //   (Examples: `mysc.teal, security/rbac.teal`)
-  //   MUST have a .teal extension
+  //   MUST have a .teal or .msig extension
   // @param force: if true it will force recompilation even if the cache is up to date.
   async ensureCompiled (filename: string, force: boolean): Promise<ASCCache> {
     if (!filename.endsWith(tealExt) && !filename.endsWith(msigExt)) {
@@ -48,7 +48,7 @@ export class CompileOp {
   readTealAndHash (filename: string): [string, number] {
     let content = fs.readFileSync(filename, 'utf8');
 
-    // if ext is .msig teal content should be text above logicSig {refer - /assets/sample-asc.msig}
+    // if ext is .msig teal content should be text above logicSig {refer - /assets/sample-text-asc.msig}
     if (filename.endsWith(msigExt)) {
       content = content.split("LogicSig: ")[0];
     }
