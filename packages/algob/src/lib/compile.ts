@@ -46,11 +46,12 @@ export class CompileOp {
   }
 
   readTealAndHash (filename: string): [string, number] {
-    let content = fs.readFileSync(filename, 'utf8');
+    const content = fs.readFileSync(filename, 'utf8');
 
     // if ext is .msig teal content should be text above logicSig {refer - /assets/sample-text-asc.msig}
     if (filename.endsWith(msigExt)) {
-      content = content.split("LogicSig: ")[0];
+      const teal = content.split("LogicSig: ")[0];
+      return [teal, murmurhash.v3(content)];
     }
     return [content, murmurhash.v3(content)];
   }

@@ -116,8 +116,8 @@ class DeployerBasicMode {
    */
   async loadMultiSig (name: string, scParams: Object): Promise<LogicSig> {
     const lsig = await getLsig(name, scParams, this.algoOp.algodClient); // get lsig from .teal (getting logic part from lsig)
-    const Msig = await readMsigFromFile(name); // Get decoded Msig object from .msig
-    Object.assign(lsig.msig = {}, Msig);
+    const msig = await readMsigFromFile(name); // Get decoded Msig object from .msig
+    Object.assign(lsig.msig = {}, msig);
     return lsig;
   }
 
@@ -129,7 +129,7 @@ class DeployerBasicMode {
   async loadBinaryMultiSig (name: string): Promise<LogicSig> {
     // get logic signature from file and decode it
     const data = await readBinaryMultiSig(name);
-    const program = new Uint8Array(Buffer.from(data, 'base64'));
+    const program = new Uint8Array(Buffer.from(data as string, 'base64'));
     const logicSignature = decode(program) as RawLsig;
 
     // dummy logic signature
@@ -139,9 +139,8 @@ class DeployerBasicMode {
 
     // assign complete logic signature
     lsig.logic = logicSignature.l; // assign logic part separately (as keys mismatch: logic, l)
+    delete logicSignature.l;
     Object.assign(lsig, logicSignature);
-    delete lsig.l;
-
     return lsig;
   }
 }

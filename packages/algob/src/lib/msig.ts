@@ -30,7 +30,7 @@ export async function decodeMsigObj (msig: string): Promise<MultiSig> {
  * Description: this function reads multisig from /assets/<filename>.msig
  *              and returns the decoded multisig object
  * @param {string} msig : multisigned msig obj
- * @returns {string} : raw msig object as string
+ * @returns {MultiSig} : decoded Msig Object
  */
 export async function readMsigFromFile (filename: string): Promise<MultiSig | undefined> {
   if (!filename.endsWith(msigExt)) {
@@ -41,7 +41,7 @@ export async function readMsigFromFile (filename: string): Promise<MultiSig | un
     const Msig = fs.readFileSync(p, 'utf8').split("LogicSig: ")[1];
     return await decodeMsigObj(Msig);
   } catch (e) {
-    if (e?.errno === -2) { return undefined; } // errno whene reading an unexisting file
+    if (e?.errno === -2) return undefined; // handling a not existing file
     throw e;
   }
 }
@@ -52,7 +52,7 @@ export async function readMsigFromFile (filename: string): Promise<MultiSig | un
  * @param {string} filename : filename [must have .msig ext]
  * @returns {string} : base64 string
  */
-export async function readBinaryMultiSig (filename: string): Promise<string> {
+export async function readBinaryMultiSig (filename: string): Promise<string | undefined> {
   if (!filename.endsWith(msigExt)) {
     throw new Error(`filename "${filename}" must end with "${msigExt}"`);
   }
@@ -60,7 +60,7 @@ export async function readBinaryMultiSig (filename: string): Promise<string> {
     const p = path.join(ASSETS_DIR, filename);
     return fs.readFileSync(p, 'base64');
   } catch (e) {
-    if (e?.errno === -2) { return ''; } // errno whene reading an unexisting file
+    if (e?.errno === -2) return undefined; // handling a not existing file
     throw e;
   }
 }
