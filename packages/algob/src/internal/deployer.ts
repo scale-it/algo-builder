@@ -1,9 +1,6 @@
 import { decode, encode } from "@msgpack/msgpack";
 import * as algosdk from "algosdk";
-import fs from "fs";
-import path from "path";
 
-import { ASSETS_DIR } from "../internal/core/project-structure";
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
 import { getLsig, logicsig } from "../lib/lsig";
@@ -22,6 +19,7 @@ import type {
   FundASCFlags,
   LogicSig,
   LsigInfo,
+  RawLsig,
   TxParams
 } from "../types";
 import { BuilderError } from "./core/errors";
@@ -132,15 +130,18 @@ class DeployerBasicMode {
     // get logic signature from file and decode it
     const data = await readBinaryMultiSig(name);
     const program = new Uint8Array(Buffer.from(data, 'base64'));
-    const logicSignature = decode(program) as LogicSig;
+    const logicSignature = decode(program) as RawLsig;
 
     // dummy logic signature
     const dummyProgram = new Uint8Array(56);
     dummyProgram.fill(0);
     const lsig = new logicsig.LogicSig(dummyProgram, []);
 
-    lsig.logic = logicSignature.l; // assign logic
-    Object.assign(lsig.msig = {}, logicSignature.msig); // assign signature
+    // assign complete logic signature
+    lsig.logic = logicSignature.l; // assign logic part separately (as keys mismatch: logic, l)
+    Object.assign(lsig, logicSignature);
+    delete lsig.l;
+
     return lsig;
   }
 }

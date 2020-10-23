@@ -3,7 +3,7 @@ import { decode } from 'hi-base32';
 import path from "path";
 
 import { ASSETS_DIR } from "../internal/core/project-structure";
-import { LogicSig, MultiSig } from "../types";
+import { MultiSig } from "../types";
 
 const msigExt = ".msig";
 

@@ -310,8 +310,15 @@ export interface MultiSig {
   v: number
 }
 
-export interface LogicSig {
+// represents Lsig object fetched directly from raw file
+export interface RawLsig {
   l: Uint8Array
+  args?: Object // optional
+  sig?: Object | undefined // optional
+  msig?: MultiSig | {} // optional
+}
+
+export interface LogicSig {
   logic: Uint8Array
   args: Object
   sig: Object | undefined
