@@ -93,7 +93,7 @@ export class CompileOp {
   }
 }
 
-class PyCompileOp {
+export class PyCompileOp {
   compileOp: CompileOp;
 
   constructor (compileOp: CompileOp) {
@@ -173,7 +173,6 @@ class PyCompileOp {
       console.error(subprocess.stderr);
       throw new Error(subprocess.stderr);
     }
-    // output TEAL code
     return subprocess.stdout;
   }
 }
