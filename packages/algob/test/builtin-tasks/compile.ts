@@ -112,7 +112,7 @@ describe("Compile task", () => {
     assert.deepEqual(content.toString(), res);
   });
 
-  it("should ", async () => {
+  it("should return correct PyASCCache", async () => {
     const pyOp = new PyCompileOp(op);
     const result: PyASCCache = await pyOp.ensureCompiled(f3PY, false);
     const expected = fs.readFileSync(path.join(ASSETS_DIR, 'gold-asa-py-check.yaml'), 'utf8');
