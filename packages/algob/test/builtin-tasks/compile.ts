@@ -112,9 +112,15 @@ describe("Compile task", () => {
     assert.deepEqual(content.toString(), res);
   });
 
-  it("should return correct PyASCCache", async () => {
+  it("should return correct PyASCCache from CompileOp", async () => {
+    const result = await op.ensureCompiled(f3PY, false);
+    const expected = fs.readFileSync(path.join(ASSETS_DIR, 'gold-asa-py-check.yaml'), 'utf8');
+    assert.deepEqual(YAML.stringify(result), expected);
+  });
+
+  it("should return correct PyASCCache from PyCompileOp", async () => {
     const pyOp = new PyCompileOp(op);
-    const result: PyASCCache = await pyOp.ensureCompiled(f3PY, false);
+    const result = await pyOp.ensureCompiled(f3PY, false);
     const expected = fs.readFileSync(path.join(ASSETS_DIR, 'gold-asa-py-check.yaml'), 'utf8');
     assert.deepEqual(YAML.stringify(result), expected);
   });
