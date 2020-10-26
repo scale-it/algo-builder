@@ -62,7 +62,7 @@ export class CompileOp {
       const p = path.join(CACHE_DIR, filename + ".yaml");
       return YAML.parse(await fs.promises.readFile(p, 'utf8')) as ASCCache;
     } catch (e) {
-      if (e?.errno === -2) { return undefined; } // errno whene reading an unexisting file
+      if (e?.errno === -2) { return undefined; } // handling a not existing file
       throw e;
     }
   }
@@ -145,7 +145,7 @@ export class PyCompileOp {
       const p = path.join(CACHE_DIR, filename + ".yaml");
       return YAML.parse(await fs.promises.readFile(p, 'utf8')) as PyASCCache;
     } catch (e) {
-      if (e?.errno === -2) { return undefined; } // errno whene reading an unexisting file
+      if (e?.errno === -2) { return undefined; } // handling a not existing file
       throw e;
     }
   }
