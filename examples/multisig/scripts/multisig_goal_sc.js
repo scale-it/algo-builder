@@ -24,7 +24,7 @@ async function run(runtimeEnv, deployer) {
 
   const lsig = await deployer.loadBinaryMultiSig("sample-raw-asc.msig");  
 
-  // Transaction PASS
+  // Transaction PASSES
   await transferAlgo(deployer, { addr: multsigaddr }, bobAccount.addr, 20, lsig);
 
   // Transaction FAIL - according to teal logic, amount should be <= 100
