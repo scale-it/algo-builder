@@ -53,7 +53,7 @@ describe("Compile task", () => {
   const cacheDir = path.join("artifacts", "cache");
   const f1 = "asc-fee-check.copy.teal";
   const f2 = "asc-fee-check.teal";
-  const f3 = "gold-asa.py";
+  const f3PY = "gold-asa.py";
   const f4 = "gold-asa.teal";
   const fhash = 2374470440; // murmur3 hash for f1 file
 
@@ -64,11 +64,11 @@ describe("Compile task", () => {
     assert.deepEqual(op.compiledFiles, [
       { filename: f1, tealHash: fhash },
       { filename: f2, tealHash: fhash },
-      { filename: f3, tealHash: 3867907430 },
+      { filename: f3PY, tealHash: 3867907430 },
       { filename: f4, tealHash: 3649244736 }]);
 
     const writtenFiles = [];
-    for (const fn of [f1, f2, f3, f4]) {
+    for (const fn of [f1, f2, f3PY, f4]) {
       const fullF = path.join(cacheDir, fn + ".yaml");
       writtenFiles.push(fullF);
       assert.isTrue(fs.existsSync(fullF));
@@ -107,7 +107,7 @@ describe("Compile task", () => {
   it("should return TEAL code", async () => {
     const pyOp = new PyCompileOp(op);
     const content = fs.readFileSync(path.join(ASSETS_DIR, f4), 'utf8');
-    const res = pyOp.compilePyTeal(f3) + '\n';
+    const res = pyOp.compilePyTeal(f3PY) + '\n';
     assert.deepEqual(content.toString(), res);
   });
 });

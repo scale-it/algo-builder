@@ -4,7 +4,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import YAML from "yaml";
 
-import { parseAlgorandError } from "../internal/core/errors";
+import { BuilderError, parseAlgorandError } from "../internal/core/errors";
+import { ERRORS } from "../internal/core/errors-list";
 import { assertDir, ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
 import { timestampNow } from "../lib/time";
 import type { ASCCache, PyASCCache } from "../types";
@@ -15,10 +16,12 @@ export const pyExt = ".py";
 
 export class CompileOp {
   algocl: Algodv2;
+  pyCompile: PyCompileOp;
   cacheAssured = false;
 
   constructor (algocl: Algodv2) {
     this.algocl = algocl;
+    this.pyCompile = new PyCompileOp(this);
   }
 
   // Gets the TEAL compiled result from artifacts cache and compiles the code if necessary.
@@ -29,8 +32,7 @@ export class CompileOp {
   // @param force: if true it will force recompilation even if the cache is up to date.
   async ensureCompiled (filename: string, force: boolean): Promise<ASCCache> {
     if (filename.endsWith(pyExt)) {
-      const pyCompile = new PyCompileOp(this);
-      return await pyCompile.ensureCompiled(filename, force);
+      return await this.pyCompile.ensureCompiled(filename, force);
     }
 
     if (!filename.endsWith(tealExt)) {
@@ -170,8 +172,11 @@ export class PyCompileOp {
     const subprocess: SpawnSyncReturns<string> = this.runPythonScript(filename);
 
     if (subprocess.stderr) {
-      console.error(subprocess.stderr);
-      throw new Error(subprocess.stderr);
+      throw new BuilderError(
+        ERRORS.PYTHON.PYTEAL_FILE_ERROR, {
+          filename: filename,
+          reason: subprocess.stderr
+        });
     }
     return subprocess.stdout;
   }

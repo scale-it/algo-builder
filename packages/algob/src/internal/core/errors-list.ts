@@ -29,7 +29,8 @@ export const ERROR_RANGES = {
   BUILTIN_TASKS: { min: 600, max: 699, title: "Built-in tasks errors" },
   PLUGINS: { min: 800, max: 899, title: "Plugin system errors" },
 
-  SCRIPT: { min: 900, max: 999, title: "Script related errors" }
+  SCRIPT: { min: 900, max: 999, title: "Script related errors" },
+  PYTHON: { min: 1000, max: 1099, title: "Python (PyTeal) related errors" }
 };
 
 const generalErrors = {
@@ -39,7 +40,7 @@ const generalErrors = {
     title: "You are not inside an algob project",
     description: `You are trying to run algob outside of an algob project.
 
-You can learn hoy to use algob by reading the [Getting Started guide](./README.md).`
+You can learn how to use algob by reading the [Getting Started guide](./README.md).`
   },
   INVALID_NODE_VERSION: {
     number: 2,
@@ -728,6 +729,16 @@ Remove the account from the optInAccNames in asa.yaml`
   }
 };
 
+const pyTealErrors = {
+  PYTEAL_FILE_ERROR: {
+    number: 1000,
+    message: `PYTEAL PARSE ERROR: '%filename%'.
+    Reason: %reason%`,
+    title: "PYTEAL ERROR",
+    description: `Reason: %reason%`
+  }
+};
+
 export const ERRORS: {
   [category in keyof typeof ERROR_RANGES]: {
     [errorName: string]: ErrorDescriptor
@@ -741,5 +752,6 @@ export const ERRORS: {
   ALGORAND: algorandNode,
   BUILTIN_TASKS: taskErrors,
   PLUGINS: pluginErrors,
-  SCRIPT: scriptErrors
+  SCRIPT: scriptErrors,
+  PYTHON: pyTealErrors
 };
