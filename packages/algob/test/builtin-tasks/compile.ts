@@ -2,11 +2,12 @@ import { Algodv2 } from "algosdk";
 import { assert } from "chai";
 import * as fs from "fs";
 import * as path from "path";
+import YAML from 'yaml';
 
 import { compile } from "../../src/builtin-tasks/compile";
 import { ASSETS_DIR } from "../../src/internal/core/project-structure";
 import { CompileOp, PyCompileOp } from "../../src/lib/compile";
-import type { ASCCache } from "../../src/types";
+import type { ASCCache, PyASCCache } from "../../src/types";
 import { useFixtureProjectCopy } from "../helpers/project";
 const murmurhash = require('murmurhash'); // eslint-disable-line @typescript-eslint/no-var-requires
 
@@ -109,5 +110,12 @@ describe("Compile task", () => {
     const content = fs.readFileSync(path.join(ASSETS_DIR, f4), 'utf8');
     const res = pyOp.compilePyTeal(f3PY) + '\n';
     assert.deepEqual(content.toString(), res);
+  });
+
+  it("should ", async () => {
+    const pyOp = new PyCompileOp(op);
+    const result: PyASCCache = await pyOp.ensureCompiled(f3PY, false);
+    const expected = fs.readFileSync(path.join(ASSETS_DIR, 'gold-asa-py-check.yaml'), 'utf8');
+    assert.deepEqual(YAML.stringify(result), expected);
   });
 });
