@@ -33,7 +33,7 @@ function filterNonExistent (scripts: string[]): string[] {
   return scripts.filter(script => !fsExtra.pathExistsSync(script));
 }
 
-function mkDeployer (
+export function mkDeployer (
   runtimeEnv: AlgobRuntimeEnv,
   cpData: CheckpointRepo,
   allowWrite: boolean,
