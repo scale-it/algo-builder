@@ -30,7 +30,7 @@ export const ERROR_RANGES = {
   PLUGINS: { min: 800, max: 899, title: "Plugin system errors" },
 
   SCRIPT: { min: 900, max: 999, title: "Script related errors" },
-  PYTHON: { min: 1000, max: 1099, title: "Python (PyTeal) related errors" }
+  PyTEAL: { min: 450, max: 460, title: "Python (PyTeal) related errors" }
 };
 
 const generalErrors = {
