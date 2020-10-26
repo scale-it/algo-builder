@@ -731,7 +731,7 @@ Remove the account from the optInAccNames in asa.yaml`
 
 const pyTealErrors = {
   PYTEAL_FILE_ERROR: {
-    number: 1000,
+    number: 450,
     message: `PYTEAL PARSE ERROR: '%filename%'.
     Reason: %reason%`,
     title: "PYTEAL ERROR",
