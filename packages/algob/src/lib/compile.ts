@@ -173,7 +173,7 @@ export class PyCompileOp {
 
     if (subprocess.stderr) {
       throw new BuilderError(
-        ERRORS.PYTHON.PYTEAL_FILE_ERROR, {
+        ERRORS.PyTEAL.PYTEAL_FILE_ERROR, {
           filename: filename,
           reason: subprocess.stderr
         });
