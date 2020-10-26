@@ -10,7 +10,7 @@ To open console session run `yarn run algob console`
 
 ## Globals
 
-Following globals can be accessed during `algob console` session
+Following globals are available in an `algob console` REPL:
 * `deployer` : algob deployer in run mode. User can access checkpoints, get logic signature, transferAlgos and all other functions supported by `algob deployer`.
 * `algodClient` : `algosdk.Algodv2`- an instance of algorand driver based on the current network.
 * `algosdk` : User can access `algosdk` package functions using this object. (eg. `algosdk.encodeAddress(..)`)  
