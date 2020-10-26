@@ -753,5 +753,5 @@ export const ERRORS: {
   BUILTIN_TASKS: taskErrors,
   PLUGINS: pluginErrors,
   SCRIPT: scriptErrors,
-  PYTHON: pyTealErrors
+  PyTEAL: pyTealErrors
 };
