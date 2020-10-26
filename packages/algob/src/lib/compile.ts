@@ -45,10 +45,11 @@ export class CompileOp {
     return a;
   }
 
+  //returns teal code, hash extracted from dissembled .msig file (part above `LogicSig: `)  {refer - /assets/sample-text-asc.msig}
+  //returns teal code(whole file content) along with hash if extension is .teal
   readTealAndHash (filename: string): [string, number] {
     const content = fs.readFileSync(filename, 'utf8');
 
-    // if ext is .msig teal content should be text above logicSig {refer - /assets/sample-text-asc.msig}
     if (filename.endsWith(msigExt)) {
       const teal = content.split("LogicSig: ")[0];
       return [teal, murmurhash.v3(content)];
