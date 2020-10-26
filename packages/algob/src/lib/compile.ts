@@ -45,8 +45,9 @@ export class CompileOp {
     return a;
   }
 
-  //returns teal code, hash extracted from dissembled .msig file (part above `LogicSig: `)  {refer - /assets/sample-text-asc.msig}
-  //returns teal code(whole file content) along with hash if extension is .teal
+  // returns teal code, hash extracted from dissembled .msig file (part above `LogicSig: `)
+  // {refer - /assets/sample-text-asc.msig}
+  // returns teal code(whole file content) along with hash if extension is .teal
   readTealAndHash (filename: string): [string, number] {
     const content = fs.readFileSync(filename, 'utf8');
 
