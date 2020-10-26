@@ -4,7 +4,7 @@ import * as algosdk from "algosdk";
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
 import { getLsig, logicsig } from "../lib/lsig";
-import { decodeMsigObj, readMsigFromFile } from "../lib/msig";
+import { readBinaryMultiSig, readMsigFromFile } from "../lib/msig";
 import { persistCheckpoint } from "../lib/script-checkpoints";
 import type {
   Account,
@@ -19,6 +19,7 @@ import type {
   FundASCFlags,
   LogicSig,
   LsigInfo,
+  RawLsig,
   TxParams
 } from "../types";
 import { BuilderError } from "./core/errors";
@@ -114,11 +115,32 @@ class DeployerBasicMode {
    * @returns {LogicSig} multi signed logic signature from assets/<file_name>.msig
    */
   async loadMultiSig (name: string, scParams: Object): Promise<LogicSig> {
-    const [tealFile, Msig] = await readMsigFromFile(name) as string; // Get tealFile name, Msig object from .mlsig
-    const lsig = await this.loadLsig(tealFile, scParams); // Load lsig from .teal (getting logic part from lsig)
-    const decodedMsig = await decodeMsigObj(Msig);
-    lsig.msig = {};
-    Object.assign(lsig.msig, decodedMsig);
+    const lsig = await getLsig(name, scParams, this.algoOp.algodClient); // get lsig from .teal (getting logic part from lsig)
+    const msig = await readMsigFromFile(name); // Get decoded Msig object from .msig
+    Object.assign(lsig.msig = {}, msig);
+    return lsig;
+  }
+
+  /**
+   * Description : loads multisigned logic signature from .msig file
+   * @param {string} name filename
+   * @returns {LogicSig} multi signed logic signature from assets/<file_name>.msig
+   */
+  async loadBinaryMultiSig (name: string): Promise<LogicSig> {
+    // get logic signature from file and decode it
+    const data = await readBinaryMultiSig(name);
+    const program = new Uint8Array(Buffer.from(data as string, 'base64'));
+    const logicSignature = decode(program) as RawLsig;
+
+    // dummy logic signature
+    const dummyProgram = new Uint8Array(56);
+    dummyProgram.fill(0);
+    const lsig = new logicsig.LogicSig(dummyProgram, []);
+
+    // assign complete logic signature
+    lsig.logic = logicSignature.l; // assign logic part separately (as keys mismatch: logic, l)
+    delete logicSignature.l;
+    Object.assign(lsig, logicSignature);
     return lsig;
   }
 }

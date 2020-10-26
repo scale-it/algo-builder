@@ -20,18 +20,19 @@ async function run(runtimeEnv, deployer) {
   // Transaction FAIL - As according to .teal logic, amount should be <= 1000
   await transferASA(deployer, goldOwnerAccount, johnAccount.addr, 1500, assetID, lsigGoldOwner);
 
-  // Transaction FAIL as John tried to send instead of GoldOwner
+  // Transaction FAIL - sender should be the delegator i.e account which signed the lsig (goldOwner in this case)
   await transferASA(deployer, johnAccount, bobAccount.addr, 100, assetID, lsigGoldOwner);
+
 
   // Transaction for ALGO - Contract : '3-gold-delegated-asc.teal'  (Delegated Approval Mode)
   const logicSignature = deployer.getDelegatedLsig('3-gold-delegated-asc.teal');
-
+  
   // Transaction PASS - As according to .teal logic, amount should be <= 100
   await transferAlgo(deployer, goldOwnerAccount, bobAccount.addr, 58, logicSignature);
 
   // Transaction FAIL - As according to .teal logic, amount should be <= 100
   await transferAlgo(deployer, goldOwnerAccount, bobAccount.addr, 580, logicSignature);
   
-}
+} 
 
 module.exports = { default: run }

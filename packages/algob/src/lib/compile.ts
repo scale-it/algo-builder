@@ -10,6 +10,7 @@ import type { ASCCache } from "../types";
 const murmurhash = require('murmurhash'); // eslint-disable-line @typescript-eslint/no-var-requires
 
 export const tealExt = ".teal";
+export const msigExt = ".msig";
 
 export class CompileOp {
   algocl: Algodv2;
@@ -23,11 +24,11 @@ export class CompileOp {
   // Will throw an exception if the source file doesn't exists.
   // @param filename: name of the TEAL code in `/assets` directory.
   //   (Examples: `mysc.teal, security/rbac.teal`)
-  //   MUST have a .teal extension
+  //   MUST have a .teal or .msig extension
   // @param force: if true it will force recompilation even if the cache is up to date.
   async ensureCompiled (filename: string, force: boolean): Promise<ASCCache> {
-    if (!filename.endsWith(tealExt)) {
-      throw new Error(`filename "${filename}" must end with "${tealExt}"`); // TODO: convert to buildererror
+    if (!filename.endsWith(tealExt) && !filename.endsWith(msigExt)) {
+      throw new Error(`filename "${filename}" must end with "${tealExt}" or "${msigExt}"`); // TODO: convert to buildererror
     }
 
     const [teal, thash] = this.readTealAndHash(path.join(ASSETS_DIR, filename));
@@ -44,8 +45,16 @@ export class CompileOp {
     return a;
   }
 
+  // returns teal code, hash extracted from dissembled .msig file (part above `LogicSig: `)
+  // {refer - /assets/sample-text-asc.msig}
+  // returns teal code(whole file content) along with hash if extension is .teal
   readTealAndHash (filename: string): [string, number] {
     const content = fs.readFileSync(filename, 'utf8');
+
+    if (filename.endsWith(msigExt)) {
+      const teal = content.split("LogicSig: ")[0];
+      return [teal, murmurhash.v3(content)];
+    }
     return [content, murmurhash.v3(content)];
   }
 
