@@ -1,8 +1,8 @@
 /**
  * Description:
- * This file demonstrates the PyTeal Example for HLTC(Hash Time Lock Contract)
+ * This file demonstrates the PyTeal Example for HTLC(Hash Time Lock Contract)
 */
-const { transferMicroAlgos, transferAsset, balanceOf, ASC1Mode } = require("algob");
+const { transferMicroAlgos } = require("algob");
 
 async function run(runtimeEnv, deployer) {
 
@@ -13,10 +13,10 @@ async function run(runtimeEnv, deployer) {
 
   // Secret value // Image : QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=
   const secret = "hero wisdom green split loop element vote belt";
-  const hltcInfoAlgoContract = await deployer.fundLsig("hltc.py", [ secret ],
+  const htlcInfoAlgoContract = await deployer.fundLsig("htlc.py", [ secret ],
     { funder: bobAccount, fundingMicroAlgo: 202000000 }, {}); 
 
-  console.log(hltcInfoAlgoContract);
+  console.log(htlcInfoAlgoContract);
   
 }
 
