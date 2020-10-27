@@ -7,7 +7,7 @@ Sometimes it's nice to work with your contracts interactively for testing and de
 ## Usage
 
 * To open console session run `yarn run algob console`
-* To select network add `--network networkName` in command.(add your Network Name in networkName)
+* To select network add `--network networkName` in command.(add your Network Name in place of networkName)
 
 ## Globals
 
