@@ -25,12 +25,12 @@ export const ERROR_RANGES = {
   ARGUMENTS: { min: 300, max: 399, title: "Arguments related errors" },
   ACCOUNT: { min: 400, max: 409, title: "Account related errors" },
   ALGORAND: { min: 410, max: 420, title: "Algorand node related errors" },
+  PyTEAL: { min: 450, max: 460, title: "Python (PyTeal) related errors" },
 
   BUILTIN_TASKS: { min: 600, max: 699, title: "Built-in tasks errors" },
   PLUGINS: { min: 800, max: 899, title: "Plugin system errors" },
 
-  SCRIPT: { min: 900, max: 999, title: "Script related errors" },
-  PyTEAL: { min: 450, max: 460, title: "Python (PyTeal) related errors" }
+  SCRIPT: { min: 900, max: 999, title: "Script related errors" }
 };
 
 const generalErrors = {
