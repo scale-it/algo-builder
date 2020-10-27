@@ -15,7 +15,7 @@ import { TASK_CONSOLE } from "./task-names";
 
 // colorize text to yellow
 function colorize (message: string): string {
-  return `\x1b[33m${message}\x1b[0m`;
+  return `\x1b[32m${message}\x1b[0m`;
 }
 
 function initializeDeployer (runtimeEnv: AlgobRuntimeEnv): AlgobDeployer {
