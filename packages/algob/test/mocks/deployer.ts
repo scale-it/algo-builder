@@ -27,6 +27,10 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   }
 
+  loadBinaryMultiSig (name: string, scParams: Object): Promise<LogicSig> {
+    throw new Error("Not implemented");
+  }
+
   loadMultiSig (name: string, scParams: Object): Promise<LogicSig> {
     throw new Error("Not implemented");
   }

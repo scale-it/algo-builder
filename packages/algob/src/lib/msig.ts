@@ -6,7 +6,6 @@ import { ASSETS_DIR } from "../internal/core/project-structure";
 import { MultiSig } from "../types";
 
 const msigExt = ".msig";
-const tealExt = ".teal";
 
 /**
  * Description: this function decodes msig object from logic signature
@@ -29,26 +28,39 @@ export async function decodeMsigObj (msig: string): Promise<MultiSig> {
 
 /**
  * Description: this function reads multisig from /assets/<filename>.msig
+ *              and returns the decoded multisig object
  * @param {string} msig : multisigned msig obj
- * @returns {[string, string]} : cached .teal filename, raw msig object as string
+ * @returns {MultiSig} : decoded Msig Object
  */
-export async function readMsigFromFile (filename: string): Promise<Object> {
+export async function readMsigFromFile (filename: string): Promise<MultiSig | undefined> {
   if (!filename.endsWith(msigExt)) {
     throw new Error(`filename "${filename}" must end with "${msigExt}"`);
   }
   try {
     const p = path.join(ASSETS_DIR, filename);
-    const [tealCode, Msig] = fs.readFileSync(p, 'utf8').split("LogicSig: ");
-
-    // Extracting teal code from .msig and dumping to .teal to get logic signature
-    const tealFile = filename.split(msigExt)[0] + '-cache' + tealExt;
-    const tealPath = path.join(ASSETS_DIR, tealFile); // assets/<file_name>.teal
-    fs.writeFileSync(tealPath, tealCode); // Write logic code to file with .teal ext
-
-    // return msig object of logic signature to decode further
-    return [tealFile, Msig];
+    const Msig = fs.readFileSync(p, 'utf8').split("LogicSig: ")[1];
+    return await decodeMsigObj(Msig);
   } catch (e) {
-    if (e?.errno === -2) { return ''; } // errno whene reading an unexisting file
+    if (e?.errno === -2) return undefined; // handling a not existing file
+    throw e;
+  }
+}
+
+/**
+ * Description: this function reads raw multisig from /assets/<filename>.msig
+ * and returns the base64 string
+ * @param {string} filename : filename [must have .msig ext]
+ * @returns {string} : base64 string
+ */
+export async function readBinaryMultiSig (filename: string): Promise<string | undefined> {
+  if (!filename.endsWith(msigExt)) {
+    throw new Error(`filename "${filename}" must end with "${msigExt}"`);
+  }
+  try {
+    const p = path.join(ASSETS_DIR, filename);
+    return fs.readFileSync(p, 'base64');
+  } catch (e) {
+    if (e?.errno === -2) return undefined; // handling a not existing file
     throw e;
   }
 }
