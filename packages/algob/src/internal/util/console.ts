@@ -19,3 +19,27 @@ export function disableReplWriterShowProxy (): void {
     });
   }
 }
+
+// handle top level await
+export function preprocess (input: string): string {
+  const awaitMatcher = /^(?:\s*(?:(?:let|var|const)\s)?\s*([^=]+)=\s*|^\s*)(await\s[\s\S]*)/;
+  const asyncWrapper = (code: string, binder: string): string => {
+    const assign = binder ? `global.${binder} = ` : '';
+    return `(function(){ async function _wrap() { return ${assign}${code} } return _wrap();})()`;
+  };
+
+  // match & transform
+  const match = input.match(awaitMatcher);
+  if (match) {
+    input = `${asyncWrapper(match[2], match[1])}`;
+  }
+  return input;
+}
+
+// check if repl error is recoverable
+export function isRecoverableError (error: Error): boolean {
+  if (error.name === 'SyntaxError') {
+    return /^(Unexpected end of input|Unexpected token)/.test(error.message);
+  }
+  return false;
+}
