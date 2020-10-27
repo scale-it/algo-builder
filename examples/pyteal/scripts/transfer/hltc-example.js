@@ -1,6 +1,10 @@
 /**
  * Description:
  * This file demonstrates the PyTeal Example for HLTC(Hash Time Lock Contract)
+ * In this scheme, the buyer funds a TEAL account with the sale price. 
+ * The buyer also picks a secret value and encodes a secure hash of this value in 
+ * the TEAL program. The TEAL program will transfer its balance to the seller 
+ * if the seller is able to provide the secret value that corresponds to the hash in the program. 
 */
 const { transferAlgo } = require("./common");
 
