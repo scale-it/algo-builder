@@ -22,11 +22,6 @@ let accounts = mkAccounts([
   // Do not use these exact accounts in your own applications.
   // See notice at the top of this file.
   {
-    name: "gold-owner-account",
-    addr: "M7VR2MGHI35EG2NMYOF3X337636PIOFVSP2HNIFUKAG7WW6BDWDCA3E2DA",
-    mnemonic: "quick stage planet wild coffee whale build brisk forest leave same segment armed alter fog know run distance excess galaxy limb talent nut able noodle"
-  },
-  {
     name: "john-account",
     addr: "2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA",
     mnemonic: "found empower message suit siege arrive dad reform museum cake evoke broom comfort fluid flower wheat gasp baby auction tuna sick case camera about flip"
