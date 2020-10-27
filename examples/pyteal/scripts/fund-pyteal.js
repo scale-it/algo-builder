@@ -11,7 +11,7 @@ async function run(runtimeEnv, deployer) {
 
   await transferMicroAlgos(deployer, masterAccount, bobAccount.addr, 200000000, {note: "funding account"});  
 
-  // Secret value // Image : QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=
+  // secret value hashed with sha256 will produce our image hash : QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=
   const secret = "hero wisdom green split loop element vote belt";
   const htlcInfoAlgoContract = await deployer.fundLsig("htlc.py", [ secret ],
     { funder: bobAccount, fundingMicroAlgo: 202000000 }, {}); 
