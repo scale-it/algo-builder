@@ -474,6 +474,10 @@ export interface ASCCache {
   toBytes: Uint8Array // compiled base64 in bytes
 }
 
+export interface PyASCCache extends ASCCache {
+  tealCode: string
+}
+
 // ************************
 //     helper types
 
