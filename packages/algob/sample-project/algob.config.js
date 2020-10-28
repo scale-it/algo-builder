@@ -17,11 +17,11 @@
 */
 
 // ## ACCOUNTS USING mnemonic ##
-// const { mkAccounts } = require("algob");
-// let accounts = mkAccounts([{
-//   addr: "KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY",
-//   mnemonic: "call boy rubber fashion arch day capable one sweet skate outside purse six early learn tuition eagle love breeze pizza loud today popular able divide"
-// }]);
+const { mkAccounts } = require("algob");
+let accounts = mkAccounts([{
+  addr: "KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY",
+  mnemonic: "call boy rubber fashion arch day capable one sweet skate outside purse six early learn tuition eagle love breeze pizza loud today popular able divide"
+}]);
 
 
 // ## ACCOUNTS loaded from a FILE ##
@@ -40,7 +40,7 @@ let defaultCfg = {
     kmdconfig.walletname, kmdconfig.walletpassword)
 };
 
-networks: {
+module.exports = {
   localhost: defaultCfg,
   default: defaultCfg
 };

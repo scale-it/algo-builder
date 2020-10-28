@@ -41,8 +41,6 @@ export type AccountDef =
 interface CommonNetworkConfig {
   accounts: Account[]
   chainName?: string
-  kmdAddresses?: Promise<AccountSDK[]>
-  kmdConfig?: KmdConfig
   // from?: string;
   // TODO: timeout?: number;
 }

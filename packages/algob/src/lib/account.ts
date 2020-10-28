@@ -79,24 +79,24 @@ interface KmdConfig {
   wallets: Array<{name: string, password: string}>
 }
 
-export async function loadKMDAccounts (cfg: KmdConfig): Promise<AccountSDK[]> {
-  const c = new Kmd(cfg.token, cfg.host, cfg.port);
+export async function loadKMDAccounts (kcfg: KmdConfig): Promise<AccountSDK[]> {
+  const c = new Kmd(kcfg.token, kcfg.host, kcfg.port);
   const wallets = (await c.listWallets()).wallets;
   const walletIDs: StrMap = {};
   for (const w of wallets) walletIDs[w.name] = w.id;
 
   const accounts: AccountSDK[] = [];
-  for (const w of cfg.wallets) {
+  for (const w of kcfg.wallets) {
     const id = walletIDs[w.name];
     if (id === undefined) {
-      console.warn("wallet id=", id, "doesn't exist in KDM");
+      console.warn("wallet id=", id, "defined in config but it doesn't exist in KMD");
       continue;
     }
     const token = (await c.initWalletHandle(id, w.password)).wallet_handle_token;
-    const address = await c.listKeys(token);
-    for (const addr of address.addresses) {
-      const accountKey = (await kmdclient.exportKey(wallethandle, password, addr));
-      accounts.push({ addr: addr, sk: accountKey.private_key });
+    const keys = await c.listKeys(token);
+    for (const addr of keys.addresses) {
+      const k = await c.exportKey(token, w.password, addr);
+      accounts.push({ addr: addr, sk: k.private_key });
     }
   }
 

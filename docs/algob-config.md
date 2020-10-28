@@ -47,10 +47,15 @@ Each network configuration requires a list of accounts. These accounts are then 
           mnemonic: "call boy rubber fashion arch day capable one sweet skate outside purse six early learn tuition eagle love breeze pizza loud today popular able divide"
         }]);
 
-1. Laded from a Key Management Daemon (KMD):
+  You can extract private keys from KMD through mnemonic phrase using `goal` command. However, we recommend not doing that and using the KMD client directly to avoid writing a plaintext menmonic in a config file.
+
+        goal -d $(ALGORAND_DATA) account list
+        goal -d $(ALGORAND_DATA) account export -a <account address>
+
+1. Loaded from a Key Management Daemon (KMD):
 
         // KMD credentials
-        let kmdconfig = {
+        let kmdcfg = {
           host: "127.0.0.1",
           port: 7833,
           token: "09c2da31d3e3e96ed98ba22cc4d58a14184f1808f2b4f21e66c9d38f70ca7232",
@@ -58,20 +63,23 @@ Each network configuration requires a list of accounts. These accounts are then 
           walletpassword: "testpassword"
         }
 
-        let kmdAddresses = await loadKMDAccounts(kmdconfig.host, kmdconfig.token, kmdconfig.port, kmdconfig.walletname, kmdconfig.walletpassword);
-
+        let kmdAddresses = await loadKMDAccounts(kmdcfg);
         console.log(kmdAddresses);
 
+        // you can create a KMD client if needed:
+        // let kmd = new algosdk.Kmd(kmdcfg.token, kmdcfg.host, kmdcfg.port)
+
 1. Loaded from `ALGOB_ACCOUNTS` shell environment variable:
-
-        const accounts = loadFromEnv();
-
-    Keys can be stored in `ALGOB_ACCOUNTS` env variable.
     The keys in env variable should be JSON string of the following structure:
 
         [{"name": "account_name", "menmonic": "mnemonic string"}]
 
->>>>>>> master
+    Use the following command to load accounts from environment:
+
+        const { loadAccountsFromEnv } = require("algob");
+        const accounts = loadAccountsFromEnv();
+
+
 NOTE: don't use any of the accounts above. They are provided only as an example - everyone has an access to them!
 
 You can merge accounts in the config file (eg by using `concat` method on an `Array`).
@@ -82,14 +90,18 @@ You can also construct different accounts for different networks.
 
 ```
 
+const { loadAccountsFromFileSync } = require("algob");
 const {devnet} = require("algorand-builder/config")
+
+const accounts = loadAccountsFromFileSync("assets/accounts_generated.yaml");
+const mainnetAccounts = loadAccountsFromFileSync("private/accounts/mainnet.yaml");
 
 var mydevnet = {
      host: "http://127.0.0.1",
      port: 8080,
      token: "abc",
+     accounts: accounts
 }
-
 
 module.exports = {
   /**
@@ -105,7 +117,8 @@ module.exports = {
     testnet: {
       host: "127.0.0.1",
       port: 9545,
-      token: "3ff96e84dd5c041aa79cbb8e876d86ac73ec337b97977261aeb92c6e6a7f2725"
+      token: "3ff96e84dd5c041aa79cbb8e876d86ac73ec337b97977261aeb92c6e6a7f2725",
+      accounts: mainnetAccounts
     }
   },
 

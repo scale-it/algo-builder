@@ -2,9 +2,8 @@ import {
   createMsigAddress,
   loadAccountsFromFile,
   loadAccountsFromFileSync,
-  loadKMDAccounts,
-  mkAccounts
   loadFromEnv,
+  loadKMDAccounts,
   mkAccounts
 } from "./lib/account";
 import { balanceOf, printAssets } from "./lib/status";
@@ -14,7 +13,7 @@ import { ASC1Mode } from "./types";
 export {
   mkAccounts,
   createMsigAddress,
-  loadKMDAccounts
+  loadKMDAccounts,
   loadAccountsFromFile,
   loadAccountsFromFileSync,
   loadFromEnv,
@@ -26,4 +25,3 @@ export {
   transferMicroAlgosLsig,
   ASC1Mode
 };
->>>>>>> master
