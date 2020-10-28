@@ -40,6 +40,9 @@ export type AccountDef =
 
 interface CommonNetworkConfig {
   accounts: Account[]
+  // optional, when provided KMD accounts will be loaded by the config resolver
+  // and merged into the accounts variable (above)
+  kmdCfg?: KmdCfg
   chainName?: string
   // from?: string;
   // TODO: timeout?: number;
@@ -65,12 +68,17 @@ export interface Networks {
   [networkName: string]: NetworkConfig
 }
 
-export interface KmdConfig {
+export interface KmdWallet {
+  name: string
+  password: string
+  accounts: Array<{name: string, address: string}> // both are obligatory
+}
+
+export interface KmdCfg {
   host: string
   port: number
   token: string
-  walletname: string
-  walletpassword: string
+  wallets: KmdWallet[]
 }
 
 /**

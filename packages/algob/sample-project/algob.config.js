@@ -35,9 +35,9 @@ let defaultCfg = {
   port: 8080,
   token: "content_of/algorand-node-data/algod.token",
   accounts: accounts,
-  kmdConfig: kmdconfig,
-  kmdAddresses: await loadKMDAccounts(kmdconfig.host, kmdconfig.token, kmdconfig.port,
-    kmdconfig.walletname, kmdconfig.walletpassword)
+  // if you want to load accoutns from KMD, you need to add the kmdCfg object. Please read
+  // algob-confg.md documentation for details.
+  // kmdCfg: kmdCfg,
 };
 
 module.exports = {

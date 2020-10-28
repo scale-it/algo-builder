@@ -1,9 +1,8 @@
 import {
   createMsigAddress,
+  loadAccountsFromEnv,
   loadAccountsFromFile,
   loadAccountsFromFileSync,
-  loadAccountsFromEnv,
-  loadKMDAccounts,
   mkAccounts
 } from "./lib/account";
 import { balanceOf, printAssets } from "./lib/status";
@@ -13,7 +12,6 @@ import { ASC1Mode } from "./types";
 export {
   mkAccounts,
   createMsigAddress,
-  loadKMDAccounts,
   loadAccountsFromFile,
   loadAccountsFromFileSync,
   loadAccountsFromEnv,

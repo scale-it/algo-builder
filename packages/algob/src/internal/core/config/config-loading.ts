@@ -1,6 +1,7 @@
 import path from "path";
 
-import { ResolvedAlgobConfig, RuntimeArgs } from "../../../types";
+import { loadKMDAccounts } from "../../../lib/account";
+import type { NetworkConfig, ResolvedAlgobConfig, RuntimeArgs, StrMap } from "../../../types";
 import { BuilderContext } from "../../context";
 import { loadPluginFile } from "../plugins";
 import { getUserConfigPath } from "../project-structure";
@@ -45,10 +46,33 @@ export async function loadConfigAndTasks (
   // To avoid bad practices we remove the previously exported stuff
   Object.keys(configEnv).forEach((key) => (globalAsAny[key] = undefined));
 
-  return resolveConfig(
+  const cfg = resolveConfig(
     configPath,
     defaultConfig,
     userConfig,
     BuilderContext.getBuilderContext().configExtenders
   );
+
+  const netname = runtimeArgs?.network;
+  if (netname !== undefined) {
+    const net = cfg.networks[netname];
+    if (net !== undefined) { await _loadKMDAccounts(net); }
+  }
+
+  return cfg;
+}
+
+// loads KMD accoutns if the net.kmdCfg is specified and merges them into net.accounts
+async function _loadKMDAccounts (net: NetworkConfig): Promise<void> {
+  if (net.kmdCfg === undefined) { return; }
+  const kmdAccounts = await loadKMDAccounts(net.kmdCfg);
+  const accounts = new Set();
+  for (const a of net.accounts) { accounts.add(a.name); }
+  for (const a of kmdAccounts) {
+    if (accounts.has(a.name)) {
+      console.warn("KMD account name conflict: KmdConfig and network.accounts both define an account with same name: ", a.name);
+    } else {
+      net.accounts.push(a);
+    }
+  }
 }
