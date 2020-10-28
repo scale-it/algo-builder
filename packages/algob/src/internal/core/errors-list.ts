@@ -24,8 +24,8 @@ export const ERROR_RANGES = {
   },
   ARGUMENTS: { min: 300, max: 399, title: "Arguments related errors" },
   ACCOUNT: { min: 400, max: 409, title: "Account related errors" },
-  ALGORAND: { min: 410, max: 430, title: "Algorand node related errors" },
-  KMD: { min: 440, max: 450, title: "KMD node related errors" },
+  ALGORAND: { min: 410, max: 429, title: "Algorand node related errors" },
+  KMD: { min: 440, max: 449, title: "KMD node related errors" },
   PyTEAL: { min: 450, max: 460, title: "Python (PyTeal) related errors" },
 
   BUILTIN_TASKS: { min: 600, max: 699, title: "Built-in tasks errors" },
@@ -693,7 +693,7 @@ Please make sure a KMD is running, and check your internet connection and networ
 Please make sure a KMD is running, and check your internet connection and networks config.`
   },
   ERROR: {
-    number: 411,
+    number: 448,
     message: `KMD error.
 Context: %ctx%`,
     title: `KMD error`,
