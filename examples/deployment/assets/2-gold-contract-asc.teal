@@ -1,0 +1,12 @@
+// Check if Transaction type is pay, Receiver is john-account AND amount is <= 100
+txn TypeEnum
+int 1
+==
+txn Receiver
+addr 2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA
+==
+&&
+txn Amount
+int 100
+<=
+&&

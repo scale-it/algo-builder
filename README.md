@@ -16,14 +16,15 @@ To attract more web developers we plan to build a JavaScript DSL for TEAL with T
 
 ### Documentation
 
+User documentation is available in [/docs](docs/README.md).
+
 The project specification is [published here](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
 
-User documentation is available in [/docs](docs/README.md).
 
 ## Requirements
 
 + Node 12+
-+ Connection to an Algorand node.
++ Connection to an Algorand node. TEAL compilation requires Developer API to be enabled (`"EnableDeveloperAPI": true` in the node config.json).
 
 
 ### Algorand Node requirements
@@ -35,8 +36,15 @@ Make sure that the node you are connecting to has a `"EnableDeveloperAPI": true`
 # Usage
 
 
-
 ## Quick start
+
+### Create a blockchain
+
++ Use [Devnet Quick Start](/infrastructure/README.md).
++ Or install a node with any other network.
++ Remember to set `"EnableDeveloperAPI": true` in the node config.json
+
+### Create an algob project
 
 1. Create a new yarn/npm project:
 
@@ -56,8 +64,9 @@ Make sure that the node you are connecting to has a `"EnableDeveloperAPI": true`
         yarn run algob help
 
 1. Update the `algob.config.js` file. Make sure you have an access to a running Algorand node (`algod`). Check Algorand instructions how to install and run it.
-    * set correct host address, port and token
+    * set correct host address, port and token (if you are using the devnet, then check algod.net and algob.token files in `node_data/PrimaryNode/`)
     * you can define multiple networks.
+    * update the account list (sample project uses a sample account which doesn't have any ALGO, for transaction executions you need to have an active account with ALGOs). See the comments in `algob.config.js` for more information.
 
 1. Add assets and smart-contracts in the `assets` directory.
 1. Add deployment scripts in `scripts` directory.
@@ -71,13 +80,10 @@ Make sure that the node you are connecting to has a `"EnableDeveloperAPI": true`
 
 You can use `algob` within a TS project. You can write your scripts and tests in TS. However to use them with `algob` you firstly need to compile the project to JS.
 
-TODO: provide a project template for TS projects. [task](https://www.pivotaltracker.com/n/projects/2452320).
+TIP: Use `tsc --watch` to update the build in a realtime while you develop the project
 
-TIPS:
+TODO: we are planning to provide a template for TS projects. [task](https://www.pivotaltracker.com/n/projects/2452320).
 
-+ Use `tsc --watch` to update the build in a realtime while you develop the project
-
-Read more in [docs](docs/README.md)
 
 # Contributing
 

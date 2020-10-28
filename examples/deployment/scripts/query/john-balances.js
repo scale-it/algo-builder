@@ -1,11 +1,4 @@
-const {
-  printCreatedAsset,
-  printAssetHolding,
-  transferMicroAlgos,
-  asaOptIn,
-  transferAsset,
-  printAssets
-} = require('../../src/asa-helpers');
+const { printAssets } = require("algob");
 
 async function run(runtimeEnv, deployer) {
 

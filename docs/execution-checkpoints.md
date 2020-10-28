@@ -9,6 +9,8 @@ This deployment information (transaction IDs, asset indexes, etc.) is persisted 
 The checkpoint files are saved in `artifacts/scripts/` in a human-readable YAML format.
 Editing is possible but duplicate asset names are not allowed (since it prevents to know which script defined which asset).
 
+Please refer to the [Checkpoints Spec](https://paper.dropbox.com/published/Algorand-builder-specs--A7njBF~7_VHYy0l3m3RAKgYVBg-c4ycJtlcmEaRIbptAPqNYS6#:h2=Deployment-Checkpoints) for more details.
+
 ## Usage
 To retrieve checkpoint data in a script user can call deployer's functions (script parameter).
 Overwriting of checkpoint data from scripts is only allowed when `--force` is used.

@@ -27,11 +27,11 @@ goal node start -d ~/.algorand-local/Node/
 
 ### Add algob and start using it
 
-We need to add algob as the package dependency
+We need to add algob as the package dependency.
 
     yarn add algob
 
-After that, `algob` will be added to a local context. To use it we either access `algob` through `node_modules`, or through `yarn run`. We advice to use the latter one.
+After that, `algob` will be added to a local yarn context. To use it we either access `algob` through `node_modules/.bin`, or through `yarn run`. We advice to use the latter one.
 
 The example is already initialized. So we don't need to run `yarn run algob init .`
 

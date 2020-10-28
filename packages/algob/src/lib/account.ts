@@ -1,11 +1,11 @@
-import { Account as AccountSDK, Kmd, mnemonicToSecretKey } from "algosdk";
+import { Account as AccountSDK, Kmd, mnemonicToSecretKey, multisigAddress } from "algosdk";
 import * as fs from "fs";
 import YAML from "yaml";
 
 import CfgErrors, { ErrorPutter } from "../internal/core/config/config-errors";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
-import type { Account, AccountDef, Accounts, HDAccount, MnemonicAccount, StrMap } from "../types";
+import type { Account, AccountDef, Accounts, AlgobAccount, HDAccount, MnemonicAccount, StrMap } from "../types";
 
 export function mkAccounts (input: AccountDef[]): Account[] {
   const accounts: Account[] = [];
@@ -101,4 +101,60 @@ export async function loadKMDAccounts (cfg: KmdConfig): Promise<AccountSDK[]> {
   }
 
   return accounts;
+}
+
+// returns multisignature account address
+export function createMsigAddress (version: number, threshold: number, accountList: Account[]): any {
+  const mparams = {
+    version: version,
+    threshold: threshold,
+    addrs: accountList
+  };
+  return [mparams, multisigAddress(mparams)];
+}
+
+function validateAlgobAccounts (algobAccounts: AlgobAccount[]): void {
+  for (const account of algobAccounts) {
+    if (account.name === undefined) {
+      throw new BuilderError(ERRORS.ACCOUNT.FIELD_REQUIRED,
+        { errors: 'Field account name must be defined and not empty in ' + JSON.stringify(account) });
+    }
+    if (account.mnemonic === undefined) {
+      throw new BuilderError(ERRORS.ACCOUNT.FIELD_REQUIRED,
+        { errors: 'Field mnemonic string must be defined and not empty in ' + JSON.stringify(account) });
+    }
+    if (account.name === "") {
+      throw new BuilderError(ERRORS.ACCOUNT.FIELD_REQUIRED,
+        { errors: 'Field account name must be defined and not empty in ' + JSON.stringify(account) });
+    }
+    if (account.mnemonic === "") {
+      throw new BuilderError(ERRORS.ACCOUNT.FIELD_REQUIRED,
+        { errors: 'Field mnemonic string must be defined and not empty in ' + JSON.stringify(account) });
+    }
+  }
+}
+
+export function loadFromEnv (): Account[] {
+  var algobAccountsString = process.env.ALGOB_ACCOUNTS;
+  if (algobAccountsString) {
+    var accounts: AlgobAccount[] = [];
+    try {
+      accounts = JSON.parse(algobAccountsString);
+    } catch (error) {
+      throw new BuilderError(ERRORS.ACCOUNT.MALFORMED, { errors: 'Some accounts are malformed or have missing fields' });
+    }
+    validateAlgobAccounts(accounts);
+    var algobAccounts: Account[] = [];
+    for (const account of accounts) {
+      try {
+        const accountSDK = mnemonicToSecretKey(account.mnemonic);
+        algobAccounts.push({ name: account.name, addr: accountSDK.addr, sk: accountSDK.sk });
+      } catch (error) {
+        throw new BuilderError(ERRORS.ACCOUNT.WRONG_MNEMONIC,
+          { errmsg: 'failed to decode mnemonic in ' + JSON.stringify(account) });
+      }
+    }
+    return algobAccounts;
+  }
+  return [];
 }

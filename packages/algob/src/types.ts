@@ -1,6 +1,5 @@
 import type { Account as AccountSDK } from "algosdk";
 import * as algosdk from "algosdk";
-import { DeepReadonly, StrictOmit } from "ts-essentials";
 import * as z from 'zod';
 
 import * as types from "./internal/core/params/argument-types";
@@ -14,6 +13,11 @@ export interface Account extends AccountSDK {
   // from AccountSDK: addr: string;
   //                  sk: Uint8Array
   name: string
+}
+
+export interface AlgobAccount {
+  name: string
+  mnemonic: string
 }
 
 export interface HDAccount {
@@ -89,7 +93,7 @@ export interface ProjectPaths {
   tests: string
 }
 
-export type UserPaths = StrictOmit<Partial<ProjectPaths>, "configFile">;
+export type UserPaths = Omit<Partial<ProjectPaths>, "configFile">;
 
 export interface AlgobConfig {
   networks?: Networks
@@ -112,7 +116,7 @@ export type EnvironmentExtender = (env: AlgobRuntimeEnv) => void;
 
 export type ConfigExtender = (
   config: ResolvedAlgobConfig,
-  userConfig: DeepReadonly<AlgobConfig>
+  userConfig: Readonly<AlgobConfig>
 ) => void;
 
 export interface TasksMap {
@@ -308,7 +312,33 @@ export interface ASAInfo extends DeployedAssetInfo {
 }
 export interface ASCInfo extends DeployedAssetInfo {
   contractAddress: string
-  logicSignature: string
+}
+
+export interface MultiSig {
+  subsig: Object
+  thr: number
+  v: number
+}
+
+// represents Lsig object fetched directly from raw file
+export interface RawLsig {
+  l?: Uint8Array
+  args?: Object // optional
+  sig?: Object // optional
+  msig?: MultiSig // optional
+}
+
+export interface LogicSig {
+  logic: Uint8Array
+  args: Object
+  sig: Object | undefined
+  msig: MultiSig | {}
+}
+
+export interface LsigInfo {
+  creator: AccountAddress
+  contractAddress: string
+  lsig: Uint8Array
 }
 
 export interface CheckpointRepo {
@@ -334,6 +364,7 @@ export interface CheckpointRepo {
 
   registerASA: (networkName: string, name: string, info: ASAInfo) => CheckpointRepo
   registerASC: (networkName: string, name: string, info: ASCInfo) => CheckpointRepo
+  registerLsig: (networkName: string, name: string, info: LsigInfo) => CheckpointRepo
 
   isDefined: (networkName: string, name: string) => boolean
   networkExistsInCurrentCP: (networkName: string) => boolean
@@ -348,6 +379,7 @@ export interface Checkpoint {
   metadata: Map<string, string>
   asa: Map<string, ASAInfo>
   asc: Map<string, ASCInfo>
+  dLsig: Map<string, LsigInfo>
 };
 
 export type ASADef = z.infer<typeof ASADefSchema>;
@@ -355,27 +387,29 @@ export type ASADefs = z.infer<typeof ASADefsSchema>;
 
 export interface TxParams {
   // feePerByte or totalFee is used to set the appropriate transaction fee parameter.
-  // SDK expects`fee: number` and boolean `flatFee`. But the API expects only one parameter:
-  // `fee` Here we use feePerByte and totalFee - both as numberic parameters. We think that
-  // this is more explicit. If both are specified, totalFee takes precedence.
+  // If both are set then totalFee takes precedence.
+  // NOTE: SDK expects`fee: number` and boolean `flatFee`. But the API expects only one
+  // on parameter: `fee`. Here, we define feePerByte and totalFee - both as numberic
+  // parameters. We think that this is more explicit.
   feePerByte?: number
   totalFee?: number
   firstValid?: number
   validRounds?: number
+  lease?: string
+  note?: string
+  noteb64?: string
 }
 
 export interface ASADeploymentFlags extends TxParams {
   creator: Account
 }
 
-export interface ASCPaymentFlags extends TxParams {
-  rawTxParamsAmt? : number
-  closeToRemainder?: string
-  note?: string
-  lease?: string
+export enum ASC1Mode {
+  DELEGATED_APPROVAL,
+  CONTRACT_ACCOUNT
 }
 
-export interface ASCDeploymentFlags {
+export interface FundASCFlags {
   funder: Account
   fundingMicroAlgo: number
 }
@@ -394,8 +428,17 @@ export interface AlgobDeployer {
   putMetadata: (key: string, value: string) => void
   getMetadata: (key: string) => string | undefined
   deployASA: (name: string, flags: ASADeploymentFlags) => Promise<ASAInfo>
-  deployASC: (name: string, scParams: Object, flags: ASCDeploymentFlags,
-    payFlags: ASCPaymentFlags) => Promise<ASCInfo>
+  fundLsig: (
+    name: string, // ASC filename
+    scParams: Object, // Parameters
+    flags: FundASCFlags,
+    payFlags: TxParams
+  ) => void
+  mkDelegatedLsig: (
+    name: string, // ASC filename
+    scParams: Object, // Parameters
+    signer: Account
+  ) => Promise<LsigInfo>
   /**
      Returns true if ASA or ACS were deployed in any script.
      Checks even for checkpoints out of from the execution
@@ -405,9 +448,28 @@ export interface AlgobDeployer {
   asa: Map<string, ASAInfo>
   asc: Map<string, ASCInfo>
 
-  // Not present in the spec:
+  // These functions are exposed only for users.
+  // Put your logic into AlgoOperator if you need to interact with the chain.
   algodClient: algosdk.Algodv2
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
+
+  // Output of these functions is undefined. It's not known what to save to CP
+  optInToASA: (name: string, accountName: string, flags: ASADeploymentFlags) => Promise<void>
+
+  // Log Transaction
+  log: (msg: string, obj: any) => void
+
+  // extract multi signed logic signature file from assets/
+  loadMultiSig: (name: string, scParams: Object) => Promise<LogicSig>
+
+  // load lsig from binary
+  loadBinaryMultiSig: (name: string, scParams: Object) => Promise<LogicSig>
+
+  // get delegated Logic signature
+  getDelegatedLsig: (lsigName: string) => Object | undefined
+
+  // load contract mode logic signature
+  loadLsig: (name: string, scParams: Object) => Promise<LogicSig>
 }
 
 // ************************
@@ -419,6 +481,11 @@ export interface ASCCache {
   compiled: string // the compiled code
   compiledHash: string // hash returned by the compiler
   srcHash: number // source code hash
+  toBytes: Uint8Array // compiled base64 in bytes
+}
+
+export interface PyASCCache extends ASCCache {
+  tealCode: string
 }
 
 // ************************

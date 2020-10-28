@@ -17,7 +17,8 @@ export const ASADefSchema = z.object({
   manager: AddressSchema.optional(),
   reserve: AddressSchema.optional(),
   freeze: AddressSchema.optional(),
-  clawback: AddressSchema.optional()
+  clawback: AddressSchema.optional(),
+  optInAccNames: z.array(z.string()).optional()
 })
   .refine(o => ((o.decimals <= 19) && (o.decimals >= 0)), {
     message: "Decimals must be between 0(non divisible) and 19",

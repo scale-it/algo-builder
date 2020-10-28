@@ -2,7 +2,8 @@
   "compilerOptions": {
     "target": "es2017",
     "lib": [
-      "esnext"
+      "esnext",
+      "dom"
     ],
     "experimentalDecorators": true,
     "esModuleInterop": true,
@@ -10,6 +11,7 @@
     "module": "commonjs",
     "resolveJsonModule": true,
     "noImplicitReturns": true,
+    "noImplicitThis": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true,

@@ -12,7 +12,8 @@ import {
   AssetScriptMap,
   Checkpoint,
   CheckpointRepo,
-  Checkpoints
+  Checkpoints,
+  LsigInfo
 } from "../types";
 import { loadFromYamlFileSilent } from "./files";
 
@@ -42,17 +43,25 @@ export function registerASC (
   return cp;
 }
 
+export function registerLsig (
+  cp: Checkpoint, name: string, info: LsigInfo): Checkpoint {
+  cp.dLsig.set(name, info);
+  return cp;
+}
+
 export class CheckpointImpl implements Checkpoint {
   timestamp: number;
   metadata: Map<string, string>;
   asa: Map<string, ASAInfo>;
   asc: Map<string, ASCInfo>;
+  dLsig: Map<string, LsigInfo>;
 
   constructor (metadata?: Map<string, string>) {
     this.timestamp = +new Date();
     this.metadata = (metadata === undefined ? new Map<string, string>() : metadata);
     this.asa = new Map<string, ASAInfo>();
     this.asc = new Map<string, ASCInfo>();
+    this.dLsig = new Map<string, LsigInfo>();
   }
 }
 
@@ -76,6 +85,7 @@ export function appendToCheckpoint (
   }
   orig.asa = new Map([...orig.asa, ...append.asa]);
   orig.asc = new Map([...orig.asc, ...append.asc]);
+  orig.dLsig = new Map([...orig.dLsig, ...append.dLsig]);
   return checkpoints;
 }
 
@@ -103,7 +113,7 @@ export class CheckpointRepoImpl implements CheckpointRepo {
     const keys: string[] = Object.keys(cp);
     for (const k of keys) {
       const current = cp[k];
-      const allAssetNames = [...current.asa.keys(), ...current.asc.keys()];
+      const allAssetNames = [...current.asa.keys(), ...current.asc.keys(), ...current.dLsig.keys()];
       for (const assetName of allAssetNames) {
         if (!(this.scriptMap[assetName])) {
           this.scriptMap[assetName] = scriptName;
@@ -155,10 +165,18 @@ export class CheckpointRepoImpl implements CheckpointRepo {
     return this;
   }
 
+  registerLsig (networkName: string, name: string, info: LsigInfo): CheckpointRepo {
+    registerLsig(this._ensureNet(this.precedingCP, networkName), name, info);
+    registerLsig(this._ensureNet(this.strippedCP, networkName), name, info);
+    registerLsig(this._ensureNet(this.allCPs, networkName), name, info);
+    return this;
+  }
+
   isDefined (networkName: string, name: string): boolean {
     const netCP = this.allCPs[networkName];
     return netCP !== undefined &&
-      (netCP.asa.get(name) !== undefined || netCP.asc.get(name) !== undefined);
+      (netCP.asa.get(name) !== undefined || netCP.asc.get(name) !== undefined ||
+      netCP.dLsig.get(name) !== undefined);
   }
 
   networkExistsInCurrentCP (networkName: string): boolean {
@@ -186,6 +204,7 @@ export function toMap <T> (obj: {[name: string]: T}): Map<string, T> {
 function convertCPValsToMaps (cpWithObjects: Checkpoint): Checkpoint {
   cpWithObjects.asa = toMap(cpWithObjects.asa as any);
   cpWithObjects.asc = toMap(cpWithObjects.asc as any);
+  cpWithObjects.dLsig = toMap(cpWithObjects.dLsig as any);
   cpWithObjects.metadata = toMap(cpWithObjects.metadata as any);
   return cpWithObjects;
 }

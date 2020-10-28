@@ -7,10 +7,12 @@
     {
       "name": "Robert Zaremba",
       "url": "https://github.com/robert-zaremba"
-    },
-    {
+    }, {
       "name": "Martynas Maciulevičius",
       "url": "https://github.com/Invertisment"
+    }, {
+      "name": "Amit Yadav",
+      "url": "https://github.com/amityadav0"
     }
   ],
   "license": "Apache-2.0",
@@ -25,7 +27,7 @@
   "scripts": {
     "cleanup": "./cleanup.sh",
     "build": "yarn workspaces run build",
-    "watch": "tsc --build --watch packages/*",
+    "watch": "tsc --build --watch packages/algob",
     "test": "yarn workspaces run test",
     "lint": "yarn workspaces -p run lint",
     "lint:fix": "yarn workspaces -p run lint:fix",
@@ -35,12 +37,10 @@
     "lodash": "^4.17.19"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.12",
     "@types/mocha": "^8.0.3",
     "@types/node": "^14.6.0",
     "@typescript-eslint/eslint-plugin": "^3.10.1",
     "@typescript-eslint/parser": "^3.10.1",
-    "chai": "^4.2.0",
     "eslint": "^7.7.0",
     "eslint-config-standard-with-typescript": "^18.0.2",
     "eslint-plugin-import": "^2.22.0",
@@ -49,10 +49,10 @@
     "eslint-plugin-simple-import-sort": "^5.0.3",
     "eslint-plugin-sonarjs": "^0.5.0",
     "eslint-plugin-standard": "^4.0.1",
+    "cross-env": "5.0.5",
     "husky": "^4.2.5",
     "lint-staged": "^10.2.12",
     "mocha": "^8.1.1",
-    "nyc": "^15.1.0",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.2"
   },

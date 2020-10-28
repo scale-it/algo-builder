@@ -8,7 +8,7 @@ async function run (runtimeEnv, deployer) {
   )
   fs.appendFileSync(
     'output.txt',
-    'ASC from second defined: ' + deployer.isDefined('fee-check.teal'))
+    'Lsig from second defined: ' + deployer.isDefined('fee-check.teal'))
 }
 
 module.exports = { default: run }

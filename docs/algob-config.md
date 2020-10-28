@@ -24,7 +24,7 @@ initialDate?: string;
 
 ## Accounts
 
-Each network configuration requires a list of accounts. These accounts are then available in scripts and in a console. An account can be constructed by:
+Each network configuration requires a list of accounts. These accounts are then available in scripts and in a console. Accounts can be created or loaded using:
 
 1. Initializing a native `algosdk.Account` object. Example:
 
@@ -47,7 +47,7 @@ Each network configuration requires a list of accounts. These accounts are then 
           mnemonic: "call boy rubber fashion arch day capable one sweet skate outside purse six early learn tuition eagle love breeze pizza loud today popular able divide"
         }]);
 
-1. Loaded from Key Management Daemon (KMD)
+1. Laded from a Key Management Daemon (KMD):
 
         // KMD credentials
         let kmdconfig = {
@@ -62,6 +62,16 @@ Each network configuration requires a list of accounts. These accounts are then 
 
         console.log(kmdAddresses);
 
+1. Loaded from `ALGOB_ACCOUNTS` shell environment variable:
+
+        const accounts = loadFromEnv();
+
+    Keys can be stored in `ALGOB_ACCOUNTS` env variable.
+    The keys in env variable should be JSON string of the following structure:
+
+        [{"name": "account_name", "menmonic": "mnemonic string"}]
+
+>>>>>>> master
 NOTE: don't use any of the accounts above. They are provided only as an example - everyone has an access to them!
 
 You can merge accounts in the config file (eg by using `concat` method on an `Array`).

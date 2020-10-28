@@ -2,10 +2,6 @@
 txn TypeEnum
 int 1
 ==
-txn Sender
-addr M7VR2MGHI35EG2NMYOF3X337636PIOFVSP2HNIFUKAG7WW6BDWDCA3E2DA
-==
-&&
 txn Amount
 int 100
 <=

@@ -313,23 +313,6 @@ describe("Environment", () => {
         );
       }, ERRORS.NETWORK.CONFIG_NOT_FOUND);
     });
-
-    // TODO:RZ -- network may need to be nullable
-    // or default parameter should be provided as default in CLI
-    /*
-    it("Should choose the default network if none is selected", () => {
-      const ctx = BuilderContext.getBuilderContext();
-      env = new Environment(
-        config,
-        { ...args, network: "TODO:RZ" },
-        tasks,
-        ctx.extendersManager.getExtenders()
-      );
-
-      assert.equal(env.network.name, "default");
-      assert.equal(env.network.config, config.networks.default);
-    });
-    */
   });
 
   describe("Plugin system", () => {

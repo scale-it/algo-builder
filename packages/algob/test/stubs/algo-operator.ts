@@ -1,16 +1,17 @@
-
 import { Algodv2 } from "algosdk";
 
+import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";
 import {
   Account,
+  Accounts,
   ASADef,
   ASADeploymentFlags,
   ASAInfo,
   ASCCache,
-  ASCDeploymentFlags,
-  ASCInfo,
-  ASCPaymentFlags
+  FundASCFlags,
+  LsigInfo,
+  TxParams
 } from "../../src/types";
 
 export class AlgoOperatorDryRunImpl implements AlgoOperator {
@@ -18,30 +19,32 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     throw new Error("Not implemented");
   };
 
+  getDelegatedLsig (lsig: string): Object | undefined {
+    throw new Error("Not implemented");
+  }
+
   waitForConfirmation (txId: string): Promise<import("algosdk").ConfirmedTxInfo> {
     throw new Error("Not implemented");
   }
 
   async deployASA (
-    name: string, asaDesc: ASADef, flags: ASADeploymentFlags, account: Account
-  ): Promise<ASAInfo> {
+    name: string, asaDesc: ASADef, flags: ASADeploymentFlags, accounts: Accounts,
+    txWriter: txWriter): Promise<ASAInfo> {
     return {
-      creator: account.addr + "-get-address-dry-run",
+      creator: flags.creator.addr + "-get-address-dry-run",
       txId: "tx-id-dry-run",
       assetIndex: -1,
       confirmedRound: -1
     };
   }
 
-  async deployASC (
-    name: string, scParams: Object, flags: ASCDeploymentFlags, payFlags: ASCPaymentFlags
-  ): Promise<ASCInfo> {
+  async fundLsig (
+    name: string, scParams: Object, flags: FundASCFlags, payFlags: TxParams,
+    txWriter: txWriter): Promise<LsigInfo> {
     return {
       creator: flags.funder.addr + "-get-address-dry-run",
-      txId: "tx-id-dry-run",
-      confirmedRound: -1,
       contractAddress: "dfssdfsd",
-      logicSignature: "12dsfdsdasd"
+      lsig: new Uint8Array(1)
     };
   }
 
@@ -51,7 +54,18 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
       timestamp: 1010, // compilation time (Unix time)
       compiled: "ASDF", // the compiled code
       compiledHash: "ASDF", // hash returned by the compiler
-      srcHash: 123 // source code hash
+      srcHash: 123, // source code hash
+      toBytes: new Uint8Array(1) // compiled base64 in bytes
     };
+  }
+
+  optInToASA (asaName: string, assetIndex: number, account: Account, params: TxParams): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+
+  optInToASAMultiple (
+    asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, assetIndex: number
+  ): Promise<void> {
+    return Promise.resolve();
   }
 }

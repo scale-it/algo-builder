@@ -67,7 +67,6 @@ export async function getEnv (defaultNetworkCfg?: NetworkConfig): Promise<AlgobR
   const config = await loadConfigAndTasks(runtimeArgs);
 
   if (runtimeArgs.network == null) {
-    // TODO:RZ
     throw new Error("INTERNAL ERROR. Default network should be registered in `register.ts` module");
   }
 

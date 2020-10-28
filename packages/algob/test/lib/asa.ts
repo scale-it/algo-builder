@@ -2,8 +2,14 @@ import { assert } from "chai";
 
 import { ERRORS } from "../../src/internal/core/errors-list";
 import { validateASADefs } from "../../src/lib/asa";
-import { ASADefs } from "../../src/types";
+import { Account, ASADefs } from "../../src/types";
 import { expectBuilderError } from "../helpers/errors";
+
+const namedAccount: Account = {
+  name: "hi",
+  addr: "addr",
+  sk: new Uint8Array(1)
+};
 
 describe("ASA parser", () => {
   it("Should validate correct obj", async () => {
@@ -13,7 +19,7 @@ describe("ASA parser", () => {
         decimals: 0
       }
     };
-    const parsed = validateASADefs(valid, "");
+    const parsed = validateASADefs(valid, new Map<string, Account>(), "");
     assert.deepEqual(parsed, {
       A1: {
         total: 1,
@@ -40,7 +46,7 @@ describe("ASA parser", () => {
         clawback: "clawback"
       }
     };
-    const parsed = validateASADefs(valid, "");
+    const parsed = validateASADefs(valid, new Map<string, Account>(), "");
     assert.deepEqual(parsed, {
       A1: {
         clawback: "clawback",
@@ -67,7 +73,7 @@ describe("ASA parser", () => {
       }
     };
     expectBuilderError(
-      () => validateASADefs(obj),
+      () => validateASADefs(obj, new Map<string, Account>(), ""),
       ERRORS.SCRIPT.ASA_PARAM_PARSE_ERROR,
       "total"
     );
@@ -81,8 +87,8 @@ describe("ASA parser", () => {
       }
     };
     expectBuilderError(
-      () => validateASADefs(obj, "SOME_FILENAME"),
-      ERRORS.SCRIPT.ASA_PARAM_PARSE_ERROR_LOAD_FROM_FILE,
+      () => validateASADefs(obj, new Map<string, Account>(), "SOME_FILENAME"),
+      ERRORS.SCRIPT.ASA_PARAM_PARSE_ERROR,
       "SOME_FILENAME"
     );
   });
@@ -95,11 +101,12 @@ describe("ASA parser", () => {
       }
     };
     expectBuilderError(
-      () => validateASADefs(obj),
+      () => validateASADefs(obj, new Map<string, Account>(), ""),
       ERRORS.SCRIPT.ASA_PARAM_PARSE_ERROR,
       "decimals"
     );
   });
+
   it("Should validate unitName; too long", async () => {
     const obj = {
       A1: {
@@ -109,39 +116,78 @@ describe("ASA parser", () => {
       }
     };
     expectBuilderError(
-      () => validateASADefs(obj),
+      () => validateASADefs(obj, new Map<string, Account>(), ""),
       ERRORS.SCRIPT.ASA_PARAM_PARSE_ERROR,
       "unitName"
     );
   });
+
   it("Should validate url; too long", async () => {
     const obj = {
       A1: {
         total: 1,
         decimals: 1,
-        // more than 32B:
+        // more than 32 bytes:
         url: "1234567890abcdef1234567890abcdef_"
       }
     };
     expectBuilderError(
-      () => validateASADefs(obj),
+      () => validateASADefs(obj, new Map<string, Account>(), ""),
       ERRORS.SCRIPT.ASA_PARAM_PARSE_ERROR,
       "url"
     );
   });
+
   it("Should validate metadataHash; too long", async () => {
     const obj = {
       A1: {
         total: 1,
         decimals: 1,
-        // more than 32B:
+        // more than 32 bytes:
         metadataHash: "1234567890abcdef1234567890abcdef_"
       }
     };
     expectBuilderError(
-      () => validateASADefs(obj),
+      () => validateASADefs(obj, new Map<string, Account>(), ""),
       ERRORS.SCRIPT.ASA_PARAM_PARSE_ERROR,
       "metadataHash"
+    );
+  });
+
+  it("Should check existence of opt-in account name accounts; green path", async () => {
+    const obj = {
+      A1: {
+        total: 1,
+        decimals: 1,
+        optInAccNames: ["hi"]
+      }
+    };
+    validateASADefs(obj, new Map<string, Account>([["hi", namedAccount]]), "");
+  });
+
+  it("Should check existence of opt-in account name accounts; empty", async () => {
+    const obj = {
+      A1: {
+        total: 1,
+        decimals: 1,
+        optInAccNames: []
+      }
+    };
+    validateASADefs(obj, new Map<string, Account>([["hi", namedAccount]]), "");
+  });
+
+  it("Should fail if opt-in account doesn't exist", async () => {
+    const obj = {
+      A1: {
+        total: 1,
+        decimals: 1,
+        optInAccNames: ["hi", "hi123"]
+      }
+    };
+    expectBuilderError(
+      () => validateASADefs(obj, new Map<string, Account>([["hi", namedAccount]]), ""),
+      ERRORS.SCRIPT.ASA_PARAM_ERROR_NO_NAMED_OPT_IN_ACCOUNT,
+      "hi123"
     );
   });
 });

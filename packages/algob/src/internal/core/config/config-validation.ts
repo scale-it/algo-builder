@@ -1,8 +1,4 @@
-import { fold, isLeft, isRight } from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/lib/pipeable";
-import * as t from "io-ts";
-import { Context, ValidationError } from "io-ts/lib";
-import { Reporter } from "io-ts/lib/Reporter";
+import * as z from 'zod';
 
 import { validateAccount } from "../../../lib/account";
 // import { Account } from "algosdk";
@@ -10,104 +6,53 @@ import type { AlgobChainCfg, HttpNetworkConfig, NetworkConfig } from "../../../t
 import { ALGOB_CHAIN_NAME } from "../../constants";
 import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
-import CfgErrors, { mkErrorMessage } from "./config-errors";
+import { parseZodError } from "../validation-errors";
+import CfgErrors from "./config-errors";
 
-function getContextPath (context: Context): string {
-  const keysPath = context
-    .slice(1)
-    .map((c) => c.key)
-    .join(".");
-
-  return `${context[0].type.name}.${keysPath}`;
-}
-
-function getMessage (e: ValidationError): string {
-  const lastContext = e.context[e.context.length - 1];
-
-  return e.message !== undefined
-    ? e.message
-    : mkErrorMessage(
-      getContextPath(e.context),
-      e.value,
-      lastContext.type.name
-    );
-}
-
-export function failure (es: ValidationError[]): string[] {
-  return es.map(getMessage);
-}
-
-export function success (): string[] {
-  return [];
-}
-
-export const DotPathReporter: Reporter<string[]> = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  report: (validation: any) => pipe(validation, fold(failure, success))
-};
-
-function optional<TypeT, OutputT> (
-  codec: t.Type<TypeT, OutputT, unknown>,
-  name = `${codec.name} | undefined`
-): t.Type<TypeT | undefined, OutputT | undefined, unknown> {
-  return new t.Type(
-    name,
-    (u: unknown): u is TypeT | undefined => u === undefined || codec.is(u),
-    (u: any, c: any) => (u === undefined ? t.success(u) : codec.validate(u, c)), // eslint-disable-line @typescript-eslint/no-explicit-any
-    (a: any) => (a === undefined ? undefined : codec.encode(a)) // eslint-disable-line @typescript-eslint/no-explicit-any
-  );
-}
-
-// IMPORTANT: This t.types MUST be kept in sync with the actual types.
-
-const AccountType = t.type({
-  addr: t.string,
-  // TODO: unsure how to handle Uint8Array type here. Instead we are doing it
-  // in the validation method below.
-  sk: t.unknown,
-  name: t.string
+const AccountType = z.object({
+  addr: z.string(),
+  sk: z.unknown(),
+  name: z.string()
 });
 
-const AlgobChainType = t.type({
-  accounts: optional(t.array(AccountType)),
-  chainName: optional(t.string),
-  throwOnTransactionFailures: optional(t.boolean),
-  throwOnCallFailures: optional(t.boolean),
-  loggingEnabled: optional(t.boolean),
-  initialDate: optional(t.string)
-});
+const AlgobChainType = z.object({
+  accounts: z.array(AccountType).optional(),
+  chainName: z.string().optional(),
+  throwOnTransactionFailures: z.boolean().optional(),
+  throwOnCallFailures: z.boolean().optional(),
+  loggingEnabled: z.boolean().optional(),
+  initialDate: z.string().optional()
+}).nonstrict();
 
-const HttpHeaders = t.record(t.string, t.string, "httpHeaders");
+const HttpHeaders = z.record(z.string());
 
-const HttpNetworkType = t.type({
-  accounts: optional(t.array(AccountType)),
-  chainName: optional(t.string),
-  // from: optional(t.string),
-  host: optional(t.string),
-  port: optional(t.number),
-  token: optional(t.string),
-  httpHeaders: optional(HttpHeaders)
-});
+const HttpNetworkType = z.object({
+  accounts: z.array(AccountType).optional(),
+  chainName: z.string().optional(),
+  // from: z.string().optional(),
+  host: z.string().optional(),
+  port: z.number().optional(),
+  token: z.string().optional(),
+  httpHeaders: HttpHeaders.optional()
+}).nonstrict();
 
-const NetworkType = t.union([AlgobChainType, HttpNetworkType]);
+const NetworkType = z.union([AlgobChainType, HttpNetworkType]);
 
-const NetworksType = t.record(t.string, NetworkType);
+const NetworksType = z.record(NetworkType);
 
-const ProjectPaths = t.type({
-  root: optional(t.string),
-  cache: optional(t.string),
-  artifacts: optional(t.string),
-  sources: optional(t.string),
-  tests: optional(t.string)
-});
+const ProjectPaths = z.object({
+  root: z.string().optional(),
+  cache: z.string().optional(),
+  artifacts: z.string().optional(),
+  sources: z.string().optional(),
+  tests: z.string().optional()
+}).nonstrict(); ;
 
-const Config = t.type(
-  {
-    networks: optional(NetworksType),
-    paths: optional(ProjectPaths)
-  },
-  "AlgobConfig"
-);
+const Config = z.object({
+  networks: NetworksType.optional(),
+  paths: ProjectPaths.optional()
+}
+).nonstrict(); ;
 
 /**
  * Validates the config, throwing a BuilderError if invalid.
@@ -127,7 +72,6 @@ export function validateConfig(config: any) { // eslint-disable-line
 export function getValidationErrors(config: any): CfgErrors {  // eslint-disable-line
   const errors = new CfgErrors();
 
-  // These can't be validated with io-ts
   if (config !== undefined && typeof config.networks === "object") {
     for (const [net, ncfg] of Object.entries<NetworkConfig>(config.networks)) {
       const accountsMap = new Map<string, number>(); // {} as ([key: string]: number);
@@ -155,26 +99,27 @@ export function getValidationErrors(config: any): CfgErrors {  // eslint-disable
         errors.push(net, "token", token, "string");
       }
 
-      const netConfigResult = HttpNetworkType.decode(hcfg);
-      if (isLeft(netConfigResult)) {
-        errors.push(net, "", hcfg, "HttpNetworkConfig");
+      try {
+        HttpNetworkType.parse(hcfg);
+      } catch (e) {
+        if (e instanceof z.ZodError) {
+          errors.concatenate([parseZodError(e)]);
+        }
       }
     }
   }
 
-  // io-ts can get confused if there are errors that it can't understand.
-  // It will treat networks as an HTTPConfig and may give a loot of errors.
   if (!errors.isEmpty()) {
     return errors;
   }
 
-  const result = Config.decode(config);
-
-  if (isRight(result)) {
-    return errors;
+  try {
+    Config.parse(config);
+  } catch (e) {
+    if (e instanceof z.ZodError) {
+      errors.concatenate([parseZodError(e)]);
+    }
   }
-
-  errors.concatenate(DotPathReporter.report(result));
   return errors;
 }
 

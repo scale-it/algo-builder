@@ -5,11 +5,32 @@ import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { ASSETS_DIR } from "../internal/core/project-structure";
 import { parseZodError } from "../internal/core/validation-errors";
-import { ASADefs } from "../types";
+import { Accounts, ASADef, ASADefs } from "../types";
 import { ASADefsSchema } from "../types-input";
 import { loadFromYamlFileSilentWithMessage } from "./files";
 
-export function validateASADefs (obj: Object, filename?: string): ASADefs {
+function validateSingle (accounts: Accounts, filename: string, asaDef: ASADef): void {
+  if (!asaDef.optInAccNames || asaDef.optInAccNames.length === 0) {
+    return;
+  }
+  for (const accName of asaDef.optInAccNames) {
+    if (!accounts.get(accName)) {
+      throw new BuilderError(
+        ERRORS.SCRIPT.ASA_PARAM_ERROR_NO_NAMED_OPT_IN_ACCOUNT, {
+          filename: filename,
+          optInAccName: accName
+        });
+    }
+  }
+}
+
+function validateParsedASADefs (accounts: Accounts, asaDefs: ASADefs, filename: string): void {
+  for (const def of Object.values(asaDefs)) {
+    validateSingle(accounts, filename, def);
+  }
+}
+
+export function validateASADefs (obj: Object, accounts: Accounts, filename: string): ASADefs {
   try {
     const parsed = ASADefsSchema.parse(obj);
     Object.keys(parsed).forEach(k => {
@@ -17,13 +38,12 @@ export function validateASADefs (obj: Object, filename?: string): ASADefs {
         parsed[k].defaultFrozen = false;
       }
     });
+    validateParsedASADefs(accounts, parsed, filename);
     return parsed;
   } catch (e) {
     if (e instanceof z.ZodError) {
       throw new BuilderError(
-        filename
-          ? ERRORS.SCRIPT.ASA_PARAM_PARSE_ERROR_LOAD_FROM_FILE
-          : ERRORS.SCRIPT.ASA_PARAM_PARSE_ERROR, {
+        ERRORS.SCRIPT.ASA_PARAM_PARSE_ERROR, {
           reason: parseZodError(e),
           filename: filename
         }, e);
@@ -32,9 +52,10 @@ export function validateASADefs (obj: Object, filename?: string): ASADefs {
   }
 }
 
-export function loadASAFile (): ASADefs {
+export function loadASAFile (accounts: Accounts): ASADefs {
   const filename = path.join(ASSETS_DIR, "asa.yaml");
   return validateASADefs(
     loadFromYamlFileSilentWithMessage(filename, path.join(ASSETS_DIR, "asa.yaml") + " doesn't exist."),
+    accounts,
     filename);
 }
