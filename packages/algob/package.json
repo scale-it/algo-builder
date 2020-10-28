@@ -45,6 +45,7 @@
     "coverage": "nyc ../../node_modules/mocha/bin/mocha",
     "build": "tsc --build .",
     "build:watch": "tsc -w -p .",
+    "build:docs": "typedoc --out docs --exclude \"internal/**\"  src",
     "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.tsbuildinfo build",
     "algob:dev": "sh ./setup_dev_project.sh"
   },
