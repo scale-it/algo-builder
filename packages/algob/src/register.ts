@@ -10,41 +10,36 @@ import {
   isNodeCalledWithoutAScript
 } from "./internal/util/console";
 
-(async () => {
-  if (!BuilderContext.isCreated()) {
-    require("source-map-support/register");
+async function registerEnv (): Promise<void> {
+  if (!BuilderContext.isCreated()) { return; }
 
-    const ctx = BuilderContext.createBuilderContext();
+  require("source-map-support/register");
 
-    if (isNodeCalledWithoutAScript()) {
-      disableReplWriterShowProxy();
-    }
+  const ctx = BuilderContext.createBuilderContext();
 
-    const runtimeArgs = getEnvRuntimeArgs(
-      ALGOB_PARAM_DEFINITIONS,
-      process.env
-    );
+  if (isNodeCalledWithoutAScript()) { disableReplWriterShowProxy(); }
 
-    if (runtimeArgs.verbose) {
-      debug.enable("algob*");
-    }
+  const runtimeArgs = getEnvRuntimeArgs(
+    ALGOB_PARAM_DEFINITIONS,
+    process.env
+  );
 
-    const config = await loadConfigAndTasks(runtimeArgs);
+  if (runtimeArgs.verbose) { debug.enable("algob*"); }
 
-    if (!runtimeArgs.network) {
-      runtimeArgs.network = "default";
-    }
+  const config = await loadConfigAndTasks(runtimeArgs);
 
-    const env = new Environment(
-      config,
-      runtimeArgs,
-      ctx.tasksDSL.getTaskDefinitions(),
-      ctx.extendersManager.getExtenders(),
-      false
-    );
+  if (!runtimeArgs.network) { runtimeArgs.network = "default"; }
 
-    ctx.setAlgobRuntimeEnv(env);
+  const env = new Environment(
+    config,
+    runtimeArgs,
+    ctx.tasksDSL.getTaskDefinitions(),
+    ctx.extendersManager.getExtenders(),
+    false
+  );
+  ctx.setAlgobRuntimeEnv(env);
 
-    env.injectToGlobal();
-  }
-})().catch((err) => console.log(err));
+  env.injectToGlobal();
+}
+
+registerEnv().catch((err) => console.error(err));

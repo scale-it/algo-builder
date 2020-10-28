@@ -26,16 +26,16 @@ declare module 'algosdk' {
 
     versions(): Promise<any>;
     listWallets(): Promise<Wallets>;
-    initWalletHandle(walletid: string, password: string): Promise<WALLETHANDLE>
+    initWalletHandle(walletid: string, password: string): Promise<WalletHandle>
     listKeys(wallet_handle_token: string): Promise<Keys>;
-    exportKey(wallet_handle_token: string, password: string, address: string): Promise<PRIVATEKEY>
+    exportKey(wallet_handle_token: string, password: string, address: string): Promise<PrivKeyWrapper>
   }
 
   interface Wallets {
-    wallets: WALLETDETAILS[]
+    wallets: WalletDetails[]
   }
 
-  interface WALLETDETAILS {
+  interface WalletDetails {
     driver_name: string,
     driver_version: number,
     id: string,
@@ -44,7 +44,7 @@ declare module 'algosdk' {
     supported_txs: string[]
   }
 
-  interface PRIVATEKEY {
+  interface PrivKeyWrapper {
     private_key: Uint8Array
   }
 
@@ -52,7 +52,7 @@ declare module 'algosdk' {
     addresses: string[]
   }
 
-  interface WALLETHANDLE {
+  interface WalletHandle {
     wallet_handle_token: string
   }
 
@@ -134,7 +134,7 @@ declare module 'algosdk' {
   export function assignGroupID (txns: any, from: any): any;
 
   export function computeGroupID (txns: any): any;
-  
+
   export function decodeObj (o: any): any;
 
   export function encodeObj (o: any): any;

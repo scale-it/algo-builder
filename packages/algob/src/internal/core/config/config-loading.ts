@@ -62,7 +62,7 @@ export async function loadConfigAndTasks (
   return cfg;
 }
 
-// loads KMD accoutns if the net.kmdCfg is specified and merges them into net.accounts
+// loads KMD accounts if the net.kmdCfg is specified and merges them into net.accounts
 async function _loadKMDAccounts (net: NetworkConfig): Promise<void> {
   if (net.kmdCfg === undefined) { return; }
   const kmdAccounts = await loadKMDAccounts(net.kmdCfg);

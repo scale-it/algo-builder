@@ -96,7 +96,7 @@ export async function loadKMDAccounts (kcfg: KmdCfg): Promise<Account[]> {
         continue;
       }
       const names = kmdWalletAddrNames(w);
-      const token = (await c.initWalletHandle(id, w.password + "xxx")).wallet_handle_token;
+      const token = (await c.initWalletHandle(id, w.password)).wallet_handle_token;
       const keys = await c.listKeys(token);
       for (const addr of keys.addresses) {
         const n = names[addr];

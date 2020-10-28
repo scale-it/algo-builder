@@ -19,6 +19,7 @@
 // ## ACCOUNTS USING mnemonic ##
 const { mkAccounts } = require("algob");
 let accounts = mkAccounts([{
+  name: "master",
   addr: "KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY",
   mnemonic: "call boy rubber fashion arch day capable one sweet skate outside purse six early learn tuition eagle love breeze pizza loud today popular able divide"
 }]);
@@ -35,12 +36,14 @@ let defaultCfg = {
   port: 8080,
   token: "content_of/algorand-node-data/algod.token",
   accounts: accounts,
-  // if you want to load accoutns from KMD, you need to add the kmdCfg object. Please read
-  // algob-confg.md documentation for details.
+  // if you want to load accounts from KMD, you need to add the kmdCfg object. Please read
+  // algob-config.md documentation for details.
   // kmdCfg: kmdCfg,
 };
 
 module.exports = {
-  localhost: defaultCfg,
-  default: defaultCfg
+  networks: {
+    localhost: defaultCfg,
+    default: defaultCfg
+  }
 };

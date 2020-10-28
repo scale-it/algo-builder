@@ -33,7 +33,7 @@ Each network configuration requires a list of accounts. These accounts are then 
           addr: 'UDF7DS5QXECBUEDF3GZVHHLXDRJOVTGR7EORYGDBPJ2FNB5D5T636QMWZY',
           sk: new Uint8Array([28,  45,  45,  15,  70, 188,  57, 228,  18,  21,  42, 228,  33, 187, 222, 162,  89,  15,  22,  52, 143, 171, 182,  17, 168, 238,  96, 177,  12, 163, 243, 231, 160, 203, 241, 203, 176, 185,   4,  26,  16, 101, 217, 179, 83, 157, 119,  28,  82, 234, 204, 209, 249,  29,  28, 24,  97, 122, 116,  86, 135, 163, 236, 253]) }
 
-1. Loading from a file (you can generate a test accounts using `gen-accounts` command). `algob` has to be available in your node_modules.
+1. Loading from a file (you can generate a test accounts using `gen-accounts` command). `algob` should be available in your node_modules.
 
         const { loadAccountsFromFileSync } = require("algob");
         const accFromFile = loadAccountsFromFileSync("assets/accounts_generated.yaml");

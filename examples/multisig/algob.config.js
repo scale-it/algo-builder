@@ -47,7 +47,6 @@ let defaultCfg = {
 
 module.exports = {
   networks: {
-    localhost: defaultCfg,
     default: defaultCfg
   }
 };
