@@ -134,7 +134,7 @@ function validateAlgobAccounts (algobAccounts: AlgobAccount[]): void {
   }
 }
 
-export function loadFromEnv (): Account[] {
+export function loadAccountsFromEnv (): Account[] {
   var algobAccountsString = process.env.ALGOB_ACCOUNTS;
   if (algobAccountsString) {
     var accounts: AlgobAccount[] = [];

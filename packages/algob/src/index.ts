@@ -2,7 +2,7 @@ import {
   createMsigAddress,
   loadAccountsFromFile,
   loadAccountsFromFileSync,
-  loadFromEnv,
+  loadAccountsFromEnv,
   loadKMDAccounts,
   mkAccounts
 } from "./lib/account";
@@ -16,7 +16,7 @@ export {
   loadKMDAccounts,
   loadAccountsFromFile,
   loadAccountsFromFileSync,
-  loadFromEnv,
+  loadAccountsFromEnv,
   transferAsset,
   transferMicroAlgos,
   balanceOf,
