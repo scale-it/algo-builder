@@ -24,7 +24,8 @@ export const ERROR_RANGES = {
   },
   ARGUMENTS: { min: 300, max: 399, title: "Arguments related errors" },
   ACCOUNT: { min: 400, max: 409, title: "Account related errors" },
-  ALGORAND: { min: 410, max: 420, title: "Algorand node related errors" },
+  ALGORAND: { min: 410, max: 429, title: "Algorand node related errors" },
+  KMD: { min: 440, max: 449, title: "KMD node related errors" },
   PyTEAL: { min: 450, max: 460, title: "Python (PyTeal) related errors" },
 
   BUILTIN_TASKS: { min: 600, max: 699, title: "Built-in tasks errors" },
@@ -681,6 +682,25 @@ context=%ctx%`,
   }
 };
 
+const kmdNode = {
+  CONNECTION: {
+    number: 440,
+    message: `Cannot connect to the KMD, context: %ctx%.
+Please make sure a KMD is running, and check your internet connection and networks config`,
+    title: "Cannot connect to the KMD",
+    description: `Cannot connect to the KMD.
+
+Please make sure a KMD is running, and check your internet connection and networks config.`
+  },
+  ERROR: {
+    number: 448,
+    message: `KMD error.
+Context: %ctx%`,
+    title: `KMD error`,
+    description: "Can't make API call to KMD"
+  }
+};
+
 const scriptErrors = {
   ASA_PARAM_PARSE_ERROR: {
     number: 900,
@@ -750,6 +770,7 @@ export const ERRORS: {
   ARGUMENTS: argumentErrors,
   ACCOUNT: accountErrors,
   ALGORAND: algorandNode,
+  KMD: kmdNode,
   BUILTIN_TASKS: taskErrors,
   PLUGINS: pluginErrors,
   SCRIPT: scriptErrors,

@@ -30,7 +30,7 @@ export function useEnvironment (
   beforeEachFn?: (algobRuntimeEnv: AlgobRuntimeEnv) => PromiseAny
 ): void {
   beforeEach("Load environment", async function () {
-    this.env = getEnv(defaultNetCfg);
+    this.env = await getEnv(defaultNetCfg);
     if (beforeEachFn) {
       return await beforeEachFn(this.env);
     }
@@ -41,7 +41,7 @@ export function useEnvironment (
   });
 }
 
-export function getEnv (defaultNetworkCfg?: NetworkConfig): AlgobRuntimeEnv {
+export async function getEnv (defaultNetworkCfg?: NetworkConfig): Promise<AlgobRuntimeEnv> {
   if (BuilderContext.isCreated()) {
     ctx = BuilderContext.getBuilderContext();
 
@@ -64,7 +64,7 @@ export function getEnv (defaultNetworkCfg?: NetworkConfig): AlgobRuntimeEnv {
     debug.enable("algob*");
   }
 
-  const config = loadConfigAndTasks(runtimeArgs);
+  const config = await loadConfigAndTasks(runtimeArgs);
 
   if (runtimeArgs.network == null) {
     throw new Error("INTERNAL ERROR. Default network should be registered in `register.ts` module");

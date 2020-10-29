@@ -24,8 +24,8 @@ describe("Config resolution", () => {
     describe("With default config", () => {
       useFixtureProject("default-config-project");
 
-      it("should return the default config", () => {
-        const config = loadConfigAndTasks();
+      it("should return the default config", async () => {
+        const config = await loadConfigAndTasks();
         assert.containsAllKeys(config.networks, [ALGOB_CHAIN_NAME]);
 
         const algobChainCfg = config.networks[ALGOB_CHAIN_NAME] as AlgobChainCfg;
@@ -37,14 +37,14 @@ describe("Config resolution", () => {
     describe("With custom config", () => {
       useFixtureProject("config-project");
 
-      it("should return the config merged ", () => {
-        const config = loadConfigAndTasks();
+      it("should return the config merged ", async () => {
+        const config = await loadConfigAndTasks();
 
         assert.containsAllKeys(config.networks, ["localhost", "custom"]);
       });
 
-      it("should return the config merged ", () => {
-        const config = loadConfigAndTasks();
+      it("should return the config merged ", async () => {
+        const config = await loadConfigAndTasks();
         assert.containsAllKeys(config.networks, ["localhost", "custom"]);
         const ncfg = config.networks.localhost as HttpNetworkConfig;
         assert.equal(ncfg.host, "http://127.0.0.1");
@@ -52,8 +52,8 @@ describe("Config resolution", () => {
         assertAccountsEqual(config.networks.localhost.accounts, [account1]);
       });
 
-      it("should keep any unknown field", () => {
-        const config = loadConfigAndTasks() as any;
+      it("should keep any unknown field", async () => {
+        const config = await loadConfigAndTasks() as any;
         assert.deepEqual(config.unknown, { asd: 123 });
       });
     });
