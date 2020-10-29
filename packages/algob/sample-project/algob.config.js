@@ -6,7 +6,7 @@
 // a sufficient ALGO balance.
 
 /**
-  Check our [algob-config.md](/docs/algob-config.md) documentation for more ways how to
+  Check our /docs/algob-config.md documentation for more ways how to
   load a private keys:
   + using mnemonic
   + using binary secret key
