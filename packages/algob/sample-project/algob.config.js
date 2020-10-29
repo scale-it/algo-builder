@@ -35,8 +35,8 @@ let defaultCfg = {
   port: 8080,
   token: "content_of/algorand-node-data/algod.token",
   accounts: accounts,
-  // if you want to load accoutns from KMD, you need to add the kmdCfg object. Please read
-  // algob-confg.md documentation for details.
+  // if you want to load accounts from KMD, you need to add the kmdCfg object. Please read
+  // algob-config.md documentation for details.
   // kmdCfg: kmdCfg,
 };
 
