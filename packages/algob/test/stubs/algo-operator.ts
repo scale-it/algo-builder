@@ -29,7 +29,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 
   async deployASA (
     name: string, asaDesc: ASADef, flags: ASADeploymentFlags, accounts: Accounts,
-    txWriter: txWriter): Promise<ASAInfo> {
+    txnWriter: txWriter): Promise<ASAInfo> {
     return {
       creator: flags.creator.addr + "-get-address-dry-run",
       txId: "tx-id-dry-run",
@@ -40,7 +40,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 
   async fundLsig (
     name: string, scParams: Object, flags: FundASCFlags, payFlags: TxParams,
-    txWriter: txWriter): Promise<LsigInfo> {
+    txnWriter: txWriter): Promise<LsigInfo> {
     return {
       creator: flags.funder.addr + "-get-address-dry-run",
       contractAddress: "dfssdfsd",
