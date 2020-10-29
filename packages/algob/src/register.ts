@@ -10,7 +10,7 @@ import {
   isNodeCalledWithoutAScript
 } from "./internal/util/console";
 
-(async () => {
+async function registerEnv() {
   if (!BuilderContext.isCreated()) {
     require("source-map-support/register");
 
@@ -47,4 +47,6 @@ import {
 
     env.injectToGlobal();
   }
-})().catch((err) => console.log(err));
+}
+
+registerEnv().catch((err) => console.error(err));
