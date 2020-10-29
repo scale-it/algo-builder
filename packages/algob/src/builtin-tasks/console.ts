@@ -3,14 +3,11 @@ import { runInNewContext } from "vm";
 
 import { mkDeployer } from "../builtin-tasks/run";
 import { task } from "../internal/core/config/config-env";
-import { txWriter, TxWriterImpl } from "../internal/tx-log-writer";
 import { isRecoverableError, preprocess } from "../internal/util/console";
-import { mkAccountIndex } from "../lib/account";
 import { createAlgoOperator } from "../lib/algo-operator";
-import { loadASAFile } from "../lib/asa";
+import { MkDeployerConfig } from "../lib/deployer";
 import { createClient } from "../lib/driver";
-import { loadCheckpointsRecursive } from "../lib/script-checkpoints";
-import { AlgobDeployer, AlgobRuntimeEnv, CheckpointRepo } from "../types";
+import { AlgobDeployer, AlgobRuntimeEnv } from "../types";
 import { TASK_CONSOLE } from "./task-names";
 
 // colorize text to yellow
@@ -20,19 +17,11 @@ function colorize (message: string): string {
 
 function initializeDeployer (runtimeEnv: AlgobRuntimeEnv): AlgobDeployer {
   const algoOp = createAlgoOperator(runtimeEnv.network);
-  const accounts = mkAccountIndex(runtimeEnv.network.config.accounts);
-  const asaDefs = loadASAFile(accounts);
-
-  const cpData: CheckpointRepo = loadCheckpointsRecursive();
-  const txWriter: txWriter = new TxWriterImpl('');
+  const deployerConfig = new MkDeployerConfig(runtimeEnv, algoOp);
   return mkDeployer(
-    runtimeEnv,
-    cpData,
     false,
-    algoOp,
-    asaDefs,
-    accounts,
-    txWriter);
+    deployerConfig
+  );
 }
 
 // handles top level await by preprocessing input and awaits the output before returning
