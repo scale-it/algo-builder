@@ -3,8 +3,6 @@ import * as algosdk from "algosdk";
 import * as z from 'zod';
 
 import * as types from "./internal/core/params/argument-types";
-import { txWriter } from "./internal/tx-log-writer";
-import { AlgoOperator } from "./lib/algo-operator";
 import { ASADefSchema, ASADefsSchema } from "./types-input";
 // Begin config types
 
@@ -346,15 +344,6 @@ export interface LsigInfo {
   creator: AccountAddress
   contractAddress: string
   lsig: Uint8Array
-}
-
-export interface DeployerConfig {
-  runtimeEnv: AlgobRuntimeEnv
-  cpData: CheckpointRepo
-  asaDefs: ASADefs
-  algoOp: AlgoOperator
-  accounts: Accounts
-  txWriter: txWriter
 }
 
 export interface CheckpointRepo {

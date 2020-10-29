@@ -4,16 +4,12 @@ import fsExtra from "fs-extra";
 import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
-import {
-  DeployerDeployMode,
-  DeployerRunMode
-} from "../internal/deployer";
 import { TxWriterImpl } from "../internal/tx-log-writer";
+import { DeployerConfig, mkDeployer, MkDeployerConfig } from "../internal/util/deployer";
 import { partitionByFn } from "../internal/util/lists";
 import { runScript } from "../internal/util/scripts-runner";
 import { AlgoOperator, createAlgoOperator } from "../lib/algo-operator";
 import { cmpStr } from "../lib/comparators";
-import { MkDeployerConfig } from "../lib/deployer";
 import { assertDirChildren } from "../lib/files";
 import {
   loadCheckpoint,
@@ -21,7 +17,7 @@ import {
   lsScriptsDir,
   scriptsDirectory
 } from "../lib/script-checkpoints";
-import { AlgobDeployer, AlgobRuntimeEnv, CheckpointRepo, DeployerConfig } from "../types";
+import { AlgobDeployer, AlgobRuntimeEnv, CheckpointRepo } from "../types";
 import { TASK_RUN } from "./task-names";
 
 interface Input {
@@ -30,28 +26,6 @@ interface Input {
 
 function filterNonExistent (scripts: string[]): string[] {
   return scripts.filter(script => !fsExtra.pathExistsSync(script));
-}
-
-export function mkDeployer (
-  allowWrite: boolean,
-  deployerConfig: DeployerConfig
-): AlgobDeployer {
-  if (allowWrite) {
-    return new DeployerDeployMode(
-      deployerConfig.runtimeEnv,
-      deployerConfig.cpData,
-      deployerConfig.asaDefs,
-      deployerConfig.algoOp,
-      deployerConfig.accounts,
-      deployerConfig.txWriter);
-  }
-  return new DeployerRunMode(
-    deployerConfig.runtimeEnv,
-    deployerConfig.cpData,
-    deployerConfig.asaDefs,
-    deployerConfig.algoOp,
-    deployerConfig.accounts,
-    deployerConfig.txWriter);
 }
 
 // returns all items before the current one and

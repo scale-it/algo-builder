@@ -1,11 +1,10 @@
 import repl from "repl";
 import { runInNewContext } from "vm";
 
-import { mkDeployer } from "../builtin-tasks/run";
 import { task } from "../internal/core/config/config-env";
 import { isRecoverableError, preprocess } from "../internal/util/console";
+import { mkDeployer, MkDeployerConfig } from "../internal/util/deployer";
 import { createAlgoOperator } from "../lib/algo-operator";
-import { MkDeployerConfig } from "../lib/deployer";
 import { createClient } from "../lib/driver";
 import { AlgobDeployer, AlgobRuntimeEnv } from "../types";
 import { TASK_CONSOLE } from "./task-names";
