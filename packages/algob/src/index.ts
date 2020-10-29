@@ -1,8 +1,8 @@
 import {
   createMsigAddress,
+  loadAccountsFromEnv,
   loadAccountsFromFile,
   loadAccountsFromFileSync,
-  loadFromEnv,
   mkAccounts
 } from "./lib/account";
 import { balanceOf, printAssets } from "./lib/status";
@@ -14,7 +14,7 @@ export {
   createMsigAddress,
   loadAccountsFromFile,
   loadAccountsFromFileSync,
-  loadFromEnv,
+  loadAccountsFromEnv,
   transferAsset,
   transferMicroAlgos,
   balanceOf,

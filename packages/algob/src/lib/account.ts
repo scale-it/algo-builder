@@ -1,11 +1,11 @@
-import { Account as AccountSDK, mnemonicToSecretKey, multisigAddress } from "algosdk";
+import { Account as AccountSDK, Kmd, mnemonicToSecretKey, multisigAddress } from "algosdk";
 import * as fs from "fs";
 import YAML from "yaml";
 
 import CfgErrors, { ErrorPutter } from "../internal/core/config/config-errors";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
-import type { Account, AccountDef, Accounts, AlgobAccount, HDAccount, MnemonicAccount } from "../types";
+import type { Account, AccountDef, Accounts, AlgobAccount, HDAccount, KmdCfg, KmdWallet, MnemonicAccount, StrMap } from "../types";
 
 export function mkAccounts (input: AccountDef[]): Account[] {
   const accounts: Account[] = [];
@@ -72,6 +72,76 @@ export function mkAccountIndex (accountList: Account[]): Accounts {
   return out;
 }
 
+function kmdWalletAddrNames (kwallet: KmdWallet): StrMap {
+  const m: StrMap = {};
+  for (const a of kwallet.accounts) {
+    m[a.address] = a.name;
+  }
+  return m;
+}
+
+export async function loadKMDAccounts (kcfg: KmdCfg): Promise<Account[]> {
+  const accounts: Account[] = [];
+  const c = new Kmd(kcfg.token, kcfg.host, kcfg.port);
+  try {
+    const wallets = (await c.listWallets()).wallets;
+
+    const walletIDs: StrMap = {};
+    for (const w of wallets) walletIDs[w.name] = w.id;
+
+    for (const w of kcfg.wallets) {
+      const id = walletIDs[w.name];
+      if (id === undefined) {
+        console.warn("wallet id=", id, "defined in config but it doesn't exist in KMD");
+        continue;
+      }
+      const names = kmdWalletAddrNames(w);
+      const token = (await c.initWalletHandle(id, w.password)).wallet_handle_token;
+      const keys = await c.listKeys(token);
+      for (const addr of keys.addresses) {
+        const n = names[addr];
+        if (n === undefined) {
+          console.debug("KMD account with address:", addr, " not found in wallet:1", w.name);
+          continue;
+        }
+        // console.debug("Adding KMD account name:", n)
+        const k = await c.exportKey(token, w.password, addr);
+        accounts.push({ name: n, addr: addr, sk: new Uint8Array(k.private_key) });
+      }
+    }
+  } catch (e) {
+    if (e.code === 'ECONNREFUSED') { throw new BuilderError(ERRORS.KMD.CONNECTION, { ctx: e }, e); }
+    throw new BuilderError(ERRORS.KMD.ERROR, { ctx: JSON.stringify(e) }, e);
+  }
+
+  return accounts;
+}
+
+export function loadAccountsFromEnv (): Account[] {
+  var algobAccountsString = process.env.ALGOB_ACCOUNTS;
+  if (algobAccountsString) {
+    var accounts: AlgobAccount[] = [];
+    try {
+      accounts = JSON.parse(algobAccountsString);
+    } catch (error) {
+      throw new BuilderError(ERRORS.ACCOUNT.MALFORMED, { errors: 'Some accounts are malformed or have missing fields' });
+    }
+    validateAlgobAccounts(accounts);
+    var algobAccounts: Account[] = [];
+    for (const account of accounts) {
+      try {
+        const accountSDK = mnemonicToSecretKey(account.mnemonic);
+        algobAccounts.push({ name: account.name, addr: accountSDK.addr, sk: accountSDK.sk });
+      } catch (error) {
+        throw new BuilderError(ERRORS.ACCOUNT.WRONG_MNEMONIC,
+          { errmsg: 'failed to decode mnemonic in ' + JSON.stringify(account) });
+      }
+    }
+    return algobAccounts;
+  }
+  return [];
+}
+
 // returns multisignature account address
 export function createMsigAddress (version: number, threshold: number, accountList: Account[]): any {
   const mparams = {
@@ -101,29 +171,4 @@ function validateAlgobAccounts (algobAccounts: AlgobAccount[]): void {
         { errors: 'Field mnemonic string must be defined and not empty in ' + JSON.stringify(account) });
     }
   }
-}
-
-export function loadFromEnv (): Account[] {
-  var algobAccountsString = process.env.ALGOB_ACCOUNTS;
-  if (algobAccountsString) {
-    var accounts: AlgobAccount[] = [];
-    try {
-      accounts = JSON.parse(algobAccountsString);
-    } catch (error) {
-      throw new BuilderError(ERRORS.ACCOUNT.MALFORMED, { errors: 'Some accounts are malformed or have missing fields' });
-    }
-    validateAlgobAccounts(accounts);
-    var algobAccounts: Account[] = [];
-    for (const account of accounts) {
-      try {
-        const accountSDK = mnemonicToSecretKey(account.mnemonic);
-        algobAccounts.push({ name: account.name, addr: accountSDK.addr, sk: accountSDK.sk });
-      } catch (error) {
-        throw new BuilderError(ERRORS.ACCOUNT.WRONG_MNEMONIC,
-          { errmsg: 'failed to decode mnemonic in ' + JSON.stringify(account) });
-      }
-    }
-    return algobAccounts;
-  }
-  return [];
 }
