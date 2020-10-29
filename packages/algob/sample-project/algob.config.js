@@ -19,6 +19,7 @@
 // ## ACCOUNTS USING mnemonic ##
 const { mkAccounts } = require("algob");
 let accounts = mkAccounts([{
+  name: "master",
   addr: "KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY",
   mnemonic: "call boy rubber fashion arch day capable one sweet skate outside purse six early learn tuition eagle love breeze pizza loud today popular able divide"
 }]);
@@ -41,6 +42,8 @@ let defaultCfg = {
 };
 
 module.exports = {
-  localhost: defaultCfg,
-  default: defaultCfg
+  networks: {
+    localhost: defaultCfg,
+    default: defaultCfg
+  }
 };
