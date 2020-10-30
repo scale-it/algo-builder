@@ -80,6 +80,12 @@ export interface KmdCfg {
   wallets: KmdWallet[]
 }
 
+export interface NetworkCredentials {
+  host: string
+  port: number
+  token: string
+}
+
 /**
  * The project paths:
  * * root: the project's root.
