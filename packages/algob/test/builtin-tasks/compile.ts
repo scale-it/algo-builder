@@ -7,7 +7,7 @@ import YAML from 'yaml';
 import { compile } from "../../src/builtin-tasks/compile";
 import { ASSETS_DIR } from "../../src/internal/core/project-structure";
 import { CompileOp, PyCompileOp } from "../../src/lib/compile";
-import type { ASCCache, PyASCCache } from "../../src/types";
+import type { ASCCache } from "../../src/types";
 import { useFixtureProjectCopy } from "../helpers/project";
 const murmurhash = require('murmurhash'); // eslint-disable-line @typescript-eslint/no-var-requires
 

@@ -4,16 +4,11 @@ import fsExtra from "fs-extra";
 import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
-import {
-  DeployerDeployMode,
-  DeployerRunMode
-} from "../internal/deployer";
-import { txWriter, TxWriterImpl } from "../internal/tx-log-writer";
+import { DeployerConfig, mkDeployer } from "../internal/deployer_cfg";
+import { TxWriterImpl } from "../internal/tx-log-writer";
 import { partitionByFn } from "../internal/util/lists";
 import { runScript } from "../internal/util/scripts-runner";
-import { mkAccountIndex } from "../lib/account";
 import { AlgoOperator, createAlgoOperator } from "../lib/algo-operator";
-import { loadASAFile } from "../lib/asa";
 import { cmpStr } from "../lib/comparators";
 import { assertDirChildren } from "../lib/files";
 import {
@@ -22,7 +17,7 @@ import {
   lsScriptsDir,
   scriptsDirectory
 } from "../lib/script-checkpoints";
-import { Accounts, AlgobDeployer, AlgobRuntimeEnv, ASADefs, CheckpointRepo } from "../types";
+import { AlgobDeployer, AlgobRuntimeEnv, CheckpointRepo } from "../types";
 import { TASK_RUN } from "./task-names";
 
 interface Input {
@@ -31,33 +26,6 @@ interface Input {
 
 function filterNonExistent (scripts: string[]): string[] {
   return scripts.filter(script => !fsExtra.pathExistsSync(script));
-}
-
-export function mkDeployer (
-  runtimeEnv: AlgobRuntimeEnv,
-  cpData: CheckpointRepo,
-  allowWrite: boolean,
-  algoOp: AlgoOperator,
-  asaDefs: ASADefs,
-  accounts: Accounts,
-  txWriter: txWriter
-): AlgobDeployer {
-  if (allowWrite) {
-    return new DeployerDeployMode(
-      runtimeEnv,
-      cpData,
-      asaDefs,
-      algoOp,
-      accounts,
-      txWriter);
-  }
-  return new DeployerRunMode(
-    runtimeEnv,
-    cpData,
-    asaDefs,
-    algoOp,
-    accounts,
-    txWriter);
 }
 
 // returns all items before the current one and
@@ -100,8 +68,7 @@ export async function runMultipleScripts (
   allowWrite: boolean,
   algoOp: AlgoOperator
 ): Promise<void> {
-  const accounts = mkAccountIndex(runtimeEnv.network.config.accounts);
-  const asaDefs = loadASAFile(accounts);
+  const deployerCfg = new DeployerConfig(runtimeEnv, algoOp);
   for (const scripts of partitionIntoSorted(scriptNames)) {
     await runSortedScripts(
       runtimeEnv,
@@ -110,9 +77,7 @@ export async function runMultipleScripts (
       force,
       logDebugTag,
       allowWrite,
-      algoOp,
-      asaDefs,
-      accounts
+      deployerCfg
     );
   }
 }
@@ -125,44 +90,37 @@ async function runSortedScripts (
   force: boolean,
   logDebugTag: string,
   allowWrite: boolean,
-  algoOp: AlgoOperator,
-  asaDefs: ASADefs,
-  accounts: Accounts
+  deployerCfg: DeployerConfig
 ): Promise<void> {
   const log = debug(logDebugTag);
-  const cpData: CheckpointRepo = loadCheckpointsRecursive();
-  const txWriter: txWriter = new TxWriterImpl('');
+  deployerCfg.cpData = loadCheckpointsRecursive();
+  deployerCfg.txWriter = new TxWriterImpl('');
   const deployer: AlgobDeployer = mkDeployer(
-    runtimeEnv,
-    cpData,
     allowWrite,
-    algoOp,
-    asaDefs,
-    accounts,
-    txWriter);
+    deployerCfg);
 
   const scriptsFromScriptsDir: string[] = lsScriptsDir();
 
   for (const relativeScriptPath of scriptNames) {
     const prevScripts = splitAfter(scriptsFromScriptsDir, relativeScriptPath);
-    loadCheckpointsIntoCPData(cpData, prevScripts);
+    loadCheckpointsIntoCPData(deployerCfg.cpData, prevScripts);
     if (prevScripts[prevScripts.length - 1] !== relativeScriptPath) {
-      cpData.merge(loadCheckpoint(relativeScriptPath), relativeScriptPath);
+      deployerCfg.cpData.merge(loadCheckpoint(relativeScriptPath), relativeScriptPath);
     }
-    if (!force && cpData.networkExistsInCurrentCP(runtimeEnv.network.name)) {
+    if (!force && deployerCfg.cpData.networkExistsInCurrentCP(runtimeEnv.network.name)) {
       log(`Skipping: Checkpoint exists for script ${relativeScriptPath}`);
       // '\x1b[33m%s\x1b[0m' this is used for setting the message color to yellow.
       console.warn('\x1b[33m%s\x1b[0m', `Skipping: Checkpoint exists for script ${relativeScriptPath}`);
       continue;
     }
-    txWriter.setScriptName(relativeScriptPath);
+    deployerCfg.txWriter.setScriptName(relativeScriptPath);
     log(`Running script ${relativeScriptPath}`);
     await runScript(
       relativeScriptPath,
       runtimeEnv,
       deployer
     );
-    onSuccessFn(cpData, relativeScriptPath);
+    onSuccessFn(deployerCfg.cpData, relativeScriptPath);
   }
 }
 

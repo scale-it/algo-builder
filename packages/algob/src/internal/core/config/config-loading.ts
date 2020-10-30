@@ -1,7 +1,7 @@
 import path from "path";
 
 import { loadKMDAccounts } from "../../../lib/account";
-import type { NetworkConfig, ResolvedAlgobConfig, RuntimeArgs, StrMap } from "../../../types";
+import type { NetworkConfig, ResolvedAlgobConfig, RuntimeArgs } from "../../../types";
 import { BuilderContext } from "../../context";
 import { loadPluginFile } from "../plugins";
 import { getUserConfigPath } from "../project-structure";
