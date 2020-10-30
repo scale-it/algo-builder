@@ -4,8 +4,8 @@ import fsExtra from "fs-extra";
 import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
+import { DeployerConfig, mkDeployer, MkDeployerConfig } from "../internal/deployer_cfg";
 import { TxWriterImpl } from "../internal/tx-log-writer";
-import { DeployerConfig, mkDeployer, MkDeployerConfig } from "../internal/util/deployer";
 import { partitionByFn } from "../internal/util/lists";
 import { runScript } from "../internal/util/scripts-runner";
 import { AlgoOperator, createAlgoOperator } from "../lib/algo-operator";
@@ -68,7 +68,7 @@ export async function runMultipleScripts (
   allowWrite: boolean,
   algoOp: AlgoOperator
 ): Promise<void> {
-  const deployerConfig = new MkDeployerConfig(runtimeEnv, algoOp);
+  const deployerCfg = new MkDeployerConfig(runtimeEnv, algoOp);
   for (const scripts of partitionIntoSorted(scriptNames)) {
     await runSortedScripts(
       runtimeEnv,
@@ -77,7 +77,7 @@ export async function runMultipleScripts (
       force,
       logDebugTag,
       allowWrite,
-      deployerConfig
+      deployerCfg
     );
   }
 }
@@ -90,37 +90,37 @@ async function runSortedScripts (
   force: boolean,
   logDebugTag: string,
   allowWrite: boolean,
-  deployerConfig: DeployerConfig
+  deployerCfg: DeployerConfig
 ): Promise<void> {
   const log = debug(logDebugTag);
-  deployerConfig.cpData = loadCheckpointsRecursive();
-  deployerConfig.txWriter = new TxWriterImpl('');
+  deployerCfg.cpData = loadCheckpointsRecursive();
+  deployerCfg.txWriter = new TxWriterImpl('');
   const deployer: AlgobDeployer = mkDeployer(
     allowWrite,
-    deployerConfig);
+    deployerCfg);
 
   const scriptsFromScriptsDir: string[] = lsScriptsDir();
 
   for (const relativeScriptPath of scriptNames) {
     const prevScripts = splitAfter(scriptsFromScriptsDir, relativeScriptPath);
-    loadCheckpointsIntoCPData(deployerConfig.cpData, prevScripts);
+    loadCheckpointsIntoCPData(deployerCfg.cpData, prevScripts);
     if (prevScripts[prevScripts.length - 1] !== relativeScriptPath) {
-      deployerConfig.cpData.merge(loadCheckpoint(relativeScriptPath), relativeScriptPath);
+      deployerCfg.cpData.merge(loadCheckpoint(relativeScriptPath), relativeScriptPath);
     }
-    if (!force && deployerConfig.cpData.networkExistsInCurrentCP(runtimeEnv.network.name)) {
+    if (!force && deployerCfg.cpData.networkExistsInCurrentCP(runtimeEnv.network.name)) {
       log(`Skipping: Checkpoint exists for script ${relativeScriptPath}`);
       // '\x1b[33m%s\x1b[0m' this is used for setting the message color to yellow.
       console.warn('\x1b[33m%s\x1b[0m', `Skipping: Checkpoint exists for script ${relativeScriptPath}`);
       continue;
     }
-    deployerConfig.txWriter.setScriptName(relativeScriptPath);
+    deployerCfg.txWriter.setScriptName(relativeScriptPath);
     log(`Running script ${relativeScriptPath}`);
     await runScript(
       relativeScriptPath,
       runtimeEnv,
       deployer
     );
-    onSuccessFn(deployerConfig.cpData, relativeScriptPath);
+    onSuccessFn(deployerCfg.cpData, relativeScriptPath);
   }
 }
 

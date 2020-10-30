@@ -1,19 +1,16 @@
-import { mkAccountIndex } from "../../lib/account";
-import { AlgoOperator } from "../../lib/algo-operator";
-import { loadASAFile } from "../../lib/asa";
-import { loadCheckpointsRecursive } from "../../lib/script-checkpoints";
+import { mkAccountIndex } from "../lib/account";
+import { AlgoOperator } from "../lib/algo-operator";
+import { loadASAFile } from "../lib/asa";
+import { loadCheckpointsRecursive } from "../lib/script-checkpoints";
 import type {
   Accounts,
   AlgobDeployer,
   AlgobRuntimeEnv,
   ASADefs,
   CheckpointRepo
-} from "../../types";
-import {
-  DeployerDeployMode,
-  DeployerRunMode
-} from "../deployer";
-import { txWriter, TxWriterImpl } from "../tx-log-writer";
+} from "../types";
+import { DeployerDeployMode, DeployerRunMode } from "./deployer";
+import { txWriter, TxWriterImpl } from "./tx-log-writer";
 
 export interface DeployerConfig {
   runtimeEnv: AlgobRuntimeEnv
@@ -26,24 +23,24 @@ export interface DeployerConfig {
 
 export function mkDeployer (
   allowWrite: boolean,
-  deployerConfig: DeployerConfig
+  deployerCfg: DeployerConfig
 ): AlgobDeployer {
   if (allowWrite) {
     return new DeployerDeployMode(
-      deployerConfig.runtimeEnv,
-      deployerConfig.cpData,
-      deployerConfig.asaDefs,
-      deployerConfig.algoOp,
-      deployerConfig.accounts,
-      deployerConfig.txWriter);
+      deployerCfg.runtimeEnv,
+      deployerCfg.cpData,
+      deployerCfg.asaDefs,
+      deployerCfg.algoOp,
+      deployerCfg.accounts,
+      deployerCfg.txWriter);
   }
   return new DeployerRunMode(
-    deployerConfig.runtimeEnv,
-    deployerConfig.cpData,
-    deployerConfig.asaDefs,
-    deployerConfig.algoOp,
-    deployerConfig.accounts,
-    deployerConfig.txWriter);
+    deployerCfg.runtimeEnv,
+    deployerCfg.cpData,
+    deployerCfg.asaDefs,
+    deployerCfg.algoOp,
+    deployerCfg.accounts,
+    deployerCfg.txWriter);
 }
 
 // intialize deployer config obj
@@ -55,10 +52,7 @@ export class MkDeployerConfig implements DeployerConfig {
   txWriter: txWriter;
   accounts: Accounts;
 
-  constructor (
-    runtimeEnv: AlgobRuntimeEnv,
-    algoOp: AlgoOperator
-  ) {
+  constructor (runtimeEnv: AlgobRuntimeEnv, algoOp: AlgoOperator) {
     this.runtimeEnv = runtimeEnv;
     this.cpData = loadCheckpointsRecursive();
     this.algoOp = algoOp;

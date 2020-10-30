@@ -2,8 +2,8 @@ import repl from "repl";
 import { runInNewContext } from "vm";
 
 import { task } from "../internal/core/config/config-env";
+import { mkDeployer, MkDeployerConfig } from "../internal/deployer_cfg";
 import { isRecoverableError, preprocess } from "../internal/util/console";
-import { mkDeployer, MkDeployerConfig } from "../internal/util/deployer";
 import { createAlgoOperator } from "../lib/algo-operator";
 import { createClient } from "../lib/driver";
 import { AlgobDeployer, AlgobRuntimeEnv } from "../types";
@@ -16,10 +16,10 @@ function colorize (message: string): string {
 
 function initializeDeployer (runtimeEnv: AlgobRuntimeEnv): AlgobDeployer {
   const algoOp = createAlgoOperator(runtimeEnv.network);
-  const deployerConfig = new MkDeployerConfig(runtimeEnv, algoOp);
+  const deployerCfg = new MkDeployerConfig(runtimeEnv, algoOp);
   return mkDeployer(
     false,
-    deployerConfig
+    deployerCfg
   );
 }
 
