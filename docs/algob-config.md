@@ -21,6 +21,35 @@ loggingEnabled?: boolean;
 initialDate?: string;
 ```
 
+## Credentials
+
+You can specify Algod Credentials in network object or you can load it from ENV.
+To load it from ENV.
+
+- Method 1
+
+        process.env.ALGOD_ADDR = "127.0.0.1:8080";
+        process.env.ALGOD_TOKEN = "algod_token";
+        let algodCred = algodCredentialsFromEnv();
+
+- Method 2
+
+        process.env.$ALGORAND_DATA = "/path_to/Algorand_Node";
+        let algodCred = algodCredentialsFromEnv();
+
+Similarly for KMD credentials you can either specify credentials in KMD object or load it from ENV.
+To load it from ENV
+
+- Method 1
+
+        process.env.KMD_ADDR = "127.0.0.1:8080";
+        process.env.KMD_TOKEN = "kmd_token";
+        let kmdCred = KMDCredentialsFromEnv();
+
+- Method 2
+
+        process.env.$KMD_DATA = "/path_to/KMD_DATA";
+        let kmdCred = KMDCredentialsFromEnv();
 
 ## Accounts
 
