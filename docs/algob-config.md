@@ -24,7 +24,7 @@ initialDate?: string;
 ## Credentials
 
 You can specify Algod Credentials in network object or you can load it from ENV.
-To load it from ENV.
+To load it from ENV:
 
 - Method 1
 
@@ -38,7 +38,7 @@ To load it from ENV.
         let algodCred = algodCredentialsFromEnv();
 
 Similarly for KMD credentials you can either specify credentials in KMD object or load it from ENV.
-To load it from ENV
+To load it from ENV:
 
 - Method 1
 
