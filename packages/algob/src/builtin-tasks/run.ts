@@ -4,7 +4,7 @@ import fsExtra from "fs-extra";
 import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
-import { DeployerConfig, mkDeployer, MkDeployerConfig } from "../internal/deployer_cfg";
+import { DeployerConfig, mkDeployer } from "../internal/deployer_cfg";
 import { TxWriterImpl } from "../internal/tx-log-writer";
 import { partitionByFn } from "../internal/util/lists";
 import { runScript } from "../internal/util/scripts-runner";
@@ -68,7 +68,7 @@ export async function runMultipleScripts (
   allowWrite: boolean,
   algoOp: AlgoOperator
 ): Promise<void> {
-  const deployerCfg = new MkDeployerConfig(runtimeEnv, algoOp);
+  const deployerCfg = new DeployerConfig(runtimeEnv, algoOp);
   for (const scripts of partitionIntoSorted(scriptNames)) {
     await runSortedScripts(
       runtimeEnv,

@@ -12,15 +12,6 @@ import type {
 import { DeployerDeployMode, DeployerRunMode } from "./deployer";
 import { txWriter, TxWriterImpl } from "./tx-log-writer";
 
-export interface DeployerConfig {
-  runtimeEnv: AlgobRuntimeEnv
-  cpData: CheckpointRepo
-  asaDefs: ASADefs
-  algoOp: AlgoOperator
-  accounts: Accounts
-  txWriter: txWriter
-}
-
 export function mkDeployer (
   allowWrite: boolean,
   deployerCfg: DeployerConfig
@@ -44,7 +35,7 @@ export function mkDeployer (
 }
 
 // intialize deployer config obj
-export class MkDeployerConfig implements DeployerConfig {
+export class DeployerConfig {
   runtimeEnv: AlgobRuntimeEnv;
   cpData: CheckpointRepo;
   asaDefs: ASADefs;
