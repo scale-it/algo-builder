@@ -15,18 +15,19 @@ export function algodCredentialsFromEnv (): NetworkCredentials {
 
     const loadToken = fs.readFileSync(path.join(algoData, "algod.token"), 'utf8');
     const loadNet = fs.readFileSync(path.join(algoData, "algod.net"), 'utf8');
+    const arr = loadNet.toString().split(':');
 
     return {
-      host: (loadNet.toString().split(':'))[0],
-      port: +(loadNet.toString().split(':'))[1],
+      host: arr[0],
+      port: +arr[1],
       token: loadToken.toString()
     };
   } else if (token === undefined || algodAddr === undefined) {
     throw new Error("Both Algod Token and Algod Address should be defined in env");
   }
 
-  const Arr = algodAddr.split(':');
-  return { host: Arr[0], port: +Arr[1], token: token };
+  const arr = algodAddr.split(':');
+  return { host: arr[0], port: +arr[1], token: token };
 }
 
 export function KMDCredentialsFromEnv (): NetworkCredentials {
@@ -41,16 +42,17 @@ export function KMDCredentialsFromEnv (): NetworkCredentials {
 
     const loadToken = fs.readFileSync(path.join(kmdData, "kmd.token"), 'utf8');
     const loadNet = fs.readFileSync(path.join(kmdData, "kmd.net"), 'utf8');
+    const arr = loadNet.toString().split(':');
 
     return {
-      host: (loadNet.toString().split(':'))[0],
-      port: +(loadNet.toString().split(':'))[1],
+      host: arr[0],
+      port: +arr[1],
       token: loadToken.toString()
     };
   } else if (token === undefined || kmdAddr === undefined) {
     throw new Error("Both KMD Token and KMD Address should be defined in env");
   }
 
-  const Arr = kmdAddr.split(':');
-  return { host: Arr[0], port: +Arr[1], token: token };
+  const arr = kmdAddr.split(':');
+  return { host: arr[0], port: +arr[1], token: token };
 }

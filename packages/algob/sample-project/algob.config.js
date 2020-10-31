@@ -40,7 +40,7 @@ let algodCred = algodCredentialsFromEnv();
 // process.env.$ALGORAND_DATA = "/path_to/Algorand_Node";
 // let algodCred = algodCredentialsFromEnv();
 
- let EnvCfg = {
+ let envCfg = {
   host: algodCred.host,
   port: algodCred.port,
   token: algodCred.token,
@@ -71,6 +71,6 @@ module.exports = {
   networks: {
     localhost: defaultCfg,
     default: defaultCfg,
-    env: EnvCfg
+    env: envCfg
   }
 };
