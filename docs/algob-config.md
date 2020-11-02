@@ -28,28 +28,48 @@ To load it from ENV:
 
 - Method 1
 
-        process.env.ALGOD_ADDR = "127.0.0.1:8080";
-        process.env.ALGOD_TOKEN = "algod_token";
+  - To add `ALGOD_ADDR` and `ALGOD_TOKEN` in env, you can use the following commands in terminal: 
+
+        export ALGOD_ADDR = "127.0.0.1:8080"
+        export ALGOD_TOKEN = "algod_token"
+
+  - To load algod credentials from env in config, you can use:
+
         let algodCred = algodCredentialsFromEnv();
 
 - Method 2
 
-        process.env.$ALGORAND_DATA = "/path_to/Algorand_Node";
-        let algodCred = algodCredentialsFromEnv();
+  - To add `$ALGORAND_DATA` in env, you can use the following command in terminal: 
+
+          export $ALGORAND_DATA = "content_of/algorand-node-data"
+
+  - To load algod credentials from env in config, you can use:
+
+          let algodCred = algodCredentialsFromEnv();
 
 Similarly for KMD credentials you can either specify credentials in KMD object or load it from ENV.
 To load it from ENV:
 
 - Method 1
 
-        process.env.KMD_ADDR = "127.0.0.1:8080";
-        process.env.KMD_TOKEN = "kmd_token";
+  - To add `KMD_ADDR` and `KMD_TOKEN` in env, you can use the following commands in terminal: 
+
+        export KMD_ADDR = "127.0.0.1:8080"
+        export KMD_TOKEN = "kmd_token"
+
+  - To load kmd credentials from env in config, you can use:
+
         let kmdCred = KMDCredentialsFromEnv();
 
 - Method 2
 
-        process.env.$KMD_DATA = "/path_to/KMD_DATA";
-        let kmdCred = KMDCredentialsFromEnv();
+  - To add `$KMD_DATA` in env, you can use the following command in terminal: 
+
+          export $KMD_DATA = "content_of/kmd-data"
+
+  - To load kmd credentials from env in config, you can use:
+
+          let kmdCred = KMDCredentialsFromEnv();
 
 ## Accounts
 
