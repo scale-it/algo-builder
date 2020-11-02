@@ -8,9 +8,8 @@ import { DeployerConfig, mkDeployer } from "../internal/deployer_cfg";
 import { isRecoverableError, preprocess } from "../internal/util/console";
 import { createAlgoOperator } from "../lib/algo-operator";
 import { createClient } from "../lib/driver";
-import { lsScriptsDir } from "../lib/script-checkpoints";
+import { loadCheckpointsIntoCPData, lsScriptsDir } from "../lib/script-checkpoints";
 import { AlgobDeployer, AlgobRuntimeEnv } from "../types";
-import { loadCheckpointsIntoCPData } from "./run";
 import { TASK_CONSOLE } from "./task-names";
 
 // colorize text to yellow
