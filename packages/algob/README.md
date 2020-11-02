@@ -2,13 +2,17 @@
 
 This package provides the main entry point into the application.
 
+Please read the main [README](../../README.md) file for details about the project and `algob`. This file provides a development description about the `algob` package.
+
 ## Usage
-It can be included as a library by importing `internal/lib/lib.ts` or be run from command line.
+
+
+`algob` can be included as a library by importing `internal/lib/lib.ts` or can be run from command line as described in the project [README](../../README.md) file.
 
 ### Command line usage
 
-Before running tasks it will check for presence of `algob.config.js`.
-If it's not present the project will be generated in the current directory.
+`algob` always starts for checking and loading `algob.config.js` file.
+If the config is not present, then it will be generated in the current directory.
 After that other commands will be possible to execute.
 
 Help

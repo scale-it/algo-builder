@@ -26,13 +26,37 @@ The project specification is [published here](https://paper.dropbox.com/publishe
 
 + Node 12+
 + Connection to an Algorand node. TEAL compilation requires Developer API to be enabled (`"EnableDeveloperAPI": true` in the node config.json).
++ Python 3.7+ (for PyTeal) with [pyteal](https://pypi.org/project/pyteal). Please read below how to install it.
 
 
 ### Algorand Node requirements
 
-+ algod v2.1.3+
++ algod v2.1.6-stable or higher
 
 Make sure that the node you are connecting to has a `"EnableDeveloperAPI": true` option set in the `<node_data>/config.json`. This is required to compile smart contracts using REST / SDK.
+
+
+### PyTeal
+
+`algob` supports TEAL smart contracts written in PyTeal. To use them, you have to have [pyteal](https://pypi.org/project/pyteal/) package available in your Python context:
+
+#### Using Pipenv
+
+We recommend to use [pipenv](https://pipenv.pypa.io) and use virtual environments. Pipenv is a packaging tool for Python that solves some common problems associated with the typical workflow using pip, virtualenv, and the good old requirements.txt. In addition to addressing some common issues, it consolidates and simplifies the development process to a single command line tool. It automatically creates and manages a virtualenv for your projects, as well as adds/removes packages from your Pipfile as you install/uninstall packages.
+
+With `pipenv` installed you can use the `Pipfile` and `Pipfile.lock` files from this repository and copy it to your project. Then:
+
+    pipenv sync
+    pipenv shell
+
+The `pipenv shell` will spawn a shell within the virtualenv with all required packages available in Python3 context. You will need to run `algob` within that python virtualenv context.
+
+#### Using pip3
+
+Otherwise you can use a system/user-wide `pyteal` installation:
+
+    pip3 install pyteal
+
 
 # Usage
 
