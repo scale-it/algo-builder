@@ -29,7 +29,9 @@ using `algob console`.
 
 ## Setup
 
-**Note**: Make sure to deploy the assets and smart contracts first. Inside `examples/deployment` run 
+In the  `examples/deployment` directory:
+1. Follow the README file
+2. deploy the assets and smart contracts:
 ```
 yarn run algob deploy
 ``` 
