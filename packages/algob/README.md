@@ -7,7 +7,7 @@ Please read the main [README](../../README.md) file for details about the projec
 ## Usage
 
 
-`albob` can be included as a library by importing `internal/lib/lib.ts` or be run from command line as described in the project [README](../../README.md) file.
+`algob` can be included as a library by importing `internal/lib/lib.ts` or can be run from command line as described in the project [README](../../README.md) file.
 
 ### Command line usage
 
