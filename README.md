@@ -1,4 +1,5 @@
-# algorand-builder
+# Algorand Builder
+
 Framework to automate development of Algorand Assets and Smart Contracts.
 
 ## Objectives
