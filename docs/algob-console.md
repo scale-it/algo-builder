@@ -35,7 +35,7 @@ In the  `examples/deployment` directory:
 ```
 yarn run algob deploy
 ``` 
-This will deploy your assets (`gold` and `tesla` in this case) and store asc1 `logic signature` in checkpoint for delegated approval mode. Also, let's initialize some of the accounts which we will use in furthur transactions. 
+This will deploy your assets (`gold` and `tesla` in this case) and store asc1 `logic signature` in checkpoint for delegated approval mode. Also, let's initialize some of the accounts which we will use in further transactions. 
 
 Open a console session and initialize `master account` using `deployer` object
 ```
@@ -54,7 +54,7 @@ Let us now execute some transactions.
 
 ## Transfer Algos
 
-Here, we will transfer `0.1 Algos` from `masterAccount` to `johnAccount` using `transferMicroAlgos` function present within `algob` context (`algob.transferMicroAlgos(..)`). Code can be found in `/scrips/transfer/master-fund-john.js`.
+Here, we will transfer `1 Algos` from `masterAccount` to `johnAccount` using `transferMicroAlgos` function present within `algob` context (`algob.transferMicroAlgos(..)`). Code can be found in `/scrips/transfer/master-fund-john.js`.
 
 ```
 await algob.transferMicroAlgos(deployer, masterAccount, johnAccount.addr, 1000000, {note: "ALGO PAID"})
@@ -80,7 +80,7 @@ Similar example - `/scrips/transfer/tesla-to-john.js`
 
 ## Transfer Algos according to ASC logic (Contract Account)
 
-Here we will transfer some `algos` from an alrogrand smart contract (`/assets/2-gold-contract-asc.teal`) to `johnAccount`. We will first load the logic signature (using `deployer.loadLsig(<file_name>.teal)` and get it's address(`lsig.address()`). This address will act as the sender(contract account mode) and receiver is `johnAccount`. Finally, we transfer some algos using `algob.transferMicroAlgosLsig(..)` function. Transaction will pass/fail according to asc logic.
+Here we will transfer some `algos` from an algorand smart contract (`/assets/2-gold-contract-asc.teal`) to `johnAccount`. We will first load the logic signature (using `deployer.loadLsig(<file_name>.teal)` and get it's address(`lsig.address()`). This address will act as the sender(contract account mode) and receiver is `johnAccount`. Finally, we transfer some algos using `algob.transferMicroAlgosLsig(..)` function. Transaction will pass/fail according to asc logic.
 ```
 lsig = await deployer.loadLsig("2-gold-contract-asc.teal");
 sender = lsig.address(); 
