@@ -30,7 +30,13 @@ module.exports = {
     "@typescript-eslint/quotes": "off",
     "@typescript-eslint/semi": ["error", "always"],
     "@typescript-eslint/strict-boolean-expressions": "off",
-
+    "@typescript-eslint/naming-convention": [
+      "error",
+      {
+        selector: "variable",
+        format: ["camelCase", "UPPER_CASE", "PascalCase"]
+      }
+    ],
     "sonarjs/cognitive-complexity": ["error", 16]
   }
 }
