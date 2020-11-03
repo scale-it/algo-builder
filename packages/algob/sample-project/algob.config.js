@@ -17,7 +17,7 @@
 */
 
 // ## ACCOUNTS USING mnemonic ##
-const { mkAccounts } = require("algob");
+const { mkAccounts, algodCredentialsFromEnv, KMDCredentialsFromEnv } = require("algob");
 let accounts = mkAccounts([{
   name: "master",
   addr: "KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY",
@@ -30,6 +30,32 @@ let accounts = mkAccounts([{
 // const accFromFile = loadAccountsFromFileSync("assets/accounts_generated.yaml");
 // accounts = accounts.concat(accFromFile);
 
+// ## Algod Credentials loaded from env
+// Method 1
+process.env.ALGOD_ADDR = "127.0.0.1:8080";
+process.env.ALGOD_TOKEN = "algod_token";
+let algodCred = algodCredentialsFromEnv();
+
+// Method 2
+// process.env.$ALGORAND_DATA = "/path_to/Algorand_Node";
+// let algodCred = algodCredentialsFromEnv();
+
+ let envCfg = {
+  host: algodCred.host,
+  port: algodCred.port,
+  token: algodCred.token,
+  accounts: accounts
+ }
+
+// ## KMD Credentials loaded from env 
+// Method 1
+// process.env.KMD_ADDR = "127.0.0.1:8080";
+// process.env.KMD_TOKEN = "kmd_token";
+// let kmdCred = KMDCredentialsFromEnv();
+
+// Method 2
+// process.env.$KMD_DATA = "/path_to/KMD_DATA";
+// let kmdCred = KMDCredentialsFromEnv();
 
 let defaultCfg = {
   host: "http://localhost",
@@ -44,6 +70,7 @@ let defaultCfg = {
 module.exports = {
   networks: {
     localhost: defaultCfg,
-    default: defaultCfg
+    default: defaultCfg,
+    env: envCfg
   }
 };

@@ -1,2 +1,3 @@
 * As a user I can access accounts from an ENV variable
 * As a user I can compile and run PyTeal Files
+* As a user I can load ALGOD and KMD credentials from ENV variable
