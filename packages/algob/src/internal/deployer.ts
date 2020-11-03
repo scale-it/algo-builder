@@ -3,7 +3,7 @@ import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
-import { getLsig, logicsig } from "../lib/lsig";
+import { getDummyLsig, getLsig } from "../lib/lsig";
 import { readBinaryMultiSig, readMsigFromFile } from "../lib/msig";
 import { persistCheckpoint } from "../lib/script-checkpoints";
 import type {
@@ -92,9 +92,7 @@ class DeployerBasicMode {
     const result = resultMap.get(lsigName)?.lsig;
     if (result === undefined) { return undefined; }
     const lsig1 = decode(result);
-    const dummyProgram = new Uint8Array(56);
-    dummyProgram.fill(0);
-    const lsig = new logicsig.LogicSig(dummyProgram, []);
+    const lsig = getDummyLsig();
     Object.assign(lsig, lsig1);
     return lsig;
   }
@@ -131,14 +129,10 @@ class DeployerBasicMode {
     const data = await readBinaryMultiSig(name);
     const program = new Uint8Array(Buffer.from(data as string, 'base64'));
     const logicSignature = decode(program) as RawLsig;
-
-    // dummy logic signature
-    const dummyProgram = new Uint8Array(56);
-    dummyProgram.fill(0);
-    const lsig = new logicsig.LogicSig(dummyProgram, []);
+    const lsig = getDummyLsig(); // dummy logic signature
 
     // assign complete logic signature
-    lsig.logic = logicSignature.l; // assign logic part separately (as keys mismatch: logic, l)
+    lsig.logic = logicSignature.l as Uint8Array; // assign logic part separately (as keys mismatch: logic, l)
     delete logicSignature.l;
     Object.assign(lsig, logicSignature);
     return lsig;
