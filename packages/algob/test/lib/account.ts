@@ -5,8 +5,8 @@ import { loadAccountsFromEnv, mkAccounts } from "../../src/lib/account";
 import { Account, AccountDef } from "../../src/types";
 
 describe("Loading accounts", () => {
-  const _gen = generateAccount();
-  const gen = { name: "gen_1", addr: _gen.addr, sk: _gen.sk };
+  const genAccount = generateAccount();
+  const gen = { name: "gen_1", addr: genAccount.addr, sk: genAccount.sk };
   const skArray = Array.from({ length: 64 }, (_, i) => i + 1);
   const account1 = { name: "a1", addr: "a1", sk: new Uint8Array(skArray) };
 
