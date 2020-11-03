@@ -31,7 +31,7 @@ module.exports = {
     "@typescript-eslint/semi": ["error", "always"],
     "@typescript-eslint/strict-boolean-expressions": "off",
     "@typescript-eslint/naming-convention": [
-      "warn",
+      "error",
       {
         selector: "variable",
         format: ["camelCase", "UPPER_CASE", "PascalCase"]
