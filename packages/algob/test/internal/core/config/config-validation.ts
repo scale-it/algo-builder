@@ -608,4 +608,148 @@ describe("Config validation", function () {
       assert.isTrue(errors.isEmpty(), errors.toString());
     });
   });
+
+  describe("KMD config", function () {
+    const localhost = {
+      host: "localhost",
+      port: 8080,
+      token: "somefaketoken",
+      kmdCfg: {}
+    };
+
+    it("Shouldn't accept invalid types", function () {
+      const kmdCfg = {
+        host: "127.0.0.1",
+        port: [8080],
+        token: "some_kmd_token",
+        wallets: [
+          {
+            name: "Wallet",
+            password: "",
+            accounts: [
+              { name: "Account1", address: "DFDZU5FACMC6CC2LEHB5H4HYS7OQDKDXP5SHTURSVF43XUGBQVQCQJYZOU" }]
+          }
+        ]
+      };
+      expectBuilderError(
+        () =>
+          validateConfig({
+            networks: {
+              localhost: Object.assign(localhost, kmdCfg),
+              [ALGOB_CHAIN_NAME]: {
+                asdasd: "1"
+              }
+            }
+          }),
+        ERRORS.GENERAL.INVALID_CONFIG
+      );
+    });
+
+    it("Shouldn't accept invalid Account name", function () {
+      const kmdCfg = {
+        host: "127.0.0.1",
+        port: 8080,
+        token: "some_kmd_token",
+        wallets: [
+          {
+            name: "Wallet",
+            password: "",
+            accounts: [
+              { name: 98712, address: "DFDZU5FACMC6CC2LEHB5H4HYS7OQDKDXP5SHTURSVF43XUGBQVQCQJYZOU" }]
+          }
+        ]
+      };
+      expectBuilderError(
+        () =>
+          validateConfig({
+            networks: {
+              localhost: Object.assign(localhost, kmdCfg),
+              [ALGOB_CHAIN_NAME]: {
+                asdasd: "2"
+              }
+            }
+          }),
+        ERRORS.GENERAL.INVALID_CONFIG
+      );
+    });
+
+    it("Shouldn't accept invalid address", function () {
+      const kmdCfg = {
+        host: "127.0.0.1",
+        port: 8080,
+        token: "some_kmd_token",
+        wallets: [
+          {
+            name: "Wallet",
+            password: "",
+            accounts: [
+              { name: "Account1", address: ["DFDZU5FACMC6CC2LEHB5H4HYS7OQDKDXP5SHTURSVF43XUGBQVQCQJYZOU"] }]
+          }
+        ]
+      };
+      expectBuilderError(
+        () =>
+          validateConfig({
+            networks: {
+              localhost: Object.assign(localhost, kmdCfg),
+              [ALGOB_CHAIN_NAME]: {
+                asdasd: "3"
+              }
+            }
+          }),
+        ERRORS.GENERAL.INVALID_CONFIG
+      );
+    });
+
+    it("Shouldn't fail with valid KMD config", function () {
+      const errors = getValidationErrors({
+        networks: {
+          localhost: localhost.kmdCfg = {
+            host: "127.0.0.1",
+            port: 8080,
+            token: "some_kmd_token",
+            wallets: [
+              {
+                name: "Wallet",
+                password: "",
+                accounts: [
+                  { name: "Account1", address: "DFDZU5FACMC6CC2LEHB5H4HYS7OQDKDXP5SHTURSVF43XUGBQVQCQJYZOU" }]
+              }
+            ]
+          },
+          [ALGOB_CHAIN_NAME]: {
+            asdasd: "1234"
+          }
+        }
+      });
+
+      assert.isEmpty(errors.errors, errors.toString());
+    });
+
+    it("Shouldn't fail with unrecognized params", function () {
+      const errors = getValidationErrors({
+        networks: {
+          localhost: localhost.kmdCfg = {
+            host: "127.0.0.1",
+            port: 8080,
+            token: "some_kmd_token",
+            wallets: [
+              {
+                name: "Wallet",
+                password: "",
+                accounts: [
+                  { name: "Account1", address: "DFDZU5FACMC6CC2LEHB5H4HYS7OQDKDXP5SHTURSVF43XUGBQVQCQJYZOU" }]
+              }
+            ],
+            otherParam: "some_other_detail"
+          },
+          [ALGOB_CHAIN_NAME]: {
+            asdasd: "123"
+          }
+        }
+      });
+
+      assert.isEmpty(errors.errors, errors.toString());
+    });
+  });
 });
