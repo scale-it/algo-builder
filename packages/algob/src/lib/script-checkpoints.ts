@@ -270,3 +270,11 @@ export function loadCheckpointsRecursive (): CheckpointRepo {
     },
     new CheckpointRepoImpl());
 }
+
+export function loadCheckpointsIntoCPData (cpData: CheckpointRepo, scriptPaths: string[]): CheckpointRepo {
+  var checkpointData = cpData;
+  for (const s of scriptPaths) {
+    checkpointData = cpData.merge(loadCheckpoint(s), s);
+  }
+  return checkpointData;
+}

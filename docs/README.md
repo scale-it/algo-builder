@@ -7,6 +7,7 @@
 + [Script execution](/docs/user-script-execution.md).
 + [Script Checkpoints](/docs/execution-checkpoints.md).
 + [Script Logging](/docs/logs.md).
++ [Algob Console](/docs/algob-console.md)
 + [PyTeal](/docs/py-teal.md).
 + [API docs](https://scale-it.github.io/algorand-builder/)
 

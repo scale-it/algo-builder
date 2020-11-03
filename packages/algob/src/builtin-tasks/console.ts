@@ -1,11 +1,14 @@
+import * as algosdk from "algosdk";
 import repl from "repl";
 import { runInNewContext } from "vm";
 
+import * as algob from "../index";
 import { task } from "../internal/core/config/config-env";
 import { DeployerConfig, mkDeployer } from "../internal/deployer_cfg";
 import { isRecoverableError, preprocess } from "../internal/util/console";
 import { createAlgoOperator } from "../lib/algo-operator";
 import { createClient } from "../lib/driver";
+import { loadCheckpointsIntoCPData, lsScriptsDir } from "../lib/script-checkpoints";
 import { AlgobDeployer, AlgobRuntimeEnv } from "../types";
 import { TASK_CONSOLE } from "./task-names";
 
@@ -17,10 +20,9 @@ function colorize (message: string): string {
 function initializeDeployer (runtimeEnv: AlgobRuntimeEnv): AlgobDeployer {
   const algoOp = createAlgoOperator(runtimeEnv.network);
   const deployerCfg = new DeployerConfig(runtimeEnv, algoOp);
-  return mkDeployer(
-    false,
-    deployerCfg
-  );
+  const scriptsFromScriptsDir: string[] = lsScriptsDir();
+  loadCheckpointsIntoCPData(deployerCfg.cpData, scriptsFromScriptsDir);
+  return mkDeployer(false, deployerCfg);
 }
 
 // handles top level await by preprocessing input and awaits the output before returning
@@ -40,6 +42,8 @@ async function evaluate (code: string, context: object, filename: string,
 }
 
 async function startConsole (runtimeEnv: AlgobRuntimeEnv): Promise<void> {
+  const deployer = initializeDeployer(runtimeEnv);
+  const algodClient = createClient(runtimeEnv.network);
   await new Promise<void>((resolve, reject) => {
     console.log(colorize('Welcome to algob console'));
     console.log(colorize('Try typing: config'));
@@ -50,10 +54,10 @@ async function startConsole (runtimeEnv: AlgobRuntimeEnv): Promise<void> {
     });
 
     // assign repl context
-    server.context.deployer = initializeDeployer(runtimeEnv);
-    server.context.algodClient = createClient(runtimeEnv.network);
-    server.context.algob = require('algob');
-    server.context.algosdk = require('algosdk');
+    server.context.deployer = deployer;
+    server.context.algodClient = algodClient;
+    server.context.algob = algob;
+    server.context.algosdk = algosdk;
 
     server.on('exit', () => {
       resolve();

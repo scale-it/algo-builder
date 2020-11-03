@@ -13,6 +13,7 @@ import { cmpStr } from "../lib/comparators";
 import { assertDirChildren } from "../lib/files";
 import {
   loadCheckpoint,
+  loadCheckpointsIntoCPData,
   loadCheckpointsRecursive,
   lsScriptsDir,
   scriptsDirectory
@@ -41,14 +42,6 @@ export function splitAfter (
     }
   }
   return scriptsFromScriptsDir.splice(0, scriptsFromScriptsDir.length);
-}
-
-function loadCheckpointsIntoCPData (cpData: CheckpointRepo, scriptPaths: string[]): CheckpointRepo {
-  var checkpointData = cpData;
-  for (const s of scriptPaths) {
-    checkpointData = cpData.merge(loadCheckpoint(s), s);
-  }
-  return checkpointData;
 }
 
 /** Partitions an unsorted string list into sorted parts:
