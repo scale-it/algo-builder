@@ -627,7 +627,7 @@ describe("Config validation", function () {
             name: "Wallet",
             password: "",
             accounts: [
-              { name: "Account1", address: "DFDZU5FACMC6CC2LEHB5H4HYS7OQDKDXP5SHTURSVF43XUGBQVQCQJYZOU" }]
+              { name: "Account1", address: "addr-1" }]
           }
         ]
       };
@@ -655,7 +655,7 @@ describe("Config validation", function () {
             name: "Wallet",
             password: "",
             accounts: [
-              { name: 98712, address: "DFDZU5FACMC6CC2LEHB5H4HYS7OQDKDXP5SHTURSVF43XUGBQVQCQJYZOU" }]
+              { name: 98712, address: "addr-2" }]
           }
         ]
       };
@@ -683,7 +683,7 @@ describe("Config validation", function () {
             name: "Wallet",
             password: "",
             accounts: [
-              { name: "Account1", address: ["DFDZU5FACMC6CC2LEHB5H4HYS7OQDKDXP5SHTURSVF43XUGBQVQCQJYZOU"] }]
+              { name: "Account1", address: ["addr-1"] }]
           }
         ]
       };
@@ -713,7 +713,7 @@ describe("Config validation", function () {
                 name: "Wallet",
                 password: "",
                 accounts: [
-                  { name: "Account1", address: "DFDZU5FACMC6CC2LEHB5H4HYS7OQDKDXP5SHTURSVF43XUGBQVQCQJYZOU" }]
+                  { name: "Account1", address: "addr-3" }]
               }
             ]
           },
@@ -738,7 +738,7 @@ describe("Config validation", function () {
                 name: "Wallet",
                 password: "",
                 accounts: [
-                  { name: "Account1", address: "DFDZU5FACMC6CC2LEHB5H4HYS7OQDKDXP5SHTURSVF43XUGBQVQCQJYZOU" }]
+                  { name: "Account1", address: "addr-4" }]
               }
             ],
             otherParam: "some_other_detail"
