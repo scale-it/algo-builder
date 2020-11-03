@@ -34,16 +34,9 @@ module.exports = {
       "warn",
       {
         selector: "variable",
-        format: ["camelCase"]
-      },
-      
-      {
-        selector: "variable",
-        modifiers: ["const"],
-        format: ["UPPER_CASE"]
+        format: ["camelCase", "UPPER_CASE", "PascalCase"]
       }
     ],
-    
     "sonarjs/cognitive-complexity": ["error", 16]
   }
 }
