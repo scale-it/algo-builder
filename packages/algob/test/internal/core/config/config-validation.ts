@@ -1,4 +1,5 @@
 import { assert } from "chai";
+import deepmerge from "deepmerge";
 
 import { ALGOB_CHAIN_NAME } from "../../../../src/internal/constants";
 import {
@@ -610,24 +611,24 @@ describe("Config validation", function () {
   });
 
   describe("KMD config", function () {
+    const kmdCfg = {
+      host: "127.0.0.1",
+      port: 8080,
+      token: "some_kmd_token",
+      wallets: [{
+        name: "Wallet",
+        password: "",
+        accounts: [{ name: "Account1", address: "addr-4" }
+        ]
+      }
+      ],
+      otherParam: ""
+    };
     const localhost = {
       host: "localhost",
       port: 8080,
       token: "somefaketoken",
-      kmdCfg: {
-        host: "127.0.0.1",
-        port: 8080,
-        token: "some_kmd_token",
-        wallets: [
-          {
-            name: "Wallet",
-            password: "",
-            accounts: [
-              { name: "Account1", address: "addr-4" }]
-          }
-        ],
-        otherParam: ""
-      }
+      kmdCfg: kmdCfg
     };
 
     it("Should work with valid KMD config", function () {
@@ -639,7 +640,6 @@ describe("Config validation", function () {
           }
         }
       });
-
       assert.isEmpty(errors.errors, errors.toString());
     });
 
@@ -652,26 +652,12 @@ describe("Config validation", function () {
           }
         }
       });
-
       assert.isEmpty(errors.errors, errors.toString());
     });
 
     it("Shouldn't accept invalid types", function () {
-      const cfg = {
-        kmdCfg: {
-          host: "127.0.0.1",
-          port: [8080],
-          token: "some_kmd_token",
-          wallets: [
-            {
-              name: "Wallet",
-              password: "",
-              accounts: [
-                { name: "Account1", address: "addr-1" }]
-            }
-          ]
-        }
-      };
+      const cfg: any = deepmerge({}, localhost);
+      cfg.kmdCfg.port = [8080];
       expectBuilderError(
         () =>
           validateConfig({
@@ -687,26 +673,21 @@ describe("Config validation", function () {
     });
 
     it("Shouldn't accept invalid Account name", function () {
-      const cfg = {
-        kmdCfg: {
-          host: "127.0.0.1",
-          port: 8080,
-          token: "some_kmd_token",
-          wallets: [
-            {
-              name: "Wallet",
-              password: "",
-              accounts: [
-                { name: 98712, address: "addr-2" }]
-            }
-          ]
-        }
-      };
+      const kmd: any = deepmerge({}, kmdCfg);
+      Object.assign(kmd, {
+        wallets: [{
+          name: "Wallet",
+          password: "",
+          accounts: [{ name: 123, address: "addr-4" }]
+        }]
+      });
+      const cfg: any = deepmerge({}, localhost);
+      Object.assign(cfg, { kmdCfg: kmd });
       expectBuilderError(
         () =>
           validateConfig({
             networks: {
-              localhost: Object.assign(localhost, cfg),
+              localhost: cfg,
               [ALGOB_CHAIN_NAME]: {
                 asdasd: "2"
               }
@@ -717,21 +698,16 @@ describe("Config validation", function () {
     });
 
     it("Shouldn't accept invalid address", function () {
-      const cfg = {
-        kmdCfg: {
-          host: "127.0.0.1",
-          port: 8080,
-          token: "some_kmd_token",
-          wallets: [
-            {
-              name: "Wallet",
-              password: "",
-              accounts: [
-                { name: "Account1", address: ["addr-1"] }]
-            }
-          ]
-        }
-      };
+      const kmd: any = deepmerge({}, kmdCfg);
+      Object.assign(kmd, {
+        wallets: [{
+          name: "Wallet",
+          password: "",
+          accounts: [{ name: "account", address: ["addr-4"] }]
+        }]
+      });
+      const cfg: any = deepmerge({}, localhost);
+      Object.assign(cfg, { kmdCfg: kmd });
       expectBuilderError(
         () =>
           validateConfig({
