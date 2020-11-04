@@ -1,4 +1,5 @@
 import { assert } from "chai";
+import deepmerge from "deepmerge";
 
 import { ALGOB_CHAIN_NAME } from "../../../../src/internal/constants";
 import {
@@ -614,109 +615,26 @@ describe("Config validation", function () {
       host: "localhost",
       port: 8080,
       token: "somefaketoken",
-      kmdCfg: {}
+      kmdCfg: {
+        host: "127.0.0.1",
+        port: 8080,
+        token: "some_kmd_token",
+        wallets: [
+          {
+            name: "Wallet",
+            password: "",
+            accounts: [
+              { name: "Account1", address: "addr-4" }]
+          }
+        ],
+        otherParam: ""
+      }
     };
-
-    it("Shouldn't accept invalid types", function () {
-      const kmdCfg = {
-        host: "127.0.0.1",
-        port: [8080],
-        token: "some_kmd_token",
-        wallets: [
-          {
-            name: "Wallet",
-            password: "",
-            accounts: [
-              { name: "Account1", address: "addr-1" }]
-          }
-        ]
-      };
-      expectBuilderError(
-        () =>
-          validateConfig({
-            networks: {
-              localhost: Object.assign(localhost, kmdCfg),
-              [ALGOB_CHAIN_NAME]: {
-                asdasd: "1"
-              }
-            }
-          }),
-        ERRORS.GENERAL.INVALID_CONFIG
-      );
-    });
-
-    it("Shouldn't accept invalid Account name", function () {
-      const kmdCfg = {
-        host: "127.0.0.1",
-        port: 8080,
-        token: "some_kmd_token",
-        wallets: [
-          {
-            name: "Wallet",
-            password: "",
-            accounts: [
-              { name: 98712, address: "addr-2" }]
-          }
-        ]
-      };
-      expectBuilderError(
-        () =>
-          validateConfig({
-            networks: {
-              localhost: Object.assign(localhost, kmdCfg),
-              [ALGOB_CHAIN_NAME]: {
-                asdasd: "2"
-              }
-            }
-          }),
-        ERRORS.GENERAL.INVALID_CONFIG
-      );
-    });
-
-    it("Shouldn't accept invalid address", function () {
-      const kmdCfg = {
-        host: "127.0.0.1",
-        port: 8080,
-        token: "some_kmd_token",
-        wallets: [
-          {
-            name: "Wallet",
-            password: "",
-            accounts: [
-              { name: "Account1", address: ["addr-1"] }]
-          }
-        ]
-      };
-      expectBuilderError(
-        () =>
-          validateConfig({
-            networks: {
-              localhost: Object.assign(localhost, kmdCfg),
-              [ALGOB_CHAIN_NAME]: {
-                asdasd: "3"
-              }
-            }
-          }),
-        ERRORS.GENERAL.INVALID_CONFIG
-      );
-    });
 
     it("Should work with valid KMD config", function () {
       const errors = getValidationErrors({
         networks: {
-          localhost: localhost.kmdCfg = {
-            host: "127.0.0.1",
-            port: 8080,
-            token: "some_kmd_token",
-            wallets: [
-              {
-                name: "Wallet",
-                password: "",
-                accounts: [
-                  { name: "Account1", address: "addr-3" }]
-              }
-            ]
-          },
+          localhost: localhost,
           [ALGOB_CHAIN_NAME]: {
             asdasd: "1234"
           }
@@ -729,20 +647,7 @@ describe("Config validation", function () {
     it("Should work with unrecognized params", function () {
       const errors = getValidationErrors({
         networks: {
-          localhost: localhost.kmdCfg = {
-            host: "127.0.0.1",
-            port: 8080,
-            token: "some_kmd_token",
-            wallets: [
-              {
-                name: "Wallet",
-                password: "",
-                accounts: [
-                  { name: "Account1", address: "addr-4" }]
-              }
-            ],
-            otherParam: "some_other_detail"
-          },
+          localhost: Object.assign(localhost, localhost.kmdCfg.otherParam = "some_other_detail"),
           [ALGOB_CHAIN_NAME]: {
             asdasd: "123"
           }
@@ -750,6 +655,96 @@ describe("Config validation", function () {
       });
 
       assert.isEmpty(errors.errors, errors.toString());
+    });
+
+    it("Shouldn't accept invalid types", function () {
+      const cfg = {
+        kmdCfg: {
+          host: "127.0.0.1",
+          port: [8080],
+          token: "some_kmd_token",
+          wallets: [
+            {
+              name: "Wallet",
+              password: "",
+              accounts: [
+                { name: "Account1", address: "addr-1" }]
+            }
+          ]
+        }
+      };
+      expectBuilderError(
+        () =>
+          validateConfig({
+            networks: {
+              localhost: Object.assign(localhost, cfg),
+              [ALGOB_CHAIN_NAME]: {
+                asdasd: "1"
+              }
+            }
+          }),
+        ERRORS.GENERAL.INVALID_CONFIG
+      );
+    });
+
+    it("Shouldn't accept invalid Account name", function () {
+      const cfg = {
+        kmdCfg: {
+          host: "127.0.0.1",
+          port: 8080,
+          token: "some_kmd_token",
+          wallets: [
+            {
+              name: "Wallet",
+              password: "",
+              accounts: [
+                { name: 98712, address: "addr-2" }]
+            }
+          ]
+        }
+      };
+      expectBuilderError(
+        () =>
+          validateConfig({
+            networks: {
+              localhost: Object.assign(localhost, cfg),
+              [ALGOB_CHAIN_NAME]: {
+                asdasd: "2"
+              }
+            }
+          }),
+        ERRORS.GENERAL.INVALID_CONFIG
+      );
+    });
+
+    it("Shouldn't accept invalid address", function () {
+      const cfg = {
+        kmdCfg: {
+          host: "127.0.0.1",
+          port: 8080,
+          token: "some_kmd_token",
+          wallets: [
+            {
+              name: "Wallet",
+              password: "",
+              accounts: [
+                { name: "Account1", address: ["addr-1"] }]
+            }
+          ]
+        }
+      };
+      expectBuilderError(
+        () =>
+          validateConfig({
+            networks: {
+              localhost: Object.assign(localhost, cfg),
+              [ALGOB_CHAIN_NAME]: {
+                asdasd: "3"
+              }
+            }
+          }),
+        ERRORS.GENERAL.INVALID_CONFIG
+      );
     });
   });
 });
