@@ -1,5 +1,4 @@
 import { assert } from "chai";
-import deepmerge from "deepmerge";
 
 import { ALGOB_CHAIN_NAME } from "../../../../src/internal/constants";
 import {
