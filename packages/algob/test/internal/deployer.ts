@@ -4,7 +4,7 @@ import { assert } from "chai";
 import { ERRORS } from "../../src/internal/core/errors-list";
 import { DeployerDeployMode } from "../../src/internal/deployer";
 import { TxWriterImpl } from "../../src/internal/tx-log-writer";
-import { logicsig } from "../../src/lib/lsig";
+import { getDummyLsig } from "../../src/lib/lsig";
 import { CheckpointRepoImpl } from "../../src/lib/script-checkpoints";
 import { ASADef, ASAInfo, ASCInfo, Checkpoints, LsigInfo } from "../../src/types";
 import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
@@ -132,9 +132,7 @@ describe("DeployerDeployMode", () => {
     const deployer = new DeployerDeployMode(
       env, cpData, { MY_ASA: mkASA() }, new AlgoOperatorDryRunImpl(), new Map(), new TxWriterImpl(''));
 
-    const dummyProgram = new Uint8Array(56);
-    dummyProgram.fill(0);
-    const logicSig = encode(new logicsig.LogicSig(dummyProgram, []));
+    const logicSig = encode(getDummyLsig());
 
     const cp1: Checkpoints = {
       network1: {
