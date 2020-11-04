@@ -701,7 +701,7 @@ describe("Config validation", function () {
       );
     });
 
-    it("Shouldn't fail with valid KMD config", function () {
+    it("Should work with valid KMD config", function () {
       const errors = getValidationErrors({
         networks: {
           localhost: localhost.kmdCfg = {
