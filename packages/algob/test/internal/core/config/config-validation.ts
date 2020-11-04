@@ -726,7 +726,7 @@ describe("Config validation", function () {
       assert.isEmpty(errors.errors, errors.toString());
     });
 
-    it("Shouldn't fail with unrecognized params", function () {
+    it("Should work with unrecognized params", function () {
       const errors = getValidationErrors({
         networks: {
           localhost: localhost.kmdCfg = {
