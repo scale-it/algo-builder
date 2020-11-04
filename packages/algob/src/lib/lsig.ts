@@ -1,8 +1,10 @@
 /* eslint @typescript-eslint/no-var-requires: "off" */
 import algosdk from "algosdk";
 
-import { ASCCache, LogicSig } from "../types";
+import { ASCCache } from "../types";
 import { CompileOp } from "./compile";
+
+export const DUMMY_LSIG = algosdk.makeLogicSig(new Uint8Array(56), []);
 
 /**
  * Description: this function makes logic signature from .teal file
@@ -15,13 +17,4 @@ export async function getLsig (name: string, scParams: Object, algodClient: algo
   const result: ASCCache = await compileOp.ensureCompiled(name, false);
   const program = result.toBytes;
   return algosdk.makeLogicSig(program, scParams);
-}
-
-/**
- * Description: this function creates and returns a dummy logic signature
- */
-export function getDummyLsig (): LogicSig {
-  const dummyProgram = new Uint8Array(56);
-  dummyProgram.fill(0);
-  return algosdk.makeLogicSig(dummyProgram, []);
 }

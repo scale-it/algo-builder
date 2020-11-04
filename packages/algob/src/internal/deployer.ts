@@ -3,7 +3,7 @@ import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
-import { getDummyLsig, getLsig } from "../lib/lsig";
+import { DUMMY_LSIG, getLsig } from "../lib/lsig";
 import { readBinaryMultiSig, readMsigFromFile } from "../lib/msig";
 import { persistCheckpoint } from "../lib/script-checkpoints";
 import type {
@@ -92,7 +92,7 @@ class DeployerBasicMode {
     const result = resultMap.get(lsigName)?.lsig;
     if (result === undefined) { return undefined; }
     const lsig1 = decode(result);
-    const lsig = getDummyLsig();
+    const lsig = DUMMY_LSIG;
     Object.assign(lsig, lsig1);
     return lsig;
   }
@@ -129,7 +129,7 @@ class DeployerBasicMode {
     const data = await readBinaryMultiSig(name);
     const program = new Uint8Array(Buffer.from(data as string, 'base64'));
     const logicSignature = decode(program) as RawLsig;
-    const lsig = getDummyLsig(); // dummy logic signature
+    const lsig = DUMMY_LSIG; // dummy logic signature
 
     // assign complete logic signature
     lsig.logic = logicSignature.l as Uint8Array; // assign logic part separately (as keys mismatch: logic, l)
