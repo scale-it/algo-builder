@@ -618,10 +618,8 @@ describe("Config validation", function () {
       wallets: [{
         name: "Wallet",
         password: "",
-        accounts: [{ name: "Account1", address: "addr-4" }
-        ]
-      }
-      ],
+        accounts: [{ name: "Account1", address: "addr-4" }]
+      }],
       otherParam: ""
     };
     const localhost = {
@@ -712,7 +710,7 @@ describe("Config validation", function () {
         () =>
           validateConfig({
             networks: {
-              localhost: Object.assign(localhost, cfg),
+              localhost: cfg,
               [ALGOB_CHAIN_NAME]: {
                 asdasd: "3"
               }
