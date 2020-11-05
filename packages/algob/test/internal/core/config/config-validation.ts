@@ -1,4 +1,5 @@
 import { assert } from "chai";
+import deepmerge from "deepmerge";
 
 import { ALGOB_CHAIN_NAME } from "../../../../src/internal/constants";
 import {
@@ -606,6 +607,117 @@ describe("Config validation", function () {
       });
 
       assert.isTrue(errors.isEmpty(), errors.toString());
+    });
+  });
+
+  describe("KMD config", function () {
+    const kmdCfg = {
+      host: "127.0.0.1",
+      port: 8080,
+      token: "some_kmd_token",
+      wallets: [{
+        name: "Wallet",
+        password: "",
+        accounts: [{ name: "Account1", address: "addr-4" }]
+      }],
+      otherParam: ""
+    };
+    const localhost = {
+      host: "localhost",
+      port: 8080,
+      token: "somefaketoken",
+      kmdCfg: kmdCfg
+    };
+
+    it("Should work with valid KMD config", function () {
+      const errors = getValidationErrors({
+        networks: {
+          localhost: localhost,
+          [ALGOB_CHAIN_NAME]: {
+            asdasd: "1234"
+          }
+        }
+      });
+      assert.isEmpty(errors.errors, errors.toString());
+    });
+
+    it("Should work with unrecognized params", function () {
+      const errors = getValidationErrors({
+        networks: {
+          localhost: Object.assign(localhost, localhost.kmdCfg.otherParam = "some_other_detail"),
+          [ALGOB_CHAIN_NAME]: {
+            asdasd: "123"
+          }
+        }
+      });
+      assert.isEmpty(errors.errors, errors.toString());
+    });
+
+    it("Shouldn't accept invalid types", function () {
+      const cfg: any = deepmerge({}, localhost);
+      cfg.kmdCfg.port = [8080];
+      expectBuilderError(
+        () =>
+          validateConfig({
+            networks: {
+              localhost: Object.assign(localhost, cfg),
+              [ALGOB_CHAIN_NAME]: {
+                asdasd: "1"
+              }
+            }
+          }),
+        ERRORS.GENERAL.INVALID_CONFIG
+      );
+    });
+
+    it("Shouldn't accept invalid Account name", function () {
+      const kmd: any = deepmerge({}, kmdCfg);
+      Object.assign(kmd, {
+        wallets: [{
+          name: "Wallet",
+          password: "",
+          accounts: [{ name: 123, address: "addr-4" }]
+        }]
+      });
+      const cfg: any = deepmerge({}, localhost);
+      Object.assign(cfg, { kmdCfg: kmd });
+      expectBuilderError(
+        () =>
+          validateConfig({
+            networks: {
+              localhost: cfg,
+              [ALGOB_CHAIN_NAME]: {
+                asdasd: "2"
+              }
+            }
+          }),
+        ERRORS.GENERAL.INVALID_CONFIG
+      );
+    });
+
+    it("Shouldn't accept invalid address", function () {
+      const kmd: any = deepmerge({}, kmdCfg);
+      Object.assign(kmd, {
+        wallets: [{
+          name: "Wallet",
+          password: "",
+          accounts: [{ name: "account", address: ["addr-4"] }]
+        }]
+      });
+      const cfg: any = deepmerge({}, localhost);
+      Object.assign(cfg, { kmdCfg: kmd });
+      expectBuilderError(
+        () =>
+          validateConfig({
+            networks: {
+              localhost: cfg,
+              [ALGOB_CHAIN_NAME]: {
+                asdasd: "3"
+              }
+            }
+          }),
+        ERRORS.GENERAL.INVALID_CONFIG
+      );
     });
   });
 });

@@ -26,6 +26,24 @@ const AlgobChainType = z.object({
 
 const HttpHeaders = z.record(z.string());
 
+const KmdAccount = z.object({
+  name: z.string(),
+  address: z.string()
+});
+
+const KmdWallet = z.object({
+  name: z.string(),
+  password: z.string(),
+  accounts: z.array(KmdAccount)
+}).nonstrict();
+
+const KmdCfg = z.object({
+  host: z.string(),
+  port: z.number(),
+  token: z.string(),
+  wallets: z.array(KmdWallet)
+}).nonstrict();
+
 const HttpNetworkType = z.object({
   accounts: z.array(AccountType).optional(),
   chainName: z.string().optional(),
@@ -33,7 +51,8 @@ const HttpNetworkType = z.object({
   host: z.string().optional(),
   port: z.number().optional(),
   token: z.string().optional(),
-  httpHeaders: HttpHeaders.optional()
+  httpHeaders: HttpHeaders.optional(),
+  kmdCfg: KmdCfg.optional()
 }).nonstrict();
 
 const NetworkType = z.union([AlgobChainType, HttpNetworkType]);
