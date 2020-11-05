@@ -459,8 +459,13 @@ export interface AlgobDeployer {
     scParams: Object, // Parameters
     signer: Account
   ) => Promise<LsigInfo>
+  deploySSC: (
+    approvalProgram: string,
+    clearProgram: string,
+    flags: SSCDeploymentFlags,
+    payFlags: TxParams) => Promise<SSCInfo>
   /**
-     Returns true if ASA or ACS were deployed in any script.
+     Returns true if ASA or ASC were deployed in any script.
      Checks even for checkpoints out of from the execution
      session which are not obtainable using get methods.
   */

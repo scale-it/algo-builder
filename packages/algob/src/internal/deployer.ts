@@ -19,6 +19,7 @@ import type {
   LogicSig,
   LsigInfo,
   RawLsig,
+  SSCDeploymentFlags,
   SSCInfo,
   TxParams
 } from "../types";
@@ -275,6 +276,29 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
     return lsigInfo;
   }
 
+  async deploySSC (
+    approvalProgram: string,
+    clearProgram: string,
+    flags: SSCDeploymentFlags,
+    payFlags: TxParams): Promise<SSCInfo> {
+    const name = approvalProgram + "-" + clearProgram;
+    this.assertNoAsset(name);
+    let sscInfo = {} as any;
+    try {
+      sscInfo = await this.algoOp.deploySSC(
+        approvalProgram, clearProgram, flags, payFlags, this.txWriter);
+    } catch (error) {
+      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+
+      console.log(error);
+      throw error;
+    }
+
+    this.cpData.registerSSC(this.networkName, name, sscInfo);
+
+    return sscInfo;
+  }
+
   async optInToASA (name: string, accountName: string, flags: TxParams): Promise<void> {
     await this.algoOp.optInToASA(
       name,
@@ -312,6 +336,16 @@ export class DeployerRunMode extends DeployerBasicMode implements AlgobDeployer 
   async mkDelegatedLsig (_name: string, scParams: Object, signer: Account): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "delegatedLsig"
+    });
+  }
+
+  async deploySSC (
+    approvalProgram: string,
+    clearProgram: string,
+    flags: SSCDeploymentFlags,
+    payFlags: TxParams): Promise<SSCInfo> {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "deploySSC"
     });
   }
 

@@ -40,6 +40,12 @@ export interface AlgoOperator {
   ) => Promise<ASAInfo>
   fundLsig: (name: string, scParams: object, flags: FundASCFlags, payFlags: TxParams,
     txWriter: txWriter) => Promise<LsigInfo>
+  deploySSC: (
+    approvalProgram: string,
+    clearProgram: string,
+    flags: SSCDeploymentFlags,
+    payFlags: TxParams,
+    txWriter: txWriter) => Promise<SSCInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
   optInToASA: (
     asaName: string, assetIndex: number, account: Account, params: TxParams
@@ -242,6 +248,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const approvalProg = this.ensureCompiled(approvalProgram, false);
     const clearProg = this.ensureCompiled(clearProgram, false);
 
+    let message = "Signed transaction with txID: ";
     const txn = algosdk.makeApplicationCreateTxn(
       sender,
       params,
@@ -255,15 +262,19 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
     const txId = txn.txID().toString();
     const signedTxn = txn.signTxn(flags.sender.sk);
-    console.log("Signed transaction with txID: %s", txId);
+    message = message.concat(txId);
+    message = message.concat("\nCreated new app-id: ");
 
     const txInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
 
     const confirmedTxInfo = await this.waitForConfirmation(txId);
     // check this part
-    const transactionResponse = await this.algodClient.pendingTransactionInformation(txId).do();
-    const appId = transactionResponse['application-index'];
-    console.log("Created new app-id: ", appId);
+    // const transactionResponse = await this.algodClient.pendingTransactionInformation(txId).do();
+    const appId = confirmedTxInfo['application-index'];
+    message = message.concat(appId.toString());
+
+    console.log(message);
+    txWriter.push(message, confirmedTxInfo);
 
     return {
       creator: flags.sender.addr,
