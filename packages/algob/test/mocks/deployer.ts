@@ -1,10 +1,20 @@
 import * as algosdk from "algosdk";
 
-import { Account, AlgobDeployer, ASADeploymentFlags, ASAInfo, ASCInfo, FundASCFlags, LogicSig, LsigInfo } from "../../src/types";
+import type {
+  Account,
+  AlgobDeployer,
+  ASADeploymentFlags,
+  ASAInfo,
+  FundASCFlags,
+  LogicSig,
+  LsigInfo, SSCDeploymentFlags,
+  SSCInfo,
+  TxParams
+} from "../../src/types";
 
 export class FakeDeployer implements AlgobDeployer {
   asa = new Map<string, ASAInfo>();
-  asc = new Map<string, ASCInfo>();
+  ssc = new Map<string, SSCInfo>();
   lsig = new Map<string, LsigInfo>();
   isDeployMode = false;
   accounts = [];
@@ -51,6 +61,14 @@ export class FakeDeployer implements AlgobDeployer {
   }
 
   async mkDelegatedLsig (name: string, scParams: object, signer: Account): Promise<LsigInfo> {
+    throw new Error("Not implemented");
+  }
+
+  async deploySSC (
+    approvalProgram: string,
+    clearProgram: string,
+    flags: SSCDeploymentFlags,
+    payFlags: TxParams): Promise<SSCInfo> {
     throw new Error("Not implemented");
   }
 

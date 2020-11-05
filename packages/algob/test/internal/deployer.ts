@@ -6,7 +6,7 @@ import { DeployerDeployMode } from "../../src/internal/deployer";
 import { TxWriterImpl } from "../../src/internal/tx-log-writer";
 import { getDummyLsig } from "../../src/lib/lsig";
 import { CheckpointRepoImpl } from "../../src/lib/script-checkpoints";
-import { ASADef, ASAInfo, ASCInfo, Checkpoints, LsigInfo } from "../../src/types";
+import { ASADef, ASAInfo, Checkpoints, LsigInfo, SSCInfo } from "../../src/types";
 import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkAlgobEnv } from "../helpers/params";
 import { cleanupMutableData } from "../lib/script-checkpoints";
@@ -26,7 +26,7 @@ describe("DeployerDeployMode", () => {
       timestamp: 12345,
       metadata: new Map([["k", "v"]]),
       asa: new Map<string, ASAInfo>(),
-      asc: new Map<string, ASCInfo>(),
+      ssc: new Map<string, SSCInfo>(),
       dLsig: new Map<string, LsigInfo>()
     });
   });
@@ -53,7 +53,7 @@ describe("DeployerDeployMode", () => {
       metadata: new Map([["key 1", "val 1"],
         ["key 2", "val 2"]]),
       asa: new Map<string, ASAInfo>(),
-      asc: new Map<string, ASCInfo>(),
+      ssc: new Map<string, SSCInfo>(),
       dLsig: new Map<string, LsigInfo>()
     });
   });
@@ -64,7 +64,7 @@ describe("DeployerDeployMode", () => {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>(),
+        ssc: new Map<string, SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       }
     };
@@ -73,7 +73,7 @@ describe("DeployerDeployMode", () => {
         timestamp: 2,
         metadata: new Map([["key 2", "data 2"]]),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>(),
+        ssc: new Map<string, SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       }
     };
@@ -85,14 +85,14 @@ describe("DeployerDeployMode", () => {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>(),
+        ssc: new Map<string, SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       },
       network2: {
         timestamp: 2,
         metadata: new Map([["key 2", "data 2"]]),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>(),
+        ssc: new Map<string, SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       }
     });
@@ -118,7 +118,7 @@ describe("DeployerDeployMode", () => {
           confirmedRound: -1,
           assetIndex: -1
         }]]),
-        asc: new Map(),
+        ssc: new Map(),
         dLsig: new Map(),
         metadata: new Map<string, string>(),
         timestamp: 515236
@@ -139,7 +139,7 @@ describe("DeployerDeployMode", () => {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, ASAInfo>(),
-        asc: new Map<string, ASCInfo>(),
+        ssc: new Map<string, SSCInfo>(),
         dLsig: new Map<string, LsigInfo>([["MY_LSIG", {
           creator: "addr-1-get-address-dry-run",
           contractAddress: "ASDFGDDSSS12A",
@@ -158,7 +158,7 @@ describe("DeployerDeployMode", () => {
     const env = mkAlgobEnv(networkName);
     const cpData = new CheckpointRepoImpl()
       .registerASA(networkName, "ASA name", { creator: "ASA creator 123", txId: "", confirmedRound: 0, assetIndex: 0 })
-      .registerASC(networkName, "ASC name", { creator: "ASC creator 951", txId: "", confirmedRound: 0, contractAddress: "addr-1" })
+      .registerSSC(networkName, "ASC name", { creator: "ASC creator 951", txId: "", confirmedRound: 0, appID: -1 })
       .registerLsig(networkName, "Lsig name", { creator: "Lsig creator", contractAddress: "addr-1", lsig: new Uint8Array(1) })
       .putMetadata(networkName, "k", "v");
     const deployer = new DeployerDeployMode(

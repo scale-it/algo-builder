@@ -11,6 +11,8 @@ import {
   ASCCache,
   FundASCFlags,
   LsigInfo,
+  SSCDeploymentFlags,
+  SSCInfo,
   TxParams
 } from "../../src/types";
 
@@ -45,6 +47,20 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
       creator: flags.funder.addr + "-get-address-dry-run",
       contractAddress: "dfssdfsd",
       lsig: new Uint8Array(1)
+    };
+  }
+
+  async deploySSC (
+    approvalProgram: string,
+    clearProgram: string,
+    flags: SSCDeploymentFlags,
+    payFlags: TxParams,
+    txWriter: txWriter): Promise<SSCInfo> {
+    return {
+      creator: flags.sender.addr + "-get-address-dry-run",
+      txId: "tx-id-dry-run",
+      confirmedRound: -1,
+      appID: -1
     };
   }
 
