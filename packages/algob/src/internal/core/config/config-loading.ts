@@ -2,7 +2,7 @@ import path from "path";
 
 import { KMDOperator } from "../../../lib/account";
 import { createKmdClient } from "../../../lib/driver";
-import type { KmdCfg, NetworkConfig, ResolvedAlgobConfig, RuntimeArgs } from "../../../types";
+import type { NetworkConfig, ResolvedAlgobConfig, RuntimeArgs } from "../../../types";
 import { BuilderContext } from "../../context";
 import { loadPluginFile } from "../plugins";
 import { getUserConfigPath } from "../project-structure";
@@ -57,8 +57,8 @@ export async function loadConfigAndTasks (
   const netname = runtimeArgs?.network;
   if (netname !== undefined) {
     const net = cfg.networks[netname];
-    if (net !== undefined) {
-      const kmdOp = new KMDOperator(createKmdClient(net.kmdCfg as KmdCfg));
+    if (net?.kmdCfg !== undefined) {
+      const kmdOp = new KMDOperator(createKmdClient(net.kmdCfg));
       await _loadKMDAccounts(net, kmdOp);
     }
   }
