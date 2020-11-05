@@ -21,6 +21,42 @@ declare module 'algosdk' {
     accountInformation(address: string): Action<AccountInfo>
   }
 
+  export const OnApplicationComplete: {
+    ClearStateOC: number;
+    CloseOutOC: number;
+    DeleteApplicationOC: number;
+    NoOpOC: number;
+    OptInOC: number;
+    UpdateApplicationOC: number;
+	};
+
+	export namespace modelsv2 {
+    function Account(...args: any[]): void;
+
+    function Application(...args: any[]): void;
+
+    function ApplicationLocalState(...args: any[]): void;
+
+    function ApplicationParams(...args: any[]): void;
+
+    function ApplicationStateSchema(...args: any[]): void;
+
+    function Asset(...args: any[]): void;
+
+    function AssetHolding(...args: any[]): void;
+
+    function AssetParams(...args: any[]): void;
+
+    function DryrunRequest(...args: any[]): void;
+
+    function DryrunSource(...args: any[]): void;
+
+    function TealKeyValue(...args: any[]): void;
+
+    function TealValue(...args: any[]): void;
+
+	}
+
  class Kmd {
     constructor(token: string, baseServer: string, port: number);
 
@@ -145,6 +181,20 @@ declare module 'algosdk' {
 
   export function logicSigFromByte (encoded: any): any;
 
+  export function makeApplicationClearStateTxn(from: any, suggestedParams: any, appIndex: any, appArgs: any, accounts: any, foreignApps: any, foreignAssets: any, note: any, lease: any, rekeyTo: any): any;
+
+	export function makeApplicationCloseOutTxn(from: any, suggestedParams: any, appIndex: any, appArgs: any, accounts: any, foreignApps: any, foreignAssets: any, note: any, lease: any, rekeyTo: any): any;
+
+	export function makeApplicationCreateTxn(from: any, suggestedParams: any, onComplete: any, approvalProgram: any, clearProgram: any, numLocalInts: any, numLocalByteSlices: any, numGlobalInts: any, numGlobalByteSlices: any, appArgs: any, accounts: any, foreignApps: any, foreignAssets: any, note: any, lease: any, rekeyTo: any): any;
+
+	export function makeApplicationDeleteTxn(from: any, suggestedParams: any, appIndex: any, appArgs: any, accounts: any, foreignApps: any, foreignAssets: any, note: any, lease: any, rekeyTo: any): any;
+
+	export function makeApplicationNoOpTxn(from: any, suggestedParams: any, appIndex: any, appArgs: any, accounts: any, foreignApps: any, foreignAssets: any, note: any, lease: any, rekeyTo: any): any;
+
+	export function makeApplicationOptInTxn(from: any, suggestedParams: any, appIndex: any, appArgs: any, accounts: any, foreignApps: any, foreignAssets: any, note: any, lease: any, rekeyTo: any): any;
+
+	export function makeApplicationUpdateTxn(from: any, suggestedParams: any, appIndex: any, approvalProgram: any, clearProgram: any, appArgs: any, accounts: any, foreignApps: any, foreignAssets: any, note: any, lease: any, rekeyTo: any): any;
+
   export function makeAssetConfigTxn (from: any, fee: any, firstRound: any, lastRound: any, note: any, genesisHash: any, genesisID: any, assetIndex: any, manager: any, reserve: any, freeze: any, clawback: any, strictEmptyAddressChecking: any): any;
 
   export function makeAssetConfigTxnWithSuggestedParams (from: any, note: any, assetIndex: any, manager: any, reserve: any, freeze: any, clawback: any, suggestedParams: any, strictEmptyAddressChecking: any): any;
@@ -200,6 +250,10 @@ declare module 'algosdk' {
   export function signMultisigTransaction (txn: any, { version, threshold, addrs }: any, sk: any): any;
 
   export function signTransaction (txn: any, sk: any): any;
+
+  export function tealSign(sk: any, data: any, contractAddress: any): any;
+
+	export function tealSignFromProgram(sk: any, data: any, program: any): any;
 
   export function verifyBytes (bytes: any, signature: any, addr: any): any;
 
