@@ -185,7 +185,7 @@ declare module 'algosdk' {
 
 	export function makeApplicationCloseOutTxn(from: any, suggestedParams: any, appIndex: any, appArgs: any, accounts: any, foreignApps: any, foreignAssets: any, note: any, lease: any, rekeyTo: any): any;
 
-	export function makeApplicationCreateTxn(from: any, suggestedParams: any, onComplete: any, approvalProgram: any, clearProgram: any, numLocalInts: any, numLocalByteSlices: any, numGlobalInts: any, numGlobalByteSlices: any, appArgs: any, accounts: any, foreignApps: any, foreignAssets: any, note: any, lease: any, rekeyTo: any): any;
+	export function makeApplicationCreateTxn(from: any, suggestedParams: any, onComplete: any, approvalProgram: any, clearProgram: any, numLocalInts: any, numLocalByteSlices: any, numGlobalInts: any, numGlobalByteSlices: any, appArgs?: any, accounts?: any, foreignApps?: any, foreignAssets?: any, note?: any, lease?: any, rekeyTo?: any): any;
 
 	export function makeApplicationDeleteTxn(from: any, suggestedParams: any, appIndex: any, appArgs: any, accounts: any, foreignApps: any, foreignAssets: any, note: any, lease: any, rekeyTo: any): any;
 
@@ -313,6 +313,7 @@ declare module 'algosdk' {
   interface ConfirmedTxInfo {
     'confirmed-round': number
     "asset-index": number
+    'application-index': number 
   }
 
   interface SuggestedParams {

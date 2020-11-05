@@ -6,7 +6,7 @@ import { ERRORS } from "../internal/core/errors-list";
 import { txWriter } from "../internal/tx-log-writer";
 import { createClient } from "../lib/driver";
 import { getLsig } from "../lib/lsig";
-import {
+import type {
   Account,
   Accounts,
   ASADef,
@@ -16,6 +16,8 @@ import {
   FundASCFlags,
   LsigInfo,
   Network,
+  SSCDeploymentFlags,
+  SSCInfo,
   TxParams
 } from "../types";
 import { CompileOp } from "./compile";
@@ -223,6 +225,51 @@ export class AlgoOperatorImpl implements AlgoOperator {
       creator: flags.funder.addr,
       contractAddress: contractAddress,
       lsig: encode(lsig)
+    };
+  }
+
+  async deploySSC (
+    approvalProgram: string,
+    clearProgram: string,
+    flags: SSCDeploymentFlags,
+    payFlags: TxParams,
+    txWriter: txWriter): Promise<SSCInfo> {
+    const sender = flags.sender.addr;
+    const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
+
+    const onComplete = algosdk.OnApplicationComplete.NoOpOC;
+
+    const approvalProg = this.ensureCompiled(approvalProgram, false);
+    const clearProg = this.ensureCompiled(clearProgram, false);
+
+    const txn = algosdk.makeApplicationCreateTxn(
+      sender,
+      params,
+      onComplete,
+      approvalProg,
+      clearProg,
+      flags.localInts,
+      flags.localBytes,
+      flags.globalInts,
+      flags.globalBytes);
+
+    const txId = txn.txID().toString();
+    const signedTxn = txn.signTxn(flags.sender.sk);
+    console.log("Signed transaction with txID: %s", txId);
+
+    const txInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
+
+    const confirmedTxInfo = await this.waitForConfirmation(txId);
+    // check this part
+    const transactionResponse = await this.algodClient.pendingTransactionInformation(txId).do();
+    const appId = transactionResponse['application-index'];
+    console.log("Created new app-id: ", appId);
+
+    return {
+      creator: flags.sender.addr,
+      txId: txInfo.txId,
+      confirmedRound: confirmedTxInfo[confirmedRound],
+      appID: appId
     };
   }
 

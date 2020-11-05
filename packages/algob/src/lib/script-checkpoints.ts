@@ -8,12 +8,12 @@ import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import {
   ASAInfo,
-  ASCInfo,
   AssetScriptMap,
   Checkpoint,
   CheckpointRepo,
   Checkpoints,
-  LsigInfo
+  LsigInfo,
+  SSCInfo
 } from "../types";
 import { loadFromYamlFileSilent } from "./files";
 
@@ -37,9 +37,9 @@ export function registerASA (
   return cp;
 }
 
-export function registerASC (
-  cp: Checkpoint, name: string, info: ASCInfo): Checkpoint {
-  cp.asc.set(name, info);
+export function registerSSC (
+  cp: Checkpoint, name: string, info: SSCInfo): Checkpoint {
+  cp.ssc.set(name, info);
   return cp;
 }
 
@@ -53,14 +53,14 @@ export class CheckpointImpl implements Checkpoint {
   timestamp: number;
   metadata: Map<string, string>;
   asa: Map<string, ASAInfo>;
-  asc: Map<string, ASCInfo>;
+  ssc: Map<string, SSCInfo>;
   dLsig: Map<string, LsigInfo>;
 
   constructor (metadata?: Map<string, string>) {
     this.timestamp = +new Date();
     this.metadata = (metadata === undefined ? new Map<string, string>() : metadata);
     this.asa = new Map<string, ASAInfo>();
-    this.asc = new Map<string, ASCInfo>();
+    this.ssc = new Map<string, SSCInfo>();
     this.dLsig = new Map<string, LsigInfo>();
   }
 }
@@ -74,17 +74,17 @@ export function appendToCheckpoint (
   }
   orig.timestamp = append.timestamp;
   orig.metadata = new Map([...orig.metadata, ...append.metadata]);
-  const allAssetNames = [...append.asa.keys(), ...append.asc.keys()];
+  const allAssetNames = [...append.asa.keys(), ...append.ssc.keys()];
   for (const assetName of allAssetNames) {
     if ((orig.asa.get(assetName) && !deepEqual(orig.asa.get(assetName), append.asa.get(assetName))) ??
-      (orig.asc.get(assetName) && !deepEqual(orig.asc.get(assetName), append.asc.get(assetName)))) {
+      (orig.ssc.get(assetName) && !deepEqual(orig.ssc.get(assetName), append.ssc.get(assetName)))) {
       throw new BuilderError(
         ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
         { assetName: assetName });
     }
   }
   orig.asa = new Map([...orig.asa, ...append.asa]);
-  orig.asc = new Map([...orig.asc, ...append.asc]);
+  orig.ssc = new Map([...orig.ssc, ...append.ssc]);
   orig.dLsig = new Map([...orig.dLsig, ...append.dLsig]);
   return checkpoints;
 }
@@ -113,7 +113,7 @@ export class CheckpointRepoImpl implements CheckpointRepo {
     const keys: string[] = Object.keys(cp);
     for (const k of keys) {
       const current = cp[k];
-      const allAssetNames = [...current.asa.keys(), ...current.asc.keys(), ...current.dLsig.keys()];
+      const allAssetNames = [...current.asa.keys(), ...current.ssc.keys(), ...current.dLsig.keys()];
       for (const assetName of allAssetNames) {
         if (!(this.scriptMap[assetName])) {
           this.scriptMap[assetName] = scriptName;
@@ -158,10 +158,10 @@ export class CheckpointRepoImpl implements CheckpointRepo {
     return this;
   }
 
-  registerASC (networkName: string, name: string, info: ASCInfo): CheckpointRepo {
-    registerASC(this._ensureNet(this.precedingCP, networkName), name, info);
-    registerASC(this._ensureNet(this.strippedCP, networkName), name, info);
-    registerASC(this._ensureNet(this.allCPs, networkName), name, info);
+  registerSSC (networkName: string, name: string, info: SSCInfo): CheckpointRepo {
+    registerSSC(this._ensureNet(this.precedingCP, networkName), name, info);
+    registerSSC(this._ensureNet(this.strippedCP, networkName), name, info);
+    registerSSC(this._ensureNet(this.allCPs, networkName), name, info);
     return this;
   }
 
@@ -175,7 +175,7 @@ export class CheckpointRepoImpl implements CheckpointRepo {
   isDefined (networkName: string, name: string): boolean {
     const netCP = this.allCPs[networkName];
     return netCP !== undefined &&
-      (netCP.asa.get(name) !== undefined || netCP.asc.get(name) !== undefined ||
+      (netCP.asa.get(name) !== undefined || netCP.ssc.get(name) !== undefined ||
       netCP.dLsig.get(name) !== undefined);
   }
 
@@ -203,7 +203,7 @@ export function toMap <T> (obj: {[name: string]: T}): Map<string, T> {
 
 function convertCPValsToMaps (cpWithObjects: Checkpoint): Checkpoint {
   cpWithObjects.asa = toMap(cpWithObjects.asa as any);
-  cpWithObjects.asc = toMap(cpWithObjects.asc as any);
+  cpWithObjects.ssc = toMap(cpWithObjects.ssc as any);
   cpWithObjects.dLsig = toMap(cpWithObjects.dLsig as any);
   cpWithObjects.metadata = toMap(cpWithObjects.metadata as any);
   return cpWithObjects;

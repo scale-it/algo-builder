@@ -321,8 +321,15 @@ export interface DeployedAssetInfo {
 export interface ASAInfo extends DeployedAssetInfo {
   assetIndex: number
 }
-export interface ASCInfo extends DeployedAssetInfo {
+
+export interface SSCInfo extends DeployedAssetInfo {
+  appID: number
+}
+
+export interface LsigInfo {
+  creator: AccountAddress
   contractAddress: string
+  lsig: Uint8Array
 }
 
 export interface MultiSig {
@@ -344,12 +351,6 @@ export interface LogicSig {
   args: Object
   sig: Object | undefined
   msig: MultiSig | {}
-}
-
-export interface LsigInfo {
-  creator: AccountAddress
-  contractAddress: string
-  lsig: Uint8Array
 }
 
 export interface CheckpointRepo {
@@ -374,7 +375,7 @@ export interface CheckpointRepo {
   getMetadata: (networkName: string, key: string) => string | undefined
 
   registerASA: (networkName: string, name: string, info: ASAInfo) => CheckpointRepo
-  registerASC: (networkName: string, name: string, info: ASCInfo) => CheckpointRepo
+  registerSSC: (networkName: string, name: string, info: SSCInfo) => CheckpointRepo
   registerLsig: (networkName: string, name: string, info: LsigInfo) => CheckpointRepo
 
   isDefined: (networkName: string, name: string) => boolean
@@ -389,7 +390,7 @@ export interface Checkpoint {
   timestamp: number
   metadata: Map<string, string>
   asa: Map<string, ASAInfo>
-  asc: Map<string, ASCInfo>
+  ssc: Map<string, SSCInfo>
   dLsig: Map<string, LsigInfo>
 };
 
@@ -425,6 +426,14 @@ export interface FundASCFlags {
   fundingMicroAlgo: number
 }
 
+export interface SSCDeploymentFlags {
+  sender: Account
+  localInts: number
+  localBytes: number
+  globalInts: number
+  globalBytes: number
+}
+
 export interface AssetScriptMap {
   [assetName: string]: string
 }
@@ -457,7 +466,7 @@ export interface AlgobDeployer {
   */
   isDefined: (name: string) => boolean
   asa: Map<string, ASAInfo>
-  asc: Map<string, ASCInfo>
+  ssc: Map<string, SSCInfo>
 
   // These functions are exposed only for users.
   // Put your logic into AlgoOperator if you need to interact with the chain.

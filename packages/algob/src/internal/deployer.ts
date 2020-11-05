@@ -14,12 +14,12 @@ import type {
   ASADefs,
   ASADeploymentFlags,
   ASAInfo,
-  ASCInfo,
   CheckpointRepo,
   FundASCFlags,
   LogicSig,
   LsigInfo,
   RawLsig,
+  SSCInfo,
   TxParams
 } from "../types";
 import { BuilderError } from "./core/errors";
@@ -68,8 +68,8 @@ class DeployerBasicMode {
     return this.cpData.precedingCP[this.networkName]?.asa ?? new Map();
   }
 
-  get asc (): Map<string, ASCInfo> {
-    return this.cpData.precedingCP[this.networkName]?.asc ?? new Map();
+  get ssc (): Map<string, SSCInfo> {
+    return this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
   }
 
   get algodClient (): algosdk.Algodv2 {
