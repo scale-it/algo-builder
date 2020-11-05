@@ -1,7 +1,8 @@
 import path from "path";
 
-import { loadKMDAccounts } from "../../../lib/account";
-import type { NetworkConfig, ResolvedAlgobConfig, RuntimeArgs } from "../../../types";
+import { KMDOperator } from "../../../lib/account";
+import { createKmdClient } from "../../../lib/driver";
+import type { KmdCfg, NetworkConfig, ResolvedAlgobConfig, RuntimeArgs } from "../../../types";
 import { BuilderContext } from "../../context";
 import { loadPluginFile } from "../plugins";
 import { getUserConfigPath } from "../project-structure";
@@ -56,16 +57,19 @@ export async function loadConfigAndTasks (
   const netname = runtimeArgs?.network;
   if (netname !== undefined) {
     const net = cfg.networks[netname];
-    if (net !== undefined) { await _loadKMDAccounts(net); }
+    if (net !== undefined) {
+      const kmdOp = new KMDOperator(createKmdClient(net.kmdCfg as KmdCfg));
+      await _loadKMDAccounts(net, kmdOp);
+    }
   }
 
   return cfg;
 }
 
 // loads KMD accounts if the net.kmdCfg is specified and merges them into net.accounts
-async function _loadKMDAccounts (net: NetworkConfig): Promise<void> {
+export async function _loadKMDAccounts (net: NetworkConfig, kmdOp: KMDOperator): Promise<void> {
   if (net.kmdCfg === undefined) { return; }
-  const kmdAccounts = await loadKMDAccounts(net.kmdCfg);
+  const kmdAccounts = await kmdOp.loadKMDAccounts(net.kmdCfg);
   const accounts = new Set();
   for (const a of net.accounts) { accounts.add(a.name); }
   for (const a of kmdAccounts) {
