@@ -245,8 +245,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
     const onComplete = algosdk.OnApplicationComplete.NoOpOC;
 
-    const approvalProg = this.ensureCompiled(approvalProgram, false);
-    const clearProg = this.ensureCompiled(clearProgram, false);
+    const approvalProg = (await this.ensureCompiled(approvalProgram, false)).toBytes;
+    const clearProg = (await this.ensureCompiled(clearProgram, false)).toBytes;
 
     let message = "Signed transaction with txID: ";
     const txn = algosdk.makeApplicationCreateTxn(
@@ -268,8 +268,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const txInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
 
     const confirmedTxInfo = await this.waitForConfirmation(txId);
-    // check this part
-    // const transactionResponse = await this.algodClient.pendingTransactionInformation(txId).do();
+
     const appId = confirmedTxInfo['application-index'];
     message = message.concat(appId.toString());
 
