@@ -79,6 +79,11 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     throw new Error("Method not implemented.");
   }
 
+  OptInToSSC (
+    sender: Account, index: number, payFlags: TxParams): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+
   optInToASAMultiple (
     asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, assetIndex: number
   ): Promise<void> {

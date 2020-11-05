@@ -310,7 +310,7 @@ export interface LinkReferences {
   }
 }
 
-type AccountAddress = string;
+export type AccountAddress = string;
 
 export interface DeployedAssetInfo {
   creator: AccountAddress
@@ -432,6 +432,13 @@ export interface SSCDeploymentFlags {
   localBytes: number
   globalInts: number
   globalBytes: number
+  appArgs?: Uint8Array
+  accounts?: string
+  foreignApps?: string
+  foreignAssets?: string
+  note?: Uint8Array
+  lease?: Uint8Array
+  rekeyTo?: string
 }
 
 export interface AssetScriptMap {
@@ -480,6 +487,8 @@ export interface AlgobDeployer {
 
   // Output of these functions is undefined. It's not known what to save to CP
   optInToASA: (name: string, accountName: string, flags: ASADeploymentFlags) => Promise<void>
+
+  OptInToSSC: (sender: Account, index: number, payFlags: TxParams) => Promise<void>
 
   // Log Transaction
   log: (msg: string, obj: any) => void

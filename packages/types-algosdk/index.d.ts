@@ -191,7 +191,7 @@ declare module 'algosdk' {
 
 	export function makeApplicationNoOpTxn(from: any, suggestedParams: any, appIndex: any, appArgs: any, accounts: any, foreignApps: any, foreignAssets: any, note: any, lease: any, rekeyTo: any): any;
 
-	export function makeApplicationOptInTxn(from: any, suggestedParams: any, appIndex: any, appArgs: any, accounts: any, foreignApps: any, foreignAssets: any, note: any, lease: any, rekeyTo: any): any;
+	export function makeApplicationOptInTxn(from: any, suggestedParams: any, appIndex: any, appArgs?: any, accounts?: any, foreignApps?: any, foreignAssets?: any, note?: any, lease?: any, rekeyTo?: any): any;
 
 	export function makeApplicationUpdateTxn(from: any, suggestedParams: any, appIndex: any, approvalProgram: any, clearProgram: any, appArgs: any, accounts: any, foreignApps: any, foreignAssets: any, note: any, lease: any, rekeyTo: any): any;
 

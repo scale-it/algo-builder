@@ -87,4 +87,9 @@ export class FakeDeployer implements AlgobDeployer {
   optInToASA (name: string, accountName: string, flags: ASADeploymentFlags): Promise<void> {
     throw new Error("Not implemented");
   }
+
+  OptInToSSC (
+    sender: Account, index: number, payFlags: TxParams): Promise<void> {
+    throw new Error("Not implemented");
+  }
 }

@@ -53,6 +53,8 @@ export interface AlgoOperator {
   optInToASAMultiple: (
     asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, assetIndex: number
   ) => Promise<void>
+  OptInToSSC: (
+    sender: Account, index: number, payFlags: TxParams) => Promise<void>
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -234,6 +236,14 @@ export class AlgoOperatorImpl implements AlgoOperator {
     };
   }
 
+  /**
+   * Description: Function to deploy Stateful Smart Contract
+   * @param approvalProgram name of file in which approval program is stored
+   * @param clearProgram name of file in which clear program is stored
+   * @param flags         SSCDeploymentFlags
+   * @param payFlags      TxParams
+   * @param txWriter
+   */
   async deploySSC (
     approvalProgram: string,
     clearProgram: string,
@@ -245,8 +255,10 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
     const onComplete = algosdk.OnApplicationComplete.NoOpOC;
 
-    const approvalProg = (await this.ensureCompiled(approvalProgram, false)).toBytes;
-    const clearProg = (await this.ensureCompiled(clearProgram, false)).toBytes;
+    const app = (await this.ensureCompiled(approvalProgram, false));
+    const approvalProg = new Uint8Array(Buffer.from(app.compiled, "base64"));
+    const clear = (await this.ensureCompiled(clearProgram, false));
+    const clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
 
     let message = "Signed transaction with txID: ";
     const txn = algosdk.makeApplicationCreateTxn(
@@ -281,6 +293,17 @@ export class AlgoOperatorImpl implements AlgoOperator {
       confirmedRound: confirmedTxInfo[confirmedRound],
       appID: appId
     };
+  }
+
+  async OptInToSSC (sender: Account, index: number, payFlags: TxParams): Promise<void> {
+    const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
+
+    const txn = algosdk.makeApplicationOptInTxn(sender, params, index);
+    const txId = txn.txID().toString();
+    const signedTxn = txn.signTxn(sender.sk);
+
+    await this.algodClient.sendRawTransaction(signedTxn).do();
+    await this.waitForConfirmation(txId);
   }
 
   private async ensureCompiled (name: string, force: boolean): Promise<ASCCache> {

@@ -306,6 +306,10 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
       this._getAccount(accountName),
       flags);
   }
+
+  async OptInToSSC (sender: Account, index: number, payFlags: TxParams): Promise<void> {
+    await this.algoOp.OptInToSSC(sender, index, payFlags);
+  }
 }
 
 // This class is what user interacts with in run task
@@ -352,6 +356,12 @@ export class DeployerRunMode extends DeployerBasicMode implements AlgobDeployer 
   optInToASA (name: string, accountName: string, flags: ASADeploymentFlags): Promise<void> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "optInToASA"
+    });
+  }
+
+  OptInToSSC (sender: Account, index: number, payFlags: TxParams): Promise<void> {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "optInToSSC"
     });
   }
 }
