@@ -276,6 +276,13 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
     return lsigInfo;
   }
 
+  /**
+   * Description: function to deploy stateful smart contracts
+   * @param approvalProgram filename which has approval program
+   * @param clearProgram filename which has clear program
+   * @param flags SSCDeploymentFlags
+   * @param payFlags Transaction Params
+   */
   async deploySSC (
     approvalProgram: string,
     clearProgram: string,
