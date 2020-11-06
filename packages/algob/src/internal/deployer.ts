@@ -69,10 +69,6 @@ class DeployerBasicMode {
     return this.cpData.precedingCP[this.networkName]?.asa ?? new Map();
   }
 
-  get ssc (): Map<string, SSCInfo> {
-    return this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
-  }
-
   get algodClient (): algosdk.Algodv2 {
     return this.algoOp.algodClient;
   }
@@ -83,6 +79,16 @@ class DeployerBasicMode {
 
   log (msg: string, obj: any): void {
     this.txWriter.push(msg, obj);
+  }
+
+  /**
+   * Description: loads stateful smart contract info from checkpoint
+   * @param nameApproval Approval program name
+   * @param nameClear clear program name
+   */
+  getSSC (nameApproval: string, nameClear: string): SSCInfo | undefined {
+    const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
+    return resultMap.get(nameApproval + "-" + nameClear);
   }
 
   /**

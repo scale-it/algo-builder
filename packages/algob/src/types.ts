@@ -478,7 +478,6 @@ export interface AlgobDeployer {
   */
   isDefined: (name: string) => boolean
   asa: Map<string, ASAInfo>
-  ssc: Map<string, SSCInfo>
 
   // These functions are exposed only for users.
   // Put your logic into AlgoOperator if you need to interact with the chain.
@@ -498,6 +497,9 @@ export interface AlgobDeployer {
 
   // load lsig from binary
   loadBinaryMultiSig: (name: string, scParams: Object) => Promise<LogicSig>
+
+  // get stateful smart contract
+  getSSC: (nameApproval: string, nameClear: string) => SSCInfo | undefined
 
   // get delegated Logic signature
   getDelegatedLsig: (lsigName: string) => Object | undefined

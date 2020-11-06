@@ -29,6 +29,10 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   }
 
+  getSSC (nameApproval: string, nameClear: string): SSCInfo | undefined {
+    throw new Error("Not implemented");
+  }
+
   getDelegatedLsig (lsig: string): object | undefined {
     throw new Error("Not implemented");
   }
