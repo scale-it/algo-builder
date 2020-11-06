@@ -1,7 +1,7 @@
 import { mkAccountIndex } from "../lib/account";
 import { AlgoOperator } from "../lib/algo-operator";
 import { loadASAFile } from "../lib/asa";
-import { loadCheckpointsRecursive } from "../lib/script-checkpoints";
+import { CheckpointRepoImpl } from "../lib/script-checkpoints";
 import type {
   Accounts,
   AlgobDeployer,
@@ -17,21 +17,9 @@ export function mkDeployer (
   deployerCfg: DeployerConfig
 ): AlgobDeployer {
   if (allowWrite) {
-    return new DeployerDeployMode(
-      deployerCfg.runtimeEnv,
-      deployerCfg.cpData,
-      deployerCfg.asaDefs,
-      deployerCfg.algoOp,
-      deployerCfg.accounts,
-      deployerCfg.txWriter);
+    return new DeployerDeployMode(deployerCfg);
   }
-  return new DeployerRunMode(
-    deployerCfg.runtimeEnv,
-    deployerCfg.cpData,
-    deployerCfg.asaDefs,
-    deployerCfg.algoOp,
-    deployerCfg.accounts,
-    deployerCfg.txWriter);
+  return new DeployerRunMode(deployerCfg);
 }
 
 // intialize deployer config obj
@@ -45,9 +33,9 @@ export class DeployerConfig {
 
   constructor (runtimeEnv: AlgobRuntimeEnv, algoOp: AlgoOperator) {
     this.runtimeEnv = runtimeEnv;
-    this.cpData = loadCheckpointsRecursive();
+    this.cpData = new CheckpointRepoImpl();
     this.algoOp = algoOp;
-    this.accounts = mkAccountIndex(runtimeEnv.network.config.accounts); ;
+    this.accounts = mkAccountIndex(runtimeEnv.network.config.accounts);
     this.txWriter = new TxWriterImpl('');
     this.asaDefs = loadASAFile(this.accounts);
   }
