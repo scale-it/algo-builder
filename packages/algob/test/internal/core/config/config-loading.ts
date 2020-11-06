@@ -13,7 +13,7 @@ import {
   TASK_TEST_GET_TEST_FILES
 } from "../../../../src/builtin-tasks/task-names";
 import { BuilderContext } from "../../../../src/internal/context";
-import { _loadKMDAccounts, loadConfigAndTasks } from "../../../../src/internal/core/config/config-loading";
+import { loadConfigAndTasks, loadKMDAccounts } from "../../../../src/internal/core/config/config-loading";
 import { ERRORS } from "../../../../src/internal/core/errors-list";
 import { resetBuilderContext } from "../../../../src/internal/reset";
 import { KMDOperator } from "../../../../src/lib/account";
@@ -210,7 +210,7 @@ describe("config loading", function () {
 
     it("should ignore if kmd config is not defined", async function () {
       net.kmdCfg = undefined;
-      const result = await _loadKMDAccounts(net, kmdOp);
+      const result = await loadKMDAccounts(net, kmdOp);
       assert.isUndefined(result);
     });
 
@@ -219,7 +219,7 @@ describe("config loading", function () {
       invalidKmdCfg.port = 123; // invalid port
 
       expectBuilderErrorAsync(
-        () => _loadKMDAccounts(net, new KMDOperator(createKmdClient(invalidKmdCfg))),
+        () => loadKMDAccounts(net, new KMDOperator(createKmdClient(invalidKmdCfg))),
         ERRORS.KMD.CONNECTION
       ).catch((err) => console.log(err)); ;
     });
@@ -228,7 +228,7 @@ describe("config loading", function () {
       const spy = sinon.spy(console, 'warn');
 
       kmdOp.addKmdAccount({ name: net.accounts[0].name, addr: "some-addr-1", sk: new Uint8Array(kmdOp.skArray) });
-      await _loadKMDAccounts(net, kmdOp);
+      await loadKMDAccounts(net, kmdOp);
 
       const warnMsg = "KMD account name conflict: KmdConfig and network.accounts both define an account with same name: ";
       assert(spy.calledWith(warnMsg));
@@ -246,7 +246,7 @@ describe("config loading", function () {
         sk: new Uint8Array(kmdOp.skArray)
       };
       kmdOp.addKmdAccount(kmdAcc);
-      await _loadKMDAccounts(net, kmdOp);
+      await loadKMDAccounts(net, kmdOp);
 
       assert.notInclude(net.accounts, kmdAcc); // network.accounts should not include kmd account with same name
       assert.include(net.accounts, networkAcc); // network.accounts should include networkAcc (higher precendence)
@@ -256,7 +256,7 @@ describe("config loading", function () {
       kmdOp.addKmdAccount({ name: "some-different-name-1", addr: "some-addr-1", sk: new Uint8Array(kmdOp.skArray) });
       kmdOp.addKmdAccount({ name: "some-different-name-2", addr: "some-addr-2", sk: new Uint8Array(kmdOp.skArray) });
 
-      await _loadKMDAccounts(net, kmdOp);
+      await loadKMDAccounts(net, kmdOp);
 
       for (const k of kmdOp.accounts) {
         assert.include(net.accounts, k); // assert if kmd accounts are merged into network.accounts
@@ -265,7 +265,7 @@ describe("config loading", function () {
 
     it("private keys are correctly loaded", async function () {
       kmdOp.addKmdAccount({ name: "some-name", addr: "some-addr", sk: new Uint8Array(kmdOp.skArray) });
-      await _loadKMDAccounts(net, kmdOp);
+      await loadKMDAccounts(net, kmdOp);
 
       for (const a of net.accounts) {
         assert.isDefined(a.sk);

@@ -59,7 +59,7 @@ export async function loadConfigAndTasks (
     const net = cfg.networks[netname];
     if (net?.kmdCfg !== undefined) {
       const kmdOp = new KMDOperator(createKmdClient(net.kmdCfg));
-      await _loadKMDAccounts(net, kmdOp);
+      await loadKMDAccounts(net, kmdOp);
     }
   }
 
@@ -67,7 +67,7 @@ export async function loadConfigAndTasks (
 }
 
 // loads KMD accounts if the net.kmdCfg is specified and merges them into net.accounts
-export async function _loadKMDAccounts (net: NetworkConfig, kmdOp: KMDOperator): Promise<void> {
+export async function loadKMDAccounts (net: NetworkConfig, kmdOp: KMDOperator): Promise<void> {
   if (net.kmdCfg === undefined) { return; }
   const kmdAccounts = await kmdOp.loadKMDAccounts(net.kmdCfg);
   const accounts = new Set();
