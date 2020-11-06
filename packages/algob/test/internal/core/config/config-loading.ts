@@ -1,6 +1,7 @@
 import { Kmd } from "algosdk";
 import { assert } from "chai";
 import path from "path";
+import sinon from 'sinon';
 
 import {
   TASK_CLEAN,
@@ -223,6 +224,17 @@ describe("config loading", function () {
       ).catch((err) => console.log(err)); ;
     });
 
+    it("should detect conflict of account names", async function () {
+      const spy = sinon.spy(console, 'warn');
+
+      kmdOp.addKmdAccount({ name: net.accounts[0].name, addr: "some-addr-1", sk: new Uint8Array(kmdOp.skArray) });
+      await _loadKMDAccounts(net, kmdOp);
+
+      const warnMsg = "KMD account name conflict: KmdConfig and network.accounts both define an account with same name: ";
+      assert(spy.calledWith(warnMsg));
+      spy.restore();
+    });
+
     it("network accounts should take precedence over KMD accounts", async function () {
       const networkAcc = net.accounts[0];
       const commonName = networkAcc.name;
@@ -246,12 +258,8 @@ describe("config loading", function () {
 
       await _loadKMDAccounts(net, kmdOp);
 
-      for (const a of net.accounts) {
-        assert.include(net.accounts, a); // assert if network accounts are merged
-      }
-
       for (const k of kmdOp.accounts) {
-        assert.include(net.accounts, k); // assert if kmd accounts are merged
+        assert.include(net.accounts, k); // assert if kmd accounts are merged into network.accounts
       }
     });
 
