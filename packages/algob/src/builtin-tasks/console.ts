@@ -1,4 +1,5 @@
 import * as algosdk from "algosdk";
+import chalk from "chalk";
 import repl from "repl";
 import { runInNewContext } from "vm";
 
@@ -45,7 +46,7 @@ async function startConsole (runtimeEnv: AlgobRuntimeEnv): Promise<void> {
   const deployer = initializeDeployer(runtimeEnv);
   const algodClient = createClient(runtimeEnv.network);
   await new Promise<void>((resolve, reject) => {
-    console.log(colorize('Welcome to algob console'));
+    console.log("★", chalk.cyan(" Welcome to algob console"), "★");
     console.log(colorize('Try typing: config'));
 
     const server = repl.start({
