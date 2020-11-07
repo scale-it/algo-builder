@@ -472,9 +472,9 @@ export interface AlgobDeployer {
     flags: SSCDeploymentFlags,
     payFlags: TxParams) => Promise<SSCInfo>
   /**
-     Returns true if ASA or ASC were deployed in any script.
-     Checks even for checkpoints out of from the execution
-     session which are not obtainable using get methods.
+     Returns true if ASA or DelegatedLsig or SSC were deployed in any script.
+     Checks even for checkpoints which are out of scope from the execution
+     session and are not obtainable using get methods.
   */
   isDefined: (name: string) => boolean
   asa: Map<string, ASAInfo>
