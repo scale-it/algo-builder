@@ -9,8 +9,8 @@ import { getUserConfigPath } from "../project-structure";
 import { resolveConfig } from "./config-resolution";
 import { validateConfig } from "./config-validation";
 
-async function importCsjOrEsModule (filePath: string): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
-  const imported = await require(filePath); // eslint-disable-line @typescript-eslint/no-var-requires
+function importCsjOrEsModule (filePath: string): any { // eslint-disable-line @typescript-eslint/no-explicit-any
+  const imported = require(filePath); // eslint-disable-line @typescript-eslint/no-var-requires
   return imported.default !== undefined ? imported.default : imported;
 }
 
@@ -40,8 +40,8 @@ export async function loadConfigAndTasks (
   );
 
   loadPluginFile(path.join(__dirname, "..", "tasks", "builtin-tasks"));
-  const defaultConfig = await importCsjOrEsModule("./default-config");
-  const userConfig = configPath !== undefined ? await importCsjOrEsModule(configPath) : defaultConfig;
+  const defaultConfig = importCsjOrEsModule("./default-config");
+  const userConfig = configPath !== undefined ? importCsjOrEsModule(configPath) : defaultConfig;
   validateConfig(userConfig);
 
   // To avoid bad practices we remove the previously exported stuff

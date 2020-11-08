@@ -173,25 +173,6 @@ describe("config loading", function () {
     });
   });
 
-  describe("Config that imports the library", function () {
-    useFixtureProject("config-imports-lib-project");
-
-    beforeEach(function () {
-      BuilderContext.createBuilderContext();
-    });
-
-    afterEach(function () {
-      resetBuilderContext();
-    });
-
-    it("should accept a relative path from the CWD", function () {
-      expectBuilderErrorAsync(
-        () => loadConfigAndTasks(),
-        ERRORS.GENERAL.LIB_IMPORTED_FROM_THE_CONFIG
-      ).catch((err) => console.log(err)); ;
-    });
-  });
-
   describe("load kmd accounts", function () {
     useFixtureProject("config-project");
     useEnvironment();
