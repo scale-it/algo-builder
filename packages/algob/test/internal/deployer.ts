@@ -27,6 +27,7 @@ describe("DeployerDeployMode", () => {
     deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
     deployerCfg.asaDefs = {};
     deployerCfg.accounts = new Map();
+    deployerCfg.cpData = new CheckpointRepoImpl();
   });
 
   it("Should ensure metadata existence for network", async () => {

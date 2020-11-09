@@ -1,7 +1,7 @@
 import { mkAccountIndex } from "../lib/account";
 import { AlgoOperator } from "../lib/algo-operator";
 import { loadASAFile } from "../lib/asa";
-import { CheckpointRepoImpl } from "../lib/script-checkpoints";
+import { loadCheckpointsRecursive } from "../lib/script-checkpoints";
 import type {
   Accounts,
   AlgobDeployer,
@@ -33,7 +33,7 @@ export class DeployerConfig {
 
   constructor (runtimeEnv: AlgobRuntimeEnv, algoOp: AlgoOperator) {
     this.runtimeEnv = runtimeEnv;
-    this.cpData = new CheckpointRepoImpl();
+    this.cpData = loadCheckpointsRecursive();
     this.algoOp = algoOp;
     this.accounts = mkAccountIndex(runtimeEnv.network.config.accounts);
     this.txWriter = new TxWriterImpl('');

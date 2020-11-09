@@ -13,11 +13,6 @@ import { loadCheckpointsIntoCPData, lsScriptsDir } from "../lib/script-checkpoin
 import { AlgobDeployer, AlgobRuntimeEnv } from "../types";
 import { TASK_CONSOLE } from "./task-names";
 
-// colorize text to yellow
-function colorize (message: string): string {
-  return `\x1b[32m${message}\x1b[0m`;
-}
-
 function initializeDeployer (runtimeEnv: AlgobRuntimeEnv): AlgobDeployer {
   const algoOp = createAlgoOperator(runtimeEnv.network);
   const deployerCfg = new DeployerConfig(runtimeEnv, algoOp);
@@ -47,7 +42,7 @@ async function startConsole (runtimeEnv: AlgobRuntimeEnv): Promise<void> {
   const algodClient = createClient(runtimeEnv.network);
   await new Promise<void>((resolve, reject) => {
     console.log("★", chalk.cyan(" Welcome to algob console"), "★");
-    console.log(colorize('Try typing: config'));
+    console.log(chalk.green('Try typing: config'));
 
     const server = repl.start({
       prompt: 'algob> ',

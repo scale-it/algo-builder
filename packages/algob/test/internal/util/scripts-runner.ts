@@ -7,6 +7,7 @@ import { DeployerConfig } from "../../../src/internal/deployer_cfg";
 import {
   runScript
 } from "../../../src/internal/util/scripts-runner";
+import { CheckpointRepoImpl } from "../../../src/lib/script-checkpoints";
 import { expectBuilderErrorAsync } from "../../helpers/errors";
 import { mkAlgobEnv } from "../../helpers/params";
 import { testFixtureOutputFile, useCleanFixtureProject } from "../../helpers/project";
@@ -22,6 +23,7 @@ describe("Scripts runner", function () {
     deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
     deployerCfg.asaDefs = {};
     deployerCfg.accounts = new Map();
+    deployerCfg.cpData = new CheckpointRepoImpl();
   });
 
   it("Should pass params to the script", async function () {
