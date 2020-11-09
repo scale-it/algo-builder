@@ -81,7 +81,7 @@ class DeployerBasicMode {
   /**
    * @param lsigName Description: loads and returns delegated logic signature from checkpoint
    */
-  getDelegatedLsig (lsigName: string): Object | undefined {
+  getDelegatedLsig (lsigName: string): LogicSig | undefined {
     const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map(); ;
     const result = resultMap.get(lsigName)?.lsig;
     if (result === undefined) { return undefined; }
@@ -256,7 +256,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
       lsigInfo = {
         creator: signer.addr,
         contractAddress: lsig.address(),
-        lsig: (lsig)
+        lsig: lsig
       };
     } catch (error) {
       persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
