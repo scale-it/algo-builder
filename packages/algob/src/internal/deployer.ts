@@ -312,6 +312,12 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
     return sscInfo;
   }
 
+  /**
+   * Description: Opt-In to ASA for a single account
+   * @param name ASA name
+   * @param accountName
+   * @param flags Transaction flags
+   */
   async optInToASA (name: string, accountName: string, flags: TxParams): Promise<void> {
     await this.algoOp.optInToASA(
       name,
@@ -320,6 +326,12 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
       flags);
   }
 
+  /**
+   * Description: Opt-In to stateful smart contract (SSC) for a single account
+   * @param sender sender account
+   * @param index appID
+   * @param payFlags Transaction flags
+   */
   async OptInToSSC (sender: Account, index: number, payFlags: TxParams): Promise<void> {
     await this.algoOp.OptInToSSC(sender, index, payFlags);
   }
