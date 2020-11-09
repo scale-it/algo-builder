@@ -1,4 +1,3 @@
-import { decode, encode } from "@msgpack/msgpack";
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/internal/core/errors-list";
@@ -137,7 +136,7 @@ describe("DeployerDeployMode", () => {
     deployerCfg.asaDefs = { MY_ASA: mkASA() };
     const deployer = new DeployerDeployMode(deployerCfg);
 
-    const logicSig = encode(getDummyLsig());
+    const logicSig = getDummyLsig() as any;
 
     const cp1: Checkpoints = {
       network1: {
@@ -155,7 +154,7 @@ describe("DeployerDeployMode", () => {
 
     deployerCfg.cpData.merge(cp1, "12s");
     const result = deployer.getDelegatedLsig("MY_LSIG");
-    assert.deepEqual(decode(logicSig), result);
+    assert.deepEqual(logicSig, result);
   });
 
   it("Should use getMetadata and isDefined from CheckpointData", async () => {

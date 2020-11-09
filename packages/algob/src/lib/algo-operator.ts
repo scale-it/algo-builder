@@ -1,4 +1,3 @@
-import { encode } from "@msgpack/msgpack";
 import algosdk from "algosdk";
 
 import { BuilderError } from "../internal/core/errors";
@@ -222,7 +221,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     return {
       creator: flags.funder.addr,
       contractAddress: contractAddress,
-      lsig: encode(lsig)
+      lsig: lsig
     };
   }
 

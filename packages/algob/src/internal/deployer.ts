@@ -1,4 +1,4 @@
-import { decode, encode } from "@msgpack/msgpack";
+import { decode } from "@msgpack/msgpack";
 import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
@@ -85,9 +85,8 @@ class DeployerBasicMode {
     const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map(); ;
     const result = resultMap.get(lsigName)?.lsig;
     if (result === undefined) { return undefined; }
-    const lsig1 = decode(result);
     const lsig = getDummyLsig();
-    Object.assign(lsig, lsig1);
+    Object.assign(lsig, result);
     return lsig;
   }
 
@@ -257,7 +256,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
       lsigInfo = {
         creator: signer.addr,
         contractAddress: lsig.address(),
-        lsig: encode(lsig)
+        lsig: (lsig)
       };
     } catch (error) {
       persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
