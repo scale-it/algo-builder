@@ -3,7 +3,7 @@ import * as algosdk from "algosdk";
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
 import { getDummyLsig, getLsig } from "../lib/lsig";
-import { bmsigExt, loadBinaryMultiSig, readMsigFromFile } from "../lib/msig";
+import { blsigExt, loadBinaryMultiSig, readMsigFromFile } from "../lib/msig";
 import { persistCheckpoint } from "../lib/script-checkpoints";
 import type {
   Account,
@@ -99,16 +99,16 @@ class DeployerBasicMode {
   }
 
   /**
-   * Description : loads multisigned logic signature from .msig or .bmsig file
+   * Description : loads multisigned logic signature from .lsig or .blsig file
    * @param {string} name filename
    * @param {Object} scParams parameters
-   * @returns {LogicSig} multi signed logic signature from assets/<file_name>.(b)msig
+   * @returns {LogicSig} multi signed logic signature from assets/<file_name>.(b)lsig
    */
   async loadMultiSig (name: string, scParams?: Object): Promise<LogicSig> {
-    if (name.endsWith(bmsigExt)) { return await loadBinaryMultiSig(name); }
+    if (name.endsWith(blsigExt)) { return await loadBinaryMultiSig(name); }
 
     const lsig = await getLsig(name, scParams as Object, this.algoOp.algodClient); // get lsig from .teal (getting logic part from lsig)
-    const msig = await readMsigFromFile(name); // Get decoded Msig object from .msig
+    const msig = await readMsigFromFile(name); // Get decoded Msig object from .lsig
     Object.assign(lsig.msig = {}, msig);
     return lsig;
   }

@@ -7,8 +7,8 @@ import { ASSETS_DIR } from "../internal/core/project-structure";
 import { LogicSig, MultiSig, RawLsig } from "../types";
 import { getDummyLsig } from "./lsig";
 
-export const bmsigExt = ".bmsig";
-const msigExt = ".msig";
+export const blsigExt = ".blsig";
+const lsigExt = ".lsig";
 
 /**
  * Description: this function decodes msig object from logic signature
@@ -31,14 +31,14 @@ export async function decodeMsigObj (msig: string): Promise<MultiSig> {
 }
 
 /**
- * Description: this function reads multisig from /assets/<filename>.msig
+ * Description: this function reads multisig from /assets/<filename>.lsig
  *              and returns the decoded multisig object
  * @param {string} msig : multisigned msig obj
  * @returns {MultiSig} : decoded Msig Object
  */
 export async function readMsigFromFile (filename: string): Promise<MultiSig | undefined> {
-  if (!filename.endsWith(msigExt)) {
-    throw new Error(`filename "${filename}" must end with "${msigExt}"`);
+  if (!filename.endsWith(lsigExt)) {
+    throw new Error(`filename "${filename}" must end with "${lsigExt}"`);
   }
   try {
     const p = path.join(ASSETS_DIR, filename);
@@ -51,14 +51,14 @@ export async function readMsigFromFile (filename: string): Promise<MultiSig | un
 }
 
 /**
- * Description: this function reads raw multisig from /assets/<filename>.msig
+ * Description: this function reads raw multisig from /assets/<filename>.lsig
  * and returns the base64 string
- * @param {string} filename : filename [must have .bmsig ext]
+ * @param {string} filename : filename [must have .blsig ext]
  * @returns {string} : base64 string
  */
 export async function readBinaryMultiSig (filename: string): Promise<string | undefined> {
-  if (!filename.endsWith(bmsigExt)) {
-    throw new Error(`filename "${filename}" must end with "${bmsigExt}"`);
+  if (!filename.endsWith(blsigExt)) {
+    throw new Error(`filename "${filename}" must end with "${blsigExt}"`);
   }
   try {
     const p = path.join(ASSETS_DIR, filename);
@@ -70,9 +70,9 @@ export async function readBinaryMultiSig (filename: string): Promise<string | un
 }
 
 /**
- * Description : loads multisigned logic signature directly from .bmsig file
+ * Description : loads multisigned logic signature directly from .blsig file
  * @param {string} name filename
- * @returns {LogicSig} multi signed logic signature from assets/<file_name>.bmsig
+ * @returns {LogicSig} multi signed logic signature from assets/<file_name>.blsig
  */
 export async function loadBinaryMultiSig (name: string): Promise<LogicSig> {
   // get logic signature from file and decode it
