@@ -1,4 +1,4 @@
-import { decode, encode } from "@msgpack/msgpack";
+import { decode } from "@msgpack/msgpack";
 import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
@@ -24,6 +24,7 @@ import type {
 } from "../types";
 import { BuilderError } from "./core/errors";
 import { ERRORS } from "./core/errors-list";
+import { DeployerConfig } from "./deployer_cfg";
 
 // Base class for deployer Run Mode (read access) and Deploy Mode (read and write access)
 class DeployerBasicMode {
@@ -35,21 +36,14 @@ class DeployerBasicMode {
   readonly accounts: Account[];
   readonly accountsByName: Accounts;
 
-  constructor (
-    runtimeEnv: AlgobRuntimeEnv,
-    cpData: CheckpointRepo,
-    asaDefs: ASADefs,
-    algoOp: AlgoOperator,
-    accountsByName: Accounts,
-    txWriter: txWriter
-  ) {
-    this.runtimeEnv = runtimeEnv;
-    this.cpData = cpData;
-    this.loadedAsaDefs = asaDefs;
-    this.algoOp = algoOp;
-    this.accounts = runtimeEnv.network.config.accounts;
-    this.accountsByName = accountsByName;
-    this.txWriter = txWriter;
+  constructor (deployerCfg: DeployerConfig) {
+    this.runtimeEnv = deployerCfg.runtimeEnv;
+    this.cpData = deployerCfg.cpData;
+    this.loadedAsaDefs = deployerCfg.asaDefs;
+    this.algoOp = deployerCfg.algoOp;
+    this.accounts = deployerCfg.runtimeEnv.network.config.accounts;
+    this.accountsByName = deployerCfg.accounts;
+    this.txWriter = deployerCfg.txWriter;
   }
 
   protected get networkName (): string {
@@ -87,13 +81,12 @@ class DeployerBasicMode {
   /**
    * @param lsigName Description: loads and returns delegated logic signature from checkpoint
    */
-  getDelegatedLsig (lsigName: string): Object | undefined {
+  getDelegatedLsig (lsigName: string): LogicSig | undefined {
     const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map(); ;
     const result = resultMap.get(lsigName)?.lsig;
     if (result === undefined) { return undefined; }
-    const lsig1 = decode(result);
     const lsig = getDummyLsig();
-    Object.assign(lsig, lsig1);
+    Object.assign(lsig, result);
     return lsig;
   }
 
@@ -263,7 +256,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
       lsigInfo = {
         creator: signer.addr,
         contractAddress: lsig.address(),
-        lsig: encode(lsig)
+        lsig: lsig
       };
     } catch (error) {
       persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
