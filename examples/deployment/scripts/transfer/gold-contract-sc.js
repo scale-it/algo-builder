@@ -12,7 +12,7 @@ async function run(runtimeEnv, deployer) {
   // Transactions for Transaction for ALGO - Contract : '2-gold-contract-asc.teal'  (Contract Mode)
   //const lsig = await deployer.getLogicSignature("2-gold-contract-asc.teal", []);
   // sender is contract account
-  const lsig = await deployer.loadLsig("2-gold-contract-asc.teal");
+  const lsig = await deployer.loadLogic("2-gold-contract-asc.teal");
   const sender = lsig.address(); 
   // Transaction PASS - As according to .teal logic, amount should be <= 100 and receiver should be john
   await transferAlgo(deployer, { addr: sender}, johnAccount.addr, 20, lsig);
