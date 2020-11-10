@@ -4,7 +4,7 @@ This project shows how to create Algorand Standard Asset (ASA).
 We will create gold and tesla assets. In algob, we recommend to
 create assets using a specification file, as provided in `assets/asa.yaml`.
 
-Each of those tokens are owned by their specific owner accounts.
+Each of these assets are owned by their specific owner accounts.
 After the creation a third account is opted-in in order to receive the tokens.
 
 Transfers can be executed by executing `algob run scripts/transfer/gold-to-john.js` and other scripts in `scripts/transfer/`.
