@@ -24,6 +24,7 @@ module.exports = {
     "simple-import-sort/sort": "warn",
     "sort-imports": "off",
 
+    "@typescript-eslint/consistent-type-assertions": "off",
     "@typescript-eslint/promise-function-async": "off",
     "@typescript-eslint/no-dynamic-delete": "off",
     "@typescript-eslint/no-unused-vars": ["warn", { "vars": "all", "args": "none", "ignoreRestSiblings": false, "varsIgnorePattern": "_" }],
