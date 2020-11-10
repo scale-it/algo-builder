@@ -3,7 +3,7 @@ import * as algosdk from "algosdk";
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
 import { getDummyLsig, getLsig } from "../lib/lsig";
-import { bmsigExt, loadBinaryMultiSig, readMsigFromFile, validateMsig } from "../lib/msig";
+import { bmsigExt, loadBinaryMultiSig, readMsigFromFile } from "../lib/msig";
 import { persistCheckpoint } from "../lib/script-checkpoints";
 import type {
   Account,
