@@ -247,3 +247,88 @@ export async function transferASALsig (
 
   return await deployer.waitForConfirmation(tx1.txId);
 }
+
+export async function callNoOpSSC (
+  deployer: AlgobDeployer,
+  sender: AccountSDK,
+  payFlags: TxParams,
+  index: number,
+  appArgs?: Uint8Array[],
+  accounts?: string,
+  foreignApps?: string,
+  foreignAssets?: string,
+  note?: Uint8Array,
+  lease?: Uint8Array,
+  rekeyTo?: string
+): Promise<void> {
+  const params = await mkSuggestedParams(deployer.algodClient, payFlags);
+  const txn = tx.makeApplicationNoOpTxn(
+    sender,
+    params,
+    index,
+    appArgs,
+    accounts,
+    foreignApps,
+    foreignAssets,
+    note,
+    lease,
+    rekeyTo);
+
+  const txId = txn.txID().toString();
+  const signedTxn = txn.signTxn(sender.sk);
+  await deployer.algodClient.sendRawTransaction(signedTxn).do();
+  const transactionResponse = await deployer.waitForConfirmation(txId);
+
+  console.log("Called app-id:", index);
+  if (transactionResponse['global-state-delta'] !== undefined) {
+    console.log("Global State updated:", transactionResponse['global-state-delta']);
+  }
+  if (transactionResponse['local-state-delta'] !== undefined) {
+    console.log("Local State updated:", transactionResponse['local-state-delta']);
+  }
+}
+
+export async function closeOutSSC (
+  deployer: AlgobDeployer,
+  sender: AccountSDK,
+  payFlags: TxParams,
+  index: number): Promise<void> {
+  const params = await mkSuggestedParams(deployer.algodClient, payFlags);
+
+  const txn = tx.makeApplicationCloseOutTxn(sender, params, index);
+
+  const txId = txn.txID().toString();
+  const signedTxn = txn.signTxn(sender.sk);
+  await deployer.algodClient.sendRawTransaction(signedTxn).do();
+  await deployer.waitForConfirmation(txId);
+}
+
+export async function deleteTxnSSC (
+  deployer: AlgobDeployer,
+  sender: AccountSDK,
+  payFlags: TxParams,
+  index: number): Promise<void> {
+  const params = await mkSuggestedParams(deployer.algodClient, payFlags);
+
+  const txn = tx.makeApplicationDeleteTxn(sender, params, index);
+
+  const txId = txn.txID().toString();
+  const signedTxn = txn.signTxn(sender.sk);
+  await deployer.algodClient.sendRawTransaction(signedTxn).do();
+  await deployer.waitForConfirmation(txId);
+}
+
+export async function clearStateSSC (
+  deployer: AlgobDeployer,
+  sender: AccountSDK,
+  payFlags: TxParams,
+  index: number): Promise<void> {
+  const params = await mkSuggestedParams(deployer.algodClient, payFlags);
+
+  const txn = tx.makeApplicationClearStateTxn(sender, params, index);
+
+  const txId = txn.txID().toString();
+  const signedTxn = txn.signTxn(sender.sk);
+  await deployer.algodClient.sendRawTransaction(signedTxn).do();
+  await deployer.waitForConfirmation(txId);
+}

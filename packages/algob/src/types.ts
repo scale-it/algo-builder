@@ -432,7 +432,7 @@ export interface SSCDeploymentFlags {
   localBytes: number
   globalInts: number
   globalBytes: number
-  appArgs?: Uint8Array
+  appArgs?: Uint8Array[]
   accounts?: string
   foreignApps?: string
   foreignAssets?: string

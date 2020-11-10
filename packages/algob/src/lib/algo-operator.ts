@@ -270,7 +270,14 @@ export class AlgoOperatorImpl implements AlgoOperator {
       flags.localInts,
       flags.localBytes,
       flags.globalInts,
-      flags.globalBytes);
+      flags.globalBytes,
+      flags.appArgs,
+      flags.accounts,
+      flags.foreignApps,
+      flags.foreignAssets,
+      flags.note,
+      flags.lease,
+      flags.rekeyTo);
 
     const txId = txn.txID().toString();
     const signedTxn = txn.signTxn(flags.sender.sk);
