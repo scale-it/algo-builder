@@ -30,7 +30,7 @@ Our `/examples` directory provides few projects with smart contracts and ASA:
 + Don't forget to study Algorand smart contract [guidelines](https://developer.algorand.org/docs/reference/teal/guidelines/).
 + Go to the [examples/ref-templates](./examples/ref-templates/README.md) to see how the reference templates are implemented.
 + Then go to [examples/asa](./examples/ref-templates/README.md) to learn how you can easily manage and deploy ASA with `algob`.
-+ check other examples as well.
++ Check other examples as well.
 
 
 ## Requirements
