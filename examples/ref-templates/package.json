@@ -1,0 +1,16 @@
+{
+  "name": "ref-templates",
+  "version": "0.0.1",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "chai": "^4.2.0"
+  },
+  "dependencies": {
+    "algob": "^0.0.5",
+    "algosdk": "github:algorand/js-algorand-sdk#v1.7.0-beta"
+  },
+  "scripts": {
+    "algob": "algob"
+  }
+}
