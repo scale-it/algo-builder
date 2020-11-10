@@ -1,10 +1,13 @@
+import * as msgpack from "@msgpack/msgpack";
 import fs from "fs";
 import { decode } from 'hi-base32';
 import path from "path";
 
 import { ASSETS_DIR } from "../internal/core/project-structure";
-import { MultiSig } from "../types";
+import { LogicSig, MultiSig, RawLsig } from "../types";
+import { getDummyLsig } from "./lsig";
 
+export const bmsigExt = ".bmsig";
 const msigExt = ".msig";
 
 /**
@@ -49,12 +52,12 @@ export async function readMsigFromFile (filename: string): Promise<MultiSig | un
 /**
  * Description: this function reads raw multisig from /assets/<filename>.msig
  * and returns the base64 string
- * @param {string} filename : filename [must have .msig ext]
+ * @param {string} filename : filename [must have .bmsig ext]
  * @returns {string} : base64 string
  */
 export async function readBinaryMultiSig (filename: string): Promise<string | undefined> {
-  if (!filename.endsWith(msigExt)) {
-    throw new Error(`filename "${filename}" must end with "${msigExt}"`);
+  if (!filename.endsWith(bmsigExt)) {
+    throw new Error(`filename "${filename}" must end with "${bmsigExt}"`);
   }
   try {
     const p = path.join(ASSETS_DIR, filename);
@@ -62,5 +65,35 @@ export async function readBinaryMultiSig (filename: string): Promise<string | un
   } catch (e) {
     if (e?.errno === -2) return undefined; // handling a not existing file
     throw e;
+  }
+}
+
+/**
+ * Description : loads multisigned logic signature directly from .bmsig file
+ * @param {string} name filename
+ * @returns {LogicSig} multi signed logic signature from assets/<file_name>.bmsig
+ */
+export async function loadBinaryMultiSig (name: string): Promise<LogicSig> {
+  // get logic signature from file and decode it
+  const data = await readBinaryMultiSig(name);
+  const program = new Uint8Array(Buffer.from(data as string, 'base64'));
+  const logicSignature = msgpack.decode(program) as RawLsig;
+  validateMsig(logicSignature.msig);
+
+  // assign complete logic signature
+  const lsig = getDummyLsig();
+  lsig.logic = logicSignature.l as Uint8Array; // assign logic part separately (as keys mismatch: logic, l)
+  delete logicSignature.l;
+  Object.assign(lsig, logicSignature);
+  return lsig;
+}
+
+/**
+ * Description : validates msig by checking for v and thr field
+ * @param {MultiSig} msig
+ */
+export function validateMsig (msig: MultiSig | undefined): void {
+  if (msig === undefined || msig.v === undefined || msig.thr === undefined) {
+    throw new Error("Error fetching multisigned logic signature from file - invalid/undefined msig");
   }
 }
