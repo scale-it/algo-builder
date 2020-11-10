@@ -35,7 +35,7 @@ Sign again with addr2 (as threshold is set to 2)
 goal clerk multisig signprogram -L <path>/signed.msig -a addr2 -A <multisig_hash> -d ~/<data_directory>
 ```
 
-The logic sig file generated using the commands above is a binary file. To use it, you have to store it in the `/assets` directory with `.bmsig` extension. You can also decompile it to a readable format (command provided below) and save it to `/assets` with `.msig` extension.
+The logic sig file generated using the commands above is a binary file. To use it, you have to store it in the `/assets` directory with `.bmsig` extension (binary encoded LogicSig). You can also decompile it to a readable format (command provided below) and save it to `/assets` with `.msig` extension.
 
  To disassemble the signed multisig binary 
 ```bash
