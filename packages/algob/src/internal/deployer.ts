@@ -1,4 +1,5 @@
 import * as algosdk from "algosdk";
+import type { LogicSig } as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
@@ -16,7 +17,6 @@ import type {
   ASCInfo,
   CheckpointRepo,
   FundASCFlags,
-  LogicSig,
   LsigInfo,
   TxParams
 } from "../types";

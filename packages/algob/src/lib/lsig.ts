@@ -1,5 +1,7 @@
 /* eslint @typescript-eslint/no-var-requires: "off" */
 import algosdk from "algosdk";
+import type {LSig}
+
 
 import { ASCCache, LogicSig } from "../types";
 import { CompileOp } from "./compile";
@@ -10,7 +12,7 @@ import { CompileOp } from "./compile";
  * @param scParams : parameters
  * @param algodClient : algodClient
  */
-export async function getLsig (name: string, scParams: Object, algodClient: algosdk.Algodv2): Promise<any> {
+export async function getLsig (name: string, scParams: Object, algodClient: algosdk.Algodv2): Promise<LogicSig> {
   const compileOp = new CompileOp(algodClient);
   const result: ASCCache = await compileOp.ensureCompiled(name, false);
   const program = result.toBytes;
