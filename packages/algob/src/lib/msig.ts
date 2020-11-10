@@ -17,6 +17,7 @@ const msigExt = ".msig";
  */
 export async function decodeMsigObj (msig: string): Promise<MultiSig> {
   const parsedMsig = JSON.parse(msig).msig;
+  validateMsig(parsedMsig);
 
   // decoding multisigned logic signature
   for (const acc of parsedMsig.subsig) {

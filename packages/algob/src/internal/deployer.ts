@@ -109,7 +109,6 @@ class DeployerBasicMode {
 
     const lsig = await getLsig(name, scParams as Object, this.algoOp.algodClient); // get lsig from .teal (getting logic part from lsig)
     const msig = await readMsigFromFile(name); // Get decoded Msig object from .msig
-    validateMsig(msig);
     Object.assign(lsig.msig = {}, msig);
     return lsig;
   }
