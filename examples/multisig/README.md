@@ -9,7 +9,7 @@ Transactions on a blockchain via asc1 (Algorand Smart Contract) logic can be don
 Let's say `john`, `bob` and `gold` create a multisignature account with threshold 2 and want to send some algos according to a smart contract logic (`sample-asc.teal`). To do so, one of the three users (say `john`) compiles the `sample-asc.teal` file and signs it. This creates a signed logic signature file (`gold-john-bob.msig`) which must be signed atleast one more time as threshold is set to 2. The current user (say `john`) passes this file to `bob` and he signs it again. Now this file can be successfully used to validate transactions. `algob` provides the functionality to load and use a multi-signed logic for transactions. Commands to create multisig account and signing logic with account addresses are provided below.  
 
 You can find the example code in `/scripts`
-1. `/multisig_goal_sc.js` - Loading a multi signed logic (either `raw` or `disassembled`) from a file (`/assets/sample-text-asc.msig` or `sample-raw-asc.msig`) and using that lsig for validating transactions.
+1. `/multisig_goal_sc.js` - Loading a multi signed logic (either `raw` or `disassembled`) from a file (`/assets/sample-text-asc.msig` or `sample-raw-asc.bmsig`) and using that lsig for validating transactions.
 2. `/multisig_sdk_sc.js` - Compile a smart-contract code from `/assets/sample-asc.teal`, load it, sign it and use in transactions.   
 
 
@@ -35,15 +35,15 @@ Sign again with addr2 (as threshold is set to 2)
 goal clerk multisig signprogram -L <path>/signed.msig -a addr2 -A <multisig_hash> -d ~/<data_directory>
 ```
 
-The logic sig file generated using the commands above is a binary file. To use it, you have to store it in the `/assets` directory. You can also decompile it to a readable format (command provided below) and save it to `/assets`.
+The logic sig file generated using the commands above is a binary file. To use it, you have to store it in the `/assets` directory with `.bmsig` extension. You can also decompile it to a readable format (command provided below) and save it to `/assets` with `.msig` extension.
 
  To disassemble the signed multisig binary 
 ```bash
 goal clerk compile -D <path>/signed.msig
 ```
-Paste the above output in `examples/multisig/assets/<file_name>.msig`  
+Paste the above output in `examples/multisig/assets/<file_name>.(b)msig`  
 
-You need to ***save the signed logic signature file in `examples/multisig/assets` directory***. The file must have ***.msig*** extension.
+You need to ***save the signed logic signature file in `examples/multisig/assets` directory***. The file must have ***.msig*** or ***.bmsig*** extension depending on the type of file (text/binary).
 
 ### Setup
 
