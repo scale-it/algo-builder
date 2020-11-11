@@ -21,13 +21,13 @@ export async function printAssets (deployer: AlgobDeployer, account: string): Pr
 }
 
 // read local state of application from user account (stateful smart contract)
-export async function readLocalState (
+export async function printLocalStateSSC (
   deployer: AlgobDeployer,
   account: string,
-  index: number): Promise<void> {
+  appId: number): Promise<void> {
   const accountInfoResponse = await deployer.algodClient.accountInformation(account).do();
   for (const value of accountInfoResponse['apps-local-state']) {
-    if (value.id === index) {
+    if (value.id === appId) {
       console.log("User's local state:");
       for (let n = 0; n < value[`key-value`].length; n++) {
         console.log(value[`key-value`][n]);
@@ -37,13 +37,13 @@ export async function readLocalState (
 }
 
 // read global state of application (stateful smart contract)
-export async function readGlobalState (
+export async function printGlobalStateSSC (
   deployer: AlgobDeployer,
   account: string,
-  index: number): Promise<void> {
+  appId: number): Promise<void> {
   const accountInfoResponse = await deployer.algodClient.accountInformation(account).do();
   for (const value of accountInfoResponse['created-apps']) {
-    if (value.id === index) {
+    if (value.id === appId) {
       console.log("Application's global state:");
       for (let n = 0; n < value.params['global-state'].length; n++) {
         console.log(value.params['global-state'][n]);

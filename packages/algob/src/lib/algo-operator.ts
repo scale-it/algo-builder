@@ -54,7 +54,7 @@ export interface AlgoOperator {
     asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, assetIndex: number
   ) => Promise<void>
   OptInToSSC: (
-    sender: Account, index: number, payFlags: TxParams) => Promise<void>
+    sender: Account, appId: number, payFlags: TxParams) => Promise<void>
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -302,10 +302,10 @@ export class AlgoOperatorImpl implements AlgoOperator {
     };
   }
 
-  async OptInToSSC (sender: Account, index: number, payFlags: TxParams): Promise<void> {
+  async OptInToSSC (sender: Account, appId: number, payFlags: TxParams): Promise<void> {
     const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
 
-    const txn = algosdk.makeApplicationOptInTxn(sender, params, index);
+    const txn = algosdk.makeApplicationOptInTxn(sender, params, appId);
     const txId = txn.txID().toString();
     const signedTxn = txn.signTxn(sender.sk);
 

@@ -252,7 +252,7 @@ export async function callNoOpSSC (
   deployer: AlgobDeployer,
   sender: AccountSDK,
   payFlags: TxParams,
-  index: number,
+  appId: number,
   appArgs?: Uint8Array[],
   accounts?: string,
   foreignApps?: string,
@@ -265,7 +265,7 @@ export async function callNoOpSSC (
   const txn = tx.makeApplicationNoOpTxn(
     sender,
     params,
-    index,
+    appId,
     appArgs,
     accounts,
     foreignApps,
@@ -279,7 +279,7 @@ export async function callNoOpSSC (
   await deployer.algodClient.sendRawTransaction(signedTxn).do();
   const transactionResponse = await deployer.waitForConfirmation(txId);
 
-  console.log("Called app-id:", index);
+  console.log("Called app-id:", appId);
   if (transactionResponse['global-state-delta'] !== undefined) {
     console.log("Global State updated:", transactionResponse['global-state-delta']);
   }
@@ -292,10 +292,10 @@ export async function closeOutSSC (
   deployer: AlgobDeployer,
   sender: AccountSDK,
   payFlags: TxParams,
-  index: number): Promise<void> {
+  appId: number): Promise<void> {
   const params = await mkSuggestedParams(deployer.algodClient, payFlags);
 
-  const txn = tx.makeApplicationCloseOutTxn(sender, params, index);
+  const txn = tx.makeApplicationCloseOutTxn(sender, params, appId);
 
   const txId = txn.txID().toString();
   const signedTxn = txn.signTxn(sender.sk);
@@ -307,10 +307,10 @@ export async function deleteTxnSSC (
   deployer: AlgobDeployer,
   sender: AccountSDK,
   payFlags: TxParams,
-  index: number): Promise<void> {
+  appId: number): Promise<void> {
   const params = await mkSuggestedParams(deployer.algodClient, payFlags);
 
-  const txn = tx.makeApplicationDeleteTxn(sender, params, index);
+  const txn = tx.makeApplicationDeleteTxn(sender, params, appId);
 
   const txId = txn.txID().toString();
   const signedTxn = txn.signTxn(sender.sk);
@@ -322,10 +322,10 @@ export async function clearStateSSC (
   deployer: AlgobDeployer,
   sender: AccountSDK,
   payFlags: TxParams,
-  index: number): Promise<void> {
+  appId: number): Promise<void> {
   const params = await mkSuggestedParams(deployer.algodClient, payFlags);
 
-  const txn = tx.makeApplicationClearStateTxn(sender, params, index);
+  const txn = tx.makeApplicationClearStateTxn(sender, params, appId);
 
   const txId = txn.txID().toString();
   const signedTxn = txn.signTxn(sender.sk);
