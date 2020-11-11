@@ -31,7 +31,7 @@ async function run(runtimeEnv, deployer) {
   contract = await deployer.loadLogic("htlc.py", [ secret ]);
   contractAddress = contract.address();
 
-  // Passes as right secret is passed
+  // Passes because right secret is passed
   await transferAlgo(deployer, { addr: contractAddress}, globalZeroAddress, 0, contract, { totalFee: 2000, closeRemainderTo: johnAccount.addr});
   
 }
