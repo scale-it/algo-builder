@@ -1,3 +1,4 @@
+import type { LogicSig, LogicSigArgs, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
@@ -16,7 +17,6 @@ import type {
   ASCInfo,
   CheckpointRepo,
   FundASCFlags,
-  LogicSig,
   LsigInfo,
   TxParams
 } from "../types";
@@ -94,22 +94,23 @@ class DeployerBasicMode {
    * @param scParams parameters
    * @returns {LogicSig} loaded logic signature from assets/<file_name>.teal
    */
-  async loadLogic (name: string, scParams: Object): Promise<LogicSig> {
+  async loadLogic (name: string, scParams: LogicSigArgs): Promise<LogicSig> {
     return await getLsig(name, scParams, this.algoOp.algodClient);
   }
 
   /**
    * Description : loads multisigned logic signature from .lsig or .blsig file
    * @param {string} name filename
-   * @param {Object} scParams parameters
+   * @param {LogicSigArgs} scParams parameters
    * @returns {LogicSig} multi signed logic signature from assets/<file_name>.(b)lsig
    */
-  async loadMultiSig (name: string, scParams?: Object): Promise<LogicSig> {
-    if (name.endsWith(blsigExt)) { return await loadBinaryMultiSig(name); }
+  async loadMultiSig (name: string, scParams: LogicSigArgs): Promise<LogicSig> {
+    if (name.endsWith(blsigExt))
+      return loadBinaryMultiSig(name);
 
-    const lsig = await getLsig(name, scParams as Object, this.algoOp.algodClient); // get lsig from .teal (getting logic part from lsig)
-    const msig = await readMsigFromFile(name); // Get decoded Msig object from .lsig
-    Object.assign(lsig.msig = {}, msig);
+    const lsig = await getLsig(name, scParams, this.algoOp.algodClient); // get lsig from .teal (getting logic part from lsig)
+    const msig = await readMsigFromFile(name); // Get decoded Msig object from .msig
+    Object.assign(lsig.msig = {} as MultiSig, msig);
     return lsig;
   }
 }
@@ -212,7 +213,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
    * @param flags    - Deployments flags (as per SPEC)
    * @param payFlags - as per SPEC
    */
-  async fundLsig (name: string, scParams: Object, flags: FundASCFlags,
+  async fundLsig (name: string, scParams: LogicSigArgs, flags: FundASCFlags,
     payFlags: TxParams): Promise<void> {
     try {
       await this.algoOp.fundLsig(name, scParams, flags, payFlags, this.txWriter);
@@ -229,7 +230,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
    * @param scParams - SC parameters
    * @param signer   - signer
    */
-  async mkDelegatedLsig (name: string, scParams: Object, signer: Account): Promise<LsigInfo> {
+  async mkDelegatedLsig (name: string, scParams: LogicSigArgs, signer: Account): Promise<LsigInfo> {
     this.assertNoAsset(name);
     let lsigInfo = {} as any;
     try {
@@ -277,20 +278,20 @@ export class DeployerRunMode extends DeployerBasicMode implements AlgobDeployer 
     });
   }
 
-  async fundLsig (_name: string, scParams: Object, flags: FundASCFlags,
-    payFlags: TxParams): Promise<LsigInfo> {
+  async fundLsig (_name: string, _scParams: LogicSigArgs, _flags: FundASCFlags,
+    _payFlags: TxParams): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "fundLsig"
     });
   }
 
-  async mkDelegatedLsig (_name: string, scParams: Object, signer: Account): Promise<LsigInfo> {
+  async mkDelegatedLsig (_name: string, _scParams: LogicSigArgs, _signer: Account): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "delegatedLsig"
     });
   }
 
-  optInToASA (name: string, accountName: string, flags: ASADeploymentFlags): Promise<void> {
+  optInToASA (_name: string, _accountName: string, _flags: ASADeploymentFlags): Promise<void> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "optInToASA"
     });

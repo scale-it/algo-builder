@@ -1,6 +1,7 @@
+import type { LogicSig } from "algosdk";
 import * as algosdk from "algosdk";
 
-import { Account, AlgobDeployer, ASADeploymentFlags, ASAInfo, ASCInfo, FundASCFlags, LogicSig, LsigInfo } from "../../src/types";
+import { Account, AlgobDeployer, ASADeploymentFlags, ASAInfo, ASCInfo, FundASCFlags, LsigInfo } from "../../src/types";
 
 export class FakeDeployer implements AlgobDeployer {
   asa = new Map<string, ASAInfo>();

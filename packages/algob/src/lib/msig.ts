@@ -1,10 +1,11 @@
 import * as msgpack from "algo-msgpack-with-bigint";
+import type { LogicSig, MultiSig } from "algosdk";
 import fs from "fs";
 import { decode } from 'hi-base32';
 import path from "path";
 
 import { ASSETS_DIR } from "../internal/core/project-structure";
-import { LogicSig, MultiSig, RawLsig } from "../types";
+import type { RawLsig } from "../types";
 import { getDummyLsig } from "./lsig";
 
 export const blsigExt = ".blsig";
@@ -13,7 +14,7 @@ const lsigExt = ".lsig";
 /**
  * Description: this function decodes msig object from logic signature
  * @param {String} name : multisig filename
- * @returns {LogicSig} : decoded msig (object with decoded public keys and their signatures)
+ * @returns {MultiSig} : decoded msig (object with decoded public keys and their signatures)
  */
 export async function decodeMsigObj (msig: string): Promise<MultiSig> {
   const parsedMsig = JSON.parse(msig).msig;

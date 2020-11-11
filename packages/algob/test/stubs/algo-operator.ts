@@ -1,3 +1,4 @@
+import type { LogicSig } from "algosdk";
 import { Algodv2 } from "algosdk";
 
 import { txWriter } from "../../src/internal/tx-log-writer";
@@ -44,7 +45,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     return {
       creator: flags.funder.addr + "-get-address-dry-run",
       contractAddress: "dfssdfsd",
-      lsig: new Uint8Array(1)
+      lsig: {} as LogicSig
     };
   }
 
