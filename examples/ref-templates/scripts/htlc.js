@@ -1,11 +1,11 @@
-const { transferMicroAlgos, transferMicroAlgosLsig } = require("algob");
+const { transferMicroAlgos, transferMicroAlgosLsig, globalZeroAddress } = require("algob");
 
 async function transferAlgo(deployer, senderAddr, receiverAddr, amount, lsig, payFlags){
     try {
         const details = await transferMicroAlgosLsig(deployer, senderAddr, receiverAddr, amount, lsig, payFlags);
         console.log(details);
     } catch (e) {
-        console.error('Transaction Failed', e);
+        console.error('Transaction Failed', e.response.error);
     }
 }
 
@@ -13,7 +13,6 @@ async function run(runtimeEnv, deployer) {
 
   const masterAccount = deployer.accountsByName.get("master-account")
   const johnAccount = deployer.accountsByName.get("john-account");
-  const globalZeroAddress = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ";
 
   await transferMicroAlgos(deployer, masterAccount, johnAccount.addr, 200000000, {note: "funding account"});  
 

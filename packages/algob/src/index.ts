@@ -5,6 +5,7 @@ import {
   loadAccountsFromFileSync,
   mkAccounts
 } from "./lib/account";
+import { globalZeroAddress } from "./lib/constants";
 import { algodCredentialsFromEnv, KMDCredentialsFromEnv } from "./lib/credentials";
 import { balanceOf, printAssets } from "./lib/status";
 import { transferASALsig, transferAsset, transferMicroAlgos, transferMicroAlgosLsig } from "./lib/tx";
@@ -24,5 +25,6 @@ export {
   transferMicroAlgosLsig,
   algodCredentialsFromEnv,
   KMDCredentialsFromEnv,
-  ASC1Mode
+  ASC1Mode,
+  globalZeroAddress
 };

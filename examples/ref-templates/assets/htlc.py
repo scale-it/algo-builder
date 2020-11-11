@@ -1,23 +1,3 @@
-"""This contract implements a "hash time lock".
-The contract will approve transactions spending algos from itself under two circumstances:
-
-- If an argument arg_0 is passed to the script such that TMPL_HASHFN(arg_0) is equal to TMPL_HASHIMG, 
-then funds may be closed out to TMPL_RCV.
-- If txn.FirstValid is greater than TMPL_TIMEOUT, then funds may be closed out to TMPL_OWN.
-
-The idea is that by knowing the preimage to TMPL_HASHIMG, funds may be released to 
-TMPL_RCV (Scenario 1). Alternatively, after some timeout round TMPL_TIMEOUT, 
-funds may be closed back to their original owner, TMPL_OWN (Scenario 2). 
-Note that Scenario 1 may occur up until Scenario 2 occurs, even if TMPL_TIMEOUT has already passed."""
-
-""" Parameters
-TMPL_RCV: the address to send funds to when the preimage is supplied
-TMPL_HASHFN: the specific hash function (sha256 or keccak256) to use (sha256 in this example)
-TMPL_HASHIMG: the image of the hash function for which knowing the preimage under TMPL_HASHFN will release funds
-TMPL_TIMEOUT: the round after which funds may be closed out to TMPL_OWN
-TMPL_OWN: the address to refund funds to on timeout
-TMPL_FEE: maximum fee of any transactions approved by this contract """
-
 from pyteal import *
 
 john = Addr("2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA")
@@ -26,12 +6,32 @@ fee = 10000
 pre_image = "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc="
 timeout = 2000
 
-def htlc(TMPL_RCV = john,
-         TMPL_OWN = master,
-         TMPL_FEE = fee,
-         TMPL_HASHIMG = pre_image,
-         TMPL_HASHFN = Sha256,
-         TMPL_TIMEOUT = timeout):
+def htlc(TMPL_RCV,
+         TMPL_OWN,
+         TMPL_FEE,
+         TMPL_HASHIMG,
+         TMPL_HASHFN,
+         TMPL_TIMEOUT):
+
+    """This contract implements a "hash time lock".
+    The contract will approve transactions spending algos from itself under two circumstances:
+
+    - If an argument arg_0 is passed to the script such that TMPL_HASHFN(arg_0) is equal to TMPL_HASHIMG, 
+    then funds may be closed out to TMPL_RCV.
+    - If txn.FirstValid is greater than TMPL_TIMEOUT, then funds may be closed out to TMPL_OWN.
+
+    The idea is that by knowing the preimage to TMPL_HASHIMG, funds may be released to 
+    TMPL_RCV (Scenario 1). Alternatively, after some timeout round TMPL_TIMEOUT, 
+    funds may be closed back to their original owner, TMPL_OWN (Scenario 2). 
+    Note that Scenario 1 may occur up until Scenario 2 occurs, even if TMPL_TIMEOUT has already passed.
+    
+    Parameters:
+    TMPL_RCV: the address to send funds to when the preimage is supplied
+    TMPL_HASHFN: the specific hash function (sha256 or keccak256) to use (sha256 in this example)
+    TMPL_HASHIMG: the image of the hash function for which knowing the preimage under TMPL_HASHFN will release funds
+    TMPL_TIMEOUT: the round after which funds may be closed out to TMPL_OWN
+    TMPL_OWN: the address to refund funds to on timeout
+    TMPL_FEE: maximum fee of any transactions approved by this contract """
     
     # First, check that the fee of this transaction is less than or equal to TMPL_FEE
     fee_check = Txn.fee() < Int(TMPL_FEE)
@@ -57,10 +57,10 @@ def htlc(TMPL_RCV = john,
         amount_check
     )
 
-    """Payout scenarios : At this point in the execution, there is one boolean variable on the 
-    stack that must be true in order for the transaction to be valid. The checks we have done 
-    above apply to any transaction that may be approved by this script.We will now check if we
-     are in one of the two payment scenarios described in the functionality section."""
+    # Payout scenarios : At this point in the execution, there is one boolean variable on the 
+    # stack that must be true in order for the transaction to be valid. The checks we have done 
+    # above apply to any transaction that may be approved by this script.We will now check if we
+    # are in one of the two payment scenarios described in the functionality section."""
 
     # Scenario 1: Hash preimage has been revealed
     # First, check that the CloseRemainderTo field is set to be the TMPL_RCV address.
@@ -91,10 +91,9 @@ def htlc(TMPL_RCV = john,
     # We want to approve this transaction if we are in scenario 1 or 2. 
     # So we logically OR the results of those checks together.
     # Finally, we logically AND the scenario checks with the initial checks.
-    return And(Or(scenario_1, scenario_2), required_condition)
-
     # At this point, the stack contains just one value: a boolean indicating 
     # whether or not it has been approved by this contract.
-
+    return And(Or(scenario_1, scenario_2), required_condition)
+    
 if __name__ == "__main__":
-    print(compileTeal(htlc(), Mode.Signature))
+    print(compileTeal(htlc(john, master, fee, pre_image, Sha256, timeout), Mode.Signature))
