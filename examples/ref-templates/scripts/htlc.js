@@ -25,7 +25,7 @@ async function run(runtimeEnv, deployer) {
   let contract = await deployer.loadLogic("htlc.py", [ wrongSecret ]);
   let contractAddress = contract.address();
   
-  // Fails as wrong secret is passed
+  // Fails because wrong secret is passed
   await transferAlgo(deployer, { addr: contractAddress}, globalZeroAddress, 0, contract, { totalFee: 1000, closeRemainderTo: johnAccount.addr});
 
   contract = await deployer.loadLogic("htlc.py", [ secret ]);
