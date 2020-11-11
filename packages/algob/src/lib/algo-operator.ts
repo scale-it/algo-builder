@@ -305,7 +305,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   /**
    * Description: Opt-In to stateful smart contract
    * @param sender Account for which opt-in is required
-   * @param appId Application Index
+   * @param appId Application Index : ID of the application being configured or empty if creating
    * @param payFlags Transaction Params
    */
   async optInToSSC (sender: Account, appId: number, payFlags: TxParams): Promise<void> {

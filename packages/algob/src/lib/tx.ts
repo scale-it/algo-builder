@@ -248,6 +248,13 @@ export async function transferASALsig (
   return await deployer.waitForConfirmation(tx1.txId);
 }
 
+/**
+ * Description: Make calls to application
+ * @param deployer AlgobDeployer
+ * @param sender Account from which call needs to be made
+ * @param payFlags Transaction Flags
+ * @param appId ID of the application being configured or empty if creating
+ */
 export async function callNoOpSSC (
   deployer: AlgobDeployer,
   sender: AccountSDK,
@@ -288,6 +295,14 @@ export async function callNoOpSSC (
   }
 }
 
+/**
+ * Description: The user may discontinue use of the application by sending a close out transaction.
+ * This will remove the local state for this application from the user's account.
+ * @param deployer AlgobDeployer
+ * @param sender Account from which call needs to be made
+ * @param payFlags Transaction Flags
+ * @param appId ID of the application being configured or empty if creating
+ */
 export async function closeOutSSC (
   deployer: AlgobDeployer,
   sender: AccountSDK,
@@ -303,6 +318,14 @@ export async function closeOutSSC (
   await deployer.waitForConfirmation(txId);
 }
 
+/**
+ * Description: The approval program defines the creator as the only account able to delete the application.
+ * This removes the global state, but does not impact any user's local state.
+ * @param deployer AlgobDeployer
+ * @param sender Account from which call needs to be made
+ * @param payFlags Transaction Flags
+ * @param appId ID of the application being configured or empty if creating
+ */
 export async function deleteTxnSSC (
   deployer: AlgobDeployer,
   sender: AccountSDK,
@@ -318,6 +341,14 @@ export async function deleteTxnSSC (
   await deployer.waitForConfirmation(txId);
 }
 
+/**
+ * Description: The user may clear the local state for an application at any time,
+ * even if the application was deleted by the creator.
+ * @param deployer AlgobDeployer
+ * @param sender Account from which call needs to be made
+ * @param payFlags Transaction Flags
+ * @param appId ID of the application being configured or empty if creating
+ */
 export async function clearStateSSC (
   deployer: AlgobDeployer,
   sender: AccountSDK,
