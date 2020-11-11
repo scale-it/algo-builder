@@ -397,7 +397,7 @@ export interface TxParams {
   lease?: string
   note?: string
   noteb64?: string
-  closeRemainderTo: AccountAddress
+  closeRemainderTo?: AccountAddress
 }
 
 export interface ASADeploymentFlags extends TxParams {
