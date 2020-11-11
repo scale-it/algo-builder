@@ -53,7 +53,7 @@ export interface AlgoOperator {
   optInToASAMultiple: (
     asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, assetIndex: number
   ) => Promise<void>
-  OptInToSSC: (
+  optInToSSC: (
     sender: Account, appId: number, payFlags: TxParams) => Promise<void>
 }
 
@@ -302,7 +302,13 @@ export class AlgoOperatorImpl implements AlgoOperator {
     };
   }
 
-  async OptInToSSC (sender: Account, appId: number, payFlags: TxParams): Promise<void> {
+  /**
+   * Description: Opt-In to stateful smart contract
+   * @param sender Account for which opt-in is required
+   * @param appId Application Index
+   * @param payFlags Transaction Params
+   */
+  async optInToSSC (sender: Account, appId: number, payFlags: TxParams): Promise<void> {
     const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
 
     const txn = algosdk.makeApplicationOptInTxn(sender, params, appId);

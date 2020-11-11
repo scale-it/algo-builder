@@ -304,11 +304,11 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
   /**
    * Description: Opt-In to stateful smart contract (SSC) for a single account
    * @param sender sender account
-   * @param index appID
+   * @param appID application index
    * @param payFlags Transaction flags
    */
-  async OptInToSSC (sender: Account, index: number, payFlags: TxParams): Promise<void> {
-    await this.algoOp.OptInToSSC(sender, index, payFlags);
+  async OptInToSSC (sender: Account, appId: number, payFlags: TxParams): Promise<void> {
+    await this.algoOp.optInToSSC(sender, appId, payFlags);
   }
 }
 
