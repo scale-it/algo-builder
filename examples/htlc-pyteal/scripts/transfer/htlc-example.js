@@ -16,13 +16,13 @@ async function run(runtimeEnv, deployer) {
     const secret = "hero wisdom green split loop element vote belt";
     const wrongSecret = "hero wisdom red split loop element vote belt";
 
-    let lsig = await deployer.loadLsig("htlc.py", [ wrongSecret ]);
+    let lsig = await deployer.loadLogic("htlc.py", [ wrongSecret ]);
     let sender = lsig.address(); 
     
     // Transaction Fails : as wrong secret value is used
     await transferAlgo(deployer, { addr: sender}, johnAccount.addr, 200, lsig);
 
-    lsig = await deployer.loadLsig("htlc.py", [ secret ]);
+    lsig = await deployer.loadLogic("htlc.py", [ secret ]);
     sender = lsig.address();
 
     // Transaction Passes : as right secret value is used

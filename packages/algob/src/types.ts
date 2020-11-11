@@ -473,14 +473,11 @@ export interface AlgobDeployer {
   // extract multi signed logic signature file from assets/
   loadMultiSig: (name: string, scParams: Object) => Promise<LogicSig>
 
-  // load lsig from binary
-  loadBinaryMultiSig: (name: string, scParams: Object) => Promise<LogicSig>
-
   // get delegated Logic signature
   getDelegatedLsig: (lsigName: string) => Object | undefined
 
   // load contract mode logic signature
-  loadLsig: (name: string, scParams: Object) => Promise<LogicSig>
+  loadLogic: (name: string, scParams: Object) => Promise<LogicSig>
 }
 
 // ************************

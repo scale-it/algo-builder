@@ -23,11 +23,7 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   }
 
-  async loadLsig (name: string, scParams: Object): Promise<LogicSig> {
-    throw new Error("Not implemented");
-  }
-
-  loadBinaryMultiSig (name: string, scParams: Object): Promise<LogicSig> {
+  async loadLogic (name: string, scParams: Object): Promise<LogicSig> {
     throw new Error("Not implemented");
   }
 
