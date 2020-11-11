@@ -1,4 +1,4 @@
-import type { Account as AccountSDK } from "algosdk";
+import type { Account as AccountSDK, LogicSig, LogicSigArgs, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
 import * as z from 'zod';
 
@@ -325,31 +325,19 @@ export interface ASCInfo extends DeployedAssetInfo {
   contractAddress: string
 }
 
-export interface MultiSig {
-  subsig: Object
-  thr: number
-  v: number
-}
-
 // represents Lsig object fetched directly from raw file
 export interface RawLsig {
   l?: Uint8Array
-  args?: Object // optional
-  sig?: Object // optional
-  msig?: MultiSig // optional
-}
-
-export interface LogicSig {
-  logic: Uint8Array
-  args: Object
-  sig: Object | undefined
-  msig: MultiSig | {}
+  // args Program arguments as array of Uint8Array arrays
+  args?: Uint8Array[]
+  sig?: Object
+  msig?: MultiSig
 }
 
 export interface LsigInfo {
   creator: AccountAddress
   contractAddress: string
-  lsig: Uint8Array
+  lsig: LogicSig
 }
 
 export interface CheckpointRepo {
@@ -441,13 +429,13 @@ export interface AlgobDeployer {
   deployASA: (name: string, flags: ASADeploymentFlags) => Promise<ASAInfo>
   fundLsig: (
     name: string, // ASC filename
-    scParams: Object, // Parameters
+    scParams: LogicSigArgs, // Parameters
     flags: FundASCFlags,
     payFlags: TxParams
   ) => void
   mkDelegatedLsig: (
     name: string, // ASC filename
-    scParams: Object, // Parameters
+    scParams: LogicSigArgs, // Parameters
     signer: Account
   ) => Promise<LsigInfo>
   /**
@@ -471,13 +459,13 @@ export interface AlgobDeployer {
   log: (msg: string, obj: any) => void
 
   // extract multi signed logic signature file from assets/
-  loadMultiSig: (name: string, scParams: Object) => Promise<LogicSig>
+  loadMultiSig: (name: string, scParams: LogicSigArgs) => Promise<LogicSig>
 
   // get delegated Logic signature
   getDelegatedLsig: (lsigName: string) => Object | undefined
 
   // load contract mode logic signature
-  loadLogic: (name: string, scParams: Object) => Promise<LogicSig>
+  loadLogic: (name: string, scParams: LogicSigArgs) => Promise<LogicSig>
 }
 
 // ************************

@@ -1,3 +1,4 @@
+import type { LogicSigArgs } from "algosdk";
 import algosdk from "algosdk";
 
 import { BuilderError } from "../internal/core/errors";
@@ -35,7 +36,7 @@ export interface AlgoOperator {
   deployASA: (
     name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, txWriter: txWriter
   ) => Promise<ASAInfo>
-  fundLsig: (name: string, scParams: object, flags: FundASCFlags, payFlags: TxParams,
+  fundLsig: (name: string, scParams: LogicSigArgs, flags: FundASCFlags, payFlags: TxParams,
     txWriter: txWriter) => Promise<LsigInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
   optInToASA: (
@@ -195,7 +196,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
    */
   async fundLsig (
     name: string,
-    scParams: Object,
+    scParams: LogicSigArgs,
     flags: FundASCFlags,
     payFlags: TxParams,
     txWriter: txWriter): Promise<LsigInfo> {

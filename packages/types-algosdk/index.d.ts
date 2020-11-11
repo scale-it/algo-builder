@@ -7,7 +7,7 @@ declare module 'algosdk' {
     status (): Promise<NodeStatus>;
   }
 
-  export class Algodv2 {
+  class Algodv2 {
     // https://github.com/algorand/js-algorand-sdk/blob/develop/src/client/v2/algod/algod.js#L19
     constructor(token: string, baseServer: string, port: number, headers?: object);
 
@@ -125,6 +125,65 @@ declare module 'algosdk' {
     signTxn(sk: Uint8Array): TxnBytes
   }
 
+  // args Program arguments as array of Uint8Array arrays
+  type LogicSigArgs = Uint8Array[]
+
+  interface Subsig {
+    pk: string
+    s: Uint8Array
+  }
+
+  interface MultiSig {
+    subsig: Subsig[]
+    thr: number
+    v: number
+  }
+
+  interface MultiSigAccount {
+    // array of base32 encoded addresses
+    addrs: string[]
+    thr: number
+    v: number
+  }
+
+  class LogicSigBase {
+    logic: Uint8Array
+    // args Program arguments as array of Uint8Array arrays
+    args: LogicSigArgs
+    sig?: Object
+    msig?: MultiSig
+  }
+
+  class LogicSig extends LogicSigBase {
+    constructor(program: Uint8Array, args: LogicSigArgs);
+
+    get_obj_for_encoding(): LogicSigBase;
+    from_obj_for_encoding(encoded: LogicSigBase): LogicSig;
+
+    // Performs signature verification
+    verify(msg: Uint8Array): boolean
+    // Compute hash of the logic sig program (that is the same as escrow account address) as string address
+    address(): string;
+    // Creates signature (if no msig provided) or multi signature otherwise
+    sign(secretKey?: Uint8Array, msig?: MultiSigAccount): void;
+    // Signs and appends a signature
+    appendToMultisig(secretKey: Uint8Array): void;
+    // signs and returns program signature, without appending it to this object
+    signProgram(secretKey: Uint8Array): Uint8Array
+    //
+    singleSignMultisig(secretKey: Uint8Array, msig: MultiSig): [Uint8Array, number]
+    // serializes and encodes the LogicSig
+    toByte(): Uint8Array;
+    // deserializes a LogicSig which was serialized using toByte()
+    fromByte(encoded: Uint8Array): LogicSig;
+  }
+
+  interface TxSig {
+    txID: string
+    // blob representing signed transaction data (it's `txn.get_obj_for_encoding()`)
+    blob: Uint8Array
+  }
+
   export function Indexer (...args: any[]): any;
 
   export function algosToMicroalgos (algos: any): any;
@@ -143,7 +202,24 @@ declare module 'algosdk' {
 
   export function isValidAddress (addr: any): any;
 
-  export function logicSigFromByte (encoded: any): any;
+  // Calls LogicSig.fromByte
+  export function logicSigFromByte (encoded: Uint8Array): LogicSig;
+
+  /**
+   * tealSign creates a signature compatible with ed25519verify opcode from contract address
+   * @param sk - uint8array with secret key
+   * @param data - buffer with data to sign
+   * @param contractAddress string representation of teal contract address (program hash)
+   */
+  export function tealSign(sk: Uint8Array, data: Uint8Array, contractAddress: string): Uint8Array;
+
+  /**
+   * tealSignFromProgram creates a signature compatible with ed25519verify opcode from raw program bytes
+   * @param sk - uint8array with secret key
+   * @param data - buffer with data to sign
+   * @param program - buffer with teal program
+   */
+  function tealSignFromProgram(sk: Uint8Array, data: Uint8Array, program: Uint8Array): Uint8Array;
 
   export function makeAssetConfigTxn (from: any, fee: any, firstRound: any, lastRound: any, note: any, genesisHash: any, genesisID: any, assetIndex: any, manager: any, reserve: any, freeze: any, clawback: any, strictEmptyAddressChecking: any): any;
 
@@ -169,7 +245,7 @@ declare module 'algosdk' {
 
   export function makeKeyRegistrationTxnWithSuggestedParams (from: any, note: any, voteKey: any, selectionKey: any, voteFirst: any, voteLast: any, voteKeyDilution: any, suggestedParams: any): any;
 
-  export function makeLogicSig (program: any, args: any): any;
+  export function makeLogicSig (program: Uint8Array, args: LogicSigArgs): LogicSig;
 
   export function makePaymentTxn (from: any, to: any, fee: any, amount: any, closeRemainderTo: any, firstRound: any, lastRound: any, note: any, genesisHash: any, genesisID: any): any;
 
@@ -193,9 +269,24 @@ declare module 'algosdk' {
 
   export function signBytes (bytes: any, sk: any): any;
 
-  export function signLogicSigTransaction (txn: any, lsig: any): any;
+  /**
+   * signLogicSigTransaction takes  a raw transaction and a LogicSig object and returns a logicsig
+   * transaction which is a blob representing a transaction and logicsig object.
+   * @param {Object} dictionary containing constructor arguments for a transaction
+   * @param {LogicSig} lsig logicsig object
+   * @returns {TxSig} Object containing txID and blob representing signed transaction.
+   * @throws error on failure
+   */
+  export function signLogicSigTransaction (txn: any, lsig: LogicSig): TxSig;
 
-  export function signLogicSigTransactionObject (txn: any, lsig: any): any;
+  /**
+   * signLogicSigTransactionObject takes transaction.Transaction and a LogicSig object and returns a logicsig
+   * transaction which is a blob representing a transaction and logicsig object.
+   * @param {Object} txn transaction.Transaction
+   * @param {LogicSig} lsig logicsig object
+   * @returns {TxSig} Object containing txID and blob representing signed transaction.
+   */
+  export function signLogicSigTransactionObject (txn: Transaction, lsig: LogicSig): TxSig;
 
   export function signMultisigTransaction (txn: any, { version, threshold, addrs }: any, sk: any): any;
 
@@ -271,15 +362,20 @@ declare module 'algosdk' {
   }
 
   interface ParsedAddress {
-    publicKey: string;
+    publicKey: string
+  }
+
+  interface Address {
+    publicKey: Uint8Array
+    checksum: Uint8Array
   }
 
   type TxnBytes = Uint8Array
 
   interface AccountAssetInfo {
-    amount: number,
-    'asset-id': number,
-    creator: string,
+    amount: number
+    'asset-id': number
+    creator: string
     'is-frozen': boolean
   }
 
