@@ -14,7 +14,6 @@ Please follow the [setup](../README.md) instructions to install dependencies and
 
 ## Run
 
-+ To run [hash time lock contract](https://developer.algorand.org/docs/reference/teal/templates/htlc/) example
+To run hash time lock contract use the deploy command:
 
         yarn run algob deploy
-
