@@ -1,4 +1,4 @@
-import * as msgpack from "@msgpack/msgpack";
+import * as msgpack from "algo-msgpack-with-bigint";
 import fs from "fs";
 import { decode } from 'hi-base32';
 import path from "path";
