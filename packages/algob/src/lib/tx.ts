@@ -196,7 +196,7 @@ export async function transferMicroAlgosLsig (
   const params = await mkSuggestedParams(deployer.algodClient, payFlags);
 
   const receiver = toAccountAddr;
-  const note = tx.encodeObj(payFlags.note);
+  const note = encodeNote(payFlags.note, payFlags.noteb64);
 
   const txn = tx.makePaymentTxnWithSuggestedParams(
     fromAccount.addr, receiver, amountMicroAlgos, payFlags.closeRemainderTo, note, params);
