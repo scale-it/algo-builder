@@ -1,4 +1,4 @@
-import type { Account, Account as AccountSDK } from "algosdk";
+import type { Account, Account as AccountSDK, LogicSig } from "algosdk";
 import tx from "algosdk";
 import { TextEncoder } from "util";
 
@@ -191,7 +191,7 @@ export async function transferMicroAlgosLsig (
   fromAccount: Account,
   toAccountAddr: string,
   amountMicroAlgos: number,
-  lsig: Object): Promise<tx.ConfirmedTxInfo> {
+  lsig: LogicSig): Promise<tx.ConfirmedTxInfo> {
   const params = await deployer.algodClient.getTransactionParams().do();
 
   const receiver = toAccountAddr;
@@ -228,7 +228,7 @@ export async function transferASALsig (
   toAccount: string,
   amountMicroAlgos: number,
   assetID: number,
-  lsig: Object): Promise<tx.ConfirmedTxInfo> {
+  lsig: LogicSig): Promise<tx.ConfirmedTxInfo> {
   const params = await deployer.algodClient.getTransactionParams().do();
   const xtxn = tx.makeAssetTransferTxnWithSuggestedParams(
     fromAccount.addr,

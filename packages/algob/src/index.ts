@@ -6,7 +6,7 @@ import {
   mkAccounts
 } from "./lib/account";
 import { algodCredentialsFromEnv, KMDCredentialsFromEnv } from "./lib/credentials";
-import { balanceOf, printAssets, readGlobalState, readLocalState } from "./lib/status";
+import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC } from "./lib/status";
 import {
   callNoOpSSC,
   clearStateSSC,
@@ -33,8 +33,8 @@ export {
   algodCredentialsFromEnv,
   KMDCredentialsFromEnv,
   ASC1Mode,
-  readLocalState,
-  readGlobalState,
+  printLocalStateSSC,
+  printGlobalStateSSC,
   callNoOpSSC,
   closeOutSSC,
   clearStateSSC,

@@ -17,7 +17,7 @@ async function run(runtimeEnv, deployer) {
   const [mparams, multsigaddr] = createMsigAddress(1, 2, addrs);   // passing (version, threshold, address list)
 
   //Get logic Signature
-  const lsig = await deployer.loadLsig("sample-asc.teal", []);
+  const lsig = await deployer.loadLogic("sample-asc.teal", []);
 
   lsig.sign(goldOwnerAccount.sk, mparams);  //lsig signed by gold-owner secret_key
   lsig.appendToMultisig(johnAccount.sk);    //lsig signed again (threshold = 2) by john-account secret_key

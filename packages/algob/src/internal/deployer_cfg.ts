@@ -17,21 +17,9 @@ export function mkDeployer (
   deployerCfg: DeployerConfig
 ): AlgobDeployer {
   if (allowWrite) {
-    return new DeployerDeployMode(
-      deployerCfg.runtimeEnv,
-      deployerCfg.cpData,
-      deployerCfg.asaDefs,
-      deployerCfg.algoOp,
-      deployerCfg.accounts,
-      deployerCfg.txWriter);
+    return new DeployerDeployMode(deployerCfg);
   }
-  return new DeployerRunMode(
-    deployerCfg.runtimeEnv,
-    deployerCfg.cpData,
-    deployerCfg.asaDefs,
-    deployerCfg.algoOp,
-    deployerCfg.accounts,
-    deployerCfg.txWriter);
+  return new DeployerRunMode(deployerCfg);
 }
 
 // intialize deployer config obj
@@ -47,7 +35,7 @@ export class DeployerConfig {
     this.runtimeEnv = runtimeEnv;
     this.cpData = loadCheckpointsRecursive();
     this.algoOp = algoOp;
-    this.accounts = mkAccountIndex(runtimeEnv.network.config.accounts); ;
+    this.accounts = mkAccountIndex(runtimeEnv.network.config.accounts);
     this.txWriter = new TxWriterImpl('');
     this.asaDefs = loadASAFile(this.accounts);
   }

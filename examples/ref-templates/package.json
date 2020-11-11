@@ -1,5 +1,5 @@
 {
-  "name": "local-project-test",
+  "name": "ref-templates",
   "version": "0.0.1",
   "main": "index.js",
   "license": "MIT",
@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "algob": "^0.0.5",
-    "algosdk": "github:algorand/js-algorand-sdk#v1.7.0-beta"
+    "algosdk": "^1.8.0"
   },
   "scripts": {
     "algob": "algob"

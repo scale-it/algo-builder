@@ -1,3 +1,4 @@
+import type { LogicSig } from "algosdk";
 import { assert } from "chai";
 import * as fs from "fs";
 
@@ -91,7 +92,7 @@ describe("Checkpoint", () => {
     registerLsig(netCheckpoint, "lsig", {
       creator: "536",
       contractAddress: "addr-3",
-      lsig: new Uint8Array(1)
+      lsig: {} as LogicSig
     });
     appendToCheckpoint(checkpoints, "network12345", netCheckpoint);
     assert.deepEqual(checkpoints, {
@@ -114,7 +115,7 @@ describe("Checkpoint", () => {
         dLsig: new Map([["lsig", {
           creator: "536",
           contractAddress: "addr-3",
-          lsig: new Uint8Array(1)
+          lsig: {} as LogicSig
         }]])
       }
     });
@@ -158,7 +159,7 @@ describe("Checkpoint", () => {
         dLsig: new Map([["lsig", {
           creator: "536",
           contractAddress: "addr-3",
-          lsig: new Uint8Array(1)
+          lsig: {} as LogicSig
         }]])
       }
     });

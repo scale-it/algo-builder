@@ -88,9 +88,7 @@ async function runSortedScripts (
   const log = debug(logDebugTag);
   deployerCfg.cpData = loadCheckpointsRecursive();
   deployerCfg.txWriter = new TxWriterImpl('');
-  const deployer: AlgobDeployer = mkDeployer(
-    allowWrite,
-    deployerCfg);
+  const deployer: AlgobDeployer = mkDeployer(allowWrite, deployerCfg);
 
   const scriptsFromScriptsDir: string[] = lsScriptsDir();
 

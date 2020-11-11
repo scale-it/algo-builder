@@ -1,10 +1,10 @@
-import { decode, encode } from "@msgpack/msgpack";
+import type { LogicSig, LogicSigArgs, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
 import { getDummyLsig, getLsig } from "../lib/lsig";
-import { readBinaryMultiSig, readMsigFromFile } from "../lib/msig";
+import { blsigExt, loadBinaryMultiSig, readMsigFromFile } from "../lib/msig";
 import { persistCheckpoint } from "../lib/script-checkpoints";
 import type {
   Account,
@@ -16,15 +16,14 @@ import type {
   ASAInfo,
   CheckpointRepo,
   FundASCFlags,
-  LogicSig,
   LsigInfo,
-  RawLsig,
   SSCDeploymentFlags,
   SSCInfo,
   TxParams
 } from "../types";
 import { BuilderError } from "./core/errors";
 import { ERRORS } from "./core/errors-list";
+import { DeployerConfig } from "./deployer_cfg";
 
 // Base class for deployer Run Mode (read access) and Deploy Mode (read and write access)
 class DeployerBasicMode {
@@ -36,21 +35,14 @@ class DeployerBasicMode {
   readonly accounts: Account[];
   readonly accountsByName: Accounts;
 
-  constructor (
-    runtimeEnv: AlgobRuntimeEnv,
-    cpData: CheckpointRepo,
-    asaDefs: ASADefs,
-    algoOp: AlgoOperator,
-    accountsByName: Accounts,
-    txWriter: txWriter
-  ) {
-    this.runtimeEnv = runtimeEnv;
-    this.cpData = cpData;
-    this.loadedAsaDefs = asaDefs;
-    this.algoOp = algoOp;
-    this.accounts = runtimeEnv.network.config.accounts;
-    this.accountsByName = accountsByName;
-    this.txWriter = txWriter;
+  constructor (deployerCfg: DeployerConfig) {
+    this.runtimeEnv = deployerCfg.runtimeEnv;
+    this.cpData = deployerCfg.cpData;
+    this.loadedAsaDefs = deployerCfg.asaDefs;
+    this.algoOp = deployerCfg.algoOp;
+    this.accounts = deployerCfg.runtimeEnv.network.config.accounts;
+    this.accountsByName = deployerCfg.accounts;
+    this.txWriter = deployerCfg.txWriter;
   }
 
   protected get networkName (): string {
@@ -94,13 +86,12 @@ class DeployerBasicMode {
   /**
    * @param lsigName Description: loads and returns delegated logic signature from checkpoint
    */
-  getDelegatedLsig (lsigName: string): Object | undefined {
+  getDelegatedLsig (lsigName: string): LogicSig | undefined {
     const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map(); ;
     const result = resultMap.get(lsigName)?.lsig;
     if (result === undefined) { return undefined; }
-    const lsig1 = decode(result);
     const lsig = getDummyLsig();
-    Object.assign(lsig, lsig1);
+    Object.assign(lsig, result);
     return lsig;
   }
 
@@ -108,40 +99,24 @@ class DeployerBasicMode {
    * Description : loads logic signature for contract mode
    * @param name ASC name
    * @param scParams parameters
+   * @returns {LogicSig} loaded logic signature from assets/<file_name>.teal
    */
-  async loadLsig (name: string, scParams: Object): Promise<LogicSig> {
+  async loadLogic (name: string, scParams: LogicSigArgs): Promise<LogicSig> {
     return await getLsig(name, scParams, this.algoOp.algodClient);
   }
 
   /**
-   * Description : loads multisigned logic signature from .msig file
+   * Description : loads multisigned logic signature from .lsig or .blsig file
    * @param {string} name filename
-   * @param {Object} scParams parameters
-   * @returns {LogicSig} multi signed logic signature from assets/<file_name>.msig
+   * @param {LogicSigArgs} scParams parameters
+   * @returns {LogicSig} multi signed logic signature from assets/<file_name>.(b)lsig
    */
-  async loadMultiSig (name: string, scParams: Object): Promise<LogicSig> {
+  async loadMultiSig (name: string, scParams: LogicSigArgs): Promise<LogicSig> {
+    if (name.endsWith(blsigExt)) { return await loadBinaryMultiSig(name); }
+
     const lsig = await getLsig(name, scParams, this.algoOp.algodClient); // get lsig from .teal (getting logic part from lsig)
     const msig = await readMsigFromFile(name); // Get decoded Msig object from .msig
-    Object.assign(lsig.msig = {}, msig);
-    return lsig;
-  }
-
-  /**
-   * Description : loads multisigned logic signature from .msig file
-   * @param {string} name filename
-   * @returns {LogicSig} multi signed logic signature from assets/<file_name>.msig
-   */
-  async loadBinaryMultiSig (name: string): Promise<LogicSig> {
-    // get logic signature from file and decode it
-    const data = await readBinaryMultiSig(name);
-    const program = new Uint8Array(Buffer.from(data as string, 'base64'));
-    const logicSignature = decode(program) as RawLsig;
-    const lsig = getDummyLsig(); // dummy logic signature
-
-    // assign complete logic signature
-    lsig.logic = logicSignature.l as Uint8Array; // assign logic part separately (as keys mismatch: logic, l)
-    delete logicSignature.l;
-    Object.assign(lsig, logicSignature);
+    Object.assign(lsig.msig = {} as MultiSig, msig);
     return lsig;
   }
 }
@@ -244,7 +219,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
    * @param flags    - Deployments flags (as per SPEC)
    * @param payFlags - as per SPEC
    */
-  async fundLsig (name: string, scParams: Object, flags: FundASCFlags,
+  async fundLsig (name: string, scParams: LogicSigArgs, flags: FundASCFlags,
     payFlags: TxParams): Promise<void> {
     try {
       await this.algoOp.fundLsig(name, scParams, flags, payFlags, this.txWriter);
@@ -261,7 +236,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
    * @param scParams - SC parameters
    * @param signer   - signer
    */
-  async mkDelegatedLsig (name: string, scParams: Object, signer: Account): Promise<LsigInfo> {
+  async mkDelegatedLsig (name: string, scParams: LogicSigArgs, signer: Account): Promise<LsigInfo> {
     this.assertNoAsset(name);
     let lsigInfo = {} as any;
     try {
@@ -270,7 +245,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
       lsigInfo = {
         creator: signer.addr,
         contractAddress: lsig.address(),
-        lsig: encode(lsig)
+        lsig: lsig
       };
     } catch (error) {
       persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
@@ -355,14 +330,14 @@ export class DeployerRunMode extends DeployerBasicMode implements AlgobDeployer 
     });
   }
 
-  async fundLsig (_name: string, scParams: Object, flags: FundASCFlags,
-    payFlags: TxParams): Promise<LsigInfo> {
+  async fundLsig (_name: string, _scParams: LogicSigArgs, _flags: FundASCFlags,
+    _payFlags: TxParams): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "fundLsig"
     });
   }
 
-  async mkDelegatedLsig (_name: string, scParams: Object, signer: Account): Promise<LsigInfo> {
+  async mkDelegatedLsig (_name: string, _scParams: LogicSigArgs, _signer: Account): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "delegatedLsig"
     });
@@ -378,7 +353,7 @@ export class DeployerRunMode extends DeployerBasicMode implements AlgobDeployer 
     });
   }
 
-  optInToASA (name: string, accountName: string, flags: ASADeploymentFlags): Promise<void> {
+  optInToASA (_name: string, _accountName: string, _flags: ASADeploymentFlags): Promise<void> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "optInToASA"
     });

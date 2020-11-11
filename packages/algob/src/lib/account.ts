@@ -72,51 +72,6 @@ export function mkAccountIndex (accountList: Account[]): Accounts {
   return out;
 }
 
-function kmdWalletAddrNames (kwallet: KmdWallet): StrMap {
-  const m: StrMap = {};
-  for (const a of kwallet.accounts) {
-    m[a.address] = a.name;
-  }
-  return m;
-}
-
-export async function loadKMDAccounts (kcfg: KmdCfg): Promise<Account[]> {
-  const accounts: Account[] = [];
-  const c = new Kmd(kcfg.token, kcfg.host, kcfg.port);
-  try {
-    const wallets = (await c.listWallets()).wallets;
-
-    const walletIDs: StrMap = {};
-    for (const w of wallets) walletIDs[w.name] = w.id;
-
-    for (const w of kcfg.wallets) {
-      const id = walletIDs[w.name];
-      if (id === undefined) {
-        console.warn("wallet id=", id, "defined in config but it doesn't exist in KMD");
-        continue;
-      }
-      const names = kmdWalletAddrNames(w);
-      const token = (await c.initWalletHandle(id, w.password)).wallet_handle_token;
-      const keys = await c.listKeys(token);
-      for (const addr of keys.addresses) {
-        const n = names[addr];
-        if (n === undefined) {
-          console.debug("KMD account with address:", addr, " not found in wallet:1", w.name);
-          continue;
-        }
-        // console.debug("Adding KMD account name:", n)
-        const k = await c.exportKey(token, w.password, addr);
-        accounts.push({ name: n, addr: addr, sk: new Uint8Array(k.private_key) });
-      }
-    }
-  } catch (e) {
-    if (e.code === 'ECONNREFUSED') { throw new BuilderError(ERRORS.KMD.CONNECTION, { ctx: e }, e); }
-    throw new BuilderError(ERRORS.KMD.ERROR, { ctx: JSON.stringify(e) }, e);
-  }
-
-  return accounts;
-}
-
 export function loadAccountsFromEnv (): Account[] {
   var algobAccountsString = process.env.ALGOB_ACCOUNTS;
   if (algobAccountsString) {
@@ -170,5 +125,57 @@ function validateAlgobAccounts (algobAccounts: AlgobAccount[]): void {
       throw new BuilderError(ERRORS.ACCOUNT.FIELD_REQUIRED,
         { errors: 'Field mnemonic string must be defined and not empty in ' + JSON.stringify(account) });
     }
+  }
+}
+
+export class KMDOperator {
+  kmdcl: Kmd;
+
+  constructor (kmdcl: Kmd) {
+    this.kmdcl = kmdcl;
+  }
+
+  kmdWalletAddrNames (kwallet: KmdWallet): StrMap {
+    const m: StrMap = {};
+    for (const a of kwallet.accounts) {
+      m[a.address] = a.name;
+    }
+    return m;
+  }
+
+  async loadKMDAccounts (kcfg: KmdCfg): Promise<Account[]> {
+    const accounts: Account[] = [];
+    try {
+      const wallets = (await this.kmdcl.listWallets()).wallets;
+
+      const walletIDs: StrMap = {};
+      for (const w of wallets) walletIDs[w.name] = w.id;
+
+      for (const w of kcfg.wallets) {
+        const id = walletIDs[w.name];
+        if (id === undefined) {
+          console.warn("wallet id=", id, "defined in config but it doesn't exist in KMD");
+          continue;
+        }
+        const names = this.kmdWalletAddrNames(w);
+        const token = (await this.kmdcl.initWalletHandle(id, w.password)).wallet_handle_token;
+        const keys = await this.kmdcl.listKeys(token);
+        for (const addr of keys.addresses) {
+          const n = names[addr];
+          if (n === undefined) {
+            console.debug("KMD account with address:", addr, " not found in wallet:1", w.name);
+            continue;
+          }
+          // console.debug("Adding KMD account name:", n)
+          const k = await this.kmdcl.exportKey(token, w.password, addr);
+          accounts.push({ name: n, addr: addr, sk: new Uint8Array(k.private_key) });
+        }
+      }
+    } catch (e) {
+      if (e.code === 'ECONNREFUSED') { throw new BuilderError(ERRORS.KMD.CONNECTION, { ctx: e }, e); }
+      throw new BuilderError(ERRORS.KMD.ERROR, { ctx: JSON.stringify(e) }, e);
+    }
+
+    return accounts;
   }
 }

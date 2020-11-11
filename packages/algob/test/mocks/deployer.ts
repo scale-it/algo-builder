@@ -1,3 +1,4 @@
+import type { LogicSig } from "algosdk";
 import * as algosdk from "algosdk";
 
 import type {
@@ -6,8 +7,8 @@ import type {
   ASADeploymentFlags,
   ASAInfo,
   FundASCFlags,
-  LogicSig,
-  LsigInfo, SSCDeploymentFlags,
+  LsigInfo,
+  SSCDeploymentFlags,
   SSCInfo,
   TxParams
 } from "../../src/types";
@@ -37,11 +38,7 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   }
 
-  async loadLsig (name: string, scParams: Object): Promise<LogicSig> {
-    throw new Error("Not implemented");
-  }
-
-  loadBinaryMultiSig (name: string, scParams: Object): Promise<LogicSig> {
+  async loadLogic (name: string, scParams: Object): Promise<LogicSig> {
     throw new Error("Not implemented");
   }
 

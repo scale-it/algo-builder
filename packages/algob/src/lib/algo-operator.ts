@@ -1,4 +1,4 @@
-import { encode } from "@msgpack/msgpack";
+import type { LogicSigArgs } from "algosdk";
 import algosdk from "algosdk";
 
 import { BuilderError } from "../internal/core/errors";
@@ -38,7 +38,7 @@ export interface AlgoOperator {
   deployASA: (
     name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, txWriter: txWriter
   ) => Promise<ASAInfo>
-  fundLsig: (name: string, scParams: object, flags: FundASCFlags, payFlags: TxParams,
+  fundLsig: (name: string, scParams: LogicSigArgs, flags: FundASCFlags, payFlags: TxParams,
     txWriter: txWriter) => Promise<LsigInfo>
   deploySSC: (
     approvalProgram: string,
@@ -206,7 +206,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
    */
   async fundLsig (
     name: string,
-    scParams: Object,
+    scParams: LogicSigArgs,
     flags: FundASCFlags,
     payFlags: TxParams,
     txWriter: txWriter): Promise<LsigInfo> {
@@ -232,7 +232,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     return {
       creator: flags.funder.addr,
       contractAddress: contractAddress,
-      lsig: encode(lsig)
+      lsig: lsig
     };
   }
 

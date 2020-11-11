@@ -22,6 +22,17 @@ User documentation is available in [/docs](docs/README.md).
 The project specification is [published here](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
 
 
+### Examples
+
+Our `/examples` directory provides few projects with smart contracts and ASA:
+
++ Please start with reading Algorand reference documentation about [smart contract](https://developer.algorand.org/docs/reference/teal/specification/).
++ Don't forget to study Algorand smart contract [guidelines](https://developer.algorand.org/docs/reference/teal/guidelines/).
++ Go to the [examples/ref-templates](./examples/ref-templates/README.md) to see how the reference templates are implemented.
++ Then go to [examples/asa](./examples/ref-templates/README.md) to learn how you can easily manage and deploy ASA with `algob`.
++ Check other examples as well.
+
+
 ## Requirements
 
 + Node 12+
