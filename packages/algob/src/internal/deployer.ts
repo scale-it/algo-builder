@@ -105,8 +105,7 @@ class DeployerBasicMode {
    * @returns {LogicSig} multi signed logic signature from assets/<file_name>.(b)lsig
    */
   async loadMultiSig (name: string, scParams: LogicSigArgs): Promise<LogicSig> {
-    if (name.endsWith(blsigExt))
-      return loadBinaryMultiSig(name);
+    if (name.endsWith(blsigExt)) { return await loadBinaryMultiSig(name); }
 
     const lsig = await getLsig(name, scParams, this.algoOp.algodClient); // get lsig from .teal (getting logic part from lsig)
     const msig = await readMsigFromFile(name); // Get decoded Msig object from .msig

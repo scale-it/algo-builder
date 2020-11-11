@@ -193,7 +193,7 @@ export async function transferMicroAlgosLsig (
   amountMicroAlgos: number,
   lsig: LogicSig,
   payFlags: TxParams): Promise<tx.ConfirmedTxInfo> {
-  const params = await deployer.algodClient.getTransactionParams().do();
+  const params = await mkSuggestedParams(deployer.algodClient, payFlags);
 
   const receiver = toAccountAddr;
   const note = tx.encodeObj(payFlags.note);
