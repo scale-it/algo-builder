@@ -80,7 +80,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     throw new Error("Method not implemented.");
   }
 
-  OptInToSSC (
+  optInToSSC (
     sender: Account, index: number, payFlags: TxParams): Promise<void> {
     throw new Error("Method not implemented.");
   }
