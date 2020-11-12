@@ -296,7 +296,7 @@ export async function callNoOpSSC (
 }
 
 /**
- * Description: The user may discontinue use of the application by sending a close out transaction.
+ * Description: The user may discontinue use of the application by sending a close out transaction (Opt Out).
  * This will remove the local state for this application from the user's account.
  * @param deployer AlgobDeployer
  * @param sender Account from which call needs to be made
