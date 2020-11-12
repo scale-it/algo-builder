@@ -257,19 +257,19 @@ declare module 'algosdk' {
    */
   function tealSignFromProgram(sk: Uint8Array, data: Uint8Array, program: Uint8Array): Uint8Array;
 
-  export function makeApplicationClearStateTxn(from: Address, suggestedParams: any, appIndex: number, appArgs?: Uint8Array[], accounts?: Address[], foreignApps?: any, foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: Address): any;
+  export function makeApplicationClearStateTxn(from: string, suggestedParams: any, appIndex: number, appArgs?: Uint8Array[], accounts?: any, foreignApps?: any, foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: string): any;
 
-	export function makeApplicationCloseOutTxn(from: Address, suggestedParams: any, appIndex: number, appArgs?: Uint8Array[], accounts?: Address[], foreignApps?: any, foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: Address): any;
+	export function makeApplicationCloseOutTxn(from: string, suggestedParams: any, appIndex: number, appArgs?: Uint8Array[], accounts?: any, foreignApps?: any, foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: string): any;
 
-	export function makeApplicationCreateTxn(from: Address, suggestedParams: any, onComplete: number, approvalProgram: any, clearProgram: any, numLocalInts: any, numLocalByteSlices: any, numGlobalInts: any, numGlobalByteSlices: any, appArgs?: Uint8Array[], accounts?: Address[], foreignApps?: any, foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: Address): any;
+	export function makeApplicationCreateTxn(from: string, suggestedParams: any, onComplete: number, approvalProgram: any, clearProgram: any, numLocalInts: any, numLocalByteSlices: any, numGlobalInts: any, numGlobalByteSlices: any, appArgs?: Uint8Array[], accounts?: any, foreignApps?: any, foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: string): any;
 
-	export function makeApplicationDeleteTxn(from: Address, suggestedParams: any, appIndex: number, appArgs?: Uint8Array[], accounts?: Address[], foreignApps?: any, foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: Address): any;
+	export function makeApplicationDeleteTxn(from: string, suggestedParams: any, appIndex: number, appArgs?: Uint8Array[], accounts?: any, foreignApps?: any, foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: string): any;
 
-	export function makeApplicationNoOpTxn(from: Address, suggestedParams: any, appIndex: number, appArgs?: Uint8Array[], accounts?: Address[], foreignApps?: any, foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: Address): any;
+	export function makeApplicationNoOpTxn(from: string, suggestedParams: any, appIndex: number, appArgs?: Uint8Array[], accounts?: any, foreignApps?: any, foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: string): any;
 
-	export function makeApplicationOptInTxn(from: Address, suggestedParams: any, appIndex: number, appArgs?: Uint8Array[], accounts?: Address[], foreignApps?: any, foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: Address): any;
+	export function makeApplicationOptInTxn(from: string, suggestedParams: any, appIndex: number, appArgs?: Uint8Array[], accounts?: any, foreignApps?: any, foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: string): any;
 
-	export function makeApplicationUpdateTxn(from: Address, suggestedParams: any, appIndex: number, approvalProgram: any, clearProgram: any, appArgs?: Uint8Array[], accounts?: Address[], foreignApps?: any, foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: Address): any;
+	export function makeApplicationUpdateTxn(from: string, suggestedParams: any, appIndex: number, approvalProgram: any, clearProgram: any, appArgs?: Uint8Array[], accounts?: Address[], foreignApps?: any, foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: Address): any;
 
   export function makeAssetConfigTxn (from: any, fee: any, firstRound: any, lastRound: any, note: any, genesisHash: any, genesisID: any, assetIndex: any, manager: any, reserve: any, freeze: any, clawback: any, strictEmptyAddressChecking: any): any;
 

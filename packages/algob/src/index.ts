@@ -9,9 +9,9 @@ import { algodCredentialsFromEnv, KMDCredentialsFromEnv } from "./lib/credential
 import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC } from "./lib/status";
 import {
   callNoOpSSC,
-  clearStateSSC,
+  clearSSCuserState,
   closeOutSSC,
-  deleteTxnSSC, transferASALsig,
+  deleteSSC, transferASALsig,
   transferAsset,
   transferMicroAlgos,
   transferMicroAlgosLsig
@@ -37,6 +37,6 @@ export {
   printGlobalStateSSC,
   callNoOpSSC,
   closeOutSSC,
-  clearStateSSC,
-  deleteTxnSSC
+  clearSSCuserState,
+  deleteSSC
 };
