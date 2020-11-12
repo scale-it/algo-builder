@@ -31,24 +31,6 @@ export function toScriptFileName (filename: string): string {
   return filename;
 }
 
-export function registerASA (
-  cp: Checkpoint, name: string, info: ASAInfo): Checkpoint {
-  cp.asa.set(name, info);
-  return cp;
-}
-
-export function registerSSC (
-  cp: Checkpoint, name: string, info: SSCInfo): Checkpoint {
-  cp.ssc.set(name, info);
-  return cp;
-}
-
-export function registerLsig (
-  cp: Checkpoint, name: string, info: LsigInfo): Checkpoint {
-  cp.dLsig.set(name, info);
-  return cp;
-}
-
 export class CheckpointImpl implements Checkpoint {
   timestamp: number;
   metadata: Map<string, string>;
@@ -152,23 +134,23 @@ export class CheckpointRepoImpl implements CheckpointRepo {
   }
 
   registerASA (networkName: string, name: string, info: ASAInfo): CheckpointRepo {
-    registerASA(this._ensureNet(this.precedingCP, networkName), name, info);
-    registerASA(this._ensureNet(this.strippedCP, networkName), name, info);
-    registerASA(this._ensureNet(this.allCPs, networkName), name, info);
+    this._ensureNet(this.precedingCP, networkName).asa.set(name, info);
+    this._ensureNet(this.strippedCP, networkName).asa.set(name, info);
+    this._ensureNet(this.allCPs, networkName).asa.set(name, info);
     return this;
   }
 
   registerSSC (networkName: string, name: string, info: SSCInfo): CheckpointRepo {
-    registerSSC(this._ensureNet(this.precedingCP, networkName), name, info);
-    registerSSC(this._ensureNet(this.strippedCP, networkName), name, info);
-    registerSSC(this._ensureNet(this.allCPs, networkName), name, info);
+    this._ensureNet(this.precedingCP, networkName).ssc.set(name, info);
+    this._ensureNet(this.strippedCP, networkName).ssc.set(name, info);
+    this._ensureNet(this.allCPs, networkName).ssc.set(name, info);
     return this;
   }
 
   registerLsig (networkName: string, name: string, info: LsigInfo): CheckpointRepo {
-    registerLsig(this._ensureNet(this.precedingCP, networkName), name, info);
-    registerLsig(this._ensureNet(this.strippedCP, networkName), name, info);
-    registerLsig(this._ensureNet(this.allCPs, networkName), name, info);
+    this._ensureNet(this.precedingCP, networkName).dLsig.set(name, info);
+    this._ensureNet(this.strippedCP, networkName).dLsig.set(name, info);
+    this._ensureNet(this.allCPs, networkName).dLsig.set(name, info);
     return this;
   }
 

@@ -9,9 +9,6 @@ import {
   CheckpointRepoImpl,
   loadCheckpoint,
   persistCheckpoint,
-  registerASA,
-  registerLsig,
-  registerSSC,
   toCheckpointFileName,
   toScriptFileName
 } from "../../src/lib/script-checkpoints";
@@ -77,19 +74,19 @@ describe("Checkpoint", () => {
     const netCheckpoint: Checkpoint = cleanupMutableData(
       new CheckpointImpl(new Map([["key", "data"],
         ["key3", "data3"]])), 34251);
-    registerASA(netCheckpoint, "asa1", {
+    netCheckpoint.asa.set("asa1", {
       creator: "123",
       txId: "",
       assetIndex: 0,
       confirmedRound: 0
     });
-    registerSSC(netCheckpoint, "SSC1", {
+    netCheckpoint.ssc.set("SSC1", {
       creator: "536",
       txId: "",
       confirmedRound: 0,
       appID: -1
     });
-    registerLsig(netCheckpoint, "lsig", {
+    netCheckpoint.dLsig.set("lsig", {
       creator: "536",
       contractAddress: "addr-3",
       lsig: {} as LogicSig
@@ -119,11 +116,12 @@ describe("Checkpoint", () => {
         }]])
       }
     });
-    const netCheckpoint2: Checkpoint = registerASA(
+    const netCheckpoint2: Checkpoint =
       cleanupMutableData(
         new CheckpointImpl(new Map([["key", "updated data"],
           ["key2", "data2"]])),
-        125154251),
+        125154251);
+    netCheckpoint2.asa.set(
       "my asa 2", {
         creator: "creator",
         txId: "",
@@ -171,7 +169,7 @@ describe("Checkpoint", () => {
       new CheckpointImpl(new Map([["key", "data"],
         ["key3", "data3"]])),
       34251);
-    registerASA(cp1, "asa1", {
+    cp1.asa.set("asa1", {
       creator: "123",
       txId: "",
       assetIndex: 0,
@@ -179,7 +177,7 @@ describe("Checkpoint", () => {
     });
     appendToCheckpoint(checkpoints, "network12345", cp1);
     const cp2: Checkpoint = cleanupMutableData(new CheckpointImpl(), 53521);
-    registerASA(cp2, "asa1", {
+    cp2.asa.set("asa1", {
       creator: "36506",
       txId: "",
       assetIndex: 0,
@@ -197,7 +195,7 @@ describe("Checkpoint", () => {
     const cp1: Checkpoint = cleanupMutableData(
       new CheckpointImpl(new Map([["key", "data"],
         ["key3", "data3"]])), 34251);
-    registerSSC(cp1, "SSC1", {
+    cp1.ssc.set("SSC1", {
       creator: "123",
       txId: "",
       confirmedRound: 0,
@@ -205,7 +203,7 @@ describe("Checkpoint", () => {
     });
     appendToCheckpoint(checkpoints, "network12345", cp1);
     const cp2: Checkpoint = cleanupMutableData(new CheckpointImpl(), 53521);
-    registerSSC(cp2, "SSC1", {
+    cp2.ssc.set("SSC1", {
       creator: "36506",
       txId: "",
       confirmedRound: 0,
@@ -237,16 +235,15 @@ describe("Checkpoint", () => {
     var cp: CheckpointImpl = new CheckpointImpl();
     cp.timestamp = 12345;
     assert.deepEqual(cp, createNetwork(12345));
-    cp = registerSSC(
-      registerASA(
-        cp,
-        "My ASA",
-        {
-          creator: "ASA deployer address",
-          txId: "",
-          assetIndex: 0,
-          confirmedRound: 0
-        }),
+    cp.asa.set(
+      "My ASA",
+      {
+        creator: "ASA deployer address",
+        txId: "",
+        assetIndex: 0,
+        confirmedRound: 0
+      });
+    cp.ssc.set(
       "My SSC",
       {
         creator: "SSC deployer address",
