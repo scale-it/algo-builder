@@ -20,7 +20,7 @@ export async function printAssets (deployer: AlgobDeployer, account: string): Pr
   console.log("Account's ALGO (microalgos):", accountInfo["amount-without-pending-rewards"]);
 }
 
-// read local state of application from user account (stateful smart contract)
+// print user state of a stateful smart contract
 export async function printLocalStateSSC (
   deployer: AlgobDeployer,
   account: string,
