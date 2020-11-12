@@ -36,7 +36,7 @@ export async function printLocalStateSSC (
   }
 }
 
-// read global state of application (stateful smart contract)
+// print global state of a stateful smart contract
 export async function printGlobalStateSSC (
   deployer: AlgobDeployer,
   account: string,
