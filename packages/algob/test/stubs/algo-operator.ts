@@ -12,6 +12,8 @@ import {
   ASCCache,
   FundASCFlags,
   LsigInfo,
+  SSCDeploymentFlags,
+  SSCInfo,
   TxParams
 } from "../../src/types";
 
@@ -49,6 +51,20 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     };
   }
 
+  async deploySSC (
+    approvalProgram: string,
+    clearProgram: string,
+    flags: SSCDeploymentFlags,
+    payFlags: TxParams,
+    txWriter: txWriter): Promise<SSCInfo> {
+    return {
+      creator: flags.sender.addr + "-get-address-dry-run",
+      txId: "tx-id-dry-run",
+      confirmedRound: -1,
+      appID: -1
+    };
+  }
+
   async ensureCompiled (name: string, force: boolean): Promise<ASCCache> {
     return {
       filename: name,
@@ -61,6 +77,11 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   optInToASA (asaName: string, assetIndex: number, account: Account, params: TxParams): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+
+  optInToSSC (
+    sender: Account, index: number, payFlags: TxParams): Promise<void> {
     throw new Error("Method not implemented.");
   }
 

@@ -1,11 +1,22 @@
 import type { LogicSig } from "algosdk";
 import * as algosdk from "algosdk";
 
-import { Account, AlgobDeployer, ASADeploymentFlags, ASAInfo, ASCInfo, FundASCFlags, LsigInfo } from "../../src/types";
+import type {
+  Account,
+  AlgobDeployer,
+  ASADeploymentFlags,
+  ASAInfo,
+  ASCCache,
+  FundASCFlags,
+  LsigInfo,
+  SSCDeploymentFlags,
+  SSCInfo,
+  TxParams
+} from "../../src/types";
 
 export class FakeDeployer implements AlgobDeployer {
   asa = new Map<string, ASAInfo>();
-  asc = new Map<string, ASCInfo>();
+  ssc = new Map<string, SSCInfo>();
   lsig = new Map<string, LsigInfo>();
   isDeployMode = false;
   accounts = [];
@@ -17,6 +28,10 @@ export class FakeDeployer implements AlgobDeployer {
   }
 
   log (msg: string, obj: any): void {
+    throw new Error("Not implemented");
+  }
+
+  getSSC (nameApproval: string, nameClear: string): SSCInfo | undefined {
     throw new Error("Not implemented");
   }
 
@@ -51,6 +66,18 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   }
 
+  async deploySSC (
+    approvalProgram: string,
+    clearProgram: string,
+    flags: SSCDeploymentFlags,
+    payFlags: TxParams): Promise<SSCInfo> {
+    throw new Error("Not implemented");
+  }
+
+  async ensureCompiled (name: string, force: boolean): Promise<ASCCache> {
+    throw new Error("Not implemented");
+  }
+
   isDefined (name: string): boolean {
     return false;
   };
@@ -64,6 +91,11 @@ export class FakeDeployer implements AlgobDeployer {
   }
 
   optInToASA (name: string, accountName: string, flags: ASADeploymentFlags): Promise<void> {
+    throw new Error("Not implemented");
+  }
+
+  OptInToSSC (
+    sender: Account, index: number, payFlags: TxParams): Promise<void> {
     throw new Error("Not implemented");
   }
 }

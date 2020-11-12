@@ -14,10 +14,12 @@ import type {
   ASADefs,
   ASADeploymentFlags,
   ASAInfo,
-  ASCInfo,
+  ASCCache,
   CheckpointRepo,
   FundASCFlags,
   LsigInfo,
+  SSCDeploymentFlags,
+  SSCInfo,
   TxParams
 } from "../types";
 import { BuilderError } from "./core/errors";
@@ -60,10 +62,6 @@ class DeployerBasicMode {
     return this.cpData.precedingCP[this.networkName]?.asa ?? new Map();
   }
 
-  get asc (): Map<string, ASCInfo> {
-    return this.cpData.precedingCP[this.networkName]?.asc ?? new Map();
-  }
-
   get algodClient (): algosdk.Algodv2 {
     return this.algoOp.algodClient;
   }
@@ -74,6 +72,16 @@ class DeployerBasicMode {
 
   log (msg: string, obj: any): void {
     this.txWriter.push(msg, obj);
+  }
+
+  /**
+   * Description: loads stateful smart contract info from checkpoint
+   * @param nameApproval Approval program name
+   * @param nameClear clear program name
+   */
+  getSSC (nameApproval: string, nameClear: string): SSCInfo | undefined {
+    const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
+    return resultMap.get(nameApproval + "-" + nameClear);
   }
 
   /**
@@ -111,6 +119,11 @@ class DeployerBasicMode {
     const msig = await readMsigFromFile(name); // Get decoded Msig object from .msig
     Object.assign(lsig.msig = {} as MultiSig, msig);
     return lsig;
+  }
+
+  // Returns compiled program, name: filename
+  async ensureCompiled (name: string, force: boolean): Promise<ASCCache> {
+    return await this.algoOp.ensureCompiled(name, force);
   }
 }
 
@@ -250,12 +263,58 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
     return lsigInfo;
   }
 
+  /**
+   * Description: function to deploy stateful smart contracts
+   * @param approvalProgram filename which has approval program
+   * @param clearProgram filename which has clear program
+   * @param flags SSCDeploymentFlags
+   * @param payFlags Transaction Params
+   */
+  async deploySSC (
+    approvalProgram: string,
+    clearProgram: string,
+    flags: SSCDeploymentFlags,
+    payFlags: TxParams): Promise<SSCInfo> {
+    const name = approvalProgram + "-" + clearProgram;
+    this.assertNoAsset(name);
+    let sscInfo = {} as any;
+    try {
+      sscInfo = await this.algoOp.deploySSC(
+        approvalProgram, clearProgram, flags, payFlags, this.txWriter);
+    } catch (error) {
+      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+
+      console.log(error);
+      throw error;
+    }
+
+    this.cpData.registerSSC(this.networkName, name, sscInfo);
+
+    return sscInfo;
+  }
+
+  /**
+   * Description: Opt-In to ASA for a single account
+   * @param name ASA name
+   * @param accountName
+   * @param flags Transaction flags
+   */
   async optInToASA (name: string, accountName: string, flags: TxParams): Promise<void> {
     await this.algoOp.optInToASA(
       name,
       this._getASAInfo(name).assetIndex,
       this._getAccount(accountName),
       flags);
+  }
+
+  /**
+   * Description: Opt-In to stateful smart contract (SSC) for a single account
+   * @param sender sender account
+   * @param appID application index
+   * @param payFlags Transaction flags
+   */
+  async OptInToSSC (sender: Account, appId: number, payFlags: TxParams): Promise<void> {
+    await this.algoOp.optInToSSC(sender, appId, payFlags);
   }
 }
 
@@ -290,9 +349,25 @@ export class DeployerRunMode extends DeployerBasicMode implements AlgobDeployer 
     });
   }
 
+  async deploySSC (
+    approvalProgram: string,
+    clearProgram: string,
+    flags: SSCDeploymentFlags,
+    payFlags: TxParams): Promise<SSCInfo> {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "deploySSC"
+    });
+  }
+
   optInToASA (_name: string, _accountName: string, _flags: ASADeploymentFlags): Promise<void> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "optInToASA"
+    });
+  }
+
+  OptInToSSC (sender: Account, index: number, payFlags: TxParams): Promise<void> {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "optInToSSC"
     });
   }
 }

@@ -310,7 +310,7 @@ export interface LinkReferences {
   }
 }
 
-type AccountAddress = string;
+export type AccountAddress = string;
 
 export interface DeployedAssetInfo {
   creator: AccountAddress
@@ -321,8 +321,9 @@ export interface DeployedAssetInfo {
 export interface ASAInfo extends DeployedAssetInfo {
   assetIndex: number
 }
-export interface ASCInfo extends DeployedAssetInfo {
-  contractAddress: string
+
+export interface SSCInfo extends DeployedAssetInfo {
+  appID: number
 }
 
 // represents Lsig object fetched directly from raw file
@@ -362,7 +363,7 @@ export interface CheckpointRepo {
   getMetadata: (networkName: string, key: string) => string | undefined
 
   registerASA: (networkName: string, name: string, info: ASAInfo) => CheckpointRepo
-  registerASC: (networkName: string, name: string, info: ASCInfo) => CheckpointRepo
+  registerSSC: (networkName: string, name: string, info: SSCInfo) => CheckpointRepo
   registerLsig: (networkName: string, name: string, info: LsigInfo) => CheckpointRepo
 
   isDefined: (networkName: string, name: string) => boolean
@@ -377,7 +378,7 @@ export interface Checkpoint {
   timestamp: number
   metadata: Map<string, string>
   asa: Map<string, ASAInfo>
-  asc: Map<string, ASCInfo>
+  ssc: Map<string, SSCInfo>
   dLsig: Map<string, LsigInfo>
 };
 
@@ -414,6 +415,21 @@ export interface FundASCFlags {
   fundingMicroAlgo: number
 }
 
+export interface SSCDeploymentFlags {
+  sender: Account
+  localInts: number
+  localBytes: number
+  globalInts: number
+  globalBytes: number
+  appArgs?: Uint8Array[]
+  accounts?: string
+  foreignApps?: string
+  foreignAssets?: string
+  note?: Uint8Array
+  lease?: Uint8Array
+  rekeyTo?: string
+}
+
 export interface AssetScriptMap {
   [assetName: string]: string
 }
@@ -439,14 +455,18 @@ export interface AlgobDeployer {
     scParams: LogicSigArgs, // Parameters
     signer: Account
   ) => Promise<LsigInfo>
+  deploySSC: (
+    approvalProgram: string,
+    clearProgram: string,
+    flags: SSCDeploymentFlags,
+    payFlags: TxParams) => Promise<SSCInfo>
   /**
-     Returns true if ASA or ACS were deployed in any script.
-     Checks even for checkpoints out of from the execution
-     session which are not obtainable using get methods.
+     Returns true if ASA or DelegatedLsig or SSC were deployed in any script.
+     Checks even for checkpoints which are out of scope from the execution
+     session and are not obtainable using get methods.
   */
   isDefined: (name: string) => boolean
   asa: Map<string, ASAInfo>
-  asc: Map<string, ASCInfo>
 
   // These functions are exposed only for users.
   // Put your logic into AlgoOperator if you need to interact with the chain.
@@ -456,17 +476,25 @@ export interface AlgobDeployer {
   // Output of these functions is undefined. It's not known what to save to CP
   optInToASA: (name: string, accountName: string, flags: ASADeploymentFlags) => Promise<void>
 
+  OptInToSSC: (sender: Account, index: number, payFlags: TxParams) => Promise<void>
+
   // Log Transaction
   log: (msg: string, obj: any) => void
 
   // extract multi signed logic signature file from assets/
   loadMultiSig: (name: string, scParams: LogicSigArgs) => Promise<LogicSig>
 
+  // get stateful smart contract
+  getSSC: (nameApproval: string, nameClear: string) => SSCInfo | undefined
+
   // get delegated Logic signature
   getDelegatedLsig: (lsigName: string) => Object | undefined
 
   // load contract mode logic signature
   loadLogic: (name: string, scParams: LogicSigArgs) => Promise<LogicSig>
+
+  // returns compiled program
+  ensureCompiled: (name: string, force: boolean) => Promise<ASCCache>
 }
 
 // ************************

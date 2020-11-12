@@ -21,6 +21,42 @@ declare module 'algosdk' {
     accountInformation(address: string): Action<AccountInfo>
   }
 
+  export const OnApplicationComplete: {
+    ClearStateOC: number;
+    CloseOutOC: number;
+    DeleteApplicationOC: number;
+    NoOpOC: number;
+    OptInOC: number;
+    UpdateApplicationOC: number;
+	};
+
+	export namespace modelsv2 {
+    function Account(...args: any[]): void;
+
+    function Application(...args: any[]): void;
+
+    function ApplicationLocalState(...args: any[]): void;
+
+    function ApplicationParams(...args: any[]): void;
+
+    function ApplicationStateSchema(...args: any[]): void;
+
+    function Asset(...args: any[]): void;
+
+    function AssetHolding(...args: any[]): void;
+
+    function AssetParams(...args: any[]): void;
+
+    function DryrunRequest(...args: any[]): void;
+
+    function DryrunSource(...args: any[]): void;
+
+    function TealKeyValue(...args: any[]): void;
+
+    function TealValue(...args: any[]): void;
+
+	}
+
  class Kmd {
     constructor(token: string, baseServer: string, port: number);
 
@@ -221,6 +257,20 @@ declare module 'algosdk' {
    */
   function tealSignFromProgram(sk: Uint8Array, data: Uint8Array, program: Uint8Array): Uint8Array;
 
+  export function makeApplicationClearStateTxn(from: string, suggestedParams: any, appIndex: number, appArgs?: Uint8Array[], accounts?: any, foreignApps?: any, foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: string): any;
+
+	export function makeApplicationCloseOutTxn(from: string, suggestedParams: any, appIndex: number, appArgs?: Uint8Array[], accounts?: any, foreignApps?: any, foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: string): any;
+
+	export function makeApplicationCreateTxn(from: string, suggestedParams: any, onComplete: number, approvalProgram: any, clearProgram: any, numLocalInts: any, numLocalByteSlices: any, numGlobalInts: any, numGlobalByteSlices: any, appArgs?: Uint8Array[], accounts?: any, foreignApps?: any, foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: string): any;
+
+	export function makeApplicationDeleteTxn(from: string, suggestedParams: any, appIndex: number, appArgs?: Uint8Array[], accounts?: any, foreignApps?: any, foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: string): any;
+
+	export function makeApplicationNoOpTxn(from: string, suggestedParams: any, appIndex: number, appArgs?: Uint8Array[], accounts?: any, foreignApps?: any, foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: string): any;
+
+	export function makeApplicationOptInTxn(from: string, suggestedParams: any, appIndex: number, appArgs?: Uint8Array[], accounts?: any, foreignApps?: any, foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: string): any;
+
+	export function makeApplicationUpdateTxn(from: string, suggestedParams: any, appIndex: number, approvalProgram: any, clearProgram: any, appArgs?: Uint8Array[], accounts?: Address[], foreignApps?: any, foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: Address): any;
+
   export function makeAssetConfigTxn (from: any, fee: any, firstRound: any, lastRound: any, note: any, genesisHash: any, genesisID: any, assetIndex: any, manager: any, reserve: any, freeze: any, clawback: any, strictEmptyAddressChecking: any): any;
 
   export function makeAssetConfigTxnWithSuggestedParams (from: any, note: any, assetIndex: any, manager: any, reserve: any, freeze: any, clawback: any, suggestedParams: any, strictEmptyAddressChecking: any): any;
@@ -292,6 +342,10 @@ declare module 'algosdk' {
 
   export function signTransaction (txn: any, sk: any): any;
 
+  export function tealSign(sk: any, data: any, contractAddress: any): any;
+
+	export function tealSignFromProgram(sk: any, data: any, program: any): any;
+
   export function verifyBytes (bytes: any, signature: any, addr: any): any;
 
   export namespace ERROR_INVALID_MICROALGOS {
@@ -350,6 +404,9 @@ declare module 'algosdk' {
   interface ConfirmedTxInfo {
     'confirmed-round': number
     "asset-index": number
+    'application-index': number 
+    'global-state-delta': string
+    'local-state-delta': string
   }
 
   interface SuggestedParams {

@@ -7,8 +7,14 @@ import {
 } from "./lib/account";
 import { globalZeroAddress } from "./lib/constants";
 import { algodCredentialsFromEnv, KMDCredentialsFromEnv } from "./lib/credentials";
-import { balanceOf, printAssets } from "./lib/status";
-import { transferASALsig, transferAsset, transferMicroAlgos, transferMicroAlgosLsig } from "./lib/tx";
+import { callNoOp, clearUserState, closeOut, deleteApplication, update } from "./lib/ssc";
+import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC } from "./lib/status";
+import {
+  transferASALsig,
+  transferAsset,
+  transferMicroAlgos,
+  transferMicroAlgosLsig
+} from "./lib/tx";
 import { ASC1Mode } from "./types";
 
 export {
@@ -26,5 +32,12 @@ export {
   algodCredentialsFromEnv,
   KMDCredentialsFromEnv,
   ASC1Mode,
+  printLocalStateSSC,
+  printGlobalStateSSC,
+  callNoOp,
+  update,
+  closeOut,
+  deleteApplication,
+  clearUserState,
   globalZeroAddress
 };
