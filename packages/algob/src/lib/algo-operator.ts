@@ -255,7 +255,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
     const onComplete = algosdk.OnApplicationComplete.NoOpOC;
 
-    const app = (await this.ensureCompiled(approvalProgram, false));
+    const app = await this.ensureCompiled(approvalProgram, false);
     const approvalProg = new Uint8Array(Buffer.from(app.compiled, "base64"));
     const clear = (await this.ensureCompiled(clearProgram, false));
     const clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
