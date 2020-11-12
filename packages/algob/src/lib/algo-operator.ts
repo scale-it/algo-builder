@@ -285,7 +285,6 @@ export class AlgoOperatorImpl implements AlgoOperator {
     message = message.concat("\nCreated new app-id: ");
 
     const txInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
-
     const confirmedTxInfo = await this.waitForConfirmation(txId);
 
     const appId = confirmedTxInfo['application-index'];
