@@ -355,7 +355,6 @@ export async function clearStateSSC (
   payFlags: TxParams,
   appId: number): Promise<void> {
   const params = await mkSuggestedParams(deployer.algodClient, payFlags);
-
   const txn = tx.makeApplicationClearStateTxn(sender, params, appId);
 
   const txId = txn.txID().toString();
