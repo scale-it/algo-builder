@@ -5,6 +5,8 @@ declare module 'algosdk' {
     constructor (token: string, baseServer: string, port: number, headers?: object);
 
     status (): Promise<NodeStatus>;
+    sendRawTransactions(rawSignedTxns: TxSig[]): Action<TxResult>
+
   }
 
   class Algodv2 {
@@ -14,7 +16,7 @@ declare module 'algosdk' {
     compile (source: string): Action<CompileOut>;
     status(): Action<any>;
 
-    sendRawTransaction(rawSignedTxn: TxnBytes): Action<TxResult>
+    sendRawTransaction(rawSignedTxn: TxnBytes | TxnBytes[]): Action<TxResult>
     getTransactionParams(): Action<SuggestedParams>
     pendingTransactionInformation(txId: string): Action<ConfirmedTxInfo>
     statusAfterBlock(lastround: number): Action<any>
@@ -190,7 +192,7 @@ declare module 'algosdk' {
 
   export function appendSignMultisigTransaction (multisigTxnBlob: any, { version, threshold, addrs }: any, sk: any): any;
 
-  export function assignGroupID (txns: any, from: any): any;
+  export function assignGroupID (txns: any, from?: any): any;
 
   export function computeGroupID (txns: any): any;
 

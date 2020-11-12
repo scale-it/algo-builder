@@ -7,7 +7,7 @@ import {
 } from "./lib/account";
 import { algodCredentialsFromEnv, KMDCredentialsFromEnv } from "./lib/credentials";
 import { balanceOf, printAssets } from "./lib/status";
-import { transferASALsig, transferAsset, transferMicroAlgos, transferMicroAlgosLsig } from "./lib/tx";
+import { transferASALsig, transferAsset, transferMicroAlgos, transferMicroAlgosLsig, transferMicroAlgosLsigAtomic } from "./lib/tx";
 import { ASC1Mode } from "./types";
 
 export {
@@ -22,6 +22,7 @@ export {
   printAssets,
   transferASALsig,
   transferMicroAlgosLsig,
+  transferMicroAlgosLsigAtomic,
   algodCredentialsFromEnv,
   KMDCredentialsFromEnv,
   ASC1Mode

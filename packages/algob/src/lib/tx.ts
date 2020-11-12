@@ -1,3 +1,4 @@
+import * as msgpack from "algo-msgpack-with-bigint";
 import type { Account, Account as AccountSDK, LogicSig } from "algosdk";
 import tx from "algosdk";
 import { TextEncoder } from "util";
@@ -6,9 +7,11 @@ import {
   AlgobDeployer,
   ASADef,
   ASADeploymentFlags,
+  GrpTxnParams,
   TxParams
 } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
+import { lsigExt } from "./compile";
 
 export async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.SuggestedParams> {
   const params = await algocl.getTransactionParams().do();
@@ -246,4 +249,44 @@ export async function transferASALsig (
   const tx1 = (await deployer.algodClient.sendRawTransaction(rawSignedTxn.blob).do());
 
   return await deployer.waitForConfirmation(tx1.txId);
+}
+
+/**
+ * Description:
+ * This function executes multiple transactions atomically where Algos are
+ * transferred from one account to another using logic signature (for signing)
+
+ * Returns:
+ * Transaction details
+*/
+
+export async function transferMicroAlgosLsigAtomic (
+  deployer: AlgobDeployer,
+  lsig: LogicSig,
+  grpTxnParams: GrpTxnParams[]
+): Promise<tx.ConfirmedTxInfo> {
+  const params = await deployer.algodClient.getTransactionParams().do();
+
+  const txns = [];
+  for (const p of grpTxnParams) {
+    const receiver = p.toAccountAddr;
+    const note = tx.encodeObj(p.payFlags.note);
+
+    const txn = tx.makePaymentTxnWithSuggestedParams(
+      p.fromAccount.addr, receiver, p.amountMicroAlgos, p.payFlags.closeRemainderTo, note, params);
+
+    txns.push(txn); // group transactions
+  }
+
+  const txgroup = tx.assignGroupID(txns);
+
+  const signed = [];
+  for (const txn of txgroup) {
+    const signedTxn = tx.signLogicSigTransactionObject(txn, lsig);
+    signed.push(signedTxn.blob);
+  }
+  console.log('Signed txns', signed);
+  const pendingTx = await deployer.algodClient.sendRawTransaction(signed).do();
+
+  return await deployer.waitForConfirmation(pendingTx.txId);
 }

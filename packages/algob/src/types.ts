@@ -384,6 +384,13 @@ export interface Checkpoint {
 export type ASADef = z.infer<typeof ASADefSchema>;
 export type ASADefs = z.infer<typeof ASADefsSchema>;
 
+export interface GrpTxnParams {
+  fromAccount: Account
+  toAccountAddr: string
+  amountMicroAlgos: number
+  payFlags: TxParams
+}
+
 export interface TxParams {
   // feePerByte or totalFee is used to set the appropriate transaction fee parameter.
   // If both are set then totalFee takes precedence.
@@ -397,6 +404,7 @@ export interface TxParams {
   lease?: string
   note?: string
   noteb64?: string
+  closeRemainderTo?: AccountAddress
 }
 
 export interface ASADeploymentFlags extends TxParams {
