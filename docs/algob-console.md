@@ -122,10 +122,10 @@ Also we can transfer `algos` from `goldOwnerAccount` to other accounts (say `bob
 logicSignature = deployer.getDelegatedLsig('3-gold-delegated-asc.teal');
 
 # Transaction PASS (amount <= 100)
-await algob.transferMicroAlgosLsig(deployer, goldOwnerAccount, bobAccount.addr, 58, logicSignature);
+await algob.transferMicroAlgosLsig(deployer, goldOwnerAccount, bobAccount.addr, 58, logicSignature, {});
 
 # Transaction FAIL (amount should be <= 100)
-await algob.transferMicroAlgosLsig(deployer, goldOwnerAccount, bobAccount.addr, 580, logicSignature);
+await algob.transferMicroAlgosLsig(deployer, goldOwnerAccount, bobAccount.addr, 580, logicSignature, {});
 ```  
 Code can be found in `/scripts/transfer/gold-sc.js`
 

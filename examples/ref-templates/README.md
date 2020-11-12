@@ -13,3 +13,7 @@ Please follow the [setup](../README.md) instructions to install dependencies and
 * Install `pyteal` using `pip3 install pyteal` https://pyteal.readthedocs.io/en/stable/installation.html
 
 ## Run
+
+To run hash time lock contract use the deploy command:
+
+        yarn run algob deploy
