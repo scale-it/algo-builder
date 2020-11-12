@@ -12,7 +12,6 @@ def htlc(TMPL_RCV,
          TMPL_HASHIMG,
          TMPL_HASHFN,
          TMPL_TIMEOUT):
-
     """This contract implements a "hash time lock".
     The contract will approve transactions spending algos from itself under two circumstances:
 
