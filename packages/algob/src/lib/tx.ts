@@ -1,4 +1,3 @@
-import * as msgpack from "algo-msgpack-with-bigint";
 import type { Account, Account as AccountSDK, LogicSig } from "algosdk";
 import tx from "algosdk";
 import { TextEncoder } from "util";
@@ -11,7 +10,6 @@ import {
   TxParams
 } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
-import { lsigExt } from "./compile";
 
 export async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.SuggestedParams> {
   const params = await algocl.getTransactionParams().do();
@@ -262,7 +260,6 @@ export async function transferASALsig (
 
 export async function transferMicroAlgosLsigAtomic (
   deployer: AlgobDeployer,
-  lsig: LogicSig,
   grpTxnParams: GrpTxnParams[]
 ): Promise<tx.ConfirmedTxInfo> {
   const params = await deployer.algodClient.getTransactionParams().do();
@@ -270,7 +267,7 @@ export async function transferMicroAlgosLsigAtomic (
   const txns = [];
   for (const p of grpTxnParams) {
     const receiver = p.toAccountAddr;
-    const note = tx.encodeObj(p.payFlags.note);
+    const note = encodeNote(p.payFlags.note, p.payFlags.noteb64);
 
     const txn = tx.makePaymentTxnWithSuggestedParams(
       p.fromAccount.addr, receiver, p.amountMicroAlgos, p.payFlags.closeRemainderTo, note, params);
@@ -278,15 +275,17 @@ export async function transferMicroAlgosLsigAtomic (
     txns.push(txn); // group transactions
   }
 
-  const txgroup = tx.assignGroupID(txns);
+  tx.assignGroupID(txns); // assign common group hash to all transactions
 
-  const signed = [];
-  for (const txn of txgroup) {
-    const signedTxn = tx.signLogicSigTransactionObject(txn, lsig);
+  const signed = []; let idx = 0;
+  for (const txn of txns) {
+    const signedTxn = tx.signLogicSigTransactionObject(txn, grpTxnParams[idx].lsig);
     signed.push(signedTxn.blob);
+    idx++;
   }
-  console.log('Signed txns', signed);
+
   const pendingTx = await deployer.algodClient.sendRawTransaction(signed).do();
+  console.log(pendingTx.txId.toString());
 
   return await deployer.waitForConfirmation(pendingTx.txId);
 }

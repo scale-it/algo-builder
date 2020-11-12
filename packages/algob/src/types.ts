@@ -387,6 +387,7 @@ export type ASADefs = z.infer<typeof ASADefsSchema>;
 export interface GrpTxnParams {
   fromAccount: Account
   toAccountAddr: string
+  lsig: LogicSig
   amountMicroAlgos: number
   payFlags: TxParams
 }
