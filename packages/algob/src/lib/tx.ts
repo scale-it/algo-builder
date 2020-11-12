@@ -249,7 +249,7 @@ export async function transferASALsig (
 }
 
 /**
- * Description: Make calls to application
+ * Description: NoOp - Generic application calls to execute the ApprovalProgram
  * @param deployer AlgobDeployer
  * @param sender Account from which call needs to be made
  * @param payFlags Transaction Flags
