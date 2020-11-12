@@ -270,7 +270,7 @@ export async function callNoOpSSC (
 ): Promise<void> {
   const params = await mkSuggestedParams(deployer.algodClient, payFlags);
   const txn = tx.makeApplicationNoOpTxn(
-    sender,
+    sender.addr,
     params,
     appId,
     appArgs,
@@ -310,7 +310,7 @@ export async function closeOutSSC (
   appId: number): Promise<void> {
   const params = await mkSuggestedParams(deployer.algodClient, payFlags);
 
-  const txn = tx.makeApplicationCloseOutTxn(sender, params, appId);
+  const txn = tx.makeApplicationCloseOutTxn(sender.addr, params, appId);
 
   const txId = txn.txID().toString();
   const signedTxn = txn.signTxn(sender.sk);
@@ -326,14 +326,14 @@ export async function closeOutSSC (
  * @param payFlags Transaction Flags
  * @param appId ID of the application being configured or empty if creating
  */
-export async function deleteTxnSSC (
+export async function deleteSSC (
   deployer: AlgobDeployer,
   sender: AccountSDK,
   payFlags: TxParams,
   appId: number): Promise<void> {
   const params = await mkSuggestedParams(deployer.algodClient, payFlags);
 
-  const txn = tx.makeApplicationDeleteTxn(sender, params, appId);
+  const txn = tx.makeApplicationDeleteTxn(sender.addr, params, appId);
 
   const txId = txn.txID().toString();
   const signedTxn = txn.signTxn(sender.sk);
@@ -349,13 +349,13 @@ export async function deleteTxnSSC (
  * @param payFlags Transaction Flags
  * @param appId ID of the application being configured or empty if creating
  */
-export async function clearStateSSC (
+export async function clearSSCuserState (
   deployer: AlgobDeployer,
   sender: AccountSDK,
   payFlags: TxParams,
   appId: number): Promise<void> {
   const params = await mkSuggestedParams(deployer.algodClient, payFlags);
-  const txn = tx.makeApplicationClearStateTxn(sender, params, appId);
+  const txn = tx.makeApplicationClearStateTxn(sender.addr, params, appId);
 
   const txId = txn.txID().toString();
   const signedTxn = txn.signTxn(sender.sk);

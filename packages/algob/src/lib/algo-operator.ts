@@ -309,7 +309,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
    */
   async optInToSSC (sender: Account, appId: number, payFlags: TxParams): Promise<void> {
     const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
-    const txn = algosdk.makeApplicationOptInTxn(sender, params, appId);
+    const txn = algosdk.makeApplicationOptInTxn(sender.addr, params, appId);
     const txId = txn.txID().toString();
     const signedTxn = txn.signTxn(sender.sk);
 
