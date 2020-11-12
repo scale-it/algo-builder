@@ -5,6 +5,7 @@ import {
   loadAccountsFromFileSync,
   mkAccounts
 } from "./lib/account";
+import { globalZeroAddress } from "./lib/constants";
 import { algodCredentialsFromEnv, KMDCredentialsFromEnv } from "./lib/credentials";
 import { callNoOp, clearUserState, closeOut, deleteApplication, update } from "./lib/ssc";
 import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC } from "./lib/status";
@@ -37,5 +38,6 @@ export {
   update,
   closeOut,
   deleteApplication,
-  clearUserState
+  clearUserState,
+  globalZeroAddress
 };
