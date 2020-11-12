@@ -6,6 +6,7 @@ import type {
   AlgobDeployer,
   ASADeploymentFlags,
   ASAInfo,
+  ASCCache,
   FundASCFlags,
   LsigInfo,
   SSCDeploymentFlags,
@@ -70,6 +71,10 @@ export class FakeDeployer implements AlgobDeployer {
     clearProgram: string,
     flags: SSCDeploymentFlags,
     payFlags: TxParams): Promise<SSCInfo> {
+    throw new Error("Not implemented");
+  }
+
+  async ensureCompiled (name: string, force: boolean): Promise<ASCCache> {
     throw new Error("Not implemented");
   }
 

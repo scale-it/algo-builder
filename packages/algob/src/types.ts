@@ -491,6 +491,9 @@ export interface AlgobDeployer {
 
   // load contract mode logic signature
   loadLogic: (name: string, scParams: LogicSigArgs) => Promise<LogicSig>
+
+  // returns compiled program
+  ensureCompiled: (name: string, force: boolean) => Promise<ASCCache>
 }
 
 // ************************

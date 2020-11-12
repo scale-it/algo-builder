@@ -6,12 +6,10 @@ import {
   mkAccounts
 } from "./lib/account";
 import { algodCredentialsFromEnv, KMDCredentialsFromEnv } from "./lib/credentials";
+import { callNoOp, clearUserState, closeOut, deleteApplication, update } from "./lib/ssc";
 import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC } from "./lib/status";
 import {
-  callNoOpSSC,
-  clearSSCuserState,
-  closeOutSSC,
-  deleteSSC, transferASALsig,
+  transferASALsig,
   transferAsset,
   transferMicroAlgos,
   transferMicroAlgosLsig
@@ -35,8 +33,9 @@ export {
   ASC1Mode,
   printLocalStateSSC,
   printGlobalStateSSC,
-  callNoOpSSC,
-  closeOutSSC,
-  clearSSCuserState,
-  deleteSSC
+  callNoOp,
+  update,
+  closeOut,
+  deleteApplication,
+  clearUserState
 };

@@ -55,6 +55,7 @@ export interface AlgoOperator {
   ) => Promise<void>
   optInToSSC: (
     sender: Account, appId: number, payFlags: TxParams) => Promise<void>
+  ensureCompiled: (name: string, force: boolean) => Promise<ASCCache>
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -260,7 +261,6 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const clear = await this.ensureCompiled(clearProgram, false);
     const clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
 
-    let message = "Signed transaction with txID: ";
     const txn = algosdk.makeApplicationCreateTxn(
       sender,
       params,
@@ -281,14 +281,12 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
     const txId = txn.txID().toString();
     const signedTxn = txn.signTxn(flags.sender.sk);
-    message = message.concat(txId);
-    message = message.concat("\nCreated new app-id: ");
 
     const txInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
     const confirmedTxInfo = await this.waitForConfirmation(txId);
 
     const appId = confirmedTxInfo['application-index'];
-    message = message.concat(appId.toString());
+    const message = `Signed transaction with txID: ${txId}\nCreated new app-id: ${appId}`; // eslint-disable-line @typescript-eslint/restrict-template-expressions
 
     console.log(message);
     txWriter.push(message, confirmedTxInfo);
@@ -317,7 +315,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     await this.waitForConfirmation(txId);
   }
 
-  private async ensureCompiled (name: string, force: boolean): Promise<ASCCache> {
+  async ensureCompiled (name: string, force: boolean): Promise<ASCCache> {
     return await this.compileOp.ensureCompiled(name, force);
   }
 }

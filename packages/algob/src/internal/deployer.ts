@@ -14,6 +14,7 @@ import type {
   ASADefs,
   ASADeploymentFlags,
   ASAInfo,
+  ASCCache,
   CheckpointRepo,
   FundASCFlags,
   LsigInfo,
@@ -118,6 +119,11 @@ class DeployerBasicMode {
     const msig = await readMsigFromFile(name); // Get decoded Msig object from .msig
     Object.assign(lsig.msig = {} as MultiSig, msig);
     return lsig;
+  }
+
+  // Returns compiled program, name: filename
+  async ensureCompiled (name: string, force: boolean): Promise<ASCCache> {
+    return await this.algoOp.ensureCompiled(name, force);
   }
 }
 
