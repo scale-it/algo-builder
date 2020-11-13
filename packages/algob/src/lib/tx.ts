@@ -265,10 +265,13 @@ export async function transferMicroAlgosLsigAtomic (
   deployer: AlgobDeployer,
   grpTxnParams: GrpTxnParams[]
 ): Promise<tx.ConfirmedTxInfo> {
-  const params = await deployer.algodClient.getTransactionParams().do();
+  if (grpTxnParams.length > 16) {
+    throw new Error("Maximum size of an atomic transfer group is 16");
+  }
 
   const txns = [];
   for (const p of grpTxnParams) {
+    const params = await mkSuggestedParams(deployer.algodClient, p.payFlags);
     const receiver = p.toAccountAddr;
     const note = encodeNote(p.payFlags.note, p.payFlags.noteb64);
 
