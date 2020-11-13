@@ -6,7 +6,7 @@ import { ERRORS } from "../internal/core/errors-list";
 import { txWriter } from "../internal/tx-log-writer";
 import { createClient } from "../lib/driver";
 import { getLsig } from "../lib/lsig";
-import {
+import type {
   Account,
   Accounts,
   ASADef,
@@ -16,6 +16,8 @@ import {
   FundASCFlags,
   LsigInfo,
   Network,
+  SSCDeploymentFlags,
+  SSCInfo,
   TxParams
 } from "../types";
 import { CompileOp } from "./compile";
@@ -38,6 +40,12 @@ export interface AlgoOperator {
   ) => Promise<ASAInfo>
   fundLsig: (name: string, scParams: LogicSigArgs, flags: FundASCFlags, payFlags: TxParams,
     txWriter: txWriter) => Promise<LsigInfo>
+  deploySSC: (
+    approvalProgram: string,
+    clearProgram: string,
+    flags: SSCDeploymentFlags,
+    payFlags: TxParams,
+    txWriter: txWriter) => Promise<SSCInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
   optInToASA: (
     asaName: string, assetIndex: number, account: Account, params: TxParams
@@ -45,6 +53,9 @@ export interface AlgoOperator {
   optInToASAMultiple: (
     asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, assetIndex: number
   ) => Promise<void>
+  optInToSSC: (
+    sender: Account, appId: number, payFlags: TxParams) => Promise<void>
+  ensureCompiled: (name: string, force: boolean) => Promise<ASCCache>
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -226,7 +237,85 @@ export class AlgoOperatorImpl implements AlgoOperator {
     };
   }
 
-  private async ensureCompiled (name: string, force: boolean): Promise<ASCCache> {
+  /**
+   * Description: Function to deploy Stateful Smart Contract
+   * @param approvalProgram name of file in which approval program is stored
+   * @param clearProgram name of file in which clear program is stored
+   * @param flags         SSCDeploymentFlags
+   * @param payFlags      TxParams
+   * @param txWriter
+   */
+  async deploySSC (
+    approvalProgram: string,
+    clearProgram: string,
+    flags: SSCDeploymentFlags,
+    payFlags: TxParams,
+    txWriter: txWriter): Promise<SSCInfo> {
+    const sender = flags.sender.addr;
+    const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
+
+    const onComplete = algosdk.OnApplicationComplete.NoOpOC;
+
+    const app = await this.ensureCompiled(approvalProgram, false);
+    const approvalProg = new Uint8Array(Buffer.from(app.compiled, "base64"));
+    const clear = await this.ensureCompiled(clearProgram, false);
+    const clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
+
+    const txn = algosdk.makeApplicationCreateTxn(
+      sender,
+      params,
+      onComplete,
+      approvalProg,
+      clearProg,
+      flags.localInts,
+      flags.localBytes,
+      flags.globalInts,
+      flags.globalBytes,
+      flags.appArgs,
+      flags.accounts,
+      flags.foreignApps,
+      flags.foreignAssets,
+      flags.note,
+      flags.lease,
+      flags.rekeyTo);
+
+    const txId = txn.txID().toString();
+    const signedTxn = txn.signTxn(flags.sender.sk);
+
+    const txInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
+    const confirmedTxInfo = await this.waitForConfirmation(txId);
+
+    const appId = confirmedTxInfo['application-index'];
+    const message = `Signed transaction with txID: ${txId}\nCreated new app-id: ${appId}`; // eslint-disable-line @typescript-eslint/restrict-template-expressions
+
+    console.log(message);
+    txWriter.push(message, confirmedTxInfo);
+
+    return {
+      creator: flags.sender.addr,
+      txId: txInfo.txId,
+      confirmedRound: confirmedTxInfo[confirmedRound],
+      appID: appId
+    };
+  }
+
+  /**
+   * Description: Opt-In to stateful smart contract
+   * @param sender Account for which opt-in is required
+   * @param appId Application Index : ID of the application being configured or empty if creating
+   * @param payFlags Transaction Params
+   */
+  async optInToSSC (sender: Account, appId: number, payFlags: TxParams): Promise<void> {
+    const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
+    const txn = algosdk.makeApplicationOptInTxn(sender.addr, params, appId);
+    const txId = txn.txID().toString();
+    const signedTxn = txn.signTxn(sender.sk);
+
+    await this.algodClient.sendRawTransaction(signedTxn).do();
+    await this.waitForConfirmation(txId);
+  }
+
+  async ensureCompiled (name: string, force: boolean): Promise<ASCCache> {
     return await this.compileOp.ensureCompiled(name, force);
   }
 }
