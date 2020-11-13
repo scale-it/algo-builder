@@ -34,14 +34,13 @@ async function run(runtimeEnv, deployer) {
   await deployer.mkDelegatedLsig("dynamic-fee.py", [], masterAccount); // sign contract
   const signedContract =  await deployer.getDelegatedLsig('dynamic-fee.py');
   
-
+  
   let transactions = [
     mkTxnParams(masterAccount, escrow, 1000, signedContract, {}),
     mkTxnParams({ addr: escrow}, johnAccount.addr, 700000, contract, { totalFee: 1000, closeRemainderTo: bobAccount.addr })]
 
   //Group Transaction FAIL - Correct transaction Fee is used BUT closeRemainderTo is set to bob
   await transferMicroAlgoAtomic(deployer, transactions);
-
 
   transactions = [
     mkTxnParams(masterAccount, escrow, 1000, signedContract, { }),

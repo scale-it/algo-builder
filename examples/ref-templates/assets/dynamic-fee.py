@@ -24,8 +24,6 @@ def dynamic_fee(TMPL_TO,
 
     - The first transaction must spend the transaction fee into account A, and the second transaction 
       must be the specified payment transaction from account A to account TMPL_TO.  
-
-    
     
     Parameters:
     TMPL_TO: the recipient of the payment from account A
@@ -53,7 +51,6 @@ def dynamic_fee(TMPL_TO,
     #Check that the second transaction is a payment.
     secondTxn_pay_check = Gtxn[1].type_enum() == TxnType.Payment
 
-
     # fold all the above checks into a single boolean.
     required_condition = And(
         grp_check,
@@ -62,7 +59,6 @@ def dynamic_fee(TMPL_TO,
         amount_check,
         secondTxn_pay_check
     )
-
 
     # Finally, check that all of the fields in the second transaction are equal to their corresponding contract parameters.
     # Check that the Receiver field is set to be the TMPL_TO address.
@@ -91,7 +87,6 @@ def dynamic_fee(TMPL_TO,
         #lv_field_check,
         #lease_field_check
     )
-
 
     # whether or not it has been approved by this contract.
     return And(required_condition, params_condition)
