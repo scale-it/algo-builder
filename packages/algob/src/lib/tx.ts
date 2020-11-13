@@ -11,7 +11,7 @@ import {
 } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
 
-const ALGO_MSG = "Transferring algo (in micro algos):";
+const ALGO_MSG = "Transferring micro Algo:";
 
 export async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.SuggestedParams> {
   const params = await algocl.getTransactionParams().do();
@@ -258,9 +258,8 @@ export async function transferASALsig (
  * transferred from one account to another using logic signature (for signing)
 
  * Returns:
- * Transaction details
+ * ConfirmedTxInfo (transaction receipt)
 */
-
 export async function transferMicroAlgosLsigAtomic (
   deployer: AlgobDeployer,
   grpTxnParams: GrpTxnParams[]

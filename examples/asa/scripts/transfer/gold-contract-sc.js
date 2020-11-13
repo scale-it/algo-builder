@@ -35,7 +35,7 @@ async function run(runtimeEnv, deployer) {
     mkTxnParams({addr: sender}, johnAccount.addr, 200, lsig, { note: "ALGO PAID" }),
     mkTxnParams({addr: sender}, johnAccount.addr, 20, lsig, { note: "ALGO PAID" })]
   
-  // Transaction FAIL - since for the first transaction amount = 200 (which is > 100, so both transactions will fail)
+  // Group transaction FAIL - one of the transaction amount is = 200 but the smart contract requires amount to be <= 100.
   await transferAlgoAtomic(deployer, transactions);
 }
 
