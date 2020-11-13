@@ -6,9 +6,12 @@ import {
   AlgobDeployer,
   ASADef,
   ASADeploymentFlags,
+  GrpTxnParams,
   TxParams
 } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
+
+const ALGO_MSG = "Transferring micro Algo:";
 
 export async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.SuggestedParams> {
   const params = await algocl.getTransactionParams().do();
@@ -123,7 +126,7 @@ export async function transferMicroAlgos (
 
   const signedTxn = txn.signTxn(from.sk);
   const pendingTx = await deployer.algodClient.sendRawTransaction(signedTxn).do();
-  console.log("Transferring algo (in micro algos):", {
+  console.log(ALGO_MSG, {
     from: from.addr,
     to: receiver,
     amount: amountMicroAlgos,
@@ -205,7 +208,7 @@ export async function transferMicroAlgosLsig (
   const txId = txn.txID().toString();
   console.log(txId);
   const pendingTx = await deployer.algodClient.sendRawTransaction(signedTxn.blob).do();
-  console.log("Transferring algo (in micro algos):", {
+  console.log(ALGO_MSG, {
     from: fromAccount.addr,
     to: receiver,
     amount: amountMicroAlgos,
@@ -247,4 +250,54 @@ export async function transferASALsig (
   const tx1 = (await deployer.algodClient.sendRawTransaction(rawSignedTxn.blob).do());
 
   return await deployer.waitForConfirmation(tx1.txId);
+}
+
+/**
+ * Description:
+ * This function executes multiple transactions atomically where Algos are
+ * transferred from one account to another using logic signature (for signing)
+
+ * Returns:
+ * ConfirmedTxInfo (transaction receipt)
+*/
+export async function transferMicroAlgosLsigAtomic (
+  deployer: AlgobDeployer,
+  grpTxnParams: GrpTxnParams[]
+): Promise<tx.ConfirmedTxInfo> {
+  if (grpTxnParams.length > 16) {
+    throw new Error("Maximum size of an atomic transfer group is 16");
+  }
+
+  const txns = [];
+  for (const p of grpTxnParams) {
+    const params = await mkSuggestedParams(deployer.algodClient, p.payFlags);
+    const receiver = p.toAccountAddr;
+    const note = encodeNote(p.payFlags.note, p.payFlags.noteb64);
+
+    const txn = tx.makePaymentTxnWithSuggestedParams(
+      p.fromAccount.addr, receiver, p.amountMicroAlgos, p.payFlags.closeRemainderTo, note, params);
+
+    txns.push(txn); // group transactions
+  }
+
+  tx.assignGroupID(txns); // assign common group hash to all transactions
+
+  const signed = []; const logs = []; let idx = 0;
+  for (const txn of txns) {
+    const signedTxn = tx.signLogicSigTransactionObject(txn, grpTxnParams[idx].lsig);
+    signed.push(signedTxn.blob);
+
+    const txnInfo = {
+      from: grpTxnParams[idx].fromAccount.addr,
+      to: grpTxnParams[idx].toAccountAddr,
+      amount: txn.amount,
+      txid: signedTxn.txID
+    };
+    logs.push(txnInfo);
+    idx++;
+  }
+
+  const pendingTx = await deployer.algodClient.sendRawTransaction(signed).do();
+  console.log(ALGO_MSG, logs);
+  return await deployer.waitForConfirmation(pendingTx.txId);
 }

@@ -13,7 +13,8 @@ import {
   transferASALsig,
   transferAsset,
   transferMicroAlgos,
-  transferMicroAlgosLsig
+  transferMicroAlgosLsig,
+  transferMicroAlgosLsigAtomic
 } from "./lib/tx";
 import { ASC1Mode } from "./types";
 
@@ -29,6 +30,7 @@ export {
   printAssets,
   transferASALsig,
   transferMicroAlgosLsig,
+  transferMicroAlgosLsigAtomic,
   algodCredentialsFromEnv,
   KMDCredentialsFromEnv,
   ASC1Mode,

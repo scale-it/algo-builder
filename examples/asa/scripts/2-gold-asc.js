@@ -7,7 +7,7 @@ async function run(runtimeEnv, deployer) {
 
   await transferMicroAlgos(deployer, masterAccount, goldOwnerAccount.addr, 200000000, {note: "funding account"});
 
-  const ascInfoAlgoContract = await deployer.fundLsig("2-gold-contract-asc.teal", [],
+  await deployer.fundLsig("2-gold-contract-asc.teal", [],
     { funder: goldOwnerAccount, fundingMicroAlgo: 101000 }, {});   // sending 0.101 Algo
 
   const ascInfoAlgoDelegated = await deployer.mkDelegatedLsig("3-gold-delegated-asc.teal", [],
@@ -16,7 +16,6 @@ async function run(runtimeEnv, deployer) {
   const ascInfoGoldDelegated = await deployer.mkDelegatedLsig("4-gold-asa.teal", [],
    goldOwnerAccount); 
 
-  console.log(ascInfoAlgoContract);
   console.log(ascInfoAlgoDelegated);
   console.log(ascInfoGoldDelegated);
   

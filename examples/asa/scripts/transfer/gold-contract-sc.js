@@ -3,14 +3,14 @@
  * This file demonstrates the example to transfer MicroAlgos
  * from contract account (contract approval mode) to another according to smart contract (ASC) logic
 */
-const { transferAlgo } = require('./common');
+const { transferMicroAlgosLsigAtomic } = require('algob/src');
+const { transferAlgo, mkTxnParams, transferMicroAlgoAtomic } = require('./common');
 
 async function run(runtimeEnv, deployer) {
   const johnAccount = deployer.accountsByName.get("john-account");
   const elonMuskAccount = deployer.accountsByName.get("elon-musk-account");
 
   // Transactions for Transaction for ALGO - Contract : '2-gold-contract-asc.teal'  (Contract Mode)
-  //const lsig = await deployer.getLogicSignature("2-gold-contract-asc.teal", []);
   // sender is contract account
   const lsig = await deployer.loadLogic("2-gold-contract-asc.teal");
   const sender = lsig.address(); 
@@ -22,6 +22,7 @@ async function run(runtimeEnv, deployer) {
 
   // Transaction FAIL as Elon tried to receive instead of John
   await transferAlgo(deployer, { addr: sender}, elonMuskAccount.addr, 50, lsig);
+  
 }
 
 module.exports = { default: run }
