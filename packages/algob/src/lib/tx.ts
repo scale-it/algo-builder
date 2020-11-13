@@ -11,6 +11,8 @@ import {
 } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
 
+const ALGO_MSG = "Transferring algo (in micro algos):";
+
 export async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.SuggestedParams> {
   const params = await algocl.getTransactionParams().do();
   // Private chains may have an issue with firstRound
@@ -124,7 +126,7 @@ export async function transferMicroAlgos (
 
   const signedTxn = txn.signTxn(from.sk);
   const pendingTx = await deployer.algodClient.sendRawTransaction(signedTxn).do();
-  console.log("Transferring algo (in micro algos):", {
+  console.log(ALGO_MSG, {
     from: from.addr,
     to: receiver,
     amount: amountMicroAlgos,
@@ -206,7 +208,7 @@ export async function transferMicroAlgosLsig (
   const txId = txn.txID().toString();
   console.log(txId);
   const pendingTx = await deployer.algodClient.sendRawTransaction(signedTxn.blob).do();
-  console.log("Transferring algo (in micro algos):", {
+  console.log(ALGO_MSG, {
     from: fromAccount.addr,
     to: receiver,
     amount: amountMicroAlgos,
@@ -278,15 +280,22 @@ export async function transferMicroAlgosLsigAtomic (
 
   tx.assignGroupID(txns); // assign common group hash to all transactions
 
-  const signed = []; let idx = 0;
+  const signed = []; const logs = []; let idx = 0;
   for (const txn of txns) {
     const signedTxn = tx.signLogicSigTransactionObject(txn, grpTxnParams[idx].lsig);
     signed.push(signedTxn.blob);
+
+    const txnInfo = {
+      from: grpTxnParams[idx].fromAccount.addr,
+      to: grpTxnParams[idx].toAccountAddr,
+      amount: txn.amount,
+      txid: signedTxn.txID
+    };
+    logs.push(txnInfo);
     idx++;
   }
 
   const pendingTx = await deployer.algodClient.sendRawTransaction(signed).do();
-  console.log(pendingTx.txId.toString());
-
+  console.log(ALGO_MSG, logs);
   return await deployer.waitForConfirmation(pendingTx.txId);
 }
