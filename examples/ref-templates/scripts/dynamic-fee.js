@@ -30,10 +30,10 @@ async function run(runtimeEnv, deployer) {
 
   let contract = await deployer.loadLogic("dynamic-fee.py");
   const escrow = contract.address(); //contract account
-
-  const signedContract =  await deployer.loadLogic("dynamic-fee.py");
-  signedContract.sign(masterAccount.sk); //sign contract 
-
+  
+  await deployer.mkDelegatedLsig("dynamic-fee.py", [], masterAccount); // sign contract
+  const signedContract =  await deployer.getDelegatedLsig('dynamic-fee.py');
+  
 
   let transactions = [
     mkTxnParams(masterAccount, escrow, 1000, signedContract, {}),
