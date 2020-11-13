@@ -18,7 +18,7 @@ exports.transferASA = async function (deployer, senderAccount, receiverAddr, amo
     }
 }
 
-exports.transferAlgoAtomic = async function (deployer, txnParams) {
+exports.transferMicroAlgoAtomic = async function (deployer, txnParams) {
     try {
         const details = await transferMicroAlgosLsigAtomic(deployer, txnParams);
         console.log(details);

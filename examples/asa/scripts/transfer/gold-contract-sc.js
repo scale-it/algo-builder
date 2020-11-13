@@ -3,7 +3,8 @@
  * This file demonstrates the example to transfer MicroAlgos
  * from contract account (contract approval mode) to another according to smart contract (ASC) logic
 */
-const { transferAlgo, mkTxnParams, transferAlgoAtomic } = require('./common');
+const { transferMicroAlgosLsigAtomic } = require('algob/src');
+const { transferAlgo, mkTxnParams, transferMicroAlgoAtomic } = require('./common');
 
 async function run(runtimeEnv, deployer) {
   const johnAccount = deployer.accountsByName.get("john-account");
@@ -21,22 +22,7 @@ async function run(runtimeEnv, deployer) {
 
   // Transaction FAIL as Elon tried to receive instead of John
   await transferAlgo(deployer, { addr: sender}, elonMuskAccount.addr, 50, lsig);
-
-  //group transactions
-  let transactions = [
-    mkTxnParams({addr: sender}, johnAccount.addr, 30, lsig, {}),
-    mkTxnParams({addr: sender}, johnAccount.addr, 40, lsig, {}),
-    mkTxnParams({addr: sender}, johnAccount.addr, 50, lsig, {})]
   
-  // Transaction PASS - for all transactions amount <= 100 and receiver is john
-  await transferAlgoAtomic(deployer, transactions);
-  
-  transactions = [
-    mkTxnParams({addr: sender}, johnAccount.addr, 200, lsig, { note: "ALGO PAID" }),
-    mkTxnParams({addr: sender}, johnAccount.addr, 20, lsig, { note: "ALGO PAID" })]
-  
-  // Group transaction FAIL - one of the transaction amount is = 200 but the smart contract requires amount to be <= 100.
-  await transferAlgoAtomic(deployer, transactions);
 }
 
 module.exports = { default: run }
