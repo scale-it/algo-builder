@@ -23,19 +23,20 @@ async function run(runtimeEnv, deployer) {
   await transferAlgo(deployer, { addr: sender}, elonMuskAccount.addr, 50, lsig);
 
   //group transactions
-  let txnParams = [
+  let transactions = [
     mkTxnParams({addr: sender}, johnAccount.addr, 30, lsig, {}),
-    mkTxnParams({addr: sender}, johnAccount.addr, 20, lsig, {})]
+    mkTxnParams({addr: sender}, johnAccount.addr, 40, lsig, {}),
+    mkTxnParams({addr: sender}, johnAccount.addr, 50, lsig, {})]
   
-  // Transaction PASS - for both transactions amount <= 100 and receiver is john
-  await transferAlgoAtomic(deployer, txnParams);
+  // Transaction PASS - for all transactions amount <= 100 and receiver is john
+  await transferAlgoAtomic(deployer, transactions);
   
-  txnParams = [
+  transactions = [
     mkTxnParams({addr: sender}, johnAccount.addr, 200, lsig, { note: "ALGO PAID" }),
     mkTxnParams({addr: sender}, johnAccount.addr, 20, lsig, { note: "ALGO PAID" })]
   
   // Transaction FAIL - since for the first transaction amount = 200 (which is > 100, so both transactions will fail)
-  await transferAlgoAtomic(deployer, txnParams);
+  await transferAlgoAtomic(deployer, transactions);
 }
 
 module.exports = { default: run }

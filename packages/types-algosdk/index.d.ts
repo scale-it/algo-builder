@@ -5,8 +5,6 @@ declare module 'algosdk' {
     constructor (token: string, baseServer: string, port: number, headers?: object);
 
     status (): Promise<NodeStatus>;
-    sendRawTransactions(rawSignedTxns: TxSig[]): Action<TxResult>
-
   }
 
   class Algodv2 {
