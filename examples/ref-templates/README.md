@@ -14,6 +14,6 @@ Please follow the [setup](../README.md) instructions to install dependencies and
 
 ## Run
 
-To run hash time lock contract use the deploy command:
+To run hash time lock contract or dynamic Fee use the deploy command:
 
         yarn run algob deploy
