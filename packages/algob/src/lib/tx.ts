@@ -4,7 +4,6 @@ import { TextEncoder } from "util";
 
 import {
   AlgobDeployer,
-  AlgoTransferParam,
   ASADef,
   ASADeploymentFlags,
   execParams,
