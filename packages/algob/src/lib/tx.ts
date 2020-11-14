@@ -100,14 +100,13 @@ async function mkTransaction (deployer: AlgobDeployer, txnParam: execParams): Pr
 
   switch (txnParam.type) {
     case "asset": {
-      // rsolve undefined
       return tx.makeAssetTransferTxnWithSuggestedParams(
         txnParam.fromAccount.addr,
         txnParam.toAccountAddr,
-        undefined,
+        txnParam.payFlags.closeRemainderTo,
         undefined,
         txnParam.amount,
-        undefined,
+        note,
         txnParam.assetID,
         params);
     }
@@ -188,11 +187,10 @@ export async function executeTransaction (
     }
     tx.assignGroupID(txns);
 
-    const signedTxns = []; let idx = 0;
-    for (const txn of txns) {
-      signedTxns.push(signTransaction(txn, txnParams[idx]));
-      idx++;
-    }
+    const signedTxns = [] as Uint8Array[];
+    txns.forEach((txn, index) => {
+      signedTxns.push(signTransaction(txn, txnParams[index]));
+    });
 
     return await sendAndWait(deployer, signedTxns);
     // txwriter log
