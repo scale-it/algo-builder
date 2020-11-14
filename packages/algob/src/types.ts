@@ -416,14 +416,6 @@ export interface SSCCallsParam extends SSCOptionalFlags, Sign {
   payFlags: TxParams
 }
 
-export interface GrpTxnParams {
-  fromAccount: Account
-  toAccountAddr: string
-  lsig: LogicSig
-  amountMicroAlgos: number
-  payFlags: TxParams
-}
-
 export interface TxParams {
   // feePerByte or totalFee is used to set the appropriate transaction fee parameter.
   // If both are set then totalFee takes precedence.
