@@ -385,6 +385,37 @@ export interface Checkpoint {
 export type ASADef = z.infer<typeof ASADefSchema>;
 export type ASADefs = z.infer<typeof ASADefsSchema>;
 
+export type execParams = AlgoTransferParam | AssetTransferParam | SSCCallsParam;
+
+export interface Sign {
+  sign: "sk" | "lsig"
+  lsig?: LogicSig
+}
+
+export interface AlgoTransferParam extends Sign {
+  type: "algo"
+  fromAccount: AccountSDK
+  toAccountAddr: AccountAddress
+  amountMicroAlgos: number
+  payFlags: TxParams
+}
+
+export interface AssetTransferParam extends Sign {
+  type: "asset"
+  fromAccount: AccountSDK
+  toAccountAddr: AccountAddress
+  amount: number
+  assetID: number
+  payFlags: TxParams
+}
+
+export interface SSCCallsParam extends SSCOptionalFlags, Sign {
+  type: "clearSSC" | "deleteSSC" | "callNoOpSSC" | "closeSSC"
+  fromAccount: AccountSDK
+  appId: number
+  payFlags: TxParams
+}
+
 export interface GrpTxnParams {
   fromAccount: Account
   toAccountAddr: string
@@ -423,12 +454,7 @@ export interface FundASCFlags {
   fundingMicroAlgo: number
 }
 
-export interface SSCDeploymentFlags {
-  sender: Account
-  localInts: number
-  localBytes: number
-  globalInts: number
-  globalBytes: number
+export interface SSCOptionalFlags {
   appArgs?: Uint8Array[]
   accounts?: string
   foreignApps?: string
@@ -436,6 +462,14 @@ export interface SSCDeploymentFlags {
   note?: Uint8Array
   lease?: Uint8Array
   rekeyTo?: string
+}
+
+export interface SSCDeploymentFlags extends SSCOptionalFlags {
+  sender: Account
+  localInts: number
+  localBytes: number
+  globalInts: number
+  globalBytes: number
 }
 
 export interface AssetScriptMap {

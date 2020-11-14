@@ -4,8 +4,10 @@ import { TextEncoder } from "util";
 
 import {
   AlgobDeployer,
+  AlgoTransferParam,
   ASADef,
   ASADeploymentFlags,
+  execParams,
   GrpTxnParams,
   TxParams
 } from "../types";
@@ -252,6 +254,112 @@ export async function transferASALsig (
   return await deployer.waitForConfirmation(tx1.txId);
 }
 
+async function mkTransaction (deployer: AlgobDeployer, txnParam: execParams): Promise<any> {
+  const params = await mkSuggestedParams(deployer.algodClient, txnParam.payFlags);
+  const note = encodeNote(txnParam.payFlags.note, txnParam.payFlags.noteb64);
+
+  switch (txnParam.type) {
+    case "asset": {
+      // rsolve undefined
+      return tx.makeAssetTransferTxnWithSuggestedParams(
+        txnParam.fromAccount.addr,
+        txnParam.toAccountAddr,
+        undefined,
+        undefined,
+        txnParam.amount,
+        undefined,
+        txnParam.assetID,
+        params);
+    }
+    case "algo": {
+      return tx.makePaymentTxnWithSuggestedParams(
+        txnParam.fromAccount.addr,
+        txnParam.toAccountAddr,
+        txnParam.amountMicroAlgos,
+        txnParam.payFlags.closeRemainderTo,
+        note,
+        params);
+    }
+    case "clearSSC": {
+      return tx.makeApplicationClearStateTxn(txnParam.fromAccount.addr, params, txnParam.appId);
+    }
+    case "deleteSSC": {
+      return tx.makeApplicationDeleteTxn(txnParam.fromAccount.addr, params, txnParam.appId);
+    }
+    case "callNoOpSSC": {
+      return tx.makeApplicationNoOpTxn(
+        txnParam.fromAccount.addr,
+        params,
+        txnParam.appId,
+        txnParam.appArgs,
+        txnParam.accounts,
+        txnParam.foreignApps,
+        txnParam.foreignAssets,
+        note,
+        txnParam.lease,
+        txnParam.rekeyTo);
+    }
+    case "closeSSC": {
+      return tx.makeApplicationCloseOutTxn(txnParam.fromAccount.addr, params, txnParam.appId);
+    }
+    default: {
+      throw new Error("Unknown type of transaction");
+    }
+  }
+}
+
+function signTransaction (txn: any, txnParam: execParams): any {
+  switch (txnParam.sign) {
+    case "sk": {
+      return txn.signTxn(txnParam.fromAccount.sk);
+    }
+    case "lsig": {
+      const logicsig = txnParam.lsig;
+      if (logicsig === undefined) {
+        throw new Error("Lsig undefined");
+      }
+      return tx.signLogicSigTransactionObject(txn, logicsig);
+    }
+    default: {
+      throw new Error("Unknown type of signature");
+    }
+  }
+}
+
+async function sendAndWait (deployer: AlgobDeployer, txns: any): Promise<tx.ConfirmedTxInfo> {
+  const txInfo = (await deployer.algodClient.sendRawTransaction(txns).do());
+  return await deployer.waitForConfirmation(txInfo.txId);
+}
+
+export async function executeTransaction (
+  deployer: AlgobDeployer,
+  txnParams: execParams | execParams[]): Promise<tx.ConfirmedTxInfo> {
+  if (Array.isArray(txnParams)) {
+    if (txnParams.length > 16) {
+      throw new Error("Maximum size of an atomic transfer group is 16");
+    }
+
+    const txns = [];
+    for (const txnParam of txnParams) {
+      const txn = await mkTransaction(deployer, txnParam);
+      txns.push(txn);
+    }
+    tx.assignGroupID(txns);
+
+    const signedTxns = []; let idx = 0;
+    for (const txn of txns) {
+      signedTxns.push(signTransaction(txn, txnParams[idx]));
+      idx++;
+    }
+
+    return await sendAndWait(deployer, signedTxns);
+    // txwriter log
+  } else {
+    const txn = await mkTransaction(deployer, txnParams);
+    const signedTxn = signTransaction(txn, txnParams);
+    return await sendAndWait(deployer, signedTxn);
+  }
+}
 /**
  * Description:
  * This function executes multiple transactions atomically where Algos are
