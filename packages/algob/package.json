@@ -18,7 +18,6 @@
   ],
   "license": "Apache-2.0",
   "repository": "https://github.com/scale-it/algorand-builder.git",
-  "types": "build/internal/lib/lib.d.ts",
   "description": "",
   "keywords": [
     "smart-contracts",
@@ -31,6 +30,7 @@
     "task-runner"
   ],
   "main": "build/index.js",
+  "types": "build/index.d.ts",
   "bin": {
     "algob": "build/internal/cli/cli.js"
   },
@@ -47,6 +47,7 @@
     "build:watch": "tsc -w -p .",
     "build:docs": "typedoc --out docs --exclude \"internal/**\"  src",
     "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.tsbuildinfo build",
+    "prepublish": "yarn build",
     "algob:dev": "sh ./setup_dev_project.sh"
   },
   "devDependencies": {
