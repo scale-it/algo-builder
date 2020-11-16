@@ -458,7 +458,7 @@ export interface FundASCFlags {
 
 export interface SSCOptionalFlags {
   appArgs?: Uint8Array[]
-  accounts?: string
+  accounts?: string[]
   foreignApps?: string
   foreignAssets?: string
   note?: Uint8Array
