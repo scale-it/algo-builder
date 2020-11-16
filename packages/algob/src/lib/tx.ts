@@ -2,6 +2,8 @@ import type { Transaction } from "algosdk";
 import tx from "algosdk";
 import { TextEncoder } from "util";
 
+import { BuilderError } from "../internal/core/errors";
+import { ERRORS } from "../internal/core/errors-list";
 import {
   AlgobDeployer,
   ASADef,
@@ -96,10 +98,19 @@ export function encodeNote (note: string | undefined, noteb64: string| undefined
   return noteb64 ? encoder.encode(noteb64) : encoder.encode(note);
 }
 
+/**
+ * Description: Returns unsigned transaction as per execParams
+ * execParams can be of following types:
+ * AlgoTransferParam used for transferring algo
+ * AssetTransferParam used for transferring asset
+ * SSCCallsParam used for calling stateful smart contracts
+ * @param deployer AlgobDeployer
+ * @param txnParam execParam
+ */
 async function mkTransaction (deployer: AlgobDeployer, txnParam: execParams): Promise<Transaction> {
   const params = await mkSuggestedParams(deployer.algodClient, txnParam.payFlags);
   const note = encodeNote(txnParam.payFlags.note, txnParam.payFlags.noteb64);
-
+  const transactionType = txnParam.type;
   switch (txnParam.type) {
     case TransactionType.TransferAsset: {
       return tx.makeAssetTransferTxnWithSuggestedParams(
@@ -144,11 +155,16 @@ async function mkTransaction (deployer: AlgobDeployer, txnParam: execParams): Pr
       return tx.makeApplicationCloseOutTxn(txnParam.fromAccount.addr, params, txnParam.appId);
     }
     default: {
-      throw new Error("Unknown type of transaction");
+      throw new BuilderError(ERRORS.GENERAL.TRANSACTION_TYPE_ERROR, { error: transactionType });
     }
   }
 }
 
+/**
+ * Description: returns signed transaction
+ * @param txn unsigned transaction
+ * @param txnParam execParams
+ */
 function signTransaction (txn: Transaction, txnParam: execParams): Uint8Array {
   switch (txnParam.sign) {
     case SignType.SecretKey: {
@@ -167,6 +183,11 @@ function signTransaction (txn: Transaction, txnParam: execParams): Uint8Array {
   }
 }
 
+/**
+ * Description: send signed transaction to network and wait for confirmation
+ * @param deployer AlgobDeployer
+ * @param txns Signed Transactions
+ */
 async function sendAndWait (
   deployer: AlgobDeployer,
   txns: Uint8Array | Uint8Array[]): Promise<tx.ConfirmedTxInfo> {
@@ -191,14 +212,18 @@ export async function executeTransaction (
 
     const signedTxns = [] as Uint8Array[];
     txns.forEach((txn, index) => {
-      signedTxns.push(signTransaction(txn, txnParams[index]));
+      const signed = signTransaction(txn, txnParams[index]);
+      deployer.log(`Transaction ${index}`, signed);
+      signedTxns.push(signed);
     });
-
-    return await sendAndWait(deployer, signedTxns);
-    // txwriter log
+    const confirmedTx = await sendAndWait(deployer, signedTxns);
+    console.log(confirmedTx);
+    return confirmedTx;
   } else {
     const txn = await mkTransaction(deployer, txnParams);
     const signedTxn = signTransaction(txn, txnParams);
-    return await sendAndWait(deployer, signedTxn);
+    const confirmedTx = await sendAndWait(deployer, signedTxn);
+    console.log(confirmedTx);
+    return confirmedTx;
   }
 }

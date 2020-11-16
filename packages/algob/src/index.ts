@@ -10,7 +10,7 @@ import { algodCredentialsFromEnv, KMDCredentialsFromEnv } from "./lib/credential
 import { update } from "./lib/ssc";
 import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC } from "./lib/status";
 import { executeTransaction } from "./lib/tx";
-import { ASC1Mode } from "./types";
+import { SignType, TransactionType } from "./types";
 
 export {
   mkAccounts,
@@ -23,7 +23,8 @@ export {
   printAssets,
   algodCredentialsFromEnv,
   KMDCredentialsFromEnv,
-  ASC1Mode,
+  TransactionType,
+  SignType,
   printLocalStateSSC,
   printGlobalStateSSC,
   update,

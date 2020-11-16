@@ -451,11 +451,6 @@ export interface ASADeploymentFlags extends TxParams {
   creator: Account
 }
 
-export enum ASC1Mode {
-  DELEGATED_APPROVAL,
-  CONTRACT_ACCOUNT
-}
-
 export interface FundASCFlags {
   funder: Account
   fundingMicroAlgo: number
