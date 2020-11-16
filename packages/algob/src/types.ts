@@ -418,9 +418,23 @@ export enum ASC1Mode {
   CONTRACT_ACCOUNT
 }
 
+export interface NFT {
+  name: string
+  url?: string
+}
+
 export interface FundASCFlags {
   funder: Account
   fundingMicroAlgo: number
+}
+
+export interface SSCStateSchema {
+  key: string
+  value: {
+    type: number
+    bytes: string
+    uint: number
+  }
 }
 
 export interface SSCDeploymentFlags {
@@ -430,7 +444,7 @@ export interface SSCDeploymentFlags {
   globalInts: number
   globalBytes: number
   appArgs?: Uint8Array[]
-  accounts?: string
+  accounts?: string[]
   foreignApps?: string
   foreignAssets?: string
   note?: Uint8Array

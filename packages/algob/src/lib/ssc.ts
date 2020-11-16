@@ -17,7 +17,7 @@ export async function callNoOp (
   payFlags: TxParams,
   appId: number,
   appArgs?: Uint8Array[],
-  accounts?: string,
+  accounts?: string[],
   foreignApps?: string,
   foreignAssets?: string,
   note?: Uint8Array,
