@@ -1,20 +1,14 @@
-const { transferMicroAlgos, transferMicroAlgosLsig, globalZeroAddress } = require("algob");
-
-async function transferAlgo(deployer, senderAddr, receiverAddr, amount, lsig, payFlags){
-    try {
-        const details = await transferMicroAlgosLsig(deployer, senderAddr, receiverAddr, amount, lsig, payFlags);
-        console.log(details);
-    } catch (e) {
-        console.error('Transaction Failed', e.response.error);
-    }
-}
+const { executeTransaction, mkTxnParams } = require("./common/common");
+const { SignType, globalZeroAddress } = require("algob");
 
 async function run(runtimeEnv, deployer) {
 
   const masterAccount = deployer.accountsByName.get("master-account")
   const johnAccount = deployer.accountsByName.get("john-account");
 
-  await transferMicroAlgos(deployer, masterAccount, johnAccount.addr, 200000000, {note: "funding account"});  
+  let txnParams = mkTxnParams(masterAccount, johnAccount.addr, 200000000, {}, {note: "funding account"});
+  txnParams.sign = SignType.SecretKey;
+  await executeTransaction(deployer, txnParams);  
 
   const secret = "hero wisdom green split loop element vote belt";
   const wrongSecret = "hero wisdom red split loop element vote belt";
@@ -25,14 +19,21 @@ async function run(runtimeEnv, deployer) {
   let contract = await deployer.loadLogic("htlc.py", [ wrongSecret ]);
   let contractAddress = contract.address();
   
+  txnParams.fromAccount = { addr: contractAddress};
+  txnParams.sign = SignType.LogicSignature;
+  txnParams.toAccountAddr = globalZeroAddress;
+  txnParams.amountMicroAlgos = 0;
+  txnParams.lsig = contract;
+  txnParams.payFlags = { totalFee: 1000, closeRemainderTo: johnAccount.addr};
   // Fails because wrong secret is passed
-  await transferAlgo(deployer, { addr: contractAddress}, globalZeroAddress, 0, contract, { totalFee: 1000, closeRemainderTo: johnAccount.addr});
+  await executeTransaction(deployer, txnParams);
 
   contract = await deployer.loadLogic("htlc.py", [ secret ]);
   contractAddress = contract.address();
 
   // Passes because right secret is passed
-  await transferAlgo(deployer, { addr: contractAddress}, globalZeroAddress, 0, contract, { totalFee: 2000, closeRemainderTo: johnAccount.addr});
+  txnParams.lsig = contract;
+  await executeTransaction(deployer, txnParams);
   
 }
 
