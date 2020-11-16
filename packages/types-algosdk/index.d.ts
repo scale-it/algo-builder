@@ -163,7 +163,22 @@ declare module 'algosdk' {
     type: any
     reKeyTo: string
 
+    addLease(lease: Uint8Array | undefined, feePerByte?: number): void
+    addRekey(reKeyTo: string, feePerByte?: number): void
+    bytesToSign(): Buffer
     signTxn(sk: Uint8Array): TxnBytes
+    toByte(): Uint8Array
+    txID(): string
+
+    from_obj_for_encoding(txnForEnc: Object): Transaction;
+    get_obj_for_encoding(): Object;
+  }
+
+  // an object created by `Transaction.signTxn` before serializing
+  interface SignedTransaction {
+    txn: Transaction,
+    sig: Uint8Array
+
   }
 
   // args Program arguments as array of Uint8Array arrays
@@ -260,7 +275,30 @@ declare module 'algosdk' {
    * @param data - buffer with data to sign
    * @param program - buffer with teal program
    */
-  function tealSignFromProgram(sk: Uint8Array, data: Uint8Array, program: Uint8Array): Uint8Array;
+  export function tealSignFromProgram(sk: Uint8Array, data: Uint8Array, program: Uint8Array): Uint8Array;
+
+  /**
+   * encodeUnsignedTransaction takes a completed Transaction object, such as from the makeFoo
+   * family of transactions, and converts it to a Buffer
+   * @param t the completed Transaction object
+   * @returns {Uint8Array}
+   */
+  function encodeUnsignedTransaction(t: Transaction): Uint8Array;
+
+  /**
+   * decodeUnsignedTransaction takes a Buffer (as if from encodeUnsignedTransaction) and converts it to a Transaction object
+   * @param b the Uint8Array containing a transaction
+   * @returns {Transaction}
+   */
+  function decodeUnsignedTransaction(b: Uint8Array): Transaction;
+
+  /**
+   * decodeSignedTransaction takes a Buffer (from transaction.signTxn) and converts it to an object
+   * containing the Transaction (txn), the signature (sig), and the auth-addr field if applicable (sgnr)
+   * @param b the Uint8Array containing a transaction
+   * @returns {Object} containing a Transaction, the signature, and possibly an auth-addr field
+   */
+  function decodeSignedTransaction(b: Uint8Array): SignedTransaction;
 
   export function makeApplicationClearStateTxn(from: string, suggestedParams: any, appIndex: number, appArgs?: Uint8Array[], accounts?: any, foreignApps?: any, foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: string): any;
 
@@ -345,7 +383,7 @@ declare module 'algosdk' {
 
   export function signMultisigTransaction (txn: any, { version, threshold, addrs }: any, sk: any): any;
 
-  export function signTransaction (txn: any, sk: any): any;
+  export function signTransaction (txn: Transaction, sk: any): any;
 
   export function tealSign(sk: any, data: any, contractAddress: any): any;
 
