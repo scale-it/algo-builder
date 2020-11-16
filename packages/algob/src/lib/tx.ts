@@ -133,10 +133,12 @@ async function mkTransaction (deployer: AlgobDeployer, txnParam: execParams): Pr
         params);
     }
     case TransactionType.ClearSSC: {
-      return tx.makeApplicationClearStateTxn(txnParam.fromAccount.addr, params, txnParam.appId);
+      return tx.makeApplicationClearStateTxn(
+        txnParam.fromAccount.addr, params, txnParam.appId, txnParam.appArgs);
     }
     case TransactionType.DeleteSSC: {
-      return tx.makeApplicationDeleteTxn(txnParam.fromAccount.addr, params, txnParam.appId);
+      return tx.makeApplicationDeleteTxn(
+        txnParam.fromAccount.addr, params, txnParam.appId, txnParam.appArgs);
     }
     case TransactionType.CallNoOpSSC: {
       return tx.makeApplicationNoOpTxn(
@@ -152,7 +154,8 @@ async function mkTransaction (deployer: AlgobDeployer, txnParam: execParams): Pr
         txnParam.rekeyTo);
     }
     case TransactionType.CloseSSC: {
-      return tx.makeApplicationCloseOutTxn(txnParam.fromAccount.addr, params, txnParam.appId);
+      return tx.makeApplicationCloseOutTxn(
+        txnParam.fromAccount.addr, params, txnParam.appId, txnParam.appArgs);
     }
     default: {
       throw new BuilderError(ERRORS.GENERAL.TRANSACTION_TYPE_ERROR, { error: transactionType });
