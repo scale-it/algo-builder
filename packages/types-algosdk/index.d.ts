@@ -256,7 +256,35 @@ declare module 'algosdk' {
 
   export function generateAccount (): Account;
 
+p  /**
+   * isValidAddress takes an Algorand address and checks if valid.
+   * @param address {string} Algorand address
+   * @returns {boolean} true if valid, false otherwise
+   */
   export function isValidAddress (addr: any): any;
+
+  /**
+   * decodeAddress takes an Algorand address in string form and decodes it into a Uint8Array.
+   * @param {string} address an Algorand address with checksum.
+   * @returns {{publicKey: Uint8Array, checksum: Uint8Array}} the decoded form of the address's public key and checksum
+   */
+  export function decodeAddress(a: string): Address;
+
+  /**
+   * encodeAddress takes an Algorand address as a Uint8Array and encodes it into a string with checksum.
+   * @param {Uint8Array} address a raw Algorand address
+   * @returns {string} the address and checksum encoded as a string.
+   */
+  export function encodeAddress(a: Uint8Array): string;
+
+  /**
+   * multisigAddress takes multisig metadata (preimage) and returns the corresponding human readable Algorand address.
+   * @param version mutlisig version
+   * @param threshold multisig threshold
+   * @param addrs  array of encoded addresses
+   */
+  function multisigAddress(metadata: {version: number, threshold: number, addrs: string[]}): string;
+
 
   // Calls LogicSig.fromByte
   export function logicSigFromByte (encoded: Uint8Array): LogicSig;
@@ -346,15 +374,18 @@ declare module 'algosdk' {
 
   export function masterDerivationKeyToMnemonic (mdk: any): string;
 
-  export function mergeMultisigTransactions (multisigTxnBlobs: any): any;
+  /**
+   * mergeMultisigTransactions takes a list of multisig transaction blobs, and merges them.
+   * @param multisigTxnBlobs a list of blobs representing encoded multisig txns
+   * @returns typed array msg-pack encoded multisig txn
+   */
+  export function mergeMultisigTransactions (multisigTxnBlobs: Uint8Array[]): Uint8Array;
 
   export function microalgosToAlgos (microalgos: any): any;
 
   export function mnemonicToMasterDerivationKey (mn: string): any;
 
   export function mnemonicToSecretKey (mn: string): Account;
-
-  export function multisigAddress ({ version, threshold, addrs }: any): any;
 
   export function secretKeyToMnemonic (sk: Uint8Array): string;
 
@@ -384,10 +415,6 @@ declare module 'algosdk' {
   export function signMultisigTransaction (txn: any, { version, threshold, addrs }: any, sk: any): any;
 
   export function signTransaction (txn: Transaction, sk: any): any;
-
-  export function tealSign(sk: any, data: any, contractAddress: any): any;
-
-	export function tealSignFromProgram(sk: any, data: any, program: any): any;
 
   export function verifyBytes (bytes: any, signature: any, addr: any): any;
 
