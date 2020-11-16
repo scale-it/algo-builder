@@ -47,12 +47,12 @@ export async function printLocalStateSSC (
   deployer: AlgobDeployer,
   account: string,
   appId: number): Promise<void> {
-    const localState = await readLocalStateSSC(deployer, account, appId);
-    if(localState === undefined) { return; } 
-    console.log("User's local state:");
-    for (let n = 0; n < localState.length; n++) {
-      console.log(localState[n]);
-    }
+  const localState = await readLocalStateSSC(deployer, account, appId);
+  if (localState === undefined) { return; }
+  console.log("User's local state:");
+  for (let n = 0; n < localState.length; n++) {
+    console.log(localState[n]);
+  }
 }
 
 // print global state of a stateful smart contract
@@ -61,7 +61,7 @@ export async function printGlobalStateSSC (
   creator: string,
   appId: number): Promise<void> {
   const globalState = await readGlobalStateSSC(deployer, creator, appId);
-  if(globalState === undefined) { return; } 
+  if (globalState === undefined) { return; }
   console.log("Application's global state:");
   for (let n = 0; n < globalState.length; n++) {
     console.log(globalState[n]);
