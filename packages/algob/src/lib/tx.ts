@@ -7,6 +7,8 @@ import {
   ASADef,
   ASADeploymentFlags,
   execParams,
+  SignType,
+  TransactionType,
   TxParams
 } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
@@ -99,7 +101,7 @@ async function mkTransaction (deployer: AlgobDeployer, txnParam: execParams): Pr
   const note = encodeNote(txnParam.payFlags.note, txnParam.payFlags.noteb64);
 
   switch (txnParam.type) {
-    case "asset": {
+    case TransactionType.TransferAsset: {
       return tx.makeAssetTransferTxnWithSuggestedParams(
         txnParam.fromAccount.addr,
         txnParam.toAccountAddr,
@@ -110,7 +112,7 @@ async function mkTransaction (deployer: AlgobDeployer, txnParam: execParams): Pr
         txnParam.assetID,
         params);
     }
-    case "algo": {
+    case TransactionType.TransferAlgo: {
       return tx.makePaymentTxnWithSuggestedParams(
         txnParam.fromAccount.addr,
         txnParam.toAccountAddr,
@@ -119,13 +121,13 @@ async function mkTransaction (deployer: AlgobDeployer, txnParam: execParams): Pr
         note,
         params);
     }
-    case "clearSSC": {
+    case TransactionType.ClearSSC: {
       return tx.makeApplicationClearStateTxn(txnParam.fromAccount.addr, params, txnParam.appId);
     }
-    case "deleteSSC": {
+    case TransactionType.DeleteSSC: {
       return tx.makeApplicationDeleteTxn(txnParam.fromAccount.addr, params, txnParam.appId);
     }
-    case "callNoOpSSC": {
+    case TransactionType.CallNoOpSSC: {
       return tx.makeApplicationNoOpTxn(
         txnParam.fromAccount.addr,
         params,
@@ -138,7 +140,7 @@ async function mkTransaction (deployer: AlgobDeployer, txnParam: execParams): Pr
         txnParam.lease,
         txnParam.rekeyTo);
     }
-    case "closeSSC": {
+    case TransactionType.CloseSSC: {
       return tx.makeApplicationCloseOutTxn(txnParam.fromAccount.addr, params, txnParam.appId);
     }
     default: {
@@ -149,13 +151,13 @@ async function mkTransaction (deployer: AlgobDeployer, txnParam: execParams): Pr
 
 function signTransaction (txn: Transaction, txnParam: execParams): Uint8Array {
   switch (txnParam.sign) {
-    case "sk": {
+    case SignType.SecretKey: {
       return txn.signTxn(txnParam.fromAccount.sk);
     }
-    case "lsig": {
+    case SignType.LogicSignature: {
       const logicsig = txnParam.lsig;
       if (logicsig === undefined) {
-        throw new Error("Lsig undefined");
+        throw new Error("logic signature for this transaction was not passed or - is not defined");
       }
       return tx.signLogicSigTransactionObject(txn, logicsig).blob;
     }

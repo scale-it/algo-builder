@@ -387,13 +387,27 @@ export type ASADefs = z.infer<typeof ASADefsSchema>;
 
 export type execParams = AlgoTransferParam | AssetTransferParam | SSCCallsParam;
 
+export enum SignType {
+  SecretKey,
+  LogicSignature
+}
+
+export enum TransactionType {
+  TransferAlgo,
+  TransferAsset,
+  CallNoOpSSC,
+  ClearSSC,
+  CloseSSC,
+  DeleteSSC
+}
+
 export interface Sign {
-  sign: "sk" | "lsig"
+  sign: SignType
   lsig?: LogicSig
 }
 
 export interface AlgoTransferParam extends Sign {
-  type: "algo"
+  type: TransactionType.TransferAlgo
   fromAccount: AccountSDK
   toAccountAddr: AccountAddress
   amountMicroAlgos: number
@@ -401,7 +415,7 @@ export interface AlgoTransferParam extends Sign {
 }
 
 export interface AssetTransferParam extends Sign {
-  type: "asset"
+  type: TransactionType.TransferAsset
   fromAccount: AccountSDK
   toAccountAddr: AccountAddress
   amount: number
@@ -410,7 +424,8 @@ export interface AssetTransferParam extends Sign {
 }
 
 export interface SSCCallsParam extends SSCOptionalFlags, Sign {
-  type: "clearSSC" | "deleteSSC" | "callNoOpSSC" | "closeSSC"
+  type: TransactionType.CallNoOpSSC | TransactionType.ClearSSC |
+  TransactionType.CloseSSC | TransactionType.DeleteSSC
   fromAccount: AccountSDK
   appId: number
   payFlags: TxParams
