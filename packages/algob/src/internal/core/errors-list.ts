@@ -155,7 +155,7 @@ Please check algob output for more details.`
     number: 14,
     message: "Error. `%error%` is Unknown",
     title: "Unknown Transaction type",
-    description: `Transaction type entered is unknown 
+    description: `Provided transaction type is unknown 
     Please double check your transaction type`
   }
 };
