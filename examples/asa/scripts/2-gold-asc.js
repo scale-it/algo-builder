@@ -1,11 +1,12 @@
-const { transferMicroAlgos, transferAsset, balanceOf, ASC1Mode } = require("algob");
+const { executeTransaction } = require("algob");
+const { mkParam } = require("./transfer/common");
 
 async function run(runtimeEnv, deployer) {
 
   const masterAccount = deployer.accountsByName.get("master-account")
   const goldOwnerAccount = deployer.accountsByName.get("gold-owner-account");
 
-  await transferMicroAlgos(deployer, masterAccount, goldOwnerAccount.addr, 200000000, {note: "funding account"});
+  await executeTransaction(deployer, mkParam(masterAccount, goldOwnerAccount.addr, 200000000, {note: "funding account"}));
 
   await deployer.fundLsig("2-gold-contract-asc.teal", [],
     { funder: goldOwnerAccount, fundingMicroAlgo: 101000 }, {});   // sending 0.101 Algo
