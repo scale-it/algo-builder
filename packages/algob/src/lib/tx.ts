@@ -103,7 +103,8 @@ export function encodeNote (note: string | undefined, noteb64: string| undefined
  * execParams can be of following types:
  * AlgoTransferParam used for transferring algo
  * AssetTransferParam used for transferring asset
- * SSCCallsParam used for calling stateful smart contracts
+ * SSCCallsParam used for calling stateful smart contracts.
+ For more advanced use-cases, please use `algosdk.tx` directly.
  * @param deployer AlgobDeployer
  * @param txnParam execParam
  */
