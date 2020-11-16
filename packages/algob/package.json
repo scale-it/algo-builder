@@ -1,19 +1,20 @@
 {
   "name": "algob",
   "version": "0.0.5",
-  "author": "Robert Zaremba",
+  "author": "Robert Zaremba (https://github.com/robert-zaremba)",
   "contributors": [
     {
       "name": "Robert Zaremba",
       "url": "https://github.com/robert-zaremba"
-    },
-    {
+    }, {
       "name": "Martynas Maciulevičius",
       "url": "https://github.com/Invertisment"
-    },
-    {
+    }, {
       "name": "Amit Yadav",
       "url": "https://github.com/amityadav0"
+    }, {
+      "name": "Ratik Jindal",
+      "url": "https://github.com/ratik21"
     }
   ],
   "license": "Apache-2.0",
