@@ -1,4 +1,5 @@
-const { transferMicroAlgos, transferAsset, balanceOf } = require("algob");
+const { executeTransaction, balanceOf } = require("algob");
+const { mkParam } = require("./transfer/common");
 
 /*
   Create "tesla" Algorand Standard Asset (ASA)
@@ -14,7 +15,7 @@ async function run(runtimeEnv, deployer) {
   const johnAccount = deployer.accountsByName.get("john-account");
 
   // activate elonMusk account
-  await transferMicroAlgos(deployer, masterAccount, elonMuskAccount.addr, 401000000, {note: "funding account"})
+  await executeTransaction(deployer, mkParam(masterAccount, elonMuskAccount.addr, 401000000, {note: "funding account"}))
 
   const asaInfo = await deployer.deployASA("tesla", {
     creator: elonMuskAccount})

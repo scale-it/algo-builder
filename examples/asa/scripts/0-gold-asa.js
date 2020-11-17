@@ -1,4 +1,5 @@
-const { transferMicroAlgos, transferAsset, balanceOf } = require("algob");
+const { executeTransaction, balanceOf } = require("algob");
+const { mkParam } = require("./transfer/common");
 /*
   Create "gold" Algorand Standard Asset (ASA)
   Accounts are loaded from config
@@ -14,9 +15,9 @@ async function run(runtimeEnv, deployer) {
   const bobAccount = deployer.accountsByName.get("bob-account")
   // activate goldOwner and john accounts
   let promises = [
-    transferMicroAlgos(deployer, masterAccount, goldOwnerAccount.addr, 401000000, {note: "funding account"}),
-    transferMicroAlgos(deployer, masterAccount, johnAccount.addr, 401000000, {note: "funding account"}),
-    transferMicroAlgos(deployer, masterAccount, bobAccount.addr, 1000000, {note: "funding account"})]
+    executeTransaction(deployer, mkParam(masterAccount, goldOwnerAccount.addr, 401000000, {note: "funding account"})),
+    executeTransaction(deployer, mkParam(masterAccount, johnAccount.addr, 401000000, {note: "funding account"})),
+    executeTransaction(deployer, mkParam(masterAccount, bobAccount.addr, 1000000, {note: "funding account"}))]
   await Promise.all(promises)
 
   const asaInfo = await deployer.deployASA("gold", {

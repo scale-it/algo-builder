@@ -1,17 +1,19 @@
-import type { Account, Account as AccountSDK, LogicSig } from "algosdk";
+import type { Transaction } from "algosdk";
 import tx from "algosdk";
 import { TextEncoder } from "util";
 
+import { BuilderError } from "../internal/core/errors";
+import { ERRORS } from "../internal/core/errors-list";
 import {
   AlgobDeployer,
   ASADef,
   ASADeploymentFlags,
-  GrpTxnParams,
+  execParams,
+  SignType,
+  TransactionType,
   TxParams
 } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
-
-const ALGO_MSG = "Transferring micro Algo:";
 
 export async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.SuggestedParams> {
   const params = await algocl.getTransactionParams().do();
@@ -97,207 +99,135 @@ export function encodeNote (note: string | undefined, noteb64: string| undefined
 }
 
 /**
-  * Description:
-  * This function is used to transfer Algos
-  * from one account to another using fromAccount secret key (for signing)
+ * Description: Returns unsigned transaction as per execParams
+ * execParams can be of following types:
+ * AlgoTransferParam used for transferring algo
+ * AssetTransferParam used for transferring asset
+ * SSCCallsParam used for calling stateful smart contracts.
+ For more advanced use-cases, please use `algosdk.tx` directly.
+ * @param deployer AlgobDeployer
+ * @param txnParam execParam
+ */
+async function mkTransaction (deployer: AlgobDeployer, txnParam: execParams): Promise<Transaction> {
+  const params = await mkSuggestedParams(deployer.algodClient, txnParam.payFlags);
+  const note = encodeNote(txnParam.payFlags.note, txnParam.payFlags.noteb64);
+  const transactionType = txnParam.type;
+  switch (txnParam.type) {
+    case TransactionType.TransferAsset: {
+      return tx.makeAssetTransferTxnWithSuggestedParams(
+        txnParam.fromAccount.addr,
+        txnParam.toAccountAddr,
+        txnParam.payFlags.closeRemainderTo,
+        undefined,
+        txnParam.amount,
+        note,
+        txnParam.assetID,
+        params);
+    }
+    case TransactionType.TransferAlgo: {
+      return tx.makePaymentTxnWithSuggestedParams(
+        txnParam.fromAccount.addr,
+        txnParam.toAccountAddr,
+        txnParam.amountMicroAlgos,
+        txnParam.payFlags.closeRemainderTo,
+        note,
+        params);
+    }
+    case TransactionType.ClearSSC: {
+      return tx.makeApplicationClearStateTxn(
+        txnParam.fromAccount.addr, params, txnParam.appId, txnParam.appArgs);
+    }
+    case TransactionType.DeleteSSC: {
+      return tx.makeApplicationDeleteTxn(
+        txnParam.fromAccount.addr, params, txnParam.appId, txnParam.appArgs);
+    }
+    case TransactionType.CallNoOpSSC: {
+      return tx.makeApplicationNoOpTxn(
+        txnParam.fromAccount.addr,
+        params,
+        txnParam.appId,
+        txnParam.appArgs,
+        txnParam.accounts,
+        txnParam.foreignApps,
+        txnParam.foreignAssets,
+        note,
+        txnParam.lease,
+        txnParam.rekeyTo);
+    }
+    case TransactionType.CloseSSC: {
+      return tx.makeApplicationCloseOutTxn(
+        txnParam.fromAccount.addr, params, txnParam.appId, txnParam.appArgs);
+    }
+    default: {
+      throw new BuilderError(ERRORS.GENERAL.TRANSACTION_TYPE_ERROR, { error: transactionType });
+    }
+  }
+}
 
-  * Returns:
-  * Transaction details
-*/
-export async function transferMicroAlgos (
+/**
+ * Description: returns signed transaction
+ * @param txn unsigned transaction
+ * @param txnParam execParams
+ */
+function signTransaction (txn: Transaction, txnParam: execParams): Uint8Array {
+  switch (txnParam.sign) {
+    case SignType.SecretKey: {
+      return txn.signTxn(txnParam.fromAccount.sk);
+    }
+    case SignType.LogicSignature: {
+      const logicsig = txnParam.lsig;
+      if (logicsig === undefined) {
+        throw new Error("logic signature for this transaction was not passed or - is not defined");
+      }
+      return tx.signLogicSigTransactionObject(txn, logicsig).blob;
+    }
+    default: {
+      throw new Error("Unknown type of signature");
+    }
+  }
+}
+
+/**
+ * Description: send signed transaction to network and wait for confirmation
+ * @param deployer AlgobDeployer
+ * @param txns Signed Transactions
+ */
+async function sendAndWait (
   deployer: AlgobDeployer,
-  from: AccountSDK,
-  to: string,
-  amountMicroAlgos: number,
-  param: TxParams
-): Promise<tx.ConfirmedTxInfo> {
-  const params = await mkSuggestedParams(deployer.algodClient, param);
+  txns: Uint8Array | Uint8Array[]): Promise<tx.ConfirmedTxInfo> {
+  const txInfo = (await deployer.algodClient.sendRawTransaction(txns).do());
+  return await deployer.waitForConfirmation(txInfo.txId);
+}
 
-  const receiver = to;
-  let note;
-  if (param.noteb64 ?? param.note) {
-    note = encodeNote(param.note, param.noteb64);
+export async function executeTransaction (
+  deployer: AlgobDeployer,
+  txnParams: execParams | execParams[]): Promise<tx.ConfirmedTxInfo> {
+  if (Array.isArray(txnParams)) {
+    if (txnParams.length > 16) {
+      throw new Error("Maximum size of an atomic transfer group is 16");
+    }
+
+    const txns = [];
+    for (const txnParam of txnParams) {
+      const txn = await mkTransaction(deployer, txnParam);
+      txns.push(txn);
+    }
+    tx.assignGroupID(txns);
+
+    const signedTxns = [] as Uint8Array[];
+    txns.forEach((txn, index) => {
+      const signed = signTransaction(txn, txnParams[index]);
+      deployer.log(`Transaction ${index}`, signed);
+      signedTxns.push(signed);
+    });
+    const confirmedTx = await sendAndWait(deployer, signedTxns);
+    console.log(confirmedTx);
+    return confirmedTx;
   } else {
-    note = undefined;
+    const txn = await mkTransaction(deployer, txnParams);
+    const signedTxn = signTransaction(txn, txnParams);
+    const confirmedTx = await sendAndWait(deployer, signedTxn);
+    console.log(confirmedTx);
+    return confirmedTx;
   }
-
-  const txn = tx.makePaymentTxnWithSuggestedParams(
-    from.addr, receiver, amountMicroAlgos, undefined, note, params);
-
-  const signedTxn = txn.signTxn(from.sk);
-  const pendingTx = await deployer.algodClient.sendRawTransaction(signedTxn).do();
-  console.log(ALGO_MSG, {
-    from: from.addr,
-    to: receiver,
-    amount: amountMicroAlgos,
-    txid: pendingTx.txId
-  });
-  return await deployer.waitForConfirmation(pendingTx.txId);
-}
-/**
-  * Description:
-  * This function is used to transfer ASA
-  * from one account to another using fromAccount secret key (for signing)
-
-  * Returns:
-  * Transaction details
-*/
-
-export async function transferAsset (
-  deployer: AlgobDeployer,
-  assetId: number,
-  from: AccountSDK,
-  to: string,
-  amount: number
-): Promise<tx.ConfirmedTxInfo> {
-  const params = await deployer.algodClient.getTransactionParams().do();
-
-  const sender = from;
-  const recipient = to;
-  const revocationTarget = undefined;
-  const closeRemainderTo = undefined;
-  const note = undefined;
-
-  const xtxn = tx.makeAssetTransferTxnWithSuggestedParams(
-    sender.addr,
-    recipient,
-    closeRemainderTo,
-    revocationTarget,
-    amount,
-    note,
-    assetId,
-    params);
-
-  const rawSignedTxn = xtxn.signTxn(sender.sk);
-  const xtx = (await deployer.algodClient.sendRawTransaction(rawSignedTxn).do());
-  console.log("Transferring:", {
-    from: sender.addr,
-    to: recipient,
-    amount: amount,
-    assetID: assetId,
-    txId: xtx.txId
-  });
-  return await deployer.waitForConfirmation(xtx.txId);
-}
-
-/**
- * Description:
- * This function is used to transfer Algos
- * from one account to another using logic signature (for signing)
-
- * Returns:
- * Transaction details
-*/
-
-export async function transferMicroAlgosLsig (
-  deployer: AlgobDeployer,
-  fromAccount: Account,
-  toAccountAddr: string,
-  amountMicroAlgos: number,
-  lsig: LogicSig,
-  payFlags: TxParams): Promise<tx.ConfirmedTxInfo> {
-  const params = await mkSuggestedParams(deployer.algodClient, payFlags);
-
-  const receiver = toAccountAddr;
-  const note = encodeNote(payFlags.note, payFlags.noteb64);
-
-  const txn = tx.makePaymentTxnWithSuggestedParams(
-    fromAccount.addr, receiver, amountMicroAlgos, payFlags.closeRemainderTo, note, params);
-
-  const signedTxn = tx.signLogicSigTransactionObject(txn, lsig);
-  const txId = txn.txID().toString();
-  console.log(txId);
-  const pendingTx = await deployer.algodClient.sendRawTransaction(signedTxn.blob).do();
-  console.log(ALGO_MSG, {
-    from: fromAccount.addr,
-    to: receiver,
-    amount: amountMicroAlgos,
-    txid: pendingTx.txId
-  });
-  return await deployer.waitForConfirmation(pendingTx.txId);
-}
-
-/**
- * Description:
- * This function is used to transfer Algorand Standard Assets (ASA)
- * from one account to another using logic signature (for signing)
-
- * Returns:
- * Transaction details
-*/
-
-export async function transferASALsig (
-  deployer: AlgobDeployer,
-  fromAccount: AccountSDK,
-  toAccount: string,
-  amountMicroAlgos: number,
-  assetID: number,
-  lsig: LogicSig): Promise<tx.ConfirmedTxInfo> {
-  const params = await deployer.algodClient.getTransactionParams().do();
-  const xtxn = tx.makeAssetTransferTxnWithSuggestedParams(
-    fromAccount.addr,
-    toAccount,
-    undefined,
-    undefined,
-    amountMicroAlgos,
-    undefined,
-    assetID,
-    params);
-
-  const rawSignedTxn = tx.signLogicSigTransactionObject(xtxn, lsig);
-
-  // send raw LogicSigTransaction to network
-  const tx1 = (await deployer.algodClient.sendRawTransaction(rawSignedTxn.blob).do());
-
-  return await deployer.waitForConfirmation(tx1.txId);
-}
-
-/**
- * Description:
- * This function executes multiple transactions atomically where Algos are
- * transferred from one account to another using logic signature (for signing)
-
- * Returns:
- * ConfirmedTxInfo (transaction receipt)
-*/
-export async function transferMicroAlgosLsigAtomic (
-  deployer: AlgobDeployer,
-  grpTxnParams: GrpTxnParams[]
-): Promise<tx.ConfirmedTxInfo> {
-  if (grpTxnParams.length > 16) {
-    throw new Error("Maximum size of an atomic transfer group is 16");
-  }
-
-  const txns = [];
-  for (const p of grpTxnParams) {
-    const params = await mkSuggestedParams(deployer.algodClient, p.payFlags);
-    const receiver = p.toAccountAddr;
-    const note = encodeNote(p.payFlags.note, p.payFlags.noteb64);
-
-    const txn = tx.makePaymentTxnWithSuggestedParams(
-      p.fromAccount.addr, receiver, p.amountMicroAlgos, p.payFlags.closeRemainderTo, note, params);
-
-    txns.push(txn); // group transactions
-  }
-
-  tx.assignGroupID(txns); // assign common group hash to all transactions
-
-  const signed = []; const logs = []; let idx = 0;
-  for (const txn of txns) {
-    const signedTxn = tx.signLogicSigTransactionObject(txn, grpTxnParams[idx].lsig);
-    signed.push(signedTxn.blob);
-
-    const txnInfo = {
-      from: grpTxnParams[idx].fromAccount.addr,
-      to: grpTxnParams[idx].toAccountAddr,
-      amount: txn.amount,
-      txid: signedTxn.txID
-    };
-    logs.push(txnInfo);
-    idx++;
-  }
-
-  const pendingTx = await deployer.algodClient.sendRawTransaction(signed).do();
-  console.log(ALGO_MSG, logs);
-  return await deployer.waitForConfirmation(pendingTx.txId);
 }

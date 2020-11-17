@@ -385,11 +385,49 @@ export interface Checkpoint {
 export type ASADef = z.infer<typeof ASADefSchema>;
 export type ASADefs = z.infer<typeof ASADefsSchema>;
 
-export interface GrpTxnParams {
-  fromAccount: Account
-  toAccountAddr: string
-  lsig: LogicSig
+export type execParams = AlgoTransferParam | AssetTransferParam | SSCCallsParam;
+
+export enum SignType {
+  SecretKey,
+  LogicSignature
+}
+
+export enum TransactionType {
+  TransferAlgo,
+  TransferAsset,
+  CallNoOpSSC,
+  ClearSSC,
+  CloseSSC,
+  DeleteSSC
+}
+
+export interface Sign {
+  sign: SignType
+  lsig?: LogicSig
+}
+
+export interface AlgoTransferParam extends Sign {
+  type: TransactionType.TransferAlgo
+  fromAccount: AccountSDK
+  toAccountAddr: AccountAddress
   amountMicroAlgos: number
+  payFlags: TxParams
+}
+
+export interface AssetTransferParam extends Sign {
+  type: TransactionType.TransferAsset
+  fromAccount: AccountSDK
+  toAccountAddr: AccountAddress
+  amount: number
+  assetID: number
+  payFlags: TxParams
+}
+
+export interface SSCCallsParam extends SSCOptionalFlags, Sign {
+  type: TransactionType.CallNoOpSSC | TransactionType.ClearSSC |
+  TransactionType.CloseSSC | TransactionType.DeleteSSC
+  fromAccount: AccountSDK
+  appId: number
   payFlags: TxParams
 }
 
@@ -413,29 +451,27 @@ export interface ASADeploymentFlags extends TxParams {
   creator: Account
 }
 
-export enum ASC1Mode {
-  DELEGATED_APPROVAL,
-  CONTRACT_ACCOUNT
-}
-
 export interface FundASCFlags {
   funder: Account
   fundingMicroAlgo: number
 }
 
-export interface SSCDeploymentFlags {
-  sender: Account
-  localInts: number
-  localBytes: number
-  globalInts: number
-  globalBytes: number
+export interface SSCOptionalFlags {
   appArgs?: Uint8Array[]
-  accounts?: string
+  accounts?: string[]
   foreignApps?: string
   foreignAssets?: string
   note?: Uint8Array
   lease?: Uint8Array
   rekeyTo?: string
+}
+
+export interface SSCDeploymentFlags extends SSCOptionalFlags {
+  sender: Account
+  localInts: number
+  localBytes: number
+  globalInts: number
+  globalBytes: number
 }
 
 export interface AssetScriptMap {

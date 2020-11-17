@@ -6,7 +6,8 @@
  * the TEAL program. The TEAL program will transfer its balance to the seller 
  * if the seller is able to provide the secret value that corresponds to the hash in the program. 
 */
-const { transferAlgo } = require("./common");
+const { TransactionType, SignType } = require("algob");
+const { executeTransaction } = require("./common")
 
 async function run(runtimeEnv, deployer) {
 
@@ -19,14 +20,25 @@ async function run(runtimeEnv, deployer) {
     let lsig = await deployer.loadLogic("htlc.py", [ wrongSecret ]);
     let sender = lsig.address(); 
     
+    let txnParams = {
+        type: TransactionType.TransferAlgo,
+        sign: SignType.LogicSignature,
+        fromAccount: { addr: sender},
+        toAccountAddr: johnAccount.addr,
+        amountMicroAlgos: 200,
+        lsig: lsig,
+        payFlags: {}
+    }
     // Transaction Fails : as wrong secret value is used
-    await transferAlgo(deployer, { addr: sender}, johnAccount.addr, 200, lsig);
+    await executeTransaction(deployer, txnParams);
 
     lsig = await deployer.loadLogic("htlc.py", [ secret ]);
     sender = lsig.address();
 
     // Transaction Passes : as right secret value is used
-    await transferAlgo(deployer, { addr: sender}, johnAccount.addr, 200, lsig);
+    txnParams.fromAccount = { addr: sender};
+    txnParams.lsig = lsig;
+    await executeTransaction(deployer, txnParams);
 
 } 
 

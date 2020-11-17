@@ -1,23 +1,4 @@
-const { transferMicroAlgos, transferMicroAlgosLsigAtomic } = require("algob");
-
-async function transferMicroAlgoAtomic(deployer, txnParams) {
-    try {
-        const details = await transferMicroAlgosLsigAtomic(deployer, txnParams);
-        console.log(details);
-    } catch (e) {
-        console.error('Transaction Failed', e.response.error);
-    }
-}
-
-function mkTxnParams(senderAccount, receiverAddr, amount, lsig, payFlags) {
-    return {
-        fromAccount: senderAccount,
-        toAccountAddr: receiverAddr,
-        amountMicroAlgos: amount,
-        lsig: lsig, 
-        payFlags: payFlags
-    }
-}
+const { executeTransaction, mkTxnParams } = require("./common/common");
 
 async function run(runtimeEnv, deployer) {
 
@@ -39,14 +20,14 @@ async function run(runtimeEnv, deployer) {
     mkTxnParams({ addr: escrow}, johnAccount.addr, 700000, contract, { totalFee: 1000, closeRemainderTo: bobAccount.addr })]
 
   //Group Transaction FAIL - Correct transaction Fee is used BUT closeRemainderTo is set to bob
-  await transferMicroAlgoAtomic(deployer, transactions);
+  await executeTransaction(deployer, transactions);
 
   transactions = [
     mkTxnParams(masterAccount, escrow, 1000, signedContract, { }),
     mkTxnParams({ addr: escrow}, johnAccount.addr, 700000, contract, { totalFee: 1000, closeRemainderTo: masterAccount.addr })]
   
   //Group Transaction PASS - Correct transaction Fee is used and closeRemainderTo is set to master
-  await transferMicroAlgoAtomic(deployer, transactions);
+  await executeTransaction(deployer, transactions);
 
 }
 
