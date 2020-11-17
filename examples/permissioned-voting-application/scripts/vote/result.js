@@ -1,11 +1,13 @@
-const { readGlobalStateSSC } = require("algob");
+const { readGlobalStateSSC, TransactionType, SignType } = require("algob");
+const { executeTransaction } = require("./common");
 
 async function run(runtimeEnv, deployer) {
 
 	const votingAdminAccount = deployer.accountsByName.get("voting-admin-account");
+	const aliceAccount = deployer.accountsByName.get("alice-account");
 
 	// Retreive AppInfo from checkpoints.
-  const appInfo = deployer.getSSC("permissioned-voting-approval.py", "permissioned-voting-clear.py");
+  	const appInfo = deployer.getSSC("permissioned-voting-approval.py", "permissioned-voting-clear.py");
 	
 	// Retreive Global State
 	const globalState = await readGlobalStateSSC(deployer, votingAdminAccount.addr, appInfo.appID);
@@ -35,6 +37,25 @@ async function run(runtimeEnv, deployer) {
 	else {
 		console.log("The Winner is CandidateA!!");
 	}
+
+	let txnParam = {
+		type: TransactionType.DeleteSSC,
+		sign: SignType.SecretKey,
+		fromAccount: votingAdminAccount,
+		appId: appInfo.appID,
+		payFlags: {}
+	}
+
+	// Delete Application
+	console.log("Deleting Application");
+	await executeTransaction(deployer, txnParam);
+
+	txnParam.fromAccount = aliceAccount;
+	txnParam.type = TransactionType.ClearSSC;
+
+	// Clear voter's account
+	console.log("Clearing Alice's Account");
+	await executeTransaction(deployer, txnParam);
 
 }
 
