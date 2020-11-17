@@ -1,0 +1,80 @@
+{
+  "name": "algorand-js",
+  "version": "0.0.1",
+  "author": "Robert Zaremba (https://github.com/robert-zaremba)",
+  "contributors": [
+    {
+      "name": "Robert Zaremba",
+      "url": "https://github.com/robert-zaremba"
+    }, {
+      "name": "Amit Yadav",
+      "url": "https://github.com/amityadav0"
+    }, {
+      "name": "Ratik Jindal",
+      "url": "https://github.com/ratik21"
+    }
+  ],
+  "license": "Apache-2.0",
+  "repository": "https://github.com/scale-it/algorand-builder.git",
+  "description": "Algorand JS runtime (transaction execution + TEAL interpreter)",
+  "keywords": [
+    "smart-contracts",
+    "blockchain",
+    "algorand",
+    "dapps",
+    "javascript",
+    "tooling"
+  ],
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "bin": {
+    "algod-js": "build/algod.js"
+  },
+  "engines": {
+    "node": ">=14.10.0"
+  },
+  "scripts": {
+    "lint": "eslint --ext .js,.ts src test",
+    "lint:fix": "eslint --fix --ext .js,.ts src test",
+    "lint:unix": "eslint --format unix --ext .js,.ts src test",
+    "test": "mocha",
+    "coverage": "nyc ../../node_modules/mocha/bin/mocha",
+    "build": "tsc --build .",
+    "build:watch": "tsc -w -p .",
+    "build:docs": "typedoc --out docs --exclude \"internal/**\"  src",
+    "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.tsbuildinfo build",
+    "prepublish": "yarn build"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.12",
+    "@types/glob": "^7.1.2",
+    "@types/murmurhash": "0.0.1",
+    "@types/sinon": "^9.0.4",
+    "chai": "^4.2.0",
+    "glob": "^7.1.6",
+    "nyc": "^15.1.0",
+    "sinon": "^9.0.2"
+  },
+  "dependencies": {
+    "algosdk": "^1.8.0",
+    "glob": "^7.1.6",
+    "murmurhash": "^1.0.0",
+    "source-map-support": "^0.5.19"
+  },
+  "nyc": {
+    "extension": [
+      ".ts"
+    ],
+    "exclude": [
+      "build",
+      "test",
+      "coverage",
+      ".nyc_output"
+    ],
+    "reporter": [
+      "text",
+      "lcovonly"
+    ],
+    "all": true
+  }
+}
