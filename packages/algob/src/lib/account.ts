@@ -98,7 +98,7 @@ export function loadAccountsFromEnv (): Account[] {
 }
 
 // returns multisignature account address
-export function createMsigAddress (version: number, threshold: number, accountList: Account[]): any {
+export function createMsigAddress (version: number, threshold: number, accountList: AccountSDK[]): any {
   const mparams = {
     version: version,
     threshold: threshold,

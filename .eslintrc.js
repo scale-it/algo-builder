@@ -29,6 +29,7 @@ module.exports = {
     "@typescript-eslint/no-dynamic-delete": "off",
     "@typescript-eslint/no-unused-vars": ["warn", { "vars": "all", "args": "none", "ignoreRestSiblings": false, "varsIgnorePattern": "_" }],
     "@typescript-eslint/quotes": "off",
+    "semi": "off",  // required for a proper work
     "@typescript-eslint/semi": ["error", "always"],
     "@typescript-eslint/strict-boolean-expressions": "off",
     "@typescript-eslint/naming-convention": [
