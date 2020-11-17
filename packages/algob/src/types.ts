@@ -431,6 +431,15 @@ export interface SSCCallsParam extends SSCOptionalFlags, Sign {
   payFlags: TxParams
 }
 
+export interface SSCStateSchema {
+  key: string
+  value: {
+    type: number
+    bytes: string
+    uint: number
+  }
+}
+
 export interface TxParams {
   // feePerByte or totalFee is used to set the appropriate transaction fee parameter.
   // If both are set then totalFee takes precedence.

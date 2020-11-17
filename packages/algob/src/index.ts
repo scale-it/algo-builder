@@ -8,7 +8,7 @@ import {
 import { globalZeroAddress } from "./lib/constants";
 import { algodCredentialsFromEnv, KMDCredentialsFromEnv } from "./lib/credentials";
 import { update } from "./lib/ssc";
-import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC } from "./lib/status";
+import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC, readGlobalStateSSC } from "./lib/status";
 import { executeTransaction } from "./lib/tx";
 import { SignType, TransactionType } from "./types";
 
@@ -27,6 +27,7 @@ export {
   SignType,
   printLocalStateSSC,
   printGlobalStateSSC,
+  readGlobalStateSSC,
   update,
   globalZeroAddress
 };
