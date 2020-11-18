@@ -318,7 +318,6 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
     appId: number,
     payFlags: TxParams,
     appArgs?: Uint8Array[]): Promise<void> {
-
     await this.algoOp.optInToSSC(sender, appId, payFlags, appArgs);
   }
 }

@@ -1,4 +1,6 @@
-import { AlgobDeployer, SSCStateSchema } from "../types";
+import type { SSCStateSchema } from "algosdk";
+
+import { AlgobDeployer } from "../types";
 
 export async function balanceOf (
   deployer: AlgobDeployer,

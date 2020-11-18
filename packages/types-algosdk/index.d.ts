@@ -199,6 +199,15 @@ export interface MultiSigAccount {
   version: number;
 }
 
+export interface SSCStateSchema {
+  key: string
+  value: {
+    type: number
+    bytes: string
+    uint: number
+  }
+}
+
 export class LogicSigBase {
   logic: Uint8Array;
   // args Program arguments as array of Uint8Array arrays
