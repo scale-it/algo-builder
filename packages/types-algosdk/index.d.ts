@@ -284,11 +284,11 @@ export function encodeAddress(a: Uint8Array): string;
 
 /**
  * multisigAddress takes multisig metadata (preimage) and returns the corresponding human readable Algorand address.
- * @param v mutlisig version
- * @param thr multisig threshold
+ * @param version mutlisig version
+ * @param threshold multisig threshold
  * @param addresses array of encoded addresses
  */
-export function multisigAddress(account: MultiSigAccount): string;
+export function multisigAddress(account: {version: number; threshold: number; addrs: string[]}): string;
 
 // Calls LogicSig.fromByte
 export function logicSigFromByte(encoded: Uint8Array): LogicSig;
