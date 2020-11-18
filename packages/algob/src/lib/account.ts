@@ -103,9 +103,9 @@ export function createMsigAddress (
   threshold: number,
   accountList: string[]): [MultiSigAccount, string] {
   const mparams = {
-    v: version,
-    thr: threshold,
-    addresses: accountList
+    version: version,
+    threshold: threshold,
+    addrs: accountList
   };
   return [mparams, multisigAddress(mparams)];
 }
