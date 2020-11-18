@@ -194,9 +194,9 @@ export interface MultiSig {
 
 export interface MultiSigAccount {
   // array of base32 encoded addresses
-  addrs: string[];
-  thr: number;
-  v: number;
+  address: string[];
+  threshold: number;
+  version: number;
 }
 
 export class LogicSigBase {
@@ -279,7 +279,7 @@ export function encodeAddress(a: Uint8Array): string;
  * @param threshold multisig threshold
  * @param addrs  array of encoded addresses
  */
-export function multisigAddress(account: {version: number; threshold: number; addrs: string[]}): string;
+export function multisigAddress(account: MultiSigAccount): string;
 
 // Calls LogicSig.fromByte
 export function logicSigFromByte(encoded: Uint8Array): LogicSig;
