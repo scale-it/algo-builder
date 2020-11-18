@@ -50,7 +50,8 @@ async function run(runtimeEnv, deployer) {
 		getInt64Bytes(regEnd), 
 		getInt64Bytes(voteBegin), 
 		getInt64Bytes(voteEnd), 
-		getInt64Bytes(assetID)];
+		getInt64Bytes(assetID)
+	];
 
 	// Create Application
 	// Note: An Account can have maximum of 10 Applications.

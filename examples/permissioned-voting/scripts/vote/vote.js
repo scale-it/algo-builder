@@ -31,7 +31,8 @@ async function run(runtimeEnv, deployer) {
       appId: appInfo.appID, payFlags: {}, appArgs},
     {type: TransactionType.TransferAsset, sign: SignType.SecretKey, fromAccount: aliceAccount,
       toAccountAddr: votingAdminAccount.addr, amount: 1, assetID: voteAssetID,
-      payFlags: {}}];
+      payFlags: {}}
+  ];
 
   // Transaction Passes because Alice is registered voter and hasn't voted yet. 
   console.log("Vote being casted by Alice");

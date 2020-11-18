@@ -256,7 +256,7 @@ declare module 'algosdk' {
 
   export function generateAccount (): Account;
 
-p  /**
+  /**
    * isValidAddress takes an Algorand address and checks if valid.
    * @param address {string} Algorand address
    * @returns {boolean} true if valid, false otherwise
