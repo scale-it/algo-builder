@@ -56,9 +56,13 @@ async function run(runtimeEnv, deployer) {
 	// Create Application
 	// Note: An Account can have maximum of 10 Applications.
 	const res = await deployer.deploySSC(
-		"permissioned-voting-approval.py", 
-		"permissioned-voting-clear.py",
-		{sender: votingAdminAccount, localInts: 0,localBytes: 1, globalInts: 6, globalBytes: 1, appArgs: appArgs}, {});
+		"permissioned-voting-approval.py", "permissioned-voting-clear.py", {
+		sender: votingAdminAccount, 
+		localInts: 0,
+		localBytes: 1, 
+		globalInts: 6, 
+		globalBytes: 1, 
+		appArgs: appArgs}, {});
 	
 	console.log(res);
 
