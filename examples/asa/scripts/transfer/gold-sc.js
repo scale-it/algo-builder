@@ -3,8 +3,8 @@
  * This file demonstrates the example to transfer Algorand Standard Assets(ASA) & MicroAlgos
  * from one account to another according to smart contract (ASC) logic
 */
-const { transferAlgo, transferASA } = require("./common");
-const { transferMicroAlgosLsigAtomic } = require("algob");
+const { executeTransaction } = require("./common");
+const { TransactionType, SignType } = require("algob");
 
 async function run(runtimeEnv, deployer) {
   const goldOwnerAccount = deployer.accountsByName.get("gold-owner-account");
@@ -15,24 +15,48 @@ async function run(runtimeEnv, deployer) {
   const lsigGoldOwner = deployer.getDelegatedLsig('4-gold-asa.teal');
   
   const assetID =  deployer.asa.get("gold").assetIndex;
+  let txnParam = {
+    type: TransactionType.TransferAsset,
+    sign: SignType.LogicSignature,
+    fromAccount: goldOwnerAccount,
+    toAccountAddr: johnAccount.addr,
+    amount: 500,
+    assetID: assetID,
+    lsig: lsigGoldOwner,
+    payFlags: {}
+  }
+
   // Transaction PASS - As according to .teal logic, amount should be <= 1000
-  await transferASA(deployer, goldOwnerAccount, johnAccount.addr, 500, assetID, lsigGoldOwner);
+  await executeTransaction(deployer, txnParam);
 
   // Transaction FAIL - As according to .teal logic, amount should be <= 1000
-  await transferASA(deployer, goldOwnerAccount, johnAccount.addr, 1500, assetID, lsigGoldOwner);
+  txnParam.amount = 1500;
+  await executeTransaction(deployer, txnParam);
 
   // Transaction FAIL - sender should be the delegator i.e account which signed the lsig (goldOwner in this case)
-  await transferASA(deployer, johnAccount, bobAccount.addr, 100, assetID, lsigGoldOwner);
+  txnParam.amount = 100;
+  txnParam.toAccountAddr = bobAccount.addr;
+  await executeTransaction(deployer, txnParam);
 
   
   // Transaction for ALGO - Contract : '3-gold-delegated-asc.teal'  (Delegated Approval Mode)
   const logicSignature = deployer.getDelegatedLsig('3-gold-delegated-asc.teal');
 
+  txnParam = {
+    type: TransactionType.TransferAlgo,
+    sign: SignType.LogicSignature,
+    fromAccount: goldOwnerAccount,
+    toAccountAddr: bobAccount.addr,
+    amountMicroAlgos: 58,
+    lsig: logicSignature,
+    payFlags: {}
+  }
   // Transaction PASS - As according to .teal logic, amount should be <= 100
-  await transferAlgo(deployer, goldOwnerAccount, bobAccount.addr, 58, logicSignature);
+  await executeTransaction(deployer, txnParam);
 
   // Transaction FAIL - As according to .teal logic, amount should be <= 100
-  await transferAlgo(deployer, goldOwnerAccount, bobAccount.addr, 580, logicSignature);
+  txnParam.amountMicroAlgos = 580;
+  await executeTransaction(deployer, txnParam);
 } 
 
 module.exports = { default: run }

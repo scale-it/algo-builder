@@ -1,7 +1,7 @@
-The Builder functionality is licensed under the Apache-2.0 license as defined in the
-package.json of the parent project except for most of the code originating between commits
-eb85a4b299841431c40cf27bafc57ad2e567b1ee and 1dca01a038fd4d68b238f2310921c8654182be65.
-Specified code originates from GitHub repository https://github.com/nomiclabs/buidler.
+The ALGOB is licensed under the Apache-2.0 license as defined in the
+algorand-builder repository (https://github.com/scale-it/algorand-builder).
+Code originating between commits
+eb85a4b299841431c40cf27bafc57ad2e567b1ee and 1dca01a038fd4d68b238f2310921c8654182be65
 It is licensed under MIT license as defined below.
 
 The MIT License

@@ -150,6 +150,13 @@ Please check algob output for more details.`
     title: "Script can't load",
     description: `Script failed during load.
 Please check algob output for more details.`
+  },
+  TRANSACTION_TYPE_ERROR: {
+    number: 14,
+    message: "Error. `%error%` is Unknown",
+    title: "Unknown Transaction type",
+    description: `Provided transaction type is unknown 
+    Please double check your transaction type`
   }
 };
 
