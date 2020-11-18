@@ -1,8 +1,8 @@
 import type { Account } from "algosdk";
 
-import { AlgobDeployer, NFT, SSCStateSchema } from "../types";
-import { callNoOp } from "./ssc";
+import { AlgobDeployer, NFT, SignType, SSCStateSchema } from "../types";
 import { readGlobalStateSSC, readLocalStateSSC } from "./status";
+import { executeTransaction } from "./tx";
 
 // generate random 32 char hash
 function _NFTToken (): string {
@@ -24,14 +24,14 @@ export async function createNewNFT (
 ): Promise<void> {
   const globalState = await readGlobalStateSSC(deployer, creater.addr, appId) as SSCStateSchema[];
   if (globalState === undefined) {
-    console.warn(creater.addr + " is not the smart contract admin");
+    console.warn(`${creater.addr} is not the smart contract admin`);
     return;
   }
 
   for (const g of globalState) {
     const key = Buffer.from(g.key, 'base64').toString();
     if (key === nft.name) {
-      throw new Error("Non Fungible Token with name " + nft.name + " already exists");
+      throw new Error(`Non Fungible Token with name ${nft.name} already exists`);
     }
   }
 
@@ -42,7 +42,16 @@ export async function createNewNFT (
   appArgs.push(new Uint8Array(Buffer.from(nft.name)));
   appArgs.push(new Uint8Array(Buffer.from(nft.url)));
 
-  await callNoOp(deployer, creater, {}, appId, appArgs);
+  const txnParam = {
+    type: 2, // TransactionType.CallNoOpSSC = 2
+    sign: SignType.SecretKey,
+    fromAccount: creater,
+    appId: appId,
+    payFlags: {},
+    appArgs
+  };
+
+  await executeTransaction(deployer, txnParam);
 }
 
 /**
@@ -70,16 +79,28 @@ export async function transferNFT (
   }
 
   if (key !== nft.name) {
-    throw new Error("Account " + fromAccount.addr + " does not hold NFT " + nft.name);
+    throw new Error(`Account ${fromAccount.addr} does not hold NFT ${nft.name}`);
   }
 
-  const appArgs = []; const accounts = [];
+  // push app arguments
+  const appArgs = [];
   appArgs.push(new Uint8Array(Buffer.from("transfer")));
   appArgs.push(new Uint8Array(Buffer.from(nft.name)));
 
-  // pass both accounts to ssc
+  // push both accounts to pass to ssc
+  const accounts = [];
   accounts.push(fromAccount.addr);
   accounts.push(toAccountAddr);
 
-  await callNoOp(deployer, fromAccount, {}, appId, appArgs, accounts);
+  const txnParam = {
+    type: 2, // TransactionType.CallNoOpSSC = 2
+    sign: SignType.SecretKey,
+    fromAccount: fromAccount,
+    appId: appId,
+    payFlags: {},
+    appArgs,
+    accounts
+  };
+
+  await executeTransaction(deployer, txnParam);
 }

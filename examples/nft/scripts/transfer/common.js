@@ -1,4 +1,12 @@
-const { createNewNFT, transferNFT } = require("algob");
+const { createNewNFT, transferNFT, executeTransaction } = require("algob");
+
+exports.executeTransaction = async function (deployer, txnParams) {
+    try {
+        await executeTransaction(deployer, txnParams);
+    } catch (e) {
+        console.error('Transaction Failed', e.response.error);
+    }
+}
 
 exports.createNewNFT = async function (deployer, masterAccount, appId, nft){
     try {

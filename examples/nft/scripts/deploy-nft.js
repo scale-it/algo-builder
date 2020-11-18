@@ -1,9 +1,9 @@
 /**
  * Description:
- * This file demonstrates the PyTeal Example for HTLC(Hash Time Lock Contract)
+ * This file deploys the stateful smart contract to create and transfer NFT
 */
-const { transferMicroAlgos } = require("algob");
-const { default: deploy } = require("algob/build/builtin-tasks/deploy");
+const { executeTransaction } = require("./transfer/common");
+const { TransactionType, SignType } = require("algob");
 
 async function run(runtimeEnv, deployer) {
 
@@ -11,8 +11,19 @@ async function run(runtimeEnv, deployer) {
   const bobAccount = deployer.accountsByName.get("bob-account"); 
   const johnAccount = deployer.accountsByName.get("john-account"); 
 
-  transferMicroAlgos(deployer, masterAccount, johnAccount.addr, 401000000, {note: "funding account"});
-  transferMicroAlgos(deployer, masterAccount, bobAccount.addr, 401000000, {note: "funding account"});
+  let algoTxnParams = {
+    type: TransactionType.TransferAlgo,
+    sign: SignType.SecretKey,
+    fromAccount: masterAccount,
+    toAccountAddr: johnAccount.addr,
+    amountMicroAlgos: 401000000,
+    payFlags: {note: "funding account"}
+  };
+
+  await executeTransaction(deployer, algoTxnParams);
+
+  algoTxnParams.toAccountAddr = bobAccount.addr;
+  await executeTransaction(deployer, algoTxnParams);
 
   await deployer.deploySSC("approval_program.teal", "clear_state_program.teal", {
     sender: masterAccount,
