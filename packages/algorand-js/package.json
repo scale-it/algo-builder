@@ -1,14 +1,11 @@
 {
-  "name": "algob",
-  "version": "0.0.5",
+  "name": "algorand-js",
+  "version": "0.0.1",
   "author": "Robert Zaremba (https://github.com/robert-zaremba)",
   "contributors": [
     {
       "name": "Robert Zaremba",
       "url": "https://github.com/robert-zaremba"
-    }, {
-      "name": "Martynas Maciulevičius",
-      "url": "https://github.com/Invertisment"
     }, {
       "name": "Amit Yadav",
       "url": "https://github.com/amityadav0"
@@ -19,21 +16,19 @@
   ],
   "license": "Apache-2.0",
   "repository": "https://github.com/scale-it/algorand-builder.git",
-  "description": "",
+  "description": "Algorand JS runtime (transaction execution + TEAL interpreter)",
   "keywords": [
     "smart-contracts",
     "blockchain",
-    "builder",
     "algorand",
     "dapps",
     "javascript",
-    "tooling",
-    "task-runner"
+    "tooling"
   ],
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "bin": {
-    "algob": "build/internal/cli/cli.js"
+    "algod-js": "build/algod.js"
   },
   "engines": {
     "node": ">=14.10.0"
@@ -48,40 +43,23 @@
     "build:watch": "tsc -w -p .",
     "build:docs": "typedoc --out docs --exclude \"internal/**\"  src",
     "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.tsbuildinfo build",
-    "prepublish": "yarn build",
-    "algob:dev": "sh ./setup_dev_project.sh"
+    "prepublish": "yarn build"
   },
   "devDependencies": {
-    "@types/algosdk": "^0.1.0",
     "@types/chai": "^4.2.12",
-    "@types/debug": "^4.1.5",
-    "@types/deep-equal": "^1.0.1",
-    "@types/fs-extra": "^9.0.1",
     "@types/glob": "^7.1.2",
     "@types/murmurhash": "0.0.1",
-    "@types/semver": "^7.2.0",
     "@types/sinon": "^9.0.4",
     "chai": "^4.2.0",
     "glob": "^7.1.6",
     "nyc": "^15.1.0",
-    "sinon": "^9.0.2",
-    "time-require": "^0.1.2"
+    "sinon": "^9.0.2"
   },
   "dependencies": {
     "algosdk": "^1.8.0",
-    "chalk": "^4.1.0",
-    "debug": "^4.1.1",
-    "deep-equal": "^2.0.3",
-    "deepmerge": "^4.2.2",
-    "enquirer": "^2.3.6",
-    "find-up": "^4.1.0",
-    "fs-extra": "^9.0.1",
     "glob": "^7.1.6",
     "murmurhash": "^1.0.0",
-    "semver": "^7.3.2",
-    "source-map-support": "^0.5.19",
-    "yaml": "^1.10.0",
-    "zod": "^1.10.2"
+    "source-map-support": "^0.5.19"
   },
   "nyc": {
     "extension": [
