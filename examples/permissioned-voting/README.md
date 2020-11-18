@@ -6,7 +6,7 @@ To create this type of application on Algorand, there are four steps that must b
 - Create Asset - Central authority needs to create a voting token using Algorand ASAs. Voters need to opt into this asset, and the asset ID needs to be stored in the stateful smart contract to verify when the user votes, and confirm they are spending their voting token.
 To create `vote-token`, we recommend to create assets using a specification file, as provided in `assets/asa.yaml`.
 
-- Create Voting Smart Contract - Central authority needs to create the voting smart contract on the Algorand blockchain and pass the round ranges for registering and voting. The creator address is passed into the creation method. This is used only to allow the creator to delete the voting smart contract. we use `pyTeal` to create contracts, as provided in `assets/` as `permissioned-voting-approval.py` and `permissioned-voting-clear.py`.
+- Create Voting Smart Contract - Central authority needs to create the voting smart contract on the Algorand blockchain and pass the round ranges for registering and voting. The creator address is passed into the creation method. This is used only to allow the creator to delete the voting smart contract. we use `PyTeal` to create contracts, as provided in `assets/` as `permissioned-voting-approval.py` and `permissioned-voting-clear.py`.
 we creating the application using `scripts/voting.js`
 
 - Register to Vote - Voters need to register with the voting smart contract by optioning into the contract. Registering to vote occurs between a set of rounds that is set during the creation of the contract. We Opt-In for a voter using `scripts/voting.js`.

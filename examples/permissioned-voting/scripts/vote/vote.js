@@ -17,8 +17,8 @@ async function run(runtimeEnv, deployer) {
 
   // App arguments to vote for "candidatea".
 	appArgs = [
-    new Uint8Array([...Buffer.from('vote')]), 
-    new Uint8Array([...Buffer.from('candidatea')])
+    new Uint8Array(Buffer.from('vote')), 
+    new Uint8Array(Buffer.from('candidatea'))
   ];
   
   // Get AppInfo and AssetID from checkpoints.

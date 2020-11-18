@@ -63,7 +63,7 @@ async function run(runtimeEnv, deployer) {
 	console.log(res);
 
 	// Register Alice in voting application
-	reg = [new Uint8Array([...Buffer.from('register')])];
+	reg = [new Uint8Array(Buffer.from('register'))];
 
 	console.log("Opting-In for Alice in voting application");
 	try {
