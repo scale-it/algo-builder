@@ -15,9 +15,19 @@ async function run(runtimeEnv, deployer) {
   const aliceAccount = deployer.accountsByName.get("alice-account");
   const votingAdminAccount = deployer.accountsByName.get("voting-admin-account");
 
-  await executeTransaction(deployer, {type:TransactionType.TransferAlgo, sign:SignType.SecretKey, 
-   fromAccount: masterAccount, toAccountAddr:votingAdminAccount.addr, amountMicroAlgos: 200000000, payFlags: {}});
+  const algoTxnParams = {
+    type:TransactionType.TransferAlgo, 
+    sign:SignType.SecretKey, 
+    fromAccount: masterAccount, 
+    toAccountAddr:votingAdminAccount.addr, 
+    amountMicroAlgos: 200000000, 
+    payFlags: {}
+  }
+  await executeTransaction(deployer, algoTxnParams);
 
+  algoTxnParams.toAccountAddr = aliceAccount.addr;
+  await executeTransaction(deployer, algoTxnParams);
+  
   // Create ASA - Vote Token
   const asaInfo = await deployer.deployASA("vote-token", {
   creator: votingAdminAccount});
@@ -42,19 +52,6 @@ async function run(runtimeEnv, deployer) {
   regEnd = regBegin + 10;
   voteBegin = regBegin + 2;
   voteEnd = voteBegin + 1000;
-
-	// Create Application
-	// Note: An Account can have maximum of 10 Applications.
-	const res = await deployer.deploySSC(
-		"permissioned-voting-approval.py", "permissioned-voting-clear.py", {
-		sender: votingAdminAccount, 
-		localInts: 0,
-		localBytes: 1, 
-		globalInts: 6, 
-		globalBytes: 1, 
-		appArgs: appArgs}, {});
-	
-  console.log(res);
   
   // store asset Id of vote token created in this script
   assetID = asaInfo.assetIndex;

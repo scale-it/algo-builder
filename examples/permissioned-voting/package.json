@@ -7,7 +7,6 @@
     "chai": "^4.2.0"
   },
   "dependencies": {
-    "algob": "^0.0.5",
     "algosdk": "^1.8.0"
   },
   "scripts": {
