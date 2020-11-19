@@ -24,7 +24,7 @@ The project specification is [published here](https://paper.dropbox.com/publishe
 
 ### Examples
 
-Our `/examples` directory provides few projects with smart contracts and ASA:
+Our `/examples` directory provides few projects with smart contracts and ASA. Check the [list](./examples/README.md).
 
 + Please start with reading Algorand reference documentation about [smart contract](https://developer.algorand.org/docs/reference/teal/specification/).
 + Don't forget to study Algorand smart contract [guidelines](https://developer.algorand.org/docs/reference/teal/guidelines/).
