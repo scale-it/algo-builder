@@ -1,13 +1,15 @@
 # Non-Fungible-Token Example using StateFul Teal
 
 In this example, we create a new non-fungible-token represented by a name and a url.
+Compared to standard ASA, in this example we create a smart-contract to manage and store NFT balances. 
+
 `algob` provides two functions :-
 * `createNewNFT` - creates a new Non Fungible Token. Only the smart contract admin can create a new NFT.
 * `transferNFT` - transfer an NFT from one account to another. Both account should have opted-in to the smart contract and the account wishing to transfer the NFT must hold the NFT (in the account's local state).
 
 Also to be noted
 * An account can hold upto a maximum of 16 NFT's in it's local storage.
-* The system can hold a maximum of 63 NFT's (in global storage)
+* The NFT smart contract can hold a maximum of 63 NFT's (in global storage)
 
 ## Setup
 
