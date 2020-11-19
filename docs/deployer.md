@@ -1,6 +1,6 @@
 # Deployer
 
-- Algorand Standard Assets(ASA):
+- [Algorand Standard Assets(ASA)](https://developer.algorand.org/docs/features/asa/):
 
   - `deployASA` : Function to deploy Algorand Standard Assets(ASA) 
     - Parameters: 
@@ -29,7 +29,7 @@
           });
 
 
-- Stateful Smart Contracts(SSC) functions:
+- [Stateful Smart Contracts(SSC)](https://developer.algorand.org/docs/features/asc1/stateful/):
 
     - `deploySSC` : Function to deploy stateful smart contracts.
       - Parameters:
