@@ -1,5 +1,5 @@
 
-export const ERROR_PREFIX = "TEALERR";
+export const ERROR_PREFIX = "TEAL_ERR";
 
 export interface ErrorDescriptor {
   number: number
