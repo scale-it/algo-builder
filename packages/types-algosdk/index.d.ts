@@ -193,10 +193,19 @@ export interface MultiSig {
 }
 
 export interface MultiSigAccount {
+  version: number,
+  threshold: number,
   // array of base32 encoded addresses
   addrs: string[];
-  thr: number;
-  v: number;
+}
+
+export interface SSCStateSchema {
+  key: string
+  value: {
+    type: number
+    bytes: string
+    uint: number
+  }
 }
 
 export class LogicSigBase {
@@ -277,7 +286,7 @@ export function encodeAddress(a: Uint8Array): string;
  * multisigAddress takes multisig metadata (preimage) and returns the corresponding human readable Algorand address.
  * @param version mutlisig version
  * @param threshold multisig threshold
- * @param addrs  array of encoded addresses
+ * @param addresses array of encoded addresses
  */
 export function multisigAddress(account: {version: number; threshold: number; addrs: string[]}): string;
 

@@ -1,4 +1,4 @@
-import { Account as AccountSDK, Kmd, mnemonicToSecretKey, multisigAddress } from "algosdk";
+import { Account as AccountSDK, Kmd, mnemonicToSecretKey, MultiSigAccount, multisigAddress } from "algosdk";
 import * as fs from "fs";
 import YAML from "yaml";
 
@@ -98,7 +98,10 @@ export function loadAccountsFromEnv (): Account[] {
 }
 
 // returns multisignature account address
-export function createMsigAddress (version: number, threshold: number, accountList: AccountSDK[]): any {
+export function createMsigAddress (
+  version: number,
+  threshold: number,
+  accountList: string[]): [MultiSigAccount, string] {
   const mparams = {
     version: version,
     threshold: threshold,
