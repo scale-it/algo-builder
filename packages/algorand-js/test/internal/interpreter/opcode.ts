@@ -1,7 +1,7 @@
 import { ERRORS } from "../../../src/internal/core/errors-list";
 import { Op } from "../../../src/internal/interpreter/opcode";
-import { Stack } from "../../../src/internal/interpreter/stack";
 import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
+import { Stack } from "../../../src/lib/stack";
 import { expectTealError } from "../../helpers/errors";
 
 describe("Teal Opcodes basic assertions", function () {

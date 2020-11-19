@@ -1,6 +1,6 @@
 import { assert } from "chai";
 
-import { Stack } from "../../../src/internal/interpreter/stack";
+import { Stack } from "../../../src/lib/stack";
 
 describe("Stack", function () {
   const stack = new Stack<string | bigint>();

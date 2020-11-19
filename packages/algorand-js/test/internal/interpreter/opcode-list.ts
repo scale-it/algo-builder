@@ -4,8 +4,8 @@ import { ERRORS } from "../../../src/internal/core/errors-list";
 import {
   Add, Arg_0, Arg_1, Arg_2, Arg_3, Len
 } from "../../../src/internal/interpreter/opcode-list";
-import { Stack } from "../../../src/internal/interpreter/stack";
 import { MAX_UINT64 } from "../../../src/lib/constants";
+import { Stack } from "../../../src/lib/stack";
 import { expectTealError } from "../../helpers/errors";
 
 describe("Teal Opcodes", function () {

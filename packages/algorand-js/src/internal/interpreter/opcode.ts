@@ -1,7 +1,7 @@
 import { MAX_UINT64, MIN_UINT64 } from "../../lib/constants";
+import { IStack } from "../../lib/stack";
 import { TealError } from "../core/errors";
 import { ERRORS } from "../core/errors-list";
-import { IStack } from "./stack";
 
 export class Op {
   assertStackLen (stack: IStack<string | bigint>, minLen: number): void {

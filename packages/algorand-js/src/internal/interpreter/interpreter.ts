@@ -1,8 +1,8 @@
 import type { execParams } from "algob/src/types";
 import { assert } from "chai";
 
+import { Stack } from "../../lib/stack";
 import type { AppArgs, Logic } from "../types";
-import { Stack } from "./stack";
 
 /**
  * Description: this function executes set of logic[] passed after

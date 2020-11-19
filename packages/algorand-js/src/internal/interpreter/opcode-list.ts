@@ -1,7 +1,7 @@
+import { IStack } from "../../lib/stack";
 import { TealError } from "../core/errors";
 import { ERRORS } from "../core/errors-list";
 import { Op } from "./opcode";
-import { IStack } from "./stack";
 
 // pops string([]byte) from stack and pushes it's length to stack
 export class Len extends Op {
