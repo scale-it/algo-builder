@@ -5,7 +5,7 @@ Deployer wraps an SDK `AlgodV2` client and provides a higher level functionality
 * load smart-contract files
 * create transaction log and checkpoints.
 
-It will protect you to deploy same ASA or steteful smart contract twice. It will store transaction log in a checkpoint and allow you to reference later (in other scripts or in REPL) deployed ASA.
+It will protect you from deploying same ASA or stateful smart contract twice. It will store transaction log in a checkpoint and allow you to reference later (in other scripts or in REPL) deployed ASA.
 
 Read more about deployment and scripts in our [spec](https://paper.dropbox.com/doc/Algorand-builder-specs--A_yfjbGmtkx5BYMOy8Ha50~uAg-Vcdp0XNngizChyUWvFXfs#:uid=213683005476107006060621&h2=Scripts).
 
