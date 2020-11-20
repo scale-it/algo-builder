@@ -5,6 +5,7 @@
 + [Configuration](/docs/algob-config.md).
 + [Devnet](/infrastructure/README.md) creation.
 + [Script execution](/docs/user-script-execution.md).
++ [Deployer](/docs/deployer.md)
 + [Script Checkpoints](/docs/execution-checkpoints.md).
 + [Script Logging](/docs/logs.md).
 + [Algob Console](/docs/algob-console.md)

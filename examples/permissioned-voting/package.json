@@ -1,0 +1,15 @@
+{
+  "name": "local-project-test",
+  "version": "0.0.1",
+  "main": "index.js",
+  "license": "apache-2.0",
+  "devDependencies": {
+    "chai": "^4.2.0"
+  },
+  "dependencies": {
+    "algosdk": "^1.8.0"
+  },
+  "scripts": {
+    "algob": "algob"
+  }
+}
