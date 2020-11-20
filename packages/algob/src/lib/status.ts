@@ -1,3 +1,5 @@
+import type { SSCStateSchema } from "algosdk";
+
 import { AlgobDeployer } from "../types";
 
 export async function balanceOf (
@@ -36,18 +38,28 @@ export async function printLocalStateSSC (
   }
 }
 
+export async function readGlobalStateSSC (
+  deployer: AlgobDeployer,
+  creator: string,
+  appId: number): Promise<SSCStateSchema[] | undefined> {
+  const accountInfoResponse = await deployer.algodClient.accountInformation(creator).do();
+  for (const value of accountInfoResponse['created-apps']) {
+    if (value.id === appId) {
+      return value.params['global-state'];
+    }
+  }
+  return undefined;
+}
+
 // print global state of a stateful smart contract
 export async function printGlobalStateSSC (
   deployer: AlgobDeployer,
-  account: string,
+  creator: string,
   appId: number): Promise<void> {
-  const accountInfoResponse = await deployer.algodClient.accountInformation(account).do();
-  for (const value of accountInfoResponse['created-apps']) {
-    if (value.id === appId) {
-      console.log("Application's global state:");
-      for (let n = 0; n < value.params['global-state'].length; n++) {
-        console.log(value.params['global-state'][n]);
-      }
-    }
+  const globalState = await readGlobalStateSSC(deployer, creator, appId);
+  if (globalState === undefined) { return; }
+  console.log("Application's global state:");
+  for (let n = 0; n < globalState.length; n++) {
+    console.log(globalState[n]);
   }
 }
