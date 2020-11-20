@@ -24,7 +24,7 @@ const tealErrors = {
     description: `You are trying to perform an operation on stack where the stack does not
 have sufficient length.`
   },
-  INVALID_OPERATION: {
+  INVALID_OP_ARG: {
     number: 2,
     message: "Error encountered while executing teal with opcode %opcode%",
     title: "Invalid Operation",

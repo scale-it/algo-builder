@@ -27,7 +27,7 @@ describe("Teal Opcodes", function () {
       const op = new Len();
       expectTealError(
         () => op.execute(stack),
-        ERRORS.TEAL.INVALID_OPERATION
+        ERRORS.TEAL.INVALID_OP_ARG
       );
     });
   });
@@ -60,7 +60,7 @@ describe("Teal Opcodes", function () {
       const op = new Add();
       expectTealError(
         () => op.execute(stack),
-        ERRORS.TEAL.INVALID_OPERATION
+        ERRORS.TEAL.INVALID_OP_ARG
       );
     });
 
@@ -116,7 +116,7 @@ describe("Teal Opcodes", function () {
       const op = new Arg_1(args);
       expectTealError(
         () => op.execute(stack),
-        ERRORS.TEAL.INVALID_OPERATION
+        ERRORS.TEAL.INVALID_OP_ARG
       );
     });
   });
