@@ -2,9 +2,10 @@ import { IStack } from "../../lib/stack";
 import { TealError } from "../core/errors";
 import { ERRORS } from "../core/errors-list";
 import type { AppArgs, StackElem } from "../types";
+import { parseNum } from "../utils/bigint";
 import { Op } from "./opcode";
 
-const BIGINT_0 = BigInt(0);
+const BIGINT0 = BigInt("0");
 // pops string([]byte) from stack and pushes it's length to stack
 export class Len extends Op {
   execute (stack: IStack<StackElem>): void {
@@ -60,7 +61,7 @@ export class Div extends Op {
     this.assertStackLen(stack, 2);
     const a = stack.pop();
     const b = stack.pop();
-    if (typeof a !== 'bigint' || typeof b !== 'bigint' || b === BIGINT_0) {
+    if (typeof a !== 'bigint' || typeof b !== 'bigint' || b === BIGINT0) {
       throw new TealError(ERRORS.TEAL.INVALID_OP_ARG, {
         opcode: "/"
       });
@@ -103,8 +104,8 @@ export class Arg_0 extends Op {
       });
     }
     if (typeof arg === 'number') {
-      this.checkOverFlow(BigInt(arg));
-      stack.push(BigInt(arg));
+      this.checkOverFlow(parseNum(arg));
+      stack.push(parseNum(arg));
     } else { stack.push(arg); }
   }
 }
@@ -119,8 +120,8 @@ export class Arg_1 extends Arg_0 {
       });
     }
     if (typeof arg === 'number') {
-      this.checkOverFlow(BigInt(arg));
-      stack.push(BigInt(arg));
+      this.checkOverFlow(parseNum(arg));
+      stack.push(parseNum(arg));
     } else { stack.push(arg); }
   }
 }
@@ -135,8 +136,8 @@ export class Arg_2 extends Arg_0 {
       });
     }
     if (typeof arg === 'number') {
-      this.checkOverFlow(BigInt(arg));
-      stack.push(BigInt(arg));
+      this.checkOverFlow(parseNum(arg));
+      stack.push(parseNum(arg));
     } else { stack.push(arg); }
   }
 }
@@ -151,8 +152,8 @@ export class Arg_3 extends Arg_0 {
       });
     }
     if (typeof arg === 'number') {
-      this.checkOverFlow(BigInt(arg));
-      stack.push(BigInt(arg));
+      this.checkOverFlow(parseNum(arg));
+      stack.push(parseNum(arg));
     } else { stack.push(arg); }
   }
 }

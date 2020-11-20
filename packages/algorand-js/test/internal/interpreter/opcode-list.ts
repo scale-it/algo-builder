@@ -19,11 +19,11 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const len = stack.pop();
-      assert.equal(len, BigInt(str.length));
+      assert.equal(len, BigInt(str.length.toString()));
     });
 
     it("should throw error with uint64", function () {
-      stack.push(BigInt(1000));
+      stack.push(BigInt("1000"));
       const op = new Len();
       expectTealError(
         () => op.execute(stack),
@@ -36,17 +36,17 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<string | bigint>();
 
     it("should return correct addition of two unit64", function () {
-      stack.push(BigInt(10));
-      stack.push(BigInt(20));
+      stack.push(BigInt("10"));
+      stack.push(BigInt("20"));
       const op = new Add();
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt(30));
+      assert.equal(top, BigInt("30"));
     });
 
     it("should throw error with Add if stack is below min length", function () {
-      stack.push(BigInt(1000)); // stack.length() = 1
+      stack.push(BigInt("1000")); // stack.length() = 1
       const op = new Add();
       expectTealError(
         () => op.execute(stack),
@@ -65,8 +65,8 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw overflow error with Add", function () {
-      stack.push(MAX_UINT64 - BigInt(5));
-      stack.push(MAX_UINT64 - BigInt(6));
+      stack.push(MAX_UINT64 - BigInt("5"));
+      stack.push(MAX_UINT64 - BigInt("6"));
       const op = new Add();
       expectTealError(
         () => op.execute(stack),
@@ -79,17 +79,17 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<string | bigint>();
 
     it("should return correct subtraction of two unit64", function () {
-      stack.push(BigInt(20));
-      stack.push(BigInt(30));
+      stack.push(BigInt("20"));
+      stack.push(BigInt("30"));
       const op = new Sub();
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt(10));
+      assert.equal(top, BigInt("10"));
     });
 
     it("should throw error with Sub if stack is below min length", function () {
-      stack.push(BigInt(1000)); // stack.length() = 1
+      stack.push(BigInt("1000")); // stack.length() = 1
       const op = new Sub();
       expectTealError(
         () => op.execute(stack),
@@ -108,8 +108,8 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw underflow error with Sub if (A - B) < 0", function () {
-      stack.push(BigInt(20));
-      stack.push(BigInt(10));
+      stack.push(BigInt("20"));
+      stack.push(BigInt("10"));
       const op = new Sub();
       expectTealError(
         () => op.execute(stack),
@@ -122,17 +122,17 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<string | bigint>();
 
     it("should return correct multiplication of two unit64", function () {
-      stack.push(BigInt(20));
-      stack.push(BigInt(30));
+      stack.push(BigInt("20"));
+      stack.push(BigInt("30"));
       const op = new Mul();
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt(600));
+      assert.equal(top, BigInt("600"));
     });
 
     it("should throw error with Mul if stack is below min length", function () {
-      stack.push(BigInt(1000)); // stack.length() = 1
+      stack.push(BigInt("1000")); // stack.length() = 1
       const op = new Mul();
       expectTealError(
         () => op.execute(stack),
@@ -151,7 +151,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw overflow error with Mul if (A * B) > max_unit64", function () {
-      stack.push(MAX_UINT64 - BigInt(5));
+      stack.push(MAX_UINT64 - BigInt("5"));
       stack.push(BigInt(2));
       const op = new Mul();
       expectTealError(
@@ -165,27 +165,27 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<string | bigint>();
 
     it("should return correct division of two unit64", function () {
-      stack.push(BigInt(20));
-      stack.push(BigInt(40));
+      stack.push(BigInt("20"));
+      stack.push(BigInt("40"));
       const op = new Div();
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt(2));
+      assert.equal(top, BigInt("2"));
     });
 
     it("should return 0 on division of two unit64 with A == 0", function () {
-      stack.push(BigInt(40));
-      stack.push(BigInt(0));
+      stack.push(BigInt("40"));
+      stack.push(BigInt("0"));
       const op = new Div();
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt(0));
+      assert.equal(top, BigInt("0"));
     });
 
     it("should throw error with Div if stack is below min length", function () {
-      stack.push(BigInt(1000)); // stack.length() = 1
+      stack.push(BigInt("1000")); // stack.length() = 1
       const op = new Div();
       expectTealError(
         () => op.execute(stack),
@@ -204,8 +204,8 @@ describe("Teal Opcodes", function () {
     });
 
     it("should panic on A/B if B == 0", function () {
-      stack.push(BigInt(0));
-      stack.push(BigInt(10));
+      stack.push(BigInt("0"));
+      stack.push(BigInt("10"));
       const op = new Div();
       expectTealError(
         () => op.execute(stack),

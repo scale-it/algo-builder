@@ -26,7 +26,7 @@ export class Interpreter {
     }
     if (this._stack.length() > 0) {
       const top = this._stack.pop() as BigInt;
-      if (typeof top === 'string' || top >= BigInt(1)) { return true; } // Logic accept
+      if (typeof top === 'string' || top >= BigInt("1")) { return true; } // Logic accept
     }
     return false; // Logic Reject
   }
