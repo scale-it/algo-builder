@@ -2,7 +2,7 @@
   "name": "htlc-pyteal",
   "version": "0.0.1",
   "main": "index.js",
-  "license": "MIT",
+  "license": "apache-2.0",
   "dependencies": {
     "algosdk": "^1.8.0"
   },

@@ -1,30 +1,55 @@
-const { createNewNFT, transferNFT } = require("./common");
+const { executeTransaction } = require("./common");
+const { TransactionType, SignType } = require("algob");
 
 async function run(runtimeEnv, deployer) {
 
   const masterAccount = deployer.accountsByName.get("master-account")
-  const johnAccount = deployer.accountsByName.get("john-account"); // Seller
-  const bobAccount = deployer.accountsByName.get("bob-account"); // Buyer
+  const johnAccount = deployer.accountsByName.get("john-account");
 
-  const sscInfo = await deployer.getSSC("approval_program.teal", "clear_state_program.teal");
+  const sscInfo = await deployer.getSSC("nft_approval.py", "nft_clear_state.py");
   const appId = sscInfo.appID;
   console.log(sscInfo);
 
-  //create new non-fungible-token (only smart contract admin can do it)
-  await createNewNFT(deployer, masterAccount, appId, { name: "nft-1" });
-  await createNewNFT(deployer, masterAccount, appId, { name: "nft-2" });
+  const nft = { name: "some-nft", ref: "ref" }
+  //push arguments "create" and nft data 
+  let appArgs = [
+    new Uint8Array(Buffer.from("create")),
+    new Uint8Array(Buffer.from(nft.name)),
+    new Uint8Array(Buffer.from(nft.ref))
+  ];
+ 
+  let txnParam = {
+    type: TransactionType.CallNoOpSSC,
+    sign: SignType.SecretKey,
+    fromAccount: masterAccount,
+    appId: appId,
+    payFlags: {},
+    appArgs
+  };
 
-  //Fails as john is not the smart contract admin
-  await createNewNFT(deployer, johnAccount, appId, { name: "nft-3" });
+  await executeTransaction(deployer, txnParam); // call to create new nft (with id = 1)
+  
+  // push arguments "transfer", 1 (NFT ID)
+  appArgs = [
+    new Uint8Array(Buffer.from("transfer")),
+    new Uint8Array(8).fill(1, 7), //[0, 0, 0, 0, 0, 0, 0, 1]
+  ];
 
-  //transfer non-fungible token from one account (must be holder of nft) to another 
-  // (both accounts must opt-in to the smart contract)
-  await transferNFT(deployer, masterAccount, johnAccount.addr, appId, { name: "nft-1" });
+  // account_A = master, account_B = john
+  const accounts = [masterAccount.addr, johnAccount.addr];
 
-  //transfer nft-2 from master -> john
-  await transferNFT(deployer, masterAccount, johnAccount.addr, appId, { name: "nft-2" });
-  //then transfer the same nft from john -> bob
-  await transferNFT(deployer, johnAccount, bobAccount.addr, appId, { name: "nft-2" });
+  txnParam = {
+    type: TransactionType.CallNoOpSSC,
+    sign: SignType.SecretKey,
+    fromAccount: masterAccount,
+    appId: appId,
+    payFlags: {},
+    appArgs,
+    accounts
+  };
+
+  //call to transfer nft from master to john
+  await executeTransaction(deployer, txnParam); 
 }
 
 module.exports = { default: run }

@@ -451,11 +451,6 @@ export interface ASADeploymentFlags extends TxParams {
   creator: Account
 }
 
-export interface NFT {
-  name: string
-  url?: string
-}
-
 export interface FundASCFlags {
   funder: Account
   fundingMicroAlgo: number

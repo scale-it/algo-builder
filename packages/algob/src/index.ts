@@ -7,7 +7,6 @@ import {
 } from "./lib/account";
 import { globalZeroAddress } from "./lib/constants";
 import { algodCredentialsFromEnv, KMDCredentialsFromEnv } from "./lib/credentials";
-import { createNewNFT, transferNFT } from "./lib/nft";
 import { update } from "./lib/ssc";
 import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC, readGlobalStateSSC } from "./lib/status";
 import { executeTransaction } from "./lib/tx";
@@ -30,7 +29,5 @@ export {
   printGlobalStateSSC,
   readGlobalStateSSC,
   update,
-  createNewNFT,
-  transferNFT,
   globalZeroAddress
 };
