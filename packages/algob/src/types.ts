@@ -318,10 +318,12 @@ export interface DeployedAssetInfo {
   confirmedRound: number
 }
 
+// ASA deployment information (log)
 export interface ASAInfo extends DeployedAssetInfo {
   assetIndex: number
 }
 
+// Stateful smart contract deployment information (log)
 export interface SSCInfo extends DeployedAssetInfo {
   appID: number
 }
@@ -335,6 +337,7 @@ export interface RawLsig {
   msig?: MultiSig
 }
 
+// stateless smart contract deployment information (log)
 export interface LsigInfo {
   creator: AccountAddress
   contractAddress: string
@@ -488,38 +491,45 @@ export interface AlgobDeployer {
   putMetadata: (key: string, value: string) => void
   getMetadata: (key: string) => string | undefined
   deployASA: (name: string, flags: ASADeploymentFlags) => Promise<ASAInfo>
+
+  // Make a payment to a contract account.
   fundLsig: (
     name: string, // ASC filename
     scParams: LogicSigArgs, // Parameters
     flags: FundASCFlags,
     payFlags: TxParams
   ) => void
+
   mkDelegatedLsig: (
     name: string, // ASC filename
     scParams: LogicSigArgs, // Parameters
     signer: Account
   ) => Promise<LsigInfo>
+
   deploySSC: (
     approvalProgram: string,
     clearProgram: string,
     flags: SSCDeploymentFlags,
     payFlags: TxParams) => Promise<SSCInfo>
+
   /**
      Returns true if ASA or DelegatedLsig or SSC were deployed in any script.
      Checks even for checkpoints which are out of scope from the execution
      session and are not obtainable using get methods.
   */
   isDefined: (name: string) => boolean
+
+  // mapping of ASA name to deployment log
   asa: Map<string, ASAInfo>
 
-  // These functions are exposed only for users.
-  // Put your logic into AlgoOperator if you need to interact with the chain.
+  /** The functions are exposed only for users.
+    * Put your logic into AlgoOperator if you need to interact with the chain **/
+
   algodClient: algosdk.Algodv2
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
 
   // Output of these functions is undefined. It's not known what to save to CP
   optInToASA: (name: string, accountName: string, flags: ASADeploymentFlags) => Promise<void>
-
   OptInToSSC: (sender: Account, index: number, payFlags: TxParams) => Promise<void>
 
   // Log Transaction
@@ -528,16 +538,16 @@ export interface AlgobDeployer {
   // extract multi signed logic signature file from assets/
   loadMultiSig: (name: string, scParams: LogicSigArgs) => Promise<LogicSig>
 
-  // get stateful smart contract
-  getSSC: (nameApproval: string, nameClear: string) => SSCInfo | undefined
-
-  // get delegated Logic signature
-  getDelegatedLsig: (lsigName: string) => Object | undefined
-
-  // load contract mode logic signature
+  // load contract mode logic signature (TEAL or PyTEAL)
   loadLogic: (name: string, scParams: LogicSigArgs) => Promise<LogicSig>
 
-  // returns compiled program
+  // gets stateful smart contract info from checkpoint
+  getSSC: (nameApproval: string, nameClear: string) => SSCInfo | undefined
+
+  // gets a delegated logic signature from checkpoint
+  getDelegatedLsig: (lsigName: string) => Object | undefined
+
+  // returns compiled program (TEAL or PyTEAL)
   ensureCompiled: (name: string, force: boolean) => Promise<ASCCache>
 }
 
