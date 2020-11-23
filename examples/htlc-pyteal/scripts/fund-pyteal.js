@@ -21,8 +21,8 @@ async function run(runtimeEnv, deployer) {
   // secret value hashed with sha256 will produce our image hash : QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=
   const secret = "hero wisdom green split loop element vote belt";
   
-  await deployer.fundLsig("htlc.py", [ secret ],
-    { funder: bobAccount, fundingMicroAlgo: 202000000 }, {}); 
+  await deployer.fundLsig("htlc.py",
+    { funder: bobAccount, fundingMicroAlgo: 202000000 }, {}, [ secret ]); 
   
 }
 

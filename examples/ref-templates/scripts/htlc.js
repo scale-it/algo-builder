@@ -14,7 +14,8 @@ async function run(runtimeEnv, deployer) {
   const wrongSecret = "hero wisdom red split loop element vote belt";
 
   // setup a contract account and send 1 ALGO from master
-  await deployer.fundLsig("htlc.py", [], { funder: masterAccount, fundingMicroAlgo: 1000000 }, { closeRemainderTo: johnAccount.addr }); 
+  await deployer.fundLsig("htlc.py", { funder: masterAccount, fundingMicroAlgo: 1000000 }, 
+  	{ closeRemainderTo: johnAccount.addr }, []); 
 
   let contract = await deployer.loadLogic("htlc.py", [ wrongSecret ]);
   let contractAddress = contract.address();
