@@ -4,17 +4,19 @@ import { ERRORS } from "../../../src/errors/errors-list";
 import {
   Add, Arg_0, Arg_1, Arg_2, Arg_3, Div, Len, Mul, Sub
 } from "../../../src/interpreter/opcode-list";
+import { toBytes } from "../../../src/lib/bigint";
 import { MAX_UINT64 } from "../../../src/lib/constants";
 import { Stack } from "../../../src/lib/stack";
+import type { StackElem } from "../../../src/types";
 import { expectTealError } from "../../helpers/errors";
 
 describe("Teal Opcodes", function () {
   describe("Len", function () {
-    const stack = new Stack<string | bigint>();
+    const stack = new Stack<StackElem>();
 
     it("should return correct length of string", function () {
       const str = "HelloWorld";
-      stack.push(str);
+      stack.push(toBytes(str));
       const op = new Len();
       op.execute(stack);
 
@@ -33,7 +35,7 @@ describe("Teal Opcodes", function () {
   });
 
   describe("Add", function () {
-    const stack = new Stack<string | bigint>();
+    const stack = new Stack<StackElem>();
 
     it("should return correct addition of two unit64", function () {
       stack.push(BigInt("10"));
@@ -55,12 +57,12 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error if Add is used with strings", function () {
-      stack.push("str1");
-      stack.push("str2");
+      stack.push(toBytes("str1"));
+      stack.push(toBytes("str2"));
       const op = new Add();
       expectTealError(
         () => op.execute(stack),
-        ERRORS.TEAL.INVALID_OP_ARG
+        ERRORS.TEAL.INVALID_UINT64
       );
     });
 
@@ -76,7 +78,7 @@ describe("Teal Opcodes", function () {
   });
 
   describe("Sub", function () {
-    const stack = new Stack<string | bigint>();
+    const stack = new Stack<StackElem>();
 
     it("should return correct subtraction of two unit64", function () {
       stack.push(BigInt("20"));
@@ -98,12 +100,12 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error if Sub is used with strings", function () {
-      stack.push("str1");
-      stack.push("str2");
+      stack.push(toBytes("str1"));
+      stack.push(toBytes("str2"));
       const op = new Sub();
       expectTealError(
         () => op.execute(stack),
-        ERRORS.TEAL.INVALID_OP_ARG
+        ERRORS.TEAL.INVALID_UINT64
       );
     });
 
@@ -119,7 +121,7 @@ describe("Teal Opcodes", function () {
   });
 
   describe("Mul", function () {
-    const stack = new Stack<string | bigint>();
+    const stack = new Stack<StackElem>();
 
     it("should return correct multiplication of two unit64", function () {
       stack.push(BigInt("20"));
@@ -141,12 +143,12 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error if Mul is used with strings", function () {
-      stack.push("str1");
-      stack.push("str2");
+      stack.push(toBytes("str1"));
+      stack.push(toBytes("str2"));
       const op = new Mul();
       expectTealError(
         () => op.execute(stack),
-        ERRORS.TEAL.INVALID_OP_ARG
+        ERRORS.TEAL.INVALID_UINT64
       );
     });
 
@@ -162,7 +164,7 @@ describe("Teal Opcodes", function () {
   });
 
   describe("Div", function () {
-    const stack = new Stack<string | bigint>();
+    const stack = new Stack<StackElem>();
 
     it("should return correct division of two unit64", function () {
       stack.push(BigInt("20"));
@@ -194,12 +196,12 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error if Div is used with strings", function () {
-      stack.push("str1");
-      stack.push("str2");
+      stack.push(toBytes("str1"));
+      stack.push(toBytes("str2"));
       const op = new Div();
       expectTealError(
         () => op.execute(stack),
-        ERRORS.TEAL.INVALID_OP_ARG
+        ERRORS.TEAL.INVALID_UINT64
       );
     });
 
@@ -215,7 +217,7 @@ describe("Teal Opcodes", function () {
   });
 
   describe("Arg[N]", function () {
-    const stack = new Stack<string | bigint>();
+    const stack = new Stack<StackElem>();
     const args = ["Arg0", "Arg1", "Arg2", "Arg3"];
 
     it("should push arg_0 from argument array", function () {
@@ -223,7 +225,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, args[0]);
+      assert.deepEqual(top, toBytes(args[0]));
     });
 
     it("should push arg_1 from argument array", function () {
@@ -231,7 +233,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, args[1]);
+      assert.deepEqual(top, toBytes(args[1]));
     });
 
     it("should push arg_2 from argument array", function () {
@@ -239,7 +241,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, args[2]);
+      assert.deepEqual(top, toBytes(args[2]));
     });
 
     it("should push arg_3 from argument array", function () {
@@ -247,7 +249,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, args[3]);
+      assert.deepEqual(top, toBytes(args[3]));
     });
 
     it("should throw error if accessing arg is not defined", function () {
