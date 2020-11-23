@@ -31,7 +31,8 @@ export class CompileOp {
   //   (Examples: `mysc.teal, security/rbac.teal`)
   //   MUST have a .teal, .lsig or .py extension
   // @param force: if true it will force recompilation even if the cache is up to date.
-  async ensureCompiled (filename: string, force?: boolean, scInitParam?: Object): Promise<ASCCache> {
+  // @param scInitParam : Smart contract initialization parameters.
+  async ensureCompiled (filename: string, force?: boolean, scInitParam?: unknown): Promise<ASCCache> {
     if (force === undefined) {
       force = false;
     }
@@ -123,7 +124,7 @@ export class PyCompileOp {
    * @param force    : if true it will force recompilation even if the cache is up to date.
    * @param scInitParam : Smart Contract Initialization Parameters
    */
-  async ensureCompiled (filename: string, force?: boolean, scInitParam?: Object): Promise<PyASCCache> {
+  async ensureCompiled (filename: string, force?: boolean, scInitParam?: unknown): Promise<PyASCCache> {
     if (!filename.endsWith(pyExt)) {
       throw new Error(`filename "${filename}" must end with "${pyExt}"`);
     }
@@ -171,10 +172,12 @@ export class PyCompileOp {
   /**
    * Description: Runs a subprocess to execute python script
    * @param filename : python filename in assets folder
+   * @param scInitParam : Smart contract initialization parameters.
    */
   private runPythonScript (filename: string, scInitParam?: string): SpawnSyncReturns<string> {
     // used spawnSync instead of spawn, as it is synchronous
     if (scInitParam === undefined) {
+      console.log("--------------OK-------------");
       return spawnSync(
         'python3', [
           path.join(ASSETS_DIR, filename)
@@ -182,6 +185,8 @@ export class PyCompileOp {
       );
     }
 
+    console.log("--------------OK1-------------");
+    console.log(scInitParam);
     return spawnSync('python3', [
       path.join(ASSETS_DIR, filename),
       scInitParam
@@ -192,6 +197,7 @@ export class PyCompileOp {
   /**
    * Description: returns TEAL code using pyTeal compiler
    * @param filename : python filename in assets folder
+   * @param scInitParam : Smart contract initialization parameters.
    */
   compilePyTeal (filename: string, scInitParam?: string): string {
     const subprocess: SpawnSyncReturns<string> = this.runPythonScript(filename, scInitParam);

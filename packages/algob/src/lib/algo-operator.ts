@@ -38,15 +38,15 @@ export interface AlgoOperator {
   deployASA: (
     name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, txWriter: txWriter
   ) => Promise<ASAInfo>
-  fundLsig: (name: string, scParams: LogicSigArgs, flags: FundASCFlags, payFlags: TxParams,
-    txWriter: txWriter, scInitParam?: Object) => Promise<LsigInfo>
+  fundLsig: (name: string, flags: FundASCFlags, payFlags: TxParams,
+    txWriter: txWriter, scParams: LogicSigArgs, scInitParam?: unknown) => Promise<LsigInfo>
   deploySSC: (
     approvalProgram: string,
     clearProgram: string,
     flags: SSCDeploymentFlags,
     payFlags: TxParams,
     txWriter: txWriter,
-    scInitParam?: Object) => Promise<SSCInfo>
+    scInitParam?: unknown) => Promise<SSCInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
   optInToASA: (
     asaName: string, assetIndex: number, account: Account, params: TxParams
@@ -56,7 +56,7 @@ export interface AlgoOperator {
   ) => Promise<void>
   optInToSSC: (
     sender: Account, appId: number, payFlags: TxParams, appArgs?: Uint8Array[]) => Promise<void>
-  ensureCompiled: (name: string, force: boolean, scInitParam?: Object) => Promise<ASCCache>
+  ensureCompiled: (name: string, force?: boolean, scInitParam?: unknown) => Promise<ASCCache>
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -201,19 +201,20 @@ export class AlgoOperatorImpl implements AlgoOperator {
   /**
    * Description - This function will send Algos to ASC account in "Contract Mode"
    * @param name     - ASC filename
-   * @param scParams - SC parameters
    * @param flags    - FundASC flags (as per SPEC)
    * @param payFlags - as per SPEC
    * @param txWriter - transaction log writer
+   * @param scParams: Smart contract Parameters(Used while calling smart contract)
+   * @param scInitParam : Smart contract initialization parameters.
    */
   async fundLsig (
     name: string,
-    scParams: LogicSigArgs,
     flags: FundASCFlags,
     payFlags: TxParams,
     txWriter: txWriter,
-    scInitParam?: Object): Promise<LsigInfo> {
-    const lsig = await getLsig(name, scParams, this.algodClient, scInitParam);
+    scParams: LogicSigArgs,
+    scInitParam?: unknown): Promise<LsigInfo> {
+    const lsig = await getLsig(name, this.algodClient, scParams, scInitParam);
     const contractAddress = lsig.address();
 
     const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
@@ -246,6 +247,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
    * @param flags         SSCDeploymentFlags
    * @param payFlags      TxParams
    * @param txWriter
+   * @param scInitParam : Smart contract initialization parameters.
    */
   async deploySSC (
     approvalProgram: string,
@@ -253,7 +255,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     flags: SSCDeploymentFlags,
     payFlags: TxParams,
     txWriter: txWriter,
-    scInitParam?: Object): Promise<SSCInfo> {
+    scInitParam?: unknown): Promise<SSCInfo> {
     const sender = flags.sender.addr;
     const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
 
@@ -322,7 +324,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     await this.waitForConfirmation(txId);
   }
 
-  async ensureCompiled (name: string, force: boolean, scInitParam?: Object): Promise<ASCCache> {
+  async ensureCompiled (name: string, force?: boolean, scInitParam?: unknown): Promise<ASCCache> {
     return await this.compileOp.ensureCompiled(name, force, scInitParam);
   }
 }

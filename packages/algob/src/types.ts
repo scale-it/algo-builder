@@ -485,34 +485,72 @@ export interface AlgobDeployer {
   isDeployMode: boolean
   accounts: Account[]
   accountsByName: Accounts
+
+  // Puts metadata in checkpount
   putMetadata: (key: string, value: string) => void
+
+  // gets metadata from the checkpoint
   getMetadata: (key: string) => string | undefined
+
+  /**
+   * Description: Deploys ASA to the network
+   * @param name: name of the ASA
+   * @param flags: ASADeplymentFlags
+   */
   deployASA: (name: string, flags: ASADeploymentFlags) => Promise<ASAInfo>
+
+  /**
+   * Description: funds logic signature account
+   * @param name: Stateless Smart Contract filename (must be present in assets folder)
+   * @param payFlags: Transaction Parameters
+   * @param scParams: Smart contract Parameters(Used while calling smart contract)
+   * @param scInitParam : Smart contract initialization parameters.
+   */
   fundLsig: (
-    name: string, // ASC filename
-    scParams: LogicSigArgs, // Parameters
+    name: string,
     flags: FundASCFlags,
     payFlags: TxParams,
-    scInitParam?: Object
+    scParams: LogicSigArgs,
+    scInitParam?: unknown
   ) => void
+
+  /**
+   * Description: Make delegated logic signature signed by signer
+   * @param name: Stateless Smart Contract filename (must be present in assets folder)
+   * @param signer: Signer Account which will sign the smart contract
+   * @param scParams: Smart contract Parameters(Used while calling smart contract)
+   * @param scInitParam : Smart contract initialization parameters.
+   */
   mkDelegatedLsig: (
-    name: string, // ASC filename
-    scParams: LogicSigArgs, // Parameters
+    name: string,
     signer: Account,
-    scInitParam?: Object
+    scParams: LogicSigArgs,
+    scInitParam?: unknown
   ) => Promise<LsigInfo>
+
+  /**
+   * Description: Make delegated logic signature signed by signer
+   * @param approvalProgram: approval program filename (must be present in assets folder)
+   * @param clearProgram: clear program filename (must be present in assets folder)
+   * @param flags: SSCDeploymentFlags
+   * @param payFlags: Transaction Parameters
+   * @param scInitParam : Smart contract initialization parameters.
+   */
   deploySSC: (
     approvalProgram: string,
     clearProgram: string,
     flags: SSCDeploymentFlags,
     payFlags: TxParams,
-    scInitParam?: Object) => Promise<SSCInfo>
+    scInitParam?: unknown) => Promise<SSCInfo>
+
   /**
      Returns true if ASA or DelegatedLsig or SSC were deployed in any script.
      Checks even for checkpoints which are out of scope from the execution
      session and are not obtainable using get methods.
   */
   isDefined: (name: string) => boolean
+
+  // map for storing ASA
   asa: Map<string, ASAInfo>
 
   // These functions are exposed only for users.
@@ -537,11 +575,21 @@ export interface AlgobDeployer {
   // get delegated Logic signature
   getDelegatedLsig: (lsigName: string) => Object | undefined
 
-  // load contract mode logic signature
-  loadLogic: (name: string, scParams: LogicSigArgs) => Promise<LogicSig>
+  /**
+   * Description: Load Logic signature from a file
+   * @param name:  Smart Contract filename (must be present in assets folder)
+   * @param scParams: Smart contract Parameters(Used while calling smart contract)
+   * @param scInitParam : Smart contract initialization parameters.
+   */
+  loadLogic: (name: string, scParams: LogicSigArgs, scInitParam?: unknown) => Promise<LogicSig>
 
-  // returns compiled program
-  ensureCompiled: (name: string, force: boolean) => Promise<ASCCache>
+  /**
+   * Description: Returns ASCCache (with compiled code)
+   * @param name: Smart Contract filename (must be present in assets folder)
+   * @param force: if force is true file will be compiled for sure, even if it's checkpoint exist
+   * @param scInitParam: Smart contract initialization parameters.
+   */
+  ensureCompiled: (name: string, force?: boolean, scInitParam?: unknown) => Promise<ASCCache>
 }
 
 // ************************

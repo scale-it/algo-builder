@@ -13,9 +13,9 @@ import { CompileOp } from "./compile";
  */
 export async function getLsig (
   name: string,
-  scParams: LogicSigArgs,
   algodClient: algosdk.Algodv2,
-  scInitParam?: Object):
+  scParams: LogicSigArgs,
+  scInitParam?: unknown):
   Promise<LogicSig> {
   const compileOp = new CompileOp(algodClient);
   const result: ASCCache = await compileOp.ensureCompiled(name, false, scInitParam);

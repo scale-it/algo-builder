@@ -1,5 +1,6 @@
 import type { LogicSig, LogicSigArgs, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
+import { unknown } from "zod";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
@@ -99,11 +100,12 @@ class DeployerBasicMode {
   /**
    * Description : loads logic signature for contract mode
    * @param name ASC name
-   * @param scParams parameters
+   * @param scParams: Smart contract Parameters(Used while calling smart contract)
+   * @param scInitParam : Smart contract initialization parameters.
    * @returns {LogicSig} loaded logic signature from assets/<file_name>.teal
    */
-  async loadLogic (name: string, scParams: LogicSigArgs, scInitParam?: Object): Promise<LogicSig> {
-    return await getLsig(name, scParams, this.algoOp.algodClient, scInitParam);
+  async loadLogic (name: string, scParams: LogicSigArgs, scInitParam?: unknown): Promise<LogicSig> {
+    return await getLsig(name, this.algoOp.algodClient, scParams, scInitParam);
   }
 
   /**
@@ -115,15 +117,20 @@ class DeployerBasicMode {
   async loadMultiSig (name: string, scParams: LogicSigArgs): Promise<LogicSig> {
     if (name.endsWith(blsigExt)) { return await loadBinaryMultiSig(name); }
 
-    const lsig = await getLsig(name, scParams, this.algoOp.algodClient); // get lsig from .teal (getting logic part from lsig)
+    const lsig = await getLsig(name, this.algoOp.algodClient, scParams); // get lsig from .teal (getting logic part from lsig)
     const msig = await readMsigFromFile(name); // Get decoded Msig object from .msig
     Object.assign(lsig.msig = {} as MultiSig, msig);
     return lsig;
   }
 
-  // Returns compiled program, name: filename
-  async ensureCompiled (name: string, force: boolean): Promise<ASCCache> {
-    return await this.algoOp.ensureCompiled(name, force);
+  /**
+   * Description: Returns ASCCache (with compiled code)
+   * @param name: Smart Contract filename (must be present in assets folder)
+   * @param force: if force is true file will be compiled for sure, even if it's checkpoint exist
+   * @param scInitParam: Smart contract initialization parameters.
+   */
+  async ensureCompiled (name: string, force?: boolean, scInitParam?: unknown): Promise<ASCCache> {
+    return await this.algoOp.ensureCompiled(name, force, scInitParam);
   }
 }
 
@@ -221,14 +228,15 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
   /**
    * Description - This function will send Algos to ASC account in "Contract Mode"
    * @param name     - ASC filename
-   * @param scParams - SC parameters
    * @param flags    - Deployments flags (as per SPEC)
    * @param payFlags - as per SPEC
+   * @param scParams: Smart contract Parameters(Used while calling smart contract)
+   * @param scInitParam : Smart contract initialization parameters.
    */
-  async fundLsig (name: string, scParams: LogicSigArgs, flags: FundASCFlags,
-    payFlags: TxParams, scInitParam?: Object): Promise<void> {
+  async fundLsig (name: string, flags: FundASCFlags,
+    payFlags: TxParams, scParams: LogicSigArgs, scInitParam?: unknown): Promise<void> {
     try {
-      await this.algoOp.fundLsig(name, scParams, flags, payFlags, this.txWriter, scInitParam);
+      await this.algoOp.fundLsig(name, flags, payFlags, this.txWriter, scParams, scInitParam);
     } catch (error) {
       console.log(error);
       throw error;
@@ -238,16 +246,17 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
   /**
    * Description - This function will create and sign a logic signature for "delegated approval".
    * https://developer.algorand.org/docs/features/asc1/stateless/sdks/#account-delegation-sdk-usage
-   * @param name     - ASC name
-   * @param scParams - SC parameters
-   * @param signer   - signer
+   * @param name: Stateless Smart Contract filename (must be present in assets folder)
+   * @param signer: Signer Account which will sign the smart contract
+   * @param scParams: Smart contract Parameters(Used while calling smart contract)
+   * @param scInitParam : Smart contract initialization parameters.
    */
   async mkDelegatedLsig (
-    name: string, scParams: LogicSigArgs, signer: Account, scInitParam?: Object): Promise<LsigInfo> {
+    name: string, signer: Account, scParams: LogicSigArgs, scInitParam?: unknown): Promise<LsigInfo> {
     this.assertNoAsset(name);
     let lsigInfo = {} as any;
     try {
-      const lsig = await getLsig(name, scParams, this.algoOp.algodClient, scInitParam);
+      const lsig = await getLsig(name, this.algoOp.algodClient, scParams, scInitParam);
       lsig.sign(signer.sk);
       lsigInfo = {
         creator: signer.addr,
@@ -270,13 +279,14 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
    * @param clearProgram filename which has clear program
    * @param flags SSCDeploymentFlags
    * @param payFlags Transaction Params
+   * @param scInitParam : Smart contract initialization parameters.
    */
   async deploySSC (
     approvalProgram: string,
     clearProgram: string,
     flags: SSCDeploymentFlags,
     payFlags: TxParams,
-    scInitParam?: Object): Promise<SSCInfo> {
+    scInitParam?: unknown): Promise<SSCInfo> {
     const name = approvalProgram + "-" + clearProgram;
     this.assertNoAsset(name);
     let sscInfo = {} as any;
@@ -342,14 +352,15 @@ export class DeployerRunMode extends DeployerBasicMode implements AlgobDeployer 
     });
   }
 
-  async fundLsig (_name: string, _scParams: LogicSigArgs, _flags: FundASCFlags,
-    _payFlags: TxParams): Promise<LsigInfo> {
+  async fundLsig (_name: string, _flags: FundASCFlags,
+    _payFlags: TxParams, _scParams: LogicSigArgs, _scInitParams?: unknown): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "fundLsig"
     });
   }
 
-  async mkDelegatedLsig (_name: string, _scParams: LogicSigArgs, _signer: Account): Promise<LsigInfo> {
+  async mkDelegatedLsig (_name: string, _signer: Account,
+    _scParams: LogicSigArgs, _scInitParams?: unknown): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "delegatedLsig"
     });
@@ -359,7 +370,8 @@ export class DeployerRunMode extends DeployerBasicMode implements AlgobDeployer 
     approvalProgram: string,
     clearProgram: string,
     flags: SSCDeploymentFlags,
-    payFlags: TxParams): Promise<SSCInfo> {
+    payFlags: TxParams,
+    scInitParam?: unknown): Promise<SSCInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deploySSC"
     });
