@@ -1,10 +1,10 @@
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { MAX_UINT64, MIN_UINT64 } from "../lib/constants";
-import { IStack } from "../lib/stack";
+import type { TEALStack } from "../types";
 
 export class Op {
-  assertStackLen (stack: IStack<string | bigint>, minLen: number): void {
+  assertStackLen (stack: TEALStack, minLen: number): void {
     if (stack.length() < minLen) {
       throw new TealError(ERRORS.TEAL.ASSERT_STACK_LENGTH);
     }
@@ -20,5 +20,12 @@ export class Op {
     if (num < MIN_UINT64) {
       throw new TealError(ERRORS.TEAL.UINT64_UNDERFLOW);
     }
+  }
+
+  assertBigInt (a: unknown): bigint {
+    if (typeof a === "undefined" || typeof a !== "bigint") {
+      throw new TealError(ERRORS.TEAL.INVALID_UINT64);
+    }
+    return a;
   }
 }
