@@ -1,8 +1,8 @@
 {
   "name": "example-asa",
-  "version": "0.0.1",
-  "main": "algob.config.js",
-  "license": "MIT",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "apache-2.0",
   "devDependencies": {
     "chai": "^4.2.0"
   },

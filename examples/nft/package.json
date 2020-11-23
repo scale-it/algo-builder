@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "apache-2.0",
   "dependencies": {
+    "config": "file:../asa",
     "algosdk": "^1.8.0"
   },
   "scripts": {
