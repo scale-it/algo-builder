@@ -15,7 +15,7 @@ async function run(runtimeEnv, deployer) {
   scInitParam = {
     TMPL_TO: johnAccount.addr,  
     TMPL_AMT: 7109,
-    TMPL_CLS: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
+    TMPL_CLS: masterAccount.addr,
     TMPL_FV: 10,
     TMPL_LV: 1000000,
     TMPL_LEASE: "023sdDE2"

@@ -98,8 +98,8 @@ if __name__ == "__main__":
     "TMPL_LEASE": "023sdDE2"
   }
 
-  # decode external parameters and update current values.
-  # (if external paramters are passed)
+  # decode external parameter and update current values.
+  # (if an external paramter is passed)
   if(sys.argv[1] != "\n"):
     try:
       param = yaml.safe_load(sys.argv[1])
