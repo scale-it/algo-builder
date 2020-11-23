@@ -1,4 +1,4 @@
-import type { LogicSig } from "algosdk";
+import type { LogicSig, LogicSigArgs } from "algosdk";
 import * as algosdk from "algosdk";
 
 import type {
@@ -39,7 +39,7 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   }
 
-  async loadLogic (name: string, scParams: Object): Promise<LogicSig> {
+  async loadLogic (name: string, scParams: LogicSigArgs, scInitParam?: unknown): Promise<LogicSig> {
     throw new Error("Not implemented");
   }
 
@@ -58,11 +58,13 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   };
 
-  async fundLsig (name: string, scParams: object, flags: FundASCFlags): Promise<void> {
+  async fundLsig (name: string, flags: FundASCFlags,
+    payFlags: TxParams, scParams: LogicSigArgs, scInitParam?: unknown): Promise<void> {
     throw new Error("Not implemented");
   }
 
-  async mkDelegatedLsig (name: string, scParams: object, signer: Account): Promise<LsigInfo> {
+  async mkDelegatedLsig (name: string, signer: Account,
+    scParams: LogicSigArgs, scInitParam?: unknown): Promise<LsigInfo> {
     throw new Error("Not implemented");
   }
 
@@ -74,7 +76,7 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   }
 
-  async ensureCompiled (name: string, force: boolean): Promise<ASCCache> {
+  async ensureCompiled (name: string, force?: boolean, scInitParam?: unknown): Promise<ASCCache> {
     throw new Error("Not implemented");
   }
 

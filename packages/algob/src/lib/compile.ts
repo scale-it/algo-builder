@@ -31,9 +31,14 @@ export class CompileOp {
   //   (Examples: `mysc.teal, security/rbac.teal`)
   //   MUST have a .teal, .lsig or .py extension
   // @param force: if true it will force recompilation even if the cache is up to date.
-  async ensureCompiled (filename: string, force: boolean): Promise<ASCCache> {
+  // @param scInitParam : Smart contract initialization parameters.
+  async ensureCompiled (filename: string, force?: boolean, scInitParam?: unknown): Promise<ASCCache> {
+    if (force === undefined) {
+      force = false;
+    }
+
     if (filename.endsWith(pyExt)) {
-      return await this.pyCompile.ensureCompiled(filename, force);
+      return await this.pyCompile.ensureCompiled(filename, force, scInitParam);
     }
 
     if (!filename.endsWith(tealExt) && !filename.endsWith(lsigExt)) {
@@ -117,13 +122,17 @@ export class PyCompileOp {
    *                   Examples : [ gold.py, asa.py]
    *                   MUST have .py extension
    * @param force    : if true it will force recompilation even if the cache is up to date.
+   * @param scInitParam : Smart Contract Initialization Parameters
    */
-  async ensureCompiled (filename: string, force: boolean): Promise<PyASCCache> {
+  async ensureCompiled (filename: string, force?: boolean, scInitParam?: unknown): Promise<PyASCCache> {
     if (!filename.endsWith(pyExt)) {
       throw new Error(`filename "${filename}" must end with "${pyExt}"`);
     }
 
-    const content = this.compilePyTeal(filename);
+    let param: string | undefined = YAML.stringify(scInitParam);
+    if (scInitParam === undefined) { param = undefined; }
+
+    const content = this.compilePyTeal(filename, param);
     const [teal, thash] = [content, murmurhash.v3(content)];
 
     const a = await this.readArtifact(filename);
@@ -164,21 +173,32 @@ export class PyCompileOp {
   /**
    * Description: Runs a subprocess to execute python script
    * @param filename : python filename in assets folder
+   * @param scInitParam : Smart contract initialization parameters.
    */
-  private runPythonScript (filename: string): SpawnSyncReturns<string> {
+  private runPythonScript (filename: string, scInitParam?: string): SpawnSyncReturns<string> {
     // used spawnSync instead of spawn, as it is synchronous
+    if (scInitParam === undefined) {
+      return spawnSync(
+        'python3', [
+          path.join(ASSETS_DIR, filename)
+        ], { encoding: 'utf8' }
+      );
+    }
+
     return spawnSync('python3', [
-      path.join(ASSETS_DIR, filename)],
-    { encoding: 'utf8' }
+      path.join(ASSETS_DIR, filename),
+      scInitParam
+    ], { encoding: 'utf8' }
     );
   }
 
   /**
    * Description: returns TEAL code using pyTeal compiler
    * @param filename : python filename in assets folder
+   * @param scInitParam : Smart contract initialization parameters.
    */
-  compilePyTeal (filename: string): string {
-    const subprocess: SpawnSyncReturns<string> = this.runPythonScript(filename);
+  compilePyTeal (filename: string, scInitParam?: string): string {
+    const subprocess: SpawnSyncReturns<string> = this.runPythonScript(filename, scInitParam);
 
     if (subprocess.stderr) {
       throw new BuilderError(

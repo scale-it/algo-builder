@@ -1,5 +1,5 @@
 import type { LogicSig } from "algosdk";
-import { Algodv2 } from "algosdk";
+import { Algodv2, LogicSigArgs } from "algosdk";
 
 import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";
@@ -42,8 +42,8 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   async fundLsig (
-    name: string, scParams: Object, flags: FundASCFlags, payFlags: TxParams,
-    txnWriter: txWriter): Promise<LsigInfo> {
+    name: string, flags: FundASCFlags, payFlags: TxParams,
+    txnWriter: txWriter, scParams: LogicSigArgs, scInitParam?: unknown): Promise<LsigInfo> {
     return {
       creator: flags.funder.addr + "-get-address-dry-run",
       contractAddress: "dfssdfsd",
@@ -56,7 +56,8 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     clearProgram: string,
     flags: SSCDeploymentFlags,
     payFlags: TxParams,
-    txWriter: txWriter): Promise<SSCInfo> {
+    txWriter: txWriter,
+    scInitParam?: unknown): Promise<SSCInfo> {
     return {
       creator: flags.sender.addr + "-get-address-dry-run",
       txId: "tx-id-dry-run",
@@ -65,7 +66,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     };
   }
 
-  async ensureCompiled (name: string, force: boolean): Promise<ASCCache> {
+  async ensureCompiled (name: string, force?: boolean, scInitParam?: unknown): Promise<ASCCache> {
     return {
       filename: name,
       timestamp: 1010, // compilation time (Unix time)

@@ -11,10 +11,14 @@ import { CompileOp } from "./compile";
  * @param scParams : parameters
  * @param algodClient : algodClient
  */
-export async function getLsig (name: string, scParams: LogicSigArgs, algodClient: algosdk.Algodv2):
-Promise<LogicSig> {
+export async function getLsig (
+  name: string,
+  algodClient: algosdk.Algodv2,
+  scParams: LogicSigArgs,
+  scInitParam?: unknown):
+  Promise<LogicSig> {
   const compileOp = new CompileOp(algodClient);
-  const result: ASCCache = await compileOp.ensureCompiled(name, false);
+  const result: ASCCache = await compileOp.ensureCompiled(name, false, scInitParam);
   const program = result.toBytes;
   return algosdk.makeLogicSig(program, scParams);
 }

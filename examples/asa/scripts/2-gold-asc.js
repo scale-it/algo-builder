@@ -8,14 +8,14 @@ async function run(runtimeEnv, deployer) {
 
   await executeTransaction(deployer, mkParam(masterAccount, goldOwnerAccount.addr, 200000000, {note: "funding account"}));
 
-  await deployer.fundLsig("2-gold-contract-asc.teal", [],
-    { funder: goldOwnerAccount, fundingMicroAlgo: 101000 }, {});   // sending 0.101 Algo
+  await deployer.fundLsig("2-gold-contract-asc.teal",
+    { funder: goldOwnerAccount, fundingMicroAlgo: 101000 }, {}, []);   // sending 0.101 Algo
 
-  const ascInfoAlgoDelegated = await deployer.mkDelegatedLsig("3-gold-delegated-asc.teal", [],
-  goldOwnerAccount);
+  const ascInfoAlgoDelegated = await deployer.mkDelegatedLsig("3-gold-delegated-asc.teal",
+  goldOwnerAccount, []);
 
-  const ascInfoGoldDelegated = await deployer.mkDelegatedLsig("4-gold-asa.teal", [],
-   goldOwnerAccount); 
+  const ascInfoGoldDelegated = await deployer.mkDelegatedLsig("4-gold-asa.teal",
+   goldOwnerAccount, []); 
 
   console.log(ascInfoAlgoDelegated);
   console.log(ascInfoGoldDelegated);

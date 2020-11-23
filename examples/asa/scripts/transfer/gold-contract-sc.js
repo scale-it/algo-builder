@@ -12,7 +12,7 @@ async function run(runtimeEnv, deployer) {
 
   // Transactions for Transaction for ALGO - Contract : '2-gold-contract-asc.teal'  (Contract Mode)
   // sender is contract account
-  const lsig = await deployer.loadLogic("2-gold-contract-asc.teal");
+  const lsig = await deployer.loadLogic("2-gold-contract-asc.teal", []);
   const sender = lsig.address();
   
   let txnParam = {

@@ -498,29 +498,63 @@ export interface AlgobDeployer {
   isDeployMode: boolean
   accounts: Account[]
   accountsByName: Accounts
+
+  // Puts metadata in checkpount
   putMetadata: (key: string, value: string) => void
+
+  // gets metadata from the checkpoint
   getMetadata: (key: string) => string | undefined
+
+  /**
+   * Description: Deploys ASA to the network
+   * @param name: name of the ASA
+   * @param flags: ASADeplymentFlags
+   */
   deployASA: (name: string, flags: ASADeploymentFlags) => Promise<ASAInfo>
 
-  // Make a payment to a contract account.
+  /**
+   * Description: funds logic signature account
+   * @param name: Stateless Smart Contract filename (must be present in assets folder)
+   * @param payFlags: Transaction Parameters
+   * @param scParams: Smart contract Parameters(Used while calling smart contract)
+   * @param scInitParam : Smart contract initialization parameters.
+   */
   fundLsig: (
-    name: string, // ASC filename
-    scParams: LogicSigArgs, // Parameters
+    name: string,
     flags: FundASCFlags,
-    payFlags: TxParams
+    payFlags: TxParams,
+    scParams: LogicSigArgs,
+    scInitParam?: unknown
   ) => void
 
+  /**
+   * Description: Make delegated logic signature signed by signer
+   * @param name: Stateless Smart Contract filename (must be present in assets folder)
+   * @param signer: Signer Account which will sign the smart contract
+   * @param scParams: Smart contract Parameters(Used while calling smart contract)
+   * @param scInitParam : Smart contract initialization parameters.
+   */
   mkDelegatedLsig: (
-    name: string, // ASC filename
-    scParams: LogicSigArgs, // Parameters
-    signer: Account
+    name: string,
+    signer: Account,
+    scParams: LogicSigArgs,
+    scInitParam?: unknown
   ) => Promise<LsigInfo>
 
+  /**
+   * Description: Make delegated logic signature signed by signer
+   * @param approvalProgram: approval program filename (must be present in assets folder)
+   * @param clearProgram: clear program filename (must be present in assets folder)
+   * @param flags: SSCDeploymentFlags
+   * @param payFlags: Transaction Parameters
+   * @param scInitParam : Smart contract initialization parameters.
+   */
   deploySSC: (
     approvalProgram: string,
     clearProgram: string,
     flags: SSCDeploymentFlags,
-    payFlags: TxParams) => Promise<SSCInfo>
+    payFlags: TxParams,
+    scInitParam?: unknown) => Promise<SSCInfo>
 
   /**
      Returns true if ASA or DelegatedLsig or SSC were deployed in any script.
@@ -548,17 +582,27 @@ export interface AlgobDeployer {
   // extract multi signed logic signature file from assets/
   loadMultiSig: (name: string, scParams: LogicSigArgs) => Promise<LogicSig>
 
-  // load contract mode logic signature (TEAL or PyTEAL)
-  loadLogic: (name: string, scParams: LogicSigArgs) => Promise<LogicSig>
-
   // gets stateful smart contract info from checkpoint
   getSSC: (nameApproval: string, nameClear: string) => SSCInfo | undefined
 
   // gets a delegated logic signature from checkpoint
   getDelegatedLsig: (lsigName: string) => Object | undefined
 
-  // returns compiled program (TEAL or PyTEAL)
-  ensureCompiled: (name: string, force: boolean) => Promise<ASCCache>
+  /**
+   * Description: load contract mode logic signature (TEAL or PyTEAL)
+   * @param name:  Smart Contract filename (must be present in assets folder)
+   * @param scParams: Smart contract Parameters(Used while calling smart contract)
+   * @param scInitParam : Smart contract initialization parameters.
+   */
+  loadLogic: (name: string, scParams: LogicSigArgs, scInitParam?: unknown) => Promise<LogicSig>
+
+  /**
+   * Description: Returns ASCCache (with compiled code)
+   * @param name: Smart Contract filename (must be present in assets folder)
+   * @param force: if force is true file will be compiled for sure, even if it's checkpoint exist
+   * @param scInitParam: Smart contract initialization parameters.
+   */
+  ensureCompiled: (name: string, force?: boolean, scInitParam?: unknown) => Promise<ASCCache>
 }
 
 // ************************
