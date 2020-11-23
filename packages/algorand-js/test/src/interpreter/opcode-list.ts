@@ -4,8 +4,8 @@ import { ERRORS } from "../../../src/errors/errors-list";
 import {
   Add, Arg_0, Arg_1, Arg_2, Arg_3, Div, Len, Mul, Sub
 } from "../../../src/interpreter/opcode-list";
-import { toBytes } from "../../../src/lib/bigint";
 import { MAX_UINT64 } from "../../../src/lib/constants";
+import { toBytes } from "../../../src/lib/parse-data";
 import { Stack } from "../../../src/lib/stack";
 import type { StackElem } from "../../../src/types";
 import { expectTealError } from "../../helpers/errors";

@@ -1,6 +1,6 @@
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
-import { parseNum, toBytes } from "../lib/bigint";
+import { parseNum, toBytes } from "../lib/parse-data";
 import type { AppArgs, TEALStack } from "../types";
 import { Op } from "./opcode";
 
