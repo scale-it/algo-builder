@@ -459,6 +459,16 @@ export interface FundASCFlags {
   fundingMicroAlgo: number
 }
 
+// Stateful Smart Contract Schema
+export interface SSCStateSchema {
+  key: string
+  value: {
+    type: number
+    bytes: string
+    uint: number
+  }
+}
+
 export interface SSCOptionalFlags {
   appArgs?: Uint8Array[]
   accounts?: string[]

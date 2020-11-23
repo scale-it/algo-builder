@@ -16,6 +16,40 @@ export async function balanceOf (
   }
 };
 
+/**
+ * Description: Function to read and return the global state of application.
+ * @param deployer AlgobDeployer
+ * @param creator Account from which call needs to be made
+ * @param appId ID of the application being configured or empty if creating
+ */
+export async function readGlobalStateSSC (
+  deployer: AlgobDeployer,
+  creator: string,
+  appId: number): Promise<SSCStateSchema[] | undefined> {
+  const accountInfoResponse = await deployer.algodClient.accountInformation(creator).do();
+  for (const value of accountInfoResponse['created-apps']) {
+    if (value.id === appId) { return value.params['global-state']; }
+  }
+  return undefined;
+}
+
+/**
+ * Description: Function to read and return the local state of application from an account.
+ * @param deployer AlgobDeployer
+ * @param account account from the which the local state has to be read
+ * @param appId ID of the application being configured or empty if creating
+ */
+export async function readLocalStateSSC (
+  deployer: AlgobDeployer,
+  account: string,
+  appId: number): Promise<SSCStateSchema[] | undefined> {
+  const accountInfoResponse = await deployer.algodClient.accountInformation(account).do();
+  for (const value of accountInfoResponse['apps-local-state']) {
+    if (value.id === appId) { return value[`key-value`]; }
+  }
+  return undefined;
+}
+
 export async function printAssets (deployer: AlgobDeployer, account: string): Promise<void> {
   const accountInfo = await deployer.algodClient.accountInformation(account).do();
   console.log("Asset Holding Info:", accountInfo.assets);
@@ -27,28 +61,12 @@ export async function printLocalStateSSC (
   deployer: AlgobDeployer,
   account: string,
   appId: number): Promise<void> {
-  const accountInfoResponse = await deployer.algodClient.accountInformation(account).do();
-  for (const value of accountInfoResponse['apps-local-state']) {
-    if (value.id === appId) {
-      console.log("User's local state:");
-      for (let n = 0; n < value[`key-value`].length; n++) {
-        console.log(value[`key-value`][n]);
-      }
-    }
+  const localState = await readLocalStateSSC(deployer, account, appId);
+  if (localState === undefined) { return; }
+  console.log("User's local state:");
+  for (let n = 0; n < localState.length; n++) {
+    console.log(localState[n]);
   }
-}
-
-export async function readGlobalStateSSC (
-  deployer: AlgobDeployer,
-  creator: string,
-  appId: number): Promise<SSCStateSchema[] | undefined> {
-  const accountInfoResponse = await deployer.algodClient.accountInformation(creator).do();
-  for (const value of accountInfoResponse['created-apps']) {
-    if (value.id === appId) {
-      return value.params['global-state'];
-    }
-  }
-  return undefined;
 }
 
 // print global state of a stateful smart contract

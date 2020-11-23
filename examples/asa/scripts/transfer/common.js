@@ -2,7 +2,7 @@ const { TransactionType, SignType, executeTransaction } = require("algob");
 
 exports.executeTransaction = async function (deployer, txnParams) {
     try {
-        const details = await executeTransaction(deployer, txnParams);
+        await executeTransaction(deployer, txnParams);
     } catch (e) {
         console.error('Transaction Failed', e.response.error);
     }
