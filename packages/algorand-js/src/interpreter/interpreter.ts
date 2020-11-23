@@ -1,7 +1,7 @@
 import type { execParams } from "algob/src/types";
 import { assert } from "chai";
 
-import { IStack, Stack } from "../../lib/stack";
+import { IStack, Stack } from "../lib/stack";
 import type { AppArgs, Operator, StackElem } from "../types";
 
 export class Interpreter {

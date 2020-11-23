@@ -1,8 +1,8 @@
-import { IStack } from "../../lib/stack";
-import { TealError } from "../core/errors";
-import { ERRORS } from "../core/errors-list";
+import { TealError } from "../errors/errors";
+import { ERRORS } from "../errors/errors-list";
+import { parseNum } from "../lib/bigint";
+import { IStack } from "../lib/stack";
 import type { AppArgs, StackElem } from "../types";
-import { parseNum } from "../utils/bigint";
 import { Op } from "./opcode";
 
 const BIGINT0 = BigInt("0");

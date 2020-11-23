@@ -1,7 +1,7 @@
 import { assert, AssertionError } from "chai";
 
-import { TealError } from "../../src/internal/core/errors";
-import { ErrorDescriptor } from "../../src/internal/core/errors-list";
+import { TealError } from "../../src/errors/errors";
+import { ErrorDescriptor } from "../../src/errors/errors-list";
 
 export function expectTealError (
   f: () => any,

@@ -1,9 +1,9 @@
 import { assert } from "chai";
 
-import { ERRORS } from "../../../src/internal/core/errors-list";
+import { ERRORS } from "../../../src/errors/errors-list";
 import {
   Add, Arg_0, Arg_1, Arg_2, Arg_3, Div, Len, Mul, Sub
-} from "../../../src/internal/interpreter/opcode-list";
+} from "../../../src/interpreter/opcode-list";
 import { MAX_UINT64 } from "../../../src/lib/constants";
 import { Stack } from "../../../src/lib/stack";
 import { expectTealError } from "../../helpers/errors";

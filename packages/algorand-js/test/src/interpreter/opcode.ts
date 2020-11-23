@@ -1,5 +1,5 @@
-import { ERRORS } from "../../../src/internal/core/errors-list";
-import { Op } from "../../../src/internal/interpreter/opcode";
+import { ERRORS } from "../../../src/errors/errors-list";
+import { Op } from "../../../src/interpreter/opcode";
 import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
 import { Stack } from "../../../src/lib/stack";
 import { expectTealError } from "../../helpers/errors";
