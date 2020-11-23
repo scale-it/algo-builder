@@ -5,7 +5,7 @@ Compared to standard ASA, in this example we create a smart-contract to manage a
 
 - Each NFT is an `(ID, ref_data, hash)` triple, stored in the smart contract as `{id: ref_data, id_h: hash}` mapping.
 - `id` is the NFT ID which is calculated as: `total_count_of_nft + 1`. Eg: `id = 1` for the first nft in the smart contract.
-- `ref_data` is associated reference data. Eg: `ref_data` = `https://nft.com/<nft_id>/ref`.
+- `ref_data` is associated reference data. Ideally the `ref_data` should be an external URL. Eg: `ref_data` = `https://nft.com/1/ref`.
 - `id_h` is a `sha256` hash of  the content of reference data.
 
 Please check smart contract for the available commands and arguments to the smart contract.

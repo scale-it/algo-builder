@@ -9,9 +9,9 @@ def approval_program():
     hash is an hash of the external resources data.
 
     Commands:
-        create    Creates a new NFT. Expects two additional arguments: nft-name, nft-ref 
-                  Only creator can create new NFTs.
-        tranfer   Transfers an NFT between two accounts. Expects one additional arg - NFT_ID.
+        create    Creates a new NFT. Expects one additional argument: nft-ref
+                  Only creator can create new NFTs. Ideally, nft-ref should be a URL.
+        transfer  Transfers an NFT between two accounts. Expects one additional arg: NFT_ID.
                   Additionally, two Accounts(from, to) must also be passed to the smart contract. 
     """
 
@@ -23,23 +23,22 @@ def approval_program():
         Assert(Txn.application_args.length() == Int(0)),
         App.globalPut(Bytes("total"), Int(0)),
         Return(Int(1))
-    ])                  
+    ])
+
+    # Always verify that the RekeyTo property of any transaction is set to the ZeroAddress 
+    # unless the contract is specifically involved ina rekeying operation.
+    no_rekey_addr = Txn.rekey_to() == Global.zero_address()
 
 	# Checks whether the sender is creator.
     is_creator = Txn.sender() == App.globalGet(Bytes("creator"))
 
     # Get total count of NFT's from global storage
-    total_nft = Itob(App.globalGet(Bytes("total")))
+    nft_id = Itob(App.globalGet(Bytes("total")))
 
-    #create ref_data for NFT (https://nft-name/<total>/nft-ref)
-    ref_data = Concat(  
-        Bytes("https://"), 
-        Txn.application_args[1], # nft-name
-        Bytes(".com/"), 
-        Itob(App.globalGet(Bytes("total"))), 
-        Bytes("/"), 
-        Txn.application_args[2] # nft-ref
-    )
+    # ref_data for NFT 
+    # nft-hash = hash of ref-data
+    ref_data = Txn.application_args[1]
+    ref_hash = Sha256(Txn.application_args[1])
 
     # Verifies if the creater is making this request
     # Verifies three arguments are passed to this transaction ("create", nft-name, nft-ref)
@@ -48,33 +47,41 @@ def approval_program():
     # Assign hash of nft-ref to ID_h
     # Add above two keys to global and creator's local storage
     create_nft = Seq([
-        Assert(is_creator),
-        Assert(Txn.application_args.length() == Int(3)),
+        Assert(And(
+            Txn.application_args.length() == Int(2),
+            is_creator,
+            no_rekey_addr
+        )),
 
         App.globalPut(Bytes("total"), App.globalGet(Bytes("total")) + Int(1)),
+        
+        App.globalPut(nft_id, ref_data),
+        App.globalPut(Concat(nft_id, Bytes("_h")) , ref_hash),
 
-        App.globalPut(total_nft, ref_data),
-        App.globalPut(Concat(total_nft, Bytes("_h")) , Sha256(Txn.application_args[2])),
-
-        App.localPut(Int(0), total_nft, ref_data),  # Int(0) represents the address of caller
-        App.localPut(Int(0), Concat(total_nft, Bytes("_h")) , Sha256(Txn.application_args[2])),
+        App.localPut(Int(0), nft_id, ref_data),  # Int(0) represents the address of caller
+        App.localPut(Int(0), Concat(nft_id, Bytes("_h")) , ref_hash),
         Return(is_creator)
     ])
-    
+
+    # nft-hash key from 1st argument 
+    id_h = Concat(Txn.application_args[1], Bytes("_h"))
 
     # Verify two arguments are passed 
     # Verify NFT_ID is present in global storage
     # Add nft to account_2's local storage
     # Remove nft from account_1's local storage
     transfer_nft = Seq([
-        Assert(Txn.application_args.length() == Int(2)),
-        Assert(App.globalGet(Bytes("total")) >= Btoi(Txn.application_args[1])),
-
+        Assert(And(
+            Txn.application_args.length() == Int(2),
+            App.globalGet(Bytes("total")) >= Btoi(Txn.application_args[1]),
+            no_rekey_addr
+        )),
+        
         App.localPut(Int(2), Txn.application_args[1], App.localGet(Int(1), Txn.application_args[1])),
-        App.localPut(Int(2), Concat(Txn.application_args[1], Bytes("_h")), App.localGet(Int(1), Concat(Txn.application_args[1], Bytes("_h")))),
+        App.localPut(Int(2), id_h, App.localGet(Int(1), id_h)),
 
         App.localDel(Int(1), Txn.application_args[1]),
-        App.localDel(Int(1), Concat(Txn.application_args[1], Bytes("_h"))),
+        App.localDel(Int(1), id_h),
         Return(Int(1))
     ])
 
@@ -86,7 +93,7 @@ def approval_program():
     # Verifies that first argument is "vote" and jumps to on_vote.
     program = Cond(
         [Txn.application_id() == Int(0), on_creation],
-        [Txn.on_completion() == OnComplete.UpdateApplication, Return(Int(0))], #block update
+        [Txn.on_completion() == OnComplete.UpdateApplication, Return(Int(1))], #block update
         [Txn.on_completion() == OnComplete.DeleteApplication, Return(is_creator)],
         [Txn.on_completion() == OnComplete.CloseOut, Return(Int(1))],
         [Txn.on_completion() == OnComplete.OptIn, Return(Int(1))],
