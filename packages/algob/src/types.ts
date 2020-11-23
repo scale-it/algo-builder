@@ -456,6 +456,7 @@ export interface FundASCFlags {
   fundingMicroAlgo: number
 }
 
+Stateful Smart Contract Schema
 export interface SSCStateSchema {
   key: string
   value: {

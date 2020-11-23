@@ -9,7 +9,8 @@ def approval_program():
     hash is an hash of the external resources data.
 
     Commands:
-        create    Creates a new NFT. Expects two additional arguments - nft-name, nft-ref 
+        create    Creates a new NFT. Expects two additional arguments: nft-name, nft-ref 
+                  Only creator can create new NFTs.
         tranfer   Transfers an NFT between two accounts. Expects one additional arg - NFT_ID.
                   Additionally, two Accounts(from, to) must also be passed to the smart contract. 
     """
