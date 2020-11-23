@@ -492,18 +492,21 @@ export interface AlgobDeployer {
     name: string, // ASC filename
     scParams: LogicSigArgs, // Parameters
     flags: FundASCFlags,
-    payFlags: TxParams
+    payFlags: TxParams,
+    scInitParam?: Object
   ) => void
   mkDelegatedLsig: (
     name: string, // ASC filename
     scParams: LogicSigArgs, // Parameters
-    signer: Account
+    signer: Account,
+    scInitParam?: Object
   ) => Promise<LsigInfo>
   deploySSC: (
     approvalProgram: string,
     clearProgram: string,
     flags: SSCDeploymentFlags,
-    payFlags: TxParams) => Promise<SSCInfo>
+    payFlags: TxParams,
+    scInitParam?: Object) => Promise<SSCInfo>
   /**
      Returns true if ASA or DelegatedLsig or SSC were deployed in any script.
      Checks even for checkpoints which are out of scope from the execution

@@ -39,13 +39,14 @@ export interface AlgoOperator {
     name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, txWriter: txWriter
   ) => Promise<ASAInfo>
   fundLsig: (name: string, scParams: LogicSigArgs, flags: FundASCFlags, payFlags: TxParams,
-    txWriter: txWriter) => Promise<LsigInfo>
+    txWriter: txWriter, scInitParam?: Object) => Promise<LsigInfo>
   deploySSC: (
     approvalProgram: string,
     clearProgram: string,
     flags: SSCDeploymentFlags,
     payFlags: TxParams,
-    txWriter: txWriter) => Promise<SSCInfo>
+    txWriter: txWriter,
+    scInitParam?: Object) => Promise<SSCInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
   optInToASA: (
     asaName: string, assetIndex: number, account: Account, params: TxParams
@@ -55,7 +56,7 @@ export interface AlgoOperator {
   ) => Promise<void>
   optInToSSC: (
     sender: Account, appId: number, payFlags: TxParams, appArgs?: Uint8Array[]) => Promise<void>
-  ensureCompiled: (name: string, force: boolean) => Promise<ASCCache>
+  ensureCompiled: (name: string, force: boolean, scInitParam?: Object) => Promise<ASCCache>
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -210,8 +211,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
     scParams: LogicSigArgs,
     flags: FundASCFlags,
     payFlags: TxParams,
-    txWriter: txWriter): Promise<LsigInfo> {
-    const lsig = await getLsig(name, scParams, this.algodClient);
+    txWriter: txWriter,
+    scInitParam?: Object): Promise<LsigInfo> {
+    const lsig = await getLsig(name, scParams, this.algodClient, scInitParam);
     const contractAddress = lsig.address();
 
     const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
@@ -250,15 +252,16 @@ export class AlgoOperatorImpl implements AlgoOperator {
     clearProgram: string,
     flags: SSCDeploymentFlags,
     payFlags: TxParams,
-    txWriter: txWriter): Promise<SSCInfo> {
+    txWriter: txWriter,
+    scInitParam?: Object): Promise<SSCInfo> {
     const sender = flags.sender.addr;
     const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
 
     const onComplete = algosdk.OnApplicationComplete.NoOpOC;
 
-    const app = await this.ensureCompiled(approvalProgram, false);
+    const app = await this.ensureCompiled(approvalProgram, false, scInitParam);
     const approvalProg = new Uint8Array(Buffer.from(app.compiled, "base64"));
-    const clear = await this.ensureCompiled(clearProgram, false);
+    const clear = await this.ensureCompiled(clearProgram, false, scInitParam);
     const clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
 
     const txn = algosdk.makeApplicationCreateTxn(
@@ -319,7 +322,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     await this.waitForConfirmation(txId);
   }
 
-  async ensureCompiled (name: string, force: boolean): Promise<ASCCache> {
-    return await this.compileOp.ensureCompiled(name, force);
+  async ensureCompiled (name: string, force: boolean, scInitParam?: Object): Promise<ASCCache> {
+    return await this.compileOp.ensureCompiled(name, force, scInitParam);
   }
 }

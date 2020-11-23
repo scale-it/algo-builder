@@ -102,8 +102,8 @@ class DeployerBasicMode {
    * @param scParams parameters
    * @returns {LogicSig} loaded logic signature from assets/<file_name>.teal
    */
-  async loadLogic (name: string, scParams: LogicSigArgs): Promise<LogicSig> {
-    return await getLsig(name, scParams, this.algoOp.algodClient);
+  async loadLogic (name: string, scParams: LogicSigArgs, scInitParam?: Object): Promise<LogicSig> {
+    return await getLsig(name, scParams, this.algoOp.algodClient, scInitParam);
   }
 
   /**
@@ -226,9 +226,9 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
    * @param payFlags - as per SPEC
    */
   async fundLsig (name: string, scParams: LogicSigArgs, flags: FundASCFlags,
-    payFlags: TxParams): Promise<void> {
+    payFlags: TxParams, scInitParam?: Object): Promise<void> {
     try {
-      await this.algoOp.fundLsig(name, scParams, flags, payFlags, this.txWriter);
+      await this.algoOp.fundLsig(name, scParams, flags, payFlags, this.txWriter, scInitParam);
     } catch (error) {
       console.log(error);
       throw error;
@@ -242,11 +242,12 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
    * @param scParams - SC parameters
    * @param signer   - signer
    */
-  async mkDelegatedLsig (name: string, scParams: LogicSigArgs, signer: Account): Promise<LsigInfo> {
+  async mkDelegatedLsig (
+    name: string, scParams: LogicSigArgs, signer: Account, scInitParam?: Object): Promise<LsigInfo> {
     this.assertNoAsset(name);
     let lsigInfo = {} as any;
     try {
-      const lsig = await getLsig(name, scParams, this.algoOp.algodClient);
+      const lsig = await getLsig(name, scParams, this.algoOp.algodClient, scInitParam);
       lsig.sign(signer.sk);
       lsigInfo = {
         creator: signer.addr,
@@ -274,13 +275,14 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
     approvalProgram: string,
     clearProgram: string,
     flags: SSCDeploymentFlags,
-    payFlags: TxParams): Promise<SSCInfo> {
+    payFlags: TxParams,
+    scInitParam?: Object): Promise<SSCInfo> {
     const name = approvalProgram + "-" + clearProgram;
     this.assertNoAsset(name);
     let sscInfo = {} as any;
     try {
       sscInfo = await this.algoOp.deploySSC(
-        approvalProgram, clearProgram, flags, payFlags, this.txWriter);
+        approvalProgram, clearProgram, flags, payFlags, this.txWriter, scInitParam);
     } catch (error) {
       persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
 
