@@ -129,7 +129,8 @@ export class PyCompileOp {
       throw new Error(`filename "${filename}" must end with "${pyExt}"`);
     }
 
-    const param = YAML.stringify(scInitParam);
+    let param: string | undefined = YAML.stringify(scInitParam);
+    if (scInitParam === undefined) { param = undefined; }
 
     const content = this.compilePyTeal(filename, param);
     const [teal, thash] = [content, murmurhash.v3(content)];
@@ -177,7 +178,6 @@ export class PyCompileOp {
   private runPythonScript (filename: string, scInitParam?: string): SpawnSyncReturns<string> {
     // used spawnSync instead of spawn, as it is synchronous
     if (scInitParam === undefined) {
-      console.log("--------------OK-------------");
       return spawnSync(
         'python3', [
           path.join(ASSETS_DIR, filename)
@@ -185,8 +185,6 @@ export class PyCompileOp {
       );
     }
 
-    console.log("--------------OK1-------------");
-    console.log(scInitParam);
     return spawnSync('python3', [
       path.join(ASSETS_DIR, filename),
       scInitParam
