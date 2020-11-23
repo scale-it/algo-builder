@@ -1,5 +1,7 @@
 import sys
-import yaml
+# Add parent-parent directory to path so that algobpy can be imported
+sys.path.insert(0,'../..')
+from algobpy.parse import parseArgs
 
 from pyteal import *
 
@@ -98,15 +100,9 @@ if __name__ == "__main__":
     "TMPL_LEASE": "023sdDE2"
   }
 
-  # decode external parameter and update current values.
-  # (if an external paramter is passed)
-  if(sys.argv[1] != "\n"):
-    try:
-      param = yaml.safe_load(sys.argv[1])
-      for key, value in param.items():
-        scParam[key] = value
-    except yaml.YAMLError as exc:
-      print(exc)
+  # Overwrite scParam if sys.argv[1] is passed
+  if(len(sys.argv) > 1):
+    scParam = parseArgs(sys.argv[1], scParam)
 
   print(compileTeal(dynamic_fee(
     Addr(scParam["TMPL_TO"]), 
@@ -115,3 +111,4 @@ if __name__ == "__main__":
     scParam["TMPL_FV"], 
     scParam["TMPL_LV"], 
     Bytes("base64", scParam["TMPL_LEASE"])), Mode.Signature))
+    
