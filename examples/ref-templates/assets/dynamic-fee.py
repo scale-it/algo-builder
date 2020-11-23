@@ -1,12 +1,7 @@
-from pyteal import *
+import sys
+import yaml
 
-#replace the following params with your custom values
-john = Addr("2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA")
-master = Addr("WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE")
-amount = 700000
-first_valid = 10
-last_valid = 1000000
-lease = Bytes("base64", "023sdDE2")
+from pyteal import *
 
 def dynamic_fee(TMPL_TO,
                 TMPL_AMT,
@@ -92,4 +87,31 @@ def dynamic_fee(TMPL_TO,
     return And(required_condition, params_condition)
     
 if __name__ == "__main__":
-    print(compileTeal(dynamic_fee(john, amount, master, first_valid, last_valid, lease), Mode.Signature))
+
+#replace these values with your customized values or pass an external parameter
+  scParam = {
+    "TMPL_TO": "2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA",
+    "TMPL_AMT": 700000,
+    "TMPL_CLS": "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
+    "TMPL_FV": 10,
+    "TMPL_LV": 1000000,
+    "TMPL_LEASE": "023sdDE2"
+  }
+
+  # decode external parameters and update current values.
+  # (if external paramters are passed)
+  if(sys.argv[1] != "\n"):
+    try:
+      param = yaml.safe_load(sys.argv[1])
+      for key, value in param.items():
+        scParam[key] = value
+    except yaml.YAMLError as exc:
+      print(exc)
+
+  print(compileTeal(dynamic_fee(
+    Addr(scParam["TMPL_TO"]), 
+    scParam["TMPL_AMT"], 
+    Addr(scParam["TMPL_CLS"]), 
+    scParam["TMPL_FV"], 
+    scParam["TMPL_LV"], 
+    Bytes("base64", scParam["TMPL_LEASE"])), Mode.Signature))
