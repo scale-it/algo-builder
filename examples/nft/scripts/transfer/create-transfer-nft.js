@@ -1,5 +1,5 @@
 const { executeTransaction } = require("./common");
-const { TransactionType, SignType } = require("algob");
+const { TransactionType, SignType, toBytes } = require("algob");
 
 async function run(runtimeEnv, deployer) {
 
@@ -10,13 +10,10 @@ async function run(runtimeEnv, deployer) {
   const appId = sscInfo.appID;
   console.log(sscInfo);
 
-  const nft = { name: "some-nft", ref: "ref" }
+  const nft_ref = "https://new-nft.com";
+
   //push arguments "create" and nft data 
-  let appArgs = [
-    new Uint8Array(Buffer.from("create")),
-    new Uint8Array(Buffer.from(nft.name)),
-    new Uint8Array(Buffer.from(nft.ref))
-  ];
+  let appArgs = [ toBytes("create"), toBytes(nft_ref) ];
  
   let txnParam = {
     type: TransactionType.CallNoOpSSC,
@@ -27,11 +24,11 @@ async function run(runtimeEnv, deployer) {
     appArgs
   };
 
-  await executeTransaction(deployer, txnParam); // call to create new nft (with id = 1)
+ await executeTransaction(deployer, txnParam); // call to create new nft (with id = 1)
   
   // push arguments "transfer", 1 (NFT ID)
   appArgs = [
-    new Uint8Array(Buffer.from("transfer")),
+    toBytes("transfer"),
     new Uint8Array(8).fill(1, 7), //[0, 0, 0, 0, 0, 0, 0, 1]
   ];
 

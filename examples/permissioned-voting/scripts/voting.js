@@ -1,4 +1,4 @@
-const { executeTransaction, TransactionType, SignType } = require("algob");
+const { executeTransaction, TransactionType, SignType, toBytes } = require("algob");
 
 /**
 * Description: Converts Integer into Bytes Array
@@ -73,7 +73,7 @@ async function run(runtimeEnv, deployer) {
   console.log(res);
 
   // Register Alice in voting application
-  reg = [new Uint8Array(Buffer.from('register'))];
+  reg = [toBytes('register')];
 
   console.log("Opting-In for Alice in voting application");
   try {

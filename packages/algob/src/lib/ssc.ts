@@ -4,6 +4,11 @@ import tx from "algosdk";
 import { AlgobDeployer, TxParams } from "../types";
 import { mkSuggestedParams } from "./tx";
 
+// returns parsed string to Uint8Array
+export function toBytes (s: string): Uint8Array {
+  return new Uint8Array(Buffer.from(s));
+}
+
 /**
  * Description: Transaction to update TEAL Programs for a contract.
  * @param deployer AlgobDeployer

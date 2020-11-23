@@ -16,6 +16,12 @@ export async function balanceOf (
   }
 };
 
+/**
+ * Description: Function to read and return the global state of application.
+ * @param deployer AlgobDeployer
+ * @param creator Account from which call needs to be made
+ * @param appId ID of the application being configured or empty if creating
+ */
 export async function readGlobalStateSSC (
   deployer: AlgobDeployer,
   creator: string,
@@ -27,6 +33,12 @@ export async function readGlobalStateSSC (
   return undefined;
 }
 
+/**
+ * Description: Function to read and return the local state of application from an account.
+ * @param deployer AlgobDeployer
+ * @param account account from the which the local state has to be read
+ * @param appId ID of the application being configured or empty if creating
+ */
 export async function readLocalStateSSC (
   deployer: AlgobDeployer,
   account: string,
