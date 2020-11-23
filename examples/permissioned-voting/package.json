@@ -1,6 +1,6 @@
 {
-  "name": "local-project-test",
-  "version": "0.0.1",
+  "name": "permissioned-voting-pyteal",
+  "version": "1.0.0",
   "main": "index.js",
   "license": "apache-2.0",
   "devDependencies": {

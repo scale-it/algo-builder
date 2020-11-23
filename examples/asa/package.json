@@ -1,7 +1,7 @@
 {
-  "name": "local-project-test",
+  "name": "example-asa",
   "version": "0.0.1",
-  "main": "index.js",
+  "main": "algob.config.js",
   "license": "MIT",
   "devDependencies": {
     "chai": "^4.2.0"
