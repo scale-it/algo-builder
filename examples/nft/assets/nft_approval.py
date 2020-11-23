@@ -15,13 +15,15 @@ def approval_program():
                   Additionally, two Accounts(from, to) must also be passed to the smart contract. 
     """
 
+    var_total = Bytes("total")
+
     # Check to see that the application ID is not set, indicating this is a creation call.
     # Store the creator address to global state.
     # Set total nft count to 0
     on_creation = Seq([
         App.globalPut(Bytes("creator"), Txn.sender()),
         Assert(Txn.application_args.length() == Int(0)),
-        App.globalPut(Bytes("total"), Int(0)),
+        App.globalPut(var_total, Int(0)),
         Return(Int(1))
     ])
 
@@ -33,7 +35,7 @@ def approval_program():
     is_creator = Txn.sender() == App.globalGet(Bytes("creator"))
 
     # Get total count of NFT's from global storage
-    nft_id = Itob(App.globalGet(Bytes("total")))
+    nft_id = Itob(App.globalGet(var_total))
 
     # ref_data for NFT 
     # nft-hash = hash of ref-data
@@ -53,7 +55,7 @@ def approval_program():
             no_rekey_addr
         )),
 
-        App.globalPut(Bytes("total"), App.globalGet(Bytes("total")) + Int(1)),
+        App.globalPut(var_total, App.globalGet(var_total) + Int(1)),
         
         App.globalPut(nft_id, ref_data),
         App.globalPut(Concat(nft_id, Bytes("_h")) , ref_hash),
@@ -73,7 +75,7 @@ def approval_program():
     transfer_nft = Seq([
         Assert(And(
             Txn.application_args.length() == Int(2),
-            App.globalGet(Bytes("total")) >= Btoi(Txn.application_args[1]),
+            App.globalGet(var_total) >= Btoi(Txn.application_args[1]),
             no_rekey_addr
         )),
         
