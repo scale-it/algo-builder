@@ -10,7 +10,6 @@ import { ERRORS } from "../internal/core/errors-list";
 import { assertDir, ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
 import { timestampNow } from "../lib/time";
 import type { ASCCache, PyASCCache } from "../types";
-import { AddressSchema } from "../types-input";
 
 export const tealExt = ".teal";
 export const pyExt = ".py";
