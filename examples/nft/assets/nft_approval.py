@@ -34,10 +34,10 @@ def approval_program():
 	# Checks whether the sender is creator.
     is_creator = Txn.sender() == App.globalGet(Bytes("creator"))
 
-    # Get total count of NFT's from global storage
+    # Get total amount of NFT's from global storage
     nft_id = Itob(App.globalGet(var_total))
 
-    # ref_data for NFT 
+    # ref_data is a reference data of the NFT, usually an URL or CID.
     # nft-hash = hash of ref-data
     ref_data = Txn.application_args[1]
     ref_hash = Sha256(Txn.application_args[1])
