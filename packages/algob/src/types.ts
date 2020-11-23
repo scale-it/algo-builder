@@ -318,10 +318,12 @@ export interface DeployedAssetInfo {
   confirmedRound: number
 }
 
+// ASA deployment information (log)
 export interface ASAInfo extends DeployedAssetInfo {
   assetIndex: number
 }
 
+// Stateful smart contract deployment information (log)
 export interface SSCInfo extends DeployedAssetInfo {
   appID: number
 }
@@ -335,6 +337,7 @@ export interface RawLsig {
   msig?: MultiSig
 }
 
+// stateless smart contract deployment information (log)
 export interface LsigInfo {
   creator: AccountAddress
   contractAddress: string
@@ -550,17 +553,17 @@ export interface AlgobDeployer {
   */
   isDefined: (name: string) => boolean
 
-  // map for storing ASA
+  // mapping of ASA name to deployment log
   asa: Map<string, ASAInfo>
 
-  // These functions are exposed only for users.
-  // Put your logic into AlgoOperator if you need to interact with the chain.
+  /** The functions are exposed only for users.
+    * Put your logic into AlgoOperator if you need to interact with the chain **/
+
   algodClient: algosdk.Algodv2
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
 
   // Output of these functions is undefined. It's not known what to save to CP
   optInToASA: (name: string, accountName: string, flags: ASADeploymentFlags) => Promise<void>
-
   OptInToSSC: (sender: Account, index: number, payFlags: TxParams) => Promise<void>
 
   // Log Transaction
@@ -569,14 +572,14 @@ export interface AlgobDeployer {
   // extract multi signed logic signature file from assets/
   loadMultiSig: (name: string, scParams: LogicSigArgs) => Promise<LogicSig>
 
-  // get stateful smart contract
+  // gets stateful smart contract info from checkpoint
   getSSC: (nameApproval: string, nameClear: string) => SSCInfo | undefined
 
-  // get delegated Logic signature
+  // gets a delegated logic signature from checkpoint
   getDelegatedLsig: (lsigName: string) => Object | undefined
 
   /**
-   * Description: Load Logic signature from a file
+   * Description: load contract mode logic signature (TEAL or PyTEAL)
    * @param name:  Smart Contract filename (must be present in assets folder)
    * @param scParams: Smart contract Parameters(Used while calling smart contract)
    * @param scInitParam : Smart contract initialization parameters.

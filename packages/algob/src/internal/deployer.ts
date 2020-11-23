@@ -85,7 +85,7 @@ class DeployerBasicMode {
   }
 
   /**
-   * @param lsigName Description: loads and returns delegated logic signature from checkpoint
+   * Description: loads a delegated logic signature from checkpoint
    */
   getDelegatedLsig (lsigName: string): LogicSig | undefined {
     const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map(); ;
