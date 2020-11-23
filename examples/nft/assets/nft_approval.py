@@ -93,7 +93,7 @@ def approval_program():
     # Verifies that first argument is "vote" and jumps to on_vote.
     program = Cond(
         [Txn.application_id() == Int(0), on_creation],
-        [Txn.on_completion() == OnComplete.UpdateApplication, Return(Int(1))], #block update
+        [Txn.on_completion() == OnComplete.UpdateApplication, Return(Int(0))], #block update
         [Txn.on_completion() == OnComplete.DeleteApplication, Return(is_creator)],
         [Txn.on_completion() == OnComplete.CloseOut, Return(Int(1))],
         [Txn.on_completion() == OnComplete.OptIn, Return(Int(1))],
