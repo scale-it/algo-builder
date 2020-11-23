@@ -30,19 +30,32 @@ have sufficient length.`
     title: "Invalid Operation",
     description: `Error encountered in stack while executing teal opcode %opcode%`
   },
-  UINT64_OVERFLOW: {
+  INVALID_UINT64: {
     number: 3,
+    message: "Error encountered while executing teal code",
+    title: "Invalid uint64",
+    description: `Fetched value from stack is not of type UINT64 or is undefined`
+  },
+  UINT64_OVERFLOW: {
+    number: 4,
     message: "Result of current operation caused integer overflow",
     title: "Uint64 Overflow",
     description: `You are tying to perform operation where the result has exceeded 
 maximun uint64 value of 18446744073709551615`
   },
   UINT64_UNDERFLOW: {
-    number: 4,
+    number: 5,
     message: "Result of current operation caused integer underflow",
     title: "Uint64 Underflow",
     description: `You are tying to perform operation where the result is less than 
 minimum uint64 value of 0`
+  },
+  TEAL_REJECTION_ERROR: {
+    number: 6,
+    message: "Invalid top of stack",
+    title: "Teal Rejection Error",
+    description: `Teal code was rejected because top of stack contains
+non zero value or []byte`
   }
 };
 

@@ -1,14 +1,16 @@
 import type { execParams } from "algob/src/types";
 import { assert } from "chai";
 
-import { IStack, Stack } from "../lib/stack";
-import type { AppArgs, Operator, StackElem } from "../types";
+import { TealError } from "../errors/errors";
+import { ERRORS } from "../errors/errors-list";
+import { Stack } from "../lib/stack";
+import type { AppArgs, Operator, StackElem, TEALStack } from "../types";
 
 export class Interpreter {
-  readonly _stack: IStack<StackElem>;
+  readonly stack: TEALStack;
 
   constructor () {
-    this._stack = new Stack<StackElem>();
+    this.stack = new Stack<StackElem>();
   }
 
   /**
@@ -22,11 +24,14 @@ export class Interpreter {
   execute (txn: execParams, logic: Operator[], args: AppArgs): boolean {
     assert(Array.isArray(args));
     for (const l of logic) {
-      l.execute(this._stack); // execute each teal opcode
+      l.execute(this.stack); // execute each teal opcode
     }
-    if (this._stack.length() > 0) {
-      const top = this._stack.pop() as BigInt;
-      if (typeof top === 'string' || top >= BigInt("1")) { return true; } // Logic accept
+    if (this.stack.length() > 0) {
+      const top = this.stack.pop();
+      if (top instanceof Uint8Array || typeof top === 'undefined') {
+        throw new TealError(ERRORS.TEAL.TEAL_REJECTION_ERROR);
+      }
+      if (top >= BigInt("1")) { return true; } // Logic accept
     }
     return false; // Logic Reject
   }
