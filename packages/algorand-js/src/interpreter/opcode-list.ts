@@ -1,6 +1,7 @@
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import type { TEALStack } from "../types";
+import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
 
 const BIGINT0 = BigInt("0");
@@ -78,5 +79,39 @@ export class Arg extends Op {
   execute (stack: TEALStack): void {
     const a = this.assertBytes(this._arg);
     stack.push(a);
+  }
+}
+
+// load block of byte-array constants
+export class Bytecblock extends Op {
+  readonly bytecblock: Uint8Array[];
+  readonly interpreter: Interpreter;
+
+  constructor (interpreter: Interpreter, bytecblock: Uint8Array[]) {
+    super();
+    this.interpreter = interpreter;
+    this.bytecblock = bytecblock;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertArrLength(this.bytecblock);
+    this.interpreter.bytecblock = this.bytecblock;
+  }
+}
+
+// push bytes constant from bytecblock to stack by index
+export class Bytec extends Op {
+  readonly index: number;
+  readonly interpreter: Interpreter;
+
+  constructor (idx: number, interpreter: Interpreter) {
+    super();
+    this.index = idx;
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    const bytec = this.assertBytes(this.interpreter.bytecblock[this.index]);
+    stack.push(bytec);
   }
 }
