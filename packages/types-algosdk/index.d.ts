@@ -193,19 +193,19 @@ export interface MultiSig {
 }
 
 export interface MultiSigAccount {
-  version: number,
-  threshold: number,
+  version: number;
+  threshold: number;
   // array of base32 encoded addresses
   addrs: string[];
 }
 
 export interface SSCStateSchema {
-  key: string
+  key: string;
   value: {
-    type: number
-    bytes: string
-    uint: number
-  }
+    type: number;
+    bytes: string;
+    uint: number;
+  };
 }
 
 export class LogicSigBase {
