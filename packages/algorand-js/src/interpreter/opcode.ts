@@ -1,6 +1,6 @@
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
-import { MAX_UINT64, MIN_UINT64 } from "../lib/constants";
+import { MAX_UINT8, MAX_UINT64, MIN_UINT64 } from "../lib/constants";
 import type { TEALStack } from "../types";
 
 export class Op {
@@ -19,6 +19,12 @@ export class Op {
   checkUnderflow (num: bigint): void {
     if (num < MIN_UINT64) {
       throw new TealError(ERRORS.TEAL.UINT64_UNDERFLOW);
+    }
+  }
+
+  assertArrLength (arr: Uint8Array[]): void {
+    if (arr.length > MAX_UINT8 + 1) {
+      throw new TealError(ERRORS.TEAL.ASSERT_ARR_LENGTH);
     }
   }
 
