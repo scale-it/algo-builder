@@ -1,8 +1,6 @@
-import { assert } from "chai";
-
 import { ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
-import { Add, Arg } from "../../../src/interpreter/opcode-list";
+import { Arg } from "../../../src/interpreter/opcode-list";
 import { toBytes } from "../../../src/lib/parse-data";
 import { expectTealError } from "../../helpers/errors";
 
@@ -16,8 +14,6 @@ const fkParam = {
 };
 
 describe("Interpreter", function () {
-  const interpreter = new Interpreter();
-
   it("should throw error if top of stack is invalid", function () {
     const interpreter = new Interpreter();
     const args = [toBytes("")];

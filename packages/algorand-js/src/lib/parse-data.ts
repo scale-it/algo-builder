@@ -1,7 +1,3 @@
-export function parseNum (num: number): bigint {
-  return BigInt(num.toString());
-}
-
 // parse string to Uint8Array
 export function toBytes (s: string): Uint8Array {
   return new Uint8Array(Buffer.from(s));
