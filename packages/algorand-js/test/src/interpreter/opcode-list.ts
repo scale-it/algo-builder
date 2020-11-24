@@ -330,11 +330,11 @@ describe("Teal Opcodes", function () {
       assert.deepEqual(top, bytecblock[3]);
     });
 
-    it("should throw error if accessing bytec[N] is not defined", function () {
+    it("should throw error on loading bytec[N] if index is out of bound", function () {
       const op = new Bytec(bytecblock.length + 1, interpreter);
       expectTealError(
         () => op.execute(stack),
-        ERRORS.TEAL.INVALID_TYPE
+        ERRORS.TEAL.INDEX_OUT_OF_BOUND
       );
     });
   });
@@ -404,11 +404,11 @@ describe("Teal Opcodes", function () {
       assert.deepEqual(top, intcblock[3]);
     });
 
-    it("should throw error if accessing intc[N] is not defined", function () {
+    it("should throw error on loading intc[N] if index is out of bound", function () {
       const op = new Intc(intcblock.length + 1, interpreter);
       expectTealError(
         () => op.execute(stack),
-        ERRORS.TEAL.INVALID_TYPE
+        ERRORS.TEAL.INDEX_OUT_OF_BOUND
       );
     });
   });

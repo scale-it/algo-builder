@@ -111,6 +111,7 @@ export class Bytec extends Op {
   }
 
   execute (stack: TEALStack): void {
+    this.checkIndexBound(this.index, this.interpreter.bytecblock);
     const bytec = this.assertBytes(this.interpreter.bytecblock[this.index]);
     stack.push(bytec);
   }
@@ -145,6 +146,7 @@ export class Intc extends Op {
   }
 
   execute (stack: TEALStack): void {
+    this.checkIndexBound(this.index, this.interpreter.intcblock);
     const intc = this.assertBigInt(this.interpreter.intcblock[this.index]);
     stack.push(intc);
   }

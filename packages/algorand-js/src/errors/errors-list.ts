@@ -70,6 +70,13 @@ minimum uint64 value of 0`
     title: "Teal Rejection Error",
     description: `Teal code was rejected because top of stack contains
 non zero value or []byte`
+  },
+  INDEX_OUT_OF_BOUND: {
+    number: 9,
+    message: "Index out of bound",
+    title: "Index out of bound",
+    description: `Segmentation fault - The teal code tried to access a value 
+by an index that does not exist.`
   }
 };
 
