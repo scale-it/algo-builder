@@ -9,13 +9,8 @@ const BIGINT0 = BigInt("0");
 export class Len extends Op {
   execute (stack: TEALStack): void {
     this.assertStackLen(stack, 1);
-    const top = stack.pop();
-    if (typeof top === 'undefined' || !(top instanceof Uint8Array)) {
-      throw new TealError(ERRORS.TEAL.INVALID_OP_ARG, {
-        opcode: "len"
-      });
-    }
-    stack.push(BigInt(top.length));
+    const a = this.assertBytes(stack.pop());
+    stack.push(BigInt(a.length));
   }
 }
 
@@ -26,8 +21,9 @@ export class Add extends Op {
     this.assertStackLen(stack, 2);
     const a = this.assertBigInt(stack.pop());
     const b = this.assertBigInt(stack.pop());
-    this.checkOverFlow(a + b);
-    stack.push(a + b);
+    const result = a + b;
+    this.checkOverflow(result);
+    stack.push(result);
   }
 }
 
@@ -38,8 +34,9 @@ export class Sub extends Op {
     this.assertStackLen(stack, 2);
     const a = this.assertBigInt(stack.pop());
     const b = this.assertBigInt(stack.pop());
-    this.checkUnderFlow(a - b);
-    stack.push(a - b);
+    const result = a - b;
+    this.checkUnderflow(result);
+    stack.push(result);
   }
 }
 
@@ -51,9 +48,7 @@ export class Div extends Op {
     const a = this.assertBigInt(stack.pop());
     const b = this.assertBigInt(stack.pop());
     if (b === BIGINT0) {
-      throw new TealError(ERRORS.TEAL.INVALID_OP_ARG, {
-        opcode: "/"
-      });
+      throw new TealError(ERRORS.TEAL.ZERO_DIV);
     }
     stack.push(a / b);
   }
@@ -66,78 +61,23 @@ export class Mul extends Op {
     this.assertStackLen(stack, 2);
     const a = this.assertBigInt(stack.pop());
     const b = this.assertBigInt(stack.pop());
-    this.checkOverFlow(a * b);
-    stack.push(a * b);
+    const result = a * b;
+    this.checkOverflow(result);
+    stack.push(result);
   }
 }
 
-// pushes 1st argument from argument array to stack
-export class Arg_0 extends Op {
-  readonly _args;
+// pushes argument[N] from argument array to stack
+export class Arg extends Op {
+  readonly _arg;
 
-  constructor (args: AppArgs) {
+  constructor (arg: Uint8Array) {
     super();
-    this._args = args;
+    this._arg = arg;
   };
 
   execute (stack: TEALStack): void {
-    const arg = this._args[0];
-    if (arg === undefined || (typeof arg !== 'string' && typeof arg !== 'number')) {
-      throw new TealError(ERRORS.TEAL.INVALID_OP_ARG, {
-        opcode: "arg_0"
-      });
-    }
-    if (typeof arg === 'number') {
-      this.checkOverFlow(parseNum(arg));
-      stack.push(parseNum(arg));
-    } else { stack.push(toBytes(arg)); }
-  }
-}
-
-// pushes 2nd argument from argument array to stack
-export class Arg_1 extends Arg_0 {
-  execute (stack: TEALStack): void {
-    const arg = this._args[1];
-    if (arg === undefined || (typeof arg !== 'string' && typeof arg !== 'number')) {
-      throw new TealError(ERRORS.TEAL.INVALID_OP_ARG, {
-        opcode: "arg_1"
-      });
-    }
-    if (typeof arg === 'number') {
-      this.checkOverFlow(parseNum(arg));
-      stack.push(parseNum(arg));
-    } else { stack.push(toBytes(arg)); }
-  }
-}
-
-// pushes 3rd argument from argument array to stack
-export class Arg_2 extends Arg_0 {
-  execute (stack: TEALStack): void {
-    const arg = this._args[2];
-    if (arg === undefined || (typeof arg !== 'string' && typeof arg !== 'number')) {
-      throw new TealError(ERRORS.TEAL.INVALID_OP_ARG, {
-        opcode: "arg_2"
-      });
-    }
-    if (typeof arg === 'number') {
-      this.checkOverFlow(parseNum(arg));
-      stack.push(parseNum(arg));
-    } else { stack.push(toBytes(arg)); }
-  }
-}
-
-// pushes 4th argument from argument array to stack
-export class Arg_3 extends Arg_0 {
-  execute (stack: TEALStack): void {
-    const arg = this._args[3];
-    if (arg === undefined || (typeof arg !== 'string' && typeof arg !== 'number')) {
-      throw new TealError(ERRORS.TEAL.INVALID_OP_ARG, {
-        opcode: "arg_3"
-      });
-    }
-    if (typeof arg === 'number') {
-      this.checkOverFlow(parseNum(arg));
-      stack.push(parseNum(arg));
-    } else { stack.push(toBytes(arg)); }
+    const a = this.assertBytes(this._arg);
+    stack.push(a);
   }
 }

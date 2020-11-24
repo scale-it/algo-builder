@@ -4,7 +4,7 @@ import { assert } from "chai";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { Stack } from "../lib/stack";
-import type { AppArgs, Operator, StackElem, TEALStack } from "../types";
+import type { Operator, StackElem, TEALStack } from "../types";
 
 export class Interpreter {
   readonly stack: TEALStack;
@@ -21,7 +21,7 @@ export class Interpreter {
  * @param {AppArgs} args : argument array passed to the current transaction
  * @returns {boolean} : transaction accepted/rejected based on asc logic
  */
-  execute (txn: execParams, logic: Operator[], args: AppArgs): boolean {
+  execute (txn: execParams, logic: Operator[], args: Uint8Array[]): boolean {
     assert(Array.isArray(args));
     for (const l of logic) {
       l.execute(this.stack); // execute each teal opcode

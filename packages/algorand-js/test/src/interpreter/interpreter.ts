@@ -2,7 +2,8 @@ import { assert } from "chai";
 
 import { ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
-import { Add, Arg_0, Arg_1 } from "../../../src/interpreter/opcode-list";
+import { Add, Arg } from "../../../src/interpreter/opcode-list";
+import { toBytes } from "../../../src/lib/parse-data";
 import { expectTealError } from "../../helpers/errors";
 
 const fkParam = {
@@ -16,27 +17,14 @@ const fkParam = {
 
 describe("Interpreter", function () {
   const interpreter = new Interpreter();
-  interpreter.execute(fkParam, [], []);
 
   it("should throw error if top of stack is invalid", function () {
     const interpreter = new Interpreter();
-    const args = [""];
-    const logic = [new Arg_0(args)];
+    const args = [toBytes("")];
+    const logic = [new Arg(args[0])];
     expectTealError(
       () => interpreter.execute(fkParam, logic, args),
       ERRORS.TEAL.TEAL_REJECTION_ERROR
     );
-  });
-
-  it("should return true if top of stack > 0 according to logic", function () {
-    const interpreter = new Interpreter();
-    const args = [1, 2];
-    const logic = [
-      new Arg_0(args),
-      new Arg_1(args),
-      new Add()
-    ];
-    const res = interpreter.execute(fkParam, logic, args);
-    assert.isTrue(res);
   });
 });

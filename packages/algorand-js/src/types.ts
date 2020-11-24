@@ -1,11 +1,10 @@
 import {
-  Add, Arg_0, Arg_1, Arg_2,
-  Arg_3, Div, Len, Mul, Sub
+  Add, Arg, Div, Len, Mul, Sub
 } from "./interpreter/opcode-list";
 import type { IStack } from "./lib/stack";
 
 export type Operator = Len | Add | Sub |
-Mul | Div | Arg_0 | Arg_1 | Arg_2 | Arg_3;
+Mul | Div | Arg;
 
 export type AppArgs = Array<string | number>;
 

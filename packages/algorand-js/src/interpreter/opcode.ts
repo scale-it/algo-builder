@@ -10,13 +10,13 @@ export class Op {
     }
   }
 
-  checkOverFlow (num: bigint): void {
+  checkOverflow (num: bigint): void {
     if (num > MAX_UINT64) {
       throw new TealError(ERRORS.TEAL.UINT64_OVERFLOW);
     }
   }
 
-  checkUnderFlow (num: bigint): void {
+  checkUnderflow (num: bigint): void {
     if (num < MIN_UINT64) {
       throw new TealError(ERRORS.TEAL.UINT64_UNDERFLOW);
     }
@@ -24,8 +24,21 @@ export class Op {
 
   assertBigInt (a: unknown): bigint {
     if (typeof a === "undefined" || typeof a !== "bigint") {
-      throw new TealError(ERRORS.TEAL.INVALID_UINT64);
+      throw new TealError(ERRORS.TEAL.INVALID_TYPE, {
+        expected: "uint64",
+        actual: typeof a
+      });
     }
     return a;
+  }
+
+  assertBytes (b: unknown): Uint8Array {
+    if (typeof b === 'undefined' || !(b instanceof Uint8Array)) {
+      throw new TealError(ERRORS.TEAL.INVALID_TYPE, {
+        expected: "byte[]",
+        actual: typeof b
+      });
+    }
+    return b;
   }
 }
