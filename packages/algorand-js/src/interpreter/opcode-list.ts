@@ -115,3 +115,37 @@ export class Bytec extends Op {
     stack.push(bytec);
   }
 }
+
+// load block of uint64 constants
+export class Intcblock extends Op {
+  readonly intcblock: Array<bigint>;
+  readonly interpreter: Interpreter;
+
+  constructor (interpreter: Interpreter, intcblock: Array<bigint>) {
+    super();
+    this.interpreter = interpreter;
+    this.intcblock = intcblock;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertArrLength(this.intcblock);
+    this.interpreter.intcblock = this.intcblock;
+  }
+}
+
+// push value from uint64 intcblock to stack by index
+export class Intc extends Op {
+  readonly index: number;
+  readonly interpreter: Interpreter;
+
+  constructor (index: number, interpreter: Interpreter) {
+    super();
+    this.index = index;
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    const intc = this.assertBigInt(this.interpreter.intcblock[this.index]);
+    stack.push(intc);
+  }
+}

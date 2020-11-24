@@ -22,8 +22,8 @@ export class Op {
     }
   }
 
-  assertArrLength (arr: Uint8Array[]): void {
-    if (arr.length > MAX_UINT8 + 1) {
+  assertArrLength (arr: Uint8Array[] | Array<bigint>): void {
+    if (!arr.length || arr.length > MAX_UINT8 + 1) {
       throw new TealError(ERRORS.TEAL.ASSERT_ARR_LENGTH);
     }
   }

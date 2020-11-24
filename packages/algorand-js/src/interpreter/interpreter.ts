@@ -9,10 +9,12 @@ import type { Operator, StackElem, TEALStack } from "../types";
 export class Interpreter {
   readonly stack: TEALStack;
   bytecblock: Uint8Array[];
+  intcblock: Array<bigint>;
 
   constructor () {
     this.stack = new Stack<StackElem>();
     this.bytecblock = [];
+    this.intcblock = [];
   }
 
   /**

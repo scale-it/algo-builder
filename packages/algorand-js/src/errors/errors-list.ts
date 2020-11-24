@@ -26,10 +26,10 @@ have sufficient length.`
   },
   ASSERT_ARR_LENGTH: {
     number: 2,
-    message: "Length of block exceeded",
-    title: "Max array length",
-    description: `The provided block of arg/[]bytes/uint64 have exceeded the max length
-of 256`
+    message: "Length of block exceeded 256 or is equal to 0",
+    title: "Invalid Block length",
+    description: `The size of provided block of []bytes/uint64 is not within the
+permissible range of 1 to 256`
   },
   INVALID_OP_ARG: {
     number: 3,
