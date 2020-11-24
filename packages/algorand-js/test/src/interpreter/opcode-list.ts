@@ -1,10 +1,12 @@
 import { assert } from "chai";
 
 import { ERRORS } from "../../../src/errors/errors-list";
+import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
-  Add, Arg, Div, Len, Mul, Sub
+  Add, Arg, Bytec,
+  Bytecblock, Div, Len, Mul, Sub
 } from "../../../src/interpreter/opcode-list";
-import { MAX_UINT64 } from "../../../src/lib/constants";
+import { MAX_UINT8, MAX_UINT64 } from "../../../src/lib/constants";
 import { toBytes } from "../../../src/lib/parse-data";
 import { Stack } from "../../../src/lib/stack";
 import type { StackElem } from "../../../src/types";
@@ -225,7 +227,7 @@ describe("Teal Opcodes", function () {
       toBytes("Arg3")
     ];
 
-    it("should push arg_0 from argument array", function () {
+    it("should push arg_0 from argument array to stack", function () {
       const op = new Arg(args[0]);
       op.execute(stack);
 
@@ -233,7 +235,7 @@ describe("Teal Opcodes", function () {
       assert.deepEqual(top, args[0]);
     });
 
-    it("should push arg_1 from argument array", function () {
+    it("should push arg_1 from argument array to stack", function () {
       const op = new Arg(args[1]);
       op.execute(stack);
 
@@ -241,7 +243,7 @@ describe("Teal Opcodes", function () {
       assert.deepEqual(top, args[1]);
     });
 
-    it("should push arg_2 from argument array", function () {
+    it("should push arg_2 from argument array to stack", function () {
       const op = new Arg(args[2]);
       op.execute(stack);
 
@@ -249,7 +251,7 @@ describe("Teal Opcodes", function () {
       assert.deepEqual(top, args[2]);
     });
 
-    it("should push arg_3 from argument array", function () {
+    it("should push arg_3 from argument array to stack", function () {
       const op = new Arg(args[3]);
       op.execute(stack);
 
@@ -260,6 +262,90 @@ describe("Teal Opcodes", function () {
     it("should throw error if accessing arg is not defined", function () {
       const args = [new Uint8Array(0)];
       const op = new Arg(args[1]);
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.INVALID_TYPE
+      );
+    });
+  });
+
+  describe("Bytecblock", function () {
+    const stack = new Stack<StackElem>();
+
+    it("should throw error if bytecblock length exceeds uint8", function () {
+      const interpreter = new Interpreter();
+      const bytecblock: Uint8Array[] = [];
+      for (let i = 0; i < MAX_UINT8 + 5; i++) {
+        bytecblock.push(toBytes("my_byte"));
+      }
+
+      const op = new Bytecblock(interpreter, bytecblock);
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.ASSERT_ARR_LENGTH
+      );
+    });
+
+    it("should load byte block to interpreter bytecblock", function () {
+      const interpreter = new Interpreter();
+      const bytecblock = [
+        toBytes("bytec_0"),
+        toBytes("bytec_1"),
+        toBytes("bytec_2"),
+        toBytes("bytec_3")
+      ];
+      const op = new Bytecblock(interpreter, bytecblock);
+      op.execute(stack);
+
+      assert.deepEqual(bytecblock, interpreter.bytecblock);
+    });
+  });
+
+  describe("Bytec[N]", function () {
+    const stack = new Stack<StackElem>();
+    const interpreter = new Interpreter();
+    const bytecblock = [
+      toBytes("bytec_0"),
+      toBytes("bytec_1"),
+      toBytes("bytec_2"),
+      toBytes("bytec_3")
+    ];
+    interpreter.bytecblock = bytecblock;
+
+    it("should push bytec_0 from bytecblock to stack", function () {
+      const op = new Bytec(0, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.deepEqual(top, bytecblock[0]);
+    });
+
+    it("should push bytec_1 from bytecblock to stack", function () {
+      const op = new Bytec(1, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.deepEqual(top, bytecblock[1]);
+    });
+
+    it("should push bytec_2 from bytecblock to stack", function () {
+      const op = new Bytec(2, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.deepEqual(top, bytecblock[2]);
+    });
+
+    it("should push bytec_3 from bytecblock to stack", function () {
+      const op = new Bytec(3, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.deepEqual(top, bytecblock[3]);
+    });
+
+    it("should throw error if accessing bytec[N] is not defined", function () {
+      const op = new Bytec(bytecblock.length + 1, interpreter);
       expectTealError(
         () => op.execute(stack),
         ERRORS.TEAL.INVALID_TYPE
