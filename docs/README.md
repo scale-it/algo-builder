@@ -11,6 +11,7 @@
 + [Algob Console](/docs/algob-console.md)
 + [PyTeal](/docs/py-teal.md).
 + [API docs](https://scale-it.github.io/algorand-builder/)
++ [Best Practices](./best-practices.md)
 
 For more in-depth description you can look at the [project specification](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
 
