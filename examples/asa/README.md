@@ -15,6 +15,7 @@ Balances can be queried by executing `algob run scripts/query/john-balances.js`.
 ## Usage
 
 Please follow the [setup](../README.md) instructions to install dependencies and update the config.
+This example is using PyTEAL, so make sure to follow the Python3 setup described above.
 
 ### Run
 ```

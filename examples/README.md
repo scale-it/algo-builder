@@ -31,8 +31,11 @@ If want to use a development version of `algob`, you can use `yarn link`:
 
 After that, `algob` will be in your local yarn context. To use it we either access `algob` through `yarn run` (recommended), or through `node_modules/.bin`.
 
-The example is already initialized. So we don't need to run `yarn run algob init .`
+The examples are already initialized. So we don't need to run `yarn run algob init .`
 
+#### PyTEAL
+
+Many examples are using PyTEAL. Please follow our [PyTEAL setup](../README.md#pyteal).
 
 ### Update config
 

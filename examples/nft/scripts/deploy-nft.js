@@ -8,14 +8,14 @@ const { TransactionType, SignType } = require("algob");
 async function run(runtimeEnv, deployer) {
 
   const masterAccount = deployer.accountsByName.get("master-account")
-  const johnAccount = deployer.accountsByName.get("john-account"); 
+  const johnAccount = deployer.accountsByName.get("john-account");
 
   let algoTxnParams = {
     type: TransactionType.TransferAlgo,
     sign: SignType.SecretKey,
     fromAccount: masterAccount,
     toAccountAddr: johnAccount.addr,
-    amountMicroAlgos: 401000000,
+    amountMicroAlgos: 401000000, // 401 algos
     payFlags: {note: "funding account"}
   };
 

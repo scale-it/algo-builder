@@ -23,6 +23,7 @@ The application is deleted and voter account is cleared using `scripts/vote/resu
 ## Setup
 
 Please follow the [setup](../README.md) instructions to install dependencies and update the config.
+This example is using PyTEAL, so make sure to follow the Python3 setup described above.
 
 ### Run
 
@@ -37,4 +38,3 @@ To Cast a Vote:
 To see the results and delete the application:
 
         yarn run algob run scripts/vote/result.js
-
