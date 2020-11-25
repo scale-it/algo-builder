@@ -7,7 +7,7 @@ const { executeTransaction, TransactionType, SignType } = require("algob");
 async function run(runtimeEnv, deployer) {
 
   const masterAccount = deployer.accountsByName.get("master-account")
-  const bob = deployer.accountsByName.get("bob-account"); // Buyer
+  const bob = deployer.accountsByName.get("bob"); // Buyer
 
   let txnParams = {
     type: TransactionType.TransferAlgo,

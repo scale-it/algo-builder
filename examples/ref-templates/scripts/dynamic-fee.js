@@ -3,8 +3,8 @@ const { executeTransaction, mkTxnParams } = require("./common/common");
 async function run(runtimeEnv, deployer) {
 
   const masterAccount = deployer.accountsByName.get("master-account")
-  const john = deployer.accountsByName.get("john-account");
-  const bob = deployer.accountsByName.get("bob-account");
+  const john = deployer.accountsByName.get("john");
+  const bob = deployer.accountsByName.get("bob");
 
   scInitParam = {
     TMPL_TO: john.addr,  

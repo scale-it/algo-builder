@@ -9,8 +9,8 @@ const { TransactionType, SignType, createMsigAddress } = require("algob");
 async function run(runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get("master-account")
   const alice = deployer.accountsByName.get("alice");
-  const john = deployer.accountsByName.get("john-account");
-  const bob = deployer.accountsByName.get("bob-account");
+  const john = deployer.accountsByName.get("john");
+  const bob = deployer.accountsByName.get("bob");
 
   //Generate multi signature account hash
   const addrs =  [alice.addr, john.addr, bob.addr]  // you can replace these addresses with your custom addrs for multisig account.

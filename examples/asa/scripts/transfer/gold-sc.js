@@ -8,8 +8,8 @@ const { TransactionType, SignType } = require("algob");
 
 async function run(runtimeEnv, deployer) {
   const goldOwner = deployer.accountsByName.get("alice");
-  const john = deployer.accountsByName.get("john-account");
-  const bob = deployer.accountsByName.get("bob-account");
+  const john = deployer.accountsByName.get("john");
+  const bob = deployer.accountsByName.get("bob");
 
   // Transactions for GOLD ASA contract : '4-gold-asa.teal'  (Delegated Approval Mode)
   const lsigGoldOwner = deployer.getDelegatedLsig('4-gold-asa.teal');

@@ -3,8 +3,8 @@ const { executeTransaction, balanceOf, TransactionType, SignType } = require("al
 async function run(runtimeEnv, deployer) {
   const teslaAssetID = deployer.asa.get("tesla").assetIndex
 
-  const john = deployer.accountsByName.get("john-account");
-  const elon = deployer.accountsByName.get("elon-musk-account");
+  const john = deployer.accountsByName.get("john");
+  const elon = deployer.accountsByName.get("elon-musk");
 
   await executeTransaction(deployer, {
     type: TransactionType.TransferAsset,

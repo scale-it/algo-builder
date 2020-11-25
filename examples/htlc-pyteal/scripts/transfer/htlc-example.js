@@ -11,8 +11,8 @@ const { executeTransaction } = require("./common")
 
 async function run(runtimeEnv, deployer) {
 
-    const john = deployer.accountsByName.get("john-account"); // Seller
-    const bob = deployer.accountsByName.get("bob-account"); // Buyer
+    const john = deployer.accountsByName.get("john"); // Seller
+    const bob = deployer.accountsByName.get("bob"); // Buyer
 
     const secret = "hero wisdom green split loop element vote belt";
     const wrongSecret = "hero wisdom red split loop element vote belt";

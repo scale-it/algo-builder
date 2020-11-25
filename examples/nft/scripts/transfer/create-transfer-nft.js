@@ -4,7 +4,7 @@ const { TransactionType, SignType, toBytes } = require("algob");
 async function run(runtimeEnv, deployer) {
 
   const masterAccount = deployer.accountsByName.get("master-account")
-  const john = deployer.accountsByName.get("john-account");
+  const john = deployer.accountsByName.get("john");
 
   const sscInfo = await deployer.getSSC("nft_approval.py", "nft_clear_state.py");
   const appId = sscInfo.appID;

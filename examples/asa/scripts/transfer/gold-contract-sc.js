@@ -7,8 +7,8 @@ const { TransactionType, SignType} = require("algob");
 const { executeTransaction } = require("./common");
 
 async function run(runtimeEnv, deployer) {
-  const john = deployer.accountsByName.get("john-account");
-  const elon = deployer.accountsByName.get("elon-musk-account");
+  const john = deployer.accountsByName.get("john");
+  const elon = deployer.accountsByName.get("elon-musk");
 
   // Transactions for Transaction for ALGO - Contract : '2-gold-contract-asc.teal'  (Contract Mode)
   // sender is contract account

@@ -8,7 +8,7 @@ const { TransactionType, SignType } = require("algob");
 async function run(runtimeEnv, deployer) {
 
   const masterAccount = deployer.accountsByName.get("master-account")
-  const john = deployer.accountsByName.get("john-account");
+  const john = deployer.accountsByName.get("john");
 
   let algoTxnParams = {
     type: TransactionType.TransferAlgo,

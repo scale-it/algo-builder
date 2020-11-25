@@ -2,7 +2,7 @@ const { printAssets } = require("algob");
 
 async function run(runtimeEnv, deployer) {
 
-  const john = deployer.accountsByName.get("john-account");
+  const john = deployer.accountsByName.get("john");
 
   // print one by one
   //const goldAssetID = deployer.algodClient.asa.get("gold").assetIndex

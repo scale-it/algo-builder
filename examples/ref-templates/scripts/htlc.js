@@ -4,7 +4,7 @@ const { SignType, globalZeroAddress } = require("algob");
 async function run(runtimeEnv, deployer) {
 
   const masterAccount = deployer.accountsByName.get("master-account")
-  const john = deployer.accountsByName.get("john-account");
+  const john = deployer.accountsByName.get("john");
 
   let txnParams = mkTxnParams(masterAccount, john.addr, 200000000, {}, {note: "funding account"});
   txnParams.sign = SignType.SecretKey;

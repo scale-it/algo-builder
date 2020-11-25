@@ -3,7 +3,7 @@ const { executeTransaction, balanceOf, TransactionType, SignType } = require("al
 async function run(runtimeEnv, deployer) {
   const goldAssetID = deployer.asa.get("gold").assetIndex
 
-  const john = deployer.accountsByName.get("john-account");
+  const john = deployer.accountsByName.get("john");
   const goldOwner = deployer.accountsByName.get("alice");
 
   await executeTransaction(deployer, {
