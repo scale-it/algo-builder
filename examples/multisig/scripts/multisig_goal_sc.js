@@ -8,12 +8,12 @@ const { TransactionType, SignType, createMsigAddress } = require("algob");
 
 async function run(runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get("master-account")
-  const alice = deployer.accountsByName.get("alice-account");
-  const johnAccount = deployer.accountsByName.get("john-account");
-  const bobAccount = deployer.accountsByName.get("bob-account");
+  const alice = deployer.accountsByName.get("alice");
+  const john = deployer.accountsByName.get("john-account");
+  const bob = deployer.accountsByName.get("bob-account");
 
   //Generate multi signature account hash
-  const addrs =  [alice.addr, johnAccount.addr, bobAccount.addr]  // you can replace these addresses with your custom addrs for multisig account.
+  const addrs =  [alice.addr, john.addr, bob.addr]  // you can replace these addresses with your custom addrs for multisig account.
   const [mparams, multsigaddr] = createMsigAddress(1, 2, addrs);   // passing (version, threshold, address list)
 
   let txnParams = {
@@ -35,7 +35,7 @@ async function run(runtimeEnv, deployer) {
     type: TransactionType.TransferAlgo,
     sign: SignType.LogicSignature,
     fromAccount: { addr: multsigaddr },
-    toAccountAddr: bobAccount.addr,
+    toAccountAddr: bob.addr,
     amountMicroAlgos: 20,
     lsig: lsig,
     payFlags: {}

@@ -11,23 +11,23 @@ async function run(runtimeEnv, deployer) {
   console.log("[tesla]: Script has started execution!")
 
   const masterAccount = deployer.accountsByName.get("master-account")
-  const elonMuskAccount = deployer.accountsByName.get("elon-musk-account");
-  const johnAccount = deployer.accountsByName.get("john-account");
+  const elon = deployer.accountsByName.get("elon-musk-account");
+  const john = deployer.accountsByName.get("john-account");
 
-  // activate elonMusk account
-  await executeTransaction(deployer, mkParam(masterAccount, elonMuskAccount.addr, 401000000, {note: "funding account"}))
+  // activate elon account
+  await executeTransaction(deployer, mkParam(masterAccount, elon.addr, 401000000, {note: "funding account"}))
 
   const asaInfo = await deployer.deployASA("tesla", {
-    creator: elonMuskAccount})
+    creator: elon})
   console.log(asaInfo)
 
   await deployer.optInToASA("tesla", "john-account", {})
 
   const assetID = asaInfo.assetIndex
-  await balanceOf(deployer, elonMuskAccount.addr, assetID);
+  await balanceOf(deployer, elon.addr, assetID);
 
-  //await printAssetHolding(deployer, elonMuskAccount.addr, assetID);
-  //await printAssetHolding(deployer, johnAccount.addr, assetID);
+  //await printAssetHolding(deployer, elon.addr, assetID);
+  //await printAssetHolding(deployer, john.addr, assetID);
 
   console.log("[tesla]: Script execution has finished!")
 }

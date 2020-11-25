@@ -12,7 +12,7 @@ function getInt64Bytes(x) {
 async function run(runtimeEnv, deployer) {
 
   const masterAccount = deployer.accountsByName.get("master-account");
-  const aliceAccount = deployer.accountsByName.get("alice-account");
+  const alice = deployer.accountsByName.get("alice");
   const votingAdminAccount = deployer.accountsByName.get("john-account");
 
   const algoTxnParams = {
@@ -25,7 +25,7 @@ async function run(runtimeEnv, deployer) {
   }
   await executeTransaction(deployer, algoTxnParams);
 
-  algoTxnParams.toAccountAddr = aliceAccount.addr;
+  algoTxnParams.toAccountAddr = alice.addr;
   await executeTransaction(deployer, algoTxnParams);
 
   // Create ASA - Vote Token
@@ -38,7 +38,7 @@ async function run(runtimeEnv, deployer) {
     type: TransactionType.TransferAsset,
     sign: SignType.SecretKey,
     fromAccount: votingAdminAccount,
-    toAccountAddr: aliceAccount.addr,
+    toAccountAddr: alice.addr,
     amount: 1,
     assetID: asaInfo.assetIndex,
     payFlags: {note: "Sending Vote Token"}
@@ -77,7 +77,7 @@ async function run(runtimeEnv, deployer) {
 
   console.log("Opting-In for Alice in voting application");
   try {
-    await deployer.OptInToSSC(aliceAccount, res.appID, {}, reg);
+    await deployer.OptInToSSC(alice, res.appID, {}, reg);
   } catch(e) {
     console.log(e);
     throw new Error(e);

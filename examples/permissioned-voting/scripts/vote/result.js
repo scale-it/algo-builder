@@ -4,7 +4,7 @@ const { executeTransaction } = require("./common");
 async function run(runtimeEnv, deployer) {
 
   const votingAdminAccount = deployer.accountsByName.get("voting-admin-account");
-  const aliceAccount = deployer.accountsByName.get("alice-account");
+  const alice = deployer.accountsByName.get("alice");
 
   // Retreive AppInfo from checkpoints.
   const appInfo = deployer.getSSC("permissioned-voting-approval.py", "permissioned-voting-clear.py");
@@ -50,7 +50,7 @@ async function run(runtimeEnv, deployer) {
   console.log("Deleting Application");
   await executeTransaction(deployer, txnParam);
 
-  txnParam.fromAccount = aliceAccount;
+  txnParam.fromAccount = alice;
   txnParam.type = TransactionType.ClearSSC;
 
   // Clear voter's account
