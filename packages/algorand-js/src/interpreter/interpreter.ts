@@ -3,6 +3,7 @@ import { assert } from "chai";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
+import { DEFAULT_STACKELEM } from "../lib/constants";
 import { Stack } from "../lib/stack";
 import type { Operator, StackElem, TEALStack } from "../types";
 
@@ -10,11 +11,13 @@ export class Interpreter {
   readonly stack: TEALStack;
   bytecblock: Uint8Array[];
   intcblock: Array<bigint>;
+  scratch: StackElem[];
 
   constructor () {
     this.stack = new Stack<StackElem>();
     this.bytecblock = [];
     this.intcblock = [];
+    this.scratch = new Array(256).fill(DEFAULT_STACKELEM);
   }
 
   /**
