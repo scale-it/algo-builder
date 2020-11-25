@@ -31,7 +31,7 @@ exports.printLocalNFT = async function (deployer, account, appId) {
         if(localState !== undefined){ 
             count = localState.length/2; 
         }
-        console.log('NFT Count for', account, ':', count); 
+        console.log('NFT balance of', account, ':', count); 
     } catch (e) {
         console.error('Error Occurred', e);
     }
