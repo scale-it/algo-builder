@@ -12,9 +12,9 @@ async function run(runtimeEnv, deployer) {
 
   const nft_ref = "https://new-nft.com";
 
-  //push arguments "create" and nft data 
+  //push arguments "create" and nft data
   let appArgs = [ toBytes("create"), toBytes(nft_ref) ];
- 
+
   let txnParam = {
     type: TransactionType.CallNoOpSSC,
     sign: SignType.SecretKey,
@@ -25,7 +25,7 @@ async function run(runtimeEnv, deployer) {
   };
 
  await executeTransaction(deployer, txnParam); // call to create new nft (with id = 1)
-  
+
   // push arguments "transfer", 1 (NFT ID)
   appArgs = [
     toBytes("transfer"),
@@ -46,7 +46,7 @@ async function run(runtimeEnv, deployer) {
   };
 
   //call to transfer nft from master to john
-  await executeTransaction(deployer, txnParam); 
+  await executeTransaction(deployer, txnParam);
 }
 
 module.exports = { default: run }

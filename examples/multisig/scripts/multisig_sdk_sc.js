@@ -12,7 +12,7 @@ async function run(runtimeEnv, deployer) {
   const johnAccount = deployer.accountsByName.get("john-account");
   const bobAccount = deployer.accountsByName.get("bob-account");
 
-  //Generate multi signature account hash 
+  //Generate multi signature account hash
   const addrs =  [goldOwnerAccount.addr, johnAccount.addr, bobAccount.addr]
   const [mparams, multsigaddr] = createMsigAddress(1, 2, addrs);   // passing (version, threshold, address list)
 
