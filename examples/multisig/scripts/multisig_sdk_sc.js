@@ -8,12 +8,12 @@ const { TransactionType, SignType, createMsigAddress } = require("algob");
 
 async function run(runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get("master-account");
-  const goldOwnerAccount = deployer.accountsByName.get("gold-owner-account");
+  const alice = deployer.accountsByName.get("gold-owner-account");
   const johnAccount = deployer.accountsByName.get("john-account");
   const bobAccount = deployer.accountsByName.get("bob-account");
 
   //Generate multi signature account hash
-  const addrs =  [goldOwnerAccount.addr, johnAccount.addr, bobAccount.addr]
+  const addrs =  [alice.addr, johnAccount.addr, bobAccount.addr]
   const [mparams, multsigaddr] = createMsigAddress(1, 2, addrs);   // passing (version, threshold, address list)
 
   //Get logic Signature

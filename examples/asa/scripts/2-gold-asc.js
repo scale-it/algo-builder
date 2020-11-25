@@ -4,7 +4,7 @@ const { mkParam } = require("./transfer/common");
 async function run(runtimeEnv, deployer) {
 
   const masterAccount = deployer.accountsByName.get("master-account")
-  const goldOwnerAccount = deployer.accountsByName.get("gold-owner-account");
+  const goldOwnerAccount = deployer.accountsByName.get("alice-account");
 
   await executeTransaction(deployer, mkParam(masterAccount, goldOwnerAccount.addr, 200000000, {note: "funding account"}));
 

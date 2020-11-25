@@ -4,7 +4,7 @@ async function run(runtimeEnv, deployer) {
   const goldAssetID = deployer.asa.get("gold").assetIndex
 
   const johnAccount = deployer.accountsByName.get("john-account");
-  const goldOwnerAccount = deployer.accountsByName.get("gold-owner-account");
+  const goldOwnerAccount = deployer.accountsByName.get("alice-account");
 
   await executeTransaction(deployer, {
     type: TransactionType.TransferAsset,

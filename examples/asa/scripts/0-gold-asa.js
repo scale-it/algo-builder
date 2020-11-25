@@ -10,7 +10,7 @@ async function run(runtimeEnv, deployer) {
   console.log("[gold]: Script has started execution!")
 
   const masterAccount = deployer.accountsByName.get("master-account")
-  const goldOwnerAccount = deployer.accountsByName.get("gold-owner-account");
+  const goldOwnerAccount = deployer.accountsByName.get("alice-account");
   const johnAccount = deployer.accountsByName.get("john-account");
   const bobAccount = deployer.accountsByName.get("bob-account")
   // activate goldOwner and john accounts
