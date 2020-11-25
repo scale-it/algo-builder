@@ -14,7 +14,7 @@ const fkParam = {
 };
 
 describe("Interpreter", function () {
-  it("should throw error if top of stack is invalid", function () {
+  it("should reject logic if top of stack is invalid", function () {
     const interpreter = new Interpreter();
     const args = [toBytes("")];
     const logic = [new Arg(args[0])];
