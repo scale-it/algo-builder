@@ -1,1 +1,1 @@
-module.exports = require("config");
+../algob.config-shared.js
