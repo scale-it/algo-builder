@@ -10,7 +10,7 @@ describe("Stack", function () {
   });
 
   it("should throw error while popping empty stack", function () {
-    const errMsg = "Stack UnderFlow - Cannot pop if stack is empty";
+    const errMsg = "pop from empty stack";
     assert.throws(() => stack.pop(), errMsg);
   });
 
