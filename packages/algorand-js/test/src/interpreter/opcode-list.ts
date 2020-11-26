@@ -3,9 +3,10 @@ import { assert } from "chai";
 import { ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
-  Add, Arg, Bytec,
+  Add, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
+  Bytec,
   Bytecblock, Div, Intc,
-  Intcblock, Len, Mul, Sub
+  Intcblock, Len, Mod, Mul, Sub
 } from "../../../src/interpreter/opcode-list";
 import { MAX_UINT8, MAX_UINT64 } from "../../../src/lib/constants";
 import { toBytes } from "../../../src/lib/parse-data";
@@ -409,6 +410,189 @@ describe("Teal Opcodes", function () {
       expectTealError(
         () => op.execute(stack),
         ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
+    });
+  });
+
+  describe("Mod", function () {
+    const stack = new Stack<StackElem>();
+
+    it("should return correct modulo of two unit64", function () {
+      stack.push(BigInt("2"));
+      stack.push(BigInt("5"));
+      const op = new Mod();
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.equal(top, BigInt("1"));
+    });
+
+    it("should return 0 on modulo of two unit64 with A == 0", function () {
+      stack.push(BigInt("4"));
+      stack.push(BigInt("0"));
+      const op = new Mod();
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.equal(top, BigInt("0"));
+    });
+
+    it("should throw error with Mod if stack is below min length", function () {
+      stack.push(BigInt("0")); // stack.length() = 1
+      const op = new Mod();
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
+    });
+
+    it("should throw error if Mod is used with strings", function () {
+      stack.push(toBytes("str1"));
+      stack.push(toBytes("str2"));
+      const op = new Mod();
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.INVALID_TYPE
+      );
+    });
+
+    it("should panic on A % B if B == 0", function () {
+      stack.push(BigInt("0"));
+      stack.push(BigInt("10"));
+      const op = new Mod();
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.ZERO_DIV
+      );
+    });
+  });
+
+  describe("Bitwise OR", function () {
+    const stack = new Stack<StackElem>();
+
+    it("should return correct bitwise-or of two unit64", function () {
+      stack.push(BigInt("10"));
+      stack.push(BigInt("20"));
+      const op = new BitwiseOr();
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.equal(top, BigInt("30"));
+    });
+
+    it("should throw error with bitwise-or if stack is below min length", function () {
+      stack.push(BigInt("1")); // stack.length() = 1
+      const op = new BitwiseOr();
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
+    });
+
+    it("should throw error if bitwise-or is used with strings", function () {
+      stack.push(toBytes("str1"));
+      stack.push(toBytes("str2"));
+      const op = new BitwiseOr();
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.INVALID_TYPE
+      );
+    });
+  });
+
+  describe("Bitwise AND", function () {
+    const stack = new Stack<StackElem>();
+
+    it("should return correct bitwise-and of two unit64", function () {
+      stack.push(BigInt("10"));
+      stack.push(BigInt("20"));
+      const op = new BitwiseAnd();
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.equal(top, BigInt("0"));
+    });
+
+    it("should throw error with bitwise-and if stack is below min length", function () {
+      stack.push(BigInt("1")); // stack.length() = 1
+      const op = new Add();
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
+    });
+
+    it("should throw error if bitwise-and is used with strings", function () {
+      stack.push(toBytes("str1"));
+      stack.push(toBytes("str2"));
+      const op = new BitwiseAnd();
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.INVALID_TYPE
+      );
+    });
+  });
+
+  describe("Bitwise XOR", function () {
+    const stack = new Stack<StackElem>();
+
+    it("should return correct bitwise-xor of two unit64", function () {
+      stack.push(BigInt("10"));
+      stack.push(BigInt("20"));
+      const op = new BitwiseXor();
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.equal(top, BigInt("30"));
+    });
+
+    it("should throw error with bitwise-xor if stack is below min length", function () {
+      stack.push(BigInt("1")); // stack.length() = 1
+      const op = new BitwiseXor();
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
+    });
+
+    it("should throw error if bitwise-xor is used with strings", function () {
+      stack.push(toBytes("str1"));
+      stack.push(toBytes("str2"));
+      const op = new BitwiseXor();
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.INVALID_TYPE
+      );
+    });
+  });
+
+  describe("Bitwise NOT", function () {
+    const stack = new Stack<StackElem>();
+
+    it("should return correct bitwise-not of unit64", function () {
+      stack.push(BigInt("10"));
+      const op = new BitwiseNot();
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.equal(top, ~BigInt("10"));
+    });
+
+    it("should throw error with bitwise-xor if stack is below min length", function () {
+      // stack.length() = 0
+      const op = new BitwiseNot();
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
+    });
+
+    it("should throw error if bitwise-not is used with string", function () {
+      stack.push(toBytes("str1"));
+      const op = new BitwiseNot();
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.INVALID_TYPE
       );
     });
   });
