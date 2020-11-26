@@ -1,6 +1,6 @@
 /**
  * Description:
- * This file create a new NFT and transfers 1 NFT from A to B
+ * This file creates a new NFT and transfers 1 NFT from A to B
 */
 const { executeTransaction, printGlobalNFT, printLocalNFT } = require("./common");
 const { TransactionType, SignType, toBytes } = require("algob");
