@@ -1,7 +1,6 @@
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
-import { DEFAULT_STACKELEM } from "../lib/constants";
-import type { StackElem, TEALStack } from "../types";
+import type { TEALStack } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
 

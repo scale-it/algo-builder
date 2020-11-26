@@ -8,7 +8,7 @@ import {
   Intcblock, Len, Load,
   Mul, Store, Sub
 } from "../../../src/interpreter/opcode-list";
-import { DEFAULT_STACKELEM, MAX_UINT8, MAX_UINT64 } from "../../../src/lib/constants";
+import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64 } from "../../../src/lib/constants";
 import { toBytes } from "../../../src/lib/parse-data";
 import { Stack } from "../../../src/lib/stack";
 import type { StackElem } from "../../../src/types";
@@ -497,7 +497,7 @@ describe("Teal Opcodes", function () {
       const interpreter = new Interpreter();
       const op = new Load(0, interpreter);
       op.execute(stack);
-      assert.equal(DEFAULT_STACKELEM, stack.pop());
+      assert.equal(DEFAULT_STACK_ELEM, stack.pop());
     });
   });
 });
