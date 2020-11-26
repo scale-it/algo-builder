@@ -10,7 +10,7 @@ import type { Operator, StackElem, TEALStack } from "../types";
 export class Interpreter {
   readonly stack: TEALStack;
   bytecblock: Uint8Array[];
-  intcblock: Array<bigint>;
+  intcblock: BigInt[];
   scratch: StackElem[];
 
   constructor () {

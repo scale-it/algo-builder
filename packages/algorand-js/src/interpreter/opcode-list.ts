@@ -167,7 +167,7 @@ export class Store extends Op {
   execute (stack: TEALStack): void {
     this.checkIndexBound(this.index, this.interpreter.scratch);
     this.assertStackLen(stack, 1);
-    const top = stack.pop() as StackElem;
+    const top = stack.pop();
     this.interpreter.scratch[this.index] = top;
   }
 }

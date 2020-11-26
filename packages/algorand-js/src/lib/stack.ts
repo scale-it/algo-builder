@@ -1,6 +1,6 @@
 export interface IStack<T> {
   push: (item: T) => void
-  pop: () => T | undefined
+  pop: () => T
   length: () => number
 }
 
@@ -20,10 +20,10 @@ export class Stack<T> implements IStack<T> {
     this._store.push(item);
   }
 
-  pop (): T | undefined {
+  pop (): T {
     if (this.length() === 0) {
       throw new Error(`Stack UnderFlow - Cannot pop if stack is empty`);
     }
-    return this._store.pop();
+    return this._store.pop() as T;
   }
 }
