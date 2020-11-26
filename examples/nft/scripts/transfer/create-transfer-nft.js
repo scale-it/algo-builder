@@ -1,4 +1,8 @@
-const { executeTransaction } = require("./common");
+/**
+ * Description:
+ * This file creates a new NFT and transfers 1 NFT from A to B
+*/
+const { executeTransaction, printGlobalNFT, printLocalNFT } = require("./common");
 const { TransactionType, SignType, toBytes } = require("algob");
 
 async function run(runtimeEnv, deployer) {
@@ -10,11 +14,13 @@ async function run(runtimeEnv, deployer) {
   const appId = sscInfo.appID;
   console.log(sscInfo);
 
+  await printGlobalNFT(deployer, masterAccount.addr, appId); //Global Count before creation
+
   const nft_ref = "https://new-nft.com";
 
   //push arguments "create" and nft data 
-  let appArgs = [ toBytes("create"), toBytes(nft_ref) ];
- 
+  let appArgs = ["create", nft_ref].map(toBytes);
+
   let txnParam = {
     type: TransactionType.CallNoOpSSC,
     sign: SignType.SecretKey,
@@ -24,8 +30,16 @@ async function run(runtimeEnv, deployer) {
     appArgs
   };
 
- await executeTransaction(deployer, txnParam); // call to create new nft (with id = 1)
+  await executeTransaction(deployer, txnParam); // call to create new nft (with id = 1)
   
+  //Global Count after creation
+  await printGlobalNFT(deployer, masterAccount.addr, appId);
+
+  // *** Transfer NFT from master to john ***
+  //print Local NFT's in master and john before transfer
+  await printLocalNFT(deployer, masterAccount.addr, appId);
+  await printLocalNFT(deployer, johnAccount.addr, appId);
+
   // push arguments "transfer", 1 (NFT ID)
   appArgs = [
     toBytes("transfer"),
@@ -46,7 +60,11 @@ async function run(runtimeEnv, deployer) {
   };
 
   //call to transfer nft from master to john
-  await executeTransaction(deployer, txnParam); 
+  await executeTransaction(deployer, txnParam);
+
+  //print Updated Local NFT's in master and john after transfer
+  await printLocalNFT(deployer, masterAccount.addr, appId);
+  await printLocalNFT(deployer, johnAccount.addr, appId);
 }
 
 module.exports = { default: run }

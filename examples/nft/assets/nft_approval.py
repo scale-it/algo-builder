@@ -42,6 +42,11 @@ def approval_program():
     ref_data = Txn.application_args[1]
     ref_hash = Sha256(Txn.application_args[1])
 
+    # var to store ref_hash
+    # var to store id_h
+    scratch_hash = ScratchVar(TealType.bytes)
+    id_h = ScratchVar(TealType.bytes)
+
     # Verifies if the creater is making this request
     # Verifies three arguments are passed to this transaction ("create", nft-name, nft-ref)
     # Increment Global NFT count by 1
@@ -56,15 +61,17 @@ def approval_program():
         )),
 
         App.globalPut(var_total, App.globalGet(var_total) + Int(1)),
-        
+
+        scratch_hash.store(ref_hash), # store ref_hash in scratchVar
+        id_h.store(Concat(nft_id, Bytes("_h"))), # store id_h in scratchVar
+
         App.globalPut(nft_id, ref_data),
-        App.globalPut(Concat(nft_id, Bytes("_h")) , ref_hash),
+        App.globalPut(id_h.load() , scratch_hash.load()),
 
         App.localPut(Int(0), nft_id, ref_data),  # Int(0) represents the address of caller
-        App.localPut(Int(0), Concat(nft_id, Bytes("_h")) , ref_hash),
+        App.localPut(Int(0), id_h.load() , scratch_hash.load()),
         Return(is_creator)
     ])
-
     # nft-hash key from 1st argument 
     id_h = Concat(Txn.application_args[1], Bytes("_h"))
 
