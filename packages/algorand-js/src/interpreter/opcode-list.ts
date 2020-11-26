@@ -185,7 +185,6 @@ export class Load extends Op {
 
   execute (stack: TEALStack): void {
     this.checkIndexBound(this.index, this.interpreter.scratch);
-    const val = this.interpreter.scratch[this.index];
-    stack.push(val);
+    stack.push(this.interpreter.scratch[this.index]);
   }
 }
