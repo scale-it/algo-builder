@@ -5,13 +5,14 @@ import { decode, encode } from "uint64be";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
-import { MAX_STRING_SIZE, MAX_UINT64 } from "../lib/constants";
+import { MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
 import { compareArray } from "../lib/helpers";
 import type { TEALStack } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
 
 const BIGINT0 = BigInt("0");
+const BIGINT1 = BigInt("1");
 // pops string([]byte) from stack and pushes it's length to stack
 export class Len extends Op {
   execute (stack: TEALStack): void {
@@ -286,9 +287,9 @@ export class LessThan extends Op {
     const a = this.assertBigInt(stack.pop());
     const b = this.assertBigInt(stack.pop());
     if (a < b) {
-      stack.push(BigInt('1'));
+      stack.push(BIGINT1);
     } else {
-      stack.push(BigInt('0'));
+      stack.push(BIGINT0);
     }
   }
 }
@@ -300,9 +301,9 @@ export class GreaterThan extends Op {
     const a = this.assertBigInt(stack.pop());
     const b = this.assertBigInt(stack.pop());
     if (a > b) {
-      stack.push(BigInt('1'));
+      stack.push(BIGINT1);
     } else {
-      stack.push(BigInt('0'));
+      stack.push(BIGINT0);
     }
   }
 }
@@ -314,9 +315,9 @@ export class LessThanEqualTo extends Op {
     const a = this.assertBigInt(stack.pop());
     const b = this.assertBigInt(stack.pop());
     if (a <= b) {
-      stack.push(BigInt('1'));
+      stack.push(BIGINT1);
     } else {
-      stack.push(BigInt('0'));
+      stack.push(BIGINT0);
     }
   }
 }
@@ -328,9 +329,9 @@ export class GreaterThanEqualTo extends Op {
     const a = this.assertBigInt(stack.pop());
     const b = this.assertBigInt(stack.pop());
     if (a >= b) {
-      stack.push(BigInt('1'));
+      stack.push(BIGINT1);
     } else {
-      stack.push(BigInt('0'));
+      stack.push(BIGINT0);
     }
   }
 }
@@ -342,9 +343,9 @@ export class And extends Op {
     const a = this.assertBigInt(stack.pop());
     const b = this.assertBigInt(stack.pop());
     if (a && b) {
-      stack.push(BigInt('1'));
+      stack.push(BIGINT1);
     } else {
-      stack.push(BigInt('0'));
+      stack.push(BIGINT0);
     }
   }
 }
@@ -356,9 +357,9 @@ export class Or extends Op {
     const a = this.assertBigInt(stack.pop());
     const b = this.assertBigInt(stack.pop());
     if (a || b) {
-      stack.push(BigInt('1'));
+      stack.push(BIGINT1);
     } else {
-      stack.push(BigInt('0'));
+      stack.push(BIGINT0);
     }
   }
 }
@@ -372,15 +373,15 @@ export class EqualTo extends Op {
     if (typeof a === typeof b) {
       if (typeof a === "bigint") {
         if (a === b) {
-          stack.push(BigInt('1'));
+          stack.push(BIGINT1);
         } else {
-          stack.push(BigInt('0'));
+          stack.push(BIGINT0);
         }
       } else {
         if (compareArray(this.assertBytes(a), this.assertBytes(b))) {
-          stack.push(BigInt('1'));
+          stack.push(BIGINT1);
         } else {
-          stack.push(BigInt('0'));
+          stack.push(BIGINT0);
         }
       }
     } else {
@@ -398,15 +399,15 @@ export class NotEqualTo extends Op {
     if (typeof a === typeof b) {
       if (typeof a === "bigint") {
         if (a === b) {
-          stack.push(BigInt('0'));
+          stack.push(BIGINT0);
         } else {
-          stack.push(BigInt('1'));
+          stack.push(BIGINT1);
         }
       } else {
         if (compareArray(this.assertBytes(a), this.assertBytes(b))) {
-          stack.push(BigInt('0'));
+          stack.push(BIGINT0);
         } else {
-          stack.push(BigInt('1'));
+          stack.push(BIGINT1);
         }
       }
     } else {
@@ -420,10 +421,10 @@ export class Not extends Op {
   execute (stack: TEALStack): void {
     this.assertStackLen(stack, 1);
     const a = this.assertBigInt(stack.pop());
-    if (a === BigInt('0')) {
-      stack.push(BigInt('1'));
+    if (a === BIGINT0) {
+      stack.push(BIGINT1);
     } else {
-      stack.push(BigInt('0'));
+      stack.push(BIGINT0);
     }
   }
 }
@@ -464,10 +465,10 @@ export class Addw extends Op {
 
     if (valueC > MAX_UINT64) {
       valueC -= MAX_UINT64;
-      stack.push(BigInt('1'));
-      stack.push(valueC - BigInt('1'));
+      stack.push(BIGINT1);
+      stack.push(valueC - BIGINT1);
     } else {
-      stack.push(BigInt('0'));
+      stack.push(BIGINT0);
       stack.push(valueC);
     }
   }
@@ -514,7 +515,7 @@ export class Concat extends Op {
     const valueB = this.assertBytes(stack.pop());
     const valueA = this.assertBytes(stack.pop());
 
-    if (valueA.length + valueB.length > MAX_STRING_SIZE) {
+    if (valueA.length + valueB.length > MAX_CONCAT_SIZE) {
       throw new TealError(ERRORS.TEAL.CONCAT_ERROR);
     }
     var c = new Uint8Array(valueB.length + valueA.length);
