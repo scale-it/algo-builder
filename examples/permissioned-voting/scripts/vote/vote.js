@@ -4,12 +4,12 @@ const { executeTransaction } = require("./common");
 async function run(runtimeEnv, deployer) {
 
   const masterAccount = deployer.accountsByName.get("master-account")
-  const aliceAccount = deployer.accountsByName.get("alice-account");
+  const alice = deployer.accountsByName.get("alice");
   const votingAdminAccount = deployer.accountsByName.get("voting-admin-account");
-  const bobAccount = deployer.accountsByName.get("bob-account");
+  const bob = deployer.accountsByName.get("bob");
 
   await executeTransaction(deployer, {type:TransactionType.TransferAlgo, sign:SignType.SecretKey,
-   fromAccount: masterAccount, toAccountAddr:aliceAccount.addr, amountMicroAlgos: 200000000, payFlags: {}});
+   fromAccount: masterAccount, toAccountAddr:alice.addr, amountMicroAlgos: 200000000, payFlags: {}});
 
   // Get last round.
   const status = await deployer.algodClient.status().do();
@@ -26,9 +26,9 @@ async function run(runtimeEnv, deployer) {
 
   // Atomic Transaction (Stateful Smart Contract call + Asset Transfer)
   let transactions = [
-    {type: TransactionType.CallNoOpSSC, sign: SignType.SecretKey, fromAccount: aliceAccount,
+    {type: TransactionType.CallNoOpSSC, sign: SignType.SecretKey, fromAccount: alice,
     appId: appInfo.appID, payFlags: {}, appArgs},
-    {type: TransactionType.TransferAsset, sign: SignType.SecretKey, fromAccount: aliceAccount,
+    {type: TransactionType.TransferAsset, sign: SignType.SecretKey, fromAccount: alice,
     toAccountAddr: votingAdminAccount.addr, amount: 1, assetID: voteAssetID,
     payFlags: {}}
   ];
@@ -43,8 +43,8 @@ async function run(runtimeEnv, deployer) {
 
   // Transaction Fails because bob is not registered voter.
   console.log("Bob tries to cast vote");
-  transactions[0].fromAccount = bobAccount;
-  transactions[1].fromAccount = bobAccount;
+  transactions[0].fromAccount = bob;
+  transactions[1].fromAccount = bob;
 
   await executeTransaction(deployer, transactions);
 

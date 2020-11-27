@@ -3,19 +3,19 @@ const { executeTransaction, balanceOf, TransactionType, SignType } = require("al
 async function run(runtimeEnv, deployer) {
   const teslaAssetID = deployer.asa.get("tesla").assetIndex
 
-  const johnAccount = deployer.accountsByName.get("john-account");
-  const elonMuskAccount = deployer.accountsByName.get("elon-musk-account");
+  const john = deployer.accountsByName.get("john");
+  const elon = deployer.accountsByName.get("elon-musk");
 
   await executeTransaction(deployer, {
     type: TransactionType.TransferAsset,
     sign: SignType.SecretKey,
-    fromAccount: elonMuskAccount, 
-    toAccountAddr: johnAccount.addr, 
+    fromAccount: elon, 
+    toAccountAddr: john.addr, 
     amount: 1,
     assetID: teslaAssetID,
     payFlags: {}});
 
-  await balanceOf(deployer, johnAccount.addr, teslaAssetID);
+  await balanceOf(deployer, john.addr, teslaAssetID);
 }
 
 module.exports = { default: run }

@@ -8,7 +8,7 @@ const { TransactionType, SignType, toBytes } = require("algob");
 async function run(runtimeEnv, deployer) {
 
   const masterAccount = deployer.accountsByName.get("master-account")
-  const johnAccount = deployer.accountsByName.get("john-account");
+  const john = deployer.accountsByName.get("john");
 
   const sscInfo = await deployer.getSSC("nft_approval.py", "nft_clear_state.py");
   const appId = sscInfo.appID;
@@ -18,7 +18,7 @@ async function run(runtimeEnv, deployer) {
 
   const nft_ref = "https://new-nft.com";
 
-  //push arguments "create" and nft data 
+  // push arguments "create" and nft data
   let appArgs = ["create", nft_ref].map(toBytes);
 
   let txnParam = {
@@ -29,40 +29,35 @@ async function run(runtimeEnv, deployer) {
     payFlags: {},
     appArgs
   };
+  await executeTransaction(deployer, txnParam); // creates new nft (with id = 1)
 
-  await executeTransaction(deployer, txnParam); // call to create new nft (with id = 1)
-  
-  //Global Count after creation
+  // print Global Count after creation
   await printGlobalNFT(deployer, masterAccount.addr, appId);
 
   // *** Transfer NFT from master to john ***
-  //print Local NFT's in master and john before transfer
+
   await printLocalNFT(deployer, masterAccount.addr, appId);
   await printLocalNFT(deployer, johnAccount.addr, appId);
 
-  // push arguments "transfer", 1 (NFT ID)
+  // push arguments: ("transfer", nft_id=1)
   appArgs = [
     toBytes("transfer"),
     new Uint8Array(8).fill(1, 7), //[0, 0, 0, 0, 0, 0, 0, 1]
   ];
 
+  // transfer nft from master to john
   // account_A = master, account_B = john
-  const accounts = [masterAccount.addr, johnAccount.addr];
-
   txnParam = {
     type: TransactionType.CallNoOpSSC,
     sign: SignType.SecretKey,
     fromAccount: masterAccount,
     appId: appId,
     payFlags: {},
-    appArgs,
-    accounts
+    accounts: [masterAccount.addr, john.addr],
+    appArgs
   };
-
-  //call to transfer nft from master to john
   await executeTransaction(deployer, txnParam);
 
-  //print Updated Local NFT's in master and john after transfer
   await printLocalNFT(deployer, masterAccount.addr, appId);
   await printLocalNFT(deployer, johnAccount.addr, appId);
 }

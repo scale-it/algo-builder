@@ -2,7 +2,7 @@ from pyteal import *
 
 def approval_program():
     """
-    This smart contract implements a Non Fungible Token 
+    This smart contract implements a Non Fungible Token
     Each NFT is an (ID, ref_data, hash) triple.
     NFT ID is the total count of NFT's in asc.
     ref-data is represented as "https://nft-name/<total>/nft-ref"
@@ -12,7 +12,7 @@ def approval_program():
         create    Creates a new NFT. Expects one additional argument: nft-ref
                   Only creator can create new NFTs. Ideally, nft-ref should be a URL.
         transfer  Transfers an NFT between two accounts. Expects one additional arg: NFT_ID.
-                  Additionally, two Accounts(from, to) must also be passed to the smart contract. 
+                  Additionally, two Accounts(from, to) must also be passed to the smart contract.
     """
 
     var_total = Bytes("total")
@@ -27,7 +27,7 @@ def approval_program():
         Return(Int(1))
     ])
 
-    # Always verify that the RekeyTo property of any transaction is set to the ZeroAddress 
+    # Always verify that the RekeyTo property of any transaction is set to the ZeroAddress
     # unless the contract is specifically involved ina rekeying operation.
     no_rekey_addr = Txn.rekey_to() == Global.zero_address()
 
@@ -72,10 +72,11 @@ def approval_program():
         App.localPut(Int(0), id_h.load() , scratch_hash.load()),
         Return(is_creator)
     ])
-    # nft-hash key from 1st argument 
+
+    # nft-hash key from 1st argument
     id_h = Concat(Txn.application_args[1], Bytes("_h"))
 
-    # Verify two arguments are passed 
+    # Verify two arguments are passed
     # Verify NFT_ID is present in global storage
     # Add nft to account_2's local storage
     # Remove nft from account_1's local storage
@@ -85,7 +86,7 @@ def approval_program():
             App.globalGet(var_total) >= Btoi(Txn.application_args[1]),
             no_rekey_addr
         )),
-        
+
         App.localPut(Int(2), Txn.application_args[1], App.localGet(Int(1), Txn.application_args[1])),
         App.localPut(Int(2), id_h, App.localGet(Int(1), id_h)),
 

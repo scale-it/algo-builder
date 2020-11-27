@@ -9,8 +9,7 @@ The goal of this project is to present how to work with ASC in `algob` using the
 ## Setup
 
 Please follow the [setup](../README.md) instructions to install dependencies and update the config.
-
-* Install `pyteal` using `pip3 install pyteal` https://pyteal.readthedocs.io/en/stable/installation.html
+This example is using PyTEAL, so make sure to follow the Python3 setup described above.
 
 ## Run
 

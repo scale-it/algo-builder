@@ -1,4 +1,4 @@
-// Check if Transaction type is pay, Receiver is john-account AND amount is <= 100
+// Check if Transaction type is pay, Receiver is john AND amount is <= 100
 txn TypeEnum
 int 1
 ==

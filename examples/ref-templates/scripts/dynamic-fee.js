@@ -3,11 +3,11 @@ const { executeTransaction, mkTxnParams } = require("./common/common");
 async function run(runtimeEnv, deployer) {
 
   const masterAccount = deployer.accountsByName.get("master-account")
-  const johnAccount = deployer.accountsByName.get("john-account");
-  const bobAccount = deployer.accountsByName.get("bob-account");
+  const john = deployer.accountsByName.get("john");
+  const bob = deployer.accountsByName.get("bob");
 
   scInitParam = {
-    TMPL_TO: johnAccount.addr,  
+    TMPL_TO: john.addr,  
     TMPL_AMT: 700000,
     TMPL_CLS: masterAccount.addr,
     TMPL_FV: 10,
@@ -27,14 +27,14 @@ async function run(runtimeEnv, deployer) {
 
   let transactions = [
     mkTxnParams(masterAccount, escrow, 1000, signedContract, {}),
-    mkTxnParams({ addr: escrow}, johnAccount.addr, 700000, contract, { totalFee: 1000, closeRemainderTo: bobAccount.addr })]
+    mkTxnParams({ addr: escrow}, john.addr, 700000, contract, { totalFee: 1000, closeRemainderTo: bob.addr })]
 
   //Group Transaction FAIL - Correct transaction Fee is used BUT closeRemainderTo is set to bob
   await executeTransaction(deployer, transactions);
 
   transactions = [
     mkTxnParams(masterAccount, escrow, 1000, signedContract, { }),
-    mkTxnParams({ addr: escrow}, johnAccount.addr, 700000, contract, { totalFee: 1000, closeRemainderTo: masterAccount.addr })]
+    mkTxnParams({ addr: escrow}, john.addr, 700000, contract, { totalFee: 1000, closeRemainderTo: masterAccount.addr })]
   
   //Group Transaction PASS - Correct transaction Fee is used and closeRemainderTo is set to master
   await executeTransaction(deployer, transactions);

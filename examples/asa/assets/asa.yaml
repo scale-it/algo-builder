@@ -12,7 +12,7 @@ gold:
   reserve: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"
   freeze: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"
   clawback: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"
-  optInAccNames: ["john-account"]
+  optInAccNames: ["john"]
 tesla:
   total: 300000
   decimals: 0
@@ -28,4 +28,4 @@ tesla:
   freeze: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"
   clawback: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"
   # Manual opt-in is configured in script scripts/1-tesla-asa.js
-  # optInAccNames: ["john-account"]
+  # optInAccNames: ["john"]

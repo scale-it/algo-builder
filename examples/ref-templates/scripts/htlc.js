@@ -4,9 +4,9 @@ const { SignType, globalZeroAddress } = require("algob");
 async function run(runtimeEnv, deployer) {
 
   const masterAccount = deployer.accountsByName.get("master-account")
-  const johnAccount = deployer.accountsByName.get("john-account");
+  const john = deployer.accountsByName.get("john");
 
-  let txnParams = mkTxnParams(masterAccount, johnAccount.addr, 200000000, {}, {note: "funding account"});
+  let txnParams = mkTxnParams(masterAccount, john.addr, 200000000, {}, {note: "funding account"});
   txnParams.sign = SignType.SecretKey;
   await executeTransaction(deployer, txnParams);  
 
@@ -15,7 +15,7 @@ async function run(runtimeEnv, deployer) {
 
   // setup a contract account and send 1 ALGO from master
   await deployer.fundLsig("htlc.py", { funder: masterAccount, fundingMicroAlgo: 1000000 }, 
-  	{ closeRemainderTo: johnAccount.addr }, []); 
+  	{ closeRemainderTo: john.addr }, []); 
 
   let contract = await deployer.loadLogic("htlc.py", [ wrongSecret ]);
   let contractAddress = contract.address();
@@ -25,7 +25,7 @@ async function run(runtimeEnv, deployer) {
   txnParams.toAccountAddr = globalZeroAddress;
   txnParams.amountMicroAlgos = 0;
   txnParams.lsig = contract;
-  txnParams.payFlags = { totalFee: 1000, closeRemainderTo: johnAccount.addr};
+  txnParams.payFlags = { totalFee: 1000, closeRemainderTo: john.addr};
   // Fails because wrong secret is passed
   await executeTransaction(deployer, txnParams);
 

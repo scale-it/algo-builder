@@ -2,16 +2,16 @@ const { printAssets } = require("algob");
 
 async function run(runtimeEnv, deployer) {
 
-  const johnAccount = deployer.accountsByName.get("john-account");
+  const john = deployer.accountsByName.get("john");
 
   // print one by one
   //const goldAssetID = deployer.algodClient.asa.get("gold").assetIndex
-  //await printAssetHolding(deployer.algodClient, johnAccount.addr, goldAssetID);
+  //await printAssetHolding(deployer.algodClient, john.addr, goldAssetID);
   //const teslaAssetID = deployer.algodClient.asa.get("tesla").assetIndex
-  //await printAssetHolding(deployer.algodClient, johnAccount.addr, teslaAssetID);
+  //await printAssetHolding(deployer.algodClient, john.addr, teslaAssetID);
 
   // print all at once
-  await printAssets(deployer, johnAccount.addr)
+  await printAssets(deployer, john.addr)
 }
 
 module.exports = { default: run }

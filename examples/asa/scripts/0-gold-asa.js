@@ -4,36 +4,36 @@ const { mkParam } = require("./transfer/common");
   Create "gold" Algorand Standard Asset (ASA)
   Accounts are loaded from config
   To use ASA accounts have to opt-in and owner is opt-in by default
-  john-account is transferred some funds to execute opt-in transaction
+  john is transferred some funds to execute opt-in transaction
 */
 async function run(runtimeEnv, deployer) {
   console.log("[gold]: Script has started execution!")
 
   const masterAccount = deployer.accountsByName.get("master-account")
-  const goldOwnerAccount = deployer.accountsByName.get("gold-owner-account");
-  const johnAccount = deployer.accountsByName.get("john-account");
-  const bobAccount = deployer.accountsByName.get("bob-account")
+  const goldOwner = deployer.accountsByName.get("alice");
+  const john = deployer.accountsByName.get("john");
+  const bob = deployer.accountsByName.get("bob")
   // activate goldOwner and john accounts
   let promises = [
-    executeTransaction(deployer, mkParam(masterAccount, goldOwnerAccount.addr, 401000000, {note: "funding account"})),
-    executeTransaction(deployer, mkParam(masterAccount, johnAccount.addr, 401000000, {note: "funding account"})),
-    executeTransaction(deployer, mkParam(masterAccount, bobAccount.addr, 1000000, {note: "funding account"}))]
+    executeTransaction(deployer, mkParam(masterAccount, goldOwner.addr, 401000000, {note: "funding account"})),
+    executeTransaction(deployer, mkParam(masterAccount, john.addr, 401000000, {note: "funding account"})),
+    executeTransaction(deployer, mkParam(masterAccount, bob.addr, 1000000, {note: "funding account"}))]
   await Promise.all(promises)
 
   const asaInfo = await deployer.deployASA("gold", {
-    creator: goldOwnerAccount
+    creator: goldOwner
     //totalFee: 1001,
     //feePerByte: 100,
     //firstValid: 10,
     //validRounds: 1002
   })
   console.log(asaInfo) 
-  await deployer.optInToASA("gold", "bob-account", {});
+  await deployer.optInToASA("gold", "bob", {});
   const assetID = asaInfo.assetIndex
-  await balanceOf(deployer, goldOwnerAccount.addr, assetID);
+  await balanceOf(deployer, goldOwner.addr, assetID);
 
-  //await printAssetHolding(deployer, goldOwnerAccount.addr, assetID);
-  //await printAssetHolding(deployer, johnAccount.addr, assetID);
+  //await printAssetHolding(deployer, goldOwner.addr, assetID);
+  //await printAssetHolding(deployer, john.addr, assetID);
 
   console.log("[gold]: Script execution has finished!")
 }

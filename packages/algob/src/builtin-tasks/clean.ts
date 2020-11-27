@@ -10,8 +10,10 @@ export default function (): void {
     "Clears the cache and deletes all artifacts",
     async (_, { config }: AlgobRuntimeEnv) => {
       if (config.paths == null) {
+        console.warn("not in a project directory");
         return;
       }
+      console.log("cleaning:", config.paths.cache, config.paths.artifacts);
       await fsExtra.remove(config.paths.cache);
       await fsExtra.remove(config.paths.artifacts);
     }

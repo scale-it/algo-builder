@@ -8,19 +8,19 @@ const { TransactionType, SignType, createMsigAddress } = require("algob");
 
 async function run(runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get("master-account");
-  const goldOwnerAccount = deployer.accountsByName.get("gold-owner-account");
-  const johnAccount = deployer.accountsByName.get("john-account");
-  const bobAccount = deployer.accountsByName.get("bob-account");
+  const alice = deployer.accountsByName.get("gold-owner-account");
+  const john = deployer.accountsByName.get("john");
+  const bob = deployer.accountsByName.get("bob");
 
-  //Generate multi signature account hash 
-  const addrs =  [goldOwnerAccount.addr, johnAccount.addr, bobAccount.addr]
+  //Generate multi signature account hash
+  const addrs =  [alice.addr, john.addr, bob.addr]
   const [mparams, multsigaddr] = createMsigAddress(1, 2, addrs);   // passing (version, threshold, address list)
 
   //Get logic Signature
   const lsig = await deployer.loadLogic("sample-asc.teal", []);
 
-  lsig.sign(goldOwnerAccount.sk, mparams);  //lsig signed by gold-owner secret_key
-  lsig.appendToMultisig(johnAccount.sk);    //lsig signed again (threshold = 2) by john-account secret_key
+  lsig.sign(goldOwner.sk, mparams);  //lsig signed by gold-owner secret_key
+  lsig.appendToMultisig(john.sk);    //lsig signed again (threshold = 2) by john secret_key
 
   let txnParams = {
     type: TransactionType.TransferAlgo,
@@ -35,7 +35,7 @@ async function run(runtimeEnv, deployer) {
   await executeTransaction(deployer, txnParams);
 
   txnParams.fromAccount = { addr: multsigaddr };
-  txnParams.toAccountAddr = bobAccount.addr;
+  txnParams.toAccountAddr = bob.addr;
   txnParams.sign = SignType.LogicSignature;
   txnParams.amountMicroAlgos = 58;
   // Transaction PASS - according to sample-asc.teal logic, amount should be <= 100

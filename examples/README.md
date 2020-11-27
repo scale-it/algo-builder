@@ -31,11 +31,16 @@ If want to use a development version of `algob`, you can use `yarn link`:
 
 After that, `algob` will be in your local yarn context. To use it we either access `algob` through `yarn run` (recommended), or through `node_modules/.bin`.
 
-The example is already initialized. So we don't need to run `yarn run algob init .`
+The examples are already initialized. So we don't need to run `yarn run algob init .`
 
+#### PyTEAL
+
+Many examples are using PyTEAL. Please follow our [PyTEAL setup](../README.md#pyteal).
 
 ### Update config
 
-Open `algob.config.js` and update:
+We created one config file for all examples in this repository. To use customize it:
+copy the `/examples/algob.confg-template.js` to `/examples/algob.config-local.js` and update
+the following positions in the latter file:
 
-+ Update `master-account`. It must be an account with some ALGOs - it will be used for deployment and for activating / funding other accounts.
++ `master-account`: must be an account with some ALGOs - it will be used for deployment and for activating / funding other accounts.

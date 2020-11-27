@@ -7,8 +7,8 @@ const { TransactionType, SignType} = require("algob");
 const { executeTransaction } = require("./common");
 
 async function run(runtimeEnv, deployer) {
-  const johnAccount = deployer.accountsByName.get("john-account");
-  const elonMuskAccount = deployer.accountsByName.get("elon-musk-account");
+  const john = deployer.accountsByName.get("john");
+  const elon = deployer.accountsByName.get("elon-musk");
 
   // Transactions for Transaction for ALGO - Contract : '2-gold-contract-asc.teal'  (Contract Mode)
   // sender is contract account
@@ -19,7 +19,7 @@ async function run(runtimeEnv, deployer) {
     type: TransactionType.TransferAlgo,
     sign: SignType.LogicSignature,
     fromAccount: {addr: sender},
-    toAccountAddr: johnAccount.addr,
+    toAccountAddr: john.addr,
     amountMicroAlgos: 20,
     lsig: lsig,
     payFlags: {}
@@ -33,7 +33,7 @@ async function run(runtimeEnv, deployer) {
 
   // Transaction FAIL as Elon tried to receive instead of John
   txnParam.amountMicroAlgos = 200;
-  txnParam.toAccountAddr = elonMuskAccount.addr
+  txnParam.toAccountAddr = elon.addr
   await executeTransaction(deployer, txnParam);
 
 }
