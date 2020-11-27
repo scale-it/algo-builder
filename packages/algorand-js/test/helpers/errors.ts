@@ -2,6 +2,21 @@ import { assert, AssertionError } from "chai";
 
 import { TealError } from "../../src/errors/errors";
 import { ErrorDescriptor } from "../../src/errors/errors-list";
+import type { Operator, StackElem, TEALStack } from "../../src/types";
+
+// takes string array and executes opcode to expect teal error
+export function execExpectError (
+  stack: TEALStack,
+  strs: StackElem[],
+  op: Operator,
+  err: ErrorDescriptor): () => void {
+  return () => {
+    for (const s of strs) {
+      stack.push(s);
+    }
+    expectTealError(() => op.execute(stack), err);
+  };
+}
 
 export function expectTealError (
   f: () => any,

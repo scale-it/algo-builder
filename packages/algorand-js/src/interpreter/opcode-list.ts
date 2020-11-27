@@ -153,6 +153,59 @@ export class Intc extends Op {
   }
 }
 
+// pops two unit64 from stack(a, b) and pushes their modulo(a % b) to stack
+// Panic if B == 0.
+export class Mod extends Op {
+  execute (stack: TEALStack): void {
+    this.assertStackLen(stack, 2);
+    const a = this.assertBigInt(stack.pop());
+    const b = this.assertBigInt(stack.pop());
+    if (b === BIGINT0) {
+      throw new TealError(ERRORS.TEAL.ZERO_DIV);
+    }
+    stack.push(a % b);
+  }
+}
+
+// pops two unit64 from stack(a, b) and pushes their bitwise-or(a | b) to stack
+export class BitwiseOr extends Op {
+  execute (stack: TEALStack): void {
+    this.assertStackLen(stack, 2);
+    const a = this.assertBigInt(stack.pop());
+    const b = this.assertBigInt(stack.pop());
+    stack.push(a | b);
+  }
+}
+
+// pops two unit64 from stack(a, b) and pushes their bitwise-and(a & b) to stack
+export class BitwiseAnd extends Op {
+  execute (stack: TEALStack): void {
+    this.assertStackLen(stack, 2);
+    const a = this.assertBigInt(stack.pop());
+    const b = this.assertBigInt(stack.pop());
+    stack.push(a & b);
+  }
+}
+
+// pops two unit64 from stack(a, b) and pushes their bitwise-xor(a ^ b) to stack
+export class BitwiseXor extends Op {
+  execute (stack: TEALStack): void {
+    this.assertStackLen(stack, 2);
+    const a = this.assertBigInt(stack.pop());
+    const b = this.assertBigInt(stack.pop());
+    stack.push(a ^ b);
+  }
+}
+
+// pop unit64 from stack and push it's bitwise-invert(~a) to stack
+export class BitwiseNot extends Op {
+  execute (stack: TEALStack): void {
+    this.assertStackLen(stack, 1);
+    const a = this.assertBigInt(stack.pop());
+    stack.push(~a);
+  }
+}
+
 // pop a value from the stack and store to scratch space
 export class Store extends Op {
   readonly index: number;
