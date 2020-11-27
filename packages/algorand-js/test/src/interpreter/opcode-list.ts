@@ -12,9 +12,11 @@ import { MAX_UINT8, MAX_UINT64 } from "../../../src/lib/constants";
 import { toBytes } from "../../../src/lib/parse-data";
 import { Stack } from "../../../src/lib/stack";
 import type { StackElem } from "../../../src/types";
-import { expectTealError } from "../../helpers/errors";
+import { execExpectError, expectTealError } from "../../helpers/errors";
 
 describe("Teal Opcodes", function () {
+  const strArr = ["str1", "str2"].map(toBytes);
+
   describe("Len", function () {
     const stack = new Stack<StackElem>();
 
@@ -51,24 +53,13 @@ describe("Teal Opcodes", function () {
       assert.equal(top, BigInt("30"));
     });
 
-    it("should throw error with Add if stack is below min length", function () {
-      stack.push(BigInt("1000")); // stack.length() = 1
-      const op = new Add();
-      expectTealError(
-        () => op.execute(stack),
-        ERRORS.TEAL.ASSERT_STACK_LENGTH
-      );
-    });
+    it("should throw error with Add if stack is below min length",
+      execExpectError(stack, [BigInt("1000")], new Add(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+    );
 
-    it("should throw error if Add is used with strings", function () {
-      stack.push(toBytes("str1"));
-      stack.push(toBytes("str2"));
-      const op = new Add();
-      expectTealError(
-        () => op.execute(stack),
-        ERRORS.TEAL.INVALID_TYPE
-      );
-    });
+    it("should throw error if Add is used with strings",
+      execExpectError(stack, strArr, new Add(), ERRORS.TEAL.INVALID_TYPE)
+    );
 
     it("should throw overflow error with Add", function () {
       stack.push(MAX_UINT64 - BigInt("5"));
@@ -94,24 +85,13 @@ describe("Teal Opcodes", function () {
       assert.equal(top, BigInt("10"));
     });
 
-    it("should throw error with Sub if stack is below min length", function () {
-      stack.push(BigInt("1000")); // stack.length() = 1
-      const op = new Sub();
-      expectTealError(
-        () => op.execute(stack),
-        ERRORS.TEAL.ASSERT_STACK_LENGTH
-      );
-    });
+    it("should throw error with Sub if stack is below min length",
+      execExpectError(stack, [BigInt("1000")], new Sub(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+    );
 
-    it("should throw error if Sub is used with strings", function () {
-      stack.push(toBytes("str1"));
-      stack.push(toBytes("str2"));
-      const op = new Sub();
-      expectTealError(
-        () => op.execute(stack),
-        ERRORS.TEAL.INVALID_TYPE
-      );
-    });
+    it("should throw error if Sub is used with strings",
+      execExpectError(stack, strArr, new Sub(), ERRORS.TEAL.INVALID_TYPE)
+    );
 
     it("should throw underflow error with Sub if (A - B) < 0", function () {
       stack.push(BigInt("20"));
@@ -137,24 +117,13 @@ describe("Teal Opcodes", function () {
       assert.equal(top, BigInt("600"));
     });
 
-    it("should throw error with Mul if stack is below min length", function () {
-      stack.push(BigInt("1000")); // stack.length() = 1
-      const op = new Mul();
-      expectTealError(
-        () => op.execute(stack),
-        ERRORS.TEAL.ASSERT_STACK_LENGTH
-      );
-    });
+    it("should throw error with Mul if stack is below min length",
+      execExpectError(stack, [BigInt("1000")], new Mul(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+    );
 
-    it("should throw error if Mul is used with strings", function () {
-      stack.push(toBytes("str1"));
-      stack.push(toBytes("str2"));
-      const op = new Mul();
-      expectTealError(
-        () => op.execute(stack),
-        ERRORS.TEAL.INVALID_TYPE
-      );
-    });
+    it("should throw error if Mul is used with strings",
+      execExpectError(stack, strArr, new Mul(), ERRORS.TEAL.INVALID_TYPE)
+    );
 
     it("should throw overflow error with Mul if (A * B) > max_unit64", function () {
       stack.push(MAX_UINT64 - BigInt("5"));
@@ -190,24 +159,13 @@ describe("Teal Opcodes", function () {
       assert.equal(top, BigInt("0"));
     });
 
-    it("should throw error with Div if stack is below min length", function () {
-      stack.push(BigInt("1000")); // stack.length() = 1
-      const op = new Div();
-      expectTealError(
-        () => op.execute(stack),
-        ERRORS.TEAL.ASSERT_STACK_LENGTH
-      );
-    });
+    it("should throw error with Div if stack is below min length",
+      execExpectError(stack, [BigInt("1000")], new Div(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+    );
 
-    it("should throw error if Div is used with strings", function () {
-      stack.push(toBytes("str1"));
-      stack.push(toBytes("str2"));
-      const op = new Div();
-      expectTealError(
-        () => op.execute(stack),
-        ERRORS.TEAL.INVALID_TYPE
-      );
-    });
+    it("should throw error if Div is used with strings",
+      execExpectError(stack, strArr, new Div(), ERRORS.TEAL.INVALID_TYPE)
+    );
 
     it("should panic on A/B if B == 0", function () {
       stack.push(BigInt("0"));
@@ -420,11 +378,18 @@ describe("Teal Opcodes", function () {
     it("should return correct modulo of two unit64", function () {
       stack.push(BigInt("2"));
       stack.push(BigInt("5"));
-      const op = new Mod();
+      let op = new Mod();
       op.execute(stack);
 
-      const top = stack.pop();
+      let top = stack.pop();
       assert.equal(top, BigInt("1"));
+
+      stack.push(BigInt("7"));
+      stack.push(BigInt("7"));
+      op = new Mod();
+      op.execute(stack);
+      top = stack.pop();
+      assert.equal(top, BigInt("0"));
     });
 
     it("should return 0 on modulo of two unit64 with A == 0", function () {
@@ -437,24 +402,13 @@ describe("Teal Opcodes", function () {
       assert.equal(top, BigInt("0"));
     });
 
-    it("should throw error with Mod if stack is below min length", function () {
-      stack.push(BigInt("0")); // stack.length() = 1
-      const op = new Mod();
-      expectTealError(
-        () => op.execute(stack),
-        ERRORS.TEAL.ASSERT_STACK_LENGTH
-      );
-    });
+    it("should throw error with Mod if stack is below min length",
+      execExpectError(stack, [BigInt("1000")], new Mod(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+    );
 
-    it("should throw error if Mod is used with strings", function () {
-      stack.push(toBytes("str1"));
-      stack.push(toBytes("str2"));
-      const op = new Mod();
-      expectTealError(
-        () => op.execute(stack),
-        ERRORS.TEAL.INVALID_TYPE
-      );
-    });
+    it("should throw error if Mod is used with strings",
+      execExpectError(stack, strArr, new Mod(), ERRORS.TEAL.INVALID_TYPE)
+    );
 
     it("should panic on A % B if B == 0", function () {
       stack.push(BigInt("0"));
@@ -480,24 +434,13 @@ describe("Teal Opcodes", function () {
       assert.equal(top, BigInt("30"));
     });
 
-    it("should throw error with bitwise-or if stack is below min length", function () {
-      stack.push(BigInt("1")); // stack.length() = 1
-      const op = new BitwiseOr();
-      expectTealError(
-        () => op.execute(stack),
-        ERRORS.TEAL.ASSERT_STACK_LENGTH
-      );
-    });
+    it("should throw error with bitwise-or if stack is below min length",
+      execExpectError(stack, [BigInt("1000")], new BitwiseOr(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+    );
 
-    it("should throw error if bitwise-or is used with strings", function () {
-      stack.push(toBytes("str1"));
-      stack.push(toBytes("str2"));
-      const op = new BitwiseOr();
-      expectTealError(
-        () => op.execute(stack),
-        ERRORS.TEAL.INVALID_TYPE
-      );
-    });
+    it("should throw error if bitwise-or is used with strings",
+      execExpectError(stack, strArr, new BitwiseOr(), ERRORS.TEAL.INVALID_TYPE)
+    );
   });
 
   describe("Bitwise AND", function () {
@@ -513,24 +456,13 @@ describe("Teal Opcodes", function () {
       assert.equal(top, BigInt("0"));
     });
 
-    it("should throw error with bitwise-and if stack is below min length", function () {
-      stack.push(BigInt("1")); // stack.length() = 1
-      const op = new Add();
-      expectTealError(
-        () => op.execute(stack),
-        ERRORS.TEAL.ASSERT_STACK_LENGTH
-      );
-    });
+    it("should throw error with bitwise-and if stack is below min length",
+      execExpectError(stack, [BigInt("1000")], new BitwiseAnd(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+    );
 
-    it("should throw error if bitwise-and is used with strings", function () {
-      stack.push(toBytes("str1"));
-      stack.push(toBytes("str2"));
-      const op = new BitwiseAnd();
-      expectTealError(
-        () => op.execute(stack),
-        ERRORS.TEAL.INVALID_TYPE
-      );
-    });
+    it("should throw error if bitwise-and is used with strings",
+      execExpectError(stack, strArr, new BitwiseAnd(), ERRORS.TEAL.INVALID_TYPE)
+    );
   });
 
   describe("Bitwise XOR", function () {
@@ -546,24 +478,13 @@ describe("Teal Opcodes", function () {
       assert.equal(top, BigInt("30"));
     });
 
-    it("should throw error with bitwise-xor if stack is below min length", function () {
-      stack.push(BigInt("1")); // stack.length() = 1
-      const op = new BitwiseXor();
-      expectTealError(
-        () => op.execute(stack),
-        ERRORS.TEAL.ASSERT_STACK_LENGTH
-      );
-    });
+    it("should throw error with bitwise-xor if stack is below min length",
+      execExpectError(stack, [BigInt("1000")], new BitwiseXor(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+    );
 
-    it("should throw error if bitwise-xor is used with strings", function () {
-      stack.push(toBytes("str1"));
-      stack.push(toBytes("str2"));
-      const op = new BitwiseXor();
-      expectTealError(
-        () => op.execute(stack),
-        ERRORS.TEAL.INVALID_TYPE
-      );
-    });
+    it("should throw error if bitwise-xor is used with strings",
+      execExpectError(stack, strArr, new BitwiseXor(), ERRORS.TEAL.INVALID_TYPE)
+    );
   });
 
   describe("Bitwise NOT", function () {
@@ -578,22 +499,12 @@ describe("Teal Opcodes", function () {
       assert.equal(top, ~BigInt("10"));
     });
 
-    it("should throw error with bitwise-xor if stack is below min length", function () {
-      // stack.length() = 0
-      const op = new BitwiseNot();
-      expectTealError(
-        () => op.execute(stack),
-        ERRORS.TEAL.ASSERT_STACK_LENGTH
-      );
-    });
+    it("should throw error with bitwise-not if stack is below min length",
+      execExpectError(stack, [], new Add(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+    );
 
-    it("should throw error if bitwise-not is used with string", function () {
-      stack.push(toBytes("str1"));
-      const op = new BitwiseNot();
-      expectTealError(
-        () => op.execute(stack),
-        ERRORS.TEAL.INVALID_TYPE
-      );
-    });
+    it("should throw error if bitwise-not is used with string",
+      execExpectError(stack, strArr, new BitwiseNot(), ERRORS.TEAL.INVALID_TYPE)
+    );
   });
 });
