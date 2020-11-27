@@ -1,5 +1,4 @@
 import deepmerge from "deepmerge";
-import * as fs from "fs";
 import * as path from "path";
 
 import type {
@@ -95,7 +94,7 @@ export function resolveProjectPaths (
   return {
     ...otherPaths,
     root,
-    userConfigPath,
+    configFile: userConfigPath,
     sources: resolvePathFrom(root, "contracts", userPaths.sources),
     cache: resolvePathFrom(root, "cache", userPaths.cache),
     artifacts: resolvePathFrom(root, "artifacts", userPaths.artifacts),
