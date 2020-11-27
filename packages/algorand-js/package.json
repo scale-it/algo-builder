@@ -6,10 +6,12 @@
     {
       "name": "Robert Zaremba",
       "url": "https://github.com/robert-zaremba"
-    }, {
+    },
+    {
       "name": "Amit Yadav",
       "url": "https://github.com/amityadav0"
-    }, {
+    },
+    {
       "name": "Ratik Jindal",
       "url": "https://github.com/ratik21"
     }
@@ -58,8 +60,12 @@
   "dependencies": {
     "algosdk": "^1.8.0",
     "glob": "^7.1.6",
+    "js-sha256": "^0.9.0",
+    "js-sha512": "^0.8.0",
     "murmurhash": "^1.0.0",
-    "source-map-support": "^0.5.19"
+    "source-map-support": "^0.5.19",
+    "types": "^0.1.0",
+    "uint64be": "^3.0.0"
   },
   "nyc": {
     "extension": [
