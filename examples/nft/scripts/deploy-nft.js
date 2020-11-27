@@ -23,8 +23,7 @@ async function run(runtimeEnv, deployer) {
 
   await deployer.deploySSC("nft_approval.py", "nft_clear_state.py", {
     sender: masterAccount,
-    localInts: 8,
-    localBytes: 8,
+    localInts: 16,
     globalInts: 1,
     globalBytes: 63
   }, {});
