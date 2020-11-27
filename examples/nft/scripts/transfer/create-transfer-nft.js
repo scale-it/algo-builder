@@ -39,8 +39,8 @@ async function run(runtimeEnv, deployer) {
   await printLocalNFT(deployer, masterAccount.addr, appId);
   await printLocalNFT(deployer, john.addr, appId);
 
-  let nftID = new Uint8Array(8).fill(1, 7), // [0, 0, 0, 0, 0, 0, 0, 1] = uint64(1)
-  appArgs2 = [
+  let nftID = new Uint8Array(8).fill(2, 7); // [0, 0, 0, 0, 0, 0, 0, 1] = uint64(1)
+  appArgs = [
     toBytes("transfer"),
     nftID,
   ];
@@ -54,7 +54,7 @@ async function run(runtimeEnv, deployer) {
     appId: appId,
     payFlags: {},
     accounts: [masterAccount.addr, john.addr],
-    appArgs2
+    appArgs
   };
   await executeTransaction(deployer, txnParam);
 

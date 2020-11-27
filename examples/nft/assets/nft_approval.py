@@ -60,9 +60,9 @@ def approval_program():
             no_rekey_addr
         )),
 
-        id_h.store(Concat(create_nft_id, Bytes("_h"))), # store id_h in scratchVar
-
         App.globalPut(var_total, App.globalGet(var_total) + var_1),
+
+        id_h.store(Concat(create_nft_id, Bytes("_h"))), # store id_h in scratchVar
         App.globalPut(create_nft_id, data_ref),
         App.globalPut(id_h.load() , data_hash),
 
