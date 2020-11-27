@@ -13,7 +13,9 @@ export default function (): void {
         console.warn("not in a project directory");
         return;
       }
-      console.log("cleaning:", config.paths.cache, config.paths.artifacts);
+      console.log("cleaning:");
+      console.log(config.paths.cache);
+      console.log(config.paths.artifacts);
       await fsExtra.remove(config.paths.cache);
       await fsExtra.remove(config.paths.artifacts);
     }
