@@ -4,11 +4,11 @@ import { ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
   Add, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
-  Bytec,
-  Bytecblock, Div, Intc,
-  Intcblock, Len, Mod, Mul, Sub
+  Bytec, Bytecblock, Div, Intc,
+  Intcblock, Len, Load,
+  Mod, Mul, Store, Sub
 } from "../../../src/interpreter/opcode-list";
-import { MAX_UINT8, MAX_UINT64 } from "../../../src/lib/constants";
+import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64 } from "../../../src/lib/constants";
 import { toBytes } from "../../../src/lib/parse-data";
 import { Stack } from "../../../src/lib/stack";
 import type { StackElem } from "../../../src/types";
@@ -421,6 +421,53 @@ describe("Teal Opcodes", function () {
     });
   });
 
+  describe("Store", function () {
+    const stack = new Stack<StackElem>();
+
+    it("should store uint64 to scratch", function () {
+      const interpreter = new Interpreter();
+      const val = BigInt("0");
+      stack.push(val);
+
+      const op = new Store(0, interpreter);
+      op.execute(stack);
+      assert.equal(stack.length(), 0); // verify stack is popped
+      assert.equal(val, interpreter.scratch[0]);
+    });
+
+    it("should store byte[] to scratch", function () {
+      const interpreter = new Interpreter();
+      const val = toBytes("HelloWorld");
+      stack.push(val);
+
+      const op = new Store(0, interpreter);
+      op.execute(stack);
+      assert.equal(stack.length(), 0); // verify stack is popped
+      assert.equal(val, interpreter.scratch[0]);
+    });
+
+    it("should throw error on store if index is out of bound", function () {
+      const interpreter = new Interpreter();
+      stack.push(BigInt("0"));
+
+      const op = new Store(MAX_UINT8 + 5, interpreter);
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
+    });
+
+    it("should throw error on store if stack is empty", function () {
+      const interpreter = new Interpreter();
+      const stack = new Stack<StackElem>(); // empty stack
+      const op = new Store(0, interpreter);
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
+    });
+  });
+
   describe("Bitwise OR", function () {
     const stack = new Stack<StackElem>();
 
@@ -506,5 +553,45 @@ describe("Teal Opcodes", function () {
     it("should throw error if bitwise-not is used with string",
       execExpectError(stack, strArr, new BitwiseNot(), ERRORS.TEAL.INVALID_TYPE)
     );
+  });
+
+  describe("Load", function () {
+    const stack = new Stack<StackElem>();
+    const interpreter = new Interpreter();
+    const scratch = [BigInt("0"), toBytes("HelloWorld")];
+    interpreter.scratch = scratch;
+
+    it("should load uint64 from scratch space to stack", function () {
+      const op = new Load(0, interpreter);
+      const len = stack.length();
+
+      op.execute(stack);
+      assert.equal(len + 1, stack.length()); // verify stack is pushed
+      assert.equal(interpreter.scratch[0], stack.pop());
+    });
+
+    it("should load byte[] from scratch space to stack", function () {
+      const op = new Load(1, interpreter);
+      const len = stack.length();
+
+      op.execute(stack);
+      assert.equal(len + 1, stack.length()); // verify stack is pushed
+      assert.equal(interpreter.scratch[1], stack.pop());
+    });
+
+    it("should throw error on load if index is out of bound", function () {
+      const op = new Load(MAX_UINT8 + 5, interpreter);
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
+    });
+
+    it("should load default value to stack if value at a slot is not intialized", function () {
+      const interpreter = new Interpreter();
+      const op = new Load(0, interpreter);
+      op.execute(stack);
+      assert.equal(DEFAULT_STACK_ELEM, stack.pop());
+    });
   });
 });
