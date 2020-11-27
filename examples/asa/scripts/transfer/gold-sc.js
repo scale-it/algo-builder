@@ -13,7 +13,7 @@ async function run(runtimeEnv, deployer) {
 
   // Transactions for GOLD ASA contract : '4-gold-asa.teal'  (Delegated Approval Mode)
   const lsigGoldOwner = deployer.getDelegatedLsig('4-gold-asa.teal');
-  
+
   const assetID =  deployer.asa.get("gold").assetIndex;
   let txnParam = {
     type: TransactionType.TransferAsset,
@@ -38,7 +38,7 @@ async function run(runtimeEnv, deployer) {
   txnParam.toAccountAddr = bob.addr;
   await executeTransaction(deployer, txnParam);
 
-  
+
   // Transaction for ALGO - Contract : '3-gold-delegated-asc.teal'  (Delegated Approval Mode)
   const logicSignature = deployer.getDelegatedLsig('3-gold-delegated-asc.teal');
 
@@ -57,6 +57,6 @@ async function run(runtimeEnv, deployer) {
   // Transaction FAIL - As according to .teal logic, amount should be <= 100
   txnParam.amountMicroAlgos = 580;
   await executeTransaction(deployer, txnParam);
-} 
+}
 
 module.exports = { default: run }
