@@ -1,6 +1,6 @@
 export interface IStack<T> {
   push: (item: T) => void
-  pop: () => T | undefined
+  pop: () => T
   length: () => number
 }
 
@@ -15,15 +15,15 @@ export class Stack<T> implements IStack<T> {
 
   push (item: T): void {
     if (this.length() === this.capacity) {
-      throw new Error(`Stack Overflow - Cannot push more items than max capacity ${this.capacity}`);
+      throw new Error(`Stack overflow: cannot push more items than max capacity ${this.capacity}`);
     }
     this._store.push(item);
   }
 
-  pop (): T | undefined {
+  pop (): T {
     if (this.length() === 0) {
-      throw new Error(`Stack UnderFlow - Cannot pop if stack is empty`);
+      throw new Error("pop from empty stack");
     }
-    return this._store.pop();
+    return this._store.pop() as T;
   }
 }

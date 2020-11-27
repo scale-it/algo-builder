@@ -1,3 +1,4 @@
+/* eslint sonarjs/no-identical-functions: 0 */
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import type { TEALStack } from "../types";
@@ -149,5 +150,41 @@ export class Intc extends Op {
     this.checkIndexBound(this.index, this.interpreter.intcblock);
     const intc = this.assertBigInt(this.interpreter.intcblock[this.index]);
     stack.push(intc);
+  }
+}
+
+// pop a value from the stack and store to scratch space
+export class Store extends Op {
+  readonly index: number;
+  readonly interpreter: Interpreter;
+
+  constructor (index: number, interpreter: Interpreter) {
+    super();
+    this.index = index;
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.checkIndexBound(this.index, this.interpreter.scratch);
+    this.assertStackLen(stack, 1);
+    const top = stack.pop();
+    this.interpreter.scratch[this.index] = top;
+  }
+}
+
+// copy a value from scratch space to the stack
+export class Load extends Op {
+  readonly index: number;
+  readonly interpreter: Interpreter;
+
+  constructor (index: number, interpreter: Interpreter) {
+    super();
+    this.index = index;
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.checkIndexBound(this.index, this.interpreter.scratch);
+    stack.push(this.interpreter.scratch[this.index]);
   }
 }

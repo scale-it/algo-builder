@@ -22,13 +22,13 @@ export class Op {
     }
   }
 
-  checkIndexBound (idx: number, arr: Array<Uint8Array | bigint>): void {
+  checkIndexBound (idx: number, arr: Array<Uint8Array | BigInt>): void {
     if (!(idx >= 0 && idx < arr.length)) {
       throw new TealError(ERRORS.TEAL.INDEX_OUT_OF_BOUND);
     }
   }
 
-  assertArrLength (arr: Uint8Array[] | Array<bigint>): void {
+  assertArrLength (arr: Uint8Array[] | BigInt[]): void {
     if (!arr.length || arr.length > MAX_UINT8 + 1) {
       throw new TealError(ERRORS.TEAL.ASSERT_ARR_LENGTH);
     }
