@@ -18,8 +18,8 @@ async function run(runtimeEnv, deployer) {
 
   const nft_ref = "https://new-nft.com";
 
-  // push arguments "create" and nft data
-  let appArgs = ["create", nft_ref].map(toBytes);
+  // arguments: "create", nft_data_ref, data_hash
+  let appArgs = ["create", nft_ref, "1234"].map(toBytes);
 
   let txnParam = {
     type: TransactionType.CallNoOpSSC,
@@ -37,12 +37,12 @@ async function run(runtimeEnv, deployer) {
   // *** Transfer NFT from master to john ***
 
   await printLocalNFT(deployer, masterAccount.addr, appId);
-  await printLocalNFT(deployer, johnAccount.addr, appId);
+  await printLocalNFT(deployer, john.addr, appId);
 
-  // push arguments: ("transfer", nft_id=1)
+  let nftID = new Uint8Array(8).fill(1, 7); // [0, 0, 0, 0, 0, 0, 0, 1] = uint64(1)
   appArgs = [
     toBytes("transfer"),
-    new Uint8Array(8).fill(1, 7), //[0, 0, 0, 0, 0, 0, 0, 1]
+    nftID,
   ];
 
   // transfer nft from master to john
@@ -59,7 +59,7 @@ async function run(runtimeEnv, deployer) {
   await executeTransaction(deployer, txnParam);
 
   await printLocalNFT(deployer, masterAccount.addr, appId);
-  await printLocalNFT(deployer, johnAccount.addr, appId);
+  await printLocalNFT(deployer, john.addr, appId);
 }
 
 module.exports = { default: run }

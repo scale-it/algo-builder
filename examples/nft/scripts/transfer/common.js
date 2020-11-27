@@ -25,13 +25,11 @@ exports.printGlobalNFT = async function (deployer, creator, appId) {
 exports.printLocalNFT = async function (deployer, account, appId) {
     try {
         const localState = await readLocalStateSSC(deployer, account, appId);
+        // each nft is stored as a one record in user store
         let count = 0;
-
-        // length/2 because each nft is a pair of {id: ref_data, id_h: ref_hash}
-        if(localState !== undefined){ 
-            count = localState.length/2; 
-        }
-        console.log('NFT balance of', account, ':', count); 
+        if (localState !== undefined)
+            count = localState.length
+        console.log('NFT balance of', account, ':', count);
     } catch (e) {
         console.error('Error Occurred', e);
     }
