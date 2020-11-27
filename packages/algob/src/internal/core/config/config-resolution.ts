@@ -1,5 +1,4 @@
 import deepmerge from "deepmerge";
-import * as fs from "fs";
 import * as path from "path";
 
 import type {
