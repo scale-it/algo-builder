@@ -1,3 +1,4 @@
+/* eslint sonarjs/no-identical-functions: 0 */
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import type { TEALStack } from "../types";
@@ -149,5 +150,94 @@ export class Intc extends Op {
     this.checkIndexBound(this.index, this.interpreter.intcblock);
     const intc = this.assertBigInt(this.interpreter.intcblock[this.index]);
     stack.push(intc);
+  }
+}
+
+// pops two unit64 from stack(a, b) and pushes their modulo(a % b) to stack
+// Panic if B == 0.
+export class Mod extends Op {
+  execute (stack: TEALStack): void {
+    this.assertStackLen(stack, 2);
+    const a = this.assertBigInt(stack.pop());
+    const b = this.assertBigInt(stack.pop());
+    if (b === BIGINT0) {
+      throw new TealError(ERRORS.TEAL.ZERO_DIV);
+    }
+    stack.push(a % b);
+  }
+}
+
+// pops two unit64 from stack(a, b) and pushes their bitwise-or(a | b) to stack
+export class BitwiseOr extends Op {
+  execute (stack: TEALStack): void {
+    this.assertStackLen(stack, 2);
+    const a = this.assertBigInt(stack.pop());
+    const b = this.assertBigInt(stack.pop());
+    stack.push(a | b);
+  }
+}
+
+// pops two unit64 from stack(a, b) and pushes their bitwise-and(a & b) to stack
+export class BitwiseAnd extends Op {
+  execute (stack: TEALStack): void {
+    this.assertStackLen(stack, 2);
+    const a = this.assertBigInt(stack.pop());
+    const b = this.assertBigInt(stack.pop());
+    stack.push(a & b);
+  }
+}
+
+// pops two unit64 from stack(a, b) and pushes their bitwise-xor(a ^ b) to stack
+export class BitwiseXor extends Op {
+  execute (stack: TEALStack): void {
+    this.assertStackLen(stack, 2);
+    const a = this.assertBigInt(stack.pop());
+    const b = this.assertBigInt(stack.pop());
+    stack.push(a ^ b);
+  }
+}
+
+// pop unit64 from stack and push it's bitwise-invert(~a) to stack
+export class BitwiseNot extends Op {
+  execute (stack: TEALStack): void {
+    this.assertStackLen(stack, 1);
+    const a = this.assertBigInt(stack.pop());
+    stack.push(~a);
+  }
+}
+
+// pop a value from the stack and store to scratch space
+export class Store extends Op {
+  readonly index: number;
+  readonly interpreter: Interpreter;
+
+  constructor (index: number, interpreter: Interpreter) {
+    super();
+    this.index = index;
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.checkIndexBound(this.index, this.interpreter.scratch);
+    this.assertStackLen(stack, 1);
+    const top = stack.pop();
+    this.interpreter.scratch[this.index] = top;
+  }
+}
+
+// copy a value from scratch space to the stack
+export class Load extends Op {
+  readonly index: number;
+  readonly interpreter: Interpreter;
+
+  constructor (index: number, interpreter: Interpreter) {
+    super();
+    this.index = index;
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.checkIndexBound(this.index, this.interpreter.scratch);
+    stack.push(this.interpreter.scratch[this.index]);
   }
 }
