@@ -1,15 +1,15 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
-import { encode, decode } from "uint64be";
+import { decode, encode } from "uint64be";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
+import { MAX_STRING_SIZE, MAX_UINT64 } from "../lib/constants";
+import { compareArray } from "../lib/helpers";
 import type { TEALStack } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
-import { compareArray } from "../lib/helpers";
-import { MAX_UINT64, MAX_STRING_SIZE } from "../lib/constants";
 
 const BIGINT0 = BigInt("0");
 // pops string([]byte) from stack and pushes it's length to stack
@@ -369,15 +369,15 @@ export class EqualTo extends Op {
     this.assertStackLen(stack, 2);
     const a = stack.pop();
     const b = stack.pop();
-    if(typeof a === typeof b) {
-      if(typeof a === "bigint") {
+    if (typeof a === typeof b) {
+      if (typeof a === "bigint") {
         if (a === b) {
           stack.push(BigInt('1'));
         } else {
           stack.push(BigInt('0'));
         }
       } else {
-        if(compareArray(this.assertBytes(a), this.assertBytes(b))) {
+        if (compareArray(this.assertBytes(a), this.assertBytes(b))) {
           stack.push(BigInt('1'));
         } else {
           stack.push(BigInt('0'));
@@ -395,15 +395,15 @@ export class NotEqualTo extends Op {
     this.assertStackLen(stack, 2);
     const a = stack.pop();
     const b = stack.pop();
-    if(typeof a === typeof b) {
-      if(typeof a === "bigint") {
+    if (typeof a === typeof b) {
+      if (typeof a === "bigint") {
         if (a === b) {
           stack.push(BigInt('0'));
         } else {
           stack.push(BigInt('1'));
         }
       } else {
-        if(compareArray(this.assertBytes(a), this.assertBytes(b))) {
+        if (compareArray(this.assertBytes(a), this.assertBytes(b))) {
           stack.push(BigInt('0'));
         } else {
           stack.push(BigInt('1'));
@@ -462,7 +462,7 @@ export class Addw extends Op {
     const valueB = this.assertBigInt(stack.pop());
     let valueC = valueA + valueB;
 
-    if(valueC > MAX_UINT64) {
+    if (valueC > MAX_UINT64) {
       valueC -= MAX_UINT64;
       stack.push(BigInt('1'));
       stack.push(valueC - BigInt('1'));
@@ -486,7 +486,7 @@ export class Dup extends Op {
   execute (stack: TEALStack): void {
     this.assertStackLen(stack, 1);
     const lastValue = stack.pop();
-   
+
     stack.push(lastValue);
     stack.push(lastValue);
   }
@@ -498,7 +498,7 @@ export class Dup2 extends Op {
     this.assertStackLen(stack, 2);
     const lastValueA = stack.pop();
     const lastValueB = stack.pop();
-    
+
     stack.push(lastValueB);
     stack.push(lastValueA);
     stack.push(lastValueB);

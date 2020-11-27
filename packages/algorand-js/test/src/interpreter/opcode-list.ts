@@ -1,17 +1,19 @@
+/* eslint sonarjs/no-identical-functions: 0 */
 import { assert } from "chai";
 
 import { ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
-  Add, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
-  Bytec, Bytecblock, Div, Intc,
-  Intcblock, Len, Load,
-  Mod, Mul, Store, Sub, Err, Sha256, Sha512_256, LessThan, LessThanEqualTo, 
-  GreaterThan, GreaterThanEqualTo, EqualTo, NotEqualTo, Not, And, Or, Itob, 
-  Btoi, Concat, Substring3, Addw, Dup, Dup2
+  Add, Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
+  Btoi, Bytec, Bytecblock, Concat, Div, Dup, Dup2,
+  EqualTo, Err, GreaterThan, GreaterThanEqualTo, Intc,
+  Intcblock, Itob,
+  Len, LessThan, LessThanEqualTo,
+  Load,
+  Mod, Mul, Not, NotEqualTo, Or, Sha256, Sha512_256, Store, Sub, Substring3
 } from "../../../src/interpreter/opcode-list";
 import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64 } from "../../../src/lib/constants";
-import { toBytes, convertToString } from "../../../src/lib/parse-data";
+import { convertToString, toBytes } from "../../../src/lib/parse-data";
 import { Stack } from "../../../src/lib/stack";
 import type { StackElem } from "../../../src/types";
 import { execExpectError, expectTealError } from "../../helpers/errors";
@@ -600,7 +602,7 @@ describe("Teal Opcodes", function () {
   describe("Err", function () {
     const stack = new Stack<StackElem>();
 
-    it("should throw error", function () {
+    it("should throw TEAL error", function () {
       const op = new Err();
       expectTealError(
         () => op.execute(stack),
@@ -623,6 +625,10 @@ describe("Teal Opcodes", function () {
       const top = stack.pop();
       assert.deepEqual(expected, top);
     });
+
+    it("should throw invalid type error",
+      execExpectError(stack, [BigInt("1")], new Sha256(), ERRORS.TEAL.INVALID_TYPE)  
+    );
   });
 
   describe("Sha512_256 opcode", function () {
@@ -639,6 +645,10 @@ describe("Teal Opcodes", function () {
       const top = stack.pop();
       assert.deepEqual(expected, top);
     });
+
+    it("should throw invalid type error",
+      execExpectError(stack, [BigInt("1")], new Sha512_256(), ERRORS.TEAL.INVALID_TYPE)  
+    );
   });
 
   describe("LessThan", function () {
@@ -665,6 +675,16 @@ describe("Teal Opcodes", function () {
       const top = stack.pop();
       assert.equal(top, BigInt('0'));
     });
+
+    it("should throw invalid type error",
+      execExpectError(stack, 
+        [new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])],
+        new LessThan(), ERRORS.TEAL.INVALID_TYPE)  
+    );
+
+    it("should throw stack length error", execExpectError(new Stack<StackElem>(), 
+      [BigInt('1')], new LessThan(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+    );
   });
 
   describe("GreaterThan", function () {
@@ -691,6 +711,16 @@ describe("Teal Opcodes", function () {
       const top = stack.pop();
       assert.equal(top, BigInt('0'));
     });
+
+    it("should throw invalid type error",
+      execExpectError(stack, 
+        [new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])],
+        new GreaterThan(), ERRORS.TEAL.INVALID_TYPE)  
+    );
+
+    it("should throw stack length error", execExpectError(new Stack<StackElem>(), 
+      [BigInt('1')], new LessThan(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+    );
   });
 
   describe("LessThanEqualTo", function () {
@@ -717,6 +747,16 @@ describe("Teal Opcodes", function () {
       const top = stack.pop();
       assert.equal(top, BigInt('0'));
     });
+
+    it("should throw invalid type error",
+      execExpectError(stack, 
+        [new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])],
+        new LessThanEqualTo(), ERRORS.TEAL.INVALID_TYPE)  
+    );
+
+    it("should throw stack length error", execExpectError(new Stack<StackElem>(), 
+      [BigInt('1')], new LessThan(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+    );
   });
 
   describe("GreaterThanEqualTo", function () {
@@ -743,6 +783,16 @@ describe("Teal Opcodes", function () {
       const top = stack.pop();
       assert.equal(top, BigInt('0'));
     });
+
+    it("should throw invalid type error",
+      execExpectError(stack, 
+        [new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])],
+        new GreaterThanEqualTo(), ERRORS.TEAL.INVALID_TYPE)  
+    );
+
+    it("should throw stack length error", execExpectError(new Stack<StackElem>(), 
+      [BigInt('1')], new LessThan(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+    );
   });
 
   describe("And", () => {
@@ -769,6 +819,16 @@ describe("Teal Opcodes", function () {
       const top = stack.pop();
       assert.equal(BigInt('0'), top);
     });
+
+    it("should throw invalid type error",
+      execExpectError(stack, 
+        [new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])],
+        new And(), ERRORS.TEAL.INVALID_TYPE)  
+    );
+
+    it("should throw stack length error", execExpectError(new Stack<StackElem>(), 
+      [BigInt('1')], new LessThan(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+    );
   });
 
   describe("Or", () => {
@@ -795,6 +855,16 @@ describe("Teal Opcodes", function () {
       const top = stack.pop();
       assert.equal(BigInt('0'), top);
     });
+
+    it("should throw invalid type error",
+      execExpectError(stack, 
+        [new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])],
+        new Or(), ERRORS.TEAL.INVALID_TYPE)  
+    );
+
+    it("should throw stack length error", execExpectError(new Stack<StackElem>(), 
+      [BigInt('1')], new LessThan(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+    );
   });
 
   describe("EqualTo", () => {
@@ -933,6 +1003,10 @@ describe("Teal Opcodes", function () {
       const expected = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 4]);
       assert.deepEqual(top, expected);
     });
+
+    it("should throw invalid type error",
+      execExpectError(stack, [new Uint8Array([1, 2])], new Itob(), ERRORS.TEAL.INVALID_TYPE)  
+    );
   });
 
   describe("btoi", () => {
@@ -947,12 +1021,10 @@ describe("Teal Opcodes", function () {
       assert.equal(top, BigInt('1'));
     });
 
-    it("should throw error as array is long", () => {
-      stack.push(new Uint8Array([0, 1, 1, 1, 1, 1, 1, 1, 0]));
-
-      const op = new Btoi();
-      assert.throws(() => op.execute(stack), "Input is longer than 8 bytes");
-    });
+    it("should throw invalid type error",
+    execExpectError(stack, [new Uint8Array([0, 1, 1, 1, 1, 1, 1, 1, 0])], 
+      new Btoi(), ERRORS.TEAL.LONG_INPUT_ERROR)  
+    );
   });
 
   describe("Addw", () => {
@@ -983,7 +1055,7 @@ describe("Teal Opcodes", function () {
     });
   });
 
-  describe("Dup",  () => {
+  describe("Dup", () => {
     const stack = new Stack<StackElem>();
 
     it("should duplicate value", () => {
@@ -998,7 +1070,7 @@ describe("Teal Opcodes", function () {
     });
   });
 
-  describe("Dup2",  () => {
+  describe("Dup2", () => {
     const stack = new Stack<StackElem>();
 
     it("should duplicate value(A, B -> A, B, A, B)", () => {
@@ -1006,15 +1078,19 @@ describe("Teal Opcodes", function () {
       stack.push(BigInt('3'));
       const op = new Dup2();
       op.execute(stack);
-      
-      let arr = [];
+
+      const arr = [];
       arr.push(stack.pop());
       arr.push(stack.pop());
       arr.push(stack.pop());
       arr.push(stack.pop());
-     
+
       assert.deepEqual(arr, ['3', '2', '3', '2'].map(BigInt));
     });
+
+    it("should throw stack length error",
+      execExpectError(stack, [new Uint8Array([1, 2])], new Dup2(), ERRORS.TEAL.ASSERT_STACK_LENGTH)  
+    );
   });
 
   describe("Concat", () => {
