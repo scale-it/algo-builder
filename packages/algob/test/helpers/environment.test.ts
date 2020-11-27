@@ -12,7 +12,7 @@ describe("Builder lib", () => {
     assert.isDefined(this.env.config.networks.custom);
   });
 
-  it("should load task user defined task", async function () {
+  it("should load user defined task", async function () {
     assert.isDefined(this.env.tasks.example2);
     assert.equal(await this.env.run("example2"), 28);
   });

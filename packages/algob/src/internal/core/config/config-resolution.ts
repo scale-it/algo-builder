@@ -95,7 +95,7 @@ export function resolveProjectPaths (
   return {
     ...otherPaths,
     root,
-    userConfigPath,
+    configFile: userConfigPath,
     sources: resolvePathFrom(root, "contracts", userPaths.sources),
     cache: resolvePathFrom(root, "cache", userPaths.cache),
     artifacts: resolvePathFrom(root, "artifacts", userPaths.artifacts),
