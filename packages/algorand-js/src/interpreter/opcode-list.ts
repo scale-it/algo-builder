@@ -1,3 +1,4 @@
+/* eslint sonarjs/no-identical-functions: 0 */
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import type { TEALStack } from "../types";
@@ -157,7 +158,7 @@ export class Store extends Op {
   readonly index: number;
   readonly interpreter: Interpreter;
 
-  constructor (index: number, interpreter: Interpreter) { // eslint-disable-line sonarjs/no-identical-functions
+  constructor (index: number, interpreter: Interpreter) {
     super();
     this.index = index;
     this.interpreter = interpreter;
@@ -176,7 +177,7 @@ export class Load extends Op {
   readonly index: number;
   readonly interpreter: Interpreter;
 
-  constructor (index: number, interpreter: Interpreter) { // eslint-disable-line sonarjs/no-identical-functions
+  constructor (index: number, interpreter: Interpreter) {
     super();
     this.index = index;
     this.interpreter = interpreter;
