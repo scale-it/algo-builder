@@ -626,8 +626,8 @@ describe("Teal Opcodes", function () {
       assert.deepEqual(expected, top);
     });
 
-    it("should throw invalid type error",
-      execExpectError(stack, [BigInt("1")], new Sha256(), ERRORS.TEAL.INVALID_TYPE)  
+    it("should throw invalid type error sha256",
+      execExpectError(stack, [BigInt("1")], new Sha256(), ERRORS.TEAL.INVALID_TYPE)
     );
   });
 
@@ -646,8 +646,8 @@ describe("Teal Opcodes", function () {
       assert.deepEqual(expected, top);
     });
 
-    it("should throw invalid type error",
-      execExpectError(stack, [BigInt("1")], new Sha512_256(), ERRORS.TEAL.INVALID_TYPE)  
+    it("should throw invalid type error sha512_256",
+      execExpectError(stack, [BigInt("1")], new Sha512_256(), ERRORS.TEAL.INVALID_TYPE)
     );
   });
 
@@ -676,13 +676,13 @@ describe("Teal Opcodes", function () {
       assert.equal(top, BigInt('0'));
     });
 
-    it("should throw invalid type error",
-      execExpectError(stack, 
+    it("should throw invalid type error LessThan",
+      execExpectError(stack,
         [new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])],
-        new LessThan(), ERRORS.TEAL.INVALID_TYPE)  
+        new LessThan(), ERRORS.TEAL.INVALID_TYPE)
     );
 
-    it("should throw stack length error", execExpectError(new Stack<StackElem>(), 
+    it("should throw stack length error LessThan", execExpectError(new Stack<StackElem>(),
       [BigInt('1')], new LessThan(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
@@ -712,13 +712,13 @@ describe("Teal Opcodes", function () {
       assert.equal(top, BigInt('0'));
     });
 
-    it("should throw invalid type error",
-      execExpectError(stack, 
+    it("should throw invalid type error GreaterThan",
+      execExpectError(stack,
         [new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])],
-        new GreaterThan(), ERRORS.TEAL.INVALID_TYPE)  
+        new GreaterThan(), ERRORS.TEAL.INVALID_TYPE)
     );
 
-    it("should throw stack length error", execExpectError(new Stack<StackElem>(), 
+    it("should throw stack length error GreaterThan", execExpectError(new Stack<StackElem>(),
       [BigInt('1')], new LessThan(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
@@ -748,13 +748,13 @@ describe("Teal Opcodes", function () {
       assert.equal(top, BigInt('0'));
     });
 
-    it("should throw invalid type error",
-      execExpectError(stack, 
+    it("should throw invalid type error LessThanEqualTo",
+      execExpectError(stack,
         [new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])],
-        new LessThanEqualTo(), ERRORS.TEAL.INVALID_TYPE)  
+        new LessThanEqualTo(), ERRORS.TEAL.INVALID_TYPE)
     );
 
-    it("should throw stack length error", execExpectError(new Stack<StackElem>(), 
+    it("should throw stack length error LessThanEqualTo", execExpectError(new Stack<StackElem>(),
       [BigInt('1')], new LessThan(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
@@ -784,13 +784,13 @@ describe("Teal Opcodes", function () {
       assert.equal(top, BigInt('0'));
     });
 
-    it("should throw invalid type error",
-      execExpectError(stack, 
+    it("should throw invalid type error GreaterThanEqualTo",
+      execExpectError(stack,
         [new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])],
-        new GreaterThanEqualTo(), ERRORS.TEAL.INVALID_TYPE)  
+        new GreaterThanEqualTo(), ERRORS.TEAL.INVALID_TYPE)
     );
 
-    it("should throw stack length error", execExpectError(new Stack<StackElem>(), 
+    it("should throw stack length error GreaterThanEqualTo", execExpectError(new Stack<StackElem>(),
       [BigInt('1')], new LessThan(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
@@ -820,13 +820,13 @@ describe("Teal Opcodes", function () {
       assert.equal(BigInt('0'), top);
     });
 
-    it("should throw invalid type error",
-      execExpectError(stack, 
+    it("should throw invalid type error (And)",
+      execExpectError(stack,
         [new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])],
-        new And(), ERRORS.TEAL.INVALID_TYPE)  
+        new And(), ERRORS.TEAL.INVALID_TYPE)
     );
 
-    it("should throw stack length error", execExpectError(new Stack<StackElem>(), 
+    it("should throw stack length error (And)", execExpectError(new Stack<StackElem>(),
       [BigInt('1')], new LessThan(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
@@ -856,13 +856,13 @@ describe("Teal Opcodes", function () {
       assert.equal(BigInt('0'), top);
     });
 
-    it("should throw invalid type error",
-      execExpectError(stack, 
+    it("should throw invalid type error (Or)",
+      execExpectError(stack,
         [new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])],
-        new Or(), ERRORS.TEAL.INVALID_TYPE)  
+        new Or(), ERRORS.TEAL.INVALID_TYPE)
     );
 
-    it("should throw stack length error", execExpectError(new Stack<StackElem>(), 
+    it("should throw stack length error (Or)", execExpectError(new Stack<StackElem>(),
       [BigInt('1')], new LessThan(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
@@ -1005,7 +1005,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw invalid type error",
-      execExpectError(stack, [new Uint8Array([1, 2])], new Itob(), ERRORS.TEAL.INVALID_TYPE)  
+      execExpectError(stack, [new Uint8Array([1, 2])], new Itob(), ERRORS.TEAL.INVALID_TYPE)
     );
   });
 
@@ -1022,8 +1022,8 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw invalid type error",
-    execExpectError(stack, [new Uint8Array([0, 1, 1, 1, 1, 1, 1, 1, 0])], 
-      new Btoi(), ERRORS.TEAL.LONG_INPUT_ERROR)  
+      execExpectError(stack, [new Uint8Array([0, 1, 1, 1, 1, 1, 1, 1, 0])],
+        new Btoi(), ERRORS.TEAL.LONG_INPUT_ERROR)
     );
   });
 
@@ -1089,7 +1089,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw stack length error",
-      execExpectError(stack, [new Uint8Array([1, 2])], new Dup2(), ERRORS.TEAL.ASSERT_STACK_LENGTH)  
+      execExpectError(stack, [new Uint8Array([1, 2])], new Dup2(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
