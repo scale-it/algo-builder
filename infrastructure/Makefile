@@ -2,18 +2,18 @@
 
 export ALGORAND_DATA=`pwd`/node_data/PrimaryNode
 
-create-devnet:
-	goal network create -r ./node_data -n private -t devnet-template.json
+create-private-net:
+	goal network create -r ./node_data -n private -t private-net-template.json
 	echo '{ "GossipFanout": 0, "EndpointAddress": "127.0.0.1:0", "DNSBootstrapID": "", "EnableProfiler": true, "NetAddress": "127.0.0.1:0", "EnableDeveloperAPI": true }' > ./node_data/PrimaryNode/config.json
 
 
-status-devnet:
+status-private-net:
 	goal network status -r ./node_data
 
-start-devnet:
+start-private-net:
 	goal network start -r ./node_data
 
-stop-devnet:
+stop-private-net:
 	goal network stop -r ./node_data
 
 

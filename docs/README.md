@@ -3,7 +3,7 @@
 + Installation: [main README](/README.md) file.
 + Project initialization → read below.
 + [Configuration](/docs/algob-config.md).
-+ [Devnet](/infrastructure/README.md) creation.
++ [Private Net](/infrastructure/README.md) creation.
 + [Script execution](/docs/user-script-execution.md).
 + [Deployer](/docs/deployer.md)
 + [Script Checkpoints](/docs/execution-checkpoints.md).
