@@ -1,12 +1,9 @@
-import * as msgpack from "algo-msgpack-with-bigint";
 import type { LogicSig, MultiSig } from "algosdk";
+import { decodeAddress, logicSigFromByte } from "algosdk";
 import fs from "fs";
-import { decode } from 'hi-base32';
 import path from "path";
 
 import { ASSETS_DIR } from "../internal/core/project-structure";
-import type { RawLsig } from "../types";
-import { getDummyLsig } from "./lsig";
 
 export const blsigExt = ".blsig";
 const lsigExt = ".lsig";
@@ -22,8 +19,7 @@ export async function decodeMsigObj (msig: string): Promise<MultiSig> {
 
   // decoding multisigned logic signature
   for (const acc of parsedMsig.subsig) {
-    const decoded = decode.asBytes(acc.pk); // decoding base32 string (public key)
-    acc.pk = new Uint8Array(decoded.slice(0, 32));
+    acc.pk = decodeAddress(acc.pk).publicKey;
     if (acc.s) {
       acc.s = new Uint8Array(Buffer.from(acc.s, 'base64')); // decode base64 signature (signed pk)
     }
@@ -43,8 +39,8 @@ export async function readMsigFromFile (filename: string): Promise<MultiSig | un
   }
   try {
     const p = path.join(ASSETS_DIR, filename);
-    const Msig = fs.readFileSync(p, 'utf8').split("LogicSig: ")[1];
-    return await decodeMsigObj(Msig);
+    const msig = fs.readFileSync(p, 'utf8').split("LogicSig: ")[1];
+    return await decodeMsigObj(msig);
   } catch (e) {
     if (e?.errno === -2) return undefined; // handling a not existing file
     throw e;
@@ -76,18 +72,12 @@ export async function readBinaryMultiSig (filename: string): Promise<string | un
  * @returns {LogicSig} multi signed logic signature from assets/<file_name>.blsig
  */
 export async function loadBinaryMultiSig (name: string): Promise<LogicSig> {
-  // get logic signature from file and decode it
   const data = await readBinaryMultiSig(name);
-  const program = new Uint8Array(Buffer.from(data as string, 'base64'));
-  const logicSignature = msgpack.decode(program) as RawLsig;
-  validateMsig(logicSignature.msig);
-
-  // assign complete logic signature
-  const lsig = getDummyLsig();
-  lsig.logic = logicSignature.l as Uint8Array; // assign logic part separately (as keys mismatch: logic, l)
-  delete logicSignature.l;
-  Object.assign(lsig, logicSignature);
-  return lsig;
+  if (data === undefined) {
+    throw new Error(`File ${name} does not exist`);
+  }
+  const program = new Uint8Array(Buffer.from(data, 'base64'));
+  return logicSigFromByte(program);
 }
 
 /**

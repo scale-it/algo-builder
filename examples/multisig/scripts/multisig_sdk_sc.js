@@ -8,7 +8,7 @@ const { TransactionType, SignType, createMsigAddress } = require("algob");
 
 async function run(runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get("master-account");
-  const alice = deployer.accountsByName.get("gold-owner-account");
+  const alice = deployer.accountsByName.get("alice");
   const john = deployer.accountsByName.get("john");
   const bob = deployer.accountsByName.get("bob");
 
@@ -19,7 +19,7 @@ async function run(runtimeEnv, deployer) {
   //Get logic Signature
   const lsig = await deployer.loadLogic("sample-asc.teal", []);
 
-  lsig.sign(goldOwner.sk, mparams);  //lsig signed by gold-owner secret_key
+  lsig.sign(alice.sk, mparams);  //lsig signed by alice's secret_key
   lsig.appendToMultisig(john.sk);    //lsig signed again (threshold = 2) by john secret_key
 
   let txnParams = {
