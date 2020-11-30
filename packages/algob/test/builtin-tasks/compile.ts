@@ -151,10 +151,11 @@ describe("Support External Parameters in PyTEAL program", () => {
     statefulHash = result.srcHash;
 
     const writtenFiles = [];
-    const statel = path.join(cacheDir, stateless + ".yaml");
-    const statef = path.join(cacheDir, stateful + ".yaml");
-    writtenFiles.push(statel);
-    writtenFiles.push(statef);
+    for (const fn of [stateless, stateful]) {
+      const fullF = path.join(cacheDir, fn + ".yaml");
+      writtenFiles.push(fullF);
+      assert.isTrue(fs.existsSync(fullF));
+    }
 
     assert.equal(op.timestamp, 2);
     assert.deepEqual(op.writtenFiles, writtenFiles);
@@ -179,10 +180,11 @@ describe("Support External Parameters in PyTEAL program", () => {
     result = await pyOp.ensureCompiled(stateful, false, scInitParam);
 
     const writtenFiles = [];
-    const statel = path.join(cacheDir, stateless + ".yaml");
-    const statef = path.join(cacheDir, stateful + ".yaml");
-    writtenFiles.push(statel);
-    writtenFiles.push(statef);
+    for (const fn of [stateless, stateful]) {
+      const fullF = path.join(cacheDir, fn + ".yaml");
+      writtenFiles.push(fullF);
+      assert.isTrue(fs.existsSync(fullF));
+    }
     // timestamp changed
     assert.equal(op.timestamp, 4);
     assert.deepEqual(op.writtenFiles, writtenFiles);
