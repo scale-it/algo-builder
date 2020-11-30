@@ -1,3 +1,4 @@
+# This example is provided for informational purposes only
 import sys
 from algobpy.parse import parseArgs
 

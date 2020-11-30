@@ -126,7 +126,7 @@ describe("Compile task", () => {
   });
 });
 
-describe("Support External Parameters in PyTEAL program", async () => {
+describe("Support External Parameters in PyTEAL program", () => {
   useFixtureProjectCopy("support-external-parameters");
   const fakeAlgod: Algodv2 = {} as Algodv2; // eslint-disable-line @typescript-eslint/consistent-type-assertions
   const op = new CompileOpMock(fakeAlgod);
@@ -136,6 +136,7 @@ describe("Support External Parameters in PyTEAL program", async () => {
   const stateless = "stateless.py";
   const stateful = "stateful.py";
   let statelessHash = 0;
+  let statefulHash = 0;
 
   const scInitParam = {
     TMPL_SENDER: 'KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY',
@@ -143,14 +144,19 @@ describe("Support External Parameters in PyTEAL program", async () => {
   };
 
   it("On first run, should compile pyTEAL code", async () => {
-    const result = await pyOp.ensureCompiled(stateless);
+    let result = await pyOp.ensureCompiled(stateless);
     statelessHash = result.srcHash;
 
-    const writtenFiles = [];
-    const fullF = path.join(cacheDir, stateless + ".yaml");
-    writtenFiles.push(fullF);
+    result = await pyOp.ensureCompiled(stateful);
+    statefulHash = result.srcHash;
 
-    assert.equal(op.timestamp, 1);
+    const writtenFiles = [];
+    const statel = path.join(cacheDir, stateless + ".yaml");
+    const statef = path.join(cacheDir, stateful + ".yaml");
+    writtenFiles.push(statel);
+    writtenFiles.push(statef);
+
+    assert.equal(op.timestamp, 2);
     assert.deepEqual(op.writtenFiles, writtenFiles);
   });
 
@@ -158,26 +164,30 @@ describe("Support External Parameters in PyTEAL program", async () => {
     await op.resetAndCompile(false);
 
     // timestamp didn't change because file is not recompiled
-    assert.equal(op.timestamp, 1);
+    assert.equal(op.timestamp, 2);
     assert.lengthOf(op.compiledFiles, 0);
     assert.lengthOf(op.writtenFiles, 0);
   });
 
-  it("On third run, should compile on third run because external parameters passed",  async () => {
-    const result = await pyOp.ensureCompiled(stateless, false, scInitParam);
-    let newStatelessHash = result.srcHash;
-    // Different Hash because external parameters are passed 
+  it("On third run, should compile on third run because external parameters passed", async () => {
+    let result = await pyOp.ensureCompiled(stateless, false, scInitParam);
+    const newStatelessHash = result.srcHash;
+    // Different Hash because external parameters are passed
     // and they are different than initial parameters
     console.log(statelessHash, newStatelessHash);
-    
-    const writtenFiles = [];
-    const fullF = path.join(cacheDir, stateless + ".yaml");
-    writtenFiles.push(fullF);
 
+    result = await pyOp.ensureCompiled(stateful, false, scInitParam);
+
+    const writtenFiles = [];
+    const statel = path.join(cacheDir, stateless + ".yaml");
+    const statef = path.join(cacheDir, stateful + ".yaml");
+    writtenFiles.push(statel);
+    writtenFiles.push(statef);
     // timestamp changed
-    assert.equal(op.timestamp, 2);
+    assert.equal(op.timestamp, 4);
     assert.deepEqual(op.writtenFiles, writtenFiles);
     // new hash should be different than initial hash
     assert.notEqual(statelessHash, newStatelessHash);
+    assert.notEqual(statefulHash, result.srcHash);
   });
 });
