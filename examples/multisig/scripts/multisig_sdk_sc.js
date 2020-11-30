@@ -19,7 +19,7 @@ async function run(runtimeEnv, deployer) {
   //Get logic Signature
   const lsig = await deployer.loadLogic("sample-asc.teal", []);
 
-  lsig.sign(alice.sk, mparams);  //lsig signed by gold-owner secret_key
+  lsig.sign(alice.sk, mparams);  //lsig signed by alice's secret_key
   lsig.appendToMultisig(john.sk);    //lsig signed again (threshold = 2) by john secret_key
 
   let txnParams = {
