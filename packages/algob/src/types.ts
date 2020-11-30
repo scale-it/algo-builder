@@ -1,4 +1,4 @@
-import type { Account as AccountSDK, LogicSig, LogicSigArgs, MultiSig } from "algosdk";
+import type { Account as AccountSDK, LogicSig, LogicSigArgs } from "algosdk";
 import * as algosdk from "algosdk";
 import * as z from 'zod';
 
@@ -326,15 +326,6 @@ export interface ASAInfo extends DeployedAssetInfo {
 // Stateful smart contract deployment information (log)
 export interface SSCInfo extends DeployedAssetInfo {
   appID: number
-}
-
-// represents Lsig object fetched directly from raw file
-export interface RawLsig {
-  l?: Uint8Array
-  // args Program arguments as array of Uint8Array arrays
-  args?: Uint8Array[]
-  sig?: Object
-  msig?: MultiSig
 }
 
 // stateless smart contract deployment information (log)
