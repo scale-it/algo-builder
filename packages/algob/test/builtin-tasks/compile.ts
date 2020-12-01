@@ -143,14 +143,15 @@ describe("Support External Parameters in PyTEAL program", () => {
     ASSET_AMOUNT: 1000
   };
 
-  it("On first run, should compile pyTEAL code", async () => {
+  it("PyTEAL code test", async () => {
+    // On first run, should compile pyTEAL code
     let result = await pyOp.ensureCompiled(stateless);
     statelessHash = result.srcHash;
 
     result = await pyOp.ensureCompiled(stateful);
     statefulHash = result.srcHash;
 
-    const writtenFiles = [];
+    let writtenFiles = [];
     for (const fn of [stateless, stateful]) {
       const fullF = path.join(cacheDir, fn + ".yaml");
       writtenFiles.push(fullF);
@@ -159,19 +160,17 @@ describe("Support External Parameters in PyTEAL program", () => {
 
     assert.equal(op.timestamp, 2);
     assert.deepEqual(op.writtenFiles, writtenFiles);
-  });
 
-  it("On second run, shouln't recompile because No external parameters passed", async () => {
+    // On second run, shouln't recompile because No external parameters passed
     await op.resetAndCompile(false);
 
     // timestamp didn't change because file is not recompiled
     assert.equal(op.timestamp, 2);
     assert.lengthOf(op.compiledFiles, 0);
     assert.lengthOf(op.writtenFiles, 0);
-  });
-
-  it("On third run, should compile on third run because external parameters passed", async () => {
-    let result = await pyOp.ensureCompiled(stateless, false, scInitParam);
+  
+    // On third run, should compile on third run because external parameters passed
+    result = await pyOp.ensureCompiled(stateless, false, scInitParam);
     const newStatelessHash = result.srcHash;
     // Different Hash because external parameters are passed
     // and they are different than initial parameters
@@ -179,7 +178,7 @@ describe("Support External Parameters in PyTEAL program", () => {
 
     result = await pyOp.ensureCompiled(stateful, false, scInitParam);
 
-    const writtenFiles = [];
+    writtenFiles = [];
     for (const fn of [stateless, stateful]) {
       const fullF = path.join(cacheDir, fn + ".yaml");
       writtenFiles.push(fullF);
