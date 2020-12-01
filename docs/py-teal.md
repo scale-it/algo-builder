@@ -36,6 +36,7 @@ To use this feature, you can pass an external parameter object from the script:
       await deployer.loadLogic("dynamic-fee.py", [], scInitParam);
 
 - PyTeal code uses `algobpy` module to parse and use external parameter.
+- Example below shows how you can use external paramters in PyTeal code
 - `parseArgs` function overwrites the `scParam` object with `external parameters` object in below example.
 
       from algobpy.parse import parseArgs
