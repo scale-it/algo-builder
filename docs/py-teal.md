@@ -26,7 +26,9 @@ If the address is loaded dynamically (eg from KMD), we can't use PyTEAL code pri
 - To solve this problem we have introduced a support for passing `external parameters`.
 - Deployer functions(`loadLogic`, `fundLsig`, `deploySSC`) take one extra optional argument: a smart contract parameters object(`scInitParam`). This argument is passed to PyTEAL script.
 - Parameter objects are part of hash. So if we change parameters, we may need to redeploy the smart contract.
-To use this feature, you can pass an external parameter object from the script: 
+### Usage
+
+To use this feature, you can pass an external parameter object in a deployment script: 
 
       scInitParam = {
         TMPL_TO: john.addr,  
