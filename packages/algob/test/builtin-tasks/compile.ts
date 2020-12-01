@@ -125,3 +125,70 @@ describe("Compile task", () => {
     assert.deepEqual(YAML.stringify(result), expected);
   });
 });
+
+describe("Support External Parameters in PyTEAL program", () => {
+  useFixtureProjectCopy("support-external-parameters");
+  const fakeAlgod: Algodv2 = {} as Algodv2; // eslint-disable-line @typescript-eslint/consistent-type-assertions
+  const op = new CompileOpMock(fakeAlgod);
+  const pyOp = new PyCompileOp(op);
+
+  const cacheDir = path.join("artifacts", "cache");
+  const stateless = "stateless.py";
+  const stateful = "stateful.py";
+  let statelessHash = 0;
+  let statefulHash = 0;
+
+  const scInitParam = {
+    TMPL_SENDER: 'KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY',
+    ASSET_AMOUNT: 1000
+  };
+
+  it("PyTEAL code test", async () => {
+    // On first run, should compile pyTEAL code
+    let result = await pyOp.ensureCompiled(stateless);
+    statelessHash = result.srcHash;
+
+    result = await pyOp.ensureCompiled(stateful);
+    statefulHash = result.srcHash;
+
+    let writtenFiles = [];
+    for (const fn of [stateless, stateful]) {
+      const fullF = path.join(cacheDir, fn + ".yaml");
+      writtenFiles.push(fullF);
+      assert.isTrue(fs.existsSync(fullF));
+    }
+
+    assert.equal(op.timestamp, 2);
+    assert.deepEqual(op.writtenFiles, writtenFiles);
+
+    // On second run, shouln't recompile because No external parameters passed
+    await op.resetAndCompile(false);
+
+    // timestamp didn't change because file is not recompiled
+    assert.equal(op.timestamp, 2);
+    assert.lengthOf(op.compiledFiles, 0);
+    assert.lengthOf(op.writtenFiles, 0);
+  
+    // On third run, should compile on third run because external parameters passed
+    result = await pyOp.ensureCompiled(stateless, false, scInitParam);
+    const newStatelessHash = result.srcHash;
+    // Different Hash because external parameters are passed
+    // and they are different than initial parameters
+    console.log(statelessHash, newStatelessHash);
+
+    result = await pyOp.ensureCompiled(stateful, false, scInitParam);
+
+    writtenFiles = [];
+    for (const fn of [stateless, stateful]) {
+      const fullF = path.join(cacheDir, fn + ".yaml");
+      writtenFiles.push(fullF);
+      assert.isTrue(fs.existsSync(fullF));
+    }
+    // timestamp changed
+    assert.equal(op.timestamp, 4);
+    assert.deepEqual(op.writtenFiles, writtenFiles);
+    // new hash should be different than initial hash
+    assert.notEqual(statelessHash, newStatelessHash);
+    assert.notEqual(statefulHash, result.srcHash);
+  });
+});
