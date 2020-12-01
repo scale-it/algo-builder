@@ -17,3 +17,43 @@ Please follow the main [README#PyTeal](../README.md#pyteal) file for setup instr
 # Usage
 
 - `algob compile` - compiles all files in `assets` folder with `.teal` as well as `.py` extension
+
+# External Parameters Support
+
+- We can use parameters in the PyTEAL code, however that parameters are hardcoded.
+If the address is loaded dynamically (eg from KMD), we can't use PyTEAL code prior to the address knowledge.
+- If we have to deploy same contract multiple times with only difference of initialization variables, we will have to change the variables in PyTeal code everytime we deploy it.
+- To solve this problem we have introduced a support for passing `external parameters`.
+- Deployer functions(`loadLogic`, `fundLsig`, `deploySSC`) takes one extra optional argument: a smart contract initialization parameters object(`scInitParam`). This argument is used (when not empty) when running PyTEAL compilation.
+- Parameter objects are part of hash. So if we change parameters, we may need to redeploy the smart contract.
+To use this feature, you can pass an external parameter object from the script: 
+
+      scInitParam = {
+        TMPL_TO: john.addr,  
+        TMPL_AMT: 700000,
+        TMPL_CLS: masterAccount.addr
+      }
+      await deployer.loadLogic("dynamic-fee.py", [], scInitParam);
+
+- PyTeal code uses `algobpy` module to parse and use external parameter.
+- `parseArgs` function overwrites the `scParam` object with `external parameters` object in below example.
+
+      from algobpy.parse import parseArgs
+
+      if __name__ == "__main__":
+
+        #replace these values with your customized values or pass an external parameter
+        scParam = {
+        "TMPL_TO": "2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA",
+        "TMPL_AMT": 700000,
+        "TMPL_CLS": "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
+        }
+
+        # Overwrite scParam if sys.argv[1] is passed
+        if(len(sys.argv) > 1):
+          scParam = parseArgs(sys.argv[1], scParam)
+
+        print(compileTeal(dynamic_fee(
+          Addr(scParam["TMPL_TO"]), 
+          scParam["TMPL_AMT"], 
+          Addr(scParam["TMPL_CLS"]), Mode.Signature))
