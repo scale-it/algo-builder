@@ -77,6 +77,36 @@ non zero value or []byte`
     title: "Index out of bound",
     description: `Segmentation fault - The teal code tried to access a value 
 by an index that does not exist.`
+  },
+  TEAL_ENCOUNTERED_ERR: {
+    number: 10,
+    message: "TEAL runtime encountered err opcode",
+    title: "TEAL runtime encountered err opcode",
+    description: `TEAL encountered err opcode while executing TEAL code`
+  },
+  CONCAT_ERROR: {
+    number: 11,
+    message: "concat resulted in string too long",
+    title: "concat resulted in string too long",
+    description: `concat panics if the result would be greater than 4096 bytes.`
+  },
+  LONG_INPUT_ERROR: {
+    number: 12,
+    message: "Input is longer than 8 bytes",
+    title: "Input is longer than 8 bytes",
+    description: `Input is longer than 8 bytes.`
+  },
+  SUBSTRING_END_BEFORE_START: {
+    number: 13,
+    message: "substring end before start",
+    title: "substring end before start",
+    description: `substring end before start.`
+  },
+  SUBSTRING_RANGE_BEYOND: {
+    number: 14,
+    message: "substring range beyond length of string",
+    title: "substring range beyond length of string",
+    description: `substring range beyond length of string.`
   }
 };
 

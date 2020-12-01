@@ -1,0 +1,16 @@
+{
+  "name": "@types/uint64be",
+  "version": "0.1.0",
+  "description": "uint64be SDK TypeScript Declaration File",
+  "main": "",
+  "typings": "index.d.ts",
+  "repository": "https://github.com/scale-it/algorand-builder.git",
+  "author": "Robert Zaremba (https://github.com/robert-zaremba)",
+  "license": "MIT",
+  "scripts": {
+    "lint": "eslint ./index.d.ts",
+    "lint:fix": "eslint --fix ./index.d.ts",
+    "build": "tsc",
+    "test": "echo ok"
+  }
+}
