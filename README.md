@@ -9,7 +9,7 @@ Algorand builder is an trustworthy framework for Algorand dapps (Decentralized A
 + REPL (console Read-Eval-Print-Loop) to quickly and easily interact with Algorand Standard Assets and Smart Contracts
 + integrated testing framework,
 + helpful boilerplates allowing developers to focus on use-cases rather than code organization, examples
-+ algorand devnet
++ algorand private net
 + tutorials to easy onramp process.
 
 To attract more web developers we plan to build a JavaScript DSL for TEAL with TypeScript bindings (for TEAL inputs). Furthermore we would like to collaborate with SDKs teams to improve the overall development experience and make it ready for enterprise projects. Finally we want to collaborate with Algorand Wallet team to ensure a smooth wallet integration.
@@ -76,7 +76,7 @@ Otherwise you can use a system/user-wide `pyteal` installation:
 
 ### Create a blockchain
 
-+ Use [Devnet Quick Start](/infrastructure/README.md).
++ Use [Private Net Quick Start](/infrastructure/README.md).
 + Or install a node with any other network.
 + Remember to set `"EnableDeveloperAPI": true` in the node config.json
 
@@ -100,7 +100,7 @@ Otherwise you can use a system/user-wide `pyteal` installation:
         yarn run algob help
 
 1. Update the `algob.config.js` file. Make sure you have an access to a running Algorand node (`algod`). Check Algorand instructions how to install and run it.
-    * set correct host address, port and token (if you are using the devnet, then check algod.net and algob.token files in `node_data/PrimaryNode/`)
+    * set correct host address, port and token (if you are using the private-net, then check algod.net and algob.token files in `node_data/PrimaryNode/`)
     * you can define multiple networks.
     * update the account list (sample project uses a sample account which doesn't have any ALGO, for transaction executions you need to have an active account with ALGOs). See the comments in `algob.config.js` for more information.
 

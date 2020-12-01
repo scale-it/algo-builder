@@ -1,11 +1,11 @@
-# Creating a devnet (local development network)
+# Creating a private-net (local development network)
 
-This directory (`/infrastructure`) provides an example setup for a devnet, which you can use for local testing. It creates a single node, fully functional Algorand blockchain with:
+This directory (`/infrastructure`) provides an example setup for a private-net, which you can use for local testing. It creates a single node, fully functional Algorand blockchain with:
 
 * one wallet: `Wallet1`
 * one address full of Algos (100% of total supply). We call that account a `master-account`.
 
-Use `make` to run tasks to `create`, `start-devnet`, `stop-devnet`.
+Use `make` to run tasks to `create`, `start-private-net`, `stop-private-net`.
 
 If you want to create a local network by your own, you can use a private net [tutorial](https://developer.algorand.org/tutorials/create-private-network/).
 
@@ -48,7 +48,7 @@ To connect from SDK or REST we need to know the network address and authorizatio
 
 ### Example REST requests
 
-Devnet
+Private Net
 
     curl http://$(cat $ALGORAND_DATA/algod.net)/v1/block/31538 -H "X-Algo-API-Token: $(cat $ALGORAND_DATA/algod.token)"
 

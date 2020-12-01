@@ -28,7 +28,7 @@ To load it from ENV:
 
 - Method 1
 
-  - To add `ALGOD_ADDR` and `ALGOD_TOKEN` in env, you can use the following commands in terminal: 
+  - To add `ALGOD_ADDR` and `ALGOD_TOKEN` in env, you can use the following commands in terminal:
 
         export ALGOD_ADDR = "127.0.0.1:8080"
         export ALGOD_TOKEN = "algod_token"
@@ -39,7 +39,7 @@ To load it from ENV:
 
 - Method 2
 
-  - To add `$ALGORAND_DATA` in env, you can use the following command in terminal: 
+  - To add `$ALGORAND_DATA` in env, you can use the following command in terminal:
 
           export $ALGORAND_DATA = "content_of/algorand-node-data"
 
@@ -52,7 +52,7 @@ To load it from ENV:
 
 - Method 1
 
-  - To add `KMD_ADDR` and `KMD_TOKEN` in env, you can use the following commands in terminal: 
+  - To add `KMD_ADDR` and `KMD_TOKEN` in env, you can use the following commands in terminal:
 
         export KMD_ADDR = "127.0.0.1:8080"
         export KMD_TOKEN = "kmd_token"
@@ -63,7 +63,7 @@ To load it from ENV:
 
 - Method 2
 
-  - To add `$KMD_DATA` in env, you can use the following command in terminal: 
+  - To add `$KMD_DATA` in env, you can use the following command in terminal:
 
           export $KMD_DATA = "content_of/kmd-data"
 
@@ -155,12 +155,12 @@ You can also construct different accounts for different networks.
 ```
 
 const { loadAccountsFromFileSync } = require("algob");
-const {devnet} = require("algorand-builder/config")
+const {privateNet} = require("algorand-builder/config")
 
 const accounts = loadAccountsFromFileSync("assets/accounts_generated.yaml");
 const mainnetAccounts = loadAccountsFromFileSync("private/accounts/mainnet.yaml");
 
-var mydevnet = {
+var myprivateNet = {
      host: "http://127.0.0.1",
      port: 8080,
      token: "abc",
@@ -173,11 +173,11 @@ module.exports = {
    * `development` network is used.
    */
   networks: {
-    // You can run an a algorand node a separate terminal, or use `algob` to run and
-    // configure for you a devnet. If `development` network is not specified, `algob`
-    // will use the internal `devnet` configuration for development network.
-    development: mydevnet,
-    devnet: devnet,
+    // You can run an algorand node in a separate terminal, or use `algob` to run and
+    // configure your private-net. If `development` network is not specified, `algob`
+    // will use the internal `privateNet` configuration for the development network.
+    development: myprivateNet,
+    privateNet: privateNet,
     testnet: {
       host: "127.0.0.1",
       port: 9545,
