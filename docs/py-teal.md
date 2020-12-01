@@ -24,7 +24,7 @@ Please follow the main [README#PyTeal](../README.md#pyteal) file for setup instr
 If the address is loaded dynamically (eg from KMD), we can't use PyTEAL code prior to the address knowledge.
 - If we have to deploy same contract multiple times with only difference of initialization variables, we will have to change the variables in PyTeal code everytime we deploy it.
 - To solve this problem we have introduced a support for passing `external parameters`.
-- Deployer functions(`loadLogic`, `fundLsig`, `deploySSC`) takes one extra optional argument: a smart contract initialization parameters object(`scInitParam`). This argument is used (when not empty) when running PyTEAL compilation.
+- Deployer functions(`loadLogic`, `fundLsig`, `deploySSC`) take one extra optional argument: a smart contract parameters object(`scInitParam`). This argument is passed to PyTEAL script.
 - Parameter objects are part of hash. So if we change parameters, we may need to redeploy the smart contract.
 To use this feature, you can pass an external parameter object from the script: 
 
