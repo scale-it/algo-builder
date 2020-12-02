@@ -4,15 +4,16 @@ import { assert } from "chai";
 import { ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
-  Add, Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
-  Btoi, Bytec, Bytecblock, Concat, Div, Dup, Dup2,
-  EqualTo, Err, GreaterThan, GreaterThanEqualTo, Intc,
+  Add, Addr,
+  Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
+  Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2,
+  EqualTo, Err, GreaterThan, GreaterThanEqualTo, Int, Intc,
   Intcblock, Itob,
   Len, LessThan, LessThanEqualTo,
-  Load,
-  Mod, Mul, Not, NotEqualTo, Or, Sha256, Sha512_256, Store, Sub, Substring3
+  Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Sha256, Sha512_256, Store, Sub, Substring,
+  Substring3
 } from "../../../src/interpreter/opcode-list";
-import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64 } from "../../../src/lib/constants";
+import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MIN_UINT8 } from "../../../src/lib/constants";
 import { convertToString, toBytes } from "../../../src/lib/parse-data";
 import { Stack } from "../../../src/lib/stack";
 import type { StackElem } from "../../../src/types";
@@ -1055,6 +1056,64 @@ describe("Teal Opcodes", function () {
     });
   });
 
+  describe("Mulw", () => {
+    const stack = new Stack<StackElem>();
+
+    it("should return correct low and high value", () => {
+      stack.push(BigInt('4581298449'));
+      stack.push(BigInt('9162596898'));
+      const op = new Mulw();
+      op.execute(stack);
+
+      const low = stack.pop();
+      const high = stack.pop();
+      assert.equal(low, BigInt('5083102810200507970'));
+      assert.equal(high, BigInt('2'));
+    });
+
+    it("high bits should be 0", () => {
+      stack.push(BigInt('10'));
+      stack.push(BigInt('3'));
+      const op = new Mulw();
+      op.execute(stack);
+
+      const low = stack.pop();
+      const high = stack.pop();
+      assert.equal(low, BigInt('30'));
+      assert.equal(high, BigInt('0'));
+    });
+
+    it("low and high should be 0 on a*b if a or b is 0", () => {
+      stack.push(BigInt('0'));
+      stack.push(BigInt('3'));
+      const op = new Mulw();
+      op.execute(stack);
+
+      const low = stack.pop();
+      const high = stack.pop();
+      assert.equal(low, BigInt('0'));
+      assert.equal(high, BigInt('0'));
+    });
+
+    it("should throw stack length error",
+      execExpectError(
+        stack,
+        [BigInt('3')],
+        new Mulw(),
+        ERRORS.TEAL.ASSERT_STACK_LENGTH
+      )
+    );
+
+    it("should throw error if type is invalid",
+      execExpectError(
+        stack,
+        ["str1", "str2"].map(toBytes),
+        new Mulw(),
+        ERRORS.TEAL.INVALID_TYPE
+      )
+    );
+  });
+
   describe("Dup", () => {
     const stack = new Stack<StackElem>();
 
@@ -1118,7 +1177,81 @@ describe("Teal Opcodes", function () {
     });
   });
 
-  describe("substring3", function () {
+  describe("Substring", function () {
+    const stack = new Stack<StackElem>();
+    const start = BigInt('0');
+    const end = BigInt('4');
+
+    it("should return correct substring", function () {
+      stack.push(toBytes("Algorand"));
+      const op = new Substring(start, end);
+      op.execute(stack);
+
+      const top = stack.pop() as Uint8Array;
+      assert.equal("Algo", convertToString(top));
+    });
+
+    it("should throw Invalid type error",
+      execExpectError(
+        stack,
+        [BigInt('1')],
+        new Substring(start, end),
+        ERRORS.TEAL.INVALID_TYPE
+      )
+    );
+
+    it("should throw error if start is not uint8", function () {
+      execExpectError(
+        stack,
+        [toBytes("Algorand")],
+        new Substring(BigInt(MIN_UINT8 - 5), end),
+        ERRORS.TEAL.INVALID_UINT8
+      );
+
+      execExpectError(
+        stack,
+        [toBytes("Algorand")],
+        new Substring(BigInt(MAX_UINT8 + 5), end),
+        ERRORS.TEAL.INVALID_UINT8
+      );
+    });
+
+    it("should throw error if end is not uint8", function () {
+      execExpectError(
+        stack,
+        [toBytes("Algorand")],
+        new Substring(start, BigInt(MIN_UINT8 - 5)),
+        ERRORS.TEAL.INVALID_UINT8
+      );
+
+      execExpectError(
+        stack,
+        [toBytes("Algorand")],
+        new Substring(start, BigInt(MAX_UINT8 + 5)),
+        ERRORS.TEAL.INVALID_UINT8
+      );
+    });
+
+    it("should throw error because start > end",
+      execExpectError(
+        stack,
+        [toBytes("Algorand")],
+        new Substring(end + BigInt('5'), end),
+        ERRORS.TEAL.SUBSTRING_END_BEFORE_START
+      )
+    );
+
+    it("should throw error because range beyong string",
+      execExpectError(
+        stack,
+        [toBytes("Algorand")],
+        new Substring(start, start + BigInt('40')),
+        ERRORS.TEAL.SUBSTRING_RANGE_BEYOND
+      )
+    );
+  });
+
+  describe("Substring3", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct substring", function () {
@@ -1133,34 +1266,59 @@ describe("Teal Opcodes", function () {
       assert.equal("Algo", convertToString(top));
     });
 
-    it("should throw Invalid type error", function () {
-      stack.push(BigInt('4'));
-      stack.push(BigInt('0'));
-      stack.push(BigInt('1234'));
-
-      const op = new Substring3();
-      expectTealError(
-        () => op.execute(stack),
+    it("should throw Invalid type error",
+      execExpectError(
+        stack,
+        ['4', '0', '1234'].map(BigInt),
+        new Substring3(),
         ERRORS.TEAL.INVALID_TYPE
+      )
+    );
+
+    it("should throw error because start > end", function () {
+      const end = BigInt('4');
+      const start = end + BigInt('1');
+      execExpectError(
+        stack,
+        [end, start, toBytes("Algorand")],
+        new Substring3(),
+        ERRORS.TEAL.SUBSTRING_END_BEFORE_START
       );
     });
 
-    it("should throw error because start > end", function () {
-      stack.push(BigInt('4'));
-      stack.push(BigInt('5'));
-      stack.push(toBytes("Algorand"));
+    it("should throw error because range beyong string",
+      execExpectError(
+        stack,
+        [BigInt('40'), BigInt('0'), toBytes("Algorand")],
+        new Substring3(),
+        ERRORS.TEAL.SUBSTRING_RANGE_BEYOND
+      )
+    );
+  });
 
-      const op = new Substring3();
-      assert.throws(() => op.execute(stack), "substring end before start");
+  describe("Pseudo-Ops", function () {
+    const stack = new Stack<StackElem>();
+
+    it("Int - should push uint64 to stack", function () {
+      const op = new Int(MAX_UINT64);
+      op.execute(stack);
+
+      assert.equal(1, stack.length());
+      assert.equal(MAX_UINT64, stack.pop());
     });
 
-    it("should throw error because range beyong string", function () {
-      stack.push(BigInt('40'));
-      stack.push(BigInt('0'));
-      stack.push(toBytes("Algorand"));
+    it("Byte/Addr - should push byte[] to stack", function () {
+      const byte = toBytes("Algorand");
 
-      const op = new Substring3();
-      assert.throws(() => op.execute(stack), "substring range beyond length of string");
+      const byteOp = new Byte(byte);
+      byteOp.execute(stack);
+      assert.equal(1, stack.length());
+      assert.equal(byte, stack.pop());
+
+      const addrOp = new Addr(byte);
+      addrOp.execute(stack);
+      assert.equal(1, stack.length());
+      assert.equal(byte, stack.pop());
     });
   });
 });
