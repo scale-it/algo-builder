@@ -17,7 +17,7 @@ async function run(runtimeEnv, deployer) {
     const secret = "hero wisdom green split loop element vote belt";
     const wrongSecret = "hero wisdom red split loop element vote belt";
 
-    let lsig = await deployer.loadLogic("htlc.py", [ wrongSecret ]);
+    let lsig = await deployer.loadLogic("htlc.py", [ new Uint8Array(Buffer.from(wrongSecret)) ]);
     let sender = lsig.address(); 
     
     let txnParams = {
@@ -27,12 +27,12 @@ async function run(runtimeEnv, deployer) {
         toAccountAddr: john.addr,
         amountMicroAlgos: 200,
         lsig: lsig,
-        payFlags: {}
+        payFlags: {totalFee: 500}
     }
     // Transaction Fails : as wrong secret value is used
     await executeTransaction(deployer, txnParams);
 
-    lsig = await deployer.loadLogic("htlc.py", [ secret ]);
+    lsig = await deployer.loadLogic("htlc.py", [ new Uint8Array(Buffer.from(secret)) ]);
     sender = lsig.address();
 
     // Transaction Passes : as right secret value is used

@@ -22,7 +22,7 @@ async function run(runtimeEnv, deployer) {
     fromAccount: masterAccount,
     toAccountAddr: multsigaddr,
     amountMicroAlgos: 10000000,
-    payFlags: {note: "Funding multisig account"}
+    payFlags: {note: "Funding multisig account", totalFee: 500}
   }
   //Funding multisignature account
   await executeTransaction(deployer, txnParams);
