@@ -450,8 +450,8 @@ export class Btoi extends Op {
       throw new TealError(ERRORS.TEAL.LONG_INPUT_ERROR);
     }
     const buf = Buffer.from(bytes);
-    const uintValue = decode(buf) as bigint;
-    stack.push(uintValue);
+    const uintValue = decode(buf);
+    stack.push(BigInt(uintValue));
   }
 }
 
@@ -471,6 +471,25 @@ export class Addw extends Op {
       stack.push(BIGINT0);
       stack.push(valueC);
     }
+  }
+}
+
+// A times B out to 128-bit long result as low (top) and high uint64 values on the stack
+export class Mulw extends Op {
+  execute (stack: TEALStack): void {
+    this.assertStackLen(stack, 2);
+    const valueA = this.assertBigInt(stack.pop());
+    const valueB = this.assertBigInt(stack.pop());
+    const result = valueA * valueB;
+
+    const low = result & MAX_UINT64;
+    this.checkOverflow(low);
+
+    const high = result >> BigInt('64');
+    this.checkOverflow(high);
+
+    stack.push(high);
+    stack.push(low);
   }
 }
 
@@ -530,8 +549,22 @@ export class Concat extends Op {
 // push the substring result. If N < M, or either is larger than the string length,
 // the program fails
 export class Substring extends Op {
+  readonly start: bigint;
+  readonly end: bigint;
+
+  constructor (start: bigint, end: bigint) {
+    super();
+    this.start = start;
+    this.end = end;
+  }
+
   execute (stack: TEALStack): void {
-    // const byteString = stack.pop();
+    const byteString = this.assertBytes(stack.pop());
+    const start = this.assertUint8(this.start);
+    const end = this.assertUint8(this.end);
+
+    const subString = this.subString(start, end, byteString);
+    stack.push(subString);
   }
 }
 
@@ -545,13 +578,52 @@ export class Substring3 extends Op {
     const start = this.assertBigInt(stack.pop());
     const end = this.assertBigInt(stack.pop());
 
-    if (end < start) {
-      throw new TealError(ERRORS.TEAL.SUBSTRING_END_BEFORE_START);
-    }
-    if (start > byteString.length || end > byteString.length) {
-      throw new TealError(ERRORS.TEAL.SUBSTRING_RANGE_BEYOND);
-    }
+    const subString = this.subString(start, end, byteString);
+    stack.push(subString);
+  }
+}
 
-    stack.push(byteString.slice(Number(start), Number(end)));
+/** Pseudo-Ops **/
+
+// push integer to stack
+export class Int extends Op {
+  readonly uint64: bigint;
+
+  constructor (uint64: bigint) {
+    super();
+    this.uint64 = uint64;
+  }
+
+  execute (stack: TEALStack): void {
+    this.checkOverflow(this.uint64);
+    stack.push(this.uint64);
+  }
+}
+
+// push bytes to stack
+export class Byte extends Op {
+  readonly byte: Uint8Array;
+
+  constructor (byte: Uint8Array) {
+    super();
+    this.byte = byte;
+  }
+
+  execute (stack: TEALStack): void {
+    stack.push(this.byte);
+  }
+}
+
+// push algorand address as bytes to stack
+export class Addr extends Op {
+  readonly addr: Uint8Array;
+
+  constructor (addr: Uint8Array) {
+    super();
+    this.addr = addr; // parser should verify the addr first
+  }
+
+  execute (stack: TEALStack): void {
+    stack.push(this.addr);
   }
 }
