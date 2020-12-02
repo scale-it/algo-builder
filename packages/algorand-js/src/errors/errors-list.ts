@@ -48,14 +48,14 @@ incorrect. Expected %expected% but got %actual%`
     number: 5,
     message: "Result of current operation caused integer overflow",
     title: "Uint64 Overflow",
-    description: `You are tying to perform operation where the result has exceeded 
+    description: `You are tying to perform operation where the result has exceeded
 maximun uint64 value of 18446744073709551615`
   },
   UINT64_UNDERFLOW: {
     number: 6,
     message: "Result of current operation caused integer underflow",
     title: "Uint64 Underflow",
-    description: `You are tying to perform operation where the result is less than 
+    description: `You are tying to perform operation where the result is less than
 minimum uint64 value of 0`
   },
   ZERO_DIV: {
@@ -75,7 +75,7 @@ non zero value or []byte`
     number: 9,
     message: "Index out of bound",
     title: "Index out of bound",
-    description: `Segmentation fault - The teal code tried to access a value 
+    description: `Segmentation fault - The teal code tried to access a value
 by an index that does not exist.`
   },
   TEAL_ENCOUNTERED_ERR: {
@@ -107,6 +107,12 @@ by an index that does not exist.`
     message: "substring range beyond length of string",
     title: "substring range beyond length of string",
     description: `substring range beyond length of string.`
+  },
+  INVALID_UINT8: {
+    number: 15,
+    message: "Input is not uint8",
+    title: "Input is outside the valid uint8 range of 0 to 255",
+    description: `Input is outside the valid uint8 range of 0 to 255`
   }
 };
 
