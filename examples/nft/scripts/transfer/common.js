@@ -29,7 +29,7 @@ exports.printLocalNFT = async function (deployer, account, appId) {
         // each nft is stored as a one record in user store
         let holdings = "";
         if (localState === undefined) {
-            holdings = "null";
+            holdings = "none";
         }
         else {
             for(const l of localState) {
