@@ -1,6 +1,6 @@
 import sys
-# Add parent-parent directory to path so that algobpy can be imported
-sys.path.insert(0,'../..')
+# Add parent directory to path so that algobpy can be imported
+sys.path.insert(0,'..')
 from algobpy.parse import parseArgs
 
 from pyteal import *
@@ -48,6 +48,11 @@ def dynamic_fee(TMPL_TO,
     #Check that the second transaction is a payment.
     secondTxn_pay_check = Gtxn[1].type_enum() == TxnType.Payment
 
+    common_fields = And(
+      Txn.rekey_to() == Global.zero_address(),
+      Txn.fee() <= Int(10000)
+    )
+
     # fold all the above checks into a single boolean.
     required_condition = And(
         grp_check,
@@ -77,6 +82,7 @@ def dynamic_fee(TMPL_TO,
     lease_field_check = Gtxn[1].lease() == TMPL_LEASE
 
     params_condition = And(
+        common_fields,
         recv_field_check,
         cls_field_check,
         amount_field_check,

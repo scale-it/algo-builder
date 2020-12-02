@@ -17,7 +17,7 @@ async function run(runtimeEnv, deployer) {
   await deployer.fundLsig("htlc.py", { funder: masterAccount, fundingMicroAlgo: 1000000 }, 
   	{ closeRemainderTo: john.addr }, []); 
 
-  let contract = await deployer.loadLogic("htlc.py", [ wrongSecret ]);
+  let contract = await deployer.loadLogic("htlc.py", [ new Uint8Array(Buffer.from(wrongSecret)) ]);
   let contractAddress = contract.address();
   
   txnParams.fromAccount = { addr: contractAddress};
@@ -29,7 +29,7 @@ async function run(runtimeEnv, deployer) {
   // Fails because wrong secret is passed
   await executeTransaction(deployer, txnParams);
 
-  contract = await deployer.loadLogic("htlc.py", [ secret ]);
+  contract = await deployer.loadLogic("htlc.py", [ new Uint8Array(Buffer.from(secret)) ]);
   contractAddress = contract.address();
 
   // Passes because right secret is passed

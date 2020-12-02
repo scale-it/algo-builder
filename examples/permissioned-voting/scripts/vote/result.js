@@ -3,7 +3,7 @@ const { executeTransaction } = require("./common");
 
 async function run(runtimeEnv, deployer) {
 
-  const votingAdminAccount = deployer.accountsByName.get("voting-admin-account");
+  const votingAdminAccount = deployer.accountsByName.get("john");
   const alice = deployer.accountsByName.get("alice");
 
   // Retreive AppInfo from checkpoints.
