@@ -1071,6 +1071,18 @@ describe("Teal Opcodes", function () {
       assert.equal(high, BigInt('2'));
     });
 
+    it("should return correct low and high value on big numbers", () => {
+      stack.push(MAX_UINT64 - BigInt('2'));
+      stack.push(BigInt('9162596898'));
+      const op = new Mulw();
+      op.execute(stack);
+
+      const low = stack.pop();
+      const high = stack.pop();
+      assert.equal(low, BigInt('18446744046221760922'));
+      assert.equal(high, BigInt('9162596897'));
+    });
+
     it("high bits should be 0", () => {
       stack.push(BigInt('10'));
       stack.push(BigInt('3'));
