@@ -18,10 +18,10 @@ let accounts = mkAccounts([
     // You should check your accounts and replace this with your own account.
     // Command to view KMD account addresses (and their balances):
     // goal account list -d ~/.algorand-local/Node/
-    addr: "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY",
+    addr: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
     // To export private mnemonic you may use this command (with you own account's address and data directory):
     // goal account export -a WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE -d ~/.algorand-local/Node/
-    mnemonic: "brand globe reason guess allow wear roof leisure season coin own pen duck worth virus silk jazz pitch behave jazz leisure pave unveil absorb kick"
+    mnemonic: "enforce drive foster uniform cradle tired win arrow wasp melt cattle chronic sport dinosaur announce shell correct shed amused dismiss mother jazz task above hospital"
   },
   // Following accounts are generated using `algob gen-accounts`.
   {
@@ -43,11 +43,15 @@ let accounts = mkAccounts([
   }
 ]);
 
+
 let defaultCfg = {
   host: "http://localhost",
-  port: 41707,
-  token: "86d823f460d62fc88eae12500b4ec4c8cd5fcab06e0b998684681a1d6702a19f",
-  accounts: accounts,
+  // if you are running a local node, you can find port and token values for your algod in
+  // $ALGORAND_DATA/algod.net and $ALGORAND_DATA/algod.token files.
+  port: 8080,
+  token: "aade468d25a7aa48fec8082d6a847c48492066a2741f3731e613fdde086cd6e9",
+  // you can also load accounts from KMD, look at /docs/algob-config.md for more details.
+  accounts: accounts
 };
 
 module.exports = {
