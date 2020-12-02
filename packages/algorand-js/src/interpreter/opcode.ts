@@ -1,6 +1,6 @@
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
-import { MAX_UINT8, MAX_UINT64, MIN_UINT64 } from "../lib/constants";
+import { MAX_UINT8, MAX_UINT64, MIN_UINT8, MIN_UINT64 } from "../lib/constants";
 import type { TEALStack } from "../types";
 
 export class Op {
@@ -52,5 +52,23 @@ export class Op {
       });
     }
     return b;
+  }
+
+  assertUint8 (a: bigint): bigint {
+    if (a < MIN_UINT8 || a > MAX_UINT8) {
+      throw new TealError(ERRORS.TEAL.INVALID_UINT8);
+    }
+    return a;
+  }
+
+  subString (start: bigint, end: bigint, byteString: Uint8Array): Uint8Array {
+    if (end < start) {
+      throw new TealError(ERRORS.TEAL.SUBSTRING_END_BEFORE_START);
+    }
+    if (start > byteString.length || end > byteString.length) {
+      throw new TealError(ERRORS.TEAL.SUBSTRING_RANGE_BEYOND);
+    }
+
+    return byteString.slice(Number(start), Number(end));
   }
 }
