@@ -614,8 +614,8 @@ export class Substring extends Op {
 export class Substring3 extends Op {
   execute (stack: TEALStack): void {
     const byteString = this.assertBytes(stack.pop());
-    const start = this.assertBigInt(stack.pop());
     const end = this.assertBigInt(stack.pop());
+    const start = this.assertBigInt(stack.pop());
 
     const subString = this.subString(start, end, byteString);
     stack.push(subString);
