@@ -1,4 +1,5 @@
 /* eslint sonarjs/no-identical-functions: 0 */
+import * as algosdk from "algosdk";
 import { assert } from "chai";
 
 import { ERRORS } from "../../../src/errors/errors-list";
@@ -81,8 +82,8 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct subtraction of two unit64", function () {
-      stack.push(BigInt("20"));
       stack.push(BigInt("30"));
+      stack.push(BigInt("20"));
       const op = new Sub();
       op.execute(stack);
 
@@ -99,8 +100,8 @@ describe("Teal Opcodes", function () {
     );
 
     it("should throw underflow error with Sub if (A - B) < 0", function () {
-      stack.push(BigInt("20"));
       stack.push(BigInt("10"));
+      stack.push(BigInt("20"));
       const op = new Sub();
       expectTealError(
         () => op.execute(stack),
@@ -145,8 +146,8 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct division of two unit64", function () {
-      stack.push(BigInt("20"));
       stack.push(BigInt("40"));
+      stack.push(BigInt("20"));
       const op = new Div();
       op.execute(stack);
 
@@ -155,8 +156,8 @@ describe("Teal Opcodes", function () {
     });
 
     it("should return 0 on division of two unit64 with A == 0", function () {
-      stack.push(BigInt("40"));
       stack.push(BigInt("0"));
+      stack.push(BigInt("40"));
       const op = new Div();
       op.execute(stack);
 
@@ -173,8 +174,8 @@ describe("Teal Opcodes", function () {
     );
 
     it("should panic on A/B if B == 0", function () {
-      stack.push(BigInt("0"));
       stack.push(BigInt("10"));
+      stack.push(BigInt("0"));
       const op = new Div();
       expectTealError(
         () => op.execute(stack),
@@ -381,8 +382,8 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct modulo of two unit64", function () {
-      stack.push(BigInt("2"));
       stack.push(BigInt("5"));
+      stack.push(BigInt("2"));
       let op = new Mod();
       op.execute(stack);
 
@@ -398,8 +399,8 @@ describe("Teal Opcodes", function () {
     });
 
     it("should return 0 on modulo of two unit64 with A == 0", function () {
-      stack.push(BigInt("4"));
       stack.push(BigInt("0"));
+      stack.push(BigInt("4"));
       const op = new Mod();
       op.execute(stack);
 
@@ -416,8 +417,8 @@ describe("Teal Opcodes", function () {
     );
 
     it("should panic on A % B if B == 0", function () {
-      stack.push(BigInt("0"));
       stack.push(BigInt("10"));
+      stack.push(BigInt("0"));
       const op = new Mod();
       expectTealError(
         () => op.execute(stack),
@@ -689,8 +690,8 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should push 1 to stack because 5 < 10", () => {
-      stack.push(BigInt('10'));
       stack.push(BigInt('5'));
+      stack.push(BigInt('10'));
 
       const op = new LessThan();
       op.execute(stack);
@@ -700,8 +701,8 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push 0 to stack as 10 > 5", () => {
-      stack.push(BigInt('5'));
       stack.push(BigInt('10'));
+      stack.push(BigInt('5'));
 
       const op = new LessThan();
       op.execute(stack);
@@ -725,8 +726,8 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should push 1 to stack as 5 > 2", () => {
-      stack.push(BigInt('2'));
       stack.push(BigInt('5'));
+      stack.push(BigInt('2'));
 
       const op = new GreaterThan();
       op.execute(stack);
@@ -736,8 +737,8 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push 0 to stack as 50 > 10", () => {
-      stack.push(BigInt('50'));
       stack.push(BigInt('10'));
+      stack.push(BigInt('50'));
 
       const op = new GreaterThan();
       op.execute(stack);
@@ -773,8 +774,8 @@ describe("Teal Opcodes", function () {
 
     it("should push 0 to stack", () => {
       const op = new LessThanEqualTo();
-      stack.push(BigInt('50'));
       stack.push(BigInt('100'));
+      stack.push(BigInt('50'));
 
       op.execute(stack);
 
@@ -809,8 +810,8 @@ describe("Teal Opcodes", function () {
 
     it("should push 0 to stack", () => {
       const op = new GreaterThanEqualTo();
-      stack.push(BigInt('500'));
       stack.push(BigInt('100'));
+      stack.push(BigInt('500'));
 
       op.execute(stack);
 
