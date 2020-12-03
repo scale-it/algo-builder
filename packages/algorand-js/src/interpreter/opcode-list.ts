@@ -1,4 +1,5 @@
 /* eslint sonarjs/no-identical-functions: 0 */
+import { decodeAddress } from "algosdk";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
 import { decode, encode } from "uint64be";
@@ -7,7 +8,9 @@ import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
 import { compareArray } from "../lib/helpers";
+import { convertToBuffer } from "../lib/parse-data";
 import type { TEALStack } from "../types";
+import { EncodingType } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
 
@@ -595,35 +598,40 @@ export class Int extends Op {
   }
 
   execute (stack: TEALStack): void {
-    this.checkOverflow(this.uint64);
     stack.push(this.uint64);
   }
 }
 
 // push bytes to stack
 export class Byte extends Op {
-  readonly byte: Uint8Array;
+  readonly str: string;
+  readonly encoding?: EncodingType;
 
-  constructor (byte: Uint8Array) {
+  constructor (str: string, encoding?: EncodingType) {
     super();
-    this.byte = byte;
+    this.str = str;
+    if (encoding !== undefined) {
+      this.encoding = encoding;
+    }
   }
 
   execute (stack: TEALStack): void {
-    stack.push(this.byte);
+    const buffer = convertToBuffer(this.str, this.encoding);
+    stack.push(new Uint8Array(buffer));
   }
 }
 
-// push algorand address as bytes to stack
+// decodes algorand address to bytes and pushes to stack
 export class Addr extends Op {
-  readonly addr: Uint8Array;
+  readonly addr: string;
 
-  constructor (addr: Uint8Array) {
+  constructor (addr: string) {
     super();
     this.addr = addr; // parser should verify the addr first
   }
 
   execute (stack: TEALStack): void {
-    stack.push(this.addr);
+    const addr = decodeAddress(this.addr);
+    stack.push(addr.publicKey);
   }
 }
