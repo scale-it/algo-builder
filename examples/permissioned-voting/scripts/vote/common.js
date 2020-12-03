@@ -1,4 +1,4 @@
-const { executeTransaction } = require("algob");
+const { executeTransaction } = require('algob');
 
 exports.executeTransaction = async function (deployer, txnParams) {
   try {
@@ -6,4 +6,4 @@ exports.executeTransaction = async function (deployer, txnParams) {
   } catch (e) {
     console.error('Transaction Failed', e.response.error);
   }
-}   
+};

@@ -1,21 +1,22 @@
-const { executeTransaction, balanceOf, TransactionType, SignType } = require("algob");
+const { executeTransaction, balanceOf, TransactionType, SignType } = require('algob');
 
-async function run(runtimeEnv, deployer) {
-  const goldAssetID = deployer.asa.get("gold").assetIndex
+async function run (runtimeEnv, deployer) {
+  const goldAssetID = deployer.asa.get('gold').assetIndex;
 
-  const john = deployer.accountsByName.get("john");
-  const goldOwner = deployer.accountsByName.get("alice");
+  const john = deployer.accountsByName.get('john');
+  const goldOwner = deployer.accountsByName.get('alice');
 
   await executeTransaction(deployer, {
     type: TransactionType.TransferAsset,
     sign: SignType.SecretKey,
-    fromAccount: goldOwner, 
-    toAccountAddr: john.addr, 
+    fromAccount: goldOwner,
+    toAccountAddr: john.addr,
     amount: 1,
     assetID: goldAssetID,
-    payFlags: {}})
+    payFlags: {}
+  });
 
   await balanceOf(deployer, john.addr, goldAssetID);
 }
 
-module.exports = { default: run }
+module.exports = { default: run };

@@ -21,7 +21,8 @@
   "license": "Apache-2.0",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/*"
   ],
   "engines": {
     "yarn": ">=1.22.4"

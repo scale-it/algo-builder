@@ -1,17 +1,16 @@
-const { printAssets } = require("algob");
+const { printAssets } = require('algob');
 
-async function run(runtimeEnv, deployer) {
-
-  const john = deployer.accountsByName.get("john");
+async function run (runtimeEnv, deployer) {
+  const john = deployer.accountsByName.get('john');
 
   // print one by one
-  //const goldAssetID = deployer.algodClient.asa.get("gold").assetIndex
-  //await printAssetHolding(deployer.algodClient, john.addr, goldAssetID);
-  //const teslaAssetID = deployer.algodClient.asa.get("tesla").assetIndex
-  //await printAssetHolding(deployer.algodClient, john.addr, teslaAssetID);
+  // const goldAssetID = deployer.algodClient.asa.get("gold").assetIndex
+  // await printAssetHolding(deployer.algodClient, john.addr, goldAssetID);
+  // const teslaAssetID = deployer.algodClient.asa.get("tesla").assetIndex
+  // await printAssetHolding(deployer.algodClient, john.addr, teslaAssetID);
 
   // print all at once
-  await printAssets(deployer, john.addr)
+  await printAssets(deployer, john.addr);
 }
 
-module.exports = { default: run }
+module.exports = { default: run };

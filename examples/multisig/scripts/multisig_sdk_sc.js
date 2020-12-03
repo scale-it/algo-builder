@@ -3,35 +3,35 @@
  * This script demonstrates how to
    - create a signed lsig using sdk and use that lsig to validate transactions
 */
-const { executeTransaction } = require("./common/common");
-const { TransactionType, SignType, createMsigAddress } = require("algob");
+const { executeTransaction } = require('./common/common');
+const { TransactionType, SignType, createMsigAddress } = require('algob');
 
-async function run(runtimeEnv, deployer) {
-  const masterAccount = deployer.accountsByName.get("master-account");
-  const alice = deployer.accountsByName.get("alice");
-  const john = deployer.accountsByName.get("john");
-  const bob = deployer.accountsByName.get("bob");
+async function run (runtimeEnv, deployer) {
+  const masterAccount = deployer.accountsByName.get('master-account');
+  const alice = deployer.accountsByName.get('alice');
+  const john = deployer.accountsByName.get('john');
+  const bob = deployer.accountsByName.get('bob');
 
-  //Generate multi signature account hash
-  const addrs =  [alice.addr, john.addr, bob.addr]
-  const [mparams, multsigaddr] = createMsigAddress(1, 2, addrs);   // passing (version, threshold, address list)
+  // Generate multi signature account hash
+  const addrs = [alice.addr, john.addr, bob.addr];
+  const [mparams, multsigaddr] = createMsigAddress(1, 2, addrs); // passing (version, threshold, address list)
 
-  //Get logic Signature
-  const lsig = await deployer.loadLogic("sample-asc.teal", []);
+  // Get logic Signature
+  const lsig = await deployer.loadLogic('sample-asc.teal', []);
 
-  lsig.sign(alice.sk, mparams);  //lsig signed by alice's secret_key
-  lsig.appendToMultisig(john.sk);    //lsig signed again (threshold = 2) by john secret_key
+  lsig.sign(alice.sk, mparams); // lsig signed by alice's secret_key
+  lsig.appendToMultisig(john.sk); // lsig signed again (threshold = 2) by john secret_key
 
-  let txnParams = {
+  const txnParams = {
     type: TransactionType.TransferAlgo,
     sign: SignType.SecretKey,
     fromAccount: masterAccount,
     toAccountAddr: multsigaddr,
     amountMicroAlgos: 10000000,
     lsig: lsig,
-    payFlags: {note: "Funding multisig account", totalFee: 1000}
-  }
-  //Funding multisignature account
+    payFlags: { note: 'Funding multisig account', totalFee: 1000 }
+  };
+  // Funding multisignature account
   await executeTransaction(deployer, txnParams);
 
   txnParams.fromAccount = { addr: multsigaddr };
@@ -46,4 +46,4 @@ async function run(runtimeEnv, deployer) {
   await executeTransaction(deployer, txnParams);
 }
 
-module.exports = { default: run }
+module.exports = { default: run };
