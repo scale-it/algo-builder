@@ -1,4 +1,5 @@
 /* eslint sonarjs/no-identical-functions: 0 */
+import { decodeAddress } from "algosdk";
 import { assert } from "chai";
 
 import { ERRORS } from "../../../src/errors/errors-list";
@@ -14,9 +15,9 @@ import {
   Substring3
 } from "../../../src/interpreter/opcode-list";
 import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MIN_UINT8 } from "../../../src/lib/constants";
-import { convertToString, toBytes } from "../../../src/lib/parse-data";
+import { convertToBuffer, convertToString, toBytes } from "../../../src/lib/parse-data";
 import { Stack } from "../../../src/lib/stack";
-import type { StackElem } from "../../../src/types";
+import { EncodingType, StackElem } from "../../../src/types";
 import { execExpectError, expectTealError } from "../../helpers/errors";
 
 describe("Teal Opcodes", function () {
@@ -1311,7 +1312,7 @@ describe("Teal Opcodes", function () {
   describe("Pseudo-Ops", function () {
     const stack = new Stack<StackElem>();
 
-    it("Int - should push uint64 to stack", function () {
+    it("Int: should push uint64 to stack", function () {
       const op = new Int(MAX_UINT64);
       op.execute(stack);
 
@@ -1319,18 +1320,56 @@ describe("Teal Opcodes", function () {
       assert.equal(MAX_UINT64, stack.pop());
     });
 
-    it("Byte/Addr - should push byte[] to stack", function () {
-      const byte = toBytes("Algorand");
-
-      const byteOp = new Byte(byte);
-      byteOp.execute(stack);
+    it("Addr: should push addr to stack", function () {
+      const addr = "SOEI4UA72A7ZL5P25GNISSVWW724YABSGZ7GHW5ERV4QKK2XSXLXGXPG5Y";
+      const op = new Addr(addr);
+      op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(byte, stack.pop());
+      assert.deepEqual(decodeAddress(addr).publicKey, stack.pop());
+    });
 
-      const addrOp = new Addr(byte);
-      addrOp.execute(stack);
+    it("Byte: should push parsed base64 string as bytes to stack", function () {
+      const base64Str = "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=";
+      const bytes = new Uint8Array(Buffer.from(base64Str, 'base64'));
+
+      const op = new Byte(base64Str, EncodingType.BASE64);
+      op.execute(stack);
+
       assert.equal(1, stack.length());
-      assert.equal(byte, stack.pop());
+      assert.deepEqual(bytes, stack.pop());
+    });
+
+    it("Byte: should push parsed base32 string as bytes to stack", function () {
+      const base32Str = "MFRGGZDFMY======";
+      const bytes = new Uint8Array(convertToBuffer(base32Str, EncodingType.BASE32));
+
+      const op = new Byte(base32Str, EncodingType.BASE32);
+      op.execute(stack);
+
+      assert.equal(1, stack.length());
+      assert.deepEqual(bytes, stack.pop());
+    });
+
+    it("Byte: should push parsed hex string as bytes to stack", function () {
+      const hexStr = "250001000192CD0000002F6D6E742F72"; // original: 0x250001000192CD0000002F6D6E742F72
+      const bytes = new Uint8Array(Buffer.from(hexStr, 'hex'));
+
+      const op = new Byte(hexStr, EncodingType.HEX);
+      op.execute(stack);
+
+      assert.equal(1, stack.length());
+      assert.deepEqual(bytes, stack.pop());
+    });
+
+    it("Byte: should push string literal as bytes to stack", function () {
+      const str = "Algorand";
+      const bytes = new Uint8Array(Buffer.from(str));
+
+      const op = new Byte(str);
+      op.execute(stack);
+
+      assert.equal(1, stack.length());
+      assert.deepEqual(bytes, stack.pop());
     });
   });
 });
