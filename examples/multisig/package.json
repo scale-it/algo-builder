@@ -1,5 +1,5 @@
 {
-  "name": "local-project-test",
+  "name": "example-multisig",
   "version": "0.0.1",
   "main": "index.js",
   "license": "MIT",
@@ -7,6 +7,9 @@
     "algosdk": "^1.8.0"
   },
   "scripts": {
-    "algob": "algob"
+    "algob": "algob",
+    "lint": "eslint --ext .js,.ts scripts",
+    "lint:fix": "eslint --fix --ext .js,.ts scripts",
+    "test": "echo ok"
   }
 }

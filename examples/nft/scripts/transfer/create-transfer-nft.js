@@ -2,24 +2,23 @@
  * Description:
  * This file creates a new NFT and transfers 1 NFT from A to B
 */
-const { executeTransaction, printGlobalNFT, printLocalNFT } = require("./common");
-const { TransactionType, SignType, toBytes } = require("algob");
+const { executeTransaction, printGlobalNFT, printLocalNFT } = require('./common');
+const { TransactionType, SignType, toBytes } = require('algob');
 
-async function run(runtimeEnv, deployer) {
+async function run (runtimeEnv, deployer) {
+  const masterAccount = deployer.accountsByName.get('master-account');
+  const john = deployer.accountsByName.get('john');
 
-  const masterAccount = deployer.accountsByName.get("master-account")
-  const john = deployer.accountsByName.get("john");
-
-  const sscInfo = await deployer.getSSC("nft_approval.py", "nft_clear_state.py");
+  const sscInfo = await deployer.getSSC('nft_approval.py', 'nft_clear_state.py');
   const appId = sscInfo.appID;
   console.log(sscInfo);
 
-  await printGlobalNFT(deployer, masterAccount.addr, appId); //Global Count before creation
+  await printGlobalNFT(deployer, masterAccount.addr, appId); // Global Count before creation
 
-  const nft_ref = "https://new-nft.com";
+  const nftRef = 'https://new-nft.com';
 
   // arguments: "create", nft_data_ref, data_hash
-  let appArgs = ["create", nft_ref, "1234"].map(toBytes);
+  let appArgs = ['create', nftRef, '1234'].map(toBytes);
 
   let txnParam = {
     type: TransactionType.CallNoOpSSC,
@@ -39,10 +38,10 @@ async function run(runtimeEnv, deployer) {
   await printLocalNFT(deployer, masterAccount.addr, appId);
   await printLocalNFT(deployer, john.addr, appId);
 
-  let nftID = new Uint8Array(8).fill(1, 7); // [0, 0, 0, 0, 0, 0, 0, 1] = uint64(1)
+  const nftID = new Uint8Array(8).fill(1, 7); // [0, 0, 0, 0, 0, 0, 0, 1] = uint64(1)
   appArgs = [
-    toBytes("transfer"),
-    nftID,
+    toBytes('transfer'),
+    nftID
   ];
 
   // transfer nft from master to john
@@ -62,4 +61,4 @@ async function run(runtimeEnv, deployer) {
   await printLocalNFT(deployer, john.addr, appId);
 }
 
-module.exports = { default: run }
+module.exports = { default: run };

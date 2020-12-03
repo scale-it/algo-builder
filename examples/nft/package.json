@@ -8,6 +8,9 @@
     "uint64be": "^3.0.0"
   },
   "scripts": {
-    "algob": "algob"
+    "algob": "algob",
+    "lint": "eslint --ext .js,.ts scripts",
+    "lint:fix": "eslint --fix --ext .js,.ts scripts",
+    "test": "echo ok"
   }
 }

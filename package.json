@@ -21,7 +21,8 @@
   "license": "Apache-2.0",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/*"
   ],
   "engines": {
     "yarn": ">=1.22.4"
@@ -59,7 +60,7 @@
     "typescript": "^4.0.2"
   },
   "lint-staged": {
-    "**/{src,test}/**/*.{ts,js}": [
+    "**/{src,test,scripts}/**/*.{ts,js}": [
       "eslint --format stylish --fix"
     ]
   },
