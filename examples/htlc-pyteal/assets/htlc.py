@@ -7,30 +7,29 @@ bob = Addr("2ILRL5YU3FZ4JDQZQVXEZUYKEWF7IEIGRRCPCMI36VKSGDMAS6FHSBXZDQ")
 secret = "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc="
 timeout = 3000
 
-def htlc(tmpl_seller=john,
-         tmpl_buyer=bob,
-         tmpl_secret=secret,
-         tmpl_hash_fn=Sha256,
-         tmpl_timeout=timeout):
+def htlc(tmpl_seller, tmpl_buyer, tmpl_secret, tmpl_hash_fn, tmpl_timeout):
     
-    type_cond = Txn.type_enum() == TxnType.Payment
+    common_fields = And(
+        Txn.type_enum() == TxnType.Payment,
+        Txn.rekey_to() == Global.zero_address(),
+        Txn.close_remainder_to() == Global.zero_address(),
+        Txn.fee() <= Int(10000)
+    )
 
     recv_cond = And(
-        Txn.close_remainder_to() == Global.zero_address(),
         Txn.receiver() == tmpl_seller,
         tmpl_hash_fn(Arg(0)) == Bytes("base64", tmpl_secret)
     )
-    
+  
     esc_cond = And(
-        Txn.close_remainder_to() == Global.zero_address(),
         Txn.receiver() == tmpl_buyer,
         Txn.first_valid() > Int(tmpl_timeout)
     )
 
     return And(
-        type_cond,
+        common_fields,
         Or(recv_cond, esc_cond)
     )
 
 if __name__ == "__main__":
-    print(compileTeal(htlc(), Mode.Signature))
+    print(compileTeal(htlc(john, bob, secret, Sha256, timeout), Mode.Signature))

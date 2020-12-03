@@ -10,7 +10,7 @@ def approval_program():
     contract, by Opting into the contract. Voters then vote by grouping two transactions. 
     The first is a smart contract call to vote for either candidate A or candidate B, and 
     the second is transferring the vote token back to the central authority. Voting is only
-     allowed within the voting range.
+    allowed within the voting range.
     """
     # Check to see that the application ID is not set, indicating this is a creation call.
     # Store the creator address to global state.
@@ -26,6 +26,10 @@ def approval_program():
         App.globalPut(Bytes("AssetID"), Btoi(Txn.application_args[4])),
         Return(Int(1))
     ])
+
+    # Always verify that the RekeyTo property of any transaction is set to the ZeroAddress
+    # unless the contract is specifically involved ina rekeying operation.
+    no_rekey_addr = Txn.rekey_to() == Global.zero_address()
 
     # Checks whether the sender is creator.
     is_creator = Txn.sender() == App.globalGet(Bytes("Creator"))
@@ -45,6 +49,7 @@ def approval_program():
     # Verifies that the round is currently between registration begin and end rounds.
     on_register = Return(
         And(
+        no_rekey_addr,
         Txn.application_args[0] == Bytes("register"),
         Global.round() >= App.globalGet(Bytes("RegBegin")),
         Global.round() <= App.globalGet(Bytes("RegEnd")))
@@ -63,6 +68,7 @@ def approval_program():
     choice_tally = App.globalGet(choice)
     on_vote = Seq([
         Assert(And(
+            no_rekey_addr,
             Global.round() >= App.globalGet(Bytes("VoteBegin")),
             Global.round() <= App.globalGet(Bytes("VoteEnd"))
         )),

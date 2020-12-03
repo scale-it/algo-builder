@@ -22,7 +22,7 @@ async function run(runtimeEnv, deployer) {
     toAccountAddr: john.addr,
     amountMicroAlgos: 20,
     lsig: lsig,
-    payFlags: {}
+    payFlags: {totalFee: 1000}
   }
   // Transaction PASS - As according to .teal logic, amount should be <= 100 and receiver should be john
   await executeTransaction(deployer, txnParam);

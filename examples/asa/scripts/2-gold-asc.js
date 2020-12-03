@@ -9,7 +9,7 @@ async function run(runtimeEnv, deployer) {
   await executeTransaction(deployer, mkParam(masterAccount, goldOwner.addr, 200000000, {note: "funding account"}));
 
   await deployer.fundLsig("2-gold-contract-asc.teal",
-    { funder: goldOwner, fundingMicroAlgo: 101000 }, {}, []);   // sending 0.101 Algo
+    { funder: goldOwner, fundingMicroAlgo: 1000000 }, {}, []);   // sending 1 Algo
 
   const ascInfoAlgoDelegated = await deployer.mkDelegatedLsig("3-gold-delegated-asc.teal",
   goldOwner, []);

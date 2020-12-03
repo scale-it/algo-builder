@@ -1,5 +1,5 @@
 const { executeTransaction, mkTxnParams } = require("./common/common");
-const { SignType, globalZeroAddress } = require("algob");
+const { SignType, globalZeroAddress, toBytes } = require("algob");
 
 async function run(runtimeEnv, deployer) {
 
@@ -17,7 +17,7 @@ async function run(runtimeEnv, deployer) {
   await deployer.fundLsig("htlc.py", { funder: masterAccount, fundingMicroAlgo: 1000000 }, 
   	{ closeRemainderTo: john.addr }, []); 
 
-  let contract = await deployer.loadLogic("htlc.py", [ wrongSecret ]);
+  let contract = await deployer.loadLogic("htlc.py", [ toBytes(wrongSecret) ]);
   let contractAddress = contract.address();
   
   txnParams.fromAccount = { addr: contractAddress};
@@ -29,7 +29,7 @@ async function run(runtimeEnv, deployer) {
   // Fails because wrong secret is passed
   await executeTransaction(deployer, txnParams);
 
-  contract = await deployer.loadLogic("htlc.py", [ secret ]);
+  contract = await deployer.loadLogic("htlc.py", [ toBytes(secret) ]);
   contractAddress = contract.address();
 
   // Passes because right secret is passed

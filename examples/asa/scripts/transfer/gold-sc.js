@@ -23,7 +23,7 @@ async function run(runtimeEnv, deployer) {
     amount: 500,
     assetID: assetID,
     lsig: lsigGoldOwner,
-    payFlags: {}
+    payFlags: {totalFee: 1000}
   }
 
   // Transaction PASS - As according to .teal logic, amount should be <= 1000
@@ -35,7 +35,7 @@ async function run(runtimeEnv, deployer) {
 
   // Transaction FAIL - sender should be the delegator i.e account which signed the lsig (goldOwner in this case)
   txnParam.amount = 100;
-  txnParam.toAccountAddr = bob.addr;
+  txnParam.fromAccount = bob;
   await executeTransaction(deployer, txnParam);
 
 
@@ -49,7 +49,7 @@ async function run(runtimeEnv, deployer) {
     toAccountAddr: bob.addr,
     amountMicroAlgos: 58,
     lsig: logicSignature,
-    payFlags: {}
+    payFlags: {totalFee: 1000}
   }
   // Transaction PASS - As according to .teal logic, amount should be <= 100
   await executeTransaction(deployer, txnParam);

@@ -168,7 +168,7 @@ describe("Support External Parameters in PyTEAL program", () => {
     assert.equal(op.timestamp, 2);
     assert.lengthOf(op.compiledFiles, 0);
     assert.lengthOf(op.writtenFiles, 0);
-  
+
     // On third run, should compile on third run because external parameters passed
     result = await pyOp.ensureCompiled(stateless, false, scInitParam);
     const newStatelessHash = result.srcHash;
