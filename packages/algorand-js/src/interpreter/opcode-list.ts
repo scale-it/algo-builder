@@ -1,12 +1,15 @@
 /* eslint sonarjs/no-identical-functions: 0 */
+import { verifyBytes } from "algosdk";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
+import { Keccak } from 'sha3';
 import { decode, encode } from "uint64be";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
 import { compareArray } from "../lib/helpers";
+import { convertToString } from "../lib/parse-data";
 import type { TEALStack } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
@@ -259,6 +262,7 @@ export class Err extends Op {
 // SHA256 hash of value X, yields [32]byte
 export class Sha256 extends Op {
   execute (stack: TEALStack): void {
+    this.assertStackLen(stack, 1);
     const hash = sha256.create();
     const val = this.assertBytes(stack.pop()) as Message;
     hash.update(val);
@@ -271,12 +275,44 @@ export class Sha256 extends Op {
 // SHA512_256 hash of value X, yields [32]byte
 export class Sha512_256 extends Op {
   execute (stack: TEALStack): void {
+    this.assertStackLen(stack, 1);
     const hash = sha512_256.create();
     const val = this.assertBytes(stack.pop()) as Message;
     hash.update(val);
     const hashedOutput = Buffer.from(hash.hex(), 'hex');
     var arrByte = Uint8Array.from(hashedOutput);
     stack.push(arrByte);
+  }
+}
+
+// Keccak256 hash of value X, yields [32]byte
+// https://github.com/phusion/node-sha3#example-2
+export class Keccak256 extends Op {
+  execute (stack: TEALStack): void {
+    this.assertStackLen(stack, 1);
+    const top = this.assertBytes(stack.pop());
+
+    const hash = new Keccak(256);
+    hash.update(convertToString(top));
+    var arrByte = Uint8Array.from(hash.digest());
+    stack.push(arrByte);
+  }
+}
+
+// for (data A, signature B, pubkey C) verify the signature of
+// ("ProgData" || program_hash || data) against the pubkey => {0 or 1}
+export class Ed25519verify extends Op {
+  execute (stack: TEALStack): void {
+    this.assertStackLen(stack, 1);
+    const pubkey = this.assertBytes(stack.pop());
+    const signature = this.assertBytes(stack.pop());
+    const data = this.assertBytes(stack.pop());
+
+    if (verifyBytes(data, signature, pubkey)) {
+      stack.push(BIGINT1);
+    } else {
+      stack.push(BIGINT0);
+    }
   }
 }
 
