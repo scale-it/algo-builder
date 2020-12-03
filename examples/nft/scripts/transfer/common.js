@@ -37,7 +37,7 @@ exports.printLocalNFT = async function (deployer, account, appId) {
                 holdings += key.toString() + ' ';
             }
         }
-        console.log('NFT holdings of', account, ':', holdings);
+        console.log('%s account holds app(%s) NFTs: ', account, appId, holdings);
     } catch (e) {
         console.error('Error Occurred', e);
     }
