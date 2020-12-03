@@ -11,7 +11,7 @@ def parseArgs(args, scParam):
     try:
         param = yaml.safe_load(args)
         for key, value in param.items():
-        scParam[key] = value
+            scParam[key] = value
         return scParam
     except yaml.YAMLError as exc:
         print(exc)
