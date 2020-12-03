@@ -17,7 +17,7 @@ async function run(runtimeEnv, deployer) {
     const secret = "hero wisdom green split loop element vote belt";
     const wrongSecret = "hero wisdom red split loop element vote belt";
 
-    let lsig = await deployer.loadLogic("htlc.py", [ new Uint8Array(Buffer.from(wrongSecret)) ]);
+    let lsig = await deployer.loadLogic("htlc.py", [ toBytes(wrongSecret) ]);
     let sender = lsig.address(); 
     
     let txnParams = {
