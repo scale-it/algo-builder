@@ -1201,7 +1201,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(Buffer.from("Algo"), top);
+      assert.deepEqual(Buffer.from("Algo"), top);
     });
 
     it("should throw Invalid type error",
@@ -1276,7 +1276,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(Buffer.from("Algo"), top);
+      assert.deepEqual(Buffer.from("Algo"), top);
     });
 
     it("should throw Invalid type error",
