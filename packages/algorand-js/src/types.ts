@@ -10,3 +10,9 @@ export type AppArgs = Array<string | number>;
 
 export type StackElem = bigint | Uint8Array;
 export type TEALStack = IStack<bigint | Uint8Array>;
+
+export enum EncodingType {
+  BASE64,
+  BASE32,
+  HEX
+}
