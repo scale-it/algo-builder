@@ -15,13 +15,13 @@ def dynamic_fee(TMPL_TO,
     The contract works by approving a group of two transactions (meaning the two transactions will occur together or not at all). 
 
     - Suppose the owner of account A wants to send a payment to account TMPL_TO, but does not want 
-      to pay a transaction fee. If account A signs the following contract with the appropriate parameters 
-      (specifying all of the necessary details of the payment transaction), then anyone can cover a fee 
-      for that payment on account A's behalf.
+    to pay a transaction fee. If account A signs the following contract with the appropriate parameters 
+    (specifying all of the necessary details of the payment transaction), then anyone can cover a fee 
+    for that payment on account A's behalf.
 
     - The first transaction must spend the transaction fee into account A, and the second transaction 
-      must be the specified payment transaction from account A to account TMPL_TO.  
-    
+    must be the specified payment transaction from account A to account TMPL_TO.  
+
     Parameters:
     TMPL_TO: the recipient of the payment from account A
     TMPL_AMT: the amount to send from account A to TMPL_TO in microAlgos
@@ -30,7 +30,7 @@ def dynamic_fee(TMPL_TO,
     TMPL_LV: the required last valid round of the payment from account A
     TMPL_LEASE: the string to use for the transaction lease in the payment from account A (to avoid replay attacks) 
     """
-    
+
     # First, check that the transaction group contains exactly two transactions. 
     grp_check = Global.group_size() == Int(2)
 
@@ -49,8 +49,8 @@ def dynamic_fee(TMPL_TO,
     secondTxn_pay_check = Gtxn[1].type_enum() == TxnType.Payment
 
     common_fields = And(
-      Txn.rekey_to() == Global.zero_address(),
-      Txn.fee() <= Int(10000)
+        Txn.rekey_to() == Global.zero_address(),
+        Txn.fee() <= Int(10000)
     )
 
     # fold all the above checks into a single boolean.
@@ -96,25 +96,25 @@ def dynamic_fee(TMPL_TO,
     
 if __name__ == "__main__":
 
-#replace these values with your customized values or pass an external parameter
-  scParam = {
-    "TMPL_TO": "2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA",
-    "TMPL_AMT": 700000,
-    "TMPL_CLS": "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
-    "TMPL_FV": 10,
-    "TMPL_LV": 1000000,
-    "TMPL_LEASE": "023sdDE2"
-  }
+    #replace these values with your customized values or pass an external parameter
+    scParam = {
+        "TMPL_TO": "2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA",
+        "TMPL_AMT": 700000,
+        "TMPL_CLS": "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
+        "TMPL_FV": 10,
+        "TMPL_LV": 1000000,
+        "TMPL_LEASE": "023sdDE2"
+    }
 
-  # Overwrite scParam if sys.argv[1] is passed
-  if(len(sys.argv) > 1):
-    scParam = parseArgs(sys.argv[1], scParam)
+    # Overwrite scParam if sys.argv[1] is passed
+    if(len(sys.argv) > 1):
+        scParam = parseArgs(sys.argv[1], scParam)
 
-  print(compileTeal(dynamic_fee(
-    Addr(scParam["TMPL_TO"]), 
-    scParam["TMPL_AMT"], 
-    Addr(scParam["TMPL_CLS"]), 
-    scParam["TMPL_FV"], 
-    scParam["TMPL_LV"], 
-    Bytes("base64", scParam["TMPL_LEASE"])), Mode.Signature))
+    print(compileTeal(dynamic_fee(
+        Addr(scParam["TMPL_TO"]), 
+        scParam["TMPL_AMT"], 
+        Addr(scParam["TMPL_CLS"]), 
+        scParam["TMPL_FV"], 
+        scParam["TMPL_LV"], 
+        Bytes("base64", scParam["TMPL_LEASE"])), Mode.Signature))
     

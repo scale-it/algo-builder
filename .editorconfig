@@ -29,3 +29,7 @@ trim_trailing_whitespace = false
 
 [*.{html,mako,less,org}]
 indent_style = tab
+
+[*.py]
+indent_style = space
+indent_size = 4
