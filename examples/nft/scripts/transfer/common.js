@@ -27,15 +27,16 @@ exports.printLocalNFT = async function (deployer, account, appId) {
     try {
         const localState = await readLocalStateSSC(deployer, account, appId);
         // each nft is stored as a one record in user store
-        let holdings = "";
+        let holdings = [];
         if (localState === undefined) {
             holdings = "none";
         }
         else {
             for(const l of localState) {
                 const key = decode(Buffer.from(l.key, 'base64'));
-                holdings += key.toString() + ' ';
+                holdings.push(key);
             }
+            holdings = holdings.join(' ')
         }
         console.log('%s account holds app(%s) NFTs: ', account, appId, holdings);
     } catch (e) {
