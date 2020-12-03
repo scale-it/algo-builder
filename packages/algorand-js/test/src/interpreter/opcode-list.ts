@@ -15,7 +15,7 @@ import {
   Substring3
 } from "../../../src/interpreter/opcode-list";
 import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MIN_UINT8 } from "../../../src/lib/constants";
-import { convertToBuffer, convertToString, toBytes } from "../../../src/lib/parse-data";
+import { convertToBuffer, toBytes } from "../../../src/lib/parse-data";
 import { Stack } from "../../../src/lib/stack";
 import { EncodingType, StackElem } from "../../../src/types";
 import { execExpectError, expectTealError } from "../../helpers/errors";
@@ -1200,8 +1200,8 @@ describe("Teal Opcodes", function () {
       const op = new Substring(start, end);
       op.execute(stack);
 
-      const top = stack.pop() as Uint8Array;
-      assert.equal("Algo", convertToString(top));
+      const top = stack.pop();
+      assert.equal(Buffer.from("Algo"), top);
     });
 
     it("should throw Invalid type error",
@@ -1275,8 +1275,8 @@ describe("Teal Opcodes", function () {
       const op = new Substring3();
       op.execute(stack);
 
-      const top = stack.pop() as Uint8Array;
-      assert.equal("Algo", convertToString(top));
+      const top = stack.pop();
+      assert.equal(Buffer.from("Algo"), top);
     });
 
     it("should throw Invalid type error",
