@@ -587,7 +587,6 @@ export class Substring3 extends Op {
 }
 
 /** Pseudo-Ops **/
-
 // push integer to stack
 export class Int extends Op {
   readonly uint64: bigint;
