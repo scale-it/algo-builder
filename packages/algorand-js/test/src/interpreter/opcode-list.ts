@@ -8,6 +8,7 @@ import {
   Btoi, Bytec, Bytecblock, Concat, Div, Dup, Dup2,
   EqualTo, Err, GreaterThan, GreaterThanEqualTo, Intc,
   Intcblock, Itob,
+  Keccak256,
   Len, LessThan, LessThanEqualTo,
   Load,
   Mod, Mul, Not, NotEqualTo, Or, Sha256, Sha512_256, Store, Sub, Substring3
@@ -614,7 +615,7 @@ describe("Teal Opcodes", function () {
   describe("Sha256", function () {
     const stack = new Stack<StackElem>();
 
-    it("should return correct hash", () => {
+    it("should return correct hash for Sha256", () => {
       stack.push(toBytes("MESSAGE"));
       const op = new Sha256();
       op.execute(stack);
@@ -629,12 +630,16 @@ describe("Teal Opcodes", function () {
     it("should throw invalid type error sha256",
       execExpectError(stack, [BigInt("1")], new Sha256(), ERRORS.TEAL.INVALID_TYPE)
     );
+
+    it("should throw error with Sha256 if stack is below min length",
+      execExpectError(stack, [], new Sha256(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+    );
   });
 
-  describe("Sha512_256 opcode", function () {
+  describe("Sha512_256", function () {
     const stack = new Stack<StackElem>();
 
-    it("should return correct hash", function () {
+    it("should return correct hash for Sha512_256", function () {
       stack.push(toBytes("MESSAGE"));
       const op = new Sha512_256();
       op.execute(stack);
@@ -648,6 +653,35 @@ describe("Teal Opcodes", function () {
 
     it("should throw invalid type error sha512_256",
       execExpectError(stack, [BigInt("1")], new Sha512_256(), ERRORS.TEAL.INVALID_TYPE)
+    );
+
+    it("should throw error with Sha512_256 if stack is below min length",
+      execExpectError(stack, [], new Sha512_256(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+    );
+  });
+
+  describe("keccak256", function () {
+    const stack = new Stack<StackElem>();
+
+    it("should return correct hash for keccak256", function () {
+      stack.push(toBytes("ALGORAND"));
+      const op = new Keccak256();
+      op.execute(stack);
+
+      // http://emn178.github.io/online-tools/keccak_256.html
+      const expected = Buffer.from(
+        "ab0d74c2852292002f95c4a64ebd411ecb5e8a599d4bc2cfc1170547c5f44807", 'hex');
+
+      const top = stack.pop();
+      assert.deepEqual(expected, top);
+    });
+
+    it("should throw invalid type error Keccak256",
+      execExpectError(stack, [BigInt("1")], new Keccak256(), ERRORS.TEAL.INVALID_TYPE)
+    );
+
+    it("should throw error with keccak256 if stack is below min length",
+      execExpectError(stack, [], new Keccak256(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
