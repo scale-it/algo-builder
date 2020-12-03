@@ -1,5 +1,5 @@
 /* eslint sonarjs/no-identical-functions: 0 */
-import * as algosdk from "algosdk";
+import { decodeAddress, generateAccount, signBytes } from "algosdk";
 import { assert } from "chai";
 
 import { ERRORS } from "../../../src/errors/errors-list";
@@ -7,6 +7,7 @@ import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
   Add, Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
   Btoi, Bytec, Bytecblock, Concat, Div, Dup, Dup2,
+  Ed25519verify,
   EqualTo, Err, GreaterThan, GreaterThanEqualTo, Intc,
   Intcblock, Itob,
   Keccak256,
@@ -683,6 +684,49 @@ describe("Teal Opcodes", function () {
 
     it("should throw error with keccak256 if stack is below min length",
       execExpectError(stack, [], new Keccak256(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+    );
+  });
+
+  describe("Ed25519verify", function () {
+    const stack = new Stack<StackElem>();
+
+    it("should push 1 to stack if signature is valid", function () {
+      const account = generateAccount();
+      const toSign = new Uint8Array(Buffer.from([1, 9, 25, 49]));
+      const signed = signBytes(toSign, account.sk);
+
+      stack.push(toSign); // data
+      stack.push(signed); // signature
+      stack.push(decodeAddress(account.addr).publicKey); // pk
+
+      const op = new Ed25519verify();
+      op.execute(stack);
+      const top = stack.pop();
+      assert.equal(top, BigInt('1'));
+    });
+
+    it("should push 0 to stack if signature is invalid", function () {
+      const account = generateAccount();
+      const toSign = new Uint8Array(Buffer.from([1, 9, 25, 49]));
+      const signed = signBytes(toSign, account.sk);
+      signed[0] = (Number(signed[0]) + 1) % 256;
+
+      stack.push(toSign); // data
+      stack.push(signed); // signature
+      stack.push(decodeAddress(account.addr).publicKey); // pk
+
+      const op = new Ed25519verify();
+      op.execute(stack);
+      const top = stack.pop();
+      assert.equal(top, BigInt('0'));
+    });
+
+    it("should throw invalid type error Ed25519verify",
+      execExpectError(stack, ['1', '1', '1'].map(BigInt), new Ed25519verify(), ERRORS.TEAL.INVALID_TYPE)
+    );
+
+    it("should throw error with Ed25519verify if stack is below min length",
+      execExpectError(stack, [], new Ed25519verify(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
