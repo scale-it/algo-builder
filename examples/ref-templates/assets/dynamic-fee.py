@@ -5,12 +5,7 @@ from algobpy.parse import parseArgs
 
 from pyteal import *
 
-def dynamic_fee(TMPL_TO,
-                TMPL_AMT,
-                TMPL_CLS,
-                TMPL_FV,
-                TMPL_LV,
-                TMPL_LEASE):
+def dynamic_fee(TMPL_TO, TMPL_AMT, TMPL_CLS, TMPL_FV, TMPL_LV, TMPL_LEASE):
     """
     The contract works by approving a group of two transactions (meaning the two transactions will occur together or not at all). 
 

@@ -12,8 +12,8 @@ def gold_asc(asset_amt=asset_amt, tmpl_sen=tmpl_sen):
 	common_fields = And(
 		Txn.type_enum() == Int(4),
 		Txn.rekey_to() == Global.zero_address(),
-    Txn.close_remainder_to() == Global.zero_address(),
-    Txn.fee() <= Int(10000)
+		Txn.close_remainder_to() == Global.zero_address(),
+		Txn.fee() <= Int(10000)
 	)
 
 	asa_opt_in = And(
