@@ -27,7 +27,7 @@ async function run(runtimeEnv, deployer) {
         toAccountAddr: john.addr,
         amountMicroAlgos: 200,
         lsig: lsig,
-        payFlags: {totalFee: 500}
+        payFlags: {totalFee: 1000}
     }
     // Transaction Fails : as wrong secret value is used
     await executeTransaction(deployer, txnParams);
