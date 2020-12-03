@@ -20,7 +20,7 @@ const BIGINT1 = BigInt("1");
 // pops string([]byte) from stack and pushes it's length to stack
 export class Len extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 1);
+    this.assertMinStackLen(stack, 1);
     const last = this.assertBytes(stack.pop());
     stack.push(BigInt(last.length));
   }
@@ -30,7 +30,7 @@ export class Len extends Op {
 // panics on overflow (result > max_unit64)
 export class Add extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 2);
+    this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
     const prev = this.assertBigInt(stack.pop());
     const result = prev + last;
@@ -43,7 +43,7 @@ export class Add extends Op {
 // panics on underflow (result < 0)
 export class Sub extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 2);
+    this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
     const prev = this.assertBigInt(stack.pop());
     const result = prev - last;
@@ -56,7 +56,7 @@ export class Sub extends Op {
 // panics if prev == 0
 export class Div extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 2);
+    this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
     const prev = this.assertBigInt(stack.pop());
     if (last === BIGINT0) {
@@ -70,7 +70,7 @@ export class Div extends Op {
 // panics on overflow (result > max_unit64)
 export class Mul extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 2);
+    this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
     const prev = this.assertBigInt(stack.pop());
     const result = prev * last;
@@ -168,7 +168,7 @@ export class Intc extends Op {
 // Panic if B == 0.
 export class Mod extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 2);
+    this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
     const prev = this.assertBigInt(stack.pop());
     if (last === BIGINT0) {
@@ -181,7 +181,7 @@ export class Mod extends Op {
 // pops two unit64 from stack(last, prev) and pushes their bitwise-or(last | prev) to stack
 export class BitwiseOr extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 2);
+    this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
     const prev = this.assertBigInt(stack.pop());
     stack.push(prev | last);
@@ -191,7 +191,7 @@ export class BitwiseOr extends Op {
 // pops two unit64 from stack(last, prev) and pushes their bitwise-and(last & prev) to stack
 export class BitwiseAnd extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 2);
+    this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
     const prev = this.assertBigInt(stack.pop());
     stack.push(prev & last);
@@ -201,7 +201,7 @@ export class BitwiseAnd extends Op {
 // pops two unit64 from stack(last, prev) and pushes their bitwise-xor(last ^ prev) to stack
 export class BitwiseXor extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 2);
+    this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
     const prev = this.assertBigInt(stack.pop());
     stack.push(prev ^ last);
@@ -211,7 +211,7 @@ export class BitwiseXor extends Op {
 // pop unit64 from stack and push it's bitwise-invert(~last) to stack
 export class BitwiseNot extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 1);
+    this.assertMinStackLen(stack, 1);
     const last = this.assertBigInt(stack.pop());
     stack.push(~last);
   }
@@ -230,7 +230,7 @@ export class Store extends Op {
 
   execute (stack: TEALStack): void {
     this.checkIndexBound(this.index, this.interpreter.scratch);
-    this.assertStackLen(stack, 1);
+    this.assertMinStackLen(stack, 1);
     const top = stack.pop();
     this.interpreter.scratch[this.index] = top;
   }
@@ -263,7 +263,7 @@ export class Err extends Op {
 // SHA256 hash of value X, yields [32]byte
 export class Sha256 extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 1);
+    this.assertMinStackLen(stack, 1);
     const hash = sha256.create();
     const val = this.assertBytes(stack.pop()) as Message;
     hash.update(val);
@@ -276,7 +276,7 @@ export class Sha256 extends Op {
 // SHA512_256 hash of value X, yields [32]byte
 export class Sha512_256 extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 1);
+    this.assertMinStackLen(stack, 1);
     const hash = sha512_256.create();
     const val = this.assertBytes(stack.pop()) as Message;
     hash.update(val);
@@ -290,7 +290,7 @@ export class Sha512_256 extends Op {
 // https://github.com/phusion/node-sha3#example-2
 export class Keccak256 extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 1);
+    this.assertMinStackLen(stack, 1);
     const top = this.assertBytes(stack.pop());
 
     const hash = new Keccak(256);
@@ -304,7 +304,7 @@ export class Keccak256 extends Op {
 // ("ProgData" || program_hash || data) against the pubkey => {0 or 1}
 export class Ed25519verify extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 3);
+    this.assertMinStackLen(stack, 3);
     const pubkey = this.assertBytes(stack.pop());
     const signature = this.assertBytes(stack.pop());
     const data = this.assertBytes(stack.pop());
@@ -322,7 +322,7 @@ export class Ed25519verify extends Op {
 // If A < B pushes '1' else '0'
 export class LessThan extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 2);
+    this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
     const prev = this.assertBigInt(stack.pop());
     if (prev < last) {
@@ -336,7 +336,7 @@ export class LessThan extends Op {
 // If A > B pushes '1' else '0'
 export class GreaterThan extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 2);
+    this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
     const prev = this.assertBigInt(stack.pop());
     if (prev > last) {
@@ -350,7 +350,7 @@ export class GreaterThan extends Op {
 // If A <= B pushes '1' else '0'
 export class LessThanEqualTo extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 2);
+    this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
     const prev = this.assertBigInt(stack.pop());
     if (prev <= last) {
@@ -364,7 +364,7 @@ export class LessThanEqualTo extends Op {
 // If A >= B pushes '1' else '0'
 export class GreaterThanEqualTo extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 2);
+    this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
     const prev = this.assertBigInt(stack.pop());
     if (prev >= last) {
@@ -378,7 +378,7 @@ export class GreaterThanEqualTo extends Op {
 // If A && B is true pushes '1' else '0'
 export class And extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 2);
+    this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
     const prev = this.assertBigInt(stack.pop());
     if (last && prev) {
@@ -392,7 +392,7 @@ export class And extends Op {
 // If A || B is true pushes '1' else '0'
 export class Or extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 2);
+    this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
     const prev = this.assertBigInt(stack.pop());
     if (prev || last) {
@@ -406,7 +406,7 @@ export class Or extends Op {
 // If A == B pushes '1' else '0'
 export class EqualTo extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 2);
+    this.assertMinStackLen(stack, 2);
     const last = stack.pop();
     const prev = stack.pop();
     if (typeof last === typeof prev) {
@@ -432,7 +432,7 @@ export class EqualTo extends Op {
 // If A != B pushes '1' else '0'
 export class NotEqualTo extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 2);
+    this.assertMinStackLen(stack, 2);
     const last = stack.pop();
     const prev = stack.pop();
     if (typeof last === typeof prev) {
@@ -458,7 +458,7 @@ export class NotEqualTo extends Op {
 // X == 0 yields 1; else 0
 export class Not extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 1);
+    this.assertMinStackLen(stack, 1);
     const last = this.assertBigInt(stack.pop());
     if (last === BIGINT0) {
       stack.push(BIGINT1);
@@ -471,7 +471,7 @@ export class Not extends Op {
 // converts uint64 X to big endian bytes
 export class Itob extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 1);
+    this.assertMinStackLen(stack, 1);
     const stackValue = this.assertBigInt(stack.pop());
     const buf = encode(Number(stackValue));
     const uint8arr = new Uint8Array(buf);
@@ -483,7 +483,7 @@ export class Itob extends Op {
 // btoi panics if the input is longer than 8 bytes.
 export class Btoi extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 1);
+    this.assertMinStackLen(stack, 1);
     const bytes = this.assertBytes(stack.pop());
     if (bytes.length > 8) {
       throw new TealError(ERRORS.TEAL.LONG_INPUT_ERROR);
@@ -497,7 +497,7 @@ export class Btoi extends Op {
 // A plus B out to 128-bit long result as sum (top) and carry-bit uint64 values on the stack
 export class Addw extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 2);
+    this.assertMinStackLen(stack, 2);
     const valueA = this.assertBigInt(stack.pop());
     const valueB = this.assertBigInt(stack.pop());
     let valueC = valueA + valueB;
@@ -516,7 +516,7 @@ export class Addw extends Op {
 // A times B out to 128-bit long result as low (top) and high uint64 values on the stack
 export class Mulw extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 2);
+    this.assertMinStackLen(stack, 2);
     const valueA = this.assertBigInt(stack.pop());
     const valueB = this.assertBigInt(stack.pop());
     const result = valueA * valueB;
@@ -535,7 +535,7 @@ export class Mulw extends Op {
 // Pop one element from stack
 export class Pop extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 1);
+    this.assertMinStackLen(stack, 1);
     stack.pop();
   }
 }
@@ -543,7 +543,7 @@ export class Pop extends Op {
 // duplicate last value on stack
 export class Dup extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 1);
+    this.assertMinStackLen(stack, 1);
     const lastValue = stack.pop();
 
     stack.push(lastValue);
@@ -554,7 +554,7 @@ export class Dup extends Op {
 // duplicate two last values on stack: A, B -> A, B, A, B
 export class Dup2 extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 2);
+    this.assertMinStackLen(stack, 2);
     const lastValueA = stack.pop();
     const lastValueB = stack.pop();
 
@@ -569,7 +569,7 @@ export class Dup2 extends Op {
 // concat panics if the result would be greater than 4096 bytes.
 export class Concat extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 2);
+    this.assertMinStackLen(stack, 2);
     const valueB = this.assertBytes(stack.pop());
     const valueA = this.assertBytes(stack.pop());
 

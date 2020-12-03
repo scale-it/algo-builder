@@ -4,7 +4,7 @@ import { MAX_UINT8, MAX_UINT64, MIN_UINT8, MIN_UINT64 } from "../lib/constants";
 import type { TEALStack } from "../types";
 
 export class Op {
-  assertStackLen (stack: TEALStack, minLen: number): void {
+  assertMinStackLen (stack: TEALStack, minLen: number): void {
     if (stack.length() < minLen) {
       throw new TealError(ERRORS.TEAL.ASSERT_STACK_LENGTH);
     }
