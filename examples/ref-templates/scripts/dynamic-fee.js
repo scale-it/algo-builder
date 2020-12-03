@@ -26,14 +26,14 @@ async function run(runtimeEnv, deployer) {
   console.log("SIGn1 ", signedContract);
 
   let transactions = [
-    mkTxnParams(masterAccount, escrow, 1000, signedContract, {}),
+    mkTxnParams(masterAccount, escrow, 1000, signedContract, {totalFee: 1000}),
     mkTxnParams({ addr: escrow}, john.addr, 700000, contract, { totalFee: 1000, closeRemainderTo: bob.addr })]
 
   //Group Transaction FAIL - Correct transaction Fee is used BUT closeRemainderTo is set to bob
   await executeTransaction(deployer, transactions);
 
   transactions = [
-    mkTxnParams(masterAccount, escrow, 1000, signedContract, { }),
+    mkTxnParams(masterAccount, escrow, 1000, signedContract, {totalFee: 1000}),
     mkTxnParams({ addr: escrow}, john.addr, 700000, contract, { totalFee: 1000, closeRemainderTo: masterAccount.addr })]
   
   //Group Transaction PASS - Correct transaction Fee is used and closeRemainderTo is set to master

@@ -1,8 +1,21 @@
+#pragma version 2
 // Check if Transaction type is pay, Sender is owner of Gold and amount is <= 100
 txn TypeEnum
 int 1
 ==
 txn Amount
 int 100
+<=
+&&
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txn CloseRemainderTo
+global ZeroAddress
+==
+&&
+txn Fee
+int 10000
 <=
 &&

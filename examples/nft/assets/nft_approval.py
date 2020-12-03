@@ -9,12 +9,12 @@ def approval_program():
     hash is an hash of the external resources data.
 
     Commands:
-      create    Creates a new NFT. Expects 2 additional arguments:
-                * nft-ref: a reference data (usually a URL or CID)
-                * nft-ref-hash: a hash of the underlying reference data
-                Only creator can create new NFTs.
-      transfer  Transfers an NFT between two accounts. Expects one additional arg: NFT_ID.
-                  Additionally, two Accounts(from, to) must also be passed to the smart contract.
+        create    Creates a new NFT. Expects 2 additional arguments:
+                    * nft-ref: a reference data (usually a URL or CID)
+                    * nft-ref-hash: a hash of the underlying reference data
+                    Only creator can create new NFTs.
+        transfer  Transfers an NFT between two accounts. Expects one additional arg: NFT_ID.
+                    Additionally, two Accounts(from, to) must also be passed to the smart contract.
     """
 
     var_total = Bytes("total")

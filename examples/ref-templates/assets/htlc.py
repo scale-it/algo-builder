@@ -7,11 +7,11 @@ pre_image = "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc="
 timeout = 2000
 
 def htlc(TMPL_RCV,
-         TMPL_OWN,
-         TMPL_FEE,
-         TMPL_HASHIMG,
-         TMPL_HASHFN,
-         TMPL_TIMEOUT):
+        TMPL_OWN,
+        TMPL_FEE,
+        TMPL_HASHIMG,
+        TMPL_HASHFN,
+        TMPL_TIMEOUT):
     """This contract implements a "hash time lock".
     The contract will approve transactions spending algos from itself under two circumstances:
 
@@ -48,12 +48,17 @@ def htlc(TMPL_RCV,
     # having a non-zero-address CloseRemainderTo will handle for us.
     amount_check = Txn.amount() == Int(0)
 
+    # Always verify that the RekeyTo property of any transaction is set to the ZeroAddress
+    # unless the contract is specifically involved ina rekeying operation.
+    rekey_check = Txn.rekey_to() == Global.zero_address()
+
     # fold all the above checks into a single boolean.
     required_condition = And(
         fee_check,
         pay_check,
         rec_field_check,
-        amount_check
+        amount_check,
+        rekey_check
     )
 
     # Payout scenarios : At this point in the execution, there is one boolean variable on the

@@ -5,7 +5,7 @@ async function run(runtimeEnv, deployer) {
 
   const masterAccount = deployer.accountsByName.get("master-account")
   const alice = deployer.accountsByName.get("alice");
-  const votingAdminAccount = deployer.accountsByName.get("voting-admin-account");
+  const votingAdminAccount = deployer.accountsByName.get("john");
   const bob = deployer.accountsByName.get("bob");
 
   await executeTransaction(deployer, {type:TransactionType.TransferAlgo, sign:SignType.SecretKey,
