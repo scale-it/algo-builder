@@ -303,7 +303,7 @@ export class Keccak256 extends Op {
 // ("ProgData" || program_hash || data) against the pubkey => {0 or 1}
 export class Ed25519verify extends Op {
   execute (stack: TEALStack): void {
-    this.assertStackLen(stack, 1);
+    this.assertStackLen(stack, 3);
     const pubkey = this.assertBytes(stack.pop());
     const signature = this.assertBytes(stack.pop());
     const data = this.assertBytes(stack.pop());
