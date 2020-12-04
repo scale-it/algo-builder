@@ -4,6 +4,9 @@ import YAML from "yaml";
 
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
+import { ASSETS_DIR } from "../internal/core/project-structure";
+
+const txExt = ".tx";
 
 function normalizePaths (mainPath: string, paths: string[]): string[] {
   return paths.map(n => path.relative(mainPath, n));
@@ -62,5 +65,25 @@ export function loadFromYamlFileSilentWithMessage (
   } catch (e) {
     console.warn(messageIfNotPresent);
     return defaultYamlValue(options);
+  }
+}
+
+/**
+ * Description: this function reads raw signed txn from file /assets/<filename>.tx
+ * and returns the encoded txn as Uint8array
+ * @param filename : filename [must have .tx ext]
+ * @returns signed transaction encoded as Uint8array
+ */
+export function loadSignedTxnFromFile (filename: string): Uint8Array | undefined {
+  if (!filename.endsWith(txExt)) {
+    throw new Error(`filename "${filename}" must end with "${txExt}"`);
+  }
+  try {
+    const p = path.join(ASSETS_DIR, filename);
+    const buffer = fs.readFileSync(p);
+    return Uint8Array.from(buffer);
+  } catch (e) {
+    if (e?.errno === -2) return undefined; // handling a not existing file
+    throw e;
   }
 }
