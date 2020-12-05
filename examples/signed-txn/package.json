@@ -1,0 +1,19 @@
+{
+  "name": "signed-txn-example",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "chai": "^4.2.0"
+  },
+  "dependencies": {
+    "algob": "^0.0.5",
+    "algosdk": "^1.8.0"
+  },
+  "scripts": {
+    "algob": "algob",
+    "lint": "eslint --ext .js,.ts scripts",
+    "lint:fix": "eslint --fix --ext .js,.ts scripts",
+    "test": "echo ok"
+  }
+}

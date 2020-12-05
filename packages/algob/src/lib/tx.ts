@@ -1,5 +1,4 @@
-import type { Transaction } from "algosdk";
-import tx from "algosdk";
+import tx, { decodeSignedTransaction, Transaction } from "algosdk";
 import { TextEncoder } from "util";
 
 import { BuilderError } from "../internal/core/errors";
@@ -14,6 +13,7 @@ import {
   TxParams
 } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
+import { loadSignedTxnFromFile } from "./files";
 
 export async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.SuggestedParams> {
   const params = await algocl.getTransactionParams().do();
@@ -230,4 +230,25 @@ export async function executeTransaction (
     console.log(confirmedTx);
     return confirmedTx;
   }
+}
+
+/**
+ * Description: decode signed txn from file and send to network.
+ * probably won't work, because transaction contains fields like
+ * firstValid and lastValid which might not be equal to the
+ * current network's blockchain block height.
+ * @param deployer AlgobDeployer
+ * @param fileName raw signed txn .tx file
+ */
+export async function executeSignedTxnFromFile (
+  deployer: AlgobDeployer,
+  fileName: string): Promise<tx.ConfirmedTxInfo> {
+  const signedTxn = loadSignedTxnFromFile(fileName);
+  if (signedTxn === undefined) {
+    throw new Error(`File ${fileName} does not exist`);
+  }
+  console.debug("Decoded txn from %s: %O", fileName, decodeSignedTransaction(signedTxn));
+  const confirmedTx = await sendAndWait(deployer, signedTxn);
+  console.log(confirmedTx);
+  return confirmedTx;
 }
