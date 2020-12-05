@@ -247,7 +247,7 @@ export async function executeSignedTxnFromFile (
   if (signedTxn === undefined) {
     throw new Error(`File ${fileName} does not exist`);
   }
-  console.log("Decoded txn from %s: %O", fileName, decodeSignedTransaction(signedTxn));
+  console.debug("Decoded txn from %s: %O", fileName, decodeSignedTransaction(signedTxn));
   const confirmedTx = await sendAndWait(deployer, signedTxn);
   console.log(confirmedTx);
   return confirmedTx;
