@@ -27,5 +27,15 @@ stop-kmd:
 account-list:
 	goal -d $(ALGORAND_DATA) account list
 
+setup-master-account:
+	# Import account with address: WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE
+	goal account import -m "enforce drive foster uniform cradle tired win arrow wasp melt cattle chronic sport dinosaur announce shell correct shed amused dismiss mother jazz task above hospital" -d $(ALGORAND_DATA)
+	# Get Account list from goal
+	$(eval list=$(shell goal account list -d $(ALGORAND_DATA)))
+	# Get first address and store it in a variable
+	$(eval netAddress=$(shell echo $(list) | awk '{print $$2}'))
+	# Transfer a lot of algos to imported account
+	goal clerk send -a 2000000000000 -f $(netAddress) -t WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE -d $(ALGORAND_DATA)
+
 # Extracting mnemonic:
 # goal -d $(ALGORAND_DATA) account export -a <account address>

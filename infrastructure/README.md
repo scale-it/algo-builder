@@ -21,7 +21,7 @@ If you want to create a local network by your own, you can use a private net [tu
 1. Then:
 
         cd infrastructure
-        make create-private
+        make create-private-net
 
 1. Update the `node_data/PrimaryNode/config.json` file. Remember to set `"EnableDeveloperAPI": true` if you want to be able to compile and execute smart-contracts.
 1. Check the access token and network address. You will need them in your config file to correctly connect to a node.
@@ -31,8 +31,12 @@ If you want to create a local network by your own, you can use a private net [tu
 
 1. To stop and start again the chain use:
 
-        make stop-private
-        make start-private
+        make stop-private-net
+        make start-private-net
+
+1. To set up master account use:
+
+        make setup-master-account
 
 
 ## Connecting to algob
