@@ -75,6 +75,18 @@ describe("Parser", function () {
       assert.deepEqual(res, expected);
     });
 
+    it("should return correct fields for byte string literal", () => {
+      let res = fieldsFromLine('byte "STRING LITERAL"');
+      let expected = ["byte", "\"STRING LITERAL\""];
+      console.log("HERE: ", res[1]);
+      assert.deepEqual(res, expected);
+
+      res = fieldsFromLine('byte "STRING \\"NESTED STRING\\" END"');
+      expected = ["byte", "\"STRING \\\"NESTED STRING\\\" END\""];
+
+      assert.deepEqual(res, expected);
+    });
+
     it("should return correct fields for int", () => {
       let res = fieldsFromLine("int 123");
       const expected = ["int", "123"];

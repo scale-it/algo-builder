@@ -11,19 +11,18 @@ export function fieldsFromLine (line: string): string[] {
   // Trim whitespace from both sides of a string
   line = line.trim();
   const fields = [] as string[];
-
   let i = 0;
   let start = i;
   let inString = false;
   let inBase64 = false;
   while (i < line.length) {
     // check if not space
-    if (line[i] !== " ") {
+    if (line[i] !== ' ') {
       switch (line[i]) {
         // check for string literal
         case '"':
           if (!inString) {
-            if ((i === 0) || (i > 0 && line[i - 1] === " ")) {
+            if ((i === 0) || (i > 0 && line[i - 1] === ' ')) {
               inString = true;
             }
           } else {
@@ -62,7 +61,6 @@ export function fieldsFromLine (line: string): string[] {
       i++;
       continue;
     }
-
     if (!inString) {
       const value = line.substr(start, i - start);
       fields.push(value);
@@ -75,7 +73,7 @@ export function fieldsFromLine (line: string): string[] {
     i++;
 
     if (!inString) {
-      while (i < line.length && line[i] === " ") {
+      while (i < line.length && line[i] === ' ') {
         i++;
       }
       start = i;
