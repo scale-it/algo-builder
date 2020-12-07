@@ -92,6 +92,6 @@ export function fieldsFromLine (line: string): string[] {
   // make objects and leave Ex: new Addr("AHGDKKADGKAJD") , new Add()
 }
 
-export function opcodesFromFields (fields: string[]): Operator[] {
+/* export function opcodesFromFields (fields: string[]): Operator[] {
 
-}
+} */
