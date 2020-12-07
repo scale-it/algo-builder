@@ -7,9 +7,12 @@ import { expectTealError } from "../../helpers/errors";
 const fkParam = {
   type: 0,
   sign: 0,
-  fromAccount: { addr: '', sk: new Uint8Array(0) },
-  to: '',
-  appId: 0,
+  fromAccount: {
+    addr: 'EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY',
+    sk: new Uint8Array(0)
+  },
+  toAccountAddr: '2ILRL5YU3FZ4JDQZQVXEZUYKEWF7IEIGRRCPCMI36VKSGDMAS6FHSBXZDQ',
+  amountMicroAlgos: 100,
   payFlags: {}
 };
 
