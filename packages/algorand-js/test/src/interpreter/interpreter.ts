@@ -1,3 +1,5 @@
+import { generateAccount } from "algosdk";
+
 import { ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import { Arg } from "../../../src/interpreter/opcode-list";
@@ -7,10 +9,7 @@ import { expectTealError } from "../../helpers/errors";
 const fkParam = {
   type: 0,
   sign: 0,
-  fromAccount: {
-    addr: 'EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY',
-    sk: new Uint8Array(0)
-  },
+  fromAccount: generateAccount(),
   toAccountAddr: '2ILRL5YU3FZ4JDQZQVXEZUYKEWF7IEIGRRCPCMI36VKSGDMAS6FHSBXZDQ',
   amountMicroAlgos: 100,
   payFlags: {}
