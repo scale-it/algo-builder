@@ -53,10 +53,10 @@ export class Interpreter {
   /**
    * Description: this function executes set of Operator[] passed after
    * parsing teal code
-   * @param {execParams} txn : Transaction parameters for current txn
-   * @param {Logic[]} logic : set of Logic objects
-   * @param {AppArgs} args : argument array passed to the current transaction
-   * @returns {boolean} : transaction accepted/rejected based on asc logic
+   * @param {execParams} txn : Transaction parameters
+   * @param {Logic[]} logic : smart contract instructions
+   * @param {AppArgs} args : external arguments
+   * @returns {boolean} : transaction accepted/rejected based on ASC logic
    */
   execute (txnParams: execParams | execParams[], logic: Operator[], args: Uint8Array[]): boolean {
     assert(Array.isArray(args));
