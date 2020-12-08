@@ -78,7 +78,7 @@ describe("Parser", function () {
     it("should return correct fields for byte string literal", () => {
       let res = fieldsFromLine('byte "STRING LITERAL"');
       let expected = ["byte", "\"STRING LITERAL\""];
-      console.log("HERE: ", res[1]);
+
       assert.deepEqual(res, expected);
 
       res = fieldsFromLine('byte "STRING \\"NESTED STRING\\" END"');

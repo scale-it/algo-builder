@@ -1,5 +1,13 @@
+import { isValidAddress } from "algosdk";
+import fs from "fs";
+import readline from "readline";
+
+import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
+import { ARITHMETIC_OPERATIONS, PSEUDO_OPS } from "../lib/constants";
+import { assertFieldLen, assertOnlyDigits } from "../lib/helpers";
 import { Operator } from "../types";
+import { Add, Addr, Byte, Div, Int, Mul, Sub } from "./opcode-list";
 
 /**
  * Description: Read line and split it into fields
@@ -86,10 +94,94 @@ export function fieldsFromLine (line: string): string[] {
   }
 
   return fields;
-  // int byte addr + - * /
-  // make objects and leave Ex: new Addr("AHGDKKADGKAJD") , new Add()
 }
 
-/* export function opcodesFromFields (fields: string[]): Operator[] {
+/**
+ * Description: Returns Opcode objects for fields with Pseudo-Ops
+ * @param fields : fields with field[0] as one of the Pseudo-Ops
+ */
+export function pseudoOps (fields: string[]): Operator {
+  switch (fields[0]) {
+    case "addr":
+      assertFieldLen(fields.length, 2);
+      if (!isValidAddress(fields[1])) {
+        throw new TealError(ERRORS.TEAL.PARSE_ERROR);
+      }
 
-} */
+      return new Addr(fields[1]);
+    /* case "byte":
+
+      // do needful
+      break; */
+    case "int":
+      // allowed fields int 123 only. (int(12) is not allowed)
+      assertFieldLen(fields.length, 2);
+      assertOnlyDigits(fields[1]);
+
+      return new Int(BigInt(fields[1]));
+    default:
+      throw new TealError(ERRORS.TEAL.INVALID_OP_ARG);
+  }
+}
+
+/**
+ * Description: Returns Opcode objects for fields with Arithmetic-Opcodes
+ * @param fields : fields with field[0] as one of the Arithmetic-Opcodes
+ */
+export function arithmeticOps (fields: string[]): Operator {
+  switch (fields[0]) {
+    case "+":
+      return new Add();
+    case "-":
+      return new Sub();
+    case "/":
+      return new Div();
+    case "*":
+      return new Mul();
+    default:
+      throw new TealError(ERRORS.TEAL.INVALID_OP_ARG);
+  }
+}
+
+/**
+ * Description: Returns Opcode object for given field
+ * @param fields : fields extracted from line
+ */
+export function opcodeFromFields (fields: string[]): Operator {
+  if (PSEUDO_OPS.includes(fields[0])) {
+    return pseudoOps(fields);
+  } else if (ARITHMETIC_OPERATIONS.includes(fields[0])) {
+    return arithmeticOps(fields);
+  } else {
+    throw new TealError(ERRORS.TEAL.INVALID_OP_ARG);
+  }
+}
+
+/**
+ * Description: Returns a list of Opcodes object after reading text from given TEAL file
+ * @param filename : Name of the TEAL file which must be present in ?????
+ */
+export function parser (filename: string): Operator[] {
+  const opCodeList = [] as Operator[];
+  const rl = readline.createInterface({
+    input: fs.createReadStream('filename'), // file location
+    output: process.stdout,
+    terminal: false
+  });
+
+  rl.on('line', (line) => {
+    // console.log(line);
+    if (line.length === 0 || line.startsWith("//") || line.startsWith("#pragma")) {
+
+    } else {
+      const fields = fieldsFromLine(line);
+      if (fields.length === 0) {
+
+      } else {
+        opCodeList.push(opcodeFromFields(fields));
+      }
+    }
+  });
+
+  return opCodeList;
+}
