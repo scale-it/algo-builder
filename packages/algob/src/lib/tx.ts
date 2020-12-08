@@ -1,4 +1,4 @@
-import tx, { decodeSignedTransaction, Transaction } from "algosdk";
+import tx, { decodeSignedTransaction, SuggestedParams, Transaction } from "algosdk";
 import { TextEncoder } from "util";
 
 import { BuilderError } from "../internal/core/errors";
@@ -108,8 +108,7 @@ export function encodeNote (note: string | undefined, noteb64: string| undefined
  * @param deployer AlgobDeployer
  * @param txnParam execParam
  */
-async function mkTransaction (deployer: AlgobDeployer, txnParam: execParams): Promise<Transaction> {
-  const params = await mkSuggestedParams(deployer.algodClient, txnParam.payFlags);
+export function mkTransaction (txnParam: execParams, suggestedParams: SuggestedParams): Transaction {
   const note = encodeNote(txnParam.payFlags.note, txnParam.payFlags.noteb64);
   const transactionType = txnParam.type;
   switch (txnParam.type) {
@@ -122,7 +121,7 @@ async function mkTransaction (deployer: AlgobDeployer, txnParam: execParams): Pr
         txnParam.amount,
         note,
         txnParam.assetID,
-        params);
+        suggestedParams);
     }
     case TransactionType.TransferAlgo: {
       return tx.makePaymentTxnWithSuggestedParams(
@@ -131,20 +130,20 @@ async function mkTransaction (deployer: AlgobDeployer, txnParam: execParams): Pr
         txnParam.amountMicroAlgos,
         txnParam.payFlags.closeRemainderTo,
         note,
-        params);
+        suggestedParams);
     }
     case TransactionType.ClearSSC: {
       return tx.makeApplicationClearStateTxn(
-        txnParam.fromAccount.addr, params, txnParam.appId, txnParam.appArgs);
+        txnParam.fromAccount.addr, suggestedParams, txnParam.appId, txnParam.appArgs);
     }
     case TransactionType.DeleteSSC: {
       return tx.makeApplicationDeleteTxn(
-        txnParam.fromAccount.addr, params, txnParam.appId, txnParam.appArgs);
+        txnParam.fromAccount.addr, suggestedParams, txnParam.appId, txnParam.appArgs);
     }
     case TransactionType.CallNoOpSSC: {
       return tx.makeApplicationNoOpTxn(
         txnParam.fromAccount.addr,
-        params,
+        suggestedParams,
         txnParam.appId,
         txnParam.appArgs,
         txnParam.accounts,
@@ -156,7 +155,7 @@ async function mkTransaction (deployer: AlgobDeployer, txnParam: execParams): Pr
     }
     case TransactionType.CloseSSC: {
       return tx.makeApplicationCloseOutTxn(
-        txnParam.fromAccount.addr, params, txnParam.appId, txnParam.appArgs);
+        txnParam.fromAccount.addr, suggestedParams, txnParam.appId, txnParam.appArgs);
     }
     default: {
       throw new BuilderError(ERRORS.GENERAL.TRANSACTION_TYPE_ERROR, { error: transactionType });
@@ -190,12 +189,12 @@ function signTransaction (txn: Transaction, txnParam: execParams): Uint8Array {
 /**
  * Description: send signed transaction to network and wait for confirmation
  * @param deployer AlgobDeployer
- * @param txns Signed Transactions
+ * @param txns Signed Transaction(s)
  */
 async function sendAndWait (
   deployer: AlgobDeployer,
   txns: Uint8Array | Uint8Array[]): Promise<tx.ConfirmedTxInfo> {
-  const txInfo = (await deployer.algodClient.sendRawTransaction(txns).do());
+  const txInfo = await deployer.algodClient.sendRawTransaction(txns).do();
   return await deployer.waitForConfirmation(txInfo.txId);
 }
 
@@ -209,7 +208,8 @@ export async function executeTransaction (
 
     const txns = [];
     for (const txnParam of txnParams) {
-      const txn = await mkTransaction(deployer, txnParam);
+      const suggestedParams = await mkSuggestedParams(deployer.algodClient, txnParam.payFlags);
+      const txn = mkTransaction(txnParam, suggestedParams);
       txns.push(txn);
     }
     tx.assignGroupID(txns);
@@ -224,7 +224,9 @@ export async function executeTransaction (
     console.log(confirmedTx);
     return confirmedTx;
   } else {
-    const txn = await mkTransaction(deployer, txnParams);
+    const suggestedParams = await mkSuggestedParams(deployer.algodClient, txnParams.payFlags);
+    const txn = mkTransaction(txnParams, suggestedParams);
+
     const signedTxn = signTransaction(txn, txnParams);
     const confirmedTx = await sendAndWait(deployer, signedTxn);
     console.log(confirmedTx);
