@@ -1,6 +1,6 @@
-import { mkTransaction, TransactionType } from "algob";
+import { mkTransaction } from "algob";
 import type { execParams } from "algob/src/types";
-import { assignGroupID, Transaction } from "algosdk";
+import { AccountInfo, assignGroupID, Transaction } from "algosdk";
 import { assert } from "chai";
 
 import { mockSuggestedParams } from "../../test/mocks/txn";
@@ -8,7 +8,7 @@ import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { DEFAULT_STACK_ELEM } from "../lib/constants";
 import { Stack } from "../lib/stack";
-import type { Operator, StackElem, TEALStack } from "../types";
+import type { AccountsMap, Operator, StackElem, TEALStack } from "../types";
 
 export class Interpreter {
   readonly stack: TEALStack;
@@ -17,20 +17,21 @@ export class Interpreter {
   scratch: StackElem[];
   tx: Transaction;
   gtxs: Transaction[];
+  accounts: AccountsMap;
 
   constructor () {
     this.stack = new Stack<StackElem>();
     this.bytecblock = [];
     this.intcblock = [];
     this.scratch = new Array(256).fill(DEFAULT_STACK_ELEM);
+    this.accounts = <AccountsMap>{};
     this.tx = <Transaction>{}; // current transaction
     this.gtxs = []; // all transactions
   }
 
   /**
    * Description: creates a new transaction object from given execParams
-   * @param  txnParams : Transaction parameters for current txn or txn Group
-   * @returns Transaction object
+   * @param txnParams : Transaction parameters for current txn or txn Group
    */
   createTxnContext (txnParams: execParams | execParams[]): void {
     if (Array.isArray(txnParams)) {
@@ -55,6 +56,16 @@ export class Interpreter {
   }
 
   /**
+   * Description: set accounts for context as {address: accountInfo}
+   * @param accounts: array of account info's
+   */
+  createStatefulContext (accounts: AccountInfo[]): void {
+    for (const acc of accounts) {
+      this.accounts[acc.address] = acc;
+    }
+  }
+
+  /**
    * Description: this function executes set of Operator[] passed after
    * parsing teal code
    * @param {execParams} txn : Transaction parameters
@@ -62,9 +73,12 @@ export class Interpreter {
    * @param {AppArgs} args : external arguments
    * @returns {boolean} : transaction accepted/rejected based on ASC logic
    */
-  execute (txnParams: execParams | execParams[], logic: Operator[], args: Uint8Array[]): boolean {
+  execute (txnParams: execParams | execParams[],
+    logic: Operator[], args: Uint8Array[],
+    accounts: AccountInfo[]): boolean {
     assert(Array.isArray(args));
     this.createTxnContext(txnParams);
+    this.createStatefulContext(accounts);
 
     for (const l of logic) {
       l.execute(this.stack); // execute each teal opcode

@@ -21,7 +21,7 @@ describe("Interpreter", function () {
     const args = [toBytes("")];
     const logic = [new Arg(args[0])];
     expectTealError(
-      () => interpreter.execute(fkParam, logic, args),
+      () => interpreter.execute(fkParam, logic, args, []),
       ERRORS.TEAL.LOGIC_REJECTION
     );
   });

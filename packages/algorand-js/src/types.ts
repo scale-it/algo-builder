@@ -1,3 +1,5 @@
+import { AccountInfo } from "algosdk";
+
 import {
   Add, Arg, Bytec, Bytecblock, Div, Len, Mul, Sub
 } from "./interpreter/opcode-list";
@@ -120,4 +122,8 @@ export enum EncodingType {
   BASE64,
   BASE32,
   HEX
+}
+
+export interface AccountsMap {
+  [addr: string]: AccountInfo
 }
