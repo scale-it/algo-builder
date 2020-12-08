@@ -1,15 +1,16 @@
 /* eslint sonarjs/no-identical-functions: 0 */
-import { decodeAddress } from "algosdk";
+import { decodeAddress, generateAccount, signBytes } from "algosdk";
 import { assert } from "chai";
 
 import { ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
-  Add, Addr,
-  Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
+  Add, Addr, Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
   Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2,
+  Ed25519verify,
   EqualTo, Err, GreaterThan, GreaterThanEqualTo, Int, Intc,
   Intcblock, Itob,
+  Keccak256,
   Len, LessThan, LessThanEqualTo,
   Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Sha256, Sha512_256, Store, Sub, Substring,
   Substring3
@@ -82,8 +83,8 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct subtraction of two unit64", function () {
-      stack.push(BigInt("20"));
       stack.push(BigInt("30"));
+      stack.push(BigInt("20"));
       const op = new Sub();
       op.execute(stack);
 
@@ -100,8 +101,8 @@ describe("Teal Opcodes", function () {
     );
 
     it("should throw underflow error with Sub if (A - B) < 0", function () {
-      stack.push(BigInt("20"));
       stack.push(BigInt("10"));
+      stack.push(BigInt("20"));
       const op = new Sub();
       expectTealError(
         () => op.execute(stack),
@@ -146,8 +147,8 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct division of two unit64", function () {
-      stack.push(BigInt("20"));
       stack.push(BigInt("40"));
+      stack.push(BigInt("20"));
       const op = new Div();
       op.execute(stack);
 
@@ -156,8 +157,8 @@ describe("Teal Opcodes", function () {
     });
 
     it("should return 0 on division of two unit64 with A == 0", function () {
-      stack.push(BigInt("40"));
       stack.push(BigInt("0"));
+      stack.push(BigInt("40"));
       const op = new Div();
       op.execute(stack);
 
@@ -174,8 +175,8 @@ describe("Teal Opcodes", function () {
     );
 
     it("should panic on A/B if B == 0", function () {
-      stack.push(BigInt("0"));
       stack.push(BigInt("10"));
+      stack.push(BigInt("0"));
       const op = new Div();
       expectTealError(
         () => op.execute(stack),
@@ -382,8 +383,8 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct modulo of two unit64", function () {
-      stack.push(BigInt("2"));
       stack.push(BigInt("5"));
+      stack.push(BigInt("2"));
       let op = new Mod();
       op.execute(stack);
 
@@ -399,8 +400,8 @@ describe("Teal Opcodes", function () {
     });
 
     it("should return 0 on modulo of two unit64 with A == 0", function () {
-      stack.push(BigInt("4"));
       stack.push(BigInt("0"));
+      stack.push(BigInt("4"));
       const op = new Mod();
       op.execute(stack);
 
@@ -417,8 +418,8 @@ describe("Teal Opcodes", function () {
     );
 
     it("should panic on A % B if B == 0", function () {
-      stack.push(BigInt("0"));
       stack.push(BigInt("10"));
+      stack.push(BigInt("0"));
       const op = new Mod();
       expectTealError(
         () => op.execute(stack),
@@ -616,7 +617,7 @@ describe("Teal Opcodes", function () {
   describe("Sha256", function () {
     const stack = new Stack<StackElem>();
 
-    it("should return correct hash", () => {
+    it("should return correct hash for Sha256", () => {
       stack.push(toBytes("MESSAGE"));
       const op = new Sha256();
       op.execute(stack);
@@ -631,12 +632,16 @@ describe("Teal Opcodes", function () {
     it("should throw invalid type error sha256",
       execExpectError(stack, [BigInt("1")], new Sha256(), ERRORS.TEAL.INVALID_TYPE)
     );
+
+    it("should throw error with Sha256 if stack is below min length",
+      execExpectError(stack, [], new Sha256(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+    );
   });
 
-  describe("Sha512_256 opcode", function () {
+  describe("Sha512_256", function () {
     const stack = new Stack<StackElem>();
 
-    it("should return correct hash", function () {
+    it("should return correct hash for Sha512_256", function () {
       stack.push(toBytes("MESSAGE"));
       const op = new Sha512_256();
       op.execute(stack);
@@ -651,14 +656,86 @@ describe("Teal Opcodes", function () {
     it("should throw invalid type error sha512_256",
       execExpectError(stack, [BigInt("1")], new Sha512_256(), ERRORS.TEAL.INVALID_TYPE)
     );
+
+    it("should throw error with Sha512_256 if stack is below min length",
+      execExpectError(stack, [], new Sha512_256(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+    );
+  });
+
+  describe("keccak256", function () {
+    const stack = new Stack<StackElem>();
+
+    it("should return correct hash for keccak256", function () {
+      stack.push(toBytes("ALGORAND"));
+      const op = new Keccak256();
+      op.execute(stack);
+
+      // http://emn178.github.io/online-tools/keccak_256.html
+      const expected = Buffer.from(
+        "ab0d74c2852292002f95c4a64ebd411ecb5e8a599d4bc2cfc1170547c5f44807", 'hex');
+
+      const top = stack.pop();
+      assert.deepEqual(expected, top);
+    });
+
+    it("should throw invalid type error Keccak256",
+      execExpectError(stack, [BigInt("1")], new Keccak256(), ERRORS.TEAL.INVALID_TYPE)
+    );
+
+    it("should throw error with keccak256 if stack is below min length",
+      execExpectError(stack, [], new Keccak256(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+    );
+  });
+
+  describe("Ed25519verify", function () {
+    const stack = new Stack<StackElem>();
+
+    it("should push 1 to stack if signature is valid", function () {
+      const account = generateAccount();
+      const toSign = new Uint8Array(Buffer.from([1, 9, 25, 49]));
+      const signed = signBytes(toSign, account.sk);
+
+      stack.push(toSign); // data
+      stack.push(signed); // signature
+      stack.push(decodeAddress(account.addr).publicKey); // pk
+
+      const op = new Ed25519verify();
+      op.execute(stack);
+      const top = stack.pop();
+      assert.equal(top, BigInt('1'));
+    });
+
+    it("should push 0 to stack if signature is invalid", function () {
+      const account = generateAccount();
+      const toSign = new Uint8Array(Buffer.from([1, 9, 25, 49]));
+      const signed = signBytes(toSign, account.sk);
+      signed[0] = (Number(signed[0]) + 1) % 256;
+
+      stack.push(toSign); // data
+      stack.push(signed); // signature
+      stack.push(decodeAddress(account.addr).publicKey); // pk
+
+      const op = new Ed25519verify();
+      op.execute(stack);
+      const top = stack.pop();
+      assert.equal(top, BigInt('0'));
+    });
+
+    it("should throw invalid type error Ed25519verify",
+      execExpectError(stack, ['1', '1', '1'].map(BigInt), new Ed25519verify(), ERRORS.TEAL.INVALID_TYPE)
+    );
+
+    it("should throw error with Ed25519verify if stack is below min length",
+      execExpectError(stack, [], new Ed25519verify(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+    );
   });
 
   describe("LessThan", function () {
     const stack = new Stack<StackElem>();
 
     it("should push 1 to stack because 5 < 10", () => {
-      stack.push(BigInt('10'));
       stack.push(BigInt('5'));
+      stack.push(BigInt('10'));
 
       const op = new LessThan();
       op.execute(stack);
@@ -668,8 +745,8 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push 0 to stack as 10 > 5", () => {
-      stack.push(BigInt('5'));
       stack.push(BigInt('10'));
+      stack.push(BigInt('5'));
 
       const op = new LessThan();
       op.execute(stack);
@@ -693,8 +770,8 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should push 1 to stack as 5 > 2", () => {
-      stack.push(BigInt('2'));
       stack.push(BigInt('5'));
+      stack.push(BigInt('2'));
 
       const op = new GreaterThan();
       op.execute(stack);
@@ -704,8 +781,8 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push 0 to stack as 50 > 10", () => {
-      stack.push(BigInt('50'));
       stack.push(BigInt('10'));
+      stack.push(BigInt('50'));
 
       const op = new GreaterThan();
       op.execute(stack);
@@ -741,8 +818,8 @@ describe("Teal Opcodes", function () {
 
     it("should push 0 to stack", () => {
       const op = new LessThanEqualTo();
-      stack.push(BigInt('50'));
       stack.push(BigInt('100'));
+      stack.push(BigInt('50'));
 
       op.execute(stack);
 
@@ -777,8 +854,8 @@ describe("Teal Opcodes", function () {
 
     it("should push 0 to stack", () => {
       const op = new GreaterThanEqualTo();
-      stack.push(BigInt('500'));
       stack.push(BigInt('100'));
+      stack.push(BigInt('500'));
 
       op.execute(stack);
 
@@ -1268,8 +1345,8 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct substring", function () {
-      stack.push(BigInt('4'));
       stack.push(BigInt('0'));
+      stack.push(BigInt('4'));
       stack.push(toBytes("Algorand"));
 
       const op = new Substring3();
@@ -1293,7 +1370,7 @@ describe("Teal Opcodes", function () {
       const start = end + BigInt('1');
       execExpectError(
         stack,
-        [end, start, toBytes("Algorand")],
+        [start, end, toBytes("Algorand")],
         new Substring3(),
         ERRORS.TEAL.SUBSTRING_END_BEFORE_START
       );
@@ -1302,7 +1379,7 @@ describe("Teal Opcodes", function () {
     it("should throw error because range beyong string",
       execExpectError(
         stack,
-        [BigInt('40'), BigInt('0'), toBytes("Algorand")],
+        [BigInt('0'), BigInt('40'), toBytes("Algorand")],
         new Substring3(),
         ERRORS.TEAL.SUBSTRING_RANGE_BEYOND
       )
