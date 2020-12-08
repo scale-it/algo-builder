@@ -157,18 +157,17 @@ export function opcodeFromFields (fields: string[]): Operator {
 
 /**
  * Description: Returns a list of Opcodes object after reading text from given TEAL file
- * @param filename : Name of the TEAL file which must be present in ?????
+ * @param filename : Name of the TEAL file with location
  */
-export function parser (filename: string): Operator[] {
+export async function parser (filename: string): Promise<Operator[]> {
   const opCodeList = [] as Operator[];
   const rl = readline.createInterface({
-    input: fs.createReadStream('filename'), // file location
+    input: fs.createReadStream(filename), // file location
     output: process.stdout,
     terminal: false
   });
 
-  rl.on('line', (line) => {
-    // console.log(line);
+  for await (const line of rl) {
     if (!(line.length === 0 || line.startsWith("//") || line.startsWith("#pragma"))) {
       const fields = fieldsFromLine(line);
 
@@ -176,7 +175,6 @@ export function parser (filename: string): Operator[] {
         opCodeList.push(opcodeFromFields(fields));
       }
     }
-  });
-
+  }
   return opCodeList;
 }

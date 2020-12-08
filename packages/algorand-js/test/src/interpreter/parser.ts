@@ -1,9 +1,11 @@
 import { assert } from "chai";
+import path from "path";
 
 import { ERRORS } from "../../../src/errors/errors-list";
 import { Add, Addr, Div, Int, Mul, Sub } from "../../../src/interpreter/opcode-list";
-import { fieldsFromLine, opcodeFromFields } from "../../../src/interpreter/parser";
+import { fieldsFromLine, opcodeFromFields, parser } from "../../../src/interpreter/parser";
 import { expectTealError } from "../../helpers/errors";
+import { useFixtureProject } from "../../helpers/project";
 
 // base64 case needs to be verified at the time of decoding
 describe("Parser", function () {
@@ -236,6 +238,49 @@ describe("Parser", function () {
         () => opcodeFromFields(["int", "123A12"]),
         ERRORS.TEAL.INVALID_TYPE
       );
+    });
+  });
+
+  describe("Opcodes list from TEAL file", () => {
+    useFixtureProject("teal-files");
+
+    it("Sould return correct opcode list for '+'", async () => {
+      const file1 = "test-file-1.teal";
+      const fPath = path.join(process.cwd(), file1);
+      let res = await parser(fPath);
+      const expected = [new Int(BigInt(1)), new Int(BigInt(3)), new Add()];
+
+      assert.deepEqual(res, expected);
+
+      res = await parser(path.join(process.cwd(), "test-file-2.teal"));
+      assert.deepEqual(res, expected);
+    });
+
+    it("Sould return correct opcode list for '-'", async () => {
+      const file = "test-file-3.teal";
+      const fPath = path.join(process.cwd(), file);
+      const res = await parser(fPath);
+      const expected = [new Int(BigInt(5)), new Int(BigInt(3)), new Sub()];
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("Sould return correct opcode list for '/'", async () => {
+      const file = "test-file-4.teal";
+      const fPath = path.join(process.cwd(), file);
+      const res = await parser(fPath);
+      const expected = [new Int(BigInt(6)), new Int(BigInt(3)), new Div()];
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("Sould return correct opcode list for '*'", async () => {
+      const file = "test-file-5.teal";
+      const fPath = path.join(process.cwd(), file);
+      const res = await parser(fPath);
+      const expected = [new Int(BigInt(5)), new Int(BigInt(3)), new Mul()];
+
+      assert.deepEqual(res, expected);
     });
   });
 });
