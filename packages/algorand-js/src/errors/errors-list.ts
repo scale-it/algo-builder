@@ -113,6 +113,18 @@ by an index that does not exist.`
     message: "Input is not uint8",
     title: "Input is outside the valid uint8 range of 0 to 255",
     description: `Input is outside the valid uint8 range of 0 to 255`
+  },
+  ASSERT_FIELD_LENGTH: {
+    number: 16,
+    message: "Input is not correct",
+    title: "Invalid Field Length",
+    description: `Invalid Field Length - Parse Error`
+  },
+  INVALID_ADDR: {
+    number: 17,
+    message: "Input Parse Error - Invalid Address",
+    title: "Address is invalid",
+    description: `Invalid Address`
   }
 };
 

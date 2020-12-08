@@ -1,7 +1,9 @@
 import { assert } from "chai";
 
 import { ERRORS } from "../../../src/errors/errors-list";
-import { fieldsFromLine } from "../../../src/interpreter/parser";
+import { Add, Addr, Div, Int, Mul, Sub } from "../../../src/interpreter/opcode-list";
+import { fieldsFromLine, opcodeFromFields } from "../../../src/interpreter/parser";
+import { expectTealError } from "../../helpers/errors";
 
 // base64 case needs to be verified at the time of decoding
 describe("Parser", function () {
@@ -132,6 +134,108 @@ describe("Parser", function () {
 
       res = fieldsFromLine("      *       //    comment     here");
       assert.deepEqual(res, expected);
+    });
+  });
+
+  describe("Opcode Objects from Fields", () => {
+    it("should return correct opcode object for '+'", () => {
+      const res = opcodeFromFields(["+"]);
+      const expected = new Add();
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("should throw error for wrong field length for '+'", () => {
+      expectTealError(
+        () => opcodeFromFields(["+", "+"]),
+        ERRORS.TEAL.ASSERT_FIELD_LENGTH
+      );
+    });
+
+    it("should return correct opcode object for '-'", () => {
+      const res = opcodeFromFields(["-"]);
+      const expected = new Sub();
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("should throw error for wrong field length for '-'", () => {
+      expectTealError(
+        () => opcodeFromFields(["-", "-"]),
+        ERRORS.TEAL.ASSERT_FIELD_LENGTH
+      );
+    });
+
+    it("should return correct opcode object for '/'", () => {
+      const res = opcodeFromFields(["/"]);
+      const expected = new Div();
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("should throw error for wrong field length for '/'", () => {
+      expectTealError(
+        () => opcodeFromFields(["/", "/"]),
+        ERRORS.TEAL.ASSERT_FIELD_LENGTH
+      );
+    });
+
+    it("should return correct opcode object for '*'", () => {
+      const res = opcodeFromFields(["*"]);
+      const expected = new Mul();
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("should throw error for wrong field length for '*'", () => {
+      expectTealError(
+        () => opcodeFromFields(["*", "*"]),
+        ERRORS.TEAL.ASSERT_FIELD_LENGTH
+      );
+    });
+
+    it("should return correct opcode object for 'addr'", () => {
+      const address = "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE";
+      const res = opcodeFromFields(["addr", address]);
+      const expected = new Addr(address);
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("should throw error for wrong field length for 'addr'", () => {
+      expectTealError(
+        () => opcodeFromFields(["addr"]),
+        ERRORS.TEAL.ASSERT_FIELD_LENGTH
+      );
+    });
+
+    it("should throw error for invalid address for 'addr'", () => {
+      expectTealError(
+        () => opcodeFromFields(["addr", "AKGH12"]),
+        ERRORS.TEAL.INVALID_ADDR
+      );
+    });
+
+    it("should return correct opcode object for 'int'", () => {
+      const value = "812546821";
+      const res = opcodeFromFields(["int", value]);
+      const expected = new Int(BigInt(value));
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("should throw error for wrong field length for 'int'", () => {
+      expectTealError(
+        () => opcodeFromFields(["int"]),
+        ERRORS.TEAL.ASSERT_FIELD_LENGTH
+      );
+    });
+
+    it("should throw error for invalid number for 'int'", () => {
+      expectTealError(
+        () => opcodeFromFields(["int", "123A12"]),
+        ERRORS.TEAL.INVALID_TYPE
+      );
     });
   });
 });

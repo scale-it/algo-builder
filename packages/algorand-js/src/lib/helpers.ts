@@ -18,7 +18,7 @@ export function compareArray (a: Uint8Array, b: Uint8Array): Boolean {
  */
 export function assertOnlyDigits (val: string): void {
   if (!(/^\d+$/.test(val))) {
-    throw new TealError(ERRORS.TEAL.PARSE_ERROR);
+    throw new TealError(ERRORS.TEAL.INVALID_TYPE);
   }
 }
 

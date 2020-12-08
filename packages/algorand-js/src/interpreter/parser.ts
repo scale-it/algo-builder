@@ -7,7 +7,7 @@ import { ERRORS } from "../errors/errors-list";
 import { ARITHMETIC_OPERATIONS, PSEUDO_OPS } from "../lib/constants";
 import { assertFieldLen, assertOnlyDigits } from "../lib/helpers";
 import { Operator } from "../types";
-import { Add, Addr, Byte, Div, Int, Mul, Sub } from "./opcode-list";
+import { Add, Addr, Div, Int, Mul, Sub } from "./opcode-list";
 
 /**
  * Description: Read line and split it into fields
@@ -105,14 +105,10 @@ export function pseudoOps (fields: string[]): Operator {
     case "addr":
       assertFieldLen(fields.length, 2);
       if (!isValidAddress(fields[1])) {
-        throw new TealError(ERRORS.TEAL.PARSE_ERROR);
+        throw new TealError(ERRORS.TEAL.INVALID_ADDR);
       }
 
       return new Addr(fields[1]);
-    /* case "byte":
-
-      // do needful
-      break; */
     case "int":
       // allowed fields int 123 only. (int(12) is not allowed)
       assertFieldLen(fields.length, 2);
@@ -129,6 +125,8 @@ export function pseudoOps (fields: string[]): Operator {
  * @param fields : fields with field[0] as one of the Arithmetic-Opcodes
  */
 export function arithmeticOps (fields: string[]): Operator {
+  assertFieldLen(fields.length, 1);
+
   switch (fields[0]) {
     case "+":
       return new Add();
@@ -171,13 +169,10 @@ export function parser (filename: string): Operator[] {
 
   rl.on('line', (line) => {
     // console.log(line);
-    if (line.length === 0 || line.startsWith("//") || line.startsWith("#pragma")) {
-
-    } else {
+    if (!(line.length === 0 || line.startsWith("//") || line.startsWith("#pragma"))) {
       const fields = fieldsFromLine(line);
-      if (fields.length === 0) {
 
-      } else {
+      if (fields.length !== 0) {
         opCodeList.push(opcodeFromFields(fields));
       }
     }
