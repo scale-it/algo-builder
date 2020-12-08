@@ -1,4 +1,4 @@
-import { mkTransaction } from "algob";
+import { mkTransaction, TransactionType } from "algob";
 import type { execParams } from "algob/src/types";
 import { assignGroupID, Transaction } from "algosdk";
 import { assert } from "chai";
@@ -15,14 +15,16 @@ export class Interpreter {
   bytecblock: Uint8Array[];
   intcblock: BigInt[];
   scratch: StackElem[];
-  txnContext: Transaction | Transaction[];
+  tx: Transaction;
+  gtxs: Transaction[];
 
   constructor () {
     this.stack = new Stack<StackElem>();
     this.bytecblock = [];
     this.intcblock = [];
     this.scratch = new Array(256).fill(DEFAULT_STACK_ELEM);
-    this.txnContext = [];
+    this.tx = <Transaction>{}; // current transaction
+    this.gtxs = []; // all transactions
   }
 
   /**
@@ -30,7 +32,7 @@ export class Interpreter {
    * @param  txnParams : Transaction parameters for current txn or txn Group
    * @returns Transaction object
    */
-  createTxnContext (txnParams: execParams | execParams[]): Transaction | Transaction[] {
+  createTxnContext (txnParams: execParams | execParams[]): void {
     if (Array.isArray(txnParams)) {
       if (txnParams.length > 16) {
         throw new Error("Maximum size of an atomic transfer group is 16");
@@ -43,10 +45,12 @@ export class Interpreter {
         txns.push(txn);
       }
       assignGroupID(txns);
-      return txns;
+      this.gtxs = txns;
+      this.tx = txns[0]; // by default current txn is the first txn
     } else {
       const mockParams = mockSuggestedParams(txnParams.payFlags);
-      return mkTransaction(txnParams, mockParams);
+      this.tx = mkTransaction(txnParams, mockParams);
+      this.gtxs = [this.tx];
     }
   }
 
@@ -60,7 +64,7 @@ export class Interpreter {
    */
   execute (txnParams: execParams | execParams[], logic: Operator[], args: Uint8Array[]): boolean {
     assert(Array.isArray(args));
-    this.txnContext = this.createTxnContext(txnParams);
+    this.createTxnContext(txnParams);
 
     for (const l of logic) {
       l.execute(this.stack); // execute each teal opcode

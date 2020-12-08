@@ -95,11 +95,13 @@ export enum GlobalField {
   CurrentApplicationID // ID of current application executing. Fails if no such application is executing.
 }
 
+// will be mapped to a specific account
 export enum AssetHolding {
   AssetBalance, // Amount of the asset unit held by this account
   AssetFrozen // Is the asset frozen or not
 }
 
+// this is for global storage
 export enum AssetParam {
   AssetTotal, // Total number of units of this asset
   AssetDecimals, // See AssetParams.Decimals
