@@ -12,7 +12,8 @@ import {
   Intcblock, Itob,
   Keccak256,
   Len, LessThan, LessThanEqualTo,
-  Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Sha256, Sha512_256, Store, Sub, Substring,
+  Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma,
+  Sha256, Sha512_256, Store, Sub, Substring,
   Substring3
 } from "../../../src/interpreter/opcode-list";
 import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MIN_UINT8 } from "../../../src/lib/constants";
@@ -43,6 +44,20 @@ describe("Teal Opcodes", function () {
       expectTealError(
         () => op.execute(stack),
         ERRORS.TEAL.INVALID_TYPE
+      );
+    });
+  });
+
+  describe("Pragma", () => {
+    it("should store pragma version", () => {
+      const op = new Pragma(["version", "2"], 1);
+      assert.equal(op.version, "2");
+    });
+
+    it("should store throw length error", () => {
+      expectTealError(
+        () => new Pragma(["version", "2", "some-value"], 1),
+        ERRORS.TEAL.ASSERT_FIELD_LENGTH
       );
     });
   });
