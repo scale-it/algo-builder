@@ -123,8 +123,8 @@ by an index that does not exist.`
   INVALID_ADDR: {
     number: 17,
     message: "Input Parse Error - Invalid Address",
-    title: "Address is invalid",
-    description: `Invalid Address`
+    title: "Invalid Address",
+    description: ``
   }
 };
 
