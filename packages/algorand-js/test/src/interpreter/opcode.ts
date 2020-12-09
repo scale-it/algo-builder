@@ -27,11 +27,11 @@ describe("Teal Opcodes basic assertions", function () {
 
   it("check minimum stack length", function () {
     const stack = new Stack<StackElem>();
-    op.assertStackLen(stack, 0);
+    op.assertMinStackLen(stack, 0);
 
     stack.push(toBytes("arg_0"));
     expectTealError(
-      () => op.assertStackLen(stack, 2),
+      () => op.assertMinStackLen(stack, 2),
       ERRORS.TEAL.ASSERT_STACK_LENGTH
     );
   });
