@@ -27,8 +27,8 @@ export function assertOnlyDigits (val: string): void {
  * @param val Comparsion result
  * @param expected expected result
  */
-export function assertFieldLen (val: number, expected: number): void {
+export function assertFieldLen (val: number, expected: number, line: number): void {
   if (val !== expected) {
-    throw new TealError(ERRORS.TEAL.ASSERT_FIELD_LENGTH);
+    throw new TealError(ERRORS.TEAL.ASSERT_FIELD_LENGTH, { line: line });
   }
 }

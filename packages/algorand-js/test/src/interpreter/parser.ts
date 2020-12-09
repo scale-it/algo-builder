@@ -141,101 +141,101 @@ describe("Parser", function () {
 
   describe("Opcode Objects from Fields", () => {
     it("should return correct opcode object for '+'", () => {
-      const res = opcodeFromFields(["+"]);
-      const expected = new Add([]);
+      const res = opcodeFromFields(["+"], 1);
+      const expected = new Add([], 1);
 
       assert.deepEqual(res, expected);
     });
 
     it("should throw error for wrong field length for '+'", () => {
       expectTealError(
-        () => opcodeFromFields(["+", "+"]),
+        () => opcodeFromFields(["+", "+"], 1),
         ERRORS.TEAL.ASSERT_FIELD_LENGTH
       );
     });
 
     it("should return correct opcode object for '-'", () => {
-      const res = opcodeFromFields(["-"]);
-      const expected = new Sub([]);
+      const res = opcodeFromFields(["-"], 1);
+      const expected = new Sub([], 1);
 
       assert.deepEqual(res, expected);
     });
 
     it("should throw error for wrong field length for '-'", () => {
       expectTealError(
-        () => opcodeFromFields(["-", "-"]),
+        () => opcodeFromFields(["-", "-"], 1),
         ERRORS.TEAL.ASSERT_FIELD_LENGTH
       );
     });
 
     it("should return correct opcode object for '/'", () => {
-      const res = opcodeFromFields(["/"]);
-      const expected = new Div([]);
+      const res = opcodeFromFields(["/"], 1);
+      const expected = new Div([], 1);
 
       assert.deepEqual(res, expected);
     });
 
     it("should throw error for wrong field length for '/'", () => {
       expectTealError(
-        () => opcodeFromFields(["/", "/"]),
+        () => opcodeFromFields(["/", "/"], 1),
         ERRORS.TEAL.ASSERT_FIELD_LENGTH
       );
     });
 
     it("should return correct opcode object for '*'", () => {
-      const res = opcodeFromFields(["*"]);
-      const expected = new Mul([]);
+      const res = opcodeFromFields(["*"], 1);
+      const expected = new Mul([], 1);
 
       assert.deepEqual(res, expected);
     });
 
     it("should throw error for wrong field length for '*'", () => {
       expectTealError(
-        () => opcodeFromFields(["*", "*"]),
+        () => opcodeFromFields(["*", "*"], 1),
         ERRORS.TEAL.ASSERT_FIELD_LENGTH
       );
     });
 
     it("should return correct opcode object for 'addr'", () => {
       const address = "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE";
-      const res = opcodeFromFields(["addr", address]);
-      const expected = new Addr([address]);
+      const res = opcodeFromFields(["addr", address], 1);
+      const expected = new Addr([address], 1);
 
       assert.deepEqual(res, expected);
     });
 
     it("should throw error for wrong field length for 'addr'", () => {
       expectTealError(
-        () => opcodeFromFields(["addr"]),
+        () => opcodeFromFields(["addr"], 1),
         ERRORS.TEAL.ASSERT_FIELD_LENGTH
       );
     });
 
     it("should throw error for invalid address for 'addr'", () => {
       expectTealError(
-        () => opcodeFromFields(["addr", "AKGH12"]),
+        () => opcodeFromFields(["addr", "AKGH12"], 1),
         ERRORS.TEAL.INVALID_ADDR
       );
     });
 
     it("should return correct opcode object for 'int'", () => {
       const value = "812546821";
-      const res = opcodeFromFields(["int", value]);
-      const expected = new Int([value]);
+      const res = opcodeFromFields(["int", value], 1);
+      const expected = new Int([value], 1);
 
       assert.deepEqual(res, expected);
     });
 
     it("should throw error for wrong field length for 'int'", () => {
       expectTealError(
-        () => opcodeFromFields(["int"]),
+        () => opcodeFromFields(["int"], 1),
         ERRORS.TEAL.ASSERT_FIELD_LENGTH
       );
     });
 
     it("should throw error for invalid number for 'int'", () => {
       expectTealError(
-        () => opcodeFromFields(["int", "123A12"]),
+        () => opcodeFromFields(["int", "123A12"], 1),
         ERRORS.TEAL.INVALID_TYPE
       );
     });
@@ -248,11 +248,12 @@ describe("Parser", function () {
       const file1 = "test-file-1.teal";
       const fPath = path.join(process.cwd(), file1);
       let res = await parser(fPath);
-      const expected = [new Int(["1"]), new Int(["3"]), new Add([])];
+      const expected = [new Int(["1"], 1), new Int(["3"], 1), new Add([], 1)];
 
       assert.deepEqual(res, expected);
 
-      const expect = [new Pragma(["version", "2"]), new Int(["1"]), new Int(["3"]), new Add([])];
+      const expect = [new Pragma(["version", "2"], 1), new Int(["1"], 1),
+        new Int(["3"], 1), new Add([], 1)];
       res = await parser(path.join(process.cwd(), "test-file-2.teal"));
       assert.deepEqual(res, expect);
     });
@@ -261,7 +262,8 @@ describe("Parser", function () {
       const file = "test-file-3.teal";
       const fPath = path.join(process.cwd(), file);
       const res = await parser(fPath);
-      const expected = [new Pragma(["version", "2"]), new Int(["5"]), new Int(["3"]), new Sub([])];
+      const expected = [new Pragma(["version", "2"], 1), new Int(["5"], 1),
+        new Int(["3"], 1), new Sub([], 1)];
 
       assert.deepEqual(res, expected);
     });
@@ -270,7 +272,8 @@ describe("Parser", function () {
       const file = "test-file-4.teal";
       const fPath = path.join(process.cwd(), file);
       const res = await parser(fPath);
-      const expected = [new Pragma(["version", "2"]), new Int(["6"]), new Int(["3"]), new Div([])];
+      const expected = [new Pragma(["version", "2"], 1), new Int(["6"], 1),
+        new Int(["3"], 1), new Div([], 1)];
 
       assert.deepEqual(res, expected);
     });
@@ -279,7 +282,8 @@ describe("Parser", function () {
       const file = "test-file-5.teal";
       const fPath = path.join(process.cwd(), file);
       const res = await parser(fPath);
-      const expected = [new Pragma(["version", "2"]), new Int(["5"]), new Int(["3"]), new Mul([])];
+      const expected = [new Pragma(["version", "2"], 1), new Int(["5"], 1),
+        new Int(["3"], 1), new Mul([], 1)];
 
       assert.deepEqual(res, expected);
     });

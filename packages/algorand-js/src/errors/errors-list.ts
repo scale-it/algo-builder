@@ -33,7 +33,7 @@ permissible range of 1 to 256`
   },
   INVALID_OP_ARG: {
     number: 3,
-    message: "Error encountered while executing teal with opcode %opcode%",
+    message: "Error encountered while executing teal with opcode %opcode% , Line : %line% ",
     title: "Invalid Operation",
     description: `Error encountered in stack while executing teal opcode %opcode%`
   },
@@ -116,13 +116,13 @@ by an index that does not exist.`
   },
   ASSERT_FIELD_LENGTH: {
     number: 16,
-    message: "Invalid Field Length - Parse Error",
+    message: "Invalid Field Length - Parse Error, Line : %line% ",
     title: "Invalid Field Length",
     description: ``
   },
   INVALID_ADDR: {
     number: 17,
-    message: "Input Parse Error - Invalid Address",
+    message: "Input Parse Error - Invalid Address, Line: %line%",
     title: "Invalid Address",
     description: ``
   }

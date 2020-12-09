@@ -22,22 +22,22 @@ const BIGINT1 = BigInt("1");
 export class Pragma extends Op {
   readonly version;
 
-  constructor (arg: string[]) {
+  constructor (arg: string[], line: number) {
     super();
-    assertFieldLen(arg.length, 2);
+    assertFieldLen(arg.length, 2, line);
     if (arg[0] === "version") {
       this.version = arg[1];
     } else {
-      throw new TealError(ERRORS.TEAL.INVALID_OP_ARG);
+      throw new TealError(ERRORS.TEAL.INVALID_OP_ARG, { line: line });
     }
   };
 }
 
 // pops string([]byte) from stack and pushes it's length to stack
 export class Len extends Op {
-  constructor (arg: string[]) {
+  constructor (arg: string[], line: number) {
     super();
-    assertFieldLen(arg.length, 0);
+    assertFieldLen(arg.length, 0, line);
   };
 
   execute (stack: TEALStack): void {
@@ -50,9 +50,9 @@ export class Len extends Op {
 // pops two unit64 from stack(last, prev) and pushes their sum(last + prev) to stack
 // panics on overflow (result > max_unit64)
 export class Add extends Op {
-  constructor (arg: string[]) {
+  constructor (arg: string[], line: number) {
     super();
-    assertFieldLen(arg.length, 0);
+    assertFieldLen(arg.length, 0, line);
   };
 
   execute (stack: TEALStack): void {
@@ -68,9 +68,9 @@ export class Add extends Op {
 // pops two unit64 from stack(last, prev) and pushes their diff(last - prev) to stack
 // panics on underflow (result < 0)
 export class Sub extends Op {
-  constructor (arg: string[]) {
+  constructor (arg: string[], line: number) {
     super();
-    assertFieldLen(arg.length, 0);
+    assertFieldLen(arg.length, 0, line);
   };
 
   execute (stack: TEALStack): void {
@@ -86,9 +86,9 @@ export class Sub extends Op {
 // pops two unit64 from stack(last, prev) and pushes their division(last / prev) to stack
 // panics if prev == 0
 export class Div extends Op {
-  constructor (arg: string[]) {
+  constructor (arg: string[], line: number) {
     super();
-    assertFieldLen(arg.length, 0);
+    assertFieldLen(arg.length, 0, line);
   };
 
   execute (stack: TEALStack): void {
@@ -105,9 +105,9 @@ export class Div extends Op {
 // pops two unit64 from stack(last, prev) and pushes their mult(last * prev) to stack
 // panics on overflow (result > max_unit64)
 export class Mul extends Op {
-  constructor (arg: string[]) {
+  constructor (arg: string[], line: number) {
     super();
-    assertFieldLen(arg.length, 0);
+    assertFieldLen(arg.length, 0, line);
   };
 
   execute (stack: TEALStack): void {
@@ -668,9 +668,9 @@ export class Substring3 extends Op {
 export class Int extends Op {
   readonly uint64: bigint;
 
-  constructor (arg: string[]) {
+  constructor (arg: string[], line: number) {
     super();
-    assertFieldLen(arg.length, 1);
+    assertFieldLen(arg.length, 1, line);
     assertOnlyDigits(arg[0]);
     this.uint64 = BigInt(arg[0]);
   }
@@ -703,11 +703,11 @@ export class Byte extends Op {
 export class Addr extends Op {
   readonly addr: string;
 
-  constructor (arg: string[]) {
+  constructor (arg: string[], line: number) {
     super();
-    assertFieldLen(arg.length, 1);
+    assertFieldLen(arg.length, 1, line);
     if (!isValidAddress(arg[0])) {
-      throw new TealError(ERRORS.TEAL.INVALID_ADDR);
+      throw new TealError(ERRORS.TEAL.INVALID_ADDR, { line: line });
     }
     this.addr = arg[0];
   };

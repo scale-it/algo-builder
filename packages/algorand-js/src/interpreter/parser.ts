@@ -112,7 +112,7 @@ export function fieldsFromLine (line: string): string[] {
  * Description: Returns Opcode object for given field
  * @param fields : fields extracted from line
  */
-export function opcodeFromFields (fields: string[]): Operator {
+export function opcodeFromFields (fields: string[], counter: number): Operator {
   const opCode = fields[0];
   fields.shift();
 
@@ -120,7 +120,7 @@ export function opcodeFromFields (fields: string[]): Operator {
     throw new TealError(ERRORS.TEAL.INVALID_OP_ARG);
   }
 
-  return new opCodeMap[opCode](fields);
+  return new opCodeMap[opCode](fields, counter);
 }
 
 /**
@@ -129,6 +129,7 @@ export function opcodeFromFields (fields: string[]): Operator {
  */
 export async function parser (filename: string): Promise<Operator[]> {
   const opCodeList = [] as Operator[];
+  let counter = 0;
 
   const rl = readline.createInterface({
     input: fs.createReadStream(filename), // file location
@@ -137,6 +138,7 @@ export async function parser (filename: string): Promise<Operator[]> {
   });
 
   for await (const line of rl) {
+    counter++;
     // If line is blank or is comment, continue.
     if (line.length === 0 || line.startsWith("//")) {
       continue;
@@ -145,7 +147,7 @@ export async function parser (filename: string): Promise<Operator[]> {
     // Trim whitespace from line and extract fields from line
     const fields = fieldsFromLine(line);
     if (fields.length !== 0) {
-      opCodeList.push(opcodeFromFields(fields));
+      opCodeList.push(opcodeFromFields(fields, counter));
     }
   }
   return opCodeList;
