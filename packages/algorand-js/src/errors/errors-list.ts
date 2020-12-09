@@ -116,15 +116,15 @@ by an index that does not exist.`
   },
   ASSERT_FIELD_LENGTH: {
     number: 16,
-    message: "Input is not correct",
+    message: "Invalid Field Length - Parse Error",
     title: "Invalid Field Length",
-    description: `Invalid Field Length - Parse Error`
+    description: ``
   },
   INVALID_ADDR: {
     number: 17,
     message: "Input Parse Error - Invalid Address",
-    title: "Address is invalid",
-    description: `Invalid Address`
+    title: "Invalid Address",
+    description: ``
   }
 };
 
