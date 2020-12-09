@@ -1,5 +1,5 @@
 /* eslint sonarjs/no-identical-functions: 0 */
-import { decodeAddress } from "algosdk";
+import { decodeAddress, isValidAddress } from "algosdk";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
 import { decode, encode } from "uint64be";
@@ -7,7 +7,7 @@ import { decode, encode } from "uint64be";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
-import { compareArray } from "../lib/helpers";
+import { assertFieldLen, assertOnlyDigits, compareArray } from "../lib/helpers";
 import { convertToBuffer } from "../lib/parse-data";
 import type { TEALStack } from "../types";
 import { EncodingType } from "../types";
@@ -16,8 +16,29 @@ import { Op } from "./opcode";
 
 const BIGINT0 = BigInt("0");
 const BIGINT1 = BigInt("1");
+
+// Store TEAL version
+export class Pragma extends Op {
+  readonly version;
+
+  constructor (arg: string[]) {
+    super();
+    assertFieldLen(arg.length, 2);
+    if (arg[0] === "version") {
+      this.version = arg[1];
+    } else {
+      throw new TealError(ERRORS.TEAL.INVALID_OP_ARG);
+    }
+  };
+}
+
 // pops string([]byte) from stack and pushes it's length to stack
 export class Len extends Op {
+  constructor (arg: string[]) {
+    super();
+    assertFieldLen(arg.length, 0);
+  };
+
   execute (stack: TEALStack): void {
     this.assertStackLen(stack, 1);
     const a = this.assertBytes(stack.pop());
@@ -28,6 +49,11 @@ export class Len extends Op {
 // pops two unit64 from stack(a, b) and pushes their sum(a + b) to stack
 // panics on overflow (result > max_unit64)
 export class Add extends Op {
+  constructor (arg: string[]) {
+    super();
+    assertFieldLen(arg.length, 0);
+  };
+
   execute (stack: TEALStack): void {
     this.assertStackLen(stack, 2);
     const a = this.assertBigInt(stack.pop());
@@ -41,6 +67,11 @@ export class Add extends Op {
 // pops two unit64 from stack(a, b) and pushes their diff(a - b) to stack
 // panics on underflow (result < 0)
 export class Sub extends Op {
+  constructor (arg: string[]) {
+    super();
+    assertFieldLen(arg.length, 0);
+  };
+
   execute (stack: TEALStack): void {
     this.assertStackLen(stack, 2);
     const a = this.assertBigInt(stack.pop());
@@ -54,6 +85,11 @@ export class Sub extends Op {
 // pops two unit64 from stack(a, b) and pushes their division(a / b) to stack
 // panics if b == 0
 export class Div extends Op {
+  constructor (arg: string[]) {
+    super();
+    assertFieldLen(arg.length, 0);
+  };
+
   execute (stack: TEALStack): void {
     this.assertStackLen(stack, 2);
     const a = this.assertBigInt(stack.pop());
@@ -68,6 +104,11 @@ export class Div extends Op {
 // pops two unit64 from stack(a, b) and pushes their mult(a * b) to stack
 // panics on overflow (result > max_unit64)
 export class Mul extends Op {
+  constructor (arg: string[]) {
+    super();
+    assertFieldLen(arg.length, 0);
+  };
+
   execute (stack: TEALStack): void {
     this.assertStackLen(stack, 2);
     const a = this.assertBigInt(stack.pop());
@@ -591,9 +632,11 @@ export class Substring3 extends Op {
 export class Int extends Op {
   readonly uint64: bigint;
 
-  constructor (uint64: bigint) {
+  constructor (arg: string[]) {
     super();
-    this.uint64 = uint64;
+    assertFieldLen(arg.length, 1);
+    assertOnlyDigits(arg[0]);
+    this.uint64 = BigInt(arg[0]);
   }
 
   execute (stack: TEALStack): void {
@@ -624,10 +667,14 @@ export class Byte extends Op {
 export class Addr extends Op {
   readonly addr: string;
 
-  constructor (addr: string) {
+  constructor (arg: string[]) {
     super();
-    this.addr = addr; // parser should verify the addr first
-  }
+    assertFieldLen(arg.length, 1);
+    if (!isValidAddress(arg[0])) {
+      throw new TealError(ERRORS.TEAL.INVALID_ADDR);
+    }
+    this.addr = arg[0];
+  };
 
   execute (stack: TEALStack): void {
     const addr = decodeAddress(this.addr);

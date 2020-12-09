@@ -1,13 +1,25 @@
-import { isValidAddress } from "algosdk";
 import fs from "fs";
 import readline from "readline";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
-import { ARITHMETIC_OPERATIONS, PSEUDO_OPS } from "../lib/constants";
-import { assertFieldLen, assertOnlyDigits } from "../lib/helpers";
 import { Operator } from "../types";
-import { Add, Addr, Div, Int, Mul, Sub } from "./opcode-list";
+import { Add, Addr, Div, Int, Mul, Pragma, Sub } from "./opcode-list"; ;
+
+var opCodeMap: {[key: string]: any } = {
+  // Pragma
+  "#pragma": Pragma,
+
+  // Pseudo-Ops
+  addr: Addr,
+  int: Int,
+
+  // Arithmetic ops
+  "+": Add,
+  "-": Sub,
+  "/": Div,
+  "*": Mul
+};
 
 /**
  * Description: Read line and split it into fields
@@ -97,62 +109,18 @@ export function fieldsFromLine (line: string): string[] {
 }
 
 /**
- * Description: Returns Opcode objects for fields with Pseudo-Ops
- * @param fields : fields with field[0] as one of the Pseudo-Ops
- */
-export function pseudoOps (fields: string[]): Operator {
-  switch (fields[0]) {
-    case "addr":
-      assertFieldLen(fields.length, 2);
-      if (!isValidAddress(fields[1])) {
-        throw new TealError(ERRORS.TEAL.INVALID_ADDR);
-      }
-
-      return new Addr(fields[1]);
-    case "int":
-      // allowed fields int 123 only. (int(12) is not allowed)
-      assertFieldLen(fields.length, 2);
-      assertOnlyDigits(fields[1]);
-
-      return new Int(BigInt(fields[1]));
-    default:
-      throw new TealError(ERRORS.TEAL.INVALID_OP_ARG);
-  }
-}
-
-/**
- * Description: Returns Opcode objects for fields with Arithmetic-Opcodes
- * @param fields : fields with field[0] as one of the Arithmetic-Opcodes
- */
-export function arithmeticOps (fields: string[]): Operator {
-  assertFieldLen(fields.length, 1);
-
-  switch (fields[0]) {
-    case "+":
-      return new Add();
-    case "-":
-      return new Sub();
-    case "/":
-      return new Div();
-    case "*":
-      return new Mul();
-    default:
-      throw new TealError(ERRORS.TEAL.INVALID_OP_ARG);
-  }
-}
-
-/**
  * Description: Returns Opcode object for given field
  * @param fields : fields extracted from line
  */
 export function opcodeFromFields (fields: string[]): Operator {
-  if (PSEUDO_OPS.includes(fields[0])) {
-    return pseudoOps(fields);
-  } else if (ARITHMETIC_OPERATIONS.includes(fields[0])) {
-    return arithmeticOps(fields);
-  } else {
+  const opCode = fields[0];
+  fields.shift();
+
+  if (opCodeMap[opCode] === undefined) {
     throw new TealError(ERRORS.TEAL.INVALID_OP_ARG);
   }
+
+  return new opCodeMap[opCode](fields);
 }
 
 /**
@@ -161,6 +129,7 @@ export function opcodeFromFields (fields: string[]): Operator {
  */
 export async function parser (filename: string): Promise<Operator[]> {
   const opCodeList = [] as Operator[];
+
   const rl = readline.createInterface({
     input: fs.createReadStream(filename), // file location
     output: process.stdout,
@@ -168,12 +137,15 @@ export async function parser (filename: string): Promise<Operator[]> {
   });
 
   for await (const line of rl) {
-    if (!(line.length === 0 || line.startsWith("//") || line.startsWith("#pragma"))) {
-      const fields = fieldsFromLine(line);
+    // If line is blank or is comment, continue.
+    if (line.length === 0 || line.startsWith("//")) {
+      continue;
+    }
 
-      if (fields.length !== 0) {
-        opCodeList.push(opcodeFromFields(fields));
-      }
+    // Trim whitespace from line and extract fields from line
+    const fields = fieldsFromLine(line);
+    if (fields.length !== 0) {
+      opCodeList.push(opcodeFromFields(fields));
     }
   }
   return opCodeList;

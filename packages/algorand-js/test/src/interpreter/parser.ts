@@ -2,7 +2,7 @@ import { assert } from "chai";
 import path from "path";
 
 import { ERRORS } from "../../../src/errors/errors-list";
-import { Add, Addr, Div, Int, Mul, Sub } from "../../../src/interpreter/opcode-list";
+import { Add, Addr, Div, Int, Mul, Pragma, Sub } from "../../../src/interpreter/opcode-list";
 import { fieldsFromLine, opcodeFromFields, parser } from "../../../src/interpreter/parser";
 import { expectTealError } from "../../helpers/errors";
 import { useFixtureProject } from "../../helpers/project";
@@ -142,7 +142,7 @@ describe("Parser", function () {
   describe("Opcode Objects from Fields", () => {
     it("should return correct opcode object for '+'", () => {
       const res = opcodeFromFields(["+"]);
-      const expected = new Add();
+      const expected = new Add([]);
 
       assert.deepEqual(res, expected);
     });
@@ -156,7 +156,7 @@ describe("Parser", function () {
 
     it("should return correct opcode object for '-'", () => {
       const res = opcodeFromFields(["-"]);
-      const expected = new Sub();
+      const expected = new Sub([]);
 
       assert.deepEqual(res, expected);
     });
@@ -170,7 +170,7 @@ describe("Parser", function () {
 
     it("should return correct opcode object for '/'", () => {
       const res = opcodeFromFields(["/"]);
-      const expected = new Div();
+      const expected = new Div([]);
 
       assert.deepEqual(res, expected);
     });
@@ -184,7 +184,7 @@ describe("Parser", function () {
 
     it("should return correct opcode object for '*'", () => {
       const res = opcodeFromFields(["*"]);
-      const expected = new Mul();
+      const expected = new Mul([]);
 
       assert.deepEqual(res, expected);
     });
@@ -199,7 +199,7 @@ describe("Parser", function () {
     it("should return correct opcode object for 'addr'", () => {
       const address = "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE";
       const res = opcodeFromFields(["addr", address]);
-      const expected = new Addr(address);
+      const expected = new Addr([address]);
 
       assert.deepEqual(res, expected);
     });
@@ -221,7 +221,7 @@ describe("Parser", function () {
     it("should return correct opcode object for 'int'", () => {
       const value = "812546821";
       const res = opcodeFromFields(["int", value]);
-      const expected = new Int(BigInt(value));
+      const expected = new Int([value]);
 
       assert.deepEqual(res, expected);
     });
@@ -248,19 +248,20 @@ describe("Parser", function () {
       const file1 = "test-file-1.teal";
       const fPath = path.join(process.cwd(), file1);
       let res = await parser(fPath);
-      const expected = [new Int(BigInt(1)), new Int(BigInt(3)), new Add()];
+      const expected = [new Int(["1"]), new Int(["3"]), new Add([])];
 
       assert.deepEqual(res, expected);
 
+      const expect = [new Pragma(["version", "2"]), new Int(["1"]), new Int(["3"]), new Add([])];
       res = await parser(path.join(process.cwd(), "test-file-2.teal"));
-      assert.deepEqual(res, expected);
+      assert.deepEqual(res, expect);
     });
 
     it("Sould return correct opcode list for '-'", async () => {
       const file = "test-file-3.teal";
       const fPath = path.join(process.cwd(), file);
       const res = await parser(fPath);
-      const expected = [new Int(BigInt(5)), new Int(BigInt(3)), new Sub()];
+      const expected = [new Pragma(["version", "2"]), new Int(["5"]), new Int(["3"]), new Sub([])];
 
       assert.deepEqual(res, expected);
     });
@@ -269,7 +270,7 @@ describe("Parser", function () {
       const file = "test-file-4.teal";
       const fPath = path.join(process.cwd(), file);
       const res = await parser(fPath);
-      const expected = [new Int(BigInt(6)), new Int(BigInt(3)), new Div()];
+      const expected = [new Pragma(["version", "2"]), new Int(["6"]), new Int(["3"]), new Div([])];
 
       assert.deepEqual(res, expected);
     });
@@ -278,7 +279,7 @@ describe("Parser", function () {
       const file = "test-file-5.teal";
       const fPath = path.join(process.cwd(), file);
       const res = await parser(fPath);
-      const expected = [new Int(BigInt(5)), new Int(BigInt(3)), new Mul()];
+      const expected = [new Pragma(["version", "2"]), new Int(["5"]), new Int(["3"]), new Mul([])];
 
       assert.deepEqual(res, expected);
     });
