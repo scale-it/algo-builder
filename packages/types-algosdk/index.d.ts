@@ -109,20 +109,20 @@ export interface CompileOut {
 export interface Transaction {
   // fields copied from
   // https://github.com/algorand/js-algorand-sdk/blob/develop/src/transaction.js#L117
-  from: ParsedAddress;
-  to: ParsedAddress;
+  from: Address;
+  to: Address;
   fee: number;
   amount: number;
   firstRound: number;
   lastRound: number;
-  note: string;
+  note: Uint8Array;
   genesisID: string;
-  genesisHash: string;
-  lease: number;
+  genesisHash: Buffer;
+  lease: Uint8Array;
 
-  closeRemainderTo: ParsedAddress;
-  voteKey: string;
-  selectionKey: string;
+  closeRemainderTo: Address;
+  voteKey: Buffer;
+  selectionKey: Buffer;
   voteFirst: any;
   voteLast: any;
   voteKeyDilution: any;
@@ -131,35 +131,36 @@ export interface Transaction {
   assetTotal: number;
   assetDecimals: number;
   assetDefaultFrozen: any;
-  assetManager: ParsedAddress;
-  assetReserve: ParsedAddress;
+  assetManager: Address;
+  assetReserve: Address;
 
-  assetFreeze: ParsedAddress;
-  assetClawback: ParsedAddress;
+  assetFreeze: Address;
+  assetClawback: Address;
   assetUnitName: string;
   assetName: string;
   assetURL: string;
-  assetMetadataHash: string;
+  assetMetadataHash: Buffer;
 
-  freezeAccount: string;
+  freezeAccount: Address;
   freezeState: any;
   assetRevocationTarget: any;
 
-  appIndex: any;
-  appOnComplete: any;
-  appLocalInts: any;
-  appLocalByteSlices: any;
-  appGlobalInts: any;
-  appGlobalByteSlices: any;
+  appIndex: number;
+  appOnComplete: number;
+  appLocalInts: number;
+  appLocalByteSlices: number;
+  appGlobalInts: number;
+  appGlobalByteSlices: number;
 
-  appApprovalProgram: any;
-  appClearProgram: any;
-  appArgs: any;
-  appAccounts: any;
-  appForeignApps: any;
-  appForeignAssets: any;
-  type: any;
-  reKeyTo: string;
+  appApprovalProgram: Uint8Array;
+  appClearProgram: Uint8Array;
+  appArgs: Uint8Array[];
+  appAccounts: Address[];
+  appForeignApps: number[];
+  appForeignAssets: number[];
+  type: string;
+  reKeyTo: Address;
+  group: Buffer;
 
   addLease: (lease: Uint8Array | undefined, feePerByte?: number) => void;
   addRekey: (reKeyTo: string, feePerByte?: number) => void;
