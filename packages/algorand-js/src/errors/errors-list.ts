@@ -113,6 +113,18 @@ by an index that does not exist.`
     message: "Input is not uint8",
     title: "Input is outside the valid uint8 range of 0 to 255",
     description: `Input is outside the valid uint8 range of 0 to 255`
+  },
+  INVALID_TXN_FIELD: {
+    number: 16,
+    message: "txn field %field% is not valid for current txn",
+    title: "txn field %field% is not valid for current txn",
+    description: `txn field %field% is not valid for current txn`
+  },
+  UNKNOWN_TRANSACTION: {
+    number: 17,
+    message: "transaction is not valid or is unknown",
+    title: "transaction is not valid or is unknown",
+    description: `transaction is not valid or is unknown`
   }
 };
 

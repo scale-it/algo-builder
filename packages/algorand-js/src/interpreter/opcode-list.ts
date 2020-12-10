@@ -10,10 +10,11 @@ import { ERRORS } from "../errors/errors-list";
 import { MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
 import { compareArray } from "../lib/helpers";
 import { convertToBuffer, convertToString } from "../lib/parse-data";
-import type { TEALStack } from "../types";
+import type { TEALStack, TxnField } from "../types";
 import { EncodingType } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
+import { txnaSpecbyField, txnSpecbyField } from "./txn";
 
 const BIGINT0 = BigInt("0");
 const BIGINT1 = BigInt("1");
@@ -619,6 +620,90 @@ export class Substring3 extends Op {
 
     const subString = this.subString(start, end, byteString);
     stack.push(subString);
+  }
+}
+
+// push field from current transaction to stack
+export class Txn extends Op {
+  readonly txField: TxnField;
+  readonly interpreter: Interpreter;
+
+  constructor (txField: TxnField, interpreter: Interpreter) {
+    super();
+    this.txField = txField;
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    const result = txnSpecbyField(this.txField, this.interpreter.tx, this.interpreter.gtxs);
+    stack.push(result);
+  }
+}
+
+// push field to the stack from a transaction in the current transaction group
+// If this transaction is i in the group, gtxn i field is equivalent to txn field.
+export class Gtxn extends Op {
+  readonly txField: TxnField;
+  readonly txIdx: number;
+  readonly interpreter: Interpreter;
+
+  constructor (txField: TxnField, txIdx: number, interpreter: Interpreter) {
+    super();
+    this.txField = txField;
+    this.txIdx = txIdx; // transaction group index
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertUint8(BigInt(this.txIdx));
+    this.checkIndexBound(this.txIdx, this.interpreter.gtxs);
+
+    const tx = this.interpreter.gtxs[this.txIdx];
+    const result = txnSpecbyField(this.txField, tx, this.interpreter.gtxs);
+    stack.push(result);
+  }
+}
+
+// push value of an array field from current transaction to stack
+export class Txna extends Op {
+  readonly txField: TxnField;
+  readonly idx: number;
+  readonly interpreter: Interpreter;
+
+  constructor (txField: TxnField, idx: number, interpreter: Interpreter) {
+    super();
+    this.txField = txField;
+    this.idx = idx;
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    const result = txnaSpecbyField(this.txField, this.interpreter.tx, this.idx, this);
+    stack.push(result);
+  }
+}
+
+// push value of a field to the stack from a transaction in the current transaction group
+export class Gtxna extends Op {
+  readonly txField: TxnField;
+  readonly txIdx: number; // transaction group index
+  readonly idx: number; // array index
+  readonly interpreter: Interpreter;
+
+  constructor (txField: TxnField, txIdx: number, idx: number, interpreter: Interpreter) {
+    super();
+    this.txField = txField;
+    this.txIdx = txIdx;
+    this.idx = idx;
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertUint8(BigInt(this.txIdx));
+
+    const tx = this.interpreter.gtxs[this.txIdx];
+    const result = txnaSpecbyField(this.txField, tx, this.idx, this);
+    stack.push(result);
   }
 }
 
