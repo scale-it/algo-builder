@@ -285,7 +285,7 @@ export function txnSpecbyField (txField: TxnField, tx: Transaction, gtxs: Transa
  * of accounts or application args
  * @param tx: current transaction
  * @param txField: transaction field
- * @param idx: index
+ * @param idx: array index
  */
 export function txnaSpecbyField (txField: TxnField, tx: Transaction, idx: number, op: Op): Uint8Array {
   switch (txField) {
@@ -300,7 +300,7 @@ export function txnaSpecbyField (txField: TxnField, tx: Transaction, idx: number
     }
     default: {
       throw new TealError(ERRORS.TEAL.INVALID_OP_ARG, {
-        opcode: "txna/gtxna"
+        opcode: "txna or gtxna"
       });
     }
   }
