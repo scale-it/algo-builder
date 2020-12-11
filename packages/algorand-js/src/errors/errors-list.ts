@@ -116,8 +116,8 @@ by an index that does not exist.`
   },
   ASSERT_FIELD_LENGTH: {
     number: 16,
-    message: "Invalid Field Length Expected: %exp% Got: %got% - Parse Error, Line : %line% ",
-    title: "Invalid Field Length",
+    message: "Invalid Field Length Expected: '%exp%' Got: '%got%', Line : %line% ",
+    title: "Parse Error",
     description: ``
   },
   INVALID_ADDR: {
