@@ -12,15 +12,14 @@ const { mkAccounts } = require("algob");
 let accounts = mkAccounts([
   {
     name: "master-account",
-    // This account is exported from algorand an node.
-    // It must already exist or ALGO tokens have to be transferred from elsewhere.
-    // It contains a lot of ALGO tokens so it can fund other accounts.
-    // You should check your accounts and replace this with your own account.
-    // Command to view KMD account addresses (and their balances):
-    // goal account list -d ~/.algorand-local/Node/
+    // This account is created using `make setup-master-account` command from our
+    // `/infrastructure` directory.
+    // It is used in all our examples to setup and fund other accounts (so it must posses ALGOs).
+    // If you don't want an account with this address (can check that by running
+    // `goal account list -d $ALGORAND_DATA`) then change it to other account you control.
     addr: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
-    // To export private mnemonic you may use this command (with you own account's address and data directory):
-    // goal account export -a WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE -d ~/.algorand-local/Node/
+    // To export a mnemonic you may use the following command:
+    // goal account export -a "your_account_address" -d $ALGORAND_DATA
     mnemonic: "enforce drive foster uniform cradle tired win arrow wasp melt cattle chronic sport dinosaur announce shell correct shed amused dismiss mother jazz task above hospital"
   },
   // Following accounts are generated using `algob gen-accounts`.
@@ -46,8 +45,6 @@ let accounts = mkAccounts([
 
 let defaultCfg = {
   host: "http://localhost",
-  // if you are running a local node, you can find port and token values for your algod in
-  // $ALGORAND_DATA/algod.net and $ALGORAND_DATA/algod.token files.
   port: 8080,
   token: "aade468d25a7aa48fec8082d6a847c48492066a2741f3731e613fdde086cd6e9",
   // you can also load accounts from KMD, look at /docs/algob-config.md for more details.
