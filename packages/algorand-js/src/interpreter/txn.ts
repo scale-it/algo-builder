@@ -24,7 +24,7 @@ const assetTxnFields = new Set([
 
 // return default value of txField if undefined,
 // otherwise return parsed data to interpreter
-export function parseToStackElem (a: unknown, field: TxField): any {
+export function parseToStackElem (a: unknown, field: TxField): StackElem {
   if (Buffer.isBuffer(a)) {
     return new Uint8Array(a);
   }
@@ -109,7 +109,7 @@ export function txAppArg (txField: TxField, tx: Txn, idx: number, op: Op): Uint8
       return TxFieldDefaults[txField];
     }
     op.checkIndexBound(idx, result);
-    return parseToStackElem(result[idx], txField);
+    return parseToStackElem(result[idx], txField) as Uint8Array;
   }
 
   throw new TealError(ERRORS.TEAL.INVALID_OP_ARG, {
