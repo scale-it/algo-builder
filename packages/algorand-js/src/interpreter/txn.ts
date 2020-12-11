@@ -1,8 +1,9 @@
+import { AssetParamsEnc } from "algosdk";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { TxFieldDefaults } from "../lib/constants";
 import { toBytes } from "../lib/parse-data";
-import { AssetParamsEnc, StackElem, TxField, TxnEncodedObj, TxnFields, TxnType } from "../types";
+import { StackElem, TxField, TxnFields, TxnType, Txn } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
 
@@ -71,20 +72,20 @@ export function txnSpecbyField (txField: string, interpreter: Interpreter): Stac
       return toBytes(tx.txID);
     }
     case 'NumAppArgs': {
-      const appArg = TxnFields.ApplicationArgs as keyof TxnEncodedObj;
+      const appArg = TxnFields.ApplicationArgs as keyof Txn;
       const appArgs = tx[appArg] as Buffer[];
       result = appArgs?.length;
       break;
     }
     case 'NumAccounts': {
-      const appAcc = TxnFields.Accounts as keyof TxnEncodedObj;
+      const appAcc = TxnFields.Accounts as keyof Txn;
       const appAccounts = tx[appAcc] as Buffer[];
       result = appAccounts?.length;
       break;
     }
     default: {
       const s = TxnFields[txField]; // eg: rcv = TxnFields["Receiver"]
-      result = tx[s as keyof TxnEncodedObj]; // pk_buffer = tx['rcv']
+      result = tx[s as keyof Txn]; // pk_buffer = tx['rcv']
     }
   }
 
@@ -98,10 +99,10 @@ export function txnSpecbyField (txField: string, interpreter: Interpreter): Stac
  * @param txField: transaction field
  * @param idx: array index
  */
-export function txAppArg (txField: TxField, tx: TxnEncodedObj, idx: number, op: Op): Uint8Array {
+export function txAppArg (txField: TxField, tx: Txn, idx: number, op: Op): Uint8Array {
   if (txField === 'Accounts' || txField === 'ApplicationArgs') {
     const s = TxnFields[txField]; // 'apaa' or 'apat'
-    const result = tx[s as keyof TxnEncodedObj] as Buffer[]; // array of pk buffers (accounts or appArgs)
+    const result = tx[s as keyof Txn] as Buffer[]; // array of pk buffers (accounts or appArgs)
 
     if (!result) { // handle
       return TxFieldDefaults[txField];

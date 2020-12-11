@@ -15,10 +15,9 @@ import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
 import { txAppArg, txnSpecbyField } from "./txn";
 
-// import { txnaSpecbyField, txnSpecbyField } from "./txn";
-
 const BIGINT0 = BigInt("0");
 const BIGINT1 = BigInt("1");
+
 // pops string([]byte) from stack and pushes it's length to stack
 export class Len extends Op {
   execute (stack: TEALStack): void {

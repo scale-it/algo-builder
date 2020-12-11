@@ -1,4 +1,4 @@
-import { AccountInfo } from "algosdk";
+import { AccountInfo, TxnEncodedObj } from "algosdk";
 
 import {
   Add, Arg, Bytec, Bytecblock, Div, Len, Mul, Sub
@@ -13,89 +13,8 @@ export type AppArgs = Array<string | number>;
 export type StackElem = bigint | Uint8Array;
 export type TEALStack = IStack<bigint | Uint8Array>;
 
-export interface TxnEncodedObj {
-  // common fields
-  // https://developer.algorand.org/docs/reference/transactions/#common-fields-header-and-type
-  fee: number
-  fv: number
-  lv: number
-  note: Buffer
-  snd: Buffer
-  type: string
-  gen: string
-  gh: Buffer
-  rekey: Buffer
-  lx: Buffer
-  grp: Buffer
-
-  // Payment Transaction
-  // https://developer.algorand.org/docs/reference/transactions/#payment-transaction
-  rcv: Buffer
-  amt: number
-  close: Buffer
-
-  // Key Registration Transaction
-  // https://developer.algorand.org/docs/reference/transactions/#key-registration-transaction
-  votekey: Buffer
-  selkey: Buffer
-  votefst: number
-  votelst: number
-  votekd: number
-
-  // Asset Configuration Transaction
-  // https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction
-  caid: number
-  apar: AssetParamsEnc
-
-  // Asset Transfer Transaction
-  // https://developer.algorand.org/docs/reference/transactions/#asset-transfer-transaction
-  xaid: number
-  aamt: number
-  asnd: Buffer
-  arcv: Buffer
-  aclose: Buffer
-
-  // Asset Freeze Transaction
-  // https://developer.algorand.org/docs/reference/transactions/#asset-freeze-transaction
-  fadd: Buffer
-  faid: number
-  afrz: boolean
-
-  // Application Call Transaction
-  // https://developer.algorand.org/docs/reference/transactions/#application-call-transaction
-  apid: number
-  apan: TxnOnComplete
-  apat: Buffer[]
-  apap: Buffer
-  apaa: Buffer[]
-  apsu: Buffer
-  apfa: number[]
-  apas: number[]
-  apls: StateSchemaEnc
-  apgs: StateSchemaEnc
-
+export interface Txn extends TxnEncodedObj {
   txID: string
-}
-
-// https://developer.algorand.org/docs/reference/transactions/#asset-parameters
-export interface AssetParamsEnc {
-  t: number
-  dc: number
-  df: number
-  un: string
-  an: string
-  au: string
-  am: Buffer
-  m: Buffer
-  r: Buffer
-  f: Buffer
-  c: Buffer
-}
-
-// https://developer.algorand.org/docs/reference/transactions/#storage-state-schema
-export interface StateSchemaEnc {
-  nui: number
-  nbs: number
 }
 
 // https://developer.algorand.org/docs/reference/teal/opcodes/#txn
@@ -160,16 +79,6 @@ export enum TxnType {
   axfer, // AssetTransfer
   afrz, // AssetFreeze
   appl // ApplicationCall
-}
-
-// https://developer.algorand.org/docs/reference/teal/specification/#oncomplete
-export enum TxnOnComplete {
-  NoOp,
-  OptIn,
-  CloseOut,
-  ClearState,
-  UpdateApplication,
-  DeleteApplication
 }
 
 export enum GlobalField {

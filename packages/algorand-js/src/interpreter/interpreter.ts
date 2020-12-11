@@ -8,15 +8,15 @@ import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { DEFAULT_STACK_ELEM } from "../lib/constants";
 import { Stack } from "../lib/stack";
-import type { AccountsMap, Operator, StackElem, TEALStack, TxnEncodedObj } from "../types";
+import type { AccountsMap, Operator, StackElem, TEALStack, Txn } from "../types";
 
 export class Interpreter {
   readonly stack: TEALStack;
   bytecblock: Uint8Array[];
   intcblock: BigInt[];
   scratch: StackElem[];
-  tx: TxnEncodedObj;
-  gtxs: TxnEncodedObj[];
+  tx: Txn;
+  gtxs: Txn[];
   accounts: AccountsMap;
 
   constructor () {
@@ -25,7 +25,7 @@ export class Interpreter {
     this.intcblock = [];
     this.scratch = new Array(256).fill(DEFAULT_STACK_ELEM);
     this.accounts = <AccountsMap>{};
-    this.tx = <TxnEncodedObj>{}; // current transaction
+    this.tx = <Txn>{}; // current transaction
     this.gtxs = []; // all transactions
   }
 
@@ -46,7 +46,7 @@ export class Interpreter {
         const tx = mkTransaction(txnParam, mockParams);
 
         // convert to encoded obj for compatibility
-        const encodedTxnObj = tx.get_obj_for_encoding() as TxnEncodedObj;
+        const encodedTxnObj = tx.get_obj_for_encoding() as Txn;
         encodedTxnObj.txID = tx.txID();
         txns.push(encodedTxnObj);
       }
@@ -58,7 +58,7 @@ export class Interpreter {
       const mockParams = mockSuggestedParams(txnParams.payFlags);
       const tx = mkTransaction(txnParams, mockParams);
 
-      const encodedTxnObj = tx.get_obj_for_encoding() as TxnEncodedObj;
+      const encodedTxnObj = tx.get_obj_for_encoding() as Txn;
       encodedTxnObj.txID = tx.txID();
       this.tx = encodedTxnObj; // assign current txn
       this.gtxs = [this.tx]; // assing single txn to grp
