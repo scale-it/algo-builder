@@ -484,6 +484,7 @@ export interface RequestError extends Error {
     body: {
       message: string;
     };
+    error?: Error;
   }
   error?: Error;
 }
