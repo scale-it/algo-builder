@@ -122,7 +122,7 @@ by an index that does not exist.`
   },
   INVALID_ADDR: {
     number: 17,
-    message: "Input Parse Error - Invalid Address %addr%, Line: %line%",
+    message: "Invalid Address '%addr%', Line: %line%",
     title: "Invalid Address",
     description: ``
   },
