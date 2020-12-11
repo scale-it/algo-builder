@@ -1,5 +1,6 @@
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
+import { reDigit } from "./constants";
 
 /**
  * Description: Compare Uint8Arrays
@@ -17,7 +18,7 @@ export function compareArray (a: Uint8Array, b: Uint8Array): Boolean {
  * @param val : string
  */
 export function assertOnlyDigits (val: string): void {
-  if (!(/^\d+$/.test(val))) {
+  if (!(reDigit.test(val))) {
     throw new TealError(ERRORS.TEAL.INVALID_TYPE);
   }
 }
@@ -26,9 +27,10 @@ export function assertOnlyDigits (val: string): void {
  * Description: assert fields length
  * @param val Comparsion result
  * @param expected expected result
+ * @param line Line number in TEAL file
  */
-export function assertFieldLen (val: number, expected: number, line: number): void {
+export function assertLen (val: number, expected: number, line: number): void {
   if (val !== expected) {
-    throw new TealError(ERRORS.TEAL.ASSERT_FIELD_LENGTH, { line: line });
+    throw new TealError(ERRORS.TEAL.ASSERT_FIELD_LENGTH, { exp: expected, got: val, line: line });
   }
 }

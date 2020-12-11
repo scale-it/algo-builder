@@ -3,7 +3,7 @@ import path from "path";
 
 import { ERRORS } from "../../../src/errors/errors-list";
 import { Add, Addr, Div, Int, Mul, Pragma, Sub } from "../../../src/interpreter/opcode-list";
-import { fieldsFromLine, opcodeFromFields, parser } from "../../../src/interpreter/parser";
+import { opcodeFromFields, parser, wordsFromLine } from "../../../src/interpreter/parser";
 import { expectTealError } from "../../helpers/errors";
 import { useFixtureProject } from "../../helpers/project";
 
@@ -11,130 +11,130 @@ import { useFixtureProject } from "../../helpers/project";
 describe("Parser", function () {
   describe("Extract Fields from line", () => {
     it("should return correct fields for addr", function () {
-      let res = fieldsFromLine("addr KAGKGFFKGKGFGLFFBSLFBJKSFB");
+      let res = wordsFromLine("addr KAGKGFFKGKGFGLFFBSLFBJKSFB");
       const expected = ["addr", "KAGKGFFKGKGFGLFFBSLFBJKSFB"];
 
       assert.deepEqual(res, expected);
 
-      res = fieldsFromLine("addr KAGKGFFKGKGFGLFFBSLFBJKSFB//comment here");
+      res = wordsFromLine("addr KAGKGFFKGKGFGLFFBSLFBJKSFB//comment here");
       assert.deepEqual(res, expected);
 
-      res = fieldsFromLine("addr KAGKGFFKGKGFGLFFBSLFBJKSFB       //comment here");
+      res = wordsFromLine("addr KAGKGFFKGKGFGLFFBSLFBJKSFB       //comment here");
       assert.deepEqual(res, expected);
 
-      res = fieldsFromLine("addr              KAGKGFFKGKGFGLFFBSLFBJKSFB//comment here");
+      res = wordsFromLine("addr              KAGKGFFKGKGFGLFFBSLFBJKSFB//comment here");
       assert.deepEqual(res, expected);
 
-      res = fieldsFromLine("      addr     KAGKGFFKGKGFGLFFBSLFBJKSFB//comment here       ");
+      res = wordsFromLine("      addr     KAGKGFFKGKGFGLFFBSLFBJKSFB//comment here       ");
       assert.deepEqual(res, expected);
     });
 
     it("should return correct fields for byte base64", () => {
-      let res = fieldsFromLine("byte base64 BKBDKSKDK");
+      let res = wordsFromLine("byte base64 BKBDKSKDK");
       let expected = ["byte", "base64", "BKBDKSKDK"];
 
       assert.deepEqual(res, expected);
 
-      res = fieldsFromLine("byte base64(BKBDKSKDK)");
+      res = wordsFromLine("byte base64(BKBDKSKDK)");
       expected = ["byte", "base64(BKBDKSKDK)"];
 
       assert.deepEqual(res, expected);
 
-      res = fieldsFromLine("byte base64(BKBDKSKD/K)");
+      res = wordsFromLine("byte base64(BKBDKSKD/K)");
       expected = ["byte", "base64(BKBDKSKD/K)"];
 
       assert.deepEqual(res, expected);
 
-      res = fieldsFromLine("byte base64(BKBDKSKDK//KBBJSKJB)");
+      res = wordsFromLine("byte base64(BKBDKSKDK//KBBJSKJB)");
       expected = ["byte", "base64(BKBDKSKDK//KBBJSKJB)"];
 
       assert.deepEqual(res, expected);
 
       // Ignore comment
-      res = fieldsFromLine("byte base64(BKBDKSKDK//KBBJSKJB) // comment here");
+      res = wordsFromLine("byte base64(BKBDKSKDK//KBBJSKJB) // comment here");
       expected = ["byte", "base64(BKBDKSKDK//KBBJSKJB)"];
 
       assert.deepEqual(res, expected);
     });
 
     it("should return correct fields for byte base32", () => {
-      let res = fieldsFromLine("byte     base32       BKBDKSKDK//commenthere");
+      let res = wordsFromLine("byte     base32       BKBDKSKDK//commenthere");
       let expected = ["byte", "base32", "BKBDKSKDK"];
 
       assert.deepEqual(res, expected);
 
-      res = fieldsFromLine("      byte  base32(BKBDKSKDK) //comment");
+      res = wordsFromLine("      byte  base32(BKBDKSKDK) //comment");
       expected = ["byte", "base32(BKBDKSKDK)"];
 
       assert.deepEqual(res, expected);
 
-      res = fieldsFromLine("byte b32(BKBDKSKDK)");
+      res = wordsFromLine("byte b32(BKBDKSKDK)");
       expected = ["byte", "b32(BKBDKSKDK)"];
 
       assert.deepEqual(res, expected);
 
-      res = fieldsFromLine("byte b32 BKBDKSKDK//comment");
+      res = wordsFromLine("byte b32 BKBDKSKDK//comment");
       expected = ["byte", "b32", "BKBDKSKDK"];
 
       assert.deepEqual(res, expected);
     });
 
     it("should return correct fields for byte string literal", () => {
-      let res = fieldsFromLine('byte "STRING LITERAL"');
+      let res = wordsFromLine('byte "STRING LITERAL"');
       let expected = ["byte", "\"STRING LITERAL\""];
 
       assert.deepEqual(res, expected);
 
-      res = fieldsFromLine('byte "STRING \\"NESTED STRING\\" END"');
+      res = wordsFromLine('byte "STRING \\"NESTED STRING\\" END"');
       expected = ["byte", "\"STRING \\\"NESTED STRING\\\" END\""];
 
       assert.deepEqual(res, expected);
     });
 
     it("should return correct fields for int", () => {
-      let res = fieldsFromLine("int 123");
+      let res = wordsFromLine("int 123");
       const expected = ["int", "123"];
 
       assert.deepEqual(res, expected);
 
-      res = fieldsFromLine("int 123//comment here");
+      res = wordsFromLine("int 123//comment here");
       assert.deepEqual(res, expected);
 
-      res = fieldsFromLine("       int       123       //comment here");
+      res = wordsFromLine("       int       123       //comment here");
       assert.deepEqual(res, expected);
 
-      res = fieldsFromLine("int 123 //comment here");
+      res = wordsFromLine("int 123 //comment here");
       assert.deepEqual(res, expected);
     });
 
     it("should return correct fields for operators", () => {
-      let res = fieldsFromLine("+");
+      let res = wordsFromLine("+");
       let expected = ["+"];
 
       assert.deepEqual(res, expected);
 
-      res = fieldsFromLine("  +//comment here");
+      res = wordsFromLine("  +//comment here");
       assert.deepEqual(res, expected);
 
-      res = fieldsFromLine("+ //comment here");
+      res = wordsFromLine("+ //comment here");
       assert.deepEqual(res, expected);
 
-      res = fieldsFromLine("         - //comment            here");
+      res = wordsFromLine("         - //comment            here");
       expected = ["-"];
       assert.deepEqual(res, expected);
 
-      res = fieldsFromLine("- //comment here");
+      res = wordsFromLine("- //comment here");
       assert.deepEqual(res, expected);
 
-      res = fieldsFromLine("/ //comment here");
+      res = wordsFromLine("/ //comment here");
       expected = ["/"];
       assert.deepEqual(res, expected);
 
-      res = fieldsFromLine("* //comment here");
+      res = wordsFromLine("* //comment here");
       expected = ["*"];
       assert.deepEqual(res, expected);
 
-      res = fieldsFromLine("      *       //    comment     here");
+      res = wordsFromLine("      *       //    comment     here");
       assert.deepEqual(res, expected);
     });
   });

@@ -27,7 +27,7 @@ var opCodeMap: {[key: string]: any } = {
  * @param line : Line read from TEAL file
  */
 /* eslint-disable sonarjs/cognitive-complexity */
-export function fieldsFromLine (line: string): string[] {
+export function wordsFromLine (line: string): string[] {
   // Trim whitespace from both sides of a string
   line = line.trim();
   const fields = [] as string[];
@@ -111,6 +111,7 @@ export function fieldsFromLine (line: string): string[] {
 /**
  * Description: Returns Opcode object for given field
  * @param fields : fields extracted from line
+ * @param counter: line number in TEAL file
  */
 export function opcodeFromFields (fields: string[], counter: number): Operator {
   const opCode = fields[0];
@@ -145,7 +146,7 @@ export async function parser (filename: string): Promise<Operator[]> {
     }
 
     // Trim whitespace from line and extract fields from line
-    const fields = fieldsFromLine(line);
+    const fields = wordsFromLine(line);
     if (fields.length !== 0) {
       opCodeList.push(opcodeFromFields(fields, counter));
     }
