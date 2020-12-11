@@ -13,8 +13,9 @@ import {
   Intcblock, Itob,
   Keccak256,
   Len, LessThan, LessThanEqualTo,
-  Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Sha256, Sha512_256, Store, Sub, Substring,
-  Substring3, Txn, Txna, Pragma
+  Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma,
+  Sha256, Sha512_256, Store, Sub, Substring,
+  Substring3, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { parseToStackElem } from "../../../src/interpreter/txn";
 import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MIN_UINT8 } from "../../../src/lib/constants";
