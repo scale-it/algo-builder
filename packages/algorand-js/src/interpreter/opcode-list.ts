@@ -22,6 +22,10 @@ const BIGINT1 = BigInt("1");
 export class Pragma extends Op {
   readonly version;
 
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
   constructor (args: string[], line: number) {
     super();
     assertLen(args.length, 2, line);
@@ -35,6 +39,10 @@ export class Pragma extends Op {
 
 // pops string([]byte) from stack and pushes it's length to stack
 export class Len extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
   constructor (args: string[], line: number) {
     super();
     assertLen(args.length, 0, line);
@@ -50,6 +58,10 @@ export class Len extends Op {
 // pops two unit64 from stack(last, prev) and pushes their sum(last + prev) to stack
 // panics on overflow (result > max_unit64)
 export class Add extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
   constructor (args: string[], line: number) {
     super();
     assertLen(args.length, 0, line);
@@ -68,6 +80,10 @@ export class Add extends Op {
 // pops two unit64 from stack(last, prev) and pushes their diff(last - prev) to stack
 // panics on underflow (result < 0)
 export class Sub extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
   constructor (args: string[], line: number) {
     super();
     assertLen(args.length, 0, line);
@@ -86,6 +102,10 @@ export class Sub extends Op {
 // pops two unit64 from stack(last, prev) and pushes their division(last / prev) to stack
 // panics if prev == 0
 export class Div extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
   constructor (args: string[], line: number) {
     super();
     assertLen(args.length, 0, line);
@@ -105,6 +125,10 @@ export class Div extends Op {
 // pops two unit64 from stack(last, prev) and pushes their mult(last * prev) to stack
 // panics on overflow (result > max_unit64)
 export class Mul extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
   constructor (args: string[], line: number) {
     super();
     assertLen(args.length, 0, line);
@@ -668,6 +692,10 @@ export class Substring3 extends Op {
 export class Int extends Op {
   readonly uint64: bigint;
 
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
   constructor (args: string[], line: number) {
     super();
     assertLen(args.length, 1, line);
@@ -703,6 +731,10 @@ export class Byte extends Op {
 export class Addr extends Op {
   readonly addr: string;
 
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
   constructor (args: string[], line: number) {
     super();
     assertLen(args.length, 1, line);
