@@ -190,16 +190,16 @@ function _applyErrorMessageTemplate (
 export function parseAlgorandError (e: RequestError, ctx: AnyMap): Error {
   if (e === undefined) { return new BuilderError(ERRORS.NETWORK.NODE_IS_NOT_RUNNING); }
 
-  if (e?.statusCode !== undefined) {
-    if (e.statusCode >= 400 && e.statusCode < 500) {
+  if (e.response?.statusCode !== undefined) {
+    if (e.response?.statusCode >= 400 && e.response?.statusCode < 500) {
       return new BuilderError(ERRORS.ALGORAND.BAD_REQUEST, {
-        status: e.statusCode,
-        message: e.body?.message ?? e.text,
+        status: e.response?.statusCode,
+        message: e.response?.body?.message ?? e.response?.text ?? e.response?.error,
         ctx: JSON.stringify(ctx)
       }, e.error);
     }
     return new BuilderError(ERRORS.ALGORAND.INTERNAL_ERROR, {
-      status: e.statusCode
+      status: e.response?.statusCode
     }, e);
   }
   return e;

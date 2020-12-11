@@ -57,3 +57,5 @@ export const TxFieldDefaults: {[key: string]: any} = {
   FreezeAssetAccount: zeroAddress,
   FreezeAssetFrozen: zeroUint64
 };
+
+export const reDigit = /^\d+$/;

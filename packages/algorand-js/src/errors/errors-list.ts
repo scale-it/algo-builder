@@ -33,7 +33,7 @@ permissible range of 1 to 256`
   },
   INVALID_OP_ARG: {
     number: 3,
-    message: "Error encountered while executing teal with opcode %opcode%",
+    message: "Error encountered while executing teal with opcode %opcode% , Line : %line% ",
     title: "Invalid Operation",
     description: `Error encountered in stack while executing teal opcode %opcode%`
   },
@@ -114,17 +114,23 @@ by an index that does not exist.`
     title: "Input is outside the valid uint8 range of 0 to 255",
     description: `Input is outside the valid uint8 range of 0 to 255`
   },
-  INVALID_TXN_FIELD: {
+  ASSERT_FIELD_LENGTH: {
     number: 16,
-    message: "txn field %field% is not valid for current txn",
-    title: "txn field %field% is not valid for current txn",
-    description: `txn field %field% is not valid for current txn`
+    message: "Invalid Field Length Expected: '%exp%' Got: '%got%', Line : %line% ",
+    title: "Parse Error",
+    description: ``
   },
-  UNKNOWN_TRANSACTION: {
+  INVALID_ADDR: {
     number: 17,
-    message: "transaction is not valid or is unknown",
-    title: "transaction is not valid or is unknown",
-    description: `transaction is not valid or is unknown`
+    message: "Invalid Address '%addr%', Line: %line%",
+    title: "Parse Error",
+    description: ``
+  },
+  PRAGMA_VERSION_ERROR: {
+    number: 18,
+    message: "Pragma version Error - Expected: version, got: %got%, Line: %line%",
+    title: "Parse Error",
+    description: ``
   }
 };
 

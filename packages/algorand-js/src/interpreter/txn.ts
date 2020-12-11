@@ -1,9 +1,10 @@
 import { AssetParamsEnc } from "algosdk";
+
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { TxFieldDefaults } from "../lib/constants";
 import { toBytes } from "../lib/parse-data";
-import { StackElem, TxField, TxnFields, TxnType, Txn } from "../types";
+import { StackElem, TxField, Txn, TxnFields, TxnType } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
 
