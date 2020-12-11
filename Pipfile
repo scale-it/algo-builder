@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 pyteal = "*"
+pyyaml = "*"
 
 [dev-packages]
 
