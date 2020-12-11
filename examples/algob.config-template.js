@@ -15,7 +15,7 @@ let accounts = mkAccounts([
     // This account is created using `make setup-master-account` command from our
     // `/infrastructure` directory.
     // It is used in all our examples to setup and fund other accounts (so it must posses ALGOs).
-    // If you don't an account with this address (can check that by running
+    // If you don't want an account with this address (can check that by running
     // `goal account list -d $ALGORAND_DATA`) then change it to other account you control.
     addr: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
     // To export a mnemonic you may use the following command:
