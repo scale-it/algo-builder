@@ -22,7 +22,7 @@ var opCodeMap: {[key: string]: any } = {
 };
 
 /**
- * Description: Read line and split it into fields
+ * Description: Read line and split it into words
  * - ignore comments, keep only part that is relevant to interpreter
  * @param line : Line read from TEAL file
  */
@@ -30,7 +30,7 @@ var opCodeMap: {[key: string]: any } = {
 export function wordsFromLine (line: string): string[] {
   // Trim whitespace from both sides of a string
   line = line.trim();
-  const fields = [] as string[];
+  const words = [] as string[];
   let i = 0;
   let start = i;
   let inString = false;
@@ -57,9 +57,9 @@ export function wordsFromLine (line: string): string[] {
           if (i < line.length - 1 && line[i + 1] === '/' && !inBase64 && !inString) {
             // if a comment without whitespace
             if (start !== i) {
-              fields.push(line.substr(start, i - start));
+              words.push(line.substr(start, i - start));
             }
-            return fields;
+            return words;
           }
           break;
         // is base64( seq?
@@ -83,7 +83,7 @@ export function wordsFromLine (line: string): string[] {
     }
     if (!inString) {
       const value = line.substr(start, i - start);
-      fields.push(value);
+      words.push(value);
       if (value === "base64" || value === "b64") {
         inBase64 = true;
       } else if (inBase64) {
@@ -102,26 +102,26 @@ export function wordsFromLine (line: string): string[] {
 
   // add rest of the string if any
   if (start < line.length) {
-    fields.push(line.substr(start, i - start));
+    words.push(line.substr(start, i - start));
   }
 
-  return fields;
+  return words;
 }
 
 /**
  * Description: Returns Opcode object for given field
- * @param fields : fields extracted from line
+ * @param words : words extracted from line
  * @param counter: line number in TEAL file
  */
-export function opcodeFromFields (fields: string[], counter: number): Operator {
-  const opCode = fields[0];
-  fields.shift();
+export function opcodeFromSentence (words: string[], counter: number): Operator {
+  const opCode = words[0];
+  words.shift();
 
   if (opCodeMap[opCode] === undefined) {
     throw new TealError(ERRORS.TEAL.INVALID_OP_ARG);
   }
 
-  return new opCodeMap[opCode](fields, counter);
+  return new opCodeMap[opCode](words, counter);
 }
 
 /**
@@ -145,10 +145,10 @@ export async function parser (filename: string): Promise<Operator[]> {
       continue;
     }
 
-    // Trim whitespace from line and extract fields from line
-    const fields = wordsFromLine(line);
-    if (fields.length !== 0) {
-      opCodeList.push(opcodeFromFields(fields, counter));
+    // Trim whitespace from line and extract words from line
+    const words = wordsFromLine(line);
+    if (words.length !== 0) {
+      opCodeList.push(opcodeFromSentence(words, counter));
     }
   }
   return opCodeList;

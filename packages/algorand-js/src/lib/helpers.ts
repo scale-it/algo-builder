@@ -24,7 +24,7 @@ export function assertOnlyDigits (val: string): void {
 }
 
 /**
- * Description: assert fields length
+ * Description: assert words length
  * @param val Comparsion result
  * @param expected expected result
  * @param line Line number in TEAL file
