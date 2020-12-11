@@ -1,32 +1,28 @@
-import { Address, Transaction } from "algosdk";
-
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { TxFieldDefaults } from "../lib/constants";
 import { toBytes } from "../lib/parse-data";
-import { TxnEncodedObj, TxnFields, TxnType, TxField, AssetParamsEnc, StackElem } from "../types";
+import { AssetParamsEnc, StackElem, TxField, TxnEncodedObj, TxnFields, TxnType } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
 
-
-
 const assetTxnFields = new Set([
-  TxnFields.ConfigAssetTotal,
-  TxnFields.ConfigAssetDecimals,
-  TxnFields.ConfigAssetDefaultFrozen,
-  TxnFields.ConfigAssetUnitName,
-  TxnFields.ConfigAssetName,
-  TxnFields.ConfigAssetURL,
-  TxnFields.ConfigAssetMetadataHash,
-  TxnFields.ConfigAssetManager,
-  TxnFields.ConfigAssetReserve,
-  TxnFields.ConfigAssetFreeze,
-  TxnFields.ConfigAssetClawback
+  'ConfigAssetTotal',
+  'ConfigAssetDecimals',
+  'ConfigAssetDefaultFrozen',
+  'ConfigAssetUnitName',
+  'ConfigAssetName',
+  'ConfigAssetURL',
+  'ConfigAssetMetadataHash',
+  'ConfigAssetManager',
+  'ConfigAssetReserve',
+  'ConfigAssetFreeze',
+  'ConfigAssetClawback'
 ]);
 
 // return default value of txField if undefined,
-// otherwise return parsed data to stackElem
-function parseToStackElem (a: unknown, field: TxField): any {
+// otherwise return parsed data to interpreter
+export function parseToStackElem (a: unknown, field: TxField): any {
   if (Buffer.isBuffer(a)) {
     return new Uint8Array(a);
   }
@@ -40,7 +36,6 @@ function parseToStackElem (a: unknown, field: TxField): any {
   return TxFieldDefaults[field];
 }
 
-
 /**
  * Description: returns specific transaction field value from tx object
  * @param txField: transaction field
@@ -52,9 +47,11 @@ export function txnSpecbyField (txField: string, interpreter: Interpreter): Stac
   let result; // store raw result, parse and return
 
   // handle nested encoded obj (for assetParams)
-  if(assetTxnFields.has(txField)) {
-    const assetMetaData = tx['apar'];
-    result = assetMetaData[txField as keyof AssetParamsEnc];
+  if (assetTxnFields.has(txField)) {
+    const s = TxnFields[txField];
+    const assetMetaData = tx.apar;
+    result = assetMetaData[s as keyof AssetParamsEnc];
+    return parseToStackElem(result, txField);
   }
 
   // handle other cases
@@ -76,24 +73,23 @@ export function txnSpecbyField (txField: string, interpreter: Interpreter): Stac
     case 'NumAppArgs': {
       const appArg = TxnFields.ApplicationArgs as keyof TxnEncodedObj;
       const appArgs = tx[appArg] as Buffer[];
-      result = appArgs && appArgs.length;
+      result = appArgs?.length;
       break;
     }
     case 'NumAccounts': {
       const appAcc = TxnFields.Accounts as keyof TxnEncodedObj;
       const appAccounts = tx[appAcc] as Buffer[];
-      result = appAccounts && appAccounts.length;
+      result = appAccounts?.length;
       break;
     }
     default: {
-      const encodedStr = TxnFields[txField]; // eg: rcv = TxnFields["Receiver"]
-      result = tx[encodedStr as keyof TxnEncodedObj]; // pk_buffer = tx['rcv']
+      const s = TxnFields[txField]; // eg: rcv = TxnFields["Receiver"]
+      result = tx[s as keyof TxnEncodedObj]; // pk_buffer = tx['rcv']
     }
   }
 
   return parseToStackElem(result, txField);
 }
-
 
 /**
  * Description: returns specific transaction field value from array
@@ -104,11 +100,11 @@ export function txnSpecbyField (txField: string, interpreter: Interpreter): Stac
  */
 export function txAppArg (txField: TxField, tx: TxnEncodedObj, idx: number, op: Op): Uint8Array {
   if (txField === 'Accounts' || txField === 'ApplicationArgs') {
-    const encodedStr = TxnFields[txField]; // 'apaa' or 'apat'
-    const result = tx[encodedStr as keyof TxnEncodedObj] as Buffer[]; // array of pk buffers (accounts or appArgs)
+    const s = TxnFields[txField]; // 'apaa' or 'apat'
+    const result = tx[s as keyof TxnEncodedObj] as Buffer[]; // array of pk buffers (accounts or appArgs)
 
-    if(result) { // handle
-      return TxFieldDefaults[txField]
+    if (!result) { // handle
+      return TxFieldDefaults[txField];
     }
     op.checkIndexBound(idx, result);
     return parseToStackElem(result[idx], txField);

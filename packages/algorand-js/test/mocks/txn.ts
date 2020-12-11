@@ -1,8 +1,6 @@
 import { TxParams } from "algob/src/types";
 import { decodeAddress, generateAccount, SuggestedParams } from "algosdk";
 
-import { toBytes } from "../../src/lib/parse-data";
-
 const ALGORAND_MIN_TX_FEE = 1000;
 const GENESIS_ID = 'testnet-v1.0';
 // testnet-v1.0 hash
@@ -21,10 +19,10 @@ export const TXN_OBJ = {
   aamt: 100,
   fv: 258820,
   lv: 259820,
-  note: toBytes("Note"),
-  genesisID: 'default-v1',
-  genesisHash: Buffer.from('default-v1'),
-  lx: new Uint8Array(0),
+  note: Buffer.from("Note"),
+  gen: 'default-v1',
+  gh: Buffer.from('default-v1'),
+  lx: Buffer.from(""),
   aclose: Buffer.from(addr.publicKey),
   close: Buffer.from(addr.publicKey),
   votekey: Buffer.from("voteKey"),
@@ -37,7 +35,7 @@ export const TXN_OBJ = {
   apar: {
     t: 10,
     dc: 0,
-    df: true,
+    df: 1,
     m: Buffer.from(addr.publicKey),
     r: Buffer.from(addr.publicKey),
     f: Buffer.from(addr.publicKey),
@@ -49,7 +47,7 @@ export const TXN_OBJ = {
   },
   fadd: Buffer.from(addr.publicKey),
   faid: 202,
-  afrz: true,
+  afrz: false,
   apid: 1201,
   apan: 0,
   apap: Buffer.from("approval"),
@@ -59,7 +57,16 @@ export const TXN_OBJ = {
   apfa: [1001, 1002, 1003],
   apas: [2001, 2002, 2003],
   type: 'pay',
-  reKey: Buffer.from(addr.publicKey),
+  apls: {
+    nui: 2,
+    nbs: 2
+  },
+  apgs: {
+    nui: 2,
+    nbs: 2
+  },
+  txID: 'transaction-id',
+  rekey: Buffer.from(addr.publicKey),
   grp: Buffer.from('group')
 };
 

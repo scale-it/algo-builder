@@ -1,5 +1,4 @@
 import { AccountInfo } from "algosdk";
-import { Interface } from "readline";
 
 import {
   Add, Arg, Bytec, Bytecblock, Div, Len, Mul, Sub
@@ -31,8 +30,8 @@ export interface TxnEncodedObj {
 
   // Payment Transaction
   // https://developer.algorand.org/docs/reference/transactions/#payment-transaction
-  rcv: Buffer,
-  amt: number,
+  rcv: Buffer
+  amt: number
   close: Buffer
 
   // Key Registration Transaction
@@ -148,8 +147,8 @@ export const TxnFields: {[key: string]: any} = {
   ConfigAssetClawback: 'c',
   FreezeAsset: 'faid',
   FreezeAssetAccount: 'fadd',
-  FreezeAssetFrozen: 'afrz',
-}
+  FreezeAssetFrozen: 'afrz'
+};
 
 export type TxField = keyof typeof TxnFields;
 

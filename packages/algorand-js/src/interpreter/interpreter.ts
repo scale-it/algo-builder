@@ -1,6 +1,6 @@
 import { mkTransaction } from "algob";
 import type { execParams } from "algob/src/types";
-import { AccountInfo, assignGroupID, Transaction } from "algosdk";
+import { AccountInfo, assignGroupID } from "algosdk";
 import { assert } from "chai";
 
 import { mockSuggestedParams } from "../../test/mocks/txn";
@@ -46,7 +46,7 @@ export class Interpreter {
         const tx = mkTransaction(txnParam, mockParams);
 
         // convert to encoded obj for compatibility
-        const encodedTxnObj = tx.get_obj_for_encoding() as TxnEncodedObj
+        const encodedTxnObj = tx.get_obj_for_encoding() as TxnEncodedObj;
         encodedTxnObj.txID = tx.txID();
         txns.push(encodedTxnObj);
       }
@@ -58,7 +58,7 @@ export class Interpreter {
       const mockParams = mockSuggestedParams(txnParams.payFlags);
       const tx = mkTransaction(txnParams, mockParams);
 
-      const encodedTxnObj = tx.get_obj_for_encoding() as TxnEncodedObj
+      const encodedTxnObj = tx.get_obj_for_encoding() as TxnEncodedObj;
       encodedTxnObj.txID = tx.txID();
       this.tx = encodedTxnObj; // assign current txn
       this.gtxs = [this.tx]; // assing single txn to grp
