@@ -23,7 +23,9 @@ initialDate?: string;
 
 ## Credentials
 
-You can specify Algod Credentials in network object or you can load it from ENV.
+If you are running a local node, you can find port and token values for your algod in `$ALGORAND_DATA/algod.net` and `$ALGORAND_DATA/algod.token` files.
+
+You can specify **Algod** Credentials in network object or you can load it from ENV.
 To load it from ENV:
 
 - Method 1
@@ -47,7 +49,7 @@ To load it from ENV:
 
           let algodCred = algodCredentialsFromEnv();
 
-Similarly for KMD credentials you can either specify credentials in KMD object or load it from ENV.
+Similarly, for **KMD** credentials you can either specify credentials in KMD object or load it from ENV.
 To load it from ENV:
 
 - Method 1
@@ -70,6 +72,7 @@ To load it from ENV:
   - To load kmd credentials from env in config, you can use:
 
           let kmdCred = KMDCredentialsFromEnv();
+
 
 ## Accounts
 

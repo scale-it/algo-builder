@@ -23,18 +23,17 @@ If you want to create a local network by your own, you can use a private net [tu
         cd infrastructure
         make create-private-net
 
-1. Update the `node_data/PrimaryNode/config.json` file. Remember to set `"EnableDeveloperAPI": true` if you want to be able to compile and execute smart-contracts.
-1. Check the access token and network address. You will need them in your config file to correctly connect to a node.
+1. Check the access token and network address. You will need them in your config file to correctly connect to a node. The network configuration (PrimaryNode/config.json) and token created using the `make create-private-net` command is fixed and shared in this repository, to match the one used in examples and default `algob.config`. Don't expose the node externally. Otherwise you will need to setup a firewall and generate a new token. You can see the network and a port by opening the following files:
 
         cat node_data/PrimaryNode/algod.net
         cat node_data/PrimaryNode/algod.token
 
-1. To stop and start again the chain use:
+1. To start and stop the the chain use the following commands:
 
-        make stop-private-net
         make start-private-net
+        make stop-private-net
 
-1. To set up master account use:
+1. To set up master account (the account with hardcoded key we use in all our examples):
 
         make setup-master-account
 
