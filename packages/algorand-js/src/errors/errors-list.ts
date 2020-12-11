@@ -116,20 +116,20 @@ by an index that does not exist.`
   },
   ASSERT_FIELD_LENGTH: {
     number: 16,
-    message: "Invalid Field Length Expected: %exp% Got: %got% - Parse Error, Line : %line% ",
-    title: "Invalid Field Length",
+    message: "Invalid Field Length Expected: '%exp%' Got: '%got%', Line : %line% ",
+    title: "Parse Error",
     description: ``
   },
   INVALID_ADDR: {
     number: 17,
-    message: "Input Parse Error - Invalid Address %addr%, Line: %line%",
-    title: "Invalid Address",
+    message: "Invalid Address '%addr%', Line: %line%",
+    title: "Parse Error",
     description: ``
   },
   PRAGMA_VERSION_ERROR: {
     number: 18,
     message: "Pragma version Error - Expected: version, got: %got%, Line: %line%",
-    title: "Invalid Address",
+    title: "Parse Error",
     description: ``
   }
 };
