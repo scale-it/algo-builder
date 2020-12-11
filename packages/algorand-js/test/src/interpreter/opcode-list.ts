@@ -6,13 +6,18 @@ import { ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
   Add, Addr, Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
+  Branch,
+  BranchIfNotZero,
+  BranchIfZero,
   Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2,
   Ed25519verify,
   EqualTo, Err, GreaterThan, GreaterThanEqualTo, Int, Intc,
   Intcblock, Itob,
   Keccak256,
+  Label,
   Len, LessThan, LessThanEqualTo,
   Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma,
+  Return,
   Sha256, Sha512_256, Store, Sub, Substring,
   Substring3
 } from "../../../src/interpreter/opcode-list";
@@ -1399,6 +1404,110 @@ describe("Teal Opcodes", function () {
         ERRORS.TEAL.SUBSTRING_RANGE_BEYOND
       )
     );
+  });
+
+  describe("Branch Ops", function () {
+    const stack = new Stack<StackElem>();
+    const interpreter = new Interpreter();
+    const logic = [
+      new Int(['1'], 0),
+      new Int(['2'], 0),
+      new Branch("dumb", interpreter),
+      new Int(['3'], 0),
+      new Label("dumb"),
+      new Int(['3'], 0)
+    ];
+    interpreter.instructions = logic;
+
+    describe("Branch: unconditional", function () {
+      it("should jump unconditionally to branch dump", function () {
+        const op = new Branch("dumb", interpreter);
+        op.execute(stack);
+        assert.equal(4, interpreter.i);
+      });
+
+      it("should throw error if label is not defined",
+        execExpectError(
+          stack,
+          [],
+          new Branch("some-branch-1", interpreter),
+          ERRORS.TEAL.LABEL_NOT_FOUND
+        )
+      );
+    });
+
+    describe("BranchIfZero", function () {
+      it("should jump to branch if top of stack is zero", function () {
+        interpreter.i = 0;
+
+        stack.push(BigInt('0'));
+        const op = new BranchIfZero("dumb", interpreter);
+        op.execute(stack);
+        assert.equal(4, interpreter.i);
+      });
+
+      it("should not jump to branch if top of stack is not zero", function () {
+        interpreter.i = 0;
+
+        stack.push(BigInt('5'));
+        const op = new BranchIfZero("dumb", interpreter);
+        op.execute(stack);
+        assert.equal(0, interpreter.i);
+      });
+
+      it("should throw error if label is not defined for bz",
+        execExpectError(
+          stack,
+          [BigInt('0')],
+          new BranchIfZero("some-branch-2", interpreter),
+          ERRORS.TEAL.LABEL_NOT_FOUND
+        )
+      );
+    });
+
+    describe("BranchIfNotZero", function () {
+      it("should not jump to branch if top of stack is zero", function () {
+        interpreter.i = 0;
+
+        stack.push(BigInt('0'));
+        const op = new BranchIfNotZero("dumb", interpreter);
+        op.execute(stack);
+        assert.equal(0, interpreter.i);
+      });
+
+      it("should jump to branch if top of stack is not zero", function () {
+        interpreter.i = 0;
+
+        stack.push(BigInt('5'));
+        const op = new BranchIfNotZero("dumb", interpreter);
+        op.execute(stack);
+        assert.equal(4, interpreter.i);
+      });
+
+      it("should throw error if label is not defined for bnz",
+        execExpectError(
+          stack,
+          [BigInt('5')],
+          new BranchIfNotZero("some-branch-3", interpreter),
+          ERRORS.TEAL.LABEL_NOT_FOUND
+        )
+      );
+    });
+  });
+
+  describe("Return", function () {
+    const stack = new Stack<StackElem>();
+    const interpreter = new Interpreter();
+
+    it("should return by taking last value from stack as success", function () {
+      stack.push(BigInt('1'));
+      stack.push(BigInt('2'));
+
+      const op = new Return(interpreter);
+      op.execute(stack);
+      assert.equal(1, stack.length());
+      assert.equal(BigInt('2'), stack.pop());
+    });
   });
 
   describe("Pseudo-Ops", function () {
