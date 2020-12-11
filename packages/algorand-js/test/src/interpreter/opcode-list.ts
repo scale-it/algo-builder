@@ -1411,17 +1411,17 @@ describe("Teal Opcodes", function () {
     const interpreter = new Interpreter();
     const logic = [
       new Int(['1'], 0),
-      new Int(['2'], 0),
-      new Branch("dumb", interpreter),
-      new Int(['3'], 0),
-      new Label("dumb"),
-      new Int(['3'], 0)
+      new Int(['2'], 1),
+      new Branch(["dumb"], 2, interpreter),
+      new Int(['3'], 3),
+      new Label(["dumb"], 4),
+      new Int(['3'], 5)
     ];
     interpreter.instructions = logic;
 
     describe("Branch: unconditional", function () {
       it("should jump unconditionally to branch dump", function () {
-        const op = new Branch("dumb", interpreter);
+        const op = new Branch(["dumb"], 2, interpreter);
         op.execute(stack);
         assert.equal(4, interpreter.i);
       });
@@ -1430,7 +1430,7 @@ describe("Teal Opcodes", function () {
         execExpectError(
           stack,
           [],
-          new Branch("some-branch-1", interpreter),
+          new Branch(["some-branch-1"], 0, interpreter),
           ERRORS.TEAL.LABEL_NOT_FOUND
         )
       );
@@ -1441,7 +1441,7 @@ describe("Teal Opcodes", function () {
         interpreter.i = 0;
 
         stack.push(BigInt('0'));
-        const op = new BranchIfZero("dumb", interpreter);
+        const op = new BranchIfZero(["dumb"], 2, interpreter);
         op.execute(stack);
         assert.equal(4, interpreter.i);
       });
@@ -1450,7 +1450,7 @@ describe("Teal Opcodes", function () {
         interpreter.i = 0;
 
         stack.push(BigInt('5'));
-        const op = new BranchIfZero("dumb", interpreter);
+        const op = new BranchIfZero(["dumb"], 2, interpreter);
         op.execute(stack);
         assert.equal(0, interpreter.i);
       });
@@ -1459,7 +1459,7 @@ describe("Teal Opcodes", function () {
         execExpectError(
           stack,
           [BigInt('0')],
-          new BranchIfZero("some-branch-2", interpreter),
+          new BranchIfZero(["some-branch-2"], 0, interpreter),
           ERRORS.TEAL.LABEL_NOT_FOUND
         )
       );
@@ -1470,7 +1470,7 @@ describe("Teal Opcodes", function () {
         interpreter.i = 0;
 
         stack.push(BigInt('0'));
-        const op = new BranchIfNotZero("dumb", interpreter);
+        const op = new BranchIfNotZero(["dumb"], 2, interpreter);
         op.execute(stack);
         assert.equal(0, interpreter.i);
       });
@@ -1479,7 +1479,7 @@ describe("Teal Opcodes", function () {
         interpreter.i = 0;
 
         stack.push(BigInt('5'));
-        const op = new BranchIfNotZero("dumb", interpreter);
+        const op = new BranchIfNotZero(["dumb"], 2, interpreter);
         op.execute(stack);
         assert.equal(4, interpreter.i);
       });
@@ -1488,7 +1488,7 @@ describe("Teal Opcodes", function () {
         execExpectError(
           stack,
           [BigInt('5')],
-          new BranchIfNotZero("some-branch-3", interpreter),
+          new BranchIfNotZero(["some-branch-3"], 0, interpreter),
           ERRORS.TEAL.LABEL_NOT_FOUND
         )
       );
@@ -1503,7 +1503,7 @@ describe("Teal Opcodes", function () {
       stack.push(BigInt('1'));
       stack.push(BigInt('2'));
 
-      const op = new Return(interpreter);
+      const op = new Return([], 0, interpreter);
       op.execute(stack);
       assert.equal(1, stack.length());
       assert.equal(BigInt('2'), stack.pop());

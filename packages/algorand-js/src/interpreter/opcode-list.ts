@@ -691,10 +691,15 @@ export class Substring3 extends Op {
 export class Label extends Op {
   readonly label: string;
 
-  constructor (label: string) {
+    /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
     super();
-    this.label = label;
-  }
+    assertLen(args.length, 1, line);
+    this.label = args[0];
+  };
 
   execute (stack: TEALStack): void {}
 }
@@ -704,9 +709,14 @@ export class Branch extends Op {
   readonly label: string;
   readonly interpreter: Interpreter;
 
-  constructor (label: string, interpreter: Interpreter) {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
-    this.label = label;
+    assertLen(args.length, 1, line);
+    this.label = args[0];
     this.interpreter = interpreter;
   }
 
@@ -720,9 +730,14 @@ export class BranchIfZero extends Op {
   readonly label: string;
   readonly interpreter: Interpreter;
 
-  constructor (label: string, interpreter: Interpreter) {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
-    this.label = label;
+    assertLen(args.length, 1, line);
+    this.label = args[0];
     this.interpreter = interpreter;
   }
 
@@ -741,9 +756,14 @@ export class BranchIfNotZero extends Op {
   readonly label: string;
   readonly interpreter: Interpreter;
 
-  constructor (label: string, interpreter: Interpreter) {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
-    this.label = label;
+    assertLen(args.length, 1, line);
+    this.label = args[0];
     this.interpreter = interpreter;
   }
 
@@ -761,8 +781,13 @@ export class BranchIfNotZero extends Op {
 export class Return extends Op {
   readonly interpreter: Interpreter;
 
-  constructor (interpreter: Interpreter) {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
+    assertLen(args.length, 0, line);
     this.interpreter = interpreter;
   }
 
