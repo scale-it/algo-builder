@@ -478,11 +478,14 @@ export class Action<T> {
 }
 
 export interface RequestError extends Error {
-  statusCode?: number;
-  text: string;
-  body?: {
-    message?: string;
-  };
+  response?: {
+    statusCode: number;
+    text: string;
+    body: {
+      message: string;
+    };
+    error?: Error;
+  }
   error?: Error;
 }
 
