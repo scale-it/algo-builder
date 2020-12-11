@@ -12,7 +12,8 @@ import {
   Intcblock, Itob,
   Keccak256,
   Len, LessThan, LessThanEqualTo,
-  Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Sha256, Sha512_256, Store, Sub, Substring,
+  Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma,
+  Sha256, Sha512_256, Store, Sub, Substring,
   Substring3
 } from "../../../src/interpreter/opcode-list";
 import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MIN_UINT8 } from "../../../src/lib/constants";
@@ -30,7 +31,7 @@ describe("Teal Opcodes", function () {
     it("should return correct length of string", function () {
       const str = "HelloWorld";
       stack.push(toBytes(str));
-      const op = new Len();
+      const op = new Len([], 0);
       op.execute(stack);
 
       const len = stack.pop();
@@ -39,10 +40,24 @@ describe("Teal Opcodes", function () {
 
     it("should throw error with uint64", function () {
       stack.push(BigInt("1000"));
-      const op = new Len();
+      const op = new Len([], 0);
       expectTealError(
         () => op.execute(stack),
         ERRORS.TEAL.INVALID_TYPE
+      );
+    });
+  });
+
+  describe("Pragma", () => {
+    it("should store pragma version", () => {
+      const op = new Pragma(["version", "2"], 1);
+      assert.equal(op.version, "2");
+    });
+
+    it("should store throw length error", () => {
+      expectTealError(
+        () => new Pragma(["version", "2", "some-value"], 1),
+        ERRORS.TEAL.ASSERT_FIELD_LENGTH
       );
     });
   });
@@ -53,7 +68,7 @@ describe("Teal Opcodes", function () {
     it("should return correct addition of two unit64", function () {
       stack.push(BigInt("10"));
       stack.push(BigInt("20"));
-      const op = new Add();
+      const op = new Add([], 0);
       op.execute(stack);
 
       const top = stack.pop();
@@ -61,17 +76,17 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error with Add if stack is below min length",
-      execExpectError(stack, [BigInt("1000")], new Add(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [BigInt("1000")], new Add([], 0), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
 
     it("should throw error if Add is used with strings",
-      execExpectError(stack, strArr, new Add(), ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, strArr, new Add([], 0), ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw overflow error with Add", function () {
       stack.push(MAX_UINT64 - BigInt("5"));
       stack.push(MAX_UINT64 - BigInt("6"));
-      const op = new Add();
+      const op = new Add([], 0);
       expectTealError(
         () => op.execute(stack),
         ERRORS.TEAL.UINT64_OVERFLOW
@@ -85,7 +100,7 @@ describe("Teal Opcodes", function () {
     it("should return correct subtraction of two unit64", function () {
       stack.push(BigInt("30"));
       stack.push(BigInt("20"));
-      const op = new Sub();
+      const op = new Sub([], 0);
       op.execute(stack);
 
       const top = stack.pop();
@@ -93,17 +108,17 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error with Sub if stack is below min length",
-      execExpectError(stack, [BigInt("1000")], new Sub(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [BigInt("1000")], new Sub([], 0), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
 
     it("should throw error if Sub is used with strings",
-      execExpectError(stack, strArr, new Sub(), ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, strArr, new Sub([], 0), ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw underflow error with Sub if (A - B) < 0", function () {
       stack.push(BigInt("10"));
       stack.push(BigInt("20"));
-      const op = new Sub();
+      const op = new Sub([], 0);
       expectTealError(
         () => op.execute(stack),
         ERRORS.TEAL.UINT64_UNDERFLOW
@@ -117,7 +132,7 @@ describe("Teal Opcodes", function () {
     it("should return correct multiplication of two unit64", function () {
       stack.push(BigInt("20"));
       stack.push(BigInt("30"));
-      const op = new Mul();
+      const op = new Mul([], 0);
       op.execute(stack);
 
       const top = stack.pop();
@@ -125,17 +140,17 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error with Mul if stack is below min length",
-      execExpectError(stack, [BigInt("1000")], new Mul(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [BigInt("1000")], new Mul([], 0), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
 
     it("should throw error if Mul is used with strings",
-      execExpectError(stack, strArr, new Mul(), ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, strArr, new Mul([], 0), ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw overflow error with Mul if (A * B) > max_unit64", function () {
       stack.push(MAX_UINT64 - BigInt("5"));
       stack.push(BigInt(2));
-      const op = new Mul();
+      const op = new Mul([], 0);
       expectTealError(
         () => op.execute(stack),
         ERRORS.TEAL.UINT64_OVERFLOW
@@ -149,7 +164,7 @@ describe("Teal Opcodes", function () {
     it("should return correct division of two unit64", function () {
       stack.push(BigInt("40"));
       stack.push(BigInt("20"));
-      const op = new Div();
+      const op = new Div([], 0);
       op.execute(stack);
 
       const top = stack.pop();
@@ -159,7 +174,7 @@ describe("Teal Opcodes", function () {
     it("should return 0 on division of two unit64 with A == 0", function () {
       stack.push(BigInt("0"));
       stack.push(BigInt("40"));
-      const op = new Div();
+      const op = new Div([], 0);
       op.execute(stack);
 
       const top = stack.pop();
@@ -167,17 +182,17 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error with Div if stack is below min length",
-      execExpectError(stack, [BigInt("1000")], new Div(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [BigInt("1000")], new Div([], 0), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
 
     it("should throw error if Div is used with strings",
-      execExpectError(stack, strArr, new Div(), ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, strArr, new Div([], 0), ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should panic on A/B if B == 0", function () {
       stack.push(BigInt("10"));
       stack.push(BigInt("0"));
-      const op = new Div();
+      const op = new Div([], 0);
       expectTealError(
         () => op.execute(stack),
         ERRORS.TEAL.ZERO_DIV
@@ -554,7 +569,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error with bitwise-not if stack is below min length",
-      execExpectError(stack, [], new Add(), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [], new Add([], 0), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
 
     it("should throw error if bitwise-not is used with string",
@@ -1390,7 +1405,7 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("Int: should push uint64 to stack", function () {
-      const op = new Int(MAX_UINT64);
+      const op = new Int([MAX_UINT64.toString()], 0);
       op.execute(stack);
 
       assert.equal(1, stack.length());
@@ -1399,7 +1414,7 @@ describe("Teal Opcodes", function () {
 
     it("Addr: should push addr to stack", function () {
       const addr = "SOEI4UA72A7ZL5P25GNISSVWW724YABSGZ7GHW5ERV4QKK2XSXLXGXPG5Y";
-      const op = new Addr(addr);
+      const op = new Addr([addr], 0);
       op.execute(stack);
       assert.equal(1, stack.length());
       assert.deepEqual(decodeAddress(addr).publicKey, stack.pop());

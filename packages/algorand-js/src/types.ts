@@ -1,12 +1,12 @@
 import { AccountInfo } from "algosdk";
 
 import {
-  Add, Arg, Bytec, Bytecblock, Div, Len, Mul, Sub
+  Add, Addr, Arg, Byte, Bytec, Bytecblock, Div, Int, Len, Mul, Sub
 } from "./interpreter/opcode-list";
 import type { IStack } from "./lib/stack";
 
 export type Operator = Len | Add | Sub |
-Mul | Div | Arg | Bytecblock | Bytec;
+Mul | Div | Arg | Bytecblock | Bytec | Addr | Int | Byte;
 
 export type AppArgs = Array<string | number>;
 

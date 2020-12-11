@@ -5,3 +5,5 @@ export const MAX_UINT8 = 255;
 export const MIN_UINT8 = 0;
 export const DEFAULT_STACK_ELEM = BigInt("0");
 export const MAX_CONCAT_SIZE = 4096;
+
+export const reDigit = /^\d+$/;

@@ -1,5 +1,5 @@
 /* eslint sonarjs/no-identical-functions: 0 */
-import { decodeAddress, encodeAddress, verifyBytes } from "algosdk";
+import { decodeAddress, encodeAddress, isValidAddress, verifyBytes } from "algosdk";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
 import { Keccak } from 'sha3';
@@ -8,7 +8,7 @@ import { decode, encode } from "uint64be";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
-import { compareArray } from "../lib/helpers";
+import { assertLen, assertOnlyDigits, compareArray } from "../lib/helpers";
 import { convertToBuffer, convertToString } from "../lib/parse-data";
 import type { TEALStack } from "../types";
 import { EncodingType } from "../types";
@@ -17,8 +17,37 @@ import { Op } from "./opcode";
 
 const BIGINT0 = BigInt("0");
 const BIGINT1 = BigInt("1");
+
+// Store TEAL version
+export class Pragma extends Op {
+  readonly version;
+
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 2, line);
+    if (args[0] === "version") {
+      this.version = args[1];
+    } else {
+      throw new TealError(ERRORS.TEAL.PRAGMA_VERSION_ERROR, { got: args[0], line: line });
+    }
+  };
+}
+
 // pops string([]byte) from stack and pushes it's length to stack
 export class Len extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1);
     const last = this.assertBytes(stack.pop());
@@ -29,6 +58,15 @@ export class Len extends Op {
 // pops two unit64 from stack(last, prev) and pushes their sum(last + prev) to stack
 // panics on overflow (result > max_unit64)
 export class Add extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
@@ -42,6 +80,15 @@ export class Add extends Op {
 // pops two unit64 from stack(last, prev) and pushes their diff(last - prev) to stack
 // panics on underflow (result < 0)
 export class Sub extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
@@ -55,6 +102,15 @@ export class Sub extends Op {
 // pops two unit64 from stack(last, prev) and pushes their division(last / prev) to stack
 // panics if prev == 0
 export class Div extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
@@ -69,6 +125,15 @@ export class Div extends Op {
 // pops two unit64 from stack(last, prev) and pushes their mult(last * prev) to stack
 // panics on overflow (result > max_unit64)
 export class Mul extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
@@ -627,9 +692,15 @@ export class Substring3 extends Op {
 export class Int extends Op {
   readonly uint64: bigint;
 
-  constructor (uint64: bigint) {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
     super();
-    this.uint64 = uint64;
+    assertLen(args.length, 1, line);
+    assertOnlyDigits(args[0]);
+    this.uint64 = BigInt(args[0]);
   }
 
   execute (stack: TEALStack): void {
@@ -660,10 +731,18 @@ export class Byte extends Op {
 export class Addr extends Op {
   readonly addr: string;
 
-  constructor (addr: string) {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
     super();
-    this.addr = addr; // parser should verify the addr first
-  }
+    assertLen(args.length, 1, line);
+    if (!isValidAddress(args[0])) {
+      throw new TealError(ERRORS.TEAL.INVALID_ADDR, { addr: args[0], line: line });
+    }
+    this.addr = args[0];
+  };
 
   execute (stack: TEALStack): void {
     const addr = decodeAddress(this.addr);

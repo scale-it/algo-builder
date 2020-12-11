@@ -33,7 +33,7 @@ permissible range of 1 to 256`
   },
   INVALID_OP_ARG: {
     number: 3,
-    message: "Error encountered while executing teal with opcode %opcode%",
+    message: "Error encountered while executing teal with opcode %opcode% , Line : %line% ",
     title: "Invalid Operation",
     description: `Error encountered in stack while executing teal opcode %opcode%`
   },
@@ -113,6 +113,24 @@ by an index that does not exist.`
     message: "Input is not uint8",
     title: "Input is outside the valid uint8 range of 0 to 255",
     description: `Input is outside the valid uint8 range of 0 to 255`
+  },
+  ASSERT_FIELD_LENGTH: {
+    number: 16,
+    message: "Invalid Field Length Expected: '%exp%' Got: '%got%', Line : %line% ",
+    title: "Parse Error",
+    description: ``
+  },
+  INVALID_ADDR: {
+    number: 17,
+    message: "Invalid Address '%addr%', Line: %line%",
+    title: "Parse Error",
+    description: ``
+  },
+  PRAGMA_VERSION_ERROR: {
+    number: 18,
+    message: "Pragma version Error - Expected: version, got: %got%, Line: %line%",
+    title: "Parse Error",
+    description: ``
   }
 };
 
