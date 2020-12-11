@@ -2,283 +2,98 @@ import { Address, Transaction } from "algosdk";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
-import { ZERO_ADDRESS } from "../lib/constants";
+import { TxFieldDefaults } from "../lib/constants";
 import { toBytes } from "../lib/parse-data";
-import { StackElem, TxnField, TxnType } from "../types";
+import { TxnEncodedObj, TxnFields, TxnType, TxField, AssetParamsEnc, StackElem } from "../types";
+import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
 
-// regular bytes
-const bytes = [
-  TxnField.ApprovalProgram,
-  TxnField.ClearStateProgram,
-  TxnField.ConfigAssetUnitName,
-  TxnField.ConfigAssetName,
-  TxnField.ConfigAssetURL,
-  TxnField.ConfigAssetMetadataHash
-];
 
-// 32 byte addresses
-const addr = [
-  TxnField.Receiver,
-  TxnField.CloseRemainderTo,
-  TxnField.VotePK,
-  TxnField.SelectionPK,
-  TxnField.AssetSender,
-  TxnField.AssetReceiver,
-  TxnField.AssetCloseTo,
-  TxnField.ConfigAssetManager,
-  TxnField.ConfigAssetReserve,
-  TxnField.ConfigAssetFreeze,
-  TxnField.ConfigAssetClawback,
-  TxnField.FreezeAssetAccount
-];
 
-// returns default value of txn field
-function defaultSpec (txField: TxnField): StackElem {
-  if (bytes.includes(txField)) {
-    return new Uint8Array(0);
+const assetTxnFields = new Set([
+  TxnFields.ConfigAssetTotal,
+  TxnFields.ConfigAssetDecimals,
+  TxnFields.ConfigAssetDefaultFrozen,
+  TxnFields.ConfigAssetUnitName,
+  TxnFields.ConfigAssetName,
+  TxnFields.ConfigAssetURL,
+  TxnFields.ConfigAssetMetadataHash,
+  TxnFields.ConfigAssetManager,
+  TxnFields.ConfigAssetReserve,
+  TxnFields.ConfigAssetFreeze,
+  TxnFields.ConfigAssetClawback
+]);
+
+// return default value of txField if undefined,
+// otherwise return parsed data to stackElem
+function parseToStackElem (a: unknown, field: TxField): any {
+  if (Buffer.isBuffer(a)) {
+    return new Uint8Array(a);
   }
-  if (addr.includes(txField)) {
-    return ZERO_ADDRESS;
+  if (typeof a === "number") {
+    return BigInt(a);
+  }
+  if (typeof a === "string") {
+    return toBytes(a);
   }
 
-  return BigInt('0');
+  return TxFieldDefaults[field];
 }
 
-function assertBytesDefined (a?: Uint8Array): Uint8Array {
-  if (a === undefined) {
-    return new Uint8Array(0);
-  }
-  return a;
-}
-
-function assertUint64Defined (a?: number): bigint {
-  if (a === undefined) {
-    return BigInt('0');
-  }
-  return BigInt(a);
-}
-
-// return Zero Address if addr is undefined
-function assertAddr (addr?: Address): Uint8Array {
-  if (addr === undefined) {
-    return ZERO_ADDRESS;
-  }
-  return addr.publicKey;
-}
 
 /**
  * Description: returns specific transaction field value from tx object
  * @param txField: transaction field
  * @param interpreter: interpreter
  */
-export function txnSpecbyField (txField: TxnField, tx: Transaction, gtxs: Transaction[]): StackElem {
-  // common fields (for all transaction types)
+export function txnSpecbyField (txField: string, interpreter: Interpreter): StackElem {
+  const tx = interpreter.tx;
+  const gtxs = interpreter.gtxs;
+  let result; // store raw result, parse and return
+
+  // handle nested encoded obj (for assetParams)
+  if(assetTxnFields.has(txField)) {
+    const assetMetaData = tx['apar'];
+    result = assetMetaData[txField as keyof AssetParamsEnc];
+  }
+
+  // handle other cases
   switch (txField) {
-    case TxnField.Fee: {
-      return assertUint64Defined(tx.fee);
-    }
-    case TxnField.FirstValid: {
-      return assertUint64Defined(tx.firstRound);
-    }
-    case TxnField.LastValid: {
-      return assertUint64Defined(tx.lastRound);
-    }
-    case TxnField.Sender: {
-      const sender = tx.from.publicKey;
-      return assertBytesDefined(sender);
-    }
-    case TxnField.Type: {
-      return toBytes(tx.type);
-    }
-    case TxnField.TypeEnum: {
-      const typeEnum = TxnType[tx.type as keyof typeof TxnType]; // TxnType['pay']
-      return BigInt(typeEnum);
-    }
-    case TxnField.Lease: {
-      return assertBytesDefined(tx.lease);
-    }
-    case TxnField.Note: {
-      return assertBytesDefined(tx.note);
-    }
-    case TxnField.RekeyTo: {
-      return assertAddr(tx.reKeyTo);
-    }
-    case TxnField.FirstValidTime: { // Causes program to fail; reserved for future use
+    case 'FirstValidTime': { // Causes program to fail; reserved for future use
       throw new TealError(ERRORS.TEAL.LOGIC_REJECTION);
     }
-    case TxnField.NumAppArgs: {
-      return assertUint64Defined(tx.appArgs.length);
+    case 'TypeEnum': {
+      result = TxnType[tx.type as keyof typeof TxnType]; // TxnType['pay']
+      break;
     }
-    case TxnField.NumAccounts: {
-      return assertUint64Defined(tx.appAccounts.length);
+    case 'GroupIndex': {
+      result = gtxs.indexOf(tx);
+      break;
     }
-    case TxnField.GroupIndex: {
-      const idx = gtxs.indexOf(tx);
-      return assertUint64Defined(idx);
+    case 'TxID': {
+      return toBytes(tx.txID);
     }
-    case TxnField.TxID: {
-      return toBytes(tx.txID());
+    case 'NumAppArgs': {
+      const appArg = TxnFields.ApplicationArgs as keyof TxnEncodedObj;
+      const appArgs = tx[appArg] as Buffer[];
+      result = appArgs && appArgs.length;
+      break;
     }
-  }
-
-  // fields specific to txn type
-  switch (tx.type) {
-    // Payment Transaction
-    case 'pay': {
-      switch (txField) {
-        case TxnField.Receiver: {
-          return assertAddr(tx.to);
-        }
-        case TxnField.Amount: {
-          return assertUint64Defined(tx.amount);
-        }
-        case TxnField.CloseRemainderTo: {
-          return assertAddr(tx.closeRemainderTo);
-        }
-        default: {
-          return defaultSpec(txField);
-        }
-      }
+    case 'NumAccounts': {
+      const appAcc = TxnFields.Accounts as keyof TxnEncodedObj;
+      const appAccounts = tx[appAcc] as Buffer[];
+      result = appAccounts && appAccounts.length;
+      break;
     }
-
-    // Key Registration Transaction
-    case 'keyreg': {
-      switch (txField) {
-        case TxnField.VotePK: {
-          return assertBytesDefined(tx.voteKey);
-        }
-        case TxnField.SelectionPK: {
-          return assertBytesDefined(tx.selectionKey);
-        }
-        case TxnField.VoteFirst: {
-          return assertUint64Defined(tx.voteFirst);
-        }
-        case TxnField.VoteLast: {
-          return assertUint64Defined(tx.voteLast);
-        }
-        case TxnField.VoteKeyDilution: {
-          return assertUint64Defined(tx.voteKeyDilution);
-        }
-        default: {
-          return defaultSpec(txField);
-        }
-      }
-    }
-
-    // Asset Configuration Transaction
-    case 'acfg': {
-      switch (txField) {
-        case TxnField.ConfigAsset: {
-          return assertUint64Defined(tx.assetIndex);
-        }
-        case TxnField.ConfigAssetTotal: {
-          return assertUint64Defined(tx.assetTotal);
-        }
-        case TxnField.ConfigAssetDecimals: {
-          return assertUint64Defined(tx.assetDecimals);
-        }
-        case TxnField.ConfigAssetDefaultFrozen: {
-          return assertUint64Defined(tx.assetDefaultFrozen);
-        }
-        case TxnField.ConfigAssetUnitName: {
-          return toBytes(tx.assetUnitName);
-        }
-        case TxnField.ConfigAssetName: {
-          return toBytes(tx.assetName);
-        }
-        case TxnField.ConfigAssetURL: {
-          return toBytes(tx.assetURL);
-        }
-        case TxnField.ConfigAssetMetadataHash: {
-          return new Uint8Array(tx.assetMetadataHash);
-        }
-        case TxnField.ConfigAssetManager: {
-          return assertAddr(tx.assetManager);
-        }
-        case TxnField.ConfigAssetReserve: {
-          return assertAddr(tx.assetReserve);
-        }
-        case TxnField.ConfigAssetFreeze: {
-          return assertAddr(tx.assetFreeze);
-        }
-        case TxnField.ConfigAssetClawback: {
-          return assertAddr(tx.assetClawback);
-        }
-        default: {
-          return defaultSpec(txField);
-        }
-      }
-    }
-
-    // Asset Transfer Transaction
-    case 'axfer': {
-      switch (txField) {
-        case TxnField.XferAsset: {
-          return assertUint64Defined(tx.assetIndex);
-        }
-        case TxnField.AssetAmount: {
-          return assertUint64Defined(tx.amount);
-        }
-        case TxnField.AssetSender: {
-          return assertAddr(tx.from);
-        }
-        case TxnField.AssetReceiver: {
-          return assertAddr(tx.to);
-        }
-        case TxnField.AssetCloseTo: {
-          return assertAddr(tx.closeRemainderTo);
-        }
-        default: {
-          return defaultSpec(txField);
-        }
-      }
-    }
-
-    // Asset Freeze Transaction
-    case 'afrz': {
-      switch (txField) {
-        case TxnField.FreezeAsset: {
-          return assertUint64Defined(tx.assetIndex);
-        }
-        case TxnField.FreezeAssetAccount: {
-          return assertAddr(tx.freezeAccount);
-        }
-        case TxnField.FreezeAssetFrozen: {
-          return assertUint64Defined(tx.freezeState);
-        }
-        default: {
-          return defaultSpec(txField);
-        }
-      }
-    }
-
-    // Application Call Transaction
-    case 'appl': {
-      switch (txField) {
-        case TxnField.ApplicationID: {
-          return assertUint64Defined(tx.appIndex);
-        }
-        case TxnField.OnCompletion: {
-          return assertUint64Defined(tx.appOnComplete);
-        }
-        case TxnField.ApprovalProgram: {
-          return assertBytesDefined(tx.appApprovalProgram);
-        }
-        case TxnField.ClearStateProgram: {
-          return assertBytesDefined(tx.appClearProgram);
-        }
-        default: {
-          return defaultSpec(txField);
-        }
-      }
-    }
-
     default: {
-      throw new TealError(ERRORS.TEAL.UNKNOWN_TRANSACTION);
+      const encodedStr = TxnFields[txField]; // eg: rcv = TxnFields["Receiver"]
+      result = tx[encodedStr as keyof TxnEncodedObj]; // pk_buffer = tx['rcv']
     }
   }
+
+  return parseToStackElem(result, txField);
 }
+
 
 /**
  * Description: returns specific transaction field value from array
@@ -287,21 +102,19 @@ export function txnSpecbyField (txField: TxnField, tx: Transaction, gtxs: Transa
  * @param txField: transaction field
  * @param idx: array index
  */
-export function txnaSpecbyField (txField: TxnField, tx: Transaction, idx: number, op: Op): Uint8Array {
-  switch (txField) {
-    case TxnField.Accounts: {
-      op.checkIndexBound(idx, tx.appAccounts);
-      const acc = tx.appAccounts[idx];
-      return acc.publicKey;
+export function txAppArg (txField: TxField, tx: TxnEncodedObj, idx: number, op: Op): Uint8Array {
+  if (txField === 'Accounts' || txField === 'ApplicationArgs') {
+    const encodedStr = TxnFields[txField]; // 'apaa' or 'apat'
+    const result = tx[encodedStr as keyof TxnEncodedObj] as Buffer[]; // array of pk buffers (accounts or appArgs)
+
+    if(result) { // handle
+      return TxFieldDefaults[txField]
     }
-    case TxnField.ApplicationArgs: {
-      op.checkIndexBound(idx, tx.appArgs);
-      return tx.appArgs[idx];
-    }
-    default: {
-      throw new TealError(ERRORS.TEAL.INVALID_OP_ARG, {
-        opcode: "txna or gtxna"
-      });
-    }
+    op.checkIndexBound(idx, result);
+    return parseToStackElem(result[idx], txField);
   }
+
+  throw new TealError(ERRORS.TEAL.INVALID_OP_ARG, {
+    opcode: "txna or gtxna"
+  });
 }

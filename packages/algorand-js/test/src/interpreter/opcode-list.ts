@@ -8,17 +8,17 @@ import {
   Add, Addr, Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
   Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2,
   Ed25519verify,
-  EqualTo, Err, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc,
+  EqualTo, Err, GreaterThan, GreaterThanEqualTo, Int, Intc,
   Intcblock, Itob,
   Keccak256,
   Len, LessThan, LessThanEqualTo,
   Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Sha256, Sha512_256, Store, Sub, Substring,
-  Substring3, Txn, Txna
+  Substring3,
 } from "../../../src/interpreter/opcode-list";
-import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MIN_UINT8, ZERO_ADDRESS } from "../../../src/lib/constants";
+import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MIN_UINT8 } from "../../../src/lib/constants";
 import { convertToBuffer, toBytes } from "../../../src/lib/parse-data";
 import { Stack } from "../../../src/lib/stack";
-import { EncodingType, StackElem, TxnField } from "../../../src/types";
+import { EncodingType, StackElem, TxnFields } from "../../../src/types";
 import { execExpectError, expectTealError } from "../../helpers/errors";
 import { TXN_OBJ } from "../../mocks/txn";
 
@@ -1387,539 +1387,539 @@ describe("Teal Opcodes", function () {
     );
   });
 
-  describe("Transaction opcodes", function () {
-    const stack = new Stack<StackElem>();
-    const interpreter = new Interpreter();
-    interpreter.tx = TXN_OBJ as Transaction;
-    console.log('-------------------------------XXXXXXXXXXXXXXXXXX-------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+   describe("Transaction opcodes", function () {
+  //   const stack = new Stack<StackElem>();
+  //   const interpreter = new Interpreter();
+  //   interpreter.tx = TXN_OBJ as Transaction;
+  //   console.log('-------------------------------XXXXXXXXXXXXXXXXXX-------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
 
     describe("Txn: Common Fields", function () {
-      it("should push txn fee to stack", function () {
-        const op = new Txn(TxnField.Fee, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.fee), stack.pop());
-      });
-
-      it("should push txn firstRound to stack", function () {
-        const op = new Txn(TxnField.FirstValid, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.firstRound), stack.pop());
-      });
-
-      it("should push txn lastRound to stack", function () {
-        const op = new Txn(TxnField.LastValid, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.lastRound), stack.pop());
-      });
-
-      it("should push txn sender to stack", function () {
-        const op = new Txn(TxnField.Sender, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.from.publicKey, stack.pop());
-      });
-
-      it("should push txn type to stack", function () {
-        const op = new Txn(TxnField.Type, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(toBytes(TXN_OBJ.type), stack.pop());
-      });
-
-      it("should push txn typeEnum to stack", function () {
-        const op = new Txn(TxnField.TypeEnum, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(BigInt('1'), stack.pop());
-      });
-
-      it("should push txn lease to stack", function () {
-        const op = new Txn(TxnField.Lease, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.lease, stack.pop());
-      });
-
-      it("should push txn note to stack", function () {
-        const op = new Txn(TxnField.Note, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.note, stack.pop());
-      });
-
-      it("should push txn rekeyTo addr to stack", function () {
-        const op = new Txn(TxnField.RekeyTo, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.reKeyTo.publicKey, stack.pop());
-      });
-
-      it("should throw error on FirstValidTime",
-        execExpectError(
-          stack,
-          [],
-          new Txn(TxnField.FirstValidTime, interpreter),
-          ERRORS.TEAL.LOGIC_REJECTION
-        )
-      );
-
-      it("should push txn NumAppArgs to stack", function () {
-        const op = new Txn(TxnField.NumAppArgs, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.appArgs.length), stack.pop());
-      });
-
-      it("should push txn NumAccounts to stack", function () {
-        const op = new Txn(TxnField.NumAccounts, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.appAccounts.length), stack.pop());
-      });
-    });
-
-    describe("Txn: Payment", function () {
-      before(function () {
-        interpreter.tx.type = 'pay';
-      });
-
-      it("should push txn Receiver to stack", function () {
-        const op = new Txn(TxnField.Receiver, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.to.publicKey, stack.pop());
-      });
-
-      it("should push txn Amount to stack", function () {
-        const op = new Txn(TxnField.Amount, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.amount), stack.pop());
-      });
-
-      it("should push txn CloseRemainderTo to stack", function () {
-        const op = new Txn(TxnField.CloseRemainderTo, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.closeRemainderTo.publicKey, stack.pop());
-      });
-
-      it("should push default value to stack for pay", function () {
-        let op = new Txn(TxnField.AssetReceiver, interpreter);
-        op.execute(stack);
-        assert.deepEqual(ZERO_ADDRESS, stack.pop());
-
-        op = new Txn(TxnField.AssetAmount, interpreter);
-        op.execute(stack);
-        assert.deepEqual(BigInt('0'), stack.pop());
-      });
-    });
-
-    describe("Txn: Key Registration", function () {
-      before(function () {
-        interpreter.tx.type = 'keyreg';
-      });
-
-      it("should push txn VotePK to stack", function () {
-        const op = new Txn(TxnField.VotePK, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.voteKey, stack.pop());
-      });
-
-      it("should push txn SelectionPK to stack", function () {
-        const op = new Txn(TxnField.SelectionPK, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.selectionKey, stack.pop());
-      });
-
-      it("should push txn VoteFirst to stack", function () {
-        const op = new Txn(TxnField.VoteFirst, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.voteFirst), stack.pop());
-      });
-
-      it("should push txn VoteLast to stack", function () {
-        const op = new Txn(TxnField.VoteLast, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.voteLast), stack.pop());
-      });
-
-      it("should push txn VoteKeyDilution to stack", function () {
-        const op = new Txn(TxnField.VoteKeyDilution, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.voteKeyDilution), stack.pop());
-      });
-
-      it("should push default value to stack for keyreg", function () {
-        let op = new Txn(TxnField.AssetReceiver, interpreter);
-        op.execute(stack);
-        assert.deepEqual(ZERO_ADDRESS, stack.pop());
-
-        op = new Txn(TxnField.AssetAmount, interpreter);
-        op.execute(stack);
-        assert.deepEqual(BigInt('0'), stack.pop());
-      });
-    });
-
-    describe("Txn: Asset Configuration Transaction", function () {
-      before(function () {
-        interpreter.tx.type = 'acfg';
-      });
-
-      it("should push txn ConfigAsset to stack", function () {
-        const op = new Txn(TxnField.ConfigAsset, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.assetIndex), stack.pop());
-      });
-
-      it("should push txn ConfigAssetTotal to stack", function () {
-        const op = new Txn(TxnField.ConfigAssetTotal, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.assetTotal), stack.pop());
-      });
-
-      it("should push txn ConfigAssetDecimals to stack", function () {
-        const op = new Txn(TxnField.ConfigAssetDecimals, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.assetDecimals), stack.pop());
-      });
-
-      it("should push txn ConfigAssetDefaultFrozen to stack", function () {
-        const op = new Txn(TxnField.ConfigAssetDefaultFrozen, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.assetDefaultFrozen), stack.pop());
-      });
-
-      it("should push txn ConfigAssetUnitName to stack", function () {
-        const op = new Txn(TxnField.ConfigAssetUnitName, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(toBytes(TXN_OBJ.assetUnitName), stack.pop());
-      });
-
-      it("should push txn ConfigAssetName to stack", function () {
-        const op = new Txn(TxnField.ConfigAssetName, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(toBytes(TXN_OBJ.assetName), stack.pop());
-      });
-
-      it("should push txn ConfigAssetDefaultFrozen to stack", function () {
-        const op = new Txn(TxnField.ConfigAssetURL, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(toBytes(TXN_OBJ.assetURL), stack.pop());
-      });
-
-      it("should push txn ConfigAssetMetadataHash to stack", function () {
-        const op = new Txn(TxnField.ConfigAssetMetadataHash, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.assetMetadataHash, stack.pop());
-      });
-
-      it("should push txn ConfigAssetManager to stack", function () {
-        const op = new Txn(TxnField.ConfigAssetManager, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.assetManager.publicKey, stack.pop());
-      });
-
-      it("should push txn ConfigAssetReserve to stack", function () {
-        const op = new Txn(TxnField.ConfigAssetReserve, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.assetReserve.publicKey, stack.pop());
-      });
-
-      it("should push txn ConfigAssetFreeze to stack", function () {
-        const op = new Txn(TxnField.ConfigAssetFreeze, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.assetFreeze.publicKey, stack.pop());
-      });
-
-      it("should push txn ConfigAssetClawback to stack", function () {
-        const op = new Txn(TxnField.ConfigAssetClawback, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.assetClawback.publicKey, stack.pop());
-      });
-
-      it("should push default value to stack for acfg", function () {
-        let op = new Txn(TxnField.AssetReceiver, interpreter);
-        op.execute(stack);
-        assert.deepEqual(ZERO_ADDRESS, stack.pop());
-
-        op = new Txn(TxnField.AssetAmount, interpreter);
-        op.execute(stack);
-        assert.deepEqual(BigInt('0'), stack.pop());
-      });
-    });
-
-    describe("Txn: Asset Transfer Transaction", function () {
-      before(function () {
-        interpreter.tx.type = 'axfer';
-      });
-
-      it("should push txn XferAsset to stack", function () {
-        const op = new Txn(TxnField.XferAsset, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.assetIndex), stack.pop());
-      });
-
-      it("should push txn AssetAmount to stack", function () {
-        const op = new Txn(TxnField.AssetAmount, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.amount), stack.pop());
-      });
-
-      it("should push txn AssetSender to stack", function () {
-        const op = new Txn(TxnField.AssetSender, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.from.publicKey, stack.pop());
-      });
-
-      it("should push txn AssetReceiver to stack", function () {
-        const op = new Txn(TxnField.AssetReceiver, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.to.publicKey, stack.pop());
-      });
-
-      it("should push txn AssetCloseTo to stack", function () {
-        const op = new Txn(TxnField.AssetCloseTo, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.closeRemainderTo.publicKey, stack.pop());
-      });
-
-      it("should push default value to stack for axfer", function () {
-        let op = new Txn(TxnField.Receiver, interpreter); // txn type should be 'pay'
-        op.execute(stack);
-        assert.deepEqual(ZERO_ADDRESS, stack.pop());
-
-        op = new Txn(TxnField.ConfigAssetTotal, interpreter);
-        op.execute(stack);
-        assert.deepEqual(BigInt('0'), stack.pop());
-      });
-    });
-
-    describe("Txn: Asset Freeze Transaction", function () {
-      before(function () {
-        interpreter.tx.type = 'afrz';
-      });
-
-      it("should push txn FreezeAsset to stack", function () {
-        const op = new Txn(TxnField.FreezeAsset, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.assetIndex), stack.pop());
-      });
-
-      it("should push txn FreezeAssetAccount to stack", function () {
-        const op = new Txn(TxnField.FreezeAssetAccount, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.freezeAccount.publicKey, stack.pop());
-      });
-
-      it("should push txn FreezeAssetFrozen to stack", function () {
-        const op = new Txn(TxnField.FreezeAssetFrozen, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.freezeState), stack.pop());
-      });
-
-      it("should push default value to stack for afrz", function () {
-        let op = new Txn(TxnField.ConfigAssetManager, interpreter); // txn type should be 'pay'
-        op.execute(stack);
-        assert.deepEqual(ZERO_ADDRESS, stack.pop());
-
-        op = new Txn(TxnField.Amount, interpreter);
-        op.execute(stack);
-        assert.deepEqual(BigInt('0'), stack.pop());
-      });
-    });
-
-    describe("Txn: Application Call Transaction", function () {
-      before(function () {
-        interpreter.tx.type = 'appl';
-      });
-
-      it("should push txn ApplicationID to stack", function () {
-        const op = new Txn(TxnField.ApplicationID, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.appIndex), stack.pop());
-      });
-
-      it("should push txn OnCompletion to stack", function () {
-        const op = new Txn(TxnField.OnCompletion, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.appOnComplete), stack.pop());
-      });
-
-      it("should push txn ApprovalProgram to stack", function () {
-        const op = new Txn(TxnField.ApprovalProgram, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.appApprovalProgram, stack.pop());
-      });
-
-      it("should push txn ClearStateProgram to stack", function () {
-        const op = new Txn(TxnField.ClearStateProgram, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.appClearProgram, stack.pop());
-      });
-
-      it("should push default value to stack", function () {
-        let op = new Txn(TxnField.AssetSender, interpreter); // txn type should be 'axfer'
-        op.execute(stack);
-        assert.deepEqual(ZERO_ADDRESS, stack.pop());
-
-        op = new Txn(TxnField.AssetAmount, interpreter);
-        op.execute(stack);
-        assert.deepEqual(BigInt('0'), stack.pop());
-      });
-    });
-
-    describe("Txn: Unknown Transaction", function () {
-      before(function () {
-        interpreter.tx.type = 'unknown';
-      });
-
-      it("should throw error if txn is invalid",
-        execExpectError(
-          stack,
-          [],
-          new Txn(TxnField.AssetAmount, interpreter),
-          ERRORS.TEAL.UNKNOWN_TRANSACTION
-        )
-      );
-    });
-
-    describe("Gtxn", function () {
-      before(function () {
-        const tx = interpreter.tx;
-        const tx2 = { ...tx, fee: 2222 };
-        interpreter.gtxs = [tx, tx2];
-      });
-
-      it("push fee from 2nd transaction in group", function () {
-        const op = new Gtxn(TxnField.Fee, 1, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(BigInt('2222'), stack.pop());
-      });
-    });
-
-    describe("Txna", function () {
-      before(function () {
-        interpreter.tx.type = 'pay';
-      });
-
-      it("push addr from 2nd account to stack", function () {
-        const op = new Txna(TxnField.Accounts, 1, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.appAccounts[1].publicKey, stack.pop());
-      });
-
-      it("push addr from 1st AppArg to stack", function () {
-        const op = new Txna(TxnField.ApplicationArgs, 0, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.appArgs[0], stack.pop());
-      });
-    });
-
-    describe("Gtxna", function () {
-      before(function () {
-        interpreter.tx.type = 'pay';
-      });
-
-      it("push addr from 1st account of 2nd Txn in txGrp to stack", function () {
-        const op = new Gtxna(TxnField.Accounts, 1, 0, interpreter);
-        op.execute(stack);
-
-        assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.appAccounts[0].publicKey, stack.pop());
-      });
-
-      it("should throw error if field is not an array", function () {
-        execExpectError(
-          stack,
-          [],
-          new Gtxna(TxnField.Fee, 1, 0, interpreter),
-          ERRORS.TEAL.INVALID_OP_ARG
-        );
-      });
-    });
-  });
+      // it("should push txn fee to stack", function () {
+      //   const op = new Txn(TxnField.Fee, interpreter);
+      //   op.execute(stack);
+
+      //   assert.equal(1, stack.length());
+      //   assert.deepEqual(BigInt(TXN_OBJ.fee), stack.pop());
+      // });
+
+  //     it("should push txn firstRound to stack", function () {
+  //       const op = new Txn(TxnField.FirstValid, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(BigInt(TXN_OBJ.firstRound), stack.pop());
+  //     });
+
+  //     it("should push txn lastRound to stack", function () {
+  //       const op = new Txn(TxnField.LastValid, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(BigInt(TXN_OBJ.lastRound), stack.pop());
+  //     });
+
+  //     it("should push txn sender to stack", function () {
+  //       const op = new Txn(TxnField.Sender, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(TXN_OBJ.from.publicKey, stack.pop());
+  //     });
+
+  //     it("should push txn type to stack", function () {
+  //       const op = new Txn(TxnField.Type, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(toBytes(TXN_OBJ.type), stack.pop());
+  //     });
+
+  //     it("should push txn typeEnum to stack", function () {
+  //       const op = new Txn(TxnField.TypeEnum, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(BigInt('1'), stack.pop());
+  //     });
+
+  //     it("should push txn lease to stack", function () {
+  //       const op = new Txn(TxnField.Lease, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(TXN_OBJ.lease, stack.pop());
+  //     });
+
+  //     it("should push txn note to stack", function () {
+  //       const op = new Txn(TxnField.Note, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(TXN_OBJ.note, stack.pop());
+  //     });
+
+  //     it("should push txn rekeyTo addr to stack", function () {
+  //       const op = new Txn(TxnField.RekeyTo, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(TXN_OBJ.reKeyTo.publicKey, stack.pop());
+  //     });
+
+  //     it("should throw error on FirstValidTime",
+  //       execExpectError(
+  //         stack,
+  //         [],
+  //         new Txn(TxnField.FirstValidTime, interpreter),
+  //         ERRORS.TEAL.LOGIC_REJECTION
+  //       )
+  //     );
+
+  //     it("should push txn NumAppArgs to stack", function () {
+  //       const op = new Txn(TxnField.NumAppArgs, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(BigInt(TXN_OBJ.appArgs.length), stack.pop());
+  //     });
+
+  //     it("should push txn NumAccounts to stack", function () {
+  //       const op = new Txn(TxnField.NumAccounts, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(BigInt(TXN_OBJ.appAccounts.length), stack.pop());
+  //     });
+      });
+
+  //   describe("Txn: Payment", function () {
+  //     before(function () {
+  //       interpreter.tx.type = 'pay';
+  //     });
+
+  //     it("should push txn Receiver to stack", function () {
+  //       const op = new Txn(TxnField.Receiver, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(TXN_OBJ.to.publicKey, stack.pop());
+  //     });
+
+  //     it("should push txn Amount to stack", function () {
+  //       const op = new Txn(TxnField.Amount, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(BigInt(TXN_OBJ.amount), stack.pop());
+  //     });
+
+  //     it("should push txn CloseRemainderTo to stack", function () {
+  //       const op = new Txn(TxnField.CloseRemainderTo, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(TXN_OBJ.closeRemainderTo.publicKey, stack.pop());
+  //     });
+
+  //     it("should push default value to stack for pay", function () {
+  //       let op = new Txn(TxnField.AssetReceiver, interpreter);
+  //       op.execute(stack);
+  //       assert.deepEqual(ZERO_ADDRESS, stack.pop());
+
+  //       op = new Txn(TxnField.AssetAmount, interpreter);
+  //       op.execute(stack);
+  //       assert.deepEqual(BigInt('0'), stack.pop());
+  //     });
+  //   });
+
+  //   describe("Txn: Key Registration", function () {
+  //     before(function () {
+  //       interpreter.tx.type = 'keyreg';
+  //     });
+
+  //     it("should push txn VotePK to stack", function () {
+  //       const op = new Txn(TxnField.VotePK, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(TXN_OBJ.voteKey, stack.pop());
+  //     });
+
+  //     it("should push txn SelectionPK to stack", function () {
+  //       const op = new Txn(TxnField.SelectionPK, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(TXN_OBJ.selectionKey, stack.pop());
+  //     });
+
+  //     it("should push txn VoteFirst to stack", function () {
+  //       const op = new Txn(TxnField.VoteFirst, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(BigInt(TXN_OBJ.voteFirst), stack.pop());
+  //     });
+
+  //     it("should push txn VoteLast to stack", function () {
+  //       const op = new Txn(TxnField.VoteLast, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(BigInt(TXN_OBJ.voteLast), stack.pop());
+  //     });
+
+  //     it("should push txn VoteKeyDilution to stack", function () {
+  //       const op = new Txn(TxnField.VoteKeyDilution, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(BigInt(TXN_OBJ.voteKeyDilution), stack.pop());
+  //     });
+
+  //     it("should push default value to stack for keyreg", function () {
+  //       let op = new Txn(TxnField.AssetReceiver, interpreter);
+  //       op.execute(stack);
+  //       assert.deepEqual(ZERO_ADDRESS, stack.pop());
+
+  //       op = new Txn(TxnField.AssetAmount, interpreter);
+  //       op.execute(stack);
+  //       assert.deepEqual(BigInt('0'), stack.pop());
+  //     });
+  //   });
+
+  //   describe("Txn: Asset Configuration Transaction", function () {
+  //     before(function () {
+  //       interpreter.tx.type = 'acfg';
+  //     });
+
+  //     it("should push txn ConfigAsset to stack", function () {
+  //       const op = new Txn(TxnField.ConfigAsset, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(BigInt(TXN_OBJ.assetIndex), stack.pop());
+  //     });
+
+  //     it("should push txn ConfigAssetTotal to stack", function () {
+  //       const op = new Txn(TxnField.ConfigAssetTotal, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(BigInt(TXN_OBJ.assetTotal), stack.pop());
+  //     });
+
+  //     it("should push txn ConfigAssetDecimals to stack", function () {
+  //       const op = new Txn(TxnField.ConfigAssetDecimals, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(BigInt(TXN_OBJ.assetDecimals), stack.pop());
+  //     });
+
+  //     it("should push txn ConfigAssetDefaultFrozen to stack", function () {
+  //       const op = new Txn(TxnField.ConfigAssetDefaultFrozen, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(BigInt(TXN_OBJ.assetDefaultFrozen), stack.pop());
+  //     });
+
+  //     it("should push txn ConfigAssetUnitName to stack", function () {
+  //       const op = new Txn(TxnField.ConfigAssetUnitName, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(toBytes(TXN_OBJ.assetUnitName), stack.pop());
+  //     });
+
+  //     it("should push txn ConfigAssetName to stack", function () {
+  //       const op = new Txn(TxnField.ConfigAssetName, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(toBytes(TXN_OBJ.assetName), stack.pop());
+  //     });
+
+  //     it("should push txn ConfigAssetDefaultFrozen to stack", function () {
+  //       const op = new Txn(TxnField.ConfigAssetURL, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(toBytes(TXN_OBJ.assetURL), stack.pop());
+  //     });
+
+  //     it("should push txn ConfigAssetMetadataHash to stack", function () {
+  //       const op = new Txn(TxnField.ConfigAssetMetadataHash, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(TXN_OBJ.assetMetadataHash, stack.pop());
+  //     });
+
+  //     it("should push txn ConfigAssetManager to stack", function () {
+  //       const op = new Txn(TxnField.ConfigAssetManager, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(TXN_OBJ.assetManager.publicKey, stack.pop());
+  //     });
+
+  //     it("should push txn ConfigAssetReserve to stack", function () {
+  //       const op = new Txn(TxnField.ConfigAssetReserve, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(TXN_OBJ.assetReserve.publicKey, stack.pop());
+  //     });
+
+  //     it("should push txn ConfigAssetFreeze to stack", function () {
+  //       const op = new Txn(TxnField.ConfigAssetFreeze, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(TXN_OBJ.assetFreeze.publicKey, stack.pop());
+  //     });
+
+  //     it("should push txn ConfigAssetClawback to stack", function () {
+  //       const op = new Txn(TxnField.ConfigAssetClawback, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(TXN_OBJ.assetClawback.publicKey, stack.pop());
+  //     });
+
+  //     it("should push default value to stack for acfg", function () {
+  //       let op = new Txn(TxnField.AssetReceiver, interpreter);
+  //       op.execute(stack);
+  //       assert.deepEqual(ZERO_ADDRESS, stack.pop());
+
+  //       op = new Txn(TxnField.AssetAmount, interpreter);
+  //       op.execute(stack);
+  //       assert.deepEqual(BigInt('0'), stack.pop());
+  //     });
+  //   });
+
+  //   describe("Txn: Asset Transfer Transaction", function () {
+  //     before(function () {
+  //       interpreter.tx.type = 'axfer';
+  //     });
+
+  //     it("should push txn XferAsset to stack", function () {
+  //       const op = new Txn(TxnField.XferAsset, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(BigInt(TXN_OBJ.assetIndex), stack.pop());
+  //     });
+
+  //     it("should push txn AssetAmount to stack", function () {
+  //       const op = new Txn(TxnField.AssetAmount, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(BigInt(TXN_OBJ.amount), stack.pop());
+  //     });
+
+  //     it("should push txn AssetSender to stack", function () {
+  //       const op = new Txn(TxnField.AssetSender, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(TXN_OBJ.from.publicKey, stack.pop());
+  //     });
+
+  //     it("should push txn AssetReceiver to stack", function () {
+  //       const op = new Txn(TxnField.AssetReceiver, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(TXN_OBJ.to.publicKey, stack.pop());
+  //     });
+
+  //     it("should push txn AssetCloseTo to stack", function () {
+  //       const op = new Txn(TxnField.AssetCloseTo, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(TXN_OBJ.closeRemainderTo.publicKey, stack.pop());
+  //     });
+
+  //     it("should push default value to stack for axfer", function () {
+  //       let op = new Txn(TxnField.Receiver, interpreter); // txn type should be 'pay'
+  //       op.execute(stack);
+  //       assert.deepEqual(ZERO_ADDRESS, stack.pop());
+
+  //       op = new Txn(TxnField.ConfigAssetTotal, interpreter);
+  //       op.execute(stack);
+  //       assert.deepEqual(BigInt('0'), stack.pop());
+  //     });
+  //   });
+
+  //   describe("Txn: Asset Freeze Transaction", function () {
+  //     before(function () {
+  //       interpreter.tx.type = 'afrz';
+  //     });
+
+  //     it("should push txn FreezeAsset to stack", function () {
+  //       const op = new Txn(TxnField.FreezeAsset, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(BigInt(TXN_OBJ.assetIndex), stack.pop());
+  //     });
+
+  //     it("should push txn FreezeAssetAccount to stack", function () {
+  //       const op = new Txn(TxnField.FreezeAssetAccount, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(TXN_OBJ.freezeAccount.publicKey, stack.pop());
+  //     });
+
+  //     it("should push txn FreezeAssetFrozen to stack", function () {
+  //       const op = new Txn(TxnField.FreezeAssetFrozen, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(BigInt(TXN_OBJ.freezeState), stack.pop());
+  //     });
+
+  //     it("should push default value to stack for afrz", function () {
+  //       let op = new Txn(TxnField.ConfigAssetManager, interpreter); // txn type should be 'pay'
+  //       op.execute(stack);
+  //       assert.deepEqual(ZERO_ADDRESS, stack.pop());
+
+  //       op = new Txn(TxnField.Amount, interpreter);
+  //       op.execute(stack);
+  //       assert.deepEqual(BigInt('0'), stack.pop());
+  //     });
+  //   });
+
+  //   describe("Txn: Application Call Transaction", function () {
+  //     before(function () {
+  //       interpreter.tx.type = 'appl';
+  //     });
+
+  //     it("should push txn ApplicationID to stack", function () {
+  //       const op = new Txn(TxnField.ApplicationID, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(BigInt(TXN_OBJ.appIndex), stack.pop());
+  //     });
+
+  //     it("should push txn OnCompletion to stack", function () {
+  //       const op = new Txn(TxnField.OnCompletion, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(BigInt(TXN_OBJ.appOnComplete), stack.pop());
+  //     });
+
+  //     it("should push txn ApprovalProgram to stack", function () {
+  //       const op = new Txn(TxnField.ApprovalProgram, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(TXN_OBJ.appApprovalProgram, stack.pop());
+  //     });
+
+  //     it("should push txn ClearStateProgram to stack", function () {
+  //       const op = new Txn(TxnField.ClearStateProgram, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(TXN_OBJ.appClearProgram, stack.pop());
+  //     });
+
+  //     it("should push default value to stack", function () {
+  //       let op = new Txn(TxnField.AssetSender, interpreter); // txn type should be 'axfer'
+  //       op.execute(stack);
+  //       assert.deepEqual(ZERO_ADDRESS, stack.pop());
+
+  //       op = new Txn(TxnField.AssetAmount, interpreter);
+  //       op.execute(stack);
+  //       assert.deepEqual(BigInt('0'), stack.pop());
+  //     });
+  //   });
+
+  //   describe("Txn: Unknown Transaction", function () {
+  //     before(function () {
+  //       interpreter.tx.type = 'unknown';
+  //     });
+
+  //     it("should throw error if txn is invalid",
+  //       execExpectError(
+  //         stack,
+  //         [],
+  //         new Txn(TxnField.AssetAmount, interpreter),
+  //         ERRORS.TEAL.UNKNOWN_TRANSACTION
+  //       )
+  //     );
+  //   });
+
+  //   describe("Gtxn", function () {
+  //     before(function () {
+  //       const tx = interpreter.tx;
+  //       const tx2 = { ...tx, fee: 2222 };
+  //       interpreter.gtxs = [tx, tx2];
+  //     });
+
+  //     it("push fee from 2nd transaction in group", function () {
+  //       const op = new Gtxn(TxnField.Fee, 1, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(BigInt('2222'), stack.pop());
+  //     });
+  //   });
+
+  //   describe("Txna", function () {
+  //     before(function () {
+  //       interpreter.tx.type = 'pay';
+  //     });
+
+  //     it("push addr from 2nd account to stack", function () {
+  //       const op = new Txna(TxnField.Accounts, 1, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(TXN_OBJ.appAccounts[1].publicKey, stack.pop());
+  //     });
+
+  //     it("push addr from 1st AppArg to stack", function () {
+  //       const op = new Txna(TxnField.ApplicationArgs, 0, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(TXN_OBJ.appArgs[0], stack.pop());
+  //     });
+  //   });
+
+  //   describe("Gtxna", function () {
+  //     before(function () {
+  //       interpreter.tx.type = 'pay';
+  //     });
+
+  //     it("push addr from 1st account of 2nd Txn in txGrp to stack", function () {
+  //       const op = new Gtxna(TxnField.Accounts, 1, 0, interpreter);
+  //       op.execute(stack);
+
+  //       assert.equal(1, stack.length());
+  //       assert.deepEqual(TXN_OBJ.appAccounts[0].publicKey, stack.pop());
+  //     });
+
+  //     it("should throw error if field is not an array", function () {
+  //       execExpectError(
+  //         stack,
+  //         [],
+  //         new Gtxna(TxnField.Fee, 1, 0, interpreter),
+  //         ERRORS.TEAL.INVALID_OP_ARG
+  //       );
+  //     });
+  //   });
+   });
 
   describe("Pseudo-Ops", function () {
     const stack = new Stack<StackElem>();
