@@ -129,7 +129,7 @@ by an index that does not exist.`
   PRAGMA_VERSION_ERROR: {
     number: 18,
     message: "Pragma version Error - Expected: version, got: %got%, Line: %line%",
-    title: "Invalid Address",
+    title: "Parse Error",
     description: ``
   }
 };
