@@ -18,7 +18,7 @@ export interface Txn extends TxnEncodedObj {
 }
 
 // https://developer.algorand.org/docs/reference/teal/opcodes/#txn
-export const TxnFields: {[key: string]: any} = {
+export const TxnFields: {[key: string]: string} = {
   Sender: 'snd',
   Fee: 'fee',
   FirstValid: 'fv',
