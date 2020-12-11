@@ -123,7 +123,7 @@ by an index that does not exist.`
   INVALID_ADDR: {
     number: 17,
     message: "Invalid Address '%addr%', Line: %line%",
-    title: "Invalid Address",
+    title: "Parse Error",
     description: ``
   },
   PRAGMA_VERSION_ERROR: {
