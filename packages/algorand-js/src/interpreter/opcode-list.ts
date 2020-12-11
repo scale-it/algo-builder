@@ -15,7 +15,7 @@ import { EncodingType } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
 
-const BIGINT0 = BigInt("0");
+export const BIGINT0 = BigInt("0");
 const BIGINT1 = BigInt("1");
 
 // Store TEAL version
@@ -684,6 +684,97 @@ export class Substring3 extends Op {
 
     const subString = this.subString(start, end, byteString);
     stack.push(subString);
+  }
+}
+
+// represents branch name of a new branch
+export class Label extends Op {
+  readonly label: string;
+
+  constructor (label: string) {
+    super();
+    this.label = label;
+  }
+
+  execute (stack: TEALStack): void {}
+}
+
+// branch unconditionally to label
+export class Branch extends Op {
+  readonly label: string;
+  readonly interpreter: Interpreter;
+
+  constructor (label: string, interpreter: Interpreter) {
+    super();
+    this.label = label;
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.interpreter.jumpForward(this.label);
+  }
+}
+
+// branch conditionally if top of stack is zero
+export class BranchIfZero extends Op {
+  readonly label: string;
+  readonly interpreter: Interpreter;
+
+  constructor (label: string, interpreter: Interpreter) {
+    super();
+    this.label = label;
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1);
+    const last = this.assertBigInt(stack.pop());
+
+    if (last === BIGINT0) {
+      this.interpreter.jumpForward(this.label);
+    }
+  }
+}
+
+// branch conditionally if top of stack is non zero
+export class BranchIfNotZero extends Op {
+  readonly label: string;
+  readonly interpreter: Interpreter;
+
+  constructor (label: string, interpreter: Interpreter) {
+    super();
+    this.label = label;
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1);
+    const last = this.assertBigInt(stack.pop());
+
+    if (last !== BIGINT0) {
+      this.interpreter.jumpForward(this.label);
+    }
+  }
+}
+
+// use last value on stack as success value; end
+export class Return extends Op {
+  readonly interpreter: Interpreter;
+
+  constructor (interpreter: Interpreter) {
+    super();
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1);
+
+    const last = stack.pop();
+    while (stack.length()) {
+      stack.pop();
+    }
+    stack.push(last); // use last value as success
+    this.interpreter.i = this.interpreter.instructions.length; // end execution
   }
 }
 

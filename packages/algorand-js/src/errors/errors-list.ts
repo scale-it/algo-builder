@@ -16,6 +16,8 @@ export const ERROR_RANGES = {
   TEAL: { min: 0, max: 99, title: "TEAL opcode errors" }
 };
 
+const PARSE_ERROR = "Parse Error";
+
 const tealErrors = {
   ASSERT_STACK_LENGTH: {
     number: 1,
@@ -117,20 +119,32 @@ by an index that does not exist.`
   ASSERT_FIELD_LENGTH: {
     number: 16,
     message: "Invalid Field Length Expected: '%exp%' Got: '%got%', Line : %line% ",
-    title: "Parse Error",
+    title: PARSE_ERROR,
     description: ``
   },
   INVALID_ADDR: {
     number: 17,
     message: "Invalid Address '%addr%', Line: %line%",
-    title: "Parse Error",
+    title: PARSE_ERROR,
     description: ``
   },
   PRAGMA_VERSION_ERROR: {
     number: 18,
     message: "Pragma version Error - Expected: version, got: %got%, Line: %line%",
-    title: "Parse Error",
+    title: PARSE_ERROR,
     description: ``
+  },
+  LABEL_NOT_FOUND: {
+    number: 19,
+    message: "Label not found",
+    title: "Label %label% not found",
+    description: `Label %label% not found`
+  },
+  INVALID_STACK_ELEM: {
+    number: 20,
+    message: "Invalid top of stack or length of stack > 1",
+    title: "Invalid top of stack or length of stack > 1",
+    description: `Either Length of stack is >= 1 or top of stack is not uint64`
   }
 };
 
