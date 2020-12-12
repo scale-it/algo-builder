@@ -116,7 +116,7 @@ by an index that does not exist.`
     title: "Input is outside the valid uint8 range of 0 to 255",
     description: `Input is outside the valid uint8 range of 0 to 255`
   },
-  ASSERT_FIELD_LENGTH: {
+  ASSERT_LENGTH: {
     number: 16,
     message: "Invalid Field Length Expected: '%exp%' Got: '%got%', Line : %line% ",
     title: PARSE_ERROR,

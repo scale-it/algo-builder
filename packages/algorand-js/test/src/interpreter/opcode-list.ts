@@ -57,7 +57,7 @@ describe("Teal Opcodes", function () {
     it("should store throw length error", () => {
       expectTealError(
         () => new Pragma(["version", "2", "some-value"], 1),
-        ERRORS.TEAL.ASSERT_FIELD_LENGTH
+        ERRORS.TEAL.ASSERT_LENGTH
       );
     });
   });
@@ -202,10 +202,12 @@ describe("Teal Opcodes", function () {
 
   describe("Arg[N]", function () {
     const stack = new Stack<StackElem>();
+    const interpreter = new Interpreter();
     const args = ["Arg0", "Arg1", "Arg2", "Arg3"].map(toBytes);
+    interpreter.args = args;
 
     it("should push arg_0 from argument array to stack", function () {
-      const op = new Arg(args[0]);
+      const op = new Arg(["0"], 1, interpreter);
       op.execute(stack);
 
       const top = stack.pop();
@@ -213,7 +215,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push arg_1 from argument array to stack", function () {
-      const op = new Arg(args[1]);
+      const op = new Arg(["1"], 1, interpreter);
       op.execute(stack);
 
       const top = stack.pop();
@@ -221,7 +223,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push arg_2 from argument array to stack", function () {
-      const op = new Arg(args[2]);
+      const op = new Arg(["2"], 1, interpreter);
       op.execute(stack);
 
       const top = stack.pop();
@@ -229,7 +231,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push arg_3 from argument array to stack", function () {
-      const op = new Arg(args[3]);
+      const op = new Arg(["3"], 1, interpreter);
       op.execute(stack);
 
       const top = stack.pop();
@@ -237,11 +239,9 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error if accessing arg is not defined", function () {
-      const args = [new Uint8Array(0)];
-      const op = new Arg(args[1]);
       expectTealError(
-        () => op.execute(stack),
-        ERRORS.TEAL.INVALID_TYPE
+        () => new Arg(["5"], 1, interpreter),
+        ERRORS.TEAL.INDEX_OUT_OF_BOUND
       );
     });
   });
@@ -251,12 +251,12 @@ describe("Teal Opcodes", function () {
 
     it("should throw error if bytecblock length exceeds uint8", function () {
       const interpreter = new Interpreter();
-      const bytecblock: Uint8Array[] = [];
+      const bytecblock: string[] = [];
       for (let i = 0; i < MAX_UINT8 + 5; i++) {
-        bytecblock.push(toBytes("my_byte"));
+        bytecblock.push("my_byte");
       }
 
-      const op = new Bytecblock(interpreter, bytecblock);
+      const op = new Bytecblock(bytecblock, interpreter);
       expectTealError(
         () => op.execute(stack),
         ERRORS.TEAL.ASSERT_ARR_LENGTH
@@ -265,11 +265,15 @@ describe("Teal Opcodes", function () {
 
     it("should load byte block to interpreter bytecblock", function () {
       const interpreter = new Interpreter();
-      const bytecblock = ["bytec_0", "bytec_1", "bytec_2", "bytec_3"].map(toBytes);
-      const op = new Bytecblock(interpreter, bytecblock);
+      const bytecblock = ["bytec_0", "bytec_1", "bytec_2", "bytec_3"];
+      const op = new Bytecblock(bytecblock, interpreter);
       op.execute(stack);
 
-      assert.deepEqual(bytecblock, interpreter.bytecblock);
+      const expected: Uint8Array[] = [];
+      for (const val of bytecblock) {
+        expected.push(toBytes(val));
+      }
+      assert.deepEqual(expected, interpreter.bytecblock);
     });
   });
 
@@ -280,7 +284,7 @@ describe("Teal Opcodes", function () {
     interpreter.bytecblock = bytecblock;
 
     it("should push bytec_0 from bytecblock to stack", function () {
-      const op = new Bytec(0, interpreter);
+      const op = new Bytec(["0"], 1, interpreter);
       op.execute(stack);
 
       const top = stack.pop();
@@ -288,7 +292,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push bytec_1 from bytecblock to stack", function () {
-      const op = new Bytec(1, interpreter);
+      const op = new Bytec(["1"], 1, interpreter);
       op.execute(stack);
 
       const top = stack.pop();
@@ -296,7 +300,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push bytec_2 from bytecblock to stack", function () {
-      const op = new Bytec(2, interpreter);
+      const op = new Bytec(["2"], 1, interpreter);
       op.execute(stack);
 
       const top = stack.pop();
@@ -304,7 +308,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push bytec_3 from bytecblock to stack", function () {
-      const op = new Bytec(3, interpreter);
+      const op = new Bytec(["3"], 1, interpreter);
       op.execute(stack);
 
       const top = stack.pop();
@@ -312,7 +316,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error on loading bytec[N] if index is out of bound", function () {
-      const op = new Bytec(bytecblock.length + 1, interpreter);
+      const op = new Bytec(["5"], 1, interpreter);
       expectTealError(
         () => op.execute(stack),
         ERRORS.TEAL.INDEX_OUT_OF_BOUND
@@ -325,12 +329,12 @@ describe("Teal Opcodes", function () {
 
     it("should throw error if intcblock length exceeds uint8", function () {
       const interpreter = new Interpreter();
-      const intcblock: Array<bigint> = [];
+      const intcblock: string[] = [];
       for (let i = 0; i < MAX_UINT8 + 5; i++) {
-        intcblock.push(BigInt(i.toString()));
+        intcblock.push(i.toString());
       }
 
-      const op = new Intcblock(interpreter, intcblock);
+      const op = new Intcblock(intcblock, interpreter);
       expectTealError(
         () => op.execute(stack),
         ERRORS.TEAL.ASSERT_ARR_LENGTH
@@ -339,11 +343,11 @@ describe("Teal Opcodes", function () {
 
     it("should load intcblock to interpreter intcblock", function () {
       const interpreter = new Interpreter();
-      const intcblock = ["0", "1", "2", "3"].map(BigInt);
-      const op = new Intcblock(interpreter, intcblock);
+      const intcblock = ["0", "1", "2", "3"];
+      const op = new Intcblock(intcblock, interpreter);
       op.execute(stack);
 
-      assert.deepEqual(intcblock, interpreter.intcblock);
+      assert.deepEqual(intcblock.map(BigInt), interpreter.intcblock);
     });
   });
 
@@ -354,7 +358,7 @@ describe("Teal Opcodes", function () {
     interpreter.intcblock = intcblock;
 
     it("should push intc_0 from intcblock to stack", function () {
-      const op = new Intc(0, interpreter);
+      const op = new Intc(["0"], 1, interpreter);
       op.execute(stack);
 
       const top = stack.pop();
@@ -362,7 +366,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push intc_1 from intcblock to stack", function () {
-      const op = new Intc(1, interpreter);
+      const op = new Intc(["1"], 1, interpreter);
       op.execute(stack);
 
       const top = stack.pop();
@@ -370,7 +374,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push intc_2 from intcblock to stack", function () {
-      const op = new Intc(2, interpreter);
+      const op = new Intc(["2"], 1, interpreter);
       op.execute(stack);
 
       const top = stack.pop();
@@ -378,7 +382,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push intc_3 from intcblock to stack", function () {
-      const op = new Intc(3, interpreter);
+      const op = new Intc(["3"], 1, interpreter);
       op.execute(stack);
 
       const top = stack.pop();
@@ -386,7 +390,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error on loading intc[N] if index is out of bound", function () {
-      const op = new Intc(intcblock.length + 1, interpreter);
+      const op = new Intc(["5"], 1, interpreter);
       expectTealError(
         () => op.execute(stack),
         ERRORS.TEAL.INDEX_OUT_OF_BOUND

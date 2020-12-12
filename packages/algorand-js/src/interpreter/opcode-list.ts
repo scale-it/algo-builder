@@ -1,4 +1,5 @@
 /* eslint sonarjs/no-identical-functions: 0 */
+import { toBytes } from "algob";
 import { decodeAddress, encodeAddress, isValidAddress, verifyBytes } from "algosdk";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
@@ -8,7 +9,7 @@ import { decode, encode } from "uint64be";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
-import { assertLen, assertOnlyDigits, compareArray } from "../lib/helpers";
+import { assertBound, assertLen, assertOnlyDigits, compareArray } from "../lib/helpers";
 import { convertToBuffer, convertToString, getEncoding } from "../lib/parse-data";
 import type { TEALStack } from "../types";
 import { EncodingType } from "../types";
@@ -152,10 +153,15 @@ export class Arg extends Op {
    * @param args words list extracted from line
    * @param line line number in TEAL file
    */
-  constructor (args: Uint8Array) {
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
-    // assertLen(args.length, 0, line);
-    this._arg = args;
+    assertLen(args.length, 1, line);
+    assertOnlyDigits(args[0]);
+
+    const index = BigInt(args);
+    assertBound(interpreter.args.length, Number(index));
+
+    this._arg = interpreter.args[Number(index)];
   }
 
   execute (stack: TEALStack): void {
@@ -169,8 +175,14 @@ export class Bytecblock extends Op {
   readonly bytecblock: Uint8Array[];
   readonly interpreter: Interpreter;
 
-  constructor (interpreter: Interpreter, bytecblock: Uint8Array[]) {
+  constructor (args: string[], interpreter: Interpreter) {
     super();
+    const bytecblock: Uint8Array[] = [];
+    for (const val of args) {
+      assertOnlyDigits(val);
+      bytecblock.push(toBytes(val));
+    }
+
     this.interpreter = interpreter;
     this.bytecblock = bytecblock;
   }
@@ -186,9 +198,11 @@ export class Bytec extends Op {
   readonly index: number;
   readonly interpreter: Interpreter;
 
-  constructor (idx: number, interpreter: Interpreter) {
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
-    this.index = idx;
+    assertLen(args.length, 1, line);
+
+    this.index = Number(args[0]);
     this.interpreter = interpreter;
   }
 
@@ -204,8 +218,14 @@ export class Intcblock extends Op {
   readonly intcblock: Array<bigint>;
   readonly interpreter: Interpreter;
 
-  constructor (interpreter: Interpreter, intcblock: Array<bigint>) {
+  constructor (args: string[], interpreter: Interpreter) {
     super();
+    const intcblock: Array<bigint> = [];
+    for (const val of args) {
+      assertOnlyDigits(val);
+      intcblock.push(BigInt(val));
+    }
+
     this.interpreter = interpreter;
     this.intcblock = intcblock;
   }
@@ -221,9 +241,11 @@ export class Intc extends Op {
   readonly index: number;
   readonly interpreter: Interpreter;
 
-  constructor (index: number, interpreter: Interpreter) {
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
-    this.index = index;
+    assertLen(args.length, 1, line);
+
+    this.index = Number(args[0]);
     this.interpreter = interpreter;
   }
 

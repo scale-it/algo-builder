@@ -19,7 +19,8 @@ describe("Interpreter", function () {
   it("should reject logic if top of stack is invalid", function () {
     const interpreter = new Interpreter();
     const args = [toBytes("")];
-    const logic = [new Arg(args[0])];
+    interpreter.args = args;
+    const logic = [new Arg(["0"], 1, interpreter)];
     expectTealError(
       () => interpreter.execute(fkParam, logic, args, []),
       ERRORS.TEAL.LOGIC_REJECTION

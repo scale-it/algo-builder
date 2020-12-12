@@ -31,7 +31,19 @@ export function assertOnlyDigits (val: string): void {
  */
 export function assertLen (val: number, expected: number, line: number): void {
   if (val !== expected) {
-    throw new TealError(ERRORS.TEAL.ASSERT_FIELD_LENGTH, { exp: expected, got: val, line: line });
+    throw new TealError(ERRORS.TEAL.ASSERT_LENGTH, { exp: expected, got: val, line: line });
+  }
+}
+
+/**
+ * Description: assert index bound
+ * @param val Comparsion result
+ * @param expected expected result
+ * @param line Line number in TEAL file
+ */
+export function assertBound (len: number, idx: number): void {
+  if (idx >= len) {
+    throw new TealError(ERRORS.TEAL.INDEX_OUT_OF_BOUND);
   }
 }
 

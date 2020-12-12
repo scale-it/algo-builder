@@ -150,7 +150,7 @@ describe("Parser", function () {
     it("should throw error for wrong field length for '+'", () => {
       expectTealError(
         () => opcodeFromSentence(["+", "+"], 1),
-        ERRORS.TEAL.ASSERT_FIELD_LENGTH
+        ERRORS.TEAL.ASSERT_LENGTH
       );
     });
 
@@ -164,7 +164,7 @@ describe("Parser", function () {
     it("should throw error for wrong field length for '-'", () => {
       expectTealError(
         () => opcodeFromSentence(["-", "-"], 1),
-        ERRORS.TEAL.ASSERT_FIELD_LENGTH
+        ERRORS.TEAL.ASSERT_LENGTH
       );
     });
 
@@ -178,7 +178,7 @@ describe("Parser", function () {
     it("should throw error for wrong field length for '/'", () => {
       expectTealError(
         () => opcodeFromSentence(["/", "/"], 1),
-        ERRORS.TEAL.ASSERT_FIELD_LENGTH
+        ERRORS.TEAL.ASSERT_LENGTH
       );
     });
 
@@ -192,7 +192,7 @@ describe("Parser", function () {
     it("should throw error for wrong field length for '*'", () => {
       expectTealError(
         () => opcodeFromSentence(["*", "*"], 1),
-        ERRORS.TEAL.ASSERT_FIELD_LENGTH
+        ERRORS.TEAL.ASSERT_LENGTH
       );
     });
 
@@ -207,7 +207,7 @@ describe("Parser", function () {
     it("should throw error for wrong field length for 'addr'", () => {
       expectTealError(
         () => opcodeFromSentence(["addr"], 1),
-        ERRORS.TEAL.ASSERT_FIELD_LENGTH
+        ERRORS.TEAL.ASSERT_LENGTH
       );
     });
 
@@ -229,7 +229,7 @@ describe("Parser", function () {
     it("should throw error for wrong field length for 'int'", () => {
       expectTealError(
         () => opcodeFromSentence(["int"], 1),
-        ERRORS.TEAL.ASSERT_FIELD_LENGTH
+        ERRORS.TEAL.ASSERT_LENGTH
       );
     });
 
