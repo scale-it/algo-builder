@@ -16,7 +16,7 @@ export const ERROR_RANGES = {
   TEAL: { min: 0, max: 99, title: "TEAL opcode errors" }
 };
 
-const PARSE_ERROR = "PARSE_ERROR";
+const PARSE_ERROR = "Parse Error";
 
 const tealErrors = {
   ASSERT_STACK_LENGTH: {
