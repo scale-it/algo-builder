@@ -8,19 +8,22 @@ import {
   Add, Addr, Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
   Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2,
   Ed25519verify,
-  EqualTo, Err, GreaterThan, GreaterThanEqualTo, Int, Intc,
+  EqualTo, Err, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna,
+  Int, Intc,
   Intcblock, Itob,
   Keccak256,
   Len, LessThan, LessThanEqualTo,
   Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma,
   Sha256, Sha512_256, Store, Sub, Substring,
-  Substring3
+  Substring3, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
+import { parseToStackElem } from "../../../src/interpreter/txn";
 import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MIN_UINT8 } from "../../../src/lib/constants";
 import { convertToBuffer, toBytes } from "../../../src/lib/parse-data";
 import { Stack } from "../../../src/lib/stack";
 import { EncodingType, StackElem } from "../../../src/types";
 import { execExpectError, expectTealError } from "../../helpers/errors";
+import { TXN_OBJ } from "../../mocks/txn";
 
 describe("Teal Opcodes", function () {
   const strArr = ["str1", "str2"].map(toBytes);
@@ -1399,6 +1402,464 @@ describe("Teal Opcodes", function () {
         ERRORS.TEAL.SUBSTRING_RANGE_BEYOND
       )
     );
+  });
+
+  describe("Transaction opcodes", function () {
+    const stack = new Stack<StackElem>();
+    const interpreter = new Interpreter();
+    interpreter.tx = TXN_OBJ;
+
+    describe("Txn: Common Fields", function () {
+      it("should push txn fee to stack", function () {
+        const op = new Txn('Fee', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(parseToStackElem(TXN_OBJ.fee, 'Fee'), stack.pop());
+      });
+
+      it("should push txn firstRound to stack", function () {
+        const op = new Txn('FirstValid', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(parseToStackElem(TXN_OBJ.fv, 'FirstValid'), stack.pop());
+      });
+
+      it("should push txn lastRound to stack", function () {
+        const op = new Txn('LastValid', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(parseToStackElem(TXN_OBJ.lv, 'LastValid'), stack.pop());
+      });
+
+      it("should push txn sender to stack", function () {
+        const op = new Txn('Sender', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.snd, stack.pop());
+      });
+
+      it("should push txn type to stack", function () {
+        const op = new Txn('Type', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(toBytes(TXN_OBJ.type), stack.pop());
+      });
+
+      it("should push txn typeEnum to stack", function () {
+        const op = new Txn('TypeEnum', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(BigInt('1'), stack.pop());
+      });
+
+      it("should push txn lease to stack", function () {
+        const op = new Txn('Lease', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.lx, stack.pop());
+      });
+
+      it("should push txn note to stack", function () {
+        const op = new Txn('Note', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.note, stack.pop());
+      });
+
+      it("should push txn rekeyTo addr to stack", function () {
+        const op = new Txn('RekeyTo', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.rekey, stack.pop());
+      });
+
+      it("should throw error on FirstValidTime",
+        execExpectError(
+          stack,
+          [],
+          new Txn('FirstValidTime', interpreter),
+          ERRORS.TEAL.LOGIC_REJECTION
+        )
+      );
+
+      it("should push txn NumAppArgs to stack", function () {
+        const op = new Txn('NumAppArgs', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(BigInt(TXN_OBJ.apaa.length), stack.pop());
+      });
+
+      it("should push txn NumAccounts to stack", function () {
+        const op = new Txn('NumAccounts', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(BigInt(TXN_OBJ.apat.length), stack.pop());
+      });
+    });
+
+    describe("Txn: Payment", function () {
+      before(function () {
+        interpreter.tx.type = 'pay';
+      });
+
+      it("should push txn Receiver to stack", function () {
+        const op = new Txn('Receiver', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.rcv, stack.pop());
+      });
+
+      it("should push txn Amount to stack", function () {
+        const op = new Txn('Amount', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(BigInt(TXN_OBJ.amt), stack.pop());
+      });
+
+      it("should push txn CloseRemainderTo to stack", function () {
+        const op = new Txn('CloseRemainderTo', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.close, stack.pop());
+      });
+    });
+
+    describe("Txn: Key Registration", function () {
+      before(function () {
+        interpreter.tx.type = 'keyreg';
+      });
+
+      it("should push txn VotePK to stack", function () {
+        const op = new Txn('VotePK', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.votekey, stack.pop());
+      });
+
+      it("should push txn SelectionPK to stack", function () {
+        const op = new Txn('SelectionPK', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.selkey, stack.pop());
+      });
+
+      it("should push txn VoteFirst to stack", function () {
+        const op = new Txn('VoteFirst', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(BigInt(TXN_OBJ.votefst), stack.pop());
+      });
+
+      it("should push txn VoteLast to stack", function () {
+        const op = new Txn('VoteLast', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(BigInt(TXN_OBJ.votelst), stack.pop());
+      });
+
+      it("should push txn VoteKeyDilution to stack", function () {
+        const op = new Txn('VoteKeyDilution', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(BigInt(TXN_OBJ.votekd), stack.pop());
+      });
+    });
+
+    describe("Txn: Asset Configuration Transaction", function () {
+      before(function () {
+        interpreter.tx.type = 'acfg';
+      });
+
+      it("should push txn ConfigAsset to stack", function () {
+        const op = new Txn('ConfigAsset', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(BigInt(TXN_OBJ.caid), stack.pop());
+      });
+
+      it("should push txn ConfigAssetTotal to stack", function () {
+        const op = new Txn('ConfigAssetTotal', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(BigInt(TXN_OBJ.apar.t), stack.pop());
+      });
+
+      it("should push txn ConfigAssetDecimals to stack", function () {
+        const op = new Txn('ConfigAssetDecimals', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(BigInt(TXN_OBJ.apar.dc), stack.pop());
+      });
+
+      it("should push txn ConfigAssetDefaultFrozen to stack", function () {
+        const op = new Txn('ConfigAssetDefaultFrozen', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(BigInt(TXN_OBJ.apar.df), stack.pop());
+      });
+
+      it("should push txn ConfigAssetUnitName to stack", function () {
+        const op = new Txn('ConfigAssetUnitName', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(toBytes(TXN_OBJ.apar.un), stack.pop());
+      });
+
+      it("should push txn ConfigAssetName to stack", function () {
+        const op = new Txn('ConfigAssetName', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(toBytes(TXN_OBJ.apar.an), stack.pop());
+      });
+
+      it("should push txn ConfigAssetDefaultFrozen to stack", function () {
+        const op = new Txn('ConfigAssetURL', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(toBytes(TXN_OBJ.apar.au), stack.pop());
+      });
+
+      it("should push txn ConfigAssetMetadataHash to stack", function () {
+        const op = new Txn('ConfigAssetMetadataHash', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apar.am, stack.pop());
+      });
+
+      it("should push txn ConfigAssetManager to stack", function () {
+        const op = new Txn('ConfigAssetManager', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apar.m, stack.pop());
+      });
+
+      it("should push txn ConfigAssetReserve to stack", function () {
+        const op = new Txn('ConfigAssetReserve', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apar.r, stack.pop());
+      });
+
+      it("should push txn ConfigAssetFreeze to stack", function () {
+        const op = new Txn('ConfigAssetFreeze', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apar.f, stack.pop());
+      });
+
+      it("should push txn ConfigAssetClawback to stack", function () {
+        const op = new Txn('ConfigAssetClawback', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apar.c, stack.pop());
+      });
+    });
+
+    describe("Txn: Asset Transfer Transaction", function () {
+      before(function () {
+        interpreter.tx.type = 'axfer';
+      });
+
+      it("should push txn XferAsset to stack", function () {
+        const op = new Txn('XferAsset', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(BigInt(TXN_OBJ.xaid), stack.pop());
+      });
+
+      it("should push txn AssetAmount to stack", function () {
+        const op = new Txn('AssetAmount', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(BigInt(TXN_OBJ.aamt), stack.pop());
+      });
+
+      it("should push txn AssetSender to stack", function () {
+        const op = new Txn('AssetSender', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.asnd, stack.pop());
+      });
+
+      it("should push txn AssetReceiver to stack", function () {
+        const op = new Txn('AssetReceiver', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.arcv, stack.pop());
+      });
+
+      it("should push txn AssetCloseTo to stack", function () {
+        const op = new Txn('AssetCloseTo', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.aclose, stack.pop());
+      });
+    });
+
+    describe("Txn: Asset Freeze Transaction", function () {
+      before(function () {
+        interpreter.tx.type = 'afrz';
+      });
+
+      it("should push txn FreezeAsset to stack", function () {
+        const op = new Txn('FreezeAsset', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(BigInt(TXN_OBJ.faid), stack.pop());
+      });
+
+      it("should push txn FreezeAssetAccount to stack", function () {
+        const op = new Txn('FreezeAssetAccount', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.fadd, stack.pop());
+      });
+
+      it("should push txn FreezeAssetFrozen to stack", function () {
+        const op = new Txn('FreezeAssetFrozen', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(BigInt(TXN_OBJ.afrz), stack.pop());
+      });
+    });
+
+    describe("Txn: Application Call Transaction", function () {
+      before(function () {
+        interpreter.tx.type = 'appl';
+      });
+
+      it("should push txn ApplicationID to stack", function () {
+        const op = new Txn('ApplicationID', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(BigInt(TXN_OBJ.apid), stack.pop());
+      });
+
+      it("should push txn OnCompletion to stack", function () {
+        const op = new Txn('OnCompletion', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(BigInt(TXN_OBJ.apan), stack.pop());
+      });
+
+      it("should push txn ApprovalProgram to stack", function () {
+        const op = new Txn('ApprovalProgram', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apap, stack.pop());
+      });
+
+      it("should push txn ClearStateProgram to stack", function () {
+        const op = new Txn('ClearStateProgram', interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apsu, stack.pop());
+      });
+    });
+
+    describe("Gtxn", function () {
+      before(function () {
+        const tx = interpreter.tx;
+        const tx2 = { ...tx, fee: 2222 };
+        interpreter.gtxs = [tx, tx2];
+      });
+
+      it("push fee from 2nd transaction in group", function () {
+        const op = new Gtxn('Fee', 1, interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(BigInt('1000'), stack.pop());
+      });
+    });
+
+    describe("Txna", function () {
+      before(function () {
+        interpreter.tx.type = 'pay';
+      });
+
+      it("push addr from 2nd account to stack", function () {
+        const op = new Txna('Accounts', 1, interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
+      });
+
+      it("push addr from 1st AppArg to stack", function () {
+        const op = new Txna('ApplicationArgs', 0, interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apaa[0], stack.pop());
+      });
+    });
+
+    describe("Gtxna", function () {
+      before(function () {
+        interpreter.tx.type = 'pay';
+      });
+
+      it("push addr from 1st account of 2nd Txn in txGrp to stack", function () {
+        const op = new Gtxna('Accounts', 1, 0, interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
+      });
+
+      it("should throw error if field is not an array", function () {
+        execExpectError(
+          stack,
+          [],
+          new Gtxna('Fee', 1, 0, interpreter),
+          ERRORS.TEAL.INVALID_OP_ARG
+        );
+      });
+    });
   });
 
   describe("Pseudo-Ops", function () {
