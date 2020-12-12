@@ -1445,7 +1445,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("Byte: should push parsed hex string as bytes to stack", function () {
-      const hexStr = "0x250001000192CD0000002F6D6E742F72"; // original: 0x250001000192CD0000002F6D6E742F72
+      const hexStr = "0x250001000192CD0000002F6D6E742F72";
       const bytes = new Uint8Array(Buffer.from(hexStr.slice(2), 'hex'));
 
       const op = new Byte([hexStr], 1);
