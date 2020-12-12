@@ -152,6 +152,7 @@ export class Arg extends Op {
   /**
    * @param args words list extracted from line
    * @param line line number in TEAL file
+   * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
@@ -175,6 +176,11 @@ export class Bytecblock extends Op {
   readonly bytecblock: Uint8Array[];
   readonly interpreter: Interpreter;
 
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     const bytecblock: Uint8Array[] = [];
@@ -197,6 +203,11 @@ export class Bytec extends Op {
   readonly index: number;
   readonly interpreter: Interpreter;
 
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     assertLen(args.length, 1, line);
@@ -217,6 +228,11 @@ export class Intcblock extends Op {
   readonly intcblock: Array<bigint>;
   readonly interpreter: Interpreter;
 
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     const intcblock: Array<bigint> = [];
@@ -240,6 +256,11 @@ export class Intc extends Op {
   readonly index: number;
   readonly interpreter: Interpreter;
 
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     assertLen(args.length, 1, line);
@@ -358,6 +379,11 @@ export class Store extends Op {
   readonly index: number;
   readonly interpreter: Interpreter;
 
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     assertLen(args.length, 1, line);
@@ -380,6 +406,11 @@ export class Load extends Op {
   readonly index: number;
   readonly interpreter: Interpreter;
 
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     assertLen(args.length, 1, line);
