@@ -1,8 +1,9 @@
 import { assert } from "chai";
 
-// import { ERRORS } from "../../../src/errors/errors-list";
+import { ERRORS } from "../../../src/errors/errors-list";
 import { getEncoding } from "../../../src/lib/parse-data";
 import { EncodingType } from "../../../src/types";
+import { expectTealError } from "../../helpers/errors";
 
 describe("Get Encoding for Byte Data", () => {
   it("should return corrent Encoding type for string", () => {
@@ -47,5 +48,24 @@ describe("Get Encoding for Byte Data", () => {
 
     res = getEncoding(["base32(MFRGGZDFMY=)"], 1);
     assert.deepEqual(res, [str, EncodingType.BASE32]);
+  });
+
+  it("should throw error for wrong decoding data", () => {
+    expectTealError(
+      () => getEncoding(["base64(././"], 1),
+      ERRORS.TEAL.DECODE_ERROR
+    );
+
+    expectTealError(
+      () => getEncoding(["b32(././"], 1),
+      ERRORS.TEAL.DECODE_ERROR
+    );
+  });
+
+  it("should throw error for unkown decoding type", () => {
+    expectTealError(
+      () => getEncoding(["base6", "(././"], 1),
+      ERRORS.TEAL.UNKOWN_DECODE_TYPE
+    );
   });
 });
