@@ -179,7 +179,6 @@ export class Bytecblock extends Op {
     super();
     const bytecblock: Uint8Array[] = [];
     for (const val of args) {
-      assertOnlyDigits(val);
       bytecblock.push(toBytes(val));
     }
 
