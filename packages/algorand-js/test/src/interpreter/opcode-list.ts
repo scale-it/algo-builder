@@ -256,7 +256,7 @@ describe("Teal Opcodes", function () {
         bytecblock.push("my_byte");
       }
 
-      const op = new Bytecblock(bytecblock, interpreter);
+      const op = new Bytecblock(bytecblock, 1, interpreter);
       expectTealError(
         () => op.execute(stack),
         ERRORS.TEAL.ASSERT_ARR_LENGTH
@@ -266,7 +266,7 @@ describe("Teal Opcodes", function () {
     it("should load byte block to interpreter bytecblock", function () {
       const interpreter = new Interpreter();
       const bytecblock = ["bytec_0", "bytec_1", "bytec_2", "bytec_3"];
-      const op = new Bytecblock(bytecblock, interpreter);
+      const op = new Bytecblock(bytecblock, 1, interpreter);
       op.execute(stack);
 
       const expected: Uint8Array[] = [];
@@ -334,7 +334,7 @@ describe("Teal Opcodes", function () {
         intcblock.push(i.toString());
       }
 
-      const op = new Intcblock(intcblock, interpreter);
+      const op = new Intcblock(intcblock, 1, interpreter);
       expectTealError(
         () => op.execute(stack),
         ERRORS.TEAL.ASSERT_ARR_LENGTH
@@ -344,7 +344,7 @@ describe("Teal Opcodes", function () {
     it("should load intcblock to interpreter intcblock", function () {
       const interpreter = new Interpreter();
       const intcblock = ["0", "1", "2", "3"];
-      const op = new Intcblock(intcblock, interpreter);
+      const op = new Intcblock(intcblock, 1, interpreter);
       op.execute(stack);
 
       assert.deepEqual(intcblock.map(BigInt), interpreter.intcblock);
@@ -455,7 +455,7 @@ describe("Teal Opcodes", function () {
       const val = BigInt("0");
       stack.push(val);
 
-      const op = new Store(0, interpreter);
+      const op = new Store(["0"], 1, interpreter);
       op.execute(stack);
       assert.equal(stack.length(), 0); // verify stack is popped
       assert.equal(val, interpreter.scratch[0]);
@@ -466,7 +466,7 @@ describe("Teal Opcodes", function () {
       const val = toBytes("HelloWorld");
       stack.push(val);
 
-      const op = new Store(0, interpreter);
+      const op = new Store(["0"], 1, interpreter);
       op.execute(stack);
       assert.equal(stack.length(), 0); // verify stack is popped
       assert.equal(val, interpreter.scratch[0]);
@@ -476,7 +476,7 @@ describe("Teal Opcodes", function () {
       const interpreter = new Interpreter();
       stack.push(BigInt("0"));
 
-      const op = new Store(MAX_UINT8 + 5, interpreter);
+      const op = new Store([(MAX_UINT8 + 5).toString()], 1, interpreter);
       expectTealError(
         () => op.execute(stack),
         ERRORS.TEAL.INDEX_OUT_OF_BOUND
@@ -486,7 +486,7 @@ describe("Teal Opcodes", function () {
     it("should throw error on store if stack is empty", function () {
       const interpreter = new Interpreter();
       const stack = new Stack<StackElem>(); // empty stack
-      const op = new Store(0, interpreter);
+      const op = new Store(["0"], 1, interpreter);
       expectTealError(
         () => op.execute(stack),
         ERRORS.TEAL.ASSERT_STACK_LENGTH
@@ -588,7 +588,7 @@ describe("Teal Opcodes", function () {
     interpreter.scratch = scratch;
 
     it("should load uint64 from scratch space to stack", function () {
-      const op = new Load(0, interpreter);
+      const op = new Load(["0"], 1, interpreter);
       const len = stack.length();
 
       op.execute(stack);
@@ -597,7 +597,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should load byte[] from scratch space to stack", function () {
-      const op = new Load(1, interpreter);
+      const op = new Load(["1"], 1, interpreter);
       const len = stack.length();
 
       op.execute(stack);
@@ -606,7 +606,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error on load if index is out of bound", function () {
-      const op = new Load(MAX_UINT8 + 5, interpreter);
+      const op = new Load([(MAX_UINT8 + 5).toString()], 1, interpreter);
       expectTealError(
         () => op.execute(stack),
         ERRORS.TEAL.INDEX_OUT_OF_BOUND
@@ -615,7 +615,7 @@ describe("Teal Opcodes", function () {
 
     it("should load default value to stack if value at a slot is not intialized", function () {
       const interpreter = new Interpreter();
-      const op = new Load(0, interpreter);
+      const op = new Load(["0"], 1, interpreter);
       op.execute(stack);
       assert.equal(DEFAULT_STACK_ELEM, stack.pop());
     });

@@ -3,6 +3,8 @@ import readline from "readline";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
+import { Interpreter } from "../interpreter/interpreter";
+import { assertLen } from "../lib/helpers";
 import { Operator } from "../types";
 import {
   Add, Addr, Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
@@ -25,9 +27,7 @@ var opCodeMap: {[key: string]: any } = {
   "/": Div,
   "*": Mul,
 
-  Arg: Arg, // TO-DO
-
-  // TO-DO
+  arg: Arg,
   bytecblock: Bytecblock,
   bytec: Bytec,
   intcblock: Intcblock,
@@ -74,6 +74,11 @@ var opCodeMap: {[key: string]: any } = {
   int: Int,
   byte: Byte
 };
+
+// list of opcodes that require one extra parameter than others: `interpreter`.
+const interpreterReqList = new Set();
+interpreterReqList.add("arg").add("bytecblock").add("bytec").add("intcblock").add("intc");
+interpreterReqList.add("store").add("load");
 
 /**
  * Description: Read line and split it into words
@@ -168,17 +173,43 @@ export function wordsFromLine (line: string): string[] {
  * @param counter: line number in TEAL file
  */
 export function opcodeFromSentence (words: string[], counter: number): Operator {
-  const opCode = words[0];
-  // arg, intc, bytec --------- intcblock, bytecblock
-  if (opCode.startsWith("arg_")) {
+  let opCode = words[0];
+  const interpreter = new Interpreter();
 
+  // arg
+  if (opCode.startsWith("arg_")) {
+    assertLen(words.length, 1, counter);
+    words = [];
+    words.push("arg_");
+    words.push(opCode.slice(4));
+    opCode = "arg";
   }
+  // intc
+  if (opCode.startsWith("intc_")) {
+    assertLen(words.length, 1, counter);
+    words = [];
+    words.push("intc_");
+    words.push(opCode.slice(5));
+    opCode = "intc";
+  }
+  // bytec
+  if (opCode.startsWith("bytec_")) {
+    assertLen(words.length, 1, counter);
+    words = [];
+    words.push("bytec_");
+    words.push(opCode.slice(6));
+    opCode = "bytec";
+  }
+
   words.shift();
 
   if (opCodeMap[opCode] === undefined) {
     throw new TealError(ERRORS.TEAL.INVALID_OP_ARG);
   }
 
+  if (interpreterReqList.has(opCode)) {
+    return new opCodeMap[opCode](words, counter, interpreter);
+  }
   return new opCodeMap[opCode](words, counter);
 }
 

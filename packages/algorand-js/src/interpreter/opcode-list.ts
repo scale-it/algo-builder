@@ -175,7 +175,7 @@ export class Bytecblock extends Op {
   readonly bytecblock: Uint8Array[];
   readonly interpreter: Interpreter;
 
-  constructor (args: string[], interpreter: Interpreter) {
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     const bytecblock: Uint8Array[] = [];
     for (const val of args) {
@@ -217,7 +217,7 @@ export class Intcblock extends Op {
   readonly intcblock: Array<bigint>;
   readonly interpreter: Interpreter;
 
-  constructor (args: string[], interpreter: Interpreter) {
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     const intcblock: Array<bigint> = [];
     for (const val of args) {
@@ -358,9 +358,12 @@ export class Store extends Op {
   readonly index: number;
   readonly interpreter: Interpreter;
 
-  constructor (index: number, interpreter: Interpreter) {
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
-    this.index = index;
+    assertLen(args.length, 1, line);
+    assertOnlyDigits(args[0]);
+
+    this.index = Number(args[0]);
     this.interpreter = interpreter;
   }
 
@@ -377,9 +380,12 @@ export class Load extends Op {
   readonly index: number;
   readonly interpreter: Interpreter;
 
-  constructor (index: number, interpreter: Interpreter) {
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
-    this.index = index;
+    assertLen(args.length, 1, line);
+    assertOnlyDigits(args[0]);
+
+    this.index = Number(args[0]);
     this.interpreter = interpreter;
   }
 
