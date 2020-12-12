@@ -20,3 +20,6 @@ export const reDigit = /^\d+$/;
  * $                          # End of input
  */
 export const reBase64 = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
+
+// A-Z and 2-7 repeated, with optional `=` at the end
+export const reBase32 = /^[A-Z2-7]+=*$/;

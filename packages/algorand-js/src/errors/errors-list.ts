@@ -139,6 +139,24 @@ by an index that does not exist.`
     message: "Invalid Base64 Error - value %val% is not base64, Line: %line%",
     title: PARSE_ERROR,
     description: `value %exp% is not base64`
+  },
+  INVALID_BASE32: {
+    number: 20,
+    message: "Invalid Base32 Error - value %val% is not base32, Line: %line%",
+    title: PARSE_ERROR,
+    description: `value %exp% is not base32`
+  },
+  DECODE_ERROR: {
+    number: 21,
+    message: "Invalid Decode Data - value %val% is invalid, Line: %line%",
+    title: "Decode Error",
+    description: `value %exp%`
+  },
+  UNKOWN_DECODE_TYPE: {
+    number: 22,
+    message: "Invalid Decode Type - value %val% is unknown, Line: %line%",
+    title: "Unkown Decode Type",
+    description: `value %exp% is unknown`
   }
 };
 

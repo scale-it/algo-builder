@@ -1422,7 +1422,7 @@ describe("Teal Opcodes", function () {
       const base64Str = "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=";
       const bytes = new Uint8Array(Buffer.from(base64Str, 'base64'));
 
-      const op = new Byte(base64Str, EncodingType.BASE64);
+      const op = new Byte(["base64", base64Str], 1);
       op.execute(stack);
 
       assert.equal(1, stack.length());
@@ -1433,7 +1433,7 @@ describe("Teal Opcodes", function () {
       const base32Str = "MFRGGZDFMY======";
       const bytes = new Uint8Array(convertToBuffer(base32Str, EncodingType.BASE32));
 
-      const op = new Byte(base32Str, EncodingType.BASE32);
+      const op = new Byte(["base32", base32Str], 1);
       op.execute(stack);
 
       assert.equal(1, stack.length());
@@ -1441,10 +1441,10 @@ describe("Teal Opcodes", function () {
     });
 
     it("Byte: should push parsed hex string as bytes to stack", function () {
-      const hexStr = "250001000192CD0000002F6D6E742F72"; // original: 0x250001000192CD0000002F6D6E742F72
-      const bytes = new Uint8Array(Buffer.from(hexStr, 'hex'));
+      const hexStr = "0x250001000192CD0000002F6D6E742F72"; // original: 0x250001000192CD0000002F6D6E742F72
+      const bytes = new Uint8Array(Buffer.from(hexStr.slice(2), 'hex'));
 
-      const op = new Byte(hexStr, EncodingType.HEX);
+      const op = new Byte([hexStr], 1);
       op.execute(stack);
 
       assert.equal(1, stack.length());
@@ -1452,10 +1452,10 @@ describe("Teal Opcodes", function () {
     });
 
     it("Byte: should push string literal as bytes to stack", function () {
-      const str = "Algorand";
-      const bytes = new Uint8Array(Buffer.from(str));
+      const str = "\"Algorand\"";
+      const bytes = new Uint8Array(Buffer.from("Algorand"));
 
-      const op = new Byte(str);
+      const op = new Byte([str], 1);
       op.execute(stack);
 
       assert.equal(1, stack.length());

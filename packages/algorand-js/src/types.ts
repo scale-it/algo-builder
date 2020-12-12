@@ -121,7 +121,8 @@ export enum AssetParam {
 export enum EncodingType {
   BASE64,
   BASE32,
-  HEX
+  HEX,
+  STRING
 }
 
 export interface AccountsMap {

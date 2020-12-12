@@ -9,7 +9,7 @@ import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
 import { assertLen, assertOnlyDigits, compareArray } from "../lib/helpers";
-import { convertToBuffer, convertToString } from "../lib/parse-data";
+import { convertToBuffer, convertToString, getEncoding } from "../lib/parse-data";
 import type { TEALStack } from "../types";
 import { EncodingType } from "../types";
 import { Interpreter } from "./interpreter";
@@ -978,12 +978,9 @@ export class Byte extends Op {
   readonly str: string;
   readonly encoding?: EncodingType;
 
-  constructor (str: string, encoding?: EncodingType) {
+  constructor (args: string[], line: number) {
     super();
-    this.str = str;
-    if (encoding !== undefined) {
-      this.encoding = encoding;
-    }
+    [this.str, this.encoding] = getEncoding(args, line);
   }
 
   execute (stack: TEALStack): void {
