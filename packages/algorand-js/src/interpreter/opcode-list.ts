@@ -148,10 +148,15 @@ export class Mul extends Op {
 export class Arg extends Op {
   readonly _arg;
 
-  constructor (arg: Uint8Array) {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: Uint8Array) {
     super();
-    this._arg = arg;
-  };
+    // assertLen(args.length, 0, line);
+    this._arg = args;
+  }
 
   execute (stack: TEALStack): void {
     const last = this.assertBytes(this._arg);
@@ -232,6 +237,15 @@ export class Intc extends Op {
 // pops two unit64 from stack(last, prev) and pushes their modulo(last % prev) to stack
 // Panic if B == 0.
 export class Mod extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
@@ -245,6 +259,15 @@ export class Mod extends Op {
 
 // pops two unit64 from stack(last, prev) and pushes their bitwise-or(last | prev) to stack
 export class BitwiseOr extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
@@ -255,6 +278,15 @@ export class BitwiseOr extends Op {
 
 // pops two unit64 from stack(last, prev) and pushes their bitwise-and(last & prev) to stack
 export class BitwiseAnd extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
@@ -265,6 +297,15 @@ export class BitwiseAnd extends Op {
 
 // pops two unit64 from stack(last, prev) and pushes their bitwise-xor(last ^ prev) to stack
 export class BitwiseXor extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
@@ -275,6 +316,15 @@ export class BitwiseXor extends Op {
 
 // pop unit64 from stack and push it's bitwise-invert(~last) to stack
 export class BitwiseNot extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1);
     const last = this.assertBigInt(stack.pop());
@@ -320,6 +370,15 @@ export class Load extends Op {
 
 // err opcode : Error. Panic immediately.
 export class Err extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     throw new TealError(ERRORS.TEAL.TEAL_ENCOUNTERED_ERR);
   }
@@ -327,6 +386,15 @@ export class Err extends Op {
 
 // SHA256 hash of value X, yields [32]byte
 export class Sha256 extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1);
     const hash = sha256.create();
@@ -340,6 +408,15 @@ export class Sha256 extends Op {
 
 // SHA512_256 hash of value X, yields [32]byte
 export class Sha512_256 extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1);
     const hash = sha512_256.create();
@@ -354,6 +431,15 @@ export class Sha512_256 extends Op {
 // Keccak256 hash of value X, yields [32]byte
 // https://github.com/phusion/node-sha3#example-2
 export class Keccak256 extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1);
     const top = this.assertBytes(stack.pop());
@@ -368,6 +454,15 @@ export class Keccak256 extends Op {
 // for (data A, signature B, pubkey C) verify the signature of
 // ("ProgData" || program_hash || data) against the pubkey => {0 or 1}
 export class Ed25519verify extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 3);
     const pubkey = this.assertBytes(stack.pop());
@@ -386,6 +481,15 @@ export class Ed25519verify extends Op {
 
 // If A < B pushes '1' else '0'
 export class LessThan extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
@@ -400,6 +504,15 @@ export class LessThan extends Op {
 
 // If A > B pushes '1' else '0'
 export class GreaterThan extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
@@ -414,6 +527,15 @@ export class GreaterThan extends Op {
 
 // If A <= B pushes '1' else '0'
 export class LessThanEqualTo extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
@@ -428,6 +550,15 @@ export class LessThanEqualTo extends Op {
 
 // If A >= B pushes '1' else '0'
 export class GreaterThanEqualTo extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
@@ -442,6 +573,15 @@ export class GreaterThanEqualTo extends Op {
 
 // If A && B is true pushes '1' else '0'
 export class And extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
@@ -456,6 +596,15 @@ export class And extends Op {
 
 // If A || B is true pushes '1' else '0'
 export class Or extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
     const last = this.assertBigInt(stack.pop());
@@ -470,6 +619,15 @@ export class Or extends Op {
 
 // If A == B pushes '1' else '0'
 export class EqualTo extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
     const last = stack.pop();
@@ -496,6 +654,15 @@ export class EqualTo extends Op {
 
 // If A != B pushes '1' else '0'
 export class NotEqualTo extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
     const last = stack.pop();
@@ -522,6 +689,15 @@ export class NotEqualTo extends Op {
 
 // X == 0 yields 1; else 0
 export class Not extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1);
     const last = this.assertBigInt(stack.pop());
@@ -535,6 +711,15 @@ export class Not extends Op {
 
 // converts uint64 X to big endian bytes
 export class Itob extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1);
     const stackValue = this.assertBigInt(stack.pop());
@@ -547,6 +732,15 @@ export class Itob extends Op {
 // converts bytes X as big endian to uint64
 // btoi panics if the input is longer than 8 bytes.
 export class Btoi extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1);
     const bytes = this.assertBytes(stack.pop());
@@ -561,6 +755,15 @@ export class Btoi extends Op {
 
 // A plus B out to 128-bit long result as sum (top) and carry-bit uint64 values on the stack
 export class Addw extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
     const valueA = this.assertBigInt(stack.pop());
@@ -580,6 +783,15 @@ export class Addw extends Op {
 
 // A times B out to 128-bit long result as low (top) and high uint64 values on the stack
 export class Mulw extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
     const valueA = this.assertBigInt(stack.pop());
@@ -599,6 +811,15 @@ export class Mulw extends Op {
 
 // Pop one element from stack
 export class Pop extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1);
     stack.pop();
@@ -607,6 +828,15 @@ export class Pop extends Op {
 
 // duplicate last value on stack
 export class Dup extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1);
     const lastValue = stack.pop();
@@ -618,6 +848,15 @@ export class Dup extends Op {
 
 // duplicate two last values on stack: A, B -> A, B, A, B
 export class Dup2 extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
     const lastValueA = stack.pop();
@@ -633,6 +872,15 @@ export class Dup2 extends Op {
 // pop two byte strings A and B and join them, push the result
 // concat panics if the result would be greater than 4096 bytes.
 export class Concat extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
     const valueB = this.assertBytes(stack.pop());
@@ -656,11 +904,19 @@ export class Substring extends Op {
   readonly start: bigint;
   readonly end: bigint;
 
-  constructor (start: bigint, end: bigint) {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
     super();
-    this.start = start;
-    this.end = end;
-  }
+    assertLen(args.length, 2, line);
+    assertOnlyDigits(args[0]);
+    assertOnlyDigits(args[1]);
+
+    this.start = BigInt(args[0]);
+    this.end = BigInt(args[1]);
+  };
 
   execute (stack: TEALStack): void {
     const byteString = this.assertBytes(stack.pop());
@@ -677,6 +933,15 @@ export class Substring extends Op {
 // but not including C, push the substring result. If C < B,
 // or either is larger than the string length, the program fails
 export class Substring3 extends Op {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 0, line);
+  };
+
   execute (stack: TEALStack): void {
     const byteString = this.assertBytes(stack.pop());
     const end = this.assertBigInt(stack.pop());

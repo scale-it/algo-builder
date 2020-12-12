@@ -4,21 +4,75 @@ import readline from "readline";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { Operator } from "../types";
-import { Add, Addr, Div, Int, Mul, Pragma, Sub } from "./opcode-list"; ;
+import {
+  Add, Addr, Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
+  Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2, Ed25519verify, EqualTo,
+  Err, GreaterThan, GreaterThanEqualTo, Int, Intc, Intcblock, Itob, Keccak256,
+  Len, LessThan, LessThanEqualTo, Load, Mod, Mul, Mulw, Not, NotEqualTo, Or,
+  Pop, Pragma, Sha256, Sha512_256, Store, Sub, Substring, Substring3
+} from "./opcode-list";
 
 var opCodeMap: {[key: string]: any } = {
   // Pragma
   "#pragma": Pragma,
 
-  // Pseudo-Ops
-  addr: Addr,
-  int: Int,
+  Len: Len,
+  err: Err,
 
   // Arithmetic ops
   "+": Add,
   "-": Sub,
   "/": Div,
-  "*": Mul
+  "*": Mul,
+
+  Arg: Arg, // TO-DO
+
+  // TO-DO
+  bytecblock: Bytecblock,
+  bytec: Bytec,
+  intcblock: Intcblock,
+  intc: Intc,
+
+  "%": Mod,
+  "|": BitwiseOr,
+  "&": BitwiseAnd,
+  "^": BitwiseXor,
+  "~": BitwiseNot,
+
+  store: Store,
+  load: Load,
+
+  // crypto opcodes
+  sha256: Sha256,
+  sha512_256: Sha512_256,
+  keccak256: Keccak256,
+  ed25519verify: Ed25519verify,
+
+  "<": LessThan,
+  ">": GreaterThan,
+  "<=": LessThanEqualTo,
+  ">=": GreaterThanEqualTo,
+  "&&": And,
+  "||": Or,
+  "==": EqualTo,
+  "!=": NotEqualTo,
+  "!": Not,
+
+  itob: Itob,
+  btoi: Btoi,
+  mulw: Mulw,
+  addw: Addw,
+  pop: Pop,
+  dup: Dup,
+  dup2: Dup2,
+  concat: Concat,
+  substring: Substring,
+  substring3: Substring3,
+
+  // Pseudo-Ops
+  addr: Addr,
+  int: Int,
+  byte: Byte
 };
 
 /**
@@ -115,6 +169,10 @@ export function wordsFromLine (line: string): string[] {
  */
 export function opcodeFromSentence (words: string[], counter: number): Operator {
   const opCode = words[0];
+  // arg, intc, bytec --------- intcblock, bytecblock
+  if (opCode.startsWith("arg_")) {
+
+  }
   words.shift();
 
   if (opCodeMap[opCode] === undefined) {

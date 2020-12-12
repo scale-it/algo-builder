@@ -16,6 +16,8 @@ export const ERROR_RANGES = {
   TEAL: { min: 0, max: 99, title: "TEAL opcode errors" }
 };
 
+const PARSE_ERROR = "PARSE_ERROR";
+
 const tealErrors = {
   ASSERT_STACK_LENGTH: {
     number: 1,
@@ -117,20 +119,26 @@ by an index that does not exist.`
   ASSERT_FIELD_LENGTH: {
     number: 16,
     message: "Invalid Field Length Expected: '%exp%' Got: '%got%', Line : %line% ",
-    title: "Parse Error",
-    description: ``
+    title: PARSE_ERROR,
+    description: `Expected: '%exp%' Got: '%got%`
   },
   INVALID_ADDR: {
     number: 17,
     message: "Invalid Address '%addr%', Line: %line%",
-    title: "Parse Error",
-    description: ``
+    title: PARSE_ERROR,
+    description: `Invalid Address '%addr%`
   },
   PRAGMA_VERSION_ERROR: {
     number: 18,
     message: "Pragma version Error - Expected: version, got: %got%, Line: %line%",
-    title: "Parse Error",
+    title: PARSE_ERROR,
     description: ``
+  },
+  INVALID_BASE64: {
+    number: 19,
+    message: "Invalid Base64 Error - value %val% is not base64, Line: %line%",
+    title: PARSE_ERROR,
+    description: `value %exp% is not base64`
   }
 };
 
