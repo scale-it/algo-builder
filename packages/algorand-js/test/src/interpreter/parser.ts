@@ -2,6 +2,7 @@ import { assert } from "chai";
 import path from "path";
 
 import { ERRORS } from "../../../src/errors/errors-list";
+import { Interpreter } from "../../../src/interpreter/interpreter";
 import { Add, Addr, Div, Int, Mul, Pragma, Sub } from "../../../src/interpreter/opcode-list";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/interpreter/parser";
 import { expectTealError } from "../../helpers/errors";
@@ -140,8 +141,10 @@ describe("Parser", function () {
   });
 
   describe("Opcode Objects from words", () => {
+    const interpreter = new Interpreter();
+
     it("should return correct opcode object for '+'", () => {
-      const res = opcodeFromSentence(["+"], 1);
+      const res = opcodeFromSentence(["+"], 1, interpreter);
       const expected = new Add([], 1);
 
       assert.deepEqual(res, expected);
@@ -149,13 +152,13 @@ describe("Parser", function () {
 
     it("should throw error for wrong field length for '+'", () => {
       expectTealError(
-        () => opcodeFromSentence(["+", "+"], 1),
+        () => opcodeFromSentence(["+", "+"], 1, interpreter),
         ERRORS.TEAL.ASSERT_LENGTH
       );
     });
 
     it("should return correct opcode object for '-'", () => {
-      const res = opcodeFromSentence(["-"], 1);
+      const res = opcodeFromSentence(["-"], 1, interpreter);
       const expected = new Sub([], 1);
 
       assert.deepEqual(res, expected);
@@ -163,13 +166,13 @@ describe("Parser", function () {
 
     it("should throw error for wrong field length for '-'", () => {
       expectTealError(
-        () => opcodeFromSentence(["-", "-"], 1),
+        () => opcodeFromSentence(["-", "-"], 1, interpreter),
         ERRORS.TEAL.ASSERT_LENGTH
       );
     });
 
     it("should return correct opcode object for '/'", () => {
-      const res = opcodeFromSentence(["/"], 1);
+      const res = opcodeFromSentence(["/"], 1, interpreter);
       const expected = new Div([], 1);
 
       assert.deepEqual(res, expected);
@@ -177,13 +180,13 @@ describe("Parser", function () {
 
     it("should throw error for wrong field length for '/'", () => {
       expectTealError(
-        () => opcodeFromSentence(["/", "/"], 1),
+        () => opcodeFromSentence(["/", "/"], 1, interpreter),
         ERRORS.TEAL.ASSERT_LENGTH
       );
     });
 
     it("should return correct opcode object for '*'", () => {
-      const res = opcodeFromSentence(["*"], 1);
+      const res = opcodeFromSentence(["*"], 1, interpreter);
       const expected = new Mul([], 1);
 
       assert.deepEqual(res, expected);
@@ -191,14 +194,14 @@ describe("Parser", function () {
 
     it("should throw error for wrong field length for '*'", () => {
       expectTealError(
-        () => opcodeFromSentence(["*", "*"], 1),
+        () => opcodeFromSentence(["*", "*"], 1, interpreter),
         ERRORS.TEAL.ASSERT_LENGTH
       );
     });
 
     it("should return correct opcode object for 'addr'", () => {
       const address = "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE";
-      const res = opcodeFromSentence(["addr", address], 1);
+      const res = opcodeFromSentence(["addr", address], 1, interpreter);
       const expected = new Addr([address], 1);
 
       assert.deepEqual(res, expected);
@@ -206,21 +209,21 @@ describe("Parser", function () {
 
     it("should throw error for wrong field length for 'addr'", () => {
       expectTealError(
-        () => opcodeFromSentence(["addr"], 1),
+        () => opcodeFromSentence(["addr"], 1, interpreter),
         ERRORS.TEAL.ASSERT_LENGTH
       );
     });
 
     it("should throw error for invalid address for 'addr'", () => {
       expectTealError(
-        () => opcodeFromSentence(["addr", "AKGH12"], 1),
+        () => opcodeFromSentence(["addr", "AKGH12"], 1, interpreter),
         ERRORS.TEAL.INVALID_ADDR
       );
     });
 
     it("should return correct opcode object for 'int'", () => {
       const value = "812546821";
-      const res = opcodeFromSentence(["int", value], 1);
+      const res = opcodeFromSentence(["int", value], 1, interpreter);
       const expected = new Int([value], 1);
 
       assert.deepEqual(res, expected);
@@ -228,14 +231,14 @@ describe("Parser", function () {
 
     it("should throw error for wrong field length for 'int'", () => {
       expectTealError(
-        () => opcodeFromSentence(["int"], 1),
+        () => opcodeFromSentence(["int"], 1, interpreter),
         ERRORS.TEAL.ASSERT_LENGTH
       );
     });
 
     it("should throw error for invalid number for 'int'", () => {
       expectTealError(
-        () => opcodeFromSentence(["int", "123A12"], 1),
+        () => opcodeFromSentence(["int", "123A12"], 1, interpreter),
         ERRORS.TEAL.INVALID_TYPE
       );
     });

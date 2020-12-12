@@ -171,10 +171,10 @@ export function wordsFromLine (line: string): string[] {
  * Description: Returns Opcode object for given field
  * @param words : words extracted from line
  * @param counter: line number in TEAL file
+ * @param interpreter: interpreter object
  */
-export function opcodeFromSentence (words: string[], counter: number): Operator {
+export function opcodeFromSentence (words: string[], counter: number, interpreter: Interpreter): Operator {
   let opCode = words[0];
-  const interpreter = new Interpreter();
 
   // arg
   if (opCode.startsWith("arg_")) {
@@ -220,6 +220,7 @@ export function opcodeFromSentence (words: string[], counter: number): Operator 
 export async function parser (filename: string): Promise<Operator[]> {
   const opCodeList = [] as Operator[];
   let counter = 0;
+  const interpreter = new Interpreter();
 
   const rl = readline.createInterface({
     input: fs.createReadStream(filename), // file location
@@ -237,7 +238,7 @@ export async function parser (filename: string): Promise<Operator[]> {
     // Trim whitespace from line and extract words from line
     const words = wordsFromLine(line);
     if (words.length !== 0) {
-      opCodeList.push(opcodeFromSentence(words, counter));
+      opCodeList.push(opcodeFromSentence(words, counter, interpreter));
     }
   }
   return opCodeList;
