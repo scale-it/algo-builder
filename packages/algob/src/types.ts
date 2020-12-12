@@ -435,7 +435,7 @@ export interface TxParams {
   totalFee?: number
   firstValid?: number
   validRounds?: number
-  lease?: string
+  lease?: Uint8Array
   note?: string
   noteb64?: string
   closeRemainderTo?: AccountAddress
@@ -463,8 +463,8 @@ export interface SSCStateSchema {
 export interface SSCOptionalFlags {
   appArgs?: Uint8Array[]
   accounts?: string[]
-  foreignApps?: string
-  foreignAssets?: string
+  foreignApps?: number[]
+  foreignAssets?: number[]
   note?: Uint8Array
   lease?: Uint8Array
   rekeyTo?: string

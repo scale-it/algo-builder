@@ -22,7 +22,7 @@ export class Op {
     }
   }
 
-  checkIndexBound (idx: number, arr: Array<Uint8Array | BigInt>): void {
+  checkIndexBound (idx: number, arr: any[]): void {
     if (!(idx >= 0 && idx < arr.length)) {
       throw new TealError(ERRORS.TEAL.INDEX_OUT_OF_BOUND);
     }

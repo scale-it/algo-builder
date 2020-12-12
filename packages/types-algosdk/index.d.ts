@@ -109,20 +109,20 @@ export interface CompileOut {
 export interface Transaction {
   // fields copied from
   // https://github.com/algorand/js-algorand-sdk/blob/develop/src/transaction.js#L117
-  from: ParsedAddress;
-  to: ParsedAddress;
+  from: Address;
+  to: Address;
   fee: number;
   amount: number;
   firstRound: number;
   lastRound: number;
-  note: string;
+  note: Uint8Array;
   genesisID: string;
-  genesisHash: string;
-  lease: number;
+  genesisHash: Buffer;
+  lease: Uint8Array;
 
-  closeRemainderTo: ParsedAddress;
-  voteKey: string;
-  selectionKey: string;
+  closeRemainderTo: Address;
+  voteKey: Buffer;
+  selectionKey: Buffer;
   voteFirst: any;
   voteLast: any;
   voteKeyDilution: any;
@@ -131,35 +131,36 @@ export interface Transaction {
   assetTotal: number;
   assetDecimals: number;
   assetDefaultFrozen: any;
-  assetManager: ParsedAddress;
-  assetReserve: ParsedAddress;
+  assetManager: Address;
+  assetReserve: Address;
 
-  assetFreeze: ParsedAddress;
-  assetClawback: ParsedAddress;
+  assetFreeze: Address;
+  assetClawback: Address;
   assetUnitName: string;
   assetName: string;
   assetURL: string;
-  assetMetadataHash: string;
+  assetMetadataHash: Buffer;
 
-  freezeAccount: string;
+  freezeAccount: Address;
   freezeState: any;
   assetRevocationTarget: any;
 
-  appIndex: any;
-  appOnComplete: any;
-  appLocalInts: any;
-  appLocalByteSlices: any;
-  appGlobalInts: any;
-  appGlobalByteSlices: any;
+  appIndex: number;
+  appOnComplete: number;
+  appLocalInts: number;
+  appLocalByteSlices: number;
+  appGlobalInts: number;
+  appGlobalByteSlices: number;
 
-  appApprovalProgram: any;
-  appClearProgram: any;
-  appArgs: any;
-  appAccounts: any;
-  appForeignApps: any;
-  appForeignAssets: any;
-  type: any;
-  reKeyTo: string;
+  appApprovalProgram: Uint8Array;
+  appClearProgram: Uint8Array;
+  appArgs: Uint8Array[];
+  appAccounts: Address[];
+  appForeignApps: number[];
+  appForeignAssets: number[];
+  type: string;
+  reKeyTo: Address;
+  group: Buffer;
 
   addLease: (lease: Uint8Array | undefined, feePerByte?: number) => void;
   addRekey: (reKeyTo: string, feePerByte?: number) => void;
@@ -559,4 +560,97 @@ export interface AccountInfo {
   'apps-total-schema': any;
   'created-apps': any;
   'created-assets': any;
+}
+
+export interface TxnEncodedObj {
+  // common fields
+  // https://developer.algorand.org/docs/reference/transactions/#common-fields-header-and-type
+  fee: number
+  fv: number
+  lv: number
+  note: Buffer
+  snd: Buffer
+  type: string
+  gen: string
+  gh: Buffer
+  rekey: Buffer
+  lx: Buffer
+  grp: Buffer
+
+  // Payment Transaction
+  // https://developer.algorand.org/docs/reference/transactions/#payment-transaction
+  rcv: Buffer
+  amt: number
+  close: Buffer
+
+  // Key Registration Transaction
+  // https://developer.algorand.org/docs/reference/transactions/#key-registration-transaction
+  votekey: Buffer
+  selkey: Buffer
+  votefst: number
+  votelst: number
+  votekd: number
+
+  // Asset Configuration Transaction
+  // https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction
+  caid: number
+  apar: AssetParamsEnc
+
+  // Asset Transfer Transaction
+  // https://developer.algorand.org/docs/reference/transactions/#asset-transfer-transaction
+  xaid: number
+  aamt: number
+  asnd: Buffer
+  arcv: Buffer
+  aclose: Buffer
+
+  // Asset Freeze Transaction
+  // https://developer.algorand.org/docs/reference/transactions/#asset-freeze-transaction
+  fadd: Buffer
+  faid: number
+  afrz: boolean
+
+  // Application Call Transaction
+  // https://developer.algorand.org/docs/reference/transactions/#application-call-transaction
+  apid: number
+  apan: TxnOnComplete
+  apat: Buffer[]
+  apap: Buffer
+  apaa: Buffer[]
+  apsu: Buffer
+  apfa: number[]
+  apas: number[]
+  apls: StateSchemaEnc
+  apgs: StateSchemaEnc
+}
+
+// https://developer.algorand.org/docs/reference/teal/specification/#oncomplete
+export enum TxnOnComplete {
+  NoOp,
+  OptIn,
+  CloseOut,
+  ClearState,
+  UpdateApplication,
+  DeleteApplication
+}
+
+// https://developer.algorand.org/docs/reference/transactions/#asset-parameters
+export interface AssetParamsEnc {
+  t: number
+  dc: number
+  df: number
+  un: string
+  an: string
+  au: string
+  am: Buffer
+  m: Buffer
+  r: Buffer
+  f: Buffer
+  c: Buffer
+}
+
+// https://developer.algorand.org/docs/reference/transactions/#storage-state-schema
+export interface StateSchemaEnc {
+  nui: number
+  nbs: number
 }
