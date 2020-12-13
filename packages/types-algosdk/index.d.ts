@@ -486,7 +486,7 @@ export interface RequestError extends Error {
       message: string;
     };
     error?: Error;
-  }
+  };
   error?: Error;
 }
 
@@ -565,63 +565,63 @@ export interface AccountInfo {
 export interface TxnEncodedObj {
   // common fields
   // https://developer.algorand.org/docs/reference/transactions/#common-fields-header-and-type
-  fee: number
-  fv: number
-  lv: number
-  note: Buffer
-  snd: Buffer
-  type: string
-  gen: string
-  gh: Buffer
-  rekey: Buffer
-  lx: Buffer
-  grp: Buffer
+  fee: number;
+  fv: number;
+  lv: number;
+  note: Buffer;
+  snd: Buffer;
+  type: string;
+  gen: string;
+  gh: Buffer;
+  rekey: Buffer;
+  lx: Buffer;
+  grp: Buffer;
 
   // Payment Transaction
   // https://developer.algorand.org/docs/reference/transactions/#payment-transaction
-  rcv: Buffer
-  amt: number
-  close: Buffer
+  rcv: Buffer;
+  amt: number;
+  close: Buffer;
 
   // Key Registration Transaction
   // https://developer.algorand.org/docs/reference/transactions/#key-registration-transaction
-  votekey: Buffer
-  selkey: Buffer
-  votefst: number
-  votelst: number
-  votekd: number
+  votekey: Buffer;
+  selkey: Buffer;
+  votefst: number;
+  votelst: number;
+  votekd: number;
 
   // Asset Configuration Transaction
   // https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction
-  caid: number
-  apar: AssetParamsEnc
+  caid: number;
+  apar: AssetParamsEnc;
 
   // Asset Transfer Transaction
   // https://developer.algorand.org/docs/reference/transactions/#asset-transfer-transaction
-  xaid: number
-  aamt: number
-  asnd: Buffer
-  arcv: Buffer
-  aclose: Buffer
+  xaid: number;
+  aamt: number;
+  asnd: Buffer;
+  arcv: Buffer;
+  aclose: Buffer;
 
   // Asset Freeze Transaction
   // https://developer.algorand.org/docs/reference/transactions/#asset-freeze-transaction
-  fadd: Buffer
-  faid: number
-  afrz: boolean
+  fadd: Buffer;
+  faid: number;
+  afrz: boolean;
 
   // Application Call Transaction
   // https://developer.algorand.org/docs/reference/transactions/#application-call-transaction
-  apid: number
-  apan: TxnOnComplete
-  apat: Buffer[]
-  apap: Buffer
-  apaa: Buffer[]
-  apsu: Buffer
-  apfa: number[]
-  apas: number[]
-  apls: StateSchemaEnc
-  apgs: StateSchemaEnc
+  apid: number;
+  apan: TxnOnComplete;
+  apat: Buffer[];
+  apap: Buffer;
+  apaa: Buffer[];
+  apsu: Buffer;
+  apfa: number[];
+  apas: number[];
+  apls: StateSchemaEnc;
+  apgs: StateSchemaEnc;
 }
 
 // https://developer.algorand.org/docs/reference/teal/specification/#oncomplete
@@ -636,21 +636,21 @@ export enum TxnOnComplete {
 
 // https://developer.algorand.org/docs/reference/transactions/#asset-parameters
 export interface AssetParamsEnc {
-  t: number
-  dc: number
-  df: number
-  un: string
-  an: string
-  au: string
-  am: Buffer
-  m: Buffer
-  r: Buffer
-  f: Buffer
-  c: Buffer
+  t: number;
+  dc: number;
+  df: number;
+  un: string;
+  an: string;
+  au: string;
+  am: Buffer;
+  m: Buffer;
+  r: Buffer;
+  f: Buffer;
+  c: Buffer;
 }
 
 // https://developer.algorand.org/docs/reference/transactions/#storage-state-schema
 export interface StateSchemaEnc {
-  nui: number
-  nbs: number
+  nui: number;
+  nbs: number;
 }
