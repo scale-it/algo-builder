@@ -1,11 +1,11 @@
 /* eslint sonarjs/no-identical-functions: 0 */
-import { decodeAddress, generateAccount, signBytes } from "algosdk";
+import { AccountInfo, decodeAddress, generateAccount, signBytes } from "algosdk";
 import { assert } from "chai";
 
 import { ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
-  Add, Addr, Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
+  Add, Addr, Addw, And, AppLocalGet, AppOptedIn, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
   Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2,
   Ed25519verify,
   EqualTo, Err, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna,
@@ -24,6 +24,7 @@ import { Stack } from "../../../src/lib/stack";
 import { EncodingType, StackElem } from "../../../src/types";
 import { execExpectError, expectTealError } from "../../helpers/errors";
 import { TXN_OBJ } from "../../mocks/txn";
+import { accInfo } from "../../mocks/ssc";
 
 describe("Teal Opcodes", function () {
   const strArr = ["str1", "str2"].map(toBytes);
@@ -1860,6 +1861,83 @@ describe("Teal Opcodes", function () {
         );
       });
     });
+  });
+
+  describe("StateFul Opcodes", function () {
+    const stack = new Stack<StackElem>();
+    const interpreter = new Interpreter();
+    interpreter.tx = TXN_OBJ;
+    interpreter.tx.snd = Buffer.from("addr-1");
+    interpreter.accounts["addr-1"] = accInfo[0] as any;
+    interpreter.accounts["addr-2"] = accInfo[0] as any;
+
+
+    describe("AppOptedIn", function () {
+      before(function () {
+        //interpreter.accounts["addr-2"].address = "addr-2";
+      })
+      it("should push 1 to stack if app is opted in", function () {
+        // for Sender
+        stack.push(BigInt('0'));
+        stack.push(BigInt('1847'));
+
+        let op = new AppOptedIn(interpreter);
+        op.execute(stack);
+
+        let top = stack.pop();
+        assert.deepEqual(BigInt('1'), top);
+
+        // for Txn.Accounts[A]
+        stack.push(BigInt('1'));
+        stack.push(BigInt('1847'));
+
+        op = new AppOptedIn(interpreter);
+        op.execute(stack);
+
+        top = stack.pop();
+        assert.deepEqual(BigInt('1'), top);
+      });
+
+      it("should push 0 to stack if app is not opted in", function () {
+        stack.push(BigInt('0'));
+        stack.push(BigInt('1111'));
+
+        let op = new AppOptedIn(interpreter);
+        op.execute(stack);
+
+        let top = stack.pop();
+        assert.deepEqual(BigInt('0'), top);
+
+        // for Txn.Accounts[A]
+        stack.push(BigInt('1'));
+        stack.push(BigInt('1111'));
+
+        op = new AppOptedIn(interpreter);
+        op.execute(stack);
+
+        top = stack.pop();
+        assert.deepEqual(BigInt('0'), top);
+      });
+    })
+
+    describe("AppLocalGet", function () {
+      before(function () {
+        interpreter.tx.apid = 1847;
+        interpreter.accounts["addr-1"] = accInfo[0] as any;
+      });
+
+      it("should push the value to stack if key is present in local state", function () {
+        // for Sender
+        stack.push(BigInt('0'));
+        stack.push(toBytes("Local-key"));
+
+        let op = new AppLocalGet(interpreter);
+        op.execute(stack);
+
+        let top = stack.pop();
+        assert.deepEqual(BigInt('1'), top);
+      });
+    })
   });
 
   describe("Pseudo-Ops", function () {
