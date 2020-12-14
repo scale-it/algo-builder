@@ -8,7 +8,7 @@ import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { DEFAULT_STACK_ELEM } from "../lib/constants";
 import { Stack } from "../lib/stack";
-import type { AccountsMap, Operator, StackElem, TEALStack, Txn } from "../types";
+import type { AccountsMap, ApplicationMap, Operator, StackElem, TEALStack, Txn } from "../types";
 
 export class Interpreter {
   readonly stack: TEALStack;
@@ -18,6 +18,7 @@ export class Interpreter {
   tx: Txn;
   gtxs: Txn[];
   accounts: AccountsMap;
+  globalApps: ApplicationMap;
 
   constructor () {
     this.stack = new Stack<StackElem>();
@@ -25,6 +26,7 @@ export class Interpreter {
     this.intcblock = [];
     this.scratch = new Array(256).fill(DEFAULT_STACK_ELEM);
     this.accounts = <AccountsMap>{};
+    this.globalApps = <ApplicationMap>{};
     this.tx = <Txn>{}; // current transaction
     this.gtxs = []; // all transactions
   }
@@ -72,6 +74,10 @@ export class Interpreter {
   createStatefulContext (accounts: AccountInfo[]): void {
     for (const acc of accounts) {
       this.accounts[acc.address] = acc;
+
+      for (const app of acc["created-apps"]) {
+        this.globalApps[app.id] = app.params;
+      }
     }
   }
 

@@ -133,7 +133,19 @@ by an index that does not exist.`
     message: "Pragma version Error - Expected: version, got: %got%, Line: %line%",
     title: PARSE_ERROR,
     description: ``
-  }
+  },
+  INVALID_SCHEMA: {
+    number: 19,
+    message: "State Schema is invalid",
+    title: "TEAL operations resulted in invalid schema",
+    description: `TEAL operations resulted in invalid schema`
+  },
+  APP_NOT_FOUND: {
+    number: 20,
+    message: "Application Id is not found or is invalid",
+    title: "Application id %appId% is not found",
+    description: `Application id %appId% is not found`
+  },
 };
 
 export const ERRORS: {

@@ -1,7 +1,11 @@
+import { AccountInfo } from "algosdk";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { MAX_UINT8, MAX_UINT64, MIN_UINT8, MIN_UINT64 } from "../lib/constants";
+import { convertToString } from "../lib/parse-data";
 import type { TEALStack } from "../types";
+import { Interpreter } from "./interpreter";
+import { BIGINT0 } from "./opcode-list";
 
 export class Op {
   assertMinStackLen (stack: TEALStack, minLen: number): void {
@@ -70,5 +74,17 @@ export class Op {
     }
 
     return byteString.slice(Number(start), Number(end));
+  }
+
+  getAccount (accountIndex: bigint, interpreter: Interpreter): AccountInfo {
+    if (accountIndex === BIGINT0) {
+      const senderAccount = convertToString(interpreter.tx.snd);
+      return interpreter.accounts[senderAccount];
+    }
+
+    accountIndex--;
+    this.checkIndexBound(Number(accountIndex), interpreter.tx.apat);
+    const pkBuffer = interpreter.tx.apat[Number(accountIndex)];
+    return interpreter.accounts[convertToString(pkBuffer)];
   }
 }
