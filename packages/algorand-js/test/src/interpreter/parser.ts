@@ -3,7 +3,13 @@ import path from "path";
 
 import { ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
-import { Add, Addr, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor, Byte, Bytec, Div, Err, Int, Intc, Len, Mod, Mul, Pragma, Sub } from "../../../src/interpreter/opcode-list";
+import {
+  Add, Addr, Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr,
+  BitwiseXor, Btoi, Byte, Bytec, Concat, Div, Dup, Dup2, Ed25519verify, EqualTo, Err, GreaterThan,
+  GreaterThanEqualTo, Int, Intc, Itob, Keccak256, Len, LessThan, LessThanEqualTo,
+  Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, Sha256, Sha512_256, Store, Sub,
+  Substring, Substring3
+} from "../../../src/interpreter/opcode-list";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/interpreter/parser";
 import { expectTealError } from "../../helpers/errors";
 import { useFixtureProject } from "../../helpers/project";
@@ -267,8 +273,11 @@ describe("Parser", function () {
     it("Sould return correct opcode list for '-'", async () => {
       const file = "test-file-3.teal";
       const res = await parser(getPath(file), interpreter);
-      const expected = [new Pragma(["version", "2"], 1), new Int(["5"], 1),
-        new Int(["3"], 1), new Sub([], 1)];
+      const expected = [
+        new Pragma(["version", "2"], 1), new Int(["5"], 1),
+        new Int(["3"], 1),
+        new Sub([], 1)
+      ];
 
       assert.deepEqual(res, expected);
     });
@@ -276,8 +285,12 @@ describe("Parser", function () {
     it("Sould return correct opcode list for '/'", async () => {
       const file = "test-file-4.teal";
       const res = await parser(getPath(file), interpreter);
-      const expected = [new Pragma(["version", "2"], 1), new Int(["6"], 1),
-        new Int(["3"], 1), new Div([], 1)];
+      const expected = [
+        new Pragma(["version", "2"], 1),
+        new Int(["6"], 1),
+        new Int(["3"], 1),
+        new Div([], 1)
+      ];
 
       assert.deepEqual(res, expected);
     });
@@ -285,8 +298,12 @@ describe("Parser", function () {
     it("Sould return correct opcode list for '*'", async () => {
       const file = "test-file-5.teal";
       const res = await parser(getPath(file), interpreter);
-      const expected = [new Pragma(["version", "2"], 1), new Int(["5"], 1),
-        new Int(["3"], 1), new Mul([], 1)];
+      const expected = [
+        new Pragma(["version", "2"], 1),
+        new Int(["5"], 1),
+        new Int(["3"], 1),
+        new Mul([], 1)
+      ];
 
       assert.deepEqual(res, expected);
     });
@@ -294,8 +311,10 @@ describe("Parser", function () {
     it("Should return correct opcode list for 'addr'", async () => {
       const file = "test-addr.teal";
       const res = await parser(getPath(file), interpreter);
-      const expected = [new Pragma(["version", "2"], 1),
-        new Addr(["WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"], 2)];
+      const expected = [
+        new Pragma(["version", "2"], 1),
+        new Addr(["WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"], 2)
+      ];
 
       assert.deepEqual(res, expected);
     });
@@ -306,10 +325,12 @@ describe("Parser", function () {
       const byte64 = "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=";
       const byte32 = "MFRGGZDFMY======";
 
-      const expected = [new Byte(["b64", byte64], 1), new Byte(["b64", byte64], 2),
+      const expected = [
+        new Byte(["b64", byte64], 1), new Byte(["b64", byte64], 2),
         new Byte(["b64", byte64], 3), new Byte(["b64", byte64], 4),
         new Byte(["b32", byte32], 5), new Byte(["b32", byte32], 6),
-        new Byte(["b32", byte32], 7), new Byte(["b32", byte32], 8)];
+        new Byte(["b32", byte32], 7), new Byte(["b32", byte32], 8)
+      ];
 
       assert.deepEqual(res, expected);
     });
@@ -325,8 +346,12 @@ describe("Parser", function () {
     it("Should return correct opcode list for 'Bitwise'", async () => {
       const file = "test-bitwise.teal";
       const res = await parser(getPath(file), interpreter);
-      const expected = [new BitwiseOr([], 2), new BitwiseAnd([], 4),
-        new BitwiseXor([], 6), new BitwiseNot([], 7)];
+      const expected = [
+        new BitwiseOr([], 2),
+        new BitwiseAnd([], 4),
+        new BitwiseXor([], 6),
+        new BitwiseNot([], 7)
+      ];
 
       assert.deepEqual(res, expected);
     });
@@ -356,6 +381,69 @@ describe("Parser", function () {
 
       const res = await parser(getPath(file), interpreter);
       const expected = [new Intc(["0"], 1, interpreter), new Bytec(["0"], 2, interpreter)];
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("Should return correct opcode list for 'Store and Load'", async () => {
+      const file = "test-store-load.teal";
+      interpreter.scratch = [BigInt("1")];
+
+      const res = await parser(getPath(file), interpreter);
+      const expected = [new Store(["0"], 1, interpreter), new Load(["0"], 2, interpreter)];
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("Should return correct opcode list for 'Crypto opcodes'", async () => {
+      const file = "test-crypto.teal";
+
+      const res = await parser(getPath(file), interpreter);
+      const expected = [
+        new Sha256([], 1),
+        new Keccak256([], 2),
+        new Sha512_256([], 3),
+        new Ed25519verify([], 1)
+      ];
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("Should return correct opcode list for 'comparsions'", async () => {
+      const file = "test-compare.teal";
+
+      const res = await parser(getPath(file), interpreter);
+      const expected = [
+        new LessThan([], 1),
+        new GreaterThan([], 2),
+        new LessThanEqualTo([], 3),
+        new GreaterThanEqualTo([], 4),
+        new And([], 5),
+        new Or([], 6),
+        new EqualTo([], 7),
+        new NotEqualTo([], 8),
+        new Not([], 9)
+      ];
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("Should return correct opcode list for 'all others'", async () => {
+      const file = "test-others.teal";
+
+      const res = await parser(getPath(file), interpreter);
+      const expected = [
+        new Itob([], 1),
+        new Btoi([], 2),
+        new Mulw([], 3),
+        new Addw([], 4),
+        new Pop([], 5),
+        new Dup([], 6),
+        new Dup2([], 7),
+        new Concat([], 8),
+        new Substring(["0", "4"], 9),
+        new Substring3([], 10)
+      ];
 
       assert.deepEqual(res, expected);
     });
