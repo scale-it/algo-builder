@@ -35,7 +35,11 @@ export class Pragma extends Op {
     } else {
       throw new TealError(ERRORS.TEAL.PRAGMA_VERSION_ERROR, { got: args[0], line: line });
     }
-  };
+  }
+
+  execute (stack: TEALStack): void {
+    throw new TealError(ERRORS.TEAL.TEAL_ENCOUNTERED_ERR);
+  }
 }
 
 // pops string([]byte) from stack and pushes it's length to stack

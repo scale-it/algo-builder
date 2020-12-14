@@ -3,11 +3,14 @@ import path from "path";
 
 import { ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
-import { Add, Addr, Div, Int, Mul, Pragma, Sub } from "../../../src/interpreter/opcode-list";
+import { Add, Addr, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor, Byte, Bytec, Div, Err, Int, Intc, Len, Mod, Mul, Pragma, Sub } from "../../../src/interpreter/opcode-list";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/interpreter/parser";
 import { expectTealError } from "../../helpers/errors";
 import { useFixtureProject } from "../../helpers/project";
 
+function getPath (file: string): string {
+  return path.join(process.cwd(), file);
+}
 // base64 case needs to be verified at the time of decoding
 describe("Parser", function () {
   describe("Extract words from line", () => {
@@ -246,25 +249,24 @@ describe("Parser", function () {
 
   describe("Opcodes list from TEAL file", () => {
     useFixtureProject("teal-files");
+    const interpreter = new Interpreter();
 
     it("Sould return correct opcode list for '+'", async () => {
       const file1 = "test-file-1.teal";
-      const fPath = path.join(process.cwd(), file1);
-      let res = await parser(fPath);
+      let res = await parser(getPath(file1), interpreter);
       const expected = [new Int(["1"], 1), new Int(["3"], 1), new Add([], 1)];
 
       assert.deepEqual(res, expected);
 
       const expect = [new Pragma(["version", "2"], 1), new Int(["1"], 1),
         new Int(["3"], 1), new Add([], 1)];
-      res = await parser(path.join(process.cwd(), "test-file-2.teal"));
+      res = await parser(path.join(process.cwd(), "test-file-2.teal"), interpreter);
       assert.deepEqual(res, expect);
     });
 
     it("Sould return correct opcode list for '-'", async () => {
       const file = "test-file-3.teal";
-      const fPath = path.join(process.cwd(), file);
-      const res = await parser(fPath);
+      const res = await parser(getPath(file), interpreter);
       const expected = [new Pragma(["version", "2"], 1), new Int(["5"], 1),
         new Int(["3"], 1), new Sub([], 1)];
 
@@ -273,8 +275,7 @@ describe("Parser", function () {
 
     it("Sould return correct opcode list for '/'", async () => {
       const file = "test-file-4.teal";
-      const fPath = path.join(process.cwd(), file);
-      const res = await parser(fPath);
+      const res = await parser(getPath(file), interpreter);
       const expected = [new Pragma(["version", "2"], 1), new Int(["6"], 1),
         new Int(["3"], 1), new Div([], 1)];
 
@@ -283,10 +284,78 @@ describe("Parser", function () {
 
     it("Sould return correct opcode list for '*'", async () => {
       const file = "test-file-5.teal";
-      const fPath = path.join(process.cwd(), file);
-      const res = await parser(fPath);
+      const res = await parser(getPath(file), interpreter);
       const expected = [new Pragma(["version", "2"], 1), new Int(["5"], 1),
         new Int(["3"], 1), new Mul([], 1)];
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("Should return correct opcode list for 'addr'", async () => {
+      const file = "test-addr.teal";
+      const res = await parser(getPath(file), interpreter);
+      const expected = [new Pragma(["version", "2"], 1),
+        new Addr(["WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"], 2)];
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("Should return correct opcode list for 'byte'", async () => {
+      const file = "test-byte.teal";
+      const res = await parser(getPath(file), interpreter);
+      const byte64 = "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=";
+      const byte32 = "MFRGGZDFMY======";
+
+      const expected = [new Byte(["b64", byte64], 1), new Byte(["b64", byte64], 2),
+        new Byte(["b64", byte64], 3), new Byte(["b64", byte64], 4),
+        new Byte(["b32", byte32], 5), new Byte(["b32", byte32], 6),
+        new Byte(["b32", byte32], 7), new Byte(["b32", byte32], 8)];
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("Should return correct opcode list for 'Len and Err'", async () => {
+      const file = "test-len-err.teal";
+      const res = await parser(getPath(file), interpreter);
+      const expected = [new Len([], 1), new Err([], 2)];
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("Should return correct opcode list for 'Bitwise'", async () => {
+      const file = "test-bitwise.teal";
+      const res = await parser(getPath(file), interpreter);
+      const expected = [new BitwiseOr([], 2), new BitwiseAnd([], 4),
+        new BitwiseXor([], 6), new BitwiseNot([], 7)];
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("Should return correct opcode list for 'Mod'", async () => {
+      const file = "test-mod.teal";
+      const res = await parser(getPath(file), interpreter);
+      const expected = [new Int(["6"], 1), new Int(["3"], 2), new Mod([], 1)];
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("Should return correct opcode list for 'Arg'", async () => {
+      const file = "test-arg.teal";
+      interpreter.args = [new Uint8Array(0)];
+
+      const res = await parser(getPath(file), interpreter);
+      const expected = [new Arg(["0"], 1, interpreter)];
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("Should return correct opcode list for 'Intc and Bytec'", async () => {
+      const file = "test-int-bytec.teal";
+      interpreter.intcblock = [BigInt("1")];
+      interpreter.bytecblock = [new Uint8Array(0)];
+
+      const res = await parser(getPath(file), interpreter);
+      const expected = [new Intc(["0"], 1, interpreter), new Bytec(["0"], 2, interpreter)];
 
       assert.deepEqual(res, expected);
     });

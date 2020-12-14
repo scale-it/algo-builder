@@ -68,4 +68,18 @@ describe("Get Encoding for Byte Data", () => {
       ERRORS.TEAL.UNKOWN_DECODE_TYPE
     );
   });
+
+  it("should throw invalid base64 data error", () => {
+    expectTealError(
+      () => getEncoding(["base64", "AJSHKJ-#"], 1),
+      ERRORS.TEAL.INVALID_BASE64
+    );
+  });
+
+  it("should throw invalid base32 data error", () => {
+    expectTealError(
+      () => getEncoding(["base32", "AJSHKJ-#"], 1),
+      ERRORS.TEAL.INVALID_BASE32
+    );
+  });
 });

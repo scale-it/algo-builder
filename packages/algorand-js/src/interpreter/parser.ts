@@ -18,7 +18,7 @@ var opCodeMap: {[key: string]: any } = {
   // Pragma
   "#pragma": Pragma,
 
-  Len: Len,
+  len: Len,
   err: Err,
 
   // Arithmetic ops
@@ -217,10 +217,9 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
  * Description: Returns a list of Opcodes object after reading text from given TEAL file
  * @param filename : Name of the TEAL file with location
  */
-export async function parser (filename: string): Promise<Operator[]> {
+export async function parser (filename: string, interpreter: Interpreter): Promise<Operator[]> {
   const opCodeList = [] as Operator[];
   let counter = 0;
-  const interpreter = new Interpreter();
 
   const rl = readline.createInterface({
     input: fs.createReadStream(filename), // file location
