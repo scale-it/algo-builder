@@ -34,3 +34,11 @@ export function assertLen (val: number, expected: number, line: number): void {
     throw new TealError(ERRORS.TEAL.ASSERT_FIELD_LENGTH, { exp: expected, got: val, line: line });
   }
 }
+
+/**
+ * Description: Coverts Buffer into string
+ * @param buf : Buffer
+ */
+export function convertToString (buf: Buffer): string {
+  return Buffer.from(buf).toString();
+}

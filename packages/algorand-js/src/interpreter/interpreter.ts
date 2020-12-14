@@ -8,7 +8,7 @@ import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { DEFAULT_STACK_ELEM } from "../lib/constants";
 import { Stack } from "../lib/stack";
-import type { AccountsMap, Operator, StackElem, TEALStack, Txn } from "../types";
+import type { AccountsMap, AssetInfo, AssetsMapAccount, AssetsMapGlobal, Operator, StackElem, TEALStack, Txn } from "../types";
 
 export class Interpreter {
   readonly stack: TEALStack;
@@ -18,6 +18,8 @@ export class Interpreter {
   tx: Txn;
   gtxs: Txn[];
   accounts: AccountsMap;
+  accountAssets: AssetsMapAccount;
+  globalAssets: AssetsMapGlobal;
 
   constructor () {
     this.stack = new Stack<StackElem>();
@@ -25,6 +27,8 @@ export class Interpreter {
     this.intcblock = [];
     this.scratch = new Array(256).fill(DEFAULT_STACK_ELEM);
     this.accounts = <AccountsMap>{};
+    this.accountAssets = <AssetsMapAccount>{};
+    this.globalAssets = <AssetsMapGlobal>{};
     this.tx = <Txn>{}; // current transaction
     this.gtxs = []; // all transactions
   }
@@ -69,10 +73,20 @@ export class Interpreter {
    * Description: set accounts for context as {address: accountInfo}
    * @param accounts: array of account info's
    */
-  createStatefulContext (accounts: AccountInfo[]): void {
+  createStatefulContext (accounts: AccountInfo[], globalAssets: AssetsMapGlobal): void {
     for (const acc of accounts) {
       this.accounts[acc.address] = acc;
+
+      const assets = acc.assets;
+      const assetInfo: AssetInfo = <AssetInfo>{};
+      for (const asset of assets) {
+        assetInfo[asset["asset-id"]] = asset;
+      }
+
+      this.accountAssets[acc.address] = assetInfo;
     }
+
+    this.globalAssets = globalAssets;
   }
 
   /**
@@ -85,10 +99,10 @@ export class Interpreter {
    */
   execute (txnParams: execParams | execParams[],
     logic: Operator[], args: Uint8Array[],
-    accounts: AccountInfo[]): boolean {
+    accounts: AccountInfo[], globalAssets: AssetsMapGlobal): boolean {
     assert(Array.isArray(args));
     this.createTxnContext(txnParams);
-    this.createStatefulContext(accounts);
+    this.createStatefulContext(accounts, globalAssets);
 
     for (const l of logic) {
       l.execute(this.stack); // execute each teal opcode

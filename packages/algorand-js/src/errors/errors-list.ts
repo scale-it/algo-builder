@@ -133,6 +133,18 @@ by an index that does not exist.`
     message: "Pragma version Error - Expected: version, got: %got%, Line: %line%",
     title: PARSE_ERROR,
     description: ``
+  },
+  ACCOUNT_DOES_NOT_EXIST: {
+    number: 19,
+    message: "Account Error - Account doesn't exist",
+    title: "Account Error",
+    description: ``
+  },
+  INVALID_FIELD_TYPE: {
+    number: 20,
+    message: "Asset Field Error - Field unknown",
+    title: "Asset Field Error",
+    description: ``
   }
 };
 

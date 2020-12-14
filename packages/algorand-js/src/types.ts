@@ -1,4 +1,4 @@
-import { AccountInfo, TxnEncodedObj } from "algosdk";
+import { AccountAssetInfo, AccountInfo, AssetParamsEnc, TxnEncodedObj } from "algosdk";
 
 import {
   Add, Addr, Arg, Byte, Bytec, Bytecblock, Div, Int, Len, Mul, Sub
@@ -122,4 +122,16 @@ export enum EncodingType {
 
 export interface AccountsMap {
   [addr: string]: AccountInfo
+}
+
+export interface AssetInfo {
+  [assetId: string]: AccountAssetInfo
+}
+
+export interface AssetsMapAccount {
+  [addr: string]: AssetInfo
+}
+
+export interface AssetsMapGlobal {
+  [assetId: string]: AssetParamsEnc
 }

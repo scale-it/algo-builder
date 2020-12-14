@@ -9,8 +9,8 @@ import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
 import { assertLen, assertOnlyDigits, compareArray } from "../lib/helpers";
-import { convertToBuffer, convertToString } from "../lib/parse-data";
-import type { EncodingType, TEALStack } from "../types";
+import { convertToBuffer, convertToString, toBytes } from "../lib/parse-data";
+import type { EncodingType, StackElem, TEALStack } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
 import { txAppArg, txnSpecbyField } from "./txn";
@@ -830,5 +830,162 @@ export class Addr extends Op {
   execute (stack: TEALStack): void {
     const addr = decodeAddress(this.addr);
     stack.push(addr.publicKey);
+  }
+}
+
+// get balance in microAlgos for given account
+export class Balance extends Op {
+  readonly interpreter: Interpreter;
+
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter Interpreter Object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.interpreter = interpreter;
+
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    let last = this.assertBigInt(stack.pop());
+    let bal = 0;
+
+    if (last === BigInt("0")) {
+      bal = this.interpreter.accounts[convertToString(this.interpreter.tx.snd)].amount;
+    } else {
+      const buf = this.interpreter.tx.apat[Number(last--)];
+      bal = this.interpreter.accounts[convertToString(buf)].amount;
+    }
+
+    if (bal === undefined) {
+      throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
+    }
+    stack.push(BigInt(bal));
+  }
+}
+
+// get Asset Holding Info for given account
+export class AssetHoldingGet extends Op {
+  readonly interpreter: Interpreter;
+  readonly field: string;
+
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter Interpreter Object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.interpreter = interpreter;
+
+    assertLen(args.length, 1, line);
+    assertOnlyDigits(args[0]);
+
+    this.field = args[0];
+  };
+
+  execute (stack: TEALStack): void {
+    let last = this.assertBigInt(stack.pop());
+    const prev = this.assertBigInt(stack.pop());
+
+    const accBuffer = this.interpreter.tx.apat[Number(last--)];
+    const res = this.interpreter.accountAssets[convertToString(accBuffer)][prev.toString()];
+
+    if (res === undefined) {
+      stack.push(BigInt("0"));
+    } else {
+      let value = 0;
+
+      switch (this.field) {
+        case "0":
+          value = res.amount;
+          break;
+        case "1":
+          value = res["is-frozen"] ? 1 : 0;
+          break;
+        default:
+          throw new TealError(ERRORS.TEAL.INVALID_FIELD_TYPE);
+      }
+      stack.push(BigInt(value));
+      stack.push(BigInt("1"));
+    }
+  }
+}
+
+// get Asset Params Info for given account
+export class AssetParamsGet extends Op {
+  readonly interpreter: Interpreter;
+  readonly field: string;
+
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter Interpreter Object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.interpreter = interpreter;
+
+    assertLen(args.length, 1, line);
+    assertOnlyDigits(args[0]);
+
+    this.field = args[0];
+  };
+
+  execute (stack: TEALStack): void {
+    let last = this.assertBigInt(stack.pop());
+    const assetId = this.interpreter.tx.apas[Number(last--)];
+
+    const res = this.interpreter.globalAssets[assetId.toString()];
+
+    if (res === undefined) {
+      stack.push(BigInt("0"));
+    } else {
+      let value: StackElem;
+
+      switch (this.field) {
+        case "0":
+          value = BigInt(res.t);
+          break;
+        case "1":
+          value = BigInt(res.dc);
+          break;
+        case "2":
+          value = BigInt(res.df);
+          break;
+        case "3":
+          value = toBytes(res.un);
+          break;
+        case "4":
+          value = toBytes(res.an);
+          break;
+        case "5":
+          value = toBytes(res.au);
+          break;
+        case "6":
+          value = res.am;
+          break;
+        case "7":
+          value = res.m;
+          break;
+        case "8":
+          value = res.r;
+          break;
+        case "9":
+          value = res.f;
+          break;
+        case "10":
+          value = res.c;
+          break;
+        default:
+          throw new TealError(ERRORS.TEAL.INVALID_FIELD_TYPE);
+      }
+
+      stack.push(BigInt(value));
+      stack.push(BigInt("1"));
+    }
   }
 }

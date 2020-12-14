@@ -5,7 +5,7 @@ import { assert } from "chai";
 import { ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
-  Add, Addr, Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
+  Add, Addr, Addw, And, Arg, Balance, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
   Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2,
   Ed25519verify,
   EqualTo, Err, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna,
@@ -1923,6 +1923,43 @@ describe("Teal Opcodes", function () {
 
       assert.equal(1, stack.length());
       assert.deepEqual(bytes, stack.pop());
+    });
+  });
+
+  describe("Balance", () => {
+    const accInfo = [{
+      address: "addr-1",
+      assets: [{ 'asset-id': 3, amount: 2, creator: "string", 'is-frozen': false },
+        { 'asset-id': 32, amount: 2, creator: "AS", 'is-frozen': false }],
+      amount: 123,
+      "amount-without-pending-rewards": 12,
+      'pending-rewards': 122,
+      'reward-base': 1,
+      rewards: 4,
+      round: 2,
+      status: "OK",
+      'apps-local-state': {},
+      'apps-total-schema': {},
+      'created-apps': {},
+      'created-assets': {}
+    }];
+
+    const inter = new Interpreter();
+    const stack = new Stack<StackElem>();
+
+    inter.tx = TXN_OBJ;
+    inter.tx.snd = convertToBuffer("addr-1");
+
+    it("should push correct balance", () => {
+      inter.createStatefulContext(accInfo, {});
+      const op = new Balance([], 1, inter);
+
+      stack.push(BigInt("0")); // push sender id
+
+      op.execute(stack);
+      const top = stack.pop();
+
+      assert.equal(top, BigInt("123"));
     });
   });
 });
