@@ -856,13 +856,16 @@ export class Balance extends Op {
     if (last === BigInt("0")) {
       bal = this.interpreter.accounts[convertToString(this.interpreter.tx.snd)].amount;
     } else {
-      const buf = this.interpreter.tx.apat[Number(last--)];
-      bal = this.interpreter.accounts[convertToString(buf)].amount;
+      const buf = this.interpreter.tx.apat[Number(--last)];
+      const res = this.interpreter.accounts[convertToString(buf)];
+
+      if (res === undefined) {
+        throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
+      }
+
+      bal = res.amount;
     }
 
-    if (bal === undefined) {
-      throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
-    }
     stack.push(BigInt(bal));
   }
 }
@@ -891,7 +894,7 @@ export class AssetHoldingGet extends Op {
     let last = this.assertBigInt(stack.pop());
     const prev = this.assertBigInt(stack.pop());
 
-    const accBuffer = this.interpreter.tx.apat[Number(last--)];
+    const accBuffer = this.interpreter.tx.apat[Number(--last)];
     const res = this.interpreter.accountAssets[convertToString(accBuffer)][prev.toString()];
 
     if (res === undefined) {
@@ -937,7 +940,7 @@ export class AssetParamsGet extends Op {
 
   execute (stack: TEALStack): void {
     let last = this.assertBigInt(stack.pop());
-    const assetId = this.interpreter.tx.apas[Number(last--)];
+    const assetId = this.interpreter.tx.apas[Number(--last)];
 
     const res = this.interpreter.globalAssets[assetId.toString()];
 

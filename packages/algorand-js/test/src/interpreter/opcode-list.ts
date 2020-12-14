@@ -1949,9 +1949,9 @@ describe("Teal Opcodes", function () {
 
     inter.tx = TXN_OBJ;
     inter.tx.snd = convertToBuffer("addr-1");
+    inter.createStatefulContext(accInfo, {});
 
     it("should push correct balance", () => {
-      inter.createStatefulContext(accInfo, {});
       const op = new Balance([], 1, inter);
 
       stack.push(BigInt("0")); // push sender id
@@ -1960,6 +1960,16 @@ describe("Teal Opcodes", function () {
       const top = stack.pop();
 
       assert.equal(top, BigInt("123"));
+    });
+
+    it("should throw account doesn't exist error", () => {
+      const op = new Balance([], 1, inter);
+      stack.push(BigInt("2"));
+
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST
+      );
     });
   });
 });
