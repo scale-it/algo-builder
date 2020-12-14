@@ -9,7 +9,7 @@ import { decode, encode } from "uint64be";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
-import { assertBound, assertLen, assertOnlyDigits, compareArray } from "../lib/helpers";
+import { assertLen, assertOnlyDigits, compareArray } from "../lib/helpers";
 import { convertToBuffer, convertToString, getEncoding } from "../lib/parse-data";
 import type { EncodingType, TEALStack } from "../types";
 import { Interpreter } from "./interpreter";
@@ -164,7 +164,7 @@ export class Arg extends Op {
     assertOnlyDigits(args[0]);
 
     const index = BigInt(args);
-    assertBound(interpreter.args.length, Number(index));
+    this.checkIndexBound(Number(index), interpreter.args);
 
     this._arg = interpreter.args[Number(index)];
   }

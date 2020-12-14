@@ -36,18 +36,6 @@ export function assertLen (val: number, expected: number, line: number): void {
 }
 
 /**
- * Description: assert index bound
- * @param val Comparsion result
- * @param expected expected result
- * @param line Line number in TEAL file
- */
-export function assertBound (len: number, idx: number): void {
-  if (idx >= len) {
-    throw new TealError(ERRORS.TEAL.INDEX_OUT_OF_BOUND);
-  }
-}
-
-/**
  * Descrition: Checks if string is base64
  * @param str : string that needs to be checked
  * @param line : line number in TEAL file
