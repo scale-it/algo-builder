@@ -1426,7 +1426,7 @@ describe("Teal Opcodes", function () {
       it("should jump unconditionally to branch dump", function () {
         const op = new Branch(["dumb"], 2, interpreter);
         op.execute(stack);
-        assert.equal(4, interpreter.i);
+        assert.equal(4, interpreter.instructionIndex);
       });
 
       it("should throw error if label is not defined",
@@ -1441,21 +1441,21 @@ describe("Teal Opcodes", function () {
 
     describe("BranchIfZero", function () {
       it("should jump to branch if top of stack is zero", function () {
-        interpreter.i = 0;
+        interpreter.instructionIndex = 0;
 
         stack.push(BigInt('0'));
         const op = new BranchIfZero(["dumb"], 2, interpreter);
         op.execute(stack);
-        assert.equal(4, interpreter.i);
+        assert.equal(4, interpreter.instructionIndex);
       });
 
       it("should not jump to branch if top of stack is not zero", function () {
-        interpreter.i = 0;
+        interpreter.instructionIndex = 0;
 
         stack.push(BigInt('5'));
         const op = new BranchIfZero(["dumb"], 2, interpreter);
         op.execute(stack);
-        assert.equal(0, interpreter.i);
+        assert.equal(0, interpreter.instructionIndex);
       });
 
       it("should throw error if label is not defined for bz",
@@ -1470,21 +1470,21 @@ describe("Teal Opcodes", function () {
 
     describe("BranchIfNotZero", function () {
       it("should not jump to branch if top of stack is zero", function () {
-        interpreter.i = 0;
+        interpreter.instructionIndex = 0;
 
         stack.push(BigInt('0'));
         const op = new BranchIfNotZero(["dumb"], 2, interpreter);
         op.execute(stack);
-        assert.equal(0, interpreter.i);
+        assert.equal(0, interpreter.instructionIndex);
       });
 
       it("should jump to branch if top of stack is not zero", function () {
-        interpreter.i = 0;
+        interpreter.instructionIndex = 0;
 
         stack.push(BigInt('5'));
         const op = new BranchIfNotZero(["dumb"], 2, interpreter);
         op.execute(stack);
-        assert.equal(4, interpreter.i);
+        assert.equal(4, interpreter.instructionIndex);
       });
 
       it("should throw error if label is not defined for bnz",

@@ -20,7 +20,7 @@ export class Interpreter {
   gtxs: Txn[];
   accounts: AccountsMap;
   instructions: Operator[];
-  i: number;
+  instructionIndex: number;
 
   constructor () {
     this.stack = new Stack<StackElem>();
@@ -31,7 +31,7 @@ export class Interpreter {
     this.tx = <Txn>{}; // current transaction
     this.gtxs = []; // all transactions
     this.instructions = [];
-    this.i = 0; // set instruction index to zero
+    this.instructionIndex = 0; // set instruction index to zero
   }
 
   /**
@@ -85,8 +85,8 @@ export class Interpreter {
    * @param label: branch label
    */
   jumpForward (label: string): void {
-    while (++this.i < this.instructions.length) {
-      const instruction = this.instructions[this.i];
+    while (++this.instructionIndex < this.instructions.length) {
+      const instruction = this.instructions[this.instructionIndex];
       if (instruction instanceof Label && instruction.label === label) {
         return;
       }
@@ -112,10 +112,10 @@ export class Interpreter {
     this.createStatefulContext(accounts);
     this.instructions = logic;
 
-    while (this.i < this.instructions.length) {
-      const instruction = this.instructions[this.i];
+    while (this.instructionIndex < this.instructions.length) {
+      const instruction = this.instructions[this.instructionIndex];
       instruction.execute(this.stack);
-      this.i++;
+      this.instructionIndex++;
     }
 
     if (this.stack.length() === 1) {

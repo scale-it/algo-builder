@@ -144,7 +144,7 @@ by an index that does not exist.`
     number: 20,
     message: "Invalid top of stack or length of stack > 1",
     title: "Invalid top of stack or length of stack > 1",
-    description: `Either Length of stack is >= 1 or top of stack is not uint64`
+    description: `Either Length of stack is > 1 or top of stack is not uint64`
   }
 };
 

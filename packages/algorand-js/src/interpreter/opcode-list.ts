@@ -781,7 +781,7 @@ export class Label extends Op {
   constructor (args: string[], line: number) {
     super();
     assertLen(args.length, 1, line);
-    this.label = args[0];
+    this.label = args[0].split(':')[0];
   };
 
   execute (stack: TEALStack): void {}
@@ -795,7 +795,7 @@ export class Branch extends Op {
   /**
    * @param args words list extracted from line
    * @param line line number in TEAL file
-   * @param interpreter interpreter
+   * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
@@ -817,7 +817,7 @@ export class BranchIfZero extends Op {
   /**
    * @param args words list extracted from line
    * @param line line number in TEAL file
-   * @param interpreter interpreter
+   * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
@@ -844,7 +844,7 @@ export class BranchIfNotZero extends Op {
   /**
    * @param args words list extracted from line
    * @param line line number in TEAL file
-   * @param interpreter interpreter
+   * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
@@ -870,7 +870,7 @@ export class Return extends Op {
   /**
    * @param args words list extracted from line
    * @param line line number in TEAL file
-   * @param interpreter interpreter
+   * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
@@ -886,7 +886,7 @@ export class Return extends Op {
       stack.pop();
     }
     stack.push(last); // use last value as success
-    this.interpreter.i = this.interpreter.instructions.length; // end execution
+    this.interpreter.instructionIndex = this.interpreter.instructions.length; // end execution
   }
 }
 
