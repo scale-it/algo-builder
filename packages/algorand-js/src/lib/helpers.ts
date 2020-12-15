@@ -36,7 +36,7 @@ export function assertLen (val: number, expected: number, line: number): void {
 }
 
 /**
- * Descrition: Checks if string is base64
+ * Description: Checks if string is base64
  * @param str : string that needs to be checked
  * @param line : line number in TEAL file
  */
