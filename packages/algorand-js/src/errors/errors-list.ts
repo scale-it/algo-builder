@@ -170,6 +170,18 @@ by an index that does not exist.`
     title: "Application id %appId% is not found",
     description: `Application id %appId% is not found`
   },
+  LABEL_NOT_FOUND: {
+    number: 25,
+    message: "Label not found",
+    title: "Label %label% not found",
+    description: `Label %label% not found`
+  },
+  INVALID_STACK_ELEM: {
+    number: 26,
+    message: "Invalid top of stack or length of stack > 1",
+    title: "Invalid top of stack or length of stack > 1",
+    description: `Either Length of stack is > 1 or top of stack is not uint64`
+  }
 };
 
 export const ERRORS: {
