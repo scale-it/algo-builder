@@ -6,10 +6,10 @@ import { assert } from "chai";
 import { ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
-  Add, Addr, Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
-  Branch, AppGlobalDel, AppGlobalGet, AppGlobalGetEx, AppGlobalPut,
+  Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx, AppGlobalPut,
   AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut, AppOptedIn,
-  BranchIfNotZero,
+  Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
+  Branch, BranchIfNotZero,
   BranchIfZero,
   Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2,
   Ed25519verify,
@@ -2217,161 +2217,161 @@ describe("Teal Opcodes", function () {
         top = stack.pop();
         assert.deepEqual(BigInt('0'), top);
       });
+    });
 
-      describe("AppLocalPut", function () {
-        before(function () {
-          interpreter.tx.apid = 1847;
-        });
-
-        it("should put the value in account's local storage", function () {
-          // for Sender, check for byte
-          stack.push(BigInt('0'));
-          stack.push(toBytes('New-Key'));
-          stack.push(toBytes('New-Val'));
-
-          let op = new AppLocalPut([], 1, interpreter);
-          op.execute(stack);
-
-          let localStateCurr = interpreter.accounts["addr-1"]["apps-local-state"][0]["key-value"];
-          let idx = localStateCurr.findIndex(a => compareArray(a.key as Uint8Array, toBytes('New-Key')));
-          assert.notEqual(idx, -1); // idx should not be -1
-          assert.deepEqual(localStateCurr[idx].value.bytes, toBytes('New-Val'));
-
-          // for Txn.Accounts[A], uint
-          stack.push(BigInt('1'));
-          stack.push(toBytes('New-Key-1'));
-          stack.push(BigInt('2222'));
-
-          op = new AppLocalPut([], 1, interpreter);
-          op.execute(stack);
-
-          localStateCurr = interpreter.accounts["addr-1"]["apps-local-state"][0]["key-value"];
-          idx = localStateCurr.findIndex(a => compareArray(a.key as Uint8Array, toBytes('New-Key-1')));
-          assert.notEqual(idx, -1); // idx should not be -1
-          assert.deepEqual(localStateCurr[idx].value.uint, 2222);
-        });
-
-        it("should throw error if resulting schema is invalid", function () {
-          // max byte slices are 2 (which we filled in prev test)
-          // so this should throw error
-          execExpectError(
-            stack,
-            [BigInt('0'), toBytes("New-Key-1"), toBytes("New-Val-2")],
-            new AppLocalPut([], 1, interpreter),
-            ERRORS.TEAL.INVALID_SCHEMA
-          );
-        });
-
-        it("should throw error if app is not found", function () {
-          interpreter.tx.apid = 9999;
-          execExpectError(
-            stack,
-            [BigInt('0'), toBytes("New-Key-1"), toBytes("New-Val-2")],
-            new AppLocalPut([], 1, interpreter),
-            ERRORS.TEAL.APP_NOT_FOUND
-          );
-        });
+    describe("AppLocalPut", function () {
+      before(function () {
+        interpreter.tx.apid = 1847;
       });
 
-      describe("AppGlobalPut", function () {
-        before(function () {
-          interpreter.tx.apid = 1828;
-          interpreter.globalApps[1828] = acc1["created-apps"][0].params;
-        });
+      it("should put the value in account's local storage", function () {
+        // for Sender, check for byte
+        stack.push(BigInt('0'));
+        stack.push(toBytes('New-Key'));
+        stack.push(toBytes('New-Val'));
 
-        it("should put the value in global storage", function () {
-          // value as byte
-          stack.push(toBytes('New-Global-Key'));
-          stack.push(toBytes('New-Global-Val'));
+        let op = new AppLocalPut([], 1, interpreter);
+        op.execute(stack);
 
-          let op = new AppGlobalPut([], 1, interpreter);
-          op.execute(stack);
+        let localStateCurr = interpreter.accounts["addr-1"]["apps-local-state"][0]["key-value"];
+        let idx = localStateCurr.findIndex(a => compareArray(a.key as Uint8Array, toBytes('New-Key')));
+        assert.notEqual(idx, -1); // idx should not be -1
+        assert.deepEqual(localStateCurr[idx].value.bytes, toBytes('New-Val'));
 
-          let globalStateCurr = interpreter.globalApps[1828]["global-state"];
-          let idx = globalStateCurr.findIndex(a => compareArray(a.key as Uint8Array, toBytes('New-Global-Key')));
-          assert.notEqual(idx, -1); // idx should not be -1
-          assert.deepEqual(globalStateCurr[idx].value.bytes, toBytes('New-Global-Val'));
+        // for Txn.Accounts[A], uint
+        stack.push(BigInt('1'));
+        stack.push(toBytes('New-Key-1'));
+        stack.push(BigInt('2222'));
 
-          // for uint
-          stack.push(toBytes('Key'));
-          stack.push(BigInt('1000'));
+        op = new AppLocalPut([], 1, interpreter);
+        op.execute(stack);
 
-          op = new AppGlobalPut([], 1, interpreter);
-          op.execute(stack);
-
-          globalStateCurr = interpreter.globalApps[1828]["global-state"];
-          idx = globalStateCurr.findIndex(a => compareArray(a.key as Uint8Array, toBytes('Key')));
-          assert.notEqual(idx, -1); // idx should not be -1
-          assert.deepEqual(globalStateCurr[idx].value.uint, 1000);
-        });
-
-        it("should throw error if resulting schema is invalid for global", function () {
-          execExpectError(
-            stack,
-            [toBytes("New-GlobalKey-1"), toBytes("New-GlobalVal-2")],
-            new AppGlobalPut([], 1, interpreter),
-            ERRORS.TEAL.INVALID_SCHEMA
-          );
-        });
-
-        it("should throw error if app is not found in global state", function () {
-          interpreter.tx.apid = 9999;
-          execExpectError(
-            stack,
-            [toBytes("New-Key-1"), toBytes("New-Val-2")],
-            new AppGlobalPut([], 1, interpreter),
-            ERRORS.TEAL.APP_NOT_FOUND
-          );
-        });
+        localStateCurr = interpreter.accounts["addr-1"]["apps-local-state"][0]["key-value"];
+        idx = localStateCurr.findIndex(a => compareArray(a.key as Uint8Array, toBytes('New-Key-1')));
+        assert.notEqual(idx, -1); // idx should not be -1
+        assert.deepEqual(localStateCurr[idx].value.uint, 2222);
       });
 
-      describe("AppLocalDel", function () {
-        before(function () {
-          interpreter.tx.apid = 1847;
-        });
-
-        it("should put remove the key-value pair from account's local storage", function () {
-          // for Sender
-          stack.push(BigInt('0'));
-          stack.push(toBytes('Local-key'));
-
-          let op = new AppLocalDel([], 1, interpreter);
-          op.execute(stack);
-
-          let localStateCurr = interpreter.accounts["addr-1"]["apps-local-state"][0]["key-value"];
-          let idx = localStateCurr.findIndex(a => compareArray(a.key as Uint8Array, toBytes('Local-key')));
-          assert.equal(idx, -1); // idx should be -1
-
-          // for Txn.Accounts[A]
-          stack.push(BigInt('1'));
-          stack.push(toBytes('Local-key'));
-
-          op = new AppLocalDel([], 1, interpreter);
-          op.execute(stack);
-
-          localStateCurr = interpreter.accounts["addr-2"]["apps-local-state"][0]["key-value"];
-          idx = localStateCurr.findIndex(a => compareArray(a.key as Uint8Array, toBytes('Local-key')));
-          assert.equal(idx, -1); // idx should be -1
-        });
+      it("should throw error if resulting schema is invalid", function () {
+        // max byte slices are 2 (which we filled in prev test)
+        // so this should throw error
+        execExpectError(
+          stack,
+          [BigInt('0'), toBytes("New-Key-1"), toBytes("New-Val-2")],
+          new AppLocalPut([], 1, interpreter),
+          ERRORS.TEAL.INVALID_SCHEMA
+        );
       });
 
-      describe("AppGlobalDel", function () {
-        before(function () {
-          interpreter.tx.apid = 1828;
-          interpreter.globalApps[1828] = acc1["created-apps"][0].params;
-        });
+      it("should throw error if app is not found", function () {
+        interpreter.tx.apid = 9999;
+        execExpectError(
+          stack,
+          [BigInt('0'), toBytes("New-Key-1"), toBytes("New-Val-2")],
+          new AppLocalPut([], 1, interpreter),
+          ERRORS.TEAL.APP_NOT_FOUND
+        );
+      });
+    });
 
-        it("should put remove the key-value pair from global storage", function () {
-          stack.push(BigInt('0'));
-          stack.push(toBytes('global-key'));
+    describe("AppGlobalPut", function () {
+      before(function () {
+        interpreter.tx.apid = 1828;
+        interpreter.globalApps[1828] = acc1["created-apps"][0].params;
+      });
 
-          const op = new AppGlobalDel([], 1, interpreter);
-          op.execute(stack);
+      it("should put the value in global storage", function () {
+        // value as byte
+        stack.push(toBytes('New-Global-Key'));
+        stack.push(toBytes('New-Global-Val'));
 
-          const globalStateCurr = interpreter.globalApps[1828]["global-state"];
-          const idx = globalStateCurr.findIndex(a => compareArray(a.key as Uint8Array, toBytes('global-key')));
-          assert.equal(idx, -1); // idx should be -1
-        });
+        let op = new AppGlobalPut([], 1, interpreter);
+        op.execute(stack);
+
+        let globalStateCurr = interpreter.globalApps[1828]["global-state"];
+        let idx = globalStateCurr.findIndex(a => compareArray(a.key as Uint8Array, toBytes('New-Global-Key')));
+        assert.notEqual(idx, -1); // idx should not be -1
+        assert.deepEqual(globalStateCurr[idx].value.bytes, toBytes('New-Global-Val'));
+
+        // for uint
+        stack.push(toBytes('Key'));
+        stack.push(BigInt('1000'));
+
+        op = new AppGlobalPut([], 1, interpreter);
+        op.execute(stack);
+
+        globalStateCurr = interpreter.globalApps[1828]["global-state"];
+        idx = globalStateCurr.findIndex(a => compareArray(a.key as Uint8Array, toBytes('Key')));
+        assert.notEqual(idx, -1); // idx should not be -1
+        assert.deepEqual(globalStateCurr[idx].value.uint, 1000);
+      });
+
+      it("should throw error if resulting schema is invalid for global", function () {
+        execExpectError(
+          stack,
+          [toBytes("New-GlobalKey-1"), toBytes("New-GlobalVal-2")],
+          new AppGlobalPut([], 1, interpreter),
+          ERRORS.TEAL.INVALID_SCHEMA
+        );
+      });
+
+      it("should throw error if app is not found in global state", function () {
+        interpreter.tx.apid = 9999;
+        execExpectError(
+          stack,
+          [toBytes("New-Key-1"), toBytes("New-Val-2")],
+          new AppGlobalPut([], 1, interpreter),
+          ERRORS.TEAL.APP_NOT_FOUND
+        );
+      });
+    });
+
+    describe("AppLocalDel", function () {
+      before(function () {
+        interpreter.tx.apid = 1847;
+      });
+
+      it("should put remove the key-value pair from account's local storage", function () {
+        // for Sender
+        stack.push(BigInt('0'));
+        stack.push(toBytes('Local-key'));
+
+        let op = new AppLocalDel([], 1, interpreter);
+        op.execute(stack);
+
+        let localStateCurr = interpreter.accounts["addr-1"]["apps-local-state"][0]["key-value"];
+        let idx = localStateCurr.findIndex(a => compareArray(a.key as Uint8Array, toBytes('Local-key')));
+        assert.equal(idx, -1); // idx should be -1
+
+        // for Txn.Accounts[A]
+        stack.push(BigInt('1'));
+        stack.push(toBytes('Local-key'));
+
+        op = new AppLocalDel([], 1, interpreter);
+        op.execute(stack);
+
+        localStateCurr = interpreter.accounts["addr-2"]["apps-local-state"][0]["key-value"];
+        idx = localStateCurr.findIndex(a => compareArray(a.key as Uint8Array, toBytes('Local-key')));
+        assert.equal(idx, -1); // idx should be -1
+      });
+    });
+
+    describe("AppGlobalDel", function () {
+      before(function () {
+        interpreter.tx.apid = 1828;
+        interpreter.globalApps[1828] = acc1["created-apps"][0].params;
+      });
+
+      it("should put remove the key-value pair from global storage", function () {
+        stack.push(BigInt('0'));
+        stack.push(toBytes('global-key'));
+
+        const op = new AppGlobalDel([], 1, interpreter);
+        op.execute(stack);
+
+        const globalStateCurr = interpreter.globalApps[1828]["global-state"];
+        const idx = globalStateCurr.findIndex(a => compareArray(a.key as Uint8Array, toBytes('global-key')));
+        assert.equal(idx, -1); // idx should be -1
       });
     });
   });

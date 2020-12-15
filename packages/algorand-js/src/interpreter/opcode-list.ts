@@ -1103,7 +1103,7 @@ export class Gtxna extends Op {
 export class Label extends Op {
   readonly label: string;
 
-    /**
+  /**
    * @param args words list extracted from line
    * @param line line number in TEAL file
    */
@@ -1232,6 +1232,7 @@ export class AppOptedIn extends Op {
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
+    assertLen(args.length, 0, line);
     this.interpreter = interpreter;
   }
 
@@ -1263,6 +1264,7 @@ export class AppLocalGet extends Op {
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
+    assertLen(args.length, 0, line);
     this.interpreter = interpreter;
   }
 
@@ -1295,6 +1297,7 @@ export class AppLocalGetEx extends Op {
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
+    assertLen(args.length, 0, line);
     this.interpreter = interpreter;
   }
 
@@ -1325,6 +1328,7 @@ export class AppGlobalGet extends Op {
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
+    assertLen(args.length, 0, line);
     this.interpreter = interpreter;
   }
 
@@ -1355,6 +1359,7 @@ export class AppGlobalGetEx extends Op {
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
+    assertLen(args.length, 0, line);
     this.interpreter = interpreter;
   }
 
@@ -1392,6 +1397,7 @@ export class AppLocalPut extends Op {
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
+    assertLen(args.length, 0, line);
     this.interpreter = interpreter;
   }
 
@@ -1421,6 +1427,7 @@ export class AppGlobalPut extends Op {
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
+    assertLen(args.length, 0, line);
     this.interpreter = interpreter;
   }
 
@@ -1446,6 +1453,7 @@ export class AppLocalDel extends Op {
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
+    assertLen(args.length, 0, line);
     this.interpreter = interpreter;
   }
 
@@ -1480,6 +1488,7 @@ export class AppGlobalDel extends Op {
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
+    assertLen(args.length, 0, line);
     this.interpreter = interpreter;
   }
 
