@@ -1419,7 +1419,7 @@ describe("Teal Opcodes", function () {
       new Int(['2'], 1),
       new Branch(["dumb"], 2, interpreter),
       new Int(['3'], 3),
-      new Label(["dumb"], 4),
+      new Label(["dumb:"], 4),
       new Int(['3'], 5)
     ];
     interpreter.instructions = logic;
