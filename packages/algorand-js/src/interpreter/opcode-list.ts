@@ -929,6 +929,8 @@ export class AssetHoldingGet extends Op {
 }
 
 // get Asset Params Info for given account
+// read from asset Txn.ForeignAssets[A] params field X (imm arg) => {0 or 1 (top), value}
+// params: txn.ForeignAssets offset. Return: did_exist flag (1 if exist and 0 otherwise), value.
 export class AssetParamsGet extends Op {
   readonly interpreter: Interpreter;
   readonly field: string;
