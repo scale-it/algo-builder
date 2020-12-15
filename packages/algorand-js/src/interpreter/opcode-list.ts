@@ -817,9 +817,6 @@ export class AppLocalGet extends Op {
     const account = this.getAccount(accountIndex, this.interpreter);
     const appId = this.interpreter.tx.apid;
 
-    console.log('A ', account);
-    console.log('B ', appId);
-
     const val = getLocalState(appId, account, key);
     if (val) {
       stack.push(val);
