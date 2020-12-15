@@ -23,7 +23,7 @@ describe("Interpreter", function () {
     const logic = [new Arg(["0"], 1, interpreter)];
     expectTealError(
       () => interpreter.execute(fkParam, logic, args, []),
-      ERRORS.TEAL.LOGIC_REJECTION
+      ERRORS.TEAL.INVALID_STACK_ELEM
     );
   });
 });

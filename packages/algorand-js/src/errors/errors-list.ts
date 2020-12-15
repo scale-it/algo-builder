@@ -157,6 +157,18 @@ by an index that does not exist.`
     message: "Invalid Decode Type - value %val% is unknown, Line: %line%",
     title: "Unkown Decode Type",
     description: `value %exp% is unknown`
+  },
+  LABEL_NOT_FOUND: {
+    number: 23,
+    message: "Label not found",
+    title: "Label %label% not found",
+    description: `Label %label% not found`
+  },
+  INVALID_STACK_ELEM: {
+    number: 24,
+    message: "Invalid top of stack or length of stack > 1",
+    title: "Invalid top of stack or length of stack > 1",
+    description: `Either Length of stack is > 1 or top of stack is not uint64`
   }
 };
 
