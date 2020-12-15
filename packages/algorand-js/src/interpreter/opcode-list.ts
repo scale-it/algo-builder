@@ -239,7 +239,7 @@ export class Intcblock extends Op {
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
-    const intcblock: BigInt[];
+    const intcblock: Array<bigint> = [];
     for (const val of args) {
       assertOnlyDigits(val);
       intcblock.push(BigInt(val));
