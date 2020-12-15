@@ -4,6 +4,7 @@ import { AccountInfo, AppLocalState, SSCSchemaConfig, SSCStateSchema } from "alg
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
+import { compareArray } from "../lib/helpers";
 import { StackElem } from "../types";
 import { Interpreter } from "./interpreter";
 
@@ -48,7 +49,7 @@ export function getLocalState (appId: number, account: AccountInfo, key: Uint8Ar
   const localState = account["apps-local-state"];
   const data = localState.find(state => state.id === appId)?.["key-value"]; // can be undefined (eg. app opted in)
   if (data) {
-    const keyValue = data.find(schema => schema.key === key);
+    const keyValue = data.find(schema => compareArray(schema.key as Uint8Array, key));
     const value = keyValue?.value;
     if (value) {
       return value?.bytes as Uint8Array || BigInt(value?.uint);
@@ -67,9 +68,14 @@ export function getLocalState (appId: number, account: AccountInfo, key: Uint8Ar
 export function getGlobalState (appId: number, key: Uint8Array,
   interpreter: Interpreter): StackElem | undefined {
   const appDelta = interpreter.globalApps[appId];
+  if (!appDelta) {
+    throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, {
+      appId: appId
+    });
+  }
   const globalState = appDelta["global-state"];
 
-  const keyValue = globalState.find(schema => schema.key === key);
+  const keyValue = globalState.find(schema => compareArray(schema.key as Uint8Array, key));
   const value = keyValue?.value;
   if (value) {
     return value?.bytes as Uint8Array || BigInt(value?.uint);
@@ -93,7 +99,7 @@ export function updateLocalState (appId: number, account: AccountInfo,
   for (const l of localState) {
     if (l.id === appId) { // find appId
       const localDelta = l["key-value"];
-      const idx = localDelta.findIndex(schema => schema.key === key);
+      const idx = localDelta.findIndex(schema => compareArray(schema.key as Uint8Array, key));
 
       if (idx === -1) {
         localDelta.push(data); // push new pair if key not found
@@ -102,7 +108,7 @@ export function updateLocalState (appId: number, account: AccountInfo,
       }
       l["key-value"] = localDelta; // save updated state
 
-      assertValidSchema(l["key-value"], l.schema); // assert if updated schema is valid by config
+      assertValidSchema(l["key-value"], l.schema); // verify if updated schema is valid by config
       return localState;
     }
   }
@@ -131,7 +137,7 @@ export function updateGlobalState (appId: number, key: Uint8Array,
 
   const globalState = appDelta["global-state"];
   const data = getKeyValPair(key, value); // key value pair to put
-  const idx = globalState.findIndex(schema => schema.key === key);
+  const idx = globalState.findIndex(schema => compareArray(schema.key as Uint8Array, key));
   if (idx === -1) {
     globalState.push(data); // push new pair if key not found
   } else {
@@ -139,6 +145,6 @@ export function updateGlobalState (appId: number, key: Uint8Array,
   }
   appDelta["global-state"] = globalState; // save updated state
 
-  assertValidSchema(appDelta["global-state"], appDelta["global-state-schema"]); // assert if updated schema is valid by config
+  assertValidSchema(appDelta["global-state"], appDelta["global-state-schema"]); // verify if updated schema is valid by config
   return globalState;
 }

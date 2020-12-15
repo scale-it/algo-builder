@@ -24,7 +24,7 @@ export const accInfo = [{
     ],
     schema: {
       'num-byte-slice': 2,
-      'num-uint': 0
+      'num-uint': 1
     }
   }],
   'apps-total-schema': { 'num-byte-slice': 583, 'num-uint': 105 },
@@ -52,7 +52,7 @@ export const accInfo = [{
           }
         }
       ],
-      'global-state-schema': { 'num-byte-slice': 63, 'num-uint': 1 },
+      'global-state-schema': { 'num-byte-slice': 3, 'num-uint': 1 },
       'local-state-schema': { 'num-byte-slice': 0, 'num-uint': 16 }
     }
   }],
