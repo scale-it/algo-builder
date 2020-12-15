@@ -1,12 +1,13 @@
 import { AccountInfo, TxnEncodedObj } from "algosdk";
 
 import {
-  Add, Addr, Arg, Byte, Bytec, Bytecblock, Div, Int, Len, Mul, Sub
+  Add, Addr, Arg, Byte, Bytec, Bytecblock, Div, Int, Len, Mul, Pragma,
+  Sub
 } from "./interpreter/opcode-list";
 import type { IStack } from "./lib/stack";
 
 export type Operator = Len | Add | Sub |
-Mul | Div | Arg | Bytecblock | Bytec | Addr | Int | Byte;
+Mul | Div | Arg | Bytecblock | Bytec | Addr | Int | Byte | Pragma;
 
 export type AppArgs = Array<string | number>;
 
@@ -117,7 +118,8 @@ export enum AssetParam {
 export enum EncodingType {
   BASE64,
   BASE32,
-  HEX
+  HEX,
+  UTF8
 }
 
 export interface AccountsMap {

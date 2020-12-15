@@ -21,6 +21,7 @@ export class Interpreter {
   accounts: AccountsMap;
   instructions: Operator[];
   instructionIndex: number;
+  args: Uint8Array[];
 
   constructor () {
     this.stack = new Stack<StackElem>();
@@ -32,6 +33,7 @@ export class Interpreter {
     this.gtxs = []; // all transactions
     this.instructions = [];
     this.instructionIndex = 0; // set instruction index to zero
+    this.args = [];
   }
 
   /**
