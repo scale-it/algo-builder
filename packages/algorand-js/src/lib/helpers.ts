@@ -39,6 +39,6 @@ export function assertLen (val: number, expected: number, line: number): void {
  * Description: Coverts Buffer into string
  * @param buf : Buffer
  */
-export function convertToString (buf: Buffer): string {
+export function convertToString (buf: Buffer | Uint8Array): string {
   return Buffer.from(buf).toString();
 }

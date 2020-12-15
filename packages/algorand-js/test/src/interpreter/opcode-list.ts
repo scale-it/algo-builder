@@ -5,7 +5,8 @@ import { assert } from "chai";
 import { ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
-  Add, Addr, Addw, And, Arg, AssetHoldingGet, Balance, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
+  Add, Addr, Addw, And, Arg, AssetHoldingGet, AssetParamsGet,
+  Balance, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
   Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2,
   Ed25519verify,
   EqualTo, Err, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna,
@@ -1944,15 +1945,33 @@ describe("Teal Opcodes", function () {
       'created-assets': {}
     }];
 
+    const globalAsssets = {
+      3: {
+        t: 1000,
+        dc: 123,
+        df: 0,
+        un: "AD",
+        an: "AssetD",
+        au: "assetURL",
+        am: convertToBuffer("string1"),
+        m: convertToBuffer("string2"),
+        r: convertToBuffer("string3"),
+        f: convertToBuffer("string4"),
+        c: convertToBuffer("string5")
+      }
+    };
+
     const inter = new Interpreter();
     const stack = new Stack<StackElem>();
 
     inter.tx = TXN_OBJ;
     inter.tx.snd = convertToBuffer("addr-1");
     inter.tx.apat = [convertToBuffer("addr-1"), convertToBuffer("addr-2")];
-    inter.createStatefulContext(accInfo, {});
+    inter.tx.apas = [3, 112];
 
-    it("should push correct balance", () => {
+    inter.createStatefulContext(accInfo, globalAsssets);
+
+    it("should push correct account balance", () => {
       const op = new Balance([], 1, inter);
 
       stack.push(BigInt("0")); // push sender id
@@ -2027,6 +2046,171 @@ describe("Teal Opcodes", function () {
 
       stack.push(BigInt("4")); // asset id
       stack.push(BigInt("10")); // account index
+
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
+    });
+
+    it("should push correct Asset Total", () => {
+      const op = new AssetParamsGet(["0"], 1, inter);
+
+      stack.push(BigInt("1")); // asset index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev.toString(), "1000");
+    });
+
+    it("should push correct Asset Decimals", () => {
+      const op = new AssetParamsGet(["1"], 1, inter);
+
+      stack.push(BigInt("1")); // asset index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev.toString(), "123");
+    });
+
+    it("should push correct Asset Default Frozen", () => {
+      const op = new AssetParamsGet(["2"], 1, inter);
+
+      stack.push(BigInt("1")); // asset index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev.toString(), "0");
+    });
+
+    it("should push correct Asset Unit Name", () => {
+      const op = new AssetParamsGet(["3"], 1, inter);
+
+      stack.push(BigInt("1")); // asset index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev, convertToBuffer("AD"));
+    });
+
+    it("should push correct Asset Name", () => {
+      const op = new AssetParamsGet(["4"], 1, inter);
+
+      stack.push(BigInt("1")); // asset index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev, convertToBuffer("AssetD"));
+    });
+
+    it("should push correct Asset URL", () => {
+      const op = new AssetParamsGet(["5"], 1, inter);
+
+      stack.push(BigInt("1")); // asset index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev, convertToBuffer("assetURL"));
+    });
+
+    it("should push correct Asset MetaData Hash", () => {
+      const op = new AssetParamsGet(["6"], 1, inter);
+
+      stack.push(BigInt("1")); // asset index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev, convertToBuffer("string1"));
+    });
+
+    it("should push correct Asset Manager", () => {
+      const op = new AssetParamsGet(["7"], 1, inter);
+
+      stack.push(BigInt("1")); // asset index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev, convertToBuffer("string2"));
+    });
+
+    it("should push correct Asset Reserve", () => {
+      const op = new AssetParamsGet(["8"], 1, inter);
+
+      stack.push(BigInt("1")); // asset index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev, convertToBuffer("string3"));
+    });
+
+    it("should push correct Asset Freeze", () => {
+      const op = new AssetParamsGet(["9"], 1, inter);
+
+      stack.push(BigInt("1")); // asset index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev, convertToBuffer("string4"));
+    });
+
+    it("should push correct Asset Clawback", () => {
+      const op = new AssetParamsGet(["10"], 1, inter);
+
+      stack.push(BigInt("1")); // asset index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev, convertToBuffer("string5"));
+    });
+
+    it("should push 0 if Asset not defined", () => {
+      const op = new AssetParamsGet(["10"], 1, inter);
+
+      stack.push(BigInt("2")); // account index
+
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.equal(top.toString(), "0");
+    });
+
+    it("should throw index out of bound error for Asset Param", () => {
+      const op = new AssetParamsGet(["1"], 1, inter);
+
+      stack.push(BigInt("4")); // asset index
 
       expectTealError(
         () => op.execute(stack),

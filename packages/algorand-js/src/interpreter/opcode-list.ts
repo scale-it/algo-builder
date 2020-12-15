@@ -999,7 +999,7 @@ export class AssetParamsGet extends Op {
           throw new TealError(ERRORS.TEAL.INVALID_FIELD_TYPE);
       }
 
-      stack.push(BigInt(value));
+      stack.push(value);
       stack.push(BigInt("1"));
     }
   }
