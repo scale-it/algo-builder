@@ -5,7 +5,7 @@ import { assert } from "chai";
 import { ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
-  Add, Addr, Addw, And, Arg, Balance, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
+  Add, Addr, Addw, And, Arg, AssetHoldingGet, Balance, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
   Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2,
   Ed25519verify,
   EqualTo, Err, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna,
@@ -1949,6 +1949,7 @@ describe("Teal Opcodes", function () {
 
     inter.tx = TXN_OBJ;
     inter.tx.snd = convertToBuffer("addr-1");
+    inter.tx.apat = [convertToBuffer("addr-1"), convertToBuffer("addr-2")];
     inter.createStatefulContext(accInfo, {});
 
     it("should push correct balance", () => {
@@ -1969,6 +1970,67 @@ describe("Teal Opcodes", function () {
       expectTealError(
         () => op.execute(stack),
         ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST
+      );
+    });
+
+    it("should throw index out of bound error", () => {
+      const op = new Balance([], 1, inter);
+      stack.push(BigInt("8"));
+
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
+    });
+
+    it("should push correct Asset Balance", () => {
+      const op = new AssetHoldingGet(["0"], 1, inter);
+
+      stack.push(BigInt("3")); // asset id
+      stack.push(BigInt("1")); // account index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev.toString(), "2");
+    });
+
+    it("should push correct Asset Freeze status", () => {
+      const op = new AssetHoldingGet(["1"], 1, inter);
+
+      stack.push(BigInt("3")); // asset id
+      stack.push(BigInt("1")); // account index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev.toString(), "0");
+    });
+
+    it("should push 0 if not defined", () => {
+      stack.push(BigInt("4")); // asset id
+      stack.push(BigInt("1")); // account index
+
+      const op = new AssetHoldingGet(["1"], 1, inter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.equal(top.toString(), "0");
+    });
+
+    it("should throw index out of bound error", () => {
+      const op = new AssetHoldingGet(["1"], 1, inter);
+
+      stack.push(BigInt("4")); // asset id
+      stack.push(BigInt("10")); // account index
+
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.INDEX_OUT_OF_BOUND
       );
     });
   });

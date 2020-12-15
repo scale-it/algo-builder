@@ -833,7 +833,10 @@ export class Addr extends Op {
   }
 }
 
-// get balance in microAlgos for given account
+// get balance for the requested account specified
+// by Txn.Accounts[A] in microalgos. A is specified as an account
+// index in the Accounts field of the ApplicationCall transaction,
+// zero index means the sender
 export class Balance extends Op {
   readonly interpreter: Interpreter;
 
@@ -856,7 +859,9 @@ export class Balance extends Op {
     if (last === BigInt("0")) {
       bal = this.interpreter.accounts[convertToString(this.interpreter.tx.snd)].amount;
     } else {
-      const buf = this.interpreter.tx.apat[Number(--last)];
+      this.checkIndexBound(Number(--last), this.interpreter.tx.apat);
+
+      const buf = this.interpreter.tx.apat[Number(last)];
       const res = this.interpreter.accounts[convertToString(buf)];
 
       if (res === undefined) {
@@ -871,6 +876,9 @@ export class Balance extends Op {
 }
 
 // get Asset Holding Info for given account
+// read from account specified by Txn.Accounts[A]
+// and asset B holding field X (imm arg) => {0 or 1 (top), value}
+// params: account index, asset id. Return: did_exist flag (1 if exist and 0 otherwise), value.
 export class AssetHoldingGet extends Op {
   readonly interpreter: Interpreter;
   readonly field: string;
@@ -894,7 +902,9 @@ export class AssetHoldingGet extends Op {
     let last = this.assertBigInt(stack.pop());
     const prev = this.assertBigInt(stack.pop());
 
-    const accBuffer = this.interpreter.tx.apat[Number(--last)];
+    this.checkIndexBound(Number(--last), this.interpreter.tx.apat);
+
+    const accBuffer = this.interpreter.tx.apat[Number(last)];
     const res = this.interpreter.accountAssets[convertToString(accBuffer)][prev.toString()];
 
     if (res === undefined) {
@@ -940,7 +950,9 @@ export class AssetParamsGet extends Op {
 
   execute (stack: TEALStack): void {
     let last = this.assertBigInt(stack.pop());
-    const assetId = this.interpreter.tx.apas[Number(--last)];
+    this.checkIndexBound(Number(--last), this.interpreter.tx.apas);
+
+    const assetId = this.interpreter.tx.apas[Number(last)];
 
     const res = this.interpreter.globalAssets[assetId.toString()];
 
