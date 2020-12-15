@@ -9,7 +9,7 @@ describe("Get Encoding for Byte Data", () => {
   it("should return corrent Encoding type for string", () => {
     const res = getEncoding(["\"string literal\""], 1);
 
-    assert.deepEqual(res, ["string literal", EncodingType.STRING]);
+    assert.deepEqual(res, ["string literal", EncodingType.UTF8]);
   });
 
   it("should return corrent Encoding type for hex", () => {

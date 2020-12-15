@@ -119,7 +119,7 @@ export enum EncodingType {
   BASE64,
   BASE32,
   HEX,
-  STRING
+  UTF8
 }
 
 export interface AccountsMap {

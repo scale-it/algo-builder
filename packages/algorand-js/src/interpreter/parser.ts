@@ -76,9 +76,7 @@ var opCodeMap: {[key: string]: any } = {
 };
 
 // list of opcodes that require one extra parameter than others: `interpreter`.
-const interpreterReqList = new Set();
-interpreterReqList.add("arg").add("bytecblock").add("bytec").add("intcblock").add("intc");
-interpreterReqList.add("store").add("load");
+const interpreterReqList = new Set(["arg", "bytecblock", "bytec", "intcblock", "intc", "store", "load"]);
 
 /**
  * Description: Read line and split it into words

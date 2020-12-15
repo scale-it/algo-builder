@@ -31,7 +31,7 @@ export function convertToBuffer (s: string, encoding?: EncodingType): Buffer {
     case EncodingType.HEX: {
       return Buffer.from(s, 'hex');
     }
-    case EncodingType.STRING: {
+    case EncodingType.UTF8: {
       return Buffer.from(s);
     }
     default: { // default encoding (utf-8)
@@ -72,7 +72,7 @@ export function getEncoding (args: string[], line: number): [string, EncodingTyp
   if (args.length === 1) {
     // "string literal"
     if (args[0].startsWith('"') && args[0].endsWith('"')) {
-      return [args[0].slice(1, args[0].length - 1), EncodingType.STRING];
+      return [args[0].slice(1, args[0].length - 1), EncodingType.UTF8];
     }
 
     // 0X.. HEX
