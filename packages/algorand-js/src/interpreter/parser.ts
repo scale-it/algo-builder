@@ -3,23 +3,80 @@ import readline from "readline";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
+import { Interpreter } from "../interpreter/interpreter";
+import { assertLen } from "../lib/helpers";
 import { Operator } from "../types";
-import { Add, Addr, Div, Int, Mul, Pragma, Sub } from "./opcode-list"; ;
+import {
+  Add, Addr, Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
+  Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2, Ed25519verify, EqualTo,
+  Err, GreaterThan, GreaterThanEqualTo, Int, Intc, Intcblock, Itob, Keccak256,
+  Len, LessThan, LessThanEqualTo, Load, Mod, Mul, Mulw, Not, NotEqualTo, Or,
+  Pop, Pragma, Sha256, Sha512_256, Store, Sub, Substring, Substring3
+} from "./opcode-list";
 
 var opCodeMap: {[key: string]: any } = {
   // Pragma
   "#pragma": Pragma,
 
-  // Pseudo-Ops
-  addr: Addr,
-  int: Int,
+  len: Len,
+  err: Err,
 
   // Arithmetic ops
   "+": Add,
   "-": Sub,
   "/": Div,
-  "*": Mul
+  "*": Mul,
+
+  arg: Arg,
+  bytecblock: Bytecblock,
+  bytec: Bytec,
+  intcblock: Intcblock,
+  intc: Intc,
+
+  "%": Mod,
+  "|": BitwiseOr,
+  "&": BitwiseAnd,
+  "^": BitwiseXor,
+  "~": BitwiseNot,
+
+  store: Store,
+  load: Load,
+
+  // crypto opcodes
+  sha256: Sha256,
+  sha512_256: Sha512_256,
+  keccak256: Keccak256,
+  ed25519verify: Ed25519verify,
+
+  "<": LessThan,
+  ">": GreaterThan,
+  "<=": LessThanEqualTo,
+  ">=": GreaterThanEqualTo,
+  "&&": And,
+  "||": Or,
+  "==": EqualTo,
+  "!=": NotEqualTo,
+  "!": Not,
+
+  itob: Itob,
+  btoi: Btoi,
+  mulw: Mulw,
+  addw: Addw,
+  pop: Pop,
+  dup: Dup,
+  dup2: Dup2,
+  concat: Concat,
+  substring: Substring,
+  substring3: Substring3,
+
+  // Pseudo-Ops
+  addr: Addr,
+  int: Int,
+  byte: Byte
 };
+
+// list of opcodes that require one extra parameter than others: `interpreter`.
+const interpreterReqList = new Set(["arg", "bytecblock", "bytec", "intcblock", "intc", "store", "load"]);
 
 /**
  * Description: Read line and split it into words
@@ -112,15 +169,45 @@ export function wordsFromLine (line: string): string[] {
  * Description: Returns Opcode object for given field
  * @param words : words extracted from line
  * @param counter: line number in TEAL file
+ * @param interpreter: interpreter object
  */
-export function opcodeFromSentence (words: string[], counter: number): Operator {
-  const opCode = words[0];
+export function opcodeFromSentence (words: string[], counter: number, interpreter: Interpreter): Operator {
+  let opCode = words[0];
+
+  // arg
+  if (opCode.startsWith("arg_")) {
+    assertLen(words.length, 1, counter);
+    words = [];
+    words.push("arg_");
+    words.push(opCode.slice(4));
+    opCode = "arg";
+  }
+  // intc
+  if (opCode.startsWith("intc_")) {
+    assertLen(words.length, 1, counter);
+    words = [];
+    words.push("intc_");
+    words.push(opCode.slice(5));
+    opCode = "intc";
+  }
+  // bytec
+  if (opCode.startsWith("bytec_")) {
+    assertLen(words.length, 1, counter);
+    words = [];
+    words.push("bytec_");
+    words.push(opCode.slice(6));
+    opCode = "bytec";
+  }
+
   words.shift();
 
   if (opCodeMap[opCode] === undefined) {
     throw new TealError(ERRORS.TEAL.INVALID_OP_ARG);
   }
 
+  if (interpreterReqList.has(opCode)) {
+    return new opCodeMap[opCode](words, counter, interpreter);
+  }
   return new opCodeMap[opCode](words, counter);
 }
 
@@ -128,7 +215,7 @@ export function opcodeFromSentence (words: string[], counter: number): Operator 
  * Description: Returns a list of Opcodes object after reading text from given TEAL file
  * @param filename : Name of the TEAL file with location
  */
-export async function parser (filename: string): Promise<Operator[]> {
+export async function parser (filename: string, interpreter: Interpreter): Promise<Operator[]> {
   const opCodeList = [] as Operator[];
   let counter = 0;
 
@@ -148,7 +235,7 @@ export async function parser (filename: string): Promise<Operator[]> {
     // Trim whitespace from line and extract words from line
     const words = wordsFromLine(line);
     if (words.length !== 0) {
-      opCodeList.push(opcodeFromSentence(words, counter));
+      opCodeList.push(opcodeFromSentence(words, counter, interpreter));
     }
   }
   return opCodeList;
