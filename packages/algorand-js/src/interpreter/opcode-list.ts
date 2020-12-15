@@ -1,4 +1,5 @@
 /* eslint sonarjs/no-identical-functions: 0 */
+/* eslint sonarjs/no-duplicate-string: 0 */
 import { decodeAddress, encodeAddress, isValidAddress, verifyBytes } from "algosdk";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
@@ -772,7 +773,8 @@ export class Gtxna extends Op {
 }
 
 // check if account specified by Txn.Accounts[A] opted in for the application B => {0 or 1}
-// params: account index, application id (top of the stack on opcode entry). Return: 1 if opted in and 0 otherwise.
+// params: account index, application id (top of the stack on opcode entry).
+// Return: 1 if opted in and 0 otherwise.
 export class AppOptedIn extends Op {
   readonly interpreter: Interpreter;
 
@@ -827,7 +829,8 @@ export class AppLocalGet extends Op {
   }
 }
 
-// read from account specified by Txn.Accounts[A] from local state of the application B key C => {0 or 1 (top), value}
+// read from account specified by Txn.Accounts[A] from local state of the
+// application B key C => {0 or 1 (top), value}
 export class AppLocalGetEx extends Op {
   readonly interpreter: Interpreter;
 
@@ -876,7 +879,8 @@ export class AppGlobalGet extends Op {
 }
 
 // read from application Txn.ForeignApps[A] global state key B => {0 or 1 (top), value}.
-// A is specified as an account index in the ForeignApps field of the ApplicationCall transaction, zero index means this app
+// A is specified as an account index in the ForeignApps field of the ApplicationCall transaction,
+// zero index means this app
 export class AppGlobalGetEx extends Op {
   readonly interpreter: Interpreter;
 
@@ -969,12 +973,12 @@ export class AppLocalDel extends Op {
     const appId = this.interpreter.tx.apid;
     const account = this.getAccount(accountIndex, this.interpreter);
 
-    const localState = account["apps-local-state"]
+    const localState = account["apps-local-state"];
     const idx = localState.findIndex(state => state.id === appId);
     if (idx !== -1) {
       const arr = localState[idx]["key-value"].filter((obj) => {
         return obj.key !== key.toString();
-      })
+      });
       localState[idx]["key-value"] = arr;
       this.interpreter.accounts[account.address]["apps-local-state"] = localState;
     }
@@ -1001,7 +1005,7 @@ export class AppGlobalDel extends Op {
       const globalState = appDelta["global-state"];
       const arr = globalState.filter((obj) => {
         return obj.key !== key.toString();
-      })
+      });
       this.interpreter.globalApps[appId]["global-state"] = arr;
     }
   }

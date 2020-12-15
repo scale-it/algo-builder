@@ -1,30 +1,25 @@
+/* eslint sonarjs/no-duplicate-string: 0 */
 import { toBytes } from "algob";
 import { AccountInfo, AppLocalState, SSCSchemaConfig, SSCStateSchema } from "algosdk";
+
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
-import { convertToString } from "../lib/parse-data";
 import { StackElem } from "../types";
 import { Interpreter } from "./interpreter";
 
-// returns new Uint8Array from base64 encoded string
-function base64Bytes (s?: string): Uint8Array | undefined {
-	if (!s) { return undefined; }
-	return new Uint8Array(Buffer.from(s, 'base64'));
-}
-
 // returns new key value pair by setting type and corresponding values
 function getKeyValPair (key: Uint8Array, value: StackElem): SSCStateSchema {
-	let val;
-	if (typeof value !== "bigint") {
-		val = {	type: 1, bytes: value,	uint: 0	}
-	} else {
-		val = { type: 2, bytes: toBytes(''), uint: Number(value) }
-	}
+  let val;
+  if (typeof value !== "bigint") {
+    val = { type: 1, bytes: value, uint: 0 };
+  } else {
+    val = { type: 2, bytes: toBytes(''), uint: Number(value) };
+  }
 
-	return {
-		key: key,
-		value: val
-	};
+  return {
+    key: key,
+    value: val
+  };
 }
 
 /**
@@ -33,13 +28,13 @@ function getKeyValPair (key: Uint8Array, value: StackElem): SSCStateSchema {
  * @param schema: permissible local/global state schema
  */
 function assertValidSchema (keyValue: SSCStateSchema[], schema: SSCSchemaConfig): void {
-	let numUint = 0, byteSlices = 0;
-	for (const k of keyValue) {
-		k.value.type === 1 ? byteSlices++ : numUint++;
-	}
-	if (numUint > schema["num-uint"] || byteSlices > schema["num-byte-slice"]) {
-		throw new TealError(ERRORS.TEAL.INVALID_SCHEMA);
-	}
+  let numUint = 0; let byteSlices = 0;
+  for (const k of keyValue) {
+    k.value.type === 1 ? byteSlices++ : numUint++;
+  }
+  if (numUint > schema["num-uint"] || byteSlices > schema["num-byte-slice"]) {
+    throw new TealError(ERRORS.TEAL.INVALID_SCHEMA);
+  }
 }
 
 /**
@@ -50,15 +45,15 @@ function assertValidSchema (keyValue: SSCStateSchema[], schema: SSCSchemaConfig)
  * @param key: key to fetch value of from local state
  */
 export function getLocalState (appId: number, account: AccountInfo, key: Uint8Array): StackElem | undefined {
-	const localState = account["apps-local-state"];
-	const data = localState.find(state => state.id === appId)?.["key-value"]; // can be undefined (eg. app opted in)
-	if (data) {
-		const keyValue = data.find(schema => schema.key === key);
-		const value = keyValue?.value;
-		if (value) {
-			return value?.bytes as Uint8Array || BigInt(value?.uint);
-		}
-	}
+  const localState = account["apps-local-state"];
+  const data = localState.find(state => state.id === appId)?.["key-value"]; // can be undefined (eg. app opted in)
+  if (data) {
+    const keyValue = data.find(schema => schema.key === key);
+    const value = keyValue?.value;
+    if (value) {
+      return value?.bytes as Uint8Array || BigInt(value?.uint);
+    }
+  }
   return undefined;
 }
 
@@ -69,16 +64,17 @@ export function getLocalState (appId: number, account: AccountInfo, key: Uint8Ar
  * @param key: key to fetch value of from local state
  * @param interpreter: interpreter object
  */
-export function getGlobalState (appId: number, key: Uint8Array, interpreter: Interpreter): StackElem | undefined {
-	const appDelta = interpreter.globalApps[appId];
-	const globalState = appDelta["global-state"];
+export function getGlobalState (appId: number, key: Uint8Array,
+  interpreter: Interpreter): StackElem | undefined {
+  const appDelta = interpreter.globalApps[appId];
+  const globalState = appDelta["global-state"];
 
-	const keyValue = globalState.find(schema => schema.key === key);
-	const value = keyValue?.value;
-	if (value) {
-		return value?.bytes as Uint8Array || BigInt(value?.uint);
-	}
-	return undefined;
+  const keyValue = globalState.find(schema => schema.key === key);
+  const value = keyValue?.value;
+  if (value) {
+    return value?.bytes as Uint8Array || BigInt(value?.uint);
+  }
+  return undefined;
 }
 
 /**
@@ -89,28 +85,29 @@ export function getGlobalState (appId: number, key: Uint8Array, interpreter: Int
  * @param key: key to fetch value of from local state
  * @param value: key to fetch value of from local state
  */
-export function updateLocalState (appId: number, account: AccountInfo, key: Uint8Array, value: StackElem): AppLocalState[] {
-	const localState = account["apps-local-state"];
-	const data = getKeyValPair(key, value); // key value pair to put
+export function updateLocalState (appId: number, account: AccountInfo,
+  key: Uint8Array, value: StackElem): AppLocalState[] {
+  const localState = account["apps-local-state"];
+  const data = getKeyValPair(key, value); // key value pair to put
 
-	for (const l of localState) {
-		if (l.id === appId) { // find appId
-			const localDelta = l["key-value"];
-			const idx = localDelta.findIndex(schema => schema.key === key);
+  for (const l of localState) {
+    if (l.id === appId) { // find appId
+      const localDelta = l["key-value"];
+      const idx = localDelta.findIndex(schema => schema.key === key);
 
-			if (idx === -1) {
-				localDelta.push(data); // push new pair if key not found
-			} else {
-				localDelta[idx].value = data.value;  // update value if key found
-			}
-			l["key-value"] = localDelta; // save updated state
+      if (idx === -1) {
+        localDelta.push(data); // push new pair if key not found
+      } else {
+        localDelta[idx].value = data.value; // update value if key found
+      }
+      l["key-value"] = localDelta; // save updated state
 
-			assertValidSchema(l["key-value"], l.schema); // assert if updated schema is valid by config
-			return localState;
-		}
-	}
+      assertValidSchema(l["key-value"], l.schema); // assert if updated schema is valid by config
+      return localState;
+    }
+  }
 
-	throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, {
+  throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, {
     appId: appId
   });
 }
@@ -123,24 +120,25 @@ export function updateLocalState (appId: number, account: AccountInfo, key: Uint
  * @param value: key to fetch value of from local state
  * @param interpreter: interpreter object
  */
-export function updateGlobalState (appId: number, key: Uint8Array, value: StackElem, interpreter: Interpreter): SSCStateSchema[] {
-	const appDelta = interpreter.globalApps[appId];
-	if (!appDelta) {
-		throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, {
-			appId: appId
-		});
-	}
+export function updateGlobalState (appId: number, key: Uint8Array,
+  value: StackElem, interpreter: Interpreter): SSCStateSchema[] {
+  const appDelta = interpreter.globalApps[appId];
+  if (!appDelta) {
+    throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, {
+      appId: appId
+    });
+  }
 
-	const globalState = appDelta["global-state"];
-	const data = getKeyValPair(key, value); // key value pair to put
-	const idx = globalState.findIndex(schema => schema.key === key);
-	if (idx === -1) {
-		globalState.push(data); // push new pair if key not found
-	} else {
-		globalState[idx].value = data.value;  // update value if key found
-	}
-	appDelta["global-state"] = globalState; // save updated state
+  const globalState = appDelta["global-state"];
+  const data = getKeyValPair(key, value); // key value pair to put
+  const idx = globalState.findIndex(schema => schema.key === key);
+  if (idx === -1) {
+    globalState.push(data); // push new pair if key not found
+  } else {
+    globalState[idx].value = data.value; // update value if key found
+  }
+  appDelta["global-state"] = globalState; // save updated state
 
-	assertValidSchema(appDelta["global-state"], appDelta["global-state-schema"]); // assert if updated schema is valid by config
-	return globalState;
+  assertValidSchema(appDelta["global-state"], appDelta["global-state-schema"]); // assert if updated schema is valid by config
+  return globalState;
 }

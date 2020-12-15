@@ -1,4 +1,5 @@
 import { AccountInfo } from "algosdk";
+
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { MAX_UINT8, MAX_UINT64, MIN_UINT8, MIN_UINT64 } from "../lib/constants";

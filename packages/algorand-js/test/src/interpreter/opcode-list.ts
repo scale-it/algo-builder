@@ -1,5 +1,5 @@
 /* eslint sonarjs/no-identical-functions: 0 */
-import { AccountInfo, decodeAddress, generateAccount, signBytes } from "algosdk";
+import { decodeAddress, generateAccount, signBytes } from "algosdk";
 import { assert } from "chai";
 
 import { ERRORS } from "../../../src/errors/errors-list";
@@ -23,8 +23,8 @@ import { convertToBuffer, toBytes } from "../../../src/lib/parse-data";
 import { Stack } from "../../../src/lib/stack";
 import { EncodingType, StackElem } from "../../../src/types";
 import { execExpectError, expectTealError } from "../../helpers/errors";
-import { TXN_OBJ } from "../../mocks/txn";
 import { accInfo } from "../../mocks/ssc";
+import { TXN_OBJ } from "../../mocks/txn";
 
 describe("Teal Opcodes", function () {
   const strArr = ["str1", "str2"].map(toBytes);
@@ -1871,11 +1871,10 @@ describe("Teal Opcodes", function () {
     interpreter.accounts["addr-1"] = accInfo[0] as any;
     interpreter.accounts["addr-2"] = accInfo[0] as any;
 
-
     describe("AppOptedIn", function () {
       before(function () {
-        //interpreter.accounts["addr-2"].address = "addr-2";
-      })
+        // interpreter.accounts["addr-2"].address = "addr-2";
+      });
       it("should push 1 to stack if app is opted in", function () {
         // for Sender
         stack.push(BigInt('0'));
@@ -1918,7 +1917,7 @@ describe("Teal Opcodes", function () {
         top = stack.pop();
         assert.deepEqual(BigInt('0'), top);
       });
-    })
+    });
 
     describe("AppLocalGet", function () {
       before(function () {
@@ -1931,13 +1930,13 @@ describe("Teal Opcodes", function () {
         stack.push(BigInt('0'));
         stack.push(toBytes("Local-key"));
 
-        let op = new AppLocalGet(interpreter);
+        const op = new AppLocalGet(interpreter);
         op.execute(stack);
 
-        let top = stack.pop();
+        const top = stack.pop();
         assert.deepEqual(BigInt('1'), top);
       });
-    })
+    });
   });
 
   describe("Pseudo-Ops", function () {

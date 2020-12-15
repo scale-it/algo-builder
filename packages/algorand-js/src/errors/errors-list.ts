@@ -145,7 +145,7 @@ by an index that does not exist.`
     message: "Application Id is not found or is invalid",
     title: "Application id %appId% is not found",
     description: `Application id %appId% is not found`
-  },
+  }
 };
 
 export const ERRORS: {
