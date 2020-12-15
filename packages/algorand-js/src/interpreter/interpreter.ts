@@ -19,6 +19,7 @@ export class Interpreter {
   gtxs: Txn[];
   accounts: AccountsMap;
   globalApps: ApplicationMap;
+  args: Uint8Array[];
 
   constructor () {
     this.stack = new Stack<StackElem>();
@@ -29,6 +30,7 @@ export class Interpreter {
     this.globalApps = <ApplicationMap>{};
     this.tx = <Txn>{}; // current transaction
     this.gtxs = []; // all transactions
+    this.args = [];
   }
 
   /**

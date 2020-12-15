@@ -116,17 +116,17 @@ by an index that does not exist.`
     title: "Input is outside the valid uint8 range of 0 to 255",
     description: `Input is outside the valid uint8 range of 0 to 255`
   },
-  ASSERT_FIELD_LENGTH: {
+  ASSERT_LENGTH: {
     number: 16,
     message: "Invalid Field Length Expected: '%exp%' Got: '%got%', Line : %line% ",
     title: PARSE_ERROR,
-    description: ``
+    description: `Expected: '%exp%' Got: '%got%`
   },
   INVALID_ADDR: {
     number: 17,
     message: "Invalid Address '%addr%', Line: %line%",
     title: PARSE_ERROR,
-    description: ``
+    description: `Invalid Address '%addr%`
   },
   PRAGMA_VERSION_ERROR: {
     number: 18,
@@ -134,18 +134,42 @@ by an index that does not exist.`
     title: PARSE_ERROR,
     description: ``
   },
-  INVALID_SCHEMA: {
+  INVALID_BASE64: {
     number: 19,
+    message: "Invalid Base64 Error - value %val% is not base64, Line: %line%",
+    title: PARSE_ERROR,
+    description: `value %exp% is not base64`
+  },
+  INVALID_BASE32: {
+    number: 20,
+    message: "Invalid Base32 Error - value %val% is not base32, Line: %line%",
+    title: PARSE_ERROR,
+    description: `value %exp% is not base32`
+  },
+  DECODE_ERROR: {
+    number: 21,
+    message: "Invalid Decode Data - value %val% is invalid, Line: %line%",
+    title: "Decode Error",
+    description: `value %exp%`
+  },
+  UNKOWN_DECODE_TYPE: {
+    number: 22,
+    message: "Invalid Decode Type - value %val% is unknown, Line: %line%",
+    title: "Unkown Decode Type",
+    description: `value %exp% is unknown`
+  },
+  INVALID_SCHEMA: {
+    number: 23,
     message: "State Schema is invalid",
     title: "TEAL operations resulted in invalid schema",
     description: `TEAL operations resulted in invalid schema`
   },
   APP_NOT_FOUND: {
-    number: 20,
+    number: 24,
     message: "Application Id is not found or is invalid",
     title: "Application id %appId% is not found",
     description: `Application id %appId% is not found`
-  }
+  },
 };
 
 export const ERRORS: {

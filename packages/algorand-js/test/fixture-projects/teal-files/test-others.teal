@@ -1,0 +1,11 @@
+itob
+                btoi
+           mulw
+                addw /// comment
+     pop
+            dup
+                dup2
+       concat 
+    substring 0 4
+ substring3
+ // comments
