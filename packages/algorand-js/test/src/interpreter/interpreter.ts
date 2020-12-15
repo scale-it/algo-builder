@@ -3,7 +3,7 @@ import { generateAccount } from "algosdk";
 import { ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import { Arg } from "../../../src/interpreter/opcode-list";
-import { toBytes } from "../../../src/lib/parse-data";
+import { toBytes } from "../../../src/lib/parsing";
 import { expectTealError } from "../../helpers/errors";
 
 const fkParam = {

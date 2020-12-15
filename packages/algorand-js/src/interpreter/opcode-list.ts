@@ -8,8 +8,9 @@ import { decode, encode } from "uint64be";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
+import { compareArray } from "../lib/compare";
 import { MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
-import { assertLen, assertOnlyDigits, convertToBuffer, convertToString, getEncoding } from "../lib/parse-data";
+import { assertLen, assertOnlyDigits, convertToBuffer, convertToString, getEncoding } from "../lib/parsing";
 import type { EncodingType, TEALStack } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
@@ -693,22 +694,20 @@ export class EqualTo extends Op {
     this.assertMinStackLen(stack, 2);
     const last = stack.pop();
     const prev = stack.pop();
-    if (typeof last === typeof prev) {
-      if (typeof last === "bigint") {
-        if (last === prev) {
-          stack.push(BIGINT1);
-        } else {
-          stack.push(BIGINT0);
-        }
+    if (typeof last !== typeof prev) {
+      throw new TealError(ERRORS.TEAL.INVALID_TYPE);
+    } else if (typeof last === "bigint") {
+      if (last === prev) {
+        stack.push(BIGINT1);
       } else {
-        if (JSON.stringify(this.assertBytes(last)) === JSON.stringify(this.assertBytes(prev))) {
-          stack.push(BIGINT1);
-        } else {
-          stack.push(BIGINT0);
-        }
+        stack.push(BIGINT0);
       }
     } else {
-      throw new TealError(ERRORS.TEAL.INVALID_TYPE);
+      if (compareArray(this.assertBytes(last), this.assertBytes(prev))) {
+        stack.push(BIGINT1);
+      } else {
+        stack.push(BIGINT0);
+      }
     }
   }
 }
@@ -728,22 +727,20 @@ export class NotEqualTo extends Op {
     this.assertMinStackLen(stack, 2);
     const last = stack.pop();
     const prev = stack.pop();
-    if (typeof last === typeof prev) {
-      if (typeof last === "bigint") {
-        if (last === prev) {
-          stack.push(BIGINT0);
-        } else {
-          stack.push(BIGINT1);
-        }
+    if (typeof last !== typeof prev) {
+      throw new TealError(ERRORS.TEAL.INVALID_TYPE);
+    } else if (typeof last === "bigint") {
+      if (last === prev) {
+        stack.push(BIGINT0);
       } else {
-        if (JSON.stringify(this.assertBytes(last)) === JSON.stringify(this.assertBytes(prev))) {
-          stack.push(BIGINT0);
-        } else {
-          stack.push(BIGINT1);
-        }
+        stack.push(BIGINT1);
       }
     } else {
-      throw new TealError(ERRORS.TEAL.INVALID_TYPE);
+      if (compareArray(this.assertBytes(last), this.assertBytes(prev))) {
+        stack.push(BIGINT0);
+      } else {
+        stack.push(BIGINT1);
+      }
     }
   }
 }

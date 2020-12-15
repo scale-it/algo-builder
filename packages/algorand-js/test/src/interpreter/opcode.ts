@@ -1,7 +1,7 @@
 import { ERRORS } from "../../../src/errors/errors-list";
 import { Op } from "../../../src/interpreter/opcode";
 import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
-import { toBytes } from "../../../src/lib/parse-data";
+import { toBytes } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import type { StackElem } from "../../../src/types";
 import { expectTealError } from "../../helpers/errors";
