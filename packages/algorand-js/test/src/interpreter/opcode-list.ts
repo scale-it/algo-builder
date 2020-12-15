@@ -1886,7 +1886,7 @@ describe("Teal Opcodes", function () {
         stack.push(BigInt('0'));
         stack.push(BigInt('1847'));
 
-        let op = new AppOptedIn(interpreter);
+        let op = new AppOptedIn([], 1, interpreter);
         op.execute(stack);
 
         let top = stack.pop();
@@ -1896,7 +1896,7 @@ describe("Teal Opcodes", function () {
         stack.push(BigInt('1'));
         stack.push(BigInt('1847'));
 
-        op = new AppOptedIn(interpreter);
+        op = new AppOptedIn([], 1, interpreter);
         op.execute(stack);
 
         top = stack.pop();
@@ -1907,7 +1907,7 @@ describe("Teal Opcodes", function () {
         stack.push(BigInt('0'));
         stack.push(BigInt('1111'));
 
-        let op = new AppOptedIn(interpreter);
+        let op = new AppOptedIn([], 1, interpreter);
         op.execute(stack);
 
         let top = stack.pop();
@@ -1917,7 +1917,7 @@ describe("Teal Opcodes", function () {
         stack.push(BigInt('1'));
         stack.push(BigInt('1111'));
 
-        op = new AppOptedIn(interpreter);
+        op = new AppOptedIn([], 1, interpreter);
         op.execute(stack);
 
         top = stack.pop();
@@ -1935,7 +1935,7 @@ describe("Teal Opcodes", function () {
         stack.push(BigInt('0'));
         stack.push(toBytes("Local-key"));
 
-        let op = new AppLocalGet(interpreter);
+        let op = new AppLocalGet([], 1, interpreter);
         op.execute(stack);
 
         let top = stack.pop();
@@ -1945,7 +1945,7 @@ describe("Teal Opcodes", function () {
         stack.push(BigInt('1'));
         stack.push(toBytes('Local-key'));
 
-        op = new AppLocalGet(interpreter);
+        op = new AppLocalGet([], 1, interpreter);
         op.execute(stack);
 
         top = stack.pop();
@@ -1957,7 +1957,7 @@ describe("Teal Opcodes", function () {
         stack.push(BigInt('0'));
         stack.push(toBytes("random-key"));
 
-        let op = new AppLocalGet(interpreter);
+        let op = new AppLocalGet([], 1, interpreter);
         op.execute(stack);
 
         let top = stack.pop();
@@ -1967,7 +1967,7 @@ describe("Teal Opcodes", function () {
         stack.push(BigInt('1'));
         stack.push(toBytes('random-key'));
 
-        op = new AppLocalGet(interpreter);
+        op = new AppLocalGet([], 1, interpreter);
         op.execute(stack);
 
         top = stack.pop();
@@ -1986,7 +1986,7 @@ describe("Teal Opcodes", function () {
         stack.push(BigInt('1847'));
         stack.push(toBytes('Local-key'));
 
-        let op = new AppLocalGetEx(interpreter);
+        let op = new AppLocalGetEx([], 1, interpreter);
         op.execute(stack);
 
         let top = stack.pop();
@@ -1997,7 +1997,7 @@ describe("Teal Opcodes", function () {
         stack.push(BigInt('1847'));
         stack.push(toBytes('Local-key'));
 
-        op = new AppLocalGetEx(interpreter);
+        op = new AppLocalGetEx([], 1, interpreter);
         op.execute(stack);
 
         top = stack.pop();
@@ -2010,7 +2010,7 @@ describe("Teal Opcodes", function () {
         stack.push(BigInt('1847'));
         stack.push(toBytes('random-key'));
 
-        let op = new AppLocalGetEx(interpreter);
+        let op = new AppLocalGetEx([], 1, interpreter);
         op.execute(stack);
 
         let top = stack.pop();
@@ -2021,7 +2021,7 @@ describe("Teal Opcodes", function () {
         stack.push(BigInt('1847'));
         stack.push(toBytes('random-key'));
 
-        op = new AppLocalGetEx(interpreter);
+        op = new AppLocalGetEx([], 1, interpreter);
         op.execute(stack);
 
         top = stack.pop();
@@ -2038,7 +2038,7 @@ describe("Teal Opcodes", function () {
       it("should push the value to stack if key is present in global state", function () {
         stack.push(toBytes('global-key'));
 
-        const op = new AppGlobalGet(interpreter);
+        const op = new AppGlobalGet([], 1, interpreter);
         op.execute(stack);
 
         const top = stack.pop();
@@ -2048,7 +2048,7 @@ describe("Teal Opcodes", function () {
       it("should push uint 0 to stack if key is not present in global state", function () {
         stack.push(toBytes('random-key'));
 
-        const op = new AppGlobalGet(interpreter);
+        const op = new AppGlobalGet([], 1, interpreter);
         op.execute(stack);
 
         const top = stack.pop();
@@ -2068,7 +2068,7 @@ describe("Teal Opcodes", function () {
         stack.push(BigInt('0'));
         stack.push(toBytes('Hello'));
 
-        let op = new AppGlobalGetEx(interpreter);
+        let op = new AppGlobalGetEx([], 1, interpreter);
         op.execute(stack);
 
         let top = stack.pop();
@@ -2078,7 +2078,7 @@ describe("Teal Opcodes", function () {
         stack.push(BigInt('1'));
         stack.push(toBytes('global-key'));
 
-        op = new AppGlobalGetEx(interpreter);
+        op = new AppGlobalGetEx([], 1, interpreter);
         op.execute(stack);
 
         top = stack.pop();
@@ -2090,7 +2090,7 @@ describe("Teal Opcodes", function () {
         stack.push(BigInt('0'));
         stack.push(toBytes('random-key'));
 
-        let op = new AppGlobalGetEx(interpreter);
+        let op = new AppGlobalGetEx([], 1, interpreter);
         op.execute(stack);
 
         let top = stack.pop();
@@ -2100,7 +2100,7 @@ describe("Teal Opcodes", function () {
         stack.push(BigInt('1'));
         stack.push(toBytes('random-key'));
 
-        op = new AppGlobalGetEx(interpreter);
+        op = new AppGlobalGetEx([], 1, interpreter);
         op.execute(stack);
 
         top = stack.pop();
@@ -2118,7 +2118,7 @@ describe("Teal Opcodes", function () {
           stack.push(toBytes('New-Key'));
           stack.push(toBytes('New-Val'));
 
-          let op = new AppLocalPut(interpreter);
+          let op = new AppLocalPut([], 1, interpreter);
           op.execute(stack);
 
           let localStateCurr = interpreter.accounts["addr-1"]["apps-local-state"][0]["key-value"];
@@ -2131,7 +2131,7 @@ describe("Teal Opcodes", function () {
           stack.push(toBytes('New-Key-1'));
           stack.push(BigInt('2222'));
 
-          op = new AppLocalPut(interpreter);
+          op = new AppLocalPut([], 1, interpreter);
           op.execute(stack);
 
           localStateCurr = interpreter.accounts["addr-1"]["apps-local-state"][0]["key-value"];
@@ -2146,7 +2146,7 @@ describe("Teal Opcodes", function () {
           execExpectError(
             stack,
             [BigInt('0'), toBytes("New-Key-1"), toBytes("New-Val-2")],
-            new AppLocalPut(interpreter),
+            new AppLocalPut([], 1, interpreter),
             ERRORS.TEAL.INVALID_SCHEMA
           );
         });
@@ -2156,7 +2156,7 @@ describe("Teal Opcodes", function () {
           execExpectError(
             stack,
             [BigInt('0'), toBytes("New-Key-1"), toBytes("New-Val-2")],
-            new AppLocalPut(interpreter),
+            new AppLocalPut([], 1, interpreter),
             ERRORS.TEAL.APP_NOT_FOUND
           );
         });
@@ -2173,7 +2173,7 @@ describe("Teal Opcodes", function () {
           stack.push(toBytes('New-Global-Key'));
           stack.push(toBytes('New-Global-Val'));
 
-          let op = new AppGlobalPut(interpreter);
+          let op = new AppGlobalPut([], 1, interpreter);
           op.execute(stack);
 
           let globalStateCurr = interpreter.globalApps[1828]["global-state"];
@@ -2185,7 +2185,7 @@ describe("Teal Opcodes", function () {
           stack.push(toBytes('Key'));
           stack.push(BigInt('1000'));
 
-          op = new AppGlobalPut(interpreter);
+          op = new AppGlobalPut([], 1, interpreter);
           op.execute(stack);
 
           globalStateCurr = interpreter.globalApps[1828]["global-state"];
@@ -2198,7 +2198,7 @@ describe("Teal Opcodes", function () {
           execExpectError(
             stack,
             [toBytes("New-GlobalKey-1"), toBytes("New-GlobalVal-2")],
-            new AppGlobalPut(interpreter),
+            new AppGlobalPut([], 1, interpreter),
             ERRORS.TEAL.INVALID_SCHEMA
           );
         });
@@ -2208,7 +2208,7 @@ describe("Teal Opcodes", function () {
           execExpectError(
             stack,
             [toBytes("New-Key-1"), toBytes("New-Val-2")],
-            new AppGlobalPut(interpreter),
+            new AppGlobalPut([], 1, interpreter),
             ERRORS.TEAL.APP_NOT_FOUND
           );
         });
@@ -2224,7 +2224,7 @@ describe("Teal Opcodes", function () {
           stack.push(BigInt('0'));
           stack.push(toBytes('Local-key'));
 
-          let op = new AppLocalDel(interpreter);
+          let op = new AppLocalDel([], 1, interpreter);
           op.execute(stack);
 
           let localStateCurr = interpreter.accounts["addr-1"]["apps-local-state"][0]["key-value"];
@@ -2235,7 +2235,7 @@ describe("Teal Opcodes", function () {
           stack.push(BigInt('1'));
           stack.push(toBytes('Local-key'));
 
-          op = new AppLocalDel(interpreter);
+          op = new AppLocalDel([], 1, interpreter);
           op.execute(stack);
 
           localStateCurr = interpreter.accounts["addr-2"]["apps-local-state"][0]["key-value"];
@@ -2254,7 +2254,7 @@ describe("Teal Opcodes", function () {
           stack.push(BigInt('0'));
           stack.push(toBytes('global-key'));
 
-          const op = new AppGlobalDel(interpreter);
+          const op = new AppGlobalDel([], 1, interpreter);
           op.execute(stack);
 
           const globalStateCurr = interpreter.globalApps[1828]["global-state"];

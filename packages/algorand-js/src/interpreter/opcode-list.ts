@@ -1105,7 +1105,12 @@ export class Gtxna extends Op {
 export class AppOptedIn extends Op {
   readonly interpreter: Interpreter;
 
-  constructor (interpreter: Interpreter) {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     this.interpreter = interpreter;
   }
@@ -1131,7 +1136,12 @@ export class AppOptedIn extends Op {
 export class AppLocalGet extends Op {
   readonly interpreter: Interpreter;
 
-  constructor (interpreter: Interpreter) {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     this.interpreter = interpreter;
   }
@@ -1158,7 +1168,12 @@ export class AppLocalGet extends Op {
 export class AppLocalGetEx extends Op {
   readonly interpreter: Interpreter;
 
-  constructor (interpreter: Interpreter) {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     this.interpreter = interpreter;
   }
@@ -1183,7 +1198,12 @@ export class AppLocalGetEx extends Op {
 export class AppGlobalGet extends Op {
   readonly interpreter: Interpreter;
 
-  constructor (interpreter: Interpreter) {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     this.interpreter = interpreter;
   }
@@ -1208,7 +1228,12 @@ export class AppGlobalGet extends Op {
 export class AppGlobalGetEx extends Op {
   readonly interpreter: Interpreter;
 
-  constructor (interpreter: Interpreter) {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     this.interpreter = interpreter;
   }
@@ -1240,7 +1265,12 @@ export class AppGlobalGetEx extends Op {
 export class AppLocalPut extends Op {
   readonly interpreter: Interpreter;
 
-  constructor (interpreter: Interpreter) {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     this.interpreter = interpreter;
   }
@@ -1264,7 +1294,12 @@ export class AppLocalPut extends Op {
 export class AppGlobalPut extends Op {
   readonly interpreter: Interpreter;
 
-  constructor (interpreter: Interpreter) {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     this.interpreter = interpreter;
   }
@@ -1284,7 +1319,12 @@ export class AppGlobalPut extends Op {
 export class AppLocalDel extends Op {
   readonly interpreter: Interpreter;
 
-  constructor (interpreter: Interpreter) {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     this.interpreter = interpreter;
   }
@@ -1313,7 +1353,12 @@ export class AppLocalDel extends Op {
 export class AppGlobalDel extends Op {
   readonly interpreter: Interpreter;
 
-  constructor (interpreter: Interpreter) {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     this.interpreter = interpreter;
   }
