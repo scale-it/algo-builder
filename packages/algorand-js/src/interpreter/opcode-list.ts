@@ -9,8 +9,7 @@ import { decode, encode } from "uint64be";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
-import { assertLen, assertOnlyDigits, compareArray } from "../lib/helpers";
-import { convertToBuffer, convertToString, getEncoding } from "../lib/parse-data";
+import { assertLen, assertOnlyDigits, convertToBuffer, convertToString, getEncoding } from "../lib/parse-data";
 import type { EncodingType, TEALStack } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
@@ -702,7 +701,7 @@ export class EqualTo extends Op {
           stack.push(BIGINT0);
         }
       } else {
-        if (compareArray(this.assertBytes(last), this.assertBytes(prev))) {
+        if (JSON.stringify(this.assertBytes(last)) === JSON.stringify(this.assertBytes(prev))) {
           stack.push(BIGINT1);
         } else {
           stack.push(BIGINT0);
@@ -737,7 +736,7 @@ export class NotEqualTo extends Op {
           stack.push(BIGINT1);
         }
       } else {
-        if (compareArray(this.assertBytes(last), this.assertBytes(prev))) {
+        if (JSON.stringify(this.assertBytes(last)) === JSON.stringify(this.assertBytes(prev))) {
           stack.push(BIGINT0);
         } else {
           stack.push(BIGINT1);
