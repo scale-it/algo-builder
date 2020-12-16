@@ -1,7 +1,7 @@
 /**
  * Description: compare two array: returns true if they are equal, else false.
  * @param a unknown (array)
- * @param b unkown (array)
+ * @param b unknown (array)
  */
 export function compareArray (a: unknown, b: unknown): Boolean {
   if ((Array.isArray(a) && Array.isArray(b))) {
