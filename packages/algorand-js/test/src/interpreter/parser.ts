@@ -213,6 +213,26 @@ describe("Parser", function () {
       expected = [];
 
       assert.deepEqual(res, expected);
+
+      res = wordsFromLine("!//");
+      expected = ["!"];
+
+      assert.deepEqual(res, expected);
+
+      res = wordsFromLine("!=//");
+      expected = ["!="];
+
+      assert.deepEqual(res, expected);
+
+      res = wordsFromLine("%//here");
+      expected = ["%"];
+
+      assert.deepEqual(res, expected);
+
+      res = wordsFromLine("|//");
+      expected = ["|"];
+
+      assert.deepEqual(res, expected);
     });
   });
 
