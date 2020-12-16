@@ -1,4 +1,4 @@
-import { AccountInfo, SSCParams, TxnEncodedObj } from "algosdk";
+import { TxnEncodedObj } from "algosdk";
 
 import {
   Add, Addr, Arg, Byte, Bytec, Bytecblock, Div, Int, Len, Mul, Pragma,
@@ -120,12 +120,4 @@ export enum EncodingType {
   BASE32,
   HEX,
   UTF8
-}
-
-export interface AccountsMap {
-  [addr: string]: AccountInfo
-}
-
-export interface ApplicationMap {
-  [appId: number]: SSCParams
 }

@@ -22,7 +22,7 @@ export class Algodv2 {
   getTransactionParams(): Action<SuggestedParams>;
   pendingTransactionInformation(txId: string): Action<ConfirmedTxInfo>;
   statusAfterBlock(lastround: number): Action<any>;
-  accountInformation(address: string): Action<AccountInfo>;
+  accountInformation(address: string): Action<AccountState>;
 }
 
 export const OnApplicationComplete: {
@@ -578,7 +578,7 @@ export interface AppLocalState {
   schema: SSCSchemaConfig;
 }
 
-export interface AccountInfo {
+export interface AccountState {
   address: string;
   assets: AccountAssetInfo[];
   amount: number;
