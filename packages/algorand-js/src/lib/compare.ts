@@ -1,17 +1,12 @@
 /**
- * Description: Compare Uint8Arrays
- * @param a Uint8Array
- * @param b Uint8Array
+ * Description: compare two array: returns true if they are equal, else false.
+ * @param a unkown (array)
+ * @param b unkown (array)
  */
-export function compareArray (a: Uint8Array | string[], b: Uint8Array | string[]): Boolean {
-  if (a.length === b.length) {
-    for (let i = 0; i < a.length; ++i) {
-      if (a[i] !== b[i]) {
-        return false;
-      }
-    }
-    return true;
-  } else {
-    return false;
+export function compareArray (a: unknown, b: unknown): Boolean {
+  if (Array.isArray(a) && Array.isArray(b)) {
+    return a.length === b.length &&
+      a.every((v, i) => v === b[i]);
   }
+  return false;
 }
