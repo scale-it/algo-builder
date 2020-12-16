@@ -1,6 +1,6 @@
 /**
  * Description: compare two array: returns true if they are equal, else false.
- * @param a unkown (array)
+ * @param a unknown (array)
  * @param b unkown (array)
  */
 export function compareArray (a: unknown, b: unknown): Boolean {
