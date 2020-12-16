@@ -8,7 +8,7 @@ import { decode, encode } from "uint64be";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
-import { MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
+import { MAX_CONCAT_SIZE, MAX_UINT64, TX_FIELD_MAP } from "../lib/constants";
 import { assertLen, assertOnlyDigits, compareArray } from "../lib/helpers";
 import { convertToBuffer, convertToString, getEncoding } from "../lib/parse-data";
 import type { EncodingType, TEALStack } from "../types";
@@ -1019,9 +1019,17 @@ export class Txn extends Op {
   readonly field: string;
   readonly interpreter: Interpreter;
 
-  constructor (txField: string, interpreter: Interpreter) {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
-    this.field = txField;
+    assertLen(args.length, 1, line);
+    assertOnlyDigits(args[0]);
+
+    this.field = TX_FIELD_MAP[args[0]];
     this.interpreter = interpreter;
   }
 
@@ -1038,10 +1046,19 @@ export class Gtxn extends Op {
   readonly txIdx: number;
   readonly interpreter: Interpreter;
 
-  constructor (field: string, txIdx: number, interpreter: Interpreter) {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
-    this.field = field;
-    this.txIdx = txIdx; // transaction group index
+    assertLen(args.length, 2, line);
+    assertOnlyDigits(args[0]);
+    assertOnlyDigits(args[1]);
+
+    this.txIdx = Number(args[0]); // transaction group index
+    this.field = TX_FIELD_MAP[args[1]];
     this.interpreter = interpreter;
   }
 
@@ -1060,10 +1077,19 @@ export class Txna extends Op {
   readonly idx: number;
   readonly interpreter: Interpreter;
 
-  constructor (field: string, idx: number, interpreter: Interpreter) {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
-    this.field = field;
-    this.idx = idx;
+    assertLen(args.length, 2, line);
+    assertOnlyDigits(args[0]);
+    assertOnlyDigits(args[1]);
+
+    this.field = TX_FIELD_MAP[args[0]];
+    this.idx = Number(args[1]);
     this.interpreter = interpreter;
   }
 
@@ -1080,11 +1106,21 @@ export class Gtxna extends Op {
   readonly idx: number; // array index
   readonly interpreter: Interpreter;
 
-  constructor (field: string, txIdx: number, idx: number, interpreter: Interpreter) {
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
-    this.field = field;
-    this.txIdx = txIdx;
-    this.idx = idx;
+    assertLen(args.length, 3, line);
+    assertOnlyDigits(args[0]);
+    assertOnlyDigits(args[1]);
+    assertOnlyDigits(args[2]);
+
+    this.txIdx = Number(args[0]);
+    this.field = TX_FIELD_MAP[args[1]];
+    this.idx = Number(args[2]);
     this.interpreter = interpreter;
   }
 
@@ -1101,7 +1137,7 @@ export class Gtxna extends Op {
 export class Label extends Op {
   readonly label: string;
 
-    /**
+  /**
    * @param args words list extracted from line
    * @param line line number in TEAL file
    */

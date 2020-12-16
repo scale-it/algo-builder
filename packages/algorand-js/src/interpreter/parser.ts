@@ -8,10 +8,13 @@ import { assertLen } from "../lib/helpers";
 import { Operator } from "../types";
 import {
   Add, Addr, Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
+  Branch,
+  BranchIfNotZero,
+  BranchIfZero,
   Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2, Ed25519verify, EqualTo,
   Err, GreaterThan, GreaterThanEqualTo, Int, Intc, Intcblock, Itob, Keccak256,
   Len, LessThan, LessThanEqualTo, Load, Mod, Mul, Mulw, Not, NotEqualTo, Or,
-  Pop, Pragma, Sha256, Sha512_256, Store, Sub, Substring, Substring3
+  Pop, Pragma, Return, Sha256, Sha512_256, Store, Sub, Substring, Substring3
 } from "./opcode-list";
 
 var opCodeMap: {[key: string]: any } = {
@@ -72,7 +75,17 @@ var opCodeMap: {[key: string]: any } = {
   // Pseudo-Ops
   addr: Addr,
   int: Int,
-  byte: Byte
+  byte: Byte,
+
+  // Branch Opcodes
+  b: Branch,
+  bz: BranchIfZero,
+  bnz: BranchIfNotZero,
+
+  return: Return
+
+  // Transaction Opcodes
+
 };
 
 // list of opcodes that require one extra parameter than others: `interpreter`.

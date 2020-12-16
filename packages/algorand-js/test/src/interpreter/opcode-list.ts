@@ -1522,7 +1522,7 @@ describe("Teal Opcodes", function () {
 
     describe("Txn: Common Fields", function () {
       it("should push txn fee to stack", function () {
-        const op = new Txn('Fee', interpreter);
+        const op = new Txn(["1"], 1, interpreter); // 1 -> Fee
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1530,7 +1530,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn firstRound to stack", function () {
-        const op = new Txn('FirstValid', interpreter);
+        const op = new Txn(["2"], 1, interpreter); // 2 -> FirstValid
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1538,7 +1538,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn lastRound to stack", function () {
-        const op = new Txn('LastValid', interpreter);
+        const op = new Txn(["4"], 1, interpreter); // 4 -> LastValid
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1546,7 +1546,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn sender to stack", function () {
-        const op = new Txn('Sender', interpreter);
+        const op = new Txn(["0"], 1, interpreter); // 0 -> sender
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1554,7 +1554,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn type to stack", function () {
-        const op = new Txn('Type', interpreter);
+        const op = new Txn(["15"], 1, interpreter); // 15 -> Type
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1562,7 +1562,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn typeEnum to stack", function () {
-        const op = new Txn('TypeEnum', interpreter);
+        const op = new Txn(["16"], 1, interpreter); // 16 -> TypeEnum
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1570,7 +1570,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn lease to stack", function () {
-        const op = new Txn('Lease', interpreter);
+        const op = new Txn(["6"], 1, interpreter); // 6 -> Lease
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1578,7 +1578,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn note to stack", function () {
-        const op = new Txn('Note', interpreter);
+        const op = new Txn(["5"], 1, interpreter); // 5 -> Note
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1586,7 +1586,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn rekeyTo addr to stack", function () {
-        const op = new Txn('RekeyTo', interpreter);
+        const op = new Txn(["32"], 1, interpreter); // 32 -> RekeyTo
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1597,13 +1597,13 @@ describe("Teal Opcodes", function () {
         execExpectError(
           stack,
           [],
-          new Txn('FirstValidTime', interpreter),
+          new Txn(["3"], 1, interpreter), // 3 -> FirstValidTime
           ERRORS.TEAL.LOGIC_REJECTION
         )
       );
 
       it("should push txn NumAppArgs to stack", function () {
-        const op = new Txn('NumAppArgs', interpreter);
+        const op = new Txn(["27"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1611,7 +1611,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn NumAccounts to stack", function () {
-        const op = new Txn('NumAccounts', interpreter);
+        const op = new Txn(["29"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1625,7 +1625,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn Receiver to stack", function () {
-        const op = new Txn('Receiver', interpreter);
+        const op = new Txn(["7"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1633,7 +1633,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn Amount to stack", function () {
-        const op = new Txn('Amount', interpreter);
+        const op = new Txn(["8"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1641,7 +1641,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn CloseRemainderTo to stack", function () {
-        const op = new Txn('CloseRemainderTo', interpreter);
+        const op = new Txn(["9"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1655,7 +1655,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn VotePK to stack", function () {
-        const op = new Txn('VotePK', interpreter);
+        const op = new Txn(["10"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1663,7 +1663,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn SelectionPK to stack", function () {
-        const op = new Txn('SelectionPK', interpreter);
+        const op = new Txn(["11"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1671,7 +1671,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn VoteFirst to stack", function () {
-        const op = new Txn('VoteFirst', interpreter);
+        const op = new Txn(["12"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1679,7 +1679,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn VoteLast to stack", function () {
-        const op = new Txn('VoteLast', interpreter);
+        const op = new Txn(["13"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1687,7 +1687,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn VoteKeyDilution to stack", function () {
-        const op = new Txn('VoteKeyDilution', interpreter);
+        const op = new Txn(["14"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1701,7 +1701,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn ConfigAsset to stack", function () {
-        const op = new Txn('ConfigAsset', interpreter);
+        const op = new Txn(["33"], 1, interpreter); // ConfigAsset
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1709,7 +1709,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn ConfigAssetTotal to stack", function () {
-        const op = new Txn('ConfigAssetTotal', interpreter);
+        const op = new Txn(["34"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1717,7 +1717,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn ConfigAssetDecimals to stack", function () {
-        const op = new Txn('ConfigAssetDecimals', interpreter);
+        const op = new Txn(["35"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1725,7 +1725,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn ConfigAssetDefaultFrozen to stack", function () {
-        const op = new Txn('ConfigAssetDefaultFrozen', interpreter);
+        const op = new Txn(["36"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1733,7 +1733,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn ConfigAssetUnitName to stack", function () {
-        const op = new Txn('ConfigAssetUnitName', interpreter);
+        const op = new Txn(["37"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1741,7 +1741,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn ConfigAssetName to stack", function () {
-        const op = new Txn('ConfigAssetName', interpreter);
+        const op = new Txn(["38"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1749,7 +1749,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn ConfigAssetDefaultFrozen to stack", function () {
-        const op = new Txn('ConfigAssetURL', interpreter);
+        const op = new Txn(["39"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1757,7 +1757,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn ConfigAssetMetadataHash to stack", function () {
-        const op = new Txn('ConfigAssetMetadataHash', interpreter);
+        const op = new Txn(["40"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1765,7 +1765,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn ConfigAssetManager to stack", function () {
-        const op = new Txn('ConfigAssetManager', interpreter);
+        const op = new Txn(["41"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1773,7 +1773,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn ConfigAssetReserve to stack", function () {
-        const op = new Txn('ConfigAssetReserve', interpreter);
+        const op = new Txn(["42"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1781,7 +1781,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn ConfigAssetFreeze to stack", function () {
-        const op = new Txn('ConfigAssetFreeze', interpreter);
+        const op = new Txn(["43"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1789,7 +1789,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn ConfigAssetClawback to stack", function () {
-        const op = new Txn('ConfigAssetClawback', interpreter);
+        const op = new Txn(["44"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1803,7 +1803,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn XferAsset to stack", function () {
-        const op = new Txn('XferAsset', interpreter);
+        const op = new Txn(["17"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1811,7 +1811,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn AssetAmount to stack", function () {
-        const op = new Txn('AssetAmount', interpreter);
+        const op = new Txn(["18"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1819,7 +1819,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn AssetSender to stack", function () {
-        const op = new Txn('AssetSender', interpreter);
+        const op = new Txn(["19"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1827,7 +1827,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn AssetReceiver to stack", function () {
-        const op = new Txn('AssetReceiver', interpreter);
+        const op = new Txn(["20"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1835,7 +1835,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn AssetCloseTo to stack", function () {
-        const op = new Txn('AssetCloseTo', interpreter);
+        const op = new Txn(["21"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1849,7 +1849,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn FreezeAsset to stack", function () {
-        const op = new Txn('FreezeAsset', interpreter);
+        const op = new Txn(["45"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1857,7 +1857,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn FreezeAssetAccount to stack", function () {
-        const op = new Txn('FreezeAssetAccount', interpreter);
+        const op = new Txn(["46"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1865,7 +1865,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn FreezeAssetFrozen to stack", function () {
-        const op = new Txn('FreezeAssetFrozen', interpreter);
+        const op = new Txn(["47"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1879,7 +1879,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn ApplicationID to stack", function () {
-        const op = new Txn('ApplicationID', interpreter);
+        const op = new Txn(["24"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1887,7 +1887,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn OnCompletion to stack", function () {
-        const op = new Txn('OnCompletion', interpreter);
+        const op = new Txn(["25"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1895,7 +1895,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn ApprovalProgram to stack", function () {
-        const op = new Txn('ApprovalProgram', interpreter);
+        const op = new Txn(["30"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1903,7 +1903,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push txn ClearStateProgram to stack", function () {
-        const op = new Txn('ClearStateProgram', interpreter);
+        const op = new Txn(["31"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1919,7 +1919,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("push fee from 2nd transaction in group", function () {
-        const op = new Gtxn('Fee', 1, interpreter);
+        const op = new Gtxn(["1", "1"], 1, interpreter); // 1 -> Fee
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1933,7 +1933,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("push addr from 2nd account to stack", function () {
-        const op = new Txna('Accounts', 1, interpreter);
+        const op = new Txna(["28", "1"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1941,7 +1941,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("push addr from 1st AppArg to stack", function () {
-        const op = new Txna('ApplicationArgs', 0, interpreter);
+        const op = new Txna(["26", "0"], 0, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1955,7 +1955,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("push addr from 1st account of 2nd Txn in txGrp to stack", function () {
-        const op = new Gtxna('Accounts', 1, 0, interpreter);
+        const op = new Gtxna(["0", "28", "1"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1966,7 +1966,7 @@ describe("Teal Opcodes", function () {
         execExpectError(
           stack,
           [],
-          new Gtxna('Fee', 1, 0, interpreter),
+          new Gtxna(["1", "1", "0"], 1, interpreter),
           ERRORS.TEAL.INVALID_OP_ARG
         );
       });
