@@ -12,9 +12,9 @@ import {
   BranchIfNotZero,
   BranchIfZero,
   Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2, Ed25519verify, EqualTo,
-  Err, GreaterThan, GreaterThanEqualTo, Int, Intc, Intcblock, Itob, Keccak256,
+  Err, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc, Intcblock, Itob, Keccak256,
   Len, LessThan, LessThanEqualTo, Load, Mod, Mul, Mulw, Not, NotEqualTo, Or,
-  Pop, Pragma, Return, Sha256, Sha512_256, Store, Sub, Substring, Substring3
+  Pop, Pragma, Return, Sha256, Sha512_256, Store, Sub, Substring, Substring3, Txn, Txna
 } from "./opcode-list";
 
 var opCodeMap: {[key: string]: any } = {
@@ -82,14 +82,20 @@ var opCodeMap: {[key: string]: any } = {
   bz: BranchIfZero,
   bnz: BranchIfNotZero,
 
-  return: Return
+  return: Return,
 
   // Transaction Opcodes
-
+  txn: Txn,
+  gtxn: Gtxn,
+  txna: Txna,
+  gtxna: Gtxna
 };
 
 // list of opcodes that require one extra parameter than others: `interpreter`.
-const interpreterReqList = new Set(["arg", "bytecblock", "bytec", "intcblock", "intc", "store", "load"]);
+const interpreterReqList = new Set([
+  "arg", "bytecblock", "bytec", "intcblock", "intc", "store", "load",
+  "b", "bz", "bnz", "txn", "gtxn", "txna", "gtxna"
+]);
 
 /**
  * Description: Read line and split it into words
@@ -213,6 +219,14 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
   }
 
   words.shift();
+
+  // Handle Label
+  if (opCode.endsWith(':')) {
+    assertLen(words.length, 0, counter);
+    if (opCodeMap.has(opCode.slice(-1))) {
+      throw new TealError(ERRORS.TEAL.INVALID_LABEL);
+    }
+  }
 
   if (opCodeMap[opCode] === undefined) {
     throw new TealError(ERRORS.TEAL.INVALID_OP_ARG);

@@ -169,6 +169,12 @@ by an index that does not exist.`
     message: "Invalid top of stack or length of stack > 1",
     title: "Invalid top of stack or length of stack > 1",
     description: `Either Length of stack is > 1 or top of stack is not uint64`
+  },
+  INVALID_LABEL: {
+    number: 25,
+    message: "Invalid Label Name",
+    title: "OpCode name cannot be used as label name",
+    description: `OpCode name cannot be used as label name`
   }
 };
 
