@@ -7,22 +7,20 @@
  * if the seller is able to provide the secret value that corresponds to the hash in the program.
 */
 const { TransactionType, SignType, toBytes } = require('algob');
-const { executeTransaction } = require('./common');
+const { executeTransaction, prepareParameters } = require('./common');
 
 async function run (runtimeEnv, deployer) {
-  const john = deployer.accountsByName.get('john'); // Seller
-
-  const secret = 'hero wisdom green split loop element vote belt';
+  const { alice, scTmplParams, secret } = prepareParameters(deployer);
   const wrongSecret = 'hero wisdom red split loop element vote belt';
 
-  let lsig = await deployer.loadLogic('htlc.py', [toBytes(wrongSecret)]);
+  let lsig = await deployer.loadLogic('htlc.py', [toBytes(wrongSecret)], scTmplParams);
   let sender = lsig.address();
 
   const txnParams = {
     type: TransactionType.TransferAlgo,
     sign: SignType.LogicSignature,
     fromAccount: { addr: sender },
-    toAccountAddr: john.addr,
+    toAccountAddr: alice.addr,
     amountMicroAlgos: 200,
     lsig: lsig,
     payFlags: { totalFee: 1000 }
@@ -30,7 +28,7 @@ async function run (runtimeEnv, deployer) {
   // Transaction Fails : as wrong secret value is used
   await executeTransaction(deployer, txnParams);
 
-  lsig = await deployer.loadLogic('htlc.py', [toBytes(secret)]);
+  lsig = await deployer.loadLogic('htlc.py', [toBytes(secret)], scTmplParams);
   sender = lsig.address();
 
   // Transaction Passes : as right secret value is used
