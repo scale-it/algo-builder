@@ -1310,6 +1310,7 @@ export class AppLocalGetEx extends Op {
     const account = this.getAccount(accountIndex, this.interpreter);
     const val = getLocalState(Number(appId), account, key);
     if (val) {
+      stack.push(BIGINT1);
       stack.push(val);
     } else {
       stack.push(BIGINT0); // The value is zero if the key does not exist.
@@ -1379,6 +1380,7 @@ export class AppGlobalGetEx extends Op {
 
     const val = getGlobalState(appId, key, this.interpreter);
     if (val) {
+      stack.push(BIGINT1);
       stack.push(val);
     } else {
       stack.push(BIGINT0); // The value is zero if the key does not exist.
