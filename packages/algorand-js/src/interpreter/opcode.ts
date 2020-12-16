@@ -1,4 +1,4 @@
-import { AccountInfo } from "algosdk";
+import { AccountState, SSCParams } from "algosdk";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
@@ -77,15 +77,32 @@ export class Op {
     return byteString.slice(Number(start), Number(end));
   }
 
-  getAccount (accountIndex: bigint, interpreter: Interpreter): AccountInfo {
+  assertAccountDefined (a?: AccountState): AccountState {
+    if (a === undefined) {
+      throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
+    }
+    return a;
+  }
+
+  assertAppDefined (appId: number, interpreter: Interpreter): SSCParams {
+    const globalDelta = interpreter.globalApps.get(appId);
+    if (globalDelta === undefined) {
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
+    }
+    return globalDelta;
+  }
+
+  getAccount (accountIndex: bigint, interpreter: Interpreter): AccountState {
+    let account: AccountState | undefined;
     if (accountIndex === BIGINT0) {
       const senderAccount = convertToString(interpreter.tx.snd);
-      return interpreter.accounts[senderAccount];
+      account = interpreter.accounts.get(senderAccount);
+    } else {
+      accountIndex--;
+      this.checkIndexBound(Number(accountIndex), interpreter.tx.apat);
+      const pkBuffer = interpreter.tx.apat[Number(accountIndex)];
+      account = interpreter.accounts.get(convertToString(pkBuffer));
     }
-
-    accountIndex--;
-    this.checkIndexBound(Number(accountIndex), interpreter.tx.apat);
-    const pkBuffer = interpreter.tx.apat[Number(accountIndex)];
-    return interpreter.accounts[convertToString(pkBuffer)];
+    return this.assertAccountDefined(account);
   }
 }

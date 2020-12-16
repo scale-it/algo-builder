@@ -181,6 +181,12 @@ by an index that does not exist.`
     message: "Invalid top of stack or length of stack > 1",
     title: "Invalid top of stack or length of stack > 1",
     description: `Either Length of stack is > 1 or top of stack is not uint64`
+  },
+  ACCOUNT_DOES_NOT_EXIST: {
+    number: 27,
+    message: "Account Error - Account doesn't exist",
+    title: "Account Error",
+    description: `Account does not exist in the current state`
   }
 };
 

@@ -1412,7 +1412,8 @@ export class AppLocalPut extends Op {
 
     // get updated local state for account
     const localState = updateLocalState(appId, account, key, value);
-    this.interpreter.accounts[account.address]["apps-local-state"] = localState;
+    const acc = this.assertAccountDefined(this.interpreter.accounts.get(account.address));
+    acc["apps-local-state"] = localState;
   }
 }
 
@@ -1438,7 +1439,9 @@ export class AppGlobalPut extends Op {
 
     const appId = this.interpreter.tx.apid;
     const globalState = updateGlobalState(appId, key, value, this.interpreter);
-    this.interpreter.globalApps[appId]["global-state"] = globalState;
+
+    const globalApp = this.assertAppDefined(appId, this.interpreter);
+    globalApp["global-state"] = globalState;
   }
 }
 
@@ -1472,7 +1475,10 @@ export class AppLocalDel extends Op {
         return !compareArray(obj.key as Uint8Array, key);
       });
       localState[idx]["key-value"] = arr;
-      this.interpreter.accounts[account.address]["apps-local-state"] = localState;
+
+      let acc = this.interpreter.accounts.get(account.address);
+      acc = this.assertAccountDefined(acc);
+      acc["apps-local-state"] = localState;
     }
   }
 }
@@ -1498,13 +1504,13 @@ export class AppGlobalDel extends Op {
 
     const appId = this.interpreter.tx.apid;
 
-    const appDelta = this.interpreter.globalApps[appId];
+    const appDelta = this.assertAppDefined(appId, this.interpreter);
     if (appDelta) {
       const globalState = appDelta["global-state"];
       const arr = globalState.filter((obj) => {
         return !compareArray(obj.key as Uint8Array, key);
       });
-      this.interpreter.globalApps[appId]["global-state"] = arr;
+      appDelta["global-state"] = arr;
     }
   }
 }

@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 import { toBytes } from "algob";
-import { AccountInfo, AppLocalState, SSCSchemaConfig, SSCStateSchema } from "algosdk";
+import { AccountState, AppLocalState, SSCSchemaConfig, SSCStateSchema } from "algosdk";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
@@ -45,7 +45,7 @@ function assertValidSchema (keyValue: SSCStateSchema[], schema: SSCSchemaConfig)
  * @param account: account having local state data
  * @param key: key to fetch value of from local state
  */
-export function getLocalState (appId: number, account: AccountInfo, key: Uint8Array): StackElem | undefined {
+export function getLocalState (appId: number, account: AccountState, key: Uint8Array): StackElem | undefined {
   const localState = account["apps-local-state"];
   const data = localState.find(state => state.id === appId)?.["key-value"]; // can be undefined (eg. app opted in)
   if (data) {
@@ -67,7 +67,7 @@ export function getLocalState (appId: number, account: AccountInfo, key: Uint8Ar
  */
 export function getGlobalState (appId: number, key: Uint8Array,
   interpreter: Interpreter): StackElem | undefined {
-  const appDelta = interpreter.globalApps[appId];
+  const appDelta = interpreter.globalApps.get(appId);
   if (!appDelta) {
     throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, {
       appId: appId
@@ -91,7 +91,7 @@ export function getGlobalState (appId: number, key: Uint8Array,
  * @param key: key to fetch value of from local state
  * @param value: key to fetch value of from local state
  */
-export function updateLocalState (appId: number, account: AccountInfo,
+export function updateLocalState (appId: number, account: AccountState,
   key: Uint8Array, value: StackElem): AppLocalState[] {
   const localState = account["apps-local-state"];
   const data = getKeyValPair(key, value); // key value pair to put
@@ -128,7 +128,7 @@ export function updateLocalState (appId: number, account: AccountInfo,
  */
 export function updateGlobalState (appId: number, key: Uint8Array,
   value: StackElem, interpreter: Interpreter): SSCStateSchema[] {
-  const appDelta = interpreter.globalApps[appId];
+  const appDelta = interpreter.globalApps.get(appId);
   if (!appDelta) {
     throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, {
       appId: appId
