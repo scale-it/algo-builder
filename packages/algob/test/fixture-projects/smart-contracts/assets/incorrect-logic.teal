@@ -1,0 +1,6 @@
+#pragma version 2
+int 6
+int 3
+-
+int 2
+==

@@ -1,0 +1,10 @@
+#pragma version 2
+int 1
+int 2
++
+pop
+int 15
+int 3
+/
+int 5
+==
