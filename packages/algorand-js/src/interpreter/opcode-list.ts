@@ -16,8 +16,8 @@ import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
 import { txAppArg, txnSpecbyField } from "./txn";
 
-const BIGINT0 = BigInt("0");
-const BIGINT1 = BigInt("1");
+export const BIGINT0 = BigInt("0");
+export const BIGINT1 = BigInt("1");
 
 // Store TEAL version
 export class Pragma extends Op {
@@ -696,18 +696,12 @@ export class EqualTo extends Op {
     const prev = stack.pop();
     if (typeof last !== typeof prev) {
       throw new TealError(ERRORS.TEAL.INVALID_TYPE);
-    } else if (typeof last === "bigint") {
-      if (last === prev) {
-        stack.push(BIGINT1);
-      } else {
-        stack.push(BIGINT0);
-      }
+    }
+    if (typeof last === "bigint") {
+      stack = this.pushBooleanCheck(stack, (last === prev));
     } else {
-      if (compareArray(this.assertBytes(last), this.assertBytes(prev))) {
-        stack.push(BIGINT1);
-      } else {
-        stack.push(BIGINT0);
-      }
+      stack = this.pushBooleanCheck(stack,
+        compareArray(this.assertBytes(last), this.assertBytes(prev)));
     }
   }
 }
@@ -729,18 +723,12 @@ export class NotEqualTo extends Op {
     const prev = stack.pop();
     if (typeof last !== typeof prev) {
       throw new TealError(ERRORS.TEAL.INVALID_TYPE);
-    } else if (typeof last === "bigint") {
-      if (last === prev) {
-        stack.push(BIGINT0);
-      } else {
-        stack.push(BIGINT1);
-      }
+    }
+    if (typeof last === "bigint") {
+      stack = this.pushBooleanCheck(stack, last !== prev);
     } else {
-      if (compareArray(this.assertBytes(last), this.assertBytes(prev))) {
-        stack.push(BIGINT0);
-      } else {
-        stack.push(BIGINT1);
-      }
+      stack = this.pushBooleanCheck(stack,
+        !compareArray(this.assertBytes(last), this.assertBytes(prev)));
     }
   }
 }

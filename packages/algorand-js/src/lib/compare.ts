@@ -3,7 +3,7 @@
  * @param a unknown (array)
  * @param b unknown (array)
  */
-export function compareArray (a: unknown, b: unknown): Boolean {
+export function compareArray (a: unknown, b: unknown): boolean {
   if ((Array.isArray(a) && Array.isArray(b))) {
     return a.length === b.length &&
       a.every((v, i) => v === b[i]);
