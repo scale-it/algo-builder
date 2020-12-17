@@ -53,7 +53,7 @@ def htlc(TMPL_RCV,
     rekey_check = Txn.rekey_to() == Global.zero_address()
 
     # fold all the above checks into a single boolean.
-    required_condition = And(
+    common_checks = And(
         fee_check,
         pay_check,
         rec_field_check,
@@ -97,7 +97,7 @@ def htlc(TMPL_RCV,
     # Finally, we logically AND the scenario checks with the initial checks.
     # At this point, the stack contains just one value: a boolean indicating
     # whether or not it has been approved by this contract.
-    return And(Or(scenario_1, scenario_2), required_condition)
+    return And(Or(scenario_1, scenario_2), common_checks)
 
 if __name__ == "__main__":
     print(compileTeal(htlc(john, master, fee, pre_image, Sha256, timeout), Mode.Signature))

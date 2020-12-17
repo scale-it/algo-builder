@@ -1081,6 +1081,126 @@ export class Gtxna extends Op {
   }
 }
 
+// represents branch name of a new branch
+export class Label extends Op {
+  readonly label: string;
+
+    /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 1, line);
+    this.label = args[0].split(':')[0];
+  };
+
+  execute (stack: TEALStack): void {}
+}
+
+// branch unconditionally to label
+export class Branch extends Op {
+  readonly label: string;
+  readonly interpreter: Interpreter;
+
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    assertLen(args.length, 1, line);
+    this.label = args[0];
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.interpreter.jumpForward(this.label);
+  }
+}
+
+// branch conditionally if top of stack is zero
+export class BranchIfZero extends Op {
+  readonly label: string;
+  readonly interpreter: Interpreter;
+
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    assertLen(args.length, 1, line);
+    this.label = args[0];
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1);
+    const last = this.assertBigInt(stack.pop());
+
+    if (last === BIGINT0) {
+      this.interpreter.jumpForward(this.label);
+    }
+  }
+}
+
+// branch conditionally if top of stack is non zero
+export class BranchIfNotZero extends Op {
+  readonly label: string;
+  readonly interpreter: Interpreter;
+
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    assertLen(args.length, 1, line);
+    this.label = args[0];
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1);
+    const last = this.assertBigInt(stack.pop());
+
+    if (last !== BIGINT0) {
+      this.interpreter.jumpForward(this.label);
+    }
+  }
+}
+
+// use last value on stack as success value; end
+export class Return extends Op {
+  readonly interpreter: Interpreter;
+
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    assertLen(args.length, 0, line);
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1);
+
+    const last = stack.pop();
+    while (stack.length()) {
+      stack.pop();
+    }
+    stack.push(last); // use last value as success
+    this.interpreter.instructionIndex = this.interpreter.instructions.length; // end execution
+  }
+}
+
 /** Pseudo-Ops **/
 // push integer to stack
 export class Int extends Op {

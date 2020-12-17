@@ -9,6 +9,7 @@ import { ERRORS } from "../errors/errors-list";
 import { DEFAULT_STACK_ELEM } from "../lib/constants";
 import { Stack } from "../lib/stack";
 import type { AccountsMap, Operator, StackElem, TEALStack, Txn } from "../types";
+import { BIGINT0, Label } from "./opcode-list";
 
 export class Interpreter {
   readonly stack: TEALStack;
@@ -18,6 +19,8 @@ export class Interpreter {
   tx: Txn;
   gtxs: Txn[];
   accounts: AccountsMap;
+  instructions: Operator[];
+  instructionIndex: number;
   args: Uint8Array[];
 
   constructor () {
@@ -28,6 +31,8 @@ export class Interpreter {
     this.accounts = <AccountsMap>{};
     this.tx = <Txn>{}; // current transaction
     this.gtxs = []; // all transactions
+    this.instructions = [];
+    this.instructionIndex = 0; // set instruction index to zero
     this.args = [];
   }
 
@@ -78,6 +83,22 @@ export class Interpreter {
   }
 
   /**
+   * Description: moves instruction index to "label", throws error if label not found
+   * @param label: branch label
+   */
+  jumpForward (label: string): void {
+    while (++this.instructionIndex < this.instructions.length) {
+      const instruction = this.instructions[this.instructionIndex];
+      if (instruction instanceof Label && instruction.label === label) {
+        return;
+      }
+    }
+    throw new TealError(ERRORS.TEAL.LABEL_NOT_FOUND, {
+      label: label
+    });
+  }
+
+  /**
    * Description: this function executes set of Operator[] passed after
    * parsing teal code
    * @param {execParams} txn : Transaction parameters
@@ -91,17 +112,21 @@ export class Interpreter {
     assert(Array.isArray(args));
     this.createTxnContext(txnParams);
     this.createStatefulContext(accounts);
+    this.instructions = logic;
 
-    for (const l of logic) {
-      l.execute(this.stack); // execute each teal opcode
+    while (this.instructionIndex < this.instructions.length) {
+      const instruction = this.instructions[this.instructionIndex];
+      instruction.execute(this.stack);
+      this.instructionIndex++;
     }
-    if (this.stack.length() > 0) {
-      const top = this.stack.pop();
-      if (top instanceof Uint8Array || typeof top === 'undefined') {
-        throw new TealError(ERRORS.TEAL.LOGIC_REJECTION);
+
+    if (this.stack.length() === 1) {
+      const s = this.stack.pop();
+
+      if (!(s instanceof Uint8Array) && s > BIGINT0) {
+        return true;
       }
-      if (top >= BigInt("1")) { return true; } // Logic accept
     }
-    return false; // Logic Reject
+    throw new TealError(ERRORS.TEAL.INVALID_STACK_ELEM);
   }
 }
