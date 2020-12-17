@@ -1,14 +1,10 @@
-import { mkTransaction } from "algob";
-import type { execParams } from "algob/src/types";
-import { AccountInfo, assignGroupID } from "algosdk";
 import { assert } from "chai";
 
-import { mockSuggestedParams } from "../../test/mocks/txn";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { DEFAULT_STACK_ELEM } from "../lib/constants";
 import { Stack } from "../lib/stack";
-import type { AccountsMap, Operator, StackElem, Storage, TEALStack, Txn } from "../types";
+import type { Operator, StackElem, Storage, TEALStack } from "../types";
 import { BIGINT0, Label, Pragma } from "./opcode-list";
 import { parser } from "./parser";
 
