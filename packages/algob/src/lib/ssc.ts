@@ -2,7 +2,7 @@ import type { Account as AccountSDK, ConfirmedTxInfo } from "algosdk";
 import tx from "algosdk";
 
 import { AlgobDeployer, TxParams } from "../types";
-import { mkSuggestedParams } from "./tx";
+import { mkTxParams } from "./tx";
 
 // returns parsed string to Uint8Array
 export function toBytes (s: string): Uint8Array {
@@ -27,7 +27,7 @@ export async function update (
   newClearProgram: string,
   appArgs?: Uint8Array[]
 ): Promise<ConfirmedTxInfo> {
-  const params = await mkSuggestedParams(deployer.algodClient, payFlags);
+  const params = await mkTxParams(deployer.algodClient, payFlags);
 
   const app = await deployer.ensureCompiled(newApprovalProgram, false);
   const approvalProg = new Uint8Array(Buffer.from(app.compiled, "base64"));

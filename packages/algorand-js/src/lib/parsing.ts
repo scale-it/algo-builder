@@ -2,8 +2,53 @@ import * as base32 from "hi-base32";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
-import { assertBase32, assertBase64 } from "../lib/helpers";
 import { EncodingType } from "../types";
+import { reBase32, reBase64, reDigit } from "./constants";
+
+/**
+ * Description: assert if string contains digits only
+ * "123" // ok.  "12+2" // error.
+ * @param val : string
+ */
+export function assertOnlyDigits (val: string): void {
+  if (!reDigit.test(val)) {
+    throw new TealError(ERRORS.TEAL.INVALID_TYPE, { expected: "unsigned integer", actual: val });
+  }
+}
+
+/**
+ * Description: assert words length
+ * @param val Comparsion result
+ * @param expected expected result
+ * @param line Line number in TEAL file
+ */
+export function assertLen (val: number, expected: number, line: number): void {
+  if (val !== expected) {
+    throw new TealError(ERRORS.TEAL.ASSERT_LENGTH, { exp: expected, got: val, line: line });
+  }
+}
+
+/**
+ * Description: Checks if string is base64
+ * @param str : string that needs to be checked
+ * @param line : line number in TEAL file
+ */
+export function assertBase64 (str: string, line: number): void {
+  if (!reBase64.test(str)) {
+    throw new TealError(ERRORS.TEAL.INVALID_BASE64, { val: str, line: line });
+  }
+}
+
+/**
+ * Description: Checks if string is base32
+ * @param str : string that needs to be checked
+ * @param line : line number in TEAL file
+ */
+export function assertBase32 (str: string, line: number): void {
+  if (!reBase32.test(str)) {
+    throw new TealError(ERRORS.TEAL.INVALID_BASE32, { val: str, line: line });
+  }
+}
 
 // parse string to Uint8Array
 export function toBytes (s: string): Uint8Array {

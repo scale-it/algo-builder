@@ -20,6 +20,7 @@ import type {
   LsigInfo,
   SSCDeploymentFlags,
   SSCInfo,
+  StrMap,
   TxParams
 } from "../types";
 import { BuilderError } from "./core/errors";
@@ -99,12 +100,12 @@ class DeployerBasicMode {
   /**
    * Description : loads logic signature for contract mode
    * @param name ASC name
-   * @param scParams: Smart contract Parameters(Used while calling smart contract)
-   * @param scInitParam : Smart contract initialization parameters.
+   * @param scParams: Smart contract parameters used for calling smart contract
+   * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    * @returns {LogicSig} loaded logic signature from assets/<file_name>.teal
    */
-  async loadLogic (name: string, scParams: LogicSigArgs, scInitParam?: unknown): Promise<LogicSig> {
-    return await getLsig(name, this.algoOp.algodClient, scParams, scInitParam);
+  async loadLogic (name: string, scParams: LogicSigArgs, scTmplParams?: StrMap): Promise<LogicSig> {
+    return await getLsig(name, this.algoOp.algodClient, scParams, scTmplParams);
   }
 
   /**
@@ -126,10 +127,11 @@ class DeployerBasicMode {
    * Description: Returns ASCCache (with compiled code)
    * @param name: Smart Contract filename (must be present in assets folder)
    * @param force: if force is true file will be compiled for sure, even if it's checkpoint exist
-   * @param scInitParam: Smart contract initialization parameters.
+   * @param scTmplParams: scTmplParams: Smart contract template parameters
+   *     (used only when compiling PyTEAL to TEAL)
    */
-  async ensureCompiled (name: string, force?: boolean, scInitParam?: unknown): Promise<ASCCache> {
-    return await this.algoOp.ensureCompiled(name, force, scInitParam);
+  async ensureCompiled (name: string, force?: boolean, scTmplParams?: StrMap): Promise<ASCCache> {
+    return await this.algoOp.ensureCompiled(name, force, scTmplParams);
   }
 }
 
@@ -229,13 +231,13 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
    * @param name     - ASC filename
    * @param flags    - Deployments flags (as per SPEC)
    * @param payFlags - as per SPEC
-   * @param scParams: Smart contract Parameters(Used while calling smart contract)
-   * @param scInitParam : Smart contract initialization parameters.
+   * @param scParams: Smart contract parameters (used while calling smart contract)
+   * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
   async fundLsig (name: string, flags: FundASCFlags,
-    payFlags: TxParams, scParams: LogicSigArgs, scInitParam?: unknown): Promise<void> {
+    payFlags: TxParams, scParams: LogicSigArgs, scTmplParams?: StrMap): Promise<void> {
     try {
-      await this.algoOp.fundLsig(name, flags, payFlags, this.txWriter, scParams, scInitParam);
+      await this.algoOp.fundLsig(name, flags, payFlags, this.txWriter, scParams, scTmplParams);
     } catch (error) {
       console.log(error);
       throw error;
@@ -248,14 +250,15 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
    * @param name: Stateless Smart Contract filename (must be present in assets folder)
    * @param signer: Signer Account which will sign the smart contract
    * @param scParams: Smart contract Parameters(Used while calling smart contract)
-   * @param scInitParam : Smart contract initialization parameters.
+   * @param scTmplParams: scTmplParams: Smart contract template parameters
+   *     (used only when compiling PyTEAL to TEAL)
    */
   async mkDelegatedLsig (
-    name: string, signer: Account, scParams: LogicSigArgs, scInitParam?: unknown): Promise<LsigInfo> {
+    name: string, signer: Account, scParams: LogicSigArgs, scTmplParams?: StrMap): Promise<LsigInfo> {
     this.assertNoAsset(name);
     let lsigInfo = {} as any;
     try {
-      const lsig = await getLsig(name, this.algoOp.algodClient, scParams, scInitParam);
+      const lsig = await getLsig(name, this.algoOp.algodClient, scParams, scTmplParams);
       lsig.sign(signer.sk);
       lsigInfo = {
         creator: signer.addr,
@@ -278,20 +281,21 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
    * @param clearProgram filename which has clear program
    * @param flags SSCDeploymentFlags
    * @param payFlags Transaction Params
-   * @param scInitParam : Smart contract initialization parameters.
+   * @param scTmplParams: scTmplParams: Smart contract template parameters
+   *     (used only when compiling PyTEAL to TEAL)
    */
   async deploySSC (
     approvalProgram: string,
     clearProgram: string,
     flags: SSCDeploymentFlags,
     payFlags: TxParams,
-    scInitParam?: unknown): Promise<SSCInfo> {
+    scTmplParams?: StrMap): Promise<SSCInfo> {
     const name = approvalProgram + "-" + clearProgram;
     this.assertNoAsset(name);
     let sscInfo = {} as any;
     try {
       sscInfo = await this.algoOp.deploySSC(
-        approvalProgram, clearProgram, flags, payFlags, this.txWriter, scInitParam);
+        approvalProgram, clearProgram, flags, payFlags, this.txWriter, scTmplParams);
     } catch (error) {
       persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
 
