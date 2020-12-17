@@ -1518,7 +1518,7 @@ describe("Teal Opcodes", function () {
   describe("Transaction opcodes", function () {
     const stack = new Stack<StackElem>();
     const interpreter = new Interpreter();
-    interpreter.tx = TXN_OBJ;
+    interpreter.storageBranch.tx = TXN_OBJ;
 
     describe("Txn: Common Fields", function () {
       it("should push txn fee to stack", function () {
@@ -1621,7 +1621,7 @@ describe("Teal Opcodes", function () {
 
     describe("Txn: Payment", function () {
       before(function () {
-        interpreter.tx.type = 'pay';
+        interpreter.storageBranch.tx.type = 'pay';
       });
 
       it("should push txn Receiver to stack", function () {
@@ -1651,7 +1651,7 @@ describe("Teal Opcodes", function () {
 
     describe("Txn: Key Registration", function () {
       before(function () {
-        interpreter.tx.type = 'keyreg';
+        interpreter.storageBranch.tx.type = 'keyreg';
       });
 
       it("should push txn VotePK to stack", function () {
@@ -1697,7 +1697,7 @@ describe("Teal Opcodes", function () {
 
     describe("Txn: Asset Configuration Transaction", function () {
       before(function () {
-        interpreter.tx.type = 'acfg';
+        interpreter.storageBranch.tx.type = 'acfg';
       });
 
       it("should push txn ConfigAsset to stack", function () {
@@ -1799,7 +1799,7 @@ describe("Teal Opcodes", function () {
 
     describe("Txn: Asset Transfer Transaction", function () {
       before(function () {
-        interpreter.tx.type = 'axfer';
+        interpreter.storageBranch.tx.type = 'axfer';
       });
 
       it("should push txn XferAsset to stack", function () {
@@ -1845,7 +1845,7 @@ describe("Teal Opcodes", function () {
 
     describe("Txn: Asset Freeze Transaction", function () {
       before(function () {
-        interpreter.tx.type = 'afrz';
+        interpreter.storageBranch.tx.type = 'afrz';
       });
 
       it("should push txn FreezeAsset to stack", function () {
@@ -1875,7 +1875,7 @@ describe("Teal Opcodes", function () {
 
     describe("Txn: Application Call Transaction", function () {
       before(function () {
-        interpreter.tx.type = 'appl';
+        interpreter.storageBranch.tx.type = 'appl';
       });
 
       it("should push txn ApplicationID to stack", function () {
@@ -1913,9 +1913,9 @@ describe("Teal Opcodes", function () {
 
     describe("Gtxn", function () {
       before(function () {
-        const tx = interpreter.tx;
+        const tx = interpreter.storageBranch.tx;
         const tx2 = { ...tx, fee: 2222 };
-        interpreter.gtxs = [tx, tx2];
+        interpreter.storageBranch.gtxs = [tx, tx2];
       });
 
       it("push fee from 2nd transaction in group", function () {
@@ -1929,7 +1929,7 @@ describe("Teal Opcodes", function () {
 
     describe("Txna", function () {
       before(function () {
-        interpreter.tx.type = 'pay';
+        interpreter.storageBranch.tx.type = 'pay';
       });
 
       it("push addr from 2nd account to stack", function () {
@@ -1951,7 +1951,7 @@ describe("Teal Opcodes", function () {
 
     describe("Gtxna", function () {
       before(function () {
-        interpreter.tx.type = 'pay';
+        interpreter.storageBranch.tx.type = 'pay';
       });
 
       it("push addr from 1st account of 2nd Txn in txGrp to stack", function () {

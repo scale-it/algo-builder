@@ -1047,7 +1047,7 @@ export class Gtxn extends Op {
 
   execute (stack: TEALStack): void {
     this.assertUint8(BigInt(this.txIdx));
-    this.checkIndexBound(this.txIdx, this.interpreter.gtxs);
+    this.checkIndexBound(this.txIdx, this.interpreter.storageBranch.gtxs);
 
     const result = txnSpecbyField(this.field, this.interpreter);
     stack.push(result);
@@ -1068,7 +1068,7 @@ export class Txna extends Op {
   }
 
   execute (stack: TEALStack): void {
-    const result = txAppArg(this.field, this.interpreter.tx, this.idx, this);
+    const result = txAppArg(this.field, this.interpreter.storageBranch.tx, this.idx, this);
     stack.push(result);
   }
 }
@@ -1091,7 +1091,7 @@ export class Gtxna extends Op {
   execute (stack: TEALStack): void {
     this.assertUint8(BigInt(this.txIdx));
 
-    const tx = this.interpreter.gtxs[this.txIdx];
+    const tx = this.interpreter.storageBranch.gtxs[this.txIdx];
     const result = txAppArg(this.field, tx, this.idx, this);
     stack.push(result);
   }
@@ -1101,7 +1101,7 @@ export class Gtxna extends Op {
 export class Label extends Op {
   readonly label: string;
 
-    /**
+  /**
    * @param args words list extracted from line
    * @param line line number in TEAL file
    */

@@ -44,8 +44,8 @@ export function parseToStackElem (a: unknown, field: TxField): StackElem {
  * @param interpreter: interpreter
  */
 export function txnSpecbyField (txField: string, interpreter: Interpreter): StackElem {
-  const tx = interpreter.tx;
-  const gtxs = interpreter.gtxs;
+  const tx = interpreter.storageBranch.tx;
+  const gtxs = interpreter.storageBranch.gtxs;
   let result; // store raw result, parse and return
 
   // handle nested encoded obj (for assetParams)
