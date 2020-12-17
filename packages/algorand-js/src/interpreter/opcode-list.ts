@@ -1269,8 +1269,8 @@ export class AppLocalGet extends Op {
   }
 }
 
-// read from account specified by Txn.Accounts[A] from local state of the
-// application B key C => {0 or 1 (top), value}
+// read from application local state at Txn.Accounts[A] => app B => key C from local state.
+// Pushes to the stack [...stack, val, 1] if the key exists, otherwise [...stack, 0]
 export class AppLocalGetEx extends Op {
   readonly interpreter: Interpreter;
 
