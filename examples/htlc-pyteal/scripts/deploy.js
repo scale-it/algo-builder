@@ -9,7 +9,7 @@ async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
   const { alice, bob, scTmplParams } = prepareParameters(deployer);
 
-  /**** firstly we fund Alice and Bob accounts ****/
+  /** ** firstly we fund Alice and Bob accounts ****/
   const bobFunding = {
     type: TransactionType.TransferAlgo,
     sign: SignType.SecretKey,
@@ -18,6 +18,7 @@ async function run (runtimeEnv, deployer) {
     amountMicroAlgos: 10e6, // 10 Algos
     payFlags: { note: 'funding account' }
   };
+  // We need to copy, because the executeTransaction is async
   const aliceFunding = Object.assign({}, bobFunding);
   aliceFunding.toAccountAddr = alice.addr;
   aliceFunding.amountMicroAlgos = 1e5; // 0.1 Algo
@@ -25,7 +26,7 @@ async function run (runtimeEnv, deployer) {
     executeTransaction(deployer, bobFunding), executeTransaction(deployer, aliceFunding)
   ]);
 
-  /**** now bob creates and deploys the escrow account ****/
+  /** ** now bob creates and deploys the escrow account ****/
   console.log('hash of the secret:', scTmplParams.hash_image);
   // hash: QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=
 

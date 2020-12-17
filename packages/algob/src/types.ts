@@ -379,7 +379,7 @@ export interface Checkpoint {
 export type ASADef = z.infer<typeof ASADefSchema>;
 export type ASADefs = z.infer<typeof ASADefsSchema>;
 
-export type execParams = AlgoTransferParam | AssetTransferParam | SSCCallsParam;
+export type ExecParams = AlgoTransferParam | AssetTransferParam | SSCCallsParam;
 
 export enum SignType {
   SecretKey,
