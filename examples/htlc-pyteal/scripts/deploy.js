@@ -9,7 +9,7 @@ async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
   const { alice, bob, scTmplParams } = prepareParameters(deployer);
 
-  /** ** firstly we fund Alice and Bob accounts ****/
+  /**** firstly we fund Alice and Bob accounts ****/
   const bobFunding = {
     type: TransactionType.TransferAlgo,
     sign: SignType.SecretKey,
@@ -25,9 +25,9 @@ async function run (runtimeEnv, deployer) {
     executeTransaction(deployer, bobFunding), executeTransaction(deployer, aliceFunding)
   ]);
 
-  /** ** now bob creates and deploys the escrow account ****/
-  // hash : QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=
+  /**** now bob creates and deploys the escrow account ****/
   console.log('hash of the secret:', scTmplParams.hash_image);
+  // hash: QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=
 
   await deployer.fundLsig('htlc.py',
     { funder: bob, fundingMicroAlgo: 2e6 }, {}, [], scTmplParams);

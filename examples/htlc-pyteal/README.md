@@ -3,8 +3,9 @@
 In this example, Bob creates an escrow account protected by a hash time lock contract:
 + Alice can withdraw funds from the account only if she will get a secret
 + to avoid locking up the funds forever, Bob can get back the funds after a specified deadline.
+A secret can represent a puzzle solution, or a coupon unveiled when Bob makes an action (eg receives assets or real world goods).
 
-Read [here](https://en.bitcoin.it/wiki/Hash_Time_Locked_Contracts) for more information about the HTLC patthern.
+Read [here](https://en.bitcoin.it/wiki/Hash_Time_Locked_Contracts) for more information about the HTLC pattern.
 
 Files:
 
