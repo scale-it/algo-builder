@@ -2,6 +2,7 @@ import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { MAX_UINT8, MAX_UINT64, MIN_UINT8, MIN_UINT64 } from "../lib/constants";
 import type { TEALStack } from "../types";
+import { BIGINT0, BIGINT1 } from "./opcode-list";
 
 export class Op {
   assertMinStackLen (stack: TEALStack, minLen: number): void {
@@ -70,5 +71,14 @@ export class Op {
     }
 
     return byteString.slice(Number(start), Number(end));
+  }
+
+  pushBooleanCheck (stack: TEALStack, ok: boolean): TEALStack {
+    if (ok) {
+      stack.push(BIGINT1);
+    } else {
+      stack.push(BIGINT0);
+    }
+    return stack;
   }
 }

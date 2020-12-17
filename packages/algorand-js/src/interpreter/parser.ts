@@ -4,7 +4,7 @@ import readline from "readline";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { Interpreter } from "../interpreter/interpreter";
-import { assertLen } from "../lib/helpers";
+import { assertLen } from "../lib/parsing";
 import { Operator } from "../types";
 import {
   Add, Addr, Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,

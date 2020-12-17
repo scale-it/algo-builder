@@ -24,7 +24,7 @@ import {
 } from "../../../src/interpreter/opcode-list";
 import { parseToStackElem } from "../../../src/interpreter/txn";
 import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MIN_UINT8 } from "../../../src/lib/constants";
-import { convertToBuffer, toBytes } from "../../../src/lib/parse-data";
+import { convertToBuffer, toBytes } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { EncodingType, StackElem } from "../../../src/types";
 import { execExpectError, expectTealError } from "../../helpers/errors";

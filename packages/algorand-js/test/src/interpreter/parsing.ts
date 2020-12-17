@@ -1,7 +1,7 @@
 import { assert } from "chai";
 
 import { ERRORS } from "../../../src/errors/errors-list";
-import { getEncoding } from "../../../src/lib/parse-data";
+import { getEncoding } from "../../../src/lib/parsing";
 import { EncodingType } from "../../../src/types";
 import { expectTealError } from "../../helpers/errors";
 
