@@ -1,4 +1,5 @@
 /* eslint sonarjs/no-identical-functions: 0 */
+/* eslint sonarjs/no-duplicate-string: 0 */
 import { toBytes } from "algob";
 import { decodeAddress, encodeAddress, isValidAddress, verifyBytes } from "algosdk";
 import { Message, sha256 } from "js-sha256";
@@ -14,6 +15,7 @@ import { assertLen, assertOnlyDigits, convertToBuffer, convertToString, getEncod
 import type { EncodingType, TEALStack } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
+import { getGlobalState, getLocalState, updateGlobalState, updateLocalState } from "./stateful";
 import { txAppArg, txnSpecbyField } from "./txn";
 
 export const BIGINT0 = BigInt("0");
@@ -1198,6 +1200,304 @@ export class Return extends Op {
     }
     stack.push(last); // use last value as success
     this.interpreter.instructionIndex = this.interpreter.instructions.length; // end execution
+  }
+}
+
+// check if account specified by Txn.Accounts[A] opted in for the application B => {0 or 1}
+// params: account index, application id (top of the stack on opcode entry).
+// Return: 1 if opted in and 0 otherwise.
+export class AppOptedIn extends Op {
+  readonly interpreter: Interpreter;
+
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    assertLen(args.length, 0, line);
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2);
+    const appId = this.assertBigInt(stack.pop());
+    const accountIndex = this.assertBigInt(stack.pop());
+
+    const account = this.getAccount(accountIndex, this.interpreter);
+    const localState = account["apps-local-state"];
+
+    const isOptedIn = localState.find(state => state.id === Number(appId));
+    if (isOptedIn) {
+      stack.push(BIGINT1);
+    } else {
+      stack.push(BIGINT0);
+    }
+  }
+}
+
+// read from account specified by Txn.Accounts[A] from local state of the current application key B => value
+export class AppLocalGet extends Op {
+  readonly interpreter: Interpreter;
+
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    assertLen(args.length, 0, line);
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2);
+    const key = this.assertBytes(stack.pop());
+    const accountIndex = this.assertBigInt(stack.pop());
+
+    const account = this.getAccount(accountIndex, this.interpreter);
+    const appId = this.interpreter.tx.apid;
+
+    const val = getLocalState(appId, account, key);
+    if (val) {
+      stack.push(val);
+    } else {
+      stack.push(BIGINT0); // The value is zero if the key does not exist.
+    }
+  }
+}
+
+// read from application local state at Txn.Accounts[A] => app B => key C from local state.
+// Pushes to the stack [...stack, val, 1] if the key exists, otherwise [...stack, 0]
+export class AppLocalGetEx extends Op {
+  readonly interpreter: Interpreter;
+
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    assertLen(args.length, 0, line);
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 3);
+    const key = this.assertBytes(stack.pop());
+    const appId = this.assertBigInt(stack.pop());
+    const accountIndex = this.assertBigInt(stack.pop());
+
+    const account = this.getAccount(accountIndex, this.interpreter);
+    const val = getLocalState(Number(appId), account, key);
+    if (val) {
+      stack.push(BIGINT1);
+      stack.push(val);
+    } else {
+      stack.push(BIGINT0); // The value is zero if the key does not exist.
+    }
+  }
+}
+
+// read key A from global state of a current application => value
+export class AppGlobalGet extends Op {
+  readonly interpreter: Interpreter;
+
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    assertLen(args.length, 0, line);
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1);
+    const key = this.assertBytes(stack.pop());
+
+    const appId = this.interpreter.tx.apid;
+    const val = getGlobalState(appId, key, this.interpreter);
+    if (val) {
+      stack.push(val);
+    } else {
+      stack.push(BIGINT0); // The value is zero if the key does not exist.
+    }
+  }
+}
+
+// read from application Txn.ForeignApps[A] global state key B => {0 or 1 (top), value}.
+// A is specified as an account index in the ForeignApps field of the ApplicationCall transaction,
+// zero index means this app
+export class AppGlobalGetEx extends Op {
+  readonly interpreter: Interpreter;
+
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    assertLen(args.length, 0, line);
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2);
+    const key = this.assertBytes(stack.pop());
+    let appIndex = this.assertBigInt(stack.pop());
+
+    const foreignApps = this.interpreter.tx.apfa;
+    let appId;
+    if (appIndex === BIGINT0) {
+      appId = this.interpreter.tx.apid; // zero index means current app
+    } else {
+      this.checkIndexBound(Number(--appIndex), foreignApps);
+      appId = foreignApps[Number(appIndex)];
+    }
+
+    const val = getGlobalState(appId, key, this.interpreter);
+    if (val) {
+      stack.push(BIGINT1);
+      stack.push(val);
+    } else {
+      stack.push(BIGINT0); // The value is zero if the key does not exist.
+    }
+  }
+}
+
+// write to account specified by Txn.Accounts[A] to local state of a current application key B with value C
+export class AppLocalPut extends Op {
+  readonly interpreter: Interpreter;
+
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    assertLen(args.length, 0, line);
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 3);
+    const value = stack.pop();
+    const key = this.assertBytes(stack.pop());
+    const accountIndex = this.assertBigInt(stack.pop());
+
+    const account = this.getAccount(accountIndex, this.interpreter);
+    const appId = this.interpreter.tx.apid;
+
+    // get updated local state for account
+    const localState = updateLocalState(appId, account, key, value);
+    const acc = this.assertAccountDefined(this.interpreter.accounts.get(account.address));
+    acc["apps-local-state"] = localState;
+  }
+}
+
+// write key A and value B to global state of the current application
+export class AppGlobalPut extends Op {
+  readonly interpreter: Interpreter;
+
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    assertLen(args.length, 0, line);
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2);
+    const value = stack.pop();
+    const key = this.assertBytes(stack.pop());
+
+    const appId = this.interpreter.tx.apid;
+    const globalState = updateGlobalState(appId, key, value, this.interpreter);
+
+    const globalApp = this.assertAppDefined(appId, this.interpreter);
+    globalApp["global-state"] = globalState;
+  }
+}
+
+// delete from account specified by Txn.Accounts[A] local state key B of the current application
+export class AppLocalDel extends Op {
+  readonly interpreter: Interpreter;
+
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    assertLen(args.length, 0, line);
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1);
+    const key = this.assertBytes(stack.pop());
+    const accountIndex = this.assertBigInt(stack.pop());
+
+    const appId = this.interpreter.tx.apid;
+    const account = this.getAccount(accountIndex, this.interpreter);
+
+    const localState = account["apps-local-state"];
+    const idx = localState.findIndex(state => state.id === appId);
+    if (idx !== -1) {
+      const arr = localState[idx]["key-value"].filter((obj) => {
+        return !compareArray(obj.key, key);
+      });
+      localState[idx]["key-value"] = arr;
+
+      let acc = this.interpreter.accounts.get(account.address);
+      acc = this.assertAccountDefined(acc);
+      acc["apps-local-state"] = localState;
+    }
+  }
+}
+
+// delete key A from a global state of the current application
+export class AppGlobalDel extends Op {
+  readonly interpreter: Interpreter;
+
+  /**
+   * @param args words list extracted from line
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    assertLen(args.length, 0, line);
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1);
+    const key = this.assertBytes(stack.pop());
+
+    const appId = this.interpreter.tx.apid;
+
+    const appDelta = this.assertAppDefined(appId, this.interpreter);
+    if (appDelta) {
+      const globalState = appDelta["global-state"];
+      const arr = globalState.filter((obj) => {
+        return !compareArray(obj.key, key);
+      });
+      appDelta["global-state"] = arr;
+    }
   }
 }
 

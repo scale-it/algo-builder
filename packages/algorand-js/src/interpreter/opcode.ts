@@ -1,7 +1,11 @@
+import { AccountState, SSCParams } from "algosdk";
+
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { MAX_UINT8, MAX_UINT64, MIN_UINT8, MIN_UINT64 } from "../lib/constants";
+import { convertToString } from "../lib/parsing";
 import type { TEALStack } from "../types";
+import { Interpreter } from "./interpreter";
 import { BIGINT0, BIGINT1 } from "./opcode-list";
 
 export class Op {
@@ -71,6 +75,38 @@ export class Op {
     }
 
     return byteString.slice(Number(start), Number(end));
+  }
+
+  // TODO: to be moved to Runtime class
+  assertAccountDefined (a?: AccountState): AccountState {
+    if (a === undefined) {
+      throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
+    }
+    return a;
+  }
+
+  // TODO: to be moved to Runtime class
+  assertAppDefined (appId: number, interpreter: Interpreter): SSCParams {
+    const globalDelta = interpreter.globalApps.get(appId);
+    if (globalDelta === undefined) {
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
+    }
+    return globalDelta;
+  }
+
+  // TODO: to be moved to Runtime class
+  getAccount (accountIndex: bigint, interpreter: Interpreter): AccountState {
+    let account: AccountState | undefined;
+    if (accountIndex === BIGINT0) {
+      const senderAccount = convertToString(interpreter.tx.snd);
+      account = interpreter.accounts.get(senderAccount);
+    } else {
+      accountIndex--;
+      this.checkIndexBound(Number(accountIndex), interpreter.tx.apat);
+      const pkBuffer = interpreter.tx.apat[Number(accountIndex)];
+      account = interpreter.accounts.get(convertToString(pkBuffer));
+    }
+    return this.assertAccountDefined(account);
   }
 
   pushBooleanCheck (stack: TEALStack, ok: boolean): TEALStack {

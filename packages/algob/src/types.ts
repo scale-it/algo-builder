@@ -450,16 +450,7 @@ export interface FundASCFlags {
   fundingMicroAlgo: number
 }
 
-// Stateful Smart Contract Schema
-export interface SSCStateSchema {
-  key: string
-  value: {
-    type: number
-    bytes: string
-    uint: number
-  }
-}
-
+// Stateful transaction optional parameters (accounts, args..)
 export interface SSCOptionalFlags {
   appArgs?: Uint8Array[]
   accounts?: string[]
@@ -470,6 +461,7 @@ export interface SSCOptionalFlags {
   rekeyTo?: string
 }
 
+// represent sender and schema of ssc
 export interface SSCDeploymentFlags extends SSCOptionalFlags {
   sender: Account
   localInts: number

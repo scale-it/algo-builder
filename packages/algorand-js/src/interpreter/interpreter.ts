@@ -1,6 +1,6 @@
 import { mkTransaction } from "algob";
 import type { ExecParams } from "algob/src/types";
-import { AccountInfo, assignGroupID } from "algosdk";
+import { AccountState, assignGroupID, SSCParams } from "algosdk";
 import { assert } from "chai";
 
 import { mockSuggestedParams } from "../../test/mocks/txn";
@@ -8,7 +8,7 @@ import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { DEFAULT_STACK_ELEM } from "../lib/constants";
 import { Stack } from "../lib/stack";
-import type { AccountsMap, Operator, StackElem, TEALStack, Txn } from "../types";
+import type { Operator, StackElem, TEALStack, Txn } from "../types";
 import { BIGINT0, Label } from "./opcode-list";
 
 export class Interpreter {
@@ -18,7 +18,8 @@ export class Interpreter {
   scratch: StackElem[];
   tx: Txn;
   gtxs: Txn[];
-  accounts: AccountsMap;
+  accounts: Map<string, AccountState>;
+  globalApps: Map<number, SSCParams>;
   instructions: Operator[];
   instructionIndex: number;
   args: Uint8Array[];
@@ -28,7 +29,8 @@ export class Interpreter {
     this.bytecblock = [];
     this.intcblock = [];
     this.scratch = new Array(256).fill(DEFAULT_STACK_ELEM);
-    this.accounts = <AccountsMap>{};
+    this.accounts = new Map<string, AccountState>();
+    this.globalApps = new Map<number, SSCParams>();
     this.tx = <Txn>{}; // current transaction
     this.gtxs = []; // all transactions
     this.instructions = [];
@@ -76,9 +78,13 @@ export class Interpreter {
    * Description: set accounts for context as {address: accountInfo}
    * @param accounts: array of account info's
    */
-  createStatefulContext (accounts: AccountInfo[]): void {
+  createStatefulContext (accounts: AccountState[]): void {
     for (const acc of accounts) {
-      this.accounts[acc.address] = acc;
+      this.accounts.set(acc.address, acc);
+
+      for (const app of acc["created-apps"]) {
+        this.globalApps.set(app.id, app.params);
+      }
     }
   }
 
@@ -108,7 +114,7 @@ export class Interpreter {
    */
   execute (txnParams: ExecParams | ExecParams[],
     logic: Operator[], args: Uint8Array[],
-    accounts: AccountInfo[]): boolean {
+    accounts: AccountState[]): boolean {
     assert(Array.isArray(args));
     this.createTxnContext(txnParams);
     this.createStatefulContext(accounts);

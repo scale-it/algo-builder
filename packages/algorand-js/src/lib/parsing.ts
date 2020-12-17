@@ -56,7 +56,7 @@ export function toBytes (s: string): Uint8Array {
 }
 
 // parse Uint8Array to string
-export function convertToString (u: Uint8Array): string {
+export function convertToString (u: Uint8Array | Buffer): string {
   return Buffer.from(u).toString('utf-8');
 }
 
