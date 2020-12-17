@@ -508,7 +508,7 @@ export interface AlgobDeployer {
    * @param name: Stateless Smart Contract filename (must be present in assets folder)
    * @param payFlags: Transaction Parameters
    * @param scParams: Smart contract parameters (used while calling smart contract)
-   * @param scTmplParam: scTmplParam: Smart contract template parameters
+   * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
   fundLsig: (
@@ -516,7 +516,7 @@ export interface AlgobDeployer {
     flags: FundASCFlags,
     payFlags: TxParams,
     scParams: LogicSigArgs,
-    scTmplParam?: StrMap
+    scTmplParams?: StrMap
   ) => void
 
   /**
@@ -524,14 +524,14 @@ export interface AlgobDeployer {
    * @param name: Stateless Smart Contract filename (must be present in assets folder)
    * @param signer: Signer Account which will sign the smart contract
    * @param scParams: Smart contract parameters (used while calling smart contract)
-   * @param scTmplParam: scTmplParam: Smart contract template parameters
+   * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
   mkDelegatedLsig: (
     name: string,
     signer: Account,
     scParams: LogicSigArgs,
-    scTmplParam?: StrMap
+    scTmplParams?: StrMap
   ) => Promise<LsigInfo>
 
   /**
@@ -540,7 +540,7 @@ export interface AlgobDeployer {
    * @param clearProgram: clear program filename (must be present in assets folder)
    * @param flags: SSCDeploymentFlags
    * @param payFlags: Transaction Parameters
-   * @param scTmplParam: scTmplParam: Smart contract template parameters
+   * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
   deploySSC: (
@@ -548,7 +548,7 @@ export interface AlgobDeployer {
     clearProgram: string,
     flags: SSCDeploymentFlags,
     payFlags: TxParams,
-    scTmplParam?: StrMap) => Promise<SSCInfo>
+    scTmplParams?: StrMap) => Promise<SSCInfo>
 
   /**
      Returns true if ASA or DelegatedLsig or SSC were deployed in any script.
@@ -586,19 +586,19 @@ export interface AlgobDeployer {
    * Description: load contract mode logic signature (TEAL or PyTEAL)
    * @param name:  Smart Contract filename (must be present in assets folder)
    * @param scParams: Smart contract parameters (Used while calling smart contract)
-   * @param scTmplParam: scTmplParam: Smart contract template parameters
+   * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  loadLogic: (name: string, scParams: LogicSigArgs, scTmplParam?: StrMap) => Promise<LogicSig>
+  loadLogic: (name: string, scParams: LogicSigArgs, scTmplParams?: StrMap) => Promise<LogicSig>
 
   /**
    * Description: Returns ASCCache (with compiled code)
    * @param name: Smart Contract filename (must be present in assets folder)
    * @param force: if force is true file will be compiled for sure, even if it's checkpoint exist
-   * @param scTmplParam: scTmplParam: Smart contract template parameters
+   * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  ensureCompiled: (name: string, force?: boolean, scTmplParam?: StrMap) => Promise<ASCCache>
+  ensureCompiled: (name: string, force?: boolean, scTmplParams?: StrMap) => Promise<ASCCache>
 }
 
 // ************************

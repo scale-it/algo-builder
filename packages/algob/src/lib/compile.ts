@@ -31,15 +31,15 @@ export class CompileOp {
    *   (Examples: `mysc.teal, security/rbac.teal`)
    *   MUST have a .teal, .lsig or .py extension
    * @param force: if true it will force recompilation even if the cache is up to date.
-   * @param scTmplParam: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
+   * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
-  async ensureCompiled (filename: string, force?: boolean, scTmplParam?: StrMap): Promise<ASCCache> {
+  async ensureCompiled (filename: string, force?: boolean, scTmplParams?: StrMap): Promise<ASCCache> {
     if (force === undefined) {
       force = false;
     }
 
     if (filename.endsWith(pyExt)) {
-      return await this.pyCompile.ensureCompiled(filename, force, scTmplParam);
+      return await this.pyCompile.ensureCompiled(filename, force, scTmplParams);
     }
 
     if (!filename.endsWith(tealExt) && !filename.endsWith(lsigExt)) {
@@ -123,16 +123,16 @@ export class PyCompileOp {
    *                   Examples : [ gold.py, asa.py]
    *                   MUST have .py extension
    * @param force    : if true it will force recompilation even if the cache is up to date.
-   * @param scTmplParam: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
+   * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
-  async ensureCompiled (filename: string, force?: boolean, scTmplParam?: unknown): Promise<PyASCCache> {
+  async ensureCompiled (filename: string, force?: boolean, scTmplParams?: unknown): Promise<PyASCCache> {
     if (!filename.endsWith(pyExt)) {
       throw new Error(`filename "${filename}" must end with "${pyExt}"`);
     }
 
-    console.log("PyTEAL template parameters", scTmplParam);
-    let param: string | undefined = YAML.stringify(scTmplParam);
-    if (scTmplParam === undefined) { param = undefined; }
+    console.log("PyTEAL template parameters", scTmplParams);
+    let param: string | undefined = YAML.stringify(scTmplParams);
+    if (scTmplParams === undefined) { param = undefined; }
 
     const content = this.compilePyTeal(filename, param);
     const [teal, thash] = [content, murmurhash.v3(content)];

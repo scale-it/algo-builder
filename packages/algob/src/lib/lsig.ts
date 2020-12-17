@@ -10,16 +10,16 @@ import { CompileOp } from "./compile";
  * @param name : ASC filename
  * @param algodClient : algodClient
  * @param scParams : smart contract parameters
- * @param scTmplParam: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
+ * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
  */
 export async function getLsig (
   name: string,
   algodClient: algosdk.Algodv2,
   scParams: LogicSigArgs,
-  scTmplParam?: StrMap):
+  scTmplParams?: StrMap):
   Promise<LogicSig> {
   const compileOp = new CompileOp(algodClient);
-  const result: ASCCache = await compileOp.ensureCompiled(name, false, scTmplParam);
+  const result: ASCCache = await compileOp.ensureCompiled(name, false, scTmplParams);
   const program = result.toBytes;
   return algosdk.makeLogicSig(program, scParams);
 }
