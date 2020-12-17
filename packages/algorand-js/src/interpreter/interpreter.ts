@@ -1,5 +1,5 @@
 import { mkTransaction } from "algob";
-import type { execParams } from "algob/src/types";
+import type { ExecParams } from "algob/src/types";
 import { AccountInfo, assignGroupID } from "algosdk";
 import { assert } from "chai";
 
@@ -40,7 +40,7 @@ export class Interpreter {
    * Description: creates a new transaction object from given execParams
    * @param txnParams : Transaction parameters for current txn or txn Group
    */
-  createTxnContext (txnParams: execParams | execParams[]): void {
+  createTxnContext (txnParams: ExecParams | ExecParams[]): void {
     // if txnParams is array, then user is requesting for a group txn
     if (Array.isArray(txnParams)) {
       if (txnParams.length > 16) {
@@ -101,12 +101,12 @@ export class Interpreter {
   /**
    * Description: this function executes set of Operator[] passed after
    * parsing teal code
-   * @param {execParams} txn : Transaction parameters
+   * @param {ExecParams} txn : Transaction parameters
    * @param {Logic[]} logic : smart contract instructions
    * @param {AppArgs} args : external arguments
    * @returns {boolean} : transaction accepted/rejected based on ASC logic
    */
-  execute (txnParams: execParams | execParams[],
+  execute (txnParams: ExecParams | ExecParams[],
     logic: Operator[], args: Uint8Array[],
     accounts: AccountInfo[]): boolean {
     assert(Array.isArray(args));

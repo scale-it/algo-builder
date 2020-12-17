@@ -123,14 +123,14 @@ export class AlgoOperatorImpl implements AlgoOperator {
   async optInToASA (
     asaName: string, assetIndex: number, account: Account, flags: TxParams
   ): Promise<void> {
-    const txParams = await tx.mkSuggestedParams(this.algodClient, flags);
+    const txParams = await tx.mkTxParams(this.algodClient, flags);
     await this._optInToASA(asaName, assetIndex, account, txParams);
   }
 
   async optInToASAMultiple (
     asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, assetIndex: number
   ): Promise<void> {
-    const txParams = await tx.mkSuggestedParams(this.algodClient, flags);
+    const txParams = await tx.mkTxParams(this.algodClient, flags);
     const optInAccounts = await this.checkBalanceForOptInTx(
       asaName,
       txParams,
@@ -183,7 +183,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     txWriter: txWriter): Promise<ASAInfo> {
     const message = 'Deploying ASA: ' + name;
     console.log(message);
-    const txParams = await tx.mkSuggestedParams(this.algodClient, flags);
+    const txParams = await tx.mkTxParams(this.algodClient, flags);
     const assetTX = tx.makeAssetCreateTxn(name, asaDef, flags, txParams);
     const rawSignedTxn = assetTX.signTxn(flags.creator.sk);
     const txInfo = await this.algodClient.sendRawTransaction(rawSignedTxn).do();
@@ -218,7 +218,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const lsig = await getLsig(name, this.algodClient, scParams, scTmplParams);
     const contractAddress = lsig.address();
 
-    const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
+    const params = await tx.mkTxParams(this.algodClient, payFlags);
     let message = "Funding Contract: " + contractAddress;
     console.log(message);
 
@@ -257,7 +257,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     txWriter: txWriter,
     scTmplParams?: StrMap): Promise<SSCInfo> {
     const sender = flags.sender.addr;
-    const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
+    const params = await tx.mkTxParams(this.algodClient, payFlags);
 
     const onComplete = algosdk.OnApplicationComplete.NoOpOC;
 
@@ -315,7 +315,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     appId: number,
     payFlags: TxParams,
     appArgs?: Uint8Array[]): Promise<void> {
-    const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
+    const params = await tx.mkTxParams(this.algodClient, payFlags);
     const txn = algosdk.makeApplicationOptInTxn(sender.addr, params, appId, appArgs);
     const txId = txn.txID().toString();
     const signedTxn = txn.signTxn(sender.sk);

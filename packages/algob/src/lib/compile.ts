@@ -130,7 +130,7 @@ export class PyCompileOp {
       throw new Error(`filename "${filename}" must end with "${pyExt}"`);
     }
 
-    console.log("PyTEAL template parameters", scTmplParams);
+    console.log("PyTEAL template parameters:", scTmplParams);
     let param: string | undefined = YAML.stringify(scTmplParams);
     if (scTmplParams === undefined) { param = undefined; }
 

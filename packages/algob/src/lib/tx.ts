@@ -1,4 +1,4 @@
-import tx, { decodeSignedTransaction, SuggestedParams, Transaction } from "algosdk";
+import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
 import { TextEncoder } from "util";
 
 import { BuilderError } from "../internal/core/errors";
@@ -7,7 +7,7 @@ import {
   AlgobDeployer,
   ASADef,
   ASADeploymentFlags,
-  execParams,
+  ExecParams,
   SignType,
   TransactionType,
   TxParams
@@ -15,7 +15,7 @@ import {
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
 import { loadSignedTxnFromFile } from "./files";
 
-export async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.SuggestedParams> {
+export async function getSuggestedParams (algocl: Algodv2): Promise<SuggestedParams> {
   const params = await algocl.getTransactionParams().do();
   // Private chains may have an issue with firstRound
   if (params.firstRound === 0) {
@@ -25,24 +25,26 @@ export async function getSuggestedParams (algocl: tx.Algodv2): Promise<tx.Sugges
   return params;
 }
 
-export async function mkSuggestedParams (
-  algocl: tx.Algodv2, userDefaults: TxParams): Promise<tx.SuggestedParams> {
-  const s = await getSuggestedParams(algocl);
+/// creates common transaction parameters. If suggested params are not provided, will call
+/// Algorand node to get suggested parameters.
+export async function mkTxParams (
+  algocl: Algodv2, userParams: TxParams, s?: SuggestedParams): Promise<SuggestedParams> {
+  if (s === undefined) { s = await getSuggestedParams(algocl); }
 
-  s.flatFee = userDefaults.totalFee !== undefined;
-  s.fee = userDefaults.totalFee ?? userDefaults.feePerByte ?? ALGORAND_MIN_TX_FEE;
+  s.flatFee = userParams.totalFee !== undefined;
+  s.fee = userParams.totalFee ?? userParams.feePerByte ?? ALGORAND_MIN_TX_FEE;
   if (s.flatFee) s.fee = Math.max(s.fee, ALGORAND_MIN_TX_FEE);
 
-  s.firstRound = userDefaults.firstValid ?? s.firstRound;
-  s.lastRound = userDefaults.firstValid === undefined || userDefaults.validRounds === undefined
+  s.firstRound = userParams.firstValid ?? s.firstRound;
+  s.lastRound = userParams.firstValid === undefined || userParams.validRounds === undefined
     ? s.lastRound
-    : userDefaults.firstValid + userDefaults.validRounds;
+    : userParams.firstValid + userParams.validRounds;
   return s;
 }
 
 export function makeAssetCreateTxn (
-  name: string, asaDef: ASADef, flags: ASADeploymentFlags, txSuggestedParams: tx.SuggestedParams
-): tx.Transaction {
+  name: string, asaDef: ASADef, flags: ASADeploymentFlags, txSuggestedParams: SuggestedParams
+): Transaction {
   // If TxParams has noteb64 or note , it gets precedence
   let note;
   if (flags.noteb64 ?? flags.note) {
@@ -54,7 +56,7 @@ export function makeAssetCreateTxn (
   }
 
   // https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js#L104
-  return tx.makeAssetCreateTxnWithSuggestedParams(
+  return algosdk.makeAssetCreateTxnWithSuggestedParams(
     flags.creator.addr,
     note,
     asaDef.total,
@@ -75,13 +77,13 @@ export function makeAssetCreateTxn (
 export function makeASAOptInTx (
   addr: string,
   assetID: number,
-  params: tx.SuggestedParams
-): tx.Transaction {
+  params: SuggestedParams
+): Transaction {
   const closeRemainderTo = undefined;
   const revocationTarget = undefined;
   const amount = 0;
   const note = undefined;
-  return tx.makeAssetTransferTxnWithSuggestedParams(
+  return algosdk.makeAssetTransferTxnWithSuggestedParams(
     addr,
     addr,
     closeRemainderTo,
@@ -99,63 +101,64 @@ export function encodeNote (note: string | undefined, noteb64: string| undefined
 }
 
 /**
- * Description: Returns unsigned transaction as per execParams
- * execParams can be of following types:
- * AlgoTransferParam used for transferring algo
- * AssetTransferParam used for transferring asset
- * SSCCallsParam used for calling stateful smart contracts.
+ * Description: Returns unsigned transaction as per ExecParams
+ * ExecParams can be of following types:
+ *  + AlgoTransferParam used for transferring algo
+ *  + AssetTransferParam used for transferring asset
+ *  + SSCCallsParam used for calling stateful smart contracts.
  For more advanced use-cases, please use `algosdk.tx` directly.
  * @param deployer AlgobDeployer
- * @param txnParam execParam
+ * @param execParams ExecParams
+ * @returns SDK Transaction object
  */
-export function mkTransaction (txnParam: execParams, suggestedParams: SuggestedParams): Transaction {
-  const note = encodeNote(txnParam.payFlags.note, txnParam.payFlags.noteb64);
-  const transactionType = txnParam.type;
-  switch (txnParam.type) {
+export function mkTransaction (execParams: ExecParams, suggestedParams: SuggestedParams): Transaction {
+  const note = encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64);
+  const transactionType = execParams.type;
+  switch (execParams.type) {
     case TransactionType.TransferAsset: {
-      return tx.makeAssetTransferTxnWithSuggestedParams(
-        txnParam.fromAccount.addr,
-        txnParam.toAccountAddr,
-        txnParam.payFlags.closeRemainderTo,
+      return algosdk.makeAssetTransferTxnWithSuggestedParams(
+        execParams.fromAccount.addr,
+        execParams.toAccountAddr,
+        execParams.payFlags.closeRemainderTo,
         undefined,
-        txnParam.amount,
+        execParams.amount,
         note,
-        txnParam.assetID,
+        execParams.assetID,
         suggestedParams);
     }
     case TransactionType.TransferAlgo: {
-      return tx.makePaymentTxnWithSuggestedParams(
-        txnParam.fromAccount.addr,
-        txnParam.toAccountAddr,
-        txnParam.amountMicroAlgos,
-        txnParam.payFlags.closeRemainderTo,
+      return algosdk.makePaymentTxnWithSuggestedParams(
+        execParams.fromAccount.addr,
+        execParams.toAccountAddr,
+        execParams.amountMicroAlgos,
+        execParams.payFlags.closeRemainderTo,
         note,
         suggestedParams);
     }
     case TransactionType.ClearSSC: {
-      return tx.makeApplicationClearStateTxn(
-        txnParam.fromAccount.addr, suggestedParams, txnParam.appId, txnParam.appArgs);
+      return algosdk.makeApplicationClearStateTxn(
+        execParams.fromAccount.addr, suggestedParams, execParams.appId, execParams.appArgs);
     }
     case TransactionType.DeleteSSC: {
-      return tx.makeApplicationDeleteTxn(
-        txnParam.fromAccount.addr, suggestedParams, txnParam.appId, txnParam.appArgs);
+      return algosdk.makeApplicationDeleteTxn(
+        execParams.fromAccount.addr, suggestedParams, execParams.appId, execParams.appArgs);
     }
     case TransactionType.CallNoOpSSC: {
-      return tx.makeApplicationNoOpTxn(
-        txnParam.fromAccount.addr,
+      return algosdk.makeApplicationNoOpTxn(
+        execParams.fromAccount.addr,
         suggestedParams,
-        txnParam.appId,
-        txnParam.appArgs,
-        txnParam.accounts,
-        txnParam.foreignApps,
-        txnParam.foreignAssets,
+        execParams.appId,
+        execParams.appArgs,
+        execParams.accounts,
+        execParams.foreignApps,
+        execParams.foreignAssets,
         note,
-        txnParam.lease,
-        txnParam.rekeyTo);
+        execParams.lease,
+        execParams.rekeyTo);
     }
     case TransactionType.CloseSSC: {
-      return tx.makeApplicationCloseOutTxn(
-        txnParam.fromAccount.addr, suggestedParams, txnParam.appId, txnParam.appArgs);
+      return algosdk.makeApplicationCloseOutTxn(
+        execParams.fromAccount.addr, suggestedParams, execParams.appId, execParams.appArgs);
     }
     default: {
       throw new BuilderError(ERRORS.GENERAL.TRANSACTION_TYPE_ERROR, { error: transactionType });
@@ -166,19 +169,19 @@ export function mkTransaction (txnParam: execParams, suggestedParams: SuggestedP
 /**
  * Description: returns signed transaction
  * @param txn unsigned transaction
- * @param txnParam execParams
+ * @param execParams transaction execution parametrs
  */
-function signTransaction (txn: Transaction, txnParam: execParams): Uint8Array {
-  switch (txnParam.sign) {
+function signTransaction (txn: Transaction, execParams: ExecParams): Uint8Array {
+  switch (execParams.sign) {
     case SignType.SecretKey: {
-      return txn.signTxn(txnParam.fromAccount.sk);
+      return txn.signTxn(execParams.fromAccount.sk);
     }
     case SignType.LogicSignature: {
-      const logicsig = txnParam.lsig;
+      const logicsig = execParams.lsig;
       if (logicsig === undefined) {
         throw new Error("logic signature for this transaction was not passed or - is not defined");
       }
-      return tx.signLogicSigTransactionObject(txn, logicsig).blob;
+      return algosdk.signLogicSigTransactionObject(txn, logicsig).blob;
     }
     default: {
       throw new Error("Unknown type of signature");
@@ -189,49 +192,43 @@ function signTransaction (txn: Transaction, txnParam: execParams): Uint8Array {
 /**
  * Description: send signed transaction to network and wait for confirmation
  * @param deployer AlgobDeployer
- * @param txns Signed Transaction(s)
+ * @param rawTxns Signed Transaction(s)
  */
 async function sendAndWait (
   deployer: AlgobDeployer,
-  txns: Uint8Array | Uint8Array[]): Promise<tx.ConfirmedTxInfo> {
-  const txInfo = await deployer.algodClient.sendRawTransaction(txns).do();
+  rawTxns: Uint8Array | Uint8Array[]): Promise<algosdk.ConfirmedTxInfo> {
+  const txInfo = await deployer.algodClient.sendRawTransaction(rawTxns).do();
   return await deployer.waitForConfirmation(txInfo.txId);
 }
 
 export async function executeTransaction (
   deployer: AlgobDeployer,
-  txnParams: execParams | execParams[]): Promise<tx.ConfirmedTxInfo> {
-  if (Array.isArray(txnParams)) {
-    if (txnParams.length > 16) {
-      throw new Error("Maximum size of an atomic transfer group is 16");
-    }
+  execParams: ExecParams | ExecParams[]): Promise<algosdk.ConfirmedTxInfo> {
+  const suggestedParams = await getSuggestedParams(deployer.algodClient);
+  const mkTx = async (p: ExecParams): Promise<Transaction> =>
+    mkTransaction(p,
+      await mkTxParams(deployer.algodClient, p.payFlags, Object.assign({}, suggestedParams)));
 
-    const txns = [];
-    for (const txnParam of txnParams) {
-      const suggestedParams = await mkSuggestedParams(deployer.algodClient, txnParam.payFlags);
-      const txn = mkTransaction(txnParam, suggestedParams);
-      txns.push(txn);
-    }
-    tx.assignGroupID(txns);
+  let signedTxn;
+  if (Array.isArray(execParams)) {
+    if (execParams.length > 16) { throw new Error("Maximum size of an atomic transfer group is 16"); }
 
-    const signedTxns = [] as Uint8Array[];
-    txns.forEach((txn, index) => {
-      const signed = signTransaction(txn, txnParams[index]);
-      deployer.log(`Transaction ${index}`, signed);
-      signedTxns.push(signed);
+    let txns = [];
+    for (const t of execParams) { txns.push(await mkTx(t)); }
+    txns = algosdk.assignGroupID(txns);
+    signedTxn = txns.map((txn: Transaction, index: number) => {
+      const signed = signTransaction(txn, execParams[index]);
+      deployer.log(`Signed transaction ${index}`, signed);
+      return signed;
     });
-    const confirmedTx = await sendAndWait(deployer, signedTxns);
-    console.log(confirmedTx);
-    return confirmedTx;
   } else {
-    const suggestedParams = await mkSuggestedParams(deployer.algodClient, txnParams.payFlags);
-    const txn = mkTransaction(txnParams, suggestedParams);
-
-    const signedTxn = signTransaction(txn, txnParams);
-    const confirmedTx = await sendAndWait(deployer, signedTxn);
-    console.log(confirmedTx);
-    return confirmedTx;
+    const txn = await mkTx(execParams);
+    signedTxn = signTransaction(txn, execParams);
+    deployer.log(`Signed transaction:`, signedTxn);
   }
+  const confirmedTx = await sendAndWait(deployer, signedTxn);
+  console.log(confirmedTx);
+  return confirmedTx;
 }
 
 /**
@@ -244,12 +241,11 @@ export async function executeTransaction (
  */
 export async function executeSignedTxnFromFile (
   deployer: AlgobDeployer,
-  fileName: string): Promise<tx.ConfirmedTxInfo> {
+  fileName: string): Promise<algosdk.ConfirmedTxInfo> {
   const signedTxn = loadSignedTxnFromFile(fileName);
-  if (signedTxn === undefined) {
-    throw new Error(`File ${fileName} does not exist`);
-  }
-  console.debug("Decoded txn from %s: %O", fileName, decodeSignedTransaction(signedTxn));
+  if (signedTxn === undefined) { throw new Error(`File ${fileName} does not exist`); }
+
+  console.debug("Decoded txn from %s: %O", fileName, algosdk.decodeSignedTransaction(signedTxn));
   const confirmedTx = await sendAndWait(deployer, signedTxn);
   console.log(confirmedTx);
   return confirmedTx;
