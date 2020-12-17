@@ -1085,7 +1085,7 @@ export class Gtxna extends Op {
 export class Label extends Op {
   readonly label: string;
 
-    /**
+  /**
    * @param args words list extracted from line
    * @param line line number in TEAL file
    */
