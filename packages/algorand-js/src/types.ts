@@ -125,3 +125,9 @@ export enum EncodingType {
 export interface AccountsMap {
   [addr: string]: AccountInfo
 }
+
+export interface Storage {
+  accounts: AccountsMap
+  tx: Txn // current txn
+  gtxs: Txn[] // all transactions
+}
