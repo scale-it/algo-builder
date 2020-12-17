@@ -19,6 +19,8 @@ async function run (runtimeEnv, deployer) {
   },
   { closeRemainderTo: john.addr }, []);
 
+  await deployer.putMetadata('User Checkpoint', 'Fund Contract Account');
+
   let contract = await deployer.loadLogic('htlc.py', [toBytes(wrongSecret)]);
   let contractAddress = contract.address();
 

@@ -28,12 +28,14 @@ These maps shouldn't be edited by the script itself.
 Other deployer functions do that.
 
 Checkpoints support additional user's metadata persistence.
-This metadata is provided by the script itself by using `setMetadata`.
+This metadata is provided by the script itself by using `putMetadata`.
 Editing is only allowed in `algob deploy` task.
 ```
 deployer.getMetadata(key: string)
 deployer.putMetadata (key: string, value: string)
 ```
+
+A deployment script which doesn't store any checkpoints for example if we have a deployment script which funds accounts and we want to make sure that it won't be called twice, then a user must store metadata using `putMetadata`.
 
 The checkpoint files are only saved after a successful `deploy` task.
 The data is not saved if an error happens.

@@ -34,6 +34,8 @@ async function run (runtimeEnv, deployer) {
   // Funding multisignature account
   await executeTransaction(deployer, txnParams);
 
+  await deployer.putMetadata('User Checkpoint', 'Fund Multisignature Account');
+
   txnParams.fromAccount = { addr: multsigaddr };
   txnParams.toAccountAddr = bob.addr;
   txnParams.sign = SignType.LogicSignature;
