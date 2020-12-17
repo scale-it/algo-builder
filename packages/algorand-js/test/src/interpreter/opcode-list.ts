@@ -2235,7 +2235,7 @@ describe("Teal Opcodes", function () {
 
         const acc = interpreter.accounts.get("addr-1") as AccountState;
         let localStateCurr = acc["apps-local-state"][0]["key-value"];
-        let idx = localStateCurr.findIndex(a => compareArray(a.key as Uint8Array, toBytes('New-Key')));
+        let idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('New-Key')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(localStateCurr[idx].value.bytes, toBytes('New-Val'));
 
@@ -2248,7 +2248,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         localStateCurr = (interpreter.accounts.get("addr-1") as AccountState)["apps-local-state"][0]["key-value"];
-        idx = localStateCurr.findIndex(a => compareArray(a.key as Uint8Array, toBytes('New-Key-1')));
+        idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('New-Key-1')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(localStateCurr[idx].value.uint, 2222);
       });
@@ -2290,7 +2290,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         let globalStateCurr = (interpreter.globalApps.get(1828) as SSCParams)["global-state"];
-        let idx = globalStateCurr.findIndex(a => compareArray(a.key as Uint8Array, toBytes('New-Global-Key')));
+        let idx = globalStateCurr.findIndex(a => compareArray(a.key, toBytes('New-Global-Key')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(globalStateCurr[idx].value.bytes, toBytes('New-Global-Val'));
 
@@ -2302,7 +2302,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         globalStateCurr = (interpreter.globalApps.get(1828) as SSCParams)["global-state"];
-        idx = globalStateCurr.findIndex(a => compareArray(a.key as Uint8Array, toBytes('Key')));
+        idx = globalStateCurr.findIndex(a => compareArray(a.key, toBytes('Key')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(globalStateCurr[idx].value.uint, 1000);
       });
@@ -2341,7 +2341,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         let localStateCurr = (interpreter.accounts.get("addr-1") as AccountState)["apps-local-state"][0]["key-value"];
-        let idx = localStateCurr.findIndex(a => compareArray(a.key as Uint8Array, toBytes('Local-key')));
+        let idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
 
         // for Txn.Accounts[A]
@@ -2352,7 +2352,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         localStateCurr = (interpreter.accounts.get("addr-2") as AccountState)["apps-local-state"][0]["key-value"];
-        idx = localStateCurr.findIndex(a => compareArray(a.key as Uint8Array, toBytes('Local-key')));
+        idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
       });
     });
@@ -2371,7 +2371,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         const globalStateCurr = (interpreter.globalApps.get(1828) as SSCParams)["global-state"];
-        const idx = globalStateCurr.findIndex(a => compareArray(a.key as Uint8Array, toBytes('global-key')));
+        const idx = globalStateCurr.findIndex(a => compareArray(a.key, toBytes('global-key')));
         assert.equal(idx, -1); // idx should be -1
       });
     });

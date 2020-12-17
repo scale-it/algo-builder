@@ -4,7 +4,7 @@ import { AccountState, AppLocalState, SSCSchemaConfig, SSCStateSchema } from "al
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
-import { compareArray } from "../lib/helpers";
+import { compareArray } from "../lib/compare";
 import { StackElem } from "../types";
 import { Interpreter } from "./interpreter";
 
@@ -50,10 +50,10 @@ export function getLocalState (appId: number, account: AccountState, key: Uint8A
   const localState = account["apps-local-state"];
   const data = localState.find(state => state.id === appId)?.["key-value"]; // can be undefined (eg. app opted in)
   if (data) {
-    const keyValue = data.find(schema => compareArray(schema.key as Uint8Array, key));
+    const keyValue = data.find(schema => compareArray(schema.key, key));
     const value = keyValue?.value;
     if (value) {
-      return value?.bytes as Uint8Array || BigInt(value?.uint);
+      return value?.bytes || BigInt(value?.uint);
     }
   }
   return undefined;
@@ -77,10 +77,10 @@ export function getGlobalState (appId: number, key: Uint8Array,
   }
   const globalState = appDelta["global-state"];
 
-  const keyValue = globalState.find(schema => compareArray(schema.key as Uint8Array, key));
+  const keyValue = globalState.find(schema => compareArray(schema.key, key));
   const value = keyValue?.value;
   if (value) {
-    return value?.bytes as Uint8Array || BigInt(value?.uint);
+    return value?.bytes || BigInt(value?.uint);
   }
   return undefined;
 }
@@ -102,7 +102,7 @@ export function updateLocalState (appId: number, account: AccountState,
   for (const l of localState) {
     if (l.id === appId) { // find appId
       const localDelta = l["key-value"];
-      const idx = localDelta.findIndex(schema => compareArray(schema.key as Uint8Array, key));
+      const idx = localDelta.findIndex(schema => compareArray(schema.key, key));
 
       if (idx === -1) {
         localDelta.push(data); // push new pair if key not found
@@ -141,7 +141,7 @@ export function updateGlobalState (appId: number, key: Uint8Array,
 
   const globalState = appDelta["global-state"];
   const data = getKeyValPair(key, value); // key value pair to put
-  const idx = globalState.findIndex(schema => compareArray(schema.key as Uint8Array, key));
+  const idx = globalState.findIndex(schema => compareArray(schema.key, key));
   if (idx === -1) {
     globalState.push(data); // push new pair if key not found
   } else {

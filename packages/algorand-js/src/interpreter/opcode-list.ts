@@ -1458,7 +1458,7 @@ export class AppLocalDel extends Op {
     const idx = localState.findIndex(state => state.id === appId);
     if (idx !== -1) {
       const arr = localState[idx]["key-value"].filter((obj) => {
-        return !compareArray(obj.key as Uint8Array, key);
+        return !compareArray(obj.key, key);
       });
       localState[idx]["key-value"] = arr;
 
@@ -1494,7 +1494,7 @@ export class AppGlobalDel extends Op {
     if (appDelta) {
       const globalState = appDelta["global-state"];
       const arr = globalState.filter((obj) => {
-        return !compareArray(obj.key as Uint8Array, key);
+        return !compareArray(obj.key, key);
       });
       appDelta["global-state"] = arr;
     }
