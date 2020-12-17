@@ -15,7 +15,7 @@ import { convertToBuffer, convertToString, getEncoding } from "../lib/parse-data
 import type { EncodingType, TEALStack } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
-import { getGlobalState, getLocalState, updateGlobalState, updateLocalState } from "./ssc";
+import { getGlobalState, getLocalState, updateGlobalState, updateLocalState } from "./stateful";
 import { txAppArg, txnSpecbyField } from "./txn";
 
 export const BIGINT0 = BigInt("0");

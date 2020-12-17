@@ -23,6 +23,7 @@ function getKeyValPair (key: Uint8Array, value: StackElem): SSCStateSchema {
   };
 }
 
+// TODO: to be moved to AccountState class
 /**
  * Description: assert if the given key-value pairs are valid by schema
  * @param keyValue: list of key-value pairs (state data)
@@ -58,6 +59,7 @@ export function getLocalState (appId: number, account: AccountState, key: Uint8A
   return undefined;
 }
 
+// TODO: to be moved to Runtime class
 /**
  * Description: fetches global state value for key present app's global data
  * returns undefined otherwise
@@ -83,6 +85,7 @@ export function getGlobalState (appId: number, key: Uint8Array,
   return undefined;
 }
 
+// TODO: to be moved to AccountState class
 /**
  * Description: add new key-value pair or updating pair with existing key in account
  * for application id: appId, throw error otherwise
@@ -118,6 +121,7 @@ export function updateLocalState (appId: number, account: AccountState,
   });
 }
 
+// TODO: to be moved to Runtime class
 /**
  * Description: add new key-value pair or updating pair with existing key in
  * app's global data for application id: appId, throw error otherwise

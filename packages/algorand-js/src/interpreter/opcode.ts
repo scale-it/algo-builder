@@ -77,6 +77,7 @@ export class Op {
     return byteString.slice(Number(start), Number(end));
   }
 
+  // TODO: to be moved to Runtime class
   assertAccountDefined (a?: AccountState): AccountState {
     if (a === undefined) {
       throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
@@ -84,6 +85,7 @@ export class Op {
     return a;
   }
 
+  // TODO: to be moved to Runtime class
   assertAppDefined (appId: number, interpreter: Interpreter): SSCParams {
     const globalDelta = interpreter.globalApps.get(appId);
     if (globalDelta === undefined) {
@@ -92,6 +94,7 @@ export class Op {
     return globalDelta;
   }
 
+  // TODO: to be moved to Runtime class
   getAccount (accountIndex: bigint, interpreter: Interpreter): AccountState {
     let account: AccountState | undefined;
     if (accountIndex === BIGINT0) {

@@ -31,7 +31,7 @@ import { convertToBuffer, toBytes } from "../../../src/lib/parse-data";
 import { Stack } from "../../../src/lib/stack";
 import { EncodingType, StackElem } from "../../../src/types";
 import { execExpectError, expectTealError } from "../../helpers/errors";
-import { accInfo } from "../../mocks/ssc";
+import { accInfo } from "../../mocks/stateful";
 import { TXN_OBJ } from "../../mocks/txn";
 
 describe("Teal Opcodes", function () {
