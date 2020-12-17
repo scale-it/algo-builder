@@ -9,7 +9,7 @@ import { BuilderError, parseAlgorandError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { assertDir, ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
 import { timestampNow } from "../lib/time";
-import type { ASCCache, PyASCCache } from "../types";
+import type { ASCCache, PyASCCache, StrMap } from "../types";
 
 export const tealExt = ".teal";
 export const pyExt = ".py";
@@ -25,20 +25,21 @@ export class CompileOp {
     this.pyCompile = new PyCompileOp(this);
   }
 
-  // Gets the TEAL compiled result from artifacts cache and compiles the code if necessary.
-  // Will throw an exception if the source file doesn't exists.
-  // @param filename: name of the TEAL code in `/assets` directory.
-  //   (Examples: `mysc.teal, security/rbac.teal`)
-  //   MUST have a .teal, .lsig or .py extension
-  // @param force: if true it will force recompilation even if the cache is up to date.
-  // @param scInitParam : Smart contract initialization parameters.
-  async ensureCompiled (filename: string, force?: boolean, scInitParam?: unknown): Promise<ASCCache> {
+  /** Gets the TEAL compiled result from artifacts cache and compiles the code if necessary.
+   * Will throw an exception if the source file doesn't exists.
+   * @param filename: name of the TEAL code in `/assets` directory.
+   *   (Examples: `mysc.teal, security/rbac.teal`)
+   *   MUST have a .teal, .lsig or .py extension
+   * @param force: if true it will force recompilation even if the cache is up to date.
+   * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
+   */
+  async ensureCompiled (filename: string, force?: boolean, scTmplParams?: StrMap): Promise<ASCCache> {
     if (force === undefined) {
       force = false;
     }
 
     if (filename.endsWith(pyExt)) {
-      return await this.pyCompile.ensureCompiled(filename, force, scInitParam);
+      return await this.pyCompile.ensureCompiled(filename, force, scTmplParams);
     }
 
     if (!filename.endsWith(tealExt) && !filename.endsWith(lsigExt)) {
@@ -122,15 +123,16 @@ export class PyCompileOp {
    *                   Examples : [ gold.py, asa.py]
    *                   MUST have .py extension
    * @param force    : if true it will force recompilation even if the cache is up to date.
-   * @param scInitParam : Smart Contract Initialization Parameters
+   * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
-  async ensureCompiled (filename: string, force?: boolean, scInitParam?: unknown): Promise<PyASCCache> {
+  async ensureCompiled (filename: string, force?: boolean, scTmplParams?: unknown): Promise<PyASCCache> {
     if (!filename.endsWith(pyExt)) {
       throw new Error(`filename "${filename}" must end with "${pyExt}"`);
     }
 
-    let param: string | undefined = YAML.stringify(scInitParam);
-    if (scInitParam === undefined) { param = undefined; }
+    console.log("PyTEAL template parameters", scTmplParams);
+    let param: string | undefined = YAML.stringify(scTmplParams);
+    if (scTmplParams === undefined) { param = undefined; }
 
     const content = this.compilePyTeal(filename, param);
     const [teal, thash] = [content, murmurhash.v3(content)];

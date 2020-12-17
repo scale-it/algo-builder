@@ -18,6 +18,7 @@ import type {
   Network,
   SSCDeploymentFlags,
   SSCInfo,
+  StrMap,
   TxParams
 } from "../types";
 import { CompileOp } from "./compile";
@@ -39,14 +40,14 @@ export interface AlgoOperator {
     name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, txWriter: txWriter
   ) => Promise<ASAInfo>
   fundLsig: (name: string, flags: FundASCFlags, payFlags: TxParams,
-    txWriter: txWriter, scParams: LogicSigArgs, scInitParam?: unknown) => Promise<LsigInfo>
+    txWriter: txWriter, scParams: LogicSigArgs, scTmplParams?: StrMap) => Promise<LsigInfo>
   deploySSC: (
     approvalProgram: string,
     clearProgram: string,
     flags: SSCDeploymentFlags,
     payFlags: TxParams,
     txWriter: txWriter,
-    scInitParam?: unknown) => Promise<SSCInfo>
+    scTmplParams?: StrMap) => Promise<SSCInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
   optInToASA: (
     asaName: string, assetIndex: number, account: Account, params: TxParams
@@ -56,7 +57,7 @@ export interface AlgoOperator {
   ) => Promise<void>
   optInToSSC: (
     sender: Account, appId: number, payFlags: TxParams, appArgs?: Uint8Array[]) => Promise<void>
-  ensureCompiled: (name: string, force?: boolean, scInitParam?: unknown) => Promise<ASCCache>
+  ensureCompiled: (name: string, force?: boolean, scTmplParams?: StrMap) => Promise<ASCCache>
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -205,7 +206,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
    * @param payFlags - as per SPEC
    * @param txWriter - transaction log writer
    * @param scParams: Smart contract Parameters(Used while calling smart contract)
-   * @param scInitParam : Smart contract initialization parameters.
+   * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
   async fundLsig (
     name: string,
@@ -213,13 +214,12 @@ export class AlgoOperatorImpl implements AlgoOperator {
     payFlags: TxParams,
     txWriter: txWriter,
     scParams: LogicSigArgs,
-    scInitParam?: unknown): Promise<LsigInfo> {
-    const lsig = await getLsig(name, this.algodClient, scParams, scInitParam);
+    scTmplParams?: StrMap): Promise<LsigInfo> {
+    const lsig = await getLsig(name, this.algodClient, scParams, scTmplParams);
     const contractAddress = lsig.address();
 
     const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
-    let message = "Funding Contract: ";
-    message = message.concat(contractAddress);
+    let message = "Funding Contract: " + contractAddress;
     console.log(message);
 
     const closeToRemainder = undefined;
@@ -247,7 +247,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
    * @param flags         SSCDeploymentFlags
    * @param payFlags      TxParams
    * @param txWriter
-   * @param scInitParam : Smart contract initialization parameters.
+   * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
   async deploySSC (
     approvalProgram: string,
@@ -255,15 +255,15 @@ export class AlgoOperatorImpl implements AlgoOperator {
     flags: SSCDeploymentFlags,
     payFlags: TxParams,
     txWriter: txWriter,
-    scInitParam?: unknown): Promise<SSCInfo> {
+    scTmplParams?: StrMap): Promise<SSCInfo> {
     const sender = flags.sender.addr;
     const params = await tx.mkSuggestedParams(this.algodClient, payFlags);
 
     const onComplete = algosdk.OnApplicationComplete.NoOpOC;
 
-    const app = await this.ensureCompiled(approvalProgram, false, scInitParam);
+    const app = await this.ensureCompiled(approvalProgram, false, scTmplParams);
     const approvalProg = new Uint8Array(Buffer.from(app.compiled, "base64"));
-    const clear = await this.ensureCompiled(clearProgram, false, scInitParam);
+    const clear = await this.ensureCompiled(clearProgram, false, scTmplParams);
     const clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
 
     const txn = algosdk.makeApplicationCreateTxn(
@@ -324,7 +324,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     await this.waitForConfirmation(txId);
   }
 
-  async ensureCompiled (name: string, force?: boolean, scInitParam?: unknown): Promise<ASCCache> {
-    return await this.compileOp.ensureCompiled(name, force, scInitParam);
+  async ensureCompiled (name: string, force?: boolean, scTmplParams?: StrMap): Promise<ASCCache> {
+    return await this.compileOp.ensureCompiled(name, force, scTmplParams);
   }
 }
