@@ -5,7 +5,7 @@ async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
   const john = deployer.accountsByName.get('john');
 
-  const txnParams = mkTxnParams(masterAccount, john.addr, 200000000, {}, { note: 'funding account' });
+  const txnParams = mkTxnParams(masterAccount, john.addr, 4e6, {}, { note: 'funding account' });
   txnParams.sign = SignType.SecretKey;
   await executeTransaction(deployer, txnParams);
 
@@ -15,7 +15,7 @@ async function run (runtimeEnv, deployer) {
   // setup a contract account and send 1 ALGO from master
   await deployer.fundLsig('htlc.py', {
     funder: masterAccount,
-    fundingMicroAlgo: 1000000
+    fundingMicroAlgo: 1e6 // 1 Algo
   },
   { closeRemainderTo: john.addr }, []);
 
