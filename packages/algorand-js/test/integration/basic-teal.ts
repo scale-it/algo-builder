@@ -29,8 +29,7 @@ describe("Algorand Smart Contracts", function () {
   });
 
   this.beforeEach(function () {
-    interpreter = new Interpreter();
-    runtime.interpreter = interpreter;
+    runtime.interpreter = new Interpreter();
   });
 
   it("should send algo's from john to bob if stateless teal logic is correct", async function () {
