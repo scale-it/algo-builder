@@ -58,58 +58,6 @@ export const TxFieldDefaults: {[key: string]: any} = {
   FreezeAssetFrozen: zeroUint64
 };
 
-// Table https://developer.algorand.org/docs/reference/teal/opcodes/?query=mulw#txn
-export const TX_FIELD_MAP: {[key: string]: string} = {
-  0: "Sender",
-  1: "Fee",
-  2: "FirstValid",
-  3: "FirstValidTime",
-  4: "LastValid",
-  5: "Note",
-  6: "Lease",
-  7: "Receiver",
-  8: "Amount",
-  9: "CloseRemainderTo",
-  10: "VotePK",
-  11: "SelectionPK",
-  12: "VoteFirst",
-  13: "VoteLast",
-  14: "VoteKeyDilution",
-  15: "Type",
-  16: "TypeEnum",
-  17: "XferAsset",
-  18: "AssetAmount",
-  19: "AssetSender",
-  20: "AssetReceiver",
-  21: "AssetCloseTo",
-  22: "GroupIndex",
-  23: "TxID",
-  24: "ApplicationID",
-  25: "OnCompletion",
-  26: "ApplicationArgs",
-  27: "NumAppArgs",
-  28: "Accounts",
-  29: "NumAccounts",
-  30: "ApprovalProgram",
-  31: "ClearStateProgram",
-  32: "RekeyTo",
-  33: "ConfigAsset",
-  34: "ConfigAssetTotal",
-  35: "ConfigAssetDecimals",
-  36: "ConfigAssetDefaultFrozen",
-  37: "ConfigAssetUnitName",
-  38: "ConfigAssetName",
-  39: "ConfigAssetURL",
-  40: "ConfigAssetMetadataHash",
-  41: "ConfigAssetManager",
-  42: "ConfigAssetReserve",
-  43: "ConfigAssetFreeze",
-  44: "ConfigAssetClawback",
-  45: "FreezeAsset",
-  46: "FreezeAssetAccount",
-  47: "FreezeAssetFrozen"
-};
-
 export const reDigit = /^\d+$/;
 
 /** is Base64 regex

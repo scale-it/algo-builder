@@ -10,7 +10,7 @@ import { decode, encode } from "uint64be";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { compareArray } from "../lib/compare";
-import { MAX_CONCAT_SIZE, MAX_UINT64, TX_FIELD_MAP } from "../lib/constants";
+import { MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
 import { assertLen, assertOnlyDigits, convertToBuffer, convertToString, getEncoding } from "../lib/parsing";
 import type { EncodingType, TEALStack } from "../types";
 import { Interpreter } from "./interpreter";
@@ -1013,9 +1013,8 @@ export class Txn extends Op {
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     assertLen(args.length, 1, line);
-    assertOnlyDigits(args[0]);
 
-    this.field = TX_FIELD_MAP[args[0]];
+    this.field = args[0]; // field
     this.interpreter = interpreter;
   }
 
@@ -1041,10 +1040,9 @@ export class Gtxn extends Op {
     super();
     assertLen(args.length, 2, line);
     assertOnlyDigits(args[0]);
-    assertOnlyDigits(args[1]);
 
     this.txIdx = Number(args[0]); // transaction group index
-    this.field = TX_FIELD_MAP[args[1]];
+    this.field = args[1]; // field
     this.interpreter = interpreter;
   }
 
@@ -1071,10 +1069,9 @@ export class Txna extends Op {
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     assertLen(args.length, 2, line);
-    assertOnlyDigits(args[0]);
     assertOnlyDigits(args[1]);
 
-    this.field = TX_FIELD_MAP[args[0]];
+    this.field = args[0]; // field
     this.idx = Number(args[1]);
     this.interpreter = interpreter;
   }
@@ -1101,12 +1098,11 @@ export class Gtxna extends Op {
     super();
     assertLen(args.length, 3, line);
     assertOnlyDigits(args[0]);
-    assertOnlyDigits(args[1]);
     assertOnlyDigits(args[2]);
 
-    this.txIdx = Number(args[0]);
-    this.field = TX_FIELD_MAP[args[1]];
-    this.idx = Number(args[2]);
+    this.txIdx = Number(args[0]); // transaction group index
+    this.field = args[1]; // field
+    this.idx = Number(args[2]); // transaction field array index
     this.interpreter = interpreter;
   }
 

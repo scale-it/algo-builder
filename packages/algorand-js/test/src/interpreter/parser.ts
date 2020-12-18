@@ -274,19 +274,14 @@ describe("Parser", function () {
       assert.deepEqual(res, expected);
 
       expectTealError(
-        () => opcodeFromSentence(["txn", "1", "2"], 1, interpreter),
+        () => opcodeFromSentence(["txn", "Fee", "Fee"], 1, interpreter),
         ERRORS.TEAL.ASSERT_LENGTH
-      );
-
-      expectTealError(
-        () => opcodeFromSentence(["txn", "1AB"], 1, interpreter),
-        ERRORS.TEAL.INVALID_TYPE
       );
     });
 
     it("should return correct object for `gtxn`", () => {
-      const res = opcodeFromSentence(["gtxn", "0", "9"], 1, interpreter);
-      const expected = new Gtxn(["0", "9"], 1, interpreter);
+      const res = opcodeFromSentence(["gtxn", "0", "Fee"], 1, interpreter);
+      const expected = new Gtxn(["0", "Fee"], 1, interpreter);
 
       assert.deepEqual(res, expected);
 
@@ -296,14 +291,14 @@ describe("Parser", function () {
       );
 
       expectTealError(
-        () => opcodeFromSentence(["gtxn", "1", "0A"], 1, interpreter),
+        () => opcodeFromSentence(["gtxn", "1AA", "Fee"], 1, interpreter),
         ERRORS.TEAL.INVALID_TYPE
       );
     });
 
     it("should return correct object for `txna`", () => {
-      const res = opcodeFromSentence(["txna", "1", "2"], 1, interpreter);
-      const expected = new Txna(["1", "2"], 1, interpreter);
+      const res = opcodeFromSentence(["txna", "Fee", "2"], 1, interpreter);
+      const expected = new Txna(["Fee", "2"], 1, interpreter);
 
       assert.deepEqual(res, expected);
 
@@ -313,14 +308,14 @@ describe("Parser", function () {
       );
 
       expectTealError(
-        () => opcodeFromSentence(["txna", "1AB", "A"], 1, interpreter),
+        () => opcodeFromSentence(["txna", "Fee", "A"], 1, interpreter),
         ERRORS.TEAL.INVALID_TYPE
       );
     });
 
     it("should return correct object for `gtxna`", () => {
-      const res = opcodeFromSentence(["gtxna", "1", "2", "4"], 1, interpreter);
-      const expected = new Gtxna(["1", "2", "4"], 1, interpreter);
+      const res = opcodeFromSentence(["gtxna", "1", "Fee", "4"], 1, interpreter);
+      const expected = new Gtxna(["1", "Fee", "4"], 1, interpreter);
 
       assert.deepEqual(res, expected);
 
@@ -330,7 +325,7 @@ describe("Parser", function () {
       );
 
       expectTealError(
-        () => opcodeFromSentence(["gtxna", "1AB", "2", "4"], 1, interpreter),
+        () => opcodeFromSentence(["gtxna", "1AB", "Fee", "4"], 1, interpreter),
         ERRORS.TEAL.INVALID_TYPE
       );
     });
