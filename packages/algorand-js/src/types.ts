@@ -132,10 +132,17 @@ export interface AccountsMap {
 export interface State {
   accounts: Map<string, SdkAccount>
   globalApps: Map<number, SSCParams>
+}
+
+// describes interpreter's local state
+export interface Context {
+  state: State
   tx: Txn // current txn
   gtxs: Txn[] // all transactions
 }
 
+// represent account used in tests and by the context
+// NOTE: custom notations are used rather than SDK AccountState notations
 export interface SdkAccount {
   address: string
   assets: AccountAssetInfo[]
@@ -146,5 +153,7 @@ export interface SdkAccount {
   createdAssets: CreatedAssets[]
   account?: Account
 
-  balance?: () => number
+  balance: () => number
+  getLocalState: (appId: number, key: Uint8Array) => StackElem | undefined
+  updateLocalState: (appId: number, key: Uint8Array, value: StackElem) => AppLocalState[]
 }

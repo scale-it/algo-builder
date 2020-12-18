@@ -2,20 +2,21 @@ import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
 import { Interpreter, Runtime } from "../../src/index";
-import { SdkAccountImpl } from "../../src/Runtime/account";
+import { SdkAccountImpl } from "../../src/runtime/account";
 import { expectTealErrorAsync } from "../helpers/errors";
 import { useFixtureProject } from "../helpers/project";
 
 describe("Algorand Smart Contracts", function () {
   useFixtureProject("smart-contracts");
 
-  const escrow = new SdkAccountImpl(100000000); // 100 ALGO
-  const john = new SdkAccountImpl(100);
+  const john = new SdkAccountImpl(1000);
+  const bob = new SdkAccountImpl(500);
+  // set up transaction paramenters
   const txnParams = {
     type: 0, // payment
     sign: 0,
-    fromAccount: escrow.account,
-    toAccountAddr: john.address,
+    fromAccount: john.account,
+    toAccountAddr: bob.address,
     amountMicroAlgos: 100,
     payFlags: { totalFee: 1000 }
   };
@@ -32,34 +33,34 @@ describe("Algorand Smart Contracts", function () {
     runtime.interpreter = interpreter;
   });
 
-  it("should update the balance if logic is correct", async function () {
+  it("should send algo's from john to bob if stateless teal logic is correct", async function () {
     // check initial balance
-    assert.equal(escrow.balance(), 100000000);
-    assert.equal(john.balance(), 100);
+    assert.equal(john.balance(), 1000);
+    assert.equal(bob.balance(), 500);
 
     // execute transaction
-    await runtime.executeTx(txnParams, 'basic.teal', [], [escrow, john]);
+    await runtime.executeTx(txnParams, 'basic.teal', [], [john, bob]);
 
-    assert.equal(escrow.balance(), 99999900); // check if funds are withdrawn
-    assert.equal(john.balance(), 200);
+    assert.equal(john.balance(), 900); // check if 100 microAlgo's are withdrawn
+    assert.equal(bob.balance(), 600);
   });
 
   it("should throw error if logic is incorrect", async function () {
     // initial balance
-    const escrowBal = escrow.balance();
-    const johnBal = john.balance();
+    const escrowBal = john.balance();
+    const johnBal = bob.balance();
 
     const invalidParams = Object.assign({}, txnParams);
     invalidParams.amountMicroAlgos = 50;
 
     // execute transaction (should fail is logic is incorrect)
     await expectTealErrorAsync(
-      async () => await runtime.executeTx(invalidParams, 'incorrect-logic.teal', [], [escrow, john]),
+      async () => await runtime.executeTx(invalidParams, 'incorrect-logic.teal', [], [john, bob]),
       ERRORS.TEAL.INVALID_STACK_ELEM
     );
 
     // verify account balance remains unchanged
-    assert.equal(escrow.balance(), escrowBal);
-    assert.equal(john.balance(), johnBal);
+    assert.equal(john.balance(), escrowBal);
+    assert.equal(bob.balance(), johnBal);
   });
 });

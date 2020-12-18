@@ -1,6 +1,5 @@
 import { getProgram } from "algob/test/helpers/fs";
 import { assert } from "chai";
-import path from "path";
 
 import { ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
@@ -11,13 +10,10 @@ import {
   Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, Sha256, Sha512_256, Store, Sub,
   Substring, Substring3
 } from "../../../src/interpreter/opcode-list";
-import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/interpreter/parser";
+import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { expectTealError } from "../../helpers/errors";
 import { useFixtureProject } from "../../helpers/project";
 
-function getPath (file: string): string {
-  return path.join(process.cwd(), file);
-}
 // base64 case needs to be verified at the time of decoding
 describe("Parser", function () {
   describe("Extract words from line", () => {

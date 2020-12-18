@@ -9,14 +9,13 @@ import { decode, encode } from "uint64be";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
-import { compareArray } from "../lib/compare";
+import { checkIndexBound, compareArray } from "../lib/compare";
 import { MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
 import { assertLen, assertOnlyDigits, convertToBuffer, convertToString, getEncoding } from "../lib/parsing";
+import { txAppArg, txnSpecbyField } from "../lib/txn";
 import type { EncodingType, TEALStack } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
-import { getGlobalState, getLocalState, updateGlobalState, updateLocalState } from "./stateful";
-import { txAppArg, txnSpecbyField } from "./txn";
 
 export const BIGINT0 = BigInt("0");
 export const BIGINT1 = BigInt("1");
@@ -39,9 +38,7 @@ export class Pragma extends Op {
     }
   }
 
-  execute (stack: TEALStack): void {
-    throw new TealError(ERRORS.TEAL.TEAL_ENCOUNTERED_ERR);
-  }
+  execute (stack: TEALStack): void {}
 }
 
 // pops string([]byte) from stack and pushes it's length to stack
@@ -166,7 +163,7 @@ export class Arg extends Op {
     assertOnlyDigits(args[0]);
 
     const index = BigInt(args);
-    this.checkIndexBound(Number(index), interpreter.args);
+    checkIndexBound(Number(index), interpreter.args);
 
     this._arg = interpreter.args[Number(index)];
   }
@@ -223,7 +220,7 @@ export class Bytec extends Op {
   }
 
   execute (stack: TEALStack): void {
-    this.checkIndexBound(this.index, this.interpreter.bytecblock);
+    checkIndexBound(this.index, this.interpreter.bytecblock);
     const bytec = this.assertBytes(this.interpreter.bytecblock[this.index]);
     stack.push(bytec);
   }
@@ -276,7 +273,7 @@ export class Intc extends Op {
   }
 
   execute (stack: TEALStack): void {
-    this.checkIndexBound(this.index, this.interpreter.intcblock);
+    checkIndexBound(this.index, this.interpreter.intcblock);
     const intc = this.assertBigInt(this.interpreter.intcblock[this.index]);
     stack.push(intc);
   }
@@ -400,7 +397,7 @@ export class Store extends Op {
   }
 
   execute (stack: TEALStack): void {
-    this.checkIndexBound(this.index, this.interpreter.scratch);
+    checkIndexBound(this.index, this.interpreter.scratch);
     this.assertMinStackLen(stack, 1);
     const top = stack.pop();
     this.interpreter.scratch[this.index] = top;
@@ -427,7 +424,7 @@ export class Load extends Op {
   }
 
   execute (stack: TEALStack): void {
-    this.checkIndexBound(this.index, this.interpreter.scratch);
+    checkIndexBound(this.index, this.interpreter.scratch);
     stack.push(this.interpreter.scratch[this.index]);
   }
 }
@@ -1033,7 +1030,7 @@ export class Gtxn extends Op {
 
   execute (stack: TEALStack): void {
     this.assertUint8(BigInt(this.txIdx));
-    this.checkIndexBound(this.txIdx, this.interpreter.storageBranch.gtxs);
+    checkIndexBound(this.txIdx, this.interpreter.ctx.gtxs);
 
     const result = txnSpecbyField(this.field, this.interpreter);
     stack.push(result);
@@ -1054,7 +1051,7 @@ export class Txna extends Op {
   }
 
   execute (stack: TEALStack): void {
-    const result = txAppArg(this.field, this.interpreter.storageBranch.tx, this.idx, this);
+    const result = txAppArg(this.field, this.interpreter.ctx.tx, this.idx, this);
     stack.push(result);
   }
 }
@@ -1077,7 +1074,7 @@ export class Gtxna extends Op {
   execute (stack: TEALStack): void {
     this.assertUint8(BigInt(this.txIdx));
 
-    const tx = this.interpreter.storageBranch.gtxs[this.txIdx];
+    const tx = this.interpreter.ctx.gtxs[this.txIdx];
     const result = txAppArg(this.field, tx, this.idx, this);
     stack.push(result);
   }
@@ -1225,7 +1222,7 @@ export class AppOptedIn extends Op {
     const appId = this.assertBigInt(stack.pop());
     const accountIndex = this.assertBigInt(stack.pop());
 
-    const account = this.getAccount(accountIndex, this.interpreter);
+    const account = this.interpreter.runtime.getAccount(accountIndex);
     const localState = account.appsLocalState;
 
     const isOptedIn = localState.find(state => state.id === Number(appId));
@@ -1257,10 +1254,10 @@ export class AppLocalGet extends Op {
     const key = this.assertBytes(stack.pop());
     const accountIndex = this.assertBigInt(stack.pop());
 
-    const account = this.getAccount(accountIndex, this.interpreter);
-    const appId = this.interpreter.storageBranch.tx.apid;
+    const account = this.interpreter.runtime.getAccount(accountIndex);
+    const appId = this.interpreter.ctx.tx.apid;
 
-    const val = getLocalState(appId, account, key);
+    const val = account.getLocalState(appId, key);
     if (val) {
       stack.push(val);
     } else {
@@ -1291,8 +1288,8 @@ export class AppLocalGetEx extends Op {
     const appId = this.assertBigInt(stack.pop());
     const accountIndex = this.assertBigInt(stack.pop());
 
-    const account = this.getAccount(accountIndex, this.interpreter);
-    const val = getLocalState(Number(appId), account, key);
+    const account = this.interpreter.runtime.getAccount(accountIndex);
+    const val = account.getLocalState(Number(appId), key);
     if (val) {
       stack.push(BIGINT1);
       stack.push(val);
@@ -1321,8 +1318,8 @@ export class AppGlobalGet extends Op {
     this.assertMinStackLen(stack, 1);
     const key = this.assertBytes(stack.pop());
 
-    const appId = this.interpreter.storageBranch.tx.apid;
-    const val = getGlobalState(appId, key, this.interpreter);
+    const appId = this.interpreter.ctx.tx.apid;
+    const val = this.interpreter.runtime.getGlobalState(appId, key);
     if (val) {
       stack.push(val);
     } else {
@@ -1353,16 +1350,16 @@ export class AppGlobalGetEx extends Op {
     const key = this.assertBytes(stack.pop());
     let appIndex = this.assertBigInt(stack.pop());
 
-    const foreignApps = this.interpreter.storageBranch.tx.apfa;
+    const foreignApps = this.interpreter.ctx.tx.apfa;
     let appId;
     if (appIndex === BIGINT0) {
-      appId = this.interpreter.storageBranch.tx.apid; // zero index means current app
+      appId = this.interpreter.ctx.tx.apid; // zero index means current app
     } else {
-      this.checkIndexBound(Number(--appIndex), foreignApps);
+      checkIndexBound(Number(--appIndex), foreignApps);
       appId = foreignApps[Number(appIndex)];
     }
 
-    const val = getGlobalState(appId, key, this.interpreter);
+    const val = this.interpreter.runtime.getGlobalState(appId, key);
     if (val) {
       stack.push(BIGINT1);
       stack.push(val);
@@ -1393,12 +1390,13 @@ export class AppLocalPut extends Op {
     const key = this.assertBytes(stack.pop());
     const accountIndex = this.assertBigInt(stack.pop());
 
-    const account = this.getAccount(accountIndex, this.interpreter);
-    const appId = this.interpreter.storageBranch.tx.apid;
+    const account = this.interpreter.runtime.getAccount(accountIndex);
+    const appId = this.interpreter.ctx.tx.apid;
 
     // get updated local state for account
-    const localState = updateLocalState(appId, account, key, value);
-    const acc = this.assertAccountDefined(this.interpreter.storageBranch.accounts.get(account.address));
+    const localState = account.updateLocalState(appId, key, value);
+    const acc = this.interpreter.runtime.assertAccountDefined(
+      this.interpreter.ctx.state.accounts.get(account.address));
     acc.appsLocalState = localState;
   }
 }
@@ -1423,10 +1421,10 @@ export class AppGlobalPut extends Op {
     const value = stack.pop();
     const key = this.assertBytes(stack.pop());
 
-    const appId = this.interpreter.storageBranch.tx.apid;
-    const globalState = updateGlobalState(appId, key, value, this.interpreter);
+    const appId = this.interpreter.ctx.tx.apid;
+    const globalState = this.interpreter.runtime.updateGlobalState(appId, key, value);
 
-    const globalApp = this.assertAppDefined(appId, this.interpreter);
+    const globalApp = this.interpreter.runtime.assertAppDefined(appId);
     globalApp["global-state"] = globalState;
   }
 }
@@ -1451,8 +1449,8 @@ export class AppLocalDel extends Op {
     const key = this.assertBytes(stack.pop());
     const accountIndex = this.assertBigInt(stack.pop());
 
-    const appId = this.interpreter.storageBranch.tx.apid;
-    const account = this.getAccount(accountIndex, this.interpreter);
+    const appId = this.interpreter.ctx.tx.apid;
+    const account = this.interpreter.runtime.getAccount(accountIndex);
 
     const localState = account.appsLocalState;
     const idx = localState.findIndex(state => state.id === appId);
@@ -1462,8 +1460,8 @@ export class AppLocalDel extends Op {
       });
       localState[idx]["key-value"] = arr;
 
-      let acc = this.interpreter.storageBranch.accounts.get(account.address);
-      acc = this.assertAccountDefined(acc);
+      let acc = this.interpreter.ctx.state.accounts.get(account.address);
+      acc = this.interpreter.runtime.assertAccountDefined(acc);
       acc.appsLocalState = localState;
     }
   }
@@ -1488,9 +1486,9 @@ export class AppGlobalDel extends Op {
     this.assertMinStackLen(stack, 1);
     const key = this.assertBytes(stack.pop());
 
-    const appId = this.interpreter.storageBranch.tx.apid;
+    const appId = this.interpreter.ctx.tx.apid;
 
-    const appDelta = this.assertAppDefined(appId, this.interpreter);
+    const appDelta = this.interpreter.runtime.assertAppDefined(appId);
     if (appDelta) {
       const globalState = appDelta["global-state"];
       const arr = globalState.filter((obj) => {

@@ -1,18 +1,15 @@
-import fs from "fs";
-import readline from "readline";
-
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { Interpreter } from "../interpreter/interpreter";
-import { assertLen } from "../lib/parsing";
-import { Operator } from "../types";
 import {
   Add, Addr, Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
   Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2, Ed25519verify, EqualTo,
   Err, GreaterThan, GreaterThanEqualTo, Int, Intc, Intcblock, Itob, Keccak256,
   Len, LessThan, LessThanEqualTo, Load, Mod, Mul, Mulw, Not, NotEqualTo, Or,
   Pop, Pragma, Sha256, Sha512_256, Store, Sub, Substring, Substring3
-} from "./opcode-list";
+} from "../interpreter/opcode-list";
+import { assertLen } from "../lib/parsing";
+import { Operator } from "../types";
 
 var opCodeMap: {[key: string]: any } = {
   // Pragma

@@ -1,16 +1,14 @@
-import { mkTransaction } from "algob";
-import type { ExecParams } from "algob/src/types";
-import { assignGroupID, SSCParams } from "algosdk";
 import { assert } from "chai";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
+import { Runtime } from "../index";
 import { DEFAULT_STACK_ELEM } from "../lib/constants";
 import { Stack } from "../lib/stack";
+import { parser } from "../parser/parser";
 import type { Operator, StackElem, State, TEALStack } from "../types";
-import { SdkAccount } from "../types";
-import { BIGINT0, Label, Pragma } from "./opcode-list";
-import { parser } from "./parser";
+import { Context } from "../types";
+import { BIGINT0, Label } from "./opcode-list";
 
 export class Interpreter {
   readonly stack: TEALStack;
@@ -20,12 +18,9 @@ export class Interpreter {
   instructions: Operator[];
   instructionIndex: number;
   args: Uint8Array[];
-  storageBranch: State;
+  ctx: Context; // interpreter's 'local' context
+  runtime: Runtime;
 
-  // tx: Txn;
-  // gtxs: Txn[];
-  // accounts: Map<string, SdkAccount>;
-  // globalApps: Map<number, SSCParams>;
   constructor () {
     this.stack = new Stack<StackElem>();
     this.bytecblock = [];
@@ -34,7 +29,8 @@ export class Interpreter {
     this.instructions = [];
     this.instructionIndex = 0; // set instruction index to zero
     this.args = [];
-    this.storageBranch = <State>{};
+    this.ctx = <Context>{};
+    this.runtime = <Runtime>{};
   }
 
   /**
@@ -60,16 +56,15 @@ export class Interpreter {
    * @param {State} state : current state as input
    */
   async execute (program: string, args: Uint8Array[],
-    state: State): Promise<State> {
+    runtime: Runtime): Promise<State> {
     assert(Array.isArray(args));
-    this.storageBranch = state;
+    this.runtime = runtime;
+    this.ctx = runtime.store; // set local context of interpreter
     this.instructions = await parser(program, this);
 
     while (this.instructionIndex < this.instructions.length) {
       const instruction = this.instructions[this.instructionIndex];
-      if (!(instruction instanceof Pragma)) {
-        instruction.execute(this.stack);
-      }
+      instruction.execute(this.stack);
       this.instructionIndex++;
     }
 
@@ -77,7 +72,7 @@ export class Interpreter {
       const s = this.stack.pop();
 
       if (!(s instanceof Uint8Array) && s > BIGINT0) {
-        return this.storageBranch;
+        return this.ctx.state;
       }
     }
     throw new TealError(ERRORS.TEAL.INVALID_STACK_ELEM);

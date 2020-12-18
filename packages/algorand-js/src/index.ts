@@ -1,5 +1,5 @@
 import { Interpreter } from "../src/interpreter/interpreter";
-import { Runtime } from "./Runtime/runtime";
+import { Runtime } from "./runtime/runtime";
 
 export {
   Interpreter,
