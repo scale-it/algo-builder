@@ -53,7 +53,7 @@ export const TXN_OBJ = {
   apap: Buffer.from("approval"),
   apsu: Buffer.from("clear"),
   apaa: [Buffer.from("arg1"), Buffer.from("arg2")],
-  apat: [Buffer.from(addr.publicKey), Buffer.from(addr.publicKey)],
+  apat: [Buffer.from("addr-2"), Buffer.from("addr-2")],
   apfa: [1001, 1002, 1003],
   apas: [2001, 2002, 2003],
   type: 'pay',
