@@ -22,8 +22,7 @@ describe("Algorand Smart Contracts", function () {
   });
 
   this.beforeEach(function () {
-    interpreter = new Interpreter();
-    runtime.interpreter = interpreter;
+    runtime.interpreter = new Interpreter();
   });
 
   it("should update the balance if logic is correct", async function () {
