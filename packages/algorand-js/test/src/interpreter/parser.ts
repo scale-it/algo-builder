@@ -61,7 +61,7 @@ describe("Parser", function () {
 
       assert.deepEqual(res, expected);
 
-      // Ignore comment
+      // Ignore `//` present in () because it may be a valid base64, but ignore outer comments
       res = wordsFromLine("byte base64(BKBDKSKDK//KBBJSKJB) // comment here");
       expected = ["byte", "base64(BKBDKSKDK//KBBJSKJB)"];
 
@@ -146,6 +146,93 @@ describe("Parser", function () {
       assert.deepEqual(res, expected);
 
       res = wordsFromLine("      *       //    comment     here");
+      assert.deepEqual(res, expected);
+    });
+
+    // more edge cases
+    // space before parentheses,
+    // space after base64: base64 (xxx ), base64( xxx) ..
+    it("should extract correct words from line", () => {
+      let res = wordsFromLine("base64 (abcd)");
+      let expected = ["base64", "(abcd)"];
+
+      assert.deepEqual(res, expected);
+
+      res = wordsFromLine("base64 (abcd )");
+      expected = ["base64", "(abcd", ")"];
+
+      assert.deepEqual(res, expected);
+
+      res = wordsFromLine("base64( abcd)");
+      expected = ["base64(", "abcd)"];
+
+      assert.deepEqual(res, expected);
+
+      res = wordsFromLine("base64(ab cd)");
+      expected = ["base64(ab", "cd)"];
+
+      assert.deepEqual(res, expected);
+
+      res = wordsFromLine("base64 \"ab cd\"");
+      expected = ["base64", "\"ab cd\""];
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("should extract correct words from line", () => {
+      let res = wordsFromLine("arg 1//comment here");
+      let expected = ["arg", "1"];
+
+      assert.deepEqual(res, expected);
+
+      res = wordsFromLine("arg_0// comment // comment // here");
+      expected = ["arg_0"];
+
+      assert.deepEqual(res, expected);
+
+      res = wordsFromLine("//comment int 2");
+      expected = [];
+
+      assert.deepEqual(res, expected);
+
+      res = wordsFromLine("         txn             LastValid       // comment here");
+      expected = ["txn", "LastValid"];
+
+      assert.deepEqual(res, expected);
+
+      res = wordsFromLine("     ed25519verify     // here");
+      expected = ["ed25519verify"];
+
+      assert.deepEqual(res, expected);
+
+      res = wordsFromLine("/");
+      expected = ["/"];
+
+      assert.deepEqual(res, expected);
+
+      res = wordsFromLine("//");
+      expected = [];
+
+      assert.deepEqual(res, expected);
+
+      res = wordsFromLine("!//");
+      expected = ["!"];
+
+      assert.deepEqual(res, expected);
+
+      res = wordsFromLine("!=//");
+      expected = ["!="];
+
+      assert.deepEqual(res, expected);
+
+      res = wordsFromLine("%//here");
+      expected = ["%"];
+
+      assert.deepEqual(res, expected);
+
+      res = wordsFromLine("|//");
+      expected = ["|"];
+
       assert.deepEqual(res, expected);
     });
   });
