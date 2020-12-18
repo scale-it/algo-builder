@@ -8,12 +8,9 @@ import { assertLen } from "../lib/parsing";
 import { Operator } from "../types";
 import {
   Add, Addr, Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
-  Branch,
-  BranchIfNotZero,
-  BranchIfZero,
-  Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2, Ed25519verify, EqualTo,
-  Err, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc, Intcblock, Itob, Keccak256,
-  Label,
+  Branch, BranchIfNotZero, BranchIfZero, Btoi, Byte, Bytec, Bytecblock,
+  Concat, Div, Dup, Dup2, Ed25519verify, EqualTo, Err, GreaterThan,
+  GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc, Intcblock, Itob, Keccak256, Label,
   Len, LessThan, LessThanEqualTo, Load, Mod, Mul, Mulw, Not, NotEqualTo, Or,
   Pop, Pragma, Return, Sha256, Sha512_256, Store, Sub, Substring, Substring3, Txn, Txna
 } from "./opcode-list";
