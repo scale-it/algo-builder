@@ -2,7 +2,7 @@ import { AccountState, SSCParams } from "algosdk";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
-import { MAX_UINT8, MAX_UINT64, MIN_UINT8, MIN_UINT64 } from "../lib/constants";
+import { MAX_UINT8, MAX_UINT64, MIN_UINT8, MIN_UINT64, TxnFields } from "../lib/constants";
 import { convertToString } from "../lib/parsing";
 import type { TEALStack } from "../types";
 import { Interpreter } from "./interpreter";
@@ -75,6 +75,13 @@ export class Op {
     }
 
     return byteString.slice(Number(start), Number(end));
+  }
+
+  // assert if known transaction field is passed
+  assertDefined (str: string): void {
+    if (TxnFields[str] === undefined) {
+      throw new TealError(ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD, { field: str });
+    }
   }
 
   // TODO: to be moved to Runtime class

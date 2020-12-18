@@ -1,0 +1,4 @@
+// comment here
+     b label1
+bz label2
+        bnz label3

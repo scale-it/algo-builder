@@ -26,7 +26,7 @@ export class Pragma extends Op {
   readonly version;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line:  {"version"}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -47,7 +47,7 @@ export class Pragma extends Op {
 // pops string([]byte) from stack and pushes it's length to stack
 export class Len extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -66,7 +66,7 @@ export class Len extends Op {
 // panics on overflow (result > max_unit64)
 export class Add extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -88,7 +88,7 @@ export class Add extends Op {
 // panics on underflow (result < 0)
 export class Sub extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -110,7 +110,7 @@ export class Sub extends Op {
 // panics if prev == 0
 export class Div extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -133,7 +133,7 @@ export class Div extends Op {
 // panics on overflow (result > max_unit64)
 export class Mul extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -156,7 +156,7 @@ export class Arg extends Op {
   readonly _arg;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {argument number}
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -183,7 +183,7 @@ export class Bytecblock extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {byte block}
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -210,7 +210,7 @@ export class Bytec extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {byteblock index number}
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -235,7 +235,7 @@ export class Intcblock extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {intc block}
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -263,7 +263,7 @@ export class Intc extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {intcblock index number}
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -286,7 +286,7 @@ export class Intc extends Op {
 // Panic if B == 0.
 export class Mod extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -308,7 +308,7 @@ export class Mod extends Op {
 // pops two unit64 from stack(last, prev) and pushes their bitwise-or(last | prev) to stack
 export class BitwiseOr extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -327,7 +327,7 @@ export class BitwiseOr extends Op {
 // pops two unit64 from stack(last, prev) and pushes their bitwise-and(last & prev) to stack
 export class BitwiseAnd extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -346,7 +346,7 @@ export class BitwiseAnd extends Op {
 // pops two unit64 from stack(last, prev) and pushes their bitwise-xor(last ^ prev) to stack
 export class BitwiseXor extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -365,7 +365,7 @@ export class BitwiseXor extends Op {
 // pop unit64 from stack and push it's bitwise-invert(~last) to stack
 export class BitwiseNot extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -386,7 +386,7 @@ export class Store extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {index for storage}
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -413,7 +413,7 @@ export class Load extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {index for storage}
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -435,7 +435,7 @@ export class Load extends Op {
 // err opcode : Error. Panic immediately.
 export class Err extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -451,7 +451,7 @@ export class Err extends Op {
 // SHA256 hash of value X, yields [32]byte
 export class Sha256 extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -473,7 +473,7 @@ export class Sha256 extends Op {
 // SHA512_256 hash of value X, yields [32]byte
 export class Sha512_256 extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -496,7 +496,7 @@ export class Sha512_256 extends Op {
 // https://github.com/phusion/node-sha3#example-2
 export class Keccak256 extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -519,7 +519,7 @@ export class Keccak256 extends Op {
 // ("ProgData" || program_hash || data) against the pubkey => {0 or 1}
 export class Ed25519verify extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -546,7 +546,7 @@ export class Ed25519verify extends Op {
 // If A < B pushes '1' else '0'
 export class LessThan extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -569,7 +569,7 @@ export class LessThan extends Op {
 // If A > B pushes '1' else '0'
 export class GreaterThan extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -592,7 +592,7 @@ export class GreaterThan extends Op {
 // If A <= B pushes '1' else '0'
 export class LessThanEqualTo extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -615,7 +615,7 @@ export class LessThanEqualTo extends Op {
 // If A >= B pushes '1' else '0'
 export class GreaterThanEqualTo extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -638,7 +638,7 @@ export class GreaterThanEqualTo extends Op {
 // If A && B is true pushes '1' else '0'
 export class And extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -661,7 +661,7 @@ export class And extends Op {
 // If A || B is true pushes '1' else '0'
 export class Or extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -684,7 +684,7 @@ export class Or extends Op {
 // If A == B pushes '1' else '0'
 export class EqualTo extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -711,7 +711,7 @@ export class EqualTo extends Op {
 // If A != B pushes '1' else '0'
 export class NotEqualTo extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -738,7 +738,7 @@ export class NotEqualTo extends Op {
 // X == 0 yields 1; else 0
 export class Not extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -760,7 +760,7 @@ export class Not extends Op {
 // converts uint64 X to big endian bytes
 export class Itob extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -781,7 +781,7 @@ export class Itob extends Op {
 // btoi panics if the input is longer than 8 bytes.
 export class Btoi extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -804,7 +804,7 @@ export class Btoi extends Op {
 // A plus B out to 128-bit long result as sum (top) and carry-bit uint64 values on the stack
 export class Addw extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -832,7 +832,7 @@ export class Addw extends Op {
 // A times B out to 128-bit long result as low (top) and high uint64 values on the stack
 export class Mulw extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -860,7 +860,7 @@ export class Mulw extends Op {
 // Pop one element from stack
 export class Pop extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -877,7 +877,7 @@ export class Pop extends Op {
 // duplicate last value on stack
 export class Dup extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -897,7 +897,7 @@ export class Dup extends Op {
 // duplicate two last values on stack: A, B -> A, B, A, B
 export class Dup2 extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -921,7 +921,7 @@ export class Dup2 extends Op {
 // concat panics if the result would be greater than 4096 bytes.
 export class Concat extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -953,7 +953,7 @@ export class Substring extends Op {
   readonly end: bigint;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {start index, end index}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -982,7 +982,7 @@ export class Substring extends Op {
 // or either is larger than the string length, the program fails
 export class Substring3 extends Op {
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -1005,9 +1005,17 @@ export class Txn extends Op {
   readonly field: string;
   readonly interpreter: Interpreter;
 
-  constructor (txField: string, interpreter: Interpreter) {
+  /**
+   * @param args words list extracted from line: {transaction field (string)}
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
-    this.field = txField;
+    assertLen(args.length, 1, line);
+    this.assertDefined(args[0]);
+
+    this.field = args[0]; // field
     this.interpreter = interpreter;
   }
 
@@ -1024,10 +1032,19 @@ export class Gtxn extends Op {
   readonly txIdx: number;
   readonly interpreter: Interpreter;
 
-  constructor (field: string, txIdx: number, interpreter: Interpreter) {
+  /**
+   * @param args words list extracted from line: {transaction group index, transaction field (string)}
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
-    this.field = field;
-    this.txIdx = txIdx; // transaction group index
+    assertLen(args.length, 2, line);
+    assertOnlyDigits(args[0]);
+    this.assertDefined(args[1]);
+
+    this.txIdx = Number(args[0]); // transaction group index
+    this.field = args[1]; // field
     this.interpreter = interpreter;
   }
 
@@ -1046,10 +1063,20 @@ export class Txna extends Op {
   readonly idx: number;
   readonly interpreter: Interpreter;
 
-  constructor (field: string, idx: number, interpreter: Interpreter) {
+  /**
+   * @param args words list extracted from line:
+   * {transaction field (string), transaction field array index}
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
-    this.field = field;
-    this.idx = idx;
+    assertLen(args.length, 2, line);
+    assertOnlyDigits(args[1]);
+    this.assertDefined(args[0]);
+
+    this.field = args[0]; // field
+    this.idx = Number(args[1]);
     this.interpreter = interpreter;
   }
 
@@ -1066,11 +1093,22 @@ export class Gtxna extends Op {
   readonly idx: number; // array index
   readonly interpreter: Interpreter;
 
-  constructor (field: string, txIdx: number, idx: number, interpreter: Interpreter) {
+  /**
+   * @param args words list extracted from line:
+   * {transaction group index, transaction field (string), transaction field array index}
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
-    this.field = field;
-    this.txIdx = txIdx;
-    this.idx = idx;
+    assertLen(args.length, 3, line);
+    assertOnlyDigits(args[0]);
+    assertOnlyDigits(args[2]);
+    this.assertDefined(args[1]);
+
+    this.txIdx = Number(args[0]); // transaction group index
+    this.field = args[1]; // field
+    this.idx = Number(args[2]); // transaction field array index
     this.interpreter = interpreter;
   }
 
@@ -1088,7 +1126,7 @@ export class Label extends Op {
   readonly label: string;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {label string}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -1106,7 +1144,7 @@ export class Branch extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {branch name}
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1128,7 +1166,7 @@ export class BranchIfZero extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {branch name}
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1155,7 +1193,7 @@ export class BranchIfNotZero extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {branch name}
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1181,7 +1219,7 @@ export class Return extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1210,7 +1248,7 @@ export class AppOptedIn extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1242,7 +1280,7 @@ export class AppLocalGet extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1275,7 +1313,7 @@ export class AppLocalGetEx extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1307,7 +1345,7 @@ export class AppGlobalGet extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1338,7 +1376,7 @@ export class AppGlobalGetEx extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1377,7 +1415,7 @@ export class AppLocalPut extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1408,7 +1446,7 @@ export class AppGlobalPut extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1436,7 +1474,7 @@ export class AppLocalDel extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1474,7 +1512,7 @@ export class AppGlobalDel extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {}
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1507,7 +1545,7 @@ export class Int extends Op {
   readonly uint64: bigint;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {number}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -1527,6 +1565,10 @@ export class Byte extends Op {
   readonly str: string;
   readonly encoding?: EncodingType;
 
+  /**
+   * @param args words list extracted from line: {data string}
+   * @param line line number in TEAL file
+   */
   constructor (args: string[], line: number) {
     super();
     [this.str, this.encoding] = getEncoding(args, line);
@@ -1543,7 +1585,7 @@ export class Addr extends Op {
   readonly addr: string;
 
   /**
-   * @param args words list extracted from line
+   * @param args words list extracted from line: {Address string}
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
