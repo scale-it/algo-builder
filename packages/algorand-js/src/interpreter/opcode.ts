@@ -80,7 +80,7 @@ export class Op {
   // assert if known transaction field is passed
   assertDefined (str: string): void {
     if (TxnFields[str] === undefined) {
-      throw new TealError(ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD);
+      throw new TealError(ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD, { field: str });
     }
   }
 

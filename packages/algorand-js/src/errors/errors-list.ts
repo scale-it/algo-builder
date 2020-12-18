@@ -196,7 +196,7 @@ by an index that does not exist.`
   },
   UNKOWN_TRANSACTION_FIELD: {
     number: 28,
-    message: "Transaction Field Error - Unknown transaction field",
+    message: "Transaction Field Error - Unknown transaction field %field%",
     title: "Transaction Field Error",
     description: `Transaction Field unkown`
   }
