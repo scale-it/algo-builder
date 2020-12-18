@@ -43,7 +43,7 @@ describe("Algorand Smart Contracts", function () {
     };
 
     // execute transaction
-    await runtime.execute(txnParams, tealFile, [], [escrow, john]);
+    await runtime.executeTx(txnParams, tealFile, [], [escrow, john]);
 
     assert.equal(escrow.balance(), 99999900); // check if funds are withdrawn
     assert.equal(john.balance(), 200);
@@ -67,7 +67,7 @@ describe("Algorand Smart Contracts", function () {
 
     // execute transaction (should fail is logic is incorrect)
     await expectTealErrorAsync(
-      async () => await runtime.execute(txnParams, tealFile, [], [escrow, john]),
+      async () => await runtime.executeTx(txnParams, tealFile, [], [escrow, john]),
       ERRORS.TEAL.INVALID_STACK_ELEM
     );
 

@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-small-switch: 0 */
 import { Interpreter } from "algorand-js/src/index";
-import type { AccountsMap, Storage, Txn } from "algorand-js/src/types";
+import type { Storage, Txn } from "algorand-js/src/types";
 import { AccountState, assignGroupID, SSCParams } from "algosdk";
 import path from "path";
 
@@ -73,6 +73,11 @@ export class Runtime {
     }
   }
 
+  prepareInitialState (txnParams: ExecParams| ExecParams[], accounts: AccountState[]): void {
+    this.createTxnContext(txnParams);
+    this.createStatefulContext(accounts); // initialize state before execution
+  }
+
   // updates account balance as per transaction parameters
   updateBalance (txnParam: ExecParams, account: AccountState): void {
     switch (txnParam.type) {
@@ -96,7 +101,7 @@ export class Runtime {
    * @param txnParams : Transaction parameters
    * @param accounts : accounts passed by user
    */
-  setState (txnParams: ExecParams | ExecParams[], accounts: AccountState[]): void {
+  prepareFinalState (txnParams: ExecParams | ExecParams[], accounts: AccountState[]): void {
     if (Array.isArray(txnParams)) { // if txn is a group, update balance as per 'each' transaction
       for (const txnParam of txnParams) {
         for (const acc of accounts) {
@@ -118,13 +123,11 @@ export class Runtime {
    * @param fileName : smart contract file (.teal) name in assets/
    * @param args : external arguments to smart contract
    */
-  async execute (txnParams: ExecParams | ExecParams[], fileName: string,
+  async executeTx (txnParams: ExecParams | ExecParams[], fileName: string,
     args: Uint8Array[], accounts: AccountState[]): Promise<void> {
-    this.createTxnContext(txnParams);
-    this.createStatefulContext(accounts); // initialize state before execution
-
+    this.prepareInitialState(txnParams, accounts); // prepare initial state
     const updatedState = await this.interpreter.execute(getPath(fileName), args, this.storage);
     this.storage = updatedState; // update account('local-state', 'global-state'..)
-    this.setState(txnParams, accounts); // update account balances
+    this.prepareFinalState(txnParams, accounts); // update account balances
   }
 }
