@@ -13,6 +13,7 @@ import {
   BranchIfZero,
   Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2, Ed25519verify, EqualTo,
   Err, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc, Intcblock, Itob, Keccak256,
+  Label,
   Len, LessThan, LessThanEqualTo, Load, Mod, Mul, Mulw, Not, NotEqualTo, Or,
   Pop, Pragma, Return, Sha256, Sha512_256, Store, Sub, Substring, Substring3, Txn, Txna
 } from "./opcode-list";
@@ -94,7 +95,7 @@ var opCodeMap: {[key: string]: any } = {
 // list of opcodes that require one extra parameter than others: `interpreter`.
 const interpreterReqList = new Set([
   "arg", "bytecblock", "bytec", "intcblock", "intc", "store", "load",
-  "b", "bz", "bnz", "txn", "gtxn", "txna", "gtxna"
+  "b", "bz", "bnz", "return", "txn", "gtxn", "txna", "gtxna"
 ]);
 
 /**
@@ -223,9 +224,10 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
   // Handle Label
   if (opCode.endsWith(':')) {
     assertLen(words.length, 0, counter);
-    if (opCodeMap.has(opCode.slice(-1))) {
+    if (opCodeMap[opCode.slice(0, opCode.length - 1)] !== undefined) {
       throw new TealError(ERRORS.TEAL.INVALID_LABEL);
     }
+    return new Label([opCode], counter);
   }
 
   if (opCodeMap[opCode] === undefined) {
