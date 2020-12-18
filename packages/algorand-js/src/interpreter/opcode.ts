@@ -1,6 +1,6 @@
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
-import { MAX_UINT8, MAX_UINT64, MIN_UINT8, MIN_UINT64 } from "../lib/constants";
+import { MAX_UINT8, MAX_UINT64, MIN_UINT8, MIN_UINT64, TxnFields } from "../lib/constants";
 import type { TEALStack } from "../types";
 import { BIGINT0, BIGINT1 } from "./opcode-list";
 
@@ -53,6 +53,13 @@ export class Op {
       });
     }
     return b;
+  }
+
+  // assert if known transaction field is passed
+  assertDefined (str: string): void {
+    if (TxnFields[str] === undefined) {
+      throw new TealError(ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD, { field: str });
+    }
   }
 
   assertUint8 (a: bigint): bigint {

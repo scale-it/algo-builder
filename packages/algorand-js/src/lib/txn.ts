@@ -2,11 +2,11 @@ import { AssetParamsEnc } from "algosdk";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
-import { Interpreter } from "../interpreter/interpreter";
+import { Interpreter } from "../index";
 import { Op } from "../interpreter/opcode";
-import { StackElem, TxField, Txn, TxnFields, TxnType } from "../types";
-import { TxFieldDefaults } from "./constants";
-import { toBytes } from "./parsing";
+import { TxFieldDefaults, TxnFields } from "../lib/constants";
+import { toBytes } from "../lib/parsing";
+import { StackElem, TxField, Txn, TxnType } from "../types";
 
 const assetTxnFields = new Set([
   'ConfigAssetTotal',

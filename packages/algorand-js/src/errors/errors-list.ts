@@ -182,11 +182,23 @@ by an index that does not exist.`
     title: "Invalid top of stack or length of stack > 1",
     description: `Either Length of stack is > 1 or top of stack is not uint64`
   },
+  INVALID_LABEL: {
+    number: 25,
+    message: "Invalid Label Name",
+    title: "OpCode name cannot be used as label name",
+    description: `OpCode name cannot be used as label name`
+  },
   ACCOUNT_DOES_NOT_EXIST: {
     number: 27,
     message: "Account Error - Account doesn't exist",
     title: "Account Error",
     description: `Account does not exist in the current state`
+  },
+  UNKOWN_TRANSACTION_FIELD: {
+    number: 28,
+    message: "Transaction Field Error - Unknown transaction field %field%",
+    title: "Transaction Field Error",
+    description: `Transaction Field unkown`
   }
 };
 
