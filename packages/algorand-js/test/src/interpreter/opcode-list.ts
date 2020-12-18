@@ -2679,7 +2679,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push 0 if Asset not defined", () => {
-      const op = new AssetParamsGet(["10"], 1, inter);
+      const op = new AssetParamsGet(["AssetFreeze"], 1, inter);
 
       stack.push(BigInt("2")); // account index
 
@@ -2690,7 +2690,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw index out of bound error for Asset Param", () => {
-      const op = new AssetParamsGet(["1"], 1, inter);
+      const op = new AssetParamsGet(["AssetFreeze"], 1, inter);
 
       stack.push(BigInt("4")); // asset index
 

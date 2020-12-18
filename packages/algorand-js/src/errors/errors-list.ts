@@ -200,9 +200,9 @@ by an index that does not exist.`
     title: "Transaction Field Error",
     description: `Transaction Field unkown`
   },
-  INVALID_FIELD_TYPE: {
+  UNKNOWN_ASSET_FIELD: {
     number: 29,
-    message: "Asset Field Error - Field unknown",
+    message: "Asset Field Error - Field unknown %field%",
     title: "Asset Field Error",
     description: `Asset field unkown`
   }

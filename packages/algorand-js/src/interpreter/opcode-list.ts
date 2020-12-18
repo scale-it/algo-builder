@@ -1,7 +1,7 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
 import { toBytes } from "algob";
-import { decodeAddress, encodeAddress, isValidAddress, verifyBytes } from "algosdk";
+import { AssetParams, decodeAddress, encodeAddress, isValidAddress, verifyBytes } from "algosdk";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
 import { Keccak } from 'sha3';
@@ -10,7 +10,7 @@ import { decode, encode } from "uint64be";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { compareArray } from "../lib/compare";
-import { MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
+import { AssetParamMap, MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
 import { assertLen, assertOnlyDigits, convertToBuffer, convertToString, getEncoding } from "../lib/parsing";
 import type { EncodingType, StackElem, TEALStack } from "../types";
 import { Interpreter } from "./interpreter";
@@ -1720,6 +1720,9 @@ export class AssetParamsGet extends Op {
     super();
     this.interpreter = interpreter;
     assertLen(args.length, 1, line);
+    if (AssetParamMap[args[0]] === undefined) {
+      throw new TealError(ERRORS.TEAL.UNKNOWN_ASSET_FIELD, { field: args[0] });
+    }
 
     this.field = args[0];
   };
@@ -1737,6 +1740,7 @@ export class AssetParamsGet extends Op {
       stack.push(BigInt("0"));
     } else {
       let value: StackElem;
+      const s = AssetParamMap[this.field] as keyof AssetParams;
 
       switch (this.field) {
         case "AssetTotal":
@@ -1745,35 +1749,9 @@ export class AssetParamsGet extends Op {
         case "AssetDecimals":
           value = BigInt(res.decimals);
           break;
-        case "AssetDefaultFrozen":
-          value = toBytes(res.defaultFrozen);
-          break;
-        case "AssetUnitName":
-          value = toBytes(res.unitName);
-          break;
-        case "AssetName":
-          value = toBytes(res.name);
-          break;
-        case "AssetURL":
-          value = toBytes(res.url);
-          break;
-        case "AssetMetadataHash":
-          value = toBytes(res.metadataHash);
-          break;
-        case "AssetManager":
-          value = toBytes(res.manager);
-          break;
-        case "AssetReserve":
-          value = toBytes(res.reserve);
-          break;
-        case "AssetFreeze":
-          value = toBytes(res.freeze);
-          break;
-        case "AssetClawback":
-          value = toBytes(res.clawback);
-          break;
         default:
-          throw new TealError(ERRORS.TEAL.INVALID_FIELD_TYPE);
+          value = toBytes(res[s] as string);
+          break;
       }
 
       stack.push(value);

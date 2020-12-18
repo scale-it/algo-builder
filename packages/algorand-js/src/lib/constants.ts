@@ -110,6 +110,20 @@ export const TxFieldDefaults: {[key: string]: any} = {
   FreezeAssetFrozen: zeroUint64
 };
 
+export const AssetParamMap: {[key: string]: string} = {
+  AssetTotal: 'total', // Total number of units of this asset
+  AssetDecimals: 'decimals', // See AssetParams.Decimals
+  AssetDefaultFrozen: 'defaultFrozen', // Frozen by default or not
+  AssetUnitName: 'unitName', // Asset unit name
+  AssetName: 'name', // Asset name
+  AssetURL: 'url', // URL with additional info about the asset
+  AssetMetadataHash: 'metadataHash', // Arbitrary commitment
+  AssetManager: 'manager', // Manager commitment
+  AssetReserve: 'reserve', // Reserve address
+  AssetFreeze: 'freeze', // Freeze address
+  AssetClawback: 'clawback' // Clawback address
+};
+
 export const reDigit = /^\d+$/;
 
 /** is Base64 regex

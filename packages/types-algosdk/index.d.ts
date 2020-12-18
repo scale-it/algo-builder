@@ -555,11 +555,26 @@ export interface SSCParams {
   'local-state-schema': SSCSchemaConfig;
 }
 
+export interface AssetParams {
+  creator: string;
+  total: number;
+  decimals: number;
+  defaultFrozen: string;
+  unitName: string;
+  name: string;
+  url: string;
+  metadataHash: string;
+  manager: string;
+  reserve: string;
+  freeze: string;
+  clawback: string;
+}
+
 export interface AccountAssetInfo {
   amount: number;
   'asset-id': number;
   creator: string;
-  'is-frozen': boolean;
+  'is-frozen': string;
 }
 
 export interface CreatedApps {
@@ -569,7 +584,7 @@ export interface CreatedApps {
 
 export interface CreatedAssets {
   index: number;
-  params: SSCParams;
+  params: AssetParams;
 }
 
 export interface AppLocalState {
