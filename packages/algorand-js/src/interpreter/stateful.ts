@@ -69,7 +69,7 @@ export function getLocalState (appId: number, account: AccountState, key: Uint8A
  */
 export function getGlobalState (appId: number, key: Uint8Array,
   interpreter: Interpreter): StackElem | undefined {
-  const appDelta = interpreter.globalApps.get(appId);
+  const appDelta = interpreter.storageBranch.globalApps.get(appId);
   if (!appDelta) {
     throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, {
       appId: appId
@@ -132,7 +132,7 @@ export function updateLocalState (appId: number, account: AccountState,
  */
 export function updateGlobalState (appId: number, key: Uint8Array,
   value: StackElem, interpreter: Interpreter): SSCStateSchema[] {
-  const appDelta = interpreter.globalApps.get(appId);
+  const appDelta = interpreter.storageBranch.globalApps.get(appId);
   if (!appDelta) {
     throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, {
       appId: appId

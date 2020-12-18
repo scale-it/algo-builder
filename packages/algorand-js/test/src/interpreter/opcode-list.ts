@@ -1980,16 +1980,19 @@ describe("Teal Opcodes", function () {
   describe("StateFul Opcodes", function () {
     const stack = new Stack<StackElem>();
     const interpreter = new Interpreter();
-    interpreter.tx = TXN_OBJ;
+    interpreter.storageBranch.tx = TXN_OBJ;
 
-    interpreter.tx.snd = Buffer.from("addr-1");
+    interpreter.storageBranch.tx.snd = Buffer.from("addr-1");
 
     const acc1 = accInfo[0]; // first account
     const acc2 = { // second account
       ...accInfo[0],
       address: "addr-2"
     };
-    interpreter.createStatefulContext([acc1, acc2]);
+    interpreter.storageBranch.accounts = new Map<string, AccountState>();
+    interpreter.storageBranch.accounts.set(acc1.address, acc1);
+    interpreter.storageBranch.accounts.set(acc2.address, acc2);
+    // interpreter.createStatefulContext([acc1, acc2]);
 
     describe("AppOptedIn", function () {
       it("should push 1 to stack if app is opted in", function () {
@@ -2038,7 +2041,7 @@ describe("Teal Opcodes", function () {
 
     describe("AppLocalGet", function () {
       before(function () {
-        interpreter.tx.apid = 1847;
+        interpreter.storageBranch.tx.apid = 1847;
       });
 
       it("should push the value to stack if key is present in local state", function () {
@@ -2088,7 +2091,7 @@ describe("Teal Opcodes", function () {
 
     describe("AppLocalGetEx", function () {
       before(function () {
-        interpreter.tx.apid = 1847;
+        interpreter.storageBranch.tx.apid = 1847;
       });
 
       it("should push the value to stack if key is present in local state from given appId", function () {
@@ -2142,8 +2145,9 @@ describe("Teal Opcodes", function () {
 
     describe("AppGlobalGet", function () {
       before(function () {
-        interpreter.tx.apid = 1828;
-        interpreter.globalApps.set(1828, acc1["created-apps"][0].params);
+        interpreter.storageBranch.tx.apid = 1828;
+        interpreter.storageBranch.globalApps = new Map<number, SSCParams>();
+        interpreter.storageBranch.globalApps.set(1828, acc1["created-apps"][0].params);
       });
 
       it("should push the value to stack if key is present in global state", function () {
@@ -2169,9 +2173,9 @@ describe("Teal Opcodes", function () {
 
     describe("AppGlobalGetEx", function () {
       before(function () {
-        interpreter.tx.apid = 1828;
-        interpreter.tx.apfa = [1828];
-        interpreter.globalApps.set(1828, acc1["created-apps"][0].params);
+        interpreter.storageBranch.tx.apid = 1828;
+        interpreter.storageBranch.tx.apfa = [1828];
+        interpreter.storageBranch.globalApps.set(1828, acc1["created-apps"][0].params);
       });
 
       it("should push the value to stack if key is present externally in global state", function () {
@@ -2221,7 +2225,7 @@ describe("Teal Opcodes", function () {
 
     describe("AppLocalPut", function () {
       before(function () {
-        interpreter.tx.apid = 1847;
+        interpreter.storageBranch.tx.apid = 1847;
       });
 
       it("should put the value in account's local storage", function () {
@@ -2233,7 +2237,7 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        const acc = interpreter.accounts.get("addr-1") as AccountState;
+        const acc = interpreter.storageBranch.accounts.get("addr-1") as AccountState;
         let localStateCurr = acc["apps-local-state"][0]["key-value"];
         let idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('New-Key')));
         assert.notEqual(idx, -1); // idx should not be -1
@@ -2247,7 +2251,7 @@ describe("Teal Opcodes", function () {
         op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        localStateCurr = (interpreter.accounts.get("addr-1") as AccountState)["apps-local-state"][0]["key-value"];
+        localStateCurr = (interpreter.storageBranch.accounts.get("addr-1") as AccountState)["apps-local-state"][0]["key-value"];
         idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('New-Key-1')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(localStateCurr[idx].value.uint, 2222);
@@ -2265,7 +2269,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should throw error if app is not found", function () {
-        interpreter.tx.apid = 9999;
+        interpreter.storageBranch.tx.apid = 9999;
         execExpectError(
           stack,
           [BigInt('0'), toBytes("New-Key-1"), toBytes("New-Val-2")],
@@ -2277,8 +2281,8 @@ describe("Teal Opcodes", function () {
 
     describe("AppGlobalPut", function () {
       before(function () {
-        interpreter.tx.apid = 1828;
-        interpreter.globalApps.set(1828, acc1["created-apps"][0].params);
+        interpreter.storageBranch.tx.apid = 1828;
+        interpreter.storageBranch.globalApps.set(1828, acc1["created-apps"][0].params);
       });
 
       it("should put the value in global storage", function () {
@@ -2289,7 +2293,7 @@ describe("Teal Opcodes", function () {
         let op = new AppGlobalPut([], 1, interpreter);
         op.execute(stack);
 
-        let globalStateCurr = (interpreter.globalApps.get(1828) as SSCParams)["global-state"];
+        let globalStateCurr = (interpreter.storageBranch.globalApps.get(1828) as SSCParams)["global-state"];
         let idx = globalStateCurr.findIndex(a => compareArray(a.key, toBytes('New-Global-Key')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(globalStateCurr[idx].value.bytes, toBytes('New-Global-Val'));
@@ -2301,7 +2305,7 @@ describe("Teal Opcodes", function () {
         op = new AppGlobalPut([], 1, interpreter);
         op.execute(stack);
 
-        globalStateCurr = (interpreter.globalApps.get(1828) as SSCParams)["global-state"];
+        globalStateCurr = (interpreter.storageBranch.globalApps.get(1828) as SSCParams)["global-state"];
         idx = globalStateCurr.findIndex(a => compareArray(a.key, toBytes('Key')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(globalStateCurr[idx].value.uint, 1000);
@@ -2317,7 +2321,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should throw error if app is not found in global state", function () {
-        interpreter.tx.apid = 9999;
+        interpreter.storageBranch.tx.apid = 9999;
         execExpectError(
           stack,
           [toBytes("New-Key-1"), toBytes("New-Val-2")],
@@ -2329,7 +2333,7 @@ describe("Teal Opcodes", function () {
 
     describe("AppLocalDel", function () {
       before(function () {
-        interpreter.tx.apid = 1847;
+        interpreter.storageBranch.tx.apid = 1847;
       });
 
       it("should put remove the key-value pair from account's local storage", function () {
@@ -2340,7 +2344,7 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        let localStateCurr = (interpreter.accounts.get("addr-1") as AccountState)["apps-local-state"][0]["key-value"];
+        let localStateCurr = (interpreter.storageBranch.accounts.get("addr-1") as AccountState)["apps-local-state"][0]["key-value"];
         let idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
 
@@ -2351,7 +2355,7 @@ describe("Teal Opcodes", function () {
         op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        localStateCurr = (interpreter.accounts.get("addr-2") as AccountState)["apps-local-state"][0]["key-value"];
+        localStateCurr = (interpreter.storageBranch.accounts.get("addr-2") as AccountState)["apps-local-state"][0]["key-value"];
         idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
       });
@@ -2359,8 +2363,8 @@ describe("Teal Opcodes", function () {
 
     describe("AppGlobalDel", function () {
       before(function () {
-        interpreter.tx.apid = 1828;
-        interpreter.globalApps.set(1828, acc1["created-apps"][0].params);
+        interpreter.storageBranch.tx.apid = 1828;
+        interpreter.storageBranch.globalApps.set(1828, acc1["created-apps"][0].params);
       });
 
       it("should put remove the key-value pair from global storage", function () {
@@ -2370,7 +2374,7 @@ describe("Teal Opcodes", function () {
         const op = new AppGlobalDel([], 1, interpreter);
         op.execute(stack);
 
-        const globalStateCurr = (interpreter.globalApps.get(1828) as SSCParams)["global-state"];
+        const globalStateCurr = (interpreter.storageBranch.globalApps.get(1828) as SSCParams)["global-state"];
         const idx = globalStateCurr.findIndex(a => compareArray(a.key, toBytes('global-key')));
         assert.equal(idx, -1); // idx should be -1
       });

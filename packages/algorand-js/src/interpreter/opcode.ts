@@ -87,7 +87,7 @@ export class Op {
 
   // TODO: to be moved to Runtime class
   assertAppDefined (appId: number, interpreter: Interpreter): SSCParams {
-    const globalDelta = interpreter.globalApps.get(appId);
+    const globalDelta = interpreter.storageBranch.globalApps.get(appId);
     if (globalDelta === undefined) {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
     }
@@ -98,13 +98,13 @@ export class Op {
   getAccount (accountIndex: bigint, interpreter: Interpreter): AccountState {
     let account: AccountState | undefined;
     if (accountIndex === BIGINT0) {
-      const senderAccount = convertToString(interpreter.tx.snd);
-      account = interpreter.accounts.get(senderAccount);
+      const senderAccount = convertToString(interpreter.storageBranch.tx.snd);
+      account = interpreter.storageBranch.accounts.get(senderAccount);
     } else {
       accountIndex--;
-      this.checkIndexBound(Number(accountIndex), interpreter.tx.apat);
-      const pkBuffer = interpreter.tx.apat[Number(accountIndex)];
-      account = interpreter.accounts.get(convertToString(pkBuffer));
+      this.checkIndexBound(Number(accountIndex), interpreter.storageBranch.tx.apat);
+      const pkBuffer = interpreter.storageBranch.tx.apat[Number(accountIndex)];
+      account = interpreter.storageBranch.accounts.get(convertToString(pkBuffer));
     }
     return this.assertAccountDefined(account);
   }

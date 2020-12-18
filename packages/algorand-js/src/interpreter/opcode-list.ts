@@ -1258,7 +1258,7 @@ export class AppLocalGet extends Op {
     const accountIndex = this.assertBigInt(stack.pop());
 
     const account = this.getAccount(accountIndex, this.interpreter);
-    const appId = this.interpreter.tx.apid;
+    const appId = this.interpreter.storageBranch.tx.apid;
 
     const val = getLocalState(appId, account, key);
     if (val) {
@@ -1321,7 +1321,7 @@ export class AppGlobalGet extends Op {
     this.assertMinStackLen(stack, 1);
     const key = this.assertBytes(stack.pop());
 
-    const appId = this.interpreter.tx.apid;
+    const appId = this.interpreter.storageBranch.tx.apid;
     const val = getGlobalState(appId, key, this.interpreter);
     if (val) {
       stack.push(val);
@@ -1353,10 +1353,10 @@ export class AppGlobalGetEx extends Op {
     const key = this.assertBytes(stack.pop());
     let appIndex = this.assertBigInt(stack.pop());
 
-    const foreignApps = this.interpreter.tx.apfa;
+    const foreignApps = this.interpreter.storageBranch.tx.apfa;
     let appId;
     if (appIndex === BIGINT0) {
-      appId = this.interpreter.tx.apid; // zero index means current app
+      appId = this.interpreter.storageBranch.tx.apid; // zero index means current app
     } else {
       this.checkIndexBound(Number(--appIndex), foreignApps);
       appId = foreignApps[Number(appIndex)];
@@ -1394,11 +1394,11 @@ export class AppLocalPut extends Op {
     const accountIndex = this.assertBigInt(stack.pop());
 
     const account = this.getAccount(accountIndex, this.interpreter);
-    const appId = this.interpreter.tx.apid;
+    const appId = this.interpreter.storageBranch.tx.apid;
 
     // get updated local state for account
     const localState = updateLocalState(appId, account, key, value);
-    const acc = this.assertAccountDefined(this.interpreter.accounts.get(account.address));
+    const acc = this.assertAccountDefined(this.interpreter.storageBranch.accounts.get(account.address));
     acc["apps-local-state"] = localState;
   }
 }
@@ -1423,7 +1423,7 @@ export class AppGlobalPut extends Op {
     const value = stack.pop();
     const key = this.assertBytes(stack.pop());
 
-    const appId = this.interpreter.tx.apid;
+    const appId = this.interpreter.storageBranch.tx.apid;
     const globalState = updateGlobalState(appId, key, value, this.interpreter);
 
     const globalApp = this.assertAppDefined(appId, this.interpreter);
@@ -1451,7 +1451,7 @@ export class AppLocalDel extends Op {
     const key = this.assertBytes(stack.pop());
     const accountIndex = this.assertBigInt(stack.pop());
 
-    const appId = this.interpreter.tx.apid;
+    const appId = this.interpreter.storageBranch.tx.apid;
     const account = this.getAccount(accountIndex, this.interpreter);
 
     const localState = account["apps-local-state"];
@@ -1462,7 +1462,7 @@ export class AppLocalDel extends Op {
       });
       localState[idx]["key-value"] = arr;
 
-      let acc = this.interpreter.accounts.get(account.address);
+      let acc = this.interpreter.storageBranch.accounts.get(account.address);
       acc = this.assertAccountDefined(acc);
       acc["apps-local-state"] = localState;
     }
@@ -1488,7 +1488,7 @@ export class AppGlobalDel extends Op {
     this.assertMinStackLen(stack, 1);
     const key = this.assertBytes(stack.pop());
 
-    const appId = this.interpreter.tx.apid;
+    const appId = this.interpreter.storageBranch.tx.apid;
 
     const appDelta = this.assertAppDefined(appId, this.interpreter);
     if (appDelta) {
