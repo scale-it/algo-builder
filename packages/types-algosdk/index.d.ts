@@ -22,7 +22,7 @@ export class Algodv2 {
   getTransactionParams(): Action<SuggestedParams>;
   pendingTransactionInformation(txId: string): Action<ConfirmedTxInfo>;
   statusAfterBlock(lastround: number): Action<any>;
-  accountInformation(address: string): Action<AccountInfo>;
+  accountInformation(address: string): Action<AccountState>;
 }
 
 export const OnApplicationComplete: {
@@ -200,13 +200,20 @@ export interface MultiSigAccount {
   addrs: string[];
 }
 
+// Stateful Smart Contract Schema
 export interface SSCStateSchema {
-  key: string;
+  key: Uint8Array;
   value: {
     type: number;
-    bytes: string;
+    bytes: Uint8Array;
     uint: number;
   };
+}
+
+// total byte slices and uint for account or unique appId
+export interface SSCSchemaConfig {
+  'num-byte-slice': number;
+  'num-uint': number;
 }
 
 export class LogicSigBase {
@@ -539,6 +546,15 @@ export interface Address {
 
 export type TxnBytes = Uint8Array;
 
+export interface SSCParams {
+  'approval-program': string;
+  'clear-state-program': string;
+  creator: string;
+  'global-state': SSCStateSchema[];
+  'global-state-schema': SSCSchemaConfig;
+  'local-state-schema': SSCSchemaConfig;
+}
+
 export interface AccountAssetInfo {
   amount: number;
   'asset-id': number;
@@ -546,7 +562,23 @@ export interface AccountAssetInfo {
   'is-frozen': boolean;
 }
 
-export interface AccountInfo {
+export interface CreatedApps {
+  id: number;
+  params: SSCParams;
+}
+
+export interface CreatedAssets {
+  index: number;
+  params: SSCParams;
+}
+
+export interface AppLocalState {
+  id: number;
+  'key-value': SSCStateSchema[];
+  schema: SSCSchemaConfig;
+}
+
+export interface AccountState {
   address: string;
   assets: AccountAssetInfo[];
   amount: number;
@@ -556,10 +588,10 @@ export interface AccountInfo {
   rewards: number;
   round: number;
   status: string;
-  'apps-local-state': any;
-  'apps-total-schema': any;
-  'created-apps': any;
-  'created-assets': any;
+  'apps-local-state': AppLocalState[];
+  'apps-total-schema': SSCSchemaConfig;
+  'created-apps': CreatedApps[];
+  'created-assets': CreatedAssets[];
 }
 
 export interface TxnEncodedObj {

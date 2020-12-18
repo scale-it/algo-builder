@@ -3,7 +3,7 @@ import { AssetParamsEnc } from "algosdk";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { TxFieldDefaults } from "../lib/constants";
-import { toBytes } from "../lib/parse-data";
+import { toBytes } from "../lib/parsing";
 import { StackElem, TxField, Txn, TxnFields, TxnType } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";

@@ -2,7 +2,7 @@ import { assert } from "chai";
 import path from "path";
 
 import { Interpreter } from "../../../src/interpreter/interpreter";
-import { toBytes } from "../../../src/lib/parse-data";
+import { toBytes } from "../../../src/lib/parsing";
 import { useFixtureProject } from "../../helpers/project";
 
 describe("Interpreter", function () {

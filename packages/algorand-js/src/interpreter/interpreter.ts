@@ -1,3 +1,6 @@
+import { mkTransaction } from "algob";
+import type { ExecParams } from "algob/src/types";
+import { AccountState, assignGroupID, SSCParams } from "algosdk";
 import { assert } from "chai";
 
 import { TealError } from "../errors/errors";
@@ -18,6 +21,10 @@ export class Interpreter {
   args: Uint8Array[];
   storageBranch: Storage;
 
+  // tx: Txn;
+  // gtxs: Txn[];
+  // accounts: Map<string, AccountState>;
+  // globalApps: Map<number, SSCParams>;
   constructor () {
     this.stack = new Stack<StackElem>();
     this.bytecblock = [];
@@ -46,7 +53,7 @@ export class Interpreter {
   }
 
   /**
-   * Description: this function executes teal code after parsing
+   * Description: this function executes TEAL code after parsing
    * @param {string} path: path to teal code
    * @param {Uint8Array[]} args : external arguments
    * @param {Storage} state : current state as input

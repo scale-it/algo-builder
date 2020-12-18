@@ -55,7 +55,7 @@ export function validateASADefs (obj: Object, accounts: Accounts, filename: stri
 export function loadASAFile (accounts: Accounts): ASADefs {
   const filename = path.join(ASSETS_DIR, "asa.yaml");
   return validateASADefs(
-    loadFromYamlFileSilentWithMessage(filename, path.join(ASSETS_DIR, "asa.yaml") + " doesn't exist."),
+    loadFromYamlFileSilentWithMessage(filename, "ASA file not defined"),
     accounts,
     filename);
 }

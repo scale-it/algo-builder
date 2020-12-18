@@ -158,17 +158,35 @@ by an index that does not exist.`
     title: "Unkown Decode Type",
     description: `value %exp% is unknown`
   },
-  LABEL_NOT_FOUND: {
+  INVALID_SCHEMA: {
     number: 23,
+    message: "State Schema is invalid",
+    title: "TEAL operations resulted in invalid schema",
+    description: `TEAL operations resulted in invalid schema`
+  },
+  APP_NOT_FOUND: {
+    number: 24,
+    message: "Application Id is not found or is invalid",
+    title: "Application id %appId% is not found",
+    description: `Application id %appId% is not found`
+  },
+  LABEL_NOT_FOUND: {
+    number: 25,
     message: "Label not found",
     title: "Label %label% not found",
     description: `Label %label% not found`
   },
   INVALID_STACK_ELEM: {
-    number: 24,
+    number: 26,
     message: "Invalid top of stack or length of stack > 1",
     title: "Invalid top of stack or length of stack > 1",
     description: `Either Length of stack is > 1 or top of stack is not uint64`
+  },
+  ACCOUNT_DOES_NOT_EXIST: {
+    number: 27,
+    message: "Account Error - Account doesn't exist",
+    title: "Account Error",
+    description: `Account does not exist in the current state`
   }
 };
 
