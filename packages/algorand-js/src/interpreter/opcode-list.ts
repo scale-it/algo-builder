@@ -1013,6 +1013,7 @@ export class Txn extends Op {
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     assertLen(args.length, 1, line);
+    this.assertDefined(args[0]);
 
     this.field = args[0]; // field
     this.interpreter = interpreter;
@@ -1040,6 +1041,7 @@ export class Gtxn extends Op {
     super();
     assertLen(args.length, 2, line);
     assertOnlyDigits(args[0]);
+    this.assertDefined(args[1]);
 
     this.txIdx = Number(args[0]); // transaction group index
     this.field = args[1]; // field
@@ -1071,6 +1073,7 @@ export class Txna extends Op {
     super();
     assertLen(args.length, 2, line);
     assertOnlyDigits(args[1]);
+    this.assertDefined(args[0]);
 
     this.field = args[0]; // field
     this.idx = Number(args[1]);
@@ -1101,6 +1104,7 @@ export class Gtxna extends Op {
     assertLen(args.length, 3, line);
     assertOnlyDigits(args[0]);
     assertOnlyDigits(args[2]);
+    this.assertDefined(args[1]);
 
     this.txIdx = Number(args[0]); // transaction group index
     this.field = args[1]; // field

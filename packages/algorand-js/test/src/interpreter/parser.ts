@@ -268,14 +268,19 @@ describe("Parser", function () {
     });
 
     it("should return correct objects for `txn`", () => {
-      const res = opcodeFromSentence(["txn", "0"], 1, interpreter);
-      const expected = new Txn(["0"], 1, interpreter);
+      const res = opcodeFromSentence(["txn", "Fee"], 1, interpreter);
+      const expected = new Txn(["Fee"], 1, interpreter);
 
       assert.deepEqual(res, expected);
 
       expectTealError(
         () => opcodeFromSentence(["txn", "Fee", "Fee"], 1, interpreter),
         ERRORS.TEAL.ASSERT_LENGTH
+      );
+
+      expectTealError(
+        () => opcodeFromSentence(["txn", "fee"], 1, interpreter),
+        ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD
       );
     });
 

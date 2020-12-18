@@ -193,6 +193,12 @@ by an index that does not exist.`
     message: "Account Error - Account doesn't exist",
     title: "Account Error",
     description: `Account does not exist in the current state`
+  },
+  UNKOWN_TRANSACTION_FIELD: {
+    number: 28,
+    message: "Transaction Field Error - Unknown transaction field",
+    title: "Transaction Field Error",
+    description: `Transaction Field unkown`
   }
 };
 
