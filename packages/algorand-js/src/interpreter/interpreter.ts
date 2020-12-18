@@ -1,6 +1,6 @@
 import { mkTransaction } from "algob";
-import type { execParams } from "algob/src/types";
-import { AccountInfo, assignGroupID } from "algosdk";
+import type { ExecParams } from "algob/src/types";
+import { AccountAssetInfo, AccountState, AssetParams, assignGroupID, SSCParams } from "algosdk";
 import { assert } from "chai";
 
 import { mockSuggestedParams } from "../../test/mocks/txn";
@@ -8,7 +8,8 @@ import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { DEFAULT_STACK_ELEM } from "../lib/constants";
 import { Stack } from "../lib/stack";
-import type { AccountsMap, AssetInfo, AssetsMapAccount, AssetsMapGlobal, Operator, StackElem, TEALStack, Txn } from "../types";
+import type { Operator, StackElem, TEALStack, Txn } from "../types";
+import { BIGINT0, Label } from "./opcode-list";
 
 export class Interpreter {
   readonly stack: TEALStack;
@@ -17,27 +18,36 @@ export class Interpreter {
   scratch: StackElem[];
   tx: Txn;
   gtxs: Txn[];
-  accounts: AccountsMap;
-  accountAssets: AssetsMapAccount;
-  globalAssets: AssetsMapGlobal;
+  accounts: Map<string, AccountState>;
+  accountsAssets: Map<string, Map<number, AccountAssetInfo>>;
+  globalApps: Map<number, SSCParams>;
+  globalAssets: Map<number, AssetParams>;
+  instructions: Operator[];
+  instructionIndex: number;
+  args: Uint8Array[];
 
   constructor () {
     this.stack = new Stack<StackElem>();
     this.bytecblock = [];
     this.intcblock = [];
     this.scratch = new Array(256).fill(DEFAULT_STACK_ELEM);
-    this.accounts = <AccountsMap>{};
-    this.accountAssets = <AssetsMapAccount>{};
-    this.globalAssets = <AssetsMapGlobal>{};
+    this.accounts = new Map<string, AccountState>();
+    const assetInfo = new Map<number, AccountAssetInfo>();
+    this.accountsAssets = new Map<string, typeof assetInfo>();
+    this.globalApps = new Map<number, SSCParams>();
+    this.globalAssets = new Map<number, AssetParams>();
     this.tx = <Txn>{}; // current transaction
     this.gtxs = []; // all transactions
+    this.instructions = [];
+    this.instructionIndex = 0; // set instruction index to zero
+    this.args = [];
   }
 
   /**
    * Description: creates a new transaction object from given execParams
    * @param txnParams : Transaction parameters for current txn or txn Group
    */
-  createTxnContext (txnParams: execParams | execParams[]): void {
+  createTxnContext (txnParams: ExecParams | ExecParams[]): void {
     // if txnParams is array, then user is requesting for a group txn
     if (Array.isArray(txnParams)) {
       if (txnParams.length > 16) {
@@ -73,47 +83,73 @@ export class Interpreter {
    * Description: set accounts for context as {address: accountInfo}
    * @param accounts: array of account info's
    */
-  createStatefulContext (accounts: AccountInfo[], globalAssets: AssetsMapGlobal): void {
+  createStatefulContext (accounts: AccountState[]): void {
     for (const acc of accounts) {
-      this.accounts[acc.address] = acc;
+      this.accounts.set(acc.address, acc);
 
-      const assets = acc.assets;
-      const assetInfo: AssetInfo = <AssetInfo>{};
-      for (const asset of assets) {
-        assetInfo[asset["asset-id"]] = asset;
+      for (const app of acc["created-apps"]) {
+        this.globalApps.set(app.id, app.params);
       }
 
-      this.accountAssets[acc.address] = assetInfo;
-    }
+      for (const asset of acc["created-assets"]) {
+        this.globalAssets.set(asset.index, asset.params);
+      }
 
-    this.globalAssets = globalAssets;
+      const assets = acc.assets;
+      const assetInfo = new Map<number, AccountAssetInfo>();
+      for (const asset of assets) {
+        assetInfo.set(asset["asset-id"], asset);
+      }
+
+      this.accountsAssets.set(acc.address, assetInfo);
+    }
+  }
+
+  /**
+   * Description: moves instruction index to "label", throws error if label not found
+   * @param label: branch label
+   */
+  jumpForward (label: string): void {
+    while (++this.instructionIndex < this.instructions.length) {
+      const instruction = this.instructions[this.instructionIndex];
+      if (instruction instanceof Label && instruction.label === label) {
+        return;
+      }
+    }
+    throw new TealError(ERRORS.TEAL.LABEL_NOT_FOUND, {
+      label: label
+    });
   }
 
   /**
    * Description: this function executes set of Operator[] passed after
    * parsing teal code
-   * @param {execParams} txn : Transaction parameters
+   * @param {ExecParams} txn : Transaction parameters
    * @param {Logic[]} logic : smart contract instructions
    * @param {AppArgs} args : external arguments
    * @returns {boolean} : transaction accepted/rejected based on ASC logic
    */
-  execute (txnParams: execParams | execParams[],
+  execute (txnParams: ExecParams | ExecParams[],
     logic: Operator[], args: Uint8Array[],
-    accounts: AccountInfo[], globalAssets: AssetsMapGlobal): boolean {
+    accounts: AccountState[]): boolean {
     assert(Array.isArray(args));
     this.createTxnContext(txnParams);
-    this.createStatefulContext(accounts, globalAssets);
+    this.createStatefulContext(accounts);
+    this.instructions = logic;
 
-    for (const l of logic) {
-      l.execute(this.stack); // execute each teal opcode
+    while (this.instructionIndex < this.instructions.length) {
+      const instruction = this.instructions[this.instructionIndex];
+      instruction.execute(this.stack);
+      this.instructionIndex++;
     }
-    if (this.stack.length() > 0) {
-      const top = this.stack.pop();
-      if (top instanceof Uint8Array || typeof top === 'undefined') {
-        throw new TealError(ERRORS.TEAL.LOGIC_REJECTION);
+
+    if (this.stack.length() === 1) {
+      const s = this.stack.pop();
+
+      if (!(s instanceof Uint8Array) && s > BIGINT0) {
+        return true;
       }
-      if (top >= BigInt("1")) { return true; } // Logic accept
     }
-    return false; // Logic Reject
+    throw new TealError(ERRORS.TEAL.INVALID_STACK_ELEM);
   }
 }

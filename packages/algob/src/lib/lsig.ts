@@ -2,23 +2,24 @@
 import type { LogicSig, LogicSigArgs } from "algosdk";
 import algosdk from "algosdk";
 
-import { ASCCache } from "../types";
+import type { ASCCache, StrMap } from "../types";
 import { CompileOp } from "./compile";
 
 /**
  * Description: this function makes logic signature from .teal file
  * @param name : ASC filename
- * @param scParams : parameters
  * @param algodClient : algodClient
+ * @param scParams : smart contract parameters
+ * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
  */
 export async function getLsig (
   name: string,
   algodClient: algosdk.Algodv2,
   scParams: LogicSigArgs,
-  scInitParam?: unknown):
+  scTmplParams?: StrMap):
   Promise<LogicSig> {
   const compileOp = new CompileOp(algodClient);
-  const result: ASCCache = await compileOp.ensureCompiled(name, false, scInitParam);
+  const result: ASCCache = await compileOp.ensureCompiled(name, false, scTmplParams);
   const program = result.toBytes;
   return algosdk.makeLogicSig(program, scParams);
 }

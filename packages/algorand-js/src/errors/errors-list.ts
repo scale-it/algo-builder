@@ -116,17 +116,17 @@ by an index that does not exist.`
     title: "Input is outside the valid uint8 range of 0 to 255",
     description: `Input is outside the valid uint8 range of 0 to 255`
   },
-  ASSERT_FIELD_LENGTH: {
+  ASSERT_LENGTH: {
     number: 16,
     message: "Invalid Field Length Expected: '%exp%' Got: '%got%', Line : %line% ",
     title: PARSE_ERROR,
-    description: ``
+    description: `Expected: '%exp%' Got: '%got%`
   },
   INVALID_ADDR: {
     number: 17,
     message: "Invalid Address '%addr%', Line: %line%",
     title: PARSE_ERROR,
-    description: ``
+    description: `Invalid Address '%addr%`
   },
   PRAGMA_VERSION_ERROR: {
     number: 18,
@@ -134,17 +134,65 @@ by an index that does not exist.`
     title: PARSE_ERROR,
     description: ``
   },
-  ACCOUNT_DOES_NOT_EXIST: {
+  INVALID_BASE64: {
     number: 19,
+    message: "Invalid Base64 Error - value %val% is not base64, Line: %line%",
+    title: PARSE_ERROR,
+    description: `value %exp% is not base64`
+  },
+  INVALID_BASE32: {
+    number: 20,
+    message: "Invalid Base32 Error - value %val% is not base32, Line: %line%",
+    title: PARSE_ERROR,
+    description: `value %exp% is not base32`
+  },
+  DECODE_ERROR: {
+    number: 21,
+    message: "Invalid Decode Data - value %val% is invalid, Line: %line%",
+    title: "Decode Error",
+    description: `value %exp%`
+  },
+  UNKOWN_DECODE_TYPE: {
+    number: 22,
+    message: "Invalid Decode Type - value %val% is unknown, Line: %line%",
+    title: "Unkown Decode Type",
+    description: `value %exp% is unknown`
+  },
+  INVALID_SCHEMA: {
+    number: 23,
+    message: "State Schema is invalid",
+    title: "TEAL operations resulted in invalid schema",
+    description: `TEAL operations resulted in invalid schema`
+  },
+  APP_NOT_FOUND: {
+    number: 24,
+    message: "Application Id is not found or is invalid",
+    title: "Application id %appId% is not found",
+    description: `Application id %appId% is not found`
+  },
+  LABEL_NOT_FOUND: {
+    number: 25,
+    message: "Label not found",
+    title: "Label %label% not found",
+    description: `Label %label% not found`
+  },
+  INVALID_STACK_ELEM: {
+    number: 26,
+    message: "Invalid top of stack or length of stack > 1",
+    title: "Invalid top of stack or length of stack > 1",
+    description: `Either Length of stack is > 1 or top of stack is not uint64`
+  },
+  ACCOUNT_DOES_NOT_EXIST: {
+    number: 27,
     message: "Account Error - Account doesn't exist",
     title: "Account Error",
-    description: ``
+    description: `Account does not exist in the current state`
   },
   INVALID_FIELD_TYPE: {
-    number: 20,
+    number: 28,
     message: "Asset Field Error - Field unknown",
     title: "Asset Field Error",
-    description: ``
+    description: `Asset field unkown`
   }
 };
 
