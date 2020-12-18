@@ -1,13 +1,14 @@
 /* eslint sonarjs/no-small-switch: 0 */
-import { Interpreter } from "algorand-js/src/index";
-import type { Storage, Txn } from "algorand-js/src/types";
-import { AccountState, assignGroupID, SSCParams } from "algosdk";
+import { mkTransaction } from "algob";
+import { ASSETS_DIR } from "algob/src/internal/core/project-structure";
+import { ExecParams, TransactionType } from "algob/src/types";
+import { getProgram } from "algob/test/helpers/fs";
+import { assignGroupID, SSCParams } from "algosdk";
 import path from "path";
 
 import { mockSuggestedParams } from "../../../algorand-js/build/test/mocks/txn";
-import { mkTransaction } from "../../src/index";
-import { ASSETS_DIR } from "../../src/internal/core/project-structure";
-import { ExecParams, TransactionType } from "../../src/types";
+import { Interpreter } from "../../src/index";
+import type { SdkAccount, State, Txn } from "../../src/types";
 
 function getPath (file: string): string {
   return path.join(process.cwd(), ASSETS_DIR, file);
@@ -15,12 +16,12 @@ function getPath (file: string): string {
 
 export class Runtime {
   interpreter: Interpreter;
-  storage: Storage;
+  storage: State;
 
   constructor (interpreter: Interpreter) {
     this.interpreter = interpreter;
     this.storage = {
-      accounts: new Map<string, AccountState>(),
+      accounts: new Map<string, SdkAccount>(),
       globalApps: new Map<number, SSCParams>(),
       tx: <Txn>{},
       gtxs: []
@@ -28,10 +29,10 @@ export class Runtime {
   }
 
   /**
-   * Description: set accounts for context as {address: AccountState}
+   * Description: set accounts for context as {address: SdkAccount}
    * @param accounts: array of account info's
    */
-  createStatefulContext (accounts: AccountState[]): void {
+  createStatefulContext (accounts: SdkAccount[]): void {
     for (const acc of accounts) {
       this.storage.accounts.set(acc.address, acc);
     }
@@ -73,13 +74,13 @@ export class Runtime {
     }
   }
 
-  prepareInitialState (txnParams: ExecParams| ExecParams[], accounts: AccountState[]): void {
+  prepareInitialState (txnParams: ExecParams| ExecParams[], accounts: SdkAccount[]): void {
     this.createTxnContext(txnParams);
     this.createStatefulContext(accounts); // initialize state before execution
   }
 
   // updates account balance as per transaction parameters
-  updateBalance (txnParam: ExecParams, account: AccountState): void {
+  updateBalance (txnParam: ExecParams, account: SdkAccount): void {
     switch (txnParam.type) {
       case TransactionType.TransferAlgo: {
         switch (account.address) {
@@ -101,7 +102,7 @@ export class Runtime {
    * @param txnParams : Transaction parameters
    * @param accounts : accounts passed by user
    */
-  prepareFinalState (txnParams: ExecParams | ExecParams[], accounts: AccountState[]): void {
+  prepareFinalState (txnParams: ExecParams | ExecParams[], accounts: SdkAccount[]): void {
     if (Array.isArray(txnParams)) { // if txn is a group, update balance as per 'each' transaction
       for (const txnParam of txnParams) {
         for (const acc of accounts) {
@@ -124,9 +125,11 @@ export class Runtime {
    * @param args : external arguments to smart contract
    */
   async executeTx (txnParams: ExecParams | ExecParams[], fileName: string,
-    args: Uint8Array[], accounts: AccountState[]): Promise<void> {
+    args: Uint8Array[], accounts: SdkAccount[]): Promise<void> {
     this.prepareInitialState(txnParams, accounts); // prepare initial state
-    const updatedState = await this.interpreter.execute(getPath(fileName), args, this.storage);
+
+    const program = getProgram(fileName);
+    const updatedState = await this.interpreter.execute(program, args, this.storage);
     this.storage = updatedState; // update account('local-state', 'global-state'..)
     this.prepareFinalState(txnParams, accounts); // update account balances
   }

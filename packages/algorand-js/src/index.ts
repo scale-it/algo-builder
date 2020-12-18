@@ -1,7 +1,7 @@
-import {
-  Interpreter
-} from "../src/interpreter/interpreter";
+import { Interpreter } from "../src/interpreter/interpreter";
+import { Runtime } from "./Runtime/runtime";
 
 export {
-  Interpreter
+  Interpreter,
+  Runtime
 };

@@ -1,4 +1,7 @@
-import { AccountState, SSCParams, TxnEncodedObj } from "algosdk";
+import {
+  Account,
+  AccountAssetInfo, AppLocalState, CreatedApps, CreatedAssets, SSCParams, SSCSchemaConfig, TxnEncodedObj
+} from "algosdk";
 
 import {
   Add, Addr, Arg, Byte, Bytec, Bytecblock, Div, Int, Len, Mul, Pragma,
@@ -123,12 +126,25 @@ export enum EncodingType {
 }
 
 export interface AccountsMap {
-  [addr: string]: AccountState
+  [addr: string]: SdkAccount
 }
 
-export interface Storage {
-  accounts: Map<string, AccountState>
+export interface State {
+  accounts: Map<string, SdkAccount>
   globalApps: Map<number, SSCParams>
   tx: Txn // current txn
   gtxs: Txn[] // all transactions
+}
+
+export interface SdkAccount {
+  address: string
+  assets: AccountAssetInfo[]
+  amount: number
+  appsLocalState: AppLocalState[]
+  appsTotalSchema: SSCSchemaConfig
+  createdApps: CreatedApps[]
+  createdAssets: CreatedAssets[]
+  account?: Account
+
+  balance?: () => number
 }

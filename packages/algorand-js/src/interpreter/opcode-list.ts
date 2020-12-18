@@ -1226,7 +1226,7 @@ export class AppOptedIn extends Op {
     const accountIndex = this.assertBigInt(stack.pop());
 
     const account = this.getAccount(accountIndex, this.interpreter);
-    const localState = account["apps-local-state"];
+    const localState = account.appsLocalState;
 
     const isOptedIn = localState.find(state => state.id === Number(appId));
     if (isOptedIn) {
@@ -1399,7 +1399,7 @@ export class AppLocalPut extends Op {
     // get updated local state for account
     const localState = updateLocalState(appId, account, key, value);
     const acc = this.assertAccountDefined(this.interpreter.storageBranch.accounts.get(account.address));
-    acc["apps-local-state"] = localState;
+    acc.appsLocalState = localState;
   }
 }
 
@@ -1454,7 +1454,7 @@ export class AppLocalDel extends Op {
     const appId = this.interpreter.storageBranch.tx.apid;
     const account = this.getAccount(accountIndex, this.interpreter);
 
-    const localState = account["apps-local-state"];
+    const localState = account.appsLocalState;
     const idx = localState.findIndex(state => state.id === appId);
     if (idx !== -1) {
       const arr = localState[idx]["key-value"].filter((obj) => {
@@ -1464,7 +1464,7 @@ export class AppLocalDel extends Op {
 
       let acc = this.interpreter.storageBranch.accounts.get(account.address);
       acc = this.assertAccountDefined(acc);
-      acc["apps-local-state"] = localState;
+      acc.appsLocalState = localState;
     }
   }
 }

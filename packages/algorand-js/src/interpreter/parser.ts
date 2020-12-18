@@ -215,17 +215,12 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
  * Description: Returns a list of Opcodes object after reading text from given TEAL file
  * @param filename : Name of the TEAL file with location
  */
-export async function parser (filename: string, interpreter: Interpreter): Promise<Operator[]> {
+export async function parser (program: string, interpreter: Interpreter): Promise<Operator[]> {
   const opCodeList = [] as Operator[];
   let counter = 0;
 
-  const rl = readline.createInterface({
-    input: fs.createReadStream(filename), // file location
-    output: process.stdout,
-    terminal: false
-  });
-
-  for await (const line of rl) {
+  const lines = program.split('\n');
+  for await (const line of lines) {
     counter++;
     // If line is blank or is comment, continue.
     if (line.length === 0 || line.startsWith("//")) {

@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
-import { AccountState, decodeAddress, generateAccount, signBytes, SSCParams } from "algosdk";
+import { decodeAddress, generateAccount, signBytes, SSCParams } from "algosdk";
 import { assert } from "chai";
 
 import { ERRORS } from "../../../src/errors/errors-list";
@@ -29,7 +29,7 @@ import { compareArray } from "../../../src/lib/compare";
 import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MIN_UINT8 } from "../../../src/lib/constants";
 import { convertToBuffer, toBytes } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
-import { EncodingType, StackElem } from "../../../src/types";
+import { EncodingType, SdkAccount, StackElem } from "../../../src/types";
 import { execExpectError, expectTealError } from "../../helpers/errors";
 import { accInfo } from "../../mocks/stateful";
 import { TXN_OBJ } from "../../mocks/txn";
@@ -1989,7 +1989,7 @@ describe("Teal Opcodes", function () {
       ...accInfo[0],
       address: "addr-2"
     };
-    interpreter.storageBranch.accounts = new Map<string, AccountState>();
+    interpreter.storageBranch.accounts = new Map<string, SdkAccount>();
     interpreter.storageBranch.accounts.set(acc1.address, acc1);
     interpreter.storageBranch.accounts.set(acc2.address, acc2);
     // interpreter.createStatefulContext([acc1, acc2]);
@@ -2147,7 +2147,7 @@ describe("Teal Opcodes", function () {
       before(function () {
         interpreter.storageBranch.tx.apid = 1828;
         interpreter.storageBranch.globalApps = new Map<number, SSCParams>();
-        interpreter.storageBranch.globalApps.set(1828, acc1["created-apps"][0].params);
+        interpreter.storageBranch.globalApps.set(1828, acc1.createdApps[0].params);
       });
 
       it("should push the value to stack if key is present in global state", function () {
@@ -2175,7 +2175,7 @@ describe("Teal Opcodes", function () {
       before(function () {
         interpreter.storageBranch.tx.apid = 1828;
         interpreter.storageBranch.tx.apfa = [1828];
-        interpreter.storageBranch.globalApps.set(1828, acc1["created-apps"][0].params);
+        interpreter.storageBranch.globalApps.set(1828, acc1.createdApps[0].params);
       });
 
       it("should push the value to stack if key is present externally in global state", function () {
@@ -2237,8 +2237,8 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        const acc = interpreter.storageBranch.accounts.get("addr-1") as AccountState;
-        let localStateCurr = acc["apps-local-state"][0]["key-value"];
+        const acc = interpreter.storageBranch.accounts.get("addr-1") as SdkAccount;
+        let localStateCurr = acc.appsLocalState[0]["key-value"];
         let idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('New-Key')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(localStateCurr[idx].value.bytes, toBytes('New-Val'));
@@ -2251,7 +2251,7 @@ describe("Teal Opcodes", function () {
         op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        localStateCurr = (interpreter.storageBranch.accounts.get("addr-1") as AccountState)["apps-local-state"][0]["key-value"];
+        localStateCurr = (interpreter.storageBranch.accounts.get("addr-1") as SdkAccount).appsLocalState[0]["key-value"];
         idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('New-Key-1')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(localStateCurr[idx].value.uint, 2222);
@@ -2282,7 +2282,7 @@ describe("Teal Opcodes", function () {
     describe("AppGlobalPut", function () {
       before(function () {
         interpreter.storageBranch.tx.apid = 1828;
-        interpreter.storageBranch.globalApps.set(1828, acc1["created-apps"][0].params);
+        interpreter.storageBranch.globalApps.set(1828, acc1.createdApps[0].params);
       });
 
       it("should put the value in global storage", function () {
@@ -2344,7 +2344,7 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        let localStateCurr = (interpreter.storageBranch.accounts.get("addr-1") as AccountState)["apps-local-state"][0]["key-value"];
+        let localStateCurr = (interpreter.storageBranch.accounts.get("addr-1") as SdkAccount).appsLocalState[0]["key-value"];
         let idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
 
@@ -2355,7 +2355,7 @@ describe("Teal Opcodes", function () {
         op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        localStateCurr = (interpreter.storageBranch.accounts.get("addr-2") as AccountState)["apps-local-state"][0]["key-value"];
+        localStateCurr = (interpreter.storageBranch.accounts.get("addr-2") as SdkAccount).appsLocalState[0]["key-value"];
         idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
       });
@@ -2364,7 +2364,7 @@ describe("Teal Opcodes", function () {
     describe("AppGlobalDel", function () {
       before(function () {
         interpreter.storageBranch.tx.apid = 1828;
-        interpreter.storageBranch.globalApps.set(1828, acc1["created-apps"][0].params);
+        interpreter.storageBranch.globalApps.set(1828, acc1.createdApps[0].params);
       });
 
       it("should put remove the key-value pair from global storage", function () {

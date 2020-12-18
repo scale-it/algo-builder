@@ -1,10 +1,11 @@
-import { AccountState, SSCParams } from "algosdk";
+import { SSCParams } from "algosdk";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { MAX_UINT8, MAX_UINT64, MIN_UINT8, MIN_UINT64 } from "../lib/constants";
 import { convertToString } from "../lib/parsing";
 import type { TEALStack } from "../types";
+import { SdkAccount } from "../types";
 import { Interpreter } from "./interpreter";
 import { BIGINT0, BIGINT1 } from "./opcode-list";
 
@@ -78,7 +79,7 @@ export class Op {
   }
 
   // TODO: to be moved to Runtime class
-  assertAccountDefined (a?: AccountState): AccountState {
+  assertAccountDefined (a?: SdkAccount): SdkAccount {
     if (a === undefined) {
       throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
     }
@@ -95,8 +96,8 @@ export class Op {
   }
 
   // TODO: to be moved to Runtime class
-  getAccount (accountIndex: bigint, interpreter: Interpreter): AccountState {
-    let account: AccountState | undefined;
+  getAccount (accountIndex: bigint, interpreter: Interpreter): SdkAccount {
+    let account: SdkAccount | undefined;
     if (accountIndex === BIGINT0) {
       const senderAccount = convertToString(interpreter.storageBranch.tx.snd);
       account = interpreter.storageBranch.accounts.get(senderAccount);

@@ -1,6 +1,9 @@
+import fs from "fs";
 import fsExtra from "fs-extra";
 import * as os from "os";
 import path from "path";
+
+import { ASSETS_DIR } from "../../src/internal/core/project-structure";
 
 declare module "mocha" {
   interface Context {
@@ -23,4 +26,10 @@ export function useTmpDir (nameHint: string): void {
   beforeEach("Creating tmp dir", async function () {
     this.tmpDir = await getEmptyTmpDir(nameHint);
   });
+}
+
+// takes file name as input and returns program as string
+export function getProgram (fileName: string): string {
+  const filePath = path.join(process.cwd(), ASSETS_DIR, fileName);
+  return fs.readFileSync(filePath, 'utf8');
 }

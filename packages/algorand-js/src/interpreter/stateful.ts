@@ -1,11 +1,11 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 import { toBytes } from "algob";
-import { AccountState, AppLocalState, SSCSchemaConfig, SSCStateSchema } from "algosdk";
+import { AppLocalState, SSCSchemaConfig, SSCStateSchema } from "algosdk";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { compareArray } from "../lib/compare";
-import { StackElem } from "../types";
+import { SdkAccount, StackElem } from "../types";
 import { Interpreter } from "./interpreter";
 
 // returns new key value pair by setting type and corresponding values
@@ -23,7 +23,7 @@ function getKeyValPair (key: Uint8Array, value: StackElem): SSCStateSchema {
   };
 }
 
-// TODO: to be moved to AccountState class
+// TODO: to be moved to SdkAccount class
 /**
  * Description: assert if the given key-value pairs are valid by schema
  * @param keyValue: list of key-value pairs (state data)
@@ -46,8 +46,8 @@ function assertValidSchema (keyValue: SSCStateSchema[], schema: SSCSchemaConfig)
  * @param account: account having local state data
  * @param key: key to fetch value of from local state
  */
-export function getLocalState (appId: number, account: AccountState, key: Uint8Array): StackElem | undefined {
-  const localState = account["apps-local-state"];
+export function getLocalState (appId: number, account: SdkAccount, key: Uint8Array): StackElem | undefined {
+  const localState = account.appsLocalState;
   const data = localState.find(state => state.id === appId)?.["key-value"]; // can be undefined (eg. app opted in)
   if (data) {
     const keyValue = data.find(schema => compareArray(schema.key, key));
@@ -85,7 +85,7 @@ export function getGlobalState (appId: number, key: Uint8Array,
   return undefined;
 }
 
-// TODO: to be moved to AccountState class
+// TODO: to be moved to SdkAccount class
 /**
  * Description: add new key-value pair or updating pair with existing key in account
  * for application id: appId, throw error otherwise
@@ -94,9 +94,9 @@ export function getGlobalState (appId: number, key: Uint8Array,
  * @param key: key to fetch value of from local state
  * @param value: key to fetch value of from local state
  */
-export function updateLocalState (appId: number, account: AccountState,
+export function updateLocalState (appId: number, account: SdkAccount,
   key: Uint8Array, value: StackElem): AppLocalState[] {
-  const localState = account["apps-local-state"];
+  const localState = account.appsLocalState;
   const data = getKeyValPair(key, value); // key value pair to put
 
   for (const l of localState) {

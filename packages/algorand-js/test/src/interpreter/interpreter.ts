@@ -1,5 +1,5 @@
+import { getProgram } from "algob/test/helpers/fs";
 import { assert } from "chai";
-import path from "path";
 
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import { toBytes } from "../../../src/lib/parsing";
@@ -12,8 +12,7 @@ describe("Interpreter", function () {
   it("should accept logic on valid teal code", async function () {
     const args = [toBytes("")];
     interpreter.args = args;
-    const filePath = path.join(process.cwd(), 'test-file-4.teal');
-    const result = await interpreter.execute(filePath, args, {} as any);
+    const result = await interpreter.execute(getProgram('test-file-4.teal'), args, {} as any);
     assert.deepEqual(result, {} as any);
   });
 });

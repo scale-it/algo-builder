@@ -1,21 +1,16 @@
-import type { Account, AccountAssetInfo } from "algosdk";
+import { SdkAccount } from "algorand-js/src/types";
+import type { Account, AccountAssetInfo, AppLocalState, CreatedApps, CreatedAssets, SSCSchemaConfig } from "algosdk";
 import { generateAccount } from "algosdk";
 
-export class MockAccount {
+export class SdkAccountImpl implements SdkAccount {
   readonly account: Account;
   readonly address: string;
   assets: AccountAssetInfo[];
   amount: number;
-  "amount-without-pending-rewards": number;
-  'pending-rewards': number;
-  'reward-base': number;
-  rewards: number;
-  round: number;
-  status: string;
-  'apps-local-state': any;
-  'apps-total-schema': any;
-  'created-apps': any;
-  'created-assets': any;
+  appsLocalState: AppLocalState[];
+  appsTotalSchema: SSCSchemaConfig;
+  createdApps: CreatedApps[];
+  createdAssets: any[];
 
   constructor (balance: number, account?: Account) {
     if (account) {
@@ -30,9 +25,10 @@ export class MockAccount {
 
     this.assets = [];
     this.amount = balance;
-    this.rewards = 0;
-    this.round = 0;
-    this.status = 'Offline';
+    this.appsLocalState = [];
+    this.appsTotalSchema = <SSCSchemaConfig>{};
+    this.createdApps = [];
+    this.createdAssets = [];
   }
 
   balance (): number {

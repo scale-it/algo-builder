@@ -1,3 +1,4 @@
+import { getProgram } from "algob/test/helpers/fs";
 import { assert } from "chai";
 import path from "path";
 
@@ -259,20 +260,21 @@ describe("Parser", function () {
 
     it("Sould return correct opcode list for '+'", async () => {
       const file1 = "test-file-1.teal";
-      let res = await parser(getPath(file1), interpreter);
+      let res = await parser(getProgram(file1), interpreter);
       const expected = [new Int(["1"], 1), new Int(["3"], 1), new Add([], 1)];
 
       assert.deepEqual(res, expected);
 
       const expect = [new Pragma(["version", "2"], 1), new Int(["1"], 1),
         new Int(["3"], 1), new Add([], 1)];
-      res = await parser(path.join(process.cwd(), "test-file-2.teal"), interpreter);
+      res = await parser(getProgram("test-file-2.teal"), interpreter);
+
       assert.deepEqual(res, expect);
     });
 
     it("Sould return correct opcode list for '-'", async () => {
       const file = "test-file-3.teal";
-      const res = await parser(getPath(file), interpreter);
+      const res = await parser(getProgram(file), interpreter);
       const expected = [
         new Pragma(["version", "2"], 1), new Int(["5"], 1),
         new Int(["3"], 1),
@@ -284,7 +286,7 @@ describe("Parser", function () {
 
     it("Sould return correct opcode list for '/'", async () => {
       const file = "test-file-4.teal";
-      const res = await parser(getPath(file), interpreter);
+      const res = await parser(getProgram(file), interpreter);
       const expected = [
         new Pragma(["version", "2"], 1),
         new Int(["6"], 1),
@@ -297,7 +299,7 @@ describe("Parser", function () {
 
     it("Sould return correct opcode list for '*'", async () => {
       const file = "test-file-5.teal";
-      const res = await parser(getPath(file), interpreter);
+      const res = await parser(getProgram(file), interpreter);
       const expected = [
         new Pragma(["version", "2"], 1),
         new Int(["5"], 1),
@@ -310,7 +312,7 @@ describe("Parser", function () {
 
     it("Should return correct opcode list for 'addr'", async () => {
       const file = "test-addr.teal";
-      const res = await parser(getPath(file), interpreter);
+      const res = await parser(getProgram(file), interpreter);
       const expected = [
         new Pragma(["version", "2"], 1),
         new Addr(["WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"], 2)
@@ -321,7 +323,7 @@ describe("Parser", function () {
 
     it("Should return correct opcode list for 'byte'", async () => {
       const file = "test-byte.teal";
-      const res = await parser(getPath(file), interpreter);
+      const res = await parser(getProgram(file), interpreter);
       const byte64 = "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=";
       const byte32 = "MFRGGZDFMY======";
 
@@ -337,7 +339,7 @@ describe("Parser", function () {
 
     it("Should return correct opcode list for 'Len and Err'", async () => {
       const file = "test-len-err.teal";
-      const res = await parser(getPath(file), interpreter);
+      const res = await parser(getProgram(file), interpreter);
       const expected = [new Len([], 1), new Err([], 2)];
 
       assert.deepEqual(res, expected);
@@ -345,7 +347,7 @@ describe("Parser", function () {
 
     it("Should return correct opcode list for 'Bitwise'", async () => {
       const file = "test-bitwise.teal";
-      const res = await parser(getPath(file), interpreter);
+      const res = await parser(getProgram(file), interpreter);
       const expected = [
         new BitwiseOr([], 2),
         new BitwiseAnd([], 4),
@@ -358,7 +360,7 @@ describe("Parser", function () {
 
     it("Should return correct opcode list for 'Mod'", async () => {
       const file = "test-mod.teal";
-      const res = await parser(getPath(file), interpreter);
+      const res = await parser(getProgram(file), interpreter);
       const expected = [new Int(["6"], 1), new Int(["3"], 2), new Mod([], 1)];
 
       assert.deepEqual(res, expected);
@@ -368,7 +370,7 @@ describe("Parser", function () {
       const file = "test-arg.teal";
       interpreter.args = [new Uint8Array(0)];
 
-      const res = await parser(getPath(file), interpreter);
+      const res = await parser(getProgram(file), interpreter);
       const expected = [new Arg(["0"], 1, interpreter)];
 
       assert.deepEqual(res, expected);
@@ -379,7 +381,7 @@ describe("Parser", function () {
       interpreter.intcblock = [BigInt("1")];
       interpreter.bytecblock = [new Uint8Array(0)];
 
-      const res = await parser(getPath(file), interpreter);
+      const res = await parser(getProgram(file), interpreter);
       const expected = [new Intc(["0"], 1, interpreter), new Bytec(["0"], 2, interpreter)];
 
       assert.deepEqual(res, expected);
@@ -389,7 +391,7 @@ describe("Parser", function () {
       const file = "test-store-load.teal";
       interpreter.scratch = [BigInt("1")];
 
-      const res = await parser(getPath(file), interpreter);
+      const res = await parser(getProgram(file), interpreter);
       const expected = [new Store(["0"], 1, interpreter), new Load(["0"], 2, interpreter)];
 
       assert.deepEqual(res, expected);
@@ -398,7 +400,7 @@ describe("Parser", function () {
     it("Should return correct opcode list for 'Crypto opcodes'", async () => {
       const file = "test-crypto.teal";
 
-      const res = await parser(getPath(file), interpreter);
+      const res = await parser(getProgram(file), interpreter);
       const expected = [
         new Sha256([], 1),
         new Keccak256([], 2),
@@ -412,7 +414,7 @@ describe("Parser", function () {
     it("Should return correct opcode list for 'comparsions'", async () => {
       const file = "test-compare.teal";
 
-      const res = await parser(getPath(file), interpreter);
+      const res = await parser(getProgram(file), interpreter);
       const expected = [
         new LessThan([], 1),
         new GreaterThan([], 2),
@@ -431,7 +433,7 @@ describe("Parser", function () {
     it("Should return correct opcode list for 'all others'", async () => {
       const file = "test-others.teal";
 
-      const res = await parser(getPath(file), interpreter);
+      const res = await parser(getProgram(file), interpreter);
       const expected = [
         new Itob([], 1),
         new Btoi([], 2),
