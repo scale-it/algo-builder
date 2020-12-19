@@ -1650,10 +1650,9 @@ export class Balance extends Op {
   }
 }
 
-// get Asset Holding Info for given account
-// read from account specified by Txn.Accounts[A]
-// and asset B holding field X (imm arg) => {0 or 1 (top), value}
-// params: account index, asset id. Return: did_exist flag (1 if exist and 0 otherwise), value.
+// For ASA A, Account B (txn.accounts[B]) pushes to the 
+// stack {...stack, 0} if account has no A holding, 
+// otherwise {...stack, holding, 1}
 export class AssetHoldingGet extends Op {
   readonly interpreter: Interpreter;
   readonly field: string;
