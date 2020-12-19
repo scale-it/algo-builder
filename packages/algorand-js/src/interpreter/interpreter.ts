@@ -53,7 +53,7 @@ export class Interpreter {
    * Description: this function executes TEAL code after parsing
    * @param {string} program: teal code
    * @param {Uint8Array[]} args : external arguments
-   * @param {State} state : current state as input
+   * @param {Runtime} runtime : runtime object
    */
   async execute (program: string, args: Uint8Array[],
     runtime: Runtime): Promise<State> {

@@ -17,7 +17,6 @@ import type { Context, SdkAccount, StackElem, Txn } from "../types";
 
 export class Runtime {
   interpreter: Interpreter;
-  // storage: State;
   store: Context;
 
   constructor (interpreter: Interpreter) {
@@ -66,15 +65,9 @@ export class Runtime {
    * returns undefined otherwise
    * @param appId: current application id
    * @param key: key to fetch value of from local state
-   * @param interpreter: interpreter object
    */
   getGlobalState (appId: number, key: Uint8Array): StackElem | undefined {
-    const appDelta = this.interpreter.ctx.state.globalApps.get(appId);
-    if (!appDelta) {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, {
-        appId: appId
-      });
-    }
+    const appDelta = this.assertAppDefined(appId);
     const globalState = appDelta["global-state"];
 
     const keyValue = globalState.find(schema => compareArray(schema.key, key));
@@ -91,17 +84,11 @@ export class Runtime {
    * @param appId: current application id
    * @param key: key to fetch value of from local state
    * @param value: key to fetch value of from local state
-   * @param interpreter: interpreter object
    */
   updateGlobalState (appId: number, key: Uint8Array, value: StackElem): SSCStateSchema[] {
-    const appDelta = this.interpreter.ctx.state.globalApps.get(appId);
-    if (!appDelta) {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, {
-        appId: appId
-      });
-    }
-
+    const appDelta = this.assertAppDefined(appId);
     const globalState = appDelta["global-state"];
+
     const data = getKeyValPair(key, value); // key value pair to put
     const idx = globalState.findIndex(schema => compareArray(schema.key, key));
     if (idx === -1) {

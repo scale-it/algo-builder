@@ -1,4 +1,3 @@
-/* eslint sonarjs/no-duplicate-string: 0 */
 import { toBytes } from "algob";
 import { SSCSchemaConfig, SSCStateSchema } from "algosdk";
 

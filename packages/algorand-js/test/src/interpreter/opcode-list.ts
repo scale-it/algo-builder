@@ -1991,18 +1991,21 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
     const interpreter = new Interpreter();
     const runtime = new Runtime(interpreter);
-    interpreter.runtime = runtime;
+    interpreter.runtime = runtime; // setup runtime
 
+    // setting txn object and sender's addr
     interpreter.ctx.tx = TXN_OBJ;
-
     interpreter.ctx.tx.snd = Buffer.from("addr-1");
 
+    // setup 1st account (to be used as sender)
     const acc1: SdkAccount = new SdkAccountImpl(123, { addr: 'addr-1', sk: new Uint8Array(0) }); // setup test account
     setDummyAccInfo(acc1);
 
+    // setup 2nd account (to be used as Txn.Accounts[A])
     const acc2 = new SdkAccountImpl(123, { addr: 'addr-2', sk: new Uint8Array(0) });
     setDummyAccInfo(acc2);
 
+    // set up ctx (accounts and global applications)
     interpreter.ctx.state = {
       accounts: new Map<string, SdkAccount>(),
       globalApps: new Map<number, SSCParams>()
@@ -2034,6 +2037,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push 0 to stack if app is not opted in", function () {
+        // for Sender
         stack.push(BigInt('0'));
         stack.push(BigInt('1111'));
 
