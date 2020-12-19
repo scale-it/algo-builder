@@ -1624,19 +1624,19 @@ export class Balance extends Op {
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1);
-    let last = this.assertBigInt(stack.pop());
+    let accountIndex = this.assertBigInt(stack.pop());
     let bal = 0;
 
-    if (last === BigInt("0")) {
+    if (accountIndex === BigInt("0")) {
       const val = this.interpreter.accounts.get(convertToString(this.interpreter.tx.snd));
       if (val === undefined) {
         throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
       }
       bal = val.amount;
     } else {
-      this.checkIndexBound(Number(--last), this.interpreter.tx.apat);
+      this.checkIndexBound(Number(--accountIndex), this.interpreter.tx.apat);
 
-      const buf = this.interpreter.tx.apat[Number(last)];
+      const buf = this.interpreter.tx.apat[Number(accountIndex)];
       const res = this.interpreter.accounts.get(convertToString(buf));
 
       if (res === undefined) {
@@ -1650,8 +1650,8 @@ export class Balance extends Op {
   }
 }
 
-// For ASA A, Account B (txn.accounts[B]) pushes to the 
-// stack {...stack, 0} if account has no A holding, 
+// For Account A, Asset B (txn.accounts[A]) pushes to the
+// stack {...stack, 0} if account has no B holding,
 // otherwise {...stack, holding, 1}
 export class AssetHoldingGet extends Op {
   readonly interpreter: Interpreter;
@@ -1672,26 +1672,26 @@ export class AssetHoldingGet extends Op {
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
-    const last = this.assertBigInt(stack.pop());
-    let prev = this.assertBigInt(stack.pop());
+    const assetId = this.assertBigInt(stack.pop());
+    let accountIdx = this.assertBigInt(stack.pop());
 
-    this.checkIndexBound(Number(--prev), this.interpreter.tx.apat);
+    this.checkIndexBound(Number(--accountIdx), this.interpreter.tx.apat);
 
-    const accBuffer = this.interpreter.tx.apat[Number(prev)];
-    const val = this.interpreter.accountsAssets.get(convertToString(accBuffer));
-    const res = val?.get(Number(last));
+    const accBuffer = this.interpreter.tx.apat[Number(accountIdx)];
+    const accountAssets = this.interpreter.accountsAssets.get(convertToString(accBuffer));
+    const assetInfo = accountAssets?.get(Number(assetId));
 
-    if (res === undefined) {
+    if (assetInfo === undefined) {
       stack.push(BigInt("0"));
       return;
-    } 
+    }
     let value: StackElem;
     switch (this.field) {
       case "AssetBalance":
-        value = BigInt(res.amount);
+        value = BigInt(assetInfo.amount);
         break;
       case "AssetFrozen":
-        value = toBytes(res["is-frozen"]);
+        value = toBytes(assetInfo["is-frozen"]);
         break;
       default:
         throw new TealError(ERRORS.TEAL.INVALID_FIELD_TYPE);
@@ -1703,8 +1703,9 @@ export class AssetHoldingGet extends Op {
 }
 
 // get Asset Params Info for given account
-// read from asset Txn.ForeignAssets[A] params field X (imm arg) => {0 or 1 (top), value}
-// params: txn.ForeignAssets offset. Return: did_exist flag (1 if exist and 0 otherwise), value.
+// For Index in ForeignAssets array
+// stack {...stack, 0} if asset doesn't exist,
+// otherwise {...stack, holding, 1}
 export class AssetParamsGet extends Op {
   readonly interpreter: Interpreter;
   readonly field: string;
@@ -1727,14 +1728,14 @@ export class AssetParamsGet extends Op {
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1);
-    let last = this.assertBigInt(stack.pop());
-    this.checkIndexBound(Number(--last), this.interpreter.tx.apas);
+    let foreignAssetsIdx = this.assertBigInt(stack.pop());
+    this.checkIndexBound(Number(--foreignAssetsIdx), this.interpreter.tx.apas);
 
-    const assetId = this.interpreter.tx.apas[Number(last)];
+    const assetId = this.interpreter.tx.apas[Number(foreignAssetsIdx)];
 
-    const res = this.interpreter.globalAssets.get(assetId);
+    const assetParams = this.interpreter.globalAssets.get(assetId);
 
-    if (res === undefined) {
+    if (assetParams === undefined) {
       stack.push(BigInt("0"));
     } else {
       let value: StackElem;
@@ -1742,13 +1743,13 @@ export class AssetParamsGet extends Op {
 
       switch (this.field) {
         case "AssetTotal":
-          value = BigInt(res.total);
+          value = BigInt(assetParams.total);
           break;
         case "AssetDecimals":
-          value = BigInt(res.decimals);
+          value = BigInt(assetParams.decimals);
           break;
         default:
-          value = toBytes(res[s] as string);
+          value = toBytes(assetParams[s] as string);
           break;
       }
 
