@@ -1653,7 +1653,7 @@ export class Balance extends Op {
 // For Account A, Asset B (txn.accounts[A]) pushes to the
 // stack {...stack, 0} if account has no B holding,
 // otherwise {...stack, holding, 1}
-export class AssetHoldingGet extends Op {
+export class GetAssetHolding extends Op {
   readonly interpreter: Interpreter;
   readonly field: string;
 
@@ -1706,7 +1706,7 @@ export class AssetHoldingGet extends Op {
 // For Index in ForeignAssets array
 // stack {...stack, 0} if asset doesn't exist,
 // otherwise {...stack, holding, 1}
-export class AssetParamsGet extends Op {
+export class GetAssetParams extends Op {
   readonly interpreter: Interpreter;
   readonly field: string;
 
