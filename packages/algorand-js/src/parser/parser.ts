@@ -236,7 +236,8 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
 
 /**
  * Description: Returns a list of Opcodes object after reading text from given TEAL file
- * @param filename : Name of the TEAL file with location
+ * @param program : TEAL code as string
+ * @param interpreter: interpreter object
  */
 export async function parser (program: string, interpreter: Interpreter): Promise<Operator[]> {
   const opCodeList = [] as Operator[];
