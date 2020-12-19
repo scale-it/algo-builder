@@ -1684,23 +1684,22 @@ export class AssetHoldingGet extends Op {
 
     if (res === undefined) {
       stack.push(BigInt("0"));
-    } else {
-      let value: StackElem;
-
-      switch (this.field) {
-        case "AssetBalance":
-          value = BigInt(res.amount);
-          break;
-        case "AssetFrozen":
-          value = toBytes(res["is-frozen"]);
-          break;
-        default:
-          throw new TealError(ERRORS.TEAL.INVALID_FIELD_TYPE);
-      }
-
-      stack.push(value);
-      stack.push(BigInt("1"));
+      return;
+    } 
+    let value: StackElem;
+    switch (this.field) {
+      case "AssetBalance":
+        value = BigInt(res.amount);
+        break;
+      case "AssetFrozen":
+        value = toBytes(res["is-frozen"]);
+        break;
+      default:
+        throw new TealError(ERRORS.TEAL.INVALID_FIELD_TYPE);
     }
+
+    stack.push(value);
+    stack.push(BigInt("1"));
   }
 }
 
