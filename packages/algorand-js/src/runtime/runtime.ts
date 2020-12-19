@@ -201,6 +201,7 @@ export class Runtime {
    * @param txn : Transaction parameters
    * @param fileName : smart contract file (.teal) name in assets/
    * @param args : external arguments to smart contract
+   * @param accounts : accounts passed by the user
    */
   async executeTx (txnParams: ExecParams | ExecParams[], fileName: string,
     args: Uint8Array[], accounts: SdkAccount[]): Promise<void> {

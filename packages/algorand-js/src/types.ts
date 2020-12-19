@@ -83,7 +83,7 @@ export interface State {
   globalApps: Map<number, SSCParams>
 }
 
-// describes interpreter's local state
+// describes interpreter's local context (state + txns)
 export interface Context {
   state: State
   tx: Txn // current txn

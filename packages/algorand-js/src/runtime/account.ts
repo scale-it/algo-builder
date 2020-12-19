@@ -44,7 +44,6 @@ export class SdkAccountImpl implements SdkAccount {
    * Description: fetches local state value for key present in account
    * returns undefined otherwise
    * @param appId: current application id
-   * @param account: account having local state data
    * @param key: key to fetch value of from local state
    */
   getLocalState (appId: number, key: Uint8Array): StackElem | undefined {
@@ -64,7 +63,6 @@ export class SdkAccountImpl implements SdkAccount {
    * Description: add new key-value pair or updating pair with existing key in account
    * for application id: appId, throw error otherwise
    * @param appId: current application id
-   * @param account: account having local state data
    * @param key: key to fetch value of from local state
    * @param value: key to fetch value of from local state
    */
