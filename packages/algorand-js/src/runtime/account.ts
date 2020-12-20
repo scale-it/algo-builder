@@ -1,4 +1,4 @@
-import { SdkAccount, StackElem } from "algorand-js/src/types";
+import { SDKAccount, StackElem } from "algorand-js/src/types";
 import type { Account, AccountAssetInfo, AppLocalState, CreatedApps, SSCSchemaConfig } from "algosdk";
 import { generateAccount } from "algosdk";
 
@@ -7,7 +7,7 @@ import { ERRORS } from "../errors/errors-list";
 import { compareArray } from "../lib/compare";
 import { assertValidSchema, getKeyValPair } from "../lib/stateful";
 
-export class SdkAccountImpl implements SdkAccount {
+export class SDKAccountImpl implements SDKAccount {
   readonly account: Account;
   readonly address: string;
   assets: AccountAssetInfo[];

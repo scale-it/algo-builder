@@ -54,12 +54,13 @@ export class Interpreter {
    * @param {string} program: teal code
    * @param {Uint8Array[]} args : external arguments
    * @param {Runtime} runtime : runtime object
+   * @param {Context} context: interpreter context (state and txns)
    */
   async execute (program: string, args: Uint8Array[],
-    runtime: Runtime): Promise<State> {
+    runtime: Runtime, context: Context): Promise<State> {
     assert(Array.isArray(args));
     this.runtime = runtime;
-    this.ctx = runtime.store; // set local context of interpreter
+    this.ctx = context; // set context of interpreter
     this.instructions = await parser(program, this);
 
     while (this.instructionIndex < this.instructions.length) {

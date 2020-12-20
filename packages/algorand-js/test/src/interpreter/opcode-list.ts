@@ -30,13 +30,13 @@ import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MIN_UINT8 } from "../../../s
 import { convertToBuffer, toBytes } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
-import { SdkAccountImpl } from "../../../src/runtime/account";
-import { EncodingType, SdkAccount, StackElem } from "../../../src/types";
+import { SDKAccountImpl } from "../../../src/runtime/account";
+import { EncodingType, SDKAccount, StackElem } from "../../../src/types";
 import { execExpectError, expectTealError } from "../../helpers/errors";
 import { accInfo } from "../../mocks/stateful";
 import { TXN_OBJ } from "../../mocks/txn";
 
-function setDummyAccInfo (acc: SdkAccount): void {
+function setDummyAccInfo (acc: SDKAccount): void {
   acc.assets = [];
   acc.appsLocalState = accInfo[0].appsLocalState;
   acc.appsTotalSchema = accInfo[0].appsTotalSchema;
@@ -1998,16 +1998,16 @@ describe("Teal Opcodes", function () {
     interpreter.ctx.tx.snd = Buffer.from("addr-1");
 
     // setup 1st account (to be used as sender)
-    const acc1: SdkAccount = new SdkAccountImpl(123, { addr: 'addr-1', sk: new Uint8Array(0) }); // setup test account
+    const acc1: SDKAccount = new SDKAccountImpl(123, { addr: 'addr-1', sk: new Uint8Array(0) }); // setup test account
     setDummyAccInfo(acc1);
 
     // setup 2nd account (to be used as Txn.Accounts[A])
-    const acc2 = new SdkAccountImpl(123, { addr: 'addr-2', sk: new Uint8Array(0) });
+    const acc2 = new SDKAccountImpl(123, { addr: 'addr-2', sk: new Uint8Array(0) });
     setDummyAccInfo(acc2);
 
     // set up ctx (accounts and global applications)
     interpreter.ctx.state = {
-      accounts: new Map<string, SdkAccount>(),
+      accounts: new Map<string, SDKAccount>(),
       globalApps: new Map<number, SSCParams>()
     };
     interpreter.ctx.state.accounts.set(acc1.address, acc1);
@@ -2257,7 +2257,7 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        const acc = interpreter.ctx.state.accounts.get("addr-1") as SdkAccount;
+        const acc = interpreter.ctx.state.accounts.get("addr-1") as SDKAccount;
         let localStateCurr = acc.appsLocalState[0]["key-value"];
         let idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('New-Key')));
         assert.notEqual(idx, -1); // idx should not be -1
@@ -2271,7 +2271,7 @@ describe("Teal Opcodes", function () {
         op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        localStateCurr = (interpreter.ctx.state.accounts.get("addr-1") as SdkAccount).appsLocalState[0]["key-value"];
+        localStateCurr = (interpreter.ctx.state.accounts.get("addr-1") as SDKAccount).appsLocalState[0]["key-value"];
         idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('New-Key-1')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(localStateCurr[idx].value.uint, 2222);
@@ -2364,7 +2364,7 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        let localStateCurr = (interpreter.ctx.state.accounts.get("addr-1") as SdkAccount).appsLocalState[0]["key-value"];
+        let localStateCurr = (interpreter.ctx.state.accounts.get("addr-1") as SDKAccount).appsLocalState[0]["key-value"];
         let idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
 
@@ -2375,7 +2375,7 @@ describe("Teal Opcodes", function () {
         op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        localStateCurr = (interpreter.ctx.state.accounts.get("addr-2") as SdkAccount).appsLocalState[0]["key-value"];
+        localStateCurr = (interpreter.ctx.state.accounts.get("addr-2") as SDKAccount).appsLocalState[0]["key-value"];
         idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
       });

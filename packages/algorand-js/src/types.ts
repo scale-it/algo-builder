@@ -75,11 +75,11 @@ export enum EncodingType {
 }
 
 export interface AccountsMap {
-  [addr: string]: SdkAccount
+  [addr: string]: SDKAccount
 }
 
 export interface State {
-  accounts: Map<string, SdkAccount>
+  accounts: Map<string, SDKAccount>
   globalApps: Map<number, SSCParams>
 }
 
@@ -92,7 +92,7 @@ export interface Context {
 
 // represent account used in tests and by the context
 // NOTE: custom notations are used rather than SDK AccountState notations
-export interface SdkAccount {
+export interface SDKAccount {
   address: string
   assets: AccountAssetInfo[]
   amount: number

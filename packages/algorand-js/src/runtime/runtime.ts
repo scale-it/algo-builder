@@ -13,25 +13,21 @@ import { BIGINT0 } from "../interpreter/opcode-list";
 import { checkIndexBound, compareArray } from "../lib/compare";
 import { convertToString } from "../lib/parsing";
 import { assertValidSchema, getKeyValPair } from "../lib/stateful";
-import type { Context, SdkAccount, StackElem, Txn } from "../types";
+import type { Context, SDKAccount, StackElem, State, Txn } from "../types";
 
 export class Runtime {
   interpreter: Interpreter;
-  store: Context;
+  store: State;
 
   constructor (interpreter: Interpreter) {
     this.interpreter = interpreter;
     this.store = {
-      state: {
-        accounts: new Map<string, SdkAccount>(),
-        globalApps: new Map<number, SSCParams>()
-      },
-      tx: <Txn>{},
-      gtxs: []
+      accounts: new Map<string, SDKAccount>(),
+      globalApps: new Map<number, SSCParams>()
     };
   }
 
-  assertAccountDefined (a?: SdkAccount): SdkAccount {
+  assertAccountDefined (a?: SDKAccount): SDKAccount {
     if (a === undefined) {
       throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
     }
@@ -46,8 +42,8 @@ export class Runtime {
     return globalDelta;
   }
 
-  getAccount (accountIndex: bigint): SdkAccount {
-    let account: SdkAccount | undefined;
+  getAccount (accountIndex: bigint): SDKAccount {
+    let account: SDKAccount | undefined;
     if (accountIndex === BIGINT0) {
       const senderAccount = convertToString(this.interpreter.ctx.tx.snd);
       account = this.interpreter.ctx.state.accounts.get(senderAccount);
@@ -103,15 +99,15 @@ export class Runtime {
   }
 
   /**
-   * Description: set accounts for context as {address: SdkAccount}
+   * Description: set accounts for context as {address: SDKAccount}
    * @param accounts: array of account info's
    */
-  createStatefulContext (accounts: SdkAccount[]): void {
+  createStatefulContext (accounts: SDKAccount[]): void {
     for (const acc of accounts) {
-      this.store.state.accounts.set(acc.address, acc);
+      this.store.accounts.set(acc.address, acc);
 
       for (const app of acc.createdApps) {
-        this.store.state.globalApps.set(app.id, app.params);
+        this.store.globalApps.set(app.id, app.params);
       }
     }
   }
@@ -119,8 +115,9 @@ export class Runtime {
   /**
    * Description: creates a new transaction object from given execParams
    * @param txnParams : Transaction parameters for current txn or txn Group
+   * @returns: [current transaction, transaction group]
    */
-  createTxnContext (txnParams: ExecParams | ExecParams[]): void {
+  createTxnContext (txnParams: ExecParams | ExecParams[]): [Txn, Txn[]] {
     // if txnParams is array, then user is requesting for a group txn
     if (Array.isArray(txnParams)) {
       if (txnParams.length > 16) {
@@ -138,8 +135,7 @@ export class Runtime {
         txns.push(encodedTxnObj);
       }
       assignGroupID(txns); // assign unique groupID to all transactions in the array/group
-      this.store.gtxs = txns;
-      this.store.tx = txns[0]; // by default current txn is the first txn
+      return [txns[0], txns]; // by default current txn is the first txn (hence txns[0])
     } else {
       // if not array, then create a single transaction
       const mockParams = mockSuggestedParams(txnParams.payFlags);
@@ -147,18 +143,22 @@ export class Runtime {
 
       const encodedTxnObj = tx.get_obj_for_encoding() as Txn;
       encodedTxnObj.txID = tx.txID();
-      this.store.tx = encodedTxnObj; // assign current txn
-      this.store.gtxs = [this.store.tx]; // assign single txn to grp
+      return [encodedTxnObj, [encodedTxnObj]];
     }
   }
 
-  prepareInitialState (txnParams: ExecParams| ExecParams[], accounts: SdkAccount[]): void {
-    this.createTxnContext(txnParams);
+  prepareInitialState (txnParams: ExecParams| ExecParams[], accounts: SDKAccount[]): Context {
+    const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
     this.createStatefulContext(accounts); // initialize state before execution
+    return {
+      state: this.store, // state is a copy of store
+      tx: tx,
+      gtxs: gtxs
+    };
   }
 
   // updates account balance as per transaction parameters
-  updateBalance (txnParam: ExecParams, account: SdkAccount): void {
+  updateBalance (txnParam: ExecParams, account: SDKAccount): void {
     switch (txnParam.type) {
       case TransactionType.TransferAlgo: {
         switch (account.address) {
@@ -180,7 +180,7 @@ export class Runtime {
    * @param txnParams : Transaction parameters
    * @param accounts : accounts passed by user
    */
-  prepareFinalState (txnParams: ExecParams | ExecParams[], accounts: SdkAccount[]): void {
+  prepareFinalState (txnParams: ExecParams | ExecParams[], accounts: SDKAccount[]): void {
     if (Array.isArray(txnParams)) { // if txn is a group, update balance as per 'each' transaction
       for (const txnParam of txnParams) {
         for (const acc of accounts) {
@@ -204,12 +204,12 @@ export class Runtime {
    * @param accounts : accounts passed by the user
    */
   async executeTx (txnParams: ExecParams | ExecParams[], fileName: string,
-    args: Uint8Array[], accounts: SdkAccount[]): Promise<void> {
-    this.prepareInitialState(txnParams, accounts); // prepare initial state
+    args: Uint8Array[], accounts: SDKAccount[]): Promise<void> {
+    const context = this.prepareInitialState(txnParams, accounts); // prepare initial state
 
     const program = getProgram(fileName);
-    const updatedState = await this.interpreter.execute(program, args, this);
-    this.store.state = updatedState; // update state after successful execution('local-state', 'global-state'..)
+    const updatedState = await this.interpreter.execute(program, args, this, context);
+    this.store = updatedState; // update state after successful execution('local-state', 'global-state'..)
     this.prepareFinalState(txnParams, accounts); // update account balances
   }
 }

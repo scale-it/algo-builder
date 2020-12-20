@@ -2,15 +2,15 @@ import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
 import { Interpreter, Runtime } from "../../src/index";
-import { SdkAccountImpl } from "../../src/runtime/account";
+import { SDKAccountImpl } from "../../src/runtime/account";
 import { expectTealErrorAsync } from "../helpers/errors";
 import { useFixtureProject } from "../helpers/project";
 
 describe("Algorand Smart Contracts", function () {
   useFixtureProject("smart-contracts");
 
-  const john = new SdkAccountImpl(1000);
-  const bob = new SdkAccountImpl(500);
+  const john = new SDKAccountImpl(1000);
+  const bob = new SDKAccountImpl(500);
   // set up transaction paramenters
   const txnParams = {
     type: 0, // payment
