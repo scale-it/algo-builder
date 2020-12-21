@@ -111,7 +111,7 @@ export class Runtime {
   }
 
   /**
-   * Description: set accounts for context as {address: StoreAccount}
+   * Setup initial accounts as {address: SDKAccount}. This should be called only when initializing Runtime.
    * @param accounts: array of account info's
    */
   initializeAccounts (accounts: StoreAccount[]): void {
