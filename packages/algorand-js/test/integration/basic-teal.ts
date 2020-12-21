@@ -1,7 +1,7 @@
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
-import { Interpreter, Runtime } from "../../src/index";
+import { Runtime } from "../../src/index";
 import { StoreAccountImpl } from "../../src/runtime/account";
 import { expectTealErrorAsync } from "../helpers/errors";
 import { useFixtureProject } from "../helpers/project";
