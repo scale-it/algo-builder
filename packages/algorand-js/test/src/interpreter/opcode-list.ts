@@ -13,7 +13,7 @@ import {
   BranchIfZero,
   Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2,
   Ed25519verify,
-  EqualTo, Err, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna,
+  EqualTo, Err, Global, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna,
   Int, Intc,
   Intcblock, Itob,
   Keccak256,
@@ -1974,6 +1974,90 @@ describe("Teal Opcodes", function () {
           ERRORS.TEAL.INVALID_OP_ARG
         );
       });
+    });
+  });
+
+  describe("Global Opcode", function () {
+    const stack = new Stack<StackElem>();
+    const interpreter = new Interpreter();
+    interpreter.tx = TXN_OBJ;
+    interpreter.gtxs = [TXN_OBJ];
+    interpreter.tx.apid = 1847;
+    interpreter.globalApps.set(1847, {} as SSCParams);
+
+    it("should push MinTxnFee to stack", function () {
+      const op = new Global(['MinTxnFee'], 1, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.deepEqual(BigInt('1000'), top);
+    });
+
+    it("should push MinBalance to stack", function () {
+      const op = new Global(['MinBalance'], 1, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.deepEqual(BigInt('10000'), top);
+    });
+
+    it("should push MaxTxnLife to stack", function () {
+      const op = new Global(['MaxTxnLife'], 1, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.deepEqual(BigInt('1000'), top);
+    });
+
+    it("should push ZeroAddress to stack", function () {
+      const op = new Global(['ZeroAddress'], 1, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.deepEqual(new Uint8Array(32), top);
+    });
+
+    it("should push GroupSize to stack", function () {
+      const op = new Global(['GroupSize'], 1, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.deepEqual(BigInt(interpreter.gtxs.length), top);
+    });
+
+    it("should push LogicSigVersion to stack", function () {
+      const op = new Global(['LogicSigVersion'], 1, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.deepEqual(BigInt('2'), top);
+    });
+
+    it("should push Round to stack", function () {
+      const op = new Global(['Round'], 1, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.deepEqual(BigInt('500'), top);
+    });
+
+    it("should push LatestTimestamp to stack", function () {
+      const op = new Global(['LatestTimestamp'], 1, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      const ts = Math.round((new Date()).getTime() / 1000);
+
+      const diff = Math.abs(ts - Number(top)); // for accuracy
+      assert.isBelow(diff, 3);
+    });
+
+    it("should push CurrentApplicationID to stack", function () {
+      const op = new Global(['CurrentApplicationID'], 1, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.deepEqual(BigInt('1847'), top);
     });
   });
 

@@ -199,6 +199,12 @@ by an index that does not exist.`
     message: "Transaction Field Error - Unknown transaction field %field%",
     title: "Transaction Field Error",
     description: `Transaction Field unkown`
+  },
+  UNKOWN_GLOBAL_FIELD: {
+    number: 29,
+    message: "Global Field Error - Unknown Global field %field%",
+    title: "Global Field Error",
+    description: `Global Field unkown`
   }
 };
 

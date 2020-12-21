@@ -10,7 +10,7 @@ import { decode, encode } from "uint64be";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { compareArray } from "../lib/compare";
-import { MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
+import { GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
 import { assertLen, assertOnlyDigits, convertToBuffer, convertToString, getEncoding } from "../lib/parsing";
 import type { EncodingType, TEALStack } from "../types";
 import { Interpreter } from "./interpreter";
@@ -1013,7 +1013,7 @@ export class Txn extends Op {
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     assertLen(args.length, 1, line);
-    this.assertDefined(args[0]);
+    this.assertTxFieldDefined(args[0]);
 
     this.field = args[0]; // field
     this.interpreter = interpreter;
@@ -1041,7 +1041,7 @@ export class Gtxn extends Op {
     super();
     assertLen(args.length, 2, line);
     assertOnlyDigits(args[0]);
-    this.assertDefined(args[1]);
+    this.assertTxFieldDefined(args[1]);
 
     this.txIdx = Number(args[0]); // transaction group index
     this.field = args[1]; // field
@@ -1073,7 +1073,7 @@ export class Txna extends Op {
     super();
     assertLen(args.length, 2, line);
     assertOnlyDigits(args[1]);
-    this.assertDefined(args[0]);
+    this.assertTxFieldDefined(args[0]);
 
     this.field = args[0]; // field
     this.idx = Number(args[1]);
@@ -1104,7 +1104,7 @@ export class Gtxna extends Op {
     assertLen(args.length, 3, line);
     assertOnlyDigits(args[0]);
     assertOnlyDigits(args[2]);
-    this.assertDefined(args[1]);
+    this.assertTxFieldDefined(args[1]);
 
     this.txIdx = Number(args[0]); // transaction group index
     this.field = args[1]; // field
@@ -1238,6 +1238,50 @@ export class Return extends Op {
     }
     stack.push(last); // use last value as success
     this.interpreter.instructionIndex = this.interpreter.instructions.length; // end execution
+  }
+}
+
+// push field from current transaction to stack
+export class Global extends Op {
+  readonly field: string;
+  readonly interpreter: Interpreter;
+
+  /**
+   * @param args words list extracted from line: {global field (string)}
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    assertLen(args.length, 1, line);
+    this.assertGlobalDefined(args[0]);
+
+    this.field = args[0]; // field
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    let g;
+    switch (this.field) {
+      case 'GroupSize': {
+        g = this.interpreter.gtxs.length;
+        break;
+      }
+      case 'CurrentApplicationID': {
+        g = this.interpreter.tx.apid;
+        this.assertAppDefined(g, this.interpreter);
+        break;
+      }
+      default: {
+        g = GlobalFields[this.field];
+      }
+    }
+
+    if (typeof g === 'number') {
+      stack.push(BigInt(g));
+    } else {
+      stack.push(g);
+    }
   }
 }
 

@@ -1,7 +1,7 @@
 import { TxParams } from "algob/src/types";
 import { decodeAddress, generateAccount, SuggestedParams } from "algosdk";
 
-const ALGORAND_MIN_TX_FEE = 1000;
+export const ALGORAND_MIN_TX_FEE = 1000;
 const GENESIS_ID = 'testnet-v1.0';
 // testnet-v1.0 hash
 const GENESIS_HASH = 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=';
