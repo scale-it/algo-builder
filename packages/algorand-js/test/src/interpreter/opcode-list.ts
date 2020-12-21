@@ -224,9 +224,11 @@ describe("Teal Opcodes", function () {
 
   describe("Arg[N]", function () {
     const stack = new Stack<StackElem>();
+    const runtime = new Runtime([]);
     const interpreter = new Interpreter();
     const args = ["Arg0", "Arg1", "Arg2", "Arg3"].map(toBytes);
-    interpreter.args = args;
+    interpreter.runtime = runtime;
+    interpreter.runtime.ctx.args = args;
 
     it("should push arg_0 from argument array to stack", function () {
       const op = new Arg(["0"], 1, interpreter);
@@ -1532,7 +1534,8 @@ describe("Teal Opcodes", function () {
   describe("Transaction opcodes", function () {
     const stack = new Stack<StackElem>();
     const interpreter = new Interpreter();
-    interpreter.ctx.tx = TXN_OBJ;
+    interpreter.runtime = new Runtime([]);
+    interpreter.runtime.ctx.tx = TXN_OBJ;
 
     describe("Txn: Common Fields", function () {
       it("should push txn fee to stack", function () {
@@ -1635,7 +1638,7 @@ describe("Teal Opcodes", function () {
 
     describe("Txn: Payment", function () {
       before(function () {
-        interpreter.ctx.tx.type = 'pay';
+        interpreter.runtime.ctx.tx.type = 'pay';
       });
 
       it("should push txn Receiver to stack", function () {
@@ -1665,7 +1668,7 @@ describe("Teal Opcodes", function () {
 
     describe("Txn: Key Registration", function () {
       before(function () {
-        interpreter.ctx.tx.type = 'keyreg';
+        interpreter.runtime.ctx.tx.type = 'keyreg';
       });
 
       it("should push txn VotePK to stack", function () {
@@ -1711,7 +1714,7 @@ describe("Teal Opcodes", function () {
 
     describe("Txn: Asset Configuration Transaction", function () {
       before(function () {
-        interpreter.ctx.tx.type = 'acfg';
+        interpreter.runtime.ctx.tx.type = 'acfg';
       });
 
       it("should push txn ConfigAsset to stack", function () {
@@ -1813,7 +1816,7 @@ describe("Teal Opcodes", function () {
 
     describe("Txn: Asset Transfer Transaction", function () {
       before(function () {
-        interpreter.ctx.tx.type = 'axfer';
+        interpreter.runtime.ctx.tx.type = 'axfer';
       });
 
       it("should push txn XferAsset to stack", function () {
@@ -1859,7 +1862,7 @@ describe("Teal Opcodes", function () {
 
     describe("Txn: Asset Freeze Transaction", function () {
       before(function () {
-        interpreter.ctx.tx.type = 'afrz';
+        interpreter.runtime.ctx.tx.type = 'afrz';
       });
 
       it("should push txn FreezeAsset to stack", function () {
@@ -1889,7 +1892,7 @@ describe("Teal Opcodes", function () {
 
     describe("Txn: Application Call Transaction", function () {
       before(function () {
-        interpreter.ctx.tx.type = 'appl';
+        interpreter.runtime.ctx.tx.type = 'appl';
       });
 
       it("should push txn ApplicationID to stack", function () {
@@ -1927,9 +1930,9 @@ describe("Teal Opcodes", function () {
 
     describe("Gtxn", function () {
       before(function () {
-        const tx = interpreter.ctx.tx;
+        const tx = interpreter.runtime.ctx.tx;
         const tx2 = { ...tx, fee: 2222 };
-        interpreter.ctx.gtxs = [tx, tx2];
+        interpreter.runtime.ctx.gtxs = [tx, tx2];
       });
 
       it("push fee from 2nd transaction in group", function () {
@@ -1943,7 +1946,7 @@ describe("Teal Opcodes", function () {
 
     describe("Txna", function () {
       before(function () {
-        interpreter.ctx.tx.type = 'pay';
+        interpreter.runtime.ctx.tx.type = 'pay';
       });
 
       it("push addr from 2nd account to stack", function () {
@@ -1965,7 +1968,7 @@ describe("Teal Opcodes", function () {
 
     describe("Gtxna", function () {
       before(function () {
-        interpreter.ctx.tx.type = 'pay';
+        interpreter.runtime.ctx.tx.type = 'pay';
       });
 
       it("push addr from 1st account of 2nd Txn in txGrp to stack", function () {
@@ -1990,12 +1993,12 @@ describe("Teal Opcodes", function () {
   describe("StateFul Opcodes", function () {
     const stack = new Stack<StackElem>();
     const interpreter = new Interpreter();
-    const runtime = new Runtime(interpreter);
+    const runtime = new Runtime([]);
     interpreter.runtime = runtime; // setup runtime
 
     // setting txn object and sender's addr
-    interpreter.ctx.tx = TXN_OBJ;
-    interpreter.ctx.tx.snd = Buffer.from("addr-1");
+    interpreter.runtime.ctx.tx = TXN_OBJ;
+    interpreter.runtime.ctx.tx.snd = Buffer.from("addr-1");
 
     // setup 1st account (to be used as sender)
     const acc1: SDKAccount = new SDKAccountImpl(123, { addr: 'addr-1', sk: new Uint8Array(0) }); // setup test account
@@ -2006,12 +2009,12 @@ describe("Teal Opcodes", function () {
     setDummyAccInfo(acc2);
 
     // set up ctx (accounts and global applications)
-    interpreter.ctx.state = {
+    interpreter.runtime.ctx.state = {
       accounts: new Map<string, SDKAccount>(),
       globalApps: new Map<number, SSCParams>()
     };
-    interpreter.ctx.state.accounts.set(acc1.address, acc1);
-    interpreter.ctx.state.accounts.set(acc2.address, acc2);
+    interpreter.runtime.ctx.state.accounts.set(acc1.address, acc1);
+    interpreter.runtime.ctx.state.accounts.set(acc2.address, acc2);
 
     describe("AppOptedIn", function () {
       it("should push 1 to stack if app is opted in", function () {
@@ -2061,7 +2064,7 @@ describe("Teal Opcodes", function () {
 
     describe("AppLocalGet", function () {
       before(function () {
-        interpreter.ctx.tx.apid = 1847;
+        interpreter.runtime.ctx.tx.apid = 1847;
       });
 
       it("should push the value to stack if key is present in local state", function () {
@@ -2111,7 +2114,7 @@ describe("Teal Opcodes", function () {
 
     describe("AppLocalGetEx", function () {
       before(function () {
-        interpreter.ctx.tx.apid = 1847;
+        interpreter.runtime.ctx.tx.apid = 1847;
       });
 
       it("should push the value to stack if key is present in local state from given appId", function () {
@@ -2165,9 +2168,9 @@ describe("Teal Opcodes", function () {
 
     describe("AppGlobalGet", function () {
       before(function () {
-        interpreter.ctx.tx.apid = 1828;
-        interpreter.ctx.state.globalApps = new Map<number, SSCParams>();
-        interpreter.ctx.state.globalApps.set(1828, acc1.createdApps[0].params);
+        interpreter.runtime.ctx.tx.apid = 1828;
+        interpreter.runtime.ctx.state.globalApps = new Map<number, SSCParams>();
+        interpreter.runtime.ctx.state.globalApps.set(1828, acc1.createdApps[0].params);
       });
 
       it("should push the value to stack if key is present in global state", function () {
@@ -2193,9 +2196,9 @@ describe("Teal Opcodes", function () {
 
     describe("AppGlobalGetEx", function () {
       before(function () {
-        interpreter.ctx.tx.apid = 1828;
-        interpreter.ctx.tx.apfa = [1828];
-        interpreter.ctx.state.globalApps.set(1828, acc1.createdApps[0].params);
+        interpreter.runtime.ctx.tx.apid = 1828;
+        interpreter.runtime.ctx.tx.apfa = [1828];
+        interpreter.runtime.ctx.state.globalApps.set(1828, acc1.createdApps[0].params);
       });
 
       it("should push the value to stack if key is present externally in global state", function () {
@@ -2245,7 +2248,7 @@ describe("Teal Opcodes", function () {
 
     describe("AppLocalPut", function () {
       before(function () {
-        interpreter.ctx.tx.apid = 1847;
+        interpreter.runtime.ctx.tx.apid = 1847;
       });
 
       it("should put the value in account's local storage", function () {
@@ -2257,7 +2260,7 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        const acc = interpreter.ctx.state.accounts.get("addr-1") as SDKAccount;
+        const acc = interpreter.runtime.ctx.state.accounts.get("addr-1") as SDKAccount;
         let localStateCurr = acc.appsLocalState[0]["key-value"];
         let idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('New-Key')));
         assert.notEqual(idx, -1); // idx should not be -1
@@ -2271,7 +2274,7 @@ describe("Teal Opcodes", function () {
         op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        localStateCurr = (interpreter.ctx.state.accounts.get("addr-1") as SDKAccount).appsLocalState[0]["key-value"];
+        localStateCurr = (interpreter.runtime.ctx.state.accounts.get("addr-1") as SDKAccount).appsLocalState[0]["key-value"];
         idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('New-Key-1')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(localStateCurr[idx].value.uint, 2222);
@@ -2289,7 +2292,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should throw error if app is not found", function () {
-        interpreter.ctx.tx.apid = 9999;
+        interpreter.runtime.ctx.tx.apid = 9999;
         execExpectError(
           stack,
           [BigInt('0'), toBytes("New-Key-1"), toBytes("New-Val-2")],
@@ -2301,8 +2304,8 @@ describe("Teal Opcodes", function () {
 
     describe("AppGlobalPut", function () {
       before(function () {
-        interpreter.ctx.tx.apid = 1828;
-        interpreter.ctx.state.globalApps.set(1828, acc1.createdApps[0].params);
+        interpreter.runtime.ctx.tx.apid = 1828;
+        interpreter.runtime.ctx.state.globalApps.set(1828, acc1.createdApps[0].params);
       });
 
       it("should put the value in global storage", function () {
@@ -2313,7 +2316,7 @@ describe("Teal Opcodes", function () {
         let op = new AppGlobalPut([], 1, interpreter);
         op.execute(stack);
 
-        let globalStateCurr = (interpreter.ctx.state.globalApps.get(1828) as SSCParams)["global-state"];
+        let globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCParams)["global-state"];
         let idx = globalStateCurr.findIndex(a => compareArray(a.key, toBytes('New-Global-Key')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(globalStateCurr[idx].value.bytes, toBytes('New-Global-Val'));
@@ -2325,7 +2328,7 @@ describe("Teal Opcodes", function () {
         op = new AppGlobalPut([], 1, interpreter);
         op.execute(stack);
 
-        globalStateCurr = (interpreter.ctx.state.globalApps.get(1828) as SSCParams)["global-state"];
+        globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCParams)["global-state"];
         idx = globalStateCurr.findIndex(a => compareArray(a.key, toBytes('Key')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(globalStateCurr[idx].value.uint, 1000);
@@ -2341,7 +2344,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should throw error if app is not found in global state", function () {
-        interpreter.ctx.tx.apid = 9999;
+        interpreter.runtime.ctx.tx.apid = 9999;
         execExpectError(
           stack,
           [toBytes("New-Key-1"), toBytes("New-Val-2")],
@@ -2353,7 +2356,7 @@ describe("Teal Opcodes", function () {
 
     describe("AppLocalDel", function () {
       before(function () {
-        interpreter.ctx.tx.apid = 1847;
+        interpreter.runtime.ctx.tx.apid = 1847;
       });
 
       it("should put remove the key-value pair from account's local storage", function () {
@@ -2364,7 +2367,7 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        let localStateCurr = (interpreter.ctx.state.accounts.get("addr-1") as SDKAccount).appsLocalState[0]["key-value"];
+        let localStateCurr = (interpreter.runtime.ctx.state.accounts.get("addr-1") as SDKAccount).appsLocalState[0]["key-value"];
         let idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
 
@@ -2375,7 +2378,7 @@ describe("Teal Opcodes", function () {
         op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        localStateCurr = (interpreter.ctx.state.accounts.get("addr-2") as SDKAccount).appsLocalState[0]["key-value"];
+        localStateCurr = (interpreter.runtime.ctx.state.accounts.get("addr-2") as SDKAccount).appsLocalState[0]["key-value"];
         idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
       });
@@ -2383,8 +2386,8 @@ describe("Teal Opcodes", function () {
 
     describe("AppGlobalDel", function () {
       before(function () {
-        interpreter.ctx.tx.apid = 1828;
-        interpreter.ctx.state.globalApps.set(1828, acc1.createdApps[0].params);
+        interpreter.runtime.ctx.tx.apid = 1828;
+        interpreter.runtime.ctx.state.globalApps.set(1828, acc1.createdApps[0].params);
       });
 
       it("should put remove the key-value pair from global storage", function () {
@@ -2394,7 +2397,7 @@ describe("Teal Opcodes", function () {
         const op = new AppGlobalDel([], 1, interpreter);
         op.execute(stack);
 
-        const globalStateCurr = (interpreter.ctx.state.globalApps.get(1828) as SSCParams)["global-state"];
+        const globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCParams)["global-state"];
         const idx = globalStateCurr.findIndex(a => compareArray(a.key, toBytes('global-key')));
         assert.equal(idx, -1); // idx should be -1
       });

@@ -22,14 +22,8 @@ describe("Algorand Smart Contracts", function () {
   };
 
   let runtime: Runtime;
-  let interpreter: Interpreter;
-
   this.beforeAll(function () {
-    runtime = new Runtime(interpreter);
-  });
-
-  this.beforeEach(function () {
-    runtime.interpreter = new Interpreter();
+    runtime = new Runtime([john, bob]); // setup test
   });
 
   it("should send algo's from john to bob if stateless teal logic is correct", async function () {
@@ -38,7 +32,7 @@ describe("Algorand Smart Contracts", function () {
     assert.equal(bob.balance(), 500);
 
     // execute transaction
-    await runtime.executeTx(txnParams, 'basic.teal', [], [john, bob]);
+    await runtime.executeTx(txnParams, 'basic.teal', []);
 
     assert.equal(john.balance(), 900); // check if 100 microAlgo's are withdrawn
     assert.equal(bob.balance(), 600);
@@ -54,7 +48,7 @@ describe("Algorand Smart Contracts", function () {
 
     // execute transaction (should fail is logic is incorrect)
     await expectTealErrorAsync(
-      async () => await runtime.executeTx(invalidParams, 'incorrect-logic.teal', [], [john, bob]),
+      async () => await runtime.executeTx(invalidParams, 'incorrect-logic.teal', []),
       ERRORS.TEAL.INVALID_STACK_ELEM
     );
 

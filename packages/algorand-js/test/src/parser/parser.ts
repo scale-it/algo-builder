@@ -12,6 +12,7 @@ import {
   Sha512_256, Store, Sub, Substring, Substring3, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
+import { Runtime } from "../../../src/runtime/runtime";
 import { expectTealError } from "../../helpers/errors";
 import { useFixtureProject } from "../../helpers/project";
 
@@ -534,7 +535,8 @@ describe("Parser", function () {
 
     it("Should return correct opcode list for 'Arg'", async () => {
       const file = "test-arg.teal";
-      interpreter.args = [new Uint8Array(0)];
+      interpreter.runtime = new Runtime([]);
+      interpreter.runtime.ctx.args = [new Uint8Array(0)];
 
       const res = await parser(getProgram(file), interpreter);
       const expected = [new Arg(["0"], 1, interpreter)];
