@@ -168,7 +168,7 @@ export class Arg extends Op {
 
   /**
    * Description: Gets the argument value from interpreter.args array.
-   * store the vale in _arg variable
+   * store the value in _arg variable
    * @param args Expected arguments: [argument number]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
