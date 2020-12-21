@@ -199,7 +199,7 @@ export class Bytecblock extends Op {
 
   /**
    * Description: Store blocks of bytes in bytecblock
-   * @param args Expected arguments: [byte block]
+   * @param args Expected arguments: [bytecblock] // Ex: ["value1" "value2"]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -253,7 +253,7 @@ export class Intcblock extends Op {
 
   /**
    * Description: Stores block of integer in intcblock
-   * @param args Expected arguments: [integer block]
+   * @param args Expected arguments: [integer block] // Ex: [100 200]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
