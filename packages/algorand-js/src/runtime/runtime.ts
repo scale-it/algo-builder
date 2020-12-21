@@ -14,17 +14,17 @@ import { BIGINT0 } from "../interpreter/opcode-list";
 import { checkIndexBound, compareArray } from "../lib/compare";
 import { convertToString } from "../lib/parsing";
 import { assertValidSchema, getKeyValPair } from "../lib/stateful";
-import type { Context, SDKAccount, StackElem, State, Txn } from "../types";
+import type { Context, StackElem, State, StoreAccount, Txn } from "../types";
 
 export class Runtime {
   store: State;
   ctx: Context;
-  accounts: SDKAccount[];
+  accounts: StoreAccount[];
 
-  constructor (accounts: SDKAccount[]) {
+  constructor (accounts: StoreAccount[]) {
     // runtime store
     this.store = {
-      accounts: new Map<string, SDKAccount>(),
+      accounts: new Map<string, StoreAccount>(),
       globalApps: new Map<number, SSCParams>()
     };
     // context for interpreter
@@ -39,7 +39,7 @@ export class Runtime {
     this.initializeAccounts(accounts);
   }
 
-  assertAccountDefined (a?: SDKAccount): SDKAccount {
+  assertAccountDefined (a?: StoreAccount): StoreAccount {
     if (a === undefined) {
       throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
     }
@@ -54,8 +54,8 @@ export class Runtime {
     return app;
   }
 
-  getAccount (accountIndex: bigint): SDKAccount {
-    let account: SDKAccount | undefined;
+  getAccount (accountIndex: bigint): StoreAccount {
+    let account: StoreAccount | undefined;
     if (accountIndex === BIGINT0) {
       const senderAccount = convertToString(this.ctx.tx.snd);
       account = this.ctx.state.accounts.get(senderAccount);
@@ -111,10 +111,10 @@ export class Runtime {
   }
 
   /**
-   * Description: set accounts for context as {address: SDKAccount}
+   * Description: set accounts for context as {address: StoreAccount}
    * @param accounts: array of account info's
    */
-  initializeAccounts (accounts: SDKAccount[]): void {
+  initializeAccounts (accounts: StoreAccount[]): void {
     for (const acc of accounts) {
       this.store.accounts.set(acc.address, acc);
 
@@ -160,7 +160,7 @@ export class Runtime {
   }
 
   // updates account balance as per transaction parameters
-  updateBalance (txnParam: ExecParams, account: SDKAccount): void {
+  updateBalance (txnParam: ExecParams, account: StoreAccount): void {
     switch (txnParam.type) {
       case TransactionType.TransferAlgo: {
         switch (account.address) {
@@ -182,7 +182,7 @@ export class Runtime {
    * @param txnParams : Transaction parameters
    * @param accounts : accounts passed by user
    */
-  prepareFinalState (txnParams: ExecParams | ExecParams[], accounts: SDKAccount[]): void {
+  prepareFinalState (txnParams: ExecParams | ExecParams[], accounts: StoreAccount[]): void {
     if (Array.isArray(txnParams)) { // if txn is a group, update balance as per 'each' transaction
       for (const txnParam of txnParams) {
         for (const acc of accounts) {
