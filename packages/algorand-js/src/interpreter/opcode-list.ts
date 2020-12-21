@@ -1206,7 +1206,7 @@ export class Branch extends Op {
 
   /**
    * Description: Sets `label` according to arguments passed.
-   * @param args Expected arguments: [label(branch name)]
+   * @param args Expected arguments: [label of branch]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
