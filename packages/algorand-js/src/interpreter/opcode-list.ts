@@ -170,7 +170,7 @@ export class Arg extends Op {
 
   /**
    * Description: Gets the argument value from interpreter.args array.
-   * store the vale in _arg variable
+   * store the value in _arg variable
    * @param args Expected arguments: [argument number]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -1208,7 +1208,7 @@ export class Branch extends Op {
 
   /**
    * Description: Sets `label` according to arguments passed.
-   * @param args Expected arguments: [label(branch name)]
+   * @param args Expected arguments: [label of branch]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
