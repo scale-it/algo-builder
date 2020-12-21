@@ -88,6 +88,7 @@ export interface Context {
   state: State
   tx: Txn // current txn
   gtxs: Txn[] // all transactions
+  args: Uint8Array[]
 }
 
 // represent account used in tests and by the context

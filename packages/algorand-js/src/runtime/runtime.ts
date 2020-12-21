@@ -4,8 +4,9 @@ import { mkTransaction } from "algob";
 import { ExecParams, TransactionType } from "algob/src/types";
 import { getProgram } from "algob/test/helpers/fs";
 import { assignGroupID, SSCParams, SSCStateSchema } from "algosdk";
+import _ from "lodash";
 
-import { mockSuggestedParams } from "../../build/test/mocks/txn";
+import { mockSuggestedParams } from "../../test/mocks/txn";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { Interpreter } from "../index";
@@ -16,15 +17,26 @@ import { assertValidSchema, getKeyValPair } from "../lib/stateful";
 import type { Context, SDKAccount, StackElem, State, Txn } from "../types";
 
 export class Runtime {
-  interpreter: Interpreter;
   store: State;
+  ctx: Context;
+  accounts: SDKAccount[];
 
-  constructor (interpreter: Interpreter) {
-    this.interpreter = interpreter;
+  constructor (accounts: SDKAccount[]) {
+    // runtime store
     this.store = {
       accounts: new Map<string, SDKAccount>(),
       globalApps: new Map<number, SSCParams>()
     };
+    // context for interpreter
+    this.ctx = {
+      state: <State>{},
+      tx: <Txn>{},
+      gtxs: [],
+      args: []
+    };
+    // intialize accounts (should be done during runtime initialization)
+    this.accounts = accounts;
+    this.initializeAccounts(accounts);
   }
 
   assertAccountDefined (a?: SDKAccount): SDKAccount {
@@ -35,23 +47,23 @@ export class Runtime {
   }
 
   assertAppDefined (appId: number): SSCParams {
-    const globalDelta = this.interpreter.ctx.state.globalApps.get(appId);
-    if (globalDelta === undefined) {
+    const app = this.ctx.state.globalApps.get(appId);
+    if (app === undefined) {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
     }
-    return globalDelta;
+    return app;
   }
 
   getAccount (accountIndex: bigint): SDKAccount {
     let account: SDKAccount | undefined;
     if (accountIndex === BIGINT0) {
-      const senderAccount = convertToString(this.interpreter.ctx.tx.snd);
-      account = this.interpreter.ctx.state.accounts.get(senderAccount);
+      const senderAccount = convertToString(this.ctx.tx.snd);
+      account = this.ctx.state.accounts.get(senderAccount);
     } else {
       accountIndex--;
-      checkIndexBound(Number(accountIndex), this.interpreter.ctx.tx.apat);
-      const pkBuffer = this.interpreter.ctx.tx.apat[Number(accountIndex)];
-      account = this.interpreter.ctx.state.accounts.get(convertToString(pkBuffer));
+      checkIndexBound(Number(accountIndex), this.ctx.tx.apat);
+      const pkBuffer = this.ctx.tx.apat[Number(accountIndex)];
+      account = this.ctx.state.accounts.get(convertToString(pkBuffer));
     }
     return this.assertAccountDefined(account);
   }
@@ -63,10 +75,10 @@ export class Runtime {
    * @param key: key to fetch value of from local state
    */
   getGlobalState (appId: number, key: Uint8Array): StackElem | undefined {
-    const appDelta = this.assertAppDefined(appId);
-    const globalState = appDelta["global-state"];
+    const app = this.assertAppDefined(appId);
+    const appGlobalState = app["global-state"];
 
-    const keyValue = globalState.find(schema => compareArray(schema.key, key));
+    const keyValue = appGlobalState.find(schema => compareArray(schema.key, key));
     const value = keyValue?.value;
     if (value) {
       return value?.bytes || BigInt(value?.uint);
@@ -82,27 +94,27 @@ export class Runtime {
    * @param value: key to fetch value of from local state
    */
   updateGlobalState (appId: number, key: Uint8Array, value: StackElem): SSCStateSchema[] {
-    const appDelta = this.assertAppDefined(appId);
-    const globalState = appDelta["global-state"];
+    const app = this.assertAppDefined(appId);
+    const appGlobalState = app["global-state"];
 
     const data = getKeyValPair(key, value); // key value pair to put
-    const idx = globalState.findIndex(schema => compareArray(schema.key, key));
+    const idx = appGlobalState.findIndex(schema => compareArray(schema.key, key));
     if (idx === -1) {
-      globalState.push(data); // push new pair if key not found
+      appGlobalState.push(data); // push new pair if key not found
     } else {
-      globalState[idx].value = data.value; // update value if key found
+      appGlobalState[idx].value = data.value; // update value if key found
     }
-    appDelta["global-state"] = globalState; // save updated state
+    app["global-state"] = appGlobalState; // save updated state
 
-    assertValidSchema(appDelta["global-state"], appDelta["global-state-schema"]); // verify if updated schema is valid by config
-    return globalState;
+    assertValidSchema(app["global-state"], app["global-state-schema"]); // verify if updated schema is valid by config
+    return appGlobalState;
   }
 
   /**
    * Description: set accounts for context as {address: SDKAccount}
    * @param accounts: array of account info's
    */
-  createStatefulContext (accounts: SDKAccount[]): void {
+  initializeAccounts (accounts: SDKAccount[]): void {
     for (const acc of accounts) {
       this.store.accounts.set(acc.address, acc);
 
@@ -147,16 +159,6 @@ export class Runtime {
     }
   }
 
-  prepareInitialState (txnParams: ExecParams| ExecParams[], accounts: SDKAccount[]): Context {
-    const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
-    this.createStatefulContext(accounts); // initialize state before execution
-    return {
-      state: this.store, // state is a copy of store
-      tx: tx,
-      gtxs: gtxs
-    };
-  }
-
   // updates account balance as per transaction parameters
   updateBalance (txnParam: ExecParams, account: SDKAccount): void {
     switch (txnParam.type) {
@@ -198,18 +200,27 @@ export class Runtime {
   /**
    * Description: this function executes a transaction based on a smart
    * contract logic and updates state afterwards
-   * @param txn : Transaction parameters
+   * @param txnParams : Transaction parameters
    * @param fileName : smart contract file (.teal) name in assets/
    * @param args : external arguments to smart contract
-   * @param accounts : accounts passed by the user
    */
   async executeTx (txnParams: ExecParams | ExecParams[], fileName: string,
-    args: Uint8Array[], accounts: SDKAccount[]): Promise<void> {
-    const context = this.prepareInitialState(txnParams, accounts); // prepare initial state
+    args: Uint8Array[]): Promise<void> {
+    const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
 
-    const program = getProgram(fileName);
-    const updatedState = await this.interpreter.execute(program, args, this, context);
-    this.store = updatedState; // update state after successful execution('local-state', 'global-state'..)
-    this.prepareFinalState(txnParams, accounts); // update account balances
+    // initialize context before each execution
+    this.ctx = {
+      state: _.cloneDeep(this.store), // state is a deep copy of store
+      tx: tx,
+      gtxs: gtxs,
+      args: args
+    };
+
+    const program = getProgram(fileName); // get TEAL code as string
+    const interpreter = new Interpreter();
+    await interpreter.execute(program, this);
+
+    this.store = this.ctx.state; // update state after successful execution('local-state', 'global-state'..)
+    this.prepareFinalState(txnParams, this.accounts); // update account balances
   }
 }

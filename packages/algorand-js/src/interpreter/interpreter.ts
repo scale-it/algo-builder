@@ -1,13 +1,10 @@
-import { assert } from "chai";
-
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { Runtime } from "../index";
 import { DEFAULT_STACK_ELEM } from "../lib/constants";
 import { Stack } from "../lib/stack";
 import { parser } from "../parser/parser";
-import type { Operator, StackElem, State, TEALStack } from "../types";
-import { Context } from "../types";
+import type { Operator, StackElem, TEALStack } from "../types";
 import { BIGINT0, Label } from "./opcode-list";
 
 export class Interpreter {
@@ -17,8 +14,6 @@ export class Interpreter {
   scratch: StackElem[];
   instructions: Operator[];
   instructionIndex: number;
-  args: Uint8Array[];
-  ctx: Context; // interpreter's 'local' context
   runtime: Runtime;
 
   constructor () {
@@ -28,8 +23,6 @@ export class Interpreter {
     this.scratch = new Array(256).fill(DEFAULT_STACK_ELEM);
     this.instructions = [];
     this.instructionIndex = 0; // set instruction index to zero
-    this.args = [];
-    this.ctx = <Context>{};
     this.runtime = <Runtime>{};
   }
 
@@ -52,15 +45,10 @@ export class Interpreter {
   /**
    * Description: this function executes TEAL code after parsing
    * @param {string} program: teal code
-   * @param {Uint8Array[]} args : external arguments
    * @param {Runtime} runtime : runtime object
-   * @param {Context} context: interpreter context (state and txns)
    */
-  async execute (program: string, args: Uint8Array[],
-    runtime: Runtime, context: Context): Promise<State> {
-    assert(Array.isArray(args));
+  async execute (program: string, runtime: Runtime): Promise<void> {
     this.runtime = runtime;
-    this.ctx = context; // set context of interpreter
     this.instructions = await parser(program, this);
 
     while (this.instructionIndex < this.instructions.length) {
@@ -72,9 +60,7 @@ export class Interpreter {
     if (this.stack.length() === 1) {
       const s = this.stack.pop();
 
-      if (!(s instanceof Uint8Array) && s > BIGINT0) {
-        return this.ctx.state;
-      }
+      if (!(s instanceof Uint8Array) && s > BIGINT0) { return; }
     }
     throw new TealError(ERRORS.TEAL.INVALID_STACK_ELEM);
   }
