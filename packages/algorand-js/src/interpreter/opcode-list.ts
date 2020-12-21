@@ -21,6 +21,8 @@ import { txAppArg, txnSpecbyField } from "./txn";
 export const BIGINT0 = BigInt("0");
 export const BIGINT1 = BigInt("1");
 
+// Opcodes reference link: https://developer.algorand.org/docs/reference/teal/opcodes/
+
 // Store TEAL version
 export class Pragma extends Op {
   readonly version: bigint;

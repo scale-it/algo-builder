@@ -63,7 +63,7 @@ describe("Teal Opcodes", function () {
   describe("Pragma", () => {
     it("should store pragma version", () => {
       const op = new Pragma(["version", "2"], 1);
-      assert.equal(op.version, "2");
+      assert.equal(op.version, BigInt("2"));
     });
 
     it("should store throw length error", () => {
