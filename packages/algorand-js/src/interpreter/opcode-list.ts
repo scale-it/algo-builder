@@ -1256,7 +1256,7 @@ export class Global extends Op {
     assertLen(args.length, 1, line);
     this.assertGlobalDefined(args[0]);
 
-    this.field = args[0]; // field
+    this.field = args[0]; // global field
     this.interpreter = interpreter;
   }
 
