@@ -72,15 +72,15 @@ export class StoreAccountImpl implements StoreAccount {
 
     for (const l of localState) {
       if (l.id === appId) { // find appId
-        const localDelta = l["key-value"];
-        const idx = localDelta.findIndex(schema => compareArray(schema.key, key));
+        const localApp = l["key-value"];
+        const idx = localApp.findIndex(schema => compareArray(schema.key, key));
 
         if (idx === -1) {
-          localDelta.push(data); // push new pair if key not found
+          localApp.push(data); // push new pair if key not found
         } else {
-          localDelta[idx].value = data.value; // update value if key found
+          localApp[idx].value = data.value; // update value if key found
         }
-        l["key-value"] = localDelta; // save updated state
+        l["key-value"] = localApp; // save updated state
 
         assertValidSchema(l["key-value"], l.schema); // verify if updated schema is valid by config
         return localState;

@@ -10,7 +10,7 @@ import { mockSuggestedParams } from "../../test/mocks/txn";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { Interpreter } from "../index";
-import { BIGINT0 } from "../interpreter/opcode-list";
+import { BIGINT0, BIGINT1 } from "../interpreter/opcode-list";
 import { checkIndexBound, compareArray } from "../lib/compare";
 import { convertToString } from "../lib/parsing";
 import { assertValidSchema, getKeyValPair } from "../lib/stateful";
@@ -60,9 +60,9 @@ export class Runtime {
       const senderAccount = convertToString(this.ctx.tx.snd);
       account = this.ctx.state.accounts.get(senderAccount);
     } else {
-      accountIndex--;
-      checkIndexBound(Number(accountIndex), this.ctx.tx.apat);
-      const pkBuffer = this.ctx.tx.apat[Number(accountIndex)];
+      const accIndex = accountIndex - BIGINT1;
+      checkIndexBound(Number(accIndex), this.ctx.tx.apat);
+      const pkBuffer = this.ctx.tx.apat[Number(accIndex)];
       account = this.ctx.state.accounts.get(convertToString(pkBuffer));
     }
     return this.assertAccountDefined(account);
