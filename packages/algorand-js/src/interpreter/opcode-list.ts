@@ -20,31 +20,42 @@ import { Op } from "./opcode";
 export const BIGINT0 = BigInt("0");
 export const BIGINT1 = BigInt("1");
 
+// Opcodes reference link: https://developer.algorand.org/docs/reference/teal/opcodes/
+
 // Store TEAL version
+// [...stack]
 export class Pragma extends Op {
-  readonly version;
+  readonly version: bigint;
 
   /**
-   * @param args words list extracted from line:  {"version"}
+   * Description: Store Pragma version
+   * @param args Expected arguments: ["version", version number]
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
     super();
     assertLen(args.length, 2, line);
     if (args[0] === "version") {
-      this.version = args[1];
+      this.version = BigInt(args[1]);
     } else {
       throw new TealError(ERRORS.TEAL.PRAGMA_VERSION_ERROR, { got: args[0], line: line });
     }
+  }
+
+  // Returns Pragma version
+  getVersion (): bigint {
+    return this.version;
   }
 
   execute (stack: TEALStack): void {}
 }
 
 // pops string([]byte) from stack and pushes it's length to stack
+// [...stack, bigint]
 export class Len extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -61,9 +72,11 @@ export class Len extends Op {
 
 // pops two unit64 from stack(last, prev) and pushes their sum(last + prev) to stack
 // panics on overflow (result > max_unit64)
+// [...stack, bigint]
 export class Add extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -83,9 +96,11 @@ export class Add extends Op {
 
 // pops two unit64 from stack(last, prev) and pushes their diff(last - prev) to stack
 // panics on underflow (result < 0)
+// [...stack, bigint]
 export class Sub extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -105,9 +120,11 @@ export class Sub extends Op {
 
 // pops two unit64 from stack(last, prev) and pushes their division(last / prev) to stack
 // panics if prev == 0
+// [...stack, bigint]
 export class Div extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -128,9 +145,11 @@ export class Div extends Op {
 
 // pops two unit64 from stack(last, prev) and pushes their mult(last * prev) to stack
 // panics on overflow (result > max_unit64)
+// [...stack, bigint]
 export class Mul extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -149,11 +168,14 @@ export class Mul extends Op {
 }
 
 // pushes argument[N] from argument array to stack
+// [...stack, bytes]
 export class Arg extends Op {
-  readonly _arg;
+  readonly _arg: Uint8Array;
 
   /**
-   * @param args words list extracted from line: {argument number}
+   * Description: Gets the argument value from interpreter.args array.
+   * store the value in _arg variable
+   * @param args Expected arguments: [argument number]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -162,10 +184,10 @@ export class Arg extends Op {
     assertLen(args.length, 1, line);
     assertOnlyDigits(args[0]);
 
-    const index = BigInt(args);
-    checkIndexBound(Number(index), interpreter.runtime.ctx.args);
+    const index = Number(args[0]);
+    this.checkIndexBound(index, interpreter.runtime.ctx.args);
 
-    this._arg = interpreter.runtime.ctx.args[Number(index)];
+    this._arg = interpreter.runtime.ctx.args[index];
   }
 
   execute (stack: TEALStack): void {
@@ -175,12 +197,14 @@ export class Arg extends Op {
 }
 
 // load block of byte-array constants
+// [...stack]
 export class Bytecblock extends Op {
   readonly bytecblock: Uint8Array[];
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line: {byte block}
+   * Description: Store blocks of bytes in bytecblock
+   * @param args Expected arguments: [bytecblock] // Ex: ["value1" "value2"]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -202,12 +226,14 @@ export class Bytecblock extends Op {
 }
 
 // push bytes constant from bytecblock to stack by index
+// [...stack, bytes]
 export class Bytec extends Op {
   readonly index: number;
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line: {byteblock index number}
+   * Description: Sets index according to arguments passed
+   * @param args Expected arguments: [byteblock index number]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -227,12 +253,14 @@ export class Bytec extends Op {
 }
 
 // load block of uint64 constants
+// [...stack]
 export class Intcblock extends Op {
   readonly intcblock: Array<bigint>;
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line: {intc block}
+   * Description: Stores block of integer in intcblock
+   * @param args Expected arguments: [integer block] // Ex: [100 200]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -255,12 +283,14 @@ export class Intcblock extends Op {
 }
 
 // push value from uint64 intcblock to stack by index
+// [...stack, bigint]
 export class Intc extends Op {
   readonly index: number;
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line: {intcblock index number}
+   * Description: Sets index according to arguments passed
+   * @param args Expected arguments: [intcblock index number]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -281,9 +311,11 @@ export class Intc extends Op {
 
 // pops two unit64 from stack(last, prev) and pushes their modulo(last % prev) to stack
 // Panic if B == 0.
+// [...stack, bigint]
 export class Mod extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -303,9 +335,11 @@ export class Mod extends Op {
 }
 
 // pops two unit64 from stack(last, prev) and pushes their bitwise-or(last | prev) to stack
+// [...stack, bigint]
 export class BitwiseOr extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -322,9 +356,11 @@ export class BitwiseOr extends Op {
 }
 
 // pops two unit64 from stack(last, prev) and pushes their bitwise-and(last & prev) to stack
+// [...stack, bigint]
 export class BitwiseAnd extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -341,9 +377,11 @@ export class BitwiseAnd extends Op {
 }
 
 // pops two unit64 from stack(last, prev) and pushes their bitwise-xor(last ^ prev) to stack
+// [...stack, bigint]
 export class BitwiseXor extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -360,9 +398,11 @@ export class BitwiseXor extends Op {
 }
 
 // pop unit64 from stack and push it's bitwise-invert(~last) to stack
+// [...stack, bigint]
 export class BitwiseNot extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -378,12 +418,14 @@ export class BitwiseNot extends Op {
 }
 
 // pop last value from the stack and store to scratch space
+// [...stack]
 export class Store extends Op {
   readonly index: number;
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line: {index for storage}
+   * Description: Stores index number according to arguments passed
+   * @param args Expected arguments: [index number]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -405,12 +447,14 @@ export class Store extends Op {
 }
 
 // copy last value from scratch space to the stack
+// [...stack, bigint/bytes]
 export class Load extends Op {
   readonly index: number;
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line: {index for storage}
+   * Description: Stores index number according to arguments passed.
+   * @param args Expected arguments: [index number]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -430,9 +474,11 @@ export class Load extends Op {
 }
 
 // err opcode : Error. Panic immediately.
+// [...stack]
 export class Err extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -446,9 +492,11 @@ export class Err extends Op {
 }
 
 // SHA256 hash of value X, yields [32]byte
+// [...stack, bytes]
 export class Sha256 extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -468,9 +516,11 @@ export class Sha256 extends Op {
 }
 
 // SHA512_256 hash of value X, yields [32]byte
+// [...stack, bytes]
 export class Sha512_256 extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -491,9 +541,11 @@ export class Sha512_256 extends Op {
 
 // Keccak256 hash of value X, yields [32]byte
 // https://github.com/phusion/node-sha3#example-2
+// [...stack, bytes]
 export class Keccak256 extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -514,9 +566,11 @@ export class Keccak256 extends Op {
 
 // for (data A, signature B, pubkey C) verify the signature of
 // ("ProgData" || program_hash || data) against the pubkey => {0 or 1}
+// [...stack, bigint]
 export class Ed25519verify extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -541,9 +595,11 @@ export class Ed25519verify extends Op {
 }
 
 // If A < B pushes '1' else '0'
+// [...stack, bigint]
 export class LessThan extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -564,9 +620,11 @@ export class LessThan extends Op {
 }
 
 // If A > B pushes '1' else '0'
+// [...stack, bigint]
 export class GreaterThan extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -587,9 +645,11 @@ export class GreaterThan extends Op {
 }
 
 // If A <= B pushes '1' else '0'
+// [...stack, bigint]
 export class LessThanEqualTo extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -610,9 +670,11 @@ export class LessThanEqualTo extends Op {
 }
 
 // If A >= B pushes '1' else '0'
+// [...stack, bigint]
 export class GreaterThanEqualTo extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -633,9 +695,11 @@ export class GreaterThanEqualTo extends Op {
 }
 
 // If A && B is true pushes '1' else '0'
+// [...stack, bigint]
 export class And extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -656,9 +720,11 @@ export class And extends Op {
 }
 
 // If A || B is true pushes '1' else '0'
+// [...stack, bigint]
 export class Or extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -679,9 +745,11 @@ export class Or extends Op {
 }
 
 // If A == B pushes '1' else '0'
+// [...stack, bigint]
 export class EqualTo extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -706,9 +774,11 @@ export class EqualTo extends Op {
 }
 
 // If A != B pushes '1' else '0'
+// [...stack, bigint]
 export class NotEqualTo extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -733,9 +803,11 @@ export class NotEqualTo extends Op {
 }
 
 // X == 0 yields 1; else 0
+// [...stack, bigint]
 export class Not extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -755,9 +827,11 @@ export class Not extends Op {
 }
 
 // converts uint64 X to big endian bytes
+// [...stack, big endian bytes]
 export class Itob extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -776,9 +850,11 @@ export class Itob extends Op {
 
 // converts bytes X as big endian to uint64
 // btoi panics if the input is longer than 8 bytes.
+// [...stack, bigint]
 export class Btoi extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -799,9 +875,11 @@ export class Btoi extends Op {
 }
 
 // A plus B out to 128-bit long result as sum (top) and carry-bit uint64 values on the stack
+// [...stack, bigint]
 export class Addw extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -827,9 +905,11 @@ export class Addw extends Op {
 }
 
 // A times B out to 128-bit long result as low (top) and high uint64 values on the stack
+// [...stack, bigint]
 export class Mulw extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -855,9 +935,11 @@ export class Mulw extends Op {
 }
 
 // Pop one element from stack
+// [...stack] // pop value.
 export class Pop extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -872,9 +954,11 @@ export class Pop extends Op {
 }
 
 // duplicate last value on stack
+// [...stack, duplicate value]
 export class Dup extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -892,9 +976,11 @@ export class Dup extends Op {
 }
 
 // duplicate two last values on stack: A, B -> A, B, A, B
+// [...stack, B, A, B, A]
 export class Dup2 extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -916,9 +1002,11 @@ export class Dup2 extends Op {
 
 // pop two byte strings A and B and join them, push the result
 // concat panics if the result would be greater than 4096 bytes.
+// [...stack, string]
 export class Concat extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -945,12 +1033,14 @@ export class Concat extends Op {
 // extract last range of bytes from it starting at M up to but not including N,
 // push the substring result. If N < M, or either is larger than the string length,
 // the program fails
+// [...stack, substring]
 export class Substring extends Op {
   readonly start: bigint;
   readonly end: bigint;
 
   /**
-   * @param args words list extracted from line: {start index, end index}
+   * Description: Stores values of `start` and `end` according to arguments passed.
+   * @param args Expected arguments: [start index number, end index number]
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -977,9 +1067,11 @@ export class Substring extends Op {
 // Extract last range of bytes from A starting at B up to
 // but not including C, push the substring result. If C < B,
 // or either is larger than the string length, the program fails
+// [...stack, substring]
 export class Substring3 extends Op {
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -998,12 +1090,16 @@ export class Substring3 extends Op {
 }
 
 // push field from current transaction to stack
+// [...stack, transaction field]
 export class Txn extends Op {
   readonly field: string;
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line: {transaction field (string)}
+   * Description: Set transaction field according to arguments passed
+   * @param args Expected arguments: [transaction field]
+   * // Note: Transaction field is expected as string instead of number.
+   * For ex: `Fee` is expected and `0` is not expected.
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1024,13 +1120,17 @@ export class Txn extends Op {
 
 // push field to the stack from a transaction in the current transaction group
 // If this transaction is i in the group, gtxn i field is equivalent to txn field.
+// [...stack, transaction field]
 export class Gtxn extends Op {
   readonly field: string;
   readonly txIdx: number;
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line: {transaction group index, transaction field (string)}
+   * Description: Sets `field`, `txIdx` values according to arguments passed.
+   * @param args Expected argumensts: [transaction group index, transaction field]
+   * // Note: Transaction field is expected as string instead of number.
+   * For ex: `Fee` is expected and `0` is not expected.
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1055,14 +1155,17 @@ export class Gtxn extends Op {
 }
 
 // push value of an array field from current transaction to stack
+// [...stack, value of an array field ]
 export class Txna extends Op {
   readonly field: string;
   readonly idx: number;
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line:
-   * {transaction field (string), transaction field array index}
+   * Description: Sets `field` and `idx` values according to arguments passed.
+   * @param args Expected arguments: [transaction field, transaction field array index]
+   * // Note: Transaction field is expected as string instead of number.
+   * For ex: `Fee` is expected and `0` is not expected.
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1084,6 +1187,7 @@ export class Txna extends Op {
 }
 
 // push value of a field to the stack from a transaction in the current transaction group
+// [...stack, value of field]
 export class Gtxna extends Op {
   readonly field: string;
   readonly txIdx: number; // transaction group index
@@ -1091,8 +1195,12 @@ export class Gtxna extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line:
-   * {transaction group index, transaction field (string), transaction field array index}
+   * Description: Sets `field`(Transaction Field), `idx`(Array Index) and
+   * `txIdx`(Transaction Group Index) values according to arguments passed.
+   * @param args Expected arguments:
+   * [transaction group index, transaction field, transaction field array index]
+   * // Note: Transaction field is expected as string instead of number.
+   * For ex: `Fee` is expected and `0` is not expected.
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1119,11 +1227,13 @@ export class Gtxna extends Op {
 }
 
 // represents branch name of a new branch
+// [...stack]
 export class Label extends Op {
   readonly label: string;
 
   /**
-   * @param args words list extracted from line: {label string}
+   * Description: Sets `label` according to arguments passed.
+   * @param args Expected arguments: [label]
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -1136,12 +1246,14 @@ export class Label extends Op {
 }
 
 // branch unconditionally to label
+// [...stack]
 export class Branch extends Op {
   readonly label: string;
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line: {branch name}
+   * Description: Sets `label` according to arguments passed.
+   * @param args Expected arguments: [label of branch]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1158,12 +1270,14 @@ export class Branch extends Op {
 }
 
 // branch conditionally if top of stack is zero
+// [...stack]
 export class BranchIfZero extends Op {
   readonly label: string;
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line: {branch name}
+   * Description: Sets `label` according to arguments passed.
+   * @param args Expected arguments: [label of branch]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1185,12 +1299,14 @@ export class BranchIfZero extends Op {
 }
 
 // branch conditionally if top of stack is non zero
+// [...stack]
 export class BranchIfNotZero extends Op {
   readonly label: string;
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line: {branch name}
+   * Description: Sets `label` according to arguments passed.
+   * @param args Expected arguments: [label of branch]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1212,11 +1328,13 @@ export class BranchIfNotZero extends Op {
 }
 
 // use last value on stack as success value; end
+// [...stack, last]
 export class Return extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1240,12 +1358,14 @@ export class Return extends Op {
 
 // check if account specified by Txn.Accounts[A] opted in for the application B => {0 or 1}
 // params: account index, application id (top of the stack on opcode entry).
-// Return: 1 if opted in and 0 otherwise.
+// [...stack, 1] if opted in
+// [...stack, 0] 0 otherwise
 export class AppOptedIn extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1273,11 +1393,13 @@ export class AppOptedIn extends Op {
 }
 
 // read from account specified by Txn.Accounts[A] from local state of the current application key B => value
+// [...stack]
 export class AppLocalGet extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1305,12 +1427,14 @@ export class AppLocalGet extends Op {
 }
 
 // read from application local state at Txn.Accounts[A] => app B => key C from local state.
-// Pushes to the stack [...stack, val, 1] if the key exists, otherwise [...stack, 0]
+// Pushes to the stack [...stack, val, 1] if the key exists,
+// otherwise [...stack, 0]
 export class AppLocalGetEx extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1338,11 +1462,14 @@ export class AppLocalGetEx extends Op {
 }
 
 // read key A from global state of a current application => value
+// [...stack, 0] if key doesn't exist
+// otherwise [...stack, value]
 export class AppGlobalGet extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1366,14 +1493,17 @@ export class AppGlobalGet extends Op {
   }
 }
 
-// read from application Txn.ForeignApps[A] global state key B => {0 or 1 (top), value}.
+// read from application Txn.ForeignApps[A] global state key B pushes to the stack
+// [...stack, 0] if key doesn't exist
+// otherwise [...stack, value, 1]
 // A is specified as an account index in the ForeignApps field of the ApplicationCall transaction,
 // zero index means this app
 export class AppGlobalGetEx extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1408,11 +1538,13 @@ export class AppGlobalGetEx extends Op {
 }
 
 // write to account specified by Txn.Accounts[A] to local state of a current application key B with value C
+// [...stack, address]
 export class AppLocalPut extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1440,11 +1572,13 @@ export class AppLocalPut extends Op {
 }
 
 // write key A and value B to global state of the current application
+// [...stack]
 export class AppGlobalPut extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1468,11 +1602,13 @@ export class AppGlobalPut extends Op {
 }
 
 // delete from account specified by Txn.Accounts[A] local state key B of the current application
+// [...stack]
 export class AppLocalDel extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1506,11 +1642,13 @@ export class AppLocalDel extends Op {
 }
 
 // delete key A from a global state of the current application
+// [...stack]
 export class AppGlobalDel extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
@@ -1539,11 +1677,13 @@ export class AppGlobalDel extends Op {
 
 /** Pseudo-Ops **/
 // push integer to stack
+// [...stack, integer value]
 export class Int extends Op {
   readonly uint64: bigint;
 
   /**
-   * @param args words list extracted from line: {number}
+   * Description: Sets uint64 variable according to arguments passed.
+   * @param args Expected arguments: [number]
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -1559,12 +1699,14 @@ export class Int extends Op {
 }
 
 // push bytes to stack
+// [...stack, converted data]
 export class Byte extends Op {
   readonly str: string;
-  readonly encoding?: EncodingType;
+  readonly encoding: EncodingType;
 
   /**
-   * @param args words list extracted from line: {data string}
+   * Description: Sets `str` and  `encoding` values according to arguments passed.
+   * @param args Expected arguments: [data string]
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
@@ -1579,11 +1721,13 @@ export class Byte extends Op {
 }
 
 // decodes algorand address to bytes and pushes to stack
+// [...stack, address]
 export class Addr extends Op {
   readonly addr: string;
 
   /**
-   * @param args words list extracted from line: {Address string}
+   * Description: Sets `addr` value according to arguments passed.
+   * @param args Expected arguments: [Address]
    * @param line line number in TEAL file
    */
   constructor (args: string[], line: number) {
