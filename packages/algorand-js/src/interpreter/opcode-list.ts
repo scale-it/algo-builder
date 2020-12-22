@@ -1749,11 +1749,13 @@ export class Addr extends Op {
 // by Txn.Accounts[A] in microalgos. A is specified as an account
 // index in the Accounts field of the ApplicationCall transaction,
 // zero index means the sender
+// [...stack, bigint]
 export class Balance extends Op {
   readonly interpreter: Interpreter;
 
   /**
-   * @param args words list extracted from line: {}
+   * Description: Asserts if arguments length is zero
+   * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    * @param interpreter Interpreter Object
    */
@@ -1794,14 +1796,17 @@ export class Balance extends Op {
 }
 
 // For Account A, Asset B (txn.accounts[A]) pushes to the
-// stack {...stack, 0} if account has no B holding,
-// otherwise {...stack, holding, 1}
+// stack [...stack, 0] if account has no B holding,
+// otherwise [...stack, holding, 1]
 export class GetAssetHolding extends Op {
   readonly interpreter: Interpreter;
   readonly field: string;
 
   /**
-   * @param args words list extracted from line: {Asset Holding field}
+   * Description: sets field according to arguments passed.
+   * @param args Expected arguments: [Asset Holding field]
+   * // Note: Asset holding field will be string
+   * For ex: `AssetBalance` is correct `0` is not.
    * @param line line number in TEAL file
    * @param interpreter Interpreter Object
    */
@@ -1846,14 +1851,17 @@ export class GetAssetHolding extends Op {
 
 // get Asset Params Info for given account
 // For Index in ForeignAssets array
-// stack {...stack, 0} if asset doesn't exist,
-// otherwise {...stack, holding, 1}
+// stack [...stack, 0] if asset doesn't exist,
+// otherwise [...stack, holding, 1]
 export class GetAssetParams extends Op {
   readonly interpreter: Interpreter;
   readonly field: string;
 
   /**
-   * @param args words list extracted from line: {Asset Params field (string)}
+   * Description: sets transaction field according to arguments passed
+   * @param args Expected arguments: [Asset Params field]
+   * // Note: Asset Params field will be string
+   * For ex: `AssetTotal` is correct `0` is not.
    * @param line line number in TEAL file
    * @param interpreter Interpreter Object
    */
