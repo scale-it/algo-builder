@@ -89,7 +89,8 @@ export interface StoreAccount {
   appsTotalSchema: SSCSchemaConfig
   createdApps: CreatedApps[]
   createdAssets: CreatedAssets[]
-  account?: Account
+  account: Account
+  accountsAssets: Map<string, Map<number, AssetHolding>>
 
   balance: () => number
   getLocalState: (appId: number, key: Uint8Array) => StackElem | undefined

@@ -3,16 +3,13 @@ import { assert } from "chai";
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime } from "../../src/index";
 import { StoreAccountImpl } from "../../src/runtime/account";
-import { StoreAccount } from "../../src/types";
+import { getAcc } from "../helpers/account";
 import { expectTealErrorAsync } from "../helpers/errors";
-
-function getAcc (runtime: Runtime, acc: StoreAccount): StoreAccountImpl {
-  return runtime.ctx.state.accounts.get(acc.address) as StoreAccountImpl;
-}
 
 describe("Algorand Smart Contracts", function () {
   let john = new StoreAccountImpl(1000);
   let bob = new StoreAccountImpl(500);
+
   // set up transaction paramenters
   const txnParams = {
     type: 0, // payment
