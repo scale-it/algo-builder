@@ -9,8 +9,8 @@ import { decode, encode } from "uint64be";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
-import { GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
 import { checkIndexBound, compareArray } from "../lib/compare";
+import { GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
 import { assertLen, assertOnlyDigits, convertToBuffer, convertToString, getEncoding } from "../lib/parsing";
 import { txAppArg, txnSpecbyField } from "../lib/txn";
 import type { EncodingType, TEALStack } from "../types";

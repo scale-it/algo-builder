@@ -1,3 +1,4 @@
+/* eslint sonarjs/no-identical-functions: 0 */
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { GlobalFields, MAX_UINT8, MAX_UINT64, MIN_UINT8, MIN_UINT64, TxnFields } from "../lib/constants";
