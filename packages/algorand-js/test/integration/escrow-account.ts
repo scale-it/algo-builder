@@ -9,8 +9,8 @@ import { expectTealErrorAsync } from "../helpers/errors";
 import { johnAccount } from "../mocks/account";
 
 describe("Algorand Stateless Smart Contracts", function () {
-  let escrow = new StoreAccountImpl(1000000000); // 1000 ALGO
-  let john = new StoreAccountImpl(500, johnAccount); // 0.005 ALGO
+  const escrow = new StoreAccountImpl(1000000000); // 1000 ALGO
+  const john = new StoreAccountImpl(500, johnAccount); // 0.005 ALGO
   // set up transaction paramenters
   const txnParams = {
     type: 0, // payment
@@ -24,12 +24,6 @@ describe("Algorand Stateless Smart Contracts", function () {
   let runtime: Runtime;
   this.beforeAll(function () {
     runtime = new Runtime([escrow, john]); // setup test
-  });
-
-  // update account state after each execution
-  afterEach(function () {
-    escrow = getAcc(runtime, escrow);
-    john = getAcc(runtime, john);
   });
 
   it("should withdraw funds from escrow on correct txn params", async function () {
