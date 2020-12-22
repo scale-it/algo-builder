@@ -2,7 +2,7 @@
 /* eslint sonarjs/no-small-switch: 0 */
 import { mkTransaction } from "algob";
 import { ExecParams, TransactionType } from "algob/src/types";
-import { getProgram } from "algob/test/helpers/fs";
+import { getProgram } from "../../test/helpers/fs";
 import { assignGroupID, SSCParams, SSCStateSchema } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 

@@ -1,4 +1,4 @@
-import { getProgram } from "algob/test/helpers/fs";
+import { getProgram } from "../../helpers/fs";
 import { assert } from "chai";
 
 import { ERRORS } from "../../../src/errors/errors-list";
@@ -14,7 +14,6 @@ import {
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { Runtime } from "../../../src/runtime/runtime";
 import { expectTealError } from "../../helpers/errors";
-import { useFixtureProject } from "../../helpers/project";
 
 // base64 case needs to be verified at the time of decoding
 describe("Parser", function () {
@@ -422,7 +421,6 @@ describe("Parser", function () {
   });
 
   describe("Opcodes list from TEAL file", () => {
-    useFixtureProject("teal-files");
     const interpreter = new Interpreter();
 
     it("Sould return correct opcode list for '+'", async () => {

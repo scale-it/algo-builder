@@ -5,15 +5,12 @@ import { Runtime } from "../../src/index";
 import { StoreAccountImpl } from "../../src/runtime/account";
 import { StoreAccount } from "../../src/types";
 import { expectTealErrorAsync } from "../helpers/errors";
-import { useFixtureProject } from "../helpers/project";
 
 function getAcc (runtime: Runtime, acc: StoreAccount): StoreAccountImpl {
   return runtime.store.accounts.get(acc.address) as StoreAccountImpl;
 }
 
 describe("Algorand Smart Contracts", function () {
-  useFixtureProject("smart-contracts");
-
   let john = new StoreAccountImpl(1000);
   let bob = new StoreAccountImpl(500);
   // set up transaction paramenters
