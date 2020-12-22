@@ -1,4 +1,4 @@
-import { AssetParamsEnc } from "algosdk";
+import { AssetDefEnc } from "algosdk";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
@@ -48,11 +48,11 @@ export function txnSpecbyField (txField: string, interpreter: Interpreter): Stac
   const gtxs = interpreter.runtime.ctx.gtxs;
   let result; // store raw result, parse and return
 
-  // handle nested encoded obj (for assetParams)
+  // handle nested encoded obj (for AssetDef)
   if (assetTxnFields.has(txField)) {
     const s = TxnFields[txField];
     const assetMetaData = tx.apar;
-    result = assetMetaData[s as keyof AssetParamsEnc];
+    result = assetMetaData[s as keyof AssetDefEnc];
     return parseToStackElem(result, txField);
   }
 

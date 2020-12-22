@@ -2,7 +2,7 @@
 /* eslint sonarjs/no-small-switch: 0 */
 import { mkTransaction } from "algob";
 import { ExecParams, TransactionType } from "algob/src/types";
-import { assignGroupID, SSCParams, SSCStateSchema } from "algosdk";
+import { AssetDef, AssetHolding, assignGroupID, SSCParams, SSCStateSchema } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
 import { getProgram } from "../../test/helpers/fs";
@@ -17,24 +17,37 @@ import { assertValidSchema, getKeyValPair } from "../lib/stateful";
 import type { Context, StackElem, State, StoreAccount, Txn } from "../types";
 
 export class Runtime {
-  store: State;
+  /**
+   * We are duplicating `accounts` data in `accountAssets`
+   * because of faster and easy querying.
+   * The structure in `accountAssets` is:
+   * Map < accountAddress, Map <AssetId, AssetHolding> >
+   * This way when querying, instead of traversing the whole object,
+   * we can get the value directly from Map
+   */
+  private store: State;
   ctx: Context;
 
   constructor (accounts: StoreAccount[]) {
     // runtime store
+    const assetInfo = new Map<number, AssetHolding>();
     this.store = {
       accounts: new Map<string, StoreAccount>(),
-      globalApps: new Map<number, SSCParams>()
+      accountAssets: new Map<string, typeof assetInfo>(),
+      globalApps: new Map<number, SSCParams>(),
+      assetDefs: new Map<number, AssetDef>()
     };
+
+    // intialize accounts (should be done during runtime initialization)
+    this.initializeAccounts(accounts);
+
     // context for interpreter
     this.ctx = {
-      state: <State>{},
+      state: cloneDeep(this.store), // state is a deep copy of store
       tx: <Txn>{},
       gtxs: [],
       args: []
     };
-    // intialize accounts (should be done during runtime initialization)
-    this.initializeAccounts(accounts);
   }
 
   assertAccountDefined (a?: StoreAccount): StoreAccount {
@@ -119,6 +132,20 @@ export class Runtime {
       for (const app of acc.createdApps) {
         this.store.globalApps.set(app.id, app.params);
       }
+
+      for (const asset of acc.createdAssets) {
+        this.store.assetDefs.set(asset.index, asset.params);
+      }
+
+      // Here we are duplicating `accounts` data
+      // to `accountAssets` for easy querying
+      const assets = acc.assets;
+      const assetInfo = new Map<number, AssetHolding>();
+      for (const asset of assets) {
+        assetInfo.set(asset["asset-id"], asset);
+      }
+
+      this.store.accountAssets.set(acc.address, assetInfo);
     }
   }
 
