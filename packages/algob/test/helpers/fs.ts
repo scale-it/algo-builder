@@ -1,4 +1,3 @@
-import fs from "fs";
 import fsExtra from "fs-extra";
 import * as os from "os";
 import path from "path";
