@@ -4,7 +4,7 @@ import { mkTransaction } from "algob";
 import { ExecParams, TransactionType } from "algob/src/types";
 import { getProgram } from "algob/test/helpers/fs";
 import { assignGroupID, SSCParams, SSCStateSchema } from "algosdk";
-import _ from "lodash";
+import cloneDeep from "lodash/cloneDeep";
 
 import { mockSuggestedParams } from "../../test/mocks/txn";
 import { TealError } from "../errors/errors";
@@ -19,7 +19,6 @@ import type { Context, StackElem, State, StoreAccount, Txn } from "../types";
 export class Runtime {
   store: State;
   ctx: Context;
-  accounts: StoreAccount[];
 
   constructor (accounts: StoreAccount[]) {
     // runtime store
@@ -35,7 +34,6 @@ export class Runtime {
       args: []
     };
     // intialize accounts (should be done during runtime initialization)
-    this.accounts = accounts;
     this.initializeAccounts(accounts);
   }
 
@@ -182,18 +180,18 @@ export class Runtime {
    * @param txnParams : Transaction parameters
    * @param accounts : accounts passed by user
    */
-  prepareFinalState (txnParams: ExecParams | ExecParams[], accounts: StoreAccount[]): void {
+  prepareFinalState (txnParams: ExecParams | ExecParams[]): void {
     if (Array.isArray(txnParams)) { // if txn is a group, update balance as per 'each' transaction
       for (const txnParam of txnParams) {
-        for (const acc of accounts) {
-          this.updateBalance(txnParam, acc);
-        }
+        this.store.accounts.forEach((account, addr) => {
+          this.updateBalance(txnParam, account);
+        })
       }
     } else {
       // for a single (stand alone) transaction
-      for (const acc of accounts) {
-        this.updateBalance(txnParams, acc);
-      }
+      this.store.accounts.forEach((account, addr) => {
+        this.updateBalance(txnParams, account);
+      })
     }
   }
 
@@ -210,7 +208,7 @@ export class Runtime {
 
     // initialize context before each execution
     this.ctx = {
-      state: _.cloneDeep(this.store), // state is a deep copy of store
+      state: cloneDeep(this.store), // state is a deep copy of store
       tx: tx,
       gtxs: gtxs,
       args: args
@@ -221,6 +219,6 @@ export class Runtime {
     await interpreter.execute(program, this);
 
     this.store = this.ctx.state; // update state after successful execution('local-state', 'global-state'..)
-    this.prepareFinalState(txnParams, this.accounts); // update account balances
+    this.prepareFinalState(txnParams); // update account balances
   }
 }
