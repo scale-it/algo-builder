@@ -7,13 +7,7 @@ export const accInfo = [{
     { 'asset-id': 32, amount: 2, creator: "AS", 'is-frozen': "false" }
   ],
   amount: 123,
-  "amount-without-pending-rewards": 12,
-  'pending-rewards': 122,
-  'reward-base': 1,
-  rewards: 4,
-  round: 2,
-  status: 'Offline',
-  'apps-local-state': [{
+  appsLocalState: [{
     id: 1847,
     'key-value': [
       {
@@ -30,8 +24,8 @@ export const accInfo = [{
       'num-uint': 1
     }
   }],
-  'apps-total-schema': { 'num-byte-slice': 583, 'num-uint': 105 },
-  'created-apps': [{
+  appsTotalSchema: { 'num-byte-slice': 583, 'num-uint': 105 },
+  createdApps: [{
     id: 1828,
     params: {
       'approval-program': '',

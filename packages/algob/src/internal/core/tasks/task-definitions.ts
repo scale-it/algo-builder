@@ -538,7 +538,7 @@ export class OverriddenTaskDefinition implements TaskDefinition {
     this.parentTaskDefinition = parentTaskDefinition;
   }
 
-  public setDescription (description: string): this{
+  public setDescription (description: string): this {
     this._description = description;
     return this;
   }

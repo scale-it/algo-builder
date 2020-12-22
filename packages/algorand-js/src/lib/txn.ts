@@ -2,11 +2,11 @@ import { AssetParamsEnc } from "algosdk";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
+import { Interpreter } from "../index";
+import { Op } from "../interpreter/opcode";
 import { TxFieldDefaults, TxnFields } from "../lib/constants";
 import { toBytes } from "../lib/parsing";
 import { StackElem, TxField, Txn, TxnType } from "../types";
-import { Interpreter } from "./interpreter";
-import { Op } from "./opcode";
 
 const assetTxnFields = new Set([
   'ConfigAssetTotal',
@@ -44,8 +44,8 @@ export function parseToStackElem (a: unknown, field: TxField): StackElem {
  * @param interpreter: interpreter
  */
 export function txnSpecbyField (txField: string, interpreter: Interpreter): StackElem {
-  const tx = interpreter.tx;
-  const gtxs = interpreter.gtxs;
+  const tx = interpreter.runtime.ctx.tx;
+  const gtxs = interpreter.runtime.ctx.gtxs;
   let result; // store raw result, parse and return
 
   // handle nested encoded obj (for assetParams)
