@@ -137,6 +137,8 @@ export class Runtime {
         this.store.assetDefs.set(asset.index, asset.params);
       }
 
+      // Here we are duplicating `accounts` data
+      // to `accountAssets` for easy querying
       const assets = acc.assets;
       const assetInfo = new Map<number, AssetHolding>();
       for (const asset of assets) {
