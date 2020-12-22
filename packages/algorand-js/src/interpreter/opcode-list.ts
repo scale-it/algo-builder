@@ -1769,29 +1769,20 @@ export class Balance extends Op {
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1);
     let accountIndex = this.assertBigInt(stack.pop());
-    let bal = 0;
+    let res;
 
     if (accountIndex === BigInt("0")) {
       const sender = convertToString(this.interpreter.runtime.ctx.tx.snd);
-      const val = this.interpreter.runtime.ctx.state.accounts.get(sender);
-      if (val === undefined) {
-        throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
-      }
-      bal = val.amount;
+      res = this.interpreter.runtime.ctx.state.accounts.get(sender);
     } else {
       this.checkIndexBound(Number(--accountIndex), this.interpreter.runtime.ctx.tx.apat);
-
       const buf = this.interpreter.runtime.ctx.tx.apat[Number(accountIndex)];
-      const res = this.interpreter.runtime.ctx.state.accounts.get(convertToString(buf));
-
-      if (res === undefined) {
-        throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
-      }
-
-      bal = res.amount;
+      res = this.interpreter.runtime.ctx.state.accounts.get(convertToString(buf));
     }
+    if (val === undefined)
+        throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
 
-    stack.push(BigInt(bal));
+    stack.push(BigInt(res.amount));
   }
 }
 
