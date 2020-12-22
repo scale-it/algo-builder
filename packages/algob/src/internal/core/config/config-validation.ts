@@ -122,7 +122,7 @@ export function getValidationErrors(config: any): CfgErrors {  // eslint-disable
         HttpNetworkType.parse(hcfg);
       } catch (e) {
         if (e instanceof z.ZodError) {
-          errors.concatenate([parseZodError(e)]);
+          errors.appendErrors([parseZodError(e)]);
         }
       }
     }
@@ -136,7 +136,7 @@ export function getValidationErrors(config: any): CfgErrors {  // eslint-disable
     Config.parse(config);
   } catch (e) {
     if (e instanceof z.ZodError) {
-      errors.concatenate([parseZodError(e)]);
+      errors.appendErrors([parseZodError(e)]);
     }
   }
   return errors;
