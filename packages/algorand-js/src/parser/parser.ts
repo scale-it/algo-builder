@@ -1,11 +1,6 @@
-import fs from "fs";
-import readline from "readline";
-
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { Interpreter } from "../interpreter/interpreter";
-import { assertLen } from "../lib/parsing";
-import { Operator } from "../types";
 import {
   Add, Addr, Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
   Branch, BranchIfNotZero, BranchIfZero, Btoi, Byte, Bytec, Bytecblock,
@@ -13,7 +8,9 @@ import {
   GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc, Intcblock, Itob, Keccak256, Label,
   Len, LessThan, LessThanEqualTo, Load, Mod, Mul, Mulw, Not, NotEqualTo, Or,
   Pop, Pragma, Return, Sha256, Sha512_256, Store, Sub, Substring, Substring3, Txn, Txna
-} from "./opcode-list";
+} from "../interpreter/opcode-list";
+import { assertLen } from "../lib/parsing";
+import { Operator } from "../types";
 
 var opCodeMap: {[key: string]: any } = {
   // Pragma
@@ -239,19 +236,15 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
 
 /**
  * Description: Returns a list of Opcodes object after reading text from given TEAL file
- * @param filename : Name of the TEAL file with location
+ * @param program : TEAL code as string
+ * @param interpreter: interpreter object
  */
-export async function parser (filename: string, interpreter: Interpreter): Promise<Operator[]> {
+export async function parser (program: string, interpreter: Interpreter): Promise<Operator[]> {
   const opCodeList = [] as Operator[];
   let counter = 0;
 
-  const rl = readline.createInterface({
-    input: fs.createReadStream(filename), // file location
-    output: process.stdout,
-    terminal: false
-  });
-
-  for await (const line of rl) {
+  const lines = program.split('\n');
+  for await (const line of lines) {
     counter++;
     // If line is blank or is comment, continue.
     if (line.length === 0 || line.startsWith("//")) {

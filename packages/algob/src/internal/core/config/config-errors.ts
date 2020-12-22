@@ -30,7 +30,7 @@ export default class CfgErrors {
       expectedType));
   }
 
-  public concatenate (errors: string[]): void{
+  public appendErrors (errors: string[]): void {
     for (const e of errors) { this.errors.push(e); }
   }
 

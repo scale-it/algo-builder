@@ -1,4 +1,7 @@
-import { TxnEncodedObj } from "algosdk";
+import {
+  Account,
+  AccountAssetInfo, AppLocalState, CreatedApps, CreatedAssets, SSCParams, SSCSchemaConfig, TxnEncodedObj
+} from "algosdk";
 
 import {
   Add, Addr, Arg, Byte, Bytec, Bytecblock, Div, Int, Len, Mul, Pragma,
@@ -69,4 +72,38 @@ export enum EncodingType {
   BASE32,
   HEX,
   UTF8
+}
+
+export interface AccountsMap {
+  [addr: string]: StoreAccount
+}
+
+export interface State {
+  accounts: Map<string, StoreAccount>
+  globalApps: Map<number, SSCParams>
+}
+
+// describes interpreter's local context (state + txns)
+export interface Context {
+  state: State
+  tx: Txn // current txn
+  gtxs: Txn[] // all transactions
+  args: Uint8Array[]
+}
+
+// represent account used in tests and by the context
+// NOTE: custom notations are used rather than SDK AccountState notations
+export interface StoreAccount {
+  address: string
+  assets: AccountAssetInfo[]
+  amount: number
+  appsLocalState: AppLocalState[]
+  appsTotalSchema: SSCSchemaConfig
+  createdApps: CreatedApps[]
+  createdAssets: CreatedAssets[]
+  account?: Account
+
+  balance: () => number
+  getLocalState: (appId: number, key: Uint8Array) => StackElem | undefined
+  updateLocalState: (appId: number, key: Uint8Array, value: StackElem) => AppLocalState[]
 }
