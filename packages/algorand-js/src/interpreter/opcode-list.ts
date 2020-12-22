@@ -1261,26 +1261,26 @@ export class Global extends Op {
   }
 
   execute (stack: TEALStack): void {
-    let g;
+    let result;
     switch (this.field) {
       case 'GroupSize': {
-        g = this.interpreter.gtxs.length;
+        result = this.interpreter.gtxs.length;
         break;
       }
       case 'CurrentApplicationID': {
-        g = this.interpreter.tx.apid;
-        this.assertAppDefined(g, this.interpreter);
+        result = this.interpreter.tx.apid;
+        this.assertAppDefined(result, this.interpreter);
         break;
       }
       default: {
-        g = GlobalFields[this.field];
+        result = GlobalFields[this.field];
       }
     }
 
-    if (typeof g === 'number') {
-      stack.push(BigInt(g));
+    if (typeof result === 'number') {
+      stack.push(BigInt(result));
     } else {
-      stack.push(g);
+      stack.push(result);
     }
   }
 }
