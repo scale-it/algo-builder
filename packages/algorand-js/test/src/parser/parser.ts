@@ -5,7 +5,7 @@ import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
   Add, Addr, Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi, Byte, Bytec, Concat,
-  Div, Dup, Dup2, Ed25519verify, EqualTo, Err, GreaterThan, GreaterThanEqualTo,
+  Div, Dup, Dup2, Ed25519verify, EqualTo, Err, Global, GreaterThan, GreaterThanEqualTo,
   Gtxn, Gtxna, Int, Intc, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
   Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, Return, Sha256,
   Sha512_256, Store, Sub, Substring, Substring3, Txn, Txna
@@ -418,6 +418,64 @@ describe("Parser", function () {
         ERRORS.TEAL.INVALID_TYPE
       );
     });
+
+    it("should return correct objects for `global`", () => {
+      let res = opcodeFromSentence(["global", "MinTxnFee"], 1, interpreter);
+      let expected = new Global(["MinTxnFee"], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      res = opcodeFromSentence(["global", "MinBalance"], 1, interpreter);
+      expected = new Global(["MinBalance"], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      res = opcodeFromSentence(["global", "MaxTxnLife"], 1, interpreter);
+      expected = new Global(["MaxTxnLife"], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      res = opcodeFromSentence(["global", "ZeroAddress"], 1, interpreter);
+      expected = new Global(["ZeroAddress"], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      res = opcodeFromSentence(["global", "GroupSize"], 1, interpreter);
+      expected = new Global(["GroupSize"], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      res = opcodeFromSentence(["global", "LogicSigVersion"], 1, interpreter);
+      expected = new Global(["LogicSigVersion"], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      res = opcodeFromSentence(["global", "Round"], 1, interpreter);
+      expected = new Global(["Round"], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      res = opcodeFromSentence(["global", "LatestTimestamp"], 1, interpreter);
+      expected = new Global(["LatestTimestamp"], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      res = opcodeFromSentence(["global", "CurrentApplicationID"], 1, interpreter);
+      expected = new Global(["CurrentApplicationID"], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      expectTealError(
+        () => opcodeFromSentence(["global", "MinTxnFee", "MinTxnFee"], 1, interpreter),
+        ERRORS.TEAL.ASSERT_LENGTH
+      );
+
+      expectTealError(
+        () => opcodeFromSentence(["global", "mintxnfee"], 1, interpreter),
+        ERRORS.TEAL.UNKOWN_GLOBAL_FIELD
+      );
+
+      expectTealError(
+        () => opcodeFromSentence(["global", "minbalance"], 1, interpreter),
+        ERRORS.TEAL.UNKOWN_GLOBAL_FIELD
+      );
+
+      expectTealError(
+        () => opcodeFromSentence(["global", "maxtxnlife"], 1, interpreter),
+        ERRORS.TEAL.UNKOWN_GLOBAL_FIELD
+      );
+    });
   });
 
   describe("Opcodes list from TEAL file", () => {
@@ -643,6 +701,25 @@ describe("Parser", function () {
 
       const res = await parser(getProgram(file), interpreter);
       const expected = [new Label(["label:"], 2)];
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("should return correct opcode list for 'global'", async () => {
+      const file = "test-global.teal";
+
+      const res = await parser(getProgram(file), interpreter);
+      const expected = [
+        new Global(["MinTxnFee"], 3, interpreter),
+        new Global(["MinBalance"], 4, interpreter),
+        new Global(["MaxTxnLife"], 5, interpreter),
+        new Global(["ZeroAddress"], 6, interpreter),
+        new Global(["GroupSize"], 7, interpreter),
+        new Global(["LogicSigVersion"], 8, interpreter),
+        new Global(["Round"], 9, interpreter),
+        new Global(["LatestTimestamp"], 10, interpreter),
+        new Global(["CurrentApplicationID"], 11, interpreter)
+      ];
 
       assert.deepEqual(res, expected);
     });

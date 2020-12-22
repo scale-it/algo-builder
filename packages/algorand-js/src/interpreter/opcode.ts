@@ -1,6 +1,7 @@
+/* eslint sonarjs/no-identical-functions: 0 */
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
-import { MAX_UINT8, MAX_UINT64, MIN_UINT8, MIN_UINT64, TxnFields } from "../lib/constants";
+import { GlobalFields, MAX_UINT8, MAX_UINT64, MIN_UINT8, MIN_UINT64, TxnFields } from "../lib/constants";
 import type { TEALStack } from "../types";
 import { BIGINT0, BIGINT1 } from "./opcode-list";
 
@@ -78,6 +79,20 @@ export class Op {
     }
 
     return byteString.slice(Number(start), Number(end));
+  }
+
+  // assert if known transaction field is passed
+  assertTxFieldDefined (str: string): void {
+    if (TxnFields[str] === undefined) {
+      throw new TealError(ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD, { field: str });
+    }
+  }
+
+  // assert if known global field is passed
+  assertGlobalDefined (str: string): void {
+    if (GlobalFields[str] === undefined) {
+      throw new TealError(ERRORS.TEAL.UNKOWN_GLOBAL_FIELD, { field: str });
+    }
   }
 
   pushBooleanCheck (stack: TEALStack, ok: boolean): TEALStack {

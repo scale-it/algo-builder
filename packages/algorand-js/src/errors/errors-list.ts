@@ -200,8 +200,14 @@ by an index that does not exist.`
     title: "Transaction Field Error",
     description: `Transaction Field unkown`
   },
-  UNKNOWN_ASSET_FIELD: {
+  UNKOWN_GLOBAL_FIELD: {
     number: 29,
+    message: "Global Field Error - Unknown Global field %field%",
+    title: "Global Field Error",
+    description: `Global Field unkown`
+  },
+  UNKNOWN_ASSET_FIELD: {
+    number: 30,
     message: "Asset Field Error - Field unknown %field%",
     title: "Asset Field Error",
     description: `Asset field unkown`

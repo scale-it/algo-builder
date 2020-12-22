@@ -1,0 +1,11 @@
+// comment
+// comment here
+global MinTxnFee
+global MinBalance
+global MaxTxnLife
+global ZeroAddress
+global GroupSize
+global LogicSigVersion
+global Round
+global LatestTimestamp
+global CurrentApplicationID

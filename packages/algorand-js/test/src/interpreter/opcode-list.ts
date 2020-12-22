@@ -11,20 +11,15 @@ import {
   AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut, AppOptedIn,
   Arg, Balance,
   BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
-  Branch, BranchIfNotZero,
-  BranchIfZero,
+  Branch, BranchIfNotZero, BranchIfZero,
   Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2,
-  Ed25519verify,
-  EqualTo, Err, GetAssetDef, GetAssetHolding, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna,
-  Int, Intc,
-  Intcblock, Itob,
-  Keccak256,
-  Label,
+  Ed25519verify, EqualTo, Err, GetAssetDef, GetAssetHolding,
+  Global,
+  GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc,
+  Intcblock, Itob, Keccak256, Label,
   Len, LessThan, LessThanEqualTo,
-  Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma,
-  Return,
-  Sha256, Sha512_256, Store, Sub, Substring,
-  Substring3, Txn, Txna
+  Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, Return,
+  Sha256, Sha512_256, Store, Sub, Substring, Substring3, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { compareArray } from "../../../src/lib/compare";
 import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MIN_UINT8 } from "../../../src/lib/constants";
@@ -1988,6 +1983,92 @@ describe("Teal Opcodes", function () {
           ERRORS.TEAL.INVALID_OP_ARG
         );
       });
+    });
+  });
+
+  describe("Global Opcode", function () {
+    const stack = new Stack<StackElem>();
+    const interpreter = new Interpreter();
+    interpreter.runtime = new Runtime([]);
+    interpreter.runtime.ctx.tx = TXN_OBJ;
+    interpreter.runtime.ctx.gtxs = [TXN_OBJ];
+    interpreter.runtime.ctx.tx.apid = 1847;
+    interpreter.runtime.ctx.state.globalApps = new Map<number, SSCParams>();
+    interpreter.runtime.ctx.state.globalApps.set(1847, {} as SSCParams);
+
+    it("should push MinTxnFee to stack", function () {
+      const op = new Global(['MinTxnFee'], 1, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.deepEqual(BigInt('1000'), top);
+    });
+
+    it("should push MinBalance to stack", function () {
+      const op = new Global(['MinBalance'], 1, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.deepEqual(BigInt('10000'), top);
+    });
+
+    it("should push MaxTxnLife to stack", function () {
+      const op = new Global(['MaxTxnLife'], 1, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.deepEqual(BigInt('1000'), top);
+    });
+
+    it("should push ZeroAddress to stack", function () {
+      const op = new Global(['ZeroAddress'], 1, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.deepEqual(new Uint8Array(32), top);
+    });
+
+    it("should push GroupSize to stack", function () {
+      const op = new Global(['GroupSize'], 1, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.deepEqual(BigInt(interpreter.runtime.ctx.gtxs.length), top);
+    });
+
+    it("should push LogicSigVersion to stack", function () {
+      const op = new Global(['LogicSigVersion'], 1, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.deepEqual(BigInt('2'), top);
+    });
+
+    it("should push Round to stack", function () {
+      const op = new Global(['Round'], 1, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.deepEqual(BigInt('500'), top);
+    });
+
+    it("should push LatestTimestamp to stack", function () {
+      const op = new Global(['LatestTimestamp'], 1, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      const ts = Math.round((new Date()).getTime() / 1000);
+
+      const diff = Math.abs(ts - Number(top)); // for accuracy
+      assert.isBelow(diff, 5);
+    });
+
+    it("should push CurrentApplicationID to stack", function () {
+      const op = new Global(['CurrentApplicationID'], 1, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.deepEqual(BigInt('1847'), top);
     });
   });
 

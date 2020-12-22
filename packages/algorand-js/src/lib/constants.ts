@@ -1,3 +1,5 @@
+import { ALGORAND_MIN_TX_FEE } from "../../test/mocks/txn";
+
 // https://docs.microsoft.com/en-us/dotnet/api/system.uint64.maxvalue?view=net-5.0
 export const MAX_UINT64 = BigInt("18446744073709551615");
 export const MIN_UINT64 = BigInt("0");
@@ -141,3 +143,17 @@ export const reBase64 = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/
 
 // A-Z and 2-7 repeated, with optional `=` at the end
 export const reBase32 = /^[A-Z2-7]+=*$/;
+
+// reference for values: https://github.com/algorand/go-algorand/blob/master/config/consensus.go#L510
+// for fields: https://developer.algorand.org/docs/reference/teal/opcodes/#global
+export const GlobalFields: {[key: string]: any} = {
+  MinTxnFee: ALGORAND_MIN_TX_FEE,
+  MinBalance: 10000,
+  MaxTxnLife: 1000,
+  ZeroAddress: zeroAddress,
+  GroupSize: '',
+  LogicSigVersion: 2, // LogicSigVersion >= 2
+  Round: 500, // constant (for tests)
+  LatestTimestamp: Math.round((new Date()).getTime() / 1000),
+  CurrentApplicationID: ''
+};
