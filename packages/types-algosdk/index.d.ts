@@ -559,11 +559,11 @@ export interface AssetParams {
   creator: string;
   total: number;
   decimals: number;
-  defaultFrozen: string;
-  unitName: string;
+  'default-frozen': string;
+  'unit-name': string;
   name: string;
   url: string;
-  metadataHash: string;
+  'metadata-hash': string;
   manager: string;
   reserve: string;
   freeze: string;
