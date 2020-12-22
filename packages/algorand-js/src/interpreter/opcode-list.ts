@@ -1787,7 +1787,7 @@ export class Balance extends Op {
 }
 
 // For Account A, Asset B (txn.accounts[A]) pushes to the
-// stack [...stack, 0] if account has no B holding,
+// push to stack [...stack, 0] if account has no B holding,
 // otherwise [...stack, bigint/bytes, 1]
 export class GetAssetHolding extends Op {
   readonly interpreter: Interpreter;
