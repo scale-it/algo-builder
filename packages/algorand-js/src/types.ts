@@ -2,7 +2,7 @@ import {
   Account,
   AccountAssetInfo,
   AppLocalState,
-  AssetParams,
+  AssetDef,
   CreatedApps,
   CreatedAssets,
   SSCParams,
@@ -68,7 +68,7 @@ export interface State {
   accounts: Map<string, StoreAccount>
   accountAssets: Map<string, Map<number, AccountAssetInfo>>
   globalApps: Map<number, SSCParams>
-  globalAssets: Map<number, AssetParams>
+  assetDefs: Map<number, AssetDef>
 }
 
 // describes interpreter's local context (state + txns)

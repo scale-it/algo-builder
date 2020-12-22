@@ -2,7 +2,7 @@
 /* eslint sonarjs/no-small-switch: 0 */
 import { mkTransaction } from "algob";
 import { ExecParams, TransactionType } from "algob/src/types";
-import { AccountAssetInfo, AssetParams, assignGroupID, SSCParams, SSCStateSchema } from "algosdk";
+import { AccountAssetInfo, AssetDef, assignGroupID, SSCParams, SSCStateSchema } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
 import { getProgram } from "../../test/helpers/fs";
@@ -27,7 +27,7 @@ export class Runtime {
       accounts: new Map<string, StoreAccount>(),
       accountAssets: new Map<string, typeof assetInfo>(),
       globalApps: new Map<number, SSCParams>(),
-      globalAssets: new Map<number, AssetParams>()
+      assetDefs: new Map<number, AssetDef>()
     };
 
     // intialize accounts (should be done during runtime initialization)
@@ -126,7 +126,7 @@ export class Runtime {
       }
 
       for (const asset of acc.createdAssets) {
-        this.store.globalAssets.set(asset.index, asset.params);
+        this.store.assetDefs.set(asset.index, asset.params);
       }
 
       const assets = acc.assets;

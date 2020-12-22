@@ -49,7 +49,7 @@ export namespace modelsv2 {
 
   function AssetHolding(...args: any[]): void;
 
-  function AssetParams(...args: any[]): void;
+  function AssetDef(...args: any[]): void;
 
   function DryrunRequest(...args: any[]): void;
 
@@ -555,7 +555,7 @@ export interface SSCParams {
   'local-state-schema': SSCSchemaConfig;
 }
 
-export interface AssetParams {
+export interface AssetDef {
   creator: string;
   total: number;
   decimals: number;
@@ -584,7 +584,7 @@ export interface CreatedApps {
 
 export interface CreatedAssets {
   index: number;
-  params: AssetParams;
+  params: AssetDef;
 }
 
 export interface AppLocalState {
@@ -641,7 +641,7 @@ export interface TxnEncodedObj {
   // Asset Configuration Transaction
   // https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction
   caid: number;
-  apar: AssetParamsEnc;
+  apar: AssetDefEnc;
 
   // Asset Transfer Transaction
   // https://developer.algorand.org/docs/reference/transactions/#asset-transfer-transaction
@@ -682,7 +682,7 @@ export enum TxnOnComplete {
 }
 
 // https://developer.algorand.org/docs/reference/transactions/#asset-parameters
-export interface AssetParamsEnc {
+export interface AssetDefEnc {
   t: number;
   dc: number;
   df: number;

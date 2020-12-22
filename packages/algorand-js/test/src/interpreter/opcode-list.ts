@@ -15,7 +15,7 @@ import {
   BranchIfZero,
   Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2,
   Ed25519verify,
-  EqualTo, Err, GetAssetHolding, GetAssetParams, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna,
+  EqualTo, Err, GetAssetDef, GetAssetHolding, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna,
   Int, Intc,
   Intcblock, Itob,
   Keccak256,
@@ -2562,7 +2562,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push correct Asset Total", () => {
-      const op = new GetAssetParams(["AssetTotal"], 1, interpreter);
+      const op = new GetAssetDef(["AssetTotal"], 1, interpreter);
 
       stack.push(BigInt("1")); // asset index
 
@@ -2575,7 +2575,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push correct Asset Decimals", () => {
-      const op = new GetAssetParams(["AssetDecimals"], 1, interpreter);
+      const op = new GetAssetDef(["AssetDecimals"], 1, interpreter);
 
       stack.push(BigInt("1")); // asset index
 
@@ -2588,7 +2588,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push correct Asset Default Frozen", () => {
-      const op = new GetAssetParams(["AssetDefaultFrozen"], 1, interpreter);
+      const op = new GetAssetDef(["AssetDefaultFrozen"], 1, interpreter);
 
       stack.push(BigInt("1")); // asset index
 
@@ -2601,7 +2601,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push correct Asset Unit Name", () => {
-      const op = new GetAssetParams(["AssetUnitName"], 1, interpreter);
+      const op = new GetAssetDef(["AssetUnitName"], 1, interpreter);
 
       stack.push(BigInt("1")); // asset index
 
@@ -2614,7 +2614,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push correct Asset Name", () => {
-      const op = new GetAssetParams(["AssetName"], 1, interpreter);
+      const op = new GetAssetDef(["AssetName"], 1, interpreter);
 
       stack.push(BigInt("1")); // asset index
 
@@ -2627,7 +2627,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push correct Asset URL", () => {
-      const op = new GetAssetParams(["AssetURL"], 1, interpreter);
+      const op = new GetAssetDef(["AssetURL"], 1, interpreter);
 
       stack.push(BigInt("1")); // asset index
 
@@ -2640,7 +2640,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push correct Asset MetaData Hash", () => {
-      const op = new GetAssetParams(["AssetMetadataHash"], 1, interpreter);
+      const op = new GetAssetDef(["AssetMetadataHash"], 1, interpreter);
 
       stack.push(BigInt("1")); // asset index
 
@@ -2653,7 +2653,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push correct Asset Manager", () => {
-      const op = new GetAssetParams(["AssetManager"], 1, interpreter);
+      const op = new GetAssetDef(["AssetManager"], 1, interpreter);
 
       stack.push(BigInt("1")); // asset index
 
@@ -2666,7 +2666,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push correct Asset Reserve", () => {
-      const op = new GetAssetParams(["AssetReserve"], 1, interpreter);
+      const op = new GetAssetDef(["AssetReserve"], 1, interpreter);
 
       stack.push(BigInt("1")); // asset index
 
@@ -2679,7 +2679,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push correct Asset Freeze", () => {
-      const op = new GetAssetParams(["AssetFreeze"], 1, interpreter);
+      const op = new GetAssetDef(["AssetFreeze"], 1, interpreter);
 
       stack.push(BigInt("1")); // asset index
 
@@ -2692,7 +2692,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push correct Asset Clawback", () => {
-      const op = new GetAssetParams(["AssetClawback"], 1, interpreter);
+      const op = new GetAssetDef(["AssetClawback"], 1, interpreter);
 
       stack.push(BigInt("1")); // asset index
 
@@ -2705,7 +2705,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push 0 if Asset not defined", () => {
-      const op = new GetAssetParams(["AssetFreeze"], 1, interpreter);
+      const op = new GetAssetDef(["AssetFreeze"], 1, interpreter);
 
       stack.push(BigInt("2")); // account index
 
@@ -2716,7 +2716,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw index out of bound error for Asset Param", () => {
-      const op = new GetAssetParams(["AssetFreeze"], 1, interpreter);
+      const op = new GetAssetDef(["AssetFreeze"], 1, interpreter);
 
       stack.push(BigInt("4")); // asset index
 

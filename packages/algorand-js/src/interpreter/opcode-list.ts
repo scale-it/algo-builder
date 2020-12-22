@@ -1,7 +1,7 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
 import { toBytes } from "algob";
-import { AssetParams, decodeAddress, encodeAddress, isValidAddress, verifyBytes } from "algosdk";
+import { AssetDef, decodeAddress, encodeAddress, isValidAddress, verifyBytes } from "algosdk";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
 import { Keccak } from 'sha3';
@@ -1843,7 +1843,7 @@ export class GetAssetHolding extends Op {
 // For Index in ForeignAssets array
 // push to stack [...stack, 0] if asset doesn't exist,
 // otherwise push to stack [...stack, bigint/bytes, 1]
-export class GetAssetParams extends Op {
+export class GetAssetDef extends Op {
   readonly interpreter: Interpreter;
   readonly field: string;
 
@@ -1873,23 +1873,23 @@ export class GetAssetParams extends Op {
 
     const assetId = this.interpreter.runtime.ctx.tx.apas[Number(foreignAssetsIdx)];
 
-    const assetParams = this.interpreter.runtime.ctx.state.globalAssets.get(assetId);
+    const AssetDef = this.interpreter.runtime.ctx.state.assetDefs.get(assetId);
 
-    if (assetParams === undefined) {
+    if (AssetDef === undefined) {
       stack.push(BigInt("0"));
     } else {
       let value: StackElem;
-      const s = AssetParamMap[this.field] as keyof AssetParams;
+      const s = AssetParamMap[this.field] as keyof AssetDef;
 
       switch (this.field) {
         case "AssetTotal":
-          value = BigInt(assetParams.total);
+          value = BigInt(AssetDef.total);
           break;
         case "AssetDecimals":
-          value = BigInt(assetParams.decimals);
+          value = BigInt(AssetDef.decimals);
           break;
         default:
-          value = toBytes(assetParams[s] as string);
+          value = toBytes(AssetDef[s] as string);
           break;
       }
 
