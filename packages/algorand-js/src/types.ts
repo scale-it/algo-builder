@@ -1,8 +1,8 @@
 import {
   Account,
-  AccountAssetInfo,
   AppLocalState,
   AssetDef,
+  AssetHolding,
   CreatedApps,
   CreatedAssets,
   SSCParams,
@@ -66,7 +66,7 @@ export interface AccountsMap {
 
 export interface State {
   accounts: Map<string, StoreAccount>
-  accountAssets: Map<string, Map<number, AccountAssetInfo>>
+  accountAssets: Map<string, Map<number, AssetHolding>>
   globalApps: Map<number, SSCParams>
   assetDefs: Map<number, AssetDef>
 }
@@ -83,7 +83,7 @@ export interface Context {
 // NOTE: custom notations are used rather than SDK AccountState notations
 export interface StoreAccount {
   address: string
-  assets: AccountAssetInfo[]
+  assets: AssetHolding[]
   amount: number
   appsLocalState: AppLocalState[]
   appsTotalSchema: SSCSchemaConfig

@@ -1,8 +1,8 @@
 import { StackElem, StoreAccount } from "algorand-js/src/types";
 import type {
   Account,
-  AccountAssetInfo,
   AppLocalState,
+  AssetHolding,
   CreatedApps,
   CreatedAssets, SSCSchemaConfig
 } from "algosdk";
@@ -16,13 +16,13 @@ import { assertValidSchema, getKeyValPair } from "../lib/stateful";
 export class StoreAccountImpl implements StoreAccount {
   readonly account: Account;
   readonly address: string;
-  assets: AccountAssetInfo[];
+  assets: AssetHolding[];
   amount: number;
   appsLocalState: AppLocalState[];
   appsTotalSchema: SSCSchemaConfig;
   createdApps: CreatedApps[];
   createdAssets: CreatedAssets[];
-  accountsAssets: Map<string, Map<number, AccountAssetInfo>>;
+  accountsAssets: Map<string, Map<number, AssetHolding>>;
 
   constructor (balance: number, account?: Account) {
     if (account) {
@@ -41,7 +41,7 @@ export class StoreAccountImpl implements StoreAccount {
     this.appsTotalSchema = <SSCSchemaConfig>{};
     this.createdApps = [];
     this.createdAssets = [];
-    const assetInfo = new Map<number, AccountAssetInfo>();
+    const assetInfo = new Map<number, AssetHolding>();
     this.accountsAssets = new Map<string, typeof assetInfo>();
   }
 

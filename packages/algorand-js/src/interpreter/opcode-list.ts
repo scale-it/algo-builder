@@ -1873,9 +1873,9 @@ export class GetAssetDef extends Op {
 
     const assetId = this.interpreter.runtime.ctx.tx.apas[Number(foreignAssetsIdx)];
 
-    const AssetDef = this.interpreter.runtime.ctx.state.assetDefs.get(assetId);
+    const AssetDefinition = this.interpreter.runtime.ctx.state.assetDefs.get(assetId);
 
-    if (AssetDef === undefined) {
+    if (AssetDefinition === undefined) {
       stack.push(BigInt("0"));
     } else {
       let value: StackElem;
@@ -1883,13 +1883,13 @@ export class GetAssetDef extends Op {
 
       switch (this.field) {
         case "AssetTotal":
-          value = BigInt(AssetDef.total);
+          value = BigInt(AssetDefinition.total);
           break;
         case "AssetDecimals":
-          value = BigInt(AssetDef.decimals);
+          value = BigInt(AssetDefinition.decimals);
           break;
         default:
-          value = toBytes(AssetDef[s] as string);
+          value = toBytes(AssetDefinition[s] as string);
           break;
       }
 

@@ -2,7 +2,7 @@
 /* eslint sonarjs/no-small-switch: 0 */
 import { mkTransaction } from "algob";
 import { ExecParams, TransactionType } from "algob/src/types";
-import { AccountAssetInfo, AssetDef, assignGroupID, SSCParams, SSCStateSchema } from "algosdk";
+import { AssetDef, AssetHolding, assignGroupID, SSCParams, SSCStateSchema } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
 import { getProgram } from "../../test/helpers/fs";
@@ -17,12 +17,20 @@ import { assertValidSchema, getKeyValPair } from "../lib/stateful";
 import type { Context, StackElem, State, StoreAccount, Txn } from "../types";
 
 export class Runtime {
+  /**
+   * We are duplicating `accounts` data in `accountAssets`
+   * because of faster and easy querying.
+   * The structure in `accountAssets` is:
+   * Map < accountAddress, Map <AssetId, AssetHolding> >
+   * This way when querying, instead of traversing the whole object,
+   * we can get the value directly from Map
+   */
   private store: State;
   ctx: Context;
 
   constructor (accounts: StoreAccount[]) {
     // runtime store
-    const assetInfo = new Map<number, AccountAssetInfo>();
+    const assetInfo = new Map<number, AssetHolding>();
     this.store = {
       accounts: new Map<string, StoreAccount>(),
       accountAssets: new Map<string, typeof assetInfo>(),
@@ -130,7 +138,7 @@ export class Runtime {
       }
 
       const assets = acc.assets;
-      const assetInfo = new Map<number, AccountAssetInfo>();
+      const assetInfo = new Map<number, AssetHolding>();
       for (const asset of assets) {
         assetInfo.set(asset["asset-id"], asset);
       }

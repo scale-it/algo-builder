@@ -570,7 +570,7 @@ export interface AssetDef {
   clawback: string;
 }
 
-export interface AccountAssetInfo {
+export interface AssetHolding {
   amount: number;
   'asset-id': number;
   creator: string;
@@ -595,7 +595,7 @@ export interface AppLocalState {
 
 export interface AccountState {
   address: string;
-  assets: AccountAssetInfo[];
+  assets: AssetHolding[];
   amount: number;
   "amount-without-pending-rewards": number;
   'pending-rewards': number;
