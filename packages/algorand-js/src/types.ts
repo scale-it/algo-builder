@@ -1,6 +1,13 @@
 import {
   Account,
-  AccountAssetInfo, AppLocalState, CreatedApps, CreatedAssets, SSCParams, SSCSchemaConfig, TxnEncodedObj
+  AppLocalState,
+  AssetDef,
+  AssetHolding,
+  CreatedApps,
+  CreatedAssets,
+  SSCParams,
+  SSCSchemaConfig,
+  TxnEncodedObj
 } from "algosdk";
 
 import {
@@ -46,27 +53,6 @@ export enum GlobalField {
   CurrentApplicationID // ID of current application executing. Fails if no such application is executing.
 }
 
-// will be mapped to a specific account
-export enum AssetHolding {
-  AssetBalance, // Amount of the asset unit held by this account
-  AssetFrozen // Is the asset frozen or not
-}
-
-// this is for global storage
-export enum AssetParam {
-  AssetTotal, // Total number of units of this asset
-  AssetDecimals, // See AssetParams.Decimals
-  AssetDefaultFrozen, // Frozen by default or not
-  AssetUnitName, // Asset unit name
-  AssetName, // Asset name
-  AssetURL, // URL with additional info about the asset
-  AssetMetadataHash, // Arbitrary commitment
-  AssetManager, // Manager commitment
-  AssetReserve, // Reserve address
-  AssetFreeze, // Freeze address
-  AssetClawback // Clawback address
-}
-
 export enum EncodingType {
   BASE64,
   BASE32,
@@ -80,7 +66,9 @@ export interface AccountsMap {
 
 export interface State {
   accounts: Map<string, StoreAccount>
+  accountAssets: Map<string, Map<number, AssetHolding>>
   globalApps: Map<number, SSCParams>
+  assetDefs: Map<number, AssetDef>
 }
 
 // describes interpreter's local context (state + txns)
@@ -95,7 +83,7 @@ export interface Context {
 // NOTE: custom notations are used rather than SDK AccountState notations
 export interface StoreAccount {
   address: string
-  assets: AccountAssetInfo[]
+  assets: AssetHolding[]
   amount: number
   appsLocalState: AppLocalState[]
   appsTotalSchema: SSCSchemaConfig

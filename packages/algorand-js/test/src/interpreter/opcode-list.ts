@@ -9,12 +9,13 @@ import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
   Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx, AppGlobalPut,
   AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut, AppOptedIn,
-  Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
+  Arg, Balance,
+  BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
   Branch, BranchIfNotZero,
   BranchIfZero,
   Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2,
   Ed25519verify,
-  EqualTo, Err, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna,
+  EqualTo, Err, GetAssetDef, GetAssetHolding, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna,
   Int, Intc,
   Intcblock, Itob,
   Keccak256,
@@ -37,11 +38,11 @@ import { accInfo } from "../../mocks/stateful";
 import { TXN_OBJ } from "../../mocks/txn";
 
 function setDummyAccInfo (acc: StoreAccount): void {
-  acc.assets = [];
+  acc.assets = accInfo[0].assets;
   acc.appsLocalState = accInfo[0].appsLocalState;
   acc.appsTotalSchema = accInfo[0].appsTotalSchema;
   acc.createdApps = accInfo[0].createdApps;
-  acc.createdAssets = [];
+  acc.createdAssets = accInfo[0]["created-assets"];
 }
 
 describe("Teal Opcodes", function () {
@@ -1976,7 +1977,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
+        assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
       });
 
       it("should throw error if field is not an array", function () {
@@ -1993,12 +1994,6 @@ describe("Teal Opcodes", function () {
   describe("StateFul Opcodes", function () {
     const stack = new Stack<StackElem>();
     const interpreter = new Interpreter();
-    const runtime = new Runtime([]);
-    interpreter.runtime = runtime; // setup runtime
-
-    // setting txn object and sender's addr
-    interpreter.runtime.ctx.tx = TXN_OBJ;
-    interpreter.runtime.ctx.tx.snd = Buffer.from("addr-1");
 
     // setup 1st account (to be used as sender)
     const acc1: StoreAccount = new StoreAccountImpl(123, { addr: 'addr-1', sk: new Uint8Array(0) }); // setup test account
@@ -2008,13 +2003,12 @@ describe("Teal Opcodes", function () {
     const acc2 = new StoreAccountImpl(123, { addr: 'addr-2', sk: new Uint8Array(0) });
     setDummyAccInfo(acc2);
 
-    // set up ctx (accounts and global applications)
-    interpreter.runtime.ctx.state = {
-      accounts: new Map<string, StoreAccount>(),
-      globalApps: new Map<number, SSCParams>()
-    };
-    interpreter.runtime.ctx.state.accounts.set(acc1.address, acc1);
-    interpreter.runtime.ctx.state.accounts.set(acc2.address, acc2);
+    const runtime = new Runtime([acc1, acc2]);
+    interpreter.runtime = runtime; // setup runtime
+
+    // setting txn object and sender's addr
+    interpreter.runtime.ctx.tx = TXN_OBJ;
+    interpreter.runtime.ctx.tx.snd = Buffer.from("addr-1");
 
     describe("AppOptedIn", function () {
       it("should push 1 to stack if app is opted in", function () {
@@ -2465,6 +2459,271 @@ describe("Teal Opcodes", function () {
 
       assert.equal(1, stack.length());
       assert.deepEqual(bytes, stack.pop());
+    });
+  });
+
+  describe("Balance", () => {
+    const stack = new Stack<StackElem>();
+    const interpreter = new Interpreter();
+
+    // setup 1st account
+    const acc1: StoreAccount = new StoreAccountImpl(123, { addr: 'addr-1', sk: new Uint8Array(0) }); // setup test account
+    setDummyAccInfo(acc1);
+
+    const runtime = new Runtime([acc1]);
+    interpreter.runtime = runtime; // setup runtime
+
+    // setting txn object
+    interpreter.runtime.ctx.tx = TXN_OBJ;
+    interpreter.runtime.ctx.tx.snd = convertToBuffer("addr-1");
+    interpreter.runtime.ctx.tx.apat = [convertToBuffer("addr-1"), convertToBuffer("addr-2")];
+    interpreter.runtime.ctx.tx.apas = [3, 112];
+
+    it("should push correct account balance", () => {
+      const op = new Balance([], 1, interpreter);
+
+      stack.push(BigInt("0")); // push sender id
+
+      op.execute(stack);
+      const top = stack.pop();
+
+      assert.equal(top, BigInt("123"));
+    });
+
+    it("should throw account doesn't exist error", () => {
+      const op = new Balance([], 1, interpreter);
+      stack.push(BigInt("2"));
+
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST
+      );
+    });
+
+    it("should throw index out of bound error", () => {
+      const op = new Balance([], 1, interpreter);
+      stack.push(BigInt("8"));
+
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
+    });
+
+    it("should push correct Asset Balance", () => {
+      const op = new GetAssetHolding(["AssetBalance"], 1, interpreter);
+
+      stack.push(BigInt("1")); // account index
+      stack.push(BigInt("3")); // asset id
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev.toString(), "2");
+    });
+
+    it("should push correct Asset Freeze status", () => {
+      const op = new GetAssetHolding(["AssetFrozen"], 1, interpreter);
+
+      stack.push(BigInt("1")); // account index
+      stack.push(BigInt("3")); // asset id
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev, convertToBuffer("false"));
+    });
+
+    it("should push 0 if not defined", () => {
+      stack.push(BigInt("1")); // account index
+      stack.push(BigInt("4")); // asset id
+
+      const op = new GetAssetHolding(["1"], 1, interpreter);
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.equal(top.toString(), "0");
+    });
+
+    it("should throw index out of bound error", () => {
+      const op = new GetAssetHolding(["1"], 1, interpreter);
+
+      stack.push(BigInt("10")); // account index
+      stack.push(BigInt("4")); // asset id
+
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
+    });
+
+    it("should push correct Asset Total", () => {
+      const op = new GetAssetDef(["AssetTotal"], 1, interpreter);
+
+      stack.push(BigInt("1")); // asset index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev.toString(), "10000");
+    });
+
+    it("should push correct Asset Decimals", () => {
+      const op = new GetAssetDef(["AssetDecimals"], 1, interpreter);
+
+      stack.push(BigInt("1")); // asset index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev.toString(), "10");
+    });
+
+    it("should push correct Asset Default Frozen", () => {
+      const op = new GetAssetDef(["AssetDefaultFrozen"], 1, interpreter);
+
+      stack.push(BigInt("1")); // asset index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev, convertToBuffer("false"));
+    });
+
+    it("should push correct Asset Unit Name", () => {
+      const op = new GetAssetDef(["AssetUnitName"], 1, interpreter);
+
+      stack.push(BigInt("1")); // asset index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev, convertToBuffer("AD"));
+    });
+
+    it("should push correct Asset Name", () => {
+      const op = new GetAssetDef(["AssetName"], 1, interpreter);
+
+      stack.push(BigInt("1")); // asset index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev, convertToBuffer("ASSETAD"));
+    });
+
+    it("should push correct Asset URL", () => {
+      const op = new GetAssetDef(["AssetURL"], 1, interpreter);
+
+      stack.push(BigInt("1")); // asset index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev, convertToBuffer("assetUrl"));
+    });
+
+    it("should push correct Asset MetaData Hash", () => {
+      const op = new GetAssetDef(["AssetMetadataHash"], 1, interpreter);
+
+      stack.push(BigInt("1")); // asset index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev, convertToBuffer("hash"));
+    });
+
+    it("should push correct Asset Manager", () => {
+      const op = new GetAssetDef(["AssetManager"], 1, interpreter);
+
+      stack.push(BigInt("1")); // asset index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev, convertToBuffer("addr-1"));
+    });
+
+    it("should push correct Asset Reserve", () => {
+      const op = new GetAssetDef(["AssetReserve"], 1, interpreter);
+
+      stack.push(BigInt("1")); // asset index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev, convertToBuffer("addr-2"));
+    });
+
+    it("should push correct Asset Freeze", () => {
+      const op = new GetAssetDef(["AssetFreeze"], 1, interpreter);
+
+      stack.push(BigInt("1")); // asset index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev, convertToBuffer("addr-3"));
+    });
+
+    it("should push correct Asset Clawback", () => {
+      const op = new GetAssetDef(["AssetClawback"], 1, interpreter);
+
+      stack.push(BigInt("1")); // asset index
+
+      op.execute(stack);
+      const last = stack.pop();
+      const prev = stack.pop();
+
+      assert.deepEqual(last.toString(), "1");
+      assert.deepEqual(prev, convertToBuffer("addr-4"));
+    });
+
+    it("should push 0 if Asset not defined", () => {
+      const op = new GetAssetDef(["AssetFreeze"], 1, interpreter);
+
+      stack.push(BigInt("2")); // account index
+
+      op.execute(stack);
+
+      const top = stack.pop();
+      assert.equal(top.toString(), "0");
+    });
+
+    it("should throw index out of bound error for Asset Param", () => {
+      const op = new GetAssetDef(["AssetFreeze"], 1, interpreter);
+
+      stack.push(BigInt("4")); // asset index
+
+      expectTealError(
+        () => op.execute(stack),
+        ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
     });
   });
 });

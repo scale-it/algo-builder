@@ -199,6 +199,12 @@ by an index that does not exist.`
     message: "Transaction Field Error - Unknown transaction field %field%",
     title: "Transaction Field Error",
     description: `Transaction Field unkown`
+  },
+  UNKNOWN_ASSET_FIELD: {
+    number: 29,
+    message: "Asset Field Error - Field unknown %field%",
+    title: "Asset Field Error",
+    description: `Asset field unkown`
   }
 };
 

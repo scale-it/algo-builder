@@ -7,7 +7,7 @@ import { StoreAccount } from "../../src/types";
 import { expectTealErrorAsync } from "../helpers/errors";
 
 function getAcc (runtime: Runtime, acc: StoreAccount): StoreAccountImpl {
-  return runtime.store.accounts.get(acc.address) as StoreAccountImpl;
+  return runtime.ctx.state.accounts.get(acc.address) as StoreAccountImpl;
 }
 
 describe("Algorand Smart Contracts", function () {

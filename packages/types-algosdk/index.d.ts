@@ -49,7 +49,7 @@ export namespace modelsv2 {
 
   function AssetHolding(...args: any[]): void;
 
-  function AssetParams(...args: any[]): void;
+  function AssetDef(...args: any[]): void;
 
   function DryrunRequest(...args: any[]): void;
 
@@ -555,11 +555,26 @@ export interface SSCParams {
   'local-state-schema': SSCSchemaConfig;
 }
 
-export interface AccountAssetInfo {
+export interface AssetDef {
+  creator: string;
+  total: number;
+  decimals: number;
+  'default-frozen': string;
+  'unit-name': string;
+  name: string;
+  url: string;
+  'metadata-hash': string;
+  manager: string;
+  reserve: string;
+  freeze: string;
+  clawback: string;
+}
+
+export interface AssetHolding {
   amount: number;
   'asset-id': number;
   creator: string;
-  'is-frozen': boolean;
+  'is-frozen': string;
 }
 
 export interface CreatedApps {
@@ -569,7 +584,7 @@ export interface CreatedApps {
 
 export interface CreatedAssets {
   index: number;
-  params: SSCParams;
+  params: AssetDef;
 }
 
 export interface AppLocalState {
@@ -580,7 +595,7 @@ export interface AppLocalState {
 
 export interface AccountState {
   address: string;
-  assets: AccountAssetInfo[];
+  assets: AssetHolding[];
   amount: number;
   "amount-without-pending-rewards": number;
   'pending-rewards': number;
@@ -626,7 +641,7 @@ export interface TxnEncodedObj {
   // Asset Configuration Transaction
   // https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction
   caid: number;
-  apar: AssetParamsEnc;
+  apar: AssetDefEnc;
 
   // Asset Transfer Transaction
   // https://developer.algorand.org/docs/reference/transactions/#asset-transfer-transaction
@@ -667,7 +682,7 @@ export enum TxnOnComplete {
 }
 
 // https://developer.algorand.org/docs/reference/transactions/#asset-parameters
-export interface AssetParamsEnc {
+export interface AssetDefEnc {
   t: number;
   dc: number;
   df: number;

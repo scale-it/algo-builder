@@ -1,7 +1,7 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
 import { toBytes } from "algob";
-import { decodeAddress, encodeAddress, isValidAddress, verifyBytes } from "algosdk";
+import { AssetDef, decodeAddress, encodeAddress, isValidAddress, verifyBytes } from "algosdk";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
 import { Keccak } from 'sha3';
@@ -10,10 +10,10 @@ import { decode, encode } from "uint64be";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { checkIndexBound, compareArray } from "../lib/compare";
-import { MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
+import { AssetParamMap, MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
 import { assertLen, assertOnlyDigits, convertToBuffer, convertToString, getEncoding } from "../lib/parsing";
 import { txAppArg, txnSpecbyField } from "../lib/txn";
-import type { EncodingType, TEALStack } from "../types";
+import type { EncodingType, StackElem, TEALStack } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
 
@@ -23,7 +23,7 @@ export const BIGINT1 = BigInt("1");
 // Opcodes reference link: https://developer.algorand.org/docs/reference/teal/opcodes/
 
 // Store TEAL version
-// [...stack]
+// push to stack [...stack]
 export class Pragma extends Op {
   readonly version: bigint;
 
@@ -51,7 +51,7 @@ export class Pragma extends Op {
 }
 
 // pops string([]byte) from stack and pushes it's length to stack
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class Len extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -72,7 +72,7 @@ export class Len extends Op {
 
 // pops two unit64 from stack(last, prev) and pushes their sum(last + prev) to stack
 // panics on overflow (result > max_unit64)
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class Add extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -96,7 +96,7 @@ export class Add extends Op {
 
 // pops two unit64 from stack(last, prev) and pushes their diff(last - prev) to stack
 // panics on underflow (result < 0)
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class Sub extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -120,7 +120,7 @@ export class Sub extends Op {
 
 // pops two unit64 from stack(last, prev) and pushes their division(last / prev) to stack
 // panics if prev == 0
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class Div extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -145,7 +145,7 @@ export class Div extends Op {
 
 // pops two unit64 from stack(last, prev) and pushes their mult(last * prev) to stack
 // panics on overflow (result > max_unit64)
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class Mul extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -168,7 +168,7 @@ export class Mul extends Op {
 }
 
 // pushes argument[N] from argument array to stack
-// [...stack, bytes]
+// push to stack [...stack, bytes]
 export class Arg extends Op {
   readonly _arg: Uint8Array;
 
@@ -197,7 +197,7 @@ export class Arg extends Op {
 }
 
 // load block of byte-array constants
-// [...stack]
+// push to stack [...stack]
 export class Bytecblock extends Op {
   readonly bytecblock: Uint8Array[];
   readonly interpreter: Interpreter;
@@ -226,7 +226,7 @@ export class Bytecblock extends Op {
 }
 
 // push bytes constant from bytecblock to stack by index
-// [...stack, bytes]
+// push to stack [...stack, bytes]
 export class Bytec extends Op {
   readonly index: number;
   readonly interpreter: Interpreter;
@@ -253,7 +253,7 @@ export class Bytec extends Op {
 }
 
 // load block of uint64 constants
-// [...stack]
+// push to stack [...stack]
 export class Intcblock extends Op {
   readonly intcblock: Array<bigint>;
   readonly interpreter: Interpreter;
@@ -283,7 +283,7 @@ export class Intcblock extends Op {
 }
 
 // push value from uint64 intcblock to stack by index
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class Intc extends Op {
   readonly index: number;
   readonly interpreter: Interpreter;
@@ -311,7 +311,7 @@ export class Intc extends Op {
 
 // pops two unit64 from stack(last, prev) and pushes their modulo(last % prev) to stack
 // Panic if B == 0.
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class Mod extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -335,7 +335,7 @@ export class Mod extends Op {
 }
 
 // pops two unit64 from stack(last, prev) and pushes their bitwise-or(last | prev) to stack
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class BitwiseOr extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -356,7 +356,7 @@ export class BitwiseOr extends Op {
 }
 
 // pops two unit64 from stack(last, prev) and pushes their bitwise-and(last & prev) to stack
-// [...stack, bigint]
+// push to stack[...stack, bigint]
 export class BitwiseAnd extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -377,7 +377,7 @@ export class BitwiseAnd extends Op {
 }
 
 // pops two unit64 from stack(last, prev) and pushes their bitwise-xor(last ^ prev) to stack
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class BitwiseXor extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -398,7 +398,7 @@ export class BitwiseXor extends Op {
 }
 
 // pop unit64 from stack and push it's bitwise-invert(~last) to stack
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class BitwiseNot extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -418,7 +418,7 @@ export class BitwiseNot extends Op {
 }
 
 // pop last value from the stack and store to scratch space
-// [...stack]
+// push to stack [...stack]
 export class Store extends Op {
   readonly index: number;
   readonly interpreter: Interpreter;
@@ -447,7 +447,7 @@ export class Store extends Op {
 }
 
 // copy last value from scratch space to the stack
-// [...stack, bigint/bytes]
+// push to stack [...stack, bigint/bytes]
 export class Load extends Op {
   readonly index: number;
   readonly interpreter: Interpreter;
@@ -474,7 +474,7 @@ export class Load extends Op {
 }
 
 // err opcode : Error. Panic immediately.
-// [...stack]
+// push to stack [...stack]
 export class Err extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -492,7 +492,7 @@ export class Err extends Op {
 }
 
 // SHA256 hash of value X, yields [32]byte
-// [...stack, bytes]
+// push to stack [...stack, bytes]
 export class Sha256 extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -516,7 +516,7 @@ export class Sha256 extends Op {
 }
 
 // SHA512_256 hash of value X, yields [32]byte
-// [...stack, bytes]
+// push to stack [...stack, bytes]
 export class Sha512_256 extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -541,7 +541,7 @@ export class Sha512_256 extends Op {
 
 // Keccak256 hash of value X, yields [32]byte
 // https://github.com/phusion/node-sha3#example-2
-// [...stack, bytes]
+// push to stack [...stack, bytes]
 export class Keccak256 extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -566,7 +566,7 @@ export class Keccak256 extends Op {
 
 // for (data A, signature B, pubkey C) verify the signature of
 // ("ProgData" || program_hash || data) against the pubkey => {0 or 1}
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class Ed25519verify extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -595,7 +595,7 @@ export class Ed25519verify extends Op {
 }
 
 // If A < B pushes '1' else '0'
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class LessThan extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -620,7 +620,7 @@ export class LessThan extends Op {
 }
 
 // If A > B pushes '1' else '0'
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class GreaterThan extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -645,7 +645,7 @@ export class GreaterThan extends Op {
 }
 
 // If A <= B pushes '1' else '0'
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class LessThanEqualTo extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -670,7 +670,7 @@ export class LessThanEqualTo extends Op {
 }
 
 // If A >= B pushes '1' else '0'
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class GreaterThanEqualTo extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -695,7 +695,7 @@ export class GreaterThanEqualTo extends Op {
 }
 
 // If A && B is true pushes '1' else '0'
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class And extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -720,7 +720,7 @@ export class And extends Op {
 }
 
 // If A || B is true pushes '1' else '0'
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class Or extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -745,7 +745,7 @@ export class Or extends Op {
 }
 
 // If A == B pushes '1' else '0'
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class EqualTo extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -774,7 +774,7 @@ export class EqualTo extends Op {
 }
 
 // If A != B pushes '1' else '0'
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class NotEqualTo extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -803,7 +803,7 @@ export class NotEqualTo extends Op {
 }
 
 // X == 0 yields 1; else 0
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class Not extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -827,7 +827,7 @@ export class Not extends Op {
 }
 
 // converts uint64 X to big endian bytes
-// [...stack, big endian bytes]
+// push to stack [...stack, big endian bytes]
 export class Itob extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -850,7 +850,7 @@ export class Itob extends Op {
 
 // converts bytes X as big endian to uint64
 // btoi panics if the input is longer than 8 bytes.
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class Btoi extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -875,7 +875,7 @@ export class Btoi extends Op {
 }
 
 // A plus B out to 128-bit long result as sum (top) and carry-bit uint64 values on the stack
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class Addw extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -905,7 +905,7 @@ export class Addw extends Op {
 }
 
 // A times B out to 128-bit long result as low (top) and high uint64 values on the stack
-// [...stack, bigint]
+// push to stack [...stack, bigint]
 export class Mulw extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -954,7 +954,7 @@ export class Pop extends Op {
 }
 
 // duplicate last value on stack
-// [...stack, duplicate value]
+// push to stack [...stack, duplicate value]
 export class Dup extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -976,7 +976,7 @@ export class Dup extends Op {
 }
 
 // duplicate two last values on stack: A, B -> A, B, A, B
-// [...stack, B, A, B, A]
+// push to stack [...stack, B, A, B, A]
 export class Dup2 extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -1002,7 +1002,7 @@ export class Dup2 extends Op {
 
 // pop two byte strings A and B and join them, push the result
 // concat panics if the result would be greater than 4096 bytes.
-// [...stack, string]
+// push to stack [...stack, string]
 export class Concat extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -1033,7 +1033,7 @@ export class Concat extends Op {
 // extract last range of bytes from it starting at M up to but not including N,
 // push the substring result. If N < M, or either is larger than the string length,
 // the program fails
-// [...stack, substring]
+// push to stack [...stack, substring]
 export class Substring extends Op {
   readonly start: bigint;
   readonly end: bigint;
@@ -1067,7 +1067,7 @@ export class Substring extends Op {
 // Extract last range of bytes from A starting at B up to
 // but not including C, push the substring result. If C < B,
 // or either is larger than the string length, the program fails
-// [...stack, substring]
+// push to stack [...stack, substring]
 export class Substring3 extends Op {
   /**
    * Description: Asserts 0 arguments are passed.
@@ -1090,7 +1090,7 @@ export class Substring3 extends Op {
 }
 
 // push field from current transaction to stack
-// [...stack, transaction field]
+// push to stack [...stack, transaction field]
 export class Txn extends Op {
   readonly field: string;
   readonly interpreter: Interpreter;
@@ -1120,7 +1120,7 @@ export class Txn extends Op {
 
 // push field to the stack from a transaction in the current transaction group
 // If this transaction is i in the group, gtxn i field is equivalent to txn field.
-// [...stack, transaction field]
+// push to stack [...stack, transaction field]
 export class Gtxn extends Op {
   readonly field: string;
   readonly txIdx: number;
@@ -1155,7 +1155,7 @@ export class Gtxn extends Op {
 }
 
 // push value of an array field from current transaction to stack
-// [...stack, value of an array field ]
+// push to stack [...stack, value of an array field ]
 export class Txna extends Op {
   readonly field: string;
   readonly idx: number;
@@ -1187,7 +1187,7 @@ export class Txna extends Op {
 }
 
 // push value of a field to the stack from a transaction in the current transaction group
-// [...stack, value of field]
+// push to stack [...stack, value of field]
 export class Gtxna extends Op {
   readonly field: string;
   readonly txIdx: number; // transaction group index
@@ -1227,7 +1227,7 @@ export class Gtxna extends Op {
 }
 
 // represents branch name of a new branch
-// [...stack]
+// push to stack [...stack]
 export class Label extends Op {
   readonly label: string;
 
@@ -1246,7 +1246,7 @@ export class Label extends Op {
 }
 
 // branch unconditionally to label
-// [...stack]
+// push to stack [...stack]
 export class Branch extends Op {
   readonly label: string;
   readonly interpreter: Interpreter;
@@ -1270,7 +1270,7 @@ export class Branch extends Op {
 }
 
 // branch conditionally if top of stack is zero
-// [...stack]
+// push to stack [...stack]
 export class BranchIfZero extends Op {
   readonly label: string;
   readonly interpreter: Interpreter;
@@ -1299,7 +1299,7 @@ export class BranchIfZero extends Op {
 }
 
 // branch conditionally if top of stack is non zero
-// [...stack]
+// push to stack [...stack]
 export class BranchIfNotZero extends Op {
   readonly label: string;
   readonly interpreter: Interpreter;
@@ -1328,7 +1328,7 @@ export class BranchIfNotZero extends Op {
 }
 
 // use last value on stack as success value; end
-// [...stack, last]
+// push to stack [...stack, last]
 export class Return extends Op {
   readonly interpreter: Interpreter;
 
@@ -1358,8 +1358,8 @@ export class Return extends Op {
 
 // check if account specified by Txn.Accounts[A] opted in for the application B => {0 or 1}
 // params: account index, application id (top of the stack on opcode entry).
-// [...stack, 1] if opted in
-// [...stack, 0] 0 otherwise
+// push to stack [...stack, 1] if opted in
+// push to stack[...stack, 0] 0 otherwise
 export class AppOptedIn extends Op {
   readonly interpreter: Interpreter;
 
@@ -1393,7 +1393,7 @@ export class AppOptedIn extends Op {
 }
 
 // read from account specified by Txn.Accounts[A] from local state of the current application key B => value
-// [...stack]
+// push to stack [...stack]
 export class AppLocalGet extends Op {
   readonly interpreter: Interpreter;
 
@@ -1462,8 +1462,8 @@ export class AppLocalGetEx extends Op {
 }
 
 // read key A from global state of a current application => value
-// [...stack, 0] if key doesn't exist
-// otherwise [...stack, value]
+// push to stack[...stack, 0] if key doesn't exist
+// otherwise push to stack [...stack, value]
 export class AppGlobalGet extends Op {
   readonly interpreter: Interpreter;
 
@@ -1494,8 +1494,8 @@ export class AppGlobalGet extends Op {
 }
 
 // read from application Txn.ForeignApps[A] global state key B pushes to the stack
-// [...stack, 0] if key doesn't exist
-// otherwise [...stack, value, 1]
+// push to stack [...stack, 0] if key doesn't exist
+// otherwise push to stack [...stack, value, 1]
 // A is specified as an account index in the ForeignApps field of the ApplicationCall transaction,
 // zero index means this app
 export class AppGlobalGetEx extends Op {
@@ -1538,7 +1538,7 @@ export class AppGlobalGetEx extends Op {
 }
 
 // write to account specified by Txn.Accounts[A] to local state of a current application key B with value C
-// [...stack, address]
+// push to stack [...stack, address]
 export class AppLocalPut extends Op {
   readonly interpreter: Interpreter;
 
@@ -1572,7 +1572,7 @@ export class AppLocalPut extends Op {
 }
 
 // write key A and value B to global state of the current application
-// [...stack]
+// push to stack [...stack]
 export class AppGlobalPut extends Op {
   readonly interpreter: Interpreter;
 
@@ -1602,7 +1602,7 @@ export class AppGlobalPut extends Op {
 }
 
 // delete from account specified by Txn.Accounts[A] local state key B of the current application
-// [...stack]
+// push to stack [...stack]
 export class AppLocalDel extends Op {
   readonly interpreter: Interpreter;
 
@@ -1642,7 +1642,7 @@ export class AppLocalDel extends Op {
 }
 
 // delete key A from a global state of the current application
-// [...stack]
+// push to stack [...stack]
 export class AppGlobalDel extends Op {
   readonly interpreter: Interpreter;
 
@@ -1677,7 +1677,7 @@ export class AppGlobalDel extends Op {
 
 /** Pseudo-Ops **/
 // push integer to stack
-// [...stack, integer value]
+// push to stack [...stack, integer value]
 export class Int extends Op {
   readonly uint64: bigint;
 
@@ -1699,7 +1699,7 @@ export class Int extends Op {
 }
 
 // push bytes to stack
-// [...stack, converted data]
+// push to stack [...stack, converted data]
 export class Byte extends Op {
   readonly str: string;
   readonly encoding: EncodingType;
@@ -1721,7 +1721,7 @@ export class Byte extends Op {
 }
 
 // decodes algorand address to bytes and pushes to stack
-// [...stack, address]
+// push to stack [...stack, address]
 export class Addr extends Op {
   readonly addr: string;
 
@@ -1742,5 +1742,159 @@ export class Addr extends Op {
   execute (stack: TEALStack): void {
     const addr = decodeAddress(this.addr);
     stack.push(addr.publicKey);
+  }
+}
+
+// get balance for the requested account specified
+// by Txn.Accounts[A] in microalgos. A is specified as an account
+// index in the Accounts field of the ApplicationCall transaction,
+// zero index means the sender
+// push to stack [...stack, bigint]
+export class Balance extends Op {
+  readonly interpreter: Interpreter;
+
+  /**
+   * Description: Asserts if arguments length is zero
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   * @param interpreter Interpreter Object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.interpreter = interpreter;
+
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1);
+    let accountIndex = this.assertBigInt(stack.pop());
+    let res;
+
+    if (accountIndex === BigInt("0")) {
+      const sender = convertToString(this.interpreter.runtime.ctx.tx.snd);
+      res = this.interpreter.runtime.ctx.state.accounts.get(sender);
+    } else {
+      this.checkIndexBound(Number(--accountIndex), this.interpreter.runtime.ctx.tx.apat);
+      const buf = this.interpreter.runtime.ctx.tx.apat[Number(accountIndex)];
+      res = this.interpreter.runtime.ctx.state.accounts.get(convertToString(buf));
+    }
+    if (res === undefined) { throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST); }
+
+    stack.push(BigInt(res.amount));
+  }
+}
+
+// For Account A, Asset B (txn.accounts[A]) pushes to the
+// push to stack [...stack, 0] if account has no B holding,
+// otherwise [...stack, bigint/bytes, 1]
+export class GetAssetHolding extends Op {
+  readonly interpreter: Interpreter;
+  readonly field: string;
+
+  /**
+   * Description: sets field according to arguments passed.
+   * @param args Expected arguments: [Asset Holding field]
+   * // Note: Asset holding field will be string
+   * For ex: `AssetBalance` is correct `0` is not.
+   * @param line line number in TEAL file
+   * @param interpreter Interpreter Object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.interpreter = interpreter;
+    assertLen(args.length, 1, line);
+
+    this.field = args[0];
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2);
+    const assetId = this.assertBigInt(stack.pop());
+    let accountIdx = this.assertBigInt(stack.pop());
+
+    this.checkIndexBound(Number(--accountIdx), this.interpreter.runtime.ctx.tx.apat);
+    const accBuffer = this.interpreter.runtime.ctx.tx.apat[Number(accountIdx)];
+    const accountAssets = this.interpreter.runtime.ctx.state.accountAssets.get(convertToString(accBuffer));
+    const assetInfo = accountAssets?.get(Number(assetId));
+
+    if (assetInfo === undefined) {
+      stack.push(BigInt("0"));
+      return;
+    }
+    let value: StackElem;
+    switch (this.field) {
+      case "AssetBalance":
+        value = BigInt(assetInfo.amount);
+        break;
+      case "AssetFrozen":
+        value = toBytes(assetInfo["is-frozen"]);
+        break;
+      default:
+        throw new TealError(ERRORS.TEAL.INVALID_FIELD_TYPE);
+    }
+
+    stack.push(value);
+    stack.push(BigInt("1"));
+  }
+}
+
+// get Asset Params Info for given account
+// For Index in ForeignAssets array
+// push to stack [...stack, 0] if asset doesn't exist,
+// otherwise push to stack [...stack, bigint/bytes, 1]
+export class GetAssetDef extends Op {
+  readonly interpreter: Interpreter;
+  readonly field: string;
+
+  /**
+   * Description: sets transaction field according to arguments passed
+   * @param args Expected arguments: [Asset Params field]
+   * // Note: Asset Params field will be string
+   * For ex: `AssetTotal` is correct `0` is not.
+   * @param line line number in TEAL file
+   * @param interpreter Interpreter Object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.interpreter = interpreter;
+    assertLen(args.length, 1, line);
+    if (AssetParamMap[args[0]] === undefined) {
+      throw new TealError(ERRORS.TEAL.UNKNOWN_ASSET_FIELD, { field: args[0] });
+    }
+
+    this.field = args[0];
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1);
+    let foreignAssetsIdx = this.assertBigInt(stack.pop());
+    this.checkIndexBound(Number(--foreignAssetsIdx), this.interpreter.runtime.ctx.tx.apas);
+
+    const assetId = this.interpreter.runtime.ctx.tx.apas[Number(foreignAssetsIdx)];
+
+    const AssetDefinition = this.interpreter.runtime.ctx.state.assetDefs.get(assetId);
+
+    if (AssetDefinition === undefined) {
+      stack.push(BigInt("0"));
+    } else {
+      let value: StackElem;
+      const s = AssetParamMap[this.field] as keyof AssetDef;
+
+      switch (this.field) {
+        case "AssetTotal":
+          value = BigInt(AssetDefinition.total);
+          break;
+        case "AssetDecimals":
+          value = BigInt(AssetDefinition.decimals);
+          break;
+        default:
+          value = toBytes(AssetDefinition[s] as string);
+          break;
+      }
+
+      stack.push(value);
+      stack.push(BigInt("1"));
+    }
   }
 }
