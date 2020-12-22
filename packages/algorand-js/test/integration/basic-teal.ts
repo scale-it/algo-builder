@@ -29,10 +29,10 @@ describe("Algorand Smart Contracts", function () {
   });
 
   // update account state after each execution
-  afterEach(function(){
+  afterEach(function () {
     john = getAcc(runtime, john);
     bob = getAcc(runtime, bob);
-  })
+  });
 
   it("should send algo's from john to bob if stateless teal logic is correct", async function () {
     // check initial balance

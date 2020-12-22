@@ -2,10 +2,10 @@
 /* eslint sonarjs/no-small-switch: 0 */
 import { mkTransaction } from "algob";
 import { ExecParams, TransactionType } from "algob/src/types";
-import { getProgram } from "../../test/helpers/fs";
 import { assignGroupID, SSCParams, SSCStateSchema } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
+import { getProgram } from "../../test/helpers/fs";
 import { mockSuggestedParams } from "../../test/mocks/txn";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
@@ -185,13 +185,13 @@ export class Runtime {
       for (const txnParam of txnParams) {
         this.store.accounts.forEach((account, addr) => {
           this.updateBalance(txnParam, account);
-        })
+        });
       }
     } else {
       // for a single (stand alone) transaction
       this.store.accounts.forEach((account, addr) => {
         this.updateBalance(txnParams, account);
-      })
+      });
     }
   }
 

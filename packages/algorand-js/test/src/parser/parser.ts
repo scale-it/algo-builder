@@ -1,4 +1,3 @@
-import { getProgram } from "../../helpers/fs";
 import { assert } from "chai";
 
 import { ERRORS } from "../../../src/errors/errors-list";
@@ -14,6 +13,7 @@ import {
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { Runtime } from "../../../src/runtime/runtime";
 import { expectTealError } from "../../helpers/errors";
+import { getProgram } from "../../helpers/fs";
 
 // base64 case needs to be verified at the time of decoding
 describe("Parser", function () {
