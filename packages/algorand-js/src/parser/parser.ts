@@ -248,7 +248,7 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
   }
 
   if (opCodeMap[opCode] === undefined) {
-    throw new TealError(ERRORS.TEAL.INVALID_OP_ARG, { opcode: opCode, line: counter });
+    throw new TealError(ERRORS.TEAL.UNKOWN_OPCODE, { opcode: opCode, line: counter });
   }
 
   if (interpreterReqList.has(opCode)) {
