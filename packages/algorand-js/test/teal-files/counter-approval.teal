@@ -1,0 +1,37 @@
+#pragma version 2
+
+// read global state
+byte "counter"
+dup
+app_global_get
+
+// increment the value
+int 1
++
+
+// store to scratch space
+dup
+store 0
+
+// update global state
+app_global_put
+
+// read local state for sender
+int 0
+byte "counter"
+app_local_get
+
+// increment the value
+int 1
++
+store 1
+
+// update local state for sender
+int 0
+byte "counter"
+load 1
+app_local_put
+
+// load return value as approval
+load 0
+return
