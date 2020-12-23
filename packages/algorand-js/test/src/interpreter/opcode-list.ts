@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
-import { decodeAddress, generateAccount, signBytes, SSCParams } from "algosdk";
+import { decodeAddress, encodeAddress, generateAccount, signBytes, SSCParams } from "algosdk";
 import { assert } from "chai";
 
 import { ERRORS } from "../../../src/errors/errors-list";
@@ -27,7 +27,7 @@ import { StoreAccountImpl } from "../../../src/runtime/account";
 import { EncodingType, StackElem, StoreAccount } from "../../../src/types";
 import { execExpectError, expectTealError } from "../../helpers/errors";
 import { accInfo } from "../../mocks/stateful";
-import { TXN_OBJ } from "../../mocks/txn";
+import { addr1, addr2, TXN_OBJ } from "../../mocks/txn";
 
 function setDummyAccInfo (acc: StoreAccount): void {
   acc.assets = accInfo[0].assets;
@@ -2074,19 +2074,21 @@ describe("Teal Opcodes", function () {
     const interpreter = new Interpreter();
 
     // setup 1st account (to be used as sender)
-    const acc1: StoreAccount = new StoreAccountImpl(123, { addr: 'addr-1', sk: new Uint8Array(0) }); // setup test account
+    const acc1: StoreAccount = new StoreAccountImpl(123, { addr: addr1, sk: new Uint8Array(0) }); // setup test account
     setDummyAccInfo(acc1);
 
     // setup 2nd account (to be used as Txn.Accounts[A])
-    const acc2 = new StoreAccountImpl(123, { addr: 'addr-2', sk: new Uint8Array(0) });
+    const acc2 = new StoreAccountImpl(123, { addr: addr2, sk: new Uint8Array(0) });
     setDummyAccInfo(acc2);
 
     const runtime = new Runtime([acc1, acc2]);
     interpreter.runtime = runtime; // setup runtime
 
     // setting txn object and sender's addr
-    interpreter.runtime.ctx.tx = TXN_OBJ;
-    interpreter.runtime.ctx.tx.snd = Buffer.from("addr-1");
+    interpreter.runtime.ctx.tx = {
+      ...TXN_OBJ,
+      snd: Buffer.from(decodeAddress(addr1).publicKey)
+    };
 
     describe("AppOptedIn", function () {
       it("should push 1 to stack if app is opted in", function () {
@@ -2340,7 +2342,7 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        const acc = interpreter.runtime.ctx.state.accounts.get("addr-1") as StoreAccount;
+        const acc = interpreter.runtime.ctx.state.accounts.get(addr1) as StoreAccount;
         let localStateCurr = acc.appsLocalState[0]["key-value"];
         let idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('New-Key')));
         assert.notEqual(idx, -1); // idx should not be -1
@@ -2354,7 +2356,7 @@ describe("Teal Opcodes", function () {
         op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        localStateCurr = (interpreter.runtime.ctx.state.accounts.get("addr-1") as StoreAccount).appsLocalState[0]["key-value"];
+        localStateCurr = (interpreter.runtime.ctx.state.accounts.get(addr2) as StoreAccount).appsLocalState[0]["key-value"];
         idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('New-Key-1')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(localStateCurr[idx].value.uint, 2222);
@@ -2447,7 +2449,7 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        let localStateCurr = (interpreter.runtime.ctx.state.accounts.get("addr-1") as StoreAccount).appsLocalState[0]["key-value"];
+        let localStateCurr = (interpreter.runtime.ctx.state.accounts.get(addr1) as StoreAccount).appsLocalState[0]["key-value"];
         let idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
 
@@ -2458,7 +2460,7 @@ describe("Teal Opcodes", function () {
         op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        localStateCurr = (interpreter.runtime.ctx.state.accounts.get("addr-2") as StoreAccount).appsLocalState[0]["key-value"];
+        localStateCurr = (interpreter.runtime.ctx.state.accounts.get(addr2) as StoreAccount).appsLocalState[0]["key-value"];
         idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
       });

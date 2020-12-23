@@ -63,7 +63,7 @@ export class StoreAccountImpl implements StoreAccount {
       const keyValue = data.find(schema => compareArray(schema.key, key));
       const value = keyValue?.value;
       if (value) {
-        return value?.bytes || BigInt(value?.uint);
+        return value.type === 1 ? value.bytes : BigInt(value.uint);
       }
     }
     return undefined;
