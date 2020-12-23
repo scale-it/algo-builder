@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
-import { decodeAddress, encodeAddress, generateAccount, signBytes, SSCParams } from "algosdk";
+import { decodeAddress, generateAccount, signBytes, SSCParams } from "algosdk";
 import { assert } from "chai";
 
 import { ERRORS } from "../../../src/errors/errors-list";
