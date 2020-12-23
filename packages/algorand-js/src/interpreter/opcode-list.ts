@@ -1584,7 +1584,8 @@ export class AppGlobalGetEx extends Op {
 }
 
 // write to account specified by Txn.Accounts[A] to local state of a current application key B with value C
-// push to stack [...stack]
+// pops from stack [...stack, value, key]
+// pushes nothing to stack, updates the app user local storage
 export class AppLocalPut extends Op {
   readonly interpreter: Interpreter;
 
