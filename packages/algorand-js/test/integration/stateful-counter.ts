@@ -3,11 +3,7 @@ import { assert } from "chai";
 import { Runtime } from "../../src/index";
 import { toBytes } from "../../src/lib/parsing";
 import { StoreAccountImpl } from "../../src/runtime/account";
-import { StoreAccount } from "../../src/types";
-
-function getAcc (runtime: Runtime, acc: StoreAccount): StoreAccountImpl {
-  return runtime.ctx.state.accounts.get(acc.address) as StoreAccountImpl;
-}
+import { getAcc } from "../helpers/account";
 
 describe("Algorand Smart Contracts - Stateful Counter example", function () {
   const john = new StoreAccountImpl(1000);
@@ -26,7 +22,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
   });
 
   const key = "counter";
-  it("should initialize global counter to 1 on first call", async function () {
+  it("should initialize global and local counter to 1 on first call", async function () {
     // execute transaction
     await runtime.executeTx(txnParams, 'counter-approval.teal', []);
 
