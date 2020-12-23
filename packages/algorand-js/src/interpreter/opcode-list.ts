@@ -1439,7 +1439,7 @@ export class AppOptedIn extends Op {
 
 // read from account specified by Txn.Accounts[A] from local state of the current application key B => value
 // push to stack [...stack, bigint/bytes] If key exist
-// push to stack [...stack, 0] if key does not exist
+// push to stack [...stack, 0] otherwise
 export class AppLocalGet extends Op {
   readonly interpreter: Interpreter;
 
