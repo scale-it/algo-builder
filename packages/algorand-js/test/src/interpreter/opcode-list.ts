@@ -1617,7 +1617,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.apaa.length), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.apaa.length), stack.pop());
       });
 
       it("should push txn NumAccounts to stack", function () {
@@ -1625,7 +1625,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.apat.length), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.apat.length), stack.pop());
       });
     });
 
@@ -1647,7 +1647,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.amt), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.amt), stack.pop());
       });
 
       it("should push txn CloseRemainderTo to stack", function () {
@@ -1685,7 +1685,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.votefst), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.votefst), stack.pop());
       });
 
       it("should push txn VoteLast to stack", function () {
@@ -1693,7 +1693,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.votelst), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.votelst), stack.pop());
       });
 
       it("should push txn VoteKeyDilution to stack", function () {
@@ -1701,7 +1701,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.votekd), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.votekd), stack.pop());
       });
     });
 
@@ -1715,7 +1715,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.caid), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.caid), stack.pop());
       });
 
       it("should push txn ConfigAssetTotal to stack", function () {
@@ -1723,7 +1723,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.apar.t), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.apar.t), stack.pop());
       });
 
       it("should push txn ConfigAssetDecimals to stack", function () {
@@ -1731,7 +1731,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.apar.dc), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.apar.dc), stack.pop());
       });
 
       it("should push txn ConfigAssetDefaultFrozen to stack", function () {
@@ -1739,7 +1739,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.apar.df), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.apar.df), stack.pop());
       });
 
       it("should push txn ConfigAssetUnitName to stack", function () {
@@ -1817,7 +1817,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.xaid), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.xaid), stack.pop());
       });
 
       it("should push txn AssetAmount to stack", function () {
@@ -1825,7 +1825,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.aamt), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.aamt), stack.pop());
       });
 
       it("should push txn AssetSender to stack", function () {
@@ -1863,7 +1863,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.faid), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.faid), stack.pop());
       });
 
       it("should push txn FreezeAssetAccount to stack", function () {
@@ -1879,7 +1879,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.afrz), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.afrz), stack.pop());
       });
     });
 
@@ -1893,7 +1893,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.apid), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.apid), stack.pop());
       });
 
       it("should push txn OnCompletion to stack", function () {
@@ -1901,7 +1901,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.apan), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.apan), stack.pop());
       });
 
       it("should push txn ApprovalProgram to stack", function () {
@@ -1933,7 +1933,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt('1000'), stack.pop());
+        assert.equal(BigInt('1000'), stack.pop());
       });
     });
 
@@ -1998,7 +1998,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.deepEqual(BigInt('1000'), top);
+      assert.equal(BigInt('1000'), top);
     });
 
     it("should push MinBalance to stack", function () {
@@ -2006,7 +2006,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.deepEqual(BigInt('10000'), top);
+      assert.equal(BigInt('10000'), top);
     });
 
     it("should push MaxTxnLife to stack", function () {
@@ -2014,7 +2014,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.deepEqual(BigInt('1000'), top);
+      assert.equal(BigInt('1000'), top);
     });
 
     it("should push ZeroAddress to stack", function () {
@@ -2030,7 +2030,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.deepEqual(BigInt(interpreter.runtime.ctx.gtxs.length), top);
+      assert.equal(BigInt(interpreter.runtime.ctx.gtxs.length), top);
     });
 
     it("should push LogicSigVersion to stack", function () {
@@ -2038,7 +2038,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.deepEqual(BigInt('2'), top);
+      assert.equal(BigInt('2'), top);
     });
 
     it("should push Round to stack", function () {
@@ -2046,7 +2046,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.deepEqual(BigInt('500'), top);
+      assert.equal(BigInt('500'), top);
     });
 
     it("should push LatestTimestamp to stack", function () {
@@ -2065,7 +2065,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.deepEqual(BigInt('1847'), top);
+      assert.equal(BigInt('1847'), top);
     });
   });
 
@@ -2098,7 +2098,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         let top = stack.pop();
-        assert.deepEqual(BigInt('1'), top);
+        assert.equal(BigInt('1'), top);
 
         // for Txn.Accounts[A]
         stack.push(BigInt('1'));
@@ -2108,7 +2108,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         top = stack.pop();
-        assert.deepEqual(BigInt('1'), top);
+        assert.equal(BigInt('1'), top);
       });
 
       it("should push 0 to stack if app is not opted in", function () {
@@ -2120,7 +2120,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         let top = stack.pop();
-        assert.deepEqual(BigInt('0'), top);
+        assert.equal(BigInt('0'), top);
 
         // for Txn.Accounts[A]
         stack.push(BigInt('1'));
@@ -2130,7 +2130,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         top = stack.pop();
-        assert.deepEqual(BigInt('0'), top);
+        assert.equal(BigInt('0'), top);
       });
     });
 
@@ -2170,7 +2170,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         let top = stack.pop();
-        assert.deepEqual(BigInt('0'), top);
+        assert.equal(BigInt('0'), top);
 
         // for Txn.Accounts[A]
         stack.push(BigInt('1'));
@@ -2180,7 +2180,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         top = stack.pop();
-        assert.deepEqual(BigInt('0'), top);
+        assert.equal(BigInt('0'), top);
       });
     });
 
@@ -2200,7 +2200,7 @@ describe("Teal Opcodes", function () {
 
         let flag = stack.pop();
         let value = stack.pop();
-        assert.deepEqual(BigInt("1"), flag);
+        assert.equal(BigInt("1"), flag);
         assert.deepEqual(toBytes('Local-val'), value);
 
         // for Txn.Accounts[A]
@@ -2213,7 +2213,7 @@ describe("Teal Opcodes", function () {
 
         flag = stack.pop();
         value = stack.pop();
-        assert.deepEqual(BigInt("1"), flag);
+        assert.equal(BigInt("1"), flag);
         assert.deepEqual(toBytes('Local-val'), value);
       });
 
@@ -2227,7 +2227,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         let flag = stack.pop();
-        assert.deepEqual(BigInt('0'), flag);
+        assert.equal(BigInt('0'), flag);
 
         // for Txn.Accounts[A]
         stack.push(BigInt('1'));
@@ -2238,7 +2238,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         flag = stack.pop();
-        assert.deepEqual(BigInt('0'), flag);
+        assert.equal(BigInt('0'), flag);
       });
     });
 
@@ -2266,7 +2266,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         const top = stack.pop();
-        assert.deepEqual(BigInt('0'), top);
+        assert.equal(BigInt('0'), top);
       });
     });
 
@@ -2287,7 +2287,7 @@ describe("Teal Opcodes", function () {
 
         let flag = stack.pop();
         let value = stack.pop();
-        assert.deepEqual(BigInt("1"), flag);
+        assert.equal(BigInt("1"), flag);
         assert.deepEqual(toBytes('World'), value);
 
         // for Txn.ForeignApps[A]
@@ -2299,7 +2299,7 @@ describe("Teal Opcodes", function () {
 
         flag = stack.pop();
         value = stack.pop();
-        assert.deepEqual(BigInt("1"), flag);
+        assert.equal(BigInt("1"), flag);
         assert.deepEqual(toBytes('global-val'), value);
       });
 
@@ -2312,7 +2312,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         let top = stack.pop();
-        assert.deepEqual(BigInt('0'), top);
+        assert.equal(BigInt('0'), top);
 
         // for Txn.ForeignApps[A]
         stack.push(BigInt('1'));
@@ -2322,7 +2322,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         top = stack.pop();
-        assert.deepEqual(BigInt('0'), top);
+        assert.equal(BigInt('0'), top);
       });
     });
 
