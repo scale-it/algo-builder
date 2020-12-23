@@ -1438,7 +1438,8 @@ export class AppOptedIn extends Op {
 }
 
 // read from account specified by Txn.Accounts[A] from local state of the current application key B => value
-// push to stack [...stack]
+// push to stack [...stack, bigint/bytes] If key exist
+// push to stack [...stack, 0] otherwise
 export class AppLocalGet extends Op {
   readonly interpreter: Interpreter;
 
@@ -1498,8 +1499,8 @@ export class AppLocalGetEx extends Op {
     const account = this.interpreter.runtime.getAccount(accountIndex);
     const val = account.getLocalState(Number(appId), key);
     if (val) {
-      stack.push(BIGINT1);
       stack.push(val);
+      stack.push(BIGINT1);
     } else {
       stack.push(BIGINT0); // The value is zero if the key does not exist.
     }
@@ -1574,8 +1575,8 @@ export class AppGlobalGetEx extends Op {
 
     const val = this.interpreter.runtime.getGlobalState(appId, key);
     if (val) {
-      stack.push(BIGINT1);
       stack.push(val);
+      stack.push(BIGINT1);
     } else {
       stack.push(BIGINT0); // The value is zero if the key does not exist.
     }
@@ -1583,7 +1584,8 @@ export class AppGlobalGetEx extends Op {
 }
 
 // write to account specified by Txn.Accounts[A] to local state of a current application key B with value C
-// push to stack [...stack, address]
+// pops from stack [...stack, value, key]
+// pushes nothing to stack, updates the app user local storage
 export class AppLocalPut extends Op {
   readonly interpreter: Interpreter;
 

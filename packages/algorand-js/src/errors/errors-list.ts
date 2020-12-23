@@ -211,6 +211,12 @@ by an index that does not exist.`
     message: "Asset Field Error - Field unknown %field%",
     title: "Asset Field Error",
     description: `Asset field unkown`
+  },
+  UNKOWN_OPCODE: {
+    number: 31,
+    message: "Error encountered while parsing teal file unkown opcode %opcode% , Line : %line% ",
+    title: PARSE_ERROR,
+    description: `Unkown Opcode encountered`
   }
 };
 
