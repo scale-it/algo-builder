@@ -2198,8 +2198,10 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalGetEx([], 1, interpreter);
         op.execute(stack);
 
-        let top = stack.pop();
-        assert.deepEqual(toBytes('Local-val'), top);
+        let flag = stack.pop();
+        let value = stack.pop();
+        assert.deepEqual(BigInt("1"), flag);
+        assert.deepEqual(toBytes('Local-val'), value);
 
         // for Txn.Accounts[A]
         stack.push(BigInt('1'));
@@ -2209,8 +2211,10 @@ describe("Teal Opcodes", function () {
         op = new AppLocalGetEx([], 1, interpreter);
         op.execute(stack);
 
-        top = stack.pop();
-        assert.deepEqual(toBytes('Local-val'), top);
+        flag = stack.pop();
+        value = stack.pop();
+        assert.deepEqual(BigInt("1"), flag);
+        assert.deepEqual(toBytes('Local-val'), value);
       });
 
       it("should push uint 0 to stack if key is not present in local state from given appId", function () {
@@ -2222,8 +2226,8 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalGetEx([], 1, interpreter);
         op.execute(stack);
 
-        let top = stack.pop();
-        assert.deepEqual(BigInt('0'), top);
+        let flag = stack.pop();
+        assert.deepEqual(BigInt('0'), flag);
 
         // for Txn.Accounts[A]
         stack.push(BigInt('1'));
@@ -2233,8 +2237,8 @@ describe("Teal Opcodes", function () {
         op = new AppLocalGetEx([], 1, interpreter);
         op.execute(stack);
 
-        top = stack.pop();
-        assert.deepEqual(BigInt('0'), top);
+        flag = stack.pop();
+        assert.deepEqual(BigInt('0'), flag);
       });
     });
 
@@ -2281,8 +2285,10 @@ describe("Teal Opcodes", function () {
         let op = new AppGlobalGetEx([], 1, interpreter);
         op.execute(stack);
 
-        let top = stack.pop();
-        assert.deepEqual(toBytes('World'), top);
+        let flag = stack.pop();
+        let value = stack.pop();
+        assert.deepEqual(BigInt("1"), flag);
+        assert.deepEqual(toBytes('World'), value);
 
         // for Txn.ForeignApps[A]
         stack.push(BigInt('1'));
@@ -2291,8 +2297,10 @@ describe("Teal Opcodes", function () {
         op = new AppGlobalGetEx([], 1, interpreter);
         op.execute(stack);
 
-        top = stack.pop();
-        assert.deepEqual(toBytes('global-val'), top);
+        flag = stack.pop();
+        value = stack.pop();
+        assert.deepEqual(BigInt("1"), flag);
+        assert.deepEqual(toBytes('global-val'), value);
       });
 
       it("should push uint 0 to stack if key is not present externally in global state", function () {
