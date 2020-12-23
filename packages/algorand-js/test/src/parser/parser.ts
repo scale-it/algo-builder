@@ -3,12 +3,15 @@ import { assert } from "chai";
 import { ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
-  Add, Addr, Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr,
-  BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi, Byte, Bytec, Concat,
-  Div, Dup, Dup2, Ed25519verify, EqualTo, Err, Global, GreaterThan, GreaterThanEqualTo,
-  Gtxn, Gtxna, Int, Intc, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
-  Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, Return, Sha256,
-  Sha512_256, Store, Sub, Substring, Substring3, Txn, Txna
+  Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx,
+  AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
+  AppOptedIn, Arg, Balance, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
+  Branch, BranchIfNotZero, BranchIfZero, Btoi, Byte, Bytec, Concat, Div,
+  Dup, Dup2, Ed25519verify, EqualTo, Err, GetAssetDef, GetAssetHolding,
+  Global, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc, Itob,
+  Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, Mod, Mul, Mulw,
+  Not, NotEqualTo, Or, Pop, Pragma, Return, Sha256, Sha512_256, Store,
+  Sub, Substring, Substring3, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { Runtime } from "../../../src/runtime/runtime";
@@ -229,6 +232,28 @@ describe("Parser", function () {
 
       res = wordsFromLine("|//");
       expected = ["|"];
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("should extract correct stateful words", () => {
+      let res = wordsFromLine("app_opted_in//comment here");
+      let expected = ["app_opted_in"];
+
+      assert.deepEqual(res, expected);
+
+      res = wordsFromLine("          app_local_get     // comment here");
+      expected = ["app_local_get"];
+
+      assert.deepEqual(res, expected);
+
+      res = wordsFromLine("          app_global_get_ex     // comment here");
+      expected = ["app_global_get_ex"];
+
+      assert.deepEqual(res, expected);
+
+      res = wordsFromLine("  balance     // comment here");
+      expected = ["balance"];
 
       assert.deepEqual(res, expected);
     });
@@ -476,6 +501,118 @@ describe("Parser", function () {
         ERRORS.TEAL.UNKOWN_GLOBAL_FIELD
       );
     });
+
+    it("should return correct opcodes for `Balance` and `Asset` opcodes", () => {
+      let res = opcodeFromSentence(["balance"], 1, interpreter);
+      let expected = new Balance([], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      expectTealError(
+        () => opcodeFromSentence(["balance", "1"], 1, interpreter),
+        ERRORS.TEAL.ASSERT_LENGTH
+      );
+
+      res = opcodeFromSentence(["asset_holding_get", "AssetBalance"], 1, interpreter);
+      expected = new GetAssetHolding(["AssetBalance"], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      expectTealError(
+        () => opcodeFromSentence(["asset_holding_get", "AssetBalance", "AssetFrozen"], 1, interpreter),
+        ERRORS.TEAL.ASSERT_LENGTH
+      );
+
+      res = opcodeFromSentence(["asset_params_get", "AssetTotal"], 1, interpreter);
+      expected = new GetAssetDef(["AssetTotal"], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      expectTealError(
+        () => opcodeFromSentence(["asset_params_get", "AssetTotal", "123"], 1, interpreter),
+        ERRORS.TEAL.ASSERT_LENGTH
+      );
+    });
+
+    it("should return correct opcodes for Stateful opcodes", () => {
+      let res = opcodeFromSentence(["app_opted_in"], 1, interpreter);
+      let expected = new AppOptedIn([], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      expectTealError(
+        () => opcodeFromSentence(["app_opted_in", "12", "123"], 1, interpreter),
+        ERRORS.TEAL.ASSERT_LENGTH
+      );
+
+      res = opcodeFromSentence(["app_local_get"], 1, interpreter);
+      expected = new AppLocalGet([], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      expectTealError(
+        () => opcodeFromSentence(["app_local_get", "123"], 1, interpreter),
+        ERRORS.TEAL.ASSERT_LENGTH
+      );
+
+      res = opcodeFromSentence(["app_local_get_ex"], 1, interpreter);
+      expected = new AppLocalGetEx([], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      expectTealError(
+        () => opcodeFromSentence(["app_local_get_ex", "22", "123"], 1, interpreter),
+        ERRORS.TEAL.ASSERT_LENGTH
+      );
+
+      res = opcodeFromSentence(["app_global_get"], 1, interpreter);
+      expected = new AppGlobalGet([], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      expectTealError(
+        () => opcodeFromSentence(["app_global_get", "12", "3"], 1, interpreter),
+        ERRORS.TEAL.ASSERT_LENGTH
+      );
+
+      res = opcodeFromSentence(["app_global_get_ex"], 1, interpreter);
+      expected = new AppGlobalGetEx([], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      expectTealError(
+        () => opcodeFromSentence(["app_global_get_ex", "4"], 1, interpreter),
+        ERRORS.TEAL.ASSERT_LENGTH
+      );
+
+      res = opcodeFromSentence(["app_local_put"], 1, interpreter);
+      expected = new AppLocalPut([], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      expectTealError(
+        () => opcodeFromSentence(["app_local_put", "1223"], 1, interpreter),
+        ERRORS.TEAL.ASSERT_LENGTH
+      );
+
+      res = opcodeFromSentence(["app_global_put"], 1, interpreter);
+      expected = new AppGlobalPut([], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      expectTealError(
+        () => opcodeFromSentence(["app_global_put", "123"], 1, interpreter),
+        ERRORS.TEAL.ASSERT_LENGTH
+      );
+
+      res = opcodeFromSentence(["app_local_del"], 1, interpreter);
+      expected = new AppLocalDel([], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      expectTealError(
+        () => opcodeFromSentence(["app_local_del", "3"], 1, interpreter),
+        ERRORS.TEAL.ASSERT_LENGTH
+      );
+
+      res = opcodeFromSentence(["app_global_del"], 1, interpreter);
+      expected = new AppGlobalDel([], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      expectTealError(
+        () => opcodeFromSentence(["app_global_del", "45"], 1, interpreter),
+        ERRORS.TEAL.ASSERT_LENGTH
+      );
+    });
   });
 
   describe("Opcodes list from TEAL file", () => {
@@ -719,6 +856,29 @@ describe("Parser", function () {
         new Global(["Round"], 9, interpreter),
         new Global(["LatestTimestamp"], 10, interpreter),
         new Global(["CurrentApplicationID"], 11, interpreter)
+      ];
+
+      assert.deepEqual(res, expected);
+    });
+
+    it("should return correct opcode list for `Stateful`", async () => {
+      const file = "test-stateful.teal";
+
+      const res = await parser(getProgram(file), interpreter);
+      const expected = [
+        new Pragma(["version", "2"], 1),
+        new Balance([], 4, interpreter),
+        new GetAssetHolding(["AssetBalance"], 5, interpreter),
+        new GetAssetDef(["AssetTotal"], 6, interpreter),
+        new AppOptedIn([], 8, interpreter),
+        new AppLocalGet([], 9, interpreter),
+        new AppLocalGetEx([], 10, interpreter),
+        new AppGlobalGet([], 11, interpreter),
+        new AppGlobalGetEx([], 12, interpreter),
+        new AppLocalPut([], 13, interpreter),
+        new AppGlobalPut([], 14, interpreter),
+        new AppLocalDel([], 15, interpreter),
+        new AppGlobalDel([], 16, interpreter)
       ];
 
       assert.deepEqual(res, expected);

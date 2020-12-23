@@ -7,17 +7,14 @@ import { ERRORS } from "../../../src/errors/errors-list";
 import { Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
-  Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx, AppGlobalPut,
-  AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut, AppOptedIn,
-  Arg, Balance,
-  BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
-  Branch, BranchIfNotZero, BranchIfZero,
-  Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2,
-  Ed25519verify, EqualTo, Err, GetAssetDef, GetAssetHolding,
-  Global,
+  Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx,
+  AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
+  AppOptedIn, Arg, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
+  BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
+  Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2, Ed25519verify,
+  EqualTo, Err, GetAssetDef, GetAssetHolding, Global,
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc,
-  Intcblock, Itob, Keccak256, Label,
-  Len, LessThan, LessThanEqualTo,
+  Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
   Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, Return,
   Sha256, Sha512_256, Store, Sub, Substring, Substring3, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
@@ -2434,7 +2431,7 @@ describe("Teal Opcodes", function () {
         interpreter.runtime.ctx.tx.apid = 1847;
       });
 
-      it("should put remove the key-value pair from account's local storage", function () {
+      it("should remove the key-value pair from account's local storage", function () {
         // for Sender
         stack.push(BigInt('0'));
         stack.push(toBytes('Local-key'));
@@ -2465,7 +2462,7 @@ describe("Teal Opcodes", function () {
         interpreter.runtime.ctx.state.globalApps.set(1828, acc1.createdApps[0].params);
       });
 
-      it("should put remove the key-value pair from global storage", function () {
+      it("should remove the key-value pair from global storage", function () {
         stack.push(BigInt('0'));
         stack.push(toBytes('global-key'));
 
