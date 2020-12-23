@@ -2,17 +2,17 @@
 /* eslint sonarjs/no-small-switch: 0 */
 import { mkTransaction } from "algob";
 import { ExecParams, TransactionType } from "algob/src/types";
-import { AssetDef, AssetHolding, assignGroupID, SSCParams, SSCStateSchema } from "algosdk";
+import { AppLocalState, AssetDef, AssetHolding, assignGroupID, encodeAddress, SSCParams, SSCStateSchema } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
 import { getProgram } from "../../test/helpers/fs";
+import { mockApp, mockAppLocalState } from "../../test/mocks/stateful";
 import { mockSuggestedParams } from "../../test/mocks/txn";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { Interpreter } from "../index";
 import { BIGINT0, BIGINT1 } from "../interpreter/opcode-list";
 import { checkIndexBound, compareArray } from "../lib/compare";
-import { convertToString } from "../lib/parsing";
 import { assertValidSchema, getKeyValPair } from "../lib/stateful";
 import type { Context, StackElem, State, StoreAccount, Txn } from "../types";
 
@@ -68,13 +68,13 @@ export class Runtime {
   getAccount (accountIndex: bigint): StoreAccount {
     let account: StoreAccount | undefined;
     if (accountIndex === BIGINT0) {
-      const senderAccount = convertToString(this.ctx.tx.snd);
+      const senderAccount = encodeAddress(this.ctx.tx.snd);
       account = this.ctx.state.accounts.get(senderAccount);
     } else {
       const accIndex = accountIndex - BIGINT1;
       checkIndexBound(Number(accIndex), this.ctx.tx.apat);
       const pkBuffer = this.ctx.tx.apat[Number(accIndex)];
-      account = this.ctx.state.accounts.get(convertToString(pkBuffer));
+      account = this.ctx.state.accounts.get(encodeAddress(pkBuffer));
     }
     return this.assertAccountDefined(account);
   }
@@ -92,7 +92,7 @@ export class Runtime {
     const keyValue = appGlobalState.find(schema => compareArray(schema.key, key));
     const value = keyValue?.value;
     if (value) {
-      return value?.bytes || BigInt(value?.uint);
+      return value.type === 1 ? value.bytes : BigInt(value.uint);
     }
     return undefined;
   }
@@ -150,7 +150,7 @@ export class Runtime {
   }
 
   /**
-   * Description: creates a new transaction object from given execParams
+   * Description: creates new transaction object (tx, gtxs) from given txnParams
    * @param txnParams : Transaction parameters for current txn or txn Group
    * @returns: [current transaction, transaction group]
    */
@@ -181,6 +181,55 @@ export class Runtime {
       const encodedTxnObj = tx.get_obj_for_encoding() as Txn;
       encodedTxnObj.txID = tx.txID();
       return [encodedTxnObj, [encodedTxnObj]];
+    }
+  }
+
+  /**
+   * Description: prepare store before txn execution
+   * (eg. create & opt-in for assets, applications)
+   * @param txnParams : Transaction parameters
+   */
+  prepareStore (txnParam: ExecParams): void {
+    const sender = txnParam.fromAccount;
+    const senderAccount = (this.store.accounts.get(sender.addr));
+    switch (txnParam.type) {
+      case TransactionType.CallNoOpSSC: {
+        const appId = txnParam.appId;
+        const appParams = this.store.globalApps.get(appId);
+        let appLocalState: AppLocalState; // required for opt-in
+        if (!appParams) {
+          // if app is not present previously, create new app
+          if (senderAccount?.createdApps.length === 10) {
+            throw new Error('Maximum created applications for an account is 10');
+          }
+
+          // create new app in sender's account
+          const newApp = mockApp(appId, sender.addr);
+          senderAccount?.createdApps.push(newApp);
+          this.store.globalApps.set(appId, newApp.params); // update globalApp map
+
+          // after creating new application, get local state config from new app
+          appLocalState = mockAppLocalState(newApp.id, newApp.params);
+        } else {
+          // if app is already present, get local state config from present app
+          appLocalState = mockAppLocalState(appId, appParams);
+        }
+
+        // opt-in for sender (if already not opted-in)
+        !senderAccount?.appsLocalState.find(cfg => cfg.id === appLocalState.id) &&
+          senderAccount?.appsLocalState.push(appLocalState);
+
+        // opt-in new app for txn.Accounts[] (if already not opted-in)
+        txnParam.accounts?.forEach((address, idx) => {
+          const txAccount = this.assertAccountDefined(this.store.accounts.get(address));
+          if (txAccount.appsLocalState.length === 10) {
+            throw new Error('Maximum Opt In applications per account is 10');
+          }
+
+          !txAccount.appsLocalState.find(cfg => cfg.id === appLocalState.id) &&
+            txAccount.appsLocalState.push(appLocalState);
+        });
+      }
     }
   }
 
@@ -232,6 +281,14 @@ export class Runtime {
   async executeTx (txnParams: ExecParams | ExecParams[], fileName: string,
     args: Uint8Array[]): Promise<void> {
     const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
+
+    // prepare store for some particular transactions
+    // eg. create and opt-in for new app on application call txn
+    if (Array.isArray(txnParams)) {
+      for (const t of txnParams) { this.prepareStore(t); }
+    } else {
+      this.prepareStore(txnParams);
+    }
 
     // initialize context before each execution
     this.ctx = {

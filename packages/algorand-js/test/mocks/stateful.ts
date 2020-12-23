@@ -1,4 +1,5 @@
 import { toBytes } from "algob";
+import { AppLocalState, CreatedApps, SSCParams } from "algosdk";
 
 export const accInfo = [{
   address: "addr-1",
@@ -71,3 +72,34 @@ export const accInfo = [{
     }
   }]
 }];
+
+/**
+ * Description: creates a new application with appId and sender
+ * @param appId: application id
+ * @param creator: creator of application
+ */
+export function mockApp (appId: number, creator: string): CreatedApps {
+  return {
+    id: appId,
+    params: {
+      'approval-program': '',
+      'clear-state-program': '',
+      creator: creator,
+      'global-state': [],
+      'global-state-schema': { 'num-byte-slice': 32, 'num-uint': 32 },
+      'local-state-schema': { 'num-byte-slice': 8, 'num-uint': 8 }
+    }
+  };
+}
+
+/**
+ * Description: creates appsLocalState for a newly created app
+ * @param app: application
+ */
+export function mockAppLocalState (appId: number, appParams: SSCParams): AppLocalState {
+  return {
+    id: appId,
+    "key-value": [],
+    schema: appParams["local-state-schema"]
+  };
+}
