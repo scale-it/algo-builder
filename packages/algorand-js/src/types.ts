@@ -1,3 +1,4 @@
+import { SSCDeploymentFlags } from "algob/src/types";
 import {
   Account,
   AppLocalState,
@@ -93,6 +94,8 @@ export interface StoreAccount {
   accountsAssets: Map<string, Map<number, AssetHolding>>
 
   balance: () => number
+  createApp: (params: SSCDeploymentFlags) => CreatedApps
+  optInToApp: (appId: number, appParams: SSCParams) => void
   getLocalState: (appId: number, key: Uint8Array) => StackElem | undefined
   updateLocalState: (appId: number, key: Uint8Array, value: StackElem) => AppLocalState[]
 }

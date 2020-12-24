@@ -463,7 +463,7 @@ export interface SSCOptionalFlags {
 
 // represent sender and schema of ssc
 export interface SSCDeploymentFlags extends SSCOptionalFlags {
-  sender: Account
+  sender: Account | AccountSDK
   localInts: number
   localBytes: number
   globalInts: number
