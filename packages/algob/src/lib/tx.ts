@@ -137,11 +137,31 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
     }
     case TransactionType.ClearSSC: {
       return algosdk.makeApplicationClearStateTxn(
-        execParams.fromAccount.addr, suggestedParams, execParams.appId, execParams.appArgs);
+        execParams.fromAccount.addr,
+        suggestedParams,
+        execParams.appId,
+        execParams.appArgs,
+        execParams.accounts,
+        execParams.foreignApps,
+        execParams.foreignAssets,
+        note,
+        execParams.lease,
+        execParams.rekeyTo
+      );
     }
     case TransactionType.DeleteSSC: {
       return algosdk.makeApplicationDeleteTxn(
-        execParams.fromAccount.addr, suggestedParams, execParams.appId, execParams.appArgs);
+        execParams.fromAccount.addr,
+        suggestedParams,
+        execParams.appId,
+        execParams.appArgs,
+        execParams.accounts,
+        execParams.foreignApps,
+        execParams.foreignAssets,
+        note,
+        execParams.lease,
+        execParams.rekeyTo
+      );
     }
     case TransactionType.CallNoOpSSC: {
       return algosdk.makeApplicationNoOpTxn(
@@ -158,7 +178,17 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
     }
     case TransactionType.CloseSSC: {
       return algosdk.makeApplicationCloseOutTxn(
-        execParams.fromAccount.addr, suggestedParams, execParams.appId, execParams.appArgs);
+        execParams.fromAccount.addr,
+        suggestedParams,
+        execParams.appId,
+        execParams.appArgs,
+        execParams.accounts,
+        execParams.foreignApps,
+        execParams.foreignAssets,
+        note,
+        execParams.lease,
+        execParams.rekeyTo
+      );
     }
     default: {
       throw new BuilderError(ERRORS.GENERAL.TRANSACTION_TYPE_ERROR, { error: transactionType });
