@@ -357,7 +357,7 @@ b finished
 //may be an issue when the last
 //person relcaims because of min balance
 //without a closeto
-// only 1 relcaim tx is allowed per account
+// only 1 reclaim tx is allowed per account
 
 
 reclaim:
