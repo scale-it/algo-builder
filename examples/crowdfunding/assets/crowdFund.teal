@@ -181,7 +181,7 @@ bnz close_out
 // passed in, which should
 // only happen when someone just
 // wants to optin
-// note the code is written
+// note that the code is written
 // to allow opting in and donating with
 // one call
 int 0
