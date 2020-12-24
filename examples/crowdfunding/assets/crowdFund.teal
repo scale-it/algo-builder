@@ -429,7 +429,7 @@ gtxn 1 Fee
 gtxn 1 Amount
 +
 
-// the int 1 is the ref to escrow
+// int 1 is ref to escrow
 int 1
 balance
 ==
