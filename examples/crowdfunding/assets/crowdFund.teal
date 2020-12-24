@@ -370,7 +370,7 @@ bz failed
 
 // verify that smart contract
 // caller is the payment
-// transction receiver
+// transaction receiver
 gtxn 1 Receiver
 gtxn 0 Sender
 ==
