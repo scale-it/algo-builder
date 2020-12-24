@@ -1,3 +1,4 @@
+import { TransactionType } from "algob/src/types";
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
@@ -12,7 +13,7 @@ describe("Algorand Smart Contracts", function () {
 
   // set up transaction paramenters
   const txnParams = {
-    type: 0, // payment
+    type: TransactionType.TransferAlgo as number, // payment
     sign: 0,
     fromAccount: john.account,
     toAccountAddr: bob.address,
@@ -57,7 +58,7 @@ describe("Algorand Smart Contracts", function () {
     // execute transaction (should fail is logic is incorrect)
     await expectTealErrorAsync(
       async () => await runtime.executeTx(invalidParams, 'incorrect-logic.teal', []),
-      ERRORS.TEAL.INVALID_STACK_ELEM
+      ERRORS.TEAL.LOGIC_REJECTION
     );
 
     // get final state (updated accounts)

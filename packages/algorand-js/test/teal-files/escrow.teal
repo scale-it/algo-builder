@@ -1,5 +1,5 @@
 #pragma version 2
-// Check if Transaction type is pay, Receiver is john, fee <= 10000 AND amount is <= 100
+// Check if Transaction type is pay, Amount is <= 100, Receiver is john AND fee <= 10000
 txn TypeEnum
 int 1
 ==
