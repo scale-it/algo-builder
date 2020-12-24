@@ -241,7 +241,7 @@ global GroupSize
 int 2
 ==
 
-// second tx is an payment
+// verify second tx is payment
 gtxn 1 TypeEnum
 int 1
 ==
