@@ -1,6 +1,8 @@
 import { TxParams } from "algob/src/types";
 import { decodeAddress, generateAccount, SuggestedParams } from "algosdk";
 
+import { elonMuskAccount, johnAccount } from "../mocks/account";
+
 export const ALGORAND_MIN_TX_FEE = 1000;
 const GENESIS_ID = 'testnet-v1.0';
 // testnet-v1.0 hash
@@ -9,8 +11,8 @@ const GENESIS_HASH = 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=';
 const account = generateAccount();
 const addr = decodeAddress(account.addr);
 
-export const addr1 = 'WHVQXVVCQAD7WX3HHFKNVUL3MOANX3BYXXMEEJEJWOZNRXJNTN7LTNPSTY';
-export const addr2 = '2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA';
+export const addr1 = elonMuskAccount.addr;
+export const addr2 = johnAccount.addr;
 
 export const TXN_OBJ = {
   snd: Buffer.from(addr.publicKey),

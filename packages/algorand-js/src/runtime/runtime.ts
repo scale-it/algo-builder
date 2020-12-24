@@ -26,6 +26,7 @@ export class Runtime {
    */
   private store: State;
   ctx: Context;
+  private counter: number;
 
   constructor (accounts: StoreAccount[]) {
     // runtime store
@@ -47,6 +48,7 @@ export class Runtime {
       gtxs: [],
       args: []
     };
+    this.counter = 0;
   }
 
   assertAccountDefined (a?: StoreAccount): StoreAccount {
@@ -187,7 +189,7 @@ export class Runtime {
   createApp (params: SSCDeploymentFlags): number {
     const sender = params.sender;
     const senderAccountDef = this.assertAccountDefined(this.store.accounts.get(sender.addr));
-    const app = senderAccountDef.createApp(params);
+    const app = senderAccountDef.createApp(++this.counter, params);
 
     this.store.globalApps.set(app.id, app.params); // update globalApps Map
     return app.id;

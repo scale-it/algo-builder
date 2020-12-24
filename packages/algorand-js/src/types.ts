@@ -4,7 +4,7 @@ import {
   AppLocalState,
   AssetDef,
   AssetHolding,
-  CreatedApps,
+  CreatedApp,
   CreatedAssets,
   SSCParams,
   SSCSchemaConfig,
@@ -88,13 +88,13 @@ export interface StoreAccount {
   amount: number
   appsLocalState: AppLocalState[]
   appsTotalSchema: SSCSchemaConfig
-  createdApps: CreatedApps[]
+  createdApps: CreatedApp[]
   createdAssets: CreatedAssets[]
   account: Account
   accountsAssets: Map<string, Map<number, AssetHolding>>
 
   balance: () => number
-  createApp: (params: SSCDeploymentFlags) => CreatedApps
+  createApp: (appId: number, params: SSCDeploymentFlags) => CreatedApp
   optInToApp: (appId: number, appParams: SSCParams) => void
   getLocalState: (appId: number, key: Uint8Array) => StackElem | undefined
   updateLocalState: (appId: number, key: Uint8Array, value: StackElem) => AppLocalState[]

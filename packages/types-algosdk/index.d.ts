@@ -577,7 +577,7 @@ export interface AssetHolding {
   'is-frozen': string;
 }
 
-export interface CreatedApps {
+export interface CreatedApp {
   id: number;
   params: SSCParams;
 }
@@ -605,7 +605,7 @@ export interface AccountState {
   status: string;
   'apps-local-state': AppLocalState[];
   'apps-total-schema': SSCSchemaConfig;
-  'created-apps': CreatedApps[];
+  'created-apps': CreatedApp[];
   'created-assets': CreatedAssets[];
 }
 

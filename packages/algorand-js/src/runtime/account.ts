@@ -4,7 +4,7 @@ import type {
   Account,
   AppLocalState,
   AssetHolding,
-  CreatedApps,
+  CreatedApp,
   CreatedAssets, SSCParams, SSCSchemaConfig
 } from "algosdk";
 import { generateAccount } from "algosdk";
@@ -17,13 +17,13 @@ import { assertValidSchema, getKeyValPair } from "../lib/stateful";
 export class StoreAccountImpl implements StoreAccount {
   readonly account: Account;
   readonly address: string;
-  assets: AssetHolding[];
+  assets: AssetHolding[]; // TODO: to be removed
   amount: number;
-  appsLocalState: AppLocalState[];
+  appsLocalState: AppLocalState[]; // TODO: update to map
   appsTotalSchema: SSCSchemaConfig;
-  createdApps: CreatedApps[];
+  createdApps: CreatedApp[];
   createdAssets: CreatedAssets[];
-  accountsAssets: Map<string, Map<number, AssetHolding>>;
+  accountsAssets: Map<string, Map<number, AssetHolding>>; // TODO: change to 1D Map
 
   constructor (balance: number, account?: Account) {
     if (account) {
@@ -103,12 +103,11 @@ export class StoreAccountImpl implements StoreAccount {
     });
   }
 
-  createApp (params: SSCDeploymentFlags): CreatedApps {
+  createApp (appId: number, params: SSCDeploymentFlags): CreatedApp {
     if (this.createdApps.length === 10) {
       throw new Error('Maximum created applications for an account is 10');
     }
 
-    const appId = Math.floor(1000 + Math.random() * 9000);
     const appParams: SSCParams = {
       'approval-program': '',
       'clear-state-program': '',
@@ -118,7 +117,7 @@ export class StoreAccountImpl implements StoreAccount {
       'local-state-schema': { 'num-byte-slice': params.localBytes, 'num-uint': params.localInts }
     };
     // create new app in sender's account
-    const newApp: CreatedApps = { id: appId, params: appParams };
+    const newApp: CreatedApp = { id: appId, params: appParams };
     this.createdApps.push(newApp); // push newly created app
 
     console.log('Created new app with id:', appId);

@@ -1,4 +1,4 @@
-import { TransactionType } from "algob/src/types";
+import { ExecParams, TransactionType } from "algob/src/types";
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
@@ -12,8 +12,8 @@ describe("Algorand Smart Contracts", function () {
   let bob = new StoreAccountImpl(500);
 
   // set up transaction paramenters
-  const txnParams = {
-    type: TransactionType.TransferAlgo as number, // payment
+  const txnParams: ExecParams = {
+    type: TransactionType.TransferAlgo, // payment
     sign: 0,
     fromAccount: john.account,
     toAccountAddr: bob.address,

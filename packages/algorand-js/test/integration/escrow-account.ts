@@ -1,5 +1,6 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 import { TransactionType } from "algob";
+import { ExecParams } from "algob/src/types";
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
@@ -9,12 +10,15 @@ import { getAcc } from "../helpers/account";
 import { expectTealErrorAsync } from "../helpers/errors";
 import { johnAccount } from "../mocks/account";
 
+const initialEscrowHolding = 1000e6;
+const initialJohnHolding = 500;
+
 describe("Algorand Stateless Smart Contracts", function () {
-  const escrow = new StoreAccountImpl(1000000000); // 1000 ALGO
-  const john = new StoreAccountImpl(500, johnAccount); // 0.005 ALGO
+  const escrow = new StoreAccountImpl(initialEscrowHolding); // 1000 ALGO
+  const john = new StoreAccountImpl(initialJohnHolding, johnAccount); // 0.005 ALGO
   // set up transaction paramenters
-  const txnParams = {
-    type: TransactionType.TransferAlgo as number, // payment
+  const txnParams: ExecParams = {
+    type: TransactionType.TransferAlgo, // payment
     sign: 0,
     fromAccount: escrow.account,
     toAccountAddr: john.address,
@@ -29,15 +33,15 @@ describe("Algorand Stateless Smart Contracts", function () {
 
   it("should withdraw funds from escrow if txn params are correct", async function () {
     // check initial balance
-    assert.equal(escrow.balance(), 1000000000);
-    assert.equal(john.balance(), 500);
+    assert.equal(escrow.balance(), initialEscrowHolding);
+    assert.equal(john.balance(), initialJohnHolding);
 
     // execute transaction
     await runtime.executeTx(txnParams, 'escrow.teal', []);
 
     // check final state (updated accounts)
-    assert.equal(getAcc(runtime, escrow).balance(), 999999900); // check if 100 microAlgo's are withdrawn
-    assert.equal(getAcc(runtime, john).balance(), 600);
+    assert.equal(getAcc(runtime, escrow).balance(), initialEscrowHolding - 100); // check if 100 microAlgo's are withdrawn
+    assert.equal(getAcc(runtime, john).balance(), initialJohnHolding + 100);
   });
 
   it("should reject transaction if amount > 100", async function () {
@@ -63,10 +67,11 @@ describe("Algorand Stateless Smart Contracts", function () {
   });
 
   it("should reject transaction type is not `pay`", async function () {
-    const invalidParams = {
+    const invalidParams: ExecParams = {
       ...txnParams,
-      type: TransactionType.TransferAsset as number, // asset transfer
-      assetID: 1111
+      type: TransactionType.TransferAsset,
+      assetID: 1111,
+      amount: 10 // asset amount
     };
 
     // execute transaction (should fail as transfer type is asset)
