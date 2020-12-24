@@ -1,10 +1,11 @@
+import { SSCDeploymentFlags } from "algob/src/types";
 import { StackElem, StoreAccount } from "algorand-js/src/types";
 import type {
   Account,
   AppLocalState,
   AssetHolding,
   CreatedApps,
-  CreatedAssets, SSCSchemaConfig
+  CreatedAssets, SSCParams, SSCSchemaConfig
 } from "algosdk";
 import { generateAccount } from "algosdk";
 
@@ -100,5 +101,46 @@ export class StoreAccountImpl implements StoreAccount {
     throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, {
       appId: appId
     });
+  }
+
+  createApp (params: SSCDeploymentFlags): CreatedApps {
+    if (this.createdApps.length === 10) {
+      throw new Error('Maximum created applications for an account is 10');
+    }
+
+    const appId = Math.floor(1000 + Math.random() * 9000);
+    const appParams: SSCParams = {
+      'approval-program': '',
+      'clear-state-program': '',
+      creator: params.sender.addr,
+      'global-state': [],
+      'global-state-schema': { 'num-byte-slice': params.globalBytes, 'num-uint': params.globalInts },
+      'local-state-schema': { 'num-byte-slice': params.localBytes, 'num-uint': params.localInts }
+    };
+    // create new app in sender's account
+    const newApp: CreatedApps = { id: appId, params: appParams };
+    this.createdApps.push(newApp); // push newly created app
+
+    console.log('Created new app with id:', appId);
+    return newApp;
+  }
+
+  // opt in to application
+  optInToApp (appId: number, appParams: SSCParams): void {
+    const localState = this.appsLocalState.find(cfg => cfg.id === appId);
+    if (localState) {
+      console.warn(`app ${appId} already opted in to ${this.address}`);
+    } else {
+      if (this.appsLocalState.length === 10) {
+        throw new Error('Maximum Opt In applications per account is 10');
+      }
+
+      const localParams: AppLocalState = {
+        id: appId,
+        "key-value": [],
+        schema: appParams["local-state-schema"]
+      };
+      this.appsLocalState.push(localParams); // push
+    }
   }
 }

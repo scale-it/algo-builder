@@ -1,12 +1,11 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
 import { mkTransaction } from "algob";
-import { ExecParams, TransactionType } from "algob/src/types";
-import { AppLocalState, AssetDef, AssetHolding, assignGroupID, encodeAddress, SSCParams, SSCStateSchema } from "algosdk";
+import { ExecParams, SSCDeploymentFlags, TransactionType } from "algob/src/types";
+import { AssetDef, AssetHolding, assignGroupID, encodeAddress, SSCParams, SSCStateSchema } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
 import { getProgram } from "../../test/helpers/fs";
-import { mockApp, mockAppLocalState } from "../../test/mocks/stateful";
 import { mockSuggestedParams } from "../../test/mocks/txn";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
@@ -184,53 +183,20 @@ export class Runtime {
     }
   }
 
-  /**
-   * Description: prepare store before txn execution
-   * (eg. create & opt-in for assets, applications)
-   * @param txnParams : Transaction parameters
-   */
-  prepareStore (txnParam: ExecParams): void {
-    const sender = txnParam.fromAccount;
-    const senderAccount = (this.store.accounts.get(sender.addr));
-    switch (txnParam.type) {
-      case TransactionType.CallNoOpSSC: {
-        const appId = txnParam.appId;
-        const appParams = this.store.globalApps.get(appId);
-        let appLocalState: AppLocalState; // required for opt-in
-        if (!appParams) {
-          // if app is not present previously, create new app
-          if (senderAccount?.createdApps.length === 10) {
-            throw new Error('Maximum created applications for an account is 10');
-          }
+  // creates new application and returns application id
+  createApp (params: SSCDeploymentFlags): number {
+    const sender = params.sender;
+    const senderAccountDef = this.assertAccountDefined(this.store.accounts.get(sender.addr));
+    const app = senderAccountDef.createApp(params);
 
-          // create new app in sender's account
-          const newApp = mockApp(appId, sender.addr);
-          senderAccount?.createdApps.push(newApp);
-          this.store.globalApps.set(appId, newApp.params); // update globalApp map
+    this.store.globalApps.set(app.id, app.params); // update globalApps Map
+    return app.id;
+  }
 
-          // after creating new application, get local state config from new app
-          appLocalState = mockAppLocalState(newApp.id, newApp.params);
-        } else {
-          // if app is already present, get local state config from present app
-          appLocalState = mockAppLocalState(appId, appParams);
-        }
-
-        // opt-in for sender (if already not opted-in)
-        !senderAccount?.appsLocalState.find(cfg => cfg.id === appLocalState.id) &&
-          senderAccount?.appsLocalState.push(appLocalState);
-
-        // opt-in new app for txn.Accounts[] (if already not opted-in)
-        txnParam.accounts?.forEach((address, idx) => {
-          const txAccount = this.assertAccountDefined(this.store.accounts.get(address));
-          if (txAccount.appsLocalState.length === 10) {
-            throw new Error('Maximum Opt In applications per account is 10');
-          }
-
-          !txAccount.appsLocalState.find(cfg => cfg.id === appLocalState.id) &&
-            txAccount.appsLocalState.push(appLocalState);
-        });
-      }
-    }
+  optInToApp (appId: number, accountAddr: string): void {
+    const appParams = this.store.globalApps.get(appId);
+    const accountDef = this.assertAccountDefined(this.store.accounts.get(accountAddr));
+    if (appParams) { accountDef.optInToApp(appId, appParams); }
   }
 
   // updates account balance as per transaction parameters
@@ -281,14 +247,6 @@ export class Runtime {
   async executeTx (txnParams: ExecParams | ExecParams[], fileName: string,
     args: Uint8Array[]): Promise<void> {
     const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
-
-    // prepare store for some particular transactions
-    // eg. create and opt-in for new app on application call txn
-    if (Array.isArray(txnParams)) {
-      for (const t of txnParams) { this.prepareStore(t); }
-    } else {
-      this.prepareStore(txnParams);
-    }
 
     // initialize context before each execution
     this.ctx = {
