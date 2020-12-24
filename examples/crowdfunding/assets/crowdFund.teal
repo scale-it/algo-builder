@@ -355,7 +355,7 @@ b finished
 //Fund did not meet total
 //Allow ppl to reclaim funds
 //may be an issue when the last
-//person relcaims because of min balance
+//person reclaims because of min balance
 //without a closeto
 // only 1 reclaim tx is allowed per account
 
