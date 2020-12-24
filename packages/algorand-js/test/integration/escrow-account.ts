@@ -27,7 +27,7 @@ describe("Algorand Stateless Smart Contracts", function () {
     runtime = new Runtime([escrow, john]); // setup test
   });
 
-  it("should withdraw funds from escrow on correct txn params", async function () {
+  it("should withdraw funds from escrow if txn params are correct", async function () {
     // check initial balance
     assert.equal(escrow.balance(), 1000000000);
     assert.equal(john.balance(), 500);
