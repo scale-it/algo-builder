@@ -422,7 +422,7 @@ bz failed
 // needs to pass the address
 // of the escrow
 // check that this is the
-// last recoverd donation
+// last recovered donation
 // if it is the closeremainderto
 // should be set
 gtxn 1 Fee
