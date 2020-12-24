@@ -66,7 +66,7 @@ minimum uint64 value of 0`
     title: "Division by zero",
     description: `Runtime error occured. Cannot divide by zero`
   },
-  LOGIC_REJECTION: {
+  REJECTED_BY_LOGIC: {
     number: 8,
     message: "Invalid top of stack",
     title: "Teal Rejection Error",

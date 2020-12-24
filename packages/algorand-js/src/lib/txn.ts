@@ -59,7 +59,7 @@ export function txnSpecbyField (txField: string, interpreter: Interpreter): Stac
   // handle other cases
   switch (txField) {
     case 'FirstValidTime': { // Causes program to fail; reserved for future use
-      throw new TealError(ERRORS.TEAL.LOGIC_REJECTION);
+      throw new TealError(ERRORS.TEAL.REJECTED_BY_LOGIC);
     }
     case 'TypeEnum': {
       result = TxnType[tx.type as keyof typeof TxnType]; // TxnType['pay']

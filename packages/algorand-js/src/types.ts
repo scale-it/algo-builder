@@ -91,7 +91,6 @@ export interface StoreAccount {
   createdApps: CreatedApp[]
   createdAssets: CreatedAssets[]
   account: Account
-  accountsAssets: Map<string, Map<number, AssetHolding>>
 
   balance: () => number
   createApp: (appId: number, params: SSCDeploymentFlags) => CreatedApp

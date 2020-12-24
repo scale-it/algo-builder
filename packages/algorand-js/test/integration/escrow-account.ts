@@ -1,6 +1,5 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
-import { TransactionType } from "algob";
-import { ExecParams } from "algob/src/types";
+import { ExecParams, SignType, TransactionType } from "algob/src/types";
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
@@ -19,7 +18,7 @@ describe("Algorand Stateless Smart Contracts", function () {
   // set up transaction paramenters
   const txnParams: ExecParams = {
     type: TransactionType.TransferAlgo, // payment
-    sign: 0,
+    sign: SignType.SecretKey,
     fromAccount: escrow.account,
     toAccountAddr: john.address,
     amountMicroAlgos: 100,
@@ -51,7 +50,7 @@ describe("Algorand Stateless Smart Contracts", function () {
     // execute transaction (should fail as amount = 500)
     await expectTealErrorAsync(
       async () => await runtime.executeTx(invalidParams, 'escrow.teal', []),
-      ERRORS.TEAL.LOGIC_REJECTION
+      ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
 
@@ -62,7 +61,7 @@ describe("Algorand Stateless Smart Contracts", function () {
     // execute transaction (should fail as fee is 12000)
     await expectTealErrorAsync(
       async () => await runtime.executeTx(invalidParams, 'escrow.teal', []),
-      ERRORS.TEAL.LOGIC_REJECTION
+      ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
 
@@ -77,7 +76,7 @@ describe("Algorand Stateless Smart Contracts", function () {
     // execute transaction (should fail as transfer type is asset)
     await expectTealErrorAsync(
       async () => await runtime.executeTx(invalidParams, 'escrow.teal', []),
-      ERRORS.TEAL.LOGIC_REJECTION
+      ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
 
@@ -89,7 +88,7 @@ describe("Algorand Stateless Smart Contracts", function () {
     // execute transaction (should fail as receiver is bob)
     await expectTealErrorAsync(
       async () => await runtime.executeTx(invalidParams, 'escrow.teal', []),
-      ERRORS.TEAL.LOGIC_REJECTION
+      ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
 });
