@@ -65,7 +65,7 @@ describe("Algorand Stateless Smart Contracts", function () {
     );
   });
 
-  it("should reject transaction type is not `pay`", async function () {
+  it("should reject transaction if type is not `pay`", async function () {
     const invalidParams: ExecParams = {
       ...txnParams,
       type: TransactionType.TransferAsset,

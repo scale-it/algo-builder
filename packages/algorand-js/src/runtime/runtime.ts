@@ -197,8 +197,8 @@ export class Runtime {
 
   optInToApp (appId: number, accountAddr: string): void {
     const appParams = this.store.globalApps.get(appId);
-    const accountDef = this.assertAccountDefined(this.store.accounts.get(accountAddr));
-    if (appParams) { accountDef.optInToApp(appId, appParams); }
+    const account = this.assertAccountDefined(this.store.accounts.get(accountAddr));
+    if (appParams) { account.optInToApp(appId, appParams); }
   }
 
   // updates account balance as per transaction parameters
