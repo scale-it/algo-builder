@@ -1,4 +1,5 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
+import { TransactionType } from "algob";
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
@@ -13,7 +14,7 @@ describe("Algorand Stateless Smart Contracts", function () {
   const john = new StoreAccountImpl(500, johnAccount); // 0.005 ALGO
   // set up transaction paramenters
   const txnParams = {
-    type: 0, // payment
+    type: TransactionType.TransferAlgo as number, // payment
     sign: 0,
     fromAccount: escrow.account,
     toAccountAddr: john.address,
@@ -46,7 +47,7 @@ describe("Algorand Stateless Smart Contracts", function () {
     // execute transaction (should fail as amount = 500)
     await expectTealErrorAsync(
       async () => await runtime.executeTx(invalidParams, 'escrow.teal', []),
-      ERRORS.TEAL.INVALID_STACK_ELEM
+      ERRORS.TEAL.LOGIC_REJECTION
     );
   });
 
@@ -57,21 +58,21 @@ describe("Algorand Stateless Smart Contracts", function () {
     // execute transaction (should fail as fee is 12000)
     await expectTealErrorAsync(
       async () => await runtime.executeTx(invalidParams, 'escrow.teal', []),
-      ERRORS.TEAL.INVALID_STACK_ELEM
+      ERRORS.TEAL.LOGIC_REJECTION
     );
   });
 
   it("should reject transaction type is not `pay`", async function () {
     const invalidParams = {
       ...txnParams,
-      type: 1, // asset transfer
+      type: TransactionType.TransferAsset as number, // asset transfer
       assetID: 1111
     };
 
     // execute transaction (should fail as transfer type is asset)
     await expectTealErrorAsync(
       async () => await runtime.executeTx(invalidParams, 'escrow.teal', []),
-      ERRORS.TEAL.INVALID_STACK_ELEM
+      ERRORS.TEAL.LOGIC_REJECTION
     );
   });
 
@@ -83,7 +84,7 @@ describe("Algorand Stateless Smart Contracts", function () {
     // execute transaction (should fail as receiver is bob)
     await expectTealErrorAsync(
       async () => await runtime.executeTx(invalidParams, 'escrow.teal', []),
-      ERRORS.TEAL.INVALID_STACK_ELEM
+      ERRORS.TEAL.LOGIC_REJECTION
     );
   });
 });
