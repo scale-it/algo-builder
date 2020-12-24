@@ -423,7 +423,7 @@ bz failed
 // of the escrow
 // check that this is the
 // last recovered donation
-// if it is the closeremainderto
+// if it is, then CloseRemainderTo
 // should be set
 gtxn 1 Fee
 gtxn 1 Amount
