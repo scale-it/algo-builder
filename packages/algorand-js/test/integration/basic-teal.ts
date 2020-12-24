@@ -1,4 +1,4 @@
-import { TransactionType } from "algob/src/types";
+import { ExecParams, SignType, TransactionType } from "algob/src/types";
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
@@ -12,9 +12,9 @@ describe("Algorand Smart Contracts", function () {
   let bob = new StoreAccountImpl(500);
 
   // set up transaction paramenters
-  const txnParams = {
-    type: TransactionType.TransferAlgo as number, // payment
-    sign: 0,
+  const txnParams: ExecParams = {
+    type: TransactionType.TransferAlgo, // payment
+    sign: SignType.SecretKey,
     fromAccount: john.account,
     toAccountAddr: bob.address,
     amountMicroAlgos: 100,
@@ -58,7 +58,7 @@ describe("Algorand Smart Contracts", function () {
     // execute transaction (should fail is logic is incorrect)
     await expectTealErrorAsync(
       async () => await runtime.executeTx(invalidParams, 'incorrect-logic.teal', []),
-      ERRORS.TEAL.LOGIC_REJECTION
+      ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 
     // get final state (updated accounts)
