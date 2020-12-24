@@ -1,4 +1,4 @@
-# Hash Time Lock Contract Example in pyTeal
+# Escrow Account Contract
 
 # Add parent directory to path so that algobpy can be imported
 import sys
