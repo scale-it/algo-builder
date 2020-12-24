@@ -22,7 +22,6 @@ export class StoreAccountImpl implements StoreAccount {
   appsTotalSchema: SSCSchemaConfig;
   createdApps: CreatedApps[];
   createdAssets: CreatedAssets[];
-  accountsAssets: Map<string, Map<number, AssetHolding>>;
 
   constructor (balance: number, account?: Account) {
     if (account) {
@@ -41,8 +40,6 @@ export class StoreAccountImpl implements StoreAccount {
     this.appsTotalSchema = <SSCSchemaConfig>{};
     this.createdApps = [];
     this.createdAssets = [];
-    const assetInfo = new Map<number, AssetHolding>();
-    this.accountsAssets = new Map<string, typeof assetInfo>();
   }
 
   // returns account balance in microAlgos

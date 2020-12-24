@@ -1,5 +1,5 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
-import { ExecParams, TransactionType } from "algob/src/types";
+import { ExecParams, SignType, TransactionType } from "algob/src/types";
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
@@ -15,7 +15,7 @@ describe("Algorand Stateless Smart Contracts", function () {
   // set up transaction paramenters
   const txnParams: ExecParams = {
     type: TransactionType.TransferAlgo, // payment
-    sign: 0,
+    sign: SignType.SecretKey,
     fromAccount: escrow.account,
     toAccountAddr: john.address,
     amountMicroAlgos: 100,
