@@ -348,7 +348,7 @@ bz failed
 b finished
 
 //dont check amount because
-//escrow account may receiver 
+//escrow account may receive
 //more than the goal
 //Could check for total vs tx1 amount
 
