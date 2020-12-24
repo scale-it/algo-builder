@@ -1,5 +1,4 @@
-import type { Account as AccountSDK, ConfirmedTxInfo } from "algosdk";
-import tx from "algosdk";
+import tx, { Account as AccountSDK, ConfirmedTxInfo, decodeAddress } from "algosdk";
 
 import { AlgobDeployer, TxParams } from "../types";
 import { mkTxParams } from "./tx";
@@ -7,6 +6,24 @@ import { mkTxParams } from "./tx";
 // returns parsed string to Uint8Array
 export function toBytes (s: string): Uint8Array {
   return new Uint8Array(Buffer.from(s));
+}
+
+/**
+ * Description: Converts integer to Bytes
+ * @param x : integer
+ */
+export function intToBytes (x: number): Uint8Array {
+  const y = Math.floor(x / 2 ** 32);
+  const byt = [y, (y << 8), (y << 16), (y << 24), x, (x << 8), (x << 16), (x << 24)].map(z => z >>> 24);
+  return new Uint8Array(byt);
+}
+
+/**
+ * Description: Converts address to Bytes
+ * @param addr : algorand address
+ */
+export function addressToBytes (addr: string): Uint8Array {
+  return decodeAddress(addr).publicKey;
 }
 
 /**

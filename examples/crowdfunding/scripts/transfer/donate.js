@@ -18,7 +18,7 @@ async function run (runtimeEnv, deployer) {
   const appArgs = [toBytes('donate')];
 
   // Get AppInfo and AssetID from checkpoints.
-  const appInfo = deployer.getSSC('crowdFund.teal', 'crowdFundClose.teal');
+  const appInfo = deployer.getSSC('crowdFundApproval.teal', 'crowdFundClear.teal');
 
   // Get Escrow Account Address
   const escrowAccount = await deployer.loadLogic('crowdFundEscrow.py', [], { APP_ID: appInfo.appID });

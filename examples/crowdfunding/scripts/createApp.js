@@ -1,14 +1,11 @@
-const { executeTransaction, TransactionType, SignType, update } = require('algob');
-const { decodeAddress } = require('algosdk');
-
-/**
-* Description: Converts Integer into Bytes Array
-*/
-function getInt64Bytes (x) {
-  const y = Math.floor(x / 2 ** 32);
-  const byt = [y, (y << 8), (y << 16), (y << 24), x, (x << 8), (x << 16), (x << 24)].map(z => z >>> 24);
-  return new Uint8Array(byt);
-}
+const {
+  executeTransaction,
+  TransactionType,
+  SignType,
+  update,
+  intToBytes,
+  addressToBytes
+} = require('algob');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -37,23 +34,20 @@ async function run (runtimeEnv, deployer) {
   const fundCloseDateTimestamp = new Date();
   fundCloseDateTimestamp.setSeconds(fundCloseDateTimestamp.getSeconds() + 120000);
 
-  // convert address to bytes
-  let addr = decodeAddress(creatorAccount.addr);
-
   // initialize app arguments
   let appArgs = [
-    getInt64Bytes(beginDateTimestamp.getTime()),
-    getInt64Bytes(endDateTimestamp.getTime()),
-    getInt64Bytes(7000000),
-    addr.publicKey,
-    getInt64Bytes(fundCloseDateTimestamp.getTime())
+    intToBytes(beginDateTimestamp.getTime()),
+    intToBytes(endDateTimestamp.getTime()),
+    intToBytes(7000000),
+    addressToBytes(creatorAccount.addr),
+    intToBytes(fundCloseDateTimestamp.getTime())
   ];
 
   // Create Application
   // Note: An Account can have maximum of 10 Applications.
   const res = await deployer.deploySSC(
-    'crowdFund.teal', // approval program
-    'crowdFundClose.teal', // clear program
+    'crowdFundApproval.teal', // approval program
+    'crowdFundClear.teal', // clear program
     {
       sender: creatorAccount,
       localInts: 1,
@@ -74,17 +68,15 @@ async function run (runtimeEnv, deployer) {
   // The update operation links the two contracts.
   const applicationID = res.appID;
 
-  // convert address into bytes
-  addr = decodeAddress(escrowAccount.address());
-  appArgs = [addr.publicKey];
+  appArgs = [addressToBytes(escrowAccount.address())];
 
   const updatedRes = await update(
     deployer,
     creatorAccount,
     {}, // pay flags
     applicationID,
-    'crowdFund.teal',
-    'crowdFundClose.teal',
+    'crowdFundApproval.teal',
+    'crowdFundClear.teal',
     appArgs
   );
   console.log('Application Updated: ', updatedRes);
