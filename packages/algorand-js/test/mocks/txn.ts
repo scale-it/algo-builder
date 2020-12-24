@@ -1,7 +1,7 @@
 import { TxParams } from "algob/src/types";
 import { decodeAddress, generateAccount, SuggestedParams } from "algosdk";
 
-import { elonMuskAccount, johnAccount } from "../mocks/account";
+import { bobAccount, elonMuskAccount, johnAccount } from "../mocks/account";
 
 export const ALGORAND_MIN_TX_FEE = 1000;
 const GENESIS_ID = 'testnet-v1.0';
@@ -58,7 +58,8 @@ export const TXN_OBJ = {
   apap: Buffer.from("approval"),
   apsu: Buffer.from("clear"),
   apaa: [Buffer.from("arg1"), Buffer.from("arg2")],
-  apat: [Buffer.from(decodeAddress(addr2).publicKey), Buffer.from(decodeAddress(addr2).publicKey)],
+  apat: [Buffer.from(decodeAddress(addr2).publicKey),
+    Buffer.from(decodeAddress(bobAccount.addr).publicKey)],
   apfa: [1001, 1002, 1003],
   apas: [2001, 2002, 2003],
   type: 'pay',

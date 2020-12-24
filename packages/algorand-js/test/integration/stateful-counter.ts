@@ -1,4 +1,4 @@
-import { ExecParams, TransactionType } from "algob/src/types";
+import { ExecParams, SignType, TransactionType } from "algob/src/types";
 import { assert } from "chai";
 
 import { Runtime } from "../../src/index";
@@ -11,7 +11,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
 
   const txnParams: ExecParams = {
     type: TransactionType.CallNoOpSSC,
-    sign: 1,
+    sign: SignType.LogicSignature,
     fromAccount: john.account,
     appId: 0,
     payFlags: { totalFee: 1000 }
