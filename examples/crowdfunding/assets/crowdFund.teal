@@ -368,7 +368,7 @@ int 2
 ==
 bz failed
 
-// verfiy that smart contract
+// verify that smart contract
 // caller is the payment
 // transction receiver
 gtxn 1 Receiver
