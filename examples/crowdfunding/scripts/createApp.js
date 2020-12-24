@@ -89,7 +89,6 @@ async function run (runtimeEnv, deployer) {
   );
   console.log('Application Updated: ', updatedRes);
 
-  // Opt-In for creatot account.
   console.log('Opting-In for Creator and Donor.');
   try {
     await deployer.OptInToSSC(creatorAccount, applicationID, {});
