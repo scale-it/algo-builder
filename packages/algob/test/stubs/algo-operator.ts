@@ -5,7 +5,7 @@ import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";
 import {
   Account,
-  Accounts,
+  AccountMap,
   ASADef,
   ASADeploymentFlags,
   ASAInfo,
@@ -31,7 +31,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   async deployASA (
-    name: string, asaDesc: ASADef, flags: ASADeploymentFlags, accounts: Accounts,
+    name: string, asaDesc: ASADef, flags: ASADeploymentFlags, accounts: AccountMap,
     txnWriter: txWriter): Promise<ASAInfo> {
     return {
       creator: flags.creator.addr + "-get-address-dry-run",
@@ -87,7 +87,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   optInToASAMultiple (
-    asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, assetIndex: number
+    asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: AccountMap, assetIndex: number
   ): Promise<void> {
     return Promise.resolve();
   }

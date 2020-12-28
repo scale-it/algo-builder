@@ -5,11 +5,11 @@ import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { ASSETS_DIR } from "../internal/core/project-structure";
 import { parseZodError } from "../internal/core/validation-errors";
-import { Accounts, ASADef, ASADefs } from "../types";
+import { AccountMap, ASADef, ASADefs } from "../types";
 import { ASADefsSchema } from "../types-input";
 import { loadFromYamlFileSilentWithMessage } from "./files";
 
-function validateSingle (accounts: Accounts, filename: string, asaDef: ASADef): void {
+function validateSingle (accounts: AccountMap, filename: string, asaDef: ASADef): void {
   if (!asaDef.optInAccNames || asaDef.optInAccNames.length === 0) {
     return;
   }
@@ -24,13 +24,13 @@ function validateSingle (accounts: Accounts, filename: string, asaDef: ASADef): 
   }
 }
 
-function validateParsedASADefs (accounts: Accounts, asaDefs: ASADefs, filename: string): void {
+function validateParsedASADefs (accounts: AccountMap, asaDefs: ASADefs, filename: string): void {
   for (const def of Object.values(asaDefs)) {
     validateSingle(accounts, filename, def);
   }
 }
 
-export function validateASADefs (obj: Object, accounts: Accounts, filename: string): ASADefs {
+export function validateASADefs (obj: Object, accounts: AccountMap, filename: string): ASADefs {
   try {
     const parsed = ASADefsSchema.parse(obj);
     Object.keys(parsed).forEach(k => {
@@ -52,7 +52,7 @@ export function validateASADefs (obj: Object, accounts: Accounts, filename: stri
   }
 }
 
-export function loadASAFile (accounts: Accounts): ASADefs {
+export function loadASAFile (accounts: AccountMap): ASADefs {
   const filename = path.join(ASSETS_DIR, "asa.yaml");
   return validateASADefs(
     loadFromYamlFileSilentWithMessage(filename, "ASA file not defined"),

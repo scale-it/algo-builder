@@ -8,7 +8,7 @@ import { createClient } from "../lib/driver";
 import { getLsig } from "../lib/lsig";
 import type {
   Account,
-  Accounts,
+  AccountMap,
   ASADef,
   ASADeploymentFlags,
   ASAInfo,
@@ -37,7 +37,7 @@ export function createAlgoOperator (network: Network): AlgoOperator {
 export interface AlgoOperator {
   algodClient: algosdk.Algodv2
   deployASA: (
-    name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, txWriter: txWriter
+    name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: AccountMap, txWriter: txWriter
   ) => Promise<ASAInfo>
   fundLsig: (name: string, flags: FundASCFlags, payFlags: TxParams,
     txWriter: txWriter, scParams: LogicSigArgs, scTmplParams?: StrMap) => Promise<LsigInfo>
@@ -53,7 +53,7 @@ export interface AlgoOperator {
     asaName: string, assetIndex: number, account: Account, params: TxParams
   ) => Promise<void>
   optInToASAMultiple: (
-    asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, assetIndex: number
+    asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: AccountMap, assetIndex: number
   ) => Promise<void>
   optInToSSC: (
     sender: Account, appId: number, payFlags: TxParams, appArgs?: Uint8Array[]) => Promise<void>
@@ -98,7 +98,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     return accoutInfo.amount - (accoutInfo.assets.length + 1) * ALGORAND_ASA_OWNERSHIP_COST;
   }
 
-  getOptInTxSize (params: algosdk.SuggestedParams, accounts: Accounts): number {
+  getOptInTxSize (params: algosdk.SuggestedParams, accounts: AccountMap): number {
     const randomAccount = accounts.values().next().value;
     // assetID can't be known before ASA creation
     // it shouldn't be easy to find out the latest asset ID
@@ -128,7 +128,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   }
 
   async optInToASAMultiple (
-    asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts, assetIndex: number
+    asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: AccountMap, assetIndex: number
   ): Promise<void> {
     const txParams = await tx.mkTxParams(this.algodClient, flags);
     const optInAccounts = await this.checkBalanceForOptInTx(
@@ -143,7 +143,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   }
 
   async checkBalanceForOptInTx (
-    name: string, params: algosdk.SuggestedParams, asaDef: ASADef, accounts: Accounts, creator: Account
+    name: string, params: algosdk.SuggestedParams, asaDef: ASADef, accounts: AccountMap, creator: Account
   ): Promise<Account[]> {
     if (!asaDef.optInAccNames || asaDef.optInAccNames.length === 0) {
       return [];
@@ -179,7 +179,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   }
 
   async deployASA (
-    name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: Accounts,
+    name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: AccountMap,
     txWriter: txWriter): Promise<ASAInfo> {
     const message = 'Deploying ASA: ' + name;
     console.log(message);

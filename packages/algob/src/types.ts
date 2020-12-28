@@ -476,13 +476,13 @@ export interface AssetScriptMap {
   [assetName: string]: string
 }
 
-export type Accounts = Map<string, Account>;
+export type AccountMap = Map<string, Account>;
 
 export interface AlgobDeployer {
   // Allows user to know whether it's possible to mutate this instance
   isDeployMode: boolean
   accounts: Account[]
-  accountsByName: Accounts
+  accountsByName: AccountMap
 
   /**
   * Sets metadata key value for a current network in the chckpoint file based on the

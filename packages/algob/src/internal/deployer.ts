@@ -8,7 +8,7 @@ import { blsigExt, loadBinaryMultiSig, readMsigFromFile } from "../lib/msig";
 import { persistCheckpoint } from "../lib/script-checkpoints";
 import type {
   Account,
-  Accounts,
+  AccountMap,
   AlgobDeployer,
   AlgobRuntimeEnv,
   ASADefs,
@@ -35,7 +35,7 @@ class DeployerBasicMode {
   protected readonly algoOp: AlgoOperator;
   protected readonly txWriter: txWriter;
   readonly accounts: Account[];
-  readonly accountsByName: Accounts;
+  readonly accountsByName: AccountMap;
 
   constructor (deployerCfg: DeployerConfig) {
     this.runtimeEnv = deployerCfg.runtimeEnv;
