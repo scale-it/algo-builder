@@ -1,10 +1,14 @@
 # Algorand Builder
 
-Framework to automate development of Algorand Assets and Smart Contracts.
+Framework to automate development of Algorand Assets and Smart Contracts:
+
++ `algob`: tool
++ `types/algosdk`: TypeScript typings for algosdk-js
++ `algorand-js`: light algorand runtime and TEAL interpreter (work in progress)
 
 ## Objectives
 
-Algorand builder is an trustworthy framework for Algorand dapps (Decentralized Applications). Its main goal is to make shipping Algorand applications simple, efficient, and scalable. Think about it as a Truffle suite for Algorand. The framework provides following functionality:
+Algorand Builder is an trustworthy framework for Algorand dapps (Decentralized Applications). Its main goal is to make shipping Algorand applications simple, efficient, and scalable. Think about it as a Truffle suite for Algorand. The framework provides following functionality through the `algob` tool:
 
 + REPL (console Read-Eval-Print-Loop) to quickly and easily interact with Algorand Standard Assets and Smart Contracts
 + integrated testing framework,
