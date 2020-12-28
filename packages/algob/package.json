@@ -1,5 +1,5 @@
 {
-  "name": "algob",
+  "name": "@algorand-builder/algob",
   "version": "0.3.0",
   "author": "Robert Zaremba (https://github.com/robert-zaremba)",
   "contributors": [
@@ -48,6 +48,7 @@
     "build:watch": "tsc -w -p .",
     "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.tsbuildinfo build",
     "prepublish": "yarn build",
+    "publish": "npm publish --access public",
     "algob:dev": "sh ./setup_dev_project.sh"
   },
   "devDependencies": {

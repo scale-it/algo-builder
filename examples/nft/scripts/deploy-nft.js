@@ -2,8 +2,8 @@
  * Description:
  * This file deploys the stateful smart contract to create and transfer NFT
 */
+const { TransactionType, SignType } = require('@algorand-builder/algob');
 const { executeTransaction } = require('./transfer/common');
-const { TransactionType, SignType } = require('algob');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');

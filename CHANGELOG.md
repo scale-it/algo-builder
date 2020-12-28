@@ -4,6 +4,8 @@
 
 ## v0.3.0 2020-12-28
 
+Moved package into `@algorand-builder` NPM organization. So all imports and install commands require to change `algob` to `@algorand-builder/algob`.
+
 * Reproducible, declarative Algorand Network setup using scripts in `/infrastructure`.
 * Re-organized examples. Now all examples share same config. Users are able to provide their own
 * We ported all developer.algorand reference templates

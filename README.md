@@ -31,8 +31,10 @@ The project specification is [published here](https://paper.dropbox.com/publishe
 
 ### Installation
 
-+ Using Yarn: `yarn global add algob`
-* Using NPM: `npm install -g algob`
+To install `algob` in your system you can use:
+
++ Using Yarn: `yarn global add @algorand-builder/algob`
++ Using NPM: `npm install -g @algorand-builder/algob`
 
 
 ### Algorand Node requirements
@@ -83,7 +85,7 @@ Otherwise you can use a system/user-wide `pyteal` installation:
         cd my_new_project
         yarn init
 
-1. Install algob in the project and initialize the workspace.
+1. Install algob in the project (unless you already installed it globally) and initialize the workspace.
 
         yarn add algob
         yarn run algob init .

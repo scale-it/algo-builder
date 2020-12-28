@@ -2,7 +2,7 @@
  * Description:
  * This file demonstrates the PyTeal Example for HTLC(Hash Time Lock Contract)
 */
-const { executeTransaction, TransactionType, SignType } = require('algob');
+const { executeTransaction, TransactionType, SignType } = require('@algorand-builder/algob');
 const { prepareParameters } = require('./withdraw/common');
 
 async function run (runtimeEnv, deployer) {

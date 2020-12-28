@@ -1,4 +1,4 @@
-const { executeTransaction, balanceOf } = require('algob');
+const { executeTransaction, balanceOf } = require('@algorand-builder/algob');
 const { mkParam } = require('./transfer/common');
 /*
   Create "gold" Algorand Standard Asset (ASA)

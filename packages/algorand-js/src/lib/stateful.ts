@@ -1,4 +1,4 @@
-import { toBytes } from "algob";
+import { toBytes } from "@algorand-builder/algob";
 import { SSCSchemaConfig, SSCStateSchema } from "algosdk";
 
 import { TealError } from "../errors/errors";

@@ -1,5 +1,5 @@
-import { applyErrorMessageTemplate } from "algob/src/internal/core/errors";
-import type { AnyMap } from "algob/src/types";
+import { applyErrorMessageTemplate } from "@algorand-builder/algob/src/internal/core/errors";
+import type { AnyMap } from "@algorand-builder/algob/src/types";
 
 import { ErrorDescriptor, getErrorCode } from "./errors-list";
 

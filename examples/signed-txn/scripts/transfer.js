@@ -1,4 +1,4 @@
-const { executeSignedTxnFromFile } = require('algob');
+const { executeSignedTxnFromFile } = require('@algorand-builder/algob');
 
 async function run (runtimeEnv, deployer) {
   /* Spec txnParams is encoded in john-to-bob.tx

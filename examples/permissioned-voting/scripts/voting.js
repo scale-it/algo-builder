@@ -1,4 +1,4 @@
-const { executeTransaction, TransactionType, SignType, toBytes } = require('algob');
+const { executeTransaction, TransactionType, SignType, toBytes } = require('@algorand-builder/algob');
 
 /**
 * Description: Converts Integer into Bytes Array
