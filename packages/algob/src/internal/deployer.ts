@@ -328,7 +328,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
    * @param appID application index
    * @param payFlags Transaction flags
    */
-  async OptInToSSC (
+  async optInToSSC (
     sender: Account,
     appId: number,
     payFlags: TxParams,
@@ -386,7 +386,7 @@ export class DeployerRunMode extends DeployerBasicMode implements AlgobDeployer 
     });
   }
 
-  OptInToSSC (sender: Account, index: number, payFlags: TxParams): Promise<void> {
+  optInToSSC (sender: Account, index: number, payFlags: TxParams): Promise<void> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "optInToSSC"
     });

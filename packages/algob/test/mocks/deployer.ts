@@ -96,7 +96,7 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   }
 
-  OptInToSSC (
+  optInToSSC (
     sender: Account, index: number, payFlags: TxParams): Promise<void> {
     throw new Error("Not implemented");
   }

@@ -560,7 +560,7 @@ export interface AlgobDeployer {
 
   // Output of these functions is undefined. It's not known what to save to CP
   optInToASA: (name: string, accountName: string, flags: ASADeploymentFlags) => Promise<void>
-  OptInToSSC: (sender: Account, index: number, payFlags: TxParams) => Promise<void>
+  optInToSSC: (sender: Account, index: number, payFlags: TxParams) => Promise<void>
 
   // Log Transaction
   log: (msg: string, obj: any) => void
