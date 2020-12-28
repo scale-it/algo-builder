@@ -141,7 +141,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
     return true;
   }
 
-  putMetadata (key: string, value: string): void {
+  addCheckpointKV (key: string, value: string): void {
     const found = this.cpData.getMetadata(this.networkName, key);
     if (found === value) {
       return;
@@ -343,9 +343,9 @@ export class DeployerRunMode extends DeployerBasicMode implements AlgobDeployer 
     return false;
   }
 
-  putMetadata (_key: string, _value: string): void {
+  addCheckpointKV (_key: string, _value: string): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      methodName: "putMetadata"
+      methodName: "addCheckpointKV"
     });
   }
 

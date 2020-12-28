@@ -353,7 +353,9 @@ export interface CheckpointRepo {
   merge: (curr: Checkpoints, scriptName: string) => CheckpointRepo
   mergeToGlobal: (curr: Checkpoints, scriptName: string) => CheckpointRepo
 
+  /// sets metadata key-value for a specified network.
   putMetadata: (networkName: string, key: string, value: string) => CheckpointRepo
+  /// gets metadata key-value for a specified network.
   getMetadata: (networkName: string, key: string) => string | undefined
 
   registerASA: (networkName: string, name: string, info: ASAInfo) => CheckpointRepo
@@ -482,16 +484,20 @@ export interface AlgobDeployer {
   accounts: Account[]
   accountsByName: Accounts
 
-  // Puts metadata in checkpount
-  putMetadata: (key: string, value: string) => void
+  /**
+  * Sets metadata key value for a current network in the chckpoint file based on the
+  * current deployment script. If run in a non deployment mode (eg `algob run script_name.js`)
+  * it will throw an exception.
+  */
+  addCheckpointKV: (key: string, value: string) => void
 
   // gets metadata from the checkpoint
   getMetadata: (key: string) => string | undefined
 
   /**
    * Description: Deploys ASA to the network
-   * @param name: name of the ASA
-   * @param flags: ASADeplymentFlags
+   * @param name:  ASA name - deployer will search for the ASA in the /assets/asa.yaml file
+   * @param flags:  deployment flags
    */
   deployASA: (name: string, flags: ASADeploymentFlags) => Promise<ASAInfo>
 

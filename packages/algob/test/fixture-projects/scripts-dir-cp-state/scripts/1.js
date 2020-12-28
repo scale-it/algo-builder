@@ -3,7 +3,7 @@ const fs = require('fs')
 
 async function run (runtimeEnv, deployer) {
   if (deployer.isDeployMode) {
-    deployer.putMetadata('META from first', 'first-ok')
+    deployer.addCheckpointKV('META from first', 'first-ok')
   }
   fs.appendFileSync(
     'output.txt',

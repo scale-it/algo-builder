@@ -34,7 +34,7 @@ async function run (runtimeEnv, deployer) {
     { funder: bob, fundingMicroAlgo: 2e6 }, {}, [], scTmplParams);
 
   // Add user checkpoint
-  await deployer.putMetadata('User Checkpoint', 'Fund Contract Account');
+  await deployer.addCheckpointKV('User Checkpoint', 'Fund Contract Account');
 }
 
 module.exports = { default: run };

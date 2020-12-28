@@ -47,7 +47,7 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   }
 
-  putMetadata (key: string, value: string): void {
+  addCheckpointKV (key: string, value: string): void {
   };
 
   getMetadata (key: string): string | undefined {
