@@ -491,8 +491,11 @@ export interface AlgobDeployer {
   */
   addCheckpointKV: (key: string, value: string) => void
 
-  // gets metadata from the checkpoint
-  getMetadata: (key: string) => string | undefined
+  /**
+   * Queries metadata key in all checkpoint files of current network. If the key is not defined
+   * in any checkpoint then `undefined` is returned. Can be run in both _run_ and _deploy_ mode.
+   */
+  getCheckpointKV: (key: string) => string | undefined
 
   /**
    * Description: Deploys ASA to the network

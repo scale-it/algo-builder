@@ -50,7 +50,7 @@ export class FakeDeployer implements AlgobDeployer {
   addCheckpointKV (key: string, value: string): void {
   };
 
-  getMetadata (key: string): string | undefined {
+  getCheckpointKV (key: string): string | undefined {
     return "metadata";
   };
 

@@ -51,7 +51,7 @@ class DeployerBasicMode {
     return this.runtimeEnv.network.name;
   }
 
-  getMetadata (key: string): string | undefined {
+  getCheckpointKV (key: string): string | undefined {
     return this.cpData.getMetadata(this.networkName, key);
   }
 

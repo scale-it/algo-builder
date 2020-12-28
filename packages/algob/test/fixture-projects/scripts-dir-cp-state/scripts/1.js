@@ -7,13 +7,13 @@ async function run (runtimeEnv, deployer) {
   }
   fs.appendFileSync(
     'output.txt',
-    'script1: META from first defined: ' + deployer.getMetadata('META from first') + '\n')
+    'script1: META from first defined: ' + deployer.getCheckpointKV('META from first') + '\n')
   fs.appendFileSync(
     'output.txt',
-    'script1: META from second defined: ' + deployer.getMetadata('META from second') + '\n')
+    'script1: META from second defined: ' + deployer.getCheckpointKV('META from second') + '\n')
   fs.appendFileSync(
     'output.txt',
-    'script1: META from third defined: ' + deployer.getMetadata('META from third') + '\n')
+    'script1: META from third defined: ' + deployer.getCheckpointKV('META from third') + '\n')
 }
 
 module.exports = { default: run }

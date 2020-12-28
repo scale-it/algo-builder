@@ -155,7 +155,7 @@ Please check algob output for more details.`
     number: 14,
     message: "Error. `%error%` is Unknown",
     title: "Unknown Transaction type",
-    description: `Provided transaction type is unknown 
+    description: `Provided transaction type is unknown
     Please double check your transaction type`
   }
 };
@@ -546,7 +546,7 @@ Checkpoint files were edited by hand or an internal error occurred.
     title: "Metadata already present",
     description: `Metadata already present: %metadataKey%. Resetting is not allowed.
 
-Use 'deployer.getMetadata(key)' to check the current value.
+Use 'deployer.getCheckpointKV(key)' to check the current value.
 `
   },
   DEPLOYER_ASSET_ALREADY_PRESENT: {

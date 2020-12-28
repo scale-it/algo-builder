@@ -44,8 +44,8 @@ describe("DeployerDeployMode", () => {
   it("Should hold metadata of a network", async () => {
     const deployer = new DeployerDeployMode(deployerCfg);
     deployer.addCheckpointKV("existent", "existent value");
-    assert.isUndefined(deployer.getMetadata("nonexistent"));
-    assert.equal(deployer.getMetadata("existent"), "existent value");
+    assert.isUndefined(deployer.getCheckpointKV("nonexistent"));
+    assert.equal(deployer.getCheckpointKV("existent"), "existent value");
   });
 
   it("Should set given data into checkpoint with timestamp", async () => {
@@ -158,7 +158,7 @@ describe("DeployerDeployMode", () => {
     assert.deepEqual(logicSig, result);
   });
 
-  it("Should use getMetadata and isDefined from CheckpointData", async () => {
+  it("Should use getCheckpointKV and isDefined from CheckpointData", async () => {
     const networkName = "network1";
     const env = mkAlgobEnv(networkName);
     const cpData = new CheckpointRepoImpl()
@@ -171,14 +171,14 @@ describe("DeployerDeployMode", () => {
     const deployer = new DeployerDeployMode(deployerCfg);
 
     assert.isTrue(deployer.isDefined("ASC name"));
-    assert.equal(deployer.getMetadata("k"), "v");
+    assert.equal(deployer.getCheckpointKV("k"), "v");
   });
 
   it("Should ignore same metadata of the same network", async () => {
     const deployer = new DeployerDeployMode(deployerCfg);
     deployer.addCheckpointKV("existent", "existent value");
     deployer.addCheckpointKV("existent", "existent value");
-    assert.equal(deployer.getMetadata("existent"), "existent value");
+    assert.equal(deployer.getCheckpointKV("existent"), "existent value");
   });
 
   it("Should crash when same metadata key is set second time & different value", async () => {
