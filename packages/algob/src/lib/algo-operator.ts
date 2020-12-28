@@ -200,7 +200,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   }
 
   /**
-   * Description - This function will send Algos to ASC account in "Contract Mode"
+   * Sends Algos to ASC account (Contract Account)
    * @param name     - ASC filename
    * @param flags    - FundASC flags (as per SPEC)
    * @param payFlags - as per SPEC
@@ -241,7 +241,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   }
 
   /**
-   * Description: Function to deploy Stateful Smart Contract
+   * Function to deploy Stateful Smart Contract
    * @param approvalProgram name of file in which approval program is stored
    * @param clearProgram name of file in which clear program is stored
    * @param flags         SSCDeploymentFlags
@@ -305,10 +305,10 @@ export class AlgoOperatorImpl implements AlgoOperator {
   }
 
   /**
-   * Description: Opt-In to stateful smart contract
-   * @param sender Account for which opt-in is required
-   * @param appId Application Index : ID of the application being configured or empty if creating
-   * @param payFlags Transaction Params
+   * Opt-In to stateful smart contract
+   * @param sender: Account for which opt-in is required
+   * @param appId: Application Index: (ID of the application)
+   * @param payFlags: Transaction Params
    */
   async optInToSSC (
     sender: Account,
