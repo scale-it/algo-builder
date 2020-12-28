@@ -22,22 +22,17 @@ User documentation is available in [/docs](docs/README.md) and [API docs](https:
 The project specification is [published here](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
 
 
-### Examples
-
-Our `/examples` directory provides few projects with smart contracts and ASA. Check the [list](./examples/README.md).
-
-+ Please start with reading Algorand reference documentation about [smart contract](https://developer.algorand.org/docs/reference/teal/specification/).
-+ Don't forget to study Algorand smart contract [guidelines](https://developer.algorand.org/docs/reference/teal/guidelines/).
-+ Go to the [examples/ref-templates](./examples/ref-templates/README.md) to see how the reference templates are implemented.
-+ Then go to [examples/asa](./examples/ref-templates/README.md) to learn how you can easily manage and deploy ASA with `algob`.
-+ Check other examples as well.
-
-
 ## Requirements
 
 + Node 12+
 + Connection to an Algorand node. TEAL compilation requires Developer API to be enabled (`"EnableDeveloperAPI": true` in the node config.json).
 + Python 3.7+ (for PyTeal) with [pyteal](https://pypi.org/project/pyteal). Please read below how to install it.
++ Yarn `v1.22+` or NPM `v6.0+`
+
+### Installation
+
++ Using Yarn: `yarn global add algob`
+* Using NPM: `npm install -g algob`
 
 
 ### Algorand Node requirements
@@ -110,6 +105,17 @@ Otherwise you can use a system/user-wide `pyteal` installation:
 1. To run `algob` on different network (by default the `default` network is used) use
 
         yarn run algob --network <other_network_name>  <command>
+
+
+### Examples
+
+Our `/examples` directory provides few projects with smart contracts and ASA. Check the [list](./examples/README.md).
+
++ Please start with reading Algorand reference documentation about [smart contract](https://developer.algorand.org/docs/reference/teal/specification/).
++ Don't forget to study Algorand smart contract [guidelines](https://developer.algorand.org/docs/reference/teal/guidelines/).
++ Go to the [examples/ref-templates](./examples/ref-templates/README.md) to see how the reference templates are implemented.
++ Then go to [examples/asa](./examples/ref-templates/README.md) to learn how you can easily manage and deploy ASA with `algob`.
++ Check other examples as well.
 
 
 ## Using algob with a TypeScript project
