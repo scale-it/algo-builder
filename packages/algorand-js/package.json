@@ -1,5 +1,5 @@
 {
-  "name": "algorand-js",
+  "name": "@algorand-builder/algorand-js",
   "version": "0.0.1",
   "contributors": [
     {
@@ -44,7 +44,8 @@
     "build:watch": "tsc -w -p .",
     "build:docs": "typedoc --out docs --exclude \"internal/**\"  src",
     "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.tsbuildinfo build",
-    "prepublish": "yarn build"
+    "prepublish": "yarn build",
+    "publish": "npm publish --access public"
   },
   "devDependencies": {
     "@types/chai": "^4.2.12",

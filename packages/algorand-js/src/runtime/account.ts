@@ -1,4 +1,3 @@
-import { StackElem, StoreAccount } from "algorand-js/src/types";
 import type {
   Account,
   AppLocalState,
@@ -12,6 +11,7 @@ import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { compareArray } from "../lib/compare";
 import { assertValidSchema, getKeyValPair } from "../lib/stateful";
+import { StackElem, StoreAccount } from "../types";
 
 export class StoreAccountImpl implements StoreAccount {
   readonly account: Account;
