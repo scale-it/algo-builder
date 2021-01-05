@@ -1901,7 +1901,6 @@ export class Int extends Op {
     }
 
     this.checkOverflow(uint64);
-    this.checkUnderflow(uint64);
     this.uint64 = uint64;
   }
 
