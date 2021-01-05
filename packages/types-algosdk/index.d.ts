@@ -672,7 +672,7 @@ export interface TxnEncodedObj {
 }
 
 // https://developer.algorand.org/docs/reference/teal/specification/#oncomplete
-export enum TxnOnComplete {
+declare enum TxnOnComplete {
   NoOp,
   OptIn,
   CloseOut,
