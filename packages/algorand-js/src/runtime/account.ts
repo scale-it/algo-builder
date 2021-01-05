@@ -1,4 +1,4 @@
-import { SSCDeploymentFlags } from "algob/src/types";
+import { SSCDeploymentFlags } from "@algorand-builder/algob/src/types";
 import { StackElem, StoreAccount } from "algorand-js/src/types";
 import type {
   Account,
