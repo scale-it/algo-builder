@@ -1,7 +1,7 @@
 import { ERRORS } from "../../../src/errors/errors-list";
 import { Op } from "../../../src/interpreter/opcode";
 import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
-import { toBytes } from "../../../src/lib/parsing";
+import { base64ToBytes } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import type { StackElem } from "../../../src/types";
 import { expectTealError } from "../../helpers/errors";
@@ -29,7 +29,7 @@ describe("Teal Opcodes basic assertions", function () {
     const stack = new Stack<StackElem>();
     op.assertMinStackLen(stack, 0);
 
-    stack.push(toBytes("arg_0"));
+    stack.push(base64ToBytes("arg_0"));
     expectTealError(
       () => op.assertMinStackLen(stack, 2),
       ERRORS.TEAL.ASSERT_STACK_LENGTH

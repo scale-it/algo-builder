@@ -1,4 +1,4 @@
-import { ExecParams, SignType, TransactionType } from "algob/src/types";
+import { ExecParams, SignType, TransactionType } from "@algorand-builder/algob/src/types";
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
