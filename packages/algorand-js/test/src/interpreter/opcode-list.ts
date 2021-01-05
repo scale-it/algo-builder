@@ -1608,7 +1608,7 @@ describe("Teal Opcodes", function () {
           stack,
           [],
           new Txn(["FirstValidTime"], 1, interpreter),
-          ERRORS.TEAL.LOGIC_REJECTION
+          ERRORS.TEAL.REJECTED_BY_LOGIC
         )
       );
 

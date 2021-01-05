@@ -1,22 +1,20 @@
+import { ExecParams, SignType, TransactionType } from "algob/src/types";
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime } from "../../src/index";
 import { StoreAccountImpl } from "../../src/runtime/account";
-import { StoreAccount } from "../../src/types";
+import { getAcc } from "../helpers/account";
 import { expectTealErrorAsync } from "../helpers/errors";
-
-function getAcc (runtime: Runtime, acc: StoreAccount): StoreAccountImpl {
-  return runtime.ctx.state.accounts.get(acc.address) as StoreAccountImpl;
-}
 
 describe("Algorand Smart Contracts", function () {
   let john = new StoreAccountImpl(1000);
   let bob = new StoreAccountImpl(500);
+
   // set up transaction paramenters
-  const txnParams = {
-    type: 0, // payment
-    sign: 0,
+  const txnParams: ExecParams = {
+    type: TransactionType.TransferAlgo, // payment
+    sign: SignType.SecretKey,
     fromAccount: john.account,
     toAccountAddr: bob.address,
     amountMicroAlgos: 100,
@@ -60,7 +58,7 @@ describe("Algorand Smart Contracts", function () {
     // execute transaction (should fail is logic is incorrect)
     await expectTealErrorAsync(
       async () => await runtime.executeTx(invalidParams, 'incorrect-logic.teal', []),
-      ERRORS.TEAL.INVALID_STACK_ELEM
+      ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 
     // get final state (updated accounts)
