@@ -1,4 +1,4 @@
-const { TransactionType, SignType, toBytes } = require('@algorand-builder/algob');
+const { TransactionType, SignType, base64ToBytes } = require('@algorand-builder/algob');
 const { executeTransaction } = require('./common');
 
 async function run (runtimeEnv, deployer) {
@@ -22,7 +22,7 @@ async function run (runtimeEnv, deployer) {
 
   // App arguments to vote for "candidatea".
   const appArgs = [
-    toBytes('vote'), toBytes('candidatea')
+    base64ToBytes('vote'), base64ToBytes('candidatea')
   ];
 
   // Get AppInfo and AssetID from checkpoints.

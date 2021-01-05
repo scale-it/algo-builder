@@ -5,7 +5,7 @@ import { ERRORS } from "../errors/errors-list";
 import { Interpreter } from "../index";
 import { Op } from "../interpreter/opcode";
 import { TxFieldDefaults, TxnFields } from "../lib/constants";
-import { toBytes } from "../lib/parsing";
+import { base64ToBytes } from "../lib/parsing";
 import { StackElem, TxField, Txn, TxnType } from "../types";
 
 const assetTxnFields = new Set([
@@ -32,7 +32,7 @@ export function parseToStackElem (a: unknown, field: TxField): StackElem {
     return BigInt(a);
   }
   if (typeof a === "string") {
-    return toBytes(a);
+    return base64ToBytes(a);
   }
 
   return TxFieldDefaults[field];
@@ -70,7 +70,7 @@ export function txnSpecbyField (txField: string, interpreter: Interpreter): Stac
       break;
     }
     case 'TxID': {
-      return toBytes(tx.txID);
+      return base64ToBytes(tx.txID);
     }
     case 'NumAppArgs': {
       const appArg = TxnFields.ApplicationArgs as keyof Txn;
