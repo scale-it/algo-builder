@@ -1,7 +1,7 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
-import { mkTransaction } from "algob";
-import { ExecParams, SSCDeploymentFlags, TransactionType } from "algob/src/types";
+import { mkTransaction } from "@algorand-builder/algob";
+import { ExecParams, SSCDeploymentFlags, TransactionType } from "@algorand-builder/algob/src/types";
 import { AssetDef, AssetHolding, assignGroupID, encodeAddress, SSCParams, SSCStateSchema } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
@@ -211,7 +211,7 @@ export class Runtime {
             break;
           }
           case txnParam.toAccountAddr: {
-            account.amount += txnParam.amountMicroAlgos; // add 'x' algo to receiver
+            account.amount += txnParam.amountMicroAlgos as number; // add 'x' algo to receiver
             break;
           }
         }

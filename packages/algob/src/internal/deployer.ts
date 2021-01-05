@@ -8,7 +8,7 @@ import { blsigExt, loadBinaryMultiSig, readMsigFromFile } from "../lib/msig";
 import { persistCheckpoint } from "../lib/script-checkpoints";
 import type {
   Account,
-  Accounts,
+  AccountMap,
   AlgobDeployer,
   AlgobRuntimeEnv,
   ASADefs,
@@ -35,7 +35,7 @@ class DeployerBasicMode {
   protected readonly algoOp: AlgoOperator;
   protected readonly txWriter: txWriter;
   readonly accounts: Account[];
-  readonly accountsByName: Accounts;
+  readonly accountsByName: AccountMap;
 
   constructor (deployerCfg: DeployerConfig) {
     this.runtimeEnv = deployerCfg.runtimeEnv;
@@ -51,7 +51,7 @@ class DeployerBasicMode {
     return this.runtimeEnv.network.name;
   }
 
-  getMetadata (key: string): string | undefined {
+  getCheckpointKV (key: string): string | undefined {
     return this.cpData.getMetadata(this.networkName, key);
   }
 
@@ -141,7 +141,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
     return true;
   }
 
-  putMetadata (key: string, value: string): void {
+  addCheckpointKV (key: string, value: string): void {
     const found = this.cpData.getMetadata(this.networkName, key);
     if (found === value) {
       return;
@@ -328,7 +328,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
    * @param appID application index
    * @param payFlags Transaction flags
    */
-  async OptInToSSC (
+  async optInToSSC (
     sender: Account,
     appId: number,
     payFlags: TxParams,
@@ -343,9 +343,9 @@ export class DeployerRunMode extends DeployerBasicMode implements AlgobDeployer 
     return false;
   }
 
-  putMetadata (_key: string, _value: string): void {
+  addCheckpointKV (_key: string, _value: string): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      methodName: "putMetadata"
+      methodName: "addCheckpointKV"
     });
   }
 
@@ -386,7 +386,7 @@ export class DeployerRunMode extends DeployerBasicMode implements AlgobDeployer 
     });
   }
 
-  OptInToSSC (sender: Account, index: number, payFlags: TxParams): Promise<void> {
+  optInToSSC (sender: Account, index: number, payFlags: TxParams): Promise<void> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "optInToSSC"
     });

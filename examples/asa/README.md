@@ -19,6 +19,6 @@ This example is using PyTEAL, so make sure to follow the Python3 setup described
 
 ### Run
 ```
-algob deploy
-algob run scripts/query/john-balances.js
+yarn algob deploy
+yarn algob run scripts/query/john-balances.js
 ```

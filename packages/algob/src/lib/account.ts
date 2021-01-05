@@ -5,7 +5,7 @@ import YAML from "yaml";
 import CfgErrors, { ErrorPutter } from "../internal/core/config/config-errors";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
-import type { Account, AccountDef, Accounts, AlgobAccount, HDAccount, KmdCfg, KmdWallet, MnemonicAccount, StrMap } from "../types";
+import type { Account, AccountDef, AccountMap, AlgobAccount, HDAccount, KmdCfg, KmdWallet, MnemonicAccount, StrMap } from "../types";
 
 export function mkAccounts (input: AccountDef[]): Account[] {
   const accounts: Account[] = [];
@@ -64,7 +64,7 @@ export function validateAccount (a: Account, errs: ErrorPutter): boolean {
   return errs.isEmpty;
 }
 
-export function mkAccountIndex (accountList: Account[]): Accounts {
+export function mkAccountIndex (accountList: Account[]): AccountMap {
   const out = new Map<string, Account>();
   for (const a of accountList) {
     out.set(a.name, a);

@@ -6,7 +6,7 @@
  * the TEAL program. The TEAL program will transfer its balance to the seller
  * if the seller is able to provide the secret value that corresponds to the hash in the program.
 */
-const { TransactionType, SignType, toBytes } = require('algob');
+const { TransactionType, SignType, toBytes } = require('@algorand-builder/algob');
 const { executeTransaction, prepareParameters } = require('./common');
 
 async function run (runtimeEnv, deployer) {

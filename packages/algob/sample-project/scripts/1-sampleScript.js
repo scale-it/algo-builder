@@ -3,7 +3,7 @@ async function run (runtimeEnv, deployer) {
   await deployer.fundLsig('fee-check.teal',
     { funder: deployer.accounts[0], fundingMicroAlgo: 20000000 }, {}, []);
 
-  await deployer.putMetadata('User Checkpoint', 'Fund Contract Account');
+  await deployer.addCheckpointKV('User Checkpoint', 'Fund Contract Account');
   console.log('Sample script for ASC Funding execution has finished!');
 }
 

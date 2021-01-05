@@ -1,4 +1,4 @@
-const { readGlobalStateSSC, TransactionType, SignType } = require('algob');
+const { readGlobalStateSSC, TransactionType, SignType } = require('@algorand-builder/algob');
 const { executeTransaction } = require('./common');
 
 async function run (runtimeEnv, deployer) {

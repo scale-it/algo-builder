@@ -1,5 +1,5 @@
 const { executeTransaction, mkTxnParams } = require('./common/common');
-const { SignType, globalZeroAddress, toBytes } = require('algob');
+const { SignType, globalZeroAddress, toBytes } = require('@algorand-builder/algob');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -19,7 +19,7 @@ async function run (runtimeEnv, deployer) {
   },
   { closeRemainderTo: john.addr }, []);
 
-  await deployer.putMetadata('User Checkpoint', 'Fund Contract Account');
+  await deployer.addCheckpointKV('User Checkpoint', 'Fund Contract Account');
 
   let contract = await deployer.loadLogic('htlc.py', [toBytes(wrongSecret)]);
   let contractAddress = contract.address();

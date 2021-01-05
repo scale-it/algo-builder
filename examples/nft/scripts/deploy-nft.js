@@ -2,8 +2,8 @@
  * Description:
  * This file deploys the stateful smart contract to create and transfer NFT
 */
+const { TransactionType, SignType } = require('@algorand-builder/algob');
 const { executeTransaction } = require('./transfer/common');
-const { TransactionType, SignType } = require('algob');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -32,8 +32,8 @@ async function run (runtimeEnv, deployer) {
   console.log(sscInfo);
 
   try {
-    await deployer.OptInToSSC(masterAccount, appId, {}); // opt-in to asc by master
-    await deployer.OptInToSSC(john, appId, {}); // opt-in to asc by john
+    await deployer.optInToSSC(masterAccount, appId, {}); // opt-in to asc by master
+    await deployer.optInToSSC(john, appId, {}); // opt-in to asc by john
   } catch (e) {
     console.log(e);
     throw new Error(e);

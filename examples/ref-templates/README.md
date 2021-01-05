@@ -15,4 +15,4 @@ This example is using PyTEAL, so make sure to follow the Python3 setup described
 
 To run hash time lock contract or dynamic Fee use the deploy command:
 
-        yarn run algob deploy
+    yarn run algob deploy

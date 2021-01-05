@@ -1,4 +1,4 @@
-const { TransactionType, SignType, executeTransaction } = require('algob');
+const { TransactionType, SignType, executeTransaction } = require('@algorand-builder/algob');
 
 exports.executeTransaction = async function (deployer, txnParams) {
   try {

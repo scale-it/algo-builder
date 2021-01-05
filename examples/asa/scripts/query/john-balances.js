@@ -1,4 +1,4 @@
-const { printAssets } = require('algob');
+const { printAssets } = require('@algorand-builder/algob');
 
 async function run (runtimeEnv, deployer) {
   const john = deployer.accountsByName.get('john');

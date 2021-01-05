@@ -1,4 +1,4 @@
-const { executeTransaction, TransactionType, SignType, toBytes } = require('algob');
+const { executeTransaction, TransactionType, SignType, toBytes } = require('@algorand-builder/algob');
 
 /**
 * Description: Converts Integer into Bytes Array
@@ -81,7 +81,7 @@ async function run (runtimeEnv, deployer) {
 
   console.log('Opting-In for Alice in voting application');
   try {
-    await deployer.OptInToSSC(alice, res.appID, {}, reg);
+    await deployer.optInToSSC(alice, res.appID, {}, reg);
   } catch (e) {
     console.log(e);
     throw new Error(e);

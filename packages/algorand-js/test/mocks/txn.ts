@@ -1,4 +1,4 @@
-import { TxParams } from "algob/src/types";
+import { TxParams } from "@algorand-builder/algob/src/types";
 import { decodeAddress, generateAccount, SuggestedParams } from "algosdk";
 
 import { bobAccount, elonMuskAccount, johnAccount } from "../mocks/account";
@@ -87,7 +87,7 @@ export function mockSuggestedParams (
   s.firstRound = payFlags.firstValid ?? 1;
   s.lastRound = payFlags.firstValid === undefined || payFlags.validRounds === undefined
     ? s.firstRound + 1000
-    : payFlags.firstValid + payFlags.validRounds;
+    : Number(payFlags.firstValid) + Number(payFlags.validRounds);
 
   s.genesisID = GENESIS_ID;
   s.genesisHash = GENESIS_HASH;

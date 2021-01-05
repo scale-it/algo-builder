@@ -1,6 +1,6 @@
 # Algorand Builder docs
 
-+ Installation: [main README](/README.md) file.
++ Installation: [main README](/README.md#installation) file.
 + Project initialization → read below.
 + [Configuration](/docs/algob-config.md).
 + [Private Net](/infrastructure/README.md) creation.

@@ -1,4 +1,4 @@
-import { toBytes } from "algob";
+import { toBytes } from "@algorand-builder/algob";
 
 export const accInfo = [{
   address: "addr-1",

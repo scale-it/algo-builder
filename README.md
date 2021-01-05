@@ -1,10 +1,14 @@
 # Algorand Builder
 
-Framework to automate development of Algorand Assets and Smart Contracts.
+Framework to automate development of Algorand Assets and Smart Contracts:
+
++ `algob`: tool
++ `types/algosdk`: TypeScript typings for algosdk-js
++ `algorand-js`: light algorand runtime and TEAL interpreter (work in progress)
 
 ## Objectives
 
-Algorand builder is an trustworthy framework for Algorand dapps (Decentralized Applications). Its main goal is to make shipping Algorand applications simple, efficient, and scalable. Think about it as a Truffle suite for Algorand. The framework provides following functionality:
+Algorand Builder is an trustworthy framework for Algorand dapps (Decentralized Applications). Its main goal is to make shipping Algorand applications simple, efficient, and scalable. Think about it as a Truffle suite for Algorand. The framework provides following functionality through the `algob` tool:
 
 + REPL (console Read-Eval-Print-Loop) to quickly and easily interact with Algorand Standard Assets and Smart Contracts
 + integrated testing framework,
@@ -22,22 +26,19 @@ User documentation is available in [/docs](docs/README.md) and [API docs](https:
 The project specification is [published here](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
 
 
-### Examples
-
-Our `/examples` directory provides few projects with smart contracts and ASA. Check the [list](./examples/README.md).
-
-+ Please start with reading Algorand reference documentation about [smart contract](https://developer.algorand.org/docs/reference/teal/specification/).
-+ Don't forget to study Algorand smart contract [guidelines](https://developer.algorand.org/docs/reference/teal/guidelines/).
-+ Go to the [examples/ref-templates](./examples/ref-templates/README.md) to see how the reference templates are implemented.
-+ Then go to [examples/asa](./examples/ref-templates/README.md) to learn how you can easily manage and deploy ASA with `algob`.
-+ Check other examples as well.
-
-
 ## Requirements
 
 + Node 12+
 + Connection to an Algorand node. TEAL compilation requires Developer API to be enabled (`"EnableDeveloperAPI": true` in the node config.json).
 + Python 3.7+ (for PyTeal) with [pyteal](https://pypi.org/project/pyteal). Please read below how to install it.
++ Yarn `v1.22+` or NPM `v6.0+`
+
+### Installation
+
+To install `algob` in your system you can use:
+
++ Using Yarn: `yarn global add @algorand-builder/algob`
++ Using NPM: `npm install -g @algorand-builder/algob`
 
 
 ### Algorand Node requirements
@@ -88,7 +89,7 @@ Otherwise you can use a system/user-wide `pyteal` installation:
         cd my_new_project
         yarn init
 
-1. Install algob in the project and initialize the workspace.
+1. Install algob in the project (unless you already installed it globally) and initialize the workspace.
 
         yarn add algob
         yarn run algob init .
@@ -110,6 +111,17 @@ Otherwise you can use a system/user-wide `pyteal` installation:
 1. To run `algob` on different network (by default the `default` network is used) use
 
         yarn run algob --network <other_network_name>  <command>
+
+
+### Examples
+
+Our `/examples` directory provides few projects with smart contracts and ASA. Check the [list](./examples/README.md).
+
++ Please start with reading Algorand reference documentation about [smart contract](https://developer.algorand.org/docs/reference/teal/specification/).
++ Don't forget to study Algorand smart contract [guidelines](https://developer.algorand.org/docs/reference/teal/guidelines/).
++ Go to the [examples/ref-templates](./examples/ref-templates/README.md) to see how the reference templates are implemented.
++ Then go to [examples/asa](./examples/ref-templates/README.md) to learn how you can easily manage and deploy ASA with `algob`.
++ Check other examples as well.
 
 
 ## Using algob with a TypeScript project

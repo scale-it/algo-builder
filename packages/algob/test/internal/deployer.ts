@@ -43,15 +43,15 @@ describe("DeployerDeployMode", () => {
 
   it("Should hold metadata of a network", async () => {
     const deployer = new DeployerDeployMode(deployerCfg);
-    deployer.putMetadata("existent", "existent value");
-    assert.isUndefined(deployer.getMetadata("nonexistent"));
-    assert.equal(deployer.getMetadata("existent"), "existent value");
+    deployer.addCheckpointKV("existent", "existent value");
+    assert.isUndefined(deployer.getCheckpointKV("nonexistent"));
+    assert.equal(deployer.getCheckpointKV("existent"), "existent value");
   });
 
   it("Should set given data into checkpoint with timestamp", async () => {
     const deployer = new DeployerDeployMode(deployerCfg);
-    deployer.putMetadata("key 1", "val 1");
-    deployer.putMetadata("key 2", "val 2");
+    deployer.addCheckpointKV("key 1", "val 1");
+    deployer.addCheckpointKV("key 2", "val 2");
     const cleanCP = cleanupMutableData(deployerCfg.cpData.precedingCP["network 123"], 12345);
     assert.deepEqual(cleanCP, {
       timestamp: 12345,
@@ -158,7 +158,7 @@ describe("DeployerDeployMode", () => {
     assert.deepEqual(logicSig, result);
   });
 
-  it("Should use getMetadata and isDefined from CheckpointData", async () => {
+  it("Should use getCheckpointKV and isDefined from CheckpointData", async () => {
     const networkName = "network1";
     const env = mkAlgobEnv(networkName);
     const cpData = new CheckpointRepoImpl()
@@ -171,21 +171,21 @@ describe("DeployerDeployMode", () => {
     const deployer = new DeployerDeployMode(deployerCfg);
 
     assert.isTrue(deployer.isDefined("ASC name"));
-    assert.equal(deployer.getMetadata("k"), "v");
+    assert.equal(deployer.getCheckpointKV("k"), "v");
   });
 
   it("Should ignore same metadata of the same network", async () => {
     const deployer = new DeployerDeployMode(deployerCfg);
-    deployer.putMetadata("existent", "existent value");
-    deployer.putMetadata("existent", "existent value");
-    assert.equal(deployer.getMetadata("existent"), "existent value");
+    deployer.addCheckpointKV("existent", "existent value");
+    deployer.addCheckpointKV("existent", "existent value");
+    assert.equal(deployer.getCheckpointKV("existent"), "existent value");
   });
 
   it("Should crash when same metadata key is set second time & different value", async () => {
     const deployer = new DeployerDeployMode(deployerCfg);
-    deployer.putMetadata("metadata_key", "orig_value");
+    deployer.addCheckpointKV("metadata_key", "orig_value");
     expectBuilderError(
-      () => deployer.putMetadata("metadata_key", "new_value"),
+      () => deployer.addCheckpointKV("metadata_key", "new_value"),
       ERRORS.BUILTIN_TASKS.DEPLOYER_METADATA_ALREADY_PRESENT,
       "metadata_key"
     );
