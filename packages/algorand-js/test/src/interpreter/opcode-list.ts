@@ -2495,6 +2495,38 @@ describe("Teal Opcodes", function () {
       assert.equal(MAX_UINT64, stack.pop());
     });
 
+    it("Int: should push correct TxnOnComplete enum value to stack", function () {
+      let op = new Int(['NoOp'], 0);
+      op.execute(stack);
+      assert.equal(1, stack.length());
+      assert.equal(BigInt('0'), stack.pop());
+
+      op = new Int(['OptIn'], 0);
+      op.execute(stack);
+      assert.equal(1, stack.length());
+      assert.equal(BigInt('1'), stack.pop());
+
+      op = new Int(['CloseOut'], 0);
+      op.execute(stack);
+      assert.equal(1, stack.length());
+      assert.equal(BigInt('2'), stack.pop());
+
+      op = new Int(['ClearState'], 0);
+      op.execute(stack);
+      assert.equal(1, stack.length());
+      assert.equal(BigInt('3'), stack.pop());
+
+      op = new Int(['UpdateApplication'], 0);
+      op.execute(stack);
+      assert.equal(1, stack.length());
+      assert.equal(BigInt('4'), stack.pop());
+
+      op = new Int(['DeleteApplication'], 0);
+      op.execute(stack);
+      assert.equal(1, stack.length());
+      assert.equal(BigInt('5'), stack.pop());
+    });
+
     it("Addr: should push addr to stack", function () {
       const addr = "SOEI4UA72A7ZL5P25GNISSVWW724YABSGZ7GHW5ERV4QKK2XSXLXGXPG5Y";
       const op = new Addr([addr], 0);
