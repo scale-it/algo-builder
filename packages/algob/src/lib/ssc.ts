@@ -5,7 +5,7 @@ import { AlgobDeployer, TxParams } from "../types";
 import { mkTxParams } from "./tx";
 
 // returns parsed string to Uint8Array
-export function toBytes (s: string): Uint8Array {
+export function base64ToBytes (s: string): Uint8Array {
   return new Uint8Array(Buffer.from(s));
 }
 
