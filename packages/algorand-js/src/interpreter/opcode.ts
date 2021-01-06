@@ -56,13 +56,6 @@ export class Op {
     return b;
   }
 
-  // assert if known transaction field is passed
-  assertDefined (str: string): void {
-    if (TxnFields[str] === undefined) {
-      throw new TealError(ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD, { field: str });
-    }
-  }
-
   assertUint8 (a: bigint): bigint {
     if (a < MIN_UINT8 || a > MAX_UINT8) {
       throw new TealError(ERRORS.TEAL.INVALID_UINT8);

@@ -13,7 +13,7 @@ import { checkIndexBound, compareArray } from "../lib/compare";
 import { AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
 import { assertLen, assertOnlyDigits, convertToBuffer, convertToString, getEncoding } from "../lib/parsing";
 import { txAppArg, txnSpecbyField } from "../lib/txn";
-import type { EncodingType, StackElem, TEALStack } from "../types";
+import { EncodingType, StackElem, TEALStack, TxnOnComplete } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
 
@@ -1722,76 +1722,6 @@ export class AppGlobalDel extends Op {
   }
 }
 
-/** Pseudo-Ops **/
-// push integer to stack
-// push to stack [...stack, integer value]
-export class Int extends Op {
-  readonly uint64: bigint;
-
-  /**
-   * Description: Sets uint64 variable according to arguments passed.
-   * @param args Expected arguments: [number]
-   * @param line line number in TEAL file
-   */
-  constructor (args: string[], line: number) {
-    super();
-    assertLen(args.length, 1, line);
-    assertOnlyDigits(args[0]);
-    this.uint64 = BigInt(args[0]);
-  }
-
-  execute (stack: TEALStack): void {
-    stack.push(this.uint64);
-  }
-}
-
-// push bytes to stack
-// push to stack [...stack, converted data]
-export class Byte extends Op {
-  readonly str: string;
-  readonly encoding: EncodingType;
-
-  /**
-   * Description: Sets `str` and  `encoding` values according to arguments passed.
-   * @param args Expected arguments: [data string]
-   * @param line line number in TEAL file
-   */
-  constructor (args: string[], line: number) {
-    super();
-    [this.str, this.encoding] = getEncoding(args, line);
-  }
-
-  execute (stack: TEALStack): void {
-    const buffer = convertToBuffer(this.str, this.encoding);
-    stack.push(new Uint8Array(buffer));
-  }
-}
-
-// decodes algorand address to bytes and pushes to stack
-// push to stack [...stack, address]
-export class Addr extends Op {
-  readonly addr: string;
-
-  /**
-   * Description: Sets `addr` value according to arguments passed.
-   * @param args Expected arguments: [Address]
-   * @param line line number in TEAL file
-   */
-  constructor (args: string[], line: number) {
-    super();
-    assertLen(args.length, 1, line);
-    if (!isValidAddress(args[0])) {
-      throw new TealError(ERRORS.TEAL.INVALID_ADDR, { addr: args[0], line: line });
-    }
-    this.addr = args[0];
-  };
-
-  execute (stack: TEALStack): void {
-    const addr = decodeAddress(this.addr);
-    stack.push(addr.publicKey);
-  }
-}
-
 // get balance for the requested account specified
 // by Txn.Accounts[A] in microalgos. A is specified as an account
 // index in the Accounts field of the ApplicationCall transaction,
@@ -1943,5 +1873,85 @@ export class GetAssetDef extends Op {
       stack.push(value);
       stack.push(BigInt("1"));
     }
+  }
+}
+
+/** Pseudo-Ops **/
+// push integer to stack
+// push to stack [...stack, integer value]
+export class Int extends Op {
+  readonly uint64: bigint;
+
+  /**
+   * Description: Sets uint64 variable according to arguments passed.
+   * @param args Expected arguments: [number]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 1, line);
+
+    let uint64;
+    const txOnComplete = TxnOnComplete[args[0] as keyof typeof TxnOnComplete]; // eg. TxnOnComplete['NoOp']
+    if (txOnComplete !== undefined) { // check if string is keyof TxnOnComplete Enum
+      uint64 = BigInt(txOnComplete);
+    } else {
+      assertOnlyDigits(args[0]);
+      uint64 = BigInt(args[0]);
+    }
+
+    this.checkOverflow(uint64);
+    this.uint64 = uint64;
+  }
+
+  execute (stack: TEALStack): void {
+    stack.push(this.uint64);
+  }
+}
+
+// push bytes to stack
+// push to stack [...stack, converted data]
+export class Byte extends Op {
+  readonly str: string;
+  readonly encoding: EncodingType;
+
+  /**
+   * Description: Sets `str` and  `encoding` values according to arguments passed.
+   * @param args Expected arguments: [data string]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    [this.str, this.encoding] = getEncoding(args, line);
+  }
+
+  execute (stack: TEALStack): void {
+    const buffer = convertToBuffer(this.str, this.encoding);
+    stack.push(new Uint8Array(buffer));
+  }
+}
+
+// decodes algorand address to bytes and pushes to stack
+// push to stack [...stack, address]
+export class Addr extends Op {
+  readonly addr: string;
+
+  /**
+   * Description: Sets `addr` value according to arguments passed.
+   * @param args Expected arguments: [Address]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    assertLen(args.length, 1, line);
+    if (!isValidAddress(args[0])) {
+      throw new TealError(ERRORS.TEAL.INVALID_ADDR, { addr: args[0], line: line });
+    }
+    this.addr = args[0];
+  };
+
+  execute (stack: TEALStack): void {
+    const addr = decodeAddress(this.addr);
+    stack.push(addr.publicKey);
   }
 }

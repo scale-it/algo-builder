@@ -95,3 +95,13 @@ export interface StoreAccount {
   getLocalState: (appId: number, key: Uint8Array) => StackElem | undefined
   updateLocalState: (appId: number, key: Uint8Array, value: StackElem) => AppLocalState[]
 }
+
+// https://developer.algorand.org/docs/reference/teal/specification/#oncomplete
+export enum TxnOnComplete {
+  NoOp = '0',
+  OptIn = '1',
+  CloseOut = '2',
+  ClearState = '3',
+  UpdateApplication = '4',
+  DeleteApplication = '5'
+}
