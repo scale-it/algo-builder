@@ -11,8 +11,8 @@ const GENESIS_HASH = 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=';
 const account = generateAccount();
 const addr = decodeAddress(account.addr);
 
-export const addr1 = elonMuskAccount.addr;
-export const addr2 = johnAccount.addr;
+export const elonAddr = elonMuskAccount.addr;
+export const johnAddr = johnAccount.addr;
 
 export const TXN_OBJ = {
   snd: Buffer.from(addr.publicKey),
@@ -58,7 +58,7 @@ export const TXN_OBJ = {
   apap: Buffer.from("approval"),
   apsu: Buffer.from("clear"),
   apaa: [Buffer.from("arg1"), Buffer.from("arg2")],
-  apat: [Buffer.from(decodeAddress(addr2).publicKey),
+  apat: [Buffer.from(decodeAddress(johnAddr).publicKey),
     Buffer.from(decodeAddress(bobAccount.addr).publicKey)],
   apfa: [1001, 1002, 1003],
   apas: [2001, 2002, 2003],

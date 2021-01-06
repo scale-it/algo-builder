@@ -28,7 +28,7 @@ export class TealError extends Error {
       messageArguments
     );
 
-    super(prefix + (formattedMessage as string));
+    super(prefix + formattedMessage);
     this.errorDescriptor = errorDescriptor;
     this.number = errorDescriptor.number;
 

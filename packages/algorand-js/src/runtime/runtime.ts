@@ -26,7 +26,7 @@ export class Runtime {
    */
   private store: State;
   ctx: Context;
-  private counter: number;
+  private appCounter: number;
 
   constructor (accounts: StoreAccount[]) {
     // runtime store
@@ -48,7 +48,7 @@ export class Runtime {
       gtxs: [],
       args: []
     };
-    this.counter = 0;
+    this.appCounter = 0;
   }
 
   assertAccountDefined (a?: StoreAccount): StoreAccount {
@@ -189,7 +189,7 @@ export class Runtime {
   createApp (params: SSCDeploymentFlags): number {
     const sender = params.sender;
     const senderAccountDef = this.assertAccountDefined(this.store.accounts.get(sender.addr));
-    const app = senderAccountDef.createApp(++this.counter, params);
+    const app = senderAccountDef.createApp(++this.appCounter, params);
 
     this.store.globalApps.set(app.id, app.params); // update globalApps Map
     return app.id;
@@ -198,7 +198,11 @@ export class Runtime {
   optInToApp (appId: number, accountAddr: string): void {
     const appParams = this.store.globalApps.get(appId);
     const account = this.assertAccountDefined(this.store.accounts.get(accountAddr));
-    if (appParams) { account.optInToApp(appId, appParams); }
+    if (appParams) {
+      account.optInToApp(appId, appParams);
+    } else {
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
+    }
   }
 
   // updates account balance as per transaction parameters
@@ -211,7 +215,7 @@ export class Runtime {
             break;
           }
           case txnParam.toAccountAddr: {
-            account.amount += txnParam.amountMicroAlgos as number; // add 'x' algo to receiver
+            account.amount += txnParam.amountMicroAlgos; // add 'x' algo to receiver
             break;
           }
         }
