@@ -14,10 +14,7 @@ async function run (runtimeEnv, deployer) {
     payFlags: {}
   });
 
-  // Get AppInfo and AssetID from checkpoints.
   const appInfo = deployer.getSSC('crowdFundApproval.teal', 'crowdFundClear.teal');
-
-  // Get Escrow Account Address
   const lsig = await deployer.loadLogic('crowdFundEscrow.py', [], { APP_ID: appInfo.appID });
   const escrowAccountAddress = lsig.address();
 

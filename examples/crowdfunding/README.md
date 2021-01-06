@@ -1,15 +1,14 @@
 # Example Crowdfunding Stateful Smart Contract Application
 
-This project demonstrates how to create a Crowdfunding Stateful Smart Contract Application.
+This project demonstrates how to create a Crowdfunding Stateful Smart Contract Application. It's based on a [tutorial](https://developer.algorand.org/solutions/example-crowdfunding-stateful-smart-contract-application/) from developer.algorand.org/solutions.
 To create this type of application on Algorand, there are five steps that must be supported:
 
-Original tutorial can be found [here](https://developer.algorand.org/solutions/example-crowdfunding-stateful-smart-contract-application/)
-- Create the Fund - Anyone should be able to create a fund, setting a begin, end, and closeout dates. The creator and receiver should also be stored. The creator is stored only to allow that address to modify or delete the smart contract.
-    - Update - As part of linking the escrow account to the stateful smart contract, you first need the application id returned from creating the stateful smart contract. The escrow account code should be modified to add the specific returned ID and compiled, returning the escrow address. This address should be placed in the global state using an update operation of the stateful smart contract. The escrow account will hold all donations.
+- Create the Fund - Anyone should be able to create a fund, setting a begin, end, and closeout dates. The creator and receiver should also be stored. Only creator can modify or delete the smart contract.
+    - Update: we need to create an escrow account (contract account - managed through stateless smart contract). It will hold all donations. The escrow account needs to know the crowdfund app ID. So we firstly need to create the app, then we create an escrow account and finally we update the app by setting the escrow address.
 We create and update the fund using `scripts/createApp.js`
 
-- Donate - Donations are accepted after the beginning date and not after the end date. The escrow account accrues all donations.
-We donate using `scripts/transfer/donate.js`
+- Donate - Donations are accepted only between `start` and `end` date. The escrow account holds all donations.
+Donations are made using `scripts/transfer/donate.js` _run_ script.
 
 - Withdraw Funds - The fund’s recipient should be able to withdraw the funds from the escrow account after the end date if the fund goal is met. 
 We claim funds using `scripts/transfer/claim.js`.
@@ -23,7 +22,7 @@ To delete fund, we are using `scripts/transfer/delete.js`
 ## Setup
 
 Please follow the [setup](../README.md) instructions to install dependencies and update the config.
-This example is using PyTEAL, so make sure to follow the Python3 setup described above.
+This example is using PyTEAL, so make sure to follow the Python3 setup described there.
 
 ### Run
 

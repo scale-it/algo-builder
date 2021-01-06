@@ -14,13 +14,8 @@ async function run (runtimeEnv, deployer) {
     payFlags: {}
   });
 
-  // App argument to claim.
   const appArgs = [toBytes('claim')];
-
-  // Get AppInfo and AssetID from checkpoints.
-  const appInfo = deployer.getSSC('crowdFundApproval.teal', 'crowdFundClear.teal');
-
-  // Get Escrow Account Address
+  const appInfo = deployer.getSSC('crowdFundApproval.teal', 'crowdFundClear.teal');  // get from checkpoint
   const escrowAccount = await deployer.loadLogic('crowdFundEscrow.py', [], { APP_ID: appInfo.appID });
 
   // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
@@ -45,7 +40,7 @@ async function run (runtimeEnv, deployer) {
   ];
 
   console.log('Claim transaction in process');
-  await executeTransaction(deployer, transactions);
+  await executeTransaction(deployer, txGroup);
   console.log('Claimed!');
 }
 

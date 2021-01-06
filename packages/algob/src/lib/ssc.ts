@@ -9,10 +9,9 @@ export function toBytes (s: string): Uint8Array {
 }
 
 /**
- * Description: Converts integer to Bytes
- * @param x : integer
+ * Converts integer to bytes in big endian.
  */
-export function intToBytes (x: number): Uint8Array {
+export function intToBigEndian (x: number): Uint8Array {
   const y = Math.floor(x / 2 ** 32);
   const byt = [y, (y << 8), (y << 16), (y << 24), x, (x << 8), (x << 16), (x << 24)].map(z => z >>> 24);
   return new Uint8Array(byt);
