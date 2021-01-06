@@ -98,10 +98,10 @@ export interface StoreAccount {
 
 // https://developer.algorand.org/docs/reference/teal/specification/#oncomplete
 export enum TxnOnComplete {
-  NoOp,
-  OptIn,
-  CloseOut,
-  ClearState,
-  UpdateApplication,
-  DeleteApplication
+  NoOp = '0',
+  OptIn = '1',
+  CloseOut = '2',
+  ClearState = '3',
+  UpdateApplication = '4',
+  DeleteApplication = '5'
 }

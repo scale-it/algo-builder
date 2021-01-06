@@ -1893,7 +1893,7 @@ export class Int extends Op {
 
     let uint64;
     const txOnComplete = TxnOnComplete[args[0] as keyof typeof TxnOnComplete]; // eg. TxnOnComplete['NoOp']
-    if (txOnComplete !== undefined && typeof txOnComplete === 'number') { // check if string is keyof TxnOnComplete Enum
+    if (txOnComplete !== undefined) { // check if string is keyof TxnOnComplete Enum
       uint64 = BigInt(txOnComplete);
     } else {
       assertOnlyDigits(args[0]);
