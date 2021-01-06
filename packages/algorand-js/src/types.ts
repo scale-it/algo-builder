@@ -32,13 +32,13 @@ export interface Txn extends TxnEncodedObj {
 export type TxField = keyof typeof TxnFields;
 
 export enum TxnType {
-  unknown, // Unknown type. Invalid transaction
-  pay, // Payment
-  keyreg, // KeyRegistration
-  acfg, // AssetConfig
-  axfer, // AssetTransfer
-  afrz, // AssetFreeze
-  appl // ApplicationCall
+  unknown = '0', // Unknown type. Invalid transaction
+  pay = '1', // Payment
+  keyreg = '2', // KeyRegistration
+  acfg = '3', // AssetConfig
+  axfer = '4', // AssetTransfer
+  afrz = '5', // AssetFreeze
+  appl = '6' // ApplicationCall
 }
 
 export enum GlobalField {

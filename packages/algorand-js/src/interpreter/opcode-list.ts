@@ -13,7 +13,7 @@ import { checkIndexBound, compareArray } from "../lib/compare";
 import { AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
 import { assertLen, assertOnlyDigits, convertToBuffer, convertToString, getEncoding } from "../lib/parsing";
 import { txAppArg, txnSpecbyField } from "../lib/txn";
-import { EncodingType, StackElem, TEALStack, TxnOnComplete } from "../types";
+import { EncodingType, StackElem, TEALStack, TxnOnComplete, TxnType } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
 
@@ -1893,8 +1893,11 @@ export class Int extends Op {
 
     let uint64;
     const txOnComplete = TxnOnComplete[args[0] as keyof typeof TxnOnComplete]; // eg. TxnOnComplete['NoOp']
+    const typeEnumConst = TxnType[args[0] as keyof typeof TxnType]; // ex: TxnType['pay']
     if (txOnComplete !== undefined) { // check if string is keyof TxnOnComplete Enum
       uint64 = BigInt(txOnComplete);
+    } else if (typeEnumConst !== undefined) { // check if string is keyof TxnType Enum
+      uint64 = BigInt(typeEnumConst);
     } else {
       assertOnlyDigits(args[0]);
       uint64 = BigInt(args[0]);

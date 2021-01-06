@@ -2527,6 +2527,43 @@ describe("Teal Opcodes", function () {
       assert.equal(BigInt('5'), stack.pop());
     });
 
+    it("Int: should push correct TypeEnumConstants enum value to stack", function () {
+      let op = new Int(['unknown'], 0);
+      op.execute(stack);
+      assert.equal(1, stack.length());
+      assert.equal(BigInt('0'), stack.pop());
+
+      op = new Int(['pay'], 0);
+      op.execute(stack);
+      assert.equal(1, stack.length());
+      assert.equal(BigInt('1'), stack.pop());
+
+      op = new Int(['keyreg'], 0);
+      op.execute(stack);
+      assert.equal(1, stack.length());
+      assert.equal(BigInt('2'), stack.pop());
+
+      op = new Int(['acfg'], 0);
+      op.execute(stack);
+      assert.equal(1, stack.length());
+      assert.equal(BigInt('3'), stack.pop());
+
+      op = new Int(['axfer'], 0);
+      op.execute(stack);
+      assert.equal(1, stack.length());
+      assert.equal(BigInt('4'), stack.pop());
+
+      op = new Int(['afrz'], 0);
+      op.execute(stack);
+      assert.equal(1, stack.length());
+      assert.equal(BigInt('5'), stack.pop());
+
+      op = new Int(['appl'], 0);
+      op.execute(stack);
+      assert.equal(1, stack.length());
+      assert.equal(BigInt('6'), stack.pop());
+    });
+
     it("Addr: should push addr to stack", function () {
       const addr = "SOEI4UA72A7ZL5P25GNISSVWW724YABSGZ7GHW5ERV4QKK2XSXLXGXPG5Y";
       const op = new Addr([addr], 0);
