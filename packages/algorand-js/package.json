@@ -32,7 +32,7 @@
     "algod-js": "build/algod.js"
   },
   "engines": {
-    "node": ">=14.10.0"
+    "node": ">=14.11.0"
   },
   "scripts": {
     "lint": "eslint --ext .js,.ts src test",
