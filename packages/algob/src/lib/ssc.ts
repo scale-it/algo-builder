@@ -3,7 +3,10 @@ import tx, { Account as AccountSDK, ConfirmedTxInfo, decodeAddress } from "algos
 import { AlgobDeployer, TxParams } from "../types";
 import { mkTxParams } from "./tx";
 
-// returns parsed string to Uint8Array
+/**
+ * Converts base64 string into bytes.
+ * @param s base64 string
+ */
 export function base64ToBytes (s: string): Uint8Array {
   return new Uint8Array(Buffer.from(s));
 }
@@ -18,7 +21,7 @@ export function intToBigEndian (x: number): Uint8Array {
 }
 
 /**
- * Description: Converts address to Bytes
+ * Converts address to bytes.
  * @param addr : algorand address
  */
 export function addressToBytes (addr: string): Uint8Array {
@@ -26,7 +29,7 @@ export function addressToBytes (addr: string): Uint8Array {
 }
 
 /**
- * Description: Transaction to update TEAL Programs for a contract.
+ * Transaction to update TEAL Programs for a contract.
  * @param deployer AlgobDeployer
  * @param sender Account from which call needs to be made
  * @param payFlags Transaction Flags
