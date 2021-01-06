@@ -1,4 +1,4 @@
-import { toBytes } from "@algorand-builder/algob";
+import { base64ToBytes } from "@algorand-builder/algob";
 
 export const accInfo = [{
   address: "addr-1",
@@ -11,9 +11,9 @@ export const accInfo = [{
     id: 1847,
     'key-value': [
       {
-        key: toBytes("Local-key"),
+        key: base64ToBytes("Local-key"),
         value: {
-          bytes: toBytes("Local-val"),
+          bytes: base64ToBytes("Local-val"),
           type: 1,
           uint: 0
         }
@@ -33,17 +33,17 @@ export const accInfo = [{
       creator: "addr-1",
       'global-state': [
         {
-          key: toBytes("Hello"),
+          key: base64ToBytes("Hello"),
           value: {
-            bytes: toBytes("World"),
+            bytes: base64ToBytes("World"),
             type: 1,
             uint: 0
           }
         },
         {
-          key: toBytes("global-key"),
+          key: base64ToBytes("global-key"),
           value: {
-            bytes: toBytes("global-val"),
+            bytes: base64ToBytes("global-val"),
             type: 1,
             uint: 0
           }

@@ -1,4 +1,4 @@
-import { toBytes } from "@algorand-builder/algob";
+import { base64ToBytes } from "@algorand-builder/algob";
 import { SSCSchemaConfig, SSCStateSchema } from "algosdk";
 
 import { TealError } from "../errors/errors";
@@ -11,7 +11,7 @@ export function getKeyValPair (key: Uint8Array, value: StackElem): SSCStateSchem
   if (typeof value !== "bigint") {
     val = { type: 1, bytes: value, uint: 0 };
   } else {
-    val = { type: 2, bytes: toBytes(''), uint: Number(value) };
+    val = { type: 2, bytes: base64ToBytes(''), uint: Number(value) };
   }
 
   return {

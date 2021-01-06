@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
-import { toBytes } from "@algorand-builder/algob";
+import { base64ToBytes } from "@algorand-builder/algob";
 import { AssetDef, decodeAddress, encodeAddress, isValidAddress, verifyBytes } from "algosdk";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
@@ -212,7 +212,7 @@ export class Bytecblock extends Op {
     super();
     const bytecblock: Uint8Array[] = [];
     for (const val of args) {
-      bytecblock.push(toBytes(val));
+      bytecblock.push(base64ToBytes(val));
     }
 
     this.interpreter = interpreter;
@@ -1875,7 +1875,7 @@ export class GetAssetHolding extends Op {
         value = BigInt(assetInfo.amount);
         break;
       case "AssetFrozen":
-        value = toBytes(assetInfo["is-frozen"]);
+        value = base64ToBytes(assetInfo["is-frozen"]);
         break;
       default:
         throw new TealError(ERRORS.TEAL.INVALID_FIELD_TYPE);
@@ -1936,7 +1936,7 @@ export class GetAssetDef extends Op {
           value = BigInt(AssetDefinition.decimals);
           break;
         default:
-          value = toBytes(AssetDefinition[s] as string);
+          value = base64ToBytes(AssetDefinition[s] as string);
           break;
       }
 
