@@ -1,9 +1,9 @@
-import { base64ToBytes } from "@algorand-builder/algob";
 import { SSCSchemaConfig, SSCStateSchema } from "algosdk";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { StackElem } from "../types";
+import { base64ToBytes } from "./parsing";
 
 // returns new key value pair by setting type and corresponding values
 export function getKeyValPair (key: Uint8Array, value: StackElem): SSCStateSchema {

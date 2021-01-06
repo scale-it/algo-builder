@@ -1,4 +1,4 @@
-import { base64ToBytes } from "@algorand-builder/algob";
+import { base64ToBytes } from "../../src/lib/parsing";
 
 export const accInfo = [{
   address: "addr-1",
