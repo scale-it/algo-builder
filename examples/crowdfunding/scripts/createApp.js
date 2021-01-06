@@ -3,7 +3,7 @@ const {
   TransactionType,
   SignType,
   update,
-  intToBytes,
+  intToBigEndian,
   addressToBytes
 } = require('algob');
 
@@ -22,25 +22,25 @@ async function run (runtimeEnv, deployer) {
   };
   await executeTransaction(deployer, algoTxnParams);
 
-  // Get begin date timestamp to pass in
-  const beginDateTimestamp = new Date();
-  beginDateTimestamp.setSeconds(beginDateTimestamp.getSeconds() + 2);
+  // Get begin date to pass in
+  const beginDate = new Date();
+  beginDate.setSeconds(beginDate.getSeconds() + 2);
 
-  // Get end date timestamp to pass in
-  const endDateTimestamp = new Date();
-  endDateTimestamp.setSeconds(endDateTimestamp.getSeconds() + 12000);
+  // Get end date to pass in
+  const endDate = new Date();
+  endDate.setSeconds(endDate.getSeconds() + 12000);
 
-  // Get fund close date timestamp to pass in
-  const fundCloseDateTimestamp = new Date();
-  fundCloseDateTimestamp.setSeconds(fundCloseDateTimestamp.getSeconds() + 120000);
+  // Get fund close date to pass in
+  const fundCloseDate = new Date();
+  fundCloseDate.setSeconds(fundCloseDate.getSeconds() + 120000);
 
   // initialize app arguments
   let appArgs = [
-    intToBytes(beginDateTimestamp.getTime()),
-    intToBytes(endDateTimestamp.getTime()),
-    intToBytes(7000000),
+    intToBigEndian(beginDate.getTime()),
+    intToBigEndian(endDate.getTime()),
+    intToBigEndian(7000000),
     addressToBytes(creatorAccount.addr),
-    intToBytes(fundCloseDateTimestamp.getTime())
+    intToBigEndian(fundCloseDate.getTime())
   ];
 
   // Create Application

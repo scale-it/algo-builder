@@ -1,5 +1,4 @@
-const { TransactionType, SignType, toBytes } = require('algob');
-const { executeTransaction } = require('./common');
+const { TransactionType, SignType, toBytes, executeTransaction } = require('algob');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');

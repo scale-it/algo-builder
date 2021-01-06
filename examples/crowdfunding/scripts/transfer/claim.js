@@ -1,5 +1,4 @@
-const { TransactionType, SignType, toBytes } = require('algob');
-const { executeTransaction } = require('./common');
+const { TransactionType, SignType, toBytes, executeTransaction } = require('algob');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -15,11 +14,11 @@ async function run (runtimeEnv, deployer) {
   });
 
   const appArgs = [toBytes('claim')];
-  const appInfo = deployer.getSSC('crowdFundApproval.teal', 'crowdFundClear.teal');  // get from checkpoint
+  const appInfo = deployer.getSSC('crowdFundApproval.teal', 'crowdFundClear.teal'); // get from checkpoint
   const escrowAccount = await deployer.loadLogic('crowdFundEscrow.py', [], { APP_ID: appInfo.appID });
 
   // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
-  const transactions = [
+  const txGroup = [
     {
       type: TransactionType.CallNoOpSSC,
       sign: SignType.SecretKey,

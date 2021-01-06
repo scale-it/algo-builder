@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "Apache-2.0",
-  "devDependencies": {
-    "chai": "^4.2.0"
-  },
   "dependencies": {
     "algosdk": "^1.8.0"
   },
