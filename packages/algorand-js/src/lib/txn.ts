@@ -62,7 +62,7 @@ export function txnSpecbyField (txField: string, interpreter: Interpreter): Stac
       throw new TealError(ERRORS.TEAL.REJECTED_BY_LOGIC);
     }
     case 'TypeEnum': {
-      result = TxnType[tx.type as keyof typeof TxnType]; // TxnType['pay']
+      result = Number(TxnType[tx.type as keyof typeof TxnType]); // TxnType['pay']
       break;
     }
     case 'GroupIndex': {
