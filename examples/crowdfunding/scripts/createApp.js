@@ -5,7 +5,7 @@ const {
   update,
   intToBigEndian,
   addressToBytes
-} = require('algob');
+} = require('@algorand-builder/algob');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -83,8 +83,8 @@ async function run (runtimeEnv, deployer) {
 
   console.log('Opting-In for Creator and Donor.');
   try {
-    await deployer.OptInToSSC(creatorAccount, applicationID, {});
-    await deployer.OptInToSSC(donorAccount, applicationID, {});
+    await deployer.optInToSSC(creatorAccount, applicationID, {});
+    await deployer.optInToSSC(donorAccount, applicationID, {});
   } catch (e) {
     console.log(e);
     throw new Error(e);

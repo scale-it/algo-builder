@@ -110,7 +110,7 @@ int 2
 
 // second tx is an payment
 gtxn 1 TypeEnum
-int 1
+int pay
 ==
 &&
 

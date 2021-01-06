@@ -1,4 +1,4 @@
-const { TransactionType, SignType, toBytes, executeTransaction } = require('algob');
+const { TransactionType, SignType, base64ToBytes, executeTransaction } = require('@algorand-builder/algob');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -13,7 +13,7 @@ async function run (runtimeEnv, deployer) {
     payFlags: {}
   });
 
-  const appArgs = [toBytes('claim')];
+  const appArgs = [base64ToBytes('claim')];
   const appInfo = deployer.getSSC('crowdFundApproval.teal', 'crowdFundClear.teal'); // get from checkpoint
   const escrowAccount = await deployer.loadLogic('crowdFundEscrow.py', [], { APP_ID: appInfo.appID });
 
