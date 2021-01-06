@@ -1892,12 +1892,12 @@ export class Int extends Op {
     assertLen(args.length, 1, line);
 
     let uint64;
-    const txOnComplete = TxnOnComplete[args[0] as keyof typeof TxnOnComplete]; // eg. TxnOnComplete['NoOp']
-    const typeEnumConst = TxnType[args[0] as keyof typeof TxnType]; // ex: TxnType['pay']
-    if (txOnComplete !== undefined) { // check if string is keyof TxnOnComplete Enum
-      uint64 = BigInt(txOnComplete);
-    } else if (typeEnumConst !== undefined) { // check if string is keyof TxnType Enum
-      uint64 = BigInt(typeEnumConst);
+    const intConst = TxnOnComplete[args[0] as keyof typeof TxnOnComplete] ||
+      TxnType[args[0] as keyof typeof TxnType];
+
+    // check if string is keyof TxnOnComplete or TxnType
+    if (intConst !== undefined) {
+      uint64 = BigInt(intConst);
     } else {
       assertOnlyDigits(args[0]);
       uint64 = BigInt(args[0]);
