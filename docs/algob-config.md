@@ -87,12 +87,12 @@ Each network configuration requires a list of accounts. These accounts are then 
 
 1. Loading from a file (you can generate a test accounts using `gen-accounts` command). `algob` should be available in your node_modules.
 
-        const { loadAccountsFromFileSync } = require("algob");
+        const { loadAccountsFromFileSync } = require("@algorand-builder/algob");
         const accFromFile = loadAccountsFromFileSync("assets/accounts_generated.yaml");
 
 1. A mnemonic string:
 
-        const { mkAccounts } = require("algob");
+        const { mkAccounts } = require("@algorand-builder/algob");
         let accounts = mkAccounts([{
           name: "gold",
           addr: "KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY",
@@ -143,7 +143,7 @@ Each network configuration requires a list of accounts. These accounts are then 
 
     Use the following command to load accounts from environment:
 
-        const { loadAccountsFromEnv } = require("algob");
+        const { loadAccountsFromEnv } = require("@algorand-builder/algob");
         const accounts = loadAccountsFromEnv();
 
 
@@ -157,7 +157,7 @@ You can also construct different accounts for different networks.
 
 ```
 
-const { loadAccountsFromFileSync } = require("algob");
+const { loadAccountsFromFileSync } = require("@algorand-builder/algob");
 const {privateNet} = require("algorand-builder/config")
 
 const accounts = loadAccountsFromFileSync("assets/accounts_generated.yaml");

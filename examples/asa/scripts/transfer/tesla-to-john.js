@@ -1,4 +1,4 @@
-const { executeTransaction, balanceOf, TransactionType, SignType } = require('algob');
+const { executeTransaction, balanceOf, TransactionType, SignType } = require('@algorand-builder/algob');
 
 async function run (runtimeEnv, deployer) {
   const teslaAssetID = deployer.asa.get('tesla').assetIndex;

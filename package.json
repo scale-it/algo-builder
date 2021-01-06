@@ -1,6 +1,5 @@
 {
   "name": "algorand-builder",
-  "version": "0.0.1",
   "description": "Framework to automate development of Algorand Assets and Smart Contracts.",
   "repository": "https://github.com/scale-it/algorand-builder.git",
   "contributors": [

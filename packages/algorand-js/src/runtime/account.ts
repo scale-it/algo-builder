@@ -1,4 +1,3 @@
-import { StackElem, StoreAccount } from "algorand-js/src/types";
 import type {
   Account,
   AppLocalState,
@@ -12,6 +11,7 @@ import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { compareArray } from "../lib/compare";
 import { assertValidSchema, getKeyValPair } from "../lib/stateful";
+import { StackElem, StoreAccount } from "../types";
 
 export class StoreAccountImpl implements StoreAccount {
   readonly account: Account;
@@ -22,7 +22,6 @@ export class StoreAccountImpl implements StoreAccount {
   appsTotalSchema: SSCSchemaConfig;
   createdApps: CreatedApps[];
   createdAssets: CreatedAssets[];
-  accountsAssets: Map<string, Map<number, AssetHolding>>;
 
   constructor (balance: number, account?: Account) {
     if (account) {
@@ -41,8 +40,6 @@ export class StoreAccountImpl implements StoreAccount {
     this.appsTotalSchema = <SSCSchemaConfig>{};
     this.createdApps = [];
     this.createdAssets = [];
-    const assetInfo = new Map<number, AssetHolding>();
-    this.accountsAssets = new Map<string, typeof assetInfo>();
   }
 
   // returns account balance in microAlgos

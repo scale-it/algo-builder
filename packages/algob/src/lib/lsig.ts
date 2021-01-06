@@ -20,7 +20,7 @@ export async function getLsig (
   Promise<LogicSig> {
   const compileOp = new CompileOp(algodClient);
   const result: ASCCache = await compileOp.ensureCompiled(name, false, scTmplParams);
-  const program = result.toBytes;
+  const program = result.base64ToBytes;
   return algosdk.makeLogicSig(program, scParams);
 }
 

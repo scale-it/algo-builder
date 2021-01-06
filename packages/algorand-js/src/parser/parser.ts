@@ -2,14 +2,16 @@ import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { Interpreter } from "../interpreter/interpreter";
 import {
-  Add, Addr, Addw, And, Arg, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
-  Branch, BranchIfNotZero, BranchIfZero, Btoi, Byte, Bytec, Bytecblock,
-  Concat, Div, Dup, Dup2, Ed25519verify, EqualTo, Err, Global, GreaterThan,
+  Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx,
+  AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
+  AppOptedIn, Arg, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
+  BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
+  Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2, Ed25519verify,
+  EqualTo, Err, GetAssetDef, GetAssetHolding, Global, GreaterThan,
   GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc, Intcblock, Itob,
-  Keccak256, Label,
-  Len, LessThan, LessThanEqualTo, Load, Mod, Mul, Mulw, Not, NotEqualTo, Or,
-  Pop, Pragma, Return,
-  Sha256, Sha512_256, Store, Sub, Substring, Substring3, Txn, Txna
+  Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, Mod,
+  Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, Return, Sha256,
+  Sha512_256, Store, Sub, Substring, Substring3, Txn, Txna
 } from "../interpreter/opcode-list";
 import { assertLen } from "../lib/parsing";
 import { Operator } from "../types";
@@ -86,13 +88,31 @@ var opCodeMap: {[key: string]: any } = {
   gtxn: Gtxn,
   txna: Txna,
   gtxna: Gtxna,
-  global: Global
+  global: Global,
+
+  // Stateful Opcodes
+  app_opted_in: AppOptedIn,
+  app_local_get: AppLocalGet,
+  app_local_get_ex: AppLocalGetEx,
+  app_global_get: AppGlobalGet,
+  app_global_get_ex: AppGlobalGetEx,
+  app_local_put: AppLocalPut,
+  app_global_put: AppGlobalPut,
+  app_local_del: AppLocalDel,
+  app_global_del: AppGlobalDel,
+
+  balance: Balance,
+  asset_holding_get: GetAssetHolding,
+  asset_params_get: GetAssetDef
 };
 
 // list of opcodes that require one extra parameter than others: `interpreter`.
 const interpreterReqList = new Set([
   "arg", "bytecblock", "bytec", "intcblock", "intc", "store", "load",
-  "b", "bz", "bnz", "return", "txn", "gtxn", "txna", "gtxna", "global"
+  "b", "bz", "bnz", "return", "txn", "gtxn", "txna", "gtxna", "global",
+  "balance", "asset_holding_get", "asset_params_get", "app_opted_in",
+  "app_local_get", "app_local_get_ex", "app_global_get", "app_global_get_ex",
+  "app_local_put", "app_global_put", "app_local_del", "app_global_del"
 ]);
 
 /**
@@ -228,7 +248,7 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
   }
 
   if (opCodeMap[opCode] === undefined) {
-    throw new TealError(ERRORS.TEAL.INVALID_OP_ARG);
+    throw new TealError(ERRORS.TEAL.UNKOWN_OPCODE, { opcode: opCode, line: counter });
   }
 
   if (interpreterReqList.has(opCode)) {

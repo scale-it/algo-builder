@@ -4,7 +4,7 @@
    - create a signed lsig using sdk and use that lsig to validate transactions
 */
 const { executeTransaction } = require('./common/common');
-const { TransactionType, SignType, createMsigAddress } = require('algob');
+const { TransactionType, SignType, createMsigAddress } = require('@algorand-builder/algob');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -34,7 +34,7 @@ async function run (runtimeEnv, deployer) {
   // Funding multisignature account
   await executeTransaction(deployer, txnParams);
 
-  await deployer.putMetadata('User Checkpoint', 'Fund Multisignature Account');
+  await deployer.addCheckpointKV('User Checkpoint', 'Fund Multisignature Account');
 
   txnParams.fromAccount = { addr: multsigaddr };
   txnParams.toAccountAddr = bob.addr;

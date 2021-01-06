@@ -1,4 +1,4 @@
-import { TxParams } from "algob/src/types";
+import { TxParams } from "@algorand-builder/algob/src/types";
 import { decodeAddress, generateAccount, SuggestedParams } from "algosdk";
 
 export const ALGORAND_MIN_TX_FEE = 1000;

@@ -47,10 +47,10 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   }
 
-  putMetadata (key: string, value: string): void {
+  addCheckpointKV (key: string, value: string): void {
   };
 
-  getMetadata (key: string): string | undefined {
+  getCheckpointKV (key: string): string | undefined {
     return "metadata";
   };
 
@@ -96,7 +96,7 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   }
 
-  OptInToSSC (
+  optInToSSC (
     sender: Account, index: number, payFlags: TxParams): Promise<void> {
     throw new Error("Not implemented");
   }

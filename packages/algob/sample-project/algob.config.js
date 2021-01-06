@@ -17,7 +17,7 @@
 */
 
 // ## ACCOUNTS USING mnemonic ##
-const { mkAccounts, algodCredentialsFromEnv } = require("algob");
+const { mkAccounts, algodCredentialsFromEnv } = require("@algorand-builder/algob");
 let accounts = mkAccounts([{
   // This account is created using `make setup-master-account` command from our
   // `/infrastructure` directory. It already has many ALGOs
@@ -27,7 +27,7 @@ let accounts = mkAccounts([{
 }]);
 
 // ## ACCOUNTS loaded from a FILE ##
-// const { loadAccountsFromFileSync } = require("algob");
+// const { loadAccountsFromFileSync } = require("@algorand-builder/algob");
 // const accFromFile = loadAccountsFromFileSync("assets/accounts_generated.yaml");
 // accounts = accounts.concat(accFromFile);
 

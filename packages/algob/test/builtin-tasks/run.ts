@@ -170,7 +170,7 @@ scripts directory: script 1 executed
           scripts: ["scripts/other-scripts/put-metadata.js"]
         }),
       ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY,
-      "putMetadata"
+      "addCheckpointKV"
     );
     const persistedSnapshot = loadCheckpoint("scripts/other-scripts/put-metadata.js");
     assert.deepEqual(persistedSnapshot, {});

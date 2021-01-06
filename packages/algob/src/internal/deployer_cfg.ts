@@ -3,7 +3,7 @@ import { AlgoOperator } from "../lib/algo-operator";
 import { loadASAFile } from "../lib/asa";
 import { loadCheckpointsRecursive } from "../lib/script-checkpoints";
 import type {
-  Accounts,
+  AccountMap,
   AlgobDeployer,
   AlgobRuntimeEnv,
   ASADefs,
@@ -29,7 +29,7 @@ export class DeployerConfig {
   asaDefs: ASADefs;
   algoOp: AlgoOperator;
   txWriter: txWriter;
-  accounts: Accounts;
+  accounts: AccountMap;
 
   constructor (runtimeEnv: AlgobRuntimeEnv, algoOp: AlgoOperator) {
     this.runtimeEnv = runtimeEnv;

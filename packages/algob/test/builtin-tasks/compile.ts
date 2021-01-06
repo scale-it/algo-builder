@@ -30,7 +30,7 @@ class CompileOpMock extends CompileOp {
       compiled: "compiled",
       compiledHash: "compiledHash",
       srcHash: tealHash,
-      toBytes: new Uint8Array(1)
+      base64ToBytes: new Uint8Array(1)
     };
   }
 

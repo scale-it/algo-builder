@@ -7,23 +7,20 @@ import { ERRORS } from "../../../src/errors/errors-list";
 import { Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
-  Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx, AppGlobalPut,
-  AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut, AppOptedIn,
-  Arg, Balance,
-  BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
-  Branch, BranchIfNotZero, BranchIfZero,
-  Btoi, Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2,
-  Ed25519verify, EqualTo, Err, GetAssetDef, GetAssetHolding,
-  Global,
+  Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx,
+  AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
+  AppOptedIn, Arg, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
+  BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
+  Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2, Ed25519verify,
+  EqualTo, Err, GetAssetDef, GetAssetHolding, Global,
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc,
-  Intcblock, Itob, Keccak256, Label,
-  Len, LessThan, LessThanEqualTo,
+  Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
   Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, Return,
   Sha256, Sha512_256, Store, Sub, Substring, Substring3, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { compareArray } from "../../../src/lib/compare";
 import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MIN_UINT8 } from "../../../src/lib/constants";
-import { convertToBuffer, toBytes } from "../../../src/lib/parsing";
+import { base64ToBytes, convertToBuffer } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
 import { StoreAccountImpl } from "../../../src/runtime/account";
@@ -41,14 +38,14 @@ function setDummyAccInfo (acc: StoreAccount): void {
 }
 
 describe("Teal Opcodes", function () {
-  const strArr = ["str1", "str2"].map(toBytes);
+  const strArr = ["str1", "str2"].map(base64ToBytes);
 
   describe("Len", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct length of string", function () {
       const str = "HelloWorld";
-      stack.push(toBytes(str));
+      stack.push(base64ToBytes(str));
       const op = new Len([], 0);
       op.execute(stack);
 
@@ -222,7 +219,7 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
     const runtime = new Runtime([]);
     const interpreter = new Interpreter();
-    const args = ["Arg0", "Arg1", "Arg2", "Arg3"].map(toBytes);
+    const args = ["Arg0", "Arg1", "Arg2", "Arg3"].map(base64ToBytes);
     interpreter.runtime = runtime;
     interpreter.runtime.ctx.args = args;
 
@@ -291,7 +288,7 @@ describe("Teal Opcodes", function () {
 
       const expected: Uint8Array[] = [];
       for (const val of bytecblock) {
-        expected.push(toBytes(val));
+        expected.push(base64ToBytes(val));
       }
       assert.deepEqual(expected, interpreter.bytecblock);
     });
@@ -300,7 +297,7 @@ describe("Teal Opcodes", function () {
   describe("Bytec[N]", function () {
     const stack = new Stack<StackElem>();
     const interpreter = new Interpreter();
-    const bytecblock = ["bytec_0", "bytec_1", "bytec_2", "bytec_3"].map(toBytes);
+    const bytecblock = ["bytec_0", "bytec_1", "bytec_2", "bytec_3"].map(base64ToBytes);
     interpreter.bytecblock = bytecblock;
 
     it("should push bytec_0 from bytecblock to stack", function () {
@@ -483,7 +480,7 @@ describe("Teal Opcodes", function () {
 
     it("should store byte[] to scratch", function () {
       const interpreter = new Interpreter();
-      const val = toBytes("HelloWorld");
+      const val = base64ToBytes("HelloWorld");
       stack.push(val);
 
       const op = new Store(["0"], 1, interpreter);
@@ -604,7 +601,7 @@ describe("Teal Opcodes", function () {
   describe("Load", function () {
     const stack = new Stack<StackElem>();
     const interpreter = new Interpreter();
-    const scratch = [BigInt("0"), toBytes("HelloWorld")];
+    const scratch = [BigInt("0"), base64ToBytes("HelloWorld")];
     interpreter.scratch = scratch;
 
     it("should load uint64 from scratch space to stack", function () {
@@ -657,7 +654,7 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct hash for Sha256", () => {
-      stack.push(toBytes("MESSAGE"));
+      stack.push(base64ToBytes("MESSAGE"));
       const op = new Sha256([], 1);
       op.execute(stack);
 
@@ -681,7 +678,7 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct hash for Sha512_256", function () {
-      stack.push(toBytes("MESSAGE"));
+      stack.push(base64ToBytes("MESSAGE"));
       const op = new Sha512_256([], 1);
       op.execute(stack);
 
@@ -705,7 +702,7 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct hash for keccak256", function () {
-      stack.push(toBytes("ALGORAND"));
+      stack.push(base64ToBytes("ALGORAND"));
       const op = new Keccak256([], 1);
       op.execute(stack);
 
@@ -1236,7 +1233,7 @@ describe("Teal Opcodes", function () {
     it("should throw error if type is invalid",
       execExpectError(
         stack,
-        ["str1", "str2"].map(toBytes),
+        ["str1", "str2"].map(base64ToBytes),
         new Mulw([], 1),
         ERRORS.TEAL.INVALID_TYPE
       )
@@ -1312,7 +1309,7 @@ describe("Teal Opcodes", function () {
     const end = "4";
 
     it("should return correct substring", function () {
-      stack.push(toBytes("Algorand"));
+      stack.push(base64ToBytes("Algorand"));
       const op = new Substring([start, end], 1);
       op.execute(stack);
 
@@ -1330,7 +1327,7 @@ describe("Teal Opcodes", function () {
     );
 
     it("should throw error if start is not uint8", function () {
-      stack.push(toBytes("Algorand"));
+      stack.push(base64ToBytes("Algorand"));
 
       expectTealError(
         () => new Substring([(MIN_UINT8 - 5).toString(), end], 1),
@@ -1345,7 +1342,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error if end is not uint8", function () {
-      stack.push(toBytes("Algorand"));
+      stack.push(base64ToBytes("Algorand"));
 
       expectTealError(
         () => new Substring([start, (MIN_UINT8 - 5).toString()], 1),
@@ -1362,7 +1359,7 @@ describe("Teal Opcodes", function () {
     it("should throw error because start > end",
       execExpectError(
         stack,
-        [toBytes("Algorand")],
+        [base64ToBytes("Algorand")],
         new Substring(["9", end], 1),
         ERRORS.TEAL.SUBSTRING_END_BEFORE_START
       )
@@ -1371,7 +1368,7 @@ describe("Teal Opcodes", function () {
     it("should throw error because range beyong string",
       execExpectError(
         stack,
-        [toBytes("Algorand")],
+        [base64ToBytes("Algorand")],
         new Substring([start, "40"], 1),
         ERRORS.TEAL.SUBSTRING_RANGE_BEYOND
       )
@@ -1384,7 +1381,7 @@ describe("Teal Opcodes", function () {
     it("should return correct substring", function () {
       stack.push(BigInt('0'));
       stack.push(BigInt('4'));
-      stack.push(toBytes("Algorand"));
+      stack.push(base64ToBytes("Algorand"));
 
       const op = new Substring3([], 1);
       op.execute(stack);
@@ -1407,7 +1404,7 @@ describe("Teal Opcodes", function () {
       const start = end + BigInt('1');
       execExpectError(
         stack,
-        [start, end, toBytes("Algorand")],
+        [start, end, base64ToBytes("Algorand")],
         new Substring3([], 1),
         ERRORS.TEAL.SUBSTRING_END_BEFORE_START
       );
@@ -1416,7 +1413,7 @@ describe("Teal Opcodes", function () {
     it("should throw error because range beyong string",
       execExpectError(
         stack,
-        [BigInt('0'), BigInt('40'), toBytes("Algorand")],
+        [BigInt('0'), BigInt('40'), base64ToBytes("Algorand")],
         new Substring3([], 1),
         ERRORS.TEAL.SUBSTRING_RANGE_BEYOND
       )
@@ -1571,7 +1568,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(toBytes(TXN_OBJ.type), stack.pop());
+        assert.deepEqual(base64ToBytes(TXN_OBJ.type), stack.pop());
       });
 
       it("should push txn typeEnum to stack", function () {
@@ -1611,7 +1608,7 @@ describe("Teal Opcodes", function () {
           stack,
           [],
           new Txn(["FirstValidTime"], 1, interpreter),
-          ERRORS.TEAL.LOGIC_REJECTION
+          ERRORS.TEAL.REJECTED_BY_LOGIC
         )
       );
 
@@ -1620,7 +1617,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.apaa.length), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.apaa.length), stack.pop());
       });
 
       it("should push txn NumAccounts to stack", function () {
@@ -1628,7 +1625,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.apat.length), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.apat.length), stack.pop());
       });
     });
 
@@ -1650,7 +1647,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.amt), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.amt), stack.pop());
       });
 
       it("should push txn CloseRemainderTo to stack", function () {
@@ -1688,7 +1685,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.votefst), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.votefst), stack.pop());
       });
 
       it("should push txn VoteLast to stack", function () {
@@ -1696,7 +1693,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.votelst), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.votelst), stack.pop());
       });
 
       it("should push txn VoteKeyDilution to stack", function () {
@@ -1704,7 +1701,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.votekd), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.votekd), stack.pop());
       });
     });
 
@@ -1718,7 +1715,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.caid), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.caid), stack.pop());
       });
 
       it("should push txn ConfigAssetTotal to stack", function () {
@@ -1726,7 +1723,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.apar.t), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.apar.t), stack.pop());
       });
 
       it("should push txn ConfigAssetDecimals to stack", function () {
@@ -1734,7 +1731,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.apar.dc), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.apar.dc), stack.pop());
       });
 
       it("should push txn ConfigAssetDefaultFrozen to stack", function () {
@@ -1742,7 +1739,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.apar.df), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.apar.df), stack.pop());
       });
 
       it("should push txn ConfigAssetUnitName to stack", function () {
@@ -1750,7 +1747,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(toBytes(TXN_OBJ.apar.un), stack.pop());
+        assert.deepEqual(base64ToBytes(TXN_OBJ.apar.un), stack.pop());
       });
 
       it("should push txn ConfigAssetName to stack", function () {
@@ -1758,7 +1755,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(toBytes(TXN_OBJ.apar.an), stack.pop());
+        assert.deepEqual(base64ToBytes(TXN_OBJ.apar.an), stack.pop());
       });
 
       it("should push txn ConfigAssetURL to stack", function () {
@@ -1766,7 +1763,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(toBytes(TXN_OBJ.apar.au), stack.pop());
+        assert.deepEqual(base64ToBytes(TXN_OBJ.apar.au), stack.pop());
       });
 
       it("should push txn ConfigAssetMetadataHash to stack", function () {
@@ -1820,7 +1817,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.xaid), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.xaid), stack.pop());
       });
 
       it("should push txn AssetAmount to stack", function () {
@@ -1828,7 +1825,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.aamt), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.aamt), stack.pop());
       });
 
       it("should push txn AssetSender to stack", function () {
@@ -1866,7 +1863,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.faid), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.faid), stack.pop());
       });
 
       it("should push txn FreezeAssetAccount to stack", function () {
@@ -1882,7 +1879,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.afrz), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.afrz), stack.pop());
       });
     });
 
@@ -1896,7 +1893,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.apid), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.apid), stack.pop());
       });
 
       it("should push txn OnCompletion to stack", function () {
@@ -1904,7 +1901,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(TXN_OBJ.apan), stack.pop());
+        assert.equal(BigInt(TXN_OBJ.apan), stack.pop());
       });
 
       it("should push txn ApprovalProgram to stack", function () {
@@ -1936,7 +1933,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt('1000'), stack.pop());
+        assert.equal(BigInt('1000'), stack.pop());
       });
     });
 
@@ -2001,7 +1998,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.deepEqual(BigInt('1000'), top);
+      assert.equal(BigInt('1000'), top);
     });
 
     it("should push MinBalance to stack", function () {
@@ -2009,7 +2006,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.deepEqual(BigInt('10000'), top);
+      assert.equal(BigInt('10000'), top);
     });
 
     it("should push MaxTxnLife to stack", function () {
@@ -2017,7 +2014,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.deepEqual(BigInt('1000'), top);
+      assert.equal(BigInt('1000'), top);
     });
 
     it("should push ZeroAddress to stack", function () {
@@ -2033,7 +2030,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.deepEqual(BigInt(interpreter.runtime.ctx.gtxs.length), top);
+      assert.equal(BigInt(interpreter.runtime.ctx.gtxs.length), top);
     });
 
     it("should push LogicSigVersion to stack", function () {
@@ -2041,7 +2038,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.deepEqual(BigInt('2'), top);
+      assert.equal(BigInt('2'), top);
     });
 
     it("should push Round to stack", function () {
@@ -2049,7 +2046,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.deepEqual(BigInt('500'), top);
+      assert.equal(BigInt('500'), top);
     });
 
     it("should push LatestTimestamp to stack", function () {
@@ -2068,7 +2065,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.deepEqual(BigInt('1847'), top);
+      assert.equal(BigInt('1847'), top);
     });
   });
 
@@ -2101,7 +2098,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         let top = stack.pop();
-        assert.deepEqual(BigInt('1'), top);
+        assert.equal(BigInt('1'), top);
 
         // for Txn.Accounts[A]
         stack.push(BigInt('1'));
@@ -2111,7 +2108,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         top = stack.pop();
-        assert.deepEqual(BigInt('1'), top);
+        assert.equal(BigInt('1'), top);
       });
 
       it("should push 0 to stack if app is not opted in", function () {
@@ -2123,7 +2120,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         let top = stack.pop();
-        assert.deepEqual(BigInt('0'), top);
+        assert.equal(BigInt('0'), top);
 
         // for Txn.Accounts[A]
         stack.push(BigInt('1'));
@@ -2133,7 +2130,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         top = stack.pop();
-        assert.deepEqual(BigInt('0'), top);
+        assert.equal(BigInt('0'), top);
       });
     });
 
@@ -2145,45 +2142,45 @@ describe("Teal Opcodes", function () {
       it("should push the value to stack if key is present in local state", function () {
         // for Sender
         stack.push(BigInt('0'));
-        stack.push(toBytes("Local-key"));
+        stack.push(base64ToBytes("Local-key"));
 
         let op = new AppLocalGet([], 1, interpreter);
         op.execute(stack);
 
         let top = stack.pop();
-        assert.deepEqual(toBytes('Local-val'), top);
+        assert.deepEqual(base64ToBytes('Local-val'), top);
 
         // for Txn.Accounts[A]
         stack.push(BigInt('1'));
-        stack.push(toBytes('Local-key'));
+        stack.push(base64ToBytes('Local-key'));
 
         op = new AppLocalGet([], 1, interpreter);
         op.execute(stack);
 
         top = stack.pop();
-        assert.deepEqual(toBytes('Local-val'), top);
+        assert.deepEqual(base64ToBytes('Local-val'), top);
       });
 
       it("should push uint 0 to stack if key is not present in local state", function () {
         // for Sender
         stack.push(BigInt('0'));
-        stack.push(toBytes("random-key"));
+        stack.push(base64ToBytes("random-key"));
 
         let op = new AppLocalGet([], 1, interpreter);
         op.execute(stack);
 
         let top = stack.pop();
-        assert.deepEqual(BigInt('0'), top);
+        assert.equal(BigInt('0'), top);
 
         // for Txn.Accounts[A]
         stack.push(BigInt('1'));
-        stack.push(toBytes('random-key'));
+        stack.push(base64ToBytes('random-key'));
 
         op = new AppLocalGet([], 1, interpreter);
         op.execute(stack);
 
         top = stack.pop();
-        assert.deepEqual(BigInt('0'), top);
+        assert.equal(BigInt('0'), top);
       });
     });
 
@@ -2196,48 +2193,52 @@ describe("Teal Opcodes", function () {
         // for Sender
         stack.push(BigInt('0'));
         stack.push(BigInt('1847'));
-        stack.push(toBytes('Local-key'));
+        stack.push(base64ToBytes('Local-key'));
 
         let op = new AppLocalGetEx([], 1, interpreter);
         op.execute(stack);
 
-        let top = stack.pop();
-        assert.deepEqual(toBytes('Local-val'), top);
+        let flag = stack.pop();
+        let value = stack.pop();
+        assert.equal(BigInt("1"), flag);
+        assert.deepEqual(base64ToBytes('Local-val'), value);
 
         // for Txn.Accounts[A]
         stack.push(BigInt('1'));
         stack.push(BigInt('1847'));
-        stack.push(toBytes('Local-key'));
+        stack.push(base64ToBytes('Local-key'));
 
         op = new AppLocalGetEx([], 1, interpreter);
         op.execute(stack);
 
-        top = stack.pop();
-        assert.deepEqual(toBytes('Local-val'), top);
+        flag = stack.pop();
+        value = stack.pop();
+        assert.equal(BigInt("1"), flag);
+        assert.deepEqual(base64ToBytes('Local-val'), value);
       });
 
       it("should push uint 0 to stack if key is not present in local state from given appId", function () {
         // for Sender
         stack.push(BigInt('0'));
         stack.push(BigInt('1847'));
-        stack.push(toBytes('random-key'));
+        stack.push(base64ToBytes('random-key'));
 
         let op = new AppLocalGetEx([], 1, interpreter);
         op.execute(stack);
 
-        let top = stack.pop();
-        assert.deepEqual(BigInt('0'), top);
+        let flag = stack.pop();
+        assert.equal(BigInt('0'), flag);
 
         // for Txn.Accounts[A]
         stack.push(BigInt('1'));
         stack.push(BigInt('1847'));
-        stack.push(toBytes('random-key'));
+        stack.push(base64ToBytes('random-key'));
 
         op = new AppLocalGetEx([], 1, interpreter);
         op.execute(stack);
 
-        top = stack.pop();
-        assert.deepEqual(BigInt('0'), top);
+        flag = stack.pop();
+        assert.equal(BigInt('0'), flag);
       });
     });
 
@@ -2249,23 +2250,23 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push the value to stack if key is present in global state", function () {
-        stack.push(toBytes('global-key'));
+        stack.push(base64ToBytes('global-key'));
 
         const op = new AppGlobalGet([], 1, interpreter);
         op.execute(stack);
 
         const top = stack.pop();
-        assert.deepEqual(toBytes('global-val'), top);
+        assert.deepEqual(base64ToBytes('global-val'), top);
       });
 
       it("should push uint 0 to stack if key is not present in global state", function () {
-        stack.push(toBytes('random-key'));
+        stack.push(base64ToBytes('random-key'));
 
         const op = new AppGlobalGet([], 1, interpreter);
         op.execute(stack);
 
         const top = stack.pop();
-        assert.deepEqual(BigInt('0'), top);
+        assert.equal(BigInt('0'), top);
       });
     });
 
@@ -2279,45 +2280,49 @@ describe("Teal Opcodes", function () {
       it("should push the value to stack if key is present externally in global state", function () {
         // zero index means current app
         stack.push(BigInt('0'));
-        stack.push(toBytes('Hello'));
+        stack.push(base64ToBytes('Hello'));
 
         let op = new AppGlobalGetEx([], 1, interpreter);
         op.execute(stack);
 
-        let top = stack.pop();
-        assert.deepEqual(toBytes('World'), top);
+        let flag = stack.pop();
+        let value = stack.pop();
+        assert.equal(BigInt("1"), flag);
+        assert.deepEqual(base64ToBytes('World'), value);
 
         // for Txn.ForeignApps[A]
         stack.push(BigInt('1'));
-        stack.push(toBytes('global-key'));
+        stack.push(base64ToBytes('global-key'));
 
         op = new AppGlobalGetEx([], 1, interpreter);
         op.execute(stack);
 
-        top = stack.pop();
-        assert.deepEqual(toBytes('global-val'), top);
+        flag = stack.pop();
+        value = stack.pop();
+        assert.equal(BigInt("1"), flag);
+        assert.deepEqual(base64ToBytes('global-val'), value);
       });
 
       it("should push uint 0 to stack if key is not present externally in global state", function () {
         // zero index means current app
         stack.push(BigInt('0'));
-        stack.push(toBytes('random-key'));
+        stack.push(base64ToBytes('random-key'));
 
         let op = new AppGlobalGetEx([], 1, interpreter);
         op.execute(stack);
 
         let top = stack.pop();
-        assert.deepEqual(BigInt('0'), top);
+        assert.equal(BigInt('0'), top);
 
         // for Txn.ForeignApps[A]
         stack.push(BigInt('1'));
-        stack.push(toBytes('random-key'));
+        stack.push(base64ToBytes('random-key'));
 
         op = new AppGlobalGetEx([], 1, interpreter);
         op.execute(stack);
 
         top = stack.pop();
-        assert.deepEqual(BigInt('0'), top);
+        assert.equal(BigInt('0'), top);
       });
     });
 
@@ -2329,28 +2334,28 @@ describe("Teal Opcodes", function () {
       it("should put the value in account's local storage", function () {
         // for Sender, check for byte
         stack.push(BigInt('0'));
-        stack.push(toBytes('New-Key'));
-        stack.push(toBytes('New-Val'));
+        stack.push(base64ToBytes('New-Key'));
+        stack.push(base64ToBytes('New-Val'));
 
         let op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
         const acc = interpreter.runtime.ctx.state.accounts.get("addr-1") as StoreAccount;
         let localStateCurr = acc.appsLocalState[0]["key-value"];
-        let idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('New-Key')));
+        let idx = localStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('New-Key')));
         assert.notEqual(idx, -1); // idx should not be -1
-        assert.deepEqual(localStateCurr[idx].value.bytes, toBytes('New-Val'));
+        assert.deepEqual(localStateCurr[idx].value.bytes, base64ToBytes('New-Val'));
 
         // for Txn.Accounts[A], uint
         stack.push(BigInt('1'));
-        stack.push(toBytes('New-Key-1'));
+        stack.push(base64ToBytes('New-Key-1'));
         stack.push(BigInt('2222'));
 
         op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
         localStateCurr = (interpreter.runtime.ctx.state.accounts.get("addr-1") as StoreAccount).appsLocalState[0]["key-value"];
-        idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('New-Key-1')));
+        idx = localStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('New-Key-1')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(localStateCurr[idx].value.uint, 2222);
       });
@@ -2360,7 +2365,7 @@ describe("Teal Opcodes", function () {
         // so this should throw error
         execExpectError(
           stack,
-          [BigInt('0'), toBytes("New-Key-1"), toBytes("New-Val-2")],
+          [BigInt('0'), base64ToBytes("New-Key-1"), base64ToBytes("New-Val-2")],
           new AppLocalPut([], 1, interpreter),
           ERRORS.TEAL.INVALID_SCHEMA
         );
@@ -2370,7 +2375,7 @@ describe("Teal Opcodes", function () {
         interpreter.runtime.ctx.tx.apid = 9999;
         execExpectError(
           stack,
-          [BigInt('0'), toBytes("New-Key-1"), toBytes("New-Val-2")],
+          [BigInt('0'), base64ToBytes("New-Key-1"), base64ToBytes("New-Val-2")],
           new AppLocalPut([], 1, interpreter),
           ERRORS.TEAL.APP_NOT_FOUND
         );
@@ -2385,26 +2390,26 @@ describe("Teal Opcodes", function () {
 
       it("should put the value in global storage", function () {
         // value as byte
-        stack.push(toBytes('New-Global-Key'));
-        stack.push(toBytes('New-Global-Val'));
+        stack.push(base64ToBytes('New-Global-Key'));
+        stack.push(base64ToBytes('New-Global-Val'));
 
         let op = new AppGlobalPut([], 1, interpreter);
         op.execute(stack);
 
         let globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCParams)["global-state"];
-        let idx = globalStateCurr.findIndex(a => compareArray(a.key, toBytes('New-Global-Key')));
+        let idx = globalStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('New-Global-Key')));
         assert.notEqual(idx, -1); // idx should not be -1
-        assert.deepEqual(globalStateCurr[idx].value.bytes, toBytes('New-Global-Val'));
+        assert.deepEqual(globalStateCurr[idx].value.bytes, base64ToBytes('New-Global-Val'));
 
         // for uint
-        stack.push(toBytes('Key'));
+        stack.push(base64ToBytes('Key'));
         stack.push(BigInt('1000'));
 
         op = new AppGlobalPut([], 1, interpreter);
         op.execute(stack);
 
         globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCParams)["global-state"];
-        idx = globalStateCurr.findIndex(a => compareArray(a.key, toBytes('Key')));
+        idx = globalStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('Key')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(globalStateCurr[idx].value.uint, 1000);
       });
@@ -2412,7 +2417,7 @@ describe("Teal Opcodes", function () {
       it("should throw error if resulting schema is invalid for global", function () {
         execExpectError(
           stack,
-          [toBytes("New-GlobalKey-1"), toBytes("New-GlobalVal-2")],
+          [base64ToBytes("New-GlobalKey-1"), base64ToBytes("New-GlobalVal-2")],
           new AppGlobalPut([], 1, interpreter),
           ERRORS.TEAL.INVALID_SCHEMA
         );
@@ -2422,7 +2427,7 @@ describe("Teal Opcodes", function () {
         interpreter.runtime.ctx.tx.apid = 9999;
         execExpectError(
           stack,
-          [toBytes("New-Key-1"), toBytes("New-Val-2")],
+          [base64ToBytes("New-Key-1"), base64ToBytes("New-Val-2")],
           new AppGlobalPut([], 1, interpreter),
           ERRORS.TEAL.APP_NOT_FOUND
         );
@@ -2434,27 +2439,27 @@ describe("Teal Opcodes", function () {
         interpreter.runtime.ctx.tx.apid = 1847;
       });
 
-      it("should put remove the key-value pair from account's local storage", function () {
+      it("should remove the key-value pair from account's local storage", function () {
         // for Sender
         stack.push(BigInt('0'));
-        stack.push(toBytes('Local-key'));
+        stack.push(base64ToBytes('Local-key'));
 
         let op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
         let localStateCurr = (interpreter.runtime.ctx.state.accounts.get("addr-1") as StoreAccount).appsLocalState[0]["key-value"];
-        let idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('Local-key')));
+        let idx = localStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
 
         // for Txn.Accounts[A]
         stack.push(BigInt('1'));
-        stack.push(toBytes('Local-key'));
+        stack.push(base64ToBytes('Local-key'));
 
         op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
         localStateCurr = (interpreter.runtime.ctx.state.accounts.get("addr-2") as StoreAccount).appsLocalState[0]["key-value"];
-        idx = localStateCurr.findIndex(a => compareArray(a.key, toBytes('Local-key')));
+        idx = localStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
       });
     });
@@ -2465,15 +2470,15 @@ describe("Teal Opcodes", function () {
         interpreter.runtime.ctx.state.globalApps.set(1828, acc1.createdApps[0].params);
       });
 
-      it("should put remove the key-value pair from global storage", function () {
+      it("should remove the key-value pair from global storage", function () {
         stack.push(BigInt('0'));
-        stack.push(toBytes('global-key'));
+        stack.push(base64ToBytes('global-key'));
 
         const op = new AppGlobalDel([], 1, interpreter);
         op.execute(stack);
 
         const globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCParams)["global-state"];
-        const idx = globalStateCurr.findIndex(a => compareArray(a.key, toBytes('global-key')));
+        const idx = globalStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('global-key')));
         assert.equal(idx, -1); // idx should be -1
       });
     });

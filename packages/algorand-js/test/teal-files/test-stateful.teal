@@ -1,0 +1,16 @@
+#pragma version 2
+// comments
+// Balance and Assets opcodes
+balance
+asset_holding_get AssetBalance
+asset_params_get AssetTotal
+// Stateful opcodes
+app_opted_in
+app_local_get //                       here   balance
+app_local_get_ex
+app_global_get
+app_global_get_ex
+app_local_put
+app_global_put
+app_local_del
+app_global_del

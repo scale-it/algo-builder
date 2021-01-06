@@ -1,7 +1,7 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
-import { mkTransaction } from "algob";
-import { ExecParams, TransactionType } from "algob/src/types";
+import { mkTransaction } from "@algorand-builder/algob";
+import { ExecParams, TransactionType } from "@algorand-builder/algob/src/types";
 import { AssetDef, AssetHolding, assignGroupID, SSCParams, SSCStateSchema } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 

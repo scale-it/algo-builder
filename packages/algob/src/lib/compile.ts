@@ -98,7 +98,7 @@ export class CompileOp {
         compiledHash: co.hash,
         srcHash: tealHash,
         // compiled base64 converted into bytes
-        toBytes: new Uint8Array(Buffer.from(co.result, "base64"))
+        base64ToBytes: new Uint8Array(Buffer.from(co.result, "base64"))
       };
     } catch (e) {
       throw parseAlgorandError(e, { filename: filename });
@@ -152,7 +152,7 @@ export class PyCompileOp {
       compiledHash: "",
       srcHash: 0,
       tealCode: content,
-      toBytes: new Uint8Array(1)
+      base64ToBytes: new Uint8Array(1)
     };
     Object.assign(pyCompiled, compiledTeal);
 

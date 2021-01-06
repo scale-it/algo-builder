@@ -1,4 +1,4 @@
-const { executeTransaction } = require('algob');
+const { executeTransaction } = require('@algorand-builder/algob');
 const sha256 = require('js-sha256').sha256;
 
 exports.executeTransaction = async function (deployer, txnParams) {

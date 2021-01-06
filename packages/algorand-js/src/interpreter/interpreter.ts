@@ -62,6 +62,6 @@ export class Interpreter {
 
       if (!(s instanceof Uint8Array) && s > BIGINT0) { return; }
     }
-    throw new TealError(ERRORS.TEAL.INVALID_STACK_ELEM);
+    throw new TealError(ERRORS.TEAL.REJECTED_BY_LOGIC);
   }
 }

@@ -5,7 +5,6 @@
   "main": "",
   "typings": "index.d.ts",
   "repository": "https://github.com/scale-it/algorand-builder.git",
-  "author": "Robert Zaremba (https://github.com/robert-zaremba)",
   "license": "MIT",
   "scripts": {
     "lint": "eslint ./index.d.ts",

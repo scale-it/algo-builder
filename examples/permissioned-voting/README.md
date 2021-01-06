@@ -29,11 +29,11 @@ This example is using PyTEAL, so make sure to follow the Python3 setup described
 
 To Create Vote-Token Asset and Permissioned voting application:
 
-        yarn run algob deploy
+    yarn run algob deploy
 
 To Cast a Vote:
 
-        yarn run algob run scripts/vote/vote.js
+    yarn run algob run scripts/vote/vote.js
 
 To see the results and delete the application:
 
