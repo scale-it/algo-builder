@@ -23,8 +23,7 @@ async function run (runtimeEnv, deployer) {
   const escrowAccount = await deployer.loadLogic('crowdFundEscrow.py', [], { APP_ID: appInfo.appID });
   console.log('Escrow Address: ', escrowAccount.address());
 
-  // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
-  const transactions = [
+  const txGroup = [
     {
       type: TransactionType.CallNoOpSSC,
       sign: SignType.SecretKey,
@@ -44,7 +43,7 @@ async function run (runtimeEnv, deployer) {
   ];
 
   console.log('Donation transaction in process');
-  await executeTransaction(deployer, transactions);
+  await executeTransaction(deployer, txGroup);
   console.log('Donated!');
 }
 

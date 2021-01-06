@@ -18,7 +18,7 @@ async function run (runtimeEnv, deployer) {
   const escrowAccountAddress = lsig.address();
 
   // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
-  const transactions = [
+  const txGroup = [
     {
       type: TransactionType.DeleteSSC,
       sign: SignType.SecretKey,
@@ -40,7 +40,7 @@ async function run (runtimeEnv, deployer) {
   ];
 
   console.log('Deleting Application transaction in process');
-  await executeTransaction(deployer, transactions);
+  await executeTransaction(deployer, txGroup);
   console.log('Application Deleted and Fund transferred to creator account');
 }
 
