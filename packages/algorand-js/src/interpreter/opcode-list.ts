@@ -1892,9 +1892,9 @@ export class Int extends Op {
     assertLen(args.length, 1, line);
 
     let uint64;
-    if (Object.values(TxnOnComplete).includes(args[0])) { // check if string is keyof TxnOnComplete Enum
-      uint64 = TxnOnComplete[args[0] as keyof typeof TxnOnComplete]; // eg. TxnOnComplete['NoOp']
-      uint64 = BigInt(uint64);
+    const txOnComplete = TxnOnComplete[args[0] as keyof typeof TxnOnComplete]; // eg. TxnOnComplete['NoOp']
+    if (txOnComplete !== undefined && typeof txOnComplete === 'number') { // check if string is keyof TxnOnComplete Enum
+      uint64 = BigInt(txOnComplete);
     } else {
       assertOnlyDigits(args[0]);
       uint64 = BigInt(args[0]);
