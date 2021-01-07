@@ -1,11 +1,12 @@
+import { SSCDeploymentFlags } from "@algorand-builder/algob/src/types";
 import {
   Account,
   AppLocalState,
   AssetDef,
   AssetHolding,
-  CreatedApps,
+  CreatedApp,
   CreatedAssets,
-  SSCParams,
+  SSCAttributes,
   SSCSchemaConfig,
   TxnEncodedObj
 } from "algosdk";
@@ -67,7 +68,7 @@ export interface AccountsMap {
 export interface State {
   accounts: Map<string, StoreAccount>
   accountAssets: Map<string, Map<number, AssetHolding>>
-  globalApps: Map<number, SSCParams>
+  globalApps: Map<number, SSCAttributes>
   assetDefs: Map<number, AssetDef>
 }
 
@@ -87,11 +88,13 @@ export interface StoreAccount {
   amount: number
   appsLocalState: AppLocalState[]
   appsTotalSchema: SSCSchemaConfig
-  createdApps: CreatedApps[]
+  createdApps: CreatedApp[]
   createdAssets: CreatedAssets[]
   account: Account
 
   balance: () => number
+  addApp: (appId: number, params: SSCDeploymentFlags) => CreatedApp
+  optInToApp: (appId: number, appParams: SSCAttributes) => void
   getLocalState: (appId: number, key: Uint8Array) => StackElem | undefined
   updateLocalState: (appId: number, key: Uint8Array, value: StackElem) => AppLocalState[]
 }

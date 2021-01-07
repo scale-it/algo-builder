@@ -1,8 +1,8 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
 import { mkTransaction } from "@algorand-builder/algob";
-import { ExecParams, TransactionType } from "@algorand-builder/algob/src/types";
-import { AssetDef, AssetHolding, assignGroupID, SSCParams, SSCStateSchema } from "algosdk";
+import { ExecParams, SSCDeploymentFlags, TransactionType } from "@algorand-builder/algob/src/types";
+import { AssetDef, AssetHolding, assignGroupID, encodeAddress, SSCAttributes, SSCStateSchema } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
 import { getProgram } from "../../test/helpers/fs";
@@ -12,7 +12,7 @@ import { ERRORS } from "../errors/errors-list";
 import { Interpreter } from "../index";
 import { BIGINT0, BIGINT1 } from "../interpreter/opcode-list";
 import { checkIndexBound, compareArray } from "../lib/compare";
-import { convertToString } from "../lib/parsing";
+import { SSC_BYTES } from "../lib/constants";
 import { assertValidSchema, getKeyValPair } from "../lib/stateful";
 import type { Context, StackElem, State, StoreAccount, Txn } from "../types";
 
@@ -27,6 +27,7 @@ export class Runtime {
    */
   private store: State;
   ctx: Context;
+  private appCounter: number;
 
   constructor (accounts: StoreAccount[]) {
     // runtime store
@@ -34,7 +35,7 @@ export class Runtime {
     this.store = {
       accounts: new Map<string, StoreAccount>(),
       accountAssets: new Map<string, typeof assetInfo>(),
-      globalApps: new Map<number, SSCParams>(),
+      globalApps: new Map<number, SSCAttributes>(),
       assetDefs: new Map<number, AssetDef>()
     };
 
@@ -48,6 +49,7 @@ export class Runtime {
       gtxs: [],
       args: []
     };
+    this.appCounter = 0;
   }
 
   assertAccountDefined (a?: StoreAccount): StoreAccount {
@@ -57,7 +59,7 @@ export class Runtime {
     return a;
   }
 
-  assertAppDefined (appId: number): SSCParams {
+  assertAppDefined (appId: number): SSCAttributes {
     const app = this.ctx.state.globalApps.get(appId);
     if (app === undefined) {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
@@ -68,13 +70,13 @@ export class Runtime {
   getAccount (accountIndex: bigint): StoreAccount {
     let account: StoreAccount | undefined;
     if (accountIndex === BIGINT0) {
-      const senderAccount = convertToString(this.ctx.tx.snd);
+      const senderAccount = encodeAddress(this.ctx.tx.snd);
       account = this.ctx.state.accounts.get(senderAccount);
     } else {
       const accIndex = accountIndex - BIGINT1;
       checkIndexBound(Number(accIndex), this.ctx.tx.apat);
       const pkBuffer = this.ctx.tx.apat[Number(accIndex)];
-      account = this.ctx.state.accounts.get(convertToString(pkBuffer));
+      account = this.ctx.state.accounts.get(encodeAddress(pkBuffer));
     }
     return this.assertAccountDefined(account);
   }
@@ -92,7 +94,7 @@ export class Runtime {
     const keyValue = appGlobalState.find(schema => compareArray(schema.key, key));
     const value = keyValue?.value;
     if (value) {
-      return value?.bytes || BigInt(value?.uint);
+      return value.type === SSC_BYTES ? value.bytes : BigInt(value.uint);
     }
     return undefined;
   }
@@ -150,7 +152,7 @@ export class Runtime {
   }
 
   /**
-   * Description: creates a new transaction object from given execParams
+   * Description: creates new transaction object (tx, gtxs) from given txnParams
    * @param txnParams : Transaction parameters for current txn or txn Group
    * @returns: [current transaction, transaction group]
    */
@@ -181,6 +183,26 @@ export class Runtime {
       const encodedTxnObj = tx.get_obj_for_encoding() as Txn;
       encodedTxnObj.txID = tx.txID();
       return [encodedTxnObj, [encodedTxnObj]];
+    }
+  }
+
+  // creates new application and returns application id
+  addApp (params: SSCDeploymentFlags): number {
+    const sender = params.sender;
+    const senderAcc = this.assertAccountDefined(this.store.accounts.get(sender.addr));
+    const app = senderAcc.addApp(++this.appCounter, params);
+
+    this.store.globalApps.set(app.id, app.params); // update globalApps Map
+    return app.id;
+  }
+
+  optInToApp (appId: number, accountAddr: string): void {
+    const appParams = this.store.globalApps.get(appId);
+    const account = this.assertAccountDefined(this.store.accounts.get(accountAddr));
+    if (appParams) {
+      account.optInToApp(appId, appParams);
+    } else {
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
     }
   }
 

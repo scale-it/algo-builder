@@ -1,26 +1,28 @@
+import { SSCDeploymentFlags } from "@algorand-builder/algob/src/types";
 import type {
   Account,
   AppLocalState,
   AssetHolding,
-  CreatedApps,
-  CreatedAssets, SSCSchemaConfig
+  CreatedApp,
+  CreatedAssets, SSCAttributes, SSCSchemaConfig
 } from "algosdk";
 import { generateAccount } from "algosdk";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { compareArray } from "../lib/compare";
+import { SSC_BYTES } from "../lib/constants";
 import { assertValidSchema, getKeyValPair } from "../lib/stateful";
 import { StackElem, StoreAccount } from "../types";
 
 export class StoreAccountImpl implements StoreAccount {
   readonly account: Account;
   readonly address: string;
-  assets: AssetHolding[];
+  assets: AssetHolding[]; // TODO: to be removed
   amount: number;
-  appsLocalState: AppLocalState[];
+  appsLocalState: AppLocalState[]; // TODO: update to map
   appsTotalSchema: SSCSchemaConfig;
-  createdApps: CreatedApps[];
+  createdApps: CreatedApp[];
   createdAssets: CreatedAssets[];
 
   constructor (balance: number, account?: Account) {
@@ -60,7 +62,7 @@ export class StoreAccountImpl implements StoreAccount {
       const keyValue = data.find(schema => compareArray(schema.key, key));
       const value = keyValue?.value;
       if (value) {
-        return value?.bytes || BigInt(value?.uint);
+        return value.type === SSC_BYTES ? value.bytes : BigInt(value.uint);
       }
     }
     return undefined;
@@ -97,5 +99,53 @@ export class StoreAccountImpl implements StoreAccount {
     throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, {
       appId: appId
     });
+  }
+
+  addApp (appId: number, params: SSCDeploymentFlags): CreatedApp {
+    if (this.createdApps.length === 10) {
+      throw new Error('Maximum created applications for an account is 10');
+    }
+
+    const app = new App(appId, params);
+    this.createdApps.push(app);
+    return app;
+  }
+
+  // opt in to application
+  optInToApp (appId: number, appParams: SSCAttributes): void {
+    const localState = this.appsLocalState.find(app => app.id === appId);
+    if (localState) {
+      console.warn(`app ${appId} already opted in to ${this.address}`);
+    } else {
+      if (this.appsLocalState.length === 10) {
+        throw new Error('Maximum Opt In applications per account is 10');
+      }
+
+      const localParams: AppLocalState = {
+        id: appId,
+        "key-value": [],
+        schema: appParams["local-state-schema"]
+      };
+      this.appsLocalState.push(localParams); // push
+    }
+  }
+}
+
+// represents stateful application
+class App {
+  readonly id: number;
+  readonly params: SSCAttributes;
+
+  constructor (appId: number, params: SSCDeploymentFlags) {
+    this.id = appId;
+    this.params = {
+      'approval-program': '',
+      'clear-state-program': '',
+      creator: params.sender.addr,
+      'global-state': [],
+      'global-state-schema': { 'num-byte-slice': params.globalBytes, 'num-uint': params.globalInts },
+      'local-state-schema': { 'num-byte-slice': params.localBytes, 'num-uint': params.localInts }
+    };
+    console.log('Created new app with id:', appId);
   }
 }
