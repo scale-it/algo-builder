@@ -2,6 +2,7 @@ module.exports = {
   env: {
     node: true,
     es6: true,
+    es2020: true,  // <- activate “es2020” globals
   },
   plugins: ["simple-import-sort", "sonarjs"],
   extends: [
@@ -10,7 +11,7 @@ module.exports = {
   ],
   parserOptions: {
     project: "./tsconfig.json",
-    ecmaVersion: 2019,
+    ecmaVersion: 2020,
     // sourceType: "module"
   },
   rules:  {
