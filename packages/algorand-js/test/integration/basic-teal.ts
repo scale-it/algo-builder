@@ -7,9 +7,12 @@ import { StoreAccountImpl } from "../../src/runtime/account";
 import { getAcc } from "../helpers/account";
 import { expectTealErrorAsync } from "../helpers/errors";
 
+const initialJohnHolding = 1000n;
+const initialBobHolding = 500n;
+
 describe("Algorand Smart Contracts", function () {
-  let john = new StoreAccountImpl(1000n);
-  let bob = new StoreAccountImpl(500n);
+  let john = new StoreAccountImpl(initialJohnHolding);
+  let bob = new StoreAccountImpl(initialBobHolding);
 
   // set up transaction paramenters
   const txnParams: ExecParams = {
@@ -34,8 +37,8 @@ describe("Algorand Smart Contracts", function () {
 
   it("should send algo's from john to bob if stateless teal logic is correct", async function () {
     // check initial balance
-    assert.equal(john.balance(), 1000n);
-    assert.equal(bob.balance(), 500n);
+    assert.equal(john.balance(), initialJohnHolding);
+    assert.equal(bob.balance(), initialBobHolding);
 
     // execute transaction
     await runtime.executeTx(txnParams, 'basic.teal', []);
@@ -43,8 +46,8 @@ describe("Algorand Smart Contracts", function () {
     // get final state (updated accounts)
     const johnAcc = getAcc(runtime, john);
     const bobAcc = getAcc(runtime, bob);
-    assert.equal(johnAcc.balance(), 900n); // check if 100 microAlgo's are withdrawn
-    assert.equal(bobAcc.balance(), 600n);
+    assert.equal(johnAcc.balance(), initialJohnHolding - 100n); // check if 100 microAlgo's are withdrawn
+    assert.equal(bobAcc.balance(), initialBobHolding + 100n);
   });
 
   it("should throw error if logic is incorrect", async function () {

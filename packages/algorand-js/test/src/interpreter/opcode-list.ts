@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
-import { decodeAddress, generateAccount, signBytes, SSCParams } from "algosdk";
+import { decodeAddress, generateAccount, signBytes, SSCAttributes } from "algosdk";
 import { assert } from "chai";
 
 import { ERRORS } from "../../../src/errors/errors-list";
@@ -27,7 +27,7 @@ import { StoreAccountImpl } from "../../../src/runtime/account";
 import { EncodingType, StackElem, StoreAccount } from "../../../src/types";
 import { execExpectError, expectTealError } from "../../helpers/errors";
 import { accInfo } from "../../mocks/stateful";
-import { TXN_OBJ } from "../../mocks/txn";
+import { elonAddr, johnAddr, TXN_OBJ } from "../../mocks/txn";
 
 function setDummyAccInfo (acc: StoreAccount): void {
   acc.assets = accInfo[0].assets;
@@ -1990,8 +1990,8 @@ describe("Teal Opcodes", function () {
     interpreter.runtime.ctx.tx = TXN_OBJ;
     interpreter.runtime.ctx.gtxs = [TXN_OBJ];
     interpreter.runtime.ctx.tx.apid = 1847;
-    interpreter.runtime.ctx.state.globalApps = new Map<number, SSCParams>();
-    interpreter.runtime.ctx.state.globalApps.set(1847, {} as SSCParams);
+    interpreter.runtime.ctx.state.globalApps = new Map<number, SSCAttributes>();
+    interpreter.runtime.ctx.state.globalApps.set(1847, {} as SSCAttributes);
 
     it("should push MinTxnFee to stack", function () {
       const op = new Global(['MinTxnFee'], 1, interpreter);
@@ -2074,19 +2074,21 @@ describe("Teal Opcodes", function () {
     const interpreter = new Interpreter();
 
     // setup 1st account (to be used as sender)
-    const acc1: StoreAccount = new StoreAccountImpl(123, { addr: 'addr-1', sk: new Uint8Array(0) }); // setup test account
+    const acc1: StoreAccount = new StoreAccountImpl(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
     setDummyAccInfo(acc1);
 
     // setup 2nd account (to be used as Txn.Accounts[A])
-    const acc2 = new StoreAccountImpl(123, { addr: 'addr-2', sk: new Uint8Array(0) });
+    const acc2 = new StoreAccountImpl(123, { addr: johnAddr, sk: new Uint8Array(0) });
     setDummyAccInfo(acc2);
 
     const runtime = new Runtime([acc1, acc2]);
     interpreter.runtime = runtime; // setup runtime
 
     // setting txn object and sender's addr
-    interpreter.runtime.ctx.tx = TXN_OBJ;
-    interpreter.runtime.ctx.tx.snd = Buffer.from("addr-1");
+    interpreter.runtime.ctx.tx = {
+      ...TXN_OBJ,
+      snd: Buffer.from(decodeAddress(elonAddr).publicKey)
+    };
 
     describe("AppOptedIn", function () {
       it("should push 1 to stack if app is opted in", function () {
@@ -2245,7 +2247,7 @@ describe("Teal Opcodes", function () {
     describe("AppGlobalGet", function () {
       before(function () {
         interpreter.runtime.ctx.tx.apid = 1828;
-        interpreter.runtime.ctx.state.globalApps = new Map<number, SSCParams>();
+        interpreter.runtime.ctx.state.globalApps = new Map<number, SSCAttributes>();
         interpreter.runtime.ctx.state.globalApps.set(1828, acc1.createdApps[0].params);
       });
 
@@ -2340,7 +2342,7 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        const acc = interpreter.runtime.ctx.state.accounts.get("addr-1") as StoreAccount;
+        const acc = interpreter.runtime.ctx.state.accounts.get(elonAddr) as StoreAccount;
         let localStateCurr = acc.appsLocalState[0]["key-value"];
         let idx = localStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('New-Key')));
         assert.notEqual(idx, -1); // idx should not be -1
@@ -2354,7 +2356,7 @@ describe("Teal Opcodes", function () {
         op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        localStateCurr = (interpreter.runtime.ctx.state.accounts.get("addr-1") as StoreAccount).appsLocalState[0]["key-value"];
+        localStateCurr = (interpreter.runtime.ctx.state.accounts.get(johnAddr) as StoreAccount).appsLocalState[0]["key-value"];
         idx = localStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('New-Key-1')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(localStateCurr[idx].value.uint, 2222);
@@ -2396,7 +2398,7 @@ describe("Teal Opcodes", function () {
         let op = new AppGlobalPut([], 1, interpreter);
         op.execute(stack);
 
-        let globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCParams)["global-state"];
+        let globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCAttributes)["global-state"];
         let idx = globalStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('New-Global-Key')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(globalStateCurr[idx].value.bytes, base64ToBytes('New-Global-Val'));
@@ -2408,7 +2410,7 @@ describe("Teal Opcodes", function () {
         op = new AppGlobalPut([], 1, interpreter);
         op.execute(stack);
 
-        globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCParams)["global-state"];
+        globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCAttributes)["global-state"];
         idx = globalStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('Key')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(globalStateCurr[idx].value.uint, 1000);
@@ -2447,7 +2449,7 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        let localStateCurr = (interpreter.runtime.ctx.state.accounts.get("addr-1") as StoreAccount).appsLocalState[0]["key-value"];
+        let localStateCurr = (interpreter.runtime.ctx.state.accounts.get(elonAddr) as StoreAccount).appsLocalState[0]["key-value"];
         let idx = localStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
 
@@ -2458,7 +2460,7 @@ describe("Teal Opcodes", function () {
         op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        localStateCurr = (interpreter.runtime.ctx.state.accounts.get("addr-2") as StoreAccount).appsLocalState[0]["key-value"];
+        localStateCurr = (interpreter.runtime.ctx.state.accounts.get(johnAddr) as StoreAccount).appsLocalState[0]["key-value"];
         idx = localStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
       });
@@ -2477,7 +2479,7 @@ describe("Teal Opcodes", function () {
         const op = new AppGlobalDel([], 1, interpreter);
         op.execute(stack);
 
-        const globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCParams)["global-state"];
+        const globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCAttributes)["global-state"];
         const idx = globalStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('global-key')));
         assert.equal(idx, -1); // idx should be -1
       });

@@ -1,6 +1,8 @@
 import { TxParams } from "@algorand-builder/algob/src/types";
 import { decodeAddress, generateAccount, SuggestedParams } from "algosdk";
 
+import { bobAccount, elonMuskAccount, johnAccount } from "../mocks/account";
+
 export const ALGORAND_MIN_TX_FEE = 1000;
 const GENESIS_ID = 'testnet-v1.0';
 // testnet-v1.0 hash
@@ -8,6 +10,9 @@ const GENESIS_HASH = 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=';
 
 const account = generateAccount();
 const addr = decodeAddress(account.addr);
+
+export const elonAddr = elonMuskAccount.addr;
+export const johnAddr = johnAccount.addr;
 
 export const TXN_OBJ = {
   snd: Buffer.from(addr.publicKey),
@@ -53,7 +58,8 @@ export const TXN_OBJ = {
   apap: Buffer.from("approval"),
   apsu: Buffer.from("clear"),
   apaa: [Buffer.from("arg1"), Buffer.from("arg2")],
-  apat: [Buffer.from("addr-2"), Buffer.from("addr-2")],
+  apat: [Buffer.from(decodeAddress(johnAddr).publicKey),
+    Buffer.from(decodeAddress(bobAccount.addr).publicKey)],
   apfa: [1001, 1002, 1003],
   apas: [2001, 2002, 2003],
   type: 'pay',
@@ -81,7 +87,7 @@ export function mockSuggestedParams (
   s.firstRound = payFlags.firstValid ?? 1;
   s.lastRound = payFlags.firstValid === undefined || payFlags.validRounds === undefined
     ? s.firstRound + 1000
-    : payFlags.firstValid + payFlags.validRounds;
+    : Number(payFlags.firstValid) + Number(payFlags.validRounds);
 
   s.genesisID = GENESIS_ID;
   s.genesisHash = GENESIS_HASH;

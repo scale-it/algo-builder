@@ -9,9 +9,12 @@ import { getAcc } from "../helpers/account";
 import { expectTealErrorAsync } from "../helpers/errors";
 import { johnAccount } from "../mocks/account";
 
+const initialEscrowHolding = 10000000006n;
+const initialJohnHolding = 500n;
+
 describe("Algorand Stateless Smart Contracts", function () {
-  const escrow = new StoreAccountImpl(1000000000n); // 1000 ALGO
-  const john = new StoreAccountImpl(500n, johnAccount); // 0.005 ALGO
+  const escrow = new StoreAccountImpl(initialEscrowHolding); // 1000 ALGO
+  const john = new StoreAccountImpl(initialJohnHolding, johnAccount); // 0.005 ALGO
   // set up transaction paramenters
   const txnParams: ExecParams = {
     type: TransactionType.TransferAlgo, // payment
@@ -29,15 +32,15 @@ describe("Algorand Stateless Smart Contracts", function () {
 
   it("should withdraw funds from escrow if txn params are correct", async function () {
     // check initial balance
-    assert.equal(escrow.balance(), 1000000000n);
-    assert.equal(john.balance(), 500n);
+    assert.equal(escrow.balance(), initialEscrowHolding);
+    assert.equal(john.balance(), initialJohnHolding);
 
     // execute transaction
     await runtime.executeTx(txnParams, 'escrow.teal', []);
 
     // check final state (updated accounts)
-    assert.equal(getAcc(runtime, escrow).balance(), 999999900n); // check if 100 microAlgo's are withdrawn
-    assert.equal(getAcc(runtime, john).balance(), 600n);
+    assert.equal(getAcc(runtime, escrow).balance(), initialEscrowHolding - 100n); // check if 100 microAlgo's are withdrawn
+    assert.equal(getAcc(runtime, john).balance(), initialJohnHolding + 100n);
   });
 
   it("should reject transaction if amount > 100", async function () {
@@ -62,7 +65,7 @@ describe("Algorand Stateless Smart Contracts", function () {
     );
   });
 
-  it("should reject transaction type is not `pay`", async function () {
+  it("should reject transaction if type is not `pay`", async function () {
     const invalidParams: ExecParams = {
       ...txnParams,
       type: TransactionType.TransferAsset,

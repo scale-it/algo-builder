@@ -472,7 +472,7 @@ export interface SSCOptionalFlags {
 /**
  * Stateful Smart contract flags for specifying sender and schema */
 export interface SSCDeploymentFlags extends SSCOptionalFlags {
-  sender: Account
+  sender: Account | AccountSDK
   localInts: number
   localBytes: number
   globalInts: number
