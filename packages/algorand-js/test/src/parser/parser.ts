@@ -13,6 +13,7 @@ import {
   Not, NotEqualTo, Or, Pop, Pragma, Return, Sha256, Sha512_256, Store,
   Sub, Substring, Substring3, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
+import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { Runtime } from "../../../src/runtime/runtime";
 import { expectTealError } from "../../helpers/errors";
@@ -358,6 +359,16 @@ describe("Parser", function () {
     it("should throw error for invalid number for 'int'", () => {
       expectTealError(
         () => opcodeFromSentence(["int", "123A12"], 1, interpreter),
+        ERRORS.TEAL.INVALID_TYPE
+      );
+
+      expectTealError(
+        () => opcodeFromSentence(["int", String(MAX_UINT64 + BigInt('5'))], 1, interpreter),
+        ERRORS.TEAL.UINT64_OVERFLOW
+      );
+
+      expectTealError(
+        () => opcodeFromSentence(["int", String(MIN_UINT64 - BigInt('5'))], 1, interpreter),
         ERRORS.TEAL.INVALID_TYPE
       );
     });

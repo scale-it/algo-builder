@@ -33,13 +33,13 @@ export interface Txn extends TxnEncodedObj {
 export type TxField = keyof typeof TxnFields;
 
 export enum TxnType {
-  unknown, // Unknown type. Invalid transaction
-  pay, // Payment
-  keyreg, // KeyRegistration
-  acfg, // AssetConfig
-  axfer, // AssetTransfer
-  afrz, // AssetFreeze
-  appl // ApplicationCall
+  unknown = '0', // Unknown type. Invalid transaction
+  pay = '1', // Payment
+  keyreg = '2', // KeyRegistration
+  acfg = '3', // AssetConfig
+  axfer = '4', // AssetTransfer
+  afrz = '5', // AssetFreeze
+  appl = '6' // ApplicationCall
 }
 
 export enum GlobalField {
@@ -97,4 +97,14 @@ export interface StoreAccount {
   optInToApp: (appId: number, appParams: SSCAttributes) => void
   getLocalState: (appId: number, key: Uint8Array) => StackElem | undefined
   updateLocalState: (appId: number, key: Uint8Array, value: StackElem) => AppLocalState[]
+}
+
+// https://developer.algorand.org/docs/reference/teal/specification/#oncomplete
+export enum TxnOnComplete {
+  NoOp = '0',
+  OptIn = '1',
+  CloseOut = '2',
+  ClearState = '3',
+  UpdateApplication = '4',
+  DeleteApplication = '5'
 }
