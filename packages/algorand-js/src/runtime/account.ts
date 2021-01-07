@@ -101,25 +101,14 @@ export class StoreAccountImpl implements StoreAccount {
     });
   }
 
-  createApp (appId: number, params: SSCDeploymentFlags): CreatedApp {
+  addApp (appId: number, params: SSCDeploymentFlags): CreatedApp {
     if (this.createdApps.length === 10) {
       throw new Error('Maximum created applications for an account is 10');
     }
 
-    const appParams: SSCAttributes = {
-      'approval-program': '',
-      'clear-state-program': '',
-      creator: params.sender.addr,
-      'global-state': [],
-      'global-state-schema': { 'num-byte-slice': params.globalBytes, 'num-uint': params.globalInts },
-      'local-state-schema': { 'num-byte-slice': params.localBytes, 'num-uint': params.localInts }
-    };
-    // create new app in sender's account
-    const newApp: CreatedApp = { id: appId, params: appParams };
-    this.createdApps.push(newApp); // push newly created app
-
-    console.log('Created new app with id:', appId);
-    return newApp;
+    const app = new App(appId, params);
+    this.createdApps.push(app);
+    return app;
   }
 
   // opt in to application
@@ -139,5 +128,24 @@ export class StoreAccountImpl implements StoreAccount {
       };
       this.appsLocalState.push(localParams); // push
     }
+  }
+}
+
+// represents stateful application
+class App {
+  readonly id: number;
+  readonly params: SSCAttributes;
+
+  constructor (appId: number, params: SSCDeploymentFlags) {
+    this.id = appId;
+    this.params = {
+      'approval-program': '',
+      'clear-state-program': '',
+      creator: params.sender.addr,
+      'global-state': [],
+      'global-state-schema': { 'num-byte-slice': params.globalBytes, 'num-uint': params.globalInts },
+      'local-state-schema': { 'num-byte-slice': params.localBytes, 'num-uint': params.localInts }
+    };
+    console.log('Created new app with id:', appId);
   }
 }

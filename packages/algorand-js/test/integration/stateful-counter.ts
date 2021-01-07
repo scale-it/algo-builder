@@ -23,7 +23,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
     runtime = new Runtime([john]); // setup test
 
     // create new app
-    txnParams.appId = runtime.createApp({
+    txnParams.appId = runtime.addApp({
       sender: john.account,
       globalBytes: 32,
       globalInts: 32,
