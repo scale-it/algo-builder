@@ -123,7 +123,7 @@ export class StoreAccountImpl implements StoreAccount {
 
   // opt in to application
   optInToApp (appId: number, appParams: SSCParams): void {
-    const localState = this.appsLocalState.find(cfg => cfg.id === appId);
+    const localState = this.appsLocalState.find(app => app.id === appId);
     if (localState) {
       console.warn(`app ${appId} already opted in to ${this.address}`);
     } else {

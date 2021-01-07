@@ -188,8 +188,8 @@ export class Runtime {
   // creates new application and returns application id
   createApp (params: SSCDeploymentFlags): number {
     const sender = params.sender;
-    const senderAccountDef = this.assertAccountDefined(this.store.accounts.get(sender.addr));
-    const app = senderAccountDef.createApp(++this.appCounter, params);
+    const senderAcc = this.assertAccountDefined(this.store.accounts.get(sender.addr));
+    const app = senderAcc.createApp(++this.appCounter, params);
 
     this.store.globalApps.set(app.id, app.params); // update globalApps Map
     return app.id;
