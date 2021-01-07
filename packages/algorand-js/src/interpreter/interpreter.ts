@@ -5,7 +5,7 @@ import { DEFAULT_STACK_ELEM } from "../lib/constants";
 import { Stack } from "../lib/stack";
 import { parser } from "../parser/parser";
 import type { Operator, StackElem, TEALStack } from "../types";
-import { BIGINT0, Label } from "./opcode-list";
+import { Label } from "./opcode-list";
 
 export class Interpreter {
   readonly stack: TEALStack;
@@ -60,7 +60,7 @@ export class Interpreter {
     if (this.stack.length() === 1) {
       const s = this.stack.pop();
 
-      if (!(s instanceof Uint8Array) && s > BIGINT0) { return; }
+      if (!(s instanceof Uint8Array) && s > 0n) { return; }
     }
     throw new TealError(ERRORS.TEAL.REJECTED_BY_LOGIC);
   }

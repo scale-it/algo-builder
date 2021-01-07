@@ -10,7 +10,6 @@ import { mockSuggestedParams } from "../../test/mocks/txn";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { Interpreter } from "../index";
-import { BIGINT0, BIGINT1 } from "../interpreter/opcode-list";
 import { checkIndexBound, compareArray } from "../lib/compare";
 import { convertToString } from "../lib/parsing";
 import { assertValidSchema, getKeyValPair } from "../lib/stateful";
@@ -67,11 +66,11 @@ export class Runtime {
 
   getAccount (accountIndex: bigint): StoreAccount {
     let account: StoreAccount | undefined;
-    if (accountIndex === BIGINT0) {
+    if (accountIndex === 0n) {
       const senderAccount = convertToString(this.ctx.tx.snd);
       account = this.ctx.state.accounts.get(senderAccount);
     } else {
-      const accIndex = accountIndex - BIGINT1;
+      const accIndex = accountIndex - 1n;
       checkIndexBound(Number(accIndex), this.ctx.tx.apat);
       const pkBuffer = this.ctx.tx.apat[Number(accIndex)];
       account = this.ctx.state.accounts.get(convertToString(pkBuffer));

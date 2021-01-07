@@ -54,7 +54,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error with uint64", function () {
-      stack.push(BigInt("1000"));
+      stack.push(1000n);
       const op = new Len([], 0);
       expectTealError(
         () => op.execute(stack),
@@ -66,7 +66,7 @@ describe("Teal Opcodes", function () {
   describe("Pragma", () => {
     it("should store pragma version", () => {
       const op = new Pragma(["version", "2"], 1);
-      assert.equal(op.version, BigInt("2"));
+      assert.equal(op.version, 2n);
     });
 
     it("should store throw length error", () => {
@@ -81,17 +81,17 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct addition of two unit64", function () {
-      stack.push(BigInt("10"));
-      stack.push(BigInt("20"));
+      stack.push(10n);
+      stack.push(20n);
       const op = new Add([], 0);
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt("30"));
+      assert.equal(top, 30n);
     });
 
     it("should throw error with Add if stack is below min length",
-      execExpectError(stack, [BigInt("1000")], new Add([], 0), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [1000n], new Add([], 0), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
 
     it("should throw error if Add is used with strings",
@@ -99,8 +99,8 @@ describe("Teal Opcodes", function () {
     );
 
     it("should throw overflow error with Add", function () {
-      stack.push(MAX_UINT64 - BigInt("5"));
-      stack.push(MAX_UINT64 - BigInt("6"));
+      stack.push(MAX_UINT64 - 5n);
+      stack.push(MAX_UINT64 - 6n);
       const op = new Add([], 0);
       expectTealError(
         () => op.execute(stack),
@@ -113,17 +113,17 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct subtraction of two unit64", function () {
-      stack.push(BigInt("30"));
-      stack.push(BigInt("20"));
+      stack.push(30n);
+      stack.push(20n);
       const op = new Sub([], 0);
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt("10"));
+      assert.equal(top, 10n);
     });
 
     it("should throw error with Sub if stack is below min length",
-      execExpectError(stack, [BigInt("1000")], new Sub([], 0), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [1000n], new Sub([], 0), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
 
     it("should throw error if Sub is used with strings",
@@ -131,8 +131,8 @@ describe("Teal Opcodes", function () {
     );
 
     it("should throw underflow error with Sub if (A - B) < 0", function () {
-      stack.push(BigInt("10"));
-      stack.push(BigInt("20"));
+      stack.push(10n);
+      stack.push(20n);
       const op = new Sub([], 0);
       expectTealError(
         () => op.execute(stack),
@@ -145,17 +145,17 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct multiplication of two unit64", function () {
-      stack.push(BigInt("20"));
-      stack.push(BigInt("30"));
+      stack.push(20n);
+      stack.push(30n);
       const op = new Mul([], 0);
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt("600"));
+      assert.equal(top, 600n);
     });
 
     it("should throw error with Mul if stack is below min length",
-      execExpectError(stack, [BigInt("1000")], new Mul([], 0), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [1000n], new Mul([], 0), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
 
     it("should throw error if Mul is used with strings",
@@ -163,7 +163,7 @@ describe("Teal Opcodes", function () {
     );
 
     it("should throw overflow error with Mul if (A * B) > max_unit64", function () {
-      stack.push(MAX_UINT64 - BigInt("5"));
+      stack.push(MAX_UINT64 - 5n);
       stack.push(BigInt(2));
       const op = new Mul([], 0);
       expectTealError(
@@ -177,27 +177,27 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct division of two unit64", function () {
-      stack.push(BigInt("40"));
-      stack.push(BigInt("20"));
+      stack.push(40n);
+      stack.push(20n);
       const op = new Div([], 0);
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt("2"));
+      assert.equal(top, 2n);
     });
 
     it("should return 0 on division of two unit64 with A == 0", function () {
-      stack.push(BigInt("0"));
-      stack.push(BigInt("40"));
+      stack.push(0n);
+      stack.push(40n);
       const op = new Div([], 0);
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt("0"));
+      assert.equal(top, 0n);
     });
 
     it("should throw error with Div if stack is below min length",
-      execExpectError(stack, [BigInt("1000")], new Div([], 0), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [1000n], new Div([], 0), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
 
     it("should throw error if Div is used with strings",
@@ -205,8 +205,8 @@ describe("Teal Opcodes", function () {
     );
 
     it("should panic on A/B if B == 0", function () {
-      stack.push(BigInt("10"));
-      stack.push(BigInt("0"));
+      stack.push(10n);
+      stack.push(0n);
       const op = new Div([], 0);
       expectTealError(
         () => op.execute(stack),
@@ -419,34 +419,34 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct modulo of two unit64", function () {
-      stack.push(BigInt("5"));
-      stack.push(BigInt("2"));
+      stack.push(5n);
+      stack.push(2n);
       let op = new Mod([], 1);
       op.execute(stack);
 
       let top = stack.pop();
-      assert.equal(top, BigInt("1"));
+      assert.equal(top, 1n);
 
-      stack.push(BigInt("7"));
-      stack.push(BigInt("7"));
+      stack.push(7n);
+      stack.push(7n);
       op = new Mod([], 1);
       op.execute(stack);
       top = stack.pop();
-      assert.equal(top, BigInt("0"));
+      assert.equal(top, 0n);
     });
 
     it("should return 0 on modulo of two unit64 with A == 0", function () {
-      stack.push(BigInt("0"));
-      stack.push(BigInt("4"));
+      stack.push(0n);
+      stack.push(4n);
       const op = new Mod([], 1);
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt("0"));
+      assert.equal(top, 0n);
     });
 
     it("should throw error with Mod if stack is below min length",
-      execExpectError(stack, [BigInt("1000")], new Mod([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [1000n], new Mod([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
 
     it("should throw error if Mod is used with strings",
@@ -454,8 +454,8 @@ describe("Teal Opcodes", function () {
     );
 
     it("should panic on A % B if B == 0", function () {
-      stack.push(BigInt("10"));
-      stack.push(BigInt("0"));
+      stack.push(10n);
+      stack.push(0n);
       const op = new Mod([], 1);
       expectTealError(
         () => op.execute(stack),
@@ -469,7 +469,7 @@ describe("Teal Opcodes", function () {
 
     it("should store uint64 to scratch", function () {
       const interpreter = new Interpreter();
-      const val = BigInt("0");
+      const val = 0n;
       stack.push(val);
 
       const op = new Store(["0"], 1, interpreter);
@@ -491,7 +491,7 @@ describe("Teal Opcodes", function () {
 
     it("should throw error on store if index is out of bound", function () {
       const interpreter = new Interpreter();
-      stack.push(BigInt("0"));
+      stack.push(0n);
 
       const op = new Store([(MAX_UINT8 + 5).toString()], 1, interpreter);
       expectTealError(
@@ -515,17 +515,17 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct bitwise-or of two unit64", function () {
-      stack.push(BigInt("10"));
-      stack.push(BigInt("20"));
+      stack.push(10n);
+      stack.push(20n);
       const op = new BitwiseOr([], 1);
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt("30"));
+      assert.equal(top, 30n);
     });
 
     it("should throw error with bitwise-or if stack is below min length",
-      execExpectError(stack, [BigInt("1000")], new BitwiseOr([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [1000n], new BitwiseOr([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
 
     it("should throw error if bitwise-or is used with strings",
@@ -537,17 +537,17 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct bitwise-and of two unit64", function () {
-      stack.push(BigInt("10"));
-      stack.push(BigInt("20"));
+      stack.push(10n);
+      stack.push(20n);
       const op = new BitwiseAnd([], 1);
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt("0"));
+      assert.equal(top, 0n);
     });
 
     it("should throw error with bitwise-and if stack is below min length",
-      execExpectError(stack, [BigInt("1000")], new BitwiseAnd([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [1000n], new BitwiseAnd([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
 
     it("should throw error if bitwise-and is used with strings",
@@ -559,17 +559,17 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct bitwise-xor of two unit64", function () {
-      stack.push(BigInt("10"));
-      stack.push(BigInt("20"));
+      stack.push(10n);
+      stack.push(20n);
       const op = new BitwiseXor([], 1);
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt("30"));
+      assert.equal(top, 30n);
     });
 
     it("should throw error with bitwise-xor if stack is below min length",
-      execExpectError(stack, [BigInt("1000")], new BitwiseXor([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [1000n], new BitwiseXor([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
 
     it("should throw error if bitwise-xor is used with strings",
@@ -581,12 +581,12 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct bitwise-not of unit64", function () {
-      stack.push(BigInt("10"));
+      stack.push(10n);
       const op = new BitwiseNot([], 1);
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, ~BigInt("10"));
+      assert.equal(top, ~10n);
     });
 
     it("should throw error with bitwise-not if stack is below min length",
@@ -601,7 +601,7 @@ describe("Teal Opcodes", function () {
   describe("Load", function () {
     const stack = new Stack<StackElem>();
     const interpreter = new Interpreter();
-    const scratch = [BigInt("0"), base64ToBytes("HelloWorld")];
+    const scratch = [0n, base64ToBytes("HelloWorld")];
     interpreter.scratch = scratch;
 
     it("should load uint64 from scratch space to stack", function () {
@@ -666,7 +666,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw invalid type error sha256",
-      execExpectError(stack, [BigInt("1")], new Sha256([], 1), ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, [1n], new Sha256([], 1), ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw error with Sha256 if stack is below min length",
@@ -690,7 +690,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw invalid type error sha512_256",
-      execExpectError(stack, [BigInt("1")], new Sha512_256([], 1), ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, [1n], new Sha512_256([], 1), ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw error with Sha512_256 if stack is below min length",
@@ -715,7 +715,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw invalid type error Keccak256",
-      execExpectError(stack, [BigInt("1")], new Keccak256([], 1), ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, [1n], new Keccak256([], 1), ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw error with keccak256 if stack is below min length",
@@ -738,7 +738,7 @@ describe("Teal Opcodes", function () {
       const op = new Ed25519verify([], 1);
       op.execute(stack);
       const top = stack.pop();
-      assert.equal(top, BigInt('1'));
+      assert.equal(top, 1n);
     });
 
     it("should push 0 to stack if signature is invalid", function () {
@@ -754,7 +754,7 @@ describe("Teal Opcodes", function () {
       const op = new Ed25519verify([], 1);
       op.execute(stack);
       const top = stack.pop();
-      assert.equal(top, BigInt('0'));
+      assert.equal(top, 0n);
     });
 
     it("should throw invalid type error Ed25519verify",
@@ -770,25 +770,25 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should push 1 to stack because 5 < 10", () => {
-      stack.push(BigInt('5'));
-      stack.push(BigInt('10'));
+      stack.push(5n);
+      stack.push(10n);
 
       const op = new LessThan([], 1);
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt('1'));
+      assert.equal(top, 1n);
     });
 
     it("should push 0 to stack as 10 > 5", () => {
-      stack.push(BigInt('10'));
-      stack.push(BigInt('5'));
+      stack.push(10n);
+      stack.push(5n);
 
       const op = new LessThan([], 1);
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt('0'));
+      assert.equal(top, 0n);
     });
 
     it("should throw invalid type error LessThan",
@@ -798,7 +798,7 @@ describe("Teal Opcodes", function () {
     );
 
     it("should throw stack length error LessThan", execExpectError(new Stack<StackElem>(),
-      [BigInt('1')], new LessThan([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      [1n], new LessThan([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
@@ -806,25 +806,25 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should push 1 to stack as 5 > 2", () => {
-      stack.push(BigInt('5'));
-      stack.push(BigInt('2'));
+      stack.push(5n);
+      stack.push(2n);
 
       const op = new GreaterThan([], 1);
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt('1'));
+      assert.equal(top, 1n);
     });
 
     it("should push 0 to stack as 50 > 10", () => {
-      stack.push(BigInt('10'));
-      stack.push(BigInt('50'));
+      stack.push(10n);
+      stack.push(50n);
 
       const op = new GreaterThan([], 1);
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt('0'));
+      assert.equal(top, 0n);
     });
 
     it("should throw invalid type error GreaterThan",
@@ -834,7 +834,7 @@ describe("Teal Opcodes", function () {
     );
 
     it("should throw stack length error GreaterThan", execExpectError(new Stack<StackElem>(),
-      [BigInt('1')], new LessThan([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      [1n], new LessThan([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
@@ -843,24 +843,24 @@ describe("Teal Opcodes", function () {
 
     it("should push 1 to stack", () => {
       const op = new LessThanEqualTo([], 1);
-      stack.push(BigInt('20'));
-      stack.push(BigInt('20'));
+      stack.push(20n);
+      stack.push(20n);
 
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt('1'));
+      assert.equal(top, 1n);
     });
 
     it("should push 0 to stack", () => {
       const op = new LessThanEqualTo([], 1);
-      stack.push(BigInt('100'));
-      stack.push(BigInt('50'));
+      stack.push(100n);
+      stack.push(50n);
 
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt('0'));
+      assert.equal(top, 0n);
     });
 
     it("should throw invalid type error LessThanEqualTo",
@@ -870,7 +870,7 @@ describe("Teal Opcodes", function () {
     );
 
     it("should throw stack length error LessThanEqualTo", execExpectError(new Stack<StackElem>(),
-      [BigInt('1')], new LessThan([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      [1n], new LessThan([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
@@ -879,24 +879,24 @@ describe("Teal Opcodes", function () {
 
     it("should push 1 to stack", () => {
       const op = new GreaterThanEqualTo([], 1);
-      stack.push(BigInt('20'));
-      stack.push(BigInt('20'));
+      stack.push(20n);
+      stack.push(20n);
 
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt('1'));
+      assert.equal(top, 1n);
     });
 
     it("should push 0 to stack", () => {
       const op = new GreaterThanEqualTo([], 1);
-      stack.push(BigInt('100'));
-      stack.push(BigInt('500'));
+      stack.push(100n);
+      stack.push(500n);
 
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt('0'));
+      assert.equal(top, 0n);
     });
 
     it("should throw invalid type error GreaterThanEqualTo",
@@ -906,7 +906,7 @@ describe("Teal Opcodes", function () {
     );
 
     it("should throw stack length error GreaterThanEqualTo", execExpectError(new Stack<StackElem>(),
-      [BigInt('1')], new LessThan([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      [1n], new LessThan([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
@@ -914,25 +914,25 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should push true to stack as both values are 1", () => {
-      stack.push(BigInt('1'));
-      stack.push(BigInt('1'));
+      stack.push(1n);
+      stack.push(1n);
 
       const op = new And([], 1);
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(BigInt('1'), top);
+      assert.equal(1n, top);
     });
 
     it("should push false to stack as one value is 0", () => {
-      stack.push(BigInt('0'));
-      stack.push(BigInt('1'));
+      stack.push(0n);
+      stack.push(1n);
 
       const op = new And([], 1);
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(BigInt('0'), top);
+      assert.equal(0n, top);
     });
 
     it("should throw invalid type error (And)",
@@ -942,7 +942,7 @@ describe("Teal Opcodes", function () {
     );
 
     it("should throw stack length error (And)", execExpectError(new Stack<StackElem>(),
-      [BigInt('1')], new LessThan([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      [1n], new LessThan([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
@@ -950,25 +950,25 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should push true to stack as one value is 1", () => {
-      stack.push(BigInt('0'));
-      stack.push(BigInt('1'));
+      stack.push(0n);
+      stack.push(1n);
 
       const op = new Or([], 1);
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(BigInt('1'), top);
+      assert.equal(1n, top);
     });
 
     it("should push false to stack as both values are 0", () => {
-      stack.push(BigInt('0'));
-      stack.push(BigInt('0'));
+      stack.push(0n);
+      stack.push(0n);
 
       const op = new Or([], 1);
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(BigInt('0'), top);
+      assert.equal(0n, top);
     });
 
     it("should throw invalid type error (Or)",
@@ -978,7 +978,7 @@ describe("Teal Opcodes", function () {
     );
 
     it("should throw stack length error (Or)", execExpectError(new Stack<StackElem>(),
-      [BigInt('1')], new LessThan([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      [1n], new LessThan([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
@@ -986,43 +986,43 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should push true to stack", () => {
-      stack.push(BigInt('22'));
-      stack.push(BigInt('22'));
+      stack.push(22n);
+      stack.push(22n);
 
       const op = new EqualTo([], 1);
       op.execute(stack);
 
       let top = stack.pop();
-      assert.equal(BigInt('1'), top);
+      assert.equal(1n, top);
 
       stack.push(new Uint8Array([1, 2, 3]));
       stack.push(new Uint8Array([1, 2, 3]));
 
       op.execute(stack);
       top = stack.pop();
-      assert.equal(BigInt('1'), top);
+      assert.equal(1n, top);
     });
 
     it("should push false to stack", () => {
-      stack.push(BigInt('22'));
-      stack.push(BigInt('1'));
+      stack.push(22n);
+      stack.push(1n);
 
       const op = new EqualTo([], 1);
       op.execute(stack);
 
       let top = stack.pop();
-      assert.equal(BigInt('0'), top);
+      assert.equal(0n, top);
 
       stack.push(new Uint8Array([1, 2, 3]));
       stack.push(new Uint8Array([1, 1, 3]));
 
       op.execute(stack);
       top = stack.pop();
-      assert.equal(BigInt('0'), top);
+      assert.equal(0n, top);
     });
 
     it("should throw error", () => {
-      stack.push(BigInt('12'));
+      stack.push(12n);
       stack.push(new Uint8Array([1, 2, 3]));
       const op = new EqualTo([], 1);
 
@@ -1037,43 +1037,43 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should push true to stack", () => {
-      stack.push(BigInt('21'));
-      stack.push(BigInt('22'));
+      stack.push(21n);
+      stack.push(22n);
 
       const op = new NotEqualTo([], 1);
       op.execute(stack);
 
       let top = stack.pop();
-      assert.equal(BigInt('1'), top);
+      assert.equal(1n, top);
 
       stack.push(new Uint8Array([1, 2, 3]));
       stack.push(new Uint8Array([1, 1, 3]));
 
       op.execute(stack);
       top = stack.pop();
-      assert.equal(BigInt('1'), top);
+      assert.equal(1n, top);
     });
 
     it("should push false to stack", () => {
-      stack.push(BigInt('22'));
-      stack.push(BigInt('22'));
+      stack.push(22n);
+      stack.push(22n);
 
       const op = new NotEqualTo([], 1);
       op.execute(stack);
 
       let top = stack.pop();
-      assert.equal(BigInt('0'), top);
+      assert.equal(0n, top);
 
       stack.push(new Uint8Array([1, 2, 3]));
       stack.push(new Uint8Array([1, 2, 3]));
 
       op.execute(stack);
       top = stack.pop();
-      assert.equal(BigInt('0'), top);
+      assert.equal(0n, top);
     });
 
     it("should throw error", () => {
-      stack.push(BigInt('12'));
+      stack.push(12n);
       stack.push(new Uint8Array([1, 2, 3]));
       const op = new EqualTo([], 1);
 
@@ -1088,21 +1088,21 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should push 1", () => {
-      stack.push(BigInt('0'));
+      stack.push(0n);
       const op = new Not([], 1);
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(BigInt('1'), top);
+      assert.equal(1n, top);
     });
 
     it("should push 0", () => {
-      stack.push(BigInt('122'));
+      stack.push(122n);
       const op = new Not([], 1);
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(BigInt('0'), top);
+      assert.equal(0n, top);
     });
   });
 
@@ -1110,7 +1110,7 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should convert int to bytes", () => {
-      stack.push(BigInt('4'));
+      stack.push(4n);
       const op = new Itob([], 1);
       op.execute(stack);
 
@@ -1133,7 +1133,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top, BigInt('1'));
+      assert.equal(top, 1n);
     });
 
     it("should throw invalid type error",
@@ -1147,26 +1147,26 @@ describe("Teal Opcodes", function () {
 
     it("should add carry", () => {
       stack.push(MAX_UINT64);
-      stack.push(BigInt('3'));
+      stack.push(3n);
       const op = new Addw([], 1);
       op.execute(stack);
 
       const valueSUM = stack.pop();
       const valueCARRY = stack.pop();
-      assert.equal(valueSUM, BigInt('2'));
-      assert.equal(valueCARRY, BigInt('1'));
+      assert.equal(valueSUM, 2n);
+      assert.equal(valueCARRY, 1n);
     });
 
     it("should not add carry", () => {
-      stack.push(BigInt('10'));
-      stack.push(BigInt('3'));
+      stack.push(10n);
+      stack.push(3n);
       const op = new Addw([], 1);
       op.execute(stack);
 
       const valueSUM = stack.pop();
       const valueCARRY = stack.pop();
-      assert.equal(valueSUM, BigInt('13'));
-      assert.equal(valueCARRY, BigInt('0'));
+      assert.equal(valueSUM, 13n);
+      assert.equal(valueCARRY, 0n);
     });
   });
 
@@ -1174,57 +1174,57 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct low and high value", () => {
-      stack.push(BigInt('4581298449'));
-      stack.push(BigInt('9162596898'));
+      stack.push(4581298449n);
+      stack.push(9162596898n);
       const op = new Mulw([], 1);
       op.execute(stack);
 
       const low = stack.pop();
       const high = stack.pop();
-      assert.equal(low, BigInt('5083102810200507970'));
-      assert.equal(high, BigInt('2'));
+      assert.equal(low, 5083102810200507970n);
+      assert.equal(high, 2n);
     });
 
     it("should return correct low and high value on big numbers", () => {
-      stack.push(MAX_UINT64 - BigInt('2'));
-      stack.push(BigInt('9162596898'));
+      stack.push(MAX_UINT64 - 2n);
+      stack.push(9162596898n);
       const op = new Mulw([], 1);
       op.execute(stack);
 
       const low = stack.pop();
       const high = stack.pop();
-      assert.equal(low, BigInt('18446744046221760922'));
-      assert.equal(high, BigInt('9162596897'));
+      assert.equal(low, 18446744046221760922n);
+      assert.equal(high, 9162596897n);
     });
 
     it("high bits should be 0", () => {
-      stack.push(BigInt('10'));
-      stack.push(BigInt('3'));
+      stack.push(10n);
+      stack.push(3n);
       const op = new Mulw([], 1);
       op.execute(stack);
 
       const low = stack.pop();
       const high = stack.pop();
-      assert.equal(low, BigInt('30'));
-      assert.equal(high, BigInt('0'));
+      assert.equal(low, 30n);
+      assert.equal(high, 0n);
     });
 
     it("low and high should be 0 on a*b if a or b is 0", () => {
-      stack.push(BigInt('0'));
-      stack.push(BigInt('3'));
+      stack.push(0n);
+      stack.push(3n);
       const op = new Mulw([], 1);
       op.execute(stack);
 
       const low = stack.pop();
       const high = stack.pop();
-      assert.equal(low, BigInt('0'));
-      assert.equal(high, BigInt('0'));
+      assert.equal(low, 0n);
+      assert.equal(high, 0n);
     });
 
     it("should throw stack length error",
       execExpectError(
         stack,
-        [BigInt('3')],
+        [3n],
         new Mulw([], 1),
         ERRORS.TEAL.ASSERT_STACK_LENGTH
       )
@@ -1244,14 +1244,14 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should duplicate value", () => {
-      stack.push(BigInt('2'));
+      stack.push(2n);
       const op = new Dup([], 1);
       op.execute(stack);
 
       const value = stack.pop();
       const dupValue = stack.pop();
-      assert.equal(value, BigInt('2'));
-      assert.equal(dupValue, BigInt('2'));
+      assert.equal(value, 2n);
+      assert.equal(dupValue, 2n);
     });
   });
 
@@ -1259,8 +1259,8 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should duplicate value(A, B -> A, B, A, B)", () => {
-      stack.push(BigInt('2'));
-      stack.push(BigInt('3'));
+      stack.push(2n);
+      stack.push(3n);
       const op = new Dup2([], 1);
       op.execute(stack);
 
@@ -1320,7 +1320,7 @@ describe("Teal Opcodes", function () {
     it("should throw Invalid type error",
       execExpectError(
         stack,
-        [BigInt('1')],
+        [1n],
         new Substring([start, end], 1),
         ERRORS.TEAL.INVALID_TYPE
       )
@@ -1379,8 +1379,8 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct substring", function () {
-      stack.push(BigInt('0'));
-      stack.push(BigInt('4'));
+      stack.push(0n);
+      stack.push(4n);
       stack.push(base64ToBytes("Algorand"));
 
       const op = new Substring3([], 1);
@@ -1400,8 +1400,8 @@ describe("Teal Opcodes", function () {
     );
 
     it("should throw error because start > end", function () {
-      const end = BigInt('4');
-      const start = end + BigInt('1');
+      const end = 4n;
+      const start = end + 1n;
       execExpectError(
         stack,
         [start, end, base64ToBytes("Algorand")],
@@ -1413,7 +1413,7 @@ describe("Teal Opcodes", function () {
     it("should throw error because range beyong string",
       execExpectError(
         stack,
-        [BigInt('0'), BigInt('40'), base64ToBytes("Algorand")],
+        [0n, 40n, base64ToBytes("Algorand")],
         new Substring3([], 1),
         ERRORS.TEAL.SUBSTRING_RANGE_BEYOND
       )
@@ -1454,7 +1454,7 @@ describe("Teal Opcodes", function () {
       it("should jump to branch if top of stack is zero", function () {
         interpreter.instructionIndex = 0;
 
-        stack.push(BigInt('0'));
+        stack.push(0n);
         const op = new BranchIfZero(["dumb"], 2, interpreter);
         op.execute(stack);
         assert.equal(4, interpreter.instructionIndex);
@@ -1463,7 +1463,7 @@ describe("Teal Opcodes", function () {
       it("should not jump to branch if top of stack is not zero", function () {
         interpreter.instructionIndex = 0;
 
-        stack.push(BigInt('5'));
+        stack.push(5n);
         const op = new BranchIfZero(["dumb"], 2, interpreter);
         op.execute(stack);
         assert.equal(0, interpreter.instructionIndex);
@@ -1472,7 +1472,7 @@ describe("Teal Opcodes", function () {
       it("should throw error if label is not defined for bz",
         execExpectError(
           stack,
-          [BigInt('0')],
+          [0n],
           new BranchIfZero(["some-branch-2"], 0, interpreter),
           ERRORS.TEAL.LABEL_NOT_FOUND
         )
@@ -1483,7 +1483,7 @@ describe("Teal Opcodes", function () {
       it("should not jump to branch if top of stack is zero", function () {
         interpreter.instructionIndex = 0;
 
-        stack.push(BigInt('0'));
+        stack.push(0n);
         const op = new BranchIfNotZero(["dumb"], 2, interpreter);
         op.execute(stack);
         assert.equal(0, interpreter.instructionIndex);
@@ -1492,7 +1492,7 @@ describe("Teal Opcodes", function () {
       it("should jump to branch if top of stack is not zero", function () {
         interpreter.instructionIndex = 0;
 
-        stack.push(BigInt('5'));
+        stack.push(5n);
         const op = new BranchIfNotZero(["dumb"], 2, interpreter);
         op.execute(stack);
         assert.equal(4, interpreter.instructionIndex);
@@ -1501,7 +1501,7 @@ describe("Teal Opcodes", function () {
       it("should throw error if label is not defined for bnz",
         execExpectError(
           stack,
-          [BigInt('5')],
+          [5n],
           new BranchIfNotZero(["some-branch-3"], 0, interpreter),
           ERRORS.TEAL.LABEL_NOT_FOUND
         )
@@ -1514,13 +1514,13 @@ describe("Teal Opcodes", function () {
     const interpreter = new Interpreter();
 
     it("should return by taking last value from stack as success", function () {
-      stack.push(BigInt('1'));
-      stack.push(BigInt('2'));
+      stack.push(1n);
+      stack.push(2n);
 
       const op = new Return([], 0, interpreter);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt('2'), stack.pop());
+      assert.equal(2n, stack.pop());
     });
   });
 
@@ -1576,7 +1576,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt('1'), stack.pop());
+        assert.deepEqual(1n, stack.pop());
       });
 
       it("should push txn lease to stack", function () {
@@ -1933,7 +1933,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.equal(BigInt('1000'), stack.pop());
+        assert.equal(1000n, stack.pop());
       });
     });
 
@@ -1998,7 +1998,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(BigInt('1000'), top);
+      assert.equal(1000n, top);
     });
 
     it("should push MinBalance to stack", function () {
@@ -2006,7 +2006,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(BigInt('10000'), top);
+      assert.equal(10000n, top);
     });
 
     it("should push MaxTxnLife to stack", function () {
@@ -2014,7 +2014,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(BigInt('1000'), top);
+      assert.equal(1000n, top);
     });
 
     it("should push ZeroAddress to stack", function () {
@@ -2038,7 +2038,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(BigInt('2'), top);
+      assert.equal(2n, top);
     });
 
     it("should push Round to stack", function () {
@@ -2046,7 +2046,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(BigInt('500'), top);
+      assert.equal(500n, top);
     });
 
     it("should push LatestTimestamp to stack", function () {
@@ -2065,7 +2065,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(BigInt('1847'), top);
+      assert.equal(1847n, top);
     });
   });
 
@@ -2091,46 +2091,46 @@ describe("Teal Opcodes", function () {
     describe("AppOptedIn", function () {
       it("should push 1 to stack if app is opted in", function () {
         // for Sender
-        stack.push(BigInt('0'));
-        stack.push(BigInt('1847'));
+        stack.push(0n);
+        stack.push(1847n);
 
         let op = new AppOptedIn([], 1, interpreter);
         op.execute(stack);
 
         let top = stack.pop();
-        assert.equal(BigInt('1'), top);
+        assert.equal(1n, top);
 
         // for Txn.Accounts[A]
-        stack.push(BigInt('1'));
-        stack.push(BigInt('1847'));
+        stack.push(1n);
+        stack.push(1847n);
 
         op = new AppOptedIn([], 1, interpreter);
         op.execute(stack);
 
         top = stack.pop();
-        assert.equal(BigInt('1'), top);
+        assert.equal(1n, top);
       });
 
       it("should push 0 to stack if app is not opted in", function () {
         // for Sender
-        stack.push(BigInt('0'));
-        stack.push(BigInt('1111'));
+        stack.push(0n);
+        stack.push(1111n);
 
         let op = new AppOptedIn([], 1, interpreter);
         op.execute(stack);
 
         let top = stack.pop();
-        assert.equal(BigInt('0'), top);
+        assert.equal(0n, top);
 
         // for Txn.Accounts[A]
-        stack.push(BigInt('1'));
-        stack.push(BigInt('1111'));
+        stack.push(1n);
+        stack.push(1111n);
 
         op = new AppOptedIn([], 1, interpreter);
         op.execute(stack);
 
         top = stack.pop();
-        assert.equal(BigInt('0'), top);
+        assert.equal(0n, top);
       });
     });
 
@@ -2141,7 +2141,7 @@ describe("Teal Opcodes", function () {
 
       it("should push the value to stack if key is present in local state", function () {
         // for Sender
-        stack.push(BigInt('0'));
+        stack.push(0n);
         stack.push(base64ToBytes("Local-key"));
 
         let op = new AppLocalGet([], 1, interpreter);
@@ -2151,7 +2151,7 @@ describe("Teal Opcodes", function () {
         assert.deepEqual(base64ToBytes('Local-val'), top);
 
         // for Txn.Accounts[A]
-        stack.push(BigInt('1'));
+        stack.push(1n);
         stack.push(base64ToBytes('Local-key'));
 
         op = new AppLocalGet([], 1, interpreter);
@@ -2163,24 +2163,24 @@ describe("Teal Opcodes", function () {
 
       it("should push uint 0 to stack if key is not present in local state", function () {
         // for Sender
-        stack.push(BigInt('0'));
+        stack.push(0n);
         stack.push(base64ToBytes("random-key"));
 
         let op = new AppLocalGet([], 1, interpreter);
         op.execute(stack);
 
         let top = stack.pop();
-        assert.equal(BigInt('0'), top);
+        assert.equal(0n, top);
 
         // for Txn.Accounts[A]
-        stack.push(BigInt('1'));
+        stack.push(1n);
         stack.push(base64ToBytes('random-key'));
 
         op = new AppLocalGet([], 1, interpreter);
         op.execute(stack);
 
         top = stack.pop();
-        assert.equal(BigInt('0'), top);
+        assert.equal(0n, top);
       });
     });
 
@@ -2191,8 +2191,8 @@ describe("Teal Opcodes", function () {
 
       it("should push the value to stack if key is present in local state from given appId", function () {
         // for Sender
-        stack.push(BigInt('0'));
-        stack.push(BigInt('1847'));
+        stack.push(0n);
+        stack.push(1847n);
         stack.push(base64ToBytes('Local-key'));
 
         let op = new AppLocalGetEx([], 1, interpreter);
@@ -2200,12 +2200,12 @@ describe("Teal Opcodes", function () {
 
         let flag = stack.pop();
         let value = stack.pop();
-        assert.equal(BigInt("1"), flag);
+        assert.equal(1n, flag);
         assert.deepEqual(base64ToBytes('Local-val'), value);
 
         // for Txn.Accounts[A]
-        stack.push(BigInt('1'));
-        stack.push(BigInt('1847'));
+        stack.push(1n);
+        stack.push(1847n);
         stack.push(base64ToBytes('Local-key'));
 
         op = new AppLocalGetEx([], 1, interpreter);
@@ -2213,32 +2213,32 @@ describe("Teal Opcodes", function () {
 
         flag = stack.pop();
         value = stack.pop();
-        assert.equal(BigInt("1"), flag);
+        assert.equal(1n, flag);
         assert.deepEqual(base64ToBytes('Local-val'), value);
       });
 
       it("should push uint 0 to stack if key is not present in local state from given appId", function () {
         // for Sender
-        stack.push(BigInt('0'));
-        stack.push(BigInt('1847'));
+        stack.push(0n);
+        stack.push(1847n);
         stack.push(base64ToBytes('random-key'));
 
         let op = new AppLocalGetEx([], 1, interpreter);
         op.execute(stack);
 
         let flag = stack.pop();
-        assert.equal(BigInt('0'), flag);
+        assert.equal(0n, flag);
 
         // for Txn.Accounts[A]
-        stack.push(BigInt('1'));
-        stack.push(BigInt('1847'));
+        stack.push(1n);
+        stack.push(1847n);
         stack.push(base64ToBytes('random-key'));
 
         op = new AppLocalGetEx([], 1, interpreter);
         op.execute(stack);
 
         flag = stack.pop();
-        assert.equal(BigInt('0'), flag);
+        assert.equal(0n, flag);
       });
     });
 
@@ -2266,7 +2266,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         const top = stack.pop();
-        assert.equal(BigInt('0'), top);
+        assert.equal(0n, top);
       });
     });
 
@@ -2279,7 +2279,7 @@ describe("Teal Opcodes", function () {
 
       it("should push the value to stack if key is present externally in global state", function () {
         // zero index means current app
-        stack.push(BigInt('0'));
+        stack.push(0n);
         stack.push(base64ToBytes('Hello'));
 
         let op = new AppGlobalGetEx([], 1, interpreter);
@@ -2287,11 +2287,11 @@ describe("Teal Opcodes", function () {
 
         let flag = stack.pop();
         let value = stack.pop();
-        assert.equal(BigInt("1"), flag);
+        assert.equal(1n, flag);
         assert.deepEqual(base64ToBytes('World'), value);
 
         // for Txn.ForeignApps[A]
-        stack.push(BigInt('1'));
+        stack.push(1n);
         stack.push(base64ToBytes('global-key'));
 
         op = new AppGlobalGetEx([], 1, interpreter);
@@ -2299,30 +2299,30 @@ describe("Teal Opcodes", function () {
 
         flag = stack.pop();
         value = stack.pop();
-        assert.equal(BigInt("1"), flag);
+        assert.equal(1n, flag);
         assert.deepEqual(base64ToBytes('global-val'), value);
       });
 
       it("should push uint 0 to stack if key is not present externally in global state", function () {
         // zero index means current app
-        stack.push(BigInt('0'));
+        stack.push(0n);
         stack.push(base64ToBytes('random-key'));
 
         let op = new AppGlobalGetEx([], 1, interpreter);
         op.execute(stack);
 
         let top = stack.pop();
-        assert.equal(BigInt('0'), top);
+        assert.equal(0n, top);
 
         // for Txn.ForeignApps[A]
-        stack.push(BigInt('1'));
+        stack.push(1n);
         stack.push(base64ToBytes('random-key'));
 
         op = new AppGlobalGetEx([], 1, interpreter);
         op.execute(stack);
 
         top = stack.pop();
-        assert.equal(BigInt('0'), top);
+        assert.equal(0n, top);
       });
     });
 
@@ -2333,7 +2333,7 @@ describe("Teal Opcodes", function () {
 
       it("should put the value in account's local storage", function () {
         // for Sender, check for byte
-        stack.push(BigInt('0'));
+        stack.push(0n);
         stack.push(base64ToBytes('New-Key'));
         stack.push(base64ToBytes('New-Val'));
 
@@ -2347,9 +2347,9 @@ describe("Teal Opcodes", function () {
         assert.deepEqual(localStateCurr[idx].value.bytes, base64ToBytes('New-Val'));
 
         // for Txn.Accounts[A], uint
-        stack.push(BigInt('1'));
+        stack.push(1n);
         stack.push(base64ToBytes('New-Key-1'));
-        stack.push(BigInt('2222'));
+        stack.push(2222n);
 
         op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
@@ -2365,7 +2365,7 @@ describe("Teal Opcodes", function () {
         // so this should throw error
         execExpectError(
           stack,
-          [BigInt('0'), base64ToBytes("New-Key-1"), base64ToBytes("New-Val-2")],
+          [0n, base64ToBytes("New-Key-1"), base64ToBytes("New-Val-2")],
           new AppLocalPut([], 1, interpreter),
           ERRORS.TEAL.INVALID_SCHEMA
         );
@@ -2375,7 +2375,7 @@ describe("Teal Opcodes", function () {
         interpreter.runtime.ctx.tx.apid = 9999;
         execExpectError(
           stack,
-          [BigInt('0'), base64ToBytes("New-Key-1"), base64ToBytes("New-Val-2")],
+          [0n, base64ToBytes("New-Key-1"), base64ToBytes("New-Val-2")],
           new AppLocalPut([], 1, interpreter),
           ERRORS.TEAL.APP_NOT_FOUND
         );
@@ -2403,7 +2403,7 @@ describe("Teal Opcodes", function () {
 
         // for uint
         stack.push(base64ToBytes('Key'));
-        stack.push(BigInt('1000'));
+        stack.push(1000n);
 
         op = new AppGlobalPut([], 1, interpreter);
         op.execute(stack);
@@ -2441,7 +2441,7 @@ describe("Teal Opcodes", function () {
 
       it("should remove the key-value pair from account's local storage", function () {
         // for Sender
-        stack.push(BigInt('0'));
+        stack.push(0n);
         stack.push(base64ToBytes('Local-key'));
 
         let op = new AppLocalDel([], 1, interpreter);
@@ -2452,7 +2452,7 @@ describe("Teal Opcodes", function () {
         assert.equal(idx, -1); // idx should be -1
 
         // for Txn.Accounts[A]
-        stack.push(BigInt('1'));
+        stack.push(1n);
         stack.push(base64ToBytes('Local-key'));
 
         op = new AppLocalDel([], 1, interpreter);
@@ -2471,7 +2471,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should remove the key-value pair from global storage", function () {
-        stack.push(BigInt('0'));
+        stack.push(0n);
         stack.push(base64ToBytes('global-key'));
 
         const op = new AppGlobalDel([], 1, interpreter);
@@ -2499,69 +2499,69 @@ describe("Teal Opcodes", function () {
       let op = new Int(['NoOp'], 0);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt('0'), stack.pop());
+      assert.equal(0n, stack.pop());
 
       op = new Int(['OptIn'], 0);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt('1'), stack.pop());
+      assert.equal(1n, stack.pop());
 
       op = new Int(['CloseOut'], 0);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt('2'), stack.pop());
+      assert.equal(2n, stack.pop());
 
       op = new Int(['ClearState'], 0);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt('3'), stack.pop());
+      assert.equal(3n, stack.pop());
 
       op = new Int(['UpdateApplication'], 0);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt('4'), stack.pop());
+      assert.equal(4n, stack.pop());
 
       op = new Int(['DeleteApplication'], 0);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt('5'), stack.pop());
+      assert.equal(5n, stack.pop());
     });
 
     it("Int: should push correct TypeEnumConstants enum value to stack", function () {
       let op = new Int(['unknown'], 0);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt('0'), stack.pop());
+      assert.equal(0n, stack.pop());
 
       op = new Int(['pay'], 0);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt('1'), stack.pop());
+      assert.equal(1n, stack.pop());
 
       op = new Int(['keyreg'], 0);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt('2'), stack.pop());
+      assert.equal(2n, stack.pop());
 
       op = new Int(['acfg'], 0);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt('3'), stack.pop());
+      assert.equal(3n, stack.pop());
 
       op = new Int(['axfer'], 0);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt('4'), stack.pop());
+      assert.equal(4n, stack.pop());
 
       op = new Int(['afrz'], 0);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt('5'), stack.pop());
+      assert.equal(5n, stack.pop());
 
       op = new Int(['appl'], 0);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt('6'), stack.pop());
+      assert.equal(6n, stack.pop());
     });
 
     it("Addr: should push addr to stack", function () {
@@ -2637,17 +2637,17 @@ describe("Teal Opcodes", function () {
     it("should push correct account balance", () => {
       const op = new Balance([], 1, interpreter);
 
-      stack.push(BigInt("0")); // push sender id
+      stack.push(0n); // push sender id
 
       op.execute(stack);
       const top = stack.pop();
 
-      assert.equal(top, BigInt("123"));
+      assert.equal(top, 123n);
     });
 
     it("should throw account doesn't exist error", () => {
       const op = new Balance([], 1, interpreter);
-      stack.push(BigInt("2"));
+      stack.push(2n);
 
       expectTealError(
         () => op.execute(stack),
@@ -2657,7 +2657,7 @@ describe("Teal Opcodes", function () {
 
     it("should throw index out of bound error", () => {
       const op = new Balance([], 1, interpreter);
-      stack.push(BigInt("8"));
+      stack.push(8n);
 
       expectTealError(
         () => op.execute(stack),
@@ -2668,8 +2668,8 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset Balance", () => {
       const op = new GetAssetHolding(["AssetBalance"], 1, interpreter);
 
-      stack.push(BigInt("1")); // account index
-      stack.push(BigInt("3")); // asset id
+      stack.push(1n); // account index
+      stack.push(3n); // asset id
 
       op.execute(stack);
       const last = stack.pop();
@@ -2682,8 +2682,8 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset Freeze status", () => {
       const op = new GetAssetHolding(["AssetFrozen"], 1, interpreter);
 
-      stack.push(BigInt("1")); // account index
-      stack.push(BigInt("3")); // asset id
+      stack.push(1n); // account index
+      stack.push(3n); // asset id
 
       op.execute(stack);
       const last = stack.pop();
@@ -2694,8 +2694,8 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push 0 if not defined", () => {
-      stack.push(BigInt("1")); // account index
-      stack.push(BigInt("4")); // asset id
+      stack.push(1n); // account index
+      stack.push(4n); // asset id
 
       const op = new GetAssetHolding(["1"], 1, interpreter);
       op.execute(stack);
@@ -2707,8 +2707,8 @@ describe("Teal Opcodes", function () {
     it("should throw index out of bound error", () => {
       const op = new GetAssetHolding(["1"], 1, interpreter);
 
-      stack.push(BigInt("10")); // account index
-      stack.push(BigInt("4")); // asset id
+      stack.push(10n); // account index
+      stack.push(4n); // asset id
 
       expectTealError(
         () => op.execute(stack),
@@ -2719,7 +2719,7 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset Total", () => {
       const op = new GetAssetDef(["AssetTotal"], 1, interpreter);
 
-      stack.push(BigInt("1")); // asset index
+      stack.push(1n); // asset index
 
       op.execute(stack);
       const last = stack.pop();
@@ -2732,7 +2732,7 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset Decimals", () => {
       const op = new GetAssetDef(["AssetDecimals"], 1, interpreter);
 
-      stack.push(BigInt("1")); // asset index
+      stack.push(1n); // asset index
 
       op.execute(stack);
       const last = stack.pop();
@@ -2745,7 +2745,7 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset Default Frozen", () => {
       const op = new GetAssetDef(["AssetDefaultFrozen"], 1, interpreter);
 
-      stack.push(BigInt("1")); // asset index
+      stack.push(1n); // asset index
 
       op.execute(stack);
       const last = stack.pop();
@@ -2758,7 +2758,7 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset Unit Name", () => {
       const op = new GetAssetDef(["AssetUnitName"], 1, interpreter);
 
-      stack.push(BigInt("1")); // asset index
+      stack.push(1n); // asset index
 
       op.execute(stack);
       const last = stack.pop();
@@ -2771,7 +2771,7 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset Name", () => {
       const op = new GetAssetDef(["AssetName"], 1, interpreter);
 
-      stack.push(BigInt("1")); // asset index
+      stack.push(1n); // asset index
 
       op.execute(stack);
       const last = stack.pop();
@@ -2784,7 +2784,7 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset URL", () => {
       const op = new GetAssetDef(["AssetURL"], 1, interpreter);
 
-      stack.push(BigInt("1")); // asset index
+      stack.push(1n); // asset index
 
       op.execute(stack);
       const last = stack.pop();
@@ -2797,7 +2797,7 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset MetaData Hash", () => {
       const op = new GetAssetDef(["AssetMetadataHash"], 1, interpreter);
 
-      stack.push(BigInt("1")); // asset index
+      stack.push(1n); // asset index
 
       op.execute(stack);
       const last = stack.pop();
@@ -2810,7 +2810,7 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset Manager", () => {
       const op = new GetAssetDef(["AssetManager"], 1, interpreter);
 
-      stack.push(BigInt("1")); // asset index
+      stack.push(1n); // asset index
 
       op.execute(stack);
       const last = stack.pop();
@@ -2823,7 +2823,7 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset Reserve", () => {
       const op = new GetAssetDef(["AssetReserve"], 1, interpreter);
 
-      stack.push(BigInt("1")); // asset index
+      stack.push(1n); // asset index
 
       op.execute(stack);
       const last = stack.pop();
@@ -2836,7 +2836,7 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset Freeze", () => {
       const op = new GetAssetDef(["AssetFreeze"], 1, interpreter);
 
-      stack.push(BigInt("1")); // asset index
+      stack.push(1n); // asset index
 
       op.execute(stack);
       const last = stack.pop();
@@ -2849,7 +2849,7 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset Clawback", () => {
       const op = new GetAssetDef(["AssetClawback"], 1, interpreter);
 
-      stack.push(BigInt("1")); // asset index
+      stack.push(1n); // asset index
 
       op.execute(stack);
       const last = stack.pop();
@@ -2862,7 +2862,7 @@ describe("Teal Opcodes", function () {
     it("should push 0 if Asset not defined", () => {
       const op = new GetAssetDef(["AssetFreeze"], 1, interpreter);
 
-      stack.push(BigInt("2")); // account index
+      stack.push(2n); // account index
 
       op.execute(stack);
 
@@ -2873,7 +2873,7 @@ describe("Teal Opcodes", function () {
     it("should throw index out of bound error for Asset Param", () => {
       const op = new GetAssetDef(["AssetFreeze"], 1, interpreter);
 
-      stack.push(BigInt("4")); // asset index
+      stack.push(4n); // asset index
 
       expectTealError(
         () => op.execute(stack),
