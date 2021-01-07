@@ -546,7 +546,7 @@ export interface Address {
 
 export type TxnBytes = Uint8Array;
 
-export interface SSCParams {
+export interface SSCAttributes {
   'approval-program': string;
   'clear-state-program': string;
   creator: string;
@@ -579,7 +579,7 @@ export interface AssetHolding {
 
 export interface CreatedApp {
   id: number;
-  params: SSCParams;
+  params: SSCAttributes;
 }
 
 export interface CreatedAssets {

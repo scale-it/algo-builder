@@ -4,13 +4,14 @@ import type {
   AppLocalState,
   AssetHolding,
   CreatedApp,
-  CreatedAssets, SSCParams, SSCSchemaConfig
+  CreatedAssets, SSCAttributes, SSCSchemaConfig
 } from "algosdk";
 import { generateAccount } from "algosdk";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { compareArray } from "../lib/compare";
+import { SSC_BYTES } from "../lib/constants";
 import { assertValidSchema, getKeyValPair } from "../lib/stateful";
 import { StackElem, StoreAccount } from "../types";
 
@@ -61,7 +62,7 @@ export class StoreAccountImpl implements StoreAccount {
       const keyValue = data.find(schema => compareArray(schema.key, key));
       const value = keyValue?.value;
       if (value) {
-        return value.type === 1 ? value.bytes : BigInt(value.uint);
+        return value.type === SSC_BYTES ? value.bytes : BigInt(value.uint);
       }
     }
     return undefined;
@@ -105,7 +106,7 @@ export class StoreAccountImpl implements StoreAccount {
       throw new Error('Maximum created applications for an account is 10');
     }
 
-    const appParams: SSCParams = {
+    const appParams: SSCAttributes = {
       'approval-program': '',
       'clear-state-program': '',
       creator: params.sender.addr,
@@ -122,7 +123,7 @@ export class StoreAccountImpl implements StoreAccount {
   }
 
   // opt in to application
-  optInToApp (appId: number, appParams: SSCParams): void {
+  optInToApp (appId: number, appParams: SSCAttributes): void {
     const localState = this.appsLocalState.find(cfg => cfg.id === appId);
     if (localState) {
       console.warn(`app ${appId} already opted in to ${this.address}`);

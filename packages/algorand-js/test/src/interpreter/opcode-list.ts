@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
-import { decodeAddress, generateAccount, signBytes, SSCParams } from "algosdk";
+import { decodeAddress, generateAccount, signBytes, SSCAttributes } from "algosdk";
 import { assert } from "chai";
 
 import { ERRORS } from "../../../src/errors/errors-list";
@@ -1990,8 +1990,8 @@ describe("Teal Opcodes", function () {
     interpreter.runtime.ctx.tx = TXN_OBJ;
     interpreter.runtime.ctx.gtxs = [TXN_OBJ];
     interpreter.runtime.ctx.tx.apid = 1847;
-    interpreter.runtime.ctx.state.globalApps = new Map<number, SSCParams>();
-    interpreter.runtime.ctx.state.globalApps.set(1847, {} as SSCParams);
+    interpreter.runtime.ctx.state.globalApps = new Map<number, SSCAttributes>();
+    interpreter.runtime.ctx.state.globalApps.set(1847, {} as SSCAttributes);
 
     it("should push MinTxnFee to stack", function () {
       const op = new Global(['MinTxnFee'], 1, interpreter);
@@ -2247,7 +2247,7 @@ describe("Teal Opcodes", function () {
     describe("AppGlobalGet", function () {
       before(function () {
         interpreter.runtime.ctx.tx.apid = 1828;
-        interpreter.runtime.ctx.state.globalApps = new Map<number, SSCParams>();
+        interpreter.runtime.ctx.state.globalApps = new Map<number, SSCAttributes>();
         interpreter.runtime.ctx.state.globalApps.set(1828, acc1.createdApps[0].params);
       });
 
@@ -2398,7 +2398,7 @@ describe("Teal Opcodes", function () {
         let op = new AppGlobalPut([], 1, interpreter);
         op.execute(stack);
 
-        let globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCParams)["global-state"];
+        let globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCAttributes)["global-state"];
         let idx = globalStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('New-Global-Key')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(globalStateCurr[idx].value.bytes, base64ToBytes('New-Global-Val'));
@@ -2410,7 +2410,7 @@ describe("Teal Opcodes", function () {
         op = new AppGlobalPut([], 1, interpreter);
         op.execute(stack);
 
-        globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCParams)["global-state"];
+        globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCAttributes)["global-state"];
         idx = globalStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('Key')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(globalStateCurr[idx].value.uint, 1000);
@@ -2479,7 +2479,7 @@ describe("Teal Opcodes", function () {
         const op = new AppGlobalDel([], 1, interpreter);
         op.execute(stack);
 
-        const globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCParams)["global-state"];
+        const globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCAttributes)["global-state"];
         const idx = globalStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('global-key')));
         assert.equal(idx, -1); // idx should be -1
       });

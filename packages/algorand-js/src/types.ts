@@ -6,7 +6,7 @@ import {
   AssetHolding,
   CreatedApp,
   CreatedAssets,
-  SSCParams,
+  SSCAttributes,
   SSCSchemaConfig,
   TxnEncodedObj
 } from "algosdk";
@@ -68,7 +68,7 @@ export interface AccountsMap {
 export interface State {
   accounts: Map<string, StoreAccount>
   accountAssets: Map<string, Map<number, AssetHolding>>
-  globalApps: Map<number, SSCParams>
+  globalApps: Map<number, SSCAttributes>
   assetDefs: Map<number, AssetDef>
 }
 
@@ -94,7 +94,7 @@ export interface StoreAccount {
 
   balance: () => number
   createApp: (appId: number, params: SSCDeploymentFlags) => CreatedApp
-  optInToApp: (appId: number, appParams: SSCParams) => void
+  optInToApp: (appId: number, appParams: SSCAttributes) => void
   getLocalState: (appId: number, key: Uint8Array) => StackElem | undefined
   updateLocalState: (appId: number, key: Uint8Array, value: StackElem) => AppLocalState[]
 }

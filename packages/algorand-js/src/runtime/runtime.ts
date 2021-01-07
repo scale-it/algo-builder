@@ -2,7 +2,7 @@
 /* eslint sonarjs/no-small-switch: 0 */
 import { mkTransaction } from "@algorand-builder/algob";
 import { ExecParams, SSCDeploymentFlags, TransactionType } from "@algorand-builder/algob/src/types";
-import { AssetDef, AssetHolding, assignGroupID, encodeAddress, SSCParams, SSCStateSchema } from "algosdk";
+import { AssetDef, AssetHolding, assignGroupID, encodeAddress, SSCAttributes, SSCStateSchema } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
 import { getProgram } from "../../test/helpers/fs";
@@ -12,6 +12,7 @@ import { ERRORS } from "../errors/errors-list";
 import { Interpreter } from "../index";
 import { BIGINT0, BIGINT1 } from "../interpreter/opcode-list";
 import { checkIndexBound, compareArray } from "../lib/compare";
+import { SSC_BYTES } from "../lib/constants";
 import { assertValidSchema, getKeyValPair } from "../lib/stateful";
 import type { Context, StackElem, State, StoreAccount, Txn } from "../types";
 
@@ -34,7 +35,7 @@ export class Runtime {
     this.store = {
       accounts: new Map<string, StoreAccount>(),
       accountAssets: new Map<string, typeof assetInfo>(),
-      globalApps: new Map<number, SSCParams>(),
+      globalApps: new Map<number, SSCAttributes>(),
       assetDefs: new Map<number, AssetDef>()
     };
 
@@ -58,7 +59,7 @@ export class Runtime {
     return a;
   }
 
-  assertAppDefined (appId: number): SSCParams {
+  assertAppDefined (appId: number): SSCAttributes {
     const app = this.ctx.state.globalApps.get(appId);
     if (app === undefined) {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
@@ -93,7 +94,7 @@ export class Runtime {
     const keyValue = appGlobalState.find(schema => compareArray(schema.key, key));
     const value = keyValue?.value;
     if (value) {
-      return value.type === 1 ? value.bytes : BigInt(value.uint);
+      return value.type === SSC_BYTES ? value.bytes : BigInt(value.uint);
     }
     return undefined;
   }
