@@ -10,15 +10,15 @@ import { expectTealErrorAsync } from "../helpers/errors";
 import { johnAccount } from "../mocks/account";
 
 describe("Algorand Stateless Smart Contracts", function () {
-  const escrow = new StoreAccountImpl(1000000000); // 1000 ALGO
-  const john = new StoreAccountImpl(500, johnAccount); // 0.005 ALGO
+  const escrow = new StoreAccountImpl(1000000000n); // 1000 ALGO
+  const john = new StoreAccountImpl(500n, johnAccount); // 0.005 ALGO
   // set up transaction paramenters
   const txnParams: ExecParams = {
     type: TransactionType.TransferAlgo, // payment
     sign: SignType.SecretKey,
     fromAccount: escrow.account,
     toAccountAddr: john.address,
-    amountMicroAlgos: 100,
+    amountMicroAlgos: 100n,
     payFlags: { totalFee: 1000 }
   };
 
@@ -29,15 +29,15 @@ describe("Algorand Stateless Smart Contracts", function () {
 
   it("should withdraw funds from escrow if txn params are correct", async function () {
     // check initial balance
-    assert.equal(escrow.balance(), 1000000000);
-    assert.equal(john.balance(), 500);
+    assert.equal(escrow.balance(), 1000000000n);
+    assert.equal(john.balance(), 500n);
 
     // execute transaction
     await runtime.executeTx(txnParams, 'escrow.teal', []);
 
     // check final state (updated accounts)
-    assert.equal(getAcc(runtime, escrow).balance(), 999999900); // check if 100 microAlgo's are withdrawn
-    assert.equal(getAcc(runtime, john).balance(), 600);
+    assert.equal(getAcc(runtime, escrow).balance(), 999999900n); // check if 100 microAlgo's are withdrawn
+    assert.equal(getAcc(runtime, john).balance(), 600n);
   });
 
   it("should reject transaction if amount > 100", async function () {

@@ -190,11 +190,11 @@ export class Runtime {
       case TransactionType.TransferAlgo: {
         switch (account.address) {
           case txnParam.fromAccount.addr: {
-            account.amount -= txnParam.amountMicroAlgos; // remove 'x' algo from sender
+            account.amount -= BigInt(txnParam.amountMicroAlgos); // remove 'x' algo from sender
             break;
           }
           case txnParam.toAccountAddr: {
-            account.amount += txnParam.amountMicroAlgos; // add 'x' algo to receiver
+            account.amount += BigInt(txnParam.amountMicroAlgos); // add 'x' algo to receiver
             break;
           }
         }
