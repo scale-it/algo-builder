@@ -410,7 +410,7 @@ export interface AlgoTransferParam extends Sign {
   type: TransactionType.TransferAlgo
   fromAccount: AccountSDK
   toAccountAddr: AccountAddress
-  amountMicroAlgos: number
+  amountMicroAlgos: number | bigint
   payFlags: TxParams
 }
 
@@ -418,7 +418,7 @@ export interface AssetTransferParam extends Sign {
   type: TransactionType.TransferAsset
   fromAccount: AccountSDK
   toAccountAddr: AccountAddress
-  amount: number
+  amount: number | bigint
   assetID: number
   payFlags: TxParams
 }
@@ -454,7 +454,7 @@ export interface ASADeploymentFlags extends TxParams {
 
 export interface FundASCFlags {
   funder: Account
-  fundingMicroAlgo: number
+  fundingMicroAlgo: number | bigint
 }
 
 /**

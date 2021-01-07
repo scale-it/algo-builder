@@ -84,14 +84,14 @@ export interface Context {
 export interface StoreAccount {
   address: string
   assets: AssetHolding[]
-  amount: number
+  amount: bigint
   appsLocalState: AppLocalState[]
   appsTotalSchema: SSCSchemaConfig
   createdApps: CreatedApps[]
   createdAssets: CreatedAssets[]
   account: Account
 
-  balance: () => number
+  balance: () => bigint
   getLocalState: (appId: number, key: Uint8Array) => StackElem | undefined
   updateLocalState: (appId: number, key: Uint8Array, value: StackElem) => AppLocalState[]
 }

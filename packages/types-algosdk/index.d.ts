@@ -112,7 +112,7 @@ export interface Transaction {
   from: Address;
   to: Address;
   fee: number;
-  amount: number;
+  amount: number | bigint;
   firstRound: number;
   lastRound: number;
   note: Uint8Array;
@@ -128,7 +128,7 @@ export interface Transaction {
   voteKeyDilution: any;
 
   assetIndex: number;
-  assetTotal: number;
+  assetTotal: number | bigint;
   assetDecimals: number;
   assetDefaultFrozen: any;
   assetManager: Address;
@@ -557,7 +557,7 @@ export interface SSCParams {
 
 export interface AssetDef {
   creator: string;
-  total: number;
+  total: number | bigint;
   decimals: number;
   'default-frozen': string;
   'unit-name': string;
@@ -571,7 +571,7 @@ export interface AssetDef {
 }
 
 export interface AssetHolding {
-  amount: number;
+  amount: number | bigint;
   'asset-id': number;
   creator: string;
   'is-frozen': string;
@@ -596,7 +596,7 @@ export interface AppLocalState {
 export interface AccountState {
   address: string;
   assets: AssetHolding[];
-  amount: number;
+  amount: number | bigint;
   "amount-without-pending-rewards": number;
   'pending-rewards': number;
   'reward-base': number;
@@ -627,7 +627,7 @@ export interface TxnEncodedObj {
   // Payment Transaction
   // https://developer.algorand.org/docs/reference/transactions/#payment-transaction
   rcv: Buffer;
-  amt: number;
+  amt: number | bigint;
   close: Buffer;
 
   // Key Registration Transaction
@@ -646,7 +646,7 @@ export interface TxnEncodedObj {
   // Asset Transfer Transaction
   // https://developer.algorand.org/docs/reference/transactions/#asset-transfer-transaction
   xaid: number;
-  aamt: number;
+  aamt: number | bigint;
   asnd: Buffer;
   arcv: Buffer;
   aclose: Buffer;
@@ -683,7 +683,7 @@ declare enum TxnOnComplete {
 
 // https://developer.algorand.org/docs/reference/transactions/#asset-parameters
 export interface AssetDefEnc {
-  t: number;
+  t: number | bigint;
   dc: number;
   df: number;
   un: string;

@@ -17,13 +17,13 @@ export class StoreAccountImpl implements StoreAccount {
   readonly account: Account;
   readonly address: string;
   assets: AssetHolding[];
-  amount: number;
+  amount: bigint;
   appsLocalState: AppLocalState[];
   appsTotalSchema: SSCSchemaConfig;
   createdApps: CreatedApps[];
   createdAssets: CreatedAssets[];
 
-  constructor (balance: number, account?: Account) {
+  constructor (balance: number | bigint, account?: Account) {
     if (account) {
       // set config if account is passed by user
       this.account = account;
@@ -35,7 +35,7 @@ export class StoreAccountImpl implements StoreAccount {
     }
 
     this.assets = [];
-    this.amount = balance;
+    this.amount = BigInt(balance);
     this.appsLocalState = [];
     this.appsTotalSchema = <SSCSchemaConfig>{};
     this.createdApps = [];
@@ -43,7 +43,7 @@ export class StoreAccountImpl implements StoreAccount {
   }
 
   // returns account balance in microAlgos
-  balance (): number {
+  balance (): bigint {
     return this.amount;
   }
 
