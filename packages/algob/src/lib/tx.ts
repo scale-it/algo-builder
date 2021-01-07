@@ -101,7 +101,7 @@ export function encodeNote (note: string | undefined, noteb64: string| undefined
 }
 
 /**
- * Description: Returns unsigned transaction as per ExecParams
+ * Returns unsigned transaction as per ExecParams
  * ExecParams can be of following types:
  *  + AlgoTransferParam used for transferring algo
  *  + AssetTransferParam used for transferring asset
@@ -137,11 +137,31 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
     }
     case TransactionType.ClearSSC: {
       return algosdk.makeApplicationClearStateTxn(
-        execParams.fromAccount.addr, suggestedParams, execParams.appId, execParams.appArgs);
+        execParams.fromAccount.addr,
+        suggestedParams,
+        execParams.appId,
+        execParams.appArgs,
+        execParams.accounts,
+        execParams.foreignApps,
+        execParams.foreignAssets,
+        note,
+        execParams.lease,
+        execParams.rekeyTo
+      );
     }
     case TransactionType.DeleteSSC: {
       return algosdk.makeApplicationDeleteTxn(
-        execParams.fromAccount.addr, suggestedParams, execParams.appId, execParams.appArgs);
+        execParams.fromAccount.addr,
+        suggestedParams,
+        execParams.appId,
+        execParams.appArgs,
+        execParams.accounts,
+        execParams.foreignApps,
+        execParams.foreignAssets,
+        note,
+        execParams.lease,
+        execParams.rekeyTo
+      );
     }
     case TransactionType.CallNoOpSSC: {
       return algosdk.makeApplicationNoOpTxn(
@@ -158,7 +178,17 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
     }
     case TransactionType.CloseSSC: {
       return algosdk.makeApplicationCloseOutTxn(
-        execParams.fromAccount.addr, suggestedParams, execParams.appId, execParams.appArgs);
+        execParams.fromAccount.addr,
+        suggestedParams,
+        execParams.appId,
+        execParams.appArgs,
+        execParams.accounts,
+        execParams.foreignApps,
+        execParams.foreignAssets,
+        note,
+        execParams.lease,
+        execParams.rekeyTo
+      );
     }
     default: {
       throw new BuilderError(ERRORS.GENERAL.TRANSACTION_TYPE_ERROR, { error: transactionType });
@@ -167,7 +197,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
 }
 
 /**
- * Description: returns signed transaction
+ * Returns signed transaction
  * @param txn unsigned transaction
  * @param execParams transaction execution parametrs
  */
@@ -190,7 +220,7 @@ function signTransaction (txn: Transaction, execParams: ExecParams): Uint8Array 
 }
 
 /**
- * Description: send signed transaction to network and wait for confirmation
+ * Send signed transaction to network and wait for confirmation
  * @param deployer AlgobDeployer
  * @param rawTxns Signed Transaction(s)
  */
@@ -201,6 +231,11 @@ async function sendAndWait (
   return await deployer.waitForConfirmation(txInfo.txId);
 }
 
+/**
+ * Execute single transaction or group of transactions (atomic transaction)
+ * @param deployer AlgobDeployer
+ * @param execParams transaction parameters or atomic transaction parameters
+ */
 export async function executeTransaction (
   deployer: AlgobDeployer,
   execParams: ExecParams | ExecParams[]): Promise<algosdk.ConfirmedTxInfo> {
@@ -232,7 +267,7 @@ export async function executeTransaction (
 }
 
 /**
- * Description: decode signed txn from file and send to network.
+ * Decode signed txn from file and send to network.
  * probably won't work, because transaction contains fields like
  * firstValid and lastValid which might not be equal to the
  * current network's blockchain block height.

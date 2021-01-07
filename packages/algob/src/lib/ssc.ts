@@ -1,16 +1,35 @@
-import type { Account as AccountSDK, ConfirmedTxInfo } from "algosdk";
-import tx from "algosdk";
+import tx, { Account as AccountSDK, ConfirmedTxInfo, decodeAddress } from "algosdk";
 
 import { AlgobDeployer, TxParams } from "../types";
 import { mkTxParams } from "./tx";
 
-// returns parsed string to Uint8Array
+/**
+ * Converts base64 string into bytes.
+ * @param s base64 string
+ */
 export function base64ToBytes (s: string): Uint8Array {
   return new Uint8Array(Buffer.from(s));
 }
 
 /**
- * Description: Transaction to update TEAL Programs for a contract.
+ * Converts integer to bytes in big endian.
+ */
+export function intToBigEndian (x: number): Uint8Array {
+  const y = Math.floor(x / 2 ** 32);
+  const byt = [y, (y << 8), (y << 16), (y << 24), x, (x << 8), (x << 16), (x << 24)].map(z => z >>> 24);
+  return new Uint8Array(byt);
+}
+
+/**
+ * Converts address to bytes.
+ * @param addr : algorand address
+ */
+export function addressToBytes (addr: string): Uint8Array {
+  return decodeAddress(addr).publicKey;
+}
+
+/**
+ * Transaction to update TEAL Programs for a contract.
  * @param deployer AlgobDeployer
  * @param sender Account from which call needs to be made
  * @param payFlags Transaction Flags

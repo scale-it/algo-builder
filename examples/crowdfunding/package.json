@@ -1,5 +1,5 @@
 {
-  "name": "permissioned-voting-pyteal",
+  "name": "crowdfunding-application",
   "version": "1.0.0",
   "main": "index.js",
   "license": "Apache-2.0",
