@@ -1,3 +1,4 @@
+import { getProgram } from "@algorand-builder/algob";
 import { ExecParams, SignType, TransactionType } from "@algorand-builder/algob/src/types";
 import { assert } from "chai";
 
@@ -42,7 +43,7 @@ describe("Algorand Smart Contracts", function () {
     assert.equal(bob.balance(), initialBobHolding);
 
     // execute transaction
-    await runtime.executeTx(txnParams, 'basic.teal', []);
+    await runtime.executeTx(txnParams, getProgram('basic.teal'), []);
 
     // get final state (updated accounts)
     const johnAcc = getAcc(runtime, john);
@@ -61,7 +62,7 @@ describe("Algorand Smart Contracts", function () {
 
     // execute transaction (should fail is logic is incorrect)
     await expectTealErrorAsync(
-      async () => await runtime.executeTx(invalidParams, 'incorrect-logic.teal', []),
+      async () => await runtime.executeTx(invalidParams, getProgram('incorrect-logic.teal'), []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 

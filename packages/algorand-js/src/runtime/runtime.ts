@@ -12,7 +12,6 @@ import { Interpreter } from "../index";
 import { BIGINT0, BIGINT1 } from "../interpreter/opcode-list";
 import { checkIndexBound, compareArray } from "../lib/compare";
 import { SSC_BYTES } from "../lib/constants";
-import { getProgram } from "../lib/files";
 import { assertValidSchema, getKeyValPair } from "../lib/stateful";
 import type { Context, StackElem, State, StoreAccount, Txn } from "../types";
 
@@ -256,7 +255,7 @@ export class Runtime {
    * @param fileName : smart contract file (.teal) name in assets/
    * @param args : external arguments to smart contract
    */
-  async executeTx (txnParams: ExecParams | ExecParams[], fileName: string,
+  async executeTx (txnParams: ExecParams | ExecParams[], program: string,
     args: Uint8Array[]): Promise<void> {
     const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
 
@@ -268,7 +267,6 @@ export class Runtime {
       args: args
     };
 
-    const program = getProgram(fileName); // get TEAL code as string
     const interpreter = new Interpreter();
     await interpreter.execute(program, this);
 

@@ -1,4 +1,5 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
+import { getProgram } from "@algorand-builder/algob";
 import { ExecParams, SignType, TransactionType } from "@algorand-builder/algob/src/types";
 import { assert } from "chai";
 
@@ -37,7 +38,7 @@ describe("Algorand Stateless Smart Contracts", function () {
     assert.equal(john.balance(), initialJohnHolding);
 
     // execute transaction
-    await runtime.executeTx(txnParams, 'escrow.teal', []);
+    await runtime.executeTx(txnParams, getProgram('escrow.teal'), []);
 
     // check final state (updated accounts)
     assert.equal(getAcc(runtime, escrow).balance(), initialEscrowHolding - 100); // check if 100 microAlgo's are withdrawn
@@ -50,7 +51,7 @@ describe("Algorand Stateless Smart Contracts", function () {
 
     // execute transaction (should fail as amount = 500)
     await expectTealErrorAsync(
-      async () => await runtime.executeTx(invalidParams, 'escrow.teal', []),
+      async () => await runtime.executeTx(invalidParams, getProgram('escrow.teal'), []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -61,7 +62,7 @@ describe("Algorand Stateless Smart Contracts", function () {
 
     // execute transaction (should fail as fee is 12000)
     await expectTealErrorAsync(
-      async () => await runtime.executeTx(invalidParams, 'escrow.teal', []),
+      async () => await runtime.executeTx(invalidParams, getProgram('escrow.teal'), []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -76,7 +77,7 @@ describe("Algorand Stateless Smart Contracts", function () {
 
     // execute transaction (should fail as transfer type is asset)
     await expectTealErrorAsync(
-      async () => await runtime.executeTx(invalidParams, 'escrow.teal', []),
+      async () => await runtime.executeTx(invalidParams, getProgram('escrow.teal'), []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -88,7 +89,7 @@ describe("Algorand Stateless Smart Contracts", function () {
 
     // execute transaction (should fail as receiver is bob)
     await expectTealErrorAsync(
-      async () => await runtime.executeTx(invalidParams, 'escrow.teal', []),
+      async () => await runtime.executeTx(invalidParams, getProgram('escrow.teal'), []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });

@@ -1,3 +1,4 @@
+import { getProgram } from "@algorand-builder/algob";
 import { assert } from "chai";
 
 import { ERRORS } from "../../../src/errors/errors-list";
@@ -14,7 +15,6 @@ import {
   Sub, Substring, Substring3, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
-import { getProgram } from "../../../src/lib/files";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { Runtime } from "../../../src/runtime/runtime";
 import { expectTealError } from "../../helpers/errors";
