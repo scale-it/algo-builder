@@ -6,13 +6,13 @@ import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccountImpl } from "../../src/index";
 import { getAcc } from "../helpers/account";
 import { expectTealErrorAsync } from "../helpers/errors";
-import { useIntegrationFile } from "../helpers/integration";
+import { useFixture } from "../helpers/integration";
 
 const initialJohnHolding = 1000;
 const initialBobHolding = 500;
 
 describe("Algorand Smart Contracts", function () {
-  useIntegrationFile("basic-teal");
+  useFixture("basic-teal");
   let john = new StoreAccountImpl(initialJohnHolding);
   let bob = new StoreAccountImpl(initialBobHolding);
 

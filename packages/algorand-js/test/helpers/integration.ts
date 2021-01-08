@@ -10,9 +10,9 @@ export function useFixture (fixtureName: string): void {
   let prevWorkingDir: string;
 
   before(() => {
-    filePath = getIntegrationFilePath(filename);
+    dirPath = getFixtureWorkingDir(fixtureName);
     prevWorkingDir = process.cwd();
-    process.chdir(filePath);
+    process.chdir(dirPath);
   });
 
   after(() => {
@@ -21,16 +21,16 @@ export function useFixture (fixtureName: string): void {
 }
 
 export function getFixtureWorkingDir (
-  filename: string
+  fixtureName: string
 ): string {
   const filePath = path.join(
     __dirname,
     "..",
-    "integration-test-files",
-    filename
+    "fixtures",
+    fixtureName
   );
   if (!fs.existsSync(filePath)) {
-    throw new Error(`Integration files ${filename} doesn't exist`);
+    throw new Error(`Fixture files ${fixtureName} doesn't exist`);
   }
 
   return fs.realpathSync(filePath);

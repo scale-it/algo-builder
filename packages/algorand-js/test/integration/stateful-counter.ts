@@ -6,10 +6,10 @@ import { Runtime, StoreAccountImpl } from "../../src/index";
 import { BIGINT1 } from "../../src/interpreter/opcode-list";
 import { base64ToBytes } from "../../src/lib/parsing";
 import { getAcc } from "../helpers/account";
-import { useIntegrationFile } from "../helpers/integration";
+import { useFixture } from "../helpers/integration";
 
 describe("Algorand Smart Contracts - Stateful Counter example", function () {
-  useIntegrationFile("stateful");
+  useFixture("stateful");
   const john = new StoreAccountImpl(1000);
 
   const txnParams: ExecParams = {
