@@ -5,7 +5,6 @@ import { ExecParams, SSCDeploymentFlags, TransactionType } from "@algorand-build
 import { AssetDef, AssetHolding, assignGroupID, encodeAddress, SSCAttributes, SSCStateSchema } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
-import { getProgram } from "../../test/helpers/fs";
 import { mockSuggestedParams } from "../../test/mocks/txn";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
@@ -13,6 +12,7 @@ import { Interpreter } from "../index";
 import { BIGINT0, BIGINT1 } from "../interpreter/opcode-list";
 import { checkIndexBound, compareArray } from "../lib/compare";
 import { SSC_BYTES } from "../lib/constants";
+import { getProgram } from "../lib/files";
 import { assertValidSchema, getKeyValPair } from "../lib/stateful";
 import type { Context, StackElem, State, StoreAccount, Txn } from "../types";
 

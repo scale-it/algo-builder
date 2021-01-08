@@ -14,10 +14,11 @@ import {
   Sub, Substring, Substring3, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
+import { getProgram } from "../../../src/lib/files";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { Runtime } from "../../../src/runtime/runtime";
 import { expectTealError } from "../../helpers/errors";
-import { getProgram } from "../../helpers/fs";
+import { useIntegrationFile } from "../../helpers/integration";
 
 // base64 case needs to be verified at the time of decoding
 describe("Parser", function () {
@@ -627,6 +628,7 @@ describe("Parser", function () {
   });
 
   describe("Opcodes list from TEAL file", () => {
+    useIntegrationFile("teal-files");
     const interpreter = new Interpreter();
 
     it("Sould return correct opcode list for '+'", async () => {

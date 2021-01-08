@@ -3,16 +3,17 @@ import { ExecParams, SignType, TransactionType } from "@algorand-builder/algob/s
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
-import { Runtime } from "../../src/index";
-import { StoreAccountImpl } from "../../src/runtime/account";
+import { Runtime, StoreAccountImpl } from "../../src/index";
 import { getAcc } from "../helpers/account";
 import { expectTealErrorAsync } from "../helpers/errors";
+import { useIntegrationFile } from "../helpers/integration";
 import { johnAccount } from "../mocks/account";
 
 const initialEscrowHolding = 1000e6;
 const initialJohnHolding = 500;
 
 describe("Algorand Stateless Smart Contracts", function () {
+  useIntegrationFile("escrow-account");
   const escrow = new StoreAccountImpl(initialEscrowHolding); // 1000 ALGO
   const john = new StoreAccountImpl(initialJohnHolding, johnAccount); // 0.005 ALGO
   // set up transaction paramenters
