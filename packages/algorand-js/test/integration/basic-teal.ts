@@ -2,15 +2,17 @@ import { ExecParams, SignType, TransactionType } from "@algorand-builder/algob/s
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
-import { Runtime } from "../../src/index";
-import { StoreAccountImpl } from "../../src/runtime/account";
+import { Runtime, StoreAccountImpl } from "../../src/index";
 import { getAcc } from "../helpers/account";
 import { expectTealErrorAsync } from "../helpers/errors";
+import { getProgram } from "../helpers/files";
+import { useFixture } from "../helpers/integration";
 
 const initialJohnHolding = 1000;
 const initialBobHolding = 500;
 
 describe("Algorand Smart Contracts", function () {
+  useFixture("basic-teal");
   let john = new StoreAccountImpl(initialJohnHolding);
   let bob = new StoreAccountImpl(initialBobHolding);
 
@@ -41,7 +43,7 @@ describe("Algorand Smart Contracts", function () {
     assert.equal(bob.balance(), initialBobHolding);
 
     // execute transaction
-    await runtime.executeTx(txnParams, 'basic.teal', []);
+    await runtime.executeTx(txnParams, getProgram('basic.teal'), []);
 
     // get final state (updated accounts)
     const johnAcc = getAcc(runtime, john);
@@ -60,7 +62,7 @@ describe("Algorand Smart Contracts", function () {
 
     // execute transaction (should fail is logic is incorrect)
     await expectTealErrorAsync(
-      async () => await runtime.executeTx(invalidParams, 'incorrect-logic.teal', []),
+      async () => await runtime.executeTx(invalidParams, getProgram('incorrect-logic.teal'), []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 

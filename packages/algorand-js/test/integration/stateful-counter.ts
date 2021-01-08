@@ -1,13 +1,15 @@
 import { ExecParams, SignType, TransactionType } from "@algorand-builder/algob/src/types";
 import { assert } from "chai";
 
-import { Runtime } from "../../src/index";
+import { Runtime, StoreAccountImpl } from "../../src/index";
 import { BIGINT1 } from "../../src/interpreter/opcode-list";
 import { base64ToBytes } from "../../src/lib/parsing";
-import { StoreAccountImpl } from "../../src/runtime/account";
 import { getAcc } from "../helpers/account";
+import { getProgram } from "../helpers/files";
+import { useFixture } from "../helpers/integration";
 
 describe("Algorand Smart Contracts - Stateful Counter example", function () {
+  useFixture("stateful");
   const john = new StoreAccountImpl(1000);
 
   const txnParams: ExecParams = {
@@ -37,7 +39,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
   const key = "counter";
   it("should initialize global and local counter to 1 on first call", async function () {
     // execute transaction
-    await runtime.executeTx(txnParams, 'counter-approval.teal', []);
+    await runtime.executeTx(txnParams, getProgram('counter-approval.teal'), []);
 
     const globalCounter = runtime.getGlobalState(txnParams.appId, base64ToBytes(key));
     assert.isDefined(globalCounter); // there should be a value present with key "counter"
@@ -57,7 +59,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
     assert.equal(localCounter, BIGINT1);
 
     // execute transaction
-    await runtime.executeTx(txnParams, 'counter-approval.teal', []);
+    await runtime.executeTx(txnParams, getProgram('counter-approval.teal'), []);
 
     // after execution the counters should be updated by +1
     const newGlobalCounter = runtime.getGlobalState(txnParams.appId, base64ToBytes(key));

@@ -3,16 +3,18 @@ import { ExecParams, SignType, TransactionType } from "@algorand-builder/algob/s
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
-import { Runtime } from "../../src/index";
-import { StoreAccountImpl } from "../../src/runtime/account";
+import { Runtime, StoreAccountImpl } from "../../src/index";
 import { getAcc } from "../helpers/account";
 import { expectTealErrorAsync } from "../helpers/errors";
+import { getProgram } from "../helpers/files";
+import { useFixture } from "../helpers/integration";
 import { johnAccount } from "../mocks/account";
 
 const initialEscrowHolding = 1000e6;
 const initialJohnHolding = 500;
 
 describe("Algorand Stateless Smart Contracts", function () {
+  useFixture("escrow-account");
   const escrow = new StoreAccountImpl(initialEscrowHolding); // 1000 ALGO
   const john = new StoreAccountImpl(initialJohnHolding, johnAccount); // 0.005 ALGO
   // set up transaction paramenters
@@ -36,7 +38,7 @@ describe("Algorand Stateless Smart Contracts", function () {
     assert.equal(john.balance(), initialJohnHolding);
 
     // execute transaction
-    await runtime.executeTx(txnParams, 'escrow.teal', []);
+    await runtime.executeTx(txnParams, getProgram('escrow.teal'), []);
 
     // check final state (updated accounts)
     assert.equal(getAcc(runtime, escrow).balance(), initialEscrowHolding - 100); // check if 100 microAlgo's are withdrawn
@@ -49,7 +51,7 @@ describe("Algorand Stateless Smart Contracts", function () {
 
     // execute transaction (should fail as amount = 500)
     await expectTealErrorAsync(
-      async () => await runtime.executeTx(invalidParams, 'escrow.teal', []),
+      async () => await runtime.executeTx(invalidParams, getProgram('escrow.teal'), []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -60,7 +62,7 @@ describe("Algorand Stateless Smart Contracts", function () {
 
     // execute transaction (should fail as fee is 12000)
     await expectTealErrorAsync(
-      async () => await runtime.executeTx(invalidParams, 'escrow.teal', []),
+      async () => await runtime.executeTx(invalidParams, getProgram('escrow.teal'), []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -75,7 +77,7 @@ describe("Algorand Stateless Smart Contracts", function () {
 
     // execute transaction (should fail as transfer type is asset)
     await expectTealErrorAsync(
-      async () => await runtime.executeTx(invalidParams, 'escrow.teal', []),
+      async () => await runtime.executeTx(invalidParams, getProgram('escrow.teal'), []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -87,7 +89,7 @@ describe("Algorand Stateless Smart Contracts", function () {
 
     // execute transaction (should fail as receiver is bob)
     await expectTealErrorAsync(
-      async () => await runtime.executeTx(invalidParams, 'escrow.teal', []),
+      async () => await runtime.executeTx(invalidParams, getProgram('escrow.teal'), []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
