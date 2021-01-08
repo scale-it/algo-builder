@@ -216,12 +216,16 @@ export class Runtime {
     const sender = flags.sender;
     const senderAcc = this.assertAccountDefined(this.store.accounts.get(sender.addr));
 
+    // create app with id = 0 in globalApps for teal execution
+    const app = senderAcc.addApp(0, flags);
+    this.ctx.state.globalApps.set(app.id, app.params);
+
     this.createApplicationTx(flags, payFlags);
     await this.run(program); // execute TEAL code with appId = 0
 
-    const app = senderAcc.addApp(++this.appCounter, flags);
-    this.store.globalApps.set(app.id, app.params); // update globalApps Map
-    return app.id;
+    this.store.globalApps.set(++this.appCounter, app.params); // update globalApps Map
+    this.ctx.state.globalApps.delete(0); // remove zero app
+    return this.appCounter;
   }
 
   // creates new OptIn transaction object and update context
