@@ -1,4 +1,3 @@
-import { getProgram } from "@algorand-builder/algob";
 import { assert } from "chai";
 
 import { ERRORS } from "../../../src/errors/errors-list";
@@ -18,6 +17,7 @@ import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { Runtime } from "../../../src/runtime/runtime";
 import { expectTealError } from "../../helpers/errors";
+import { getProgram } from "../../helpers/files";
 import { useFixture } from "../../helpers/integration";
 
 // base64 case needs to be verified at the time of decoding

@@ -1,4 +1,3 @@
-import { getProgram } from "@algorand-builder/algob";
 import { ExecParams, SignType, TransactionType } from "@algorand-builder/algob/src/types";
 import { assert } from "chai";
 
@@ -6,6 +5,7 @@ import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccountImpl } from "../../src/index";
 import { getAcc } from "../helpers/account";
 import { expectTealErrorAsync } from "../helpers/errors";
+import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 
 const initialJohnHolding = 1000;
