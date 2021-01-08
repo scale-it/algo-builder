@@ -2,13 +2,11 @@ import * as fs from "fs";
 import path from "path";
 
 /**
- * This helper adds mocha hooks to run the tests inside one of the projects
- * from test/integration-test-files.
- *
- * @param filename The base name of the folder with the integration files to use.
+ * This helper adds mocha hooks to run the tests inside one of the projects in test/fixtures.
+ * @param fixtureName: The base name of the folder in test/fixtures
  */
-export function useIntegrationFile (filename: string): void {
-  let filePath: string;
+export function useFixture (fixtureName: string): void {
+  let dirPath: string;
   let prevWorkingDir: string;
 
   before(() => {
