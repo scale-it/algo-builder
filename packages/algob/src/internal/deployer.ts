@@ -20,6 +20,7 @@ import type {
   LsigInfo,
   SSCDeploymentFlags,
   SSCInfo,
+  SSCOptionalFlags,
   StrMap,
   TxParams
 } from "../types";
@@ -332,8 +333,8 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
     sender: Account,
     appId: number,
     payFlags: TxParams,
-    appArgs?: Uint8Array[]): Promise<void> {
-    await this.algoOp.optInToSSC(sender, appId, payFlags, appArgs);
+    flags: SSCOptionalFlags): Promise<void> {
+    await this.algoOp.optInToSSC(sender, appId, payFlags, flags);
   }
 }
 

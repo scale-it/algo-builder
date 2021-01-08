@@ -18,6 +18,7 @@ import type {
   Network,
   SSCDeploymentFlags,
   SSCInfo,
+  SSCOptionalFlags,
   StrMap,
   TxParams
 } from "../types";
@@ -56,7 +57,7 @@ export interface AlgoOperator {
     asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: AccountMap, assetIndex: number
   ) => Promise<void>
   optInToSSC: (
-    sender: Account, appId: number, payFlags: TxParams, appArgs?: Uint8Array[]) => Promise<void>
+    sender: Account, appId: number, payFlags: TxParams, flags: SSCOptionalFlags) => Promise<void>
   ensureCompiled: (name: string, force?: boolean, scTmplParams?: StrMap) => Promise<ASCCache>
 }
 
@@ -314,9 +315,20 @@ export class AlgoOperatorImpl implements AlgoOperator {
     sender: Account,
     appId: number,
     payFlags: TxParams,
-    appArgs?: Uint8Array[]): Promise<void> {
+    flags: SSCOptionalFlags): Promise<void> {
     const params = await tx.mkTxParams(this.algodClient, payFlags);
-    const txn = algosdk.makeApplicationOptInTxn(sender.addr, params, appId, appArgs);
+    const txn = algosdk.makeApplicationOptInTxn(
+      sender.addr,
+      params,
+      appId,
+      flags.appArgs,
+      flags.accounts,
+      flags.foreignApps,
+      flags.foreignAssets,
+      flags.note,
+      flags.lease,
+      flags.rekeyTo);
+
     const txId = txn.txID().toString();
     const signedTxn = txn.signTxn(sender.sk);
 

@@ -585,7 +585,7 @@ export interface AlgobDeployer {
    * @sender Account for which opt-in is required
    * @appId Application Index (ID of the application)
    */
-  optInToSSC: (sender: Account, index: number, payFlags: TxParams) => Promise<void>
+  optInToSSC: (sender: Account, index: number, payFlags: TxParams, flags: SSCOptionalFlags) => Promise<void>
 
   /**
    * Create an entry in a script log (stored in artifacts/scripts/<script_name>.log) file. */
