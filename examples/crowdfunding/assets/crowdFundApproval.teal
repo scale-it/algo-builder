@@ -101,7 +101,7 @@ balance
 // if the balance is 0 allow the delete
 bnz finished
 
-// if the escrow is not empty then 
+// if the escrow is not empty then
 // there must be need two transactions
 // in a group
 global GroupSize
@@ -122,7 +122,7 @@ gtxn 1 CloseRemainderTo
 ==
 &&
 
-// the amount of the payment transaction 
+// the amount of the payment transaction
 // should be 0
 gtxn 1 Amount
 int 0
@@ -154,7 +154,7 @@ app_global_get
 txn Sender
 ==
 
-// the call should pass the escrow 
+// the call should pass the escrow
 // address
 txn NumAppArgs
 int 1
@@ -189,7 +189,7 @@ txn NumAppArgs
 ==
 bz check_params
 
-// Verify someone is 
+// Verify someone is
 // not just opting in
 int OptIn
 txn OnCompletion
@@ -207,13 +207,13 @@ bnz donate
 
 // reclaim
 txna ApplicationArgs 0
-byte "reclaim" 
+byte "reclaim"
 ==
 bnz reclaim
 
 // claim
 txna ApplicationArgs 0
-byte "claim" 
+byte "claim"
 ==
 bnz claim
 b failed
@@ -224,7 +224,7 @@ donate:
 
 // check dates to verify
 // in valid range
-// Note: Timestamp check is excluded from this example, 
+// Note: Timestamp check is excluded from this example,
 // To add it, remove comments from following lines.
 // global LatestTimestamp
 // byte "StartDate"
@@ -250,7 +250,7 @@ int 1
 &&
 bz failed
 
-// verify escrow is receiving 
+// verify escrow is receiving
 // second payment tx
 byte "Escrow"
 app_global_get
@@ -258,7 +258,7 @@ gtxn 1 Receiver
 ==
 bz failed
 
-// increment the total 
+// increment the total
 // funds raised so far
 byte "Total"
 app_global_get
@@ -305,9 +305,9 @@ int 2
 ==
 bz failed
 
-// verify that the receiver 
+// verify that the receiver
 // of the payment transaction
-// is the address stored 
+// is the address stored
 // when the fund was created
 gtxn 1 Receiver
 byte "Receiver"
@@ -325,13 +325,13 @@ app_global_get
 
 // verify that the CloseRemainderTo
 // attribute is set to the receiver
-gtxn 1 CloseRemainderTo 
+gtxn 1 CloseRemainderTo
 byte "Receiver"
 app_global_get
 ==
 &&
 
-// verify that the fund end date 
+// verify that the fund end date
 // has passed
 // global LatestTimestamp
 // byte "EndDate"
@@ -403,11 +403,11 @@ app_global_get
 
 // because the escrow
 // has to pay the fee
-// the amount of the 
+// the amount of the
 // payment transaction
 // plus the fee should
 // be less than or equal to
-// the amount originally 
+// the amount originally
 // given
 gtxn 1 Amount
 gtxn 1 Fee
@@ -435,7 +435,7 @@ gtxn 1 Amount
 int 1
 balance
 ==
-gtxn 1 CloseRemainderTo 
+gtxn 1 CloseRemainderTo
 global ZeroAddress
 ==
 ||

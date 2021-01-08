@@ -1460,7 +1460,7 @@ export class AppLocalGet extends Op {
     const accountIndex = this.assertBigInt(stack.pop());
 
     const account = this.interpreter.runtime.getAccount(accountIndex);
-    const appId = this.interpreter.runtime.ctx.tx.apid;
+    const appId = this.interpreter.runtime.ctx.tx.apid || 0;
 
     const val = account.getLocalState(appId, key);
     if (val) {
@@ -1528,7 +1528,7 @@ export class AppGlobalGet extends Op {
     this.assertMinStackLen(stack, 1);
     const key = this.assertBytes(stack.pop());
 
-    const appId = this.interpreter.runtime.ctx.tx.apid;
+    const appId = this.interpreter.runtime.ctx.tx.apid || 0;
     const val = this.interpreter.runtime.getGlobalState(appId, key);
     if (val) {
       stack.push(val);
@@ -1607,7 +1607,7 @@ export class AppLocalPut extends Op {
     const accountIndex = this.assertBigInt(stack.pop());
 
     const account = this.interpreter.runtime.getAccount(accountIndex);
-    const appId = this.interpreter.runtime.ctx.tx.apid;
+    const appId = this.interpreter.runtime.ctx.tx.apid || 0;
 
     // get updated local state for account
     const localState = account.updateLocalState(appId, key, value);
@@ -1639,7 +1639,7 @@ export class AppGlobalPut extends Op {
     const value = stack.pop();
     const key = this.assertBytes(stack.pop());
 
-    const appId = this.interpreter.runtime.ctx.tx.apid;
+    const appId = this.interpreter.runtime.ctx.tx.apid || 0; // if undefined use 0 as default
     const globalState = this.interpreter.runtime.updateGlobalState(appId, key, value);
 
     const globalApp = this.interpreter.runtime.assertAppDefined(appId);
@@ -1669,7 +1669,7 @@ export class AppLocalDel extends Op {
     const key = this.assertBytes(stack.pop());
     const accountIndex = this.assertBigInt(stack.pop());
 
-    const appId = this.interpreter.runtime.ctx.tx.apid;
+    const appId = this.interpreter.runtime.ctx.tx.apid || 0;
     const account = this.interpreter.runtime.getAccount(accountIndex);
 
     const localState = account.appsLocalState;
@@ -1708,7 +1708,7 @@ export class AppGlobalDel extends Op {
     this.assertMinStackLen(stack, 1);
     const key = this.assertBytes(stack.pop());
 
-    const appId = this.interpreter.runtime.ctx.tx.apid;
+    const appId = this.interpreter.runtime.ctx.tx.apid || 0;
 
     const appDelta = this.interpreter.runtime.assertAppDefined(appId);
     if (appDelta) {

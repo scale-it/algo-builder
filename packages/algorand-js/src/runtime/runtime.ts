@@ -1,8 +1,8 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
 import { mkTransaction } from "@algorand-builder/algob";
-import { ExecParams, SSCDeploymentFlags, TransactionType } from "@algorand-builder/algob/src/types";
-import { AssetDef, AssetHolding, assignGroupID, encodeAddress, SSCAttributes, SSCStateSchema } from "algosdk";
+import { ExecParams, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
+import algosdk, { AssetDef, AssetHolding, assignGroupID, encodeAddress, SSCAttributes, SSCStateSchema } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
 import { mockSuggestedParams } from "../../test/mocks/txn";
@@ -185,14 +185,71 @@ export class Runtime {
     }
   }
 
-  // creates new application and returns application id
-  addApp (params: SSCDeploymentFlags): number {
-    const sender = params.sender;
-    const senderAcc = this.assertAccountDefined(this.store.accounts.get(sender.addr));
-    const app = senderAcc.addApp(++this.appCounter, params);
+  // creates new application transaction object and update context
+  createApplicationTx (flags: SSCDeploymentFlags, payFlags: TxParams): void {
+    const txn = algosdk.makeApplicationCreateTxn(
+      flags.sender.addr,
+      mockSuggestedParams(payFlags),
+      algosdk.OnApplicationComplete.NoOpOC,
+      new Uint8Array(32), // mock approval program
+      new Uint8Array(32), // mock clear progam
+      flags.localInts,
+      flags.localBytes,
+      flags.globalInts,
+      flags.globalBytes,
+      flags.appArgs,
+      flags.accounts,
+      flags.foreignApps,
+      flags.foreignAssets,
+      flags.note,
+      flags.lease,
+      flags.rekeyTo);
 
-    this.store.globalApps.set(app.id, app.params); // update globalApps Map
-    return app.id;
+    const encTx = txn.get_obj_for_encoding();
+    encTx.txID = txn.txID();
+    this.ctx.tx = encTx;
+    this.ctx.gtxs = [encTx];
+  }
+
+  // creates new application and returns application id
+  async addApp (flags: SSCDeploymentFlags, payFlags: TxParams, program: string): Promise<number> {
+    const sender = flags.sender;
+    const senderAcc = this.assertAccountDefined(this.store.accounts.get(sender.addr));
+
+    // create app with id = 0 in globalApps for teal execution
+    const app = senderAcc.addApp(0, flags);
+    this.ctx.state.globalApps.set(app.id, app.params);
+
+    this.createApplicationTx(flags, payFlags);
+    await this.run(program); // execute TEAL code with appId = 0
+
+    this.store.globalApps.set(++this.appCounter, app.params); // update globalApps Map
+    this.ctx.state.globalApps.delete(0); // remove zero app
+    return this.appCounter;
+  }
+
+  // creates new OptIn transaction object and update context
+  createOptInTx (
+    senderAddr: string,
+    appId: number,
+    payFlags: TxParams,
+    flags: SSCOptionalFlags): void {
+    const txn = algosdk.makeApplicationOptInTxn(
+      senderAddr,
+      mockSuggestedParams(payFlags),
+      appId,
+      flags.appArgs,
+      flags.accounts,
+      flags.foreignApps,
+      flags.foreignAssets,
+      flags.note,
+      flags.lease,
+      flags.rekeyTo);
+
+    const encTx = txn.get_obj_for_encoding();
+    encTx.txID = txn.txID();
+    this.ctx.tx = encTx;
+    this.ctx.gtxs = [encTx];
   }
 
   /**
@@ -200,10 +257,14 @@ export class Runtime {
    * @param appId Application Id
    * @param accountAddr Account address
    */
-  optInToApp (appId: number, accountAddr: string): void {
+  async optInToApp (appId: number, accountAddr: string,
+    flags: SSCOptionalFlags, payFlags: TxParams, program: string): Promise<void> {
     const appParams = this.store.globalApps.get(appId);
     const account = this.assertAccountDefined(this.store.accounts.get(accountAddr));
     if (appParams) {
+      this.createOptInTx(accountAddr, appId, payFlags, flags);
+      await this.run(program); // execute TEAL code
+
       account.optInToApp(appId, appParams);
     } else {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
@@ -229,7 +290,7 @@ export class Runtime {
   }
 
   /**
-   * Description: update current state and account balances
+   * Update current state and account balances
    * @param txnParams : Transaction parameters
    * @param accounts : accounts passed by user
    */
@@ -249,7 +310,7 @@ export class Runtime {
   }
 
   /**
-   * Description: this function executes a transaction based on a smart
+   * This function executes a transaction based on a smart
    * contract logic and updates state afterwards
    * @param txnParams : Transaction parameters
    * @param fileName : smart contract file (.teal) name in assets/
@@ -267,10 +328,14 @@ export class Runtime {
       args: args
     };
 
+    await this.run(program);
+    this.prepareFinalState(txnParams); // update account balances
+  }
+
+  // execute teal code line by line
+  async run (program: string): Promise<void> {
     const interpreter = new Interpreter();
     await interpreter.execute(program, this);
-
     this.store = this.ctx.state; // update state after successful execution('local-state', 'global-state'..)
-    this.prepareFinalState(txnParams); // update account balances
   }
 }

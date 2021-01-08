@@ -11,6 +11,7 @@ import type {
   LsigInfo,
   SSCDeploymentFlags,
   SSCInfo,
+  SSCOptionalFlags,
   TxParams
 } from "../../src/types";
 
@@ -97,7 +98,7 @@ export class FakeDeployer implements AlgobDeployer {
   }
 
   optInToSSC (
-    sender: Account, index: number, payFlags: TxParams): Promise<void> {
+    sender: Account, index: number, payFlags: TxParams, flags: SSCOptionalFlags): Promise<void> {
     throw new Error("Not implemented");
   }
 }

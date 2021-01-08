@@ -146,6 +146,5 @@ class App {
       'global-state-schema': { 'num-byte-slice': params.globalBytes, 'num-uint': params.globalInts },
       'local-state-schema': { 'num-byte-slice': params.localBytes, 'num-uint': params.localInts }
     };
-    console.log('Created new app with id:', appId);
   }
 }

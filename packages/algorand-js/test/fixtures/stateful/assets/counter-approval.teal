@@ -1,5 +1,15 @@
 #pragma version 2
 
+int 0
+txn ApplicationID
+==
+bnz on_creation
+
+int OptIn
+txn OnCompletion
+==
+bnz on_optin
+
 // read global state
 byte "counter"
 dup
@@ -34,4 +44,12 @@ app_local_put
 
 // load return value as approval
 load 0
+return
+
+on_creation:
+int 1
+return
+
+on_optin:
+int 1
 return
