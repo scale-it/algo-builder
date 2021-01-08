@@ -20,7 +20,7 @@ export function useFixture (fixtureName: string): void {
   });
 }
 
-export function getIntegrationFilePath (
+export function getFixtureWorkingDir (
   filename: string
 ): string {
   const filePath = path.join(
