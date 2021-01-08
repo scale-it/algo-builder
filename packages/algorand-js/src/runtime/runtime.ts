@@ -82,7 +82,7 @@ export class Runtime {
   }
 
   /**
-   * Description: fetches global state value for key present app's global data
+   * Fetches global state value for key present app's global data
    * returns undefined otherwise
    * @param appId: current application id
    * @param key: key to fetch value of from local state
@@ -100,7 +100,7 @@ export class Runtime {
   }
 
   /**
-   * Description: add new key-value pair or updating pair with existing key in
+   * Add new key-value pair or updating pair with existing key in
    * app's global data for application id: appId, throw error otherwise
    * @param appId: current application id
    * @param key: key to fetch value of from local state
@@ -152,7 +152,7 @@ export class Runtime {
   }
 
   /**
-   * Description: creates new transaction object (tx, gtxs) from given txnParams
+   * Creates new transaction object (tx, gtxs) from given txnParams
    * @param txnParams : Transaction parameters for current txn or txn Group
    * @returns: [current transaction, transaction group]
    */
@@ -196,6 +196,11 @@ export class Runtime {
     return app.id;
   }
 
+  /**
+   * Account address opt-in for application Id
+   * @param appId Application Id
+   * @param accountAddr Account address
+   */
   optInToApp (appId: number, accountAddr: string): void {
     const appParams = this.store.globalApps.get(appId);
     const account = this.assertAccountDefined(this.store.accounts.get(accountAddr));
