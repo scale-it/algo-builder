@@ -51,7 +51,7 @@ export function assertBase32 (str: string, line: number): void {
 }
 
 // parse string to Uint8Array
-export function base64ToBytes (s: string): Uint8Array {
+export function stringToBytes (s: string): Uint8Array {
   return new Uint8Array(Buffer.from(s));
 }
 

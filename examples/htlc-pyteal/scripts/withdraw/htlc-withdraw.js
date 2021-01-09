@@ -6,14 +6,14 @@
  * the TEAL program. The TEAL program will transfer its balance to the seller
  * if the seller is able to provide the secret value that corresponds to the hash in the program.
 */
-const { TransactionType, SignType, base64ToBytes } = require('@algorand-builder/algob');
+const { TransactionType, SignType, stringToBytes } = require('@algorand-builder/algob');
 const { executeTransaction, prepareParameters } = require('./common');
 
 async function run (runtimeEnv, deployer) {
   const { alice, scTmplParams, secret } = prepareParameters(deployer);
   const wrongSecret = 'hero wisdom red split loop element vote belt';
 
-  let lsig = await deployer.loadLogic('htlc.py', [base64ToBytes(wrongSecret)], scTmplParams);
+  let lsig = await deployer.loadLogic('htlc.py', [stringToBytes(wrongSecret)], scTmplParams);
   let sender = lsig.address();
 
   const txnParams = {
@@ -28,7 +28,7 @@ async function run (runtimeEnv, deployer) {
   // Transaction Fails : as wrong secret value is used
   await executeTransaction(deployer, txnParams);
 
-  lsig = await deployer.loadLogic('htlc.py', [base64ToBytes(secret)], scTmplParams);
+  lsig = await deployer.loadLogic('htlc.py', [stringToBytes(secret)], scTmplParams);
   sender = lsig.address();
 
   // Transaction Passes : as right secret value is used

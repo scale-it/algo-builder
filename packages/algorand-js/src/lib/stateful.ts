@@ -4,7 +4,7 @@ import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { StackElem } from "../types";
 import { SSC_BYTES, SSC_UINT } from "./constants";
-import { base64ToBytes } from "./parsing";
+import { stringToBytes } from "./parsing";
 
 // returns new key value pair by setting type and corresponding values
 export function getKeyValPair (key: Uint8Array, value: StackElem): SSCStateSchema {
@@ -12,7 +12,7 @@ export function getKeyValPair (key: Uint8Array, value: StackElem): SSCStateSchem
   if (typeof value !== "bigint") {
     val = { type: SSC_BYTES, bytes: value, uint: 0 };
   } else {
-    val = { type: SSC_UINT, bytes: base64ToBytes(''), uint: Number(value) };
+    val = { type: SSC_UINT, bytes: stringToBytes(''), uint: Number(value) };
   }
 
   return {

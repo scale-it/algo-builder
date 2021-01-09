@@ -1,13 +1,13 @@
 import tx, { Account as AccountSDK, ConfirmedTxInfo, decodeAddress } from "algosdk";
 
-import { AlgobDeployer, TxParams } from "../types";
-import { mkTxParams } from "./tx";
+import { AlgobDeployer, SSCOptionalFlags, TxParams } from "../types";
+import { encodeNote, mkTxParams } from "./tx";
 
 /**
- * Converts base64 string into bytes.
- * @param s base64 string
+ * Converts string to bytes.
+ * @param s string
  */
-export function base64ToBytes (s: string): Uint8Array {
+export function stringToBytes (s: string): Uint8Array {
   return new Uint8Array(Buffer.from(s));
 }
 
@@ -44,16 +44,29 @@ export async function update (
   appId: number,
   newApprovalProgram: string,
   newClearProgram: string,
-  appArgs?: Uint8Array[]
+  flags: SSCOptionalFlags
 ): Promise<ConfirmedTxInfo> {
   const params = await mkTxParams(deployer.algodClient, payFlags);
+  const note = encodeNote(payFlags.note, payFlags.noteb64);
 
   const app = await deployer.ensureCompiled(newApprovalProgram, false);
   const approvalProg = new Uint8Array(Buffer.from(app.compiled, "base64"));
   const clear = await deployer.ensureCompiled(newClearProgram, false);
   const clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
 
-  const txn = tx.makeApplicationUpdateTxn(sender.addr, params, appId, approvalProg, clearProg, appArgs);
+  const txn = tx.makeApplicationUpdateTxn(
+    sender.addr,
+    params,
+    appId,
+    approvalProg,
+    clearProg,
+    flags.appArgs,
+    flags.accounts,
+    flags.foreignApps,
+    flags.foreignAssets,
+    note,
+    flags.lease,
+    flags.rekeyTo);
 
   const txId = txn.txID().toString();
   const signedTxn = txn.signTxn(sender.sk);

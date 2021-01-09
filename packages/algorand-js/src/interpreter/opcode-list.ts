@@ -10,7 +10,7 @@ import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { checkIndexBound, compareArray } from "../lib/compare";
 import { AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
-import { assertLen, assertOnlyDigits, base64ToBytes, convertToBuffer, convertToString, getEncoding } from "../lib/parsing";
+import { assertLen, assertOnlyDigits, convertToBuffer, convertToString, getEncoding, stringToBytes } from "../lib/parsing";
 import { txAppArg, txnSpecbyField } from "../lib/txn";
 import { EncodingType, StackElem, TEALStack, TxnOnComplete, TxnType } from "../types";
 import { Interpreter } from "./interpreter";
@@ -211,7 +211,7 @@ export class Bytecblock extends Op {
     super();
     const bytecblock: Uint8Array[] = [];
     for (const val of args) {
-      bytecblock.push(base64ToBytes(val));
+      bytecblock.push(stringToBytes(val));
     }
 
     this.interpreter = interpreter;
@@ -1804,7 +1804,7 @@ export class GetAssetHolding extends Op {
         value = BigInt(assetInfo.amount);
         break;
       case "AssetFrozen":
-        value = base64ToBytes(assetInfo["is-frozen"]);
+        value = stringToBytes(assetInfo["is-frozen"]);
         break;
       default:
         throw new TealError(ERRORS.TEAL.INVALID_FIELD_TYPE);
@@ -1865,7 +1865,7 @@ export class GetAssetDef extends Op {
           value = BigInt(AssetDefinition.decimals);
           break;
         default:
-          value = base64ToBytes(AssetDefinition[s] as string);
+          value = stringToBytes(AssetDefinition[s] as string);
           break;
       }
 

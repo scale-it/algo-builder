@@ -5,7 +5,7 @@ import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccountImpl } from "../../src/index";
-import { base64ToBytes } from "../../src/lib/parsing";
+import { stringToBytes } from "../../src/lib/parsing";
 import { expectTealErrorAsync } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
@@ -66,11 +66,11 @@ describe("Crowdfunding basic tests", function () {
 
     // verify global state
     assert.isDefined(appId);
-    assert.deepEqual(runtime.getGlobalState(appId, base64ToBytes('Creator')), johnPk);
-    assert.deepEqual(runtime.getGlobalState(appId, base64ToBytes('StartDate')), BigInt(beginDate.getTime()));
-    assert.deepEqual(runtime.getGlobalState(appId, base64ToBytes('EndDate')), BigInt(endDate.getTime()));
-    assert.deepEqual(runtime.getGlobalState(appId, base64ToBytes('Goal')), 7000000n);
-    assert.deepEqual(runtime.getGlobalState(appId, base64ToBytes('Receiver')), johnPk);
-    assert.deepEqual(runtime.getGlobalState(appId, base64ToBytes('Total')), 0n);
+    assert.deepEqual(runtime.getGlobalState(appId, stringToBytes('Creator')), johnPk);
+    assert.deepEqual(runtime.getGlobalState(appId, stringToBytes('StartDate')), BigInt(beginDate.getTime()));
+    assert.deepEqual(runtime.getGlobalState(appId, stringToBytes('EndDate')), BigInt(endDate.getTime()));
+    assert.deepEqual(runtime.getGlobalState(appId, stringToBytes('Goal')), 7000000n);
+    assert.deepEqual(runtime.getGlobalState(appId, stringToBytes('Receiver')), johnPk);
+    assert.deepEqual(runtime.getGlobalState(appId, stringToBytes('Total')), 0n);
   });
 });

@@ -1,4 +1,4 @@
-const { TransactionType, SignType, base64ToBytes, executeTransaction } = require('@algorand-builder/algob');
+const { TransactionType, SignType, stringToBytes, executeTransaction } = require('@algorand-builder/algob');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -14,7 +14,7 @@ async function run (runtimeEnv, deployer) {
   });
 
   // App argument to claim.
-  const appArgs = [base64ToBytes('reclaim')];
+  const appArgs = [stringToBytes('reclaim')];
 
   // Get AppInfo and AssetID from checkpoints.
   const appInfo = deployer.getSSC('crowdFundApproval.teal', 'crowdFundClear.teal');
