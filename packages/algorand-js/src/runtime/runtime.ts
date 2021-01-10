@@ -2,16 +2,16 @@
 /* eslint sonarjs/no-small-switch: 0 */
 import { mkTransaction } from "@algorand-builder/algob";
 import { ExecParams, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
-import algosdk, { AssetDef, AssetHolding, assignGroupID, encodeAddress, SSCAttributes, SSCStateSchema } from "algosdk";
+import algosdk, { AssetDef, AssetHolding, encodeAddress, SSCAttributes, SSCStateSchema } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
-import { mockSuggestedParams } from "../../test/mocks/txn";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { Interpreter } from "../index";
 import { BIGINT0, BIGINT1 } from "../interpreter/opcode-list";
 import { checkIndexBound, compareArray } from "../lib/compare";
 import { SSC_BYTES } from "../lib/constants";
+import { mockSuggestedParams } from "../lib/mocks";
 import { assertValidSchema, getKeyValPair } from "../lib/stateful";
 import type { Context, StackElem, State, StoreAccount, Txn } from "../types";
 
