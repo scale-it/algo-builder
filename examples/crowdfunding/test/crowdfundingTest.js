@@ -18,10 +18,7 @@ function getAcc (runtime, acc) {
 
 const initialDonorBalance = 10000;
 const initialCreatorBalance = 10000;
-// init - create app, update app.
-// opt in
 
-// case 1 : donate, claim - fail
 // case 2 : donate, donate, claim - pass
 // case 3 : donate, reclaim
 // case 4 : delete and claim
@@ -39,7 +36,7 @@ describe('Crowdfunding Tests', function () {
   let flags;
   let applicationId;
   this.beforeAll(async function () {
-    runtime = new Runtime([creatorAccount, escrowAccount, donorAccount]); // setup test more accounts
+    runtime = new Runtime([creatorAccount, escrowAccount, donorAccount]);
     program = getProgram('crowdFundApproval.teal');
 
     flags = {
@@ -174,11 +171,44 @@ describe('Crowdfunding Tests', function () {
       }
     ];
 
-    // execute transaction
+    // execute transaction: Expected to be rejected by logic
     try {
       await runtime.executeTx(txGroup, program, []);
     } catch (e) {
       console.warn(e);
     }
+  });
+
+  it('donor should be able to reclaim if goal is not met', async () => {
+    /* const appArgs = [stringToBytes('reclaim')];
+    const txGroup = [
+      {
+        type: TransactionType.CallNoOpSSC,
+        sign: SignType.SecretKey,
+        fromAccount: donorAccount.account,
+        appId: applicationId,
+        payFlags: {},
+        appArgs: appArgs,
+        accounts: [escrowAccount.address] //  AppAccounts
+      },
+      {
+        type: TransactionType.TransferAlgo,
+        sign: SignType.LogicSignature,
+        fromAccount: { addr: escrowAccount.address },
+        toAccountAddr: donorAccount.address,
+        amountMicroAlgos: 1000,
+        lsig: escrowAccount,
+        payFlags: { }
+      }
+    ];
+
+    await runtime.executeTx(txGroup, program, []);
+    syncAccounts();
+    assert.equal(escrowAccount.balance(), 0);
+    assert.equal(donorAccount.balance(), initialDonorBalance); */
+  });
+
+  it('should claim if goal is reached', async () => {
+
   });
 });

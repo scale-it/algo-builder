@@ -172,7 +172,7 @@ export class Runtime {
         encodedTxnObj.txID = tx.txID();
         txns.push(encodedTxnObj);
       }
-      assignGroupID(txns); // assign unique groupID to all transactions in the array/group
+      // assignGroupID(txns); // assign unique groupID to all transactions in the array/group
       return [txns[0], txns]; // by default current txn is the first txn (hence txns[0])
     } else {
       // if not array, then create a single transaction
@@ -367,7 +367,6 @@ export class Runtime {
   async executeTx (txnParams: ExecParams | ExecParams[], program: string,
     args: Uint8Array[]): Promise<void> {
     const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
-
     // initialize context before each execution
     this.ctx = {
       state: cloneDeep(this.store), // state is a deep copy of store

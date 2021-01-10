@@ -43,9 +43,7 @@ export function parseToStackElem (a: unknown, field: TxField): StackElem {
  * @param txField: transaction field
  * @param interpreter: interpreter
  */
-export function txnSpecbyField (txField: string, interpreter: Interpreter): StackElem {
-  const tx = interpreter.runtime.ctx.tx;
-  const gtxs = interpreter.runtime.ctx.gtxs;
+export function txnSpecbyField (txField: string, tx: Txn): StackElem {
   let result; // store raw result, parse and return
 
   // handle nested encoded obj (for AssetDef)
@@ -63,10 +61,6 @@ export function txnSpecbyField (txField: string, interpreter: Interpreter): Stac
     }
     case 'TypeEnum': {
       result = Number(TxnType[tx.type as keyof typeof TxnType]); // TxnType['pay']
-      break;
-    }
-    case 'GroupIndex': {
-      result = gtxs.indexOf(tx);
       break;
     }
     case 'TxID': {

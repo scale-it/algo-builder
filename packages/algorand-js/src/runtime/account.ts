@@ -115,7 +115,7 @@ export class StoreAccountImpl implements StoreAccount {
   optInToApp (appId: number, appParams: SSCAttributes): void {
     const localState = this.appsLocalState.find(app => app.id === appId);
     if (localState) {
-      console.warn(`app ${appId} already opted in to ${this.address}`);
+      console.warn(`${this.address} is already opted in to app ${appId}`);
     } else {
       if (this.appsLocalState.length === 10) {
         throw new Error('Maximum Opt In applications per account is 10');

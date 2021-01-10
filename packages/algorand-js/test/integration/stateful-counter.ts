@@ -36,7 +36,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
     }, {}, program);
 
     // opt-in to app
-    await runtime.optInToApp(txnParams.appId, john.address, {}, {}, program);
+    await runtime.optInToApp(john.address, txnParams.appId, {}, {}, program);
   });
 
   const key = "counter";

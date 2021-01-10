@@ -1929,11 +1929,11 @@ describe("Teal Opcodes", function () {
       });
 
       it("push fee from 2nd transaction in group", function () {
-        const op = new Gtxn(["1", "Fee"], 1, interpreter); // 1 -> Fee
+        const op = new Gtxn(["1", "Fee"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.equal(BigInt('1000'), stack.pop());
+        assert.equal(BigInt('2222'), stack.pop());
       });
     });
 
