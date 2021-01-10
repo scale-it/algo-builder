@@ -63,13 +63,13 @@ describe('Crowdfunding Tests', function () {
       intToBigEndian(beginDate.getTime()),
       intToBigEndian(endDate.getTime()),
       intToBigEndian(goal),
-      addressToBytes(creatorAccount.account.addr),
+      addressToBytes(creatorAccount.address),
       intToBigEndian(fundCloseDate.getTime())
     ];
 
     const appId = await runtime.addApp({ ...creationFlags, appArgs: appArgs }, {}, program);
     applicationId = appId;
-    const creatorPk = addressToBytes(creatorAccount.account.addr);
+    const creatorPk = addressToBytes(creatorAccount.address);
 
     // verify global state
     assert.isDefined(appId);
@@ -82,15 +82,14 @@ describe('Crowdfunding Tests', function () {
   });
 
   it('should update application with correct escrow account address', async () => {
-    const appArgs = [addressToBytes(escrowAccount.account.addr)];
+    const appArgs = [addressToBytes(escrowAccount.address)];
 
     await runtime.updateApp(
       creatorAccount.account.addr,
       applicationId,
       program,
       {}, { appArgs: appArgs });
-
-    const escrowPk = addressToBytes(escrowAccount.account.addr);
+    const escrowPk = addressToBytes(escrowAccount.address);
 
     // verify escrow storage
     assert.isDefined(applicationId);
@@ -98,8 +97,8 @@ describe('Crowdfunding Tests', function () {
   });
 
   it('should opt-in to app', async () => {
-    await runtime.optInToApp(creatorAccount.account.addr, applicationId, {}, {}, program);
-    await runtime.optInToApp(donorAccount.account.addr, applicationId, {}, {}, program);
+    await runtime.optInToApp(creatorAccount.address, applicationId, {}, {}, program);
+    await runtime.optInToApp(donorAccount.address, applicationId, {}, {}, program);
 
     syncAccounts();
     assert.isDefined(creatorAccount.appsLocalState.find(app => app.id === applicationId));
@@ -111,6 +110,7 @@ describe('Crowdfunding Tests', function () {
     const appArgs = [stringToBytes('donate')];
     const donationAmount = 600000;
 
+    // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     const txGroup = [
       {
         type: TransactionType.CallNoOpSSC,
@@ -129,7 +129,6 @@ describe('Crowdfunding Tests', function () {
         payFlags: {}
       }
     ];
-
     // execute transaction
     await runtime.executeTx(txGroup, program, []);
 
@@ -140,6 +139,7 @@ describe('Crowdfunding Tests', function () {
 
   it('should not be able to claim funds because goal is not reached', async () => {
     const appArgs = [stringToBytes('claim')];
+    // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     const txGroup = [
       {
         type: TransactionType.CallNoOpSSC,
@@ -159,7 +159,6 @@ describe('Crowdfunding Tests', function () {
         payFlags: { closeRemainderTo: creatorAccount.address }
       }
     ];
-
     // execute transaction: Expected to be rejected by logic
     try {
       await runtime.executeTx(txGroup, program, []);
@@ -170,6 +169,7 @@ describe('Crowdfunding Tests', function () {
 
   it('donor should be able to reclaim if goal is not met', async () => {
     const appArgs = [stringToBytes('reclaim')];
+    // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     const txGroup = [
       {
         type: TransactionType.CallNoOpSSC,
@@ -204,6 +204,7 @@ describe('Crowdfunding Tests', function () {
     let appArgs = [stringToBytes('donate')];
     const donationAmount = 7000000;
 
+    // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     let txGroup = [
       {
         type: TransactionType.CallNoOpSSC,
@@ -222,7 +223,6 @@ describe('Crowdfunding Tests', function () {
         payFlags: {}
       }
     ];
-
     // execute transaction
     await runtime.executeTx(txGroup, program, []);
 
@@ -246,7 +246,6 @@ describe('Crowdfunding Tests', function () {
         payFlags: { closeRemainderTo: creatorAccount.address }
       }
     ];
-
     await runtime.executeTx(txGroup, program, []);
     // TODO- close account and tranfer funds to closeRemainderTo
   });

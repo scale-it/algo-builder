@@ -57,12 +57,12 @@ describe("Crowdfunding basic tests", function () {
       intToBigEndian(beginDate.getTime()),
       intToBigEndian(endDate.getTime()),
       intToBigEndian(7000000),
-      addressToBytes(john.account.addr),
+      addressToBytes(john.address),
       intToBigEndian(fundCloseDate.getTime())
     ];
 
     const appId = await runtime.addApp({ ...validFlags, appArgs: appArgs }, {}, program);
-    const johnPk = decodeAddress(john.account.addr).publicKey;
+    const johnPk = decodeAddress(john.address).publicKey;
 
     // verify global state
     assert.isDefined(appId);
