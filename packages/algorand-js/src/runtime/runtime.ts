@@ -254,10 +254,10 @@ export class Runtime {
 
   /**
    * Account address opt-in for application Id
-   * @param appId Application Id
    * @param accountAddr Account address
+   * @param appId Application Id
    */
-  async optInToApp (appId: number, accountAddr: string,
+  async optInToApp (accountAddr: string, appId: number,
     flags: SSCOptionalFlags, payFlags: TxParams, program: string): Promise<void> {
     const appParams = this.store.globalApps.get(appId);
     const account = this.assertAccountDefined(this.store.accounts.get(accountAddr));
@@ -266,6 +266,54 @@ export class Runtime {
       await this.run(program); // execute TEAL code
 
       account.optInToApp(appId, appParams);
+    } else {
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
+    }
+  }
+
+  // creates new Update transaction object and update context
+  createUpdateTx (
+    senderAddr: string,
+    appId: number,
+    payFlags: TxParams,
+    flags: SSCOptionalFlags): void {
+    const txn = algosdk.makeApplicationUpdateTxn(
+      senderAddr,
+      mockSuggestedParams(payFlags),
+      appId,
+      new Uint8Array(32), // mock approval program
+      new Uint8Array(32), // mock clear progam
+      flags.appArgs,
+      flags.accounts,
+      flags.foreignApps,
+      flags.foreignAssets,
+      flags.note,
+      flags.lease,
+      flags.rekeyTo);
+
+    const encTx = txn.get_obj_for_encoding();
+    encTx.txID = txn.txID();
+    this.ctx.tx = encTx;
+    this.ctx.gtxs = [encTx];
+  }
+
+  /**
+   * Update application
+   * @param senderAddr sender address
+   * @param appId application Id
+   * @param newProgram updated program
+   */
+  async updateApp (
+    senderAddr: string,
+    appId: number,
+    newProgram: string,
+    payFlags: TxParams,
+    flags: SSCOptionalFlags
+  ): Promise<void> {
+    const appParams = this.store.globalApps.get(appId);
+    if (appParams) {
+      this.createUpdateTx(senderAddr, appId, payFlags, flags);
+      await this.run(newProgram); // execute TEAL code
     } else {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
     }
