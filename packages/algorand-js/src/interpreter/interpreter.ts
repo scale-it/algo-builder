@@ -55,8 +55,6 @@ export class Interpreter {
       const instruction = this.instructions[this.instructionIndex];
       instruction.execute(this.stack);
       this.instructionIndex++;
-      // console.log(instruction);
-      // console.log("STACK_----------", this.stack);
     }
 
     if (this.stack.length() === 1) {
@@ -64,7 +62,6 @@ export class Interpreter {
 
       if (!(s instanceof Uint8Array) && s > BIGINT0) { return; }
     }
-    // console.log("STACK", this.stack);
     throw new TealError(ERRORS.TEAL.REJECTED_BY_LOGIC);
   }
 }

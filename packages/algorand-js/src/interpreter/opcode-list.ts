@@ -1754,12 +1754,12 @@ export class Balance extends Op {
     let res;
 
     if (accountIndex === BigInt("0")) {
-      const sender = convertToString(this.interpreter.runtime.ctx.tx.snd);
+      const sender = encodeAddress(this.interpreter.runtime.ctx.tx.snd);
       res = this.interpreter.runtime.ctx.state.accounts.get(sender);
     } else {
       this.checkIndexBound(Number(--accountIndex), this.interpreter.runtime.ctx.tx.apat);
       const buf = this.interpreter.runtime.ctx.tx.apat[Number(accountIndex)];
-      res = this.interpreter.runtime.ctx.state.accounts.get(convertToString(buf));
+      res = this.interpreter.runtime.ctx.state.accounts.get(encodeAddress(buf));
     }
     if (res === undefined) { throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST); }
 
@@ -1797,7 +1797,7 @@ export class GetAssetHolding extends Op {
 
     this.checkIndexBound(Number(--accountIdx), this.interpreter.runtime.ctx.tx.apat);
     const accBuffer = this.interpreter.runtime.ctx.tx.apat[Number(accountIdx)];
-    const accountAssets = this.interpreter.runtime.ctx.state.accountAssets.get(convertToString(accBuffer));
+    const accountAssets = this.interpreter.runtime.ctx.state.accountAssets.get(encodeAddress(accBuffer));
     const assetInfo = accountAssets?.get(Number(assetId));
 
     if (assetInfo === undefined) {

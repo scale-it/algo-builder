@@ -2624,7 +2624,7 @@ describe("Teal Opcodes", function () {
     const interpreter = new Interpreter();
 
     // setup 1st account
-    const acc1: StoreAccount = new StoreAccountImpl(123, { addr: 'addr-1', sk: new Uint8Array(0) }); // setup test account
+    const acc1: StoreAccount = new StoreAccountImpl(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
     setDummyAccInfo(acc1);
 
     const runtime = new Runtime([acc1]);
@@ -2632,8 +2632,11 @@ describe("Teal Opcodes", function () {
 
     // setting txn object
     interpreter.runtime.ctx.tx = TXN_OBJ;
-    interpreter.runtime.ctx.tx.snd = convertToBuffer("addr-1");
-    interpreter.runtime.ctx.tx.apat = [convertToBuffer("addr-1"), convertToBuffer("addr-2")];
+    interpreter.runtime.ctx.tx.snd = Buffer.from(decodeAddress(elonAddr).publicKey);
+    interpreter.runtime.ctx.tx.apat = [
+      Buffer.from(decodeAddress(elonAddr).publicKey),
+      Buffer.from(decodeAddress(johnAddr).publicKey)
+    ];
     interpreter.runtime.ctx.tx.apas = [3, 112];
 
     it("should push correct account balance", () => {

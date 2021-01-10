@@ -9,23 +9,12 @@ import {
 import { Runtime, StoreAccountImpl } from '@algorand-builder/algorand-js/build/src/index'; // fix
 import { assert } from 'chai';
 
-// returns account from runtime store (updated state)
-function getAcc (runtime, acc) {
-  const account = runtime.ctx.state.accounts.get(acc.address);
-  assert.isDefined(account);
-  return account;
-}
+import { getAcc } from './common';
 
-const initialDonorBalance = 10000;
+const initialDonorBalance = 60000000;
 const initialCreatorBalance = 10000;
+const goal = 7000000;
 
-// case 2 : donate, donate, claim - pass
-// case 3 : donate, reclaim
-// case 4 : delete and claim
-
-// task - add delete , add update test
-// task - fix mockSuggested
-// add test for atomic transaction
 describe('Crowdfunding Tests', function () {
   let creatorAccount = new StoreAccountImpl(initialCreatorBalance);
   let escrowAccount = new StoreAccountImpl(0);
@@ -73,7 +62,7 @@ describe('Crowdfunding Tests', function () {
     const appArgs = [
       intToBigEndian(beginDate.getTime()),
       intToBigEndian(endDate.getTime()),
-      intToBigEndian(2000),
+      intToBigEndian(goal),
       addressToBytes(creatorAccount.account.addr),
       intToBigEndian(fundCloseDate.getTime())
     ];
@@ -120,7 +109,7 @@ describe('Crowdfunding Tests', function () {
   it('should donate correct amount to escrow account', async () => {
     // App argument to donate.
     const appArgs = [stringToBytes('donate')];
-    const donationAmount = 1000;
+    const donationAmount = 600000;
 
     const txGroup = [
       {
@@ -180,7 +169,7 @@ describe('Crowdfunding Tests', function () {
   });
 
   it('donor should be able to reclaim if goal is not met', async () => {
-    /* const appArgs = [stringToBytes('reclaim')];
+    const appArgs = [stringToBytes('reclaim')];
     const txGroup = [
       {
         type: TransactionType.CallNoOpSSC,
@@ -194,21 +183,71 @@ describe('Crowdfunding Tests', function () {
       {
         type: TransactionType.TransferAlgo,
         sign: SignType.LogicSignature,
-        fromAccount: { addr: escrowAccount.address },
+        fromAccount: escrowAccount.account,
         toAccountAddr: donorAccount.address,
-        amountMicroAlgos: 1000,
+        amountMicroAlgos: 300000,
         lsig: escrowAccount,
-        payFlags: { }
+        payFlags: {}
+      }
+    ];
+
+    syncAccounts();
+    const donorBalance = donorAccount.balance();
+    await runtime.executeTx(txGroup, program, []);
+
+    syncAccounts();
+    assert.equal(escrowAccount.balance(), 300000);
+    assert.equal(donorAccount.balance(), donorBalance + 300000);
+  });
+
+  it('should claim if goal is reached', async () => {
+    let appArgs = [stringToBytes('donate')];
+    const donationAmount = 7000000;
+
+    let txGroup = [
+      {
+        type: TransactionType.CallNoOpSSC,
+        sign: SignType.SecretKey,
+        fromAccount: donorAccount.account,
+        appId: applicationId,
+        payFlags: {},
+        appArgs: appArgs
+      },
+      {
+        type: TransactionType.TransferAlgo,
+        sign: SignType.SecretKey,
+        fromAccount: donorAccount.account,
+        toAccountAddr: escrowAccount.address,
+        amountMicroAlgos: donationAmount,
+        payFlags: {}
+      }
+    ];
+
+    // execute transaction
+    await runtime.executeTx(txGroup, program, []);
+
+    appArgs = [stringToBytes('claim')];
+    txGroup = [
+      {
+        type: TransactionType.CallNoOpSSC,
+        sign: SignType.SecretKey,
+        fromAccount: creatorAccount.account,
+        appId: applicationId,
+        payFlags: {},
+        appArgs: appArgs
+      },
+      {
+        type: TransactionType.TransferAlgo,
+        sign: SignType.LogicSignature,
+        fromAccount: escrowAccount.account,
+        toAccountAddr: creatorAccount.address,
+        amountMicroAlgos: 0,
+        lsig: escrowAccount,
+        payFlags: { closeRemainderTo: creatorAccount.address }
       }
     ];
 
     await runtime.executeTx(txGroup, program, []);
-    syncAccounts();
-    assert.equal(escrowAccount.balance(), 0);
-    assert.equal(donorAccount.balance(), initialDonorBalance); */
-  });
-
-  it('should claim if goal is reached', async () => {
-
+    // TODO- close account and tranfer funds to closeRemainderTo
   });
 });
