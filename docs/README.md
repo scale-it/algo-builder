@@ -10,6 +10,7 @@
 + [Script Logging](/docs/logs.md).
 + [Algob Console](/docs/algob-console.md)
 + [PyTeal](/docs/py-teal.md).
++ [Test TEAL](/docs/testing-teal.md).
 + [API docs](https://scale-it.github.io/algorand-builder/)
 + [Best Practices](./best-practices.md)
 
