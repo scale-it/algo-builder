@@ -277,7 +277,7 @@ export function generateAccount(): Account;
 export function isValidAddress(addr: string): boolean;
 
 /**
- * decodeAddress takes an Algorand address in string form and decodes it into a Uint8Array.
+ * decodeAddress takes an Algorand address in string form and decodes it into a Uint8Array(as public key).
  * @param address an Algorand address with checksum.
  * @returns the decoded form of the address's public key and checksum
  */
