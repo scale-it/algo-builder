@@ -70,7 +70,7 @@ minimum uint64 value of 0`
     number: 8,
     message: "Teal code rejected by logic",
     title: "Teal Rejection Error",
-    description: `Teal code rejected`
+    description: `Teal code rejected because stack doesn't contain a single non-zero uint64 value`
   },
   INDEX_OUT_OF_BOUND: {
     number: 9,

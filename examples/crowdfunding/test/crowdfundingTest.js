@@ -82,7 +82,7 @@ describe('Crowdfunding Tests', function () {
   });
 
   it('should update application with correct escrow account address', async () => {
-    const appArgs = [addressToBytes(escrow.address)];
+    const appArgs = [addressToBytes(escrow.address)]; // converts algorand address to Uint8Array
 
     await runtime.updateApp(
       creator.address,
