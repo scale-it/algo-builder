@@ -172,7 +172,6 @@ export class Runtime {
         encodedTxnObj.txID = tx.txID();
         txns.push(encodedTxnObj);
       }
-      // assignGroupID(txns); // assign unique groupID to all transactions in the array/group
       return [txns[0], txns]; // by default current txn is the first txn (hence txns[0])
     } else {
       // if not array, then create a single transaction

@@ -16,20 +16,20 @@ const initialCreatorBalance = 10000;
 const goal = 7000000;
 
 describe('Crowdfunding Tests', function () {
-  let creatorAccount = new StoreAccountImpl(initialCreatorBalance);
-  let escrowAccount = new StoreAccountImpl(0);
-  let donorAccount = new StoreAccountImpl(initialDonorBalance);
+  let creator = new StoreAccountImpl(initialCreatorBalance);
+  let escrow = new StoreAccountImpl(0);
+  let donor = new StoreAccountImpl(initialDonorBalance);
 
   let runtime;
   let program;
   let flags;
   let applicationId;
   this.beforeAll(async function () {
-    runtime = new Runtime([creatorAccount, escrowAccount, donorAccount]);
+    runtime = new Runtime([creator, escrow, donor]);
     program = getProgram('crowdFundApproval.teal');
 
     flags = {
-      sender: creatorAccount.account,
+      sender: creator.account,
       localInts: 1,
       localBytes: 0,
       globalInts: 5,
@@ -39,9 +39,9 @@ describe('Crowdfunding Tests', function () {
 
   // update account state
   function syncAccounts () {
-    creatorAccount = getAcc(runtime, creatorAccount);
-    escrowAccount = getAcc(runtime, escrowAccount);
-    donorAccount = getAcc(runtime, donorAccount);
+    creator = getAcc(runtime, creator);
+    escrow = getAcc(runtime, escrow);
+    donor = getAcc(runtime, donor);
   }
 
   it('should create crowdfunding application with correct global states', async () => {
@@ -63,33 +63,33 @@ describe('Crowdfunding Tests', function () {
       intToBigEndian(beginDate.getTime()),
       intToBigEndian(endDate.getTime()),
       intToBigEndian(goal),
-      addressToBytes(creatorAccount.address),
+      addressToBytes(creator.address),
       intToBigEndian(fundCloseDate.getTime())
     ];
 
     const appId = await runtime.addApp({ ...creationFlags, appArgs: appArgs }, {}, program);
     applicationId = appId;
-    const creatorPk = addressToBytes(creatorAccount.address);
+    const creatorPk = addressToBytes(creator.address);
 
     // verify global state
     assert.isDefined(appId);
     assert.deepEqual(runtime.getGlobalState(appId, stringToBytes('Creator')), creatorPk);
     assert.deepEqual(runtime.getGlobalState(appId, stringToBytes('StartDate')), BigInt(beginDate.getTime()));
     assert.deepEqual(runtime.getGlobalState(appId, stringToBytes('EndDate')), BigInt(endDate.getTime()));
-    assert.deepEqual(runtime.getGlobalState(appId, stringToBytes('Goal')), BigInt(7000000));
+    assert.deepEqual(runtime.getGlobalState(appId, stringToBytes('Goal')), 7000000n);
     assert.deepEqual(runtime.getGlobalState(appId, stringToBytes('Receiver')), creatorPk);
-    assert.deepEqual(runtime.getGlobalState(appId, stringToBytes('Total')), BigInt(0));
+    assert.deepEqual(runtime.getGlobalState(appId, stringToBytes('Total')), 0n);
   });
 
   it('should update application with correct escrow account address', async () => {
-    const appArgs = [addressToBytes(escrowAccount.address)];
+    const appArgs = [addressToBytes(escrow.address)];
 
     await runtime.updateApp(
-      creatorAccount.account.addr,
+      creator.address,
       applicationId,
       program,
       {}, { appArgs: appArgs });
-    const escrowPk = addressToBytes(escrowAccount.address);
+    const escrowPk = addressToBytes(escrow.address);
 
     // verify escrow storage
     assert.isDefined(applicationId);
@@ -97,12 +97,12 @@ describe('Crowdfunding Tests', function () {
   });
 
   it('should opt-in to app', async () => {
-    await runtime.optInToApp(creatorAccount.address, applicationId, {}, {}, program);
-    await runtime.optInToApp(donorAccount.address, applicationId, {}, {}, program);
+    await runtime.optInToApp(creator.address, applicationId, {}, {}, program);
+    await runtime.optInToApp(donor.address, applicationId, {}, {}, program);
 
     syncAccounts();
-    assert.isDefined(creatorAccount.appsLocalState.find(app => app.id === applicationId));
-    assert.isDefined(donorAccount.appsLocalState.find(app => app.id === applicationId));
+    assert.isDefined(creator.appsLocalState.find(app => app.id === applicationId));
+    assert.isDefined(donor.appsLocalState.find(app => app.id === applicationId));
   });
 
   it('should donate correct amount to escrow account', async () => {
@@ -115,7 +115,7 @@ describe('Crowdfunding Tests', function () {
       {
         type: TransactionType.CallNoOpSSC,
         sign: SignType.SecretKey,
-        fromAccount: donorAccount.account,
+        fromAccount: donor.account,
         appId: applicationId,
         payFlags: {},
         appArgs: appArgs
@@ -123,8 +123,8 @@ describe('Crowdfunding Tests', function () {
       {
         type: TransactionType.TransferAlgo,
         sign: SignType.SecretKey,
-        fromAccount: donorAccount.account,
-        toAccountAddr: escrowAccount.address,
+        fromAccount: donor.account,
+        toAccountAddr: escrow.address,
         amountMicroAlgos: donationAmount,
         payFlags: {}
       }
@@ -133,8 +133,8 @@ describe('Crowdfunding Tests', function () {
     await runtime.executeTx(txGroup, program, []);
 
     syncAccounts();
-    assert.equal(escrowAccount.balance(), donationAmount);
-    assert.equal(donorAccount.balance(), initialDonorBalance - donationAmount);
+    assert.equal(escrow.balance(), donationAmount);
+    assert.equal(donor.balance(), initialDonorBalance - donationAmount);
   });
 
   it('should not be able to claim funds if goal is not reached', async () => {
@@ -144,7 +144,7 @@ describe('Crowdfunding Tests', function () {
       {
         type: TransactionType.CallNoOpSSC,
         sign: SignType.SecretKey,
-        fromAccount: creatorAccount.account,
+        fromAccount: creator.account,
         appId: applicationId,
         payFlags: {},
         appArgs: appArgs
@@ -152,14 +152,14 @@ describe('Crowdfunding Tests', function () {
       {
         type: TransactionType.TransferAlgo,
         sign: SignType.LogicSignature,
-        fromAccount: { addr: escrowAccount.address },
-        toAccountAddr: creatorAccount.address,
+        fromAccount: { addr: escrow.address },
+        toAccountAddr: creator.address,
         amountMicroAlgos: 0,
-        lsig: escrowAccount,
-        payFlags: { closeRemainderTo: creatorAccount.address }
+        lsig: escrow,
+        payFlags: { closeRemainderTo: creator.address }
       }
     ];
-    // execute transaction: Expected to be rejected by logic
+    // execute transaction: Expected to be rejected by logic because goal is not reached
     try {
       await runtime.executeTx(txGroup, program, []);
     } catch (e) {
@@ -174,30 +174,30 @@ describe('Crowdfunding Tests', function () {
       {
         type: TransactionType.CallNoOpSSC,
         sign: SignType.SecretKey,
-        fromAccount: donorAccount.account,
+        fromAccount: donor.account,
         appId: applicationId,
         payFlags: {},
         appArgs: appArgs,
-        accounts: [escrowAccount.address] //  AppAccounts
+        accounts: [escrow.address] //  AppAccounts
       },
       {
         type: TransactionType.TransferAlgo,
         sign: SignType.LogicSignature,
-        fromAccount: escrowAccount.account,
-        toAccountAddr: donorAccount.address,
+        fromAccount: escrow.account,
+        toAccountAddr: donor.address,
         amountMicroAlgos: 300000,
-        lsig: escrowAccount,
+        lsig: escrow,
         payFlags: {}
       }
     ];
 
     syncAccounts();
-    const donorBalance = donorAccount.balance();
+    const donorBalance = donor.balance();
     await runtime.executeTx(txGroup, program, []);
 
     syncAccounts();
-    assert.equal(escrowAccount.balance(), 300000);
-    assert.equal(donorAccount.balance(), donorBalance + 300000);
+    assert.equal(escrow.balance(), 300000);
+    assert.equal(donor.balance(), donorBalance + 300000);
   });
 
   it('should claim if goal is reached', async () => {
@@ -209,7 +209,7 @@ describe('Crowdfunding Tests', function () {
       {
         type: TransactionType.CallNoOpSSC,
         sign: SignType.SecretKey,
-        fromAccount: donorAccount.account,
+        fromAccount: donor.account,
         appId: applicationId,
         payFlags: {},
         appArgs: appArgs
@@ -217,8 +217,8 @@ describe('Crowdfunding Tests', function () {
       {
         type: TransactionType.TransferAlgo,
         sign: SignType.SecretKey,
-        fromAccount: donorAccount.account,
-        toAccountAddr: escrowAccount.address,
+        fromAccount: donor.account,
+        toAccountAddr: escrow.address,
         amountMicroAlgos: donationAmount,
         payFlags: {}
       }
@@ -231,7 +231,7 @@ describe('Crowdfunding Tests', function () {
       {
         type: TransactionType.CallNoOpSSC,
         sign: SignType.SecretKey,
-        fromAccount: creatorAccount.account,
+        fromAccount: creator.account,
         appId: applicationId,
         payFlags: {},
         appArgs: appArgs
@@ -239,11 +239,11 @@ describe('Crowdfunding Tests', function () {
       {
         type: TransactionType.TransferAlgo,
         sign: SignType.LogicSignature,
-        fromAccount: escrowAccount.account,
-        toAccountAddr: creatorAccount.address,
+        fromAccount: escrow.account,
+        toAccountAddr: creator.address,
         amountMicroAlgos: 0,
-        lsig: escrowAccount,
-        payFlags: { closeRemainderTo: creatorAccount.address }
+        lsig: escrow,
+        payFlags: { closeRemainderTo: creator.address }
       }
     ];
     await runtime.executeTx(txGroup, program, []);

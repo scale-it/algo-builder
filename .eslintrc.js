@@ -12,7 +12,7 @@ module.exports = {
   ],
   parserOptions: {
     project: "./tsconfig.json",
-    ecmaVersion: 2019,
+    ecmaVersion: 2020,
     // sourceType: "module"
   },
   rules:  {
