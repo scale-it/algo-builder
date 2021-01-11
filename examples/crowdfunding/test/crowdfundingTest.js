@@ -137,7 +137,7 @@ describe('Crowdfunding Tests', function () {
     assert.equal(donorAccount.balance(), initialDonorBalance - donationAmount);
   });
 
-  it('should not be able to claim funds because goal is not reached', async () => {
+  it('should not be able to claim funds if goal is not reached', async () => {
     const appArgs = [stringToBytes('claim')];
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     const txGroup = [
