@@ -1112,8 +1112,11 @@ export class Txn extends Op {
   }
 
   execute (stack: TEALStack): void {
-    const r = txnSpecbyField(this.field, this.interpreter.runtime.ctx.tx);
-    stack.push(r);
+    const result = txnSpecbyField(
+      this.field,
+      this.interpreter.runtime.ctx.tx,
+      this.interpreter.runtime.ctx.gtxs);
+    stack.push(result);
   }
 }
 
@@ -1148,13 +1151,10 @@ export class Gtxn extends Op {
     this.assertUint8(BigInt(this.txIdx));
     checkIndexBound(this.txIdx, this.interpreter.runtime.ctx.gtxs);
 
-    let result;
-    const tx = this.interpreter.runtime.ctx.gtxs[this.txIdx];
-    if (this.field === 'GroupIndex') {
-      result = BigInt(this.interpreter.runtime.ctx.gtxs.indexOf(tx));
-    } else {
-      result = txnSpecbyField(this.field, tx);
-    }
+    const result = txnSpecbyField(
+      this.field,
+      this.interpreter.runtime.ctx.gtxs[this.txIdx],
+      this.interpreter.runtime.ctx.gtxs);
     stack.push(result);
   }
 }
