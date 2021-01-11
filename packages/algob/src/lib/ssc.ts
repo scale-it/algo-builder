@@ -21,7 +21,7 @@ export function intToBigEndian (x: number): Uint8Array {
 }
 
 /**
- * Converts address to bytes.
+ * Takes an Algorand address in string form and decodes it into a Uint8Array
  * @param addr : algorand address
  */
 export function addressToBytes (addr: string): Uint8Array {
