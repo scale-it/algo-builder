@@ -127,8 +127,8 @@ describe('Crowdfunding Tests', function () {
     await runtime.optInToApp(donor.address, applicationId, {}, {}, program);
 
     syncAccounts();
-    assert.isDefined(creator.appsLocalState.find(app => app.id === applicationId));
-    assert.isDefined(donor.appsLocalState.find(app => app.id === applicationId));
+    assert.isDefined(creator.appsLocalState.get(applicationId));
+    assert.isDefined(donor.appsLocalState.get(applicationId));
 
     // donate correct amount to escrow account
     // App argument to donate.
