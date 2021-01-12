@@ -1,4 +1,4 @@
-import { ALGORAND_MIN_TX_FEE } from "../../test/mocks/txn";
+import { ALGORAND_MIN_TX_FEE } from "../mock/tx";
 
 // https://docs.microsoft.com/en-us/dotnet/api/system.uint64.maxvalue?view=net-5.0
 export const MAX_UINT64 = BigInt("18446744073709551615");

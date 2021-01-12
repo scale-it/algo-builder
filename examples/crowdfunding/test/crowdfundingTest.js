@@ -6,7 +6,7 @@ import {
   stringToBytes,
   TransactionType
 } from '@algorand-builder/algob';
-import { Runtime, StoreAccountImpl } from '@algorand-builder/algorand-js/build/src/index';
+import { Runtime, StoreAccountImpl } from '@algorand-builder/algorand-js';
 import { assert } from 'chai';
 
 import { getAcc } from './common';
