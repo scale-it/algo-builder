@@ -3,7 +3,7 @@ import { SSCDeploymentFlags } from "@algorand-builder/algob/src/types";
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
-import { Runtime, StoreAccountImpl } from "../../src/index";
+import { Runtime, StoreAccount } from "../../src/index";
 import { stringToBytes } from "../../src/lib/parsing";
 import { expectTealErrorAsync } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
@@ -11,7 +11,7 @@ import { useFixture } from "../helpers/integration";
 
 describe("Crowdfunding basic tests", function () {
   useFixture("stateful");
-  const john = new StoreAccountImpl(1000);
+  const john = new StoreAccount(1000);
 
   let runtime: Runtime;
   let program: string;

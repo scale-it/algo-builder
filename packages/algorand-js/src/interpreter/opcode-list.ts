@@ -1433,7 +1433,7 @@ export class AppOptedIn extends Op {
     const account = this.interpreter.runtime.getAccount(accountIndex);
     const localState = account.appsLocalState;
 
-    const isOptedIn = localState.find(state => state.id === Number(appId));
+    const isOptedIn = localState.get(Number(appId));
     if (isOptedIn) {
       stack.push(BIGINT1);
     } else {
@@ -1619,7 +1619,7 @@ export class AppLocalPut extends Op {
     const localState = account.updateLocalState(appId, key, value);
     const acc = this.interpreter.runtime.assertAccountDefined(
       this.interpreter.runtime.ctx.state.accounts.get(account.address));
-    acc.appsLocalState = localState;
+    acc.appsLocalState.set(appId, localState);
   }
 }
 
@@ -1678,17 +1678,16 @@ export class AppLocalDel extends Op {
     const appId = this.interpreter.runtime.ctx.tx.apid || 0;
     const account = this.interpreter.runtime.getAccount(accountIndex);
 
-    const localState = account.appsLocalState;
-    const idx = localState.findIndex(state => state.id === appId);
-    if (idx !== -1) {
-      const arr = localState[idx]["key-value"].filter((obj) => {
+    const localState = account.appsLocalState.get(appId);
+    if (localState) {
+      const arr = localState["key-value"].filter((obj) => {
         return !compareArray(obj.key, key);
       });
-      localState[idx]["key-value"] = arr;
+      localState["key-value"] = arr;
 
       let acc = this.interpreter.runtime.ctx.state.accounts.get(account.address);
       acc = this.interpreter.runtime.assertAccountDefined(acc);
-      acc.appsLocalState = localState;
+      acc.appsLocalState.set(appId, localState);
     }
   }
 }

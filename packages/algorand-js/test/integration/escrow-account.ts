@@ -3,7 +3,7 @@ import { ExecParams, SignType, TransactionType } from "@algorand-builder/algob/s
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
-import { Runtime, StoreAccountImpl } from "../../src/index";
+import { Runtime, StoreAccount } from "../../src/index";
 import { getAcc } from "../helpers/account";
 import { expectTealErrorAsync } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
@@ -15,8 +15,8 @@ const initialJohnHolding = 500;
 
 describe("Algorand Stateless Smart Contracts", function () {
   useFixture("escrow-account");
-  const escrow = new StoreAccountImpl(initialEscrowHolding); // 1000 ALGO
-  const john = new StoreAccountImpl(initialJohnHolding, johnAccount); // 0.005 ALGO
+  const escrow = new StoreAccount(initialEscrowHolding); // 1000 ALGO
+  const john = new StoreAccount(initialJohnHolding, johnAccount); // 0.005 ALGO
   // set up transaction paramenters
   const txnParams: ExecParams = {
     type: TransactionType.TransferAlgo, // payment
@@ -83,7 +83,7 @@ describe("Algorand Stateless Smart Contracts", function () {
   });
 
   it("should reject transaction if receiver is not john", async function () {
-    const bob = new StoreAccountImpl(100);
+    const bob = new StoreAccount(100);
     const invalidParams = Object.assign({}, txnParams);
     invalidParams.toAccountAddr = bob.address;
 

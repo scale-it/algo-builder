@@ -2,7 +2,6 @@ import { AssetDefEnc } from "algosdk";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
-import { Interpreter } from "../index";
 import { Op } from "../interpreter/opcode";
 import { TxFieldDefaults, TxnFields } from "../lib/constants";
 import { stringToBytes } from "../lib/parsing";

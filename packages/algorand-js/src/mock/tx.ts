@@ -1,7 +1,8 @@
 import { TxParams } from "@algorand-builder/algob/src/types";
 import { SuggestedParams } from "algosdk";
 
-export const ALGORAND_MIN_TX_FEE = 1000;
+import { ALGORAND_MIN_TX_FEE } from "../lib/constants";
+
 const GENESIS_ID = 'testnet-v1.0';
 // testnet-v1.0 hash
 const GENESIS_HASH = 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=';
