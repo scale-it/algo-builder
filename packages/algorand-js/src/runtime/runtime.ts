@@ -319,13 +319,17 @@ export class Runtime {
   }
 
   // Delete application from account's state and global state
-  deleteApp (accountAddr: string, appId: number): void {
+  deleteApp (appId: number): void {
     if (!this.store.globalApps.has(appId)) {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
     }
-    this.store.globalApps.delete(appId);
+    const accountAddr = this.store.globalApps.get(appId)?.creator;
+    if (accountAddr === undefined) {
+      throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
+    }
     const account = this.assertAccountDefined(this.store.accounts.get(accountAddr));
     account.deleteApp(appId);
+    this.store.globalApps.delete(appId);
   }
 
   // updates account balance as per transaction parameters
@@ -352,22 +356,18 @@ export class Runtime {
    * @param accounts : accounts passed by user
    */
   prepareFinalState (txnParams: ExecParams | ExecParams[]): void {
-    if (Array.isArray(txnParams)) { // if txn is a group, update balance as per 'each' transaction
-      for (const txnParam of txnParams) {
-        this.store.accounts.forEach((account, addr) => {
-          this.updateBalance(txnParam, account);
-        });
-        if (txnParam.type === TransactionType.DeleteSSC) {
-          this.deleteApp(txnParam.fromAccount.addr, txnParam.appId);
-        }
-      }
+    let txnParameters;
+    if (!Array.isArray(txnParams)) {
+      txnParameters = [txnParams];
     } else {
-      // for a single (stand alone) transaction
+      txnParameters = txnParams;
+    }
+    for (const txnParam of txnParameters) {
       this.store.accounts.forEach((account, addr) => {
-        this.updateBalance(txnParams, account);
+        this.updateBalance(txnParam, account);
       });
-      if (txnParams.type === TransactionType.DeleteSSC) {
-        this.deleteApp(txnParams.fromAccount.addr, txnParams.appId);
+      if (txnParam.type === TransactionType.DeleteSSC) {
+        this.deleteApp(txnParam.appId);
       }
     }
   }

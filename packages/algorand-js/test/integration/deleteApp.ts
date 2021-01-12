@@ -10,6 +10,7 @@ import { useFixture } from "../helpers/integration";
 describe("Algorand Smart Contracts - Delete Application", function () {
   useFixture("stateful");
   const john = new StoreAccountImpl(1000);
+  const alice = new StoreAccountImpl(1000);
 
   let runtime: Runtime;
   let program: string;
@@ -50,5 +51,20 @@ describe("Algorand Smart Contracts - Delete Application", function () {
     // verify app is deleted
     const res = runtime.ctx.state.globalApps.has(appId);
     assert.equal(res, false);
+  });
+
+  it("should not delete application if logic is rejected", async function () {
+    // create app
+    const appId = await runtime.addApp(flags, {}, program);
+    deleteParams.appId = appId;
+    deleteParams.fromAccount = alice.account;
+
+    await expectTealErrorAsync(
+      async () => await runtime.executeTx(deleteParams, program, []),
+      ERRORS.TEAL.REJECTED_BY_LOGIC
+    );
+    // verify app is not deleted
+    const res = runtime.ctx.state.globalApps.has(appId);
+    assert.equal(res, true);
   });
 });

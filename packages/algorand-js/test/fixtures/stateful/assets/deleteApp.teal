@@ -17,19 +17,19 @@ int DeleteApplication
 txn OnCompletion
 ==
 
-bz not_deletion
+bz finished
 
 // check if creator is deleting
 byte "Creator"
 app_global_get
 txn Sender
 ==
-bnz finished
-
-not_deletion:
-int 1
-return
+bz failed
 
 finished:
 int 1
+return
+
+failed:
+int 0
 return

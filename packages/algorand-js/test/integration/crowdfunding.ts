@@ -1,6 +1,5 @@
 import { addressToBytes, intToBigEndian } from "@algorand-builder/algob";
 import { SSCDeploymentFlags } from "@algorand-builder/algob/src/types";
-import { decodeAddress } from "algosdk";
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
@@ -64,7 +63,7 @@ describe("Crowdfunding basic tests", function () {
     const appId = await runtime.addApp({ ...validFlags, appArgs: appArgs }, {}, program);
     const getGlobal = (key: string):
       bigint | Uint8Array |undefined => runtime.getGlobalState(appId, stringToBytes(key));
-    const johnPk = decodeAddress(john.address).publicKey;
+    const johnPk = addressToBytes(john.address);
 
     // verify global state
     assert.isDefined(appId);
