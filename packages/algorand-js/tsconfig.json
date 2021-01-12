@@ -1,10 +1,1 @@
-{
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "outDir": "./build"
-  },
-  "include": [
-    "src",
-    "../../@types"
-  ]
-}
+../../tsconfig-project.json
