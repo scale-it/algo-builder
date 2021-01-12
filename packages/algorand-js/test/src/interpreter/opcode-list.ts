@@ -23,13 +23,13 @@ import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MIN_UINT8 } from "../../../s
 import { convertToBuffer, stringToBytes } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
-import { StoreAccountImpl } from "../../../src/runtime/account";
-import { EncodingType, StackElem, StoreAccount } from "../../../src/types";
+import { StoreAccount } from "../../../src/runtime/account";
+import { EncodingType, StackElem, StoreAccountI } from "../../../src/types";
 import { execExpectError, expectTealError } from "../../helpers/errors";
 import { accInfo } from "../../mocks/stateful";
 import { elonAddr, johnAddr, TXN_OBJ } from "../../mocks/txn";
 
-function setDummyAccInfo (acc: StoreAccount): void {
+function setDummyAccInfo (acc: StoreAccountI): void {
   acc.assets = accInfo[0].assets;
   acc.appsLocalState = accInfo[0].appsLocalState;
   acc.appsTotalSchema = accInfo[0].appsTotalSchema;
@@ -2074,11 +2074,11 @@ describe("Teal Opcodes", function () {
     const interpreter = new Interpreter();
 
     // setup 1st account (to be used as sender)
-    const acc1: StoreAccount = new StoreAccountImpl(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
+    const acc1: StoreAccountI = new StoreAccount(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
     setDummyAccInfo(acc1);
 
     // setup 2nd account (to be used as Txn.Accounts[A])
-    const acc2 = new StoreAccountImpl(123, { addr: johnAddr, sk: new Uint8Array(0) });
+    const acc2 = new StoreAccount(123, { addr: johnAddr, sk: new Uint8Array(0) });
     setDummyAccInfo(acc2);
 
     const runtime = new Runtime([acc1, acc2]);
@@ -2342,7 +2342,7 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        const acc = interpreter.runtime.ctx.state.accounts.get(elonAddr) as StoreAccount;
+        const acc = interpreter.runtime.ctx.state.accounts.get(elonAddr) as StoreAccountI;
         let localStateCurr = acc.appsLocalState[0]["key-value"];
         let idx = localStateCurr.findIndex(a => compareArray(a.key, stringToBytes('New-Key')));
         assert.notEqual(idx, -1); // idx should not be -1
@@ -2356,7 +2356,7 @@ describe("Teal Opcodes", function () {
         op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        localStateCurr = (interpreter.runtime.ctx.state.accounts.get(johnAddr) as StoreAccount).appsLocalState[0]["key-value"];
+        localStateCurr = (interpreter.runtime.ctx.state.accounts.get(johnAddr) as StoreAccountI).appsLocalState[0]["key-value"];
         idx = localStateCurr.findIndex(a => compareArray(a.key, stringToBytes('New-Key-1')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(localStateCurr[idx].value.uint, 2222);
@@ -2449,7 +2449,7 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        let localStateCurr = (interpreter.runtime.ctx.state.accounts.get(elonAddr) as StoreAccount).appsLocalState[0]["key-value"];
+        let localStateCurr = (interpreter.runtime.ctx.state.accounts.get(elonAddr) as StoreAccountI).appsLocalState[0]["key-value"];
         let idx = localStateCurr.findIndex(a => compareArray(a.key, stringToBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
 
@@ -2460,7 +2460,7 @@ describe("Teal Opcodes", function () {
         op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        localStateCurr = (interpreter.runtime.ctx.state.accounts.get(johnAddr) as StoreAccount).appsLocalState[0]["key-value"];
+        localStateCurr = (interpreter.runtime.ctx.state.accounts.get(johnAddr) as StoreAccountI).appsLocalState[0]["key-value"];
         idx = localStateCurr.findIndex(a => compareArray(a.key, stringToBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
       });
@@ -2624,7 +2624,7 @@ describe("Teal Opcodes", function () {
     const interpreter = new Interpreter();
 
     // setup 1st account
-    const acc1: StoreAccount = new StoreAccountImpl(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
+    const acc1: StoreAccountI = new StoreAccount(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
     setDummyAccInfo(acc1);
 
     const runtime = new Runtime([acc1]);

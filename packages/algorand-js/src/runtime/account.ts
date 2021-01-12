@@ -13,9 +13,9 @@ import { ERRORS } from "../errors/errors-list";
 import { compareArray } from "../lib/compare";
 import { SSC_BYTES } from "../lib/constants";
 import { assertValidSchema, getKeyValPair } from "../lib/stateful";
-import { StackElem, StoreAccount } from "../types";
+import { StackElem, StoreAccountI } from "../types";
 
-export class StoreAccountImpl implements StoreAccount {
+export class StoreAccount implements StoreAccountI {
   readonly account: Account;
   readonly address: string;
   assets: AssetHolding[]; // TODO: to be removed

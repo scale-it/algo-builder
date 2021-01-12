@@ -1,7 +1,7 @@
 import { ExecParams, SignType, TransactionType } from "@algorand-builder/algob/src/types";
 import { assert } from "chai";
 
-import { Runtime, StoreAccountImpl } from "../../src/index";
+import { Runtime, StoreAccount } from "../../src/index";
 import { BIGINT1 } from "../../src/interpreter/opcode-list";
 import { stringToBytes } from "../../src/lib/parsing";
 import { getAcc } from "../helpers/account";
@@ -10,7 +10,7 @@ import { useFixture } from "../helpers/integration";
 
 describe("Algorand Smart Contracts - Stateful Counter example", function () {
   useFixture("stateful");
-  const john = new StoreAccountImpl(1000);
+  const john = new StoreAccount(1000);
 
   const txnParams: ExecParams = {
     type: TransactionType.CallNoOpSSC,
