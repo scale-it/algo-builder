@@ -134,9 +134,9 @@ export class Runtime {
         this.store.globalApps.set(id, params);
       });
 
-      for (const asset of acc.createdAssets) {
-        this.store.assetDefs.set(asset.index, asset.params);
-      }
+      acc.createdAssets.forEach((params, assetIndex) => {
+        this.store.assetDefs.set(assetIndex, params);
+      });
 
       // Here we are duplicating `accounts` data
       // to `accountAssets` for easy querying

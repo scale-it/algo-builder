@@ -2,9 +2,10 @@ import { SSCDeploymentFlags } from "@algorand-builder/algob/src/types";
 import type {
   Account,
   AppLocalState,
+  AssetDef,
   AssetHolding,
   CreatedApp,
-  CreatedAssets, SSCAttributes, SSCSchemaConfig
+  SSCAttributes, SSCSchemaConfig
 } from "algosdk";
 import { generateAccount } from "algosdk";
 
@@ -24,7 +25,7 @@ export class StoreAccount implements StoreAccountI {
   appsLocalState: Map<number, AppLocalState>;
   appsTotalSchema: SSCSchemaConfig;
   createdApps: Map<number, SSCAttributes>;
-  createdAssets: CreatedAssets[];
+  createdAssets: Map<number, AssetDef>;
 
   constructor (balance: number, account?: Account) {
     if (account) {
@@ -42,7 +43,7 @@ export class StoreAccount implements StoreAccountI {
     this.appsLocalState = new Map<number, AppLocalState>();
     this.appsTotalSchema = <SSCSchemaConfig>{};
     this.createdApps = new Map<number, SSCAttributes>();
-    this.createdAssets = [];
+    this.createdAssets = new Map<number, AssetDef>();
   }
 
   // returns account balance in microAlgos

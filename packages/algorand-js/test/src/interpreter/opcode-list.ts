@@ -35,7 +35,7 @@ function setDummyAccInfo (acc: StoreAccountI): void {
   acc.appsLocalState = accInfo[0].appsLocalState;
   acc.appsTotalSchema = accInfo[0].appsTotalSchema;
   acc.createdApps = accInfo[0].createdApps;
-  acc.createdAssets = accInfo[0]["created-assets"];
+  acc.createdAssets = accInfo[0].createdAssets;
 }
 
 describe("Teal Opcodes", function () {

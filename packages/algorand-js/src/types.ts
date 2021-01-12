@@ -5,7 +5,6 @@ import {
   AssetDef,
   AssetHolding,
   CreatedApp,
-  CreatedAssets,
   SSCAttributes,
   SSCSchemaConfig,
   TxnEncodedObj
@@ -89,7 +88,7 @@ export interface StoreAccountI {
   appsLocalState: Map<number, AppLocalState>
   appsTotalSchema: SSCSchemaConfig
   createdApps: Map<number, SSCAttributes>
-  createdAssets: CreatedAssets[]
+  createdAssets: Map<number, AssetDef>
   account: Account
 
   balance: () => number

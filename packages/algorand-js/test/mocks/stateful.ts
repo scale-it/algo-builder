@@ -1,9 +1,10 @@
-import { AppLocalState, SSCAttributes } from "algosdk";
+import { AppLocalState, AssetDef, SSCAttributes } from "algosdk";
 
 import { stringToBytes } from "../../src/lib/parsing";
 
 const appLocalState = new Map<number, AppLocalState>();
 const createdApps = new Map<number, SSCAttributes>();
+const createdAssets = new Map<number, AssetDef>();
 export const accInfo = [{
   address: "addr-1",
   assets: [
@@ -54,21 +55,18 @@ export const accInfo = [{
     'global-state-schema': { 'num-byte-slice': 3, 'num-uint': 1 },
     'local-state-schema': { 'num-byte-slice': 0, 'num-uint': 16 }
   }),
-  'created-assets': [{
-    index: 3,
-    params: {
-      creator: "addr-1",
-      total: 10000,
-      decimals: 10,
-      'default-frozen': "false",
-      'unit-name': "AD",
-      name: "ASSETAD",
-      url: "assetUrl",
-      'metadata-hash': "hash",
-      manager: "addr-1",
-      reserve: "addr-2",
-      freeze: "addr-3",
-      clawback: "addr-4"
-    }
-  }]
+  createdAssets: createdAssets.set(3, {
+    creator: "addr-1",
+    total: 10000,
+    decimals: 10,
+    'default-frozen': "false",
+    'unit-name': "AD",
+    name: "ASSETAD",
+    url: "assetUrl",
+    'metadata-hash': "hash",
+    manager: "addr-1",
+    reserve: "addr-2",
+    freeze: "addr-3",
+    clawback: "addr-4"
+  })
 }];
