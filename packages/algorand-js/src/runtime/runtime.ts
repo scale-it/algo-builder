@@ -318,6 +318,16 @@ export class Runtime {
     }
   }
 
+  // Delete application from account's state and global state
+  deleteApp (accountAddr: string, appId: number): void {
+    if (!this.store.globalApps.has(appId)) {
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
+    }
+    this.store.globalApps.delete(appId);
+    const account = this.assertAccountDefined(this.store.accounts.get(accountAddr));
+    account.deleteApp(appId);
+  }
+
   // updates account balance as per transaction parameters
   updateBalance (txnParam: ExecParams, account: StoreAccount): void {
     switch (txnParam.type) {
@@ -347,12 +357,18 @@ export class Runtime {
         this.store.accounts.forEach((account, addr) => {
           this.updateBalance(txnParam, account);
         });
+        if (txnParam.type === TransactionType.DeleteSSC) {
+          this.deleteApp(txnParam.fromAccount.addr, txnParam.appId);
+        }
       }
     } else {
       // for a single (stand alone) transaction
       this.store.accounts.forEach((account, addr) => {
         this.updateBalance(txnParams, account);
       });
+      if (txnParams.type === TransactionType.DeleteSSC) {
+        this.deleteApp(txnParams.fromAccount.addr, txnParams.appId);
+      }
     }
   }
 

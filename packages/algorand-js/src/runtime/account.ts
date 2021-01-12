@@ -101,6 +101,7 @@ export class StoreAccountImpl implements StoreAccount {
     });
   }
 
+  // add application in account's state
   addApp (appId: number, params: SSCDeploymentFlags): CreatedApp {
     if (this.createdApps.length === 10) {
       throw new Error('Maximum created applications for an account is 10');
@@ -127,6 +128,16 @@ export class StoreAccountImpl implements StoreAccount {
         schema: appParams["local-state-schema"]
       };
       this.appsLocalState.push(localParams); // push
+    }
+  }
+
+  // delete application from account's state
+  deleteApp (appId: number): void {
+    for (const app of this.createdApps) {
+      if (app.id === appId) {
+        const index = this.createdApps.indexOf(app);
+        this.createdApps.splice(index, 1);
+      }
     }
   }
 }
