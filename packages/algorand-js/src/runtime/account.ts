@@ -23,7 +23,7 @@ export class StoreAccount implements StoreAccountI {
   amount: number;
   appsLocalState: Map<number, AppLocalState>;
   appsTotalSchema: SSCSchemaConfig;
-  createdApps: CreatedApp[];
+  createdApps: Map<number, SSCAttributes>;
   createdAssets: CreatedAssets[];
 
   constructor (balance: number, account?: Account) {
@@ -41,7 +41,7 @@ export class StoreAccount implements StoreAccountI {
     this.amount = balance;
     this.appsLocalState = new Map<number, AppLocalState>();
     this.appsTotalSchema = <SSCSchemaConfig>{};
-    this.createdApps = [];
+    this.createdApps = new Map<number, SSCAttributes>();
     this.createdAssets = [];
   }
 
@@ -101,12 +101,12 @@ export class StoreAccount implements StoreAccountI {
   }
 
   addApp (appId: number, params: SSCDeploymentFlags): CreatedApp {
-    if (this.createdApps.length === 10) {
+    if (this.createdApps.size === 10) {
       throw new Error('Maximum created applications for an account is 10');
     }
 
     const app = new App(appId, params);
-    this.createdApps.push(app);
+    this.createdApps.set(app.id, app.params);
     return app;
   }
 

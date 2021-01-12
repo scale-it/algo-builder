@@ -56,7 +56,7 @@ export const TXN_OBJ = {
   apaa: [Buffer.from("arg1"), Buffer.from("arg2")],
   apat: [Buffer.from(decodeAddress(johnAddr).publicKey),
     Buffer.from(decodeAddress(bobAccount.addr).publicKey)],
-  apfa: [1001, 1002, 1003],
+  apfa: [1828, 1002, 1003],
   apas: [2001, 2002, 2003],
   type: 'pay',
   apls: {

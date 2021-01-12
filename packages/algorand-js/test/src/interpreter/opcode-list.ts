@@ -2250,7 +2250,8 @@ describe("Teal Opcodes", function () {
       before(function () {
         interpreter.runtime.ctx.tx.apid = 1828;
         interpreter.runtime.ctx.state.globalApps = new Map<number, SSCAttributes>();
-        interpreter.runtime.ctx.state.globalApps.set(1828, acc1.createdApps[0].params);
+        const app = acc1.createdApps.get(1828);
+        if (app) interpreter.runtime.ctx.state.globalApps.set(1828, app);
       });
 
       it("should push the value to stack if key is present in global state", function () {
@@ -2277,8 +2278,8 @@ describe("Teal Opcodes", function () {
     describe("AppGlobalGetEx", function () {
       before(function () {
         interpreter.runtime.ctx.tx.apid = 1828;
-        interpreter.runtime.ctx.tx.apfa = [1828];
-        interpreter.runtime.ctx.state.globalApps.set(1828, acc1.createdApps[0].params);
+        const app = acc1.createdApps.get(1828);
+        if (app) interpreter.runtime.ctx.state.globalApps.set(1828, app);
       });
 
       it("should push the value to stack if key is present externally in global state", function () {
@@ -2402,7 +2403,8 @@ describe("Teal Opcodes", function () {
     describe("AppGlobalPut", function () {
       before(function () {
         interpreter.runtime.ctx.tx.apid = 1828;
-        interpreter.runtime.ctx.state.globalApps.set(1828, acc1.createdApps[0].params);
+        const app = acc1.createdApps.get(1828);
+        if (app) interpreter.runtime.ctx.state.globalApps.set(1828, app);
       });
 
       it("should put the value in global storage", function () {
@@ -2488,7 +2490,8 @@ describe("Teal Opcodes", function () {
     describe("AppGlobalDel", function () {
       before(function () {
         interpreter.runtime.ctx.tx.apid = 1828;
-        interpreter.runtime.ctx.state.globalApps.set(1828, acc1.createdApps[0].params);
+        const app = acc1.createdApps.get(1828);
+        if (app) interpreter.runtime.ctx.state.globalApps.set(1828, app);
       });
 
       it("should remove the key-value pair from global storage", function () {

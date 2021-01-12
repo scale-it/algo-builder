@@ -130,9 +130,9 @@ export class Runtime {
     for (const acc of accounts) {
       this.store.accounts.set(acc.address, acc);
 
-      for (const app of acc.createdApps) {
-        this.store.globalApps.set(app.id, app.params);
-      }
+      acc.createdApps.forEach((params, id) => {
+        this.store.globalApps.set(id, params);
+      });
 
       for (const asset of acc.createdAssets) {
         this.store.assetDefs.set(asset.index, asset.params);

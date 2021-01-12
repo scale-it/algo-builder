@@ -1,8 +1,9 @@
-import { AppLocalState } from "algosdk";
+import { AppLocalState, SSCAttributes } from "algosdk";
 
 import { stringToBytes } from "../../src/lib/parsing";
 
 const appLocalState = new Map<number, AppLocalState>();
+const createdApps = new Map<number, SSCAttributes>();
 export const accInfo = [{
   address: "addr-1",
   assets: [
@@ -28,34 +29,31 @@ export const accInfo = [{
     }
   }),
   appsTotalSchema: { 'num-byte-slice': 583, 'num-uint': 105 },
-  createdApps: [{
-    id: 1828,
-    params: {
-      'approval-program': '',
-      'clear-state-program': '',
-      creator: "addr-1",
-      'global-state': [
-        {
-          key: stringToBytes("Hello"),
-          value: {
-            bytes: stringToBytes("World"),
-            type: 1,
-            uint: 0
-          }
-        },
-        {
-          key: stringToBytes("global-key"),
-          value: {
-            bytes: stringToBytes("global-val"),
-            type: 1,
-            uint: 0
-          }
+  createdApps: createdApps.set(1828, {
+    'approval-program': '',
+    'clear-state-program': '',
+    creator: "addr-1",
+    'global-state': [
+      {
+        key: stringToBytes("Hello"),
+        value: {
+          bytes: stringToBytes("World"),
+          type: 1,
+          uint: 0
         }
-      ],
-      'global-state-schema': { 'num-byte-slice': 3, 'num-uint': 1 },
-      'local-state-schema': { 'num-byte-slice': 0, 'num-uint': 16 }
-    }
-  }],
+      },
+      {
+        key: stringToBytes("global-key"),
+        value: {
+          bytes: stringToBytes("global-val"),
+          type: 1,
+          uint: 0
+        }
+      }
+    ],
+    'global-state-schema': { 'num-byte-slice': 3, 'num-uint': 1 },
+    'local-state-schema': { 'num-byte-slice': 0, 'num-uint': 16 }
+  }),
   'created-assets': [{
     index: 3,
     params: {
