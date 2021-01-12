@@ -11,8 +11,8 @@ import { Interpreter } from "../index";
 import { BIGINT0, BIGINT1 } from "../interpreter/opcode-list";
 import { checkIndexBound, compareArray } from "../lib/compare";
 import { SSC_BYTES } from "../lib/constants";
-import { mockSuggestedParams } from "../lib/mocks";
 import { assertValidSchema, getKeyValPair } from "../lib/stateful";
+import { mockSuggestedParams } from "../mock/tx";
 import type { Context, StackElem, State, StoreAccount, Txn } from "../types";
 
 export class Runtime {

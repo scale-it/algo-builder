@@ -22,6 +22,7 @@ describe('Crowdfunding Tests', function () {
 
   let runtime;
   let flags;
+  let applicationId;
   const program = getProgram('crowdFundApproval.teal');
 
   this.beforeAll(async function () {
@@ -51,6 +52,8 @@ describe('Crowdfunding Tests', function () {
     };
   });
 
+  const getGlobal = (key) => runtime.getGlobalState(applicationId, stringToBytes(key));
+
   // fetch latest account state
   function syncAccounts () {
     creator = getAcc(runtime, creator);
@@ -79,20 +82,31 @@ describe('Crowdfunding Tests', function () {
   ];
 
   it('crowdfunding application', async () => {
+    /**
+     * This test demonstrates how to create a Crowdfunding Stateful Smart Contract Application
+     * and interact with it. there are following operations that are performed:
+     * - Create the application
+     * - Update the application
+     * - Donate funds
+     * - Reclaim funds
+     * - Claim funds
+     * Note: - In this example timestamps are commented because it is possible
+     * that network timestamp and system timestamp may not be in sync.
+     */
     const creationFlags = Object.assign({}, flags);
 
     // create application
-    const applicationId = await runtime.addApp({ ...creationFlags, appArgs: creationArgs }, {}, program);
+    applicationId = await runtime.addApp({ ...creationFlags, appArgs: creationArgs }, {}, program);
     const creatorPk = addressToBytes(creator.address);
 
     // verify global state
     assert.isDefined(applicationId);
-    assert.deepEqual(runtime.getGlobalState(applicationId, stringToBytes('Creator')), creatorPk);
-    assert.deepEqual(runtime.getGlobalState(applicationId, stringToBytes('StartDate')), BigInt(beginDate.getTime()));
-    assert.deepEqual(runtime.getGlobalState(applicationId, stringToBytes('EndDate')), BigInt(endDate.getTime()));
-    assert.deepEqual(runtime.getGlobalState(applicationId, stringToBytes('Goal')), 7000000n);
-    assert.deepEqual(runtime.getGlobalState(applicationId, stringToBytes('Receiver')), creatorPk);
-    assert.deepEqual(runtime.getGlobalState(applicationId, stringToBytes('Total')), 0n);
+    assert.deepEqual(getGlobal('Creator'), creatorPk);
+    assert.deepEqual(getGlobal('StartDate'), BigInt(beginDate.getTime()));
+    assert.deepEqual(getGlobal('EndDate'), BigInt(endDate.getTime()));
+    assert.deepEqual(getGlobal('Goal'), 7000000n);
+    assert.deepEqual(getGlobal('Receiver'), creatorPk);
+    assert.deepEqual(getGlobal('Total'), 0n);
 
     // update application with correct escrow account address
     let appArgs = [addressToBytes(escrow.address)]; // converts algorand address to Uint8Array
@@ -106,7 +120,7 @@ describe('Crowdfunding Tests', function () {
 
     // verify escrow storage
     assert.isDefined(applicationId);
-    assert.deepEqual(runtime.getGlobalState(applicationId, stringToBytes('Escrow')), escrowPk);
+    assert.deepEqual(getGlobal('Escrow'), escrowPk);
 
     // opt-in to app
     await runtime.optInToApp(creator.address, applicationId, {}, {}, program);

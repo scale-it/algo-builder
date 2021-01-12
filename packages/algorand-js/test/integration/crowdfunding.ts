@@ -62,15 +62,17 @@ describe("Crowdfunding basic tests", function () {
     ];
 
     const appId = await runtime.addApp({ ...validFlags, appArgs: appArgs }, {}, program);
+    const getGlobal = (key: string):
+      bigint | Uint8Array |undefined => runtime.getGlobalState(appId, stringToBytes(key));
     const johnPk = decodeAddress(john.address).publicKey;
 
     // verify global state
     assert.isDefined(appId);
-    assert.deepEqual(runtime.getGlobalState(appId, stringToBytes('Creator')), johnPk);
-    assert.deepEqual(runtime.getGlobalState(appId, stringToBytes('StartDate')), BigInt(beginDate.getTime()));
-    assert.deepEqual(runtime.getGlobalState(appId, stringToBytes('EndDate')), BigInt(endDate.getTime()));
-    assert.deepEqual(runtime.getGlobalState(appId, stringToBytes('Goal')), 7000000n);
-    assert.deepEqual(runtime.getGlobalState(appId, stringToBytes('Receiver')), johnPk);
-    assert.deepEqual(runtime.getGlobalState(appId, stringToBytes('Total')), 0n);
+    assert.deepEqual(getGlobal('Creator'), johnPk);
+    assert.deepEqual(getGlobal('StartDate'), BigInt(beginDate.getTime()));
+    assert.deepEqual(getGlobal('EndDate'), BigInt(endDate.getTime()));
+    assert.deepEqual(getGlobal('Goal'), 7000000n);
+    assert.deepEqual(getGlobal('Receiver'), johnPk);
+    assert.deepEqual(getGlobal('Total'), 0n);
   });
 });
