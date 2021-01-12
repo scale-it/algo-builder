@@ -86,7 +86,7 @@ export interface StoreAccountI {
   address: string
   assets: AssetHolding[]
   amount: number
-  appsLocalState: AppLocalState[]
+  appsLocalState: Map<number, AppLocalState>
   appsTotalSchema: SSCSchemaConfig
   createdApps: CreatedApp[]
   createdAssets: CreatedAssets[]
@@ -96,7 +96,7 @@ export interface StoreAccountI {
   addApp: (appId: number, params: SSCDeploymentFlags) => CreatedApp
   optInToApp: (appId: number, appParams: SSCAttributes) => void
   getLocalState: (appId: number, key: Uint8Array) => StackElem | undefined
-  updateLocalState: (appId: number, key: Uint8Array, value: StackElem) => AppLocalState[]
+  updateLocalState: (appId: number, key: Uint8Array, value: StackElem) => AppLocalState
 }
 
 // https://developer.algorand.org/docs/reference/teal/specification/#oncomplete

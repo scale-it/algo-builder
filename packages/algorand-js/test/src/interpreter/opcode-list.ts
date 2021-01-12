@@ -2069,6 +2069,7 @@ describe("Teal Opcodes", function () {
     });
   });
 
+  /* eslint-disable sonarjs/cognitive-complexity */
   describe("StateFul Opcodes", function () {
     const stack = new Stack<StackElem>();
     const interpreter = new Interpreter();
@@ -2334,6 +2335,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should put the value in account's local storage", function () {
+        let idx;
         // for Sender, check for byte
         stack.push(BigInt('0'));
         stack.push(stringToBytes('New-Key'));
@@ -2342,11 +2344,17 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
+        const appId = interpreter.runtime.ctx.tx.apid;
         const acc = interpreter.runtime.ctx.state.accounts.get(elonAddr) as StoreAccountI;
-        let localStateCurr = acc.appsLocalState[0]["key-value"];
-        let idx = localStateCurr.findIndex(a => compareArray(a.key, stringToBytes('New-Key')));
-        assert.notEqual(idx, -1); // idx should not be -1
-        assert.deepEqual(localStateCurr[idx].value.bytes, stringToBytes('New-Val'));
+        let localStateCurr = acc.appsLocalState.get(appId)?.["key-value"];
+        assert.isDefined(localStateCurr);
+        if (localStateCurr) {
+          // TODO: will be updated to Map
+          idx = localStateCurr.findIndex(a => compareArray(a.key, stringToBytes('New-Key')));
+          assert.isDefined(idx);
+          assert.notEqual(idx, -1); // idx should not be -1
+          if (idx) assert.deepEqual(localStateCurr[idx].value.bytes, stringToBytes('New-Val'));
+        }
 
         // for Txn.Accounts[A], uint
         stack.push(BigInt('1'));
@@ -2356,10 +2364,16 @@ describe("Teal Opcodes", function () {
         op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        localStateCurr = (interpreter.runtime.ctx.state.accounts.get(johnAddr) as StoreAccountI).appsLocalState[0]["key-value"];
-        idx = localStateCurr.findIndex(a => compareArray(a.key, stringToBytes('New-Key-1')));
-        assert.notEqual(idx, -1); // idx should not be -1
-        assert.deepEqual(localStateCurr[idx].value.uint, 2222);
+        localStateCurr = (interpreter.runtime.ctx.state.accounts.get(johnAddr) as StoreAccountI)
+          .appsLocalState.get(appId)?.["key-value"];
+        assert.isDefined(localStateCurr);
+        if (localStateCurr) {
+          // TODO: will be updated to Map
+          idx = localStateCurr.findIndex(a => compareArray(a.key, stringToBytes('New-Key-1')));
+          assert.isDefined(idx);
+          assert.notEqual(idx, -1); // idx should not be -1
+          if (idx) assert.deepEqual(localStateCurr[idx].value.uint, 2222);
+        }
       });
 
       it("should throw error if resulting schema is invalid", function () {
@@ -2449,8 +2463,11 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        let localStateCurr = (interpreter.runtime.ctx.state.accounts.get(elonAddr) as StoreAccountI).appsLocalState[0]["key-value"];
-        let idx = localStateCurr.findIndex(a => compareArray(a.key, stringToBytes('Local-key')));
+        let idx;
+        const appId = interpreter.runtime.ctx.tx.apid;
+        let localStateCurr = (interpreter.runtime.ctx.state.accounts.get(elonAddr) as StoreAccountI)
+          .appsLocalState.get(appId)?.["key-value"];
+        if (localStateCurr) idx = localStateCurr.findIndex(a => compareArray(a.key, stringToBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
 
         // for Txn.Accounts[A]
@@ -2460,8 +2477,9 @@ describe("Teal Opcodes", function () {
         op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        localStateCurr = (interpreter.runtime.ctx.state.accounts.get(johnAddr) as StoreAccountI).appsLocalState[0]["key-value"];
-        idx = localStateCurr.findIndex(a => compareArray(a.key, stringToBytes('Local-key')));
+        localStateCurr = (interpreter.runtime.ctx.state.accounts.get(johnAddr) as StoreAccountI)
+          .appsLocalState.get(appId)?.["key-value"];
+        if (localStateCurr) idx = localStateCurr.findIndex(a => compareArray(a.key, stringToBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
       });
     });

@@ -1,5 +1,8 @@
+import { AppLocalState } from "algosdk";
+
 import { stringToBytes } from "../../src/lib/parsing";
 
+const appLocalState = new Map<number, AppLocalState>();
 export const accInfo = [{
   address: "addr-1",
   assets: [
@@ -7,7 +10,7 @@ export const accInfo = [{
     { 'asset-id': 32, amount: 2, creator: "AS", 'is-frozen': "false" }
   ],
   amount: 123,
-  appsLocalState: [{
+  appsLocalState: appLocalState.set(1847, {
     id: 1847,
     'key-value': [
       {
@@ -23,7 +26,7 @@ export const accInfo = [{
       'num-byte-slice': 2,
       'num-uint': 1
     }
-  }],
+  }),
   appsTotalSchema: { 'num-byte-slice': 583, 'num-uint': 105 },
   createdApps: [{
     id: 1828,
