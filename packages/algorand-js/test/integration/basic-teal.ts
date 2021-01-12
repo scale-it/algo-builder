@@ -2,7 +2,7 @@ import { ExecParams, SignType, TransactionType } from "@algorand-builder/algob/s
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
-import { Runtime, StoreAccountImpl } from "../../src/index";
+import { Runtime, StoreAccount } from "../../src/index";
 import { getAcc } from "../helpers/account";
 import { expectTealErrorAsync } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
@@ -13,8 +13,8 @@ const initialBobHolding = 500;
 
 describe("Algorand Smart Contracts", function () {
   useFixture("basic-teal");
-  let john = new StoreAccountImpl(initialJohnHolding);
-  let bob = new StoreAccountImpl(initialBobHolding);
+  let john = new StoreAccount(initialJohnHolding);
+  let bob = new StoreAccount(initialBobHolding);
 
   // set up transaction paramenters
   const txnParams: ExecParams = {

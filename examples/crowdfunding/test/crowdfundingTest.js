@@ -6,7 +6,7 @@ import {
   stringToBytes,
   TransactionType
 } from '@algorand-builder/algob';
-import { Runtime, StoreAccountImpl } from '@algorand-builder/algorand-js';
+import { Runtime, StoreAccount } from '@algorand-builder/algorand-js';
 import { assert } from 'chai';
 
 import { getAcc } from './common';
@@ -16,9 +16,9 @@ const initialCreatorBalance = 10000;
 const goal = 7000000;
 
 describe('Crowdfunding Tests', function () {
-  let creator = new StoreAccountImpl(initialCreatorBalance);
-  let escrow = new StoreAccountImpl(0);
-  let donor = new StoreAccountImpl(initialDonorBalance);
+  let creator = new StoreAccount(initialCreatorBalance);
+  let escrow = new StoreAccount(0);
+  let donor = new StoreAccount(initialDonorBalance);
 
   let runtime;
   let flags;
@@ -38,9 +38,9 @@ describe('Crowdfunding Tests', function () {
   });
 
   this.afterEach(async function () {
-    creator = new StoreAccountImpl(initialCreatorBalance);
-    escrow = new StoreAccountImpl(0);
-    donor = new StoreAccountImpl(initialDonorBalance);
+    creator = new StoreAccount(initialCreatorBalance);
+    escrow = new StoreAccount(0);
+    donor = new StoreAccount(initialDonorBalance);
     runtime = new Runtime([creator, escrow, donor]);
 
     flags = {
@@ -127,8 +127,8 @@ describe('Crowdfunding Tests', function () {
     await runtime.optInToApp(donor.address, applicationId, {}, {}, program);
 
     syncAccounts();
-    assert.isDefined(creator.appsLocalState.find(app => app.id === applicationId));
-    assert.isDefined(donor.appsLocalState.find(app => app.id === applicationId));
+    assert.isDefined(creator.appsLocalState.get(applicationId));
+    assert.isDefined(donor.appsLocalState.get(applicationId));
 
     // donate correct amount to escrow account
     // App argument to donate.

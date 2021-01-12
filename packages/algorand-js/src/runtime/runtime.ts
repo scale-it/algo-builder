@@ -13,7 +13,7 @@ import { checkIndexBound, compareArray } from "../lib/compare";
 import { SSC_BYTES } from "../lib/constants";
 import { assertValidSchema, getKeyValPair } from "../lib/stateful";
 import { mockSuggestedParams } from "../mock/tx";
-import type { Context, StackElem, State, StoreAccount, Txn } from "../types";
+import type { Context, StackElem, State, StoreAccountI, Txn } from "../types";
 
 export class Runtime {
   /**
@@ -28,11 +28,11 @@ export class Runtime {
   ctx: Context;
   private appCounter: number;
 
-  constructor (accounts: StoreAccount[]) {
+  constructor (accounts: StoreAccountI[]) {
     // runtime store
     const assetInfo = new Map<number, AssetHolding>();
     this.store = {
-      accounts: new Map<string, StoreAccount>(),
+      accounts: new Map<string, StoreAccountI>(),
       accountAssets: new Map<string, typeof assetInfo>(),
       globalApps: new Map<number, SSCAttributes>(),
       assetDefs: new Map<number, AssetDef>()
@@ -51,7 +51,7 @@ export class Runtime {
     this.appCounter = 0;
   }
 
-  assertAccountDefined (a?: StoreAccount): StoreAccount {
+  assertAccountDefined (a?: StoreAccountI): StoreAccountI {
     if (a === undefined) {
       throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
     }
@@ -66,8 +66,8 @@ export class Runtime {
     return app;
   }
 
-  getAccount (accountIndex: bigint): StoreAccount {
-    let account: StoreAccount | undefined;
+  getAccount (accountIndex: bigint): StoreAccountI {
+    let account: StoreAccountI | undefined;
     if (accountIndex === BIGINT0) {
       const senderAccount = encodeAddress(this.ctx.tx.snd);
       account = this.ctx.state.accounts.get(senderAccount);
@@ -126,7 +126,7 @@ export class Runtime {
    * Setup initial accounts as {address: SDKAccount}. This should be called only when initializing Runtime.
    * @param accounts: array of account info's
    */
-  initializeAccounts (accounts: StoreAccount[]): void {
+  initializeAccounts (accounts: StoreAccountI[]): void {
     for (const acc of accounts) {
       this.store.accounts.set(acc.address, acc);
 
@@ -319,7 +319,7 @@ export class Runtime {
   }
 
   // updates account balance as per transaction parameters
-  updateBalance (txnParam: ExecParams, account: StoreAccount): void {
+  updateBalance (txnParam: ExecParams, account: StoreAccountI): void {
     switch (txnParam.type) {
       case TransactionType.TransferAlgo: {
         switch (account.address) {

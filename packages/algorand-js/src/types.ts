@@ -62,11 +62,11 @@ export enum EncodingType {
 }
 
 export interface AccountsMap {
-  [addr: string]: StoreAccount
+  [addr: string]: StoreAccountI
 }
 
 export interface State {
-  accounts: Map<string, StoreAccount>
+  accounts: Map<string, StoreAccountI>
   accountAssets: Map<string, Map<number, AssetHolding>>
   globalApps: Map<number, SSCAttributes>
   assetDefs: Map<number, AssetDef>
@@ -82,11 +82,11 @@ export interface Context {
 
 // represent account used in tests and by the context
 // NOTE: custom notations are used rather than SDK AccountState notations
-export interface StoreAccount {
+export interface StoreAccountI {
   address: string
   assets: AssetHolding[]
   amount: number
-  appsLocalState: AppLocalState[]
+  appsLocalState: Map<number, AppLocalState>
   appsTotalSchema: SSCSchemaConfig
   createdApps: CreatedApp[]
   createdAssets: CreatedAssets[]
@@ -96,7 +96,7 @@ export interface StoreAccount {
   addApp: (appId: number, params: SSCDeploymentFlags) => CreatedApp
   optInToApp: (appId: number, appParams: SSCAttributes) => void
   getLocalState: (appId: number, key: Uint8Array) => StackElem | undefined
-  updateLocalState: (appId: number, key: Uint8Array, value: StackElem) => AppLocalState[]
+  updateLocalState: (appId: number, key: Uint8Array, value: StackElem) => AppLocalState
 }
 
 // https://developer.algorand.org/docs/reference/teal/specification/#oncomplete

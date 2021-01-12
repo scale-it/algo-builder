@@ -13,14 +13,14 @@ import { ERRORS } from "../errors/errors-list";
 import { compareArray } from "../lib/compare";
 import { SSC_BYTES } from "../lib/constants";
 import { assertValidSchema, getKeyValPair } from "../lib/stateful";
-import { StackElem, StoreAccount } from "../types";
+import { StackElem, StoreAccountI } from "../types";
 
-export class StoreAccountImpl implements StoreAccount {
+export class StoreAccount implements StoreAccountI {
   readonly account: Account;
   readonly address: string;
   assets: AssetHolding[]; // TODO: to be removed
   amount: number;
-  appsLocalState: AppLocalState[]; // TODO: update to map
+  appsLocalState: Map<number, AppLocalState>; // TODO: update to map
   appsTotalSchema: SSCSchemaConfig;
   createdApps: CreatedApp[];
   createdAssets: CreatedAssets[];
@@ -38,7 +38,7 @@ export class StoreAccountImpl implements StoreAccount {
 
     this.assets = [];
     this.amount = balance;
-    this.appsLocalState = [];
+    this.appsLocalState = new Map<number, AppLocalState>();
     this.appsTotalSchema = <SSCSchemaConfig>{};
     this.createdApps = [];
     this.createdAssets = [];
@@ -57,7 +57,7 @@ export class StoreAccountImpl implements StoreAccount {
    */
   getLocalState (appId: number, key: Uint8Array): StackElem | undefined {
     const localState = this.appsLocalState;
-    const data = localState.find(state => state.id === appId)?.["key-value"]; // can be undefined (eg. app opted in)
+    const data = localState.get(appId)?.["key-value"]; // can be undefined (eg. app opted in)
     if (data) {
       const keyValue = data.find(schema => compareArray(schema.key, key));
       const value = keyValue?.value;
@@ -75,25 +75,23 @@ export class StoreAccountImpl implements StoreAccount {
    * @param key: key to fetch value of from local state
    * @param value: key to fetch value of from local state
    */
-  updateLocalState (appId: number, key: Uint8Array, value: StackElem): AppLocalState[] {
-    const localState = this.appsLocalState;
+  updateLocalState (appId: number, key: Uint8Array, value: StackElem): AppLocalState {
+    const localState = this.appsLocalState.get(appId);
     const data = getKeyValPair(key, value); // key value pair to put
 
-    for (const l of localState) {
-      if (l.id === appId) { // find appId
-        const localApp = l["key-value"];
-        const idx = localApp.findIndex(schema => compareArray(schema.key, key));
+    const localApp = localState?.["key-value"];
+    if (localState && localApp) {
+      const idx = localApp.findIndex(schema => compareArray(schema.key, key));
 
-        if (idx === -1) {
-          localApp.push(data); // push new pair if key not found
-        } else {
-          localApp[idx].value = data.value; // update value if key found
-        }
-        l["key-value"] = localApp; // save updated state
-
-        assertValidSchema(l["key-value"], l.schema); // verify if updated schema is valid by config
-        return localState;
+      if (idx === -1) {
+        localApp.push(data); // push new pair if key not found
+      } else {
+        localApp[idx].value = data.value; // update value if key found
       }
+      localState["key-value"] = localApp; // save updated state
+
+      assertValidSchema(localState["key-value"], localState.schema); // verify if updated schema is valid by config
+      return localState;
     }
 
     throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, {
@@ -113,11 +111,11 @@ export class StoreAccountImpl implements StoreAccount {
 
   // opt in to application
   optInToApp (appId: number, appParams: SSCAttributes): void {
-    const localState = this.appsLocalState.find(app => app.id === appId);
+    const localState = this.appsLocalState.get(appId);
     if (localState) {
       console.warn(`${this.address} is already opted in to app ${appId}`);
     } else {
-      if (this.appsLocalState.length === 10) {
+      if (this.appsLocalState.size === 10) {
         throw new Error('Maximum Opt In applications per account is 10');
       }
 
@@ -126,7 +124,7 @@ export class StoreAccountImpl implements StoreAccount {
         "key-value": [],
         schema: appParams["local-state-schema"]
       };
-      this.appsLocalState.push(localParams); // push
+      this.appsLocalState.set(appId, localParams); // push
     }
   }
 }
