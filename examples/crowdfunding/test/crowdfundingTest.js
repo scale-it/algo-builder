@@ -51,7 +51,7 @@ describe('Crowdfunding Tests', function () {
     };
   });
 
-  // update account state
+  // fetch latest account state
   function syncAccounts () {
     creator = getAcc(runtime, creator);
     escrow = getAcc(runtime, escrow);
