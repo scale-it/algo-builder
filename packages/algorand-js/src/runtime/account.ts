@@ -15,12 +15,13 @@ import { SSC_BYTES } from "../lib/constants";
 import { assertValidSchema, getKeyValPair } from "../lib/stateful";
 import { StackElem, StoreAccountI } from "../types";
 
+const keyValue = "key-value";
 export class StoreAccount implements StoreAccountI {
   readonly account: Account;
   readonly address: string;
   assets: AssetHolding[]; // TODO: to be removed
   amount: number;
-  appsLocalState: Map<number, AppLocalState>; // TODO: update to map
+  appsLocalState: Map<number, AppLocalState>;
   appsTotalSchema: SSCSchemaConfig;
   createdApps: CreatedApp[];
   createdAssets: CreatedAssets[];
@@ -57,7 +58,7 @@ export class StoreAccount implements StoreAccountI {
    */
   getLocalState (appId: number, key: Uint8Array): StackElem | undefined {
     const localState = this.appsLocalState;
-    const data = localState.get(appId)?.["key-value"]; // can be undefined (eg. app opted in)
+    const data = localState.get(appId)?.[keyValue]; // can be undefined (eg. app opted in)
     if (data) {
       const keyValue = data.find(schema => compareArray(schema.key, key));
       const value = keyValue?.value;
@@ -79,7 +80,7 @@ export class StoreAccount implements StoreAccountI {
     const localState = this.appsLocalState.get(appId);
     const data = getKeyValPair(key, value); // key value pair to put
 
-    const localApp = localState?.["key-value"];
+    const localApp = localState?.[keyValue];
     if (localState && localApp) {
       const idx = localApp.findIndex(schema => compareArray(schema.key, key));
 
@@ -88,9 +89,9 @@ export class StoreAccount implements StoreAccountI {
       } else {
         localApp[idx].value = data.value; // update value if key found
       }
-      localState["key-value"] = localApp; // save updated state
+      localState[keyValue] = localApp; // save updated state
 
-      assertValidSchema(localState["key-value"], localState.schema); // verify if updated schema is valid by config
+      assertValidSchema(localState[keyValue], localState.schema); // verify if updated schema is valid by config
       return localState;
     }
 

@@ -29,6 +29,7 @@ import { execExpectError, expectTealError } from "../../helpers/errors";
 import { accInfo } from "../../mocks/stateful";
 import { elonAddr, johnAddr, TXN_OBJ } from "../../mocks/txn";
 
+const keyValue = "key-value";
 function setDummyAccInfo (acc: StoreAccountI): void {
   acc.assets = accInfo[0].assets;
   acc.appsLocalState = accInfo[0].appsLocalState;
@@ -2346,7 +2347,7 @@ describe("Teal Opcodes", function () {
 
         const appId = interpreter.runtime.ctx.tx.apid;
         const acc = interpreter.runtime.ctx.state.accounts.get(elonAddr) as StoreAccountI;
-        let localStateCurr = acc.appsLocalState.get(appId)?.["key-value"];
+        let localStateCurr = acc.appsLocalState.get(appId)?.[keyValue];
         assert.isDefined(localStateCurr);
         if (localStateCurr) {
           // TODO: will be updated to Map
@@ -2365,7 +2366,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         localStateCurr = (interpreter.runtime.ctx.state.accounts.get(johnAddr) as StoreAccountI)
-          .appsLocalState.get(appId)?.["key-value"];
+          .appsLocalState.get(appId)?.[keyValue];
         assert.isDefined(localStateCurr);
         if (localStateCurr) {
           // TODO: will be updated to Map
@@ -2466,7 +2467,7 @@ describe("Teal Opcodes", function () {
         let idx;
         const appId = interpreter.runtime.ctx.tx.apid;
         let localStateCurr = (interpreter.runtime.ctx.state.accounts.get(elonAddr) as StoreAccountI)
-          .appsLocalState.get(appId)?.["key-value"];
+          .appsLocalState.get(appId)?.[keyValue];
         if (localStateCurr) idx = localStateCurr.findIndex(a => compareArray(a.key, stringToBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
 
@@ -2478,7 +2479,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         localStateCurr = (interpreter.runtime.ctx.state.accounts.get(johnAddr) as StoreAccountI)
-          .appsLocalState.get(appId)?.["key-value"];
+          .appsLocalState.get(appId)?.[keyValue];
         if (localStateCurr) idx = localStateCurr.findIndex(a => compareArray(a.key, stringToBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
       });
