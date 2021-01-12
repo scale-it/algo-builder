@@ -277,7 +277,7 @@ export function generateAccount(): Account;
 export function isValidAddress(addr: string): boolean;
 
 /**
- * decodeAddress takes an Algorand address in string form and decodes it into a Uint8Array.
+ * decodeAddress takes an Algorand address in string form and decodes it into a Uint8Array(as public key).
  * @param address an Algorand address with checksum.
  * @returns the decoded form of the address's public key and checksum
  */
@@ -340,34 +340,34 @@ export function decodeUnsignedTransaction(b: Uint8Array): Transaction;
  */
 export function decodeSignedTransaction(b: Uint8Array): SignedTransaction;
 
-export function makeApplicationClearStateTxn(from: string, suggestedParams: any, appIndex: number,
-  appArgs?: Uint8Array[], accounts?: any, foreignApps?: any, foreignAssets?: any,
+export function makeApplicationClearStateTxn(from: string, suggestedParams: SuggestedParams, appIndex: number,
+  appArgs?: Uint8Array[], accounts?: string[], foreignApps?: any, foreignAssets?: any,
   note?: Uint8Array, lease?: Uint8Array, rekeyTo?: string): any;
 
-export function makeApplicationCloseOutTxn(from: string, suggestedParams: any, appIndex: number,
-  appArgs?: Uint8Array[], accounts?: any, foreignApps?: any, foreignAssets?: any,
+export function makeApplicationCloseOutTxn(from: string, suggestedParams: SuggestedParams, appIndex: number,
+  appArgs?: Uint8Array[], accounts?: string[], foreignApps?: number[], foreignAssets?: number[],
   note?: Uint8Array, lease?: Uint8Array, rekeyTo?: string): any;
 
-export function makeApplicationCreateTxn(from: string, suggestedParams: any, onComplete: number,
+export function makeApplicationCreateTxn(from: string, suggestedParams: SuggestedParams, onComplete: number,
   approvalProgram: any, clearProgram: any, numLocalInts: any, numLocalByteSlices: any,
-  numGlobalInts: any, numGlobalByteSlices: any, appArgs?: Uint8Array[], accounts?: any, foreignApps?: any,
-  foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: string): any;
+  numGlobalInts: any, numGlobalByteSlices: any, appArgs?: Uint8Array[], accounts?: string[], foreignApps?: number[],
+  foreignAssets?: number[], note?: Uint8Array, lease?: Uint8Array, rekeyTo?: string): any;
 
-export function makeApplicationDeleteTxn(from: string, suggestedParams: any, appIndex: number,
-  appArgs?: Uint8Array[], accounts?: any, foreignApps?: any, foreignAssets?: any, note?: Uint8Array,
+export function makeApplicationDeleteTxn(from: string, suggestedParams: SuggestedParams, appIndex: number,
+  appArgs?: Uint8Array[], accounts?: string[], foreignApps?: number[], foreignAssets?: number[], note?: Uint8Array,
   lease?: Uint8Array, rekeyTo?: string): any;
 
-export function makeApplicationNoOpTxn(from: string, suggestedParams: any, appIndex: number,
-  appArgs?: Uint8Array[], accounts?: any, foreignApps?: any, foreignAssets?: any, note?: Uint8Array,
+export function makeApplicationNoOpTxn(from: string, suggestedParams: SuggestedParams, appIndex: number,
+  appArgs?: Uint8Array[], accounts?: string[], foreignApps?: number[], foreignAssets?: number[], note?: Uint8Array,
   lease?: Uint8Array, rekeyTo?: string): any;
 
-export function makeApplicationOptInTxn(from: string, suggestedParams: any, appIndex: number,
-  appArgs?: Uint8Array[], accounts?: any, foreignApps?: any, foreignAssets?: any, note?: Uint8Array,
+export function makeApplicationOptInTxn(from: string, suggestedParams: SuggestedParams, appIndex: number,
+  appArgs?: Uint8Array[], accounts?: string[], foreignApps?: number[], foreignAssets?: number[], note?: Uint8Array,
   lease?: Uint8Array, rekeyTo?: string): any;
 
-export function makeApplicationUpdateTxn(from: string, suggestedParams: any, appIndex: number,
-  approvalProgram: any, clearProgram: any, appArgs?: Uint8Array[], accounts?: Address[], foreignApps?: any,
-  foreignAssets?: any, note?: Uint8Array, lease?: Uint8Array, rekeyTo?: Address): any;
+export function makeApplicationUpdateTxn(from: string, suggestedParams: SuggestedParams, appIndex: number,
+  approvalProgram: any, clearProgram: any, appArgs?: Uint8Array[], accounts?: string[], foreignApps?: number[],
+  foreignAssets?: number[], note?: Uint8Array, lease?: Uint8Array, rekeyTo?: string): any;
 
 export function makeAssetConfigTxn(from: any, fee: any, firstRound: any, lastRound: any,
   note: any, genesisHash: any, genesisID: any, assetIndex: any, manager: any, reserve: any,

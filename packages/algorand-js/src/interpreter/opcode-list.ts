@@ -10,7 +10,7 @@ import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { checkIndexBound, compareArray } from "../lib/compare";
 import { AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
-import { assertLen, assertOnlyDigits, base64ToBytes, convertToBuffer, convertToString, getEncoding } from "../lib/parsing";
+import { assertLen, assertOnlyDigits, convertToBuffer, convertToString, getEncoding, stringToBytes } from "../lib/parsing";
 import { txAppArg, txnSpecbyField } from "../lib/txn";
 import { EncodingType, StackElem, TEALStack, TxnOnComplete, TxnType } from "../types";
 import { Interpreter } from "./interpreter";
@@ -211,7 +211,7 @@ export class Bytecblock extends Op {
     super();
     const bytecblock: Uint8Array[] = [];
     for (const val of args) {
-      bytecblock.push(base64ToBytes(val));
+      bytecblock.push(stringToBytes(val));
     }
 
     this.interpreter = interpreter;
@@ -1112,8 +1112,11 @@ export class Txn extends Op {
   }
 
   execute (stack: TEALStack): void {
-    const r = txnSpecbyField(this.field, this.interpreter);
-    stack.push(r);
+    const result = txnSpecbyField(
+      this.field,
+      this.interpreter.runtime.ctx.tx,
+      this.interpreter.runtime.ctx.gtxs);
+    stack.push(result);
   }
 }
 
@@ -1148,7 +1151,10 @@ export class Gtxn extends Op {
     this.assertUint8(BigInt(this.txIdx));
     checkIndexBound(this.txIdx, this.interpreter.runtime.ctx.gtxs);
 
-    const result = txnSpecbyField(this.field, this.interpreter);
+    const result = txnSpecbyField(
+      this.field,
+      this.interpreter.runtime.ctx.gtxs[this.txIdx],
+      this.interpreter.runtime.ctx.gtxs);
     stack.push(result);
   }
 }
@@ -1748,12 +1754,12 @@ export class Balance extends Op {
     let res;
 
     if (accountIndex === BigInt("0")) {
-      const sender = convertToString(this.interpreter.runtime.ctx.tx.snd);
+      const sender = encodeAddress(this.interpreter.runtime.ctx.tx.snd);
       res = this.interpreter.runtime.ctx.state.accounts.get(sender);
     } else {
       this.checkIndexBound(Number(--accountIndex), this.interpreter.runtime.ctx.tx.apat);
       const buf = this.interpreter.runtime.ctx.tx.apat[Number(accountIndex)];
-      res = this.interpreter.runtime.ctx.state.accounts.get(convertToString(buf));
+      res = this.interpreter.runtime.ctx.state.accounts.get(encodeAddress(buf));
     }
     if (res === undefined) { throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST); }
 
@@ -1791,7 +1797,7 @@ export class GetAssetHolding extends Op {
 
     this.checkIndexBound(Number(--accountIdx), this.interpreter.runtime.ctx.tx.apat);
     const accBuffer = this.interpreter.runtime.ctx.tx.apat[Number(accountIdx)];
-    const accountAssets = this.interpreter.runtime.ctx.state.accountAssets.get(convertToString(accBuffer));
+    const accountAssets = this.interpreter.runtime.ctx.state.accountAssets.get(encodeAddress(accBuffer));
     const assetInfo = accountAssets?.get(Number(assetId));
 
     if (assetInfo === undefined) {
@@ -1804,7 +1810,7 @@ export class GetAssetHolding extends Op {
         value = BigInt(assetInfo.amount);
         break;
       case "AssetFrozen":
-        value = base64ToBytes(assetInfo["is-frozen"]);
+        value = stringToBytes(assetInfo["is-frozen"]);
         break;
       default:
         throw new TealError(ERRORS.TEAL.INVALID_FIELD_TYPE);
@@ -1865,7 +1871,7 @@ export class GetAssetDef extends Op {
           value = BigInt(AssetDefinition.decimals);
           break;
         default:
-          value = base64ToBytes(AssetDefinition[s] as string);
+          value = stringToBytes(AssetDefinition[s] as string);
           break;
       }
 

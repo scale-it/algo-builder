@@ -1,4 +1,4 @@
-import { base64ToBytes } from "../../src/lib/parsing";
+import { stringToBytes } from "../../src/lib/parsing";
 
 export const accInfo = [{
   address: "addr-1",
@@ -11,9 +11,9 @@ export const accInfo = [{
     id: 1847,
     'key-value': [
       {
-        key: base64ToBytes("Local-key"),
+        key: stringToBytes("Local-key"),
         value: {
-          bytes: base64ToBytes("Local-val"),
+          bytes: stringToBytes("Local-val"),
           type: 1,
           uint: 0
         }
@@ -33,17 +33,17 @@ export const accInfo = [{
       creator: "addr-1",
       'global-state': [
         {
-          key: base64ToBytes("Hello"),
+          key: stringToBytes("Hello"),
           value: {
-            bytes: base64ToBytes("World"),
+            bytes: stringToBytes("World"),
             type: 1,
             uint: 0
           }
         },
         {
-          key: base64ToBytes("global-key"),
+          key: stringToBytes("global-key"),
           value: {
-            bytes: base64ToBytes("global-val"),
+            bytes: stringToBytes("global-val"),
             type: 1,
             uint: 0
           }

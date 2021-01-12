@@ -3,7 +3,7 @@
  * This file creates a new NFT and transfers 1 NFT from A to B
 */
 const { executeTransaction, printGlobalNFT, printLocalNFT } = require('./common');
-const { TransactionType, SignType, base64ToBytes } = require('@algorand-builder/algob');
+const { TransactionType, SignType, stringToBytes } = require('@algorand-builder/algob');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -18,7 +18,7 @@ async function run (runtimeEnv, deployer) {
   const nftRef = 'https://new-nft.com';
 
   // arguments: "create", nft_data_ref, data_hash
-  let appArgs = ['create', nftRef, '1234'].map(base64ToBytes);
+  let appArgs = ['create', nftRef, '1234'].map(stringToBytes);
 
   let txnParam = {
     type: TransactionType.CallNoOpSSC,
@@ -40,7 +40,7 @@ async function run (runtimeEnv, deployer) {
 
   const nftID = new Uint8Array(8).fill(1, 7); // [0, 0, 0, 0, 0, 0, 0, 1] = uint64(1)
   appArgs = [
-    base64ToBytes('transfer'),
+    stringToBytes('transfer'),
     nftID
   ];
 

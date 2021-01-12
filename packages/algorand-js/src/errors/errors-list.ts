@@ -68,10 +68,9 @@ minimum uint64 value of 0`
   },
   REJECTED_BY_LOGIC: {
     number: 8,
-    message: "Invalid top of stack",
+    message: "Teal code rejected by logic",
     title: "Teal Rejection Error",
-    description: `Teal code was rejected because top of stack contains
-non zero value or []byte`
+    description: `Teal code rejected because stack doesn't contain a single non-zero uint64 value`
   },
   INDEX_OUT_OF_BOUND: {
     number: 9,

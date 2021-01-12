@@ -5,7 +5,7 @@ import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccountImpl } from "../../src/index";
-import { base64ToBytes } from "../../src/lib/parsing";
+import { stringToBytes } from "../../src/lib/parsing";
 import { expectTealErrorAsync } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
@@ -57,20 +57,22 @@ describe("Crowdfunding basic tests", function () {
       intToBigEndian(beginDate.getTime()),
       intToBigEndian(endDate.getTime()),
       intToBigEndian(7000000),
-      addressToBytes(john.account.addr),
+      addressToBytes(john.address),
       intToBigEndian(fundCloseDate.getTime())
     ];
 
     const appId = await runtime.addApp({ ...validFlags, appArgs: appArgs }, {}, program);
-    const johnPk = decodeAddress(john.account.addr).publicKey;
+    const getGlobal = (key: string):
+      bigint | Uint8Array |undefined => runtime.getGlobalState(appId, stringToBytes(key));
+    const johnPk = decodeAddress(john.address).publicKey;
 
     // verify global state
     assert.isDefined(appId);
-    assert.deepEqual(runtime.getGlobalState(appId, base64ToBytes('Creator')), johnPk);
-    assert.deepEqual(runtime.getGlobalState(appId, base64ToBytes('StartDate')), BigInt(beginDate.getTime()));
-    assert.deepEqual(runtime.getGlobalState(appId, base64ToBytes('EndDate')), BigInt(endDate.getTime()));
-    assert.deepEqual(runtime.getGlobalState(appId, base64ToBytes('Goal')), 7000000n);
-    assert.deepEqual(runtime.getGlobalState(appId, base64ToBytes('Receiver')), johnPk);
-    assert.deepEqual(runtime.getGlobalState(appId, base64ToBytes('Total')), 0n);
+    assert.deepEqual(getGlobal('Creator'), johnPk);
+    assert.deepEqual(getGlobal('StartDate'), BigInt(beginDate.getTime()));
+    assert.deepEqual(getGlobal('EndDate'), BigInt(endDate.getTime()));
+    assert.deepEqual(getGlobal('Goal'), 7000000n);
+    assert.deepEqual(getGlobal('Receiver'), johnPk);
+    assert.deepEqual(getGlobal('Total'), 0n);
   });
 });

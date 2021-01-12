@@ -8,7 +8,7 @@ import {
 import { globalZeroAddress } from "./lib/constants";
 import { algodCredentialsFromEnv, KMDCredentialsFromEnv } from "./lib/credentials";
 import { getProgram } from "./lib/files";
-import { addressToBytes, base64ToBytes, intToBigEndian, update } from "./lib/ssc";
+import { addressToBytes, intToBigEndian, stringToBytes, update } from "./lib/ssc";
 import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC, readGlobalStateSSC, readLocalStateSSC } from "./lib/status";
 import { executeSignedTxnFromFile, executeTransaction, mkTransaction } from "./lib/tx";
 import { SignType, TransactionType } from "./types";
@@ -33,7 +33,7 @@ export {
   readGlobalStateSSC,
   readLocalStateSSC,
   update,
-  base64ToBytes,
+  stringToBytes,
   globalZeroAddress,
   intToBigEndian,
   addressToBytes,

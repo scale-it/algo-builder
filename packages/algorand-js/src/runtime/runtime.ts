@@ -2,10 +2,9 @@
 /* eslint sonarjs/no-small-switch: 0 */
 import { mkTransaction } from "@algorand-builder/algob";
 import { ExecParams, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
-import algosdk, { AssetDef, AssetHolding, assignGroupID, encodeAddress, SSCAttributes, SSCStateSchema } from "algosdk";
+import algosdk, { AssetDef, AssetHolding, encodeAddress, SSCAttributes, SSCStateSchema } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
-import { mockSuggestedParams } from "../../test/mocks/txn";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { Interpreter } from "../index";
@@ -13,6 +12,7 @@ import { BIGINT0, BIGINT1 } from "../interpreter/opcode-list";
 import { checkIndexBound, compareArray } from "../lib/compare";
 import { SSC_BYTES } from "../lib/constants";
 import { assertValidSchema, getKeyValPair } from "../lib/stateful";
+import { mockSuggestedParams } from "../mock/tx";
 import type { Context, StackElem, State, StoreAccount, Txn } from "../types";
 
 export class Runtime {
@@ -172,7 +172,6 @@ export class Runtime {
         encodedTxnObj.txID = tx.txID();
         txns.push(encodedTxnObj);
       }
-      assignGroupID(txns); // assign unique groupID to all transactions in the array/group
       return [txns[0], txns]; // by default current txn is the first txn (hence txns[0])
     } else {
       // if not array, then create a single transaction
@@ -254,10 +253,10 @@ export class Runtime {
 
   /**
    * Account address opt-in for application Id
-   * @param appId Application Id
    * @param accountAddr Account address
+   * @param appId Application Id
    */
-  async optInToApp (appId: number, accountAddr: string,
+  async optInToApp (accountAddr: string, appId: number,
     flags: SSCOptionalFlags, payFlags: TxParams, program: string): Promise<void> {
     const appParams = this.store.globalApps.get(appId);
     const account = this.assertAccountDefined(this.store.accounts.get(accountAddr));
@@ -266,6 +265,54 @@ export class Runtime {
       await this.run(program); // execute TEAL code
 
       account.optInToApp(appId, appParams);
+    } else {
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
+    }
+  }
+
+  // creates new Update transaction object and update context
+  createUpdateTx (
+    senderAddr: string,
+    appId: number,
+    payFlags: TxParams,
+    flags: SSCOptionalFlags): void {
+    const txn = algosdk.makeApplicationUpdateTxn(
+      senderAddr,
+      mockSuggestedParams(payFlags),
+      appId,
+      new Uint8Array(32), // mock approval program
+      new Uint8Array(32), // mock clear progam
+      flags.appArgs,
+      flags.accounts,
+      flags.foreignApps,
+      flags.foreignAssets,
+      flags.note,
+      flags.lease,
+      flags.rekeyTo);
+
+    const encTx = txn.get_obj_for_encoding();
+    encTx.txID = txn.txID();
+    this.ctx.tx = encTx;
+    this.ctx.gtxs = [encTx];
+  }
+
+  /**
+   * Update application
+   * @param senderAddr sender address
+   * @param appId application Id
+   * @param newProgram updated program
+   */
+  async updateApp (
+    senderAddr: string,
+    appId: number,
+    newProgram: string,
+    payFlags: TxParams,
+    flags: SSCOptionalFlags
+  ): Promise<void> {
+    const appParams = this.store.globalApps.get(appId);
+    if (appParams) {
+      this.createUpdateTx(senderAddr, appId, payFlags, flags);
+      await this.run(newProgram); // execute TEAL code
     } else {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
     }
@@ -319,7 +366,6 @@ export class Runtime {
   async executeTx (txnParams: ExecParams | ExecParams[], program: string,
     args: Uint8Array[]): Promise<void> {
     const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
-
     // initialize context before each execution
     this.ctx = {
       state: cloneDeep(this.store), // state is a deep copy of store

@@ -77,7 +77,7 @@ async function run (runtimeEnv, deployer) {
     applicationID,
     'crowdFundApproval.teal',
     'crowdFundClear.teal',
-    appArgs
+    { appArgs: appArgs }
   );
   console.log('Application Updated: ', updatedRes);
 

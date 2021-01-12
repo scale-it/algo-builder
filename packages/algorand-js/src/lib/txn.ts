@@ -5,7 +5,7 @@ import { ERRORS } from "../errors/errors-list";
 import { Interpreter } from "../index";
 import { Op } from "../interpreter/opcode";
 import { TxFieldDefaults, TxnFields } from "../lib/constants";
-import { base64ToBytes } from "../lib/parsing";
+import { stringToBytes } from "../lib/parsing";
 import { StackElem, TxField, Txn, TxnType } from "../types";
 
 const assetTxnFields = new Set([
@@ -32,7 +32,7 @@ export function parseToStackElem (a: unknown, field: TxField): StackElem {
     return BigInt(a);
   }
   if (typeof a === "string") {
-    return base64ToBytes(a);
+    return stringToBytes(a);
   }
 
   return TxFieldDefaults[field];
@@ -43,9 +43,7 @@ export function parseToStackElem (a: unknown, field: TxField): StackElem {
  * @param txField: transaction field
  * @param interpreter: interpreter
  */
-export function txnSpecbyField (txField: string, interpreter: Interpreter): StackElem {
-  const tx = interpreter.runtime.ctx.tx;
-  const gtxs = interpreter.runtime.ctx.gtxs;
+export function txnSpecbyField (txField: string, tx: Txn, gtxns: Txn[]): StackElem {
   let result; // store raw result, parse and return
 
   // handle nested encoded obj (for AssetDef)
@@ -65,12 +63,12 @@ export function txnSpecbyField (txField: string, interpreter: Interpreter): Stac
       result = Number(TxnType[tx.type as keyof typeof TxnType]); // TxnType['pay']
       break;
     }
-    case 'GroupIndex': {
-      result = gtxs.indexOf(tx);
-      break;
-    }
     case 'TxID': {
-      return base64ToBytes(tx.txID);
+      return stringToBytes(tx.txID);
+    }
+    case 'GroupIndex': {
+      result = gtxns.indexOf(tx);
+      break;
     }
     case 'NumAppArgs': {
       const appArg = TxnFields.ApplicationArgs as keyof Txn;

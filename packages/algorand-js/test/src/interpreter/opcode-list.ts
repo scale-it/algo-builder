@@ -20,7 +20,7 @@ import {
 } from "../../../src/interpreter/opcode-list";
 import { compareArray } from "../../../src/lib/compare";
 import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MIN_UINT8 } from "../../../src/lib/constants";
-import { base64ToBytes, convertToBuffer } from "../../../src/lib/parsing";
+import { convertToBuffer, stringToBytes } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
 import { StoreAccountImpl } from "../../../src/runtime/account";
@@ -38,14 +38,14 @@ function setDummyAccInfo (acc: StoreAccount): void {
 }
 
 describe("Teal Opcodes", function () {
-  const strArr = ["str1", "str2"].map(base64ToBytes);
+  const strArr = ["str1", "str2"].map(stringToBytes);
 
   describe("Len", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct length of string", function () {
       const str = "HelloWorld";
-      stack.push(base64ToBytes(str));
+      stack.push(stringToBytes(str));
       const op = new Len([], 0);
       op.execute(stack);
 
@@ -219,7 +219,7 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
     const runtime = new Runtime([]);
     const interpreter = new Interpreter();
-    const args = ["Arg0", "Arg1", "Arg2", "Arg3"].map(base64ToBytes);
+    const args = ["Arg0", "Arg1", "Arg2", "Arg3"].map(stringToBytes);
     interpreter.runtime = runtime;
     interpreter.runtime.ctx.args = args;
 
@@ -288,7 +288,7 @@ describe("Teal Opcodes", function () {
 
       const expected: Uint8Array[] = [];
       for (const val of bytecblock) {
-        expected.push(base64ToBytes(val));
+        expected.push(stringToBytes(val));
       }
       assert.deepEqual(expected, interpreter.bytecblock);
     });
@@ -297,7 +297,7 @@ describe("Teal Opcodes", function () {
   describe("Bytec[N]", function () {
     const stack = new Stack<StackElem>();
     const interpreter = new Interpreter();
-    const bytecblock = ["bytec_0", "bytec_1", "bytec_2", "bytec_3"].map(base64ToBytes);
+    const bytecblock = ["bytec_0", "bytec_1", "bytec_2", "bytec_3"].map(stringToBytes);
     interpreter.bytecblock = bytecblock;
 
     it("should push bytec_0 from bytecblock to stack", function () {
@@ -480,7 +480,7 @@ describe("Teal Opcodes", function () {
 
     it("should store byte[] to scratch", function () {
       const interpreter = new Interpreter();
-      const val = base64ToBytes("HelloWorld");
+      const val = stringToBytes("HelloWorld");
       stack.push(val);
 
       const op = new Store(["0"], 1, interpreter);
@@ -601,7 +601,7 @@ describe("Teal Opcodes", function () {
   describe("Load", function () {
     const stack = new Stack<StackElem>();
     const interpreter = new Interpreter();
-    const scratch = [BigInt("0"), base64ToBytes("HelloWorld")];
+    const scratch = [BigInt("0"), stringToBytes("HelloWorld")];
     interpreter.scratch = scratch;
 
     it("should load uint64 from scratch space to stack", function () {
@@ -654,7 +654,7 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct hash for Sha256", () => {
-      stack.push(base64ToBytes("MESSAGE"));
+      stack.push(stringToBytes("MESSAGE"));
       const op = new Sha256([], 1);
       op.execute(stack);
 
@@ -678,7 +678,7 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct hash for Sha512_256", function () {
-      stack.push(base64ToBytes("MESSAGE"));
+      stack.push(stringToBytes("MESSAGE"));
       const op = new Sha512_256([], 1);
       op.execute(stack);
 
@@ -702,7 +702,7 @@ describe("Teal Opcodes", function () {
     const stack = new Stack<StackElem>();
 
     it("should return correct hash for keccak256", function () {
-      stack.push(base64ToBytes("ALGORAND"));
+      stack.push(stringToBytes("ALGORAND"));
       const op = new Keccak256([], 1);
       op.execute(stack);
 
@@ -1233,7 +1233,7 @@ describe("Teal Opcodes", function () {
     it("should throw error if type is invalid",
       execExpectError(
         stack,
-        ["str1", "str2"].map(base64ToBytes),
+        ["str1", "str2"].map(stringToBytes),
         new Mulw([], 1),
         ERRORS.TEAL.INVALID_TYPE
       )
@@ -1309,7 +1309,7 @@ describe("Teal Opcodes", function () {
     const end = "4";
 
     it("should return correct substring", function () {
-      stack.push(base64ToBytes("Algorand"));
+      stack.push(stringToBytes("Algorand"));
       const op = new Substring([start, end], 1);
       op.execute(stack);
 
@@ -1327,7 +1327,7 @@ describe("Teal Opcodes", function () {
     );
 
     it("should throw error if start is not uint8", function () {
-      stack.push(base64ToBytes("Algorand"));
+      stack.push(stringToBytes("Algorand"));
 
       expectTealError(
         () => new Substring([(MIN_UINT8 - 5).toString(), end], 1),
@@ -1342,7 +1342,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error if end is not uint8", function () {
-      stack.push(base64ToBytes("Algorand"));
+      stack.push(stringToBytes("Algorand"));
 
       expectTealError(
         () => new Substring([start, (MIN_UINT8 - 5).toString()], 1),
@@ -1359,7 +1359,7 @@ describe("Teal Opcodes", function () {
     it("should throw error because start > end",
       execExpectError(
         stack,
-        [base64ToBytes("Algorand")],
+        [stringToBytes("Algorand")],
         new Substring(["9", end], 1),
         ERRORS.TEAL.SUBSTRING_END_BEFORE_START
       )
@@ -1368,7 +1368,7 @@ describe("Teal Opcodes", function () {
     it("should throw error because range beyong string",
       execExpectError(
         stack,
-        [base64ToBytes("Algorand")],
+        [stringToBytes("Algorand")],
         new Substring([start, "40"], 1),
         ERRORS.TEAL.SUBSTRING_RANGE_BEYOND
       )
@@ -1381,7 +1381,7 @@ describe("Teal Opcodes", function () {
     it("should return correct substring", function () {
       stack.push(BigInt('0'));
       stack.push(BigInt('4'));
-      stack.push(base64ToBytes("Algorand"));
+      stack.push(stringToBytes("Algorand"));
 
       const op = new Substring3([], 1);
       op.execute(stack);
@@ -1404,7 +1404,7 @@ describe("Teal Opcodes", function () {
       const start = end + BigInt('1');
       execExpectError(
         stack,
-        [start, end, base64ToBytes("Algorand")],
+        [start, end, stringToBytes("Algorand")],
         new Substring3([], 1),
         ERRORS.TEAL.SUBSTRING_END_BEFORE_START
       );
@@ -1413,7 +1413,7 @@ describe("Teal Opcodes", function () {
     it("should throw error because range beyong string",
       execExpectError(
         stack,
-        [BigInt('0'), BigInt('40'), base64ToBytes("Algorand")],
+        [BigInt('0'), BigInt('40'), stringToBytes("Algorand")],
         new Substring3([], 1),
         ERRORS.TEAL.SUBSTRING_RANGE_BEYOND
       )
@@ -1568,7 +1568,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(base64ToBytes(TXN_OBJ.type), stack.pop());
+        assert.deepEqual(stringToBytes(TXN_OBJ.type), stack.pop());
       });
 
       it("should push txn typeEnum to stack", function () {
@@ -1747,7 +1747,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(base64ToBytes(TXN_OBJ.apar.un), stack.pop());
+        assert.deepEqual(stringToBytes(TXN_OBJ.apar.un), stack.pop());
       });
 
       it("should push txn ConfigAssetName to stack", function () {
@@ -1755,7 +1755,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(base64ToBytes(TXN_OBJ.apar.an), stack.pop());
+        assert.deepEqual(stringToBytes(TXN_OBJ.apar.an), stack.pop());
       });
 
       it("should push txn ConfigAssetURL to stack", function () {
@@ -1763,7 +1763,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(base64ToBytes(TXN_OBJ.apar.au), stack.pop());
+        assert.deepEqual(stringToBytes(TXN_OBJ.apar.au), stack.pop());
       });
 
       it("should push txn ConfigAssetMetadataHash to stack", function () {
@@ -1929,11 +1929,11 @@ describe("Teal Opcodes", function () {
       });
 
       it("push fee from 2nd transaction in group", function () {
-        const op = new Gtxn(["1", "Fee"], 1, interpreter); // 1 -> Fee
+        const op = new Gtxn(["1", "Fee"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.equal(BigInt('1000'), stack.pop());
+        assert.equal(BigInt('2222'), stack.pop());
       });
     });
 
@@ -2144,29 +2144,29 @@ describe("Teal Opcodes", function () {
       it("should push the value to stack if key is present in local state", function () {
         // for Sender
         stack.push(BigInt('0'));
-        stack.push(base64ToBytes("Local-key"));
+        stack.push(stringToBytes("Local-key"));
 
         let op = new AppLocalGet([], 1, interpreter);
         op.execute(stack);
 
         let top = stack.pop();
-        assert.deepEqual(base64ToBytes('Local-val'), top);
+        assert.deepEqual(stringToBytes('Local-val'), top);
 
         // for Txn.Accounts[A]
         stack.push(BigInt('1'));
-        stack.push(base64ToBytes('Local-key'));
+        stack.push(stringToBytes('Local-key'));
 
         op = new AppLocalGet([], 1, interpreter);
         op.execute(stack);
 
         top = stack.pop();
-        assert.deepEqual(base64ToBytes('Local-val'), top);
+        assert.deepEqual(stringToBytes('Local-val'), top);
       });
 
       it("should push uint 0 to stack if key is not present in local state", function () {
         // for Sender
         stack.push(BigInt('0'));
-        stack.push(base64ToBytes("random-key"));
+        stack.push(stringToBytes("random-key"));
 
         let op = new AppLocalGet([], 1, interpreter);
         op.execute(stack);
@@ -2176,7 +2176,7 @@ describe("Teal Opcodes", function () {
 
         // for Txn.Accounts[A]
         stack.push(BigInt('1'));
-        stack.push(base64ToBytes('random-key'));
+        stack.push(stringToBytes('random-key'));
 
         op = new AppLocalGet([], 1, interpreter);
         op.execute(stack);
@@ -2195,7 +2195,7 @@ describe("Teal Opcodes", function () {
         // for Sender
         stack.push(BigInt('0'));
         stack.push(BigInt('1847'));
-        stack.push(base64ToBytes('Local-key'));
+        stack.push(stringToBytes('Local-key'));
 
         let op = new AppLocalGetEx([], 1, interpreter);
         op.execute(stack);
@@ -2203,12 +2203,12 @@ describe("Teal Opcodes", function () {
         let flag = stack.pop();
         let value = stack.pop();
         assert.equal(BigInt("1"), flag);
-        assert.deepEqual(base64ToBytes('Local-val'), value);
+        assert.deepEqual(stringToBytes('Local-val'), value);
 
         // for Txn.Accounts[A]
         stack.push(BigInt('1'));
         stack.push(BigInt('1847'));
-        stack.push(base64ToBytes('Local-key'));
+        stack.push(stringToBytes('Local-key'));
 
         op = new AppLocalGetEx([], 1, interpreter);
         op.execute(stack);
@@ -2216,14 +2216,14 @@ describe("Teal Opcodes", function () {
         flag = stack.pop();
         value = stack.pop();
         assert.equal(BigInt("1"), flag);
-        assert.deepEqual(base64ToBytes('Local-val'), value);
+        assert.deepEqual(stringToBytes('Local-val'), value);
       });
 
       it("should push uint 0 to stack if key is not present in local state from given appId", function () {
         // for Sender
         stack.push(BigInt('0'));
         stack.push(BigInt('1847'));
-        stack.push(base64ToBytes('random-key'));
+        stack.push(stringToBytes('random-key'));
 
         let op = new AppLocalGetEx([], 1, interpreter);
         op.execute(stack);
@@ -2234,7 +2234,7 @@ describe("Teal Opcodes", function () {
         // for Txn.Accounts[A]
         stack.push(BigInt('1'));
         stack.push(BigInt('1847'));
-        stack.push(base64ToBytes('random-key'));
+        stack.push(stringToBytes('random-key'));
 
         op = new AppLocalGetEx([], 1, interpreter);
         op.execute(stack);
@@ -2252,17 +2252,17 @@ describe("Teal Opcodes", function () {
       });
 
       it("should push the value to stack if key is present in global state", function () {
-        stack.push(base64ToBytes('global-key'));
+        stack.push(stringToBytes('global-key'));
 
         const op = new AppGlobalGet([], 1, interpreter);
         op.execute(stack);
 
         const top = stack.pop();
-        assert.deepEqual(base64ToBytes('global-val'), top);
+        assert.deepEqual(stringToBytes('global-val'), top);
       });
 
       it("should push uint 0 to stack if key is not present in global state", function () {
-        stack.push(base64ToBytes('random-key'));
+        stack.push(stringToBytes('random-key'));
 
         const op = new AppGlobalGet([], 1, interpreter);
         op.execute(stack);
@@ -2282,7 +2282,7 @@ describe("Teal Opcodes", function () {
       it("should push the value to stack if key is present externally in global state", function () {
         // zero index means current app
         stack.push(BigInt('0'));
-        stack.push(base64ToBytes('Hello'));
+        stack.push(stringToBytes('Hello'));
 
         let op = new AppGlobalGetEx([], 1, interpreter);
         op.execute(stack);
@@ -2290,11 +2290,11 @@ describe("Teal Opcodes", function () {
         let flag = stack.pop();
         let value = stack.pop();
         assert.equal(BigInt("1"), flag);
-        assert.deepEqual(base64ToBytes('World'), value);
+        assert.deepEqual(stringToBytes('World'), value);
 
         // for Txn.ForeignApps[A]
         stack.push(BigInt('1'));
-        stack.push(base64ToBytes('global-key'));
+        stack.push(stringToBytes('global-key'));
 
         op = new AppGlobalGetEx([], 1, interpreter);
         op.execute(stack);
@@ -2302,13 +2302,13 @@ describe("Teal Opcodes", function () {
         flag = stack.pop();
         value = stack.pop();
         assert.equal(BigInt("1"), flag);
-        assert.deepEqual(base64ToBytes('global-val'), value);
+        assert.deepEqual(stringToBytes('global-val'), value);
       });
 
       it("should push uint 0 to stack if key is not present externally in global state", function () {
         // zero index means current app
         stack.push(BigInt('0'));
-        stack.push(base64ToBytes('random-key'));
+        stack.push(stringToBytes('random-key'));
 
         let op = new AppGlobalGetEx([], 1, interpreter);
         op.execute(stack);
@@ -2318,7 +2318,7 @@ describe("Teal Opcodes", function () {
 
         // for Txn.ForeignApps[A]
         stack.push(BigInt('1'));
-        stack.push(base64ToBytes('random-key'));
+        stack.push(stringToBytes('random-key'));
 
         op = new AppGlobalGetEx([], 1, interpreter);
         op.execute(stack);
@@ -2336,28 +2336,28 @@ describe("Teal Opcodes", function () {
       it("should put the value in account's local storage", function () {
         // for Sender, check for byte
         stack.push(BigInt('0'));
-        stack.push(base64ToBytes('New-Key'));
-        stack.push(base64ToBytes('New-Val'));
+        stack.push(stringToBytes('New-Key'));
+        stack.push(stringToBytes('New-Val'));
 
         let op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
         const acc = interpreter.runtime.ctx.state.accounts.get(elonAddr) as StoreAccount;
         let localStateCurr = acc.appsLocalState[0]["key-value"];
-        let idx = localStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('New-Key')));
+        let idx = localStateCurr.findIndex(a => compareArray(a.key, stringToBytes('New-Key')));
         assert.notEqual(idx, -1); // idx should not be -1
-        assert.deepEqual(localStateCurr[idx].value.bytes, base64ToBytes('New-Val'));
+        assert.deepEqual(localStateCurr[idx].value.bytes, stringToBytes('New-Val'));
 
         // for Txn.Accounts[A], uint
         stack.push(BigInt('1'));
-        stack.push(base64ToBytes('New-Key-1'));
+        stack.push(stringToBytes('New-Key-1'));
         stack.push(BigInt('2222'));
 
         op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
         localStateCurr = (interpreter.runtime.ctx.state.accounts.get(johnAddr) as StoreAccount).appsLocalState[0]["key-value"];
-        idx = localStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('New-Key-1')));
+        idx = localStateCurr.findIndex(a => compareArray(a.key, stringToBytes('New-Key-1')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(localStateCurr[idx].value.uint, 2222);
       });
@@ -2367,7 +2367,7 @@ describe("Teal Opcodes", function () {
         // so this should throw error
         execExpectError(
           stack,
-          [BigInt('0'), base64ToBytes("New-Key-1"), base64ToBytes("New-Val-2")],
+          [BigInt('0'), stringToBytes("New-Key-1"), stringToBytes("New-Val-2")],
           new AppLocalPut([], 1, interpreter),
           ERRORS.TEAL.INVALID_SCHEMA
         );
@@ -2377,7 +2377,7 @@ describe("Teal Opcodes", function () {
         interpreter.runtime.ctx.tx.apid = 9999;
         execExpectError(
           stack,
-          [BigInt('0'), base64ToBytes("New-Key-1"), base64ToBytes("New-Val-2")],
+          [BigInt('0'), stringToBytes("New-Key-1"), stringToBytes("New-Val-2")],
           new AppLocalPut([], 1, interpreter),
           ERRORS.TEAL.APP_NOT_FOUND
         );
@@ -2392,26 +2392,26 @@ describe("Teal Opcodes", function () {
 
       it("should put the value in global storage", function () {
         // value as byte
-        stack.push(base64ToBytes('New-Global-Key'));
-        stack.push(base64ToBytes('New-Global-Val'));
+        stack.push(stringToBytes('New-Global-Key'));
+        stack.push(stringToBytes('New-Global-Val'));
 
         let op = new AppGlobalPut([], 1, interpreter);
         op.execute(stack);
 
         let globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCAttributes)["global-state"];
-        let idx = globalStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('New-Global-Key')));
+        let idx = globalStateCurr.findIndex(a => compareArray(a.key, stringToBytes('New-Global-Key')));
         assert.notEqual(idx, -1); // idx should not be -1
-        assert.deepEqual(globalStateCurr[idx].value.bytes, base64ToBytes('New-Global-Val'));
+        assert.deepEqual(globalStateCurr[idx].value.bytes, stringToBytes('New-Global-Val'));
 
         // for uint
-        stack.push(base64ToBytes('Key'));
+        stack.push(stringToBytes('Key'));
         stack.push(BigInt('1000'));
 
         op = new AppGlobalPut([], 1, interpreter);
         op.execute(stack);
 
         globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCAttributes)["global-state"];
-        idx = globalStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('Key')));
+        idx = globalStateCurr.findIndex(a => compareArray(a.key, stringToBytes('Key')));
         assert.notEqual(idx, -1); // idx should not be -1
         assert.deepEqual(globalStateCurr[idx].value.uint, 1000);
       });
@@ -2419,7 +2419,7 @@ describe("Teal Opcodes", function () {
       it("should throw error if resulting schema is invalid for global", function () {
         execExpectError(
           stack,
-          [base64ToBytes("New-GlobalKey-1"), base64ToBytes("New-GlobalVal-2")],
+          [stringToBytes("New-GlobalKey-1"), stringToBytes("New-GlobalVal-2")],
           new AppGlobalPut([], 1, interpreter),
           ERRORS.TEAL.INVALID_SCHEMA
         );
@@ -2429,7 +2429,7 @@ describe("Teal Opcodes", function () {
         interpreter.runtime.ctx.tx.apid = 9999;
         execExpectError(
           stack,
-          [base64ToBytes("New-Key-1"), base64ToBytes("New-Val-2")],
+          [stringToBytes("New-Key-1"), stringToBytes("New-Val-2")],
           new AppGlobalPut([], 1, interpreter),
           ERRORS.TEAL.APP_NOT_FOUND
         );
@@ -2444,24 +2444,24 @@ describe("Teal Opcodes", function () {
       it("should remove the key-value pair from account's local storage", function () {
         // for Sender
         stack.push(BigInt('0'));
-        stack.push(base64ToBytes('Local-key'));
+        stack.push(stringToBytes('Local-key'));
 
         let op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
         let localStateCurr = (interpreter.runtime.ctx.state.accounts.get(elonAddr) as StoreAccount).appsLocalState[0]["key-value"];
-        let idx = localStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('Local-key')));
+        let idx = localStateCurr.findIndex(a => compareArray(a.key, stringToBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
 
         // for Txn.Accounts[A]
         stack.push(BigInt('1'));
-        stack.push(base64ToBytes('Local-key'));
+        stack.push(stringToBytes('Local-key'));
 
         op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
         localStateCurr = (interpreter.runtime.ctx.state.accounts.get(johnAddr) as StoreAccount).appsLocalState[0]["key-value"];
-        idx = localStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('Local-key')));
+        idx = localStateCurr.findIndex(a => compareArray(a.key, stringToBytes('Local-key')));
         assert.equal(idx, -1); // idx should be -1
       });
     });
@@ -2474,13 +2474,13 @@ describe("Teal Opcodes", function () {
 
       it("should remove the key-value pair from global storage", function () {
         stack.push(BigInt('0'));
-        stack.push(base64ToBytes('global-key'));
+        stack.push(stringToBytes('global-key'));
 
         const op = new AppGlobalDel([], 1, interpreter);
         op.execute(stack);
 
         const globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCAttributes)["global-state"];
-        const idx = globalStateCurr.findIndex(a => compareArray(a.key, base64ToBytes('global-key')));
+        const idx = globalStateCurr.findIndex(a => compareArray(a.key, stringToBytes('global-key')));
         assert.equal(idx, -1); // idx should be -1
       });
     });
@@ -2624,7 +2624,7 @@ describe("Teal Opcodes", function () {
     const interpreter = new Interpreter();
 
     // setup 1st account
-    const acc1: StoreAccount = new StoreAccountImpl(123, { addr: 'addr-1', sk: new Uint8Array(0) }); // setup test account
+    const acc1: StoreAccount = new StoreAccountImpl(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
     setDummyAccInfo(acc1);
 
     const runtime = new Runtime([acc1]);
@@ -2632,8 +2632,11 @@ describe("Teal Opcodes", function () {
 
     // setting txn object
     interpreter.runtime.ctx.tx = TXN_OBJ;
-    interpreter.runtime.ctx.tx.snd = convertToBuffer("addr-1");
-    interpreter.runtime.ctx.tx.apat = [convertToBuffer("addr-1"), convertToBuffer("addr-2")];
+    interpreter.runtime.ctx.tx.snd = Buffer.from(decodeAddress(elonAddr).publicKey);
+    interpreter.runtime.ctx.tx.apat = [
+      Buffer.from(decodeAddress(elonAddr).publicKey),
+      Buffer.from(decodeAddress(johnAddr).publicKey)
+    ];
     interpreter.runtime.ctx.tx.apas = [3, 112];
 
     it("should push correct account balance", () => {
