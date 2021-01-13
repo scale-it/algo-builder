@@ -95,6 +95,7 @@ export interface StoreAccountI {
   balance: () => number
   addApp: (appId: number, params: SSCDeploymentFlags) => CreatedApp
   optInToApp: (appId: number, appParams: SSCAttributes) => void
+  deleteApp: (appId: number) => void
   getLocalState: (appId: number, key: Uint8Array) => StackElem | undefined
   updateLocalState: (appId: number, key: Uint8Array, value: StackElem) => AppLocalState
 }

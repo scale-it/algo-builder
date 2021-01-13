@@ -99,6 +99,7 @@ export class StoreAccount implements StoreAccountI {
     });
   }
 
+  // add application in account's state
   addApp (appId: number, params: SSCDeploymentFlags): CreatedApp {
     if (this.createdApps.length === 10) {
       throw new Error('Maximum created applications for an account is 10');
@@ -125,6 +126,21 @@ export class StoreAccount implements StoreAccountI {
         schema: appParams["local-state-schema"]
       };
       this.appsLocalState.set(appId, localParams); // push
+    }
+  }
+
+  // delete application from account's state
+  deleteApp (appId: number): void {
+    let found = false;
+    for (const app of this.createdApps) {
+      if (app.id === appId) {
+        const index = this.createdApps.indexOf(app);
+        this.createdApps.splice(index, 1);
+        found = true;
+      }
+    }
+    if (!found) {
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
     }
   }
 }

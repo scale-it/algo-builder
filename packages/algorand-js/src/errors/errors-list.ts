@@ -165,9 +165,9 @@ by an index that does not exist.`
   },
   APP_NOT_FOUND: {
     number: 24,
-    message: "Application Id is not found or is invalid",
-    title: "Application id %appId% is not found",
-    description: `Application id %appId% is not found`
+    message: "Application Index %appId% not found or is invalid",
+    title: "Application index %appId% is not found",
+    description: `Application index %appId% is not found`
   },
   LABEL_NOT_FOUND: {
     number: 25,

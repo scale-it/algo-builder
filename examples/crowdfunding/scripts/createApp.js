@@ -4,7 +4,7 @@ const {
   SignType,
   update,
   intToBigEndian,
-  addressToBytes
+  addressToPk
 } = require('@algorand-builder/algob');
 
 async function run (runtimeEnv, deployer) {
@@ -39,7 +39,7 @@ async function run (runtimeEnv, deployer) {
     intToBigEndian(beginDate.getTime()),
     intToBigEndian(endDate.getTime()),
     intToBigEndian(7000000),
-    addressToBytes(creatorAccount.addr),
+    addressToPk(creatorAccount.addr),
     intToBigEndian(fundCloseDate.getTime())
   ];
 
@@ -68,7 +68,7 @@ async function run (runtimeEnv, deployer) {
   // The update operation links the two contracts.
   const applicationID = res.appID;
 
-  appArgs = [addressToBytes(escrowAccount.address())];
+  appArgs = [addressToPk(escrowAccount.address())];
 
   const updatedRes = await update(
     deployer,

@@ -1,7 +1,7 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
 import { mkTransaction } from "@algorand-builder/algob";
-import { ExecParams, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
+import { AlgoTransferParam, ExecParams, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
 import algosdk, { AssetDef, AssetHolding, encodeAddress, SSCAttributes, SSCStateSchema } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
@@ -61,7 +61,7 @@ export class Runtime {
   assertAppDefined (appId: number): SSCAttributes {
     const app = this.ctx.state.globalApps.get(appId);
     if (app === undefined) {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
     }
     return app;
   }
@@ -224,6 +224,11 @@ export class Runtime {
 
     this.store.globalApps.set(++this.appCounter, app.params); // update globalApps Map
     this.ctx.state.globalApps.delete(0); // remove zero app
+
+    // update local state
+    senderAcc.createdApps.pop();
+    senderAcc.addApp(this.appCounter, flags);
+    this.store.accounts.set(sender.addr, senderAcc);
     return this.appCounter;
   }
 
@@ -266,7 +271,7 @@ export class Runtime {
 
       account.optInToApp(appId, appParams);
     } else {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
     }
   }
 
@@ -314,26 +319,31 @@ export class Runtime {
       this.createUpdateTx(senderAddr, appId, payFlags, flags);
       await this.run(newProgram); // execute TEAL code
     } else {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
     }
   }
 
-  // updates account balance as per transaction parameters
-  updateBalance (txnParam: ExecParams, account: StoreAccountI): void {
-    switch (txnParam.type) {
-      case TransactionType.TransferAlgo: {
-        switch (account.address) {
-          case txnParam.fromAccount.addr: {
-            account.amount -= txnParam.amountMicroAlgos; // remove 'x' algo from sender
-            break;
-          }
-          case txnParam.toAccountAddr: {
-            account.amount += txnParam.amountMicroAlgos; // add 'x' algo to receiver
-            break;
-          }
-        }
-      }
+  // Delete application from account's state and global state
+  deleteApp (appId: number): void {
+    if (!this.store.globalApps.has(appId)) {
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
     }
+    const accountAddr = this.store.globalApps.get(appId)?.creator;
+    if (accountAddr === undefined) {
+      throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
+    }
+    const account = this.assertAccountDefined(this.store.accounts.get(accountAddr));
+    account.deleteApp(appId);
+    this.store.globalApps.delete(appId);
+  }
+
+  // transfer ALGO as per transaction parameters
+  transferAlgo (txnParam: AlgoTransferParam): void {
+    const fromAccount = this.assertAccountDefined(this.store.accounts.get(txnParam.fromAccount.addr));
+    const toAccount = this.assertAccountDefined(this.store.accounts.get(txnParam.toAccountAddr));
+
+    fromAccount.amount -= txnParam.amountMicroAlgos; // remove 'x' algo from sender
+    toAccount.amount += txnParam.amountMicroAlgos; // add 'x' algo to receiver
   }
 
   /**
@@ -342,17 +352,21 @@ export class Runtime {
    * @param accounts : accounts passed by user
    */
   prepareFinalState (txnParams: ExecParams | ExecParams[]): void {
-    if (Array.isArray(txnParams)) { // if txn is a group, update balance as per 'each' transaction
-      for (const txnParam of txnParams) {
-        this.store.accounts.forEach((account, addr) => {
-          this.updateBalance(txnParam, account);
-        });
-      }
+    let txnParameters;
+    if (!Array.isArray(txnParams)) {
+      txnParameters = [txnParams];
     } else {
-      // for a single (stand alone) transaction
-      this.store.accounts.forEach((account, addr) => {
-        this.updateBalance(txnParams, account);
-      });
+      txnParameters = txnParams;
+    }
+    for (const txnParam of txnParameters) {
+      switch (txnParam.type) {
+        case TransactionType.TransferAlgo:
+          this.transferAlgo(txnParam);
+          break;
+        case TransactionType.DeleteSSC:
+          this.deleteApp(txnParam.appId);
+          break;
+      }
     }
   }
 
