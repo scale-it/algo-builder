@@ -131,11 +131,16 @@ export class StoreAccount implements StoreAccountI {
 
   // delete application from account's state
   deleteApp (appId: number): void {
+    let found = false;
     for (const app of this.createdApps) {
       if (app.id === appId) {
         const index = this.createdApps.indexOf(app);
         this.createdApps.splice(index, 1);
+        found = true;
       }
+    }
+    if (!found) {
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
     }
   }
 }
