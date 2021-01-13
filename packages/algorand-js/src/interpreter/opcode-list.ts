@@ -1680,10 +1680,7 @@ export class AppLocalDel extends Op {
 
     const localState = account.appsLocalState.get(appId);
     if (localState) {
-      const arr = localState["key-value"].filter((obj) => {
-        return !compareArray(obj.key, key);
-      });
-      localState["key-value"] = arr;
+      localState["key-value"].delete(key.toString()); // delete from local state
 
       let acc = this.interpreter.runtime.ctx.state.accounts.get(account.address);
       acc = this.interpreter.runtime.assertAccountDefined(acc);
@@ -1715,13 +1712,10 @@ export class AppGlobalDel extends Op {
 
     const appId = this.interpreter.runtime.ctx.tx.apid || 0;
 
-    const appDelta = this.interpreter.runtime.assertAppDefined(appId);
-    if (appDelta) {
-      const globalState = appDelta["global-state"];
-      const arr = globalState.filter((obj) => {
-        return !compareArray(obj.key, key);
-      });
-      appDelta["global-state"] = arr;
+    const app = this.interpreter.runtime.assertAppDefined(appId);
+    if (app) {
+      const globalState = app["global-state"];
+      globalState.delete(key.toString());
     }
   }
 }

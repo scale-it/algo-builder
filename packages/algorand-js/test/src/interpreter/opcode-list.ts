@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
-import { decodeAddress, generateAccount, signBytes, SSCAttributes } from "algosdk";
+import { decodeAddress, generateAccount, signBytes } from "algosdk";
 import { assert } from "chai";
 
 import { ERRORS } from "../../../src/errors/errors-list";
@@ -18,18 +18,18 @@ import {
   Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, Return,
   Sha256, Sha512_256, Store, Sub, Substring, Substring3, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
-import { compareArray } from "../../../src/lib/compare";
 import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MIN_UINT8 } from "../../../src/lib/constants";
 import { convertToBuffer, stringToBytes } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
 import { StoreAccount } from "../../../src/runtime/account";
-import { EncodingType, StackElem, StoreAccountI } from "../../../src/types";
+import { EncodingType, SSCAttributesM, StackElem, StoreAccountI } from "../../../src/types";
 import { execExpectError, expectTealError } from "../../helpers/errors";
 import { accInfo } from "../../mocks/stateful";
 import { elonAddr, johnAddr, TXN_OBJ } from "../../mocks/txn";
 
 const keyValue = "key-value";
+const byteToStr = (str: string): string => { return stringToBytes(str).toString(); };
 function setDummyAccInfo (acc: StoreAccountI): void {
   acc.assets = accInfo[0].assets;
   acc.appsLocalState = accInfo[0].appsLocalState;
@@ -1991,8 +1991,8 @@ describe("Teal Opcodes", function () {
     interpreter.runtime.ctx.tx = TXN_OBJ;
     interpreter.runtime.ctx.gtxs = [TXN_OBJ];
     interpreter.runtime.ctx.tx.apid = 1847;
-    interpreter.runtime.ctx.state.globalApps = new Map<number, SSCAttributes>();
-    interpreter.runtime.ctx.state.globalApps.set(1847, {} as SSCAttributes);
+    interpreter.runtime.ctx.state.globalApps = new Map<number, SSCAttributesM>();
+    interpreter.runtime.ctx.state.globalApps.set(1847, {} as SSCAttributesM);
 
     it("should push MinTxnFee to stack", function () {
       const op = new Global(['MinTxnFee'], 1, interpreter);
@@ -2140,7 +2140,9 @@ describe("Teal Opcodes", function () {
 
     describe("AppLocalGet", function () {
       before(function () {
+        console.log('---------------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
         interpreter.runtime.ctx.tx.apid = 1847;
+        console.log(accInfo[0].appsLocalState.get(1847));
       });
 
       it("should push the value to stack if key is present in local state", function () {
@@ -2249,7 +2251,7 @@ describe("Teal Opcodes", function () {
     describe("AppGlobalGet", function () {
       before(function () {
         interpreter.runtime.ctx.tx.apid = 1828;
-        interpreter.runtime.ctx.state.globalApps = new Map<number, SSCAttributes>();
+        interpreter.runtime.ctx.state.globalApps = new Map<number, SSCAttributesM>();
         const app = acc1.createdApps.get(1828);
         if (app) interpreter.runtime.ctx.state.globalApps.set(1828, app);
       });
@@ -2337,7 +2339,7 @@ describe("Teal Opcodes", function () {
       });
 
       it("should put the value in account's local storage", function () {
-        let idx;
+        let value;
         // for Sender, check for byte
         stack.push(BigInt('0'));
         stack.push(stringToBytes('New-Key'));
@@ -2351,11 +2353,9 @@ describe("Teal Opcodes", function () {
         let localStateCurr = acc.appsLocalState.get(appId)?.[keyValue];
         assert.isDefined(localStateCurr);
         if (localStateCurr) {
-          // TODO: will be updated to Map
-          idx = localStateCurr.findIndex(a => compareArray(a.key, stringToBytes('New-Key')));
-          assert.isDefined(idx);
-          assert.notEqual(idx, -1); // idx should not be -1
-          if (idx) assert.deepEqual(localStateCurr[idx].value.bytes, stringToBytes('New-Val'));
+          value = localStateCurr.get(byteToStr('New-Key'));
+          assert.isDefined(value);
+          if (value) assert.deepEqual(value, stringToBytes('New-Val'));
         }
 
         // for Txn.Accounts[A], uint
@@ -2370,11 +2370,9 @@ describe("Teal Opcodes", function () {
           .appsLocalState.get(appId)?.[keyValue];
         assert.isDefined(localStateCurr);
         if (localStateCurr) {
-          // TODO: will be updated to Map
-          idx = localStateCurr.findIndex(a => compareArray(a.key, stringToBytes('New-Key-1')));
-          assert.isDefined(idx);
-          assert.notEqual(idx, -1); // idx should not be -1
-          if (idx) assert.deepEqual(localStateCurr[idx].value.uint, 2222);
+          value = localStateCurr.get(byteToStr('New-Key-1'));
+          assert.isDefined(value);
+          if (value) assert.deepEqual(value, 2222n);
         }
       });
 
@@ -2415,10 +2413,10 @@ describe("Teal Opcodes", function () {
         let op = new AppGlobalPut([], 1, interpreter);
         op.execute(stack);
 
-        let globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCAttributes)["global-state"];
-        let idx = globalStateCurr.findIndex(a => compareArray(a.key, stringToBytes('New-Global-Key')));
-        assert.notEqual(idx, -1); // idx should not be -1
-        assert.deepEqual(globalStateCurr[idx].value.bytes, stringToBytes('New-Global-Val'));
+        let globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCAttributesM)["global-state"];
+        let value = globalStateCurr.get(byteToStr('New-Global-Key'));
+        assert.isDefined(value); // idx should not be -1
+        assert.deepEqual(value, stringToBytes('New-Global-Val'));
 
         // for uint
         stack.push(stringToBytes('Key'));
@@ -2427,10 +2425,10 @@ describe("Teal Opcodes", function () {
         op = new AppGlobalPut([], 1, interpreter);
         op.execute(stack);
 
-        globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCAttributes)["global-state"];
-        idx = globalStateCurr.findIndex(a => compareArray(a.key, stringToBytes('Key')));
-        assert.notEqual(idx, -1); // idx should not be -1
-        assert.deepEqual(globalStateCurr[idx].value.uint, 1000);
+        globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCAttributesM)["global-state"];
+        value = globalStateCurr.get(byteToStr('Key'));
+        assert.isDefined(value); // idx should not be -1
+        assert.deepEqual(value, 1000n);
       });
 
       it("should throw error if resulting schema is invalid for global", function () {
@@ -2466,12 +2464,12 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        let idx;
+        let value;
         const appId = interpreter.runtime.ctx.tx.apid;
         let localStateCurr = (interpreter.runtime.ctx.state.accounts.get(elonAddr) as StoreAccountI)
           .appsLocalState.get(appId)?.[keyValue];
-        if (localStateCurr) idx = localStateCurr.findIndex(a => compareArray(a.key, stringToBytes('Local-key')));
-        assert.equal(idx, -1); // idx should be -1
+        if (localStateCurr) value = localStateCurr.get(byteToStr('Local-key'));
+        assert.isUndefined(value); // value should be undefined
 
         // for Txn.Accounts[A]
         stack.push(BigInt('1'));
@@ -2482,8 +2480,8 @@ describe("Teal Opcodes", function () {
 
         localStateCurr = (interpreter.runtime.ctx.state.accounts.get(johnAddr) as StoreAccountI)
           .appsLocalState.get(appId)?.[keyValue];
-        if (localStateCurr) idx = localStateCurr.findIndex(a => compareArray(a.key, stringToBytes('Local-key')));
-        assert.equal(idx, -1); // idx should be -1
+        if (localStateCurr) value = localStateCurr.get(byteToStr('Local-key'));
+        assert.isUndefined(value); // value should be undefined
       });
     });
 
@@ -2501,9 +2499,9 @@ describe("Teal Opcodes", function () {
         const op = new AppGlobalDel([], 1, interpreter);
         op.execute(stack);
 
-        const globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCAttributes)["global-state"];
-        const idx = globalStateCurr.findIndex(a => compareArray(a.key, stringToBytes('global-key')));
-        assert.equal(idx, -1); // idx should be -1
+        const globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCAttributesM)["global-state"];
+        const value = globalStateCurr.get(byteToStr('global-key'));
+        assert.isUndefined(value); // value should be undefined
       });
     });
   });

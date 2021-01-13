@@ -2,18 +2,17 @@
 /* eslint sonarjs/no-small-switch: 0 */
 import { mkTransaction } from "@algorand-builder/algob";
 import { ExecParams, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
-import algosdk, { AssetDef, AssetHolding, encodeAddress, SSCAttributes, SSCStateSchema } from "algosdk";
+import algosdk, { AssetDef, AssetHolding, encodeAddress } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { Interpreter } from "../index";
 import { BIGINT0, BIGINT1 } from "../interpreter/opcode-list";
-import { checkIndexBound, compareArray } from "../lib/compare";
-import { SSC_BYTES } from "../lib/constants";
-import { assertValidSchema, getKeyValPair } from "../lib/stateful";
+import { checkIndexBound } from "../lib/compare";
+import { assertValidSchema } from "../lib/stateful";
 import { mockSuggestedParams } from "../mock/tx";
-import type { Context, StackElem, State, StoreAccountI, Txn } from "../types";
+import type { Context, SSCAttributesM, StackElem, State, StoreAccountI, Txn } from "../types";
 
 export class Runtime {
   /**
@@ -34,7 +33,7 @@ export class Runtime {
     this.store = {
       accounts: new Map<string, StoreAccountI>(),
       accountAssets: new Map<string, typeof assetInfo>(),
-      globalApps: new Map<number, SSCAttributes>(),
+      globalApps: new Map<number, SSCAttributesM>(),
       assetDefs: new Map<number, AssetDef>()
     };
 
@@ -58,7 +57,7 @@ export class Runtime {
     return a;
   }
 
-  assertAppDefined (appId: number): SSCAttributes {
+  assertAppDefined (appId: number): SSCAttributesM {
     const app = this.ctx.state.globalApps.get(appId);
     if (app === undefined) {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
@@ -89,13 +88,7 @@ export class Runtime {
   getGlobalState (appId: number, key: Uint8Array): StackElem | undefined {
     const app = this.assertAppDefined(appId);
     const appGlobalState = app["global-state"];
-
-    const keyValue = appGlobalState.find(schema => compareArray(schema.key, key));
-    const value = keyValue?.value;
-    if (value) {
-      return value.type === SSC_BYTES ? value.bytes : BigInt(value.uint);
-    }
-    return undefined;
+    return appGlobalState.get(key.toString());
   }
 
   /**
@@ -105,17 +98,10 @@ export class Runtime {
    * @param key: key to fetch value of from local state
    * @param value: key to fetch value of from local state
    */
-  updateGlobalState (appId: number, key: Uint8Array, value: StackElem): SSCStateSchema[] {
+  updateGlobalState (appId: number, key: Uint8Array, value: StackElem): Map<string, StackElem> {
     const app = this.assertAppDefined(appId);
     const appGlobalState = app["global-state"];
-
-    const data = getKeyValPair(key, value); // key value pair to put
-    const idx = appGlobalState.findIndex(schema => compareArray(schema.key, key));
-    if (idx === -1) {
-      appGlobalState.push(data); // push new pair if key not found
-    } else {
-      appGlobalState[idx].value = data.value; // update value if key found
-    }
+    appGlobalState.set(key.toString(), value); // set new value in global state
     app["global-state"] = appGlobalState; // save updated state
 
     assertValidSchema(app["global-state"], app["global-state-schema"]); // verify if updated schema is valid by config
