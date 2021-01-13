@@ -82,6 +82,7 @@ export class StoreAccount implements StoreAccountI {
     });
   }
 
+  // add application in account's state
   addApp (appId: number, params: SSCDeploymentFlags): CreatedAppM {
     if (this.createdApps.size === 10) {
       throw new Error('Maximum created applications for an account is 10');
@@ -109,6 +110,14 @@ export class StoreAccount implements StoreAccountI {
       };
       this.appsLocalState.set(appId, localParams); // push
     }
+  }
+
+  // delete application from account's state
+  deleteApp (appId: number): void {
+    if (!this.createdApps.has(appId)) {
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
+    }
+    this.createdApps.delete(appId);
   }
 }
 

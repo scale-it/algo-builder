@@ -1,0 +1,35 @@
+// check if application is being created
+int 0
+txn ApplicationID
+==
+
+bz not_creation
+
+// save the creator address to the global state
+byte "Creator"
+txn Sender
+app_global_put
+int 1
+return
+
+not_creation:
+int DeleteApplication
+txn OnCompletion
+==
+
+bz finished
+
+// check if creator is deleting
+byte "Creator"
+app_global_get
+txn Sender
+==
+bz failed
+
+finished:
+int 1
+return
+
+failed:
+int 0
+return
