@@ -1,7 +1,7 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
 import { mkTransaction } from "@algorand-builder/algob";
-import { ExecParams, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
+import { AlgoTransferParam, ExecParams, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
 import algosdk, { AssetDef, AssetHolding, encodeAddress, SSCAttributes, SSCStateSchema } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
@@ -332,22 +332,13 @@ export class Runtime {
     this.store.globalApps.delete(appId);
   }
 
-  // updates account balance as per transaction parameters
-  updateBalance (txnParam: ExecParams, account: StoreAccountI): void {
-    switch (txnParam.type) {
-      case TransactionType.TransferAlgo: {
-        switch (account.address) {
-          case txnParam.fromAccount.addr: {
-            account.amount -= txnParam.amountMicroAlgos; // remove 'x' algo from sender
-            break;
-          }
-          case txnParam.toAccountAddr: {
-            account.amount += txnParam.amountMicroAlgos; // add 'x' algo to receiver
-            break;
-          }
-        }
-      }
-    }
+  // transfer ALGO as per transaction parameters
+  transferAlgo (txnParam: AlgoTransferParam): void {
+    const fromAccount = this.assertAccountDefined(this.store.accounts.get(txnParam.fromAccount.addr));
+    const toAccount = this.assertAccountDefined(this.store.accounts.get(txnParam.toAccountAddr));
+
+    fromAccount.amount -= txnParam.amountMicroAlgos; // remove 'x' algo from sender
+    toAccount.amount += txnParam.amountMicroAlgos; // add 'x' algo to receiver
   }
 
   /**
@@ -363,11 +354,13 @@ export class Runtime {
       txnParameters = txnParams;
     }
     for (const txnParam of txnParameters) {
-      this.store.accounts.forEach((account, addr) => {
-        this.updateBalance(txnParam, account);
-      });
-      if (txnParam.type === TransactionType.DeleteSSC) {
-        this.deleteApp(txnParam.appId);
+      switch (txnParam.type) {
+        case TransactionType.TransferAlgo:
+          this.transferAlgo(txnParam);
+          break;
+        case TransactionType.DeleteSSC:
+          this.deleteApp(txnParam.appId);
+          break;
       }
     }
   }

@@ -1,4 +1,4 @@
-import { addressToBytes, intToBigEndian } from "@algorand-builder/algob";
+import { addressToPk, intToBigEndian } from "@algorand-builder/algob";
 import { SSCDeploymentFlags } from "@algorand-builder/algob/src/types";
 import { assert } from "chai";
 
@@ -56,14 +56,14 @@ describe("Crowdfunding basic tests", function () {
       intToBigEndian(beginDate.getTime()),
       intToBigEndian(endDate.getTime()),
       intToBigEndian(7000000),
-      addressToBytes(john.address),
+      addressToPk(john.address),
       intToBigEndian(fundCloseDate.getTime())
     ];
 
     const appId = await runtime.addApp({ ...validFlags, appArgs: appArgs }, {}, program);
     const getGlobal = (key: string):
       bigint | Uint8Array |undefined => runtime.getGlobalState(appId, stringToBytes(key));
-    const johnPk = addressToBytes(john.address);
+    const johnPk = addressToPk(john.address);
 
     // verify global state
     assert.isDefined(appId);

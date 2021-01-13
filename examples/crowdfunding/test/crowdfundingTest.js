@@ -1,5 +1,5 @@
 import {
-  addressToBytes,
+  addressToPk,
   getProgram,
   intToBigEndian,
   SignType,
@@ -77,7 +77,7 @@ describe('Crowdfunding Tests', function () {
     intToBigEndian(beginDate.getTime()),
     intToBigEndian(endDate.getTime()),
     intToBigEndian(goal),
-    addressToBytes(creator.address),
+    addressToPk(creator.address),
     intToBigEndian(fundCloseDate.getTime())
   ];
 
@@ -97,7 +97,7 @@ describe('Crowdfunding Tests', function () {
 
     // create application
     applicationId = await runtime.addApp({ ...creationFlags, appArgs: creationArgs }, {}, program);
-    const creatorPk = addressToBytes(creator.address);
+    const creatorPk = addressToPk(creator.address);
 
     // verify global state
     assert.isDefined(applicationId);
@@ -109,14 +109,14 @@ describe('Crowdfunding Tests', function () {
     assert.deepEqual(getGlobal('Total'), 0n);
 
     // update application with correct escrow account address
-    let appArgs = [addressToBytes(escrow.address)]; // converts algorand address to Uint8Array
+    let appArgs = [addressToPk(escrow.address)]; // converts algorand address to Uint8Array
 
     await runtime.updateApp(
       creator.address,
       applicationId,
       program,
       {}, { appArgs: appArgs });
-    const escrowPk = addressToBytes(escrow.address);
+    const escrowPk = addressToPk(escrow.address);
 
     // verify escrow storage
     assert.isDefined(applicationId);
@@ -248,7 +248,7 @@ describe('Crowdfunding Tests', function () {
     const applicationId = await runtime.addApp({ ...creationFlags, appArgs: creationArgs }, {}, program);
 
     // update application with correct escrow account address
-    let appArgs = [addressToBytes(escrow.address)]; // converts algorand address to Uint8Array
+    let appArgs = [addressToPk(escrow.address)]; // converts algorand address to Uint8Array
     await runtime.updateApp(
       creator.address,
       applicationId,
