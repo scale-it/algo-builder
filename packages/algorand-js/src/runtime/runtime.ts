@@ -4,6 +4,7 @@ import { mkTransaction } from "@algorand-builder/algob";
 import { AlgoTransferParam, ExecParams, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
 import algosdk, { AssetDef, AssetHolding, encodeAddress, SSCAttributes, SSCStateSchema } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
+import { send } from "process";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
@@ -61,7 +62,7 @@ export class Runtime {
   assertAppDefined (appId: number): SSCAttributes {
     const app = this.ctx.state.globalApps.get(appId);
     if (app === undefined) {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
     }
     return app;
   }
@@ -224,6 +225,11 @@ export class Runtime {
 
     this.store.globalApps.set(++this.appCounter, app.params); // update globalApps Map
     this.ctx.state.globalApps.delete(0); // remove zero app
+
+    // update local state
+    senderAcc.createdApps.pop();
+    senderAcc.addApp(this.appCounter, flags);
+    this.store.accounts.set(sender.addr, senderAcc);
     return this.appCounter;
   }
 
@@ -266,7 +272,7 @@ export class Runtime {
 
       account.optInToApp(appId, appParams);
     } else {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
     }
   }
 
@@ -314,14 +320,14 @@ export class Runtime {
       this.createUpdateTx(senderAddr, appId, payFlags, flags);
       await this.run(newProgram); // execute TEAL code
     } else {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
     }
   }
 
   // Delete application from account's state and global state
   deleteApp (appId: number): void {
     if (!this.store.globalApps.has(appId)) {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
     }
     const accountAddr = this.store.globalApps.get(appId)?.creator;
     if (accountAddr === undefined) {

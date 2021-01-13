@@ -140,7 +140,7 @@ export class StoreAccount implements StoreAccountI {
       }
     }
     if (!found) {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND);
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
     }
   }
 }
