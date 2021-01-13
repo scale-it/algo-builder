@@ -194,11 +194,14 @@ export class Runtime {
     this.createApplicationTx(flags, payFlags);
     await this.run(program); // execute TEAL code with appId = 0
 
-    this.store.globalApps.set(++this.appCounter, app.params); // update globalApps Map
-    this.ctx.state.globalApps.delete(0); // remove zero app
+    // create new application in globalApps map
+    this.store.globalApps.set(++this.appCounter, app.params);
 
-    // update local state
-    senderAcc.createdApps.delete(0);
+    this.ctx.state.globalApps.delete(0); // remove zero app from context after execution
+    senderAcc.createdApps.delete(0); // remove zero app from sender's account
+
+    // set new application in sender's account
+    // after setting in globalApps
     senderAcc.addApp(this.appCounter, flags);
     this.store.accounts.set(sender.addr, senderAcc);
     return this.appCounter;
