@@ -2,7 +2,7 @@
 /* eslint sonarjs/no-small-switch: 0 */
 import { mkTransaction } from "@algorand-builder/algob";
 import { ExecParams, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
-import algosdk, { AssetDef, AssetHolding, encodeAddress } from "algosdk";
+import algosdk, { AssetDef, encodeAddress } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
 import { TealError } from "../errors/errors";
@@ -16,10 +16,8 @@ import type { Context, SSCAttributesM, StackElem, State, StoreAccountI, Txn } fr
 
 export class Runtime {
   /**
-   * We are duplicating `accounts` data in `accountAssets`
+   * We are using Maps instead of algosdk arrays
    * because of faster and easy querying.
-   * The structure in `accountAssets` is:
-   * Map < accountAddress, Map <AssetId, AssetHolding> >
    * This way when querying, instead of traversing the whole object,
    * we can get the value directly from Map
    */
@@ -29,12 +27,10 @@ export class Runtime {
 
   constructor (accounts: StoreAccountI[]) {
     // runtime store
-    const assetInfo = new Map<number, AssetHolding>();
     this.store = {
-      accounts: new Map<string, StoreAccountI>(),
-      accountAssets: new Map<string, typeof assetInfo>(),
-      globalApps: new Map<number, SSCAttributesM>(),
-      assetDefs: new Map<number, AssetDef>()
+      accounts: new Map<string, StoreAccountI>(), // string represents account address
+      globalApps: new Map<number, SSCAttributesM>(), // number represents appId
+      assetDefs: new Map<number, AssetDef>() // number represents assetId
     };
 
     // intialize accounts (should be done during runtime initialization)
@@ -123,16 +119,6 @@ export class Runtime {
       acc.createdAssets.forEach((params, assetIndex) => {
         this.store.assetDefs.set(assetIndex, params);
       });
-
-      // Here we are duplicating `accounts` data
-      // to `accountAssets` for easy querying
-      const assets = acc.assets;
-      const assetInfo = new Map<number, AssetHolding>();
-      for (const asset of assets) {
-        assetInfo.set(asset["asset-id"], asset);
-      }
-
-      this.store.accountAssets.set(acc.address, assetInfo);
     }
   }
 

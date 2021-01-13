@@ -16,7 +16,7 @@ const keyValue = "key-value";
 export class StoreAccount implements StoreAccountI {
   readonly account: Account;
   readonly address: string;
-  assets: AssetHolding[]; // TODO: to be removed
+  assets: Map<number, AssetHolding>;
   amount: number;
   appsLocalState: Map<number, AppLocalStateM>;
   appsTotalSchema: SSCSchemaConfig;
@@ -34,7 +34,7 @@ export class StoreAccount implements StoreAccountI {
       this.address = this.account.addr;
     }
 
-    this.assets = [];
+    this.assets = new Map<number, AssetHolding>();
     this.amount = balance;
     this.appsLocalState = new Map<number, AppLocalStateM>();
     this.appsTotalSchema = <SSCSchemaConfig>{};

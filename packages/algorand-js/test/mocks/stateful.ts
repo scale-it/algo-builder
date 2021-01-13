@@ -1,4 +1,4 @@
-import { AssetDef } from "algosdk";
+import { AssetDef, AssetHolding } from "algosdk";
 
 import { stringToBytes } from "../../src/lib/parsing";
 import { AppLocalStateM, SSCAttributesM, StackElem } from "../../src/types";
@@ -9,6 +9,10 @@ const appLocalState = new Map<number, AppLocalStateM>();
 const createdApps = new Map<number, SSCAttributesM>();
 const createdAssets = new Map<number, AssetDef>();
 
+const assets = new Map<number, AssetHolding>();
+assets.set(3, { 'asset-id': 3, amount: 2, creator: "string", 'is-frozen': "false" });
+assets.set(32, { 'asset-id': 32, amount: 2, creator: "AS", 'is-frozen': "false" });
+
 const globalKeyVal = new Map<string, StackElem>();
 globalKeyVal.set(byteToStr('Hello'), stringToBytes('World'));
 globalKeyVal.set(byteToStr('global-key'), stringToBytes('global-val'));
@@ -18,10 +22,7 @@ localKeyVal.set(byteToStr('Local-key'), stringToBytes('Local-val'));
 
 export const accInfo = [{
   address: "addr-1",
-  assets: [
-    { 'asset-id': 3, amount: 2, creator: "string", 'is-frozen': "false" },
-    { 'asset-id': 32, amount: 2, creator: "AS", 'is-frozen': "false" }
-  ],
+  assets: assets,
   amount: 123,
   appsLocalState: appLocalState.set(1847, {
     id: 1847,

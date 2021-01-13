@@ -1786,13 +1786,10 @@ export class GetAssetHolding extends Op {
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
     const assetId = this.assertBigInt(stack.pop());
-    let accountIdx = this.assertBigInt(stack.pop());
+    const accountIndex = this.assertBigInt(stack.pop());
 
-    this.checkIndexBound(Number(--accountIdx), this.interpreter.runtime.ctx.tx.apat);
-    const accBuffer = this.interpreter.runtime.ctx.tx.apat[Number(accountIdx)];
-    const accountAssets = this.interpreter.runtime.ctx.state.accountAssets.get(encodeAddress(accBuffer));
-    const assetInfo = accountAssets?.get(Number(assetId));
-
+    const account = this.interpreter.runtime.getAccount(accountIndex);
+    const assetInfo = account.assets.get(Number(assetId));
     if (assetInfo === undefined) {
       stack.push(BigInt("0"));
       return;
@@ -1847,7 +1844,6 @@ export class GetAssetDef extends Op {
     this.checkIndexBound(Number(--foreignAssetsIdx), this.interpreter.runtime.ctx.tx.apas);
 
     const assetId = this.interpreter.runtime.ctx.tx.apas[Number(foreignAssetsIdx)];
-
     const AssetDefinition = this.interpreter.runtime.ctx.state.assetDefs.get(assetId);
 
     if (AssetDefinition === undefined) {

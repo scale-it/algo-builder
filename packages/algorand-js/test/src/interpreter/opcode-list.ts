@@ -2140,9 +2140,7 @@ describe("Teal Opcodes", function () {
 
     describe("AppLocalGet", function () {
       before(function () {
-        console.log('---------------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
         interpreter.runtime.ctx.tx.apid = 1847;
-        console.log(accInfo[0].appsLocalState.get(1847));
       });
 
       it("should push the value to stack if key is present in local state", function () {

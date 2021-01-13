@@ -63,7 +63,6 @@ export interface AccountsMap {
 
 export interface State {
   accounts: Map<string, StoreAccountI>
-  accountAssets: Map<string, Map<number, AssetHolding>>
   globalApps: Map<number, SSCAttributesM>
   assetDefs: Map<number, AssetDef>
 }
@@ -103,7 +102,7 @@ export interface CreatedAppM {
 // NOTE: custom notations are used rather than SDK AccountState notations
 export interface StoreAccountI {
   address: string
-  assets: AssetHolding[]
+  assets: Map<number, AssetHolding>
   amount: number
   appsLocalState: Map<number, AppLocalStateM>
   appsTotalSchema: SSCSchemaConfig
