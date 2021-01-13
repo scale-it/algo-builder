@@ -4,7 +4,6 @@ import { mkTransaction } from "@algorand-builder/algob";
 import { AlgoTransferParam, ExecParams, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
 import algosdk, { AssetDef, AssetHolding, encodeAddress, SSCAttributes, SSCStateSchema } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
-import { send } from "process";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
