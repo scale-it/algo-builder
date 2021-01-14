@@ -102,6 +102,7 @@ export class Runtime {
    * Fetches local state for account address and application index
    * @param appId application index
    * @param accountAddr address for which local state needs to be retrieved
+   * @param key: key to fetch value of from local state
    */
   getLocalState (appId: number, accountAddr: string, key: Uint8Array): StackElem | undefined {
     const account = this.assertAccountDefined(this.store.accounts.get(accountAddr));
