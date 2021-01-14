@@ -30,7 +30,7 @@ export const accInfo = [{
   appsTotalSchema: { 'num-byte-slice': 583, 'num-uint': 105 },
   createdApps: [{
     id: 1828,
-    params: {
+    attributes: {
       'approval-program': '',
       'clear-state-program': '',
       creator: "addr-1",
@@ -58,7 +58,7 @@ export const accInfo = [{
   }],
   'created-assets': [{
     index: 3,
-    params: {
+    attributes: {
       creator: "addr-1",
       total: 10000,
       decimals: 10,

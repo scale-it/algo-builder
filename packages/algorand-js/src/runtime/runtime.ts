@@ -99,13 +99,24 @@ export class Runtime {
   }
 
   /**
+   * Fetches local state for account address and application index
+   * @param appId application index
+   * @param accountAddr address for which local state needs to be retrieved
+   * @param key: key to fetch value of from local state
+   */
+  getLocalState (appId: number, accountAddr: string, key: Uint8Array): StackElem | undefined {
+    const account = this.assertAccountDefined(this.store.accounts.get(accountAddr));
+    return account.getLocalState(appId, key);
+  }
+
+  /**
    * Add new key-value pair or updating pair with existing key in
    * app's global data for application id: appId, throw error otherwise
    * @param appId: current application id
    * @param key: key to fetch value of from local state
    * @param value: key to fetch value of from local state
    */
-  updateGlobalState (appId: number, key: Uint8Array, value: StackElem): SSCStateSchema[] {
+  setGlobalState (appId: number, key: Uint8Array, value: StackElem): SSCStateSchema[] {
     const app = this.assertAppDefined(appId);
     const appGlobalState = app["global-state"];
 
@@ -131,11 +142,11 @@ export class Runtime {
       this.store.accounts.set(acc.address, acc);
 
       for (const app of acc.createdApps) {
-        this.store.globalApps.set(app.id, app.params);
+        this.store.globalApps.set(app.id, app.attributes);
       }
 
       for (const asset of acc.createdAssets) {
-        this.store.assetDefs.set(asset.index, asset.params);
+        this.store.assetDefs.set(asset.index, asset.attributes);
       }
 
       // Here we are duplicating `accounts` data
@@ -185,7 +196,7 @@ export class Runtime {
   }
 
   // creates new application transaction object and update context
-  createApplicationTx (flags: SSCDeploymentFlags, payFlags: TxParams): void {
+  makeAndSetCtxAppCreateTxn (flags: SSCDeploymentFlags, payFlags: TxParams): void {
     const txn = algosdk.makeApplicationCreateTxn(
       flags.sender.addr,
       mockSuggestedParams(payFlags),
@@ -217,12 +228,12 @@ export class Runtime {
 
     // create app with id = 0 in globalApps for teal execution
     const app = senderAcc.addApp(0, flags);
-    this.ctx.state.globalApps.set(app.id, app.params);
+    this.ctx.state.globalApps.set(app.id, app.attributes);
 
-    this.createApplicationTx(flags, payFlags);
+    this.makeAndSetCtxAppCreateTxn(flags, payFlags);
     await this.run(program); // execute TEAL code with appId = 0
 
-    this.store.globalApps.set(++this.appCounter, app.params); // update globalApps Map
+    this.store.globalApps.set(++this.appCounter, app.attributes); // update globalApps Map
     this.ctx.state.globalApps.delete(0); // remove zero app
 
     // update local state
