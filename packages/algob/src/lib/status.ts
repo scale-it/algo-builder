@@ -27,8 +27,8 @@ export async function readGlobalStateSSC (
   creator: string,
   appId: number): Promise<SSCStateSchema[] | undefined> {
   const accountInfoResponse = await deployer.algodClient.accountInformation(creator).do();
-  for (const value of accountInfoResponse['created-apps']) {
-    if (value.id === appId) { return value.params['global-state']; }
+  for (const app of accountInfoResponse['created-apps']) {
+    if (app.id === appId) { return app.attributes['global-state']; }
   }
   return undefined;
 }
@@ -44,8 +44,8 @@ export async function readLocalStateSSC (
   account: string,
   appId: number): Promise<SSCStateSchema[] | undefined> {
   const accountInfoResponse = await deployer.algodClient.accountInformation(account).do();
-  for (const value of accountInfoResponse['apps-local-state']) {
-    if (value.id === appId) { return value[`key-value`]; }
+  for (const app of accountInfoResponse['apps-local-state']) {
+    if (app.id === appId) { return app[`key-value`]; }
   }
   return undefined;
 }

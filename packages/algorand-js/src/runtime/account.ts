@@ -3,7 +3,8 @@ import type {
   Account,
   AssetDef,
   AssetHolding,
-  SSCSchemaConfig
+  CreatedApp,
+  CreatedAsset, SSCAttributes, SSCSchemaConfig
 } from "algosdk";
 import { generateAccount } from "algosdk";
 
@@ -66,7 +67,7 @@ export class StoreAccount implements StoreAccountI {
    * @param key: key to fetch value of from local state
    * @param value: key to fetch value of from local state
    */
-  updateLocalState (appId: number, key: Uint8Array, value: StackElem): AppLocalStateM {
+  setLocalState (appId: number, key: Uint8Array, value: StackElem): AppLocalStateM {
     const localState = this.appsLocalState.get(appId);
     const localApp = localState?.[keyValue];
     if (localState && localApp) {
@@ -89,7 +90,7 @@ export class StoreAccount implements StoreAccountI {
     }
 
     const app = new App(appId, params);
-    this.createdApps.set(app.id, app.params);
+    this.createdApps.set(app.id, app.attributes);
     return app;
   }
 
@@ -124,11 +125,11 @@ export class StoreAccount implements StoreAccountI {
 // represents stateful application
 class App {
   readonly id: number;
-  readonly params: SSCAttributesM;
+  readonly attributes: SSCAttributesM;
 
   constructor (appId: number, params: SSCDeploymentFlags) {
     this.id = appId;
-    this.params = {
+    this.attributes = {
       'approval-program': '',
       'clear-state-program': '',
       creator: params.sender.addr,

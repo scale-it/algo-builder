@@ -95,7 +95,7 @@ export interface SSCAttributesM {
 // custom CreatedApp for StoreAccount
 export interface CreatedAppM {
   id: number
-  params: SSCAttributesM
+  attributes: SSCAttributesM
 }
 
 // represent account used in tests and by the context
@@ -115,7 +115,7 @@ export interface StoreAccountI {
   optInToApp: (appId: number, appParams: SSCAttributesM) => void
   deleteApp: (appId: number) => void
   getLocalState: (appId: number, key: Uint8Array) => StackElem | undefined
-  updateLocalState: (appId: number, key: Uint8Array, value: StackElem) => AppLocalStateM
+  setLocalState: (appId: number, key: Uint8Array, value: StackElem) => AppLocalStateM
 }
 
 // https://developer.algorand.org/docs/reference/teal/specification/#oncomplete

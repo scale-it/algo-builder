@@ -1616,7 +1616,7 @@ export class AppLocalPut extends Op {
     const appId = this.interpreter.runtime.ctx.tx.apid || 0;
 
     // get updated local state for account
-    const localState = account.updateLocalState(appId, key, value);
+    const localState = account.setLocalState(appId, key, value);
     const acc = this.interpreter.runtime.assertAccountDefined(
       this.interpreter.runtime.ctx.state.accounts.get(account.address));
     acc.appsLocalState.set(appId, localState);
@@ -1646,7 +1646,7 @@ export class AppGlobalPut extends Op {
     const key = this.assertBytes(stack.pop());
 
     const appId = this.interpreter.runtime.ctx.tx.apid || 0; // if undefined use 0 as default
-    const globalState = this.interpreter.runtime.updateGlobalState(appId, key, value);
+    const globalState = this.interpreter.runtime.setGlobalState(appId, key, value);
 
     const globalApp = this.interpreter.runtime.assertAppDefined(appId);
     globalApp["global-state"] = globalState;
