@@ -28,7 +28,7 @@ export async function readGlobalStateSSC (
   appId: number): Promise<SSCStateSchema[] | undefined> {
   const accountInfoResponse = await deployer.algodClient.accountInformation(creator).do();
   for (const value of accountInfoResponse['created-apps']) {
-    if (value.id === appId) { return value.params['global-state']; }
+    if (value.id === appId) { return value.attributes['global-state']; }
   }
   return undefined;
 }

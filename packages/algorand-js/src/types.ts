@@ -5,7 +5,7 @@ import {
   AssetDef,
   AssetHolding,
   CreatedApp,
-  CreatedAssets,
+  CreatedAsset,
   SSCAttributes,
   SSCSchemaConfig,
   TxnEncodedObj
@@ -89,7 +89,7 @@ export interface StoreAccountI {
   appsLocalState: Map<number, AppLocalState>
   appsTotalSchema: SSCSchemaConfig
   createdApps: CreatedApp[]
-  createdAssets: CreatedAssets[]
+  createdAssets: CreatedAsset[]
   account: Account
 
   balance: () => number
@@ -97,7 +97,7 @@ export interface StoreAccountI {
   optInToApp: (appId: number, appParams: SSCAttributes) => void
   deleteApp: (appId: number) => void
   getLocalState: (appId: number, key: Uint8Array) => StackElem | undefined
-  updateLocalState: (appId: number, key: Uint8Array, value: StackElem) => AppLocalState
+  setLocalState: (appId: number, key: Uint8Array, value: StackElem) => AppLocalState
 }
 
 // https://developer.algorand.org/docs/reference/teal/specification/#oncomplete
