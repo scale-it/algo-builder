@@ -108,12 +108,12 @@ Now, we will execute a transaction with stateful TEAL (which increments a global
     assert.isDefined(globalCounter); // there should be a value present with key "counter"
     assert.equal(globalCounter, BIGINT1);
 
-    const localCounter = getAcc(runtime, john).getLocalState(txnParams.appId, base64ToBytes(key)); // get local value from john account
+    const localCounter = runtime.getLocalState(txnParams.appId, base64ToBytes(key)); // get local value from john account
     assert.isDefined(localCounter); // there should be a value present in local state with key "counter"
     assert.equal(localCounter, BIGINT1);
   });
   ```
-  In this test, after executing the transaction (stateful smart contract call), we are verifying if the `global state` and `local state` is updated. User can use `runtime.getGlobalState()` and `account.getLocalState()` to check state.
+  In this test, after executing the transaction (stateful smart contract call), we are verifying if the `global state` and `local state` is updated. User can use `runtime.getGlobalState()` and `runtime.getLocalState()` to check state.
 
 Complete test can be found [here](../packages/algorand-js/test/integration/stateful-counter.ts).
 
