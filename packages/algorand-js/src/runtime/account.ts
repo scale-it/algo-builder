@@ -109,7 +109,7 @@ export class StoreAccount implements StoreAccountI {
         "key-value": new Map<string, StackElem>(),
         schema: appParams["local-state-schema"]
       };
-      this.appsLocalState.set(appId, localParams); // opt-in
+      this.appsLocalState.set(appId, localParams);
     }
   }
 
