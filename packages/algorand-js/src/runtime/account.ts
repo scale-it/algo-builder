@@ -3,8 +3,7 @@ import type {
   Account,
   AssetDef,
   AssetHolding,
-  CreatedApp,
-  CreatedAsset, SSCAttributes, SSCSchemaConfig
+  SSCSchemaConfig
 } from "algosdk";
 import { generateAccount } from "algosdk";
 
