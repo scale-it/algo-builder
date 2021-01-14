@@ -114,8 +114,8 @@ export interface StoreAccountI {
   addApp: (appId: number, params: SSCDeploymentFlags) => CreatedAppM
   optInToApp: (appId: number, appParams: SSCAttributesM) => void
   deleteApp: (appId: number) => void
-  getLocalState: (appId: number, key: Uint8Array) => StackElem | undefined
-  setLocalState: (appId: number, key: Uint8Array, value: StackElem) => AppLocalStateM
+  getLocalState: (appId: number, key: Uint8Array | string) => StackElem | undefined
+  setLocalState: (appId: number, key: Uint8Array | string, value: StackElem) => AppLocalStateM
 }
 
 // https://developer.algorand.org/docs/reference/teal/specification/#oncomplete

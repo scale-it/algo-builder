@@ -6,7 +6,7 @@ import { EncodingType } from "../types";
 import { reBase32, reBase64, reDigit } from "./constants";
 
 /**
- * Description: assert if string contains digits only
+ * assert if string contains digits only
  * "123" // ok.  "12+2" // error.
  * @param val : string
  */
@@ -17,7 +17,7 @@ export function assertOnlyDigits (val: string): void {
 }
 
 /**
- * Description: assert words length
+ * assert words length
  * @param val Comparsion result
  * @param expected expected result
  * @param line Line number in TEAL file
@@ -29,7 +29,7 @@ export function assertLen (val: number, expected: number, line: number): void {
 }
 
 /**
- * Description: Checks if string is base64
+ * Checks if string is base64
  * @param str : string that needs to be checked
  * @param line : line number in TEAL file
  */
@@ -40,7 +40,7 @@ export function assertBase64 (str: string, line: number): void {
 }
 
 /**
- * Description: Checks if string is base32
+ * Checks if string is base32
  * @param str : string that needs to be checked
  * @param line : line number in TEAL file
  */
@@ -48,6 +48,14 @@ export function assertBase32 (str: string, line: number): void {
   if (!reBase32.test(str)) {
     throw new TealError(ERRORS.TEAL.INVALID_BASE32, { val: str, line: line });
   }
+}
+
+/**
+ * returns key as bytes
+ * @param key : key in a stateful key-value pair
+ */
+export function keyToBytes (key: Uint8Array | string): Uint8Array {
+  return typeof key === 'string' ? stringToBytes(key) : key;
 }
 
 // parse string to Uint8Array
@@ -86,7 +94,7 @@ export function convertToBuffer (s: string, encoding?: EncodingType): Buffer {
 }
 
 /**
- * Description: Returns base64 or base32 string
+ * Returns base64 or base32 string
  * @param args words list
  * @param line line number
  */
@@ -110,7 +118,7 @@ function base64OrBase32 (args: string[], line: number): [string, EncodingType] {
 }
 
 /**
- * Description: returns encodingtype and string from words list
+ * returns encodingtype and string from words list
  * @param args : words list for base64 and base32
  */
 export function getEncoding (args: string[], line: number): [string, EncodingType] {
