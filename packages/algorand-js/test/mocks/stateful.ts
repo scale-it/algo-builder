@@ -3,7 +3,7 @@ import { AssetDef, AssetHolding } from "algosdk";
 import { stringToBytes } from "../../src/lib/parsing";
 import { AppLocalStateM, SSCAttributesM, StackElem } from "../../src/types";
 
-const byteToStr = (str: string): string => { return stringToBytes(str).toString(); };
+const convertToKey = (str: string): string => { return stringToBytes(str).toString(); };
 
 const appLocalState = new Map<number, AppLocalStateM>();
 const createdApps = new Map<number, SSCAttributesM>();
@@ -13,12 +13,12 @@ const assets = new Map<number, AssetHolding>();
 assets.set(3, { 'asset-id': 3, amount: 2, creator: "string", 'is-frozen': "false" });
 assets.set(32, { 'asset-id': 32, amount: 2, creator: "AS", 'is-frozen': "false" });
 
-const globalKeyVal = new Map<string, StackElem>();
-globalKeyVal.set(byteToStr('Hello'), stringToBytes('World'));
-globalKeyVal.set(byteToStr('global-key'), stringToBytes('global-val'));
+const globalStateMap = new Map<string, StackElem>();
+globalStateMap.set(convertToKey('Hello'), stringToBytes('World'));
+globalStateMap.set(convertToKey('global-key'), stringToBytes('global-val'));
 
-const localKeyVal = new Map<string, StackElem>();
-localKeyVal.set(byteToStr('Local-key'), stringToBytes('Local-val'));
+const localStateMap = new Map<string, StackElem>();
+localStateMap.set(convertToKey('Local-key'), stringToBytes('Local-val'));
 
 export const accInfo = [{
   address: "addr-1",
@@ -26,7 +26,7 @@ export const accInfo = [{
   amount: 123,
   appsLocalState: appLocalState.set(1847, {
     id: 1847,
-    'key-value': localKeyVal,
+    'key-value': localStateMap,
     schema: {
       'num-byte-slice': 2,
       'num-uint': 1
@@ -37,7 +37,7 @@ export const accInfo = [{
     'approval-program': '',
     'clear-state-program': '',
     creator: "addr-1",
-    'global-state': globalKeyVal,
+    'global-state': globalStateMap,
     'global-state-schema': { 'num-byte-slice': 3, 'num-uint': 1 },
     'local-state-schema': { 'num-byte-slice': 0, 'num-uint': 16 }
   }),

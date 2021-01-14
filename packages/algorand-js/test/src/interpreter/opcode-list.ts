@@ -29,7 +29,7 @@ import { accInfo } from "../../mocks/stateful";
 import { elonAddr, johnAddr, TXN_OBJ } from "../../mocks/txn";
 
 const keyValue = "key-value";
-const byteToStr = (str: string): string => { return stringToBytes(str).toString(); };
+const convertToKey = (str: string): string => { return stringToBytes(str).toString(); };
 function setDummyAccInfo (acc: StoreAccountI): void {
   acc.assets = accInfo[0].assets;
   acc.appsLocalState = accInfo[0].appsLocalState;
@@ -2351,7 +2351,7 @@ describe("Teal Opcodes", function () {
         let localStateCurr = acc.appsLocalState.get(appId)?.[keyValue];
         assert.isDefined(localStateCurr);
         if (localStateCurr) {
-          value = localStateCurr.get(byteToStr('New-Key'));
+          value = localStateCurr.get(convertToKey('New-Key'));
           assert.isDefined(value);
           if (value) assert.deepEqual(value, stringToBytes('New-Val'));
         }
@@ -2368,7 +2368,7 @@ describe("Teal Opcodes", function () {
           .appsLocalState.get(appId)?.[keyValue];
         assert.isDefined(localStateCurr);
         if (localStateCurr) {
-          value = localStateCurr.get(byteToStr('New-Key-1'));
+          value = localStateCurr.get(convertToKey('New-Key-1'));
           assert.isDefined(value);
           if (value) assert.deepEqual(value, 2222n);
         }
@@ -2412,7 +2412,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         let globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCAttributesM)["global-state"];
-        let value = globalStateCurr.get(byteToStr('New-Global-Key'));
+        let value = globalStateCurr.get(convertToKey('New-Global-Key'));
         assert.isDefined(value); // idx should not be -1
         assert.deepEqual(value, stringToBytes('New-Global-Val'));
 
@@ -2424,7 +2424,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCAttributesM)["global-state"];
-        value = globalStateCurr.get(byteToStr('Key'));
+        value = globalStateCurr.get(convertToKey('Key'));
         assert.isDefined(value); // idx should not be -1
         assert.deepEqual(value, 1000n);
       });
@@ -2466,7 +2466,7 @@ describe("Teal Opcodes", function () {
         const appId = interpreter.runtime.ctx.tx.apid;
         let localStateCurr = (interpreter.runtime.ctx.state.accounts.get(elonAddr) as StoreAccountI)
           .appsLocalState.get(appId)?.[keyValue];
-        if (localStateCurr) value = localStateCurr.get(byteToStr('Local-key'));
+        if (localStateCurr) value = localStateCurr.get(convertToKey('Local-key'));
         assert.isUndefined(value); // value should be undefined
 
         // for Txn.Accounts[A]
@@ -2478,7 +2478,7 @@ describe("Teal Opcodes", function () {
 
         localStateCurr = (interpreter.runtime.ctx.state.accounts.get(johnAddr) as StoreAccountI)
           .appsLocalState.get(appId)?.[keyValue];
-        if (localStateCurr) value = localStateCurr.get(byteToStr('Local-key'));
+        if (localStateCurr) value = localStateCurr.get(convertToKey('Local-key'));
         assert.isUndefined(value); // value should be undefined
       });
     });
@@ -2498,7 +2498,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         const globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCAttributesM)["global-state"];
-        const value = globalStateCurr.get(byteToStr('global-key'));
+        const value = globalStateCurr.get(convertToKey('global-key'));
         assert.isUndefined(value); // value should be undefined
       });
     });

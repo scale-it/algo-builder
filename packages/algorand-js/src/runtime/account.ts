@@ -13,7 +13,7 @@ import { ERRORS } from "../errors/errors-list";
 import { assertValidSchema } from "../lib/stateful";
 import { AppLocalStateM, CreatedAppM, SSCAttributesM, StackElem, StoreAccountI } from "../types";
 
-const keyValue = "key-value";
+const StateMap = "key-value";
 export class StoreAccount implements StoreAccountI {
   readonly account: Account;
   readonly address: string;
@@ -56,7 +56,7 @@ export class StoreAccount implements StoreAccountI {
    */
   getLocalState (appId: number, key: Uint8Array): StackElem | undefined {
     const localState = this.appsLocalState;
-    const data = localState.get(appId)?.[keyValue]; // can be undefined (eg. app opted in)
+    const data = localState.get(appId)?.[StateMap]; // can be undefined (eg. app opted in)
     return data?.get(key.toString());
   }
 
@@ -69,12 +69,12 @@ export class StoreAccount implements StoreAccountI {
    */
   setLocalState (appId: number, key: Uint8Array, value: StackElem): AppLocalStateM {
     const localState = this.appsLocalState.get(appId);
-    const localApp = localState?.[keyValue];
+    const localApp = localState?.[StateMap];
     if (localState && localApp) {
       localApp.set(key.toString(), value);
-      localState[keyValue] = localApp; // save updated state
+      localState[StateMap] = localApp; // save updated state
 
-      assertValidSchema(localState[keyValue], localState.schema); // verify if updated schema is valid by config
+      assertValidSchema(localState[StateMap], localState.schema); // verify if updated schema is valid by config
       return localState;
     }
 
@@ -96,7 +96,7 @@ export class StoreAccount implements StoreAccountI {
 
   // opt in to application
   optInToApp (appId: number, appParams: SSCAttributesM): void {
-    const localState = this.appsLocalState.get(appId);
+    const localState = this.appsLocalState.get(appId); // fetch local state from account
     if (localState) {
       console.warn(`${this.address} is already opted in to app ${appId}`);
     } else {
@@ -104,12 +104,13 @@ export class StoreAccount implements StoreAccountI {
         throw new Error('Maximum Opt In applications per account is 10');
       }
 
+      // create new local app attribute
       const localParams: AppLocalStateM = {
         id: appId,
         "key-value": new Map<string, StackElem>(),
         schema: appParams["local-state-schema"]
       };
-      this.appsLocalState.set(appId, localParams); // push
+      this.appsLocalState.set(appId, localParams); // opt-in
     }
   }
 

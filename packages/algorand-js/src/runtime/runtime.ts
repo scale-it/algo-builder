@@ -82,6 +82,8 @@ export class Runtime {
    * @param key: key to fetch value of from local state
    */
   getGlobalState (appId: number, key: Uint8Array): StackElem | undefined {
+    // TODO: will be updated in https://www.pivotaltracker.com/story/show/176487715
+    // we will operate on accounts rather than globalApp map
     const app = this.assertAppDefined(appId);
     const appGlobalState = app["global-state"];
     return appGlobalState.get(key.toString());
@@ -106,6 +108,8 @@ export class Runtime {
    * @param value: key to fetch value of from local state
    */
   setGlobalState (appId: number, key: Uint8Array, value: StackElem): Map<string, StackElem> {
+    // TODO: will be updated in https://www.pivotaltracker.com/story/show/176487715
+    // we will operate on accounts rather than globalApp map
     const app = this.assertAppDefined(appId);
     const appGlobalState = app["global-state"];
     appGlobalState.set(key.toString(), value); // set new value in global state
@@ -213,6 +217,7 @@ export class Runtime {
 
     // set new application in sender's account
     // after setting in globalApps
+    // TODO: will be updated in https://www.pivotaltracker.com/story/show/176487715
     senderAcc.addApp(this.appCounter, flags);
     this.store.accounts.set(sender.addr, senderAcc);
     return this.appCounter;
@@ -246,6 +251,9 @@ export class Runtime {
    * Account address opt-in for application Id
    * @param accountAddr Account address
    * @param appId Application Id
+   * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
+   * @param payFlags Transaction Parameters
+   * @param program TEAL code as string
    */
   async optInToApp (accountAddr: string, appId: number,
     flags: SSCOptionalFlags, payFlags: TxParams, program: string): Promise<void> {
@@ -255,6 +263,7 @@ export class Runtime {
       this.createOptInTx(accountAddr, appId, payFlags, flags);
       await this.run(program); // execute TEAL code
 
+      // TODO: will be updated in https://www.pivotaltracker.com/story/show/176487715
       account.optInToApp(appId, appParams);
     } else {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
