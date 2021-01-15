@@ -2,25 +2,22 @@
 /* eslint sonarjs/no-small-switch: 0 */
 import { mkTransaction } from "@algorand-builder/algob";
 import { AlgoTransferParam, ExecParams, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
-import algosdk, { AssetDef, AssetHolding, encodeAddress, SSCAttributes, SSCStateSchema } from "algosdk";
+import algosdk, { AssetDef, encodeAddress } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { Interpreter } from "../index";
 import { BIGINT0, BIGINT1 } from "../interpreter/opcode-list";
-import { checkIndexBound, compareArray } from "../lib/compare";
-import { SSC_BYTES } from "../lib/constants";
-import { assertValidSchema, getKeyValPair } from "../lib/stateful";
+import { checkIndexBound } from "../lib/compare";
+import { assertValidSchema } from "../lib/stateful";
 import { mockSuggestedParams } from "../mock/tx";
-import type { Context, StackElem, State, StoreAccountI, Txn } from "../types";
+import type { Context, SSCAttributesM, StackElem, State, StoreAccountI, Txn } from "../types";
 
 export class Runtime {
   /**
-   * We are duplicating `accounts` data in `accountAssets`
+   * We are using Maps instead of algosdk arrays
    * because of faster and easy querying.
-   * The structure in `accountAssets` is:
-   * Map < accountAddress, Map <AssetId, AssetHolding> >
    * This way when querying, instead of traversing the whole object,
    * we can get the value directly from Map
    */
@@ -30,12 +27,10 @@ export class Runtime {
 
   constructor (accounts: StoreAccountI[]) {
     // runtime store
-    const assetInfo = new Map<number, AssetHolding>();
     this.store = {
-      accounts: new Map<string, StoreAccountI>(),
-      accountAssets: new Map<string, typeof assetInfo>(),
-      globalApps: new Map<number, SSCAttributes>(),
-      assetDefs: new Map<number, AssetDef>()
+      accounts: new Map<string, StoreAccountI>(), // string represents account address
+      globalApps: new Map<number, SSCAttributesM>(), // number represents appId
+      assetDefs: new Map<number, AssetDef>() // number represents assetId
     };
 
     // intialize accounts (should be done during runtime initialization)
@@ -58,7 +53,7 @@ export class Runtime {
     return a;
   }
 
-  assertAppDefined (appId: number): SSCAttributes {
+  assertAppDefined (appId: number): SSCAttributesM {
     const app = this.ctx.state.globalApps.get(appId);
     if (app === undefined) {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
@@ -87,15 +82,11 @@ export class Runtime {
    * @param key: key to fetch value of from local state
    */
   getGlobalState (appId: number, key: Uint8Array): StackElem | undefined {
+    // TODO: will be updated in https://www.pivotaltracker.com/story/show/176487715
+    // we will operate on accounts rather than globalApp map
     const app = this.assertAppDefined(appId);
     const appGlobalState = app["global-state"];
-
-    const keyValue = appGlobalState.find(schema => compareArray(schema.key, key));
-    const value = keyValue?.value;
-    if (value) {
-      return value.type === SSC_BYTES ? value.bytes : BigInt(value.uint);
-    }
-    return undefined;
+    return appGlobalState.get(key.toString());
   }
 
   /**
@@ -116,17 +107,12 @@ export class Runtime {
    * @param key: key to fetch value of from local state
    * @param value: key to fetch value of from local state
    */
-  setGlobalState (appId: number, key: Uint8Array, value: StackElem): SSCStateSchema[] {
+  setGlobalState (appId: number, key: Uint8Array, value: StackElem): Map<string, StackElem> {
+    // TODO: will be updated in https://www.pivotaltracker.com/story/show/176487715
+    // we will operate on accounts rather than globalApp map
     const app = this.assertAppDefined(appId);
     const appGlobalState = app["global-state"];
-
-    const data = getKeyValPair(key, value); // key value pair to put
-    const idx = appGlobalState.findIndex(schema => compareArray(schema.key, key));
-    if (idx === -1) {
-      appGlobalState.push(data); // push new pair if key not found
-    } else {
-      appGlobalState[idx].value = data.value; // update value if key found
-    }
+    appGlobalState.set(key.toString(), value); // set new value in global state
     app["global-state"] = appGlobalState; // save updated state
 
     assertValidSchema(app["global-state"], app["global-state-schema"]); // verify if updated schema is valid by config
@@ -141,23 +127,13 @@ export class Runtime {
     for (const acc of accounts) {
       this.store.accounts.set(acc.address, acc);
 
-      for (const app of acc.createdApps) {
-        this.store.globalApps.set(app.id, app.attributes);
-      }
+      acc.createdApps.forEach((params, id) => {
+        this.store.globalApps.set(id, params);
+      });
 
-      for (const asset of acc.createdAssets) {
-        this.store.assetDefs.set(asset.index, asset.attributes);
-      }
-
-      // Here we are duplicating `accounts` data
-      // to `accountAssets` for easy querying
-      const assets = acc.assets;
-      const assetInfo = new Map<number, AssetHolding>();
-      for (const asset of assets) {
-        assetInfo.set(asset["asset-id"], asset);
-      }
-
-      this.store.accountAssets.set(acc.address, assetInfo);
+      acc.createdAssets.forEach((params, assetIndex) => {
+        this.store.assetDefs.set(assetIndex, params);
+      });
     }
   }
 
@@ -233,11 +209,15 @@ export class Runtime {
     this.makeAndSetCtxAppCreateTxn(flags, payFlags);
     await this.run(program); // execute TEAL code with appId = 0
 
-    this.store.globalApps.set(++this.appCounter, app.attributes); // update globalApps Map
-    this.ctx.state.globalApps.delete(0); // remove zero app
+    // create new application in globalApps map
+    this.store.globalApps.set(++this.appCounter, app.attributes);
 
-    // update local state
-    senderAcc.createdApps.pop();
+    this.ctx.state.globalApps.delete(0); // remove zero app from context after execution
+    senderAcc.createdApps.delete(0); // remove zero app from sender's account
+
+    // set new application in sender's account
+    // after setting in globalApps
+    // TODO: will be updated in https://www.pivotaltracker.com/story/show/176487715
     senderAcc.addApp(this.appCounter, flags);
     this.store.accounts.set(sender.addr, senderAcc);
     return this.appCounter;
@@ -271,6 +251,9 @@ export class Runtime {
    * Account address opt-in for application Id
    * @param accountAddr Account address
    * @param appId Application Id
+   * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
+   * @param payFlags Transaction Parameters
+   * @param program TEAL code as string
    */
   async optInToApp (accountAddr: string, appId: number,
     flags: SSCOptionalFlags, payFlags: TxParams, program: string): Promise<void> {
@@ -280,6 +263,7 @@ export class Runtime {
       this.createOptInTx(accountAddr, appId, payFlags, flags);
       await this.run(program); // execute TEAL code
 
+      // TODO: will be updated in https://www.pivotaltracker.com/story/show/176487715
       account.optInToApp(appId, appParams);
     } else {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });

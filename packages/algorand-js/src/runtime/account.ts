@@ -1,29 +1,27 @@
 import { SSCDeploymentFlags } from "@algorand-builder/algob/src/types";
 import type {
   Account,
-  AppLocalState,
+  AssetDef,
   AssetHolding,
-  CreatedApp,
-  CreatedAsset, SSCAttributes, SSCSchemaConfig
+  SSCSchemaConfig
 } from "algosdk";
 import { generateAccount } from "algosdk";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
-import { compareArray } from "../lib/compare";
-import { SSC_BYTES } from "../lib/constants";
-import { assertValidSchema, getKeyValPair } from "../lib/stateful";
-import { StackElem, StoreAccountI } from "../types";
+import { assertValidSchema } from "../lib/stateful";
+import { AppLocalStateM, CreatedAppM, SSCAttributesM, StackElem, StoreAccountI } from "../types";
 
+const StateMap = "key-value";
 export class StoreAccount implements StoreAccountI {
   readonly account: Account;
   readonly address: string;
-  assets: AssetHolding[]; // TODO: to be removed
+  assets: Map<number, AssetHolding>;
   amount: number;
-  appsLocalState: Map<number, AppLocalState>; // TODO: update to map
+  appsLocalState: Map<number, AppLocalStateM>;
   appsTotalSchema: SSCSchemaConfig;
-  createdApps: CreatedApp[];
-  createdAssets: CreatedAsset[];
+  createdApps: Map<number, SSCAttributesM>;
+  createdAssets: Map<number, AssetDef>;
 
   constructor (balance: number, account?: Account) {
     if (account) {
@@ -36,12 +34,12 @@ export class StoreAccount implements StoreAccountI {
       this.address = this.account.addr;
     }
 
-    this.assets = [];
+    this.assets = new Map<number, AssetHolding>();
     this.amount = balance;
-    this.appsLocalState = new Map<number, AppLocalState>();
+    this.appsLocalState = new Map<number, AppLocalStateM>();
     this.appsTotalSchema = <SSCSchemaConfig>{};
-    this.createdApps = [];
-    this.createdAssets = [];
+    this.createdApps = new Map<number, SSCAttributesM>();
+    this.createdAssets = new Map<number, AssetDef>();
   }
 
   // returns account balance in microAlgos
@@ -57,15 +55,8 @@ export class StoreAccount implements StoreAccountI {
    */
   getLocalState (appId: number, key: Uint8Array): StackElem | undefined {
     const localState = this.appsLocalState;
-    const data = localState.get(appId)?.["key-value"]; // can be undefined (eg. app opted in)
-    if (data) {
-      const keyValue = data.find(schema => compareArray(schema.key, key));
-      const value = keyValue?.value;
-      if (value) {
-        return value.type === SSC_BYTES ? value.bytes : BigInt(value.uint);
-      }
-    }
-    return undefined;
+    const data = localState.get(appId)?.[StateMap]; // can be undefined (eg. app opted in)
+    return data?.get(key.toString());
   }
 
   /**
@@ -75,22 +66,14 @@ export class StoreAccount implements StoreAccountI {
    * @param key: key to fetch value of from local state
    * @param value: key to fetch value of from local state
    */
-  setLocalState (appId: number, key: Uint8Array, value: StackElem): AppLocalState {
+  setLocalState (appId: number, key: Uint8Array, value: StackElem): AppLocalStateM {
     const localState = this.appsLocalState.get(appId);
-    const data = getKeyValPair(key, value); // key value pair to put
-
-    const localApp = localState?.["key-value"];
+    const localApp = localState?.[StateMap];
     if (localState && localApp) {
-      const idx = localApp.findIndex(schema => compareArray(schema.key, key));
+      localApp.set(key.toString(), value);
+      localState[StateMap] = localApp; // save updated state
 
-      if (idx === -1) {
-        localApp.push(data); // push new pair if key not found
-      } else {
-        localApp[idx].value = data.value; // update value if key found
-      }
-      localState["key-value"] = localApp; // save updated state
-
-      assertValidSchema(localState["key-value"], localState.schema); // verify if updated schema is valid by config
+      assertValidSchema(localState[StateMap], localState.schema); // verify if updated schema is valid by config
       return localState;
     }
 
@@ -100,19 +83,19 @@ export class StoreAccount implements StoreAccountI {
   }
 
   // add application in account's state
-  addApp (appId: number, params: SSCDeploymentFlags): CreatedApp {
-    if (this.createdApps.length === 10) {
+  addApp (appId: number, params: SSCDeploymentFlags): CreatedAppM {
+    if (this.createdApps.size === 10) {
       throw new Error('Maximum created applications for an account is 10');
     }
 
     const app = new App(appId, params);
-    this.createdApps.push(app);
+    this.createdApps.set(app.id, app.attributes);
     return app;
   }
 
   // opt in to application
-  optInToApp (appId: number, appParams: SSCAttributes): void {
-    const localState = this.appsLocalState.get(appId);
+  optInToApp (appId: number, appParams: SSCAttributesM): void {
+    const localState = this.appsLocalState.get(appId); // fetch local state from account
     if (localState) {
       console.warn(`${this.address} is already opted in to app ${appId}`);
     } else {
@@ -120,35 +103,29 @@ export class StoreAccount implements StoreAccountI {
         throw new Error('Maximum Opt In applications per account is 10');
       }
 
-      const localParams: AppLocalState = {
+      // create new local app attribute
+      const localParams: AppLocalStateM = {
         id: appId,
-        "key-value": [],
+        "key-value": new Map<string, StackElem>(),
         schema: appParams["local-state-schema"]
       };
-      this.appsLocalState.set(appId, localParams); // push
+      this.appsLocalState.set(appId, localParams);
     }
   }
 
   // delete application from account's state
   deleteApp (appId: number): void {
-    let found = false;
-    for (const app of this.createdApps) {
-      if (app.id === appId) {
-        const index = this.createdApps.indexOf(app);
-        this.createdApps.splice(index, 1);
-        found = true;
-      }
-    }
-    if (!found) {
+    if (!this.createdApps.has(appId)) {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
     }
+    this.createdApps.delete(appId);
   }
 }
 
 // represents stateful application
 class App {
   readonly id: number;
-  readonly attributes: SSCAttributes;
+  readonly attributes: SSCAttributesM;
 
   constructor (appId: number, params: SSCDeploymentFlags) {
     this.id = appId;
@@ -156,7 +133,7 @@ class App {
       'approval-program': '',
       'clear-state-program': '',
       creator: params.sender.addr,
-      'global-state': [],
+      'global-state': new Map<string, StackElem>(),
       'global-state-schema': { 'num-byte-slice': params.globalBytes, 'num-uint': params.globalInts },
       'local-state-schema': { 'num-byte-slice': params.localBytes, 'num-uint': params.localInts }
     };
