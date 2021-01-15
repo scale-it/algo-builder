@@ -1493,7 +1493,7 @@ export class Global extends Op {
       }
       case 'CurrentApplicationID': {
         result = this.interpreter.runtime.ctx.tx.apid;
-        this.interpreter.runtime.assertAppDefined(result);
+        this.interpreter.runtime.assertAppDefined(result, this.line);
         break;
       }
       default: {
@@ -1733,7 +1733,7 @@ export class AppLocalPut extends Op {
     // get updated local state for account
     const localState = account.setLocalState(appId, key, value);
     const acc = this.interpreter.runtime.assertAccountDefined(
-      this.interpreter.runtime.ctx.state.accounts.get(account.address));
+      this.interpreter.runtime.ctx.state.accounts.get(account.address), this.line);
     acc.appsLocalState.set(appId, localState);
   }
 }
@@ -1765,7 +1765,7 @@ export class AppGlobalPut extends Op {
     const appId = this.interpreter.runtime.ctx.tx.apid || 0; // if undefined use 0 as default
     const globalState = this.interpreter.runtime.setGlobalState(appId, key, value);
 
-    const globalApp = this.interpreter.runtime.assertAppDefined(appId);
+    const globalApp = this.interpreter.runtime.assertAppDefined(appId, this.line);
     globalApp["global-state"] = globalState;
   }
 }
@@ -1802,7 +1802,7 @@ export class AppLocalDel extends Op {
       localState["key-value"].delete(key.toString()); // delete from local state
 
       let acc = this.interpreter.runtime.ctx.state.accounts.get(account.address);
-      acc = this.interpreter.runtime.assertAccountDefined(acc);
+      acc = this.interpreter.runtime.assertAccountDefined(acc, this.line);
       acc.appsLocalState.set(appId, localState);
     }
   }
@@ -1833,7 +1833,7 @@ export class AppGlobalDel extends Op {
 
     const appId = this.interpreter.runtime.ctx.tx.apid || 0;
 
-    const app = this.interpreter.runtime.assertAppDefined(appId);
+    const app = this.interpreter.runtime.assertAppDefined(appId, this.line);
     if (app) {
       const globalState = app["global-state"];
       globalState.delete(key.toString());
@@ -1866,20 +1866,10 @@ export class Balance extends Op {
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
-    let accountIndex = this.assertBigInt(stack.pop(), this.line);
-    let res;
+    const accountIndex = this.assertBigInt(stack.pop(), this.line);
+    const acc = this.interpreter.runtime.getAccount(accountIndex, this.line);
 
-    if (accountIndex === BigInt("0")) {
-      const sender = encodeAddress(this.interpreter.runtime.ctx.tx.snd);
-      res = this.interpreter.runtime.ctx.state.accounts.get(sender);
-    } else {
-      this.checkIndexBound(Number(--accountIndex), this.interpreter.runtime.ctx.tx.apat, this.line);
-      const buf = this.interpreter.runtime.ctx.tx.apat[Number(accountIndex)];
-      res = this.interpreter.runtime.ctx.state.accounts.get(encodeAddress(buf));
-    }
-    if (res === undefined) { throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST); }
-
-    stack.push(BigInt(res.amount));
+    stack.push(BigInt(acc.amount));
   }
 }
 
@@ -1892,7 +1882,7 @@ export class GetAssetHolding extends Op {
   readonly line: number;
 
   /**
-   * Description: sets field according to arguments passed.
+   * Sets field according to arguments passed.
    * @param args Expected arguments: [Asset Holding field]
    * // Note: Asset holding field will be string
    * For ex: `AssetBalance` is correct `0` is not.
@@ -1913,7 +1903,7 @@ export class GetAssetHolding extends Op {
     const assetId = this.assertBigInt(stack.pop(), this.line);
     const accountIndex = this.assertBigInt(stack.pop(), this.line);
 
-    const account = this.interpreter.runtime.getAccount(accountIndex);
+    const account = this.interpreter.runtime.getAccount(accountIndex, this.line);
     const assetInfo = account.assets.get(Number(assetId));
     if (assetInfo === undefined) {
       stack.push(BigInt("0"));

@@ -25,7 +25,9 @@ export class Op {
   }
 
   checkIndexBound (idx: number, arr: any[], line: number): void {
+    console.log("BAALAL-------------------");
     if (!(idx >= 0 && idx < arr.length)) {
+      console.log("HSGDKGHSKDK-----: ", line);
       throw new TealError(ERRORS.TEAL.INDEX_OUT_OF_BOUND, { line: line });
     }
   }

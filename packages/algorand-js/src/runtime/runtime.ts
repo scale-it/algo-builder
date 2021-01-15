@@ -46,29 +46,31 @@ export class Runtime {
     this.appCounter = 0;
   }
 
-  assertAccountDefined (a?: StoreAccountI): StoreAccountI {
+  assertAccountDefined (a?: StoreAccountI, line?: number): StoreAccountI {
+    const lineNumber = line ?? 'unknown';
     if (a === undefined) {
-      throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
+      throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST, { line: lineNumber });
     }
     return a;
   }
 
-  assertAppDefined (appId: number): SSCAttributesM {
+  assertAppDefined (appId: number, line?: number): SSCAttributesM {
+    const lineNumber = line ?? 'unknown';
     const app = this.ctx.state.globalApps.get(appId);
     if (app === undefined) {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: lineNumber });
     }
     return app;
   }
 
-  getAccount (accountIndex: bigint): StoreAccountI {
+  getAccount (accountIndex: bigint, line?: number): StoreAccountI {
     let account: StoreAccountI | undefined;
     if (accountIndex === BIGINT0) {
       const senderAccount = encodeAddress(this.ctx.tx.snd);
       account = this.ctx.state.accounts.get(senderAccount);
     } else {
       const accIndex = accountIndex - BIGINT1;
-      checkIndexBound(Number(accIndex), this.ctx.tx.apat);
+      checkIndexBound(Number(accIndex), this.ctx.tx.apat, line);
       const pkBuffer = this.ctx.tx.apat[Number(accIndex)];
       account = this.ctx.state.accounts.get(encodeAddress(pkBuffer));
     }

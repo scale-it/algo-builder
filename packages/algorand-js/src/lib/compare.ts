@@ -20,8 +20,9 @@ export function compareArray (a: unknown, b: unknown): boolean {
 }
 
 // check if index is accessible in an array
-export function checkIndexBound (idx: number, arr: any[]): void {
+export function checkIndexBound (idx: number, arr: any[], line?: number): void {
+  const lineNumber = line ?? 'unknown';
   if (!(idx >= 0 && idx < arr.length)) {
-    throw new TealError(ERRORS.TEAL.INDEX_OUT_OF_BOUND);
+    throw new TealError(ERRORS.TEAL.INDEX_OUT_OF_BOUND, { line: lineNumber });
   }
 }
