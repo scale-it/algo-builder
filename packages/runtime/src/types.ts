@@ -1,12 +1,8 @@
 import { SSCDeploymentFlags } from "@algorand-builder/algob/src/types";
 import {
   Account,
-  AppLocalState,
   AssetDef,
   AssetHolding,
-  CreatedApp,
-  CreatedAsset,
-  SSCAttributes,
   SSCSchemaConfig,
   TxnEncodedObj
 } from "algosdk";
@@ -67,8 +63,7 @@ export interface AccountsMap {
 
 export interface State {
   accounts: Map<string, StoreAccountI>
-  accountAssets: Map<string, Map<number, AssetHolding>>
-  globalApps: Map<number, SSCAttributes>
+  globalApps: Map<number, SSCAttributesM>
   assetDefs: Map<number, AssetDef>
 }
 
@@ -80,24 +75,47 @@ export interface Context {
   args: Uint8Array[]
 }
 
+// custom AppsLocalState for StoreAccount (using maps instead of array in 'key-value')
+export interface AppLocalStateM {
+  id: number
+  'key-value': Map<string, StackElem> // string represents bytes as string eg. 11,22,34
+  schema: SSCSchemaConfig
+}
+
+// custom SSCAttributes for StoreAccount (using maps instead of array in 'global-state')
+export interface SSCAttributesM {
+  'approval-program': string
+  'clear-state-program': string
+  creator: string
+  'global-state': Map<string, StackElem>
+  'global-state-schema': SSCSchemaConfig
+  'local-state-schema': SSCSchemaConfig
+}
+
+// custom CreatedApp for StoreAccount
+export interface CreatedAppM {
+  id: number
+  attributes: SSCAttributesM
+}
+
 // represent account used in tests and by the context
 // NOTE: custom notations are used rather than SDK AccountState notations
 export interface StoreAccountI {
   address: string
-  assets: AssetHolding[]
+  assets: Map<number, AssetHolding>
   amount: number
-  appsLocalState: Map<number, AppLocalState>
+  appsLocalState: Map<number, AppLocalStateM>
   appsTotalSchema: SSCSchemaConfig
-  createdApps: CreatedApp[]
-  createdAssets: CreatedAsset[]
+  createdApps: Map<number, SSCAttributesM>
+  createdAssets: Map<number, AssetDef>
   account: Account
 
   balance: () => number
-  addApp: (appId: number, params: SSCDeploymentFlags) => CreatedApp
-  optInToApp: (appId: number, appParams: SSCAttributes) => void
+  addApp: (appId: number, params: SSCDeploymentFlags) => CreatedAppM
+  optInToApp: (appId: number, appParams: SSCAttributesM) => void
   deleteApp: (appId: number) => void
   getLocalState: (appId: number, key: Uint8Array) => StackElem | undefined
-  setLocalState: (appId: number, key: Uint8Array, value: StackElem) => AppLocalState
+  setLocalState: (appId: number, key: Uint8Array, value: StackElem) => AppLocalStateM
 }
 
 // https://developer.algorand.org/docs/reference/teal/specification/#oncomplete

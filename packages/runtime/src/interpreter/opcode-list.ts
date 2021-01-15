@@ -1680,10 +1680,7 @@ export class AppLocalDel extends Op {
 
     const localState = account.appsLocalState.get(appId);
     if (localState) {
-      const arr = localState["key-value"].filter((obj) => {
-        return !compareArray(obj.key, key);
-      });
-      localState["key-value"] = arr;
+      localState["key-value"].delete(key.toString()); // delete from local state
 
       let acc = this.interpreter.runtime.ctx.state.accounts.get(account.address);
       acc = this.interpreter.runtime.assertAccountDefined(acc);
@@ -1715,13 +1712,10 @@ export class AppGlobalDel extends Op {
 
     const appId = this.interpreter.runtime.ctx.tx.apid || 0;
 
-    const appDelta = this.interpreter.runtime.assertAppDefined(appId);
-    if (appDelta) {
-      const globalState = appDelta["global-state"];
-      const arr = globalState.filter((obj) => {
-        return !compareArray(obj.key, key);
-      });
-      appDelta["global-state"] = arr;
+    const app = this.interpreter.runtime.assertAppDefined(appId);
+    if (app) {
+      const globalState = app["global-state"];
+      globalState.delete(key.toString());
     }
   }
 }
@@ -1792,13 +1786,10 @@ export class GetAssetHolding extends Op {
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2);
     const assetId = this.assertBigInt(stack.pop());
-    let accountIdx = this.assertBigInt(stack.pop());
+    const accountIndex = this.assertBigInt(stack.pop());
 
-    this.checkIndexBound(Number(--accountIdx), this.interpreter.runtime.ctx.tx.apat);
-    const accBuffer = this.interpreter.runtime.ctx.tx.apat[Number(accountIdx)];
-    const accountAssets = this.interpreter.runtime.ctx.state.accountAssets.get(encodeAddress(accBuffer));
-    const assetInfo = accountAssets?.get(Number(assetId));
-
+    const account = this.interpreter.runtime.getAccount(accountIndex);
+    const assetInfo = account.assets.get(Number(assetId));
     if (assetInfo === undefined) {
       stack.push(BigInt("0"));
       return;
@@ -1853,7 +1844,6 @@ export class GetAssetDef extends Op {
     this.checkIndexBound(Number(--foreignAssetsIdx), this.interpreter.runtime.ctx.tx.apas);
 
     const assetId = this.interpreter.runtime.ctx.tx.apas[Number(foreignAssetsIdx)];
-
     const AssetDefinition = this.interpreter.runtime.ctx.state.assetDefs.get(assetId);
 
     if (AssetDefinition === undefined) {
