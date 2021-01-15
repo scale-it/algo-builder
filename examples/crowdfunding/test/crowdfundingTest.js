@@ -6,7 +6,7 @@ import {
   stringToBytes,
   TransactionType
 } from '@algorand-builder/algob';
-import { Runtime, StoreAccount } from '@algorand-builder/algorand-js';
+import { Runtime, StoreAccount } from '@algorand-builder/runtime';
 import { assert } from 'chai';
 
 import { getAcc } from './common';
@@ -239,7 +239,7 @@ describe('Crowdfunding Tests', function () {
       }
     ];
     await runtime.executeTx(txGroup, program, []);
-    // TODO- close account and tranfer funds to closeRemainderTo in algorand-js
+    // TODO- close account and tranfer funds to closeRemainderTo in runtime
   });
 
   it('should be rejected by logic when claiming funds if goal is not met', async () => {

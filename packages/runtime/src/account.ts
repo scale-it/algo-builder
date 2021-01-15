@@ -8,12 +8,12 @@ import type {
 } from "algosdk";
 import { generateAccount } from "algosdk";
 
-import { TealError } from "../errors/errors";
-import { ERRORS } from "../errors/errors-list";
-import { compareArray } from "../lib/compare";
-import { SSC_BYTES } from "../lib/constants";
-import { assertValidSchema, getKeyValPair } from "../lib/stateful";
-import { StackElem, StoreAccountI } from "../types";
+import { TealError } from "./errors/errors";
+import { ERRORS } from "./errors/errors-list";
+import { compareArray } from "./lib/compare";
+import { SSC_BYTES } from "./lib/constants";
+import { assertValidSchema, getKeyValPair } from "./lib/stateful";
+import { StackElem, StoreAccountI } from "./types";
 
 export class StoreAccount implements StoreAccountI {
   readonly account: Account;
