@@ -1,14 +1,16 @@
 import tx, { Account as AccountSDK, ConfirmedTxInfo, decodeAddress } from "algosdk";
 
 import { AlgobDeployer, SSCOptionalFlags, TxParams } from "../types";
+import { MAX_UINT64, MIN_UINT64 } from "./constants";
 import { encodeNote, mkTxParams } from "./tx";
 
-/**
- * Converts string to bytes.
- * @param s string
- */
-export function stringToBytes (s: string): Uint8Array {
-  return new Uint8Array(Buffer.from(s));
+export const reDigit = /^\d+$/;
+
+// verify n is an unsigned 64 bit integer
+function assertUint64 (n: bigint): void {
+  if (n < MIN_UINT64 || n > MAX_UINT64) {
+    throw new Error(`Invalid uint64 ${n}`);
+  }
 }
 
 /**
@@ -18,6 +20,7 @@ export function uint64ToBigEndian (x: number | bigint): Uint8Array {
   const bytes = new Uint8Array(8);
   let i = 0;
   x = BigInt(x); // use x as bigint internally to support upto uint64
+  assertUint64(x);
   while (x) {
     bytes[i++] = Number(x % 256n);
     x /= 256n;
@@ -25,12 +28,57 @@ export function uint64ToBigEndian (x: number | bigint): Uint8Array {
   return bytes.reverse();
 }
 
+const throwErr = (appArg: string): void => {
+  throw new Error(`Format of arguments passed to stateful smart is invalid for ${appArg}`);
+};
+
 /**
- * Parses appArgs to stateful smart contract if arguments are passed similar to goal.
+ * Parses appArgs to bytes if arguments passed to SSC are similar to goal ('int:1', 'str:hello'..)
+ * https://developer.algorand.org/docs/features/asc1/stateful/#passing-arguments-to-stateful-smart-contracts
  * eg. "int:1" => new Uint8Aarray([0, 0, 0, 0, 0, 0, 0, 1])
+ * @param appArgs : arguments to stateful smart contract
  */
 export function parseSSCAppArgs (appArgs?: Array<Uint8Array | string>): Uint8Array[] | undefined {
+  if (appArgs === undefined) { return undefined; }
+
+  appArgs.forEach((appArg, idx) => {
+    if (appArg instanceof Uint8Array) { return; }
+    const [type, value] = appArg.split(':'); // eg "int:1" => ['int', '1']
+    if (type === undefined || value === undefined) { throwErr(appArg); }
+
+    // parse string to bytes according to type
+    switch (type) {
+      case 'int': {
+        if (!reDigit.test(value)) { throwErr(appArg); } // verify only digits are present in string
+        appArgs[idx] = uint64ToBigEndian(BigInt(value));
+        break;
+      }
+      case 'str': {
+        appArgs[idx] = stringToBytes(value);
+        break;
+      }
+      case 'addr': {
+        appArgs[idx] = addressToPk(value);
+        break;
+      }
+      case 'b64': {
+        appArgs[idx] = new Uint8Array(Buffer.from(value, 'base64'));
+        break;
+      }
+      default: {
+        throwErr(appArg);
+      }
+    }
+  });
   return appArgs as Uint8Array[];
+}
+
+/**
+ * Converts string to bytes.
+ * @param s string
+ */
+export function stringToBytes (s: string): Uint8Array {
+  return new Uint8Array(Buffer.from(s));
 }
 
 /**
