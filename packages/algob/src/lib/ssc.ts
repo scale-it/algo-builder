@@ -12,12 +12,17 @@ export function stringToBytes (s: string): Uint8Array {
 }
 
 /**
- * Converts integer to bytes in big endian.
+ * Converts 64 bit unsigned integer to bytes in big endian.
  */
-export function intToBigEndian (x: number): Uint8Array {
-  const y = Math.floor(x / 2 ** 32);
-  const byt = [y, (y << 8), (y << 16), (y << 24), x, (x << 8), (x << 16), (x << 24)].map(z => z >>> 24);
-  return new Uint8Array(byt);
+export function uint64ToBigEndian (x: number | bigint): Uint8Array {
+  const bytes = new Uint8Array(8);
+  let i = 0;
+  x = BigInt(x); // use x as bigint internally to support upto uint64
+  while (x) {
+    bytes[i++] = Number(x % 256n);
+    x /= 256n;
+  }
+  return bytes.reverse();
 }
 
 /**
