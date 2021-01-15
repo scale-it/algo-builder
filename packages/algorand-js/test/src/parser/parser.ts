@@ -634,12 +634,12 @@ describe("Parser", function () {
     it("Sould return correct opcode list for '+'", async () => {
       const file1 = "test-file-1.teal";
       let res = await parser(getProgram(file1), interpreter);
-      const expected = [new Int(["1"], 1), new Int(["3"], 1), new Add([], 1)];
+      const expected = [new Int(["1"], 1), new Int(["3"], 2), new Add([], 3)];
 
       assert.deepEqual(res, expected);
 
-      const expect = [new Pragma(["version", "2"], 1), new Int(["1"], 1),
-        new Int(["3"], 1), new Add([], 1)];
+      const expect = [new Pragma(["version", "2"], 1), new Int(["1"], 2),
+        new Int(["3"], 3), new Add([], 4)];
       res = await parser(getProgram("test-file-2.teal"), interpreter);
 
       assert.deepEqual(res, expect);
