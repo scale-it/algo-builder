@@ -579,12 +579,12 @@ export interface AssetHolding {
 
 export interface CreatedApp {
   id: number;
-  attributes: SSCAttributes;
+  params: SSCAttributes;
 }
 
 export interface CreatedAsset {
   index: number;
-  attributes: AssetDef;
+  params: AssetDef;
 }
 
 export interface AppLocalState {
