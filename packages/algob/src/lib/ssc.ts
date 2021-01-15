@@ -21,6 +21,14 @@ export function intToBigEndian (x: number): Uint8Array {
 }
 
 /**
+ * Parses appArgs to stateful smart contract if arguments are passed similar to goal.
+ * eg. "int:1" => new Uint8Aarray([0, 0, 0, 0, 0, 0, 0, 1])
+ */
+export function parseSSCAppArgs (appArgs?: Array<Uint8Array | string>): Uint8Array[] | undefined {
+  return appArgs as Uint8Array[];
+}
+
+/**
  * Takes an Algorand address in string form and decodes it into a Uint8Array (as public key)
  * @param addr : algorand address
  */
@@ -60,7 +68,7 @@ export async function update (
     appId,
     approvalProg,
     clearProg,
-    flags.appArgs,
+    parseSSCAppArgs(flags.appArgs),
     flags.accounts,
     flags.foreignApps,
     flags.foreignAssets,
