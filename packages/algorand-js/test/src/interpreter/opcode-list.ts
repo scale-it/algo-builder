@@ -2058,7 +2058,7 @@ describe("Teal Opcodes", function () {
       const ts = Math.round((new Date()).getTime() / 1000);
 
       const diff = Math.abs(ts - Number(top)); // for accuracy
-      assert.isBelow(diff, 5);
+      assert.isBelow(diff, 10);
     });
 
     it("should push CurrentApplicationID to stack", function () {
