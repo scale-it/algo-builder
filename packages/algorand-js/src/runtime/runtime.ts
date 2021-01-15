@@ -63,6 +63,11 @@ export class Runtime {
     return app;
   }
 
+  /**
+   * Fetch account using accountIndex from `ForeignAccounts` list
+   * @param accountIndex account list
+   * @param line line number
+   */
   getAccount (accountIndex: bigint, line?: number): StoreAccountI {
     let account: StoreAccountI | undefined;
     if (accountIndex === BIGINT0) {

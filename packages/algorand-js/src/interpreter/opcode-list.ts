@@ -1408,7 +1408,7 @@ export class BranchIfNotZero extends Op {
   readonly line: number;
 
   /**
-   * Description: Sets `label` according to arguments passed.
+   * Sets `label` according to arguments passed.
    * @param args Expected arguments: [label of branch]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -1438,7 +1438,7 @@ export class Return extends Op {
   readonly line: number;
 
   /**
-   * Description: Asserts 0 arguments are passed.
+   * Asserts 0 arguments are passed.
    * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -1469,7 +1469,7 @@ export class Global extends Op {
   readonly line: number;
 
   /**
-   * Description: Stores global field to query as string
+   * Stores global field to query as string
    * @param args Expected arguments: [field] // Ex: ["GroupSize"]
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -1518,7 +1518,7 @@ export class AppOptedIn extends Op {
   readonly line: number;
 
   /**
-   * Description: Asserts 0 arguments are passed.
+   * Asserts 0 arguments are passed.
    * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -1555,7 +1555,7 @@ export class AppLocalGet extends Op {
   readonly line: number;
 
   /**
-   * Description: Asserts 0 arguments are passed.
+   * Asserts 0 arguments are passed.
    * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -1592,7 +1592,7 @@ export class AppLocalGetEx extends Op {
   readonly line: number;
 
   /**
-   * Description: Asserts 0 arguments are passed.
+   * Asserts 0 arguments are passed.
    * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -1629,7 +1629,7 @@ export class AppGlobalGet extends Op {
   readonly line: number;
 
   /**
-   * Description: Asserts 0 arguments are passed.
+   * Asserts 0 arguments are passed.
    * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -1665,7 +1665,7 @@ export class AppGlobalGetEx extends Op {
   readonly line: number;
 
   /**
-   * Description: Asserts 0 arguments are passed.
+   * Asserts 0 arguments are passed.
    * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -1709,7 +1709,7 @@ export class AppLocalPut extends Op {
   readonly line: number;
 
   /**
-   * Description: Asserts 0 arguments are passed.
+   * Asserts 0 arguments are passed.
    * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -1745,7 +1745,7 @@ export class AppGlobalPut extends Op {
   readonly line: number;
 
   /**
-   * Description: Asserts 0 arguments are passed.
+   * Asserts 0 arguments are passed.
    * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -1777,7 +1777,7 @@ export class AppLocalDel extends Op {
   readonly line: number;
 
   /**
-   * Description: Asserts 0 arguments are passed.
+   * Asserts 0 arguments are passed.
    * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -1815,7 +1815,7 @@ export class AppGlobalDel extends Op {
   readonly line: number;
 
   /**
-   * Description: Asserts 0 arguments are passed.
+   * Asserts 0 arguments are passed.
    * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    * @param interpreter interpreter object
@@ -1851,7 +1851,7 @@ export class Balance extends Op {
   readonly line: number;
 
   /**
-   * Description: Asserts if arguments length is zero
+   * Asserts if arguments length is zero
    * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
    * @param interpreter Interpreter Object
@@ -1936,7 +1936,7 @@ export class GetAssetDef extends Op {
   readonly line: number;
 
   /**
-   * Description: sets transaction field according to arguments passed
+   * Sets transaction field according to arguments passed
    * @param args Expected arguments: [Asset Params field]
    * // Note: Asset Params field will be string
    * For ex: `AssetTotal` is correct `0` is not.
@@ -1995,7 +1995,7 @@ export class Int extends Op {
   readonly line: number;
 
   /**
-   * Description: Sets uint64 variable according to arguments passed.
+   * Sets uint64 variable according to arguments passed.
    * @param args Expected arguments: [number]
    * @param line line number in TEAL file
    */
@@ -2033,7 +2033,7 @@ export class Byte extends Op {
   readonly line: number;
 
   /**
-   * Description: Sets `str` and  `encoding` values according to arguments passed.
+   * Sets `str` and  `encoding` values according to arguments passed.
    * @param args Expected arguments: [data string]
    * @param line line number in TEAL file
    */
@@ -2056,7 +2056,7 @@ export class Addr extends Op {
   readonly line: number;
 
   /**
-   * Description: Sets `addr` value according to arguments passed.
+   * Sets `addr` value according to arguments passed.
    * @param args Expected arguments: [Address]
    * @param line line number in TEAL file
    */
