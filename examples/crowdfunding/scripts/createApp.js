@@ -38,7 +38,7 @@ async function run (runtimeEnv, deployer) {
   let appArgs = [
     uint64ToBigEndian(beginDate.getTime()),
     uint64ToBigEndian(endDate.getTime()),
-    uint64ToBigEndian(7000000),
+    'int:7000000', // args similar to `goal --app-arg ..` are also supported
     addressToPk(creatorAccount.addr),
     uint64ToBigEndian(fundCloseDate.getTime())
   ];
