@@ -1,4 +1,4 @@
-import { SSCDeploymentFlags } from "@algorand-builder/algob/src/types";
+import { AccountAddress, SSCDeploymentFlags } from "@algorand-builder/algob/src/types";
 import {
   Account,
   AssetDef,
@@ -63,8 +63,8 @@ export interface AccountsMap {
 
 export interface State {
   accounts: Map<string, StoreAccountI>
-  globalApps: Map<number, SSCAttributesM>
-  assetDefs: Map<number, AssetDef>
+  globalApps: Map<number, AccountAddress>
+  assetDefs: Map<number, AccountAddress>
 }
 
 // describes interpreter's local context (state + txns)

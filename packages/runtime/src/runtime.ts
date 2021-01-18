@@ -1,8 +1,8 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
 import { mkTransaction } from "@algorand-builder/algob";
-import { AlgoTransferParam, ExecParams, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
-import algosdk, { AssetDef, encodeAddress } from "algosdk";
+import { AccountAddress, AlgoTransferParam, ExecParams, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
+import algosdk, { encodeAddress } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
 import { TealError } from "./errors/errors";
@@ -30,8 +30,8 @@ export class Runtime {
     // runtime store
     this.store = {
       accounts: new Map<string, StoreAccountI>(), // string represents account address
-      globalApps: new Map<number, SSCAttributesM>(), // number represents appId
-      assetDefs: new Map<number, AssetDef>() // number represents assetId
+      globalApps: new Map<number, AccountAddress>(), // number represents appId
+      assetDefs: new Map<number, AccountAddress>() // number represents assetId
     };
 
     // intialize accounts (should be done during runtime initialization)
@@ -54,8 +54,18 @@ export class Runtime {
     return a;
   }
 
+  assertAddressDefined (addr: string | undefined): string {
+    if (addr === undefined) {
+      throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
+    }
+    return addr;
+  }
+
   assertAppDefined (appId: number): SSCAttributesM {
-    const app = this.ctx.state.globalApps.get(appId);
+    const accAddress = this.assertAddressDefined(this.ctx.state.globalApps.get(appId));
+    const account = this.ctx.state.accounts.get(accAddress);
+    const app = account?.createdApps.get(appId);
+
     if (app === undefined) {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
     }
@@ -77,14 +87,12 @@ export class Runtime {
   }
 
   /**
-   * Fetches global state value for key present app's global data
-   * returns undefined otherwise
+   * Fetches global state value for key present in creator's global state
+   * for given appId, returns undefined otherwise
    * @param appId: current application id
    * @param key: key to fetch value of from local state
    */
   getGlobalState (appId: number, key: Uint8Array | string): StackElem | undefined {
-    // TODO: will be updated in https://www.pivotaltracker.com/story/show/176487715
-    // we will operate on accounts rather than globalApp map
     const app = this.assertAppDefined(appId);
     const appGlobalState = app["global-state"];
     const globalKey = keyToBytes(key);
@@ -110,8 +118,6 @@ export class Runtime {
    * @param value: key to fetch value of from local state
    */
   setGlobalState (appId: number, key: Uint8Array | string, value: StackElem): Map<string, StackElem> {
-    // TODO: will be updated in https://www.pivotaltracker.com/story/show/176487715
-    // we will operate on accounts rather than globalApp map
     const app = this.assertAppDefined(appId);
     const appGlobalState = app["global-state"];
     const globalKey = keyToBytes(key);
@@ -130,13 +136,13 @@ export class Runtime {
     for (const acc of accounts) {
       this.store.accounts.set(acc.address, acc);
 
-      acc.createdApps.forEach((params, id) => {
-        this.store.globalApps.set(id, params);
-      });
+      for (const appId of acc.createdApps.keys()) {
+        this.store.globalApps.set(appId, acc.address);
+      }
 
-      acc.createdAssets.forEach((params, assetIndex) => {
-        this.store.assetDefs.set(assetIndex, params);
-      });
+      for (const assetId of acc.createdAssets.keys()) {
+        this.store.assetDefs.set(assetId, acc.address);
+      }
     }
   }
 
@@ -200,27 +206,29 @@ export class Runtime {
     this.ctx.gtxs = [encTx];
   }
 
-  // creates new application and returns application id
+  /**
+   * creates new application and returns application id
+   * @param flags SSCDeployment flags
+   * @param payFlags Transaction parameters
+   * @param program approval program
+   */
   async addApp (flags: SSCDeploymentFlags, payFlags: TxParams, program: string): Promise<number> {
     const sender = flags.sender;
     const senderAcc = this.assertAccountDefined(this.store.accounts.get(sender.addr));
 
     // create app with id = 0 in globalApps for teal execution
     const app = senderAcc.addApp(0, flags);
-    this.ctx.state.globalApps.set(app.id, app.attributes);
+    this.ctx.state.globalApps.set(app.id, senderAcc.address);
 
     this.makeAndSetCtxAppCreateTxn(flags, payFlags);
     await this.run(program); // execute TEAL code with appId = 0
 
     // create new application in globalApps map
-    this.store.globalApps.set(++this.appCounter, app.attributes);
+    this.store.globalApps.set(++this.appCounter, senderAcc.address);
 
     this.ctx.state.globalApps.delete(0); // remove zero app from context after execution
     senderAcc.createdApps.delete(0); // remove zero app from sender's account
 
-    // set new application in sender's account
-    // after setting in globalApps
-    // TODO: will be updated in https://www.pivotaltracker.com/story/show/176487715
     senderAcc.addApp(this.appCounter, flags);
     this.store.accounts.set(sender.addr, senderAcc);
     return this.appCounter;
@@ -260,13 +268,12 @@ export class Runtime {
    */
   async optInToApp (accountAddr: string, appId: number,
     flags: SSCOptionalFlags, payFlags: TxParams, program: string): Promise<void> {
-    const appParams = this.store.globalApps.get(appId);
+    const appParams = this.assertAppDefined(appId);
     const account = this.assertAccountDefined(this.store.accounts.get(accountAddr));
     if (appParams) {
       this.createOptInTx(accountAddr, appId, payFlags, flags);
       await this.run(program); // execute TEAL code
 
-      // TODO: will be updated in https://www.pivotaltracker.com/story/show/176487715
       account.optInToApp(appId, appParams);
     } else {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
@@ -312,7 +319,7 @@ export class Runtime {
     payFlags: TxParams,
     flags: SSCOptionalFlags
   ): Promise<void> {
-    const appParams = this.store.globalApps.get(appId);
+    const appParams = this.assertAppDefined(appId);
     if (appParams) {
       this.createUpdateTx(senderAddr, appId, payFlags, flags);
       await this.run(newProgram); // execute TEAL code
@@ -321,18 +328,23 @@ export class Runtime {
     }
   }
 
-  // Delete application from account's state and global state
+  /**
+   * Delete application from account's state and global state
+   * @param appId Application Index
+   */
   deleteApp (appId: number): void {
     if (!this.store.globalApps.has(appId)) {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
     }
-    const accountAddr = this.store.globalApps.get(appId)?.creator;
+    const accountAddr = this.store.globalApps.get(appId);
     if (accountAddr === undefined) {
       throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
     }
     const account = this.assertAccountDefined(this.store.accounts.get(accountAddr));
+
     account.deleteApp(appId);
     this.store.globalApps.delete(appId);
+    this.store.accounts.set(account.address, account);
   }
 
   // transfer ALGO as per transaction parameters

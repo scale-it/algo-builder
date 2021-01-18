@@ -1844,7 +1844,7 @@ export class GetAssetDef extends Op {
     this.checkIndexBound(Number(--foreignAssetsIdx), this.interpreter.runtime.ctx.tx.apas);
 
     const assetId = this.interpreter.runtime.ctx.tx.apas[Number(foreignAssetsIdx)];
-    const AssetDefinition = this.interpreter.runtime.ctx.state.assetDefs.get(assetId);
+    const AssetDefinition = this.interpreter.getAssetDef(assetId);
 
     if (AssetDefinition === undefined) {
       stack.push(BigInt("0"));

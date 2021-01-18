@@ -1,3 +1,5 @@
+import { AssetDef } from "algosdk";
+
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { Runtime } from "../index";

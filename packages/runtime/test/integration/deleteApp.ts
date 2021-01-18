@@ -48,7 +48,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
     deleteParams.appId = appId;
     await runtime.executeTx(deleteParams, program, []);
 
-    // verify app is deleted
+    // verify app is deleted - use app get function//
     const res = runtime.ctx.state.globalApps.has(appId);
     assert.equal(res, false);
   });
@@ -63,7 +63,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
       async () => await runtime.executeTx(deleteParams, program, []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
-    // verify app is not deleted
+    // verify app is not deleted - use app get function
     const res = runtime.ctx.state.globalApps.has(appId);
     assert.equal(res, true);
   });
