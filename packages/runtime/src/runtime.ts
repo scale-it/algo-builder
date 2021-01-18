@@ -46,6 +46,11 @@ export class Runtime {
     this.appCounter = 0;
   }
 
+  /**
+   * asserts if account is defined.
+   * @param a account
+   * @param line line number in TEAL file
+   */
   assertAccountDefined (a?: StoreAccountI, line?: number): StoreAccountI {
     const lineNumber = line ?? 'unknown';
     if (a === undefined) {
@@ -54,6 +59,11 @@ export class Runtime {
     return a;
   }
 
+  /**
+   * asserts if application exists in state
+   * @param appId application index
+   * @param line line number in TEAL file
+   */
   assertAppDefined (appId: number, line?: number): SSCAttributesM {
     const lineNumber = line ?? 'unknown';
     const app = this.ctx.state.globalApps.get(appId);
@@ -69,6 +79,7 @@ export class Runtime {
    * that may be accessed from the application's approval-program and clear-state-program.
    * @param accountIndex index of account to fetch from account list
    * @param line line number
+   * NOTE: index 0 represents txn sender account
    */
   getAccount (accountIndex: bigint, line?: number): StoreAccountI {
     let account: StoreAccountI | undefined;
