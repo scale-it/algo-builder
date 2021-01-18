@@ -19,7 +19,7 @@ export class Op {
   }
 
   /**
-   * asserts number is less than equal to MAX_UINT64
+   * asserts number is less than or equal to MAX_UINT64
    * @param num number to check
    * @param line line number in TEAL file
    */
