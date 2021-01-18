@@ -13,7 +13,7 @@ import { reBase32, reBase64, reDigit } from "./constants";
 export function assertOnlyDigits (val: string, line: number): void {
   if (!reDigit.test(val)) {
     throw new TealError(ERRORS.TEAL.INVALID_TYPE, {
-      expected: "unsigned integer",
+      expected: "unsigned integer (upto 64 bit)",
       actual: val,
       line: line
     });
