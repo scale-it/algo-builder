@@ -7,11 +7,11 @@ import type {
 } from "algosdk";
 import { generateAccount } from "algosdk";
 
-import { TealError } from "../errors/errors";
-import { ERRORS } from "../errors/errors-list";
-import { keyToBytes } from "../lib/parsing";
-import { assertValidSchema } from "../lib/stateful";
-import { AppLocalStateM, CreatedAppM, SSCAttributesM, StackElem, StoreAccountI } from "../types";
+import { TealError } from "./errors/errors";
+import { ERRORS } from "./errors/errors-list";
+import { keyToBytes } from "./lib/parsing";
+import { assertValidSchema } from "./lib/stateful";
+import { AppLocalStateM, CreatedAppM, SSCAttributesM, StackElem, StoreAccountI } from "./types";
 
 const StateMap = "key-value";
 export class StoreAccount implements StoreAccountI {

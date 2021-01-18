@@ -4,7 +4,7 @@ Framework to automate development of Algorand Assets and Smart Contracts:
 
 + `algob`: tool
 + `types/algosdk`: TypeScript typings for algosdk-js
-+ `algorand-js`: light algorand runtime and TEAL interpreter (work in progress)
++ `runtime`: light algorand runtime and TEAL interpreter (work in progress)
 
 ## Objectives
 

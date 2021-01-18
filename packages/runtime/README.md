@@ -1,4 +1,4 @@
-# Algorand-js
+# Runtime
 
 JavaScript Algorand runtime. It provides:
 
