@@ -11,16 +11,20 @@ describe("Teal Opcodes basic assertions", function () {
 
   it("check uint64 overflow", function () {
     const max = MAX_UINT64 + BigInt("5");
+    const lineNumber = 1;
+
     expectTealError(
-      () => op.checkOverflow(max, 1),
+      () => op.checkOverflow(max, lineNumber),
       ERRORS.TEAL.UINT64_OVERFLOW
     );
   });
 
   it("check uint64 underflow", function () {
     const min = MIN_UINT64 - BigInt("1");
+    const lineNumber = 1;
+
     expectTealError(
-      () => op.checkUnderflow(min, 1),
+      () => op.checkUnderflow(min, lineNumber),
       ERRORS.TEAL.UINT64_UNDERFLOW
     );
   });
