@@ -1,24 +1,24 @@
 # Testing TEAL
 
-[TEAL](https://developer.algorand.org/docs/reference/teal/specification/) is a bytecode based stack language that executes inside Algorand transactions to check the parameters of the transaction and approve the transaction as if by a signature. `@algorand-builder/algorand-js` provides a lightweight runtime and TEAL interpreter to test Algorand Smart Contracts.
+[TEAL](https://developer.algorand.org/docs/reference/teal/specification/) is a bytecode based stack language that executes inside Algorand transactions to check the parameters of the transaction and approve the transaction as if by a signature. `@algorand-builder/runtime` provides a lightweight runtime and TEAL interpreter to test Algorand Smart Contracts.
 
 **NOTE:** TEAL can not modify nor create transactions, only reject or approve them. Approval is signaled by finishing with the stack containing a single non-zero uint64 value.
 
 ## How it works
 
-`@algorand-builder/algorand-js` (JavaScript Algorand runtime) executes transactions and processes TEAL in 3 parts :-
+`@algorand-builder/runtime` (JavaScript Algorand runtime) executes transactions and processes TEAL in 3 parts :-
 
-- [Runtime](../packages/algorand-js/src/runtime/runtime.ts): For a transaction or txn group, the state management is handled by the `Runtime`. User can use `Runtime` object to set up accounts, create applications, opt-in to app, update app, etc...
-- [StoreAccount](../packages/algorand-js/src/runtime/account.ts): User can create new accounts using the `StoreAccount` object. All information about account (`apps`, `assets`, `localState` etc..) is stored in `StoreAccount`.
-- [Parser](../packages/algorand-js/src/parser): Reads TEAL code and converts it to a list of opcodes which are executable by the interpreter. If any opcode/data in teal code is invalid, parser will throw an error.
-- [Interpreter](../packages/algorand-js/src/interpreter): Executes the list of opcodes returned by parser and updates stack after each execution. At the end of execution, if the stack contains a single non-zero uint64 element then the teal code is approved, and transaction can be executed.
+- [Runtime](../packages/runtime/src/runtime.ts): For a transaction or txn group, the state management is handled by the `Runtime`. User can use `Runtime` object to set up accounts, create applications, opt-in to app, update app, etc...
+- [StoreAccount](../packages/runtime/src/account.ts): User can create new accounts using the `StoreAccount` object. All information about account (`apps`, `assets`, `localState` etc..) is stored in `StoreAccount`.
+- [Parser](../packages/runtime/src/parser): Reads TEAL code and converts it to a list of opcodes which are executable by the interpreter. If any opcode/data in teal code is invalid, parser will throw an error.
+- [Interpreter](../packages/runtime/src/interpreter): Executes the list of opcodes returned by parser and updates stack after each execution. At the end of execution, if the stack contains a single non-zero uint64 element then the teal code is approved, and transaction can be executed.
 
 ## Run tests
 In this section we will demonstrate executing transactions with stateless and stateful teal.
 
 ### Stateless TEAL
 
-Let's try to execute a transaction where a user (say `john`) can withdraw funds from an `escrow` account based on a stateless smart contract logic. TEAL code can be found [here](../packages/algorand-js/test/fixtures/escrow-account/assets/escrow.teal).
+Let's try to execute a transaction where a user (say `john`) can withdraw funds from an `escrow` account based on a stateless smart contract logic. TEAL code can be found [here](../packages/runtime/test/fixtures/escrow-account/assets/escrow.teal).
 - First let's set up the state: initialize accounts and set up runtime (snippet from mocha test is also provided below).
   ```
   const escrow = new StoreAccountImpl(1000e6); // 1000 ALGO
@@ -67,11 +67,11 @@ Let's try to execute a transaction where a user (say `john`) can withdraw funds 
   });
   ```
 
-Full mocha test with more transactions can be found [here](../packages/algorand-js/test/integration/escrow-account.ts).
+Full mocha test with more transactions can be found [here](../packages/runtime/test/integration/escrow-account.ts).
 
 ### Stateful TEAL
 
-Now, we will execute a transaction with stateful TEAL (which increments a global and local "counter" by on each application call). Teal code can be found [here](../packages/algorand-js/test/fixtures/stateful/assets/counter-approval.teal)
+Now, we will execute a transaction with stateful TEAL (which increments a global and local "counter" by on each application call). Teal code can be found [here](../packages/runtime/test/fixtures/stateful/assets/counter-approval.teal)
 
 - Similar to the previous test, we need to setup accounts and initialize runtime. Now, for stateful smart contract, we also need to create a new application in user account and opt-in (to call the stateful smart contract later). User can use `runtime.addApp()` and `runtime.optInToApp()` for app setup.
   ```
@@ -115,11 +115,11 @@ Now, we will execute a transaction with stateful TEAL (which increments a global
   ```
   In this test, after executing the transaction (stateful smart contract call), we are verifying if the `global state` and `local state` is updated. User can use `runtime.getGlobalState()` and `runtime.getLocalState()` to check state.
 
-Complete test can be found [here](../packages/algorand-js/test/integration/stateful-counter.ts).
+Complete test can be found [here](../packages/runtime/test/integration/stateful-counter.ts).
 
 ## What we support now
 
-Currently, `algorand-js` supports:
+Currently, `runtime` supports:
 
 - Prepare account state for teal execution.
 - Stateless TEAL - Approve/Reject logic.
@@ -131,7 +131,7 @@ Currently, `algorand-js` supports:
   + `delete` application
 - Full transaction processing for type `payment` (transfer amount between accounts).
 
-Currently `algorand-js` does not support :-
+Currently `runtime` does not support :-
 
  - Full transaction processing for txn types other than 'pay' (`asset transfer`, `asset freeze` etc)
  - Transactions to
@@ -141,9 +141,9 @@ Currently `algorand-js` does not support :-
 
 ## Examples
 
-Teal files used for the below tests can be found in `/test/fixtures` in `algorand-js`.
+Teal files used for the below tests can be found in `/test/fixtures` in `runtime`.
 
-+ [Boilerplate Stateless Teal](../packages/algorand-js/test/integration/basic-teal.ts)
-+ [Escrow Account](../packages/algorand-js/test/integration/escrow-account.ts)
-+ [Boilerplate Stateful Teal](../packages/algorand-js/test/integration/stateful-counter.ts)
++ [Boilerplate Stateless Teal](../packages/runtime/test/integration/basic-teal.ts)
++ [Escrow Account](../packages/runtime/test/integration/escrow-account.ts)
++ [Boilerplate Stateful Teal](../packages/runtime/test/integration/stateful-counter.ts)
 + Complex Teal (Stateless + Stateful + Atomic transactions) - [Crowdfunding application](../examples/crowdfunding)

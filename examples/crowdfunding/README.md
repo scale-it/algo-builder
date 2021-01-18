@@ -54,6 +54,6 @@ To Delete application and tranfer remaining funds to crreator:
 
 ### Executing test
 
-Crowdfunding app provides TEAL tests which use the Alogrand Builder `algorand-js` Runtime. Tu execute tests:
+Crowdfunding app provides TEAL tests which use the Alogrand Builder `runtime`. To execute tests:
 
     yarn run test

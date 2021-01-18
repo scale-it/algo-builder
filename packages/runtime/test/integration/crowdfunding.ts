@@ -4,7 +4,7 @@ import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccount } from "../../src/index";
-import { stringToBytes } from "../../src/lib/parsing";
+import { StackElem } from "../../src/types";
 import { expectTealErrorAsync } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
@@ -62,7 +62,7 @@ describe("Crowdfunding basic tests", function () {
 
     const appId = await runtime.addApp({ ...validFlags, appArgs: appArgs }, {}, program);
     const getGlobal = (key: string):
-      bigint | Uint8Array |undefined => runtime.getGlobalState(appId, stringToBytes(key));
+    StackElem |undefined => runtime.getGlobalState(appId, key);
     const johnPk = addressToPk(john.address);
 
     // verify global state
