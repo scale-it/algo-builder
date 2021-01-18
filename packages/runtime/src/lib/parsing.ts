@@ -10,9 +10,13 @@ import { reBase32, reBase64, reDigit } from "./constants";
  * "123" // ok.  "12+2" // error.
  * @param val : string
  */
-export function assertOnlyDigits (val: string): void {
+export function assertOnlyDigits (val: string, line: number): void {
   if (!reDigit.test(val)) {
-    throw new TealError(ERRORS.TEAL.INVALID_TYPE, { expected: "unsigned integer", actual: val });
+    throw new TealError(ERRORS.TEAL.INVALID_TYPE, {
+      expected: "unsigned integer (upto 64 bit)",
+      actual: val,
+      line: line
+    });
   }
 }
 

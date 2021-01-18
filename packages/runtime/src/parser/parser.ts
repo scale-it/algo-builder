@@ -242,7 +242,7 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
   if (opCode.endsWith(':')) {
     assertLen(words.length, 0, counter);
     if (opCodeMap[opCode.slice(0, opCode.length - 1)] !== undefined) {
-      throw new TealError(ERRORS.TEAL.INVALID_LABEL);
+      throw new TealError(ERRORS.TEAL.INVALID_LABEL, { line: counter });
     }
     return new Label([opCode], counter);
   }
