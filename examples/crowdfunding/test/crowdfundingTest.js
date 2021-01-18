@@ -76,7 +76,7 @@ describe('Crowdfunding Tests', function () {
   const creationArgs = [
     uint64ToBigEndian(beginDate.getTime()),
     uint64ToBigEndian(endDate.getTime()),
-    uint64ToBigEndian(goal),
+    `int:${goal}`, // args similar to `goal --app-arg ..` are also supported
     addressToPk(creator.address),
     uint64ToBigEndian(fundCloseDate.getTime())
   ];

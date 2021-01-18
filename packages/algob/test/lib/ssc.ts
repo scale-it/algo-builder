@@ -12,7 +12,7 @@ describe("Convert integer to big endian", () => {
    * binary.BigEndian.PutUint64(buf, v)
    * fmt.Println(buf)
    */
-  it("should return correct big endian for given integers", () => {
+  it("should return correct big endian for 64 bit integer", () => {
     let res = uint64ToBigEndian(0);
     let expected = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0]);
     assert.deepEqual(res, expected);
@@ -32,11 +32,10 @@ describe("Convert integer to big endian", () => {
     res = uint64ToBigEndian(Number.MAX_SAFE_INTEGER);
     expected = new Uint8Array([0, 31, 255, 255, 255, 255, 255, 255]);
     assert.deepEqual(res, expected);
-  });
 
-  it("should return correct big endian for 64 bit integer", () => {
-    let res = uint64ToBigEndian(MIN_UINT64);
-    let expected = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0]);
+    // passing bigint in tests below
+    res = uint64ToBigEndian(MIN_UINT64);
+    expected = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0]);
     assert.deepEqual(res, expected);
 
     res = uint64ToBigEndian(233654n);
@@ -73,7 +72,7 @@ describe("Parse appArgs to SSC to bytes", () => {
 
   it("should return same bytes if all bytes are passed", () => {
     const res = parseSSCAppArgs(['a', 'b', 'c'].map(stringToBytes));
-    const expected = [97, 98, 99].map(z => new Uint8Array([z]));
+    const expected = [[97], [98], [99]].map(z => new Uint8Array(z));
     assert.deepEqual(res, expected);
   });
 
