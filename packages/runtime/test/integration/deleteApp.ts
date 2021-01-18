@@ -23,7 +23,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
     localInts: 8
   };
   this.beforeAll(async function () {
-    runtime = new Runtime([john]); // setup test
+    runtime = new Runtime([john, alice]); // setup test
     program = getProgram('deleteApp.teal');
 
     deleteParams = {
@@ -48,9 +48,11 @@ describe("Algorand Smart Contracts - Delete Application", function () {
     deleteParams.appId = appId;
     await runtime.executeTx(deleteParams, program, []);
 
-    // verify app is deleted - use app get function//
-    const res = runtime.ctx.state.globalApps.has(appId);
-    assert.equal(res, false);
+    // verify app is deleted
+    await expectTealErrorAsync(
+      async () => runtime.getApp(appId),
+      ERRORS.TEAL.APP_NOT_FOUND
+    );
   });
 
   it("should not delete application if logic is rejected", async function () {
@@ -63,8 +65,9 @@ describe("Algorand Smart Contracts - Delete Application", function () {
       async () => await runtime.executeTx(deleteParams, program, []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
+
     // verify app is not deleted - use app get function
-    const res = runtime.ctx.state.globalApps.has(appId);
-    assert.equal(res, true);
+    const res = runtime.getApp(appId);
+    assert.isDefined(res);
   });
 });

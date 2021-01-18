@@ -2,16 +2,13 @@
 /* eslint sonarjs/no-small-switch: 0 */
 import { mkTransaction } from "@algorand-builder/algob";
 import { AccountAddress, AlgoTransferParam, ExecParams, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
-import algosdk, { encodeAddress } from "algosdk";
+import algosdk from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
 import { TealError } from "./errors/errors";
 import { ERRORS } from "./errors/errors-list";
 import { Interpreter } from "./index";
-import { BIGINT0, BIGINT1 } from "./interpreter/opcode-list";
-import { checkIndexBound } from "./lib/compare";
 import { keyToBytes } from "./lib/parsing";
-import { assertValidSchema } from "./lib/stateful";
 import { mockSuggestedParams } from "./mock/tx";
 import type { Context, SSCAttributesM, StackElem, State, StoreAccountI, Txn } from "./types";
 
@@ -21,6 +18,7 @@ export class Runtime {
    * because of faster and easy querying.
    * This way when querying, instead of traversing the whole object,
    * we can get the value directly from Map
+   * Note: Runtime operates on `store`, it doesn't operate on `ctx`.
    */
   private store: State;
   ctx: Context;
@@ -62,25 +60,30 @@ export class Runtime {
     return a;
   }
 
-  assertAddressDefined (addr: string | undefined): string {
+  /**
+   * asserts if account address is defined
+   * @param addr account address
+   * @param line line number in TEAL file
+   * Note: if user is accessing this function directly through runtime,
+   * the line number is unknown
+   */
+  assertAddressDefined (addr: string | undefined, line?: number): string {
     if (addr === undefined) {
-      throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
+      throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST, { line: line });
     }
     return addr;
   }
 
   /**
    * asserts if application exists in state
+   * @param app application
    * @param appId application index
    * @param line line number in TEAL file
    * Note: if user is accessing this function directly through runtime,
    * the line number is unknown
    */
-  assertAppDefined (appId: number, line?: number): SSCAttributesM {
+  assertAppDefined (app: SSCAttributesM | undefined, appId: number, line?: number): SSCAttributesM {
     const lineNumber = line ?? 'unknown';
-    const accAddress = this.assertAddressDefined(this.ctx.state.globalApps.get(appId));
-    const account = this.ctx.state.accounts.get(accAddress);
-    const app = account?.createdApps.get(appId);
     if (app === undefined) {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: lineNumber });
     }
@@ -88,25 +91,25 @@ export class Runtime {
   }
 
   /**
-   * Fetch account using accountIndex from `Accounts` list
-   * Accounts: List of accounts in addition to the sender
-   * that may be accessed from the application's approval-program and clear-state-program.
-   * @param accountIndex index of account to fetch from account list
-   * @param line line number
-   * NOTE: index 0 represents txn sender account
-   * - if user is accessing this function directly through runtime, the line number is unknown
+   * Fetches app from `this.store`
+   * @param appId Application Index
    */
-  getAccount (accountIndex: bigint, line?: number): StoreAccountI {
-    let account: StoreAccountI | undefined;
-    if (accountIndex === BIGINT0) {
-      const senderAccount = encodeAddress(this.ctx.tx.snd);
-      account = this.ctx.state.accounts.get(senderAccount);
-    } else {
-      const accIndex = accountIndex - BIGINT1;
-      checkIndexBound(Number(accIndex), this.ctx.tx.apat, line);
-      const pkBuffer = this.ctx.tx.apat[Number(accIndex)];
-      account = this.ctx.state.accounts.get(encodeAddress(pkBuffer));
+  getApp (appId: number): SSCAttributesM {
+    if (!this.store.globalApps.has(appId)) {
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
+    const accAddress = this.assertAddressDefined(this.store.globalApps.get(appId));
+    const account = this.store.accounts.get(accAddress);
+    const app = account?.createdApps.get(appId);
+    return this.assertAppDefined(app, appId);
+  }
+
+  /**
+   * Fetches account from `this.store`
+   * @param address account address
+   */
+  getAccount (address: string): StoreAccountI {
+    const account = this.store.accounts.get(address);
     return this.assertAccountDefined(account);
   }
 
@@ -117,7 +120,7 @@ export class Runtime {
    * @param key: key to fetch value of from local state
    */
   getGlobalState (appId: number, key: Uint8Array | string): StackElem | undefined {
-    const app = this.assertAppDefined(appId);
+    const app = this.getApp(appId);
     const appGlobalState = app["global-state"];
     const globalKey = keyToBytes(key);
     return appGlobalState.get(globalKey.toString());
@@ -132,24 +135,6 @@ export class Runtime {
   getLocalState (appId: number, accountAddr: string, key: Uint8Array | string): StackElem | undefined {
     const account = this.assertAccountDefined(this.store.accounts.get(accountAddr));
     return account.getLocalState(appId, key);
-  }
-
-  /**
-   * Add new key-value pair or updating pair with existing key in
-   * app's global data for application id: appId, throw error otherwise
-   * @param appId: current application id
-   * @param key: key to fetch value of from local state
-   * @param value: key to fetch value of from local state
-   */
-  setGlobalState (appId: number, key: Uint8Array | string, value: StackElem): Map<string, StackElem> {
-    const app = this.assertAppDefined(appId);
-    const appGlobalState = app["global-state"];
-    const globalKey = keyToBytes(key);
-    appGlobalState.set(globalKey.toString(), value); // set new value in global state
-    app["global-state"] = appGlobalState; // save updated state
-
-    assertValidSchema(app["global-state"], app["global-state-schema"]); // verify if updated schema is valid by config
-    return appGlobalState;
   }
 
   /**
@@ -242,6 +227,7 @@ export class Runtime {
 
     // create app with id = 0 in globalApps for teal execution
     const app = senderAcc.addApp(0, flags);
+    this.ctx.state.accounts.set(senderAcc.address, senderAcc);
     this.ctx.state.globalApps.set(app.id, senderAcc.address);
 
     this.makeAndSetCtxAppCreateTxn(flags, payFlags);
@@ -250,11 +236,14 @@ export class Runtime {
     // create new application in globalApps map
     this.store.globalApps.set(++this.appCounter, senderAcc.address);
 
+    const attributes = this.assertAppDefined(senderAcc.createdApps.get(0), 0);
     this.ctx.state.globalApps.delete(0); // remove zero app from context after execution
     senderAcc.createdApps.delete(0); // remove zero app from sender's account
 
-    senderAcc.addApp(this.appCounter, flags);
+    senderAcc.createdApps.set(this.appCounter, attributes);
     this.store.accounts.set(sender.addr, senderAcc);
+    this.ctx.state.accounts.set(senderAcc.address, senderAcc);
+
     return this.appCounter;
   }
 
@@ -292,7 +281,7 @@ export class Runtime {
    */
   async optInToApp (accountAddr: string, appId: number,
     flags: SSCOptionalFlags, payFlags: TxParams, program: string): Promise<void> {
-    const appParams = this.assertAppDefined(appId);
+    const appParams = this.getApp(appId);
     const account = this.assertAccountDefined(this.store.accounts.get(accountAddr));
     if (appParams) {
       this.createOptInTx(accountAddr, appId, payFlags, flags);
@@ -343,7 +332,7 @@ export class Runtime {
     payFlags: TxParams,
     flags: SSCOptionalFlags
   ): Promise<void> {
-    const appParams = this.assertAppDefined(appId);
+    const appParams = this.getApp(appId);
     if (appParams) {
       this.createUpdateTx(senderAddr, appId, payFlags, flags);
       await this.run(newProgram); // execute TEAL code
@@ -385,7 +374,7 @@ export class Runtime {
    * @param txnParams : Transaction parameters
    * @param accounts : accounts passed by user
    */
-  prepareFinalState (txnParams: ExecParams | ExecParams[]): void {
+  updateFinalState (txnParams: ExecParams | ExecParams[]): void {
     let txnParameters;
     if (!Array.isArray(txnParams)) {
       txnParameters = [txnParams];
@@ -423,13 +412,15 @@ export class Runtime {
     };
 
     await this.run(program);
-    this.prepareFinalState(txnParams); // update account balances
+    this.updateFinalState(txnParams); // update account balances
   }
 
   // execute teal code line by line
   async run (program: string): Promise<void> {
     const interpreter = new Interpreter();
+    console.log("BEFORE", this.ctx.state.accounts);
     await interpreter.execute(program, this);
+    console.log("AFTER", this.ctx.state.accounts);
     this.store = this.ctx.state; // update state after successful execution('local-state', 'global-state'..)
   }
 }

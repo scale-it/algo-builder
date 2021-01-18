@@ -3,7 +3,6 @@ import { assert } from "chai";
 
 import { Runtime, StoreAccount } from "../../src/index";
 import { BIGINT1 } from "../../src/interpreter/opcode-list";
-import { getAcc } from "../helpers/account";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 
@@ -47,14 +46,14 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
     assert.isDefined(globalCounter); // there should be a value present with key "counter"
     assert.equal(globalCounter, BIGINT1);
 
-    const localCounter = getAcc(runtime, john).getLocalState(txnParams.appId, key); // get local value from john account
+    const localCounter = runtime.getAccount(john.address).getLocalState(txnParams.appId, key); // get local value from john account
     assert.isDefined(localCounter); // there should be a value present in local state with key "counter"
     assert.equal(localCounter, BIGINT1);
   });
 
   it("should update counter by +1 for both global and local states on second call", async function () {
     const globalCounter = runtime.getGlobalState(txnParams.appId, key) as bigint;
-    const localCounter = getAcc(runtime, john).getLocalState(txnParams.appId, key) as bigint;
+    const localCounter = runtime.getAccount(john.address).getLocalState(txnParams.appId, key) as bigint;
 
     // verfify that both counters are set to 1 (by the previous test)
     assert.equal(globalCounter, BIGINT1);
@@ -65,7 +64,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
 
     // after execution the counters should be updated by +1
     const newGlobalCounter = runtime.getGlobalState(txnParams.appId, key);
-    const newLocalCounter = getAcc(runtime, john).getLocalState(txnParams.appId, key);
+    const newLocalCounter = runtime.getAccount(john.address).getLocalState(txnParams.appId, key);
 
     assert.equal(newGlobalCounter, globalCounter + BIGINT1);
     assert.equal(newLocalCounter, localCounter + BIGINT1);

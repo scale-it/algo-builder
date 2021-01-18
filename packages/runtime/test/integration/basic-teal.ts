@@ -3,7 +3,6 @@ import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccount } from "../../src/index";
-import { getAcc } from "../helpers/account";
 import { expectTealErrorAsync } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
@@ -33,8 +32,8 @@ describe("Algorand Smart Contracts", function () {
 
   // update account state after each execution
   afterEach(function () {
-    john = getAcc(runtime, john);
-    bob = getAcc(runtime, bob);
+    john = runtime.getAccount(john.address);
+    bob = runtime.getAccount(bob.address);
   });
 
   it("should send algo's from john to bob if stateless teal logic is correct", async function () {
@@ -46,8 +45,8 @@ describe("Algorand Smart Contracts", function () {
     await runtime.executeTx(txnParams, getProgram('basic.teal'), []);
 
     // get final state (updated accounts)
-    const johnAcc = getAcc(runtime, john);
-    const bobAcc = getAcc(runtime, bob);
+    const johnAcc = runtime.getAccount(john.address);
+    const bobAcc = runtime.getAccount(bob.address);
     assert.equal(johnAcc.balance(), initialJohnHolding - 100); // check if 100 microAlgo's are withdrawn
     assert.equal(bobAcc.balance(), initialBobHolding + 100);
   });
@@ -67,8 +66,8 @@ describe("Algorand Smart Contracts", function () {
     );
 
     // get final state (updated accounts)
-    const johnAcc = getAcc(runtime, john);
-    const bobAcc = getAcc(runtime, bob);
+    const johnAcc = runtime.getAccount(john.address);
+    const bobAcc = runtime.getAccount(bob.address);
 
     // verify account balance in updated state remains unchanged
     assert.equal(johnAcc.balance(), johnBal);
