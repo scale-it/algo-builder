@@ -1,7 +1,10 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
 import { mkTransaction } from "@algorand-builder/algob";
-import { AccountAddress, AlgoTransferParam, ExecParams, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
+import {
+  AccountAddress, AlgoTransferParam, ExecParams,
+  SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams
+} from "@algorand-builder/algob/src/types";
 import algosdk from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
@@ -418,9 +421,7 @@ export class Runtime {
   // execute teal code line by line
   async run (program: string): Promise<void> {
     const interpreter = new Interpreter();
-    console.log("BEFORE", this.ctx.state.accounts);
     await interpreter.execute(program, this);
-    console.log("AFTER", this.ctx.state.accounts);
     this.store = this.ctx.state; // update state after successful execution('local-state', 'global-state'..)
   }
 }
