@@ -67,7 +67,7 @@ export class Runtime {
    * Fetch account using accountIndex from `Accounts` list
    * Accounts: List of accounts in addition to the sender
    * that may be accessed from the application's approval-program and clear-state-program.
-   * @param accountIndex account list
+   * @param accountIndex index of account to fetch from account list
    * @param line line number
    */
   getAccount (accountIndex: bigint, line?: number): StoreAccountI {
