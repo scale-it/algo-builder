@@ -100,11 +100,11 @@ export class Interpreter {
   }
 
   /**
-   * Add new key-value pair or updating pair with existing key in
-   * app's global data for application id: appId, throw error otherwise
-   * @param appId: current application id
-   * @param key: key to fetch value of from local state
-   * @param value: key to fetch value of from local state
+   * Upserts app global state.
+   * Throws error if app is not found.
+   * @param appId: application id
+   * @param key: app global state key
+   * @param value: value associated with a key
    */
   setGlobalState (appId: number, key: Uint8Array | string, value: StackElem, line: number): void {
     const app = this.runtime.assertAppDefined(this.getApp(appId, line), line);
