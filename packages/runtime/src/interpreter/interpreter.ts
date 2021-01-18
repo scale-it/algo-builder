@@ -52,7 +52,7 @@ export class Interpreter {
   }
 
   /**
-   * fetches app from `this.store`
+   * Queries app (SSCAttributesM) from state. Throws TEAL.APP_NOT_FOUND if app is not found.
    * @param appId Application Index
    */
   getApp (appId: number, line: number): SSCAttributesM | undefined {
