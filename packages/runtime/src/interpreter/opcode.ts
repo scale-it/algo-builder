@@ -97,7 +97,7 @@ export class Op {
 
   /**
    * asserts if given bigint is an 8 bit unsigned integer
-   * @param a bigint
+   * @param a  value to assert (in bigint)
    * @param line line number in TEAL file
    */
   assertUint8 (a: bigint, line: number): bigint {
