@@ -50,6 +50,8 @@ export class Runtime {
    * asserts if account is defined.
    * @param a account
    * @param line line number in TEAL file
+   * Note: if user is accessing this function directly through runtime,
+   * the line number is unknown
    */
   assertAccountDefined (a?: StoreAccountI, line?: number): StoreAccountI {
     const lineNumber = line ?? 'unknown';
@@ -63,6 +65,8 @@ export class Runtime {
    * asserts if application exists in state
    * @param appId application index
    * @param line line number in TEAL file
+   * Note: if user is accessing this function directly through runtime,
+   * the line number is unknown
    */
   assertAppDefined (appId: number, line?: number): SSCAttributesM {
     const lineNumber = line ?? 'unknown';
@@ -80,6 +84,7 @@ export class Runtime {
    * @param accountIndex index of account to fetch from account list
    * @param line line number
    * NOTE: index 0 represents txn sender account
+   * - if user is accessing this function directly through runtime, the line number is unknown
    */
   getAccount (accountIndex: bigint, line?: number): StoreAccountI {
     let account: StoreAccountI | undefined;
