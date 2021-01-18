@@ -66,9 +66,8 @@ export class Interpreter {
   }
 
   /**
-   * Fetch account using accountIndex from `Accounts` list
-   * Accounts: List of accounts in addition to the sender
-   * that may be accessed from the application's approval-program and clear-state-program.
+   * Queries account by accountIndex or `ctx.tx.snd` (if `accountIndex==0`).
+   * Throws exception if account is not found.
    * @param accountIndex index of account to fetch from account list
    * @param line line number
    * NOTE: index 0 represents txn sender account
