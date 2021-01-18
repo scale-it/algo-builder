@@ -6,7 +6,7 @@ import { EncodingType } from "../types";
 import { reBase32, reBase64, reDigit } from "./constants";
 
 /**
- * Description: assert if string contains digits only
+ * assert if string contains digits only
  * "123" // ok.  "12+2" // error.
  * @param val : string
  */
@@ -17,7 +17,7 @@ export function assertOnlyDigits (val: string): void {
 }
 
 /**
- * Description: assert words length
+ * assert that a line has given number of words
  * @param val Comparsion result
  * @param expected expected result
  * @param line Line number in TEAL file
@@ -29,7 +29,7 @@ export function assertLen (val: number, expected: number, line: number): void {
 }
 
 /**
- * Description: Checks if string is base64
+ * Checks if string is base64
  * @param str : string that needs to be checked
  * @param line : line number in TEAL file
  */
@@ -40,7 +40,7 @@ export function assertBase64 (str: string, line: number): void {
 }
 
 /**
- * Description: Checks if string is base32
+ * Checks if string is base32
  * @param str : string that needs to be checked
  * @param line : line number in TEAL file
  */
@@ -48,6 +48,14 @@ export function assertBase32 (str: string, line: number): void {
   if (!reBase32.test(str)) {
     throw new TealError(ERRORS.TEAL.INVALID_BASE32, { val: str, line: line });
   }
+}
+
+/**
+ * returns key as bytes
+ * @param key : key in a stateful key-value pair
+ */
+export function keyToBytes (key: Uint8Array | string): Uint8Array {
+  return typeof key === 'string' ? stringToBytes(key) : key;
 }
 
 // parse string to Uint8Array
@@ -86,32 +94,37 @@ export function convertToBuffer (s: string, encoding?: EncodingType): Buffer {
 }
 
 /**
- * Description: Returns base64 or base32 string
- * @param args words list
+ * Returns string and type of encoding (base64 or base32) on string
+ * @param arg string containg type of encoding + encoded string
+ * eg. b32(MFRGGZDFMY=) => returns [MFRGGZDFMY=, EncodingType.BASE32]
  * @param line line number
  */
-function base64OrBase32 (args: string[], line: number): [string, EncodingType] {
+function base64OrBase32 (arg: string, line: number): [string, EncodingType] {
   // Base64 string
-  if ((args[0].startsWith('base64(') || args[0].startsWith('b64(')) && args[0].endsWith(')')) {
-    const str = args[0].startsWith('b64(') ? args[0].slice(4, args[0].length - 1) : args[0].slice(7, args[0].length - 1);
+  if ((arg.startsWith('base64(') || arg.startsWith('b64(')) && arg.endsWith(')')) {
+    const str = arg.startsWith('b64(') ? arg.slice(4, arg.length - 1) : arg.slice(7, arg.length - 1);
     assertBase64(str, line);
 
     return [str, EncodingType.BASE64];
   }
 
   // Base32 string
-  if ((args[0].startsWith('base32(') || args[0].startsWith('b32(')) && args[0].endsWith(')')) {
-    const str = args[0].startsWith('b32(') ? args[0].slice(4, args[0].length - 1) : args[0].slice(7, args[0].length - 1);
+  if ((arg.startsWith('base32(') || arg.startsWith('b32(')) && arg.endsWith(')')) {
+    const str = arg.startsWith('b32(') ? arg.slice(4, arg.length - 1) : arg.slice(7, arg.length - 1);
     assertBase32(str, line);
 
     return [str, EncodingType.BASE32];
   }
-  throw new TealError(ERRORS.TEAL.DECODE_ERROR, { val: args[0], line: line });
+  throw new TealError(ERRORS.TEAL.DECODE_ERROR, { val: arg, line: line });
 }
 
 /**
- * Description: returns encodingtype and string from words list
+ * returns encodingtype (base32, base64, utf8, hex) and the encoded string from words list
+ * eg. base64 "dfc/==" => returns [dfc/==, EncodingType.BASE64]
+ *     0xadkjka => returns [adkjka, EncodingType.HEX] (removing 0x)
+ *     "hello" => returns [hello, EncodingType.UTF8] (removing quotes "")
  * @param args : words list for base64 and base32
+ * @param line line number
  */
 export function getEncoding (args: string[], line: number): [string, EncodingType] {
   if (args.length === 1) {
@@ -125,7 +138,7 @@ export function getEncoding (args: string[], line: number): [string, EncodingTyp
       return [args[0].slice(2), EncodingType.HEX];
     }
 
-    return base64OrBase32(args, line);
+    return base64OrBase32(args[0], line);
   } else if (args.length === 2) {
     // base64 string
     if (["base64", "b64"].includes(args[0])) {

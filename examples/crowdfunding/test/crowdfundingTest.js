@@ -52,7 +52,7 @@ describe('Crowdfunding Tests', function () {
     };
   });
 
-  const getGlobal = (key) => runtime.getGlobalState(applicationId, stringToBytes(key));
+  const getGlobal = (key) => runtime.getGlobalState(applicationId, key);
 
   // fetch latest account state
   function syncAccounts () {

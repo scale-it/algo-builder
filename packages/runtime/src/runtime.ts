@@ -10,6 +10,7 @@ import { ERRORS } from "./errors/errors-list";
 import { Interpreter } from "./index";
 import { BIGINT0, BIGINT1 } from "./interpreter/opcode-list";
 import { checkIndexBound } from "./lib/compare";
+import { keyToBytes } from "./lib/parsing";
 import { assertValidSchema } from "./lib/stateful";
 import { mockSuggestedParams } from "./mock/tx";
 import type { Context, SSCAttributesM, StackElem, State, StoreAccountI, Txn } from "./types";
@@ -81,12 +82,13 @@ export class Runtime {
    * @param appId: current application id
    * @param key: key to fetch value of from local state
    */
-  getGlobalState (appId: number, key: Uint8Array): StackElem | undefined {
+  getGlobalState (appId: number, key: Uint8Array | string): StackElem | undefined {
     // TODO: will be updated in https://www.pivotaltracker.com/story/show/176487715
     // we will operate on accounts rather than globalApp map
     const app = this.assertAppDefined(appId);
     const appGlobalState = app["global-state"];
-    return appGlobalState.get(key.toString());
+    const globalKey = keyToBytes(key);
+    return appGlobalState.get(globalKey.toString());
   }
 
   /**
@@ -95,7 +97,7 @@ export class Runtime {
    * @param accountAddr address for which local state needs to be retrieved
    * @param key: key to fetch value of from local state
    */
-  getLocalState (appId: number, accountAddr: string, key: Uint8Array): StackElem | undefined {
+  getLocalState (appId: number, accountAddr: string, key: Uint8Array | string): StackElem | undefined {
     const account = this.assertAccountDefined(this.store.accounts.get(accountAddr));
     return account.getLocalState(appId, key);
   }
@@ -107,12 +109,13 @@ export class Runtime {
    * @param key: key to fetch value of from local state
    * @param value: key to fetch value of from local state
    */
-  setGlobalState (appId: number, key: Uint8Array, value: StackElem): Map<string, StackElem> {
+  setGlobalState (appId: number, key: Uint8Array | string, value: StackElem): Map<string, StackElem> {
     // TODO: will be updated in https://www.pivotaltracker.com/story/show/176487715
     // we will operate on accounts rather than globalApp map
     const app = this.assertAppDefined(appId);
     const appGlobalState = app["global-state"];
-    appGlobalState.set(key.toString(), value); // set new value in global state
+    const globalKey = keyToBytes(key);
+    appGlobalState.set(globalKey.toString(), value); // set new value in global state
     app["global-state"] = appGlobalState; // save updated state
 
     assertValidSchema(app["global-state"], app["global-state-schema"]); // verify if updated schema is valid by config

@@ -9,6 +9,7 @@ import { generateAccount } from "algosdk";
 
 import { TealError } from "./errors/errors";
 import { ERRORS } from "./errors/errors-list";
+import { keyToBytes } from "./lib/parsing";
 import { assertValidSchema } from "./lib/stateful";
 import { AppLocalStateM, CreatedAppM, SSCAttributesM, StackElem, StoreAccountI } from "./types";
 
@@ -48,29 +49,31 @@ export class StoreAccount implements StoreAccountI {
   }
 
   /**
-   * Description: fetches local state value for key present in account
+   * Fetches local state value for key present in account
    * returns undefined otherwise
    * @param appId: current application id
    * @param key: key to fetch value of from local state
    */
-  getLocalState (appId: number, key: Uint8Array): StackElem | undefined {
+  getLocalState (appId: number, key: Uint8Array | string): StackElem | undefined {
     const localState = this.appsLocalState;
     const data = localState.get(appId)?.[StateMap]; // can be undefined (eg. app opted in)
-    return data?.get(key.toString());
+    const localKey = keyToBytes(key);
+    return data?.get(localKey.toString());
   }
 
   /**
-   * Description: add new key-value pair or updating pair with existing key in account
+   * Set new key-value pair or update pair with existing key in account
    * for application id: appId, throw error otherwise
    * @param appId: current application id
    * @param key: key to fetch value of from local state
-   * @param value: key to fetch value of from local state
+   * @param value: value of key to put in local state
    */
-  setLocalState (appId: number, key: Uint8Array, value: StackElem): AppLocalStateM {
+  setLocalState (appId: number, key: Uint8Array | string, value: StackElem): AppLocalStateM {
     const localState = this.appsLocalState.get(appId);
     const localApp = localState?.[StateMap];
     if (localState && localApp) {
-      localApp.set(key.toString(), value);
+      const localKey = keyToBytes(key);
+      localApp.set(localKey.toString(), value);
       localState[StateMap] = localApp; // save updated state
 
       assertValidSchema(localState[StateMap], localState.schema); // verify if updated schema is valid by config
