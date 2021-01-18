@@ -53,7 +53,7 @@ export class Op {
   }
 
   /**
-   * asserts if array length is less than equal to MAX_UINT8 and not equal to 0
+   * asserts if array length is less than equal to MAX_UINT8 (255) and not equal to 0
    * @param arr array
    * @param line line number in TEAL file
    */
