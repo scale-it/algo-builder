@@ -1,6 +1,6 @@
 import { Interpreter } from "../src/interpreter/interpreter";
-import { StoreAccount } from "./runtime/account";
-import { Runtime } from "./runtime/runtime";
+import { StoreAccount } from "./account";
+import { Runtime } from "./runtime";
 
 export {
   Interpreter,
