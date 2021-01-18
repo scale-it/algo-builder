@@ -111,7 +111,7 @@ export class Op {
    * Returns substring from given string (if it exists)
    * @param start starting index
    * @param end ending index
-   * @param byteString given string
+   * @param byteString given string as bytes
    * @param line line number in TEAL file
    */
   subString (start: bigint, end: bigint, byteString: Uint8Array, line: number): Uint8Array {
