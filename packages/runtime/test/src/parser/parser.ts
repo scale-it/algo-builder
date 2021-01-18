@@ -634,12 +634,12 @@ describe("Parser", function () {
     it("Sould return correct opcode list for '+'", async () => {
       const file1 = "test-file-1.teal";
       let res = await parser(getProgram(file1), interpreter);
-      const expected = [new Int(["1"], 1), new Int(["3"], 1), new Add([], 1)];
+      const expected = [new Int(["1"], 1), new Int(["3"], 2), new Add([], 3)];
 
       assert.deepEqual(res, expected);
 
-      const expect = [new Pragma(["version", "2"], 1), new Int(["1"], 1),
-        new Int(["3"], 1), new Add([], 1)];
+      const expect = [new Pragma(["version", "2"], 1), new Int(["1"], 2),
+        new Int(["3"], 3), new Add([], 4)];
       res = await parser(getProgram("test-file-2.teal"), interpreter);
 
       assert.deepEqual(res, expect);
@@ -649,9 +649,10 @@ describe("Parser", function () {
       const file = "test-file-3.teal";
       const res = await parser(getProgram(file), interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1), new Int(["5"], 1),
-        new Int(["3"], 1),
-        new Sub([], 1)
+        new Pragma(["version", "2"], 1),
+        new Int(["5"], 2),
+        new Int(["3"], 3),
+        new Sub([], 4)
       ];
 
       assert.deepEqual(res, expected);
@@ -662,9 +663,9 @@ describe("Parser", function () {
       const res = await parser(getProgram(file), interpreter);
       const expected = [
         new Pragma(["version", "2"], 1),
-        new Int(["6"], 1),
-        new Int(["3"], 1),
-        new Div([], 1)
+        new Int(["6"], 2),
+        new Int(["3"], 3),
+        new Div([], 6)
       ];
 
       assert.deepEqual(res, expected);
@@ -675,9 +676,9 @@ describe("Parser", function () {
       const res = await parser(getProgram(file), interpreter);
       const expected = [
         new Pragma(["version", "2"], 1),
-        new Int(["5"], 1),
-        new Int(["3"], 1),
-        new Mul([], 1)
+        new Int(["5"], 4),
+        new Int(["3"], 6),
+        new Mul([], 10)
       ];
 
       assert.deepEqual(res, expected);
@@ -734,7 +735,7 @@ describe("Parser", function () {
     it("Should return correct opcode list for 'Mod'", async () => {
       const file = "test-mod.teal";
       const res = await parser(getProgram(file), interpreter);
-      const expected = [new Int(["6"], 1), new Int(["3"], 2), new Mod([], 1)];
+      const expected = [new Int(["6"], 1), new Int(["3"], 2), new Mod([], 3)];
 
       assert.deepEqual(res, expected);
     });
@@ -779,7 +780,7 @@ describe("Parser", function () {
         new Sha256([], 1),
         new Keccak256([], 2),
         new Sha512_256([], 3),
-        new Ed25519verify([], 1)
+        new Ed25519verify([], 4)
       ];
 
       assert.deepEqual(res, expected);

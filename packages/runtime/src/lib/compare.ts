@@ -19,9 +19,17 @@ export function compareArray (a: unknown, b: unknown): boolean {
   return false;
 }
 
-// check if index is accessible in an array
-export function checkIndexBound (idx: number, arr: any[]): void {
+/**
+ * check if index is accessible in an array
+ * @param idx Index
+ * @param arr given array
+ * @param line line number in TEAL file
+ * Note: if user is accessing this function directly through runtime,
+ * the line number is unknown
+ */
+export function checkIndexBound (idx: number, arr: any[], line?: number): void {
+  const lineNumber = line ?? 'unknown';
   if (!(idx >= 0 && idx < arr.length)) {
-    throw new TealError(ERRORS.TEAL.INDEX_OUT_OF_BOUND);
+    throw new TealError(ERRORS.TEAL.INDEX_OUT_OF_BOUND, { line: lineNumber });
   }
 }

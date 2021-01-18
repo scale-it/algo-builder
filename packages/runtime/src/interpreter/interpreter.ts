@@ -29,10 +29,24 @@ export class Interpreter {
   }
 
   /**
+   * Fetches Asset Definition for given asset index from current context (ctx)
+   * @param assetId Asset Index
+   */
+  getAssetDef (assetId: number): AssetDef | undefined {
+    let accountAddr = this.runtime.ctx.state.assetDefs.get(assetId);
+    accountAddr = this.runtime.assertAddressDefined(accountAddr);
+
+    let account = this.runtime.ctx.state.accounts.get(accountAddr);
+    account = this.runtime.assertAccountDefined(account);
+
+    return account.createdAssets.get(assetId);
+  }
+
+  /**
    * Description: moves instruction index to "label", throws error if label not found
    * @param label: branch label
    */
-  jumpForward (label: string): void {
+  jumpForward (label: string, line: number): void {
     while (++this.instructionIndex < this.instructions.length) {
       const instruction = this.instructions[this.instructionIndex];
       if (instruction instanceof Label && instruction.label === label) {
@@ -40,7 +54,8 @@ export class Interpreter {
       }
     }
     throw new TealError(ERRORS.TEAL.LABEL_NOT_FOUND, {
-      label: label
+      label: label,
+      line: line
     });
   }
 
