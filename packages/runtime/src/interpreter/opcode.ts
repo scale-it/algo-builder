@@ -7,7 +7,7 @@ import { BIGINT0, BIGINT1 } from "./opcode-list";
 
 export class Op {
   /**
-   * assert stack length is less than minLen
+   * assert stack length is atleast minLen
    * @param stack TEAL stack
    * @param minLen length to check from
    * @param line line number in TEAL file
