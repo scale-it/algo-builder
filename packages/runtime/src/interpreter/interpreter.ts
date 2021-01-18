@@ -30,7 +30,7 @@ export class Interpreter {
    * Description: moves instruction index to "label", throws error if label not found
    * @param label: branch label
    */
-  jumpForward (label: string): void {
+  jumpForward (label: string, line: number): void {
     while (++this.instructionIndex < this.instructions.length) {
       const instruction = this.instructions[this.instructionIndex];
       if (instruction instanceof Label && instruction.label === label) {
@@ -38,7 +38,8 @@ export class Interpreter {
       }
     }
     throw new TealError(ERRORS.TEAL.LABEL_NOT_FOUND, {
-      label: label
+      label: label,
+      line: line
     });
   }
 
