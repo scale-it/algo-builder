@@ -5,14 +5,14 @@ import { AlgoTransferParam, ExecParams, SSCDeploymentFlags, SSCOptionalFlags, Tr
 import algosdk, { AssetDef, encodeAddress } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
-import { TealError } from "../errors/errors";
-import { ERRORS } from "../errors/errors-list";
-import { Interpreter } from "../index";
-import { BIGINT0, BIGINT1 } from "../interpreter/opcode-list";
-import { checkIndexBound } from "../lib/compare";
-import { assertValidSchema } from "../lib/stateful";
-import { mockSuggestedParams } from "../mock/tx";
-import type { Context, SSCAttributesM, StackElem, State, StoreAccountI, Txn } from "../types";
+import { TealError } from "./errors/errors";
+import { ERRORS } from "./errors/errors-list";
+import { Interpreter } from "./index";
+import { BIGINT0, BIGINT1 } from "./interpreter/opcode-list";
+import { checkIndexBound } from "./lib/compare";
+import { assertValidSchema } from "./lib/stateful";
+import { mockSuggestedParams } from "./mock/tx";
+import type { Context, SSCAttributesM, StackElem, State, StoreAccountI, Txn } from "./types";
 
 export class Runtime {
   /**

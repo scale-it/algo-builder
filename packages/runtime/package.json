@@ -1,5 +1,5 @@
 {
-  "name": "@algorand-builder/algorand-js",
+  "name": "@algorand-builder/runtime",
   "version": "0.0.1",
   "contributors": [
     {
@@ -17,7 +17,7 @@
   ],
   "license": "Apache-2.0",
   "repository": "https://github.com/scale-it/algorand-builder.git",
-  "description": "Algorand JS runtime (transaction execution + TEAL interpreter)",
+  "description": "Algorand runtime (transaction execution + TEAL interpreter)",
   "keywords": [
     "smart-contracts",
     "blockchain",

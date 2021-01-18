@@ -15,7 +15,7 @@ import {
 } from "../../../src/interpreter/opcode-list";
 import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
-import { Runtime } from "../../../src/runtime/runtime";
+import { Runtime } from "../../../src/runtime";
 import { expectTealError } from "../../helpers/errors";
 import { getProgram } from "../../helpers/files";
 import { useFixture } from "../../helpers/integration";

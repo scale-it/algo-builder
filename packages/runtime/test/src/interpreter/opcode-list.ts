@@ -3,6 +3,7 @@
 import { decodeAddress, generateAccount, signBytes } from "algosdk";
 import { assert } from "chai";
 
+import { StoreAccount } from "../../../src/account";
 import { ERRORS } from "../../../src/errors/errors-list";
 import { Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
@@ -22,7 +23,6 @@ import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MIN_UINT8 } from "../../../s
 import { convertToBuffer, stringToBytes } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
-import { StoreAccount } from "../../../src/runtime/account";
 import { EncodingType, SSCAttributesM, StackElem, StoreAccountI } from "../../../src/types";
 import { execExpectError, expectTealError } from "../../helpers/errors";
 import { accInfo } from "../../mocks/stateful";
