@@ -17,7 +17,7 @@ const globalState = "global-state";
 export class Interpreter {
   /**
    * Note: Interpreter operates on only ctx, current context of runtime
-   * All the functions fetches and sets the values only in current context, not in `runtime.store`.
+   * All the functions query or update only a state copy from the interpreter, not the `runtime.store`.
    */
   readonly stack: TEALStack;
   bytecblock: Uint8Array[];
