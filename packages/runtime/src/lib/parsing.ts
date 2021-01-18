@@ -17,7 +17,7 @@ export function assertOnlyDigits (val: string): void {
 }
 
 /**
- * assert words length
+ * assert that a line has given number of words
  * @param val Comparsion result
  * @param expected expected result
  * @param line Line number in TEAL file
