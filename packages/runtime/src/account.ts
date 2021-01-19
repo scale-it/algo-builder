@@ -86,8 +86,7 @@ export class StoreAccount implements StoreAccountI {
   }
 
   /**
-   * Fetches global state value for key present in account
-   * returns undefined otherwise
+   * Queries app global state value. Returns `undefined` if the key is not present.
    * @param appId: current application id
    * @param key: key to fetch value of from local state
    */
