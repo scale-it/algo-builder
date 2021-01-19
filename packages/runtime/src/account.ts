@@ -14,6 +14,8 @@ import { assertValidSchema } from "./lib/stateful";
 import { AppLocalStateM, CreatedAppM, SSCAttributesM, StackElem, StoreAccountI } from "./types";
 
 const StateMap = "key-value";
+const globalState = "global-state";
+
 export class StoreAccount implements StoreAccountI {
   readonly account: Account;
   readonly address: string;
@@ -85,7 +87,51 @@ export class StoreAccount implements StoreAccountI {
     });
   }
 
-  // add application in account's state
+  /**
+   * Queries app global state value. Returns `undefined` if the key is not present.
+   * @param appId: current application id
+   * @param key: key to fetch value of from local state
+   */
+  getGlobalState (appId: number, key: Uint8Array | string): StackElem | undefined {
+    const app = this.getApp(appId);
+    if (!app) return undefined;
+    const appGlobalState = app[globalState];
+    const globalKey = keyToBytes(key);
+    return appGlobalState.get(globalKey.toString());
+  }
+
+  /**
+   * Updates app global state.
+   * Throws error if app is not found.
+   * @param appId: application id
+   * @param key: app global state key
+   * @param value: value associated with a key
+   */
+  setGlobalState (appId: number, key: Uint8Array | string, value: StackElem, line?: number): void {
+    const app = this.getApp(appId);
+    if (app === undefined) throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: line });
+    const appGlobalState = app[globalState];
+    const globalKey = keyToBytes(key);
+    appGlobalState.set(globalKey.toString(), value); // set new value in global state
+    app[globalState] = appGlobalState; // save updated state
+
+    assertValidSchema(app[globalState], app["global-state-schema"]); // verify if updated schema is valid by config
+  }
+
+  /**
+   * Queries application by application index. Returns undefined if app is not found.
+   * @param appId application index
+   */
+  getApp (appId: number): SSCAttributesM | undefined {
+    return this.createdApps.get(appId);
+  }
+
+  /**
+   * Add application in account's state
+   * check maximum account creation limit
+   * @param appId application index
+   * @param params SSCDeployment Flags
+   */
   addApp (appId: number, params: SSCDeploymentFlags): CreatedAppM {
     if (this.createdApps.size === 10) {
       throw new Error('Maximum created applications for an account is 10');

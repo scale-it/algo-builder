@@ -460,7 +460,7 @@ export interface FundASCFlags {
 /**
  * Stateful smart contract transaction optional parameters (accounts, args..). */
 export interface SSCOptionalFlags {
-  appArgs?: Uint8Array[]
+  appArgs?: Array<Uint8Array | string>
   accounts?: string[]
   foreignApps?: number[]
   foreignAssets?: number[]

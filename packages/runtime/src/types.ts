@@ -1,4 +1,4 @@
-import { SSCDeploymentFlags } from "@algorand-builder/algob/src/types";
+import { AccountAddress, SSCDeploymentFlags } from "@algorand-builder/algob/src/types";
 import {
   Account,
   AssetDef,
@@ -63,8 +63,8 @@ export interface AccountsMap {
 
 export interface State {
   accounts: Map<string, StoreAccountI>
-  globalApps: Map<number, SSCAttributesM>
-  assetDefs: Map<number, AssetDef>
+  globalApps: Map<number, AccountAddress>
+  assetDefs: Map<number, AccountAddress>
 }
 
 // describes interpreter's local context (state + txns)
@@ -111,11 +111,14 @@ export interface StoreAccountI {
   account: Account
 
   balance: () => number
+  getApp: (appId: number) => SSCAttributesM | undefined
   addApp: (appId: number, params: SSCDeploymentFlags) => CreatedAppM
   optInToApp: (appId: number, appParams: SSCAttributesM) => void
   deleteApp: (appId: number) => void
   getLocalState: (appId: number, key: Uint8Array | string) => StackElem | undefined
   setLocalState: (appId: number, key: Uint8Array | string, value: StackElem) => AppLocalStateM
+  getGlobalState: (appId: number, key: Uint8Array | string) => StackElem | undefined
+  setGlobalState: (appId: number, key: Uint8Array | string, value: StackElem, line?: number) => void
 }
 
 // https://developer.algorand.org/docs/reference/teal/specification/#oncomplete

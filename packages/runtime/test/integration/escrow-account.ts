@@ -4,7 +4,6 @@ import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccount } from "../../src/index";
-import { getAcc } from "../helpers/account";
 import { expectTealErrorAsync } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
@@ -41,8 +40,8 @@ describe("Algorand Stateless Smart Contracts", function () {
     await runtime.executeTx(txnParams, getProgram('escrow.teal'), []);
 
     // check final state (updated accounts)
-    assert.equal(getAcc(runtime, escrow).balance(), initialEscrowHolding - 100); // check if 100 microAlgo's are withdrawn
-    assert.equal(getAcc(runtime, john).balance(), initialJohnHolding + 100);
+    assert.equal(runtime.getAccount(escrow.address).balance(), initialEscrowHolding - 100); // check if 100 microAlgo's are withdrawn
+    assert.equal(runtime.getAccount(john.address).balance(), initialJohnHolding + 100);
   });
 
   it("should reject transaction if amount > 100", async function () {

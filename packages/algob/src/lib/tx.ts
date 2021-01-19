@@ -14,6 +14,7 @@ import {
 } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
 import { loadSignedTxnFromFile } from "./files";
+import { parseSSCAppArgs } from "./ssc";
 
 export async function getSuggestedParams (algocl: Algodv2): Promise<SuggestedParams> {
   const params = await algocl.getTransactionParams().do();
@@ -140,7 +141,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.fromAccount.addr,
         suggestedParams,
         execParams.appId,
-        execParams.appArgs,
+        parseSSCAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
         execParams.foreignAssets,
@@ -154,7 +155,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.fromAccount.addr,
         suggestedParams,
         execParams.appId,
-        execParams.appArgs,
+        parseSSCAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
         execParams.foreignAssets,
@@ -168,7 +169,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.fromAccount.addr,
         suggestedParams,
         execParams.appId,
-        execParams.appArgs,
+        parseSSCAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
         execParams.foreignAssets,
@@ -181,7 +182,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.fromAccount.addr,
         suggestedParams,
         execParams.appId,
-        execParams.appArgs,
+        parseSSCAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
         execParams.foreignAssets,

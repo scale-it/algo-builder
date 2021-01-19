@@ -1,15 +1,13 @@
 import {
   addressToPk,
   getProgram,
-  intToBigEndian,
   SignType,
   stringToBytes,
-  TransactionType
+  TransactionType,
+  uint64ToBigEndian
 } from '@algorand-builder/algob';
 import { Runtime, StoreAccount } from '@algorand-builder/runtime';
 import { assert } from 'chai';
-
-import { getAcc } from './common';
 
 const initialDonorBalance = 60000000;
 const initialCreatorBalance = 10000;
@@ -56,9 +54,9 @@ describe('Crowdfunding Tests', function () {
 
   // fetch latest account state
   function syncAccounts () {
-    creator = getAcc(runtime, creator);
-    escrow = getAcc(runtime, escrow);
-    donor = getAcc(runtime, donor);
+    creator = runtime.getAccount(creator.address);
+    escrow = runtime.getAccount(escrow.address);
+    donor = runtime.getAccount(donor.address);
   }
 
   // Get begin date to pass in
@@ -74,11 +72,11 @@ describe('Crowdfunding Tests', function () {
   fundCloseDate.setSeconds(fundCloseDate.getSeconds() + 120000);
 
   const creationArgs = [
-    intToBigEndian(beginDate.getTime()),
-    intToBigEndian(endDate.getTime()),
-    intToBigEndian(goal),
+    uint64ToBigEndian(beginDate.getTime()),
+    uint64ToBigEndian(endDate.getTime()),
+    `int:${goal}`, // args similar to `goal --app-arg ..` are also supported
     addressToPk(creator.address),
-    intToBigEndian(fundCloseDate.getTime())
+    uint64ToBigEndian(fundCloseDate.getTime())
   ];
 
   it('crowdfunding application', async () => {

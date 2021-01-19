@@ -23,6 +23,7 @@ import type {
   TxParams
 } from "../types";
 import { CompileOp } from "./compile";
+import { parseSSCAppArgs } from "./ssc";
 import * as tx from "./tx";
 const confirmedRound = "confirmed-round";
 
@@ -277,7 +278,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       flags.localBytes,
       flags.globalInts,
       flags.globalBytes,
-      flags.appArgs,
+      parseSSCAppArgs(flags.appArgs),
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
@@ -321,7 +322,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       sender.addr,
       params,
       appId,
-      flags.appArgs,
+      parseSSCAppArgs(flags.appArgs),
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
