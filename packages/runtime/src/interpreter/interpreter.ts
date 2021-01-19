@@ -7,19 +7,16 @@ import { checkIndexBound } from "../lib/compare";
 import { DEFAULT_STACK_ELEM } from "../lib/constants";
 import { keyToBytes } from "../lib/parsing";
 import { Stack } from "../lib/stack";
-import { assertValidSchema } from "../lib/stateful";
 import { parser } from "../parser/parser";
 import type { Operator, SSCAttributesM, StackElem, StoreAccountI, TEALStack } from "../types";
 import { BIGINT0, BIGINT1, Label } from "./opcode-list";
-
-const globalState = "global-state";
 
 export class Interpreter {
   /**
    * Note: Interpreter operates on `ctx`, it doesn't operate on `store`.
    * All the functions query or update only a state copy from the interpreter, not the `runtime.store`.
    */
-   
+
   readonly stack: TEALStack;
   bytecblock: Uint8Array[];
   intcblock: BigInt[];
@@ -56,14 +53,15 @@ export class Interpreter {
    * Queries app (SSCAttributesM) from state. Throws TEAL.APP_NOT_FOUND if app is not found.
    * @param appId Application Index
    */
-  getApp (appId: number, line: number): SSCAttributesM | undefined {
+  getApp (appId: number, line: number): SSCAttributesM {
     if (!this.runtime.ctx.state.globalApps.has(appId)) {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: line });
     }
     const accAddress = this.runtime.assertAddressDefined(
       this.runtime.ctx.state.globalApps.get(appId));
-    const account = this.runtime.ctx.state.accounts.get(accAddress);
-    return account?.createdApps.get(appId);
+    let account = this.runtime.ctx.state.accounts.get(accAddress);
+    account = this.runtime.assertAccountDefined(account);
+    return this.runtime.assertAppDefined(appId, account.getApp(appId), line);
   }
 
   /**
@@ -94,7 +92,7 @@ export class Interpreter {
    */
   getGlobalState (appId: number, key: Uint8Array | string, line: number): StackElem | undefined {
     const app = this.runtime.assertAppDefined(appId, this.getApp(appId, line), line);
-    const appGlobalState = app[globalState];
+    const appGlobalState = app["global-state"];
     const globalKey = keyToBytes(key);
     return appGlobalState.get(globalKey.toString());
   }
@@ -107,13 +105,15 @@ export class Interpreter {
    * @param value: value associated with a key
    */
   setGlobalState (appId: number, key: Uint8Array | string, value: StackElem, line: number): void {
-    const app = this.runtime.assertAppDefined(appId, this.getApp(appId, line), line);
-    const appGlobalState = app[globalState];
-    const globalKey = keyToBytes(key);
-    appGlobalState.set(globalKey.toString(), value); // set new value in global state
-    app["global-state"] = appGlobalState; // save updated state
+    if (!this.runtime.ctx.state.globalApps.has(appId)) {
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: line });
+    }
+    const accAddress = this.runtime.assertAddressDefined(
+      this.runtime.ctx.state.globalApps.get(appId));
+    let account = this.runtime.ctx.state.accounts.get(accAddress);
+    account = this.runtime.assertAccountDefined(account);
 
-    assertValidSchema(app[globalState], app["global-state-schema"]); // verify if updated schema is valid by config
+    account.setGlobalState(appId, key, value, line);
   }
 
   /**

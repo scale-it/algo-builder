@@ -14,6 +14,8 @@ import { assertValidSchema } from "./lib/stateful";
 import { AppLocalStateM, CreatedAppM, SSCAttributesM, StackElem, StoreAccountI } from "./types";
 
 const StateMap = "key-value";
+const globalState = "global-state";
+
 export class StoreAccount implements StoreAccountI {
   readonly account: Account;
   readonly address: string;
@@ -93,9 +95,27 @@ export class StoreAccount implements StoreAccountI {
   getGlobalState (appId: number, key: Uint8Array | string): StackElem | undefined {
     const app = this.getApp(appId);
     if (!app) return undefined;
-    const appGlobalState = app["global-state"];
+    const appGlobalState = app[globalState];
     const globalKey = keyToBytes(key);
     return appGlobalState.get(globalKey.toString());
+  }
+
+  /**
+   * Updates app global state.
+   * Throws error if app is not found.
+   * @param appId: application id
+   * @param key: app global state key
+   * @param value: value associated with a key
+   */
+  setGlobalState (appId: number, key: Uint8Array | string, value: StackElem, line?: number): void {
+    const app = this.getApp(appId);
+    if (app === undefined) throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: line });
+    const appGlobalState = app[globalState];
+    const globalKey = keyToBytes(key);
+    appGlobalState.set(globalKey.toString(), value); // set new value in global state
+    app[globalState] = appGlobalState; // save updated state
+
+    assertValidSchema(app[globalState], app["global-state-schema"]); // verify if updated schema is valid by config
   }
 
   /**

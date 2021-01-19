@@ -118,6 +118,7 @@ export interface StoreAccountI {
   getLocalState: (appId: number, key: Uint8Array | string) => StackElem | undefined
   setLocalState: (appId: number, key: Uint8Array | string, value: StackElem) => AppLocalStateM
   getGlobalState: (appId: number, key: Uint8Array | string) => StackElem | undefined
+  setGlobalState: (appId: number, key: Uint8Array | string, value: StackElem, line?: number) => void
 }
 
 // https://developer.algorand.org/docs/reference/teal/specification/#oncomplete
