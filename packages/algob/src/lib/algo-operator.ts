@@ -278,7 +278,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       flags.localBytes,
       flags.globalInts,
       flags.globalBytes,
-      parseSSCAppArgs(flags.appArgs),
+      parseSSCAppArgs(flags.appArgs), // parseSSCAppArgs returns undefined if flags.appArgs is undefined
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
@@ -311,6 +311,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
    * @param sender: Account for which opt-in is required
    * @param appId: Application Index: (ID of the application)
    * @param payFlags: Transaction Params
+   * @param flags Optional parameters to SSC (accounts, args..)
    */
   async optInToSSC (
     sender: Account,
@@ -322,7 +323,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       sender.addr,
       params,
       appId,
-      parseSSCAppArgs(flags.appArgs),
+      parseSSCAppArgs(flags.appArgs), // parseSSCAppArgs returns undefined if flags.appArgs is undefined
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
