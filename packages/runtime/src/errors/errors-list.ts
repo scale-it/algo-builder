@@ -207,7 +207,7 @@ by an index that does not exist.`
   },
   UNKOWN_OPCODE: {
     number: 31,
-    message: "Error encountered while parsing teal file unkown opcode %opcode% , Line : %line% ",
+    message: "Error encountered while parsing teal file: unkown opcode \"%opcode%\" for teal version #%version%, Line : %line% ",
     title: PARSE_ERROR,
     description: `Unkown Opcode encountered`
   },

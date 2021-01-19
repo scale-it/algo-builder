@@ -262,7 +262,11 @@ describe("Parser", function () {
   });
 
   describe("Opcode Objects from words", () => {
-    const interpreter = new Interpreter();
+    let interpreter: Interpreter;
+    beforeEach(function () {
+      interpreter = new Interpreter();
+      interpreter.tealVersion = 2;
+    });
 
     it("should return correct opcode object for '+'", () => {
       const res = opcodeFromSentence(["+"], 1, interpreter);
@@ -634,6 +638,7 @@ describe("Parser", function () {
     let interpreter: Interpreter;
     beforeEach(function () {
       interpreter = new Interpreter();
+      interpreter.tealVersion = 2;
     });
 
     it("Sould return correct opcode list for '+'", async () => {
@@ -780,10 +785,10 @@ describe("Parser", function () {
     it("Should return correct opcode list for 'Crypto opcodes'", async () => {
       const res = await parser(getProgram(cryptoFile), interpreter);
       const expected = [
-        new Sha256([], 1, interpreter),
-        new Keccak256([], 2, interpreter),
-        new Sha512_256([], 3, interpreter),
-        new Ed25519verify([], 4, interpreter)
+        new Sha256([], 1),
+        new Keccak256([], 2),
+        new Sha512_256([], 3),
+        new Ed25519verify([], 4)
       ];
       assert.deepEqual(res, expected);
     });
@@ -912,20 +917,20 @@ describe("Parser", function () {
     it("Should return correct gas cost for 'Crypto opcodes' for tealversion 1", async () => {
       interpreter.tealVersion = 1; // by default the version is also 1
 
-      let op = new Sha256([], 1, interpreter);
+      let op = new Sha256([], 1);
       assert.equal(interpreter.gas, 7);
 
       interpreter.gas = 0;
-      op = new Keccak256([], 2, interpreter);
+      op = new Keccak256([], 2);
       assert.equal(interpreter.gas, 26);
 
       interpreter.gas = 0;
-      op = new Sha512_256([], 3, interpreter);
+      op = new Sha512_256([], 3);
       assert.equal(interpreter.gas, 9);
 
       interpreter.gas = 0;
       // eslint-disable-next-line
-      op = new Ed25519verify([], 4, interpreter);
+      op = new Ed25519verify([], 4);
       assert.equal(interpreter.gas, 1900);
 
       interpreter.gas = 0;
@@ -936,20 +941,20 @@ describe("Parser", function () {
     it("Should return correct gas cost for 'Crypto opcodes' for tealversion 2", async () => {
       interpreter.tealVersion = 2;
 
-      let op = new Sha256([], 1, interpreter);
+      let op = new Sha256([], 1);
       assert.equal(interpreter.gas, 35);
 
       interpreter.gas = 0;
-      op = new Keccak256([], 2, interpreter);
+      op = new Keccak256([], 2);
       assert.equal(interpreter.gas, 130);
 
       interpreter.gas = 0;
-      op = new Sha512_256([], 3, interpreter);
+      op = new Sha512_256([], 3);
       assert.equal(interpreter.gas, 45);
 
       interpreter.gas = 0;
       // eslint-disable-next-line
-      op = new Ed25519verify([], 4, interpreter);
+      op = new Ed25519verify([], 4);
       assert.equal(interpreter.gas, 1900);
 
       interpreter.gas = 0;

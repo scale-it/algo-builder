@@ -16,79 +16,91 @@ import {
 import { assertLen } from "../lib/parsing";
 import { Operator } from "../types";
 
-var opCodeMap: {[key: string]: any } = {
-  // Pragma
-  "#pragma": Pragma,
+// teal v1 opcodes
+const opCodeMap: { [key: number]: {[key: string]: any} } = { // tealVersion => opcodeMap
+  1: {
+    // Pragma
+    "#pragma": Pragma,
 
-  len: Len,
-  err: Err,
+    len: Len,
+    err: Err,
 
-  // Arithmetic ops
-  "+": Add,
-  "-": Sub,
-  "/": Div,
-  "*": Mul,
+    // Arithmetic ops
+    "+": Add,
+    "-": Sub,
+    "/": Div,
+    "*": Mul,
 
-  arg: Arg,
-  bytecblock: Bytecblock,
-  bytec: Bytec,
-  intcblock: Intcblock,
-  intc: Intc,
+    arg: Arg,
+    bytecblock: Bytecblock,
+    bytec: Bytec,
+    intcblock: Intcblock,
+    intc: Intc,
 
-  "%": Mod,
-  "|": BitwiseOr,
-  "&": BitwiseAnd,
-  "^": BitwiseXor,
-  "~": BitwiseNot,
+    "%": Mod,
+    "|": BitwiseOr,
+    "&": BitwiseAnd,
+    "^": BitwiseXor,
+    "~": BitwiseNot,
 
-  store: Store,
-  load: Load,
+    store: Store,
+    load: Load,
 
-  // crypto opcodes
-  sha256: Sha256,
-  sha512_256: Sha512_256,
-  keccak256: Keccak256,
-  ed25519verify: Ed25519verify,
+    // crypto opcodes
+    sha256: Sha256,
+    sha512_256: Sha512_256,
+    keccak256: Keccak256,
+    ed25519verify: Ed25519verify,
 
-  "<": LessThan,
-  ">": GreaterThan,
-  "<=": LessThanEqualTo,
-  ">=": GreaterThanEqualTo,
-  "&&": And,
-  "||": Or,
-  "==": EqualTo,
-  "!=": NotEqualTo,
-  "!": Not,
+    "<": LessThan,
+    ">": GreaterThan,
+    "<=": LessThanEqualTo,
+    ">=": GreaterThanEqualTo,
+    "&&": And,
+    "||": Or,
+    "==": EqualTo,
+    "!=": NotEqualTo,
+    "!": Not,
 
-  itob: Itob,
-  btoi: Btoi,
-  mulw: Mulw,
-  addw: Addw,
-  pop: Pop,
-  dup: Dup,
+    itob: Itob,
+    btoi: Btoi,
+    mulw: Mulw,
+    addw: Addw,
+    pop: Pop,
+    dup: Dup,
+
+    // Pseudo-Ops
+    addr: Addr,
+    int: Int,
+    byte: Byte,
+
+    // Branch Opcodes
+    bnz: BranchIfNotZero,
+
+    // Transaction Opcodes
+    txn: Txn,
+    gtxn: Gtxn,
+    global: Global
+  }
+};
+
+// teal v2 opcodes
+opCodeMap[2] = {
+  ...opCodeMap[1], // includes all v1 opcodes
+
+  // txn ops
+  txna: Txna,
+  gtxna: Gtxna,
+
+  // branch opcodes in v2
+  b: Branch,
+  bz: BranchIfZero,
+  return: Return,
+
   dup2: Dup2,
   concat: Concat,
   substring: Substring,
   substring3: Substring3,
-
-  // Pseudo-Ops
-  addr: Addr,
-  int: Int,
-  byte: Byte,
-
-  // Branch Opcodes
-  b: Branch,
-  bz: BranchIfZero,
-  bnz: BranchIfNotZero,
-
-  return: Return,
-
-  // Transaction Opcodes
-  txn: Txn,
-  gtxn: Gtxn,
-  txna: Txna,
-  gtxna: Gtxna,
-  global: Global,
 
   // Stateful Opcodes
   app_opted_in: AppOptedIn,
@@ -211,6 +223,7 @@ export function wordsFromLine (line: string): string[] {
  */
 export function opcodeFromSentence (words: string[], counter: number, interpreter: Interpreter): Operator {
   let opCode = words[0];
+  const tealVersion = interpreter.tealVersion;
 
   // arg
   if (opCode.startsWith("arg_")) {
@@ -242,20 +255,20 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
   // Handle Label
   if (opCode.endsWith(':')) {
     assertLen(words.length, 0, counter);
-    if (opCodeMap[opCode.slice(0, opCode.length - 1)] !== undefined) {
-      throw new TealError(ERRORS.TEAL.INVALID_LABEL, { line: counter });
+    if (opCodeMap[tealVersion][opCode.slice(0, opCode.length - 1)] !== undefined) {
+      throw new TealError(ERRORS.TEAL.INVALID_LABEL, { line: counter }); // eg. `int:` is invalid label as `int` is an opcode
     }
     return new Label([opCode], counter);
   }
 
-  if (opCodeMap[opCode] === undefined) {
-    throw new TealError(ERRORS.TEAL.UNKOWN_OPCODE, { opcode: opCode, line: counter });
+  if (opCodeMap[tealVersion][opCode] === undefined) {
+    throw new TealError(ERRORS.TEAL.UNKOWN_OPCODE, { opcode: opCode, version: tealVersion, line: counter });
   }
 
   if (interpreterReqList.has(opCode)) {
-    return new opCodeMap[opCode](words, counter, interpreter);
+    return new opCodeMap[tealVersion][opCode](words, counter, interpreter);
   }
-  return new opCodeMap[opCode](words, counter);
+  return new opCodeMap[tealVersion][opCode](words, counter);
 }
 
 /**

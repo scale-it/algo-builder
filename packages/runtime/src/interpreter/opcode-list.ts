@@ -539,11 +539,10 @@ export class Sha256 extends Op {
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
-  constructor (args: string[], line: number, interpreter: Interpreter) {
+  constructor (args: string[], line: number) {
     super();
     this.line = line;
     assertLen(args.length, 0, line);
-    interpreter.gas += interpreter.tealVersion === 1 ? 7 : 35;
   };
 
   execute (stack: TEALStack): void {
@@ -567,11 +566,10 @@ export class Sha512_256 extends Op {
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
-  constructor (args: string[], line: number, interpreter: Interpreter) {
+  constructor (args: string[], line: number) {
     super();
     this.line = line;
     assertLen(args.length, 0, line);
-    interpreter.gas += interpreter.tealVersion === 1 ? 9 : 45;
   };
 
   execute (stack: TEALStack): void {
@@ -596,11 +594,10 @@ export class Keccak256 extends Op {
    * @param line line number in TEAL file
    * @param interpreter interpreter object
    */
-  constructor (args: string[], line: number, interpreter: Interpreter) {
+  constructor (args: string[], line: number) {
     super();
     this.line = line;
     assertLen(args.length, 0, line);
-    interpreter.gas += interpreter.tealVersion === 1 ? 26 : 130;
   };
 
   execute (stack: TEALStack): void {
@@ -625,11 +622,10 @@ export class Ed25519verify extends Op {
    * @param line line number in TEAL file
    * @param interpreter interpreter objects
    */
-  constructor (args: string[], line: number, interpreter: Interpreter) {
+  constructor (args: string[], line: number) {
     super();
     this.line = line;
     assertLen(args.length, 0, line);
-    interpreter.gas += 1900;
   };
 
   execute (stack: TEALStack): void {
