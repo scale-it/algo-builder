@@ -217,7 +217,7 @@ export class Runtime {
 
   /**
    * creates new application and returns application id
-   * Note: In this function we are operating on ctx to ensure
+   * Note: In this function we are operating on ctx to ensure that
    * the states are updated correctly
    * - First we are setting ctx according to application
    * - Second we run the TEAL code
