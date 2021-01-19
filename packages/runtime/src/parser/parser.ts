@@ -13,6 +13,7 @@ import {
   Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, Return, Sha256,
   Sha512_256, Store, Sub, Substring, Substring3, Txn, Txna
 } from "../interpreter/opcode-list";
+import { LogicSigMaxCost, OpGasCost } from "../lib/constants";
 import { assertLen } from "../lib/parsing";
 import { Operator } from "../types";
 
@@ -65,7 +66,6 @@ const opCodeMap: { [key: number]: {[key: string]: any} } = { // tealVersion => o
     itob: Itob,
     btoi: Btoi,
     mulw: Mulw,
-    addw: Addw,
     pop: Pop,
     dup: Dup,
 
@@ -87,6 +87,8 @@ const opCodeMap: { [key: number]: {[key: string]: any} } = { // tealVersion => o
 // teal v2 opcodes
 opCodeMap[2] = {
   ...opCodeMap[1], // includes all v1 opcodes
+
+  addw: Addw,
 
   // txn ops
   txna: Txna,
@@ -265,6 +267,10 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
     throw new TealError(ERRORS.TEAL.UNKOWN_OPCODE, { opcode: opCode, version: tealVersion, line: counter });
   }
 
+  // increment gas of TEAL code
+  // select from OpGasCost map if cost is different than 1
+  if (opCode !== '#pragma') { interpreter.gas += OpGasCost[tealVersion][opCode] ?? 1; }
+
   if (interpreterReqList.has(opCode)) {
     return new opCodeMap[tealVersion][opCode](words, counter, interpreter);
   }
@@ -293,6 +299,10 @@ export async function parser (program: string, interpreter: Interpreter): Promis
     if (words.length !== 0) {
       opCodeList.push(opcodeFromSentence(words, counter, interpreter));
     }
+  }
+
+  if (interpreter.gas > LogicSigMaxCost) {
+    throw new TealError(ERRORS.TEAL.INVALID_LOGICSIG_MAX_COST, { cost: interpreter.gas });
   }
   return opCodeList;
 }

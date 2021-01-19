@@ -4,7 +4,7 @@ import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { Runtime } from "../index";
 import { checkIndexBound } from "../lib/compare";
-import { DEFAULT_STACK_ELEM, LogicSigMaxCost } from "../lib/constants";
+import { DEFAULT_STACK_ELEM } from "../lib/constants";
 import { keyToBytes } from "../lib/parsing";
 import { Stack } from "../lib/stack";
 import { parser } from "../parser/parser";
@@ -145,10 +145,6 @@ export class Interpreter {
   async execute (program: string, runtime: Runtime): Promise<void> {
     this.runtime = runtime;
     this.instructions = await parser(program, this);
-
-    if (this.gas > LogicSigMaxCost) {
-      throw new TealError(ERRORS.TEAL.INVALID_LOGICSIG_MAX_COST, { cost: this.gas });
-    }
 
     while (this.instructionIndex < this.instructions.length) {
       const instruction = this.instructions[this.instructionIndex];

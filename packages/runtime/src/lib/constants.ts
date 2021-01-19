@@ -159,3 +159,21 @@ export const GlobalFields: {[key: string]: any} = {
   LatestTimestamp: Math.round((new Date()).getTime() / 1000),
   CurrentApplicationID: ''
 };
+
+// creating map for opcodes whose cost is other than 1
+export const OpGasCost: {[key: number]: {[key: string]: number}} = { // version => opcode => cost
+  // v1 opcodes cost
+  1: {
+    sha256: 7,
+    sha512_256: 9,
+    keccak256: 26,
+    ed25519verify: 1900
+  }
+};
+// v2 opcodes cost
+OpGasCost[2] = {
+  ...OpGasCost[1], // includes all v1 opcodes
+  sha256: 35,
+  sha512_256: 45,
+  keccak256: 130
+};

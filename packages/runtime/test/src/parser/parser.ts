@@ -16,7 +16,7 @@ import {
 import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { Runtime } from "../../../src/runtime";
-import { expectTealError } from "../../helpers/errors";
+import { expectTealError, expectTealErrorAsync } from "../../helpers/errors";
 import { getProgram } from "../../helpers/files";
 import { useFixture } from "../../helpers/integration";
 
@@ -817,16 +817,17 @@ describe("Parser", function () {
 
       const res = await parser(getProgram(file), interpreter);
       const expected = [
-        new Itob([], 1),
-        new Btoi([], 2),
-        new Mulw([], 3),
-        new Addw([], 4),
-        new Pop([], 5),
-        new Dup([], 6),
-        new Dup2([], 7),
-        new Concat([], 8),
-        new Substring(["0", "4"], 9),
-        new Substring3([], 10)
+        new Pragma(["version", "2"], 1, interpreter),
+        new Itob([], 2),
+        new Btoi([], 3),
+        new Mulw([], 4),
+        new Addw([], 5),
+        new Pop([], 6),
+        new Dup([], 7),
+        new Dup2([], 8),
+        new Concat([], 9),
+        new Substring(["0", "4"], 10),
+        new Substring3([], 11)
       ];
 
       assert.deepEqual(res, expected);
@@ -917,49 +918,88 @@ describe("Parser", function () {
     it("Should return correct gas cost for 'Crypto opcodes' for tealversion 1", async () => {
       interpreter.tealVersion = 1; // by default the version is also 1
 
-      let op = new Sha256([], 1);
+      let op = opcodeFromSentence(["sha256"], 1, interpreter);
       assert.equal(interpreter.gas, 7);
 
       interpreter.gas = 0;
-      op = new Keccak256([], 2);
+      op = opcodeFromSentence(["keccak256"], 2, interpreter);
       assert.equal(interpreter.gas, 26);
 
       interpreter.gas = 0;
-      op = new Sha512_256([], 3);
+      op = opcodeFromSentence(["sha512_256"], 3, interpreter);
       assert.equal(interpreter.gas, 9);
 
       interpreter.gas = 0;
       // eslint-disable-next-line
-      op = new Ed25519verify([], 4);
+      op = opcodeFromSentence(["ed25519verify"], 4, interpreter);
       assert.equal(interpreter.gas, 1900);
 
       interpreter.gas = 0;
       await parser(getProgram(cryptoFile), interpreter);
-      assert.deepEqual(interpreter.gas, 1942); // 7 + 26 + 9 + 1900
+      assert.equal(interpreter.gas, 1942); // 7 + 26 + 9 + 1900
     });
 
     it("Should return correct gas cost for 'Crypto opcodes' for tealversion 2", async () => {
       interpreter.tealVersion = 2;
 
-      let op = new Sha256([], 1);
+      let op = opcodeFromSentence(["sha256"], 1, interpreter);
       assert.equal(interpreter.gas, 35);
 
       interpreter.gas = 0;
-      op = new Keccak256([], 2);
+      op = opcodeFromSentence(["keccak256"], 2, interpreter);
       assert.equal(interpreter.gas, 130);
 
       interpreter.gas = 0;
-      op = new Sha512_256([], 3);
+      op = opcodeFromSentence(["sha512_256"], 3, interpreter);
       assert.equal(interpreter.gas, 45);
 
       interpreter.gas = 0;
       // eslint-disable-next-line
-      op = new Ed25519verify([], 4);
+      op = opcodeFromSentence(["ed25519verify"], 4, interpreter);
       assert.equal(interpreter.gas, 1900);
 
       interpreter.gas = 0;
       await parser(getProgram(cryptoFile), interpreter);
-      assert.deepEqual(interpreter.gas, 2110); // 35 + 130 + 45 + 1900
+      assert.equal(interpreter.gas, 2110); // 35 + 130 + 45 + 1900
+    });
+
+    it("Should return correct gas cost for mix opcodes from teal files", async () => {
+      let file = "test-file-1.teal";
+      await parser(getProgram(file), interpreter);
+      assert.equal(interpreter.gas, 3);
+
+      interpreter.gas = 0;
+      file = "test-file-3.teal";
+      await parser(getProgram(file), interpreter);
+      assert.equal(interpreter.gas, 3);
+
+      interpreter.gas = 0;
+      file = "test-file-4.teal";
+      await parser(getProgram(file), interpreter);
+      assert.equal(interpreter.gas, 3);
+
+      interpreter.gas = 0;
+      file = "test-label.teal";
+      await parser(getProgram(file), interpreter);
+      assert.equal(interpreter.gas, 0); // label has cost 0
+
+      interpreter.gas = 0;
+      file = "test-others.teal";
+      await parser(getProgram(file), interpreter);
+      assert.equal(interpreter.gas, 10);
+
+      interpreter.gas = 0;
+      file = "test-stateful.teal";
+      await parser(getProgram(file), interpreter);
+      assert.equal(interpreter.gas, 12);
+    });
+
+    it("Should throw error if total cost exceeds 20000", async () => {
+      const file = "test-max-opcost.teal"; // has cost 22800
+      await expectTealErrorAsync(
+        async () => await parser(getProgram(file), interpreter),
+        ERRORS.TEAL.INVALID_LOGICSIG_MAX_COST
+      );
     });
   });
 });
