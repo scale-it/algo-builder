@@ -652,7 +652,6 @@ describe("Teal Opcodes", function () {
 
   describe("Sha256", function () {
     const stack = new Stack<StackElem>();
-    const interpreter = new Interpreter();
 
     it("should return correct hash for Sha256", () => {
       stack.push(stringToBytes("MESSAGE"));
@@ -677,7 +676,6 @@ describe("Teal Opcodes", function () {
 
   describe("Sha512_256", function () {
     const stack = new Stack<StackElem>();
-    const interpreter = new Interpreter();
 
     it("should return correct hash for Sha512_256", function () {
       stack.push(stringToBytes("MESSAGE"));
@@ -702,7 +700,6 @@ describe("Teal Opcodes", function () {
 
   describe("keccak256", function () {
     const stack = new Stack<StackElem>();
-    const interpreter = new Interpreter();
 
     it("should return correct hash for keccak256", function () {
       stack.push(stringToBytes("ALGORAND"));
@@ -728,7 +725,6 @@ describe("Teal Opcodes", function () {
 
   describe("Ed25519verify", function () {
     const stack = new Stack<StackElem>();
-    const interpreter = new Interpreter();
 
     it("should push 1 to stack if signature is valid", function () {
       const account = generateAccount();
