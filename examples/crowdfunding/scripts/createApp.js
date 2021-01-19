@@ -3,7 +3,7 @@ const {
   TransactionType,
   SignType,
   update,
-  intToBigEndian,
+  uint64ToBigEndian,
   addressToPk
 } = require('@algorand-builder/algob');
 
@@ -36,11 +36,11 @@ async function run (runtimeEnv, deployer) {
 
   // initialize app arguments
   let appArgs = [
-    intToBigEndian(beginDate.getTime()),
-    intToBigEndian(endDate.getTime()),
-    intToBigEndian(7000000),
+    uint64ToBigEndian(beginDate.getTime()),
+    uint64ToBigEndian(endDate.getTime()),
+    'int:7000000', // args similar to `goal --app-arg ..` are also supported
     addressToPk(creatorAccount.addr),
-    intToBigEndian(fundCloseDate.getTime())
+    uint64ToBigEndian(fundCloseDate.getTime())
   ];
 
   // Create Application

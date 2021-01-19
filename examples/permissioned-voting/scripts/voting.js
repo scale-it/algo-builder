@@ -1,13 +1,4 @@
-const { executeTransaction, TransactionType, SignType, stringToBytes } = require('@algorand-builder/algob');
-
-/**
-* Description: Converts Integer into Bytes Array
-*/
-function getInt64Bytes (x) {
-  const y = Math.floor(x / 2 ** 32);
-  const byt = [y, (y << 8), (y << 16), (y << 24), x, (x << 8), (x << 16), (x << 24)].map(z => z >>> 24);
-  return new Uint8Array(byt);
-}
+const { executeTransaction, TransactionType, SignType, stringToBytes, uint64ToBigEndian } = require('@algorand-builder/algob');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -54,12 +45,12 @@ async function run (runtimeEnv, deployer) {
   // store asset Id of vote token created in this script
   const assetID = asaInfo.assetIndex;
   const appArgs = [
-    getInt64Bytes(regBegin),
-    getInt64Bytes(regEnd),
-    getInt64Bytes(voteBegin),
-    getInt64Bytes(voteEnd),
-    getInt64Bytes(assetID)
-  ];
+    regBegin,
+    regEnd,
+    voteBegin,
+    voteEnd,
+    assetID
+  ].map(uint64ToBigEndian);
 
   // Create Application
   // Note: An Account can have maximum of 10 Applications.

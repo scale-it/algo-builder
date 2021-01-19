@@ -1,4 +1,4 @@
-import { addressToPk, intToBigEndian } from "@algorand-builder/algob";
+import { addressToPk, uint64ToBigEndian } from "@algorand-builder/algob";
 import { SSCDeploymentFlags } from "@algorand-builder/algob/src/types";
 import { assert } from "chai";
 
@@ -53,11 +53,11 @@ describe("Crowdfunding basic tests", function () {
     fundCloseDate.setSeconds(fundCloseDate.getSeconds() + 120000);
 
     const appArgs = [
-      intToBigEndian(beginDate.getTime()),
-      intToBigEndian(endDate.getTime()),
-      intToBigEndian(7000000),
+      uint64ToBigEndian(beginDate.getTime()),
+      uint64ToBigEndian(endDate.getTime()),
+      uint64ToBigEndian(7000000),
       addressToPk(john.address),
-      intToBigEndian(fundCloseDate.getTime())
+      uint64ToBigEndian(fundCloseDate.getTime())
     ];
 
     const appId = await runtime.addApp({ ...validFlags, appArgs: appArgs }, {}, program);
