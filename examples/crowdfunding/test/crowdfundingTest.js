@@ -9,8 +9,6 @@ import {
 import { Runtime, StoreAccount } from '@algorand-builder/runtime';
 import { assert } from 'chai';
 
-import { getAcc } from './common';
-
 const initialDonorBalance = 60000000;
 const initialCreatorBalance = 10000;
 const goal = 7000000;
@@ -56,9 +54,9 @@ describe('Crowdfunding Tests', function () {
 
   // fetch latest account state
   function syncAccounts () {
-    creator = getAcc(runtime, creator);
-    escrow = getAcc(runtime, escrow);
-    donor = getAcc(runtime, donor);
+    creator = runtime.getAccount(creator.address);
+    escrow = runtime.getAccount(escrow.address);
+    donor = runtime.getAccount(donor.address);
   }
 
   // Get begin date to pass in

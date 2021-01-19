@@ -23,13 +23,11 @@ import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MIN_UINT8 } from "../../../s
 import { convertToBuffer, stringToBytes } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
-import { EncodingType, SSCAttributesM, StackElem, StoreAccountI } from "../../../src/types";
+import { EncodingType, StackElem, StoreAccountI } from "../../../src/types";
 import { execExpectError, expectTealError } from "../../helpers/errors";
 import { accInfo } from "../../mocks/stateful";
 import { elonAddr, johnAddr, TXN_OBJ } from "../../mocks/txn";
 
-const keyValue = "key-value";
-const convertToKey = (str: string): string => { return stringToBytes(str).toString(); };
 function setDummyAccInfo (acc: StoreAccountI): void {
   acc.assets = accInfo[0].assets;
   acc.appsLocalState = accInfo[0].appsLocalState;
@@ -1987,12 +1985,15 @@ describe("Teal Opcodes", function () {
   describe("Global Opcode", function () {
     const stack = new Stack<StackElem>();
     const interpreter = new Interpreter();
-    interpreter.runtime = new Runtime([]);
+
+    // setup 1st account (to be used as sender)
+    const acc1: StoreAccountI = new StoreAccount(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
+    setDummyAccInfo(acc1);
+
+    interpreter.runtime = new Runtime([acc1]);
     interpreter.runtime.ctx.tx = TXN_OBJ;
     interpreter.runtime.ctx.gtxs = [TXN_OBJ];
-    interpreter.runtime.ctx.tx.apid = 1847;
-    interpreter.runtime.ctx.state.globalApps = new Map<number, SSCAttributesM>();
-    interpreter.runtime.ctx.state.globalApps.set(1847, {} as SSCAttributesM);
+    interpreter.runtime.ctx.tx.apid = 1828;
 
     it("should push MinTxnFee to stack", function () {
       const op = new Global(['MinTxnFee'], 1, interpreter);
@@ -2066,14 +2067,14 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(BigInt('1847'), top);
+      assert.equal(BigInt('1828'), top);
     });
   });
 
-  /* eslint-disable sonarjs/cognitive-complexity */
   describe("StateFul Opcodes", function () {
     const stack = new Stack<StackElem>();
     const interpreter = new Interpreter();
+    const lineNumber = 0;
 
     // setup 1st account (to be used as sender)
     const acc1: StoreAccountI = new StoreAccount(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
@@ -2249,9 +2250,6 @@ describe("Teal Opcodes", function () {
     describe("AppGlobalGet", function () {
       before(function () {
         interpreter.runtime.ctx.tx.apid = 1828;
-        interpreter.runtime.ctx.state.globalApps = new Map<number, SSCAttributesM>();
-        const app = acc1.createdApps.get(1828);
-        if (app) interpreter.runtime.ctx.state.globalApps.set(1828, app);
       });
 
       it("should push the value to stack if key is present in global state", function () {
@@ -2278,8 +2276,6 @@ describe("Teal Opcodes", function () {
     describe("AppGlobalGetEx", function () {
       before(function () {
         interpreter.runtime.ctx.tx.apid = 1828;
-        const app = acc1.createdApps.get(1828);
-        if (app) interpreter.runtime.ctx.state.globalApps.set(1828, app);
       });
 
       it("should push the value to stack if key is present externally in global state", function () {
@@ -2348,13 +2344,10 @@ describe("Teal Opcodes", function () {
 
         const appId = interpreter.runtime.ctx.tx.apid;
         const acc = interpreter.runtime.ctx.state.accounts.get(elonAddr) as StoreAccountI;
-        let localStateCurr = acc.appsLocalState.get(appId)?.[keyValue];
-        assert.isDefined(localStateCurr);
-        if (localStateCurr) {
-          value = localStateCurr.get(convertToKey('New-Key'));
-          assert.isDefined(value);
-          if (value) assert.deepEqual(value, stringToBytes('New-Val'));
-        }
+
+        value = acc.getLocalState(appId, 'New-Key');
+        assert.isDefined(value);
+        assert.deepEqual(value, stringToBytes('New-Val'));
 
         // for Txn.Accounts[A], uint
         stack.push(BigInt('1'));
@@ -2364,14 +2357,9 @@ describe("Teal Opcodes", function () {
         op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        localStateCurr = (interpreter.runtime.ctx.state.accounts.get(johnAddr) as StoreAccountI)
-          .appsLocalState.get(appId)?.[keyValue];
-        assert.isDefined(localStateCurr);
-        if (localStateCurr) {
-          value = localStateCurr.get(convertToKey('New-Key-1'));
-          assert.isDefined(value);
-          if (value) assert.deepEqual(value, 2222n);
-        }
+        value = acc.getLocalState(appId, 'New-Key-1');
+        assert.isDefined(value);
+        assert.deepEqual(value, 2222n);
       });
 
       it("should throw error if resulting schema is invalid", function () {
@@ -2399,9 +2387,8 @@ describe("Teal Opcodes", function () {
     describe("AppGlobalPut", function () {
       before(function () {
         interpreter.runtime.ctx.tx.apid = 1828;
-        const app = acc1.createdApps.get(1828);
-        if (app) interpreter.runtime.ctx.state.globalApps.set(1828, app);
       });
+      const appId = 1828;
 
       it("should put the value in global storage", function () {
         // value as byte
@@ -2411,8 +2398,7 @@ describe("Teal Opcodes", function () {
         let op = new AppGlobalPut([], 1, interpreter);
         op.execute(stack);
 
-        let globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCAttributesM)["global-state"];
-        let value = globalStateCurr.get(convertToKey('New-Global-Key'));
+        let value = interpreter.getGlobalState(appId, 'New-Global-Key', lineNumber);
         assert.isDefined(value); // idx should not be -1
         assert.deepEqual(value, stringToBytes('New-Global-Val'));
 
@@ -2423,8 +2409,7 @@ describe("Teal Opcodes", function () {
         op = new AppGlobalPut([], 1, interpreter);
         op.execute(stack);
 
-        globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCAttributesM)["global-state"];
-        value = globalStateCurr.get(convertToKey('Key'));
+        value = interpreter.getGlobalState(appId, 'Key', lineNumber);
         assert.isDefined(value); // idx should not be -1
         assert.deepEqual(value, 1000n);
       });
@@ -2462,11 +2447,9 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        let value;
         const appId = interpreter.runtime.ctx.tx.apid;
-        let localStateCurr = (interpreter.runtime.ctx.state.accounts.get(elonAddr) as StoreAccountI)
-          .appsLocalState.get(appId)?.[keyValue];
-        if (localStateCurr) value = localStateCurr.get(convertToKey('Local-key'));
+        let acc = interpreter.runtime.ctx.state.accounts.get(elonAddr) as StoreAccountI;
+        let value = acc.getLocalState(appId, 'Local-Key');
         assert.isUndefined(value); // value should be undefined
 
         // for Txn.Accounts[A]
@@ -2476,9 +2459,8 @@ describe("Teal Opcodes", function () {
         op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        localStateCurr = (interpreter.runtime.ctx.state.accounts.get(johnAddr) as StoreAccountI)
-          .appsLocalState.get(appId)?.[keyValue];
-        if (localStateCurr) value = localStateCurr.get(convertToKey('Local-key'));
+        acc = interpreter.runtime.ctx.state.accounts.get(johnAddr) as StoreAccountI;
+        value = acc.getLocalState(appId, 'Local-Key');
         assert.isUndefined(value); // value should be undefined
       });
     });
@@ -2486,8 +2468,6 @@ describe("Teal Opcodes", function () {
     describe("AppGlobalDel", function () {
       before(function () {
         interpreter.runtime.ctx.tx.apid = 1828;
-        const app = acc1.createdApps.get(1828);
-        if (app) interpreter.runtime.ctx.state.globalApps.set(1828, app);
       });
 
       it("should remove the key-value pair from global storage", function () {
@@ -2497,8 +2477,7 @@ describe("Teal Opcodes", function () {
         const op = new AppGlobalDel([], 1, interpreter);
         op.execute(stack);
 
-        const globalStateCurr = (interpreter.runtime.ctx.state.globalApps.get(1828) as SSCAttributesM)["global-state"];
-        const value = globalStateCurr.get(convertToKey('global-key'));
+        const value = interpreter.getGlobalState(1828, 'global-key', lineNumber);
         assert.isUndefined(value); // value should be undefined
       });
     });
