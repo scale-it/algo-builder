@@ -99,7 +99,7 @@ export class StoreAccount implements StoreAccountI {
   }
 
   /**
-   * Queries application by application index
+   * Queries application by application index. Returns undefined if app is not found.
    * @param appId application index
    */
   getApp (appId: number): SSCAttributesM | undefined {
