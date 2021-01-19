@@ -107,7 +107,12 @@ export class StoreAccount implements StoreAccountI {
     return this.createdApps.get(appId);
   }
 
-  // add application in account's state
+  /**
+   * Add application in account's state
+   * check maximum account creation limit
+   * @param appId application index
+   * @param params SSCDeployment Flags
+   */
   addApp (appId: number, params: SSCDeploymentFlags): CreatedAppM {
     if (this.createdApps.size === 10) {
       throw new Error('Maximum created applications for an account is 10');
