@@ -16,7 +16,7 @@ const globalState = "global-state";
 
 export class Interpreter {
   /**
-   * Note: Interpreter operates on only ctx, current context of runtime
+   * Note: Interpreter operates on `ctx`, it doesn't operate on `store`.
    * All the functions query or update only a state copy from the interpreter, not the `runtime.store`.
    */
   readonly stack: TEALStack;
@@ -38,7 +38,7 @@ export class Interpreter {
   }
 
   /**
-   * Fetches Asset Definition for given asset index from current context (ctx)
+   * Queries ASA Definitions data by assetID
    * @param assetId Asset Index
    */
   getAssetDef (assetId: number): AssetDef | undefined {
@@ -93,21 +93,21 @@ export class Interpreter {
    * @param key: key to fetch value of from local state
    */
   getGlobalState (appId: number, key: Uint8Array | string, line: number): StackElem | undefined {
-    const app = this.runtime.assertAppDefined(this.getApp(appId, line), line);
+    const app = this.runtime.assertAppDefined(appId, this.getApp(appId, line), line);
     const appGlobalState = app[globalState];
     const globalKey = keyToBytes(key);
     return appGlobalState.get(globalKey.toString());
   }
 
   /**
-   * Upserts app global state.
+   * Updates app global state.
    * Throws error if app is not found.
    * @param appId: application id
    * @param key: app global state key
    * @param value: value associated with a key
    */
   setGlobalState (appId: number, key: Uint8Array | string, value: StackElem, line: number): void {
-    const app = this.runtime.assertAppDefined(this.getApp(appId, line), line);
+    const app = this.runtime.assertAppDefined(appId, this.getApp(appId, line), line);
     const appGlobalState = app[globalState];
     const globalKey = keyToBytes(key);
     appGlobalState.set(globalKey.toString(), value); // set new value in global state

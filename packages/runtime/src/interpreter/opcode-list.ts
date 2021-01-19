@@ -1493,7 +1493,10 @@ export class Global extends Op {
       }
       case 'CurrentApplicationID': {
         result = this.interpreter.runtime.ctx.tx.apid;
-        this.interpreter.runtime.assertAppDefined(this.interpreter.getApp(result, this.line), this.line);
+        this.interpreter.runtime.assertAppDefined(
+          result,
+          this.interpreter.getApp(result, this.line),
+          this.line);
         break;
       }
       default: {

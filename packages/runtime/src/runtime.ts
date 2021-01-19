@@ -85,7 +85,7 @@ export class Runtime {
    * Note: if user is accessing this function directly through runtime,
    * the line number is unknown
    */
-  assertAppDefined (app: SSCAttributesM | undefined, appId: number, line?: number): SSCAttributesM {
+  assertAppDefined (appId: number, app?: SSCAttributesM, line?: number): SSCAttributesM {
     const lineNumber = line ?? 'unknown';
     if (app === undefined) {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: lineNumber });
@@ -102,9 +102,8 @@ export class Runtime {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
     const accAddress = this.assertAddressDefined(this.store.globalApps.get(appId));
-    const account = this.store.accounts.get(accAddress);
-    const app = account?.createdApps.get(appId);
-    return this.assertAppDefined(app, appId);
+    const account = this.assertAccountDefined(this.store.accounts.get(accAddress));
+    return this.assertAppDefined(appId, account.getApp(appId));
   }
 
   /**
@@ -123,10 +122,12 @@ export class Runtime {
    * @param key: key to fetch value of from local state
    */
   getGlobalState (appId: number, key: Uint8Array | string): StackElem | undefined {
-    const app = this.getApp(appId);
-    const appGlobalState = app["global-state"];
-    const globalKey = keyToBytes(key);
-    return appGlobalState.get(globalKey.toString());
+    if (!this.store.globalApps.has(appId)) {
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
+    }
+    const accAddress = this.assertAddressDefined(this.store.globalApps.get(appId));
+    const account = this.assertAccountDefined(this.store.accounts.get(accAddress));
+    return account.getGlobalState(appId, key);
   }
 
   /**
@@ -239,13 +240,12 @@ export class Runtime {
     // create new application in globalApps map
     this.store.globalApps.set(++this.appCounter, senderAcc.address);
 
-    const attributes = this.assertAppDefined(senderAcc.createdApps.get(0), 0);
+    const attributes = this.assertAppDefined(0, senderAcc.createdApps.get(0));
     this.ctx.state.globalApps.delete(0); // remove zero app from context after execution
     senderAcc.createdApps.delete(0); // remove zero app from sender's account
 
     senderAcc.createdApps.set(this.appCounter, attributes);
     this.store.accounts.set(sender.addr, senderAcc);
-    this.ctx.state.accounts.set(senderAcc.address, senderAcc);
 
     return this.appCounter;
   }
@@ -360,7 +360,6 @@ export class Runtime {
 
     account.deleteApp(appId);
     this.store.globalApps.delete(appId);
-    this.store.accounts.set(account.address, account);
   }
 
   // transfer ALGO as per transaction parameters

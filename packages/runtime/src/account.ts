@@ -85,6 +85,28 @@ export class StoreAccount implements StoreAccountI {
     });
   }
 
+  /**
+   * Fetches global state value for key present in account
+   * returns undefined otherwise
+   * @param appId: current application id
+   * @param key: key to fetch value of from local state
+   */
+  getGlobalState (appId: number, key: Uint8Array | string): StackElem | undefined {
+    const app = this.getApp(appId);
+    if (!app) return undefined;
+    const appGlobalState = app["global-state"];
+    const globalKey = keyToBytes(key);
+    return appGlobalState.get(globalKey.toString());
+  }
+
+  /**
+   * Queries application by application index
+   * @param appId application index
+   */
+  getApp (appId: number): SSCAttributesM | undefined {
+    return this.createdApps.get(appId);
+  }
+
   // add application in account's state
   addApp (appId: number, params: SSCDeploymentFlags): CreatedAppM {
     if (this.createdApps.size === 10) {
