@@ -18,14 +18,14 @@ function assertUint64 (n: bigint): void {
  */
 export function uint64ToBigEndian (x: number | bigint): Uint8Array {
   const bytes = new Uint8Array(8);
-  let i = 0;
+  let i = 7;
   x = BigInt(x); // use x as bigint internally to support upto uint64
   assertUint64(x);
   while (x) {
-    bytes[i++] = Number(x % 256n);
+    bytes[i--] = Number(x % 256n);
     x /= 256n;
   }
-  return bytes.reverse();
+  return bytes;
 }
 
 const throwErr = (appArg: string): void => {
@@ -40,37 +40,47 @@ const throwErr = (appArg: string): void => {
  */
 export function parseSSCAppArgs (appArgs?: Array<Uint8Array | string>): Uint8Array[] | undefined {
   if (appArgs === undefined) { return undefined; }
+  const args = [];
 
-  appArgs.forEach((appArg, idx) => {
-    if (appArg instanceof Uint8Array) { return; }
+  for (const appArg of appArgs) {
+    // if appArg already bytes, then we don't need to parse
+    // just push to array and continue
+    if (appArg instanceof Uint8Array) {
+      args.push(appArg);
+      continue;
+    }
     const [type, value] = appArg.split(':'); // eg "int:1" => ['int', '1']
+
+    // if given string is not invalid, throw error
     if (type === undefined || value === undefined) { throwErr(appArg); }
 
     // parse string to bytes according to type
+    let arg;
     switch (type) {
       case 'int': {
         if (!reDigit.test(value)) { throwErr(appArg); } // verify only digits are present in string
-        appArgs[idx] = uint64ToBigEndian(BigInt(value));
+        arg = uint64ToBigEndian(BigInt(value));
         break;
       }
       case 'str': {
-        appArgs[idx] = stringToBytes(value);
+        arg = stringToBytes(value);
         break;
       }
       case 'addr': {
-        appArgs[idx] = addressToPk(value);
+        arg = addressToPk(value);
         break;
       }
       case 'b64': {
-        appArgs[idx] = new Uint8Array(Buffer.from(value, 'base64'));
+        arg = new Uint8Array(Buffer.from(value, 'base64'));
         break;
       }
       default: {
         throwErr(appArg);
       }
     }
-  });
-  return appArgs as Uint8Array[];
+    args.push(arg);
+  };
+  return args as Uint8Array[];
 }
 
 /**
