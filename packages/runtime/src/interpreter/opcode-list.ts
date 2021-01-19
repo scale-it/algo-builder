@@ -537,7 +537,6 @@ export class Sha256 extends Op {
    * Asserts 0 arguments are passed.
    * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
-   * @param interpreter interpreter object
    */
   constructor (args: string[], line: number) {
     super();
@@ -564,7 +563,6 @@ export class Sha512_256 extends Op {
    * Asserts 0 arguments are passed.
    * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
-   * @param interpreter interpreter object
    */
   constructor (args: string[], line: number) {
     super();
@@ -592,7 +590,6 @@ export class Keccak256 extends Op {
    * Asserts 0 arguments are passed.
    * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
-   * @param interpreter interpreter object
    */
   constructor (args: string[], line: number) {
     super();
@@ -620,7 +617,6 @@ export class Ed25519verify extends Op {
    * Asserts 0 arguments are passed.
    * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
-   * @param interpreter interpreter objects
    */
   constructor (args: string[], line: number) {
     super();
