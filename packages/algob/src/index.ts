@@ -8,10 +8,10 @@ import {
 import { globalZeroAddress } from "./lib/constants";
 import { algodCredentialsFromEnv, KMDCredentialsFromEnv } from "./lib/credentials";
 import { getProgram } from "./lib/files";
-import { addressToPk, intToBigEndian, stringToBytes, update } from "./lib/ssc";
+import { addressToPk, parseSSCAppArgs, stringToBytes, uint64ToBigEndian, update } from "./lib/ssc";
 import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC, readGlobalStateSSC, readLocalStateSSC } from "./lib/status";
 import { executeSignedTxnFromFile, executeTransaction, mkTransaction } from "./lib/tx";
-import { SignType, TransactionType } from "./types";
+import { ExecParams, SignType, TransactionType } from "./types";
 
 export {
   mkAccounts,
@@ -28,14 +28,16 @@ export {
   KMDCredentialsFromEnv,
   TransactionType,
   SignType,
+  ExecParams,
   printLocalStateSSC,
   printGlobalStateSSC,
   readGlobalStateSSC,
   readLocalStateSSC,
   update,
   stringToBytes,
+  parseSSCAppArgs,
   globalZeroAddress,
-  intToBigEndian,
+  uint64ToBigEndian,
   addressToPk,
   getProgram
 };

@@ -40,7 +40,7 @@ async function run (runtimeEnv, deployer) {
 
   const nftID = new Uint8Array(8).fill(1, 7); // [0, 0, 0, 0, 0, 0, 0, 1] = uint64(1)
   appArgs = [
-    stringToBytes('transfer'),
+    'str:transfer', // appArgs similar to goal are also supported
     nftID
   ];
 

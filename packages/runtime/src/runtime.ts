@@ -1,7 +1,7 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
-import { mkTransaction } from "@algorand-builder/algob";
-import { AlgoTransferParam, ExecParams, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
+import { ExecParams, mkTransaction, parseSSCAppArgs } from "@algorand-builder/algob";
+import { AlgoTransferParam, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
 import algosdk, { AssetDef, encodeAddress } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
@@ -211,7 +211,7 @@ export class Runtime {
       flags.localBytes,
       flags.globalInts,
       flags.globalBytes,
-      flags.appArgs,
+      parseSSCAppArgs(flags.appArgs),
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
@@ -261,7 +261,7 @@ export class Runtime {
       senderAddr,
       mockSuggestedParams(payFlags),
       appId,
-      flags.appArgs,
+      parseSSCAppArgs(flags.appArgs),
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
@@ -310,7 +310,7 @@ export class Runtime {
       appId,
       new Uint8Array(32), // mock approval program
       new Uint8Array(32), // mock clear progam
-      flags.appArgs,
+      parseSSCAppArgs(flags.appArgs),
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
