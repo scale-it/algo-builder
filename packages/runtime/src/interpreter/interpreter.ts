@@ -39,7 +39,7 @@ export class Interpreter {
   }
 
   /**
-   * Queries ASA Definitions data by assetID
+   * Queries ASA Definitions data by assetID.  Returns undefined if ASA is not deployed.
    * @param assetId Asset Index
    */
   getAssetDef (assetId: number): AssetDef | undefined {
