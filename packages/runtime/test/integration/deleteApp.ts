@@ -66,7 +66,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 
-    // verify app is not deleted - use app get function
+    // verify app is not deleted - using getApp function
     const res = runtime.getApp(appId);
     assert.isDefined(res);
   });
