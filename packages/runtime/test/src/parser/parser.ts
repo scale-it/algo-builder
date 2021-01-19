@@ -924,6 +924,7 @@ describe("Parser", function () {
       assert.equal(interpreter.gas, 9);
 
       interpreter.gas = 0;
+      // eslint-disable-next-line
       op = new Ed25519verify([], 4, interpreter);
       assert.equal(interpreter.gas, 1900);
 
@@ -947,6 +948,7 @@ describe("Parser", function () {
       assert.equal(interpreter.gas, 45);
 
       interpreter.gas = 0;
+      // eslint-disable-next-line
       op = new Ed25519verify([], 4, interpreter);
       assert.equal(interpreter.gas, 1900);
 
