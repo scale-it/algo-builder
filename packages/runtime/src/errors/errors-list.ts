@@ -210,6 +210,12 @@ by an index that does not exist.`
     message: "Error encountered while parsing teal file unkown opcode %opcode% , Line : %line% ",
     title: PARSE_ERROR,
     description: `Unkown Opcode encountered`
+  },
+  INVALID_LOGICSIG_MAX_COST: {
+    number: 32,
+    message: "Cost of provided TEAL code = %cost% exceeds max cost of 20000",
+    title: 'LogicSigMaxCost Error',
+    description: `LogicSigMaxCost Error`
   }
 };
 

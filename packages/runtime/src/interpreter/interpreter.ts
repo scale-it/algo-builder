@@ -1,7 +1,7 @@
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { Runtime } from "../index";
-import { DEFAULT_STACK_ELEM } from "../lib/constants";
+import { DEFAULT_STACK_ELEM, LogicSigMaxCost } from "../lib/constants";
 import { Stack } from "../lib/stack";
 import { parser } from "../parser/parser";
 import type { Operator, StackElem, TEALStack } from "../types";
@@ -9,6 +9,8 @@ import { BIGINT0, Label } from "./opcode-list";
 
 export class Interpreter {
   readonly stack: TEALStack;
+  tealVersion: number; // LogicSigVersion
+  gas: number; // total gas cost of TEAL code
   bytecblock: Uint8Array[];
   intcblock: BigInt[];
   scratch: StackElem[];
@@ -18,6 +20,8 @@ export class Interpreter {
 
   constructor () {
     this.stack = new Stack<StackElem>();
+    this.tealVersion = 1; // LogicSigVersion = 1 by default (if not specified by pragma)
+    this.gas = 0; // initial cost
     this.bytecblock = [];
     this.intcblock = [];
     this.scratch = new Array(256).fill(DEFAULT_STACK_ELEM);
@@ -51,6 +55,10 @@ export class Interpreter {
   async execute (program: string, runtime: Runtime): Promise<void> {
     this.runtime = runtime;
     this.instructions = await parser(program, this);
+
+    if (this.gas > LogicSigMaxCost) {
+      throw new TealError(ERRORS.TEAL.INVALID_LOGICSIG_MAX_COST, { cost: this.gas });
+    }
 
     while (this.instructionIndex < this.instructions.length) {
       const instruction = this.instructions[this.instructionIndex];

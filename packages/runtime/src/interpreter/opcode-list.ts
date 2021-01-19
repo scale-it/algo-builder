@@ -24,26 +24,28 @@ export const BIGINT1 = BigInt("1");
 // Store TEAL version
 // push to stack [...stack]
 export class Pragma extends Op {
-  readonly version: bigint;
+  readonly version: number;
   readonly line: number;
   /**
    * Store Pragma version
    * @param args Expected arguments: ["version", version number]
    * @param line line number in TEAL file
+   * @param interpreter interpreter object
    */
-  constructor (args: string[], line: number) {
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     this.line = line;
     assertLen(args.length, 2, line);
-    if (args[0] === "version") {
-      this.version = BigInt(args[1]);
+    if (args[0] === "version" && (args[1] === '1' || args[1] === '2')) {
+      this.version = Number(args[1]);
+      interpreter.tealVersion = this.version;
     } else {
-      throw new TealError(ERRORS.TEAL.PRAGMA_VERSION_ERROR, { got: args[0], line: line });
+      throw new TealError(ERRORS.TEAL.PRAGMA_VERSION_ERROR, { got: args.join(' '), line: line });
     }
   }
 
   // Returns Pragma version
-  getVersion (): bigint {
+  getVersion (): number {
     return this.version;
   }
 
@@ -535,11 +537,13 @@ export class Sha256 extends Op {
    * Asserts 0 arguments are passed.
    * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
+   * @param interpreter interpreter object
    */
-  constructor (args: string[], line: number) {
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     this.line = line;
     assertLen(args.length, 0, line);
+    interpreter.gas += interpreter.tealVersion === 1 ? 7 : 35;
   };
 
   execute (stack: TEALStack): void {
@@ -561,11 +565,13 @@ export class Sha512_256 extends Op {
    * Asserts 0 arguments are passed.
    * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
+   * @param interpreter interpreter object
    */
-  constructor (args: string[], line: number) {
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     this.line = line;
     assertLen(args.length, 0, line);
+    interpreter.gas += interpreter.tealVersion === 1 ? 9 : 45;
   };
 
   execute (stack: TEALStack): void {
@@ -588,11 +594,13 @@ export class Keccak256 extends Op {
    * Asserts 0 arguments are passed.
    * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
+   * @param interpreter interpreter object
    */
-  constructor (args: string[], line: number) {
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     this.line = line;
     assertLen(args.length, 0, line);
+    interpreter.gas += interpreter.tealVersion === 1 ? 26 : 130;
   };
 
   execute (stack: TEALStack): void {
@@ -615,11 +623,13 @@ export class Ed25519verify extends Op {
    * Asserts 0 arguments are passed.
    * @param args Expected arguments: [] // none
    * @param line line number in TEAL file
+   * @param interpreter interpreter objects
    */
-  constructor (args: string[], line: number) {
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     this.line = line;
     assertLen(args.length, 0, line);
+    interpreter.gas += 1900;
   };
 
   execute (stack: TEALStack): void {
