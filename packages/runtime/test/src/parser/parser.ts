@@ -627,9 +627,14 @@ describe("Parser", function () {
     });
   });
 
+  const cryptoFile = "test-crypto.teal";
   describe("Opcodes list from TEAL file", () => {
     useFixture("teal-files");
-    const interpreter = new Interpreter();
+
+    let interpreter: Interpreter;
+    beforeEach(function () {
+      interpreter = new Interpreter();
+    });
 
     it("Sould return correct opcode list for '+'", async () => {
       const file1 = "test-file-1.teal";
@@ -638,7 +643,7 @@ describe("Parser", function () {
 
       assert.deepEqual(res, expected);
 
-      const expect = [new Pragma(["version", "2"], 1), new Int(["1"], 2),
+      const expect = [new Pragma(["version", "2"], 1, interpreter), new Int(["1"], 2),
         new Int(["3"], 3), new Add([], 4)];
       res = await parser(getProgram("test-file-2.teal"), interpreter);
 
@@ -649,7 +654,7 @@ describe("Parser", function () {
       const file = "test-file-3.teal";
       const res = await parser(getProgram(file), interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1),
+        new Pragma(["version", "2"], 1, interpreter),
         new Int(["5"], 2),
         new Int(["3"], 3),
         new Sub([], 4)
@@ -662,7 +667,7 @@ describe("Parser", function () {
       const file = "test-file-4.teal";
       const res = await parser(getProgram(file), interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1),
+        new Pragma(["version", "2"], 1, interpreter),
         new Int(["6"], 2),
         new Int(["3"], 3),
         new Div([], 6)
@@ -675,7 +680,7 @@ describe("Parser", function () {
       const file = "test-file-5.teal";
       const res = await parser(getProgram(file), interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1),
+        new Pragma(["version", "2"], 1, interpreter),
         new Int(["5"], 4),
         new Int(["3"], 6),
         new Mul([], 10)
@@ -688,7 +693,7 @@ describe("Parser", function () {
       const file = "test-addr.teal";
       const res = await parser(getProgram(file), interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1),
+        new Pragma(["version", "2"], 1, interpreter),
         new Addr(["WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"], 2)
       ];
 
@@ -773,16 +778,13 @@ describe("Parser", function () {
     });
 
     it("Should return correct opcode list for 'Crypto opcodes'", async () => {
-      const file = "test-crypto.teal";
-
-      const res = await parser(getProgram(file), interpreter);
+      const res = await parser(getProgram(cryptoFile), interpreter);
       const expected = [
-        new Sha256([], 1),
-        new Keccak256([], 2),
-        new Sha512_256([], 3),
-        new Ed25519verify([], 4)
+        new Sha256([], 1, interpreter),
+        new Keccak256([], 2, interpreter),
+        new Sha512_256([], 3, interpreter),
+        new Ed25519verify([], 4, interpreter)
       ];
-
       assert.deepEqual(res, expected);
     });
 
@@ -880,7 +882,7 @@ describe("Parser", function () {
 
       const res = await parser(getProgram(file), interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1),
+        new Pragma(["version", "2"], 1, interpreter),
         new Balance([], 4, interpreter),
         new GetAssetHolding(["AssetBalance"], 5, interpreter),
         new GetAssetDef(["AssetTotal"], 6, interpreter),
@@ -896,6 +898,61 @@ describe("Parser", function () {
       ];
 
       assert.deepEqual(res, expected);
+    });
+  });
+
+  describe("Gas cost of Opcodes from TEAL file", () => {
+    useFixture("teal-files");
+
+    let interpreter: Interpreter;
+    beforeEach(function () {
+      interpreter = new Interpreter();
+    });
+
+    it("Should return correct gas cost for 'Crypto opcodes' for tealversion 1", async () => {
+      interpreter.tealVersion = 1; // by default the version is also 1
+
+      let op = new Sha256([], 1, interpreter);
+      assert.equal(interpreter.gas, 7);
+
+      interpreter.gas = 0;
+      op = new Keccak256([], 2, interpreter);
+      assert.equal(interpreter.gas, 26);
+
+      interpreter.gas = 0;
+      op = new Sha512_256([], 3, interpreter);
+      assert.equal(interpreter.gas, 9);
+
+      interpreter.gas = 0;
+      op = new Ed25519verify([], 4, interpreter);
+      assert.equal(interpreter.gas, 1900);
+
+      interpreter.gas = 0;
+      await parser(getProgram(cryptoFile), interpreter);
+      assert.deepEqual(interpreter.gas, 1942); // 7 + 26 + 9 + 1900
+    });
+
+    it("Should return correct gas cost for 'Crypto opcodes' for tealversion 2", async () => {
+      interpreter.tealVersion = 2;
+
+      let op = new Sha256([], 1, interpreter);
+      assert.equal(interpreter.gas, 35);
+
+      interpreter.gas = 0;
+      op = new Keccak256([], 2, interpreter);
+      assert.equal(interpreter.gas, 130);
+
+      interpreter.gas = 0;
+      op = new Sha512_256([], 3, interpreter);
+      assert.equal(interpreter.gas, 45);
+
+      interpreter.gas = 0;
+      op = new Ed25519verify([], 4, interpreter);
+      assert.equal(interpreter.gas, 1900);
+
+      interpreter.gas = 0;
+      await parser(getProgram(cryptoFile), interpreter);
+      assert.deepEqual(interpreter.gas, 2110); // 35 + 130 + 45 + 1900
     });
   });
 });

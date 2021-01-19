@@ -65,14 +65,15 @@ describe("Teal Opcodes", function () {
   });
 
   describe("Pragma", () => {
+    const interpreter = new Interpreter();
     it("should store pragma version", () => {
-      const op = new Pragma(["version", "2"], 1);
-      assert.equal(op.version, BigInt("2"));
+      const op = new Pragma(["version", "2"], 1, interpreter);
+      assert.equal(op.version, 2);
     });
 
     it("should store throw length error", () => {
       expectTealError(
-        () => new Pragma(["version", "2", "some-value"], 1),
+        () => new Pragma(["version", "2", "some-value"], 1, interpreter),
         ERRORS.TEAL.ASSERT_LENGTH
       );
     });
@@ -653,10 +654,11 @@ describe("Teal Opcodes", function () {
 
   describe("Sha256", function () {
     const stack = new Stack<StackElem>();
+    const interpreter = new Interpreter();
 
     it("should return correct hash for Sha256", () => {
       stack.push(stringToBytes("MESSAGE"));
-      const op = new Sha256([], 1);
+      const op = new Sha256([], 1, interpreter);
       op.execute(stack);
 
       const expected = Buffer.from(
@@ -667,20 +669,21 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw invalid type error sha256",
-      execExpectError(stack, [BigInt("1")], new Sha256([], 1), ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, [BigInt("1")], new Sha256([], 1, interpreter), ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw error with Sha256 if stack is below min length",
-      execExpectError(stack, [], new Sha256([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [], new Sha256([], 1, interpreter), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
   describe("Sha512_256", function () {
     const stack = new Stack<StackElem>();
+    const interpreter = new Interpreter();
 
     it("should return correct hash for Sha512_256", function () {
       stack.push(stringToBytes("MESSAGE"));
-      const op = new Sha512_256([], 1);
+      const op = new Sha512_256([], 1, interpreter);
       op.execute(stack);
 
       const expected = Buffer.from(
@@ -691,20 +694,21 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw invalid type error sha512_256",
-      execExpectError(stack, [BigInt("1")], new Sha512_256([], 1), ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, [BigInt("1")], new Sha512_256([], 1, interpreter), ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw error with Sha512_256 if stack is below min length",
-      execExpectError(stack, [], new Sha512_256([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [], new Sha512_256([], 1, interpreter), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
   describe("keccak256", function () {
     const stack = new Stack<StackElem>();
+    const interpreter = new Interpreter();
 
     it("should return correct hash for keccak256", function () {
       stack.push(stringToBytes("ALGORAND"));
-      const op = new Keccak256([], 1);
+      const op = new Keccak256([], 1, interpreter);
       op.execute(stack);
 
       // http://emn178.github.io/online-tools/keccak_256.html
@@ -716,16 +720,17 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw invalid type error Keccak256",
-      execExpectError(stack, [BigInt("1")], new Keccak256([], 1), ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, [BigInt("1")], new Keccak256([], 1, interpreter), ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw error with keccak256 if stack is below min length",
-      execExpectError(stack, [], new Keccak256([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [], new Keccak256([], 1, interpreter), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
   describe("Ed25519verify", function () {
     const stack = new Stack<StackElem>();
+    const interpreter = new Interpreter();
 
     it("should push 1 to stack if signature is valid", function () {
       const account = generateAccount();
@@ -736,7 +741,7 @@ describe("Teal Opcodes", function () {
       stack.push(signed); // signature
       stack.push(decodeAddress(account.addr).publicKey); // pk
 
-      const op = new Ed25519verify([], 1);
+      const op = new Ed25519verify([], 1, interpreter);
       op.execute(stack);
       const top = stack.pop();
       assert.equal(top, BigInt('1'));
@@ -752,18 +757,18 @@ describe("Teal Opcodes", function () {
       stack.push(signed); // signature
       stack.push(decodeAddress(account.addr).publicKey); // pk
 
-      const op = new Ed25519verify([], 1);
+      const op = new Ed25519verify([], 1, interpreter);
       op.execute(stack);
       const top = stack.pop();
       assert.equal(top, BigInt('0'));
     });
 
     it("should throw invalid type error Ed25519verify",
-      execExpectError(stack, ['1', '1', '1'].map(BigInt), new Ed25519verify([], 1), ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, ['1', '1', '1'].map(BigInt), new Ed25519verify([], 1, interpreter), ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw error with Ed25519verify if stack is below min length",
-      execExpectError(stack, [], new Ed25519verify([], 1), ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [], new Ed25519verify([], 1, interpreter), ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
