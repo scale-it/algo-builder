@@ -217,6 +217,11 @@ export class Runtime {
 
   /**
    * creates new application and returns application id
+   * Note: In this function we are operating on ctx to ensure
+   * the states are updated correctly
+   * - First we are setting ctx according to application
+   * - Second we run the TEAL code
+   * - Finally if run is successful we update the store.
    * @param flags SSCDeployment flags
    * @param payFlags Transaction parameters
    * @param program approval program
@@ -239,9 +244,7 @@ export class Runtime {
     const attributes = this.assertAppDefined(0, senderAcc.createdApps.get(0));
     this.ctx.state.globalApps.delete(0); // remove zero app from context after execution
     senderAcc.createdApps.delete(0); // remove zero app from sender's account
-
     senderAcc.createdApps.set(this.appCounter, attributes);
-    this.store.accounts.set(sender.addr, senderAcc);
 
     return this.appCounter;
   }
