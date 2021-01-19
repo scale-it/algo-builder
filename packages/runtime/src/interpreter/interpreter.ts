@@ -88,8 +88,7 @@ export class Interpreter {
   }
 
   /**
-   * Fetches global state value for key present in creator's global state
-   * for given appId, returns undefined otherwise
+   * Queries application by application index. Returns undefined if app is not found.
    * @param appId: current application id
    * @param key: key to fetch value of from local state
    */
