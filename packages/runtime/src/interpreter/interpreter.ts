@@ -19,6 +19,7 @@ export class Interpreter {
    * Note: Interpreter operates on `ctx`, it doesn't operate on `store`.
    * All the functions query or update only a state copy from the interpreter, not the `runtime.store`.
    */
+   
   readonly stack: TEALStack;
   bytecblock: Uint8Array[];
   intcblock: BigInt[];
