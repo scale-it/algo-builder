@@ -1,19 +1,22 @@
-import type { SSCStateSchema } from "algosdk";
+import type { AssetHolding, SSCStateSchema } from "algosdk";
 
 import { AlgobDeployer } from "../types";
 
+/// Returns `account` asset holding of `assetID`. Returns undefined if the account is not
+/// opt-in to the given asset id.
 export async function balanceOf (
   deployer: AlgobDeployer,
   account: string,
-  assetid: number
-): Promise<void> {
+  assetID: number
+): Promise<AssetHolding | undefined> {
   const accountInfo = await deployer.algodClient.accountInformation(account).do();
   for (const asset of accountInfo.assets) {
-    if (asset['asset-id'] === assetid) {
-      console.log("Asset Holding Info:", asset, accountInfo);
-      break;
+    if (asset['asset-id'] === assetID) {
+      console.log("Asset Holding Info:", asset);
+      return asset;
     }
   }
+  return undefined;
 };
 
 /**
