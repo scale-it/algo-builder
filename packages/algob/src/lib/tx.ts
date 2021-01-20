@@ -108,8 +108,9 @@ export function encodeNote (note: string | undefined, noteb64: string| undefined
  *  + AssetTransferParam used for transferring asset
  *  + SSCCallsParam used for calling stateful smart contracts.
  For more advanced use-cases, please use `algosdk.tx` directly.
- * @param deployer AlgobDeployer
+ NOTE: parseSSCAppArgs is used to handle case when user passes appArgs similar to goal
  * @param execParams ExecParams
+ * @param suggestedParams Suggested params
  * @returns SDK Transaction object
  */
 export function mkTransaction (execParams: ExecParams, suggestedParams: SuggestedParams): Transaction {

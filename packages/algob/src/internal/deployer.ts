@@ -328,6 +328,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
    * @param sender sender account
    * @param appID application index
    * @param payFlags Transaction flags
+   * @param flags Optional parameters to SSC (accounts, args..)
    */
   async optInToSSC (
     sender: Account,

@@ -311,6 +311,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
    * @param sender: Account for which opt-in is required
    * @param appId: Application Index: (ID of the application)
    * @param payFlags: Transaction Params
+   * @param flags Optional parameters to SSC (accounts, args..)
    */
   async optInToSSC (
     sender: Account,
