@@ -278,7 +278,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       flags.localBytes,
       flags.globalInts,
       flags.globalBytes,
-      parseSSCAppArgs(flags.appArgs), // parseSSCAppArgs returns undefined if flags.appArgs is undefined
+      parseSSCAppArgs(flags.appArgs),
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
@@ -323,7 +323,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       sender.addr,
       params,
       appId,
-      parseSSCAppArgs(flags.appArgs), // parseSSCAppArgs returns undefined if flags.appArgs is undefined
+      parseSSCAppArgs(flags.appArgs),
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,

@@ -134,7 +134,7 @@ export async function update (
     appId,
     approvalProg,
     clearProg,
-    parseSSCAppArgs(flags.appArgs), // remains undefined if appArgs is undefined
+    parseSSCAppArgs(flags.appArgs),
     flags.accounts,
     flags.foreignApps,
     flags.foreignAssets,

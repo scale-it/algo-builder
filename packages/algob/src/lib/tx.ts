@@ -142,7 +142,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.fromAccount.addr,
         suggestedParams,
         execParams.appId,
-        parseSSCAppArgs(execParams.appArgs), // remains undefined if appArgs is undefined
+        parseSSCAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
         execParams.foreignAssets,
