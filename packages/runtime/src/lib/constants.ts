@@ -14,31 +14,39 @@ const zeroUint64 = BigInt('0');
 const zeroByte = new Uint8Array(0);
 
 // https://developer.algorand.org/docs/reference/teal/opcodes/#txn
-export const TxnFields: {[key: string]: string} = {
-  Sender: 'snd',
-  Fee: 'fee',
-  FirstValid: 'fv',
-  FirstValidTime: '',
-  LastValid: 'lv',
-  Note: 'note',
-  Lease: 'lx',
-  Receiver: 'rcv',
-  Amount: 'amt',
-  CloseRemainderTo: 'close',
-  VotePK: 'votekey',
-  SelectionPK: 'selkey',
-  VoteFirst: 'votefst',
-  VoteLast: 'votelst',
-  VoteKeyDilution: 'votekd',
-  Type: 'type',
-  TypeEnum: '',
-  XferAsset: 'xaid',
-  AssetAmount: 'aamt',
-  AssetSender: 'asnd',
-  AssetReceiver: 'arcv',
-  AssetCloseTo: 'aclose',
-  GroupIndex: '',
-  TxID: '',
+// transaction fields supported by teal v1
+export const TxnFields: {[key: number]: {[key: string]: any}} = {
+  1: {
+    Sender: 'snd',
+    Fee: 'fee',
+    FirstValid: 'fv',
+    FirstValidTime: '',
+    LastValid: 'lv',
+    Note: 'note',
+    Lease: 'lx',
+    Receiver: 'rcv',
+    Amount: 'amt',
+    CloseRemainderTo: 'close',
+    VotePK: 'votekey',
+    SelectionPK: 'selkey',
+    VoteFirst: 'votefst',
+    VoteLast: 'votelst',
+    VoteKeyDilution: 'votekd',
+    Type: 'type',
+    TypeEnum: '',
+    XferAsset: 'xaid',
+    AssetAmount: 'aamt',
+    AssetSender: 'asnd',
+    AssetReceiver: 'arcv',
+    AssetCloseTo: 'aclose',
+    GroupIndex: '',
+    TxID: ''
+  }
+};
+
+// transaction fields supported by teal v2
+TxnFields[2] = {
+  ...TxnFields[1],
   ApplicationID: 'apid',
   OnCompletion: 'apan',
   ApplicationArgs: 'apaa',

@@ -1529,6 +1529,7 @@ describe("Teal Opcodes", function () {
     const interpreter = new Interpreter();
     interpreter.runtime = new Runtime([]);
     interpreter.runtime.ctx.tx = TXN_OBJ;
+    interpreter.tealVersion = 2; // set tealversion to latest (to support all tx fields)
 
     describe("Txn: Common Fields", function () {
       it("should push txn fee to stack", function () {
@@ -1981,6 +1982,54 @@ describe("Teal Opcodes", function () {
         );
       });
     });
+
+    describe("Tx fields for specific version", function () {
+      it("should throw error if transaction field is not present in teal version", function () {
+        interpreter.tealVersion = 1;
+
+        // for txn
+        expectTealError(
+          () => new Txn(['ApplicationID'], 1, interpreter),
+          ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD
+        );
+
+        expectTealError(
+          () => new Txn(['ApprovalProgram'], 1, interpreter),
+          ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD
+        );
+
+        expectTealError(
+          () => new Txn(['ConfigAssetDecimals'], 1, interpreter),
+          ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD
+        );
+
+        expectTealError(
+          () => new Txn(['FreezeAssetAccount'], 1, interpreter),
+          ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD
+        );
+
+        expectTealError(
+          () => new Txn(['FreezeAssetAccount'], 1, interpreter),
+          ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD
+        );
+
+        // for gtxn
+        expectTealError(
+          () => new Gtxn(['0', 'OnCompletion'], 1, interpreter),
+          ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD
+        );
+
+        expectTealError(
+          () => new Gtxn(['0', 'RekeyTo'], 1, interpreter),
+          ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD
+        );
+
+        expectTealError(
+          () => new Gtxn(['0', 'ConfigAssetClawback'], 1, interpreter),
+          ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD
+        );
+      });
+    });
   });
 
   describe("Global Opcode", function () {
@@ -1995,7 +2044,7 @@ describe("Teal Opcodes", function () {
     interpreter.runtime.ctx.tx = TXN_OBJ;
     interpreter.runtime.ctx.gtxs = [TXN_OBJ];
     interpreter.runtime.ctx.tx.apid = 1828;
-    interpreter.tealVersion = 2; // set tealversion to latest (to support all opcodes)
+    interpreter.tealVersion = 2; // set tealversion to latest (to support all global fields)
 
     it("should push MinTxnFee to stack", function () {
       const op = new Global(['MinTxnFee'], 1, interpreter);

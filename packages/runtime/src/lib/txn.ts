@@ -40,14 +40,16 @@ export function parseToStackElem (a: unknown, field: TxField): StackElem {
 /**
  * Description: returns specific transaction field value from tx object
  * @param txField: transaction field
- * @param interpreter: interpreter
+ * @param tx Current transaction
+ * @param txns Transaction group
+ * @param tealVersion version of TEAL
  */
-export function txnSpecbyField (txField: string, tx: Txn, gtxns: Txn[]): StackElem {
+export function txnSpecbyField (txField: string, tx: Txn, gtxns: Txn[], tealVersion: number): StackElem {
   let result; // store raw result, parse and return
 
   // handle nested encoded obj (for AssetDef)
   if (assetTxnFields.has(txField)) {
-    const s = TxnFields[txField];
+    const s = TxnFields[tealVersion][txField];
     const assetMetaData = tx.apar;
     result = assetMetaData[s as keyof AssetDefEnc];
     return parseToStackElem(result, txField);
@@ -70,19 +72,19 @@ export function txnSpecbyField (txField: string, tx: Txn, gtxns: Txn[]): StackEl
       break;
     }
     case 'NumAppArgs': {
-      const appArg = TxnFields.ApplicationArgs as keyof Txn;
+      const appArg = TxnFields[tealVersion].ApplicationArgs as keyof Txn;
       const appArgs = tx[appArg] as Buffer[];
       result = appArgs?.length;
       break;
     }
     case 'NumAccounts': {
-      const appAcc = TxnFields.Accounts as keyof Txn;
+      const appAcc = TxnFields[tealVersion].Accounts as keyof Txn;
       const appAccounts = tx[appAcc] as Buffer[];
       result = appAccounts?.length;
       break;
     }
     default: {
-      const s = TxnFields[txField]; // eg: rcv = TxnFields["Receiver"]
+      const s = TxnFields[tealVersion][txField]; // eg: rcv = TxnFields["Receiver"]
       result = tx[s as keyof Txn]; // pk_buffer = tx['rcv']
     }
   }
@@ -91,15 +93,19 @@ export function txnSpecbyField (txField: string, tx: Txn, gtxns: Txn[]): StackEl
 }
 
 /**
- * Description: returns specific transaction field value from array
+ * Returns specific transaction field value from array
  * of accounts or application args
- * @param tx: current transaction
- * @param txField: transaction field
- * @param idx: array index
+ * @param tx current transaction
+ * @param txField transaction field
+ * @param idx array index
+ * @param op Op object
+ * @param tealVersion version of TEAL
+ * @param line line number in TEAL file
  */
-export function txAppArg (txField: TxField, tx: Txn, idx: number, op: Op, line: number): Uint8Array {
+export function txAppArg (txField: TxField, tx: Txn, idx: number, op: Op,
+  tealVersion: number, line: number): Uint8Array {
   if (txField === 'Accounts' || txField === 'ApplicationArgs') {
-    const s = TxnFields[txField]; // 'apaa' or 'apat'
+    const s = TxnFields[tealVersion][txField]; // 'apaa' or 'apat'
     const result = tx[s as keyof Txn] as Buffer[]; // array of pk buffers (accounts or appArgs)
 
     if (!result) { // handle

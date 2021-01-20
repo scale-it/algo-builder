@@ -1192,7 +1192,7 @@ export class Txn extends Op {
     super();
     this.line = line;
     assertLen(args.length, 1, line);
-    this.assertTxFieldDefined(args[0], line);
+    this.assertTxFieldDefined(args[0], interpreter.tealVersion, line);
 
     this.field = args[0]; // field
     this.interpreter = interpreter;
@@ -1202,7 +1202,8 @@ export class Txn extends Op {
     const result = txnSpecbyField(
       this.field,
       this.interpreter.runtime.ctx.tx,
-      this.interpreter.runtime.ctx.gtxs);
+      this.interpreter.runtime.ctx.gtxs,
+      this.interpreter.tealVersion);
     stack.push(result);
   }
 }
@@ -1229,7 +1230,7 @@ export class Gtxn extends Op {
     this.line = line;
     assertLen(args.length, 2, line);
     assertOnlyDigits(args[0], line);
-    this.assertTxFieldDefined(args[1], line);
+    this.assertTxFieldDefined(args[1], interpreter.tealVersion, line);
 
     this.txIdx = Number(args[0]); // transaction group index
     this.field = args[1]; // field
@@ -1243,7 +1244,8 @@ export class Gtxn extends Op {
     const result = txnSpecbyField(
       this.field,
       this.interpreter.runtime.ctx.gtxs[this.txIdx],
-      this.interpreter.runtime.ctx.gtxs);
+      this.interpreter.runtime.ctx.gtxs,
+      this.interpreter.tealVersion);
     stack.push(result);
   }
 }
@@ -1269,7 +1271,7 @@ export class Txna extends Op {
     this.line = line;
     assertLen(args.length, 2, line);
     assertOnlyDigits(args[1], line);
-    this.assertTxFieldDefined(args[0], line);
+    this.assertTxFieldDefined(args[0], interpreter.tealVersion, line);
 
     this.field = args[0]; // field
     this.idx = Number(args[1]);
@@ -1277,7 +1279,8 @@ export class Txna extends Op {
   }
 
   execute (stack: TEALStack): void {
-    const result = txAppArg(this.field, this.interpreter.runtime.ctx.tx, this.idx, this, this.line);
+    const result = txAppArg(this.field, this.interpreter.runtime.ctx.tx, this.idx, this,
+      this.interpreter.tealVersion, this.line);
     stack.push(result);
   }
 }
@@ -1306,7 +1309,7 @@ export class Gtxna extends Op {
     assertLen(args.length, 3, line);
     assertOnlyDigits(args[0], line);
     assertOnlyDigits(args[2], line);
-    this.assertTxFieldDefined(args[1], line);
+    this.assertTxFieldDefined(args[1], interpreter.tealVersion, line);
 
     this.txIdx = Number(args[0]); // transaction group index
     this.field = args[1]; // field
@@ -1319,7 +1322,7 @@ export class Gtxna extends Op {
     this.assertUint8(BigInt(this.txIdx), this.line);
 
     const tx = this.interpreter.runtime.ctx.gtxs[this.txIdx];
-    const result = txAppArg(this.field, tx, this.idx, this, this.line);
+    const result = txAppArg(this.field, tx, this.idx, this, this.interpreter.tealVersion, this.line);
     stack.push(result);
   }
 }

@@ -26,7 +26,7 @@ export interface Txn extends TxnEncodedObj {
   txID: string
 }
 
-export type TxField = keyof typeof TxnFields;
+export type TxField = keyof typeof TxnFields[2];
 
 export enum TxnType {
   unknown = '0', // Unknown type. Invalid transaction

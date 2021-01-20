@@ -189,7 +189,7 @@ by an index that does not exist.`
   },
   UNKOWN_TRANSACTION_FIELD: {
     number: 28,
-    message: "Transaction Field Error - Unknown transaction field %field% at %line%",
+    message: "Transaction Field Error - Unknown transaction field \"%field%\" for teal version #%version% at line %line%",
     title: "Transaction Field Error at %line%",
     description: `Transaction Field unknown`
   },
