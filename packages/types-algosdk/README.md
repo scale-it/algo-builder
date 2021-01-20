@@ -2,11 +2,15 @@
 
 This package contains type definitions for [js-algorand-sdk](https://github.com/algorand/js-algorand-sdk)
 
-The following is a `tsconfig.json` requirement:
+## Usage
 
-By default all visible ”@types” packages are included in your compilation. Packages in `node_modules/@types` of any enclosing folder are considered visible.
+By default, the TypeScript compiler searches for type definitions in 
+* all packages discoverable (node [modules](https://docs.npmjs.com/cli/v6/configuring-npm/folders#node-modules): `./node_modles`) under  ”@types” organization (eg `node_modules/@types` of any enclosing folder are considered visible).
+* local `*d.ts` files
+* all subpackages defined `tsconfig.compilerOptions.typeRoots`.
 
-To include this typing `typeRoots` needs to be specified, only packages under typeRoots will be included.
+To use this package in a Typescript you have to update your `tsconfig.json` file. The `typeRoots` attribute must be  updated:
+
 
 ```
 {
