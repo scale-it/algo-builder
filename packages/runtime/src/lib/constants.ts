@@ -148,12 +148,20 @@ export const reBase32 = /^[A-Z2-7]+=*$/;
 
 // reference for values: https://github.com/algorand/go-algorand/blob/master/config/consensus.go#L510
 // for fields: https://developer.algorand.org/docs/reference/teal/opcodes/#global
-export const GlobalFields: {[key: string]: any} = {
-  MinTxnFee: ALGORAND_MIN_TX_FEE,
-  MinBalance: 10000,
-  MaxTxnLife: 1000,
-  ZeroAddress: zeroAddress,
-  GroupSize: '',
+// global field supported by teal v1
+export const GlobalFields: {[key: number]: {[key: string]: any}} = { // teal version => global field => value
+  1: {
+    MinTxnFee: ALGORAND_MIN_TX_FEE,
+    MinBalance: 10000,
+    MaxTxnLife: 1000,
+    ZeroAddress: zeroAddress,
+    GroupSize: ''
+  }
+};
+
+// global field supported by teal v2
+GlobalFields[2] = {
+  ...GlobalFields[1],
   LogicSigVersion: 2, // LogicSigVersion >= 2
   Round: 500, // constant (for tests)
   LatestTimestamp: Math.round((new Date()).getTime() / 1000),

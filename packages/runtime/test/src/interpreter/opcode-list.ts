@@ -1995,6 +1995,7 @@ describe("Teal Opcodes", function () {
     interpreter.runtime.ctx.tx = TXN_OBJ;
     interpreter.runtime.ctx.gtxs = [TXN_OBJ];
     interpreter.runtime.ctx.tx.apid = 1828;
+    interpreter.tealVersion = 2; // set tealversion to latest (to support all opcodes)
 
     it("should push MinTxnFee to stack", function () {
       const op = new Global(['MinTxnFee'], 1, interpreter);
@@ -2069,6 +2070,30 @@ describe("Teal Opcodes", function () {
 
       const top = stack.pop();
       assert.equal(BigInt('1828'), top);
+    });
+
+    it("should throw error if global field is not present in teal version", function () {
+      interpreter.tealVersion = 1;
+
+      expectTealError(
+        () => new Global(['LogicSigVersion'], 1, interpreter),
+        ERRORS.TEAL.UNKOWN_GLOBAL_FIELD
+      );
+
+      expectTealError(
+        () => new Global(['Round'], 1, interpreter),
+        ERRORS.TEAL.UNKOWN_GLOBAL_FIELD
+      );
+
+      expectTealError(
+        () => new Global(['LatestTimestamp'], 1, interpreter),
+        ERRORS.TEAL.UNKOWN_GLOBAL_FIELD
+      );
+
+      expectTealError(
+        () => new Global(['CurrentApplicationID'], 1, interpreter),
+        ERRORS.TEAL.UNKOWN_GLOBAL_FIELD
+      );
     });
   });
 

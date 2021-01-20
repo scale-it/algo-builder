@@ -139,11 +139,12 @@ export class Op {
   /**
    * asserts if known global field is passed
    * @param str global field
+   * @param tealVersion version of TEAL
    * @param line line number in TEAL file
    */
-  assertGlobalDefined (str: string, line: number): void {
-    if (GlobalFields[str] === undefined) {
-      throw new TealError(ERRORS.TEAL.UNKOWN_GLOBAL_FIELD, { field: str, line: line });
+  assertGlobalDefined (str: string, tealVersion: number, line: number): void {
+    if (GlobalFields[tealVersion][str] === undefined) {
+      throw new TealError(ERRORS.TEAL.UNKOWN_GLOBAL_FIELD, { field: str, version: tealVersion, line: line });
     }
   }
 

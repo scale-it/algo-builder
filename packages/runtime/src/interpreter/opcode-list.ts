@@ -1479,7 +1479,7 @@ export class Global extends Op {
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     assertLen(args.length, 1, line);
-    this.assertGlobalDefined(args[0], line);
+    this.assertGlobalDefined(args[0], interpreter.tealVersion, line);
 
     this.field = args[0]; // global field
     this.interpreter = interpreter;
@@ -1502,7 +1502,7 @@ export class Global extends Op {
         break;
       }
       default: {
-        result = GlobalFields[this.field];
+        result = GlobalFields[this.interpreter.tealVersion][this.field];
       }
     }
 

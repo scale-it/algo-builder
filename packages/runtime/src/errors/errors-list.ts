@@ -195,7 +195,7 @@ by an index that does not exist.`
   },
   UNKOWN_GLOBAL_FIELD: {
     number: 29,
-    message: "Global Field Error - Unknown Global field %field% at %line%",
+    message: "Global Field Error - Unknown Global field \"%field%\" for teal version #%version% at line %line%",
     title: "Global Field Error at %line%",
     description: `Global Field unknown`
   },
