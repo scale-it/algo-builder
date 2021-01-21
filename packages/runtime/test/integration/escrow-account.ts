@@ -92,4 +92,24 @@ describe("Algorand Stateless Smart Contracts", function () {
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
+
+  it("should close escrow account if closeRemainderTo is passed", async function () {
+    const initialEscrowBal = runtime.getAccount(escrow.address).balance();
+    const initialJohnBal = runtime.getAccount(john.address).balance();
+
+    assert.isAbove(initialEscrowBal, 0); // initial balance should be > 0
+
+    const closeParams: ExecParams = {
+      ...txnParams,
+      amountMicroAlgos: 0,
+      payFlags: {
+        totalFee: 1000,
+        closeRemainderTo: john.address
+      }
+    };
+    await runtime.executeTx(closeParams, getProgram('escrow.teal'), []);
+
+    assert.equal(runtime.getAccount(escrow.address).balance(), 0);
+    assert.equal(runtime.getAccount(john.address).balance(), initialJohnBal + initialEscrowBal);
+  });
 });
