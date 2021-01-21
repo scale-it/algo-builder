@@ -183,7 +183,7 @@ declare module 'algosdk' {
   export type LogicSigArgs = Uint8Array[];
 
   export interface Subsig {
-    pk: string;
+    pk: Uint8Array;
     s: Uint8Array;
   }
 
