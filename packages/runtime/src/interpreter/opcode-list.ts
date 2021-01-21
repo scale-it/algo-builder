@@ -1869,7 +1869,7 @@ export class Balance extends Op {
     const accountIndex = this.assertBigInt(stack.pop(), this.line);
     const acc = this.interpreter.getAccount(accountIndex, this.line);
 
-    stack.push(BigInt(acc.amount));
+    stack.push(BigInt(acc.balance()));
   }
 }
 

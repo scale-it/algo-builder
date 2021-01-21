@@ -370,6 +370,14 @@ export class Runtime {
 
     fromAccount.amount -= txnParam.amountMicroAlgos; // remove 'x' algo from sender
     toAccount.amount += txnParam.amountMicroAlgos; // add 'x' algo to receiver
+
+    if (txnParam.payFlags.closeRemainderTo) {
+      const closeRemToAcc = this.assertAccountDefined(
+        this.store.accounts.get(txnParam.payFlags.closeRemainderTo));
+
+      closeRemToAcc.amount += fromAccount.amount; // transfer funds of sender to closeRemTo account
+      fromAccount.amount = 0; // close sender's account
+    }
   }
 
   /**

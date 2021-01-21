@@ -159,7 +159,7 @@ describe('Crowdfunding Tests', function () {
     assert.equal(escrow.balance(), donationAmount);
     assert.equal(donor.balance(), initialDonorBalance - donationAmount);
 
-    // donor should be able to reclaim if goal is met
+    // donor should be able to reclaim if goal is NOT met
     appArgs = [stringToBytes('reclaim')];
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     txGroup = [
@@ -213,8 +213,12 @@ describe('Crowdfunding Tests', function () {
         payFlags: {}
       }
     ];
+    const escrowBal = escrow.balance();
     // execute transaction
     await runtime.executeTx(txGroup, program, []);
+
+    syncAccounts();
+    assert.equal(escrow.balance(), escrowBal + 7000000); // verify donation of 7000000
 
     appArgs = [stringToBytes('claim')];
     txGroup = [
@@ -236,8 +240,49 @@ describe('Crowdfunding Tests', function () {
         payFlags: { closeRemainderTo: creator.address }
       }
     ];
+    const creatorBal = creator.balance(); // creator's balance before 'claim' tx
+    const escrowFunds = escrow.balance(); //  funds in escrow
+    // execute transaction
     await runtime.executeTx(txGroup, program, []);
-    // TODO- close account and tranfer funds to closeRemainderTo in runtime
+
+    syncAccounts();
+    assert.equal(escrow.balance(), 0); // escrow should be empty after claim
+    assert.equal(creator.balance(), creatorBal + escrowFunds); // funds transferred to creator from escrow
+
+    // after claiming, creator of the crowdfunding application should be able to delete the application
+    txGroup = [
+      {
+        type: TransactionType.DeleteSSC,
+        sign: SignType.SecretKey,
+        fromAccount: creator.account,
+        appId: applicationId,
+        payFlags: {},
+        appArgs: [],
+        accounts: [escrow.address] //  AppAccounts
+      },
+      {
+        type: TransactionType.TransferAlgo,
+        sign: SignType.LogicSignature,
+        fromAccount: { addr: escrow.address },
+        toAccountAddr: creator.address,
+        amountMicroAlgos: 0,
+        lsig: escrow,
+        payFlags: { closeRemainderTo: creator.address }
+      }
+    ];
+
+    const app = runtime.getApp(applicationId);
+    assert.isDefined(app); // verify app is present before delete tx
+
+    // execute delete tx
+    await runtime.executeTx(txGroup, program, []);
+
+    // should throw error as app is deleted
+    try {
+      runtime.getApp(applicationId);
+    } catch (e) {
+      console.log(e.message); // app not found..
+    }
   });
 
   it('should be rejected by logic when claiming funds if goal is not met', async () => {
