@@ -5,14 +5,16 @@ import { Runtime } from "../../src/runtime";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 
+const programName = "escrow.teal";
+
 describe("Logic Signature Test", () => {
   useFixture("escrow-account");
   const john = new StoreAccount(10);
   const bob = new StoreAccount(100);
   const runtime = new Runtime([john, bob]);
 
-  it("should sign the lsig by john", () => {
-    const lsig = runtime.getLogicSig(getProgram("escrow.teal"), []);
+  it("should sign the lsig by john(delegated signature)", () => {
+    const lsig = runtime.getLogicSig(getProgram(programName), []);
 
     lsig.sign(john.account);
     const result = lsig.verify(john.address);
@@ -20,12 +22,22 @@ describe("Logic Signature Test", () => {
     assert.equal(result, true);
   });
 
-  it("should return false if lsig is not signed by john", () => {
-    const lsig = runtime.getLogicSig(getProgram("escrow.teal"), []);
+  it("should return false if lsig is not signed by john(delegated signature)", () => {
+    const lsig = runtime.getLogicSig(getProgram(programName), []);
 
     lsig.sign(bob.account);
     const result = lsig.verify(john.address);
 
+    assert.equal(result, false);
+  });
+
+  it("should verify only for lsig address", () => {
+    const lsig = runtime.getLogicSig(getProgram(programName), []);
+
+    let result = lsig.verify(lsig.address());
+    assert.equal(result, true);
+
+    result = lsig.verify(john.address);
     assert.equal(result, false);
   });
 });

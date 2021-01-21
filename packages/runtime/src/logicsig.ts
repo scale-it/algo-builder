@@ -79,7 +79,7 @@ export class LogicSig {
    * @param accAddr Sender's account address
    */
   verify (accAddr: string): boolean {
-    if (this.sig === new Uint8Array(0) && this.msig === undefined) {
+    if (compareArray(this.sig, new Uint8Array(0)) && this.msig === undefined) {
       if (accAddr === this.SignatureAddress) return true;
       return false;
     }
