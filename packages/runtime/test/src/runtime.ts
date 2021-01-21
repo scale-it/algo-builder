@@ -15,7 +15,7 @@ describe("Logic Signature Test", () => {
     const lsig = runtime.getLogicSig(getProgram("escrow.teal"), []);
 
     lsig.sign(john.account);
-    const result = lsig.verify(john.account);
+    const result = lsig.verify(john.address);
 
     assert.equal(result, true);
   });
@@ -24,7 +24,7 @@ describe("Logic Signature Test", () => {
     const lsig = runtime.getLogicSig(getProgram("escrow.teal"), []);
 
     lsig.sign(bob.account);
-    const result = lsig.verify(john.account);
+    const result = lsig.verify(john.address);
 
     assert.equal(result, false);
   });

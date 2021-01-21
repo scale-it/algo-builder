@@ -78,8 +78,12 @@ export class LogicSig {
    * Performs signature verification
    * @param accAddr Sender's account address
    */
-  verify (account: Account): boolean {
-    return verifyBytes(this.logic, this.sig, account.addr);
+  verify (accAddr: string): boolean {
+    if (this.sig === new Uint8Array(0) && this.msig === undefined) {
+      if (accAddr === this.SignatureAddress) return true;
+      return false;
+    }
+    return verifyBytes(this.logic, this.sig, accAddr);
   }
 
   /**
