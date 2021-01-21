@@ -210,6 +210,12 @@ by an index that does not exist.`
     message: "Error encountered while parsing teal file unkown opcode %opcode% , Line : %line% ",
     title: PARSE_ERROR,
     description: `Unkown Opcode encountered`
+  },
+  INSUFFICIENT_ACCOUNT_BALANCE: {
+    number: 32,
+    message: "Cannot withdraw %amount% microalgos from account %address%: resulting balance would be insufficient",
+    title: 'Insufficient account balance',
+    description: `Withdrawing %amount% microalgos will lead to insufficient balance`
   }
 };
 

@@ -363,11 +363,23 @@ export class Runtime {
     this.store.globalApps.delete(appId);
   }
 
+  // verify 'amt' microalgos can be withdrawn from account
+  assertMinBalance (amt: number, address: string): void {
+    const account = this.assertAccountDefined(this.store.accounts.get(address));
+    if ((account.amount - amt) < account.minBalance) {
+      throw new TealError(ERRORS.TEAL.INSUFFICIENT_ACCOUNT_BALANCE, {
+        amount: amt,
+        address: address
+      });
+    }
+  }
+
   // transfer ALGO as per transaction parameters
   transferAlgo (txnParam: AlgoTransferParam): void {
     const fromAccount = this.assertAccountDefined(this.store.accounts.get(txnParam.fromAccount.addr));
     const toAccount = this.assertAccountDefined(this.store.accounts.get(txnParam.toAccountAddr));
 
+    this.assertMinBalance(txnParam.amountMicroAlgos, fromAccount.address);
     fromAccount.amount -= txnParam.amountMicroAlgos; // remove 'x' algo from sender
     toAccount.amount += txnParam.amountMicroAlgos; // add 'x' algo to receiver
 
@@ -385,23 +397,29 @@ export class Runtime {
    * @param txnParams : Transaction parameters
    */
   updateFinalState (txnParams: ExecParams[]): void {
-    for (const txnParam of txnParams) {
-      switch (txnParam.type) {
-        case TransactionType.TransferAlgo: {
-          this.transferAlgo(txnParam);
-          break;
-        }
-        case TransactionType.DeleteSSC: {
-          this.deleteApp(txnParam.appId);
-          break;
-        }
-        case TransactionType.CloseSSC || TransactionType.ClearSSC: {
-          const fromAccount = this.assertAccountDefined(this.store.accounts.get(txnParam.fromAccount.addr));
-          fromAccount.closeApp(txnParam.appId); // remove app from local state
-          break;
+    txnParams.forEach((txnParam, idx) => {
+      const fromAccount = this.assertAccountDefined(this.store.accounts.get(txnParam.fromAccount.addr));
+      const fee = this.ctx.gtxs[idx].fee;
+      this.assertMinBalance(fee, txnParam.fromAccount.addr);
+      fromAccount.amount -= fee; // remove tx fee from Sender's account
+
+      if (txnParam.payFlags) {
+        switch (txnParam.type) {
+          case TransactionType.TransferAlgo: {
+            this.transferAlgo(txnParam);
+            break;
+          }
+          case TransactionType.DeleteSSC: {
+            this.deleteApp(txnParam.appId);
+            break;
+          }
+          case TransactionType.CloseSSC || TransactionType.ClearSSC: {
+            fromAccount.closeApp(txnParam.appId); // remove app from local state
+            break;
+          }
         }
       }
-    }
+    });
   }
 
   /**

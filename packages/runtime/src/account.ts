@@ -9,16 +9,19 @@ import { generateAccount } from "algosdk";
 
 import { TealError } from "./errors/errors";
 import { ERRORS } from "./errors/errors-list";
+import { ALGORAND_ACCOUNT_MIN_BALANCE, SSC_KEY_BYTE_SLICE, SSC_VALUE_BYTES, SSC_VALUE_UINT } from "./lib/constants";
 import { keyToBytes } from "./lib/parsing";
 import { assertValidSchema } from "./lib/stateful";
 import { AppLocalStateM, CreatedAppM, SSCAttributesM, StackElem, StoreAccountI } from "./types";
 
 const StateMap = "key-value";
 const globalState = "global-state";
+const localStateSchema = "local-state-schema";
 
 export class StoreAccount implements StoreAccountI {
   readonly account: Account;
   readonly address: string;
+  minBalance: number; // required minimum balance of account
   assets: Map<number, AssetHolding>;
   amount: number;
   appsLocalState: Map<number, AppLocalStateM>;
@@ -39,6 +42,7 @@ export class StoreAccount implements StoreAccountI {
 
     this.assets = new Map<number, AssetHolding>();
     this.amount = balance;
+    this.minBalance = ALGORAND_ACCOUNT_MIN_BALANCE;
     this.appsLocalState = new Map<number, AppLocalStateM>();
     this.appsTotalSchema = <SSCSchemaConfig>{};
     this.createdApps = new Map<number, SSCAttributesM>();
@@ -152,6 +156,13 @@ export class StoreAccount implements StoreAccountI {
       throw new Error('Maximum created applications for an account is 10');
     }
 
+    // raise minimum balance
+    // https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
+    this.minBalance += (
+      ALGORAND_ACCOUNT_MIN_BALANCE +
+      (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * params.globalInts +
+      (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * params.globalBytes
+    );
     const app = new App(appId, params);
     this.createdApps.set(app.id, app.attributes);
     return app;
@@ -167,11 +178,18 @@ export class StoreAccount implements StoreAccountI {
         throw new Error('Maximum Opt In applications per account is 10');
       }
 
+      // https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
+      this.minBalance += (
+        ALGORAND_ACCOUNT_MIN_BALANCE +
+        (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * appParams[localStateSchema]["num-uint"] +
+        (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * appParams[localStateSchema]["num-byte-slice"]
+      );
+
       // create new local app attribute
       const localParams: AppLocalStateM = {
         id: appId,
         "key-value": new Map<string, StackElem>(),
-        schema: appParams["local-state-schema"]
+        schema: appParams[localStateSchema]
       };
       this.appsLocalState.set(appId, localParams);
     }

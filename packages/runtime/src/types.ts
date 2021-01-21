@@ -104,6 +104,7 @@ export interface StoreAccountI {
   address: string
   assets: Map<number, AssetHolding>
   amount: number
+  minBalance: number
   appsLocalState: Map<number, AppLocalStateM>
   appsTotalSchema: SSCSchemaConfig
   createdApps: Map<number, SSCAttributesM>

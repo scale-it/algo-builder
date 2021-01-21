@@ -9,13 +9,14 @@ import {
 import { Runtime, StoreAccount } from '@algorand-builder/runtime';
 import { assert } from 'chai';
 
+const minBalance = 10000000; // 10 ALGO's
 const initialDonorBalance = 60000000;
-const initialCreatorBalance = 10000;
+const initialCreatorBalance = minBalance + 10000;
 const goal = 7000000;
 
 describe('Crowdfunding Tests', function () {
   let creator = new StoreAccount(initialCreatorBalance);
-  let escrow = new StoreAccount(0);
+  let escrow = new StoreAccount(minBalance);
   let donor = new StoreAccount(initialDonorBalance);
 
   let runtime;
@@ -37,7 +38,7 @@ describe('Crowdfunding Tests', function () {
 
   this.afterEach(async function () {
     creator = new StoreAccount(initialCreatorBalance);
-    escrow = new StoreAccount(0);
+    escrow = new StoreAccount(minBalance);
     donor = new StoreAccount(initialDonorBalance);
     runtime = new Runtime([creator, escrow, donor]);
 
@@ -132,7 +133,6 @@ describe('Crowdfunding Tests', function () {
     // App argument to donate.
     appArgs = [stringToBytes('donate')];
     const donationAmount = 600000;
-
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     let txGroup = [
       {
@@ -140,7 +140,7 @@ describe('Crowdfunding Tests', function () {
         sign: SignType.SecretKey,
         fromAccount: donor.account,
         appId: applicationId,
-        payFlags: {},
+        payFlags: { totalFee: 1000 },
         appArgs: appArgs
       },
       {
@@ -149,18 +149,19 @@ describe('Crowdfunding Tests', function () {
         fromAccount: donor.account,
         toAccountAddr: escrow.address,
         amountMicroAlgos: donationAmount,
-        payFlags: {}
+        payFlags: { totalFee: 1000 }
       }
     ];
     // execute transaction
     await runtime.executeTx(txGroup, program, []);
 
     syncAccounts();
-    assert.equal(escrow.balance(), donationAmount);
-    assert.equal(donor.balance(), initialDonorBalance - donationAmount);
+    assert.equal(escrow.balance(), minBalance + donationAmount);
+    assert.equal(donor.balance(), initialDonorBalance - donationAmount - 2000); // 2000 because of tx fee
 
     // donor should be able to reclaim if goal is NOT met
     appArgs = [stringToBytes('reclaim')];
+
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     txGroup = [
       {
@@ -168,7 +169,7 @@ describe('Crowdfunding Tests', function () {
         sign: SignType.SecretKey,
         fromAccount: donor.account,
         appId: applicationId,
-        payFlags: {},
+        payFlags: { totalFee: 1000 },
         appArgs: appArgs,
         accounts: [escrow.address] //  AppAccounts
       },
@@ -179,17 +180,19 @@ describe('Crowdfunding Tests', function () {
         toAccountAddr: donor.address,
         amountMicroAlgos: 300000,
         lsig: escrow,
-        payFlags: {}
+        payFlags: { totalFee: 1000 }
       }
     ];
 
     syncAccounts();
     const donorBalance = donor.balance();
+    const escrowBalance = escrow.balance();
     await runtime.executeTx(txGroup, program, []);
 
     syncAccounts();
-    assert.equal(escrow.balance(), 300000);
-    assert.equal(donor.balance(), donorBalance + 300000);
+    // verify 300000 is withdrawn from escrow (with tx fee of 1000 as well)
+    assert.equal(escrow.balance(), escrowBalance - 300000 - 1000);
+    assert.equal(donor.balance(), donorBalance + 300000 - 1000);
 
     // should claim if goal is reached'
     appArgs = [stringToBytes('donate')];
@@ -201,7 +204,7 @@ describe('Crowdfunding Tests', function () {
         sign: SignType.SecretKey,
         fromAccount: donor.account,
         appId: applicationId,
-        payFlags: {},
+        payFlags: { totalFee: 1000 },
         appArgs: appArgs
       },
       {
@@ -210,7 +213,7 @@ describe('Crowdfunding Tests', function () {
         fromAccount: donor.account,
         toAccountAddr: escrow.address,
         amountMicroAlgos: 7000000,
-        payFlags: {}
+        payFlags: { totalFee: 1000 }
       }
     ];
     const escrowBal = escrow.balance();
@@ -227,7 +230,7 @@ describe('Crowdfunding Tests', function () {
         sign: SignType.SecretKey,
         fromAccount: creator.account,
         appId: applicationId,
-        payFlags: {},
+        payFlags: { totalFee: 1000 },
         appArgs: appArgs
       },
       {
@@ -237,7 +240,7 @@ describe('Crowdfunding Tests', function () {
         toAccountAddr: creator.address,
         amountMicroAlgos: 0,
         lsig: escrow,
-        payFlags: { closeRemainderTo: creator.address }
+        payFlags: { totalFee: 1000, closeRemainderTo: creator.address }
       }
     ];
     const creatorBal = creator.balance(); // creator's balance before 'claim' tx
@@ -247,35 +250,25 @@ describe('Crowdfunding Tests', function () {
 
     syncAccounts();
     assert.equal(escrow.balance(), 0); // escrow should be empty after claim
-    assert.equal(creator.balance(), creatorBal + escrowFunds); // funds transferred to creator from escrow
+    assert.equal(creator.balance(), creatorBal + escrowFunds - 2000); // funds transferred to creator from escrow
 
     // after claiming, creator of the crowdfunding application should be able to delete the application
-    txGroup = [
-      {
-        type: TransactionType.DeleteSSC,
-        sign: SignType.SecretKey,
-        fromAccount: creator.account,
-        appId: applicationId,
-        payFlags: {},
-        appArgs: [],
-        accounts: [escrow.address] //  AppAccounts
-      },
-      {
-        type: TransactionType.TransferAlgo,
-        sign: SignType.LogicSignature,
-        fromAccount: { addr: escrow.address },
-        toAccountAddr: creator.address,
-        amountMicroAlgos: 0,
-        lsig: escrow,
-        payFlags: { closeRemainderTo: creator.address }
-      }
-    ];
+    // NOTE: we don't need a txGroup here as escrow is already empty
+    const deleteTx = {
+      type: TransactionType.DeleteSSC,
+      sign: SignType.SecretKey,
+      fromAccount: creator.account,
+      appId: applicationId,
+      payFlags: { totalFee: 1000 },
+      appArgs: [],
+      accounts: [escrow.address] //  AppAccounts
+    };
 
     const app = runtime.getApp(applicationId);
     assert.isDefined(app); // verify app is present before delete tx
 
     // execute delete tx
-    await runtime.executeTx(txGroup, program, []);
+    await runtime.executeTx(deleteTx, program, []);
 
     // should throw error as app is deleted
     try {

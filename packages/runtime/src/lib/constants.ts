@@ -5,9 +5,15 @@ export const MAX_UINT8 = 255;
 export const MIN_UINT8 = 0;
 export const DEFAULT_STACK_ELEM = BigInt("0");
 export const MAX_CONCAT_SIZE = 4096;
-export const SSC_BYTES = 1; // 1 represents type 'byte' in stateful key-value pair
-export const SSC_UINT = 2; // 2 represents type 'uint' in stateful key-value pair
 export const ALGORAND_MIN_TX_FEE = 1000;
+export const ALGORAND_ACCOUNT_MIN_BALANCE = 1000000;
+
+// values taken from: https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
+// minimum balance costs (in microalgos) for ssc schema
+export const SSC_KEY_BYTE_SLICE = 25000; // cost for 'key' (always in bytes)
+export const SSC_VALUE_UINT = 3500; // cost for value as uint64
+export const SSC_VALUE_BYTES = 25000; // cost for value as bytes
+
 const zeroAddress = new Uint8Array(32);
 const zeroUint64 = BigInt('0');
 const zeroByte = new Uint8Array(0);

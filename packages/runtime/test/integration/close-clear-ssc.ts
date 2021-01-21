@@ -1,8 +1,9 @@
-import { ExecParams, SignType, SSCCallsParam, TransactionType } from "@algorand-builder/algob/build/types";
+import { SignType, SSCCallsParam, TransactionType } from "@algorand-builder/algob/build/types";
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccount } from "../../src/index";
+import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { stringToBytes } from "../../src/lib/parsing";
 import { expectTealErrorAsync } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
@@ -10,8 +11,9 @@ import { useFixture } from "../helpers/integration";
 
 describe("ASC - CloseOut from Application and Clear State", function () {
   useFixture("stateful");
-  let john = new StoreAccount(1000);
-  let alice = new StoreAccount(1000);
+  const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE * 10 + 1000; // 1000 to cover fee
+  let john = new StoreAccount(minBalance + 1000);
+  let alice = new StoreAccount(minBalance + 1000);
 
   let runtime: Runtime;
   let program: string;
@@ -32,7 +34,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
       sign: SignType.SecretKey,
       fromAccount: john.account,
       appId: 11,
-      payFlags: {}
+      payFlags: { totalFee: 1000 }
     };
   });
 
