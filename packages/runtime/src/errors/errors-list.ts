@@ -165,7 +165,7 @@ by an index that does not exist.`
   },
   APP_NOT_FOUND: {
     number: 24,
-    message: "Application Index %appId% not found or is invalid at %line%",
+    message: "Application Index %appId% not found or is invalid at line %line%",
     title: "Application index %appId% is not found at %line%",
     description: `Application index %appId% is not found`
   },
@@ -178,12 +178,12 @@ by an index that does not exist.`
   INVALID_LABEL: {
     number: 26,
     message: "Invalid Label Name at %line%",
-    title: "OpCode name cannot be used as label name at %line%",
+    title: "OpCode name cannot be used as label name at line %line%",
     description: `OpCode name cannot be used as label name`
   },
   ACCOUNT_DOES_NOT_EXIST: {
     number: 27,
-    message: "Account Error - Account doesn't exist at %line%",
+    message: "Account Error - Account doesn't exist at line %line%",
     title: "Account Error at %line%",
     description: `Account does not exist in the current state`
   },
@@ -201,7 +201,7 @@ by an index that does not exist.`
   },
   UNKNOWN_ASSET_FIELD: {
     number: 30,
-    message: "Asset Field Error - Field unknown %field% at %line%",
+    message: "Asset Field Error - Field unknown %field% at line %line%",
     title: "Asset Field Error at %line%",
     description: `Asset field unknown`
   },

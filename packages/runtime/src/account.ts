@@ -69,8 +69,12 @@ export class StoreAccount implements StoreAccountI {
    * @param appId: current application id
    * @param key: key to fetch value of from local state
    * @param value: value of key to put in local state
+   * @param line line number in TEAL file
+   * Note: if user is accessing this function directly through runtime,
+   * the line number is unknown
    */
-  setLocalState (appId: number, key: Uint8Array | string, value: StackElem): AppLocalStateM {
+  setLocalState (appId: number, key: Uint8Array | string, value: StackElem, line?: number): AppLocalStateM {
+    const lineNumber = line ?? 'unknown';
     const localState = this.appsLocalState.get(appId);
     const localApp = localState?.[StateMap];
     if (localState && localApp) {
@@ -83,7 +87,8 @@ export class StoreAccount implements StoreAccountI {
     }
 
     throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, {
-      appId: appId
+      appId: appId,
+      line: lineNumber
     });
   }
 
@@ -109,7 +114,7 @@ export class StoreAccount implements StoreAccountI {
    */
   setGlobalState (appId: number, key: Uint8Array | string, value: StackElem, line?: number): void {
     const app = this.getApp(appId);
-    if (app === undefined) throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: line });
+    if (app === undefined) throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: line ?? 'unknown' });
     const appGlobalState = app[globalState];
     const globalKey = keyToBytes(key);
     appGlobalState.set(globalKey.toString(), value); // set new value in global state
@@ -119,11 +124,21 @@ export class StoreAccount implements StoreAccountI {
   }
 
   /**
-   * Queries application by application index. Returns undefined if app is not found.
+   * Queries application by application index from account's global state.
+   * Returns undefined if app is not found.
    * @param appId application index
    */
   getApp (appId: number): SSCAttributesM | undefined {
     return this.createdApps.get(appId);
+  }
+
+  /**
+   * Queries application by application index from account's local state.
+   * Returns undefined if app is not found.
+   * @param appId application index
+   */
+  getAppFromLocal (appId: number): AppLocalStateM | undefined {
+    return this.appsLocalState.get(appId);
   }
 
   /**
@@ -162,12 +177,20 @@ export class StoreAccount implements StoreAccountI {
     }
   }
 
-  // delete application from account's state
+  // delete application from account's global state (createdApps)
   deleteApp (appId: number): void {
     if (!this.createdApps.has(appId)) {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
     }
     this.createdApps.delete(appId);
+  }
+
+  // close(delete) application from account's local state (appsLocalState)
+  closeApp (appId: number): void {
+    if (!this.appsLocalState.has(appId)) {
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
+    }
+    this.appsLocalState.delete(appId);
   }
 }
 

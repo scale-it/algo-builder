@@ -291,7 +291,7 @@ export class Runtime {
 
       account.optInToApp(appId, appParams);
     } else {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
   }
 
@@ -341,7 +341,7 @@ export class Runtime {
       this.createUpdateTx(senderAddr, appId, payFlags, flags);
       await this.run(newProgram); // execute TEAL code
     } else {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
   }
 
@@ -375,7 +375,6 @@ export class Runtime {
   /**
    * Update current state and account balances
    * @param txnParams : Transaction parameters
-   * @param accounts : accounts passed by user
    */
   updateFinalState (txnParams: ExecParams | ExecParams[]): void {
     let txnParameters;
@@ -386,12 +385,19 @@ export class Runtime {
     }
     for (const txnParam of txnParameters) {
       switch (txnParam.type) {
-        case TransactionType.TransferAlgo:
+        case TransactionType.TransferAlgo: {
           this.transferAlgo(txnParam);
           break;
-        case TransactionType.DeleteSSC:
+        }
+        case TransactionType.DeleteSSC: {
           this.deleteApp(txnParam.appId);
           break;
+        }
+        case TransactionType.CloseSSC: {
+          const fromAccount = this.assertAccountDefined(this.store.accounts.get(txnParam.fromAccount.addr));
+          fromAccount.closeApp(txnParam.appId); // remove app from local state
+          break;
+        }
       }
     }
   }
@@ -406,6 +412,7 @@ export class Runtime {
   async executeTx (txnParams: ExecParams | ExecParams[], program: string,
     args: Uint8Array[]): Promise<void> {
     const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
+
     // initialize context before each execution
     this.ctx = {
       state: cloneDeep(this.store), // state is a deep copy of store

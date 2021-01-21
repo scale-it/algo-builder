@@ -1734,7 +1734,7 @@ export class AppLocalPut extends Op {
     const appId = this.interpreter.runtime.ctx.tx.apid || 0;
 
     // get updated local state for account
-    const localState = account.setLocalState(appId, key, value);
+    const localState = account.setLocalState(appId, key, value, this.line);
     const acc = this.interpreter.runtime.assertAccountDefined(
       this.interpreter.runtime.ctx.state.accounts.get(account.address), this.line);
     acc.appsLocalState.set(appId, localState);
