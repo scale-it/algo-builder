@@ -5,6 +5,7 @@
       "esnext",
       "dom"
     ],
+    "typeRoots": ["node_modules/@types", "node_modules/@algorand-builder/types-algosdk"],
     "experimentalDecorators": true,
     "esModuleInterop": true,
     "allowJs": true,

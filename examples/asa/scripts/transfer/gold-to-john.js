@@ -1,11 +1,20 @@
 const { executeTransaction, balanceOf, TransactionType, SignType } = require('@algorand-builder/algob');
 
 async function run (runtimeEnv, deployer) {
-  const goldAssetID = deployer.asa.get('gold').assetIndex;
+  // query gold ASA from deployer (using checkpoint information),
+  const goldAsset = deployer.asa.get('gold');
+  if (goldAsset === undefined) {
+    console.error('Gold was not deployed. You must run `algob deploy` first.');
+    return;
+  }
 
+  const goldAssetID = goldAsset.assetIndex;
+
+  // query accounts from config
   const john = deployer.accountsByName.get('john');
   const goldOwner = deployer.accountsByName.get('alice');
 
+  // execute asset transfer transaction
   await executeTransaction(deployer, {
     type: TransactionType.TransferAsset,
     sign: SignType.SecretKey,
