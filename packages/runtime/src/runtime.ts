@@ -376,14 +376,8 @@ export class Runtime {
    * Update current state and account balances
    * @param txnParams : Transaction parameters
    */
-  updateFinalState (txnParams: ExecParams | ExecParams[]): void {
-    let txnParameters;
-    if (!Array.isArray(txnParams)) {
-      txnParameters = [txnParams];
-    } else {
-      txnParameters = txnParams;
-    }
-    for (const txnParam of txnParameters) {
+  updateFinalState (txnParams: ExecParams[]): void {
+    for (const txnParam of txnParams) {
       switch (txnParam.type) {
         case TransactionType.TransferAlgo: {
           this.transferAlgo(txnParam);
@@ -393,7 +387,7 @@ export class Runtime {
           this.deleteApp(txnParam.appId);
           break;
         }
-        case TransactionType.CloseSSC: {
+        case TransactionType.CloseSSC || TransactionType.ClearSSC: {
           const fromAccount = this.assertAccountDefined(this.store.accounts.get(txnParam.fromAccount.addr));
           fromAccount.closeApp(txnParam.appId); // remove app from local state
           break;
@@ -421,8 +415,21 @@ export class Runtime {
       args: args
     };
 
-    await this.run(program);
-    this.updateFinalState(txnParams); // update account balances
+    const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
+
+    try {
+      await this.run(program);
+    } catch (error) {
+      // if transaction type is Clear Call, remove the app first before throwing error (rejecting tx)
+      for (const txnParam of txnParameters) {
+        if (txnParam.type === TransactionType.ClearSSC) {
+          const fromAccount = this.assertAccountDefined(this.store.accounts.get(txnParam.fromAccount.addr));
+          fromAccount.closeApp(txnParam.appId); // remove app from local state
+        }
+      }
+      throw error;
+    }
+    this.updateFinalState(txnParameters); // update account balances
   }
 
   // execute teal code line by line

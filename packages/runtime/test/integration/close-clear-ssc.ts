@@ -1,4 +1,4 @@
-import { SignType, SSCCallsParam, TransactionType } from "@algorand-builder/algob/build/types";
+import { ExecParams, SignType, SSCCallsParam, TransactionType } from "@algorand-builder/algob/build/types";
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
@@ -8,10 +8,10 @@ import { expectTealErrorAsync } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 
-describe("Algorand Smart Contracts - CloseOut from Application", function () {
+describe("ASC - CloseOut from Application and Clear State", function () {
   useFixture("stateful");
   let john = new StoreAccount(1000);
-  const alice = new StoreAccount(1000);
+  let alice = new StoreAccount(1000);
 
   let runtime: Runtime;
   let program: string;
@@ -25,7 +25,7 @@ describe("Algorand Smart Contracts - CloseOut from Application", function () {
   };
   this.beforeAll(async function () {
     runtime = new Runtime([john, alice]); // setup test
-    program = getProgram('close-ssc.teal');
+    program = getProgram('close-clear-ssc.teal');
 
     closeOutParams = {
       type: TransactionType.CloseSSC,
@@ -36,7 +36,10 @@ describe("Algorand Smart Contracts - CloseOut from Application", function () {
     };
   });
 
-  const syncAccount = (): void => { john = runtime.getAccount(john.address); };
+  const syncAccount = (): void => {
+    john = runtime.getAccount(john.address);
+    alice = runtime.getAccount(alice.address);
+  };
 
   it("should fail during closeOut if app id is not defined", async function () {
     await expectTealErrorAsync(
@@ -72,7 +75,7 @@ describe("Algorand Smart Contracts - CloseOut from Application", function () {
     assert.deepEqual(globalVal, stringToBytes('global-val'));
   });
 
-  it("should not delete application if logic is rejected", async function () {
+  it("should not delete application on CloseOut call if logic is rejected", async function () {
     // create app
     const appId = await runtime.addApp(flags, {}, program);
     closeOutParams.appId = appId;
@@ -89,5 +92,38 @@ describe("Algorand Smart Contracts - CloseOut from Application", function () {
     // verify app is not deleted from account's local state (as tx is rejected)
     const res = john.getAppFromLocal(appId);
     assert.isDefined(res);
+  });
+
+  // clearState call is different from closeOut call as in clear call, app is deleted from account
+  // even if transaction fails
+  it("should delete application on clearState call even if logic is rejected", async function () {
+    // create app
+    const appId = await runtime.addApp(flags, {}, program);
+    const clearAppParams: SSCCallsParam = {
+      type: TransactionType.ClearSSC,
+      sign: SignType.SecretKey,
+      fromAccount: alice.account, // sending txn sender other than creator (john), so txn should be rejected
+      appId: appId,
+      payFlags: {}
+    };
+    await runtime.optInToApp(alice.address, appId, {}, {}, program); // opt-in to app (set new local state)
+    syncAccount();
+
+    // verify before tx execution that local state is present
+    let res = alice.getAppFromLocal(appId);
+    assert.isDefined(res);
+
+    // execute tx
+    await expectTealErrorAsync(
+      async () => await runtime.executeTx(clearAppParams, program, []),
+      ERRORS.TEAL.REJECTED_BY_LOGIC
+    );
+
+    // verify app is deleted from account's local state even if tx is rejected after execution
+    res = alice.getAppFromLocal(appId);
+    assert.isUndefined(res);
+
+    // verify global state is not deleted
+    assert.isDefined(runtime.getApp(appId));
   });
 });

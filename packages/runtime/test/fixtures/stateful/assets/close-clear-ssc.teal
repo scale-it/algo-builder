@@ -17,7 +17,12 @@ not_creation:
 int CloseOut
 txn OnCompletion
 ==
+int ClearState
+txn OnCompletion
+==
+||
 
+// finish if not closeOut/Clear call
 bz finished
 
 // check if creator is closing out

@@ -180,7 +180,7 @@ export class StoreAccount implements StoreAccountI {
   // delete application from account's global state (createdApps)
   deleteApp (appId: number): void {
     if (!this.createdApps.has(appId)) {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
     this.createdApps.delete(appId);
   }
@@ -188,7 +188,7 @@ export class StoreAccount implements StoreAccountI {
   // close(delete) application from account's local state (appsLocalState)
   closeApp (appId: number): void {
     if (!this.appsLocalState.has(appId)) {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
     this.appsLocalState.delete(appId);
   }
