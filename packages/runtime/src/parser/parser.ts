@@ -13,9 +13,9 @@ import {
   Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, Return, Sha256,
   Sha512_256, Store, Sub, Substring, Substring3, Txn, Txna
 } from "../interpreter/opcode-list";
-import { LogicSigMaxCost, OpGasCost } from "../lib/constants";
+import { LogicSigMaxCost, LogicSigMaxSize, MaxAppProgramCost, MaxAppProgramLen, OpGasCost } from "../lib/constants";
 import { assertLen } from "../lib/parsing";
-import { Operator } from "../types";
+import { ExecutionMode, Operator } from "../types";
 
 // teal v1 opcodes
 const opCodeMap: { [key: number]: {[key: string]: any} } = { // tealVersion => opcodeMap
@@ -276,12 +276,59 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
   return new opCodeMap[tealVersion][opCode](words, counter);
 }
 
+// verify max cost of TEAL code is within consensus parameters
+function assertMaxCost (gas: number, mode: ExecutionMode): void {
+  if (mode === ExecutionMode.STATELESS) {
+    // check max cost (for stateless)
+    if (gas > LogicSigMaxCost) {
+      throw new TealError(ERRORS.TEAL.INVALID_MAX_COST, {
+        cost: gas,
+        maxcost: LogicSigMaxCost,
+        mode: 'Stateless'
+      });
+    }
+  } else {
+    if (gas > MaxAppProgramCost) {
+      // check max cost (for stateful)
+      throw new TealError(ERRORS.TEAL.INVALID_MAX_COST, {
+        cost: gas,
+        maxcost: MaxAppProgramCost,
+        mode: 'Stateful'
+      });
+    }
+  }
+}
+
+// verify max length of TEAL code is within consensus parameters
+function assertMaxLen (len: number, mode: ExecutionMode): void {
+  if (mode === ExecutionMode.STATELESS) {
+    // check max program cost (for stateless)
+    if (len > LogicSigMaxSize) {
+      throw new TealError(ERRORS.TEAL.INVALID_MAX_LEN, {
+        length: len,
+        maxlen: LogicSigMaxSize,
+        mode: 'Stateless'
+      });
+    }
+  } else {
+    if (len > MaxAppProgramLen) {
+      // check max program length (for stateful)
+      throw new TealError(ERRORS.TEAL.INVALID_MAX_LEN, {
+        length: len,
+        maxlen: MaxAppProgramLen,
+        mode: 'Stateful'
+      });
+    }
+  }
+}
+
 /**
  * Description: Returns a list of Opcodes object after reading text from given TEAL file
  * @param program : TEAL code as string
+ * @param mode : execution mode of TEAL code (Stateless or Application)
  * @param interpreter: interpreter object
  */
-export async function parser (program: string, interpreter: Interpreter): Promise<Operator[]> {
+export function parser (program: string, mode: ExecutionMode, interpreter: Interpreter): Operator[] {
   const opCodeList = [] as Operator[];
   let counter = 0;
 
@@ -295,13 +342,13 @@ export async function parser (program: string, interpreter: Interpreter): Promis
 
     // Trim whitespace from line and extract words from line
     const words = wordsFromLine(line);
+    interpreter.length += words.join('').length; // calculate length of TEAL code
     if (words.length !== 0) {
       opCodeList.push(opcodeFromSentence(words, counter, interpreter));
     }
   }
 
-  if (interpreter.gas > LogicSigMaxCost) {
-    throw new TealError(ERRORS.TEAL.INVALID_LOGICSIG_MAX_COST, { cost: interpreter.gas });
-  }
+  assertMaxCost(interpreter.gas, mode);
+  // assertMaxLen(interpreter.length, mode); // TBD
   return opCodeList;
 }

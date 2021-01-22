@@ -8,7 +8,13 @@ export const MAX_CONCAT_SIZE = 4096;
 export const SSC_BYTES = 1; // 1 represents type 'byte' in stateful key-value pair
 export const SSC_UINT = 2; // 2 represents type 'uint' in stateful key-value pair
 export const ALGORAND_MIN_TX_FEE = 1000;
+
+// values taken from https://github.com/algorand/go-algorand/find/master#L689
 export const LogicSigMaxCost = 20000;
+export const MaxAppProgramCost = 700;
+export const LogicSigMaxSize = 1000;
+export const MaxAppProgramLen = 1024;
+
 const zeroAddress = new Uint8Array(32);
 const zeroUint64 = BigInt('0');
 const zeroByte = new Uint8Array(0);

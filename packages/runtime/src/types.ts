@@ -130,3 +130,9 @@ export enum TxnOnComplete {
   UpdateApplication = '4',
   DeleteApplication = '5'
 }
+
+// https://developer.algorand.org/docs/reference/teal/specification/#execution-modes
+export enum ExecutionMode {
+  STATELESS, // stateless TEAL
+  STATEFUL // application call (NoOp, CloseOut..)
+}
