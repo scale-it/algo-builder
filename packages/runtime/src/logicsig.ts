@@ -1,8 +1,7 @@
 import {
   Account, decodeAddress, encodeAddress,
-  generateAccount,
-  MultiSig, MultiSigAccount, multisigAddress, signBytes,
-  verifyBytes
+  generateAccount, MultiSig, MultiSigAccount,
+  multisigAddress, signBytes, verifyBytes
 } from "algosdk";
 
 import { compareArray } from "../src/lib/compare";
@@ -94,7 +93,7 @@ export class LogicSig {
     }
 
     if (this.msig) {
-      return this.verifyMultisig(this.msig, decodeAddress(accAddr).publicKey);
+      return this.verifyMultisig(this.msig, accAddr);
     }
 
     return false;
@@ -105,7 +104,7 @@ export class LogicSig {
    * @param msig Msig
    * @param publicKey Public key of sender
    */
-  verifyMultisig (msig: MultiSig, publicKey: Uint8Array): boolean {
+  verifyMultisig (msig: MultiSig, accAddr: string): boolean {
     const version = msig.v;
     const threshold = msig.thr;
     const subsigs = msig.subsig;
@@ -117,14 +116,14 @@ export class LogicSig {
       return false;
     }
 
-    let pk;
+    let multiSigaddr;
     try {
-      pk = decodeAddress(multisigAddress({ version, threshold, addrs })).publicKey;
+      multiSigaddr = multisigAddress({ version, threshold, addrs });
     } catch (e) {
       return false;
     }
 
-    if (compareArray(pk, publicKey)) {
+    if (accAddr !== multiSigaddr) {
       return false;
     }
 
@@ -140,7 +139,7 @@ export class LogicSig {
 
     let verifiedCounter = 0;
     for (const subsig of subsigs) {
-      if (subsig.s !== new Uint8Array(0) && verifyBytes(this.logic, this.sig, publicKey)) {
+      if (subsig.s !== new Uint8Array(0) && verifyBytes(this.logic, this.sig, accAddr)) {
         verifiedCounter += 1;
       }
     }
