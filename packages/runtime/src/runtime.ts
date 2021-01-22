@@ -326,6 +326,8 @@ export class Runtime {
    * @param senderAddr sender address
    * @param appId application Id
    * @param newProgram updated program
+   * @param payFlags Transaction parameters
+   * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
    */
   async updateApp (
     senderAddr: string,

@@ -1,5 +1,7 @@
 # Algorand Builder docs
 
++ [API documentation](https://scale-it.github.io/algorand-builder/)
+
 + Installation: [main README](/README.md#installation) file.
 + Project initialization → read below.
 + [Configuration](/docs/algob-config.md).
@@ -11,7 +13,6 @@
 + [Algob Console](/docs/algob-console.md)
 + [PyTeal](/docs/py-teal.md).
 + [Test TEAL](/docs/testing-teal.md).
-+ [API docs](https://scale-it.github.io/algorand-builder/)
 + [Best Practices](./best-practices.md)
 
 For more in-depth description you can look at the [project specification](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
@@ -31,6 +32,7 @@ or
 ```
 algob -h deploy
 ```
+
 
 ## Project initialization
 To start using `algob` you must first create a project similar to what `yarn` and `npm` would do.
@@ -52,6 +54,7 @@ Further information about the `sample-project` can be found [here](/packages/alg
 
 
 ### Checkpoints
+
 `algob` uses local file system files to version its state.
 These files are called checkpoints and they save information about deployed assets/contracts.
 As they are checked-in into Version Control System you can use them to track the deployed state of your assets.
