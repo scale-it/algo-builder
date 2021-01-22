@@ -118,7 +118,12 @@ export class LogicSig {
 
     let multiSigaddr;
     try {
-      multiSigaddr = multisigAddress({ version, threshold, addrs });
+      const mparams = {
+        version: version,
+        threshold: threshold,
+        addrs: addrs
+      };
+      multiSigaddr = multisigAddress(mparams);
     } catch (e) {
       return false;
     }
@@ -129,7 +134,7 @@ export class LogicSig {
 
     let counter = 0;
     for (const subsig of subsigs) {
-      if (subsig.s !== new Uint8Array(0)) {
+      if (!compareArray(subsig.s, new Uint8Array(0))) {
         counter += 1;
       }
     }
@@ -139,7 +144,8 @@ export class LogicSig {
 
     let verifiedCounter = 0;
     for (const subsig of subsigs) {
-      if (subsig.s !== new Uint8Array(0) && verifyBytes(this.logic, this.sig, accAddr)) {
+      const subsigAddr = encodeAddress(subsig.pk);
+      if (!compareArray(subsig.s, new Uint8Array(0)) && verifyBytes(this.logic, subsig.s, subsigAddr)) {
         verifiedCounter += 1;
       }
     }
