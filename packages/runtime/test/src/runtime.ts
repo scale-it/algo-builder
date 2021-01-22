@@ -8,6 +8,7 @@ import { useFixture } from "../helpers/integration";
 const programName = "escrow.teal";
 
 describe("Logic Signature Test", () => {
+  // console.log(fromMultisigPreImg({version: 1, threshold: 2, pks: []}));
   useFixture("escrow-account");
   const john = new StoreAccount(10);
   const bob = new StoreAccount(100);
