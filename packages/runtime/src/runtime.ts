@@ -409,7 +409,7 @@ export class Runtime {
    * This function executes a transaction based on a smart
    * contract logic and updates state afterwards
    * @param txnParams : Transaction parameters
-   * @param program : teal code as string
+   * @param program : teal code as a string
    * @param args : external arguments to smart contract
    */
   async executeTx (txnParams: ExecParams | ExecParams[], program: string,
