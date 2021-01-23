@@ -211,13 +211,13 @@ by an index that does not exist.`
     title: PARSE_ERROR,
     description: `Unkown Opcode encountered`
   },
-  INVALID_MAX_COST: {
+  MAX_COST_EXCEEDED: {
     number: 32,
     message: "Cost of provided TEAL code = %cost% exceeds max cost of %maxcost%, Mode: %mode%",
     title: 'MaxCost Error',
     description: `MaxCost Error`
   },
-  INVALID_MAX_LEN: {
+  MAX_LEN_EXCEEDED: {
     number: 33,
     message: "Length of provided TEAL code = %length% exceeds max length of %maxlen%, Mode: %mode%",
     title: 'MaxLength Error',

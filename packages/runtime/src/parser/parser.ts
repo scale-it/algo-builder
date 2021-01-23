@@ -281,7 +281,7 @@ function assertMaxCost (gas: number, mode: ExecutionMode): void {
   if (mode === ExecutionMode.STATELESS) {
     // check max cost (for stateless)
     if (gas > LogicSigMaxCost) {
-      throw new TealError(ERRORS.TEAL.INVALID_MAX_COST, {
+      throw new TealError(ERRORS.TEAL.MAX_COST_EXCEEDED, {
         cost: gas,
         maxcost: LogicSigMaxCost,
         mode: 'Stateless'
@@ -290,7 +290,7 @@ function assertMaxCost (gas: number, mode: ExecutionMode): void {
   } else {
     if (gas > MaxAppProgramCost) {
       // check max cost (for stateful)
-      throw new TealError(ERRORS.TEAL.INVALID_MAX_COST, {
+      throw new TealError(ERRORS.TEAL.MAX_COST_EXCEEDED, {
         cost: gas,
         maxcost: MaxAppProgramCost,
         mode: 'Stateful'
@@ -304,7 +304,7 @@ function assertMaxLen (len: number, mode: ExecutionMode): void {
   if (mode === ExecutionMode.STATELESS) {
     // check max program cost (for stateless)
     if (len > LogicSigMaxSize) {
-      throw new TealError(ERRORS.TEAL.INVALID_MAX_LEN, {
+      throw new TealError(ERRORS.TEAL.MAX_LEN_EXCEEDED, {
         length: len,
         maxlen: LogicSigMaxSize,
         mode: 'Stateless'
@@ -313,7 +313,7 @@ function assertMaxLen (len: number, mode: ExecutionMode): void {
   } else {
     if (len > MaxAppProgramLen) {
       // check max program length (for stateful)
-      throw new TealError(ERRORS.TEAL.INVALID_MAX_LEN, {
+      throw new TealError(ERRORS.TEAL.MAX_LEN_EXCEEDED, {
         length: len,
         maxlen: MaxAppProgramLen,
         mode: 'Stateful'

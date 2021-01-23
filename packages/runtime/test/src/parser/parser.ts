@@ -1011,7 +1011,7 @@ describe("Parser", function () {
       const file = "test-max-opcost.teal"; // has cost 22800
       expectTealError(
         () => parser(getProgram(file), ExecutionMode.STATELESS, interpreter),
-        ERRORS.TEAL.INVALID_MAX_COST
+        ERRORS.TEAL.MAX_COST_EXCEEDED
       );
     });
   });
