@@ -1990,43 +1990,43 @@ describe("Teal Opcodes", function () {
         // for txn
         expectTealError(
           () => new Txn(['ApplicationID'], 1, interpreter),
-          ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD
+          ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
         );
 
         expectTealError(
           () => new Txn(['ApprovalProgram'], 1, interpreter),
-          ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD
+          ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
         );
 
         expectTealError(
           () => new Txn(['ConfigAssetDecimals'], 1, interpreter),
-          ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD
+          ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
         );
 
         expectTealError(
           () => new Txn(['FreezeAssetAccount'], 1, interpreter),
-          ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD
+          ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
         );
 
         expectTealError(
           () => new Txn(['FreezeAssetAccount'], 1, interpreter),
-          ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD
+          ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
         );
 
         // for gtxn
         expectTealError(
           () => new Gtxn(['0', 'OnCompletion'], 1, interpreter),
-          ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD
+          ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
         );
 
         expectTealError(
           () => new Gtxn(['0', 'RekeyTo'], 1, interpreter),
-          ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD
+          ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
         );
 
         expectTealError(
           () => new Gtxn(['0', 'ConfigAssetClawback'], 1, interpreter),
-          ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD
+          ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
         );
       });
     });
@@ -2126,22 +2126,22 @@ describe("Teal Opcodes", function () {
 
       expectTealError(
         () => new Global(['LogicSigVersion'], 1, interpreter),
-        ERRORS.TEAL.UNKOWN_GLOBAL_FIELD
+        ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
       );
 
       expectTealError(
         () => new Global(['Round'], 1, interpreter),
-        ERRORS.TEAL.UNKOWN_GLOBAL_FIELD
+        ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
       );
 
       expectTealError(
         () => new Global(['LatestTimestamp'], 1, interpreter),
-        ERRORS.TEAL.UNKOWN_GLOBAL_FIELD
+        ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
       );
 
       expectTealError(
         () => new Global(['CurrentApplicationID'], 1, interpreter),
-        ERRORS.TEAL.UNKOWN_GLOBAL_FIELD
+        ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
       );
     });
   });

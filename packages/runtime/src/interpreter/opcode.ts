@@ -133,7 +133,7 @@ export class Op {
    */
   assertTxFieldDefined (str: string, tealVersion: number, line: number): void {
     if (TxnFields[tealVersion][str] === undefined) {
-      throw new TealError(ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD,
+      throw new TealError(ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD,
         { field: str, version: tealVersion, line: line });
     }
   }
@@ -146,7 +146,7 @@ export class Op {
    */
   assertGlobalDefined (str: string, tealVersion: number, line: number): void {
     if (GlobalFields[tealVersion][str] === undefined) {
-      throw new TealError(ERRORS.TEAL.UNKOWN_GLOBAL_FIELD, { field: str, version: tealVersion, line: line });
+      throw new TealError(ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD, { field: str, version: tealVersion, line: line });
     }
   }
 

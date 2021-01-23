@@ -406,7 +406,7 @@ describe("Parser", function () {
 
       expectTealError(
         () => opcodeFromSentence(["txn", "fee"], 1, interpreter),
-        ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD
+        ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
       );
     });
 
@@ -505,17 +505,17 @@ describe("Parser", function () {
 
       expectTealError(
         () => opcodeFromSentence(["global", "mintxnfee"], 1, interpreter),
-        ERRORS.TEAL.UNKOWN_GLOBAL_FIELD
+        ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
       );
 
       expectTealError(
         () => opcodeFromSentence(["global", "minbalance"], 1, interpreter),
-        ERRORS.TEAL.UNKOWN_GLOBAL_FIELD
+        ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
       );
 
       expectTealError(
         () => opcodeFromSentence(["global", "maxtxnlife"], 1, interpreter),
-        ERRORS.TEAL.UNKOWN_GLOBAL_FIELD
+        ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
       );
     });
 
