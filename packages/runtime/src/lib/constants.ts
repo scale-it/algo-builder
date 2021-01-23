@@ -9,7 +9,7 @@ export const SSC_BYTES = 1; // 1 represents type 'byte' in stateful key-value pa
 export const SSC_UINT = 2; // 2 represents type 'uint' in stateful key-value pair
 export const ALGORAND_MIN_TX_FEE = 1000;
 
-// values taken from https://github.com/algorand/go-algorand/find/master#L689
+// values taken from [https://github.com/algorand/go-algorand/blob/master/config/consensus.go#L691]
 export const LogicSigMaxCost = 20000;
 export const MaxAppProgramCost = 700;
 export const LogicSigMaxSize = 1000;

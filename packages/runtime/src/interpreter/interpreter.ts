@@ -19,7 +19,7 @@ export class Interpreter {
   readonly stack: TEALStack;
   tealVersion: number; // LogicSigVersion
   gas: number; // total gas cost of TEAL code
-  length: number; // total length of TEAL code
+  length: number; // total length of 'compiled' TEAL code
   bytecblock: Uint8Array[];
   intcblock: BigInt[];
   scratch: StackElem[];

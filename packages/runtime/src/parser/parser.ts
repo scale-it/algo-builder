@@ -218,6 +218,9 @@ export function wordsFromLine (line: string): string[] {
 
 /**
  * Description: Returns Opcode object for given field
+ * NOTE: we are also calculating the gas cost associated with each opcode,
+ * and throwing error if the total gas of TEAL code exceeds the max gas cost for
+ * respective execution modes
  * @param words : words extracted from line
  * @param counter: line number in TEAL file
  * @param interpreter: interpreter object
@@ -342,13 +345,13 @@ export function parser (program: string, mode: ExecutionMode, interpreter: Inter
 
     // Trim whitespace from line and extract words from line
     const words = wordsFromLine(line);
-    interpreter.length += words.join('').length; // calculate length of TEAL code
     if (words.length !== 0) {
       opCodeList.push(opcodeFromSentence(words, counter, interpreter));
     }
   }
 
   assertMaxCost(interpreter.gas, mode);
-  // assertMaxLen(interpreter.length, mode); // TBD
+  // TODO: check if we can calculate length in: https://www.pivotaltracker.com/story/show/176623588
+  // assertMaxLen(interpreter.length, mode);
   return opCodeList;
 }
