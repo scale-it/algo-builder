@@ -969,42 +969,31 @@ describe("Parser", function () {
       const mode = ExecutionMode.STATELESS;
       parser(getProgram(file), mode, interpreter);
       assert.equal(interpreter.gas, 3);
-      assert.equal(interpreter.length, 9);
 
       interpreter.gas = 0;
-      interpreter.length = 0;
       file = "test-file-3.teal";
       parser(getProgram(file), mode, interpreter);
       assert.equal(interpreter.gas, 3);
-      assert.equal(interpreter.length, 24);
 
       interpreter.gas = 0;
-      interpreter.length = 0;
       file = "test-file-4.teal";
       parser(getProgram(file), mode, interpreter);
       assert.equal(interpreter.gas, 3);
-      assert.equal(interpreter.length, 24);
 
       interpreter.gas = 0;
-      interpreter.length = 0;
       file = "test-label.teal";
       parser(getProgram(file), mode, interpreter);
       assert.equal(interpreter.gas, 0); // label has cost 0
-      assert.equal(interpreter.length, 6);
 
       interpreter.gas = 0;
-      interpreter.length = 0;
       file = "test-others.teal";
       parser(getProgram(file), mode, interpreter);
       assert.equal(interpreter.gas, 10);
-      assert.equal(interpreter.length, 68);
 
       interpreter.gas = 0;
-      interpreter.length = 0;
       file = "test-stateful.teal";
       parser(getProgram(file), ExecutionMode.STATEFUL, interpreter);
       assert.equal(interpreter.gas, 12);
-      assert.equal(interpreter.length, 203);
     });
 
     it("Should throw error if total cost exceeds 20000", async () => {
