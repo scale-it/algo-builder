@@ -270,7 +270,7 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
   }
 
   // increment gas of TEAL code
-  // select from OpGasCost map if cost is different than 1
+  // Add 1 if opCode is not present in OpGasCost map
   if (opCode !== '#pragma') { interpreter.gas += OpGasCost[tealVersion][opCode] ?? 1; }
 
   if (interpreterReqList.has(opCode)) {

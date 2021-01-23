@@ -141,7 +141,7 @@ export class Interpreter {
   /**
    * This function executes TEAL code after parsing
    * @param program: teal code
-   * @param mode : execution mode of TEAL code (Stateless or Application)
+   * @param mode : execution mode of TEAL code (Stateless or Stateful)
    * @param runtime : runtime object
    */
   execute (program: string, mode: ExecutionMode, runtime: Runtime): void {

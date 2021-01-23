@@ -784,7 +784,7 @@ describe("Parser", function () {
     });
 
     it("Should return correct opcode list for 'Crypto opcodes'", async () => {
-      const res = await parser(getProgram(cryptoFile), ExecutionMode.STATELESS, interpreter);
+      const res = parser(getProgram(cryptoFile), ExecutionMode.STATELESS, interpreter);
       const expected = [
         new Sha256([], 1),
         new Keccak256([], 2),
