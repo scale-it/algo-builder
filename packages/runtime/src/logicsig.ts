@@ -21,14 +21,14 @@ export class LogicSig {
   args: Uint8Array[];
   sig: Uint8Array;
   msig: MultiSig | undefined;
-  SignatureAddress: string;
+  lsigAddress: string;
 
   constructor (program: string, args: Uint8Array[]) {
     this.logic = stringToBytes(program);
     this.args = args;
     this.sig = new Uint8Array(0);
     this.msig = undefined;
-    this.SignatureAddress = generateAccount().addr;
+    this.lsigAddress = generateAccount().addr;
   }
 
   /**
@@ -97,7 +97,7 @@ export class LogicSig {
    */
   verify (accAddr: string): boolean {
     if (compareArray(this.sig, new Uint8Array(0)) && this.msig === undefined) {
-      if (accAddr === this.SignatureAddress) return true;
+      if (accAddr === this.lsigAddress) return true;
       return false;
     }
 
@@ -174,7 +174,7 @@ export class LogicSig {
    * Returns logic signature address
    */
   address (): string {
-    return this.SignatureAddress;
+    return this.lsigAddress;
   }
 
   /**
