@@ -216,6 +216,12 @@ by an index that does not exist.`
     message: "invalid secret key: %secretkey%",
     title: "secret key error",
     description: `secret key error`
+  },
+  LOGIC_SIGNATURE_NOT_FOUND: {
+    number: 33,
+    message: "logic signature not found",
+    title: "lsig error",
+    description: `lsig error`
   }
 };
 

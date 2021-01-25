@@ -1,14 +1,15 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
-import { ExecParams, mkTransaction, parseSSCAppArgs } from "@algorand-builder/algob";
+import { ExecParams, mkTransaction, parseSSCAppArgs, SignType } from "@algorand-builder/algob";
 import { AccountAddress, AlgoTransferParam, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
-import algosdk from "algosdk";
+import algosdk, { decodeAddress } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
 import { StoreAccount } from "./account";
 import { TealError } from "./errors/errors";
 import { ERRORS } from "./errors/errors-list";
 import { Interpreter } from "./index";
+import { convertToString } from "./lib/parsing";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import type { Context, SSCAttributesM, StackElem, State, StoreAccountI, Txn } from "./types";
@@ -391,7 +392,7 @@ export class Runtime {
    * @param txnParams : Transaction parameters
    * @param accounts : accounts passed by user
    */
-  updateFinalState (txnParams: ExecParams | ExecParams[]): void {
+  async updateFinalState (txnParams: ExecParams | ExecParams[]): Promise<void> {
     let txnParameters;
     if (!Array.isArray(txnParams)) {
       txnParameters = [txnParams];
@@ -399,6 +400,20 @@ export class Runtime {
       txnParameters = txnParams;
     }
     for (const txnParam of txnParameters) {
+      // check if transaction is signed by logic signature,
+      // if yes verify signature and run logic
+      if (txnParam.sign === SignType.LogicSignature) {
+        if (txnParam.lsig === undefined) {
+          throw new TealError(ERRORS.TEAL.LOGIC_SIGNATURE_NOT_FOUND);
+        }
+
+        // signature validation
+        txnParam.lsig.verify(decodeAddress(txnParam.fromAccount.addr).publicKey);
+
+        // logic validation
+        const program = convertToString(txnParam.lsig.logic);
+        await this.run(program);
+      }
       switch (txnParam.type) {
         case TransactionType.TransferAlgo:
           this.transferAlgo(txnParam);
@@ -429,7 +444,7 @@ export class Runtime {
     };
 
     await this.run(program);
-    this.updateFinalState(txnParams); // update account balances
+    await this.updateFinalState(txnParams); // update account balances
   }
 
   // execute teal code line by line

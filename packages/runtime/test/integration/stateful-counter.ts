@@ -12,7 +12,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
 
   const txnParams: ExecParams = {
     type: TransactionType.CallNoOpSSC,
-    sign: SignType.LogicSignature,
+    sign: SignType.SecretKey,
     fromAccount: john.account,
     appId: 0,
     payFlags: { totalFee: 1000 }
