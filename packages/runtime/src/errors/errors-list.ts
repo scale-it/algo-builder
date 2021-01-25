@@ -211,8 +211,14 @@ by an index that does not exist.`
     title: PARSE_ERROR,
     description: `Unkown Opcode encountered`
   },
-  INSUFFICIENT_ACCOUNT_BALANCE: {
+  INVALID_SECRET_KEY: {
     number: 32,
+    message: "invalid secret key: %secretkey%",
+    title: "secret key error",
+    description: `secret key error`
+  },
+  INSUFFICIENT_ACCOUNT_BALANCE: {
+    number: 33,
     message: "Cannot withdraw %amount% microalgos from account %address%: resulting balance would be insufficient",
     title: 'Insufficient account balance',
     description: `Withdrawing %amount% microalgos will lead to insufficient balance`

@@ -183,7 +183,7 @@ declare module 'algosdk' {
   export type LogicSigArgs = Uint8Array[];
 
   export interface Subsig {
-    pk: string;
+    pk: Uint8Array;
     s: Uint8Array;
   }
 
@@ -435,7 +435,14 @@ declare module 'algosdk' {
 
   export function signBid(bid: any, sk: any): any;
 
-  export function signBytes(bytes: any, sk: any): any;
+  /**
+   * signBytes takes arbitrary bytes and a secret key, prepends the bytes with "MX" for domain separation, signs the bytes 
+   * with the private key, and returns the signature.
+   * @param bytes arbitrary bytes
+   * @param sk Algorand secret key
+   * @returns binary signature
+   */
+  export function signBytes(bytes: Uint8Array, sk: Uint8Array): Uint8Array;
 
   /**
    * signLogicSigTransaction takes  a raw transaction and a LogicSig object and returns a logicsig
@@ -460,7 +467,15 @@ declare module 'algosdk' {
 
   export function signTransaction(txn: Transaction, sk: any): any;
 
-  export function verifyBytes(bytes: any, signature: any, addr: any): any;
+  /**
+   * verifyBytes takes array of bytes, an address, and a signature and verifies if the signature is correct for the public
+   * key and the bytes (the bytes should have been signed with "MX" prepended for domain separation).
+   * @param bytes arbitrary bytes
+   * @param signature binary signature
+   * @param addr string address
+   * @returns bool
+   */
+  export function verifyBytes(bytes: Uint8Array, signature: Uint8Array, addr: string): boolean;
 
   export namespace ERROR_INVALID_MICROALGOS {
     const message: string;

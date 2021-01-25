@@ -5,9 +5,11 @@ import { AccountAddress, AlgoTransferParam, SSCDeploymentFlags, SSCOptionalFlags
 import algosdk from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
+import { StoreAccount } from "./account";
 import { TealError } from "./errors/errors";
 import { ERRORS } from "./errors/errors-list";
 import { Interpreter } from "./index";
+import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import type { Context, SSCAttributesM, StackElem, State, StoreAccountI, Txn } from "./types";
 
@@ -372,6 +374,18 @@ export class Runtime {
         address: address
       });
     }
+  }
+
+  /**
+   * Returns logic signature
+   * @param program TEAL code
+   * @param args arguments passed
+   */
+  getLogicSig (program: string, args: Uint8Array[]): LogicSig {
+    const lsig = new LogicSig(program, args);
+    const acc = new StoreAccount(0, { addr: lsig.address(), sk: new Uint8Array(0) });
+    this.store.accounts.set(acc.address, acc);
+    return lsig;
   }
 
   // transfer ALGO as per transaction parameters
