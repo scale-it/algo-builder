@@ -211,14 +211,20 @@ by an index that does not exist.`
     title: PARSE_ERROR,
     description: `Unknown Opcode encountered`
   },
-  MAX_COST_EXCEEDED: {
+  INVALID_SECRET_KEY: {
     number: 32,
+    message: "invalid secret key: %secretkey%",
+    title: "secret key error",
+    description: `secret key error`
+  },
+  MAX_COST_EXCEEDED: {
+    number: 33,
     message: "Cost of provided TEAL code = %cost% exceeds max cost of %maxcost%, Mode: %mode%",
     title: 'MaxCost Error',
     description: `MaxCost Error`
   },
   MAX_LEN_EXCEEDED: {
-    number: 33,
+    number: 34,
     message: "Length of provided TEAL code = %length% exceeds max length of %maxlen%, Mode: %mode%",
     title: 'MaxLength Error',
     description: `MaxLength Error`
