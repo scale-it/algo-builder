@@ -7,6 +7,12 @@ import {
 import { compareArray } from "../src/lib/compare";
 import { convertToString, stringToBytes } from "../src/lib/parsing";
 
+/**
+ * Note: We cannot use algosdk LogicSig class here,
+ * because algosdk.makeLogicSig() takes compiled bytes as a argument
+ * and currently we don't calculate compiled bytes from TEAL program.
+ * We are using raw TEAL code as program.(by converting string into bytes)
+ */
 export class LogicSig {
   logic: Uint8Array;
   args: Uint8Array[];
