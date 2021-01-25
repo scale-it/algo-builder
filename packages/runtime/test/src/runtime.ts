@@ -18,7 +18,7 @@ describe("Logic Signature Test", () => {
   it("should sign the lsig by john(delegated signature)", () => {
     const lsig = runtime.getLogicSig(getProgram(programName), []);
 
-    lsig.sign(john.account);
+    lsig.sign(john.account.sk);
     const result = lsig.verify(john.address);
 
     assert.equal(result, true);
@@ -27,7 +27,7 @@ describe("Logic Signature Test", () => {
   it("should return false if lsig is not signed by john(delegated signature)", () => {
     const lsig = runtime.getLogicSig(getProgram(programName), []);
 
-    lsig.sign(bob.account);
+    lsig.sign(bob.account.sk);
     const result = lsig.verify(john.address);
 
     assert.equal(result, false);
@@ -63,9 +63,9 @@ describe("Multi-Signature Test", () => {
   it("should verify if threshold is verified and sender is multisigAddr", () => {
     const lsig = runtime.getLogicSig(getProgram(multiSigProg), []);
     // lsig signed by alice
-    lsig.sign(alice.account, mparams);
+    lsig.sign(alice.account.sk, mparams);
     // lsig signed again (threshold = 2) by john
-    lsig.appendToMultisig(john.account);
+    lsig.appendToMultisig(john.account.sk);
 
     const result = lsig.verify(multsigaddr);
     assert.equal(result, true);
@@ -74,9 +74,9 @@ describe("Multi-Signature Test", () => {
   it("should not verify if threshold is achieved but sender is not multisigAddr", () => {
     const lsig = runtime.getLogicSig(getProgram(multiSigProg), []);
     // lsig signed by alice
-    lsig.sign(alice.account, mparams);
+    lsig.sign(alice.account.sk, mparams);
     // lsig signed again (threshold = 2) by john
-    lsig.appendToMultisig(john.account);
+    lsig.appendToMultisig(john.account.sk);
 
     const result = lsig.verify(bob.address);
     assert.equal(result, false);
@@ -85,7 +85,7 @@ describe("Multi-Signature Test", () => {
   it("should not verify if threshold is not achieved but sender is multisigAddr", () => {
     const lsig = runtime.getLogicSig(getProgram(multiSigProg), []);
     // lsig signed by alice
-    lsig.sign(alice.account, mparams);
+    lsig.sign(alice.account.sk, mparams);
 
     const result = lsig.verify(multsigaddr);
     assert.equal(result, false);

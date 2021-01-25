@@ -1,8 +1,9 @@
 import {
-  Account, decodeAddress, encodeAddress,
+  decodeAddress, encodeAddress,
   generateAccount, MultiSig, MultiSigAccount,
   multisigAddress, signBytes, verifyBytes
 } from "algosdk";
+import * as tweet from "tweetnacl-ts";
 
 import { compareArray } from "../src/lib/compare";
 import { convertToString, stringToBytes } from "../src/lib/parsing";
@@ -32,12 +33,15 @@ export class LogicSig {
    * Creates signature (if no msig provided) or multi signature otherwise
    * @param secretKey sender's secret key
    */
-  sign (account: Account, msig?: MultiSigAccount): void {
+  sign (secretKey: Uint8Array, msig?: MultiSigAccount): void {
     if (msig === undefined) {
-      this.sig = signBytes(this.logic, account.sk);
+      this.sig = signBytes(this.logic, secretKey);
     } else {
       const subsigs = msig.addrs.map(addr => {
-        return { pk: decodeAddress(addr).publicKey, s: new Uint8Array(0) };
+        return {
+          pk: decodeAddress(addr).publicKey, 
+          s: new Uint8Array(0) 
+        };
       });
       this.msig = {
         v: msig.version,
@@ -45,30 +49,30 @@ export class LogicSig {
         subsig: subsigs
       };
 
-      const [sig, index] = this.singleSignMultisig(account, this.msig);
+      const [sig, index] = this.singleSignMultisig(secretKey, this.msig);
       this.msig.subsig[index].s = sig;
     }
   }
 
   /**
    * Sign Multisignature
-   * @param account Account
+   * @param secretKey Secret key to sign with
    * @param msig Multisignature
    */
-  singleSignMultisig (account: Account, msig: MultiSig): [Uint8Array, number] {
+  singleSignMultisig (secretKey: Uint8Array, msig: MultiSig): [Uint8Array, number] {
     let index = -1;
-    const accountPk = decodeAddress(account.addr).publicKey;
+    const accountPk = tweet.sign_keyPair_fromSecretKey(secretKey).publicKey;
     for (let i = 0; i < msig.subsig.length; i++) {
       const pk = msig.subsig[i].pk;
-      if (compareArray(pk, passedPk)) {
+      if (compareArray(pk, accountPk)) {
         index = i;
         break;
       }
     }
     if (index === -1) {
-      throw new Error("invalid secret key");
+      throw new Error("invalid secret key: ${secretKey}");
     }
-    const sig = signBytes(this.logic, account.sk);
+    const sig = signBytes(this.logic, secretKey);
     return [sig, index];
   }
 
@@ -76,11 +80,11 @@ export class LogicSig {
    * Appends a signature to multi signature
    * @param {Uint8Array} secretKey Secret key to sign with
    */
-  appendToMultisig (account: Account): void {
+  appendToMultisig (secretKey: Uint8Array): void {
     if (this.msig === undefined) {
       throw new Error("no multisig present");
     }
-    const [sig, index] = this.singleSignMultisig(account, this.msig);
+    const [sig, index] = this.singleSignMultisig(secretKey, this.msig);
     this.msig.subsig[index].s = sig;
   }
 
