@@ -67,6 +67,7 @@
     "murmurhash": "^1.0.0",
     "sha3": "^2.1.3",
     "source-map-support": "^0.5.19",
+    "tweetnacl-ts": "^1.0.3",
     "types": "^0.1.0",
     "uint64be": "^3.0.0"
   },

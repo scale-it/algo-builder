@@ -210,6 +210,12 @@ by an index that does not exist.`
     message: "Error encountered while parsing teal file unkown opcode %opcode% , Line : %line% ",
     title: PARSE_ERROR,
     description: `Unkown Opcode encountered`
+  },
+  INVALID_SECRET_KEY: {
+    number: 32,
+    message: "invalid secret key: %secretkey%",
+    title: "secret key error",
+    description: `secret key error`
   }
 };
 
