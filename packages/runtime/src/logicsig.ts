@@ -57,7 +57,7 @@ export class LogicSig {
    */
   singleSignMultisig (account: Account, msig: MultiSig): [Uint8Array, number] {
     let index = -1;
-    const passedPk = decodeAddress(account.addr).publicKey;
+    const accountPk = decodeAddress(account.addr).publicKey;
     for (let i = 0; i < msig.subsig.length; i++) {
       const pk = msig.subsig[i].pk;
       if (compareArray(pk, passedPk)) {
