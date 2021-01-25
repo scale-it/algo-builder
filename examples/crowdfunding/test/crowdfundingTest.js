@@ -37,7 +37,6 @@ describe('Crowdfunding Tests', function () {
 
   this.afterEach(async function () {
     creator = new StoreAccount(initialCreatorBalance);
-    escrow = new StoreAccount(0);
     donor = new StoreAccount(initialDonorBalance);
     runtime = new Runtime([creator, escrow, donor]);
 
@@ -53,9 +52,9 @@ describe('Crowdfunding Tests', function () {
   const getGlobal = (key) => runtime.getGlobalState(applicationId, key);
 
   // fetch latest account state
-  function syncAccounts () {
+  function syncAccounts (escrowAddress) {
     creator = runtime.getAccount(creator.address);
-    escrow = runtime.getAccount(escrow.address);
+    escrow = runtime.getAccount(escrowAddress);
     donor = runtime.getAccount(donor.address);
   }
 
@@ -97,6 +96,11 @@ describe('Crowdfunding Tests', function () {
     applicationId = await runtime.addApp({ ...creationFlags, appArgs: creationArgs }, {}, program);
     const creatorPk = addressToPk(creator.address);
 
+    // setup escrow account
+    const escrowProg = getProgram('crowdFundEscrow.py', { APP_ID: applicationId });
+    const lsig = runtime.getLogicSig(escrowProg, []);
+    console.log('Escrow Address: ', lsig.address());
+
     // verify global state
     assert.isDefined(applicationId);
     assert.deepEqual(getGlobal('Creator'), creatorPk);
@@ -107,14 +111,14 @@ describe('Crowdfunding Tests', function () {
     assert.deepEqual(getGlobal('Total'), 0n);
 
     // update application with correct escrow account address
-    let appArgs = [addressToPk(escrow.address)]; // converts algorand address to Uint8Array
+    let appArgs = [addressToPk(lsig.address())]; // converts algorand address to Uint8Array
 
     await runtime.updateApp(
       creator.address,
       applicationId,
       program,
       {}, { appArgs: appArgs });
-    const escrowPk = addressToPk(escrow.address);
+    const escrowPk = addressToPk(lsig.address());
 
     // verify escrow storage
     assert.isDefined(applicationId);
@@ -124,7 +128,7 @@ describe('Crowdfunding Tests', function () {
     await runtime.optInToApp(creator.address, applicationId, {}, {}, program);
     await runtime.optInToApp(donor.address, applicationId, {}, {}, program);
 
-    syncAccounts();
+    syncAccounts(lsig.address());
     assert.isDefined(creator.appsLocalState.get(applicationId));
     assert.isDefined(donor.appsLocalState.get(applicationId));
 
@@ -155,7 +159,7 @@ describe('Crowdfunding Tests', function () {
     // execute transaction
     await runtime.executeTx(txGroup, program, []);
 
-    syncAccounts();
+    syncAccounts(lsig.address());
     assert.equal(escrow.balance(), donationAmount);
     assert.equal(donor.balance(), initialDonorBalance - donationAmount);
 
@@ -178,16 +182,16 @@ describe('Crowdfunding Tests', function () {
         fromAccount: escrow.account,
         toAccountAddr: donor.address,
         amountMicroAlgos: 300000,
-        lsig: escrow,
+        lsig: lsig,
         payFlags: {}
       }
     ];
 
-    syncAccounts();
+    syncAccounts(lsig.address());
     const donorBalance = donor.balance();
     await runtime.executeTx(txGroup, program, []);
 
-    syncAccounts();
+    syncAccounts(lsig.address());
     assert.equal(escrow.balance(), 300000);
     assert.equal(donor.balance(), donorBalance + 300000);
 
@@ -232,7 +236,7 @@ describe('Crowdfunding Tests', function () {
         fromAccount: escrow.account,
         toAccountAddr: creator.address,
         amountMicroAlgos: 0,
-        lsig: escrow,
+        lsig: lsig,
         payFlags: { closeRemainderTo: creator.address }
       }
     ];
@@ -245,8 +249,14 @@ describe('Crowdfunding Tests', function () {
     const creationFlags = Object.assign({}, flags);
     const applicationId = await runtime.addApp({ ...creationFlags, appArgs: creationArgs }, {}, program);
 
+    // setup escrow account
+    const escrowProg = getProgram('crowdFundEscrow.py', { APP_ID: applicationId });
+    const lsig = runtime.getLogicSig(escrowProg, []);
+    console.log('Escrow Address: ', lsig.address());
+    syncAccounts(lsig.address());
+
     // update application with correct escrow account address
-    let appArgs = [addressToPk(escrow.address)]; // converts algorand address to Uint8Array
+    let appArgs = [addressToPk(lsig.address())]; // converts algorand address to Uint8Array
     await runtime.updateApp(
       creator.address,
       applicationId,
@@ -267,10 +277,10 @@ describe('Crowdfunding Tests', function () {
       {
         type: TransactionType.TransferAlgo,
         sign: SignType.LogicSignature,
-        fromAccount: { addr: escrow.address },
+        fromAccount: escrow.account,
         toAccountAddr: creator.address,
         amountMicroAlgos: 0,
-        lsig: escrow,
+        lsig: lsig,
         payFlags: { closeRemainderTo: creator.address }
       }
     ];

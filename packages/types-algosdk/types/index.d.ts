@@ -436,7 +436,7 @@ declare module 'algosdk' {
   export function signBid(bid: any, sk: any): any;
 
   /**
-   * signBytes takes arbitrary bytes and a secret key, prepends the bytes with "MX" for domain separation, signs the bytes 
+   * signBytes takes arbitrary bytes and a secret key, prepends the bytes with "MX" for domain separation, signs the bytes
    * with the private key, and returns the signature.
    * @param bytes arbitrary bytes
    * @param sk Algorand secret key
