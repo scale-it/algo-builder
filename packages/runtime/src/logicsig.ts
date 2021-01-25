@@ -7,6 +7,8 @@ import * as tweet from "tweetnacl-ts";
 
 import { compareArray } from "../src/lib/compare";
 import { convertToString, stringToBytes } from "../src/lib/parsing";
+import { TealError } from "./errors/errors";
+import { ERRORS } from "./errors/errors-list";
 
 /**
  * Note: We cannot use algosdk LogicSig class here,
@@ -32,6 +34,7 @@ export class LogicSig {
   /**
    * Creates signature (if no msig provided) or multi signature otherwise
    * @param secretKey sender's secret key
+   * @param msig multisignature if it exists
    */
   sign (secretKey: Uint8Array, msig?: MultiSigAccount): void {
     if (msig === undefined) {
@@ -39,8 +42,8 @@ export class LogicSig {
     } else {
       const subsigs = msig.addrs.map(addr => {
         return {
-          pk: decodeAddress(addr).publicKey, 
-          s: new Uint8Array(0) 
+          pk: decodeAddress(addr).publicKey,
+          s: new Uint8Array(0)
         };
       });
       this.msig = {
@@ -70,7 +73,7 @@ export class LogicSig {
       }
     }
     if (index === -1) {
-      throw new Error("invalid secret key: ${secretKey}");
+      throw new TealError(ERRORS.TEAL.INVALID_SECRET_KEY, { secretkey: secretKey });
     }
     const sig = signBytes(this.logic, secretKey);
     return [sig, index];
@@ -112,7 +115,7 @@ export class LogicSig {
   /**
    * Verify multi-signature
    * @param msig Msig
-   * @param publicKey Public key of sender
+   * @param accAddr Sender's account address
    */
   verifyMultisig (msig: MultiSig, accAddr: string): boolean {
     const version = msig.v;
