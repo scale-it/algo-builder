@@ -438,7 +438,7 @@ declare module 'algosdk' {
   /**
    * signBytes takes arbitrary bytes and a secret key, prepends the bytes with "MX" for domain separation, signs the bytes 
    * with the private key, and returns the signature.
-   * @param bytes Uint8array
+   * @param bytes arbitrary bytes
    * @param sk Algorand secret key
    * @returns binary signature
    */
@@ -470,7 +470,7 @@ declare module 'algosdk' {
   /**
    * verifyBytes takes array of bytes, an address, and a signature and verifies if the signature is correct for the public
    * key and the bytes (the bytes should have been signed with "MX" prepended for domain separation).
-   * @param bytes Uint8Array
+   * @param bytes arbitrary bytes
    * @param signature binary signature
    * @param addr string address
    * @returns bool

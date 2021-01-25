@@ -1,4 +1,4 @@
-import { createMsigAddress } from "@algorand-builder/algob";
+import { multisigAddress } from "algosdk";
 import { assert } from "chai";
 
 import { StoreAccount } from "../../src/account";
@@ -53,7 +53,12 @@ describe("Multi-Signature Test", () => {
   const runtime = new Runtime([alice, john, bob]);
   // Generate multi signature account hash
   const addrs = [alice.address, john.address, bob.address];
-  const [mparams, multsigaddr] = createMsigAddress(1, 2, addrs); // passing (version, threshold, address list)
+  const mparams = {
+    version: 1,
+    threshold: 2,
+    addrs: addrs
+  };
+  const multsigaddr = multisigAddress(mparams);
 
   it("should verify if threshold is verified and sender is multisigAddr", () => {
     const lsig = runtime.getLogicSig(getProgram(multiSigProg), []);
