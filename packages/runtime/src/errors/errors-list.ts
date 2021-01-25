@@ -222,6 +222,12 @@ by an index that does not exist.`
     message: "logic signature not found",
     title: "lsig error",
     description: `lsig error`
+  },
+  LOGIC_SIGNATURE_VALIDATION_FAILED: {
+    number: 34,
+    message: "logic signature validation failed. address: %address%",
+    title: "lsig validation error",
+    description: `lsig validation error`
   }
 };
 

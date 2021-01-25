@@ -1,23 +1,30 @@
 import { ExecParams, SignType, TransactionType } from "@algorand-builder/algob/src/types";
+import { LogicSig } from "algosdk";
 import { assert } from "chai";
 
 import { StoreAccount } from "../../src/account";
+import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime } from "../../src/runtime";
+import { expectTealErrorAsync } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 
 const programName = "basic.teal";
 const minBalance = 1e7;
 
-describe("Logic Signature Transaction in Runtime", () => {
+describe("Logic Signature Transaction in Runtime", function () {
   useFixture("basic-teal");
   const john = new StoreAccount(minBalance);
   const bob = new StoreAccount(minBalance);
-  const runtime = new Runtime([john, bob]);
+  const alice = new StoreAccount(minBalance);
 
-  it("should execute the lsig and verify john(delegated signature)", async () => {
-    const lsig = runtime.getLogicSig(getProgram(programName), []);
-    const txnParam: ExecParams = {
+  let runtime: Runtime;
+  let lsig: LogicSig;
+  let txnParam: ExecParams;
+  this.beforeAll(function () {
+    runtime = new Runtime([john, bob, alice]);
+    lsig = runtime.getLogicSig(getProgram(programName), []);
+    txnParam = {
       type: TransactionType.TransferAlgo,
       sign: SignType.LogicSignature,
       fromAccount: john.account,
@@ -26,11 +33,37 @@ describe("Logic Signature Transaction in Runtime", () => {
       lsig: lsig,
       payFlags: { totalFee: 1000 }
     };
+  });
 
+  it("should execute the lsig and verify john(delegated signature)", async () => {
     lsig.sign(john.account.sk);
     await runtime.executeTx(txnParam, getProgram(programName), []);
 
+    // balance should be updated because logic is verified and accepted
     const bobAcc = runtime.getAccount(bob.address);
     assert.equal(bobAcc.balance(), minBalance + 1000);
+  });
+
+  it("should not verify signature because alice sent it", async () => {
+    txnParam.fromAccount = alice.account;
+
+    // execute transaction (logic signature validation failed)
+    await expectTealErrorAsync(
+      async () => await runtime.executeTx(txnParam, getProgram(programName), []),
+      ERRORS.TEAL.LOGIC_SIGNATURE_VALIDATION_FAILED
+    );
+  });
+
+  it("should verify signature but reject logic", async () => {
+    const logicSig = runtime.getLogicSig(getProgram("reject.teal"), []);
+    txnParam.lsig = logicSig;
+    txnParam.fromAccount = john.account;
+
+    logicSig.sign(john.account.sk);
+    // execute transaction (rejected by logic after signature validation)
+    await expectTealErrorAsync(
+      async () => await runtime.executeTx(txnParam, getProgram(programName), []),
+      ERRORS.TEAL.REJECTED_BY_LOGIC
+    );
   });
 });

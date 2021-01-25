@@ -408,8 +408,11 @@ export class Runtime {
         }
 
         // signature validation
-        txnParam.lsig.verify(decodeAddress(txnParam.fromAccount.addr).publicKey);
-
+        const result = txnParam.lsig.verify(decodeAddress(txnParam.fromAccount.addr).publicKey);
+        if (!result) {
+          throw new TealError(ERRORS.TEAL.LOGIC_SIGNATURE_VALIDATION_FAILED,
+            { address: txnParam.fromAccount.addr });
+        }
         // logic validation
         const program = convertToString(txnParam.lsig.logic);
         await this.run(program);
