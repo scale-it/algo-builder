@@ -1,3 +1,5 @@
+#pragma version 2
+
 // check if application is being created
 int 0
 txn ApplicationID

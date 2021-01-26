@@ -8,36 +8,51 @@ export const MAX_CONCAT_SIZE = 4096;
 export const SSC_BYTES = 1; // 1 represents type 'byte' in stateful key-value pair
 export const SSC_UINT = 2; // 2 represents type 'uint' in stateful key-value pair
 export const ALGORAND_MIN_TX_FEE = 1000;
+
+// values taken from [https://github.com/algorand/go-algorand/blob/master/config/consensus.go#L691]
+export const LogicSigMaxCost = 20000;
+export const MaxAppProgramCost = 700;
+export const LogicSigMaxSize = 1000;
+export const MaxAppProgramLen = 1024;
+
 const zeroAddress = new Uint8Array(32);
 const zeroUint64 = BigInt('0');
 const zeroByte = new Uint8Array(0);
 
 // https://developer.algorand.org/docs/reference/teal/opcodes/#txn
-export const TxnFields: {[key: string]: string} = {
-  Sender: 'snd',
-  Fee: 'fee',
-  FirstValid: 'fv',
-  FirstValidTime: '',
-  LastValid: 'lv',
-  Note: 'note',
-  Lease: 'lx',
-  Receiver: 'rcv',
-  Amount: 'amt',
-  CloseRemainderTo: 'close',
-  VotePK: 'votekey',
-  SelectionPK: 'selkey',
-  VoteFirst: 'votefst',
-  VoteLast: 'votelst',
-  VoteKeyDilution: 'votekd',
-  Type: 'type',
-  TypeEnum: '',
-  XferAsset: 'xaid',
-  AssetAmount: 'aamt',
-  AssetSender: 'asnd',
-  AssetReceiver: 'arcv',
-  AssetCloseTo: 'aclose',
-  GroupIndex: '',
-  TxID: '',
+// transaction fields supported by teal v1
+export const TxnFields: {[key: number]: {[key: string]: any}} = {
+  1: {
+    Sender: 'snd',
+    Fee: 'fee',
+    FirstValid: 'fv',
+    FirstValidTime: '',
+    LastValid: 'lv',
+    Note: 'note',
+    Lease: 'lx',
+    Receiver: 'rcv',
+    Amount: 'amt',
+    CloseRemainderTo: 'close',
+    VotePK: 'votekey',
+    SelectionPK: 'selkey',
+    VoteFirst: 'votefst',
+    VoteLast: 'votelst',
+    VoteKeyDilution: 'votekd',
+    Type: 'type',
+    TypeEnum: '',
+    XferAsset: 'xaid',
+    AssetAmount: 'aamt',
+    AssetSender: 'asnd',
+    AssetReceiver: 'arcv',
+    AssetCloseTo: 'aclose',
+    GroupIndex: '',
+    TxID: ''
+  }
+};
+
+// transaction fields supported by teal v2
+TxnFields[2] = {
+  ...TxnFields[1],
   ApplicationID: 'apid',
   OnCompletion: 'apan',
   ApplicationArgs: 'apaa',
@@ -147,14 +162,40 @@ export const reBase32 = /^[A-Z2-7]+=*$/;
 
 // reference for values: https://github.com/algorand/go-algorand/blob/master/config/consensus.go#L510
 // for fields: https://developer.algorand.org/docs/reference/teal/opcodes/#global
-export const GlobalFields: {[key: string]: any} = {
-  MinTxnFee: ALGORAND_MIN_TX_FEE,
-  MinBalance: 10000,
-  MaxTxnLife: 1000,
-  ZeroAddress: zeroAddress,
-  GroupSize: '',
+// global field supported by teal v1
+export const GlobalFields: {[key: number]: {[key: string]: any}} = { // teal version => global field => value
+  1: {
+    MinTxnFee: ALGORAND_MIN_TX_FEE,
+    MinBalance: 10000,
+    MaxTxnLife: 1000,
+    ZeroAddress: zeroAddress,
+    GroupSize: ''
+  }
+};
+
+// global field supported by teal v2
+GlobalFields[2] = {
+  ...GlobalFields[1],
   LogicSigVersion: 2, // LogicSigVersion >= 2
   Round: 500, // constant (for tests)
   LatestTimestamp: Math.round((new Date()).getTime() / 1000),
   CurrentApplicationID: ''
+};
+
+// creating map for opcodes whose cost is other than 1
+export const OpGasCost: {[key: number]: {[key: string]: number}} = { // version => opcode => cost
+  // v1 opcodes cost
+  1: {
+    sha256: 7,
+    sha512_256: 9,
+    keccak256: 26,
+    ed25519verify: 1900
+  }
+};
+// v2 opcodes cost
+OpGasCost[2] = {
+  ...OpGasCost[1], // includes all v1 opcodes
+  sha256: 35,
+  sha512_256: 45,
+  keccak256: 130
 };

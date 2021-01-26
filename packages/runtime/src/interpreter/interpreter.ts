@@ -8,7 +8,7 @@ import { DEFAULT_STACK_ELEM } from "../lib/constants";
 import { keyToBytes } from "../lib/parsing";
 import { Stack } from "../lib/stack";
 import { parser } from "../parser/parser";
-import type { Operator, SSCAttributesM, StackElem, StoreAccountI, TEALStack } from "../types";
+import type { ExecutionMode, Operator, SSCAttributesM, StackElem, StoreAccountI, TEALStack } from "../types";
 import { BIGINT0, BIGINT1, Label } from "./opcode-list";
 
 export class Interpreter {
@@ -16,8 +16,10 @@ export class Interpreter {
    * Note: Interpreter operates on `ctx`, it doesn't operate on `store`.
    * All the functions query or update only a state copy from the interpreter, not the `runtime.store`.
    */
-
   readonly stack: TEALStack;
+  tealVersion: number; // LogicSigVersion
+  gas: number; // total gas cost of TEAL code
+  length: number; // total length of 'compiled' TEAL code
   bytecblock: Uint8Array[];
   intcblock: BigInt[];
   scratch: StackElem[];
@@ -27,6 +29,9 @@ export class Interpreter {
 
   constructor () {
     this.stack = new Stack<StackElem>();
+    this.tealVersion = 1; // LogicSigVersion = 1 by default (if not specified by pragma)
+    this.gas = 0; // initial cost
+    this.length = 0; // initial length
     this.bytecblock = [];
     this.intcblock = [];
     this.scratch = new Array(256).fill(DEFAULT_STACK_ELEM);
@@ -134,13 +139,14 @@ export class Interpreter {
   }
 
   /**
-   * Description: this function executes TEAL code after parsing
-   * @param {string} program: teal code
-   * @param {Runtime} runtime : runtime object
+   * This function executes TEAL code after parsing
+   * @param program: teal code
+   * @param mode : execution mode of TEAL code (Stateless or Stateful)
+   * @param runtime : runtime object
    */
-  async execute (program: string, runtime: Runtime): Promise<void> {
+  execute (program: string, mode: ExecutionMode, runtime: Runtime): void {
     this.runtime = runtime;
-    this.instructions = await parser(program, this);
+    this.instructions = parser(program, mode, this);
 
     while (this.instructionIndex < this.instructions.length) {
       const instruction = this.instructions[this.instructionIndex];

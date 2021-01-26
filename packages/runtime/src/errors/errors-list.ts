@@ -187,15 +187,15 @@ by an index that does not exist.`
     title: "Account Error at %line%",
     description: `Account does not exist in the current state`
   },
-  UNKOWN_TRANSACTION_FIELD: {
+  UNKNOWN_TRANSACTION_FIELD: {
     number: 28,
-    message: "Transaction Field Error - Unknown transaction field %field% at %line%",
+    message: "Transaction Field Error - Unknown transaction field \"%field%\" for teal version #%version% at line %line%",
     title: "Transaction Field Error at %line%",
     description: `Transaction Field unknown`
   },
-  UNKOWN_GLOBAL_FIELD: {
+  UNKNOWN_GLOBAL_FIELD: {
     number: 29,
-    message: "Global Field Error - Unknown Global field %field% at %line%",
+    message: "Global Field Error - Unknown Global field \"%field%\" for teal version #%version% at line %line%",
     title: "Global Field Error at %line%",
     description: `Global Field unknown`
   },
@@ -205,17 +205,29 @@ by an index that does not exist.`
     title: "Asset Field Error at %line%",
     description: `Asset field unknown`
   },
-  UNKOWN_OPCODE: {
+  UNKNOWN_OPCODE: {
     number: 31,
-    message: "Error encountered while parsing teal file unkown opcode %opcode% , Line : %line% ",
+    message: "Error encountered while parsing teal file: unknown opcode \"%opcode%\" for teal version #%version%, Line: %line% ",
     title: PARSE_ERROR,
-    description: `Unkown Opcode encountered`
+    description: `Unknown Opcode encountered`
   },
   INVALID_SECRET_KEY: {
     number: 32,
     message: "invalid secret key: %secretkey%",
     title: "secret key error",
     description: `secret key error`
+  },
+  MAX_COST_EXCEEDED: {
+    number: 33,
+    message: "Cost of provided TEAL code = %cost% exceeds max cost of %maxcost%, Mode: %mode%",
+    title: 'MaxCost Error',
+    description: `MaxCost Error`
+  },
+  MAX_LEN_EXCEEDED: {
+    number: 34,
+    message: "Length of provided TEAL code = %length% exceeds max length of %maxlen%, Mode: %mode%",
+    title: 'MaxLength Error',
+    description: `MaxLength Error`
   }
 };
 

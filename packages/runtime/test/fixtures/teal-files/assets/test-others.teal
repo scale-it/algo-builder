@@ -1,3 +1,4 @@
+#pragma version 2
 itob
                 btoi
            mulw
@@ -5,7 +6,7 @@ itob
      pop
             dup
                 dup2
-       concat 
+       concat
     substring 0 4
  substring3
  // comments
