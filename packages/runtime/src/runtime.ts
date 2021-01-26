@@ -230,7 +230,7 @@ export class Runtime {
    * @param payFlags Transaction parameters
    * @param program approval program
    */
-  async addApp (flags: SSCDeploymentFlags, payFlags: TxParams, program: string): Promise<number> {
+  addApp (flags: SSCDeploymentFlags, payFlags: TxParams, program: string): number {
     const sender = flags.sender;
     const senderAcc = this.assertAccountDefined(this.store.accounts.get(sender.addr));
 
@@ -285,8 +285,8 @@ export class Runtime {
    * @param payFlags Transaction Parameters
    * @param program TEAL code as string
    */
-  async optInToApp (accountAddr: string, appId: number,
-    flags: SSCOptionalFlags, payFlags: TxParams, program: string): Promise<void> {
+  optInToApp (accountAddr: string, appId: number,
+    flags: SSCOptionalFlags, payFlags: TxParams, program: string): void {
     const appParams = this.getApp(appId);
     const account = this.assertAccountDefined(this.store.accounts.get(accountAddr));
     if (appParams) {
@@ -333,13 +333,13 @@ export class Runtime {
    * @param payFlags Transaction parameters
    * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
    */
-  async updateApp (
+  updateApp (
     senderAddr: string,
     appId: number,
     newProgram: string,
     payFlags: TxParams,
     flags: SSCOptionalFlags
-  ): Promise<void> {
+  ): void {
     const appParams = this.getApp(appId);
     if (appParams) {
       this.createUpdateTx(senderAddr, appId, payFlags, flags);
@@ -444,8 +444,8 @@ export class Runtime {
    * @param program : teal code as a string
    * @param args : external arguments to smart contract
    */
-  async executeTx (txnParams: ExecParams | ExecParams[], program: string,
-    args: Uint8Array[]): Promise<void> {
+  executeTx (txnParams: ExecParams | ExecParams[], program: string,
+    args: Uint8Array[]): void {
     const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
     // initialize context before each execution
     this.ctx = {

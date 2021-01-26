@@ -5,7 +5,7 @@ import { assert } from "chai";
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccount } from "../../src/index";
 import { StackElem } from "../../src/types";
-import { expectTealErrorAsync } from "../helpers/errors";
+import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 
@@ -29,15 +29,15 @@ describe("Crowdfunding basic tests", function () {
     };
   });
 
-  it("should fail during create application if 0 args are passed", async function () {
+  it("should fail during create application if 0 args are passed", function () {
     // create new app
-    await expectTealErrorAsync(
-      async () => await runtime.addApp(flags, {}, program),
+    expectTealError(
+      () => runtime.addApp(flags, {}, program),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
 
-  it("should create application and update global state if correct args are passed", async function () {
+  it("should create application and update global state if correct args are passed", function () {
     const validFlags: SSCDeploymentFlags = Object.assign({}, flags);
 
     // Get begin date to pass in
@@ -60,7 +60,7 @@ describe("Crowdfunding basic tests", function () {
       uint64ToBigEndian(fundCloseDate.getTime())
     ];
 
-    const appId = await runtime.addApp({ ...validFlags, appArgs: appArgs }, {}, program);
+    const appId = runtime.addApp({ ...validFlags, appArgs: appArgs }, {}, program);
     const getGlobal = (key: string):
     StackElem |undefined => runtime.getGlobalState(appId, key);
     const johnPk = addressToPk(john.address);

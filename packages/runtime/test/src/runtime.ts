@@ -5,7 +5,7 @@ import { assert } from "chai";
 import { StoreAccount } from "../../src/account";
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime } from "../../src/runtime";
-import { expectTealErrorAsync } from "../helpers/errors";
+import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 
@@ -35,21 +35,21 @@ describe("Logic Signature Transaction in Runtime", function () {
     };
   });
 
-  it("should execute the lsig and verify john(delegated signature)", async () => {
+  it("should execute the lsig and verify john(delegated signature)", () => {
     lsig.sign(john.account.sk);
-    await runtime.executeTx(txnParam, getProgram(programName), []);
+    runtime.executeTx(txnParam, getProgram(programName), []);
 
     // balance should be updated because logic is verified and accepted
     const bobAcc = runtime.getAccount(bob.address);
     assert.equal(bobAcc.balance(), minBalance + 1000);
   });
 
-  it("should not verify signature because alice sent it", async () => {
+  it("should not verify signature because alice sent it", () => {
     txnParam.fromAccount = alice.account;
 
     // execute transaction (logic signature validation failed)
-    await expectTealErrorAsync(
-      async () => await runtime.executeTx(txnParam, getProgram(programName), []),
+    expectTealError(
+      () => runtime.executeTx(txnParam, getProgram(programName), []),
       ERRORS.TEAL.LOGIC_SIGNATURE_VALIDATION_FAILED
     );
   });
@@ -61,8 +61,8 @@ describe("Logic Signature Transaction in Runtime", function () {
 
     logicSig.sign(john.account.sk);
     // execute transaction (rejected by logic after signature validation)
-    await expectTealErrorAsync(
-      async () => await runtime.executeTx(txnParam, getProgram(programName), []),
+    expectTealError(
+      () => runtime.executeTx(txnParam, getProgram(programName), []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });

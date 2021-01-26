@@ -78,7 +78,7 @@ describe('Crowdfunding Tests', function () {
     uint64ToBigEndian(fundCloseDate.getTime())
   ];
 
-  it('crowdfunding application', async () => {
+  it('crowdfunding application', () => {
     /**
      * This test demonstrates how to create a Crowdfunding Stateful Smart Contract Application
      * and interact with it. there are following operations that are performed:
@@ -93,7 +93,7 @@ describe('Crowdfunding Tests', function () {
     const creationFlags = Object.assign({}, flags);
 
     // create application
-    applicationId = await runtime.addApp({ ...creationFlags, appArgs: creationArgs }, {}, program);
+    applicationId = runtime.addApp({ ...creationFlags, appArgs: creationArgs }, {}, program);
     const creatorPk = addressToPk(creator.address);
 
     // setup escrow account
@@ -113,7 +113,7 @@ describe('Crowdfunding Tests', function () {
     // update application with correct escrow account address
     let appArgs = [addressToPk(lsig.address())]; // converts algorand address to Uint8Array
 
-    await runtime.updateApp(
+    runtime.updateApp(
       creator.address,
       applicationId,
       program,
@@ -125,8 +125,8 @@ describe('Crowdfunding Tests', function () {
     assert.deepEqual(getGlobal('Escrow'), escrowPk);
 
     // opt-in to app
-    await runtime.optInToApp(creator.address, applicationId, {}, {}, program);
-    await runtime.optInToApp(donor.address, applicationId, {}, {}, program);
+    runtime.optInToApp(creator.address, applicationId, {}, {}, program);
+    runtime.optInToApp(donor.address, applicationId, {}, {}, program);
 
     syncAccounts(lsig.address());
     assert.isDefined(creator.appsLocalState.get(applicationId));
@@ -157,7 +157,7 @@ describe('Crowdfunding Tests', function () {
       }
     ];
     // execute transaction
-    await runtime.executeTx(txGroup, program, []);
+    runtime.executeTx(txGroup, program, []);
 
     syncAccounts(lsig.address());
     assert.equal(escrow.balance(), donationAmount);
@@ -189,7 +189,7 @@ describe('Crowdfunding Tests', function () {
 
     syncAccounts(lsig.address());
     const donorBalance = donor.balance();
-    await runtime.executeTx(txGroup, program, []);
+    runtime.executeTx(txGroup, program, []);
 
     syncAccounts(lsig.address());
     assert.equal(escrow.balance(), 300000);
@@ -218,7 +218,7 @@ describe('Crowdfunding Tests', function () {
       }
     ];
     // execute transaction
-    await runtime.executeTx(txGroup, program, []);
+    runtime.executeTx(txGroup, program, []);
 
     appArgs = [stringToBytes('claim')];
     txGroup = [
@@ -240,14 +240,14 @@ describe('Crowdfunding Tests', function () {
         payFlags: { closeRemainderTo: creator.address }
       }
     ];
-    await runtime.executeTx(txGroup, program, []);
+    runtime.executeTx(txGroup, program, []);
     // TODO- close account and tranfer funds to closeRemainderTo in runtime
   });
 
-  it('should be rejected by logic when claiming funds if goal is not met', async () => {
+  it('should be rejected by logic when claiming funds if goal is not met', () => {
     // create application
     const creationFlags = Object.assign({}, flags);
-    const applicationId = await runtime.addApp({ ...creationFlags, appArgs: creationArgs }, {}, program);
+    const applicationId = runtime.addApp({ ...creationFlags, appArgs: creationArgs }, {}, program);
 
     // setup escrow account
     const escrowProg = getProgram('crowdFundEscrow.py', { APP_ID: applicationId });
@@ -257,7 +257,7 @@ describe('Crowdfunding Tests', function () {
 
     // update application with correct escrow account address
     let appArgs = [addressToPk(lsig.address())]; // converts algorand address to Uint8Array
-    await runtime.updateApp(
+    runtime.updateApp(
       creator.address,
       applicationId,
       program,
@@ -286,7 +286,7 @@ describe('Crowdfunding Tests', function () {
     ];
     // execute transaction: Expected to be rejected by logic because goal is not reached
     try {
-      await runtime.executeTx(txGroup, program, []);
+      runtime.executeTx(txGroup, program, []);
     } catch (e) {
       console.warn(e);
     }
