@@ -21,7 +21,7 @@ const localStateSchema = "local-state-schema";
 export class StoreAccount implements StoreAccountI {
   readonly account: Account;
   readonly address: string;
-  minBalance: number; // required minimum balance of account
+  minBalance: number; // required minimum balance for account
   assets: Map<number, AssetHolding>;
   amount: number;
   appsLocalState: Map<number, AppLocalStateM>;
@@ -75,7 +75,7 @@ export class StoreAccount implements StoreAccountI {
    * @param value: value of key to put in local state
    * @param line line number in TEAL file
    * Note: if user is accessing this function directly through runtime,
-   * the line number is unknown
+   * then line number is unknown
    */
   setLocalState (appId: number, key: Uint8Array | string, value: StackElem, line?: number): AppLocalStateM {
     const lineNumber = line ?? 'unknown';
