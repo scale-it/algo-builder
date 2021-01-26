@@ -26,7 +26,7 @@ export interface Txn extends TxnEncodedObj {
   txID: string
 }
 
-export type TxField = keyof typeof TxnFields;
+export type TxField = keyof typeof TxnFields[2];
 
 export enum TxnType {
   unknown = '0', // Unknown type. Invalid transaction
@@ -129,4 +129,10 @@ export enum TxnOnComplete {
   ClearState = '3',
   UpdateApplication = '4',
   DeleteApplication = '5'
+}
+
+// https://developer.algorand.org/docs/reference/teal/specification/#execution-modes
+export enum ExecutionMode {
+  STATELESS, // stateless TEAL
+  STATEFUL // application call (NoOp, CloseOut..)
 }

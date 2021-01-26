@@ -128,22 +128,25 @@ export class Op {
   /**
    * asserts if known transaction field is passed
    * @param str transaction field
+   * @param tealVersion version of TEAL
    * @param line line number in TEAL file
    */
-  assertTxFieldDefined (str: string, line: number): void {
-    if (TxnFields[str] === undefined) {
-      throw new TealError(ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD, { field: str, line: line });
+  assertTxFieldDefined (str: string, tealVersion: number, line: number): void {
+    if (TxnFields[tealVersion][str] === undefined) {
+      throw new TealError(ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD,
+        { field: str, version: tealVersion, line: line });
     }
   }
 
   /**
    * asserts if known global field is passed
    * @param str global field
+   * @param tealVersion version of TEAL
    * @param line line number in TEAL file
    */
-  assertGlobalDefined (str: string, line: number): void {
-    if (GlobalFields[str] === undefined) {
-      throw new TealError(ERRORS.TEAL.UNKOWN_GLOBAL_FIELD, { field: str, line: line });
+  assertGlobalDefined (str: string, tealVersion: number, line: number): void {
+    if (GlobalFields[tealVersion][str] === undefined) {
+      throw new TealError(ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD, { field: str, version: tealVersion, line: line });
     }
   }
 

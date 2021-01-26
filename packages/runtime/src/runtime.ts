@@ -13,6 +13,7 @@ import { convertToString } from "./lib/parsing";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import type { Context, SSCAttributesM, StackElem, State, StoreAccountI, Txn } from "./types";
+import { ExecutionMode } from "./types";
 
 export class Runtime {
   /**
@@ -239,7 +240,7 @@ export class Runtime {
     this.ctx.state.globalApps.set(app.id, senderAcc.address);
 
     this.makeAndSetCtxAppCreateTxn(flags, payFlags);
-    await this.run(program); // execute TEAL code with appId = 0
+    this.run(program, ExecutionMode.STATEFUL); // execute TEAL code with appId = 0
 
     // create new application in globalApps map
     this.store.globalApps.set(++this.appCounter, senderAcc.address);
@@ -290,7 +291,7 @@ export class Runtime {
     const account = this.assertAccountDefined(this.store.accounts.get(accountAddr));
     if (appParams) {
       this.createOptInTx(accountAddr, appId, payFlags, flags);
-      await this.run(program); // execute TEAL code
+      this.run(program, ExecutionMode.STATEFUL); // execute TEAL code
 
       account.optInToApp(appId, appParams);
     } else {
@@ -342,7 +343,7 @@ export class Runtime {
     const appParams = this.getApp(appId);
     if (appParams) {
       this.createUpdateTx(senderAddr, appId, payFlags, flags);
-      await this.run(newProgram); // execute TEAL code
+      this.run(newProgram, ExecutionMode.STATEFUL); // execute TEAL code
     } else {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
     }
@@ -392,7 +393,7 @@ export class Runtime {
    * @param txnParams : Transaction parameters
    * @param accounts : accounts passed by user
    */
-  async updateFinalState (txnParams: ExecParams | ExecParams[]): Promise<void> {
+  updateFinalState (txnParams: ExecParams | ExecParams[]): void {
     let txnParameters;
     if (!Array.isArray(txnParams)) {
       txnParameters = [txnParams];
@@ -415,7 +416,7 @@ export class Runtime {
         }
         // logic validation
         const program = convertToString(txnParam.lsig.logic);
-        await this.run(program);
+        this.run(program, ExecutionMode.STATELESS);
       }
       switch (txnParam.type) {
         case TransactionType.TransferAlgo:
@@ -428,11 +429,19 @@ export class Runtime {
     }
   }
 
+  // get execution mode (stateless or application) based on txParams
+  getExecutionMode (txnParam: ExecParams): ExecutionMode {
+    if (txnParam.sign === SignType.LogicSignature) {
+      return ExecutionMode.STATELESS;
+    }
+    return ExecutionMode.STATEFUL;
+  }
+
   /**
    * This function executes a transaction based on a smart
    * contract logic and updates state afterwards
    * @param txnParams : Transaction parameters
-   * @param fileName : smart contract file (.teal) name in assets/
+   * @param program : teal code as a string
    * @param args : external arguments to smart contract
    */
   async executeTx (txnParams: ExecParams | ExecParams[], program: string,
@@ -446,14 +455,33 @@ export class Runtime {
       args: args
     };
 
-    await this.run(program);
-    await this.updateFinalState(txnParams); // update account balances
+    // TODO: Add Support for group transaction for execution modes
+    // as for stateless TEAL we need to have TEAL code with each txParam
+    // TASKs: https://www.pivotaltracker.com/story/show/176455371, https://www.pivotaltracker.com/story/show/176455329
+    let mode = ExecutionMode.STATEFUL;
+    if (!Array.isArray(txnParams)) {
+      mode = this.getExecutionMode(txnParams);
+    } else {
+      let flag = true;
+      for (const txParam of txnParams) {
+        flag = flag && txParam.sign === SignType.LogicSignature;
+      }
+      if (flag) { mode = ExecutionMode.STATELESS; } // if all txns in grp are stateless
+    }
+
+    this.run(program, mode);
+    this.updateFinalState(txnParams); // update account balances
   }
 
-  // execute teal code line by line
-  async run (program: string): Promise<void> {
+  /**
+   * This function executes TEAL code line by line
+   * @param program : teal code as string
+   * @param executionMode : execution Mode (Stateless or Stateful)
+   * NOTE: Application mode is only supported in TEAL v2
+   */
+  run (program: string, executionMode: ExecutionMode): void {
     const interpreter = new Interpreter();
-    await interpreter.execute(program, this);
+    interpreter.execute(program, executionMode, this);
     this.store = this.ctx.state; // update state after successful execution('local-state', 'global-state'..)
   }
 }
