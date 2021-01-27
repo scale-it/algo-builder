@@ -14,8 +14,7 @@ import { mockSuggestedParams } from "./mock/tx";
 import type {
   AccountAddress, AlgoTransferParam, Context, ExecParams,
   SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
-  StackElem, State,
-  StoreAccountI, Txn, TxParams
+  StackElem, State, StoreAccountI, Txn, TxParams
 } from "./types";
 import { ExecutionMode, SignType, TransactionType } from "./types";
 
