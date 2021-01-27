@@ -17,15 +17,11 @@ function assertUint64 (n: bigint): void {
  * Converts 64 bit unsigned integer to bytes in big endian.
  */
 export function uint64ToBigEndian (x: number | bigint): Uint8Array {
-  const bytes = new Uint8Array(8);
-  let i = 7;
   x = BigInt(x); // use x as bigint internally to support upto uint64
   assertUint64(x);
-  while (x) {
-    bytes[i--] = Number(x % 256n);
-    x /= 256n;
-  }
-  return bytes;
+  const buff = Buffer.alloc(8);
+  buff.writeBigUInt64BE(x);
+  return Uint8Array.from(buff);
 }
 
 const throwErr = (appArg: string): void => {

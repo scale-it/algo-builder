@@ -4,7 +4,6 @@ import { AssetDef, decodeAddress, encodeAddress, isValidAddress, verifyBytes } f
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
 import { Keccak } from 'sha3';
-import { decode, encode } from "uint64be";
 
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
@@ -908,9 +907,9 @@ export class Itob extends Op {
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
     const stackValue = this.assertBigInt(stack.pop(), this.line);
-    const buf = encode(Number(stackValue));
-    const uint8arr = new Uint8Array(buf);
-    stack.push(uint8arr);
+    const buff = Buffer.alloc(8);
+    buff.writeBigUInt64BE(stackValue);
+    stack.push(Uint8Array.from(buff));
   }
 }
 
@@ -936,9 +935,8 @@ export class Btoi extends Op {
     if (bytes.length > 8) {
       throw new TealError(ERRORS.TEAL.LONG_INPUT_ERROR, { line: this.line });
     }
-    const buf = Buffer.from(bytes);
-    const uintValue = decode(buf);
-    stack.push(BigInt(uintValue));
+    const uint64 = Buffer.from(bytes).readBigUInt64BE();
+    stack.push(uint64);
   }
 }
 
