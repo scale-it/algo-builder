@@ -4,8 +4,7 @@
   "main": "index.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "algosdk": "^1.8.0",
-    "uint64be": "^3.0.0"
+    "algosdk": "^1.8.0"
   },
   "scripts": {
     "algob": "algob",

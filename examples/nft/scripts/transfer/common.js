@@ -1,5 +1,4 @@
 const { executeTransaction, readGlobalStateSSC, readLocalStateSSC } = require('@algorand-builder/algob');
-const { decode } = require('uint64be');
 
 exports.executeTransaction = async function (deployer, txnParams) {
   try {
@@ -32,7 +31,7 @@ exports.printLocalNFT = async function (deployer, account, appId) {
       holdings = 'none';
     } else {
       for (const l of localState) {
-        const key = decode(Buffer.from(l.key, 'base64'));
+        const key = Buffer.from(l.key, 'base64').readBigUInt64BE();
         holdings.push(key);
       }
       holdings = holdings.join(' ');
