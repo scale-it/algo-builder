@@ -4,7 +4,7 @@ import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { Op } from "../interpreter/opcode";
 import { TxFieldDefaults, TxnFields } from "../lib/constants";
-import { stringToBytes } from "../lib/parsing";
+import { parseSSCAppArgs, stringToBytes } from "../lib/parsing";
 import { ExecParams, StackElem, TransactionType, TxField, Txn, TxnType } from "../types";
 
 const assetTxnFields = new Set([
@@ -167,7 +167,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.fromAccount.addr,
         suggestedParams,
         execParams.appId,
-        execParams.appArgs,
+        parseSSCAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
         execParams.foreignAssets,
@@ -181,7 +181,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.fromAccount.addr,
         suggestedParams,
         execParams.appId,
-        execParams.appArgs,
+        parseSSCAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
         execParams.foreignAssets,
@@ -195,7 +195,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.fromAccount.addr,
         suggestedParams,
         execParams.appId,
-        execParams.appArgs,
+        parseSSCAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
         execParams.foreignAssets,
@@ -208,7 +208,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.fromAccount.addr,
         suggestedParams,
         execParams.appId,
-        execParams.appArgs,
+        parseSSCAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
         execParams.foreignAssets,

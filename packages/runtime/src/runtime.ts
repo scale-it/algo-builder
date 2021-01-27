@@ -7,7 +7,7 @@ import { StoreAccount } from "./account";
 import { TealError } from "./errors/errors";
 import { ERRORS } from "./errors/errors-list";
 import { Interpreter } from "./index";
-import { convertToString } from "./lib/parsing";
+import { convertToString, parseSSCAppArgs } from "./lib/parsing";
 import { mkTransaction } from "./lib/txn";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
@@ -218,7 +218,7 @@ export class Runtime {
       flags.localBytes,
       flags.globalInts,
       flags.globalBytes,
-      flags.appArgs,
+      parseSSCAppArgs(flags.appArgs),
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
@@ -276,7 +276,7 @@ export class Runtime {
       senderAddr,
       mockSuggestedParams(payFlags),
       appId,
-      flags.appArgs,
+      parseSSCAppArgs(flags.appArgs),
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
@@ -324,7 +324,7 @@ export class Runtime {
       appId,
       new Uint8Array(32), // mock approval program
       new Uint8Array(32), // mock clear progam
-      flags.appArgs,
+      parseSSCAppArgs(flags.appArgs),
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
