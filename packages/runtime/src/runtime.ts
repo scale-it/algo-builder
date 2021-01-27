@@ -1,8 +1,8 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
 import { ExecParams, mkTransaction, parseSSCAppArgs, SignType } from "@algorand-builder/algob";
-import { AccountAddress, AlgoTransferParam, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
-import algosdk from "algosdk";
+import { AccountAddress, AlgoTransferParam, SSCDeploymentFlags, SSCOptionalFlags, TransactionType } from "@algorand-builder/algob/src/types";
+import algosdk, { SuggestedParams } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
 import { StoreAccount } from "./account";
@@ -11,7 +11,7 @@ import { ERRORS } from "./errors/errors-list";
 import { Interpreter } from "./index";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
-import type { Context, SSCAttributesM, StackElem, State, StoreAccountI, Txn } from "./types";
+import type { Context, SSCAttributesM, StackElem, State, StoreAccountI, Txn, TxParams } from "./types";
 import { ExecutionMode } from "./types";
 
 export class Runtime {
@@ -25,6 +25,8 @@ export class Runtime {
   private store: State;
   ctx: Context;
   private appCounter: number;
+  // https://developer.algorand.org/docs/features/transactions/?query=round
+  private round;
 
   constructor (accounts: StoreAccountI[]) {
     // runtime store
@@ -45,6 +47,7 @@ export class Runtime {
       args: []
     };
     this.appCounter = 0;
+    this.round = 2;
   }
 
   /**
@@ -90,6 +93,35 @@ export class Runtime {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: lineNumber });
     }
     return app;
+  }
+
+  /**
+   * Validate first and last rounds of transaction using current round
+   * @param gtxns transactions
+   */
+  validateRounds (gtxns: Txn[]): void {
+    // https://developer.algorand.org/docs/features/transactions/#current-round
+    for (const txn of gtxns) {
+      console.log("FCC   ", txn.fv, "  LVVVV  ", txn.lv);
+      if (txn.fv >= this.round || txn.lv <= this.round) {
+        throw new TealError(ERRORS.TEAL.INVALID_ROUND, { round: this.round });
+      }
+    }
+  }
+
+  /**
+   * set current round to given value
+   * @param r current round
+   */
+  setRound (r: number): void {
+    this.round = r;
+  }
+
+  /**
+   * Return current round
+   */
+  getRound (): number {
+    return this.round;
   }
 
   /**
@@ -159,6 +191,22 @@ export class Runtime {
   }
 
   /**
+   * mock suggested parameters according to current round
+   * @param flags payment flags
+   */
+  mockSuggestedParameters (flags: TxParams): SuggestedParams {
+    const s = mockSuggestedParams(flags);
+
+    // https://developer.algorand.org/docs/features/transactions/#setting-first-and-last-valid
+    s.firstRound = flags.firstValid ?? (this.round + 1);
+    s.lastRound = flags.firstValid === undefined || flags.validRounds === undefined
+      ? s.firstRound + 1000
+      : Number(flags.firstValid) + Number(flags.validRounds);
+
+    return s;
+  }
+
+  /**
    * Creates new transaction object (tx, gtxs) from given txnParams
    * @param txnParams : Transaction parameters for current txn or txn Group
    * @returns: [current transaction, transaction group]
@@ -172,7 +220,7 @@ export class Runtime {
 
       const txns = [];
       for (const txnParam of txnParams) { // create encoded_obj for each txn in group
-        const mockParams = mockSuggestedParams(txnParam.payFlags);
+        const mockParams = this.mockSuggestedParameters(txnParam.payFlags);
         const tx = mkTransaction(txnParam, mockParams);
 
         // convert to encoded obj for compatibility
@@ -429,6 +477,8 @@ export class Runtime {
   async executeTx (txnParams: ExecParams | ExecParams[], program: string,
     args: Uint8Array[]): Promise<void> {
     const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
+    // validate first and last rounds
+    this.validateRounds(gtxs);
     // initialize context before each execution
     this.ctx = {
       state: cloneDeep(this.store), // state is a deep copy of store

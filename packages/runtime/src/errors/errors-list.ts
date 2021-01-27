@@ -228,6 +228,12 @@ by an index that does not exist.`
     message: "Length of provided TEAL code = %length% exceeds max length of %maxlen%, Mode: %mode%",
     title: 'MaxLength Error',
     description: `MaxLength Error`
+  },
+  INVALID_ROUND: {
+    number: 35,
+    message: "Transaction rounds are not valid, current round: %round%.",
+    title: 'Round Error',
+    description: `Round Error`
   }
 };
 

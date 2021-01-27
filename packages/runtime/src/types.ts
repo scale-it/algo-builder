@@ -136,3 +136,20 @@ export enum ExecutionMode {
   STATELESS, // stateless TEAL
   STATEFUL // application call (NoOp, CloseOut..)
 }
+
+export interface TxParams {
+  /**
+   * feePerByte or totalFee is used to set the appropriate transaction fee parameter.
+   * If both are set then totalFee takes precedence.
+   * NOTE: SDK expects`fee: number` and boolean `flatFee`. But the API expects only one
+   * on parameter: `fee`. Here, we define feePerByte and totalFee - both as numberic
+   * parameters. We think that this is more explicit. */
+  feePerByte?: number
+  totalFee?: number
+  firstValid?: number
+  validRounds?: number
+  lease?: Uint8Array
+  note?: string
+  noteb64?: string
+  closeRemainderTo?: string
+}
