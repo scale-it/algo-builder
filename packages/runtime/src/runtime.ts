@@ -402,7 +402,7 @@ export class Runtime {
    * validate logic signature and teal logic
    * @param txnParam Transaction Parameters
    */
-  validateLsig (txnParam: ExecParams): void {
+  validateLsigAndRun (txnParam: ExecParams): void {
     // check if transaction is signed by logic signature,
     // if yes verify signature and run logic
     if (txnParam.lsig === undefined) {
@@ -478,14 +478,14 @@ export class Runtime {
       mode = this.getExecutionMode(txnParams);
       this.assertAmbiguousTxnParams(txnParams);
       if (txnParams.sign === SignType.LogicSignature) {
-        this.validateLsig(txnParams);
+        this.validateLsigAndRun(txnParams);
       }
     } else {
       let flag = true;
       for (const txParam of txnParams) {
         this.assertAmbiguousTxnParams(txParam);
         if (txParam.sign === SignType.LogicSignature) {
-          this.validateLsig(txParam);
+          this.validateLsigAndRun(txParam);
         }
         flag = flag && txParam.sign === SignType.LogicSignature;
       }
