@@ -389,6 +389,28 @@ export class Runtime {
   }
 
   /**
+   * validate logic signature and teal logic
+   * @param txnParam Transaction Parameters
+   */
+  validateLsig (txnParam: ExecParams): void {
+    // check if transaction is signed by logic signature,
+    // if yes verify signature and run logic
+    if (txnParam.lsig === undefined) {
+      throw new TealError(ERRORS.TEAL.LOGIC_SIGNATURE_NOT_FOUND);
+    }
+
+    // signature validation
+    const result = txnParam.lsig.verify(decodeAddress(txnParam.fromAccount.addr).publicKey);
+    if (!result) {
+      throw new TealError(ERRORS.TEAL.LOGIC_SIGNATURE_VALIDATION_FAILED,
+        { address: txnParam.fromAccount.addr });
+    }
+    // logic validation
+    const program = convertToString(txnParam.lsig.logic);
+    this.run(program, ExecutionMode.STATELESS);
+  }
+
+  /**
    * Update current state and account balances
    * @param txnParams : Transaction parameters
    * @param accounts : accounts passed by user
@@ -401,23 +423,6 @@ export class Runtime {
       txnParameters = txnParams;
     }
     for (const txnParam of txnParameters) {
-      // check if transaction is signed by logic signature,
-      // if yes verify signature and run logic
-      if (txnParam.sign === SignType.LogicSignature) {
-        if (txnParam.lsig === undefined) {
-          throw new TealError(ERRORS.TEAL.LOGIC_SIGNATURE_NOT_FOUND);
-        }
-
-        // signature validation
-        const result = txnParam.lsig.verify(decodeAddress(txnParam.fromAccount.addr).publicKey);
-        if (!result) {
-          throw new TealError(ERRORS.TEAL.LOGIC_SIGNATURE_VALIDATION_FAILED,
-            { address: txnParam.fromAccount.addr });
-        }
-        // logic validation
-        const program = convertToString(txnParam.lsig.logic);
-        this.run(program, ExecutionMode.STATELESS);
-      }
       switch (txnParam.type) {
         case TransactionType.TransferAlgo:
           this.transferAlgo(txnParam);
@@ -461,9 +466,15 @@ export class Runtime {
     let mode = ExecutionMode.STATEFUL;
     if (!Array.isArray(txnParams)) {
       mode = this.getExecutionMode(txnParams);
+      if (txnParams.sign === SignType.LogicSignature) {
+        this.validateLsig(txnParams);
+      }
     } else {
       let flag = true;
       for (const txParam of txnParams) {
+        if (txParam.sign === SignType.LogicSignature) {
+          this.validateLsig(txParam);
+        }
         flag = flag && txParam.sign === SignType.LogicSignature;
       }
       if (flag) { mode = ExecutionMode.STATELESS; } // if all txns in grp are stateless
