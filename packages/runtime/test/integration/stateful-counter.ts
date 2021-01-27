@@ -1,8 +1,8 @@
-import { ExecParams, SignType, TransactionType } from "@algorand-builder/algob";
 import { assert } from "chai";
 
 import { Runtime, StoreAccount } from "../../src/index";
 import { BIGINT1 } from "../../src/interpreter/opcode-list";
+import { ExecParams, SignType, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 

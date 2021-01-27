@@ -242,10 +242,16 @@ by an index that does not exist.`
     description: `lsig validation error`
   },
   INVALID_TRANSACTION_PARAMS: {
-    number: 27,
+    number: 37,
     message: "Secret key and Logic Signature should not be passed together",
     title: "Transaction params error",
     description: `Transaction params error`
+  },
+  UNKNOWN_TRANSACTION_TYPE: {
+    number: 38,
+    message: "Unknown Transaction type: %transaction%",
+    title: "Transaction error",
+    description: `Transaction error`
   }
 };
 

@@ -1,7 +1,5 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
-import { ExecParams, mkTransaction, parseSSCAppArgs, SignType } from "@algorand-builder/algob";
-import { AccountAddress, AlgoTransferParam, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
 import algosdk, { decodeAddress } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
@@ -10,10 +8,16 @@ import { TealError } from "./errors/errors";
 import { ERRORS } from "./errors/errors-list";
 import { Interpreter } from "./index";
 import { convertToString } from "./lib/parsing";
+import { mkTransaction } from "./lib/txn";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
-import type { Context, SSCAttributesM, StackElem, State, StoreAccountI, Txn } from "./types";
-import { ExecutionMode } from "./types";
+import type {
+  AccountAddress, AlgoTransferParam, Context, ExecParams,
+  SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
+  StackElem, State,
+  StoreAccountI, Txn, TxParams
+} from "./types";
+import { ExecutionMode, SignType, TransactionType } from "./types";
 
 export class Runtime {
   /**
@@ -215,7 +219,7 @@ export class Runtime {
       flags.localBytes,
       flags.globalInts,
       flags.globalBytes,
-      parseSSCAppArgs(flags.appArgs),
+      flags.appArgs,
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
@@ -273,7 +277,7 @@ export class Runtime {
       senderAddr,
       mockSuggestedParams(payFlags),
       appId,
-      parseSSCAppArgs(flags.appArgs),
+      flags.appArgs,
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
@@ -321,7 +325,7 @@ export class Runtime {
       appId,
       new Uint8Array(32), // mock approval program
       new Uint8Array(32), // mock clear progam
-      parseSSCAppArgs(flags.appArgs),
+      flags.appArgs,
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,

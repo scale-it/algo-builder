@@ -1,3 +1,4 @@
+import { decodeAddress } from "algosdk";
 import * as base32 from "hi-base32";
 
 import { TealError } from "../errors/errors";
@@ -95,6 +96,24 @@ export function convertToBuffer (s: string, encoding?: EncodingType): Buffer {
       return Buffer.from(s);
     }
   }
+}
+
+/**
+ * Converts 64 bit unsigned integer to bytes in big endian.
+ */
+export function uint64ToBigEndian (x: number | bigint): Uint8Array {
+  x = BigInt(x); // use x as bigint internally to support upto uint64
+  const buff = Buffer.alloc(8);
+  buff.writeBigUInt64BE(x);
+  return Uint8Array.from(buff);
+}
+
+/**
+ * Takes an Algorand address in string form and decodes it into a Uint8Array (as public key)
+ * @param addr : algorand address
+ */
+export function addressToPk (addr: string): Uint8Array {
+  return decodeAddress(addr).publicKey;
 }
 
 /**

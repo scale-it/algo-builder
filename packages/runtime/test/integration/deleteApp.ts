@@ -1,8 +1,8 @@
-import { SignType, SSCCallsParam, TransactionType } from "@algorand-builder/algob/build/types";
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccount } from "../../src/index";
+import { SignType, SSCCallsParam, TransactionType } from "../../src/types";
 import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";

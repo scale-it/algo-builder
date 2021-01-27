@@ -1,4 +1,3 @@
-import { SSCDeploymentFlags } from "@algorand-builder/algob/src/types";
 import type {
   Account,
   AssetDef,
@@ -11,7 +10,7 @@ import { TealError } from "./errors/errors";
 import { ERRORS } from "./errors/errors-list";
 import { keyToBytes } from "./lib/parsing";
 import { assertValidSchema } from "./lib/stateful";
-import { AppLocalStateM, CreatedAppM, SSCAttributesM, StackElem, StoreAccountI } from "./types";
+import { AppLocalStateM, CreatedAppM, SSCAttributesM, SSCDeploymentFlags, StackElem, StoreAccountI } from "./types";
 
 const StateMap = "key-value";
 const globalState = "global-state";
