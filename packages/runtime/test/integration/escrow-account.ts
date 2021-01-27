@@ -111,7 +111,11 @@ describe("Algorand Stateless Smart Contracts - Escrow Account Example", function
     };
     await runtime.executeTx(closeParams, getProgram('escrow.teal'), []);
 
-    assert.equal(runtime.getAccount(escrow.address).balance(), 0);
+    // verify closeRemainderTo account is closed (removed from network)
+    await expectTealErrorAsync(
+      async () => await runtime.executeTx(closeParams, getProgram('escrow.teal'), []),
+      ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST
+    );
     assert.equal(runtime.getAccount(john.address).balance(), (initialJohnBal + initialEscrowBal) - 1000);
   });
 });

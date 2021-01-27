@@ -49,7 +49,7 @@ export class Interpreter {
     if (!accountAddr) return undefined;
 
     let account = this.runtime.ctx.state.accounts.get(accountAddr);
-    account = this.runtime.assertAccountDefined(account);
+    account = this.runtime.assertAccountDefined(accountAddr, account);
 
     return account.createdAssets.get(assetId);
   }
@@ -65,7 +65,7 @@ export class Interpreter {
     const accAddress = this.runtime.assertAddressDefined(
       this.runtime.ctx.state.globalApps.get(appId));
     let account = this.runtime.ctx.state.accounts.get(accAddress);
-    account = this.runtime.assertAccountDefined(account);
+    account = this.runtime.assertAccountDefined(accAddress, account);
     return this.runtime.assertAppDefined(appId, account.getApp(appId), line);
   }
 
@@ -78,16 +78,18 @@ export class Interpreter {
    */
   getAccount (accountIndex: bigint, line: number): StoreAccountI {
     let account: StoreAccountI | undefined;
+    let address: string;
     if (accountIndex === BIGINT0) {
-      const senderAccount = encodeAddress(this.runtime.ctx.tx.snd);
-      account = this.runtime.ctx.state.accounts.get(senderAccount);
+      address = encodeAddress(this.runtime.ctx.tx.snd);
+      account = this.runtime.ctx.state.accounts.get(address);
     } else {
       const accIndex = accountIndex - BIGINT1;
       checkIndexBound(Number(accIndex), this.runtime.ctx.tx.apat, line);
       const pkBuffer = this.runtime.ctx.tx.apat[Number(accIndex)];
-      account = this.runtime.ctx.state.accounts.get(encodeAddress(pkBuffer));
+      address = encodeAddress(pkBuffer);
+      account = this.runtime.ctx.state.accounts.get(address);
     }
-    return this.runtime.assertAccountDefined(account, line);
+    return this.runtime.assertAccountDefined(address, account, line);
   }
 
   /**
@@ -116,7 +118,7 @@ export class Interpreter {
     const accAddress = this.runtime.assertAddressDefined(
       this.runtime.ctx.state.globalApps.get(appId));
     let account = this.runtime.ctx.state.accounts.get(accAddress);
-    account = this.runtime.assertAccountDefined(account);
+    account = this.runtime.assertAccountDefined(accAddress, account);
 
     account.setGlobalState(appId, key, value, line);
   }

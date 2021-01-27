@@ -183,7 +183,7 @@ by an index that does not exist.`
   },
   ACCOUNT_DOES_NOT_EXIST: {
     number: 27,
-    message: "Account Error - Account doesn't exist at line %line%",
+    message: "Account Error - Account %address% doesn't exist at line %line%",
     title: "Account Error at %line%",
     description: `Account does not exist in the current state`
   },

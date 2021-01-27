@@ -38,12 +38,6 @@ byte "global-key"
 byte "global-val"
 app_global_put
 
-// update txn sender's local state before closing out
-int 0 //sender
-byte "local-key"
-byte "local-val"
-app_local_put
-
 finished:
 int 1
 return

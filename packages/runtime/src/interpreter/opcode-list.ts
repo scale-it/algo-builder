@@ -1740,7 +1740,7 @@ export class AppLocalPut extends Op {
 
     // get updated local state for account
     const localState = account.setLocalState(appId, key, value, this.line);
-    const acc = this.interpreter.runtime.assertAccountDefined(
+    const acc = this.interpreter.runtime.assertAccountDefined(account.address,
       this.interpreter.runtime.ctx.state.accounts.get(account.address), this.line);
     acc.appsLocalState.set(appId, localState);
   }
@@ -1807,7 +1807,7 @@ export class AppLocalDel extends Op {
       localState["key-value"].delete(key.toString()); // delete from local state
 
       let acc = this.interpreter.runtime.ctx.state.accounts.get(account.address);
-      acc = this.interpreter.runtime.assertAccountDefined(acc, this.line);
+      acc = this.interpreter.runtime.assertAccountDefined(account.address, acc, this.line);
       acc.appsLocalState.set(appId, localState);
     }
   }

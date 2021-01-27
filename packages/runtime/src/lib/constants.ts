@@ -6,7 +6,7 @@ export const MIN_UINT8 = 0;
 export const DEFAULT_STACK_ELEM = BigInt("0");
 export const MAX_CONCAT_SIZE = 4096;
 export const ALGORAND_MIN_TX_FEE = 1000;
-export const ALGORAND_ACCOUNT_MIN_BALANCE = 1000000;
+export const ALGORAND_ACCOUNT_MIN_BALANCE = 1e6; // 1 ALGO
 
 // values taken from: https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
 // minimum balance costs (in microalgos) for ssc schema

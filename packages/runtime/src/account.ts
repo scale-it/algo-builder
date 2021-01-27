@@ -159,8 +159,7 @@ export class StoreAccount implements StoreAccountI {
     // raise minimum balance
     // https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
     this.minBalance += (
-      ALGORAND_ACCOUNT_MIN_BALANCE +
-      (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * params.globalInts +
+      0.1e6 + (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * params.globalInts +
       (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * params.globalBytes
     );
     const app = new App(appId, params);
@@ -180,8 +179,7 @@ export class StoreAccount implements StoreAccountI {
 
       // https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
       this.minBalance += (
-        ALGORAND_ACCOUNT_MIN_BALANCE +
-        (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * appParams[localStateSchema]["num-uint"] +
+        0.1e6 + (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * appParams[localStateSchema]["num-uint"] +
         (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * appParams[localStateSchema]["num-byte-slice"]
       );
 
