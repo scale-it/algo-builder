@@ -94,6 +94,16 @@ export class Runtime {
   }
 
   /**
+   * Asserts if correct transaction parameters are passed
+   * @param txnParams Transaction Parameters
+   */
+  assertAmbiguousTxnParams (txnParams: ExecParams): void {
+    if (txnParams.sign === SignType.SecretKey && txnParams.lsig) {
+      throw new TealError(ERRORS.TEAL.INVALID_TRANSACTION_PARAMS);
+    }
+  }
+
+  /**
    * Fetches app from `this.store`
    * @param appId Application Index
    */
@@ -466,12 +476,14 @@ export class Runtime {
     let mode = ExecutionMode.STATEFUL;
     if (!Array.isArray(txnParams)) {
       mode = this.getExecutionMode(txnParams);
+      this.assertAmbiguousTxnParams(txnParams);
       if (txnParams.sign === SignType.LogicSignature) {
         this.validateLsig(txnParams);
       }
     } else {
       let flag = true;
       for (const txParam of txnParams) {
+        this.assertAmbiguousTxnParams(txParam);
         if (txParam.sign === SignType.LogicSignature) {
           this.validateLsig(txParam);
         }

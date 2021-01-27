@@ -240,6 +240,12 @@ by an index that does not exist.`
     message: "logic signature validation failed. address: %address%",
     title: "lsig validation error",
     description: `lsig validation error`
+  },
+  INVALID_TRANSACTION_PARAMS: {
+    number: 27,
+    message: "Secret key and Logic Signature should not be passed together",
+    title: "Transaction params error",
+    description: `Transaction params error`
   }
 };
 
