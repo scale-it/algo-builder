@@ -9,23 +9,21 @@ import { useFixture } from "../helpers/integration";
 const programName = "escrow.teal";
 const multiSigProg = "sample-asc.teal";
 
-describe("Logic Signature Test", () => {
+describe("Logic Signature", () => {
   useFixture("escrow-account");
   const john = new StoreAccount(10);
   const bob = new StoreAccount(100);
   const runtime = new Runtime([john, bob]);
   const johnPk = decodeAddress(john.address).publicKey;
 
-  it("should sign the lsig by john(delegated signature)", () => {
+  it("john should be able to create a delegated signature", () => {
     const lsig = runtime.getLogicSig(getProgram(programName), []);
 
     lsig.sign(john.account.sk);
-    const result = lsig.verify(johnPk);
-
-    assert.equal(result, true);
+    assert.isTrue(lsig.verify(johnPk));
   });
 
-  it("should return false if lsig is not signed by john(delegated signature)", () => {
+  it("should fail to verify delegated signature signed by someone else", () => {
     const lsig = runtime.getLogicSig(getProgram(programName), []);
 
     lsig.sign(bob.account.sk);
@@ -34,7 +32,7 @@ describe("Logic Signature Test", () => {
     assert.equal(result, false);
   });
 
-  it("should verify only for lsig address(escrow account)", () => {
+  it("should handle contract lsig (escrow account) verification correctly", () => {
     const lsig = runtime.getLogicSig(getProgram(programName), []);
 
     let result = lsig.verify(decodeAddress(lsig.address()).publicKey);
