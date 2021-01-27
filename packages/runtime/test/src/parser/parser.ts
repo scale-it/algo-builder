@@ -16,6 +16,7 @@ import {
 import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { Runtime } from "../../../src/runtime";
+import { ExecutionMode } from "../../../src/types";
 import { expectTealError } from "../../helpers/errors";
 import { getProgram } from "../../helpers/files";
 import { useFixture } from "../../helpers/integration";
@@ -262,7 +263,11 @@ describe("Parser", function () {
   });
 
   describe("Opcode Objects from words", () => {
-    const interpreter = new Interpreter();
+    let interpreter: Interpreter;
+    beforeEach(function () {
+      interpreter = new Interpreter();
+      interpreter.tealVersion = 2;
+    });
 
     it("should return correct opcode object for '+'", () => {
       const res = opcodeFromSentence(["+"], 1, interpreter);
@@ -401,7 +406,7 @@ describe("Parser", function () {
 
       expectTealError(
         () => opcodeFromSentence(["txn", "fee"], 1, interpreter),
-        ERRORS.TEAL.UNKOWN_TRANSACTION_FIELD
+        ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
       );
     });
 
@@ -500,17 +505,17 @@ describe("Parser", function () {
 
       expectTealError(
         () => opcodeFromSentence(["global", "mintxnfee"], 1, interpreter),
-        ERRORS.TEAL.UNKOWN_GLOBAL_FIELD
+        ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
       );
 
       expectTealError(
         () => opcodeFromSentence(["global", "minbalance"], 1, interpreter),
-        ERRORS.TEAL.UNKOWN_GLOBAL_FIELD
+        ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
       );
 
       expectTealError(
         () => opcodeFromSentence(["global", "maxtxnlife"], 1, interpreter),
-        ERRORS.TEAL.UNKOWN_GLOBAL_FIELD
+        ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
       );
     });
 
@@ -627,29 +632,35 @@ describe("Parser", function () {
     });
   });
 
+  const cryptoFile = "test-crypto.teal";
   describe("Opcodes list from TEAL file", () => {
     useFixture("teal-files");
-    const interpreter = new Interpreter();
+
+    let interpreter: Interpreter;
+    beforeEach(function () {
+      interpreter = new Interpreter();
+      interpreter.tealVersion = 2;
+    });
 
     it("Sould return correct opcode list for '+'", async () => {
       const file1 = "test-file-1.teal";
-      let res = await parser(getProgram(file1), interpreter);
+      let res = parser(getProgram(file1), ExecutionMode.STATELESS, interpreter);
       const expected = [new Int(["1"], 1), new Int(["3"], 2), new Add([], 3)];
 
       assert.deepEqual(res, expected);
 
-      const expect = [new Pragma(["version", "2"], 1), new Int(["1"], 2),
+      const expect = [new Pragma(["version", "2"], 1, interpreter), new Int(["1"], 2),
         new Int(["3"], 3), new Add([], 4)];
-      res = await parser(getProgram("test-file-2.teal"), interpreter);
+      res = parser(getProgram("test-file-2.teal"), ExecutionMode.STATELESS, interpreter);
 
       assert.deepEqual(res, expect);
     });
 
     it("Sould return correct opcode list for '-'", async () => {
       const file = "test-file-3.teal";
-      const res = await parser(getProgram(file), interpreter);
+      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1),
+        new Pragma(["version", "2"], 1, interpreter),
         new Int(["5"], 2),
         new Int(["3"], 3),
         new Sub([], 4)
@@ -660,9 +671,9 @@ describe("Parser", function () {
 
     it("Sould return correct opcode list for '/'", async () => {
       const file = "test-file-4.teal";
-      const res = await parser(getProgram(file), interpreter);
+      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1),
+        new Pragma(["version", "2"], 1, interpreter),
         new Int(["6"], 2),
         new Int(["3"], 3),
         new Div([], 6)
@@ -673,9 +684,9 @@ describe("Parser", function () {
 
     it("Sould return correct opcode list for '*'", async () => {
       const file = "test-file-5.teal";
-      const res = await parser(getProgram(file), interpreter);
+      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1),
+        new Pragma(["version", "2"], 1, interpreter),
         new Int(["5"], 4),
         new Int(["3"], 6),
         new Mul([], 10)
@@ -686,9 +697,9 @@ describe("Parser", function () {
 
     it("Should return correct opcode list for 'addr'", async () => {
       const file = "test-addr.teal";
-      const res = await parser(getProgram(file), interpreter);
+      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1),
+        new Pragma(["version", "2"], 1, interpreter),
         new Addr(["WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"], 2)
       ];
 
@@ -697,7 +708,7 @@ describe("Parser", function () {
 
     it("Should return correct opcode list for 'byte'", async () => {
       const file = "test-byte.teal";
-      const res = await parser(getProgram(file), interpreter);
+      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
       const byte64 = "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=";
       const byte32 = "MFRGGZDFMY======";
 
@@ -713,7 +724,7 @@ describe("Parser", function () {
 
     it("Should return correct opcode list for 'Len and Err'", async () => {
       const file = "test-len-err.teal";
-      const res = await parser(getProgram(file), interpreter);
+      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
       const expected = [new Len([], 1), new Err([], 2)];
 
       assert.deepEqual(res, expected);
@@ -721,7 +732,7 @@ describe("Parser", function () {
 
     it("Should return correct opcode list for 'Bitwise'", async () => {
       const file = "test-bitwise.teal";
-      const res = await parser(getProgram(file), interpreter);
+      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
       const expected = [
         new BitwiseOr([], 2),
         new BitwiseAnd([], 4),
@@ -734,7 +745,7 @@ describe("Parser", function () {
 
     it("Should return correct opcode list for 'Mod'", async () => {
       const file = "test-mod.teal";
-      const res = await parser(getProgram(file), interpreter);
+      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
       const expected = [new Int(["6"], 1), new Int(["3"], 2), new Mod([], 3)];
 
       assert.deepEqual(res, expected);
@@ -745,7 +756,7 @@ describe("Parser", function () {
       interpreter.runtime = new Runtime([]);
       interpreter.runtime.ctx.args = [new Uint8Array(0)];
 
-      const res = await parser(getProgram(file), interpreter);
+      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
       const expected = [new Arg(["0"], 1, interpreter)];
 
       assert.deepEqual(res, expected);
@@ -756,7 +767,7 @@ describe("Parser", function () {
       interpreter.intcblock = [BigInt("1")];
       interpreter.bytecblock = [new Uint8Array(0)];
 
-      const res = await parser(getProgram(file), interpreter);
+      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
       const expected = [new Intc(["0"], 1, interpreter), new Bytec(["0"], 2, interpreter)];
 
       assert.deepEqual(res, expected);
@@ -766,30 +777,27 @@ describe("Parser", function () {
       const file = "test-store-load.teal";
       interpreter.scratch = [BigInt("1")];
 
-      const res = await parser(getProgram(file), interpreter);
+      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
       const expected = [new Store(["0"], 1, interpreter), new Load(["0"], 2, interpreter)];
 
       assert.deepEqual(res, expected);
     });
 
     it("Should return correct opcode list for 'Crypto opcodes'", async () => {
-      const file = "test-crypto.teal";
-
-      const res = await parser(getProgram(file), interpreter);
+      const res = parser(getProgram(cryptoFile), ExecutionMode.STATELESS, interpreter);
       const expected = [
         new Sha256([], 1),
         new Keccak256([], 2),
         new Sha512_256([], 3),
         new Ed25519verify([], 4)
       ];
-
       assert.deepEqual(res, expected);
     });
 
     it("Should return correct opcode list for 'comparsions'", async () => {
       const file = "test-compare.teal";
 
-      const res = await parser(getProgram(file), interpreter);
+      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
       const expected = [
         new LessThan([], 1),
         new GreaterThan([], 2),
@@ -808,18 +816,19 @@ describe("Parser", function () {
     it("Should return correct opcode list for 'all others'", async () => {
       const file = "test-others.teal";
 
-      const res = await parser(getProgram(file), interpreter);
+      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
       const expected = [
-        new Itob([], 1),
-        new Btoi([], 2),
-        new Mulw([], 3),
-        new Addw([], 4),
-        new Pop([], 5),
-        new Dup([], 6),
-        new Dup2([], 7),
-        new Concat([], 8),
-        new Substring(["0", "4"], 9),
-        new Substring3([], 10)
+        new Pragma(["version", "2"], 1, interpreter),
+        new Itob([], 2),
+        new Btoi([], 3),
+        new Mulw([], 4),
+        new Addw([], 5),
+        new Pop([], 6),
+        new Dup([], 7),
+        new Dup2([], 8),
+        new Concat([], 9),
+        new Substring(["0", "4"], 10),
+        new Substring3([], 11)
       ];
 
       assert.deepEqual(res, expected);
@@ -828,7 +837,7 @@ describe("Parser", function () {
     it("should return correct opcode list for 'b, bz, bnz'", async () => {
       const file = "test-branch.teal";
 
-      const res = await parser(getProgram(file), interpreter);
+      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
       const expected = [
         new Branch(["label1"], 2, interpreter),
         new BranchIfZero(["label2"], 3, interpreter),
@@ -841,7 +850,7 @@ describe("Parser", function () {
     it("should return correct opcode list for 'return'", async () => {
       const file = "test-return.teal";
 
-      const res = await parser(getProgram(file), interpreter);
+      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
       const expected = [new Return([], 2, interpreter)];
 
       assert.deepEqual(res, expected);
@@ -850,7 +859,7 @@ describe("Parser", function () {
     it("should return correct opcode list for 'Label'", async () => {
       const file = "test-label.teal";
 
-      const res = await parser(getProgram(file), interpreter);
+      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
       const expected = [new Label(["label:"], 2)];
 
       assert.deepEqual(res, expected);
@@ -859,7 +868,7 @@ describe("Parser", function () {
     it("should return correct opcode list for 'global'", async () => {
       const file = "test-global.teal";
 
-      const res = await parser(getProgram(file), interpreter);
+      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
       const expected = [
         new Global(["MinTxnFee"], 3, interpreter),
         new Global(["MinBalance"], 4, interpreter),
@@ -878,9 +887,9 @@ describe("Parser", function () {
     it("should return correct opcode list for `Stateful`", async () => {
       const file = "test-stateful.teal";
 
-      const res = await parser(getProgram(file), interpreter);
+      const res = parser(getProgram(file), ExecutionMode.STATEFUL, interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1),
+        new Pragma(["version", "2"], 1, interpreter),
         new Balance([], 4, interpreter),
         new GetAssetHolding(["AssetBalance"], 5, interpreter),
         new GetAssetDef(["AssetTotal"], 6, interpreter),
@@ -896,6 +905,103 @@ describe("Parser", function () {
       ];
 
       assert.deepEqual(res, expected);
+    });
+  });
+
+  describe("Gas cost of Opcodes from TEAL file", () => {
+    useFixture("teal-files");
+
+    let interpreter: Interpreter;
+    beforeEach(function () {
+      interpreter = new Interpreter();
+    });
+
+    it("Should return correct gas cost for 'Crypto opcodes' for tealversion 1", async () => {
+      interpreter.tealVersion = 1; // by default the version is also 1
+
+      let op = opcodeFromSentence(["sha256"], 1, interpreter);
+      assert.equal(interpreter.gas, 7);
+
+      interpreter.gas = 0;
+      op = opcodeFromSentence(["keccak256"], 2, interpreter);
+      assert.equal(interpreter.gas, 26);
+
+      interpreter.gas = 0;
+      op = opcodeFromSentence(["sha512_256"], 3, interpreter);
+      assert.equal(interpreter.gas, 9);
+
+      interpreter.gas = 0;
+      // eslint-disable-next-line
+      op = opcodeFromSentence(["ed25519verify"], 4, interpreter);
+      assert.equal(interpreter.gas, 1900);
+
+      interpreter.gas = 0;
+      parser(getProgram(cryptoFile), ExecutionMode.STATELESS, interpreter);
+      assert.equal(interpreter.gas, 1942); // 7 + 26 + 9 + 1900
+    });
+
+    it("Should return correct gas cost for 'Crypto opcodes' for tealversion 2", async () => {
+      interpreter.tealVersion = 2;
+
+      let op = opcodeFromSentence(["sha256"], 1, interpreter);
+      assert.equal(interpreter.gas, 35);
+
+      interpreter.gas = 0;
+      op = opcodeFromSentence(["keccak256"], 2, interpreter);
+      assert.equal(interpreter.gas, 130);
+
+      interpreter.gas = 0;
+      op = opcodeFromSentence(["sha512_256"], 3, interpreter);
+      assert.equal(interpreter.gas, 45);
+
+      interpreter.gas = 0;
+      // eslint-disable-next-line
+      op = opcodeFromSentence(["ed25519verify"], 4, interpreter);
+      assert.equal(interpreter.gas, 1900);
+
+      interpreter.gas = 0;
+      parser(getProgram(cryptoFile), ExecutionMode.STATELESS, interpreter);
+      assert.equal(interpreter.gas, 2110); // 35 + 130 + 45 + 1900
+    });
+
+    it("Should return correct gas cost for mix opcodes from teal files", async () => {
+      let file = "test-file-1.teal";
+      const mode = ExecutionMode.STATELESS;
+      parser(getProgram(file), mode, interpreter);
+      assert.equal(interpreter.gas, 3);
+
+      interpreter.gas = 0;
+      file = "test-file-3.teal";
+      parser(getProgram(file), mode, interpreter);
+      assert.equal(interpreter.gas, 3);
+
+      interpreter.gas = 0;
+      file = "test-file-4.teal";
+      parser(getProgram(file), mode, interpreter);
+      assert.equal(interpreter.gas, 3);
+
+      interpreter.gas = 0;
+      file = "test-label.teal";
+      parser(getProgram(file), mode, interpreter);
+      assert.equal(interpreter.gas, 0); // label has cost 0
+
+      interpreter.gas = 0;
+      file = "test-others.teal";
+      parser(getProgram(file), mode, interpreter);
+      assert.equal(interpreter.gas, 10);
+
+      interpreter.gas = 0;
+      file = "test-stateful.teal";
+      parser(getProgram(file), ExecutionMode.STATEFUL, interpreter);
+      assert.equal(interpreter.gas, 12);
+    });
+
+    it("Should throw error if total cost exceeds 20000", async () => {
+      const file = "test-max-opcost.teal"; // has cost 22800
+      expectTealError(
+        () => parser(getProgram(file), ExecutionMode.STATELESS, interpreter),
+        ERRORS.TEAL.MAX_COST_EXCEEDED
+      );
     });
   });
 });

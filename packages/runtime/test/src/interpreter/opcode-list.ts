@@ -63,14 +63,15 @@ describe("Teal Opcodes", function () {
   });
 
   describe("Pragma", () => {
+    const interpreter = new Interpreter();
     it("should store pragma version", () => {
-      const op = new Pragma(["version", "2"], 1);
-      assert.equal(op.version, BigInt("2"));
+      const op = new Pragma(["version", "2"], 1, interpreter);
+      assert.equal(op.version, 2);
     });
 
     it("should store throw length error", () => {
       expectTealError(
-        () => new Pragma(["version", "2", "some-value"], 1),
+        () => new Pragma(["version", "2", "some-value"], 1, interpreter),
         ERRORS.TEAL.ASSERT_LENGTH
       );
     });
@@ -1528,6 +1529,7 @@ describe("Teal Opcodes", function () {
     const interpreter = new Interpreter();
     interpreter.runtime = new Runtime([]);
     interpreter.runtime.ctx.tx = TXN_OBJ;
+    interpreter.tealVersion = 2; // set tealversion to latest (to support all tx fields)
 
     describe("Txn: Common Fields", function () {
       it("should push txn fee to stack", function () {
@@ -1980,6 +1982,54 @@ describe("Teal Opcodes", function () {
         );
       });
     });
+
+    describe("Tx fields for specific version", function () {
+      it("should throw error if transaction field is not present in teal version", function () {
+        interpreter.tealVersion = 1;
+
+        // for txn
+        expectTealError(
+          () => new Txn(['ApplicationID'], 1, interpreter),
+          ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+        );
+
+        expectTealError(
+          () => new Txn(['ApprovalProgram'], 1, interpreter),
+          ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+        );
+
+        expectTealError(
+          () => new Txn(['ConfigAssetDecimals'], 1, interpreter),
+          ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+        );
+
+        expectTealError(
+          () => new Txn(['FreezeAssetAccount'], 1, interpreter),
+          ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+        );
+
+        expectTealError(
+          () => new Txn(['FreezeAssetAccount'], 1, interpreter),
+          ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+        );
+
+        // for gtxn
+        expectTealError(
+          () => new Gtxn(['0', 'OnCompletion'], 1, interpreter),
+          ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+        );
+
+        expectTealError(
+          () => new Gtxn(['0', 'RekeyTo'], 1, interpreter),
+          ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+        );
+
+        expectTealError(
+          () => new Gtxn(['0', 'ConfigAssetClawback'], 1, interpreter),
+          ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+        );
+      });
+    });
   });
 
   describe("Global Opcode", function () {
@@ -1994,6 +2044,7 @@ describe("Teal Opcodes", function () {
     interpreter.runtime.ctx.tx = TXN_OBJ;
     interpreter.runtime.ctx.gtxs = [TXN_OBJ];
     interpreter.runtime.ctx.tx.apid = 1828;
+    interpreter.tealVersion = 2; // set tealversion to latest (to support all global fields)
 
     it("should push MinTxnFee to stack", function () {
       const op = new Global(['MinTxnFee'], 1, interpreter);
@@ -2068,6 +2119,30 @@ describe("Teal Opcodes", function () {
 
       const top = stack.pop();
       assert.equal(BigInt('1828'), top);
+    });
+
+    it("should throw error if global field is not present in teal version", function () {
+      interpreter.tealVersion = 1;
+
+      expectTealError(
+        () => new Global(['LogicSigVersion'], 1, interpreter),
+        ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
+      );
+
+      expectTealError(
+        () => new Global(['Round'], 1, interpreter),
+        ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
+      );
+
+      expectTealError(
+        () => new Global(['LatestTimestamp'], 1, interpreter),
+        ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
+      );
+
+      expectTealError(
+        () => new Global(['CurrentApplicationID'], 1, interpreter),
+        ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
+      );
     });
   });
 

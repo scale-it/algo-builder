@@ -1,3 +1,4 @@
+#pragma version 2
 // check if application is being created
 // This ssc only allows creator to close out
 int 0

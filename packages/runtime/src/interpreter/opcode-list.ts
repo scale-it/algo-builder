@@ -24,26 +24,28 @@ export const BIGINT1 = BigInt("1");
 // Store TEAL version
 // push to stack [...stack]
 export class Pragma extends Op {
-  readonly version: bigint;
+  readonly version: number;
   readonly line: number;
   /**
    * Store Pragma version
    * @param args Expected arguments: ["version", version number]
    * @param line line number in TEAL file
+   * @param interpreter interpreter object
    */
-  constructor (args: string[], line: number) {
+  constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     this.line = line;
     assertLen(args.length, 2, line);
-    if (args[0] === "version") {
-      this.version = BigInt(args[1]);
+    if (args[0] === "version" && (args[1] === '1' || args[1] === '2')) {
+      this.version = Number(args[1]);
+      interpreter.tealVersion = this.version;
     } else {
-      throw new TealError(ERRORS.TEAL.PRAGMA_VERSION_ERROR, { got: args[0], line: line });
+      throw new TealError(ERRORS.TEAL.PRAGMA_VERSION_ERROR, { got: args.join(' '), line: line });
     }
   }
 
   // Returns Pragma version
-  getVersion (): bigint {
+  getVersion (): number {
     return this.version;
   }
 
@@ -1190,7 +1192,7 @@ export class Txn extends Op {
     super();
     this.line = line;
     assertLen(args.length, 1, line);
-    this.assertTxFieldDefined(args[0], line);
+    this.assertTxFieldDefined(args[0], interpreter.tealVersion, line);
 
     this.field = args[0]; // field
     this.interpreter = interpreter;
@@ -1200,7 +1202,8 @@ export class Txn extends Op {
     const result = txnSpecbyField(
       this.field,
       this.interpreter.runtime.ctx.tx,
-      this.interpreter.runtime.ctx.gtxs);
+      this.interpreter.runtime.ctx.gtxs,
+      this.interpreter.tealVersion);
     stack.push(result);
   }
 }
@@ -1227,7 +1230,7 @@ export class Gtxn extends Op {
     this.line = line;
     assertLen(args.length, 2, line);
     assertOnlyDigits(args[0], line);
-    this.assertTxFieldDefined(args[1], line);
+    this.assertTxFieldDefined(args[1], interpreter.tealVersion, line);
 
     this.txIdx = Number(args[0]); // transaction group index
     this.field = args[1]; // field
@@ -1241,7 +1244,8 @@ export class Gtxn extends Op {
     const result = txnSpecbyField(
       this.field,
       this.interpreter.runtime.ctx.gtxs[this.txIdx],
-      this.interpreter.runtime.ctx.gtxs);
+      this.interpreter.runtime.ctx.gtxs,
+      this.interpreter.tealVersion);
     stack.push(result);
   }
 }
@@ -1267,7 +1271,7 @@ export class Txna extends Op {
     this.line = line;
     assertLen(args.length, 2, line);
     assertOnlyDigits(args[1], line);
-    this.assertTxFieldDefined(args[0], line);
+    this.assertTxFieldDefined(args[0], interpreter.tealVersion, line);
 
     this.field = args[0]; // field
     this.idx = Number(args[1]);
@@ -1275,7 +1279,8 @@ export class Txna extends Op {
   }
 
   execute (stack: TEALStack): void {
-    const result = txAppArg(this.field, this.interpreter.runtime.ctx.tx, this.idx, this, this.line);
+    const result = txAppArg(this.field, this.interpreter.runtime.ctx.tx, this.idx, this,
+      this.interpreter.tealVersion, this.line);
     stack.push(result);
   }
 }
@@ -1304,7 +1309,7 @@ export class Gtxna extends Op {
     assertLen(args.length, 3, line);
     assertOnlyDigits(args[0], line);
     assertOnlyDigits(args[2], line);
-    this.assertTxFieldDefined(args[1], line);
+    this.assertTxFieldDefined(args[1], interpreter.tealVersion, line);
 
     this.txIdx = Number(args[0]); // transaction group index
     this.field = args[1]; // field
@@ -1317,7 +1322,7 @@ export class Gtxna extends Op {
     this.assertUint8(BigInt(this.txIdx), this.line);
 
     const tx = this.interpreter.runtime.ctx.gtxs[this.txIdx];
-    const result = txAppArg(this.field, tx, this.idx, this, this.line);
+    const result = txAppArg(this.field, tx, this.idx, this, this.interpreter.tealVersion, this.line);
     stack.push(result);
   }
 }
@@ -1477,7 +1482,7 @@ export class Global extends Op {
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     assertLen(args.length, 1, line);
-    this.assertGlobalDefined(args[0], line);
+    this.assertGlobalDefined(args[0], interpreter.tealVersion, line);
 
     this.field = args[0]; // global field
     this.interpreter = interpreter;
@@ -1500,7 +1505,7 @@ export class Global extends Op {
         break;
       }
       default: {
-        result = GlobalFields[this.field];
+        result = GlobalFields[this.interpreter.tealVersion][this.field];
       }
     }
 
