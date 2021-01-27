@@ -1,3 +1,4 @@
+import { ExecParams, SignType, TransactionType } from "@algorand-builder/algob/src/types";
 import { multisigAddress } from "algosdk";
 import { assert } from "chai";
 
@@ -8,11 +9,12 @@ import { useFixture } from "../helpers/integration";
 
 const programName = "escrow.teal";
 const multiSigProg = "sample-asc.teal";
+const initialHolding = 2e7; ;
 
 describe("Logic Signature Test", () => {
   useFixture("escrow-account");
-  const john = new StoreAccount(10);
-  const bob = new StoreAccount(100);
+  const john = new StoreAccount(initialHolding);
+  const bob = new StoreAccount(initialHolding);
   const runtime = new Runtime([john, bob]);
 
   it("should sign the lsig by john(delegated signature)", () => {
@@ -46,9 +48,9 @@ describe("Logic Signature Test", () => {
 
 describe("Multi-Signature Test", () => {
   useFixture("multi-signature");
-  const alice = new StoreAccount(10);
-  const john = new StoreAccount(100);
-  const bob = new StoreAccount(1000);
+  const alice = new StoreAccount(initialHolding);
+  const john = new StoreAccount(initialHolding);
+  const bob = new StoreAccount(initialHolding);
 
   const runtime = new Runtime([alice, john, bob]);
   // Generate multi signature account hash

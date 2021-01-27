@@ -102,7 +102,6 @@ export class Runtime {
   validateRounds (gtxns: Txn[]): void {
     // https://developer.algorand.org/docs/features/transactions/#current-round
     for (const txn of gtxns) {
-      console.log("FCC   ", txn.fv, "  LVVVV  ", txn.lv);
       if (txn.fv >= this.round || txn.lv <= this.round) {
         throw new TealError(ERRORS.TEAL.INVALID_ROUND, { round: this.round });
       }
