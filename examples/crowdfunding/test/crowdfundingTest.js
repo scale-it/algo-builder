@@ -9,9 +9,9 @@ import {
 import { Runtime, StoreAccount } from '@algorand-builder/runtime';
 import { assert } from 'chai';
 
-const initialDonorBalance = 60000000;
-const initialCreatorBalance = 10000;
-const goal = 7000000;
+const initialDonorBalance = 6e7;
+const initialCreatorBalance = 1e4;
+const goal = 7e6;
 
 describe('Crowdfunding Tests', function () {
   let creator = new StoreAccount(initialCreatorBalance);
@@ -52,10 +52,10 @@ describe('Crowdfunding Tests', function () {
   const getGlobal = (key) => runtime.getGlobalState(applicationId, key);
 
   // fetch latest account state
-  function syncAccounts (escrowAddress) {
+  function syncAccounts () {
     creator = runtime.getAccount(creator.address);
-    escrow = runtime.getAccount(escrowAddress);
     donor = runtime.getAccount(donor.address);
+    escrow = runtime.getAccount(escrow.address);
   }
 
   // Get begin date to pass in
@@ -99,7 +99,11 @@ describe('Crowdfunding Tests', function () {
     // setup escrow account
     const escrowProg = getProgram('crowdFundEscrow.py', { APP_ID: applicationId });
     const lsig = runtime.getLogicSig(escrowProg, []);
-    console.log('Escrow Address: ', lsig.address());
+    const escrowAddress = lsig.address();
+
+    // sync escrow account
+    escrow = runtime.getAccount(escrowAddress);
+    console.log('Escrow Address: ', escrowAddress);
 
     // verify global state
     assert.isDefined(applicationId);
@@ -111,14 +115,14 @@ describe('Crowdfunding Tests', function () {
     assert.deepEqual(getGlobal('Total'), 0n);
 
     // update application with correct escrow account address
-    let appArgs = [addressToPk(lsig.address())]; // converts algorand address to Uint8Array
+    let appArgs = [addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
 
     runtime.updateApp(
       creator.address,
       applicationId,
       program,
       {}, { appArgs: appArgs });
-    const escrowPk = addressToPk(lsig.address());
+    const escrowPk = addressToPk(escrowAddress);
 
     // verify escrow storage
     assert.isDefined(applicationId);
@@ -128,7 +132,7 @@ describe('Crowdfunding Tests', function () {
     runtime.optInToApp(creator.address, applicationId, {}, {}, program);
     runtime.optInToApp(donor.address, applicationId, {}, {}, program);
 
-    syncAccounts(lsig.address());
+    syncAccounts();
     assert.isDefined(creator.appsLocalState.get(applicationId));
     assert.isDefined(donor.appsLocalState.get(applicationId));
 
@@ -159,7 +163,8 @@ describe('Crowdfunding Tests', function () {
     // execute transaction
     runtime.executeTx(txGroup, program, []);
 
-    syncAccounts(lsig.address());
+    // sync accounts
+    syncAccounts();
     assert.equal(escrow.balance(), donationAmount);
     assert.equal(donor.balance(), initialDonorBalance - donationAmount);
 
@@ -187,11 +192,11 @@ describe('Crowdfunding Tests', function () {
       }
     ];
 
-    syncAccounts(lsig.address());
+    syncAccounts();
     const donorBalance = donor.balance();
     runtime.executeTx(txGroup, program, []);
 
-    syncAccounts(lsig.address());
+    syncAccounts();
     assert.equal(escrow.balance(), 300000);
     assert.equal(donor.balance(), donorBalance + 300000);
 
@@ -252,8 +257,12 @@ describe('Crowdfunding Tests', function () {
     // setup escrow account
     const escrowProg = getProgram('crowdFundEscrow.py', { APP_ID: applicationId });
     const lsig = runtime.getLogicSig(escrowProg, []);
-    console.log('Escrow Address: ', lsig.address());
-    syncAccounts(lsig.address());
+    const escrowAddress = lsig.address();
+
+    // sync escrow account
+    escrow = runtime.getAccount(escrowAddress);
+    console.log('Escrow Address: ', escrowAddress);
+    syncAccounts();
 
     // update application with correct escrow account address
     let appArgs = [addressToPk(lsig.address())]; // converts algorand address to Uint8Array
