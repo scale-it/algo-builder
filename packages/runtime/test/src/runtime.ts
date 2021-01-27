@@ -1,4 +1,4 @@
-import { ExecParams, SignType, TransactionType } from "@algorand-builder/algob/src/types";
+import { AlgoTransferParam, ExecParams, SignType, TransactionType } from "@algorand-builder/algob/src/types";
 import { LogicSig } from "algosdk";
 import { assert } from "chai";
 
@@ -76,26 +76,34 @@ describe("Rounds Test", function () {
   let bob = new StoreAccount(minBalance);
   let runtime: Runtime;
   let program: string;
+  let txnParams: AlgoTransferParam;
   this.beforeAll(function () {
     runtime = new Runtime([john, bob]); // setup test
     program = getProgram('basic.teal');
+
+    // set up transaction paramenters
+    txnParams = {
+      type: TransactionType.TransferAlgo, // payment
+      sign: SignType.SecretKey,
+      fromAccount: john.account,
+      toAccountAddr: bob.address,
+      amountMicroAlgos: 100,
+      payFlags: { firstValid: 5, validRounds: 200 }
+    };
   });
 
   afterEach(function () {
     john = new StoreAccount(minBalance);
     bob = new StoreAccount(minBalance);
     runtime = new Runtime([john, bob]);
+    txnParams.fromAccount = john.account;
+    txnParams.toAccountAddr = bob.address;
   });
 
-  // set up transaction paramenters
-  const txnParams: ExecParams = {
-    type: TransactionType.TransferAlgo, // payment
-    sign: SignType.SecretKey,
-    fromAccount: john.account,
-    toAccountAddr: bob.address,
-    amountMicroAlgos: 100,
-    payFlags: { firstValid: 5, validRounds: 200 }
-  };
+  function syncAccounts (): void {
+    john = runtime.getAccount(john.address);
+    bob = runtime.getAccount(bob.address);
+  }
 
   it("should pass if first and last valid are in current round range", () => {
     // set round
@@ -105,10 +113,9 @@ describe("Rounds Test", function () {
     runtime.executeTx(txnParams, program, []);
 
     // get final state (updated accounts)
-    const johnAcc = runtime.getAccount(john.address);
-    const bobAcc = runtime.getAccount(bob.address);
-    assert.equal(johnAcc.balance(), minBalance - 100);
-    assert.equal(bobAcc.balance(), minBalance + 100);
+    syncAccounts();
+    assert.equal(john.balance(), minBalance - 100);
+    assert.equal(bob.balance(), minBalance + 100);
   });
 
   it("should fail if first and last valid are not in current round range", () => {
@@ -123,6 +130,14 @@ describe("Rounds Test", function () {
   });
 
   it("should pass if no rounds are passed", () => {
+    txnParams.payFlags = {};
 
+    // execute transaction
+    runtime.executeTx(txnParams, program, []);
+
+    // get final state (updated accounts)
+    syncAccounts();
+    assert.equal(john.balance(), minBalance - 100);
+    assert.equal(bob.balance(), minBalance + 100);
   });
 });
