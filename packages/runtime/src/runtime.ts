@@ -393,7 +393,7 @@ export class Runtime {
   // transfer ALGO as per transaction parameters
   transferAlgo (txnParam: AlgoTransferParam): void {
     const fromAccount = this.getAccount(txnParam.fromAccount.addr);
-    const toAccount = this.getAccount(txnParam.toAccountAddr);;
+    const toAccount = this.getAccount(txnParam.toAccountAddr);
 
     this.assertMinBalance(txnParam.amountMicroAlgos, fromAccount.address);
     fromAccount.amount -= txnParam.amountMicroAlgos; // remove 'x' algo from sender
