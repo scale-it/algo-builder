@@ -173,7 +173,7 @@ export class LogicSig {
 
   /**
    * Returns signed logic
-   * @param secretKey account's secret key
+   * @param secretKey: account's secret key
    */
   signProgram (secretKey: Uint8Array): Uint8Array {
     return signBytes(this.logic, secretKey);
