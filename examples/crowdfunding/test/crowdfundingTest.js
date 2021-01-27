@@ -265,7 +265,7 @@ describe('Crowdfunding Tests', function () {
     syncAccounts();
 
     // update application with correct escrow account address
-    let appArgs = [addressToPk(lsig.address())]; // converts algorand address to Uint8Array
+    let appArgs = [addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
     runtime.updateApp(
       creator.address,
       applicationId,

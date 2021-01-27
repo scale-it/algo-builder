@@ -60,7 +60,9 @@ describe("Logic Signature Transaction in Runtime", function () {
     txnParam.fromAccount = john.account;
 
     logicSig.sign(john.account.sk);
-    // execute transaction (rejected by logic after signature validation)
+    // execute transaction (rejected by logic)
+    // - Signature successfully validated for john
+    // - But teal file logic is rejected
     expectTealError(
       () => runtime.executeTx(txnParam, getProgram(programName), []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
