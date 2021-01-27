@@ -1,10 +1,10 @@
-import { Algodv2 } from "algosdk";
 import fs from "fs";
 import path from "path";
 import YAML from "yaml";
 
 import { ASSETS_DIR } from "../internal/core/project-structure";
 import { CompileOp, PyCompileOp, pyExt, tealExt } from "./compile";
+import { mockAlgod } from "./constants";
 
 // takes file name as input and returns program as string
 export function getProgram (fileName: string, scInitParam?: unknown): string {
@@ -20,8 +20,6 @@ export function getProgram (fileName: string, scInitParam?: unknown): string {
     let param: string | undefined = YAML.stringify(scInitParam);
     if (scInitParam === undefined) { param = undefined; }
 
-    // mock algod credentials to initialize PyCompileOp
-    const mockAlgod = new Algodv2("dummyToken", "dummyNetwork", 8080);
     const py = new PyCompileOp(new CompileOp(mockAlgod));
     return py.compilePyTeal(fileName, param);
   }
