@@ -9,7 +9,7 @@ import {
 import { Runtime, StoreAccount } from '@algorand-builder/runtime';
 import { assert } from 'chai';
 
-const initialDonorBalance = 6e7;
+const initialDonorBalance = 60e6;
 const initialCreatorBalance = 1e4;
 const goal = 7e6;
 
