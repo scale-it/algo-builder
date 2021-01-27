@@ -3,7 +3,7 @@ import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccount } from "../../src/index";
-import { expectTealErrorAsync } from "../helpers/errors";
+import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 
@@ -36,33 +36,33 @@ describe("Algorand Smart Contracts - Delete Application", function () {
     };
   });
 
-  it("should fail during delete application if app id is not defined", async function () {
-    await expectTealErrorAsync(
-      async () => await runtime.executeTx(deleteParams, program, []),
+  it("should fail during delete application if app id is not defined", function () {
+    expectTealError(
+      () => runtime.executeTx(deleteParams, program, []),
       ERRORS.TEAL.APP_NOT_FOUND
     );
   });
 
-  it("should delete application", async function () {
-    const appId = await runtime.addApp(flags, {}, program);
+  it("should delete application", function () {
+    const appId = runtime.addApp(flags, {}, program);
     deleteParams.appId = appId;
-    await runtime.executeTx(deleteParams, program, []);
+    runtime.executeTx(deleteParams, program, []);
 
     // verify app is deleted
-    await expectTealErrorAsync(
-      async () => runtime.getApp(appId),
+    expectTealError(
+      () => runtime.getApp(appId),
       ERRORS.TEAL.APP_NOT_FOUND
     );
   });
 
-  it("should not delete application if logic is rejected", async function () {
+  it("should not delete application if logic is rejected", function () {
     // create app
-    const appId = await runtime.addApp(flags, {}, program);
+    const appId = runtime.addApp(flags, {}, program);
     deleteParams.appId = appId;
     deleteParams.fromAccount = alice.account;
 
-    await expectTealErrorAsync(
-      async () => await runtime.executeTx(deleteParams, program, []),
+    expectTealError(
+      () => runtime.executeTx(deleteParams, program, []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 

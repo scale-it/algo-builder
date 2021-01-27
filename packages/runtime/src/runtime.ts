@@ -2,13 +2,14 @@
 /* eslint sonarjs/no-small-switch: 0 */
 import { ExecParams, mkTransaction, parseSSCAppArgs, SignType } from "@algorand-builder/algob";
 import { AccountAddress, AlgoTransferParam, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
-import algosdk from "algosdk";
+import algosdk, { decodeAddress } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
 import { StoreAccount } from "./account";
 import { TealError } from "./errors/errors";
 import { ERRORS } from "./errors/errors-list";
 import { Interpreter } from "./index";
+import { convertToString } from "./lib/parsing";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import type { Context, SSCAttributesM, StackElem, State, StoreAccountI, Txn } from "./types";
@@ -90,6 +91,16 @@ export class Runtime {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: lineNumber });
     }
     return app;
+  }
+
+  /**
+   * Asserts if correct transaction parameters are passed
+   * @param txnParams Transaction Parameters
+   */
+  assertAmbiguousTxnParams (txnParams: ExecParams): void {
+    if (txnParams.sign === SignType.SecretKey && txnParams.lsig) {
+      throw new TealError(ERRORS.TEAL.INVALID_TRANSACTION_PARAMS);
+    }
   }
 
   /**
@@ -229,7 +240,7 @@ export class Runtime {
    * @param payFlags Transaction parameters
    * @param program approval program
    */
-  async addApp (flags: SSCDeploymentFlags, payFlags: TxParams, program: string): Promise<number> {
+  addApp (flags: SSCDeploymentFlags, payFlags: TxParams, program: string): number {
     const sender = flags.sender;
     const senderAcc = this.assertAccountDefined(this.store.accounts.get(sender.addr));
 
@@ -284,8 +295,8 @@ export class Runtime {
    * @param payFlags Transaction Parameters
    * @param program TEAL code as string
    */
-  async optInToApp (accountAddr: string, appId: number,
-    flags: SSCOptionalFlags, payFlags: TxParams, program: string): Promise<void> {
+  optInToApp (accountAddr: string, appId: number,
+    flags: SSCOptionalFlags, payFlags: TxParams, program: string): void {
     const appParams = this.getApp(appId);
     const account = this.assertAccountDefined(this.store.accounts.get(accountAddr));
     if (appParams) {
@@ -332,13 +343,13 @@ export class Runtime {
    * @param payFlags Transaction parameters
    * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
    */
-  async updateApp (
+  updateApp (
     senderAddr: string,
     appId: number,
     newProgram: string,
     payFlags: TxParams,
     flags: SSCOptionalFlags
-  ): Promise<void> {
+  ): void {
     const appParams = this.getApp(appId);
     if (appParams) {
       this.createUpdateTx(senderAddr, appId, payFlags, flags);
@@ -388,6 +399,28 @@ export class Runtime {
   }
 
   /**
+   * validate logic signature and teal logic
+   * @param txnParam Transaction Parameters
+   */
+  validateLsigAndRun (txnParam: ExecParams): void {
+    // check if transaction is signed by logic signature,
+    // if yes verify signature and run logic
+    if (txnParam.lsig === undefined) {
+      throw new TealError(ERRORS.TEAL.LOGIC_SIGNATURE_NOT_FOUND);
+    }
+
+    // signature validation
+    const result = txnParam.lsig.verify(decodeAddress(txnParam.fromAccount.addr).publicKey);
+    if (!result) {
+      throw new TealError(ERRORS.TEAL.LOGIC_SIGNATURE_VALIDATION_FAILED,
+        { address: txnParam.fromAccount.addr });
+    }
+    // logic validation
+    const program = convertToString(txnParam.lsig.logic);
+    this.run(program, ExecutionMode.STATELESS);
+  }
+
+  /**
    * Update current state and account balances
    * @param txnParams : Transaction parameters
    * @param accounts : accounts passed by user
@@ -426,8 +459,8 @@ export class Runtime {
    * @param program : teal code as a string
    * @param args : external arguments to smart contract
    */
-  async executeTx (txnParams: ExecParams | ExecParams[], program: string,
-    args: Uint8Array[]): Promise<void> {
+  executeTx (txnParams: ExecParams | ExecParams[], program: string,
+    args: Uint8Array[]): void {
     const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
     // initialize context before each execution
     this.ctx = {
@@ -443,9 +476,17 @@ export class Runtime {
     let mode = ExecutionMode.STATEFUL;
     if (!Array.isArray(txnParams)) {
       mode = this.getExecutionMode(txnParams);
+      this.assertAmbiguousTxnParams(txnParams);
+      if (txnParams.sign === SignType.LogicSignature) {
+        this.validateLsigAndRun(txnParams);
+      }
     } else {
       let flag = true;
       for (const txParam of txnParams) {
+        this.assertAmbiguousTxnParams(txParam);
+        if (txParam.sign === SignType.LogicSignature) {
+          this.validateLsigAndRun(txParam);
+        }
         flag = flag && txParam.sign === SignType.LogicSignature;
       }
       if (flag) { mode = ExecutionMode.STATELESS; } // if all txns in grp are stateless

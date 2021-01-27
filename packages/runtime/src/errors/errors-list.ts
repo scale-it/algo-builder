@@ -228,6 +228,24 @@ by an index that does not exist.`
     message: "Length of provided TEAL code = %length% exceeds max length of %maxlen%, Mode: %mode%",
     title: 'MaxLength Error',
     description: `MaxLength Error`
+  },
+  LOGIC_SIGNATURE_NOT_FOUND: {
+    number: 35,
+    message: "logic signature not found",
+    title: "lsig error",
+    description: `lsig error`
+  },
+  LOGIC_SIGNATURE_VALIDATION_FAILED: {
+    number: 36,
+    message: "logic signature validation failed. address: %address%",
+    title: "lsig validation error",
+    description: `lsig validation error`
+  },
+  INVALID_TRANSACTION_PARAMS: {
+    number: 27,
+    message: "Secret key and Logic Signature should not be passed together",
+    title: "Transaction params error",
+    description: `Transaction params error`
   }
 };
 
