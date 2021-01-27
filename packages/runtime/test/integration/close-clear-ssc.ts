@@ -45,7 +45,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 
   it("should fail during closeOut if app id is not defined", async function () {
     await expectTealErrorAsync(
-      async () => await runtime.executeTx(closeOutParams, program, []),
+      async () => runtime.executeTx(closeOutParams, program, []),
       ERRORS.TEAL.APP_NOT_FOUND
     );
   });
@@ -87,7 +87,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
     closeOutParams.fromAccount = alice.account;
 
     await expectTealErrorAsync(
-      async () => await runtime.executeTx(closeOutParams, program, []),
+      async () => runtime.executeTx(closeOutParams, program, []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 
@@ -117,7 +117,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 
     // execute tx
     await expectTealErrorAsync(
-      async () => await runtime.executeTx(clearAppParams, program, []),
+      async () => runtime.executeTx(clearAppParams, program, []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 

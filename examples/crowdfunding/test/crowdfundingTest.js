@@ -9,12 +9,13 @@ import {
 import { Runtime, StoreAccount } from '@algorand-builder/runtime';
 import { assert } from 'chai';
 
-const minBalance = 10000000; // 10 ALGO's
-const initialDonorBalance = 60000000;
-const initialCreatorBalance = minBalance + 10000;
-const goal = 7000000;
+const minBalance = 10e6; // 10 ALGO's
+const initialDonorBalance = minBalance + 60e6;
+const initialCreatorBalance = minBalance + 0.01e6;
+const goal = 7e6;
 
 describe('Crowdfunding Tests', function () {
+  const master = new StoreAccount(1000e6);
   let creator = new StoreAccount(initialCreatorBalance);
   let escrow = new StoreAccount(minBalance);
   let donor = new StoreAccount(initialDonorBalance);
@@ -25,7 +26,7 @@ describe('Crowdfunding Tests', function () {
   const program = getProgram('crowdFundApproval.teal');
 
   this.beforeAll(async function () {
-    runtime = new Runtime([creator, escrow, donor]);
+    runtime = new Runtime([master, creator, escrow, donor]);
 
     flags = {
       sender: creator.account,
@@ -38,9 +39,8 @@ describe('Crowdfunding Tests', function () {
 
   this.afterEach(async function () {
     creator = new StoreAccount(initialCreatorBalance);
-    escrow = new StoreAccount(minBalance);
     donor = new StoreAccount(initialDonorBalance);
-    runtime = new Runtime([creator, escrow, donor]);
+    runtime = new Runtime([master, creator, escrow, donor]);
 
     flags = {
       sender: creator.account,
@@ -56,8 +56,8 @@ describe('Crowdfunding Tests', function () {
   // fetch latest account state
   function syncAccounts () {
     creator = runtime.getAccount(creator.address);
-    escrow = runtime.getAccount(escrow.address);
     donor = runtime.getAccount(donor.address);
+    escrow = runtime.getAccount(escrow.address);
   }
 
   // Get begin date to pass in
@@ -80,7 +80,7 @@ describe('Crowdfunding Tests', function () {
     uint64ToBigEndian(fundCloseDate.getTime())
   ];
 
-  it('crowdfunding application', async () => {
+  it('crowdfunding application', () => {
     /**
      * This test demonstrates how to create a Crowdfunding Stateful Smart Contract Application
      * and interact with it. there are following operations that are performed:
@@ -95,8 +95,27 @@ describe('Crowdfunding Tests', function () {
     const creationFlags = Object.assign({}, flags);
 
     // create application
-    applicationId = await runtime.addApp({ ...creationFlags, appArgs: creationArgs }, {}, program);
+    applicationId = runtime.addApp({ ...creationFlags, appArgs: creationArgs }, {}, program);
     const creatorPk = addressToPk(creator.address);
+
+    // setup escrow account
+    const escrowProg = getProgram('crowdFundEscrow.py', { APP_ID: applicationId });
+    const lsig = runtime.getLogicSig(escrowProg, []);
+    const escrowAddress = lsig.address();
+
+    // sync escrow account
+    escrow = runtime.getAccount(escrowAddress);
+    console.log('Escrow Address: ', escrowAddress);
+
+    // fund escrow with some minimum balance first
+    runtime.transferAlgo({
+      type: TransactionType.TransferAlgo,
+      sign: SignType.SecretKey,
+      fromAccount: master.account,
+      toAccountAddr: escrowAddress,
+      amountMicroAlgos: minBalance,
+      payFlags: {}
+    })
 
     // verify global state
     assert.isDefined(applicationId);
@@ -108,22 +127,22 @@ describe('Crowdfunding Tests', function () {
     assert.deepEqual(getGlobal('Total'), 0n);
 
     // update application with correct escrow account address
-    let appArgs = [addressToPk(escrow.address)]; // converts algorand address to Uint8Array
+    let appArgs = [addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
 
-    await runtime.updateApp(
+    runtime.updateApp(
       creator.address,
       applicationId,
       program,
       {}, { appArgs: appArgs });
-    const escrowPk = addressToPk(escrow.address);
+    const escrowPk = addressToPk(escrowAddress);
 
     // verify escrow storage
     assert.isDefined(applicationId);
     assert.deepEqual(getGlobal('Escrow'), escrowPk);
 
     // opt-in to app
-    await runtime.optInToApp(creator.address, applicationId, {}, {}, program);
-    await runtime.optInToApp(donor.address, applicationId, {}, {}, program);
+    runtime.optInToApp(creator.address, applicationId, {}, {}, program);
+    runtime.optInToApp(donor.address, applicationId, {}, {}, program);
 
     syncAccounts();
     assert.isDefined(creator.appsLocalState.get(applicationId));
@@ -153,8 +172,9 @@ describe('Crowdfunding Tests', function () {
       }
     ];
     // execute transaction
-    await runtime.executeTx(txGroup, program, []);
+    runtime.executeTx(txGroup, program, []);
 
+    // sync accounts
     syncAccounts();
     assert.equal(escrow.balance(), minBalance + donationAmount);
     assert.equal(donor.balance(), initialDonorBalance - donationAmount - 2000); // 2000 because of tx fee
@@ -179,7 +199,7 @@ describe('Crowdfunding Tests', function () {
         fromAccount: escrow.account,
         toAccountAddr: donor.address,
         amountMicroAlgos: 300000,
-        lsig: escrow,
+        lsig: lsig,
         payFlags: { totalFee: 1000 }
       }
     ];
@@ -187,7 +207,7 @@ describe('Crowdfunding Tests', function () {
     syncAccounts();
     const donorBalance = donor.balance();
     const escrowBalance = escrow.balance();
-    await runtime.executeTx(txGroup, program, []);
+    runtime.executeTx(txGroup, program, []);
 
     syncAccounts();
     // verify 300000 is withdrawn from escrow (with tx fee of 1000 as well)
@@ -218,7 +238,7 @@ describe('Crowdfunding Tests', function () {
     ];
     const escrowBal = escrow.balance();
     // execute transaction
-    await runtime.executeTx(txGroup, program, []);
+    runtime.executeTx(txGroup, program, []);
 
     syncAccounts();
     assert.equal(escrow.balance(), escrowBal + 7000000); // verify donation of 7000000
@@ -239,14 +259,14 @@ describe('Crowdfunding Tests', function () {
         fromAccount: escrow.account,
         toAccountAddr: creator.address,
         amountMicroAlgos: 0,
-        lsig: escrow,
+        lsig: lsig,
         payFlags: { totalFee: 1000, closeRemainderTo: creator.address }
       }
     ];
     const creatorBal = creator.balance(); // creator's balance before 'claim' tx
     const escrowFunds = escrow.balance(); //  funds in escrow
     // execute transaction
-    await runtime.executeTx(txGroup, program, []);
+    runtime.executeTx(txGroup, program, []);
 
     syncAccounts();
     assert.equal(escrow.balance(), 0); // escrow should be empty after claim
@@ -268,7 +288,7 @@ describe('Crowdfunding Tests', function () {
     assert.isDefined(app); // verify app is present before delete tx
 
     // execute delete tx
-    await runtime.executeTx(deleteTx, program, []);
+    runtime.executeTx(deleteTx, program, []);
 
     // should throw error as app is deleted
     try {
@@ -278,14 +298,24 @@ describe('Crowdfunding Tests', function () {
     }
   });
 
-  it('should be rejected by logic when claiming funds if goal is not met', async () => {
+  it('should be rejected by logic when claiming funds if goal is not met', () => {
     // create application
     const creationFlags = Object.assign({}, flags);
-    const applicationId = await runtime.addApp({ ...creationFlags, appArgs: creationArgs }, {}, program);
+    const applicationId = runtime.addApp({ ...creationFlags, appArgs: creationArgs }, {}, program);
+
+    // setup escrow account
+    const escrowProg = getProgram('crowdFundEscrow.py', { APP_ID: applicationId });
+    const lsig = runtime.getLogicSig(escrowProg, []);
+    const escrowAddress = lsig.address();
+
+    // sync escrow account
+    escrow = runtime.getAccount(escrowAddress);
+    console.log('Escrow Address: ', escrowAddress);
+    syncAccounts();
 
     // update application with correct escrow account address
-    let appArgs = [addressToPk(escrow.address)]; // converts algorand address to Uint8Array
-    await runtime.updateApp(
+    let appArgs = [addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
+    runtime.updateApp(
       creator.address,
       applicationId,
       program,
@@ -305,16 +335,16 @@ describe('Crowdfunding Tests', function () {
       {
         type: TransactionType.TransferAlgo,
         sign: SignType.LogicSignature,
-        fromAccount: { addr: escrow.address },
+        fromAccount: escrow.account,
         toAccountAddr: creator.address,
         amountMicroAlgos: 0,
-        lsig: escrow,
+        lsig: lsig,
         payFlags: { closeRemainderTo: creator.address }
       }
     ];
     // execute transaction: Expected to be rejected by logic because goal is not reached
     try {
-      await runtime.executeTx(txGroup, program, []);
+      runtime.executeTx(txGroup, program, []);
     } catch (e) {
       console.warn(e);
     }

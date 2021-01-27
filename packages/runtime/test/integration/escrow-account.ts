@@ -5,7 +5,7 @@ import { assert } from "chai";
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccount } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
-import { expectTealErrorAsync } from "../helpers/errors";
+import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { johnAccount } from "../mocks/account";
@@ -39,7 +39,7 @@ describe("Algorand Stateless Smart Contracts - Escrow Account Example", function
     assert.equal(john.balance(), initialJohnHolding);
 
     // execute transaction
-    await runtime.executeTx(txnParams, getProgram('escrow.teal'), []);
+    runtime.executeTx(txnParams, getProgram('escrow.teal'), []);
 
     // check final state (updated accounts)
     assert.equal(runtime.getAccount(escrow.address).balance(), initialEscrowHolding - 1100); // check if 100 microAlgo's + fee are withdrawn
@@ -51,8 +51,8 @@ describe("Algorand Stateless Smart Contracts - Escrow Account Example", function
     invalidParams.amountMicroAlgos = 500;
 
     // execute transaction (should fail as amount = 500)
-    await expectTealErrorAsync(
-      async () => await runtime.executeTx(invalidParams, getProgram('escrow.teal'), []),
+    expectTealError(
+      () => runtime.executeTx(invalidParams, getProgram('escrow.teal'), []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -62,8 +62,8 @@ describe("Algorand Stateless Smart Contracts - Escrow Account Example", function
     invalidParams.payFlags = { totalFee: 12000 };
 
     // execute transaction (should fail as fee is 12000)
-    await expectTealErrorAsync(
-      async () => await runtime.executeTx(invalidParams, getProgram('escrow.teal'), []),
+    expectTealError(
+      () => runtime.executeTx(invalidParams, getProgram('escrow.teal'), []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -77,8 +77,8 @@ describe("Algorand Stateless Smart Contracts - Escrow Account Example", function
     };
 
     // execute transaction (should fail as transfer type is asset)
-    await expectTealErrorAsync(
-      async () => await runtime.executeTx(invalidParams, getProgram('escrow.teal'), []),
+    await expectTealError(
+      () => runtime.executeTx(invalidParams, getProgram('escrow.teal'), []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -89,8 +89,8 @@ describe("Algorand Stateless Smart Contracts - Escrow Account Example", function
     invalidParams.toAccountAddr = bob.address;
 
     // execute transaction (should fail as receiver is bob)
-    await expectTealErrorAsync(
-      async () => await runtime.executeTx(invalidParams, getProgram('escrow.teal'), []),
+    expectTealError(
+      () => runtime.executeTx(invalidParams, getProgram('escrow.teal'), []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -109,13 +109,9 @@ describe("Algorand Stateless Smart Contracts - Escrow Account Example", function
         closeRemainderTo: john.address
       }
     };
-    await runtime.executeTx(closeParams, getProgram('escrow.teal'), []);
+    runtime.executeTx(closeParams, getProgram('escrow.teal'), []);
 
-    // verify closeRemainderTo account is closed (removed from network)
-    await expectTealErrorAsync(
-      async () => await runtime.executeTx(closeParams, getProgram('escrow.teal'), []),
-      ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST
-    );
+    assert.equal(runtime.getAccount(escrow.address).balance(), 0);
     assert.equal(runtime.getAccount(john.address).balance(), (initialJohnBal + initialEscrowBal) - 1000);
   });
 });
