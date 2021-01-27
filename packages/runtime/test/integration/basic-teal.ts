@@ -3,7 +3,7 @@ import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccount } from "../../src/index";
-import { expectTealErrorAsync } from "../helpers/errors";
+import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 
@@ -36,13 +36,13 @@ describe("Algorand Smart Contracts", function () {
     bob = runtime.getAccount(bob.address);
   });
 
-  it("should send algo's from john to bob if stateless teal logic is correct", async function () {
+  it("should send algo's from john to bob if stateless teal logic is correct", function () {
     // check initial balance
     assert.equal(john.balance(), initialJohnHolding);
     assert.equal(bob.balance(), initialBobHolding);
 
     // execute transaction
-    await runtime.executeTx(txnParams, getProgram('basic.teal'), []);
+    runtime.executeTx(txnParams, getProgram('basic.teal'), []);
 
     // get final state (updated accounts)
     const johnAcc = runtime.getAccount(john.address);
@@ -51,7 +51,7 @@ describe("Algorand Smart Contracts", function () {
     assert.equal(bobAcc.balance(), initialBobHolding + 100);
   });
 
-  it("should throw error if logic is incorrect", async function () {
+  it("should throw error if logic is incorrect", function () {
     // initial balance
     const johnBal = john.balance();
     const bobBal = bob.balance();
@@ -60,8 +60,8 @@ describe("Algorand Smart Contracts", function () {
     invalidParams.amountMicroAlgos = 50;
 
     // execute transaction (should fail is logic is incorrect)
-    await expectTealErrorAsync(
-      async () => await runtime.executeTx(invalidParams, getProgram('incorrect-logic.teal'), []),
+    expectTealError(
+      () => runtime.executeTx(invalidParams, getProgram('incorrect-logic.teal'), []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 

@@ -229,8 +229,26 @@ by an index that does not exist.`
     title: 'MaxLength Error',
     description: `MaxLength Error`
   },
-  INVALID_ROUND: {
+  LOGIC_SIGNATURE_NOT_FOUND: {
     number: 35,
+    message: "logic signature not found",
+    title: "lsig error",
+    description: `lsig error`
+  },
+  LOGIC_SIGNATURE_VALIDATION_FAILED: {
+    number: 36,
+    message: "logic signature validation failed. address: %address%",
+    title: "lsig validation error",
+    description: `lsig validation error`
+  },
+  INVALID_TRANSACTION_PARAMS: {
+    number: 37,
+    message: "Secret key and Logic Signature should not be passed together",
+    title: "Transaction params error",
+    description: `Transaction params error`
+  },
+  INVALID_ROUND: {
+    number: 38,
     message: "Transaction rounds are not valid, current round: %round%.",
     title: 'Round Error',
     description: `Round Error`

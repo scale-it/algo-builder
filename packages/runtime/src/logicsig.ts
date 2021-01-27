@@ -1,6 +1,6 @@
 import {
   decodeAddress, encodeAddress,
-  generateAccount, MultiSig, MultiSigAccount,
+  generateAccount, LogicSigBase, MultiSig, MultiSigAccount,
   multisigAddress, signBytes, verifyBytes
 } from "algosdk";
 import * as tweet from "tweetnacl-ts";
@@ -38,7 +38,7 @@ export class LogicSig {
    */
   sign (secretKey: Uint8Array, msig?: MultiSigAccount): void {
     if (msig === undefined) {
-      this.sig = signBytes(this.logic, secretKey);
+      this.sig = this.signProgram(secretKey);
     } else {
       const subsigs = msig.addrs.map(addr => {
         return {
@@ -75,7 +75,7 @@ export class LogicSig {
     if (index === -1) {
       throw new TealError(ERRORS.TEAL.INVALID_SECRET_KEY, { secretkey: secretKey });
     }
-    const sig = signBytes(this.logic, secretKey);
+    const sig = this.signProgram(secretKey);
     return [sig, index];
   }
 
@@ -95,7 +95,8 @@ export class LogicSig {
    * Performs signature verification
    * @param accAddr Sender's account address
    */
-  verify (accAddr: string): boolean {
+  verify (accPk: Uint8Array): boolean {
+    const accAddr = encodeAddress(accPk);
     if (compareArray(this.sig, new Uint8Array(0)) && this.msig === undefined) {
       if (accAddr === this.lsigAddress) return true;
       return false;
@@ -171,6 +172,14 @@ export class LogicSig {
   }
 
   /**
+   * Returns signed logic
+   * @param secretKey: account's secret key
+   */
+  signProgram (secretKey: Uint8Array): Uint8Array {
+    return signBytes(this.logic, secretKey);
+  }
+
+  /**
    * Returns logic signature address
    */
   address (): string {
@@ -182,5 +191,32 @@ export class LogicSig {
    */
   program (): string {
     return convertToString(this.logic);
+  }
+
+  /**
+   * Note: following functions are dummy functions
+   * they are used only to match type with algosdk LogicSig
+   * there is a possibility that we may use them in future.
+   */
+
+  toByte (): Uint8Array {
+    return this.logic;
+  }
+
+  fromByte (val: Uint8Array): LogicSig {
+    return new LogicSig("DUMMY", []);
+  }
+
+  get_obj_for_encoding (): LogicSigBase {
+    return {
+      logic: this.logic,
+      args: this.args,
+      sig: this.sig,
+      msig: this.msig
+    };
+  }
+
+  from_obj_for_encoding (lsig: LogicSigBase): LogicSig {
+    return new LogicSig("DUMMY", []);
   }
 }
