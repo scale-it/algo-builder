@@ -11,7 +11,7 @@ import { getProgram } from "./lib/load-program";
 import { addressToPk, parseSSCAppArgs, stringToBytes, uint64ToBigEndian, update } from "./lib/ssc";
 import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC, readGlobalStateSSC, readLocalStateSSC } from "./lib/status";
 import { executeSignedTxnFromFile, executeTransaction, mkTransaction } from "./lib/tx";
-import { ExecParams, SignType, TransactionType } from "./types";
+import { AlgobDeployer, AlgobRuntimeEnv, AlgoTransferParam, ExecParams, SignType, TransactionType } from "./types";
 
 export {
   mkAccounts,
@@ -29,6 +29,9 @@ export {
   TransactionType,
   SignType,
   ExecParams,
+  AlgoTransferParam,
+  AlgobDeployer,
+  AlgobRuntimeEnv,
   printLocalStateSSC,
   printGlobalStateSSC,
   readGlobalStateSSC,

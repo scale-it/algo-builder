@@ -2,15 +2,23 @@
  * Description:
  * This file demonstrates the PyTeal Example for HTLC(Hash Time Lock Contract)
 */
-const { executeTransaction, TransactionType, SignType } = require('@algorand-builder/algob');
-const { prepareParameters } = require('./withdraw/common');
+import {
+  AlgobDeployer,
+  AlgobRuntimeEnv,
+  AlgoTransferParam,
+  executeTransaction,
+  SignType,
+  TransactionType
+} from "@algorand-builder/algob";
 
-async function run (runtimeEnv, deployer) {
-  const masterAccount = deployer.accountsByName.get('master-account');
+import { getDeployerAccount, prepareParameters } from "./withdraw/common";
+
+async function run (runtimeEnv: AlgobRuntimeEnv, deployer: AlgobDeployer): Promise<void> {
+  const masterAccount = getDeployerAccount(deployer, 'master-account');
   const { alice, bob, scTmplParams } = prepareParameters(deployer);
 
   /** ** firstly we fund Alice and Bob accounts ****/
-  const bobFunding = {
+  const bobFunding: AlgoTransferParam = {
     type: TransactionType.TransferAlgo,
     sign: SignType.SecretKey,
     fromAccount: masterAccount,
@@ -21,7 +29,7 @@ async function run (runtimeEnv, deployer) {
   // We need to copy, because the executeTransaction is async
   const aliceFunding = Object.assign({}, bobFunding);
   aliceFunding.toAccountAddr = alice.addr;
-  aliceFunding.amountMicroAlgos = 1e5; // 0.1 Algo
+  aliceFunding.amountMicroAlgos = 0.1e6; // 0.1 Algo
   await Promise.all([
     executeTransaction(deployer, bobFunding), executeTransaction(deployer, aliceFunding)
   ]);
@@ -30,12 +38,11 @@ async function run (runtimeEnv, deployer) {
   console.log('hash of the secret:', scTmplParams.hash_image);
   // hash: QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=
 
-  await deployer.fundLsig('htlc.py',
+  deployer.fundLsig('htlc.py',
     { funder: bob, fundingMicroAlgo: 2e6 }, {}, [], scTmplParams);
 
   // Add user checkpoint
-  await deployer.addCheckpointKV('User Checkpoint', 'Fund Contract Account');
+  deployer.addCheckpointKV('User Checkpoint', 'Fund Contract Account');
 }
 
 module.exports = { default: run };
-;
