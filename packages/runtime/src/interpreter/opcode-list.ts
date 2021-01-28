@@ -9,7 +9,10 @@ import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { compareArray } from "../lib/compare";
 import { AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
-import { assertLen, assertOnlyDigits, convertToBuffer, convertToString, getEncoding, stringToBytes } from "../lib/parsing";
+import {
+  assertLen, assertOnlyDigits, convertToBuffer,
+  convertToString, getEncoding, stringToBytes
+} from "../lib/parsing";
 import { txAppArg, txnSpecbyField } from "../lib/txn";
 import { EncodingType, StackElem, TEALStack, TxnOnComplete, TxnType } from "../types";
 import { Interpreter } from "./interpreter";

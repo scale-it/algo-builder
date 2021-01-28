@@ -8,7 +8,10 @@ import { DEFAULT_STACK_ELEM } from "../lib/constants";
 import { keyToBytes } from "../lib/parsing";
 import { Stack } from "../lib/stack";
 import { parser } from "../parser/parser";
-import type { ExecutionMode, Operator, SSCAttributesM, StackElem, StoreAccountI, TEALStack } from "../types";
+import type {
+  ExecutionMode, Operator, SSCAttributesM,
+  StackElem, StoreAccountI, TEALStack
+} from "../types";
 import { BIGINT0, BIGINT1, Label } from "./opcode-list";
 
 export class Interpreter {

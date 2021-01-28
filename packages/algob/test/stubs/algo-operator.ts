@@ -1,3 +1,4 @@
+import { SSCDeploymentFlags, SSCOptionalFlags, TxParams } from "@algorand-builder/runtime";
 import type { LogicSig } from "algosdk";
 import { Algodv2, LogicSigArgs } from "algosdk";
 
@@ -12,10 +13,7 @@ import {
   ASCCache,
   FundASCFlags,
   LsigInfo,
-  SSCDeploymentFlags,
-  SSCInfo,
-  SSCOptionalFlags,
-  TxParams
+  SSCInfo
 } from "../../src/types";
 
 export class AlgoOperatorDryRunImpl implements AlgoOperator {

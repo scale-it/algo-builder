@@ -1,3 +1,4 @@
+import { encodeNote, parseSSCAppArgs, SSCDeploymentFlags, SSCOptionalFlags, TxParams } from "@algorand-builder/runtime";
 import type { LogicSigArgs } from "algosdk";
 import algosdk from "algosdk";
 
@@ -16,14 +17,10 @@ import type {
   FundASCFlags,
   LsigInfo,
   Network,
-  SSCDeploymentFlags,
   SSCInfo,
-  SSCOptionalFlags,
-  StrMap,
-  TxParams
+  StrMap
 } from "../types";
 import { CompileOp } from "./compile";
-import { parseSSCAppArgs } from "./ssc";
 import * as tx from "./tx";
 const confirmedRound = "confirmed-round";
 
@@ -225,7 +222,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     console.log(message);
 
     const closeToRemainder = undefined;
-    const note = tx.encodeNote(payFlags.note, payFlags.noteb64);
+    const note = encodeNote(payFlags.note, payFlags.noteb64);
     const t = algosdk.makePaymentTxnWithSuggestedParams(flags.funder.addr, contractAddress,
       flags.fundingMicroAlgo, closeToRemainder,
       note,

@@ -218,7 +218,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
       );
     }
     default: {
-      throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST, { transaction: transactionType });
+      throw new TealError(ERRORS.TEAL.UNKNOWN_TRANSACTION_TYPE, { transaction: transactionType });
     }
   }
 }

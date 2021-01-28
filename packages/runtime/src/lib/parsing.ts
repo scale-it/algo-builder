@@ -4,7 +4,7 @@ import * as base32 from "hi-base32";
 import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { EncodingType } from "../types";
-import { reBase32, reBase64, reDigit } from "./constants";
+import { MAX_UINT64, MIN_UINT64, reBase32, reBase64, reDigit } from "./constants";
 
 /**
  * assert if string contains digits only
@@ -98,11 +98,19 @@ export function convertToBuffer (s: string, encoding?: EncodingType): Buffer {
   }
 }
 
+// verify n is an unsigned 64 bit integer
+function assertUint64 (n: bigint): void {
+  if (n < MIN_UINT64 || n > MAX_UINT64) {
+    throw new Error(`Invalid uint64 ${n}`);
+  }
+}
+
 /**
  * Converts 64 bit unsigned integer to bytes in big endian.
  */
 export function uint64ToBigEndian (x: number | bigint): Uint8Array {
   x = BigInt(x); // use x as bigint internally to support upto uint64
+  assertUint64(x);
   const buff = Buffer.alloc(8);
   buff.writeBigUInt64BE(x);
   return Uint8Array.from(buff);
@@ -116,7 +124,7 @@ export function addressToPk (addr: string): Uint8Array {
   return decodeAddress(addr).publicKey;
 }
 
-const throwErr = (appArg: string): void => {
+const throwFmtError = (appArg: string): void => {
   throw new Error(`Format of arguments passed to stateful smart is invalid for ${appArg}`);
 };
 
@@ -142,13 +150,13 @@ export function parseSSCAppArgs (appArgs?: Array<Uint8Array | string>): Uint8Arr
     const [type, value] = appArg.split(':'); // eg "int:1" => ['int', '1']
 
     // if given string is not invalid, throw error
-    if (type === undefined || value === undefined) { throwErr(appArg); }
+    if (type === undefined || value === undefined) { throwFmtError(appArg); }
 
     // parse string to bytes according to type
     let arg;
     switch (type) {
       case 'int': {
-        if (!reDigit.test(value)) { throwErr(appArg); } // verify only digits are present in string
+        if (!reDigit.test(value)) { throwFmtError(appArg); } // verify only digits are present in string
         arg = uint64ToBigEndian(BigInt(value));
         break;
       }
@@ -165,7 +173,7 @@ export function parseSSCAppArgs (appArgs?: Array<Uint8Array | string>): Uint8Arr
         break;
       }
       default: {
-        throwErr(appArg);
+        throwFmtError(appArg);
       }
     }
     args.push(arg);
