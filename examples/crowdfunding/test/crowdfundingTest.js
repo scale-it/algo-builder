@@ -181,7 +181,6 @@ describe('Crowdfunding Tests', function () {
 
     // donor should be able to reclaim if goal is NOT met
     appArgs = [stringToBytes('reclaim')];
-
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     txGroup = [
       {
@@ -294,7 +293,7 @@ describe('Crowdfunding Tests', function () {
     try {
       runtime.getApp(applicationId);
     } catch (e) {
-      console.log(e.message); // app not found..
+      console.log(e.message); // app not found.
     }
   });
 
