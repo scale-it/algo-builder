@@ -59,7 +59,6 @@ describe("ASC - CloseOut from Application and Clear State", function () {
     await runtime.executeTx(closeOutParams, program, []);
 
     syncAccount();
-
     // verify app is deleted from local state
     const localApp = john.getAppFromLocal(appId);
     assert.isUndefined(localApp);
