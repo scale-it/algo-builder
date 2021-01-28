@@ -29,6 +29,7 @@ export class Runtime {
   private store: State;
   ctx: Context;
   private appCounter: number;
+  private readonly programMap: Map<number, string[]>;
 
   constructor (accounts: StoreAccountI[]) {
     // runtime store
@@ -49,6 +50,7 @@ export class Runtime {
       args: []
     };
     this.appCounter = 0;
+    this.programMap = new Map<number, string[]>();
   }
 
   /**
@@ -155,6 +157,18 @@ export class Runtime {
   }
 
   /**
+   * Returns programs from programMap
+   * @param appId Application Index
+   */
+  getProgram (appId: number): string[] {
+    const res = this.programMap.get(appId);
+    if (res === undefined) {
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
+    }
+    return res;
+  }
+
+  /**
    * Setup initial accounts as {address: SDKAccount}. This should be called only when initializing Runtime.
    * @param accounts: array of account info's
    */
@@ -243,7 +257,10 @@ export class Runtime {
    * @param payFlags Transaction parameters
    * @param program approval program
    */
-  addApp (flags: SSCDeploymentFlags, payFlags: TxParams, program: string): number {
+  addApp (
+    flags: SSCDeploymentFlags, payFlags: TxParams,
+    approvalProgram: string, clearProgram: string
+  ): number {
     const sender = flags.sender;
     const senderAcc = this.assertAccountDefined(this.store.accounts.get(sender.addr));
 
@@ -253,7 +270,7 @@ export class Runtime {
     this.ctx.state.globalApps.set(app.id, senderAcc.address);
 
     this.makeAndSetCtxAppCreateTxn(flags, payFlags);
-    this.run(program, ExecutionMode.STATEFUL); // execute TEAL code with appId = 0
+    this.run(approvalProgram, ExecutionMode.STATEFUL); // execute TEAL code with appId = 0
 
     // create new application in globalApps map
     this.store.globalApps.set(++this.appCounter, senderAcc.address);
@@ -262,6 +279,8 @@ export class Runtime {
     this.ctx.state.globalApps.delete(0); // remove zero app from context after execution
     senderAcc.createdApps.delete(0); // remove zero app from sender's account
     senderAcc.createdApps.set(this.appCounter, attributes);
+    // save programs in programMap
+    this.programMap.set(this.appCounter, [approvalProgram, clearProgram]);
 
     return this.appCounter;
   }
@@ -299,12 +318,13 @@ export class Runtime {
    * @param program TEAL code as string
    */
   optInToApp (accountAddr: string, appId: number,
-    flags: SSCOptionalFlags, payFlags: TxParams, program: string): void {
+    flags: SSCOptionalFlags, payFlags: TxParams): void {
     const appParams = this.getApp(appId);
     const account = this.assertAccountDefined(this.store.accounts.get(accountAddr));
     if (appParams) {
       this.createOptInTx(accountAddr, appId, payFlags, flags);
-      this.run(program, ExecutionMode.STATEFUL); // execute TEAL code
+      // Execute approval program for Opt-In
+      this.run(this.getProgram(appId)[0], ExecutionMode.STATEFUL);
 
       account.optInToApp(appId, appParams);
     } else {
@@ -349,14 +369,18 @@ export class Runtime {
   updateApp (
     senderAddr: string,
     appId: number,
-    newProgram: string,
+    approvalProgram: string,
+    clearProgram: string,
     payFlags: TxParams,
     flags: SSCOptionalFlags
   ): void {
     const appParams = this.getApp(appId);
     if (appParams) {
       this.createUpdateTx(senderAddr, appId, payFlags, flags);
-      this.run(newProgram, ExecutionMode.STATEFUL); // execute TEAL code
+      // Execute approval program for Update
+      this.run(this.getProgram(appId)[0], ExecutionMode.STATEFUL);
+      // If successful update programs
+      this.programMap.set(appId, [approvalProgram, clearProgram]);
     } else {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
     }
@@ -378,6 +402,7 @@ export class Runtime {
 
     account.deleteApp(appId);
     this.store.globalApps.delete(appId);
+    this.programMap.delete(appId);
   }
 
   /**
@@ -428,14 +453,10 @@ export class Runtime {
    * @param txnParams : Transaction parameters
    * @param accounts : accounts passed by user
    */
-  updateFinalState (txnParams: ExecParams | ExecParams[]): void {
-    let txnParameters;
-    if (!Array.isArray(txnParams)) {
-      txnParameters = [txnParams];
-    } else {
-      txnParameters = txnParams;
-    }
-    for (const txnParam of txnParameters) {
+  updateFinalState (txnParams: ExecParams[]): void {
+    this.store = this.ctx.state; // update state after successful execution('local-state', 'global-state'..)
+
+    for (const txnParam of txnParams) {
       switch (txnParam.type) {
         case TransactionType.TransferAlgo:
           this.transferAlgo(txnParam);
@@ -462,41 +483,49 @@ export class Runtime {
    * @param program : teal code as a string
    * @param args : external arguments to smart contract
    */
-  executeTx (txnParams: ExecParams | ExecParams[], program: string,
-    args: Uint8Array[]): void {
+  executeTx (txnParams: ExecParams | ExecParams[], program?: string,
+    args?: Uint8Array[]): void {
     const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
     // initialize context before each execution
     this.ctx = {
       state: cloneDeep(this.store), // state is a deep copy of store
       tx: tx,
       gtxs: gtxs,
-      args: args
+      args: args ?? []
     };
 
-    // TODO: Add Support for group transaction for execution modes
-    // as for stateless TEAL we need to have TEAL code with each txParam
-    // TASKs: https://www.pivotaltracker.com/story/show/176455371, https://www.pivotaltracker.com/story/show/176455329
-    let mode = ExecutionMode.STATEFUL;
+    let txnParameters;
     if (!Array.isArray(txnParams)) {
-      mode = this.getExecutionMode(txnParams);
-      this.assertAmbiguousTxnParams(txnParams);
-      if (txnParams.sign === SignType.LogicSignature) {
-        this.validateLsigAndRun(txnParams);
-      }
+      txnParameters = [txnParams];
     } else {
-      let flag = true;
-      for (const txParam of txnParams) {
-        this.assertAmbiguousTxnParams(txParam);
-        if (txParam.sign === SignType.LogicSignature) {
-          this.validateLsigAndRun(txParam);
-        }
-        flag = flag && txParam.sign === SignType.LogicSignature;
-      }
-      if (flag) { mode = ExecutionMode.STATELESS; } // if all txns in grp are stateless
+      txnParameters = txnParams;
     }
 
-    this.run(program, mode);
-    this.updateFinalState(txnParams); // update account balances
+    // Run TEAL program associated with each transaction without interacting with store.
+    for (const txnParam of txnParameters) {
+      this.assertAmbiguousTxnParams(txnParam);
+      if (txnParam.sign === SignType.LogicSignature) {
+        this.validateLsigAndRun(txnParam);
+      }
+      // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
+      switch (txnParam.type) {
+        case TransactionType.CallNoOpSSC:
+          this.run(this.getProgram(txnParam.appId)[0], ExecutionMode.STATEFUL); // approval program
+          break;
+        case TransactionType.CloseSSC:
+          this.run(this.getProgram(txnParam.appId)[0], ExecutionMode.STATEFUL); // approval program
+          break;
+        case TransactionType.DeleteSSC:
+          this.run(this.getProgram(txnParam.appId)[0], ExecutionMode.STATEFUL); // approval program
+          break;
+        case TransactionType.ClearSSC:
+          this.run(this.getProgram(txnParam.appId)[1], ExecutionMode.STATEFUL); // clear program
+          break;
+      }
+    }
+
+    // Update store and transaction state if all transactions are accepted
+    this.updateFinalState(txnParameters);
   }
 
   /**
@@ -508,6 +537,5 @@ export class Runtime {
   run (program: string, executionMode: ExecutionMode): void {
     const interpreter = new Interpreter();
     interpreter.execute(program, executionMode, this);
-    this.store = this.ctx.state; // update state after successful execution('local-state', 'global-state'..)
   }
 }
