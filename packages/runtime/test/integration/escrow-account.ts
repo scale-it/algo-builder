@@ -33,7 +33,7 @@ describe("Algorand Stateless Smart Contracts - Escrow Account Example", function
     runtime = new Runtime([escrow, john]); // setup test
   });
 
-  it("should withdraw funds from escrow if txn params are correct", async function () {
+  it("should withdraw funds from escrow if txn params are correct", function () {
     // check initial balance
     assert.equal(escrow.balance(), initialEscrowHolding);
     assert.equal(john.balance(), initialJohnHolding);
@@ -46,7 +46,7 @@ describe("Algorand Stateless Smart Contracts - Escrow Account Example", function
     assert.equal(runtime.getAccount(john.address).balance(), initialJohnHolding + 100);
   });
 
-  it("should reject transaction if amount > 100", async function () {
+  it("should reject transaction if amount > 100", function () {
     const invalidParams = Object.assign({}, txnParams);
     invalidParams.amountMicroAlgos = 500;
 
@@ -57,7 +57,7 @@ describe("Algorand Stateless Smart Contracts - Escrow Account Example", function
     );
   });
 
-  it("should reject transaction if Fee > 10000", async function () {
+  it("should reject transaction if Fee > 10000", function () {
     const invalidParams = Object.assign({}, txnParams);
     invalidParams.payFlags = { totalFee: 12000 };
 
@@ -68,7 +68,7 @@ describe("Algorand Stateless Smart Contracts - Escrow Account Example", function
     );
   });
 
-  it("should reject transaction if type is not `pay`", async function () {
+  it("should reject transaction if type is not `pay`", function () {
     const invalidParams: ExecParams = {
       ...txnParams,
       type: TransactionType.TransferAsset,
@@ -77,13 +77,13 @@ describe("Algorand Stateless Smart Contracts - Escrow Account Example", function
     };
 
     // execute transaction (should fail as transfer type is asset)
-    await expectTealError(
+    expectTealError(
       () => runtime.executeTx(invalidParams, getProgram('escrow.teal'), []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
 
-  it("should reject transaction if receiver is not john", async function () {
+  it("should reject transaction if receiver is not john", function () {
     const bob = new StoreAccount(100);
     const invalidParams = Object.assign({}, txnParams);
     invalidParams.toAccountAddr = bob.address;
@@ -95,7 +95,7 @@ describe("Algorand Stateless Smart Contracts - Escrow Account Example", function
     );
   });
 
-  it("should close escrow account if closeRemainderTo is passed", async function () {
+  it("should close escrow account if closeRemainderTo is passed", function () {
     const initialEscrowBal = runtime.getAccount(escrow.address).balance();
     const initialJohnBal = runtime.getAccount(john.address).balance();
 
