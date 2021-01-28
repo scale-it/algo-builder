@@ -148,6 +148,7 @@ export class Runtime {
    * @param key: key to fetch value of from local state
    */
   getLocalState (appId: number, accountAddr: string, key: Uint8Array | string): StackElem | undefined {
+    accountAddr = this.assertAddressDefined(accountAddr);
     const account = this.assertAccountDefined(accountAddr, this.store.accounts.get(accountAddr));
     return account.getLocalState(appId, key);
   }

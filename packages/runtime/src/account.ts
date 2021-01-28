@@ -9,7 +9,7 @@ import { generateAccount } from "algosdk";
 
 import { TealError } from "./errors/errors";
 import { ERRORS } from "./errors/errors-list";
-import { ALGORAND_ACCOUNT_MIN_BALANCE, SSC_KEY_BYTE_SLICE, SSC_VALUE_BYTES, SSC_VALUE_UINT } from "./lib/constants";
+import { ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE, SSC_KEY_BYTE_SLICE, SSC_VALUE_BYTES, SSC_VALUE_UINT } from "./lib/constants";
 import { keyToBytes } from "./lib/parsing";
 import { assertValidSchema } from "./lib/stateful";
 import { AppLocalStateM, CreatedAppM, SSCAttributesM, StackElem, StoreAccountI } from "./types";
@@ -159,7 +159,8 @@ export class StoreAccount implements StoreAccountI {
     // raise minimum balance
     // https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
     this.minBalance += (
-      0.1e6 + (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * params.globalInts +
+      APPLICATION_BASE_FEE +
+      (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * params.globalInts +
       (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * params.globalBytes
     );
     const app = new App(appId, params);
@@ -179,7 +180,8 @@ export class StoreAccount implements StoreAccountI {
 
       // https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
       this.minBalance += (
-        0.1e6 + (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * appParams[localStateSchema]["num-uint"] +
+        APPLICATION_BASE_FEE +
+        (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * appParams[localStateSchema]["num-uint"] +
         (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * appParams[localStateSchema]["num-byte-slice"]
       );
 
