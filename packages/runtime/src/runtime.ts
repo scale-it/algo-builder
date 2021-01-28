@@ -483,7 +483,7 @@ export class Runtime {
    * @param program : teal code as a string
    * @param args : external arguments to smart contract
    */
-  executeTx (txnParams: ExecParams | ExecParams[], program?: string,
+  executeTx (txnParams: ExecParams | ExecParams[],
     args?: Uint8Array[]): void {
     const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
     // initialize context before each execution
