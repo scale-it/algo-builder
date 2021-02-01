@@ -2,6 +2,7 @@ import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccount } from "../../src/index";
+import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { SignType, SSCCallsParam, TransactionType } from "../../src/types";
 import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
@@ -9,8 +10,9 @@ import { useFixture } from "../helpers/integration";
 
 describe("Algorand Smart Contracts - Delete Application", function () {
   useFixture("stateful");
-  const john = new StoreAccount(1000);
-  const alice = new StoreAccount(1000);
+  const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE * 10 + 1000; // 1000 to cover fee
+  const john = new StoreAccount(minBalance + 1000);
+  const alice = new StoreAccount(minBalance + 1000);
 
   let runtime: Runtime;
   let approvalProgram: string;
@@ -32,7 +34,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
       sign: SignType.SecretKey,
       fromAccount: john.account,
       appId: 10,
-      payFlags: {},
+      payFlags: { totalFee: 1000 },
       appArgs: []
     };
   });

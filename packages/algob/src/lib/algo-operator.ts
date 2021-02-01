@@ -1,4 +1,9 @@
-import { encodeNote, parseSSCAppArgs, SSCDeploymentFlags, SSCOptionalFlags, TxParams } from "@algorand-builder/runtime";
+import { encodeNote, parseSSCAppArgs } from "@algorand-builder/runtime";
+import type {
+  SSCDeploymentFlags,
+  SSCOptionalFlags,
+  TxParams
+} from "@algorand-builder/runtime/build/types";
 import type { LogicSigArgs } from "algosdk";
 import algosdk from "algosdk";
 

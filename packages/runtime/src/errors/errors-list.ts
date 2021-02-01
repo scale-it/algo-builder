@@ -13,7 +13,8 @@ export function getErrorCode (error: ErrorDescriptor): string {
 }
 
 export const ERROR_RANGES = {
-  TEAL: { min: 0, max: 99, title: "TEAL opcode errors" }
+  TEAL: { min: 0, max: 99, title: "TEAL opcode errors" },
+  TRANSACTION: { min: 0, max: 99, title: "Transaction error" }
 };
 
 const PARSE_ERROR = "Parse Error";
@@ -165,7 +166,7 @@ by an index that does not exist.`
   },
   APP_NOT_FOUND: {
     number: 24,
-    message: "Application Index %appId% not found or is invalid at %line%",
+    message: "Application Index %appId% not found or is invalid at line %line%",
     title: "Application index %appId% is not found at %line%",
     description: `Application index %appId% is not found`
   },
@@ -178,12 +179,12 @@ by an index that does not exist.`
   INVALID_LABEL: {
     number: 26,
     message: "Invalid Label Name at %line%",
-    title: "OpCode name cannot be used as label name at %line%",
+    title: "OpCode name cannot be used as label name at line %line%",
     description: `OpCode name cannot be used as label name`
   },
   ACCOUNT_DOES_NOT_EXIST: {
     number: 27,
-    message: "Account Error - Account doesn't exist at %line%",
+    message: "Account Error - Account %address% doesn't exist at line %line%",
     title: "Account Error at %line%",
     description: `Account does not exist in the current state`
   },
@@ -201,7 +202,7 @@ by an index that does not exist.`
   },
   UNKNOWN_ASSET_FIELD: {
     number: 30,
-    message: "Asset Field Error - Field unknown %field% at %line%",
+    message: "Asset Field Error - Unknown Field:  %field% at line %line%",
     title: "Asset Field Error at %line%",
     description: `Asset field unknown`
   },
@@ -217,14 +218,20 @@ by an index that does not exist.`
     title: "secret key error",
     description: `secret key error`
   },
-  MAX_COST_EXCEEDED: {
+  INSUFFICIENT_ACCOUNT_BALANCE: {
     number: 33,
+    message: "Cannot withdraw %amount% microalgos from account %address%: resulting balance would be insufficient",
+    title: 'Insufficient account balance',
+    description: `Withdrawing %amount% microalgos will lead to insufficient balance`
+  },
+  MAX_COST_EXCEEDED: {
+    number: 34,
     message: "Cost of provided TEAL code = %cost% exceeds max cost of %maxcost%, Mode: %mode%",
     title: 'MaxCost Error',
     description: `MaxCost Error`
   },
   MAX_LEN_EXCEEDED: {
-    number: 34,
+    number: 35,
     message: "Length of provided TEAL code = %length% exceeds max length of %maxlen%, Mode: %mode%",
     title: 'MaxLength Error',
     description: `MaxLength Error`
@@ -246,9 +253,12 @@ by an index that does not exist.`
     message: "Secret key and Logic Signature should not be passed together",
     title: "Transaction params error",
     description: `Transaction params error`
-  },
+  }
+};
+
+const transactionErrors = {
   UNKNOWN_TRANSACTION_TYPE: {
-    number: 38,
+    number: 1,
     message: "Unknown Transaction type: %transaction%",
     title: "Transaction error",
     description: `Transaction error`
@@ -260,5 +270,6 @@ export const ERRORS: {
     [errorName: string]: ErrorDescriptor
   };
 } = {
-  TEAL: tealErrors
+  TEAL: tealErrors,
+  TRANSACTION: transactionErrors
 };

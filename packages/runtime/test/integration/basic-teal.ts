@@ -2,13 +2,15 @@ import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccount } from "../../src/index";
+import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { ExecParams, SignType, TransactionType } from "../../src/types";
 import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 
-const initialJohnHolding = 1000;
-const initialBobHolding = 500;
+const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE + 1000; // 1000 to cover fee
+const initialJohnHolding = minBalance + 1000;
+const initialBobHolding = minBalance + 500;
 
 describe("Algorand Smart Contracts", function () {
   useFixture("basic-teal");
@@ -18,7 +20,7 @@ describe("Algorand Smart Contracts", function () {
   // set up transaction paramenters
   const txnParams: ExecParams = {
     type: TransactionType.TransferAlgo, // payment
-    sign: SignType.SecretKey,
+    sign: SignType.LogicSignature,
     fromAccount: john.account,
     toAccountAddr: bob.address,
     amountMicroAlgos: 100,
@@ -40,14 +42,18 @@ describe("Algorand Smart Contracts", function () {
     // check initial balance
     assert.equal(john.balance(), initialJohnHolding);
     assert.equal(bob.balance(), initialBobHolding);
+    // get logic signature
+    const lsig = runtime.getLogicSig(getProgram('basic.teal'), []);
+    lsig.sign(john.account.sk);
+    txnParams.lsig = lsig;
 
     // execute transaction
-    runtime.executeTx(txnParams, getProgram('basic.teal'), []);
+    runtime.executeTx(txnParams);
 
     // get final state (updated accounts)
     const johnAcc = runtime.getAccount(john.address);
     const bobAcc = runtime.getAccount(bob.address);
-    assert.equal(johnAcc.balance(), initialJohnHolding - 100); // check if 100 microAlgo's are withdrawn
+    assert.equal(johnAcc.balance(), initialJohnHolding - 1100); // check if (100 microAlgo's + fee of 1000) are withdrawn
     assert.equal(bobAcc.balance(), initialBobHolding + 100);
   });
 
@@ -55,13 +61,17 @@ describe("Algorand Smart Contracts", function () {
     // initial balance
     const johnBal = john.balance();
     const bobBal = bob.balance();
+    // get logic signature
+    const lsig = runtime.getLogicSig(getProgram('incorrect-logic.teal'), []);
+    lsig.sign(john.account.sk);
+    txnParams.lsig = lsig;
 
     const invalidParams = Object.assign({}, txnParams);
     invalidParams.amountMicroAlgos = 50;
 
     // execute transaction (should fail is logic is incorrect)
     expectTealError(
-      () => runtime.executeTx(invalidParams, getProgram('incorrect-logic.teal'), []),
+      () => runtime.executeTx(invalidParams),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 

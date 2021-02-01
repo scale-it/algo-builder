@@ -1,8 +1,7 @@
 import {
-  addressToPk, ExecParams, mkTransaction,
-  parseSSCAppArgs, SignType,
-  stringToBytes,
-  TransactionType, uint64ToBigEndian
+  addressToPk, mkTransaction,
+  parseSSCAppArgs, stringToBytes,
+  uint64ToBigEndian
 } from "@algorand-builder/runtime";
 
 import {
@@ -32,9 +31,6 @@ export {
   printAssets,
   algodCredentialsFromEnv,
   KMDCredentialsFromEnv,
-  TransactionType,
-  SignType,
-  ExecParams,
   printLocalStateSSC,
   printGlobalStateSSC,
   readGlobalStateSSC,

@@ -5,7 +5,8 @@
     User saves the signed logic in assets/ which is extracted and used here.
 */
 const { executeTransaction } = require('./common/common');
-const { TransactionType, SignType, createMsigAddress } = require('@algorand-builder/algob');
+const { createMsigAddress } = require('@algorand-builder/algob');
+const { TransactionType, SignType } = require('@algorand-builder/runtime/build/types');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');

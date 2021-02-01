@@ -19,6 +19,7 @@ describe("Crowdfunding basic tests", function () {
   this.beforeAll(async function () {
     runtime = new Runtime([john]); // setup test
     approvalProgram = getProgram('crowdfunding.teal');
+    clearProgram = getProgram('clear.teal');
 
     flags = {
       sender: john.account,

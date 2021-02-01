@@ -1,4 +1,4 @@
-import { SSCDeploymentFlags, SSCOptionalFlags, TxParams } from "@algorand-builder/runtime";
+import type { SSCDeploymentFlags, SSCOptionalFlags, TxParams } from "@algorand-builder/runtime/build/types";
 import type { LogicSig } from "algosdk";
 import { Algodv2, LogicSigArgs } from "algosdk";
 

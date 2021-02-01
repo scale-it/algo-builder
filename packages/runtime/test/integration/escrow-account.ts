@@ -1,34 +1,54 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
+import { LogicSig } from "algosdk";
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccount } from "../../src/index";
+import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { ExecParams, SignType, TransactionType } from "../../src/types";
 import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { johnAccount } from "../mocks/account";
 
-const initialEscrowHolding = 1000e6;
-const initialJohnHolding = 500;
+const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE + 1000; // 1000 to cover fee
+const initialEscrowHolding = minBalance + 1000e6;
+const initialJohnHolding = minBalance + 500;
 
-describe("Algorand Stateless Smart Contracts", function () {
+describe("Algorand Stateless Smart Contracts - Escrow Account Example", function () {
   useFixture("escrow-account");
-  const escrow = new StoreAccount(initialEscrowHolding); // 1000 ALGO
   const john = new StoreAccount(initialJohnHolding, johnAccount); // 0.005 ALGO
+  const admin = new StoreAccount(1e12);
   // set up transaction paramenters
   const txnParams: ExecParams = {
     type: TransactionType.TransferAlgo, // payment
     sign: SignType.SecretKey,
-    fromAccount: escrow.account,
+    fromAccount: admin.account,
     toAccountAddr: john.address,
-    amountMicroAlgos: 100,
+    amountMicroAlgos: initialEscrowHolding,
     payFlags: { totalFee: 1000 }
   };
 
   let runtime: Runtime;
+  let escrow: StoreAccount;
+  let lsig: LogicSig;
   this.beforeAll(function () {
-    runtime = new Runtime([escrow, john]); // setup test
+    runtime = new Runtime([john, admin]); // setup test
+    lsig = runtime.getLogicSig(getProgram('escrow.teal'), []);
+    escrow = runtime.getAccount(lsig.address());
+
+    // fund escrow account
+    txnParams.toAccountAddr = escrow.address;
+    // execute transaction
+    runtime.executeTx(txnParams);
+    escrow = runtime.getAccount(escrow.address);
+
+    // update transaction parameters
+    txnParams.sign = SignType.LogicSignature;
+    txnParams.fromAccount = escrow.account;
+    txnParams.toAccountAddr = john.address;
+    txnParams.amountMicroAlgos = 100;
+    txnParams.lsig = lsig;
   });
 
   it("should withdraw funds from escrow if txn params are correct", function () {
@@ -37,10 +57,10 @@ describe("Algorand Stateless Smart Contracts", function () {
     assert.equal(john.balance(), initialJohnHolding);
 
     // execute transaction
-    runtime.executeTx(txnParams, getProgram('escrow.teal'), []);
+    runtime.executeTx(txnParams);
 
     // check final state (updated accounts)
-    assert.equal(runtime.getAccount(escrow.address).balance(), initialEscrowHolding - 100); // check if 100 microAlgo's are withdrawn
+    assert.equal(runtime.getAccount(escrow.address).balance(), initialEscrowHolding - 1100); // check if 100 microAlgo's + fee are withdrawn
     assert.equal(runtime.getAccount(john.address).balance(), initialJohnHolding + 100);
   });
 
@@ -50,7 +70,7 @@ describe("Algorand Stateless Smart Contracts", function () {
 
     // execute transaction (should fail as amount = 500)
     expectTealError(
-      () => runtime.executeTx(invalidParams, getProgram('escrow.teal'), []),
+      () => runtime.executeTx(invalidParams),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -61,7 +81,7 @@ describe("Algorand Stateless Smart Contracts", function () {
 
     // execute transaction (should fail as fee is 12000)
     expectTealError(
-      () => runtime.executeTx(invalidParams, getProgram('escrow.teal'), []),
+      () => runtime.executeTx(invalidParams),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -76,7 +96,7 @@ describe("Algorand Stateless Smart Contracts", function () {
 
     // execute transaction (should fail as transfer type is asset)
     expectTealError(
-      () => runtime.executeTx(invalidParams, getProgram('escrow.teal'), []),
+      () => runtime.executeTx(invalidParams),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -88,8 +108,28 @@ describe("Algorand Stateless Smart Contracts", function () {
 
     // execute transaction (should fail as receiver is bob)
     expectTealError(
-      () => runtime.executeTx(invalidParams, getProgram('escrow.teal'), []),
+      () => runtime.executeTx(invalidParams),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
+  });
+
+  it("should close escrow account if closeRemainderTo is passed", function () {
+    const initialEscrowBal = runtime.getAccount(escrow.address).balance();
+    const initialJohnBal = runtime.getAccount(john.address).balance();
+
+    assert.isAbove(initialEscrowBal, 0); // initial balance should be > 0
+
+    const closeParams: ExecParams = {
+      ...txnParams,
+      amountMicroAlgos: 0,
+      payFlags: {
+        totalFee: 1000,
+        closeRemainderTo: john.address
+      }
+    };
+    runtime.executeTx(closeParams);
+
+    assert.equal(runtime.getAccount(escrow.address).balance(), 0);
+    assert.equal(runtime.getAccount(john.address).balance(), (initialJohnBal + initialEscrowBal) - 1000);
   });
 });

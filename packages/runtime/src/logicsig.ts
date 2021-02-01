@@ -5,10 +5,10 @@ import {
 } from "algosdk";
 import * as tweet from "tweetnacl-ts";
 
-import { compareArray } from "../src/lib/compare";
-import { convertToString, stringToBytes } from "../src/lib/parsing";
 import { TealError } from "./errors/errors";
 import { ERRORS } from "./errors/errors-list";
+import { compareArray } from "./lib/compare";
+import { convertToString, stringToBytes } from "./lib/parsing";
 
 /**
  * Note: We cannot use algosdk LogicSig class here,

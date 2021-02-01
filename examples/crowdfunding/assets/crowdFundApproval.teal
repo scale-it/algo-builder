@@ -71,9 +71,10 @@ txn OnCompletion
 ==
 bz not_deletion
 
-// To delete the app
+// NOTE: To delete the app
 // The creator must empty the escrow
 // to the fund receiver if the escrow has funds
+
 // only the creator
 // can delete the app
 byte "Creator"
