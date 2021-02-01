@@ -1,7 +1,5 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
-import { ExecParams, mkTransaction, parseSSCAppArgs, SignType } from "@algorand-builder/algob";
-import { AccountAddress, AlgoTransferParam, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
 import algosdk, { decodeAddress } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
@@ -9,11 +7,16 @@ import { StoreAccount } from "./account";
 import { TealError } from "./errors/errors";
 import { ERRORS } from "./errors/errors-list";
 import { Interpreter } from "./index";
-import { convertToString } from "./lib/parsing";
+import { convertToString, parseSSCAppArgs } from "./lib/parsing";
+import { mkTransaction } from "./lib/txn";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
-import type { Context, SSCAttributesM, StackElem, State, StoreAccountI, Txn } from "./types";
-import { ExecutionMode } from "./types";
+import type {
+  AccountAddress, AlgoTransferParam, Context, ExecParams,
+  SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
+  StackElem, State, StoreAccountI, Txn, TxParams
+} from "./types";
+import { ExecutionMode, SignType, TransactionType } from "./types";
 
 export class Runtime {
   /**

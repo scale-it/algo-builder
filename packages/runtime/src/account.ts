@@ -1,4 +1,3 @@
-import { SSCDeploymentFlags } from "@algorand-builder/algob/src/types";
 import type {
   Account,
   AssetDef,
@@ -12,7 +11,7 @@ import { ERRORS } from "./errors/errors-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE, SSC_KEY_BYTE_SLICE, SSC_VALUE_BYTES, SSC_VALUE_UINT } from "./lib/constants";
 import { keyToBytes } from "./lib/parsing";
 import { assertValidSchema } from "./lib/stateful";
-import { AppLocalStateM, CreatedAppM, SSCAttributesM, StackElem, StoreAccountI } from "./types";
+import { AppLocalStateM, CreatedAppM, SSCAttributesM, SSCDeploymentFlags, StackElem, StoreAccountI } from "./types";
 
 const StateMap = "key-value";
 const globalState = "global-state";

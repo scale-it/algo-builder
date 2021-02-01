@@ -1,10 +1,10 @@
-import { ExecParams, SignType, TransactionType } from "@algorand-builder/algob/src/types";
 import { LogicSig } from "algosdk";
 import { assert } from "chai";
 
 import { StoreAccount } from "../../src/account";
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime } from "../../src/runtime";
+import { ExecParams, SignType, TransactionType } from "../../src/types";
 import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";

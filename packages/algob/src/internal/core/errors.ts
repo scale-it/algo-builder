@@ -1,8 +1,8 @@
+import { applyErrorMessageTemplate } from "@algorand-builder/runtime";
 import type { RequestError } from 'algosdk';
 
 import type { AnyMap } from "../../types";
 import { getClosestCallerPackage } from "../util/caller-package";
-import { replaceAll } from "../util/strings";
 import { ErrorDescriptor, ERRORS, getErrorCode } from "./errors-list";
 
 export { ERRORS }; // re-export errors-list
@@ -103,88 +103,6 @@ export class BuilderPluginError extends Error {
     this._isBuilderPluginError = true;
     Object.setPrototypeOf(this, BuilderPluginError.prototype);
   }
-}
-
-/**
- * This function applies error messages templates like this:
- *
- *  - Template is a string which contains a variable tags. A variable tag is a
- *    a variable name surrounded by %. Eg: %plugin1%
- *  - A variable name is a string of alphanumeric ascii characters.
- *  - Every variable tag is replaced by its value.
- *  - %% is replaced by %.
- *  - Values can't contain variable tags.
- *  - If a variable is not present in the template, but present in the values
- *    object, an error is thrown.
- *
- * @param template The template string.
- * @param values A map of variable names to their values.
- */
-export function applyErrorMessageTemplate (
-  template: string,
-  values: { [templateVar: string]: any } // eslint-disable-line @typescript-eslint/no-explicit-any
-): string {
-  return _applyErrorMessageTemplate(template, values, false);
-}
-
-function _applyErrorMessageTemplate (
-  template: string,
-  values: { [templateVar: string]: any }, // eslint-disable-line @typescript-eslint/no-explicit-any
-  isRecursiveCall: boolean
-): string {
-  // if (!isRecursiveCall) {
-  //  for (const variableName of Object.keys(values)) {
-  //    if (variableName.match(/^[a-zA-Z][a-zA-Z0-9]*$/) === null) {
-  //      throw new BuilderError(ERRORS.INTERNAL.TEMPLATE_INVALID_VARIABLE_NAME, {
-  //        variable: variableName,
-  //      });
-  //    }
-
-  //    const variableTag = `%${variableName}%`;
-
-  //    if (!template.includes(variableTag)) {
-  //      throw new BuilderError(ERRORS.INTERNAL.TEMPLATE_VARIABLE_TAG_MISSING, {
-  //        variable: variableName,
-  //      });
-  //    }
-  //  }
-  // }
-
-  if (template.includes("%%")) {
-    return template
-      .split("%%")
-      .map((part) => _applyErrorMessageTemplate(part, values, true))
-      .join("%");
-  }
-
-  for (const variableName of Object.keys(values)) {
-    let value: string;
-
-    if (values[variableName] === undefined) {
-      value = "undefined";
-    } else if (values[variableName] === null) {
-      value = "null";
-    } else {
-      value = values[variableName].toString();
-    }
-
-    if (value === undefined) {
-      value = "undefined";
-    }
-
-    const variableTag = `%${variableName}%`;
-
-    // if (value.match(/%([a-zA-Z][a-zA-Z0-9]*)?%/) !== null) {
-    //  throw new BuilderError(
-    //    ERRORS.INTERNAL.TEMPLATE_VALUE_CONTAINS_VARIABLE_TAG,
-    //    { variable: variableName }
-    //  );
-    // }
-
-    template = replaceAll(template, variableTag, value);
-  }
-
-  return template;
 }
 
 export function parseAlgorandError (e: RequestError, ctx: AnyMap): Error {

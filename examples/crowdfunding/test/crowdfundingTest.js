@@ -1,12 +1,11 @@
 import {
   addressToPk,
   getProgram,
-  SignType,
   stringToBytes,
-  TransactionType,
   uint64ToBigEndian
 } from '@algorand-builder/algob';
 import { Runtime, StoreAccount } from '@algorand-builder/runtime';
+import { SignType, TransactionType } from '@algorand-builder/runtime/build/types';
 import { assert } from 'chai';
 
 const minBalance = 10e6; // 10 ALGO's
@@ -115,7 +114,7 @@ describe('Crowdfunding Tests', function () {
       toAccountAddr: escrowAddress,
       amountMicroAlgos: minBalance,
       payFlags: {}
-    })
+    });
 
     // verify global state
     assert.isDefined(applicationId);

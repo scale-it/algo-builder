@@ -1,8 +1,8 @@
+import { parseSSCAppArgs, stringToBytes, uint64ToBigEndian } from "@algorand-builder/runtime";
 import { decodeAddress } from "algosdk";
 import { assert } from "chai";
 
 import { MAX_UINT64, MIN_UINT64 } from "../../src/lib/constants";
-import { parseSSCAppArgs, stringToBytes, uint64ToBigEndian } from "../../src/lib/ssc";
 
 describe("Convert integer to big endian", () => {
   /**

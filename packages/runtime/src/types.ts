@@ -1,8 +1,8 @@
-import { AccountAddress, SSCDeploymentFlags } from "@algorand-builder/algob/src/types";
 import {
   Account,
   AssetDef,
   AssetHolding,
+  LogicSig,
   SSCSchemaConfig,
   TxnEncodedObj
 } from "algosdk";
@@ -56,6 +56,8 @@ export enum EncodingType {
   HEX,
   UTF8
 }
+
+export type AccountAddress = string;
 
 export interface AccountsMap {
   [addr: string]: StoreAccountI
@@ -138,4 +140,93 @@ export enum TxnOnComplete {
 export enum ExecutionMode {
   STATELESS, // stateless TEAL
   STATEFUL // application call (NoOp, CloseOut..)
+}
+
+export interface TxParams {
+  /**
+   * feePerByte or totalFee is used to set the appropriate transaction fee parameter.
+   * If both are set then totalFee takes precedence.
+   * NOTE: SDK expects`fee: number` and boolean `flatFee`. But the API expects only one
+   * on parameter: `fee`. Here, we define feePerByte and totalFee - both as numberic
+   * parameters. We think that this is more explicit. */
+  feePerByte?: number
+  totalFee?: number
+  firstValid?: number
+  validRounds?: number
+  lease?: Uint8Array
+  note?: string
+  noteb64?: string
+  closeRemainderTo?: AccountAddress
+}
+
+/**
+ * Stateful Smart contract flags for specifying sender and schema */
+export interface SSCDeploymentFlags extends SSCOptionalFlags {
+  sender: Account
+  localInts: number
+  localBytes: number
+  globalInts: number
+  globalBytes: number
+}
+
+/**
+ * Stateful smart contract transaction optional parameters (accounts, args..). */
+export interface SSCOptionalFlags {
+  appArgs?: Array<Uint8Array | string>
+  accounts?: string[]
+  foreignApps?: number[]
+  foreignAssets?: number[]
+  note?: Uint8Array
+  lease?: Uint8Array
+  rekeyTo?: string
+}
+
+export type ExecParams = AlgoTransferParam | AssetTransferParam | SSCCallsParam;
+
+export enum SignType {
+  SecretKey,
+  LogicSignature
+}
+
+export enum TransactionType {
+  TransferAlgo,
+  TransferAsset,
+  CallNoOpSSC,
+  ClearSSC,
+  CloseSSC,
+  DeleteSSC
+}
+
+export interface Sign {
+  sign: SignType
+  lsig?: LogicSig
+}
+
+export interface AlgoTransferParam extends Sign {
+  type: TransactionType.TransferAlgo
+  fromAccount: Account
+  toAccountAddr: AccountAddress
+  amountMicroAlgos: number
+  payFlags: TxParams
+}
+
+export interface AssetTransferParam extends Sign {
+  type: TransactionType.TransferAsset
+  fromAccount: Account
+  toAccountAddr: AccountAddress
+  amount: number
+  assetID: number
+  payFlags: TxParams
+}
+
+export interface SSCCallsParam extends SSCOptionalFlags, Sign {
+  type: TransactionType.CallNoOpSSC | TransactionType.ClearSSC |
+  TransactionType.CloseSSC | TransactionType.DeleteSSC
+  fromAccount: Account
+  appId: number
+  payFlags: TxParams
+}
+
+export interface AnyMap {
+  [key: string]: any // eslint-disable-line @typescript-eslint/no-explicit-any
 }

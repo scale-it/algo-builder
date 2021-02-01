@@ -3,7 +3,7 @@
  * This file demonstrates the example to transfer MicroAlgos
  * from contract account (contract approval mode) to another according to smart contract (ASC) logic
 */
-const { TransactionType, SignType } = require('@algorand-builder/algob');
+const { TransactionType, SignType } = require('@algorand-builder/runtime/build/types');
 const { executeTransaction } = require('./common');
 
 async function run (runtimeEnv, deployer) {

@@ -1,3 +1,4 @@
+import type { SSCDeploymentFlags, SSCOptionalFlags, TxParams } from "@algorand-builder/runtime/build/types";
 import type { LogicSig, LogicSigArgs } from "algosdk";
 import * as algosdk from "algosdk";
 
@@ -9,10 +10,7 @@ import type {
   ASCCache,
   FundASCFlags,
   LsigInfo,
-  SSCDeploymentFlags,
-  SSCInfo,
-  SSCOptionalFlags,
-  TxParams
+  SSCInfo
 } from "../../src/types";
 
 export class FakeDeployer implements AlgobDeployer {
