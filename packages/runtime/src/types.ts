@@ -104,6 +104,7 @@ export interface StoreAccountI {
   address: string
   assets: Map<number, AssetHolding>
   amount: number
+  minBalance: number
   appsLocalState: Map<number, AppLocalStateM>
   appsTotalSchema: SSCSchemaConfig
   createdApps: Map<number, SSCAttributesM>
@@ -112,11 +113,13 @@ export interface StoreAccountI {
 
   balance: () => number
   getApp: (appId: number) => SSCAttributesM | undefined
+  getAppFromLocal: (appId: number) => AppLocalStateM | undefined
   addApp: (appId: number, params: SSCDeploymentFlags) => CreatedAppM
   optInToApp: (appId: number, appParams: SSCAttributesM) => void
   deleteApp: (appId: number) => void
+  closeApp: (appId: number) => void
   getLocalState: (appId: number, key: Uint8Array | string) => StackElem | undefined
-  setLocalState: (appId: number, key: Uint8Array | string, value: StackElem) => AppLocalStateM
+  setLocalState: (appId: number, key: Uint8Array | string, value: StackElem, line?: number) => AppLocalStateM
   getGlobalState: (appId: number, key: Uint8Array | string) => StackElem | undefined
   setGlobalState: (appId: number, key: Uint8Array | string, value: StackElem, line?: number) => void
 }

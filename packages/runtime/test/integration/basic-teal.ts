@@ -3,12 +3,14 @@ import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccount } from "../../src/index";
+import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 
-const initialJohnHolding = 1000;
-const initialBobHolding = 500;
+const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE + 1000; // 1000 to cover fee
+const initialJohnHolding = minBalance + 1000;
+const initialBobHolding = minBalance + 500;
 
 describe("Algorand Smart Contracts", function () {
   useFixture("basic-teal");
@@ -47,7 +49,7 @@ describe("Algorand Smart Contracts", function () {
     // get final state (updated accounts)
     const johnAcc = runtime.getAccount(john.address);
     const bobAcc = runtime.getAccount(bob.address);
-    assert.equal(johnAcc.balance(), initialJohnHolding - 100); // check if 100 microAlgo's are withdrawn
+    assert.equal(johnAcc.balance(), initialJohnHolding - 1100); // check if (100 microAlgo's + fee of 1000) are withdrawn
     assert.equal(bobAcc.balance(), initialBobHolding + 100);
   });
 

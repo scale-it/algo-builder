@@ -9,16 +9,19 @@ import { generateAccount } from "algosdk";
 
 import { TealError } from "./errors/errors";
 import { ERRORS } from "./errors/errors-list";
+import { ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE, SSC_KEY_BYTE_SLICE, SSC_VALUE_BYTES, SSC_VALUE_UINT } from "./lib/constants";
 import { keyToBytes } from "./lib/parsing";
 import { assertValidSchema } from "./lib/stateful";
 import { AppLocalStateM, CreatedAppM, SSCAttributesM, StackElem, StoreAccountI } from "./types";
 
 const StateMap = "key-value";
 const globalState = "global-state";
+const localStateSchema = "local-state-schema";
 
 export class StoreAccount implements StoreAccountI {
   readonly account: Account;
   readonly address: string;
+  minBalance: number; // required minimum balance for account
   assets: Map<number, AssetHolding>;
   amount: number;
   appsLocalState: Map<number, AppLocalStateM>;
@@ -39,6 +42,7 @@ export class StoreAccount implements StoreAccountI {
 
     this.assets = new Map<number, AssetHolding>();
     this.amount = balance;
+    this.minBalance = ALGORAND_ACCOUNT_MIN_BALANCE;
     this.appsLocalState = new Map<number, AppLocalStateM>();
     this.appsTotalSchema = <SSCSchemaConfig>{};
     this.createdApps = new Map<number, SSCAttributesM>();
@@ -69,8 +73,12 @@ export class StoreAccount implements StoreAccountI {
    * @param appId: current application id
    * @param key: key to fetch value of from local state
    * @param value: value of key to put in local state
+   * @param line line number in TEAL file
+   * Note: if user is accessing this function directly through runtime,
+   * then line number is unknown
    */
-  setLocalState (appId: number, key: Uint8Array | string, value: StackElem): AppLocalStateM {
+  setLocalState (appId: number, key: Uint8Array | string, value: StackElem, line?: number): AppLocalStateM {
+    const lineNumber = line ?? 'unknown';
     const localState = this.appsLocalState.get(appId);
     const localApp = localState?.[StateMap];
     if (localState && localApp) {
@@ -83,7 +91,8 @@ export class StoreAccount implements StoreAccountI {
     }
 
     throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, {
-      appId: appId
+      appId: appId,
+      line: lineNumber
     });
   }
 
@@ -109,7 +118,7 @@ export class StoreAccount implements StoreAccountI {
    */
   setGlobalState (appId: number, key: Uint8Array | string, value: StackElem, line?: number): void {
     const app = this.getApp(appId);
-    if (app === undefined) throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: line });
+    if (app === undefined) throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: line ?? 'unknown' });
     const appGlobalState = app[globalState];
     const globalKey = keyToBytes(key);
     appGlobalState.set(globalKey.toString(), value); // set new value in global state
@@ -119,11 +128,21 @@ export class StoreAccount implements StoreAccountI {
   }
 
   /**
-   * Queries application by application index. Returns undefined if app is not found.
+   * Queries application by application index from account's global state.
+   * Returns undefined if app is not found.
    * @param appId application index
    */
   getApp (appId: number): SSCAttributesM | undefined {
     return this.createdApps.get(appId);
+  }
+
+  /**
+   * Queries application by application index from account's local state.
+   * Returns undefined if app is not found.
+   * @param appId application index
+   */
+  getAppFromLocal (appId: number): AppLocalStateM | undefined {
+    return this.appsLocalState.get(appId);
   }
 
   /**
@@ -137,6 +156,13 @@ export class StoreAccount implements StoreAccountI {
       throw new Error('Maximum created applications for an account is 10');
     }
 
+    // raise minimum balance
+    // https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
+    this.minBalance += (
+      APPLICATION_BASE_FEE +
+      (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * params.globalInts +
+      (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * params.globalBytes
+    );
     const app = new App(appId, params);
     this.createdApps.set(app.id, app.attributes);
     return app;
@@ -152,22 +178,37 @@ export class StoreAccount implements StoreAccountI {
         throw new Error('Maximum Opt In applications per account is 10');
       }
 
+      // https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
+      this.minBalance += (
+        APPLICATION_BASE_FEE +
+        (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * appParams[localStateSchema]["num-uint"] +
+        (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * appParams[localStateSchema]["num-byte-slice"]
+      );
+
       // create new local app attribute
       const localParams: AppLocalStateM = {
         id: appId,
         "key-value": new Map<string, StackElem>(),
-        schema: appParams["local-state-schema"]
+        schema: appParams[localStateSchema]
       };
       this.appsLocalState.set(appId, localParams);
     }
   }
 
-  // delete application from account's state
+  // delete application from account's global state (createdApps)
   deleteApp (appId: number): void {
     if (!this.createdApps.has(appId)) {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
     this.createdApps.delete(appId);
+  }
+
+  // close(delete) application from account's local state (appsLocalState)
+  closeApp (appId: number): void {
+    if (!this.appsLocalState.has(appId)) {
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
+    }
+    this.appsLocalState.delete(appId);
   }
 }
 

@@ -15,10 +15,6 @@ txn RekeyTo
 global ZeroAddress
 ==
 &&
-txn CloseRemainderTo
-global ZeroAddress
-==
-&&
 txn Fee
 int 10000
 <=

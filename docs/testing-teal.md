@@ -129,11 +129,14 @@ Currently, `runtime` supports:
   + `opt-in` to application
   + `update` application
   + `delete` application
-- Full transaction processing for type `payment` (transfer amount between accounts).
+  + `closeout` from an application
+  + `clearState` of application
+
+- Full transaction processing for type `payment`, `application call`
 
 Currently `runtime` does not support :-
 
- - Full transaction processing for txn types other than 'pay' (`asset transfer`, `asset freeze` etc)
+ - Asset related transactions
  - Transactions to
    + `create` an asset
    + `opt-in` to asset
