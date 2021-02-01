@@ -1,0 +1,54 @@
+version: '3'
+
+services:
+  algod:
+    container_name: "algorand-sandbox-algod"
+    build:
+      context: .
+      dockerfile: ./images/algod/Dockerfile
+      args:
+        CHANNEL: "${ALGOD_CHANNEL}"
+        URL: "${ALGOD_URL}"
+        BRANCH: "${ALGOD_BRANCH}"
+        SHA: "${ALGOD_SHA}"
+        BOOTSTRAP_URL: "${NETWORK_BOOTSTRAP_URL}"
+        GENESIS_FILE: "${NETWORK_GENESIS_FILE}"
+        TOKEN: "aade468d25a7aa48fec8082d6a847c48492066a2741f3731e613fdde086cd6e9"
+        ALGOD_PORT: "8081"
+        KMD_PORT: "8082"
+    ports:
+      - 8081:8081
+      - 8082:8082
+
+  indexer:
+    container_name: "algorand-sandbox-indexer"
+    build:
+      context: .
+      dockerfile: ./images/indexer/Dockerfile
+      args:
+        URL: "${INDEXER_URL}"
+        BRANCH: "${INDEXER_BRANCH}"
+        SHA: "${INDEXER_SHA}"
+    ports:
+      - 8980:8980
+    restart: unless-stopped
+    environment:
+      DISABLED: "${INDEXER_DISABLED}"
+      PORT: "8980"
+      SNAPSHOT: ""
+      CONNECTION_STRING: "host=indexer-db port=5432 user=algorand password=algorand dbname=indexer_db sslmode=disable"
+      ALGOD_ADDR: "algod:8081"
+      ALGOD_TOKEN: "aade468d25a7aa48fec8082d6a847c48492066a2741f3731e613fdde086cd6e9"
+    depends_on:
+      - indexer-db
+      - algod
+
+  indexer-db:
+    image: "postgres:13-alpine"
+    container_name: "algorand-sandbox-postgres"
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_USER: algorand
+      POSTGRES_PASSWORD: algorand
+      POSTGRES_DB: indexer_db
