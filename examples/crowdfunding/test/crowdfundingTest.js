@@ -6,7 +6,7 @@ import {
   TransactionType,
   uint64ToBigEndian
 } from '@algorand-builder/algob';
-import { Runtime, StoreAccount } from '@algorand-builder/runtime';
+import { Runtime, StoreAccount } from '@algorand-builder/runtime/';
 import { assert } from 'chai';
 
 const minBalance = 10e6; // 10 ALGO's
