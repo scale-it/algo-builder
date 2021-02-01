@@ -22,7 +22,8 @@ describe('Crowdfunding Tests', function () {
   let runtime;
   let flags;
   let applicationId;
-  const program = getProgram('crowdFundApproval.teal');
+  const approvalProgram = getProgram('crowdFundApproval.teal');
+  const clearProgram = getProgram('crowdFundClear.teal');
 
   this.beforeAll(async function () {
     runtime = new Runtime([master, creator, escrow, donor]);
@@ -94,7 +95,8 @@ describe('Crowdfunding Tests', function () {
     const creationFlags = Object.assign({}, flags);
 
     // create application
-    applicationId = runtime.addApp({ ...creationFlags, appArgs: creationArgs }, {}, program);
+    applicationId = runtime.addApp(
+      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
     const creatorPk = addressToPk(creator.address);
 
     // setup escrow account
@@ -131,7 +133,8 @@ describe('Crowdfunding Tests', function () {
     runtime.updateApp(
       creator.address,
       applicationId,
-      program,
+      approvalProgram,
+      clearProgram,
       {}, { appArgs: appArgs });
     const escrowPk = addressToPk(escrowAddress);
 
@@ -140,8 +143,8 @@ describe('Crowdfunding Tests', function () {
     assert.deepEqual(getGlobal('Escrow'), escrowPk);
 
     // opt-in to app
-    runtime.optInToApp(creator.address, applicationId, {}, {}, program);
-    runtime.optInToApp(donor.address, applicationId, {}, {}, program);
+    runtime.optInToApp(creator.address, applicationId, {}, {});
+    runtime.optInToApp(donor.address, applicationId, {}, {});
 
     syncAccounts();
     assert.isDefined(creator.appsLocalState.get(applicationId));
@@ -171,7 +174,7 @@ describe('Crowdfunding Tests', function () {
       }
     ];
     // execute transaction
-    runtime.executeTx(txGroup, program, []);
+    runtime.executeTx(txGroup);
 
     // sync accounts
     syncAccounts();
@@ -205,7 +208,7 @@ describe('Crowdfunding Tests', function () {
     syncAccounts();
     const donorBalance = donor.balance();
     const escrowBalance = escrow.balance();
-    runtime.executeTx(txGroup, program, []);
+    runtime.executeTx(txGroup);
 
     syncAccounts();
     // verify 300000 is withdrawn from escrow (with tx fee of 1000 as well)
@@ -236,7 +239,7 @@ describe('Crowdfunding Tests', function () {
     ];
     const escrowBal = escrow.balance();
     // execute transaction
-    runtime.executeTx(txGroup, program, []);
+    runtime.executeTx(txGroup);
 
     syncAccounts();
     assert.equal(escrow.balance(), escrowBal + 7000000); // verify donation of 7000000
@@ -264,7 +267,7 @@ describe('Crowdfunding Tests', function () {
     const creatorBal = creator.balance(); // creator's balance before 'claim' tx
     const escrowFunds = escrow.balance(); //  funds in escrow
     // execute transaction
-    runtime.executeTx(txGroup, program, []);
+    runtime.executeTx(txGroup);
 
     syncAccounts();
     assert.equal(escrow.balance(), 0); // escrow should be empty after claim
@@ -286,7 +289,7 @@ describe('Crowdfunding Tests', function () {
     assert.isDefined(app); // verify app is present before delete tx
 
     // execute delete tx
-    runtime.executeTx(deleteTx, program, []);
+    runtime.executeTx(deleteTx);
 
     // should throw error as app is deleted
     try {
@@ -299,7 +302,8 @@ describe('Crowdfunding Tests', function () {
   it('should be rejected by logic when claiming funds if goal is not met', () => {
     // create application
     const creationFlags = Object.assign({}, flags);
-    const applicationId = runtime.addApp({ ...creationFlags, appArgs: creationArgs }, {}, program);
+    const applicationId = runtime.addApp(
+      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
 
     // setup escrow account
     const escrowProg = getProgram('crowdFundEscrow.py', { APP_ID: applicationId });
@@ -316,7 +320,8 @@ describe('Crowdfunding Tests', function () {
     runtime.updateApp(
       creator.address,
       applicationId,
-      program,
+      approvalProgram,
+      clearProgram,
       {}, { appArgs: appArgs });
 
     appArgs = [stringToBytes('claim')];
@@ -342,7 +347,7 @@ describe('Crowdfunding Tests', function () {
     ];
     // execute transaction: Expected to be rejected by logic because goal is not reached
     try {
-      runtime.executeTx(txGroup, program, []);
+      runtime.executeTx(txGroup);
     } catch (e) {
       console.warn(e);
     }

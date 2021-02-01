@@ -379,10 +379,12 @@ export class Runtime {
     const appParams = this.getApp(appId);
     if (appParams) {
       this.createUpdateTx(senderAddr, appId, payFlags, flags);
+      this.ctx.state = cloneDeep(this.store);
       // Execute approval program for Update
       this.run(this.getProgram(appId)[0], ExecutionMode.STATEFUL);
-      // If successful update programs
+      // If successful update programs and state
       this.programMap.set(appId, [approvalProgram, clearProgram]);
+      this.store = this.ctx.state;
     } else {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
