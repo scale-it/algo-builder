@@ -1,6 +1,6 @@
 import { encodeNote, mkTransaction } from "@algorand-builder/runtime";
-import type { ExecParams, TxParams } from "@algorand-builder/runtime/src/types";
-import { SignType } from "@algorand-builder/runtime/src/types";
+import type { ExecParams, TxParams } from "@algorand-builder/runtime/build/types";
+import { SignType } from "@algorand-builder/runtime/build/types";
 import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
 import {

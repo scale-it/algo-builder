@@ -1,5 +1,5 @@
 import { encodeNote, parseSSCAppArgs } from "@algorand-builder/runtime";
-import type { SSCOptionalFlags, TxParams } from "@algorand-builder/runtime/src/types";
+import type { SSCOptionalFlags, TxParams } from "@algorand-builder/runtime/build/types";
 import tx, { Account as AccountSDK, ConfirmedTxInfo } from "algosdk";
 
 import { AlgobDeployer } from "../types";
