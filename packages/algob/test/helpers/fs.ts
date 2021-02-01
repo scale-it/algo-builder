@@ -2,8 +2,6 @@ import fsExtra from "fs-extra";
 import * as os from "os";
 import path from "path";
 
-import { ASSETS_DIR } from "../../src/internal/core/project-structure";
-
 declare module "mocha" {
   interface Context {
     tmpDir: string

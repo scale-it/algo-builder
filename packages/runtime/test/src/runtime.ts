@@ -1,10 +1,10 @@
-import { AlgoTransferParam, ExecParams, SignType, TransactionType } from "@algorand-builder/algob/src/types";
 import { LogicSig } from "algosdk";
 import { assert } from "chai";
 
 import { StoreAccount } from "../../src/account";
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime } from "../../src/runtime";
+import { AlgoTransferParam, ExecParams, SignType, TransactionType } from "../../src/types";
 import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
@@ -106,6 +106,7 @@ describe("Rounds Test", function () {
   }
 
   it("should pass if first and last valid are in current round range", () => {
+    txnParams.payFlags = { totalFee: 1000, firstValid: 5, validRounds: 200 };
     // set round
     runtime.setRound(20);
 
@@ -114,7 +115,7 @@ describe("Rounds Test", function () {
 
     // get final state (updated accounts)
     syncAccounts();
-    assert.equal(john.balance(), minBalance - 100);
+    assert.equal(john.balance(), minBalance - 1100);
     assert.equal(bob.balance(), minBalance + 100);
   });
 
@@ -130,14 +131,14 @@ describe("Rounds Test", function () {
   });
 
   it("should pass if no rounds are passed", () => {
-    txnParams.payFlags = {};
+    txnParams.payFlags = { totalFee: 1000 };
 
     // execute transaction
     runtime.executeTx(txnParams, program, []);
 
     // get final state (updated accounts)
     syncAccounts();
-    assert.equal(john.balance(), minBalance - 100);
+    assert.equal(john.balance(), minBalance - 1100);
     assert.equal(bob.balance(), minBalance + 100);
   });
 });
