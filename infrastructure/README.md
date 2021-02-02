@@ -55,7 +55,7 @@ Algorand Sandbox is a fast way to create and configure an Algorand development e
 *NOTE:* Please make sure to have [Docker Compose](https://docs.docker.com/compose/install/) installed (with non root privilages) before running sandbox.
 1. `sandbox-up` - Clones the sandbox [git repo](https://github.com/algorand/sandbox.git) in `~/sandbox` and brings up the network (this might take a while).
 
-2. `sandbox-setup-master-account` - After starting up the network using `sandbox-up`, we can use this job to create the master account present in algob config.
+2. `sandbox-setup-master-account` - After starting the network using `sandbox-up`, we can use this job to create the master account present in algob config.
 
 3. `sandbox-algod` - Use this command to enter the algod's docker container. To exit use `ctrl + D`.
 
