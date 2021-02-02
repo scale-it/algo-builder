@@ -532,7 +532,7 @@ export class Runtime {
     args: Uint8Array[]): void {
     const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
     // validate first and last rounds
-    this.validateRounds(gtxs);
+    this.validateTxRound(gtxs);
 
     // initialize context before each execution
     this.ctx = {
