@@ -22,7 +22,7 @@ This example is using PyTEAL, so make sure to follow the Python3 setup described
 
 ## Run
 
-**NOTE**: Make sure to run `yarn build` before the following commands.
+**NOTE**: Make sure to run `yarn build` before the following commands. `yarn build` compiles the typescript code to javascript (in `/build`). During active development use `yarn build:watch` to update the build in real time.
 
 ```
 yarn run algob deploy

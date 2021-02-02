@@ -6,13 +6,10 @@
  * the TEAL program. The TEAL program will transfer its balance to the seller
  * if the seller is able to provide the secret value that corresponds to the hash in the program.
 */
-import {
-  SignType,
-  stringToBytes,
-  TransactionType
-} from "@algorand-builder/algob";
-import { AlgobRuntimeEnv, AlgobDeployer } from "@algorand-builder/algob/src/types";
-import { AlgoTransferParam } from "@algorand-builder/runtime/src/types";
+import { stringToBytes } from "@algorand-builder/algob";
+import { AlgobDeployer, AlgobRuntimeEnv } from "@algorand-builder/algob/src/types";
+import { AlgoTransferParam, SignType, TransactionType } from "@algorand-builder/runtime/build/types";
+
 import { executeTx, prepareParameters } from "./common";
 
 async function run (runtimeEnv: AlgobRuntimeEnv, deployer: AlgobDeployer): Promise<void> {
@@ -25,7 +22,7 @@ async function run (runtimeEnv: AlgobRuntimeEnv, deployer: AlgobDeployer): Promi
   const txnParams: AlgoTransferParam = {
     type: TransactionType.TransferAlgo,
     sign: SignType.LogicSignature,
-    fromAccount: { addr: sender, sk: new Uint8Array(0) },
+    fromAccount: { addr: sender, sk: new Uint8Array(0) }, // we don't need secret key for logic signature account so added a dummy
     toAccountAddr: alice.addr,
     amountMicroAlgos: 200,
     lsig: lsig,

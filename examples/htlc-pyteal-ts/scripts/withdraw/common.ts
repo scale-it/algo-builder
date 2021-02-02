@@ -1,7 +1,13 @@
 import { executeTransaction } from "@algorand-builder/algob";
-import { Account, AlgobDeployer, ExecParams } from "@algorand-builder/algob/src/types";
+import { Account, AlgobDeployer } from "@algorand-builder/algob/src/types";
+import { ExecParams } from "@algorand-builder/runtime/src/types";
 import { sha256 } from 'js-sha256';
 
+/**
+ * Returns account from algob config (by name)
+ * @param deployer AlgobDeployer
+ * @param name Name of the account to fetch
+ */
 export function getDeployerAccount (deployer: AlgobDeployer, name: string): Account {
   const account = deployer.accountsByName.get(name);
   if (account === undefined) {
@@ -18,6 +24,15 @@ export async function executeTx (deployer: AlgobDeployer, txnParams: ExecParams)
   }
 };
 
+/**
+ * Prepares parameters for htlc run and deploy tasks
+ *  - alice account
+ *  - bob account
+ *  - secret value
+ *  - hash of secret
+ *  - pyteal template params (to pass to htlc.py)
+ * @param deployer AlgobDeployer
+ */
 export function prepareParameters (deployer: AlgobDeployer): any {
   const bob = getDeployerAccount(deployer, 'bob');
   const alice = getDeployerAccount(deployer, 'alice');

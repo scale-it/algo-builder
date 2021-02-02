@@ -2,7 +2,7 @@ import {
   addressToPk, mkTransaction,
   parseSSCAppArgs, stringToBytes,
   uint64ToBigEndian
-} from "@algorand-builder/runtime/src/index";
+} from "@algorand-builder/runtime";
 
 import {
   createMsigAddress,
