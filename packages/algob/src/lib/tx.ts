@@ -1,20 +1,15 @@
+import { encodeNote, mkTransaction } from "@algorand-builder/runtime";
+import type { ExecParams, TxParams } from "@algorand-builder/runtime/build/types";
+import { SignType } from "@algorand-builder/runtime/build/types";
 import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
-import { TextEncoder } from "util";
 
-import { BuilderError } from "../internal/core/errors";
-import { ERRORS } from "../internal/core/errors-list";
 import {
   AlgobDeployer,
   ASADef,
-  ASADeploymentFlags,
-  ExecParams,
-  SignType,
-  TransactionType,
-  TxParams
+  ASADeploymentFlags
 } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
 import { loadSignedTxnFromFile } from "./files";
-import { parseSSCAppArgs } from "./ssc";
 
 export async function getSuggestedParams (algocl: Algodv2): Promise<SuggestedParams> {
   const params = await algocl.getTransactionParams().do();
@@ -93,109 +88,6 @@ export function makeASAOptInTx (
     note,
     assetID,
     params);
-}
-
-export function encodeNote (note: string | undefined, noteb64: string| undefined): Uint8Array | undefined {
-  if (note === undefined && noteb64 === undefined) { return undefined; }
-  const encoder = new TextEncoder();
-  return noteb64 ? encoder.encode(noteb64) : encoder.encode(note);
-}
-
-/**
- * Returns unsigned transaction as per ExecParams
- * ExecParams can be of following types:
- *  + AlgoTransferParam used for transferring algo
- *  + AssetTransferParam used for transferring asset
- *  + SSCCallsParam used for calling stateful smart contracts.
- For more advanced use-cases, please use `algosdk.tx` directly.
- NOTE: parseSSCAppArgs is used to handle case when user passes appArgs similar to goal
- * @param execParams ExecParams
- * @param suggestedParams Suggested params
- * @returns SDK Transaction object
- */
-export function mkTransaction (execParams: ExecParams, suggestedParams: SuggestedParams): Transaction {
-  const note = encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64);
-  const transactionType = execParams.type;
-  switch (execParams.type) {
-    case TransactionType.TransferAsset: {
-      return algosdk.makeAssetTransferTxnWithSuggestedParams(
-        execParams.fromAccount.addr,
-        execParams.toAccountAddr,
-        execParams.payFlags.closeRemainderTo,
-        undefined,
-        execParams.amount,
-        note,
-        execParams.assetID,
-        suggestedParams);
-    }
-    case TransactionType.TransferAlgo: {
-      return algosdk.makePaymentTxnWithSuggestedParams(
-        execParams.fromAccount.addr,
-        execParams.toAccountAddr,
-        execParams.amountMicroAlgos,
-        execParams.payFlags.closeRemainderTo,
-        note,
-        suggestedParams);
-    }
-    case TransactionType.ClearSSC: {
-      return algosdk.makeApplicationClearStateTxn(
-        execParams.fromAccount.addr,
-        suggestedParams,
-        execParams.appId,
-        parseSSCAppArgs(execParams.appArgs),
-        execParams.accounts,
-        execParams.foreignApps,
-        execParams.foreignAssets,
-        note,
-        execParams.lease,
-        execParams.rekeyTo
-      );
-    }
-    case TransactionType.DeleteSSC: {
-      return algosdk.makeApplicationDeleteTxn(
-        execParams.fromAccount.addr,
-        suggestedParams,
-        execParams.appId,
-        parseSSCAppArgs(execParams.appArgs),
-        execParams.accounts,
-        execParams.foreignApps,
-        execParams.foreignAssets,
-        note,
-        execParams.lease,
-        execParams.rekeyTo
-      );
-    }
-    case TransactionType.CallNoOpSSC: {
-      return algosdk.makeApplicationNoOpTxn(
-        execParams.fromAccount.addr,
-        suggestedParams,
-        execParams.appId,
-        parseSSCAppArgs(execParams.appArgs),
-        execParams.accounts,
-        execParams.foreignApps,
-        execParams.foreignAssets,
-        note,
-        execParams.lease,
-        execParams.rekeyTo);
-    }
-    case TransactionType.CloseSSC: {
-      return algosdk.makeApplicationCloseOutTxn(
-        execParams.fromAccount.addr,
-        suggestedParams,
-        execParams.appId,
-        parseSSCAppArgs(execParams.appArgs),
-        execParams.accounts,
-        execParams.foreignApps,
-        execParams.foreignAssets,
-        note,
-        execParams.lease,
-        execParams.rekeyTo
-      );
-    }
-    default: {
-      throw new BuilderError(ERRORS.GENERAL.TRANSACTION_TYPE_ERROR, { error: transactionType });
-    }
-  }
 }
 
 /**

@@ -1,3 +1,4 @@
+import type { SSCDeploymentFlags, SSCOptionalFlags, TxParams } from "@algorand-builder/runtime/build/types";
 import type { LogicSig, LogicSigArgs, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
 
@@ -18,11 +19,8 @@ import type {
   CheckpointRepo,
   FundASCFlags,
   LsigInfo,
-  SSCDeploymentFlags,
   SSCInfo,
-  SSCOptionalFlags,
-  StrMap,
-  TxParams
+  StrMap
 } from "../types";
 import { BuilderError } from "./core/errors";
 import { ERRORS } from "./core/errors-list";

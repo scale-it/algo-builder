@@ -4,7 +4,8 @@
    - create a signed lsig using sdk and use that lsig to validate transactions
 */
 const { executeTransaction } = require('./common/common');
-const { TransactionType, SignType, createMsigAddress } = require('@algorand-builder/algob');
+const { createMsigAddress } = require('@algorand-builder/algob');
+const { TransactionType, SignType } = require('@algorand-builder/runtime/build/types');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');

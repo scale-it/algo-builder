@@ -9,7 +9,10 @@ import { TealError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { compareArray } from "../lib/compare";
 import { AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
-import { assertLen, assertOnlyDigits, convertToBuffer, convertToString, getEncoding, stringToBytes } from "../lib/parsing";
+import {
+  assertLen, assertOnlyDigits, convertToBuffer,
+  convertToString, getEncoding, stringToBytes
+} from "../lib/parsing";
 import { txAppArg, txnSpecbyField } from "../lib/txn";
 import { EncodingType, StackElem, TEALStack, TxnOnComplete, TxnType } from "../types";
 import { Interpreter } from "./interpreter";
@@ -1737,8 +1740,8 @@ export class AppLocalPut extends Op {
     const appId = this.interpreter.runtime.ctx.tx.apid || 0;
 
     // get updated local state for account
-    const localState = account.setLocalState(appId, key, value);
-    const acc = this.interpreter.runtime.assertAccountDefined(
+    const localState = account.setLocalState(appId, key, value, this.line);
+    const acc = this.interpreter.runtime.assertAccountDefined(account.address,
       this.interpreter.runtime.ctx.state.accounts.get(account.address), this.line);
     acc.appsLocalState.set(appId, localState);
   }
@@ -1805,7 +1808,7 @@ export class AppLocalDel extends Op {
       localState["key-value"].delete(key.toString()); // delete from local state
 
       let acc = this.interpreter.runtime.ctx.state.accounts.get(account.address);
-      acc = this.interpreter.runtime.assertAccountDefined(acc, this.line);
+      acc = this.interpreter.runtime.assertAccountDefined(account.address, acc, this.line);
       acc.appsLocalState.set(appId, localState);
     }
   }
@@ -1872,7 +1875,7 @@ export class Balance extends Op {
     const accountIndex = this.assertBigInt(stack.pop(), this.line);
     const acc = this.interpreter.getAccount(accountIndex, this.line);
 
-    stack.push(BigInt(acc.amount));
+    stack.push(BigInt(acc.balance()));
   }
 }
 

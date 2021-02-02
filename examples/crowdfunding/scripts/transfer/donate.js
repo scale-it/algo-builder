@@ -1,4 +1,5 @@
-const { TransactionType, SignType, stringToBytes, executeTransaction } = require('@algorand-builder/algob');
+const { stringToBytes, executeTransaction } = require('@algorand-builder/algob');
+const { TransactionType, SignType } = require('@algorand-builder/runtime/build/types');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');

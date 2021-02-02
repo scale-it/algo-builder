@@ -1,10 +1,9 @@
-import { addressToPk, uint64ToBigEndian } from "@algorand-builder/algob";
-import { SSCDeploymentFlags } from "@algorand-builder/algob/src/types";
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccount } from "../../src/index";
-import { StackElem } from "../../src/types";
+import { addressToPk, uint64ToBigEndian } from "../../src/lib/parsing";
+import { SSCDeploymentFlags, StackElem } from "../../src/types";
 import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
