@@ -206,22 +206,6 @@ export class Runtime {
   }
 
   /**
-   * mock suggested parameters according to current round
-   * @param flags payment flags
-   */
-  mockSuggestedParameters (flags: TxParams): SuggestedParams {
-    const s = mockSuggestedParams(flags);
-
-    // https://developer.algorand.org/docs/features/transactions/#setting-first-and-last-valid
-    s.firstRound = flags.firstValid ?? (this.round - 1);
-    s.lastRound = flags.firstValid === undefined || flags.validRounds === undefined
-      ? s.firstRound + 1000
-      : Number(flags.firstValid) + Number(flags.validRounds);
-
-    return s;
-  }
-
-  /**
    * Creates new transaction object (tx, gtxs) from given txnParams
    * @param txnParams : Transaction parameters for current txn or txn Group
    * @returns: [current transaction, transaction group]
@@ -235,7 +219,7 @@ export class Runtime {
 
       const txns = [];
       for (const txnParam of txnParams) { // create encoded_obj for each txn in group
-        const mockParams = this.mockSuggestedParameters(txnParam.payFlags);
+        const mockParams = mockSuggestedParams(txnParam.payFlags, this.round);
         const tx = mkTransaction(txnParam, mockParams);
 
         // convert to encoded obj for compatibility
@@ -246,7 +230,7 @@ export class Runtime {
       return [txns[0], txns]; // by default current txn is the first txn (hence txns[0])
     } else {
       // if not array, then create a single transaction
-      const mockParams = this.mockSuggestedParameters(txnParams.payFlags);
+      const mockParams = mockSuggestedParams(txnParams.payFlags, this.round);
       const tx = mkTransaction(txnParams, mockParams);
 
       const encodedTxnObj = tx.get_obj_for_encoding() as Txn;
@@ -259,7 +243,7 @@ export class Runtime {
   makeAndSetCtxAppCreateTxn (flags: SSCDeploymentFlags, payFlags: TxParams): void {
     const txn = algosdk.makeApplicationCreateTxn(
       flags.sender.addr,
-      this.mockSuggestedParameters(payFlags),
+      mockSuggestedParams(payFlags, this.round),
       algosdk.OnApplicationComplete.NoOpOC,
       new Uint8Array(32), // mock approval program
       new Uint8Array(32), // mock clear progam
@@ -323,7 +307,7 @@ export class Runtime {
     flags: SSCOptionalFlags): void {
     const txn = algosdk.makeApplicationOptInTxn(
       senderAddr,
-      this.mockSuggestedParameters(payFlags),
+      mockSuggestedParams(payFlags, this.round),
       appId,
       parseSSCAppArgs(flags.appArgs),
       flags.accounts,
@@ -369,7 +353,7 @@ export class Runtime {
     flags: SSCOptionalFlags): void {
     const txn = algosdk.makeApplicationUpdateTxn(
       senderAddr,
-      this.mockSuggestedParameters(payFlags),
+      mockSuggestedParams(payFlags, this.round),
       appId,
       new Uint8Array(32), // mock approval program
       new Uint8Array(32), // mock clear progam
