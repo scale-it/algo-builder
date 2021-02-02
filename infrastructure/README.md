@@ -54,7 +54,7 @@ To connect from SDK or REST we need to know the network address and authorizatio
 Algorand Sandbox is a fast way to create and configure an Algorand development environment with [Algod](https://github.com/algorand/go-algorand) and [Indexer](https://github.com/algorand/indexer). To quickly bring up a private network with algorand sandbox and use it within algob, following jobs are provided (in `/infrastructure`) :-
 1. `sandbox-up` - Clones the sandbox [git repo](https://github.com/algorand/sandbox.git) in `~/sandbox` and brings up the network (this might take a while).
 
-2. `sandbox-setup-master-account` - After starting up the network using `sandbox-up`, we can use this job to create the master account present in algob config.
+2. `sandbox-setup-master-account` - After starting the network using `sandbox-up`, we can use this job to create the master account present in algob config.
 
 3. `sandbox-algod` - Use this command to enter the algod's docker container. To exit use `ctrl + D`.
 
