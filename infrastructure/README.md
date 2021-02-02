@@ -52,6 +52,7 @@ To connect from SDK or REST we need to know the network address and authorizatio
 ## Using Sandbox 2.0
 
 Algorand Sandbox is a fast way to create and configure an Algorand development environment with [Algod](https://github.com/algorand/go-algorand) and [Indexer](https://github.com/algorand/indexer). To quickly bring up a private network with algorand sandbox and use it within algob, following jobs are provided (in `/infrastructure`) :-
+*NOTE:* Please make sure to have [Docker Compose](https://docs.docker.com/compose/install/) installed (with non root privilages) before running sandbox.
 1. `sandbox-up` - Clones the sandbox [git repo](https://github.com/algorand/sandbox.git) in `~/sandbox` and brings up the network (this might take a while).
 
 2. `sandbox-setup-master-account` - After starting up the network using `sandbox-up`, we can use this job to create the master account present in algob config.
@@ -67,6 +68,7 @@ Algorand Sandbox is a fast way to create and configure an Algorand development e
 
 2. Algod port is set to `8081` and kmd port is set to `8082`. Make sure to update the port in `algob.config` before running the examples.
 
+To learn more about sandbox, click [here](https://github.com/algorand/sandbox#algorand-sandbox).
 ### Example REST requests
 
 Private Net
