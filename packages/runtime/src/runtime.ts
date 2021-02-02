@@ -114,7 +114,7 @@ export class Runtime {
    * Validate first and last rounds of transaction using current round
    * @param gtxns transactions
    */
-  validateRounds (gtxns: Txn[]): void {
+  validateTxRound (gtxns: Txn[]): void {
     // https://developer.algorand.org/docs/features/transactions/#current-round
     for (const txn of gtxns) {
       if (txn.fv >= this.round || txn.lv <= this.round) {
