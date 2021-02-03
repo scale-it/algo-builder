@@ -149,8 +149,11 @@ export class StoreAccount implements StoreAccountI {
    * check maximum account creation limit
    * @param appId application index
    * @param params SSCDeployment Flags
+   * @param approvalProgram application approval program
+   * @param clearProgram application clear program
    */
-  addApp (appId: number, params: SSCDeploymentFlags): CreatedAppM {
+  addApp (appId: number, params: SSCDeploymentFlags,
+    approvalProgram: string, clearProgram: string): CreatedAppM {
     if (this.createdApps.size === 10) {
       throw new Error('Maximum created applications for an account is 10');
     }
@@ -162,7 +165,7 @@ export class StoreAccount implements StoreAccountI {
       (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * params.globalInts +
       (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * params.globalBytes
     );
-    const app = new App(appId, params);
+    const app = new App(appId, params, approvalProgram, clearProgram);
     this.createdApps.set(app.id, app.attributes);
     return app;
   }
@@ -216,11 +219,12 @@ class App {
   readonly id: number;
   readonly attributes: SSCAttributesM;
 
-  constructor (appId: number, params: SSCDeploymentFlags) {
+  constructor (appId: number, params: SSCDeploymentFlags,
+    approvalProgram: string, clearProgram: string) {
     this.id = appId;
     this.attributes = {
-      'approval-program': '',
-      'clear-state-program': '',
+      'approval-program': approvalProgram,
+      'clear-state-program': clearProgram,
       creator: params.sender.addr,
       'global-state': new Map<string, StackElem>(),
       'global-state-schema': { 'num-byte-slice': params.globalBytes, 'num-uint': params.globalInts },
