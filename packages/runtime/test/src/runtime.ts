@@ -120,7 +120,7 @@ describe("Rounds Test", function () {
     assert.equal(bob.balance(), minBalance + 100);
   });
 
-  it("should fail if first and last valid are not in current round range", () => {
+  it("should fail if current round is not between first and last valid", () => {
     // set round
     runtime.setRound(3);
 
