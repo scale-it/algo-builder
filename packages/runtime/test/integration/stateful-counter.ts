@@ -1,7 +1,7 @@
 import { assert } from "chai";
 
 import { Runtime, StoreAccount } from "../../src/index";
-import { BIGINT1 } from "../../src/interpreter/opcode-list";
+import { BIGINT0, BIGINT1 } from "../../src/interpreter/opcode-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { ExecParams, SignType, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";
@@ -41,6 +41,13 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
   });
 
   const key = "counter";
+
+  it("should initialize local counter to 0 after opt-in", function () {
+    const localCounter = runtime.getAccount(john.address).getLocalState(txnParams.appId, key); // get local value from john account
+    assert.isDefined(localCounter); // there should be a value present in local state with key "counter"
+    assert.equal(localCounter, BIGINT0);
+  });
+
   it("should initialize global and local counter to 1 on first call", function () {
     runtime.executeTx(txnParams);
 

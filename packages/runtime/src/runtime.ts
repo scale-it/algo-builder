@@ -337,17 +337,14 @@ export class Runtime {
   optInToApp (accountAddr: string, appId: number,
     flags: SSCOptionalFlags, payFlags: TxParams): void {
     const appParams = this.getApp(appId);
-    const account = this.assertAccountDefined(accountAddr, this.store.accounts.get(accountAddr));
-    if (appParams) {
-      this.addCtxOptInTx(accountAddr, appId, payFlags, flags);
-      // Execute approval program for Opt-In
-      const app = this.assertAppDefined(appId, this.getApp(appId));
-      this.run(app["approval-program"], ExecutionMode.STATEFUL);
+    this.addCtxOptInTx(accountAddr, appId, payFlags, flags);
+    this.ctx.state = cloneDeep(this.store);
+    const account = this.assertAccountDefined(accountAddr, this.ctx.state.accounts.get(accountAddr));
+    account.optInToApp(appId, appParams);
 
-      account.optInToApp(appId, appParams);
-    } else {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
-    }
+    // Execute approval program for Opt-In
+    this.run(appParams["approval-program"], ExecutionMode.STATEFUL);
+    this.store = this.ctx.state;
   }
 
   // creates new Update transaction object and update context
