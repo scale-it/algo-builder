@@ -108,10 +108,8 @@ describe("Rounds Test", function () {
 
   it("should succeed if current round is between first and last valid", () => {
     txnParams.payFlags = { totalFee: 1000, firstValid: 5, validRounds: 200 };
-    // set round
     runtime.setRound(20);
 
-    // execute transaction
     runtime.executeTx(txnParams, program, []);
 
     // get final state (updated accounts)
@@ -121,10 +119,8 @@ describe("Rounds Test", function () {
   });
 
   it("should fail if current round is not between first and last valid", () => {
-    // set round
     runtime.setRound(3);
 
-    // execute transaction
     expectTealError(
       () => runtime.executeTx(txnParams, program, []),
       ERRORS.TEAL.INVALID_ROUND
@@ -134,7 +130,6 @@ describe("Rounds Test", function () {
   it("should succeeded by default (no round requirement is passed)", () => {
     txnParams.payFlags = { totalFee: 1000 };
 
-    // execute transaction
     runtime.executeTx(txnParams, program, []);
 
     // get final state (updated accounts)

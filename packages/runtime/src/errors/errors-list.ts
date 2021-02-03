@@ -256,7 +256,7 @@ by an index that does not exist.`
   },
   INVALID_ROUND: {
     number: 38,
-    message: "Transaction rounds (firstValid, lastValid) are not valid, current round: %round%.",
+    message: "Transaction rounds (firstValid: %first%, lastValid: %last%) are not valid, current round: %round%.",
     title: 'Round Error',
     description: `Round Error`
   }

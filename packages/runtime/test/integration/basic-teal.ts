@@ -43,7 +43,6 @@ describe("Algorand Smart Contracts", function () {
     assert.equal(john.balance(), initialJohnHolding);
     assert.equal(bob.balance(), initialBobHolding);
 
-    // execute transaction
     runtime.executeTx(txnParams, getProgram('basic.teal'), []);
 
     // get final state (updated accounts)

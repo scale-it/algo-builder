@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
-import algosdk, { decodeAddress, SuggestedParams } from "algosdk";
+import algosdk, { decodeAddress } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
 import { StoreAccount } from "./account";
@@ -118,7 +118,8 @@ export class Runtime {
     // https://developer.algorand.org/docs/features/transactions/#current-round
     for (const txn of gtxns) {
       if (txn.fv >= this.round || txn.lv <= this.round) {
-        throw new TealError(ERRORS.TEAL.INVALID_ROUND, { round: this.round });
+        throw new TealError(ERRORS.TEAL.INVALID_ROUND,
+          { first: txn.fv, last: txn.lv, round: this.round });
       }
     }
   }
