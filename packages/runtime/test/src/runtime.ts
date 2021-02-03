@@ -38,7 +38,7 @@ describe("Logic Signature Transaction in Runtime", function () {
 
   it("should execute the lsig and verify john(delegated signature)", () => {
     lsig.sign(john.account.sk);
-    runtime.executeTx(txnParam, getProgram(programName), []);
+    runtime.executeTx(txnParam);
 
     // balance should be updated because logic is verified and accepted
     const bobAcc = runtime.getAccount(bob.address);
@@ -50,7 +50,7 @@ describe("Logic Signature Transaction in Runtime", function () {
 
     // execute transaction (logic signature validation failed)
     expectTealError(
-      () => runtime.executeTx(txnParam, getProgram(programName), []),
+      () => runtime.executeTx(txnParam),
       ERRORS.TEAL.LOGIC_SIGNATURE_VALIDATION_FAILED
     );
   });
@@ -65,7 +65,7 @@ describe("Logic Signature Transaction in Runtime", function () {
     // - Signature successfully validated for john
     // - But teal file logic is rejected
     expectTealError(
-      () => runtime.executeTx(txnParam, getProgram(programName), []),
+      () => runtime.executeTx(txnParam),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -76,11 +76,9 @@ describe("Rounds Test", function () {
   let john = new StoreAccount(minBalance);
   let bob = new StoreAccount(minBalance);
   let runtime: Runtime;
-  let program: string;
   let txnParams: AlgoTransferParam;
   this.beforeAll(function () {
     runtime = new Runtime([john, bob]); // setup test
-    program = getProgram('basic.teal');
 
     // set up transaction paramenters
     txnParams = {
@@ -110,7 +108,7 @@ describe("Rounds Test", function () {
     txnParams.payFlags = { totalFee: 1000, firstValid: 5, validRounds: 200 };
     runtime.setRound(20);
 
-    runtime.executeTx(txnParams, program, []);
+    runtime.executeTx(txnParams);
 
     // get final state (updated accounts)
     syncAccounts();
@@ -122,7 +120,7 @@ describe("Rounds Test", function () {
     runtime.setRound(3);
 
     expectTealError(
-      () => runtime.executeTx(txnParams, program, []),
+      () => runtime.executeTx(txnParams),
       ERRORS.TEAL.INVALID_ROUND
     );
   });
@@ -130,7 +128,7 @@ describe("Rounds Test", function () {
   it("should succeeded by default (no round requirement is passed)", () => {
     txnParams.payFlags = { totalFee: 1000 };
 
-    runtime.executeTx(txnParams, program, []);
+    runtime.executeTx(txnParams);
 
     // get final state (updated accounts)
     syncAccounts();

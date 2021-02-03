@@ -65,7 +65,7 @@ export interface AccountsMap {
 
 export interface State {
   accounts: Map<string, StoreAccountI>
-  globalApps: Map<number, AccountAddress>
+  globalApps: Map<number, GlobalAppsData>
   assetDefs: Map<number, AccountAddress>
 }
 
@@ -98,6 +98,12 @@ export interface SSCAttributesM {
 export interface CreatedAppM {
   id: number
   attributes: SSCAttributesM
+}
+
+export interface GlobalAppsData {
+  address: AccountAddress
+  approvalProgram: string
+  clearProgram: string
 }
 
 // represent account used in tests and by the context

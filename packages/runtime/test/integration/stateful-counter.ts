@@ -21,10 +21,11 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
   };
 
   let runtime: Runtime;
-  let program: string;
+  let approvalProgram: string;
+  let clearProgram: string;
   this.beforeAll(function () {
     runtime = new Runtime([john]); // setup test
-    program = getProgram('counter-approval.teal');
+    approvalProgram = getProgram('counter-approval.teal');
 
     // create new app
     txnParams.appId = runtime.addApp({
@@ -33,15 +34,15 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
       globalInts: 32,
       localBytes: 8,
       localInts: 8
-    }, {}, program);
+    }, {}, approvalProgram, clearProgram);
 
     // opt-in to app
-    runtime.optInToApp(john.address, txnParams.appId, {}, {}, program);
+    runtime.optInToApp(john.address, txnParams.appId, {}, {});
   });
 
   const key = "counter";
   it("should initialize global and local counter to 1 on first call", function () {
-    runtime.executeTx(txnParams, program, []);
+    runtime.executeTx(txnParams);
 
     const globalCounter = runtime.getGlobalState(txnParams.appId, key);
     assert.isDefined(globalCounter); // there should be a value present with key "counter"
@@ -60,7 +61,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
     assert.equal(globalCounter, BIGINT1);
     assert.equal(localCounter, BIGINT1);
 
-    runtime.executeTx(txnParams, program, []);
+    runtime.executeTx(txnParams);
 
     // after execution the counters should be updated by +1
     const newGlobalCounter = runtime.getGlobalState(txnParams.appId, key);

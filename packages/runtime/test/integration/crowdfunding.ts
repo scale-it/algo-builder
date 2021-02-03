@@ -13,11 +13,13 @@ describe("Crowdfunding basic tests", function () {
   const john = new StoreAccount(1000);
 
   let runtime: Runtime;
-  let program: string;
+  let approvalProgram: string;
+  let clearProgram: string;
   let flags: SSCDeploymentFlags;
   this.beforeAll(async function () {
     runtime = new Runtime([john]); // setup test
-    program = getProgram('crowdfunding.teal');
+    approvalProgram = getProgram('crowdfunding.teal');
+    clearProgram = getProgram('clear.teal');
 
     flags = {
       sender: john.account,
@@ -31,7 +33,7 @@ describe("Crowdfunding basic tests", function () {
   it("should fail during create application if 0 args are passed", function () {
     // create new app
     expectTealError(
-      () => runtime.addApp(flags, {}, program),
+      () => runtime.addApp(flags, {}, approvalProgram, clearProgram),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -59,7 +61,8 @@ describe("Crowdfunding basic tests", function () {
       uint64ToBigEndian(fundCloseDate.getTime())
     ];
 
-    const appId = runtime.addApp({ ...validFlags, appArgs: appArgs }, {}, program);
+    const appId = runtime.addApp(
+      { ...validFlags, appArgs: appArgs }, {}, approvalProgram, clearProgram);
     const getGlobal = (key: string):
     StackElem |undefined => runtime.getGlobalState(appId, key);
     const johnPk = addressToPk(john.address);

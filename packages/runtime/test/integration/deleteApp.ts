@@ -15,7 +15,8 @@ describe("Algorand Smart Contracts - Delete Application", function () {
   const alice = new StoreAccount(minBalance + 1000);
 
   let runtime: Runtime;
-  let program: string;
+  let approvalProgram: string;
+  let clearProgram: string;
   let deleteParams: SSCCallsParam;
   const flags = {
     sender: john.account,
@@ -26,7 +27,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
   };
   this.beforeAll(async function () {
     runtime = new Runtime([john, alice]); // setup test
-    program = getProgram('deleteApp.teal');
+    approvalProgram = getProgram('deleteApp.teal');
 
     deleteParams = {
       type: TransactionType.DeleteSSC,
@@ -40,15 +41,15 @@ describe("Algorand Smart Contracts - Delete Application", function () {
 
   it("should fail during delete application if app id is not defined", function () {
     expectTealError(
-      () => runtime.executeTx(deleteParams, program, []),
+      () => runtime.executeTx(deleteParams),
       ERRORS.TEAL.APP_NOT_FOUND
     );
   });
 
   it("should delete application", function () {
-    const appId = runtime.addApp(flags, {}, program);
+    const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram);
     deleteParams.appId = appId;
-    runtime.executeTx(deleteParams, program, []);
+    runtime.executeTx(deleteParams);
 
     // verify app is deleted
     expectTealError(
@@ -59,12 +60,12 @@ describe("Algorand Smart Contracts - Delete Application", function () {
 
   it("should not delete application if logic is rejected", function () {
     // create app
-    const appId = runtime.addApp(flags, {}, program);
+    const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram);
     deleteParams.appId = appId;
     deleteParams.fromAccount = alice.account;
 
     expectTealError(
-      () => runtime.executeTx(deleteParams, program, []),
+      () => runtime.executeTx(deleteParams),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 
