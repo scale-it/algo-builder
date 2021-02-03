@@ -56,7 +56,6 @@ describe("Algorand Stateless Smart Contracts (Contract Account Mode) - Escrow Ac
     assert.equal(escrow.balance(), initialEscrowHolding);
     assert.equal(john.balance(), initialJohnHolding);
 
-    // execute transaction
     runtime.executeTx(txnParams);
 
     // check final state (updated accounts)

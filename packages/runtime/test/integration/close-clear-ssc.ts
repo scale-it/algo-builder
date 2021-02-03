@@ -57,7 +57,6 @@ describe("ASC - CloseOut from Application and Clear State", function () {
     closeOutParams.appId = appId;
     runtime.optInToApp(john.address, appId, {}, {}); // opt-in to app (set new local state)
 
-    // execute clostOut txn
     runtime.executeTx(closeOutParams);
 
     syncAccount();
@@ -129,7 +128,6 @@ describe("ASC - CloseOut from Application and Clear State", function () {
     let res = alice.getAppFromLocal(appId);
     assert.isDefined(res);
 
-    // execute tx
     expectTealError(
       () => runtime.executeTx(clearAppParams),
       ERRORS.TEAL.REJECTED_BY_LOGIC

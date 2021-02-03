@@ -47,7 +47,6 @@ describe("Algorand Smart Contracts", function () {
     lsig.sign(john.account.sk);
     txnParams.lsig = lsig;
 
-    // execute transaction
     runtime.executeTx(txnParams);
 
     // get final state (updated accounts)

@@ -173,7 +173,6 @@ describe('Crowdfunding Tests', function () {
         payFlags: { totalFee: 1000 }
       }
     ];
-    // execute transaction
     runtime.executeTx(txGroup);
 
     // sync accounts
@@ -238,7 +237,6 @@ describe('Crowdfunding Tests', function () {
       }
     ];
     const escrowBal = escrow.balance();
-    // execute transaction
     runtime.executeTx(txGroup);
 
     syncAccounts();
@@ -266,7 +264,6 @@ describe('Crowdfunding Tests', function () {
     ];
     const creatorBal = creator.balance(); // creator's balance before 'claim' tx
     const escrowFunds = escrow.balance(); //  funds in escrow
-    // execute transaction
     runtime.executeTx(txGroup);
 
     syncAccounts();
@@ -288,7 +285,6 @@ describe('Crowdfunding Tests', function () {
     const app = runtime.getApp(applicationId);
     assert.isDefined(app); // verify app is present before delete tx
 
-    // execute delete tx
     runtime.executeTx(deleteTx);
 
     // should throw error as app is deleted
