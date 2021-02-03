@@ -281,32 +281,6 @@ export class Runtime {
     }
   }
 
-  // creates new asset creation transaction object and update context
-  addCtxAssetCreateTxn (
-    name: string, flags: ASADeploymentFlags, asaDef: ASADef, payFlags: TxParams): void {
-    const txn = algosdk.makeAssetCreateTxnWithSuggestedParams(
-      flags.creator.addr,
-      flags.note,
-      asaDef.total,
-      asaDef.decimals,
-      asaDef.defaultFrozen,
-      asaDef.manager,
-      asaDef.reserve,
-      asaDef.freeze,
-      asaDef.clawback,
-      asaDef.unitName,
-      name,
-      asaDef.url,
-      asaDef.metadataHash,
-      mockSuggestedParams(payFlags, this.round)
-    );
-
-    const encTx = txn.get_obj_for_encoding();
-    encTx.txID = txn.txID();
-    this.ctx.tx = encTx;
-    this.ctx.gtxs = [encTx];
-  }
-
   /**
    * Creates Asset in Runtime
    * @param name ASA name
