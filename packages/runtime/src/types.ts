@@ -65,6 +65,8 @@ export interface AccountsMap {
   [addr: string]: StoreAccountI
 }
 
+export type RuntimeAccountMap = Map<string, StoreAccountI>;
+
 export interface State {
   accounts: Map<string, StoreAccountI>
   globalApps: Map<number, GlobalAppsData>
@@ -124,6 +126,7 @@ export interface StoreAccountI {
   balance: () => number
   getApp: (appId: number) => SSCAttributesM | undefined
   getAppFromLocal: (appId: number) => AppLocalStateM | undefined
+  createAsset: (assetId: number, name: string, asadef: ASADef, creator: string) => AssetDef
   addApp: (appId: number, params: SSCDeploymentFlags) => CreatedAppM
   optInToApp: (appId: number, appParams: SSCAttributesM) => void
   deleteApp: (appId: number) => void
@@ -243,6 +246,10 @@ export interface Account extends AccountSDK {
   // from AccountSDK: addr: string;
   //                  sk: Uint8Array
   name: string
+}
+
+export interface ASADeploymentFlags extends TxParams {
+  creator: Account
 }
 
 export type AccountMap = Map<string, Account>;

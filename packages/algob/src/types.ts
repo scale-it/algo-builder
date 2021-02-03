@@ -1,6 +1,7 @@
 import type {
-  Account,
-  AccountMap, SSCDeploymentFlags, SSCOptionalFlags,
+  Account, AccountMap,
+  ASADeploymentFlags,
+  SSCDeploymentFlags, SSCOptionalFlags,
   TxParams
 } from "@algorand-builder/runtime/build/types";
 import type { LogicSig, LogicSigArgs } from "algosdk";
@@ -378,10 +379,6 @@ export interface Checkpoint {
   ssc: Map<string, SSCInfo>
   dLsig: Map<string, LsigInfo>
 };
-
-export interface ASADeploymentFlags extends TxParams {
-  creator: Account
-}
 
 export interface FundASCFlags {
   funder: Account

@@ -16,7 +16,8 @@ import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 function mkASA (): ASADef {
   return {
     total: 1,
-    decimals: 1
+    decimals: 1,
+    unitName: 'ASA'
   };
 }
 

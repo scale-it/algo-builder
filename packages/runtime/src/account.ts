@@ -8,10 +8,16 @@ import { generateAccount } from "algosdk";
 
 import { TealError } from "./errors/errors";
 import { ERRORS } from "./errors/errors-list";
-import { ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE, SSC_KEY_BYTE_SLICE, SSC_VALUE_BYTES, SSC_VALUE_UINT } from "./lib/constants";
+import {
+  ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE,
+  ASSET_CREATION_FEE, SSC_KEY_BYTE_SLICE, SSC_VALUE_BYTES, SSC_VALUE_UINT
+} from "./lib/constants";
 import { keyToBytes } from "./lib/parsing";
 import { assertValidSchema } from "./lib/stateful";
-import { AppLocalStateM, CreatedAppM, SSCAttributesM, SSCDeploymentFlags, StackElem, StoreAccountI } from "./types";
+import {
+  AppLocalStateM, ASADef, CreatedAppM, SSCAttributesM,
+  SSCDeploymentFlags, StackElem, StoreAccountI
+} from "./types";
 
 const StateMap = "key-value";
 const globalState = "global-state";
@@ -145,6 +151,22 @@ export class StoreAccount implements StoreAccountI {
   }
 
   /**
+   * Creates Asset in account's state
+   * @param name Asset Name
+   * @param asaDef Asset Definitions
+   */
+  createAsset (assetId: number, name: string, asaDef: ASADef, creator: string): AssetDef {
+    if (this.createdAssets.size === 1000) {
+      throw new Error('Maximum created assets for an account is 1000');
+    }
+
+    this.minBalance += ASSET_CREATION_FEE;
+    const asset = new Asset(assetId, asaDef, creator, name);
+    this.createdAssets.set(asset.id, asset.definitions);
+    return asset.definitions;
+  }
+
+  /**
    * Add application in account's state
    * check maximum account creation limit
    * @param appId application index
@@ -225,6 +247,30 @@ class App {
       'global-state': new Map<string, StackElem>(),
       'global-state-schema': { 'num-byte-slice': params.globalBytes, 'num-uint': params.globalInts },
       'local-state-schema': { 'num-byte-slice': params.localBytes, 'num-uint': params.localInts }
+    };
+  }
+}
+
+// represents asset
+class Asset {
+  readonly id: number;
+  readonly definitions: AssetDef;
+
+  constructor (assetId: number, def: ASADef, creator: string, assetName: string) {
+    this.id = assetId;
+    this.definitions = {
+      creator: creator,
+      total: def.total,
+      decimals: def.decimals,
+      'default-frozen': def.defaultFrozen ?? false,
+      "unit-name": def.unitName ?? '',
+      name: assetName,
+      url: def.url ?? '',
+      "metadata-hash": def.metadataHash ?? '',
+      manager: def.manager ?? '',
+      reserve: def.reserve ?? '',
+      freeze: def.freeze ?? '',
+      clawback: def.clawback ?? ''
     };
   }
 }

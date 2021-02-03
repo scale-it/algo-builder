@@ -4,13 +4,13 @@ import * as z from 'zod';
 import { BuilderError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { parseZodError } from "../errors/validation-errors";
-import { AccountMap, ASADef, ASADefs } from "../types";
+import { AccountMap, ASADef, ASADefs, RuntimeAccountMap } from "../types";
 import { ASADefsSchema } from "../types-input";
 import { loadFromYamlFileSilentWithMessage } from "./files";
 
 const ASSETS_DIR = "assets";
 
-function validateSingle (accounts: AccountMap, filename: string, asaDef: ASADef): void {
+function validateSingle (accounts: AccountMap | RuntimeAccountMap, filename: string, asaDef: ASADef): void {
   if (!asaDef.optInAccNames || asaDef.optInAccNames.length === 0) {
     return;
   }
@@ -25,13 +25,15 @@ function validateSingle (accounts: AccountMap, filename: string, asaDef: ASADef)
   }
 }
 
-function validateParsedASADefs (accounts: AccountMap, asaDefs: ASADefs, filename: string): void {
+function validateParsedASADefs (
+  accounts: AccountMap | RuntimeAccountMap, asaDefs: ASADefs, filename: string): void {
   for (const def of Object.values(asaDefs)) {
     validateSingle(accounts, filename, def);
   }
 }
 
-export function validateASADefs (obj: Object, accounts: AccountMap, filename: string): ASADefs {
+export function validateASADefs (
+  obj: Object, accounts: AccountMap | RuntimeAccountMap, filename: string): ASADefs {
   try {
     const parsed = ASADefsSchema.parse(obj);
     Object.keys(parsed).forEach(k => {
@@ -53,7 +55,7 @@ export function validateASADefs (obj: Object, accounts: AccountMap, filename: st
   }
 }
 
-export function loadASAFile (accounts: AccountMap): ASADefs {
+export function loadASAFile (accounts: AccountMap | RuntimeAccountMap): ASADefs {
   const filename = path.join(ASSETS_DIR, "asa.yaml");
   return validateASADefs(
     loadFromYamlFileSilentWithMessage(filename, "ASA file not defined"),

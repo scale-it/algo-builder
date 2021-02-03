@@ -6,13 +6,13 @@ import cloneDeep from "lodash/cloneDeep";
 import { StoreAccount } from "./account";
 import { TealError } from "./errors/errors";
 import { ERRORS } from "./errors/errors-list";
-import { Interpreter } from "./index";
+import { Interpreter, loadASAFile } from "./index";
 import { convertToString, parseSSCAppArgs } from "./lib/parsing";
 import { mkTransaction } from "./lib/txn";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import type {
-  AccountAddress, AlgoTransferParam, Context, ExecParams,
+  AccountAddress, AlgoTransferParam, ASADef, ASADefs, ASADeploymentFlags, Context, ExecParams,
   GlobalAppsData,
   SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
   StackElem, State, StoreAccountI, Txn, TxParams
@@ -30,8 +30,10 @@ export class Runtime {
   private store: State;
   ctx: Context;
   private appCounter: number;
+  private assetCounter: number;
   // https://developer.algorand.org/docs/features/transactions/?query=round
-  private round;
+  private round: number;
+  private readonly loadedAssetsDefs: ASADefs;
 
   constructor (accounts: StoreAccountI[]) {
     // runtime store
@@ -44,6 +46,9 @@ export class Runtime {
     // intialize accounts (should be done during runtime initialization)
     this.initializeAccounts(accounts);
 
+    // load asa yaml files
+    this.loadedAssetsDefs = loadASAFile(this.store.accounts);
+
     // context for interpreter
     this.ctx = {
       state: cloneDeep(this.store), // state is a deep copy of store
@@ -52,6 +57,7 @@ export class Runtime {
       args: []
     };
     this.appCounter = 0;
+    this.assetCounter = 0;
     this.round = 2;
   }
 
@@ -257,6 +263,42 @@ export class Runtime {
       encodedTxnObj.txID = tx.txID();
       return [encodedTxnObj, [encodedTxnObj]];
     }
+  }
+
+  // creates new asset creation transaction object and update context
+  addCtxAssetCreate (
+    name: string, flags: ASADeploymentFlags, asaDef: ASADef, payFlags: TxParams): void {
+    const txn = algosdk.makeAssetCreateTxnWithSuggestedParams(
+      flags.creator.addr,
+      flags.note,
+      asaDef.total,
+      asaDef.decimals,
+      asaDef.defaultFrozen,
+      asaDef.manager,
+      asaDef.reserve,
+      asaDef.freeze,
+      asaDef.clawback,
+      asaDef.unitName,
+      name,
+      asaDef.url,
+      asaDef.metadataHash,
+      mockSuggestedParams(payFlags, this.round)
+    );
+
+    const encTx = txn.get_obj_for_encoding();
+    encTx.txID = txn.txID();
+    this.ctx.tx = encTx;
+    this.ctx.gtxs = [encTx];
+  }
+
+  createAsset (name: string, flags: ASADeploymentFlags): number {
+    const sender = flags.creator;
+    const senderAcc = this.assertAccountDefined(sender.addr, this.store.accounts.get(sender.addr));
+
+    // create asset
+    senderAcc.createAsset(++this.assetCounter, name, this.loadedAssetsDefs[name], sender.addr);
+    this.store.assetDefs.set(this.assetCounter, sender.addr);
+    return this.assetCounter;
   }
 
   // creates new application transaction object and update context

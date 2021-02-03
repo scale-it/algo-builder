@@ -3,6 +3,7 @@ import type {
   Account,
   AccountMap,
   ASADef,
+  ASADeploymentFlags,
   SSCDeploymentFlags,
   SSCOptionalFlags,
   TxParams
@@ -15,7 +16,6 @@ import { txWriter } from "../internal/tx-log-writer";
 import { createClient } from "../lib/driver";
 import { getLsig } from "../lib/lsig";
 import type {
-  ASADeploymentFlags,
   ASAInfo,
   ASCCache,
   FundASCFlags,

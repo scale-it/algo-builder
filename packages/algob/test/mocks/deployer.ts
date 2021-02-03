@@ -1,10 +1,9 @@
-import type { Account, SSCDeploymentFlags, SSCOptionalFlags, TxParams } from "@algorand-builder/runtime/build/types";
+import type { Account, ASADeploymentFlags, SSCDeploymentFlags, SSCOptionalFlags, TxParams } from "@algorand-builder/runtime/build/types";
 import type { LogicSig, LogicSigArgs } from "algosdk";
 import * as algosdk from "algosdk";
 
 import type {
   AlgobDeployer,
-  ASADeploymentFlags,
   ASAInfo,
   ASCCache,
   FundASCFlags,

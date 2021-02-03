@@ -1,7 +1,7 @@
 import { BuilderError } from "@algorand-builder/runtime";
 import type {
-  Account,
-  AccountMap, ASADefs, SSCDeploymentFlags, SSCOptionalFlags,
+  Account, AccountMap, ASADefs, ASADeploymentFlags,
+  SSCDeploymentFlags, SSCOptionalFlags,
   TxParams
 } from "@algorand-builder/runtime/build/types";
 import type { LogicSig, LogicSigArgs, MultiSig } from "algosdk";
@@ -15,7 +15,6 @@ import { persistCheckpoint } from "../lib/script-checkpoints";
 import type {
   AlgobDeployer,
   AlgobRuntimeEnv,
-  ASADeploymentFlags,
   ASAInfo,
   ASCCache,
   CheckpointRepo,

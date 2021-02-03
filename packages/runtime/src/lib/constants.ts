@@ -10,6 +10,7 @@ export const ALGORAND_ACCOUNT_MIN_BALANCE = 1e6; // 1 ALGO
 // values taken from: https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
 // minimum balance costs (in microalgos) for ssc schema
 export const APPLICATION_BASE_FEE = 0.1e6; // base fee for creating or opt-in to application
+export const ASSET_CREATION_FEE = 0.1e6; // creation fee for asset
 export const SSC_KEY_BYTE_SLICE = 25000; // cost for 'key' (always in bytes)
 export const SSC_VALUE_UINT = 3500; // cost for value as uint64
 export const SSC_VALUE_BYTES = 25000; // cost for value as bytes
