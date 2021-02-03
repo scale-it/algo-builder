@@ -296,6 +296,12 @@ Opt-in account not found by name: %optInAccName%`,
 Opt-in account not found by name: %optInAccName%
 
 Please check your ASA and config files`
+  },
+  ASSET_NOT_FOUND: {
+    number: 902,
+    message: `Asset with Index %assetId% not found`,
+    title: "Asset Not Found",
+    description: "Asset Not Found"
   }
 };
 

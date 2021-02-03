@@ -151,6 +151,14 @@ export class StoreAccount implements StoreAccountI {
   }
 
   /**
+   * Returns asset definitions
+   * @param assetId asset index
+   */
+  getAssetDef (assetId: number): AssetDef | undefined {
+    return this.createdAssets.get(assetId);
+  }
+
+  /**
    * Creates Asset in account's state
    * @param name Asset Name
    * @param asaDef Asset Definitions
@@ -263,7 +271,7 @@ class Asset {
       total: def.total,
       decimals: def.decimals,
       'default-frozen': def.defaultFrozen ?? false,
-      "unit-name": def.unitName ?? '',
+      "unit-name": def.unitName,
       name: assetName,
       url: def.url ?? '',
       "metadata-hash": def.metadataHash ?? '',

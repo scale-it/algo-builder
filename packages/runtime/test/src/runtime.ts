@@ -136,3 +136,20 @@ describe("Rounds Test", function () {
     assert.equal(bob.balance(), minBalance + 100);
   });
 });
+
+describe("Asset Creation", function () {
+  useFixture('asa-check');
+  const john = new StoreAccount(minBalance);
+  let runtime: Runtime;
+  this.beforeAll(() => {
+    runtime = new Runtime([john]);
+  });
+
+  it("should create asset using asa.yaml file", () => {
+    const assetId = runtime.createAsset('gold',
+      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+
+    const res = runtime.getAssetDef(assetId);
+    assert.equal(res.decimals, 0);
+  });
+});

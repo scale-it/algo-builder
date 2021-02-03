@@ -126,6 +126,7 @@ export interface StoreAccountI {
   balance: () => number
   getApp: (appId: number) => SSCAttributesM | undefined
   getAppFromLocal: (appId: number) => AppLocalStateM | undefined
+  getAssetDef: (assetId: number) => AssetDef | undefined
   createAsset: (assetId: number, name: string, asadef: ASADef, creator: string) => AssetDef
   addApp: (appId: number, params: SSCDeploymentFlags) => CreatedAppM
   optInToApp: (appId: number, appParams: SSCAttributesM) => void
