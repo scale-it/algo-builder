@@ -106,7 +106,7 @@ describe("Rounds Test", function () {
     bob = runtime.getAccount(bob.address);
   }
 
-  it("should pass if first and last valid are in current round range", () => {
+  it("should succeed if current round is between first and last valid", () => {
     txnParams.payFlags = { totalFee: 1000, firstValid: 5, validRounds: 200 };
     // set round
     runtime.setRound(20);
