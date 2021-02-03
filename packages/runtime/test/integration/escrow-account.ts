@@ -15,7 +15,7 @@ const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE + 1000; // 1000 to cover fee
 const initialEscrowHolding = minBalance + 1000e6;
 const initialJohnHolding = minBalance + 500;
 
-describe("Algorand Stateless Smart Contracts - Escrow Account Example", function () {
+describe("Algorand Stateless Smart Contracts (Contract Account Mode) - Escrow Account Example", function () {
   useFixture("escrow-account");
   const john = new StoreAccount(initialJohnHolding, johnAccount); // 0.005 ALGO
   const admin = new StoreAccount(1e12);

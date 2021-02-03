@@ -159,7 +159,7 @@ export class Runtime {
   }
 
   /**
-   * Returns programs from programMap
+   * Returns approval and clear program from programMap
    * @param appId Application Index
    */
   getProgram (appId: number): string[] {
