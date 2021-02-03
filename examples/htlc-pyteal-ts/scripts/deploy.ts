@@ -2,16 +2,19 @@
  * Description:
  * This file demonstrates the PyTeal Example for HTLC(Hash Time Lock Contract)
 */
-const { executeTransaction } = require('@algorand-builder/algob');
-const { TransactionType, SignType } = require('@algorand-builder/runtime/build/types');
-const { prepareParameters } = require('./withdraw/common');
+import { executeTransaction } from "@algorand-builder/algob";
+import { AlgobDeployer, AlgobRuntimeEnv } from "@algorand-builder/algob/src/types";
+import { SignType, TransactionType } from "@algorand-builder/runtime/build/types";
+import { AlgoTransferParam } from "@algorand-builder/runtime/src/types";
 
-async function run (runtimeEnv, deployer) {
-  const masterAccount = deployer.accountsByName.get('master-account');
+import { getDeployerAccount, prepareParameters } from "./withdraw/common";
+
+async function run (runtimeEnv: AlgobRuntimeEnv, deployer: AlgobDeployer): Promise<void> {
+  const masterAccount = getDeployerAccount(deployer, 'master-account');
   const { alice, bob, scTmplParams } = prepareParameters(deployer);
 
   /** ** firstly we fund Alice and Bob accounts ****/
-  const bobFunding = {
+  const bobFunding: AlgoTransferParam = {
     type: TransactionType.TransferAlgo,
     sign: SignType.SecretKey,
     fromAccount: masterAccount,
@@ -22,9 +25,10 @@ async function run (runtimeEnv, deployer) {
   // We need to copy, because the executeTransaction is async
   const aliceFunding = Object.assign({}, bobFunding);
   aliceFunding.toAccountAddr = alice.addr;
-  aliceFunding.amountMicroAlgos = 1e5; // 0.1 Algo
+  aliceFunding.amountMicroAlgos = 0.1e6; // 0.1 Algo
   await Promise.all([
-    executeTransaction(deployer, bobFunding), executeTransaction(deployer, aliceFunding)
+    executeTransaction(deployer, bobFunding),
+    executeTransaction(deployer, aliceFunding)
   ]);
 
   /** ** now bob creates and deploys the escrow account ****/
@@ -35,8 +39,7 @@ async function run (runtimeEnv, deployer) {
     { funder: bob, fundingMicroAlgo: 2e6 }, {}, [], scTmplParams);
 
   // Add user checkpoint
-  await deployer.addCheckpointKV('User Checkpoint', 'Fund Contract Account');
+  deployer.addCheckpointKV('User Checkpoint', 'Fund Contract Account');
 }
 
 module.exports = { default: run };
-;
