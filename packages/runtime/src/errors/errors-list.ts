@@ -253,6 +253,12 @@ by an index that does not exist.`
     message: "Secret key and Logic Signature should not be passed together",
     title: "Transaction params error",
     description: `Transaction params error`
+  },
+  INVALID_ROUND: {
+    number: 38,
+    message: "Transaction rounds (firstValid: %first%, lastValid: %last%) are not valid, current round: %round%.",
+    title: 'Round Error',
+    description: `Round Error`
   }
 };
 

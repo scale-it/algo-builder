@@ -29,6 +29,8 @@ export class Runtime {
   private store: State;
   ctx: Context;
   private appCounter: number;
+  // https://developer.algorand.org/docs/features/transactions/?query=round
+  private round;
 
   constructor (accounts: StoreAccountI[]) {
     // runtime store
@@ -49,6 +51,7 @@ export class Runtime {
       args: []
     };
     this.appCounter = 0;
+    this.round = 2;
   }
 
   /**
@@ -105,6 +108,35 @@ export class Runtime {
     if (txnParams.sign === SignType.SecretKey && txnParams.lsig) {
       throw new TealError(ERRORS.TEAL.INVALID_TRANSACTION_PARAMS);
     }
+  }
+
+  /**
+   * Validate first and last rounds of transaction using current round
+   * @param gtxns transactions
+   */
+  validateTxRound (gtxns: Txn[]): void {
+    // https://developer.algorand.org/docs/features/transactions/#current-round
+    for (const txn of gtxns) {
+      if (txn.fv >= this.round || txn.lv <= this.round) {
+        throw new TealError(ERRORS.TEAL.INVALID_ROUND,
+          { first: txn.fv, last: txn.lv, round: this.round });
+      }
+    }
+  }
+
+  /**
+   * set current round to given value
+   * @param r current round
+   */
+  setRound (r: number): void {
+    this.round = r;
+  }
+
+  /**
+   * Return current round
+   */
+  getRound (): number {
+    return this.round;
   }
 
   /**
@@ -188,7 +220,7 @@ export class Runtime {
 
       const txns = [];
       for (const txnParam of txnParams) { // create encoded_obj for each txn in group
-        const mockParams = mockSuggestedParams(txnParam.payFlags);
+        const mockParams = mockSuggestedParams(txnParam.payFlags, this.round);
         const tx = mkTransaction(txnParam, mockParams);
 
         // convert to encoded obj for compatibility
@@ -199,7 +231,7 @@ export class Runtime {
       return [txns[0], txns]; // by default current txn is the first txn (hence txns[0])
     } else {
       // if not array, then create a single transaction
-      const mockParams = mockSuggestedParams(txnParams.payFlags);
+      const mockParams = mockSuggestedParams(txnParams.payFlags, this.round);
       const tx = mkTransaction(txnParams, mockParams);
 
       const encodedTxnObj = tx.get_obj_for_encoding() as Txn;
@@ -212,7 +244,7 @@ export class Runtime {
   makeAndSetCtxAppCreateTxn (flags: SSCDeploymentFlags, payFlags: TxParams): void {
     const txn = algosdk.makeApplicationCreateTxn(
       flags.sender.addr,
-      mockSuggestedParams(payFlags),
+      mockSuggestedParams(payFlags, this.round),
       algosdk.OnApplicationComplete.NoOpOC,
       new Uint8Array(32), // mock approval program
       new Uint8Array(32), // mock clear progam
@@ -276,7 +308,7 @@ export class Runtime {
     flags: SSCOptionalFlags): void {
     const txn = algosdk.makeApplicationOptInTxn(
       senderAddr,
-      mockSuggestedParams(payFlags),
+      mockSuggestedParams(payFlags, this.round),
       appId,
       parseSSCAppArgs(flags.appArgs),
       flags.accounts,
@@ -322,7 +354,7 @@ export class Runtime {
     flags: SSCOptionalFlags): void {
     const txn = algosdk.makeApplicationUpdateTxn(
       senderAddr,
-      mockSuggestedParams(payFlags),
+      mockSuggestedParams(payFlags, this.round),
       appId,
       new Uint8Array(32), // mock approval program
       new Uint8Array(32), // mock clear progam
@@ -500,6 +532,8 @@ export class Runtime {
   executeTx (txnParams: ExecParams | ExecParams[], program: string,
     args: Uint8Array[]): void {
     const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
+    // validate first and last rounds
+    this.validateTxRound(gtxs);
 
     // initialize context before each execution
     this.ctx = {

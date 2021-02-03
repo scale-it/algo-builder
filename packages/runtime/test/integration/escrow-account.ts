@@ -38,7 +38,6 @@ describe("Algorand Stateless Smart Contracts - Escrow Account Example", function
     assert.equal(escrow.balance(), initialEscrowHolding);
     assert.equal(john.balance(), initialJohnHolding);
 
-    // execute transaction
     runtime.executeTx(txnParams, getProgram('escrow.teal'), []);
 
     // check final state (updated accounts)

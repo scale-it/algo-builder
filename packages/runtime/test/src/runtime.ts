@@ -4,7 +4,8 @@ import { assert } from "chai";
 import { StoreAccount } from "../../src/account";
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime } from "../../src/runtime";
-import { ExecParams, SignType, TransactionType } from "../../src/types";
+import type { AlgoTransferParam, ExecParams } from "../../src/types";
+import { SignType, TransactionType } from "../../src/types";
 import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
@@ -67,5 +68,73 @@ describe("Logic Signature Transaction in Runtime", function () {
       () => runtime.executeTx(txnParam, getProgram(programName), []),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
+  });
+});
+
+describe("Rounds Test", function () {
+  useFixture("basic-teal");
+  let john = new StoreAccount(minBalance);
+  let bob = new StoreAccount(minBalance);
+  let runtime: Runtime;
+  let program: string;
+  let txnParams: AlgoTransferParam;
+  this.beforeAll(function () {
+    runtime = new Runtime([john, bob]); // setup test
+    program = getProgram('basic.teal');
+
+    // set up transaction paramenters
+    txnParams = {
+      type: TransactionType.TransferAlgo, // payment
+      sign: SignType.SecretKey,
+      fromAccount: john.account,
+      toAccountAddr: bob.address,
+      amountMicroAlgos: 100,
+      payFlags: { firstValid: 5, validRounds: 200 }
+    };
+  });
+
+  afterEach(function () {
+    john = new StoreAccount(minBalance);
+    bob = new StoreAccount(minBalance);
+    runtime = new Runtime([john, bob]);
+    txnParams.fromAccount = john.account;
+    txnParams.toAccountAddr = bob.address;
+  });
+
+  function syncAccounts (): void {
+    john = runtime.getAccount(john.address);
+    bob = runtime.getAccount(bob.address);
+  }
+
+  it("should succeed if current round is between first and last valid", () => {
+    txnParams.payFlags = { totalFee: 1000, firstValid: 5, validRounds: 200 };
+    runtime.setRound(20);
+
+    runtime.executeTx(txnParams, program, []);
+
+    // get final state (updated accounts)
+    syncAccounts();
+    assert.equal(john.balance(), minBalance - 1100);
+    assert.equal(bob.balance(), minBalance + 100);
+  });
+
+  it("should fail if current round is not between first and last valid", () => {
+    runtime.setRound(3);
+
+    expectTealError(
+      () => runtime.executeTx(txnParams, program, []),
+      ERRORS.TEAL.INVALID_ROUND
+    );
+  });
+
+  it("should succeeded by default (no round requirement is passed)", () => {
+    txnParams.payFlags = { totalFee: 1000 };
+
+    runtime.executeTx(txnParams, program, []);
+
+    // get final state (updated accounts)
+    syncAccounts();
+    assert.equal(john.balance(), minBalance - 1100);
+    assert.equal(bob.balance(), minBalance + 100);
   });
 });
