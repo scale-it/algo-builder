@@ -2,6 +2,7 @@
 
 export ALGORAND_DATA=`pwd`/node_data/PrimaryNode
 export SANDBOX_PATH = ~/sandbox
+export REMOTE_REPO = https://github.com/algorand/sandbox.git
 
 create-private-net:
 	@goal network create -r ./node_data -n private -t private-net-template.json
@@ -40,9 +41,9 @@ setup-master-account:
 	goal clerk send -a 2000000000000 -f $(netAddress) -t WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE -d $(ALGORAND_DATA)
 
 sandbox-up:
-# clone sandbox git repo: https://github.com/algorand/sandbox.git
-	rm -rf $(SANDBOX_PATH)/
-	git clone https://github.com/algorand/sandbox.git $(SANDBOX_PATH)
+# clone sandbox git repo: https://github.com/algorand/sandbox.git and pull
+	[ -d $(SANDBOX_PATH) ] || git clone $(REMOTE_REPO) $(SANDBOX_PATH)
+	(cd $(SANDBOX_PATH); git pull $(REMOTE_REPO))
 # override .yml with custom config (custom token and port for private network)
 	cat ./sandbox-docker-compose.yml > $(SANDBOX_PATH)/docker-compose.yml
 	$(SANDBOX_PATH)/sandbox up -v
