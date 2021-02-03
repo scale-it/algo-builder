@@ -131,7 +131,7 @@ describe("Rounds Test", function () {
     );
   });
 
-  it("should pass if no rounds are passed", () => {
+  it("should succeeded by default (no round requirement is passed)", () => {
     txnParams.payFlags = { totalFee: 1000 };
 
     // execute transaction
