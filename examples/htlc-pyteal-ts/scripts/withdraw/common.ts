@@ -1,6 +1,6 @@
 import { executeTransaction } from "@algorand-builder/algob";
-import { Account, AlgobDeployer } from "@algorand-builder/algob/src/types";
-import { ExecParams } from "@algorand-builder/runtime/src/types";
+import { AlgobDeployer } from "@algorand-builder/algob/src/types";
+import { Account, ExecParams } from "@algorand-builder/runtime/src/types";
 import { sha256 } from 'js-sha256';
 
 /**
