@@ -1,4 +1,4 @@
-# Hash-Time-Lock-Contract Example using PyTeal
+# Hash-Time-Lock-Contract Example in Typescript using PyTeal
 
 In this example, Bob creates an escrow account protected by a hash time lock contract:
 + Alice can withdraw funds from the account only if she will get a secret
@@ -11,8 +11,8 @@ Files:
 
 * `htlc.py` : It is the HTLC. SHA256 function is used for hashing. <br />
         secret value : `hero wisdom green split loop element vote belt` hashed with sha256 will produce `QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=`  which is used in this code.
-* `deploy.js` : It is used to create and fund HTLC contract account which is defined in `assets/htlc.py`.
-* `htlc-withdraw.js` : It is used to show transactions between contract and a user.
+* `deploy.ts` : It is used to create and fund HTLC contract account which is defined in `assets/htlc.py`.
+* `htlc-withdraw.ts` : It is used to show transactions between contract and a user.
 
 
 ## Setup
@@ -21,6 +21,8 @@ Please follow the [setup](../README.md) instructions to install dependencies and
 This example is using PyTEAL, so make sure to follow the Python3 setup described above.
 
 ## Run
+
+**NOTE**: Make sure to run `yarn build` before the following commands. `yarn build` compiles the typescript code to javascript (in `/build`). During active development use `yarn build:watch` to update the build in real time.
 
 ```
 yarn run algob deploy

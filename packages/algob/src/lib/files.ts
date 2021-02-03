@@ -13,7 +13,7 @@ function normalizePaths (mainPath: string, paths: string[]): string[] {
 }
 
 export function assertDirChildren (dir: string, scriptNames: string[]): string[] {
-  const normalized = normalizePaths(".", scriptNames);
+  let normalized = normalizePaths(".", scriptNames);
   const nonScriptPaths = normalized
     .filter(scriptName => !path.relative(".", scriptName).startsWith(dir));
   if (nonScriptPaths.length !== 0) {
@@ -21,17 +21,22 @@ export function assertDirChildren (dir: string, scriptNames: string[]): string[]
       scripts: nonScriptPaths
     });
   }
+
+  normalized = normalized.map(scriptName =>
+    scriptName.endsWith('.ts') ? path.join('build', scriptName.split('.ts')[0] + '.js') : scriptName);
   return normalized;
 }
 
 export function assertDirectDirChildren (dir: string, scriptNames: string[]): string[] {
-  const normalized = normalizePaths(".", scriptNames);
+  let normalized = normalizePaths(".", scriptNames);
   const badPaths = normalized.filter(scriptName => path.dirname(scriptName) !== dir);
   if (badPaths.length !== 0) {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOY_SCRIPT_NON_DIRECT_CHILD, {
       scripts: badPaths
     });
   }
+  normalized = normalized.map(scriptName =>
+    scriptName.endsWith('.ts') ? path.join('build', scriptName.split('.ts')[0] + '.js') : scriptName);
   return normalized;
 }
 

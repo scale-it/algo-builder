@@ -4,7 +4,7 @@
  * from one account to another according to smart contract (ASC) logic
 */
 const { executeTransaction } = require('./common');
-const { TransactionType, SignType } = require('@algorand-builder/algob');
+const { TransactionType, SignType } = require('@algorand-builder/runtime/build/types');
 
 async function run (runtimeEnv, deployer) {
   const goldOwner = deployer.accountsByName.get('alice');

@@ -1,7 +1,5 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
-import { ExecParams, mkTransaction, parseSSCAppArgs, SignType } from "@algorand-builder/algob";
-import { AccountAddress, AlgoTransferParam, SSCDeploymentFlags, SSCOptionalFlags, TransactionType, TxParams } from "@algorand-builder/algob/src/types";
 import algosdk, { decodeAddress } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
@@ -9,11 +7,17 @@ import { StoreAccount } from "./account";
 import { TealError } from "./errors/errors";
 import { ERRORS } from "./errors/errors-list";
 import { Interpreter } from "./index";
-import { convertToString } from "./lib/parsing";
+import { convertToString, parseSSCAppArgs } from "./lib/parsing";
+import { mkTransaction } from "./lib/txn";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
-import type { Context, SSCAttributesM, StackElem, State, StoreAccountI, Txn } from "./types";
-import { ExecutionMode } from "./types";
+import type {
+  AccountAddress, AlgoTransferParam, Context, ExecParams,
+  GlobalAppsData,
+  SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
+  StackElem, State, StoreAccountI, Txn, TxParams
+} from "./types";
+import { ExecutionMode, SignType, TransactionType } from "./types";
 
 export class Runtime {
   /**
@@ -26,12 +30,14 @@ export class Runtime {
   private store: State;
   ctx: Context;
   private appCounter: number;
+  // https://developer.algorand.org/docs/features/transactions/?query=round
+  private round;
 
   constructor (accounts: StoreAccountI[]) {
     // runtime store
     this.store = {
       accounts: new Map<string, StoreAccountI>(), // string represents account address
-      globalApps: new Map<number, AccountAddress>(), // number represents appId
+      globalApps: new Map<number, GlobalAppsData>(), // number represents appId
       assetDefs: new Map<number, AccountAddress>() // number represents assetId
     };
 
@@ -46,6 +52,7 @@ export class Runtime {
       args: []
     };
     this.appCounter = 0;
+    this.round = 2;
   }
 
   /**
@@ -105,6 +112,35 @@ export class Runtime {
   }
 
   /**
+   * Validate first and last rounds of transaction using current round
+   * @param gtxns transactions
+   */
+  validateTxRound (gtxns: Txn[]): void {
+    // https://developer.algorand.org/docs/features/transactions/#current-round
+    for (const txn of gtxns) {
+      if (txn.fv >= this.round || txn.lv <= this.round) {
+        throw new TealError(ERRORS.TEAL.INVALID_ROUND,
+          { first: txn.fv, last: txn.lv, round: this.round });
+      }
+    }
+  }
+
+  /**
+   * set current round to given value
+   * @param r current round
+   */
+  setRound (r: number): void {
+    this.round = r;
+  }
+
+  /**
+   * Return current round
+   */
+  getRound (): number {
+    return this.round;
+  }
+
+  /**
    * Fetches app from `this.store`
    * @param appId Application Index
    */
@@ -112,7 +148,7 @@ export class Runtime {
     if (!this.store.globalApps.has(appId)) {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
-    const accAddress = this.assertAddressDefined(this.store.globalApps.get(appId));
+    const accAddress = this.assertAddressDefined(this.store.globalApps.get(appId)?.address);
     const account = this.assertAccountDefined(accAddress, this.store.accounts.get(accAddress));
     return this.assertAppDefined(appId, account.getApp(appId));
   }
@@ -136,7 +172,7 @@ export class Runtime {
     if (!this.store.globalApps.has(appId)) {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
-    const accAddress = this.assertAddressDefined(this.store.globalApps.get(appId));
+    const accAddress = this.assertAddressDefined(this.store.globalApps.get(appId)?.address);
     const account = this.assertAccountDefined(accAddress, this.store.accounts.get(accAddress));
     return account.getGlobalState(appId, key);
   }
@@ -154,6 +190,18 @@ export class Runtime {
   }
 
   /**
+   * Returns approval and clear program from programMap
+   * @param appId Application Index
+   */
+  getProgram (appId: number): GlobalAppsData {
+    const res = this.store.globalApps.get(appId);
+    if (res === undefined) {
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
+    }
+    return res;
+  }
+
+  /**
    * Setup initial accounts as {address: SDKAccount}. This should be called only when initializing Runtime.
    * @param accounts: array of account info's
    */
@@ -161,9 +209,15 @@ export class Runtime {
     for (const acc of accounts) {
       this.store.accounts.set(acc.address, acc);
 
-      for (const appId of acc.createdApps.keys()) {
-        this.store.globalApps.set(appId, acc.address);
-      }
+      acc.createdApps.forEach((value, key) => {
+        this.store.globalApps.set(
+          key, {
+            address: value.creator,
+            approvalProgram: value["approval-program"],
+            clearProgram: value["clear-state-program"]
+          }
+        );
+      });
 
       for (const assetId of acc.createdAssets.keys()) {
         this.store.assetDefs.set(assetId, acc.address);
@@ -185,7 +239,7 @@ export class Runtime {
 
       const txns = [];
       for (const txnParam of txnParams) { // create encoded_obj for each txn in group
-        const mockParams = mockSuggestedParams(txnParam.payFlags);
+        const mockParams = mockSuggestedParams(txnParam.payFlags, this.round);
         const tx = mkTransaction(txnParam, mockParams);
 
         // convert to encoded obj for compatibility
@@ -196,7 +250,7 @@ export class Runtime {
       return [txns[0], txns]; // by default current txn is the first txn (hence txns[0])
     } else {
       // if not array, then create a single transaction
-      const mockParams = mockSuggestedParams(txnParams.payFlags);
+      const mockParams = mockSuggestedParams(txnParams.payFlags, this.round);
       const tx = mkTransaction(txnParams, mockParams);
 
       const encodedTxnObj = tx.get_obj_for_encoding() as Txn;
@@ -209,7 +263,7 @@ export class Runtime {
   makeAndSetCtxAppCreateTxn (flags: SSCDeploymentFlags, payFlags: TxParams): void {
     const txn = algosdk.makeApplicationCreateTxn(
       flags.sender.addr,
-      mockSuggestedParams(payFlags),
+      mockSuggestedParams(payFlags, this.round),
       algosdk.OnApplicationComplete.NoOpOC,
       new Uint8Array(32), // mock approval program
       new Uint8Array(32), // mock clear progam
@@ -242,20 +296,35 @@ export class Runtime {
    * @param payFlags Transaction parameters
    * @param program approval program
    */
-  addApp (flags: SSCDeploymentFlags, payFlags: TxParams, program: string): number {
+  addApp (
+    flags: SSCDeploymentFlags, payFlags: TxParams,
+    approvalProgram: string, clearProgram: string
+  ): number {
     const sender = flags.sender;
     const senderAcc = this.assertAccountDefined(sender.addr, this.store.accounts.get(sender.addr));
 
     // create app with id = 0 in globalApps for teal execution
     const app = senderAcc.addApp(0, flags);
     this.ctx.state.accounts.set(senderAcc.address, senderAcc);
-    this.ctx.state.globalApps.set(app.id, senderAcc.address);
+    this.ctx.state.globalApps.set(
+      app.id, {
+        address: senderAcc.address,
+        approvalProgram: approvalProgram,
+        clearProgram: clearProgram
+      }
+    );
 
     this.makeAndSetCtxAppCreateTxn(flags, payFlags);
-    this.run(program, ExecutionMode.STATEFUL); // execute TEAL code with appId = 0
+    this.run(approvalProgram, ExecutionMode.STATEFUL); // execute TEAL code with appId = 0
 
     // create new application in globalApps map
-    this.store.globalApps.set(++this.appCounter, senderAcc.address);
+    this.store.globalApps.set(
+      ++this.appCounter, {
+        address: senderAcc.address,
+        approvalProgram: approvalProgram,
+        clearProgram: clearProgram
+      }
+    );
 
     const attributes = this.assertAppDefined(0, senderAcc.createdApps.get(0));
     this.ctx.state.globalApps.delete(0); // remove zero app from context after execution
@@ -273,7 +342,7 @@ export class Runtime {
     flags: SSCOptionalFlags): void {
     const txn = algosdk.makeApplicationOptInTxn(
       senderAddr,
-      mockSuggestedParams(payFlags),
+      mockSuggestedParams(payFlags, this.round),
       appId,
       parseSSCAppArgs(flags.appArgs),
       flags.accounts,
@@ -298,12 +367,13 @@ export class Runtime {
    * @param program TEAL code as string
    */
   optInToApp (accountAddr: string, appId: number,
-    flags: SSCOptionalFlags, payFlags: TxParams, program: string): void {
+    flags: SSCOptionalFlags, payFlags: TxParams): void {
     const appParams = this.getApp(appId);
     const account = this.assertAccountDefined(accountAddr, this.store.accounts.get(accountAddr));
     if (appParams) {
       this.createOptInTx(accountAddr, appId, payFlags, flags);
-      this.run(program, ExecutionMode.STATEFUL); // execute TEAL code
+      // Execute approval program for Opt-In
+      this.run(this.getProgram(appId).approvalProgram, ExecutionMode.STATEFUL);
 
       account.optInToApp(appId, appParams);
     } else {
@@ -319,7 +389,7 @@ export class Runtime {
     flags: SSCOptionalFlags): void {
     const txn = algosdk.makeApplicationUpdateTxn(
       senderAddr,
-      mockSuggestedParams(payFlags),
+      mockSuggestedParams(payFlags, this.round),
       appId,
       new Uint8Array(32), // mock approval program
       new Uint8Array(32), // mock clear progam
@@ -348,14 +418,28 @@ export class Runtime {
   updateApp (
     senderAddr: string,
     appId: number,
-    newProgram: string,
+    approvalProgram: string,
+    clearProgram: string,
     payFlags: TxParams,
     flags: SSCOptionalFlags
   ): void {
     const appParams = this.getApp(appId);
     if (appParams) {
+      const creator = this.getProgram(appId).address;
       this.createUpdateTx(senderAddr, appId, payFlags, flags);
-      this.run(newProgram, ExecutionMode.STATEFUL); // execute TEAL code
+      this.ctx.state = cloneDeep(this.store);
+      // Execute approval program for Update
+      this.run(this.getProgram(appId).approvalProgram, ExecutionMode.STATEFUL);
+
+      this.store = this.ctx.state;
+      // If successful update programs and state
+      this.store.globalApps.set(
+        appId, {
+          address: creator,
+          approvalProgram: approvalProgram,
+          clearProgram: clearProgram
+        }
+      );
     } else {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
@@ -367,9 +451,9 @@ export class Runtime {
    */
   deleteApp (appId: number): void {
     if (!this.store.globalApps.has(appId)) {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId });
+      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
-    const accountAddr = this.store.globalApps.get(appId);
+    const accountAddr = this.store.globalApps.get(appId)?.address;
     if (accountAddr === undefined) {
       throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
     }
@@ -429,6 +513,7 @@ export class Runtime {
     if (txnParam.lsig === undefined) {
       throw new TealError(ERRORS.TEAL.LOGIC_SIGNATURE_NOT_FOUND);
     }
+    this.ctx.args = txnParam.lsig.args;
 
     // signature validation
     const result = txnParam.lsig.verify(decodeAddress(txnParam.fromAccount.addr).publicKey);
@@ -446,6 +531,8 @@ export class Runtime {
    * @param txnParams : Transaction parameters
    */
   updateFinalState (txnParams: ExecParams[]): void {
+    this.store = this.ctx.state; // update state after successful execution('local-state', 'global-state'..)
+
     txnParams.forEach((txnParam, idx) => {
       const fromAccount = this.getAccount(txnParam.fromAccount.addr);
       const fee = this.ctx.gtxs[idx].fee;
@@ -468,22 +555,9 @@ export class Runtime {
             fromAccount.closeApp(txnParam.appId); // remove app from local state
             break;
           }
-          case TransactionType.ClearSSC: {
-            // https://developer.algorand.org/docs/reference/cli/goal/app/clear/#search-overlay
-            fromAccount.closeApp(txnParam.appId); // remove app from local state
-            break;
-          }
         }
       }
     });
-  }
-
-  // get execution mode (stateless or application) based on txParams
-  getExecutionMode (txnParam: ExecParams): ExecutionMode {
-    if (txnParam.sign === SignType.LogicSignature) {
-      return ExecutionMode.STATELESS;
-    }
-    return ExecutionMode.STATEFUL;
   }
 
   /**
@@ -493,55 +567,59 @@ export class Runtime {
    * @param program : teal code as a string
    * @param args : external arguments to smart contract
    */
-  /* eslint-disable sonarjs/cognitive-complexity */
-  executeTx (txnParams: ExecParams | ExecParams[], program: string,
-    args: Uint8Array[]): void {
+  executeTx (txnParams: ExecParams | ExecParams[]): void {
     const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
+    // validate first and last rounds
+    this.validateTxRound(gtxs);
 
     // initialize context before each execution
     this.ctx = {
       state: cloneDeep(this.store), // state is a deep copy of store
       tx: tx,
       gtxs: gtxs,
-      args: args
+      args: []
     };
 
-    // TODO: Add Support for group transaction for execution modes
-    // as for stateless TEAL we need to have TEAL code with each txParam
-    // TASKs: https://www.pivotaltracker.com/story/show/176455371, https://www.pivotaltracker.com/story/show/176455329
-    let mode = ExecutionMode.STATEFUL;
-    if (!Array.isArray(txnParams)) {
-      mode = this.getExecutionMode(txnParams);
-      this.assertAmbiguousTxnParams(txnParams);
-      if (txnParams.sign === SignType.LogicSignature) {
-        this.validateLsigAndRun(txnParams);
+    const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
+    // Run TEAL program associated with each transaction without interacting with store.
+    for (const txnParam of txnParameters) {
+      this.assertAmbiguousTxnParams(txnParam);
+      if (txnParam.sign === SignType.LogicSignature) {
+        this.validateLsigAndRun(txnParam);
       }
-    } else {
-      let flag = true;
-      for (const txParam of txnParams) {
-        this.assertAmbiguousTxnParams(txParam);
-        if (txParam.sign === SignType.LogicSignature) {
-          this.validateLsigAndRun(txParam);
+      let fromAccount;
+      // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
+      switch (txnParam.type) {
+        case TransactionType.CallNoOpSSC: {
+          this.run(this.getProgram(txnParam.appId).approvalProgram, ExecutionMode.STATEFUL);
+          break;
         }
-        flag = flag && txParam.sign === SignType.LogicSignature;
+        case TransactionType.CloseSSC: {
+          this.run(this.getProgram(txnParam.appId).approvalProgram, ExecutionMode.STATEFUL);
+          break;
+        }
+        case TransactionType.DeleteSSC: {
+          this.run(this.getProgram(txnParam.appId).approvalProgram, ExecutionMode.STATEFUL);
+          break;
+        }
+        case TransactionType.ClearSSC: {
+          fromAccount = this.getAccount(txnParam.fromAccount.addr);
+          try {
+            this.run(this.getProgram(txnParam.appId).clearProgram, ExecutionMode.STATEFUL);
+          } catch (error) {
+            // if transaction type is Clear Call, remove the app first before throwing error (rejecting tx)
+            // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
+            fromAccount.closeApp(txnParam.appId); // remove app from local state
+            throw error;
+          }
+
+          fromAccount.closeApp(txnParam.appId); // remove app from local state
+          break;
+        }
       }
-      if (flag) { mode = ExecutionMode.STATELESS; } // if all txns in grp are stateless
     }
 
-    const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
-    try {
-      this.run(program, mode);
-    } catch (error) {
-      // if transaction type is Clear Call, remove the app first before throwing error (rejecting tx)
-      // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
-      for (const txnParam of txnParameters) {
-        if (txnParam.type === TransactionType.ClearSSC) {
-          const fromAccount = this.getAccount(txnParam.fromAccount.addr);
-          fromAccount.closeApp(txnParam.appId); // remove app from local state
-        }
-      }
-      throw error;
-    }
+    // update store only if all the transactions are passed
     this.updateFinalState(txnParameters);
   }
 
@@ -554,6 +632,5 @@ export class Runtime {
   run (program: string, executionMode: ExecutionMode): void {
     const interpreter = new Interpreter();
     interpreter.execute(program, executionMode, this);
-    this.store = this.ctx.state; // update state after successful execution('local-state', 'global-state'..)
   }
 }

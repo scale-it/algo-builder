@@ -1,7 +1,6 @@
+import { encodeNote } from "@algorand-builder/runtime";
 import { assert } from "chai";
 import { TextEncoder } from "util";
-
-import { encodeNote } from "../../src/lib/tx";
 
 describe("Note in TxParams", () => {
   const encoder = new TextEncoder();

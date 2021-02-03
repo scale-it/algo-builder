@@ -1,3 +1,4 @@
+import type { SSCDeploymentFlags, SSCOptionalFlags, TxParams } from "@algorand-builder/runtime/build/types";
 import type { Account as AccountSDK, LogicSig, LogicSigArgs } from "algosdk";
 import * as algosdk from "algosdk";
 import * as z from 'zod';
@@ -385,69 +386,6 @@ export interface Checkpoint {
 export type ASADef = z.infer<typeof ASADefSchema>;
 export type ASADefs = z.infer<typeof ASADefsSchema>;
 
-export type ExecParams = AlgoTransferParam | AssetTransferParam | SSCCallsParam;
-
-export enum SignType {
-  SecretKey,
-  LogicSignature
-}
-
-export enum TransactionType {
-  TransferAlgo,
-  TransferAsset,
-  CallNoOpSSC,
-  ClearSSC,
-  CloseSSC,
-  DeleteSSC
-}
-
-export interface Sign {
-  sign: SignType
-  lsig?: LogicSig
-}
-
-export interface AlgoTransferParam extends Sign {
-  type: TransactionType.TransferAlgo
-  fromAccount: AccountSDK
-  toAccountAddr: AccountAddress
-  amountMicroAlgos: number
-  payFlags: TxParams
-}
-
-export interface AssetTransferParam extends Sign {
-  type: TransactionType.TransferAsset
-  fromAccount: AccountSDK
-  toAccountAddr: AccountAddress
-  amount: number
-  assetID: number
-  payFlags: TxParams
-}
-
-export interface SSCCallsParam extends SSCOptionalFlags, Sign {
-  type: TransactionType.CallNoOpSSC | TransactionType.ClearSSC |
-  TransactionType.CloseSSC | TransactionType.DeleteSSC
-  fromAccount: AccountSDK
-  appId: number
-  payFlags: TxParams
-}
-
-export interface TxParams {
-  /**
-   * feePerByte or totalFee is used to set the appropriate transaction fee parameter.
-   * If both are set then totalFee takes precedence.
-   * NOTE: SDK expects`fee: number` and boolean `flatFee`. But the API expects only one
-   * on parameter: `fee`. Here, we define feePerByte and totalFee - both as numberic
-   * parameters. We think that this is more explicit. */
-  feePerByte?: number
-  totalFee?: number
-  firstValid?: number
-  validRounds?: number
-  lease?: Uint8Array
-  note?: string
-  noteb64?: string
-  closeRemainderTo?: AccountAddress
-}
-
 export interface ASADeploymentFlags extends TxParams {
   creator: Account
 }
@@ -455,28 +393,6 @@ export interface ASADeploymentFlags extends TxParams {
 export interface FundASCFlags {
   funder: Account
   fundingMicroAlgo: number
-}
-
-/**
- * Stateful smart contract transaction optional parameters (accounts, args..). */
-export interface SSCOptionalFlags {
-  appArgs?: Array<Uint8Array | string>
-  accounts?: string[]
-  foreignApps?: number[]
-  foreignAssets?: number[]
-  note?: Uint8Array
-  lease?: Uint8Array
-  rekeyTo?: string
-}
-
-/**
- * Stateful Smart contract flags for specifying sender and schema */
-export interface SSCDeploymentFlags extends SSCOptionalFlags {
-  sender: Account | AccountSDK
-  localInts: number
-  localBytes: number
-  globalInts: number
-  globalBytes: number
 }
 
 export interface AssetScriptMap {

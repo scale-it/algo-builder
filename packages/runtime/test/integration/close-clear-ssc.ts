@@ -1,10 +1,10 @@
-import { SignType, SSCCallsParam, TransactionType } from "@algorand-builder/algob/build/types";
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccount } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { stringToBytes } from "../../src/lib/parsing";
+import { SignType, SSCCallsParam, TransactionType } from "../../src/types";
 import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
@@ -16,7 +16,8 @@ describe("ASC - CloseOut from Application and Clear State", function () {
   let alice = new StoreAccount(minBalance + 1000);
 
   let runtime: Runtime;
-  let program: string;
+  let approvalProgram: string;
+  let clearProgram: string;
   let closeOutParams: SSCCallsParam;
   const flags = {
     sender: john.account,
@@ -27,7 +28,8 @@ describe("ASC - CloseOut from Application and Clear State", function () {
   };
   this.beforeAll(async function () {
     runtime = new Runtime([john, alice]); // setup test
-    program = getProgram('close-clear-ssc.teal');
+    approvalProgram = getProgram('close-clear-ssc.teal');
+    clearProgram = getProgram('clear.teal');
 
     closeOutParams = {
       type: TransactionType.CloseSSC,
@@ -45,18 +47,17 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 
   it("should fail during closeOut if app id is not defined", function () {
     expectTealError(
-      () => runtime.executeTx(closeOutParams, program, []),
+      () => runtime.executeTx(closeOutParams),
       ERRORS.TEAL.APP_NOT_FOUND
     );
   });
 
   it("should successfully closeOut from app and update state according to asc", function () {
-    const appId = runtime.addApp(flags, {}, program); // create app
+    const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram); // create app
     closeOutParams.appId = appId;
-    runtime.optInToApp(john.address, appId, {}, {}, program); // opt-in to app (set new local state)
+    runtime.optInToApp(john.address, appId, {}, {}); // opt-in to app (set new local state)
 
-    // execute clostOut txn
-    runtime.executeTx(closeOutParams, program, []);
+    runtime.executeTx(closeOutParams);
 
     syncAccount();
     // verify app is deleted from local state
@@ -78,11 +79,11 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 
   it("should throw error if user is not opted-in for closeOut call", function () {
     // create app
-    const appId = runtime.addApp(flags, {}, program);
+    const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram);
     closeOutParams.appId = appId;
 
     expectTealError(
-      () => runtime.executeTx(closeOutParams, program, []),
+      () => runtime.executeTx(closeOutParams),
       ERRORS.TEAL.APP_NOT_FOUND
     );
     syncAccount();
@@ -90,15 +91,15 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 
   it("should not delete application on CloseOut call if logic is rejected", function () {
     // create app
-    const appId = runtime.addApp(flags, {}, program);
+    const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram);
     closeOutParams.appId = appId;
-    runtime.optInToApp(john.address, appId, {}, {}, program); // opt-in to app (set new local state)
+    runtime.optInToApp(john.address, appId, {}, {}); // opt-in to app (set new local state)
 
     // sending txn sender other than creator (john), so txn should be rejected
     closeOutParams.fromAccount = alice.account;
 
     expectTealError(
-      () => runtime.executeTx(closeOutParams, program, []),
+      () => runtime.executeTx(closeOutParams),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 
@@ -111,7 +112,8 @@ describe("ASC - CloseOut from Application and Clear State", function () {
   // even if transaction fails
   it("should delete application on clearState call even if logic is rejected", function () {
     // create app
-    const appId = runtime.addApp(flags, {}, program);
+    const rejectClearProgram = getProgram('rejectClear.teal');
+    const appId = runtime.addApp(flags, {}, approvalProgram, rejectClearProgram);
     const clearAppParams: SSCCallsParam = {
       type: TransactionType.ClearSSC,
       sign: SignType.SecretKey,
@@ -119,16 +121,15 @@ describe("ASC - CloseOut from Application and Clear State", function () {
       appId: appId,
       payFlags: {}
     };
-    runtime.optInToApp(alice.address, appId, {}, {}, program); // opt-in to app (set new local state)
+    runtime.optInToApp(alice.address, appId, {}, {}); // opt-in to app (set new local state)
     syncAccount();
 
     // verify before tx execution that local state is present
     let res = alice.getAppFromLocal(appId);
     assert.isDefined(res);
 
-    // execute tx
     expectTealError(
-      () => runtime.executeTx(clearAppParams, program, []),
+      () => runtime.executeTx(clearAppParams),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 

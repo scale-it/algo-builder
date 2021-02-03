@@ -29,7 +29,10 @@ export function loadFilenames (directory: string): string[] {
     });
   }
 
-  return glob.sync(path.join(directory, "*.js")).sort(cmpStr);
+  const jsFiles = glob.sync(path.join(directory, "*.js")).sort(cmpStr);
+  if (jsFiles.length) { return jsFiles; }
+  // if not js file, return the compiled ts files from ./build
+  return glob.sync(path.join("build", directory, "*.js")).sort(cmpStr);
 }
 
 function clearCheckpointFiles (scriptNames: string[]): void {

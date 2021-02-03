@@ -3,7 +3,8 @@
  * This file creates a new NFT and transfers 1 NFT from A to B
 */
 const { executeTransaction, printGlobalNFT, printLocalNFT } = require('./common');
-const { TransactionType, SignType, stringToBytes } = require('@algorand-builder/algob');
+const { stringToBytes } = require('@algorand-builder/algob');
+const { TransactionType, SignType } = require('@algorand-builder/runtime/build/types');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');

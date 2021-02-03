@@ -8,7 +8,10 @@ import { DEFAULT_STACK_ELEM } from "../lib/constants";
 import { keyToBytes } from "../lib/parsing";
 import { Stack } from "../lib/stack";
 import { parser } from "../parser/parser";
-import type { ExecutionMode, Operator, SSCAttributesM, StackElem, StoreAccountI, TEALStack } from "../types";
+import type {
+  ExecutionMode, Operator, SSCAttributesM,
+  StackElem, StoreAccountI, TEALStack
+} from "../types";
 import { BIGINT0, BIGINT1, Label } from "./opcode-list";
 
 export class Interpreter {
@@ -63,7 +66,7 @@ export class Interpreter {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: line });
     }
     const accAddress = this.runtime.assertAddressDefined(
-      this.runtime.ctx.state.globalApps.get(appId));
+      this.runtime.ctx.state.globalApps.get(appId)?.address);
     let account = this.runtime.ctx.state.accounts.get(accAddress);
     account = this.runtime.assertAccountDefined(accAddress, account);
     return this.runtime.assertAppDefined(appId, account.getApp(appId), line);
@@ -116,7 +119,7 @@ export class Interpreter {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: line });
     }
     const accAddress = this.runtime.assertAddressDefined(
-      this.runtime.ctx.state.globalApps.get(appId));
+      this.runtime.ctx.state.globalApps.get(appId)?.address);
     let account = this.runtime.ctx.state.accounts.get(accAddress);
     account = this.runtime.assertAccountDefined(accAddress, account);
 
