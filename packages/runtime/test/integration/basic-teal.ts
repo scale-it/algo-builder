@@ -12,7 +12,7 @@ const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE + 1000; // 1000 to cover fee
 const initialJohnHolding = minBalance + 1000;
 const initialBobHolding = minBalance + 500;
 
-describe("Algorand Smart Contracts", function () {
+describe("Stateless Algorand Smart Contracts delegated signature mode", function () {
   useFixture("basic-teal");
   let john = new StoreAccount(initialJohnHolding);
   let bob = new StoreAccount(initialBobHolding);

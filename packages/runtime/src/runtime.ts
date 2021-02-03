@@ -13,6 +13,7 @@ import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import type {
   AccountAddress, AlgoTransferParam, Context, ExecParams,
+  GlobalAppsData,
   SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
   StackElem, State, StoreAccountI, Txn, TxParams
 } from "./types";
@@ -29,7 +30,6 @@ export class Runtime {
   private store: State;
   ctx: Context;
   private appCounter: number;
-  private readonly programMap: Map<number, string[]>;
   // https://developer.algorand.org/docs/features/transactions/?query=round
   private round;
 
@@ -37,7 +37,7 @@ export class Runtime {
     // runtime store
     this.store = {
       accounts: new Map<string, StoreAccountI>(), // string represents account address
-      globalApps: new Map<number, AccountAddress>(), // number represents appId
+      globalApps: new Map<number, GlobalAppsData>(), // number represents appId
       assetDefs: new Map<number, AccountAddress>() // number represents assetId
     };
 
@@ -52,7 +52,6 @@ export class Runtime {
       args: []
     };
     this.appCounter = 0;
-    this.programMap = new Map<number, string[]>();
     this.round = 2;
   }
 
@@ -149,7 +148,7 @@ export class Runtime {
     if (!this.store.globalApps.has(appId)) {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
-    const accAddress = this.assertAddressDefined(this.store.globalApps.get(appId));
+    const accAddress = this.assertAddressDefined(this.store.globalApps.get(appId)?.address);
     const account = this.assertAccountDefined(accAddress, this.store.accounts.get(accAddress));
     return this.assertAppDefined(appId, account.getApp(appId));
   }
@@ -173,7 +172,7 @@ export class Runtime {
     if (!this.store.globalApps.has(appId)) {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
-    const accAddress = this.assertAddressDefined(this.store.globalApps.get(appId));
+    const accAddress = this.assertAddressDefined(this.store.globalApps.get(appId)?.address);
     const account = this.assertAccountDefined(accAddress, this.store.accounts.get(accAddress));
     return account.getGlobalState(appId, key);
   }
@@ -194,8 +193,8 @@ export class Runtime {
    * Returns approval and clear program from programMap
    * @param appId Application Index
    */
-  getProgram (appId: number): string[] {
-    const res = this.programMap.get(appId);
+  getProgram (appId: number): GlobalAppsData {
+    const res = this.store.globalApps.get(appId);
     if (res === undefined) {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
@@ -210,9 +209,15 @@ export class Runtime {
     for (const acc of accounts) {
       this.store.accounts.set(acc.address, acc);
 
-      for (const appId of acc.createdApps.keys()) {
-        this.store.globalApps.set(appId, acc.address);
-      }
+      acc.createdApps.forEach((value, key) => {
+        this.store.globalApps.set(
+          key, {
+            address: value.creator,
+            approvalProgram: value["approval-program"],
+            clearProgram: value["clear-state-program"]
+          }
+        );
+      });
 
       for (const assetId of acc.createdAssets.keys()) {
         this.store.assetDefs.set(assetId, acc.address);
@@ -301,20 +306,30 @@ export class Runtime {
     // create app with id = 0 in globalApps for teal execution
     const app = senderAcc.addApp(0, flags);
     this.ctx.state.accounts.set(senderAcc.address, senderAcc);
-    this.ctx.state.globalApps.set(app.id, senderAcc.address);
+    this.store.globalApps.set(
+      app.id, {
+        address: senderAcc.address,
+        approvalProgram: approvalProgram,
+        clearProgram: clearProgram
+      }
+    );
 
     this.makeAndSetCtxAppCreateTxn(flags, payFlags);
     this.run(approvalProgram, ExecutionMode.STATEFUL); // execute TEAL code with appId = 0
 
     // create new application in globalApps map
-    this.store.globalApps.set(++this.appCounter, senderAcc.address);
+    this.store.globalApps.set(
+      ++this.appCounter, {
+        address: senderAcc.address,
+        approvalProgram: approvalProgram,
+        clearProgram: clearProgram
+      }
+    );
 
     const attributes = this.assertAppDefined(0, senderAcc.createdApps.get(0));
     this.ctx.state.globalApps.delete(0); // remove zero app from context after execution
     senderAcc.createdApps.delete(0); // remove zero app from sender's account
     senderAcc.createdApps.set(this.appCounter, attributes);
-    // save programs in programMap
-    this.programMap.set(this.appCounter, [approvalProgram, clearProgram]);
 
     return this.appCounter;
   }
@@ -358,7 +373,7 @@ export class Runtime {
     if (appParams) {
       this.createOptInTx(accountAddr, appId, payFlags, flags);
       // Execute approval program for Opt-In
-      this.run(this.getProgram(appId)[0], ExecutionMode.STATEFUL);
+      this.run(this.getProgram(appId).approvalProgram, ExecutionMode.STATEFUL);
 
       account.optInToApp(appId, appParams);
     } else {
@@ -410,13 +425,21 @@ export class Runtime {
   ): void {
     const appParams = this.getApp(appId);
     if (appParams) {
+      const creator = this.getProgram(appId).address;
       this.createUpdateTx(senderAddr, appId, payFlags, flags);
       this.ctx.state = cloneDeep(this.store);
       // Execute approval program for Update
-      this.run(this.getProgram(appId)[0], ExecutionMode.STATEFUL);
-      // If successful update programs and state
-      this.programMap.set(appId, [approvalProgram, clearProgram]);
+      this.run(this.getProgram(appId).approvalProgram, ExecutionMode.STATEFUL);
+
       this.store = this.ctx.state;
+      // If successful update programs and state
+      this.store.globalApps.set(
+        appId, {
+          address: creator,
+          approvalProgram: approvalProgram,
+          clearProgram: clearProgram
+        }
+      );
     } else {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
@@ -430,7 +453,7 @@ export class Runtime {
     if (!this.store.globalApps.has(appId)) {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
-    const accountAddr = this.store.globalApps.get(appId);
+    const accountAddr = this.store.globalApps.get(appId)?.address;
     if (accountAddr === undefined) {
       throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
     }
@@ -438,7 +461,6 @@ export class Runtime {
 
     account.deleteApp(appId);
     this.store.globalApps.delete(appId);
-    this.programMap.delete(appId);
   }
 
   // verify 'amt' microalgos can be withdrawn from account
@@ -491,6 +513,7 @@ export class Runtime {
     if (txnParam.lsig === undefined) {
       throw new TealError(ERRORS.TEAL.LOGIC_SIGNATURE_NOT_FOUND);
     }
+    this.ctx.args = txnParam.lsig.args;
 
     // signature validation
     const result = txnParam.lsig.verify(decodeAddress(txnParam.fromAccount.addr).publicKey);
@@ -544,7 +567,7 @@ export class Runtime {
    * @param program : teal code as a string
    * @param args : external arguments to smart contract
    */
-  executeTx (txnParams: ExecParams | ExecParams[], args?: Uint8Array[]): void {
+  executeTx (txnParams: ExecParams | ExecParams[]): void {
     const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
     // validate first and last rounds
     this.validateTxRound(gtxs);
@@ -554,7 +577,7 @@ export class Runtime {
       state: cloneDeep(this.store), // state is a deep copy of store
       tx: tx,
       gtxs: gtxs,
-      args: args ?? []
+      args: []
     };
 
     const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
@@ -567,23 +590,24 @@ export class Runtime {
       let fromAccount;
       // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
       switch (txnParam.type) {
-        case TransactionType.CallNoOpSSC:
-          this.run(this.getProgram(txnParam.appId)[0], ExecutionMode.STATEFUL); // approval program
+        case TransactionType.CallNoOpSSC || TransactionType.CloseSSC || TransactionType.DeleteSSC: {
+          this.run(this.getProgram(txnParam.appId).approvalProgram, ExecutionMode.STATEFUL); // approval program
           break;
-        case TransactionType.CloseSSC:
-          this.run(this.getProgram(txnParam.appId)[0], ExecutionMode.STATEFUL); // approval program
-          break;
-        case TransactionType.DeleteSSC:
-          this.run(this.getProgram(txnParam.appId)[0], ExecutionMode.STATEFUL); // approval program
-          break;
-        case TransactionType.ClearSSC:
-          // if transaction type is Clear Call, remove the app first before throwing error (rejecting tx)
-          // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
+        }
+        case TransactionType.ClearSSC: {
           fromAccount = this.getAccount(txnParam.fromAccount.addr);
-          fromAccount.closeApp(txnParam.appId); // remove app from local state
+          try {
+            this.run(this.getProgram(txnParam.appId).clearProgram, ExecutionMode.STATEFUL); // clear program
+          } catch (error) {
+            // if transaction type is Clear Call, remove the app first before throwing error (rejecting tx)
+            // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
+            fromAccount.closeApp(txnParam.appId); // remove app from local state
+            throw error;
+          }
 
-          this.run(this.getProgram(txnParam.appId)[1], ExecutionMode.STATEFUL); // clear program
+          fromAccount.closeApp(txnParam.appId); // remove app from local state
           break;
+        }
       }
     }
 

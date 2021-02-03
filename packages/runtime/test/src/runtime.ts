@@ -76,11 +76,9 @@ describe("Rounds Test", function () {
   let john = new StoreAccount(minBalance);
   let bob = new StoreAccount(minBalance);
   let runtime: Runtime;
-  let program: string;
   let txnParams: AlgoTransferParam;
   this.beforeAll(function () {
     runtime = new Runtime([john, bob]); // setup test
-    program = getProgram('basic.teal');
 
     // set up transaction paramenters
     txnParams = {
@@ -110,7 +108,7 @@ describe("Rounds Test", function () {
     txnParams.payFlags = { totalFee: 1000, firstValid: 5, validRounds: 200 };
     runtime.setRound(20);
 
-    runtime.executeTx(txnParams, program, []);
+    runtime.executeTx(txnParams);
 
     // get final state (updated accounts)
     syncAccounts();
@@ -122,7 +120,7 @@ describe("Rounds Test", function () {
     runtime.setRound(3);
 
     expectTealError(
-      () => runtime.executeTx(txnParams, program, []),
+      () => runtime.executeTx(txnParams),
       ERRORS.TEAL.INVALID_ROUND
     );
   });
@@ -130,7 +128,7 @@ describe("Rounds Test", function () {
   it("should succeeded by default (no round requirement is passed)", () => {
     txnParams.payFlags = { totalFee: 1000 };
 
-    runtime.executeTx(txnParams, program, []);
+    runtime.executeTx(txnParams);
 
     // get final state (updated accounts)
     syncAccounts();
