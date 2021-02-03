@@ -382,10 +382,10 @@ declare module 'algosdk' {
     reserve: any, freeze: any, clawback: any, unitName: any, assetName: any, assetURL: any,
     assetMetadataHash: any): any;
 
-  export function makeAssetCreateTxnWithSuggestedParams(from: any, note: any, total: any,
-    decimals: any, defaultFrozen: any, manager: any, reserve: any, freeze: any,
-    clawback: any, unitName: any, assetName: any, assetURL: any, assetMetadataHash: any,
-    suggestedParams: any): Transaction;
+  export function makeAssetCreateTxnWithSuggestedParams(from: string, note: Uint8Array, total: number,
+    decimals: number, defaultFrozen: boolean, manager: string, reserve: string, freeze: string,
+    clawback: string, unitName: string, assetName: string, assetURL: string, assetMetadataHash: string,
+    suggestedParams: SuggestedParams): Transaction;
 
   export function makeAssetDestroyTxn(from: any, fee: any, firstRound: any, lastRound: any, note: any, genesisHash: any, genesisID: any, assetIndex: any): any;
 
