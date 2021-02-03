@@ -2,6 +2,7 @@ import { AssetDef, AssetHolding } from "algosdk";
 
 import { stringToBytes } from "../../src/lib/parsing";
 import { AppLocalStateM, SSCAttributesM, StackElem } from "../../src/types";
+import { elonAddr } from "./txn";
 
 const convertToKey = (str: string): string => { return stringToBytes(str).toString(); };
 
@@ -36,7 +37,7 @@ export const accInfo = [{
   createdApps: createdApps.set(1828, {
     'approval-program': '',
     'clear-state-program': '',
-    creator: "addr-1",
+    creator: elonAddr,
     'global-state': globalStateMap,
     'global-state-schema': { 'num-byte-slice': 3, 'num-uint': 1 },
     'local-state-schema': { 'num-byte-slice': 0, 'num-uint': 16 }

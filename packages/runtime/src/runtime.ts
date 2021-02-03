@@ -306,7 +306,7 @@ export class Runtime {
     // create app with id = 0 in globalApps for teal execution
     const app = senderAcc.addApp(0, flags);
     this.ctx.state.accounts.set(senderAcc.address, senderAcc);
-    this.store.globalApps.set(
+    this.ctx.state.globalApps.set(
       app.id, {
         address: senderAcc.address,
         approvalProgram: approvalProgram,
@@ -590,14 +590,22 @@ export class Runtime {
       let fromAccount;
       // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
       switch (txnParam.type) {
-        case TransactionType.CallNoOpSSC || TransactionType.CloseSSC || TransactionType.DeleteSSC: {
-          this.run(this.getProgram(txnParam.appId).approvalProgram, ExecutionMode.STATEFUL); // approval program
+        case TransactionType.CallNoOpSSC: {
+          this.run(this.getProgram(txnParam.appId).approvalProgram, ExecutionMode.STATEFUL);
+          break;
+        }
+        case TransactionType.CloseSSC: {
+          this.run(this.getProgram(txnParam.appId).approvalProgram, ExecutionMode.STATEFUL);
+          break;
+        }
+        case TransactionType.DeleteSSC: {
+          this.run(this.getProgram(txnParam.appId).approvalProgram, ExecutionMode.STATEFUL);
           break;
         }
         case TransactionType.ClearSSC: {
           fromAccount = this.getAccount(txnParam.fromAccount.addr);
           try {
-            this.run(this.getProgram(txnParam.appId).clearProgram, ExecutionMode.STATEFUL); // clear program
+            this.run(this.getProgram(txnParam.appId).clearProgram, ExecutionMode.STATEFUL);
           } catch (error) {
             // if transaction type is Clear Call, remove the app first before throwing error (rejecting tx)
             // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
