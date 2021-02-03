@@ -1,8 +1,9 @@
+import type { Account } from "@algorand-builder/runtime/build/types";
 import { generateAccount, mnemonicToSecretKey, secretKeyToMnemonic } from "algosdk";
 import { assert } from "chai";
 
 import { loadAccountsFromEnv, mkAccounts } from "../../src/lib/account";
-import { Account, AccountDef } from "../../src/types";
+import { AccountDef } from "../../src/types";
 
 describe("Loading accounts", () => {
   const genAccount = generateAccount();

@@ -1,13 +1,14 @@
 import path from "path";
 import * as z from 'zod';
 
-import { BuilderError } from "../internal/core/errors";
-import { ERRORS } from "../internal/core/errors-list";
-import { ASSETS_DIR } from "../internal/core/project-structure";
-import { parseZodError } from "../internal/core/validation-errors";
+import { BuilderError } from "../errors/errors";
+import { ERRORS } from "../errors/errors-list";
+import { parseZodError } from "../errors/validation-errors";
 import { AccountMap, ASADef, ASADefs } from "../types";
 import { ASADefsSchema } from "../types-input";
 import { loadFromYamlFileSilentWithMessage } from "./files";
+
+const ASSETS_DIR = "assets";
 
 function validateSingle (accounts: AccountMap, filename: string, asaDef: ASADef): void {
   if (!asaDef.optInAccNames || asaDef.optInAccNames.length === 0) {
@@ -16,7 +17,7 @@ function validateSingle (accounts: AccountMap, filename: string, asaDef: ASADef)
   for (const accName of asaDef.optInAccNames) {
     if (!accounts.get(accName)) {
       throw new BuilderError(
-        ERRORS.SCRIPT.ASA_PARAM_ERROR_NO_NAMED_OPT_IN_ACCOUNT, {
+        ERRORS.ASA.ASA_PARAM_ERROR_NO_NAMED_OPT_IN_ACCOUNT, {
           filename: filename,
           optInAccName: accName
         });
@@ -43,7 +44,7 @@ export function validateASADefs (obj: Object, accounts: AccountMap, filename: st
   } catch (e) {
     if (e instanceof z.ZodError) {
       throw new BuilderError(
-        ERRORS.SCRIPT.ASA_PARAM_PARSE_ERROR, {
+        ERRORS.ASA.ASA_PARAM_PARSE_ERROR, {
           reason: parseZodError(e),
           filename: filename
         }, e);

@@ -1,11 +1,12 @@
+import { BuilderError } from "@algorand-builder/runtime";
+import type { Account, AccountMap } from "@algorand-builder/runtime/build/types";
 import { Account as AccountSDK, Kmd, mnemonicToSecretKey, MultiSigAccount, multisigAddress } from "algosdk";
 import * as fs from "fs";
 import YAML from "yaml";
 
 import CfgErrors, { ErrorPutter } from "../internal/core/config/config-errors";
-import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
-import type { Account, AccountDef, AccountMap, AlgobAccount, HDAccount, KmdCfg, KmdWallet, MnemonicAccount, StrMap } from "../types";
+import type { AccountDef, AlgobAccount, HDAccount, KmdCfg, KmdWallet, MnemonicAccount, StrMap } from "../types";
 
 export function mkAccounts (input: AccountDef[]): Account[] {
   const accounts: Account[] = [];

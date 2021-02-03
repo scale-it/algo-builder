@@ -1,10 +1,11 @@
+import { BuilderError } from "@algorand-builder/runtime";
 import algosdk from "algosdk";
 import * as _fs from "fs";
 import * as path from "path";
 import YAML from "yaml";
 
 import { task } from "../internal/core/config/config-env";
-import { BuilderError, ERRORS } from "../internal/core/errors";
+import { ERRORS } from "../internal/core/errors";
 import * as types from "../internal/core/params/argument-types";
 import { assertAllDirs, ASSETS_DIR } from "../internal/core/project-structure";
 import { AlgobRuntimeEnv, MnemonicAccount, TaskArguments } from "../types";

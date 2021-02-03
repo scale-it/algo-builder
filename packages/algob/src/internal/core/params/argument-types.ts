@@ -1,6 +1,6 @@
+import { BuilderError } from "@algorand-builder/runtime";
 import * as fs from "fs";
 
-import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
 
 /**

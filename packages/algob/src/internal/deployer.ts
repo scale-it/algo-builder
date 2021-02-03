@@ -1,4 +1,9 @@
-import type { SSCDeploymentFlags, SSCOptionalFlags, TxParams } from "@algorand-builder/runtime/build/types";
+import { BuilderError } from "@algorand-builder/runtime";
+import type {
+  Account,
+  AccountMap, ASADefs, SSCDeploymentFlags, SSCOptionalFlags,
+  TxParams
+} from "@algorand-builder/runtime/build/types";
 import type { LogicSig, LogicSigArgs, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
 
@@ -8,11 +13,8 @@ import { getDummyLsig, getLsig } from "../lib/lsig";
 import { blsigExt, loadBinaryMultiSig, readMsigFromFile } from "../lib/msig";
 import { persistCheckpoint } from "../lib/script-checkpoints";
 import type {
-  Account,
-  AccountMap,
   AlgobDeployer,
   AlgobRuntimeEnv,
-  ASADefs,
   ASADeploymentFlags,
   ASAInfo,
   ASCCache,
@@ -22,7 +24,6 @@ import type {
   SSCInfo,
   StrMap
 } from "../types";
-import { BuilderError } from "./core/errors";
 import { ERRORS } from "./core/errors-list";
 import { DeployerConfig } from "./deployer_cfg";
 

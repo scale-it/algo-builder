@@ -14,7 +14,8 @@ export function getErrorCode (error: ErrorDescriptor): string {
 
 export const ERROR_RANGES = {
   TEAL: { min: 0, max: 99, title: "TEAL opcode errors" },
-  TRANSACTION: { min: 0, max: 99, title: "Transaction error" }
+  TRANSACTION: { min: 100, max: 199, title: "Transaction error" },
+  ASA: { min: 900, max: 999, title: "ASA File Parse Error" }
 };
 
 const PARSE_ERROR = "Parse Error";
@@ -264,10 +265,37 @@ by an index that does not exist.`
 
 const transactionErrors = {
   UNKNOWN_TRANSACTION_TYPE: {
-    number: 1,
+    number: 100,
     message: "Unknown Transaction type: %transaction%",
     title: "Transaction error",
     description: `Transaction error`
+  }
+};
+
+const asaErrors = {
+  ASA_PARAM_PARSE_ERROR: {
+    number: 900,
+    message: `Invalid ASA definition: '%filename%'.
+Reason:
+
+%reason%`,
+    title: "Invalid ASA definition",
+    description: `Invalid ASA definition: '%filename%'.
+
+Reason:
+%reason%
+
+Please check your ASA file`
+  },
+  ASA_PARAM_ERROR_NO_NAMED_OPT_IN_ACCOUNT: {
+    number: 901,
+    message: `Invalid ASA definition: '%filename%'.
+Opt-in account not found by name: %optInAccName%`,
+    title: "Opt-in account not found.",
+    description: `Invalid ASA definition: '%filename%'.
+Opt-in account not found by name: %optInAccName%
+
+Please check your ASA and config files`
   }
 };
 
@@ -277,5 +305,6 @@ export const ERRORS: {
   };
 } = {
   TEAL: tealErrors,
-  TRANSACTION: transactionErrors
+  TRANSACTION: transactionErrors,
+  ASA: asaErrors
 };

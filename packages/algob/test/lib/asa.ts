@@ -1,8 +1,8 @@
+import { validateASADefs } from "@algorand-builder/runtime";
+import type { Account, ASADefs } from "@algorand-builder/runtime/build/types";
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/internal/core/errors-list";
-import { validateASADefs } from "../../src/lib/asa";
-import { Account, ASADefs } from "../../src/types";
 import { expectBuilderError } from "../helpers/errors";
 
 const namedAccount: Account = {

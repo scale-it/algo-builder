@@ -1,5 +1,8 @@
-import { encodeNote, parseSSCAppArgs } from "@algorand-builder/runtime";
+import { BuilderError, encodeNote, parseSSCAppArgs } from "@algorand-builder/runtime";
 import type {
+  Account,
+  AccountMap,
+  ASADef,
   SSCDeploymentFlags,
   SSCOptionalFlags,
   TxParams
@@ -7,15 +10,11 @@ import type {
 import type { LogicSigArgs } from "algosdk";
 import algosdk from "algosdk";
 
-import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { txWriter } from "../internal/tx-log-writer";
 import { createClient } from "../lib/driver";
 import { getLsig } from "../lib/lsig";
 import type {
-  Account,
-  AccountMap,
-  ASADef,
   ASADeploymentFlags,
   ASAInfo,
   ASCCache,
