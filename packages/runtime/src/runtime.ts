@@ -369,13 +369,15 @@ export class Runtime {
   optInToApp (accountAddr: string, appId: number,
     flags: SSCOptionalFlags, payFlags: TxParams): void {
     const appParams = this.getApp(appId);
-    const account = this.assertAccountDefined(accountAddr, this.store.accounts.get(accountAddr));
     if (appParams) {
       this.createOptInTx(accountAddr, appId, payFlags, flags);
+      this.ctx.state = cloneDeep(this.store);
+      const account = this.assertAccountDefined(accountAddr, this.ctx.state.accounts.get(accountAddr));
+      account.optInToApp(appId, appParams);
+
       // Execute approval program for Opt-In
       this.run(this.getProgram(appId).approvalProgram, ExecutionMode.STATEFUL);
-
-      account.optInToApp(appId, appParams);
+      this.store = this.ctx.state;
     } else {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }

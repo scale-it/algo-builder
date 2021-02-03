@@ -94,6 +94,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
     const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram);
     closeOutParams.appId = appId;
     runtime.optInToApp(john.address, appId, {}, {}); // opt-in to app (set new local state)
+    syncAccount();
 
     // sending txn sender other than creator (john), so txn should be rejected
     closeOutParams.fromAccount = alice.account;

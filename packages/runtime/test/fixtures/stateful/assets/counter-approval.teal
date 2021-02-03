@@ -51,5 +51,9 @@ int 1
 return
 
 on_optin:
+int 0
+byte "counter"
+int 0
+app_local_put
 int 1
 return
