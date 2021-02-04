@@ -8,11 +8,11 @@ import { TealError } from "./errors/errors";
 import { ERRORS } from "./errors/errors-list";
 import { Interpreter, loadASAFile } from "./index";
 import { convertToString, parseSSCAppArgs } from "./lib/parsing";
-import { mkTransaction } from "./lib/txn";
+import { encodeNote, mkTransaction } from "./lib/txn";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import type {
-  AccountAddress, AlgoTransferParam, ASADef, ASADefs, ASADeploymentFlags, Context, ExecParams,
+  AccountAddress, AlgoTransferParam, ASADefs, ASADeploymentFlags, Context, ExecParams,
   GlobalAppsData,
   SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
   StackElem, State, StoreAccountI, Txn, TxParams
@@ -281,6 +281,28 @@ export class Runtime {
     }
   }
 
+  // creates new asset creation transaction object and update context
+  addCtxAssetCreate (
+    name: string, flags: ASADeploymentFlags, asaDef: AssetDef): void {
+    // this funtion is called only for validation of parameters passed
+    algosdk.makeAssetCreateTxnWithSuggestedParams(
+      flags.creator.addr,
+      encodeNote(flags.note, flags.noteb64),
+      asaDef.total,
+      asaDef.decimals,
+      asaDef["default-frozen"],
+      asaDef.manager,
+      asaDef.reserve,
+      asaDef.freeze,
+      asaDef.clawback,
+      asaDef["unit-name"],
+      name,
+      asaDef.url,
+      asaDef["metadata-hash"],
+      mockSuggestedParams(flags, this.round)
+    );
+  }
+
   /**
    * Creates Asset in Runtime
    * @param name ASA name
@@ -291,7 +313,8 @@ export class Runtime {
     const senderAcc = this.assertAccountDefined(sender.addr, this.store.accounts.get(sender.addr));
 
     // create asset
-    senderAcc.createAsset(++this.assetCounter, name, this.loadedAssetsDefs[name], sender.addr);
+    const asset = senderAcc.addAsset(++this.assetCounter, name, this.loadedAssetsDefs[name]);
+    this.addCtxAssetCreate(name, flags, asset);
     this.store.assetDefs.set(this.assetCounter, sender.addr);
     return this.assetCounter;
   }

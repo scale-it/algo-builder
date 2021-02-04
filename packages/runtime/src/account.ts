@@ -9,8 +9,9 @@ import { generateAccount } from "algosdk";
 import { TealError } from "./errors/errors";
 import { ERRORS } from "./errors/errors-list";
 import {
-  ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE,
-  ASSET_CREATION_FEE, SSC_KEY_BYTE_SLICE, SSC_VALUE_BYTES, SSC_VALUE_UINT
+  ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE, ASSET_CREATION_FEE, MAX_ALGORAND_ACCOUNT_APPS,
+  MAX_ALGORAND_ACCOUNT_ASSETS,
+  SSC_KEY_BYTE_SLICE, SSC_VALUE_BYTES, SSC_VALUE_UINT
 } from "./lib/constants";
 import { keyToBytes } from "./lib/parsing";
 import { assertValidSchema } from "./lib/stateful";
@@ -163,13 +164,14 @@ export class StoreAccount implements StoreAccountI {
    * @param name Asset Name
    * @param asaDef Asset Definitions
    */
-  createAsset (assetId: number, name: string, asaDef: ASADef, creator: string): AssetDef {
-    if (this.createdAssets.size === 1000) {
-      throw new Error('Error while creating asset \"${asaDef.unitName}\" for ${this.address}. Maximum created assets for an account is 1000');
+  addAsset (assetId: number, name: string, asaDef: ASADef): AssetDef {
+    if (this.createdAssets.size === MAX_ALGORAND_ACCOUNT_ASSETS) {
+      throw new TealError(ERRORS.TEAL.MAX_LIMIT_ASSETS,
+        { name: name, address: this.address, max: MAX_ALGORAND_ACCOUNT_APPS });
     }
 
     this.minBalance += ASSET_CREATION_FEE;
-    const asset = new Asset(assetId, asaDef, creator, name);
+    const asset = new Asset(assetId, asaDef, this.address, name);
     this.createdAssets.set(asset.id, asset.definitions);
     return asset.definitions;
   }
@@ -181,8 +183,9 @@ export class StoreAccount implements StoreAccountI {
    * @param params SSCDeployment Flags
    */
   addApp (appId: number, params: SSCDeploymentFlags): CreatedAppM {
-    if (this.createdApps.size === 10) {
-      throw new Error('Maximum created applications for an account is 10');
+    if (this.createdApps.size === MAX_ALGORAND_ACCOUNT_APPS) {
+      throw new TealError(ERRORS.TEAL.MAX_LIMIT_APPS,
+        { address: this.address, max: MAX_ALGORAND_ACCOUNT_APPS });
     }
 
     // raise minimum balance

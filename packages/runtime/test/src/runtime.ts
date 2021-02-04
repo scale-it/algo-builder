@@ -151,5 +151,14 @@ describe("Asset Creation", function () {
 
     const res = runtime.getAssetDef(assetId);
     assert.equal(res.decimals, 0);
+    assert.equal(res["default-frozen"], false);
+    assert.equal(res.total, 5912599999515);
+    assert.equal(res["unit-name"], "GLD");
+    assert.equal(res.url, "url");
+    assert.equal(res["metadata-hash"], "12312442142141241244444411111133");
+    assert.equal(res.manager, "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE");
+    assert.equal(res.reserve, "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE");
+    assert.equal(res.freeze, "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE");
+    assert.equal(res.clawback, "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE");
   });
 });

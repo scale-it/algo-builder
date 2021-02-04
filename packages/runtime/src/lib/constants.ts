@@ -21,6 +21,9 @@ export const MaxAppProgramCost = 700;
 export const LogicSigMaxSize = 1000;
 export const MaxAppProgramLen = 1024;
 
+export const MAX_ALGORAND_ACCOUNT_ASSETS = 1000;
+export const MAX_ALGORAND_ACCOUNT_APPS = 10;
+
 const zeroAddress = new Uint8Array(32);
 const zeroUint64 = BigInt('0');
 const zeroByte = new Uint8Array(0);

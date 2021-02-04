@@ -260,6 +260,18 @@ by an index that does not exist.`
     message: "Transaction rounds (firstValid: %first%, lastValid: %last%) are not valid, current round: %round%.",
     title: 'Round Error',
     description: `Round Error`
+  },
+  MAX_LIMIT_ASSETS: {
+    number: 39,
+    message: "Error while creating asset %name% for %address%. Maximum created assets for an account is %max%}'",
+    title: 'Asset Creation Error',
+    description: `Asset Creation Error`
+  },
+  MAX_LIMIT_APPS: {
+    number: 40,
+    message: "Error while creating app for %address%. Maximum created apps for an account is %max%}'",
+    title: 'App Creation Error',
+    description: `App Creation Error`
   }
 };
 
@@ -276,26 +288,20 @@ const asaErrors = {
   ASA_PARAM_PARSE_ERROR: {
     number: 900,
     message: `Invalid ASA definition: '%filename%'.
-Reason:
-
-%reason%`,
+    Reason: %reason%`,
     title: "Invalid ASA definition",
     description: `Invalid ASA definition: '%filename%'.
-
-Reason:
-%reason%
-
-Please check your ASA file`
+    Reason: %reason%
+    Please check your ASA file`
   },
   ASA_PARAM_ERROR_NO_NAMED_OPT_IN_ACCOUNT: {
     number: 901,
     message: `Invalid ASA definition: '%filename%'.
-Opt-in account not found by name: %optInAccName%`,
+    Opt-in account not found by name: %optInAccName%`,
     title: "Opt-in account not found.",
     description: `Invalid ASA definition: '%filename%'.
-Opt-in account not found by name: %optInAccName%
-
-Please check your ASA and config files`
+    Opt-in account not found by name: %optInAccName%
+    Please check your ASA and config files`
   },
   ASSET_NOT_FOUND: {
     number: 902,

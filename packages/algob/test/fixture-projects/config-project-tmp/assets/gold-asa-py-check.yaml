@@ -1,0 +1,36 @@
+filename: gold-asa.py
+timestamp: 10
+compiled: compiled
+compiledHash: compiledHash
+srcHash: 3867907430
+tealCode: |
+  #pragma version 2
+  global GroupSize
+  int 1
+  ==
+  txn GroupIndex
+  int 0
+  ==
+  &&
+  txn TypeEnum
+  int 4
+  ==
+  &&
+  txn AssetAmount
+  int 0
+  ==
+  &&
+  txn TypeEnum
+  int 4
+  ==
+  txn Sender
+  addr M7VR2MGHI35EG2NMYOF3X337636PIOFVSP2HNIFUKAG7WW6BDWDCA3E2DA
+  ==
+  &&
+  txn AssetAmount
+  int 1000
+  <=
+  &&
+  ||
+base64ToBytes:
+  - 0
