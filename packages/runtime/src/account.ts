@@ -151,7 +151,7 @@ export class StoreAccount implements StoreAccountI {
   }
 
   /**
-   * Returns asset definitions
+   * Queries asset definition by assetId
    * @param assetId asset index
    */
   getAssetDef (assetId: number): AssetDef | undefined {
@@ -165,7 +165,7 @@ export class StoreAccount implements StoreAccountI {
    */
   createAsset (assetId: number, name: string, asaDef: ASADef, creator: string): AssetDef {
     if (this.createdAssets.size === 1000) {
-      throw new Error('Maximum created assets for an account is 1000');
+      throw new Error('Error while creating asset \"${asaDef.unitName}\" for ${this.address}. Maximum created assets for an account is 1000');
     }
 
     this.minBalance += ASSET_CREATION_FEE;
