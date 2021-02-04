@@ -85,7 +85,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
     assert.isDefined(app);
     assert.deepEqual(app[approvalStr], oldApprovalProgram);
 
-    // update should be rejected as sender is not creator
+    // update should be rejected because sender is not creator
     expectTealError(
       () => runtime.updateApp(alice.address, appId, newApprovalProgram, clearProgram, {}, {}),
       ERRORS.TEAL.REJECTED_BY_LOGIC
