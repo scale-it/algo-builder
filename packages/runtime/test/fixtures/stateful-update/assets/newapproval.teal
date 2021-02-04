@@ -22,7 +22,7 @@ byte "local-val"
 &&
 bz failed
 
-// after verifying, set new state as well
+// after verifying, set new state
 byte "new-global-key"
 byte "new-global-val"
 app_global_put

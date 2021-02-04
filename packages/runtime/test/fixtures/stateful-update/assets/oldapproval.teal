@@ -33,12 +33,12 @@ txn Sender
 ==
 bz failed
 
-// update global state before updating
+// update global state before updating application
 byte "global-key"
 byte "global-val"
 app_global_put
 
-// update global state before updating
+// update local state before updating application
 int 0
 byte "local-key"
 byte "local-val"

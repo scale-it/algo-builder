@@ -397,7 +397,7 @@ export class Runtime {
     // Execute current approval program for Update
     this.run(appParams["approval-program"], ExecutionMode.STATEFUL);
 
-    // If successful update programs and state
+    // If successful, Update programs and state
     this.store = this.ctx.state;
     const updatedApp = this.getApp(appId); // get app after updating store
     updatedApp["approval-program"] = approvalProgram;
