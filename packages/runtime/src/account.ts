@@ -151,6 +151,7 @@ export class StoreAccount implements StoreAccountI {
    * @param params SSCDeployment Flags
    * @param approvalProgram application approval program
    * @param clearProgram application clear program
+   * NOTE - approval and clear program must be the TEAL code as string
    */
   addApp (appId: number, params: SSCDeploymentFlags,
     approvalProgram: string, clearProgram: string): CreatedAppM {
@@ -219,6 +220,7 @@ class App {
   readonly id: number;
   readonly attributes: SSCAttributesM;
 
+  // NOTE - approval and clear program must be the TEAL code as string
   constructor (appId: number, params: SSCDeploymentFlags,
     approvalProgram: string, clearProgram: string) {
     this.id = appId;

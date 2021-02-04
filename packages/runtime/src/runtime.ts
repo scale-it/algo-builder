@@ -36,7 +36,7 @@ export class Runtime {
     // runtime store
     this.store = {
       accounts: new Map<string, StoreAccountI>(), // string represents account address
-      globalApps: new Map<number, string>(), // number represents appId
+      globalApps: new Map<number, AccountAddress>(), // map of {appId: accountAddress}
       assetDefs: new Map<number, AccountAddress>() // number represents assetId
     };
 
@@ -277,6 +277,7 @@ export class Runtime {
    * @param payFlags Transaction parameters
    * @param approvalProgram application approval program
    * @param clearProgram application clear program
+   * NOTE - approval and clear program must be the TEAL code as string (not compiled code)
    */
   addApp (
     flags: SSCDeploymentFlags, payFlags: TxParams,
@@ -380,6 +381,7 @@ export class Runtime {
    * @param clearProgram new clear program
    * @param payFlags Transaction parameters
    * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
+   * NOTE - approval and clear program must be the TEAL code as string
    */
   updateApp (
     senderAddr: string,
