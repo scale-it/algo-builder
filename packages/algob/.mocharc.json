@@ -1,1 +1,13 @@
-../../.mocharc.json
+{
+  "diff": true,
+  "extension": ["js", "ts"],
+  "package": "./package.json",
+  "reporter": "spec",
+  "slow": 75,
+  "timeout": 10000,
+  "ui": "bdd",
+  "watch-files": ["src/**/*.js", "test/**/*.js", "src/**/*.ts", "test/**/*.ts"],
+  "require": ["ts-node/register", "source-map-support/register"],
+  "recursive": true,
+  "ignore": ["test/fixture-projects/**/*"]
+}
