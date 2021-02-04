@@ -1,19 +1,16 @@
-import type { SSCDeploymentFlags, SSCOptionalFlags, TxParams } from "@algorand-builder/runtime/build/types";
-import type { Account as AccountSDK, LogicSig, LogicSigArgs } from "algosdk";
+import type {
+  Account, AccountMap,
+  ASADeploymentFlags,
+  SSCDeploymentFlags, SSCOptionalFlags,
+  TxParams
+} from "@algorand-builder/runtime/build/types";
+import type { LogicSig, LogicSigArgs } from "algosdk";
 import * as algosdk from "algosdk";
-import * as z from 'zod';
 
 import * as types from "./internal/core/params/argument-types";
-import { ASADefSchema, ASADefsSchema } from "./types-input";
 // Begin config types
 
 // IMPORTANT: This t.types MUST be kept in sync with the actual types.
-
-export interface Account extends AccountSDK {
-  // from AccountSDK: addr: string;
-  //                  sk: Uint8Array
-  name: string
-}
 
 export interface AlgobAccount {
   name: string
@@ -383,13 +380,6 @@ export interface Checkpoint {
   dLsig: Map<string, LsigInfo>
 };
 
-export type ASADef = z.infer<typeof ASADefSchema>;
-export type ASADefs = z.infer<typeof ASADefsSchema>;
-
-export interface ASADeploymentFlags extends TxParams {
-  creator: Account
-}
-
 export interface FundASCFlags {
   funder: Account
   fundingMicroAlgo: number
@@ -398,8 +388,6 @@ export interface FundASCFlags {
 export interface AssetScriptMap {
   [assetName: string]: string
 }
-
-export type AccountMap = Map<string, Account>;
 
 export interface AlgobDeployer {
   /**

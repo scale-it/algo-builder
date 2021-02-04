@@ -1,6 +1,3 @@
-
-export const ERROR_PREFIX = "ABLDR";
-
 export interface ErrorDescriptor {
   number: number
   // Message can use templates. See applyErrorMessageTemplate
@@ -8,10 +5,6 @@ export interface ErrorDescriptor {
   // Title and description can be Markdown
   title: string
   description: string
-}
-
-export function getErrorCode (error: ErrorDescriptor): string {
-  return `${ERROR_PREFIX}${error.number}`;
 }
 
 export const ERROR_RANGES = {

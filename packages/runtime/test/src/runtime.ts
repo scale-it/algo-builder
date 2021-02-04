@@ -136,3 +136,29 @@ describe("Rounds Test", function () {
     assert.equal(bob.balance(), minBalance + 100);
   });
 });
+
+describe("Asset Creation", function () {
+  useFixture('asa-check');
+  const john = new StoreAccount(minBalance);
+  let runtime: Runtime;
+  this.beforeAll(() => {
+    runtime = new Runtime([john]);
+  });
+
+  it("should create asset using asa.yaml file", () => {
+    const assetId = runtime.createAsset('gold',
+      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+
+    const res = runtime.getAssetDef(assetId);
+    assert.equal(res.decimals, 0);
+    assert.equal(res["default-frozen"], false);
+    assert.equal(res.total, 5912599999515);
+    assert.equal(res["unit-name"], "GLD");
+    assert.equal(res.url, "url");
+    assert.equal(res["metadata-hash"], "12312442142141241244444411111133");
+    assert.equal(res.manager, "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE");
+    assert.equal(res.reserve, "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE");
+    assert.equal(res.freeze, "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE");
+    assert.equal(res.clawback, "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE");
+  });
+});

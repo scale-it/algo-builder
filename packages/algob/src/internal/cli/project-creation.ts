@@ -1,3 +1,4 @@
+import { BuilderError } from "@algorand-builder/runtime";
 import chalk from "chalk";
 import fsExtra from "fs-extra";
 import os from "os";
@@ -5,7 +6,6 @@ import path from "path";
 
 import type { PromiseAny } from "../../types";
 import { ALGOB_NAME } from "../constants";
-import { BuilderError } from "../core/errors";
 import { ERRORS } from "../core/errors-list";
 import { ExecutionMode, getExecutionMode } from "../core/execution-mode";
 import { getPackageJson, getPackageRoot } from "../util/package-info";

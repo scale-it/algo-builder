@@ -1,3 +1,5 @@
+import { BuilderError } from "@algorand-builder/runtime";
+
 import {
   AlgobParamDefinitions,
   AlgobShortParamSubstitutions,
@@ -7,7 +9,6 @@ import {
   TaskArguments,
   TaskDefinition
 } from "../../types";
-import { BuilderError } from "../core/errors";
 import { ERRORS } from "../core/errors-list";
 
 export class ArgumentsParser {

@@ -1,6 +1,7 @@
+import { BuilderError } from "@algorand-builder/runtime";
+
 import { AlgobRuntimeEnv, ConfigExtender } from "../types";
 import { ExtenderManager } from "./core/config/extenders";
-import { BuilderError } from "./core/errors";
 import { ERRORS } from "./core/errors-list";
 import { TasksDSL } from "./core/tasks/dsl";
 
