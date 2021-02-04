@@ -240,7 +240,8 @@ export class Runtime {
     }
   }
 
-  // creates new application transaction object and update context
+  // creates new application transaction object in the current context
+  // It will overwrite the current transaction (`this.ctx.tx`)
   addCtxAppCreateTxn (flags: SSCDeploymentFlags, payFlags: TxParams): void {
     const txn = algosdk.makeApplicationCreateTxn(
       flags.sender.addr,
