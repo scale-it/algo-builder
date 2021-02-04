@@ -1921,7 +1921,7 @@ export class GetAssetHolding extends Op {
         value = BigInt(assetInfo.amount);
         break;
       case "AssetFrozen":
-        value = stringToBytes(assetInfo["is-frozen"]);
+        value = BigInt(assetInfo["is-frozen"]);
         break;
       default:
         throw new TealError(ERRORS.TEAL.INVALID_FIELD_TYPE, { line: this.line });

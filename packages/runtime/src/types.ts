@@ -127,9 +127,11 @@ export interface StoreAccountI {
   getApp: (appId: number) => SSCAttributesM | undefined
   getAppFromLocal: (appId: number) => AppLocalStateM | undefined
   getAssetDef: (assetId: number) => AssetDef | undefined
+  getAssetHolding: (assetId: number) => AssetHolding | undefined
   addAsset: (assetId: number, name: string, asadef: ASADef) => AssetDef
   addApp: (appId: number, params: SSCDeploymentFlags) => CreatedAppM
   optInToApp: (appId: number, appParams: SSCAttributesM) => void
+  optInToASA: (assetIndex: number, assetHolding: AssetHolding) => void
   deleteApp: (appId: number) => void
   closeApp: (appId: number) => void
   getLocalState: (appId: number, key: Uint8Array | string) => StackElem | undefined

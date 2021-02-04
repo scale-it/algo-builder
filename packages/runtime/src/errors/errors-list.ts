@@ -272,7 +272,7 @@ by an index that does not exist.`
     message: "Error while creating app for %address%. Maximum created apps for an account is %max%}'",
     title: 'App Creation Error',
     description: `App Creation Error`
-  }
+  },
 };
 
 const transactionErrors = {
@@ -281,7 +281,13 @@ const transactionErrors = {
     message: "Unknown Transaction type: %transaction%",
     title: "Transaction error",
     description: `Transaction error`
-  }
+  },
+  INSUFFICIENT_ACCOUNT_ASSETS: {
+    number: 101,
+    message: "Cannot withdraw %amount% assets from account %address%: insufficient balance",
+    title: 'Insufficient account assests',
+    description: `Withdrawing %amount% assets will lead to insufficient balance`
+  },
 };
 
 const asaErrors = {
@@ -308,6 +314,12 @@ const asaErrors = {
     message: `Asset with Index %assetId% not found`,
     title: "Asset Not Found",
     description: "Asset Not Found"
+  },
+  ASSET_HOLDING_NOT_FOUND: {
+    number: 903,
+    message: `Account %address% does not hold asset index %assetId%`,
+    title: "Asset Holding Not Found",
+    description: "Asset Holding Not Found"
   }
 };
 
