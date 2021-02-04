@@ -342,7 +342,6 @@ export class Runtime {
     const account = this.assertAccountDefined(accountAddr, this.ctx.state.accounts.get(accountAddr));
     account.optInToApp(appId, appParams);
 
-    // Execute approval program for Opt-In
     this.run(appParams["approval-program"], ExecutionMode.STATEFUL);
     this.store = this.ctx.state;
   }
@@ -394,7 +393,6 @@ export class Runtime {
     this.addCtxAppUpdateTx(senderAddr, appId, payFlags, flags);
     this.ctx.state = cloneDeep(this.store);
 
-    // Execute current approval program for Update
     this.run(appParams["approval-program"], ExecutionMode.STATEFUL);
 
     // If successful update programs and state
@@ -546,7 +544,7 @@ export class Runtime {
       if (txnParam.sign === SignType.LogicSignature) {
         this.validateLsigAndRun(txnParam);
       }
-      // let fromAccount;
+
       // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
       switch (txnParam.type) {
         case TransactionType.CallNoOpSSC:
