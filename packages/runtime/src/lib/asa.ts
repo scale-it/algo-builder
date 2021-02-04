@@ -9,7 +9,13 @@ import { ASADefsSchema } from "../types-input";
 import { loadFromYamlFileSilentWithMessage } from "./files";
 
 const ASSETS_DIR = "assets";
-
+/**
+ * Validates asset definitions and checks if opt-in acc names are present in network
+ * @param accounts AccountMap is the SDK account type, used in builder. RuntimeAccountMap is
+ * for StoreAccount used in runtime (where we use maps instead of arrays in sdk structures).
+ * @param filename asa filename
+ * @param asaDef asset definitions
+ */
 function validateSingle (accounts: AccountMap | RuntimeAccountMap, filename: string, asaDef: ASADef): void {
   if (!asaDef.optInAccNames || asaDef.optInAccNames.length === 0) {
     return;
@@ -17,7 +23,7 @@ function validateSingle (accounts: AccountMap | RuntimeAccountMap, filename: str
   for (const accName of asaDef.optInAccNames) {
     if (!accounts.get(accName)) {
       throw new BuilderError(
-        ERRORS.ASA.ASA_PARAM_ERROR_NO_NAMED_OPT_IN_ACCOUNT, {
+        ERRORS.ASA.PARAM_ERROR_NO_NAMED_OPT_IN_ACCOUNT, {
           filename: filename,
           optInAccName: accName
         });
@@ -46,7 +52,7 @@ export function validateASADefs (
   } catch (e) {
     if (e instanceof z.ZodError) {
       throw new BuilderError(
-        ERRORS.ASA.ASA_PARAM_PARSE_ERROR, {
+        ERRORS.ASA.PARAM_PARSE_ERROR, {
           reason: parseZodError(e),
           filename: filename
         }, e);

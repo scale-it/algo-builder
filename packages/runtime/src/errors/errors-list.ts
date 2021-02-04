@@ -285,7 +285,7 @@ const transactionErrors = {
 };
 
 const asaErrors = {
-  ASA_PARAM_PARSE_ERROR: {
+  PARAM_PARSE_ERROR: {
     number: 900,
     message: `Invalid ASA definition: '%filename%'.
     Reason: %reason%`,
@@ -294,7 +294,7 @@ const asaErrors = {
     Reason: %reason%
     Please check your ASA file`
   },
-  ASA_PARAM_ERROR_NO_NAMED_OPT_IN_ACCOUNT: {
+  PARAM_ERROR_NO_NAMED_OPT_IN_ACCOUNT: {
     number: 901,
     message: `Invalid ASA definition: '%filename%'.
     Opt-in account not found by name: %optInAccName%`,
