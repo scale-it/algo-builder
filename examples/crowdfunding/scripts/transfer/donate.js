@@ -1,13 +1,13 @@
 const { stringToBytes, executeTransaction } = require('@algorand-builder/algob');
-const { TransactionType, SignType } = require('@algorand-builder/runtime/build/types');
+const { types } = require('@algorand-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
   const donorAccount = deployer.accountsByName.get('john');
 
   await executeTransaction(deployer, {
-    type: TransactionType.TransferAlgo,
-    sign: SignType.SecretKey,
+    type: types.TransactionType.TransferAlgo,
+    sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
     toAccountAddr: donorAccount.addr,
     amountMicroAlgos: 20000000,
@@ -26,16 +26,16 @@ async function run (runtimeEnv, deployer) {
 
   const txGroup = [
     {
-      type: TransactionType.CallNoOpSSC,
-      sign: SignType.SecretKey,
+      type: types.TransactionType.CallNoOpSSC,
+      sign: types.SignType.SecretKey,
       fromAccount: donorAccount,
       appId: appInfo.appID,
       payFlags: {},
       appArgs: appArgs
     },
     {
-      type: TransactionType.TransferAlgo,
-      sign: SignType.SecretKey,
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
       fromAccount: donorAccount,
       toAccountAddr: escrowAccount.address(),
       amountMicroAlgos: 5000000,

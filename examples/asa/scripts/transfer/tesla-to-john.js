@@ -1,5 +1,5 @@
 const { executeTransaction, balanceOf } = require('@algorand-builder/algob');
-const { TransactionType, SignType } = require('@algorand-builder/runtime/build/types');
+const { types } = require('@algorand-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   const teslaAssetID = deployer.asa.get('tesla').assetIndex;
@@ -8,8 +8,8 @@ async function run (runtimeEnv, deployer) {
   const elon = deployer.accountsByName.get('elon-musk');
 
   await executeTransaction(deployer, {
-    type: TransactionType.TransferAsset,
-    sign: SignType.SecretKey,
+    type: types.TransactionType.TransferAsset,
+    sign: types.SignType.SecretKey,
     fromAccount: elon,
     toAccountAddr: john.addr,
     amount: 1,

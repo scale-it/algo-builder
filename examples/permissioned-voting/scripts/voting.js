@@ -1,5 +1,5 @@
 const { executeTransaction, stringToBytes, uint64ToBigEndian } = require('@algorand-builder/algob');
-const { TransactionType, SignType } = require('@algorand-builder/runtime/build/types');
+const { types } = require('@algorand-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -7,8 +7,8 @@ async function run (runtimeEnv, deployer) {
   const votingAdminAccount = deployer.accountsByName.get('john');
 
   const algoTxnParams = {
-    type: TransactionType.TransferAlgo,
-    sign: SignType.SecretKey,
+    type: types.TransactionType.TransferAlgo,
+    sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
     toAccountAddr: votingAdminAccount.addr,
     amountMicroAlgos: 200000000,
@@ -25,8 +25,8 @@ async function run (runtimeEnv, deployer) {
 
   // Transfer 1 vote token to alice.
   const txnParam = {
-    type: TransactionType.TransferAsset,
-    sign: SignType.SecretKey,
+    type: types.TransactionType.TransferAsset,
+    sign: types.SignType.SecretKey,
     fromAccount: votingAdminAccount,
     toAccountAddr: alice.addr,
     amount: 1,

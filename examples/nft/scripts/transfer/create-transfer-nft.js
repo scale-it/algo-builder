@@ -4,7 +4,7 @@
 */
 const { executeTransaction, printGlobalNFT, printLocalNFT } = require('./common');
 const { stringToBytes } = require('@algorand-builder/algob');
-const { TransactionType, SignType } = require('@algorand-builder/runtime/build/types');
+const { types } = require('@algorand-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -22,8 +22,8 @@ async function run (runtimeEnv, deployer) {
   let appArgs = ['create', nftRef, '1234'].map(stringToBytes);
 
   let txnParam = {
-    type: TransactionType.CallNoOpSSC,
-    sign: SignType.SecretKey,
+    type: types.TransactionType.CallNoOpSSC,
+    sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
     appId: appId,
     payFlags: {},
@@ -48,8 +48,8 @@ async function run (runtimeEnv, deployer) {
   // transfer nft from master to john
   // account_A = master, account_B = john
   txnParam = {
-    type: TransactionType.CallNoOpSSC,
-    sign: SignType.SecretKey,
+    type: types.TransactionType.CallNoOpSSC,
+    sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
     appId: appId,
     payFlags: {},

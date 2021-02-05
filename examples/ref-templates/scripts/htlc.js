@@ -1,13 +1,13 @@
 const { executeTransaction, mkTxnParams } = require('./common/common');
 const { globalZeroAddress, stringToBytes } = require('@algorand-builder/algob');
-const { SignType } = require('@algorand-builder/runtime/build/types');
+const { types } = require('@algorand-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
   const john = deployer.accountsByName.get('john');
 
   const txnParams = mkTxnParams(masterAccount, john.addr, 4e6, {}, { note: 'funding account' });
-  txnParams.sign = SignType.SecretKey;
+  txnParams.sign = types.SignType.SecretKey;
   await executeTransaction(deployer, txnParams);
 
   const secret = 'hero wisdom green split loop element vote belt';
@@ -26,7 +26,7 @@ async function run (runtimeEnv, deployer) {
   let contractAddress = contract.address();
 
   txnParams.fromAccount = { addr: contractAddress };
-  txnParams.sign = SignType.LogicSignature;
+  txnParams.sign = types.SignType.LogicSignature;
   txnParams.toAccountAddr = globalZeroAddress;
   txnParams.amountMicroAlgos = 0;
   txnParams.lsig = contract;

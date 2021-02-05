@@ -8,7 +8,7 @@
 */
 import { stringToBytes } from "@algorand-builder/algob";
 import { AlgobDeployer, AlgobRuntimeEnv } from "@algorand-builder/algob/src/types";
-import { AlgoTransferParam, SignType, TransactionType } from "@algorand-builder/runtime/build/types";
+import * as runtime from "@algorand-builder/runtime";
 
 import { executeTx, prepareParameters } from "./common";
 
@@ -19,9 +19,9 @@ async function run (runtimeEnv: AlgobRuntimeEnv, deployer: AlgobDeployer): Promi
   let lsig = await deployer.loadLogic('htlc.py', [stringToBytes(wrongSecret)], scTmplParams);
   let sender = lsig.address();
 
-  const txnParams: AlgoTransferParam = {
-    type: TransactionType.TransferAlgo,
-    sign: SignType.LogicSignature,
+  const txnParams: runtime.types.AlgoTransferParam = {
+    type: runtime.types.TransactionType.TransferAlgo,
+    sign: runtime.types.SignType.LogicSignature,
     fromAccount: { addr: sender, sk: new Uint8Array(0) }, // we don't need secret key for logic signature account so added a dummy
     toAccountAddr: alice.addr,
     amountMicroAlgos: 200,

@@ -1,13 +1,13 @@
 const { stringToBytes, executeTransaction } = require('@algorand-builder/algob');
-const { TransactionType, SignType } = require('@algorand-builder/runtime/build/types');
+const { types } = require('@algorand-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
   const creatorAccount = deployer.accountsByName.get('alice');
 
   await executeTransaction(deployer, {
-    type: TransactionType.TransferAlgo,
-    sign: SignType.SecretKey,
+    type: types.TransactionType.TransferAlgo,
+    sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
     toAccountAddr: creatorAccount.addr,
     amountMicroAlgos: 5000000,
@@ -21,16 +21,16 @@ async function run (runtimeEnv, deployer) {
   // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
   const txGroup = [
     {
-      type: TransactionType.CallNoOpSSC,
-      sign: SignType.SecretKey,
+      type: types.TransactionType.CallNoOpSSC,
+      sign: types.SignType.SecretKey,
       fromAccount: creatorAccount,
       appId: appInfo.appID,
       payFlags: {},
       appArgs: appArgs
     },
     {
-      type: TransactionType.TransferAlgo,
-      sign: SignType.LogicSignature,
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.LogicSignature,
       fromAccount: { addr: escrowAccount.address() },
       toAccountAddr: creatorAccount.addr,
       amountMicroAlgos: 0,

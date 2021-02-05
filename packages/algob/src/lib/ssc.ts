@@ -1,5 +1,5 @@
 import { encodeNote, parseSSCAppArgs } from "@algorand-builder/runtime";
-import type { SSCOptionalFlags, TxParams } from "@algorand-builder/runtime/build/types";
+import * as runtime from "@algorand-builder/runtime";
 import tx, { Account as AccountSDK, ConfirmedTxInfo } from "algosdk";
 
 import { AlgobDeployer } from "../types";
@@ -20,11 +20,11 @@ export const reDigit = /^\d+$/;
 export async function update (
   deployer: AlgobDeployer,
   sender: AccountSDK,
-  payFlags: TxParams,
+  payFlags: runtime.types.TxParams,
   appId: number,
   newApprovalProgram: string,
   newClearProgram: string,
-  flags: SSCOptionalFlags
+  flags: runtime.types.SSCOptionalFlags
 ): Promise<ConfirmedTxInfo> {
   const params = await mkTxParams(deployer.algodClient, payFlags);
   const note = encodeNote(payFlags.note, payFlags.noteb64);

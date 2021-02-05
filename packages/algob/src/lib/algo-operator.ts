@@ -1,13 +1,5 @@
 import { BuilderError, encodeNote, parseSSCAppArgs } from "@algorand-builder/runtime";
-import type {
-  Account,
-  AccountMap,
-  ASADef,
-  ASADeploymentFlags,
-  SSCDeploymentFlags,
-  SSCOptionalFlags,
-  TxParams
-} from "@algorand-builder/runtime/build/types";
+import * as runtime from "@algorand-builder/runtime";
 import type { LogicSigArgs } from "algosdk";
 import algosdk from "algosdk";
 
@@ -40,26 +32,29 @@ export function createAlgoOperator (network: Network): AlgoOperator {
 export interface AlgoOperator {
   algodClient: algosdk.Algodv2
   deployASA: (
-    name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: AccountMap, txWriter: txWriter
+    name: string, asaDef: runtime.types.ASADef,
+    flags: runtime.types.ASADeploymentFlags, accounts: runtime.types.AccountMap, txWriter: txWriter
   ) => Promise<ASAInfo>
-  fundLsig: (name: string, flags: FundASCFlags, payFlags: TxParams,
+  fundLsig: (name: string, flags: FundASCFlags, payFlags: runtime.types.TxParams,
     txWriter: txWriter, scParams: LogicSigArgs, scTmplParams?: StrMap) => Promise<LsigInfo>
   deploySSC: (
     approvalProgram: string,
     clearProgram: string,
-    flags: SSCDeploymentFlags,
-    payFlags: TxParams,
+    flags: runtime.types.SSCDeploymentFlags,
+    payFlags: runtime.types.TxParams,
     txWriter: txWriter,
     scTmplParams?: StrMap) => Promise<SSCInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
   optInToASA: (
-    asaName: string, assetIndex: number, account: Account, params: TxParams
+    asaName: string, assetIndex: number, account: runtime.types.Account, params: runtime.types.TxParams
   ) => Promise<void>
   optInToASAMultiple: (
-    asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: AccountMap, assetIndex: number
+    asaName: string, asaDef: runtime.types.ASADef,
+    flags: runtime.types.ASADeploymentFlags, accounts: runtime.types.AccountMap, assetIndex: number
   ) => Promise<void>
   optInToSSC: (
-    sender: Account, appId: number, payFlags: TxParams, flags: SSCOptionalFlags) => Promise<void>
+    sender: runtime.types.Account, appId: number,
+    payFlags: runtime.types.TxParams, flags: runtime.types.SSCOptionalFlags) => Promise<void>
   ensureCompiled: (name: string, force?: boolean, scTmplParams?: StrMap) => Promise<ASCCache>
 }
 
@@ -101,7 +96,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     return accoutInfo.amount - (accoutInfo.assets.length + 1) * ALGORAND_ASA_OWNERSHIP_COST;
   }
 
-  getOptInTxSize (params: algosdk.SuggestedParams, accounts: AccountMap): number {
+  getOptInTxSize (params: algosdk.SuggestedParams, accounts: runtime.types.AccountMap): number {
     const randomAccount = accounts.values().next().value;
     // assetID can't be known before ASA creation
     // it shouldn't be easy to find out the latest asset ID
@@ -114,7 +109,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   }
 
   async _optInToASA (
-    asaName: string, assetIndex: number, account: Account, params: algosdk.SuggestedParams
+    asaName: string, assetIndex: number, account: runtime.types.Account, params: algosdk.SuggestedParams
   ): Promise<void> {
     console.log(`ASA ${account.name} opt-in for ASA ${asaName}`);
     const sampleASAOptInTX = tx.makeASAOptInTx(account.addr, assetIndex, params);
@@ -124,14 +119,15 @@ export class AlgoOperatorImpl implements AlgoOperator {
   }
 
   async optInToASA (
-    asaName: string, assetIndex: number, account: Account, flags: TxParams
+    asaName: string, assetIndex: number, account: runtime.types.Account, flags: runtime.types.TxParams
   ): Promise<void> {
     const txParams = await tx.mkTxParams(this.algodClient, flags);
     await this._optInToASA(asaName, assetIndex, account, txParams);
   }
 
   async optInToASAMultiple (
-    asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: AccountMap, assetIndex: number
+    asaName: string, asaDef: runtime.types.ASADef,
+    flags: runtime.types.ASADeploymentFlags, accounts: runtime.types.AccountMap, assetIndex: number
   ): Promise<void> {
     const txParams = await tx.mkTxParams(this.algodClient, flags);
     const optInAccounts = await this.checkBalanceForOptInTx(
@@ -146,8 +142,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
   }
 
   async checkBalanceForOptInTx (
-    name: string, params: algosdk.SuggestedParams, asaDef: ASADef, accounts: AccountMap, creator: Account
-  ): Promise<Account[]> {
+    name: string, params: algosdk.SuggestedParams,
+    asaDef: runtime.types.ASADef, accounts: runtime.types.AccountMap, creator: runtime.types.Account
+  ): Promise<runtime.types.Account[]> {
     if (!asaDef.optInAccNames || asaDef.optInAccNames.length === 0) {
       return [];
     }
@@ -182,7 +179,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
   }
 
   async deployASA (
-    name: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: AccountMap,
+    name: string, asaDef: runtime.types.ASADef,
+    flags: runtime.types.ASADeploymentFlags, accounts: runtime.types.AccountMap,
     txWriter: txWriter): Promise<ASAInfo> {
     const message = 'Deploying ASA: ' + name;
     console.log(message);
@@ -214,7 +212,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   async fundLsig (
     name: string,
     flags: FundASCFlags,
-    payFlags: TxParams,
+    payFlags: runtime.types.TxParams,
     txWriter: txWriter,
     scParams: LogicSigArgs,
     scTmplParams?: StrMap): Promise<LsigInfo> {
@@ -255,8 +253,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
   async deploySSC (
     approvalProgram: string,
     clearProgram: string,
-    flags: SSCDeploymentFlags,
-    payFlags: TxParams,
+    flags: runtime.types.SSCDeploymentFlags,
+    payFlags: runtime.types.TxParams,
     txWriter: txWriter,
     scTmplParams?: StrMap): Promise<SSCInfo> {
     const sender = flags.sender.addr;
@@ -315,10 +313,10 @@ export class AlgoOperatorImpl implements AlgoOperator {
    * @param flags Optional parameters to SSC (accounts, args..)
    */
   async optInToSSC (
-    sender: Account,
+    sender: runtime.types.Account,
     appId: number,
-    payFlags: TxParams,
-    flags: SSCOptionalFlags): Promise<void> {
+    payFlags: runtime.types.TxParams,
+    flags: runtime.types.SSCOptionalFlags): Promise<void> {
     const params = await tx.mkTxParams(this.algodClient, payFlags);
     const txn = algosdk.makeApplicationOptInTxn(
       sender.addr,
