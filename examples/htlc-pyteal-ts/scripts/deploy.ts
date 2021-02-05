@@ -3,12 +3,13 @@
  * This file demonstrates the PyTeal Example for HTLC(Hash Time Lock Contract)
 */
 import { executeTransaction } from "@algorand-builder/algob";
-import { AlgobDeployer, AlgobRuntimeEnv } from "@algorand-builder/algob/src/types";
+import * as algob from "@algorand-builder/algob";
 import * as runtime from "@algorand-builder/runtime";
 
 import { getDeployerAccount, prepareParameters } from "./withdraw/common";
 
-async function run (runtimeEnv: AlgobRuntimeEnv, deployer: AlgobDeployer): Promise<void> {
+async function run (
+  runtimeEnv: algob.types.AlgobRuntimeEnv, deployer: algob.types.AlgobDeployer): Promise<void> {
   const masterAccount = getDeployerAccount(deployer, 'master-account');
   const { alice, bob, scTmplParams } = prepareParameters(deployer);
 

@@ -7,12 +7,13 @@
  * if the seller is able to provide the secret value that corresponds to the hash in the program.
 */
 import { stringToBytes } from "@algorand-builder/algob";
-import { AlgobDeployer, AlgobRuntimeEnv } from "@algorand-builder/algob/src/types";
+import * as algob from "@algorand-builder/algob";
 import * as runtime from "@algorand-builder/runtime";
 
 import { executeTx, prepareParameters } from "./common";
 
-async function run (runtimeEnv: AlgobRuntimeEnv, deployer: AlgobDeployer): Promise<void> {
+async function run (
+  runtimeEnv: algob.types.AlgobRuntimeEnv, deployer: algob.types.AlgobDeployer): Promise<void> {
   const { alice, scTmplParams, secret } = prepareParameters(deployer);
   const wrongSecret = 'hero wisdom red split loop element vote belt';
 
