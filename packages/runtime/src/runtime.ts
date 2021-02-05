@@ -17,7 +17,7 @@ import type {
   SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
   StackElem, State, StoreAccountI, Txn, TxParams
 } from "./types";
-import { ExecutionMode, SignType, TransactionType, AssetTransferParam } from "./types";
+import { AssetTransferParam, ExecutionMode, SignType, TransactionType } from "./types";
 
 export class Runtime {
   /**
@@ -314,7 +314,7 @@ export class Runtime {
 
     // create asset
     const asset = senderAcc.addAsset(++this.assetCounter, name, this.loadedAssetsDefs[name]);
-    this.addCtxAssetCreate(name, flags, asset);
+    this.mkAssetCreateTx(name, flags, asset);
     this.store.assetDefs.set(this.assetCounter, sender.addr);
     return this.assetCounter;
   }
@@ -327,17 +327,17 @@ export class Runtime {
    */
   optIntoASA (assetIndex: number, address: AccountAddress, flags: TxParams): void {
     const assetDef = this.getAssetDef(assetIndex);
-    const creatorAddr = this.assertAddressDefined(this.store.assetDefs.get(assetIndex));
+    const creatorAddr = assetDef.creator;
     makeAssetTransferTxnWithSuggestedParams(
       address, address, undefined, undefined, 0, undefined, assetIndex,
       mockSuggestedParams(flags, this.round));
 
     const assetHolding: AssetHolding = {
-      amount: 0,
+      amount: address === creatorAddr ? assetDef.total : 0, // for creator opt-in amount is total assets
       'asset-id': assetIndex,
       creator: creatorAddr,
       'is-frozen': assetDef["default-frozen"]
-    }
+    };
 
     const account = this.getAccount(address);
     account.optInToASA(assetIndex, assetHolding);
@@ -636,7 +636,8 @@ export class Runtime {
     toAssetHolding.amount += txnParam.amount;
 
     if (txnParam.payFlags.closeRemainderTo) {
-      const closeRemToAssetHolding = this.getAssetHolding(txnParam.assetID, txnParam.payFlags.closeRemainderTo);
+      const closeRemToAssetHolding = this.getAssetHolding(
+        txnParam.assetID, txnParam.payFlags.closeRemainderTo);
 
       closeRemToAssetHolding.amount += fromAssetHolding.amount; // transfer assets of sender to closeRemTo account
       fromAssetHolding.amount = 0; // close sender's account
