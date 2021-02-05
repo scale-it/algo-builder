@@ -175,7 +175,7 @@ export class StoreAccount implements StoreAccountI {
   addAsset (assetId: number, name: string, asaDef: ASADef): AssetDef {
     if (this.createdAssets.size === MAX_ALGORAND_ACCOUNT_ASSETS) {
       throw new TealError(ERRORS.TEAL.MAX_LIMIT_ASSETS,
-        { name: name, address: this.address, max: MAX_ALGORAND_ACCOUNT_APPS });
+        { name: name, address: this.address, max: MAX_ALGORAND_ACCOUNT_ASSETS });
     }
 
     this.minBalance += ASSET_CREATION_FEE;
