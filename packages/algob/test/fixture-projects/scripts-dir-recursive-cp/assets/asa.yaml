@@ -1,3 +1,6 @@
 ASA from first:
   total: 1
   decimals: 0
+  unitName: "ASA"
+  defaultFrozen: false
+

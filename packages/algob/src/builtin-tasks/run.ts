@@ -1,8 +1,8 @@
+import { BuilderError } from "@algorand-builder/runtime";
 import debug from "debug";
 import fsExtra from "fs-extra";
 
 import { task } from "../internal/core/config/config-env";
-import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { DeployerConfig, mkDeployer } from "../internal/deployer_cfg";
 import { TxWriterImpl } from "../internal/tx-log-writer";

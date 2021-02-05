@@ -1,3 +1,4 @@
+import type { Account } from "@algorand-builder/runtime/build/types";
 import { Kmd } from "algosdk";
 import { assert } from "chai";
 import path from "path";
@@ -18,7 +19,7 @@ import { ERRORS } from "../../../../src/internal/core/errors-list";
 import { resetBuilderContext } from "../../../../src/internal/reset";
 import { KMDOperator } from "../../../../src/lib/account";
 import { createKmdClient } from "../../../../src/lib/driver";
-import { Account, KmdCfg, NetworkConfig } from "../../../../src/types";
+import { KmdCfg, NetworkConfig } from "../../../../src/types";
 import { assertAccountsEqual } from "../../../helpers/assert-methods";
 import { useEnvironment } from "../../../helpers/environment";
 import { expectBuilderErrorAsync } from "../../../helpers/errors";

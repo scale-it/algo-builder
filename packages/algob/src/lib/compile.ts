@@ -1,3 +1,4 @@
+import { BuilderError } from "@algorand-builder/runtime";
 import type { Algodv2, CompileOut } from "algosdk";
 import { spawnSync, SpawnSyncReturns } from "child_process";
 import * as fs from 'fs';
@@ -5,7 +6,7 @@ import * as murmurhash from 'murmurhash';
 import * as path from 'path';
 import YAML from "yaml";
 
-import { BuilderError, parseAlgorandError } from "../internal/core/errors";
+import { parseAlgorandError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { assertDir, ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
 import { timestampNow } from "../lib/time";

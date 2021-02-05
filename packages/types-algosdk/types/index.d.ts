@@ -574,7 +574,7 @@ declare module 'algosdk' {
     creator: string;
     total: number;
     decimals: number;
-    'default-frozen': string;
+    'default-frozen': boolean;
     'unit-name': string;
     name: string;
     url: string;

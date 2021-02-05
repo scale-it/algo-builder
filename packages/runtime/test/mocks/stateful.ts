@@ -46,7 +46,7 @@ export const accInfo = [{
     creator: "addr-1",
     total: 10000,
     decimals: 10,
-    'default-frozen': "false",
+    'default-frozen': false,
     'unit-name': "AD",
     name: "ASSETAD",
     url: "assetUrl",
