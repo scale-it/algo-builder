@@ -272,7 +272,7 @@ by an index that does not exist.`
     message: "Error while creating app for %address%. Maximum created apps for an account is %max%",
     title: 'App Creation Error',
     description: `App Creation Error`
-  },
+  }
 };
 
 const transactionErrors = {
@@ -287,7 +287,7 @@ const transactionErrors = {
     message: "Cannot withdraw %amount% assets from account %address%: insufficient balance",
     title: 'Insufficient account assests',
     description: `Withdrawing %amount% assets will lead to insufficient balance`
-  },
+  }
 };
 
 const asaErrors = {
