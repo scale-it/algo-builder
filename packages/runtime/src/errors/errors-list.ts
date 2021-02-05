@@ -263,13 +263,13 @@ by an index that does not exist.`
   },
   MAX_LIMIT_ASSETS: {
     number: 39,
-    message: "Error while creating asset %name% for %address%. Maximum created assets for an account is %max%}'",
+    message: "Error while creating asset %name% for %address%. Maximum created assets for an account is %max%",
     title: 'Asset Creation Error',
     description: `Asset Creation Error`
   },
   MAX_LIMIT_APPS: {
     number: 40,
-    message: "Error while creating app for %address%. Maximum created apps for an account is %max%}'",
+    message: "Error while creating app for %address%. Maximum created apps for an account is %max%",
     title: 'App Creation Error',
     description: `App Creation Error`
   }

@@ -282,7 +282,7 @@ export class Runtime {
   }
 
   // creates new asset creation transaction object and update context
-  addCtxAssetCreate (
+  mkAssetCreateTx (
     name: string, flags: ASADeploymentFlags, asaDef: AssetDef): void {
     // this funtion is called only for validation of parameters passed
     algosdk.makeAssetCreateTxnWithSuggestedParams(
