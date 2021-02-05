@@ -1,12 +1,10 @@
 import { encodeNote, mkTransaction } from "@algorand-builder/runtime";
-import type { ExecParams, TxParams } from "@algorand-builder/runtime/build/types";
+import type { ASADef, ASADeploymentFlags, ExecParams, TxParams } from "@algorand-builder/runtime/build/types";
 import { SignType } from "@algorand-builder/runtime/build/types";
 import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
 import {
-  AlgobDeployer,
-  ASADef,
-  ASADeploymentFlags
+  AlgobDeployer
 } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
 import { loadSignedTxnFromFile } from "./files";

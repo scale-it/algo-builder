@@ -1982,6 +1982,9 @@ export class GetAssetDef extends Op {
         case "AssetDecimals":
           value = BigInt(AssetDefinition.decimals);
           break;
+        case "AssetDefaultFrozen":
+          value = AssetDefinition["default-frozen"] ? 1n : 0n;
+          break;
         default:
           value = stringToBytes(AssetDefinition[s] as string);
           break;

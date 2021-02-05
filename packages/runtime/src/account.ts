@@ -8,10 +8,17 @@ import { generateAccount } from "algosdk";
 
 import { TealError } from "./errors/errors";
 import { ERRORS } from "./errors/errors-list";
-import { ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE, SSC_KEY_BYTE_SLICE, SSC_VALUE_BYTES, SSC_VALUE_UINT } from "./lib/constants";
+import {
+  ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE, ASSET_CREATION_FEE, MAX_ALGORAND_ACCOUNT_APPS,
+  MAX_ALGORAND_ACCOUNT_ASSETS,
+  SSC_KEY_BYTE_SLICE, SSC_VALUE_BYTES, SSC_VALUE_UINT
+} from "./lib/constants";
 import { keyToBytes } from "./lib/parsing";
 import { assertValidSchema } from "./lib/stateful";
-import { AppLocalStateM, CreatedAppM, SSCAttributesM, SSCDeploymentFlags, StackElem, StoreAccountI } from "./types";
+import {
+  AppLocalStateM, ASADef, CreatedAppM, SSCAttributesM,
+  SSCDeploymentFlags, StackElem, StoreAccountI
+} from "./types";
 
 const StateMap = "key-value";
 const globalState = "global-state";
@@ -145,14 +152,40 @@ export class StoreAccount implements StoreAccountI {
   }
 
   /**
+   * Queries asset definition by assetId
+   * @param assetId asset index
+   */
+  getAssetDef (assetId: number): AssetDef | undefined {
+    return this.createdAssets.get(assetId);
+  }
+
+  /**
+   * Creates Asset in account's state
+   * @param name Asset Name
+   * @param asaDef Asset Definitions
+   */
+  addAsset (assetId: number, name: string, asaDef: ASADef): AssetDef {
+    if (this.createdAssets.size === MAX_ALGORAND_ACCOUNT_ASSETS) {
+      throw new TealError(ERRORS.TEAL.MAX_LIMIT_ASSETS,
+        { name: name, address: this.address, max: MAX_ALGORAND_ACCOUNT_ASSETS });
+    }
+
+    this.minBalance += ASSET_CREATION_FEE;
+    const asset = new Asset(assetId, asaDef, this.address, name);
+    this.createdAssets.set(asset.id, asset.definitions);
+    return asset.definitions;
+  }
+
+  /**
    * Add application in account's state
    * check maximum account creation limit
    * @param appId application index
    * @param params SSCDeployment Flags
    */
   addApp (appId: number, params: SSCDeploymentFlags): CreatedAppM {
-    if (this.createdApps.size === 10) {
-      throw new Error('Maximum created applications for an account is 10');
+    if (this.createdApps.size === MAX_ALGORAND_ACCOUNT_APPS) {
+      throw new TealError(ERRORS.TEAL.MAX_LIMIT_APPS,
+        { address: this.address, max: MAX_ALGORAND_ACCOUNT_APPS });
     }
 
     // raise minimum balance
@@ -225,6 +258,30 @@ class App {
       'global-state': new Map<string, StackElem>(),
       'global-state-schema': { 'num-byte-slice': params.globalBytes, 'num-uint': params.globalInts },
       'local-state-schema': { 'num-byte-slice': params.localBytes, 'num-uint': params.localInts }
+    };
+  }
+}
+
+// represents asset
+class Asset {
+  readonly id: number;
+  readonly definitions: AssetDef;
+
+  constructor (assetId: number, def: ASADef, creator: string, assetName: string) {
+    this.id = assetId;
+    this.definitions = {
+      creator: creator,
+      total: def.total,
+      decimals: def.decimals,
+      'default-frozen': def.defaultFrozen ?? false,
+      "unit-name": def.unitName,
+      name: assetName,
+      url: def.url ?? '',
+      "metadata-hash": def.metadataHash ?? '',
+      manager: def.manager ?? '',
+      reserve: def.reserve ?? '',
+      freeze: def.freeze ?? '',
+      clawback: def.clawback ?? ''
     };
   }
 }

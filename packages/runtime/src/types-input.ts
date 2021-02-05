@@ -9,7 +9,7 @@ export const ASADefSchema = z.object({
   total: z.number(),
   decimals: z.number(),
   defaultFrozen: z.boolean().optional(),
-  unitName: z.string().optional(),
+  unitName: z.string(),
   url: z.string().optional(),
   metadataHash: z.string().optional(),
   note: z.string().optional(),

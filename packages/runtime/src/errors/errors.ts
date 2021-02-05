@@ -1,6 +1,8 @@
 import { AnyMap } from "../types";
 import { ErrorDescriptor, getErrorCode } from "./errors-list";
 
+export const ERROR_PREFIX = "ABLDR";
+
 export class TealError extends Error {
   public static isTealError(other: any): other is TealError { // eslint-disable-line
     return (
@@ -36,6 +38,44 @@ export class TealError extends Error {
 
     this._isTealError = true;
     Object.setPrototypeOf(this, TealError.prototype);
+  }
+}
+
+export class BuilderError extends Error {
+  public static isBuilderError(other: any): other is BuilderError { // eslint-disable-line
+    return (
+      other !== undefined && other !== null && other._isBuilderError === true
+    );
+  }
+
+  public readonly errorDescriptor: ErrorDescriptor;
+  public readonly number: number;
+  public readonly parent?: Error;
+
+  private readonly _isBuilderError: boolean;
+
+  constructor (
+    errorDescriptor: ErrorDescriptor,
+    messageArguments: AnyMap = {},
+    parentError?: Error
+  ) {
+    const prefix = `${`${ERROR_PREFIX}${errorDescriptor.number}`}: `;
+
+    const formattedMessage = applyErrorMessageTemplate(
+      errorDescriptor.message,
+      messageArguments
+    );
+
+    super(prefix + formattedMessage);
+    this.errorDescriptor = errorDescriptor;
+    this.number = errorDescriptor.number;
+
+    if (parentError instanceof Error) {
+      this.parent = parentError;
+    }
+
+    this._isBuilderError = true;
+    Object.setPrototypeOf(this, BuilderError.prototype);
   }
 }
 

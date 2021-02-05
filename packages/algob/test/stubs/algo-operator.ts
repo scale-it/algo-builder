@@ -1,14 +1,13 @@
-import type { SSCDeploymentFlags, SSCOptionalFlags, TxParams } from "@algorand-builder/runtime/build/types";
+import type {
+  Account, AccountMap, ASADef, ASADeploymentFlags,
+  SSCDeploymentFlags, SSCOptionalFlags, TxParams
+} from "@algorand-builder/runtime/build/types";
 import type { LogicSig } from "algosdk";
 import { Algodv2, LogicSigArgs } from "algosdk";
 
 import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";
 import {
-  Account,
-  AccountMap,
-  ASADef,
-  ASADeploymentFlags,
   ASAInfo,
   ASCCache,
   FundASCFlags,

@@ -1,7 +1,8 @@
+import { BuilderError } from "@algorand-builder/runtime";
 import debug from "debug";
 import * as path from "path";
 
-import { BuilderError, ERRORS, parseAlgorandError } from "../../internal/core/errors";
+import { ERRORS, parseAlgorandError } from "../../internal/core/errors";
 import { AlgobDeployer, AlgobRuntimeEnv } from "../../types";
 
 const log = debug("algob:core:scripts-runner");

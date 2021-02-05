@@ -1,8 +1,7 @@
+import { BuilderError } from "@algorand-builder/runtime";
 import { assert } from "chai";
 
 import {
-  // applyErrorMessageTemplate,
-  BuilderError,
   BuilderPluginError
 } from "../../../src/internal/core/errors";
 import {

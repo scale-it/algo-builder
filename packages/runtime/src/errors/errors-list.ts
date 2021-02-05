@@ -14,7 +14,8 @@ export function getErrorCode (error: ErrorDescriptor): string {
 
 export const ERROR_RANGES = {
   TEAL: { min: 0, max: 99, title: "TEAL opcode errors" },
-  TRANSACTION: { min: 0, max: 99, title: "Transaction error" }
+  TRANSACTION: { min: 100, max: 199, title: "Transaction error" },
+  ASA: { min: 900, max: 999, title: "ASA File Parse Error" }
 };
 
 const PARSE_ERROR = "Parse Error";
@@ -259,15 +260,54 @@ by an index that does not exist.`
     message: "Transaction rounds (firstValid: %first%, lastValid: %last%) are not valid, current round: %round%.",
     title: 'Round Error',
     description: `Round Error`
+  },
+  MAX_LIMIT_ASSETS: {
+    number: 39,
+    message: "Error while creating asset %name% for %address%. Maximum created assets for an account is %max%",
+    title: 'Asset Creation Error',
+    description: `Asset Creation Error`
+  },
+  MAX_LIMIT_APPS: {
+    number: 40,
+    message: "Error while creating app for %address%. Maximum created apps for an account is %max%",
+    title: 'App Creation Error',
+    description: `App Creation Error`
   }
 };
 
 const transactionErrors = {
   UNKNOWN_TRANSACTION_TYPE: {
-    number: 1,
+    number: 100,
     message: "Unknown Transaction type: %transaction%",
     title: "Transaction error",
     description: `Transaction error`
+  }
+};
+
+const asaErrors = {
+  PARAM_PARSE_ERROR: {
+    number: 900,
+    message: `Invalid ASA definition: '%filename%'.
+    Reason: %reason%`,
+    title: "Invalid ASA definition",
+    description: `Invalid ASA definition: '%filename%'.
+    Reason: %reason%
+    Please check your ASA file`
+  },
+  PARAM_ERROR_NO_NAMED_OPT_IN_ACCOUNT: {
+    number: 901,
+    message: `Invalid ASA definition: '%filename%'.
+    Opt-in account not found by name: %optInAccName%`,
+    title: "Opt-in account not found.",
+    description: `Invalid ASA definition: '%filename%'.
+    Opt-in account not found by name: %optInAccName%
+    Please check your ASA and config files`
+  },
+  ASSET_NOT_FOUND: {
+    number: 902,
+    message: `Asset with Index %assetId% not found`,
+    title: "Asset Not Found",
+    description: "Asset Not Found"
   }
 };
 
@@ -277,5 +317,6 @@ export const ERRORS: {
   };
 } = {
   TEAL: tealErrors,
-  TRANSACTION: transactionErrors
+  TRANSACTION: transactionErrors,
+  ASA: asaErrors
 };

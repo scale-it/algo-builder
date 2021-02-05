@@ -1,12 +1,11 @@
+import { BuilderError, parseZodError } from "@algorand-builder/runtime";
 import * as z from 'zod';
 
 import { validateAccount } from "../../../lib/account";
 // import { Account } from "algosdk";
 import type { AlgobChainCfg, HttpNetworkConfig, NetworkConfig } from "../../../types";
 import { ALGOB_CHAIN_NAME } from "../../constants";
-import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
-import { parseZodError } from "../validation-errors";
 import CfgErrors from "./config-errors";
 
 const AccountType = z.object({
