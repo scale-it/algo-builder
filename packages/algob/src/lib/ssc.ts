@@ -1,4 +1,3 @@
-import { encodeNote, parseSSCAppArgs } from "@algorand-builder/runtime";
 import * as runtime from "@algorand-builder/runtime";
 import tx, { Account as AccountSDK, ConfirmedTxInfo } from "algosdk";
 
@@ -27,7 +26,7 @@ export async function update (
   flags: runtime.types.SSCOptionalFlags
 ): Promise<ConfirmedTxInfo> {
   const params = await mkTxParams(deployer.algodClient, payFlags);
-  const note = encodeNote(payFlags.note, payFlags.noteb64);
+  const note = runtime.encodeNote(payFlags.note, payFlags.noteb64);
 
   const app = await deployer.ensureCompiled(newApprovalProgram, false);
   const approvalProg = new Uint8Array(Buffer.from(app.compiled, "base64"));
@@ -40,7 +39,7 @@ export async function update (
     appId,
     approvalProg,
     clearProg,
-    parseSSCAppArgs(flags.appArgs),
+    runtime.parseSSCAppArgs(flags.appArgs),
     flags.accounts,
     flags.foreignApps,
     flags.foreignAssets,

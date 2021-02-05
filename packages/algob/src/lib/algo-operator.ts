@@ -1,4 +1,3 @@
-import { BuilderError, encodeNote, parseSSCAppArgs } from "@algorand-builder/runtime";
 import * as runtime from "@algorand-builder/runtime";
 import type { LogicSigArgs } from "algosdk";
 import algosdk from "algosdk";
@@ -153,20 +152,20 @@ export class AlgoOperatorImpl implements AlgoOperator {
     for (const accName of asaDef.optInAccNames) {
       const account = accounts.get(accName);
       if (!account) {
-        throw new BuilderError(
+        throw new runtime.BuilderError(
           ERRORS.SCRIPT.ASA_OPT_IN_ACCOUNT_NOT_FOUND, {
             accountName: accName
           });
       }
       optInAccs.push(account);
       if (account.addr === creator.addr) {
-        throw new BuilderError(ERRORS.SCRIPT.ASA_TRIED_TO_OPT_IN_CREATOR);
+        throw new runtime.BuilderError(ERRORS.SCRIPT.ASA_TRIED_TO_OPT_IN_CREATOR);
       }
       const accountInfo = await this.algodClient.accountInformation(account.addr).do();
       const requiredAmount = optInTxFee + ALGORAND_ASA_OWNERSHIP_COST;
       const usableAmount = this.getUsableAccBalance(accountInfo);
       if (usableAmount < requiredAmount) {
-        throw new BuilderError(
+        throw new runtime.BuilderError(
           ERRORS.SCRIPT.ASA_OPT_IN_ACCOUNT_INSUFFICIENT_BALANCE, {
             accountName: accName,
             balance: usableAmount,
@@ -224,7 +223,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     console.log(message);
 
     const closeToRemainder = undefined;
-    const note = encodeNote(payFlags.note, payFlags.noteb64);
+    const note = runtime.encodeNote(payFlags.note, payFlags.noteb64);
     const t = algosdk.makePaymentTxnWithSuggestedParams(flags.funder.addr, contractAddress,
       flags.fundingMicroAlgo, closeToRemainder,
       note,
@@ -277,7 +276,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       flags.localBytes,
       flags.globalInts,
       flags.globalBytes,
-      parseSSCAppArgs(flags.appArgs),
+      runtime.parseSSCAppArgs(flags.appArgs),
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
@@ -322,7 +321,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       sender.addr,
       params,
       appId,
-      parseSSCAppArgs(flags.appArgs),
+      runtime.parseSSCAppArgs(flags.appArgs),
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,

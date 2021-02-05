@@ -1,4 +1,3 @@
-import { loadASAFile } from "@algorand-builder/runtime";
 import * as runtime from "@algorand-builder/runtime";
 
 import { mkAccountIndex } from "../lib/account";
@@ -37,6 +36,6 @@ export class DeployerConfig {
     this.algoOp = algoOp;
     this.accounts = mkAccountIndex(runtimeEnv.network.config.accounts);
     this.txWriter = new TxWriterImpl('');
-    this.asaDefs = loadASAFile(this.accounts);
+    this.asaDefs = runtime.loadASAFile(this.accounts);
   }
 }

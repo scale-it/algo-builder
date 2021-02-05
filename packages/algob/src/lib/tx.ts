@@ -1,4 +1,3 @@
-import { encodeNote, mkTransaction } from "@algorand-builder/runtime";
 import * as runtime from "@algorand-builder/runtime";
 import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
@@ -41,10 +40,10 @@ export function makeAssetCreateTxn (
   let note;
   if (flags.noteb64 ?? flags.note) {
     // TxParams note
-    note = encodeNote(flags.note, flags.noteb64);
+    note = runtime.encodeNote(flags.note, flags.noteb64);
   } else if (asaDef.noteb64 ?? asaDef.note) {
     // ASA definition note
-    note = encodeNote(asaDef.note, asaDef.noteb64);
+    note = runtime.encodeNote(asaDef.note, asaDef.noteb64);
   }
 
   // https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js#L104
@@ -131,7 +130,7 @@ export async function executeTransaction (
   execParams: runtime.types.ExecParams | runtime.types.ExecParams[]): Promise<algosdk.ConfirmedTxInfo> {
   const suggestedParams = await getSuggestedParams(deployer.algodClient);
   const mkTx = async (p: runtime.types.ExecParams): Promise<Transaction> =>
-    mkTransaction(p,
+    runtime.mkTransaction(p,
       await mkTxParams(deployer.algodClient, p.payFlags, Object.assign({}, suggestedParams)));
 
   let signedTxn;
