@@ -3,6 +3,7 @@
 export ALGORAND_DATA=`pwd`/node_data/PrimaryNode
 
 create-private-net:
+	if [ -d ./node_data ] ;  then echo "./node_data directory already exists - remove it if you want to create a new private network" ; false; fi
 	@goal network create -r ./node_data -n private -t private-net-template.json
 	@echo '{ "GossipFanout": 0, "EndpointAddress": "127.0.0.1:0", "DNSBootstrapID": "", "EnableProfiler": true, "NetAddress": "127.0.0.1:0", "EnableDeveloperAPI": true }' > ./node_data/PrimaryNode/config.json
 	@echo 'aade468d25a7aa48fec8082d6a847c48492066a2741f3731e613fdde086cd6e9' > ./node_data/PrimaryNode/algod.token
