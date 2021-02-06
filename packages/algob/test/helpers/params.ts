@@ -1,4 +1,6 @@
-import { Account, AlgobRuntimeEnv, PromiseAny } from "../../src/types";
+import type { Account } from "@algorand-builder/runtime/build/types";
+
+import { AlgobRuntimeEnv, PromiseAny } from "../../src/types";
 
 function mkAcc (name: string): Account {
   return {

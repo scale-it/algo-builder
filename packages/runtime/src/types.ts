@@ -1,11 +1,12 @@
 import {
-  Account,
+  Account as AccountSDK,
   AssetDef,
   AssetHolding,
   LogicSig,
   SSCSchemaConfig,
   TxnEncodedObj
 } from "algosdk";
+import * as z from 'zod';
 
 import {
   Add, Addr, Arg, Byte, Bytec, Bytecblock, Div, Int, Len, Mul, Pragma,
@@ -13,6 +14,7 @@ import {
 } from "./interpreter/opcode-list";
 import { TxnFields } from "./lib/constants";
 import type { IStack } from "./lib/stack";
+import type { ASADefSchema, ASADefsSchema } from "./types-input";
 
 export type Operator = Len | Add | Sub |
 Mul | Div | Arg | Bytecblock | Bytec | Addr | Int | Byte | Pragma;
@@ -63,6 +65,8 @@ export interface AccountsMap {
   [addr: string]: StoreAccountI
 }
 
+export type RuntimeAccountMap = Map<string, StoreAccountI>;
+
 export interface State {
   accounts: Map<string, StoreAccountI>
   globalApps: Map<number, string>
@@ -111,13 +115,15 @@ export interface StoreAccountI {
   appsTotalSchema: SSCSchemaConfig
   createdApps: Map<number, SSCAttributesM>
   createdAssets: Map<number, AssetDef>
-  account: Account
+  account: AccountSDK
 
   balance: () => number
   getApp: (appId: number) => SSCAttributesM | undefined
   getAppFromLocal: (appId: number) => AppLocalStateM | undefined
   addApp: (appId: number, params: SSCDeploymentFlags,
     approvalProgram: string, clearProgram: string) => CreatedAppM
+  getAssetDef: (assetId: number) => AssetDef | undefined
+  addAsset: (assetId: number, name: string, asadef: ASADef) => AssetDef
   optInToApp: (appId: number, appParams: SSCAttributesM) => void
   deleteApp: (appId: number) => void
   closeApp: (appId: number) => void
@@ -163,7 +169,7 @@ export interface TxParams {
 /**
  * Stateful Smart contract flags for specifying sender and schema */
 export interface SSCDeploymentFlags extends SSCOptionalFlags {
-  sender: Account
+  sender: AccountSDK
   localInts: number
   localBytes: number
   globalInts: number
@@ -205,7 +211,7 @@ export interface Sign {
 
 export interface AlgoTransferParam extends Sign {
   type: TransactionType.TransferAlgo
-  fromAccount: Account
+  fromAccount: AccountSDK
   toAccountAddr: AccountAddress
   amountMicroAlgos: number
   payFlags: TxParams
@@ -213,7 +219,7 @@ export interface AlgoTransferParam extends Sign {
 
 export interface AssetTransferParam extends Sign {
   type: TransactionType.TransferAsset
-  fromAccount: Account
+  fromAccount: AccountSDK
   toAccountAddr: AccountAddress
   amount: number
   assetID: number
@@ -223,7 +229,7 @@ export interface AssetTransferParam extends Sign {
 export interface SSCCallsParam extends SSCOptionalFlags, Sign {
   type: TransactionType.CallNoOpSSC | TransactionType.ClearSSC |
   TransactionType.CloseSSC | TransactionType.DeleteSSC
-  fromAccount: Account
+  fromAccount: AccountSDK
   appId: number
   payFlags: TxParams
 }
@@ -231,3 +237,19 @@ export interface SSCCallsParam extends SSCOptionalFlags, Sign {
 export interface AnyMap {
   [key: string]: any // eslint-disable-line @typescript-eslint/no-explicit-any
 }
+
+export interface Account extends AccountSDK {
+  // from AccountSDK: addr: string;
+  //                  sk: Uint8Array
+  name: string
+}
+
+export interface ASADeploymentFlags extends TxParams {
+  creator: Account
+}
+
+export type AccountMap = Map<string, Account>;
+
+export type ASADef = z.infer<typeof ASADefSchema>;
+
+export type ASADefs = z.infer<typeof ASADefsSchema>;

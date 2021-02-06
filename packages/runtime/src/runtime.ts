@@ -1,18 +1,18 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
-import algosdk, { decodeAddress } from "algosdk";
+import algosdk, { AssetDef, decodeAddress } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
 import { StoreAccount } from "./account";
 import { TealError } from "./errors/errors";
 import { ERRORS } from "./errors/errors-list";
-import { Interpreter } from "./index";
+import { Interpreter, loadASAFile } from "./index";
 import { convertToString, parseSSCAppArgs } from "./lib/parsing";
-import { mkTransaction } from "./lib/txn";
+import { encodeNote, mkTransaction } from "./lib/txn";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import type {
-  AccountAddress, AlgoTransferParam, Context, ExecParams,
+  AccountAddress, AlgoTransferParam, ASADefs, ASADeploymentFlags, Context, ExecParams,
   SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
   StackElem, State, StoreAccountI, Txn, TxParams
 } from "./types";
@@ -29,8 +29,10 @@ export class Runtime {
   private store: State;
   ctx: Context;
   private appCounter: number;
+  private assetCounter: number;
   // https://developer.algorand.org/docs/features/transactions/?query=round
-  private round;
+  private round: number;
+  private readonly loadedAssetsDefs: ASADefs;
 
   constructor (accounts: StoreAccountI[]) {
     // runtime store
@@ -43,6 +45,9 @@ export class Runtime {
     // intialize accounts (should be done during runtime initialization)
     this.initializeAccounts(accounts);
 
+    // load asa yaml files
+    this.loadedAssetsDefs = loadASAFile(this.store.accounts);
+
     // context for interpreter
     this.ctx = {
       state: cloneDeep(this.store), // state is a deep copy of store
@@ -51,6 +56,7 @@ export class Runtime {
       args: []
     };
     this.appCounter = 0;
+    this.assetCounter = 0;
     this.round = 2;
   }
 
@@ -98,6 +104,22 @@ export class Runtime {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: lineNumber });
     }
     return app;
+  }
+
+  /**
+   * asserts if asset exists in state
+   * @param assetId asset index
+   * @param assetDef asset definitions
+   * @param line line number
+   * Note: if user is accessing this function directly through runtime,
+   * the line number is unknown
+   */
+  assertAssetDefined (assetId: number, assetDef?: AssetDef, line?: number): AssetDef {
+    const lineNumber = line ?? 'unknown';
+    if (assetDef === undefined) {
+      throw new TealError(ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId, line: lineNumber });
+    }
+    return assetDef;
   }
 
   /**
@@ -240,8 +262,60 @@ export class Runtime {
     }
   }
 
-  // creates new application transaction object in the current context
-  // It will overwrite the current transaction (`this.ctx.tx`)
+  // creates new asset creation transaction object and update context
+  mkAssetCreateTx (
+    name: string, flags: ASADeploymentFlags, asaDef: AssetDef): void {
+    // this funtion is called only for validation of parameters passed
+    algosdk.makeAssetCreateTxnWithSuggestedParams(
+      flags.creator.addr,
+      encodeNote(flags.note, flags.noteb64),
+      asaDef.total,
+      asaDef.decimals,
+      asaDef["default-frozen"],
+      asaDef.manager,
+      asaDef.reserve,
+      asaDef.freeze,
+      asaDef.clawback,
+      asaDef["unit-name"],
+      name,
+      asaDef.url,
+      asaDef["metadata-hash"],
+      mockSuggestedParams(flags, this.round)
+    );
+  }
+
+  /**
+   * Creates Asset in Runtime
+   * @param name ASA name
+   * @param flags ASA Deployment Flags
+   */
+  createAsset (name: string, flags: ASADeploymentFlags): number {
+    const sender = flags.creator;
+    const senderAcc = this.assertAccountDefined(sender.addr, this.store.accounts.get(sender.addr));
+
+    // create asset
+    const asset = senderAcc.addAsset(++this.assetCounter, name, this.loadedAssetsDefs[name]);
+    this.mkAssetCreateTx(name, flags, asset);
+    this.store.assetDefs.set(this.assetCounter, sender.addr);
+    return this.assetCounter;
+  }
+
+  /**
+   * Returns Asset Definitions
+   * @param assetId Asset Index
+   */
+  getAssetDef (assetId: number): AssetDef {
+    const addr = this.store.assetDefs.get(assetId);
+    if (addr === undefined) {
+      throw new TealError(ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
+    }
+
+    const creatorAcc = this.assertAccountDefined(addr, this.store.accounts.get(addr));
+    const assetDef = creatorAcc.getAssetDef(assetId);
+    return this.assertAssetDefined(assetId, assetDef);
+  }
+
+  // creates new application transaction object and update context
   addCtxAppCreateTxn (flags: SSCDeploymentFlags, payFlags: TxParams): void {
     const txn = algosdk.makeApplicationCreateTxn(
       flags.sender.addr,

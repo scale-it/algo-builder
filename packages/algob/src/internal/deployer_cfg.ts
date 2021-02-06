@@ -1,12 +1,12 @@
+import { loadASAFile } from "@algorand-builder/runtime";
+import type { AccountMap, ASADefs } from "@algorand-builder/runtime/build/types";
+
 import { mkAccountIndex } from "../lib/account";
 import { AlgoOperator } from "../lib/algo-operator";
-import { loadASAFile } from "../lib/asa";
 import { loadCheckpointsRecursive } from "../lib/script-checkpoints";
 import type {
-  AccountMap,
   AlgobDeployer,
   AlgobRuntimeEnv,
-  ASADefs,
   CheckpointRepo
 } from "../types";
 import { DeployerDeployMode, DeployerRunMode } from "./deployer";

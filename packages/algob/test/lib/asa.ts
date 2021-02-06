@@ -1,8 +1,8 @@
+import { validateASADefs } from "@algorand-builder/runtime";
+import type { Account, ASADefs } from "@algorand-builder/runtime/build/types";
 import { assert } from "chai";
 
 import { ERRORS } from "../../src/internal/core/errors-list";
-import { validateASADefs } from "../../src/lib/asa";
-import { Account, ASADefs } from "../../src/types";
 import { expectBuilderError } from "../helpers/errors";
 
 const namedAccount: Account = {
@@ -16,7 +16,9 @@ describe("ASA parser", () => {
     const valid: ASADefs = {
       A1: {
         total: 1,
-        decimals: 0
+        decimals: 0,
+        unitName: 'ASA',
+        defaultFrozen: false
       }
     };
     const parsed = validateASADefs(valid, new Map<string, Account>(), "");
@@ -24,6 +26,7 @@ describe("ASA parser", () => {
       A1: {
         total: 1,
         decimals: 0,
+        unitName: 'ASA',
         defaultFrozen: false
       }
     });
@@ -69,7 +72,8 @@ describe("ASA parser", () => {
     const obj = {
       A1: {
         total: "hi",
-        decimals: 0
+        decimals: 0,
+        unitName: 'ASA'
       }
     };
     expectBuilderError(
@@ -83,7 +87,8 @@ describe("ASA parser", () => {
     const obj = {
       A1: {
         total: "hi",
-        decimals: 0
+        decimals: 0,
+        unitName: 'ASA'
       }
     };
     expectBuilderError(
@@ -97,7 +102,8 @@ describe("ASA parser", () => {
     const obj = {
       A1: {
         total: 1,
-        decimals: 20
+        decimals: 20,
+        unitName: 'ASA'
       }
     };
     expectBuilderError(
@@ -128,7 +134,8 @@ describe("ASA parser", () => {
         total: 1,
         decimals: 1,
         // more than 32 bytes:
-        url: "1234567890abcdef1234567890abcdef_"
+        url: "1234567890abcdef1234567890abcdef_",
+        unitName: 'ASA'
       }
     };
     expectBuilderError(
@@ -143,6 +150,7 @@ describe("ASA parser", () => {
       A1: {
         total: 1,
         decimals: 1,
+        unitName: 'ASA',
         // more than 32 bytes:
         metadataHash: "1234567890abcdef1234567890abcdef_"
       }
@@ -159,6 +167,7 @@ describe("ASA parser", () => {
       A1: {
         total: 1,
         decimals: 1,
+        unitName: 'ASA',
         optInAccNames: ["hi"]
       }
     };
@@ -170,6 +179,7 @@ describe("ASA parser", () => {
       A1: {
         total: 1,
         decimals: 1,
+        unitName: 'ASA',
         optInAccNames: []
       }
     };
@@ -181,6 +191,7 @@ describe("ASA parser", () => {
       A1: {
         total: 1,
         decimals: 1,
+        unitName: 'ASA',
         optInAccNames: ["hi", "hi123"]
       }
     };
