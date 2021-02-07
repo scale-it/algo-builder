@@ -1,4 +1,4 @@
-import * as runtime from "@algorand-builder/runtime";
+import { loadASAFile, types as rtypes } from "@algorand-builder/runtime";
 
 import { mkAccountIndex } from "../lib/account";
 import { AlgoOperator } from "../lib/algo-operator";
@@ -25,10 +25,10 @@ export function mkDeployer (
 export class DeployerConfig {
   runtimeEnv: AlgobRuntimeEnv;
   cpData: CheckpointRepo;
-  asaDefs: runtime.types.ASADefs;
+  asaDefs: rtypes.ASADefs;
   algoOp: AlgoOperator;
   txWriter: txWriter;
-  accounts: runtime.types.AccountMap;
+  accounts: rtypes.AccountMap;
 
   constructor (runtimeEnv: AlgobRuntimeEnv, algoOp: AlgoOperator) {
     this.runtimeEnv = runtimeEnv;
@@ -36,6 +36,6 @@ export class DeployerConfig {
     this.algoOp = algoOp;
     this.accounts = mkAccountIndex(runtimeEnv.network.config.accounts);
     this.txWriter = new TxWriterImpl('');
-    this.asaDefs = runtime.loadASAFile(this.accounts);
+    this.asaDefs = loadASAFile(this.accounts);
   }
 }

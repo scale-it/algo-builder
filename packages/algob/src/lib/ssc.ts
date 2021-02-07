@@ -1,4 +1,4 @@
-import * as runtime from "@algorand-builder/runtime";
+import { encodeNote, parseSSCAppArgs, types as rtypes } from "@algorand-builder/runtime";
 import tx, { Account as AccountSDK, ConfirmedTxInfo } from "algosdk";
 
 import { AlgobDeployer } from "../types";
@@ -19,14 +19,14 @@ export const reDigit = /^\d+$/;
 export async function update (
   deployer: AlgobDeployer,
   sender: AccountSDK,
-  payFlags: runtime.types.TxParams,
+  payFlags: rtypes.TxParams,
   appId: number,
   newApprovalProgram: string,
   newClearProgram: string,
-  flags: runtime.types.SSCOptionalFlags
+  flags: rtypes.SSCOptionalFlags
 ): Promise<ConfirmedTxInfo> {
   const params = await mkTxParams(deployer.algodClient, payFlags);
-  const note = runtime.encodeNote(payFlags.note, payFlags.noteb64);
+  const note = encodeNote(payFlags.note, payFlags.noteb64);
 
   const app = await deployer.ensureCompiled(newApprovalProgram, false);
   const approvalProg = new Uint8Array(Buffer.from(app.compiled, "base64"));
@@ -39,7 +39,7 @@ export async function update (
     appId,
     approvalProg,
     clearProg,
-    runtime.parseSSCAppArgs(flags.appArgs),
+    parseSSCAppArgs(flags.appArgs),
     flags.accounts,
     flags.foreignApps,
     flags.foreignAssets,

@@ -4,7 +4,7 @@
 */
 import { executeTransaction } from "@algorand-builder/algob";
 import * as algob from "@algorand-builder/algob";
-import * as runtime from "@algorand-builder/runtime";
+import { types as rtypes } from "@algorand-builder/runtime";
 
 import { getDeployerAccount, prepareParameters } from "./withdraw/common";
 
@@ -14,9 +14,9 @@ async function run (
   const { alice, bob, scTmplParams } = prepareParameters(deployer);
 
   /** ** firstly we fund Alice and Bob accounts ****/
-  const bobFunding: runtime.types.AlgoTransferParam = {
-    type: runtime.types.TransactionType.TransferAlgo,
-    sign: runtime.types.SignType.SecretKey,
+  const bobFunding: rtypes.AlgoTransferParam = {
+    type: rtypes.TransactionType.TransferAlgo,
+    sign: rtypes.SignType.SecretKey,
     fromAccount: masterAccount,
     toAccountAddr: bob.addr,
     amountMicroAlgos: 10e6, // 10 Algos

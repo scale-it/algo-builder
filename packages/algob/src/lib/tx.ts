@@ -1,4 +1,4 @@
-import * as runtime from "@algorand-builder/runtime";
+import { encodeNote, mkTransaction, types as rtypes } from "@algorand-builder/runtime";
 import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
 import { AlgobDeployer } from "../types";
@@ -18,7 +18,7 @@ export async function getSuggestedParams (algocl: Algodv2): Promise<SuggestedPar
 /// creates common transaction parameters. If suggested params are not provided, will call
 /// Algorand node to get suggested parameters.
 export async function mkTxParams (
-  algocl: Algodv2, userParams: runtime.types.TxParams, s?: SuggestedParams): Promise<SuggestedParams> {
+  algocl: Algodv2, userParams: rtypes.TxParams, s?: SuggestedParams): Promise<SuggestedParams> {
   if (s === undefined) { s = await getSuggestedParams(algocl); }
 
   s.flatFee = userParams.totalFee !== undefined;
@@ -33,17 +33,17 @@ export async function mkTxParams (
 }
 
 export function makeAssetCreateTxn (
-  name: string, asaDef: runtime.types.ASADef,
-  flags: runtime.types.ASADeploymentFlags, txSuggestedParams: SuggestedParams
+  name: string, asaDef: rtypes.ASADef,
+  flags: rtypes.ASADeploymentFlags, txSuggestedParams: SuggestedParams
 ): Transaction {
   // If TxParams has noteb64 or note , it gets precedence
   let note;
   if (flags.noteb64 ?? flags.note) {
     // TxParams note
-    note = runtime.encodeNote(flags.note, flags.noteb64);
+    note = encodeNote(flags.note, flags.noteb64);
   } else if (asaDef.noteb64 ?? asaDef.note) {
     // ASA definition note
-    note = runtime.encodeNote(asaDef.note, asaDef.noteb64);
+    note = encodeNote(asaDef.note, asaDef.noteb64);
   }
 
   // https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js#L104
@@ -90,12 +90,12 @@ export function makeASAOptInTx (
  * @param txn unsigned transaction
  * @param execParams transaction execution parametrs
  */
-function signTransaction (txn: Transaction, execParams: runtime.types.ExecParams): Uint8Array {
+function signTransaction (txn: Transaction, execParams: rtypes.ExecParams): Uint8Array {
   switch (execParams.sign) {
-    case runtime.types.SignType.SecretKey: {
+    case rtypes.SignType.SecretKey: {
       return txn.signTxn(execParams.fromAccount.sk);
     }
-    case runtime.types.SignType.LogicSignature: {
+    case rtypes.SignType.LogicSignature: {
       const logicsig = execParams.lsig;
       if (logicsig === undefined) {
         throw new Error("logic signature for this transaction was not passed or - is not defined");
@@ -127,10 +127,10 @@ async function sendAndWait (
  */
 export async function executeTransaction (
   deployer: AlgobDeployer,
-  execParams: runtime.types.ExecParams | runtime.types.ExecParams[]): Promise<algosdk.ConfirmedTxInfo> {
+  execParams: rtypes.ExecParams | rtypes.ExecParams[]): Promise<algosdk.ConfirmedTxInfo> {
   const suggestedParams = await getSuggestedParams(deployer.algodClient);
-  const mkTx = async (p: runtime.types.ExecParams): Promise<Transaction> =>
-    runtime.mkTransaction(p,
+  const mkTx = async (p: rtypes.ExecParams): Promise<Transaction> =>
+    mkTransaction(p,
       await mkTxParams(deployer.algodClient, p.payFlags, Object.assign({}, suggestedParams)));
 
   let signedTxn;

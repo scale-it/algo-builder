@@ -1,5 +1,4 @@
-import { BuilderError } from "@algorand-builder/runtime";
-import * as runtime from "@algorand-builder/runtime";
+import { BuilderError, types as rtypes } from "@algorand-builder/runtime";
 import type { LogicSig, LogicSigArgs, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
 
@@ -26,11 +25,11 @@ import { DeployerConfig } from "./deployer_cfg";
 class DeployerBasicMode {
   protected readonly runtimeEnv: AlgobRuntimeEnv;
   protected readonly cpData: CheckpointRepo;
-  protected readonly loadedAsaDefs: runtime.types.ASADefs;
+  protected readonly loadedAsaDefs: rtypes.ASADefs;
   protected readonly algoOp: AlgoOperator;
   protected readonly txWriter: txWriter;
-  readonly accounts: runtime.types.Account[];
-  readonly accountsByName: runtime.types.AccountMap;
+  readonly accounts: rtypes.Account[];
+  readonly accountsByName: rtypes.AccountMap;
 
   constructor (deployerCfg: DeployerConfig) {
     this.runtimeEnv = deployerCfg.runtimeEnv;
@@ -171,7 +170,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
     return found;
   }
 
-  private _getAccount (name: string): runtime.types.Account {
+  private _getAccount (name: string): rtypes.Account {
     const found = this.accountsByName.get(name);
     if (!found) {
       throw new BuilderError(
@@ -182,7 +181,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
     return found;
   }
 
-  async deployASA (name: string, flags: runtime.types.ASADeploymentFlags): Promise<ASAInfo> {
+  async deployASA (name: string, flags: rtypes.ASADeploymentFlags): Promise<ASAInfo> {
     if (this.loadedAsaDefs[name] === undefined) {
       persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
       throw new BuilderError(
@@ -230,7 +229,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
   async fundLsig (name: string, flags: FundASCFlags,
-    payFlags: runtime.types.TxParams, scParams: LogicSigArgs, scTmplParams?: StrMap): Promise<void> {
+    payFlags: rtypes.TxParams, scParams: LogicSigArgs, scTmplParams?: StrMap): Promise<void> {
     try {
       await this.algoOp.fundLsig(name, flags, payFlags, this.txWriter, scParams, scTmplParams);
     } catch (error) {
@@ -249,7 +248,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
    *     (used only when compiling PyTEAL to TEAL)
    */
   async mkDelegatedLsig (
-    name: string, signer: runtime.types.Account,
+    name: string, signer: rtypes.Account,
     scParams: LogicSigArgs, scTmplParams?: StrMap): Promise<LsigInfo> {
     this.assertNoAsset(name);
     let lsigInfo = {} as any;
@@ -283,8 +282,8 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
   async deploySSC (
     approvalProgram: string,
     clearProgram: string,
-    flags: runtime.types.SSCDeploymentFlags,
-    payFlags: runtime.types.TxParams,
+    flags: rtypes.SSCDeploymentFlags,
+    payFlags: rtypes.TxParams,
     scTmplParams?: StrMap): Promise<SSCInfo> {
     const name = approvalProgram + "-" + clearProgram;
     this.assertNoAsset(name);
@@ -310,7 +309,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
    * @param accountName
    * @param flags Transaction flags
    */
-  async optInToASA (name: string, accountName: string, flags: runtime.types.TxParams): Promise<void> {
+  async optInToASA (name: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
     await this.algoOp.optInToASA(
       name,
       this._getASAInfo(name).assetIndex,
@@ -326,10 +325,10 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
    * @param flags Optional parameters to SSC (accounts, args..)
    */
   async optInToSSC (
-    sender: runtime.types.Account,
+    sender: rtypes.Account,
     appId: number,
-    payFlags: runtime.types.TxParams,
-    flags: runtime.types.SSCOptionalFlags): Promise<void> {
+    payFlags: rtypes.TxParams,
+    flags: rtypes.SSCOptionalFlags): Promise<void> {
     await this.algoOp.optInToSSC(sender, appId, payFlags, flags);
   }
 }
@@ -346,20 +345,20 @@ export class DeployerRunMode extends DeployerBasicMode implements AlgobDeployer 
     });
   }
 
-  async deployASA (_name: string, _flags: runtime.types.ASADeploymentFlags): Promise<ASAInfo> {
+  async deployASA (_name: string, _flags: rtypes.ASADeploymentFlags): Promise<ASAInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployASA"
     });
   }
 
   async fundLsig (_name: string, _flags: FundASCFlags,
-    _payFlags: runtime.types.TxParams, _scParams: LogicSigArgs, _scInitParams?: unknown): Promise<LsigInfo> {
+    _payFlags: rtypes.TxParams, _scParams: LogicSigArgs, _scInitParams?: unknown): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "fundLsig"
     });
   }
 
-  async mkDelegatedLsig (_name: string, _signer: runtime.types.Account,
+  async mkDelegatedLsig (_name: string, _signer: rtypes.Account,
     _scParams: LogicSigArgs, _scInitParams?: unknown): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "delegatedLsig"
@@ -369,21 +368,21 @@ export class DeployerRunMode extends DeployerBasicMode implements AlgobDeployer 
   async deploySSC (
     approvalProgram: string,
     clearProgram: string,
-    flags: runtime.types.SSCDeploymentFlags,
-    payFlags: runtime.types.TxParams,
+    flags: rtypes.SSCDeploymentFlags,
+    payFlags: rtypes.TxParams,
     scInitParam?: unknown): Promise<SSCInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deploySSC"
     });
   }
 
-  optInToASA (_name: string, _accountName: string, _flags: runtime.types.ASADeploymentFlags): Promise<void> {
+  optInToASA (_name: string, _accountName: string, _flags: rtypes.ASADeploymentFlags): Promise<void> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "optInToASA"
     });
   }
 
-  optInToSSC (sender: runtime.types.Account, index: number, payFlags: runtime.types.TxParams): Promise<void> {
+  optInToSSC (sender: rtypes.Account, index: number, payFlags: rtypes.TxParams): Promise<void> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "optInToSSC"
     });

@@ -1,5 +1,4 @@
-import { BuilderError } from "@algorand-builder/runtime";
-import * as runtime from "@algorand-builder/runtime";
+import { BuilderError, types as rtypes } from "@algorand-builder/runtime";
 import { Account as AccountSDK, Kmd, mnemonicToSecretKey, MultiSigAccount, multisigAddress } from "algosdk";
 import * as fs from "fs";
 import YAML from "yaml";
@@ -8,17 +7,17 @@ import CfgErrors, { ErrorPutter } from "../internal/core/config/config-errors";
 import { ERRORS } from "../internal/core/errors-list";
 import type { AccountDef, AlgobAccount, HDAccount, KmdCfg, KmdWallet, MnemonicAccount, StrMap } from "../types";
 
-export function mkAccounts (input: AccountDef[]): runtime.types.Account[] {
-  const accounts: runtime.types.Account[] = [];
+export function mkAccounts (input: AccountDef[]): rtypes.Account[] {
+  const accounts: rtypes.Account[] = [];
   const errs = new CfgErrors("");
-  let a: runtime.types.Account;
+  let a: rtypes.Account;
   let idx = 0;
   for (const i of input) {
     ++idx;
     if ((i as HDAccount).path) {
       throw new BuilderError(ERRORS.ACCOUNT.HD_ACCOUNT, { path: (i as HDAccount).path });
-    } else if ((i as runtime.types.Account).sk) {
-      a = i as runtime.types.Account;
+    } else if ((i as rtypes.Account).sk) {
+      a = i as rtypes.Account;
     } else {
       a = fromMnemonic(i as MnemonicAccount);
     }
@@ -28,7 +27,7 @@ export function mkAccounts (input: AccountDef[]): runtime.types.Account[] {
   return accounts;
 }
 
-function fromMnemonic (ia: MnemonicAccount): runtime.types.Account {
+function fromMnemonic (ia: MnemonicAccount): rtypes.Account {
   const a = parseMnemonic(ia.mnemonic);
   if (a.addr !== ia.addr && ia.addr !== "") {
     throw new BuilderError(ERRORS.ACCOUNT.MNEMONIC_ADDR_MISSMATCH,
@@ -45,39 +44,39 @@ function parseMnemonic (mnemonic: string): AccountSDK {
   }
 }
 
-function _loadAccounts (content: string): runtime.types.Account[] {
+function _loadAccounts (content: string): rtypes.Account[] {
   const parsed = YAML.parse(content) as AccountDef[];
   return mkAccounts(parsed);
 }
 
 // Loads accounts from `filename`. The file should be a YAML file with list of objects
 // which is either `HDAccount`, `MnemonicAccount` or an `Account`.
-export async function loadAccountsFromFile (filename: string): Promise<runtime.types.Account[]> {
+export async function loadAccountsFromFile (filename: string): Promise<rtypes.Account[]> {
   return _loadAccounts(await fs.promises.readFile(filename, 'utf8'));
 }
 
 // Same as `loadAccountsFromFile` but uses sync method instead of async
-export function loadAccountsFromFileSync (filename: string): runtime.types.Account[] {
+export function loadAccountsFromFileSync (filename: string): rtypes.Account[] {
   return _loadAccounts(fs.readFileSync(filename, 'utf8'));
 }
 
 // returns false if account validation doesn't pass
-export function validateAccount (a: runtime.types.Account, errs: ErrorPutter): boolean {
+export function validateAccount (a: rtypes.Account, errs: ErrorPutter): boolean {
   if (a.addr === "") { errs.push("addr", "can't be empty", "string"); }
   if (!(a.sk && a.sk instanceof Uint8Array && a.sk.length === 64)) { errs.push("sk", "Must be an instance of Uint8Array(64)", 'Uint8Array'); }
   if (!(typeof a.name === 'string' && a.name !== "")) { errs.push("name", "can't be empty", 'string'); }
   return errs.isEmpty;
 }
 
-export function mkAccountIndex (accountList: runtime.types.Account[]): runtime.types.AccountMap {
-  const out = new Map<string, runtime.types.Account>();
+export function mkAccountIndex (accountList: rtypes.Account[]): rtypes.AccountMap {
+  const out = new Map<string, rtypes.Account>();
   for (const a of accountList) {
     out.set(a.name, a);
   }
   return out;
 }
 
-export function loadAccountsFromEnv (): runtime.types.Account[] {
+export function loadAccountsFromEnv (): rtypes.Account[] {
   var algobAccountsString = process.env.ALGOB_ACCOUNTS;
   if (algobAccountsString) {
     var accounts: AlgobAccount[] = [];
@@ -87,7 +86,7 @@ export function loadAccountsFromEnv (): runtime.types.Account[] {
       throw new BuilderError(ERRORS.ACCOUNT.MALFORMED, { errors: 'Some accounts are malformed or have missing fields' });
     }
     validateAlgobAccounts(accounts);
-    var algobAccounts: runtime.types.Account[] = [];
+    var algobAccounts: rtypes.Account[] = [];
     for (const account of accounts) {
       try {
         const accountSDK = mnemonicToSecretKey(account.mnemonic);
@@ -151,8 +150,8 @@ export class KMDOperator {
     return m;
   }
 
-  async loadKMDAccounts (kcfg: KmdCfg): Promise<runtime.types.Account[]> {
-    const accounts: runtime.types.Account[] = [];
+  async loadKMDAccounts (kcfg: KmdCfg): Promise<rtypes.Account[]> {
+    const accounts: rtypes.Account[] = [];
     try {
       const wallets = (await this.kmdcl.listWallets()).wallets;
 

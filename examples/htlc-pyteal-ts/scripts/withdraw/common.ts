@@ -1,6 +1,6 @@
 import { executeTransaction } from "@algorand-builder/algob";
 import * as algob from "@algorand-builder/algob";
-import * as runtime from "@algorand-builder/runtime";
+import { types as rtypes } from "@algorand-builder/runtime";
 import { sha256 } from 'js-sha256';
 
 /**
@@ -9,7 +9,7 @@ import { sha256 } from 'js-sha256';
  * @param name Name of the account to fetch
  */
 export function getDeployerAccount (
-  deployer: algob.types.AlgobDeployer, name: string): runtime.types.Account {
+  deployer: algob.types.AlgobDeployer, name: string): rtypes.Account {
   const account = deployer.accountsByName.get(name);
   if (account === undefined) {
     throw new Error(`Account ${name} is not defined`);
@@ -18,7 +18,7 @@ export function getDeployerAccount (
 }
 
 export async function executeTx (
-  deployer: algob.types.AlgobDeployer, txnParams: runtime.types.ExecParams): Promise<void> {
+  deployer: algob.types.AlgobDeployer, txnParams: rtypes.ExecParams): Promise<void> {
   try {
     await executeTransaction(deployer, txnParams);
   } catch (e) {

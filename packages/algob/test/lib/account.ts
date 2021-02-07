@@ -15,7 +15,7 @@ describe("Loading accounts", () => {
     let a = mkAccounts([]);
     assert.deepEqual(a, [], "should return empty list on empty input");
 
-    const expected: runtime.types.Account[] = [account1,
+    const expected: rtypes.Account[] = [account1,
       { name: "n2", addr: "a2", sk: new Uint8Array(skArray) }];
     a = mkAccounts(expected);
     assert.deepEqual(a, expected, "Account instances should be just copied");
