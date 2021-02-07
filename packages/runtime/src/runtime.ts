@@ -314,7 +314,7 @@ export class Runtime {
 
     // create asset
     const asset = senderAcc.addAsset(++this.assetCounter, name, this.loadedAssetsDefs[name]);
-    this.addCtxAssetCreate(name, flags, asset);
+    this.mkAssetCreateTx(name, flags, asset);
     this.store.assetDefs.set(this.assetCounter, sender.addr);
     return this.assetCounter;
   }

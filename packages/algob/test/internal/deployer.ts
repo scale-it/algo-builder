@@ -1,4 +1,4 @@
-import type { ASADef } from "@algorand-builder/runtime/build/types";
+import { types as rtypes } from "@algorand-builder/runtime";
 import type { LogicSig } from "algosdk";
 import { assert } from "chai";
 
@@ -13,7 +13,7 @@ import { mkAlgobEnv } from "../helpers/params";
 import { cleanupMutableData } from "../lib/script-checkpoints";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
-function mkASA (): ASADef {
+function mkASA (): rtypes.ASADef {
   return {
     total: 1,
     decimals: 1,

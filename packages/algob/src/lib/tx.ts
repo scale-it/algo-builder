@@ -1,11 +1,7 @@
-import { encodeNote, mkTransaction } from "@algorand-builder/runtime";
-import type { ASADef, ASADeploymentFlags, ExecParams, TxParams } from "@algorand-builder/runtime/build/types";
-import { SignType } from "@algorand-builder/runtime/build/types";
+import { encodeNote, mkTransaction, types as rtypes } from "@algorand-builder/runtime";
 import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
-import {
-  AlgobDeployer
-} from "../types";
+import { AlgobDeployer } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
 import { loadSignedTxnFromFile } from "./files";
 
@@ -22,7 +18,7 @@ export async function getSuggestedParams (algocl: Algodv2): Promise<SuggestedPar
 /// creates common transaction parameters. If suggested params are not provided, will call
 /// Algorand node to get suggested parameters.
 export async function mkTxParams (
-  algocl: Algodv2, userParams: TxParams, s?: SuggestedParams): Promise<SuggestedParams> {
+  algocl: Algodv2, userParams: rtypes.TxParams, s?: SuggestedParams): Promise<SuggestedParams> {
   if (s === undefined) { s = await getSuggestedParams(algocl); }
 
   s.flatFee = userParams.totalFee !== undefined;
@@ -37,7 +33,8 @@ export async function mkTxParams (
 }
 
 export function makeAssetCreateTxn (
-  name: string, asaDef: ASADef, flags: ASADeploymentFlags, txSuggestedParams: SuggestedParams
+  name: string, asaDef: rtypes.ASADef,
+  flags: rtypes.ASADeploymentFlags, txSuggestedParams: SuggestedParams
 ): Transaction {
   // If TxParams has noteb64 or note , it gets precedence
   let note;
@@ -93,12 +90,12 @@ export function makeASAOptInTx (
  * @param txn unsigned transaction
  * @param execParams transaction execution parametrs
  */
-function signTransaction (txn: Transaction, execParams: ExecParams): Uint8Array {
+function signTransaction (txn: Transaction, execParams: rtypes.ExecParams): Uint8Array {
   switch (execParams.sign) {
-    case SignType.SecretKey: {
+    case rtypes.SignType.SecretKey: {
       return txn.signTxn(execParams.fromAccount.sk);
     }
-    case SignType.LogicSignature: {
+    case rtypes.SignType.LogicSignature: {
       const logicsig = execParams.lsig;
       if (logicsig === undefined) {
         throw new Error("logic signature for this transaction was not passed or - is not defined");
@@ -130,9 +127,9 @@ async function sendAndWait (
  */
 export async function executeTransaction (
   deployer: AlgobDeployer,
-  execParams: ExecParams | ExecParams[]): Promise<algosdk.ConfirmedTxInfo> {
+  execParams: rtypes.ExecParams | rtypes.ExecParams[]): Promise<algosdk.ConfirmedTxInfo> {
   const suggestedParams = await getSuggestedParams(deployer.algodClient);
-  const mkTx = async (p: ExecParams): Promise<Transaction> =>
+  const mkTx = async (p: rtypes.ExecParams): Promise<Transaction> =>
     mkTransaction(p,
       await mkTxParams(deployer.algodClient, p.payFlags, Object.assign({}, suggestedParams)));
 

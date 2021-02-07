@@ -3,20 +3,20 @@
  * This file demonstrates the PyTeal Example for HTLC(Hash Time Lock Contract)
 */
 import { executeTransaction } from "@algorand-builder/algob";
-import { AlgobDeployer, AlgobRuntimeEnv } from "@algorand-builder/algob/src/types";
-import { SignType, TransactionType } from "@algorand-builder/runtime/build/types";
-import { AlgoTransferParam } from "@algorand-builder/runtime/src/types";
+import * as algob from "@algorand-builder/algob";
+import { types as rtypes } from "@algorand-builder/runtime";
 
 import { getDeployerAccount, prepareParameters } from "./withdraw/common";
 
-async function run (runtimeEnv: AlgobRuntimeEnv, deployer: AlgobDeployer): Promise<void> {
+async function run (
+  runtimeEnv: algob.types.AlgobRuntimeEnv, deployer: algob.types.AlgobDeployer): Promise<void> {
   const masterAccount = getDeployerAccount(deployer, 'master-account');
   const { alice, bob, scTmplParams } = prepareParameters(deployer);
 
   /** ** firstly we fund Alice and Bob accounts ****/
-  const bobFunding: AlgoTransferParam = {
-    type: TransactionType.TransferAlgo,
-    sign: SignType.SecretKey,
+  const bobFunding: rtypes.AlgoTransferParam = {
+    type: rtypes.TransactionType.TransferAlgo,
+    sign: rtypes.SignType.SecretKey,
     fromAccount: masterAccount,
     toAccountAddr: bob.addr,
     amountMicroAlgos: 10e6, // 10 Algos

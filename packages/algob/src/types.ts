@@ -1,9 +1,4 @@
-import type {
-  Account, AccountMap,
-  ASADeploymentFlags,
-  SSCDeploymentFlags, SSCOptionalFlags,
-  TxParams
-} from "@algorand-builder/runtime/build/types";
+import { types as rtypes } from "@algorand-builder/runtime";
 import type { LogicSig, LogicSigArgs } from "algosdk";
 import * as algosdk from "algosdk";
 
@@ -33,10 +28,10 @@ export interface MnemonicAccount {
 export type AccountDef =
   | MnemonicAccount
   | HDAccount
-  | Account;
+  | rtypes.Account;
 
 interface CommonNetworkConfig {
-  accounts: Account[]
+  accounts: rtypes.Account[]
   // optional, when provided KMD accounts will be loaded by the config resolver
   // and merged into the accounts variable (above)
   kmdCfg?: KmdCfg
@@ -381,7 +376,7 @@ export interface Checkpoint {
 };
 
 export interface FundASCFlags {
-  funder: Account
+  funder: rtypes.Account
   fundingMicroAlgo: number
 }
 
@@ -393,8 +388,8 @@ export interface AlgobDeployer {
   /**
    * Allows user to know whether a script is running in a `deploy` or `run` mode. */
   isDeployMode: boolean
-  accounts: Account[]
-  accountsByName: AccountMap
+  accounts: rtypes.Account[]
+  accountsByName: rtypes.AccountMap
 
   /**
    * Mapping of ASA name to deployment log */
@@ -416,7 +411,7 @@ export interface AlgobDeployer {
    * Creates and deploys ASA.
    * @name  ASA name - deployer will search for the ASA in the /assets/asa.yaml file
    * @flags  deployment flags */
-  deployASA: (name: string, flags: ASADeploymentFlags) => Promise<ASAInfo>
+  deployASA: (name: string, flags: rtypes.ASADeploymentFlags) => Promise<ASAInfo>
 
   /**
    * Funds logic signature account (Contract Account).
@@ -429,7 +424,7 @@ export interface AlgobDeployer {
   fundLsig: (
     name: string,
     flags: FundASCFlags,
-    payFlags: TxParams,
+    payFlags: rtypes.TxParams,
     scParams: LogicSigArgs,
     scTmplParams?: StrMap
   ) => void
@@ -444,7 +439,7 @@ export interface AlgobDeployer {
    */
   mkDelegatedLsig: (
     name: string,
-    signer: Account,
+    signer: rtypes.Account,
     scParams: LogicSigArgs,
     scTmplParams?: StrMap
   ) => Promise<LsigInfo>
@@ -461,8 +456,8 @@ export interface AlgobDeployer {
   deploySSC: (
     approvalProgram: string,
     clearProgram: string,
-    flags: SSCDeploymentFlags,
-    payFlags: TxParams,
+    flags: rtypes.SSCDeploymentFlags,
+    payFlags: rtypes.TxParams,
     scTmplParams?: StrMap) => Promise<SSCInfo>
 
   /**
@@ -481,7 +476,7 @@ export interface AlgobDeployer {
   /**
    * Creates an opt-in transaction for given ASA name, which must be defined in
    * `/assets/asa.yaml` file. */
-  optInToASA: (name: string, accountName: string, flags: ASADeploymentFlags) => Promise<void>
+  optInToASA: (name: string, accountName: string, flags: rtypes.ASADeploymentFlags) => Promise<void>
 
   /**
    * Creates an opt-in transaction for given Stateful Smart Contract (SSC). The SSC must be
@@ -489,7 +484,8 @@ export interface AlgobDeployer {
    * @sender Account for which opt-in is required
    * @appId Application Index (ID of the application)
    */
-  optInToSSC: (sender: Account, index: number, payFlags: TxParams, flags: SSCOptionalFlags) => Promise<void>
+  optInToSSC: (sender: rtypes.Account, index: number,
+    payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags) => Promise<void>
 
   /**
    * Create an entry in a script log (stored in artifacts/scripts/<script_name>.log) file. */

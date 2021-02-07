@@ -4,7 +4,7 @@
  * from one account to another according to smart contract (ASC) logic
 */
 const { executeTransaction } = require('./common');
-const { TransactionType, SignType } = require('@algorand-builder/runtime/build/types');
+const { types } = require('@algorand-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   const goldOwner = deployer.accountsByName.get('alice');
@@ -16,8 +16,8 @@ async function run (runtimeEnv, deployer) {
 
   const assetID = deployer.asa.get('gold').assetIndex;
   let txnParam = {
-    type: TransactionType.TransferAsset,
-    sign: SignType.LogicSignature,
+    type: types.TransactionType.TransferAsset,
+    sign: types.SignType.LogicSignature,
     fromAccount: goldOwner,
     toAccountAddr: john.addr,
     amount: 500,
@@ -43,8 +43,8 @@ async function run (runtimeEnv, deployer) {
   const logicSignature = deployer.getDelegatedLsig('3-gold-delegated-asc.teal');
 
   txnParam = {
-    type: TransactionType.TransferAlgo,
-    sign: SignType.LogicSignature,
+    type: types.TransactionType.TransferAlgo,
+    sign: types.SignType.LogicSignature,
     fromAccount: goldOwner,
     toAccountAddr: bob.addr,
     amountMicroAlgos: 58,

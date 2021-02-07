@@ -1,4 +1,4 @@
-import type { Account } from "@algorand-builder/runtime/build/types";
+import { types as rtypes } from "@algorand-builder/runtime";
 import { Kmd } from "algosdk";
 import { assert } from "chai";
 import path from "path";
@@ -30,18 +30,18 @@ import {
 import { account1 } from "../../../mocks/account";
 
 class KMDOperatorMock extends KMDOperator {
-  accounts = [] as Account[];
+  accounts = [] as rtypes.Account[];
   skArray = Array.from({ length: 64 }, (_, i) => i + 1);
 
   resetAccounts (): void {
     this.accounts = [];
   }
 
-  addKmdAccount (acc: Account): void {
+  addKmdAccount (acc: rtypes.Account): void {
     this.accounts.push(acc);
   }
 
-  async loadKMDAccounts (_kcfg: KmdCfg): Promise<Account[]> {
+  async loadKMDAccounts (_kcfg: KmdCfg): Promise<rtypes.Account[]> {
     return this.accounts;
   }
 }

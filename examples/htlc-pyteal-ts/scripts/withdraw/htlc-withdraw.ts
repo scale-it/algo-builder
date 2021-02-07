@@ -7,21 +7,22 @@
  * if the seller is able to provide the secret value that corresponds to the hash in the program.
 */
 import { stringToBytes } from "@algorand-builder/algob";
-import { AlgobDeployer, AlgobRuntimeEnv } from "@algorand-builder/algob/src/types";
-import { AlgoTransferParam, SignType, TransactionType } from "@algorand-builder/runtime/build/types";
+import * as algob from "@algorand-builder/algob";
+import { types as rtypes } from "@algorand-builder/runtime";
 
 import { executeTx, prepareParameters } from "./common";
 
-async function run (runtimeEnv: AlgobRuntimeEnv, deployer: AlgobDeployer): Promise<void> {
+async function run (
+  runtimeEnv: algob.types.AlgobRuntimeEnv, deployer: algob.types.AlgobDeployer): Promise<void> {
   const { alice, scTmplParams, secret } = prepareParameters(deployer);
   const wrongSecret = 'hero wisdom red split loop element vote belt';
 
   let lsig = await deployer.loadLogic('htlc.py', [stringToBytes(wrongSecret)], scTmplParams);
   let sender = lsig.address();
 
-  const txnParams: AlgoTransferParam = {
-    type: TransactionType.TransferAlgo,
-    sign: SignType.LogicSignature,
+  const txnParams: rtypes.AlgoTransferParam = {
+    type: rtypes.TransactionType.TransferAlgo,
+    sign: rtypes.SignType.LogicSignature,
     fromAccount: { addr: sender, sk: new Uint8Array(0) }, // we don't need secret key for logic signature account so added a dummy
     toAccountAddr: alice.addr,
     amountMicroAlgos: 200,

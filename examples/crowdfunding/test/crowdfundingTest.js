@@ -4,8 +4,7 @@ import {
   stringToBytes,
   uint64ToBigEndian
 } from '@algorand-builder/algob';
-import { Runtime, StoreAccount } from '@algorand-builder/runtime';
-import { SignType, TransactionType } from '@algorand-builder/runtime/build/types';
+import { Runtime, StoreAccount, types } from '@algorand-builder/runtime';
 import { assert } from 'chai';
 
 const minBalance = 10e6; // 10 ALGO's
@@ -110,8 +109,8 @@ describe('Crowdfunding Tests', function () {
 
     // fund escrow with some minimum balance first
     runtime.transferAlgo({
-      type: TransactionType.TransferAlgo,
-      sign: SignType.SecretKey,
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
       fromAccount: master.account,
       toAccountAddr: escrowAddress,
       amountMicroAlgos: minBalance,
@@ -157,16 +156,16 @@ describe('Crowdfunding Tests', function () {
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     let txGroup = [
       {
-        type: TransactionType.CallNoOpSSC,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.CallNoOpSSC,
+        sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appId: applicationId,
         payFlags: { totalFee: 1000 },
         appArgs: appArgs
       },
       {
-        type: TransactionType.TransferAlgo,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         toAccountAddr: escrow.address,
         amountMicroAlgos: donationAmount,
@@ -185,8 +184,8 @@ describe('Crowdfunding Tests', function () {
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     txGroup = [
       {
-        type: TransactionType.CallNoOpSSC,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.CallNoOpSSC,
+        sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appId: applicationId,
         payFlags: { totalFee: 1000 },
@@ -194,8 +193,8 @@ describe('Crowdfunding Tests', function () {
         accounts: [escrow.address] //  AppAccounts
       },
       {
-        type: TransactionType.TransferAlgo,
-        sign: SignType.LogicSignature,
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.LogicSignature,
         fromAccount: escrow.account,
         toAccountAddr: donor.address,
         amountMicroAlgos: 300000,
@@ -220,16 +219,16 @@ describe('Crowdfunding Tests', function () {
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     txGroup = [
       {
-        type: TransactionType.CallNoOpSSC,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.CallNoOpSSC,
+        sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appId: applicationId,
         payFlags: { totalFee: 1000 },
         appArgs: appArgs
       },
       {
-        type: TransactionType.TransferAlgo,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         toAccountAddr: escrow.address,
         amountMicroAlgos: 7000000,
@@ -245,16 +244,16 @@ describe('Crowdfunding Tests', function () {
     appArgs = [stringToBytes('claim')];
     txGroup = [
       {
-        type: TransactionType.CallNoOpSSC,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.CallNoOpSSC,
+        sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appId: applicationId,
         payFlags: { totalFee: 1000 },
         appArgs: appArgs
       },
       {
-        type: TransactionType.TransferAlgo,
-        sign: SignType.LogicSignature,
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.LogicSignature,
         fromAccount: escrow.account,
         toAccountAddr: creator.address,
         amountMicroAlgos: 0,
@@ -273,8 +272,8 @@ describe('Crowdfunding Tests', function () {
     // after claiming, creator of the crowdfunding application should be able to delete the application
     // NOTE: we don't need a txGroup here as escrow is already empty
     const deleteTx = {
-      type: TransactionType.DeleteSSC,
-      sign: SignType.SecretKey,
+      type: types.TransactionType.DeleteSSC,
+      sign: types.SignType.SecretKey,
       fromAccount: creator.account,
       appId: applicationId,
       payFlags: { totalFee: 1000 },
@@ -324,16 +323,16 @@ describe('Crowdfunding Tests', function () {
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     const txGroup = [
       {
-        type: TransactionType.CallNoOpSSC,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.CallNoOpSSC,
+        sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appId: applicationId,
         payFlags: {},
         appArgs: appArgs
       },
       {
-        type: TransactionType.TransferAlgo,
-        sign: SignType.LogicSignature,
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.LogicSignature,
         fromAccount: escrow.account,
         toAccountAddr: creator.address,
         amountMicroAlgos: 0,
