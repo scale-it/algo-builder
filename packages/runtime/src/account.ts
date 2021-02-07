@@ -199,6 +199,18 @@ export class StoreAccount implements StoreAccountI {
   }
 
   /**
+   * Freeze asset
+   * @param assetId Asset Index
+   */
+  freezeAsset (assetId: number, state: boolean): void {
+    const holding = this.assets.get(assetId);
+    if (holding === undefined) {
+      throw new TealError(ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
+    }
+    holding["is-frozen"] = state;
+  }
+
+  /**
    * Add application in account's state
    * check maximum account creation limit
    * @param appId application index

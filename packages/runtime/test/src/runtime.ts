@@ -1,6 +1,5 @@
 import { LogicSig } from "algosdk";
-import { assert } from "chai";
-import { min } from "lodash";
+import { assert, expect } from "chai";
 
 import { StoreAccount } from "../../src/account";
 import { ERRORS } from "../../src/errors/errors-list";
@@ -191,5 +190,30 @@ describe("Algorand Standard Assets", function () {
     assert.equal(res.reserve, bob.address);
     assert.equal(res.clawback, john.address);
     assert.equal(res.freeze, john.address);
+  });
+
+  it("should fail because only manager account can modify asset", () => {
+    const assetId = runtime.createAsset('gold',
+      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+
+    expect(() => {
+      runtime.modifyAsset(bob.address, assetId, modFields, {});
+    }).to.throw("Only Manager account can modify asset");
+  });
+
+  it("should fail because only freeze account can freeze asset", () => {
+    const assetId = runtime.createAsset('gold',
+      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+
+    expect(() => {
+      runtime.freezeAsset(bob.address, assetId, john.address, false, {});
+    }).to.throw(Error, "Only Freeze account can freeze asset");
+  });
+
+  it("should freeze asset", () => {
+    // const assetId = runtime.createAsset('gold',
+    //  { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+    // to-do opt-in
+    // runtime.freezeAsset(elon.address, assetId, );
   });
 });

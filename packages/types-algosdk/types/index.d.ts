@@ -589,7 +589,7 @@ declare module 'algosdk' {
     amount: number;
     'asset-id': number;
     creator: string;
-    'is-frozen': string;
+    'is-frozen': boolean;
   }
 
   export interface CreatedApp {

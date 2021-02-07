@@ -11,8 +11,8 @@ const createdApps = new Map<number, SSCAttributesM>();
 const createdAssets = new Map<number, AssetDef>();
 
 const assets = new Map<number, AssetHolding>();
-assets.set(3, { 'asset-id': 3, amount: 2, creator: "string", 'is-frozen': "false" });
-assets.set(32, { 'asset-id': 32, amount: 2, creator: "AS", 'is-frozen': "false" });
+assets.set(3, { 'asset-id': 3, amount: 2, creator: "string", 'is-frozen': false });
+assets.set(32, { 'asset-id': 32, amount: 2, creator: "AS", 'is-frozen': false });
 
 const globalStateMap = new Map<string, StackElem>();
 globalStateMap.set(convertToKey('Hello'), stringToBytes('World'));

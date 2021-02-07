@@ -1,7 +1,6 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
 import algosdk, { AssetDef, decodeAddress } from "algosdk";
-import { add } from "lodash";
 import cloneDeep from "lodash/cloneDeep";
 
 import { StoreAccount } from "./account";
@@ -237,6 +236,16 @@ export class Runtime {
   }
 
   /**
+   * Returns Asset Definitions
+   * @param assetId Asset Index
+   */
+  getAssetDef (assetId: number): AssetDef {
+    const creatorAcc = this.getAssetCreatorAccount(assetId);
+    const assetDef = creatorAcc.getAssetDef(assetId);
+    return this.assertAssetDefined(assetId, assetDef);
+  }
+
+  /**
    * Setup initial accounts as {address: SDKAccount}. This should be called only when initializing Runtime.
    * @param accounts: array of account info's
    */
@@ -332,7 +341,7 @@ export class Runtime {
     return this.assetCounter;
   }
 
-  // creates new asset configuration transaction object.
+  // creates asset configuration transaction object.
   mkAssetConfigTx (sender: string, assetId: number, fields: AssetModFields, flags: TxParams): void {
     // this funtion is called only for validation of parameters passed
     algosdk.makeAssetConfigTxnWithSuggestedParams(
@@ -365,14 +374,39 @@ export class Runtime {
     creatorAcc.modifyAsset(assetId, fields);
   }
 
+  // creates asset freeze transaction object.
+  makeAssetFreezeTx (
+    sender: string, assetId: number, target: string, state: boolean, flags: TxParams): void {
+    // this funtion is called only for validation of parameters passed
+    algosdk.makeAssetFreezeTxnWithSuggestedParams(
+      sender,
+      encodeNote(flags.note, flags.noteb64),
+      assetId,
+      target,
+      state,
+      mockSuggestedParams(flags, this.round)
+    );
+  }
+
   /**
-   * Returns Asset Definitions
-   * @param assetId Asset Index
+   * Freezes assets for a target account
+   * @param sender sender address
+   * @param assetId asset index
+   * @param freezeTarget target account
+   * @param freezeState target state
+   * @param payFlags transaction parameters
    */
-  getAssetDef (assetId: number): AssetDef {
-    const creatorAcc = this.getAssetCreatorAccount(assetId);
-    const assetDef = creatorAcc.getAssetDef(assetId);
-    return this.assertAssetDefined(assetId, assetDef);
+  freezeAsset (
+    sender: string, assetId: number, freezeTarget: string,
+    freezeState: boolean, payFlags: TxParams
+  ): void {
+    const asset = this.getAssetDef(assetId);
+    if (asset.freeze !== sender) {
+      throw new Error("Only Freeze account can freeze asset");
+    }
+    this.makeAssetFreezeTx(sender, assetId, freezeTarget, freezeState, payFlags);
+    const acc = this.assertAccountDefined(freezeTarget, this.store.accounts.get(freezeTarget));
+    acc.freezeAsset(assetId, freezeState);
   }
 
   // creates new application transaction object and update context
