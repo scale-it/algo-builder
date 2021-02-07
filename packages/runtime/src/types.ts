@@ -128,6 +128,7 @@ export interface StoreAccountI {
   getAppFromLocal: (appId: number) => AppLocalStateM | undefined
   getAssetDef: (assetId: number) => AssetDef | undefined
   addAsset: (assetId: number, name: string, asadef: ASADef) => AssetDef
+  modifyAsset: (assetId: number, fields: AssetModFields) => void
   addApp: (appId: number, params: SSCDeploymentFlags) => CreatedAppM
   optInToApp: (appId: number, appParams: SSCAttributesM) => void
   deleteApp: (appId: number) => void
@@ -258,3 +259,13 @@ export type AccountMap = Map<string, Account>;
 export type ASADef = z.infer<typeof ASADefSchema>;
 
 export type ASADefs = z.infer<typeof ASADefsSchema>;
+
+// After an asset has been created only the manager,
+// reserve, freeze and reserve accounts can be changed.
+// All other parameters are locked for the life of the asset.
+export interface AssetModFields {
+  manager: string
+  reserve: string
+  freeze: string
+  clawback: string
+}

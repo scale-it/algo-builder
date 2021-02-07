@@ -375,7 +375,7 @@ declare module 'algosdk' {
 
   export function makeAssetConfigTxnWithSuggestedParams(from: any, note: any, assetIndex: any,
     manager: any, reserve: any, freeze: any, clawback: any, suggestedParams: any,
-    strictEmptyAddressChecking: any): any;
+    strictEmptyAddressChecking?: any): any;
 
   export function makeAssetCreateTxn(from: any, fee: any, firstRound: any, lastRound: any,
     note: any, genesisHash: any, genesisID: any, total: any, decimals: any, defaultFrozen: any, manager: any,

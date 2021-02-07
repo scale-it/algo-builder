@@ -1,6 +1,7 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
 import algosdk, { AssetDef, decodeAddress } from "algosdk";
+import { add } from "lodash";
 import cloneDeep from "lodash/cloneDeep";
 
 import { StoreAccount } from "./account";
@@ -12,7 +13,7 @@ import { encodeNote, mkTransaction } from "./lib/txn";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import type {
-  AccountAddress, AlgoTransferParam, ASADefs, ASADeploymentFlags, Context, ExecParams,
+  AccountAddress, AlgoTransferParam, ASADefs, ASADeploymentFlags, AssetModFields, Context, ExecParams,
   GlobalAppsData,
   SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
   StackElem, State, StoreAccountI, Txn, TxParams
@@ -224,6 +225,18 @@ export class Runtime {
   }
 
   /**
+   * Returns asset creator account or throws error is it doesn't exist
+   * @param Asset Index
+   */
+  getAssetCreatorAccount (assetId: number): StoreAccountI {
+    const addr = this.store.assetDefs.get(assetId);
+    if (addr === undefined) {
+      throw new TealError(ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
+    }
+    return this.assertAccountDefined(addr, this.store.accounts.get(addr));
+  }
+
+  /**
    * Setup initial accounts as {address: SDKAccount}. This should be called only when initializing Runtime.
    * @param accounts: array of account info's
    */
@@ -281,7 +294,7 @@ export class Runtime {
     }
   }
 
-  // creates new asset creation transaction object and update context
+  // creates new asset creation transaction object.
   mkAssetCreateTx (
     name: string, flags: ASADeploymentFlags, asaDef: AssetDef): void {
     // this funtion is called only for validation of parameters passed
@@ -319,17 +332,45 @@ export class Runtime {
     return this.assetCounter;
   }
 
+  // creates new asset configuration transaction object.
+  mkAssetConfigTx (sender: string, assetId: number, fields: AssetModFields, flags: TxParams): void {
+    // this funtion is called only for validation of parameters passed
+    algosdk.makeAssetConfigTxnWithSuggestedParams(
+      sender,
+      encodeNote(flags.note, flags.noteb64),
+      assetId,
+      fields.manager,
+      fields.reserve,
+      fields.freeze,
+      fields.clawback,
+      mockSuggestedParams(flags, this.round)
+    );
+  }
+
+  /**
+   * https://developer.algorand.org/docs/features/asa/#modifying-an-asset
+   * @param sender sender address
+   * @param assetId Asset Index
+   * @param fields Asset modifying fields
+   * @param payFlags Transaction Parameters
+   */
+  modifyAsset (sender: string, assetId: number, fields: AssetModFields, payFlags: TxParams): void {
+    // check for "".
+    const asset = this.getAssetDef(assetId);
+    if (asset.manager !== sender) {
+      throw new Error("Only Manager account can modify asset");
+    }
+    this.mkAssetConfigTx(sender, assetId, fields, payFlags);
+    const creatorAcc = this.getAssetCreatorAccount(assetId);
+    creatorAcc.modifyAsset(assetId, fields);
+  }
+
   /**
    * Returns Asset Definitions
    * @param assetId Asset Index
    */
   getAssetDef (assetId: number): AssetDef {
-    const addr = this.store.assetDefs.get(assetId);
-    if (addr === undefined) {
-      throw new TealError(ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
-    }
-
-    const creatorAcc = this.assertAccountDefined(addr, this.store.accounts.get(addr));
+    const creatorAcc = this.getAssetCreatorAccount(assetId);
     const assetDef = creatorAcc.getAssetDef(assetId);
     return this.assertAssetDefined(assetId, assetDef);
   }

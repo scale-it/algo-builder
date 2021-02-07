@@ -1,14 +1,16 @@
 import { LogicSig } from "algosdk";
 import { assert } from "chai";
+import { min } from "lodash";
 
 import { StoreAccount } from "../../src/account";
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime } from "../../src/runtime";
-import type { AlgoTransferParam, ExecParams } from "../../src/types";
+import type { AlgoTransferParam, AssetModFields, ExecParams } from "../../src/types";
 import { SignType, TransactionType } from "../../src/types";
 import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
+import { elonMuskAccount } from "../mocks/account";
 
 const programName = "basic.teal";
 const minBalance = 1e7;
@@ -137,12 +139,21 @@ describe("Rounds Test", function () {
   });
 });
 
-describe("Asset Creation", function () {
+describe("Algorand Standard Assets", function () {
   useFixture('asa-check');
   const john = new StoreAccount(minBalance);
+  const bob = new StoreAccount(minBalance);
+  const elon = new StoreAccount(minBalance, elonMuskAccount);
   let runtime: Runtime;
+  let modFields: AssetModFields;
   this.beforeAll(() => {
-    runtime = new Runtime([john]);
+    runtime = new Runtime([john, bob]);
+    modFields = {
+      manager: bob.address,
+      reserve: bob.address,
+      clawback: john.address,
+      freeze: john.address
+    };
   });
 
   it("should create asset using asa.yaml file", () => {
@@ -156,9 +167,29 @@ describe("Asset Creation", function () {
     assert.equal(res["unit-name"], "GLD");
     assert.equal(res.url, "url");
     assert.equal(res["metadata-hash"], "12312442142141241244444411111133");
-    assert.equal(res.manager, "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE");
-    assert.equal(res.reserve, "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE");
-    assert.equal(res.freeze, "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE");
-    assert.equal(res.clawback, "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE");
+    assert.equal(res.manager, elon.address);
+    assert.equal(res.reserve, elon.address);
+    assert.equal(res.freeze, elon.address);
+    assert.equal(res.clawback, elon.address);
+  });
+
+  it("should throw error if asset is not found while modifying", () => {
+    expectTealError(
+      () => runtime.modifyAsset(john.address, 120, modFields, {}),
+      ERRORS.ASA.ASSET_NOT_FOUND
+    );
+  });
+
+  it("should modify asset", () => {
+    const assetId = runtime.createAsset('gold',
+      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+
+    runtime.modifyAsset(elon.address, assetId, modFields, {});
+
+    const res = runtime.getAssetDef(assetId);
+    assert.equal(res.manager, bob.address);
+    assert.equal(res.reserve, bob.address);
+    assert.equal(res.clawback, john.address);
+    assert.equal(res.freeze, john.address);
   });
 });
