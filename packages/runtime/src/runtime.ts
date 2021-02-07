@@ -358,13 +358,13 @@ export class Runtime {
 
   /**
    * https://developer.algorand.org/docs/features/asa/#modifying-an-asset
+   * Modifies asset fields
    * @param sender sender address
    * @param assetId Asset Index
    * @param fields Asset modifying fields
    * @param payFlags Transaction Parameters
    */
   modifyAsset (sender: string, assetId: number, fields: AssetModFields, payFlags: TxParams): void {
-    // check for "".
     const asset = this.getAssetDef(assetId);
     if (asset.manager !== sender) {
       throw new Error("Only Manager account can modify asset");
@@ -375,7 +375,7 @@ export class Runtime {
   }
 
   // creates asset freeze transaction object.
-  makeAssetFreezeTx (
+  mkAssetFreezeTx (
     sender: string, assetId: number, target: string, state: boolean, flags: TxParams): void {
     // this funtion is called only for validation of parameters passed
     algosdk.makeAssetFreezeTxnWithSuggestedParams(
@@ -389,6 +389,7 @@ export class Runtime {
   }
 
   /**
+   * https://developer.algorand.org/docs/features/asa/#freezing-an-asset
    * Freezes assets for a target account
    * @param sender sender address
    * @param assetId asset index
@@ -404,9 +405,51 @@ export class Runtime {
     if (asset.freeze !== sender) {
       throw new Error("Only Freeze account can freeze asset");
     }
-    this.makeAssetFreezeTx(sender, assetId, freezeTarget, freezeState, payFlags);
+    this.mkAssetFreezeTx(sender, assetId, freezeTarget, freezeState, payFlags);
     const acc = this.assertAccountDefined(freezeTarget, this.store.accounts.get(freezeTarget));
     acc.freezeAsset(assetId, freezeState);
+  }
+
+  // creates asset revoke transaction object.
+  mkAssetRevokeTx (
+    sender: string, recipient: string, assetId: number,
+    revocationTarget: string, amount: number, flags: TxParams
+  ): void {
+    // this funtion is called only for validation of parameters passed
+    algosdk.makeAssetTransferTxnWithSuggestedParams(
+      sender,
+      recipient,
+      flags.closeRemainderTo,
+      revocationTarget,
+      amount,
+      encodeNote(flags.note, flags.noteb64),
+      assetId,
+      mockSuggestedParams(flags, this.round)
+    );
+  }
+
+  /**
+   * https://developer.algorand.org/docs/features/asa/#revoking-an-asset
+   * Revoking an asset for an account removes a specific number of the asset
+   * from the revoke target account.
+   * @param sender sender address
+   * @param recipient asset receiver address
+   * @param assetId asset index
+   * @param revocationTarget revoke target account
+   * @param amount amount of assets
+   * @param payFlags transaction parameters
+   */
+  revokeAsset (
+    sender: string, recipient: string,
+    assetId: number, revocationTarget: string,
+    amount: number, payFlags: TxParams
+  ): void {
+    const asset = this.getAssetDef(assetId);
+    if (asset.clawback !== sender) {
+      throw new Error("Only Clawback account can revoke assets");
+    }
+    this.mkAssetRevokeTx(sender, recipient, assetId, revocationTarget, amount, payFlags);
+    // To-Do transfer assets
   }
 
   // creates new application transaction object and update context
