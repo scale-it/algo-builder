@@ -1,4 +1,4 @@
-import * as runtime from "@algorand-builder/runtime";
+import { types as rtypes } from "@algorand-builder/runtime";
 import { generateAccount, mnemonicToSecretKey, secretKeyToMnemonic } from "algosdk";
 import { assert } from "chai";
 
