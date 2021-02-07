@@ -1,6 +1,7 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
 import algosdk, { AssetDef, decodeAddress } from "algosdk";
+import { forEach } from "lodash";
 import cloneDeep from "lodash/cloneDeep";
 
 import { StoreAccount } from "./account";
@@ -450,6 +451,37 @@ export class Runtime {
     }
     this.mkAssetRevokeTx(sender, recipient, assetId, revocationTarget, amount, payFlags);
     // To-Do transfer assets
+  }
+
+  // creates asset destroy transaction object.
+  mkDestroyAssetTx (sender: string, assetId: number, flags: TxParams): void {
+    // this funtion is called only for validation of parameters passed
+    algosdk.makeAssetDestroyTxnWithSuggestedParams(
+      sender, encodeNote(flags.note, flags.noteb64),
+      assetId, mockSuggestedParams(flags, this.round)
+    );
+  }
+
+  /**
+   * https://developer.algorand.org/docs/features/asa/#destroying-an-asset
+   * Destroy asset
+   * @param sender sender's address
+   * @param assetId asset index
+   * @param payFlags transaction parameters
+   */
+  destroyAsset (sender: string, assetId: number, payFlags: TxParams): void {
+    const asset = this.getAssetDef(assetId);
+    if (asset.manager !== sender) {
+      throw new Error("Only Manager account can destroy assets");
+    }
+    this.mkDestroyAssetTx(sender, assetId, payFlags);
+    const creatorAcc = this.getAssetCreatorAccount(assetId);
+    // destroy asset from creator's account
+    creatorAcc.destroyAsset(assetId);
+    // delete assets from all accounts
+    this.store.accounts.forEach((value, key) => {
+      value.assets.delete(assetId);
+    });
   }
 
   // creates new application transaction object and update context

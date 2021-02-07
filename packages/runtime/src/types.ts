@@ -130,6 +130,7 @@ export interface StoreAccountI {
   addAsset: (assetId: number, name: string, asadef: ASADef) => AssetDef
   modifyAsset: (assetId: number, fields: AssetModFields) => void
   freezeAsset: (assetId: number, state: boolean) => void
+  destroyAsset: (assetId: number) => void
   addApp: (appId: number, params: SSCDeploymentFlags) => CreatedAppM
   optInToApp: (appId: number, appParams: SSCAttributesM) => void
   deleteApp: (appId: number) => void

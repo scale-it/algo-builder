@@ -211,6 +211,23 @@ export class StoreAccount implements StoreAccountI {
   }
 
   /**
+   * Destroys asset
+   * @param assetId Asset Index
+   */
+  destroyAsset (assetId: number): void {
+    const holding = this.assets.get(assetId);
+    const asset = this.getAssetDef(assetId);
+    if (holding === undefined || asset === undefined) {
+      throw new TealError(ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
+    }
+    if (holding.amount !== asset.total) {
+      throw new Error("All of the created assets should be in creator's account");
+    }
+    this.createdAssets.delete(assetId);
+    this.assets.delete(assetId);
+  }
+
+  /**
    * Add application in account's state
    * check maximum account creation limit
    * @param appId application index
