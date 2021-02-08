@@ -206,6 +206,7 @@ export const inputFile: ArgumentType<string> = {
   name: "inputFile",
   parse (argName: string, strValue: string): string {
     try {
+      fs.existsSync(strValue);
       fs.accessSync(strValue, fs.constants.R_OK);
       const stats = fs.lstatSync(strValue);
 
