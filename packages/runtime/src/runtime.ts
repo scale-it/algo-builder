@@ -447,15 +447,28 @@ export class Runtime {
    */
   revokeAsset (
     sender: string, recipient: string,
-    assetId: number, revocationTarget: string,
+    assetID: number, revocationTarget: string,
     amount: number, payFlags: TxParams
   ): void {
-    const asset = this.getAssetDef(assetId);
+    const asset = this.getAssetDef(assetID);
     if (asset.clawback !== sender) {
       throw new Error("Only Clawback account can revoke assets");
     }
-    this.mkAssetRevokeTx(sender, recipient, assetId, revocationTarget, amount, payFlags);
-    // To-Do transfer assets
+    this.mkAssetRevokeTx(sender, recipient, assetID, revocationTarget, amount, payFlags);
+    // Transfer assets
+    const fromAssetHolding = this.getAssetHolding(assetID, revocationTarget);
+    const toAssetHolding = this.getAssetHolding(assetID, recipient);
+    this.assertAssetNotFrozen(assetID, revocationTarget);
+    this.assertAssetNotFrozen(assetID, recipient);
+
+    if (fromAssetHolding.amount - amount < 0) {
+      throw new TealError(ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS, {
+        amount: amount,
+        address: revocationTarget
+      });
+    }
+    fromAssetHolding.amount -= amount;
+    toAssetHolding.amount += amount;
   }
 
   // creates asset destroy transaction object.

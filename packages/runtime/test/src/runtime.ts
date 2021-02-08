@@ -1,4 +1,4 @@
-import { AssetHolding, LogicSig } from "algosdk";
+import { LogicSig } from "algosdk";
 import { assert, expect } from "chai";
 import sinon from "sinon";
 
@@ -261,10 +261,8 @@ describe("Algorand Standard Assets", function () {
     assert.isDefined(res);
     runtime.optIntoASA(assetId, john.address, {});
     runtime.optIntoASA(assetId, alice.address, {});
-
     // freezing asset holding for john
-    const johnHolding = john.getAssetHolding(assetId) as AssetHolding;
-    johnHolding["is-frozen"] = true;
+    runtime.freezeAsset(elon.address, assetId, john.address, true, {});
 
     assetTransferParam.assetID = assetId;
     const errMsg = `TEAL_ERR904: Asset index ${assetId} frozen for account ${john.address}`;
@@ -335,9 +333,67 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should freeze asset", () => {
-    // const assetId = runtime.createAsset('gold',
-    //  { creator: { name: "john", addr: john.address, sk: john.account.sk } });
-    // to-do opt-in
-    // runtime.freezeAsset(elon.address, assetId, );
+    const assetId = runtime.createAsset('gold',
+      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+
+    runtime.optIntoASA(assetId, john.address, {});
+    runtime.freezeAsset(elon.address, assetId, john.address, true, {});
+
+    const johnAssetHolding = runtime.getAssetHolding(assetId, john.address);
+    assert.equal(johnAssetHolding["is-frozen"], true);
+  });
+
+  it("should fail because only clawback account can revoke assets", () => {
+    const assetId = runtime.createAsset('gold',
+      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+
+    expect(() => {
+      runtime.revokeAsset(alice.address, john.address, assetId, bob.address, 1, {});
+    }).to.throw(Error, "Only Clawback account can revoke assets");
+  });
+
+  it("should revoke assets", () => {
+    const assetId = runtime.createAsset('gold',
+      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+
+    runtime.optIntoASA(assetId, john.address, {});
+    runtime.optIntoASA(assetId, bob.address, {});
+
+    assetTransferParam.toAccountAddr = bob.address;
+    assetTransferParam.amount = 20;
+    assetTransferParam.assetID = assetId;
+    assetTransferParam.payFlags = {};
+
+    runtime.executeTx(assetTransferParam);
+
+    let bobHolding = runtime.getAssetHolding(assetId, bob.address);
+    const beforeRevokeJohn = runtime.getAssetHolding(assetId, john.address).amount;
+    assert.equal(bobHolding.amount, assetTransferParam.amount);
+
+    runtime.revokeAsset(elon.address, john.address, assetId, bob.address, 15, {});
+
+    const johnHolding = runtime.getAssetHolding(assetId, john.address);
+    bobHolding = runtime.getAssetHolding(assetId, bob.address);
+    assert.equal(beforeRevokeJohn + 15, johnHolding.amount);
+    assert.equal(bobHolding.amount, 5);
+  });
+
+  it("should not revoke if asset is frozen", () => {
+    const assetId = runtime.createAsset('gold',
+      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+
+    runtime.optIntoASA(assetId, john.address, {});
+    runtime.optIntoASA(assetId, bob.address, {});
+
+    assetTransferParam.toAccountAddr = bob.address;
+    assetTransferParam.amount = 20;
+    assetTransferParam.assetID = assetId;
+    assetTransferParam.payFlags = {};
+    runtime.executeTx(assetTransferParam);
+    runtime.freezeAsset(elon.address, assetId, bob.address, true, {});
+
+    const errMsg = `TEAL_ERR904: Asset index ${assetId} frozen for account ${bob.address}`;
+    assert.throws(() =>
+      runtime.revokeAsset(elon.address, john.address, assetId, bob.address, 15, {}), errMsg);
   });
 });
