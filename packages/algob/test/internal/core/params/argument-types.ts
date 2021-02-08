@@ -233,19 +233,20 @@ describe("argumentTypes", () => {
     });
 
     it("Should throw if the file isn't readable", function () {
-      if (os.type() === "Windows_NT") {
+      var isRoot = process.getuid && process.getuid() === 0;
+      if (os.type() === "Windows_NT" || isRoot) {
         this.skip();
       }
-      const filePath = path.join(__dirname, 'A');
-      fsExtra.createFileSync(filePath);
-      fsExtra.chmodSync(filePath, 0o000); // assign no permission [read-execute-write: 000]
+
+      fsExtra.createFileSync("A");
+      fsExtra.chmodSync("A", 0o000); // assign no permission [read-execute-write: 000]
 
       expectBuilderError(
-        () => types.inputFile.parse("A file", filePath),
+        () => types.inputFile.parse("A file", "A"),
         ERRORS.ARGUMENTS.INVALID_INPUT_FILE
       );
 
-      fsExtra.unlinkSync(filePath);
+      fsExtra.unlinkSync("A");
     });
 
     it("Should throw if a directory is given", () => {
