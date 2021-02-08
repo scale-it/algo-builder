@@ -323,7 +323,7 @@ export class Runtime {
    * Asset Opt-In for account in Runtime
    * @param assetIndex Asset Index
    * @param address Account address to opt-into asset
-   * @param flags txParams
+   * @param flags Transaction Parameters
    */
   optIntoASA (assetIndex: number, address: AccountAddress, flags: TxParams): void {
     const assetDef = this.getAssetDef(assetIndex);
