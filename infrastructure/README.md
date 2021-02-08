@@ -49,6 +49,26 @@ To connect from SDK or REST we need to know the network address and authorizatio
     cat $ALGORAND_DATA/algod.net
     cat $ALGORAND_DATA/algod.token
 
+## Using Sandbox 2.0
+
+Algorand Sandbox is a fast way to create and configure an Algorand development environment with [Algod](https://github.com/algorand/go-algorand) and [Indexer](https://github.com/algorand/indexer). To quickly bring up a private network with algorand sandbox and use it within algob, following jobs are provided (in `/infrastructure`) :-
+*NOTE:* Please make sure to have [Docker Compose](https://docs.docker.com/compose/install/) installed (with non root privilages) before running sandbox.
+1. `sandbox-up` - Clones the sandbox [git repo](https://github.com/algorand/sandbox.git) in `~/.algorand-sandbox` and setups the network (this might take a while).
+
+2. `sandbox-setup-master-account` - After starting the network using `sandbox-up`, we can use this job to create the master account present in algob config.
+
+3. `sandbox-algod` - Use this command to enter the algod's docker container. To exit use `ctrl + D`.
+
+4. `sandbox-down` - Bring down the sandbox network i.e stop docker containers running algod, indexer and indexer-db.
+
+5. `sandbox-clean` - Clean up the env by removing stopped container and unused images.
+
+**Few Points to be noted :**
+1. To use goal commands within sandbox environment, we need to use the sandbox executable file (present in ~/.algorand-sandbox). eg. To list accounts using goal, use `~/.algorand-sandbox/sandbox goal account list` (where `~/.algorand-sandbox` is the directory and `~/.algorand-sandbox/sandbox` is the executable file). If you want to use `goal` directly, you can execute these commands from within the algod's container. To enter use `sandbox-algod`.
+
+2. Algod port is set to `8081` and kmd port is set to `8082`. Make sure to update the port in `algob.config` before running the examples.
+
+To learn more about sandbox, click [here](https://github.com/algorand/sandbox#algorand-sandbox).
 ### Example REST requests
 
 Private Net

@@ -160,6 +160,14 @@ export class StoreAccount implements StoreAccountI {
   }
 
   /**
+   * Queries asset holding by assetId
+   * @param assetId asset index
+   */
+  getAssetHolding (assetId: number): AssetHolding | undefined {
+    return this.assets.get(assetId);
+  }
+
+  /**
    * Creates Asset in account's state
    * @param name Asset Name
    * @param asaDef Asset Definitions
@@ -232,12 +240,18 @@ export class StoreAccount implements StoreAccountI {
    * check maximum account creation limit
    * @param appId application index
    * @param params SSCDeployment Flags
+   * @param approvalProgram application approval program
+   * @param clearProgram application clear program
+   * NOTE - approval and clear program must be the TEAL code as string
    */
-  addApp (appId: number, params: SSCDeploymentFlags): CreatedAppM {
+  addApp (appId: number, params: SSCDeploymentFlags,
+    approvalProgram: string, clearProgram: string): CreatedAppM {
     if (this.createdApps.size === MAX_ALGORAND_ACCOUNT_APPS) {
-      throw new TealError(ERRORS.TEAL.MAX_LIMIT_APPS,
-        { address: this.address, max: MAX_ALGORAND_ACCOUNT_APPS });
-    }
+      throw new TealError(ERRORS.TEAL.MAX_LIMIT_APPS, {
+        address: this.address,
+        max: MAX_ALGORAND_ACCOUNT_APPS
+      });
+    };
 
     // raise minimum balance
     // https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
@@ -246,7 +260,7 @@ export class StoreAccount implements StoreAccountI {
       (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * params.globalInts +
       (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * params.globalBytes
     );
-    const app = new App(appId, params);
+    const app = new App(appId, params, approvalProgram, clearProgram);
     this.createdApps.set(app.id, app.attributes);
     return app;
   }
@@ -278,6 +292,22 @@ export class StoreAccount implements StoreAccountI {
     }
   }
 
+  // opt-in to asset
+  optInToASA (assetIndex: number, assetHolding: AssetHolding): void {
+    const accAssetHolding = this.assets.get(assetIndex); // fetch asset holding of account
+    if (accAssetHolding) {
+      console.warn(`${this.address} is already opted in to asset ${assetIndex}`);
+    } else {
+      if ((this.createdAssets.size + this.assets.size) === MAX_ALGORAND_ACCOUNT_ASSETS) {
+        throw new TealError(ERRORS.TEAL.MAX_LIMIT_ASSETS,
+          { address: assetHolding.creator, max: MAX_ALGORAND_ACCOUNT_ASSETS });
+      }
+
+      this.minBalance += ASSET_CREATION_FEE;
+      this.assets.set(assetIndex, assetHolding);
+    }
+  }
+
   // delete application from account's global state (createdApps)
   deleteApp (appId: number): void {
     if (!this.createdApps.has(appId)) {
@@ -300,11 +330,13 @@ class App {
   readonly id: number;
   readonly attributes: SSCAttributesM;
 
-  constructor (appId: number, params: SSCDeploymentFlags) {
+  // NOTE - approval and clear program must be the TEAL code as string
+  constructor (appId: number, params: SSCDeploymentFlags,
+    approvalProgram: string, clearProgram: string) {
     this.id = appId;
     this.attributes = {
-      'approval-program': '',
-      'clear-state-program': '',
+      'approval-program': approvalProgram,
+      'clear-state-program': clearProgram,
       creator: params.sender.addr,
       'global-state': new Map<string, StackElem>(),
       'global-state-schema': { 'num-byte-slice': params.globalBytes, 'num-uint': params.globalInts },

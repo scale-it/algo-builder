@@ -1,0 +1,53 @@
+#pragma version 2
+
+// check if the app is being created
+// if so save creator
+int 0
+txn ApplicationID
+==
+
+// if not creation skip this section
+bz not_creation
+
+// save the creator address to the global state
+byte "Creator"
+txn Sender
+app_global_put
+
+
+// return a success
+int 1
+return
+
+not_creation:
+int UpdateApplication
+txn OnCompletion
+==
+
+bz finished
+
+// only creator can update the app
+byte "Creator"
+app_global_get
+txn Sender
+==
+bz failed
+
+// update global state before updating application
+byte "global-key"
+byte "global-val"
+app_global_put
+
+// update local state before updating application
+int 0
+byte "local-key"
+byte "local-val"
+app_local_put
+
+finished:
+int 1
+return
+
+failed:
+int 0
+return

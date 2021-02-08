@@ -66,7 +66,7 @@ export class Interpreter {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: line });
     }
     const accAddress = this.runtime.assertAddressDefined(
-      this.runtime.ctx.state.globalApps.get(appId)?.address);
+      this.runtime.ctx.state.globalApps.get(appId));
     let account = this.runtime.ctx.state.accounts.get(accAddress);
     account = this.runtime.assertAccountDefined(accAddress, account);
     return this.runtime.assertAppDefined(appId, account.getApp(appId), line);
@@ -119,7 +119,7 @@ export class Interpreter {
       throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: line });
     }
     const accAddress = this.runtime.assertAddressDefined(
-      this.runtime.ctx.state.globalApps.get(appId)?.address);
+      this.runtime.ctx.state.globalApps.get(appId));
     let account = this.runtime.ctx.state.accounts.get(accAddress);
     account = this.runtime.assertAccountDefined(accAddress, account);
 
