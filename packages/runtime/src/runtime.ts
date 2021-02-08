@@ -604,6 +604,17 @@ export class Runtime {
     return lsig;
   }
 
+  // verifies assetId is not frozen for an account
+  assertAssetNotFrozen (assetIndex: number, address: AccountAddress): void {
+    const assetHolding = this.getAssetHolding(assetIndex, address);
+    if (assetHolding["is-frozen"]) {
+      throw new TealError(ERRORS.ASA.ACCOUNT_ASSET_FROZEN, {
+        assetId: assetIndex,
+        address: address
+      });
+    }
+  }
+
   // transfer ALGO as per transaction parameters
   transferAlgo (txnParam: AlgoTransferParam): void {
     const fromAccount = this.getAccount(txnParam.fromAccount.addr);
@@ -626,6 +637,7 @@ export class Runtime {
     const fromAssetHolding = this.getAssetHolding(txnParam.assetID, txnParam.fromAccount.addr);
     const toAssetHolding = this.getAssetHolding(txnParam.assetID, txnParam.toAccountAddr);
 
+    this.assertAssetNotFrozen(txnParam.assetID, txnParam.fromAccount.addr);
     if (fromAssetHolding.amount - txnParam.amount < 0) {
       throw new TealError(ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS, {
         amount: txnParam.amount,

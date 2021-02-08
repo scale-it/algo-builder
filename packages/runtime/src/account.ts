@@ -237,8 +237,8 @@ export class StoreAccount implements StoreAccountI {
 
   // opt-in to asset
   optInToASA (assetIndex: number, assetHolding: AssetHolding): void {
-    const localAsset = this.assets.get(assetIndex); // fetch asset holding of account
-    if (localAsset) {
+    const accAssetHolding = this.assets.get(assetIndex); // fetch asset holding of account
+    if (accAssetHolding) {
       console.warn(`${this.address} is already opted in to asset ${assetIndex}`);
     } else {
       if ((this.createdAssets.size + this.assets.size) === MAX_ALGORAND_ACCOUNT_ASSETS) {

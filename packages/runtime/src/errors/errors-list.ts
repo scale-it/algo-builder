@@ -320,6 +320,12 @@ const asaErrors = {
     message: `Account %address% does not hold asset index %assetId%`,
     title: "Asset Holding Not Found",
     description: "Asset Holding Not Found"
+  },
+  ACCOUNT_ASSET_FROZEN: {
+    number: 904,
+    message: `Asset index %assetId% frozen for account %address%`,
+    title: "Asset Frozen",
+    description: "Asset Frozen for account"
   }
 };
 

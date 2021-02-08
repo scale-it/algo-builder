@@ -1,4 +1,4 @@
-import { LogicSig } from "algosdk";
+import { AssetHolding, LogicSig } from "algosdk";
 import { assert } from "chai";
 import sinon from "sinon";
 
@@ -244,6 +244,24 @@ describe("Algorand Standard Assets", function () {
     assert.equal(alice.getAssetHolding(assetId)?.amount, initialAliceAssets + 100);
   });
 
+  it("should throw error on transfer asset if asset is frozen", () => {
+    const assetId = runtime.createAsset('gold',
+      { creator: { ...john.account, name: "john" } });
+
+    const res = runtime.getAssetDef(assetId);
+    assert.isDefined(res);
+    runtime.optIntoASA(assetId, john.address, {});
+    runtime.optIntoASA(assetId, alice.address, {});
+
+    // freezing asset holding for john
+    const johnHolding = john.getAssetHolding(assetId) as AssetHolding;
+    johnHolding["is-frozen"] = true;
+
+    assetTransferParam.assetID = assetId;
+    const errMsg = `TEAL_ERR904: Asset index ${assetId} frozen for account ${john.address}`;
+    assert.throws(() => runtime.executeTx(assetTransferParam), errMsg);
+  });
+
   it("should close john account for transfer asset if close remainder to is specified", () => {
     const assetId = runtime.createAsset('gold',
       { creator: { ...john.account, name: "john" } });
@@ -253,6 +271,7 @@ describe("Algorand Standard Assets", function () {
     runtime.optIntoASA(assetId, john.address, {});
     runtime.optIntoASA(assetId, alice.address, {});
 
+    syncAccounts();
     const initialJohnAssets = john.getAssetHolding(assetId)?.amount as number;
     const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as number;
     assert.isDefined(initialJohnAssets);
