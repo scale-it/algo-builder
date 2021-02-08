@@ -4,7 +4,7 @@ const {
   uint64ToBigEndian,
   addressToPk
 } = require('@algorand-builder/algob');
-const { TransactionType, SignType } = require('@algorand-builder/runtime/build/types');
+const { types } = require('@algorand-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -12,8 +12,8 @@ async function run (runtimeEnv, deployer) {
   const donorAccount = deployer.accountsByName.get('john');
 
   const algoTxnParams = {
-    type: TransactionType.TransferAlgo,
-    sign: SignType.SecretKey,
+    type: types.TransactionType.TransferAlgo,
+    sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
     toAccountAddr: creatorAccount.addr,
     amountMicroAlgos: 200000000,

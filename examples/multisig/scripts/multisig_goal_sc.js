@@ -6,7 +6,7 @@
 */
 const { executeTransaction } = require('./common/common');
 const { createMsigAddress } = require('@algorand-builder/algob');
-const { TransactionType, SignType } = require('@algorand-builder/runtime/build/types');
+const { types } = require('@algorand-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -20,8 +20,8 @@ async function run (runtimeEnv, deployer) {
   console.log('mparams: %s multisigaddr: %s \n', mparams, multsigaddr);
 
   let txnParams = {
-    type: TransactionType.TransferAlgo,
-    sign: SignType.SecretKey,
+    type: types.TransactionType.TransferAlgo,
+    sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
     toAccountAddr: multsigaddr,
     amountMicroAlgos: 10000000,
@@ -38,8 +38,8 @@ async function run (runtimeEnv, deployer) {
   const lsig = await deployer.loadMultiSig('sample-raw-asc.blsig');
 
   txnParams = {
-    type: TransactionType.TransferAlgo,
-    sign: SignType.LogicSignature,
+    type: types.TransactionType.TransferAlgo,
+    sign: types.SignType.LogicSignature,
     fromAccount: { addr: multsigaddr },
     toAccountAddr: bob.addr,
     amountMicroAlgos: 20,

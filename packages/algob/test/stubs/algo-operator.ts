@@ -1,7 +1,4 @@
-import type {
-  Account, AccountMap, ASADef, ASADeploymentFlags,
-  SSCDeploymentFlags, SSCOptionalFlags, TxParams
-} from "@algorand-builder/runtime/build/types";
+import { types as rtypes } from "@algorand-builder/runtime";
 import type { LogicSig } from "algosdk";
 import { Algodv2, LogicSigArgs } from "algosdk";
 
@@ -29,7 +26,8 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   async deployASA (
-    name: string, asaDesc: ASADef, flags: ASADeploymentFlags, accounts: AccountMap,
+    name: string, asaDesc: rtypes.ASADef,
+    flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap,
     txnWriter: txWriter): Promise<ASAInfo> {
     return {
       creator: flags.creator.addr + "-get-address-dry-run",
@@ -40,7 +38,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   async fundLsig (
-    name: string, flags: FundASCFlags, payFlags: TxParams,
+    name: string, flags: FundASCFlags, payFlags: rtypes.TxParams,
     txnWriter: txWriter, scParams: LogicSigArgs, scInitParam?: unknown): Promise<LsigInfo> {
     return {
       creator: flags.funder.addr + "-get-address-dry-run",
@@ -52,8 +50,8 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   async deploySSC (
     approvalProgram: string,
     clearProgram: string,
-    flags: SSCDeploymentFlags,
-    payFlags: TxParams,
+    flags: rtypes.SSCDeploymentFlags,
+    payFlags: rtypes.TxParams,
     txWriter: txWriter,
     scInitParam?: unknown): Promise<SSCInfo> {
     return {
@@ -75,17 +73,21 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     };
   }
 
-  optInToASA (asaName: string, assetIndex: number, account: Account, params: TxParams): Promise<void> {
+  optInToASA (
+    asaName: string, assetIndex: number, account: rtypes.Account,
+    params: rtypes.TxParams): Promise<void> {
     throw new Error("Method not implemented.");
   }
 
   optInToSSC (
-    sender: Account, index: number, payFlags: TxParams, flags: SSCOptionalFlags): Promise<void> {
+    sender: rtypes.Account, index: number,
+    payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags): Promise<void> {
     throw new Error("Method not implemented.");
   }
 
   optInToASAMultiple (
-    asaName: string, asaDef: ASADef, flags: ASADeploymentFlags, accounts: AccountMap, assetIndex: number
+    asaName: string, asaDef: rtypes.ASADef,
+    flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap, assetIndex: number
   ): Promise<void> {
     return Promise.resolve();
   }

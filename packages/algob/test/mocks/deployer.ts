@@ -1,4 +1,4 @@
-import type { Account, ASADeploymentFlags, SSCDeploymentFlags, SSCOptionalFlags, TxParams } from "@algorand-builder/runtime/build/types";
+import { types as rtypes } from "@algorand-builder/runtime";
 import type { LogicSig, LogicSigArgs } from "algosdk";
 import * as algosdk from "algosdk";
 
@@ -17,7 +17,7 @@ export class FakeDeployer implements AlgobDeployer {
   lsig = new Map<string, LsigInfo>();
   isDeployMode = false;
   accounts = [];
-  accountsByName = new Map<string, Account>();
+  accountsByName = new Map<string, rtypes.Account>();
   scriptName = '';
 
   setScriptName (name: string): void {
@@ -51,16 +51,16 @@ export class FakeDeployer implements AlgobDeployer {
     return "metadata";
   };
 
-  async deployASA (name: string, flags: ASADeploymentFlags): Promise<ASAInfo> {
+  async deployASA (name: string, flags: rtypes.ASADeploymentFlags): Promise<ASAInfo> {
     throw new Error("Not implemented");
   };
 
   async fundLsig (name: string, flags: FundASCFlags,
-    payFlags: TxParams, scParams: LogicSigArgs, scInitParam?: unknown): Promise<void> {
+    payFlags: rtypes.TxParams, scParams: LogicSigArgs, scInitParam?: unknown): Promise<void> {
     throw new Error("Not implemented");
   }
 
-  async mkDelegatedLsig (name: string, signer: Account,
+  async mkDelegatedLsig (name: string, signer: rtypes.Account,
     scParams: LogicSigArgs, scInitParam?: unknown): Promise<LsigInfo> {
     throw new Error("Not implemented");
   }
@@ -68,8 +68,8 @@ export class FakeDeployer implements AlgobDeployer {
   async deploySSC (
     approvalProgram: string,
     clearProgram: string,
-    flags: SSCDeploymentFlags,
-    payFlags: TxParams): Promise<SSCInfo> {
+    flags: rtypes.SSCDeploymentFlags,
+    payFlags: rtypes.TxParams): Promise<SSCInfo> {
     throw new Error("Not implemented");
   }
 
@@ -89,12 +89,13 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   }
 
-  optInToASA (name: string, accountName: string, flags: ASADeploymentFlags): Promise<void> {
+  optInToASA (name: string, accountName: string, flags: rtypes.ASADeploymentFlags): Promise<void> {
     throw new Error("Not implemented");
   }
 
   optInToSSC (
-    sender: Account, index: number, payFlags: TxParams, flags: SSCOptionalFlags): Promise<void> {
+    sender: rtypes.Account, index: number, payFlags: rtypes.TxParams,
+    flags: rtypes.SSCOptionalFlags): Promise<void> {
     throw new Error("Not implemented");
   }
 }

@@ -1,6 +1,6 @@
 import { executeTransaction } from "@algorand-builder/algob";
-import { AlgobDeployer } from "@algorand-builder/algob/src/types";
-import { Account, ExecParams } from "@algorand-builder/runtime/src/types";
+import * as algob from "@algorand-builder/algob";
+import { types as rtypes } from "@algorand-builder/runtime";
 import { sha256 } from 'js-sha256';
 
 /**
@@ -8,7 +8,8 @@ import { sha256 } from 'js-sha256';
  * @param deployer AlgobDeployer
  * @param name Name of the account to fetch
  */
-export function getDeployerAccount (deployer: AlgobDeployer, name: string): Account {
+export function getDeployerAccount (
+  deployer: algob.types.AlgobDeployer, name: string): rtypes.Account {
   const account = deployer.accountsByName.get(name);
   if (account === undefined) {
     throw new Error(`Account ${name} is not defined`);
@@ -16,7 +17,8 @@ export function getDeployerAccount (deployer: AlgobDeployer, name: string): Acco
   return account;
 }
 
-export async function executeTx (deployer: AlgobDeployer, txnParams: ExecParams): Promise<void> {
+export async function executeTx (
+  deployer: algob.types.AlgobDeployer, txnParams: rtypes.ExecParams): Promise<void> {
   try {
     await executeTransaction(deployer, txnParams);
   } catch (e) {
@@ -33,7 +35,7 @@ export async function executeTx (deployer: AlgobDeployer, txnParams: ExecParams)
  *  - pyteal template params (to pass to htlc.py)
  * @param deployer AlgobDeployer
  */
-export function prepareParameters (deployer: AlgobDeployer): any {
+export function prepareParameters (deployer: algob.types.AlgobDeployer): any {
   const bob = getDeployerAccount(deployer, 'bob');
   const alice = getDeployerAccount(deployer, 'alice');
 

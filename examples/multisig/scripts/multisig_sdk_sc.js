@@ -5,7 +5,7 @@
 */
 const { executeTransaction } = require('./common/common');
 const { createMsigAddress } = require('@algorand-builder/algob');
-const { TransactionType, SignType } = require('@algorand-builder/runtime/build/types');
+const { types } = require('@algorand-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -24,8 +24,8 @@ async function run (runtimeEnv, deployer) {
   lsig.appendToMultisig(john.sk); // lsig signed again (threshold = 2) by john secret_key
 
   const txnParams = {
-    type: TransactionType.TransferAlgo,
-    sign: SignType.SecretKey,
+    type: types.TransactionType.TransferAlgo,
+    sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
     toAccountAddr: multsigaddr,
     amountMicroAlgos: 10000000,
@@ -39,7 +39,7 @@ async function run (runtimeEnv, deployer) {
 
   txnParams.fromAccount = { addr: multsigaddr };
   txnParams.toAccountAddr = bob.addr;
-  txnParams.sign = SignType.LogicSignature;
+  txnParams.sign = types.SignType.LogicSignature;
   txnParams.amountMicroAlgos = 58;
   // Transaction PASS - according to sample-asc.teal logic, amount should be <= 100
   await executeTransaction(deployer, txnParams);

@@ -1,5 +1,5 @@
 const { executeTransaction, balanceOf } = require('@algorand-builder/algob');
-const { TransactionType, SignType } = require('@algorand-builder/runtime/build/types');
+const { types } = require('@algorand-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   // query gold ASA from deployer (using checkpoint information),
@@ -17,8 +17,8 @@ async function run (runtimeEnv, deployer) {
 
   // execute asset transfer transaction
   await executeTransaction(deployer, {
-    type: TransactionType.TransferAsset,
-    sign: SignType.SecretKey,
+    type: types.TransactionType.TransferAsset,
+    sign: types.SignType.SecretKey,
     fromAccount: goldOwner,
     toAccountAddr: john.addr,
     amount: 1,

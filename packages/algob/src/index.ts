@@ -17,6 +17,7 @@ import { getProgram } from "./lib/load-program";
 import { update } from "./lib/ssc";
 import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC, readGlobalStateSSC, readLocalStateSSC } from "./lib/status";
 import { executeSignedTxnFromFile, executeTransaction } from "./lib/tx";
+import * as types from "./types";
 
 export {
   mkAccounts,
@@ -41,5 +42,6 @@ export {
   globalZeroAddress,
   uint64ToBigEndian,
   addressToPk,
-  getProgram
+  getProgram,
+  types
 };

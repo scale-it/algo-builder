@@ -7,6 +7,7 @@ import { loadFromYamlFileSilent, loadFromYamlFileSilentWithMessage } from "./lib
 import { addressToPk, parseSSCAppArgs, stringToBytes, uint64ToBigEndian } from "./lib/parsing";
 import { encodeNote, mkTransaction } from "./lib/txn";
 import { Runtime } from "./runtime";
+import * as types from "./types";
 
 export {
   Interpreter,
@@ -24,5 +25,6 @@ export {
   loadFromYamlFileSilentWithMessage,
   loadASAFile,
   parseZodError,
-  validateASADefs
+  validateASADefs,
+  types
 };
