@@ -638,6 +638,7 @@ export class Runtime {
     const toAssetHolding = this.getAssetHolding(txnParam.assetID, txnParam.toAccountAddr);
 
     this.assertAssetNotFrozen(txnParam.assetID, txnParam.fromAccount.addr);
+    this.assertAssetNotFrozen(txnParam.assetID, txnParam.toAccountAddr);
     if (fromAssetHolding.amount - txnParam.amount < 0) {
       throw new TealError(ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS, {
         amount: txnParam.amount,
