@@ -1,6 +1,8 @@
 # https://developer.algorand.org/tutorials/create-private-network/
 
 export ALGORAND_DATA=`pwd`/node_data/PrimaryNode
+export SANDBOX_PATH = ~/.algorand-sandbox
+export REMOTE_REPO = https://github.com/algorand/sandbox.git
 
 create-private-net:
 	if [ -d ./node_data ] ;  then echo "./node_data directory already exists - remove it if you want to create a new private network" ; false; fi
@@ -18,6 +20,8 @@ start-private-net:
 stop-private-net:
 	goal network stop -r ./node_data
 
+delete-private-net:
+	goal network delete -r ./node_data
 
 start-kmd:
 	goal kmd start -d $(ALGORAND_DATA)
@@ -36,6 +40,33 @@ setup-master-account:
 	@$(eval list=$(shell goal account list -d $(ALGORAND_DATA)))
 	@$(eval netAddress=$(shell echo $(list) | awk '{print $$2}'))
 	goal clerk send -a 2000000000000 -f $(netAddress) -t WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE -d $(ALGORAND_DATA)
+
+sandbox-up:
+# clone sandbox git repo: https://github.com/algorand/sandbox.git and pull
+	[ -d $(SANDBOX_PATH) ] || git clone $(REMOTE_REPO) $(SANDBOX_PATH)
+	(cd $(SANDBOX_PATH); git pull $(REMOTE_REPO))
+# override .yml with custom config (custom token and port for private network)
+	cat ./sandbox-docker-compose.yml > $(SANDBOX_PATH)/docker-compose.yml
+	$(SANDBOX_PATH)/sandbox up -v
+
+sandbox-down:
+# stops docker containers for algod, indexer and indexer-db
+	$(SANDBOX_PATH)/sandbox down
+
+sandbox-clean:
+# clean up env (removing stopped docker containers, images)
+	$(SANDBOX_PATH)/sandbox clean
+
+sandbox-algod:
+# enter algod's docker shell
+	$(SANDBOX_PATH)/sandbox enter algod
+
+sandbox-setup-master-account:
+# similar to setup-master-account but with sandbox, goal commands are executed using the ./sandbox file
+	$(SANDBOX_PATH)/sandbox goal account import -m "enforce drive foster uniform cradle tired win arrow wasp melt cattle chronic sport dinosaur announce shell correct shed amused dismiss mother jazz task above hospital"
+	@$(eval list=$(shell $(SANDBOX_PATH)/sandbox goal account list))
+	@$(eval netAddress=$(shell echo $(list) | awk '{print $$2}'))
+	$(SANDBOX_PATH)/sandbox goal clerk send -a 2000000000000 -f $(netAddress) -t WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE
 
 # Extracting mnemonic:
 # goal -d $(ALGORAND_DATA) account export -a <account address>
