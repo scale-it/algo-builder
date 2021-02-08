@@ -69,7 +69,7 @@ export type RuntimeAccountMap = Map<string, StoreAccountI>;
 
 export interface State {
   accounts: Map<string, StoreAccountI>
-  globalApps: Map<number, GlobalAppsData>
+  globalApps: Map<number, string>
   assetDefs: Map<number, AccountAddress>
 }
 
@@ -104,12 +104,6 @@ export interface CreatedAppM {
   attributes: SSCAttributesM
 }
 
-export interface GlobalAppsData {
-  address: AccountAddress
-  approvalProgram: string
-  clearProgram: string
-}
-
 // represent account used in tests and by the context
 // NOTE: custom notations are used rather than SDK AccountState notations
 export interface StoreAccountI {
@@ -126,9 +120,10 @@ export interface StoreAccountI {
   balance: () => number
   getApp: (appId: number) => SSCAttributesM | undefined
   getAppFromLocal: (appId: number) => AppLocalStateM | undefined
+  addApp: (appId: number, params: SSCDeploymentFlags,
+    approvalProgram: string, clearProgram: string) => CreatedAppM
   getAssetDef: (assetId: number) => AssetDef | undefined
   addAsset: (assetId: number, name: string, asadef: ASADef) => AssetDef
-  addApp: (appId: number, params: SSCDeploymentFlags) => CreatedAppM
   optInToApp: (appId: number, appParams: SSCAttributesM) => void
   deleteApp: (appId: number) => void
   closeApp: (appId: number) => void
