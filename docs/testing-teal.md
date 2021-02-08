@@ -16,8 +16,11 @@
 ## Block Rounds/Height
 In runtime User can decide the round for each transaction or group of transactions. By default round is set to `2`.
 Block rounds for runtime can be set by using `runtime.setRound(round)`. We can retrieve the round by using `runtime.getRound()` function.<br />
+Example:
+
+      runtime.setRound(5);
+This means that current round is set to 5 and transaction will pass only if first valid round is less than 5 and last valid round is greater than 5.
 Note: Block round remains same until user changes it by using `runtime.setRound(round)`.
-// add more details
 
 ## Flow of Testing
 In this section we will describe the flow of testing:
@@ -43,7 +46,7 @@ In this section we will demonstrate executing transactions with stateless and st
 ### Stateless TEAL
 
 Let's try to execute a transaction where a user (say `john`) can withdraw funds from an `escrow` account based on a stateless smart contract logic. TEAL code can be found [here](../packages/runtime/test/fixtures/escrow-account/assets/escrow.teal).
-- First let's set up the state: initialize accounts and set up runtime (snippet from mocha test is also provided below).
+- First let's set up the state: initialize accounts, get the logic signature for escrow using `runtime.getLogicSig()` function and set up runtime (snippet from mocha test is also provided below).
   ```
   const john = new StoreAccountImpl(500, johnAccount); // 0.005 ALGO
   const runtime = new Runtime([john]); // setup runtime
