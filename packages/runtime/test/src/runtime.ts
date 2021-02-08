@@ -396,4 +396,45 @@ describe("Algorand Standard Assets", function () {
     assert.throws(() =>
       runtime.revokeAsset(elon.address, john.address, assetId, bob.address, 15, {}), errMsg);
   });
+
+  it("Should fail because only manager can destroy assets", () => {
+    const assetId = runtime.createAsset('gold',
+      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+    runtime.optIntoASA(assetId, john.address, {});
+
+    expect(() => {
+      runtime.destroyAsset(alice.address, assetId, {});
+    }).to.throw(Error, "Only Manager account can destroy assets");
+  });
+
+  it("Should destroy asset", () => {
+    const assetId = runtime.createAsset('gold',
+      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+    runtime.optIntoASA(assetId, john.address, {});
+
+    runtime.destroyAsset(elon.address, assetId, {});
+
+    expectTealError(
+      () => runtime.getAssetDef(assetId),
+      ERRORS.ASA.ASSET_NOT_FOUND
+    );
+  });
+
+  it("Should not destroy asset if total assets are not in creator's account", () => {
+    const assetId = runtime.createAsset('gold',
+      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+
+    runtime.optIntoASA(assetId, john.address, {});
+    runtime.optIntoASA(assetId, bob.address, {});
+
+    assetTransferParam.toAccountAddr = bob.address;
+    assetTransferParam.amount = 20;
+    assetTransferParam.assetID = assetId;
+    assetTransferParam.payFlags = {};
+    runtime.executeTx(assetTransferParam);
+
+    expect(() => {
+      runtime.destroyAsset(elon.address, assetId, {});
+    }).to.throw(Error, "All of the created assets should be in creator's account");
+  });
 });
