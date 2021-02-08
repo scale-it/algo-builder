@@ -317,7 +317,7 @@ const asaErrors = {
   },
   ASSET_HOLDING_NOT_FOUND: {
     number: 903,
-    message: `Account %address% does not hold asset index %assetId%`,
+    message: `Account %address% doesn't hold asset index %assetId%`,
     title: "Asset Holding Not Found",
     description: "Asset Holding Not Found"
   }
