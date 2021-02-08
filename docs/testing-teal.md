@@ -13,6 +13,30 @@
 - [Parser](../packages/runtime/src/parser): Reads TEAL code and converts it to a list of opcodes which are executable by the interpreter. If any opcode/data in teal code is invalid, parser will throw an error.
 - [Interpreter](../packages/runtime/src/interpreter): Executes the list of opcodes returned by parser and updates stack after each execution. At the end of execution, if the stack contains a single non-zero uint64 element then the teal code is approved, and transaction can be executed.
 
+## Block Rounds/Height
+In runtime User can decide the round for each transaction or group of transactions. By default round is set to `2`.
+Block rounds for runtime can be set by using `runtime.setRound(round)`. We can retrieve the round by using `runtime.getRound()` function.<br />
+Note: Block round remains same until user changes it by using `runtime.setRound(round)`.
+// add more details
+
+## Flow of Testing
+In this section we will describe the flow of testing:
+- Prepare Accounts: First of all we will create accounts using `StoreAccount`.
+
+      const john = new StoreAccount(initialAlgo);
+      const bob = new StoreAccount(initialAlgo);
+- Prepare Runtime: After creating accounts we will create a runtime object with those accounts.
+
+      const runtime = new Runtime([john, bob]);
+- Set Rounds: Now we will set the rounds according to our requirement.
+
+      runtime.setRound(20);
+    This means that current round is set to 20 and transactions will pass only if their round range includes 20.
+- Create Apps/Assets: At this point we have set up everything, now we can create apps or assets or both and test our smart contracts. If we want to create an app, we can use `runtime.addApp()` funtion, similarly for asset we can use `runtime.addAsset()` function.
+- Create and Execute Transactions: Now we will create transactions to test functioning of our created apps or smart contracts. Example: Payment Transaction, Atomic Transfers, Asset Transfer etc. we can use `runtime.executeTx()` funtion to execute transaction.
+- State: Please note after a transaction is executed the state of account will be updated, so we will have to update our accounts with the latest state from runtime. We update our accounts using `syncAccounts()` funtion.
+- Verify State: Now, we can verify our state, we will assert if updated state is correct.
+
 ## Run tests
 In this section we will demonstrate executing transactions with stateless and stateful teal.
 
@@ -21,9 +45,10 @@ In this section we will demonstrate executing transactions with stateless and st
 Let's try to execute a transaction where a user (say `john`) can withdraw funds from an `escrow` account based on a stateless smart contract logic. TEAL code can be found [here](../packages/runtime/test/fixtures/escrow-account/assets/escrow.teal).
 - First let's set up the state: initialize accounts and set up runtime (snippet from mocha test is also provided below).
   ```
-  const escrow = new StoreAccountImpl(1000e6); // 1000 ALGO
   const john = new StoreAccountImpl(500, johnAccount); // 0.005 ALGO
-  const runtime = new Runtime([escrow, john]); // setup runtime
+  const runtime = new Runtime([john]); // setup runtime
+  const lsig = runtime.getLogicSig(getProgram('escrow.teal'), []);
+  const escrow = runtime.getAccount(lsig.address());
   ```
 
 - Execute transaction (using `runtime.executeTx()`) with valid txnParams.
@@ -31,11 +56,12 @@ Let's try to execute a transaction where a user (say `john`) can withdraw funds 
   // set up transaction paramenters
   const txnParams: ExecParams = {
     type: TransactionType.TransferAlgo, // payment
-    sign: SignType.SecretKey,
+    sign = SignType.LogicSignature;
     fromAccount: escrow.account,
     toAccountAddr: john.address,
     amountMicroAlgos: 100,
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: 1000 },
+    lsig: lsig
   };
 
   it("should withdraw funds from escrow if txn params are correct", async function () {
@@ -44,14 +70,14 @@ Let's try to execute a transaction where a user (say `john`) can withdraw funds 
     assert.equal(john.balance(), initialJohnHolding);
 
     // execute transaction
-    await runtime.executeTx(txnParams, getProgram('escrow.teal'), []);
+    await runtime.executeTx(txnParams);
 
     // check final state (updated accounts)
     assert.equal(getAcc(runtime, escrow).balance(), initialEscrowHolding - 100); // check if 100 microAlgo's are withdrawn
     assert.equal(getAcc(runtime, john).balance(), initialJohnHolding + 100);
   });
   ```
-  In test, we are first checking the initial balance which we set during initialization. Then we are executing transaction by passing `txnParams, teal code (as a string), external arguments to smart contract`. After execution, we are verifying the account balances if the funds are withdrawn from `escrow`.
+  In test, we are first checking the initial balance which we set during initialization. Then we are executing transaction by passing `txnParams`. After execution, we are verifying the account balances if the funds are withdrawn from `escrow`.
 
 - Executing transaction with invalid txnParams results in failure.
   ```
@@ -61,7 +87,7 @@ Let's try to execute a transaction where a user (say `john`) can withdraw funds 
 
     // execute transaction (should fail as amount = 500)
     await expectTealErrorAsync(
-      async () => await runtime.executeTx(invalidParams, getProgram('escrow.teal'), []),
+      async () => await runtime.executeTx(invalidParams),
       ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -102,7 +128,7 @@ Now, we will execute a transaction with stateful TEAL (which increments a global
   const key = "counter";
   it("should initialize global and local counter to 1 on first call", async function () {
     // execute transaction
-    await runtime.executeTx(txnParams, program, []);
+    await runtime.executeTx(txnParams);
 
     const globalCounter = runtime.getGlobalState(txnParams.appId, base64ToBytes(key));
     assert.isDefined(globalCounter); // there should be a value present with key "counter"
@@ -116,6 +142,12 @@ Now, we will execute a transaction with stateful TEAL (which increments a global
   In this test, after executing the transaction (stateful smart contract call), we are verifying if the `global state` and `local state` is updated. User can use `runtime.getGlobalState()` and `runtime.getLocalState()` to check state.
 
 Complete test can be found [here](../packages/runtime/test/integration/stateful-counter.ts).
+
+## Best Practices
+- Follow Flow of Testing section to set up your tests.
+- Keep each test independent of each other.
+- Use `beforeEach` and `AfterEach` functions to set clear boundaries while testing.
+- Sync your accounts's state after execution of each transaction.
 
 ## What we support now
 
@@ -131,15 +163,19 @@ Currently, `runtime` supports:
   + `delete` application
   + `closeout` from an application
   + `clearState` of application
+  + `create` an asset
+  + `opt-in` to asset
+  + `transfer` an asset
 
 - Full transaction processing for type `payment`, `application call`
 
 Currently `runtime` does not support :-
 
- - Asset related transactions
- - Transactions to
-   + `create` an asset
-   + `opt-in` to asset
+ - Asset related transactions:
+    - Asset Destroy
+    - Asset Revoke
+    - Asset Freeze
+    - Asset Configuration
 
 
 ## Examples
