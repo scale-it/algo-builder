@@ -160,6 +160,14 @@ export class StoreAccount implements StoreAccountI {
   }
 
   /**
+   * Queries asset holding by assetId
+   * @param assetId asset index
+   */
+  getAssetHolding (assetId: number): AssetHolding | undefined {
+    return this.assets.get(assetId);
+  }
+
+  /**
    * Creates Asset in account's state
    * @param name Asset Name
    * @param asaDef Asset Definitions
@@ -230,6 +238,22 @@ export class StoreAccount implements StoreAccountI {
         schema: appParams[localStateSchema]
       };
       this.appsLocalState.set(appId, localParams);
+    }
+  }
+
+  // opt-in to asset
+  optInToASA (assetIndex: number, assetHolding: AssetHolding): void {
+    const accAssetHolding = this.assets.get(assetIndex); // fetch asset holding of account
+    if (accAssetHolding) {
+      console.warn(`${this.address} is already opted in to asset ${assetIndex}`);
+    } else {
+      if ((this.createdAssets.size + this.assets.size) === MAX_ALGORAND_ACCOUNT_ASSETS) {
+        throw new TealError(ERRORS.TEAL.MAX_LIMIT_ASSETS,
+          { address: assetHolding.creator, max: MAX_ALGORAND_ACCOUNT_ASSETS });
+      }
+
+      this.minBalance += ASSET_CREATION_FEE;
+      this.assets.set(assetIndex, assetHolding);
     }
   }
 

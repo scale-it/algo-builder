@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
-import algosdk, { AssetDef, decodeAddress } from "algosdk";
+import algosdk, { AssetDef, AssetHolding, decodeAddress, makeAssetTransferTxnWithSuggestedParams } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
 import { StoreAccount } from "./account";
@@ -16,7 +16,7 @@ import type {
   SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
   StackElem, State, StoreAccountI, Txn, TxParams
 } from "./types";
-import { ExecutionMode, SignType, TransactionType } from "./types";
+import { AssetTransferParam, ExecutionMode, SignType, TransactionType } from "./types";
 
 export class Runtime {
   /**
@@ -301,6 +301,30 @@ export class Runtime {
   }
 
   /**
+   * Asset Opt-In for account in Runtime
+   * @param assetIndex Asset Index
+   * @param address Account address to opt-into asset
+   * @param flags Transaction Parameters
+   */
+  optIntoASA (assetIndex: number, address: AccountAddress, flags: TxParams): void {
+    const assetDef = this.getAssetDef(assetIndex);
+    const creatorAddr = assetDef.creator;
+    makeAssetTransferTxnWithSuggestedParams(
+      address, address, undefined, undefined, 0, undefined, assetIndex,
+      mockSuggestedParams(flags, this.round));
+
+    const assetHolding: AssetHolding = {
+      amount: address === creatorAddr ? assetDef.total : 0, // for creator opt-in amount is total assets
+      'asset-id': assetIndex,
+      creator: creatorAddr,
+      'is-frozen': assetDef["default-frozen"]
+    };
+
+    const account = this.getAccount(address);
+    account.optInToASA(assetIndex, assetHolding);
+  }
+
+  /**
    * Returns Asset Definitions
    * @param assetId Asset Index
    */
@@ -313,6 +337,23 @@ export class Runtime {
     const creatorAcc = this.assertAccountDefined(addr, this.store.accounts.get(addr));
     const assetDef = creatorAcc.getAssetDef(assetId);
     return this.assertAssetDefined(assetId, assetDef);
+  }
+
+  /**
+   * Returns Asset Holding from an account
+   * @param assetIndex Asset Index
+   * @param address address of account to get holding from
+   */
+  getAssetHolding (assetIndex: number, address: AccountAddress): AssetHolding {
+    const account = this.assertAccountDefined(address, this.store.accounts.get(address));
+    const assetHolding = account.getAssetHolding(assetIndex);
+    if (assetHolding === undefined) {
+      throw new TealError(ERRORS.ASA.ASSET_HOLDING_NOT_FOUND, {
+        assetId: assetIndex,
+        address: address
+      });
+    }
+    return assetHolding;
   }
 
   // creates new application transaction object and update context
@@ -520,6 +561,17 @@ export class Runtime {
     return lsig;
   }
 
+  // verifies assetId is not frozen for an account
+  assertAssetNotFrozen (assetIndex: number, address: AccountAddress): void {
+    const assetHolding = this.getAssetHolding(assetIndex, address);
+    if (assetHolding["is-frozen"]) {
+      throw new TealError(ERRORS.ASA.ACCOUNT_ASSET_FROZEN, {
+        assetId: assetIndex,
+        address: address
+      });
+    }
+  }
+
   // transfer ALGO as per transaction parameters
   transferAlgo (txnParam: AlgoTransferParam): void {
     const fromAccount = this.getAccount(txnParam.fromAccount.addr);
@@ -534,6 +586,31 @@ export class Runtime {
 
       closeRemToAcc.amount += fromAccount.amount; // transfer funds of sender to closeRemTo account
       fromAccount.amount = 0; // close sender's account
+    }
+  }
+
+  // transfer ASSET as per transaction parameters
+  transferAsset (txnParam: AssetTransferParam): void {
+    const fromAssetHolding = this.getAssetHolding(txnParam.assetID, txnParam.fromAccount.addr);
+    const toAssetHolding = this.getAssetHolding(txnParam.assetID, txnParam.toAccountAddr);
+
+    this.assertAssetNotFrozen(txnParam.assetID, txnParam.fromAccount.addr);
+    this.assertAssetNotFrozen(txnParam.assetID, txnParam.toAccountAddr);
+    if (fromAssetHolding.amount - txnParam.amount < 0) {
+      throw new TealError(ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS, {
+        amount: txnParam.amount,
+        address: txnParam.fromAccount.addr
+      });
+    }
+    fromAssetHolding.amount -= txnParam.amount;
+    toAssetHolding.amount += txnParam.amount;
+
+    if (txnParam.payFlags.closeRemainderTo) {
+      const closeRemToAssetHolding = this.getAssetHolding(
+        txnParam.assetID, txnParam.payFlags.closeRemainderTo);
+
+      closeRemToAssetHolding.amount += fromAssetHolding.amount; // transfer assets of sender to closeRemTo account
+      fromAssetHolding.amount = 0; // close sender's account
     }
   }
 
@@ -577,6 +654,10 @@ export class Runtime {
         switch (txnParam.type) {
           case TransactionType.TransferAlgo: {
             this.transferAlgo(txnParam);
+            break;
+          }
+          case TransactionType.TransferAsset: {
+            this.transferAsset(txnParam);
             break;
           }
           case TransactionType.DeleteSSC: {

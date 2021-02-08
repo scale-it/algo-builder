@@ -123,8 +123,10 @@ export interface StoreAccountI {
   addApp: (appId: number, params: SSCDeploymentFlags,
     approvalProgram: string, clearProgram: string) => CreatedAppM
   getAssetDef: (assetId: number) => AssetDef | undefined
+  getAssetHolding: (assetId: number) => AssetHolding | undefined
   addAsset: (assetId: number, name: string, asadef: ASADef) => AssetDef
   optInToApp: (appId: number, appParams: SSCAttributesM) => void
+  optInToASA: (assetIndex: number, assetHolding: AssetHolding) => void
   deleteApp: (appId: number) => void
   closeApp: (appId: number) => void
   getLocalState: (appId: number, key: Uint8Array | string) => StackElem | undefined

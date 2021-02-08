@@ -2767,7 +2767,7 @@ describe("Teal Opcodes", function () {
       const prev = stack.pop();
 
       assert.deepEqual(last.toString(), "1");
-      assert.deepEqual(prev, convertToBuffer("false"));
+      assert.deepEqual(prev, 0n);
     });
 
     it("should push 0 if not defined", () => {

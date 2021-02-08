@@ -1,10 +1,11 @@
-import { LogicSig } from "algosdk";
+import { AssetHolding, LogicSig } from "algosdk";
 import { assert } from "chai";
+import sinon from "sinon";
 
 import { StoreAccount } from "../../src/account";
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime } from "../../src/runtime";
-import type { AlgoTransferParam, ExecParams } from "../../src/types";
+import type { AlgoTransferParam, AssetTransferParam, ExecParams } from "../../src/types";
 import { SignType, TransactionType } from "../../src/types";
 import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
@@ -137,17 +138,34 @@ describe("Rounds Test", function () {
   });
 });
 
-describe("Asset Creation", function () {
+describe("Algorand Standard Assets", function () {
   useFixture('asa-check');
-  const john = new StoreAccount(minBalance);
+  let john = new StoreAccount(minBalance);
+  let alice = new StoreAccount(minBalance);
   let runtime: Runtime;
+  let assetTransferParam: AssetTransferParam;
   this.beforeAll(() => {
-    runtime = new Runtime([john]);
+    runtime = new Runtime([john, alice]);
+
+    assetTransferParam = {
+      type: TransactionType.TransferAsset,
+      sign: SignType.SecretKey,
+      fromAccount: john.account,
+      toAccountAddr: alice.account.addr,
+      amount: 10,
+      assetID: 1,
+      payFlags: { totalFee: 1000 }
+    };
   });
+
+  const syncAccounts = (): void => {
+    john = runtime.getAccount(john.address);
+    alice = runtime.getAccount(alice.address);
+  };
 
   it("should create asset using asa.yaml file", () => {
     const assetId = runtime.createAsset('gold',
-      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+      { creator: { ...john.account, name: "john" } });
 
     const res = runtime.getAssetDef(assetId);
     assert.equal(res.decimals, 0);
@@ -160,5 +178,112 @@ describe("Asset Creation", function () {
     assert.equal(res.reserve, "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE");
     assert.equal(res.freeze, "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE");
     assert.equal(res.clawback, "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE");
+  });
+
+  it("should opt-in to asset for john", () => {
+    const assetId = runtime.createAsset('gold',
+      { creator: { ...john.account, name: "john" } });
+
+    const res = runtime.getAssetDef(assetId);
+    assert.isDefined(res);
+
+    // opt-in for john (creator)
+    runtime.optIntoASA(assetId, john.address, {});
+    const johnAssetHolding = john.getAssetHolding(assetId);
+    assert.isDefined(johnAssetHolding);
+    assert.equal(johnAssetHolding?.amount as number, 5912599999515);
+
+    // opt-in for alice
+    runtime.optIntoASA(assetId, alice.address, {});
+    const aliceAssetHolding = alice.getAssetHolding(assetId);
+    assert.isDefined(aliceAssetHolding);
+    assert.equal(aliceAssetHolding?.amount as number, 0);
+  });
+
+  it("should throw error on opt-in of asset does not exist", () => {
+    const errMsg = 'TEAL_ERR902: Asset with Index 1234 not found';
+    assert.throws(() => runtime.optIntoASA(1234, john.address, {}), errMsg);
+  });
+
+  it("should warn if account already is already opted-into asset", () => {
+    const spy = sinon.spy(console, 'warn');
+    const assetId = runtime.createAsset('gold',
+      { creator: { ...john.account, name: "john" } });
+
+    const res = runtime.getAssetDef(assetId);
+    assert.isDefined(res);
+    runtime.optIntoASA(assetId, john.address, {});
+
+    // executing same opt-in tx again
+    const warnMsg = `${john.address} is already opted in to asset ${assetId}`;
+    runtime.optIntoASA(assetId, john.address, {});
+    assert(spy.calledWith(warnMsg));
+    spy.restore();
+  });
+
+  it("should transfer asset between two accounts", () => {
+    const assetId = runtime.createAsset('gold',
+      { creator: { ...john.account, name: "john" } });
+
+    const res = runtime.getAssetDef(assetId);
+    assert.isDefined(res);
+    runtime.optIntoASA(assetId, john.address, {});
+    runtime.optIntoASA(assetId, alice.address, {});
+
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as number;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as number;
+    assert.isDefined(initialJohnAssets);
+    assert.isDefined(initialAliceAssets);
+
+    assetTransferParam.assetID = assetId;
+    assetTransferParam.amount = 100;
+    runtime.executeTx(assetTransferParam);
+    syncAccounts();
+
+    assert.equal(john.getAssetHolding(assetId)?.amount, initialJohnAssets - 100);
+    assert.equal(alice.getAssetHolding(assetId)?.amount, initialAliceAssets + 100);
+  });
+
+  it("should throw error on transfer asset if asset is frozen", () => {
+    const assetId = runtime.createAsset('gold',
+      { creator: { ...john.account, name: "john" } });
+
+    const res = runtime.getAssetDef(assetId);
+    assert.isDefined(res);
+    runtime.optIntoASA(assetId, john.address, {});
+    runtime.optIntoASA(assetId, alice.address, {});
+
+    // freezing asset holding for john
+    const johnHolding = john.getAssetHolding(assetId) as AssetHolding;
+    johnHolding["is-frozen"] = true;
+
+    assetTransferParam.assetID = assetId;
+    const errMsg = `TEAL_ERR904: Asset index ${assetId} frozen for account ${john.address}`;
+    assert.throws(() => runtime.executeTx(assetTransferParam), errMsg);
+  });
+
+  it("should close john account for transfer asset if close remainder to is specified", () => {
+    const assetId = runtime.createAsset('gold',
+      { creator: { ...john.account, name: "john" } });
+
+    const res = runtime.getAssetDef(assetId);
+    assert.isDefined(res);
+    runtime.optIntoASA(assetId, john.address, {});
+    runtime.optIntoASA(assetId, alice.address, {});
+
+    syncAccounts();
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as number;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as number;
+    assert.isDefined(initialJohnAssets);
+    assert.isDefined(initialAliceAssets);
+
+    assetTransferParam.assetID = assetId;
+    assetTransferParam.amount = 0;
+    assetTransferParam.payFlags = { totalFee: 1000, closeRemainderTo: alice.address };
+    runtime.executeTx(assetTransferParam); // transfer all assets of john => alice (using closeRemTo)
+    syncAccounts();
+
+    assert.equal(john.getAssetHolding(assetId)?.amount, 0);
+    assert.equal(alice.getAssetHolding(assetId)?.amount, initialAliceAssets + initialJohnAssets);
   });
 });

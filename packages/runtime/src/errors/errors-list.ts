@@ -281,6 +281,12 @@ const transactionErrors = {
     message: "Unknown Transaction type: %transaction%",
     title: "Transaction error",
     description: `Transaction error`
+  },
+  INSUFFICIENT_ACCOUNT_ASSETS: {
+    number: 101,
+    message: "Cannot withdraw %amount% assets from account %address%: insufficient balance",
+    title: 'Insufficient account assests',
+    description: `Withdrawing %amount% assets will lead to insufficient balance`
   }
 };
 
@@ -308,6 +314,18 @@ const asaErrors = {
     message: `Asset with Index %assetId% not found`,
     title: "Asset Not Found",
     description: "Asset Not Found"
+  },
+  ASSET_HOLDING_NOT_FOUND: {
+    number: 903,
+    message: `Account %address% doesn't hold asset index %assetId%`,
+    title: "Asset Holding Not Found",
+    description: "Asset Holding Not Found"
+  },
+  ACCOUNT_ASSET_FROZEN: {
+    number: 904,
+    message: `Asset index %assetId% frozen for account %address%`,
+    title: "Asset Frozen",
+    description: "Asset Frozen for account"
   }
 };
 
