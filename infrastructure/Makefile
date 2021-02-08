@@ -1,7 +1,7 @@
 # https://developer.algorand.org/tutorials/create-private-network/
 
 export ALGORAND_DATA=`pwd`/node_data/PrimaryNode
-export SANDBOX_PATH = ~/sandbox
+export SANDBOX_PATH = ~/.algorand-sandbox
 export REMOTE_REPO = https://github.com/algorand/sandbox.git
 
 create-private-net:

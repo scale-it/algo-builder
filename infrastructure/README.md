@@ -53,7 +53,7 @@ To connect from SDK or REST we need to know the network address and authorizatio
 
 Algorand Sandbox is a fast way to create and configure an Algorand development environment with [Algod](https://github.com/algorand/go-algorand) and [Indexer](https://github.com/algorand/indexer). To quickly bring up a private network with algorand sandbox and use it within algob, following jobs are provided (in `/infrastructure`) :-
 *NOTE:* Please make sure to have [Docker Compose](https://docs.docker.com/compose/install/) installed (with non root privilages) before running sandbox.
-1. `sandbox-up` - Clones the sandbox [git repo](https://github.com/algorand/sandbox.git) in `~/sandbox` and setups up the network (this might take a while).
+1. `sandbox-up` - Clones the sandbox [git repo](https://github.com/algorand/sandbox.git) in `~/.algorand-sandbox` and setups up the network (this might take a while).
 
 2. `sandbox-setup-master-account` - After starting the network using `sandbox-up`, we can use this job to create the master account present in algob config.
 
@@ -64,7 +64,7 @@ Algorand Sandbox is a fast way to create and configure an Algorand development e
 5. `sandbox-clean` - Clean up the env by removing stopped container and unused images.
 
 **Few Points to be noted :**
-1. To use goal commands within sandbox environment, we need to use the sandbox executable file (present in ~/sandbox). eg. To list accounts using goal, use `~/sandbox/sandbox goal account list` (where `~/sandbox` is the directory and `~/sandbox/sandbox` is the executable file). If you want to use `goal` directly, you can execute these commands from within the algod's container. To enter use `sandbox-algod`.
+1. To use goal commands within sandbox environment, we need to use the sandbox executable file (present in ~/.algorand-sandbox). eg. To list accounts using goal, use `~/.algorand-sandbox/sandbox goal account list` (where `~/.algorand-sandbox` is the directory and `~/.algorand-sandbox/sandbox` is the executable file). If you want to use `goal` directly, you can execute these commands from within the algod's container. To enter use `sandbox-algod`.
 
 2. Algod port is set to `8081` and kmd port is set to `8082`. Make sure to update the port in `algob.config` before running the examples.
 
