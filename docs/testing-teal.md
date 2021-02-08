@@ -19,7 +19,7 @@ Block rounds for runtime can be set by using `runtime.setRound(round)`. We can r
 Example:
 
       runtime.setRound(5);
-This means that current round is set to 5 and transaction will pass only if first valid round is less than 5 and last valid round is greater than 5.
+This means that current round is set to 5 and transaction will pass only if first valid round is less than 5 and last valid round is greater than 5 for that particular transaction.
 Note: Block round remains same until user changes it by using `runtime.setRound(round)`.
 
 ## Flow of Testing
@@ -59,7 +59,7 @@ Let's try to execute a transaction where a user (say `john`) can withdraw funds 
   // set up transaction paramenters
   const txnParams: ExecParams = {
     type: TransactionType.TransferAlgo, // payment
-    sign = SignType.LogicSignature;
+    sign: SignType.LogicSignature;
     fromAccount: escrow.account,
     toAccountAddr: john.address,
     amountMicroAlgos: 100,
