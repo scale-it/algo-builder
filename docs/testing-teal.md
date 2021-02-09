@@ -46,58 +46,126 @@ In this section we will demonstrate executing transactions with stateless and st
 
 ### Stateless TEAL
 
-Let's try to execute a transaction where a user (say `john`) can withdraw funds from an `escrow` account based on a stateless smart contract logic. TEAL code can be found [here](../packages/runtime/test/fixtures/escrow-account/assets/escrow.teal).
-- First let's set up the state: initialize accounts, get the logic signature for escrow using `runtime.getLogicSig()` function and set up runtime (snippet from mocha test is also provided below).
-  ```
-  const john = new StoreAccountImpl(500, johnAccount); // 0.005 ALGO
-  const runtime = new Runtime([john]); // setup runtime
-  const lsig = runtime.getLogicSig(getProgram('escrow.teal'), []);
-  const escrow = runtime.getAccount(lsig.address());
-  ```
+  #### Escrow Account
+  Let's try to execute a transaction where a user (say `john`) can withdraw funds from an `escrow` account based on a stateless smart contract logic. TEAL code can be found [here](../packages/runtime/test/fixtures/escrow-account/assets/escrow.teal).
+  - First let's set up the state: initialize accounts, get the logic signature for escrow using `runtime.getLogicSig()` function and set up runtime (snippet from mocha test is also provided below).
+    ```
+    const john = new StoreAccount(initialJohnHolding);
+    const runtime = new Runtime([john]); // setup runtime
+    const lsig = runtime.getLogicSig(getProgram('escrow.teal'), []);
+    const escrow = runtime.getAccount(lsig.address());
+    ```
 
-- Execute transaction (using `runtime.executeTx()`) with valid txnParams.
-  ```
-  // set up transaction paramenters
-  const txnParams: ExecParams = {
-    type: TransactionType.TransferAlgo, // payment
-    sign: SignType.LogicSignature;
-    fromAccount: escrow.account,
-    toAccountAddr: john.address,
-    amountMicroAlgos: 100,
-    payFlags: { totalFee: 1000 },
-    lsig: lsig
-  };
+  - Execute transaction (using `runtime.executeTx()`) with valid txnParams.
+    ```
+    // set up transaction paramenters
+    const txnParams: ExecParams = {
+      type: TransactionType.TransferAlgo, // payment
+      sign: SignType.LogicSignature;
+      fromAccount: escrow.account,
+      toAccountAddr: john.address,
+      amountMicroAlgos: 100,
+      payFlags: { totalFee: 1000 },
+      lsig: lsig
+    };
 
-  it("should withdraw funds from escrow if txn params are correct", async function () {
-    // check initial balance
-    assert.equal(escrow.balance(), initialEscrowHolding);
-    assert.equal(john.balance(), initialJohnHolding);
+    it("should withdraw funds from escrow if txn params are correct", async function () {
+      // check initial balance
+      assert.equal(escrow.balance(), initialEscrowHolding);
+      assert.equal(john.balance(), initialJohnHolding);
 
-    // execute transaction
-    await runtime.executeTx(txnParams);
+      // execute transaction
+      await runtime.executeTx(txnParams);
 
-    // check final state (updated accounts)
-    assert.equal(getAcc(runtime, escrow).balance(), initialEscrowHolding - 100); // check if 100 microAlgo's are withdrawn
-    assert.equal(getAcc(runtime, john).balance(), initialJohnHolding + 100);
-  });
-  ```
-  In test, we are first checking the initial balance which we set during initialization. Then we are executing transaction by passing `txnParams`. After execution, we are verifying the account balances if the funds are withdrawn from `escrow`.
+      // check final state (updated accounts)
+      assert.equal(getAcc(runtime, escrow).balance(), initialEscrowHolding - 100); // check if 100 microAlgo's are withdrawn
+      assert.equal(getAcc(runtime, john).balance(), initialJohnHolding + 100);
+    });
+    ```
+    In test, we are first checking the initial balance which we set during initialization. Then we are executing transaction by passing `txnParams`. After execution, we are verifying the account balances if the funds are withdrawn from `escrow`.
 
-- Executing transaction with invalid txnParams results in failure.
-  ```
-  it("should reject transaction if amount > 100", async function () {
-    const invalidParams = Object.assign({}, txnParams);
-    invalidParams.amountMicroAlgos = 500;
+  - Executing transaction with invalid txnParams results in failure.
+    ```
+    it("should reject transaction if amount > 100", async function () {
+      const invalidParams = Object.assign({}, txnParams);
+      invalidParams.amountMicroAlgos = 500;
 
-    // execute transaction (should fail as amount = 500)
-    await expectTealErrorAsync(
-      async () => await runtime.executeTx(invalidParams),
-      ERRORS.TEAL.REJECTED_BY_LOGIC
-    );
-  });
-  ```
+      // execute transaction (should fail as amount = 500)
+      await expectTealErrorAsync(
+        async () => await runtime.executeTx(invalidParams),
+        ERRORS.TEAL.REJECTED_BY_LOGIC
+      );
+    });
+    ```
 
-Full mocha test with more transactions can be found [here](../packages/runtime/test/integration/escrow-account.ts).
+  Full mocha test with more transactions can be found [here](../packages/runtime/test/integration/escrow-account.ts).
+
+  #### Delegated Signuature Account
+  Let's try to execute a transaction where a user (say `john`) will use delegated signature based on a stateless smart contract logic. TEAL code can be found [here](../packages/runtime/test/fixtures/basic-teal/assets/basic.teal).
+  - First let's set up the state: initialize accounts, get the logic signature for escrow using `runtime.getLogicSig()` function, sign logic signature with john's secret key and set up runtime (snippet from mocha test is also provided below).
+    ```
+    const john = new StoreAccount(initialHolding);
+    const bob = new StoreAccount(initialHolding)
+    const runtime = new Runtime([john, bob]); // setup runtime
+    const lsig = runtime.getLogicSig(getProgram('escrow.teal'), []);
+    lsig.sign(john.account.sk);
+    ```
+
+  - Execute transaction (using `runtime.executeTx()`) with valid txnParams.
+    ```
+    // set up transaction paramenters
+    const txnParams: ExecParams = {
+      type: TransactionType.TransferAlgo, // payment
+      sign: SignType.LogicSignature,
+      fromAccount: john.account,
+      toAccountAddr: bob.address,
+      amountMicroAlgos: 100,
+      payFlags: { totalFee: 1000 }
+    };
+
+    it("should send algo's from john to bob if stateless teal logic is correct", function () {
+      // check initial balance
+      assert.equal(john.balance(), initialHolding);
+      assert.equal(bob.balance(), initialHolding);
+      // get logic signature
+      const lsig = runtime.getLogicSig(getProgram('basic.teal'), []);
+      lsig.sign(john.account.sk);
+      txnParams.lsig = lsig;
+
+      runtime.executeTx(txnParams);
+
+      // get final state (updated accounts)
+      const johnAcc = runtime.getAccount(john.address);
+      const bobAcc = runtime.getAccount(bob.address);
+      assert.equal(johnAcc.balance(), initialJohnHolding - 1100); // check if (100 microAlgo's + fee of 1000) are withdrawn
+      assert.equal(bobAcc.balance(), initialBobHolding + 100);
+    });
+    ```
+    In test, we are first checking the initial balance which we set during initialization. Then we are executing transaction by passing `txnParams`. After execution, we are verifying the account balances if the funds are withdrawn from `john` account.
+
+  - Executing transaction with logic rejecting teal file results in failure.
+    ```
+    it("should throw error if logic is incorrect", function () {
+      // initial balance
+      const johnBal = john.balance();
+      const bobBal = bob.balance();
+      // get logic signature
+      const lsig = runtime.getLogicSig(getProgram('incorrect-logic.teal'), []);
+      lsig.sign(john.account.sk);
+      txnParams.lsig = lsig;
+
+      const invalidParams = Object.assign({}, txnParams);
+      invalidParams.amountMicroAlgos = 50;
+
+      // execute transaction (should fail is logic is rejected)
+      expectTealError(
+        () => runtime.executeTx(invalidParams),
+        ERRORS.TEAL.REJECTED_BY_LOGIC
+      );
+    });
+    ```
+
+  Full mocha test with more transactions can be found [here](../packages/runtime/test/integration/basic-teal.ts).
 
 ### Stateful TEAL
 
