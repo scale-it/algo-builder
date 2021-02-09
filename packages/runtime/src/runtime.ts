@@ -323,21 +323,6 @@ export class Runtime {
     return this.assetCounter;
   }
 
-  // creates asset configuration transaction object.
-  mkAssetConfigTx (sender: string, assetId: number, fields: AssetModFields, flags: TxParams): void {
-    // this funtion is called only for validation of parameters passed
-    algosdk.makeAssetConfigTxnWithSuggestedParams(
-      sender,
-      encodeNote(flags.note, flags.noteb64),
-      assetId,
-      fields.manager,
-      fields.reserve,
-      fields.freeze,
-      fields.clawback,
-      mockSuggestedParams(flags, this.round)
-    );
-  }
-
   /**
    * Asset Opt-In for account in Runtime
    * @param assetIndex Asset Index
@@ -362,6 +347,25 @@ export class Runtime {
     account.optInToASA(assetIndex, assetHolding);
   }
 
+  // creates asset configuration transaction object.
+  mkAssetConfigTx (sender: string, assetId: number, fields: AssetModFields, flags: TxParams): void {
+    // this funtion is called only for validation of parameters passed
+    algosdk.makeAssetConfigTxnWithSuggestedParams(
+      sender,
+      encodeNote(flags.note, flags.noteb64),
+      assetId,
+      fields.manager,
+      fields.reserve,
+      fields.freeze,
+      fields.clawback,
+      mockSuggestedParams(flags, this.round)
+    );
+    const asset = this.getAssetDef(assetId);
+    if (asset.manager !== sender) {
+      throw new Error("Only Manager account can modify asset");
+    }
+  }
+
   /**
    * https://developer.algorand.org/docs/features/asa/#modifying-an-asset
    * Modifies asset fields
@@ -371,10 +375,6 @@ export class Runtime {
    * @param payFlags Transaction Parameters
    */
   modifyAsset (sender: string, assetId: number, fields: AssetModFields, payFlags: TxParams): void {
-    const asset = this.getAssetDef(assetId);
-    if (asset.manager !== sender) {
-      throw new Error("Only Manager account can modify asset");
-    }
     this.mkAssetConfigTx(sender, assetId, fields, payFlags);
     const creatorAcc = this.getAssetCreatorAccount(assetId);
     creatorAcc.modifyAsset(assetId, fields);
@@ -392,6 +392,10 @@ export class Runtime {
       state,
       mockSuggestedParams(flags, this.round)
     );
+    const asset = this.getAssetDef(assetId);
+    if (asset.freeze !== sender) {
+      throw new Error("Only Freeze account can freeze asset");
+    }
   }
 
   /**
@@ -407,10 +411,6 @@ export class Runtime {
     sender: string, assetId: number, freezeTarget: string,
     freezeState: boolean, payFlags: TxParams
   ): void {
-    const asset = this.getAssetDef(assetId);
-    if (asset.freeze !== sender) {
-      throw new Error("Only Freeze account can freeze asset");
-    }
     this.mkAssetFreezeTx(sender, assetId, freezeTarget, freezeState, payFlags);
     const acc = this.assertAccountDefined(freezeTarget, this.store.accounts.get(freezeTarget));
     acc.freezeAsset(assetId, freezeState);
@@ -419,7 +419,7 @@ export class Runtime {
   // creates asset revoke transaction object.
   mkAssetRevokeTx (
     sender: string, recipient: string, assetId: number,
-    revocationTarget: string, amount: number, flags: TxParams
+    revocationTarget: string, amount: number, flags: TxParams, assetID: number
   ): void {
     // this funtion is called only for validation of parameters passed
     algosdk.makeAssetTransferTxnWithSuggestedParams(
@@ -432,6 +432,10 @@ export class Runtime {
       assetId,
       mockSuggestedParams(flags, this.round)
     );
+    const asset = this.getAssetDef(assetID);
+    if (asset.clawback !== sender) {
+      throw new Error("Only Clawback account can revoke assets");
+    }
   }
 
   /**
@@ -450,11 +454,7 @@ export class Runtime {
     assetID: number, revocationTarget: string,
     amount: number, payFlags: TxParams
   ): void {
-    const asset = this.getAssetDef(assetID);
-    if (asset.clawback !== sender) {
-      throw new Error("Only Clawback account can revoke assets");
-    }
-    this.mkAssetRevokeTx(sender, recipient, assetID, revocationTarget, amount, payFlags);
+    this.mkAssetRevokeTx(sender, recipient, assetID, revocationTarget, amount, payFlags, assetID);
     // Transfer assets
     const fromAssetHolding = this.getAssetHolding(assetID, revocationTarget);
     const toAssetHolding = this.getAssetHolding(assetID, recipient);
@@ -478,6 +478,10 @@ export class Runtime {
       sender, encodeNote(flags.note, flags.noteb64),
       assetId, mockSuggestedParams(flags, this.round)
     );
+    const asset = this.getAssetDef(assetId);
+    if (asset.manager !== sender) {
+      throw new Error("Only Manager account can destroy assets");
+    }
   }
 
   /**
@@ -488,10 +492,6 @@ export class Runtime {
    * @param payFlags transaction parameters
    */
   destroyAsset (sender: string, assetId: number, payFlags: TxParams): void {
-    const asset = this.getAssetDef(assetId);
-    if (asset.manager !== sender) {
-      throw new Error("Only Manager account can destroy assets");
-    }
     this.mkDestroyAssetTx(sender, assetId, payFlags);
     const creatorAcc = this.getAssetCreatorAccount(assetId);
     // destroy asset from creator's account
