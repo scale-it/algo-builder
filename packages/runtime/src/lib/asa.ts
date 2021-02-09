@@ -34,6 +34,10 @@ function validateSingle (accounts: AccountMap | RuntimeAccountMap, filename: str
 function validateParsedASADefs (
   accounts: AccountMap | RuntimeAccountMap, asaDefs: ASADefs, filename: string): void {
   for (const def of Object.values(asaDefs)) {
+    def.manager = def.manager !== "" ? def.manager : undefined;
+    def.reserve = def.reserve !== "" ? def.reserve : undefined;
+    def.freeze = def.freeze !== "" ? def.freeze : undefined;
+    def.clawback = def.clawback !== "" ? def.clawback : undefined;
     validateSingle(accounts, filename, def);
   }
 }
