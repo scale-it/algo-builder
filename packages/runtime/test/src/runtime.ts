@@ -314,6 +314,22 @@ describe("Algorand Standard Assets", function () {
     assert.equal(res.freeze, john.address);
   });
 
+  it("Blank field test, should not modify asset because field is set to blank", () => {
+    const assetId = runtime.createAsset('silver',
+      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+
+    const modFields: AssetModFields = {
+      manager: bob.address,
+      reserve: bob.address,
+      clawback: john.address,
+      freeze: alice.address
+    };
+
+    expect(() => {
+      runtime.modifyAsset(elon.address, assetId, modFields, {});
+    }).to.throw("Cannot reset a blank address");
+  });
+
   it("should fail because only manager account can modify asset", () => {
     const assetId = runtime.createAsset('gold',
       { creator: { name: "john", addr: john.address, sk: john.account.sk } });

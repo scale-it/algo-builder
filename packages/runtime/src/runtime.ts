@@ -295,10 +295,10 @@ export class Runtime {
       asaDef.total,
       asaDef.decimals,
       asaDef["default-frozen"],
-      asaDef.manager,
-      asaDef.reserve,
-      asaDef.freeze,
-      asaDef.clawback,
+      asaDef.manager !== "" ? asaDef.manager : undefined,
+      asaDef.reserve !== "" ? asaDef.reserve : undefined,
+      asaDef.freeze !== "" ? asaDef.freeze : undefined,
+      asaDef.clawback !== "" ? asaDef.clawback : undefined,
       asaDef["unit-name"],
       name,
       asaDef.url,
@@ -354,11 +354,12 @@ export class Runtime {
       sender,
       encodeNote(flags.note, flags.noteb64),
       assetId,
-      fields.manager,
-      fields.reserve,
-      fields.freeze,
-      fields.clawback,
-      mockSuggestedParams(flags, this.round)
+      fields.manager !== "" ? fields.manager : undefined,
+      fields.reserve !== "" ? fields.reserve : undefined,
+      fields.freeze !== "" ? fields.freeze : undefined,
+      fields.clawback !== "" ? fields.clawback : undefined,
+      mockSuggestedParams(flags, this.round),
+      false
     );
     const asset = this.getAssetDef(assetId);
     if (asset.manager !== sender) {
