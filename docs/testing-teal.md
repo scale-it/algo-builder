@@ -15,15 +15,15 @@
 
 ## Block Rounds/Height
 In runtime User can decide the round for each transaction or group of transactions. By default round is set to `2`.
-Block rounds for runtime can be set by using `runtime.setRound(round)`. We can retrieve the round by using `runtime.getRound()` function.<br />
+Block rounds for runtime can be set by using `runtime.setRound(round)`. We can retrieve the current round by using `runtime.getRound()` function.<br />
 Example:
 
-      runtime.setRound(5);
+      runtime.setRound(5); // set current round to 5
 This means that current round is set to 5 and transaction will pass only if first valid round is less than 5 and last valid round is greater than 5 for that particular transaction.
-Note: Block round remains same until user changes it by using `runtime.setRound(round)`.
+Note: Block round remains same until user changes it by calling `runtime.setRound(round)`.
 
 ## Flow of Testing
-In this section we will describe the flow of testing:
+In this section we will describe the flow of testing smart contracts in runtime:
 - Prepare Accounts: First of all we will create accounts using `StoreAccount`.
 
       const john = new StoreAccount(initialAlgo);
@@ -36,8 +36,8 @@ In this section we will describe the flow of testing:
       runtime.setRound(20);
     This means that current round is set to 20 and transactions will pass only if their round range includes 20.
 - Create Apps/Assets: At this point we have set up everything, now we can create apps or assets or both and test our smart contracts. If we want to create an app, we can use `runtime.addApp()` funtion, similarly for asset we can use `runtime.addAsset()` function.
-- Create and Execute Transactions: Now we will create transactions to test functioning of our created apps or smart contracts. Example: Payment Transaction, Atomic Transfers, Asset Transfer etc. we can use `runtime.executeTx()` funtion to execute transaction.
-- State: Please note after a transaction is executed the state of account will be updated, so we will have to update our accounts with the latest state from runtime. We update our accounts using `syncAccounts()` funtion.
+- Create and Execute Transactions: now we will create transactions to test our smart contracts. Use `runtime.executeTx()` funtion to execute transaction (Payment Transaction, Atomic Transfers, Asset Transfer etc...).
+- Update/Refresh State: Please note that after a transaction is executed the state of an account will be updated. In order to inspect a new state of accounts we need to re-query them from the runtime. We usually create a `syncAccounts()` closure function which will reassign accounts to their latest state.
 - Verify State: Now, we can verify our state, we will assert if updated state is correct.
 
 ## Run tests
@@ -150,7 +150,7 @@ Complete test can be found [here](../packages/runtime/test/integration/stateful-
 - Follow Flow of Testing section to set up your tests.
 - Structure tests by the AAA pattern: Structure your tests with 3 well-separated sections: Arrange, Act & Assert (AAA). The first part includes the test setup, then the execution of the unit under test, and finally the assertion phase. Following this structure guarantees that the reader spends no brain CPU on understanding the test plan.
 - To prevent test coupling and easily reason about the test flow, each test should add and act on its own set of states.
-- Use `beforeEach` and `AfterEach` functions to set clear boundaries while testing.
+- Use `beforeEach` and `afterEach` functions to set clear boundaries while testing.
 - Sync your accounts's state after execution of each transaction.
 
 ## What we support now
