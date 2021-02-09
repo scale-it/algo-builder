@@ -414,7 +414,7 @@ export class Runtime {
   ): void {
     this.mkAssetFreezeTx(sender, assetId, freezeTarget, freezeState, payFlags);
     const acc = this.assertAccountDefined(freezeTarget, this.store.accounts.get(freezeTarget));
-    acc.freezeAsset(assetId, freezeState);
+    acc.setFreezeState(assetId, freezeState);
   }
 
   // creates asset revoke transaction object.

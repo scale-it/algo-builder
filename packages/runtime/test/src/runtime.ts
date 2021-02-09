@@ -303,7 +303,7 @@ describe("Algorand Standard Assets", function () {
 
   it("should modify asset", () => {
     const assetId = runtime.createAsset('gold',
-      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+      { creator: { ...john.account, name: "john" } });
 
     runtime.modifyAsset(elon.address, assetId, modFields, {});
 
@@ -316,7 +316,7 @@ describe("Algorand Standard Assets", function () {
 
   it("Blank field test, should not modify asset because field is set to blank", () => {
     const assetId = runtime.createAsset('silver',
-      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+      { creator: { ...john.account, name: "john" } });
 
     const modFields: AssetModFields = {
       manager: bob.address,
@@ -332,7 +332,7 @@ describe("Algorand Standard Assets", function () {
 
   it("should fail because only manager account can modify asset", () => {
     const assetId = runtime.createAsset('gold',
-      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+      { creator: { ...john.account, name: "john" } });
 
     expect(() => {
       runtime.modifyAsset(bob.address, assetId, modFields, {});
@@ -341,7 +341,7 @@ describe("Algorand Standard Assets", function () {
 
   it("should fail because only freeze account can freeze asset", () => {
     const assetId = runtime.createAsset('gold',
-      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+      { creator: { ...john.account, name: "john" } });
 
     expect(() => {
       runtime.freezeAsset(bob.address, assetId, john.address, false, {});
@@ -350,7 +350,7 @@ describe("Algorand Standard Assets", function () {
 
   it("should freeze asset", () => {
     const assetId = runtime.createAsset('gold',
-      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+      { creator: { ...john.account, name: "john" } });
 
     runtime.optIntoASA(assetId, john.address, {});
     runtime.freezeAsset(elon.address, assetId, john.address, true, {});
@@ -361,7 +361,7 @@ describe("Algorand Standard Assets", function () {
 
   it("should fail because only clawback account can revoke assets", () => {
     const assetId = runtime.createAsset('gold',
-      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+      { creator: { ...john.account, name: "john" } });
 
     expect(() => {
       runtime.revokeAsset(alice.address, john.address, assetId, bob.address, 1, {});
@@ -370,7 +370,7 @@ describe("Algorand Standard Assets", function () {
 
   it("should revoke assets", () => {
     const assetId = runtime.createAsset('gold',
-      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+      { creator: { ...john.account, name: "john" } });
 
     runtime.optIntoASA(assetId, john.address, {});
     runtime.optIntoASA(assetId, bob.address, {});
@@ -396,7 +396,7 @@ describe("Algorand Standard Assets", function () {
 
   it("should not revoke if asset is frozen", () => {
     const assetId = runtime.createAsset('gold',
-      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+      { creator: { ...john.account, name: "john" } });
 
     runtime.optIntoASA(assetId, john.address, {});
     runtime.optIntoASA(assetId, bob.address, {});
@@ -415,7 +415,7 @@ describe("Algorand Standard Assets", function () {
 
   it("Should fail because only manager can destroy assets", () => {
     const assetId = runtime.createAsset('gold',
-      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+      { creator: { ...john.account, name: "john" } });
     runtime.optIntoASA(assetId, john.address, {});
 
     expect(() => {
@@ -425,7 +425,7 @@ describe("Algorand Standard Assets", function () {
 
   it("Should destroy asset", () => {
     const assetId = runtime.createAsset('gold',
-      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+      { creator: { ...john.account, name: "john" } });
     runtime.optIntoASA(assetId, john.address, {});
 
     runtime.destroyAsset(elon.address, assetId, {});
@@ -438,7 +438,7 @@ describe("Algorand Standard Assets", function () {
 
   it("Should not destroy asset if total assets are not in creator's account", () => {
     const assetId = runtime.createAsset('gold',
-      { creator: { name: "john", addr: john.address, sk: john.account.sk } });
+      { creator: { ...john.account, name: "john" } });
 
     runtime.optIntoASA(assetId, john.address, {});
     runtime.optIntoASA(assetId, bob.address, {});

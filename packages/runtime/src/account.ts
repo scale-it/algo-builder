@@ -209,8 +209,9 @@ export class StoreAccount implements StoreAccountI {
   /**
    * Freeze asset
    * @param assetId Asset Index
+   * @state new freeze state
    */
-  freezeAsset (assetId: number, state: boolean): void {
+  setFreezeState (assetId: number, state: boolean): void {
     const holding = this.assets.get(assetId);
     if (holding === undefined) {
       throw new TealError(ERRORS.ASA.ASSET_HOLDING_NOT_FOUND,
