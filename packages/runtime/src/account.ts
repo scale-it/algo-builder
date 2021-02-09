@@ -197,7 +197,7 @@ export class StoreAccount implements StoreAccountI {
     // check for blank fields
     if ((fields.reserve !== "" && asset.reserve === "") || (fields.freeze !== "" && asset.freeze === "") ||
       (fields.clawback !== "" && asset.clawback === "")) {
-      throw new Error("Cannot reset a blank address");
+      throw new TealError(ERRORS.ASA.BLANK_ADDRESS_ERROR);
     }
 
     asset.manager = fields.manager;

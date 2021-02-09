@@ -325,9 +325,10 @@ describe("Algorand Standard Assets", function () {
       freeze: alice.address
     };
 
-    expect(() => {
-      runtime.modifyAsset(elon.address, assetId, modFields, {});
-    }).to.throw("Cannot reset a blank address");
+    expectTealError(
+      () => runtime.modifyAsset(elon.address, assetId, modFields, {}),
+      ERRORS.ASA.BLANK_ADDRESS_ERROR
+    );
   });
 
   it("should fail because only manager account can modify asset", () => {

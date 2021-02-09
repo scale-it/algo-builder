@@ -344,6 +344,12 @@ const asaErrors = {
     message: `Only Clawback account %address% can revoke asset`,
     title: "Clawback Error",
     description: "Clawback Error"
+  },
+  BLANK_ADDRESS_ERROR: {
+    number: 908,
+    message: `Cannot reset a blank address`,
+    title: "Blank Address Error",
+    description: "Blank Address Error"
   }
 };
 
