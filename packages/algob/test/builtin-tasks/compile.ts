@@ -62,7 +62,7 @@ describe("Compile task", () => {
   before(function () {
     var isRoot = process.getuid && process.getuid() === 0;
     if (isRoot) {
-      const warnMsg = chalk.yellowBright(`*** If running tests as root, make sure to have pyteal exist in sudo env (or install pyteal as root).
+      const warnMsg = chalk.yellowBright(`*** If running tests as root, make sure to have pyteal installed in sudo env (or install pyteal as root).
       Otherwise below tests will fail ***`);
       console.warn(warnMsg);
     }
