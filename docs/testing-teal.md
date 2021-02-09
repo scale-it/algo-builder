@@ -28,7 +28,7 @@ In this section we will describe the flow of testing smart contracts in runtime:
 
       const john = new StoreAccount(initialAlgo);
       const bob = new StoreAccount(initialAlgo);
-  `initialAlgo`: To set up accounts we can pass the amount of algos we want to have in it.
+  `initialAlgo`: To set up accounts we can pass the initial amount of algos we want to have in it. It's recommended to have some initial algos (to cover transaction fees and to maintain minimum balance for an account)
 - Prepare Runtime: After creating accounts we will create a runtime object with those accounts.
 
       const runtime = new Runtime([john, bob]);
