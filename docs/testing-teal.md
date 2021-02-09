@@ -19,7 +19,7 @@ Block rounds for runtime can be set by using `runtime.setRound(round)`. We can r
 Example:
 
       runtime.setRound(5); // set current round to 5
-This means that current round is set to 5 and transaction will pass only if first valid round is less than 5 and last valid round is greater than 5 for that particular transaction.
+This means that current round is set to 5 and transaction will pass only if its' first valid round is less or equal 5 and the last valid round is greater than 5.
 Note: Block round remains same until user changes it by calling `runtime.setRound(round)`.
 
 ## Flow of Testing
@@ -35,7 +35,7 @@ In this section we will describe the flow of testing smart contracts in runtime:
 
       runtime.setRound(20);
     This means that current round is set to 20 and transactions will pass only if their round range includes 20.
-- Create Apps/Assets: At this point we have set up everything, now we can create apps or assets or both and test our smart contracts. If we want to create an app, we can use `runtime.addApp()` funtion, similarly for asset we can use `runtime.addAsset()` function.
+- Create Apps/Assets: At this point our runtime is read. Now we can create apps and/or assets and begin testing our smart contracts (present in `/fixtures/project/assets`). For creating a stateful application, use `runtime.addApp()` funtion. Similarly for creating a new asset we can use `runtime.addAsset()` function.
 - Create and Execute Transactions: now we will create transactions to test our smart contracts. Use `runtime.executeTx()` funtion to execute transaction (Payment Transaction, Atomic Transfers, Asset Transfer etc...).
 - Update/Refresh State: Please note that after a transaction is executed the state of an account will be updated. In order to inspect a new state of accounts we need to re-query them from the runtime. We usually create a `syncAccounts()` closure function which will reassign accounts to their latest state.
 - Verify State: Now, we can verify our state, we will assert if updated state is correct.
