@@ -326,6 +326,24 @@ const asaErrors = {
     message: `Asset index %assetId% frozen for account %address%`,
     title: "Asset Frozen",
     description: "Asset Frozen for account"
+  },
+  MANAGER_ERROR: {
+    number: 905,
+    message: `Only Manager account %address% can modify asset`,
+    title: "Manager Error",
+    description: "Manager Error"
+  },
+  FREEZE_ERROR: {
+    number: 906,
+    message: `Only Freeze account %address% can freeze asset`,
+    title: "Freeze Error",
+    description: "Freeze Error"
+  },
+  CLAWBACK_ERROR: {
+    number: 907,
+    message: `Only Clawback account %address% can revoke asset`,
+    title: "Clawback Error",
+    description: "Clawback Error"
   }
 };
 

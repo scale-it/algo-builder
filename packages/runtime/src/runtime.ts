@@ -363,7 +363,7 @@ export class Runtime {
     );
     const asset = this.getAssetDef(assetId);
     if (asset.manager !== sender) {
-      throw new Error("Only Manager account can modify asset");
+      throw new TealError(ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
     }
   }
 
@@ -395,7 +395,7 @@ export class Runtime {
     );
     const asset = this.getAssetDef(assetId);
     if (asset.freeze !== sender) {
-      throw new Error(`Only Freeze account(${asset.freeze}) can freeze asset`);
+      throw new TealError(ERRORS.ASA.FREEZE_ERROR, { address: asset.freeze });
     }
   }
 
@@ -435,7 +435,7 @@ export class Runtime {
     );
     const asset = this.getAssetDef(assetID);
     if (asset.clawback !== sender) {
-      throw new Error(`Only Clawback account(${asset.clawback}) can revoke assets`);
+      throw new TealError(ERRORS.ASA.CLAWBACK_ERROR, { address: asset.clawback });
     }
   }
 
@@ -481,7 +481,7 @@ export class Runtime {
     );
     const asset = this.getAssetDef(assetId);
     if (asset.manager !== sender) {
-      throw new Error("Only Manager account can destroy assets");
+      throw new TealError(ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
     }
   }
 

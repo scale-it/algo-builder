@@ -334,18 +334,20 @@ describe("Algorand Standard Assets", function () {
     const assetId = runtime.createAsset('gold',
       { creator: { ...john.account, name: "john" } });
 
-    expect(() => {
-      runtime.modifyAsset(bob.address, assetId, modFields, {});
-    }).to.throw("Only Manager account can modify asset");
+    expectTealError(
+      () => runtime.modifyAsset(bob.address, assetId, modFields, {}),
+      ERRORS.ASA.MANAGER_ERROR
+    );
   });
 
   it("should fail because only freeze account can freeze asset", () => {
     const assetId = runtime.createAsset('gold',
       { creator: { ...john.account, name: "john" } });
 
-    expect(() => {
-      runtime.freezeAsset(bob.address, assetId, john.address, false, {});
-    }).to.throw(Error, "Only Freeze account can freeze asset");
+    expectTealError(
+      () => runtime.freezeAsset(bob.address, assetId, john.address, false, {}),
+      ERRORS.ASA.FREEZE_ERROR
+    );
   });
 
   it("should freeze asset", () => {
@@ -363,9 +365,10 @@ describe("Algorand Standard Assets", function () {
     const assetId = runtime.createAsset('gold',
       { creator: { ...john.account, name: "john" } });
 
-    expect(() => {
-      runtime.revokeAsset(alice.address, john.address, assetId, bob.address, 1, {});
-    }).to.throw(Error, "Only Clawback account can revoke assets");
+    expectTealError(
+      () => runtime.revokeAsset(alice.address, john.address, assetId, bob.address, 1, {}),
+      ERRORS.ASA.CLAWBACK_ERROR
+    );
   });
 
   it("should revoke assets", () => {
@@ -408,9 +411,10 @@ describe("Algorand Standard Assets", function () {
     runtime.executeTx(assetTransferParam);
     runtime.freezeAsset(elon.address, assetId, bob.address, true, {});
 
-    const errMsg = `TEAL_ERR904: Asset index ${assetId} frozen for account ${bob.address}`;
-    assert.throws(() =>
-      runtime.revokeAsset(elon.address, john.address, assetId, bob.address, 15, {}), errMsg);
+    expectTealError(
+      () => runtime.revokeAsset(elon.address, john.address, assetId, bob.address, 15, {}),
+      ERRORS.ASA.ACCOUNT_ASSET_FROZEN
+    );
   });
 
   it("Should fail because only manager can destroy assets", () => {
@@ -418,9 +422,10 @@ describe("Algorand Standard Assets", function () {
       { creator: { ...john.account, name: "john" } });
     runtime.optIntoASA(assetId, john.address, {});
 
-    expect(() => {
-      runtime.destroyAsset(alice.address, assetId, {});
-    }).to.throw(Error, "Only Manager account can destroy assets");
+    expectTealError(
+      () => runtime.destroyAsset(alice.address, assetId, {}),
+      ERRORS.ASA.MANAGER_ERROR
+    );
   });
 
   it("Should destroy asset", () => {
