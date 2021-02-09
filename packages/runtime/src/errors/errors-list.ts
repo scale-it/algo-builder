@@ -173,8 +173,8 @@ by an index that does not exist.`
   },
   LABEL_NOT_FOUND: {
     number: 25,
-    message: "Label not found at %line%",
-    title: "Label %label% not found at %line%",
+    message: "Label \"%label%\" not found at line %line%",
+    title: "Label %label% not found at line %line%",
     description: `Label %label% not found`
   },
   INVALID_LABEL: {
