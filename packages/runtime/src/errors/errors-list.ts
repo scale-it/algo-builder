@@ -350,6 +350,12 @@ const asaErrors = {
     message: `Cannot reset a blank address`,
     title: "Blank Address Error",
     description: "Blank Address Error"
+  },
+  ASSET_TOTAL_ERROR: {
+    number: 909,
+    message: "All of the created assets should be in creator's account",
+    title: "Asset Total Error",
+    description: "Asset Total Error"
   }
 };
 

@@ -455,8 +455,9 @@ describe("Algorand Standard Assets", function () {
     assetTransferParam.payFlags = {};
     runtime.executeTx(assetTransferParam);
 
-    expect(() => {
-      runtime.destroyAsset(elon.address, assetId, {});
-    }).to.throw(Error, "All of the created assets should be in creator's account");
+    expectTealError(
+      () => runtime.destroyAsset(elon.address, assetId, {}),
+      ERRORS.ASA.ASSET_TOTAL_ERROR
+    );
   });
 });

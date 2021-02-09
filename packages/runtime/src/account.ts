@@ -231,7 +231,7 @@ export class StoreAccount implements StoreAccountI {
       throw new TealError(ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
     }
     if (holding.amount !== asset.total) {
-      throw new Error("All of the created assets should be in creator's account");
+      throw new TealError(ERRORS.ASA.ASSET_TOTAL_ERROR);
     }
     this.createdAssets.delete(assetId);
     this.assets.delete(assetId);
