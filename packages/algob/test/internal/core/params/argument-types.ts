@@ -1,4 +1,5 @@
 import { assert } from "chai";
+import chalk from "chalk";
 import * as fsExtra from "fs-extra";
 import * as os from "os";
 import * as path from "path";
@@ -235,6 +236,7 @@ describe("argumentTypes", () => {
     it("Should throw if the file isn't readable", function () {
       var isRoot = process.getuid && process.getuid() === 0;
       if (os.type() === "Windows_NT" || isRoot) {
+        console.warn(chalk.yellowBright("Skipping test: either OS is windows or tests are being run as root"));
         this.skip();
       }
 
