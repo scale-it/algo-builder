@@ -219,7 +219,7 @@ Complete test can be found [here](../packages/runtime/test/integration/stateful-
 - Follow Flow of Testing section to set up your tests.
 - Structure tests by the AAA pattern: Structure your tests with 3 well-separated sections: Arrange, Act & Assert (AAA). The first part includes the test setup, then the execution of the unit under test, and finally the assertion phase. Following this structure guarantees that the reader spends no brain CPU on understanding the test plan.
 - To prevent test coupling and easily reason about the test flow, each test should add and act on its own set of states.
-- Use `beforeEach` and `afterEach` functions to set clear boundaries while testing.
+- Use `beforeEach`, `afterEach`, `beforeAll`, `afterAll` functions to set clear boundaries while testing.
 - Sync your accounts's state after execution of each transaction.
 
 ## What we support now
