@@ -215,7 +215,7 @@ export class Runtime {
    * Returns asset creator account or throws error is it doesn't exist
    * @param Asset Index
    */
-  getAssetCreatorAccount (assetId: number): StoreAccountI {
+  getAssetAccount (assetId: number): StoreAccountI {
     const addr = this.store.assetDefs.get(assetId);
     if (addr === undefined) {
       throw new TealError(ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
