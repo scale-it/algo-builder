@@ -82,7 +82,7 @@ In this section we will demonstrate executing transactions with stateless and st
       assert.equal(getAcc(runtime, john).balance(), initialJohnHolding + 100);
     });
     ```
-    In test, we are first checking the initial balance which we set during initialization. Then we are executing transaction by passing `txnParams`. After execution, we are verifying the account balances if the funds are withdrawn from `escrow`.
+    In this test, we are first checking the initial balance which we set during initialization. Then we are executing transaction by passing `txnParams`. After execution, we are verifying the account balances if the funds are withdrawn from `escrow`.
 
   - Executing transaction with invalid txnParams results in failure.
     ```
