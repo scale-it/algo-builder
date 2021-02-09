@@ -395,7 +395,7 @@ export class Runtime {
     );
     const asset = this.getAssetDef(assetId);
     if (asset.freeze !== sender) {
-      throw new Error("Only Freeze account can freeze asset");
+      throw new Error(`Only Freeze account(${asset.freeze}) can freeze asset`);
     }
   }
 
@@ -435,7 +435,7 @@ export class Runtime {
     );
     const asset = this.getAssetDef(assetID);
     if (asset.clawback !== sender) {
-      throw new Error("Only Clawback account can revoke assets");
+      throw new Error(`Only Clawback account(${asset.clawback}) can revoke assets`);
     }
   }
 
@@ -497,7 +497,7 @@ export class Runtime {
     const creatorAcc = this.getAssetAccount(assetId);
     // destroy asset from creator's account
     creatorAcc.destroyAsset(assetId);
-    // delete assets from all accounts
+    // delete asset holdings from all accounts
     this.store.accounts.forEach((value, key) => {
       value.assets.delete(assetId);
     });
