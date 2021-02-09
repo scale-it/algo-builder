@@ -228,7 +228,7 @@ export class Runtime {
    * @param assetId Asset Index
    */
   getAssetDef (assetId: number): AssetDef {
-    const creatorAcc = this.getAssetCreatorAccount(assetId);
+    const creatorAcc = this.getAssetAccount(assetId);
     const assetDef = creatorAcc.getAssetDef(assetId);
     return this.assertAssetDefined(assetId, assetDef);
   }
@@ -376,7 +376,7 @@ export class Runtime {
    */
   modifyAsset (sender: string, assetId: number, fields: AssetModFields, payFlags: TxParams): void {
     this.mkAssetConfigTx(sender, assetId, fields, payFlags);
-    const creatorAcc = this.getAssetCreatorAccount(assetId);
+    const creatorAcc = this.getAssetAccount(assetId);
     creatorAcc.modifyAsset(assetId, fields);
   }
 
@@ -493,7 +493,7 @@ export class Runtime {
    */
   destroyAsset (sender: string, assetId: number, payFlags: TxParams): void {
     this.mkDestroyAssetTx(sender, assetId, payFlags);
-    const creatorAcc = this.getAssetCreatorAccount(assetId);
+    const creatorAcc = this.getAssetAccount(assetId);
     // destroy asset from creator's account
     creatorAcc.destroyAsset(assetId);
     // delete assets from all accounts
