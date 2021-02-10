@@ -1,7 +1,8 @@
-import { BuilderError, encodeNote, parseSSCAppArgs, types as rtypes } from "@algorand-builder/runtime";
+import { encodeNote, parseSSCAppArgs, types as rtypes } from "@algorand-builder/runtime";
 import type { LogicSigArgs } from "algosdk";
 import algosdk from "algosdk";
 
+import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { txWriter } from "../internal/tx-log-writer";
 import { createClient } from "../lib/driver";

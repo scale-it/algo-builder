@@ -1,5 +1,3 @@
-import { BuilderError } from "@algorand-builder/runtime";
-
 import {
   ActionType,
   ParamDefinitionAny,
@@ -7,6 +5,7 @@ import {
   TaskArguments,
   TaskDefinition
 } from "../../../types";
+import { BuilderError } from "../errors";
 import { ErrorDescriptor, ERRORS } from "../errors-list";
 import * as types from "../params/argument-types";
 import { ALGOB_PARAM_DEFINITIONS } from "../params/builder-params";

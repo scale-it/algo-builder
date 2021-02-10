@@ -1,4 +1,3 @@
-import { BuilderError } from "@algorand-builder/runtime";
 import debug from "debug";
 
 import type {
@@ -14,6 +13,7 @@ import type {
   TaskDefinition,
   TasksMap
 } from "../../types";
+import { BuilderError } from "./errors";
 import { ERRORS } from "./errors-list";
 import { OverriddenTaskDefinition } from "./tasks/task-definitions";
 
