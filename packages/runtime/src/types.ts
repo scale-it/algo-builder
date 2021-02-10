@@ -193,7 +193,8 @@ export interface SSCOptionalFlags {
   rekeyTo?: string
 }
 
-export type ExecParams = AlgoTransferParam | AssetTransferParam | SSCCallsParam;
+export type ExecParams = AlgoTransferParam | AssetTransferParam | SSCCallsParam |
+ModifyAssetParam | FreezeAssetParam | RevokeAssetParam | DestroyAssetParam;
 
 export enum SignType {
   SecretKey,
@@ -203,6 +204,10 @@ export enum SignType {
 export enum TransactionType {
   TransferAlgo,
   TransferAsset,
+  ModifyAsset,
+  FreezeAsset,
+  RevokeAsset,
+  DestroyAsset,
   CallNoOpSSC,
   ClearSSC,
   CloseSSC,
@@ -212,6 +217,40 @@ export enum TransactionType {
 export interface Sign {
   sign: SignType
   lsig?: LogicSig
+}
+
+export interface ModifyAssetParam extends Sign {
+  type: TransactionType.ModifyAsset
+  fromAccount: AccountSDK
+  assetID: number
+  fields: AssetModFields
+  payFlags: TxParams
+}
+
+export interface FreezeAssetParam extends Sign {
+  type: TransactionType.FreezeAsset
+  fromAccount: AccountSDK
+  assetID: number
+  freezeTarget: AccountAddress
+  freezeState: boolean
+  payFlags: TxParams
+}
+
+export interface RevokeAssetParam extends Sign {
+  type: TransactionType.RevokeAsset
+  fromAccount: AccountSDK
+  recipient: AccountAddress
+  assetID: number
+  revocationTarget: AccountAddress
+  amount: number
+  payFlags: TxParams
+}
+
+export interface DestroyAssetParam extends Sign {
+  type: TransactionType.DestroyAsset
+  fromAccount: AccountSDK
+  assetID: number
+  payFlags: TxParams
 }
 
 export interface AlgoTransferParam extends Sign {

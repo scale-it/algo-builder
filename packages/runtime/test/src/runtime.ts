@@ -1,11 +1,11 @@
 import { LogicSig } from "algosdk";
-import { assert, expect } from "chai";
+import { assert } from "chai";
 import sinon from "sinon";
 
 import { StoreAccount } from "../../src/account";
 import { ERRORS } from "../../src/errors/errors-list";
 import { Runtime } from "../../src/runtime";
-import type { AlgoTransferParam, AssetModFields, AssetTransferParam, ExecParams } from "../../src/types";
+import type { AlgoTransferParam, AssetModFields, AssetTransferParam, DestroyAssetParam, ExecParams, FreezeAssetParam, ModifyAssetParam, RevokeAssetParam } from "../../src/types";
 import { SignType, TransactionType } from "../../src/types";
 import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
@@ -256,13 +256,22 @@ describe("Algorand Standard Assets", function () {
   it("should throw error on transfer asset if asset is frozen", () => {
     const assetId = runtime.createAsset('gold',
       { creator: { ...john.account, name: "john" } });
+    const freezeParam: FreezeAssetParam = {
+      type: TransactionType.FreezeAsset,
+      sign: SignType.SecretKey,
+      fromAccount: elon.account,
+      assetID: assetId,
+      freezeTarget: john.address,
+      freezeState: true,
+      payFlags: {}
+    };
 
     const res = runtime.getAssetDef(assetId);
     assert.isDefined(res);
     runtime.optIntoASA(assetId, john.address, {});
     runtime.optIntoASA(assetId, alice.address, {});
     // freezing asset holding for john
-    runtime.freezeAsset(elon.address, assetId, john.address, true, {});
+    runtime.executeTx(freezeParam);
 
     assetTransferParam.assetID = assetId;
     const errMsg = `TEAL_ERR904: Asset index ${assetId} frozen for account ${john.address}`;
@@ -295,8 +304,16 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should throw error if asset is not found while modifying", () => {
+    const modifyParam: ModifyAssetParam = {
+      type: TransactionType.ModifyAsset,
+      sign: SignType.SecretKey,
+      fromAccount: john.account,
+      assetID: 120,
+      fields: modFields,
+      payFlags: {}
+    };
     expectTealError(
-      () => runtime.modifyAsset(john.address, 120, modFields, {}),
+      () => runtime.executeTx(modifyParam),
       ERRORS.ASA.ASSET_NOT_FOUND
     );
   });
@@ -304,8 +321,15 @@ describe("Algorand Standard Assets", function () {
   it("should modify asset", () => {
     const assetId = runtime.createAsset('gold',
       { creator: { ...john.account, name: "john" } });
-
-    runtime.modifyAsset(elon.address, assetId, modFields, {});
+    const modifyParam: ModifyAssetParam = {
+      type: TransactionType.ModifyAsset,
+      sign: SignType.SecretKey,
+      fromAccount: elon.account,
+      assetID: assetId,
+      fields: modFields,
+      payFlags: {}
+    };
+    runtime.executeTx(modifyParam);
 
     const res = runtime.getAssetDef(assetId);
     assert.equal(res.manager, bob.address);
@@ -324,9 +348,17 @@ describe("Algorand Standard Assets", function () {
       clawback: john.address,
       freeze: alice.address
     };
+    const modifyParam: ModifyAssetParam = {
+      type: TransactionType.ModifyAsset,
+      sign: SignType.SecretKey,
+      fromAccount: elon.account,
+      assetID: assetId,
+      fields: modFields,
+      payFlags: {}
+    };
 
     expectTealError(
-      () => runtime.modifyAsset(elon.address, assetId, modFields, {}),
+      () => runtime.executeTx(modifyParam),
       ERRORS.ASA.BLANK_ADDRESS_ERROR
     );
   });
@@ -334,9 +366,16 @@ describe("Algorand Standard Assets", function () {
   it("should fail because only manager account can modify asset", () => {
     const assetId = runtime.createAsset('gold',
       { creator: { ...john.account, name: "john" } });
-
+    const modifyParam: ModifyAssetParam = {
+      type: TransactionType.ModifyAsset,
+      sign: SignType.SecretKey,
+      fromAccount: bob.account,
+      assetID: assetId,
+      fields: modFields,
+      payFlags: {}
+    };
     expectTealError(
-      () => runtime.modifyAsset(bob.address, assetId, modFields, {}),
+      () => runtime.executeTx(modifyParam),
       ERRORS.ASA.MANAGER_ERROR
     );
   });
@@ -345,8 +384,18 @@ describe("Algorand Standard Assets", function () {
     const assetId = runtime.createAsset('gold',
       { creator: { ...john.account, name: "john" } });
 
+    const freezeParam: FreezeAssetParam = {
+      type: TransactionType.FreezeAsset,
+      sign: SignType.SecretKey,
+      fromAccount: bob.account,
+      assetID: assetId,
+      freezeTarget: john.address,
+      freezeState: true,
+      payFlags: {}
+    };
+
     expectTealError(
-      () => runtime.freezeAsset(bob.address, assetId, john.address, false, {}),
+      () => runtime.executeTx(freezeParam),
       ERRORS.ASA.FREEZE_ERROR
     );
   });
@@ -355,8 +404,17 @@ describe("Algorand Standard Assets", function () {
     const assetId = runtime.createAsset('gold',
       { creator: { ...john.account, name: "john" } });
 
+    const freezeParam: FreezeAssetParam = {
+      type: TransactionType.FreezeAsset,
+      sign: SignType.SecretKey,
+      fromAccount: elon.account,
+      assetID: assetId,
+      freezeTarget: john.address,
+      freezeState: true,
+      payFlags: {}
+    };
     runtime.optIntoASA(assetId, john.address, {});
-    runtime.freezeAsset(elon.address, assetId, john.address, true, {});
+    runtime.executeTx(freezeParam);
 
     const johnAssetHolding = runtime.getAssetHolding(assetId, john.address);
     assert.equal(johnAssetHolding["is-frozen"], true);
@@ -365,9 +423,18 @@ describe("Algorand Standard Assets", function () {
   it("should fail because only clawback account can revoke assets", () => {
     const assetId = runtime.createAsset('gold',
       { creator: { ...john.account, name: "john" } });
-
+    const revokeParam: RevokeAssetParam = {
+      type: TransactionType.RevokeAsset,
+      sign: SignType.SecretKey,
+      fromAccount: alice.account,
+      recipient: john.address,
+      assetID: assetId,
+      revocationTarget: bob.address,
+      amount: 1,
+      payFlags: {}
+    };
     expectTealError(
-      () => runtime.revokeAsset(alice.address, john.address, assetId, bob.address, 1, {}),
+      () => runtime.executeTx(revokeParam),
       ERRORS.ASA.CLAWBACK_ERROR
     );
   });
@@ -375,7 +442,16 @@ describe("Algorand Standard Assets", function () {
   it("should revoke assets", () => {
     const assetId = runtime.createAsset('gold',
       { creator: { ...john.account, name: "john" } });
-
+    const revokeParam: RevokeAssetParam = {
+      type: TransactionType.RevokeAsset,
+      sign: SignType.SecretKey,
+      fromAccount: elon.account,
+      recipient: john.address,
+      assetID: assetId,
+      revocationTarget: bob.address,
+      amount: 15,
+      payFlags: {}
+    };
     runtime.optIntoASA(assetId, john.address, {});
     runtime.optIntoASA(assetId, bob.address, {});
 
@@ -390,7 +466,7 @@ describe("Algorand Standard Assets", function () {
     const beforeRevokeJohn = runtime.getAssetHolding(assetId, john.address).amount;
     assert.equal(bobHolding.amount, assetTransferParam.amount);
 
-    runtime.revokeAsset(elon.address, john.address, assetId, bob.address, 15, {});
+    runtime.executeTx(revokeParam);
 
     const johnHolding = runtime.getAssetHolding(assetId, john.address);
     bobHolding = runtime.getAssetHolding(assetId, bob.address);
@@ -398,10 +474,28 @@ describe("Algorand Standard Assets", function () {
     assert.equal(bobHolding.amount, 5);
   });
 
-  it("should not revoke if asset is frozen", () => {
+  it("should revoke if asset is frozen", () => {
     const assetId = runtime.createAsset('gold',
       { creator: { ...john.account, name: "john" } });
-
+    const freezeParam: FreezeAssetParam = {
+      type: TransactionType.FreezeAsset,
+      sign: SignType.SecretKey,
+      fromAccount: elon.account,
+      assetID: assetId,
+      freezeTarget: bob.address,
+      freezeState: true,
+      payFlags: {}
+    };
+    const revokeParam: RevokeAssetParam = {
+      type: TransactionType.RevokeAsset,
+      sign: SignType.SecretKey,
+      fromAccount: elon.account,
+      recipient: john.address,
+      assetID: assetId,
+      revocationTarget: bob.address,
+      amount: 15,
+      payFlags: {}
+    };
     runtime.optIntoASA(assetId, john.address, {});
     runtime.optIntoASA(assetId, bob.address, {});
 
@@ -410,21 +504,32 @@ describe("Algorand Standard Assets", function () {
     assetTransferParam.assetID = assetId;
     assetTransferParam.payFlags = {};
     runtime.executeTx(assetTransferParam);
-    runtime.freezeAsset(elon.address, assetId, bob.address, true, {});
+    runtime.executeTx(freezeParam);
+    let bobHolding = runtime.getAssetHolding(assetId, bob.address);
+    const beforeRevokeJohn = runtime.getAssetHolding(assetId, john.address).amount;
+    assert.equal(bobHolding.amount, assetTransferParam.amount);
 
-    expectTealError(
-      () => runtime.revokeAsset(elon.address, john.address, assetId, bob.address, 15, {}),
-      ERRORS.ASA.ACCOUNT_ASSET_FROZEN
-    );
+    runtime.executeTx(revokeParam);
+
+    const johnHolding = runtime.getAssetHolding(assetId, john.address);
+    bobHolding = runtime.getAssetHolding(assetId, bob.address);
+    assert.equal(beforeRevokeJohn + 15, johnHolding.amount);
+    assert.equal(bobHolding.amount, 5);
   });
 
   it("Should fail because only manager can destroy assets", () => {
     const assetId = runtime.createAsset('gold',
       { creator: { ...john.account, name: "john" } });
     runtime.optIntoASA(assetId, john.address, {});
-
+    const destroyParam: DestroyAssetParam = {
+      type: TransactionType.DestroyAsset,
+      sign: SignType.SecretKey,
+      fromAccount: alice.account,
+      assetID: assetId,
+      payFlags: {}
+    };
     expectTealError(
-      () => runtime.destroyAsset(alice.address, assetId, {}),
+      () => runtime.executeTx(destroyParam),
       ERRORS.ASA.MANAGER_ERROR
     );
   });
@@ -432,9 +537,16 @@ describe("Algorand Standard Assets", function () {
   it("Should destroy asset", () => {
     const assetId = runtime.createAsset('gold',
       { creator: { ...john.account, name: "john" } });
+    const destroyParam: DestroyAssetParam = {
+      type: TransactionType.DestroyAsset,
+      sign: SignType.SecretKey,
+      fromAccount: elon.account,
+      assetID: assetId,
+      payFlags: {}
+    };
     runtime.optIntoASA(assetId, john.address, {});
 
-    runtime.destroyAsset(elon.address, assetId, {});
+    runtime.executeTx(destroyParam);
 
     expectTealError(
       () => runtime.getAssetDef(assetId),
@@ -445,6 +557,13 @@ describe("Algorand Standard Assets", function () {
   it("Should not destroy asset if total assets are not in creator's account", () => {
     const assetId = runtime.createAsset('gold',
       { creator: { ...john.account, name: "john" } });
+    const destroyParam: DestroyAssetParam = {
+      type: TransactionType.DestroyAsset,
+      sign: SignType.SecretKey,
+      fromAccount: elon.account,
+      assetID: assetId,
+      payFlags: {}
+    };
 
     runtime.optIntoASA(assetId, john.address, {});
     runtime.optIntoASA(assetId, bob.address, {});
@@ -456,7 +575,7 @@ describe("Algorand Standard Assets", function () {
     runtime.executeTx(assetTransferParam);
 
     expectTealError(
-      () => runtime.destroyAsset(elon.address, assetId, {}),
+      () => runtime.executeTx(destroyParam),
       ERRORS.ASA.ASSET_TOTAL_ERROR
     );
   });

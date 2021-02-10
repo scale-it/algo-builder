@@ -153,6 +153,49 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.assetID,
         suggestedParams);
     }
+    case TransactionType.ModifyAsset: {
+      return algosdk.makeAssetConfigTxnWithSuggestedParams(
+        execParams.fromAccount.addr,
+        encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64),
+        execParams.assetID,
+        execParams.fields.manager !== "" ? execParams.fields.manager : undefined,
+        execParams.fields.reserve !== "" ? execParams.fields.reserve : undefined,
+        execParams.fields.freeze !== "" ? execParams.fields.freeze : undefined,
+        execParams.fields.clawback !== "" ? execParams.fields.clawback : undefined,
+        suggestedParams,
+        false
+      );
+    }
+    case TransactionType.FreezeAsset: {
+      return algosdk.makeAssetFreezeTxnWithSuggestedParams(
+        execParams.fromAccount.addr,
+        encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64),
+        execParams.assetID,
+        execParams.freezeTarget,
+        execParams.freezeState,
+        suggestedParams
+      );
+    }
+    case TransactionType.RevokeAsset: {
+      return algosdk.makeAssetTransferTxnWithSuggestedParams(
+        execParams.fromAccount.addr,
+        execParams.recipient,
+        execParams.payFlags.closeRemainderTo,
+        execParams.revocationTarget,
+        execParams.amount,
+        encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64),
+        execParams.assetID,
+        suggestedParams
+      );
+    }
+    case TransactionType.DestroyAsset: {
+      return algosdk.makeAssetDestroyTxnWithSuggestedParams(
+        execParams.fromAccount.addr,
+        encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64),
+        execParams.assetID,
+        suggestedParams
+      );
+    }
     case TransactionType.TransferAlgo: {
       return algosdk.makePaymentTxnWithSuggestedParams(
         execParams.fromAccount.addr,

@@ -347,26 +347,6 @@ export class Runtime {
     account.optInToASA(assetIndex, assetHolding);
   }
 
-  // creates asset configuration transaction object.
-  mkAssetConfigTx (sender: string, assetId: number, fields: AssetModFields, flags: TxParams): void {
-    // this funtion is called only for validation of parameters passed
-    algosdk.makeAssetConfigTxnWithSuggestedParams(
-      sender,
-      encodeNote(flags.note, flags.noteb64),
-      assetId,
-      fields.manager !== "" ? fields.manager : undefined,
-      fields.reserve !== "" ? fields.reserve : undefined,
-      fields.freeze !== "" ? fields.freeze : undefined,
-      fields.clawback !== "" ? fields.clawback : undefined,
-      mockSuggestedParams(flags, this.round),
-      false
-    );
-    const asset = this.getAssetDef(assetId);
-    if (asset.manager !== sender) {
-      throw new TealError(ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
-    }
-  }
-
   /**
    * https://developer.algorand.org/docs/features/asa/#modifying-an-asset
    * Modifies asset fields
@@ -375,28 +355,9 @@ export class Runtime {
    * @param fields Asset modifying fields
    * @param payFlags Transaction Parameters
    */
-  modifyAsset (sender: string, assetId: number, fields: AssetModFields, payFlags: TxParams): void {
-    this.mkAssetConfigTx(sender, assetId, fields, payFlags);
+  modifyAsset (assetId: number, fields: AssetModFields): void {
     const creatorAcc = this.getAssetAccount(assetId);
     creatorAcc.modifyAsset(assetId, fields);
-  }
-
-  // creates asset freeze transaction object.
-  mkAssetFreezeTx (
-    sender: string, assetId: number, target: string, state: boolean, flags: TxParams): void {
-    // this funtion is called only for validation of parameters passed
-    algosdk.makeAssetFreezeTxnWithSuggestedParams(
-      sender,
-      encodeNote(flags.note, flags.noteb64),
-      assetId,
-      target,
-      state,
-      mockSuggestedParams(flags, this.round)
-    );
-    const asset = this.getAssetDef(assetId);
-    if (asset.freeze !== sender) {
-      throw new TealError(ERRORS.ASA.FREEZE_ERROR, { address: asset.freeze });
-    }
   }
 
   /**
@@ -409,34 +370,10 @@ export class Runtime {
    * @param payFlags transaction parameters
    */
   freezeAsset (
-    sender: string, assetId: number, freezeTarget: string,
-    freezeState: boolean, payFlags: TxParams
+    assetId: number, freezeTarget: string, freezeState: boolean
   ): void {
-    this.mkAssetFreezeTx(sender, assetId, freezeTarget, freezeState, payFlags);
     const acc = this.assertAccountDefined(freezeTarget, this.store.accounts.get(freezeTarget));
     acc.setFreezeState(assetId, freezeState);
-  }
-
-  // creates asset revoke transaction object.
-  mkAssetRevokeTx (
-    sender: string, recipient: string, assetId: number,
-    revocationTarget: string, amount: number, flags: TxParams, assetID: number
-  ): void {
-    // this funtion is called only for validation of parameters passed
-    algosdk.makeAssetTransferTxnWithSuggestedParams(
-      sender,
-      recipient,
-      flags.closeRemainderTo,
-      revocationTarget,
-      amount,
-      encodeNote(flags.note, flags.noteb64),
-      assetId,
-      mockSuggestedParams(flags, this.round)
-    );
-    const asset = this.getAssetDef(assetID);
-    if (asset.clawback !== sender) {
-      throw new TealError(ERRORS.ASA.CLAWBACK_ERROR, { address: asset.clawback });
-    }
   }
 
   /**
@@ -451,16 +388,12 @@ export class Runtime {
    * @param payFlags transaction parameters
    */
   revokeAsset (
-    sender: string, recipient: string,
-    assetID: number, revocationTarget: string,
-    amount: number, payFlags: TxParams
+    recipient: string, assetID: number,
+    revocationTarget: string, amount: number
   ): void {
-    this.mkAssetRevokeTx(sender, recipient, assetID, revocationTarget, amount, payFlags, assetID);
     // Transfer assets
     const fromAssetHolding = this.getAssetHolding(assetID, revocationTarget);
     const toAssetHolding = this.getAssetHolding(assetID, recipient);
-    this.assertAssetNotFrozen(assetID, revocationTarget);
-    this.assertAssetNotFrozen(assetID, recipient);
 
     if (fromAssetHolding.amount - amount < 0) {
       throw new TealError(ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS, {
@@ -472,19 +405,6 @@ export class Runtime {
     toAssetHolding.amount += amount;
   }
 
-  // creates asset destroy transaction object.
-  mkDestroyAssetTx (sender: string, assetId: number, flags: TxParams): void {
-    // this funtion is called only for validation of parameters passed
-    algosdk.makeAssetDestroyTxnWithSuggestedParams(
-      sender, encodeNote(flags.note, flags.noteb64),
-      assetId, mockSuggestedParams(flags, this.round)
-    );
-    const asset = this.getAssetDef(assetId);
-    if (asset.manager !== sender) {
-      throw new TealError(ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
-    }
-  }
-
   /**
    * https://developer.algorand.org/docs/features/asa/#destroying-an-asset
    * Destroy asset
@@ -492,8 +412,7 @@ export class Runtime {
    * @param assetId asset index
    * @param payFlags transaction parameters
    */
-  destroyAsset (sender: string, assetId: number, payFlags: TxParams): void {
-    this.mkDestroyAssetTx(sender, assetId, payFlags);
+  destroyAsset (assetId: number): void {
     const creatorAcc = this.getAssetAccount(assetId);
     // destroy asset from creator's account
     creatorAcc.destroyAsset(assetId);
@@ -824,6 +743,24 @@ export class Runtime {
             this.transferAsset(txnParam);
             break;
           }
+          case TransactionType.ModifyAsset: {
+            this.modifyAsset(txnParam.assetID, txnParam.fields);
+            break;
+          }
+          case TransactionType.FreezeAsset: {
+            this.freezeAsset(txnParam.assetID, txnParam.freezeTarget, txnParam.freezeState);
+            break;
+          }
+          case TransactionType.RevokeAsset: {
+            this.revokeAsset(
+              txnParam.recipient, txnParam.assetID,
+              txnParam.revocationTarget, txnParam.amount);
+            break;
+          }
+          case TransactionType.DestroyAsset: {
+            this.destroyAsset(txnParam.assetID);
+            break;
+          }
           case TransactionType.DeleteSSC: {
             this.deleteApp(txnParam.appId);
             break;
@@ -846,6 +783,7 @@ export class Runtime {
    * @param program : teal code as a string
    * @param args : external arguments to smart contract
    */
+  /* eslint-disable sonarjs/cognitive-complexity */
   executeTx (txnParams: ExecParams | ExecParams[]): void {
     const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
     // validate first and last rounds
@@ -889,6 +827,28 @@ export class Runtime {
           }
 
           fromAccount.closeApp(txnParam.appId); // remove app from local state
+          break;
+        }
+        case TransactionType.FreezeAsset: {
+          const asset = this.getAssetDef(txnParam.assetID);
+          if (asset.freeze !== txnParam.fromAccount.addr) {
+            throw new TealError(ERRORS.ASA.FREEZE_ERROR, { address: asset.freeze });
+          }
+          break;
+        }
+        case TransactionType.RevokeAsset: {
+          const asset = this.getAssetDef(txnParam.assetID);
+          if (asset.clawback !== txnParam.fromAccount.addr) {
+            throw new TealError(ERRORS.ASA.CLAWBACK_ERROR, { address: asset.clawback });
+          }
+          break;
+        }
+        case TransactionType.DestroyAsset:
+        case TransactionType.ModifyAsset: {
+          const asset = this.getAssetDef(txnParam.assetID);
+          if (asset.manager !== txnParam.fromAccount.addr) {
+            throw new TealError(ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
+          }
           break;
         }
       }
