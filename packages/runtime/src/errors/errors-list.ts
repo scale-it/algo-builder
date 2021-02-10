@@ -24,7 +24,7 @@ export const TEAL_ERROR_RANGES = {
 export const RUNTIME_ERROR_RANGES = {
   GENERAL: { min: 1300, max: 1399, title: "Runtime General Error" },
   TRANSACTION: { min: 1400, max: 1499, title: "Transaction error" },
-  ASA: { min: 1500, max: 1599, title: "ASA File Parse Error" }
+  ASA: { min: 1500, max: 1599, title: "ASA Error" }
 };
 
 const PARSE_ERROR = "Parse Error";

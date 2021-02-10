@@ -17,7 +17,7 @@ export function expectRuntimeError (
     assert.notMatch(
       error.message,
       /%[a-zA-Z][a-zA-Z0-9]*%/,
-      "TealError has an non-replaced variable tag"
+      "RuntimeError has an non-replaced variable tag"
     );
 
     if (typeof matchMessage === "string") {
@@ -62,7 +62,7 @@ export async function expectRuntimeErrorAsync (
     assert.notMatch(
       error.message,
       /%[a-zA-Z][a-zA-Z0-9]*%/,
-      "TealError has an non-replaced variable tag"
+      "RuntimeError has an non-replaced variable tag"
     );
 
     if (matchMessage !== undefined) {
