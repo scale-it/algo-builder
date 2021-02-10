@@ -18,7 +18,7 @@ As noted above there are two commands to execute scripts:
 
 
 #### Run
-Runs scripts and doesn't save script checkpoints.
+Runs provided scripts and doesn't save script checkpoints.
 Useful to query the current state of blockchain.
 Example:
     

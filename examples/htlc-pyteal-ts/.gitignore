@@ -1,2 +1,11 @@
 node_modules/
 build/
+scripts/deploy.d.ts
+scripts/deploy.js
+scripts/deploy.js.map
+scripts/withdraw/common.d.ts
+scripts/withdraw/common.js
+scripts/withdraw/common.js.map
+scripts/withdraw/htlc-withdraw.d.ts
+scripts/withdraw/htlc-withdraw.js
+scripts/withdraw/htlc-withdraw.js.map
