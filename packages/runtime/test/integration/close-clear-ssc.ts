@@ -1,13 +1,14 @@
 import { assert } from "chai";
 
-import { ERRORS } from "../../src/errors/errors-list";
+import { RUNTIME_ERRORS, TEAL_ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccount } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { stringToBytes } from "../../src/lib/parsing";
 import { SignType, SSCCallsParam, TransactionType } from "../../src/types";
-import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
+import { expectRuntimeError } from "../helpers/runtime-errors";
+import { expectTealError } from "../helpers/teal-errors";
 
 describe("ASC - CloseOut from Application and Clear State", function () {
   useFixture("stateful");
@@ -46,9 +47,9 @@ describe("ASC - CloseOut from Application and Clear State", function () {
   };
 
   it("should fail during closeOut if app id is not defined", function () {
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(closeOutParams),
-      ERRORS.TEAL.APP_NOT_FOUND
+      RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND
     );
   });
 
@@ -82,9 +83,9 @@ describe("ASC - CloseOut from Application and Clear State", function () {
     const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram);
     closeOutParams.appId = appId;
 
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(closeOutParams),
-      ERRORS.TEAL.APP_NOT_FOUND
+      RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND
     );
     syncAccount();
   });
@@ -101,7 +102,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 
     expectTealError(
       () => runtime.executeTx(closeOutParams),
-      ERRORS.TEAL.REJECTED_BY_LOGIC
+      TEAL_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 
     // verify app is not deleted from account's local state (as tx is rejected)
@@ -131,7 +132,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 
     expectTealError(
       () => runtime.executeTx(clearAppParams),
-      ERRORS.TEAL.REJECTED_BY_LOGIC
+      TEAL_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 
     // verify app is deleted from account's local state even if tx is rejected after execution

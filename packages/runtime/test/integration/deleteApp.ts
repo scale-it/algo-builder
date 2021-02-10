@@ -1,12 +1,13 @@
 import { assert } from "chai";
 
-import { ERRORS } from "../../src/errors/errors-list";
+import { RUNTIME_ERRORS, TEAL_ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccount } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { SignType, SSCCallsParam, TransactionType } from "../../src/types";
-import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
+import { expectRuntimeError } from "../helpers/runtime-errors";
+import { expectTealError } from "../helpers/teal-errors";
 
 describe("Algorand Smart Contracts - Delete Application", function () {
   useFixture("stateful");
@@ -40,9 +41,9 @@ describe("Algorand Smart Contracts - Delete Application", function () {
   });
 
   it("should fail during delete application if app id is not defined", function () {
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(deleteParams),
-      ERRORS.TEAL.APP_NOT_FOUND
+      RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND
     );
   });
 
@@ -52,9 +53,9 @@ describe("Algorand Smart Contracts - Delete Application", function () {
     runtime.executeTx(deleteParams);
 
     // verify app is deleted
-    expectTealError(
+    expectRuntimeError(
       () => runtime.getApp(appId),
-      ERRORS.TEAL.APP_NOT_FOUND
+      RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND
     );
   });
 
@@ -66,7 +67,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
 
     expectTealError(
       () => runtime.executeTx(deleteParams),
-      ERRORS.TEAL.REJECTED_BY_LOGIC
+      TEAL_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 
     // verify app is not deleted - using getApp function

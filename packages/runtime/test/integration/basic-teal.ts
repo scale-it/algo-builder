@@ -1,12 +1,12 @@
 import { assert } from "chai";
 
-import { ERRORS } from "../../src/errors/errors-list";
+import { TEAL_ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccount } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { ExecParams, SignType, TransactionType } from "../../src/types";
-import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
+import { expectTealError } from "../helpers/teal-errors";
 
 const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE + 1000; // 1000 to cover fee
 const initialJohnHolding = minBalance + 1000;
@@ -71,7 +71,7 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
     // execute transaction (should fail is logic is incorrect)
     expectTealError(
       () => runtime.executeTx(invalidParams),
-      ERRORS.TEAL.REJECTED_BY_LOGIC
+      TEAL_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 
     // get final state (updated accounts)

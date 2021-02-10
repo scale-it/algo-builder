@@ -1,9 +1,9 @@
 import { assert } from "chai";
 
-import { ERRORS } from "../../../src/errors/errors-list";
+import { TEAL_ERRORS } from "../../../src/errors/errors-list";
 import { getEncoding } from "../../../src/lib/parsing";
 import { EncodingType } from "../../../src/types";
-import { expectTealError } from "../../helpers/errors";
+import { expectTealError } from "../../helpers/teal-errors";
 
 describe("Get Encoding for Byte Data", () => {
   it("should return corrent Encoding type for string", () => {
@@ -53,33 +53,33 @@ describe("Get Encoding for Byte Data", () => {
   it("should throw error for wrong decoding data", () => {
     expectTealError(
       () => getEncoding(["base64(././"], 1),
-      ERRORS.TEAL.DECODE_ERROR
+      TEAL_ERRORS.TEAL.DECODE_ERROR
     );
 
     expectTealError(
       () => getEncoding(["b32(././"], 1),
-      ERRORS.TEAL.DECODE_ERROR
+      TEAL_ERRORS.TEAL.DECODE_ERROR
     );
   });
 
   it("should throw error for unkown decoding type", () => {
     expectTealError(
       () => getEncoding(["base6", "(././"], 1),
-      ERRORS.TEAL.UNKOWN_DECODE_TYPE
+      TEAL_ERRORS.TEAL.UNKOWN_DECODE_TYPE
     );
   });
 
   it("should throw invalid base64 data error", () => {
     expectTealError(
       () => getEncoding(["base64", "AJSHKJ-#"], 1),
-      ERRORS.TEAL.INVALID_BASE64
+      TEAL_ERRORS.TEAL.INVALID_BASE64
     );
   });
 
   it("should throw invalid base32 data error", () => {
     expectTealError(
       () => getEncoding(["base32", "AJSHKJ-#"], 1),
-      ERRORS.TEAL.INVALID_BASE32
+      TEAL_ERRORS.TEAL.INVALID_BASE32
     );
   });
 });

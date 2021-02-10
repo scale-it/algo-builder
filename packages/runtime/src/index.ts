@@ -1,5 +1,5 @@
 import { StoreAccount } from "./account";
-import { applyErrorMessageTemplate, BuilderError } from "./errors/errors";
+import { applyErrorMessageTemplate } from "./errors/runtime-errors";
 import { parseZodError } from "./errors/validation-errors";
 import { Interpreter } from "./interpreter/interpreter";
 import { loadASAFile, validateASADefs } from "./lib/asa";
@@ -13,7 +13,6 @@ export {
   Interpreter,
   Runtime,
   StoreAccount,
-  BuilderError,
   mkTransaction,
   applyErrorMessageTemplate,
   parseSSCAppArgs,

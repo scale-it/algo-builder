@@ -1,7 +1,8 @@
 import { AssetDef, encodeAddress } from "algosdk";
 
-import { TealError } from "../errors/errors";
-import { ERRORS } from "../errors/errors-list";
+import { RUNTIME_ERRORS, TEAL_ERRORS } from "../errors/errors-list";
+import { RuntimeError } from "../errors/runtime-errors";
+import { TealError } from "../errors/teal-errors";
 import { Runtime } from "../index";
 import { checkIndexBound } from "../lib/compare";
 import { DEFAULT_STACK_ELEM } from "../lib/constants";
@@ -63,7 +64,7 @@ export class Interpreter {
    */
   getApp (appId: number, line: number): SSCAttributesM {
     if (!this.runtime.ctx.state.globalApps.has(appId)) {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: line });
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: line });
     }
     const accAddress = this.runtime.assertAddressDefined(
       this.runtime.ctx.state.globalApps.get(appId));
@@ -116,7 +117,7 @@ export class Interpreter {
    */
   setGlobalState (appId: number, key: Uint8Array | string, value: StackElem, line: number): void {
     if (!this.runtime.ctx.state.globalApps.has(appId)) {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: line });
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: line });
     }
     const accAddress = this.runtime.assertAddressDefined(
       this.runtime.ctx.state.globalApps.get(appId));
@@ -137,7 +138,7 @@ export class Interpreter {
         return;
       }
     }
-    throw new TealError(ERRORS.TEAL.LABEL_NOT_FOUND, {
+    throw new TealError(TEAL_ERRORS.TEAL.LABEL_NOT_FOUND, {
       label: label,
       line: line
     });
@@ -164,6 +165,6 @@ export class Interpreter {
 
       if (!(s instanceof Uint8Array) && s > BIGINT0) { return; }
     }
-    throw new TealError(ERRORS.TEAL.REJECTED_BY_LOGIC);
+    throw new TealError(TEAL_ERRORS.TEAL.REJECTED_BY_LOGIC);
   }
 }

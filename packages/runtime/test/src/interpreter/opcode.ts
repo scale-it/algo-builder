@@ -1,10 +1,10 @@
-import { ERRORS } from "../../../src/errors/errors-list";
+import { TEAL_ERRORS } from "../../../src/errors/errors-list";
 import { Op } from "../../../src/interpreter/opcode";
 import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
 import { stringToBytes } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import type { StackElem } from "../../../src/types";
-import { expectTealError } from "../../helpers/errors";
+import { expectTealError } from "../../helpers/teal-errors";
 
 describe("Teal Opcodes basic assertions", function () {
   const op = new Op();
@@ -15,7 +15,7 @@ describe("Teal Opcodes basic assertions", function () {
 
     expectTealError(
       () => op.checkOverflow(max, lineNumber),
-      ERRORS.TEAL.UINT64_OVERFLOW
+      TEAL_ERRORS.TEAL.UINT64_OVERFLOW
     );
   });
 
@@ -25,7 +25,7 @@ describe("Teal Opcodes basic assertions", function () {
 
     expectTealError(
       () => op.checkUnderflow(min, lineNumber),
-      ERRORS.TEAL.UINT64_UNDERFLOW
+      TEAL_ERRORS.TEAL.UINT64_UNDERFLOW
     );
   });
 
@@ -40,7 +40,7 @@ describe("Teal Opcodes basic assertions", function () {
     lineNumber = 1;
     expectTealError(
       () => op.assertMinStackLen(stack, stackLen, lineNumber),
-      ERRORS.TEAL.ASSERT_STACK_LENGTH
+      TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH
     );
   });
 });

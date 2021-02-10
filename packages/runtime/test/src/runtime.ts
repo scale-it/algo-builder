@@ -3,13 +3,14 @@ import { assert } from "chai";
 import sinon from "sinon";
 
 import { StoreAccount } from "../../src/account";
-import { ERRORS } from "../../src/errors/errors-list";
+import { RUNTIME_ERRORS, TEAL_ERRORS } from "../../src/errors/errors-list";
 import { Runtime } from "../../src/runtime";
 import type { AlgoTransferParam, AssetTransferParam, ExecParams } from "../../src/types";
 import { SignType, TransactionType } from "../../src/types";
-import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
+import { expectRuntimeError } from "../helpers/runtime-errors";
+import { expectTealError } from "../helpers/teal-errors";
 
 const programName = "basic.teal";
 const minBalance = 1e7;
@@ -50,9 +51,9 @@ describe("Logic Signature Transaction in Runtime", function () {
     txnParam.fromAccount = alice.account;
 
     // execute transaction (logic signature validation failed)
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(txnParam),
-      ERRORS.TEAL.LOGIC_SIGNATURE_VALIDATION_FAILED
+      RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_VALIDATION_FAILED
     );
   });
 
@@ -67,7 +68,7 @@ describe("Logic Signature Transaction in Runtime", function () {
     // - But teal file logic is rejected
     expectTealError(
       () => runtime.executeTx(txnParam),
-      ERRORS.TEAL.REJECTED_BY_LOGIC
+      TEAL_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
 });
@@ -120,9 +121,9 @@ describe("Rounds Test", function () {
   it("should fail if current round is not between first and last valid", () => {
     runtime.setRound(3);
 
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(txnParams),
-      ERRORS.TEAL.INVALID_ROUND
+      RUNTIME_ERRORS.GENERAL.INVALID_ROUND
     );
   });
 
@@ -201,8 +202,10 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should throw error on opt-in of asset does not exist", () => {
-    const errMsg = 'TEAL_ERR902: Asset with Index 1234 not found';
-    assert.throws(() => runtime.optIntoASA(1234, john.address, {}), errMsg);
+    expectRuntimeError(
+      () => runtime.optIntoASA(1234, john.address, {}),
+      RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND
+    );
   });
 
   it("should warn if account already is already opted-into asset", () => {
@@ -258,8 +261,10 @@ describe("Algorand Standard Assets", function () {
     johnHolding["is-frozen"] = true;
 
     assetTransferParam.assetID = assetId;
-    const errMsg = `TEAL_ERR904: Asset index ${assetId} frozen for account ${john.address}`;
-    assert.throws(() => runtime.executeTx(assetTransferParam), errMsg);
+    expectRuntimeError(
+      () => runtime.executeTx(assetTransferParam),
+      RUNTIME_ERRORS.ASA.ACCOUNT_ASSET_FROZEN
+    );
   });
 
   it("should close john account for transfer asset if close remainder to is specified", () => {

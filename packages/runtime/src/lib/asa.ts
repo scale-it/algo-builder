@@ -1,8 +1,8 @@
 import path from "path";
 import * as z from 'zod';
 
-import { BuilderError } from "../errors/errors";
-import { ERRORS } from "../errors/errors-list";
+import { RUNTIME_ERRORS } from "../errors/errors-list";
+import { RuntimeError } from "../errors/runtime-errors";
 import { parseZodError } from "../errors/validation-errors";
 import { AccountMap, ASADef, ASADefs, RuntimeAccountMap } from "../types";
 import { ASADefsSchema } from "../types-input";
@@ -22,8 +22,8 @@ function validateSingle (accounts: AccountMap | RuntimeAccountMap, filename: str
   }
   for (const accName of asaDef.optInAccNames) {
     if (!accounts.get(accName)) {
-      throw new BuilderError(
-        ERRORS.ASA.PARAM_ERROR_NO_NAMED_OPT_IN_ACCOUNT, {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.ASA.PARAM_ERROR_NO_NAMED_OPT_IN_ACCOUNT, {
           filename: filename,
           optInAccName: accName
         });
@@ -55,8 +55,8 @@ export function validateASADefs (
     return parsed;
   } catch (e) {
     if (e instanceof z.ZodError) {
-      throw new BuilderError(
-        ERRORS.ASA.PARAM_PARSE_ERROR, {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.ASA.PARAM_PARSE_ERROR, {
           reason: parseZodError(e),
           filename: filename
         }, e);
