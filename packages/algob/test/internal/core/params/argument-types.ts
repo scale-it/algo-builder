@@ -1,4 +1,5 @@
 import { assert } from "chai";
+import chalk from "chalk";
 import * as fsExtra from "fs-extra";
 import * as os from "os";
 import * as path from "path";
@@ -232,19 +233,22 @@ describe("argumentTypes", () => {
       );
     });
 
-    it("Should throw if the file isn't readable", async function () {
-      if (os.type() === "Windows_NT") {
+    it("Should throw if the file isn't readable", function () {
+      var isRoot = process.getuid && process.getuid() === 0;
+      if (os.type() === "Windows_NT" || isRoot) {
+        console.warn(chalk.yellowBright("Skipping test: either OS is windows or tests are being run as root"));
         this.skip();
       }
-      await fsExtra.createFile("A");
-      await fsExtra.chmod("A", 0);
+
+      fsExtra.createFileSync("A");
+      fsExtra.chmodSync("A", 0o000); // assign no permission [read-execute-write: 000]
 
       expectBuilderError(
         () => types.inputFile.parse("A file", "A"),
         ERRORS.ARGUMENTS.INVALID_INPUT_FILE
       );
 
-      await fsExtra.unlink("A");
+      fsExtra.unlinkSync("A");
     });
 
     it("Should throw if a directory is given", () => {
