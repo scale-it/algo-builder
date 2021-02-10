@@ -17,7 +17,9 @@ describe("ASA parser", () => {
         total: 1,
         decimals: 0,
         unitName: 'ASA',
-        defaultFrozen: false
+        defaultFrozen: false,
+        manager: "manager",
+        reserve: ""
       }
     };
     const parsed = validateASADefs(valid, new Map<string, rtypes.Account>(), "");
@@ -26,7 +28,11 @@ describe("ASA parser", () => {
         total: 1,
         decimals: 0,
         unitName: 'ASA',
-        defaultFrozen: false
+        defaultFrozen: false,
+        manager: "manager",
+        reserve: undefined,
+        freeze: undefined,
+        clawback: undefined
       }
     });
   });
