@@ -24,6 +24,7 @@ async function run (runtimeEnv, deployer) {
   };
 
   /** Update clawback address to escrow **/
+  console.log('* Updating asset clawback to escrow *');
   const assetConfigParams = {
     type: types.TransactionType.ModifyAsset,
     sign: types.SignType.SecretKey,
@@ -35,6 +36,7 @@ async function run (runtimeEnv, deployer) {
   await executeTransaction(deployer, assetConfigParams);
 
   /** now lock the asset by clearing the manager and freezer **/
+  console.log('* Locking the manager and freeze address *');
   const assetLockParams = {
     ...assetConfigParams,
     fields: {

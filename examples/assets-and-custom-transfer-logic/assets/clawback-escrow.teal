@@ -1,9 +1,9 @@
 #pragma version 2
 // Application ID - Must be changed before compiling
-int 93
+int 78
 store 10
 // Asset ID - Must be changed before compiling
-int 91
+int 76
 store 11
 
 global GroupSize
@@ -27,7 +27,6 @@ int 1
 ==
 &&
 bz failed
-
 
 // check no rekeying etc
 gtxn 0 RekeyTo
@@ -83,6 +82,7 @@ gtxn 1 AssetSender
 ==
 &&
 bz failed
+
 
 //vette second transaction
 // tx 1 - clawback transactions that moves the frozen asset from sender to receiver - signed by clawback-escrow

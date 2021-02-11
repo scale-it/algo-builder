@@ -30,7 +30,7 @@ async function run (runtimeEnv, deployer) {
   ];
 
   const res = await deployer.deploySSC(
-    'poi.teal', // approval program
+    'poi-approval.teal', // approval program
     'poi-clear.teal', // clear program
     {
       sender: creator,
