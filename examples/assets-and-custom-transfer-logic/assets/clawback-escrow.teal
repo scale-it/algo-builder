@@ -1,0 +1,116 @@
+#pragma version 2
+// Application ID - Must be changed before compiling
+int 93
+store 10
+// Asset ID - Must be changed before compiling
+int 91
+store 11
+
+global GroupSize
+int 3
+==
+gtxn 0 TypeEnum
+int appl
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 2 TypeEnum
+int pay
+==
+&&
+// Verify this is indeed the asset transfer tx
+txn GroupIndex
+int 1
+==
+&&
+bz failed
+
+
+// check no rekeying etc
+gtxn 0 RekeyTo
+global ZeroAddress
+==
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 2 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 0 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 1 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 2 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 0 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 1 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 2 AssetCloseTo
+global ZeroAddress
+==
+&&
+bz failed
+
+
+
+//vette first transaction
+//check level smart contract call - signed by asset sender
+gtxn 0 ApplicationID
+load 10
+==
+gtxn 0 Sender
+gtxn 2 Sender
+==
+&&
+gtxn 0 Sender
+gtxn 1 AssetSender
+==
+&&
+bz failed
+
+//vette second transaction
+// tx 1 - clawback transactions that moves the frozen asset from sender to receiver - signed by clawback-escrow
+// verify the account sent in the accounts array is
+// actually the receiver of the asset in asset xfer
+gtxn 0 Accounts 1
+gtxn 1 AssetReceiver
+==
+gtxn 1 XferAsset
+load 11
+==
+&&
+bz failed
+
+//vette third transaction
+// tx 2 - payment transaction from sender to clawback-escrow to pay for the fee of the clawback
+gtxn 1 Sender
+gtxn 2 Receiver
+==
+// verify the fee amount is good
+gtxn 2 Amount
+gtxn 1 Fee
+>=
+&&
+bz failed
+int 1
+return
+
+failed:
+int 0
+return
