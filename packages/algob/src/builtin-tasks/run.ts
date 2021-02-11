@@ -127,9 +127,9 @@ async function executeRunTask (
   const nonExistent = filterNonExistent(scripts);
   if (nonExistent.length !== 0) {
     // If files doesn't exist in scripts, check for build folder
-    for (let i = 0; i < scripts.length; i++) {
-      scripts[0] = path.join("build", scripts[0]);
-    }
+    scripts.forEach(function (script, index) {
+      scripts[index] = path.join("build", script);
+    });
     if (filterNonExistent(scripts).length !== 0) {
       throw new BuilderError(ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND, {
         scripts: nonExistent
