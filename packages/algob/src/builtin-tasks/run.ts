@@ -137,7 +137,7 @@ async function executeRunTask (
     }
     scriptsPath = path.join("build", scriptsDirectory);
   }
-  console.log(scriptsPath);
+
   await runMultipleScripts(
     runtimeEnv,
     assertDirChildren(scriptsPath, scripts),
