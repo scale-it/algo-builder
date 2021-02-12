@@ -14,7 +14,7 @@ import {
   toCheckpointFileName
 } from "../lib/script-checkpoints";
 import { AlgobRuntimeEnv, CheckpointRepo } from "../types";
-import { runMultipleScripts } from "./run";
+import { filterNonExistent, runMultipleScripts } from "./run";
 import { TASK_DEPLOY } from "./task-names";
 
 export interface TaskArgs {
@@ -52,10 +52,26 @@ export async function executeDeployTask (
   algoOp: AlgoOperator
 ): Promise<void> {
   const logDebugTag = "algob:tasks:deploy";
-
-  const scriptNames = fileNames.length === 0
-    ? loadFilenames(scriptsDirectory)
-    : assertDirectDirChildren(scriptsDirectory, fileNames);
+  let scriptsPath = scriptsDirectory;
+  let scriptNames;
+  if (fileNames.length !== 0) {
+    const nonExistent = filterNonExistent(fileNames);
+    if (nonExistent.length !== 0) {
+      // If files doesn't exist in scripts, check for build folder
+      fileNames.forEach(function (script, index) {
+        fileNames[index] = path.join("build", script);
+      });
+      if (filterNonExistent(fileNames).length !== 0) {
+        throw new BuilderError(ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND, {
+          scripts: nonExistent
+        });
+      }
+      scriptsPath = path.join("build", scriptsDirectory);
+    }
+    scriptNames = assertDirectDirChildren(scriptsPath, fileNames);
+  } else {
+    scriptNames = loadFilenames(scriptsPath);
+  }
 
   if (scriptNames.length === 0) {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.SCRIPTS_NO_FILES_FOUND, {
