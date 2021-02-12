@@ -7,13 +7,19 @@ async function run (runtimeEnv, deployer) {
   const creator = deployer.accountsByName.get('alice');
 
   // NOTE: make sure to deploy 0-createAppAsset.js first
+  const appInfo = deployer.getSSC('poi.teal', 'poi-clear.teal');
   const assetInfo = deployer.asa.get('gold');
 
   /** * Compile and fund the escrow***/
-  await deployer.fundLsig('clawback-escrow.teal',
-    { funder: creator, fundingMicroAlgo: 1e6 }, {}, []); // sending 1 Algo
+  const escrowParams = {
+    ASSET_ID: assetInfo.assetIndex,
+    APP_ID: appInfo.appID
+  };
 
-  const escrowLsig = await deployer.loadLogic('clawback-escrow.teal', []);
+  await deployer.fundLsig('clawback-escrow.py',
+    { funder: creator, fundingMicroAlgo: 1e6 }, {}, [], escrowParams); // sending 1 Algo
+
+  const escrowLsig = await deployer.loadLogic('clawback-escrow.py', [], escrowParams);
   const escrowAddress = escrowLsig.address();
 
   const assetModFields = {
