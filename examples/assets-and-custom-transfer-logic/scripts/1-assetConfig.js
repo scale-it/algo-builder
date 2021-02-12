@@ -7,7 +7,7 @@ async function run (runtimeEnv, deployer) {
   const creator = deployer.accountsByName.get('alice');
 
   // NOTE: make sure to deploy 0-createAppAsset.js first
-  const appInfo = deployer.getSSC('poi.teal', 'poi-clear.teal');
+  const appInfo = deployer.getSSC('poi-approval.teal', 'poi-clear.teal');
   const assetInfo = deployer.asa.get('gold');
 
   /** * Compile and fund the escrow***/

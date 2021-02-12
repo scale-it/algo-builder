@@ -6,9 +6,14 @@ async function run (runtimeEnv, deployer) {
   const bob = deployer.accountsByName.get('bob');
 
   // NOTE: set min asset level first using ./set-clear-level.js
-  const appInfo = deployer.getSSC('poi.teal', 'poi-clear.teal');
+  const appInfo = deployer.getSSC('poi-approval.teal', 'poi-clear.teal');
   const assetInfo = deployer.asa.get('gold');
-  const escrowLsig = await deployer.loadLogic('clawback-escrow.teal', []);
+
+  const escrowParams = {
+    ASSET_ID: assetInfo.assetIndex,
+    APP_ID: appInfo.appID
+  };
+  const escrowLsig = await deployer.loadLogic('clawback-escrow.py', [], escrowParams);
   const escrowAddress = escrowLsig.address();
 
   const txGroup = [
@@ -61,7 +66,7 @@ async function run (runtimeEnv, deployer) {
   try {
     await executeTransaction(deployer, txGroup);
   } catch (error) {
-    console.log('Error Occurred: ', error);
+    console.log('Error Occurred: ', error.response.error);
   }
 }
 

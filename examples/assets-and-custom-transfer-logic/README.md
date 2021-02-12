@@ -30,11 +30,10 @@ Please follow the [setup](../README.md) instructions to install dependencies and
 yarn run algob deploy
 ```
 
-
 ### Run
 ```
-yarn run algob run scripts/multisig_goal_sc.js
-yarn run algob run scripts/multisig_sdk_sc.js
+yarn run algob run scripts/transfer/set-clear-level.js // set minimum level(to transfer asset)
+yarn run algob run scripts/transfer/transfer-asset.js // transfer asset from Alice -> Bob
 ```
 
 ### More information
