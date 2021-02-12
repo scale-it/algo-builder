@@ -26,7 +26,7 @@ interface Input {
   scripts: string[]
 }
 
-function filterNonExistent (scripts: string[]): string[] {
+export function filterNonExistent (scripts: string[]): string[] {
   return scripts.filter(script => !fsExtra.pathExistsSync(script));
 }
 
@@ -137,7 +137,7 @@ async function executeRunTask (
     }
     scriptsPath = path.join("build", scriptsDirectory);
   }
-
+  console.log(scriptsPath);
   await runMultipleScripts(
     runtimeEnv,
     assertDirChildren(scriptsPath, scripts),
