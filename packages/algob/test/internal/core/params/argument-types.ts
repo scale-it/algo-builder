@@ -243,6 +243,11 @@ describe("argumentTypes", () => {
       fsExtra.createFileSync("A");
       fsExtra.chmodSync("A", 0o000); // assign no permission [read-execute-write: 000]
 
+      // check if permission set or not
+      fsExtra.access("A", fsExtra.constants.R_OK, (err) => {
+        if (err) { this.skip(); }
+      });
+
       expectBuilderError(
         () => types.inputFile.parse("A file", "A"),
         ERRORS.ARGUMENTS.INVALID_INPUT_FILE
