@@ -148,6 +148,7 @@ describe("Algorand Standard Assets", function () {
   let runtime: Runtime;
   let modFields: AssetModFields;
   let assetTransferParam: AssetTransferParam;
+  let assetId: number;
   this.beforeAll(() => {
     runtime = new Runtime([john, bob, alice, elon]);
     modFields = {
@@ -167,15 +168,17 @@ describe("Algorand Standard Assets", function () {
     };
   });
 
+  this.beforeEach(() => {
+    assetId = runtime.createAsset('gold',
+      { creator: { ...john.account, name: "john" } });
+  });
+
   const syncAccounts = (): void => {
     john = runtime.getAccount(john.address);
     alice = runtime.getAccount(alice.address);
   };
 
   it("should create asset using asa.yaml file", () => {
-    const assetId = runtime.createAsset('gold',
-      { creator: { ...john.account, name: "john" } });
-
     const res = runtime.getAssetDef(assetId);
     assert.equal(res.decimals, 0);
     assert.equal(res["default-frozen"], false);
@@ -190,9 +193,6 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should opt-in to asset for john", () => {
-    const assetId = runtime.createAsset('gold',
-      { creator: { ...john.account, name: "john" } });
-
     const res = runtime.getAssetDef(assetId);
     assert.isDefined(res);
 
@@ -216,9 +216,6 @@ describe("Algorand Standard Assets", function () {
 
   it("should warn if account already is already opted-into asset", () => {
     const spy = sinon.spy(console, 'warn');
-    const assetId = runtime.createAsset('gold',
-      { creator: { ...john.account, name: "john" } });
-
     const res = runtime.getAssetDef(assetId);
     assert.isDefined(res);
     runtime.optIntoASA(assetId, john.address, {});
@@ -231,9 +228,6 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should transfer asset between two accounts", () => {
-    const assetId = runtime.createAsset('gold',
-      { creator: { ...john.account, name: "john" } });
-
     const res = runtime.getAssetDef(assetId);
     assert.isDefined(res);
     runtime.optIntoASA(assetId, john.address, {});
@@ -254,8 +248,6 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should throw error on transfer asset if asset is frozen", () => {
-    const assetId = runtime.createAsset('gold',
-      { creator: { ...john.account, name: "john" } });
     const freezeParam: FreezeAssetParam = {
       type: TransactionType.FreezeAsset,
       sign: SignType.SecretKey,
@@ -274,14 +266,13 @@ describe("Algorand Standard Assets", function () {
     runtime.executeTx(freezeParam);
 
     assetTransferParam.assetID = assetId;
-    const errMsg = `TEAL_ERR904: Asset index ${assetId} frozen for account ${john.address}`;
-    assert.throws(() => runtime.executeTx(assetTransferParam), errMsg);
+    expectTealError(
+      () => runtime.executeTx(assetTransferParam),
+      ERRORS.ASA.ACCOUNT_ASSET_FROZEN
+    );
   });
 
   it("should close john account for transfer asset if close remainder to is specified", () => {
-    const assetId = runtime.createAsset('gold',
-      { creator: { ...john.account, name: "john" } });
-
     const res = runtime.getAssetDef(assetId);
     assert.isDefined(res);
     runtime.optIntoASA(assetId, john.address, {});
@@ -319,8 +310,6 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should modify asset", () => {
-    const assetId = runtime.createAsset('gold',
-      { creator: { ...john.account, name: "john" } });
     const modifyParam: ModifyAssetParam = {
       type: TransactionType.ModifyAsset,
       sign: SignType.SecretKey,
@@ -364,8 +353,6 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should fail because only manager account can modify asset", () => {
-    const assetId = runtime.createAsset('gold',
-      { creator: { ...john.account, name: "john" } });
     const modifyParam: ModifyAssetParam = {
       type: TransactionType.ModifyAsset,
       sign: SignType.SecretKey,
@@ -381,9 +368,6 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should fail because only freeze account can freeze asset", () => {
-    const assetId = runtime.createAsset('gold',
-      { creator: { ...john.account, name: "john" } });
-
     const freezeParam: FreezeAssetParam = {
       type: TransactionType.FreezeAsset,
       sign: SignType.SecretKey,
@@ -401,9 +385,6 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should freeze asset", () => {
-    const assetId = runtime.createAsset('gold',
-      { creator: { ...john.account, name: "john" } });
-
     const freezeParam: FreezeAssetParam = {
       type: TransactionType.FreezeAsset,
       sign: SignType.SecretKey,
@@ -421,8 +402,6 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should fail because only clawback account can revoke assets", () => {
-    const assetId = runtime.createAsset('gold',
-      { creator: { ...john.account, name: "john" } });
     const revokeParam: RevokeAssetParam = {
       type: TransactionType.RevokeAsset,
       sign: SignType.SecretKey,
@@ -440,8 +419,6 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should revoke assets", () => {
-    const assetId = runtime.createAsset('gold',
-      { creator: { ...john.account, name: "john" } });
     const revokeParam: RevokeAssetParam = {
       type: TransactionType.RevokeAsset,
       sign: SignType.SecretKey,
@@ -475,8 +452,6 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should revoke if asset is frozen", () => {
-    const assetId = runtime.createAsset('gold',
-      { creator: { ...john.account, name: "john" } });
     const freezeParam: FreezeAssetParam = {
       type: TransactionType.FreezeAsset,
       sign: SignType.SecretKey,
@@ -518,8 +493,6 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("Should fail because only manager can destroy assets", () => {
-    const assetId = runtime.createAsset('gold',
-      { creator: { ...john.account, name: "john" } });
     runtime.optIntoASA(assetId, john.address, {});
     const destroyParam: DestroyAssetParam = {
       type: TransactionType.DestroyAsset,
@@ -535,8 +508,6 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("Should destroy asset", () => {
-    const assetId = runtime.createAsset('gold',
-      { creator: { ...john.account, name: "john" } });
     const destroyParam: DestroyAssetParam = {
       type: TransactionType.DestroyAsset,
       sign: SignType.SecretKey,
@@ -555,8 +526,6 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("Should not destroy asset if total assets are not in creator's account", () => {
-    const assetId = runtime.createAsset('gold',
-      { creator: { ...john.account, name: "john" } });
     const destroyParam: DestroyAssetParam = {
       type: TransactionType.DestroyAsset,
       sign: SignType.SecretKey,
