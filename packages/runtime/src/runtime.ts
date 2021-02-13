@@ -12,7 +12,8 @@ import { encodeNote, mkTransaction } from "./lib/txn";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import type {
-  AccountAddress, AlgoTransferParam, ASADefs, ASADeploymentFlags, Context, ExecParams,
+  AccountAddress, AlgoTransferParam, ASADefs,
+  ASADeploymentFlags, AssetModFields, Context, ExecParams,
   SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
   StackElem, State, StoreAccountI, Txn, TxParams
 } from "./types";
@@ -211,6 +212,28 @@ export class Runtime {
   }
 
   /**
+   * Returns asset creator account or throws error is it doesn't exist
+   * @param Asset Index
+   */
+  getAssetAccount (assetId: number): StoreAccountI {
+    const addr = this.store.assetDefs.get(assetId);
+    if (addr === undefined) {
+      throw new TealError(ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
+    }
+    return this.assertAccountDefined(addr, this.store.accounts.get(addr));
+  }
+
+  /**
+   * Returns Asset Definitions
+   * @param assetId Asset Index
+   */
+  getAssetDef (assetId: number): AssetDef {
+    const creatorAcc = this.getAssetAccount(assetId);
+    const assetDef = creatorAcc.getAssetDef(assetId);
+    return this.assertAssetDefined(assetId, assetDef);
+  }
+
+  /**
    * Setup initial accounts as {address: SDKAccount}. This should be called only when initializing Runtime.
    * @param accounts: array of account info's
    */
@@ -262,7 +285,7 @@ export class Runtime {
     }
   }
 
-  // creates new asset creation transaction object and update context
+  // creates new asset creation transaction object.
   mkAssetCreateTx (
     name: string, flags: ASADeploymentFlags, asaDef: AssetDef): void {
     // this funtion is called only for validation of parameters passed
@@ -272,10 +295,10 @@ export class Runtime {
       asaDef.total,
       asaDef.decimals,
       asaDef["default-frozen"],
-      asaDef.manager,
-      asaDef.reserve,
-      asaDef.freeze,
-      asaDef.clawback,
+      asaDef.manager !== "" ? asaDef.manager : undefined,
+      asaDef.reserve !== "" ? asaDef.reserve : undefined,
+      asaDef.freeze !== "" ? asaDef.freeze : undefined,
+      asaDef.clawback !== "" ? asaDef.clawback : undefined,
       asaDef["unit-name"],
       name,
       asaDef.url,
@@ -325,18 +348,78 @@ export class Runtime {
   }
 
   /**
-   * Returns Asset Definitions
+   * https://developer.algorand.org/docs/features/asa/#modifying-an-asset
+   * Modifies asset fields
+   * @param sender sender address
    * @param assetId Asset Index
+   * @param fields Asset modifying fields
+   * @param payFlags Transaction Parameters
    */
-  getAssetDef (assetId: number): AssetDef {
-    const addr = this.store.assetDefs.get(assetId);
-    if (addr === undefined) {
-      throw new TealError(ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
-    }
+  modifyAsset (assetId: number, fields: AssetModFields): void {
+    const creatorAcc = this.getAssetAccount(assetId);
+    creatorAcc.modifyAsset(assetId, fields);
+  }
 
-    const creatorAcc = this.assertAccountDefined(addr, this.store.accounts.get(addr));
-    const assetDef = creatorAcc.getAssetDef(assetId);
-    return this.assertAssetDefined(assetId, assetDef);
+  /**
+   * https://developer.algorand.org/docs/features/asa/#freezing-an-asset
+   * Freezes assets for a target account
+   * @param sender sender address
+   * @param assetId asset index
+   * @param freezeTarget target account
+   * @param freezeState target state
+   * @param payFlags transaction parameters
+   */
+  freezeAsset (
+    assetId: number, freezeTarget: string, freezeState: boolean
+  ): void {
+    const acc = this.assertAccountDefined(freezeTarget, this.store.accounts.get(freezeTarget));
+    acc.setFreezeState(assetId, freezeState);
+  }
+
+  /**
+   * https://developer.algorand.org/docs/features/asa/#revoking-an-asset
+   * Revoking an asset for an account removes a specific number of the asset
+   * from the revoke target account.
+   * @param sender sender address
+   * @param recipient asset receiver address
+   * @param assetId asset index
+   * @param revocationTarget revoke target account
+   * @param amount amount of assets
+   * @param payFlags transaction parameters
+   */
+  revokeAsset (
+    recipient: string, assetID: number,
+    revocationTarget: string, amount: number
+  ): void {
+    // Transfer assets
+    const fromAssetHolding = this.getAssetHolding(assetID, revocationTarget);
+    const toAssetHolding = this.getAssetHolding(assetID, recipient);
+
+    if (fromAssetHolding.amount - amount < 0) {
+      throw new TealError(ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS, {
+        amount: amount,
+        address: revocationTarget
+      });
+    }
+    fromAssetHolding.amount -= amount;
+    toAssetHolding.amount += amount;
+  }
+
+  /**
+   * https://developer.algorand.org/docs/features/asa/#destroying-an-asset
+   * Destroy asset
+   * @param sender sender's address
+   * @param assetId asset index
+   * @param payFlags transaction parameters
+   */
+  destroyAsset (assetId: number): void {
+    const creatorAcc = this.getAssetAccount(assetId);
+    // destroy asset from creator's account
+    creatorAcc.destroyAsset(assetId);
+    // delete asset holdings from all accounts
+    this.store.accounts.forEach((value, key) => {
+      value.assets.delete(assetId);
+    });
   }
 
   /**
@@ -348,7 +431,7 @@ export class Runtime {
     const account = this.assertAccountDefined(address, this.store.accounts.get(address));
     const assetHolding = account.getAssetHolding(assetIndex);
     if (assetHolding === undefined) {
-      throw new TealError(ERRORS.ASA.ASSET_HOLDING_NOT_FOUND, {
+      throw new TealError(ERRORS.TRANSACTION.ASA_NOT_OPTIN, {
         assetId: assetIndex,
         address: address
       });
@@ -660,6 +743,24 @@ export class Runtime {
             this.transferAsset(txnParam);
             break;
           }
+          case TransactionType.ModifyAsset: {
+            this.modifyAsset(txnParam.assetID, txnParam.fields);
+            break;
+          }
+          case TransactionType.FreezeAsset: {
+            this.freezeAsset(txnParam.assetID, txnParam.freezeTarget, txnParam.freezeState);
+            break;
+          }
+          case TransactionType.RevokeAsset: {
+            this.revokeAsset(
+              txnParam.recipient, txnParam.assetID,
+              txnParam.revocationTarget, txnParam.amount);
+            break;
+          }
+          case TransactionType.DestroyAsset: {
+            this.destroyAsset(txnParam.assetID);
+            break;
+          }
           case TransactionType.DeleteSSC: {
             this.deleteApp(txnParam.appId);
             break;
@@ -682,6 +783,7 @@ export class Runtime {
    * @param program : teal code as a string
    * @param args : external arguments to smart contract
    */
+  /* eslint-disable sonarjs/cognitive-complexity */
   executeTx (txnParams: ExecParams | ExecParams[]): void {
     const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
     // validate first and last rounds
@@ -725,6 +827,28 @@ export class Runtime {
           }
 
           fromAccount.closeApp(txnParam.appId); // remove app from local state
+          break;
+        }
+        case TransactionType.FreezeAsset: {
+          const asset = this.getAssetDef(txnParam.assetID);
+          if (asset.freeze !== txnParam.fromAccount.addr) {
+            throw new TealError(ERRORS.ASA.FREEZE_ERROR, { address: asset.freeze });
+          }
+          break;
+        }
+        case TransactionType.RevokeAsset: {
+          const asset = this.getAssetDef(txnParam.assetID);
+          if (asset.clawback !== txnParam.fromAccount.addr) {
+            throw new TealError(ERRORS.ASA.CLAWBACK_ERROR, { address: asset.clawback });
+          }
+          break;
+        }
+        case TransactionType.DestroyAsset:
+        case TransactionType.ModifyAsset: {
+          const asset = this.getAssetDef(txnParam.assetID);
+          if (asset.manager !== txnParam.fromAccount.addr) {
+            throw new TealError(ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
+          }
           break;
         }
       }

@@ -287,6 +287,12 @@ const transactionErrors = {
     message: "Cannot withdraw %amount% assets from account %address%: insufficient balance",
     title: 'Insufficient account assests',
     description: `Withdrawing %amount% assets will lead to insufficient balance`
+  },
+  ASA_NOT_OPTIN: {
+    number: 102,
+    message: `Account %address% doesn't hold asset index %assetId%`,
+    title: "Asset Not Opt-In",
+    description: "Asset Holding Not Found"
   }
 };
 
@@ -315,17 +321,41 @@ const asaErrors = {
     title: "Asset Not Found",
     description: "Asset Not Found"
   },
-  ASSET_HOLDING_NOT_FOUND: {
-    number: 903,
-    message: `Account %address% doesn't hold asset index %assetId%`,
-    title: "Asset Holding Not Found",
-    description: "Asset Holding Not Found"
-  },
   ACCOUNT_ASSET_FROZEN: {
-    number: 904,
+    number: 903,
     message: `Asset index %assetId% frozen for account %address%`,
     title: "Asset Frozen",
     description: "Asset Frozen for account"
+  },
+  MANAGER_ERROR: {
+    number: 904,
+    message: `Only Manager account %address% can modify asset`,
+    title: "Manager Error",
+    description: "Manager Error"
+  },
+  FREEZE_ERROR: {
+    number: 905,
+    message: `Only Freeze account %address% can freeze asset`,
+    title: "Freeze Error",
+    description: "Freeze Error"
+  },
+  CLAWBACK_ERROR: {
+    number: 906,
+    message: `Only Clawback account %address% can revoke asset`,
+    title: "Clawback Error",
+    description: "Clawback Error"
+  },
+  BLANK_ADDRESS_ERROR: {
+    number: 907,
+    message: `Cannot reset a blank address`,
+    title: "Blank Address Error",
+    description: "Blank Address Error"
+  },
+  ASSET_TOTAL_ERROR: {
+    number: 908,
+    message: "All of the created assets should be in creator's account",
+    title: "Asset Total Error",
+    description: "Asset Total Error"
   }
 };
 

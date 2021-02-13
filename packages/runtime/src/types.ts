@@ -125,6 +125,9 @@ export interface StoreAccountI {
   getAssetDef: (assetId: number) => AssetDef | undefined
   getAssetHolding: (assetId: number) => AssetHolding | undefined
   addAsset: (assetId: number, name: string, asadef: ASADef) => AssetDef
+  modifyAsset: (assetId: number, fields: AssetModFields) => void
+  setFreezeState: (assetId: number, state: boolean) => void
+  destroyAsset: (assetId: number) => void
   optInToApp: (appId: number, appParams: SSCAttributesM) => void
   optInToASA: (assetIndex: number, assetHolding: AssetHolding) => void
   deleteApp: (appId: number) => void
@@ -190,7 +193,8 @@ export interface SSCOptionalFlags {
   rekeyTo?: string
 }
 
-export type ExecParams = AlgoTransferParam | AssetTransferParam | SSCCallsParam;
+export type ExecParams = AlgoTransferParam | AssetTransferParam | SSCCallsParam |
+ModifyAssetParam | FreezeAssetParam | RevokeAssetParam | DestroyAssetParam;
 
 export enum SignType {
   SecretKey,
@@ -200,6 +204,10 @@ export enum SignType {
 export enum TransactionType {
   TransferAlgo,
   TransferAsset,
+  ModifyAsset,
+  FreezeAsset,
+  RevokeAsset,
+  DestroyAsset,
   CallNoOpSSC,
   ClearSSC,
   CloseSSC,
@@ -209,6 +217,40 @@ export enum TransactionType {
 export interface Sign {
   sign: SignType
   lsig?: LogicSig
+}
+
+export interface ModifyAssetParam extends Sign {
+  type: TransactionType.ModifyAsset
+  fromAccount: AccountSDK
+  assetID: number
+  fields: AssetModFields
+  payFlags: TxParams
+}
+
+export interface FreezeAssetParam extends Sign {
+  type: TransactionType.FreezeAsset
+  fromAccount: AccountSDK
+  assetID: number
+  freezeTarget: AccountAddress
+  freezeState: boolean
+  payFlags: TxParams
+}
+
+export interface RevokeAssetParam extends Sign {
+  type: TransactionType.RevokeAsset
+  fromAccount: AccountSDK // fromAccount should be clawback address.
+  recipient: AccountAddress // Revoked assets are sent to this address
+  assetID: number
+  revocationTarget: AccountAddress // Revocation target is the account from which the clawback revokes asset.
+  amount: number
+  payFlags: TxParams
+}
+
+export interface DestroyAssetParam extends Sign {
+  type: TransactionType.DestroyAsset
+  fromAccount: AccountSDK
+  assetID: number
+  payFlags: TxParams
 }
 
 export interface AlgoTransferParam extends Sign {
@@ -255,3 +297,13 @@ export type AccountMap = Map<string, Account>;
 export type ASADef = z.infer<typeof ASADefSchema>;
 
 export type ASADefs = z.infer<typeof ASADefsSchema>;
+
+// After an asset has been created only the manager,
+// reserve, freeze and reserve accounts can be changed.
+// All other parameters are locked for the life of the asset.
+export interface AssetModFields {
+  manager: string
+  reserve: string
+  freeze: string
+  clawback: string
+}

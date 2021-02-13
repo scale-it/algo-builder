@@ -16,7 +16,7 @@ import {
 import { keyToBytes } from "./lib/parsing";
 import { assertValidSchema } from "./lib/stateful";
 import {
-  AppLocalStateM, ASADef, CreatedAppM, SSCAttributesM,
+  AppLocalStateM, ASADef, AssetModFields, CreatedAppM, SSCAttributesM,
   SSCDeploymentFlags, StackElem, StoreAccountI
 } from "./types";
 
@@ -182,6 +182,59 @@ export class StoreAccount implements StoreAccountI {
     const asset = new Asset(assetId, asaDef, this.address, name);
     this.createdAssets.set(asset.id, asset.definitions);
     return asset.definitions;
+  }
+
+  /**
+   * Modifies Asset fields
+   * @param assetId Asset Index
+   * @param fields Fields for modification
+   */
+  modifyAsset (assetId: number, fields: AssetModFields): void {
+    const asset = this.getAssetDef(assetId);
+    if (asset === undefined) {
+      throw new TealError(ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
+    }
+    // check for blank fields
+    if ((fields.reserve !== "" && asset.reserve === "") || (fields.freeze !== "" && asset.freeze === "") ||
+      (fields.clawback !== "" && asset.clawback === "")) {
+      throw new TealError(ERRORS.ASA.BLANK_ADDRESS_ERROR);
+    }
+
+    asset.manager = fields.manager;
+    asset.reserve = fields.reserve;
+    asset.freeze = fields.freeze;
+    asset.clawback = fields.clawback;
+  }
+
+  /**
+   * Freeze asset
+   * @param assetId Asset Index
+   * @state new freeze state
+   */
+  setFreezeState (assetId: number, state: boolean): void {
+    const holding = this.assets.get(assetId);
+    if (holding === undefined) {
+      throw new TealError(ERRORS.TRANSACTION.ASA_NOT_OPTIN,
+        { address: this.address, assetId: assetId });
+    }
+    holding["is-frozen"] = state;
+  }
+
+  /**
+   * Destroys asset
+   * @param assetId Asset Index
+   */
+  destroyAsset (assetId: number): void {
+    const holding = this.assets.get(assetId);
+    const asset = this.getAssetDef(assetId);
+    if (holding === undefined || asset === undefined) {
+      throw new TealError(ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
+    }
+    if (holding.amount !== asset.total) {
+      throw new TealError(ERRORS.ASA.ASSET_TOTAL_ERROR);
+    }
+    this.createdAssets.delete(assetId);
+    this.assets.delete(assetId);
   }
 
   /**
