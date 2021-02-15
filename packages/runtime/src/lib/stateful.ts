@@ -1,7 +1,7 @@
 import { SSCSchemaConfig } from "algosdk";
 
-import { TEAL_ERRORS } from "../errors/errors-list";
-import { TealError } from "../errors/teal-errors";
+import { RUNTIME_ERRORS } from "../errors/errors-list";
+import { RuntimeError } from "../errors/runtime-errors";
 import { StackElem } from "../types";
 
 /**
@@ -15,6 +15,6 @@ export function assertValidSchema (keyValue: Map<string, StackElem>, schema: SSC
     value instanceof Uint8Array ? byteSlices++ : numUint++;
   });
   if (numUint > schema["num-uint"] || byteSlices > schema["num-byte-slice"]) {
-    throw new TealError(TEAL_ERRORS.TEAL.INVALID_SCHEMA);
+    throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_SCHEMA);
   }
 }

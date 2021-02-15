@@ -97,7 +97,7 @@ In this section we will demonstrate executing transactions with stateless and st
       invalidParams.amountMicroAlgos = 500;
 
       // execute transaction (should fail as amount = 500)
-      await expectTealErrorAsync(
+      await expectRuntimeErrorAsync(
         async () => await runtime.executeTx(invalidParams),
         ERRORS.TEAL.REJECTED_BY_LOGIC
       );
@@ -165,7 +165,7 @@ Let's try to execute a transaction where a user (say `john`) will use delegated 
       invalidParams.amountMicroAlgos = 50;
 
       // execute transaction (should fail is logic is rejected)
-      expectTealError(
+      expectRuntimeError(
         () => runtime.executeTx(invalidParams),
         ERRORS.TEAL.REJECTED_BY_LOGIC
       );

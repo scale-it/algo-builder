@@ -1,8 +1,7 @@
 import { AssetDef, encodeAddress } from "algosdk";
 
-import { RUNTIME_ERRORS, TEAL_ERRORS } from "../errors/errors-list";
+import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
-import { TealError } from "../errors/teal-errors";
 import { Runtime } from "../index";
 import { checkIndexBound } from "../lib/compare";
 import { DEFAULT_STACK_ELEM } from "../lib/constants";
@@ -138,7 +137,7 @@ export class Interpreter {
         return;
       }
     }
-    throw new TealError(TEAL_ERRORS.TEAL.LABEL_NOT_FOUND, {
+    throw new RuntimeError(RUNTIME_ERRORS.TEAL.LABEL_NOT_FOUND, {
       label: label,
       line: line
     });
@@ -165,6 +164,6 @@ export class Interpreter {
 
       if (!(s instanceof Uint8Array) && s > BIGINT0) { return; }
     }
-    throw new TealError(TEAL_ERRORS.TEAL.REJECTED_BY_LOGIC);
+    throw new RuntimeError(RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC);
   }
 }

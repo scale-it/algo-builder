@@ -4,7 +4,7 @@ import { decodeAddress, generateAccount, signBytes } from "algosdk";
 import { assert } from "chai";
 
 import { StoreAccount } from "../../../src/account";
-import { RUNTIME_ERRORS, TEAL_ERRORS } from "../../../src/errors/errors-list";
+import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
@@ -24,8 +24,7 @@ import { convertToBuffer, stringToBytes } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
 import { EncodingType, StackElem, StoreAccountI } from "../../../src/types";
-import { expectRuntimeError } from "../../helpers/runtime-errors";
-import { execExpectError, expectTealError } from "../../helpers/teal-errors";
+import { execExpectError, expectRuntimeError } from "../../helpers/runtime-errors";
 import { accInfo } from "../../mocks/stateful";
 import { elonAddr, johnAddr, TXN_OBJ } from "../../mocks/txn";
 
@@ -56,9 +55,9 @@ describe("Teal Opcodes", function () {
     it("should throw error with uint64", function () {
       stack.push(BigInt("1000"));
       const op = new Len([], 0);
-      expectTealError(
+      expectRuntimeError(
         () => op.execute(stack),
-        TEAL_ERRORS.TEAL.INVALID_TYPE
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
       );
     });
   });
@@ -71,9 +70,9 @@ describe("Teal Opcodes", function () {
     });
 
     it("should store throw length error", () => {
-      expectTealError(
+      expectRuntimeError(
         () => new Pragma(["version", "2", "some-value"], 1, interpreter),
-        TEAL_ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
     });
   });
@@ -92,20 +91,20 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error with Add if stack is below min length",
-      execExpectError(stack, [BigInt("1000")], new Add([], 0), TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [BigInt("1000")], new Add([], 0), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
 
     it("should throw error if Add is used with strings",
-      execExpectError(stack, strArr, new Add([], 0), TEAL_ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, strArr, new Add([], 0), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw overflow error with Add", function () {
       stack.push(MAX_UINT64 - BigInt("5"));
       stack.push(MAX_UINT64 - BigInt("6"));
       const op = new Add([], 0);
-      expectTealError(
+      expectRuntimeError(
         () => op.execute(stack),
-        TEAL_ERRORS.TEAL.UINT64_OVERFLOW
+        RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
       );
     });
   });
@@ -124,20 +123,20 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error with Sub if stack is below min length",
-      execExpectError(stack, [BigInt("1000")], new Sub([], 0), TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [BigInt("1000")], new Sub([], 0), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
 
     it("should throw error if Sub is used with strings",
-      execExpectError(stack, strArr, new Sub([], 0), TEAL_ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, strArr, new Sub([], 0), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw underflow error with Sub if (A - B) < 0", function () {
       stack.push(BigInt("10"));
       stack.push(BigInt("20"));
       const op = new Sub([], 0);
-      expectTealError(
+      expectRuntimeError(
         () => op.execute(stack),
-        TEAL_ERRORS.TEAL.UINT64_UNDERFLOW
+        RUNTIME_ERRORS.TEAL.UINT64_UNDERFLOW
       );
     });
   });
@@ -156,20 +155,20 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error with Mul if stack is below min length",
-      execExpectError(stack, [BigInt("1000")], new Mul([], 0), TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [BigInt("1000")], new Mul([], 0), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
 
     it("should throw error if Mul is used with strings",
-      execExpectError(stack, strArr, new Mul([], 0), TEAL_ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, strArr, new Mul([], 0), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw overflow error with Mul if (A * B) > max_unit64", function () {
       stack.push(MAX_UINT64 - BigInt("5"));
       stack.push(BigInt(2));
       const op = new Mul([], 0);
-      expectTealError(
+      expectRuntimeError(
         () => op.execute(stack),
-        TEAL_ERRORS.TEAL.UINT64_OVERFLOW
+        RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
       );
     });
   });
@@ -198,20 +197,20 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error with Div if stack is below min length",
-      execExpectError(stack, [BigInt("1000")], new Div([], 0), TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [BigInt("1000")], new Div([], 0), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
 
     it("should throw error if Div is used with strings",
-      execExpectError(stack, strArr, new Div([], 0), TEAL_ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, strArr, new Div([], 0), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should panic on A/B if B == 0", function () {
       stack.push(BigInt("10"));
       stack.push(BigInt("0"));
       const op = new Div([], 0);
-      expectTealError(
+      expectRuntimeError(
         () => op.execute(stack),
-        TEAL_ERRORS.TEAL.ZERO_DIV
+        RUNTIME_ERRORS.TEAL.ZERO_DIV
       );
     });
   });
@@ -257,9 +256,9 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error if accessing arg is not defined", function () {
-      expectTealError(
+      expectRuntimeError(
         () => new Arg(["5"], 1, interpreter),
-        TEAL_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
       );
     });
   });
@@ -275,9 +274,9 @@ describe("Teal Opcodes", function () {
       }
 
       const op = new Bytecblock(bytecblock, 1, interpreter);
-      expectTealError(
+      expectRuntimeError(
         () => op.execute(stack),
-        TEAL_ERRORS.TEAL.ASSERT_ARR_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_ARR_LENGTH
       );
     });
 
@@ -335,9 +334,9 @@ describe("Teal Opcodes", function () {
 
     it("should throw error on loading bytec[N] if index is out of bound", function () {
       const op = new Bytec(["5"], 1, interpreter);
-      expectTealError(
+      expectRuntimeError(
         () => op.execute(stack),
-        TEAL_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
       );
     });
   });
@@ -353,9 +352,9 @@ describe("Teal Opcodes", function () {
       }
 
       const op = new Intcblock(intcblock, 1, interpreter);
-      expectTealError(
+      expectRuntimeError(
         () => op.execute(stack),
-        TEAL_ERRORS.TEAL.ASSERT_ARR_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_ARR_LENGTH
       );
     });
 
@@ -409,9 +408,9 @@ describe("Teal Opcodes", function () {
 
     it("should throw error on loading intc[N] if index is out of bound", function () {
       const op = new Intc(["5"], 1, interpreter);
-      expectTealError(
+      expectRuntimeError(
         () => op.execute(stack),
-        TEAL_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
       );
     });
   });
@@ -447,20 +446,20 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error with Mod if stack is below min length",
-      execExpectError(stack, [BigInt("1000")], new Mod([], 1), TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [BigInt("1000")], new Mod([], 1), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
 
     it("should throw error if Mod is used with strings",
-      execExpectError(stack, strArr, new Mod([], 1), TEAL_ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, strArr, new Mod([], 1), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should panic on A % B if B == 0", function () {
       stack.push(BigInt("10"));
       stack.push(BigInt("0"));
       const op = new Mod([], 1);
-      expectTealError(
+      expectRuntimeError(
         () => op.execute(stack),
-        TEAL_ERRORS.TEAL.ZERO_DIV
+        RUNTIME_ERRORS.TEAL.ZERO_DIV
       );
     });
   });
@@ -495,9 +494,9 @@ describe("Teal Opcodes", function () {
       stack.push(BigInt("0"));
 
       const op = new Store([(MAX_UINT8 + 5).toString()], 1, interpreter);
-      expectTealError(
+      expectRuntimeError(
         () => op.execute(stack),
-        TEAL_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
       );
     });
 
@@ -505,9 +504,9 @@ describe("Teal Opcodes", function () {
       const interpreter = new Interpreter();
       const stack = new Stack<StackElem>(); // empty stack
       const op = new Store(["0"], 1, interpreter);
-      expectTealError(
+      expectRuntimeError(
         () => op.execute(stack),
-        TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
       );
     });
   });
@@ -526,11 +525,11 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error with bitwise-or if stack is below min length",
-      execExpectError(stack, [BigInt("1000")], new BitwiseOr([], 1), TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [BigInt("1000")], new BitwiseOr([], 1), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
 
     it("should throw error if bitwise-or is used with strings",
-      execExpectError(stack, strArr, new BitwiseOr([], 1), TEAL_ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, strArr, new BitwiseOr([], 1), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
     );
   });
 
@@ -548,11 +547,11 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error with bitwise-and if stack is below min length",
-      execExpectError(stack, [BigInt("1000")], new BitwiseAnd([], 1), TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [BigInt("1000")], new BitwiseAnd([], 1), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
 
     it("should throw error if bitwise-and is used with strings",
-      execExpectError(stack, strArr, new BitwiseAnd([], 1), TEAL_ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, strArr, new BitwiseAnd([], 1), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
     );
   });
 
@@ -570,11 +569,11 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error with bitwise-xor if stack is below min length",
-      execExpectError(stack, [BigInt("1000")], new BitwiseXor([], 1), TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [BigInt("1000")], new BitwiseXor([], 1), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
 
     it("should throw error if bitwise-xor is used with strings",
-      execExpectError(stack, strArr, new BitwiseXor([], 1), TEAL_ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, strArr, new BitwiseXor([], 1), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
     );
   });
 
@@ -591,11 +590,11 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw error with bitwise-not if stack is below min length",
-      execExpectError(stack, [], new Add([], 0), TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [], new Add([], 0), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
 
     it("should throw error if bitwise-not is used with string",
-      execExpectError(stack, strArr, new BitwiseNot([], 1), TEAL_ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, strArr, new BitwiseNot([], 1), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
     );
   });
 
@@ -625,9 +624,9 @@ describe("Teal Opcodes", function () {
 
     it("should throw error on load if index is out of bound", function () {
       const op = new Load([(MAX_UINT8 + 5).toString()], 1, interpreter);
-      expectTealError(
+      expectRuntimeError(
         () => op.execute(stack),
-        TEAL_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
       );
     });
 
@@ -644,9 +643,9 @@ describe("Teal Opcodes", function () {
 
     it("should throw TEAL error", function () {
       const op = new Err([], 1);
-      expectTealError(
+      expectRuntimeError(
         () => op.execute(stack),
-        TEAL_ERRORS.TEAL.TEAL_ENCOUNTERED_ERR
+        RUNTIME_ERRORS.TEAL.TEAL_ENCOUNTERED_ERR
       );
     });
   });
@@ -667,11 +666,11 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw invalid type error sha256",
-      execExpectError(stack, [BigInt("1")], new Sha256([], 1), TEAL_ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, [BigInt("1")], new Sha256([], 1), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw error with Sha256 if stack is below min length",
-      execExpectError(stack, [], new Sha256([], 1), TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [], new Sha256([], 1), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
@@ -691,11 +690,11 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw invalid type error sha512_256",
-      execExpectError(stack, [BigInt("1")], new Sha512_256([], 1), TEAL_ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, [BigInt("1")], new Sha512_256([], 1), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw error with Sha512_256 if stack is below min length",
-      execExpectError(stack, [], new Sha512_256([], 1), TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [], new Sha512_256([], 1), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
@@ -716,11 +715,11 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw invalid type error Keccak256",
-      execExpectError(stack, [BigInt("1")], new Keccak256([], 1), TEAL_ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, [BigInt("1")], new Keccak256([], 1), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw error with keccak256 if stack is below min length",
-      execExpectError(stack, [], new Keccak256([], 1), TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [], new Keccak256([], 1), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
@@ -759,11 +758,11 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw invalid type error Ed25519verify",
-      execExpectError(stack, ['1', '1', '1'].map(BigInt), new Ed25519verify([], 1), TEAL_ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, ['1', '1', '1'].map(BigInt), new Ed25519verify([], 1), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw error with Ed25519verify if stack is below min length",
-      execExpectError(stack, [], new Ed25519verify([], 1), TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(stack, [], new Ed25519verify([], 1), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
@@ -795,11 +794,11 @@ describe("Teal Opcodes", function () {
     it("should throw invalid type error LessThan",
       execExpectError(stack,
         [new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])],
-        new LessThan([], 1), TEAL_ERRORS.TEAL.INVALID_TYPE)
+        new LessThan([], 1), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw stack length error LessThan", execExpectError(new Stack<StackElem>(),
-      [BigInt('1')], new LessThan([], 1), TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      [BigInt('1')], new LessThan([], 1), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
@@ -831,11 +830,11 @@ describe("Teal Opcodes", function () {
     it("should throw invalid type error GreaterThan",
       execExpectError(stack,
         [new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])],
-        new GreaterThan([], 1), TEAL_ERRORS.TEAL.INVALID_TYPE)
+        new GreaterThan([], 1), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw stack length error GreaterThan", execExpectError(new Stack<StackElem>(),
-      [BigInt('1')], new LessThan([], 1), TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      [BigInt('1')], new LessThan([], 1), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
@@ -867,11 +866,11 @@ describe("Teal Opcodes", function () {
     it("should throw invalid type error LessThanEqualTo",
       execExpectError(stack,
         [new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])],
-        new LessThanEqualTo([], 1), TEAL_ERRORS.TEAL.INVALID_TYPE)
+        new LessThanEqualTo([], 1), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw stack length error LessThanEqualTo", execExpectError(new Stack<StackElem>(),
-      [BigInt('1')], new LessThan([], 1), TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      [BigInt('1')], new LessThan([], 1), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
@@ -903,11 +902,11 @@ describe("Teal Opcodes", function () {
     it("should throw invalid type error GreaterThanEqualTo",
       execExpectError(stack,
         [new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])],
-        new GreaterThanEqualTo([], 1), TEAL_ERRORS.TEAL.INVALID_TYPE)
+        new GreaterThanEqualTo([], 1), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw stack length error GreaterThanEqualTo", execExpectError(new Stack<StackElem>(),
-      [BigInt('1')], new LessThan([], 1), TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      [BigInt('1')], new LessThan([], 1), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
@@ -939,11 +938,11 @@ describe("Teal Opcodes", function () {
     it("should throw invalid type error (And)",
       execExpectError(stack,
         [new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])],
-        new And([], 1), TEAL_ERRORS.TEAL.INVALID_TYPE)
+        new And([], 1), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw stack length error (And)", execExpectError(new Stack<StackElem>(),
-      [BigInt('1')], new LessThan([], 1), TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      [BigInt('1')], new LessThan([], 1), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
@@ -975,11 +974,11 @@ describe("Teal Opcodes", function () {
     it("should throw invalid type error (Or)",
       execExpectError(stack,
         [new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])],
-        new Or([], 1), TEAL_ERRORS.TEAL.INVALID_TYPE)
+        new Or([], 1), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
     );
 
     it("should throw stack length error (Or)", execExpectError(new Stack<StackElem>(),
-      [BigInt('1')], new LessThan([], 1), TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      [BigInt('1')], new LessThan([], 1), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH)
     );
   });
 
@@ -1027,9 +1026,9 @@ describe("Teal Opcodes", function () {
       stack.push(new Uint8Array([1, 2, 3]));
       const op = new EqualTo([], 1);
 
-      expectTealError(
+      expectRuntimeError(
         () => op.execute(stack),
-        TEAL_ERRORS.TEAL.INVALID_TYPE
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
       );
     });
   });
@@ -1078,9 +1077,9 @@ describe("Teal Opcodes", function () {
       stack.push(new Uint8Array([1, 2, 3]));
       const op = new EqualTo([], 1);
 
-      expectTealError(
+      expectRuntimeError(
         () => op.execute(stack),
-        TEAL_ERRORS.TEAL.INVALID_TYPE
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
       );
     });
   });
@@ -1121,7 +1120,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw invalid type error",
-      execExpectError(stack, [new Uint8Array([1, 2])], new Itob([], 1), TEAL_ERRORS.TEAL.INVALID_TYPE)
+      execExpectError(stack, [new Uint8Array([1, 2])], new Itob([], 1), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
     );
   });
 
@@ -1139,7 +1138,7 @@ describe("Teal Opcodes", function () {
 
     it("should throw invalid type error",
       execExpectError(stack, [new Uint8Array([0, 1, 1, 1, 1, 1, 1, 1, 0])],
-        new Btoi([], 1), TEAL_ERRORS.TEAL.LONG_INPUT_ERROR)
+        new Btoi([], 1), RUNTIME_ERRORS.TEAL.LONG_INPUT_ERROR)
     );
   });
 
@@ -1227,7 +1226,7 @@ describe("Teal Opcodes", function () {
         stack,
         [BigInt('3')],
         new Mulw([], 1),
-        TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
       )
     );
 
@@ -1236,7 +1235,7 @@ describe("Teal Opcodes", function () {
         stack,
         ["str1", "str2"].map(stringToBytes),
         new Mulw([], 1),
-        TEAL_ERRORS.TEAL.INVALID_TYPE
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
       )
     );
   });
@@ -1275,7 +1274,9 @@ describe("Teal Opcodes", function () {
     });
 
     it("should throw stack length error",
-      execExpectError(stack, [new Uint8Array([1, 2])], new Dup2([], 1), TEAL_ERRORS.TEAL.ASSERT_STACK_LENGTH)
+      execExpectError(
+        stack, [new Uint8Array([1, 2])], new Dup2([], 1), RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+      )
     );
   });
 
@@ -1297,9 +1298,9 @@ describe("Teal Opcodes", function () {
       stack.push(new Uint8Array(1000));
       const op = new Concat([], 1);
 
-      expectTealError(
+      expectRuntimeError(
         () => op.execute(stack),
-        TEAL_ERRORS.TEAL.CONCAT_ERROR
+        RUNTIME_ERRORS.TEAL.CONCAT_ERROR
       );
     });
   });
@@ -1323,37 +1324,37 @@ describe("Teal Opcodes", function () {
         stack,
         [BigInt('1')],
         new Substring([start, end], 1),
-        TEAL_ERRORS.TEAL.INVALID_TYPE
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
       )
     );
 
     it("should throw error if start is not uint8", function () {
       stack.push(stringToBytes("Algorand"));
 
-      expectTealError(
+      expectRuntimeError(
         () => new Substring([(MIN_UINT8 - 5).toString(), end], 1),
-        TEAL_ERRORS.TEAL.INVALID_TYPE
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
       );
 
       const op = new Substring([(MAX_UINT8 + 5).toString(), end], 1);
-      expectTealError(
+      expectRuntimeError(
         () => op.execute(stack),
-        TEAL_ERRORS.TEAL.INVALID_UINT8
+        RUNTIME_ERRORS.TEAL.INVALID_UINT8
       );
     });
 
     it("should throw error if end is not uint8", function () {
       stack.push(stringToBytes("Algorand"));
 
-      expectTealError(
+      expectRuntimeError(
         () => new Substring([start, (MIN_UINT8 - 5).toString()], 1),
-        TEAL_ERRORS.TEAL.INVALID_TYPE
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
       );
 
       const op = new Substring([start, (MAX_UINT8 + 5).toString()], 1);
-      expectTealError(
+      expectRuntimeError(
         () => op.execute(stack),
-        TEAL_ERRORS.TEAL.INVALID_UINT8
+        RUNTIME_ERRORS.TEAL.INVALID_UINT8
       );
     });
 
@@ -1362,7 +1363,7 @@ describe("Teal Opcodes", function () {
         stack,
         [stringToBytes("Algorand")],
         new Substring(["9", end], 1),
-        TEAL_ERRORS.TEAL.SUBSTRING_END_BEFORE_START
+        RUNTIME_ERRORS.TEAL.SUBSTRING_END_BEFORE_START
       )
     );
 
@@ -1371,7 +1372,7 @@ describe("Teal Opcodes", function () {
         stack,
         [stringToBytes("Algorand")],
         new Substring([start, "40"], 1),
-        TEAL_ERRORS.TEAL.SUBSTRING_RANGE_BEYOND
+        RUNTIME_ERRORS.TEAL.SUBSTRING_RANGE_BEYOND
       )
     );
   });
@@ -1396,7 +1397,7 @@ describe("Teal Opcodes", function () {
         stack,
         ['4', '0', '1234'].map(BigInt),
         new Substring3([], 1),
-        TEAL_ERRORS.TEAL.INVALID_TYPE
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
       )
     );
 
@@ -1407,7 +1408,7 @@ describe("Teal Opcodes", function () {
         stack,
         [start, end, stringToBytes("Algorand")],
         new Substring3([], 1),
-        TEAL_ERRORS.TEAL.SUBSTRING_END_BEFORE_START
+        RUNTIME_ERRORS.TEAL.SUBSTRING_END_BEFORE_START
       );
     });
 
@@ -1416,7 +1417,7 @@ describe("Teal Opcodes", function () {
         stack,
         [BigInt('0'), BigInt('40'), stringToBytes("Algorand")],
         new Substring3([], 1),
-        TEAL_ERRORS.TEAL.SUBSTRING_RANGE_BEYOND
+        RUNTIME_ERRORS.TEAL.SUBSTRING_RANGE_BEYOND
       )
     );
   });
@@ -1446,7 +1447,7 @@ describe("Teal Opcodes", function () {
           stack,
           [],
           new Branch(["some-branch-1"], 0, interpreter),
-          TEAL_ERRORS.TEAL.LABEL_NOT_FOUND
+          RUNTIME_ERRORS.TEAL.LABEL_NOT_FOUND
         )
       );
     });
@@ -1475,7 +1476,7 @@ describe("Teal Opcodes", function () {
           stack,
           [BigInt('0')],
           new BranchIfZero(["some-branch-2"], 0, interpreter),
-          TEAL_ERRORS.TEAL.LABEL_NOT_FOUND
+          RUNTIME_ERRORS.TEAL.LABEL_NOT_FOUND
         )
       );
     });
@@ -1504,7 +1505,7 @@ describe("Teal Opcodes", function () {
           stack,
           [BigInt('5')],
           new BranchIfNotZero(["some-branch-3"], 0, interpreter),
-          TEAL_ERRORS.TEAL.LABEL_NOT_FOUND
+          RUNTIME_ERRORS.TEAL.LABEL_NOT_FOUND
         )
       );
     });
@@ -1610,7 +1611,7 @@ describe("Teal Opcodes", function () {
           stack,
           [],
           new Txn(["FirstValidTime"], 1, interpreter),
-          TEAL_ERRORS.TEAL.REJECTED_BY_LOGIC
+          RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
         )
       );
 
@@ -1979,7 +1980,7 @@ describe("Teal Opcodes", function () {
           stack,
           [],
           new Gtxna(["1", "Accounts", "0"], 1, interpreter),
-          TEAL_ERRORS.TEAL.INVALID_OP_ARG
+          RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
         );
       });
     });
@@ -1989,45 +1990,45 @@ describe("Teal Opcodes", function () {
         interpreter.tealVersion = 1;
 
         // for txn
-        expectTealError(
+        expectRuntimeError(
           () => new Txn(['ApplicationID'], 1, interpreter),
-          TEAL_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+          RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
         );
 
-        expectTealError(
+        expectRuntimeError(
           () => new Txn(['ApprovalProgram'], 1, interpreter),
-          TEAL_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+          RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
         );
 
-        expectTealError(
+        expectRuntimeError(
           () => new Txn(['ConfigAssetDecimals'], 1, interpreter),
-          TEAL_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+          RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
         );
 
-        expectTealError(
+        expectRuntimeError(
           () => new Txn(['FreezeAssetAccount'], 1, interpreter),
-          TEAL_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+          RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
         );
 
-        expectTealError(
+        expectRuntimeError(
           () => new Txn(['FreezeAssetAccount'], 1, interpreter),
-          TEAL_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+          RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
         );
 
         // for gtxn
-        expectTealError(
+        expectRuntimeError(
           () => new Gtxn(['0', 'OnCompletion'], 1, interpreter),
-          TEAL_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+          RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
         );
 
-        expectTealError(
+        expectRuntimeError(
           () => new Gtxn(['0', 'RekeyTo'], 1, interpreter),
-          TEAL_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+          RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
         );
 
-        expectTealError(
+        expectRuntimeError(
           () => new Gtxn(['0', 'ConfigAssetClawback'], 1, interpreter),
-          TEAL_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+          RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
         );
       });
     });
@@ -2125,24 +2126,24 @@ describe("Teal Opcodes", function () {
     it("should throw error if global field is not present in teal version", function () {
       interpreter.tealVersion = 1;
 
-      expectTealError(
+      expectRuntimeError(
         () => new Global(['LogicSigVersion'], 1, interpreter),
-        TEAL_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
+        RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
       );
 
-      expectTealError(
+      expectRuntimeError(
         () => new Global(['Round'], 1, interpreter),
-        TEAL_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
+        RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
       );
 
-      expectTealError(
+      expectRuntimeError(
         () => new Global(['LatestTimestamp'], 1, interpreter),
-        TEAL_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
+        RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
       );
 
-      expectTealError(
+      expectRuntimeError(
         () => new Global(['CurrentApplicationID'], 1, interpreter),
-        TEAL_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
+        RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
       );
     });
   });
@@ -2445,7 +2446,7 @@ describe("Teal Opcodes", function () {
           stack,
           [BigInt('0'), stringToBytes("New-Key-1"), stringToBytes("New-Val-2")],
           new AppLocalPut([], 1, interpreter),
-          TEAL_ERRORS.TEAL.INVALID_SCHEMA
+          RUNTIME_ERRORS.TEAL.INVALID_SCHEMA
         );
       });
 
@@ -2455,7 +2456,7 @@ describe("Teal Opcodes", function () {
           stack,
           [BigInt('0'), stringToBytes("New-Key-1"), stringToBytes("New-Val-2")],
           new AppLocalPut([], 1, interpreter),
-          TEAL_ERRORS.TEAL.APP_NOT_FOUND
+          RUNTIME_ERRORS.TEAL.APP_NOT_FOUND
         );
       });
     });
@@ -2495,7 +2496,7 @@ describe("Teal Opcodes", function () {
           stack,
           [stringToBytes("New-GlobalKey-1"), stringToBytes("New-GlobalVal-2")],
           new AppGlobalPut([], 1, interpreter),
-          TEAL_ERRORS.TEAL.INVALID_SCHEMA
+          RUNTIME_ERRORS.TEAL.INVALID_SCHEMA
         );
       });
 
@@ -2505,7 +2506,7 @@ describe("Teal Opcodes", function () {
           stack,
           [stringToBytes("New-Key-1"), stringToBytes("New-Val-2")],
           new AppGlobalPut([], 1, interpreter),
-          TEAL_ERRORS.TEAL.APP_NOT_FOUND
+          RUNTIME_ERRORS.TEAL.APP_NOT_FOUND
         );
       });
     });
@@ -2737,9 +2738,9 @@ describe("Teal Opcodes", function () {
       const op = new Balance([], 1, interpreter);
       stack.push(BigInt("8"));
 
-      expectTealError(
+      expectRuntimeError(
         () => op.execute(stack),
-        TEAL_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
       );
     });
 
@@ -2788,9 +2789,9 @@ describe("Teal Opcodes", function () {
       stack.push(BigInt("10")); // account index
       stack.push(BigInt("4")); // asset id
 
-      expectTealError(
+      expectRuntimeError(
         () => op.execute(stack),
-        TEAL_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
       );
     });
 
@@ -2953,9 +2954,9 @@ describe("Teal Opcodes", function () {
 
       stack.push(BigInt("4")); // asset index
 
-      expectTealError(
+      expectRuntimeError(
         () => op.execute(stack),
-        TEAL_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
       );
     });
   });

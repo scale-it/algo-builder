@@ -3,14 +3,13 @@ import { assert } from "chai";
 import sinon from "sinon";
 
 import { StoreAccount } from "../../src/account";
-import { RUNTIME_ERRORS, TEAL_ERRORS } from "../../src/errors/errors-list";
+import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { Runtime } from "../../src/runtime";
 import type { AlgoTransferParam, AssetModFields, AssetTransferParam, DestroyAssetParam, ExecParams, FreezeAssetParam, ModifyAssetParam, RevokeAssetParam } from "../../src/types";
 import { SignType, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
-import { expectTealError } from "../helpers/teal-errors";
 import { elonMuskAccount } from "../mocks/account";
 
 const programName = "basic.teal";
@@ -67,9 +66,9 @@ describe("Logic Signature Transaction in Runtime", function () {
     // execute transaction (rejected by logic)
     // - Signature successfully validated for john
     // - But teal file logic is rejected
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(txnParam),
-      TEAL_ERRORS.TEAL.REJECTED_BY_LOGIC
+      RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
 });

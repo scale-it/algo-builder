@@ -1,6 +1,6 @@
 import { assert } from "chai";
 
-import { RUNTIME_ERRORS, TEAL_ERRORS } from "../../src/errors/errors-list";
+import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccount } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { stringToBytes } from "../../src/lib/parsing";
@@ -8,7 +8,6 @@ import { SignType, SSCCallsParam, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
-import { expectTealError } from "../helpers/teal-errors";
 
 describe("ASC - CloseOut from Application and Clear State", function () {
   useFixture("stateful");
@@ -100,9 +99,9 @@ describe("ASC - CloseOut from Application and Clear State", function () {
     // sending txn sender other than creator (john), so txn should be rejected
     closeOutParams.fromAccount = alice.account;
 
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(closeOutParams),
-      TEAL_ERRORS.TEAL.REJECTED_BY_LOGIC
+      RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 
     // verify app is not deleted from account's local state (as tx is rejected)
@@ -130,9 +129,9 @@ describe("ASC - CloseOut from Application and Clear State", function () {
     let res = alice.getAppFromLocal(appId);
     assert.isDefined(res);
 
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(clearAppParams),
-      TEAL_ERRORS.TEAL.REJECTED_BY_LOGIC
+      RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 
     // verify app is deleted from account's local state even if tx is rejected after execution
