@@ -320,6 +320,8 @@ export class Runtime {
     const asset = senderAcc.addAsset(++this.assetCounter, name, this.loadedAssetsDefs[name]);
     this.mkAssetCreateTx(name, flags, asset);
     this.store.assetDefs.set(this.assetCounter, sender.addr);
+
+    this.optIntoASA(this.assetCounter, sender.addr, {}); // opt-in for creator
     return this.assetCounter;
   }
 
@@ -340,7 +342,7 @@ export class Runtime {
       amount: address === creatorAddr ? assetDef.total : 0, // for creator opt-in amount is total assets
       'asset-id': assetIndex,
       creator: creatorAddr,
-      'is-frozen': assetDef["default-frozen"]
+      'is-frozen': address === creatorAddr ? false : assetDef["default-frozen"]
     };
 
     const account = this.getAccount(address);
@@ -799,9 +801,10 @@ export class Runtime {
 
     const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
     // Run TEAL program associated with each transaction without interacting with store.
-    for (const txnParam of txnParameters) {
+    for (const [index, txnParam] of txnParameters.entries()) {
       this.assertAmbiguousTxnParams(txnParam);
       if (txnParam.sign === SignType.LogicSignature) {
+        this.ctx.tx = this.ctx.gtxs[index]; // update current tx
         this.validateLsigAndRun(txnParam);
       }
 

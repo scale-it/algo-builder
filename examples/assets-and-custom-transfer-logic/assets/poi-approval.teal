@@ -226,7 +226,7 @@ bz failed
 // tx 1 - clawback transactions that moves the frozen asset from sender to receiver - signed by clawback-escrow
 // verify the account sent in the accounts array is
 // actually the receiver of the asset in asset xfer
-gtxn 0 Accounts 1
+gtxna 0 Accounts 1
 gtxn 1 AssetReceiver
 ==
 gtxn 1 XferAsset
