@@ -66,7 +66,7 @@ maximun uint64 value of 18446744073709551615`
   },
   UINT64_UNDERFLOW: {
     number: 1005,
-    message: "Result of current operation caused integer underflow at %line%",
+    message: "Result of current operation caused integer underflow at line %line%",
     title: "Uint64 Underflow at %line%",
     description: `You are tying to perform operation where the result is less than
 minimum uint64 value of 0`
