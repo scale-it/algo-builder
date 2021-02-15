@@ -20,7 +20,9 @@ As noted above there are two commands to execute scripts:
 #### Run
 Runs provided scripts and doesn't save script checkpoints.
 Useful to query the current state of blockchain.
-
+Example:
+    
+    algob run scripts/script1.js
 #### Deploy
 Runs scripts and creates execution [checkpoints](/docs/execution-checkpoints.md).
 If a script throws an exception it will stop the execution and script checkpoint won't be created/updated.
@@ -30,3 +32,8 @@ Script execution checkpoints are cached in `artifacts` directory.
 They guard against duplicate deployment and should be added to version control system.
 
 Execution checkpoints can be overridden by using `--force` to rerun the scripts even if they succeeded previously.
+Example:
+
+    algob deploy // will run all the scripts present in scripts folder
+    algob deploy scripts/script1.js // will run script1.js.
+    algob deploy scripts/script2.js scripts/script1.js // will run script2.js and script1.js in given order

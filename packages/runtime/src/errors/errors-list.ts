@@ -294,6 +294,18 @@ const transactionErrors = {
     message: "Secret key and Logic Signature should not be passed together",
     title: "Transaction params error",
     description: `Transaction params error`
+  },
+  ASA_NOT_OPTIN: {
+    number: 1404,
+    message: `Account %address% doesn't hold asset index %assetId%`,
+    title: "Asset Not Opt-In",
+    description: "Asset Holding Not Found"
+  },
+  ACCOUNT_ASSET_FROZEN: {
+    number: 1505,
+    message: `Asset index %assetId% frozen for account %address%`,
+    title: "Asset Frozen",
+    description: "Asset Frozen for account"
   }
 };
 
@@ -322,23 +334,41 @@ const runtimeAsaErrors = {
     title: "Asset Not Found",
     description: "Asset Not Found"
   },
-  ASSET_HOLDING_NOT_FOUND: {
-    number: 1503,
-    message: `Account %address% doesn't hold asset index %assetId%`,
-    title: "Asset Holding Not Found",
-    description: "Asset Holding Not Found"
-  },
-  ACCOUNT_ASSET_FROZEN: {
-    number: 1504,
-    message: `Asset index %assetId% frozen for account %address%`,
-    title: "Asset Frozen",
-    description: "Asset Frozen for account"
-  },
   MAX_LIMIT_ASSETS: {
-    number: 1505,
+    number: 1503,
     message: "Error while creating asset %name% for %address%. Maximum created assets for an account is %max%",
     title: 'Asset Creation Error',
     description: `Asset Creation Error`
+  },
+  MANAGER_ERROR: {
+    number: 1504,
+    message: `Only Manager account %address% can modify asset`,
+    title: "Manager Error",
+    description: "Manager Error"
+  },
+  FREEZE_ERROR: {
+    number: 1505,
+    message: `Only Freeze account %address% can freeze asset`,
+    title: "Freeze Error",
+    description: "Freeze Error"
+  },
+  CLAWBACK_ERROR: {
+    number: 1506,
+    message: `Only Clawback account %address% can revoke asset`,
+    title: "Clawback Error",
+    description: "Clawback Error"
+  },
+  BLANK_ADDRESS_ERROR: {
+    number: 1507,
+    message: `Cannot reset a blank address`,
+    title: "Blank Address Error",
+    description: "Blank Address Error"
+  },
+  ASSET_TOTAL_ERROR: {
+    number: 1508,
+    message: "All of the created assets should be in creator's account",
+    title: "Asset Total Error",
+    description: "Asset Total Error"
   }
 };
 

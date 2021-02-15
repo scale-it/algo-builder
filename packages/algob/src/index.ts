@@ -14,9 +14,9 @@ import {
 import { globalZeroAddress } from "./lib/constants";
 import { algodCredentialsFromEnv, KMDCredentialsFromEnv } from "./lib/credentials";
 import { getProgram } from "./lib/load-program";
-import { update } from "./lib/ssc";
+import { updateSSC } from "./lib/ssc";
 import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC, readGlobalStateSSC, readLocalStateSSC } from "./lib/status";
-import { executeSignedTxnFromFile, executeTransaction } from "./lib/tx";
+import { executeSignedTxnFromFile, executeTransaction, getSuggestedParams, mkTxParams } from "./lib/tx";
 import * as types from "./types";
 
 export {
@@ -28,6 +28,8 @@ export {
   loadAccountsFromEnv,
   executeTransaction,
   executeSignedTxnFromFile,
+  mkTxParams,
+  getSuggestedParams,
   balanceOf,
   printAssets,
   algodCredentialsFromEnv,
@@ -36,7 +38,7 @@ export {
   printGlobalStateSSC,
   readGlobalStateSSC,
   readLocalStateSSC,
-  update,
+  updateSSC,
   stringToBytes,
   parseSSCAppArgs,
   globalZeroAddress,
