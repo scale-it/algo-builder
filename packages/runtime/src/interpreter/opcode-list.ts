@@ -1626,6 +1626,7 @@ export class AppLocalGetEx extends Op {
       stack.push(BIGINT1);
     } else {
       stack.push(BIGINT0); // The value is zero if the key does not exist.
+      stack.push(BIGINT0); // did_exist_flag
     }
   }
 }
@@ -1706,6 +1707,7 @@ export class AppGlobalGetEx extends Op {
       stack.push(BIGINT1);
     } else {
       stack.push(BIGINT0); // The value is zero if the key does not exist.
+      stack.push(BIGINT0); // did_exist_flag
     }
   }
 }
