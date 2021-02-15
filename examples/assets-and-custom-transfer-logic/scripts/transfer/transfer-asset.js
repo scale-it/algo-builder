@@ -33,7 +33,7 @@ async function run (runtimeEnv, deployer) {
       accounts: [bob.addr] //  AppAccounts
     },
     /**
-     * tx 1 - Actual asset transfer transaction from Alice -> Bob. This tx is executed
+     * tx 1 - Asset transfer transaction from Alice -> Bob. This tx is executed
      * and approved by the escrow account (clawback-escrow.teal). The escrow account address is
      * also the clawback address which transfers the frozen asset (amount = 1000) from Alice to Bob
      */
