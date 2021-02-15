@@ -7,7 +7,6 @@ sys.path.insert(0,'..')
 from algobpy.parse import parseArgs
 from pyteal import *
 
-
 def clawback_escrow(ASSET_ID, APP_ID):
 
 	# check properties of txGroup passed
@@ -33,7 +32,7 @@ def clawback_escrow(ASSET_ID, APP_ID):
         Gtxn[2].asset_close_to() == Global.zero_address()
     )
 
-    # vette first transaction
+    # verify first transaction
     # check level smart contract call - signed by asset sender
     first_transaction_checks = And(
         # check app_id passed through params
@@ -42,7 +41,7 @@ def clawback_escrow(ASSET_ID, APP_ID):
         Gtxn[0].sender() == Gtxn[1].asset_sender()
     )
 
-    # vette second transaction
+    # verify second transaction
     # tx 1 - clawback transactions that moves the frozen asset from sender to receiver - signed by clawback-escrow
     # verify the account sent in the accounts array is
     # actually the receiver of the asset in asset xfer
@@ -52,7 +51,7 @@ def clawback_escrow(ASSET_ID, APP_ID):
         Gtxn[1].xfer_asset() == Int(ASSET_ID)
     )
 
-    # vette third transaction
+    # verify third transaction
     # tx 2 - payment transaction from sender to clawback-escrow to pay for the fee of the clawback
     third_transaction_checks = And(
         Gtxn[1].sender() == Gtxn[2].receiver(),

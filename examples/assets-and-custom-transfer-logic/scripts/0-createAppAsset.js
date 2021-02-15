@@ -23,7 +23,7 @@ async function run (runtimeEnv, deployer) {
   await deployer.optInToASA('gold', 'bob', {}); // asa optIn for bob
   console.log(asaInfo);
 
-  /** * Creating Application ***/
+  /*** Creating Application ***/
   // initialize app arguments
   const appArgs = [
     `int:${asaInfo.assetIndex}`,

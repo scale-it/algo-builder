@@ -15,7 +15,7 @@ This solution explains the process of how this can be done in Algorand using a S
 
 ## Problem Solution
 
-Using Algorand’s Atomic Transaction feature allows multiple transactions to be submitted at one time and if any of the transactions fail, then they all fail. So, one way of solving this issue is to group an asset transfer transaction with a call to a stateful smart contract and submit them simultaneously. The only caveat to this is that nothing prevents the asset transfer transaction being submitted by itself.
+Using Algorand’s Atomic Transaction feature allows multiple transactions to be submitted at one time and if any of the transactions fail, then they all fail. So, one way of solving this issue is to group an asset transfer transaction with a call to a stateful smart contract and submit them simultaneously. The only limitation to this is that nothing prevents the asset transfer transaction being submitted by itself.
 
 This example uses a stateful smart contract that uses a level system. The level is a simple integer and represents the required level a user must have to transfer a specific asset. Users who opt into the stateful smart contract have their level stored in local storage. So for a given asset we store globally, the required level to transfer the asset and for each user we store locally, their current level for the asset.
 
