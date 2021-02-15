@@ -238,10 +238,10 @@ export interface FreezeAssetParam extends Sign {
 
 export interface RevokeAssetParam extends Sign {
   type: TransactionType.RevokeAsset
-  fromAccount: AccountSDK
-  recipient: AccountAddress
+  fromAccount: AccountSDK // fromAccount should be clawback address.
+  recipient: AccountAddress // Revoked assets are sent to this address
   assetID: number
-  revocationTarget: AccountAddress
+  revocationTarget: AccountAddress // Revocation target is the account from which the clawback revokes asset.
   amount: number
   payFlags: TxParams
 }

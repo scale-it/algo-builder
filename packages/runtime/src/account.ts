@@ -214,7 +214,7 @@ export class StoreAccount implements StoreAccountI {
   setFreezeState (assetId: number, state: boolean): void {
     const holding = this.assets.get(assetId);
     if (holding === undefined) {
-      throw new TealError(ERRORS.ASA.ASSET_HOLDING_NOT_FOUND,
+      throw new TealError(ERRORS.TRANSACTION.ASA_NOT_OPTIN,
         { address: this.address, assetId: assetId });
     }
     holding["is-frozen"] = state;

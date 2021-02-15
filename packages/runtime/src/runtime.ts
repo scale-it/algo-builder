@@ -431,7 +431,7 @@ export class Runtime {
     const account = this.assertAccountDefined(address, this.store.accounts.get(address));
     const assetHolding = account.getAssetHolding(assetIndex);
     if (assetHolding === undefined) {
-      throw new TealError(ERRORS.ASA.ASSET_HOLDING_NOT_FOUND, {
+      throw new TealError(ERRORS.TRANSACTION.ASA_NOT_OPTIN, {
         assetId: assetIndex,
         address: address
       });

@@ -16,7 +16,7 @@ export const reDigit = /^\d+$/;
  * @param newClearProgram New Clear Program filename
  * @param flags Optional parameters to SSC (accounts, args..)
  */
-export async function update (
+export async function updateSSC (
   deployer: AlgobDeployer,
   sender: AccountSDK,
   payFlags: rtypes.TxParams,
