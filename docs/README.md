@@ -67,8 +67,7 @@ Read more about checkpoints [here](/docs/execution-checkpoints.md).
 To develop in `typescript`, please remember these points:
 
 - Make sure to compile your `ts` project using `tsc --build .` Never forget to compile files.
-- If you are actively developing, please use `tsc -w -p .` to build your files in real time.
-- Best way to build project is to run tsc in a watch mode.
+- If you are actively developing, please use `tsc -w -p .` to build your files in real time.(this is recommended)
 - Transpiled js files should be present in `build` folder, therefore `outDir` in tsconfig.json should be set as:
 
     "outDir": "./build/scripts"
