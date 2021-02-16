@@ -1450,6 +1450,35 @@ describe("Teal Opcodes", function () {
           RUNTIME_ERRORS.TEAL.LABEL_NOT_FOUND
         )
       );
+
+      it("should jump to last label if multiple labels have same teal code", function () {
+        const stack = new Stack<StackElem>();
+        const interpreter = new Interpreter();
+        interpreter.instructions = [
+          new Int(['1'], 0),
+          new Int(['2'], 1),
+          new Branch(["label1"], 2, interpreter),
+          new Int(['3'], 3),
+          new Label(["label1:"], 4),
+          new Label(["label2:"], 5),
+          new Label(["label3:"], 6),
+          new Int(['3'], 7)
+        ];
+        const op = new Branch(["label1"], 2, interpreter);
+        op.execute(stack);
+        assert.equal(interpreter.instructionIndex, 6);
+
+        // checking for label2, label3 as well
+        interpreter.instructionIndex = 0;
+        interpreter.instructions[2] = new Branch(["label2"], 2, interpreter);
+        op.execute(stack);
+        assert.equal(interpreter.instructionIndex, 6);
+
+        interpreter.instructionIndex = 0;
+        interpreter.instructions[2] = new Branch(["label3"], 2, interpreter);
+        op.execute(stack);
+        assert.equal(interpreter.instructionIndex, 6);
+      });
     });
 
     describe("BranchIfZero", function () {

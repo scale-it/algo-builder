@@ -134,6 +134,11 @@ export class Interpreter {
     while (++this.instructionIndex < this.instructions.length) {
       const instruction = this.instructions[this.instructionIndex];
       if (instruction instanceof Label && instruction.label === label) {
+        // if next immediate op is also label, then keep continuing, otherwise return
+        for (; this.instructionIndex < this.instructions.length - 1; ++this.instructionIndex) {
+          const nextInstruction = this.instructions[this.instructionIndex + 1];
+          if (!(nextInstruction instanceof Label)) { break; }
+        }
         return;
       }
     }
