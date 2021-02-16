@@ -183,11 +183,13 @@ export const GlobalFields: {[key: number]: {[key: string]: any}} = { // teal ver
 };
 
 // global field supported by teal v2
+// Note: Round, LatestTimestamp are dummy values and these are overrided by runtime class's
+// round and timestamp
 GlobalFields[2] = {
   ...GlobalFields[1],
   LogicSigVersion: 2, // LogicSigVersion >= 2
-  Round: 500, // constant (for tests)
-  LatestTimestamp: Math.round((new Date()).getTime() / 1000),
+  Round: 1,
+  LatestTimestamp: 1,
   CurrentApplicationID: ''
 };
 

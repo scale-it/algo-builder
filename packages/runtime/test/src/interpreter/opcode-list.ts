@@ -2126,6 +2126,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push Round to stack", function () {
+      interpreter.runtime.setBlock(500, 1);
       const op = new Global(['Round'], 1, interpreter);
       op.execute(stack);
 
@@ -2134,14 +2135,12 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push LatestTimestamp to stack", function () {
+      interpreter.runtime.setBlock(500, 100);
       const op = new Global(['LatestTimestamp'], 1, interpreter);
       op.execute(stack);
 
       const top = stack.pop();
-      const ts = Math.round((new Date()).getTime() / 1000);
-
-      const diff = Math.abs(ts - Number(top)); // for accuracy
-      assert.isBelow(diff, 10);
+      assert.equal(BigInt('100'), top);
     });
 
     it("should push CurrentApplicationID to stack", function () {
