@@ -4,8 +4,8 @@ import algosdk, { AssetDef, AssetHolding, decodeAddress, makeAssetTransferTxnWit
 import cloneDeep from "lodash/cloneDeep";
 
 import { StoreAccount } from "./account";
-import { TealError } from "./errors/errors";
-import { ERRORS } from "./errors/errors-list";
+import { RUNTIME_ERRORS } from "./errors/errors-list";
+import { RuntimeError } from "./errors/runtime-errors";
 import { Interpreter, loadASAFile } from "./index";
 import { convertToString, parseSSCAppArgs } from "./lib/parsing";
 import { encodeNote, mkTransaction } from "./lib/txn";
@@ -33,6 +33,7 @@ export class Runtime {
   private assetCounter: number;
   // https://developer.algorand.org/docs/features/transactions/?query=round
   private round: number;
+  private timestamp: number;
   private readonly loadedAssetsDefs: ASADefs;
 
   constructor (accounts: StoreAccountI[]) {
@@ -59,6 +60,7 @@ export class Runtime {
     this.appCounter = 0;
     this.assetCounter = 0;
     this.round = 2;
+    this.timestamp = 1;
   }
 
   /**
@@ -71,7 +73,8 @@ export class Runtime {
   assertAccountDefined (address: string, a?: StoreAccountI, line?: number): StoreAccountI {
     const lineNumber = line ?? 'unknown';
     if (a === undefined) {
-      throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST, { address: address, line: lineNumber });
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.ACCOUNT_DOES_NOT_EXIST,
+        { address: address, line: lineNumber });
     }
     return a;
   }
@@ -86,7 +89,8 @@ export class Runtime {
   assertAddressDefined (addr: string | undefined, line?: number): string {
     const lineNumber = line ?? 'unknown';
     if (addr === undefined) {
-      throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST, { address: addr, line: lineNumber });
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.ACCOUNT_DOES_NOT_EXIST,
+        { address: addr, line: lineNumber });
     }
     return addr;
   }
@@ -102,7 +106,8 @@ export class Runtime {
   assertAppDefined (appId: number, app?: SSCAttributesM, line?: number): SSCAttributesM {
     const lineNumber = line ?? 'unknown';
     if (app === undefined) {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: lineNumber });
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND,
+        { appId: appId, line: lineNumber });
     }
     return app;
   }
@@ -118,7 +123,8 @@ export class Runtime {
   assertAssetDefined (assetId: number, assetDef?: AssetDef, line?: number): AssetDef {
     const lineNumber = line ?? 'unknown';
     if (assetDef === undefined) {
-      throw new TealError(ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId, line: lineNumber });
+      throw new RuntimeError(RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND,
+        { assetId: assetId, line: lineNumber });
     }
     return assetDef;
   }
@@ -129,7 +135,7 @@ export class Runtime {
    */
   assertAmbiguousTxnParams (txnParams: ExecParams): void {
     if (txnParams.sign === SignType.SecretKey && txnParams.lsig) {
-      throw new TealError(ERRORS.TEAL.INVALID_TRANSACTION_PARAMS);
+      throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INVALID_TRANSACTION_PARAMS);
     }
   }
 
@@ -141,18 +147,20 @@ export class Runtime {
     // https://developer.algorand.org/docs/features/transactions/#current-round
     for (const txn of gtxns) {
       if (txn.fv >= this.round || txn.lv <= this.round) {
-        throw new TealError(ERRORS.TEAL.INVALID_ROUND,
+        throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_ROUND,
           { first: txn.fv, last: txn.lv, round: this.round });
       }
     }
   }
 
   /**
-   * set current round to given value
+   * set current round with timestamp for a block
    * @param r current round
+   * @param timestamp block's timestamp
    */
-  setRound (r: number): void {
+  setRoundAndTimestamp (r: number, timestamp: number): void {
     this.round = r;
+    this.timestamp = timestamp;
   }
 
   /**
@@ -163,12 +171,19 @@ export class Runtime {
   }
 
   /**
+   * Return current timestamp
+   */
+  getTimestamp (): number {
+    return this.timestamp;
+  }
+
+  /**
    * Fetches app from `this.store`
    * @param appId Application Index
    */
   getApp (appId: number): SSCAttributesM {
     if (!this.store.globalApps.has(appId)) {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
     const accAddress = this.assertAddressDefined(this.store.globalApps.get(appId));
     const account = this.assertAccountDefined(accAddress, this.store.accounts.get(accAddress));
@@ -192,7 +207,7 @@ export class Runtime {
    */
   getGlobalState (appId: number, key: Uint8Array | string): StackElem | undefined {
     if (!this.store.globalApps.has(appId)) {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
     const accAddress = this.assertAddressDefined(this.store.globalApps.get(appId));
     const account = this.assertAccountDefined(accAddress, this.store.accounts.get(accAddress));
@@ -218,7 +233,7 @@ export class Runtime {
   getAssetAccount (assetId: number): StoreAccountI {
     const addr = this.store.assetDefs.get(assetId);
     if (addr === undefined) {
-      throw new TealError(ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
+      throw new RuntimeError(RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
     }
     return this.assertAccountDefined(addr, this.store.accounts.get(addr));
   }
@@ -398,7 +413,7 @@ export class Runtime {
     const toAssetHolding = this.getAssetHolding(assetID, recipient);
 
     if (fromAssetHolding.amount - amount < 0) {
-      throw new TealError(ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS, {
+      throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS, {
         amount: amount,
         address: revocationTarget
       });
@@ -433,7 +448,7 @@ export class Runtime {
     const account = this.assertAccountDefined(address, this.store.accounts.get(address));
     const assetHolding = account.getAssetHolding(assetIndex);
     if (assetHolding === undefined) {
-      throw new TealError(ERRORS.TRANSACTION.ASA_NOT_OPTIN, {
+      throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.ASA_NOT_OPTIN, {
         assetId: assetIndex,
         address: address
       });
@@ -611,11 +626,11 @@ export class Runtime {
    */
   deleteApp (appId: number): void {
     if (!this.store.globalApps.has(appId)) {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
     const accountAddr = this.assertAddressDefined(this.store.globalApps.get(appId));
     if (accountAddr === undefined) {
-      throw new TealError(ERRORS.TEAL.ACCOUNT_DOES_NOT_EXIST);
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.ACCOUNT_DOES_NOT_EXIST);
     }
     const account = this.assertAccountDefined(accountAddr, this.store.accounts.get(accountAddr));
 
@@ -627,7 +642,7 @@ export class Runtime {
   assertMinBalance (amt: number, address: string): void {
     const account = this.getAccount(address);
     if ((account.amount - amt) < account.minBalance) {
-      throw new TealError(ERRORS.TEAL.INSUFFICIENT_ACCOUNT_BALANCE, {
+      throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE, {
         amount: amt,
         address: address
       });
@@ -650,7 +665,7 @@ export class Runtime {
   assertAssetNotFrozen (assetIndex: number, address: AccountAddress): void {
     const assetHolding = this.getAssetHolding(assetIndex, address);
     if (assetHolding["is-frozen"]) {
-      throw new TealError(ERRORS.ASA.ACCOUNT_ASSET_FROZEN, {
+      throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.ACCOUNT_ASSET_FROZEN, {
         assetId: assetIndex,
         address: address
       });
@@ -682,7 +697,7 @@ export class Runtime {
     this.assertAssetNotFrozen(txnParam.assetID, txnParam.fromAccount.addr);
     this.assertAssetNotFrozen(txnParam.assetID, txnParam.toAccountAddr);
     if (fromAssetHolding.amount - txnParam.amount < 0) {
-      throw new TealError(ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS, {
+      throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS, {
         amount: txnParam.amount,
         address: txnParam.fromAccount.addr
       });
@@ -707,14 +722,14 @@ export class Runtime {
     // check if transaction is signed by logic signature,
     // if yes verify signature and run logic
     if (txnParam.lsig === undefined) {
-      throw new TealError(ERRORS.TEAL.LOGIC_SIGNATURE_NOT_FOUND);
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_NOT_FOUND);
     }
     this.ctx.args = txnParam.lsig.args;
 
     // signature validation
     const result = txnParam.lsig.verify(decodeAddress(txnParam.fromAccount.addr).publicKey);
     if (!result) {
-      throw new TealError(ERRORS.TEAL.LOGIC_SIGNATURE_VALIDATION_FAILED,
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_VALIDATION_FAILED,
         { address: txnParam.fromAccount.addr });
     }
     // logic validation
@@ -835,14 +850,14 @@ export class Runtime {
         case TransactionType.FreezeAsset: {
           const asset = this.getAssetDef(txnParam.assetID);
           if (asset.freeze !== txnParam.fromAccount.addr) {
-            throw new TealError(ERRORS.ASA.FREEZE_ERROR, { address: asset.freeze });
+            throw new RuntimeError(RUNTIME_ERRORS.ASA.FREEZE_ERROR, { address: asset.freeze });
           }
           break;
         }
         case TransactionType.RevokeAsset: {
           const asset = this.getAssetDef(txnParam.assetID);
           if (asset.clawback !== txnParam.fromAccount.addr) {
-            throw new TealError(ERRORS.ASA.CLAWBACK_ERROR, { address: asset.clawback });
+            throw new RuntimeError(RUNTIME_ERRORS.ASA.CLAWBACK_ERROR, { address: asset.clawback });
           }
           break;
         }
@@ -850,7 +865,7 @@ export class Runtime {
         case TransactionType.ModifyAsset: {
           const asset = this.getAssetDef(txnParam.assetID);
           if (asset.manager !== txnParam.fromAccount.addr) {
-            throw new TealError(ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
+            throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
           }
           break;
         }

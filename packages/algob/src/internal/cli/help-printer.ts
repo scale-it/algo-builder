@@ -1,5 +1,3 @@
-import { BuilderError } from "@algorand-builder/runtime";
-
 import { cmpStr } from "../../lib/comparators";
 import {
   AlgobParamDefinitions,
@@ -8,6 +6,7 @@ import {
   ParamDefinitionsMap,
   TasksMap
 } from "../../types";
+import { BuilderError } from "../core/errors";
 import { ERRORS } from "../core/errors-list";
 import { ArgumentsParser } from "./arguments-parser";
 

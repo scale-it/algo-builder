@@ -1,6 +1,6 @@
-import { BuilderError } from "@algorand-builder/runtime";
 import { assert, AssertionError } from "chai";
 
+import { BuilderError } from "../../src/internal/core/errors";
 import { ErrorDescriptor } from "../../src/internal/core/errors-list";
 
 export async function expectErrorAsync (

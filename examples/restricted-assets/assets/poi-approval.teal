@@ -1,0 +1,309 @@
+// source: https://github.com/algorand/smart-contracts/blob/master/devrel/poi/poi.teal
+#pragma version 2
+// Creator Address
+// check if the app is being created
+// if so save creator
+int 0
+txn ApplicationID
+==
+bz not_creation
+txn NumAppArgs
+int 2
+==
+bz failed
+
+
+byte "Creator"
+txn Sender
+app_global_put
+byte "AssetID"
+txna ApplicationArgs 0
+btoi
+app_global_put
+byte "AssetLevel"
+txna ApplicationArgs 1
+btoi
+app_global_put
+int 1
+return
+
+
+not_creation:
+txn OnCompletion
+int NoOp
+==
+bnz handle_noop
+txn OnCompletion
+int OptIn
+==
+bnz handle_optin
+txn OnCompletion
+int CloseOut
+==
+bnz handle_closeout
+txn OnCompletion
+int UpdateApplication
+==
+bnz handle_updateapp
+txn OnCompletion
+int DeleteApplication
+==
+bnz handle_deleteapp
+// Unexpected OnCompletion value. Should be unreachable.
+b failed
+
+
+handle_noop:
+// Handle NoOp
+txn NumAppArgs
+int 1
+>=
+txn NumAppArgs
+int 2
+<=
+&&
+bz failed
+// should be one argument with
+// set-level, clear, or check-level
+// set-level and check-level have to be the creator
+// trade is the specific user trying to trade GLD
+txna ApplicationArgs 0
+byte "set-level"
+==
+bnz set-level
+
+txna ApplicationArgs 0
+byte "clear"
+==
+bnz clear
+txna ApplicationArgs 0
+byte "check-level"
+==
+bnz check-level
+err
+
+
+// only callable by creator
+// just one arg
+set-level:
+txn NumAppArgs
+int 2
+==
+byte "Creator"
+app_global_get
+txn Sender
+==
+&&
+global GroupSize
+int 1
+==
+&&
+bz failed
+int 1 //first account in accounts array
+byte "Accred-Level"
+txna ApplicationArgs 1
+btoi
+app_local_put
+int 1
+return
+
+
+clear:
+txn NumAppArgs
+int 1
+==
+byte "Creator"
+app_global_get
+txn Sender
+==
+&&
+global GroupSize
+int 1
+==
+&&
+bz failed
+int 1 //first account in accounts array
+byte "Accred-Level"
+app_local_del
+int 1
+return
+
+// check level should be called
+// with the following txes
+// tx 0 - check level smart contract call - signed by sender of asset
+// tx 1 - clawback transactions that moves the frozen asset from sender to receiver - signed by clawback-escrow
+// tx 2 - payment transaction from sender to clawback-escrow to pay for the fee of the clawback
+
+check-level:
+// check number and types of transactions
+global GroupSize
+int 3
+==
+gtxn 0 TypeEnum
+int appl
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 2 TypeEnum
+int pay
+==
+&&
+// Verify that this is index the stateful contract call
+txn GroupIndex
+int 0
+==
+&&
+bz failed
+
+// check no rekeying etc
+gtxn 0 RekeyTo
+global ZeroAddress
+==
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 2 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 0 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 1 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 2 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 0 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 1 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 2 AssetCloseTo
+global ZeroAddress
+==
+&&
+bz failed
+
+// tx 0 - check level smart contract call - signed by sender of asset
+// tx 1 - clawback transactions that moves the frozen asset from sender to receiver - signed by clawback-escrow
+// tx 2 - payment transaction from sender to clawback-escrow to pay for the fee of the clawback
+
+// get asset id from global
+int 0 //current app
+byte "AssetID"
+app_global_get_ex
+bz failed
+// store assetid
+store 11
+
+// verify first transaction
+// check level smart contract call - signed by asset sender
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+gtxn 0 Sender
+gtxn 2 Sender
+==
+&&
+gtxn 0 Sender
+gtxn 1 AssetSender
+==
+&&
+bz failed
+
+// verify second transaction
+// tx 1 - clawback transactions that moves the frozen asset from sender to receiver - signed by clawback-escrow
+// verify the account sent in the accounts array is
+// Note: the receiver of the asset is asset xfer
+gtxn 0 Accounts 1
+gtxn 1 AssetReceiver
+==
+gtxn 1 XferAsset
+load 11
+==
+&&
+bz failed
+
+// verify third transaction
+// tx 2 - payment transaction from sender to clawback-escrow to pay for the fee of the clawback
+
+// verify the fee amount is good
+gtxn 2 Amount
+gtxn 1 Fee
+>=
+
+bz failed
+
+
+// now handle the level check
+// get asset sender stored accreditation level
+int 0 //sender
+gtxn 0 ApplicationID
+byte "Accred-Level"
+app_local_get_ex
+bz failed // must have an accred level set
+
+// top of the stack has the current user level
+// load asset required level
+byte "AssetLevel"
+app_global_get
+>=
+bz failed // users level not high enough
+
+// get asset receiver stored accreditation level
+int 1 //asset receiver account
+txn ApplicationID
+byte "Accred-Level"
+app_local_get_ex
+bz failed // must have an accred level set
+// top of the stack has the current user level
+// load asset required level
+byte "AssetLevel"
+app_global_get
+>=
+bz failed // users level not high enough
+
+int 1
+return
+
+handle_optin:
+txn NumAppArgs
+int 0
+==
+txn GroupIndex
+int 0
+==
+&&
+bz failed
+int 1
+return
+handle_closeout:
+txn GroupIndex
+int 0
+==
+bz failed
+// we should not have to clear the
+// accred level
+int 1
+return
+
+// By default, disallow updating or deleting the app. Add custom authorization
+// logic below to allow updating or deletion in certain circumstances.
+handle_updateapp:
+handle_deleteapp:
+err
+failed:
+int 0
+return

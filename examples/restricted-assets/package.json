@@ -1,0 +1,16 @@
+{
+  "name": "assets-and-custom-transfer-logic",
+  "version": "0.0.1",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "algosdk": "^1.8.0"
+  },
+  "scripts": {
+    "algob": "algob",
+    "lint": "eslint --ext .js,.ts scripts",
+    "lint:fix": "eslint --fix --ext .js,.ts scripts",
+    "test": "echo ok",
+    "build": "echo ok"
+  }
+}

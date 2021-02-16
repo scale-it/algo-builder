@@ -1,0 +1,15 @@
+gold:
+  total: 1000000
+  decimals: 0
+  defaultFrozen: true
+  unitName: "GLD"
+  url: "url"
+  # User may get "signature validation failed" from node if shorter hash is used.
+  metadataHash: "12312442142141241244444411111133"
+  note: "note"
+  noteb64: "noteb64"
+  # alice-account is the manager and creator of this asset
+  manager: "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY"
+  reserve: "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY"
+  freeze: "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY"
+  clawback: "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY"

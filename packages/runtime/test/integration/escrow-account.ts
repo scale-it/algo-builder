@@ -2,13 +2,13 @@
 import { LogicSig } from "algosdk";
 import { assert } from "chai";
 
-import { ERRORS } from "../../src/errors/errors-list";
+import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccount } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { ExecParams, SignType, TransactionType } from "../../src/types";
-import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
+import { expectRuntimeError } from "../helpers/runtime-errors";
 import { johnAccount } from "../mocks/account";
 
 const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE + 1000; // 1000 to cover fee
@@ -68,9 +68,9 @@ describe("Algorand Stateless Smart Contracts (Contract Account Mode) - Escrow Ac
     invalidParams.amountMicroAlgos = 500;
 
     // execute transaction (should fail as amount = 500)
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(invalidParams),
-      ERRORS.TEAL.REJECTED_BY_LOGIC
+      RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
 
@@ -79,9 +79,9 @@ describe("Algorand Stateless Smart Contracts (Contract Account Mode) - Escrow Ac
     invalidParams.payFlags = { totalFee: 12000 };
 
     // execute transaction (should fail as fee is 12000)
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(invalidParams),
-      ERRORS.TEAL.REJECTED_BY_LOGIC
+      RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
 
@@ -94,9 +94,9 @@ describe("Algorand Stateless Smart Contracts (Contract Account Mode) - Escrow Ac
     };
 
     // execute transaction (should fail as transfer type is asset)
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(invalidParams),
-      ERRORS.TEAL.REJECTED_BY_LOGIC
+      RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
 
@@ -106,9 +106,9 @@ describe("Algorand Stateless Smart Contracts (Contract Account Mode) - Escrow Ac
     invalidParams.toAccountAddr = bob.address;
 
     // execute transaction (should fail as receiver is bob)
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(invalidParams),
-      ERRORS.TEAL.REJECTED_BY_LOGIC
+      RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
 

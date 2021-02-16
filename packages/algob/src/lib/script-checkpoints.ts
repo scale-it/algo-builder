@@ -1,10 +1,11 @@
 
-import { BuilderError, loadFromYamlFileSilent } from "@algorand-builder/runtime";
+import { loadFromYamlFileSilent } from "@algorand-builder/runtime";
 import deepEqual from "deep-equal";
 import * as fs from "fs";
 import path from "path";
 import YAML from "yaml";
 
+import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import {
   ASAInfo,
