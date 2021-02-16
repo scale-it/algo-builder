@@ -2126,7 +2126,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push Round to stack", function () {
-      interpreter.runtime.setBlockGlobalData(500, 1);
+      interpreter.runtime.setRoundAndTimestamp(500, 1);
       const op = new Global(['Round'], 1, interpreter);
       op.execute(stack);
 
@@ -2135,7 +2135,7 @@ describe("Teal Opcodes", function () {
     });
 
     it("should push LatestTimestamp to stack", function () {
-      interpreter.runtime.setBlockGlobalData(500, 100);
+      interpreter.runtime.setRoundAndTimestamp(500, 100);
       const op = new Global(['LatestTimestamp'], 1, interpreter);
       op.execute(stack);
 

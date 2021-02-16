@@ -158,7 +158,7 @@ export class Runtime {
    * @param r current round
    * @param timestamp block's timestamp
    */
-  setBlockGlobalData (r: number, timestamp: number): void {
+  setRoundAndTimestamp (r: number, timestamp: number): void {
     this.round = r;
     this.timestamp = timestamp;
   }
