@@ -19,8 +19,12 @@ Algorand’s Atomic Transaction feature allows multiple transactions to be submi
 
 This example uses a stateful smart contract that uses a _user level_ approach. An app global level is an integer and represents the required level a user must have to transfer a specific asset. Users who opt into a stateful smart contract have their level stored in their local storage. So for a given asset we store globally, the required level to transfer the asset and for each user we store locally, their current level for that asset.
 
-To implement this solution, three basic operations are required in the stateful smart contract. The first operation is only executable by the stateful smart contract creator and it allows setting the level for a specific asset for a given user. The second operation is only executable by the stateful smart contract creator as well and it allows clearing the level for a specific user. The final operation is a call that checks if an asset transfer is ok. This operation can be called by anyone wishing to transfer an asset. This operation verifies both the asset sender and receiver levels are higher than or equal the required level for the asset.
+To implement this solution, three basic operations are required in the stateful smart contract.
+- The first operation, `set-level`, is only executable by the stateful smart contract creator and it allows setting the level for a specific asset for a given user.
+- The second operation, `clear-level`, is only executable by the stateful smart contract creator as well and it allows clearing the level for a specific user.
+- The final operation, `check-level`, is a call that checks if an asset transfer is ok. This operation can be called by anyone wishing to transfer an asset. This operation verifies both the asset sender and receiver levels are higher than or equal the required level for the asset.
 
+*NOTE:* User is only able to transfer asset from X to Y iff level of X & Y is greater than or equal to the minimum required level (which can by set by using the `set-level` tx). Otherwise, in case of a simple asset transfer from A to B the transaction will be rejected.
 
 ### Setup
 
