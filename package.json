@@ -33,7 +33,7 @@
     "cleanup": "./cleanup.sh",
     "build": "yarn workspaces run build",
     "build:apidocs": "rm -rf docs; cd packages/algob; typedoc --out docs --excludePrivate --exclude 'src/internal/**' --mode modules --gitRevision typedoc; touch docs/.nojekyll && mv docs ../../",
-    "watch": "tsc --build --watch packages/algob",
+    "watch": "tsc --build --watch packages/runtime packages/algob",
     "test": "yarn workspaces run test",
     "lint": "yarn workspaces -p run lint",
     "lint:fix": "yarn workspaces -p run lint:fix",

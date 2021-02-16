@@ -1,0 +1,4 @@
+// source: https://github.com/algorand/smart-contracts/blob/master/devrel/poi/poi-clear.teal
+#pragma version 2
+int 1
+return
