@@ -152,7 +152,7 @@ describe('Test for transferring asset using custom logic', function () {
     };
     runtime.executeTx(assetConfigParams);
 
-    // verify clawback is updated & manger, freeze is set to ""
+    // verify clawback is updated & manager, freeze address is set to ""
     assetDef = runtime.getAssetDef(assetId);
     assert.equal(assetDef.clawback, escrowAddress);
     assert.equal(assetDef.manager, '');
