@@ -7,6 +7,7 @@ sys.path.insert(0,'..')
 from algobpy.parse import parseArgs
 from pyteal import *
 
+# source: https://github.com/algorand/smart-contracts/blob/master/devrel/poi/clawback-escrow.teal
 def clawback_escrow(ASSET_ID, APP_ID):
 
 	# check properties of txGroup passed

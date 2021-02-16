@@ -43,4 +43,6 @@ yarn run algob run scripts/transfer/transfer-asset.js // transfer asset from Ali
 ### More information
 
 
-+ [https://developer.algorand.org/solutions/assets-and-custom-transfer-logic/](https://developer.algorand.org/solutions/assets-and-custom-transfer-logic/)
++ Article published on this solution: [https://developer.algorand.org/solutions/assets-and-custom-transfer-logic/](https://developer.algorand.org/solutions/assets-and-custom-transfer-logic/)
++ Smart contracts source: [https://github.com/algorand/smart-contracts/tree/master/devrel/poi](https://github.com/algorand/smart-contracts/tree/master/devrel/poi)
++ Video: [https://www.youtube.com/watch?v=aMDZamxtR14](https://www.youtube.com/watch?v=aMDZamxtR14)
