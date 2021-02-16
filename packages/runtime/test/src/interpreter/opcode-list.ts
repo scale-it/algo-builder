@@ -1948,7 +1948,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
+        assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
       });
 
       it("push addr from 1st AppArg to stack", function () {
@@ -1966,11 +1966,11 @@ describe("Teal Opcodes", function () {
       });
 
       it("push addr from 1st account of 2nd Txn in txGrp to stack", function () {
-        const op = new Gtxna(["0", "Accounts", "1"], 1, interpreter);
+        const op = new Gtxna(["1", "Accounts", "1"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
+        assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
       });
 
       it("should throw error if field is not an array", function () {
