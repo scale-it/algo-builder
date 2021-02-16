@@ -1594,8 +1594,7 @@ export class AppLocalGet extends Op {
 }
 
 // read from application local state at Txn.Accounts[A] => app B => key C from local state.
-// Pushes to the stack [...stack, val, 1] if the key exists,
-// otherwise [...stack, 0]
+// push to stack [...stack, value, 1] (Note: value is 0 if key does not exist)
 export class AppLocalGetEx extends Op {
   readonly interpreter: Interpreter;
   readonly line: number;
@@ -1626,6 +1625,7 @@ export class AppLocalGetEx extends Op {
       stack.push(BIGINT1);
     } else {
       stack.push(BIGINT0); // The value is zero if the key does not exist.
+      stack.push(BIGINT0); // did_exist_flag
     }
   }
 }
@@ -1665,8 +1665,7 @@ export class AppGlobalGet extends Op {
 }
 
 // read from application Txn.ForeignApps[A] global state key B pushes to the stack
-// push to stack [...stack, 0] if key doesn't exist
-// otherwise push to stack [...stack, value, 1]
+// push to stack [...stack, value, 1] (Note: value is 0 if key does not exist)
 // A is specified as an account index in the ForeignApps field of the ApplicationCall transaction,
 // zero index means this app
 export class AppGlobalGetEx extends Op {
@@ -1706,6 +1705,7 @@ export class AppGlobalGetEx extends Op {
       stack.push(BIGINT1);
     } else {
       stack.push(BIGINT0); // The value is zero if the key does not exist.
+      stack.push(BIGINT0); // did_exist_flag
     }
   }
 }
