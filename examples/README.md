@@ -44,3 +44,17 @@ copy the `/examples/algob.confg-template.js` to `/examples/algob.config-local.js
 the following positions in the latter file:
 
 + `master-account`: must be an account with some ALGOs - it will be used for deployment and for activating / funding other accounts.
+
+### Examples Description
+
+- [asa](./asa) - This `javascript` project shows how to create Algorand Standard Asset (ASA).
+- [crowdfunding](./crowdfunding) - This `javascript` project demonstrates how to create a Crowdfunding Stateful Smart Contract Application. It's based on a [tutorial](https://developer.algorand.org/solutions/
+- [multisig](./multisig) - This `javascript` example demonstrates authorizing transactions based on logic signature signed by multiple accounts.
+- [nft](./nft) - Non-Fungible-Token Example using stateful TEAL in `javascript`. In this example, we create a new non-fungible-token represented by a name and a ref.
+- [permissioned-voting](./permissioned-voting) -  This `javascript` project demonstrates how to create a Permissioned Voting Stateful Smart Contract Application.
+Original tutorial can be found [here](https://developer.algorand.org/solutions/example-permissioned-voting-stateful-smart-contract-application/)
+- [ref-templates](./ref-templates) - The goal of this project is to present how to work with ASC in `algob` using the best practices and templates using the Algorand reference templates.This is a `javascript` project.
+- [signed-txn](./signed-txn) - This example demonstrates executing a serialized transaction loaded directly from a file. A user can create a transaction and sign it (using `goal`) and send it to someone else to execute it. This is a `javascript` project.
+- [htlc](./htlc-pyteal-ts) - Hash-Time-Lock-Contract Example in `typescript` using PyTeal.
+This is a `typescript` project therefore it requires a compilation to `js` files.
+In this project we are transpiling the files in `js` and then using them with `algob`.
