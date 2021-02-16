@@ -1,4 +1,4 @@
-# Multisignature delegated account support
+# Asset Transfer using custom logic
 
 This example demonstrates authorizing asset transfer transactions based on custom logic by smart contract.
 

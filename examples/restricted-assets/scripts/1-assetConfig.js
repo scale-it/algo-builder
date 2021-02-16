@@ -10,7 +10,7 @@ async function run (runtimeEnv, deployer) {
   const appInfo = deployer.getSSC('poi-approval.teal', 'poi-clear.teal');
   const assetInfo = deployer.asa.get('gold');
 
-  /*** Compile and fund escrow***/
+  /** * Compile and fund escrow***/
   const escrowParams = {
     ASSET_ID: assetInfo.assetIndex,
     APP_ID: appInfo.appID
