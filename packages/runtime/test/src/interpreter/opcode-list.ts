@@ -2299,7 +2299,7 @@ describe("Teal Opcodes", function () {
 
       it("should push uint 0 to stack if key is not present in local state from given appId", function () {
         // for Sender
-        stack.push(BigInt('0'));
+        stack.push(0n);
         stack.push(BigInt('1847'));
         stack.push(stringToBytes('random-key'));
 
@@ -2308,11 +2308,11 @@ describe("Teal Opcodes", function () {
 
         let didExistFlag = stack.pop();
         let val = stack.pop();
-        assert.equal(BigInt('0'), didExistFlag);
-        assert.equal(BigInt('0'), val);
+        assert.equal(0n, didExistFlag);
+        assert.equal(0n, val);
 
         // for Txn.Accounts[A]
-        stack.push(BigInt('1'));
+        stack.push(1n);
         stack.push(BigInt('1847'));
         stack.push(stringToBytes('random-key'));
 
@@ -2321,8 +2321,8 @@ describe("Teal Opcodes", function () {
 
         didExistFlag = stack.pop();
         val = stack.pop();
-        assert.equal(BigInt('0'), didExistFlag);
-        assert.equal(BigInt('0'), val);
+        assert.equal(0n, didExistFlag);
+        assert.equal(0n, val);
       });
     });
 
@@ -2385,7 +2385,7 @@ describe("Teal Opcodes", function () {
 
       it("should push uint 0 to stack if key is not present externally in global state", function () {
         // zero index means current app
-        stack.push(BigInt('0'));
+        stack.push(0n);
         stack.push(stringToBytes('random-key'));
 
         let op = new AppGlobalGetEx([], 1, interpreter);
@@ -2393,11 +2393,11 @@ describe("Teal Opcodes", function () {
 
         let didExistFlag = stack.pop();
         let val = stack.pop();
-        assert.equal(BigInt('0'), didExistFlag);
-        assert.equal(BigInt('0'), val);
+        assert.equal(0n, didExistFlag);
+        assert.equal(0n, val);
 
         // for Txn.ForeignApps[A]
-        stack.push(BigInt('1'));
+        stack.push(1n);
         stack.push(stringToBytes('random-key'));
 
         op = new AppGlobalGetEx([], 1, interpreter);
@@ -2405,8 +2405,8 @@ describe("Teal Opcodes", function () {
 
         didExistFlag = stack.pop();
         val = stack.pop();
-        assert.equal(BigInt('0'), didExistFlag);
-        assert.equal(BigInt('0'), val);
+        assert.equal(0n, didExistFlag);
+        assert.equal(0n, val);
       });
     });
 
