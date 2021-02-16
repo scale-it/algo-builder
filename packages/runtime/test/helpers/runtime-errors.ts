@@ -1,7 +1,7 @@
 import { assert, AssertionError } from "chai";
 
-import { TealError } from "../../src/errors/errors";
 import { ErrorDescriptor } from "../../src/errors/errors-list";
+import { RuntimeError } from "../../src/errors/runtime-errors";
 import type { Operator, StackElem, TEALStack } from "../../src/types";
 
 // takes string array and executes opcode to expect teal error
@@ -14,11 +14,11 @@ export function execExpectError (
     for (const s of strs) {
       stack.push(s);
     }
-    expectTealError(() => op.execute(stack), err);
+    expectRuntimeError(() => op.execute(stack), err);
   };
 }
 
-export function expectTealError (
+export function expectRuntimeError (
   f: () => any,
   errorDescriptor: ErrorDescriptor,
   matchMessage?: string | RegExp,
@@ -27,12 +27,12 @@ export function expectTealError (
   try {
     f();
   } catch (error) {
-    assert.instanceOf(error, TealError, errorMessage);
+    assert.instanceOf(error, RuntimeError, errorMessage);
     assert.equal(error.number, errorDescriptor.number, errorMessage);
     assert.notMatch(
       error.message,
       /%[a-zA-Z][a-zA-Z0-9]*%/,
-      "TealError has an non-replaced variable tag"
+      "RuntimeError has an non-replaced variable tag"
     );
 
     if (typeof matchMessage === "string") {
@@ -44,11 +44,11 @@ export function expectTealError (
     return;
   }
   throw new AssertionError( // eslint-disable-line @typescript-eslint/no-throw-literal
-    `TealError number ${errorDescriptor.number} expected, but no Error was thrown`
+    `RuntimeError number ${errorDescriptor.number} expected, but no Error was thrown`
   );
 }
 
-export async function expectTealErrorAsync (
+export async function expectRuntimeErrorAsync (
   f: () => Promise<any>,
   errorDescriptor: ErrorDescriptor,
   matchMessage?: string | RegExp
@@ -57,27 +57,27 @@ export async function expectTealErrorAsync (
   // This makes things easier, at least as long as we don't have async stack
   // traces. This may change in the near-ish future.
   const error = new AssertionError(
-    `TealError number ${errorDescriptor.number} expected, but no Error was thrown`
+    `RuntimeError number ${errorDescriptor.number} expected, but no Error was thrown`
   );
 
   const match = String(matchMessage);
   const notExactMatch = new AssertionError(
-    `TealError was correct, but should have include "${match}" but got "`
+    `RuntimeError was correct, but should have include "${match}" but got "`
   );
 
   const notRegexpMatch = new AssertionError(
-    `TealError was correct, but should have matched regex ${match} but got "`
+    `RuntimeError was correct, but should have matched regex ${match} but got "`
   );
 
   try {
     await f();
   } catch (error) {
-    assert.instanceOf(error, TealError);
+    assert.instanceOf(error, RuntimeError);
     assert.equal(error.number, errorDescriptor.number);
     assert.notMatch(
       error.message,
       /%[a-zA-Z][a-zA-Z0-9]*%/,
-      "TealError has an non-replaced variable tag"
+      "RuntimeError has an non-replaced variable tag"
     );
 
     if (matchMessage !== undefined) {

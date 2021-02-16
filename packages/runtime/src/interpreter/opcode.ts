@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
-import { TealError } from "../errors/errors";
-import { ERRORS } from "../errors/errors-list";
+import { RUNTIME_ERRORS } from "../errors/errors-list";
+import { RuntimeError } from "../errors/runtime-errors";
 import { GlobalFields, MAX_UINT8, MAX_UINT64, MIN_UINT8, MIN_UINT64, TxnFields } from "../lib/constants";
 import type { TEALStack } from "../types";
 import { BIGINT0, BIGINT1 } from "./opcode-list";
@@ -14,7 +14,7 @@ export class Op {
    */
   assertMinStackLen (stack: TEALStack, minLen: number, line: number): void {
     if (stack.length() < minLen) {
-      throw new TealError(ERRORS.TEAL.ASSERT_STACK_LENGTH, { line: line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH, { line: line });
     }
   }
 
@@ -25,7 +25,7 @@ export class Op {
    */
   checkOverflow (num: bigint, line: number): void {
     if (num > MAX_UINT64) {
-      throw new TealError(ERRORS.TEAL.UINT64_OVERFLOW, { line: line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW, { line: line });
     }
   }
 
@@ -36,7 +36,7 @@ export class Op {
    */
   checkUnderflow (num: bigint, line: number): void {
     if (num < MIN_UINT64) {
-      throw new TealError(ERRORS.TEAL.UINT64_UNDERFLOW, { line: line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.UINT64_UNDERFLOW, { line: line });
     }
   }
 
@@ -48,7 +48,7 @@ export class Op {
    */
   checkIndexBound (idx: number, arr: any[], line: number): void {
     if (!(idx >= 0 && idx < arr.length)) {
-      throw new TealError(ERRORS.TEAL.INDEX_OUT_OF_BOUND, { line: line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND, { line: line });
     }
   }
 
@@ -59,7 +59,7 @@ export class Op {
    */
   assertArrLength (arr: Uint8Array[] | BigInt[], line: number): void {
     if (!arr.length || arr.length > MAX_UINT8 + 1) {
-      throw new TealError(ERRORS.TEAL.ASSERT_ARR_LENGTH, { line: line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.ASSERT_ARR_LENGTH, { line: line });
     }
   }
 
@@ -70,7 +70,7 @@ export class Op {
    */
   assertBigInt (a: unknown, line: number): bigint {
     if (typeof a === "undefined" || typeof a !== "bigint") {
-      throw new TealError(ERRORS.TEAL.INVALID_TYPE, {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, {
         expected: "uint64",
         actual: typeof a,
         line: line
@@ -86,7 +86,7 @@ export class Op {
    */
   assertBytes (b: unknown, line: number): Uint8Array {
     if (typeof b === 'undefined' || !(b instanceof Uint8Array)) {
-      throw new TealError(ERRORS.TEAL.INVALID_TYPE, {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, {
         expected: "byte[]",
         actual: typeof b,
         line: line
@@ -102,7 +102,7 @@ export class Op {
    */
   assertUint8 (a: bigint, line: number): bigint {
     if (a < MIN_UINT8 || a > MAX_UINT8) {
-      throw new TealError(ERRORS.TEAL.INVALID_UINT8, { line: line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_UINT8, { line: line });
     }
     return a;
   }
@@ -116,10 +116,10 @@ export class Op {
    */
   subString (start: bigint, end: bigint, byteString: Uint8Array, line: number): Uint8Array {
     if (end < start) {
-      throw new TealError(ERRORS.TEAL.SUBSTRING_END_BEFORE_START, { line: line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.SUBSTRING_END_BEFORE_START, { line: line });
     }
     if (start > byteString.length || end > byteString.length) {
-      throw new TealError(ERRORS.TEAL.SUBSTRING_RANGE_BEYOND, { line: line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.SUBSTRING_RANGE_BEYOND, { line: line });
     }
 
     return byteString.slice(Number(start), Number(end));
@@ -133,7 +133,7 @@ export class Op {
    */
   assertTxFieldDefined (str: string, tealVersion: number, line: number): void {
     if (TxnFields[tealVersion][str] === undefined) {
-      throw new TealError(ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD,
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD,
         { field: str, version: tealVersion, line: line });
     }
   }
@@ -146,7 +146,8 @@ export class Op {
    */
   assertGlobalDefined (str: string, tealVersion: number, line: number): void {
     if (GlobalFields[tealVersion][str] === undefined) {
-      throw new TealError(ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD, { field: str, version: tealVersion, line: line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD,
+        { field: str, version: tealVersion, line: line });
     }
   }
 

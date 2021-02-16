@@ -1,9 +1,10 @@
-import { BuilderError, types as rtypes } from "@algorand-builder/runtime";
+import { types as rtypes } from "@algorand-builder/runtime";
 import { Account as AccountSDK, Kmd, mnemonicToSecretKey, MultiSigAccount, multisigAddress } from "algosdk";
 import * as fs from "fs";
 import YAML from "yaml";
 
 import CfgErrors, { ErrorPutter } from "../internal/core/config/config-errors";
+import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import type { AccountDef, AlgobAccount, HDAccount, KmdCfg, KmdWallet, MnemonicAccount, StrMap } from "../types";
 

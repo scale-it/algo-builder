@@ -1,8 +1,8 @@
 import path from "path";
 import * as z from 'zod';
 
-import { BuilderError } from "../errors/errors";
-import { ERRORS } from "../errors/errors-list";
+import { RUNTIME_ERRORS } from "../errors/errors-list";
+import { RuntimeError } from "../errors/runtime-errors";
 import { parseZodError } from "../errors/validation-errors";
 import { AccountMap, ASADef, ASADefs, RuntimeAccountMap } from "../types";
 import { ASADefsSchema } from "../types-input";
@@ -22,8 +22,8 @@ function validateSingle (accounts: AccountMap | RuntimeAccountMap, filename: str
   }
   for (const accName of asaDef.optInAccNames) {
     if (!accounts.get(accName)) {
-      throw new BuilderError(
-        ERRORS.ASA.PARAM_ERROR_NO_NAMED_OPT_IN_ACCOUNT, {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.ASA.PARAM_ERROR_NO_NAMED_OPT_IN_ACCOUNT, {
           filename: filename,
           optInAccName: accName
         });
@@ -34,6 +34,10 @@ function validateSingle (accounts: AccountMap | RuntimeAccountMap, filename: str
 function validateParsedASADefs (
   accounts: AccountMap | RuntimeAccountMap, asaDefs: ASADefs, filename: string): void {
   for (const def of Object.values(asaDefs)) {
+    def.manager = def.manager !== "" ? def.manager : undefined;
+    def.reserve = def.reserve !== "" ? def.reserve : undefined;
+    def.freeze = def.freeze !== "" ? def.freeze : undefined;
+    def.clawback = def.clawback !== "" ? def.clawback : undefined;
     validateSingle(accounts, filename, def);
   }
 }
@@ -51,8 +55,8 @@ export function validateASADefs (
     return parsed;
   } catch (e) {
     if (e instanceof z.ZodError) {
-      throw new BuilderError(
-        ERRORS.ASA.PARAM_PARSE_ERROR, {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.ASA.PARAM_PARSE_ERROR, {
           reason: parseZodError(e),
           filename: filename
         }, e);

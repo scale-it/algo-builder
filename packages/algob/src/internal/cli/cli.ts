@@ -2,7 +2,6 @@
 // -*- mode: typescript -*- // https://github.com/syl20bnr/spacemacs/issues/13715
 import "source-map-support/register";
 
-import { BuilderError } from "@algorand-builder/runtime";
 import chalk from "chalk";
 import debug from "debug";
 import semver from "semver";
@@ -13,7 +12,7 @@ import { AlgobRuntimeEnv, RuntimeArgs, TaskArguments } from "../../types";
 import { ALGOB_NAME } from "../constants";
 import { BuilderContext } from "../context";
 import { loadConfigAndTasks } from "../core/config/config-loading";
-import { BuilderPluginError } from "../core/errors";
+import { BuilderError, BuilderPluginError } from "../core/errors";
 import { ERRORS } from "../core/errors-list";
 import {
   ALGOB_PARAM_DEFINITIONS,

@@ -1,5 +1,5 @@
-import { TealError } from "../errors/errors";
-import { ERRORS } from "../errors/errors-list";
+import { RUNTIME_ERRORS } from "../errors/errors-list";
+import { RuntimeError } from "../errors/runtime-errors";
 
 /**
  * Description: compare two array: returns true if they are equal, else false.
@@ -30,6 +30,6 @@ export function compareArray (a: unknown, b: unknown): boolean {
 export function checkIndexBound (idx: number, arr: any[], line?: number): void {
   const lineNumber = line ?? 'unknown';
   if (!(idx >= 0 && idx < arr.length)) {
-    throw new TealError(ERRORS.TEAL.INDEX_OUT_OF_BOUND, { line: lineNumber });
+    throw new RuntimeError(RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND, { line: lineNumber });
   }
 }

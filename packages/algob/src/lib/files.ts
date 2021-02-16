@@ -1,7 +1,7 @@
-import { BuilderError } from "@algorand-builder/runtime";
 import fs from "fs";
 import path from "path";
 
+import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { ASSETS_DIR } from "../internal/core/project-structure";
 

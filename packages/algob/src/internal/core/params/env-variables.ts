@@ -1,8 +1,7 @@
-import { BuilderError } from "@algorand-builder/runtime";
-
 import { AlgobParamDefinitions, RuntimeArgs } from "../../../types";
 import { ArgumentsParser } from "../../cli/arguments-parser";
 import { unsafeObjectKeys } from "../../util/unsafe";
+import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
 
 import ProcessEnv = NodeJS.ProcessEnv;

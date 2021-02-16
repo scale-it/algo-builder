@@ -6,8 +6,8 @@ import type {
 } from "algosdk";
 import { generateAccount } from "algosdk";
 
-import { TealError } from "./errors/errors";
-import { ERRORS } from "./errors/errors-list";
+import { RUNTIME_ERRORS } from "./errors/errors-list";
+import { RuntimeError } from "./errors/runtime-errors";
 import {
   ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE, ASSET_CREATION_FEE, MAX_ALGORAND_ACCOUNT_APPS,
   MAX_ALGORAND_ACCOUNT_ASSETS,
@@ -16,7 +16,7 @@ import {
 import { keyToBytes } from "./lib/parsing";
 import { assertValidSchema } from "./lib/stateful";
 import {
-  AppLocalStateM, ASADef, CreatedAppM, SSCAttributesM,
+  AppLocalStateM, ASADef, AssetModFields, CreatedAppM, SSCAttributesM,
   SSCDeploymentFlags, StackElem, StoreAccountI
 } from "./types";
 
@@ -96,7 +96,7 @@ export class StoreAccount implements StoreAccountI {
       return localState;
     }
 
-    throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, {
+    throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, {
       appId: appId,
       line: lineNumber
     });
@@ -124,7 +124,7 @@ export class StoreAccount implements StoreAccountI {
    */
   setGlobalState (appId: number, key: Uint8Array | string, value: StackElem, line?: number): void {
     const app = this.getApp(appId);
-    if (app === undefined) throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: line ?? 'unknown' });
+    if (app === undefined) throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: line ?? 'unknown' });
     const appGlobalState = app[globalState];
     const globalKey = keyToBytes(key);
     appGlobalState.set(globalKey.toString(), value); // set new value in global state
@@ -174,7 +174,7 @@ export class StoreAccount implements StoreAccountI {
    */
   addAsset (assetId: number, name: string, asaDef: ASADef): AssetDef {
     if (this.createdAssets.size === MAX_ALGORAND_ACCOUNT_ASSETS) {
-      throw new TealError(ERRORS.TEAL.MAX_LIMIT_ASSETS,
+      throw new RuntimeError(RUNTIME_ERRORS.ASA.MAX_LIMIT_ASSETS,
         { name: name, address: this.address, max: MAX_ALGORAND_ACCOUNT_ASSETS });
     }
 
@@ -182,6 +182,59 @@ export class StoreAccount implements StoreAccountI {
     const asset = new Asset(assetId, asaDef, this.address, name);
     this.createdAssets.set(asset.id, asset.definitions);
     return asset.definitions;
+  }
+
+  /**
+   * Modifies Asset fields
+   * @param assetId Asset Index
+   * @param fields Fields for modification
+   */
+  modifyAsset (assetId: number, fields: AssetModFields): void {
+    const asset = this.getAssetDef(assetId);
+    if (asset === undefined) {
+      throw new RuntimeError(RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
+    }
+    // check for blank fields
+    if ((fields.reserve !== "" && asset.reserve === "") || (fields.freeze !== "" && asset.freeze === "") ||
+      (fields.clawback !== "" && asset.clawback === "")) {
+      throw new RuntimeError(RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR);
+    }
+
+    asset.manager = fields.manager;
+    asset.reserve = fields.reserve;
+    asset.freeze = fields.freeze;
+    asset.clawback = fields.clawback;
+  }
+
+  /**
+   * Freeze asset
+   * @param assetId Asset Index
+   * @state new freeze state
+   */
+  setFreezeState (assetId: number, state: boolean): void {
+    const holding = this.assets.get(assetId);
+    if (holding === undefined) {
+      throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.ASA_NOT_OPTIN,
+        { address: this.address, assetId: assetId });
+    }
+    holding["is-frozen"] = state;
+  }
+
+  /**
+   * Destroys asset
+   * @param assetId Asset Index
+   */
+  destroyAsset (assetId: number): void {
+    const holding = this.assets.get(assetId);
+    const asset = this.getAssetDef(assetId);
+    if (holding === undefined || asset === undefined) {
+      throw new RuntimeError(RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
+    }
+    if (holding.amount !== asset.total) {
+      throw new RuntimeError(RUNTIME_ERRORS.ASA.ASSET_TOTAL_ERROR);
+    }
+    this.createdAssets.delete(assetId);
+    this.assets.delete(assetId);
   }
 
   /**
@@ -196,7 +249,7 @@ export class StoreAccount implements StoreAccountI {
   addApp (appId: number, params: SSCDeploymentFlags,
     approvalProgram: string, clearProgram: string): CreatedAppM {
     if (this.createdApps.size === MAX_ALGORAND_ACCOUNT_APPS) {
-      throw new TealError(ERRORS.TEAL.MAX_LIMIT_APPS, {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.MAX_LIMIT_APPS, {
         address: this.address,
         max: MAX_ALGORAND_ACCOUNT_APPS
       });
@@ -248,7 +301,7 @@ export class StoreAccount implements StoreAccountI {
       console.warn(`${this.address} is already opted in to asset ${assetIndex}`);
     } else {
       if ((this.createdAssets.size + this.assets.size) === MAX_ALGORAND_ACCOUNT_ASSETS) {
-        throw new TealError(ERRORS.TEAL.MAX_LIMIT_ASSETS,
+        throw new RuntimeError(RUNTIME_ERRORS.ASA.MAX_LIMIT_ASSETS,
           { address: assetHolding.creator, max: MAX_ALGORAND_ACCOUNT_ASSETS });
       }
 
@@ -260,7 +313,7 @@ export class StoreAccount implements StoreAccountI {
   // delete application from account's global state (createdApps)
   deleteApp (appId: number): void {
     if (!this.createdApps.has(appId)) {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
     this.createdApps.delete(appId);
   }
@@ -268,7 +321,7 @@ export class StoreAccount implements StoreAccountI {
   // close(delete) application from account's local state (appsLocalState)
   closeApp (appId: number): void {
     if (!this.appsLocalState.has(appId)) {
-      throw new TealError(ERRORS.TEAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
     this.appsLocalState.delete(appId);
   }
