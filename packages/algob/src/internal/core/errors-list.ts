@@ -1,3 +1,5 @@
+export const ERROR_PREFIX = "ABLDR";
+
 export interface ErrorDescriptor {
   number: number
   // Message can use templates. See applyErrorMessageTemplate
@@ -5,6 +7,10 @@ export interface ErrorDescriptor {
   // Title and description can be Markdown
   title: string
   description: string
+}
+
+export function getErrorCode (error: ErrorDescriptor): string {
+  return `${ERROR_PREFIX}${error.number}`;
 }
 
 export const ERROR_RANGES = {
@@ -143,13 +149,6 @@ Please check algob output for more details.`
     title: "Script can't load",
     description: `Script failed during load.
 Please check algob output for more details.`
-  },
-  TRANSACTION_TYPE_ERROR: {
-    number: 14,
-    message: "Error. `%error%` is Unknown",
-    title: "Unknown Transaction type",
-    description: `Provided transaction type is unknown
-    Please double check your transaction type`
   }
 };
 
@@ -702,32 +701,8 @@ Context: %ctx%`,
 };
 
 const scriptErrors = {
-  ASA_PARAM_PARSE_ERROR: {
-    number: 900,
-    message: `Invalid ASA definition: '%filename%'.
-Reason:
-
-%reason%`,
-    title: "Invalid ASA definition",
-    description: `Invalid ASA definition: '%filename%'.
-
-Reason:
-%reason%
-
-Please check your ASA file`
-  },
-  ASA_PARAM_ERROR_NO_NAMED_OPT_IN_ACCOUNT: {
-    number: 901,
-    message: `Invalid ASA definition: '%filename%'.
-Opt-in account not found by name: %optInAccName%`,
-    title: "Opt-in account not found.",
-    description: `Invalid ASA definition: '%filename%'.
-Opt-in account not found by name: %optInAccName%
-
-Please check your ASA and config files`
-  },
   ASA_OPT_IN_ACCOUNT_INSUFFICIENT_BALANCE: {
-    number: 902,
+    number: 900,
     message: `Account '%accountName%' has insufficient usable balance (%balance% out of %requiredBalance%) to opt-in to ASA '%asaName%'.`,
     title: "Account has insufficient usable balance to opt-in to ASA.",
     description: `Account '%accountName%' has insufficient usable balance (%balance% out of %requiredBalance%) to opt-in to ASA '%asaName%'.
@@ -735,13 +710,13 @@ Please check your ASA and config files`
 Please transfer more funds`
   },
   ASA_OPT_IN_ACCOUNT_NOT_FOUND: {
-    number: 903,
+    number: 901,
     message: `Account with name '%accountName%' was not found.`,
     title: "Account not found",
     description: `Account with name '%accountName%' was not found.`
   },
   ASA_TRIED_TO_OPT_IN_CREATOR: {
-    number: 904,
+    number: 902,
     message: `Account with name '%accountName%' is the creator of ASA. It's automatically opt-in.`,
     title: "Account opt-in is not possible",
     description: `Account with name '%accountName%' is the creator of ASA. It's automatically opt-in.

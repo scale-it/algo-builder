@@ -3,13 +3,13 @@ import { assert } from "chai";
 import sinon from "sinon";
 
 import { StoreAccount } from "../../src/account";
-import { ERRORS } from "../../src/errors/errors-list";
+import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { Runtime } from "../../src/runtime";
 import type { AlgoTransferParam, AssetModFields, AssetTransferParam, DestroyAssetParam, ExecParams, FreezeAssetParam, ModifyAssetParam, RevokeAssetParam } from "../../src/types";
 import { SignType, TransactionType } from "../../src/types";
-import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
+import { expectRuntimeError } from "../helpers/runtime-errors";
 import { elonMuskAccount } from "../mocks/account";
 
 const programName = "basic.teal";
@@ -51,9 +51,9 @@ describe("Logic Signature Transaction in Runtime", function () {
     txnParam.fromAccount = alice.account;
 
     // execute transaction (logic signature validation failed)
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(txnParam),
-      ERRORS.TEAL.LOGIC_SIGNATURE_VALIDATION_FAILED
+      RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_VALIDATION_FAILED
     );
   });
 
@@ -66,9 +66,9 @@ describe("Logic Signature Transaction in Runtime", function () {
     // execute transaction (rejected by logic)
     // - Signature successfully validated for john
     // - But teal file logic is rejected
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(txnParam),
-      ERRORS.TEAL.REJECTED_BY_LOGIC
+      RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
 });
@@ -121,9 +121,9 @@ describe("Rounds Test", function () {
   it("should fail if current round is not between first and last valid", () => {
     runtime.setRound(3);
 
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(txnParams),
-      ERRORS.TEAL.INVALID_ROUND
+      RUNTIME_ERRORS.GENERAL.INVALID_ROUND
     );
   });
 
@@ -210,8 +210,10 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should throw error on opt-in of asset does not exist", () => {
-    const errMsg = 'TEAL_ERR902: Asset with Index 1234 not found';
-    assert.throws(() => runtime.optIntoASA(1234, john.address, {}), errMsg);
+    expectRuntimeError(
+      () => runtime.optIntoASA(1234, john.address, {}),
+      RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND
+    );
   });
 
   it("should warn if account already is already opted-into asset", () => {
@@ -266,9 +268,9 @@ describe("Algorand Standard Assets", function () {
     runtime.executeTx(freezeParam);
 
     assetTransferParam.assetID = assetId;
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(assetTransferParam),
-      ERRORS.ASA.ACCOUNT_ASSET_FROZEN
+      RUNTIME_ERRORS.TRANSACTION.ACCOUNT_ASSET_FROZEN
     );
   });
 
@@ -303,9 +305,9 @@ describe("Algorand Standard Assets", function () {
       fields: modFields,
       payFlags: {}
     };
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(modifyParam),
-      ERRORS.ASA.ASSET_NOT_FOUND
+      RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND
     );
   });
 
@@ -346,9 +348,9 @@ describe("Algorand Standard Assets", function () {
       payFlags: {}
     };
 
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(modifyParam),
-      ERRORS.ASA.BLANK_ADDRESS_ERROR
+      RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR
     );
   });
 
@@ -361,9 +363,9 @@ describe("Algorand Standard Assets", function () {
       fields: modFields,
       payFlags: {}
     };
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(modifyParam),
-      ERRORS.ASA.MANAGER_ERROR
+      RUNTIME_ERRORS.ASA.MANAGER_ERROR
     );
   });
 
@@ -378,9 +380,9 @@ describe("Algorand Standard Assets", function () {
       payFlags: {}
     };
 
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(freezeParam),
-      ERRORS.ASA.FREEZE_ERROR
+      RUNTIME_ERRORS.ASA.FREEZE_ERROR
     );
   });
 
@@ -412,9 +414,9 @@ describe("Algorand Standard Assets", function () {
       amount: 1,
       payFlags: {}
     };
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(revokeParam),
-      ERRORS.ASA.CLAWBACK_ERROR
+      RUNTIME_ERRORS.ASA.CLAWBACK_ERROR
     );
   });
 
@@ -501,9 +503,9 @@ describe("Algorand Standard Assets", function () {
       assetID: assetId,
       payFlags: {}
     };
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(destroyParam),
-      ERRORS.ASA.MANAGER_ERROR
+      RUNTIME_ERRORS.ASA.MANAGER_ERROR
     );
   });
 
@@ -519,9 +521,9 @@ describe("Algorand Standard Assets", function () {
 
     runtime.executeTx(destroyParam);
 
-    expectTealError(
+    expectRuntimeError(
       () => runtime.getAssetDef(assetId),
-      ERRORS.ASA.ASSET_NOT_FOUND
+      RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND
     );
   });
 
@@ -543,9 +545,9 @@ describe("Algorand Standard Assets", function () {
     assetTransferParam.payFlags = {};
     runtime.executeTx(assetTransferParam);
 
-    expectTealError(
+    expectRuntimeError(
       () => runtime.executeTx(destroyParam),
-      ERRORS.ASA.ASSET_TOTAL_ERROR
+      RUNTIME_ERRORS.ASA.ASSET_TOTAL_ERROR
     );
   });
 });

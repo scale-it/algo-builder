@@ -1,8 +1,8 @@
-import { BuilderError } from "@algorand-builder/runtime";
 import debug from "debug";
 
 import { BuilderContext } from "../../src/internal/context";
 import { loadConfigAndTasks } from "../../src/internal/core/config/config-loading";
+import { BuilderError } from "../../src/internal/core/errors";
 import { ERRORS } from "../../src/internal/core/errors-list";
 import { ALGOB_PARAM_DEFINITIONS } from "../../src/internal/core/params/builder-params";
 import { getEnvRuntimeArgs } from "../../src/internal/core/params/env-variables";

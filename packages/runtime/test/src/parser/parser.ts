@@ -1,6 +1,6 @@
 import { assert } from "chai";
 
-import { ERRORS } from "../../../src/errors/errors-list";
+import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
   Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx,
@@ -17,9 +17,9 @@ import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { Runtime } from "../../../src/runtime";
 import { ExecutionMode } from "../../../src/types";
-import { expectTealError } from "../../helpers/errors";
 import { getProgram } from "../../helpers/files";
 import { useFixture } from "../../helpers/integration";
+import { expectRuntimeError } from "../../helpers/runtime-errors";
 
 // base64 case needs to be verified at the time of decoding
 describe("Parser", function () {
@@ -277,9 +277,9 @@ describe("Parser", function () {
     });
 
     it("should throw error for wrong field length for '+'", () => {
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["+", "+"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
     });
 
@@ -291,9 +291,9 @@ describe("Parser", function () {
     });
 
     it("should throw error for wrong field length for '-'", () => {
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["-", "-"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
     });
 
@@ -305,9 +305,9 @@ describe("Parser", function () {
     });
 
     it("should throw error for wrong field length for '/'", () => {
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["/", "/"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
     });
 
@@ -319,9 +319,9 @@ describe("Parser", function () {
     });
 
     it("should throw error for wrong field length for '*'", () => {
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["*", "*"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
     });
 
@@ -334,16 +334,16 @@ describe("Parser", function () {
     });
 
     it("should throw error for wrong field length for 'addr'", () => {
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["addr"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
     });
 
     it("should throw error for invalid address for 'addr'", () => {
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["addr", "AKGH12"], 1, interpreter),
-        ERRORS.TEAL.INVALID_ADDR
+        RUNTIME_ERRORS.TEAL.INVALID_ADDR
       );
     });
 
@@ -356,26 +356,26 @@ describe("Parser", function () {
     });
 
     it("should throw error for wrong field length for 'int'", () => {
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["int"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
     });
 
     it("should throw error for invalid number for 'int'", () => {
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["int", "123A12"], 1, interpreter),
-        ERRORS.TEAL.INVALID_TYPE
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
       );
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["int", String(MAX_UINT64 + BigInt('5'))], 1, interpreter),
-        ERRORS.TEAL.UINT64_OVERFLOW
+        RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
       );
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["int", String(MIN_UINT64 - BigInt('5'))], 1, interpreter),
-        ERRORS.TEAL.INVALID_TYPE
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
       );
     });
 
@@ -387,9 +387,9 @@ describe("Parser", function () {
     });
 
     it("should throw error if wrong label is used", () => {
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["substring:"], 1, interpreter),
-        ERRORS.TEAL.INVALID_LABEL
+        RUNTIME_ERRORS.TEAL.INVALID_LABEL
       );
     });
 
@@ -399,14 +399,14 @@ describe("Parser", function () {
 
       assert.deepEqual(res, expected);
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["txn", "Fee", "Fee"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["txn", "fee"], 1, interpreter),
-        ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+        RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
       );
     });
 
@@ -416,14 +416,14 @@ describe("Parser", function () {
 
       assert.deepEqual(res, expected);
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["gtxn", "1"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["gtxn", "1AA", "Fee"], 1, interpreter),
-        ERRORS.TEAL.INVALID_TYPE
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
       );
     });
 
@@ -433,14 +433,14 @@ describe("Parser", function () {
 
       assert.deepEqual(res, expected);
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["txna", "2"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["txna", "Fee", "A"], 1, interpreter),
-        ERRORS.TEAL.INVALID_TYPE
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
       );
     });
 
@@ -450,14 +450,14 @@ describe("Parser", function () {
 
       assert.deepEqual(res, expected);
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["gtxna", "1", "2", "3", "4"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["gtxna", "1AB", "Fee", "4"], 1, interpreter),
-        ERRORS.TEAL.INVALID_TYPE
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
       );
     });
 
@@ -498,24 +498,24 @@ describe("Parser", function () {
       expected = new Global(["CurrentApplicationID"], 1, interpreter);
       assert.deepEqual(res, expected);
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["global", "MinTxnFee", "MinTxnFee"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["global", "mintxnfee"], 1, interpreter),
-        ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
+        RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
       );
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["global", "minbalance"], 1, interpreter),
-        ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
+        RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
       );
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["global", "maxtxnlife"], 1, interpreter),
-        ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
+        RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
       );
     });
 
@@ -524,27 +524,27 @@ describe("Parser", function () {
       let expected = new Balance([], 1, interpreter);
       assert.deepEqual(res, expected);
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["balance", "1"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
 
       res = opcodeFromSentence(["asset_holding_get", "AssetBalance"], 1, interpreter);
       expected = new GetAssetHolding(["AssetBalance"], 1, interpreter);
       assert.deepEqual(res, expected);
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["asset_holding_get", "AssetBalance", "AssetFrozen"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
 
       res = opcodeFromSentence(["asset_params_get", "AssetTotal"], 1, interpreter);
       expected = new GetAssetDef(["AssetTotal"], 1, interpreter);
       assert.deepEqual(res, expected);
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["asset_params_get", "AssetTotal", "123"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
     });
 
@@ -553,81 +553,81 @@ describe("Parser", function () {
       let expected = new AppOptedIn([], 1, interpreter);
       assert.deepEqual(res, expected);
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["app_opted_in", "12", "123"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
 
       res = opcodeFromSentence(["app_local_get"], 1, interpreter);
       expected = new AppLocalGet([], 1, interpreter);
       assert.deepEqual(res, expected);
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["app_local_get", "123"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
 
       res = opcodeFromSentence(["app_local_get_ex"], 1, interpreter);
       expected = new AppLocalGetEx([], 1, interpreter);
       assert.deepEqual(res, expected);
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["app_local_get_ex", "22", "123"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
 
       res = opcodeFromSentence(["app_global_get"], 1, interpreter);
       expected = new AppGlobalGet([], 1, interpreter);
       assert.deepEqual(res, expected);
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["app_global_get", "12", "3"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
 
       res = opcodeFromSentence(["app_global_get_ex"], 1, interpreter);
       expected = new AppGlobalGetEx([], 1, interpreter);
       assert.deepEqual(res, expected);
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["app_global_get_ex", "4"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
 
       res = opcodeFromSentence(["app_local_put"], 1, interpreter);
       expected = new AppLocalPut([], 1, interpreter);
       assert.deepEqual(res, expected);
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["app_local_put", "1223"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
 
       res = opcodeFromSentence(["app_global_put"], 1, interpreter);
       expected = new AppGlobalPut([], 1, interpreter);
       assert.deepEqual(res, expected);
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["app_global_put", "123"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
 
       res = opcodeFromSentence(["app_local_del"], 1, interpreter);
       expected = new AppLocalDel([], 1, interpreter);
       assert.deepEqual(res, expected);
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["app_local_del", "3"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
 
       res = opcodeFromSentence(["app_global_del"], 1, interpreter);
       expected = new AppGlobalDel([], 1, interpreter);
       assert.deepEqual(res, expected);
 
-      expectTealError(
+      expectRuntimeError(
         () => opcodeFromSentence(["app_global_del", "45"], 1, interpreter),
-        ERRORS.TEAL.ASSERT_LENGTH
+        RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
     });
   });
@@ -998,9 +998,9 @@ describe("Parser", function () {
 
     it("Should throw error if total cost exceeds 20000", async () => {
       const file = "test-max-opcost.teal"; // has cost 22800
-      expectTealError(
+      expectRuntimeError(
         () => parser(getProgram(file), ExecutionMode.STATELESS, interpreter),
-        ERRORS.TEAL.MAX_COST_EXCEEDED
+        RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED
       );
     });
   });

@@ -5,8 +5,8 @@ import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
 import { Keccak } from 'sha3';
 
-import { TealError } from "../errors/errors";
-import { ERRORS } from "../errors/errors-list";
+import { RUNTIME_ERRORS } from "../errors/errors-list";
+import { RuntimeError } from "../errors/runtime-errors";
 import { compareArray } from "../lib/compare";
 import { AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
 import {
@@ -42,7 +42,7 @@ export class Pragma extends Op {
       this.version = Number(args[1]);
       interpreter.tealVersion = this.version;
     } else {
-      throw new TealError(ERRORS.TEAL.PRAGMA_VERSION_ERROR, { got: args.join(' '), line: line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.PRAGMA_VERSION_ERROR, { got: args.join(' '), line: line });
     }
   }
 
@@ -149,7 +149,7 @@ export class Div extends Op {
     const last = this.assertBigInt(stack.pop(), this.line);
     const prev = this.assertBigInt(stack.pop(), this.line);
     if (last === BIGINT0) {
-      throw new TealError(ERRORS.TEAL.ZERO_DIV, { line: this.line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.ZERO_DIV, { line: this.line });
     }
     stack.push(prev / last);
   }
@@ -354,7 +354,7 @@ export class Mod extends Op {
     const last = this.assertBigInt(stack.pop(), this.line);
     const prev = this.assertBigInt(stack.pop(), this.line);
     if (last === BIGINT0) {
-      throw new TealError(ERRORS.TEAL.ZERO_DIV, { line: this.line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.ZERO_DIV, { line: this.line });
     }
     stack.push(prev % last);
   }
@@ -527,7 +527,7 @@ export class Err extends Op {
   };
 
   execute (stack: TEALStack): void {
-    throw new TealError(ERRORS.TEAL.TEAL_ENCOUNTERED_ERR, { line: this.line });
+    throw new RuntimeError(RUNTIME_ERRORS.TEAL.TEAL_ENCOUNTERED_ERR, { line: this.line });
   }
 }
 
@@ -824,7 +824,7 @@ export class EqualTo extends Op {
     const last = stack.pop();
     const prev = stack.pop();
     if (typeof last !== typeof prev) {
-      throw new TealError(ERRORS.TEAL.INVALID_TYPE, { line: this.line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, { line: this.line });
     }
     if (typeof last === "bigint") {
       stack = this.pushBooleanCheck(stack, (last === prev));
@@ -855,7 +855,7 @@ export class NotEqualTo extends Op {
     const last = stack.pop();
     const prev = stack.pop();
     if (typeof last !== typeof prev) {
-      throw new TealError(ERRORS.TEAL.INVALID_TYPE, { line: this.line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, { line: this.line });
     }
     if (typeof last === "bigint") {
       stack = this.pushBooleanCheck(stack, last !== prev);
@@ -936,7 +936,7 @@ export class Btoi extends Op {
     this.assertMinStackLen(stack, 1, this.line);
     const bytes = this.assertBytes(stack.pop(), this.line);
     if (bytes.length > 8) {
-      throw new TealError(ERRORS.TEAL.LONG_INPUT_ERROR, { line: this.line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.LONG_INPUT_ERROR, { line: this.line });
     }
     const uint64 = Buffer.from(bytes).readBigUInt64BE();
     stack.push(uint64);
@@ -1101,7 +1101,7 @@ export class Concat extends Op {
     const valueA = this.assertBytes(stack.pop(), this.line);
 
     if (valueA.length + valueB.length > MAX_CONCAT_SIZE) {
-      throw new TealError(ERRORS.TEAL.CONCAT_ERROR, { line: this.line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.CONCAT_ERROR, { line: this.line });
     }
     var c = new Uint8Array(valueB.length + valueA.length);
     c.set(valueB);
@@ -1924,7 +1924,7 @@ export class GetAssetHolding extends Op {
         value = assetInfo["is-frozen"] ? 1n : 0n;
         break;
       default:
-        throw new TealError(ERRORS.TEAL.INVALID_FIELD_TYPE, { line: this.line });
+        throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_FIELD_TYPE, { line: this.line });
     }
 
     stack.push(value);
@@ -1955,7 +1955,7 @@ export class GetAssetDef extends Op {
     this.interpreter = interpreter;
     assertLen(args.length, 1, line);
     if (AssetParamMap[args[0]] === undefined) {
-      throw new TealError(ERRORS.TEAL.UNKNOWN_ASSET_FIELD, { field: args[0], line: line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_ASSET_FIELD, { field: args[0], line: line });
     }
 
     this.field = args[0];
@@ -2073,7 +2073,7 @@ export class Addr extends Op {
     super();
     assertLen(args.length, 1, line);
     if (!isValidAddress(args[0])) {
-      throw new TealError(ERRORS.TEAL.INVALID_ADDR, { addr: args[0], line: line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_ADDR, { addr: args[0], line: line });
     }
     this.addr = args[0];
     this.line = line;

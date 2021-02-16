@@ -1,8 +1,8 @@
 import { decodeAddress } from "algosdk";
 import * as base32 from "hi-base32";
 
-import { TealError } from "../errors/errors";
-import { ERRORS } from "../errors/errors-list";
+import { RUNTIME_ERRORS } from "../errors/errors-list";
+import { RuntimeError } from "../errors/runtime-errors";
 import { EncodingType } from "../types";
 import { MAX_UINT64, MIN_UINT64, reBase32, reBase64, reDigit } from "./constants";
 
@@ -13,7 +13,7 @@ import { MAX_UINT64, MIN_UINT64, reBase32, reBase64, reDigit } from "./constants
  */
 export function assertOnlyDigits (val: string, line: number): void {
   if (!reDigit.test(val)) {
-    throw new TealError(ERRORS.TEAL.INVALID_TYPE, {
+    throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, {
       expected: "unsigned integer (upto 64 bit)",
       actual: val,
       line: line
@@ -29,7 +29,7 @@ export function assertOnlyDigits (val: string, line: number): void {
  */
 export function assertLen (val: number, expected: number, line: number): void {
   if (val !== expected) {
-    throw new TealError(ERRORS.TEAL.ASSERT_LENGTH, { exp: expected, got: val, line: line });
+    throw new RuntimeError(RUNTIME_ERRORS.TEAL.ASSERT_LENGTH, { exp: expected, got: val, line: line });
   }
 }
 
@@ -40,7 +40,7 @@ export function assertLen (val: number, expected: number, line: number): void {
  */
 export function assertBase64 (str: string, line: number): void {
   if (!reBase64.test(str)) {
-    throw new TealError(ERRORS.TEAL.INVALID_BASE64, { val: str, line: line });
+    throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_BASE64, { val: str, line: line });
   }
 }
 
@@ -51,7 +51,7 @@ export function assertBase64 (str: string, line: number): void {
  */
 export function assertBase32 (str: string, line: number): void {
   if (!reBase32.test(str)) {
-    throw new TealError(ERRORS.TEAL.INVALID_BASE32, { val: str, line: line });
+    throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_BASE32, { val: str, line: line });
   }
 }
 
@@ -203,7 +203,7 @@ function base64OrBase32 (arg: string, line: number): [string, EncodingType] {
 
     return [str, EncodingType.BASE32];
   }
-  throw new TealError(ERRORS.TEAL.DECODE_ERROR, { val: arg, line: line });
+  throw new RuntimeError(RUNTIME_ERRORS.TEAL.DECODE_ERROR, { val: arg, line: line });
 }
 
 /**
@@ -239,8 +239,8 @@ export function getEncoding (args: string[], line: number): [string, EncodingTyp
       assertBase32(args[1], line);
       return [args[1], EncodingType.BASE32];
     }
-    throw new TealError(ERRORS.TEAL.UNKOWN_DECODE_TYPE, { val: args[0], line: line });
+    throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKOWN_DECODE_TYPE, { val: args[0], line: line });
   } else {
-    throw new TealError(ERRORS.TEAL.UNKOWN_DECODE_TYPE, { val: args[0], line: line });
+    throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKOWN_DECODE_TYPE, { val: args[0], line: line });
   }
 }

@@ -5,8 +5,8 @@ import {
 } from "algosdk";
 import * as tweet from "tweetnacl-ts";
 
-import { TealError } from "./errors/errors";
-import { ERRORS } from "./errors/errors-list";
+import { RUNTIME_ERRORS } from "./errors/errors-list";
+import { RuntimeError } from "./errors/runtime-errors";
 import { compareArray } from "./lib/compare";
 import { convertToString, stringToBytes } from "./lib/parsing";
 
@@ -73,7 +73,7 @@ export class LogicSig {
       }
     }
     if (index === -1) {
-      throw new TealError(ERRORS.TEAL.INVALID_SECRET_KEY, { secretkey: secretKey });
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_SECRET_KEY, { secretkey: secretKey });
     }
     const sig = this.signProgram(secretKey);
     return [sig, index];

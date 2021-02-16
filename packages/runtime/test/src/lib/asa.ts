@@ -1,10 +1,11 @@
-import { types as rtypes, validateASADefs } from "@algorand-builder/runtime";
 import { assert } from "chai";
 
-import { ERRORS } from "../../src/internal/core/errors-list";
-import { expectBuilderError } from "../helpers/errors";
+import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
+import { validateASADefs } from "../../../src/lib/asa";
+import { Account, ASADefs } from "../../../src/types";
+import { expectRuntimeError } from "../../helpers/runtime-errors";
 
-const namedAccount: rtypes.Account = {
+const namedAccount: Account = {
   name: "hi",
   addr: "addr",
   sk: new Uint8Array(1)
@@ -12,7 +13,7 @@ const namedAccount: rtypes.Account = {
 
 describe("ASA parser", () => {
   it("Should validate correct obj", async () => {
-    const valid: rtypes.ASADefs = {
+    const valid: ASADefs = {
       A1: {
         total: 1,
         decimals: 0,
@@ -22,7 +23,7 @@ describe("ASA parser", () => {
         reserve: ""
       }
     };
-    const parsed = validateASADefs(valid, new Map<string, rtypes.Account>(), "");
+    const parsed = validateASADefs(valid, new Map<string, Account>(), "");
     assert.deepEqual(parsed, {
       A1: {
         total: 1,
@@ -54,7 +55,7 @@ describe("ASA parser", () => {
         clawback: "clawback"
       }
     };
-    const parsed = validateASADefs(valid, new Map<string, rtypes.Account>(), "");
+    const parsed = validateASADefs(valid, new Map<string, Account>(), "");
     assert.deepEqual(parsed, {
       A1: {
         clawback: "clawback",
@@ -81,9 +82,9 @@ describe("ASA parser", () => {
         unitName: 'ASA'
       }
     };
-    expectBuilderError(
-      () => validateASADefs(obj, new Map<string, rtypes.Account>(), ""),
-      ERRORS.SCRIPT.ASA_PARAM_PARSE_ERROR,
+    expectRuntimeError(
+      () => validateASADefs(obj, new Map<string, Account>(), ""),
+      RUNTIME_ERRORS.ASA.PARAM_PARSE_ERROR,
       "total"
     );
   });
@@ -96,9 +97,9 @@ describe("ASA parser", () => {
         unitName: 'ASA'
       }
     };
-    expectBuilderError(
-      () => validateASADefs(obj, new Map<string, rtypes.Account>(), "SOME_FILENAME"),
-      ERRORS.SCRIPT.ASA_PARAM_PARSE_ERROR,
+    expectRuntimeError(
+      () => validateASADefs(obj, new Map<string, Account>(), "SOME_FILENAME"),
+      RUNTIME_ERRORS.ASA.PARAM_PARSE_ERROR,
       "SOME_FILENAME"
     );
   });
@@ -111,9 +112,9 @@ describe("ASA parser", () => {
         unitName: 'ASA'
       }
     };
-    expectBuilderError(
-      () => validateASADefs(obj, new Map<string, rtypes.Account>(), ""),
-      ERRORS.SCRIPT.ASA_PARAM_PARSE_ERROR,
+    expectRuntimeError(
+      () => validateASADefs(obj, new Map<string, Account>(), ""),
+      RUNTIME_ERRORS.ASA.PARAM_PARSE_ERROR,
       "decimals"
     );
   });
@@ -126,9 +127,9 @@ describe("ASA parser", () => {
         unitName: "123456789"
       }
     };
-    expectBuilderError(
-      () => validateASADefs(obj, new Map<string, rtypes.Account>(), ""),
-      ERRORS.SCRIPT.ASA_PARAM_PARSE_ERROR,
+    expectRuntimeError(
+      () => validateASADefs(obj, new Map<string, Account>(), ""),
+      RUNTIME_ERRORS.ASA.PARAM_PARSE_ERROR,
       "unitName"
     );
   });
@@ -143,9 +144,9 @@ describe("ASA parser", () => {
         unitName: 'ASA'
       }
     };
-    expectBuilderError(
-      () => validateASADefs(obj, new Map<string, rtypes.Account>(), ""),
-      ERRORS.SCRIPT.ASA_PARAM_PARSE_ERROR,
+    expectRuntimeError(
+      () => validateASADefs(obj, new Map<string, Account>(), ""),
+      RUNTIME_ERRORS.ASA.PARAM_PARSE_ERROR,
       "url"
     );
   });
@@ -160,9 +161,9 @@ describe("ASA parser", () => {
         metadataHash: "1234567890abcdef1234567890abcdef_"
       }
     };
-    expectBuilderError(
-      () => validateASADefs(obj, new Map<string, rtypes.Account>(), ""),
-      ERRORS.SCRIPT.ASA_PARAM_PARSE_ERROR,
+    expectRuntimeError(
+      () => validateASADefs(obj, new Map<string, Account>(), ""),
+      RUNTIME_ERRORS.ASA.PARAM_PARSE_ERROR,
       "metadataHash"
     );
   });
@@ -176,7 +177,7 @@ describe("ASA parser", () => {
         optInAccNames: ["hi"]
       }
     };
-    validateASADefs(obj, new Map<string, rtypes.Account>([["hi", namedAccount]]), "");
+    validateASADefs(obj, new Map<string, Account>([["hi", namedAccount]]), "");
   });
 
   it("Should check existence of opt-in account name accounts; empty", async () => {
@@ -188,7 +189,7 @@ describe("ASA parser", () => {
         optInAccNames: []
       }
     };
-    validateASADefs(obj, new Map<string, rtypes.Account>([["hi", namedAccount]]), "");
+    validateASADefs(obj, new Map<string, Account>([["hi", namedAccount]]), "");
   });
 
   it("Should fail if opt-in account doesn't exist", async () => {
@@ -200,9 +201,9 @@ describe("ASA parser", () => {
         optInAccNames: ["hi", "hi123"]
       }
     };
-    expectBuilderError(
-      () => validateASADefs(obj, new Map<string, rtypes.Account>([["hi", namedAccount]]), ""),
-      ERRORS.SCRIPT.ASA_PARAM_ERROR_NO_NAMED_OPT_IN_ACCOUNT,
+    expectRuntimeError(
+      () => validateASADefs(obj, new Map<string, Account>([["hi", namedAccount]]), ""),
+      RUNTIME_ERRORS.ASA.PARAM_ERROR_NO_NAMED_OPT_IN_ACCOUNT,
       "hi123"
     );
   });

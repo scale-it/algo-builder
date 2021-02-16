@@ -1,12 +1,12 @@
 import { assert } from "chai";
 
-import { ERRORS } from "../../src/errors/errors-list";
+import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { Runtime, StoreAccount, stringToBytes } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { SignType, SSCCallsParam, TransactionType } from "../../src/types";
-import { expectTealError } from "../helpers/errors";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
+import { expectRuntimeError } from "../helpers/runtime-errors";
 
 const approvalStr = "approval-program";
 describe("Algorand Smart Contracts - Update Application", function () {
@@ -35,9 +35,9 @@ describe("Algorand Smart Contracts - Update Application", function () {
   });
 
   it("should fail during update application if app id is not defined", function () {
-    expectTealError(
+    expectRuntimeError(
       () => runtime.updateApp(creator.address, 1111, oldApprovalProgram, clearProgram, {}, {}),
-      ERRORS.TEAL.APP_NOT_FOUND
+      RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND
     );
   });
 
@@ -86,9 +86,9 @@ describe("Algorand Smart Contracts - Update Application", function () {
     assert.deepEqual(app[approvalStr], oldApprovalProgram);
 
     // update should be rejected because sender is not creator
-    expectTealError(
+    expectRuntimeError(
       () => runtime.updateApp(alice.address, appId, newApprovalProgram, clearProgram, {}, {}),
-      ERRORS.TEAL.REJECTED_BY_LOGIC
+      RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 
     // verify approval program & state is not updated as tx is rejected

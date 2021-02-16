@@ -1,7 +1,7 @@
 import algosdk, { AssetDefEnc, SuggestedParams, Transaction } from "algosdk";
 
-import { TealError } from "../errors/errors";
-import { ERRORS } from "../errors/errors-list";
+import { RUNTIME_ERRORS } from "../errors/errors-list";
+import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
 import { TxFieldDefaults, TxnFields } from "../lib/constants";
 import { parseSSCAppArgs, stringToBytes } from "../lib/parsing";
@@ -58,7 +58,7 @@ export function txnSpecbyField (txField: string, tx: Txn, gtxns: Txn[], tealVers
   // handle other cases
   switch (txField) {
     case 'FirstValidTime': { // Causes program to fail; reserved for future use
-      throw new TealError(ERRORS.TEAL.REJECTED_BY_LOGIC);
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC);
     }
     case 'TypeEnum': {
       result = Number(TxnType[tx.type as keyof typeof TxnType]); // TxnType['pay']
@@ -115,7 +115,7 @@ export function txAppArg (txField: TxField, tx: Txn, idx: number, op: Op,
     return parseToStackElem(result[idx], txField) as Uint8Array;
   }
 
-  throw new TealError(ERRORS.TEAL.INVALID_OP_ARG, {
+  throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_OP_ARG, {
     opcode: "txna or gtxna"
   });
 }
@@ -261,7 +261,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
       );
     }
     default: {
-      throw new TealError(ERRORS.TRANSACTION.UNKNOWN_TRANSACTION_TYPE, { transaction: transactionType });
+      throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.TRANSACTION_TYPE_ERROR,
+        { transaction: transactionType });
     }
   }
 }
