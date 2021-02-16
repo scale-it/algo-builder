@@ -10,7 +10,7 @@ async function run (runtimeEnv, deployer) {
   const appInfo = deployer.getSSC('poi-approval.teal', 'poi-clear.teal');
   const assetInfo = deployer.asa.get('gold');
 
-  /** * Compile and fund the escrow***/
+  /** * Compile and fund escrow***/
   const escrowParams = {
     ASSET_ID: assetInfo.assetIndex,
     APP_ID: appInfo.appID
@@ -41,7 +41,7 @@ async function run (runtimeEnv, deployer) {
   };
   await executeTransaction(deployer, assetConfigParams);
 
-  /** now lock the asset by clearing the manager and freezer **/
+  /** now lock the asset by clearing the manager and freeze account **/
   console.log('* Locking the manager and freeze address *');
   const assetLockParams = {
     ...assetConfigParams,

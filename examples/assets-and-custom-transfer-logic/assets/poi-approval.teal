@@ -82,8 +82,8 @@ bnz check-level
 err
 
 
-//only callable by creator
-//just one arg
+// only callable by creator
+// just one arg
 set-level:
 txn NumAppArgs
 int 2
@@ -134,7 +134,7 @@ return
 // tx 2 - payment transaction from sender to clawback-escrow to pay for the fee of the clawback
 
 check-level:
-// check number and types of txes
+// check number and types of transactions
 global GroupSize
 int 3
 ==
@@ -207,8 +207,8 @@ bz failed
 // store assetid
 store 11
 
-//vette first transaction
-//check level smart contract call - signed by asset sender
+// verify first transaction
+// check level smart contract call - signed by asset sender
 gtxn 0 ApplicationID
 global CurrentApplicationID
 ==
@@ -222,7 +222,7 @@ gtxn 1 AssetSender
 &&
 bz failed
 
-//vette second transaction
+// verify second transaction
 // tx 1 - clawback transactions that moves the frozen asset from sender to receiver - signed by clawback-escrow
 // verify the account sent in the accounts array is
 // actually the receiver of the asset in asset xfer
@@ -235,7 +235,7 @@ load 11
 &&
 bz failed
 
-//vette third transaction
+// verify third transaction
 // tx 2 - payment transaction from sender to clawback-escrow to pay for the fee of the clawback
 
 // verify the fee amount is good
@@ -247,7 +247,7 @@ bz failed
 
 
 // now handle the level check
-// get asset sender stored accredidation level
+// get asset sender stored accreditation level
 int 0 //sender
 gtxn 0 ApplicationID
 byte "Accred-Level"
@@ -261,7 +261,7 @@ app_global_get
 >=
 bz failed // users level not high enough
 
-// get asset receiver stored accredidation level
+// get asset receiver stored accreditation level
 int 1 //asset receiver account
 txn ApplicationID
 byte "Accred-Level"
@@ -276,7 +276,6 @@ bz failed // users level not high enough
 
 int 1
 return
-
 
 handle_optin:
 txn NumAppArgs
