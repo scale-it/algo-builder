@@ -150,7 +150,9 @@ gtxn 2 TypeEnum
 int pay
 ==
 &&
-// Verify that this is index the stateful contract call
+
+// the first txn group index is zero. When a txGroup is executed by default
+// (without any stateless txn first, then groupIndex should be 0)
 txn GroupIndex
 int 0
 ==

@@ -62,6 +62,11 @@ async function run (runtimeEnv, deployer) {
     }
   ];
 
+  /**
+   * Note: Transaction can fail if minimum level is not set correctly,
+   * or transaction params are invalid (eg. sender is not creator,
+   * less txs in group than required, clawback is not set correctly etc.)
+   */
   console.log('* Transferring 1000 Assets from Aice to Bob *');
   try {
     await executeTransaction(deployer, txGroup);
