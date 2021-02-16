@@ -66,8 +66,8 @@ Read more about checkpoints [here](/docs/execution-checkpoints.md).
 `Typescript` project requires a compilation to `js` files. So that algob can execute `js` files.
 To develop in `typescript`, please remember these points:
 
-- Make sure to compile your `ts` project using `tsc --build .` Never forget to compile files.
-- If you are actively developing, please use `tsc -w -p .` to build your files in real time.(this is recommended)
+- Make sure to compile your `ts` project using `yarn build` (which runs `tsc --build .`) Never forget to compile files.
+- TIP: If you are actively developing, please use `yarn build:watch`(`tsc -w -p .`) to build or compile your `.ts` files in real time.(this is recommended)
 - Transpiled js files should be present in `build` folder, therefore `outDir` in tsconfig.json should be set as:
 
     "outDir": "./build/scripts"
