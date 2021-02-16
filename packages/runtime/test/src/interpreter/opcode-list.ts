@@ -2122,26 +2122,25 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(BigInt('2'), top);
+      assert.equal(2n, top);
     });
 
     it("should push Round to stack", function () {
+      interpreter.runtime.setRoundAndTimestamp(500, 1);
       const op = new Global(['Round'], 1, interpreter);
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(BigInt('500'), top);
+      assert.equal(500n, top);
     });
 
     it("should push LatestTimestamp to stack", function () {
+      interpreter.runtime.setRoundAndTimestamp(500, 100);
       const op = new Global(['LatestTimestamp'], 1, interpreter);
       op.execute(stack);
 
       const top = stack.pop();
-      const ts = Math.round((new Date()).getTime() / 1000);
-
-      const diff = Math.abs(ts - Number(top)); // for accuracy
-      assert.isBelow(diff, 10);
+      assert.equal(100n, top);
     });
 
     it("should push CurrentApplicationID to stack", function () {
@@ -2149,7 +2148,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(BigInt('1828'), top);
+      assert.equal(1828n, top);
     });
 
     it("should throw error if global field is not present in teal version", function () {

@@ -14,17 +14,17 @@
 - [Interpreter](../packages/runtime/src/interpreter): Executes the list of opcodes returned by parser and updates stack after each execution. At the end of execution, if the stack contains a single non-zero uint64 element then the teal code is approved, and transaction can be executed.
 
 ## Block Rounds/Height
-In Algorand blockchain, the time is divided into rounds. Specifically, one round represents a a time to propose, validate and confirm a blog. 
+In Algorand blockchain, the time is divided into rounds. Specifically, one round represents a a time to propose, validate and confirm a block. 
 In Alogrand Builder Runtime, we don't have blocks. All transactions are processed immediately. 
-However, we keep the notion of rounds because it is needed for transaction and smart contract validation.
+However, we keep the notion of rounds and timestamps because it is needed for transaction and smart contract validation.
 
-The default Runtime round is set to `2`. Runtime doesn't change the round - it's up to the user and the test flow to manage the round. To change the round we need to call `runtime.setRound(round)`. We can retrieve the current round by using `runtime.getRound()` function. <br />
+The default Runtime block round is set to `2` and timestamp to `1`. Runtime doesn't change the block round or timestamp - it's up to the user and the test flow to manage the block. To change the block round and timestamp we need to call `runtime.setRoundAndTimestamp(round, timestamp)`. We can retrieve the current block round by using `runtime.getRound()` function and current timestamp by using `runtime.getTimestamp()`. <br />
 Example:
 
-    runtime.setRound(5); // set current round to 5
+    runtime.setRoundAndTimestamp(5, 10); // set current block round to 5 and timestamp to 10
 
-This means that current round is set to 5 and transaction will pass only if its' first valid round is less or equal 5 and the last valid round is greater than 5.
-Note: Block round remains same until user changes it by calling `runtime.setRound(round)`.
+This means that current block round is set to 5 and transaction will pass only if its' first valid round is less or equal 5 and the last valid round is greater than 5.
+Note: Block round and timestamp remains same until user changes it by calling `runtime.setRoundAndTimestamp(round, timestamp)`.
 
 ## Test structure
 In this section we will describe the flow of testing smart contracts in runtime:
@@ -37,9 +37,9 @@ In this section we will describe the flow of testing smart contracts in runtime:
 
       const runtime = new Runtime([john, bob]);
 
-- Set Rounds: Now we will set the rounds according to our requirement.
+- Set Rounds and timestamps: Now we will set the rounds and timestamp for that round according to our requirement.
 
-      runtime.setRound(20);
+      runtime.setRoundAndTimestamp(20, 100);
 
 - Create Apps/Assets: At this point our runtime is ready. Now we can create apps and/or assets and begin testing our smart contracts (present in your current directory's `asset` folder). For creating a stateful application, use `runtime.addApp()` funtion. Similarly for creating a new asset we can use `runtime.addAsset()` function.
 - Create and Execute Transactions: we can create transactions to test our smart contracts. Use `runtime.executeTx()` funtion to execute transaction (Payment Transaction, Atomic Transfers, Asset Transfer etc...).

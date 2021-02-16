@@ -1505,6 +1505,14 @@ export class Global extends Op {
           this.line);
         break;
       }
+      case 'Round': {
+        result = this.interpreter.runtime.getRound();
+        break;
+      }
+      case 'LatestTimestamp': {
+        result = this.interpreter.runtime.getTimestamp();
+        break;
+      }
       default: {
         result = GlobalFields[this.interpreter.tealVersion][this.field];
       }

@@ -33,6 +33,7 @@ export class Runtime {
   private assetCounter: number;
   // https://developer.algorand.org/docs/features/transactions/?query=round
   private round: number;
+  private timestamp: number;
   private readonly loadedAssetsDefs: ASADefs;
 
   constructor (accounts: StoreAccountI[]) {
@@ -59,6 +60,7 @@ export class Runtime {
     this.appCounter = 0;
     this.assetCounter = 0;
     this.round = 2;
+    this.timestamp = 1;
   }
 
   /**
@@ -152,11 +154,13 @@ export class Runtime {
   }
 
   /**
-   * set current round to given value
+   * set current round with timestamp for a block
    * @param r current round
+   * @param timestamp block's timestamp
    */
-  setRound (r: number): void {
+  setRoundAndTimestamp (r: number, timestamp: number): void {
     this.round = r;
+    this.timestamp = timestamp;
   }
 
   /**
@@ -164,6 +168,13 @@ export class Runtime {
    */
   getRound (): number {
     return this.round;
+  }
+
+  /**
+   * Return current timestamp
+   */
+  getTimestamp (): number {
+    return this.timestamp;
   }
 
   /**

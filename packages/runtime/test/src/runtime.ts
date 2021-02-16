@@ -108,7 +108,7 @@ describe("Rounds Test", function () {
 
   it("should succeed if current round is between first and last valid", () => {
     txnParams.payFlags = { totalFee: 1000, firstValid: 5, validRounds: 200 };
-    runtime.setRound(20);
+    runtime.setRoundAndTimestamp(20, 20);
 
     runtime.executeTx(txnParams);
 
@@ -119,7 +119,7 @@ describe("Rounds Test", function () {
   });
 
   it("should fail if current round is not between first and last valid", () => {
-    runtime.setRound(3);
+    runtime.setRoundAndTimestamp(3, 20);
 
     expectRuntimeError(
       () => runtime.executeTx(txnParams),
