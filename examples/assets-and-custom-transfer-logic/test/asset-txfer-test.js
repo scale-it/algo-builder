@@ -8,6 +8,7 @@ import { assert } from 'chai';
 const minBalance = 10e6; // 10 ALGO's
 const aliceAddr = 'EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY';
 const bobAddr = '2ILRL5YU3FZ4JDQZQVXEZUYKEWF7IEIGRRCPCMI36VKSGDMAS6FHSBXZDQ';
+const ACCRED_LEVEL = 'Accred-Level';
 
 describe('Test for transferring asset using custom logic', function () {
   const master = new StoreAccount(1000e6);
@@ -35,8 +36,8 @@ describe('Test for transferring asset using custom logic', function () {
   });
 
   this.afterEach(async function () {
-    const alice = new StoreAccount(minBalance);
-    const bob = new StoreAccount(minBalance);
+    alice = new StoreAccount(minBalance, { addr: aliceAddr, sk: new Uint8Array(0) });
+    bob = new StoreAccount(minBalance, { addr: bobAddr, sk: new Uint8Array(0) });
     runtime = new Runtime([master, alice, bob]);
 
     creationFlags = {
@@ -49,6 +50,8 @@ describe('Test for transferring asset using custom logic', function () {
   });
 
   const getGlobal = (key) => runtime.getGlobalState(applicationId, key);
+  const getEscrowProg = (assetId, appId) =>
+    getProgram('clawback-escrow.py', { ASSET_ID: assetId, APP_ID: appId });
 
   // fetch latest account state
   function syncAccounts () {
@@ -113,7 +116,7 @@ describe('Test for transferring asset using custom logic', function () {
     assert.isDefined(bobLocalApp);
 
     /* Setup Escrow Account */
-    const escrowProg = getProgram('clawback-escrow.py', { ASSET_ID: assetId, APP_ID: applicationId });
+    const escrowProg = getEscrowProg(assetId, applicationId);
     const escrowLsig = runtime.getLogicSig(escrowProg, []);
     const escrowAddress = escrowLsig.address();
 
@@ -188,8 +191,8 @@ describe('Test for transferring asset using custom logic', function () {
     syncAccounts();
 
     // verify level is set in local-state
-    assert.equal(alice.getLocalState(applicationId, 'Accred-Level'), 2n);
-    assert.equal(bob.getLocalState(applicationId, 'Accred-Level'), 2n);
+    assert.equal(alice.getLocalState(applicationId, ACCRED_LEVEL), 2n);
+    assert.equal(bob.getLocalState(applicationId, ACCRED_LEVEL), 2n);
 
     /* Transfer 1000 assets from Alice to Bob */
     const prevAliceAssets = runtime.getAssetHolding(assetId, aliceAddr).amount;
@@ -234,57 +237,118 @@ describe('Test for transferring asset using custom logic', function () {
     assert.equal(afterBobAssets, prevBobAssets + 1000); // Bob received 1000 GLD
   });
 
-  // it('should be rejected by logic when claiming funds if goal is not met', () => {
-  //   // create application
-  //   const creationFlags = Object.assign({}, flags);
-  //   const applicationId = runtime.addApp(
-  //     { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
+  it('should fail on set level if sender is not creator', () => {
+    assetId = runtime.createAsset('gold', { creator: { ...alice.account, name: 'alice' } });
+    runtime.optIntoASA(assetId, bob.address, {});
 
-  //   // setup escrow account
-  //   const escrowProg = getProgram('crowdFundEscrow.py', { APP_ID: applicationId });
-  //   const lsig = runtime.getLogicSig(escrowProg, []);
-  //   const escrowAddress = lsig.address();
+    /* Create application + optIn to app */
+    const creationArgs = [
+      `int:${assetId}`,
+      'int:2' // set min user level(2) for asset transfer ("Accred-level")
+    ];
 
-  //   // sync escrow account
-  //   escrow = runtime.getAccount(escrowAddress);
-  //   console.log('Escrow Address: ', escrowAddress);
-  //   syncAccounts();
+    applicationId = runtime.addApp(
+      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
+    const app = alice.getApp(applicationId);
+    assert.isDefined(app);
 
-  //   // update application with correct escrow account address
-  //   let appArgs = [addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
-  //   runtime.updateApp(
-  //     creator.address,
-  //     applicationId,
-  //     approvalProgram,
-  //     clearProgram,
-  //     {}, { appArgs: appArgs });
+    // opt in to app + verify optin
+    runtime.optInToApp(alice.address, applicationId, {}, {});
+    runtime.optInToApp(bob.address, applicationId, {}, {});
 
-  //   appArgs = [stringToBytes('claim')];
-  //   // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
-  //   const txGroup = [
-  //     {
-  //       type: types.TransactionType.CallNoOpSSC,
-  //       sign: types.SignType.SecretKey,
-  //       fromAccount: creator.account,
-  //       appId: applicationId,
-  //       payFlags: {},
-  //       appArgs: appArgs
-  //     },
-  //     {
-  //       type: types.TransactionType.TransferAlgo,
-  //       sign: types.SignType.LogicSignature,
-  //       fromAccount: escrow.account,
-  //       toAccountAddr: creator.address,
-  //       amountMicroAlgos: 0,
-  //       lsig: lsig,
-  //       payFlags: { closeRemainderTo: creator.address }
-  //     }
-  //   ];
-  //   // execute transaction: Expected to be rejected by logic because goal is not reached
-  //   try {
-  //     runtime.executeTx(txGroup);
-  //   } catch (e) {
-  //     console.warn(e);
-  //   }
-  // });
+    /* Setup Escrow Account */
+    const escrowProg = getEscrowProg(assetId, applicationId); ;
+    const escrowLsig = runtime.getLogicSig(escrowProg, []);
+    const escrowAddress = escrowLsig.address();
+
+    // sync escrow account
+    escrow = runtime.getAccount(escrowAddress);
+
+    syncAccounts();
+    const setLevelParams = {
+      type: types.TransactionType.CallNoOpSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: bob.account,
+      appId: applicationId,
+      payFlags: {},
+      appArgs: ['str:set-level', 'int:2'],
+      accounts: [alice.address] //  AppAccounts
+    };
+
+    try {
+      runtime.executeTx(setLevelParams);
+    } catch (e) {
+      console.log('[Expected as Sender(Bob) !== Creator(Alice)', e.errorDescriptor);
+    }
+  });
+
+  it('should reject transaction if minimum level is not set correctly', () => {
+    assetId = runtime.createAsset('gold', { creator: { ...alice.account, name: 'alice' } });
+    runtime.optIntoASA(assetId, bob.address, {});
+
+    /* Create application + optIn to app */
+    const creationArgs = [
+      `int:${assetId}`,
+      'int:2' // set min user level(2) for asset transfer ("Accred-level")
+    ];
+
+    applicationId = runtime.addApp(
+      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
+    const app = alice.getApp(applicationId);
+    assert.isDefined(app);
+
+    // opt in to app + verify optin
+    runtime.optInToApp(alice.address, applicationId, {}, {});
+    runtime.optInToApp(bob.address, applicationId, {}, {});
+
+    /* Setup Escrow Account */
+    const escrowProg = getEscrowProg(assetId, applicationId);
+    const escrowLsig = runtime.getLogicSig(escrowProg, []);
+    const escrowAddress = escrowLsig.address();
+
+    // sync escrow account
+    escrow = runtime.getAccount(escrowAddress);
+
+    /* Setting level 1 (and minimum req is 2), so it should fail on asset transfer */
+    syncAccounts();
+    alice.setLocalState(applicationId, ACCRED_LEVEL, 1n);
+    bob.setLocalState(applicationId, ACCRED_LEVEL, 1n);
+
+    const txGroup = [
+      {
+        type: types.TransactionType.CallNoOpSSC,
+        sign: types.SignType.SecretKey,
+        fromAccount: alice.account,
+        appId: applicationId,
+        payFlags: { totalFee: 1000 },
+        appArgs: ['str:check-level'],
+        accounts: [bob.address] //  AppAccounts
+      },
+      {
+        type: types.TransactionType.RevokeAsset,
+        sign: types.SignType.LogicSignature,
+        fromAccount: { addr: escrowAddress },
+        recipient: bob.address,
+        assetID: assetId,
+        revocationTarget: alice.address,
+        amount: 1000,
+        lsig: escrowLsig,
+        payFlags: { totalFee: 1000 }
+      },
+      {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
+        fromAccount: alice.account,
+        toAccountAddr: escrowAddress,
+        amountMicroAlgos: 1000,
+        payFlags: { totalFee: 1000 }
+      }
+    ];
+
+    try {
+      runtime.executeTx(txGroup);
+    } catch (e) {
+      console.log('[Expected as level Alice(=1) < Min Level(=2)] ', e.errorDescriptor);
+    }
+  });
 });
