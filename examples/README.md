@@ -56,5 +56,5 @@ Original tutorial can be found [here](https://developer.algorand.org/solutions/e
 - [ref-templates](./ref-templates) - The goal of this project is to present how to work with ASC in `algob` using the best practices and templates using the Algorand reference templates.This is a `javascript` project.
 - [signed-txn](./signed-txn) - This example demonstrates executing a serialized transaction loaded directly from a file. A user can create a transaction and sign it (using `goal`) and send it to someone else to execute it. This is a `javascript` project.
 - [htlc](./htlc-pyteal-ts) - Hash-Time-Lock-Contract Example in `typescript` using PyTeal.
-This is a `typescript` project therefore it requires a compilation to `js` files.
+This is a `typescript` project therefore it requires a transpilation to `js` files.
 In this project we are transpiling the files in `js` and then using them with `algob`.

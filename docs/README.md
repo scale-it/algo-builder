@@ -63,7 +63,7 @@ Read more about checkpoints [here](/docs/execution-checkpoints.md).
 
 ### Typescript Projects
 
-`Typescript` project requires a compilation to `js` files. So that algob can execute `js` files.
+`Typescript` project requires a transpilation to `js` files. So that algob can execute `js` files.
 To develop in `typescript`, please remember these points:
 
 - Make sure to compile your `ts` project using `yarn build` (which runs `tsc --build .`) Never forget to compile files.
