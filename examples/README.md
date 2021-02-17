@@ -48,7 +48,7 @@ the following positions in the latter file:
 ### Examples Description
 
 - [asa](./asa) - This `javascript` project demonstrates how to create and manage Algorand Standard Assets (ASA).
-- [crowdfunding](./crowdfunding) - This `javascript` project demonstrates how to create a Crowdfunding Stateful Smart Contract Application. It's based on a [tutorial](https://developer.algorand.org/solutions/
+- [crowdfunding](./crowdfunding) - This `javascript` project demonstrates how to create a Crowdfunding Stateful Smart Contract Application. It's based on a [tutorial](https://developer.algorand.org/solutions/example-crowdfunding-stateful-smart-contract-application/)
 - [multisig](./multisig) - This `javascript` example demonstrates authorizing transactions based on logic signature signed by multiple accounts.
 - [nft](./nft) - Non-Fungible-Token Example using stateful TEAL in `javascript`. In this example, we create a new non-fungible-token represented by a name and a ref.
 - [permissioned-voting](./permissioned-voting) -  This `javascript` project demonstrates how to create a Permissioned Voting Stateful Smart Contract Application.
