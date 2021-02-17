@@ -52,7 +52,6 @@
     "algob:dev": "sh ./setup_dev_project.sh"
   },
   "files": [
-    "src/",
     "build/",
     "LICENSE",
     "README.md",
