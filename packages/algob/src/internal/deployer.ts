@@ -377,7 +377,7 @@ export class DeployerRunMode extends DeployerBasicMode implements AlgobDeployer 
     });
   }
 
-  optInToASA (_name: string, _accountName: string, _flags: rtypes.ASADeploymentFlags): Promise<void> {
+  optInToASA (_name: string, _accountName: string, _flags: rtypes.TxParams): Promise<void> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "optInToASA"
     });
