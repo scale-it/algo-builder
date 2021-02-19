@@ -203,7 +203,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.amountMicroAlgos,
         execParams.payFlags.closeRemainderTo,
         note,
-        suggestedParams);
+        suggestedParams,
+        execParams.payFlags.rekeyTo);
     }
     case TransactionType.ClearSSC: {
       return algosdk.makeApplicationClearStateTxn(

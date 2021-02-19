@@ -282,7 +282,6 @@ export class Runtime {
       for (const txnParam of txnParams) { // create encoded_obj for each txn in group
         const mockParams = mockSuggestedParams(txnParam.payFlags, this.round);
         const tx = mkTransaction(txnParam, mockParams);
-
         // convert to encoded obj for compatibility
         const encodedTxnObj = tx.get_obj_for_encoding() as Txn;
         encodedTxnObj.txID = tx.txID();

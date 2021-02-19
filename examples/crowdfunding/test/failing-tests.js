@@ -15,7 +15,7 @@ const goal = 7e6;
 describe('Crowdfunding Test - Failing Scenarios', function () {
   const master = new StoreAccount(1000e6);
   let creator = new StoreAccount(initialCreatorBalance);
-  let escrow = new StoreAccount(minBalance);
+  let escrow;
   let donor = new StoreAccount(initialDonorBalance);
 
   let runtime;
@@ -26,13 +26,14 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
   let fundCloseDate;
   let donateTxGroup;
   let lsig;
+  let escrowAddress;
   const rejectMsg = 'RUNTIME_ERR1007: Teal code rejected by logic';
   const approvalProgram = getProgram('crowdFundApproval.teal');
   const clearProgram = getProgram('crowdFundClear.teal');
 
   // Create new runtime and application before each test.
   this.beforeEach(() => {
-    runtime = new Runtime([master, creator, escrow, donor]);
+    runtime = new Runtime([master, creator, donor]);
 
     // Get begin date to pass in
     beginDate = new Date();
@@ -71,7 +72,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     // setup escrow account
     const escrowProg = getProgram('crowdFundEscrow.py', { APP_ID: applicationId });
     lsig = runtime.getLogicSig(escrowProg, []);
-    const escrowAddress = lsig.address();
+    escrowAddress = lsig.address();
 
     // sync escrow account
     escrow = runtime.getAccount(escrowAddress);
@@ -86,20 +87,6 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
       amountMicroAlgos: minBalance,
       payFlags: {}
     });
-
-    // update application with correct escrow account address
-    appArgs = [addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
-
-    runtime.updateApp(
-      creator.address,
-      applicationId,
-      approvalProgram,
-      clearProgram,
-      {}, { appArgs: appArgs });
-
-    // opt-in to app
-    runtime.optInToApp(creator.address, applicationId, {}, {});
-    runtime.optInToApp(donor.address, applicationId, {}, {});
 
     appArgs = [stringToBytes('donate')];
     donateTxGroup = [
@@ -122,6 +109,22 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     ];
   });
 
+  function updateAndOptIn () {
+    // update application with correct escrow account address
+    appArgs = [addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
+
+    runtime.updateApp(
+      creator.address,
+      applicationId,
+      approvalProgram,
+      clearProgram,
+      {}, { appArgs: appArgs });
+
+    // opt-in to app
+    runtime.optInToApp(creator.address, applicationId, {}, {});
+    runtime.optInToApp(donor.address, applicationId, {}, {});
+  }
+
   this.afterEach(async function () {
     creator = new StoreAccount(initialCreatorBalance);
     donor = new StoreAccount(initialDonorBalance);
@@ -129,6 +132,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
   });
 
   it('should fail donation if donor has insufficient balance', () => {
+    updateAndOptIn();
     appArgs = [stringToBytes('donate')];
     const donationAmount = initialDonorBalance + 1000;
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
@@ -155,6 +159,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
   });
 
   it('should fail donation if timestamp is after endDate', () => {
+    updateAndOptIn();
     // set timestamp to after of endDate
     runtime.setRoundAndTimestamp(5, endDate.getSeconds() + 100);
 
@@ -162,6 +167,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
   });
 
   it('should fail donation if timestamp is before of beginDate', () => {
+    updateAndOptIn();
     // set timestamp to out of endDate
     runtime.setRoundAndTimestamp(5, beginDate.getSeconds() - 100);
 
@@ -169,6 +175,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
   });
 
   it('should fail if goal is met, and donor tries to reclaim funds', () => {
+    updateAndOptIn();
     runtime.executeTx(donateTxGroup);
     runtime.executeTx(donateTxGroup);
     runtime.setRoundAndTimestamp(5, endDate.getTime() + 100); // end date is passed
@@ -201,6 +208,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
   });
 
   it('should fail if goal is not met, donor tries to reclaim funds before fund close date', () => {
+    updateAndOptIn();
     runtime.executeTx(donateTxGroup);
 
     // donor should be able to reclaim if goal is NOT met
@@ -231,6 +239,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
   });
 
   it('should fail if creator tries to claim funds before fund end date', () => {
+    updateAndOptIn();
     runtime.executeTx(donateTxGroup);
     runtime.executeTx(donateTxGroup);
     appArgs = [stringToBytes('claim')];
@@ -258,6 +267,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
   });
 
   it('should fail if a transaction is missing in group transaction', () => {
+    updateAndOptIn();
     appArgs = [stringToBytes('donate')];
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     const txGroup = [
@@ -275,6 +285,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
   });
 
   it('should fail if transaction is signed by wrong lsig', () => {
+    updateAndOptIn();
     runtime.executeTx(donateTxGroup);
     runtime.executeTx(donateTxGroup);
     const escrowProg = getProgram('wrongEscrow.teal', { APP_ID: applicationId });
@@ -305,6 +316,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
   });
 
   it('should fail if transaction is lsig is missing', () => {
+    updateAndOptIn();
     runtime.executeTx(donateTxGroup);
     runtime.executeTx(donateTxGroup);
     runtime.setRoundAndTimestamp(5, endDate.getTime() + 11);
@@ -332,6 +344,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
   });
 
   it('should fail to delete app because escrow account balance is not empty', () => {
+    updateAndOptIn();
     runtime.setRoundAndTimestamp(5, fundCloseDate.getTime() + 12);
     const deleteTx = {
       type: types.TransactionType.DeleteSSC,
@@ -344,5 +357,49 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     };
 
     assert.throws(() => runtime.executeTx(deleteTx), 'RUNTIME_ERR1008: Index out of bound');
+  });
+
+  it('should fail if trying to update application where sender is not creator', () => {
+    appArgs = [addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
+
+    assert.throws(() =>
+      runtime.updateApp(
+        donor.address,
+        applicationId,
+        approvalProgram,
+        clearProgram,
+        {}, { appArgs: appArgs }
+      ),
+    rejectMsg
+    );
+  });
+
+  it('should fail if closing the funds in escrow but closeRemainderTo is not fundReceiver', () => {
+    updateAndOptIn();
+    runtime.executeTx(donateTxGroup);
+    runtime.executeTx(donateTxGroup);
+    runtime.setRoundAndTimestamp(5, endDate.getTime() + 122);
+    appArgs = [stringToBytes('claim')];
+    const txGroup = [
+      {
+        type: types.TransactionType.CallNoOpSSC,
+        sign: types.SignType.SecretKey,
+        fromAccount: creator.account,
+        appId: applicationId,
+        payFlags: { totalFee: 1000 },
+        appArgs: appArgs
+      },
+      {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.LogicSignature,
+        fromAccount: escrow.account,
+        toAccountAddr: creator.address,
+        amountMicroAlgos: 0,
+        lsig: lsig,
+        payFlags: { totalFee: 1000, closeRemainderTo: donor.address }
+      }
+    ];
+
+    assert.throws(() => runtime.executeTx(txGroup), rejectMsg);
   });
 });

@@ -169,6 +169,7 @@ export interface TxParams {
   note?: string
   noteb64?: string
   closeRemainderTo?: AccountAddress
+  rekeyTo?: AccountAddress
 }
 
 /**
