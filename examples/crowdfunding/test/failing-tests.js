@@ -315,7 +315,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     assert.throws(() => runtime.executeTx(txGroup), 'RUNTIME_ERR1301: logic signature validation failed.');
   });
 
-  it('should fail if transaction is lsig is missing', () => {
+  it('should fail transaction if logic signature is not passed', () => {
     updateAndOptIn();
     runtime.executeTx(donateTxGroup);
     runtime.executeTx(donateTxGroup);
@@ -359,7 +359,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     assert.throws(() => runtime.executeTx(deleteTx), 'RUNTIME_ERR1008: Index out of bound');
   });
 
-  it('should fail if trying to update application where sender is not creator', () => {
+  it('should fail on trying to update application where sender is not creator', () => {
     appArgs = [addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
 
     assert.throws(() =>
