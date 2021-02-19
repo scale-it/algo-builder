@@ -176,11 +176,11 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
 
   it('should fail if goal is met, and donor tries to reclaim funds', () => {
     updateAndOptIn();
-    runtime.executeTx(donateTxGroup);
+    // set donation to greater than goal
+    donateTxGroup[1].amountMicroAlgos = goal + 1000;
     runtime.executeTx(donateTxGroup);
     runtime.setRoundAndTimestamp(5, endDate.getTime() + 100); // end date is passed
 
-    // donor should be able to reclaim if goal is NOT met
     appArgs = [stringToBytes('reclaim')];
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     const txGroup = [
@@ -211,7 +211,6 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     updateAndOptIn();
     runtime.executeTx(donateTxGroup);
 
-    // donor should be able to reclaim if goal is NOT met
     appArgs = [stringToBytes('reclaim')];
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     const txGroup = [
@@ -240,7 +239,8 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
 
   it('should fail if creator tries to claim funds before fund end date', () => {
     updateAndOptIn();
-    runtime.executeTx(donateTxGroup);
+    // set donation to greater than goal
+    donateTxGroup[1].amountMicroAlgos = goal + 1000;
     runtime.executeTx(donateTxGroup);
     appArgs = [stringToBytes('claim')];
     const txGroup = [
@@ -269,7 +269,6 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
   it('should fail if a transaction is missing in group transaction while donating', () => {
     updateAndOptIn();
     appArgs = [stringToBytes('donate')];
-    // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     const txGroup = [
       {
         type: types.TransactionType.CallNoOpSSC,
@@ -286,7 +285,8 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
 
   it('should fail if transaction is signed by wrong lsig', () => {
     updateAndOptIn();
-    runtime.executeTx(donateTxGroup);
+    // set donation to greater than goal
+    donateTxGroup[1].amountMicroAlgos = goal + 1000;
     runtime.executeTx(donateTxGroup);
     const escrowProg = getProgram('wrongEscrow.teal', { APP_ID: applicationId });
     const wrongLsig = runtime.getLogicSig(escrowProg, []);
@@ -315,9 +315,20 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     assert.throws(() => runtime.executeTx(txGroup), 'RUNTIME_ERR1301: logic signature validation failed.');
   });
 
+  it('should fail if escrow address is not updated in app', () => {
+    // opt-in to app
+    runtime.optInToApp(creator.address, applicationId, {}, {});
+    runtime.optInToApp(donor.address, applicationId, {}, {});
+
+    // we get invalid type error because if we don't update escrow in global state,
+    // it returns 0 value when compared with bytes array results in this error.
+    assert.throws(() => runtime.executeTx(donateTxGroup), 'RUNTIME_ERR1003: Type of data is incorrect.');
+  });
+
   it('should fail transaction if logic signature is not passed', () => {
     updateAndOptIn();
-    runtime.executeTx(donateTxGroup);
+    // set donation to greater than goal
+    donateTxGroup[1].amountMicroAlgos = goal + 1000;
     runtime.executeTx(donateTxGroup);
     runtime.setRoundAndTimestamp(5, endDate.getTime() + 11);
     appArgs = [stringToBytes('claim')];
@@ -376,7 +387,8 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
 
   it('should fail if closing the funds in escrow but closeRemainderTo is not fundReceiver', () => {
     updateAndOptIn();
-    runtime.executeTx(donateTxGroup);
+    // set donation to greater than goal
+    donateTxGroup[1].amountMicroAlgos = goal + 1000;
     runtime.executeTx(donateTxGroup);
     runtime.setRoundAndTimestamp(5, endDate.getTime() + 122);
     appArgs = [stringToBytes('claim')];
@@ -408,7 +420,8 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
   // commit is released
   /* it('should fail if ReKeyTo is not zeroAddress in transaction', () => {
     updateAndOptIn();
-    runtime.executeTx(donateTxGroup);
+    // set donation to greater than goal
+    donateTxGroup[1].amountMicroAlgos = goal + 1000;
     runtime.executeTx(donateTxGroup);
     runtime.setRoundAndTimestamp(5, endDate.getTime() + 122);
     appArgs = [stringToBytes('claim')];
