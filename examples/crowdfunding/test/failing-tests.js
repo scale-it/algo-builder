@@ -12,7 +12,7 @@ const initialDonorBalance = minBalance + 60e6;
 const initialCreatorBalance = minBalance + 0.01e6;
 const goal = 7e6;
 
-describe('Failing Scenario', function () {
+describe('Crowdfunding Test - Failing Scenarios', function () {
   const master = new StoreAccount(1000e6);
   let creator = new StoreAccount(initialCreatorBalance);
   let escrow = new StoreAccount(minBalance);
