@@ -1,5 +1,5 @@
-// source: https://github.com/algorand/smart-contracts/blob/master/devrel/poi/poi.teal
 #pragma version 2
+// source: https://github.com/algorand/smart-contracts/blob/master/devrel/poi/poi.teal
 // Creator Address
 // check if the app is being created
 // if so save creator

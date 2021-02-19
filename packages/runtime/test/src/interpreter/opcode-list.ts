@@ -1974,8 +1974,24 @@ describe("Teal Opcodes", function () {
         interpreter.runtime.ctx.tx.type = 'pay';
       });
 
-      it("push addr from 2nd account to stack", function () {
-        const op = new Txna(["Accounts", "1"], 1, interpreter);
+      it("push addr from txn.Accounts to stack according to index", function () {
+        // index 0 should push sender's address to stack
+        let op = new Txna(["Accounts", "0"], 1, interpreter);
+        op.execute(stack);
+
+        const senderPk = Uint8Array.from(interpreter.runtime.ctx.tx.snd);
+        assert.equal(1, stack.length());
+        assert.deepEqual(senderPk, stack.pop());
+
+        // should push Accounts[0] to stack
+        op = new Txna(["Accounts", "1"], 1, interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
+
+        // should push Accounts[1] to stack
+        op = new Txna(["Accounts", "2"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
@@ -1997,7 +2013,23 @@ describe("Teal Opcodes", function () {
       });
 
       it("push addr from 1st account of 2nd Txn in txGrp to stack", function () {
-        const op = new Gtxna(["0", "Accounts", "1"], 1, interpreter);
+        // index 0 should push sender's address to stack from 1st tx
+        let op = new Gtxna(["0", "Accounts", "1"], 1, interpreter);
+        op.execute(stack);
+
+        const senderPk = Uint8Array.from(interpreter.runtime.ctx.gtxs[0].snd);
+        assert.equal(1, stack.length());
+        assert.deepEqual(senderPk, stack.pop());
+
+        // should push Accounts[0] to stack
+        op = new Gtxna(["0", "Accounts", "1"], 1, interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
+
+        // should push Accounts[1] to stack
+        op = new Gtxna(["0", "Accounts", "2"], 1, interpreter);
         op.execute(stack);
 
         assert.equal(1, stack.length());
