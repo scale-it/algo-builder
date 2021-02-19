@@ -191,7 +191,6 @@ export interface SSCOptionalFlags {
   foreignAssets?: number[]
   note?: Uint8Array
   lease?: Uint8Array
-  rekeyTo?: string
 }
 
 export type ExecParams = AlgoTransferParam | AssetTransferParam | SSCCallsParam |

@@ -402,4 +402,36 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
 
     assert.throws(() => runtime.executeTx(txGroup), rejectMsg);
   });
+
+  // uncomment when
+  // https://github.com/algorand/js-algorand-sdk/commit/b18e3beab8004d7e53a5370334b8e9f5c7699146#diff-75520b02c557ab3f0b89e5f03029db31af2f0dc79e5215d3e221ed9ea59fe441
+  // commit is released
+  /* it('should fail if ReKeyTo is not zeroAddress in transaction', () => {
+    updateAndOptIn();
+    runtime.executeTx(donateTxGroup);
+    runtime.executeTx(donateTxGroup);
+    runtime.setRoundAndTimestamp(5, endDate.getTime() + 122);
+    appArgs = [stringToBytes('claim')];
+    const txGroup = [
+      {
+        type: types.TransactionType.CallNoOpSSC,
+        sign: types.SignType.SecretKey,
+        fromAccount: creator.account,
+        appId: applicationId,
+        payFlags: { totalFee: 1000, ReKeyTo: donor.address },
+        appArgs: appArgs
+      },
+      {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.LogicSignature,
+        fromAccount: escrow.account,
+        toAccountAddr: creator.address,
+        amountMicroAlgos: 0,
+        lsig: lsig,
+        payFlags: { totalFee: 1000, closeRemainderTo: creator.address, ReKeyTo: donor.address }
+      }
+    ];
+
+    assert.throws(() => runtime.executeTx(txGroup), rejectMsg);
+  }); */
 });

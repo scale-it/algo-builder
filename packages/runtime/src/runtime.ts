@@ -471,7 +471,7 @@ export class Runtime {
       flags.foreignAssets,
       flags.note,
       flags.lease,
-      flags.rekeyTo);
+      payFlags.rekeyTo);
 
     const encTx = txn.get_obj_for_encoding();
     encTx.txID = txn.txID();
@@ -533,7 +533,7 @@ export class Runtime {
       flags.foreignAssets,
       flags.note,
       flags.lease,
-      flags.rekeyTo);
+      payFlags.rekeyTo);
 
     const encTx = txn.get_obj_for_encoding();
     encTx.txID = txn.txID();
@@ -578,7 +578,7 @@ export class Runtime {
       flags.foreignAssets,
       flags.note,
       flags.lease,
-      flags.rekeyTo);
+      payFlags.rekeyTo);
 
     const encTx = txn.get_obj_for_encoding();
     encTx.txID = txn.txID();
