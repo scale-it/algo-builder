@@ -1951,6 +1951,35 @@ describe("Teal Opcodes", function () {
         assert.equal(1, stack.length());
         assert.deepEqual(TXN_OBJ.apsu, stack.pop());
       });
+
+      it("should push value from accounts or args array by index", function () {
+        let op = new Txn(["Accounts", "0"], 1, interpreter);
+        op.execute(stack);
+
+        const senderPk = Uint8Array.from(interpreter.runtime.ctx.tx.snd);
+        assert.equal(1, stack.length());
+        assert.deepEqual(senderPk, stack.pop());
+
+        // should push Accounts[0] to stack
+        op = new Txn(["Accounts", "1"], 1, interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
+
+        // should push Accounts[1] to stack
+        op = new Txn(["Accounts", "2"], 1, interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
+
+        op = new Txn(["ApplicationArgs", "0"], 0, interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apaa[0], stack.pop());
+      });
     });
 
     describe("Gtxn", function () {
@@ -1966,6 +1995,35 @@ describe("Teal Opcodes", function () {
 
         assert.equal(1, stack.length());
         assert.equal(BigInt('2222'), stack.pop());
+      });
+
+      it("should push value from accounts or args array by index from tx group", function () {
+        let op = new Gtxn(["1", "Accounts", "0"], 1, interpreter);
+        op.execute(stack);
+
+        const senderPk = Uint8Array.from(interpreter.runtime.ctx.tx.snd);
+        assert.equal(1, stack.length());
+        assert.deepEqual(senderPk, stack.pop());
+
+        // should push Accounts[0] to stack
+        op = new Gtxn(["1", "Accounts", "1"], 1, interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
+
+        // should push Accounts[1] to stack
+        op = new Gtxn(["1", "Accounts", "2"], 1, interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
+
+        op = new Gtxn(["1", "ApplicationArgs", "0"], 0, interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.deepEqual(TXN_OBJ.apaa[0], stack.pop());
       });
     });
 
