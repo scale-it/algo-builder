@@ -402,6 +402,10 @@ describe("Parser", function () {
       expected = new Txn(["Accounts", "1"], 1, interpreter);
       assert.deepEqual(res, expected);
 
+      res = opcodeFromSentence(["txn", "ApplicationArgs", "0"], 1, interpreter);
+      expected = new Txn(["ApplicationArgs", "0"], 1, interpreter);
+      assert.deepEqual(res, expected);
+
       expectRuntimeError(
         () => opcodeFromSentence(["txn", "Fee", "Fee"], 1, interpreter),
         RUNTIME_ERRORS.TEAL.ASSERT_LENGTH

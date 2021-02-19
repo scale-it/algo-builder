@@ -1279,10 +1279,13 @@ export class Gtxn extends Op {
   }
 }
 
-// push value of an array field from current transaction to stack
-// push to stack [...stack, value of an array field ]
-// NOTE: for arg="Accounts" index 0 means sender's address, and index 1 means first address
-// from accounts array (eg. txna Accounts 1: will push 1st address from Accounts[] to stack)
+/**
+ * push value of an array field from current transaction to stack
+ * push to stack [...stack, value of an array field ]
+ * NOTE: a) for arg="Accounts" index 0 means sender's address, and index 1 means first address
+ * from accounts array (eg. txna Accounts 1: will push 1st address from Accounts[] to stack)
+ * b) for arg="ApplicationArgs" index 0 means first argument for application array (normal indexing)
+ */
 export class Txna extends Op {
   readonly field: string;
   readonly idx: number;
@@ -1316,10 +1319,13 @@ export class Txna extends Op {
   }
 }
 
-// push value of a field to the stack from a transaction in the current transaction group
-// push to stack [...stack, value of field]
-// NOTE: for arg="Accounts" index 0 means sender's address, and index 1 means first address from accounts
-// array (eg. gtxna 0 Accounts 1: will push 1st address from Accounts[](from the 1st tx in group) to stack)
+/**
+ * push value of a field to the stack from a transaction in the current transaction group
+ * push to stack [...stack, value of field]
+ * NOTE: for arg="Accounts" index 0 means sender's address, and index 1 means first address from accounts
+ * array (eg. gtxna 0 Accounts 1: will push 1st address from Accounts[](from the 1st tx in group) to stack)
+ * b) for arg="ApplicationArgs" index 0 means first argument for application array (normal indexing)
+ */
 export class Gtxna extends Op {
   readonly field: string;
   readonly txIdx: number; // transaction group index
