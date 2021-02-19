@@ -207,7 +207,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     assert.throws(() => runtime.executeTx(txGroup), rejectMsg);
   });
 
-  it('should fail if goal is not met, donor tries to reclaim funds before fund close date', () => {
+  it('should fail if goal is not met, but donor tries to reclaim funds before fund close date', () => {
     updateAndOptIn();
     runtime.executeTx(donateTxGroup);
 
@@ -266,7 +266,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     assert.throws(() => runtime.executeTx(txGroup), rejectMsg);
   });
 
-  it('should fail if a transaction is missing in group transaction', () => {
+  it('should fail if a transaction is missing in group transaction while donating', () => {
     updateAndOptIn();
     appArgs = [stringToBytes('donate')];
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
