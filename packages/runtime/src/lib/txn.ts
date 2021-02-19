@@ -104,20 +104,18 @@ export function txnSpecbyField (txField: string, tx: Txn, gtxns: Txn[], tealVers
  */
 export function txAppArg (txField: TxField, tx: Txn, idx: number, op: Op,
   tealVersion: number, line: number): Uint8Array {
-  if (txField === 'Accounts' || txField === 'ApplicationArgs') {
-    const s = TxnFields[tealVersion][txField]; // 'apaa' or 'apat'
-    const result = tx[s as keyof Txn] as Buffer[]; // array of pk buffers (accounts or appArgs)
-
-    if (!result) { // handle
-      return TxFieldDefaults[txField];
-    }
-    op.checkIndexBound(idx, result, line);
-    return parseToStackElem(result[idx], txField) as Uint8Array;
+  const s = TxnFields[tealVersion][txField]; // 'apaa' or 'apat'
+  const result = tx[s as keyof Txn] as Buffer[]; // array of pk buffers (accounts or appArgs)
+  if (!result) { // handle defaults
+    return TxFieldDefaults[txField];
   }
 
-  throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_OP_ARG, {
-    opcode: "txna or gtxna"
-  });
+  if (txField === 'Accounts') {
+    if (idx === 0) { return parseToStackElem(tx.snd, txField) as Uint8Array; }
+    idx--; // if not sender, then reduce index by 1
+  }
+  op.checkIndexBound(idx, result, line);
+  return parseToStackElem(result[idx], txField) as Uint8Array;
 }
 
 export function encodeNote (note: string | undefined, noteb64: string| undefined): Uint8Array | undefined {

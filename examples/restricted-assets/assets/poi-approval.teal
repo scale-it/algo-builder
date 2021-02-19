@@ -1,5 +1,5 @@
-// source: https://github.com/algorand/smart-contracts/blob/master/devrel/poi/poi.teal
 #pragma version 2
+// source: https://github.com/algorand/smart-contracts/blob/master/devrel/poi/poi.teal
 // Creator Address
 // check if the app is being created
 // if so save creator
@@ -302,8 +302,12 @@ return
 // By default, disallow updating or deleting the app. Add custom authorization
 // logic below to allow updating or deletion in certain circumstances.
 handle_updateapp:
-handle_deleteapp:
 err
+// update below code to throw err to block delete call
+handle_deleteapp:
+int 1
+return
+
 failed:
 int 0
 return

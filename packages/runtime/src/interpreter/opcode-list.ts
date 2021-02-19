@@ -1178,6 +1178,7 @@ export class Substring3 extends Op {
 // push to stack [...stack, transaction field]
 export class Txn extends Op {
   readonly field: string;
+  readonly idx: number | undefined;
   readonly interpreter: Interpreter;
   readonly line: number;
 
@@ -1192,7 +1193,14 @@ export class Txn extends Op {
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     this.line = line;
-    assertLen(args.length, 1, line);
+    this.idx = undefined;
+    if (args[0] === "ApplicationArgs" || args[0] === "Accounts") { // eg. txn Accounts 1
+      assertLen(args.length, 2, line);
+      assertOnlyDigits(args[1], line);
+      this.idx = Number(args[1]);
+    } else {
+      assertLen(args.length, 1, line);
+    }
     this.assertTxFieldDefined(args[0], interpreter.tealVersion, line);
 
     this.field = args[0]; // field
@@ -1200,11 +1208,17 @@ export class Txn extends Op {
   }
 
   execute (stack: TEALStack): void {
-    const result = txnSpecbyField(
-      this.field,
-      this.interpreter.runtime.ctx.tx,
-      this.interpreter.runtime.ctx.gtxs,
-      this.interpreter.tealVersion);
+    let result;
+    if (this.idx !== undefined) { // if field is an array use txAppArg (with "Accounts"/"ApplicationArgs")
+      result = txAppArg(this.field, this.interpreter.runtime.ctx.tx, this.idx, this,
+        this.interpreter.tealVersion, this.line);
+    } else {
+      result = txnSpecbyField(
+        this.field,
+        this.interpreter.runtime.ctx.tx,
+        this.interpreter.runtime.ctx.gtxs,
+        this.interpreter.tealVersion);
+    }
     stack.push(result);
   }
 }
@@ -1215,12 +1229,13 @@ export class Txn extends Op {
 export class Gtxn extends Op {
   readonly field: string;
   readonly txIdx: number;
+  readonly txFieldIdx: number | undefined;
   readonly interpreter: Interpreter;
   readonly line: number;
 
   /**
    * Sets `field`, `txIdx` values according to arguments passed.
-   * @param args Expected argumensts: [transaction group index, transaction field]
+   * @param args Expected arguments: [transaction group index, transaction field]
    * // Note: Transaction field is expected as string instead of number.
    * For ex: `Fee` is expected and `0` is not expected.
    * @param line line number in TEAL file
@@ -1229,7 +1244,14 @@ export class Gtxn extends Op {
   constructor (args: string[], line: number, interpreter: Interpreter) {
     super();
     this.line = line;
-    assertLen(args.length, 2, line);
+    this.txFieldIdx = undefined;
+    if (args[1] === "ApplicationArgs" || args[1] === "Accounts") {
+      assertLen(args.length, 3, line); // eg. gtxn 0 Accounts 1
+      assertOnlyDigits(args[2], line);
+      this.txFieldIdx = Number(args[2]);
+    } else {
+      assertLen(args.length, 2, line);
+    }
     assertOnlyDigits(args[0], line);
     this.assertTxFieldDefined(args[1], interpreter.tealVersion, line);
 
@@ -1241,18 +1263,29 @@ export class Gtxn extends Op {
   execute (stack: TEALStack): void {
     this.assertUint8(BigInt(this.txIdx), this.line);
     this.checkIndexBound(this.txIdx, this.interpreter.runtime.ctx.gtxs, this.line);
+    let result;
 
-    const result = txnSpecbyField(
-      this.field,
-      this.interpreter.runtime.ctx.gtxs[this.txIdx],
-      this.interpreter.runtime.ctx.gtxs,
-      this.interpreter.tealVersion);
+    if (this.txFieldIdx !== undefined) {
+      const tx = this.interpreter.runtime.ctx.gtxs[this.txIdx]; // current tx
+      result = txAppArg(this.field, tx, this.txFieldIdx, this, this.interpreter.tealVersion, this.line);
+    } else {
+      result = txnSpecbyField(
+        this.field,
+        this.interpreter.runtime.ctx.gtxs[this.txIdx],
+        this.interpreter.runtime.ctx.gtxs,
+        this.interpreter.tealVersion);
+    }
     stack.push(result);
   }
 }
 
-// push value of an array field from current transaction to stack
-// push to stack [...stack, value of an array field ]
+/**
+ * push value of an array field from current transaction to stack
+ * push to stack [...stack, value of an array field ]
+ * NOTE: a) for arg="Accounts" index 0 means sender's address, and index 1 means first address
+ * from accounts array (eg. txna Accounts 1: will push 1st address from Accounts[] to stack)
+ * b) for arg="ApplicationArgs" index 0 means first argument for application array (normal indexing)
+ */
 export class Txna extends Op {
   readonly field: string;
   readonly idx: number;
@@ -1272,7 +1305,7 @@ export class Txna extends Op {
     this.line = line;
     assertLen(args.length, 2, line);
     assertOnlyDigits(args[1], line);
-    this.assertTxFieldDefined(args[0], interpreter.tealVersion, line);
+    this.assertTxArrFieldDefined(args[0], interpreter.tealVersion, line);
 
     this.field = args[0]; // field
     this.idx = Number(args[1]);
@@ -1286,8 +1319,13 @@ export class Txna extends Op {
   }
 }
 
-// push value of a field to the stack from a transaction in the current transaction group
-// push to stack [...stack, value of field]
+/**
+ * push value of a field to the stack from a transaction in the current transaction group
+ * push to stack [...stack, value of field]
+ * NOTE: for arg="Accounts" index 0 means sender's address, and index 1 means first address from accounts
+ * array (eg. gtxna 0 Accounts 1: will push 1st address from Accounts[](from the 1st tx in group) to stack)
+ * b) for arg="ApplicationArgs" index 0 means first argument for application array (normal indexing)
+ */
 export class Gtxna extends Op {
   readonly field: string;
   readonly txIdx: number; // transaction group index
@@ -1310,7 +1348,7 @@ export class Gtxna extends Op {
     assertLen(args.length, 3, line);
     assertOnlyDigits(args[0], line);
     assertOnlyDigits(args[2], line);
-    this.assertTxFieldDefined(args[1], interpreter.tealVersion, line);
+    this.assertTxArrFieldDefined(args[1], interpreter.tealVersion, line);
 
     this.txIdx = Number(args[0]); // transaction group index
     this.field = args[1]; // field
