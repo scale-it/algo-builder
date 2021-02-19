@@ -426,7 +426,7 @@ export interface AlgobDeployer {
     flags: FundASCFlags,
     payFlags: rtypes.TxParams,
     scParams: LogicSigArgs,
-    scTmplParams?: StrMap
+    scTmplParams?: SCParams
   ) => void
 
   /**
@@ -441,7 +441,7 @@ export interface AlgobDeployer {
     name: string,
     signer: rtypes.Account,
     scParams: LogicSigArgs,
-    scTmplParams?: StrMap
+    scTmplParams?: SCParams
   ) => Promise<LsigInfo>
 
   /**
@@ -458,7 +458,7 @@ export interface AlgobDeployer {
     clearProgram: string,
     flags: rtypes.SSCDeploymentFlags,
     payFlags: rtypes.TxParams,
-    scTmplParams?: StrMap) => Promise<SSCInfo>
+    scTmplParams?: SCParams) => Promise<SSCInfo>
 
   /**
    * Returns true if ASA or DelegatedLsig or SSC were deployed in any script.
@@ -510,7 +510,7 @@ export interface AlgobDeployer {
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  loadLogic: (name: string, scParams: LogicSigArgs, scTmplParams?: StrMap) => Promise<LogicSig>
+  loadLogic: (name: string, scParams: LogicSigArgs, scTmplParams?: SCParams) => Promise<LogicSig>
 
   /**
    * Returns ASCCache (with compiled code)
@@ -519,7 +519,7 @@ export interface AlgobDeployer {
    * @scTmplParams  scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  ensureCompiled: (name: string, force?: boolean, scTmplParams?: StrMap) => Promise<ASCCache>
+  ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>
 }
 
 // ************************
@@ -543,6 +543,10 @@ export interface PyASCCache extends ASCCache {
 
 export interface StrMap {
   [key: string]: string
+}
+
+export interface SCParams {
+  [key: string]: string | bigint
 }
 
 export interface AnyMap {

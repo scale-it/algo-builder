@@ -15,6 +15,7 @@ import type {
   CheckpointRepo,
   FundASCFlags,
   LsigInfo,
+  SCParams,
   SSCInfo,
   StrMap
 } from "../types";
@@ -99,7 +100,7 @@ class DeployerBasicMode {
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    * @returns {LogicSig} loaded logic signature from assets/<file_name>.teal
    */
-  async loadLogic (name: string, scParams: LogicSigArgs, scTmplParams?: StrMap): Promise<LogicSig> {
+  async loadLogic (name: string, scParams: LogicSigArgs, scTmplParams?: SCParams): Promise<LogicSig> {
     return await getLsig(name, this.algoOp.algodClient, scParams, scTmplParams);
   }
 
@@ -125,7 +126,7 @@ class DeployerBasicMode {
    * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  async ensureCompiled (name: string, force?: boolean, scTmplParams?: StrMap): Promise<ASCCache> {
+  async ensureCompiled (name: string, force?: boolean, scTmplParams?: SCParams): Promise<ASCCache> {
     return await this.algoOp.ensureCompiled(name, force, scTmplParams);
   }
 }
@@ -230,7 +231,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
   async fundLsig (name: string, flags: FundASCFlags,
-    payFlags: rtypes.TxParams, scParams: LogicSigArgs, scTmplParams?: StrMap): Promise<void> {
+    payFlags: rtypes.TxParams, scParams: LogicSigArgs, scTmplParams?: SCParams): Promise<void> {
     try {
       await this.algoOp.fundLsig(name, flags, payFlags, this.txWriter, scParams, scTmplParams);
     } catch (error) {
@@ -250,7 +251,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
    */
   async mkDelegatedLsig (
     name: string, signer: rtypes.Account,
-    scParams: LogicSigArgs, scTmplParams?: StrMap): Promise<LsigInfo> {
+    scParams: LogicSigArgs, scTmplParams?: SCParams): Promise<LsigInfo> {
     this.assertNoAsset(name);
     let lsigInfo = {} as any;
     try {
@@ -285,7 +286,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
     clearProgram: string,
     flags: rtypes.SSCDeploymentFlags,
     payFlags: rtypes.TxParams,
-    scTmplParams?: StrMap): Promise<SSCInfo> {
+    scTmplParams?: SCParams): Promise<SSCInfo> {
     const name = approvalProgram + "-" + clearProgram;
     this.assertNoAsset(name);
     let sscInfo = {} as any;

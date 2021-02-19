@@ -9,7 +9,7 @@ import { BuilderError, parseAlgorandError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { assertDir, ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
 import { timestampNow } from "../lib/time";
-import type { ASCCache, PyASCCache, StrMap } from "../types";
+import type { ASCCache, PyASCCache, SCParams } from "../types";
 
 export const tealExt = ".teal";
 export const pyExt = ".py";
@@ -33,7 +33,7 @@ export class CompileOp {
    * @param force: if true it will force recompilation even if the cache is up to date.
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
-  async ensureCompiled (filename: string, force?: boolean, scTmplParams?: StrMap): Promise<ASCCache> {
+  async ensureCompiled (filename: string, force?: boolean, scTmplParams?: SCParams): Promise<ASCCache> {
     if (force === undefined) {
       force = false;
     }
@@ -125,7 +125,7 @@ export class PyCompileOp {
    * @param force    : if true it will force recompilation even if the cache is up to date.
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
-  async ensureCompiled (filename: string, force?: boolean, scTmplParams?: unknown): Promise<PyASCCache> {
+  async ensureCompiled (filename: string, force?: boolean, scTmplParams?: SCParams): Promise<PyASCCache> {
     if (!filename.endsWith(pyExt)) {
       throw new Error(`filename "${filename}" must end with "${pyExt}"`);
     }
