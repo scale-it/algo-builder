@@ -45,9 +45,8 @@ let accounts = mkAccounts([
 
 let defaultCfg = {
   host: "http://localhost",
-  port: 8080, // change to 4001 if using sandbox
-  // update to 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' if using sandbox
-  token: "aade468d25a7aa48fec8082d6a847c48492066a2741f3731e613fdde086cd6e9",
+  port: 4001,
+  token: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   // you can also load accounts from KMD, look at /docs/algob-config.md for more details.
   accounts: accounts
 };

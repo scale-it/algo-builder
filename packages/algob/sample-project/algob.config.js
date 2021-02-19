@@ -46,10 +46,10 @@ let accounts = mkAccounts([{
 
 let defaultCfg = {
   host: "http://localhost",
-  port: 8080,
+  port: 4001,
   // Below is a token created through our script in `/infrastructure`
   // If you use other setup, update it accordignly (eg content of algorand-node-data/algod.token)
-  token: "aade468d25a7aa48fec8082d6a847c48492066a2741f3731e613fdde086cd6e9",
+  token: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   accounts: accounts,
   // if you want to load accounts from KMD, you need to add the kmdCfg object. Please read
   // algob-config.md documentation for details.
@@ -59,7 +59,7 @@ let defaultCfg = {
 // You can also use Environment variables to get Algod credentials
 // Please check https://github.com/scale-it/algorand-builder/blob/master/docs/algob-config.md#credentials for more details and more methods.
 // Method 1
-process.env.ALGOD_ADDR = "127.0.0.1:8080";
+process.env.ALGOD_ADDR = "127.0.0.1:4001";
 process.env.ALGOD_TOKEN = "algod_token";
 let algodCred = algodCredentialsFromEnv();
 

@@ -32,7 +32,7 @@ To load it from ENV:
 
   - To add `ALGOD_ADDR` and `ALGOD_TOKEN` in env, you can use the following commands in terminal:
 
-        export ALGOD_ADDR = "127.0.0.1:8080"
+        export ALGOD_ADDR = "127.0.0.1:4001"
         export ALGOD_TOKEN = "algod_token"
 
   - To load algod credentials from env in config, you can use:
@@ -56,7 +56,7 @@ To load it from ENV:
 
   - To add `KMD_ADDR` and `KMD_TOKEN` in env, you can use the following commands in terminal:
 
-        export KMD_ADDR = "127.0.0.1:8080"
+        export KMD_ADDR = "127.0.0.1:4001"
         export KMD_TOKEN = "kmd_token"
 
   - To load kmd credentials from env in config, you can use:
@@ -165,7 +165,7 @@ const mainnetAccounts = loadAccountsFromFileSync("private/accounts/mainnet.yaml"
 
 var myprivateNet = {
      host: "http://127.0.0.1",
-     port: 8080,
+     port: 4001,
      token: "abc",
      accounts: accounts
 }
