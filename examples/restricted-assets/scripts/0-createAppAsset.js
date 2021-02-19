@@ -8,7 +8,7 @@ async function run (runtimeEnv, deployer) {
   const creator = deployer.accountsByName.get('alice');
   const bob = deployer.accountsByName.get('bob');
 
-  /** Fund Creator account by master **/
+  /** Fund Creator & Bob account by master **/
   const algoTxnParams = {
     type: types.TransactionType.TransferAlgo,
     sign: types.SignType.SecretKey,
@@ -17,6 +17,8 @@ async function run (runtimeEnv, deployer) {
     amountMicroAlgos: 200e6,
     payFlags: {}
   };
+  await executeTransaction(deployer, algoTxnParams);
+  algoTxnParams.toAccountAddr = bob.addr;
   await executeTransaction(deployer, algoTxnParams);
 
   const asaInfo = await deployer.deployASA('gold', { creator: creator });
