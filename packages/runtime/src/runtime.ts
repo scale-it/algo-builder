@@ -632,13 +632,14 @@ export class Runtime {
         }
         case TransactionType.ClearSSC: {
           const appParams = this.assertAppDefined(txnParam.appId, this.getApp(txnParam.appId));
-          console.log(appParams);
           try {
             this.run(appParams["clear-state-program"], ExecutionMode.STATEFUL);
           } catch (error) {
             // if transaction type is Clear Call, remove the app first before throwing error (rejecting tx)
             // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
             this.ctxOp.closeApp(txnParam.fromAccount.addr, txnParam.appId); // remove app from local state
+            // group, store not updated
+            // open
             throw error;
           }
 

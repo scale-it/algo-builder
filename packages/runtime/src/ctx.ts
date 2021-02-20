@@ -3,7 +3,7 @@ import { AssetHolding } from "algosdk";
 import { Runtime } from ".";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
-import { AccountAddress, AlgoTransferParam, AssetModFields, AssetTransferParam, StoreAccountI } from "./types";
+import { AccountAddress, AlgoTransferParam, AssetModFields, AssetTransferParam, SSCAttributesM, StoreAccountI } from "./types";
 
 export class Ctx {
   private readonly runtime: Runtime;
@@ -70,6 +70,21 @@ export class Ctx {
       });
     }
     return assetHolding;
+  }
+
+  /**
+   * Fetches app from `this.ctx`
+   * @param appId Application Index
+   */
+  getApp (appId: number): SSCAttributesM {
+    if (!this.runtime.ctx.state.globalApps.has(appId)) {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
+    }
+    const accAddress = this.runtime.assertAddressDefined(this.runtime.ctx.state.globalApps.get(appId));
+    const account = this.runtime.assertAccountDefined(
+      accAddress, this.runtime.ctx.state.accounts.get(accAddress)
+    );
+    return this.runtime.assertAppDefined(appId, account.getApp(appId));
   }
 
   // transfer ALGO as per transaction parameters
@@ -226,7 +241,7 @@ export class Ctx {
   closeApp (sender: AccountAddress, appId: number): void {
     const fromAccount = this.getAccount(sender);
     // https://developer.algorand.org/docs/reference/cli/goal/app/closeout/#search-overlay
-    this.runtime.assertAppDefined(appId, fromAccount.getApp(appId));
+    this.runtime.assertAppDefined(appId, this.getApp(appId));
     fromAccount.closeApp(appId); // remove app from local state
   }
 }
