@@ -4,6 +4,7 @@ import algosdk, { AssetDef, AssetHolding, decodeAddress, makeAssetTransferTxnWit
 import cloneDeep from "lodash/cloneDeep";
 
 import { StoreAccount } from "./account";
+import { Ctx } from "./ctx";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { Interpreter, loadASAFile } from "./index";
@@ -12,12 +13,12 @@ import { encodeNote, mkTransaction } from "./lib/txn";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import type {
-  AccountAddress, AlgoTransferParam, ASADefs,
-  ASADeploymentFlags, AssetModFields, Context, ExecParams,
+  AccountAddress, ASADefs,
+  ASADeploymentFlags, Context, ExecParams,
   SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
   StackElem, State, StoreAccountI, Txn, TxParams
 } from "./types";
-import { AssetTransferParam, ExecutionMode, SignType, TransactionType } from "./types";
+import { ExecutionMode, SignType, TransactionType } from "./types";
 
 export class Runtime {
   /**
@@ -35,6 +36,7 @@ export class Runtime {
   private round: number;
   private timestamp: number;
   private readonly loadedAssetsDefs: ASADefs;
+  private readonly ctxOp: Ctx;
 
   constructor (accounts: StoreAccountI[]) {
     // runtime store
@@ -57,6 +59,9 @@ export class Runtime {
       gtxs: [],
       args: []
     };
+
+    // ctx class
+    this.ctxOp = new Ctx(this);
     this.appCounter = 0;
     this.assetCounter = 0;
     this.round = 2;
@@ -363,81 +368,6 @@ export class Runtime {
   }
 
   /**
-   * https://developer.algorand.org/docs/features/asa/#modifying-an-asset
-   * Modifies asset fields
-   * @param sender sender address
-   * @param assetId Asset Index
-   * @param fields Asset modifying fields
-   * @param payFlags Transaction Parameters
-   */
-  modifyAsset (assetId: number, fields: AssetModFields): void {
-    const creatorAcc = this.getAssetAccount(assetId);
-    creatorAcc.modifyAsset(assetId, fields);
-  }
-
-  /**
-   * https://developer.algorand.org/docs/features/asa/#freezing-an-asset
-   * Freezes assets for a target account
-   * @param sender sender address
-   * @param assetId asset index
-   * @param freezeTarget target account
-   * @param freezeState target state
-   * @param payFlags transaction parameters
-   */
-  freezeAsset (
-    assetId: number, freezeTarget: string, freezeState: boolean
-  ): void {
-    const acc = this.assertAccountDefined(freezeTarget, this.store.accounts.get(freezeTarget));
-    acc.setFreezeState(assetId, freezeState);
-  }
-
-  /**
-   * https://developer.algorand.org/docs/features/asa/#revoking-an-asset
-   * Revoking an asset for an account removes a specific number of the asset
-   * from the revoke target account.
-   * @param sender sender address
-   * @param recipient asset receiver address
-   * @param assetId asset index
-   * @param revocationTarget revoke target account
-   * @param amount amount of assets
-   * @param payFlags transaction parameters
-   */
-  revokeAsset (
-    recipient: string, assetID: number,
-    revocationTarget: string, amount: number
-  ): void {
-    // Transfer assets
-    const fromAssetHolding = this.getAssetHolding(assetID, revocationTarget);
-    const toAssetHolding = this.getAssetHolding(assetID, recipient);
-
-    if (fromAssetHolding.amount - amount < 0) {
-      throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS, {
-        amount: amount,
-        address: revocationTarget
-      });
-    }
-    fromAssetHolding.amount -= amount;
-    toAssetHolding.amount += amount;
-  }
-
-  /**
-   * https://developer.algorand.org/docs/features/asa/#destroying-an-asset
-   * Destroy asset
-   * @param sender sender's address
-   * @param assetId asset index
-   * @param payFlags transaction parameters
-   */
-  destroyAsset (assetId: number): void {
-    const creatorAcc = this.getAssetAccount(assetId);
-    // destroy asset from creator's account
-    creatorAcc.destroyAsset(assetId);
-    // delete asset holdings from all accounts
-    this.store.accounts.forEach((value, key) => {
-      value.assets.delete(assetId);
-    });
-  }
-
-  /**
    * Returns Asset Holding from an account
    * @param assetIndex Asset Index
    * @param address address of account to get holding from
@@ -618,24 +548,6 @@ export class Runtime {
     updatedApp["clear-state-program"] = clearProgram;
   }
 
-  /**
-   * Delete application from account's state and global state
-   * @param appId Application Index
-   */
-  deleteApp (appId: number): void {
-    if (!this.store.globalApps.has(appId)) {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
-    }
-    const accountAddr = this.assertAddressDefined(this.store.globalApps.get(appId));
-    if (accountAddr === undefined) {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.ACCOUNT_DOES_NOT_EXIST);
-    }
-    const account = this.assertAccountDefined(accountAddr, this.store.accounts.get(accountAddr));
-
-    account.deleteApp(appId);
-    this.store.globalApps.delete(appId);
-  }
-
   // verify 'amt' microalgos can be withdrawn from account
   assertMinBalance (amt: number, address: string): void {
     const account = this.getAccount(address);
@@ -657,59 +569,6 @@ export class Runtime {
     const acc = new StoreAccount(0, { addr: lsig.address(), sk: new Uint8Array(0) });
     this.store.accounts.set(acc.address, acc);
     return lsig;
-  }
-
-  // verifies assetId is not frozen for an account
-  assertAssetNotFrozen (assetIndex: number, address: AccountAddress): void {
-    const assetHolding = this.getAssetHolding(assetIndex, address);
-    if (assetHolding["is-frozen"]) {
-      throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.ACCOUNT_ASSET_FROZEN, {
-        assetId: assetIndex,
-        address: address
-      });
-    }
-  }
-
-  // transfer ALGO as per transaction parameters
-  transferAlgo (txnParam: AlgoTransferParam): void {
-    const fromAccount = this.getAccount(txnParam.fromAccount.addr);
-    const toAccount = this.getAccount(txnParam.toAccountAddr);
-
-    this.assertMinBalance(txnParam.amountMicroAlgos, fromAccount.address);
-    fromAccount.amount -= txnParam.amountMicroAlgos; // remove 'x' algo from sender
-    toAccount.amount += txnParam.amountMicroAlgos; // add 'x' algo to receiver
-
-    if (txnParam.payFlags.closeRemainderTo) {
-      const closeRemToAcc = this.getAccount(txnParam.payFlags.closeRemainderTo);
-
-      closeRemToAcc.amount += fromAccount.amount; // transfer funds of sender to closeRemTo account
-      fromAccount.amount = 0; // close sender's account
-    }
-  }
-
-  // transfer ASSET as per transaction parameters
-  transferAsset (txnParam: AssetTransferParam): void {
-    const fromAssetHolding = this.getAssetHolding(txnParam.assetID, txnParam.fromAccount.addr);
-    const toAssetHolding = this.getAssetHolding(txnParam.assetID, txnParam.toAccountAddr);
-
-    this.assertAssetNotFrozen(txnParam.assetID, txnParam.fromAccount.addr);
-    this.assertAssetNotFrozen(txnParam.assetID, txnParam.toAccountAddr);
-    if (fromAssetHolding.amount - txnParam.amount < 0) {
-      throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS, {
-        amount: txnParam.amount,
-        address: txnParam.fromAccount.addr
-      });
-    }
-    fromAssetHolding.amount -= txnParam.amount;
-    toAssetHolding.amount += txnParam.amount;
-
-    if (txnParam.payFlags.closeRemainderTo) {
-      const closeRemToAssetHolding = this.getAssetHolding(
-        txnParam.assetID, txnParam.payFlags.closeRemainderTo);
-
-      closeRemToAssetHolding.amount += fromAssetHolding.amount; // transfer assets of sender to closeRemTo account
-      fromAssetHolding.amount = 0; // close sender's account
-    }
   }
 
   /**
@@ -736,56 +595,97 @@ export class Runtime {
   }
 
   /**
-   * Update current state and account balances
-   * @param txnParams : Transaction parameters
+   * Process transactions in ctx
+   * - Runs TEAL code if associated with transaction
+   * - Executes the transaction on ctx.state
+   * @param txnParams Transaction Parameters
    */
-  updateFinalState (txnParams: ExecParams[]): void {
-    this.store = this.ctx.state; // update state after successful execution('local-state', 'global-state'..)
-
+  processTransactions (txnParams: ExecParams[]): void {
     txnParams.forEach((txnParam, idx) => {
-      const fromAccount = this.getAccount(txnParam.fromAccount.addr);
-      const fee = this.ctx.gtxs[idx].fee;
-      this.assertMinBalance(fee, txnParam.fromAccount.addr);
-      fromAccount.amount -= fee; // remove tx fee from Sender's account
+      this.ctxOp.deductFee(txnParam.fromAccount.addr, idx);
+      this.assertAmbiguousTxnParams(txnParam);
 
-      if (txnParam.payFlags) {
-        switch (txnParam.type) {
-          case TransactionType.TransferAlgo: {
-            this.transferAlgo(txnParam);
-            break;
+      if (txnParam.sign === SignType.LogicSignature) {
+        this.validateLsigAndRun(txnParam);
+      }
+
+      // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
+      switch (txnParam.type) {
+        case TransactionType.TransferAlgo: {
+          this.ctxOp.transferAlgo(txnParam);
+          break;
+        }
+        case TransactionType.TransferAsset: {
+          this.ctxOp.transferAsset(txnParam);
+          break;
+        }
+        case TransactionType.CallNoOpSSC: {
+          const appParams = this.getApp(txnParam.appId);
+          this.run(appParams["approval-program"], ExecutionMode.STATEFUL);
+          break;
+        }
+        case TransactionType.CloseSSC: {
+          const appParams = this.getApp(txnParam.appId);
+          this.run(appParams["approval-program"], ExecutionMode.STATEFUL);
+          this.ctxOp.closeApp(txnParam.fromAccount.addr, txnParam.appId);
+          break;
+        }
+        case TransactionType.ClearSSC: {
+          const appParams = this.assertAppDefined(txnParam.appId, this.getApp(txnParam.appId));
+          console.log(appParams);
+          try {
+            this.run(appParams["clear-state-program"], ExecutionMode.STATEFUL);
+          } catch (error) {
+            // if transaction type is Clear Call, remove the app first before throwing error (rejecting tx)
+            // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
+            this.ctxOp.closeApp(txnParam.fromAccount.addr, txnParam.appId); // remove app from local state
+            throw error;
           }
-          case TransactionType.TransferAsset: {
-            this.transferAsset(txnParam);
-            break;
+
+          this.ctxOp.closeApp(txnParam.fromAccount.addr, txnParam.appId); // remove app from local state
+          break;
+        }
+        case TransactionType.DeleteSSC: {
+          const appParams = this.getApp(txnParam.appId);
+          this.run(appParams["approval-program"], ExecutionMode.STATEFUL);
+          this.ctxOp.deleteApp(txnParam.appId);
+          break;
+        }
+        case TransactionType.ModifyAsset: {
+          const asset = this.getAssetDef(txnParam.assetID);
+          if (asset.manager !== txnParam.fromAccount.addr) {
+            throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
           }
-          case TransactionType.ModifyAsset: {
-            this.modifyAsset(txnParam.assetID, txnParam.fields);
-            break;
+          // modify asset in ctx.
+          this.ctxOp.modifyAsset(txnParam.assetID, txnParam.fields);
+          break;
+        }
+        case TransactionType.FreezeAsset: {
+          const asset = this.getAssetDef(txnParam.assetID);
+          if (asset.freeze !== txnParam.fromAccount.addr) {
+            throw new RuntimeError(RUNTIME_ERRORS.ASA.FREEZE_ERROR, { address: asset.freeze });
           }
-          case TransactionType.FreezeAsset: {
-            this.freezeAsset(txnParam.assetID, txnParam.freezeTarget, txnParam.freezeState);
-            break;
+          this.ctxOp.freezeAsset(txnParam.assetID, txnParam.freezeTarget, txnParam.freezeState);
+          break;
+        }
+        case TransactionType.RevokeAsset: {
+          const asset = this.getAssetDef(txnParam.assetID);
+          if (asset.clawback !== txnParam.fromAccount.addr) {
+            throw new RuntimeError(RUNTIME_ERRORS.ASA.CLAWBACK_ERROR, { address: asset.clawback });
           }
-          case TransactionType.RevokeAsset: {
-            this.revokeAsset(
-              txnParam.recipient, txnParam.assetID,
-              txnParam.revocationTarget, txnParam.amount);
-            break;
+          this.ctxOp.revokeAsset(
+            txnParam.recipient, txnParam.assetID,
+            txnParam.revocationTarget, txnParam.amount
+          );
+          break;
+        }
+        case TransactionType.DestroyAsset: {
+          const asset = this.getAssetDef(txnParam.assetID);
+          if (asset.manager !== txnParam.fromAccount.addr) {
+            throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
           }
-          case TransactionType.DestroyAsset: {
-            this.destroyAsset(txnParam.assetID);
-            break;
-          }
-          case TransactionType.DeleteSSC: {
-            this.deleteApp(txnParam.appId);
-            break;
-          }
-          case TransactionType.CloseSSC: {
-            // https://developer.algorand.org/docs/reference/cli/goal/app/closeout/#search-overlay
-            this.assertAppDefined(txnParam.appId, fromAccount.getApp(txnParam.appId));
-            fromAccount.closeApp(txnParam.appId); // remove app from local state
-            break;
-          }
+          this.ctxOp.destroyAsset(txnParam.assetID);
+          break;
         }
       }
     });
@@ -798,7 +698,6 @@ export class Runtime {
    * @param program : teal code as a string
    * @param args : external arguments to smart contract
    */
-  /* eslint-disable sonarjs/cognitive-complexity */
   executeTx (txnParams: ExecParams | ExecParams[]): void {
     const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
     // validate first and last rounds
@@ -813,64 +712,12 @@ export class Runtime {
     };
 
     const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
-    // Run TEAL program associated with each transaction without interacting with store.
-    for (const txnParam of txnParameters) {
-      this.assertAmbiguousTxnParams(txnParam);
-      if (txnParam.sign === SignType.LogicSignature) {
-        this.validateLsigAndRun(txnParam);
-      }
-
-      // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
-      switch (txnParam.type) {
-        case TransactionType.CallNoOpSSC:
-        case TransactionType.CloseSSC:
-        case TransactionType.DeleteSSC: {
-          const appParams = this.getApp(txnParam.appId);
-          this.run(appParams["approval-program"], ExecutionMode.STATEFUL);
-          break;
-        }
-        case TransactionType.ClearSSC: {
-          const appParams = this.assertAppDefined(txnParam.appId, this.getApp(txnParam.appId));
-          const fromAccount = this.getAccount(txnParam.fromAccount.addr);
-          try {
-            this.run(appParams["clear-state-program"], ExecutionMode.STATEFUL);
-          } catch (error) {
-            // if transaction type is Clear Call, remove the app first before throwing error (rejecting tx)
-            // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
-            fromAccount.closeApp(txnParam.appId); // remove app from local state
-            throw error;
-          }
-
-          fromAccount.closeApp(txnParam.appId); // remove app from local state
-          break;
-        }
-        case TransactionType.FreezeAsset: {
-          const asset = this.getAssetDef(txnParam.assetID);
-          if (asset.freeze !== txnParam.fromAccount.addr) {
-            throw new RuntimeError(RUNTIME_ERRORS.ASA.FREEZE_ERROR, { address: asset.freeze });
-          }
-          break;
-        }
-        case TransactionType.RevokeAsset: {
-          const asset = this.getAssetDef(txnParam.assetID);
-          if (asset.clawback !== txnParam.fromAccount.addr) {
-            throw new RuntimeError(RUNTIME_ERRORS.ASA.CLAWBACK_ERROR, { address: asset.clawback });
-          }
-          break;
-        }
-        case TransactionType.DestroyAsset:
-        case TransactionType.ModifyAsset: {
-          const asset = this.getAssetDef(txnParam.assetID);
-          if (asset.manager !== txnParam.fromAccount.addr) {
-            throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
-          }
-          break;
-        }
-      }
-    }
+    // Run TEAL program associated with each transaction and
+    // then execute the transaction without interacting with store.
+    this.processTransactions(txnParameters);
 
     // update store only if all the transactions are passed
-    this.updateFinalState(txnParameters);
+    this.store = this.ctx.state;
   }
 
   /**
