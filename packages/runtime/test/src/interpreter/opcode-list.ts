@@ -2053,7 +2053,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
+        assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
       });
 
       it("push addr from 1st AppArg to stack", function () {
@@ -2091,7 +2091,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         assert.equal(1, stack.length());
-        assert.deepEqual(TXN_OBJ.apat[0], stack.pop());
+        assert.deepEqual(TXN_OBJ.apat[1], stack.pop());
       });
 
       it("should throw error if field is not an array", function () {

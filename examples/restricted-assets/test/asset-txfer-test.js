@@ -12,8 +12,8 @@ const ACCRED_LEVEL = 'Accred-Level';
 
 describe('Test for transferring asset using custom logic', function () {
   const master = new StoreAccount(1000e6);
-  let alice = new StoreAccount(minBalance, { addr: aliceAddr, sk: new Uint8Array(0) });
-  let bob = new StoreAccount(minBalance, { addr: bobAddr, sk: new Uint8Array(0) });
+  let alice;
+  let bob;
   let escrow; // initialized later (using runtime.getLogicSig)
 
   let runtime;
@@ -23,19 +23,7 @@ describe('Test for transferring asset using custom logic', function () {
   const approvalProgram = getProgram('poi-approval.teal');
   const clearProgram = getProgram('poi-clear.teal');
 
-  this.beforeAll(async function () {
-    runtime = new Runtime([master, alice, bob]);
-
-    creationFlags = {
-      sender: alice.account,
-      localInts: 1,
-      localBytes: 0,
-      globalInts: 2,
-      globalBytes: 1
-    };
-  });
-
-  this.afterEach(async function () {
+  this.beforeEach(async function () {
     alice = new StoreAccount(minBalance, { addr: aliceAddr, sk: new Uint8Array(0) });
     bob = new StoreAccount(minBalance, { addr: bobAddr, sk: new Uint8Array(0) });
     runtime = new Runtime([master, alice, bob]);
