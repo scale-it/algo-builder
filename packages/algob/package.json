@@ -51,6 +51,13 @@
     "publish": "npm publish --access public",
     "algob:dev": "sh ./setup_dev_project.sh"
   },
+  "files": [
+    "build/",
+    "LICENSE",
+    "README.md",
+    "setup_dev_project.sh",
+    "sample-project/"
+  ],
   "devDependencies": {
     "@algorand-builder/types-algosdk": "^0.1.0",
     "@types/chai": "^4.2.12",

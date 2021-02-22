@@ -47,6 +47,11 @@
     "prepublish": "yarn build",
     "publish": "npm publish --access public"
   },
+  "files": [
+    "build/",
+    "LICENSE",
+    "README.md"
+  ],
   "devDependencies": {
     "@types/chai": "^4.2.12",
     "@types/glob": "^7.1.2",
