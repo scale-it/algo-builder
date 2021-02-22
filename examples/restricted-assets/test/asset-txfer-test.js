@@ -20,6 +20,7 @@ describe('Test for transferring asset using custom logic', function () {
   let creationFlags;
   let applicationId;
   let assetId;
+  let assetDef;
   const approvalProgram = getProgram('poi-approval.teal');
   const clearProgram = getProgram('poi-clear.teal');
 
@@ -35,35 +36,10 @@ describe('Test for transferring asset using custom logic', function () {
       globalInts: 2,
       globalBytes: 1
     };
-  });
-
-  const getGlobal = (key) => runtime.getGlobalState(applicationId, key);
-  const getEscrowProg = (assetId, appId) =>
-    getProgram('clawback-escrow.py', { ASSET_ID: assetId, APP_ID: appId });
-
-  // fetch latest account state
-  function syncAccounts () {
-    alice = runtime.getAccount(alice.address);
-    bob = runtime.getAccount(bob.address);
-    if (escrow) { escrow = runtime.getAccount(escrow.address); }
-  }
-
-  it('should transfer 1000 Assets from Alice to Bob according to custom logic', () => {
-    /**
-     * This test demonstrates how to transfer assets from account A to B using custom logic
-     * based on a smart contract. Asset is actually transferred by the clawback address (an escrow
-     * account in this case). Following operations are performed
-     * - Create the asset + optIn
-     * - Create the application + optIn
-     * - Setup Escrow Account
-     * - Update Asset clawback + lock manager and freeze address
-     * - Set Accred-Level
-     * - Transfer Asset from Alice -> Bob  
-     */
 
     /* Create asset + optIn to asset */
     assetId = runtime.createAsset('gold', { creator: { ...alice.account, name: 'alice' } });
-    let assetDef = runtime.getAssetDef(assetId);
+    assetDef = runtime.getAssetDef(assetId);
 
     assert.equal(assetDef.creator, alice.address);
     assert.equal(assetDef['default-frozen'], true);
@@ -95,6 +71,31 @@ describe('Test for transferring asset using custom logic', function () {
     assert.deepEqual(getGlobal('Creator'), alicePk);
     assert.deepEqual(getGlobal('AssetID'), BigInt(assetId));
     assert.deepEqual(getGlobal('AssetLevel'), 2n); // we are setting level 2 in examples
+  });
+
+  const getGlobal = (key) => runtime.getGlobalState(applicationId, key);
+  const getEscrowProg = (assetId, appId) =>
+    getProgram('clawback-escrow.py', { ASSET_ID: assetId, APP_ID: appId });
+
+  // fetch latest account state
+  function syncAccounts () {
+    alice = runtime.getAccount(alice.address);
+    bob = runtime.getAccount(bob.address);
+    if (escrow) { escrow = runtime.getAccount(escrow.address); }
+  }
+
+  it('should transfer 1000 Assets from Alice to Bob according to custom logic', () => {
+    /**
+     * This test demonstrates how to transfer assets from account A to B using custom logic
+     * based on a smart contract. Asset is actually transferred by the clawback address (an escrow
+     * account in this case). Following operations are performed
+     * - Create the asset + optIn
+     * - Create the application + optIn
+     * - Setup Escrow Account
+     * - Update Asset clawback + lock manager and freeze address
+     * - Set Accred-Level
+     * - Transfer Asset from Alice -> Bob
+     */
 
     // opt in to app + verify optin
     runtime.optInToApp(alice.address, applicationId, {}, {});
@@ -229,21 +230,7 @@ describe('Test for transferring asset using custom logic', function () {
   });
 
   it('should fail on set level if sender is not creator', () => {
-    assetId = runtime.createAsset('gold', { creator: { ...alice.account, name: 'alice' } });
-    runtime.optIntoASA(assetId, bob.address, {});
-
-    /* Create application + optIn to app */
-    const creationArgs = [
-      `int:${assetId}`,
-      'int:2' // set min user level(2) for asset transfer ("Accred-level")
-    ];
-
-    applicationId = runtime.addApp(
-      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
-    const app = alice.getApp(applicationId);
-    assert.isDefined(app);
-
-    // opt in to app + verify optin
+    // opt in to app
     runtime.optInToApp(alice.address, applicationId, {}, {});
     runtime.optInToApp(bob.address, applicationId, {}, {});
 
