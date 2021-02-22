@@ -412,9 +412,9 @@ declare module 'algosdk' {
   export function makeLogicSig(program: Uint8Array, args: LogicSigArgs): LogicSig;
 
   export function makePaymentTxn(from: any, to: any, fee: any, amount: any, closeRemainderTo: any,
-    firstRound: any, lastRound: any, note: any, genesisHash: any, genesisID: any): any;
+    firstRound: any, lastRound: any, note: any, genesisHash: any, genesisID: any, rekeyTo?: string): any;
 
-  export function makePaymentTxnWithSuggestedParams(from: any, to: any, amount: any, closeRemainderTo: any, note: any, suggestedParams: any): any;
+  export function makePaymentTxnWithSuggestedParams(from: any, to: any, amount: any, closeRemainderTo: any, note: any, suggestedParams: any, rekeyTo?: string): any;
 
   export function masterDerivationKeyToMnemonic(mdk: any): string;
 

@@ -149,6 +149,9 @@ describe('Crowdfunding Tests', function () {
     assert.isDefined(creator.appsLocalState.get(applicationId));
     assert.isDefined(donor.appsLocalState.get(applicationId));
 
+    // set timestamp
+    runtime.setRoundAndTimestamp(5, beginDate.getTime() + 12);
+
     // donate correct amount to escrow account
     // App argument to donate.
     appArgs = [stringToBytes('donate')];
@@ -179,7 +182,8 @@ describe('Crowdfunding Tests', function () {
     assert.equal(escrow.balance(), minBalance + donationAmount);
     assert.equal(donor.balance(), initialDonorBalance - donationAmount - 2000); // 2000 because of tx fee
 
-    // donor should be able to reclaim if goal is NOT met
+    runtime.setRoundAndTimestamp(5, endDate.getTime() + 12);
+    // donor should be able to reclaim if goal is NOT met and end date is passed
     appArgs = [stringToBytes('reclaim')];
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     txGroup = [
@@ -213,6 +217,7 @@ describe('Crowdfunding Tests', function () {
     assert.equal(escrow.balance(), escrowBalance - 300000 - 1000);
     assert.equal(donor.balance(), donorBalance + 300000 - 1000);
 
+    runtime.setRoundAndTimestamp(5, beginDate.getTime() + 12);
     // should claim if goal is reached'
     appArgs = [stringToBytes('donate')];
 
@@ -241,6 +246,7 @@ describe('Crowdfunding Tests', function () {
     syncAccounts();
     assert.equal(escrow.balance(), escrowBal + 7000000); // verify donation of 7000000
 
+    runtime.setRoundAndTimestamp(5, endDate.getTime() + 12);
     appArgs = [stringToBytes('claim')];
     txGroup = [
       {
@@ -269,6 +275,7 @@ describe('Crowdfunding Tests', function () {
     assert.equal(escrow.balance(), 0); // escrow should be empty after claim
     assert.equal(creator.balance(), creatorBal + escrowFunds - 2000); // funds transferred to creator from escrow
 
+    runtime.setRoundAndTimestamp(5, fundCloseDate.getTime() + 12);
     // after claiming, creator of the crowdfunding application should be able to delete the application
     // NOTE: we don't need a txGroup here as escrow is already empty
     const deleteTx = {
