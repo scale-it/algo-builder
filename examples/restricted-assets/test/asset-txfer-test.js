@@ -59,7 +59,6 @@ describe('Test for transferring asset using custom logic', function () {
       `int:${assetId}`,
       'int:2' // set min user level(2) for asset transfer ("Accred-level")
     ];
-
     applicationId = runtime.addApp(
       { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
 
@@ -150,7 +149,7 @@ describe('Test for transferring asset using custom logic', function () {
     assert.equal(assetDef.manager, '');
     assert.equal(assetDef.freeze, '');
 
-    /* Updating clawback again should throw error now (since we locked the asset) */
+    /* Updating clawback again should throw error now (since we set the asset manager to ``) */
     const newCfgParams = {
       ...assetConfigParams,
       fields: {
