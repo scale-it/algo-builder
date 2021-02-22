@@ -56,6 +56,9 @@ describe('Test for transferring asset using custom logic', function () {
      * - Create the asset + optIn
      * - Create the application + optIn
      * - Setup Escrow Account
+     * - Update Asset clawback + lock manager and freeze address
+     * - Set Accred-Level
+     * - Transfer Asset from Alice -> Bob  
      */
 
     /* Create asset + optIn to asset */
