@@ -77,7 +77,7 @@ describe('Test for transferring asset using custom logic', function () {
   const getEscrowProg = (assetId, appId) =>
     getProgram('clawback-escrow.py', { ASSET_ID: assetId, APP_ID: appId });
 
-  // fetch latest account state
+  // Update account state
   function syncAccounts () {
     alice = runtime.getAccount(alice.address);
     bob = runtime.getAccount(bob.address);
