@@ -105,9 +105,9 @@ export class Ctx {
   }
 
   /**
-   * Deduct fee from sender.
+   * Deduct transaction fee from sender account.
    * @param sender Sender address
-   * @param index Index of transaction in a group
+   * @param index Index of transaction in tx group
    */
   deductFee (sender: AccountAddress, index: number): void {
     const fromAccount = this.getAccount(sender);
