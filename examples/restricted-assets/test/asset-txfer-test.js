@@ -93,7 +93,7 @@ describe('Test for transferring asset using custom logic', function () {
      * - Setup Escrow Account
      * - Update Asset clawback + lock manager and freeze address
      * - Set Accred-Level
-     * - Transfer Asset from Alice -> Bob
+     * - Transfer Asset from Alice -> Bob (assets are revoken via clawback escrow)
      */
 
     // opt in to app + verify optin
@@ -185,7 +185,7 @@ describe('Test for transferring asset using custom logic', function () {
     assert.equal(alice.getLocalState(applicationId, ACCRED_LEVEL), 2n);
     assert.equal(bob.getLocalState(applicationId, ACCRED_LEVEL), 2n);
 
-    /* Transfer 1000 assets from Alice to Bob */
+    /* Transfer 1000 assets from Alice to Bob (assets are revoken via clawback escrow) */
     const prevAliceAssets = runtime.getAssetHolding(assetId, aliceAddr).amount;
     const prevBobAssets = runtime.getAssetHolding(assetId, bobAddr).amount;
     const txGroup = [

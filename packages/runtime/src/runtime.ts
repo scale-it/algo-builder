@@ -819,8 +819,9 @@ export class Runtime {
     for (const [index, txnParam] of txnParameters.entries()) {
       this.assertAmbiguousTxnParams(txnParam);
       if (txnParam.sign === SignType.LogicSignature) {
-        this.ctx.tx = this.ctx.gtxs[index]; // update current tx
+        this.ctx.tx = this.ctx.gtxs[index]; // update current tx to index of stateless
         this.validateLsigAndRun(txnParam);
+        this.ctx.tx = this.ctx.gtxs[0]; // after executing stateless tx updating current tx to default (index 0)
       }
 
       // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
