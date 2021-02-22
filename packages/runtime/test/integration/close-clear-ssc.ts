@@ -134,6 +134,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
       RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 
+    syncAccount();
     // verify app is deleted from account's local state even if tx is rejected after execution
     res = alice.getAppFromLocal(appId);
     assert.isUndefined(res);

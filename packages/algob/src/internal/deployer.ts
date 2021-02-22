@@ -16,8 +16,7 @@ import type {
   FundASCFlags,
   LsigInfo,
   SCParams,
-  SSCInfo,
-  StrMap
+  SSCInfo
 } from "../types";
 import { BuilderError } from "./core/errors";
 import { ERRORS } from "./core/errors-list";

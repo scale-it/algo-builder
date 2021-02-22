@@ -600,7 +600,9 @@ export class Runtime {
    * - Executes the transaction on ctx.state
    * @param txnParams Transaction Parameters
    */
+  /* eslint-disable sonarjs/cognitive-complexity */
   processTransactions (txnParams: ExecParams[]): void {
+    let clearErrorBool = false;
     txnParams.forEach((txnParam, idx) => {
       this.ctxOp.deductFee(txnParam.fromAccount.addr, idx);
       this.assertAmbiguousTxnParams(txnParam);
@@ -637,10 +639,13 @@ export class Runtime {
           } catch (error) {
             // if transaction type is Clear Call, remove the app first before throwing error (rejecting tx)
             // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
-            this.ctxOp.closeApp(txnParam.fromAccount.addr, txnParam.appId); // remove app from local state
-            // group, store not updated
-            // open
-            throw error;
+            if (error instanceof RuntimeError && error.number === 1007) {
+              this.ctxOp.closeApp(txnParam.fromAccount.addr, txnParam.appId); // remove app from local state
+              clearErrorBool = true;
+              break;
+            } else {
+              throw error;
+            }
           }
 
           this.ctxOp.closeApp(txnParam.fromAccount.addr, txnParam.appId); // remove app from local state
@@ -690,6 +695,10 @@ export class Runtime {
         }
       }
     });
+    if (clearErrorBool) {
+      this.store = this.ctx.state;
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC);
+    }
   }
 
   /**
