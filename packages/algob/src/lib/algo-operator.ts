@@ -13,8 +13,8 @@ import type {
   FundASCFlags,
   LsigInfo,
   Network,
-  SSCInfo,
-  StrMap
+  SCParams,
+  SSCInfo
 } from "../types";
 import { CompileOp } from "./compile";
 import * as tx from "./tx";
@@ -36,14 +36,14 @@ export interface AlgoOperator {
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap, txWriter: txWriter
   ) => Promise<ASAInfo>
   fundLsig: (name: string, flags: FundASCFlags, payFlags: rtypes.TxParams,
-    txWriter: txWriter, scParams: LogicSigArgs, scTmplParams?: StrMap) => Promise<LsigInfo>
+    txWriter: txWriter, scParams: LogicSigArgs, scTmplParams?: SCParams) => Promise<LsigInfo>
   deploySSC: (
     approvalProgram: string,
     clearProgram: string,
     flags: rtypes.SSCDeploymentFlags,
     payFlags: rtypes.TxParams,
     txWriter: txWriter,
-    scTmplParams?: StrMap) => Promise<SSCInfo>
+    scTmplParams?: SCParams) => Promise<SSCInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
   optInToASA: (
     asaName: string, assetIndex: number, account: rtypes.Account, params: rtypes.TxParams
@@ -55,7 +55,7 @@ export interface AlgoOperator {
   optInToSSC: (
     sender: rtypes.Account, appId: number,
     payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags) => Promise<void>
-  ensureCompiled: (name: string, force?: boolean, scTmplParams?: StrMap) => Promise<ASCCache>
+  ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -215,7 +215,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     payFlags: rtypes.TxParams,
     txWriter: txWriter,
     scParams: LogicSigArgs,
-    scTmplParams?: StrMap): Promise<LsigInfo> {
+    scTmplParams?: SCParams): Promise<LsigInfo> {
     const lsig = await getLsig(name, this.algodClient, scParams, scTmplParams);
     const contractAddress = lsig.address();
 
@@ -256,7 +256,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     flags: rtypes.SSCDeploymentFlags,
     payFlags: rtypes.TxParams,
     txWriter: txWriter,
-    scTmplParams?: StrMap): Promise<SSCInfo> {
+    scTmplParams?: SCParams): Promise<SSCInfo> {
     const sender = flags.sender.addr;
     const params = await tx.mkTxParams(this.algodClient, payFlags);
 
@@ -337,7 +337,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     await this.waitForConfirmation(txId);
   }
 
-  async ensureCompiled (name: string, force?: boolean, scTmplParams?: StrMap): Promise<ASCCache> {
+  async ensureCompiled (name: string, force?: boolean, scTmplParams?: SCParams): Promise<ASCCache> {
     return await this.compileOp.ensureCompiled(name, force, scTmplParams);
   }
 }

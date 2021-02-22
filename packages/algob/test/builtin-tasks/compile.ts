@@ -150,7 +150,7 @@ describe("Support External Parameters in PyTEAL program", () => {
 
   const scInitParam = {
     TMPL_SENDER: 'KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY',
-    ASSET_AMOUNT: 1000
+    ASSET_AMOUNT: 1000n
   };
 
   it("PyTEAL code test", async () => {

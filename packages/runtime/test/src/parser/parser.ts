@@ -394,9 +394,16 @@ describe("Parser", function () {
     });
 
     it("should return correct objects for `txn`", () => {
-      const res = opcodeFromSentence(["txn", "Fee"], 1, interpreter);
-      const expected = new Txn(["Fee"], 1, interpreter);
+      let res = opcodeFromSentence(["txn", "Fee"], 1, interpreter);
+      let expected = new Txn(["Fee"], 1, interpreter);
+      assert.deepEqual(res, expected);
 
+      res = opcodeFromSentence(["txn", "Accounts", "1"], 1, interpreter);
+      expected = new Txn(["Accounts", "1"], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      res = opcodeFromSentence(["txn", "ApplicationArgs", "0"], 1, interpreter);
+      expected = new Txn(["ApplicationArgs", "0"], 1, interpreter);
       assert.deepEqual(res, expected);
 
       expectRuntimeError(
@@ -411,9 +418,12 @@ describe("Parser", function () {
     });
 
     it("should return correct object for `gtxn`", () => {
-      const res = opcodeFromSentence(["gtxn", "0", "Fee"], 1, interpreter);
-      const expected = new Gtxn(["0", "Fee"], 1, interpreter);
+      let res = opcodeFromSentence(["gtxn", "0", "Fee"], 1, interpreter);
+      let expected = new Gtxn(["0", "Fee"], 1, interpreter);
+      assert.deepEqual(res, expected);
 
+      res = opcodeFromSentence(["gtxn", "0", "ApplicationArgs", "0"], 1, interpreter);
+      expected = new Gtxn(["0", "ApplicationArgs", "0"], 1, interpreter);
       assert.deepEqual(res, expected);
 
       expectRuntimeError(
@@ -428,10 +438,18 @@ describe("Parser", function () {
     });
 
     it("should return correct object for `txna`", () => {
-      const res = opcodeFromSentence(["txna", "Fee", "2"], 1, interpreter);
-      const expected = new Txna(["Fee", "2"], 1, interpreter);
-
+      let res = opcodeFromSentence(["txna", "Accounts", "0"], 1, interpreter);
+      let expected = new Txna(["Accounts", "0"], 1, interpreter);
       assert.deepEqual(res, expected);
+
+      res = opcodeFromSentence(["txna", "ApplicationArgs", "2"], 1, interpreter);
+      expected = new Txna(["ApplicationArgs", "2"], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      expectRuntimeError(
+        () => opcodeFromSentence(["txna", "Fee", "2"], 1, interpreter),
+        RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
+      );
 
       expectRuntimeError(
         () => opcodeFromSentence(["txna", "2"], 1, interpreter),
@@ -445,10 +463,18 @@ describe("Parser", function () {
     });
 
     it("should return correct object for `gtxna`", () => {
-      const res = opcodeFromSentence(["gtxna", "1", "Fee", "4"], 1, interpreter);
-      const expected = new Gtxna(["1", "Fee", "4"], 1, interpreter);
-
+      let res = opcodeFromSentence(["gtxna", "1", "Accounts", "1"], 1, interpreter);
+      let expected = new Gtxna(["1", "Accounts", "1"], 1, interpreter);
       assert.deepEqual(res, expected);
+
+      res = opcodeFromSentence(["gtxna", "1", "ApplicationArgs", "4"], 1, interpreter);
+      expected = new Gtxna(["1", "ApplicationArgs", "4"], 1, interpreter);
+      assert.deepEqual(res, expected);
+
+      expectRuntimeError(
+        () => opcodeFromSentence(["gtxna", "1", "Fee", "4"], 1, interpreter),
+        RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
+      );
 
       expectRuntimeError(
         () => opcodeFromSentence(["gtxna", "1", "2", "3", "4"], 1, interpreter),

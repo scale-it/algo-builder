@@ -60,3 +60,15 @@ These files are called checkpoints and they save information about deployed asse
 As they are checked-in into Version Control System you can use them to track the deployed state of your assets.
 
 Read more about checkpoints [here](/docs/execution-checkpoints.md).
+
+### Typescript Projects
+
+`Typescript` project requires a transpilation to `js` files. So that algob can execute `js` files.
+To develop in `typescript`, please remember these points:
+
+- Make sure to compile your `ts` project using `yarn build` (which runs `tsc --build .`) Never forget to compile files.
+- TIP: If you are actively developing, please use `yarn build:watch`(`tsc -w -p .`) to build or compile your `.ts` files in real time (this is recommended).
+- Transpiled js files should be present in `build` folder, therefore `outDir` in tsconfig.json should be set as:
+
+    "outDir": "./build/scripts"
+- Typescript example [htlc-pyteal-ts](../examples/htlc-pyteal-ts). This example project shows how to build with typescript in algob.
