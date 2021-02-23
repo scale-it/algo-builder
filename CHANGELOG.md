@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v0.5.0
+## unreleased
 
 * Full support for asset related transaction (create, opt-in, transfer, modify, freeze, revoke, destroy)
 * Support for group transactions
