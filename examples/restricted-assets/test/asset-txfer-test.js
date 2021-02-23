@@ -116,7 +116,7 @@ describe('Test for transferring asset using custom logic', function () {
     console.log('Escrow Address: ', escrowAddress);
 
     // fund escrow with some minimum balance first
-    runtime.transferAlgo({
+    runtime.executeTx({
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
       fromAccount: master.account,
