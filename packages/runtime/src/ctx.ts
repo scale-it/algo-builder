@@ -278,7 +278,7 @@ export class Ctx implements Context {
    */
   /* eslint-disable sonarjs/cognitive-complexity */
   processTransactions (txnParams: ExecParams[]): boolean {
-    let clearErrorBool = false;
+    const clearErrorBool = false;
     txnParams.forEach((txnParam, idx) => {
       this.deductFee(txnParam.fromAccount.addr, idx);
       this.runtime.assertAmbiguousTxnParams(txnParam);
@@ -315,16 +315,9 @@ export class Ctx implements Context {
           try {
             this.runtime.run(appParams["clear-state-program"], ExecutionMode.STATEFUL);
           } catch (error) {
-            // if transaction type is Clear Call, remove the app first before throwing error (rejecting tx)
+            // if transaction type is Clear Call, remove the app without throwing error (rejecting tx)
+            // tested by running on algorand network
             // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
-            // Clear call is executed only if error is (rejected by logic i.e error number 1007)
-            if (error instanceof RuntimeError && error.number === 1007) {
-              this.closeApp(txnParam.fromAccount.addr, txnParam.appId); // remove app from local state
-              clearErrorBool = true;
-              break;
-            } else {
-              throw error;
-            }
           }
 
           this.closeApp(txnParam.fromAccount.addr, txnParam.appId); // remove app from local state
