@@ -1,12 +1,13 @@
 const { executeTransaction, mkTxnParams } = require('./common/common');
-const { SignType, globalZeroAddress, base64ToBytes } = require('@algorand-builder/algob');
+const { globalZeroAddress, stringToBytes } = require('@algorand-builder/algob');
+const { types } = require('@algorand-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
   const john = deployer.accountsByName.get('john');
 
   const txnParams = mkTxnParams(masterAccount, john.addr, 4e6, {}, { note: 'funding account' });
-  txnParams.sign = SignType.SecretKey;
+  txnParams.sign = types.SignType.SecretKey;
   await executeTransaction(deployer, txnParams);
 
   const secret = 'hero wisdom green split loop element vote belt';
@@ -21,11 +22,11 @@ async function run (runtimeEnv, deployer) {
 
   await deployer.addCheckpointKV('User Checkpoint', 'Fund Contract Account');
 
-  let contract = await deployer.loadLogic('htlc.py', [base64ToBytes(wrongSecret)]);
+  let contract = await deployer.loadLogic('htlc.py', [stringToBytes(wrongSecret)]);
   let contractAddress = contract.address();
 
   txnParams.fromAccount = { addr: contractAddress };
-  txnParams.sign = SignType.LogicSignature;
+  txnParams.sign = types.SignType.LogicSignature;
   txnParams.toAccountAddr = globalZeroAddress;
   txnParams.amountMicroAlgos = 0;
   txnParams.lsig = contract;
@@ -33,7 +34,7 @@ async function run (runtimeEnv, deployer) {
   // Fails because wrong secret is passed
   await executeTransaction(deployer, txnParams);
 
-  contract = await deployer.loadLogic('htlc.py', [base64ToBytes(secret)]);
+  contract = await deployer.loadLogic('htlc.py', [stringToBytes(secret)]);
   contractAddress = contract.address();
 
   // Passes because right secret is passed

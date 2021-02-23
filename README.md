@@ -4,7 +4,7 @@ Framework to automate development of Algorand Assets and Smart Contracts:
 
 + `algob`: tool
 + `types/algosdk`: TypeScript typings for algosdk-js
-+ `algorand-js`: light algorand runtime and TEAL interpreter (work in progress)
++ `runtime`: light algorand runtime and TEAL interpreter (work in progress)
 
 ## Objectives
 
@@ -39,6 +39,20 @@ To install `algob` in your system you can use:
 
 + Using Yarn: `yarn global add @algorand-builder/algob`
 + Using NPM: `npm install -g @algorand-builder/algob`
+
+
+Installation from source (if you want to use `algob` with latest, not released version):
+
+```
+git clone https://github.com/scale-it/algorand-builder.git
+cd algorand-builder
+yarn install
+yarn build
+cd packages/algob
+yarn link
+```
+Finally, make sure your `yarn global bin` directory is in your `$PATH`.
+
 
 
 ### Algorand Node requirements

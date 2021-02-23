@@ -1,13 +1,5 @@
-const { executeTransaction, TransactionType, SignType, base64ToBytes } = require('@algorand-builder/algob');
-
-/**
-* Description: Converts Integer into Bytes Array
-*/
-function getInt64Bytes (x) {
-  const y = Math.floor(x / 2 ** 32);
-  const byt = [y, (y << 8), (y << 16), (y << 24), x, (x << 8), (x << 16), (x << 24)].map(z => z >>> 24);
-  return new Uint8Array(byt);
-}
+const { executeTransaction, stringToBytes, uint64ToBigEndian } = require('@algorand-builder/algob');
+const { types } = require('@algorand-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -15,8 +7,8 @@ async function run (runtimeEnv, deployer) {
   const votingAdminAccount = deployer.accountsByName.get('john');
 
   const algoTxnParams = {
-    type: TransactionType.TransferAlgo,
-    sign: SignType.SecretKey,
+    type: types.TransactionType.TransferAlgo,
+    sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
     toAccountAddr: votingAdminAccount.addr,
     amountMicroAlgos: 200000000,
@@ -33,8 +25,8 @@ async function run (runtimeEnv, deployer) {
 
   // Transfer 1 vote token to alice.
   const txnParam = {
-    type: TransactionType.TransferAsset,
-    sign: SignType.SecretKey,
+    type: types.TransactionType.TransferAsset,
+    sign: types.SignType.SecretKey,
     fromAccount: votingAdminAccount,
     toAccountAddr: alice.addr,
     amount: 1,
@@ -54,12 +46,12 @@ async function run (runtimeEnv, deployer) {
   // store asset Id of vote token created in this script
   const assetID = asaInfo.assetIndex;
   const appArgs = [
-    getInt64Bytes(regBegin),
-    getInt64Bytes(regEnd),
-    getInt64Bytes(voteBegin),
-    getInt64Bytes(voteEnd),
-    getInt64Bytes(assetID)
-  ];
+    regBegin,
+    regEnd,
+    voteBegin,
+    voteEnd,
+    assetID
+  ].map(uint64ToBigEndian);
 
   // Create Application
   // Note: An Account can have maximum of 10 Applications.
@@ -77,11 +69,11 @@ async function run (runtimeEnv, deployer) {
   console.log(res);
 
   // Register Alice in voting application
-  const reg = [base64ToBytes('register')];
+  const reg = [stringToBytes('register')];
 
   console.log('Opting-In for Alice in voting application');
   try {
-    await deployer.optInToSSC(alice, res.appID, {}, reg);
+    await deployer.optInToSSC(alice, res.appID, {}, { appArgs: reg });
   } catch (e) {
     console.log(e);
     throw new Error(e);

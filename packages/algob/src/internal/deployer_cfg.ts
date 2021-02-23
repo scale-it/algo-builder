@@ -1,12 +1,11 @@
+import { loadASAFile, types as rtypes } from "@algorand-builder/runtime";
+
 import { mkAccountIndex } from "../lib/account";
 import { AlgoOperator } from "../lib/algo-operator";
-import { loadASAFile } from "../lib/asa";
 import { loadCheckpointsRecursive } from "../lib/script-checkpoints";
 import type {
-  AccountMap,
   AlgobDeployer,
   AlgobRuntimeEnv,
-  ASADefs,
   CheckpointRepo
 } from "../types";
 import { DeployerDeployMode, DeployerRunMode } from "./deployer";
@@ -26,10 +25,10 @@ export function mkDeployer (
 export class DeployerConfig {
   runtimeEnv: AlgobRuntimeEnv;
   cpData: CheckpointRepo;
-  asaDefs: ASADefs;
+  asaDefs: rtypes.ASADefs;
   algoOp: AlgoOperator;
   txWriter: txWriter;
-  accounts: AccountMap;
+  accounts: rtypes.AccountMap;
 
   constructor (runtimeEnv: AlgobRuntimeEnv, algoOp: AlgoOperator) {
     this.runtimeEnv = runtimeEnv;

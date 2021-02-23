@@ -2,7 +2,8 @@ module.exports = {
   env: {
     node: true,
     es6: true,
-    es2020: true,  // <- activate “es2020” globals
+    es2020: true,
+    mocha: true
   },
   plugins: ["simple-import-sort", "sonarjs"],
   extends: [

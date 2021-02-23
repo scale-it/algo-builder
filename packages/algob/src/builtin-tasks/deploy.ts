@@ -14,7 +14,7 @@ import {
   toCheckpointFileName
 } from "../lib/script-checkpoints";
 import { AlgobRuntimeEnv, CheckpointRepo } from "../types";
-import { runMultipleScripts } from "./run";
+import { filterNonExistent, runMultipleScripts } from "./run";
 import { TASK_DEPLOY } from "./task-names";
 
 export interface TaskArgs {
@@ -29,7 +29,10 @@ export function loadFilenames (directory: string): string[] {
     });
   }
 
-  return glob.sync(path.join(directory, "*.js")).sort(cmpStr);
+  const jsFiles = glob.sync(path.join(directory, "*.js")).sort(cmpStr);
+  if (jsFiles.length) { return jsFiles; }
+  // if not js file, return the compiled ts files from ./build
+  return glob.sync(path.join("build", directory, "*.js")).sort(cmpStr);
 }
 
 function clearCheckpointFiles (scriptNames: string[]): void {
@@ -49,10 +52,26 @@ export async function executeDeployTask (
   algoOp: AlgoOperator
 ): Promise<void> {
   const logDebugTag = "algob:tasks:deploy";
-
-  const scriptNames = fileNames.length === 0
-    ? loadFilenames(scriptsDirectory)
-    : assertDirectDirChildren(scriptsDirectory, fileNames);
+  let scriptsPath = scriptsDirectory;
+  let scriptNames;
+  if (fileNames.length !== 0) {
+    const nonExistent = filterNonExistent(fileNames);
+    if (nonExistent.length !== 0) {
+      // If files doesn't exist in scripts, check for build folder
+      fileNames.forEach(function (script, index) {
+        fileNames[index] = path.join("build", script);
+      });
+      if (filterNonExistent(fileNames).length !== 0) {
+        throw new BuilderError(ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND, {
+          scripts: nonExistent
+        });
+      }
+      scriptsPath = path.join("build", scriptsDirectory);
+    }
+    scriptNames = assertDirectDirChildren(scriptsPath, fileNames);
+  } else {
+    scriptNames = loadFilenames(scriptsPath);
+  }
 
   if (scriptNames.length === 0) {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.SCRIPTS_NO_FILES_FOUND, {

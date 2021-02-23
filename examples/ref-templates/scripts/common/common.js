@@ -1,4 +1,5 @@
-const { TransactionType, SignType, executeTransaction } = require('@algorand-builder/algob');
+const { executeTransaction } = require('@algorand-builder/algob');
+const { types } = require('@algorand-builder/runtime');
 
 exports.executeTransaction = async function (deployer, txnParams) {
   try {
@@ -10,8 +11,8 @@ exports.executeTransaction = async function (deployer, txnParams) {
 
 exports.mkTxnParams = function (senderAccount, receiverAddr, amount, lsig, payFlags) {
   return {
-    type: TransactionType.TransferAlgo,
-    sign: SignType.LogicSignature,
+    type: types.TransactionType.TransferAlgo,
+    sign: types.SignType.LogicSignature,
     fromAccount: senderAccount,
     toAccountAddr: receiverAddr,
     amountMicroAlgos: amount,

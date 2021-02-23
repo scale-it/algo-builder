@@ -1,21 +1,24 @@
-import type { SSCStateSchema } from "algosdk";
+import type { AssetHolding, SSCStateSchema } from "algosdk";
 
 import { AlgobDeployer } from "../types";
 
+/// Returns `account` asset holding of `assetID`. Returns undefined if the account is not
+/// opt-in to the given asset id.
 export async function balanceOf (
   deployer: AlgobDeployer,
   account: string,
-  assetid: number
-): Promise<void> {
+  assetID: number
+): Promise<AssetHolding | undefined> {
   // NOTE: bigint is not currently supported in the response yet, so amount (> 2^53 -1) may lose precision
   // PR: https://github.com/algorand/js-algorand-sdk/pull/260
   const accountInfo = await deployer.algodClient.accountInformation(account).do();
   for (const asset of accountInfo.assets) {
-    if (asset['asset-id'] === assetid) {
-      console.log("Asset Holding Info:", asset, accountInfo);
-      break;
+    if (asset['asset-id'] === assetID) {
+      console.log("Asset Holding Info:", asset);
+      return asset;
     }
   }
+  return undefined;
 };
 
 /**
@@ -29,8 +32,8 @@ export async function readGlobalStateSSC (
   creator: string,
   appId: number): Promise<SSCStateSchema[] | undefined> {
   const accountInfoResponse = await deployer.algodClient.accountInformation(creator).do();
-  for (const value of accountInfoResponse['created-apps']) {
-    if (value.id === appId) { return value.params['global-state']; }
+  for (const app of accountInfoResponse['created-apps']) {
+    if (app.id === appId) { return app.params['global-state']; }
   }
   return undefined;
 }
@@ -46,8 +49,8 @@ export async function readLocalStateSSC (
   account: string,
   appId: number): Promise<SSCStateSchema[] | undefined> {
   const accountInfoResponse = await deployer.algodClient.accountInformation(account).do();
-  for (const value of accountInfoResponse['apps-local-state']) {
-    if (value.id === appId) { return value[`key-value`]; }
+  for (const app of accountInfoResponse['apps-local-state']) {
+    if (app.id === appId) { return app[`key-value`]; }
   }
   return undefined;
 }

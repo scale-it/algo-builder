@@ -3,7 +3,7 @@
  * This file demonstrates the example to transfer MicroAlgos
  * from contract account (contract approval mode) to another according to smart contract (ASC) logic
 */
-const { TransactionType, SignType } = require('@algorand-builder/algob');
+const { types } = require('@algorand-builder/runtime');
 const { executeTransaction } = require('./common');
 
 async function run (runtimeEnv, deployer) {
@@ -16,8 +16,8 @@ async function run (runtimeEnv, deployer) {
   const sender = lsig.address();
 
   const txnParam = {
-    type: TransactionType.TransferAlgo,
-    sign: SignType.LogicSignature,
+    type: types.TransactionType.TransferAlgo,
+    sign: types.SignType.LogicSignature,
     fromAccount: { addr: sender },
     toAccountAddr: john.addr,
     amountMicroAlgos: 20n, // bigint is also supported

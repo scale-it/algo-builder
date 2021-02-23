@@ -1,3 +1,4 @@
+import { types as rtypes } from "@algorand-builder/runtime";
 import type { LogicSig } from "algosdk";
 import { assert } from "chai";
 
@@ -6,16 +7,17 @@ import { DeployerDeployMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
 import { getDummyLsig } from "../../src/lib/lsig";
 import { CheckpointRepoImpl } from "../../src/lib/script-checkpoints";
-import { ASADef, ASAInfo, Checkpoints, LsigInfo, SSCInfo } from "../../src/types";
+import { ASAInfo, Checkpoints, LsigInfo, SSCInfo } from "../../src/types";
 import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkAlgobEnv } from "../helpers/params";
 import { cleanupMutableData } from "../lib/script-checkpoints";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
-function mkASA (): ASADef {
+function mkASA (): rtypes.ASADef {
   return {
     total: 1,
-    decimals: 1
+    decimals: 1,
+    unitName: 'ASA'
   };
 }
 

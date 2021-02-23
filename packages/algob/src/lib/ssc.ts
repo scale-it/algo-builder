@@ -1,40 +1,51 @@
-import type { Account as AccountSDK, ConfirmedTxInfo } from "algosdk";
-import tx from "algosdk";
+import { encodeNote, parseSSCAppArgs, types as rtypes } from "@algorand-builder/runtime";
+import tx, { Account as AccountSDK, ConfirmedTxInfo } from "algosdk";
 
-import { AlgobDeployer, TxParams } from "../types";
+import { AlgobDeployer } from "../types";
 import { mkTxParams } from "./tx";
 
-// returns parsed string to Uint8Array
-export function base64ToBytes (s: string): Uint8Array {
-  return new Uint8Array(Buffer.from(s));
-}
+export const reDigit = /^\d+$/;
 
 /**
- * Description: Transaction to update TEAL Programs for a contract.
+ * Transaction to update TEAL Programs for a contract.
  * @param deployer AlgobDeployer
  * @param sender Account from which call needs to be made
  * @param payFlags Transaction Flags
  * @param appId ID of the application being configured or empty if creating
  * @param newApprovalProgram New Approval Program filename
  * @param newClearProgram New Clear Program filename
+ * @param flags Optional parameters to SSC (accounts, args..)
  */
-export async function update (
+export async function updateSSC (
   deployer: AlgobDeployer,
   sender: AccountSDK,
-  payFlags: TxParams,
+  payFlags: rtypes.TxParams,
   appId: number,
   newApprovalProgram: string,
   newClearProgram: string,
-  appArgs?: Uint8Array[]
+  flags: rtypes.SSCOptionalFlags
 ): Promise<ConfirmedTxInfo> {
   const params = await mkTxParams(deployer.algodClient, payFlags);
+  const note = encodeNote(payFlags.note, payFlags.noteb64);
 
   const app = await deployer.ensureCompiled(newApprovalProgram, false);
   const approvalProg = new Uint8Array(Buffer.from(app.compiled, "base64"));
   const clear = await deployer.ensureCompiled(newClearProgram, false);
   const clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
 
-  const txn = tx.makeApplicationUpdateTxn(sender.addr, params, appId, approvalProg, clearProg, appArgs);
+  const txn = tx.makeApplicationUpdateTxn(
+    sender.addr,
+    params,
+    appId,
+    approvalProg,
+    clearProg,
+    parseSSCAppArgs(flags.appArgs),
+    flags.accounts,
+    flags.foreignApps,
+    flags.foreignAssets,
+    note,
+    flags.lease,
+    flags.rekeyTo);
 
   const txId = txn.txID().toString();
   const signedTxn = txn.signTxn(sender.sk);

@@ -1,5 +1,7 @@
 # Algorand Builder docs
 
++ [API documentation](https://scale-it.github.io/algorand-builder/)
+
 + Installation: [main README](/README.md#installation) file.
 + Project initialization → read below.
 + [Configuration](/docs/algob-config.md).
@@ -10,7 +12,7 @@
 + [Script Logging](/docs/logs.md).
 + [Algob Console](/docs/algob-console.md)
 + [PyTeal](/docs/py-teal.md).
-+ [API docs](https://scale-it.github.io/algorand-builder/)
++ [Test TEAL](/docs/testing-teal.md).
 + [Best Practices](./best-practices.md)
 
 For more in-depth description you can look at the [project specification](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
@@ -30,6 +32,7 @@ or
 ```
 algob -h deploy
 ```
+
 
 ## Project initialization
 To start using `algob` you must first create a project similar to what `yarn` and `npm` would do.
@@ -51,8 +54,21 @@ Further information about the `sample-project` can be found [here](/packages/alg
 
 
 ### Checkpoints
+
 `algob` uses local file system files to version its state.
 These files are called checkpoints and they save information about deployed assets/contracts.
 As they are checked-in into Version Control System you can use them to track the deployed state of your assets.
 
 Read more about checkpoints [here](/docs/execution-checkpoints.md).
+
+### Typescript Projects
+
+`Typescript` project requires a transpilation to `js` files. So that algob can execute `js` files.
+To develop in `typescript`, please remember these points:
+
+- Make sure to compile your `ts` project using `yarn build` (which runs `tsc --build .`) Never forget to compile files.
+- TIP: If you are actively developing, please use `yarn build:watch`(`tsc -w -p .`) to build or compile your `.ts` files in real time (this is recommended).
+- Transpiled js files should be present in `build` folder, therefore `outDir` in tsconfig.json should be set as:
+
+    "outDir": "./build/scripts"
+- Typescript example [htlc-pyteal-ts](../examples/htlc-pyteal-ts). This example project shows how to build with typescript in algob.

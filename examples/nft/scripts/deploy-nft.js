@@ -2,7 +2,7 @@
  * Description:
  * This file deploys the stateful smart contract to create and transfer NFT
 */
-const { TransactionType, SignType } = require('@algorand-builder/algob');
+const { types } = require('@algorand-builder/runtime');
 const { executeTransaction } = require('./transfer/common');
 
 async function run (runtimeEnv, deployer) {
@@ -10,8 +10,8 @@ async function run (runtimeEnv, deployer) {
   const john = deployer.accountsByName.get('john');
 
   const algoTxnParams = {
-    type: TransactionType.TransferAlgo,
-    sign: SignType.SecretKey,
+    type: types.TransactionType.TransferAlgo,
+    sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
     toAccountAddr: john.addr,
     amountMicroAlgos: 401000000, // 401 algos
@@ -32,8 +32,8 @@ async function run (runtimeEnv, deployer) {
   console.log(sscInfo);
 
   try {
-    await deployer.optInToSSC(masterAccount, appId, {}); // opt-in to asc by master
-    await deployer.optInToSSC(john, appId, {}); // opt-in to asc by john
+    await deployer.optInToSSC(masterAccount, appId, {}, {}); // opt-in to asc by master
+    await deployer.optInToSSC(john, appId, {}, {}); // opt-in to asc by john
   } catch (e) {
     console.log(e);
     throw new Error(e);

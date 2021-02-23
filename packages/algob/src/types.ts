@@ -1,18 +1,11 @@
-import type { Account as AccountSDK, LogicSig, LogicSigArgs } from "algosdk";
+import { types as rtypes } from "@algorand-builder/runtime";
+import type { LogicSig, LogicSigArgs } from "algosdk";
 import * as algosdk from "algosdk";
-import * as z from 'zod';
 
 import * as types from "./internal/core/params/argument-types";
-import { ASADefSchema, ASADefsSchema } from "./types-input";
 // Begin config types
 
 // IMPORTANT: This t.types MUST be kept in sync with the actual types.
-
-export interface Account extends AccountSDK {
-  // from AccountSDK: addr: string;
-  //                  sk: Uint8Array
-  name: string
-}
 
 export interface AlgobAccount {
   name: string
@@ -35,10 +28,10 @@ export interface MnemonicAccount {
 export type AccountDef =
   | MnemonicAccount
   | HDAccount
-  | Account;
+  | rtypes.Account;
 
 interface CommonNetworkConfig {
-  accounts: Account[]
+  accounts: rtypes.Account[]
   // optional, when provided KMD accounts will be loaded by the config resolver
   // and merged into the accounts variable (above)
   kmdCfg?: KmdCfg
@@ -382,115 +375,21 @@ export interface Checkpoint {
   dLsig: Map<string, LsigInfo>
 };
 
-export type ASADef = z.infer<typeof ASADefSchema>;
-export type ASADefs = z.infer<typeof ASADefsSchema>;
-
-export type ExecParams = AlgoTransferParam | AssetTransferParam | SSCCallsParam;
-
-export enum SignType {
-  SecretKey,
-  LogicSignature
-}
-
-export enum TransactionType {
-  TransferAlgo,
-  TransferAsset,
-  CallNoOpSSC,
-  ClearSSC,
-  CloseSSC,
-  DeleteSSC
-}
-
-export interface Sign {
-  sign: SignType
-  lsig?: LogicSig
-}
-
-export interface AlgoTransferParam extends Sign {
-  type: TransactionType.TransferAlgo
-  fromAccount: AccountSDK
-  toAccountAddr: AccountAddress
-  amountMicroAlgos: number | bigint
-  payFlags: TxParams
-}
-
-export interface AssetTransferParam extends Sign {
-  type: TransactionType.TransferAsset
-  fromAccount: AccountSDK
-  toAccountAddr: AccountAddress
-  amount: number | bigint
-  assetID: number
-  payFlags: TxParams
-}
-
-export interface SSCCallsParam extends SSCOptionalFlags, Sign {
-  type: TransactionType.CallNoOpSSC | TransactionType.ClearSSC |
-  TransactionType.CloseSSC | TransactionType.DeleteSSC
-  fromAccount: AccountSDK
-  appId: number
-  payFlags: TxParams
-}
-
-export interface TxParams {
-  /**
-   * feePerByte or totalFee is used to set the appropriate transaction fee parameter.
-   * If both are set then totalFee takes precedence.
-   * NOTE: SDK expects`fee: number` and boolean `flatFee`. But the API expects only one
-   * on parameter: `fee`. Here, we define feePerByte and totalFee - both as numberic
-   * parameters. We think that this is more explicit. */
-  feePerByte?: number
-  totalFee?: number
-  firstValid?: number
-  validRounds?: number
-  lease?: Uint8Array
-  note?: string
-  noteb64?: string
-  closeRemainderTo?: AccountAddress
-}
-
-export interface ASADeploymentFlags extends TxParams {
-  creator: Account
-}
-
 export interface FundASCFlags {
-  funder: Account
-  fundingMicroAlgo: number | bigint
-}
-
-/**
- * Stateful smart contract transaction optional parameters (accounts, args..). */
-export interface SSCOptionalFlags {
-  appArgs?: Uint8Array[]
-  accounts?: string[]
-  foreignApps?: number[]
-  foreignAssets?: number[]
-  note?: Uint8Array
-  lease?: Uint8Array
-  rekeyTo?: string
-}
-
-/**
- * Stateful Smart contract flags for specifying sender and schema */
-export interface SSCDeploymentFlags extends SSCOptionalFlags {
-  sender: Account | AccountSDK
-  localInts: number
-  localBytes: number
-  globalInts: number
-  globalBytes: number
+  funder: rtypes.Account
+  fundingMicroAlgo: number
 }
 
 export interface AssetScriptMap {
   [assetName: string]: string
 }
 
-export type AccountMap = Map<string, Account>;
-
 export interface AlgobDeployer {
   /**
    * Allows user to know whether a script is running in a `deploy` or `run` mode. */
   isDeployMode: boolean
-  accounts: Account[]
-  accountsByName: AccountMap
+  accounts: rtypes.Account[]
+  accountsByName: rtypes.AccountMap
 
   /**
    * Mapping of ASA name to deployment log */
@@ -512,7 +411,7 @@ export interface AlgobDeployer {
    * Creates and deploys ASA.
    * @name  ASA name - deployer will search for the ASA in the /assets/asa.yaml file
    * @flags  deployment flags */
-  deployASA: (name: string, flags: ASADeploymentFlags) => Promise<ASAInfo>
+  deployASA: (name: string, flags: rtypes.ASADeploymentFlags) => Promise<ASAInfo>
 
   /**
    * Funds logic signature account (Contract Account).
@@ -525,9 +424,9 @@ export interface AlgobDeployer {
   fundLsig: (
     name: string,
     flags: FundASCFlags,
-    payFlags: TxParams,
+    payFlags: rtypes.TxParams,
     scParams: LogicSigArgs,
-    scTmplParams?: StrMap
+    scTmplParams?: SCParams
   ) => void
 
   /**
@@ -540,9 +439,9 @@ export interface AlgobDeployer {
    */
   mkDelegatedLsig: (
     name: string,
-    signer: Account,
+    signer: rtypes.Account,
     scParams: LogicSigArgs,
-    scTmplParams?: StrMap
+    scTmplParams?: SCParams
   ) => Promise<LsigInfo>
 
   /**
@@ -557,9 +456,9 @@ export interface AlgobDeployer {
   deploySSC: (
     approvalProgram: string,
     clearProgram: string,
-    flags: SSCDeploymentFlags,
-    payFlags: TxParams,
-    scTmplParams?: StrMap) => Promise<SSCInfo>
+    flags: rtypes.SSCDeploymentFlags,
+    payFlags: rtypes.TxParams,
+    scTmplParams?: SCParams) => Promise<SSCInfo>
 
   /**
    * Returns true if ASA or DelegatedLsig or SSC were deployed in any script.
@@ -577,7 +476,7 @@ export interface AlgobDeployer {
   /**
    * Creates an opt-in transaction for given ASA name, which must be defined in
    * `/assets/asa.yaml` file. */
-  optInToASA: (name: string, accountName: string, flags: ASADeploymentFlags) => Promise<void>
+  optInToASA: (name: string, accountName: string, flags: rtypes.TxParams) => Promise<void>
 
   /**
    * Creates an opt-in transaction for given Stateful Smart Contract (SSC). The SSC must be
@@ -585,7 +484,8 @@ export interface AlgobDeployer {
    * @sender Account for which opt-in is required
    * @appId Application Index (ID of the application)
    */
-  optInToSSC: (sender: Account, index: number, payFlags: TxParams) => Promise<void>
+  optInToSSC: (sender: rtypes.Account, index: number,
+    payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags) => Promise<void>
 
   /**
    * Create an entry in a script log (stored in artifacts/scripts/<script_name>.log) file. */
@@ -610,7 +510,7 @@ export interface AlgobDeployer {
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  loadLogic: (name: string, scParams: LogicSigArgs, scTmplParams?: StrMap) => Promise<LogicSig>
+  loadLogic: (name: string, scParams: LogicSigArgs, scTmplParams?: SCParams) => Promise<LogicSig>
 
   /**
    * Returns ASCCache (with compiled code)
@@ -619,7 +519,7 @@ export interface AlgobDeployer {
    * @scTmplParams  scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  ensureCompiled: (name: string, force?: boolean, scTmplParams?: StrMap) => Promise<ASCCache>
+  ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>
 }
 
 // ************************
@@ -643,6 +543,10 @@ export interface PyASCCache extends ASCCache {
 
 export interface StrMap {
   [key: string]: string
+}
+
+export interface SCParams {
+  [key: string]: string | bigint
 }
 
 export interface AnyMap {

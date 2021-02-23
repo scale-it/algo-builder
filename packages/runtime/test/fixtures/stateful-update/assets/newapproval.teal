@@ -1,0 +1,41 @@
+#pragma version 2
+
+txn OnCompletion
+int NoOp
+==
+bnz handle_noop
+
+int 0
+return
+
+handle_noop:
+// verify state from previous approval program
+byte "global-key"
+app_global_get
+byte "global-val"
+==
+int 0
+byte "local-key"
+app_local_get
+byte "local-val"
+==
+&&
+bz failed
+
+// after verifying, set new state
+byte "new-global-key"
+byte "new-global-val"
+app_global_put
+
+int 0
+byte "new-local-key"
+byte "new-local-val"
+app_local_put
+
+// return success
+int 1
+return
+
+failed:
+int 0
+return

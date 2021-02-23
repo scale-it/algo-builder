@@ -1,9 +1,7 @@
 import { assert } from "chai";
 
 import {
-  // applyErrorMessageTemplate,
-  BuilderError,
-  BuilderPluginError
+  BuilderError, BuilderPluginError
 } from "../../../src/internal/core/errors";
 import {
   ERROR_RANGES,

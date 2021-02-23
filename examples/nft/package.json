@@ -4,13 +4,13 @@
   "main": "index.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "algosdk": "^1.8.0",
-    "uint64be": "^3.0.0"
+    "algosdk": "^1.8.0"
   },
   "scripts": {
     "algob": "algob",
     "lint": "eslint --ext .js,.ts scripts",
     "lint:fix": "eslint --fix --ext .js,.ts scripts",
-    "test": "echo ok"
+    "test": "echo ok",
+    "build": "echo ok"
   }
 }

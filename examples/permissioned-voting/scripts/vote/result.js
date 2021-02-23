@@ -1,4 +1,5 @@
-const { readGlobalStateSSC, TransactionType, SignType } = require('@algorand-builder/algob');
+const { readGlobalStateSSC } = require('@algorand-builder/algob');
+const { types } = require('@algorand-builder/runtime');
 const { executeTransaction } = require('./common');
 
 async function run (runtimeEnv, deployer) {
@@ -36,8 +37,8 @@ async function run (runtimeEnv, deployer) {
   }
 
   const txnParam = {
-    type: TransactionType.DeleteSSC,
-    sign: SignType.SecretKey,
+    type: types.TransactionType.DeleteSSC,
+    sign: types.SignType.SecretKey,
     fromAccount: votingAdminAccount,
     appId: appInfo.appID,
     payFlags: {}
@@ -48,7 +49,7 @@ async function run (runtimeEnv, deployer) {
   await executeTransaction(deployer, txnParam);
 
   txnParam.fromAccount = alice;
-  txnParam.type = TransactionType.ClearSSC;
+  txnParam.type = types.TransactionType.ClearSSC;
 
   // Clear voter's account
   console.log("Clearing Alice's Account");

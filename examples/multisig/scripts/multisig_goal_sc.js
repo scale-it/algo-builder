@@ -5,7 +5,8 @@
     User saves the signed logic in assets/ which is extracted and used here.
 */
 const { executeTransaction } = require('./common/common');
-const { TransactionType, SignType, createMsigAddress } = require('@algorand-builder/algob');
+const { createMsigAddress } = require('@algorand-builder/algob');
+const { types } = require('@algorand-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -19,8 +20,8 @@ async function run (runtimeEnv, deployer) {
   console.log('mparams: %s multisigaddr: %s \n', mparams, multsigaddr);
 
   let txnParams = {
-    type: TransactionType.TransferAlgo,
-    sign: SignType.SecretKey,
+    type: types.TransactionType.TransferAlgo,
+    sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
     toAccountAddr: multsigaddr,
     amountMicroAlgos: 10000000,
@@ -37,8 +38,8 @@ async function run (runtimeEnv, deployer) {
   const lsig = await deployer.loadMultiSig('sample-raw-asc.blsig');
 
   txnParams = {
-    type: TransactionType.TransferAlgo,
-    sign: SignType.LogicSignature,
+    type: types.TransactionType.TransferAlgo,
+    sign: types.SignType.LogicSignature,
     fromAccount: { addr: multsigaddr },
     toAccountAddr: bob.addr,
     amountMicroAlgos: 20,

@@ -1,4 +1,10 @@
 import {
+  addressToPk, mkTransaction,
+  parseSSCAppArgs, stringToBytes,
+  uint64ToBigEndian
+} from "@algorand-builder/runtime";
+
+import {
   createMsigAddress,
   loadAccountsFromEnv,
   loadAccountsFromFile,
@@ -7,10 +13,11 @@ import {
 } from "./lib/account";
 import { globalZeroAddress } from "./lib/constants";
 import { algodCredentialsFromEnv, KMDCredentialsFromEnv } from "./lib/credentials";
-import { base64ToBytes, update } from "./lib/ssc";
+import { getProgram } from "./lib/load-program";
+import { updateSSC } from "./lib/ssc";
 import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC, readGlobalStateSSC, readLocalStateSSC } from "./lib/status";
-import { executeSignedTxnFromFile, executeTransaction, mkTransaction } from "./lib/tx";
-import { SignType, TransactionType } from "./types";
+import { executeSignedTxnFromFile, executeTransaction, getSuggestedParams, mkTxParams } from "./lib/tx";
+import * as types from "./types";
 
 export {
   mkAccounts,
@@ -21,17 +28,22 @@ export {
   loadAccountsFromEnv,
   executeTransaction,
   executeSignedTxnFromFile,
+  mkTxParams,
+  getSuggestedParams,
   balanceOf,
   printAssets,
   algodCredentialsFromEnv,
   KMDCredentialsFromEnv,
-  TransactionType,
-  SignType,
   printLocalStateSSC,
   printGlobalStateSSC,
   readGlobalStateSSC,
   readLocalStateSSC,
-  update,
-  base64ToBytes,
-  globalZeroAddress
+  updateSSC,
+  stringToBytes,
+  parseSSCAppArgs,
+  globalZeroAddress,
+  uint64ToBigEndian,
+  addressToPk,
+  getProgram,
+  types
 };

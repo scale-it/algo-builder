@@ -1,4 +1,5 @@
 
+import { loadFromYamlFileSilent } from "@algorand-builder/runtime";
 import deepEqual from "deep-equal";
 import * as fs from "fs";
 import path from "path";
@@ -15,7 +16,6 @@ import {
   LsigInfo,
   SSCInfo
 } from "../types";
-import { loadFromYamlFileSilent } from "./files";
 
 export const scriptsDirectory = "scripts";
 const artifactsPath = "artifacts";

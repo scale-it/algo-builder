@@ -1,17 +1,7 @@
+import { encodeNote, mkTransaction, types as rtypes } from "@algorand-builder/runtime";
 import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
-import { TextEncoder } from "util";
 
-import { BuilderError } from "../internal/core/errors";
-import { ERRORS } from "../internal/core/errors-list";
-import {
-  AlgobDeployer,
-  ASADef,
-  ASADeploymentFlags,
-  ExecParams,
-  SignType,
-  TransactionType,
-  TxParams
-} from "../types";
+import { AlgobDeployer } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
 import { loadSignedTxnFromFile } from "./files";
 
@@ -28,7 +18,7 @@ export async function getSuggestedParams (algocl: Algodv2): Promise<SuggestedPar
 /// creates common transaction parameters. If suggested params are not provided, will call
 /// Algorand node to get suggested parameters.
 export async function mkTxParams (
-  algocl: Algodv2, userParams: TxParams, s?: SuggestedParams): Promise<SuggestedParams> {
+  algocl: Algodv2, userParams: rtypes.TxParams, s?: SuggestedParams): Promise<SuggestedParams> {
   if (s === undefined) { s = await getSuggestedParams(algocl); }
 
   s.flatFee = userParams.totalFee !== undefined;
@@ -43,7 +33,8 @@ export async function mkTxParams (
 }
 
 export function makeAssetCreateTxn (
-  name: string, asaDef: ASADef, flags: ASADeploymentFlags, txSuggestedParams: SuggestedParams
+  name: string, asaDef: rtypes.ASADef,
+  flags: rtypes.ASADeploymentFlags, txSuggestedParams: SuggestedParams
 ): Transaction {
   // If TxParams has noteb64 or note , it gets precedence
   let note;
@@ -94,89 +85,17 @@ export function makeASAOptInTx (
     params);
 }
 
-export function encodeNote (note: string | undefined, noteb64: string| undefined): Uint8Array | undefined {
-  if (note === undefined && noteb64 === undefined) { return undefined; }
-  const encoder = new TextEncoder();
-  return noteb64 ? encoder.encode(noteb64) : encoder.encode(note);
-}
-
 /**
- * Description: Returns unsigned transaction as per ExecParams
- * ExecParams can be of following types:
- *  + AlgoTransferParam used for transferring algo
- *  + AssetTransferParam used for transferring asset
- *  + SSCCallsParam used for calling stateful smart contracts.
- For more advanced use-cases, please use `algosdk.tx` directly.
- * @param deployer AlgobDeployer
- * @param execParams ExecParams
- * @returns SDK Transaction object
- */
-export function mkTransaction (execParams: ExecParams, suggestedParams: SuggestedParams): Transaction {
-  const note = encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64);
-  const transactionType = execParams.type;
-  switch (execParams.type) {
-    case TransactionType.TransferAsset: {
-      return algosdk.makeAssetTransferTxnWithSuggestedParams(
-        execParams.fromAccount.addr,
-        execParams.toAccountAddr,
-        execParams.payFlags.closeRemainderTo,
-        undefined,
-        execParams.amount,
-        note,
-        execParams.assetID,
-        suggestedParams);
-    }
-    case TransactionType.TransferAlgo: {
-      return algosdk.makePaymentTxnWithSuggestedParams(
-        execParams.fromAccount.addr,
-        execParams.toAccountAddr,
-        execParams.amountMicroAlgos,
-        execParams.payFlags.closeRemainderTo,
-        note,
-        suggestedParams);
-    }
-    case TransactionType.ClearSSC: {
-      return algosdk.makeApplicationClearStateTxn(
-        execParams.fromAccount.addr, suggestedParams, execParams.appId, execParams.appArgs);
-    }
-    case TransactionType.DeleteSSC: {
-      return algosdk.makeApplicationDeleteTxn(
-        execParams.fromAccount.addr, suggestedParams, execParams.appId, execParams.appArgs);
-    }
-    case TransactionType.CallNoOpSSC: {
-      return algosdk.makeApplicationNoOpTxn(
-        execParams.fromAccount.addr,
-        suggestedParams,
-        execParams.appId,
-        execParams.appArgs,
-        execParams.accounts,
-        execParams.foreignApps,
-        execParams.foreignAssets,
-        note,
-        execParams.lease,
-        execParams.rekeyTo);
-    }
-    case TransactionType.CloseSSC: {
-      return algosdk.makeApplicationCloseOutTxn(
-        execParams.fromAccount.addr, suggestedParams, execParams.appId, execParams.appArgs);
-    }
-    default: {
-      throw new BuilderError(ERRORS.GENERAL.TRANSACTION_TYPE_ERROR, { error: transactionType });
-    }
-  }
-}
-
-/**
- * Description: returns signed transaction
+ * Returns signed transaction
  * @param txn unsigned transaction
  * @param execParams transaction execution parametrs
  */
-function signTransaction (txn: Transaction, execParams: ExecParams): Uint8Array {
+function signTransaction (txn: Transaction, execParams: rtypes.ExecParams): Uint8Array {
   switch (execParams.sign) {
-    case SignType.SecretKey: {
+    case rtypes.SignType.SecretKey: {
       return txn.signTxn(execParams.fromAccount.sk);
     }
-    case SignType.LogicSignature: {
+    case rtypes.SignType.LogicSignature: {
       const logicsig = execParams.lsig;
       if (logicsig === undefined) {
         throw new Error("logic signature for this transaction was not passed or - is not defined");
@@ -190,7 +109,7 @@ function signTransaction (txn: Transaction, execParams: ExecParams): Uint8Array 
 }
 
 /**
- * Description: send signed transaction to network and wait for confirmation
+ * Send signed transaction to network and wait for confirmation
  * @param deployer AlgobDeployer
  * @param rawTxns Signed Transaction(s)
  */
@@ -201,11 +120,16 @@ async function sendAndWait (
   return await deployer.waitForConfirmation(txInfo.txId);
 }
 
+/**
+ * Execute single transaction or group of transactions (atomic transaction)
+ * @param deployer AlgobDeployer
+ * @param execParams transaction parameters or atomic transaction parameters
+ */
 export async function executeTransaction (
   deployer: AlgobDeployer,
-  execParams: ExecParams | ExecParams[]): Promise<algosdk.ConfirmedTxInfo> {
+  execParams: rtypes.ExecParams | rtypes.ExecParams[]): Promise<algosdk.ConfirmedTxInfo> {
   const suggestedParams = await getSuggestedParams(deployer.algodClient);
-  const mkTx = async (p: ExecParams): Promise<Transaction> =>
+  const mkTx = async (p: rtypes.ExecParams): Promise<Transaction> =>
     mkTransaction(p,
       await mkTxParams(deployer.algodClient, p.payFlags, Object.assign({}, suggestedParams)));
 
@@ -232,7 +156,7 @@ export async function executeTransaction (
 }
 
 /**
- * Description: decode signed txn from file and send to network.
+ * Decode signed txn from file and send to network.
  * probably won't work, because transaction contains fields like
  * firstValid and lastValid which might not be equal to the
  * current network's blockchain block height.

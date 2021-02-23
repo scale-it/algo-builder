@@ -1,5 +1,6 @@
 import { Algodv2 } from "algosdk";
 import { assert } from "chai";
+import chalk from "chalk";
 import * as fs from "fs";
 import * as murmurhash from 'murmurhash';
 import * as path from "path";
@@ -57,6 +58,15 @@ describe("Compile task", () => {
   const f3PY = "gold-asa.py";
   const f4 = "gold-asa.teal";
   const fhash = 2374470440; // murmur3 hash for f1 file
+
+  before(function () {
+    var isRoot = process.getuid && process.getuid() === 0;
+    if (isRoot) {
+      const warnMsg = chalk.yellowBright(`*** If running tests as root, make sure to have pyteal installed in sudo env (or install pyteal as root).
+      Otherwise below tests will fail ***`);
+      console.warn(warnMsg);
+    }
+  });
 
   it("on first run it should compile all .teal sources", async () => {
     await op.resetAndCompile(false);
@@ -140,7 +150,7 @@ describe("Support External Parameters in PyTEAL program", () => {
 
   const scInitParam = {
     TMPL_SENDER: 'KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY',
-    ASSET_AMOUNT: 1000
+    ASSET_AMOUNT: 1000n
   };
 
   it("PyTEAL code test", async () => {
