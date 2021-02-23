@@ -83,11 +83,11 @@ txn Sender
 ==
 
 // check that we are past fund close date
-// global LatestTimestamp
-// byte "FundCloseDate"
-// app_global_get
-// >=
-// &&
+global LatestTimestamp
+byte "FundCloseDate"
+app_global_get
+>=
+&&
 bz failed
 
 // if escrow balance is zero
@@ -225,18 +225,16 @@ donate:
 
 // check dates to verify
 // in valid range
-// Note: Timestamp check is excluded from this example,
-// To add it, remove comments from following lines.
-// global LatestTimestamp
-// byte "StartDate"
-// app_global_get
-// >=
-// global LatestTimestamp
-// byte "EndDate"
-// app_global_get
-// <=
-// &&
-// bz failed
+global LatestTimestamp
+byte "StartDate"
+app_global_get
+>=
+global LatestTimestamp
+byte "EndDate"
+app_global_get
+<=
+&&
+bz failed
 
 // check if grouped with
 // two transactions
@@ -334,11 +332,11 @@ app_global_get
 
 // verify that the fund end date
 // has passed
-// global LatestTimestamp
-// byte "EndDate"
-// app_global_get
-// >
-// &&
+global LatestTimestamp
+byte "EndDate"
+app_global_get
+>
+&&
 bz failed
 
 // verify that the goal was reached
@@ -387,11 +385,11 @@ app_global_get
 &&
 
 // verify that fund end date has passed
-// global LatestTimestamp
-// byte "EndDate"
-// app_global_get
-// >
-// &&
+global LatestTimestamp
+byte "EndDate"
+app_global_get
+>
+&&
 
 // verify the fund goal was
 // not met

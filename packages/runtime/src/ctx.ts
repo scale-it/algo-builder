@@ -12,10 +12,10 @@ import {
 const approvalProgram = "approval-program";
 
 export class Ctx implements Context {
-  readonly state: State;
-  readonly tx: Txn;
-  readonly gtxs: Txn[];
-  readonly args: Uint8Array[];
+  state: State;
+  tx: Txn;
+  gtxs: Txn[];
+  args: Uint8Array[];
   runtime: Runtime;
 
   constructor (state: State, tx: Txn, gtxs: Txn[], args: Uint8Array[], runtime: Runtime) {
@@ -284,7 +284,9 @@ export class Ctx implements Context {
       this.runtime.assertAmbiguousTxnParams(txnParam);
 
       if (txnParam.sign === SignType.LogicSignature) {
+        this.tx = this.gtxs[idx]; // update current tx to index of stateless
         this.runtime.validateLsigAndRun(txnParam);
+        this.tx = this.gtxs[0]; // after executing stateless tx updating current tx to default (index 0)
       }
 
       // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract

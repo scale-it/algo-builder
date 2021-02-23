@@ -192,12 +192,10 @@ describe("Algorand Standard Assets", function () {
     assert.equal(res.clawback, elon.address);
   });
 
-  it("should opt-in to asset for john", () => {
+  it("should opt-in to asset", () => {
     const res = runtime.getAssetDef(assetId);
     assert.isDefined(res);
 
-    // opt-in for john (creator)
-    runtime.optIntoASA(assetId, john.address, {});
     const johnAssetHolding = john.getAssetHolding(assetId);
     assert.isDefined(johnAssetHolding);
     assert.equal(johnAssetHolding?.amount as number, 5912599999515);
@@ -220,7 +218,6 @@ describe("Algorand Standard Assets", function () {
     const spy = sinon.spy(console, 'warn');
     const res = runtime.getAssetDef(assetId);
     assert.isDefined(res);
-    runtime.optIntoASA(assetId, john.address, {});
 
     // executing same opt-in tx again
     const warnMsg = `${john.address} is already opted in to asset ${assetId}`;
@@ -232,7 +229,6 @@ describe("Algorand Standard Assets", function () {
   it("should transfer asset between two accounts", () => {
     const res = runtime.getAssetDef(assetId);
     assert.isDefined(res);
-    runtime.optIntoASA(assetId, john.address, {});
     runtime.optIntoASA(assetId, alice.address, {});
 
     const initialJohnAssets = john.getAssetHolding(assetId)?.amount as number;
@@ -262,7 +258,6 @@ describe("Algorand Standard Assets", function () {
 
     const res = runtime.getAssetDef(assetId);
     assert.isDefined(res);
-    runtime.optIntoASA(assetId, john.address, {});
     runtime.optIntoASA(assetId, alice.address, {});
     // freezing asset holding for john
     runtime.executeTx(freezeParam);
@@ -277,7 +272,6 @@ describe("Algorand Standard Assets", function () {
   it("should close john account for transfer asset if close remainder to is specified", () => {
     const res = runtime.getAssetDef(assetId);
     assert.isDefined(res);
-    runtime.optIntoASA(assetId, john.address, {});
     runtime.optIntoASA(assetId, alice.address, {});
 
     syncAccounts();
@@ -396,7 +390,6 @@ describe("Algorand Standard Assets", function () {
       freezeState: true,
       payFlags: {}
     };
-    runtime.optIntoASA(assetId, john.address, {});
     runtime.executeTx(freezeParam);
 
     const johnAssetHolding = runtime.getAssetHolding(assetId, john.address);
@@ -431,7 +424,6 @@ describe("Algorand Standard Assets", function () {
       amount: 15,
       payFlags: {}
     };
-    runtime.optIntoASA(assetId, john.address, {});
     runtime.optIntoASA(assetId, bob.address, {});
 
     assetTransferParam.toAccountAddr = bob.address;
@@ -473,7 +465,6 @@ describe("Algorand Standard Assets", function () {
       amount: 15,
       payFlags: {}
     };
-    runtime.optIntoASA(assetId, john.address, {});
     runtime.optIntoASA(assetId, bob.address, {});
 
     assetTransferParam.toAccountAddr = bob.address;
@@ -495,7 +486,6 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("Should fail because only manager can destroy assets", () => {
-    runtime.optIntoASA(assetId, john.address, {});
     const destroyParam: DestroyAssetParam = {
       type: TransactionType.DestroyAsset,
       sign: SignType.SecretKey,
@@ -517,7 +507,6 @@ describe("Algorand Standard Assets", function () {
       assetID: assetId,
       payFlags: {}
     };
-    runtime.optIntoASA(assetId, john.address, {});
 
     runtime.executeTx(destroyParam);
 
@@ -535,8 +524,6 @@ describe("Algorand Standard Assets", function () {
       assetID: assetId,
       payFlags: {}
     };
-
-    runtime.optIntoASA(assetId, john.address, {});
     runtime.optIntoASA(assetId, bob.address, {});
 
     assetTransferParam.toAccountAddr = bob.address;

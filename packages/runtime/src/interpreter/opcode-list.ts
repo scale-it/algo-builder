@@ -824,7 +824,11 @@ export class EqualTo extends Op {
     const last = stack.pop();
     const prev = stack.pop();
     if (typeof last !== typeof prev) {
-      throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, { line: this.line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, {
+        expected: typeof prev,
+        actual: typeof last,
+        line: this.line
+      });
     }
     if (typeof last === "bigint") {
       stack = this.pushBooleanCheck(stack, (last === prev));
@@ -855,7 +859,11 @@ export class NotEqualTo extends Op {
     const last = stack.pop();
     const prev = stack.pop();
     if (typeof last !== typeof prev) {
-      throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, { line: this.line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, {
+        expected: typeof prev,
+        actual: typeof last,
+        line: this.line
+      });
     }
     if (typeof last === "bigint") {
       stack = this.pushBooleanCheck(stack, last !== prev);

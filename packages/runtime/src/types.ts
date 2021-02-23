@@ -186,6 +186,7 @@ export interface TxParams {
   note?: string
   noteb64?: string
   closeRemainderTo?: AccountAddress
+  rekeyTo?: AccountAddress
 }
 
 /**
@@ -207,7 +208,6 @@ export interface SSCOptionalFlags {
   foreignAssets?: number[]
   note?: Uint8Array
   lease?: Uint8Array
-  rekeyTo?: string
 }
 
 export type ExecParams = AlgoTransferParam | AssetTransferParam | SSCCallsParam |

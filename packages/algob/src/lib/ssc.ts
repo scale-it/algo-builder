@@ -45,7 +45,7 @@ export async function updateSSC (
     flags.foreignAssets,
     note,
     flags.lease,
-    flags.rekeyTo);
+    payFlags.rekeyTo);
 
   const txId = txn.txID().toString();
   const signedTxn = txn.signTxn(sender.sk);

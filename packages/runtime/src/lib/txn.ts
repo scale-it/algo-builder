@@ -201,7 +201,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.amountMicroAlgos,
         execParams.payFlags.closeRemainderTo,
         note,
-        suggestedParams);
+        suggestedParams,
+        execParams.payFlags.rekeyTo);
     }
     case TransactionType.ClearSSC: {
       return algosdk.makeApplicationClearStateTxn(
@@ -214,7 +215,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.foreignAssets,
         note,
         execParams.lease,
-        execParams.rekeyTo
+        execParams.payFlags.rekeyTo
       );
     }
     case TransactionType.DeleteSSC: {
@@ -228,7 +229,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.foreignAssets,
         note,
         execParams.lease,
-        execParams.rekeyTo
+        execParams.payFlags.rekeyTo
       );
     }
     case TransactionType.CallNoOpSSC: {
@@ -242,7 +243,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.foreignAssets,
         note,
         execParams.lease,
-        execParams.rekeyTo);
+        execParams.payFlags.rekeyTo);
     }
     case TransactionType.CloseSSC: {
       return algosdk.makeApplicationCloseOutTxn(
@@ -255,7 +256,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.foreignAssets,
         note,
         execParams.lease,
-        execParams.rekeyTo
+        execParams.payFlags.rekeyTo
       );
     }
     default: {
