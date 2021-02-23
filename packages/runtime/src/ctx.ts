@@ -1,14 +1,28 @@
-import { AssetHolding } from "algosdk";
+import { AssetDef, AssetHolding } from "algosdk";
 
 import { Runtime } from ".";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
-import { AccountAddress, AlgoTransferParam, AssetModFields, AssetTransferParam, SSCAttributesM, StoreAccountI } from "./types";
+import {
+  AccountAddress, AlgoTransferParam, AssetModFields,
+  AssetTransferParam, Context, ExecParams, ExecutionMode,
+  SignType, SSCAttributesM, State, StoreAccountI, TransactionType, Txn
+} from "./types";
 
-export class Ctx {
-  private readonly runtime: Runtime;
+const approvalProgram = "approval-program";
 
-  constructor (runtime: Runtime) {
+export class Ctx implements Context {
+  readonly state: State;
+  readonly tx: Txn;
+  readonly gtxs: Txn[];
+  readonly args: Uint8Array[];
+  runtime: Runtime;
+
+  constructor (state: State, tx: Txn, gtxs: Txn[], args: Uint8Array[], runtime: Runtime) {
+    this.state = state;
+    this.tx = tx;
+    this.gtxs = gtxs;
+    this.args = args;
     this.runtime = runtime;
   }
 
@@ -39,7 +53,7 @@ export class Ctx {
    * @param address account address
    */
   getAccount (address: string): StoreAccountI {
-    const account = this.runtime.ctx.state.accounts.get(address);
+    const account = this.state.accounts.get(address);
     return this.runtime.assertAccountDefined(address, account);
   }
 
@@ -53,6 +67,16 @@ export class Ctx {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
     }
     return this.runtime.assertAccountDefined(addr, this.runtime.ctx.state.accounts.get(addr));
+  }
+
+  /**
+   * Returns Asset Definitions
+   * @param assetId Asset Index
+   */
+  getAssetDef (assetId: number): AssetDef {
+    const creatorAcc = this.getAssetAccount(assetId);
+    const assetDef = creatorAcc.getAssetDef(assetId);
+    return this.runtime.assertAssetDefined(assetId, assetDef);
   }
 
   /**
@@ -243,5 +267,113 @@ export class Ctx {
     // https://developer.algorand.org/docs/reference/cli/goal/app/closeout/#search-overlay
     this.runtime.assertAppDefined(appId, this.getApp(appId));
     fromAccount.closeApp(appId); // remove app from local state
+  }
+
+  /**
+   * Process transactions in ctx
+   * - Runs TEAL code if associated with transaction
+   * - Executes the transaction on ctx.state
+   * @param txnParams Transaction Parameters
+   */
+  /* eslint-disable sonarjs/cognitive-complexity */
+  processTransactions (txnParams: ExecParams[]): boolean {
+    let clearErrorBool = false;
+    txnParams.forEach((txnParam, idx) => {
+      this.deductFee(txnParam.fromAccount.addr, idx);
+      this.runtime.assertAmbiguousTxnParams(txnParam);
+
+      if (txnParam.sign === SignType.LogicSignature) {
+        this.runtime.validateLsigAndRun(txnParam);
+      }
+
+      // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
+      switch (txnParam.type) {
+        case TransactionType.TransferAlgo: {
+          this.transferAlgo(txnParam);
+          break;
+        }
+        case TransactionType.TransferAsset: {
+          this.transferAsset(txnParam);
+          break;
+        }
+        case TransactionType.CallNoOpSSC: {
+          const appParams = this.getApp(txnParam.appId);
+          this.runtime.run(appParams[approvalProgram], ExecutionMode.STATEFUL);
+          break;
+        }
+        case TransactionType.CloseSSC: {
+          const appParams = this.getApp(txnParam.appId);
+          this.runtime.run(appParams[approvalProgram], ExecutionMode.STATEFUL);
+          this.closeApp(txnParam.fromAccount.addr, txnParam.appId);
+          break;
+        }
+        case TransactionType.ClearSSC: {
+          const appParams = this.runtime.assertAppDefined(txnParam.appId, this.getApp(txnParam.appId));
+          try {
+            this.runtime.run(appParams["clear-state-program"], ExecutionMode.STATEFUL);
+          } catch (error) {
+            // if transaction type is Clear Call, remove the app first before throwing error (rejecting tx)
+            // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
+            // Clear call is executed only if error is (rejected by logic i.e error number 1007)
+            if (error instanceof RuntimeError && error.number === 1007) {
+              this.closeApp(txnParam.fromAccount.addr, txnParam.appId); // remove app from local state
+              clearErrorBool = true;
+              break;
+            } else {
+              throw error;
+            }
+          }
+
+          this.closeApp(txnParam.fromAccount.addr, txnParam.appId); // remove app from local state
+          break;
+        }
+        case TransactionType.DeleteSSC: {
+          const appParams = this.getApp(txnParam.appId);
+          this.runtime.run(appParams[approvalProgram], ExecutionMode.STATEFUL);
+          this.deleteApp(txnParam.appId);
+          break;
+        }
+        case TransactionType.ModifyAsset: {
+          const asset = this.getAssetDef(txnParam.assetID);
+          if (asset.manager !== txnParam.fromAccount.addr) {
+            throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
+          }
+          // modify asset in ctx.
+          this.modifyAsset(txnParam.assetID, txnParam.fields);
+          break;
+        }
+        case TransactionType.FreezeAsset: {
+          const asset = this.getAssetDef(txnParam.assetID);
+          if (asset.freeze !== txnParam.fromAccount.addr) {
+            throw new RuntimeError(RUNTIME_ERRORS.ASA.FREEZE_ERROR, { address: asset.freeze });
+          }
+          this.freezeAsset(txnParam.assetID, txnParam.freezeTarget, txnParam.freezeState);
+          break;
+        }
+        case TransactionType.RevokeAsset: {
+          const asset = this.getAssetDef(txnParam.assetID);
+          if (asset.clawback !== txnParam.fromAccount.addr) {
+            throw new RuntimeError(RUNTIME_ERRORS.ASA.CLAWBACK_ERROR, { address: asset.clawback });
+          }
+          this.revokeAsset(
+            txnParam.recipient, txnParam.assetID,
+            txnParam.revocationTarget, txnParam.amount
+          );
+          break;
+        }
+        case TransactionType.DestroyAsset: {
+          const asset = this.getAssetDef(txnParam.assetID);
+          if (asset.manager !== txnParam.fromAccount.addr) {
+            throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
+          }
+          this.destroyAsset(txnParam.assetID);
+          break;
+        }
+      }
+    });
+    if (clearErrorBool) {
+      return true;
+    }
+    return false;
   }
 }

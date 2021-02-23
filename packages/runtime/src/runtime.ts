@@ -18,7 +18,7 @@ import type {
   SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
   StackElem, State, StoreAccountI, Txn, TxParams
 } from "./types";
-import { ExecutionMode, SignType, TransactionType } from "./types";
+import { ExecutionMode, SignType } from "./types";
 
 export class Runtime {
   /**
@@ -36,7 +36,6 @@ export class Runtime {
   private round: number;
   private timestamp: number;
   private readonly loadedAssetsDefs: ASADefs;
-  private readonly ctxOp: Ctx;
 
   constructor (accounts: StoreAccountI[]) {
     // runtime store
@@ -53,15 +52,8 @@ export class Runtime {
     this.loadedAssetsDefs = loadASAFile(this.store.accounts);
 
     // context for interpreter
-    this.ctx = {
-      state: cloneDeep(this.store), // state is a deep copy of store
-      tx: <Txn>{},
-      gtxs: [],
-      args: []
-    };
+    this.ctx = new Ctx(cloneDeep(this.store), <Txn>{}, [], [], this);
 
-    // ctx class
-    this.ctxOp = new Ctx(this);
     this.appCounter = 0;
     this.assetCounter = 0;
     this.round = 2;
@@ -595,113 +587,6 @@ export class Runtime {
   }
 
   /**
-   * Process transactions in ctx
-   * - Runs TEAL code if associated with transaction
-   * - Executes the transaction on ctx.state
-   * @param txnParams Transaction Parameters
-   */
-  /* eslint-disable sonarjs/cognitive-complexity */
-  processTransactions (txnParams: ExecParams[]): void {
-    let clearErrorBool = false;
-    txnParams.forEach((txnParam, idx) => {
-      this.ctxOp.deductFee(txnParam.fromAccount.addr, idx);
-      this.assertAmbiguousTxnParams(txnParam);
-
-      if (txnParam.sign === SignType.LogicSignature) {
-        this.validateLsigAndRun(txnParam);
-      }
-
-      // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
-      switch (txnParam.type) {
-        case TransactionType.TransferAlgo: {
-          this.ctxOp.transferAlgo(txnParam);
-          break;
-        }
-        case TransactionType.TransferAsset: {
-          this.ctxOp.transferAsset(txnParam);
-          break;
-        }
-        case TransactionType.CallNoOpSSC: {
-          const appParams = this.getApp(txnParam.appId);
-          this.run(appParams["approval-program"], ExecutionMode.STATEFUL);
-          break;
-        }
-        case TransactionType.CloseSSC: {
-          const appParams = this.getApp(txnParam.appId);
-          this.run(appParams["approval-program"], ExecutionMode.STATEFUL);
-          this.ctxOp.closeApp(txnParam.fromAccount.addr, txnParam.appId);
-          break;
-        }
-        case TransactionType.ClearSSC: {
-          const appParams = this.assertAppDefined(txnParam.appId, this.getApp(txnParam.appId));
-          try {
-            this.run(appParams["clear-state-program"], ExecutionMode.STATEFUL);
-          } catch (error) {
-            // if transaction type is Clear Call, remove the app first before throwing error (rejecting tx)
-            // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
-            if (error instanceof RuntimeError && error.number === 1007) {
-              this.ctxOp.closeApp(txnParam.fromAccount.addr, txnParam.appId); // remove app from local state
-              clearErrorBool = true;
-              break;
-            } else {
-              throw error;
-            }
-          }
-
-          this.ctxOp.closeApp(txnParam.fromAccount.addr, txnParam.appId); // remove app from local state
-          break;
-        }
-        case TransactionType.DeleteSSC: {
-          const appParams = this.getApp(txnParam.appId);
-          this.run(appParams["approval-program"], ExecutionMode.STATEFUL);
-          this.ctxOp.deleteApp(txnParam.appId);
-          break;
-        }
-        case TransactionType.ModifyAsset: {
-          const asset = this.getAssetDef(txnParam.assetID);
-          if (asset.manager !== txnParam.fromAccount.addr) {
-            throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
-          }
-          // modify asset in ctx.
-          this.ctxOp.modifyAsset(txnParam.assetID, txnParam.fields);
-          break;
-        }
-        case TransactionType.FreezeAsset: {
-          const asset = this.getAssetDef(txnParam.assetID);
-          if (asset.freeze !== txnParam.fromAccount.addr) {
-            throw new RuntimeError(RUNTIME_ERRORS.ASA.FREEZE_ERROR, { address: asset.freeze });
-          }
-          this.ctxOp.freezeAsset(txnParam.assetID, txnParam.freezeTarget, txnParam.freezeState);
-          break;
-        }
-        case TransactionType.RevokeAsset: {
-          const asset = this.getAssetDef(txnParam.assetID);
-          if (asset.clawback !== txnParam.fromAccount.addr) {
-            throw new RuntimeError(RUNTIME_ERRORS.ASA.CLAWBACK_ERROR, { address: asset.clawback });
-          }
-          this.ctxOp.revokeAsset(
-            txnParam.recipient, txnParam.assetID,
-            txnParam.revocationTarget, txnParam.amount
-          );
-          break;
-        }
-        case TransactionType.DestroyAsset: {
-          const asset = this.getAssetDef(txnParam.assetID);
-          if (asset.manager !== txnParam.fromAccount.addr) {
-            throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
-          }
-          this.ctxOp.destroyAsset(txnParam.assetID);
-          break;
-        }
-      }
-    });
-    if (clearErrorBool) {
-      this.store = this.ctx.state;
-      throw new RuntimeError(RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC);
-    }
-  }
-
-  /**
    * This function executes a transaction based on a smart
    * contract logic and updates state afterwards
    * @param txnParams : Transaction parameters
@@ -714,17 +599,16 @@ export class Runtime {
     this.validateTxRound(gtxs);
 
     // initialize context before each execution
-    this.ctx = {
-      state: cloneDeep(this.store), // state is a deep copy of store
-      tx: tx,
-      gtxs: gtxs,
-      args: []
-    };
+    // state is a deep copy of store
+    this.ctx = new Ctx(cloneDeep(this.store), tx, gtxs, [], this);
 
     const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
     // Run TEAL program associated with each transaction and
     // then execute the transaction without interacting with store.
-    this.processTransactions(txnParameters);
+    if (this.ctx.processTransactions(txnParameters)) {
+      this.store = this.ctx.state;
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC);
+    }
 
     // update store only if all the transactions are passed
     this.store = this.ctx.state;
