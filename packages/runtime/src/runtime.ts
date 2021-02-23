@@ -606,10 +606,7 @@ export class Runtime {
     const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
     // Run TEAL program associated with each transaction and
     // then execute the transaction without interacting with store.
-    if (this.ctx.processTransactions(txnParameters)) {
-      this.store = this.ctx.state;
-      throw new RuntimeError(RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC);
-    }
+    this.ctx.processTransactions(txnParameters);
 
     // update store only if all the transactions are passed
     this.store = this.ctx.state;

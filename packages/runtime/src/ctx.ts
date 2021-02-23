@@ -277,8 +277,7 @@ export class Ctx implements Context {
    * @param txnParams Transaction Parameters
    */
   /* eslint-disable sonarjs/cognitive-complexity */
-  processTransactions (txnParams: ExecParams[]): boolean {
-    const clearErrorBool = false;
+  processTransactions (txnParams: ExecParams[]): void {
     txnParams.forEach((txnParam, idx) => {
       this.deductFee(txnParam.fromAccount.addr, idx);
       this.runtime.assertAmbiguousTxnParams(txnParam);
@@ -367,9 +366,5 @@ export class Ctx implements Context {
         }
       }
     });
-    if (clearErrorBool) {
-      return true;
-    }
-    return false;
   }
 }

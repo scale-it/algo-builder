@@ -95,7 +95,7 @@ export interface Context {
   destroyAsset: (assetId: number) => void
   deleteApp: (appId: number) => void
   closeApp: (sender: AccountAddress, appId: number) => void
-  processTransactions: (txnParams: ExecParams[]) => boolean
+  processTransactions: (txnParams: ExecParams[]) => void
 }
 
 // custom AppsLocalState for StoreAccount (using maps instead of array in 'key-value')
