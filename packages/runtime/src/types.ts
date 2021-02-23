@@ -82,7 +82,7 @@ export interface Context {
   args: Uint8Array[]
   getAccount: (address: string) => StoreAccountI
   getAssetAccount: (assetId: number) => StoreAccountI
-  getApp: (appId: number) => SSCAttributesM
+  getApp: (appId: number, line?: number) => SSCAttributesM
   transferAlgo: (txnParam: AlgoTransferParam) => void
   deductFee: (sender: AccountAddress, index: number) => void
   transferAsset: (txnParam: AssetTransferParam) => void

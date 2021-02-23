@@ -62,11 +62,11 @@ export class Ctx implements Context {
    * @param Asset Index
    */
   getAssetAccount (assetId: number): StoreAccountI {
-    const addr = this.runtime.ctx.state.assetDefs.get(assetId);
+    const addr = this.state.assetDefs.get(assetId);
     if (addr === undefined) {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
     }
-    return this.runtime.assertAccountDefined(addr, this.runtime.ctx.state.accounts.get(addr));
+    return this.runtime.assertAccountDefined(addr, this.state.accounts.get(addr));
   }
 
   /**
@@ -85,7 +85,7 @@ export class Ctx implements Context {
    * @param address address of account to get holding from
    */
   getAssetHolding (assetIndex: number, address: AccountAddress): AssetHolding {
-    const account = this.runtime.assertAccountDefined(address, this.runtime.ctx.state.accounts.get(address));
+    const account = this.runtime.assertAccountDefined(address, this.state.accounts.get(address));
     const assetHolding = account.getAssetHolding(assetIndex);
     if (assetHolding === undefined) {
       throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.ASA_NOT_OPTIN, {
@@ -97,16 +97,17 @@ export class Ctx implements Context {
   }
 
   /**
-   * Fetches app from `this.ctx`
+   * Fetches app from `ctx state`
    * @param appId Application Index
    */
-  getApp (appId: number): SSCAttributesM {
-    if (!this.runtime.ctx.state.globalApps.has(appId)) {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
+  getApp (appId: number, line?: number): SSCAttributesM {
+    const lineNumber = line ?? 'unknown';
+    if (!this.state.globalApps.has(appId)) {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: lineNumber });
     }
-    const accAddress = this.runtime.assertAddressDefined(this.runtime.ctx.state.globalApps.get(appId));
+    const accAddress = this.runtime.assertAddressDefined(this.state.globalApps.get(appId));
     const account = this.runtime.assertAccountDefined(
-      accAddress, this.runtime.ctx.state.accounts.get(accAddress)
+      accAddress, this.state.accounts.get(accAddress)
     );
     return this.runtime.assertAppDefined(appId, account.getApp(appId));
   }
@@ -135,7 +136,7 @@ export class Ctx implements Context {
    */
   deductFee (sender: AccountAddress, index: number): void {
     const fromAccount = this.getAccount(sender);
-    const fee = this.runtime.ctx.gtxs[index].fee;
+    const fee = this.gtxs[index].fee;
     this.assertMinBalance(fee, sender);
     fromAccount.amount -= fee; // remove tx fee from Sender's account
   }
@@ -188,7 +189,7 @@ export class Ctx implements Context {
   ): void {
     const acc = this.runtime.assertAccountDefined(
       freezeTarget,
-      this.runtime.ctx.state.accounts.get(freezeTarget)
+      this.state.accounts.get(freezeTarget)
     );
     acc.setFreezeState(assetId, freezeState);
   }
@@ -232,7 +233,7 @@ export class Ctx implements Context {
     // destroy asset from creator's account
     creatorAcc.destroyAsset(assetId);
     // delete asset holdings from all accounts
-    this.runtime.ctx.state.accounts.forEach((value, key) => {
+    this.state.accounts.forEach((value, key) => {
       value.assets.delete(assetId);
     });
   }
@@ -242,19 +243,19 @@ export class Ctx implements Context {
    * @param appId Application Index
    */
   deleteApp (appId: number): void {
-    if (!this.runtime.ctx.state.globalApps.has(appId)) {
+    if (!this.state.globalApps.has(appId)) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
-    const accountAddr = this.runtime.assertAddressDefined(this.runtime.ctx.state.globalApps.get(appId));
+    const accountAddr = this.runtime.assertAddressDefined(this.state.globalApps.get(appId));
     if (accountAddr === undefined) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.ACCOUNT_DOES_NOT_EXIST);
     }
     const account = this.runtime.assertAccountDefined(
-      accountAddr, this.runtime.ctx.state.accounts.get(accountAddr)
+      accountAddr, this.state.accounts.get(accountAddr)
     );
 
     account.deleteApp(appId);
-    this.runtime.ctx.state.globalApps.delete(appId);
+    this.state.globalApps.delete(appId);
   }
 
   /**
@@ -272,7 +273,7 @@ export class Ctx implements Context {
   /**
    * Process transactions in ctx
    * - Runs TEAL code if associated with transaction
-   * - Executes the transaction on ctx.state
+   * - Executes the transaction on ctx
    * @param txnParams Transaction Parameters
    */
   /* eslint-disable sonarjs/cognitive-complexity */

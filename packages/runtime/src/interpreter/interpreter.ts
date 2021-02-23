@@ -62,14 +62,7 @@ export class Interpreter {
    * @param appId Application Index
    */
   getApp (appId: number, line: number): SSCAttributesM {
-    if (!this.runtime.ctx.state.globalApps.has(appId)) {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: line });
-    }
-    const accAddress = this.runtime.assertAddressDefined(
-      this.runtime.ctx.state.globalApps.get(appId));
-    let account = this.runtime.ctx.state.accounts.get(accAddress);
-    account = this.runtime.assertAccountDefined(accAddress, account);
-    return this.runtime.assertAppDefined(appId, account.getApp(appId), line);
+    return this.runtime.ctx.getApp(appId, line);
   }
 
   /**
