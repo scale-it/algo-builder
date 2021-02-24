@@ -249,7 +249,7 @@ export interface RevokeAssetParam extends Sign {
   recipient: AccountAddress // Revoked assets are sent to this address
   assetID: number
   revocationTarget: AccountAddress // Revocation target is the account from which the clawback revokes asset.
-  amount: bigint
+  amount: number | bigint
   payFlags: TxParams
 }
 
@@ -264,7 +264,7 @@ export interface AlgoTransferParam extends Sign {
   type: TransactionType.TransferAlgo
   fromAccount: AccountSDK
   toAccountAddr: AccountAddress
-  amountMicroAlgos: bigint
+  amountMicroAlgos: number | bigint
   payFlags: TxParams
 }
 
@@ -272,7 +272,7 @@ export interface AssetTransferParam extends Sign {
   type: TransactionType.TransferAsset
   fromAccount: AccountSDK
   toAccountAddr: AccountAddress
-  amount: bigint
+  amount: number | bigint
   assetID: number
   payFlags: TxParams
 }

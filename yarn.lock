@@ -438,9 +438,9 @@ algosdk@^1.8.0:
     superagent "^6.1.0"
     tweetnacl "^1.0.3"
 
-"algosdk@https://github.com/algorand/js-algorand-sdk.git#263fd5dd3fd65a38c4c82fd06504ba7795be70fe":
+"algosdk@https://github.com/algorand/js-algorand-sdk.git#9a5824782511dff1f521c68fe54d562b3872d1ae":
   version "1.8.1"
-  resolved "https://github.com/algorand/js-algorand-sdk.git#263fd5dd3fd65a38c4c82fd06504ba7795be70fe"
+  resolved "https://github.com/algorand/js-algorand-sdk.git#9a5824782511dff1f521c68fe54d562b3872d1ae"
   dependencies:
     algo-msgpack-with-bigint "^2.1.0"
     buffer "^6.0.2"
@@ -448,6 +448,7 @@ algosdk@^1.8.0:
     js-sha256 "^0.9.0"
     js-sha3 "^0.8.0"
     js-sha512 "^0.8.0"
+    json-bigint "^1.0.0"
     superagent "^6.1.0"
     tweetnacl "^1.0.3"
 
@@ -603,6 +604,11 @@ base64-js@^1.0.2, base64-js@^1.3.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.5.1.tgz#1b1b440160a5bf7ad40b650f095963481903930a"
   integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
+
+bignumber.js@^9.0.0:
+  version "9.0.1"
+  resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-9.0.1.tgz#8d7ba124c882bfd8e43260c67475518d0689e4e5"
+  integrity sha512-IdZR9mh6ahOBv/hYGiXyVuyCetmGJhtYkqLBpTStdhEGjegpPlUawydyaF3pbIOFynJTpllEs+NP+CS9jKFLjA==
 
 binary-extensions@^2.0.0:
   version "2.1.0"
@@ -1953,6 +1959,13 @@ jsesc@^2.5.1:
   version "2.5.2"
   resolved "https://registry.yarnpkg.com/jsesc/-/jsesc-2.5.2.tgz#80564d2e483dacf6e8ef209650a67df3f0c283a4"
   integrity sha512-OYu7XEzjkCQ3C5Ps3QIZsQfNpqoJyZZA99wd9aWd05NCtC5pWOkShK2mkL6HXQR6/Cy2lbNdPlZBpuQHXE63gA==
+
+json-bigint@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/json-bigint/-/json-bigint-1.0.0.tgz#ae547823ac0cad8398667f8cd9ef4730f5b01ff1"
+  integrity sha512-SiPv/8VpZuWbvLSMtTDU8hEfrZWg/mH/nV/b4o0CYbSxu1UIQPLdwKOCIyLQX+VIPO5vrLX3i8qtqFyhdPSUSQ==
+  dependencies:
+    bignumber.js "^9.0.0"
 
 json-parse-even-better-errors@^2.3.0:
   version "2.3.0"

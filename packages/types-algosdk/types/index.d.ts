@@ -23,6 +23,8 @@ declare module 'algosdk' {
     pendingTransactionInformation(txId: string): Action<ConfirmedTxInfo>;
     statusAfterBlock(lastround: number): Action<any>;
     accountInformation(address: string): Action<AccountState>;
+    setIntEncoding(method: string): void
+    getIntEncoding(): string;
   }
 
   export const OnApplicationComplete: {
@@ -217,10 +219,11 @@ declare module 'algosdk' {
   }
 
   export class LogicSigBase {
+    tag?: Buffer | Uint8Array;
     logic: Uint8Array;
     // args Program arguments as array of Uint8Array arrays
     args: LogicSigArgs;
-    sig?: unknown;
+    sig?: Uint8Array;
     msig?: MultiSig;
   }
 

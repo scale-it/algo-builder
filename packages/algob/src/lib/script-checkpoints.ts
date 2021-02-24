@@ -148,6 +148,7 @@ export class CheckpointRepoImpl implements CheckpointRepo {
   }
 
   registerLsig (networkName: string, name: string, info: LsigInfo): CheckpointRepo {
+    if (info.lsig.tag) { info.lsig.tag = Uint8Array.from(info.lsig.tag); }
     this._ensureNet(this.precedingCP, networkName).dLsig.set(name, info);
     this._ensureNet(this.strippedCP, networkName).dLsig.set(name, info);
     this._ensureNet(this.allCPs, networkName).dLsig.set(name, info);

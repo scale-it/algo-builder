@@ -77,7 +77,7 @@
     "time-require": "^0.1.2"
   },
   "dependencies": {
-    "algosdk": "https://github.com/algorand/js-algorand-sdk.git#263fd5dd3fd65a38c4c82fd06504ba7795be70fe",
+    "algosdk": "https://github.com/algorand/js-algorand-sdk.git#9a5824782511dff1f521c68fe54d562b3872d1ae",
     "chalk": "^4.1.0",
     "debug": "^4.1.1",
     "deep-equal": "^2.0.3",

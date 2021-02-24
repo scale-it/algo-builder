@@ -676,6 +676,7 @@ export class Runtime {
     const fromAccount = this.getAccount(txnParam.fromAccount.addr);
     const toAccount = this.getAccount(txnParam.toAccountAddr);
 
+    txnParam.amountMicroAlgos = BigInt(txnParam.amountMicroAlgos); // process internally as bigint
     this.assertMinBalance(txnParam.amountMicroAlgos, fromAccount.address);
     fromAccount.amount -= txnParam.amountMicroAlgos; // remove 'x' algo from sender
     toAccount.amount += txnParam.amountMicroAlgos; // add 'x' algo to receiver
@@ -692,6 +693,7 @@ export class Runtime {
   transferAsset (txnParam: AssetTransferParam): void {
     const fromAssetHolding = this.getAssetHolding(txnParam.assetID, txnParam.fromAccount.addr);
     const toAssetHolding = this.getAssetHolding(txnParam.assetID, txnParam.toAccountAddr);
+    txnParam.amount = BigInt(txnParam.amount); // process internally as bigint
 
     this.assertAssetNotFrozen(txnParam.assetID, txnParam.fromAccount.addr);
     this.assertAssetNotFrozen(txnParam.assetID, txnParam.toAccountAddr);
@@ -770,7 +772,7 @@ export class Runtime {
           case TransactionType.RevokeAsset: {
             this.revokeAsset(
               txnParam.recipient, txnParam.assetID,
-              txnParam.revocationTarget, txnParam.amount);
+              txnParam.revocationTarget, BigInt(txnParam.amount));
             break;
           }
           case TransactionType.DestroyAsset: {
