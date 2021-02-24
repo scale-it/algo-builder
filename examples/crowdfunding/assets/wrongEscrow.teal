@@ -1,0 +1,21 @@
+#pragma version 2
+// Check if Transaction type is pay, Amount is <= 100, Receiver is john AND fee <= 10000
+txn TypeEnum
+int 1
+==
+txn Amount
+int 100
+<=
+&&
+txn Receiver
+addr 2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA
+==
+&&
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txn Fee
+int 10000
+<=
+&&

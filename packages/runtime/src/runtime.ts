@@ -283,7 +283,6 @@ export class Runtime {
       for (const txnParam of txnParams) { // create encoded_obj for each txn in group
         const mockParams = mockSuggestedParams(txnParam.payFlags, this.round);
         const tx = mkTransaction(txnParam, mockParams);
-
         // convert to encoded obj for compatibility
         const encodedTxnObj = tx.get_obj_for_encoding() as Txn;
         encodedTxnObj.txID = tx.txID();
@@ -336,6 +335,8 @@ export class Runtime {
     const asset = senderAcc.addAsset(++this.assetCounter, name, this.loadedAssetsDefs[name]);
     this.mkAssetCreateTx(name, flags, asset);
     this.store.assetDefs.set(this.assetCounter, sender.addr);
+
+    this.optIntoASA(this.assetCounter, sender.addr, {}); // opt-in for creator
     return this.assetCounter;
   }
 
@@ -356,7 +357,7 @@ export class Runtime {
       amount: address === creatorAddr ? BigInt(assetDef.total) : 0n, // for creator opt-in amount is total assets
       'asset-id': assetIndex,
       creator: creatorAddr,
-      'is-frozen': assetDef["default-frozen"]
+      'is-frozen': address === creatorAddr ? false : assetDef["default-frozen"]
     };
 
     const account = this.getAccount(address);
@@ -473,7 +474,7 @@ export class Runtime {
       flags.foreignAssets,
       flags.note,
       flags.lease,
-      flags.rekeyTo);
+      payFlags.rekeyTo);
 
     const encTx = txn.get_obj_for_encoding();
     encTx.txID = txn.txID();
@@ -535,7 +536,7 @@ export class Runtime {
       flags.foreignAssets,
       flags.note,
       flags.lease,
-      flags.rekeyTo);
+      payFlags.rekeyTo);
 
     const encTx = txn.get_obj_for_encoding();
     encTx.txID = txn.txID();
@@ -580,7 +581,7 @@ export class Runtime {
       flags.foreignAssets,
       flags.note,
       flags.lease,
-      flags.rekeyTo);
+      payFlags.rekeyTo);
 
     const encTx = txn.get_obj_for_encoding();
     encTx.txID = txn.txID();
@@ -817,10 +818,12 @@ export class Runtime {
 
     const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
     // Run TEAL program associated with each transaction without interacting with store.
-    for (const txnParam of txnParameters) {
+    for (const [index, txnParam] of txnParameters.entries()) {
       this.assertAmbiguousTxnParams(txnParam);
       if (txnParam.sign === SignType.LogicSignature) {
+        this.ctx.tx = this.ctx.gtxs[index]; // update current tx to index of stateless
         this.validateLsigAndRun(txnParam);
+        this.ctx.tx = this.ctx.gtxs[0]; // after executing stateless tx updating current tx to default (index 0)
       }
 
       // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract

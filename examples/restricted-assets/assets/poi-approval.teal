@@ -151,7 +151,9 @@ gtxn 2 TypeEnum
 int pay
 ==
 &&
-// Verify that this is index the stateful contract call
+
+// the first txn group index is zero. When a txGroup is executed by default
+// (without any stateless txn first, then groupIndex should be 0)
 txn GroupIndex
 int 0
 ==
@@ -227,7 +229,7 @@ bz failed
 // tx 1 - clawback transactions that moves the frozen asset from sender to receiver - signed by clawback-escrow
 // verify the account sent in the accounts array is
 // Note: the receiver of the asset is asset xfer
-gtxn 0 Accounts 1
+gtxna 0 Accounts 1
 gtxn 1 AssetReceiver
 ==
 gtxn 1 XferAsset

@@ -283,7 +283,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       flags.foreignAssets,
       flags.note,
       flags.lease,
-      flags.rekeyTo);
+      payFlags.rekeyTo);
 
     const txId = txn.txID().toString();
     const signedTxn = txn.signTxn(flags.sender.sk);
@@ -328,7 +328,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       flags.foreignAssets,
       flags.note,
       flags.lease,
-      flags.rekeyTo);
+      payFlags.rekeyTo);
 
     const txId = txn.txID().toString();
     const signedTxn = txn.signTxn(sender.sk);

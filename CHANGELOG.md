@@ -2,8 +2,22 @@
 
 ## unreleased
 
-+ Updating the default token and endpoint port. For compatibility with Sandbox we use the sandbox token and port (4001) in all examples and sample project. If you have your run an algorand node using our private node setup then either recreate the network (stop, remove node_data and create it again), or update the `node_data/PrimaryNode/config.json` and set: `"EndpointAddress": "127.0.0.1:4001"`
+* Full support for asset related transaction (create, opt-in, transfer, modify, freeze, revoke, destroy)
+* Support for group transactions
+* Support Sandbox in `/infrastructure` to quickly set up the private net
+* Add documentation (in `/docs/testing-teal.md`) to test TEAL using `@algorand-builder/runtime`
+* Updating the default token and endpoint port. For compatibility with Sandbox we use the sandbox token and port (4001) in all examples and sample project. If you run an algorand node using our private node setup then either recreate the network (stop, remove node_data and create it again), or update the `node_data/PrimaryNode/config.json` and set: `"EndpointAddress": "127.0.0.1:4001"`
 
+## v0.4.0 2021-02-03
+
+* Renamed `@algorand-builder/algorand-js` to `@algorand-builder/runtime`
+* Added new example project - Crowdfunding Application
+* Added transaction in `@algorand-builder/runtime` for app creation, opt-in
+* Added support for arguments in stateful smart contracts similar to goal (eg. `str:abc`, 'int:12')
+* Logic signature validation for stateless teal in runtime
+* Introduced versioning of TEAL opcodes in runtime with max cost assertion
+* Full transaction processing for types payment, stateful (application call, clear, delete, close)
+* Typescript example project - `htlc-pyteal-ts`
 
 ## v0.3.0 2020-12-28
 
