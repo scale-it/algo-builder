@@ -38,7 +38,7 @@ describe('Test for transferring asset using custom logic', function () {
     };
 
     /* Create asset + optIn to asset */
-    assetId = runtime.createAsset('gold', { creator: { ...alice.account, name: 'alice' } });
+    assetId = runtime.addAsset('gold', { creator: { ...alice.account, name: 'alice' } });
     assetDef = runtime.getAssetDef(assetId);
 
     assert.equal(assetDef.creator, alice.address);
@@ -260,7 +260,7 @@ describe('Test for transferring asset using custom logic', function () {
   });
 
   it('should reject transaction if minimum level is not set correctly', () => {
-    assetId = runtime.createAsset('gold', { creator: { ...alice.account, name: 'alice' } });
+    assetId = runtime.addAsset('gold', { creator: { ...alice.account, name: 'alice' } });
     runtime.optIntoASA(assetId, bob.address, {});
 
     /* Create application + optIn to app */

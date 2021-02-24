@@ -169,7 +169,7 @@ describe("Algorand Standard Assets", function () {
   });
 
   this.beforeEach(() => {
-    assetId = runtime.createAsset('gold',
+    assetId = runtime.addAsset('gold',
       { creator: { ...john.account, name: "john" } });
   });
 
@@ -324,7 +324,7 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("Blank field test, should not modify asset because field is set to blank", () => {
-    const assetId = runtime.createAsset('silver',
+    const assetId = runtime.addAsset('silver',
       { creator: { ...john.account, name: "john" } });
 
     const modFields: AssetModFields = {

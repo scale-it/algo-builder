@@ -319,11 +319,11 @@ export class Runtime {
   }
 
   /**
-   * Creates Asset in Runtime
+   * Add Asset in Runtime
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  createAsset (name: string, flags: ASADeploymentFlags): number {
+  addAsset (name: string, flags: ASADeploymentFlags): number {
     const sender = flags.creator;
     const senderAcc = this.assertAccountDefined(sender.addr, this.store.accounts.get(sender.addr));
 
