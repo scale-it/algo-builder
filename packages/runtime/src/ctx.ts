@@ -132,7 +132,7 @@ export class Ctx implements Context {
   /**
    * Deduct transaction fee from sender account.
    * @param sender Sender address
-   * @param index Index of transaction in tx group
+   * @param index Index of current tx being processed in tx group
    */
   deductFee (sender: AccountAddress, index: number): void {
     const fromAccount = this.getAccount(sender);
