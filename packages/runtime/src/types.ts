@@ -9,8 +9,9 @@ import {
 import * as z from 'zod';
 
 import {
-  Add, Addr, Arg, Byte, Bytec, Bytecblock, Div, Int, Len, Mul, Pragma,
-  Sub
+  Add, Addr, Arg, Byte, Bytec,
+  Bytecblock, Div, Int, Len, Mul,
+  Pragma, Sub
 } from "./interpreter/opcode-list";
 import { TxnFields } from "./lib/constants";
 import type { IStack } from "./lib/stack";
@@ -79,6 +80,22 @@ export interface Context {
   tx: Txn // current txn
   gtxs: Txn[] // all transactions
   args: Uint8Array[]
+  getAccount: (address: string) => StoreAccountI
+  getAssetAccount: (assetId: number) => StoreAccountI
+  getApp: (appId: number, line?: number) => SSCAttributesM
+  transferAlgo: (txnParam: AlgoTransferParam) => void
+  deductFee: (sender: AccountAddress, index: number) => void
+  transferAsset: (txnParam: AssetTransferParam) => void
+  modifyAsset: (assetId: number, fields: AssetModFields) => void
+  freezeAsset: (assetId: number, freezeTarget: string, freezeState: boolean) => void
+  revokeAsset: (
+    recipient: string, assetID: number,
+    revocationTarget: string, amount: number
+  ) => void
+  destroyAsset: (assetId: number) => void
+  deleteApp: (appId: number) => void
+  closeApp: (sender: AccountAddress, appId: number) => void
+  processTransactions: (txnParams: ExecParams[]) => void
 }
 
 // custom AppsLocalState for StoreAccount (using maps instead of array in 'key-value')
