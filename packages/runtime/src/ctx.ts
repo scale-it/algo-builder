@@ -98,7 +98,8 @@ export class Ctx implements Context {
 
   /**
    * Fetches app from `ctx state`
-   * @param appId Application Index
+   * @param appId Application Index'
+   * @param line Line number in teal file
    */
   getApp (appId: number, line?: number): SSCAttributesM {
     const lineNumber = line ?? 'unknown';
@@ -224,9 +225,7 @@ export class Ctx implements Context {
   /**
    * https://developer.algorand.org/docs/features/asa/#destroying-an-asset
    * Destroy asset
-   * @param sender sender's address
    * @param assetId asset index
-   * @param payFlags transaction parameters
    */
   destroyAsset (assetId: number): void {
     const creatorAcc = this.getAssetAccount(assetId);
@@ -274,6 +273,9 @@ export class Ctx implements Context {
    * Process transactions in ctx
    * - Runs TEAL code if associated with transaction
    * - Executes the transaction on ctx
+   * Note: we're doing this because if any one tx in group fails,
+   * then it does not affect runtime.store, otherwise we just update
+   * store with ctx (if all transactions are executed successfully).
    * @param txnParams Transaction Parameters
    */
   /* eslint-disable sonarjs/cognitive-complexity */
