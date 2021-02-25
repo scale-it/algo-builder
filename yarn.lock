@@ -425,19 +425,6 @@ algo-msgpack-with-bigint@^2.1.0:
   resolved "https://registry.yarnpkg.com/algo-msgpack-with-bigint/-/algo-msgpack-with-bigint-2.1.1.tgz#38bb717220525b3ff42232eefdcd9efb9ad405d6"
   integrity sha512-F1tGh056XczEaEAqu7s+hlZUDWwOBT70Eq0lfMpBP2YguSQVyxRbprLq5rELXKQOyOaixTWYhMeMQMzP0U5FoQ==
 
-algosdk@^1.8.0:
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/algosdk/-/algosdk-1.8.0.tgz#85473eac8b781d638e16e34ff81ca9abbbf3b214"
-  integrity sha512-gmI8ZldGXhl6iSdozPJBnSwfef+epqJoNcI4UHly5SEJeU1SfE10Vd+cClBTV+gQpDeR8maFPOeTt7PsKmUF3w==
-  dependencies:
-    algo-msgpack-with-bigint "^2.1.0"
-    hi-base32 "^0.5.0"
-    js-sha256 "^0.9.0"
-    js-sha512 "^0.8.0"
-    keccak "^3.0.1"
-    superagent "^6.1.0"
-    tweetnacl "^1.0.3"
-
 "algosdk@https://github.com/algorand/js-algorand-sdk.git#9a5824782511dff1f521c68fe54d562b3872d1ae":
   version "1.8.1"
   resolved "https://github.com/algorand/js-algorand-sdk.git#9a5824782511dff1f521c68fe54d562b3872d1ae"
@@ -2010,14 +1997,6 @@ just-extend@^4.0.2:
   resolved "https://registry.yarnpkg.com/just-extend/-/just-extend-4.1.0.tgz#7278a4027d889601640ee0ce0e5a00b992467da4"
   integrity sha512-ApcjaOdVTJ7y4r08xI5wIqpvwS48Q0PBG4DJROcEkH1f8MdAiNFyFxz3xoL0LWAVwjrwPYZdVHHxhRHcx/uGLA==
 
-keccak@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/keccak/-/keccak-3.0.1.tgz#ae30a0e94dbe43414f741375cff6d64c8bea0bff"
-  integrity sha512-epq90L9jlFWCW7+pQa6JOnKn2Xgl2mtI664seYR6MHskvI9agt7AnDqmAlp9TqU4/caMYbA08Hi5DMZAl5zdkA==
-  dependencies:
-    node-addon-api "^2.0.0"
-    node-gyp-build "^4.2.0"
-
 levn@^0.4.1:
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/levn/-/levn-0.4.1.tgz#ae4562c007473b932a6200d403268dd2fffc6ade"
@@ -2283,16 +2262,6 @@ nise@^4.0.4:
     "@sinonjs/text-encoding" "^0.7.1"
     just-extend "^4.0.2"
     path-to-regexp "^1.7.0"
-
-node-addon-api@^2.0.0:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-2.0.2.tgz#432cfa82962ce494b132e9d72a15b29f71ff5d32"
-  integrity sha512-Ntyt4AIXyaLIuMHF6IOoTakB3K+RWxwtsHNRxllEoA6vPwP9o4866g6YWDLUdnucilZhmkxiHwHr11gAENw+QA==
-
-node-gyp-build@^4.2.0:
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-4.2.3.tgz#ce6277f853835f718829efb47db20f3e4d9c4739"
-  integrity sha512-MN6ZpzmfNCRM+3t57PTJHgHyw/h4OWnZ6mR8P5j/uZtqQr46RRuDE/P+g3n0YR/AiYXeWixZZzaip77gdICfRg==
 
 node-preload@^0.2.1:
   version "0.2.1"
