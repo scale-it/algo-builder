@@ -129,11 +129,9 @@ describe("ASC - CloseOut from Application and Clear State", function () {
     let res = alice.getAppFromLocal(appId);
     assert.isDefined(res);
 
-    expectRuntimeError(
-      () => runtime.executeTx(clearAppParams),
-      RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
-    );
+    runtime.executeTx(clearAppParams);
 
+    syncAccount();
     // verify app is deleted from account's local state even if tx is rejected after execution
     res = alice.getAppFromLocal(appId);
     assert.isUndefined(res);

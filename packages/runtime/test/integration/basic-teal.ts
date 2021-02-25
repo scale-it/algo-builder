@@ -8,8 +8,8 @@ import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 
-const minBalance = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE + 1000); // 1000 to cover fee
-const initialJohnHolding = minBalance + 1000n;
+const minBalance = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE + 1000); ; // 1000 to cover fee
+const initialJohnHolding = minBalance + 2000n;
 const initialBobHolding = minBalance + 500n;
 
 describe("Stateless Algorand Smart Contracts delegated signature mode", function () {
