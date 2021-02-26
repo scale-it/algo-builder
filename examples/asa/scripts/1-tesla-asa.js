@@ -1,4 +1,5 @@
 const { executeTransaction, balanceOf } = require('@algorand-builder/algob');
+const { types } = require('@algorand-builder/runtime');
 const { mkParam } = require('./transfer/common');
 
 /*
@@ -19,7 +20,7 @@ async function run (runtimeEnv, deployer) {
   const asaInfo = await deployer.deployASA('tesla', { creator: elon });
   console.log(asaInfo);
 
-  await deployer.optInToASA('tesla', 'john', {});
+  await deployer.optInToASA('tesla', 'john', {}, { sign: types.SignType.SecretKey });
 
   const assetID = asaInfo.assetIndex;
   await balanceOf(deployer, elon.addr, assetID);

@@ -4,18 +4,19 @@
  * from contract account (contract approval mode) to another according to smart contract (ASC) logic
 */
 const { types } = require('@algorand-builder/runtime');
+const { balanceOf } = require('@algorand-builder/algob');
 const { executeTransaction } = require('./common');
 
 async function run (runtimeEnv, deployer) {
   const john = deployer.accountsByName.get('john');
-  const elon = deployer.accountsByName.get('elon-musk');
+  const bob = deployer.accountsByName.get('bob');
 
   // Transactions for Transaction for ALGO - Contract : '2-gold-contract-asc.teal'  (Contract Mode)
   // sender is contract account
   const lsig = await deployer.loadLogic('2-gold-contract-asc.teal', []);
   const sender = lsig.address();
 
-  const txnParam = {
+  const algoTxParam = {
     type: types.TransactionType.TransferAlgo,
     sign: types.SignType.LogicSignature,
     fromAccount: { addr: sender },
@@ -24,17 +25,36 @@ async function run (runtimeEnv, deployer) {
     lsig: lsig,
     payFlags: { totalFee: 1000 }
   };
-  // Transaction PASS - As according to .teal logic, amount should be <= 100 and receiver should be john
-  await executeTransaction(deployer, txnParam);
+  // Transaction PASS - As according to .teal logic, amount should be <= 100
+  await executeTransaction(deployer, algoTxParam);
 
   // Transaction FAIL - Gets rejected by logic - As according to .teal logic, amount should be <= 100
-  txnParam.amountMicroAlgos = 200;
-  await executeTransaction(deployer, txnParam);
+  const invalidParams = Object.assign({}, algoTxParam);
+  invalidParams.amountMicroAlgos = 200;
+  await executeTransaction(deployer, invalidParams);
 
-  // Transaction FAIL as Elon tried to receive instead of John
-  txnParam.amountMicroAlgos = 200;
-  txnParam.toAccountAddr = elon.addr;
-  await executeTransaction(deployer, txnParam);
+  // Transactions for Transaction for ASA (Gold) - Contract : '2-gold-contract-asc.teal'  (Contract Mode)
+  const assetID = deployer.asa.get('gold').assetIndex;
+  const assetTxParam = {
+    type: types.TransactionType.TransferAsset,
+    sign: types.SignType.LogicSignature,
+    fromAccount: { addr: sender },
+    toAccountAddr: bob.addr,
+    amount: 10,
+    assetID: assetID,
+    lsig: lsig,
+    payFlags: { totalFee: 1000 }
+  };
+
+  // Transaction PASS - As according to .teal logic, asset amount should be <= 100
+  await executeTransaction(deployer, assetTxParam);
+  // print assetHolding of bob
+  await balanceOf(deployer, bob.addr, assetID);
+
+  // Transaction FAIL - Gets rejected by logic - As according to .teal logic, amount should be <= 100
+  const invalidTxParams = Object.assign({}, assetTxParam);
+  invalidTxParams.amount = 500;
+  await executeTransaction(deployer, invalidTxParams);
 }
 
 module.exports = { default: run };

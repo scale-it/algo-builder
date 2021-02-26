@@ -74,8 +74,8 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   optInToASA (
-    asaName: string, assetIndex: number, account: rtypes.Account,
-    params: rtypes.TxParams): Promise<void> {
+    asaName: string, assetIndex: number, account: rtypes.Account | undefined,
+    params: rtypes.TxParams, signature: rtypes.Sign): Promise<void> {
     throw new Error("Method not implemented.");
   }
 

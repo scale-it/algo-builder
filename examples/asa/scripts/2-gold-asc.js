@@ -1,4 +1,5 @@
-const { executeTransaction } = require('@algorand-builder/algob');
+const { executeTransaction, balanceOf } = require('@algorand-builder/algob');
+const { types } = require('@algorand-builder/runtime');
 const { mkParam } = require('./transfer/common');
 
 async function run (runtimeEnv, deployer) {
@@ -18,6 +19,29 @@ async function run (runtimeEnv, deployer) {
 
   console.log(ascInfoAlgoDelegated);
   console.log(ascInfoGoldDelegated);
+
+  /* Contract opt-in for ASA gold + fund contract with ASA gold */
+  const lsig = await deployer.loadLogic('2-gold-contract-asc.teal', []);
+  const goldAsset = deployer.asa.get('gold');
+  const goldAssetID = goldAsset.assetIndex;
+
+  await deployer.optInToASA('gold', '', { totalFee: 1000 }, {
+    sign: types.SignType.LogicSignature,
+    lsig: lsig
+  });
+
+  console.log(`Funding contract ${lsig.address()} with ASA gold`);
+  await executeTransaction(deployer, {
+    type: types.TransactionType.TransferAsset,
+    sign: types.SignType.SecretKey,
+    fromAccount: goldOwner,
+    toAccountAddr: lsig.address(),
+    amount: 1e5,
+    assetID: goldAssetID,
+    payFlags: { totalFee: 1000 }
+  });
+
+  await balanceOf(deployer, lsig.address(), goldAssetID);
 }
 
 module.exports = { default: run };

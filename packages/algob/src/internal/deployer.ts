@@ -1,4 +1,5 @@
 import { types as rtypes } from "@algorand-builder/runtime";
+import { SignType } from "@algorand-builder/runtime/build/types";
 import type { LogicSig, LogicSigArgs, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
 
@@ -306,16 +307,21 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
 
   /**
    * Description: Opt-In to ASA for a single account
-   * @param name ASA name
-   * @param accountName
+   * @param asaName ASA name
+   * @param accountName Account
    * @param flags Transaction flags
+   * @param signature Signature (LogicSig or SecretKey)
    */
-  async optInToASA (name: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
+  async optInToASA (asaName: string, accountName: string,
+    flags: rtypes.TxParams, signature: rtypes.Sign): Promise<void> {
+    let sdkAccount;
+    if (signature.sign === SignType.SecretKey) { sdkAccount = this._getAccount(accountName); }
     await this.algoOp.optInToASA(
-      name,
-      this._getASAInfo(name).assetIndex,
-      this._getAccount(accountName),
-      flags);
+      asaName,
+      this._getASAInfo(asaName).assetIndex,
+      sdkAccount,
+      flags,
+      signature);
   }
 
   /**

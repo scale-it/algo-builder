@@ -1,6 +1,6 @@
 import { encodeNote, parseSSCAppArgs, types as rtypes } from "@algorand-builder/runtime";
-import type { LogicSigArgs } from "algosdk";
-import algosdk from "algosdk";
+import { SignType } from "@algorand-builder/runtime/build/types";
+import algosdk, { LogicSigArgs } from "algosdk";
 
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
@@ -46,7 +46,8 @@ export interface AlgoOperator {
     scTmplParams?: SCParams) => Promise<SSCInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
   optInToASA: (
-    asaName: string, assetIndex: number, account: rtypes.Account, params: rtypes.TxParams
+    asaName: string, assetIndex: number, account: rtypes.Account | undefined,
+    params: rtypes.TxParams, signature: rtypes.Sign
   ) => Promise<void>
   optInToASAMultiple: (
     asaName: string, asaDef: rtypes.ASADef,
@@ -109,20 +110,33 @@ export class AlgoOperatorImpl implements AlgoOperator {
   }
 
   async _optInToASA (
-    asaName: string, assetIndex: number, account: rtypes.Account, params: algosdk.SuggestedParams
+    asaName: string, assetIndex: number, account: rtypes.Account | undefined,
+    params: algosdk.SuggestedParams, signature: rtypes.Sign
   ): Promise<void> {
-    console.log(`ASA ${account.name} opt-in for ASA ${asaName}`);
-    const sampleASAOptInTX = tx.makeASAOptInTx(account.addr, assetIndex, params);
-    const rawSignedTxn = sampleASAOptInTX.signTxn(account.sk);
+    let sampleASAOptInTX, rawSignedTxn;
+    if (signature.sign === SignType.SecretKey && account) {
+      console.log(`ASA ${account.name} opt-in for ASA ${asaName}`);
+      sampleASAOptInTX = tx.makeASAOptInTx(account.addr, assetIndex, params);
+      rawSignedTxn = sampleASAOptInTX.signTxn(account.sk);
+    } else {
+      const lsig = signature.lsig;
+      if (lsig === undefined) {
+        throw new Error("logic signature for this transaction was not passed or - is not defined");
+      }
+      console.log(`Contract ${lsig.address()} opt-in for ASA ${asaName}`);
+      sampleASAOptInTX = tx.makeASAOptInTx(lsig.address(), assetIndex, params);
+      rawSignedTxn = algosdk.signLogicSigTransactionObject(sampleASAOptInTX, lsig).blob;
+    }
     const txInfo = await this.algodClient.sendRawTransaction(rawSignedTxn).do();
     await this.waitForConfirmation(txInfo.txId);
   }
 
   async optInToASA (
-    asaName: string, assetIndex: number, account: rtypes.Account, flags: rtypes.TxParams
+    asaName: string, assetIndex: number, account: rtypes.Account | undefined,
+    flags: rtypes.TxParams, signature: rtypes.Sign
   ): Promise<void> {
     const txParams = await tx.mkTxParams(this.algodClient, flags);
-    await this._optInToASA(asaName, assetIndex, account, txParams);
+    await this._optInToASA(asaName, assetIndex, account, txParams, signature);
   }
 
   async optInToASAMultiple (
@@ -137,7 +151,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       accounts,
       flags.creator);
     for (const account of optInAccounts) {
-      await this._optInToASA(asaName, assetIndex, account, txParams);
+      await this._optInToASA(asaName, assetIndex, account, txParams, { sign: SignType.SecretKey });
     }
   }
 
