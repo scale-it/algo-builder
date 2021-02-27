@@ -50,7 +50,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
 
   const key = "counter";
 
-  it("should execute payment and asset transaction", () => {
+  it("should execute group of (payment + asset transaction) successfully", () => {
     const txGroup: ExecParams[] = [
       {
         type: TransactionType.TransferAlgo,
@@ -64,9 +64,9 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         type: TransactionType.TransferAsset,
         sign: SignType.SecretKey,
         fromAccount: john.account,
-        toAccountAddr: alice.account.addr,
+        toAccountAddr: alice.address,
         amount: 10,
-        assetID: 1,
+        assetID: assetId,
         payFlags: { totalFee: 1000 }
       }
     ];
@@ -84,7 +84,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     assert.equal(alice.balance(), initialBalance + 100);
   });
 
-  it("should not execute payment transaction if asset transaction fails", () => {
+  it("should not execute payment transaction (in group) if asset transaction fails", () => {
     const txGroup: ExecParams[] = [
       {
         type: TransactionType.TransferAlgo,
@@ -98,7 +98,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         type: TransactionType.TransferAsset,
         sign: SignType.SecretKey,
         fromAccount: alice.account,
-        toAccountAddr: john.account.addr,
+        toAccountAddr: john.address,
         amount: 1000,
         assetID: 1,
         payFlags: { totalFee: 1000 }
@@ -154,7 +154,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     assert.equal(alice.balance(), initialBalance + 100);
   });
 
-  it("should fail if payment transaction fails", () => {
+  it("should fail if payment transaction in group fails", () => {
     const txGroup: ExecParams[] = [
       {
         type: TransactionType.CallNoOpSSC,
