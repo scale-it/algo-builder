@@ -27,6 +27,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     assetId = runtime.addAsset('gold',
       { creator: { ...john.account, name: "john" } });
     approvalProgram = getProgram('counter-approval.teal');
+    clearProgram = getProgram('clear.teal');
 
     // create new app
     appId = runtime.addApp({
@@ -109,6 +110,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 
+    // Fails because account alice doesn't hold enough assets
     expectRuntimeError(
       () => runtime.executeTx(txGroup),
       RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS
@@ -180,6 +182,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     const localCounter = runtime.getAccount(john.address).getLocalState(appId, key);
     assert.isDefined(localCounter);
     assert.equal(localCounter, 0n);
+    const globalCounter = runtime.getGlobalState(appId, key);
+    assert.isUndefined(globalCounter);
 
     syncAccounts();
     assert.equal(john.balance(), initialBalance);
@@ -241,6 +245,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         payFlags: { totalFee: 1000 }
       }
     ];
+    const assetManagerOrig = runtime.getAssetDef(assetId).manager;
 
     expectRuntimeError(
       () => runtime.executeTx(txGroup),
@@ -248,7 +253,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     );
 
     // Verify asset manager is not changed
-    assert.equal(runtime.getAssetDef(assetId).manager, "WHVQXVVCQAD7WX3HHFKNVUL3MOANX3BYXXMEEJEJWOZNRXJNTN7LTNPSTY");
+    assert.equal(runtime.getAssetDef(assetId).manager, assetManagerOrig);
   });
 
   it("should not revoke asset if payment fails", () => {
@@ -259,7 +264,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
       fromAccount: john.account,
       toAccountAddr: alice.account.addr,
       amount: 20,
-      assetID: 1,
+      assetID: assetId,
       payFlags: { totalFee: 1000 }
     });
     const txGroup: ExecParams[] = [
@@ -318,6 +323,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
       RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE
     );
 
+    assert.isDefined(runtime.getAssetDef(assetId));
     assert.equal(runtime.getAssetDef(assetId).creator, john.address);
   });
 
