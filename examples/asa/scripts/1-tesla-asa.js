@@ -14,7 +14,7 @@ async function run (runtimeEnv, deployer) {
   const elon = deployer.accountsByName.get('elon-musk');
 
   // activate elon account
-  await executeTransaction(deployer, mkParam(masterAccount, elon.addr, 401000000, { note: 'funding account' }));
+  await executeTransaction(deployer, mkParam(masterAccount, elon.addr, 401e6, { note: 'funding account' }));
 
   const asaInfo = await deployer.deployASA('tesla', { creator: elon });
   console.log(asaInfo);
