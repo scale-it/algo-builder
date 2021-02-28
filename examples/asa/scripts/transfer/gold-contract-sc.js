@@ -1,7 +1,12 @@
 /**
  * Description:
- * This file demonstrates the example to transfer MicroAlgos
- * from contract account (contract approval mode) to another according to smart contract (ASC) logic
+ * This file demonstrates the example to transfer micro Algos
+ * from contract account (lsig) to a user account.
+ * The logic assures that:
+ *  + receiver is 2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA (John)
+ *  + tx is payment and amount is <- 100
+ *  + fee is <= 1000
+ *  + we don't do any rekey, closeReminderTo
 */
 const { types } = require('@algorand-builder/runtime');
 const { executeTransaction } = require('./common');
@@ -27,12 +32,12 @@ async function run (runtimeEnv, deployer) {
   // Transaction PASS - As according to .teal logic, amount should be <= 100 and receiver should be john
   await executeTransaction(deployer, txnParam);
 
-  // Transaction FAIL - Gets rejected by logic - As according to .teal logic, amount should be <= 100
+  // Transaction FAIL - rejected by lsig because amount is not <= 100
   txnParam.amountMicroAlgos = 200;
   await executeTransaction(deployer, txnParam);
 
-  // Transaction FAIL as Elon tried to receive instead of John
-  txnParam.amountMicroAlgos = 200;
+  // Transaction FAIL - rejected by lsig because receiver is not John
+  txnParam.amountMicroAlgos = 80;
   txnParam.toAccountAddr = elon.addr;
   await executeTransaction(deployer, txnParam);
 }
