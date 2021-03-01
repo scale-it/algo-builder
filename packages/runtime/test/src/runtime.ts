@@ -538,3 +538,49 @@ describe("Algorand Standard Assets", function () {
     );
   });
 });
+
+describe("Stateful Smart Contracts", function () {
+  useFixture('stateful');
+  const john = new StoreAccount(minBalance);
+  let runtime: Runtime;
+  this.beforeEach(() => {
+    runtime = new Runtime([john]);
+  });
+  const creationFlags = {
+    sender: john.account,
+    globalBytes: 32,
+    globalInts: 32,
+    localBytes: 8,
+    localInts: 8
+  };
+
+  it("Should not create application if approval program is empty", () => {
+    const approvalProgram = "";
+    const clearProgram = getProgram('clear.teal');
+
+    expectRuntimeError(
+      () => runtime.addApp(creationFlags, {}, approvalProgram, clearProgram),
+      RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM
+    );
+  });
+
+  it("Should not create application if clear program is empty", () => {
+    const approvalProgram = getProgram('counter-approval.teal');
+    const clearProgram = "";
+
+    expectRuntimeError(
+      () => runtime.addApp(creationFlags, {}, approvalProgram, clearProgram),
+      RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM
+    );
+  });
+
+  it("Should create application", () => {
+    const approvalProgram = getProgram('counter-approval.teal');
+    const clearProgram = getProgram('clear.teal');
+
+    const appId = runtime.addApp(creationFlags, {}, approvalProgram, clearProgram);
+
+    const app = runtime.getApp(appId);
+    assert.isDefined(app);
+  });
+});

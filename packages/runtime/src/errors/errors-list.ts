@@ -261,13 +261,13 @@ const runtimeGeneralErrors = {
   },
   INVALID_APPROVAL_PROGRAM: {
     number: 1307,
-    message: "Approval program is empty or undefined",
+    message: "Approval program is empty",
     title: "Invalid approval program",
     description: `Invalid approval program`
   },
   INVALID_CLEAR_PROGRAM: {
     number: 1308,
-    message: "Clear program is empty or undefined",
+    message: "Clear program is empty",
     title: "Invalid clear program",
     description: `Invalid clear program`
   }

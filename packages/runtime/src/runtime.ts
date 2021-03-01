@@ -423,10 +423,10 @@ export class Runtime {
     const sender = flags.sender;
     const senderAcc = this.assertAccountDefined(sender.addr, this.store.accounts.get(sender.addr));
 
-    if (approvalProgram === "" || approvalProgram === undefined) {
+    if (approvalProgram === "") {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
     }
-    if (clearProgram === "" || clearProgram === undefined) {
+    if (clearProgram === "") {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
     }
     // create app with id = 0 in globalApps for teal execution
