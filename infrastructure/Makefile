@@ -62,8 +62,8 @@ sandbox-clean:
 # clean up env (removing stopped docker containers, images)
 	$(SANDBOX_PATH)/sandbox clean
 
-sandbox-shell:
-# enters to the sandbox bash shell
+sandbox-algod-shell:
+# Opens algod cointainer bash shell
 	$(SANDBOX_PATH)/sandbox enter algod
 
 sandbox-setup-master-account:
