@@ -25,10 +25,8 @@ async function run (runtimeEnv, deployer) {
   const goldAsset = deployer.asa.get('gold');
   const goldAssetID = goldAsset.assetIndex;
 
-  await deployer.optInToASA('gold', '', { totalFee: 1000 }, {
-    sign: types.SignType.LogicSignature,
-    lsig: lsig
-  });
+  await deployer.lsigASAOptIn('gold', lsig, { totalFee: 1000 });
+  await balanceOf(deployer, lsig.address(), goldAssetID);
 
   console.log(`Funding contract ${lsig.address()} with ASA gold`);
   await executeTransaction(deployer, {

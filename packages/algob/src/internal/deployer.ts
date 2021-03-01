@@ -1,5 +1,4 @@
 import { types as rtypes } from "@algorand-builder/runtime";
-import { SignType } from "@algorand-builder/runtime/build/types";
 import type { LogicSig, LogicSigArgs, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
 
@@ -306,22 +305,29 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
   }
 
   /**
-   * Description: Opt-In to ASA for a single account
+   * Description: Opt-In to ASA for a single account. The opt-in transaction is
+   * signed by account secret key
    * @param asaName ASA name
-   * @param accountName Account
+   * @param accountName
    * @param flags Transaction flags
-   * @param signature Signature (LogicSig or SecretKey)
    */
-  async optInToASA (asaName: string, accountName: string,
-    flags: rtypes.TxParams, signature: rtypes.Sign): Promise<void> {
-    let sdkAccount;
-    if (signature.sign === SignType.SecretKey) { sdkAccount = this._getAccount(accountName); }
-    await this.algoOp.optInToASA(
+  async accountASAOptIn (asaName: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
+    await this.algoOp.accountASAOptIn(
       asaName,
       this._getASAInfo(asaName).assetIndex,
-      sdkAccount,
-      flags,
-      signature);
+      this._getAccount(accountName),
+      flags);
+  }
+
+  /**
+   * Description: Opt-In to ASA for a contract account (represented by logic signture).
+   * The opt-in transaction is signed by the logic signature
+   * @param asaName ASA name
+   * @param lsig logic signature
+   * @param flags Transaction flags
+   */
+  async lsigASAOptIn (asaName: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
+    await this.algoOp.lsigASAOptIn(asaName, this._getASAInfo(asaName).assetIndex, lsig, flags);
   }
 
   /**
@@ -383,9 +389,15 @@ export class DeployerRunMode extends DeployerBasicMode implements AlgobDeployer 
     });
   }
 
-  optInToASA (_name: string, _accountName: string, _flags: rtypes.TxParams): Promise<void> {
+  async accountASAOptIn (_asaName: string, _accountName: string, _flags: rtypes.TxParams): Promise<void> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      methodName: "optInToASA"
+      methodName: "accountASAOptIn"
+    });
+  }
+
+  async lsigASAOptIn (_asaName: string, _lsig: LogicSig, _flags: rtypes.TxParams): Promise<void> {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "lsigASAOptIn"
     });
   }
 
