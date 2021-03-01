@@ -86,7 +86,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     escrow = runtime.getAccount(escrowAddress);
 
     // fund escrow with some minimum balance
-    runtime.transferAlgo({
+    runtime.executeTx({
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
       fromAccount: master.account,
@@ -165,7 +165,8 @@ describe('Crowdfunding Tests - Happy Paths', function () {
 
     // update global storage to add escrow address
     const escrowPk = addressToPk(escrow.address);
-    creator.setGlobalState(applicationId, 'Escrow', escrowPk);
+    runtime.getAccount(creator.address).setGlobalState(applicationId, 'Escrow', escrowPk);
+    syncAccounts();
 
     // opt-in to app
     creator.optInToApp(applicationId, runtime.getApp(applicationId));
@@ -193,6 +194,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
         payFlags: { totalFee: 1000 }
       }
     ];
+
     runtime.executeTx(donateTxGroup);
 
     syncAccounts();
@@ -204,12 +206,15 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     setupAppAndEscrow();
     // fund end date should be passed
     runtime.setRoundAndTimestamp(2, 15); // StartTs=1, EndTs=10
-    creator.setGlobalState(applicationId, 'Escrow', addressToPk(escrow.address));
+    runtime.getAccount(creator.address).setGlobalState(applicationId, 'Escrow', addressToPk(escrow.address));
+    syncAccounts();
+
     creator.optInToApp(applicationId, runtime.getApp(applicationId));
     donor.optInToApp(applicationId, runtime.getApp(applicationId));
+    syncAccounts();
 
     // fund escrow with amount = goal
-    runtime.transferAlgo({
+    runtime.executeTx({
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
       fromAccount: donor.account,
@@ -217,8 +222,9 @@ describe('Crowdfunding Tests - Happy Paths', function () {
       amountMicroAlgos: goal,
       payFlags: {}
     });
+
     // update Global State
-    creator.setGlobalState(applicationId, 'Total', BigInt(goal));
+    runtime.getAccount(creator.address).setGlobalState(applicationId, 'Total', BigInt(goal));
     syncAccounts();
 
     // transaction to claim/withdraw funds from escrow
@@ -254,12 +260,15 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     setupAppAndEscrow();
     // fund end date should be passed
     runtime.setRoundAndTimestamp(2, 15); // StartTs=1, EndTs=10
-    creator.setGlobalState(applicationId, 'Escrow', addressToPk(escrow.address));
+    runtime.getAccount(creator.address).setGlobalState(applicationId, 'Escrow', addressToPk(escrow.address));
+    syncAccounts();
+
     creator.optInToApp(applicationId, runtime.getApp(applicationId));
     donor.optInToApp(applicationId, runtime.getApp(applicationId));
+    syncAccounts();
 
     // fund escrow with amount < goal
-    runtime.transferAlgo({
+    runtime.executeTx({
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
       fromAccount: donor.account,
@@ -309,12 +318,15 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     setupAppAndEscrow();
     // fund close date should be passed
     runtime.setRoundAndTimestamp(2, 25); // fundCloseTs=20n
-    creator.setGlobalState(applicationId, 'Escrow', addressToPk(escrow.address));
+    runtime.getAccount(creator.address).setGlobalState(applicationId, 'Escrow', addressToPk(escrow.address));
+    syncAccounts();
+
     creator.optInToApp(applicationId, runtime.getApp(applicationId));
     donor.optInToApp(applicationId, runtime.getApp(applicationId));
+    syncAccounts();
 
     // let's close escrow account first
-    runtime.transferAlgo({
+    runtime.executeTx({
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
       fromAccount: escrow.account,
@@ -353,7 +365,9 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     setupAppAndEscrow();
     // fund close date should be passed
     runtime.setRoundAndTimestamp(2, 25); // fundCloseTs=20n
-    creator.setGlobalState(applicationId, 'Escrow', addressToPk(escrow.address));
+    runtime.getAccount(creator.address).setGlobalState(applicationId, 'Escrow', addressToPk(escrow.address));
+    syncAccounts();
+
     creator.optInToApp(applicationId, runtime.getApp(applicationId));
     donor.optInToApp(applicationId, runtime.getApp(applicationId));
     syncAccounts();
