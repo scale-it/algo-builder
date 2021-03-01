@@ -9,7 +9,7 @@ import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 
 const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE + 1000; // 1000 to cover fee
-const initialJohnHolding = minBalance + 1000;
+const initialJohnHolding = minBalance + 2000;
 const initialBobHolding = minBalance + 500;
 
 describe("Stateless Algorand Smart Contracts delegated signature mode", function () {

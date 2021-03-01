@@ -2,7 +2,7 @@
 import type { LogicSig, LogicSigArgs } from "algosdk";
 import algosdk from "algosdk";
 
-import type { ASCCache, StrMap } from "../types";
+import type { ASCCache, SCParams } from "../types";
 import { CompileOp } from "./compile";
 
 /**
@@ -16,7 +16,7 @@ export async function getLsig (
   name: string,
   algodClient: algosdk.Algodv2,
   scParams: LogicSigArgs,
-  scTmplParams?: StrMap):
+  scTmplParams?: SCParams):
   Promise<LogicSig> {
   const compileOp = new CompileOp(algodClient);
   const result: ASCCache = await compileOp.ensureCompiled(name, false, scTmplParams);

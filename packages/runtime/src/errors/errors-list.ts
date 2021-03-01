@@ -38,13 +38,13 @@ permissible range of 1 to 256`
   },
   INVALID_OP_ARG: {
     number: 1002,
-    message: "Error encountered while executing teal with opcode %opcode% , Line : %line% ",
+    message: "Error encountered while executing teal with opcode %opcode% for teal version #%version% at line %line%",
     title: "Invalid Operation",
     description: `Error encountered in stack while executing teal opcode %opcode%`
   },
   INVALID_TYPE: {
     number: 1003,
-    message: "Error encountered while executing teal code at line %line%",
+    message: "Type of data is incorrect. Expected %expected% but got %actual% at line %line%",
     title: "Invalid type at line %line%",
     description: `Error encountered while executing teal code. Type of data is
 incorrect. Expected %expected% but got %actual% at line %line%`
