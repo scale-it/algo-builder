@@ -5,7 +5,8 @@ async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
   const john = deployer.accountsByName.get('john');
 
-  await executeTransaction(deployer, mkParam(masterAccount, john.addr, 1000000, { note: 'ALGO PAID' }));
+  // fund John account with 1 Algo
+  await executeTransaction(deployer, mkParam(masterAccount, john.addr, 1e6, { note: 'ALGO PAID' }));
 }
 
 module.exports = { default: run };

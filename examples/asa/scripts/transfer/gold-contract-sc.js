@@ -1,7 +1,12 @@
 /**
  * Description:
- * This file demonstrates the example to transfer MicroAlgos
- * from contract account (contract approval mode) to another according to smart contract (ASC) logic
+ * This file demonstrates the example to transfer micro Algos
+ * from contract account (lsig) to a user account.
+ * The logic assures that:
+ *  + receiver is 2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA (John)
+ *  + tx is payment and amount is <- 100
+ *  + fee is <= 1000
+ *  + we don't do any rekey, closeReminderTo
 */
 const { types } = require('@algorand-builder/runtime');
 const { balanceOf } = require('@algorand-builder/algob');
