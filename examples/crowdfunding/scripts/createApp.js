@@ -20,26 +20,23 @@ async function run (runtimeEnv, deployer) {
     payFlags: {}
   };
   await executeTransaction(deployer, algoTxnParams);
+  algoTxnParams.toAccountAddr = donorAccount.addr;
+  await executeTransaction(deployer, algoTxnParams);
 
   // Get begin date to pass in
-  const beginDate = new Date();
-  beginDate.setSeconds(beginDate.getSeconds() + 2);
-
+  const beginDate = Math.round(new Date().getTime() / 1000);
   // Get end date to pass in
-  const endDate = new Date();
-  endDate.setSeconds(endDate.getSeconds() + 12000);
-
+  const endDate = Math.round(new Date().getTime() / 1000) + 200;
   // Get fund close date to pass in
-  const fundCloseDate = new Date();
-  fundCloseDate.setSeconds(fundCloseDate.getSeconds() + 120000);
+  const fundCloseDate = endDate + 400;
 
   // initialize app arguments
   let appArgs = [
-    uint64ToBigEndian(beginDate.getTime()),
-    uint64ToBigEndian(endDate.getTime()),
+    uint64ToBigEndian(beginDate),
+    uint64ToBigEndian(endDate),
     'int:7000000', // args similar to `goal --app-arg ..` are also supported
     addressToPk(creatorAccount.addr),
-    uint64ToBigEndian(fundCloseDate.getTime())
+    uint64ToBigEndian(fundCloseDate)
   ];
 
   // Create Application
