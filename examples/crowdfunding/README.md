@@ -50,7 +50,7 @@ To Delete application and tranfer remaining funds to crreator:
     - Creator can only claim funds when total goal is reached.
     - Donor can only reclaim funds when total goal is not reached.
     - In this example time period is set to 200 seconds from time of deploying. Therefore you can only run donate script in this period. Claim, reclaim scripts can be run only after time period is over. Similarly for delete script fund close date is set to 400 seconds from time of deploying.
-    - Timestamps: To view timestamp of your private network, you can use `goal ledger block roundNumber -d ./path_to_node`. This command can be used keep track of global timestamp of private network and run scripts accordingly.
+    - Timestamps: To view timestamp of your private network, you can use `goal ledger block roundNumber -d ./path_to_node`. This command can be used to keep track of global timestamp of your private network and run scripts accordingly.
 
 ### Executing test
 
