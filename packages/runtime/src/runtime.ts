@@ -40,7 +40,7 @@ export class Runtime {
   constructor (accounts: StoreAccountI[]) {
     // runtime store
     this.store = {
-      accounts: new Map<string, StoreAccountI>(), // string represents account address
+      accounts: new Map<AccountAddress, StoreAccountI>(), // string represents account address
       globalApps: new Map<number, AccountAddress>(), // map of {appId: accountAddress}
       assetDefs: new Map<number, AccountAddress>() // number represents assetId
     };
