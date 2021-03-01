@@ -5,9 +5,7 @@ export SANDBOX_PATH = ~/.algorand-sandbox
 export REMOTE_REPO = https://github.com/algorand/sandbox.git
 
 setup-private-net: create-private-net start-private-net setup-master-account status-private-net
-_rm-private-net:
-	rm -rf ./node_data
-recreate-private-net: stop-private-net _rm-private-net setup-private-net
+recreate-private-net: stop-private-net delete-private-net setup-private-net
 
 create-private-net:
 	if [ -d ./node_data ] ;  then echo "./node_data directory already exists - remove it if you want to create a new private network" ; false; fi
