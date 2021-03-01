@@ -1,7 +1,7 @@
 /**
  * Description:
  * This file demonstrates the example to transfer Algorand Standard Assets(ASA) & MicroAlgos
- * from one account to another according to smart contract (ASC) logic
+ * using delegated lsig (between 2 user accounts).
 */
 const { executeTransaction } = require('./common');
 const { types } = require('@algorand-builder/runtime');
@@ -26,14 +26,14 @@ async function run (runtimeEnv, deployer) {
     payFlags: { totalFee: 1000 }
   };
 
-  // Transaction PASS - As according to .teal logic, amount should be <= 1000
+  // Transaction PASS
   await executeTransaction(deployer, txnParam);
 
-  // Transaction FAIL - As according to .teal logic, amount should be <= 1000
+  // Transaction FAIL - rejected by lsig because amount is not <= 1000
   txnParam.amount = 1500;
   await executeTransaction(deployer, txnParam);
 
-  // Transaction FAIL - sender should be the delegator i.e
+  // Transaction FAIL - rejected by lsig because sender must be the delegator i.e
   // account which signed the lsig (goldOwner in this case)
   txnParam.amount = 100;
   txnParam.fromAccount = bob;
@@ -51,10 +51,10 @@ async function run (runtimeEnv, deployer) {
     lsig: logicSignature,
     payFlags: { totalFee: 1000 }
   };
-  // Transaction PASS - As according to .teal logic, amount should be <= 100
+  // Transaction PASS
   await executeTransaction(deployer, txnParam);
 
-  // Transaction FAIL - As according to .teal logic, amount should be <= 100
+  // Transaction FAIL - rejected by lsig because amount is not <= 100
   txnParam.amountMicroAlgos = 580;
   await executeTransaction(deployer, txnParam);
 }
