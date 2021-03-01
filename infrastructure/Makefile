@@ -4,6 +4,11 @@ export ALGORAND_DATA=`pwd`/node_data/PrimaryNode
 export SANDBOX_PATH = ~/.algorand-sandbox
 export REMOTE_REPO = https://github.com/algorand/sandbox.git
 
+setup-private-net: create-private-net start-private-net setup-master-account status-private-net
+_rm-private-net:
+	rm -rf ./node_data
+recreate-private-net: stop-private-net _rm-private-net setup-private-net
+
 create-private-net:
 	if [ -d ./node_data ] ;  then echo "./node_data directory already exists - remove it if you want to create a new private network" ; false; fi
 	@goal network create -r ./node_data -n private -t private-net-template.json
@@ -57,8 +62,8 @@ sandbox-clean:
 # clean up env (removing stopped docker containers, images)
 	$(SANDBOX_PATH)/sandbox clean
 
-sandbox-algod:
-# enter algod's docker shell
+sandbox-shell:
+# enters to the sandbox bash shell
 	$(SANDBOX_PATH)/sandbox enter algod
 
 sandbox-setup-master-account:
