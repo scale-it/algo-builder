@@ -13,9 +13,7 @@ import { encodeNote, mkTransaction } from "./lib/txn";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import type {
-  AccountAddress, AlgoTransferParam, ASADefs,
-  ASADeploymentFlags, AssetHoldingM,
-  AssetModFields, Context, ExecParams,
+  AccountAddress, ASADefs, ASADeploymentFlags, AssetHoldingM, Context, ExecParams,
   SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
   StackElem, State, StoreAccountI, Txn, TxParams
 } from "./types";
