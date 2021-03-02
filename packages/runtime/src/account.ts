@@ -355,7 +355,7 @@ class Asset {
     this.id = assetId;
     this.definitions = {
       creator: creator,
-      total: BigInt(def.total), // ........> ....> ....> ....> ....> ....> ....> ....> ....> ....> ....> ....> ....> ....> ....>....>
+      total: BigInt(def.total),
       decimals: def.decimals,
       'default-frozen': def.defaultFrozen ?? false,
       "unit-name": def.unitName,
