@@ -89,7 +89,7 @@ describe("ASA parser", () => {
     );
   });
 
-  it("Should check total to be a positive number < 2^64 - 1", async () => {
+  it("Should check total to be a positive number <= 2^64 - 1", async () => {
     let obj = {
       A1: {
         total: 0xFFFFFFFFFFFFFFFFn + 5n,
