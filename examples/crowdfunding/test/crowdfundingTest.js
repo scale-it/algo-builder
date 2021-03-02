@@ -126,6 +126,7 @@ describe('Crowdfunding Tests', function () {
     assert.deepEqual(getGlobal('Goal'), 7000000n);
     assert.deepEqual(getGlobal('Receiver'), creatorPk);
     assert.deepEqual(getGlobal('Total'), 0n);
+    assert.deepEqual(getGlobal('FundCloseDate'), BigInt(fundCloseDate.getTime()));
 
     // update application with correct escrow account address
     let appArgs = [addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
