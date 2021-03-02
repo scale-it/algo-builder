@@ -543,8 +543,12 @@ describe("Stateful Smart Contracts", function () {
   useFixture('stateful');
   const john = new StoreAccount(minBalance);
   let runtime: Runtime;
+  let approvalProgram: string;
+  let clearProgram: string;
   this.beforeEach(() => {
     runtime = new Runtime([john]);
+    approvalProgram = getProgram('counter-approval.teal');
+    clearProgram = getProgram('clear.teal');
   });
   const creationFlags = {
     sender: john.account,
@@ -555,8 +559,7 @@ describe("Stateful Smart Contracts", function () {
   };
 
   it("Should not create application if approval program is empty", () => {
-    const approvalProgram = "";
-    const clearProgram = getProgram('clear.teal');
+    approvalProgram = "";
 
     expectRuntimeError(
       () => runtime.addApp(creationFlags, {}, approvalProgram, clearProgram),
@@ -565,8 +568,7 @@ describe("Stateful Smart Contracts", function () {
   });
 
   it("Should not create application if clear program is empty", () => {
-    const approvalProgram = getProgram('counter-approval.teal');
-    const clearProgram = "";
+    clearProgram = "";
 
     expectRuntimeError(
       () => runtime.addApp(creationFlags, {}, approvalProgram, clearProgram),
@@ -575,12 +577,23 @@ describe("Stateful Smart Contracts", function () {
   });
 
   it("Should create application", () => {
-    const approvalProgram = getProgram('counter-approval.teal');
-    const clearProgram = getProgram('clear.teal');
-
     const appId = runtime.addApp(creationFlags, {}, approvalProgram, clearProgram);
 
     const app = runtime.getApp(appId);
     assert.isDefined(app);
+  });
+
+  it("Should not update application if approval or clear program is empty", () => {
+    const appId = runtime.addApp(creationFlags, {}, approvalProgram, clearProgram);
+
+    expectRuntimeError(
+      () => runtime.updateApp(john.address, appId, "", clearProgram, {}, {}),
+      RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM
+    );
+
+    expectRuntimeError(
+      () => runtime.updateApp(john.address, appId, approvalProgram, "", {}, {}),
+      RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM
+    );
   });
 });

@@ -534,6 +534,13 @@ export class Runtime {
     payFlags: TxParams,
     flags: SSCOptionalFlags
   ): void {
+    if (approvalProgram === "") {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
+    }
+    if (clearProgram === "") {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
+    }
+
     const appParams = this.getApp(appId);
     this.addCtxAppUpdateTx(senderAddr, appId, payFlags, flags);
     this.ctx.state = cloneDeep(this.store);
@@ -564,6 +571,9 @@ export class Runtime {
    * @param args arguments passed
    */
   getLogicSig (program: string, args: Uint8Array[]): LogicSig {
+    if (program === "") {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
+    }
     const lsig = new LogicSig(program, args);
     const acc = new StoreAccount(0, { addr: lsig.address(), sk: new Uint8Array(0) });
     this.store.accounts.set(acc.address, acc);

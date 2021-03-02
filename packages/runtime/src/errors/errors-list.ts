@@ -270,6 +270,12 @@ const runtimeGeneralErrors = {
     message: "Clear program is empty",
     title: "Invalid clear program",
     description: `Invalid clear program`
+  },
+  INVALID_PROGRAM: {
+    number: 1309,
+    message: "Program is empty",
+    title: "Invalid program",
+    description: `Invalid program`
   }
 };
 
