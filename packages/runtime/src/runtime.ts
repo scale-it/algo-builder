@@ -600,6 +600,9 @@ export class Runtime {
     }
     // logic validation
     const program = convertToString(txnParam.lsig.logic);
+    if (program === "") {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
+    }
     this.run(program, ExecutionMode.STATELESS);
   }
 
