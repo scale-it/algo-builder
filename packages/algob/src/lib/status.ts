@@ -9,8 +9,6 @@ export async function balanceOf (
   account: string,
   assetID: number
 ): Promise<AssetHolding | undefined> {
-  // NOTE: bigint is not currently supported in the response yet, so amount (> 2^53 -1) may lose precision
-  // PR: https://github.com/algorand/js-algorand-sdk/pull/260
   const accountInfo = await deployer.algodClient.accountInformation(account).do();
   for (const asset of accountInfo.assets) {
     if (asset['asset-id'] === assetID) {
@@ -56,8 +54,6 @@ export async function readLocalStateSSC (
 }
 
 export async function printAssets (deployer: AlgobDeployer, account: string): Promise<void> {
-  // NOTE: bigint is not currently supported in the response yet, so amount (> 2^53 -1) may lose precision
-  // PR: https://github.com/algorand/js-algorand-sdk/pull/260
   const accountInfo = await deployer.algodClient.accountInformation(account).do();
   console.log("Asset Holding Info:", accountInfo.assets);
   console.log("Account's ALGO (microalgos):", accountInfo["amount-without-pending-rewards"]);
