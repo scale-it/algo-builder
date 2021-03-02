@@ -26,6 +26,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
   this.beforeAll(function () {
     runtime = new Runtime([john]); // setup test
     approvalProgram = getProgram('counter-approval.teal');
+    clearProgram = getProgram('clear.teal');
 
     // create new app
     txnParams.appId = runtime.addApp({

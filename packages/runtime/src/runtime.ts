@@ -423,6 +423,12 @@ export class Runtime {
     const sender = flags.sender;
     const senderAcc = this.assertAccountDefined(sender.addr, this.store.accounts.get(sender.addr));
 
+    if (approvalProgram === "") {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
+    }
+    if (clearProgram === "") {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
+    }
     // create app with id = 0 in globalApps for teal execution
     const app = senderAcc.addApp(0, flags, approvalProgram, clearProgram);
     this.ctx.state.accounts.set(senderAcc.address, senderAcc);
@@ -528,6 +534,13 @@ export class Runtime {
     payFlags: TxParams,
     flags: SSCOptionalFlags
   ): void {
+    if (approvalProgram === "") {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
+    }
+    if (clearProgram === "") {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
+    }
+
     const appParams = this.getApp(appId);
     this.addCtxAppUpdateTx(senderAddr, appId, payFlags, flags);
     this.ctx.state = cloneDeep(this.store);
@@ -558,6 +571,9 @@ export class Runtime {
    * @param args arguments passed
    */
   getLogicSig (program: string, args: Uint8Array[]): LogicSig {
+    if (program === "") {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
+    }
     const lsig = new LogicSig(program, args);
     const acc = new StoreAccount(0, { addr: lsig.address(), sk: new Uint8Array(0) });
     this.store.accounts.set(acc.address, acc);
@@ -584,6 +600,9 @@ export class Runtime {
     }
     // logic validation
     const program = convertToString(txnParam.lsig.logic);
+    if (program === "") {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
+    }
     this.run(program, ExecutionMode.STATELESS);
   }
 
