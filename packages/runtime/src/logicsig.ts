@@ -17,6 +17,7 @@ import { convertToString, stringToBytes } from "./lib/parsing";
  * We are using raw TEAL code as program.(by converting string into bytes)
  */
 export class LogicSig {
+  tag: Buffer;
   logic: Uint8Array;
   args: Uint8Array[];
   sig: Uint8Array;
@@ -24,6 +25,7 @@ export class LogicSig {
   lsigAddress: string;
 
   constructor (program: string, args: Uint8Array[]) {
+    this.tag = Buffer.from("Program");
     this.logic = stringToBytes(program);
     this.args = args;
     this.sig = new Uint8Array(0);
@@ -209,6 +211,7 @@ export class LogicSig {
 
   get_obj_for_encoding (): LogicSigBase {
     return {
+      tag: this.tag,
       logic: this.logic,
       args: this.args,
       sig: this.sig,

@@ -219,7 +219,7 @@ declare module 'algosdk' {
   }
 
   export class LogicSigBase {
-    tag?: Buffer | Uint8Array;
+    tag: Buffer | Uint8Array;
     logic: Uint8Array;
     // args Program arguments as array of Uint8Array arrays
     args: LogicSigArgs;
