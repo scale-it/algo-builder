@@ -38,6 +38,16 @@ If you want to create a local network by your own, you can use a private net [tu
         make setup-master-account
 
 
+The command below will combine all the steps above(create network, start network, setup master account and show network status):
+
+    make setup-private-net
+
+
+To recreate the private net (stop the current instance, remove all data and re-setup):
+
+    make recreate-private-net
+
+
 ## Connecting to algob
 
 We can connect to an `algob` node either using `goal` command or REST. `goal` is only able to use a local node (need to have an access to the node data directory). So each use of `goal` will require specifying `--datadir` flag or `ALGORAND_DATA` environment variable. It's useful to define the former one (we are doing it in the Makefile):
