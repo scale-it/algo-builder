@@ -38,7 +38,7 @@ If you want to create a local network by your own, you can use a private net [tu
         make setup-master-account
 
 
-The command below will combine all the steps above:
+The command below will combine all the steps above(create network, start network, setup master account and show network status):
 
     make setup-private-net
 
