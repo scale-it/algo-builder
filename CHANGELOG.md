@@ -10,6 +10,7 @@
     * token = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 * Add documentation (in `/docs/testing-teal.md`) to test TEAL using `@algorand-builder/runtime`
 * Updating the default token and endpoint port. For compatibility with Sandbox we use the sandbox token and port (4001) in all examples and sample project. If you run an algorand node using our private node setup then either recreate the network (stop, remove node_data and create it again), or update the `node_data/PrimaryNode/config.json` and set: `"EndpointAddress": "127.0.0.1:4001"`
+* Use `bigint` for all numeric values in `runtime` and `algob` to support integers upto 64 bit(`uint64`).
 
 ## v0.4.0 2021-02-03
 

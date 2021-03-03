@@ -14,8 +14,8 @@
 - [Interpreter](../packages/runtime/src/interpreter): Executes the list of opcodes returned by parser and updates stack after each execution. At the end of execution, if the stack contains a single non-zero uint64 element then the teal code is approved, and transaction can be executed.
 
 ## Block Rounds/Height
-In Algorand blockchain, the time is divided into rounds. Specifically, one round represents a a time to propose, validate and confirm a block. 
-In Alogrand Builder Runtime, we don't have blocks. All transactions are processed immediately. 
+In Algorand blockchain, the time is divided into rounds. Specifically, one round represents a a time to propose, validate and confirm a block.
+In Alogrand Builder Runtime, we don't have blocks. All transactions are processed immediately.
 However, we keep the notion of rounds and timestamps because it is needed for transaction and smart contract validation.
 
 The default Runtime block round is set to `2` and timestamp to `1`. Runtime doesn't change the block round or timestamp - it's up to the user and the test flow to manage the block. To change the block round and timestamp we need to call `runtime.setRoundAndTimestamp(round, timestamp)`. We can retrieve the current block round by using `runtime.getRound()` function and current timestamp by using `runtime.getTimestamp()`. <br />
@@ -211,11 +211,11 @@ Now, we will execute a transaction with stateful TEAL (which increments a global
 
     const globalCounter = runtime.getGlobalState(txnParams.appId, base64ToBytes(key));
     assert.isDefined(globalCounter); // there should be a value present with key "counter"
-    assert.equal(globalCounter, BIGINT1);
+    assert.equal(globalCounter, 1n);
 
     const localCounter = runtime.getLocalState(txnParams.appId, base64ToBytes(key)); // get local value from john account
     assert.isDefined(localCounter); // there should be a value present in local state with key "counter"
-    assert.equal(localCounter, BIGINT1);
+    assert.equal(localCounter, 1n);
   });
   ```
   In this test, after executing the transaction (stateful smart contract call), we are verifying if the `global state` and `local state` is updated. User can use `runtime.getGlobalState()` and `runtime.getLocalState()` to check state.

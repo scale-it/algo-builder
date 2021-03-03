@@ -25,7 +25,7 @@ async function run (runtimeEnv, deployer) {
     sign: types.SignType.LogicSignature,
     fromAccount: { addr: sender },
     toAccountAddr: john.addr,
-    amountMicroAlgos: 20,
+    amountMicroAlgos: 20n, // bigint is also supported
     lsig: lsig,
     payFlags: { totalFee: 1000 }
   };

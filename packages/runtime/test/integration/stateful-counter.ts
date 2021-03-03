@@ -1,7 +1,6 @@
 import { assert } from "chai";
 
 import { Runtime, StoreAccount } from "../../src/index";
-import { BIGINT0, BIGINT1 } from "../../src/interpreter/opcode-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { ExecParams, SignType, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";
@@ -46,7 +45,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
   it("should initialize local counter to 0 after opt-in", function () {
     const localCounter = runtime.getAccount(john.address).getLocalState(txnParams.appId, key); // get local value from john account
     assert.isDefined(localCounter); // there should be a value present in local state with key "counter"
-    assert.equal(localCounter, BIGINT0);
+    assert.equal(localCounter, 0n);
   });
 
   it("should initialize global and local counter to 1 on first call", function () {
@@ -54,11 +53,11 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
 
     const globalCounter = runtime.getGlobalState(txnParams.appId, key);
     assert.isDefined(globalCounter); // there should be a value present with key "counter"
-    assert.equal(globalCounter, BIGINT1);
+    assert.equal(globalCounter, 1n);
 
     const localCounter = runtime.getAccount(john.address).getLocalState(txnParams.appId, key); // get local value from john account
     assert.isDefined(localCounter); // there should be a value present in local state with key "counter"
-    assert.equal(localCounter, BIGINT1);
+    assert.equal(localCounter, 1n);
   });
 
   it("should update counter by +1 for both global and local states on second call", function () {
@@ -66,8 +65,8 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
     const localCounter = runtime.getAccount(john.address).getLocalState(txnParams.appId, key) as bigint;
 
     // verfify that both counters are set to 1 (by the previous test)
-    assert.equal(globalCounter, BIGINT1);
-    assert.equal(localCounter, BIGINT1);
+    assert.equal(globalCounter, 1n);
+    assert.equal(localCounter, 1n);
 
     runtime.executeTx(txnParams);
 
@@ -75,7 +74,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
     const newGlobalCounter = runtime.getGlobalState(txnParams.appId, key);
     const newLocalCounter = runtime.getAccount(john.address).getLocalState(txnParams.appId, key);
 
-    assert.equal(newGlobalCounter, globalCounter + BIGINT1);
-    assert.equal(newLocalCounter, localCounter + BIGINT1);
+    assert.equal(newGlobalCounter, globalCounter + 1n);
+    assert.equal(newLocalCounter, localCounter + 1n);
   });
 });

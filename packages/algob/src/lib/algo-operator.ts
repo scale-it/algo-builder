@@ -89,11 +89,11 @@ export class AlgoOperatorImpl implements AlgoOperator {
     return Math.max(ALGORAND_MIN_TX_FEE, txSize);
   }
 
-  getUsableAccBalance (accoutInfo: algosdk.AccountState): number {
+  getUsableAccBalance (accoutInfo: algosdk.AccountState): bigint {
     // Extracted from interacting with Algorand node:
     // 7 opted-in assets require to have 800000 micro algos (frozen in account).
     // 11 assets require 1200000.
-    return accoutInfo.amount - (accoutInfo.assets.length + 1) * ALGORAND_ASA_OWNERSHIP_COST;
+    return BigInt(accoutInfo.amount) - BigInt((accoutInfo.assets.length + 1) * ALGORAND_ASA_OWNERSHIP_COST);
   }
 
   getOptInTxSize (params: algosdk.SuggestedParams, accounts: rtypes.AccountMap): number {

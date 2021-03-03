@@ -12,7 +12,7 @@ import type {
   ExecutionMode, Operator, SSCAttributesM,
   StackElem, StoreAccountI, TEALStack
 } from "../types";
-import { BIGINT0, BIGINT1, Label } from "./opcode-list";
+import { Label } from "./opcode-list";
 
 export class Interpreter {
   /**
@@ -75,11 +75,11 @@ export class Interpreter {
   getAccount (accountIndex: bigint, line: number): StoreAccountI {
     let account: StoreAccountI | undefined;
     let address: string;
-    if (accountIndex === BIGINT0) {
+    if (accountIndex === 0n) {
       address = encodeAddress(this.runtime.ctx.tx.snd);
       account = this.runtime.ctx.state.accounts.get(address);
     } else {
-      const accIndex = accountIndex - BIGINT1;
+      const accIndex = accountIndex - 1n;
       checkIndexBound(Number(accIndex), this.runtime.ctx.tx.apat, line);
       const pkBuffer = this.runtime.ctx.tx.apat[Number(accIndex)];
       address = encodeAddress(pkBuffer);
@@ -160,7 +160,7 @@ export class Interpreter {
     if (this.stack.length() === 1) {
       const s = this.stack.pop();
 
-      if (!(s instanceof Uint8Array) && s > BIGINT0) { return; }
+      if (!(s instanceof Uint8Array) && s > 0n) { return; }
     }
     throw new RuntimeError(RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC);
   }

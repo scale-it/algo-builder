@@ -11,9 +11,9 @@ import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 import { johnAccount } from "../mocks/account";
 
-const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE + 1000; // 1000 to cover fee
-const initialEscrowHolding = minBalance + 1000e6;
-const initialJohnHolding = minBalance + 500;
+const minBalance = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE + 1000); // 1000 to cover fee
+const initialEscrowHolding = minBalance + BigInt(1000e6);
+const initialJohnHolding = minBalance + 500n;
 
 describe("Algorand Stateless Smart Contracts (Contract Account Mode) - Escrow Account Example", function () {
   useFixture("escrow-account");
@@ -47,7 +47,7 @@ describe("Algorand Stateless Smart Contracts (Contract Account Mode) - Escrow Ac
     txnParams.sign = SignType.LogicSignature;
     txnParams.fromAccount = escrow.account;
     txnParams.toAccountAddr = john.address;
-    txnParams.amountMicroAlgos = 100;
+    txnParams.amountMicroAlgos = 100n;
     txnParams.lsig = lsig;
   });
 
@@ -59,13 +59,13 @@ describe("Algorand Stateless Smart Contracts (Contract Account Mode) - Escrow Ac
     runtime.executeTx(txnParams);
 
     // check final state (updated accounts)
-    assert.equal(runtime.getAccount(escrow.address).balance(), initialEscrowHolding - 1100); // check if 100 microAlgo's + fee are withdrawn
-    assert.equal(runtime.getAccount(john.address).balance(), initialJohnHolding + 100);
+    assert.equal(runtime.getAccount(escrow.address).balance(), initialEscrowHolding - 1100n); // check if 100 microAlgo's + fee are withdrawn
+    assert.equal(runtime.getAccount(john.address).balance(), initialJohnHolding + 100n);
   });
 
   it("should reject transaction if amount > 100", function () {
     const invalidParams = Object.assign({}, txnParams);
-    invalidParams.amountMicroAlgos = 500;
+    invalidParams.amountMicroAlgos = 500n;
 
     // execute transaction (should fail as amount = 500)
     expectRuntimeError(
@@ -90,7 +90,7 @@ describe("Algorand Stateless Smart Contracts (Contract Account Mode) - Escrow Ac
       ...txnParams,
       type: TransactionType.TransferAsset,
       assetID: 1111,
-      amount: 10 // asset amount
+      amount: 10n // asset amount
     };
 
     // execute transaction (should fail as transfer type is asset)
@@ -116,11 +116,11 @@ describe("Algorand Stateless Smart Contracts (Contract Account Mode) - Escrow Ac
     const initialEscrowBal = runtime.getAccount(escrow.address).balance();
     const initialJohnBal = runtime.getAccount(john.address).balance();
 
-    assert.isAbove(initialEscrowBal, 0); // initial balance should be > 0
+    assert.isAbove(Number(initialEscrowBal), 0); // initial balance should be > 0
 
     const closeParams: ExecParams = {
       ...txnParams,
-      amountMicroAlgos: 0,
+      amountMicroAlgos: 0n,
       payFlags: {
         totalFee: 1000,
         closeRemainderTo: john.address
@@ -128,7 +128,7 @@ describe("Algorand Stateless Smart Contracts (Contract Account Mode) - Escrow Ac
     };
     runtime.executeTx(closeParams);
 
-    assert.equal(runtime.getAccount(escrow.address).balance(), 0);
-    assert.equal(runtime.getAccount(john.address).balance(), (initialJohnBal + initialEscrowBal) - 1000);
+    assert.equal(runtime.getAccount(escrow.address).balance(), 0n);
+    assert.equal(runtime.getAccount(john.address).balance(), (initialJohnBal + initialEscrowBal) - 1000n);
   });
 });

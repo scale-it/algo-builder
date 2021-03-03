@@ -1,7 +1,7 @@
-import { AssetDef, AssetHolding } from "algosdk";
+import { AssetDef } from "algosdk";
 
 import { stringToBytes } from "../../src/lib/parsing";
-import { AppLocalStateM, SSCAttributesM, StackElem } from "../../src/types";
+import { AppLocalStateM, AssetHoldingM, SSCAttributesM, StackElem } from "../../src/types";
 import { elonAddr } from "./txn";
 
 const convertToKey = (str: string): string => { return stringToBytes(str).toString(); };
@@ -10,9 +10,9 @@ const appLocalState = new Map<number, AppLocalStateM>();
 const createdApps = new Map<number, SSCAttributesM>();
 const createdAssets = new Map<number, AssetDef>();
 
-const assets = new Map<number, AssetHolding>();
-assets.set(3, { 'asset-id': 3, amount: 2, creator: "string", 'is-frozen': false });
-assets.set(32, { 'asset-id': 32, amount: 2, creator: "AS", 'is-frozen': false });
+const assets = new Map<number, AssetHoldingM>();
+assets.set(3, { 'asset-id': 3, amount: 2n, creator: "string", 'is-frozen': false });
+assets.set(32, { 'asset-id': 32, amount: 2n, creator: "AS", 'is-frozen': false });
 
 const globalStateMap = new Map<string, StackElem>();
 globalStateMap.set(convertToKey('Hello'), stringToBytes('World'));
@@ -44,7 +44,7 @@ export const accInfo = [{
   }),
   createdAssets: createdAssets.set(3, {
     creator: "addr-1",
-    total: 10000,
+    total: 10000n,
     decimals: 10,
     'default-frozen': false,
     'unit-name': "AD",

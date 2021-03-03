@@ -1,7 +1,6 @@
 import type {
   Account,
   AssetDef,
-  AssetHolding,
   SSCSchemaConfig
 } from "algosdk";
 import { generateAccount } from "algosdk";
@@ -16,7 +15,7 @@ import {
 import { keyToBytes } from "./lib/parsing";
 import { assertValidSchema } from "./lib/stateful";
 import {
-  AppLocalStateM, ASADef, AssetModFields, CreatedAppM, SSCAttributesM,
+  AppLocalStateM, ASADef, AssetHoldingM, AssetModFields, CreatedAppM, SSCAttributesM,
   SSCDeploymentFlags, StackElem, StoreAccountI
 } from "./types";
 
@@ -28,14 +27,14 @@ export class StoreAccount implements StoreAccountI {
   readonly account: Account;
   readonly address: string;
   minBalance: number; // required minimum balance for account
-  assets: Map<number, AssetHolding>;
-  amount: number;
+  assets: Map<number, AssetHoldingM>;
+  amount: bigint;
   appsLocalState: Map<number, AppLocalStateM>;
   appsTotalSchema: SSCSchemaConfig;
   createdApps: Map<number, SSCAttributesM>;
   createdAssets: Map<number, AssetDef>;
 
-  constructor (balance: number, account?: Account) {
+  constructor (balance: number | bigint, account?: Account) {
     if (account) {
       // set config if account is passed by user
       this.account = account;
@@ -46,8 +45,8 @@ export class StoreAccount implements StoreAccountI {
       this.address = this.account.addr;
     }
 
-    this.assets = new Map<number, AssetHolding>();
-    this.amount = balance;
+    this.assets = new Map<number, AssetHoldingM>();
+    this.amount = BigInt(balance);
     this.minBalance = ALGORAND_ACCOUNT_MIN_BALANCE;
     this.appsLocalState = new Map<number, AppLocalStateM>();
     this.appsTotalSchema = <SSCSchemaConfig>{};
@@ -56,7 +55,7 @@ export class StoreAccount implements StoreAccountI {
   }
 
   // returns account balance in microAlgos
-  balance (): number {
+  balance (): bigint {
     return this.amount;
   }
 
@@ -163,7 +162,7 @@ export class StoreAccount implements StoreAccountI {
    * Queries asset holding by assetId
    * @param assetId asset index
    */
-  getAssetHolding (assetId: number): AssetHolding | undefined {
+  getAssetHolding (assetId: number): AssetHoldingM | undefined {
     return this.assets.get(assetId);
   }
 
@@ -295,7 +294,7 @@ export class StoreAccount implements StoreAccountI {
   }
 
   // opt-in to asset
-  optInToASA (assetIndex: number, assetHolding: AssetHolding): void {
+  optInToASA (assetIndex: number, assetHolding: AssetHoldingM): void {
     const accAssetHolding = this.assets.get(assetIndex); // fetch asset holding of account
     if (accAssetHolding) {
       console.warn(`${this.address} is already opted in to asset ${assetIndex}`);
@@ -356,7 +355,7 @@ class Asset {
     this.id = assetId;
     this.definitions = {
       creator: creator,
-      total: def.total,
+      total: BigInt(def.total),
       decimals: def.decimals,
       'default-frozen': def.defaultFrozen ?? false,
       "unit-name": def.unitName,

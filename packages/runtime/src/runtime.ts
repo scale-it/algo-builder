@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
-import algosdk, { AssetDef, AssetHolding, decodeAddress, makeAssetTransferTxnWithSuggestedParams } from "algosdk";
+import algosdk, { AssetDef, decodeAddress, makeAssetTransferTxnWithSuggestedParams } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
 import { StoreAccount } from "./account";
@@ -13,8 +13,7 @@ import { encodeNote, mkTransaction } from "./lib/txn";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import type {
-  AccountAddress, ASADefs,
-  ASADeploymentFlags, Context, ExecParams,
+  AccountAddress, ASADefs, ASADeploymentFlags, AssetHoldingM, Context, ExecParams,
   SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
   StackElem, State, StoreAccountI, Txn, TxParams
 } from "./types";
@@ -349,8 +348,8 @@ export class Runtime {
       address, address, undefined, undefined, 0, undefined, assetIndex,
       mockSuggestedParams(flags, this.round));
 
-    const assetHolding: AssetHolding = {
-      amount: address === creatorAddr ? assetDef.total : 0, // for creator opt-in amount is total assets
+    const assetHolding: AssetHoldingM = {
+      amount: address === creatorAddr ? BigInt(assetDef.total) : 0n, // for creator opt-in amount is total assets
       'asset-id': assetIndex,
       creator: creatorAddr,
       'is-frozen': address === creatorAddr ? false : assetDef["default-frozen"]
@@ -365,7 +364,7 @@ export class Runtime {
    * @param assetIndex Asset Index
    * @param address address of account to get holding from
    */
-  getAssetHolding (assetIndex: number, address: AccountAddress): AssetHolding {
+  getAssetHolding (assetIndex: number, address: AccountAddress): AssetHoldingM {
     const account = this.assertAccountDefined(address, this.store.accounts.get(address));
     const assetHolding = account.getAssetHolding(assetIndex);
     if (assetHolding === undefined) {
@@ -555,7 +554,7 @@ export class Runtime {
   }
 
   // verify 'amt' microalgos can be withdrawn from account
-  assertMinBalance (amt: number, address: string): void {
+  assertMinBalance (amt: bigint, address: string): void {
     const account = this.getAccount(address);
     if ((account.amount - amt) < account.minBalance) {
       throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE, {

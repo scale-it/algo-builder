@@ -1,4 +1,5 @@
-import algosdk, { AssetDefEnc, SuggestedParams, Transaction } from "algosdk";
+import type { AssetDefEnc, SuggestedParams, Transaction } from "algosdk";
+import algosdk from "algosdk";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
@@ -27,7 +28,7 @@ export function parseToStackElem (a: unknown, field: TxField): StackElem {
   if (Buffer.isBuffer(a)) {
     return new Uint8Array(a);
   }
-  if (typeof a === "number") {
+  if (typeof a === "number" || typeof a === "bigint") {
     return BigInt(a);
   }
   if (typeof a === "string") {

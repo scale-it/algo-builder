@@ -4,9 +4,10 @@ export const AddressSchema = z.string();
 
 // https://developer.algorand.org/docs/reference/rest-apis/algod/
 const metadataRegex = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==\|[A-Za-z0-9+/]{3}=)?$/;
+const totalRegex = /^\d+$/;
 
 export const ASADefSchema = z.object({
-  total: z.number(),
+  total: z.union([z.number(), z.bigint(), z.string()]), // 'string' to support bigint from yaml file
   decimals: z.number(),
   defaultFrozen: z.boolean().optional(),
   unitName: z.string(),
@@ -20,6 +21,11 @@ export const ASADefSchema = z.object({
   clawback: AddressSchema.optional(),
   optInAccNames: z.array(z.string()).optional()
 })
+  .refine(o => (totalRegex.test(String(o.total)) &&
+  BigInt(o.total) <= 0xFFFFFFFFFFFFFFFFn && BigInt(o.total) > 0n), {
+    message: "Total must be a positive number and smaller than 2^64-1 ",
+    path: ['total']
+  })
   .refine(o => ((o.decimals <= 19) && (o.decimals >= 0)), {
     message: "Decimals must be between 0(non divisible) and 19",
     path: ['decimals']

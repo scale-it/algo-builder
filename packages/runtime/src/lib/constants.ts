@@ -2,7 +2,7 @@ export const MIN_UINT64 = 0n;
 export const MAX_UINT64 = 0xFFFFFFFFFFFFFFFFn;
 export const MAX_UINT8 = 255;
 export const MIN_UINT8 = 0;
-export const DEFAULT_STACK_ELEM = BigInt("0");
+export const DEFAULT_STACK_ELEM = 0n;
 export const MAX_CONCAT_SIZE = 4096;
 export const ALGORAND_MIN_TX_FEE = 1000;
 export const ALGORAND_ACCOUNT_MIN_BALANCE = 1e6; // 1 ALGO
@@ -25,7 +25,7 @@ export const MAX_ALGORAND_ACCOUNT_ASSETS = 1000;
 export const MAX_ALGORAND_ACCOUNT_APPS = 10;
 
 const zeroAddress = new Uint8Array(32);
-const zeroUint64 = BigInt('0');
+const zeroUint64 = 0n;
 const zeroByte = new Uint8Array(0);
 
 // https://developer.algorand.org/docs/reference/teal/opcodes/#txn

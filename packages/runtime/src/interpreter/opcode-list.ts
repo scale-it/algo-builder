@@ -18,9 +18,6 @@ import { EncodingType, StackElem, TEALStack, TxnOnComplete, TxnType } from "../t
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
 
-export const BIGINT0 = BigInt("0");
-export const BIGINT1 = BigInt("1");
-
 // Opcodes reference link: https://developer.algorand.org/docs/reference/teal/opcodes/
 
 // Store TEAL version
@@ -148,7 +145,7 @@ export class Div extends Op {
     this.assertMinStackLen(stack, 2, this.line);
     const last = this.assertBigInt(stack.pop(), this.line);
     const prev = this.assertBigInt(stack.pop(), this.line);
-    if (last === BIGINT0) {
+    if (last === 0n) {
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.ZERO_DIV, { line: this.line });
     }
     stack.push(prev / last);
@@ -353,7 +350,7 @@ export class Mod extends Op {
     this.assertMinStackLen(stack, 2, this.line);
     const last = this.assertBigInt(stack.pop(), this.line);
     const prev = this.assertBigInt(stack.pop(), this.line);
-    if (last === BIGINT0) {
+    if (last === 0n) {
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.ZERO_DIV, { line: this.line });
     }
     stack.push(prev % last);
@@ -635,9 +632,9 @@ export class Ed25519verify extends Op {
     const addr = encodeAddress(pubkey);
     const isValid = verifyBytes(data, signature, addr);
     if (isValid) {
-      stack.push(BIGINT1);
+      stack.push(1n);
     } else {
-      stack.push(BIGINT0);
+      stack.push(0n);
     }
   }
 }
@@ -662,9 +659,9 @@ export class LessThan extends Op {
     const last = this.assertBigInt(stack.pop(), this.line);
     const prev = this.assertBigInt(stack.pop(), this.line);
     if (prev < last) {
-      stack.push(BIGINT1);
+      stack.push(1n);
     } else {
-      stack.push(BIGINT0);
+      stack.push(0n);
     }
   }
 }
@@ -689,9 +686,9 @@ export class GreaterThan extends Op {
     const last = this.assertBigInt(stack.pop(), this.line);
     const prev = this.assertBigInt(stack.pop(), this.line);
     if (prev > last) {
-      stack.push(BIGINT1);
+      stack.push(1n);
     } else {
-      stack.push(BIGINT0);
+      stack.push(0n);
     }
   }
 }
@@ -716,9 +713,9 @@ export class LessThanEqualTo extends Op {
     const last = this.assertBigInt(stack.pop(), this.line);
     const prev = this.assertBigInt(stack.pop(), this.line);
     if (prev <= last) {
-      stack.push(BIGINT1);
+      stack.push(1n);
     } else {
-      stack.push(BIGINT0);
+      stack.push(0n);
     }
   }
 }
@@ -743,9 +740,9 @@ export class GreaterThanEqualTo extends Op {
     const last = this.assertBigInt(stack.pop(), this.line);
     const prev = this.assertBigInt(stack.pop(), this.line);
     if (prev >= last) {
-      stack.push(BIGINT1);
+      stack.push(1n);
     } else {
-      stack.push(BIGINT0);
+      stack.push(0n);
     }
   }
 }
@@ -770,9 +767,9 @@ export class And extends Op {
     const last = this.assertBigInt(stack.pop(), this.line);
     const prev = this.assertBigInt(stack.pop(), this.line);
     if (last && prev) {
-      stack.push(BIGINT1);
+      stack.push(1n);
     } else {
-      stack.push(BIGINT0);
+      stack.push(0n);
     }
   }
 }
@@ -797,9 +794,9 @@ export class Or extends Op {
     const last = this.assertBigInt(stack.pop(), this.line);
     const prev = this.assertBigInt(stack.pop(), this.line);
     if (prev || last) {
-      stack.push(BIGINT1);
+      stack.push(1n);
     } else {
-      stack.push(BIGINT0);
+      stack.push(0n);
     }
   }
 }
@@ -892,10 +889,10 @@ export class Not extends Op {
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
     const last = this.assertBigInt(stack.pop(), this.line);
-    if (last === BIGINT0) {
-      stack.push(BIGINT1);
+    if (last === 0n) {
+      stack.push(1n);
     } else {
-      stack.push(BIGINT0);
+      stack.push(0n);
     }
   }
 }
@@ -974,10 +971,10 @@ export class Addw extends Op {
 
     if (valueC > MAX_UINT64) {
       valueC -= MAX_UINT64;
-      stack.push(BIGINT1);
-      stack.push(valueC - BIGINT1);
+      stack.push(1n);
+      stack.push(valueC - 1n);
     } else {
-      stack.push(BIGINT0);
+      stack.push(0n);
       stack.push(valueC);
     }
   }
@@ -1446,7 +1443,7 @@ export class BranchIfZero extends Op {
     this.assertMinStackLen(stack, 1, this.line);
     const last = this.assertBigInt(stack.pop(), this.line);
 
-    if (last === BIGINT0) {
+    if (last === 0n) {
       this.interpreter.jumpForward(this.label, this.line);
     }
   }
@@ -1477,7 +1474,7 @@ export class BranchIfNotZero extends Op {
     this.assertMinStackLen(stack, 1, this.line);
     const last = this.assertBigInt(stack.pop(), this.line);
 
-    if (last !== BIGINT0) {
+    if (last !== 0n) {
       this.interpreter.jumpForward(this.label, this.line);
     }
   }
@@ -1603,9 +1600,9 @@ export class AppOptedIn extends Op {
 
     const isOptedIn = localState.get(Number(appId));
     if (isOptedIn) {
-      stack.push(BIGINT1);
+      stack.push(1n);
     } else {
-      stack.push(BIGINT0);
+      stack.push(0n);
     }
   }
 }
@@ -1642,7 +1639,7 @@ export class AppLocalGet extends Op {
     if (val) {
       stack.push(val);
     } else {
-      stack.push(BIGINT0); // The value is zero if the key does not exist.
+      stack.push(0n); // The value is zero if the key does not exist.
     }
   }
 }
@@ -1676,10 +1673,10 @@ export class AppLocalGetEx extends Op {
     const val = account.getLocalState(Number(appId), key);
     if (val) {
       stack.push(val);
-      stack.push(BIGINT1);
+      stack.push(1n);
     } else {
-      stack.push(BIGINT0); // The value is zero if the key does not exist.
-      stack.push(BIGINT0); // did_exist_flag
+      stack.push(0n); // The value is zero if the key does not exist.
+      stack.push(0n); // did_exist_flag
     }
   }
 }
@@ -1713,7 +1710,7 @@ export class AppGlobalGet extends Op {
     if (val) {
       stack.push(val);
     } else {
-      stack.push(BIGINT0); // The value is zero if the key does not exist.
+      stack.push(0n); // The value is zero if the key does not exist.
     }
   }
 }
@@ -1746,7 +1743,7 @@ export class AppGlobalGetEx extends Op {
 
     const foreignApps = this.interpreter.runtime.ctx.tx.apfa;
     let appId;
-    if (appIndex === BIGINT0) {
+    if (appIndex === 0n) {
       appId = this.interpreter.runtime.ctx.tx.apid; // zero index means current app
     } else {
       this.checkIndexBound(Number(--appIndex), foreignApps, this.line);
@@ -1756,10 +1753,10 @@ export class AppGlobalGetEx extends Op {
     const val = this.interpreter.getGlobalState(appId, key, this.line);
     if (val) {
       stack.push(val);
-      stack.push(BIGINT1);
+      stack.push(1n);
     } else {
-      stack.push(BIGINT0); // The value is zero if the key does not exist.
-      stack.push(BIGINT0); // did_exist_flag
+      stack.push(0n); // The value is zero if the key does not exist.
+      stack.push(0n); // did_exist_flag
     }
   }
 }
@@ -1966,7 +1963,7 @@ export class GetAssetHolding extends Op {
     const account = this.interpreter.getAccount(accountIndex, this.line);
     const assetInfo = account.assets.get(Number(assetId));
     if (assetInfo === undefined) {
-      stack.push(BigInt("0"));
+      stack.push(0n);
       return;
     }
     let value: StackElem;
@@ -1982,7 +1979,7 @@ export class GetAssetHolding extends Op {
     }
 
     stack.push(value);
-    stack.push(BigInt("1"));
+    stack.push(1n);
   }
 }
 
@@ -2024,7 +2021,7 @@ export class GetAssetDef extends Op {
     const AssetDefinition = this.interpreter.getAssetDef(assetId);
 
     if (AssetDefinition === undefined) {
-      stack.push(BigInt("0"));
+      stack.push(0n);
     } else {
       let value: StackElem;
       const s = AssetParamMap[this.field] as keyof AssetDef;
@@ -2045,7 +2042,7 @@ export class GetAssetDef extends Op {
       }
 
       stack.push(value);
-      stack.push(BigInt("1"));
+      stack.push(1n);
     }
   }
 }

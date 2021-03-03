@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "algosdk": "^1.8.0"
+    "algosdk": "algorand/js-algorand-sdk.git#9a5824782511dff1f521c68fe54d562b3872d1ae"
   },
   "scripts": {
     "algob": "algob",
