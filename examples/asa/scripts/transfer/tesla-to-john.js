@@ -12,7 +12,7 @@ async function run (runtimeEnv, deployer) {
     sign: types.SignType.SecretKey,
     fromAccount: elon,
     toAccountAddr: john.addr,
-    amount: 1,
+    amount: 184467440737095516n, // use bigint for large transfer amount
     assetID: teslaAssetID,
     payFlags: {}
   });

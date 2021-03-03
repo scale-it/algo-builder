@@ -21,7 +21,11 @@ export async function getLsig (
   const compileOp = new CompileOp(algodClient);
   const result: ASCCache = await compileOp.ensureCompiled(name, false, scTmplParams);
   const program = result.base64ToBytes;
-  return algosdk.makeLogicSig(program, scParams);
+  const lsig = algosdk.makeLogicSig(program, scParams);
+  // below line saves data in cp is {tag: <value>} which we need, otherwise it'll save as
+  // { type: 'buffer', data: <value> } and throws error upon running examples
+  if (lsig.tag) { lsig.tag = Uint8Array.from(lsig.tag); }
+  return lsig;
 }
 
 /**

@@ -28,6 +28,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
   this.beforeAll(async function () {
     runtime = new Runtime([john, alice]); // setup test
     approvalProgram = getProgram('deleteApp.teal');
+    clearProgram = getProgram('clear.teal');
 
     deleteParams = {
       type: TransactionType.DeleteSSC,

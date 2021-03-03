@@ -89,6 +89,7 @@ class DeployerBasicMode {
     if (result === undefined) { return undefined; }
     const lsig = getDummyLsig();
     Object.assign(lsig, result);
+    if (lsig.sig) { lsig.sig = Uint8Array.from(lsig.sig); };
     return lsig;
   }
 

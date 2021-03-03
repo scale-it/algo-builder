@@ -369,12 +369,12 @@ describe("Parser", function () {
       );
 
       expectRuntimeError(
-        () => opcodeFromSentence(["int", String(MAX_UINT64 + BigInt('5'))], 1, interpreter),
+        () => opcodeFromSentence(["int", String(MAX_UINT64 + 5n)], 1, interpreter),
         RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
       );
 
       expectRuntimeError(
-        () => opcodeFromSentence(["int", String(MIN_UINT64 - BigInt('5'))], 1, interpreter),
+        () => opcodeFromSentence(["int", String(MIN_UINT64 - 5n)], 1, interpreter),
         RUNTIME_ERRORS.TEAL.INVALID_TYPE
       );
     });
@@ -790,7 +790,7 @@ describe("Parser", function () {
 
     it("Should return correct opcode list for 'Intc and Bytec'", async () => {
       const file = "test-int-bytec.teal";
-      interpreter.intcblock = [BigInt("1")];
+      interpreter.intcblock = [1n];
       interpreter.bytecblock = [new Uint8Array(0)];
 
       const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
@@ -801,7 +801,7 @@ describe("Parser", function () {
 
     it("Should return correct opcode list for 'Store and Load'", async () => {
       const file = "test-store-load.teal";
-      interpreter.scratch = [BigInt("1")];
+      interpreter.scratch = [1n];
 
       const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
       const expected = [new Store(["0"], 1, interpreter), new Load(["0"], 2, interpreter)];

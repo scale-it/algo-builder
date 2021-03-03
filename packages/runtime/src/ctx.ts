@@ -1,10 +1,10 @@
-import { AssetDef, AssetHolding } from "algosdk";
+import { AssetDef } from "algosdk";
 
 import { Runtime } from ".";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import {
-  AccountAddress, AlgoTransferParam, AssetModFields,
+  AccountAddress, AlgoTransferParam, AssetHoldingM, AssetModFields,
   AssetTransferParam, Context, ExecParams, ExecutionMode,
   SignType, SSCAttributesM, State, StoreAccountI, TransactionType, Txn
 } from "./types";
@@ -27,7 +27,7 @@ export class Ctx implements Context {
   }
 
   // verify 'amt' microalgos can be withdrawn from account
-  assertMinBalance (amt: number, address: string): void {
+  assertMinBalance (amt: bigint, address: string): void {
     const account = this.getAccount(address);
     if ((account.amount - amt) < account.minBalance) {
       throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE, {
@@ -84,7 +84,7 @@ export class Ctx implements Context {
    * @param assetIndex Asset Index
    * @param address address of account to get holding from
    */
-  getAssetHolding (assetIndex: number, address: AccountAddress): AssetHolding {
+  getAssetHolding (assetIndex: number, address: AccountAddress): AssetHoldingM {
     const account = this.runtime.assertAccountDefined(address, this.state.accounts.get(address));
     const assetHolding = account.getAssetHolding(assetIndex);
     if (assetHolding === undefined) {
@@ -117,6 +117,7 @@ export class Ctx implements Context {
   transferAlgo (txnParam: AlgoTransferParam): void {
     const fromAccount = this.getAccount(txnParam.fromAccount.addr);
     const toAccount = this.getAccount(txnParam.toAccountAddr);
+    txnParam.amountMicroAlgos = BigInt(txnParam.amountMicroAlgos);
 
     this.assertMinBalance(txnParam.amountMicroAlgos, fromAccount.address);
     fromAccount.amount -= txnParam.amountMicroAlgos; // remove 'x' algo from sender
@@ -126,7 +127,7 @@ export class Ctx implements Context {
       const closeRemToAcc = this.getAccount(txnParam.payFlags.closeRemainderTo);
 
       closeRemToAcc.amount += fromAccount.amount; // transfer funds of sender to closeRemTo account
-      fromAccount.amount = 0; // close sender's account
+      fromAccount.amount = 0n; // close sender's account
     }
   }
 
@@ -137,7 +138,7 @@ export class Ctx implements Context {
    */
   deductFee (sender: AccountAddress, index: number): void {
     const fromAccount = this.getAccount(sender);
-    const fee = this.gtxs[index].fee;
+    const fee = BigInt(this.gtxs[index].fee);
     this.assertMinBalance(fee, sender);
     fromAccount.amount -= fee; // remove tx fee from Sender's account
   }
@@ -146,6 +147,7 @@ export class Ctx implements Context {
   transferAsset (txnParam: AssetTransferParam): void {
     const fromAssetHolding = this.getAssetHolding(txnParam.assetID, txnParam.fromAccount.addr);
     const toAssetHolding = this.getAssetHolding(txnParam.assetID, txnParam.toAccountAddr);
+    txnParam.amount = BigInt(txnParam.amount);
 
     this.assertAssetNotFrozen(txnParam.assetID, txnParam.fromAccount.addr);
     this.assertAssetNotFrozen(txnParam.assetID, txnParam.toAccountAddr);
@@ -163,7 +165,7 @@ export class Ctx implements Context {
         txnParam.assetID, txnParam.payFlags.closeRemainderTo);
 
       closeRemToAssetHolding.amount += fromAssetHolding.amount; // transfer assets of sender to closeRemTo account
-      fromAssetHolding.amount = 0; // close sender's account
+      fromAssetHolding.amount = 0n; // close sender's account
     }
   }
 
@@ -206,7 +208,7 @@ export class Ctx implements Context {
    */
   revokeAsset (
     recipient: string, assetID: number,
-    revocationTarget: string, amount: number
+    revocationTarget: string, amount: bigint
   ): void {
     // Transfer assets
     const fromAssetHolding = this.getAssetHolding(assetID, revocationTarget);
@@ -354,7 +356,7 @@ export class Ctx implements Context {
           }
           this.revokeAsset(
             txnParam.recipient, txnParam.assetID,
-            txnParam.revocationTarget, txnParam.amount
+            txnParam.revocationTarget, BigInt(txnParam.amount)
           );
           break;
         }

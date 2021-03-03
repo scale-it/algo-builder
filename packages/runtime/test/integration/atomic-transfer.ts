@@ -10,7 +10,7 @@ import { elonMuskAccount } from "../mocks/account";
 
 describe("Algorand Smart Contracts - Atomic Transfers", function () {
   useFixture("stateful");
-  const initialBalance = 5e6;
+  const initialBalance = BigInt(5e6);
   let john: StoreAccount;
   let alice: StoreAccount;
   let runtime: Runtime;
@@ -71,18 +71,18 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         payFlags: { totalFee: 1000 }
       }
     ];
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as number;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as number;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 
     runtime.executeTx(txGroup);
 
     syncAccounts();
-    assert.equal(john.getAssetHolding(assetId)?.amount, initialJohnAssets - 10);
-    assert.equal(alice.getAssetHolding(assetId)?.amount, initialAliceAssets + 10);
-    assert.equal(john.balance(), initialBalance - 2100);
-    assert.equal(alice.balance(), initialBalance + 100);
+    assert.equal(john.getAssetHolding(assetId)?.amount, initialJohnAssets - 10n);
+    assert.equal(alice.getAssetHolding(assetId)?.amount, initialAliceAssets + 10n);
+    assert.equal(john.balance(), initialBalance - 2100n);
+    assert.equal(alice.balance(), initialBalance + 100n);
   });
 
   it("should not execute payment transaction (in group) if asset transaction fails", () => {
@@ -105,8 +105,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         payFlags: { totalFee: 1000 }
       }
     ];
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as number;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as number;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 
@@ -152,8 +152,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     assert.equal(localCounter, 1n);
 
     syncAccounts();
-    assert.equal(john.balance(), initialBalance - 2100);
-    assert.equal(alice.balance(), initialBalance + 100);
+    assert.equal(john.balance(), initialBalance - 2100n);
+    assert.equal(alice.balance(), initialBalance + 100n);
   });
 
   it("should fail if payment transaction in group fails", () => {
@@ -288,7 +288,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
       }
     ];
     syncAccounts();
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as number;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
 
     expectRuntimeError(
       () => runtime.executeTx(txGroup),
@@ -419,8 +419,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         payFlags: { totalFee: 1000 }
       }
     ];
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as number;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as number;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
     const initialJohnBalance = john.balance();
 
     expectRuntimeError(

@@ -50,7 +50,7 @@ export function makeAssetCreateTxn (
   return algosdk.makeAssetCreateTxnWithSuggestedParams(
     flags.creator.addr,
     note,
-    asaDef.total,
+    BigInt(asaDef.total),
     asaDef.decimals,
     asaDef.defaultFrozen,
     asaDef.manager,

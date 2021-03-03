@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
-import algosdk, { AssetDef, AssetHolding, decodeAddress, makeAssetTransferTxnWithSuggestedParams } from "algosdk";
+import algosdk, { AssetDef, decodeAddress, makeAssetTransferTxnWithSuggestedParams } from "algosdk";
 import cloneDeep from "lodash/cloneDeep";
 
 import { StoreAccount } from "./account";
@@ -13,8 +13,7 @@ import { encodeNote, mkTransaction } from "./lib/txn";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import type {
-  AccountAddress, ASADefs,
-  ASADeploymentFlags, Context, ExecParams,
+  AccountAddress, ASADefs, ASADeploymentFlags, AssetHoldingM, Context, ExecParams,
   SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
   StackElem, State, StoreAccountI, Txn, TxParams
 } from "./types";
@@ -40,7 +39,7 @@ export class Runtime {
   constructor (accounts: StoreAccountI[]) {
     // runtime store
     this.store = {
-      accounts: new Map<string, StoreAccountI>(), // string represents account address
+      accounts: new Map<AccountAddress, StoreAccountI>(), // string represents account address
       globalApps: new Map<number, AccountAddress>(), // map of {appId: accountAddress}
       assetDefs: new Map<number, AccountAddress>() // number represents assetId
     };
@@ -349,8 +348,8 @@ export class Runtime {
       address, address, undefined, undefined, 0, undefined, assetIndex,
       mockSuggestedParams(flags, this.round));
 
-    const assetHolding: AssetHolding = {
-      amount: address === creatorAddr ? assetDef.total : 0, // for creator opt-in amount is total assets
+    const assetHolding: AssetHoldingM = {
+      amount: address === creatorAddr ? BigInt(assetDef.total) : 0n, // for creator opt-in amount is total assets
       'asset-id': assetIndex,
       creator: creatorAddr,
       'is-frozen': address === creatorAddr ? false : assetDef["default-frozen"]
@@ -365,7 +364,7 @@ export class Runtime {
    * @param assetIndex Asset Index
    * @param address address of account to get holding from
    */
-  getAssetHolding (assetIndex: number, address: AccountAddress): AssetHolding {
+  getAssetHolding (assetIndex: number, address: AccountAddress): AssetHoldingM {
     const account = this.assertAccountDefined(address, this.store.accounts.get(address));
     const assetHolding = account.getAssetHolding(assetIndex);
     if (assetHolding === undefined) {
@@ -423,6 +422,12 @@ export class Runtime {
     const sender = flags.sender;
     const senderAcc = this.assertAccountDefined(sender.addr, this.store.accounts.get(sender.addr));
 
+    if (approvalProgram === "") {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
+    }
+    if (clearProgram === "") {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
+    }
     // create app with id = 0 in globalApps for teal execution
     const app = senderAcc.addApp(0, flags, approvalProgram, clearProgram);
     this.ctx.state.accounts.set(senderAcc.address, senderAcc);
@@ -528,6 +533,13 @@ export class Runtime {
     payFlags: TxParams,
     flags: SSCOptionalFlags
   ): void {
+    if (approvalProgram === "") {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
+    }
+    if (clearProgram === "") {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
+    }
+
     const appParams = this.getApp(appId);
     this.addCtxAppUpdateTx(senderAddr, appId, payFlags, flags);
     this.ctx.state = cloneDeep(this.store);
@@ -542,7 +554,7 @@ export class Runtime {
   }
 
   // verify 'amt' microalgos can be withdrawn from account
-  assertMinBalance (amt: number, address: string): void {
+  assertMinBalance (amt: bigint, address: string): void {
     const account = this.getAccount(address);
     if ((account.amount - amt) < account.minBalance) {
       throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE, {
@@ -558,6 +570,9 @@ export class Runtime {
    * @param args arguments passed
    */
   getLogicSig (program: string, args: Uint8Array[]): LogicSig {
+    if (program === "") {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
+    }
     const lsig = new LogicSig(program, args);
     const acc = new StoreAccount(0, { addr: lsig.address(), sk: new Uint8Array(0) });
     this.store.accounts.set(acc.address, acc);
@@ -584,6 +599,9 @@ export class Runtime {
     }
     // logic validation
     const program = convertToString(txnParam.lsig.logic);
+    if (program === "") {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
+    }
     this.run(program, ExecutionMode.STATELESS);
   }
 

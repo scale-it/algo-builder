@@ -2,9 +2,11 @@ import { decodeAddress, multisigAddress } from "algosdk";
 import { assert } from "chai";
 
 import { StoreAccount } from "../../src/account";
+import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { Runtime } from "../../src/runtime";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
+import { expectRuntimeError } from "../helpers/runtime-errors";
 
 const programName = "escrow.teal";
 const multiSigProg = "sample-asc.teal";
@@ -40,6 +42,13 @@ describe("Logic Signature", () => {
 
     result = lsig.verify(johnPk);
     assert.equal(result, false);
+  });
+
+  it("should fail if empty program is passed", () => {
+    expectRuntimeError(
+      () => runtime.getLogicSig("", []),
+      RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM
+    );
   });
 });
 

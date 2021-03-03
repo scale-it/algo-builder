@@ -20,7 +20,7 @@ describe("Teal Opcodes basic assertions", function () {
   });
 
   it("check uint64 underflow", function () {
-    const min = MIN_UINT64 - BigInt("1");
+    const min = MIN_UINT64 - 1n;
     const lineNumber = 1;
 
     expectRuntimeError(

@@ -258,6 +258,24 @@ const runtimeGeneralErrors = {
     message: "Application Index %appId% not found or is invalid at line %line%",
     title: "Application index %appId% is not found line at %line%",
     description: `Application index %appId% is not found`
+  },
+  INVALID_APPROVAL_PROGRAM: {
+    number: 1307,
+    message: "Approval program is empty",
+    title: "Invalid approval program",
+    description: `Invalid approval program`
+  },
+  INVALID_CLEAR_PROGRAM: {
+    number: 1308,
+    message: "Clear program is empty",
+    title: "Invalid clear program",
+    description: `Invalid clear program`
+  },
+  INVALID_PROGRAM: {
+    number: 1309,
+    message: "Program is empty",
+    title: "Invalid program",
+    description: `Invalid program`
   }
 };
 
