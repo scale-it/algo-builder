@@ -23,6 +23,10 @@ You can write deployment tasks synchronously and they'll be executed in the corr
 
 To deploy an ASA you must have `asa.yaml` file in `assets` folder. Head to the [ASA Definition File Spec](https://paper.dropbox.com/doc/Algorand-builder-specs-Vcdp0XNngizChyUWvFXfs#:uid=077585002872354521007982&h2=ASA-Definition-File) to learn more.
 
+For opting in to ASA, `deployer` supports two methods :-
+- `optInAcountToASA` to opt-in to a single account signed by secret key of sender.
+- `optInLsigToASA` to opt-in to a contract account (say escrow) where the account is represented by the logic signature address (`lsig.address()`).
+
 #### Smart contracts
 
 You can also deploy a Stateful Smart Contracts (SSC). Check our [examples/permissioned-voting](../examples/permissioned-voting) project. Open the `scripts/voting.js` file, you will find there:
