@@ -44,10 +44,10 @@ export interface AlgoOperator {
     txWriter: txWriter,
     scTmplParams?: SCParams) => Promise<SSCInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
-  accountASAOptIn: (
+  optInAcountToASA: (
     asaName: string, assetIndex: number, account: rtypes.Account, params: rtypes.TxParams
   ) => Promise<void>
-  lsigASAOptIn: (
+  optInLsigToASA: (
     asaName: string, assetIndex: number, lsig: algosdk.LogicSig, params: rtypes.TxParams
   ) => Promise<void>
   optInToASAMultiple: (
@@ -110,7 +110,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     return rawSignedTxn.length;
   }
 
-  async _accountASAOptIn (
+  async _optInAcountToASA (
     asaName: string, assetIndex: number, account: rtypes.Account, params: algosdk.SuggestedParams
   ): Promise<void> {
     console.log(`ASA ${account.name} opt-in for ASA ${asaName}`);
@@ -120,21 +120,21 @@ export class AlgoOperatorImpl implements AlgoOperator {
     await this.waitForConfirmation(txInfo.txId);
   }
 
-  async accountASAOptIn (
+  async optInAcountToASA (
     asaName: string, assetIndex: number, account: rtypes.Account, flags: rtypes.TxParams
   ): Promise<void> {
     const txParams = await tx.mkTxParams(this.algodClient, flags);
-    await this._accountASAOptIn(asaName, assetIndex, account, txParams);
+    await this._optInAcountToASA(asaName, assetIndex, account, txParams);
   }
 
-  async lsigASAOptIn (
+  async optInLsigToASA (
     asaName: string, assetIndex: number, lsig: algosdk.LogicSig, flags: rtypes.TxParams
   ): Promise<void> {
     console.log(`Contract ${lsig.address()} opt-in for ASA ${asaName}`);
     const txParams = await tx.mkTxParams(this.algodClient, flags);
 
-    const lsigASAOptInTx = tx.makeASAOptInTx(lsig.address(), assetIndex, txParams);
-    const rawLsigSignedTx = algosdk.signLogicSigTransactionObject(lsigASAOptInTx, lsig).blob;
+    const optInLsigToASATx = tx.makeASAOptInTx(lsig.address(), assetIndex, txParams);
+    const rawLsigSignedTx = algosdk.signLogicSigTransactionObject(optInLsigToASATx, lsig).blob;
     const txInfo = await this.algodClient.sendRawTransaction(rawLsigSignedTx).do();
     await this.waitForConfirmation(txInfo.txId);
   }
@@ -151,7 +151,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       accounts,
       flags.creator);
     for (const account of optInAccounts) {
-      await this._accountASAOptIn(asaName, assetIndex, account, txParams);
+      await this._optInAcountToASA(asaName, assetIndex, account, txParams);
     }
   }
 

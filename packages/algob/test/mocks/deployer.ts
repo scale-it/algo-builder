@@ -89,11 +89,11 @@ export class FakeDeployer implements AlgobDeployer {
     throw new Error("Not implemented");
   }
 
-  accountASAOptIn (name: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
+  optInAcountToASA (name: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
     throw new Error("Not implemented");
   }
 
-  lsigASAOptIn (asaName: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
+  optInLsigToASA (asaName: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
     throw new Error("Not implemented");
   }
 

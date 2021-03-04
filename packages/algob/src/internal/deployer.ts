@@ -312,8 +312,8 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
    * @param accountName
    * @param flags Transaction flags
    */
-  async accountASAOptIn (asaName: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
-    await this.algoOp.accountASAOptIn(
+  async optInAcountToASA (asaName: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
+    await this.algoOp.optInAcountToASA(
       asaName,
       this._getASAInfo(asaName).assetIndex,
       this._getAccount(accountName),
@@ -327,8 +327,8 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
    * @param lsig logic signature
    * @param flags Transaction flags
    */
-  async lsigASAOptIn (asaName: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
-    await this.algoOp.lsigASAOptIn(asaName, this._getASAInfo(asaName).assetIndex, lsig, flags);
+  async optInLsigToASA (asaName: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
+    await this.algoOp.optInLsigToASA(asaName, this._getASAInfo(asaName).assetIndex, lsig, flags);
   }
 
   /**
@@ -390,15 +390,15 @@ export class DeployerRunMode extends DeployerBasicMode implements AlgobDeployer 
     });
   }
 
-  async accountASAOptIn (_asaName: string, _accountName: string, _flags: rtypes.TxParams): Promise<void> {
+  async optInAcountToASA (_asaName: string, _accountName: string, _flags: rtypes.TxParams): Promise<void> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      methodName: "accountASAOptIn"
+      methodName: "optInAcountToASA"
     });
   }
 
-  async lsigASAOptIn (_asaName: string, _lsig: LogicSig, _flags: rtypes.TxParams): Promise<void> {
+  async optInLsigToASA (_asaName: string, _lsig: LogicSig, _flags: rtypes.TxParams): Promise<void> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      methodName: "lsigASAOptIn"
+      methodName: "optInLsigToASA"
     });
   }
 

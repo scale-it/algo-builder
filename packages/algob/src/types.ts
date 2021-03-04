@@ -476,13 +476,13 @@ export interface AlgobDeployer {
   /**
    * Creates an opt-in transaction for given ASA name, which must be defined in
    * `/assets/asa.yaml` file. The opt-in transaction is signed by the account secret key */
-  accountASAOptIn: (name: string, accountName: string,
+  optInAcountToASA: (name: string, accountName: string,
     flags: rtypes.TxParams, sign: rtypes.Sign) => Promise<void>
 
   /**
    * Creates an opt-in transaction for given ASA name, which must be defined in
    * `/assets/asa.yaml` file. The opt-in transaction is signed by the logic signature */
-  lsigASAOptIn: (asaName: string, lsig: LogicSig, flags: rtypes.TxParams) => Promise<void>
+  optInLsigToASA: (asaName: string, lsig: LogicSig, flags: rtypes.TxParams) => Promise<void>
 
   /**
    * Creates an opt-in transaction for given Stateful Smart Contract (SSC). The SSC must be
