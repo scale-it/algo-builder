@@ -306,17 +306,29 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
   }
 
   /**
-   * Description: Opt-In to ASA for a single account
-   * @param name ASA name
+   * Description: Opt-In to ASA for a single account. The opt-in transaction is
+   * signed by account secret key
+   * @param asaName ASA name
    * @param accountName
    * @param flags Transaction flags
    */
-  async optInToASA (name: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
-    await this.algoOp.optInToASA(
-      name,
-      this._getASAInfo(name).assetIndex,
+  async optInAcountToASA (asaName: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
+    await this.algoOp.optInAcountToASA(
+      asaName,
+      this._getASAInfo(asaName).assetIndex,
       this._getAccount(accountName),
       flags);
+  }
+
+  /**
+   * Description: Opt-In to ASA for a contract account (represented by logic signture).
+   * The opt-in transaction is signed by the logic signature
+   * @param asaName ASA name
+   * @param lsig logic signature
+   * @param flags Transaction flags
+   */
+  async optInLsigToASA (asaName: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
+    await this.algoOp.optInLsigToASA(asaName, this._getASAInfo(asaName).assetIndex, lsig, flags);
   }
 
   /**
@@ -378,9 +390,15 @@ export class DeployerRunMode extends DeployerBasicMode implements AlgobDeployer 
     });
   }
 
-  optInToASA (_name: string, _accountName: string, _flags: rtypes.TxParams): Promise<void> {
+  async optInAcountToASA (_asaName: string, _accountName: string, _flags: rtypes.TxParams): Promise<void> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      methodName: "optInToASA"
+      methodName: "optInAcountToASA"
+    });
+  }
+
+  async optInLsigToASA (_asaName: string, _lsig: LogicSig, _flags: rtypes.TxParams): Promise<void> {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "optInLsigToASA"
     });
   }
 

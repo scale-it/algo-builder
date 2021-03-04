@@ -19,13 +19,11 @@ async function run (runtimeEnv, deployer) {
   const asaInfo = await deployer.deployASA('tesla', { creator: elon });
   console.log(asaInfo);
 
-  await deployer.optInToASA('tesla', 'john', {});
+  await deployer.optInAcountToASA('tesla', 'john', {});
 
   const assetID = asaInfo.assetIndex;
   await balanceOf(deployer, elon.addr, assetID);
-
-  // await printAssetHolding(deployer, elon.addr, assetID);
-  // await printAssetHolding(deployer, john.addr, assetID);
+  // await balanceOf(deployer, john.addr, assetID);
 
   console.log('[tesla]: Script execution has finished!');
 }
