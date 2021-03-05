@@ -219,7 +219,7 @@ by an index that does not exist.`
     message: "Error encountered at line %line%: #pragma should be at 1st line",
     title: '#pragma error',
     description: `#pragma error`
-  },
+  }
 };
 
 const runtimeGeneralErrors = {
