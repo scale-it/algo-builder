@@ -213,7 +213,13 @@ by an index that does not exist.`
     message: "Length of provided TEAL code = %length% exceeds max length of %maxlen%, Mode: %mode%",
     title: 'MaxLength Error',
     description: `MaxLength Error`
-  }
+  },
+  PRAGMA_NOT_AT_FIRST_LINE: {
+    number: 1031,
+    message: "Error encountered at line %line%: #pragma should be at 1st line",
+    title: '#pragma error',
+    description: `#pragma error`
+  },
 };
 
 const runtimeGeneralErrors = {
