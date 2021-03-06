@@ -216,7 +216,7 @@ by an index that does not exist.`
   },
   PRAGMA_NOT_AT_FIRST_LINE: {
     number: 1031,
-    message: "Error encountered at line %line%: #pragma should be at 1st line",
+    message: "#pragma statement must be at 1st line. [error-line: %line%]",
     title: '#pragma error',
     description: `#pragma error`
   }
