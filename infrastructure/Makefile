@@ -61,7 +61,7 @@ sandbox-clean:
 	$(SANDBOX_PATH)/sandbox clean
 
 sandbox-algod-shell:
-# Opens algod cointainer bash shell
+# Opens algod container bash shell
 	$(SANDBOX_PATH)/sandbox enter algod
 
 sandbox-setup-master-account:

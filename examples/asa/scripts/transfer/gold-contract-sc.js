@@ -1,12 +1,11 @@
 /**
  * Description:
- * This file demonstrates the example to transfer micro Algos
+ * This file demonstrates the example to transfer micro Algos and ASA's
  * from contract account (lsig) to a user account.
  * The logic assures that:
- *  + receiver is 2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA (John)
- *  + tx is payment and amount is <- 100
+ *  + tx is payment and amount is <= 100 OR tx is AssetTransfer and AssetAmount is <= 100
  *  + fee is <= 1000
- *  + we don't do any rekey, closeReminderTo
+ *  + we don't do any rekey, closeRemainderTo
 */
 const { types } = require('@algorand-builder/runtime');
 const { balanceOf } = require('@algorand-builder/algob');
@@ -38,7 +37,7 @@ async function run (runtimeEnv, deployer) {
   invalidParams.amountMicroAlgos = 200;
   await executeTransaction(deployer, invalidParams);
 
-  // Transactions for Transaction for ASA (Gold) - Contract : '2-gold-contract-asc.teal'  (Contract Mode)
+  /* Transfer ASA 'gold' from contract account to user account */
   const assetID = deployer.asa.get('gold').assetIndex;
   const assetTxParam = {
     type: types.TransactionType.TransferAsset,

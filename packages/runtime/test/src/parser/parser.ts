@@ -668,7 +668,7 @@ describe("Parser", function () {
       interpreter.tealVersion = 2;
     });
 
-    it("Sould return correct opcode list for '+'", async () => {
+    it("Should return correct opcode list for '+'", async () => {
       const file1 = "test-file-1.teal";
       let res = parser(getProgram(file1), ExecutionMode.STATELESS, interpreter);
       const expected = [new Int(["1"], 1), new Int(["3"], 2), new Add([], 3)];
@@ -682,7 +682,21 @@ describe("Parser", function () {
       assert.deepEqual(res, expect);
     });
 
-    it("Sould return correct opcode list for '-'", async () => {
+    it("Should throw error if #pragma is not on 1st line", async () => {
+      let file = "test-pragma-1.teal";
+      expectRuntimeError(
+        () => parser(getProgram(file), ExecutionMode.STATELESS, interpreter),
+        RUNTIME_ERRORS.TEAL.PRAGMA_NOT_AT_FIRST_LINE
+      );
+
+      file = "test-pragma-2.teal";
+      expectRuntimeError(
+        () => parser(getProgram(file), ExecutionMode.STATELESS, interpreter),
+        RUNTIME_ERRORS.TEAL.PRAGMA_NOT_AT_FIRST_LINE
+      );
+    });
+
+    it("Should return correct opcode list for '-'", async () => {
       const file = "test-file-3.teal";
       const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
       const expected = [
@@ -695,7 +709,7 @@ describe("Parser", function () {
       assert.deepEqual(res, expected);
     });
 
-    it("Sould return correct opcode list for '/'", async () => {
+    it("Should return correct opcode list for '/'", async () => {
       const file = "test-file-4.teal";
       const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
       const expected = [
@@ -708,7 +722,7 @@ describe("Parser", function () {
       assert.deepEqual(res, expected);
     });
 
-    it("Sould return correct opcode list for '*'", async () => {
+    it("Should return correct opcode list for '*'", async () => {
       const file = "test-file-5.teal";
       const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
       const expected = [

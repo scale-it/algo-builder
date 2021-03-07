@@ -35,6 +35,9 @@ export class Pragma extends Op {
     super();
     this.line = line;
     assertLen(args.length, 2, line);
+    if (this.line > 1) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.PRAGMA_NOT_AT_FIRST_LINE, { line: line });
+    }
     if (args[0] === "version" && (args[1] === '1' || args[1] === '2')) {
       this.version = Number(args[1]);
       interpreter.tealVersion = this.version;
