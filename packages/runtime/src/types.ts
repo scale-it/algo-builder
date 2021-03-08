@@ -1,7 +1,6 @@
 import {
   Account as AccountSDK,
   AssetDef,
-  AssetHolding,
   LogicSig,
   SSCSchemaConfig,
   TxnEncodedObj
@@ -90,12 +89,20 @@ export interface Context {
   freezeAsset: (assetId: number, freezeTarget: string, freezeState: boolean) => void
   revokeAsset: (
     recipient: string, assetID: number,
-    revocationTarget: string, amount: number
+    revocationTarget: string, amount: bigint
   ) => void
   destroyAsset: (assetId: number) => void
   deleteApp: (appId: number) => void
   closeApp: (sender: AccountAddress, appId: number) => void
   processTransactions: (txnParams: ExecParams[]) => void
+}
+
+// custom AssetHolding for StoreAccount (using bigint in amount instead of number)
+export interface AssetHoldingM {
+  amount: bigint
+  'asset-id': number
+  creator: string
+  'is-frozen': boolean
 }
 
 // custom AppsLocalState for StoreAccount (using maps instead of array in 'key-value')
@@ -125,8 +132,8 @@ export interface CreatedAppM {
 // NOTE: custom notations are used rather than SDK AccountState notations
 export interface StoreAccountI {
   address: string
-  assets: Map<number, AssetHolding>
-  amount: number
+  assets: Map<number, AssetHoldingM>
+  amount: bigint
   minBalance: number
   appsLocalState: Map<number, AppLocalStateM>
   appsTotalSchema: SSCSchemaConfig
@@ -134,19 +141,19 @@ export interface StoreAccountI {
   createdAssets: Map<number, AssetDef>
   account: AccountSDK
 
-  balance: () => number
+  balance: () => bigint
   getApp: (appId: number) => SSCAttributesM | undefined
   getAppFromLocal: (appId: number) => AppLocalStateM | undefined
   addApp: (appId: number, params: SSCDeploymentFlags,
     approvalProgram: string, clearProgram: string) => CreatedAppM
   getAssetDef: (assetId: number) => AssetDef | undefined
-  getAssetHolding: (assetId: number) => AssetHolding | undefined
+  getAssetHolding: (assetId: number) => AssetHoldingM | undefined
   addAsset: (assetId: number, name: string, asadef: ASADef) => AssetDef
   modifyAsset: (assetId: number, fields: AssetModFields) => void
   setFreezeState: (assetId: number, state: boolean) => void
   destroyAsset: (assetId: number) => void
   optInToApp: (appId: number, appParams: SSCAttributesM) => void
-  optInToASA: (assetIndex: number, assetHolding: AssetHolding) => void
+  optInToASA: (assetIndex: number, assetHolding: AssetHoldingM) => void
   deleteApp: (appId: number) => void
   closeApp: (appId: number) => void
   getLocalState: (appId: number, key: Uint8Array | string) => StackElem | undefined
@@ -259,7 +266,7 @@ export interface RevokeAssetParam extends Sign {
   recipient: AccountAddress // Revoked assets are sent to this address
   assetID: number
   revocationTarget: AccountAddress // Revocation target is the account from which the clawback revokes asset.
-  amount: number
+  amount: number | bigint
   payFlags: TxParams
 }
 
@@ -274,7 +281,7 @@ export interface AlgoTransferParam extends Sign {
   type: TransactionType.TransferAlgo
   fromAccount: AccountSDK
   toAccountAddr: AccountAddress
-  amountMicroAlgos: number
+  amountMicroAlgos: number | bigint
   payFlags: TxParams
 }
 
@@ -282,7 +289,7 @@ export interface AssetTransferParam extends Sign {
   type: TransactionType.TransferAsset
   fromAccount: AccountSDK
   toAccountAddr: AccountAddress
-  amount: number
+  amount: number | bigint
   assetID: number
   payFlags: TxParams
 }

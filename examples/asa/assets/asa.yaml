@@ -14,7 +14,8 @@ gold:
   clawback: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"
   optInAccNames: ["john"]
 tesla:
-  total: 300000
+  # use string to issue assets with total > 2^53-1 (max: 2^64-1)
+  total: '18446744073709551611'
   decimals: 0
   defaultFrozen: false
   unitName: "TSLA"

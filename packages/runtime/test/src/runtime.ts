@@ -13,7 +13,7 @@ import { expectRuntimeError } from "../helpers/runtime-errors";
 import { elonMuskAccount } from "../mocks/account";
 
 const programName = "basic.teal";
-const minBalance = 1e7;
+const minBalance = BigInt(1e7);
 
 describe("Logic Signature Transaction in Runtime", function () {
   useFixture("basic-teal");
@@ -32,7 +32,7 @@ describe("Logic Signature Transaction in Runtime", function () {
       sign: SignType.LogicSignature,
       fromAccount: john.account,
       toAccountAddr: bob.account.addr,
-      amountMicroAlgos: 1000,
+      amountMicroAlgos: 1000n,
       lsig: lsig,
       payFlags: { totalFee: 1000 }
     };
@@ -44,7 +44,7 @@ describe("Logic Signature Transaction in Runtime", function () {
 
     // balance should be updated because logic is verified and accepted
     const bobAcc = runtime.getAccount(bob.address);
-    assert.equal(bobAcc.balance(), minBalance + 1000);
+    assert.equal(bobAcc.balance(), minBalance + 1000n);
   });
 
   it("should not verify signature because alice sent it", () => {
@@ -88,7 +88,7 @@ describe("Rounds Test", function () {
       sign: SignType.SecretKey,
       fromAccount: john.account,
       toAccountAddr: bob.address,
-      amountMicroAlgos: 100,
+      amountMicroAlgos: 100n,
       payFlags: { firstValid: 5, validRounds: 200 }
     };
   });
@@ -114,8 +114,8 @@ describe("Rounds Test", function () {
 
     // get final state (updated accounts)
     syncAccounts();
-    assert.equal(john.balance(), minBalance - 1100);
-    assert.equal(bob.balance(), minBalance + 100);
+    assert.equal(john.balance(), minBalance - 1100n);
+    assert.equal(bob.balance(), minBalance + 100n);
   });
 
   it("should fail if current round is not between first and last valid", () => {
@@ -134,8 +134,8 @@ describe("Rounds Test", function () {
 
     // get final state (updated accounts)
     syncAccounts();
-    assert.equal(john.balance(), minBalance - 1100);
-    assert.equal(bob.balance(), minBalance + 100);
+    assert.equal(john.balance(), minBalance - 1100n);
+    assert.equal(bob.balance(), minBalance + 100n);
   });
 });
 
@@ -162,7 +162,7 @@ describe("Algorand Standard Assets", function () {
       sign: SignType.SecretKey,
       fromAccount: john.account,
       toAccountAddr: alice.account.addr,
-      amount: 10,
+      amount: 10n,
       assetID: 1,
       payFlags: { totalFee: 1000 }
     };
@@ -182,7 +182,7 @@ describe("Algorand Standard Assets", function () {
     const res = runtime.getAssetDef(assetId);
     assert.equal(res.decimals, 0);
     assert.equal(res["default-frozen"], false);
-    assert.equal(res.total, 5912599999515);
+    assert.equal(res.total, 5912599999515n);
     assert.equal(res["unit-name"], "GLD");
     assert.equal(res.url, "url");
     assert.equal(res["metadata-hash"], "12312442142141241244444411111133");
@@ -198,13 +198,13 @@ describe("Algorand Standard Assets", function () {
 
     const johnAssetHolding = john.getAssetHolding(assetId);
     assert.isDefined(johnAssetHolding);
-    assert.equal(johnAssetHolding?.amount as number, 5912599999515);
+    assert.equal(johnAssetHolding?.amount as bigint, 5912599999515n);
 
     // opt-in for alice
     runtime.optIntoASA(assetId, alice.address, {});
     const aliceAssetHolding = alice.getAssetHolding(assetId);
     assert.isDefined(aliceAssetHolding);
-    assert.equal(aliceAssetHolding?.amount as number, 0);
+    assert.equal(aliceAssetHolding?.amount as bigint, 0n);
   });
 
   it("should throw error on opt-in of asset does not exist", () => {
@@ -231,18 +231,18 @@ describe("Algorand Standard Assets", function () {
     assert.isDefined(res);
     runtime.optIntoASA(assetId, alice.address, {});
 
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as number;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as number;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 
     assetTransferParam.assetID = assetId;
-    assetTransferParam.amount = 100;
+    assetTransferParam.amount = 100n;
     runtime.executeTx(assetTransferParam);
     syncAccounts();
 
-    assert.equal(john.getAssetHolding(assetId)?.amount, initialJohnAssets - 100);
-    assert.equal(alice.getAssetHolding(assetId)?.amount, initialAliceAssets + 100);
+    assert.equal(john.getAssetHolding(assetId)?.amount, initialJohnAssets - 100n);
+    assert.equal(alice.getAssetHolding(assetId)?.amount, initialAliceAssets + 100n);
   });
 
   it("should throw error on transfer asset if asset is frozen", () => {
@@ -275,18 +275,18 @@ describe("Algorand Standard Assets", function () {
     runtime.optIntoASA(assetId, alice.address, {});
 
     syncAccounts();
-    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as number;
-    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as number;
+    const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
+    const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 
     assetTransferParam.assetID = assetId;
-    assetTransferParam.amount = 0;
+    assetTransferParam.amount = 0n;
     assetTransferParam.payFlags = { totalFee: 1000, closeRemainderTo: alice.address };
     runtime.executeTx(assetTransferParam); // transfer all assets of john => alice (using closeRemTo)
     syncAccounts();
 
-    assert.equal(john.getAssetHolding(assetId)?.amount, 0);
+    assert.equal(john.getAssetHolding(assetId)?.amount, 0n);
     assert.equal(alice.getAssetHolding(assetId)?.amount, initialAliceAssets + initialJohnAssets);
   });
 
@@ -404,7 +404,7 @@ describe("Algorand Standard Assets", function () {
       recipient: john.address,
       assetID: assetId,
       revocationTarget: bob.address,
-      amount: 1,
+      amount: 1n,
       payFlags: {}
     };
     expectRuntimeError(
@@ -421,13 +421,13 @@ describe("Algorand Standard Assets", function () {
       recipient: john.address,
       assetID: assetId,
       revocationTarget: bob.address,
-      amount: 15,
+      amount: 15n,
       payFlags: {}
     };
     runtime.optIntoASA(assetId, bob.address, {});
 
     assetTransferParam.toAccountAddr = bob.address;
-    assetTransferParam.amount = 20;
+    assetTransferParam.amount = 20n;
     assetTransferParam.assetID = assetId;
     assetTransferParam.payFlags = {};
 
@@ -441,8 +441,8 @@ describe("Algorand Standard Assets", function () {
 
     const johnHolding = runtime.getAssetHolding(assetId, john.address);
     bobHolding = runtime.getAssetHolding(assetId, bob.address);
-    assert.equal(beforeRevokeJohn + 15, johnHolding.amount);
-    assert.equal(bobHolding.amount, 5);
+    assert.equal(beforeRevokeJohn + 15n, johnHolding.amount);
+    assert.equal(bobHolding.amount, 5n);
   });
 
   it("should revoke if asset is frozen", () => {
@@ -462,13 +462,13 @@ describe("Algorand Standard Assets", function () {
       recipient: john.address,
       assetID: assetId,
       revocationTarget: bob.address,
-      amount: 15,
+      amount: 15n,
       payFlags: {}
     };
     runtime.optIntoASA(assetId, bob.address, {});
 
     assetTransferParam.toAccountAddr = bob.address;
-    assetTransferParam.amount = 20;
+    assetTransferParam.amount = 20n;
     assetTransferParam.assetID = assetId;
     assetTransferParam.payFlags = {};
     runtime.executeTx(assetTransferParam);
@@ -481,8 +481,8 @@ describe("Algorand Standard Assets", function () {
 
     const johnHolding = runtime.getAssetHolding(assetId, john.address);
     bobHolding = runtime.getAssetHolding(assetId, bob.address);
-    assert.equal(beforeRevokeJohn + 15, johnHolding.amount);
-    assert.equal(bobHolding.amount, 5);
+    assert.equal(beforeRevokeJohn + 15n, johnHolding.amount);
+    assert.equal(bobHolding.amount, 5n);
   });
 
   it("Should fail because only manager can destroy assets", () => {
@@ -527,7 +527,7 @@ describe("Algorand Standard Assets", function () {
     runtime.optIntoASA(assetId, bob.address, {});
 
     assetTransferParam.toAccountAddr = bob.address;
-    assetTransferParam.amount = 20;
+    assetTransferParam.amount = 20n;
     assetTransferParam.assetID = assetId;
     assetTransferParam.payFlags = {};
     runtime.executeTx(assetTransferParam);

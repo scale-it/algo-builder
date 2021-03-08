@@ -8,9 +8,9 @@ import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 
-const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE + 1000; // 1000 to cover fee
-const initialJohnHolding = minBalance + 2000;
-const initialBobHolding = minBalance + 500;
+const minBalance = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE + 1000); ; // 1000 to cover fee
+const initialJohnHolding = minBalance + 2000n;
+const initialBobHolding = minBalance + 500n;
 
 describe("Stateless Algorand Smart Contracts delegated signature mode", function () {
   useFixture("basic-teal");
@@ -23,7 +23,7 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
     sign: SignType.LogicSignature,
     fromAccount: john.account,
     toAccountAddr: bob.address,
-    amountMicroAlgos: 100,
+    amountMicroAlgos: 100n,
     payFlags: { totalFee: 1000 }
   };
 
@@ -52,8 +52,8 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
     // get final state (updated accounts)
     const johnAcc = runtime.getAccount(john.address);
     const bobAcc = runtime.getAccount(bob.address);
-    assert.equal(johnAcc.balance(), initialJohnHolding - 1100); // check if (100 microAlgo's + fee of 1000) are withdrawn
-    assert.equal(bobAcc.balance(), initialBobHolding + 100);
+    assert.equal(johnAcc.balance(), initialJohnHolding - 1100n); // check if (100 microAlgo's + fee of 1000) are withdrawn
+    assert.equal(bobAcc.balance(), initialBobHolding + 100n);
   });
 
   it("should throw error if logic is incorrect", function () {
@@ -66,7 +66,7 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
     txnParams.lsig = lsig;
 
     const invalidParams = Object.assign({}, txnParams);
-    invalidParams.amountMicroAlgos = 50;
+    invalidParams.amountMicroAlgos = 50n;
 
     // execute transaction (should fail is logic is incorrect)
     expectRuntimeError(

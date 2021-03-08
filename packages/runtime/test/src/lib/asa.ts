@@ -89,6 +89,32 @@ describe("ASA parser", () => {
     );
   });
 
+  it("Should check total to be a positive number <= 2^64 - 1", async () => {
+    let obj = {
+      A1: {
+        total: 0xFFFFFFFFFFFFFFFFn + 5n,
+        decimals: 0
+      }
+    };
+    expectRuntimeError(
+      () => validateASADefs(obj, new Map<string, Account>(), ""),
+      RUNTIME_ERRORS.ASA.PARAM_PARSE_ERROR,
+      "total"
+    );
+
+    obj = {
+      A1: {
+        total: -5n,
+        decimals: 0
+      }
+    };
+    expectRuntimeError(
+      () => validateASADefs(obj, new Map<string, Account>(), ""),
+      RUNTIME_ERRORS.ASA.PARAM_PARSE_ERROR,
+      "total"
+    );
+  });
+
   it("Should include filename", async () => {
     const obj = {
       A1: {

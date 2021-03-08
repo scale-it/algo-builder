@@ -23,6 +23,8 @@ declare module 'algosdk' {
     pendingTransactionInformation(txId: string): Action<ConfirmedTxInfo>;
     statusAfterBlock(lastround: number): Action<any>;
     accountInformation(address: string): Action<AccountState>;
+    setIntEncoding(method: string): void
+    getIntEncoding(): string;
   }
 
   export const OnApplicationComplete: {
@@ -112,7 +114,7 @@ declare module 'algosdk' {
     from: Address;
     to: Address;
     fee: number;
-    amount: number;
+    amount: number | bigint;
     firstRound: number;
     lastRound: number;
     note: Uint8Array;
@@ -128,7 +130,7 @@ declare module 'algosdk' {
     voteKeyDilution: any;
 
     assetIndex: number;
-    assetTotal: number;
+    assetTotal: number | bigint;
     assetDecimals: number;
     assetDefaultFrozen: any;
     assetManager: Address;
@@ -206,7 +208,7 @@ declare module 'algosdk' {
     value: {
       type: number;
       bytes: Uint8Array;
-      uint: number;
+      uint: number | bigint;
     };
   }
 
@@ -217,10 +219,11 @@ declare module 'algosdk' {
   }
 
   export class LogicSigBase {
+    tag: Buffer | Uint8Array;
     logic: Uint8Array;
     // args Program arguments as array of Uint8Array arrays
     args: LogicSigArgs;
-    sig?: unknown;
+    sig?: Uint8Array;
     msig?: MultiSig;
   }
 
@@ -572,7 +575,7 @@ declare module 'algosdk' {
 
   export interface AssetDef {
     creator: string;
-    total: number;
+    total: number | bigint;
     decimals: number;
     'default-frozen': boolean;
     'unit-name': string;
@@ -586,7 +589,7 @@ declare module 'algosdk' {
   }
 
   export interface AssetHolding {
-    amount: number;
+    amount: number | bigint;
     'asset-id': number;
     creator: string;
     'is-frozen': boolean;
@@ -611,7 +614,7 @@ declare module 'algosdk' {
   export interface AccountState {
     address: string;
     assets: AssetHolding[];
-    amount: number;
+    amount: number | bigint;
     "amount-without-pending-rewards": number;
     'pending-rewards': number;
     'reward-base': number;
@@ -642,7 +645,7 @@ declare module 'algosdk' {
     // Payment Transaction
     // https://developer.algorand.org/docs/reference/transactions/#payment-transaction
     rcv: Buffer;
-    amt: number;
+    amt: number | bigint;
     close: Buffer;
 
     // Key Registration Transaction
@@ -661,7 +664,7 @@ declare module 'algosdk' {
     // Asset Transfer Transaction
     // https://developer.algorand.org/docs/reference/transactions/#asset-transfer-transaction
     xaid: number;
-    aamt: number;
+    aamt: number | bigint;
     asnd: Buffer;
     arcv: Buffer;
     aclose: Buffer;
@@ -698,7 +701,7 @@ declare module 'algosdk' {
 
   // https://developer.algorand.org/docs/reference/transactions/#asset-parameters
   export interface AssetDefEnc {
-    t: number;
+    t: number | bigint;
     dc: number;
     df: number;
     un: string;

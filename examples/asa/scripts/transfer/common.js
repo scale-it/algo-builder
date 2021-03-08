@@ -5,7 +5,7 @@ exports.executeTransaction = async function (deployer, txnParams) {
   try {
     await executeTransaction(deployer, txnParams);
   } catch (e) {
-    console.error('Transaction Failed', e.response ? e.response.error : e.error);
+    console.error('Transaction Failed', e.response ? e.response.error : e);
   }
 };
 

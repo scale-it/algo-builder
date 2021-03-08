@@ -3,7 +3,6 @@ import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { GlobalFields, MAX_UINT8, MAX_UINT64, MIN_UINT8, MIN_UINT64, TxnFields } from "../lib/constants";
 import type { TEALStack } from "../types";
-import { BIGINT0, BIGINT1 } from "./opcode-list";
 
 export class Op {
   /**
@@ -171,9 +170,9 @@ export class Op {
    */
   pushBooleanCheck (stack: TEALStack, ok: boolean): TEALStack {
     if (ok) {
-      stack.push(BIGINT1);
+      stack.push(1n);
     } else {
-      stack.push(BIGINT0);
+      stack.push(0n);
     }
     return stack;
   }

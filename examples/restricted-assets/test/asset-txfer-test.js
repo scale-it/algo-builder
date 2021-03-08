@@ -224,8 +224,8 @@ describe('Test for transferring asset using custom logic', function () {
 
     const afterAliceAssets = runtime.getAssetHolding(assetId, aliceAddr).amount;
     const afterBobAssets = runtime.getAssetHolding(assetId, bobAddr).amount;
-    assert.equal(afterAliceAssets, prevAliceAssets - 1000);
-    assert.equal(afterBobAssets, prevBobAssets + 1000); // Bob received 1000 GLD
+    assert.equal(afterAliceAssets, prevAliceAssets - 1000n);
+    assert.equal(afterBobAssets, prevBobAssets + 1000n); // Bob received 1000 GLD
   });
 
   it('should fail on set level if sender is not creator', () => {

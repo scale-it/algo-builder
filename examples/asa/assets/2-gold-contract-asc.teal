@@ -1,13 +1,17 @@
 #pragma version 2
-// Check if Transaction type is pay, Receiver is john AND amount is <= 100
+// Check if Transaction type is pay or axfer, algo amount AND asset amount is <= 100
 txn TypeEnum
 int 1
 ==
-txn Receiver
-addr 2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA
+txn TypeEnum
+int 4
 ==
-&&
+||
 txn Amount
+int 100
+<=
+&&
+txn AssetAmount
 int 100
 <=
 &&

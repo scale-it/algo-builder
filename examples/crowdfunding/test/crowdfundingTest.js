@@ -216,8 +216,8 @@ describe('Crowdfunding Tests', function () {
 
     syncAccounts();
     // verify 300000 is withdrawn from escrow (with tx fee of 1000 as well)
-    assert.equal(escrow.balance(), escrowBalance - 300000 - 1000);
-    assert.equal(donor.balance(), donorBalance + 300000 - 1000);
+    assert.equal(escrow.balance(), escrowBalance - 300000n - 1000n);
+    assert.equal(donor.balance(), donorBalance + 300000n - 1000n);
 
     runtime.setRoundAndTimestamp(5, beginDate.getTime() + 12);
     // should claim if goal is reached'
@@ -246,7 +246,7 @@ describe('Crowdfunding Tests', function () {
     runtime.executeTx(txGroup);
 
     syncAccounts();
-    assert.equal(escrow.balance(), escrowBal + 7000000); // verify donation of 7000000
+    assert.equal(escrow.balance(), escrowBal + 7000000n); // verify donation of 7000000
 
     runtime.setRoundAndTimestamp(5, endDate.getTime() + 12);
     appArgs = [stringToBytes('claim')];
@@ -274,8 +274,8 @@ describe('Crowdfunding Tests', function () {
     runtime.executeTx(txGroup);
 
     syncAccounts();
-    assert.equal(escrow.balance(), 0); // escrow should be empty after claim
-    assert.equal(creator.balance(), creatorBal + escrowFunds - 2000); // funds transferred to creator from escrow
+    assert.equal(escrow.balance(), 0n); // escrow should be empty after claim
+    assert.equal(creator.balance(), creatorBal + escrowFunds - 2000n); // funds transferred to creator from escrow
 
     runtime.setRoundAndTimestamp(5, fundCloseDate.getTime() + 12);
     // after claiming, creator of the crowdfunding application should be able to delete the application

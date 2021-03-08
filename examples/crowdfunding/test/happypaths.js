@@ -198,8 +198,8 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     runtime.executeTx(donateTxGroup);
 
     syncAccounts();
-    assert.equal(escrow.balance(), escrowBal + 7e6); // verify donation of 7000000
-    assert.equal(donor.balance(), donorBal - 7e6 - 2000); // 2000 is also deducted because of tx fee
+    assert.equal(escrow.balance(), escrowBal + BigInt(7e6)); // verify donation of 7000000
+    assert.equal(donor.balance(), donorBal - BigInt(7e6) - 2000n); // 2000 is also deducted because of tx fee
   });
 
   it('Receiver should be able to withdraw funds if Goal is met', () => {
@@ -253,7 +253,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
 
     syncAccounts();
     assert.equal(escrow.balance(), 0); // escrow should be empty after claim
-    assert.equal(fundReceiver.balance(), fundReceiverBal + escrowFunds - 1000); // funds transferred to receiver from escrow
+    assert.equal(fundReceiver.balance(), fundReceiverBal + escrowFunds - 1000n); // funds transferred to receiver from escrow
   });
 
   it('Donor should be able reclaim funds if Goal is not met', () => {
@@ -310,8 +310,8 @@ describe('Crowdfunding Tests - Happy Paths', function () {
 
     syncAccounts();
     // verify 300000 is withdrawn from escrow (with tx fee of 1000 as well)
-    assert.equal(escrow.balance(), escrowBalance - 300000 - 1000);
-    assert.equal(donor.balance(), donorBalance + 300000 - 1000);
+    assert.equal(escrow.balance(), escrowBalance - 300000n - 1000n);
+    assert.equal(donor.balance(), donorBalance + 300000n - 1000n);
   });
 
   it('Creator should be able to delete the application after the fund close date (using single tx)', () => {
