@@ -10,8 +10,7 @@ import {
   TASK_HELP,
   TASK_INIT,
   TASK_RUN,
-  TASK_TEST_EXAMPLE,
-  TASK_TEST_GET_TEST_FILES
+  TASK_TEST
 } from "../../../../src/builtin-tasks/task-names";
 import { BuilderContext } from "../../../../src/internal/context";
 import { loadConfigAndTasks, loadKMDAccounts } from "../../../../src/internal/core/config/config-loading";
@@ -131,8 +130,7 @@ describe("config loading", function () {
         TASK_INIT,
         TASK_CONSOLE,
         TASK_HELP,
-        TASK_TEST_GET_TEST_FILES,
-        TASK_TEST_EXAMPLE
+        TASK_TEST
       ]);
     });
 
