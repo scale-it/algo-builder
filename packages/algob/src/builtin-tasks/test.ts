@@ -1,33 +1,25 @@
-import glob from "glob";
-import path from "path";
+import Mocha from "mocha";
 
-import { internalTask } from "../internal/core/config/config-env";
-import { cmpStr } from "../lib/comparators";
-import type { AlgobRuntimeEnv, ResolvedAlgobConfig } from "../types";
-import { TaskArgs } from "./deploy";
-import { TASK_TEST_GET_TEST_FILES } from "./task-names";
+import { task } from "../internal/core/config/config-env";
+import { testsDirectory } from "../lib/script-checkpoints";
+import type { AlgobConfig } from "../types";
+import { loadFilenames } from "./deploy";
+import { TASK_TEST } from "./task-names";
+
+async function runTests (config: AlgobConfig): Promise<void> {
+  const testFiles = loadFilenames(testsDirectory);
+  console.log("Test files:", testFiles);
+  const mocha = new Mocha(config.mocha);
+  console.log("Adding test files to mocha");
+  testFiles.forEach((file) => mocha.addFile(file));
+  console.log("Executing test files ");
+  const testFailures = await new Promise<number>((resolve, reject) => {
+    mocha.run(resolve);
+  });
+  console.log(testFailures);
+}
 
 export default function (): void {
-  internalTask(TASK_TEST_GET_TEST_FILES)
-    .addOptionalVariadicPositionalParam(
-      "filenames",
-      "An optional list of files to test",
-      []
-    )
-    .setAction(runTests);
-}
-
-function loadFiles (fileNames: string[], config: ResolvedAlgobConfig): string[] {
-  if (fileNames.length !== 0) {
-    return fileNames;
-  }
-  if (config.paths == null) {
-    throw new Error("unexpected non-project execution");
-  }
-  return glob.sync(path.join(config.paths.tests, "**/*.js")).sort(cmpStr);
-}
-
-async function runTests ({ fileNames }: TaskArgs, { config }: AlgobRuntimeEnv): Promise<void> {
-  const testfiles = loadFiles;
-  console.log("Test files:", testfiles);
+  task(TASK_TEST, "Runs tests using mocha in project root")
+    .setAction((config) => runTests(config));
 }
