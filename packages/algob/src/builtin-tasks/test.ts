@@ -20,6 +20,6 @@ async function runTests (config: AlgobConfig): Promise<void> {
 }
 
 export default function (): void {
-  task(TASK_TEST, "Runs tests using mocha in project root")
+  task(TASK_TEST, "Run tests using mocha in project root")
     .setAction((config) => runTests(config));
 }
