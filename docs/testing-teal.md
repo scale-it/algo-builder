@@ -47,8 +47,16 @@ In this section we will describe the flow of testing smart contracts in runtime:
 - Verify State: Now, we can verify our state, we will assert if updated state is correct.
   we can verify if the `global state` and `local state` is updated. we can use `runtime.getGlobalState()` and `runtime.getLocalState()` to check state.
 
+
 ## Run tests
 In this section we will demonstrate executing transactions with stateless and stateful teal.
+
+TL;DR: Write tests in `/tests` directory and then call `mocha`:
+
+    mocha <test name>
+
+See one of our examples for more details (eg: `examples/crowdfunding/test`).
+
 
 ### Stateless TEAL
 
