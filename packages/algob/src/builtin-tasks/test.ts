@@ -10,10 +10,9 @@ async function runTests (config: AlgobConfig): Promise<void> {
   const testFiles = loadFilenames(testsDirectory);
   console.log("Test files:", testFiles);
   const mocha = new Mocha(config.mocha);
-  console.log("Adding test files to mocha");
+  // Adding test files to mocha object
   testFiles.forEach((file) => mocha.addFile(file));
-  console.log("Executing test files ");
-  const testFailures = await new Promise<number>((resolve, reject) => {
+  const testFailures = await new Promise<number>((resolve) => {
     mocha.run(resolve);
   });
   console.log(testFailures);
