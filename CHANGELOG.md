@@ -2,27 +2,35 @@
 
 ## unreleased
 
+## v0.5.0 2021-03-08
+
+General:
+* Added documentation (in `/docs/testing-teal.md`) to test TEAL using `@algorand-builder/runtime`
+* [breaking] Added support for ASA OptIn for contract account (eg. escrow) represented by logic signature. Changed `optInToASA` to `optInAcountToASA` (for optIn using account) and `optInLsigToASA` (for optIn using logic signature account).
+* Use `bigint` for all numeric values in `runtime` and `algob` to support integers upto 64 bit(`uint64`).
+
+@algorand-builder/runtime:
 * Full support for asset related transaction (create, opt-in, transfer, modify, freeze, revoke, destroy)
 * Support for group transactions
+
+Infrastructure:
 * Support Sandbox in `/infrastructure` to quickly set up the private net
-* Changed default network config and the private-net for compatibility with Sandbox:
+* [breaking] Changed default network config and the private-net for compatibility with Sandbox:
     * port = 4001
     * token = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-* Add documentation (in `/docs/testing-teal.md`) to test TEAL using `@algorand-builder/runtime`
-* Add support for ASA OptIn for contract account (eg. escrow) represented by logic signature. Changed `optInToASA` to `optInAcountToASA` (for optIn using account) and `optInLsigToASA` (for optIn using logic signature account).
-* Updating the default token and endpoint port. For compatibility with Sandbox we use the sandbox token and port (4001) in all examples and sample project. If you run an algorand node using our private node setup then either recreate the network (stop, remove node_data and create it again), or update the `node_data/PrimaryNode/config.json` and set: `"EndpointAddress": "127.0.0.1:4001"`
-* Use `bigint` for all numeric values in `runtime` and `algob` to support integers upto 64 bit(`uint64`).
+* Updated the default token and endpoint port. For compatibility with Sandbox we use the sandbox token and port (4001) in all examples and sample project. If you run an algorand node using our private node setup then either recreate the network (stop, remove node_data and create it again), or update the `node_data/PrimaryNode/config.json` and set: `"EndpointAddress": "127.0.0.1:4001"`
+
 
 ## v0.4.0 2021-02-03
 
 * Renamed `@algorand-builder/algorand-js` to `@algorand-builder/runtime`
 * Added new example project - Crowdfunding Application
-* Added transaction in `@algorand-builder/runtime` for app creation, opt-in
+* `@algorand-builder/runtime`: added support for transactions: payment, app creation, opt-in, stateful (application call, clear, delete, close).
 * Added support for arguments in stateful smart contracts similar to goal (eg. `str:abc`, 'int:12')
 * Logic signature validation for stateless teal in runtime
 * Introduced versioning of TEAL opcodes in runtime with max cost assertion
-* Full transaction processing for types payment, stateful (application call, clear, delete, close)
-* Typescript example project - `htlc-pyteal-ts`
+* Added a Typescript example project - `htlc-pyteal-ts`
+
 
 ## v0.3.0 2020-12-28
 
