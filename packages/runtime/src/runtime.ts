@@ -1,7 +1,7 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
 import algosdk, { AssetDef, decodeAddress, makeAssetTransferTxnWithSuggestedParams } from "algosdk";
-import cloneDeep from "lodash/cloneDeep";
+import cloneDeep from "lodash.clonedeep";
 
 import { StoreAccount } from "./account";
 import { Ctx } from "./ctx";
