@@ -3,7 +3,7 @@ import { Runtime, StoreAccount, types } from '@algorand-builder/runtime';
 import { getProgram } from '../../build';
 const { assert } = require('chai');
 
-const minBalance = 1000000n;
+const minBalance = BigInt(1e6);
 const masterBalance = 10000000n;
 const amount = 1000000n;
 
