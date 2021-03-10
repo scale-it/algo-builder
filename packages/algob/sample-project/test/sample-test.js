@@ -17,7 +17,6 @@ describe('Sample Test', function () {
   this.beforeEach(async function () {
     master = new StoreAccount(masterBalance);
     fundReceiver = new StoreAccount(minBalance);
-
     runtime = new Runtime([master, fundReceiver]);
   });
 
