@@ -46,6 +46,7 @@ build/Release
 # Dependency directories
 /node_modules
 /packages/*/node_modules
+/packages/algob/sample-project/node_modules
 jspm_packages/
 
 # TypeScript v1 declaration files
