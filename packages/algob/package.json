@@ -71,6 +71,7 @@
     "@types/murmurhash": "0.0.1",
     "@types/semver": "^7.2.0",
     "@types/sinon": "^9.0.4",
+    "@types/tmp": "^0.2.0",
     "chai": "^4.2.0",
     "glob": "^7.1.6",
     "sinon": "^9.0.2",
@@ -90,6 +91,7 @@
     "murmurhash": "^1.0.0",
     "semver": "^7.3.2",
     "source-map-support": "^0.5.19",
+    "tmp": "^0.2.1",
     "yaml": "^1.10.0",
     "zod": "^1.10.2"
   },

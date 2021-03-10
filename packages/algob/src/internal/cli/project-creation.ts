@@ -123,7 +123,7 @@ export async function createProject (location: string): PromiseAny {
   printSuggestedCommands();
 }
 
-function createConfirmationPrompt (name: string, message: string) { // eslint-disable-line @typescript-eslint/explicit-function-return-type
+export function createConfirmationPrompt (name: string, message: string) { // eslint-disable-line @typescript-eslint/explicit-function-return-type
   return {
     type: "confirm",
     name,
