@@ -27,8 +27,8 @@ describe('Sample Test', function () {
   it('Should not fail because txn fees is equal to or greater than 10000 microAlgos', () => {
     const fees = 10000;
     syncAccounts();
-    assert.deepEqual(fundReceiver.balance(), minBalance);
-    assert.deepEqual(master.balance(), masterBalance);
+    assert.equal(fundReceiver.balance(), minBalance);
+    assert.equal(master.balance(), masterBalance);
     const lsig = runtime.getLogicSig(feeCheckProgram);
     lsig.sign(master.account.sk);
     runtime.executeTx({
@@ -41,15 +41,13 @@ describe('Sample Test', function () {
       payFlags: { totalFee: fees }
     });
     syncAccounts();
-    assert.deepEqual(fundReceiver.balance(), minBalance + amount);
-    assert.deepEqual(master.balance(), masterBalance - amount - BigInt(fees));
+    assert.equal(fundReceiver.balance(), minBalance + amount);
+    assert.equal(master.balance(), masterBalance - amount - BigInt(fees));
   });
 
   it('Should fail because txn fees is less than 10000 microAlgos', () => {
     const fees = 1000;
     syncAccounts();
-    assert.deepEqual(fundReceiver.balance(), minBalance);
-    assert.deepEqual(master.balance(), masterBalance);
     const lsig = runtime.getLogicSig(feeCheckProgram);
     lsig.sign(master.account.sk);
     try {
@@ -66,6 +64,8 @@ describe('Sample Test', function () {
       console.log(error);
     }
     syncAccounts();
+    assert.equal(fundReceiver.balance(), minBalance);
+    assert.equal(master.balance(), masterBalance);
     assert.notEqual(fundReceiver.balance(), minBalance + amount);
     assert.notEqual(master.balance(), masterBalance - amount - BigInt(fees));
   });
