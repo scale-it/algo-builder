@@ -12,7 +12,7 @@ describe('Sample Test', function () {
   let fundReceiver = new StoreAccount(minBalance);
 
   let runtime;
-  const approvalProgram = getProgram('fee-check.teal');
+  const feeCheckProgram = getProgram('fee-check.teal');
 
   this.beforeEach(async function () {
     master = new StoreAccount(masterBalance);
