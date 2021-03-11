@@ -589,7 +589,7 @@ Please check your config file.
 `
   },
   TESTS_DIRECTORY_NOT_FOUND: {
-    number: 603,
+    number: 614,
     message: "Tests directory %directory% doesn't exist.",
     title: "Tests directory doesn't exist",
     description: `Tried to use \`algob test\` with nonexistent tests directory: %directory%.
