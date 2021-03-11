@@ -37,3 +37,10 @@ Example:
     algob deploy // will run all the scripts present in scripts folder
     algob deploy scripts/script1.js // will run script1.js.
     algob deploy scripts/script2.js scripts/script1.js // will run script2.js and script1.js in given order
+
+
+## Tests
+
+In algob, test files are JS files located in `test` directory and their purpose is to test algorand smart contracts present in `/assets`. Check `@algorand-builder/runtime` package for more info on tests.
+
+Tests are run through the command `algob test`.

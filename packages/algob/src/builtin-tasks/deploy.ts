@@ -22,11 +22,17 @@ export interface TaskArgs {
   force: boolean
 }
 
-export function loadFilenames (directory: string): string[] {
+export function loadFilenames (directory: string, taskType?: string): string[] {
   if (!fs.existsSync(directory)) {
-    throw new BuilderError(ERRORS.BUILTIN_TASKS.SCRIPTS_DIRECTORY_NOT_FOUND, {
-      directory
-    });
+    if (taskType === "test") {
+      throw new BuilderError(ERRORS.BUILTIN_TASKS.TESTS_DIRECTORY_NOT_FOUND, {
+        directory
+      });
+    } else {
+      throw new BuilderError(ERRORS.BUILTIN_TASKS.SCRIPTS_DIRECTORY_NOT_FOUND, {
+        directory
+      });
+    }
   }
 
   const jsFiles = glob.sync(path.join(directory, "*.js")).sort(cmpStr);

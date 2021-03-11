@@ -587,6 +587,14 @@ Use 'deployer.isDefined(name)' to check if the name is already used in any check
 
 Please check your config file.
 `
+  },
+  TESTS_DIRECTORY_NOT_FOUND: {
+    number: 614,
+    message: "Tests directory %directory% doesn't exist.",
+    title: "Tests directory doesn't exist",
+    description: `Tried to use \`algob test\` with nonexistent tests directory: %directory%.
+
+Please check your directory`
   }
 };
 
