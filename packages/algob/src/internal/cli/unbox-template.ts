@@ -13,6 +13,11 @@ function isYarnProject (destination: string): boolean {
   return fse.existsSync(path.join(destination, "yarn.lock"));
 }
 
+/**
+ * Confirm if user wants to install project dependencies in template directory
+ * @param name Selected Dapp template name
+ * @param destination location to initialize template
+ */
 async function confirmDepInstallation (name: string, destination: string): Promise<boolean> {
   const { default: enquirer } = await import("enquirer");
 
@@ -40,6 +45,12 @@ async function confirmDepInstallation (name: string, destination: string): Promi
   return responses.shouldInstall;
 }
 
+/**
+ * Checks if the destination directory is non-empty and confirm if the user
+ * wants to proceed with the unboxing, skips if --force is used.
+ * @param destination location to initialize template
+ * @param force true if --force flag is used
+ */
 async function checkDir (destination: string, force: boolean): Promise<void> {
   if (!force) {
     const unboxDir = fse.readdirSync(destination);
@@ -71,6 +82,12 @@ async function checkDir (destination: string, force: boolean): Promise<void> {
   }
 }
 
+/**
+ * Ensures that the template passed by user exists in scale-it/algorand-builder-templates,
+ * otherwise user can select a template from the existing templates or exit unboxing
+ * @param basePath path to temporary directory (contains all dapp-templates)
+ * @param templateName template name passed by user (bare if no template name is passed)
+ */
 async function checkTemplateExists (basePath: string, templateName: string): Promise<[string, string]> {
   const templatePath = path.join(basePath, templateName);
   if (fse.existsSync(templatePath)) { return [templatePath, templateName]; } else {
@@ -100,6 +117,10 @@ async function checkTemplateExists (basePath: string, templateName: string): Pro
   }
 }
 
+/**
+ * returns complete path (eg. "./" => current working directory)
+ * @param destination base path
+ */
 function _normalizeDestination (destination?: string): string {
   const workingDirectory = process.cwd();
   if (!destination) {
@@ -118,7 +139,8 @@ function printSuggestedDAppCommands (packageManager: string): void {
 }
 
 export async function unbox ({ force, destination, templateName }:
-{ force: boolean, destination: string | undefined, templateName: string | undefined }): Promise<void> {
+  { force: boolean, destination: string | undefined,
+  templateName: string | undefined }): Promise<void> {
   await printWelcomeMessage();
 
   const normalizedDestination = _normalizeDestination(destination);
@@ -127,21 +149,24 @@ export async function unbox ({ force, destination, templateName }:
 
   const tempDir = await setUpTempDirectory();
   const tempDirPath = tempDir.path;
-  console.log('-> ', tempDirPath);
   const tempDirCleanup = tempDir.cleanupCallback;
 
   console.info(`* Fetching dapp-templates from ${ALGOB_DAPP_TEMPLATES_GIT_REMOTE} *`);
   await fetchRepository(ALGOB_DAPP_TEMPLATES_GIT_REMOTE, tempDirPath);
-  if (templateName === undefined) { templateName = DEFAULT_DAPP_TEMPLATE; }
+  if (templateName === undefined) {
+    console.log(`Template name not passed: using default template ${chalk.green(DEFAULT_DAPP_TEMPLATE)}`);
+    templateName = DEFAULT_DAPP_TEMPLATE;
+  }
   let templatePath;
   [templatePath, templateName] = await checkTemplateExists(tempDirPath, templateName);
 
   await copyTemplatetoDestination(templatePath, normalizedDestination, force);
-  tempDirCleanup();
+  tempDirCleanup(); // clean temporary directory
 
   console.log(
     chalk.cyan(`\n★ Template ${templateName} initialized in ${normalizedDestination} ★\n`));
 
+  // install dependencies in /templatePath
   const shouldInstallDependencies = await confirmDepInstallation(templateName, normalizedDestination);
   const packageManager = isYarnProject(normalizedDestination) ? "yarn" : "npm";
   let shouldShowInstallationInstructions;

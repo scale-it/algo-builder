@@ -10,6 +10,10 @@ interface TmpI {
   cleanupCallback: () => void
 }
 
+/**
+ * Creates a temporary directory in /tmp to download templates
+ * eg. tmp-86625-iMiAxZVeTy1U/dapp-templates
+ */
 export async function setUpTempDirectory (): Promise<TmpI> {
   const options = {
     unsafeCleanup: true
@@ -26,6 +30,12 @@ export async function setUpTempDirectory (): Promise<TmpI> {
   }
 }
 
+/**
+ * Creates a prompt for each overwriting file, and confirms overwrite.
+ * if overwrite is confirmed the file is deleted
+ * @param contentCollisions Colliding files
+ * @param destination location to copy template from tempDir
+ */
 async function promptOverwrites (
   contentCollisions: string[],
   destination: string
@@ -58,6 +68,13 @@ async function promptOverwrites (
   return overwriteContents;
 }
 
+/**
+ * Copies template files from tempory directory to destination directory.
+ * If --force is not used, user is asked by a promt to overwrite colliding files or not
+ * @param tmpDir template directory to copy from
+ * @param destination directory to copy template to
+ * @param force if true, the colliding files are overwritten by default
+ */
 export async function copyTemplatetoDestination (
   tmpDir: string,
   destination: string,
@@ -88,6 +105,11 @@ export async function copyTemplatetoDestination (
   }
 }
 
+/**
+ * Downloads repo from git url to destination path
+ * @param url git url (<organization/repo>)
+ * @param destination location to download repo
+ */
 export async function fetchRepository (url: string, destination: string): Promise<void> {
   try {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
