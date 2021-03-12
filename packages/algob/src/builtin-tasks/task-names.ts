@@ -10,8 +10,4 @@ export const TASK_RUN = "run";
 export const TASK_DEPLOY = "deploy";
 export const TASK_COMPILE = "compile";
 export const TASK_UNBOX_TEMPLATE = "unbox-template";
-
-// tasks for testing
-export const TASK_TEST_GET_TEST_FILES = "test:get-test-files";
-export const TASK_TEST_EXAMPLE = "example";
 export const TASK_TEST = "test";

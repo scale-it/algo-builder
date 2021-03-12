@@ -1,11 +1,11 @@
-import {
+const {
   addressToPk,
   getProgram,
   stringToBytes,
   uint64ToBigEndian
-} from '@algorand-builder/algob';
-import { Runtime, StoreAccount, types } from '@algorand-builder/runtime';
-import { assert } from 'chai';
+} = require('@algorand-builder/algob');
+const { Runtime, StoreAccount, types } = require('@algorand-builder/runtime');
+const { assert } = require('chai');
 
 const minBalance = 10e6; // 10 ALGO's
 const initialDonorBalance = minBalance + 60e6;

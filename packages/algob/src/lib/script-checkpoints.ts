@@ -18,6 +18,7 @@ import {
 } from "../types";
 
 export const scriptsDirectory = "scripts";
+export const testsDirectory = "test";
 const artifactsPath = "artifacts";
 const checkpointFileSuffix = ".cp.yaml";
 
