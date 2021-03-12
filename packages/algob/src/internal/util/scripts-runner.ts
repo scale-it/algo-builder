@@ -18,17 +18,29 @@ async function loadScript (relativeScriptPath: string): Promise<any> {
   }
 }
 
+// returns error line number with path. eg: scripts/2-gold-asc.js => scripts/2-gold-asc.js:11:3
+function attachLineNumbertoScriptPath (error: Error | BuilderError | any, scriptPath: string): string {
+  const stackTraces = error.stack.split('\n');
+  for (const trace of stackTraces) {
+    const line = trace?.split(scriptPath)[1]?.slice(0, -1); // extract line number
+    if (line) { return scriptPath.concat(line); }
+  }
+  return scriptPath;
+}
+
 function displayErr (error: Error | BuilderError | any, relativeScriptPath: string): void {
   if (error instanceof BuilderError) {
     throw error;
   }
-  const maybeWrappedError = parseAlgorandError(error, { scriptPath: relativeScriptPath });
+  const relativeScriptPathWithLine = attachLineNumbertoScriptPath(error, relativeScriptPath);
+
+  const maybeWrappedError = parseAlgorandError(error, { scriptPath: relativeScriptPathWithLine });
   if (maybeWrappedError instanceof BuilderError) {
     throw maybeWrappedError;
   }
   throw new BuilderError(
     ERRORS.BUILTIN_TASKS.SCRIPT_EXECUTION_ERROR, {
-      script: relativeScriptPath,
+      script: relativeScriptPathWithLine,
       message: error.message
     },
     error
