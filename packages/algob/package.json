@@ -84,6 +84,7 @@
     "debug": "^4.1.1",
     "deep-equal": "^2.0.3",
     "deepmerge": "^4.2.2",
+    "download-git-repo": "^3.0.2",
     "enquirer": "^2.3.6",
     "find-up": "^4.1.0",
     "fs-extra": "^9.0.1",
