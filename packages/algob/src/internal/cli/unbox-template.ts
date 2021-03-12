@@ -1,8 +1,7 @@
 import chalk from "chalk";
+import enquirer from "enquirer";
 import fse from "fs-extra";
 import path from "path";
-import enquirer from "enquirer";
-import { execSync, spawn, spawnSync } from "child_process";
 
 import { copyTemplatetoDestination, fetchRepository, setUpTempDirectory } from "../util/unpack";
 import { createConfirmationPrompt, installDependencies, printSuggestedAlgobCommands, printWelcomeMessage } from "./project-creation";
@@ -10,7 +9,7 @@ import { createConfirmationPrompt, installDependencies, printSuggestedAlgobComma
 const ALGOB_DAPP_TEMPLATES_GIT_REMOTE = 'scale-it/algorand-builder-templates';
 const DEFAULT_DAPP_TEMPLATE = 'bare';
 
-function isYarnProject (destination: string) {
+function isYarnProject (destination: string): boolean {
   return fse.existsSync(path.join(destination, "yarn.lock"));
 }
 
@@ -112,7 +111,7 @@ function _normalizeDestination (destination?: string): string {
 };
 
 // commands to start and build the react app
-function printSuggestedDAppCommands(packageManager: string) {
+function printSuggestedDAppCommands (packageManager: string): void {
   console.log(`To use the react app, try running:`);
   console.log(`  ${packageManager} start`);
   console.log(`  ${packageManager} build`);

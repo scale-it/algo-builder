@@ -34,7 +34,7 @@ async function promptOverwrites (
   const overwriteContents = [];
   let response: {
     overwrite: boolean
-  }
+  };
 
   for (const file of contentCollisions) {
     console.log(chalk.yellow(`${file} already exists in this directory..`));
@@ -90,6 +90,7 @@ export async function copyTemplatetoDestination (
 
 export async function fetchRepository (url: string, destination: string): Promise<void> {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     await promisify(download)(url, destination);
   } catch (error) {
     console.error(`Failed to unbox ${url}`);

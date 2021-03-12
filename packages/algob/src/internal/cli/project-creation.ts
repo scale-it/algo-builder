@@ -2,7 +2,6 @@ import chalk from "chalk";
 import fsExtra from "fs-extra";
 import os from "os";
 import path from "path";
-import { cwd } from "process";
 
 import type { PromiseAny } from "../../types";
 import { ALGOB_NAME } from "../constants";
