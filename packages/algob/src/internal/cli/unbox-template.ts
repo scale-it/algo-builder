@@ -139,8 +139,7 @@ function printSuggestedDAppCommands (packageManager: string): void {
 }
 
 export async function unbox ({ force, destination, templateName }:
-  { force: boolean, destination: string | undefined,
-  templateName: string | undefined }): Promise<void> {
+{ force: boolean, destination?: string, templateName?: string}): Promise<void> {
   await printWelcomeMessage();
 
   const normalizedDestination = _normalizeDestination(destination);
