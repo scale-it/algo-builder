@@ -24,7 +24,7 @@ function attachLineNumbertoScriptPath (error: Error | BuilderError | any, script
   for (const trace of stackTraces) {
     const line = trace?.split(scriptPath.concat(':'))[1]?.slice(0, -1); // extract line number
     if (line) {
-      const [lineNo, position] = line.split(':');
+      const [lineNo, position] = line.split(':') as [string, string];
       return scriptPath.concat(`:Line:${lineNo},position:${position}`);
     }
   }
