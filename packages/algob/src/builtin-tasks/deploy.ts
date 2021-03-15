@@ -37,8 +37,8 @@ export function loadFilenames (directory: string, taskType?: string): string[] {
 
   // return .js, .ts files from /scripts directory
   return glob.sync(path.join(directory, "*.js"))
-          .concat(glob.sync(path.join(directory, "*.ts")))
-          .sort(cmpStr);
+    .concat(glob.sync(path.join(directory, "*.ts")))
+    .sort(cmpStr);
 }
 
 function clearCheckpointFiles (scriptNames: string[]): void {
