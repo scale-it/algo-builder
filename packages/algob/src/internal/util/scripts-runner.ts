@@ -22,8 +22,11 @@ async function loadScript (relativeScriptPath: string): Promise<any> {
 function attachLineNumbertoScriptPath (error: Error | BuilderError | any, scriptPath: string): string {
   const stackTraces = error.stack.split('\n');
   for (const trace of stackTraces) {
-    const line = trace?.split(scriptPath)[1]?.slice(0, -1); // extract line number
-    if (line) { return scriptPath.concat(line); }
+    const line = trace?.split(scriptPath.concat(':'))[1]?.slice(0, -1); // extract line number
+    if (line) {
+      const [lineNo, position] = line.split(':');
+      return scriptPath.concat(`:Line:${lineNo},position:${position}`);
+    }
   }
   return scriptPath;
 }
