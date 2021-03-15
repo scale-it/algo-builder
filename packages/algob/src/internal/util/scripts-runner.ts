@@ -40,6 +40,11 @@ export async function runScript (
   runtimeEnv: AlgobRuntimeEnv,
   deployer: AlgobDeployer
 ): Promise<void> {
+  // if .ts file is encountered, load from /build/scripts/file.ts
+  if (relativeScriptPath.endsWith('.ts')) {
+    relativeScriptPath = path.join('build', relativeScriptPath.split('.ts')[0] + '.js');
+  }
+
   log(`Running ${relativeScriptPath}.default()`);
   const requiredScript = await loadScript(relativeScriptPath);
   if (!requiredScript.default) {
