@@ -18,14 +18,18 @@ async function loadScript (relativeScriptPath: string): Promise<any> {
   }
 }
 
-// returns error line number with path. eg: scripts/2-gold-asc.js => scripts/2-gold-asc.js:11:3
+/** Returns error line number and position at line attached with path.
+ * eg: scripts/2-gold-asc.js => scripts/2-gold-asc.js:Line:11,Position:3
+ * @param error Error
+ * @param scriptPath relative path to script where error occured
+ */
 function attachLineNumbertoScriptPath (error: Error | BuilderError | any, scriptPath: string): string {
   const stackTraces = error.stack.split('\n');
   for (const trace of stackTraces) {
     const line = trace?.split(scriptPath.concat(':'))[1]?.slice(0, -1); // extract line number
     if (line) {
       const [lineNo, position] = line.split(':') as [string, string];
-      return scriptPath.concat(`:Line:${lineNo},position:${position}`);
+      return scriptPath.concat(`:Line:${lineNo},Position:${position}`);
     }
   }
   return scriptPath;
