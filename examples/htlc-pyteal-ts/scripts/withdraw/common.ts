@@ -1,6 +1,6 @@
-import { executeTransaction } from "@algorand-builder/algob";
-import * as algob from "@algorand-builder/algob";
-import { types as rtypes } from "@algorand-builder/runtime";
+import { executeTransaction } from "@algo-builder/algob";
+import * as algob from "@algo-builder/algob";
+import { types as rtypes } from "@algo-builder/runtime";
 import { sha256 } from 'js-sha256';
 
 /**

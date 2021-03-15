@@ -1,4 +1,4 @@
-import { encodeNote, parseSSCAppArgs, types as rtypes } from "@algorand-builder/runtime";
+import { encodeNote, parseSSCAppArgs, types as rtypes } from "@algo-builder/runtime";
 import algosdk, { LogicSigArgs } from "algosdk";
 
 import { BuilderError } from "../internal/core/errors";

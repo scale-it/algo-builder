@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 
-// import { mkAccounts } from "@algorand-builder/algob";
+// import { mkAccounts } from "@algo-builder/algob";
 // let accounts = mkAccounts([{
 //   addr: "KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY",
 //   mnemonic: "call boy rubber fashion arch day capable one sweet skate outside purse six early learn tuition eagle love breeze pizza loud today popular able divide"

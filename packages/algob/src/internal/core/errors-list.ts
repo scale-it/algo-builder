@@ -59,7 +59,7 @@ Please upgrade your version of Node.js and try again.`
 
 Unless you are creating a task or plugin, this is probably a bug.
 
-Please [report it](https://github.com/scale-it/algorand-builder/issues/new) to help us improve algob.`
+Please [report it](https://github.com/scale-it/algo-builder/issues/new) to help us improve algob.`
   },
   CONTEXT_ALREADY_CREATED: {
     number: 4,
@@ -67,7 +67,7 @@ Please [report it](https://github.com/scale-it/algorand-builder/issues/new) to h
     title: "algob was already initialized",
     description: `algob initialization was executed twice. This is a bug.
 
-Please [report it](https://github.com/scale-it/algorand-builder/issues/new) to help us improve algob.`
+Please [report it](https://github.com/scale-it/algo-builder/issues/new) to help us improve algob.`
   },
   CONTEXT_NOT_CREATED: {
     number: 5,
@@ -75,7 +75,7 @@ Please [report it](https://github.com/scale-it/algorand-builder/issues/new) to h
     title: "algob wasn't initialized",
     description: `algob initialization failed. This is a bug.
 
-Please [report it](https://github.com/scale-it/algorand-builder/issues/new) to help us improve algob.`
+Please [report it](https://github.com/scale-it/algo-builder/issues/new) to help us improve algob.`
   },
   CONTEXT_BRE_NOT_DEFINED: {
     number: 6,
@@ -84,7 +84,7 @@ Please [report it](https://github.com/scale-it/algorand-builder/issues/new) to h
     title: "algob Runtime Environment not created",
     description: `algob initialization failed. This is a bug.
 
-Please [report it](https://github.com/scale-it/algorand-builder/issues/new) to help us improve algob.`
+Please [report it](https://github.com/scale-it/algo-builder/issues/new) to help us improve algob.`
   },
   CONTEXT_BRE_ALREADY_DEFINED: {
     number: 7,
@@ -93,7 +93,7 @@ Please [report it](https://github.com/scale-it/algorand-builder/issues/new) to h
     title: "Tried to create the algob Runtime Environment twice",
     description: `The algob initialization process was executed twice. This is a bug.
 
-Please [report it](https://github.com/scale-it/algorand-builder/issues/new) to help us improve algob.`
+Please [report it](https://github.com/scale-it/algo-builder/issues/new) to help us improve algob.`
   },
   INVALID_CONFIG: {
     number: 8,
@@ -101,20 +101,20 @@ Please [report it](https://github.com/scale-it/algorand-builder/issues/new) to h
 
 %errors%
 
-To learn more about algob's configuration, please go to https://github.com/scale-it/algorand-builder`,
+To learn more about algob's configuration, please go to https://github.com/scale-it/algo-builder`,
     title: "Invalid algob config",
     description: `You have one or more errors in your config file.
 
-Check the error message for details, or go to [documentation](https://github.com/scale-it/algorand-builder) to learn more.`
+Check the error message for details, or go to [documentation](https://github.com/scale-it/algo-builder) to learn more.`
   },
   LIB_IMPORTED_FROM_THE_CONFIG: {
     number: 9,
     message: `Error while loading algob's configuration.
-You probably imported @scale-it/algorand-builder instead of @scale-it/algorand-builder/config`,
+You probably imported @scale-it/algo-builder instead of @scale-it/algo-builder/config`,
     title: "Failed to load config file",
     description: `There was an error while loading your config file.
 
-The most common source of errors is trying to import \`@scale-it/algorand-builder\` instead of \`@scale-it/algorand-builder/config\`.
+The most common source of errors is trying to import \`@scale-it/algo-builder\` instead of \`@scale-it/algo-builder/config\`.
 
 Please make sure your config file is correct.`
   },
@@ -127,7 +127,7 @@ You or one of your plugins is trying to modify the userConfig.%path% value from 
 
 This is probably a bug in one of your plugins.
 
-Please [report it](https://github.com/scale-it/algorand-builder/issues/new) to help us improve algob.`
+Please [report it](https://github.com/scale-it/algo-builder/issues/new) to help us improve algob.`
   },
   INIT_INSIDE_PROJECT: {
     number: 11,
@@ -161,7 +161,7 @@ const networkErrors = {
 
 Verify you config and either change a network with '--network' parameter or a make sure the '%network%' exists.
 
-Read the [documentation](https://github.com/scale-it/algorand-builder) to learn how to define custom networks.`
+Read the [documentation](https://github.com/scale-it/algo-builder) to learn how to define custom networks.`
   },
   INVALID_GLOBAL_CHAIN_NAME: {
     number: 101,
@@ -197,7 +197,7 @@ Please make sure that your KMD has unlocked accounts.`
     title: "Invalid HD path",
     description: `An invalid HD/BIP32 derivation path was provided in your config.
 
-Read the [documentation](https://github.com/scale-it/algorand-builder) to learn how to define HD accounts correctly.`
+Read the [documentation](https://github.com/scale-it/algo-builder) to learn how to define HD accounts correctly.`
   },
   INVALID_RPC_QUANTITY_VALUE: {
     number: 108,

@@ -1,4 +1,4 @@
-import { types as rtypes } from "@algorand-builder/runtime";
+import { types as rtypes } from "@algo-builder/runtime";
 import { Kmd } from "algosdk";
 import { assert } from "chai";
 import path from "path";

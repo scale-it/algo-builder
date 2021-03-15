@@ -1,4 +1,4 @@
-import { types as rtypes } from "@algorand-builder/runtime";
+import { types as rtypes } from "@algo-builder/runtime";
 import { Account as AccountSDK, Kmd, mnemonicToSecretKey, MultiSigAccount, multisigAddress } from "algosdk";
 import * as fs from "fs";
 import YAML from "yaml";

@@ -1,4 +1,4 @@
-import { encodeNote, parseSSCAppArgs, types as rtypes } from "@algorand-builder/runtime";
+import { encodeNote, parseSSCAppArgs, types as rtypes } from "@algo-builder/runtime";
 import tx, { Account as AccountSDK, ConfirmedTxInfo } from "algosdk";
 
 import { AlgobDeployer } from "../types";

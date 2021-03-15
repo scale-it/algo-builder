@@ -1,6 +1,6 @@
 {
-  "name": "@algorand-builder/runtime",
-  "version": "0.1.1",
+  "name": "@algo-builder/runtime",
+  "version": "0.1.3",
   "contributors": [
     {
       "name": "Robert Zaremba",
@@ -16,8 +16,8 @@
     }
   ],
   "license": "Apache-2.0",
-  "repository": "https://github.com/scale-it/algorand-builder.git",
-  "description": "Algorand runtime (transaction execution + TEAL interpreter)",
+  "repository": "https://github.com/scale-it/algo-builder.git",
+  "description": "JavaScript implementation of Algorand runtime (transaction execution + TEAL interpreter)",
   "keywords": [
     "smart-contracts",
     "blockchain",
@@ -43,9 +43,9 @@
     "build": "tsc --build .",
     "build:watch": "tsc -w -p .",
     "build:docs": "typedoc --out docs --exclude \"internal/**\"  src",
-    "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.tsbuildinfo build",
+    "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.ts buildinfo build",
     "prepublish": "yarn build",
-    "publish": "npm publish --access public"
+    "publish": "yarn publish --access public"
   },
   "files": [
     "build/",

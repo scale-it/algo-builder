@@ -1,4 +1,4 @@
-import { loadASAFile, types as rtypes } from "@algorand-builder/runtime";
+import { loadASAFile, types as rtypes } from "@algo-builder/runtime";
 
 import { mkAccountIndex } from "../lib/account";
 import { AlgoOperator } from "../lib/algo-operator";
