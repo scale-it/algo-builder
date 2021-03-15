@@ -1,6 +1,6 @@
 const { executeTransaction, mkTxnParams } = require('./common/common');
-const { globalZeroAddress, stringToBytes } = require('@algorand-builder/algob');
-const { types } = require('@algorand-builder/runtime');
+const { globalZeroAddress, stringToBytes } = require('@algo-builder/algob');
+const { types } = require('@algo-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');

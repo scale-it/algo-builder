@@ -2,7 +2,7 @@
  * Description:
  * This file deploys the stateful smart contract to create and transfer NFT
 */
-const { types } = require('@algorand-builder/runtime');
+const { types } = require('@algo-builder/runtime');
 const { executeTransaction } = require('./transfer/common');
 
 async function run (runtimeEnv, deployer) {

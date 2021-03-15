@@ -25,8 +25,8 @@ All dependencies are managed by `npm` / `yarn`. To install:
 
 If want to use a development version of `algob`, you can use `yarn link`:
 
-    yarn remove @algorand-builder/algob
-    yarn link @algorand-builder/algob
+    yarn remove @algo-builder/algob
+    yarn link @algo-builder/algob
 
 
 After that, `algob` will be in your local yarn context. To use it we either access `algob` through `yarn run` (recommended), or through `node_modules/.bin`.

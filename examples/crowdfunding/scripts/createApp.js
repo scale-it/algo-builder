@@ -3,8 +3,8 @@ const {
   updateSSC,
   uint64ToBigEndian,
   addressToPk
-} = require('@algorand-builder/algob');
-const { types } = require('@algorand-builder/runtime');
+} = require('@algo-builder/algob');
+const { types } = require('@algo-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');

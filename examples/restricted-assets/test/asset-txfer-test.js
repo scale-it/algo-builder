@@ -1,8 +1,8 @@
 import {
   addressToPk,
   getProgram
-} from '@algorand-builder/algob';
-import { Runtime, StoreAccount, types } from '@algorand-builder/runtime';
+} from '@algo-builder/algob';
+import { Runtime, StoreAccount, types } from '@algo-builder/runtime';
 import { assert } from 'chai';
 
 const minBalance = 10e6; // 10 ALGO's

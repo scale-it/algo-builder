@@ -37,4 +37,4 @@ Smart contracts must be stored in `assets` folder.
 
 The main difference between deploying an ASA and SSC is that ASA takes `asset-name` and `ASADeploymentFlags` as input and SSC takes `smart-contract-names` and `SSCDeploymentFlags` as input.
 
-You can learn more about the flags from [Deployer API](https://scale-it.github.io/algorand-builder/);
+You can learn more about the flags from [Deployer API](https://scale-it.github.io/algo-builder/);

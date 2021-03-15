@@ -1,12 +1,12 @@
 # Testing TEAL
 
-[TEAL](https://developer.algorand.org/docs/reference/teal/specification/) is a bytecode based stack language that executes inside Algorand transactions to check the parameters of the transaction and approve the transaction as if by a signature. `@algorand-builder/runtime` provides a lightweight runtime and TEAL interpreter to test Algorand Smart Contracts.
+[TEAL](https://developer.algorand.org/docs/reference/teal/specification/) is a bytecode based stack language that executes inside Algorand transactions to check the parameters of the transaction and approve the transaction as if by a signature. `@algo-builder/runtime` provides a lightweight runtime and TEAL interpreter to test Algorand Smart Contracts.
 
 **NOTE:** TEAL can not modify nor create transactions, only reject or approve them. Approval is signaled by finishing with the stack containing a single non-zero uint64 value.
 
 ## How it works
 
-`@algorand-builder/runtime` (JavaScript Algorand runtime) executes transactions and processes TEAL in 3 parts :-
+`@algo-builder/runtime` (JavaScript Algorand runtime) executes transactions and processes TEAL in 3 parts :-
 
 - [Runtime](../packages/runtime/src/runtime.ts): For a transaction or txn group, the state management is handled by the `Runtime`. User can use `Runtime` object to set up accounts, create applications, opt-in to app, update app, etc...
 - [StoreAccount](../packages/runtime/src/account.ts): User can create new accounts using the `StoreAccount` object. All information about account (`apps`, `assets`, `localState`, `globalState` etc..) is stored in `StoreAccount`.

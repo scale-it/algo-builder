@@ -1,7 +1,7 @@
 const {
   executeTransaction
-} = require('@algorand-builder/algob');
-const { types } = require('@algorand-builder/runtime');
+} = require('@algo-builder/algob');
+const { types } = require('@algo-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   const creator = deployer.accountsByName.get('alice');

@@ -1,6 +1,6 @@
 {
-  "name": "@algorand-builder/algob",
-  "version": "0.5.2",
+  "name": "@algo-builder/algob",
+  "version": "0.5.4",
   "author": "Robert Zaremba (https://github.com/robert-zaremba)",
   "contributors": [
     {
@@ -21,8 +21,8 @@
     }
   ],
   "license": "Apache-2.0",
-  "repository": "https://github.com/scale-it/algorand-builder.git",
-  "description": "",
+  "repository": "https://github.com/scale-it/algo-builder.git",
+  "description": "A framework for building and testing Algorand smart contracts and dapps.",
   "keywords": [
     "smart-contracts",
     "blockchain",
@@ -49,9 +49,9 @@
     "coverage": "nyc ../../node_modules/mocha/bin/mocha",
     "build": "tsc --build .",
     "build:watch": "tsc -w -p .",
-    "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.tsbuildinfo build",
+    "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.ts buildinfo build",
     "prepublish": "yarn build",
-    "publish": "npm publish --access public",
+    "publish": "yarn publish --access public",
     "algob:dev": "sh ./setup_dev_project.sh"
   },
   "files": [
@@ -62,7 +62,7 @@
     "sample-project/"
   ],
   "devDependencies": {
-    "@algorand-builder/types-algosdk": "^0.2.0",
+    "@algo-builder/types-algosdk": "^0.2.0",
     "@types/chai": "^4.2.12",
     "@types/debug": "^4.1.5",
     "@types/deep-equal": "^1.0.1",
@@ -77,7 +77,7 @@
     "time-require": "^0.1.2"
   },
   "dependencies": {
-    "@algorand-builder/runtime": "^0.1.0",
+    "@algo-builder/runtime": "^0.1.0",
     "algosdk": "algorand/js-algorand-sdk.git#9a5824782511dff1f521c68fe54d562b3872d1ae",
     "chalk": "^4.1.0",
     "debug": "^4.1.1",

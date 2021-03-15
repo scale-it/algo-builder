@@ -1,4 +1,4 @@
-import { types as rtypes } from "@algorand-builder/runtime";
+import { types as rtypes } from "@algo-builder/runtime";
 import type { LogicSig } from "algosdk";
 import { Algodv2, LogicSigArgs } from "algosdk";
 

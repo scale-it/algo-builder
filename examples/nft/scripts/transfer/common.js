@@ -1,4 +1,4 @@
-const { executeTransaction, readGlobalStateSSC, readLocalStateSSC } = require('@algorand-builder/algob');
+const { executeTransaction, readGlobalStateSSC, readLocalStateSSC } = require('@algo-builder/algob');
 
 exports.executeTransaction = async function (deployer, txnParams) {
   try {

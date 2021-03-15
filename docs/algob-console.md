@@ -16,7 +16,7 @@ Following globals are available in an `algob console` REPL:
 * `deployer` : algob deployer in run mode. User can access checkpoints, get logic signature, transferAlgos and all other functions supported by `algob deployer`.
 * `algodClient` : `algosdk.Algodv2`- an instance of algorand driver based on the current network (default if `--network` flag is not passed).
 * `algosdk` : User can access `algosdk` package functions using this object. (eg. `algosdk.encodeAddress(..)`)  
-* `algob` : all`algob` [exported](https://github.com/scale-it/algorand-builder/blob/master/packages/algob/src/index.ts) functions (eg. `algob.mkAccounts(..)`, `algob.balanceOf(..) etc)`
+* `algob` : all`algob` [exported](https://github.com/scale-it/algo-builder/blob/master/packages/algob/src/index.ts) functions (eg. `algob.mkAccounts(..)`, `algob.balanceOf(..) etc)`
 
 # Example Walkthrough
 

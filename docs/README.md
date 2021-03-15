@@ -1,6 +1,6 @@
-# Algorand Builder docs
+# Algo Builder docs
 
-+ [API documentation](https://scale-it.github.io/algorand-builder/)
++ [API documentation](https://scale-it.github.io/algo-builder/)
 
 + Installation: [main README](/README.md#installation) file.
 + Project initialization → read below.

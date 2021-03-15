@@ -2,12 +2,12 @@
 
 This package provides the main entry point into the application.
 
-Please read the main [README](https://github.com/scale-it/algorand-builder/blob/master/README.md) file for details about the project and `algob`. This file provides a development description about the `algob` package.
+Please read the main [README](https://github.com/scale-it/algo-builder/blob/master/README.md) file for details about the project and `algob`. This file provides a development description about the `algob` package.
 
 ## Usage
 
 
-`algob` can be included as a library by importing `internal/lib/lib.ts` or can be run from command line as described in the project [README](https://github.com/scale-it/algorand-builder/blob/master/README.md) file.
+`algob` can be included as a library by importing `internal/lib/lib.ts` or can be run from command line as described in the project [README](https://github.com/scale-it/algo-builder/blob/master/README.md) file.
 
 ### Command line usage
 

@@ -7,8 +7,8 @@
  *  + fee is <= 1000
  *  + we don't do any rekey, closeRemainderTo
 */
-const { types } = require('@algorand-builder/runtime');
-const { balanceOf } = require('@algorand-builder/algob');
+const { types } = require('@algo-builder/runtime');
+const { balanceOf } = require('@algo-builder/algob');
 const { executeTransaction } = require('./common');
 
 async function run (runtimeEnv, deployer) {

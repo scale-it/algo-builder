@@ -1,4 +1,4 @@
-import { applyErrorMessageTemplate } from "@algorand-builder/runtime";
+import { applyErrorMessageTemplate } from "@algo-builder/runtime";
 import type { RequestError } from 'algosdk';
 
 import type { AnyMap } from "../../types";

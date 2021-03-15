@@ -1,4 +1,4 @@
-# Algorand Builder
+# Algo Builder
 
 Framework to automate development of Algorand Assets and Smart Contracts:
 
@@ -8,7 +8,7 @@ Framework to automate development of Algorand Assets and Smart Contracts:
 
 ## Objectives
 
-Algorand Builder is an trustworthy framework for Algorand dapps (Decentralized Applications). Its main goal is to make shipping Algorand applications simple, efficient, and scalable. Think about it as a Truffle suite for Algorand. The framework provides following functionality through the `algob` tool:
+Algo Builder is an trustworthy framework for Algorand dapps (Decentralized Applications). Its main goal is to make shipping Algorand applications simple, efficient, and scalable. Think about it as a Truffle suite for Algorand. The framework provides following functionality through the `algob` tool:
 
 + REPL (console Read-Eval-Print-Loop) to quickly and easily interact with Algorand Standard Assets and Smart Contracts
 + integrated testing framework,
@@ -21,7 +21,7 @@ To attract more web developers we plan to build a JavaScript DSL for TEAL with T
 
 ### Documentation
 
-User documentation is available in [/docs](docs/README.md) and [API docs](https://scale-it.github.io/algorand-builder/).
+User documentation is available in [/docs](docs/README.md) and [API docs](https://scale-it.github.io/algo-builder/).
 
 The project specification is [published here](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
 
@@ -37,15 +37,15 @@ The project specification is [published here](https://paper.dropbox.com/publishe
 
 To install `algob` globally in your system you can use:
 
-+ Using Yarn: `yarn global add @algorand-builder/algob`
-+ Using NPM: `npm install -g @algorand-builder/algob`
++ Using Yarn: `yarn global add @algo-builder/algob`
++ Using NPM: `npm install -g @algo-builder/algob`
 
 
 **Recommended**: Installation from source (if you want to use `algob` with latest, not released version):
 
 ```
-git clone https://github.com/scale-it/algorand-builder.git
-cd algorand-builder
+git clone https://github.com/scale-it/algo-builder.git
+cd algo-builder
 yarn install
 yarn build
 cd packages/algob
@@ -105,7 +105,7 @@ Otherwise you can use a system/user-wide `pyteal` installation:
 
 1. Install algob in the project (unless you already installed it globally) and initialize the workspace.
 
-        yarn add @algorand-builder/algob
+        yarn add @algo-builder/algob
         yarn run algob init .
 
     The `init` command expects a directory where to initialize the workspace and creates sample project files there. Refer to [/docs/README](docs/README.md) for more information.

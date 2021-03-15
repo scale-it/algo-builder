@@ -10,7 +10,7 @@ import {
 describe("package-info", () => {
   it("Should give the right package.json", async () => {
     const packageJson = await getPackageJson();
-    assert.equal(packageJson.name, "@algorand-builder/algob");
+    assert.equal(packageJson.name, "@algo-builder/algob");
     // We don't test the version number because that would be hard to maintain
     assert.isString(packageJson.version);
   });

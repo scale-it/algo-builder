@@ -2,6 +2,10 @@
 
 ## unreleased
 
+## v0.5.4 2021-03-15
+
+Renaming the organization and package names to `@algo-builder`.
+
 ## v0.5.0 2021-03-08
 
 General:
