@@ -14,7 +14,7 @@ import {
   toCheckpointFileName
 } from "../lib/script-checkpoints";
 import { AlgobRuntimeEnv, CheckpointRepo } from "../types";
-import { filterNonExistent, runMultipleScripts } from "./run";
+import { runMultipleScripts } from "./run";
 import { TASK_DEPLOY } from "./task-names";
 
 export interface TaskArgs {
@@ -22,6 +22,12 @@ export interface TaskArgs {
   force: boolean
 }
 
+/**
+ * Load .js, .ts files from /scripts (default) directory
+ * @param directory directory to load files from
+ * @param taskType task type (eg. test)
+ * @returns array of paths as string eg. ['scripts/file1.js', 'scripts/file2.js', ..]
+ */
 export function loadFilenames (directory: string, taskType?: string): string[] {
   if (!fs.existsSync(directory)) {
     if (taskType === "test") {
@@ -35,10 +41,9 @@ export function loadFilenames (directory: string, taskType?: string): string[] {
     }
   }
 
-  const jsFiles = glob.sync(path.join(directory, "*.js")).sort(cmpStr);
-  if (jsFiles.length) { return jsFiles; }
-  // if not js file, return the compiled ts files from ./build
-  return glob.sync(path.join("build", directory, "*.js")).sort(cmpStr);
+  return glob.sync(path.join(directory, "*.js"))
+    .concat(glob.sync(path.join(directory, "*.ts")))
+    .sort(cmpStr);
 }
 
 function clearCheckpointFiles (scriptNames: string[]): void {
@@ -58,26 +63,10 @@ export async function executeDeployTask (
   algoOp: AlgoOperator
 ): Promise<void> {
   const logDebugTag = "algob:tasks:deploy";
-  let scriptsPath = scriptsDirectory;
-  let scriptNames;
-  if (fileNames.length !== 0) {
-    const nonExistent = filterNonExistent(fileNames);
-    if (nonExistent.length !== 0) {
-      // If files doesn't exist in scripts, check for build folder
-      fileNames.forEach(function (script, index) {
-        fileNames[index] = path.join("build", script);
-      });
-      if (filterNonExistent(fileNames).length !== 0) {
-        throw new BuilderError(ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND, {
-          scripts: nonExistent
-        });
-      }
-      scriptsPath = path.join("build", scriptsDirectory);
-    }
-    scriptNames = assertDirectDirChildren(scriptsPath, fileNames);
-  } else {
-    scriptNames = loadFilenames(scriptsPath);
-  }
+
+  const scriptNames = fileNames.length === 0
+    ? loadFilenames(scriptsDirectory)
+    : assertDirectDirChildren(scriptsDirectory, fileNames);
 
   if (scriptNames.length === 0) {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.SCRIPTS_NO_FILES_FOUND, {
