@@ -12,6 +12,7 @@
     "lint:fix": "eslint --fix ./types/index.d.ts",
     "build": "tsc",
     "test": "echo ok",
+    "build:docs": "echo ok",
     "publish": "yarn publish --access public"
   }
 }

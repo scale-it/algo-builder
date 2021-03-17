@@ -11,6 +11,7 @@
     "lint": "eslint --ext .js,.ts scripts",
     "lint:fix": "eslint --fix --ext .js,.ts scripts",
     "test": "echo ok",
+    "build:docs": "echo ok",
     "build": "echo ok"
   }
 }
