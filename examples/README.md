@@ -47,13 +47,13 @@ the following positions in the latter file:
 
 ### Examples Description
 
-- [JS][asa](./asa) - This project demonstrates how to create and manage Algorand Standard Assets (ASA).
-- [JS][crowdfunding](./crowdfunding) - This project demonstrates how to create a Crowdfunding Stateful Smart Contract Application. It's based on a [tutorial](https://developer.algorand.org/solutions/example-crowdfunding-stateful-smart-contract-application/)
-- [JS][multisig](./multisig) - This example demonstrates authorizing transactions based on logic signature signed by multiple accounts.
-- [JS][nft](./nft) - Non-Fungible-Token Example using stateful TEAL. In this example, we create a new non-fungible-token represented by a name and a ref.
-- [JS][permissioned-voting](./permissioned-voting) -  This project demonstrates how to create a Permissioned Voting Stateful Smart Contract Application.
-Original tutorial can be found [here](https://developer.algorand.org/solutions/example-permissioned-voting-stateful-smart-contract-application/)
-- [JS][ref-templates](./ref-templates) - The goal of this project is to present how to work with ASC in `algob` using the best practices and templates using the Algorand reference templates.
-- [JS][signed-txn](./signed-txn) - This example demonstrates executing a serialized transaction loaded directly from a file. A user can create a transaction and sign it (using `goal`) and send it to someone else to execute it.
-- [TS][htlc](./htlc-pyteal-ts) - Hash-Time-Lock-Contract Example using PyTeal.
+- [JS] [asa](./asa) - This project demonstrates how to create and manage Algorand Standard Assets (ASA).
+- [JS] [crowdfunding](./crowdfunding) - This project demonstrates how to create a Crowdfunding Stateful Smart Contract Application. It's based on a [tutorial](https://developer.algorand.org/solutions/example-crowdfunding-stateful-smart-contract-application/)
+- [JS] [multisig](./multisig) - This example demonstrates authorizing transactions based on logic signature signed by multiple accounts.
+- [JS] [nft](./nft) - Non-Fungible-Token Example using stateful TEAL. In this example, we create a new non-fungible-token represented by a name and a ref.
+- [JS] [permissioned-voting](./permissioned-voting) -  This project demonstrates how to create a Permissioned Voting Stateful Smart Contract Application.
+Origin al tutorial can be found [here](https://developer.algorand.org/solutions/example-permissioned-voting-stateful-smart-contract-application/)
+- [JS] [ref-templates](./ref-templates) - The goal of this project is to present how to work with ASC in `algob` using the best practices and templates using the Algorand reference templates.
+- [JS] [signed-txn](./signed-txn) - This example demonstrates executing a serialized transaction loaded directly from a file. A user can create a transaction and sign it (using `goal`) and send it to someone else to execute it.
+- [TS] [htlc](./htlc-pyteal-ts) - Hash-Time-Lock-Contract Example using PyTeal.
 In this project we are transpiling the files in `js` and then using them with `algob`.

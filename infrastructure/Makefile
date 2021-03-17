@@ -8,7 +8,7 @@ setup-private-net: create-private-net start-private-net setup-master-account sta
 recreate-private-net: stop-private-net delete-private-net setup-private-net
 
 create-private-net:
-	if [ -d ./node_data ] ;  then echo "./node_data directory already exists - remove it if you want to create a new private network" ; false; fi
+	@if [ -d ./node_data ] ;  then echo "./node_data directory already exists - remove it if you want to create a new private network" ; false; fi
 	@goal network create -r ./node_data -n private -t private-net-template.json
 	@echo '{ "GossipFanout": 0, "EndpointAddress": "127.0.0.1:4001", "DNSBootstrapID": "", "EnableProfiler": true, "NetAddress": "127.0.0.1:0", "EnableDeveloperAPI": true }' > ./node_data/PrimaryNode/config.json
 	@echo 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' > ./node_data/PrimaryNode/algod.token
@@ -42,7 +42,7 @@ setup-master-account:
 # Send lot of ALGO from a primary account to the "master" account we created above
 	@$(eval list=$(shell goal account list -d $(ALGORAND_DATA)))
 	@$(eval netAddress=$(shell echo $(list) | awk '{print $$2}'))
-	goal clerk send -a 2000000000000 -f $(netAddress) -t WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE -d $(ALGORAND_DATA)
+	@goal clerk send -a 2000000000000 -f $(netAddress) -t WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE -d $(ALGORAND_DATA)
 
 sandbox-up:
 # clone sandbox git repo: https://github.com/algorand/sandbox.git and pull
