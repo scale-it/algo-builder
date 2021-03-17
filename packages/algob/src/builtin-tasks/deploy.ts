@@ -22,6 +22,12 @@ export interface TaskArgs {
   force: boolean
 }
 
+/**
+ * Load .js, .ts files from /scripts (default) directory
+ * @param directory directory to load files from
+ * @param taskType task type (eg. test)
+ * @returns array of paths as string eg. ['scripts/file1.js', 'scripts/file2.js', ..]
+ */
 export function loadFilenames (directory: string, taskType?: string): string[] {
   if (!fs.existsSync(directory)) {
     if (taskType === "test") {
@@ -35,7 +41,6 @@ export function loadFilenames (directory: string, taskType?: string): string[] {
     }
   }
 
-  // return .js, .ts files from /scripts directory
   return glob.sync(path.join(directory, "*.js"))
     .concat(glob.sync(path.join(directory, "*.ts")))
     .sort(cmpStr);
