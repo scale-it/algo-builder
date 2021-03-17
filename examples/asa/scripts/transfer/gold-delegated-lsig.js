@@ -4,7 +4,7 @@
  * using delegated lsig (between 2 user accounts).
 */
 const { executeTransaction } = require('./common');
-const { types } = require('@algorand-builder/runtime');
+const { types } = require('@algo-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   const goldOwner = deployer.accountsByName.get('alice');

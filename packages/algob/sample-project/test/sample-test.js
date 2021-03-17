@@ -1,5 +1,5 @@
-import { getProgram } from '@algorand-builder/algob';
-import { Runtime, StoreAccount, types } from '@algorand-builder/runtime';
+import { getProgram } from '@algo-builder/algob';
+import { Runtime, StoreAccount, types } from '@algo-builder/runtime';
 const { assert } = require('chai');
 
 const minBalance = BigInt(1e6);

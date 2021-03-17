@@ -1,4 +1,4 @@
-import { encodeNote } from "@algorand-builder/runtime";
+import { encodeNote } from "@algo-builder/runtime";
 import { assert } from "chai";
 import { TextEncoder } from "util";
 

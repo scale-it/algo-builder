@@ -41,6 +41,6 @@ Example:
 
 ## Tests
 
-In algob, test files are JS files located in `test` directory and their purpose is to test algorand smart contracts present in `/assets`. Check `@algorand-builder/runtime` package for more info on tests.
+In algob, test files are JS files located in `test` directory and their purpose is to test algorand smart contracts present in `/assets`. Check `@algo-builder/runtime` package for more info on tests.
 
 Tests are run through the command `algob test`.

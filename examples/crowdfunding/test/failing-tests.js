@@ -3,8 +3,8 @@ const {
   getProgram,
   stringToBytes,
   uint64ToBigEndian
-} = require('@algorand-builder/algob');
-const { Runtime, StoreAccount, types } = require('@algorand-builder/runtime');
+} = require('@algo-builder/algob');
+const { Runtime, StoreAccount, types } = require('@algo-builder/runtime');
 const { assert } = require('chai');
 
 const minBalance = 10e6; // 10 ALGO's

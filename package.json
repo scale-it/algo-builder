@@ -1,7 +1,7 @@
 {
-  "name": "algorand-builder",
+  "name": "algo-builder",
   "description": "Framework to automate development of Algorand Assets and Smart Contracts.",
-  "repository": "https://github.com/scale-it/algorand-builder.git",
+  "repository": "https://github.com/scale-it/algo-builder.git",
   "contributors": [
     {
       "name": "Robert Zaremba",

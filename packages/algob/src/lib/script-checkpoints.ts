@@ -1,5 +1,5 @@
 
-import { loadFromYamlFileSilent } from "@algorand-builder/runtime";
+import { loadFromYamlFileSilent } from "@algo-builder/runtime";
 import deepEqual from "deep-equal";
 import * as fs from "fs";
 import path from "path";

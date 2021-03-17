@@ -1,4 +1,4 @@
-import { parseZodError } from "@algorand-builder/runtime";
+import { parseZodError } from "@algo-builder/runtime";
 import * as z from 'zod';
 
 import { validateAccount } from "../../../lib/account";

@@ -1,4 +1,4 @@
-import { encodeNote, mkTransaction, types as rtypes } from "@algorand-builder/runtime";
+import { encodeNote, mkTransaction, types as rtypes } from "@algo-builder/runtime";
 import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
 import { AlgobDeployer } from "../types";

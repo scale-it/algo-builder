@@ -1,4 +1,4 @@
-const { executeTransaction } = require('@algorand-builder/algob');
+const { executeTransaction } = require('@algo-builder/algob');
 const { mkParam } = require('./common');
 
 async function run (runtimeEnv, deployer) {
