@@ -23,7 +23,7 @@
   "license": "Apache-2.0",
   "private": true,
   "workspaces": [
-  	"packages/runtime",
+    "packages/runtime",
     "packages/*",
     "examples/*"
   ],
@@ -34,7 +34,7 @@
   "scripts": {
     "cleanup": "./cleanup.sh",
     "build": "yarn workspaces run build",
-    "build:apidocs": "rm -rf docs; cd packages/algob; typedoc --out docs --excludePrivate --exclude 'src/internal/**' --mode modules --gitRevision typedoc; touch docs/.nojekyll && mv docs ../../",
+    "build:apidocs": "yarn workspaces run build:docs; touch doc/.nojekyll",
     "watch": "tsc --build --watch packages/runtime packages/algob",
     "test": "yarn workspaces run test",
     "lint": "yarn workspaces -p run lint",
@@ -63,6 +63,7 @@
     "mocha": "^8.1.1",
     "nyc": "^15.1.0",
     "ts-node": "^9.0.0",
+    "typedoc": "^0.20.32",
     "typescript": "^4.2.3"
   },
   "lint-staged": {
