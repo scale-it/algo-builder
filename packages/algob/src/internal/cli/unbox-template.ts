@@ -6,7 +6,7 @@ import path from "path";
 import { copyTemplatetoDestination, fetchRepository, setUpTempDirectory } from "../util/unpack";
 import { createConfirmationPrompt, installDependencies, printSuggestedAlgobCommands, printWelcomeMessage } from "./project-creation";
 
-const ALGOB_DAPP_TEMPLATES_GIT_REMOTE = 'scale-it/algorand-builder-templates';
+const ALGOB_DAPP_TEMPLATES_GIT_REMOTE = 'scale-it/algo-builder-templates';
 const DEFAULT_DAPP_TEMPLATE = 'bare';
 
 function isYarnProject (destination: string): boolean {
@@ -138,6 +138,19 @@ function printSuggestedDAppCommands (packageManager: string): void {
   console.log(`  ${packageManager} build`);
 }
 
+/**
+ * Unboxes a dapp template from 'scale-it/algo-builder-templates' with given name
+ * and destination
+ * @param force --force flag. If true then contents in destination directory are overwritten
+ * @param destination destination directory to unbox template to. Defaults to current working directory
+ * @param templateName templateName to unbox from scale-it/algo-builder-templates.
+ *  - If template name is not passed, the default template is unboxed.
+ *  - If template name passed is incorrect (template does not exist), then user is asked to unbox
+ *     from one of the existing templates or exit unboxing
+ *  - If there are conflicting files while copying template, then user is asked to overwrite each file
+ *     or not (if --force is not used).
+ *  - If `--force` is used, then conflicting files are overwritten.
+ */
 export async function unbox ({ force, destination, templateName }:
 { force: boolean, destination?: string, templateName?: string}): Promise<void> {
   await printWelcomeMessage();
@@ -163,7 +176,7 @@ export async function unbox ({ force, destination, templateName }:
   tempDirCleanup(); // clean temporary directory
 
   console.log(
-    chalk.cyan(`\n★ Template ${templateName} initialized in ${normalizedDestination} ★\n`));
+    chalk.greenBright(`\n★ Template ${templateName} initialized in ${normalizedDestination} ★\n`));
 
   // install dependencies in /templatePath
   const shouldInstallDependencies = await confirmDepInstallation(templateName, normalizedDestination);
