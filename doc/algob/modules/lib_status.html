@@ -1,0 +1,352 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>lib/status | @algo-builder/algob</title>
+	<meta name="description" content="Documentation for @algo-builder/algob">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="../assets/css/main.css">
+	<script async src="../assets/js/search.js" id="search-script"></script>
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.json" data-base="..">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="../index.html" class="title">@algo-builder/algob</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="../modules.html">@algo-builder/algob</a>
+				</li>
+				<li>
+					<a href="lib_status.html">lib/status</a>
+				</li>
+			</ul>
+			<h1>Module lib/status</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Functions</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="lib_status.html#balanceof" class="tsd-kind-icon">balance<wbr>Of</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="lib_status.html#printassets" class="tsd-kind-icon">print<wbr>Assets</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="lib_status.html#printglobalstatessc" class="tsd-kind-icon">print<wbr>Global<wbr>StateSSC</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="lib_status.html#printlocalstatessc" class="tsd-kind-icon">print<wbr>Local<wbr>StateSSC</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="lib_status.html#readglobalstatessc" class="tsd-kind-icon">read<wbr>Global<wbr>StateSSC</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="lib_status.html#readlocalstatessc" class="tsd-kind-icon">read<wbr>Local<wbr>StateSSC</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Functions</h2>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+					<a name="balanceof" class="tsd-anchor"></a>
+					<h3>balance<wbr>Of</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">balance<wbr>Of<span class="tsd-signature-symbol">(</span>deployer<span class="tsd-signature-symbol">: </span><a href="../interfaces/types.algobdeployer.html" class="tsd-signature-type" data-tsd-kind="Interface">AlgobDeployer</a>, account<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, assetID<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">AssetHolding</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/algob/src/lib/status.ts#L7">algob/src/lib/status.ts:7</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>deployer: <a href="../interfaces/types.algobdeployer.html" class="tsd-signature-type" data-tsd-kind="Interface">AlgobDeployer</a></h5>
+								</li>
+								<li>
+									<h5>account: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>assetID: <span class="tsd-signature-type">number</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">AssetHolding</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+					<a name="printassets" class="tsd-anchor"></a>
+					<h3>print<wbr>Assets</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">print<wbr>Assets<span class="tsd-signature-symbol">(</span>deployer<span class="tsd-signature-symbol">: </span><a href="../interfaces/types.algobdeployer.html" class="tsd-signature-type" data-tsd-kind="Interface">AlgobDeployer</a>, account<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/algob/src/lib/status.ts#L56">algob/src/lib/status.ts:56</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>deployer: <a href="../interfaces/types.algobdeployer.html" class="tsd-signature-type" data-tsd-kind="Interface">AlgobDeployer</a></h5>
+								</li>
+								<li>
+									<h5>account: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+					<a name="printglobalstatessc" class="tsd-anchor"></a>
+					<h3>print<wbr>Global<wbr>StateSSC</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">print<wbr>Global<wbr>StateSSC<span class="tsd-signature-symbol">(</span>deployer<span class="tsd-signature-symbol">: </span><a href="../interfaces/types.algobdeployer.html" class="tsd-signature-type" data-tsd-kind="Interface">AlgobDeployer</a>, creator<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, appId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/algob/src/lib/status.ts#L76">algob/src/lib/status.ts:76</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>deployer: <a href="../interfaces/types.algobdeployer.html" class="tsd-signature-type" data-tsd-kind="Interface">AlgobDeployer</a></h5>
+								</li>
+								<li>
+									<h5>creator: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>appId: <span class="tsd-signature-type">number</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+					<a name="printlocalstatessc" class="tsd-anchor"></a>
+					<h3>print<wbr>Local<wbr>StateSSC</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">print<wbr>Local<wbr>StateSSC<span class="tsd-signature-symbol">(</span>deployer<span class="tsd-signature-symbol">: </span><a href="../interfaces/types.algobdeployer.html" class="tsd-signature-type" data-tsd-kind="Interface">AlgobDeployer</a>, account<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, appId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/algob/src/lib/status.ts#L63">algob/src/lib/status.ts:63</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>deployer: <a href="../interfaces/types.algobdeployer.html" class="tsd-signature-type" data-tsd-kind="Interface">AlgobDeployer</a></h5>
+								</li>
+								<li>
+									<h5>account: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>appId: <span class="tsd-signature-type">number</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+					<a name="readglobalstatessc" class="tsd-anchor"></a>
+					<h3>read<wbr>Global<wbr>StateSSC</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">read<wbr>Global<wbr>StateSSC<span class="tsd-signature-symbol">(</span>deployer<span class="tsd-signature-symbol">: </span><a href="../interfaces/types.algobdeployer.html" class="tsd-signature-type" data-tsd-kind="Interface">AlgobDeployer</a>, creator<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, appId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">SSCStateSchema</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/algob/src/lib/status.ts#L28">algob/src/lib/status.ts:28</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Description: Function to read and return the global state of application.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>deployer: <a href="../interfaces/types.algobdeployer.html" class="tsd-signature-type" data-tsd-kind="Interface">AlgobDeployer</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>AlgobDeployer</p>
+									</div>
+								</li>
+								<li>
+									<h5>creator: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Account from which call needs to be made</p>
+									</div>
+								</li>
+								<li>
+									<h5>appId: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>ID of the application being configured or empty if creating</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">SSCStateSchema</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+					<a name="readlocalstatessc" class="tsd-anchor"></a>
+					<h3>read<wbr>Local<wbr>StateSSC</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">read<wbr>Local<wbr>StateSSC<span class="tsd-signature-symbol">(</span>deployer<span class="tsd-signature-symbol">: </span><a href="../interfaces/types.algobdeployer.html" class="tsd-signature-type" data-tsd-kind="Interface">AlgobDeployer</a>, account<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, appId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">SSCStateSchema</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/algob/src/lib/status.ts#L45">algob/src/lib/status.ts:45</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Description: Function to read and return the local state of application from an account.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>deployer: <a href="../interfaces/types.algobdeployer.html" class="tsd-signature-type" data-tsd-kind="Interface">AlgobDeployer</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>AlgobDeployer</p>
+									</div>
+								</li>
+								<li>
+									<h5>account: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>account from the which the local state has to be read</p>
+									</div>
+								</li>
+								<li>
+									<h5>appId: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>ID of the application being configured or empty if creating</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">SSCStateSchema</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class=" ">
+						<a href="../modules.html">Exports</a>
+					</li>
+					<li class="current tsd-kind-module">
+						<a href="lib_status.html">lib/status</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="lib_status.html#balanceof" class="tsd-kind-icon">balance<wbr>Of</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="lib_status.html#printassets" class="tsd-kind-icon">print<wbr>Assets</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="lib_status.html#printglobalstatessc" class="tsd-kind-icon">print<wbr>Global<wbr>StateSSC</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="lib_status.html#printlocalstatessc" class="tsd-kind-icon">print<wbr>Local<wbr>StateSSC</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="lib_status.html#readglobalstatessc" class="tsd-kind-icon">read<wbr>Global<wbr>StateSSC</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="lib_status.html#readlocalstatessc" class="tsd-kind-icon">read<wbr>Local<wbr>StateSSC</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>

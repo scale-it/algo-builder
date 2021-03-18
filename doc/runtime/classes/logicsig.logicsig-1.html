@@ -1,0 +1,737 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>LogicSig | @algo-builder/runtime</title>
+	<meta name="description" content="Documentation for @algo-builder/runtime">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="../assets/css/main.css">
+	<script async src="../assets/js/search.js" id="search-script"></script>
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.json" data-base="..">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="../index.html" class="title">@algo-builder/runtime</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="../modules.html">@algo-builder/runtime</a>
+				</li>
+				<li>
+					<a href="../modules/logicsig.html">logicsig</a>
+				</li>
+				<li>
+					<a href="logicsig.logicsig-1.html">LogicSig</a>
+				</li>
+			</ul>
+			<h1>Class LogicSig</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>Note: We cannot use algosdk LogicSig class here,
+							because algosdk.makeLogicSig() takes compiled bytes as a argument
+							and currently we don&#39;t calculate compiled bytes from TEAL program.
+						We are using raw TEAL code as program.(by converting string into bytes)</p>
+					</div>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">LogicSig</span>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Constructors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="logicsig.logicsig-1.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Properties</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="logicsig.logicsig-1.html#args" class="tsd-kind-icon">args</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="logicsig.logicsig-1.html#logic" class="tsd-kind-icon">logic</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="logicsig.logicsig-1.html#lsigaddress" class="tsd-kind-icon">lsig<wbr>Address</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="logicsig.logicsig-1.html#msig" class="tsd-kind-icon">msig</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="logicsig.logicsig-1.html#sig" class="tsd-kind-icon">sig</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="logicsig.logicsig-1.html#tag" class="tsd-kind-icon">tag</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Methods</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="logicsig.logicsig-1.html#address" class="tsd-kind-icon">address</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="logicsig.logicsig-1.html#appendtomultisig" class="tsd-kind-icon">append<wbr>ToMultisig</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="logicsig.logicsig-1.html#frombyte" class="tsd-kind-icon">from<wbr>Byte</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="logicsig.logicsig-1.html#from_obj_for_encoding" class="tsd-kind-icon">from_<wbr>obj_<wbr>for_<wbr>encoding</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="logicsig.logicsig-1.html#get_obj_for_encoding" class="tsd-kind-icon">get_<wbr>obj_<wbr>for_<wbr>encoding</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="logicsig.logicsig-1.html#program" class="tsd-kind-icon">program</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="logicsig.logicsig-1.html#sign" class="tsd-kind-icon">sign</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="logicsig.logicsig-1.html#signprogram" class="tsd-kind-icon">sign<wbr>Program</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="logicsig.logicsig-1.html#singlesignmultisig" class="tsd-kind-icon">single<wbr>Sign<wbr>Multisig</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="logicsig.logicsig-1.html#tobyte" class="tsd-kind-icon">to<wbr>Byte</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="logicsig.logicsig-1.html#verify" class="tsd-kind-icon">verify</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="logicsig.logicsig-1.html#verifymultisig" class="tsd-kind-icon">verify<wbr>Multisig</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Logic<wbr>Sig<span class="tsd-signature-symbol">(</span>program<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, args<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="logicsig.logicsig-1.html" class="tsd-signature-type" data-tsd-kind="Class">LogicSig</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/runtime/src/logicsig.ts#L25">packages/runtime/src/logicsig.ts:25</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>program: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>args: <span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">[]</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="logicsig.logicsig-1.html" class="tsd-signature-type" data-tsd-kind="Class">LogicSig</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="args" class="tsd-anchor"></a>
+					<h3>args</h3>
+					<div class="tsd-signature tsd-kind-icon">args<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">[]</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/runtime/src/logicsig.ts#L22">packages/runtime/src/logicsig.ts:22</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="logic" class="tsd-anchor"></a>
+					<h3>logic</h3>
+					<div class="tsd-signature tsd-kind-icon">logic<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Uint8Array</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/runtime/src/logicsig.ts#L21">packages/runtime/src/logicsig.ts:21</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="lsigaddress" class="tsd-anchor"></a>
+					<h3>lsig<wbr>Address</h3>
+					<div class="tsd-signature tsd-kind-icon">lsig<wbr>Address<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/runtime/src/logicsig.ts#L25">packages/runtime/src/logicsig.ts:25</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="msig" class="tsd-anchor"></a>
+					<h3>msig</h3>
+					<div class="tsd-signature tsd-kind-icon">msig<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">MultiSig</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/runtime/src/logicsig.ts#L24">packages/runtime/src/logicsig.ts:24</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="sig" class="tsd-anchor"></a>
+					<h3>sig</h3>
+					<div class="tsd-signature tsd-kind-icon">sig<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Uint8Array</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/runtime/src/logicsig.ts#L23">packages/runtime/src/logicsig.ts:23</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="tag" class="tsd-anchor"></a>
+					<h3>tag</h3>
+					<div class="tsd-signature tsd-kind-icon">tag<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Buffer</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/runtime/src/logicsig.ts#L20">packages/runtime/src/logicsig.ts:20</a></li>
+						</ul>
+					</aside>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="address" class="tsd-anchor"></a>
+					<h3>address</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">address<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/runtime/src/logicsig.ts#L187">packages/runtime/src/logicsig.ts:187</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns logic signature address</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="appendtomultisig" class="tsd-anchor"></a>
+					<h3>append<wbr>ToMultisig</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">append<wbr>ToMultisig<span class="tsd-signature-symbol">(</span>secretKey<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/runtime/src/logicsig.ts#L88">packages/runtime/src/logicsig.ts:88</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Appends a signature to multi signature</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>secretKey: <span class="tsd-signature-type">Uint8Array</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Secret key to sign with</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="frombyte" class="tsd-anchor"></a>
+					<h3>from<wbr>Byte</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">from<wbr>Byte<span class="tsd-signature-symbol">(</span>val<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="logicsig.logicsig-1.html" class="tsd-signature-type" data-tsd-kind="Class">LogicSig</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/runtime/src/logicsig.ts#L208">packages/runtime/src/logicsig.ts:208</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>val: <span class="tsd-signature-type">Uint8Array</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="logicsig.logicsig-1.html" class="tsd-signature-type" data-tsd-kind="Class">LogicSig</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="from_obj_for_encoding" class="tsd-anchor"></a>
+					<h3>from_<wbr>obj_<wbr>for_<wbr>encoding</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">from_<wbr>obj_<wbr>for_<wbr>encoding<span class="tsd-signature-symbol">(</span>lsig<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">LogicSigBase</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="logicsig.logicsig-1.html" class="tsd-signature-type" data-tsd-kind="Class">LogicSig</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/runtime/src/logicsig.ts#L222">packages/runtime/src/logicsig.ts:222</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>lsig: <span class="tsd-signature-type">LogicSigBase</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="logicsig.logicsig-1.html" class="tsd-signature-type" data-tsd-kind="Class">LogicSig</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="get_obj_for_encoding" class="tsd-anchor"></a>
+					<h3>get_<wbr>obj_<wbr>for_<wbr>encoding</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get_<wbr>obj_<wbr>for_<wbr>encoding<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">LogicSigBase</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/runtime/src/logicsig.ts#L212">packages/runtime/src/logicsig.ts:212</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">LogicSigBase</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="program" class="tsd-anchor"></a>
+					<h3>program</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">program<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/runtime/src/logicsig.ts#L194">packages/runtime/src/logicsig.ts:194</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns program associated with logic signature</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="sign" class="tsd-anchor"></a>
+					<h3>sign</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">sign<span class="tsd-signature-symbol">(</span>secretKey<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Uint8Array</span>, msig<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">MultiSigAccount</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/runtime/src/logicsig.ts#L41">packages/runtime/src/logicsig.ts:41</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Creates signature (if no msig provided) or multi signature otherwise</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>secretKey: <span class="tsd-signature-type">Uint8Array</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>sender&#39;s secret key</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> msig: <span class="tsd-signature-type">MultiSigAccount</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>multisignature if it exists</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="signprogram" class="tsd-anchor"></a>
+					<h3>sign<wbr>Program</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">sign<wbr>Program<span class="tsd-signature-symbol">(</span>secretKey<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Uint8Array</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/runtime/src/logicsig.ts#L180">packages/runtime/src/logicsig.ts:180</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns signed logic</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>secretKey: <span class="tsd-signature-type">Uint8Array</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Uint8Array</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="singlesignmultisig" class="tsd-anchor"></a>
+					<h3>single<wbr>Sign<wbr>Multisig</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">single<wbr>Sign<wbr>Multisig<span class="tsd-signature-symbol">(</span>secretKey<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Uint8Array</span>, msig<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">MultiSig</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/runtime/src/logicsig.ts#L67">packages/runtime/src/logicsig.ts:67</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Sign Multisignature</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>secretKey: <span class="tsd-signature-type">Uint8Array</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Secret key to sign with</p>
+									</div>
+								</li>
+								<li>
+									<h5>msig: <span class="tsd-signature-type">MultiSig</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Multisignature</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="tobyte" class="tsd-anchor"></a>
+					<h3>to<wbr>Byte</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">to<wbr>Byte<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Uint8Array</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/runtime/src/logicsig.ts#L204">packages/runtime/src/logicsig.ts:204</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Note: following functions are dummy functions
+										they are used only to match type with algosdk LogicSig
+									there is a possibility that we may use them in future.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Uint8Array</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="verify" class="tsd-anchor"></a>
+					<h3>verify</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">verify<span class="tsd-signature-symbol">(</span>accPk<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/runtime/src/logicsig.ts#L100">packages/runtime/src/logicsig.ts:100</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Performs signature verification</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>accPk: <span class="tsd-signature-type">Uint8Array</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="verifymultisig" class="tsd-anchor"></a>
+					<h3>verify<wbr>Multisig</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">verify<wbr>Multisig<span class="tsd-signature-symbol">(</span>msig<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">MultiSig</span>, accAddr<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/runtime/src/logicsig.ts#L123">packages/runtime/src/logicsig.ts:123</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Verify multi-signature</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>msig: <span class="tsd-signature-type">MultiSig</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Msig</p>
+									</div>
+								</li>
+								<li>
+									<h5>accAddr: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Sender&#39;s account address</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class=" ">
+						<a href="../modules.html">Exports</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/account.html">account</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/ctx.html">ctx</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/errors_errors_list.html">errors/errors-<wbr>list</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/errors_runtime_errors.html">errors/runtime-<wbr>errors</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/errors_validation_errors.html">errors/validation-<wbr>errors</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/index.html">index</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/interpreter_interpreter.html">interpreter/interpreter</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/interpreter_opcode.html">interpreter/opcode</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/interpreter_opcode_list.html">interpreter/opcode-<wbr>list</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/lib_asa.html">lib/asa</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/lib_compare.html">lib/compare</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/lib_constants.html">lib/constants</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/lib_files.html">lib/files</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/lib_parsing.html">lib/parsing</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/lib_stack.html">lib/stack</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/lib_stateful.html">lib/stateful</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/lib_txn.html">lib/txn</a>
+					</li>
+					<li class="current tsd-kind-module">
+						<a href="../modules/logicsig.html">logicsig</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/mock_tx.html">mock/tx</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/parser_parser.html">parser/parser</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/runtime.html">runtime</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/types.html">types</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/types_input.html">types-<wbr>input</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-class tsd-parent-kind-module">
+						<a href="logicsig.logicsig-1.html" class="tsd-kind-icon">Logic<wbr>Sig</a>
+						<ul>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+								<a href="logicsig.logicsig-1.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="logicsig.logicsig-1.html#args" class="tsd-kind-icon">args</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="logicsig.logicsig-1.html#logic" class="tsd-kind-icon">logic</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="logicsig.logicsig-1.html#lsigaddress" class="tsd-kind-icon">lsig<wbr>Address</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="logicsig.logicsig-1.html#msig" class="tsd-kind-icon">msig</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="logicsig.logicsig-1.html#sig" class="tsd-kind-icon">sig</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="logicsig.logicsig-1.html#tag" class="tsd-kind-icon">tag</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="logicsig.logicsig-1.html#address" class="tsd-kind-icon">address</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="logicsig.logicsig-1.html#appendtomultisig" class="tsd-kind-icon">append<wbr>ToMultisig</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="logicsig.logicsig-1.html#frombyte" class="tsd-kind-icon">from<wbr>Byte</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="logicsig.logicsig-1.html#from_obj_for_encoding" class="tsd-kind-icon">from_<wbr>obj_<wbr>for_<wbr>encoding</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="logicsig.logicsig-1.html#get_obj_for_encoding" class="tsd-kind-icon">get_<wbr>obj_<wbr>for_<wbr>encoding</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="logicsig.logicsig-1.html#program" class="tsd-kind-icon">program</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="logicsig.logicsig-1.html#sign" class="tsd-kind-icon">sign</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="logicsig.logicsig-1.html#signprogram" class="tsd-kind-icon">sign<wbr>Program</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="logicsig.logicsig-1.html#singlesignmultisig" class="tsd-kind-icon">single<wbr>Sign<wbr>Multisig</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="logicsig.logicsig-1.html#tobyte" class="tsd-kind-icon">to<wbr>Byte</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="logicsig.logicsig-1.html#verify" class="tsd-kind-icon">verify</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="logicsig.logicsig-1.html#verifymultisig" class="tsd-kind-icon">verify<wbr>Multisig</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>

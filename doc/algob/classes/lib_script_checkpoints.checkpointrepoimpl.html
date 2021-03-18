@@ -1,0 +1,606 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>CheckpointRepoImpl | @algo-builder/algob</title>
+	<meta name="description" content="Documentation for @algo-builder/algob">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="../assets/css/main.css">
+	<script async src="../assets/js/search.js" id="search-script"></script>
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.json" data-base="..">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="../index.html" class="title">@algo-builder/algob</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="../modules.html">@algo-builder/algob</a>
+				</li>
+				<li>
+					<a href="../modules/lib_script_checkpoints.html">lib/script-checkpoints</a>
+				</li>
+				<li>
+					<a href="lib_script_checkpoints.checkpointrepoimpl.html">CheckpointRepoImpl</a>
+				</li>
+			</ul>
+			<h1>Class CheckpointRepoImpl</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">CheckpointRepoImpl</span>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel">
+				<h3>Implements</h3>
+				<ul class="tsd-hierarchy">
+					<li><a href="../interfaces/types.checkpointrepo.html" class="tsd-signature-type" data-tsd-kind="Interface">CheckpointRepo</a></li>
+				</ul>
+			</section>
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Constructors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="lib_script_checkpoints.checkpointrepoimpl.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Properties</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="lib_script_checkpoints.checkpointrepoimpl.html#allcps" class="tsd-kind-icon">allCPs</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="lib_script_checkpoints.checkpointrepoimpl.html#precedingcp" class="tsd-kind-icon">precedingCP</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="lib_script_checkpoints.checkpointrepoimpl.html#scriptmap" class="tsd-kind-icon">script<wbr>Map</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="lib_script_checkpoints.checkpointrepoimpl.html#strippedcp" class="tsd-kind-icon">strippedCP</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Methods</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="lib_script_checkpoints.checkpointrepoimpl.html#getmetadata" class="tsd-kind-icon">get<wbr>Metadata</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="lib_script_checkpoints.checkpointrepoimpl.html#isdefined" class="tsd-kind-icon">is<wbr>Defined</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="lib_script_checkpoints.checkpointrepoimpl.html#merge" class="tsd-kind-icon">merge</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="lib_script_checkpoints.checkpointrepoimpl.html#mergetoglobal" class="tsd-kind-icon">merge<wbr>ToGlobal</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="lib_script_checkpoints.checkpointrepoimpl.html#networkexistsincurrentcp" class="tsd-kind-icon">network<wbr>Exists<wbr>InCurrentCP</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="lib_script_checkpoints.checkpointrepoimpl.html#putmetadata" class="tsd-kind-icon">put<wbr>Metadata</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="lib_script_checkpoints.checkpointrepoimpl.html#registerasa" class="tsd-kind-icon">registerASA</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="lib_script_checkpoints.checkpointrepoimpl.html#registerlsig" class="tsd-kind-icon">register<wbr>Lsig</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="lib_script_checkpoints.checkpointrepoimpl.html#registerssc" class="tsd-kind-icon">registerSSC</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Checkpoint<wbr>Repo<wbr>Impl<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="lib_script_checkpoints.checkpointrepoimpl.html" class="tsd-signature-type" data-tsd-kind="Class">CheckpointRepoImpl</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="lib_script_checkpoints.checkpointrepoimpl.html" class="tsd-signature-type" data-tsd-kind="Class">CheckpointRepoImpl</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="allcps" class="tsd-anchor"></a>
+					<h3>allCPs</h3>
+					<div class="tsd-signature tsd-kind-icon">allCPs<span class="tsd-signature-symbol">:</span> <a href="../interfaces/types.checkpoints.html" class="tsd-signature-type" data-tsd-kind="Interface">Checkpoints</a><span class="tsd-signature-symbol"> = ...</span></div>
+					<aside class="tsd-sources">
+						<p>Implementation of <a href="../interfaces/types.checkpointrepo.html">CheckpointRepo</a>.<a href="../interfaces/types.checkpointrepo.html#allcps">allCPs</a></p>
+						<ul>
+							<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/algob/src/lib/script-checkpoints.ts#L78">algob/src/lib/script-checkpoints.ts:78</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>All possible values that are loaded in advance.
+							This allows to prevent asset name clashes between scripts.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="precedingcp" class="tsd-anchor"></a>
+					<h3>precedingCP</h3>
+					<div class="tsd-signature tsd-kind-icon">precedingCP<span class="tsd-signature-symbol">:</span> <a href="../interfaces/types.checkpoints.html" class="tsd-signature-type" data-tsd-kind="Interface">Checkpoints</a><span class="tsd-signature-symbol"> = ...</span></div>
+					<aside class="tsd-sources">
+						<p>Implementation of <a href="../interfaces/types.checkpointrepo.html">CheckpointRepo</a>.<a href="../interfaces/types.checkpointrepo.html#precedingcp">precedingCP</a></p>
+						<ul>
+							<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/algob/src/lib/script-checkpoints.ts#L77">algob/src/lib/script-checkpoints.ts:77</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Accumulates state as scripts are executed. This way it hides values generated by
+							remaining checkpoints. It is what should be exposed to the running scripts.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="scriptmap" class="tsd-anchor"></a>
+					<h3>script<wbr>Map</h3>
+					<div class="tsd-signature tsd-kind-icon">script<wbr>Map<span class="tsd-signature-symbol">:</span> <a href="../interfaces/types.assetscriptmap.html" class="tsd-signature-type" data-tsd-kind="Interface">AssetScriptMap</a><span class="tsd-signature-symbol"> = ...</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/algob/src/lib/script-checkpoints.ts#L79">algob/src/lib/script-checkpoints.ts:79</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="strippedcp" class="tsd-anchor"></a>
+					<h3>strippedCP</h3>
+					<div class="tsd-signature tsd-kind-icon">strippedCP<span class="tsd-signature-symbol">:</span> <a href="../interfaces/types.checkpoints.html" class="tsd-signature-type" data-tsd-kind="Interface">Checkpoints</a><span class="tsd-signature-symbol"> = ...</span></div>
+					<aside class="tsd-sources">
+						<p>Implementation of <a href="../interfaces/types.checkpointrepo.html">CheckpointRepo</a>.<a href="../interfaces/types.checkpointrepo.html#strippedcp">strippedCP</a></p>
+						<ul>
+							<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/algob/src/lib/script-checkpoints.ts#L76">algob/src/lib/script-checkpoints.ts:76</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Variables that current script introduced, short version of what was added.
+							Used for state persistence.</p>
+						</div>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getmetadata" class="tsd-anchor"></a>
+					<h3>get<wbr>Metadata</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Metadata<span class="tsd-signature-symbol">(</span>networkName<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Implementation of CheckpointRepo.getMetadata</p>
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/algob/src/lib/script-checkpoints.ts#L130">algob/src/lib/script-checkpoints.ts:130</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Gets metadata key-value for a specified network.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>networkName: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>key: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="isdefined" class="tsd-anchor"></a>
+					<h3>is<wbr>Defined</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">is<wbr>Defined<span class="tsd-signature-symbol">(</span>networkName<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Implementation of CheckpointRepo.isDefined</p>
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/algob/src/lib/script-checkpoints.ts#L158">algob/src/lib/script-checkpoints.ts:158</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>networkName: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>name: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="merge" class="tsd-anchor"></a>
+					<h3>merge</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">merge<span class="tsd-signature-symbol">(</span>cp<span class="tsd-signature-symbol">: </span><a href="../interfaces/types.checkpoints.html" class="tsd-signature-type" data-tsd-kind="Interface">Checkpoints</a>, scriptName<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/types.checkpointrepo.html" class="tsd-signature-type" data-tsd-kind="Interface">CheckpointRepo</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Implementation of CheckpointRepo.merge</p>
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/algob/src/lib/script-checkpoints.ts#L88">algob/src/lib/script-checkpoints.ts:88</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>cp: <a href="../interfaces/types.checkpoints.html" class="tsd-signature-type" data-tsd-kind="Interface">Checkpoints</a></h5>
+								</li>
+								<li>
+									<h5>scriptName: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/types.checkpointrepo.html" class="tsd-signature-type" data-tsd-kind="Interface">CheckpointRepo</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="mergetoglobal" class="tsd-anchor"></a>
+					<h3>merge<wbr>ToGlobal</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">merge<wbr>ToGlobal<span class="tsd-signature-symbol">(</span>cp<span class="tsd-signature-symbol">: </span><a href="../interfaces/types.checkpoints.html" class="tsd-signature-type" data-tsd-kind="Interface">Checkpoints</a>, scriptName<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/types.checkpointrepo.html" class="tsd-signature-type" data-tsd-kind="Interface">CheckpointRepo</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Implementation of CheckpointRepo.mergeToGlobal</p>
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/algob/src/lib/script-checkpoints.ts#L95">algob/src/lib/script-checkpoints.ts:95</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>cp: <a href="../interfaces/types.checkpoints.html" class="tsd-signature-type" data-tsd-kind="Interface">Checkpoints</a></h5>
+								</li>
+								<li>
+									<h5>scriptName: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/types.checkpointrepo.html" class="tsd-signature-type" data-tsd-kind="Interface">CheckpointRepo</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="networkexistsincurrentcp" class="tsd-anchor"></a>
+					<h3>network<wbr>Exists<wbr>InCurrentCP</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">network<wbr>Exists<wbr>InCurrentCP<span class="tsd-signature-symbol">(</span>networkName<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Implementation of CheckpointRepo.networkExistsInCurrentCP</p>
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/algob/src/lib/script-checkpoints.ts#L165">algob/src/lib/script-checkpoints.ts:165</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>networkName: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="putmetadata" class="tsd-anchor"></a>
+					<h3>put<wbr>Metadata</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">put<wbr>Metadata<span class="tsd-signature-symbol">(</span>networkName<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/types.checkpointrepo.html" class="tsd-signature-type" data-tsd-kind="Interface">CheckpointRepo</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Implementation of CheckpointRepo.putMetadata</p>
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/algob/src/lib/script-checkpoints.ts#L123">algob/src/lib/script-checkpoints.ts:123</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Sets metadata key-value for a specified network.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>networkName: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>key: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>value: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/types.checkpointrepo.html" class="tsd-signature-type" data-tsd-kind="Interface">CheckpointRepo</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="registerasa" class="tsd-anchor"></a>
+					<h3>registerASA</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">registerASA<span class="tsd-signature-symbol">(</span>networkName<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, info<span class="tsd-signature-symbol">: </span><a href="../interfaces/types.asainfo.html" class="tsd-signature-type" data-tsd-kind="Interface">ASAInfo</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/types.checkpointrepo.html" class="tsd-signature-type" data-tsd-kind="Interface">CheckpointRepo</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Implementation of CheckpointRepo.registerASA</p>
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/algob/src/lib/script-checkpoints.ts#L137">algob/src/lib/script-checkpoints.ts:137</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>networkName: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>name: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>info: <a href="../interfaces/types.asainfo.html" class="tsd-signature-type" data-tsd-kind="Interface">ASAInfo</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/types.checkpointrepo.html" class="tsd-signature-type" data-tsd-kind="Interface">CheckpointRepo</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="registerlsig" class="tsd-anchor"></a>
+					<h3>register<wbr>Lsig</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">register<wbr>Lsig<span class="tsd-signature-symbol">(</span>networkName<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, info<span class="tsd-signature-symbol">: </span><a href="../interfaces/types.lsiginfo.html" class="tsd-signature-type" data-tsd-kind="Interface">LsigInfo</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/types.checkpointrepo.html" class="tsd-signature-type" data-tsd-kind="Interface">CheckpointRepo</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Implementation of CheckpointRepo.registerLsig</p>
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/algob/src/lib/script-checkpoints.ts#L151">algob/src/lib/script-checkpoints.ts:151</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>networkName: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>name: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>info: <a href="../interfaces/types.lsiginfo.html" class="tsd-signature-type" data-tsd-kind="Interface">LsigInfo</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/types.checkpointrepo.html" class="tsd-signature-type" data-tsd-kind="Interface">CheckpointRepo</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="registerssc" class="tsd-anchor"></a>
+					<h3>registerSSC</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">registerSSC<span class="tsd-signature-symbol">(</span>networkName<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, info<span class="tsd-signature-symbol">: </span><a href="../interfaces/types.sscinfo.html" class="tsd-signature-type" data-tsd-kind="Interface">SSCInfo</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/types.checkpointrepo.html" class="tsd-signature-type" data-tsd-kind="Interface">CheckpointRepo</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Implementation of CheckpointRepo.registerSSC</p>
+								<ul>
+									<li>Defined in <a href="https://github.com/scale-it/algo-builder/blob/6858045/packages/algob/src/lib/script-checkpoints.ts#L144">algob/src/lib/script-checkpoints.ts:144</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>networkName: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>name: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>info: <a href="../interfaces/types.sscinfo.html" class="tsd-signature-type" data-tsd-kind="Interface">SSCInfo</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/types.checkpointrepo.html" class="tsd-signature-type" data-tsd-kind="Interface">CheckpointRepo</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class=" ">
+						<a href="../modules.html">Exports</a>
+					</li>
+					<li class="current tsd-kind-module">
+						<a href="../modules/lib_script_checkpoints.html">lib/script-<wbr>checkpoints</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="lib_script_checkpoints.checkpointimpl.html" class="tsd-kind-icon">Checkpoint<wbr>Impl</a>
+					</li>
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-class tsd-parent-kind-module">
+						<a href="lib_script_checkpoints.checkpointrepoimpl.html" class="tsd-kind-icon">Checkpoint<wbr>Repo<wbr>Impl</a>
+						<ul>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+								<a href="lib_script_checkpoints.checkpointrepoimpl.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="lib_script_checkpoints.checkpointrepoimpl.html#allcps" class="tsd-kind-icon">allCPs</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="lib_script_checkpoints.checkpointrepoimpl.html#precedingcp" class="tsd-kind-icon">precedingCP</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="lib_script_checkpoints.checkpointrepoimpl.html#scriptmap" class="tsd-kind-icon">script<wbr>Map</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="lib_script_checkpoints.checkpointrepoimpl.html#strippedcp" class="tsd-kind-icon">strippedCP</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="lib_script_checkpoints.checkpointrepoimpl.html#getmetadata" class="tsd-kind-icon">get<wbr>Metadata</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="lib_script_checkpoints.checkpointrepoimpl.html#isdefined" class="tsd-kind-icon">is<wbr>Defined</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="lib_script_checkpoints.checkpointrepoimpl.html#merge" class="tsd-kind-icon">merge</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="lib_script_checkpoints.checkpointrepoimpl.html#mergetoglobal" class="tsd-kind-icon">merge<wbr>ToGlobal</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="lib_script_checkpoints.checkpointrepoimpl.html#networkexistsincurrentcp" class="tsd-kind-icon">network<wbr>Exists<wbr>InCurrentCP</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="lib_script_checkpoints.checkpointrepoimpl.html#putmetadata" class="tsd-kind-icon">put<wbr>Metadata</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="lib_script_checkpoints.checkpointrepoimpl.html#registerasa" class="tsd-kind-icon">registerASA</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="lib_script_checkpoints.checkpointrepoimpl.html#registerlsig" class="tsd-kind-icon">register<wbr>Lsig</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="lib_script_checkpoints.checkpointrepoimpl.html#registerssc" class="tsd-kind-icon">registerSSC</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
+					<li class=" tsd-kind-variable tsd-parent-kind-module">
+						<a href="../modules/lib_script_checkpoints.html#scriptsdirectory" class="tsd-kind-icon">scripts<wbr>Directory</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-module">
+						<a href="../modules/lib_script_checkpoints.html#testsdirectory" class="tsd-kind-icon">tests<wbr>Directory</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="../modules/lib_script_checkpoints.html#appendtocheckpoint" class="tsd-kind-icon">append<wbr>ToCheckpoint</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="../modules/lib_script_checkpoints.html#loadcheckpoint" class="tsd-kind-icon">load<wbr>Checkpoint</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="../modules/lib_script_checkpoints.html#loadcheckpointbycpname" class="tsd-kind-icon">load<wbr>Checkpoint<wbr>ByCPName</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="../modules/lib_script_checkpoints.html#loadcheckpointsintocpdata" class="tsd-kind-icon">load<wbr>Checkpoints<wbr>IntoCPData</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="../modules/lib_script_checkpoints.html#loadcheckpointsrecursive" class="tsd-kind-icon">load<wbr>Checkpoints<wbr>Recursive</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="../modules/lib_script_checkpoints.html#lsscriptsdir" class="tsd-kind-icon">ls<wbr>Scripts<wbr>Dir</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="../modules/lib_script_checkpoints.html#persistcheckpoint" class="tsd-kind-icon">persist<wbr>Checkpoint</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="../modules/lib_script_checkpoints.html#tocheckpointfilename" class="tsd-kind-icon">to<wbr>Checkpoint<wbr>File<wbr>Name</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="../modules/lib_script_checkpoints.html#tomap" class="tsd-kind-icon">to<wbr>Map</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="../modules/lib_script_checkpoints.html#toscriptfilename" class="tsd-kind-icon">to<wbr>Script<wbr>File<wbr>Name</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>
