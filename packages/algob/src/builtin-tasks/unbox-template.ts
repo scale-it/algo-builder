@@ -7,7 +7,7 @@ export default function (): void {
     .addFlag(
       "force",
       "Unbox project in the current directory regardless of its " +
-      "state. Be careful, this\n                will potentially overwrite files " +
+      "state. Be careful, this\n                will overwrite files " +
       "that exist in the directory."
     )
     .addOptionalPositionalParam<string>(

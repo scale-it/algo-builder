@@ -38,10 +38,8 @@ async function confirmDepInstallation (name: string, destination: string): Promi
     if (e === "") {
       return false;
     }
-
     throw e;
   }
-
   return responses.shouldInstall;
 }
 
@@ -71,7 +69,6 @@ async function checkDir (destination: string, force: boolean): Promise<void> {
         if (e === "") {
           return;
         }
-
         throw e;
       }
       if (!responses.shouldProceedWithNonEmptyDir) {
