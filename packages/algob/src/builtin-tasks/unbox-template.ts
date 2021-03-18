@@ -11,14 +11,14 @@ export default function (): void {
       "that exist in the directory."
     )
     .addOptionalPositionalParam<string>(
-    "destination",
-    "Path to the directory in which you would like to unbox the project files. " +
-      "If destination is\n                not provided, this defaults to the current directory.\n"
-  )
-    .addOptionalPositionalParam<string>(
     "templateName",
     "Name of the dapp template. If no template is specified, a default " +
-      "template(bare) will be downloaded."
+        "template(bare) will be downloaded."
+  )
+    .addOptionalPositionalParam<string>(
+    "destination",
+    "Path to the directory in which you would like to unbox the project files. " +
+        "If destination is\n                not provided, this defaults to the current directory.\n"
   )
     .setAction((input, _) => unbox(input));
 }

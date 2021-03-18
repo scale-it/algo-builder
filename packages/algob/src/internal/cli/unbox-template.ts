@@ -139,8 +139,8 @@ function printSuggestedDAppCommands (packageManager: string): void {
  * Unboxes a dapp template from 'scale-it/algo-builder-templates' with given name
  * and destination
  * @param force --force flag. If true then contents in destination directory are overwritten
- * @param destination destination directory to unbox template to. Defaults to current working directory
  * @param templateName templateName to unbox from scale-it/algo-builder-templates.
+ * @param destination destination directory to unbox template to. Defaults to current working directory
  *  - If template name is not passed, the default template is unboxed.
  *  - If template name passed is incorrect (template does not exist), then user is asked to unbox
  *     from one of the existing templates or exit unboxing
@@ -148,8 +148,8 @@ function printSuggestedDAppCommands (packageManager: string): void {
  *     or not (if --force is not used).
  *  - If `--force` is used, then conflicting files are overwritten.
  */
-export async function unbox ({ force, destination, templateName }:
-{ force: boolean, destination?: string, templateName?: string}): Promise<void> {
+export async function unbox ({ force, templateName, destination }:
+{ force: boolean, templateName?: string, destination?: string}): Promise<void> {
   await printWelcomeMessage();
 
   const normalizedDestination = _normalizeDestination(destination);
