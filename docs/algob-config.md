@@ -1,6 +1,6 @@
 # algob config
 
-Algorand builder project must have an `algob.config.js` file present in a root directory.
+Algo Builder project must have an `algob.config.js` file present in a root directory.
 The config is used to list available algorand networks and instructions how to connect to them.
 
 A network object can specify following entries:
@@ -87,12 +87,12 @@ Each network configuration requires a list of accounts. These accounts are then 
 
 1. Loading from a file (you can generate a test accounts using `gen-accounts` command). `algob` should be available in your node_modules.
 
-        const { loadAccountsFromFileSync } = require("@algorand-builder/algob");
+        const { loadAccountsFromFileSync } = require("@algo-builder/algob");
         const accFromFile = loadAccountsFromFileSync("assets/accounts_generated.yaml");
 
 1. A mnemonic string:
 
-        const { mkAccounts } = require("@algorand-builder/algob");
+        const { mkAccounts } = require("@algo-builder/algob");
         let accounts = mkAccounts([{
           name: "gold",
           addr: "KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY",
@@ -111,7 +111,7 @@ Each network configuration requires a list of accounts. These accounts are then 
    account with same name is already listed in given `network.accounts` then KMD loader will
    ignore that account. Similarly, account will be ignored if KMD wallet doesn't have a
    specified address.
-   Please see the [KmdCfg type](https://scale-it.github.io/algorand-builder/interfaces/_types_.kmdcfg.html) documentation for details.
+   Please see the [KmdCfg type](https://scale-it.github.io/algo-builder/interfaces/_types_.kmdcfg.html) documentation for details.
 
         // KMD credentials
         let kmdCfg = {
@@ -143,7 +143,7 @@ Each network configuration requires a list of accounts. These accounts are then 
 
     Use the following command to load accounts from environment:
 
-        const { loadAccountsFromEnv } = require("@algorand-builder/algob");
+        const { loadAccountsFromEnv } = require("@algo-builder/algob");
         const accounts = loadAccountsFromEnv();
 
 
@@ -157,8 +157,8 @@ You can also construct different accounts for different networks.
 
 ```
 
-const { loadAccountsFromFileSync } = require("@algorand-builder/algob");
-const {privateNet} = require("algorand-builder/config")
+const { loadAccountsFromFileSync } = require("@algo-builder/algob");
+const {privateNet} = require("algo-builder/config")
 
 const accounts = loadAccountsFromFileSync("assets/accounts_generated.yaml");
 const mainnetAccounts = loadAccountsFromFileSync("private/accounts/mainnet.yaml");

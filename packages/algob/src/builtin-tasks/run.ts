@@ -1,6 +1,5 @@
 import debug from "debug";
 import fsExtra from "fs-extra";
-import path from "path";
 
 import { task } from "../internal/core/config/config-env";
 import { BuilderError } from "../internal/core/errors";
@@ -92,7 +91,6 @@ async function runSortedScripts (
   const deployer: AlgobDeployer = mkDeployer(allowWrite, deployerCfg);
 
   const scriptsFromScriptsDir: string[] = lsScriptsDir();
-
   for (const relativeScriptPath of scriptNames) {
     const prevScripts = splitAfter(scriptsFromScriptsDir, relativeScriptPath);
     loadCheckpointsIntoCPData(deployerCfg.cpData, prevScripts);
@@ -122,25 +120,17 @@ async function executeRunTask (
   algoOp: AlgoOperator
 ): Promise<any> {
   const logDebugTag = "algob:tasks:run";
-  let scriptsPath = scriptsDirectory;
 
   const nonExistent = filterNonExistent(scripts);
   if (nonExistent.length !== 0) {
-    // If files doesn't exist in scripts, check for build folder
-    scripts.forEach(function (script, index) {
-      scripts[index] = path.join("build", script);
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND, {
+      scripts: nonExistent
     });
-    if (filterNonExistent(scripts).length !== 0) {
-      throw new BuilderError(ERRORS.BUILTIN_TASKS.RUN_FILES_NOT_FOUND, {
-        scripts: nonExistent
-      });
-    }
-    scriptsPath = path.join("build", scriptsDirectory);
   }
 
   await runMultipleScripts(
     runtimeEnv,
-    assertDirChildren(scriptsPath, scripts),
+    assertDirChildren(scriptsDirectory, scripts),
     (_cpData: CheckpointRepo, _relativeScriptPath: string) => { },
     true,
     logDebugTag,

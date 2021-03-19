@@ -1,4 +1,4 @@
-import { parseSSCAppArgs, stringToBytes, uint64ToBigEndian } from "@algorand-builder/runtime";
+import { parseSSCAppArgs, stringToBytes, uint64ToBigEndian } from "@algo-builder/runtime";
 import { decodeAddress } from "algosdk";
 import { assert } from "chai";
 

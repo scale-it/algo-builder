@@ -1,4 +1,4 @@
-# ASA deployment using [Algorand Builder](https://github.com/scale-it/algorand-builder/)
+# ASA deployment using [Algo Builder](https://github.com/scale-it/algo-builder/)
 
 This project shows how to create Algorand Standard Asset (ASA).
 We will create gold and tesla assets. In algob, we recommend to

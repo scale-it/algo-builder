@@ -1,4 +1,4 @@
-const { executeTransaction, balanceOf } = require('@algorand-builder/algob');
+const { executeTransaction, balanceOf } = require('@algo-builder/algob');
 const { mkParam } = require('./transfer/common');
 
 /*

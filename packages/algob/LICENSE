@@ -1,12 +1,12 @@
 The ALGOB is licensed under the Apache-2.0 license as defined in the
-algorand-builder repository (https://github.com/scale-it/algorand-builder).
+algo-builder repository (https://github.com/scale-it/algo-builder).
 Code originating between commits
 eb85a4b299841431c40cf27bafc57ad2e567b1ee and 1dca01a038fd4d68b238f2310921c8654182be65
 It is licensed under MIT license as defined below.
 
 The MIT License
 
-Copyright (c) 2020 algorand-builder contributors (see project.json in the root directory)
+Copyright (c) 2020 Algo Builder contributors (see project.json in the root directory)
 Copyright (c) 2019 Nomic Labs LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

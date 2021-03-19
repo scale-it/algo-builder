@@ -23,7 +23,7 @@ These fields provide a way to view ASA and ASC1 information that was saved in th
 deployer.asa
 deployer.asc
 ```
-They return JS Maps where asset name (string) points to asset information (see `Checkpoint` type in [types.ts](https://github.com/scale-it/algorand-builder/blob/master/packages/algob/src/types.ts)).
+They return JS Maps where asset name (string) points to asset information (see `Checkpoint` type in [types.ts](https://github.com/scale-it/algo-builder/blob/master/packages/algob/src/types.ts)).
 These maps shouldn't be edited by the script itself.
 Other deployer functions do that.
 
@@ -56,5 +56,5 @@ Currently it's possible to edit these files by hand but it may be decided to dis
 
 ## Parameters
 
-For more details on checkpoint parameters and their specific types please refer to `Checkpoint` type in [types.ts](https://github.com/scale-it/algorand-builder/blob/master/packages/algob/src/types.ts).
+For more details on checkpoint parameters and their specific types please refer to `Checkpoint` type in [types.ts](https://github.com/scale-it/algo-builder/blob/master/packages/algob/src/types.ts).
 Make sure that your local `algob` version matches the version from the link.

@@ -3,8 +3,8 @@
  * This script shows a basic ASA transfer functionality between 2 user accounts.
  */
 
-const { executeTransaction, balanceOf } = require('@algorand-builder/algob');
-const { types } = require('@algorand-builder/runtime');
+const { executeTransaction, balanceOf } = require('@algo-builder/algob');
+const { types } = require('@algo-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   // query gold ASA from deployer (using checkpoint information),

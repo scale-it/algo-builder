@@ -6,7 +6,7 @@
 // a sufficient ALGO balance.
 
 /**
-   Check our /docs/algob-config.md documentation (https://github.com/scale-it/algorand-builder/blob/master/docs/algob-config.md) for more configuration options and ways how to
+   Check our /docs/algob-config.md documentation (https://github.com/scale-it/algo-builder/blob/master/docs/algob-config.md) for more configuration options and ways how to
   load a private keys:
   + using mnemonic
   + using binary secret key
@@ -17,7 +17,7 @@
 */
 
 // ## ACCOUNTS USING mnemonic ##
-const { mkAccounts, algodCredentialsFromEnv } = require("@algorand-builder/algob");
+const { mkAccounts, algodCredentialsFromEnv } = require("@algo-builder/algob");
 let accounts = mkAccounts([{
   // This account is created using `make setup-master-account` command from our
   // `/infrastructure` directory. It already has many ALGOs
@@ -27,14 +27,14 @@ let accounts = mkAccounts([{
 }]);
 
 // ## ACCOUNTS loaded from a FILE ##
-// const { loadAccountsFromFileSync } = require("@algorand-builder/algob");
+// const { loadAccountsFromFileSync } = require("@algo-builder/algob");
 // const accFromFile = loadAccountsFromFileSync("assets/accounts_generated.yaml");
 // accounts = accounts.concat(accFromFile);
 
 
 
 /// ## Enabling KMD access
-/// Please check https://github.com/scale-it/algorand-builder/blob/master/docs/algob-config.md#credentials for more details and more methods.
+/// Please check https://github.com/scale-it/algo-builder/blob/master/docs/algob-config.md#credentials for more details and more methods.
 
 // process.env.$KMD_DATA = "/path_to/KMD_DATA";
 // let kmdCred = KMDCredentialsFromEnv();
@@ -57,7 +57,7 @@ let defaultCfg = {
 };
 
 // You can also use Environment variables to get Algod credentials
-// Please check https://github.com/scale-it/algorand-builder/blob/master/docs/algob-config.md#credentials for more details and more methods.
+// Please check https://github.com/scale-it/algo-builder/blob/master/docs/algob-config.md#credentials for more details and more methods.
 // Method 1
 process.env.ALGOD_ADDR = "127.0.0.1:4001";
 process.env.ALGOD_TOKEN = "algod_token";

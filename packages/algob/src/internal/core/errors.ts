@@ -1,4 +1,4 @@
-import { applyErrorMessageTemplate } from "@algorand-builder/runtime";
+import { applyErrorMessageTemplate } from "@algo-builder/runtime";
 import type { RequestError } from 'algosdk';
 
 import type { AnyMap } from "../../types";
@@ -112,7 +112,7 @@ export function parseAlgorandError (e: RequestError, ctx: AnyMap): Error {
     if (e.response?.statusCode >= 400 && e.response?.statusCode < 500) {
       return new BuilderError(ERRORS.ALGORAND.BAD_REQUEST, {
         status: e.response?.statusCode,
-        message: e.response?.body?.message ?? e.response?.text ?? e.response?.error,
+        message: e.response?.error ?? e.response?.body?.message ?? e.response?.text,
         ctx: JSON.stringify(ctx)
       }, e.error);
     }
