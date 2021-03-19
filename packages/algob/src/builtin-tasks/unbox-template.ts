@@ -3,7 +3,7 @@ import { task } from "../internal/core/config/config-env";
 import { TASK_UNBOX_TEMPLATE } from "./task-names";
 
 export default function (): void {
-  task(TASK_UNBOX_TEMPLATE, "Unboxes a new dapp template using algorand-builder")
+  task(TASK_UNBOX_TEMPLATE, "Unboxes a new dapp template using algo-builder")
     .addFlag(
       "force",
       "Unbox project in the current directory regardless of its " +

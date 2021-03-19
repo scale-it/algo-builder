@@ -80,7 +80,7 @@ async function checkDir (destination: string, force: boolean): Promise<void> {
 }
 
 /**
- * Ensures that the template passed by user exists in scale-it/algorand-builder-templates,
+ * Ensures that the template passed by user exists in scale-it/algo-builder-templates,
  * otherwise user can select a template from the existing templates or exit unboxing
  * @param basePath path to temporary directory (contains all dapp-templates)
  * @param templateName template name passed by user (bare if no template name is passed)
