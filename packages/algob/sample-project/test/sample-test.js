@@ -1,5 +1,5 @@
-import { getProgram } from '@algo-builder/algob';
-import { Runtime, StoreAccount, types } from '@algo-builder/runtime';
+const { getProgram } =  require('@algo-builder/algob');
+const { Runtime, StoreAccount, types } = require('@algo-builder/runtime');
 const { assert } = require('chai');
 
 const minBalance = BigInt(1e6);
@@ -11,12 +11,16 @@ describe('Sample Test', function () {
   let fundReceiver;
 
   let runtime;
+  let lsig;
   const feeCheckProgram = getProgram('fee-check.teal');
 
   this.beforeEach(async function () {
     master = new StoreAccount(masterBalance);
     fundReceiver = new StoreAccount(minBalance);
     runtime = new Runtime([master, fundReceiver]);
+
+    lsig = runtime.getLogicSig(feeCheckProgram);
+    lsig.sign(master.account.sk);
   });
 
   function syncAccounts () {
@@ -25,12 +29,10 @@ describe('Sample Test', function () {
   }
 
   it('Should not fail because txn fees is equal to or greater than 10000 microAlgos', () => {
-    const fees = 10000;
-    syncAccounts();
+    const validTxFee = 10000;
     assert.equal(fundReceiver.balance(), minBalance);
     assert.equal(master.balance(), masterBalance);
-    const lsig = runtime.getLogicSig(feeCheckProgram);
-    lsig.sign(master.account.sk);
+
     runtime.executeTx({
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.LogicSignature,
@@ -38,18 +40,18 @@ describe('Sample Test', function () {
       fromAccount: master.account,
       toAccountAddr: fundReceiver.address,
       amountMicroAlgos: amount,
-      payFlags: { totalFee: fees }
+      payFlags: { totalFee: validTxFee }
     });
     syncAccounts();
     assert.equal(fundReceiver.balance(), minBalance + amount);
-    assert.equal(master.balance(), masterBalance - amount - BigInt(fees));
+    assert.equal(master.balance(), masterBalance - amount - BigInt(validTxFee));
   });
 
   it('Should fail because txn fees is less than 10000 microAlgos', () => {
-    const fees = 1000;
-    syncAccounts();
-    const lsig = runtime.getLogicSig(feeCheckProgram);
-    lsig.sign(master.account.sk);
+    const invalidTxFee = 1000;
+    const initialFundRecBalance = fundReceiver.balance();
+    const initialMasterBalance = master.balance();
+
     try {
       runtime.executeTx({
         type: types.TransactionType.TransferAlgo,
@@ -58,15 +60,14 @@ describe('Sample Test', function () {
         fromAccount: master.account,
         toAccountAddr: fundReceiver.address,
         amountMicroAlgos: amount,
-        payFlags: { totalFee: fees }
+        payFlags: { totalFee: invalidTxFee }
       });
     } catch (error) {
       console.log(error);
     }
     syncAccounts();
-    assert.equal(fundReceiver.balance(), minBalance);
-    assert.equal(master.balance(), masterBalance);
-    assert.notEqual(fundReceiver.balance(), minBalance + amount);
-    assert.notEqual(master.balance(), masterBalance - amount - BigInt(fees));
+    // verify balance is unchanged
+    assert.equal(fundReceiver.balance(), initialFundRecBalance);
+    assert.equal(master.balance(), initialMasterBalance);
   });
 });
