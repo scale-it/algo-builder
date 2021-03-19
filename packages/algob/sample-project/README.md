@@ -1,4 +1,4 @@
-This is a sample project (boilerplate `algob` project with basic ASA deployment and funding a smart contract)
+This is a sample project (boilerplate `algob` project with ASA deployment and funding a smart contract)
 
 To run the `sample-project`:
 
