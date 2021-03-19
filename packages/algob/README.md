@@ -1,4 +1,4 @@
-# Builder
+# Algo-Builder
 
 This package provides the main entry point into the application.
 
@@ -6,8 +6,7 @@ Please read the main [README](https://github.com/scale-it/algo-builder/blob/mast
 
 ## Usage
 
-
-`algob` can be included as a library by importing `internal/lib/lib.ts` or can be run from command line as described in the project [README](https://github.com/scale-it/algo-builder/blob/master/README.md) file.
+`algob` can be included as a library using `yarn add @algo-builder/algob` and then import it using `import * from '@algo-builder/algob'` or can be run from command line as described in the project [README](https://github.com/scale-it/algo-builder/blob/master/README.md) file.
 
 ### Command line usage
 

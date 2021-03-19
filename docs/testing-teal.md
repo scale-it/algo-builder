@@ -51,9 +51,13 @@ In this section we will describe the flow of testing smart contracts in runtime:
 ## Run tests
 In this section we will demonstrate executing transactions with stateless and stateful teal.
 
-TL;DR: Write tests in `/tests` directory and then call `mocha`:
+TL;DR: Write tests in `/test` directory and then call `mocha`:
 
     mocha <test name>
+
+or you can also run tests using algob
+
+    algob test
 
 See one of our examples for more details (eg: `examples/crowdfunding/test`).
 
@@ -256,14 +260,11 @@ Currently, `runtime` supports:
   + `transfer` an asset
 
 - Full transaction processing for type `payment`, `application call`
-
-Currently `runtime` does not support :-
-
- - Asset related transactions:
-    - Asset Destroy
-    - Asset Revoke
-    - Asset Freeze
-    - Asset Configuration
+- Asset related transactions:
+  - Asset Destroy
+  - Asset Revoke
+  - Asset Freeze
+  - Asset Configuration
 
 
 ## Examples
