@@ -47,7 +47,7 @@
     "lint:unix": "eslint --format unix --ext .js,.ts src test",
     "test": "mocha",
     "coverage": "nyc ../../node_modules/mocha/bin/mocha",
-    "build:docs": "typedoc --out ../../doc/algob --excludePrivate --exclude 'src/internal/**' src",
+    "build:docs": "typedoc --out ../../doc/algob --excludePrivate --exclude 'src/internal/**' src/index.ts",
     "build": "tsc --build .",
     "build:watch": "tsc -w -p .",
     "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.ts buildinfo build",
