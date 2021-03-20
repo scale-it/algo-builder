@@ -1,6 +1,6 @@
 # Builder
 
-Algob is the CLI (Command Line Interface) for Algo Builder. Think about it as a Ethereum Truffle but for Algorand projects.
+Algob is the CLI (Command Line Interface) for Algo Builder. Think about it as an Ethereum Truffle but for Algorand projects.
 
 Please read the main [README](https://github.com/scale-it/algo-builder/blob/master/README.md) file for details about the project and `algob`. This file provides a development description about the `algob` package.
 
