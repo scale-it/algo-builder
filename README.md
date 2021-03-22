@@ -146,6 +146,12 @@ TIP: Use `tsc --watch` to update the build in a realtime while you develop the p
 
 TODO: we are planning to provide a template for TS projects. [task](https://www.pivotaltracker.com/n/projects/2452320).
 
+## Templates
+
+Using the `algob unbox-template` command, the developers can get a pre-built dApp project containing scripts to deploy assets and smart contracts with react.js interactive frontend. The templates heavily use [Algosigner](https://github.com/PureStake/algosigner) to securely sign and send transactions to the ledger. 
+
+The detailed description about the templates can be found [here](https://github.com/scale-it/algo-builder-templates).
+
 
 # Contributing
 
