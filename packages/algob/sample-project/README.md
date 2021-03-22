@@ -1,4 +1,4 @@
-This is a sample project (boilerplate `algob` project with ASA deployment and funding a smart contract)
+This is a boilerplate `algob` project with ASA deployment and funding a smart contract
 
 To run the `sample-project`:
 
@@ -14,7 +14,6 @@ To run the `sample-project`:
 * Install `Algo Builder`
 
   - `yarn add @algo-builder/algob` or
-
   - `yarn link @algo-builder/algob` (with local installation, this is recommended if you want to use `algob` with latest, not released version). Read more about it [here](https://github.com/scale-it/algo-builder#installation).
 
 * Deploy your ASA and Smart Contracts:
