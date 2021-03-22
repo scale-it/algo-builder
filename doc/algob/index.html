@@ -61,10 +61,14 @@
 				<a href="#builder" id="builder" style="color: inherit; text-decoration: none;">
 					<h1>Builder</h1>
 				</a>
-				<p>This package provides the main entry point into the application.</p>
+				<p>Algob is the CLI (Command Line Interface) for Algo Builder. Think about it as an Ethereum Truffle but for Algorand projects.</p>
 				<p>Please read the main <a href="https://github.com/scale-it/algo-builder/blob/master/README.md">README</a> file for details about the project and <code>algob</code>. This file provides a development description about the <code>algob</code> package.</p>
-				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
-					<h2>Usage</h2>
+				<a href="#how-to-use-the-api-docs" id="how-to-use-the-api-docs" style="color: inherit; text-decoration: none;">
+					<h2>How to use the API docs?</h2>
+				</a>
+				<p>The best way to find a type, function or something related to a use case is by using the <strong>search field</strong> at the <strong>top</strong> of this page.</p>
+				<a href="#using-algob" id="using-algob" style="color: inherit; text-decoration: none;">
+					<h2>Using algob</h2>
 				</a>
 				<p><code>algob</code> can be included as a library by importing <code>internal/lib/lib.ts</code> or can be run from command line as described in the project <a href="https://github.com/scale-it/algo-builder/blob/master/README.md">README</a> file.</p>
 				<a href="#command-line-usage" id="command-line-usage" style="color: inherit; text-decoration: none;">
@@ -96,106 +100,88 @@
 					<li class=" ">
 						<a href="modules.html">Exports</a>
 					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/builtin_tasks_clean.html">builtin-<wbr>tasks/clean</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/builtin_tasks_compile.html">builtin-<wbr>tasks/compile</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/builtin_tasks_console.html">builtin-<wbr>tasks/console</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/builtin_tasks_deploy.html">builtin-<wbr>tasks/deploy</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/builtin_tasks_gen_accounts.html">builtin-<wbr>tasks/gen-<wbr>accounts</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/builtin_tasks_help.html">builtin-<wbr>tasks/help</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/builtin_tasks_init.html">builtin-<wbr>tasks/init</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/builtin_tasks_node_info.html">builtin-<wbr>tasks/node-<wbr>info</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/builtin_tasks_run.html">builtin-<wbr>tasks/run</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/builtin_tasks_task_names.html">builtin-<wbr>tasks/task-<wbr>names</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/builtin_tasks_test.html">builtin-<wbr>tasks/test</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/config.html">config</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/index.html">index</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/lib_account.html">lib/account</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/lib_algo_operator.html">lib/algo-<wbr>operator</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/lib_comparators.html">lib/comparators</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/lib_compile.html">lib/compile</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/lib_constants.html">lib/constants</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/lib_credentials.html">lib/credentials</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/lib_driver.html">lib/driver</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/lib_exceptions.html">lib/exceptions</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/lib_files.html">lib/files</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/lib_load_program.html">lib/load-<wbr>program</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/lib_lsig.html">lib/lsig</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/lib_msig.html">lib/msig</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/lib_script_checkpoints.html">lib/script-<wbr>checkpoints</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/lib_ssc.html">lib/ssc</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/lib_status.html">lib/status</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/lib_time.html">lib/time</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/lib_tx.html">lib/tx</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/register.html">register</a>
-					</li>
-					<li class=" tsd-kind-module">
+					<li class=" tsd-kind-namespace">
 						<a href="modules/types.html">types</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-variable">
+						<a href="modules.html#globalzeroaddress" class="tsd-kind-icon">global<wbr>Zero<wbr>Address</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#kmdcredentialsfromenv" class="tsd-kind-icon">KMDCredentials<wbr>From<wbr>Env</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#addresstopk" class="tsd-kind-icon">address<wbr>ToPk</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#algodcredentialsfromenv" class="tsd-kind-icon">algod<wbr>Credentials<wbr>From<wbr>Env</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#balanceof" class="tsd-kind-icon">balance<wbr>Of</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#createmsigaddress" class="tsd-kind-icon">create<wbr>Msig<wbr>Address</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#executesignedtxnfromfile" class="tsd-kind-icon">execute<wbr>Signed<wbr>Txn<wbr>From<wbr>File</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#executetransaction" class="tsd-kind-icon">execute<wbr>Transaction</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#getprogram" class="tsd-kind-icon">get<wbr>Program</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#getsuggestedparams" class="tsd-kind-icon">get<wbr>Suggested<wbr>Params</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#loadaccountsfromenv" class="tsd-kind-icon">load<wbr>Accounts<wbr>From<wbr>Env</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#loadaccountsfromfile" class="tsd-kind-icon">load<wbr>Accounts<wbr>From<wbr>File</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#loadaccountsfromfilesync" class="tsd-kind-icon">load<wbr>Accounts<wbr>From<wbr>File<wbr>Sync</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#mkaccounts" class="tsd-kind-icon">mk<wbr>Accounts</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#mktransaction" class="tsd-kind-icon">mk<wbr>Transaction</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#mktxparams" class="tsd-kind-icon">mk<wbr>TxParams</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#parsesscappargs" class="tsd-kind-icon">parseSSCApp<wbr>Args</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#printassets" class="tsd-kind-icon">print<wbr>Assets</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#printglobalstatessc" class="tsd-kind-icon">print<wbr>Global<wbr>StateSSC</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#printlocalstatessc" class="tsd-kind-icon">print<wbr>Local<wbr>StateSSC</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#readglobalstatessc" class="tsd-kind-icon">read<wbr>Global<wbr>StateSSC</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#readlocalstatessc" class="tsd-kind-icon">read<wbr>Local<wbr>StateSSC</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#stringtobytes" class="tsd-kind-icon">string<wbr>ToBytes</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#uint64tobigendian" class="tsd-kind-icon">uint64<wbr>ToBig<wbr>Endian</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#updatessc" class="tsd-kind-icon">updateSSC</a>
+					</li>
 				</ul>
 			</nav>
 		</div>
@@ -205,20 +191,6 @@
 	<div class="container">
 		<h2>Legend</h2>
 		<div class="tsd-legend-group">
-			<ul class="tsd-legend">
-				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
-				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
-				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
-				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
-				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
-				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
-			</ul>
 		</div>
 	</div>
 </footer>
