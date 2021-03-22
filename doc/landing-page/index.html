@@ -16,18 +16,18 @@
 <body>
 
 <!--Header Section-->
-<section class="bg-gradient pt-5 pb-6">
+<section class="bg-gradient pt-4 pb-6">
     <div class="container">
         <div class="row">
             <div class="col-12 d-flex flex-row align-items-center justify-content-between">
-                <div class="heading-brand">Algo Builder</div>
+                <div class="heading-brand"><img style="width: 30%; height: 40%;" src="../../media/logo.svg" /></div>
                 <a href="https://github.com/scale-it/algo-builder" class="btn btn-success svg-icon">
                     <em class="mr-2" data-feather="github"></em>
                     Github
                 </a>
             </div>
         </div>
-        <div class="row mt-6" style="margin-bottom: 50px;">
+        <div class="row mt-5" style="margin-bottom: 50px;">
             <div class="col-md-10 mx-auto text-center">
                 <h1>Framework to automate development of Algorand Assets and Smart Contracts</h1>
             <p class="col-md-12 mx-auto mb-2 text-center" style="font-size: x-large;">Algo Builder is an trustworthy framework for Algorand dapps (Decentralized Applications).
@@ -106,7 +106,7 @@ import { rtypes } from '@algorand-builder/runtime';
 async function run (runtimeEnv, deployer) {
   const masterAccount `=` deployer.accountsByName.get('master-account');
   const goldOwner `=` deployer.accountsByName.get('alice');
-  const bob = deployer.accountsByName.get('bob');
+  const bob `=` deployer.accountsByName.get('bob');
 
   // transfer ALGO
   await executeTransaction(deployer, {
@@ -253,8 +253,8 @@ async function run (runtimeEnv, deployer) {
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.28.0/feather.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/prism.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
 <script src="js/scripts.js"></script>
 </body>
 </html>
