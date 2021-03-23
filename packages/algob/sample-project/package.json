@@ -7,6 +7,7 @@
     "mocha": "^8.1.1"
   },
   "scripts": {
+    "algob": "algob",
     "test": "mocha"
   }
 }

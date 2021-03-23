@@ -1,13 +1,17 @@
-# Builder
+# Algo-Builder
 
-This package provides the main entry point into the application.
+Algob is the CLI (Command Line Interface) for Algo Builder. Think about it as an Ethereum Truffle but for Algorand projects.
 
 Please read the main [README](https://github.com/scale-it/algo-builder/blob/master/README.md) file for details about the project and `algob`. This file provides a development description about the `algob` package.
 
-## Usage
+## How to use the API docs?
+
+The best way to find a type, function or something related to a use case is by using the **search field** at the **top** of this page.
 
 
-`algob` can be included as a library by importing `internal/lib/lib.ts` or can be run from command line as described in the project [README](https://github.com/scale-it/algo-builder/blob/master/README.md) file.
+## Using algob
+
+`algob` can be included as a library using `yarn add @algo-builder/algob` and then import it using `import * from '@algo-builder/algob'` or can be run from command line as described in the project [README](https://github.com/scale-it/algo-builder/blob/master/README.md) file.
 
 ### Command line usage
 
