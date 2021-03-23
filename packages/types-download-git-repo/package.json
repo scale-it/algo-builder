@@ -1,0 +1,14 @@
+{
+  "name": "@types/download-git-repo",
+  "version": "0.1.0",
+  "description": "TypeScript Declaration File",
+  "main": "",
+  "typings": "index.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "lint": "eslint ./index.d.ts",
+    "lint:fix": "eslint --fix ./index.d.ts",
+    "build": "tsc",
+    "test": "echo ok"
+  }
+}
