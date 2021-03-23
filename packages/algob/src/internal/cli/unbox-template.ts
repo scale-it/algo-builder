@@ -7,7 +7,7 @@ import { copyTemplatetoDestination, fetchRepository, setUpTempDirectory } from "
 import { createConfirmationPrompt, installDependencies, printSuggestedAlgobCommands, printWelcomeMessage } from "./project-creation";
 
 const ALGOB_DAPP_TEMPLATES_GIT_REMOTE = 'scale-it/algo-builder-templates';
-const DEFAULT_DAPP_TEMPLATE = 'bare';
+const DEFAULT_DAPP_TEMPLATE = 'default';
 
 function isYarnProject (destination: string): boolean {
   return fse.existsSync(path.join(destination, "yarn.lock"));
