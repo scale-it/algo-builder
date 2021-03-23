@@ -110,18 +110,21 @@ Otherwise you can use a system/user-wide `pyteal` installation:
 
     The `init` command expects a directory where to initialize the workspace and creates sample project files there. Refer to [/docs/README](docs/README.md) for more information.
 
-1. Check that it was installed correctly:
+1. Verify if it was installed correctly:
 
         yarn run algob help
 
-1. Update the `algob.config.js` file. Make sure you have an access to a running Algorand node (`algod`). Check Algorand instructions how to install and run it.
+1. Update the `algob.config.js` file. Make sure you have access to a running Algorand node (`algod`). Check Algorand instructions how to install and run it.
     * set correct host address, port and token (if you are using the private-net, then check algod.net and algob.token files in `node_data/PrimaryNode/`)
+    * Note: If you are using `private-net` from `infrastructure`, you don't need to update the network config because they are already configured.
     * you can define multiple networks.
     * update the account list (sample project uses a sample account which doesn't have any ALGO, for transaction executions you need to have an active account with ALGOs). See the comments in `algob.config.js` for more information.
+    * Note: If you follow `infrastructure` instructions, you don't need to do this step as well because command will fund the master account.
 
 1. Add assets and smart-contracts in the `assets` directory.
 1. Add deployment scripts in `scripts` directory.
 1. Run `yarn run algob deploy` to compile and deploy everything.
+1. Run `yarn run algob run scriptPath/scriptName` to run script.
 1. To run `algob` on different network (by default the `default` network is used) use
 
         yarn run algob --network <other_network_name>  <command>

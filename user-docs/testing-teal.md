@@ -51,9 +51,13 @@ In this section we will describe the flow of testing smart contracts in runtime:
 ## Run tests
 In this section we will demonstrate executing transactions with stateless and stateful teal.
 
-TL;DR: Write tests in `/tests` directory and then call `mocha`:
+TL;DR: Write tests in `/test` directory and then call `mocha`:
 
     mocha <test name>
+
+or you can also run tests using algob
+
+    algob test
 
 See one of our examples for more details (eg: `examples/crowdfunding/test`).
 
@@ -245,25 +249,23 @@ Currently, `runtime` supports:
 - Stateless TEAL - Approve/Reject logic.
 - Stateful TEAL - Update and verify global/local states if teal logic is correct.
 - Transactions to
-  + `create` an application
-  + `opt-in` to application
-  + `update` application
-  + `delete` application
-  + `closeout` from an application
-  + `clearState` of application
-  + `create` an asset
-  + `opt-in` to asset
-  + `transfer` an asset
+  + [`create` an application](https://developer.algorand.org/docs/features/asc1/stateful/sdks/#create)
+  + [`opt-in` to application](https://developer.algorand.org/docs/features/asc1/stateful/sdks/#opt-in)
+  + [`call` application](https://developer.algorand.org/docs/features/asc1/stateful/sdks/#call-noop)
+  + [`update` application](https://developer.algorand.org/docs/features/asc1/stateful/sdks/#update)
+  + [`delete` application](https://developer.algorand.org/docs/features/asc1/stateful/sdks/#delete)
+  + [`closeout` from an application](https://developer.algorand.org/docs/features/asc1/stateful/sdks/#close-out)
+  + [`clearState` of application](https://developer.algorand.org/docs/features/asc1/stateful/sdks/#clear-state)
+  + [`create` an asset](https://developer.algorand.org/docs/features/transactions/#create-an-asset)
+  + [`opt-in` to asset](https://developer.algorand.org/docs/features/transactions/#asset-transfer-transaction)
+  + [`transfer` an asset](https://developer.algorand.org/docs/reference/transactions/#asset-transfer-transaction)
 
 - Full transaction processing for type `payment`, `application call`
-
-Currently `runtime` does not support :-
-
- - Asset related transactions:
-    - Asset Destroy
-    - Asset Revoke
-    - Asset Freeze
-    - Asset Configuration
+- Asset related transactions:
+    - [Asset Destroy](https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction)
+    - [Asset Revoke](https://developer.algorand.org/docs/reference/transactions/#asset-clawback-transaction)
+    - [Asset Freeze](https://developer.algorand.org/docs/reference/transactions/#asset-freeze-transaction)
+    - [Asset Configuration](https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction)
 
 
 ## Examples
