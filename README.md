@@ -21,7 +21,7 @@ To attract more web developers we plan to build a JavaScript DSL for TEAL with T
 
 ### Documentation
 
-User documentation is available in [/docs](docs/README.md) and [API docs](https://scale-it.github.io/algo-builder/).
+User documentation is available in [/user-docs](user-docs/README.md) and [API docs](https://scale-it.github.io/algo-builder/).
 
 The project specification is [published here](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
 
