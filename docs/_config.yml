@@ -18,17 +18,21 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
+title: "Algo Builder"
 name: "Algo Builder"
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 
+minimal_mistakes_skin: "air" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum" "sunrise"
 
 # Build settings
 markdown: kramdown # markdown processor
-theme: minimal-mistakes-jekyll
+remote_theme: "mmistakes/minimal-mistakes@4.22.0"
+
 plugins:
   - jekyll-feed
-  - jekyll-relative-links
+  - jekyll-relative-links # to handle .md ext
+  - jekyll-include-cache
 
 kramdown:
   math_engine: mathjax

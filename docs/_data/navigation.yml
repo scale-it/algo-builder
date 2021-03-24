@@ -1,0 +1,7 @@
+main:
+  - title: "Quick-Start Guide"
+    url: https://github.com/scale-it/algo-builder#installation
+  - title: "API Docs"
+    url: /page-archive/
+  - title: "Index"
+    url: /guide/README
