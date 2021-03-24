@@ -9,6 +9,7 @@
     "lint": "eslint ./index.d.ts",
     "lint:fix": "eslint --fix ./index.d.ts",
     "build": "tsc",
+    "build:docs": "echo ok",
     "test": "echo ok"
   }
 }
