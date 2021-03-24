@@ -20,8 +20,9 @@
 
 title: "Algo Builder"
 name: "Algo Builder"
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+baseurl: "/algo-builder" # the subpath of your site, e.g. /blog
+url: "https://scale-it.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+repository: "scale-it.github.io/algo-builder"
 
 minimal_mistakes_skin: "air" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum" "sunrise"
 
@@ -46,6 +47,10 @@ footer:
 
 atom_feed:
   hide: true
+
+include:
+  - _css
+  - _js
 
 # Exclude from processing.
 # The following items will not be processed, by default.
