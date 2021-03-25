@@ -1,7 +1,7 @@
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
-import { Runtime, StoreAccount } from "../../src/index";
+import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { ExecParams, SignType, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";
@@ -14,8 +14,8 @@ const initialBobHolding = minBalance + 500n;
 
 describe("Stateless Algorand Smart Contracts delegated signature mode", function () {
   useFixture("basic-teal");
-  let john = new StoreAccount(initialJohnHolding);
-  let bob = new StoreAccount(initialBobHolding);
+  let john = new AccountStore(initialJohnHolding);
+  let bob = new AccountStore(initialBobHolding);
 
   // set up transaction paramenters
   const txnParams: ExecParams = {

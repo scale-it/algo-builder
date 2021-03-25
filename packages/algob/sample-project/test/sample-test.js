@@ -1,5 +1,5 @@
-const { getProgram } =  require('@algo-builder/algob');
-const { Runtime, StoreAccount, types } = require('@algo-builder/runtime');
+const { getProgram } = require('@algo-builder/algob');
+const { Runtime, AccountStore, types } = require('@algo-builder/runtime');
 const { assert } = require('chai');
 
 const minBalance = BigInt(1e6);
@@ -15,8 +15,8 @@ describe('Sample Test', function () {
   const feeCheckProgram = getProgram('fee-check.teal');
 
   this.beforeEach(async function () {
-    master = new StoreAccount(masterBalance);
-    fundReceiver = new StoreAccount(minBalance);
+    master = new AccountStore(masterBalance);
+    fundReceiver = new AccountStore(minBalance);
     runtime = new Runtime([master, fundReceiver]);
 
     lsig = runtime.getLogicSig(feeCheckProgram);

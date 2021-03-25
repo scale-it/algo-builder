@@ -3,7 +3,7 @@
 import { decodeAddress, generateAccount, signBytes } from "algosdk";
 import { assert } from "chai";
 
-import { StoreAccount } from "../../../src/account";
+import { AccountStore } from "../../../src/account";
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Runtime } from "../../../src/index";
 import { Interpreter } from "../../../src/interpreter/interpreter";
@@ -23,12 +23,12 @@ import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MIN_UINT8 } from "../../../s
 import { convertToBuffer, stringToBytes } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
-import { EncodingType, StackElem, StoreAccountI } from "../../../src/types";
+import { AccountStoreI, EncodingType, StackElem } from "../../../src/types";
 import { execExpectError, expectRuntimeError } from "../../helpers/runtime-errors";
 import { accInfo } from "../../mocks/stateful";
 import { elonAddr, johnAddr, TXN_OBJ } from "../../mocks/txn";
 
-function setDummyAccInfo (acc: StoreAccountI): void {
+function setDummyAccInfo (acc: AccountStoreI): void {
   acc.assets = accInfo[0].assets;
   acc.appsLocalState = accInfo[0].appsLocalState;
   acc.appsTotalSchema = accInfo[0].appsTotalSchema;
@@ -2158,7 +2158,7 @@ describe("Teal Opcodes", function () {
     const interpreter = new Interpreter();
 
     // setup 1st account (to be used as sender)
-    const acc1: StoreAccountI = new StoreAccount(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
+    const acc1: AccountStoreI = new AccountStore(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
     setDummyAccInfo(acc1);
 
     interpreter.runtime = new Runtime([acc1]);
@@ -2272,11 +2272,11 @@ describe("Teal Opcodes", function () {
     const lineNumber = 0;
 
     // setup 1st account (to be used as sender)
-    const acc1: StoreAccountI = new StoreAccount(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
+    const acc1: AccountStoreI = new AccountStore(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
     setDummyAccInfo(acc1);
 
     // setup 2nd account (to be used as Txn.Accounts[A])
-    const acc2 = new StoreAccount(123, { addr: johnAddr, sk: new Uint8Array(0) });
+    const acc2 = new AccountStore(123, { addr: johnAddr, sk: new Uint8Array(0) });
     setDummyAccInfo(acc2);
 
     const runtime = new Runtime([acc1, acc2]);
@@ -2546,7 +2546,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         const appId = interpreter.runtime.ctx.tx.apid;
-        const acc = interpreter.runtime.ctx.state.accounts.get(elonAddr) as StoreAccountI;
+        const acc = interpreter.runtime.ctx.state.accounts.get(elonAddr) as AccountStoreI;
 
         value = acc.getLocalState(appId, 'New-Key');
         assert.isDefined(value);
@@ -2651,7 +2651,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         const appId = interpreter.runtime.ctx.tx.apid;
-        let acc = interpreter.runtime.ctx.state.accounts.get(elonAddr) as StoreAccountI;
+        let acc = interpreter.runtime.ctx.state.accounts.get(elonAddr) as AccountStoreI;
         let value = acc.getLocalState(appId, 'Local-Key');
         assert.isUndefined(value); // value should be undefined
 
@@ -2662,7 +2662,7 @@ describe("Teal Opcodes", function () {
         op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        acc = interpreter.runtime.ctx.state.accounts.get(johnAddr) as StoreAccountI;
+        acc = interpreter.runtime.ctx.state.accounts.get(johnAddr) as AccountStoreI;
         value = acc.getLocalState(appId, 'Local-Key');
         assert.isUndefined(value); // value should be undefined
       });
@@ -2824,7 +2824,7 @@ describe("Teal Opcodes", function () {
     const interpreter = new Interpreter();
 
     // setup 1st account
-    const acc1: StoreAccountI = new StoreAccount(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
+    const acc1: AccountStoreI = new AccountStore(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
     setDummyAccInfo(acc1);
 
     const runtime = new Runtime([acc1]);

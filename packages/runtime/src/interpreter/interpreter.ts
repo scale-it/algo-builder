@@ -9,8 +9,8 @@ import { keyToBytes } from "../lib/parsing";
 import { Stack } from "../lib/stack";
 import { parser } from "../parser/parser";
 import type {
-  ExecutionMode, Operator, SSCAttributesM,
-  StackElem, StoreAccountI, TEALStack
+  AccountStoreI, ExecutionMode, Operator, SSCAttributesM,
+  StackElem, TEALStack
 } from "../types";
 import { Label } from "./opcode-list";
 
@@ -72,8 +72,8 @@ export class Interpreter {
    * @param line line number
    * NOTE: index 0 represents txn sender account
    */
-  getAccount (accountIndex: bigint, line: number): StoreAccountI {
-    let account: StoreAccountI | undefined;
+  getAccount (accountIndex: bigint, line: number): AccountStoreI {
+    let account: AccountStoreI | undefined;
     let address: string;
     if (accountIndex === 0n) {
       address = encodeAddress(this.runtime.ctx.tx.snd);

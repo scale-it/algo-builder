@@ -1,4 +1,4 @@
-import { StoreAccount } from "./account";
+import { AccountStore } from "./account";
 import { applyErrorMessageTemplate } from "./errors/runtime-errors";
 import { parseZodError } from "./errors/validation-errors";
 import { Interpreter } from "./interpreter/interpreter";
@@ -12,7 +12,7 @@ import * as types from "./types";
 export {
   Interpreter,
   Runtime,
-  StoreAccount,
+  AccountStore,
   mkTransaction,
   applyErrorMessageTemplate,
   parseSSCAppArgs,
