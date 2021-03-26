@@ -46,6 +46,28 @@ class DeployerBasicMode {
     return this.runtimeEnv.network.name;
   }
 
+  private _getASAInfo (name: string): ASAInfo {
+    const found = this.asa.get(name);
+    if (!found) {
+      throw new BuilderError(
+        ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_NOT_DEFINED, {
+          assetName: name
+        });
+    }
+    return found;
+  }
+
+  private _getAccount (name: string): rtypes.Account {
+    const found = this.accountsByName.get(name);
+    if (!found) {
+      throw new BuilderError(
+        ERRORS.BUILTIN_TASKS.ACCOUNT_NOT_FOUND, {
+          assetName: name
+        });
+    }
+    return found;
+  }
+
   getCheckpointKV (key: string): string | undefined {
     return this.cpData.getMetadata(this.networkName, key);
   }
@@ -120,6 +142,47 @@ class DeployerBasicMode {
   }
 
   /**
+   * Description: Opt-In to ASA for a single account. The opt-in transaction is
+   * signed by account secret key
+   * @param asaName ASA name
+   * @param accountName
+   * @param flags Transaction flags
+   */
+  async optInAcountToASA (asaName: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
+    await this.algoOp.optInAcountToASA(
+      asaName,
+      this._getASAInfo(asaName).assetIndex,
+      this._getAccount(accountName),
+      flags);
+  }
+
+  /**
+   * Description: Opt-In to ASA for a contract account (represented by logic signture).
+   * The opt-in transaction is signed by the logic signature
+   * @param asaName ASA name
+   * @param lsig logic signature
+   * @param flags Transaction flags
+   */
+  async optInLsigToASA (asaName: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
+    await this.algoOp.optInLsigToASA(asaName, this._getASAInfo(asaName).assetIndex, lsig, flags);
+  }
+
+  /**
+   * Description: Opt-In to stateful smart contract (SSC) for a single account
+   * @param sender sender account
+   * @param appID application index
+   * @param payFlags Transaction flags
+   * @param flags Optional parameters to SSC (accounts, args..)
+   */
+  async optInToSSC (
+    sender: rtypes.Account,
+    appId: number,
+    payFlags: rtypes.TxParams,
+    flags: rtypes.SSCOptionalFlags): Promise<void> {
+    await this.algoOp.optInToSSC(sender, appId, payFlags, flags);
+  }
+
+  /**
    * Description: Returns ASCCache (with compiled code)
    * @param name: Smart Contract filename (must be present in assets folder)
    * @param force: if force is true file will be compiled for sure, even if it's checkpoint exist
@@ -159,28 +222,6 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
           assetName: name
         });
     }
-  }
-
-  private _getASAInfo (name: string): ASAInfo {
-    const found = this.asa.get(name);
-    if (!found) {
-      throw new BuilderError(
-        ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_NOT_DEFINED, {
-          assetName: name
-        });
-    }
-    return found;
-  }
-
-  private _getAccount (name: string): rtypes.Account {
-    const found = this.accountsByName.get(name);
-    if (!found) {
-      throw new BuilderError(
-        ERRORS.BUILTIN_TASKS.ACCOUNT_NOT_FOUND, {
-          assetName: name
-        });
-    }
-    return found;
   }
 
   async deployASA (name: string, flags: rtypes.ASADeploymentFlags): Promise<ASAInfo> {
@@ -304,47 +345,6 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
 
     return sscInfo;
   }
-
-  /**
-   * Description: Opt-In to ASA for a single account. The opt-in transaction is
-   * signed by account secret key
-   * @param asaName ASA name
-   * @param accountName
-   * @param flags Transaction flags
-   */
-  async optInAcountToASA (asaName: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
-    await this.algoOp.optInAcountToASA(
-      asaName,
-      this._getASAInfo(asaName).assetIndex,
-      this._getAccount(accountName),
-      flags);
-  }
-
-  /**
-   * Description: Opt-In to ASA for a contract account (represented by logic signture).
-   * The opt-in transaction is signed by the logic signature
-   * @param asaName ASA name
-   * @param lsig logic signature
-   * @param flags Transaction flags
-   */
-  async optInLsigToASA (asaName: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
-    await this.algoOp.optInLsigToASA(asaName, this._getASAInfo(asaName).assetIndex, lsig, flags);
-  }
-
-  /**
-   * Description: Opt-In to stateful smart contract (SSC) for a single account
-   * @param sender sender account
-   * @param appID application index
-   * @param payFlags Transaction flags
-   * @param flags Optional parameters to SSC (accounts, args..)
-   */
-  async optInToSSC (
-    sender: rtypes.Account,
-    appId: number,
-    payFlags: rtypes.TxParams,
-    flags: rtypes.SSCOptionalFlags): Promise<void> {
-    await this.algoOp.optInToSSC(sender, appId, payFlags, flags);
-  }
 }
 
 // This class is what user interacts with in run task
@@ -387,24 +387,6 @@ export class DeployerRunMode extends DeployerBasicMode implements AlgobDeployer 
     scInitParam?: unknown): Promise<SSCInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deploySSC"
-    });
-  }
-
-  async optInAcountToASA (_asaName: string, _accountName: string, _flags: rtypes.TxParams): Promise<void> {
-    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      methodName: "optInAcountToASA"
-    });
-  }
-
-  async optInLsigToASA (_asaName: string, _lsig: LogicSig, _flags: rtypes.TxParams): Promise<void> {
-    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      methodName: "optInLsigToASA"
-    });
-  }
-
-  optInToSSC (sender: rtypes.Account, index: number, payFlags: rtypes.TxParams): Promise<void> {
-    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      methodName: "optInToSSC"
     });
   }
 }
