@@ -1,7 +1,7 @@
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../build/errors/errors-list";
-import { Runtime, StoreAccount } from "../../src/index";
+import { AccountStore, Runtime } from "../../src/index";
 import { ExecParams, SignType, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
@@ -11,8 +11,8 @@ import { elonMuskAccount } from "../mocks/account";
 describe("Algorand Smart Contracts - Atomic Transfers", function () {
   useFixture("stateful");
   const initialBalance = BigInt(5e6);
-  let john: StoreAccount;
-  let alice: StoreAccount;
+  let john: AccountStore;
+  let alice: AccountStore;
   let runtime: Runtime;
   let approvalProgram: string;
   let clearProgram: string;
@@ -20,8 +20,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
   let appId: number;
 
   this.beforeEach(() => {
-    john = new StoreAccount(initialBalance, elonMuskAccount);
-    alice = new StoreAccount(initialBalance);
+    john = new AccountStore(initialBalance, elonMuskAccount);
+    alice = new AccountStore(initialBalance);
     runtime = new Runtime([john, alice]); // setup test
     // create asset
     assetId = runtime.addAsset('gold',

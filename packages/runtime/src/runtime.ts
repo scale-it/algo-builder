@@ -3,7 +3,7 @@
 import algosdk, { AssetDef, decodeAddress, makeAssetTransferTxnWithSuggestedParams } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
-import { StoreAccount } from "./account";
+import { AccountStore } from "./account";
 import { Ctx } from "./ctx";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
@@ -13,9 +13,9 @@ import { encodeNote, mkTransaction } from "./lib/txn";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import type {
-  AccountAddress, ASADefs, ASADeploymentFlags, AssetHoldingM, Context, ExecParams,
+  AccountAddress, AccountStoreI, ASADefs, ASADeploymentFlags, AssetHoldingM, Context, ExecParams,
   SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
-  StackElem, State, StoreAccountI, Txn, TxParams
+  StackElem, State, Txn, TxParams
 } from "./types";
 import { ExecutionMode, SignType } from "./types";
 
@@ -36,10 +36,10 @@ export class Runtime {
   private timestamp: number;
   private readonly loadedAssetsDefs: ASADefs;
 
-  constructor (accounts: StoreAccountI[]) {
+  constructor (accounts: AccountStoreI[]) {
     // runtime store
     this.store = {
-      accounts: new Map<AccountAddress, StoreAccountI>(), // string represents account address
+      accounts: new Map<AccountAddress, AccountStoreI>(), // string represents account address
       globalApps: new Map<number, AccountAddress>(), // map of {appId: accountAddress}
       assetDefs: new Map<number, AccountAddress>() // number represents assetId
     };
@@ -66,7 +66,7 @@ export class Runtime {
    * Note: if user is accessing this function directly through runtime,
    * the line number is unknown
    */
-  assertAccountDefined (address: string, a?: StoreAccountI, line?: number): StoreAccountI {
+  assertAccountDefined (address: string, a?: AccountStoreI, line?: number): AccountStoreI {
     const lineNumber = line ?? 'unknown';
     if (a === undefined) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.ACCOUNT_DOES_NOT_EXIST,
@@ -190,7 +190,7 @@ export class Runtime {
    * Fetches account from `this.store`
    * @param address account address
    */
-  getAccount (address: string): StoreAccountI {
+  getAccount (address: string): AccountStoreI {
     const account = this.store.accounts.get(address);
     return this.assertAccountDefined(address, account);
   }
@@ -226,7 +226,7 @@ export class Runtime {
    * Returns asset creator account or throws error is it doesn't exist
    * @param Asset Index
    */
-  getAssetAccount (assetId: number): StoreAccountI {
+  getAssetAccount (assetId: number): AccountStoreI {
     const addr = this.store.assetDefs.get(assetId);
     if (addr === undefined) {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
@@ -248,7 +248,7 @@ export class Runtime {
    * Setup initial accounts as {address: SDKAccount}. This should be called only when initializing Runtime.
    * @param accounts: array of account info's
    */
-  initializeAccounts (accounts: StoreAccountI[]): void {
+  initializeAccounts (accounts: AccountStoreI[]): void {
     for (const acc of accounts) {
       this.store.accounts.set(acc.address, acc);
 
@@ -574,7 +574,7 @@ export class Runtime {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
     }
     const lsig = new LogicSig(program, args);
-    const acc = new StoreAccount(0, { addr: lsig.address(), sk: new Uint8Array(0) });
+    const acc = new AccountStore(0, { addr: lsig.address(), sk: new Uint8Array(0) });
     this.store.accounts.set(acc.address, acc);
     return lsig;
   }

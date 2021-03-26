@@ -4,9 +4,9 @@ import { Runtime } from ".";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import {
-  AccountAddress, AlgoTransferParam, AssetHoldingM, AssetModFields,
+  AccountAddress, AccountStoreI, AlgoTransferParam, AssetHoldingM, AssetModFields,
   AssetTransferParam, Context, ExecParams, ExecutionMode,
-  SignType, SSCAttributesM, State, StoreAccountI, TransactionType, Txn
+  SignType, SSCAttributesM, State, TransactionType, Txn
 } from "./types";
 
 const approvalProgram = "approval-program";
@@ -52,7 +52,7 @@ export class Ctx implements Context {
    * Fetches account from `runtime.ctx`
    * @param address account address
    */
-  getAccount (address: string): StoreAccountI {
+  getAccount (address: string): AccountStoreI {
     const account = this.state.accounts.get(address);
     return this.runtime.assertAccountDefined(address, account);
   }
@@ -61,7 +61,7 @@ export class Ctx implements Context {
    * Returns asset creator account from runtime.ctx or throws error is it doesn't exist
    * @param Asset Index
    */
-  getAssetAccount (assetId: number): StoreAccountI {
+  getAssetAccount (assetId: number): AccountStoreI {
     const addr = this.state.assetDefs.get(assetId);
     if (addr === undefined) {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });

@@ -1,7 +1,7 @@
 import { decodeAddress, multisigAddress } from "algosdk";
 import { assert } from "chai";
 
-import { StoreAccount } from "../../src/account";
+import { AccountStore } from "../../src/account";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { Runtime } from "../../src/runtime";
 import { getProgram } from "../helpers/files";
@@ -13,8 +13,8 @@ const multiSigProg = "sample-asc.teal";
 
 describe("Logic Signature", () => {
   useFixture("escrow-account");
-  const john = new StoreAccount(10);
-  const bob = new StoreAccount(100);
+  const john = new AccountStore(10);
+  const bob = new AccountStore(100);
   const runtime = new Runtime([john, bob]);
   const johnPk = decodeAddress(john.address).publicKey;
 
@@ -54,9 +54,9 @@ describe("Logic Signature", () => {
 
 describe("Multi-Signature Test", () => {
   useFixture("multi-signature");
-  const alice = new StoreAccount(10);
-  const john = new StoreAccount(100);
-  const bob = new StoreAccount(1000);
+  const alice = new AccountStore(10);
+  const john = new AccountStore(100);
+  const bob = new AccountStore(1000);
   const bobPk = decodeAddress(bob.address).publicKey;
 
   const runtime = new Runtime([alice, john, bob]);

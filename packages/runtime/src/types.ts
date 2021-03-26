@@ -62,13 +62,13 @@ export enum EncodingType {
 export type AccountAddress = string;
 
 export interface AccountsMap {
-  [addr: string]: StoreAccountI
+  [addr: string]: AccountStoreI
 }
 
-export type RuntimeAccountMap = Map<string, StoreAccountI>;
+export type RuntimeAccountMap = Map<string, AccountStoreI>;
 
 export interface State {
-  accounts: Map<string, StoreAccountI>
+  accounts: Map<string, AccountStoreI>
   globalApps: Map<number, string>
   assetDefs: Map<number, AccountAddress>
 }
@@ -79,8 +79,8 @@ export interface Context {
   tx: Txn // current txn
   gtxs: Txn[] // all transactions
   args: Uint8Array[]
-  getAccount: (address: string) => StoreAccountI
-  getAssetAccount: (assetId: number) => StoreAccountI
+  getAccount: (address: string) => AccountStoreI
+  getAssetAccount: (assetId: number) => AccountStoreI
   getApp: (appId: number, line?: number) => SSCAttributesM
   transferAlgo: (txnParam: AlgoTransferParam) => void
   deductFee: (sender: AccountAddress, index: number) => void
@@ -97,7 +97,7 @@ export interface Context {
   processTransactions: (txnParams: ExecParams[]) => void
 }
 
-// custom AssetHolding for StoreAccount (using bigint in amount instead of number)
+// custom AssetHolding for AccountStore (using bigint in amount instead of number)
 export interface AssetHoldingM {
   amount: bigint
   'asset-id': number
@@ -105,14 +105,14 @@ export interface AssetHoldingM {
   'is-frozen': boolean
 }
 
-// custom AppsLocalState for StoreAccount (using maps instead of array in 'key-value')
+// custom AppsLocalState for AccountStore (using maps instead of array in 'key-value')
 export interface AppLocalStateM {
   id: number
   'key-value': Map<string, StackElem> // string represents bytes as string eg. 11,22,34
   schema: SSCSchemaConfig
 }
 
-// custom SSCAttributes for StoreAccount (using maps instead of array in 'global-state')
+// custom SSCAttributes for AccountStore (using maps instead of array in 'global-state')
 export interface SSCAttributesM {
   'approval-program': string
   'clear-state-program': string
@@ -122,7 +122,7 @@ export interface SSCAttributesM {
   'local-state-schema': SSCSchemaConfig
 }
 
-// custom CreatedApp for StoreAccount
+// custom CreatedApp for AccountStore
 export interface CreatedAppM {
   id: number
   attributes: SSCAttributesM
@@ -130,7 +130,7 @@ export interface CreatedAppM {
 
 // represent account used in tests and by the context
 // NOTE: custom notations are used rather than SDK AccountState notations
-export interface StoreAccountI {
+export interface AccountStoreI {
   address: string
   assets: Map<number, AssetHoldingM>
   amount: bigint

@@ -2,7 +2,7 @@ import {
   addressToPk,
   getProgram
 } from '@algo-builder/algob';
-import { Runtime, StoreAccount, types } from '@algo-builder/runtime';
+import { AccountStore, Runtime, types } from '@algo-builder/runtime';
 import { assert } from 'chai';
 
 const minBalance = 10e6; // 10 ALGO's
@@ -11,7 +11,7 @@ const bobAddr = '2ILRL5YU3FZ4JDQZQVXEZUYKEWF7IEIGRRCPCMI36VKSGDMAS6FHSBXZDQ';
 const ACCRED_LEVEL = 'Accred-Level';
 
 describe('Test for transferring asset using custom logic', function () {
-  const master = new StoreAccount(1000e6);
+  const master = new AccountStore(1000e6);
   let alice;
   let bob;
   let escrow; // initialized later (using runtime.getLogicSig)
@@ -25,8 +25,8 @@ describe('Test for transferring asset using custom logic', function () {
   const clearProgram = getProgram('poi-clear.teal');
 
   this.beforeEach(async function () {
-    alice = new StoreAccount(minBalance, { addr: aliceAddr, sk: new Uint8Array(0) });
-    bob = new StoreAccount(minBalance, { addr: bobAddr, sk: new Uint8Array(0) });
+    alice = new AccountStore(minBalance, { addr: aliceAddr, sk: new Uint8Array(0) });
+    bob = new AccountStore(minBalance, { addr: bobAddr, sk: new Uint8Array(0) });
     runtime = new Runtime([master, alice, bob]);
 
     creationFlags = {

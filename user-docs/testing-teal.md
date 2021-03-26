@@ -9,7 +9,7 @@
 `@algo-builder/runtime` (JavaScript Algorand runtime) executes transactions and processes TEAL in 3 parts :-
 
 - [Runtime](../packages/runtime/src/runtime.ts): For a transaction or txn group, the state management is handled by the `Runtime`. User can use `Runtime` object to set up accounts, create applications, opt-in to app, update app, etc...
-- [StoreAccount](../packages/runtime/src/account.ts): User can create new accounts using the `StoreAccount` object. All information about account (`apps`, `assets`, `localState`, `globalState` etc..) is stored in `StoreAccount`.
+- [AccountStore](../packages/runtime/src/account.ts): User can create new accounts using the `AccountStore` object. All information about account (`apps`, `assets`, `localState`, `globalState` etc..) is stored in `AccountStore`.
 - [Parser](../packages/runtime/src/parser): Reads TEAL code and converts it to a list of opcodes which are executable by the interpreter. If any opcode/data in teal code is invalid, parser will throw an error.
 - [Interpreter](../packages/runtime/src/interpreter): Executes the list of opcodes returned by parser and updates stack after each execution. At the end of execution, if the stack contains a single non-zero uint64 element then the teal code is approved, and transaction can be executed.
 
@@ -28,10 +28,10 @@ Note: Block round and timestamp remains same until user changes it by calling `r
 
 ## Test structure
 In this section we will describe the flow of testing smart contracts in runtime:
-- Prepare Accounts: First of all we will create accounts using `StoreAccount`.
+- Prepare Accounts: First of all we will create accounts using `AccountStore`.
 
-      const john = new StoreAccount(initialAlgo);
-      const bob = new StoreAccount(initialAlgo);
+      const john = new AccountStore(initialAlgo);
+      const bob = new AccountStore(initialAlgo);
   `initialAlgo`: To set up accounts we can pass the initial amount of algos we want to have in it. It's recommended to have some initial algos (to cover transaction fees and to maintain minimum balance for an account)
 - Prepare Runtime: After creating accounts we will create a runtime object with those accounts.
 
@@ -68,7 +68,7 @@ See one of our examples for more details (eg: `examples/crowdfunding/test`).
   Let's try to execute a transaction where a user (say `john`) can withdraw funds from an `escrow` account based on a stateless smart contract logic. In the example below, we will use a TEAL code from our [escrow account test](../packages/runtime/test/fixtures/escrow-account/assets/escrow.teal).
   - First let's prepare the runtime and state: initialize accounts, get a logic signature for escrow and set up runtime:
     ```
-    const john = new StoreAccount(initialJohnHolding);
+    const john = new AccountStore(initialJohnHolding);
     const runtime = new Runtime([john]); // setup runtime
     const lsig = runtime.getLogicSig(getProgram('escrow.teal'), []);
     const escrow = runtime.getAccount(lsig.address());
@@ -123,8 +123,8 @@ See one of our examples for more details (eg: `examples/crowdfunding/test`).
 Let's try to execute a transaction where a user (say `john`) will use delegated signature based on a stateless smart contract logic. We will use a TEAL code from our [asset test](../packages/runtime/test/fixtures/basic-teal/assets/basic.teal).
   - As before we start with preparing the runtime. We use `runtime.getLogicSig(getProgram('escrow.teal'), [])` to create a logic signature.
     ```
-    const john = new StoreAccount(initialHolding);
-    const bob = new StoreAccount(initialHolding)
+    const john = new AccountStore(initialHolding);
+    const bob = new AccountStore(initialHolding)
     const runtime = new Runtime([john, bob]); // setup runtime
     const lsig = runtime.getLogicSig(getProgram('escrow.teal'), []);
     lsig.sign(john.account.sk);
@@ -192,7 +192,7 @@ Now, we will execute a transaction with stateful TEAL (which increments a global
 
 - Similar to the previous test, we need to setup accounts and initialize runtime. Now, for stateful smart contract, we also need to create a new application in user account and opt-in (to call the stateful smart contract later). User can use `runtime.addApp()` and `runtime.optInToApp()` for app setup.
   ```
-  const john = new StoreAccountImpl(1000);
+  const john = new AccountStoreImpl(1000);
 
   let runtime: Runtime;
   let program: string;
