@@ -34,7 +34,7 @@
   "scripts": {
     "cleanup": "./cleanup.sh",
     "build": "yarn workspaces run build",
-    "build:apidocs": "yarn workspaces run build:docs; touch doc/.nojekyll",
+    "build:apidocs": "yarn workspaces run build:docs",
     "watch": "tsc --build --watch packages/runtime packages/algob",
     "test": "yarn workspaces run test",
     "lint": "yarn workspaces -p run lint",
