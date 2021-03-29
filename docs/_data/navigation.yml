@@ -1,7 +1,7 @@
 main:
-  - title: "Quick-Start Guide"
+  - title: "Quick-Start"
     url: https://github.com/scale-it/algo-builder#installation
-  - title: "API Docs"
+  - title: "API"
     url: https://scale-it.github.io/algo-builder/ # TODO: Update to custom api readme link
-  - title: "Index"
+  - title: "Guide"
     url: /guide/README
