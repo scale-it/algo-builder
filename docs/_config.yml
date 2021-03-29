@@ -31,7 +31,7 @@ markdown: kramdown # markdown processor
 remote_theme: "mmistakes/minimal-mistakes@4.22.0"
 
 plugins:
-  - jekyll-feed
+  # - jekyll-feed (https://github.com/github/pages-gem/issues/627)
   - jekyll-relative-links # to handle .md ext
   - jekyll-include-cache
 
