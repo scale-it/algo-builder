@@ -2906,7 +2906,9 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top.toString(), "0");
+      const prev = stack.pop();
+      assert.equal(top, 0n);
+      assert.equal(prev, 0n);
     });
 
     it("should throw index out of bound error", () => {
@@ -3072,7 +3074,9 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(top.toString(), "0");
+      const prev = stack.pop();
+      assert.equal(top, 0n);
+      assert.equal(prev, 0n);
     });
 
     it("should throw index out of bound error for Asset Param", () => {
