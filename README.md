@@ -149,6 +149,14 @@ TIP: Use `tsc --watch` to update the build in a realtime while you develop the p
 
 TODO: we are planning to provide a template for TS projects. [task](https://www.pivotaltracker.com/n/projects/2452320).
 
+## Templates
+
+In the `Algo-Builder-Templates` [repository](https://github.com/scale-it/algo-builder-templates), several templates can be found to use as a base for implementing dApps.
+
+Using the `algob unbox-template` command, the developers can get a pre-built dApp project containing scripts to deploy assets and smart contracts with react.js interactive frontend. The templates use [AlgoSigner](https://github.com/PureStake/algosigner) to securely sign and send transactions to an Algorand Blockchain Network. 
+
+Detailed description about the templates can be found [here](https://github.com/scale-it/algo-builder-templates#algo-builder-templates).
+
 
 # Contributing
 

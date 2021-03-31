@@ -4,16 +4,17 @@
 
 + Installation: [main README](/README.md#installation) file.
 + Project initialization → read below.
-+ [Configuration](/docs/algob-config.md).
++ [Configuration](./algob-config.md).
 + [Private Net](/infrastructure/README.md) creation.
-+ [Script execution](/docs/user-script-execution.md).
-+ [Deployer](/docs/deployer.md)
-+ [Script Checkpoints](/docs/execution-checkpoints.md).
-+ [Script Logging](/docs/logs.md).
-+ [Algob Console](/docs/algob-console.md)
-+ [PyTeal](/docs/py-teal.md).
-+ [Test TEAL](/docs/testing-teal.md).
++ [Script execution](./user-script-execution.md).
++ [Deployer](./deployer.md)
++ [Script Checkpoints](./execution-checkpoints.md).
++ [Script Logging](./logs.md).
++ [Algob Console](./algob-console.md)
++ [PyTeal](./py-teal.md).
++ [Test TEAL](./testing-teal.md).
 + [Best Practices](./best-practices.md)
++ [Templates](./templates.md)
 
 For more in-depth description you can look at the [project specification](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
 
@@ -59,7 +60,7 @@ Further information about the `sample-project` can be found [here](/packages/alg
 These files are called checkpoints and they save information about deployed assets/contracts.
 As they are checked-in into Version Control System you can use them to track the deployed state of your assets.
 
-Read more about checkpoints [here](/docs/execution-checkpoints.md).
+Read more about checkpoints [here](./execution-checkpoints.md).
 
 ### Typescript Projects
 
