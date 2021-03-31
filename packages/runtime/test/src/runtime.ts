@@ -2,7 +2,7 @@ import { LogicSig } from "algosdk";
 import { assert } from "chai";
 import sinon from "sinon";
 
-import { StoreAccount } from "../../src/account";
+import { AccountStore } from "../../src/account";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { Runtime } from "../../src/runtime";
 import type { AlgoTransferParam, AssetModFields, AssetTransferParam, DestroyAssetParam, ExecParams, FreezeAssetParam, ModifyAssetParam, RevokeAssetParam } from "../../src/types";
@@ -17,9 +17,9 @@ const minBalance = BigInt(1e7);
 
 describe("Logic Signature Transaction in Runtime", function () {
   useFixture("basic-teal");
-  const john = new StoreAccount(minBalance);
-  const bob = new StoreAccount(minBalance);
-  const alice = new StoreAccount(minBalance);
+  const john = new AccountStore(minBalance);
+  const bob = new AccountStore(minBalance);
+  const alice = new AccountStore(minBalance);
 
   let runtime: Runtime;
   let lsig: LogicSig;
@@ -75,8 +75,8 @@ describe("Logic Signature Transaction in Runtime", function () {
 
 describe("Rounds Test", function () {
   useFixture("basic-teal");
-  let john = new StoreAccount(minBalance);
-  let bob = new StoreAccount(minBalance);
+  let john = new AccountStore(minBalance);
+  let bob = new AccountStore(minBalance);
   let runtime: Runtime;
   let txnParams: AlgoTransferParam;
   this.beforeAll(function () {
@@ -94,8 +94,8 @@ describe("Rounds Test", function () {
   });
 
   afterEach(function () {
-    john = new StoreAccount(minBalance);
-    bob = new StoreAccount(minBalance);
+    john = new AccountStore(minBalance);
+    bob = new AccountStore(minBalance);
     runtime = new Runtime([john, bob]);
     txnParams.fromAccount = john.account;
     txnParams.toAccountAddr = bob.address;
@@ -141,10 +141,10 @@ describe("Rounds Test", function () {
 
 describe("Algorand Standard Assets", function () {
   useFixture('asa-check');
-  let john = new StoreAccount(minBalance);
-  const bob = new StoreAccount(minBalance);
-  let alice = new StoreAccount(minBalance);
-  const elon = new StoreAccount(minBalance, elonMuskAccount);
+  let john = new AccountStore(minBalance);
+  const bob = new AccountStore(minBalance);
+  let alice = new AccountStore(minBalance);
+  const elon = new AccountStore(minBalance, elonMuskAccount);
   let runtime: Runtime;
   let modFields: AssetModFields;
   let assetTransferParam: AssetTransferParam;
@@ -541,7 +541,7 @@ describe("Algorand Standard Assets", function () {
 
 describe("Stateful Smart Contracts", function () {
   useFixture('stateful');
-  const john = new StoreAccount(minBalance);
+  const john = new AccountStore(minBalance);
   let runtime: Runtime;
   let approvalProgram: string;
   let clearProgram: string;

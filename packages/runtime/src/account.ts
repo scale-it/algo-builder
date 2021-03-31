@@ -15,15 +15,16 @@ import {
 import { keyToBytes } from "./lib/parsing";
 import { assertValidSchema } from "./lib/stateful";
 import {
+  AccountStoreI,
   AppLocalStateM, ASADef, AssetHoldingM, AssetModFields, CreatedAppM, SSCAttributesM,
-  SSCDeploymentFlags, StackElem, StoreAccountI
+  SSCDeploymentFlags, StackElem
 } from "./types";
 
 const StateMap = "key-value";
 const globalState = "global-state";
 const localStateSchema = "local-state-schema";
 
-export class StoreAccount implements StoreAccountI {
+export class AccountStore implements AccountStoreI {
   readonly account: Account;
   readonly address: string;
   minBalance: number; // required minimum balance for account

@@ -42,7 +42,7 @@
     "coverage": "nyc ../../node_modules/mocha/bin/mocha",
     "build": "tsc --build .",
     "build:watch": "tsc -w -p .",
-    "build:docs": "typedoc --out ../../doc/runtime --excludePrivate --exclude \"internal/**\" src/index.ts",
+    "build:docs": "typedoc --out ../../docs/api/runtime --excludePrivate --exclude \"internal/**\" src/index.ts",
     "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.ts buildinfo build",
     "prepublish": "yarn build",
     "publish": "yarn publish --access public"

@@ -4,7 +4,7 @@ const {
   stringToBytes,
   uint64ToBigEndian
 } = require('@algo-builder/algob');
-const { Runtime, StoreAccount, types } = require('@algo-builder/runtime');
+const { Runtime, AccountStore, types } = require('@algo-builder/runtime');
 const { assert } = require('chai');
 
 const minBalance = 10e6; // 10 ALGO's
@@ -13,10 +13,10 @@ const initialCreatorBalance = minBalance + 0.01e6;
 const goal = 7e6;
 
 describe('Crowdfunding Tests', function () {
-  const master = new StoreAccount(1000e6);
-  let creator = new StoreAccount(initialCreatorBalance);
-  let escrow = new StoreAccount(minBalance);
-  let donor = new StoreAccount(initialDonorBalance);
+  const master = new AccountStore(1000e6);
+  let creator = new AccountStore(initialCreatorBalance);
+  let escrow = new AccountStore(minBalance);
+  let donor = new AccountStore(initialDonorBalance);
 
   let runtime;
   let flags;
@@ -37,8 +37,8 @@ describe('Crowdfunding Tests', function () {
   });
 
   this.afterEach(async function () {
-    creator = new StoreAccount(initialCreatorBalance);
-    donor = new StoreAccount(initialDonorBalance);
+    creator = new AccountStore(initialCreatorBalance);
+    donor = new AccountStore(initialDonorBalance);
     runtime = new Runtime([master, creator, escrow, donor]);
 
     flags = {

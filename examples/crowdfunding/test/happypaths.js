@@ -4,7 +4,7 @@ const {
   stringToBytes,
   uint64ToBigEndian
 } = require('@algo-builder/algob');
-const { Runtime, StoreAccount, types } = require('@algo-builder/runtime');
+const { Runtime, AccountStore, types } = require('@algo-builder/runtime');
 const { assert } = require('chai');
 
 const minBalance = 10e6; // 10 ALGO's
@@ -21,10 +21,10 @@ const goal = 7e6;
  * We only call the smart contract during the actual 'claim' tx call, and verify state later.
  */
 describe('Crowdfunding Tests - Happy Paths', function () {
-  const master = new StoreAccount(1000e6);
-  let creator = new StoreAccount(initialCreatorBalance);
-  let fundReceiver = new StoreAccount(minBalance);
-  let donor = new StoreAccount(initialDonorBalance);
+  const master = new AccountStore(1000e6);
+  let creator = new AccountStore(initialCreatorBalance);
+  let fundReceiver = new AccountStore(minBalance);
+  let donor = new AccountStore(initialDonorBalance);
   let escrow, escrowLsig; // initialized later
 
   let runtime;
@@ -61,9 +61,9 @@ describe('Crowdfunding Tests - Happy Paths', function () {
    */
   function setupAppAndEscrow () {
     // refresh accounts + initialize runtime
-    creator = new StoreAccount(initialCreatorBalance);
-    fundReceiver = new StoreAccount(minBalance);
-    donor = new StoreAccount(initialDonorBalance);
+    creator = new AccountStore(initialCreatorBalance);
+    fundReceiver = new AccountStore(minBalance);
+    donor = new AccountStore(initialDonorBalance);
     runtime = new Runtime([master, creator, donor, fundReceiver]);
 
     applicationId = 1;

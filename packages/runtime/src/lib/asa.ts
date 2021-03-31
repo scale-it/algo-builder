@@ -12,7 +12,7 @@ const ASSETS_DIR = "assets";
 /**
  * Validates asset definitions and checks if opt-in acc names are present in network
  * @param accounts AccountMap is the SDK account type, used in builder. RuntimeAccountMap is
- * for StoreAccount used in runtime (where we use maps instead of arrays in sdk structures).
+ * for AccountStore used in runtime (where we use maps instead of arrays in sdk structures).
  * @param filename asa filename
  * @param asaDef asset definitions
  */

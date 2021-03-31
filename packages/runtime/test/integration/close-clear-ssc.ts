@@ -1,7 +1,7 @@
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
-import { Runtime, StoreAccount } from "../../src/index";
+import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { stringToBytes } from "../../src/lib/parsing";
 import { SignType, SSCCallsParam, TransactionType } from "../../src/types";
@@ -12,8 +12,8 @@ import { expectRuntimeError } from "../helpers/runtime-errors";
 describe("ASC - CloseOut from Application and Clear State", function () {
   useFixture("stateful");
   const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE * 10 + 1000; // 1000 to cover fee
-  let john = new StoreAccount(minBalance + 1000);
-  let alice = new StoreAccount(minBalance + 1000);
+  let john = new AccountStore(minBalance + 1000);
+  let alice = new AccountStore(minBalance + 1000);
 
   let runtime: Runtime;
   let approvalProgram: string;

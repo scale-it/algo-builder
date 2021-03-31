@@ -1,7 +1,7 @@
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
-import { Runtime, StoreAccount, stringToBytes } from "../../src/index";
+import { AccountStore, Runtime, stringToBytes } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { SignType, SSCCallsParam, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";
@@ -12,8 +12,8 @@ const approvalStr = "approval-program";
 describe("Algorand Smart Contracts - Update Application", function () {
   useFixture("stateful-update");
   const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE * 10 + 1000; // 1000 to cover fee
-  let creator = new StoreAccount(minBalance + 1000);
-  const alice = new StoreAccount(minBalance + 1000);
+  let creator = new AccountStore(minBalance + 1000);
+  const alice = new AccountStore(minBalance + 1000);
 
   let runtime: Runtime;
   let oldApprovalProgram: string;

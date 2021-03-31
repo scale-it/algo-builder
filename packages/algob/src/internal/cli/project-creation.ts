@@ -22,7 +22,7 @@ async function removeProjectDirIfPresent (projectRoot: string, dirName: string):
   }
 }
 
-async function printWelcomeMessage (): Promise<void> {
+export async function printWelcomeMessage (): Promise<void> {
   const packageJson = await getPackageJson();
 
   console.log(
@@ -56,19 +56,20 @@ function copySampleProject (location: string): void {
   });
 }
 
-function printSuggestedCommands (): void {
+export function printSuggestedAlgobCommands (): void {
   const npx =
     getExecutionMode() === ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION
       ? ""
       : "npx ";
 
   console.log(`Try running some of the following tasks:`);
-  console.log(`  ${npx}${ALGOB_NAME} accounts`);
+  console.log(`  ${npx}${ALGOB_NAME} gen-accounts`);
   console.log(`  ${npx}${ALGOB_NAME} compile`);
   console.log(`  ${npx}${ALGOB_NAME} test`);
-  console.log(`  ${npx}${ALGOB_NAME} node`);
+  console.log(`  ${npx}${ALGOB_NAME} node-info`);
   console.log(`  node scripts/sample-script.js`);
   console.log(`  ${npx}${ALGOB_NAME} help`);
+  console.log(`  ${npx}${ALGOB_NAME} console`);
 }
 
 async function printPluginInstallationInstructions (): Promise<void> {
@@ -120,10 +121,10 @@ export async function createProject (location: string): PromiseAny {
     console.log(``);
   }
 
-  printSuggestedCommands();
+  printSuggestedAlgobCommands();
 }
 
-function createConfirmationPrompt (name: string, message: string) { // eslint-disable-line @typescript-eslint/explicit-function-return-type
+export function createConfirmationPrompt (name: string, message: string) { // eslint-disable-line @typescript-eslint/explicit-function-return-type
   return {
     type: "confirm",
     name,
@@ -217,16 +218,18 @@ async function confirmPluginInstallation (): Promise<boolean> {
   return responses.shouldInstallPlugin;
 }
 
-async function installDependencies (
+export async function installDependencies (
   packageManager: string,
-  args: string[]
+  args: string[],
+  location?: string
 ): Promise<boolean> {
   const { spawn } = await import("child_process");
 
   console.log(`${packageManager} ${args.join(" ")}`);
 
   const childProcess = spawn(packageManager, args, {
-    stdio: "inherit" as any // eslint-disable-line @typescript-eslint/no-explicit-any
+    stdio: "inherit" as any, // eslint-disable-line @typescript-eslint/no-explicit-any,
+    cwd: location
   });
 
   return await new Promise<boolean>((resolve, reject) => {

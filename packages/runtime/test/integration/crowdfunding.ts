@@ -1,7 +1,7 @@
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
-import { Runtime, StoreAccount } from "../../src/index";
+import { AccountStore, Runtime } from "../../src/index";
 import { addressToPk, uint64ToBigEndian } from "../../src/lib/parsing";
 import { SSCDeploymentFlags, StackElem } from "../../src/types";
 import { getProgram } from "../helpers/files";
@@ -10,7 +10,7 @@ import { expectRuntimeError } from "../helpers/runtime-errors";
 
 describe("Crowdfunding basic tests", function () {
   useFixture("stateful");
-  const john = new StoreAccount(1000);
+  const john = new AccountStore(1000);
 
   let runtime: Runtime;
   let approvalProgram: string;

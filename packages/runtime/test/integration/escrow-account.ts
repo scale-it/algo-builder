@@ -3,7 +3,7 @@ import { LogicSig } from "algosdk";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
-import { Runtime, StoreAccount } from "../../src/index";
+import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { ExecParams, SignType, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";
@@ -17,8 +17,8 @@ const initialJohnHolding = minBalance + 500n;
 
 describe("Algorand Stateless Smart Contracts (Contract Account Mode) - Escrow Account Example", function () {
   useFixture("escrow-account");
-  const john = new StoreAccount(initialJohnHolding, johnAccount); // 0.005 ALGO
-  const admin = new StoreAccount(1e12);
+  const john = new AccountStore(initialJohnHolding, johnAccount); // 0.005 ALGO
+  const admin = new AccountStore(1e12);
   // set up transaction paramenters
   const txnParams: ExecParams = {
     type: TransactionType.TransferAlgo, // payment
@@ -30,7 +30,7 @@ describe("Algorand Stateless Smart Contracts (Contract Account Mode) - Escrow Ac
   };
 
   let runtime: Runtime;
-  let escrow: StoreAccount;
+  let escrow: AccountStore;
   let lsig: LogicSig;
   this.beforeAll(function () {
     runtime = new Runtime([john, admin]); // setup test
@@ -101,7 +101,7 @@ describe("Algorand Stateless Smart Contracts (Contract Account Mode) - Escrow Ac
   });
 
   it("should reject transaction if receiver is not john", function () {
-    const bob = new StoreAccount(100);
+    const bob = new AccountStore(100);
     const invalidParams = Object.assign({}, txnParams);
     invalidParams.toAccountAddr = bob.address;
 

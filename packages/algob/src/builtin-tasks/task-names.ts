@@ -9,4 +9,5 @@ export const TASK_NODE_INFO = "node-info";
 export const TASK_RUN = "run";
 export const TASK_DEPLOY = "deploy";
 export const TASK_COMPILE = "compile";
+export const TASK_UNBOX_TEMPLATE = "unbox-template";
 export const TASK_TEST = "test";
