@@ -1,6 +1,6 @@
 # Decentralized Application Templates
 
-Distributed Applications (dApps) are basically decentralized applications. The templates can be found [here](https://github.com/scale-it/algo-builder-templates) and are extremely helpful and easy to use. They are designed and implemented in such a way that they can provide the aspiring developers a headstart in building dApps based on `Algorand Blockchain`. The templates heavily use [algosdk](https://github.com/algorand/js-algorand-sdk), [algo-builder](https://github.com/scale-it/algo-builder) and [AlgoSigner](https://github.com/PureStake/algosigner).
+The templates can be found [here](https://github.com/scale-it/algo-builder-templates) and are extremely helpful and easy to use. They are designed and implemented in such a way that they can provide the aspiring developers a headstart in building dApps based on `Algorand Blockchain`. The templates heavily use [algosdk](https://github.com/algorand/js-algorand-sdk), [algo-builder](https://github.com/scale-it/algo-builder) and [AlgoSigner](https://github.com/PureStake/algosigner).
 
 ## Template Structure
 
@@ -12,6 +12,8 @@ After successfully unboxing the template, please link the `algob` package in the
 
 
 ## Usage
+
+The first step is to link `algob` package in the global bin. The documentation for the same can be found [here](https://github.com/scale-it/algo-builder/blob/master/packages/algob/README.md).
 
 `algob unbox-template <template-name> <destination-directory> --force (flag)`
  - if `destination-directory` is not passed then current directory will be used.
