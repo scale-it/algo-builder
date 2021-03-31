@@ -13,7 +13,7 @@ import {
   scriptsDirectory,
   toCheckpointFileName
 } from "../lib/script-checkpoints";
-import { AlgobRuntimeEnv, CheckpointRepo } from "../types";
+import { CheckpointRepo, RuntimeEnv } from "../types";
 import { runMultipleScripts } from "./run";
 import { TASK_DEPLOY } from "./task-names";
 
@@ -59,7 +59,7 @@ function clearCheckpointFiles (scriptNames: string[]): void {
 
 export async function executeDeployTask (
   { fileNames, force }: TaskArgs,
-  runtimeEnv: AlgobRuntimeEnv,
+  runtimeEnv: RuntimeEnv,
   algoOp: AlgoOperator
 ): Promise<void> {
   const logDebugTag = "algob:tasks:deploy";

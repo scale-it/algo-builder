@@ -6,7 +6,7 @@ import { BuilderContext } from "../../../../src/internal/context";
 import { loadConfigAndTasks } from "../../../../src/internal/core/config/config-loading";
 import { resolveProjectPaths } from "../../../../src/internal/core/config/config-resolution";
 import { resetBuilderContext } from "../../../../src/internal/reset";
-import { AlgobChainCfg, HttpNetworkConfig, UserPaths } from "../../../../src/types";
+import { ChainCfg, HttpNetworkConfig, UserPaths } from "../../../../src/types";
 import { assertAccountsEqual } from "../../../helpers/assert-methods";
 import { useFixtureProject } from "../../../helpers/project";
 import { account1 } from "../../../mocks/account";
@@ -28,7 +28,7 @@ describe("Config resolution", () => {
         const config = await loadConfigAndTasks();
         assert.containsAllKeys(config.networks, [ALGOB_CHAIN_NAME]);
 
-        const algobChainCfg = config.networks[ALGOB_CHAIN_NAME] as AlgobChainCfg;
+        const algobChainCfg = config.networks[ALGOB_CHAIN_NAME] as ChainCfg;
         assert.isTrue(algobChainCfg.throwOnTransactionFailures);
         assert.isTrue(algobChainCfg.throwOnCallFailures);
       });

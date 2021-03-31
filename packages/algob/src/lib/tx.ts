@@ -1,7 +1,7 @@
 import { encodeNote, mkTransaction, types as rtypes } from "@algo-builder/runtime";
 import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
-import { AlgobDeployer } from "../types";
+import { Deployer } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
 import { loadSignedTxnFromFile } from "./files";
 
@@ -110,11 +110,11 @@ function signTransaction (txn: Transaction, execParams: rtypes.ExecParams): Uint
 
 /**
  * Send signed transaction to network and wait for confirmation
- * @param deployer AlgobDeployer
+ * @param deployer Deployer
  * @param rawTxns Signed Transaction(s)
  */
 async function sendAndWait (
-  deployer: AlgobDeployer,
+  deployer: Deployer,
   rawTxns: Uint8Array | Uint8Array[]): Promise<algosdk.ConfirmedTxInfo> {
   const txInfo = await deployer.algodClient.sendRawTransaction(rawTxns).do();
   return await deployer.waitForConfirmation(txInfo.txId);
@@ -122,11 +122,11 @@ async function sendAndWait (
 
 /**
  * Execute single transaction or group of transactions (atomic transaction)
- * @param deployer AlgobDeployer
+ * @param deployer Deployer
  * @param execParams transaction parameters or atomic transaction parameters
  */
 export async function executeTransaction (
-  deployer: AlgobDeployer,
+  deployer: Deployer,
   execParams: rtypes.ExecParams | rtypes.ExecParams[]): Promise<algosdk.ConfirmedTxInfo> {
   const suggestedParams = await getSuggestedParams(deployer.algodClient);
   const mkTx = async (p: rtypes.ExecParams): Promise<Transaction> =>
@@ -160,11 +160,11 @@ export async function executeTransaction (
  * probably won't work, because transaction contains fields like
  * firstValid and lastValid which might not be equal to the
  * current network's blockchain block height.
- * @param deployer AlgobDeployer
+ * @param deployer Deployer
  * @param fileName raw signed txn .tx file
  */
 export async function executeSignedTxnFromFile (
-  deployer: AlgobDeployer,
+  deployer: Deployer,
   fileName: string): Promise<algosdk.ConfirmedTxInfo> {
   const signedTxn = loadSignedTxnFromFile(fileName);
   if (signedTxn === undefined) { throw new Error(`File ${fileName} does not exist`); }

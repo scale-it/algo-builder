@@ -13,7 +13,7 @@ import { types as rtypes } from "@algo-builder/runtime";
 import { executeTx, prepareParameters } from "./common";
 
 async function run (
-  runtimeEnv: algob.types.AlgobRuntimeEnv, deployer: algob.types.AlgobDeployer): Promise<void> {
+  runtimeEnv: algob.types.RuntimeEnv, deployer: algob.types.Deployer): Promise<void> {
   const { alice, scTmplParams, secret } = prepareParameters(deployer);
   const wrongSecret = 'hero wisdom red split loop element vote belt';
 

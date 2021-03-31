@@ -8,12 +8,12 @@ import { ALGOB_PARAM_DEFINITIONS } from "../../src/internal/core/params/builder-
 import { getEnvRuntimeArgs } from "../../src/internal/core/params/env-variables";
 import { Environment } from "../../src/internal/core/runtime-environment";
 import { resetBuilderContext } from "../../src/internal/reset";
-import { AlgobRuntimeEnv, HttpNetworkConfig, NetworkConfig, PromiseAny } from "../../src/types";
+import { HttpNetworkConfig, NetworkConfig, PromiseAny, RuntimeEnv } from "../../src/types";
 import { account1 } from "../mocks/account";
 
 declare module "mocha" {
   interface Context {
-    env: AlgobRuntimeEnv
+    env: RuntimeEnv
   }
 }
 
@@ -27,7 +27,7 @@ export const defaultNetCfg: HttpNetworkConfig = {
 };
 
 export function useEnvironment (
-  beforeEachFn?: (algobRuntimeEnv: AlgobRuntimeEnv) => PromiseAny
+  beforeEachFn?: (algobRuntimeEnv: RuntimeEnv) => PromiseAny
 ): void {
   beforeEach("Load environment", async function () {
     this.env = await getEnv(defaultNetCfg);
@@ -41,7 +41,7 @@ export function useEnvironment (
   });
 }
 
-export async function getEnv (defaultNetworkCfg?: NetworkConfig): Promise<AlgobRuntimeEnv> {
+export async function getEnv (defaultNetworkCfg?: NetworkConfig): Promise<RuntimeEnv> {
   if (BuilderContext.isCreated()) {
     ctx = BuilderContext.getBuilderContext();
 
@@ -80,7 +80,7 @@ export async function getEnv (defaultNetworkCfg?: NetworkConfig): Promise<AlgobR
     ctx.tasksDSL.getTaskDefinitions(),
     ctx.extendersManager.getExtenders(),
     true);
-  ctx.setAlgobRuntimeEnv(env);
+  ctx.setRuntimeEnv(env);
 
   return env;
 }

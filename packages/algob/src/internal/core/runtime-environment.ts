@@ -1,14 +1,14 @@
 import debug from "debug";
 
 import type {
-  AlgobRuntimeEnv,
   EnvironmentExtender,
   Network,
   ParamDefinitionAny,
-  ResolvedAlgobConfig,
+  ResolvedConfig,
   RunSuperFunction,
   RunTaskFunction,
   RuntimeArgs,
+  RuntimeEnv,
   TaskArguments,
   TaskDefinition,
   TasksMap
@@ -19,7 +19,7 @@ import { OverriddenTaskDefinition } from "./tasks/task-definitions";
 
 const log = debug("algob:core:bre");
 
-export class Environment implements AlgobRuntimeEnv {
+export class Environment implements RuntimeEnv {
   private static readonly _BLACKLISTED_PROPERTIES: string[] = [
     "injectToGlobal",
     "_runTaskDefinition"
@@ -43,13 +43,13 @@ export class Environment implements AlgobRuntimeEnv {
    * @param networkRequired if true it will assert that a requested network is defined.
    */
   constructor (
-    public readonly config: ResolvedAlgobConfig,
+    public readonly config: ResolvedConfig,
     public readonly runtimeArgs: RuntimeArgs,
     public readonly tasks: TasksMap,
     extenders: EnvironmentExtender[] = [],
     networkRequired: boolean = true
   ) {
-    log("Creating AlgobRuntimeEnv");
+    log("Creating RuntimeEnv");
 
     const ncfg = config.networks[runtimeArgs.network];
     // network configuration is required for all tasks except few setup tasks

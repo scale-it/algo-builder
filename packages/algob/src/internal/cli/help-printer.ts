@@ -1,8 +1,8 @@
 import { cmpStr } from "../../lib/comparators";
 import {
-  AlgobParamDefinitions,
   ParamDefinition,
   ParamDefinitionAny,
+  ParamDefinitions,
   ParamDefinitionsMap,
   TasksMap
 } from "../../types";
@@ -16,7 +16,7 @@ export class HelpPrinter {
   constructor (
     private readonly _programName: string,
     private readonly _version: string,
-    private readonly _algobParamDefs: AlgobParamDefinitions,
+    private readonly _algobParamDefs: ParamDefinitions,
     private readonly _tasks: TasksMap
   ) {}
 

@@ -1,4 +1,4 @@
-import { AlgobParamDefinitions, RuntimeArgs } from "../../../types";
+import { ParamDefinitions, RuntimeArgs } from "../../../types";
 import { ArgumentsParser } from "../../cli/arguments-parser";
 import { unsafeObjectKeys } from "../../util/unsafe";
 import { BuilderError } from "../errors";
@@ -34,7 +34,7 @@ export function getEnvVariablesMap (
 }
 
 export function getEnvRuntimeArgs (
-  paramDefinitions: AlgobParamDefinitions,
+  paramDefinitions: ParamDefinitions,
   envVariables: ProcessEnv
 ): RuntimeArgs {
   const envArgs: any = {};  // eslint-disable-line

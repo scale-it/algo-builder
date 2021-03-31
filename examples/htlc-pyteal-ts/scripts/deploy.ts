@@ -9,7 +9,7 @@ import { types as rtypes } from "@algo-builder/runtime";
 import { getDeployerAccount, prepareParameters } from "./withdraw/common";
 
 async function run (
-  runtimeEnv: algob.types.AlgobRuntimeEnv, deployer: algob.types.AlgobDeployer): Promise<void> {
+  runtimeEnv: algob.types.RuntimeEnv, deployer: algob.types.Deployer): Promise<void> {
   const masterAccount = getDeployerAccount(deployer, 'master-account');
   const { alice, bob, scTmplParams } = prepareParameters(deployer);
 

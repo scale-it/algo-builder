@@ -9,10 +9,10 @@ import { Environment } from "../../../src/internal/core/runtime-environment";
 import { TasksDSL } from "../../../src/internal/core/tasks/dsl";
 import { resetBuilderContext } from "../../../src/internal/reset";
 import {
-  AlgobRuntimeEnv,
   ParamDefinition,
-  ResolvedAlgobConfig,
+  ResolvedConfig,
   RuntimeArgs,
+  RuntimeEnv,
   TasksMap
 } from "../../../src/types";
 import {
@@ -22,7 +22,7 @@ import {
 import { useFixtureProject } from "../../helpers/project";
 
 describe("Environment", () => {
-  const config: ResolvedAlgobConfig = {
+  const config: ResolvedConfig = {
     networks: {
       localNet: {
         accounts: [],
@@ -48,7 +48,7 @@ describe("Environment", () => {
   };
 
   let tasks: TasksMap;
-  let env: AlgobRuntimeEnv;
+  let env: RuntimeEnv;
   let dsl: TasksDSL;
 
   beforeEach(() => {
@@ -103,7 +103,7 @@ describe("Environment", () => {
     tasks = ctx.tasksDSL.getTaskDefinitions();
 
     env = new Environment(config, args, tasks, [], true);
-    ctx.setAlgobRuntimeEnv(env);
+    ctx.setRuntimeEnv(env);
   });
 
   afterEach(() => resetBuilderContext());

@@ -1,9 +1,9 @@
 import {
-  AlgobParamDefinitions,
-  AlgobShortParamSubstitutions,
   ParamDefinition,
+  ParamDefinitions,
   ParamDefinitionsMap,
   RuntimeArgs,
+  ShortParamSubstitutions,
   TaskArguments,
   TaskDefinition
 } from "../../types";
@@ -49,7 +49,7 @@ export class ArgumentsParser {
     );
   }
 
-  _substituteShortParam (arg: string, shortParamSubs: AlgobShortParamSubstitutions): string {
+  _substituteShortParam (arg: string, shortParamSubs: ShortParamSubstitutions): string {
     if (this._hasShortParamNameFormat(arg)) {
       const substitution = shortParamSubs[arg.substr(1)];
       if (substitution) {
@@ -60,8 +60,8 @@ export class ArgumentsParser {
   }
 
   public parseRuntimeArgs (
-    paramDefs: AlgobParamDefinitions,
-    shortParamSubs: AlgobShortParamSubstitutions,
+    paramDefs: ParamDefinitions,
+    shortParamSubs: ShortParamSubstitutions,
     envVariableArguments: RuntimeArgs,
     rawCLAs: string[]
   ): {
@@ -167,7 +167,7 @@ export class ArgumentsParser {
   }
 
   _addBuilderDefaultArguments (
-    paramDefs: AlgobParamDefinitions,
+    paramDefs: ParamDefinitions,
     envVariableArguments: RuntimeArgs,
     runtimeArgs: Partial<RuntimeArgs>
   ): RuntimeArgs {

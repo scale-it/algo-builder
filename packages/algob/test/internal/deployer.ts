@@ -9,7 +9,7 @@ import { getDummyLsig } from "../../src/lib/lsig";
 import { CheckpointRepoImpl } from "../../src/lib/script-checkpoints";
 import { ASAInfo, Checkpoints, LsigInfo, SSCInfo } from "../../src/types";
 import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
-import { mkAlgobEnv } from "../helpers/params";
+import { mkEnv } from "../helpers/params";
 import { cleanupMutableData } from "../lib/script-checkpoints";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
@@ -25,7 +25,7 @@ describe("DeployerDeployMode", () => {
   let deployerCfg: DeployerConfig, env;
 
   beforeEach(function () {
-    env = mkAlgobEnv("network 123");
+    env = mkEnv("network 123");
     deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
     deployerCfg.asaDefs = {};
     deployerCfg.accounts = new Map();
@@ -106,7 +106,7 @@ describe("DeployerDeployMode", () => {
   });
 
   it("Should save info to checkpoint after asset deployment", async () => {
-    const env = mkAlgobEnv("network1");
+    const env = mkEnv("network1");
     const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
     deployerCfg.asaDefs = { MY_ASA: mkASA() };
     const deployer = new DeployerDeployMode(deployerCfg);
@@ -134,7 +134,7 @@ describe("DeployerDeployMode", () => {
   });
 
   it("Should load delegated logic signature", async () => {
-    const env = mkAlgobEnv("network1");
+    const env = mkEnv("network1");
     const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
     deployerCfg.asaDefs = { MY_ASA: mkASA() };
     const deployer = new DeployerDeployMode(deployerCfg);
@@ -162,7 +162,7 @@ describe("DeployerDeployMode", () => {
 
   it("Should use getCheckpointKV and isDefined from CheckpointData", async () => {
     const networkName = "network1";
-    const env = mkAlgobEnv(networkName);
+    const env = mkEnv(networkName);
     const cpData = new CheckpointRepoImpl()
       .registerASA(networkName, "ASA name", { creator: "ASA creator 123", txId: "", confirmedRound: 0, assetIndex: 0 })
       .registerSSC(networkName, "ASC name", { creator: "ASC creator 951", txId: "", confirmedRound: 0, appID: -1 })

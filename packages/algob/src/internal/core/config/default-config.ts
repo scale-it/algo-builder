@@ -1,14 +1,14 @@
-import type { AlgobChainCfg, AlgobConfig } from "../../../types";
+import type { ChainCfg, Config } from "../../../types";
 import { ALGOB_CHAIN_NAME } from "../../constants";
 
-const cfg: AlgobChainCfg = {
+const cfg: ChainCfg = {
   accounts: [],
   chainName: ALGOB_CHAIN_NAME,
   throwOnTransactionFailures: true,
   throwOnCallFailures: true
 };
 
-const defaultConfig: AlgobConfig = {
+const defaultConfig: Config = {
   networks: {
     [ALGOB_CHAIN_NAME]: cfg
   },

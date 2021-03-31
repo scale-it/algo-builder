@@ -2,7 +2,7 @@ import debug from "debug";
 import * as path from "path";
 
 import { BuilderError, ERRORS, parseAlgorandError } from "../../internal/core/errors";
-import { AlgobDeployer, AlgobRuntimeEnv } from "../../types";
+import { Deployer, RuntimeEnv } from "../../types";
 
 const log = debug("algob:core:scripts-runner");
 
@@ -56,8 +56,8 @@ function displayErr (error: Error | BuilderError | any, relativeScriptPath: stri
 
 export async function runScript (
   relativeScriptPath: string,
-  runtimeEnv: AlgobRuntimeEnv,
-  deployer: AlgobDeployer
+  runtimeEnv: RuntimeEnv,
+  deployer: Deployer
 ): Promise<void> {
   // if .ts file is encountered, load from /build/scripts/file.js
   if (relativeScriptPath.endsWith('.ts')) {

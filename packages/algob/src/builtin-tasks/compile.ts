@@ -5,7 +5,7 @@ import { assertDir, ASSETS_DIR, CACHE_DIR } from "../internal/core/project-struc
 import { cmpStr } from "../lib/comparators";
 import { CompileOp, pyExt, tealExt } from "../lib/compile";
 import { createClient } from "../lib/driver";
-import type { AlgobRuntimeEnv } from "../types";
+import type { RuntimeEnv } from "../types";
 import { TASK_COMPILE } from "./task-names";
 
 export default function (): void {
@@ -18,7 +18,7 @@ export interface TaskArgs {
   force: boolean
 }
 
-function compileTask ({ force }: TaskArgs, env: AlgobRuntimeEnv): Promise<void> {
+function compileTask ({ force }: TaskArgs, env: RuntimeEnv): Promise<void> {
   const op = new CompileOp(createClient(env.network));
   return compile(force, op);
 }

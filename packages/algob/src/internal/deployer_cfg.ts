@@ -4,9 +4,9 @@ import { mkAccountIndex } from "../lib/account";
 import { AlgoOperator } from "../lib/algo-operator";
 import { loadCheckpointsRecursive } from "../lib/script-checkpoints";
 import type {
-  AlgobDeployer,
-  AlgobRuntimeEnv,
-  CheckpointRepo
+  CheckpointRepo,
+  Deployer,
+  RuntimeEnv
 } from "../types";
 import { DeployerDeployMode, DeployerRunMode } from "./deployer";
 import { txWriter, TxWriterImpl } from "./tx-log-writer";
@@ -14,7 +14,7 @@ import { txWriter, TxWriterImpl } from "./tx-log-writer";
 export function mkDeployer (
   allowWrite: boolean,
   deployerCfg: DeployerConfig
-): AlgobDeployer {
+): Deployer {
   if (allowWrite) {
     return new DeployerDeployMode(deployerCfg);
   }
@@ -23,14 +23,14 @@ export function mkDeployer (
 
 // intialize deployer config obj
 export class DeployerConfig {
-  runtimeEnv: AlgobRuntimeEnv;
+  runtimeEnv: RuntimeEnv;
   cpData: CheckpointRepo;
   asaDefs: rtypes.ASADefs;
   algoOp: AlgoOperator;
   txWriter: txWriter;
   accounts: rtypes.AccountMap;
 
-  constructor (runtimeEnv: AlgobRuntimeEnv, algoOp: AlgoOperator) {
+  constructor (runtimeEnv: RuntimeEnv, algoOp: AlgoOperator) {
     this.runtimeEnv = runtimeEnv;
     this.cpData = loadCheckpointsRecursive();
     this.algoOp = algoOp;

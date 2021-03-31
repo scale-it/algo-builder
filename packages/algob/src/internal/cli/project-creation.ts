@@ -56,7 +56,7 @@ function copySampleProject (location: string): void {
   });
 }
 
-export function printSuggestedAlgobCommands (): void {
+export function printSuggestedCommands (): void {
   const npx =
     getExecutionMode() === ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION
       ? ""
@@ -121,7 +121,7 @@ export async function createProject (location: string): PromiseAny {
     console.log(``);
   }
 
-  printSuggestedAlgobCommands();
+  printSuggestedCommands();
 }
 
 export function createConfirmationPrompt (name: string, message: string) { // eslint-disable-line @typescript-eslint/explicit-function-return-type

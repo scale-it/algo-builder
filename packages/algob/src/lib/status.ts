@@ -1,11 +1,11 @@
 import type { AssetHolding, SSCStateSchema } from "algosdk";
 
-import { AlgobDeployer } from "../types";
+import { Deployer } from "../types";
 
 /// Returns `account` asset holding of `assetID`. Returns undefined if the account is not
 /// opt-in to the given asset id.
 export async function balanceOf (
-  deployer: AlgobDeployer,
+  deployer: Deployer,
   account: string,
   assetID: number
 ): Promise<AssetHolding | undefined> {
@@ -21,12 +21,12 @@ export async function balanceOf (
 
 /**
  * Description: Function to read and return the global state of application.
- * @param deployer AlgobDeployer
+ * @param deployer Deployer
  * @param creator Account from which call needs to be made
  * @param appId ID of the application being configured or empty if creating
  */
 export async function readGlobalStateSSC (
-  deployer: AlgobDeployer,
+  deployer: Deployer,
   creator: string,
   appId: number): Promise<SSCStateSchema[] | undefined> {
   const accountInfoResponse = await deployer.algodClient.accountInformation(creator).do();
@@ -38,12 +38,12 @@ export async function readGlobalStateSSC (
 
 /**
  * Description: Function to read and return the local state of application from an account.
- * @param deployer AlgobDeployer
+ * @param deployer Deployer
  * @param account account from the which the local state has to be read
  * @param appId ID of the application being configured or empty if creating
  */
 export async function readLocalStateSSC (
-  deployer: AlgobDeployer,
+  deployer: Deployer,
   account: string,
   appId: number): Promise<SSCStateSchema[] | undefined> {
   const accountInfoResponse = await deployer.algodClient.accountInformation(account).do();
@@ -53,7 +53,7 @@ export async function readLocalStateSSC (
   return undefined;
 }
 
-export async function printAssets (deployer: AlgobDeployer, account: string): Promise<void> {
+export async function printAssets (deployer: Deployer, account: string): Promise<void> {
   const accountInfo = await deployer.algodClient.accountInformation(account).do();
   console.log("Asset Holding Info:", accountInfo.assets);
   console.log("Account's ALGO (microalgos):", accountInfo["amount-without-pending-rewards"]);
@@ -61,7 +61,7 @@ export async function printAssets (deployer: AlgobDeployer, account: string): Pr
 
 // print user state of a stateful smart contract
 export async function printLocalStateSSC (
-  deployer: AlgobDeployer,
+  deployer: Deployer,
   account: string,
   appId: number): Promise<void> {
   const localState = await readLocalStateSSC(deployer, account, appId);
@@ -74,7 +74,7 @@ export async function printLocalStateSSC (
 
 // print global state of a stateful smart contract
 export async function printGlobalStateSSC (
-  deployer: AlgobDeployer,
+  deployer: Deployer,
   creator: string,
   appId: number): Promise<void> {
   const globalState = await readGlobalStateSSC(deployer, creator, appId);

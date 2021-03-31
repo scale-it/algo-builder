@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 
-import { AlgobRuntimeEnv, PromiseAny } from "../../src/types";
+import { PromiseAny, RuntimeEnv } from "../../src/types";
 
 function mkAcc (name: string): rtypes.Account {
   return {
@@ -10,7 +10,7 @@ function mkAcc (name: string): rtypes.Account {
   };
 }
 
-export function mkAlgobEnv (networkName?: string): AlgobRuntimeEnv {
+export function mkEnv (networkName?: string): RuntimeEnv {
   return {
     config: {
       networks: {}

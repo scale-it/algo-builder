@@ -4,7 +4,7 @@ import fse from "fs-extra";
 import path from "path";
 
 import { copyTemplatetoDestination, fetchRepository, setUpTempDirectory } from "../util/unpack";
-import { createConfirmationPrompt, installDependencies, printSuggestedAlgobCommands, printWelcomeMessage } from "./project-creation";
+import { createConfirmationPrompt, installDependencies, printSuggestedCommands, printWelcomeMessage } from "./project-creation";
 
 const ALGOB_DAPP_TEMPLATES_GIT_REMOTE = 'scale-it/algo-builder-templates';
 const DEFAULT_DAPP_TEMPLATE = 'default';
@@ -196,6 +196,6 @@ export async function unbox ({ force, templateName, destination }:
       chalk.yellow(`\nInstall your project dependencies using '${packageManager} install'`)
     );
   }
-  printSuggestedAlgobCommands();
+  printSuggestedCommands();
   printSuggestedDAppCommands(packageManager);
 }
