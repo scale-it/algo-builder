@@ -1989,8 +1989,8 @@ export class GetAssetHolding extends Op {
 
 // get Asset Params Info for given account
 // For Index in ForeignAssets array
+// push to stack [...stack, value(bigint/bytes), did_exist]
 // NOTE: if asset doesn't exist, then did_exist = 0, value = 0
-// otherwise push to stack [...stack, value(bigint/bytes), 1]
 export class GetAssetDef extends Op {
   readonly interpreter: Interpreter;
   readonly field: string;

@@ -440,7 +440,7 @@ export class Runtime {
       }
 
       for (const assetId of account.createdAssets.keys()) {
-        this.store.assetDefs.set(assetId, account.address);
+        this.ctx.state.assetDefs.set(assetId, account.address);
       }
     }
 
