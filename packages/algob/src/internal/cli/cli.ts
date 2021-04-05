@@ -8,7 +8,7 @@ import semver from "semver";
 
 import { TASK_HELP, TASK_INIT } from "../../builtin-tasks/task-names";
 import { checkAlgorandUnauthorized } from "../../lib/exceptions";
-import { AlgobRuntimeEnv, RuntimeArgs, TaskArguments } from "../../types";
+import { RuntimeArgs, RuntimeEnv, TaskArguments } from "../../types";
 import { ALGOB_NAME } from "../constants";
 import { BuilderContext } from "../context";
 import { loadConfigAndTasks } from "../core/config/config-loading";
@@ -63,7 +63,7 @@ function printStackTraces (showStackTraces: boolean, error: BuilderError): void 
 }
 
 interface EnvAndArgs {
-  env: AlgobRuntimeEnv
+  env: RuntimeEnv
   taskName: string
   taskArguments: TaskArguments
 }
@@ -165,7 +165,7 @@ export async function loadEnvironmentAndArgs (
     envExtenders,
     !isSetup);
 
-  ctx.setAlgobRuntimeEnv(env);
+  ctx.setRuntimeEnv(env);
 
   return {
     env: env,

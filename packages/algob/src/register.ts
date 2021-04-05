@@ -37,7 +37,7 @@ async function registerEnv (): Promise<void> {
     ctx.extendersManager.getExtenders(),
     false
   );
-  ctx.setAlgobRuntimeEnv(env);
+  ctx.setRuntimeEnv(env);
 
   env.injectToGlobal();
 }

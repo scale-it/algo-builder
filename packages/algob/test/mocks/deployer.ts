@@ -3,15 +3,15 @@ import type { LogicSig, LogicSigArgs } from "algosdk";
 import * as algosdk from "algosdk";
 
 import type {
-  AlgobDeployer,
   ASAInfo,
   ASCCache,
+  Deployer,
   FundASCFlags,
   LsigInfo,
   SSCInfo
 } from "../../src/types";
 
-export class FakeDeployer implements AlgobDeployer {
+export class FakeDeployer implements Deployer {
   asa = new Map<string, ASAInfo>();
   ssc = new Map<string, SSCInfo>();
   lsig = new Map<string, LsigInfo>();

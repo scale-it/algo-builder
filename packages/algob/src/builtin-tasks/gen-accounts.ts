@@ -7,7 +7,7 @@ import { task } from "../internal/core/config/config-env";
 import { BuilderError, ERRORS } from "../internal/core/errors";
 import * as types from "../internal/core/params/argument-types";
 import { assertAllDirs, ASSETS_DIR } from "../internal/core/project-structure";
-import { AlgobRuntimeEnv, MnemonicAccount, TaskArguments } from "../types";
+import { MnemonicAccount, RuntimeEnv, TaskArguments } from "../types";
 import { TASK_GEN_ACCOUNTS } from "./task-names";
 const fsp = _fs.promises;
 
@@ -20,7 +20,7 @@ export default function (): void {
 
 export function getFilename (): string { return path.join(ASSETS_DIR, "accounts_generated.yaml"); }
 
-export async function mkAccounts (taskArgs: TaskArguments, _env: AlgobRuntimeEnv): Promise<void> {
+export async function mkAccounts (taskArgs: TaskArguments, _env: RuntimeEnv): Promise<void> {
   const filename = getFilename();
   const n = taskArgs.n as number;
   if (n <= 0) {

@@ -8,13 +8,13 @@ import { getDummyLsig, getLsig } from "../lib/lsig";
 import { blsigExt, loadBinaryMultiSig, readMsigFromFile } from "../lib/msig";
 import { persistCheckpoint } from "../lib/script-checkpoints";
 import type {
-  AlgobDeployer,
-  AlgobRuntimeEnv,
   ASAInfo,
   ASCCache,
   CheckpointRepo,
+  Deployer,
   FundASCFlags,
   LsigInfo,
+  RuntimeEnv,
   SCParams,
   SSCInfo
 } from "../types";
@@ -24,7 +24,7 @@ import { DeployerConfig } from "./deployer_cfg";
 
 // Base class for deployer Run Mode (read access) and Deploy Mode (read and write access)
 class DeployerBasicMode {
-  protected readonly runtimeEnv: AlgobRuntimeEnv;
+  protected readonly runtimeEnv: RuntimeEnv;
   protected readonly cpData: CheckpointRepo;
   protected readonly loadedAsaDefs: rtypes.ASADefs;
   protected readonly algoOp: AlgoOperator;
@@ -195,7 +195,7 @@ class DeployerBasicMode {
 }
 
 // This class is what user interacts with in deploy task
-export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeployer {
+export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   get isDeployMode (): boolean {
     return true;
   }
@@ -348,7 +348,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements AlgobDeploy
 }
 
 // This class is what user interacts with in run task
-export class DeployerRunMode extends DeployerBasicMode implements AlgobDeployer {
+export class DeployerRunMode extends DeployerBasicMode implements Deployer {
   get isDeployMode (): boolean {
     return false;
   }

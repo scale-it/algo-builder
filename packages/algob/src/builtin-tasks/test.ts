@@ -2,11 +2,11 @@ import Mocha from "mocha";
 
 import { task } from "../internal/core/config/config-env";
 import { testsDirectory } from "../lib/script-checkpoints";
-import type { AlgobConfig } from "../types";
+import type { Config } from "../types";
 import { loadFilenames } from "./deploy";
 import { TASK_TEST } from "./task-names";
 
-async function runTests (config: AlgobConfig): Promise<void> {
+async function runTests (config: Config): Promise<void> {
   try {
     const testFiles = loadFilenames(testsDirectory, "test");
     console.log("Test files:", testFiles);

@@ -57,7 +57,7 @@ describe("Builder context", function () {
     it("should throw when BRE is not defined", async function () {
       const ctx = BuilderContext.createBuilderContext();
       expectBuilderError(
-        () => ctx.getAlgobRuntimeEnv(),
+        () => ctx.getRuntimeEnv(),
         ERRORS.GENERAL.CONTEXT_BRE_NOT_DEFINED
       );
     });
@@ -68,14 +68,14 @@ describe("Builder context", function () {
     useEnvironment();
     it("should create context and set BRE into context", async function () {
       assert.equal(
-        BuilderContext.getBuilderContext().getAlgobRuntimeEnv(),
+        BuilderContext.getBuilderContext().getRuntimeEnv(),
         this.env
       );
     });
     it("should throw when trying to set BRE", async function () {
       expectBuilderError(
         () =>
-          BuilderContext.getBuilderContext().setAlgobRuntimeEnv(
+          BuilderContext.getBuilderContext().setRuntimeEnv(
             this.env
           ),
         ERRORS.GENERAL.CONTEXT_BRE_ALREADY_DEFINED

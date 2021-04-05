@@ -9,14 +9,14 @@ import {
 } from "../../../src/internal/util/scripts-runner";
 import { CheckpointRepoImpl } from "../../../src/lib/script-checkpoints";
 import { expectBuilderErrorAsync } from "../../helpers/errors";
-import { mkAlgobEnv } from "../../helpers/params";
+import { mkEnv } from "../../helpers/params";
 import { testFixtureOutputFile, useCleanFixtureProject } from "../../helpers/project";
 import { AlgoOperatorDryRunImpl } from "../../stubs/algo-operator";
 
 describe("Scripts runner", function () {
   useCleanFixtureProject("project-with-scripts");
 
-  const env = mkAlgobEnv();
+  const env = mkEnv();
   let deployerCfg: DeployerConfig;
 
   beforeEach(function () {

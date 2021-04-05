@@ -6,7 +6,7 @@ import YAML from "yaml";
 import CfgErrors, { ErrorPutter } from "../internal/core/config/config-errors";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
-import type { AccountDef, AlgobAccount, HDAccount, KmdCfg, KmdWallet, MnemonicAccount, StrMap } from "../types";
+import type { Account, AccountDef, HDAccount, KmdCfg, KmdWallet, MnemonicAccount, StrMap } from "../types";
 
 export function mkAccounts (input: AccountDef[]): rtypes.Account[] {
   const accounts: rtypes.Account[] = [];
@@ -80,13 +80,13 @@ export function mkAccountIndex (accountList: rtypes.Account[]): rtypes.AccountMa
 export function loadAccountsFromEnv (): rtypes.Account[] {
   var algobAccountsString = process.env.ALGOB_ACCOUNTS;
   if (algobAccountsString) {
-    var accounts: AlgobAccount[] = [];
+    var accounts: Account[] = [];
     try {
       accounts = JSON.parse(algobAccountsString);
     } catch (error) {
       throw new BuilderError(ERRORS.ACCOUNT.MALFORMED, { errors: 'Some accounts are malformed or have missing fields' });
     }
-    validateAlgobAccounts(accounts);
+    validateAccounts(accounts);
     var algobAccounts: rtypes.Account[] = [];
     for (const account of accounts) {
       try {
@@ -115,7 +115,7 @@ export function createMsigAddress (
   return [mparams, multisigAddress(mparams)];
 }
 
-function validateAlgobAccounts (algobAccounts: AlgobAccount[]): void {
+function validateAccounts (algobAccounts: Account[]): void {
   for (const account of algobAccounts) {
     if (account.name === undefined) {
       throw new BuilderError(ERRORS.ACCOUNT.FIELD_REQUIRED,

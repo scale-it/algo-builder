@@ -2,7 +2,7 @@ import path from "path";
 
 import { KMDOperator } from "../../../lib/account";
 import { createKmdClient } from "../../../lib/driver";
-import type { NetworkConfig, ResolvedAlgobConfig, RuntimeArgs } from "../../../types";
+import type { NetworkConfig, ResolvedConfig, RuntimeArgs } from "../../../types";
 import { BuilderContext } from "../../context";
 import { loadPluginFile } from "../plugins";
 import { getUserConfigPath } from "../project-structure";
@@ -16,7 +16,7 @@ function importCsjOrEsModule (filePath: string): any { // eslint-disable-line @t
 
 export async function loadConfigAndTasks (
   runtimeArgs?: Partial<RuntimeArgs>
-): Promise<ResolvedAlgobConfig> {
+): Promise<ResolvedConfig> {
   let configPath =
     runtimeArgs !== undefined ? runtimeArgs.config : undefined;
 

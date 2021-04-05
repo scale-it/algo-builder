@@ -3,7 +3,7 @@ import * as fsExtra from "fs-extra";
 import path from "path";
 
 import { TASK_CLEAN } from "../../src/builtin-tasks/task-names";
-import { AlgobRuntimeEnv } from "../../src/types";
+import { RuntimeEnv } from "../../src/types";
 import { useEnvironment } from "./environment";
 
 export const testFixtureOutputFile = "output.txt";
@@ -67,7 +67,7 @@ export function useFixtureProjectCopy (srcProjectName: string): void {
  */
 export function useCleanFixtureProject (projectName: string): void {
   useFixtureProject(projectName);
-  useEnvironment(async (algobEnv: AlgobRuntimeEnv) => {
+  useEnvironment(async (algobEnv: RuntimeEnv) => {
     return await algobEnv.run(TASK_CLEAN, {});
   });
 

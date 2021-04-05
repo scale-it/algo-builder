@@ -1,7 +1,7 @@
-import { AlgobParamDefinitions, AlgobShortParamSubstitutions, ParamDefinition } from "../../../types";
+import { ParamDefinition, ParamDefinitions, ShortParamSubstitutions } from "../../../types";
 import * as types from "./argument-types";
 
-export const ALGOB_PARAM_DEFINITIONS: AlgobParamDefinitions = {
+export const ALGOB_PARAM_DEFINITIONS: ParamDefinitions = {
   network: {
     name: "network",
     defaultValue: "default",
@@ -60,7 +60,7 @@ export const ALGOB_PARAM_DEFINITIONS: AlgobParamDefinitions = {
 };
 
 // reverse lookup map for short parameters
-export const ALGOB_SHORT_PARAM_SUBSTITUTIONS: AlgobShortParamSubstitutions =
+export const ALGOB_SHORT_PARAM_SUBSTITUTIONS: ShortParamSubstitutions =
   Object.entries(ALGOB_PARAM_DEFINITIONS)
     .reduce((out: Record<string, string>, kv: [string, ParamDefinition<unknown>]) => {
       const [name, value] = kv;

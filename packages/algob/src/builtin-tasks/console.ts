@@ -10,10 +10,10 @@ import { isRecoverableError, preprocess } from "../internal/util/console";
 import { createAlgoOperator } from "../lib/algo-operator";
 import { createClient } from "../lib/driver";
 import { loadCheckpointsIntoCPData, lsScriptsDir } from "../lib/script-checkpoints";
-import { AlgobDeployer, AlgobRuntimeEnv } from "../types";
+import { Deployer, RuntimeEnv } from "../types";
 import { TASK_CONSOLE } from "./task-names";
 
-function initializeDeployer (runtimeEnv: AlgobRuntimeEnv): AlgobDeployer {
+function initializeDeployer (runtimeEnv: RuntimeEnv): Deployer {
   const algoOp = createAlgoOperator(runtimeEnv.network);
   const deployerCfg = new DeployerConfig(runtimeEnv, algoOp);
   const scriptsFromScriptsDir: string[] = lsScriptsDir();
@@ -37,7 +37,7 @@ async function evaluate (code: string, context: object, filename: string,
   }
 }
 
-async function startConsole (runtimeEnv: AlgobRuntimeEnv): Promise<void> {
+async function startConsole (runtimeEnv: RuntimeEnv): Promise<void> {
   const deployer = initializeDeployer(runtimeEnv);
   const algodClient = createClient(runtimeEnv.network);
   await new Promise<void>((resolve, reject) => {
@@ -67,7 +67,7 @@ export default function (): void {
     .setAction(
       async (
         { noCompile }: { noCompile: boolean },
-        runtimeEnv: AlgobRuntimeEnv
+        runtimeEnv: RuntimeEnv
       ) => {
         if (!runtimeEnv.config.paths) {
           return;

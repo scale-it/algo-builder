@@ -2,22 +2,22 @@ import deepmerge from "deepmerge";
 import * as path from "path";
 
 import type {
-  AlgobConfig,
+  Config,
   ConfigExtender,
   ProjectPaths,
-  ResolvedAlgobConfig,
+  ResolvedConfig,
   StrMap,
   UserPaths
 } from "../../../types";
 import { fromEntries } from "../../util/lang";
 
 function mergeUserAndDefaultConfigs (
-  defaultConfig: AlgobConfig,
-  userConfig: AlgobConfig
-): Partial<ResolvedAlgobConfig> {
+  defaultConfig: Config,
+  userConfig: Config
+): Partial<ResolvedConfig> {
   return deepmerge(defaultConfig, userConfig, {
     arrayMerge: (destination: any[], source: any[]) => source // eslint-disable-line @typescript-eslint/no-explicit-any
-  }) as Partial<ResolvedAlgobConfig>;
+  }) as Partial<ResolvedConfig>;
 }
 
 /**
@@ -33,16 +33,16 @@ function mergeUserAndDefaultConfigs (
  */
 export function resolveConfig (
   userConfigPath: string | undefined,
-  defaultConfig: AlgobConfig,
-  userConfig: AlgobConfig,
+  defaultConfig: Config,
+  userConfig: Config,
   configExtenders: ConfigExtender[]
-): ResolvedAlgobConfig {
-  const config: Partial<ResolvedAlgobConfig> = mergeUserAndDefaultConfigs(defaultConfig, userConfig);
+): ResolvedConfig {
+  const config: Partial<ResolvedConfig> = mergeUserAndDefaultConfigs(defaultConfig, userConfig);
 
   const paths = userConfigPath !== undefined
     ? resolveProjectPaths(userConfigPath, userConfig.paths)
     : undefined;
-  const resolved: ResolvedAlgobConfig = {
+  const resolved: ResolvedConfig = {
     ...config,
     paths,
     networks: config.networks ?? {}

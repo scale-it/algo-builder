@@ -3,7 +3,7 @@ import * as z from 'zod';
 
 import { validateAccount } from "../../../lib/account";
 // import { Account } from "algosdk";
-import type { AlgobChainCfg, HttpNetworkConfig, NetworkConfig } from "../../../types";
+import type { ChainCfg, HttpNetworkConfig, NetworkConfig } from "../../../types";
 import { ALGOB_CHAIN_NAME } from "../../constants";
 import { BuilderError } from "../errors";
 import { ERRORS } from "../errors-list";
@@ -15,7 +15,7 @@ const AccountType = z.object({
   name: z.string()
 });
 
-const AlgobChainType = z.object({
+const ChainType = z.object({
   accounts: z.array(AccountType).optional(),
   chainName: z.string().optional(),
   throwOnTransactionFailures: z.boolean().optional(),
@@ -55,7 +55,7 @@ const HttpNetworkType = z.object({
   kmdCfg: KmdCfg.optional()
 }).nonstrict();
 
-const NetworkType = z.union([AlgobChainType, HttpNetworkType]);
+const NetworkType = z.union([ChainType, HttpNetworkType]);
 
 const NetworksType = z.record(NetworkType);
 
@@ -102,9 +102,9 @@ export function getValidationErrors(config: any): CfgErrors {  // eslint-disable
         if ((j = accountsMap.get(a.name)) !== undefined) { p.push('name', `Account name ${a.name} already exists at index ${j}`, 'string'); } else { accountsMap.set(a.name, i); }
       }
 
-      // ONLY AlgobChain network can be of type AlgobChainCfg
+      // ONLY Chain network can be of type ChainCfg
       if (net === ALGOB_CHAIN_NAME) {
-        validateAlgobChainCfg(ncfg, errors);
+        validateChainCfg(ncfg, errors);
         continue;
       }
 
@@ -142,7 +142,7 @@ export function getValidationErrors(config: any): CfgErrors {  // eslint-disable
   return errors;
 }
 
-function validateAlgobChainCfg (ncfg: AlgobChainCfg, errors: CfgErrors): void {
+function validateChainCfg (ncfg: ChainCfg, errors: CfgErrors): void {
   const tBoolOpt = "boolean | undefined";
   if (
     ncfg.initialDate !== undefined &&

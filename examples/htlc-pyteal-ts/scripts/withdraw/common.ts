@@ -5,11 +5,11 @@ import { sha256 } from 'js-sha256';
 
 /**
  * Returns account from algob config (by name)
- * @param deployer AlgobDeployer
+ * @param deployer Deployer
  * @param name Name of the account to fetch
  */
 export function getDeployerAccount (
-  deployer: algob.types.AlgobDeployer, name: string): rtypes.Account {
+  deployer: algob.types.Deployer, name: string): rtypes.Account {
   const account = deployer.accountsByName.get(name);
   if (account === undefined) {
     throw new Error(`Account ${name} is not defined`);
@@ -18,7 +18,7 @@ export function getDeployerAccount (
 }
 
 export async function executeTx (
-  deployer: algob.types.AlgobDeployer, txnParams: rtypes.ExecParams): Promise<void> {
+  deployer: algob.types.Deployer, txnParams: rtypes.ExecParams): Promise<void> {
   try {
     await executeTransaction(deployer, txnParams);
   } catch (e) {
@@ -33,9 +33,9 @@ export async function executeTx (
  *  - secret value
  *  - hash of secret
  *  - pyteal template params (to pass to htlc.py)
- * @param deployer AlgobDeployer
+ * @param deployer Deployer
  */
-export function prepareParameters (deployer: algob.types.AlgobDeployer): any {
+export function prepareParameters (deployer: algob.types.Deployer): any {
   const bob = getDeployerAccount(deployer, 'bob');
   const alice = getDeployerAccount(deployer, 'alice');
 

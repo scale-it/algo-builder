@@ -18,7 +18,7 @@ import {
   lsScriptsDir,
   scriptsDirectory
 } from "../lib/script-checkpoints";
-import { AlgobDeployer, AlgobRuntimeEnv, CheckpointRepo } from "../types";
+import { CheckpointRepo, Deployer, RuntimeEnv } from "../types";
 import { TASK_RUN } from "./task-names";
 
 interface Input {
@@ -53,7 +53,7 @@ function partitionIntoSorted (unsorted: string[]): string[][] {
 }
 
 export async function runMultipleScripts (
-  runtimeEnv: AlgobRuntimeEnv,
+  runtimeEnv: RuntimeEnv,
   scriptNames: string[],
   onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
   force: boolean,
@@ -77,7 +77,7 @@ export async function runMultipleScripts (
 
 // Function only accepts sorted scripts -- only this way it loads the state correctly.
 async function runSortedScripts (
-  runtimeEnv: AlgobRuntimeEnv,
+  runtimeEnv: RuntimeEnv,
   scriptNames: string[],
   onSuccessFn: (cpData: CheckpointRepo, relativeScriptPath: string) => void,
   force: boolean,
@@ -88,7 +88,7 @@ async function runSortedScripts (
   const log = debug(logDebugTag);
   deployerCfg.cpData = loadCheckpointsRecursive();
   deployerCfg.txWriter = new TxWriterImpl('');
-  const deployer: AlgobDeployer = mkDeployer(allowWrite, deployerCfg);
+  const deployer: Deployer = mkDeployer(allowWrite, deployerCfg);
 
   const scriptsFromScriptsDir: string[] = lsScriptsDir();
   for (const relativeScriptPath of scriptNames) {
@@ -116,7 +116,7 @@ async function runSortedScripts (
 
 async function executeRunTask (
   { scripts }: Input,
-  runtimeEnv: AlgobRuntimeEnv,
+  runtimeEnv: RuntimeEnv,
   algoOp: AlgoOperator
 ): Promise<any> {
   const logDebugTag = "algob:tasks:run";

@@ -1,14 +1,14 @@
 import { encodeNote, parseSSCAppArgs, types as rtypes } from "@algo-builder/runtime";
 import tx, { Account as AccountSDK, ConfirmedTxInfo } from "algosdk";
 
-import { AlgobDeployer } from "../types";
+import { Deployer } from "../types";
 import { mkTxParams } from "./tx";
 
 export const reDigit = /^\d+$/;
 
 /**
  * Transaction to update TEAL Programs for a contract.
- * @param deployer AlgobDeployer
+ * @param deployer Deployer
  * @param sender Account from which call needs to be made
  * @param payFlags Transaction Flags
  * @param appId ID of the application being configured or empty if creating
@@ -17,7 +17,7 @@ export const reDigit = /^\d+$/;
  * @param flags Optional parameters to SSC (accounts, args..)
  */
 export async function updateSSC (
-  deployer: AlgobDeployer,
+  deployer: Deployer,
   sender: AccountSDK,
   payFlags: rtypes.TxParams,
   appId: number,

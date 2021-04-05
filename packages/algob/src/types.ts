@@ -7,7 +7,7 @@ import * as types from "./internal/core/params/argument-types";
 
 // IMPORTANT: This t.types MUST be kept in sync with the actual types.
 
-export interface AlgobAccount {
+export interface Account {
   name: string
   mnemonic: string
 }
@@ -40,7 +40,7 @@ interface CommonNetworkConfig {
   // TODO: timeout?: number;
 }
 
-export interface AlgobChainCfg extends CommonNetworkConfig {
+export interface ChainCfg extends CommonNetworkConfig {
   throwOnTransactionFailures?: boolean
   throwOnCallFailures?: boolean
   loggingEnabled?: boolean
@@ -54,7 +54,7 @@ export interface HttpNetworkConfig extends CommonNetworkConfig {
   httpHeaders?: { [name: string]: string }
 }
 
-export type NetworkConfig = AlgobChainCfg | HttpNetworkConfig;
+export type NetworkConfig = ChainCfg | HttpNetworkConfig;
 
 export interface Networks {
   [networkName: string]: NetworkConfig
@@ -99,13 +99,13 @@ export interface ProjectPaths {
 
 export type UserPaths = Omit<Partial<ProjectPaths>, "configFile">;
 
-export interface AlgobConfig {
+export interface Config {
   networks?: Networks
   paths?: UserPaths
   mocha?: Mocha.MochaOptions
 }
 
-export interface ResolvedAlgobConfig extends AlgobConfig {
+export interface ResolvedConfig extends Config {
   paths?: ProjectPaths
   networks: Networks
 }
@@ -113,14 +113,14 @@ export interface ResolvedAlgobConfig extends AlgobConfig {
 // End config types
 
 /**
- * A function that receives a AlgobRuntimeEnv and
+ * A function that receives a RuntimeEnv and
  * modify its properties or add new ones.
  */
-export type EnvironmentExtender = (env: AlgobRuntimeEnv) => void;
+export type EnvironmentExtender = (env: RuntimeEnv) => void;
 
 export type ConfigExtender = (
-  config: ResolvedAlgobConfig,
-  userConfig: Readonly<AlgobConfig>
+  config: ResolvedConfig,
+  userConfig: Readonly<Config>
 ) => void;
 
 export interface TasksMap {
@@ -219,13 +219,13 @@ export interface RuntimeArgs {
   verbose: boolean
 }
 
-export type AlgobParamDefinitions = {
+export type ParamDefinitions = {
   [param in keyof Required<RuntimeArgs>]: OptionalParamDefinition<
   RuntimeArgs[param]
   >;
 };
 
-export interface AlgobShortParamSubstitutions {
+export interface ShortParamSubstitutions {
   [name: string]: string
 };
 
@@ -270,7 +270,7 @@ export interface RunSuperFunction<ArgT extends TaskArguments> {
 
 export type ActionType<ArgsT extends TaskArguments> = (
   taskArgs: ArgsT,
-  env: AlgobRuntimeEnv,
+  env: RuntimeEnv,
   runSuper: RunSuperFunction<ArgsT>
 ) => PromiseAny;
 
@@ -280,8 +280,8 @@ export interface Network {
   // provider:
 }
 
-export interface AlgobRuntimeEnv {
-  readonly config: ResolvedAlgobConfig
+export interface RuntimeEnv {
+  readonly config: ResolvedConfig
   readonly runtimeArgs: RuntimeArgs
   readonly tasks: TasksMap
   readonly run: RunTaskFunction
@@ -384,7 +384,7 @@ export interface AssetScriptMap {
   [assetName: string]: string
 }
 
-export interface AlgobDeployer {
+export interface Deployer {
   /**
    * Allows user to know whether a script is running in a `deploy` or `run` mode. */
   isDeployMode: boolean

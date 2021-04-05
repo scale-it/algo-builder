@@ -1,6 +1,6 @@
 import { task } from "../internal/core/config/config-env";
 import { createClient } from "../lib/driver";
-import { AlgobRuntimeEnv, TaskArguments } from "../types";
+import { RuntimeEnv, TaskArguments } from "../types";
 import { TASK_NODE_INFO } from "./task-names";
 
 export default function (): void {
@@ -8,7 +8,7 @@ export default function (): void {
     .setAction(nodeInfo);
 }
 
-async function nodeInfo (_taskArgs: TaskArguments, env: AlgobRuntimeEnv): Promise<void> {
+async function nodeInfo (_taskArgs: TaskArguments, env: RuntimeEnv): Promise<void> {
   const n = env.network;
   const algocl = createClient(n);
   const st = await algocl.status().do();
