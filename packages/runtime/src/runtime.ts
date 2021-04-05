@@ -428,21 +428,13 @@ export class Runtime {
     if (clearProgram === "") {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
     }
+
+    // prepare context
+    this.ctx.state = cloneDeep(this.store);
     // create app with id = 0 in globalApps for teal execution
     const app = senderAcc.addApp(0, flags, approvalProgram, clearProgram);
     this.ctx.state.accounts.set(senderAcc.address, senderAcc);
     this.ctx.state.globalApps.set(app.id, senderAcc.address);
-
-    for (const [address, account] of this.store.accounts) {
-      this.ctx.state.accounts.set(address, account);
-      for (const appId of account.createdApps.keys()) {
-        this.ctx.state.globalApps.set(appId, account.address);
-      }
-
-      for (const assetId of account.createdAssets.keys()) {
-        this.ctx.state.assetDefs.set(assetId, account.address);
-      }
-    }
 
     this.addCtxAppCreateTxn(flags, payFlags);
     this.run(approvalProgram, ExecutionMode.STATEFUL); // execute TEAL code with appId = 0
