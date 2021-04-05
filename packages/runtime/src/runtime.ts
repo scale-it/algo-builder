@@ -428,6 +428,9 @@ export class Runtime {
     if (clearProgram === "") {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
     }
+
+    // prepare context
+    this.ctx.state = cloneDeep(this.store);
     // create app with id = 0 in globalApps for teal execution
     const app = senderAcc.addApp(0, flags, approvalProgram, clearProgram);
     this.ctx.state.accounts.set(senderAcc.address, senderAcc);

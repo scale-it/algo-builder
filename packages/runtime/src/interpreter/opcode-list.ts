@@ -1934,8 +1934,8 @@ export class Balance extends Op {
 }
 
 // For Account A, Asset B (txn.accounts[A]) pushes to the
-// push to stack [...stack, 0] if account has no B holding,
-// otherwise [...stack, bigint/bytes, 1]
+// push to stack [...stack, value(bigint/bytes), 1]
+// NOTE: if account has no B holding then value = 0, did_exist = 0,
 export class GetAssetHolding extends Op {
   readonly interpreter: Interpreter;
   readonly field: string;
@@ -1967,6 +1967,7 @@ export class GetAssetHolding extends Op {
     const assetInfo = account.assets.get(Number(assetId));
     if (assetInfo === undefined) {
       stack.push(0n);
+      stack.push(0n);
       return;
     }
     let value: StackElem;
@@ -1988,8 +1989,8 @@ export class GetAssetHolding extends Op {
 
 // get Asset Params Info for given account
 // For Index in ForeignAssets array
-// push to stack [...stack, 0] if asset doesn't exist,
-// otherwise push to stack [...stack, bigint/bytes, 1]
+// push to stack [...stack, value(bigint/bytes), did_exist]
+// NOTE: if asset doesn't exist, then did_exist = 0, value = 0
 export class GetAssetDef extends Op {
   readonly interpreter: Interpreter;
   readonly field: string;
@@ -2024,6 +2025,7 @@ export class GetAssetDef extends Op {
     const AssetDefinition = this.interpreter.getAssetDef(assetId);
 
     if (AssetDefinition === undefined) {
+      stack.push(0n);
       stack.push(0n);
     } else {
       let value: StackElem;
