@@ -3,7 +3,7 @@ from pyteal import *
 john = Addr("2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA")
 master = Addr("WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE")
 fee = 10000
-pre_image = "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc="
+hash_image = "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc="
 timeout = 2000
 
 def htlc(TMPL_RCV,
@@ -100,4 +100,4 @@ def htlc(TMPL_RCV,
     return And(Or(scenario_1, scenario_2), common_checks)
 
 if __name__ == "__main__":
-    print(compileTeal(htlc(john, master, fee, pre_image, Sha256, timeout), Mode.Signature))
+    print(compileTeal(htlc(john, master, fee, hash_image, Sha256, timeout), Mode.Signature))
