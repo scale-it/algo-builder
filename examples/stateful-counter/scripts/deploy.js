@@ -12,7 +12,7 @@ async function run (runtimeEnv, deployer) {
     sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
     toAccountAddr: creatorAccount.addr,
-    amountMicroAlgos: 200000000,
+    amountMicroAlgos: 200e6,
     payFlags: {}
   };
   // transfer some algos to creator account
