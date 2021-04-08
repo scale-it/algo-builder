@@ -41,9 +41,9 @@ export async function mkTxParams (
 }
 
 /**
- * Returns a transaction object for ASA creation operation
- * @param name the name to be used for asset
- * @param asaDef the custom params to be used while creating the asset
+ * Returns SDK transaction object for ASA creation
+ * @param name asset name
+ * @param asaDef asset definition (passed in `/assets/asa.yaml)
  * @param flags basic transaction flags like `feePerByte`, `totalFee`, etc
  * @param txSuggestedParams suggested transaction params
  */
@@ -81,7 +81,7 @@ export function makeAssetCreateTxn (
 }
 
 /**
- * Returns a transaction object for ASA Opt-In operation
+ * Returns SDK transaction object for ASA Opt-In operation
  * @param addr the address of the user to be opted-in
  * @param assetID the unique asset ID for which the opt-in transaction will be performed
  * @param params suggested transaction params
