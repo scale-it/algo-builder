@@ -1,6 +1,6 @@
 import {
   decodeAddress, encodeAddress,
-  generateAccount, LogicSigBase, MultiSig, MultiSigAccount,
+  generateAccount, LogicSigBase, MultiSig, MultisigMetadata,
   multisigAddress, signBytes, verifyBytes
 } from "algosdk";
 import * as tweet from "tweetnacl-ts";
@@ -38,7 +38,7 @@ export class LogicSig {
    * @param secretKey sender's secret key
    * @param msig multisignature if it exists
    */
-  sign (secretKey: Uint8Array, msig?: MultiSigAccount): void {
+  sign (secretKey: Uint8Array, msig?: MultisigMetadata): void {
     if (msig === undefined) {
       this.sig = this.signProgram(secretKey);
     } else {
