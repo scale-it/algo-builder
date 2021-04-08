@@ -1,5 +1,5 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import { Account as AccountSDK, Kmd, mnemonicToSecretKey, MultisigMetadata, multisigAddress } from "algosdk";
+import { Account as AccountSDK, Kmd, mnemonicToSecretKey, multisigAddress, MultisigMetadata } from "algosdk";
 import * as fs from "fs";
 import YAML from "yaml";
 

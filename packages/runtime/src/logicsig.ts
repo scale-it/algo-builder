@@ -1,7 +1,7 @@
 import {
   decodeAddress, encodeAddress,
-  generateAccount, LogicSigBase, MultiSig, MultisigMetadata,
-  multisigAddress, signBytes, verifyBytes
+  generateAccount, LogicSigBase, MultiSig, multisigAddress, MultisigMetadata,
+  signBytes, verifyBytes
 } from "algosdk";
 import * as tweet from "tweetnacl-ts";
 
