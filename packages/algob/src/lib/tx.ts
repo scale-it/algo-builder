@@ -5,6 +5,10 @@ import { Deployer } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
 import { loadSignedTxnFromFile } from "./files";
 
+/**
+ * Returns blockchain transaction suggested parameters
+ * @param algocl an Algorand client, instance of Algodv2, used to communicate with a blockchain node.
+ */
 export async function getSuggestedParams (algocl: Algodv2): Promise<SuggestedParams> {
   const params = await algocl.getTransactionParams().do();
   // Private chains may have an issue with firstRound
@@ -15,8 +19,12 @@ export async function getSuggestedParams (algocl: Algodv2): Promise<SuggestedPar
   return params;
 }
 
-/// creates common transaction parameters. If suggested params are not provided, will call
-/// Algorand node to get suggested parameters.
+/**
+ * Returns a union object of custom transaction params and suggested params.
+ * @param algocl an Algorand client, instance of Algodv2, used to communicate with a blockchain node.
+ * @param userParams a dict containing custom params defined by the user
+ * @param s suggested transaction params
+ */
 export async function mkTxParams (
   algocl: Algodv2, userParams: rtypes.TxParams, s?: SuggestedParams): Promise<SuggestedParams> {
   if (s === undefined) { s = await getSuggestedParams(algocl); }
@@ -32,6 +40,13 @@ export async function mkTxParams (
   return s;
 }
 
+/**
+ * Returns SDK transaction object for ASA creation
+ * @param name asset name
+ * @param asaDef asset definition (passed in `/assets/asa.yaml)
+ * @param flags basic transaction flags like `feePerByte`, `totalFee`, etc
+ * @param txSuggestedParams suggested transaction params
+ */
 export function makeAssetCreateTxn (
   name: string, asaDef: rtypes.ASADef,
   flags: rtypes.ASADeploymentFlags, txSuggestedParams: SuggestedParams
@@ -65,6 +80,12 @@ export function makeAssetCreateTxn (
   );
 }
 
+/**
+ * Returns SDK transaction object for ASA Opt-In operation
+ * @param addr the address of the user to be opted-in
+ * @param assetID the unique asset ID for which the opt-in transaction will be performed
+ * @param params suggested transaction params
+ */
 export function makeASAOptInTx (
   addr: string,
   assetID: number,
@@ -121,7 +142,7 @@ async function sendAndWait (
 }
 
 /**
- * Execute single transaction or group of transactions (atomic transaction)
+ * Execute single transactions or group of transactions (atomic transaction)
  * @param deployer Deployer
  * @param execParams transaction parameters or atomic transaction parameters
  */
