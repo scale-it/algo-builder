@@ -48,6 +48,6 @@ In the `sample-project` folder you'll have following items:
 
 * `test/`: Directory for test files for testing your assets and smart contracts:
     - `sample-test.js` : This is a basic example of how tests should be and how they work.
-    - You can add tests for your scripts here. Basic tests for algo-transfer using `@algo-builder/runtime` are added.
+    - You can add tests for your scripts here.
 
 * `algob.config.js`: Algob configuration file
