@@ -1,4 +1,4 @@
-## Example
+## Stateful Counter Example
 
 We will create a simple stateful smart contract which will:
 - Have a global variable `counter`
