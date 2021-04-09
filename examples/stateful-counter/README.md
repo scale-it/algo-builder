@@ -6,13 +6,13 @@ We will create a simple stateful smart contract which will:
 
 ## Steps
 
-+ Create a file with Approval Program
-+ Create a file with Clear program
-+ Deploy New Application
-+ Opt-In to Application
-+ Call Application
-+ Update Application
-+ Delete Application
++ Create a file with Approval Program(https://github.com/scale-it/algo-builder/examples/stateful-counter/assets/approval_program.teal)
++ Create a file with Clear program(https://github.com/scale-it/algo-builder/examples/stateful-counter/assets/clear_program.teal)
++ Deploy New Application(https://github.com/scale-it/algo-builder/examples/stateful-counter/scripts/deploy.js)
++ Opt-In to Application(https://github.com/scale-it/algo-builder/examples/stateful-counter/scripts/deploy.js)
++ Call Application(https://github.com/scale-it/algo-builder/examples/stateful-counter/scripts//interaction_scripts/call_application.js)
++ Update Application(https://github.com/scale-it/algo-builder/examples/stateful-counter/scripts/interaction_scripts/update_application.js)
++ Delete Application(https://github.com/scale-it/algo-builder/examples/stateful-counter/scripts/interaction_scripts/delete_application.js)
 
 # 1. Create a file with Approval Program
 
@@ -207,3 +207,5 @@ To delete an existing application you can use:
 
   await executeTransaction(deployer, tx);
 ```
+
+Note: Deleting non existing app will throw error.
