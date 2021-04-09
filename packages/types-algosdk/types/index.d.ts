@@ -179,6 +179,7 @@ declare module 'algosdk' {
   export interface SignedTransaction {
     txn: Transaction;
     sig: Uint8Array;
+    msig: any;
   }
 
   // args Program arguments as array of Uint8Array arrays
