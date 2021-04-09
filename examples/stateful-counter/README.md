@@ -139,7 +139,7 @@ Created new app-id: 189
 To Opt-In to an application use the following code in one of your scripts (in `./scripts`):
 
 ```javascript
-	await deployer.optInToSSC(account, applicationID, {}, {});
+  await deployer.optInToSSC(account, applicationID, {}, {});
 ```
 
 where `Account` is the account you want to opt-in and applicationID is application index.
@@ -149,7 +149,7 @@ where `Account` is the account you want to opt-in and applicationID is applicati
 To call an application use the following code in one of your scripts (in `./scripts`):
 
 ```javascript
-	const tx = {
+  const tx = {
     type: types.TransactionType.CallNoOpSSC,
     sign: types.SignType.SecretKey,
     fromAccount: creatorAccount,
