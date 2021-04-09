@@ -16,7 +16,7 @@ We will create a simple stateful smart contract which will:
 
 # 1. Create a file with Approval Program
 
-We will create a approval program which has global `counter` and it is incremented when we call the application. Put the code below in `/assets/approval_program.teal`:
+We will create an approval program which has global `counter` and it is incremented by 1 each time we call the application. Put the code below in `/assets/approval_program.teal`:
 
 ```
 #pragma version 2
@@ -72,18 +72,18 @@ To deploy the contract use the following code in a new file named `deploy.js` in
     sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
     toAccountAddr: creatorAccount.addr,
-    amountMicroAlgos: 200000000,
+    amountMicroAlgos: 200e6,
     payFlags: {}
   };
   // transfer some algos to creator account
   await executeTransaction(deployer, algoTxnParams);
 ```
 
-In the code above we declare user accounts and fund `creatorAccount` account. `masterAccount` is the default account used in algob private net.
+In the code above we declared user accounts and funded `creatorAccount` account. `masterAccount` is the default account used in algob private net.
 
 ### Deploy stateful contract
 
-Firstly we need to put some money into the contract. `master` account will fund it:
+Firstly we need to fund the contract. `master` account will fund it (as it has lot of algos):
 
 ```javascript
   // Create Application
@@ -106,11 +106,11 @@ Parameters passed are:
   - Approval Program
   - Clear Program
   - SSC(stateful smart contract) arguments which includes sender and details for storage usage.
-  - Transaction parameters
+  - Common transaction parameters (eg. totalFee)
 
 - In above code we have deployed a new application.
 
-- After deploying application you will get the following information on your terminal:
+- After deploying application you should see the following information on your terminal:
 
 ```
 Created new app-id: 189
@@ -128,7 +128,7 @@ Created new app-id: 189
 To Opt-In to an application use the following code in one of your scripts (in `./scripts`):
 
 ```javascript
-	await deployer.optInToSSC(Account, applicationID, {}, {});
+	await deployer.optInToSSC(account, applicationID, {}, {});
 ```
 
 where `Account` is the account you want to opt-in and applicationID is application index.
@@ -151,10 +151,10 @@ To call an application use the following code in one of your scripts (in `./scri
 
 In `tx` there are following parameters:
   - we set the type which is `CallNoOpSSC` - Call to stateful smart contract
-  - set the sign to SecretKey
+  - set the sign to SecretKey (tx is signed by creatorAccount's sk)
   - provide fromAccount details
-  - provide application index of SSC
-  - provide payment flags. If any (fee, firstValid, lastvalid etc)
+  - provide application index of SSC (retreived from checkpoint)
+  - provide payment flags, if any (eg. fee, firstValid, lastvalid etc)
 
 Calling application each time will increase the stateful counter by 1.
 To view the global state of the application you can use the following code:
@@ -172,11 +172,11 @@ Output:
 [ { key: 'Y291bnRlcg==', value: { bytes: '', type: 2, uint: 3 } } ]
 ```
 
-here key 'Y291bnRlcg==' is converted form of `counter`.
+here key 'Y291bnRlcg==' is base64 encoded form of `counter`.
 
 # 6. Update Application
 
-To update application you can use:
+To update an application with (new_approval.teal, new_clear.teal), you can use:
 
 ```javascript
   const updatedRes = await updateSSC(
@@ -193,7 +193,7 @@ console.log('Application Updated: ', updatedRes);
 
 # 7. Delete Application
 
-To delete application you can use:
+To delete an existing application you can use:
 
 ```javascript
 	const tx = {
@@ -207,4 +207,3 @@ To delete application you can use:
 
   await executeTransaction(deployer, tx);
 ```
-
