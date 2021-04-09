@@ -75,19 +75,19 @@ To deploy the contract use the following code in a new file named `deploy.js` in
 ### Create user accounts
 
 ```javascript
-  const masterAccount = deployer.accountsByName.get('master-account');
-  const creatorAccount = deployer.accountsByName.get('alice');
+const masterAccount = deployer.accountsByName.get('master-account');
+const creatorAccount = deployer.accountsByName.get('alice');
 
-  const algoTxnParams = {
-    type: types.TransactionType.TransferAlgo,
-    sign: types.SignType.SecretKey,
-    fromAccount: masterAccount,
-    toAccountAddr: creatorAccount.addr,
-    amountMicroAlgos: 200e6,
-    payFlags: {}
-  };
-  // transfer some algos to creator account
-  await executeTransaction(deployer, algoTxnParams);
+const algoTxnParams = {
+  type: types.TransactionType.TransferAlgo,
+  sign: types.SignType.SecretKey,
+  fromAccount: masterAccount,
+  toAccountAddr: creatorAccount.addr,
+  amountMicroAlgos: 200e6,
+  payFlags: {}
+};
+// transfer some algos to creator account
+await executeTransaction(deployer, algoTxnParams);
 ```
 
 In the code above we declared user accounts and funded `creatorAccount` account. `masterAccount` is the default account used in algob private net.
@@ -97,20 +97,20 @@ In the code above we declared user accounts and funded `creatorAccount` account.
 Firstly we need to fund the contract. `master` account will fund it (as it has lot of algos):
 
 ```javascript
-  // Create Application
-  // Note: An Account can have maximum of 10 Applications.
-  const sscInfo = await deployer.deploySSC(
-    'approval_program.teal', // approval program
-    'clear_program.teal', // clear program
-    {
-      sender: creatorAccount,
-      localInts: 1,
-      localBytes: 1,
-      globalInts: 1,
-      globalBytes: 1
-    }, {});
+// Create Application
+// Note: An Account can have maximum of 10 Applications.
+const sscInfo = await deployer.deploySSC(
+  'approval_program.teal', // approval program
+  'clear_program.teal', // clear program
+  {
+    sender: creatorAccount,
+    localInts: 1,
+    localBytes: 1,
+    globalInts: 1,
+    globalBytes: 1
+  }, {});
 
-  console.log(sscInfo);
+console.log(sscInfo);
 ```
 
 Parameters passed are:
@@ -139,7 +139,7 @@ Created new app-id: 189
 To Opt-In to an application use the following code in one of your scripts (in `./scripts`):
 
 ```javascript
-  await deployer.optInToSSC(account, applicationID, {}, {});
+await deployer.optInToSSC(account, applicationID, {}, {});
 ```
 
 where `Account` is the account you want to opt-in and applicationID is application index.
@@ -149,15 +149,15 @@ where `Account` is the account you want to opt-in and applicationID is applicati
 To call an application use the following code in one of your scripts (in `./scripts`):
 
 ```javascript
-  const tx = {
-    type: types.TransactionType.CallNoOpSSC,
-    sign: types.SignType.SecretKey,
-    fromAccount: creatorAccount,
-    appId: applicationID,
-    payFlags: {}
-  }
+const tx = {
+  type: types.TransactionType.CallNoOpSSC,
+  sign: types.SignType.SecretKey,
+  fromAccount: creatorAccount,
+  appId: applicationID,
+  payFlags: {}
+}
 
-  await executeTransaction(deployer, tx);
+await executeTransaction(deployer, tx);
 ```
 
 In `tx` there are following parameters:
@@ -171,9 +171,9 @@ Calling application each time will increase the stateful counter by 1.
 To view the global state of the application you can use the following code:
 
 ```
-  // Retreive Global State
-  let globalState = await readGlobalStateSSC(deployer, creatorAccount.addr, applicationID);
-  console.log(globalState);
+// Retreive Global State
+let globalState = await readGlobalStateSSC(deployer, creatorAccount.addr, applicationID);
+console.log(globalState);
 ```
 
 Output:
@@ -190,15 +190,15 @@ here key 'Y291bnRlcg==' is base64 encoded form of `counter`.
 To update an application with (new_approval.teal, new_clear.teal), you can use:
 
 ```javascript
-  const updatedRes = await updateSSC(
-    deployer,
-    creatorAccount,
-    {}, // pay flags
-    applicationID,
-    'new_approval.teal',
-    'new_clear.teal',
-    {}
-  );
+const updatedRes = await updateSSC(
+  deployer,
+  creatorAccount,
+  {}, // pay flags
+  applicationID,
+  'new_approval.teal',
+  'new_clear.teal',
+  {}
+);
 console.log('Application Updated: ', updatedRes);
 ```
 
@@ -207,16 +207,16 @@ console.log('Application Updated: ', updatedRes);
 To delete an existing application you can use:
 
 ```javascript
-	const tx = {
-    type: types.TransactionType.DeleteSSC,
-    sign: types.SignType.SecretKey,
-    fromAccount: creatorAccount,
-    appId: applicationID,
-    payFlags: {},
-    appArgs: []
-  }
+const tx = {
+  type: types.TransactionType.DeleteSSC,
+  sign: types.SignType.SecretKey,
+  fromAccount: creatorAccount,
+  appId: applicationID,
+  payFlags: {},
+  appArgs: []
+}
 
-  await executeTransaction(deployer, tx);
+await executeTransaction(deployer, tx);
 ```
 
 Note: Deleting non existing app will throw error.
