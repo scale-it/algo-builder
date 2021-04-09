@@ -1,5 +1,16 @@
 #pragma version 2
 
+int NoOp
+txn OnCompletion
+==
+
+bnz application_call
+
+int 1
+return
+
+application_call:
+
 // read global state
 byte "counter"
 dup
