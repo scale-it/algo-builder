@@ -139,14 +139,14 @@ To call an application use the following code in one of your scripts (in `./scri
 
 ```javascript
 	const tx = {
-      type: types.TransactionType.CallNoOpSSC,
-      sign: types.SignType.SecretKey,
-      fromAccount: creatorAccount,
-      appId: applicationID,
-      payFlags: {}
-    }
+    type: types.TransactionType.CallNoOpSSC,
+    sign: types.SignType.SecretKey,
+    fromAccount: creatorAccount,
+    appId: applicationID,
+    payFlags: {}
+  }
 
-    await executeTransaction(deployer, tx);
+  await executeTransaction(deployer, tx);
 ```
 
 In `tx` there are following parameters:
@@ -179,7 +179,7 @@ here key 'Y291bnRlcg==' is converted form of `counter`.
 To update application you can use:
 
 ```javascript
-const updatedRes = await updateSSC(
+  const updatedRes = await updateSSC(
     deployer,
     creatorAccount,
     {}, // pay flags
@@ -197,14 +197,14 @@ To delete application you can use:
 
 ```javascript
 	const tx = {
-      type: types.TransactionType.DeleteSSC,
-      sign: types.SignType.SecretKey,
-      fromAccount: creatorAccount,
-      appId: applicationID,
-      payFlags: {},
-      appArgs: []
-    }
+    type: types.TransactionType.DeleteSSC,
+    sign: types.SignType.SecretKey,
+    fromAccount: creatorAccount,
+    appId: applicationID,
+    payFlags: {},
+    appArgs: []
+  }
 
-    await executeTransaction(deployer, tx);
+  await executeTransaction(deployer, tx);
 ```
 
