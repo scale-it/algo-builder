@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs from "fs-extra";
 import path from "path";
 
 import { BuilderError } from "../internal/core/errors";
@@ -37,19 +37,39 @@ export function assertDirectDirChildren (dir: string, scriptNames: string[]): st
 /**
  * Description: this function reads raw signed txn from file /assets/<filename>.tx
  * and returns the encoded txn as Uint8array
- * @param filename : filename [must have .tx ext]
+ * @param fileName : fileName [must have .tx ext]
  * @returns signed transaction encoded as Uint8array
  */
-export function loadSignedTxnFromFile (filename: string): Uint8Array | undefined {
-  if (!filename.endsWith(txExt)) {
-    throw new Error(`filename "${filename}" must end with "${txExt}"`);
+export function loadSignedTxnFromFile (fileName: string): Uint8Array | undefined {
+  if (!fileName.endsWith(txExt)) {
+    throw new Error(`filename "${fileName}" must end with "${txExt}"`);
   }
   try {
-    const p = path.join(ASSETS_DIR, filename);
+    const p = path.join(ASSETS_DIR, fileName);
     const buffer = fs.readFileSync(p);
     return Uint8Array.from(buffer);
   } catch (e) {
     if (e?.errno === -2) return undefined; // handling a not existing file
     throw e;
   }
+}
+
+/**
+ * Description: This function reads raw signed transaction from file /assets/<filename.ext>
+ * and returns the encoded txn as Uint8Array Buffer
+ * @param fileName : fileName
+ * @returns signed transaction as buffer
+ */
+export function loadRawSignedTxnFromFile (fileName: string): Buffer | undefined {
+  const p = path.join(ASSETS_DIR, fileName);
+  return fs.readFileSync(p);
+}
+
+/**
+ * Description: This function writes the data to file.
+ * @param fileName: Output file name
+ * @param data: Data to be written to file
+ */
+export function writeToFile (fileName: string, data: any): void {
+  fs.outputFileSync(fileName, data);
 }
