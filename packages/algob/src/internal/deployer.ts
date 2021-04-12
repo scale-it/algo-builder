@@ -1,4 +1,4 @@
-import { types as rtypes } from "@algo-builder/runtime";
+import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
 import type { LogicSig, LogicSigArgs, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
 
@@ -224,8 +224,11 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     }
   }
 
-  async deployASA (name: string, flags: rtypes.ASADeploymentFlags): Promise<ASAInfo> {
-    if (this.loadedAsaDefs[name] === undefined) {
+  async deployASA (name: string, flags: rtypes.ASADeploymentFlags,
+    asaParams?: Partial<rtypes.ASADef>): Promise<ASAInfo> {
+    const asaDef = overrideASADef(this.accountsByName, this.loadedAsaDefs[name], asaParams);
+
+    if (asaDef === undefined) {
       persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
       throw new BuilderError(
         ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_DEF_NOT_FOUND, {
@@ -236,7 +239,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     let asaInfo = {} as any;
     try {
       asaInfo = await this.algoOp.deployASA(
-        name, this.loadedAsaDefs[name], flags, this.accountsByName, this.txWriter);
+        name, asaDef, flags, this.accountsByName, this.txWriter);
     } catch (error) {
       persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
 
@@ -249,7 +252,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     try {
       await this.algoOp.optInToASAMultiple(
         name,
-        this.loadedAsaDefs[name],
+        asaDef,
         flags,
         this.accountsByName,
         asaInfo.assetIndex);

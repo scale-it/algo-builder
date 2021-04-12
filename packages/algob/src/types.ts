@@ -411,7 +411,7 @@ export interface Deployer {
    * Creates and deploys ASA.
    * @name  ASA name - deployer will search for the ASA in the /assets/asa.yaml file
    * @flags  deployment flags */
-  deployASA: (name: string, flags: rtypes.ASADeploymentFlags) => Promise<ASAInfo>
+  deployASA: (name: string, flags: rtypes.ASADeploymentFlags, asaParams: rtypes.ASADef) => Promise<ASAInfo>
 
   /**
    * Funds logic signature account (Contract Account).
