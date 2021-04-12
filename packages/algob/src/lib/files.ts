@@ -5,7 +5,7 @@ import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { ASSETS_DIR } from "../internal/core/project-structure";
 
-const txExt = ".tx";
+const txExt = ".txn";
 
 function normalizePaths (mainPath: string, paths: string[]): string[] {
   return paths.map(n => path.relative(mainPath, n));
@@ -35,9 +35,9 @@ export function assertDirectDirChildren (dir: string, scriptNames: string[]): st
 }
 
 /**
- * Description: this function reads raw signed txn from file /assets/<filename>.tx
+ * Description: this function reads raw signed txn from file /assets/<filename>.txn
  * and returns the encoded txn as Uint8array
- * @param filename : filename [must have .tx ext]
+ * @param filename : filename [must have .txn ext]
  * @returns signed transaction encoded as Uint8array
  */
 export function loadSignedTxnFromFile (filename: string): Uint8Array | undefined {
