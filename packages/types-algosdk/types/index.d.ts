@@ -204,13 +204,11 @@ declare module 'algosdk' {
      * Multisig version
      */
     version: number;
-
     /**
      * Multisig threshold value. Authorization requires a subset of signatures,
      * equal to or greater than the threshold value.
      */
     threshold: number;
-
     /**
      * A list of Algorand addresses representing possible signers for this multisig. Order is important.
      */
