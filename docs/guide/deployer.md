@@ -33,7 +33,7 @@ For opting in to ASA, `deployer` supports two methods :-
 
 ### Smart contracts
 
-You can also deploy a Stateful/Stateless Smart Contracts (SSC). 
+You can also deploy a Stateful/Stateless Smart Contracts (SSC).
 
 #### Stateful Smart Contracts
 Check our [examples/permissioned-voting](../examples/permissioned-voting) project. Open the `scripts/voting.js` file, you will find there:
@@ -48,11 +48,26 @@ You can learn more about the flags from [Deployer API](https://scale-it.github.i
 
 #### Stateless Smart Contracts
 
-Check our [examples/htlc-pyteal-ts](../examples/htlc-pyteal-ts) project to explore how to deploy Stateless Smart Contracts(lsig). In the file `scripts/deploy.ts`, you will find:
+- *Contract Mode:*
 
-```
-await deployer.fundLsig('htlc.py',
+  Contract accounts act in a similar fashion to escrow accounts, where when the smart contract is compiled it produces an Algorand address. This address can accept Algos or Algorand ASAs with standard transactions, where the contract’s address is the receiver of the transaction.
+
+   Check our [examples/htlc-pyteal-ts](../examples/htlc-pyteal-ts) project to explore how to deploy Stateless Smart Contracts(lsig). In the file `scripts/deploy.ts`, you will find:
+
+  ```
+  await deployer.fundLsig('htlc.py',
     { funder: bob, fundingMicroAlgo: 2e6 }, {}, [], scTmplParams);
-```
+  ```
+  `fundLsig` funds the contract account (compiled hash of the smart contract). The function `fundLsig` accepts `pyteal` code too, which provides the functionality of dynamically providing the params before compiling into TEAL code.
 
-The function `fundLsig` accepts `pyteal` code too, which provides the functionality of dynamically providing the params before compiling into TEAL code. You can learn more about Statless Smart Contracts [here](https://developer.algorand.org/docs/features/asc1/stateless/).
+- *Delegated Signature*:
+
+  Stateless smart contracts can also be used to delegate signature authority. When used in this mode, the logic of the smart contract is signed by a specific account or multi-signature account. This signed logic can then be shared with another party that can use it to withdrawal Algos or Algorand ASAs from the signing account, based on the logic of the contract.
+
+  Use `mkDelegatedLsig` function to compile and sign a logic signature & save it to checkpoint.
+  ```javascript
+  const ascInfoGoldDelegated = await deployer.mkDelegatedLsig('4-gold-asa.teal', goldOwner, []);
+  console.log(ascInfoGoldDelegated);
+  ```
+
+You can learn more about Statless Smart Contracts [here](https://developer.algorand.org/docs/features/asc1/stateless/).
