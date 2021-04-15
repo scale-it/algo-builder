@@ -24,7 +24,7 @@ goal clerk sign -i [input file] -o [output file] -d ~/<data_directory>
 ```
 
 You need to ***save the signed transaction file in `examples/multisig/assets` directory***.
-
+The standard transaction file extension is `.txn`, but the code accepts any extension. The only constraint is that the file should have a valid signed encoded transaction object.
 
 ### Run
 ```
