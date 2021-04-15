@@ -39,8 +39,13 @@ async function updateReserve (deployer, newReserve) {
 
   const reserveAssetHolding = await balanceOf(deployer, asaReserve.addr, asaInfo.assetIndex);
 
-  // note: probably better method is to use close_remaninder_to to transfer funds & update reserve
-  // but that will fail if creator == reserve (as creator cannot opt-out of the asset)
+  /**
+   * NOTE: Another way to execute tx is using close_remainder_to property.
+   * Transaction group would look like:
+   *  tx0: opt-out by the previous reserve to creator (now creator has all assets)
+   *  tx1: transfer all tokens from creator to new reserve
+   *  tx2: asset config transaction updating reserve address to new one
+   */
   const updateReserveParams = [
     /**
      * tx 0 - Asset transfer transaction from current Reserve -> newReserve.
