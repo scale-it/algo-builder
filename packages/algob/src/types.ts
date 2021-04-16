@@ -413,6 +413,10 @@ export interface Deployer {
    * @flags  deployment flags */
   deployASA: (name: string, flags: rtypes.ASADeploymentFlags) => Promise<ASAInfo>
 
+  assertNoAsset: (name: string) => void
+
+  getASADef: (name: string) => rtypes.ASADef | undefined
+
   /**
    * Funds logic signature account (Contract Account).
    * @name  Stateless Smart Contract filename (must be present in assets folder)

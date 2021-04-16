@@ -1,4 +1,5 @@
 import { types as rtypes } from "@algo-builder/runtime";
+import { ASADef } from "@algo-builder/runtime/build/types";
 import type { LogicSig, LogicSigArgs, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
 
@@ -66,6 +67,28 @@ class DeployerBasicMode {
         });
     }
     return found;
+  }
+
+  /**
+   * Asserts if asset is present in checkpoint
+   * @param name Asset name
+   */
+  assertNoAsset (name: string): void {
+    if (this.isDefined(name)) {
+      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+      throw new BuilderError(
+        ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT, {
+          assetName: name
+        });
+    }
+  }
+
+  /**
+   * Returns asset definition for given name
+   * @param name Asset name
+   */
+  getASADef (name: string): ASADef | undefined {
+    return this.loadedAsaDefs[name];
   }
 
   getCheckpointKV (key: string): string | undefined {
@@ -212,16 +235,6 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
         });
     }
     this.cpData.putMetadata(this.networkName, key, value);
-  }
-
-  private assertNoAsset (name: string): void {
-    if (this.isDefined(name)) {
-      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
-      throw new BuilderError(
-        ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT, {
-          assetName: name
-        });
-    }
   }
 
   async deployASA (name: string, flags: rtypes.ASADeploymentFlags): Promise<ASAInfo> {

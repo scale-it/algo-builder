@@ -1,4 +1,5 @@
 import { encodeNote, mkTransaction, types as rtypes } from "@algo-builder/runtime";
+import { TransactionType } from "@algo-builder/runtime/build/types";
 import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
 import { Deployer } from "../types";
@@ -159,7 +160,29 @@ export async function executeTransaction (
     if (execParams.length > 16) { throw new Error("Maximum size of an atomic transfer group is 16"); }
 
     let txns = [];
-    for (const t of execParams) { txns.push(await mkTx(t)); }
+    for (const t of execParams) {
+      switch (t.type) {
+        case TransactionType.DeployASA: {
+          deployer.assertNoAsset(name);
+          t.asaDef = deployer.getASADef(t.asaName);
+          // TODO: store deployed in checkpoint
+          // get asset index
+          // PERSIST CHECKPOINT IF FAILED
+          break;
+        }
+        case TransactionType.DeploySSC: {
+          const name = t.approvalProgram + "-" + t.clearProgram;
+          deployer.assertNoAsset(name);
+          const approval = await deployer.ensureCompiled(t.approvalProgram);
+          const clear = await deployer.ensureCompiled(t.clearProgram);
+          t.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
+          t.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
+          // TODO: persist register
+          break;
+        }
+      }
+      txns.push(await mkTx(t));
+    }
     txns = algosdk.assignGroupID(txns);
     signedTxn = txns.map((txn: Transaction, index: number) => {
       const signed = signTransaction(txn, execParams[index]);
