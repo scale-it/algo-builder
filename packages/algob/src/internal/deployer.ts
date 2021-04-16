@@ -150,8 +150,11 @@ class DeployerBasicMode {
    * @param mparams: passed when signing a new multisig
    * @returns multi signed logic signature (with appended signature from signer's sk)
    */
-  signMultiSig (lsig: LogicSig, signer: rtypes.Account, mparams?: MultisigMetadata): LogicSig {
+  signLogicSigMultiSig (lsig: LogicSig, signer: rtypes.Account, mparams?: MultisigMetadata): LogicSig {
     if (lsig.msig === undefined) { // if multisig not found, create new msig
+      if (mparams === undefined) {
+        throw new Error('MultiSig Metadata is undefined, which is required for single sign multisig');
+      }
       lsig.sign(signer.sk, mparams);
     } else {
       lsig.appendToMultisig(signer.sk); // else append signature to msig

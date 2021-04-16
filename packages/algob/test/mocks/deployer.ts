@@ -44,7 +44,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  signMultiSig (lsig: LogicSig, signer: rtypes.Account): LogicSig {
+  signLogicSigMultiSig (lsig: LogicSig, signer: rtypes.Account): LogicSig {
     throw new Error("Not implemented");
   }
 

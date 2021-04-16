@@ -24,8 +24,8 @@ async function run (runtimeEnv, deployer) {
    * NOTE: this is just for example purpose, in a realistic use-case user does
    * not control multiple secret keys of the multisignature account
    */
-  deployer.signMultiSig(lsig, alice, mparams); // lsig signed by alice's secret_key (creates a new multisig)
-  deployer.signMultiSig(lsig, john); // lsig signed again (threshold = 2) by john secret_key (appends signature to newly created msig)
+  deployer.signLogicSigMultiSig(lsig, alice, mparams); // lsig signed by alice's secret_key (creates a new multisig)
+  deployer.signLogicSigMultiSig(lsig, john); // lsig signed again (threshold = 2) by john secret_key (appends signature to newly created msig)
 
   const txnParams = {
     type: types.TransactionType.TransferAlgo,

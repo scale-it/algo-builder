@@ -504,7 +504,7 @@ export interface Deployer {
   /**
    * Appends signer's signature to multi-signed lsig. If multisig is not found
    * then new multisig is created. */
-  signMultiSig: (lsig: LogicSig, signer: rtypes.Account) => LogicSig
+  signLogicSigMultiSig: (lsig: LogicSig, signer: rtypes.Account) => LogicSig
 
   /**
    * Queries a stateful smart contract info from checkpoint. */
