@@ -218,7 +218,9 @@ export interface SSCOptionalFlags {
 }
 
 export type ExecParams = AlgoTransferParam | AssetTransferParam | SSCCallsParam |
-ModifyAssetParam | FreezeAssetParam | RevokeAssetParam | DestroyAssetParam;
+ModifyAssetParam | FreezeAssetParam | RevokeAssetParam |
+DestroyAssetParam | DeployASAParam | DeploySSCParam |
+OptInSSCParam | OptInASAParam;
 
 export enum SignType {
   SecretKey,
@@ -235,12 +237,48 @@ export enum TransactionType {
   CallNoOpSSC,
   ClearSSC,
   CloseSSC,
-  DeleteSSC
+  DeleteSSC,
+  DeployASA,
+  DeploySSC,
+  OptInASA,
+  OptInSSC
 }
 
 export interface Sign {
   sign: SignType
   lsig?: LogicSig
+}
+
+export interface DeployASAParam extends Sign {
+  type: TransactionType.DeployASA
+  fromAccount: AccountSDK
+  asaName: string
+  asaDef?: ASADef
+  payFlags: TxParams
+}
+
+export interface DeploySSCParam extends Sign, SSCDeploymentFlags {
+  type: TransactionType.DeploySSC
+  fromAccount: AccountSDK
+  approvalProgram: string
+  clearProgram: string
+  approvalProg?: Uint8Array
+  clearProg?: Uint8Array
+  payFlags: TxParams
+}
+
+export interface OptInSSCParam extends Sign, SSCOptionalFlags {
+  type: TransactionType.OptInSSC
+  fromAccount: AccountSDK
+  appID: number
+  payFlags: TxParams
+}
+
+export interface OptInASAParam extends Sign {
+  type: TransactionType.OptInASA
+  fromAccount: AccountSDK
+  assetID: number
+  payFlags: TxParams
 }
 
 export interface ModifyAssetParam extends Sign {
