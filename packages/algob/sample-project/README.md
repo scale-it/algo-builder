@@ -47,6 +47,7 @@ In the `sample-project` folder you'll have following items:
     - `1-sampleScript.js` : This script shows how to deploy ASC.
 
 * `test/`: Directory for test files for testing your assets and smart contracts:
-    - You can add tests for your scripts here. Basic tests for algo-transfer using `@algo-builder/runtime` are added.
+    - `sample-test.js` : This is a basic example of how tests should be and how they work.
+    - You can add tests for your scripts here.
 
 * `algob.config.js`: Algob configuration file
