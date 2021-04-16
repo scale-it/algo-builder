@@ -372,7 +372,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 }
 
 /**
- * This class is what user interacts with in run task
+ * This class is what user interacts with in run task mode
  */
 export class DeployerRunMode extends DeployerBasicMode implements Deployer {
   get isDeployMode (): boolean {
