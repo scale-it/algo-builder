@@ -1,5 +1,5 @@
-import type { LogicSig, MultiSig } from "algosdk";
-import { decodeAddress, logicSigFromByte } from "algosdk";
+import type { Account, LogicSig, MultiSig, TxSig } from "algosdk";
+import { appendSignMultisigTransaction, decodeAddress, decodeSignedTransaction, encodeAddress, logicSigFromByte } from "algosdk";
 import fs from "fs";
 import path from "path";
 
@@ -88,4 +88,32 @@ export function validateMsig (msig: MultiSig | undefined): void {
   if (msig === undefined || msig.v === undefined || msig.thr === undefined) {
     throw new Error("Error fetching multisigned logic signature from file - invalid/undefined msig");
   }
+}
+
+/**
+ * Description: Signs an encoded signed multi-sig transaction object
+ * @param {Account} signerAccount
+ * @param {TxSig} signedTxn
+ * @returns {TxSig} signed transaction object
+ */
+export function signMultiSig (signerAccount: Account, signedTxn: TxSig): TxSig {
+  const tx = signedTxn;
+  const decodedTx = decodeSignedTransaction(tx.blob);
+  console.debug("Decoded txn: %O", decodedTx);
+  validateMsig(decodedTx.msig);
+  console.log("Msig: %O", decodedTx.msig);
+  const addresses = [];
+  for (var sig of decodedTx.msig.subsig) {
+    addresses.push(encodeAddress(Uint8Array.from(sig.pk)));
+  }
+  const mparams = {
+    version: decodedTx.msig.v,
+    threshold: decodedTx.msig.thr,
+    addrs: addresses
+  };
+  signedTxn = appendSignMultisigTransaction(tx.blob, mparams, signerAccount.sk);
+  const decodedSignedTxn = decodeSignedTransaction(signedTxn.blob);
+  console.debug("Decoded txn after successfully signing: %O", decodedSignedTxn);
+  console.log("Msig: %O", decodedSignedTxn.msig);
+  return signedTxn;
 }

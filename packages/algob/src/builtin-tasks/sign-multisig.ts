@@ -3,6 +3,7 @@ import fs from "fs-extra";
 
 import { task } from "../internal/core/config/config-env";
 import { loadRawSignedTxnFromFile, writeToFile } from "../lib/files";
+import { signMultiSig } from "../lib/msig";
 import { RuntimeEnv } from "../types";
 import { TASK_SIGN_MULTISIG } from "./task-names";
 
@@ -17,42 +18,17 @@ async function multiSignTx (
   runtimeEnv: RuntimeEnv
 ): Promise<void> {
   const signerAccount = runtimeEnv.network.config.accounts.find(acc => acc.name === taskArgs.accountName);
-  let signedTxn;
   if (signerAccount === undefined) {
     console.error("No account with the name \"%s\" exists in the config file.", taskArgs.accountName);
     return;
   }
   const txFile = loadRawSignedTxnFromFile(taskArgs.file);
-  if (txFile === undefined) {
-    throw new Error(`File ${taskArgs.file} does not exist`);
-  }
-  console.log(txFile);
   const tx = algosdk.decodeObj(txFile);
   if (!tx.blob) {
     console.error("The decoded transaction doesn't appear to be a signed transaction.");
     return;
   }
-  const decodedTx = algosdk.decodeSignedTransaction(tx.blob);
-  console.debug("Decoded txn from %s: %O", taskArgs.file, decodedTx);
-  console.log(decodedTx.msig);
-  if (decodedTx.msig) {
-    const addresses = [];
-    for (var sig of decodedTx.msig.subsig) {
-      addresses.push(algosdk.encodeAddress(Uint8Array.from(sig.pk)));
-    }
-    const mparams = {
-      version: decodedTx.msig.v,
-      threshold: decodedTx.msig.thr,
-      addrs: addresses
-    };
-    signedTxn = algosdk.appendSignMultisigTransaction(tx.blob, mparams, signerAccount.sk);
-    const decodedSignedTxn = algosdk.decodeSignedTransaction(signedTxn.blob);
-    console.debug("Decoded txn after successfully signing: %O", decodedSignedTxn);
-    console.log(decodedSignedTxn.msig);
-  } else {
-    console.log("Transaction is not a msig transaction.");
-    return;
-  }
+  const signedTxn = signMultiSig(signerAccount, tx);
   let outFileName = taskArgs.file.slice(0, -4) + "_out.txn";
   if (taskArgs.out) {
     if (fs.pathExistsSync(taskArgs.out)) {

@@ -62,7 +62,11 @@ export function loadSignedTxnFromFile (fileName: string): Uint8Array | undefined
  */
 export function loadRawSignedTxnFromFile (fileName: string): Buffer | undefined {
   const p = path.join(ASSETS_DIR, fileName);
-  return fs.readFileSync(p);
+  const txFile = fs.readFileSync(p);
+  if (txFile === undefined) {
+    throw new Error(`File ${fileName} does not exist`);
+  }
+  return txFile;
 }
 
 /**

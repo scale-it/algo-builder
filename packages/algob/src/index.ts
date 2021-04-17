@@ -14,6 +14,7 @@ import {
 import { globalZeroAddress } from "./lib/constants";
 import { algodCredentialsFromEnv, KMDCredentialsFromEnv } from "./lib/credentials";
 import { getProgram } from "./lib/load-program";
+import { signMultiSig } from "./lib/msig";
 import { updateSSC } from "./lib/ssc";
 import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC, readGlobalStateSSC, readLocalStateSSC } from "./lib/status";
 import { executeSignedTxnFromFile, executeTransaction, getSuggestedParams, mkTxParams } from "./lib/tx";
@@ -45,5 +46,6 @@ export {
   uint64ToBigEndian,
   addressToPk,
   getProgram,
-  types
+  types,
+  signMultiSig
 };
