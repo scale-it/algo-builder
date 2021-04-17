@@ -182,7 +182,7 @@ export async function executeTransaction (
  * firstValid and lastValid which might not be equal to the
  * current network's blockchain block height.
  * @param deployer Deployer
- * @param fileName raw signed txn .tx file
+ * @param fileName raw(encoded) signed txn file
  */
 export async function executeSignedTxnFromFile (
   deployer: Deployer,
