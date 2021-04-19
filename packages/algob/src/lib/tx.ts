@@ -1,8 +1,8 @@
 import { encodeNote, mkTransaction, types as rtypes } from "@algo-builder/runtime";
 import { TransactionType } from "@algo-builder/runtime/build/types";
-import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
+import algosdk, { Algodv2, encodeAddress, SuggestedParams, Transaction } from "algosdk";
 
-import { Deployer } from "../types";
+import { ASAInfo, Deployer, SSCInfo } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
 import { loadSignedTxnFromFile } from "./files";
 
@@ -143,6 +143,42 @@ async function sendAndWait (
 }
 
 /**
+ * Make transaction parameters and update ASA and SSC params
+ * @param deployer Deployer object
+ * @param t Execution parameters
+ * @param index index of current execParam
+ * @param txIDMap Map for index to name
+ */
+async function mkTx (
+  deployer: Deployer,
+  t: rtypes.ExecParams,
+  index: number,
+  txIDMap: Map<number, string>
+): Promise<Transaction> {
+  switch (t.type) {
+    case TransactionType.DeployASA: {
+      deployer.assertNoAsset(t.asaName);
+      t.asaDef = deployer.getASADef(t.asaName);
+      txIDMap.set(index, t.asaName);
+      break;
+    }
+    case TransactionType.DeploySSC: {
+      const name = t.approvalProgram + "-" + t.clearProgram;
+      deployer.assertNoAsset(name);
+      const approval = await deployer.ensureCompiled(t.approvalProgram);
+      const clear = await deployer.ensureCompiled(t.clearProgram);
+      t.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
+      t.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
+      txIDMap.set(index, name);
+      break;
+    }
+  }
+  const suggestedParams = await getSuggestedParams(deployer.algodClient);
+  return mkTransaction(t,
+    await mkTxParams(deployer.algodClient, t.payFlags, Object.assign({}, suggestedParams)));
+}
+
+/**
  * Execute single transactions or group of transactions (atomic transaction)
  * @param deployer Deployer
  * @param execParams transaction parameters or atomic transaction parameters
@@ -150,53 +186,80 @@ async function sendAndWait (
 export async function executeTransaction (
   deployer: Deployer,
   execParams: rtypes.ExecParams | rtypes.ExecParams[]): Promise<algosdk.ConfirmedTxInfo> {
-  const suggestedParams = await getSuggestedParams(deployer.algodClient);
-  const mkTx = async (p: rtypes.ExecParams): Promise<Transaction> =>
-    mkTransaction(p,
-      await mkTxParams(deployer.algodClient, p.payFlags, Object.assign({}, suggestedParams)));
+  try {
+    let signedTxn;
+    let txns: Transaction[] = [];
+    const txIDMap = new Map<number, string>();
+    if (Array.isArray(execParams)) {
+      if (execParams.length > 16) { throw new Error("Maximum size of an atomic transfer group is 16"); }
 
-  let signedTxn;
-  if (Array.isArray(execParams)) {
-    if (execParams.length > 16) { throw new Error("Maximum size of an atomic transfer group is 16"); }
-
-    let txns = [];
-    for (const t of execParams) {
-      switch (t.type) {
-        case TransactionType.DeployASA: {
-          deployer.assertNoAsset(name);
-          t.asaDef = deployer.getASADef(t.asaName);
-          // TODO: store deployed in checkpoint
-          // get asset index
-          // PERSIST CHECKPOINT IF FAILED
-          break;
-        }
-        case TransactionType.DeploySSC: {
-          const name = t.approvalProgram + "-" + t.clearProgram;
-          deployer.assertNoAsset(name);
-          const approval = await deployer.ensureCompiled(t.approvalProgram);
-          const clear = await deployer.ensureCompiled(t.clearProgram);
-          t.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
-          t.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
-          // TODO: persist register
-          break;
-        }
+      for (const [index, t] of execParams.entries()) {
+        txns.push(await mkTx(deployer, t, index, txIDMap));
       }
-      txns.push(await mkTx(t));
+
+      txns = algosdk.assignGroupID(txns);
+      signedTxn = txns.map((txn: Transaction, index: number) => {
+        const signed = signTransaction(txn, execParams[index]);
+        deployer.log(`Signed transaction ${index}`, signed);
+        return signed;
+      });
+    } else {
+      const txn = await mkTx(deployer, execParams, 0, txIDMap);
+      signedTxn = signTransaction(txn, execParams);
+      deployer.log(`Signed transaction:`, signedTxn);
+      txns = [txn];
     }
-    txns = algosdk.assignGroupID(txns);
-    signedTxn = txns.map((txn: Transaction, index: number) => {
-      const signed = signTransaction(txn, execParams[index]);
-      deployer.log(`Signed transaction ${index}`, signed);
-      return signed;
-    });
-  } else {
-    const txn = await mkTx(execParams);
-    signedTxn = signTransaction(txn, execParams);
-    deployer.log(`Signed transaction:`, signedTxn);
+    const confirmedTx = await sendAndWait(deployer, signedTxn);
+    console.log(confirmedTx);
+    await registerCheckpoints(deployer, txns, txIDMap);
+    return confirmedTx;
+  } catch (error) {
+    deployer.storeCheckpoint();
+
+    console.log(error);
+    throw error;
   }
-  const confirmedTx = await sendAndWait(deployer, signedTxn);
-  console.log(confirmedTx);
-  return confirmedTx;
+}
+
+/**
+ * Register checkpoints for ASA and SSC
+ * @param deployer Deployer object
+ * @param txns transaction array
+ * @param txIDMap transaction map index to name
+ */
+async function registerCheckpoints (
+  deployer: Deployer,
+  txns: Transaction[],
+  txIDMap: Map<number, string>
+): Promise<void> {
+  for (const [i, txn] of txns.entries()) {
+    let txConfirmation;
+    const name = txIDMap.get(i);
+    switch (txn.type) {
+      case 'acfg': {
+        txConfirmation = await deployer.waitForConfirmation(txn.txID());
+        const asaInfo: ASAInfo = {
+          creator: encodeAddress(txn.from.publicKey),
+          txId: txn.txID(),
+          assetIndex: txConfirmation["asset-index"],
+          confirmedRound: txConfirmation['confirmed-round']
+        };
+        if (name) deployer.registerASAInfo(name, asaInfo);
+        break;
+      }
+      case 'appl': {
+        txConfirmation = await deployer.waitForConfirmation(txn.txID());
+        const sscInfo: SSCInfo = {
+          creator: encodeAddress(txn.from.publicKey),
+          txId: txn.txID(),
+          appID: txConfirmation['application-index'],
+          confirmedRound: txConfirmation['confirmed-round']
+        };
+        if (name) deployer.registerSSCInfo(name, sscInfo);
+        break;
+      }
+    }
+  }
 }
 
 /**

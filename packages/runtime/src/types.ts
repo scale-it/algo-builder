@@ -257,11 +257,15 @@ export interface DeployASAParam extends Sign {
   payFlags: TxParams
 }
 
-export interface DeploySSCParam extends Sign, SSCDeploymentFlags {
+export interface DeploySSCParam extends Sign, SSCOptionalFlags {
   type: TransactionType.DeploySSC
   fromAccount: AccountSDK
   approvalProgram: string
   clearProgram: string
+  localInts: number
+  localBytes: number
+  globalInts: number
+  globalBytes: number
   approvalProg?: Uint8Array
   clearProg?: Uint8Array
   payFlags: TxParams

@@ -417,6 +417,12 @@ export interface Deployer {
 
   getASADef: (name: string) => rtypes.ASADef | undefined
 
+  storeCheckpoint: () => void
+
+  registerASAInfo: (name: string, asaInfo: ASAInfo) => void
+
+  registerSSCInfo: (name: string, sscInfo: SSCInfo) => void
+
   /**
    * Funds logic signature account (Contract Account).
    * @name  Stateless Smart Contract filename (must be present in assets folder)

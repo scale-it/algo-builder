@@ -237,6 +237,28 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     this.cpData.putMetadata(this.networkName, key, value);
   }
 
+  /**
+   * Persist checkpoint till current call.
+   */
+  storeCheckpoint (): void {
+    persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+  }
+
+  /**
+   * Register ASA Info in checkpoints
+   */
+  registerASAInfo (name: string, asaInfo: ASAInfo): void {
+    console.log("REGISTERED....");
+    this.cpData.registerASA(this.networkName, name, asaInfo);
+  }
+
+  /**
+   * Register SSC Info in checkpoints
+   */
+  registerSSCInfo (name: string, sscInfo: SSCInfo): void {
+    this.cpData.registerSSC(this.networkName, name, sscInfo);
+  }
+
   async deployASA (name: string, flags: rtypes.ASADeploymentFlags): Promise<ASAInfo> {
     if (this.loadedAsaDefs[name] === undefined) {
       persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
@@ -364,6 +386,24 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 export class DeployerRunMode extends DeployerBasicMode implements Deployer {
   get isDeployMode (): boolean {
     return false;
+  }
+
+  storeCheckpoint (): void {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "storeCheckpoint"
+    });
+  }
+
+  registerASAInfo (name: string, asaInfo: ASAInfo): void {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "registerASAInfo"
+    });
+  }
+
+  registerSSCInfo (name: string, sscInfo: SSCInfo): void {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "registerSSCInfo"
+    });
   }
 
   addCheckpointKV (_key: string, _value: string): void {
