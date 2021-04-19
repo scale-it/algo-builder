@@ -93,6 +93,17 @@ class DeployerBasicMode {
   }
 
   /**
+   * Loads deployed Asset Definition from checkpoint.
+   * NOTE: This function returns "deployed" ASADef, as immutable properties
+   * of asaDef could be updated during tx execution (eg. update asset clawback)
+   * @param asaName asset name in asa.yaml
+   */
+  loadASADef (asaName: string): rtypes.ASADef | undefined {
+    const asaMap = this.cpData.precedingCP[this.networkName]?.asa ?? new Map();
+    return asaMap.get(asaName)?.assetDef;
+  }
+
+  /**
    * Description: loads stateful smart contract info from checkpoint
    * @param nameApproval Approval program name
    * @param nameClear clear program name
@@ -236,7 +247,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
         });
     }
     this.assertNoAsset(name);
-    let asaInfo = {} as any;
+    let asaInfo = {} as ASAInfo;
     try {
       asaInfo = await this.algoOp.deployASA(
         name, asaDef, flags, this.accountsByName, this.txWriter);

@@ -63,21 +63,21 @@ function _parseASADef (asaDef: ASADef, source?: string): ASADef {
 /**
  * Override & validate ASA definition in asa.yaml using custom params passed via deployASA
  * @param accounts accounts by name
- * @param sourceDef source asset definition (in asa.yaml)
- * @param customDef custom asset def params (passed during ASA deployment)
+ * @param origDef source asset definition (in asa.yaml)
+ * @param newDef custom asset def params (passed during ASA deployment)
  * @returns overriden asset definition. If custom params are empty, return source asa def
  */
 export function overrideASADef (
   accounts: AccountMap,
-  sourceDef: ASADef,
-  customDef?: Partial<ASADef>): ASADef {
-  if (customDef === undefined) { return sourceDef; }
+  origDef: ASADef,
+  newDef?: Partial<ASADef>): ASADef {
+  if (newDef === undefined) { return origDef; }
 
   const source = 'ASA deployment';
-  let asaDef = Object.assign(sourceDef, customDef);
-  asaDef = _parseASADef(asaDef, source);
-  validateOptInAccNames(accounts, asaDef, source);
-  return asaDef;
+  Object.assign(origDef, newDef);
+  origDef = _parseASADef(origDef, source);
+  validateOptInAccNames(accounts, origDef, source);
+  return origDef;
 }
 
 export function validateASADefs (
