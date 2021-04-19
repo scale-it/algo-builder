@@ -147,7 +147,7 @@ async function run (runtimeEnv, deployer) {
   await transfer(deployer, bob, john, 30);
 
   try {
-    // transaction FAIL: as receiver will have balance of 120 now(> 100)
+    // transaction FAIL: as receiver will have balance of 110 now(> 100)
     await transfer(deployer, bob, john, 80);
   } catch (e) {
     console.log('[Expected (receiver asset_balance > 100)]', e.response ? e.response.error.text : e);

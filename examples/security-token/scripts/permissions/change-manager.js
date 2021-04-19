@@ -23,8 +23,8 @@ async function changePermissionsManager (deployer, assetManager, address) {
     fromAccount: assetManager, // asset manager account (fails otherwise)
     appId: controllerSSCInfo.appID,
     payFlags: { totalFee: 1000 },
-    appArgs: ['str:change_permissions_manager'], // note: don't need to pass appID in appArg with tealv3 (just use foreignApps)
-    accounts: [address], // pass address to add to whitelists
+    appArgs: ['str:change_permissions_manager'],
+    accounts: [address],
     foreignAssets: [asaInfo.assetIndex] // to verify token_id & token_manager
   };
 
