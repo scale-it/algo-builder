@@ -20,6 +20,26 @@ export class FakeDeployer implements Deployer {
   accountsByName = new Map<string, rtypes.Account>();
   scriptName = '';
 
+  assertNoAsset (name: string): void {
+    throw new Error("Not implemented");
+  }
+
+  getASADef (name: string): rtypes.ASADef | undefined {
+    throw new Error("Not implemented");
+  }
+
+  storeCheckpoint (): void {
+    throw new Error("Not implemented");
+  }
+
+  registerASAInfo (name: string, asaInfo: ASAInfo): void {
+    throw new Error("Not implemented");
+  }
+
+  registerSSCInfo (name: string, sscInfo: SSCInfo): void {
+    throw new Error("Not implemented");
+  }
+
   setScriptName (name: string): void {
     this.scriptName = name;
   }
