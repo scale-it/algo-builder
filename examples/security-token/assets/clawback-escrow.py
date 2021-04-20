@@ -102,7 +102,6 @@ def clawback_escrow(TOKEN_ID, CONTROLLER_APP_ID):
         Or(issuance_tx, update_reserve),
         token_transfer
     )
-    # return Int(1)
 
 if __name__ == "__main__":
     params = {
