@@ -19,7 +19,7 @@ def approval_program():
     permission_id = Bytes("permissions_sc_app_id") # permissions smart contract application index
 
     # Always verify that the RekeyTo property of any transaction is set to the ZeroAddress
-    # unless the contract is specifically involved ina rekeying operation.Btoi
+    # unless the contract is specifically involved in a rekeying operation.
     no_rekey_addr = Txn.rekey_to() == Global.zero_address()
 
     # retreive asset manager from Txn.ForeignAssets[0]
