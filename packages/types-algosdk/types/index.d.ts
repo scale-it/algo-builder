@@ -195,10 +195,23 @@ declare module 'algosdk' {
     v: number;
   }
 
-  export interface MultiSigAccount {
+  /**
+   * Src: https://github.com/algorand/js-algorand-sdk/blob/develop/src/types/multisig.ts#L6
+   */
+  // TODO: use latest typings from SDK
+  export interface MultisigMetadata {
+    /**
+     * Multisig version
+     */
     version: number;
+    /**
+     * Multisig threshold value. Authorization requires a subset of signatures,
+     * equal to or greater than the threshold value.
+     */
     threshold: number;
-    // array of base32 encoded addresses
+    /**
+     * A list of Algorand addresses representing possible signers for this multisig. Order is important.
+     */
     addrs: string[];
   }
 
@@ -238,7 +251,7 @@ declare module 'algosdk' {
     // Compute hash of the logic sig program (that is the same as escrow account address) as string address
     address(): string;
     // Creates signature (if no msig provided) or multi signature otherwise
-    sign(secretKey?: Uint8Array, msig?: MultiSigAccount): void;
+    sign(secretKey?: Uint8Array, msig?: MultisigMetadata): void;
     // Signs and appends a signature
     appendToMultisig(secretKey: Uint8Array): void;
     // signs and returns program signature, without appending it to this object

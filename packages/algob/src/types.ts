@@ -502,6 +502,11 @@ export interface Deployer {
   loadMultiSig: (name: string, scParams: LogicSigArgs) => Promise<LogicSig>
 
   /**
+   * Appends signer's signature to multi-signed lsig. If multisig is not found
+   * then new multisig is created. */
+  signLogicSigMultiSig: (lsig: LogicSig, signer: rtypes.Account) => LogicSig
+
+  /**
    * Queries a stateful smart contract info from checkpoint. */
   getSSC: (nameApproval: string, nameClear: string) => SSCInfo | undefined
 
