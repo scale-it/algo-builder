@@ -91,10 +91,10 @@ export function validateMsig (msig: MultiSig | undefined): void {
 }
 
 /**
- * Description: Signs an encoded signed multi-sig transaction object
- * @param {Account} signerAccount
- * @param {TxSig} signedTxn
- * @returns {TxSig} signed transaction object
+ * Description : Appends a signature to an encoded signed multi-sig transaction object
+ * @param signerAccount
+ * @param  signedTxn
+ * @returns signed transaction object
  */
 export function signMultiSig (signerAccount: Account, signedTxn: TxSig): TxSig {
   const tx = signedTxn;

@@ -53,27 +53,3 @@ export function loadSignedTxnFromFile (fileName: string): Uint8Array | undefined
     throw e;
   }
 }
-
-/**
- * Description: This function reads raw signed transaction from file /assets/<filename.ext>
- * and returns the encoded txn as Uint8Array Buffer
- * @param fileName : fileName
- * @returns signed transaction as buffer
- */
-export function loadRawSignedTxnFromFile (fileName: string): Buffer | undefined {
-  const p = path.join(ASSETS_DIR, fileName);
-  const txFile = fs.readFileSync(p);
-  if (txFile === undefined) {
-    throw new Error(`File ${fileName} does not exist`);
-  }
-  return txFile;
-}
-
-/**
- * Description: This function writes the data to file.
- * @param fileName: Output file name
- * @param data: Data to be written to file
- */
-export function writeToFile (fileName: string, data: any): void {
-  fs.outputFileSync(fileName, data);
-}

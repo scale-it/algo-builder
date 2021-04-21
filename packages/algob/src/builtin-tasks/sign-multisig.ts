@@ -2,15 +2,17 @@ import algosdk from "algosdk";
 import fs from "fs-extra";
 
 import { task } from "../internal/core/config/config-env";
-import { loadRawSignedTxnFromFile, writeToFile } from "../lib/files";
+import { loadSignedTxnFromFile } from "../lib/files";
 import { signMultiSig } from "../lib/msig";
 import { RuntimeEnv } from "../types";
+import { writeToFile } from "./gen-accounts";
 import { TASK_SIGN_MULTISIG } from "./task-names";
 
 export interface TaskArgs {
   file: string
   accountName: string
   out: string
+  force: boolean
 }
 
 async function multiSignTx (
@@ -22,14 +24,18 @@ async function multiSignTx (
     console.error("No account with the name \"%s\" exists in the config file.", taskArgs.accountName);
     return;
   }
-  const txFile = loadRawSignedTxnFromFile(taskArgs.file);
+  const txFile = loadSignedTxnFromFile(taskArgs.file);
+  if (txFile === undefined) {
+    console.error("Error loading transaction from the file.");
+    return;
+  }
   const tx = algosdk.decodeObj(txFile);
   if (!tx.blob) {
     console.error("The decoded transaction doesn't appear to be a signed transaction.");
     return;
   }
   const signedTxn = signMultiSig(signerAccount, tx);
-  let outFileName = taskArgs.file.slice(0, -4) + "_out.txn";
+  let outFileName = taskArgs.file.split(".")[0] + "_out.txn";
   if (taskArgs.out) {
     if (fs.pathExistsSync(taskArgs.out)) {
       console.log("Provided output path exists. Using default value for output.");
@@ -37,8 +43,7 @@ async function multiSignTx (
       outFileName = taskArgs.out;
     }
   }
-  writeToFile(outFileName, algosdk.encodeObj(signedTxn));
-  console.log("Signed transaction written succesfully to %s", outFileName);
+  await writeToFile(algosdk.encodeObj(signedTxn), taskArgs.force, outFileName);
 }
 
 export default function (): void {
@@ -55,5 +60,6 @@ export default function (): void {
       "out",
       "Name of the file to be used for resultant transaction file.\n\t\t        If not provided source transaction file's name will be appended by \"_out\""
     )
+    .addFlag("force", "Overwrite output transaction file if the file already exists.")
     .setAction((input, env) => multiSignTx(input, env));
 }
