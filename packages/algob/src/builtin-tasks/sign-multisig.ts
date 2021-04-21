@@ -12,7 +12,7 @@ export interface TaskArgs {
   file: string
   accountName: string
   out?: string
-  force?: boolean
+  force: boolean
 }
 
 async function multiSignTx (
