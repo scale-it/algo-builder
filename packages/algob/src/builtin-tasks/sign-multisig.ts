@@ -11,8 +11,8 @@ import { TASK_SIGN_MULTISIG } from "./task-names";
 export interface TaskArgs {
   file: string
   accountName: string
-  out: string
-  force: boolean
+  out?: string
+  force?: boolean
 }
 
 async function multiSignTx (
