@@ -6,7 +6,7 @@ def approval_program():
     ensures that the permissions smart contract is called upon each
     token transfer between non-reserve accounts. The permissions smart contract
     validates the transfer with some rule checks (eg. asset_amount <= 100).
-    Controller application id is set in clawback-escrow (as a template parameter),
+    Controller application id is set in clawback (as a template parameter),
     to ensure there is a call to controller during a token-transfer.
     It also handles kill_status of the token. If token is killed then no token transfers
     are allowed. User can only optOut of the asset.

@@ -42,7 +42,7 @@ def clawback_escrow(TOKEN_ID, CONTROLLER_APP_ID):
     )
 
     # verify second transaction
-    # tx 1 - clawback transactions that moves the frozen asset from sender to receiver - signed by clawback-escrow
+    # tx 1 - clawback transactions that moves the frozen asset from sender to receiver - signed by clawback
     # verify the account sent in the accounts array is
     # actually the receiver of the asset in asset xfer
     second_transaction_checks = (
@@ -51,7 +51,7 @@ def clawback_escrow(TOKEN_ID, CONTROLLER_APP_ID):
     )
 
     # verify third transaction
-    # tx 2 - payment transaction from sender to clawback-escrow to pay for the fee of the clawback
+    # tx 2 - payment transaction from sender to clawback to pay for the fee of the clawback
     third_transaction_checks = And(
         Gtxn[1].sender() == Gtxn[2].receiver(),
         # verify the fee amount is good

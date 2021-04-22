@@ -31,7 +31,7 @@ async function transfer (deployer, from, to, amount) {
     CONTROLLER_APP_ID: controllerSSCInfo.appID
   };
 
-  const escrowLsig = await deployer.loadLogic('clawback-escrow.py', [], escrowParams);
+  const escrowLsig = await deployer.loadLogic('clawback.py', [], escrowParams);
   const escrowAddress = escrowLsig.address();
 
   const txGroup = [
@@ -52,9 +52,9 @@ async function transfer (deployer, from, to, amount) {
     },
     /**
      * tx 1 - Asset transfer transaction from sender -> receiver. This tx is executed
-     * and approved by the escrow account (clawback-escrow.teal). The escrow account address is
+     * and approved by the escrow account (clawback.teal). The escrow account address is
      * also the clawback address which transfers the frozen asset (amount = 1000) from Alice to Bob.
-     * Clawback-escrow ensures a call to controller smart contract during token transfer.
+     * clawback ensures a call to controller smart contract during token transfer.
      */
     {
       type: types.TransactionType.RevokeAsset,

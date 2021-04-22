@@ -25,7 +25,7 @@ async function updateReserve (deployer, newReserve) {
     CONTROLLER_APP_ID: controllerSSCInfo.appID
   };
 
-  const escrowLsig = await deployer.loadLogic('clawback-escrow.py', [], escrowParams);
+  const escrowLsig = await deployer.loadLogic('clawback.py', [], escrowParams);
   const escrowAddress = escrowLsig.address();
 
   // TODO: update assetConfig tx to only take fields to be modified

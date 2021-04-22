@@ -4,7 +4,7 @@ const {
 const { types } = require('@algo-builder/runtime');
 
 /**
- * Compile clawback-escrow and set template parameters
+ * Compile clawback and set template parameters
  * - token_id : deployed asa index
  * - controller_app_id: application index of controller smart contract. This makes sure that
  *   rules smart contract is called in any token transfer b/w non-reserve accounts
@@ -34,10 +34,10 @@ async function run (runtimeEnv, deployer) {
     CONTROLLER_APP_ID: controllerInfo.appID
   };
 
-  await deployer.fundLsig('clawback-escrow.py',
+  await deployer.fundLsig('clawback.py',
     { funder: alice, fundingMicroAlgo: 5e6 }, {}, [], escrowParams); // sending 5 Algo
 
-  const escrowLsig = await deployer.loadLogic('clawback-escrow.py', [], escrowParams);
+  const escrowLsig = await deployer.loadLogic('clawback.py', [], escrowParams);
   const escrowAddress = escrowLsig.address();
 
   const assetModFields = {
