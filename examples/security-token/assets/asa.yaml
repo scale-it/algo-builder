@@ -1,5 +1,5 @@
 gold:
-  total: 1000000000 # (10 billions)
+  total: 10000000000 # (10 billions)
   decimals: 0
   defaultFrozen: true
   unitName: "GLD"
