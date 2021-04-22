@@ -80,7 +80,7 @@ For executing this tx, permissions manager calls the permissions smart contract 
 
 ### Other Solution
 
-The solution in this template extends Algorand Dev Office Hour idea presented by Jason - using asset clawback as escrow for permissioned token.
+The solution in this template extends [Algorand Dev Office Hour](https://register.gotowebinar.com/recording/recordingView?webinarKey=1651582324861824270&registrantEmail=ratikjindal21%40gmail.com) idea presented by Jason - using asset clawback as escrow for permissioned token.
 In this template we add a new contract - `controller.py` which essentially "controls" the asset/token. This controls the general properties of the asset and also ensures that rule(s) smart contract(s) are called.
 
 ### Links
