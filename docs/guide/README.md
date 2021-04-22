@@ -18,6 +18,7 @@ layout: splash
 + [PyTeal](./py-teal.md).
 + [Test TEAL](./testing-teal.md).
 + [Best Practices](./best-practices.md)
++ [Templates](./templates.md)
 
 For more in-depth description you can look at the [project specification](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
 

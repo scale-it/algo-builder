@@ -1,5 +1,5 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import { Account as AccountSDK, Kmd, mnemonicToSecretKey, MultiSigAccount, multisigAddress } from "algosdk";
+import { Account as AccountSDK, Kmd, mnemonicToSecretKey, multisigAddress, MultisigMetadata } from "algosdk";
 import * as fs from "fs";
 import YAML from "yaml";
 
@@ -106,7 +106,7 @@ export function loadAccountsFromEnv (): rtypes.Account[] {
 export function createMsigAddress (
   version: number,
   threshold: number,
-  accountList: string[]): [MultiSigAccount, string] {
+  accountList: string[]): [MultisigMetadata, string] {
   const mparams = {
     version: version,
     threshold: threshold,

@@ -5,8 +5,6 @@ import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { ASSETS_DIR } from "../internal/core/project-structure";
 
-const txExt = ".tx";
-
 function normalizePaths (mainPath: string, paths: string[]): string[] {
   return paths.map(n => path.relative(mainPath, n));
 }
@@ -35,15 +33,12 @@ export function assertDirectDirChildren (dir: string, scriptNames: string[]): st
 }
 
 /**
- * Description: this function reads raw signed txn from file /assets/<filename>.tx
+ * This function reads raw signed txn from file /assets/<filename.ext>
  * and returns the encoded txn as Uint8array
- * @param fileName : fileName [must have .tx ext]
+ * @param fileName : file name
  * @returns signed transaction encoded as Uint8array
  */
 export function loadSignedTxnFromFile (fileName: string): Uint8Array | undefined {
-  if (!fileName.endsWith(txExt)) {
-    throw new Error(`filename "${fileName}" must end with "${txExt}"`);
-  }
   try {
     const p = path.join(ASSETS_DIR, fileName);
     const buffer = fs.readFileSync(p);

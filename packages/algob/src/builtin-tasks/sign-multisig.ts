@@ -24,12 +24,12 @@ async function multiSignTx (
     console.error("No account with the name \"%s\" exists in the config file.", taskArgs.accountName);
     return;
   }
-  const txFile = loadSignedTxnFromFile(taskArgs.file);
-  if (txFile === undefined) {
+  const encodedTx = loadSignedTxnFromFile(taskArgs.file);
+  if (encodedTx === undefined) {
     console.error("Error loading transaction from the file.");
     return;
   }
-  const tx = algosdk.decodeObj(txFile);
+  const tx = algosdk.decodeObj(encodedTx);
   if (!tx.blob) {
     console.error("The decoded transaction doesn't appear to be a signed transaction.");
     return;

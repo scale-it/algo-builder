@@ -9,7 +9,7 @@ export const blsigExt = ".blsig";
 const lsigExt = ".lsig";
 
 /**
- * Description: this function decodes msig object from logic signature
+ * This function decodes msig object from logic signature
  * @param {String} name : multisig filename
  * @returns {MultiSig} : decoded msig (object with decoded public keys and their signatures)
  */
@@ -28,7 +28,7 @@ export async function decodeMsigObj (msig: string): Promise<MultiSig> {
 }
 
 /**
- * Description: this function reads multisig from /assets/<filename>.lsig
+ * This function reads multisig from /assets/<filename>.lsig
  *              and returns the decoded multisig object
  * @param {string} msig : multisigned msig obj
  * @returns {MultiSig} : decoded Msig Object
@@ -48,7 +48,7 @@ export async function readMsigFromFile (filename: string): Promise<MultiSig | un
 }
 
 /**
- * Description: this function reads raw multisig from /assets/<filename>.lsig
+ * This function reads raw multisig from /assets/<filename>.lsig
  * and returns the base64 string
  * @param {string} filename : filename [must have .blsig ext]
  * @returns {string} : base64 string
@@ -67,7 +67,7 @@ export async function readBinaryMultiSig (filename: string): Promise<string | un
 }
 
 /**
- * Description : loads multisigned logic signature directly from .blsig file
+ * Loads multisigned logic signature directly from .blsig file
  * @param {string} name filename
  * @returns {LogicSig} multi signed logic signature from assets/<file_name>.blsig
  */
@@ -81,7 +81,7 @@ export async function loadBinaryMultiSig (name: string): Promise<LogicSig> {
 }
 
 /**
- * Description : validates msig by checking for v and thr field
+ * Validates msig by checking for v and thr field
  * @param {MultiSig} msig
  */
 export function validateMsig (msig: MultiSig | undefined): void {
@@ -91,7 +91,7 @@ export function validateMsig (msig: MultiSig | undefined): void {
 }
 
 /**
- * Description : Appends a signature to an encoded signed multi-sig transaction object
+ * Appends a signature to an encoded signed multi-sig transaction object
  * @param signerAccount
  * @param  signedTxn
  * @returns signed transaction object

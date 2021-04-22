@@ -1,5 +1,5 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import type { LogicSig, LogicSigArgs, MultiSig } from "algosdk";
+import type { LogicSig, LogicSigArgs, MultiSig, MultisigMetadata } from "algosdk";
 import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
@@ -93,7 +93,7 @@ class DeployerBasicMode {
   }
 
   /**
-   * Description: loads stateful smart contract info from checkpoint
+   * Loads stateful smart contract info from checkpoint
    * @param nameApproval Approval program name
    * @param nameClear clear program name
    */
@@ -103,7 +103,7 @@ class DeployerBasicMode {
   }
 
   /**
-   * Description: loads a delegated logic signature from checkpoint
+   * Loads a single signed delegated logic signature from checkpoint
    */
   getDelegatedLsig (lsigName: string): LogicSig | undefined {
     const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map(); ;
@@ -116,21 +116,21 @@ class DeployerBasicMode {
   }
 
   /**
-   * Description : loads logic signature for contract mode
+   * Loads logic signature for contract mode
    * @param name ASC name
    * @param scParams: Smart contract parameters used for calling smart contract
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
-   * @returns {LogicSig} loaded logic signature from assets/<file_name>.teal
+   * @returns loaded logic signature from assets/<file_name>.teal
    */
   async loadLogic (name: string, scParams: LogicSigArgs, scTmplParams?: SCParams): Promise<LogicSig> {
     return await getLsig(name, this.algoOp.algodClient, scParams, scTmplParams);
   }
 
   /**
-   * Description : loads multisigned logic signature from .lsig or .blsig file
-   * @param {string} name filename
-   * @param {LogicSigArgs} scParams parameters
-   * @returns {LogicSig} multi signed logic signature from assets/<file_name>.(b)lsig
+   * Loads multisigned logic signature from .lsig or .blsig file
+   * @param name filename
+   * @param scParams parameters
+   * @returns multi signed logic signature from assets/<file_name>.(b)lsig
    */
   async loadMultiSig (name: string, scParams: LogicSigArgs): Promise<LogicSig> {
     if (name.endsWith(blsigExt)) { return await loadBinaryMultiSig(name); }
@@ -142,7 +142,28 @@ class DeployerBasicMode {
   }
 
   /**
-   * Description: Opt-In to ASA for a single account. The opt-in transaction is
+   * Appends signature (using signer's sk) to multi-signed logic signature. If multisig is not found
+   * then new multisig is created
+   * eg. appending own signature to a signed lsig (received from multisignature account address network)
+   * @param lsig Logic Sig object
+   * @param signer: Signer Account which will sign the smart contract
+   * @param mparams: passed when signing a new multisig
+   * @returns multi signed logic signature (with appended signature from signer's sk)
+   */
+  signLogicSigMultiSig (lsig: LogicSig, signer: rtypes.Account, mparams?: MultisigMetadata): LogicSig {
+    if (lsig.msig === undefined) { // if multisig not found, create new msig
+      if (mparams === undefined) {
+        throw new Error('MultiSig Metadata is undefined, which is required for single sign multisig');
+      }
+      lsig.sign(signer.sk, mparams);
+    } else {
+      lsig.appendToMultisig(signer.sk); // else append signature to msig
+    }
+    return lsig;
+  }
+
+  /**
+   * Opt-In to ASA for a single account. The opt-in transaction is
    * signed by account secret key
    * @param asaName ASA name
    * @param accountName
@@ -168,7 +189,7 @@ class DeployerBasicMode {
   }
 
   /**
-   * Description: Opt-In to stateful smart contract (SSC) for a single account
+   * Opt-In to stateful smart contract (SSC) for a single account
    * @param sender sender account
    * @param appID application index
    * @param payFlags Transaction flags
@@ -183,7 +204,7 @@ class DeployerBasicMode {
   }
 
   /**
-   * Description: Returns ASCCache (with compiled code)
+   * Returns ASCCache (with compiled code)
    * @param name: Smart Contract filename (must be present in assets folder)
    * @param force: if force is true file will be compiled for sure, even if it's checkpoint exist
    * @param scTmplParams: scTmplParams: Smart contract template parameters
@@ -194,7 +215,9 @@ class DeployerBasicMode {
   }
 }
 
-// This class is what user interacts with in deploy task
+/**
+ * This class is what user interacts with in deploy task
+ */
 export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   get isDeployMode (): boolean {
     return true;
@@ -264,7 +287,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   }
 
   /**
-   * Description - This function will send Algos to ASC account in "Contract Mode"
+   * This function will send Algos to ASC account in "Contract Mode"
    * @param name     - ASC filename
    * @param flags    - Deployments flags (as per SPEC)
    * @param payFlags - as per SPEC
@@ -282,7 +305,8 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   }
 
   /**
-   * Description - This function will create and sign a logic signature for "delegated approval".
+   * Create and sign (using signer's sk) a logic signature for "delegated approval". Then save signed lsig
+   * info to checkpoints (in /artifacts)
    * https://developer.algorand.org/docs/features/asc1/stateless/sdks/#account-delegation-sdk-usage
    * @param name: Stateless Smart Contract filename (must be present in assets folder)
    * @param signer: Signer Account which will sign the smart contract
@@ -314,7 +338,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   }
 
   /**
-   * Description: function to deploy stateful smart contracts
+   * Deploys Algorand Stateful Smart Contract
    * @param approvalProgram filename which has approval program
    * @param clearProgram filename which has clear program
    * @param flags SSCDeploymentFlags
@@ -347,7 +371,9 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   }
 }
 
-// This class is what user interacts with in run task
+/**
+ * This class is what user interacts with in run task mode
+ */
 export class DeployerRunMode extends DeployerBasicMode implements Deployer {
   get isDeployMode (): boolean {
     return false;
