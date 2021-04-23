@@ -28,7 +28,11 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  storeCheckpoint (): void {
+  persistCP (): void {
+    throw new Error("Not implemented");
+  }
+
+  logTx (message: string, txConfirmation: algosdk.ConfirmedTxInfo): void {
     throw new Error("Not implemented");
   }
 

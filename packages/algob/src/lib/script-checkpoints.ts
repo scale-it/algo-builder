@@ -202,7 +202,10 @@ export async function registerCheckpoints (
           assetIndex: txConfirmation["asset-index"],
           confirmedRound: txConfirmation['confirmed-round']
         };
-        if (name) deployer.registerASAInfo(name, asaInfo);
+        if (name) {
+          deployer.registerASAInfo(name, asaInfo);
+          deployer.logTx("Deploying ASA: " + name, txConfirmation);
+        }
         break;
       }
       case 'appl': {
@@ -213,7 +216,10 @@ export async function registerCheckpoints (
           appID: txConfirmation['application-index'],
           confirmedRound: txConfirmation['confirmed-round']
         };
-        if (name) deployer.registerSSCInfo(name, sscInfo);
+        if (name) {
+          deployer.registerSSCInfo(name, sscInfo);
+          deployer.logTx("Deploying SSC: " + name, txConfirmation);
+        }
         break;
       }
     }

@@ -423,6 +423,8 @@ export interface Deployer {
 
   registerSSCInfo: (name: string, sscInfo: SSCInfo) => void
 
+  logTx: (message: string, txConfirmation: algosdk.ConfirmedTxInfo) => void
+
   /**
    * Funds logic signature account (Contract Account).
    * @name  Stateless Smart Contract filename (must be present in assets folder)

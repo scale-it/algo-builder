@@ -258,6 +258,13 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     this.cpData.registerSSC(this.networkName, sscName, sscInfo);
   }
 
+  /**
+   * Log transaction with message using txwriter
+   */
+  logTx (message: string, txConfirmation: algosdk.ConfirmedTxInfo): void {
+    this.txWriter.push(message, txConfirmation);
+  }
+
   async deployASA (name: string, flags: rtypes.ASADeploymentFlags): Promise<ASAInfo> {
     if (this.loadedAsaDefs[name] === undefined) {
       this.persistCP();
@@ -408,6 +415,12 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
   registerSSCInfo (name: string, sscInfo: SSCInfo): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "registerSSCInfo"
+    });
+  }
+
+  logTx (message: string, txConfirmation: algosdk.ConfirmedTxInfo): void {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "logTx"
     });
   }
 
