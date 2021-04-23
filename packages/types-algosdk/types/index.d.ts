@@ -18,7 +18,7 @@ declare module 'algosdk' {
     compile(source: string): Action<CompileOut>;
     status(): Action<any>;
 
-    sendRawTransaction(rawSignedTxn: TxnBytes | TxnBytes[]): Action<TxResult>;;
+    sendRawTransaction(rawSignedTxn: TxnBytes | TxnBytes[]): Action<TxResult>;
     getTransactionParams(): Action<SuggestedParams>;
     pendingTransactionInformation(txId: string): Action<ConfirmedTxInfo>;
     statusAfterBlock(lastround: number): Action<any>;
