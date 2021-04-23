@@ -6,6 +6,33 @@ import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
 import { loadSignedTxnFromFile } from "./files";
 
 /**
+ * Parses execution params if transaction type is modify asset i.e fetch asset
+ * mutable properties from network and set them (if they are not passed).
+ * @param deployer algob deployer
+ * @param execParams transaction parameter passed by user
+ */
+async function _parseExecParams (
+  deployer: Deployer,
+  execParams: rtypes.ExecParams): Promise<rtypes.ExecParams> {
+  if (execParams.type === rtypes.TransactionType.ModifyAsset) {
+    const assetInfo = await deployer.getAssetByID(execParams.assetID);
+
+    execParams.fields.manager =
+      execParams.fields.manager !== "" ? execParams.fields.manager ?? assetInfo.params.manager : undefined;
+
+    execParams.fields.freeze =
+      execParams.fields.freeze !== "" ? execParams.fields.freeze ?? assetInfo.params.freeze : undefined;
+
+    execParams.fields.clawback =
+      execParams.fields.clawback !== "" ? execParams.fields.clawback ?? assetInfo.params.clawback : undefined;
+
+    execParams.fields.reserve =
+      execParams.fields.reserve !== "" ? execParams.fields.reserve ?? assetInfo.params.reserve : undefined;
+  }
+  return execParams;
+}
+
+/**
  * Returns blockchain transaction suggested parameters
  * @param algocl an Algorand client, instance of Algodv2, used to communicate with a blockchain node.
  */
@@ -150,9 +177,11 @@ export async function executeTransaction (
   deployer: Deployer,
   execParams: rtypes.ExecParams | rtypes.ExecParams[]): Promise<algosdk.ConfirmedTxInfo> {
   const suggestedParams = await getSuggestedParams(deployer.algodClient);
-  const mkTx = async (p: rtypes.ExecParams): Promise<Transaction> =>
-    mkTransaction(p,
+  const mkTx = async (p: rtypes.ExecParams): Promise<Transaction> => {
+    p = await _parseExecParams(deployer, p);
+    return mkTransaction(p,
       await mkTxParams(deployer.algodClient, p.payFlags, Object.assign({}, suggestedParams)));
+  };
 
   let signedTxn;
   if (Array.isArray(execParams)) {

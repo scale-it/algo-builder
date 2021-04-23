@@ -22,13 +22,6 @@ async function run (runtimeEnv, deployer) {
   const escrowLsig = await deployer.loadLogic('clawback-escrow.py', [], escrowParams);
   const escrowAddress = escrowLsig.address();
 
-  const assetModFields = {
-    manager: creator.addr,
-    reserve: creator.addr,
-    freeze: creator.addr,
-    clawback: escrowAddress
-  };
-
   /** Update clawback address to escrow **/
   console.log('* Updating asset clawback to escrow *');
   const assetConfigParams = {
@@ -36,7 +29,7 @@ async function run (runtimeEnv, deployer) {
     sign: types.SignType.SecretKey,
     fromAccount: creator,
     assetID: assetInfo.assetIndex,
-    fields: assetModFields,
+    fields: { clawback: escrowAddress }, // only pass the field you want to update
     payFlags: { totalFee: 1000 }
   };
   await executeTransaction(deployer, assetConfigParams);
@@ -45,11 +38,7 @@ async function run (runtimeEnv, deployer) {
   console.log('* Locking the manager and freeze address *');
   const assetLockParams = {
     ...assetConfigParams,
-    fields: {
-      ...assetModFields,
-      manager: '',
-      freeze: ''
-    }
+    fields: { manager: '', freeze: '' }
   };
   await executeTransaction(deployer, assetLockParams);
 }
