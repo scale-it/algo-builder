@@ -70,20 +70,6 @@ class DeployerBasicMode {
   }
 
   /**
-   * Asserts if asset is present in checkpoint
-   * @param name Asset name
-   */
-  assertNoAsset (name: string): void {
-    if (this.isDefined(name)) {
-      this.persistCheckpoint();
-      throw new BuilderError(
-        ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT, {
-          assetName: name
-        });
-    }
-  }
-
-  /**
    * Returns asset definition for given name
    * @param name Asset name
    */
@@ -238,9 +224,23 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   }
 
   /**
+   * Asserts if asset is present in checkpoint
+   * @param name Asset name
+   */
+  assertNoAsset (name: string): void {
+    if (this.isDefined(name)) {
+      this.persistCP();
+      throw new BuilderError(
+        ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT, {
+          assetName: name
+        });
+    }
+  }
+
+  /**
    * Persist checkpoint till current call.
    */
-  storeCheckpoint (): void {
+  persistCP (): void {
     persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
   }
 
@@ -248,7 +248,6 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * Register ASA Info in checkpoints
    */
   registerASAInfo (asaName: string, asaInfo: ASAInfo): void {
-    console.log("REGISTERED....");
     this.cpData.registerASA(this.networkName, asaName, asaInfo);
   }
 
@@ -256,12 +255,12 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * Register SSC Info in checkpoints
    */
   registerSSCInfo (sscName: string, sscInfo: SSCInfo): void {
-    this.cpData.registerSSC(this.networkName, name, sscInfo);
+    this.cpData.registerSSC(this.networkName, sscName, sscInfo);
   }
 
   async deployASA (name: string, flags: rtypes.ASADeploymentFlags): Promise<ASAInfo> {
     if (this.loadedAsaDefs[name] === undefined) {
-      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+      this.persistCP();
       throw new BuilderError(
         ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_DEF_NOT_FOUND, {
           asaName: name
@@ -273,13 +272,13 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
       asaInfo = await this.algoOp.deployASA(
         name, this.loadedAsaDefs[name], flags, this.accountsByName, this.txWriter);
     } catch (error) {
-      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+      this.persistCP();
 
       console.log(error);
       throw error;
     }
 
-    this.cpData.registerASA(this.networkName, name, asaInfo);
+    this.registerASAInfo(name, asaInfo);
 
     try {
       await this.algoOp.optInToASAMultiple(
@@ -289,7 +288,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
         this.accountsByName,
         asaInfo.assetIndex);
     } catch (error) {
-      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+      this.persistCP();
 
       console.log(error);
       throw error;
@@ -339,7 +338,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
         lsig: lsig
       };
     } catch (error) {
-      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+      this.persistCP();
 
       console.log(error);
       throw error;
@@ -370,13 +369,13 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
       sscInfo = await this.algoOp.deploySSC(
         approvalProgram, clearProgram, flags, payFlags, this.txWriter, scTmplParams);
     } catch (error) {
-      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+      this.persistCP();
 
       console.log(error);
       throw error;
     }
 
-    this.cpData.registerSSC(this.networkName, name, sscInfo);
+    this.registerSSCInfo(name, sscInfo);
 
     return sscInfo;
   }
@@ -388,9 +387,15 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     return false;
   }
 
-  storeCheckpoint (): void {
+  persistCP (): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      methodName: "storeCheckpoint"
+      methodName: "persistCP"
+    });
+  }
+
+  assertNoAsset (name: string): void {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "assertNoAsset"
     });
   }
 

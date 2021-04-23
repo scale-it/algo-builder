@@ -1,5 +1,6 @@
 
 import { loadFromYamlFileSilent } from "@algo-builder/runtime";
+import { encodeAddress, Transaction } from "algosdk";
 import deepEqual from "deep-equal";
 import * as fs from "fs";
 import path from "path";
@@ -13,6 +14,7 @@ import {
   Checkpoint,
   CheckpointRepo,
   Checkpoints,
+  Deployer,
   LsigInfo,
   SSCInfo
 } from "../types";
@@ -175,6 +177,47 @@ export function persistCheckpoint (scriptName: string, checkpoint: Checkpoints):
     scriptPath,
     YAML.stringify(checkpoint)
   );
+}
+
+/**
+ * Register checkpoints for ASA and SSC
+ * @param deployer Deployer object
+ * @param txns transaction array
+ * @param txIdxMap transaction map index to name
+ */
+export async function registerCheckpoints (
+  deployer: Deployer,
+  txns: Transaction[],
+  txIdxMap: Map<number, string>
+): Promise<void> {
+  for (const [idx, txn] of txns.entries()) {
+    let txConfirmation;
+    const name = txIdxMap.get(idx);
+    switch (txn.type) {
+      case 'acfg': {
+        txConfirmation = await deployer.waitForConfirmation(txn.txID());
+        const asaInfo: ASAInfo = {
+          creator: encodeAddress(txn.from.publicKey),
+          txId: txn.txID(),
+          assetIndex: txConfirmation["asset-index"],
+          confirmedRound: txConfirmation['confirmed-round']
+        };
+        if (name) deployer.registerASAInfo(name, asaInfo);
+        break;
+      }
+      case 'appl': {
+        txConfirmation = await deployer.waitForConfirmation(txn.txID());
+        const sscInfo: SSCInfo = {
+          creator: encodeAddress(txn.from.publicKey),
+          txId: txn.txID(),
+          appID: txConfirmation['application-index'],
+          confirmedRound: txConfirmation['confirmed-round']
+        };
+        if (name) deployer.registerSSCInfo(name, sscInfo);
+        break;
+      }
+    }
+  }
 }
 
 // http://xahlee.info/js/js_object_to_map_datatype.html

@@ -417,7 +417,7 @@ export interface Deployer {
 
   getASADef: (name: string) => rtypes.ASADef | undefined
 
-  storeCheckpoint: () => void
+  persistCP: () => void
 
   registerASAInfo: (name: string, asaInfo: ASAInfo) => void
 
