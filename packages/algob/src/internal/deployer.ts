@@ -75,7 +75,7 @@ class DeployerBasicMode {
    */
   assertNoAsset (name: string): void {
     if (this.isDefined(name)) {
-      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+      this.persistCheckpoint();
       throw new BuilderError(
         ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT, {
           assetName: name
@@ -247,15 +247,15 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   /**
    * Register ASA Info in checkpoints
    */
-  registerASAInfo (name: string, asaInfo: ASAInfo): void {
+  registerASAInfo (asaName: string, asaInfo: ASAInfo): void {
     console.log("REGISTERED....");
-    this.cpData.registerASA(this.networkName, name, asaInfo);
+    this.cpData.registerASA(this.networkName, asaName, asaInfo);
   }
 
   /**
    * Register SSC Info in checkpoints
    */
-  registerSSCInfo (name: string, sscInfo: SSCInfo): void {
+  registerSSCInfo (sscName: string, sscInfo: SSCInfo): void {
     this.cpData.registerSSC(this.networkName, name, sscInfo);
   }
 
