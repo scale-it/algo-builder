@@ -35,7 +35,7 @@ async function run (runtimeEnv, deployer) {
     // firstValid: 10,
     // validRounds: 1002
   }, {
-    reserve: bob.addr // pass asa fields here to override asa def in asa.yaml
+    reserve: bob.addr // override default value set in asa.yaml
     // freeze: bob.addr
     // note: "gold-asa"
   });
