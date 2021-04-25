@@ -13,15 +13,19 @@ async function run (runtimeEnv, deployer) {
   const john = deployer.accountsByName.get('john');
   const bob = deployer.accountsByName.get('bob');
 
-  // Generate multi signature account hash
+  // Generate multi signature account hash (note: order is important)
   const addrs = [alice.addr, john.addr, bob.addr];
   const [mparams, multsigaddr] = createMsigAddress(1, 2, addrs); // passing (version, threshold, address list)
 
   // Get logic Signature
   const lsig = await deployer.loadLogic('sample-asc.teal', []);
 
-  lsig.sign(alice.sk, mparams); // lsig signed by alice's secret_key
-  lsig.appendToMultisig(john.sk); // lsig signed again (threshold = 2) by john secret_key
+  /**
+   * NOTE: this is just for example purpose, in a realistic use-case user does
+   * not control multiple secret keys of the multisignature account
+   */
+  deployer.signLogicSigMultiSig(lsig, alice, mparams); // lsig signed by alice's secret_key (creates a new multisig)
+  deployer.signLogicSigMultiSig(lsig, john); // lsig signed again (threshold = 2) by john secret_key (appends signature to newly created msig)
 
   const txnParams = {
     type: types.TransactionType.TransferAlgo,

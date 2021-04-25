@@ -14,9 +14,9 @@ Please follow the [setup](../README.md) instructions to install dependencies and
 
 You can use `goal` to create a transaction and sign it.
 
-Creating a transaction and writing to file `out.tx`
+Creating a transaction and writing to file `out.txn`
 ```bash
-goal clerk send -a <amount> -f <from_account> -t <to_account> -o out.tx -d ~/<data_directory>
+goal clerk send -a <amount> -f <from_account> -t <to_account> -o out.txn -d ~/<data_directory>
 ```
 Sign transaction (signed by `<from_account>`)
 ```bash
@@ -24,8 +24,7 @@ goal clerk sign -i [input file] -o [output file] -d ~/<data_directory>
 ```
 
 You need to ***save the signed transaction file in `examples/multisig/assets` directory***.
- The file must have ***.tx*** extension.
-
+The standard transaction file extension is `.txn`, but the code accepts any extension. The only constraint is that the file should have a valid signed encoded transaction object.
 
 ### Run
 ```

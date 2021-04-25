@@ -1,0 +1,32 @@
+#pragma version 2
+
+int NoOp
+txn OnCompletion
+==
+
+bnz application_call
+
+int 1
+return
+
+application_call:
+
+// read global state
+byte "counter"
+dup
+app_global_get
+
+// increment the value
+int 1
++
+
+// store to scratch space
+dup
+store 0
+
+// update global state
+app_global_put
+
+// load return value as approval
+load 0
+return
