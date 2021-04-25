@@ -191,6 +191,10 @@ describe("DeployerDeployMode", () => {
         timestamp: 515236
       }
     });
+
+    // after recreating deployer with the same config, assetDef should be expected (overriden) one
+    const newDeployer = new DeployerDeployMode(deployerCfg);
+    assert.deepEqual(newDeployer.asa.get("MY_ASA")?.assetDef, expectedASADef);
   });
 
   it("Should load delegated logic signature", async () => {
