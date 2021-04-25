@@ -34,6 +34,10 @@ async function run (runtimeEnv, deployer) {
     // feePerByte: 100,
     // firstValid: 10,
     // validRounds: 1002
+  }, {
+    reserve: bob.addr // override default value set in asa.yaml
+    // freeze: bob.addr
+    // note: "gold-asa"
   });
   console.log(asaInfo);
 

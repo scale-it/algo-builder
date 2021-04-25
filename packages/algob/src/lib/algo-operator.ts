@@ -210,7 +210,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
       creator: flags.creator.addr,
       txId: txInfo.txId,
       assetIndex: assetIndex,
-      confirmedRound: txConfirmation[confirmedRound]
+      confirmedRound: txConfirmation[confirmedRound],
+      assetDef: asaDef
     };
   }
 

@@ -1,4 +1,4 @@
-import { types as rtypes } from "@algo-builder/runtime";
+import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
 import type { LogicSig, LogicSigArgs, MultiSig, MultisigMetadata } from "algosdk";
 import * as algosdk from "algosdk";
 
@@ -90,6 +90,17 @@ class DeployerBasicMode {
 
   log (msg: string, obj: any): void {
     this.txWriter.push(msg, obj);
+  }
+
+  /**
+   * Loads deployed Asset Definition from checkpoint.
+   * NOTE: This function returns "deployed" ASADef, as immutable properties
+   * of asaDef could be updated during tx execution (eg. update asset clawback)
+   * @param asaName asset name in asa.yaml
+   */
+  loadASADef (asaName: string): rtypes.ASADef | undefined {
+    const asaMap = this.cpData.precedingCP[this.networkName]?.asa ?? new Map();
+    return asaMap.get(asaName)?.assetDef;
   }
 
   /**
@@ -247,8 +258,11 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     }
   }
 
-  async deployASA (name: string, flags: rtypes.ASADeploymentFlags): Promise<ASAInfo> {
-    if (this.loadedAsaDefs[name] === undefined) {
+  async deployASA (name: string, flags: rtypes.ASADeploymentFlags,
+    asaParams?: Partial<rtypes.ASADef>): Promise<ASAInfo> {
+    const asaDef = overrideASADef(this.accountsByName, this.loadedAsaDefs[name], asaParams);
+
+    if (asaDef === undefined) {
       persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
       throw new BuilderError(
         ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_DEF_NOT_FOUND, {
@@ -256,10 +270,10 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
         });
     }
     this.assertNoAsset(name);
-    let asaInfo = {} as any;
+    let asaInfo = {} as ASAInfo;
     try {
       asaInfo = await this.algoOp.deployASA(
-        name, this.loadedAsaDefs[name], flags, this.accountsByName, this.txWriter);
+        name, asaDef, flags, this.accountsByName, this.txWriter);
     } catch (error) {
       persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
 
@@ -272,7 +286,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     try {
       await this.algoOp.optInToASAMultiple(
         name,
-        this.loadedAsaDefs[name],
+        asaDef,
         flags,
         this.accountsByName,
         asaInfo.assetIndex);

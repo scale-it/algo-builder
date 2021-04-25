@@ -59,6 +59,10 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   };
 
+  loadASADef (asaName: string): rtypes.ASADef | undefined {
+    throw new Error("Not implemented");
+  }
+
   async fundLsig (name: string, flags: FundASCFlags,
     payFlags: rtypes.TxParams, scParams: LogicSigArgs, scInitParam?: unknown): Promise<void> {
     throw new Error("Not implemented");

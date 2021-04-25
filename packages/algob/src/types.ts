@@ -314,6 +314,7 @@ export interface DeployedAssetInfo {
 // ASA deployment information (log)
 export interface ASAInfo extends DeployedAssetInfo {
   assetIndex: number
+  assetDef: rtypes.ASADef
 }
 
 // Stateful smart contract deployment information (log)
@@ -411,7 +412,14 @@ export interface Deployer {
    * Creates and deploys ASA.
    * @name  ASA name - deployer will search for the ASA in the /assets/asa.yaml file
    * @flags  deployment flags */
-  deployASA: (name: string, flags: rtypes.ASADeploymentFlags) => Promise<ASAInfo>
+  deployASA: (name: string, flags: rtypes.ASADeploymentFlags, asaParams: rtypes.ASADef) => Promise<ASAInfo>
+
+  /**
+   * Loads deployed asset definition from checkpoint.
+   * NOTE: This function returns "deployed" ASADef, as immutable properties
+   * of asaDef could be updated during tx execution (eg. update asset clawback)
+   * @name  ASA name - name of ASA in the /assets/asa.yaml file */
+  loadASADef: (asaName: string) => rtypes.ASADef | undefined
 
   /**
    * Funds logic signature account (Contract Account).
