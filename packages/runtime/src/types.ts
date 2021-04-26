@@ -3,7 +3,6 @@ import {
   AssetDef,
   LogicSig,
   SSCSchemaConfig,
-  Transaction,
   TxnEncodedObj
 } from "algosdk";
 import * as z from 'zod';
