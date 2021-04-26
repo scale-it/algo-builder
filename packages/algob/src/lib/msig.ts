@@ -91,27 +91,26 @@ export function validateMsig (msig: MultiSig | undefined): void {
 }
 
 /**
- * Appends a signature to an encoded signed multi-sig transaction object
+ * Signs a raw multi-sig transaction object
  * @param signerAccount
- * @param  signedTxn
+ * @param  rawTxn
  * @returns signed transaction object
  */
-export function signMultiSig (signerAccount: Account, signedTxn: TxSig): TxSig {
-  const tx = signedTxn;
-  const decodedTx = decodeSignedTransaction(tx.blob);
-  console.debug("Decoded txn: %O", decodedTx);
-  validateMsig(decodedTx.msig);
-  console.log("Msig: %O", decodedTx.msig);
+export function signMultiSig (signerAccount: Account, rawTxn: Uint8Array): TxSig {
+  const decodedTxn = decodeSignedTransaction(rawTxn);
+  console.debug("Decoded txn before signing: %O", decodedTxn);
+  validateMsig(decodedTxn.msig);
+  console.log("Msig: %O", decodedTxn.msig);
   const addresses = [];
-  for (var sig of decodedTx.msig.subsig) {
+  for (const sig of decodedTxn.msig.subsig) {
     addresses.push(encodeAddress(Uint8Array.from(sig.pk)));
   }
   const mparams = {
-    version: decodedTx.msig.v,
-    threshold: decodedTx.msig.thr,
+    version: decodedTxn.msig.v,
+    threshold: decodedTxn.msig.thr,
     addrs: addresses
   };
-  signedTxn = appendSignMultisigTransaction(tx.blob, mparams, signerAccount.sk);
+  const signedTxn = appendSignMultisigTransaction(rawTxn, mparams, signerAccount.sk);
   const decodedSignedTxn = decodeSignedTransaction(signedTxn.blob);
   console.debug("Decoded txn after successfully signing: %O", decodedSignedTxn);
   console.log("Msig: %O", decodedSignedTxn.msig);

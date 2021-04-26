@@ -1,5 +1,4 @@
-import algosdk from "algosdk";
-import fs from "fs-extra";
+import path from "path";
 
 import { task } from "../internal/core/config/config-env";
 import { loadSignedTxnFromFile } from "../lib/files";
@@ -24,26 +23,15 @@ async function multiSignTx (
     console.error("No account with the name \"%s\" exists in the config file.", taskArgs.accountName);
     return;
   }
-  const encodedTx = loadSignedTxnFromFile(taskArgs.file);
-  if (encodedTx === undefined) {
+  const rawTxn = loadSignedTxnFromFile(taskArgs.file);
+  if (rawTxn === undefined) {
     console.error("Error loading transaction from the file.");
     return;
   }
-  const tx = algosdk.decodeObj(encodedTx);
-  if (!tx.blob) {
-    console.error("The decoded transaction doesn't appear to be a signed transaction.");
-    return;
-  }
-  const signedTxn = signMultiSig(signerAccount, tx);
-  let outFileName = taskArgs.file.split(".")[0] + "_out.txn";
-  if (taskArgs.out) {
-    if (fs.pathExistsSync(taskArgs.out)) {
-      console.log("Provided output path exists. Using default value for output.");
-    } else {
-      outFileName = taskArgs.out;
-    }
-  }
-  await writeToFile(algosdk.encodeObj(signedTxn), taskArgs.force, outFileName);
+  const signedTxn = signMultiSig(signerAccount, rawTxn);
+  const outFileName = taskArgs.out ?? taskArgs.file.split(".")[0] + "_out.txn";
+  const outFilePath = path.join("assets/", outFileName);
+  await writeToFile(signedTxn.blob, taskArgs.force, outFilePath);
 }
 
 export default function (): void {

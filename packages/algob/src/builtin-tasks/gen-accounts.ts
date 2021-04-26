@@ -47,7 +47,7 @@ export function genAccounts (n: number): MnemonicAccount[] {
   return accounts;
 }
 
-export async function writeToFile (content: string, force: boolean, fileName: string): Promise<void> {
+export async function writeToFile (content: any, force: boolean, fileName: string): Promise<void> {
   await assertAllDirs();
   try {
     await fsp.access(fileName, _fs.constants.F_OK);
