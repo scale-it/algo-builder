@@ -23,8 +23,7 @@ async function run (runtimeEnv, deployer) {
   const lsig = await deployer.loadLogic('2-gold-contract-asc.teal', []);
   const goldAsset = deployer.asa.get('gold');
   const goldAssetID = goldAsset.assetIndex;
-
-  await deployer.optInLsigToASA('gold', lsig, { totalFee: 1000 });
+  await deployer.optInLsigToASA(goldAssetID, lsig, { totalFee: 1000 });
   await balanceOf(deployer, lsig.address(), goldAssetID);
 
   console.log(`Funding contract ${lsig.address()} with ASA gold`);
@@ -37,7 +36,6 @@ async function run (runtimeEnv, deployer) {
     assetID: goldAssetID,
     payFlags: { totalFee: 1000 }
   });
-
   await balanceOf(deployer, lsig.address(), goldAssetID);
 }
 
