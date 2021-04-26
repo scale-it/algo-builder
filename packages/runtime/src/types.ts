@@ -276,7 +276,7 @@ export interface DeploySSCParam extends BasicParams, SSCOptionalFlags {
 
 export interface UpdateSSCParam extends BasicParams, SSCOptionalFlags {
   type: TransactionType.UpdateSSC
-  appId: number
+  appID: number
   newApprovalProgram: string
   newClearProgram: string
   approvalProg?: Uint8Array
