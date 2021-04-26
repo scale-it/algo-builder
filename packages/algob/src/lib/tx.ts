@@ -146,7 +146,7 @@ async function sendAndWait (
 /**
  * Make transaction parameters and update ASA and SSC params
  * @param deployer Deployer object
- * @param t Execution parameters
+ * @param txn Execution parameters
  * @param index index of current execParam
  * @param txIdxMap Map for index to name
  */
