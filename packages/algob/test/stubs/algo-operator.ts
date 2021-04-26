@@ -26,14 +26,15 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   async deployASA (
-    name: string, asaDesc: rtypes.ASADef,
+    name: string, asaDef: rtypes.ASADef,
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap,
     txnWriter: txWriter): Promise<ASAInfo> {
     return {
       creator: flags.creator.addr + "-get-address-dry-run",
       txId: "tx-id-dry-run",
       assetIndex: -1,
-      confirmedRound: -1
+      confirmedRound: -1,
+      assetDef: asaDef
     };
   }
 

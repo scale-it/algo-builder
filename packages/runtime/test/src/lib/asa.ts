@@ -95,7 +95,7 @@ describe("ASA parser", () => {
         total: 0xFFFFFFFFFFFFFFFFn + 5n,
         decimals: 0
       }
-    };
+    } as any;
     expectRuntimeError(
       () => validateASADefs(obj, new Map<string, Account>(), ""),
       RUNTIME_ERRORS.ASA.PARAM_PARSE_ERROR,

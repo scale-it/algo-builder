@@ -24,7 +24,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  getASADef (name: string): rtypes.ASADef | undefined {
+  getASADef (name: string): rtypes.ASADef {
     throw new Error("Not implemented");
   }
 
@@ -68,6 +68,10 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
+  signLogicSigMultiSig (lsig: LogicSig, signer: rtypes.Account): LogicSig {
+    throw new Error("Not implemented");
+  }
+
   addCheckpointKV (key: string, value: string): void {
   };
 
@@ -78,6 +82,10 @@ export class FakeDeployer implements Deployer {
   async deployASA (name: string, flags: rtypes.ASADeploymentFlags): Promise<ASAInfo> {
     throw new Error("Not implemented");
   };
+
+  loadASADef (asaName: string): rtypes.ASADef | undefined {
+    throw new Error("Not implemented");
+  }
 
   async fundLsig (name: string, flags: FundASCFlags,
     payFlags: rtypes.TxParams, scParams: LogicSigArgs, scInitParam?: unknown): Promise<void> {

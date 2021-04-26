@@ -314,6 +314,7 @@ export interface DeployedAssetInfo {
 // ASA deployment information (log)
 export interface ASAInfo extends DeployedAssetInfo {
   assetIndex: number
+  assetDef: rtypes.ASADef
 }
 
 // Stateful smart contract deployment information (log)
@@ -411,11 +412,18 @@ export interface Deployer {
    * Creates and deploys ASA.
    * @name  ASA name - deployer will search for the ASA in the /assets/asa.yaml file
    * @flags  deployment flags */
-  deployASA: (name: string, flags: rtypes.ASADeploymentFlags) => Promise<ASAInfo>
+  deployASA: (name: string, flags: rtypes.ASADeploymentFlags, asaParams: rtypes.ASADef) => Promise<ASAInfo>
+
+  /**
+   * Loads deployed asset definition from checkpoint.
+   * NOTE: This function returns "deployed" ASADef, as immutable properties
+   * of asaDef could be updated during tx execution (eg. update asset clawback)
+   * @name  ASA name - name of ASA in the /assets/asa.yaml file */
+  loadASADef: (asaName: string) => rtypes.ASADef | undefined
 
   assertNoAsset: (name: string) => void
 
-  getASADef: (name: string) => rtypes.ASADef | undefined
+  getASADef: (name: string, asaParams?: Partial<rtypes.ASADef>) => rtypes.ASADef
 
   persistCP: () => void
 
@@ -512,6 +520,11 @@ export interface Deployer {
   /**
    * Extracts multi signed logic signature file from `assets/`. */
   loadMultiSig: (name: string, scParams: LogicSigArgs) => Promise<LogicSig>
+
+  /**
+   * Appends signer's signature to multi-signed lsig. If multisig is not found
+   * then new multisig is created. */
+  signLogicSigMultiSig: (lsig: LogicSig, signer: rtypes.Account) => LogicSig
 
   /**
    * Queries a stateful smart contract info from checkpoint. */

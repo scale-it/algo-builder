@@ -154,13 +154,14 @@ async function mkTx (
   deployer: Deployer,
   txn: rtypes.ExecParams,
   index: number,
-  txIdxMap: Map<number, string>
+  txIdxMap: Map<number, [string, rtypes.ASADef]>
 ): Promise<Transaction> {
   switch (txn.type) {
     case TransactionType.DeployASA: {
       deployer.assertNoAsset(txn.asaName);
-      txn.asaDef = deployer.getASADef(txn.asaName);
-      txIdxMap.set(index, txn.asaName);
+      const asaDef = deployer.getASADef(txn.asaName, txn.asaDef);
+      txn.asaDef = asaDef;
+      if (txn.asaDef) txIdxMap.set(index, [txn.asaName, asaDef]);
       break;
     }
     case TransactionType.DeploySSC: {
@@ -170,7 +171,7 @@ async function mkTx (
       const clear = await deployer.ensureCompiled(txn.clearProgram);
       txn.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
       txn.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
-      txIdxMap.set(index, name);
+      txIdxMap.set(index, [name, { total: 1, decimals: 1, unitName: "MOCK" }]);
       break;
     }
   }
@@ -190,7 +191,7 @@ export async function executeTransaction (
   try {
     let signedTxn;
     let txns: Transaction[] = [];
-    const txIdxMap = new Map<number, string>();
+    const txIdxMap = new Map<number, [string, rtypes.ASADef]>();
     if (Array.isArray(execParams)) {
       if (execParams.length > 16) { throw new Error("Maximum size of an atomic transfer group is 16"); }
 

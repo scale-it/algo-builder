@@ -253,7 +253,7 @@ export interface DeployASAParam extends Sign {
   type: TransactionType.DeployASA
   fromAccount: AccountSDK
   asaName: string
-  asaDef?: ASADef
+  asaDef?: Partial<ASADef>
   payFlags: TxParams
 }
 

@@ -1,7 +1,8 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import type { LogicSig } from "algosdk";
+import { generateAccount, LogicSig } from "algosdk";
 import { assert } from "chai";
 
+import { genAccounts } from "../../src/builtin-tasks/gen-accounts";
 import { ERRORS } from "../../src/internal/core/errors-list";
 import { DeployerDeployMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
@@ -17,7 +18,8 @@ function mkASA (): rtypes.ASADef {
   return {
     total: 1,
     decimals: 1,
-    unitName: 'ASA'
+    unitName: 'ASA',
+    defaultFrozen: false
   };
 }
 
@@ -112,18 +114,18 @@ describe("DeployerDeployMode", () => {
     const deployer = new DeployerDeployMode(deployerCfg);
 
     const asaInfo = await deployer.deployASA("MY_ASA", { creator: deployer.accounts[0] });
-    assert.deepEqual(asaInfo, { creator: "addr-1-get-address-dry-run", txId: "tx-id-dry-run", confirmedRound: -1, assetIndex: -1 });
+    assert.deepEqual(asaInfo,
+      { creator: "addr-1-get-address-dry-run", txId: "tx-id-dry-run", confirmedRound: -1, assetIndex: -1, assetDef: mkASA() });
 
     deployerCfg.cpData.precedingCP.network1.timestamp = 515236;
-    // console.log(deployerCfg.cpData.precedingCP);
     assert.deepEqual(deployerCfg.cpData.precedingCP, {
       network1: {
-
         asa: new Map([["MY_ASA", {
           creator: "addr-1-get-address-dry-run",
           txId: "tx-id-dry-run",
           confirmedRound: -1,
-          assetIndex: -1
+          assetIndex: -1,
+          assetDef: mkASA()
         }]]),
         ssc: new Map(),
         dLsig: new Map(),
@@ -131,6 +133,68 @@ describe("DeployerDeployMode", () => {
         timestamp: 515236
       }
     });
+  });
+
+  it("Should save overriden asaDef to checkpoint after asset deployment if custom ASA params are passed", async () => {
+    const env = mkEnv("network1");
+    const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
+    const accounts = genAccounts(4);
+    const fixedAccount = generateAccount();
+    deployerCfg.asaDefs = {
+      MY_ASA: {
+        ...mkASA(),
+        manager: accounts[0].addr,
+        reserve: accounts[1].addr,
+        clawback: fixedAccount.addr,
+        freeze: fixedAccount.addr
+      }
+    };
+    const deployer = new DeployerDeployMode(deployerCfg);
+
+    // passing different manager & reserve address in customParams during ASA deploy
+    const asaInfo = await deployer.deployASA("MY_ASA", { creator: deployer.accounts[0] }, {
+      manager: accounts[2].addr,
+      reserve: accounts[3].addr
+    });
+
+    // manager, reserve should be overriden
+    // clawback, freeze should be original one
+    const expectedASADef = {
+      ...mkASA(),
+      manager: accounts[2].addr,
+      reserve: accounts[3].addr,
+      clawback: fixedAccount.addr,
+      freeze: fixedAccount.addr
+    };
+
+    assert.deepEqual(asaInfo, {
+      creator: "addr-1-get-address-dry-run",
+      txId: "tx-id-dry-run",
+      confirmedRound: -1,
+      assetIndex: -1,
+      assetDef: expectedASADef
+    });
+
+    deployerCfg.cpData.precedingCP.network1.timestamp = 515236;
+    assert.deepEqual(deployerCfg.cpData.precedingCP, {
+      network1: {
+        asa: new Map([["MY_ASA", {
+          creator: "addr-1-get-address-dry-run",
+          txId: "tx-id-dry-run",
+          confirmedRound: -1,
+          assetIndex: -1,
+          assetDef: expectedASADef
+        }]]),
+        ssc: new Map(),
+        dLsig: new Map(),
+        metadata: new Map<string, string>(),
+        timestamp: 515236
+      }
+    });
+
+    // after recreating deployer with the same config, assetDef should be expected (overriden) one
+    const newDeployer = new DeployerDeployMode(deployerCfg);
+    assert.deepEqual(newDeployer.asa.get("MY_ASA")?.assetDef, expectedASADef);
   });
 
   it("Should load delegated logic signature", async () => {
@@ -164,7 +228,7 @@ describe("DeployerDeployMode", () => {
     const networkName = "network1";
     const env = mkEnv(networkName);
     const cpData = new CheckpointRepoImpl()
-      .registerASA(networkName, "ASA name", { creator: "ASA creator 123", txId: "", confirmedRound: 0, assetIndex: 0 })
+      .registerASA(networkName, "ASA name", { creator: "ASA creator 123", txId: "", confirmedRound: 0, assetIndex: 0, assetDef: {} as rtypes.ASADef })
       .registerSSC(networkName, "ASC name", { creator: "ASC creator 951", txId: "", confirmedRound: 0, appID: -1 })
       .registerLsig(networkName, "Lsig name", { creator: "Lsig creator", contractAddress: "addr-1", lsig: {} as LogicSig })
       .putMetadata(networkName, "k", "v");
@@ -229,7 +293,8 @@ describe("DeployerDeployMode", () => {
       creator: "",
       txId: "",
       confirmedRound: 0,
-      assetIndex: 1337
+      assetIndex: 1337,
+      assetDef: {} as rtypes.ASADef
     });
     assert.deepEqual(deployer.asa, new Map());
   });
@@ -242,7 +307,8 @@ describe("DeployerDeployMode", () => {
       creator: 'addr-1-get-address-dry-run',
       txId: 'tx-id-dry-run',
       assetIndex: -1,
-      confirmedRound: -1
+      confirmedRound: -1,
+      assetDef: mkASA()
     }]]));
   });
 });

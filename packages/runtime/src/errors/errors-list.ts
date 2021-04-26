@@ -328,19 +328,19 @@ const transactionErrors = {
 const runtimeAsaErrors = {
   PARAM_PARSE_ERROR: {
     number: 1500,
-    message: `Invalid ASA definition: '%filename%'.
+    message: `Invalid ASA definition: '%source%'.
     Reason: %reason%`,
     title: "Invalid ASA definition",
-    description: `Invalid ASA definition: '%filename%'.
+    description: `Invalid ASA definition: '%source%'.
     Reason: %reason%
     Please check your ASA file`
   },
   PARAM_ERROR_NO_NAMED_OPT_IN_ACCOUNT: {
     number: 1501,
-    message: `Invalid ASA definition: '%filename%'.
+    message: `Invalid ASA definition: '%source%'.
     Opt-in account not found by name: %optInAccName%`,
     title: "Opt-in account not found.",
-    description: `Invalid ASA definition: '%filename%'.
+    description: `Invalid ASA definition: '%source%'.
     Opt-in account not found by name: %optInAccName%
     Please check your ASA and config files`
   },

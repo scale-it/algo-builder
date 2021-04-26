@@ -1,7 +1,7 @@
+import findupSync from "findup-sync";
 import * as fs from "fs";
 import { join } from "path";
 const fsp = fs.promises;
-import findupSync from "findup-sync";
 
 export const JS_CONFIG_FILENAME = "algob.config.js";
 // export const TS_CONFIG_FILENAME = "algob.config.ts";

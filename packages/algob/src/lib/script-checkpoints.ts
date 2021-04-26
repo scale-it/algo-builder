@@ -1,5 +1,5 @@
 
-import { loadFromYamlFileSilent } from "@algo-builder/runtime";
+import { loadFromYamlFileSilent, types as rtypes } from "@algo-builder/runtime";
 import { encodeAddress, Transaction } from "algosdk";
 import deepEqual from "deep-equal";
 import * as fs from "fs";
@@ -188,23 +188,24 @@ export function persistCheckpoint (scriptName: string, checkpoint: Checkpoints):
 export async function registerCheckpoints (
   deployer: Deployer,
   txns: Transaction[],
-  txIdxMap: Map<number, string>
+  txIdxMap: Map<number, [string, rtypes.ASADef]>
 ): Promise<void> {
   for (const [idx, txn] of txns.entries()) {
     let txConfirmation;
-    const name = txIdxMap.get(idx);
+    const res = txIdxMap.get(idx);
     switch (txn.type) {
       case 'acfg': {
         txConfirmation = await deployer.waitForConfirmation(txn.txID());
-        const asaInfo: ASAInfo = {
-          creator: encodeAddress(txn.from.publicKey),
-          txId: txn.txID(),
-          assetIndex: txConfirmation["asset-index"],
-          confirmedRound: txConfirmation['confirmed-round']
-        };
-        if (name) {
-          deployer.registerASAInfo(name, asaInfo);
-          deployer.logTx("Deploying ASA: " + name, txConfirmation);
+        if (res) {
+          const asaInfo: ASAInfo = {
+            creator: encodeAddress(txn.from.publicKey),
+            txId: txn.txID(),
+            assetIndex: txConfirmation["asset-index"],
+            confirmedRound: txConfirmation['confirmed-round'],
+            assetDef: res[1]
+          };
+          deployer.registerASAInfo(res[0], asaInfo);
+          deployer.logTx("Deploying ASA: " + res[0], txConfirmation);
         }
         break;
       }
@@ -216,9 +217,9 @@ export async function registerCheckpoints (
           appID: txConfirmation['application-index'],
           confirmedRound: txConfirmation['confirmed-round']
         };
-        if (name) {
-          deployer.registerSSCInfo(name, sscInfo);
-          deployer.logTx("Deploying SSC: " + name, txConfirmation);
+        if (res) {
+          deployer.registerSSCInfo(res[0], sscInfo);
+          deployer.logTx("Deploying SSC: " + res[0], txConfirmation);
         }
         break;
       }
