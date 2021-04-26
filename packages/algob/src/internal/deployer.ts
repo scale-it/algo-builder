@@ -224,7 +224,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   }
 
   /**
-   * Asserts if asset is present in checkpoint
+   * Asserts if asset is not already present in checkpoint
    * @param name Asset name
    */
   assertNoAsset (name: string): void {
