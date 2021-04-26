@@ -1,6 +1,7 @@
 import path from "path";
 
 import { task } from "../internal/core/config/config-env";
+import { ASSETS_DIR } from "../internal/core/project-structure";
 import { loadSignedTxnFromFile } from "../lib/files";
 import { signMultiSig } from "../lib/msig";
 import { RuntimeEnv } from "../types";
@@ -30,7 +31,7 @@ async function multiSignTx (
   }
   const signedTxn = signMultiSig(signerAccount, rawTxn);
   const outFileName = taskArgs.out ?? taskArgs.file.split(".")[0] + "_out.txn";
-  const outFilePath = path.join("assets/", outFileName);
+  const outFilePath = path.join(ASSETS_DIR, outFileName);
   await writeToFile(signedTxn.blob, taskArgs.force, outFilePath);
 }
 
