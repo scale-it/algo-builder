@@ -68,6 +68,14 @@ class DeployerBasicMode {
     return found;
   }
 
+  /**
+   * Returns asset definition for given name
+   * @param name Asset name
+   */
+  getASADef (name: string, asaParams?: Partial<rtypes.ASADef>): rtypes.ASADef {
+    return overrideASADef(this.accountsByName, this.loadedAsaDefs[name], asaParams);
+  }
+
   getCheckpointKV (key: string): string | undefined {
     return this.cpData.getMetadata(this.networkName, key);
   }
@@ -248,9 +256,13 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     this.cpData.putMetadata(this.networkName, key, value);
   }
 
-  private assertNoAsset (name: string): void {
+  /**
+   * Asserts if asset is not already present in checkpoint
+   * @param name Asset name
+   */
+  assertNoAsset (name: string): void {
     if (this.isDefined(name)) {
-      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+      this.persistCP();
       throw new BuilderError(
         ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT, {
           assetName: name
@@ -258,12 +270,44 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     }
   }
 
-  async deployASA (name: string, flags: rtypes.ASADeploymentFlags,
-    asaParams?: Partial<rtypes.ASADef>): Promise<ASAInfo> {
+  /**
+   * Persist checkpoint till current call.
+   */
+  persistCP (): void {
+    persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+  }
+
+  /**
+   * Register ASA Info in checkpoints
+   */
+  registerASAInfo (asaName: string, asaInfo: ASAInfo): void {
+    this.cpData.registerASA(this.networkName, asaName, asaInfo);
+  }
+
+  /**
+   * Register SSC Info in checkpoints
+   */
+  registerSSCInfo (sscName: string, sscInfo: SSCInfo): void {
+    this.cpData.registerSSC(this.networkName, sscName, sscInfo);
+  }
+
+  /**
+   * Log transaction with message using txwriter
+   */
+  logTx (message: string, txConfirmation: algosdk.ConfirmedTxInfo): void {
+    this.txWriter.push(message, txConfirmation);
+  }
+
+  async deployASA (
+    name: string,
+    flags: rtypes.ASADeploymentFlags,
+    asaParams?: Partial<rtypes.ASADef>
+  ): Promise<ASAInfo> {
     const asaDef = overrideASADef(this.accountsByName, this.loadedAsaDefs[name], asaParams);
 
     if (asaDef === undefined) {
-      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+      this.persistCP();
+
       throw new BuilderError(
         ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_DEF_NOT_FOUND, {
           asaName: name
@@ -275,13 +319,13 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
       asaInfo = await this.algoOp.deployASA(
         name, asaDef, flags, this.accountsByName, this.txWriter);
     } catch (error) {
-      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+      this.persistCP();
 
       console.log(error);
       throw error;
     }
 
-    this.cpData.registerASA(this.networkName, name, asaInfo);
+    this.registerASAInfo(name, asaInfo);
 
     try {
       await this.algoOp.optInToASAMultiple(
@@ -291,7 +335,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
         this.accountsByName,
         asaInfo.assetIndex);
     } catch (error) {
-      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+      this.persistCP();
 
       console.log(error);
       throw error;
@@ -342,7 +386,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
         lsig: lsig
       };
     } catch (error) {
-      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+      this.persistCP();
 
       console.log(error);
       throw error;
@@ -373,13 +417,13 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
       sscInfo = await this.algoOp.deploySSC(
         approvalProgram, clearProgram, flags, payFlags, this.txWriter, scTmplParams);
     } catch (error) {
-      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+      this.persistCP();
 
       console.log(error);
       throw error;
     }
 
-    this.cpData.registerSSC(this.networkName, name, sscInfo);
+    this.registerSSCInfo(name, sscInfo);
 
     return sscInfo;
   }
@@ -391,6 +435,36 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 export class DeployerRunMode extends DeployerBasicMode implements Deployer {
   get isDeployMode (): boolean {
     return false;
+  }
+
+  persistCP (): void {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "persistCP"
+    });
+  }
+
+  assertNoAsset (name: string): void {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "assertNoAsset"
+    });
+  }
+
+  registerASAInfo (name: string, asaInfo: ASAInfo): void {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "registerASAInfo"
+    });
+  }
+
+  registerSSCInfo (name: string, sscInfo: SSCInfo): void {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "registerSSCInfo"
+    });
+  }
+
+  logTx (message: string, txConfirmation: algosdk.ConfirmedTxInfo): void {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "logTx"
+    });
   }
 
   addCheckpointKV (_key: string, _value: string): void {

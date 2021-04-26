@@ -421,6 +421,18 @@ export interface Deployer {
    * @name  ASA name - name of ASA in the /assets/asa.yaml file */
   loadASADef: (asaName: string) => rtypes.ASADef | undefined
 
+  assertNoAsset: (name: string) => void
+
+  getASADef: (name: string, asaParams?: Partial<rtypes.ASADef>) => rtypes.ASADef
+
+  persistCP: () => void
+
+  registerASAInfo: (name: string, asaInfo: ASAInfo) => void
+
+  registerSSCInfo: (name: string, sscInfo: SSCInfo) => void
+
+  logTx: (message: string, txConfirmation: algosdk.ConfirmedTxInfo) => void
+
   /**
    * Funds logic signature account (Contract Account).
    * @name  Stateless Smart Contract filename (must be present in assets folder)
