@@ -92,16 +92,20 @@ describe("ASC - CloseOut from Application and Clear State", function () {
   it("should not delete application on CloseOut call if logic is rejected", function () {
     // create app
     const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram);
-    closeOutParams.appId = appId;
     runtime.optInToApp(john.address, appId, {}, {}); // opt-in to app (set new local state)
     syncAccount();
 
-    // sending txn sender other than creator (john), so txn should be rejected
-    closeOutParams.fromAccount = alice.account;
+    const invalidParams: SSCCallsParam = {
+      type: TransactionType.ClearSSC,
+      sign: SignType.SecretKey,
+      fromAccount: alice.account, // sending txn sender other than creator (john), so txn should be rejected
+      appId: appId,
+      payFlags: {}
+    };
 
     expectRuntimeError(
-      () => runtime.executeTx(closeOutParams),
-      RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
+      () => runtime.executeTx(invalidParams),
+      RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND
     );
 
     // verify app is not deleted from account's local state (as tx is rejected)

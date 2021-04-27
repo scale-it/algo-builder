@@ -62,8 +62,14 @@ describe("Algorand Smart Contracts - Delete Application", function () {
   it("should not delete application if logic is rejected", function () {
     // create app
     const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram);
-    deleteParams.appId = appId;
-    deleteParams.fromAccount = alice.account;
+    const deleteParams: SSCCallsParam = {
+      type: TransactionType.DeleteSSC,
+      sign: SignType.SecretKey,
+      fromAccount: alice.account,
+      appId: appId,
+      payFlags: { totalFee: 1000 },
+      appArgs: []
+    };
 
     expectRuntimeError(
       () => runtime.executeTx(deleteParams),
