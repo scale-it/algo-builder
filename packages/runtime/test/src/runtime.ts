@@ -54,7 +54,6 @@ describe("Logic Signature Transaction in Runtime", function () {
       fromAccountAddr: alice.account.addr,
       lsig: lsig
     };
-    // txnParam.fromAccount = alice.account;
 
     // execute transaction (logic signature validation failed)
     expectRuntimeError(

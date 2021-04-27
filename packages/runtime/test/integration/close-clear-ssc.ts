@@ -96,7 +96,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
     syncAccount();
 
     const invalidParams: SSCCallsParam = {
-      type: TransactionType.ClearSSC,
+      type: TransactionType.CloseSSC,
       sign: SignType.SecretKey,
       fromAccount: alice.account, // sending txn sender other than creator (john), so txn should be rejected
       appId: appId,
@@ -105,7 +105,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 
     expectRuntimeError(
       () => runtime.executeTx(invalidParams),
-      RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND
+      RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 
     // verify app is not deleted from account's local state (as tx is rejected)
