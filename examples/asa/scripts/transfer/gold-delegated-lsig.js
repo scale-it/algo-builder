@@ -18,7 +18,7 @@ async function run (runtimeEnv, deployer) {
   let txnParam = {
     type: types.TransactionType.TransferAsset,
     sign: types.SignType.LogicSignature,
-    fromAccount: goldOwner,
+    fromAccountAddr: goldOwner.addr,
     toAccountAddr: john.addr,
     amount: 500,
     assetID: assetID,
@@ -45,7 +45,7 @@ async function run (runtimeEnv, deployer) {
   txnParam = {
     type: types.TransactionType.TransferAlgo,
     sign: types.SignType.LogicSignature,
-    fromAccount: goldOwner,
+    fromAccountAddr: goldOwner.addr,
     toAccountAddr: bob.addr,
     amountMicroAlgos: 58,
     lsig: logicSignature,

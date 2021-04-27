@@ -40,7 +40,7 @@ async function run (runtimeEnv, deployer) {
     {
       type: types.TransactionType.RevokeAsset,
       sign: types.SignType.LogicSignature,
-      fromAccount: { addr: escrowAddress },
+      fromAccountAddr: escrowAddress,
       recipient: bob.addr,
       assetID: assetInfo.assetIndex,
       revocationTarget: creator.addr,

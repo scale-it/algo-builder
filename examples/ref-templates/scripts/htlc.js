@@ -26,7 +26,7 @@ async function run (runtimeEnv, deployer) {
   let contract = await deployer.loadLogic('htlc.py', [stringToBytes(wrongSecret)]);
   let contractAddress = contract.address();
 
-  txnParams.fromAccount = { addr: contractAddress };
+  txnParams.fromAccountAddr = contractAddress;
   txnParams.sign = types.SignType.LogicSignature;
   txnParams.toAccountAddr = globalZeroAddress;
   txnParams.amountMicroAlgos = 0;

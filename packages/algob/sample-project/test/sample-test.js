@@ -37,7 +37,7 @@ describe('Sample Test', function () {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.LogicSignature,
       lsig: lsig,
-      fromAccount: master.account,
+      fromAccountAddr: master.address,
       toAccountAddr: fundReceiver.address,
       amountMicroAlgos: amount,
       payFlags: { totalFee: validTxFee }
@@ -57,7 +57,7 @@ describe('Sample Test', function () {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.LogicSignature,
         lsig: lsig,
-        fromAccount: master.account,
+        fromAccountAddr: master.address,
         toAccountAddr: fundReceiver.address,
         amountMicroAlgos: amount,
         payFlags: { totalFee: invalidTxFee }
