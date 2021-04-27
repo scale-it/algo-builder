@@ -1,5 +1,5 @@
 import { encodeNote, mkTransaction, types as rtypes } from "@algo-builder/runtime";
-import { TransactionType } from "@algo-builder/runtime/build/types";
+import { AssetModFields, TransactionType, TxField } from "@algo-builder/runtime/build/types";
 import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
 import { Deployer } from "../types";
@@ -150,6 +150,7 @@ async function sendAndWait (
  * @param index index of current execParam
  * @param txIdxMap Map for index to name
  */
+/* eslint-disable sonarjs/cognitive-complexity */
 async function mkTx (
   deployer: Deployer,
   txn: rtypes.ExecParams,
@@ -178,17 +179,18 @@ async function mkTx (
       // fetch asset mutable properties from network and set them (if they are not passed)
       // before modifying asset
       const assetInfo = await deployer.getAssetByID(txn.assetID);
-      txn.fields.manager =
-        txn.fields.manager !== "" ? txn.fields.manager ?? assetInfo.params.manager : undefined;
+      if (txn.fields.manager === "") txn.fields.manager = undefined;
+      else txn.fields.manager = txn.fields.manager ?? assetInfo.params.manager;
 
-      txn.fields.freeze =
-        txn.fields.freeze !== "" ? txn.fields.freeze ?? assetInfo.params.freeze : undefined;
+      if (txn.fields.freeze === "") txn.fields.freeze = undefined;
+      else txn.fields.freeze = txn.fields.freeze ?? assetInfo.params.freeze;
 
-      txn.fields.clawback =
-        txn.fields.clawback !== "" ? txn.fields.clawback ?? assetInfo.params.clawback : undefined;
+      if (txn.fields.clawback === "") txn.fields.clawback = undefined;
+      else txn.fields.clawback = txn.fields.clawback ?? assetInfo.params.clawback;
 
-      txn.fields.reserve =
-        txn.fields.reserve !== "" ? txn.fields.reserve ?? assetInfo.params.reserve : undefined;
+      if (txn.fields.reserve === "") txn.fields.reserve = undefined;
+      else txn.fields.reserve = txn.fields.reserve ?? assetInfo.params.reserve;
+
       break;
     }
   }
