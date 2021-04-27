@@ -120,9 +120,6 @@ function signTransaction (txn: Transaction, execParams: rtypes.ExecParams): Uint
     }
     case rtypes.SignType.LogicSignature: {
       const logicsig = execParams.lsig;
-      if (logicsig === undefined) {
-        throw new Error("logic signature for this transaction was not passed or - is not defined");
-      }
       return algosdk.signLogicSigTransactionObject(txn, logicsig).blob;
     }
     default: {
