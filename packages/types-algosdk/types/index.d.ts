@@ -25,7 +25,7 @@ declare module 'algosdk' {
     accountInformation(address: string): Action<AccountState>;
     setIntEncoding(method: string): void
     getIntEncoding(): string;
-    getAssetByID(assetIndex: number): Action<AssetInfo>;
+    getAssetByID(assetIndex: number | bigint): Action<AssetInfo>;
   }
 
   export const OnApplicationComplete: {
@@ -616,7 +616,7 @@ declare module 'algosdk' {
   }
 
   export interface AssetInfo {
-    index: number;
+    index: number | bigint;
     params: AssetDef;
   }
 

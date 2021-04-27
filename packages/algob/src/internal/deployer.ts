@@ -101,7 +101,7 @@ class DeployerBasicMode {
    * @param assetIndex asset index
    * @returns asset info from network
    */
-  async getAssetByID (assetIndex: number): Promise<algosdk.AssetInfo> {
+  async getAssetByID (assetIndex: number | bigint): Promise<algosdk.AssetInfo> {
     return await this.algoOp.getAssetByID(assetIndex);
   }
 

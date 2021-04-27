@@ -495,7 +495,7 @@ export interface Deployer {
 
   /**
    * Queries blockchain using algodv2 for asset information by index  */
-  getAssetByID: (assetIndex: number) => Promise<algosdk.AssetInfo>
+  getAssetByID: (assetIndex: number | bigint) => Promise<algosdk.AssetInfo>
 
   /**
    * Creates an opt-in transaction for given ASA name, which must be defined in
