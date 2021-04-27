@@ -8,33 +8,6 @@ import { loadSignedTxnFromFile } from "./files";
 import { registerCheckpoints } from "./script-checkpoints";
 
 /**
- * Parses execution params if transaction type is modify asset i.e fetch asset
- * mutable properties from network and set them (if they are not passed).
- * @param deployer algob deployer
- * @param execParams transaction parameter passed by user
- */
-async function _parseExecParams (
-  deployer: Deployer,
-  execParams: rtypes.ExecParams): Promise<rtypes.ExecParams> {
-  if (execParams.type === rtypes.TransactionType.ModifyAsset) {
-    const assetInfo = await deployer.getAssetByID(execParams.assetID);
-
-    execParams.fields.manager =
-      execParams.fields.manager !== "" ? execParams.fields.manager ?? assetInfo.params.manager : undefined;
-
-    execParams.fields.freeze =
-      execParams.fields.freeze !== "" ? execParams.fields.freeze ?? assetInfo.params.freeze : undefined;
-
-    execParams.fields.clawback =
-      execParams.fields.clawback !== "" ? execParams.fields.clawback ?? assetInfo.params.clawback : undefined;
-
-    execParams.fields.reserve =
-      execParams.fields.reserve !== "" ? execParams.fields.reserve ?? assetInfo.params.reserve : undefined;
-  }
-  return execParams;
-}
-
-/**
  * Returns blockchain transaction suggested parameters
  * @param algocl an Algorand client, instance of Algodv2, used to communicate with a blockchain node.
  */
@@ -171,7 +144,7 @@ async function sendAndWait (
 }
 
 /**
- * Make transaction parameters and update ASA and SSC params
+ * Make transaction parameters and update deployASA, deploySSC & ModifyAsset params
  * @param deployer Deployer object
  * @param txn Execution parameters
  * @param index index of current execParam
@@ -201,7 +174,25 @@ async function mkTx (
       txIdxMap.set(index, [name, { total: 1, decimals: 1, unitName: "MOCK" }]);
       break;
     }
+    case TransactionType.ModifyAsset: {
+      // fetch asset mutable properties from network and set them (if they are not passed)
+      // before modifying asset
+      const assetInfo = await deployer.getAssetByID(txn.assetID);
+      txn.fields.manager =
+        txn.fields.manager !== "" ? txn.fields.manager ?? assetInfo.params.manager : undefined;
+
+      txn.fields.freeze =
+        txn.fields.freeze !== "" ? txn.fields.freeze ?? assetInfo.params.freeze : undefined;
+
+      txn.fields.clawback =
+        txn.fields.clawback !== "" ? txn.fields.clawback ?? assetInfo.params.clawback : undefined;
+
+      txn.fields.reserve =
+        txn.fields.reserve !== "" ? txn.fields.reserve ?? assetInfo.params.reserve : undefined;
+      break;
+    }
   }
+
   const suggestedParams = await getSuggestedParams(deployer.algodClient);
   return mkTransaction(txn,
     await mkTxParams(deployer.algodClient, txn.payFlags, Object.assign({}, suggestedParams)));
