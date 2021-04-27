@@ -21,6 +21,10 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     throw new Error("Not implemented");
   }
 
+  getAssetByID (assetIndex: number | bigint): Promise<import("algosdk").AssetInfo> {
+    throw new Error("Not implemented");
+  }
+
   waitForConfirmation (txId: string): Promise<import("algosdk").ConfirmedTxInfo> {
     throw new Error("Not implemented");
   }

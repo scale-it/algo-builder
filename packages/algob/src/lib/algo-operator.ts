@@ -44,6 +44,7 @@ export interface AlgoOperator {
     txWriter: txWriter,
     scTmplParams?: SCParams) => Promise<SSCInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
+  getAssetByID: (assetIndex: number | bigint) => Promise<algosdk.AssetInfo>
   optInAcountToASA: (
     asaName: string, assetIndex: number, account: rtypes.Account, params: rtypes.TxParams
   ) => Promise<void>
@@ -83,6 +84,12 @@ export class AlgoOperatorImpl implements AlgoOperator {
       await this.algodClient.statusAfterBlock(lastround).do();
     }
   };
+
+  /**
+   * Queries blockchain using algodClient for asset information by index */
+  async getAssetByID (assetIndex: number | bigint): Promise<algosdk.AssetInfo> {
+    return await this.algodClient.getAssetByID(assetIndex).do();
+  }
 
   getTxFee (params: algosdk.SuggestedParams, txSize: number): number {
     if (params.flatFee) {

@@ -101,6 +101,15 @@ class DeployerBasicMode {
     return await this.algoOp.waitForConfirmation(txId);
   }
 
+  /**
+   * Queries blockchain using algodv2 for asset information by index
+   * @param assetIndex asset index
+   * @returns asset info from network
+   */
+  async getAssetByID (assetIndex: number | bigint): Promise<algosdk.AssetInfo> {
+    return await this.algoOp.getAssetByID(assetIndex);
+  }
+
   log (msg: string, obj: any): void {
     this.txWriter.push(msg, obj);
   }

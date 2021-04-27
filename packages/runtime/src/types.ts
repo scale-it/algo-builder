@@ -361,8 +361,8 @@ export type ASADefs = z.infer<typeof ASADefsSchema>;
 // reserve, freeze and reserve accounts can be changed.
 // All other parameters are locked for the life of the asset.
 export interface AssetModFields {
-  manager: string
-  reserve: string
-  freeze: string
-  clawback: string
+  manager?: string
+  reserve?: string
+  freeze?: string
+  clawback?: string
 }

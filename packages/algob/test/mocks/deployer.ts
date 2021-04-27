@@ -117,6 +117,10 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   };
 
+  getAssetByID (assetIndex: number | bigint): Promise<algosdk.AssetInfo> {
+    throw new Error("Not implemented");
+  }
+
   waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
     throw new Error("Not implemented");
   }

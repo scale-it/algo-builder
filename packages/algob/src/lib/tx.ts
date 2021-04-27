@@ -1,5 +1,5 @@
 import { encodeNote, mkTransaction, types as rtypes } from "@algo-builder/runtime";
-import { TransactionType } from "@algo-builder/runtime/build/types";
+import { AssetModFields, TransactionType, TxField } from "@algo-builder/runtime/build/types";
 import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
 import { Deployer } from "../types";
@@ -144,12 +144,13 @@ async function sendAndWait (
 }
 
 /**
- * Make transaction parameters and update ASA and SSC params
+ * Make transaction parameters and update deployASA, deploySSC & ModifyAsset params
  * @param deployer Deployer object
  * @param txn Execution parameters
  * @param index index of current execParam
  * @param txIdxMap Map for index to name
  */
+/* eslint-disable sonarjs/cognitive-complexity */
 async function mkTx (
   deployer: Deployer,
   txn: rtypes.ExecParams,
@@ -184,7 +185,26 @@ async function mkTx (
       txIdxMap.set(index, [name, { total: 1, decimals: 1, unitName: "MOCK" }]);
       break;
     }
+    case TransactionType.ModifyAsset: {
+      // fetch asset mutable properties from network and set them (if they are not passed)
+      // before modifying asset
+      const assetInfo = await deployer.getAssetByID(txn.assetID);
+      if (txn.fields.manager === "") txn.fields.manager = undefined;
+      else txn.fields.manager = txn.fields.manager ?? assetInfo.params.manager;
+
+      if (txn.fields.freeze === "") txn.fields.freeze = undefined;
+      else txn.fields.freeze = txn.fields.freeze ?? assetInfo.params.freeze;
+
+      if (txn.fields.clawback === "") txn.fields.clawback = undefined;
+      else txn.fields.clawback = txn.fields.clawback ?? assetInfo.params.clawback;
+
+      if (txn.fields.reserve === "") txn.fields.reserve = undefined;
+      else txn.fields.reserve = txn.fields.reserve ?? assetInfo.params.reserve;
+
+      break;
+    }
   }
+
   const suggestedParams = await getSuggestedParams(deployer.algodClient);
   return mkTransaction(txn,
     await mkTxParams(deployer.algodClient, txn.payFlags, Object.assign({}, suggestedParams)));

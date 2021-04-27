@@ -25,6 +25,7 @@ declare module 'algosdk' {
     accountInformation(address: string): Action<AccountState>;
     setIntEncoding(method: string): void
     getIntEncoding(): string;
+    getAssetByID(assetIndex: number | bigint): Action<AssetInfo>;
   }
 
   export const OnApplicationComplete: {
@@ -596,10 +597,10 @@ declare module 'algosdk' {
     name: string;
     url: string;
     'metadata-hash': string;
-    manager: string;
-    reserve: string;
-    freeze: string;
-    clawback: string;
+    manager: string | undefined;
+    reserve: string | undefined;
+    freeze: string | undefined;
+    clawback: string | undefined;
   }
 
   export interface AssetHolding {
@@ -614,8 +615,8 @@ declare module 'algosdk' {
     params: SSCAttributes;
   }
 
-  export interface CreatedAsset {
-    index: number;
+  export interface AssetInfo {
+    index: number | bigint;
     params: AssetDef;
   }
 
@@ -638,7 +639,7 @@ declare module 'algosdk' {
     'apps-local-state': AppLocalState[];
     'apps-total-schema': SSCSchemaConfig;
     'created-apps': CreatedApp[];
-    'created-assets': CreatedAsset[];
+    'created-assets': AssetInfo[];
   }
 
   export interface TxnEncodedObj {
