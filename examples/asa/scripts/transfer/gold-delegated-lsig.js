@@ -36,7 +36,7 @@ async function run (runtimeEnv, deployer) {
   // Transaction FAIL - rejected by lsig because sender must be the delegator i.e
   // account which signed the lsig (goldOwner in this case)
   txnParam.amount = 100;
-  txnParam.fromAccount = bob;
+  txnParam.fromAccountAddr = bob.addr;
   await executeTransaction(deployer, txnParam);
 
   // Transaction for ALGO - Contract : '3-gold-delegated-asc.teal'  (Delegated Approval Mode)

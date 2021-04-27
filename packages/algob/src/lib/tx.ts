@@ -212,9 +212,8 @@ export async function executeTransaction (
     await registerCheckpoints(deployer, txns, txIdxMap);
     return confirmedTx;
   } catch (error) {
-    deployer.persistCP();
+    if (deployer.isDeployMode) { deployer.persistCP(); }
 
-    console.log(error);
     throw error;
   }
 }
