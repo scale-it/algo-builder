@@ -242,7 +242,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
       {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.LogicSignature,
-        fromAccount: escrow.account,
+        fromAccountAddr: escrow.account.addr,
         toAccountAddr: fundReceiver.address,
         amountMicroAlgos: 0,
         lsig: escrowLsig, // initialized in setUpApp
@@ -297,7 +297,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
       {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.LogicSignature,
-        fromAccount: escrow.account,
+        fromAccountAddr: escrow.account.addr,
         toAccountAddr: donor.address,
         amountMicroAlgos: 300000,
         lsig: escrowLsig,
@@ -387,7 +387,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
       {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.LogicSignature,
-        fromAccount: escrow.account,
+        fromAccountAddr: escrow.account.addr,
         toAccountAddr: donor.address,
         amountMicroAlgos: 0,
         lsig: escrowLsig,

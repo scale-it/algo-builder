@@ -201,7 +201,7 @@ describe('Test for transferring asset using custom logic', function () {
       {
         type: types.TransactionType.RevokeAsset,
         sign: types.SignType.LogicSignature,
-        fromAccount: { addr: escrowAddress },
+        fromAccountAddr: escrowAddress,
         recipient: bob.address,
         assetID: assetId,
         revocationTarget: alice.address,
@@ -304,7 +304,7 @@ describe('Test for transferring asset using custom logic', function () {
       {
         type: types.TransactionType.RevokeAsset,
         sign: types.SignType.LogicSignature,
-        fromAccount: { addr: escrowAddress },
+        fromAccountAddr: escrowAddress,
         recipient: bob.address,
         assetID: assetId,
         revocationTarget: alice.address,
