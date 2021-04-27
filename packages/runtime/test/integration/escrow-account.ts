@@ -22,9 +22,10 @@ describe("Algorand Stateless Smart Contracts (Contract Account Mode) - Escrow Ac
   // set up transaction paramenters
   const txnParams: ExecParams = {
     type: TransactionType.TransferAlgo, // payment
-    sign: SignType.SecretKey,
-    fromAccount: admin.account,
+    sign: SignType.LogicSignature,
+    fromAccountAddr: admin.account.addr,
     toAccountAddr: john.address,
+    lsig: {} as LogicSig,
     amountMicroAlgos: initialEscrowHolding,
     payFlags: { totalFee: 1000 }
   };
@@ -40,12 +41,15 @@ describe("Algorand Stateless Smart Contracts (Contract Account Mode) - Escrow Ac
     // fund escrow account
     txnParams.toAccountAddr = escrow.address;
     // execute transaction
-    runtime.executeTx(txnParams);
+    runtime.executeTx({
+      ...txnParams,
+      sign: SignType.SecretKey,
+      fromAccount: admin.account
+    });
     escrow = runtime.getAccount(escrow.address);
 
     // update transaction parameters
-    txnParams.sign = SignType.LogicSignature;
-    txnParams.fromAccount = escrow.account;
+    txnParams.fromAccountAddr = escrow.account.addr;
     txnParams.toAccountAddr = john.address;
     txnParams.amountMicroAlgos = 100n;
     txnParams.lsig = lsig;

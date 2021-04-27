@@ -196,7 +196,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
       {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.LogicSignature,
-        fromAccount: escrow.account,
+        fromAccountAddr: escrow.account.addr,
         toAccountAddr: donor.address,
         amountMicroAlgos: 300000,
         lsig: lsig,
@@ -226,7 +226,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
       {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.LogicSignature,
-        fromAccount: escrow.account,
+        fromAccountAddr: escrow.account.addr,
         toAccountAddr: donor.address,
         amountMicroAlgos: 300000,
         lsig: lsig,
@@ -255,7 +255,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
       {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.LogicSignature,
-        fromAccount: escrow.account,
+        fromAccountAddr: escrow.account.addr,
         toAccountAddr: creator.address,
         amountMicroAlgos: 0,
         lsig: lsig,
@@ -304,7 +304,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
       {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.LogicSignature,
-        fromAccount: escrow.account,
+        fromAccountAddr: escrow.account.addr,
         toAccountAddr: creator.address,
         amountMicroAlgos: 0,
         lsig: wrongLsig,
@@ -344,7 +344,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
       {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.LogicSignature,
-        fromAccount: escrow.account,
+        fromAccountAddr: escrow.account.addr,
         toAccountAddr: creator.address,
         amountMicroAlgos: 0,
         payFlags: { totalFee: 1000, closeRemainderTo: creator.address }
@@ -404,7 +404,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
       {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.LogicSignature,
-        fromAccount: escrow.account,
+        fromAccountAddr: escrow.account.addr,
         toAccountAddr: creator.address,
         amountMicroAlgos: 0,
         lsig: lsig,
@@ -437,7 +437,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
       {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.LogicSignature,
-        fromAccount: escrow.account,
+        fromAccountAddr: escrow.account.addr,
         toAccountAddr: creator.address,
         amountMicroAlgos: 0,
         lsig: lsig,

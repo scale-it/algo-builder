@@ -11,8 +11,3 @@ pyyaml = "*"
 
 [requires]
 python_version = "3.8"
-
-[packages.scratch_var]
-git = "https://github.com/algorand/pyteal.git"
-editable = true
-ref = "master"

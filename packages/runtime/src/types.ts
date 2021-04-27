@@ -245,23 +245,33 @@ export enum TransactionType {
   UpdateSSC
 }
 
-export interface Sign {
-  sign: SignType
-  lsig?: LogicSig
-}
-
-export interface BasicParams extends Sign {
+interface SignWithSk {
+  sign: SignType.SecretKey
   fromAccount: AccountSDK
-  payFlags: TxParams
+  // if passed then it will be used as the from account address, but tx will be signed
+  // by fromAcount's sk. This is used if an account address is rekeyed to another account.
+  fromAccountAddr?: AccountAddress
 }
 
-export interface DeployASAParam extends BasicParams {
+interface SignWithLsig {
+  sign: SignType.LogicSignature
+  fromAccountAddr: AccountAddress
+  lsig: LogicSig
+}
+
+export type Sign = SignWithSk | SignWithLsig;
+
+export type BasicParams = Sign & {
+  payFlags: TxParams
+};
+
+export type DeployASAParam = BasicParams & {
   type: TransactionType.DeployASA
   asaName: string
   asaDef?: Partial<ASADef>
-}
+};
 
-export interface DeploySSCParam extends BasicParams, SSCOptionalFlags {
+export type DeploySSCParam = BasicParams & SSCOptionalFlags & {
   type: TransactionType.DeploySSC
   approvalProgram: string
   clearProgram: string
@@ -271,71 +281,71 @@ export interface DeploySSCParam extends BasicParams, SSCOptionalFlags {
   globalBytes: number
   approvalProg?: Uint8Array
   clearProg?: Uint8Array
-}
+};
 
-export interface UpdateSSCParam extends BasicParams, SSCOptionalFlags {
+export type UpdateSSCParam = BasicParams & SSCOptionalFlags & {
   type: TransactionType.UpdateSSC
   appID: number
   newApprovalProgram: string
   newClearProgram: string
   approvalProg?: Uint8Array
   clearProg?: Uint8Array
-}
+};
 
-export interface OptInSSCParam extends BasicParams, SSCOptionalFlags {
+export type OptInSSCParam = BasicParams & SSCOptionalFlags & {
   type: TransactionType.OptInSSC
   appID: number
-}
+};
 
-export interface OptInASAParam extends BasicParams {
+export type OptInASAParam = BasicParams & {
   type: TransactionType.OptInASA
   assetID: number
-}
+};
 
-export interface ModifyAssetParam extends BasicParams {
+export type ModifyAssetParam = BasicParams & {
   type: TransactionType.ModifyAsset
   assetID: number
   fields: AssetModFields
-}
+};
 
-export interface FreezeAssetParam extends BasicParams {
+export type FreezeAssetParam = BasicParams & {
   type: TransactionType.FreezeAsset
   assetID: number
   freezeTarget: AccountAddress
   freezeState: boolean
-}
+};
 
-export interface RevokeAssetParam extends BasicParams {
+export type RevokeAssetParam = BasicParams & {
   type: TransactionType.RevokeAsset
   recipient: AccountAddress // Revoked assets are sent to this address
   assetID: number
   revocationTarget: AccountAddress // Revocation target is the account from which the clawback revokes asset.
   amount: number | bigint
-}
+};
 
-export interface DestroyAssetParam extends BasicParams {
+export type DestroyAssetParam = BasicParams & {
   type: TransactionType.DestroyAsset
   assetID: number
-}
+};
 
-export interface AlgoTransferParam extends BasicParams {
+export type AlgoTransferParam = BasicParams & {
   type: TransactionType.TransferAlgo
   toAccountAddr: AccountAddress
   amountMicroAlgos: number | bigint
-}
+};
 
-export interface AssetTransferParam extends BasicParams {
+export type AssetTransferParam = BasicParams & {
   type: TransactionType.TransferAsset
   toAccountAddr: AccountAddress
   amount: number | bigint
   assetID: number
-}
+};
 
-export interface SSCCallsParam extends SSCOptionalFlags, BasicParams {
+export type SSCCallsParam = BasicParams & SSCOptionalFlags & {
   type: TransactionType.CallNoOpSSC | TransactionType.ClearSSC |
   TransactionType.CloseSSC | TransactionType.DeleteSSC
   appId: number
-}
+};
 
 export interface AnyMap {
   [key: string]: any // eslint-disable-line @typescript-eslint/no-explicit-any

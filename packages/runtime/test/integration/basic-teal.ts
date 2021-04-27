@@ -3,6 +3,7 @@ import { assert } from "chai";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
+import { LogicSig } from "../../src/logicsig";
 import { ExecParams, SignType, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
@@ -21,9 +22,10 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
   const txnParams: ExecParams = {
     type: TransactionType.TransferAlgo, // payment
     sign: SignType.LogicSignature,
-    fromAccount: john.account,
+    fromAccountAddr: john.account.addr,
     toAccountAddr: bob.address,
     amountMicroAlgos: 100n,
+    lsig: {} as LogicSig, // populated below
     payFlags: { totalFee: 1000 }
   };
 

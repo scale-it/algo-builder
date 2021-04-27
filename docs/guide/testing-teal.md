@@ -85,7 +85,7 @@ Let's try to execute a transaction where a user (say `john`) can withdraw funds 
   const txnParams: ExecParams = {
     type: TransactionType.TransferAlgo, // payment
     sign: SignType.LogicSignature;
-    fromAccount: escrow.account,
+    fromAccountAddr: escrow.address,
     toAccountAddr: john.address,
     amountMicroAlgos: 100,
     payFlags: { totalFee: 1000 },
@@ -141,7 +141,7 @@ Let's try to execute a transaction where a user (say `john`) will use delegated 
     const txnParams: ExecParams = {
       type: TransactionType.TransferAlgo, // payment
       sign: SignType.LogicSignature,
-      fromAccount: john.account,
+      fromAccountAddr: john.address,
       toAccountAddr: bob.address,
       amountMicroAlgos: 100,
       payFlags: { totalFee: 1000 }

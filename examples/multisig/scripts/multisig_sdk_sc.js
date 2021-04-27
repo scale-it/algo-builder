@@ -41,7 +41,7 @@ async function run (runtimeEnv, deployer) {
 
   await deployer.addCheckpointKV('User Checkpoint', 'Fund Multisignature Account');
 
-  txnParams.fromAccount = { addr: multsigaddr };
+  txnParams.fromAccountAddr = multsigaddr;
   txnParams.toAccountAddr = bob.addr;
   txnParams.sign = types.SignType.LogicSignature;
   txnParams.amountMicroAlgos = 58;

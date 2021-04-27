@@ -30,7 +30,7 @@ describe("Logic Signature Transaction in Runtime", function () {
     txnParam = {
       type: TransactionType.TransferAlgo,
       sign: SignType.LogicSignature,
-      fromAccount: john.account,
+      fromAccountAddr: john.account.addr,
       toAccountAddr: bob.account.addr,
       amountMicroAlgos: 1000n,
       lsig: lsig,
@@ -48,26 +48,35 @@ describe("Logic Signature Transaction in Runtime", function () {
   });
 
   it("should not verify signature because alice sent it", () => {
-    txnParam.fromAccount = alice.account;
+    const invalidParams: ExecParams = {
+      ...txnParam,
+      sign: SignType.LogicSignature,
+      fromAccountAddr: alice.account.addr,
+      lsig: lsig
+    };
 
     // execute transaction (logic signature validation failed)
     expectRuntimeError(
-      () => runtime.executeTx(txnParam),
+      () => runtime.executeTx(invalidParams),
       RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_VALIDATION_FAILED
     );
   });
 
   it("should verify signature but reject logic", async () => {
     const logicSig = runtime.getLogicSig(getProgram("reject.teal"), []);
-    txnParam.lsig = logicSig;
-    txnParam.fromAccount = john.account;
+    const txParams: ExecParams = {
+      ...txnParam,
+      sign: SignType.LogicSignature,
+      fromAccountAddr: john.account.addr,
+      lsig: logicSig
+    };
 
     logicSig.sign(john.account.sk);
     // execute transaction (rejected by logic)
     // - Signature successfully validated for john
     // - But teal file logic is rejected
     expectRuntimeError(
-      () => runtime.executeTx(txnParam),
+      () => runtime.executeTx(txParams),
       RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });
@@ -97,8 +106,12 @@ describe("Rounds Test", function () {
     john = new AccountStore(minBalance);
     bob = new AccountStore(minBalance);
     runtime = new Runtime([john, bob]);
-    txnParams.fromAccount = john.account;
-    txnParams.toAccountAddr = bob.address;
+    txnParams = {
+      ...txnParams,
+      sign: SignType.SecretKey,
+      fromAccount: john.account,
+      toAccountAddr: bob.address
+    };
   });
 
   function syncAccounts (): void {

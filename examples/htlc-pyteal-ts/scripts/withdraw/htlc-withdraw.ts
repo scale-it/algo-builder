@@ -23,7 +23,7 @@ async function run (
   const txnParams: rtypes.AlgoTransferParam = {
     type: rtypes.TransactionType.TransferAlgo,
     sign: rtypes.SignType.LogicSignature,
-    fromAccount: { addr: sender, sk: new Uint8Array(0) }, // we don't need secret key for logic signature account so added a dummy
+    fromAccountAddr: sender, // we don't need secret key for logic signature account so added a dummy
     toAccountAddr: alice.addr,
     amountMicroAlgos: 200,
     lsig: lsig,
@@ -36,7 +36,7 @@ async function run (
   sender = lsig.address();
 
   // Transaction Passes : as right secret value is used
-  txnParams.fromAccount = { addr: sender, sk: new Uint8Array(0) };
+  txnParams.fromAccountAddr = sender;
   txnParams.lsig = lsig;
   await executeTx(deployer, txnParams);
 }
