@@ -47,22 +47,23 @@ export function genAccounts (n: number): MnemonicAccount[] {
   return accounts;
 }
 
-async function writeToFile (content: string, force: boolean, filename: string): Promise<void> {
+export async function writeToFile (content: any, force: boolean, fileName: string): Promise<void> {
   await assertAllDirs();
   try {
-    await fsp.access(filename, _fs.constants.F_OK);
+    await fsp.access(fileName, _fs.constants.F_OK);
     if (!force) {
-      console.error("File", filename,
+      console.error("File", fileName,
         "already exists. Aborting. Use --force flag if you want to overwrite it");
       return;
     }
   } catch (e) {}
 
   try {
-    await fsp.writeFile(filename, content, 'utf8');
+    await fsp.writeFile(fileName, content, 'utf8');
+    console.log("Data written succesfully to %s", fileName);
   } catch (e) {
     const err = e as Error;
-    console.log("An error occured while writing to file:", filename);
+    console.log("An error occured while writing to file:", fileName);
     console.error(err.name, err.message);
   }
 }

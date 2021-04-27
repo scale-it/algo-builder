@@ -1,3 +1,4 @@
+import { types as rtypes } from "@algo-builder/runtime";
 import type { LogicSig } from "algosdk";
 import { assert } from "chai";
 import * as fs from "fs";
@@ -78,7 +79,8 @@ describe("Checkpoint", () => {
       creator: "123",
       txId: "",
       assetIndex: 0,
-      confirmedRound: 0
+      confirmedRound: 0,
+      assetDef: {} as rtypes.ASADef
     });
     netCheckpoint.ssc.set("SSC1", {
       creator: "536",
@@ -101,7 +103,8 @@ describe("Checkpoint", () => {
           creator: "123",
           txId: "",
           assetIndex: 0,
-          confirmedRound: 0
+          confirmedRound: 0,
+          assetDef: {} as rtypes.ASADef
         }]]),
         ssc: new Map([["SSC1", {
           creator: "536",
@@ -126,7 +129,8 @@ describe("Checkpoint", () => {
         creator: "creator",
         txId: "",
         assetIndex: 0,
-        confirmedRound: 0
+        confirmedRound: 0,
+        assetDef: {} as rtypes.ASADef
       });
     checkpoints = appendToCheckpoint(checkpoints, "network12345", netCheckpoint2);
     assert.deepEqual(checkpoints, {
@@ -140,13 +144,15 @@ describe("Checkpoint", () => {
             creator: "123",
             txId: "",
             assetIndex: 0,
-            confirmedRound: 0
+            confirmedRound: 0,
+            assetDef: {} as rtypes.ASADef
           }],
           ["my asa 2", {
             creator: "creator",
             txId: "",
             assetIndex: 0,
-            confirmedRound: 0
+            confirmedRound: 0,
+            assetDef: {} as rtypes.ASADef
           }]]),
         ssc: new Map([["SSC1", {
           creator: "536",
@@ -173,7 +179,8 @@ describe("Checkpoint", () => {
       creator: "123",
       txId: "",
       assetIndex: 0,
-      confirmedRound: 0
+      confirmedRound: 0,
+      assetDef: {} as rtypes.ASADef
     });
     appendToCheckpoint(checkpoints, "network12345", cp1);
     const cp2: Checkpoint = cleanupMutableData(new CheckpointImpl(), 53521);
@@ -181,7 +188,8 @@ describe("Checkpoint", () => {
       creator: "36506",
       txId: "",
       assetIndex: 0,
-      confirmedRound: 0
+      confirmedRound: 0,
+      assetDef: {} as rtypes.ASADef
     });
     expectBuilderError(
       () => appendToCheckpoint(checkpoints, "network12345", cp2),
@@ -241,7 +249,8 @@ describe("Checkpoint", () => {
         creator: "ASA deployer address",
         txId: "",
         assetIndex: 0,
-        confirmedRound: 0
+        confirmedRound: 0,
+        assetDef: {} as rtypes.ASADef
       });
     cp.ssc.set(
       "My SSC",
@@ -258,7 +267,8 @@ describe("Checkpoint", () => {
         creator: "ASA deployer address",
         txId: "",
         assetIndex: 0,
-        confirmedRound: 0
+        confirmedRound: 0,
+        assetDef: {} as rtypes.ASADef
       }]]),
       ssc: new Map([["My SSC", {
         creator: "SSC deployer address",
@@ -306,7 +316,8 @@ describe("CheckpointRepoImpl", () => {
           creator: "ASA creator 123",
           txId: "",
           assetIndex: 0,
-          confirmedRound: 0
+          confirmedRound: 0,
+          assetDef: {} as rtypes.ASADef
         }]]),
         ssc: new Map<string, SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
@@ -320,7 +331,8 @@ describe("CheckpointRepoImpl", () => {
           creator: "ASA creator 123",
           txId: "",
           assetIndex: 0,
-          confirmedRound: 0
+          confirmedRound: 0,
+          assetDef: {} as rtypes.ASADef
         }]]),
         ssc: new Map<string, SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
@@ -384,7 +396,8 @@ describe("CheckpointRepoImpl", () => {
         creator: "ASA creator 123",
         txId: "",
         assetIndex: 0,
-        confirmedRound: 0
+        confirmedRound: 0,
+        assetDef: {} as rtypes.ASADef
       })
       .putMetadata("network1", "metadata key", "metadata value");
     cpData.precedingCP.network1.timestamp = 123;
@@ -396,7 +409,8 @@ describe("CheckpointRepoImpl", () => {
           creator: "ASA creator 123",
           txId: "",
           assetIndex: 0,
-          confirmedRound: 0
+          confirmedRound: 0,
+          assetDef: {} as rtypes.ASADef
         }]]),
         ssc: new Map<string, SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
@@ -497,7 +511,8 @@ describe("CheckpointRepoImpl", () => {
           creator: "asa creator",
           txId: "",
           assetIndex: 0,
-          confirmedRound: 0
+          confirmedRound: 0,
+          assetDef: {} as rtypes.ASADef
         }]]),
         ssc: new Map<string, SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
@@ -517,7 +532,8 @@ describe("CheckpointRepoImpl", () => {
           creator: "asa creator",
           txId: "",
           assetIndex: 0,
-          confirmedRound: 0
+          confirmedRound: 0,
+          assetDef: {} as rtypes.ASADef
         }]]),
         ssc: new Map<string, SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
@@ -531,7 +547,8 @@ describe("CheckpointRepoImpl", () => {
           creator: "asa creator",
           txId: "",
           assetIndex: 0,
-          confirmedRound: 0
+          confirmedRound: 0,
+          assetDef: {} as rtypes.ASADef
         }
         ]]),
         ssc: new Map<string, SSCInfo>(),
@@ -546,7 +563,8 @@ describe("CheckpointRepoImpl", () => {
           creator: "asa creator",
           txId: "",
           assetIndex: 0,
-          confirmedRound: 0
+          confirmedRound: 0,
+          assetDef: {} as rtypes.ASADef
         }]]),
         ssc: new Map<string, SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
@@ -672,7 +690,8 @@ describe("CheckpointRepoImpl", () => {
         creator: "ASA creator 123",
         txId: "",
         assetIndex: 0,
-        confirmedRound: 0
+        confirmedRound: 0,
+        assetDef: {} as rtypes.ASADef
       })
       .registerSSC("network1", "SSC name", {
         creator: "SSC creator 951",
@@ -702,7 +721,8 @@ describe("CheckpointRepoImpl", () => {
             creator: "ASA creator 123",
             txId: "",
             assetIndex: 0,
-            confirmedRound: 0
+            confirmedRound: 0,
+            assetDef: {} as rtypes.ASADef
           }
           ]]),
           ssc: new Map([["SSC name", {
@@ -738,7 +758,8 @@ describe("CheckpointRepoImpl", () => {
             creator: "ASA creator 123",
             txId: "",
             assetIndex: 0,
-            confirmedRound: 0
+            confirmedRound: 0,
+            assetDef: {} as rtypes.ASADef
           }]]),
           ssc: new Map([["SSC name", {
             creator: "SSC creator 951",
@@ -767,7 +788,8 @@ describe("CheckpointRepoImpl", () => {
             creator: "ASA creator 123",
             txId: "",
             assetIndex: 0,
-            confirmedRound: 0
+            confirmedRound: 0,
+            assetDef: {} as rtypes.ASADef
           }]]),
           ssc: new Map([["SSC name", {
             creator: "SSC creator 951",
@@ -802,7 +824,8 @@ describe("CheckpointRepoImpl", () => {
       creator: "ASA creator 123",
       txId: "",
       assetIndex: 0,
-      confirmedRound: 0
+      confirmedRound: 0,
+      assetDef: {} as rtypes.ASADef
     })
       .registerSSC("network1", "SSC name", {
         creator: "SSC creator 951",

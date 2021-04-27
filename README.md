@@ -21,7 +21,7 @@ To attract more web developers we plan to build a JavaScript DSL for TEAL with T
 
 ### Documentation
 
-User documentation is available in [/user-docs](user-docs/README.md) and [API docs](https://scale-it.github.io/algo-builder/).
+User documentation is available in [/docs/guide](docs/guide/README) and [API docs](https://scale-it.github.io/algo-builder/).
 
 The project specification is [published here](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
 
@@ -108,7 +108,7 @@ Otherwise you can use a system/user-wide `pyteal` installation:
         yarn add @algo-builder/algob
         yarn run algob init .
 
-    The `init` command expects a directory where to initialize the workspace and creates sample project files there. Refer to [/docs/README](docs/README.md) for more information.
+    The `init` command expects a directory where to initialize the workspace and creates sample project files there. Refer to [/docs/guide/README](docs/guide#project-initialization) for more information.
 
 1. Verify if it was installed correctly:
 

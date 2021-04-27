@@ -260,6 +260,80 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.payFlags.rekeyTo
       );
     }
+    case TransactionType.DeployASA: {
+      if (execParams.asaDef) {
+        // https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js#L104
+        return algosdk.makeAssetCreateTxnWithSuggestedParams(
+          execParams.fromAccount.addr,
+          note,
+          BigInt(execParams.asaDef.total),
+          execParams.asaDef.decimals,
+          execParams.asaDef.defaultFrozen,
+          execParams.asaDef.manager,
+          execParams.asaDef.reserve,
+          execParams.asaDef.freeze,
+          execParams.asaDef.clawback,
+          execParams.asaDef.unitName,
+          execParams.asaName,
+          execParams.asaDef.url,
+          execParams.asaDef.metadataHash,
+          suggestedParams
+        );
+      } else {
+        throw new RuntimeError(
+          RUNTIME_ERRORS.ASA.PARAM_PARSE_ERROR, {
+            reason: "ASA Definition not found",
+            filename: execParams.asaName
+          });
+      }
+    }
+    case TransactionType.DeploySSC: {
+      const onComplete = algosdk.OnApplicationComplete.NoOpOC;
+
+      return algosdk.makeApplicationCreateTxn(
+        execParams.fromAccount.addr,
+        suggestedParams,
+        onComplete,
+        execParams.approvalProg,
+        execParams.clearProg,
+        execParams.localInts,
+        execParams.localBytes,
+        execParams.globalInts,
+        execParams.globalBytes,
+        parseSSCAppArgs(execParams.appArgs),
+        execParams.accounts,
+        execParams.foreignApps,
+        execParams.foreignAssets,
+        note,
+        execParams.lease,
+        execParams.payFlags.rekeyTo
+      );
+    }
+    case TransactionType.OptInSSC: {
+      return algosdk.makeApplicationOptInTxn(
+        execParams.fromAccount.addr,
+        suggestedParams,
+        execParams.appID,
+        parseSSCAppArgs(execParams.appArgs),
+        execParams.accounts,
+        execParams.foreignApps,
+        execParams.foreignAssets,
+        note,
+        execParams.lease,
+        execParams.payFlags.rekeyTo);
+    }
+    case TransactionType.OptInASA: {
+      return algosdk.makeAssetTransferTxnWithSuggestedParams(
+        execParams.fromAccount.addr,
+        execParams.fromAccount.addr,
+        undefined,
+        undefined,
+        0,
+        note,
+        execParams.assetID,
+        suggestedParams
+      );
+    }
     default: {
       throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.TRANSACTION_TYPE_ERROR,
         { transaction: transactionType });

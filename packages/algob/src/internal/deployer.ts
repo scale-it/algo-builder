@@ -1,4 +1,4 @@
-import { types as rtypes } from "@algo-builder/runtime";
+import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
 import type { LogicSig, LogicSigArgs, MultiSig, MultisigMetadata } from "algosdk";
 import * as algosdk from "algosdk";
 
@@ -68,6 +68,14 @@ class DeployerBasicMode {
     return found;
   }
 
+  /**
+   * Returns asset definition for given name
+   * @param name Asset name
+   */
+  getASADef (name: string, asaParams?: Partial<rtypes.ASADef>): rtypes.ASADef {
+    return overrideASADef(this.accountsByName, this.loadedAsaDefs[name], asaParams);
+  }
+
   getCheckpointKV (key: string): string | undefined {
     return this.cpData.getMetadata(this.networkName, key);
   }
@@ -99,6 +107,17 @@ class DeployerBasicMode {
 
   log (msg: string, obj: any): void {
     this.txWriter.push(msg, obj);
+  }
+
+  /**
+   * Loads deployed Asset Definition from checkpoint.
+   * NOTE: This function returns "deployed" ASADef, as immutable properties
+   * of asaDef could be updated during tx execution (eg. update asset clawback)
+   * @param asaName asset name in asa.yaml
+   */
+  loadASADef (asaName: string): rtypes.ASADef | undefined {
+    const asaMap = this.cpData.precedingCP[this.networkName]?.asa ?? new Map();
+    return asaMap.get(asaName)?.assetDef;
   }
 
   /**
@@ -246,9 +265,13 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     this.cpData.putMetadata(this.networkName, key, value);
   }
 
-  private assertNoAsset (name: string): void {
+  /**
+   * Asserts if asset is not already present in checkpoint
+   * @param name Asset name
+   */
+  assertNoAsset (name: string): void {
     if (this.isDefined(name)) {
-      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+      this.persistCP();
       throw new BuilderError(
         ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT, {
           assetName: name
@@ -256,37 +279,72 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     }
   }
 
-  async deployASA (name: string, flags: rtypes.ASADeploymentFlags): Promise<ASAInfo> {
-    if (this.loadedAsaDefs[name] === undefined) {
-      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+  /**
+   * Persist checkpoint till current call.
+   */
+  persistCP (): void {
+    persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+  }
+
+  /**
+   * Register ASA Info in checkpoints
+   */
+  registerASAInfo (asaName: string, asaInfo: ASAInfo): void {
+    this.cpData.registerASA(this.networkName, asaName, asaInfo);
+  }
+
+  /**
+   * Register SSC Info in checkpoints
+   */
+  registerSSCInfo (sscName: string, sscInfo: SSCInfo): void {
+    this.cpData.registerSSC(this.networkName, sscName, sscInfo);
+  }
+
+  /**
+   * Log transaction with message using txwriter
+   */
+  logTx (message: string, txConfirmation: algosdk.ConfirmedTxInfo): void {
+    this.txWriter.push(message, txConfirmation);
+  }
+
+  async deployASA (
+    name: string,
+    flags: rtypes.ASADeploymentFlags,
+    asaParams?: Partial<rtypes.ASADef>
+  ): Promise<ASAInfo> {
+    const asaDef = overrideASADef(this.accountsByName, this.loadedAsaDefs[name], asaParams);
+
+    if (asaDef === undefined) {
+      this.persistCP();
+
       throw new BuilderError(
         ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_DEF_NOT_FOUND, {
           asaName: name
         });
     }
     this.assertNoAsset(name);
-    let asaInfo = {} as any;
+    let asaInfo = {} as ASAInfo;
     try {
       asaInfo = await this.algoOp.deployASA(
-        name, this.loadedAsaDefs[name], flags, this.accountsByName, this.txWriter);
+        name, asaDef, flags, this.accountsByName, this.txWriter);
     } catch (error) {
-      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+      this.persistCP();
 
       console.log(error);
       throw error;
     }
 
-    this.cpData.registerASA(this.networkName, name, asaInfo);
+    this.registerASAInfo(name, asaInfo);
 
     try {
       await this.algoOp.optInToASAMultiple(
         name,
-        this.loadedAsaDefs[name],
+        asaDef,
         flags,
         this.accountsByName,
         asaInfo.assetIndex);
     } catch (error) {
-      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+      this.persistCP();
 
       console.log(error);
       throw error;
@@ -337,7 +395,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
         lsig: lsig
       };
     } catch (error) {
-      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+      this.persistCP();
 
       console.log(error);
       throw error;
@@ -368,13 +426,13 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
       sscInfo = await this.algoOp.deploySSC(
         approvalProgram, clearProgram, flags, payFlags, this.txWriter, scTmplParams);
     } catch (error) {
-      persistCheckpoint(this.txWriter.scriptName, this.cpData.strippedCP);
+      this.persistCP();
 
       console.log(error);
       throw error;
     }
 
-    this.cpData.registerSSC(this.networkName, name, sscInfo);
+    this.registerSSCInfo(name, sscInfo);
 
     return sscInfo;
   }
@@ -386,6 +444,36 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 export class DeployerRunMode extends DeployerBasicMode implements Deployer {
   get isDeployMode (): boolean {
     return false;
+  }
+
+  persistCP (): void {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "persistCP"
+    });
+  }
+
+  assertNoAsset (name: string): void {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "assertNoAsset"
+    });
+  }
+
+  registerASAInfo (name: string, asaInfo: ASAInfo): void {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "registerASAInfo"
+    });
+  }
+
+  registerSSCInfo (name: string, sscInfo: SSCInfo): void {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "registerSSCInfo"
+    });
+  }
+
+  logTx (message: string, txConfirmation: algosdk.ConfirmedTxInfo): void {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "logTx"
+    });
   }
 
   addCheckpointKV (_key: string, _value: string): void {

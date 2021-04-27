@@ -1,5 +1,5 @@
-import type { LogicSig, MultiSig } from "algosdk";
-import { decodeAddress, logicSigFromByte } from "algosdk";
+import type { Account, LogicSig, MultiSig, TxSig } from "algosdk";
+import { appendSignMultisigTransaction, decodeAddress, decodeSignedTransaction, encodeAddress, logicSigFromByte } from "algosdk";
 import fs from "fs";
 import path from "path";
 
@@ -9,7 +9,7 @@ export const blsigExt = ".blsig";
 const lsigExt = ".lsig";
 
 /**
- * Description: this function decodes msig object from logic signature
+ * This function decodes msig object from logic signature
  * @param {String} name : multisig filename
  * @returns {MultiSig} : decoded msig (object with decoded public keys and their signatures)
  */
@@ -28,7 +28,7 @@ export async function decodeMsigObj (msig: string): Promise<MultiSig> {
 }
 
 /**
- * Description: this function reads multisig from /assets/<filename>.lsig
+ * This function reads multisig from /assets/<filename>.lsig
  *              and returns the decoded multisig object
  * @param {string} msig : multisigned msig obj
  * @returns {MultiSig} : decoded Msig Object
@@ -48,7 +48,7 @@ export async function readMsigFromFile (filename: string): Promise<MultiSig | un
 }
 
 /**
- * Description: this function reads raw multisig from /assets/<filename>.lsig
+ * This function reads raw multisig from /assets/<filename>.lsig
  * and returns the base64 string
  * @param {string} filename : filename [must have .blsig ext]
  * @returns {string} : base64 string
@@ -67,7 +67,7 @@ export async function readBinaryMultiSig (filename: string): Promise<string | un
 }
 
 /**
- * Description : loads multisigned logic signature directly from .blsig file
+ * Loads multisigned logic signature directly from .blsig file
  * @param {string} name filename
  * @returns {LogicSig} multi signed logic signature from assets/<file_name>.blsig
  */
@@ -81,11 +81,38 @@ export async function loadBinaryMultiSig (name: string): Promise<LogicSig> {
 }
 
 /**
- * Description : validates msig by checking for v and thr field
+ * Validates msig by checking for v and thr field
  * @param {MultiSig} msig
  */
 export function validateMsig (msig: MultiSig | undefined): void {
   if (msig === undefined || msig.v === undefined || msig.thr === undefined) {
     throw new Error("Error fetching multisigned logic signature from file - invalid/undefined msig");
   }
+}
+
+/**
+ * Signs a raw multi-sig transaction object
+ * @param signerAccount
+ * @param  rawTxn
+ * @returns signed transaction object
+ */
+export function signMultiSig (signerAccount: Account, rawTxn: Uint8Array): TxSig {
+  const decodedTxn = decodeSignedTransaction(rawTxn);
+  console.debug("Decoded txn before signing: %O", decodedTxn);
+  validateMsig(decodedTxn.msig);
+  console.log("Msig: %O", decodedTxn.msig);
+  const addresses = [];
+  for (const sig of decodedTxn.msig.subsig) {
+    addresses.push(encodeAddress(Uint8Array.from(sig.pk)));
+  }
+  const mparams = {
+    version: decodedTxn.msig.v,
+    threshold: decodedTxn.msig.thr,
+    addrs: addresses
+  };
+  const signedTxn = appendSignMultisigTransaction(rawTxn, mparams, signerAccount.sk);
+  const decodedSignedTxn = decodeSignedTransaction(signedTxn.blob);
+  console.debug("Decoded txn after successfully signing: %O", decodedSignedTxn);
+  console.log("Msig: %O", decodedSignedTxn.msig);
+  return signedTxn;
 }
