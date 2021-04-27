@@ -11,3 +11,4 @@ export const TASK_DEPLOY = "deploy";
 export const TASK_COMPILE = "compile";
 export const TASK_UNBOX_TEMPLATE = "unbox-template";
 export const TASK_TEST = "test";
+export const TASK_SIGN_MULTISIG = "sign-multisig";

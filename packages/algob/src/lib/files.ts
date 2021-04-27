@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs from "fs-extra";
 import path from "path";
 
 import { BuilderError } from "../internal/core/errors";
@@ -33,14 +33,14 @@ export function assertDirectDirChildren (dir: string, scriptNames: string[]): st
 }
 
 /**
- * Description: this function reads raw signed txn from file /assets/<filename.ext>
+ * This function reads raw signed txn from file /assets/<filename.ext>
  * and returns the encoded txn as Uint8array
- * @param filename : filename
+ * @param fileName : file name
  * @returns signed transaction encoded as Uint8array
  */
-export function loadSignedTxnFromFile (filename: string): Uint8Array | undefined {
+export function loadSignedTxnFromFile (fileName: string): Uint8Array | undefined {
   try {
-    const p = path.join(ASSETS_DIR, filename);
+    const p = path.join(ASSETS_DIR, fileName);
     const buffer = fs.readFileSync(p);
     return Uint8Array.from(buffer);
   } catch (e) {
