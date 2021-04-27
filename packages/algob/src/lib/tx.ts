@@ -175,6 +175,16 @@ async function mkTx (
       txIdxMap.set(index, [name, { total: 1, decimals: 1, unitName: "MOCK" }]);
       break;
     }
+    case TransactionType.UpdateSSC: {
+      const name = txn.newApprovalProgram + "-" + txn.newClearProgram;
+      deployer.assertNoAsset(name);
+      const approval = await deployer.ensureCompiled(txn.newApprovalProgram);
+      const clear = await deployer.ensureCompiled(txn.newClearProgram);
+      txn.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
+      txn.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
+      txIdxMap.set(index, [name, { total: 1, decimals: 1, unitName: "MOCK" }]);
+      break;
+    }
     case TransactionType.ModifyAsset: {
       // fetch asset mutable properties from network and set them (if they are not passed)
       // before modifying asset

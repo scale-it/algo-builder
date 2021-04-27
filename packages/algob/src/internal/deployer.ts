@@ -71,11 +71,16 @@ class DeployerBasicMode {
   /**
    * Returns asset definition for given name
    * @param name Asset name
+   * @param asaParams Asa parameters if user wants to override existing asa definition
    */
   getASADef (name: string, asaParams?: Partial<rtypes.ASADef>): rtypes.ASADef {
     return overrideASADef(this.accountsByName, this.loadedAsaDefs[name], asaParams);
   }
 
+  /**
+   * Returns checkpoint metadata
+   * @param key key for the map
+   */
   getCheckpointKV (key: string): string | undefined {
     return this.cpData.getMetadata(this.networkName, key);
   }

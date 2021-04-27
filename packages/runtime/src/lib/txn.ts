@@ -309,6 +309,21 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.payFlags.rekeyTo
       );
     }
+    case TransactionType.UpdateSSC: {
+      return algosdk.makeApplicationUpdateTxn(
+        execParams.fromAccount.addr,
+        suggestedParams,
+        execParams.appID,
+        execParams.approvalProg,
+        execParams.clearProg,
+        parseSSCAppArgs(execParams.appArgs),
+        execParams.accounts,
+        execParams.foreignApps,
+        execParams.foreignAssets,
+        note,
+        execParams.lease,
+        execParams.payFlags.rekeyTo);
+    }
     case TransactionType.OptInSSC: {
       return algosdk.makeApplicationOptInTxn(
         execParams.fromAccount.addr,

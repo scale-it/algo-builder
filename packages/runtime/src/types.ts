@@ -220,7 +220,7 @@ export interface SSCOptionalFlags {
 export type ExecParams = AlgoTransferParam | AssetTransferParam | SSCCallsParam |
 ModifyAssetParam | FreezeAssetParam | RevokeAssetParam |
 DestroyAssetParam | DeployASAParam | DeploySSCParam |
-OptInSSCParam | OptInASAParam;
+OptInSSCParam | OptInASAParam | UpdateSSCParam;
 
 export enum SignType {
   SecretKey,
@@ -241,7 +241,8 @@ export enum TransactionType {
   DeployASA,
   DeploySSC,
   OptInASA,
-  OptInSSC
+  OptInSSC,
+  UpdateSSC
 }
 
 export interface Sign {
@@ -268,6 +269,15 @@ export interface DeploySSCParam extends BasicParams, SSCOptionalFlags {
   localBytes: number
   globalInts: number
   globalBytes: number
+  approvalProg?: Uint8Array
+  clearProg?: Uint8Array
+}
+
+export interface UpdateSSCParam extends BasicParams, SSCOptionalFlags {
+  type: TransactionType.UpdateSSC
+  appID: number
+  newApprovalProgram: string
+  newClearProgram: string
   approvalProg?: Uint8Array
   clearProg?: Uint8Array
 }
