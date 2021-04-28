@@ -21,19 +21,24 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     throw new Error("Not implemented");
   }
 
+  getAssetByID (assetIndex: number | bigint): Promise<import("algosdk").AssetInfo> {
+    throw new Error("Not implemented");
+  }
+
   waitForConfirmation (txId: string): Promise<import("algosdk").ConfirmedTxInfo> {
     throw new Error("Not implemented");
   }
 
   async deployASA (
-    name: string, asaDesc: rtypes.ASADef,
+    name: string, asaDef: rtypes.ASADef,
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap,
     txnWriter: txWriter): Promise<ASAInfo> {
     return {
       creator: flags.creator.addr + "-get-address-dry-run",
       txId: "tx-id-dry-run",
       assetIndex: -1,
-      confirmedRound: -1
+      confirmedRound: -1,
+      assetDef: asaDef
     };
   }
 

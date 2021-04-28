@@ -23,7 +23,7 @@ async function run (runtimeEnv, deployer) {
   const algoTxParam = {
     type: types.TransactionType.TransferAlgo,
     sign: types.SignType.LogicSignature,
-    fromAccount: { addr: sender },
+    fromAccountAddr: sender,
     toAccountAddr: john.addr,
     amountMicroAlgos: 20n, // bigint is also supported
     lsig: lsig,
@@ -42,7 +42,7 @@ async function run (runtimeEnv, deployer) {
   const assetTxParam = {
     type: types.TransactionType.TransferAsset,
     sign: types.SignType.LogicSignature,
-    fromAccount: { addr: sender },
+    fromAccountAddr: sender,
     toAccountAddr: bob.addr,
     amount: 10,
     assetID: assetID,

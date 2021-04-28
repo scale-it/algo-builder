@@ -314,6 +314,7 @@ export interface DeployedAssetInfo {
 // ASA deployment information (log)
 export interface ASAInfo extends DeployedAssetInfo {
   assetIndex: number
+  assetDef: rtypes.ASADef
 }
 
 // Stateful smart contract deployment information (log)
@@ -411,7 +412,26 @@ export interface Deployer {
    * Creates and deploys ASA.
    * @name  ASA name - deployer will search for the ASA in the /assets/asa.yaml file
    * @flags  deployment flags */
-  deployASA: (name: string, flags: rtypes.ASADeploymentFlags) => Promise<ASAInfo>
+  deployASA: (name: string, flags: rtypes.ASADeploymentFlags, asaParams: rtypes.ASADef) => Promise<ASAInfo>
+
+  /**
+   * Loads deployed asset definition from checkpoint.
+   * NOTE: This function returns "deployed" ASADef, as immutable properties
+   * of asaDef could be updated during tx execution (eg. update asset clawback)
+   * @name  ASA name - name of ASA in the /assets/asa.yaml file */
+  loadASADef: (asaName: string) => rtypes.ASADef | undefined
+
+  assertNoAsset: (name: string) => void
+
+  getASADef: (name: string, asaParams?: Partial<rtypes.ASADef>) => rtypes.ASADef
+
+  persistCP: () => void
+
+  registerASAInfo: (name: string, asaInfo: ASAInfo) => void
+
+  registerSSCInfo: (name: string, sscInfo: SSCInfo) => void
+
+  logTx: (message: string, txConfirmation: algosdk.ConfirmedTxInfo) => void
 
   /**
    * Funds logic signature account (Contract Account).
@@ -472,6 +492,10 @@ export interface Deployer {
   /**
    * Queries blockchain for a given transaction and waits until it will be processed. */
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
+
+  /**
+   * Queries blockchain using algodv2 for asset information by index  */
+  getAssetByID: (assetIndex: number | bigint) => Promise<algosdk.AssetInfo>
 
   /**
    * Creates an opt-in transaction for given ASA name, which must be defined in

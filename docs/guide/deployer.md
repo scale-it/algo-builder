@@ -27,6 +27,22 @@ You can write deployment tasks synchronously and they'll be executed in the corr
 
 To deploy an ASA you must have `asa.yaml` file in `assets` folder. Head to the [ASA Definition File Spec](https://paper.dropbox.com/doc/Algorand-builder-specs-Vcdp0XNngizChyUWvFXfs#:uid=077585002872354521007982&h2=ASA-Definition-File) to learn more.
 
+#### Deploying ASA with custom parameters
+
+User can also override the fields in `assets/asa.yaml` when deploying ASA. Eg. If user wants to use a multisig address from 3 accounts: `alice, bob, john` as the Asset Reserve. We can create a multisig address in `algob` script first and then pass this address as a custom asaParams.
+
+```javascript
+const { createMsigAddress } = require('@algo-builder/algob');
+
+const addrs = [alice.addr, bob.addr, john.addr];
+const [mparams, multsigaddr] = createMsigAddress(1, 2, addrs); // version = 1, threshold = 2
+
+// while deploying ASA pass custom asa param
+await deployer.deployASA("ASA-2", {...}, { reserve: multsigaddr }); // this will overwrite reserve field from assets/asa.yaml
+```
+
+#### OptIn to ASA
+
 For opting in to ASA, `deployer` supports two methods :-
 - `optInAcountToASA` to opt-in to a single account signed by secret key of sender.
 - `optInLsigToASA` to opt-in to a contract account (say escrow) where the account is represented by the logic signature address (`lsig.address()`).

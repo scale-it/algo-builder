@@ -20,6 +20,30 @@ export class FakeDeployer implements Deployer {
   accountsByName = new Map<string, rtypes.Account>();
   scriptName = '';
 
+  assertNoAsset (name: string): void {
+    throw new Error("Not implemented");
+  }
+
+  getASADef (name: string): rtypes.ASADef {
+    throw new Error("Not implemented");
+  }
+
+  persistCP (): void {
+    throw new Error("Not implemented");
+  }
+
+  logTx (message: string, txConfirmation: algosdk.ConfirmedTxInfo): void {
+    throw new Error("Not implemented");
+  }
+
+  registerASAInfo (name: string, asaInfo: ASAInfo): void {
+    throw new Error("Not implemented");
+  }
+
+  registerSSCInfo (name: string, sscInfo: SSCInfo): void {
+    throw new Error("Not implemented");
+  }
+
   setScriptName (name: string): void {
     this.scriptName = name;
   }
@@ -59,6 +83,10 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   };
 
+  loadASADef (asaName: string): rtypes.ASADef | undefined {
+    throw new Error("Not implemented");
+  }
+
   async fundLsig (name: string, flags: FundASCFlags,
     payFlags: rtypes.TxParams, scParams: LogicSigArgs, scInitParam?: unknown): Promise<void> {
     throw new Error("Not implemented");
@@ -88,6 +116,10 @@ export class FakeDeployer implements Deployer {
   get algodClient (): algosdk.Algodv2 {
     throw new Error("Not implemented");
   };
+
+  getAssetByID (assetIndex: number | bigint): Promise<algosdk.AssetInfo> {
+    throw new Error("Not implemented");
+  }
 
   waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
     throw new Error("Not implemented");

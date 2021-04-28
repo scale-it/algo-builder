@@ -218,7 +218,9 @@ export interface SSCOptionalFlags {
 }
 
 export type ExecParams = AlgoTransferParam | AssetTransferParam | SSCCallsParam |
-ModifyAssetParam | FreezeAssetParam | RevokeAssetParam | DestroyAssetParam;
+ModifyAssetParam | FreezeAssetParam | RevokeAssetParam |
+DestroyAssetParam | DeployASAParam | DeploySSCParam |
+OptInSSCParam | OptInASAParam | UpdateSSCParam;
 
 export enum SignType {
   SecretKey,
@@ -235,72 +237,115 @@ export enum TransactionType {
   CallNoOpSSC,
   ClearSSC,
   CloseSSC,
-  DeleteSSC
+  DeleteSSC,
+  DeployASA,
+  DeploySSC,
+  OptInASA,
+  OptInSSC,
+  UpdateSSC
 }
 
-export interface Sign {
-  sign: SignType
-  lsig?: LogicSig
-}
-
-export interface ModifyAssetParam extends Sign {
-  type: TransactionType.ModifyAsset
+interface SignWithSk {
+  sign: SignType.SecretKey
   fromAccount: AccountSDK
+  // if passed then it will be used as the from account address, but tx will be signed
+  // by fromAcount's sk. This is used if an account address is rekeyed to another account.
+  fromAccountAddr?: AccountAddress
+}
+
+interface SignWithLsig {
+  sign: SignType.LogicSignature
+  fromAccountAddr: AccountAddress
+  lsig: LogicSig
+}
+
+export type Sign = SignWithSk | SignWithLsig;
+
+export type BasicParams = Sign & {
+  payFlags: TxParams
+};
+
+export type DeployASAParam = BasicParams & {
+  type: TransactionType.DeployASA
+  asaName: string
+  asaDef?: Partial<ASADef>
+};
+
+export type DeploySSCParam = BasicParams & SSCOptionalFlags & {
+  type: TransactionType.DeploySSC
+  approvalProgram: string
+  clearProgram: string
+  localInts: number
+  localBytes: number
+  globalInts: number
+  globalBytes: number
+  approvalProg?: Uint8Array
+  clearProg?: Uint8Array
+};
+
+export type UpdateSSCParam = BasicParams & SSCOptionalFlags & {
+  type: TransactionType.UpdateSSC
+  appID: number
+  newApprovalProgram: string
+  newClearProgram: string
+  approvalProg?: Uint8Array
+  clearProg?: Uint8Array
+};
+
+export type OptInSSCParam = BasicParams & SSCOptionalFlags & {
+  type: TransactionType.OptInSSC
+  appID: number
+};
+
+export type OptInASAParam = BasicParams & {
+  type: TransactionType.OptInASA
+  assetID: number
+};
+
+export type ModifyAssetParam = BasicParams & {
+  type: TransactionType.ModifyAsset
   assetID: number
   fields: AssetModFields
-  payFlags: TxParams
-}
+};
 
-export interface FreezeAssetParam extends Sign {
+export type FreezeAssetParam = BasicParams & {
   type: TransactionType.FreezeAsset
-  fromAccount: AccountSDK
   assetID: number
   freezeTarget: AccountAddress
   freezeState: boolean
-  payFlags: TxParams
-}
+};
 
-export interface RevokeAssetParam extends Sign {
+export type RevokeAssetParam = BasicParams & {
   type: TransactionType.RevokeAsset
-  fromAccount: AccountSDK // fromAccount should be clawback address.
   recipient: AccountAddress // Revoked assets are sent to this address
   assetID: number
   revocationTarget: AccountAddress // Revocation target is the account from which the clawback revokes asset.
   amount: number | bigint
-  payFlags: TxParams
-}
+};
 
-export interface DestroyAssetParam extends Sign {
+export type DestroyAssetParam = BasicParams & {
   type: TransactionType.DestroyAsset
-  fromAccount: AccountSDK
   assetID: number
-  payFlags: TxParams
-}
+};
 
-export interface AlgoTransferParam extends Sign {
+export type AlgoTransferParam = BasicParams & {
   type: TransactionType.TransferAlgo
-  fromAccount: AccountSDK
   toAccountAddr: AccountAddress
   amountMicroAlgos: number | bigint
-  payFlags: TxParams
-}
+};
 
-export interface AssetTransferParam extends Sign {
+export type AssetTransferParam = BasicParams & {
   type: TransactionType.TransferAsset
-  fromAccount: AccountSDK
   toAccountAddr: AccountAddress
   amount: number | bigint
   assetID: number
-  payFlags: TxParams
-}
+};
 
-export interface SSCCallsParam extends SSCOptionalFlags, Sign {
+export type SSCCallsParam = BasicParams & SSCOptionalFlags & {
   type: TransactionType.CallNoOpSSC | TransactionType.ClearSSC |
   TransactionType.CloseSSC | TransactionType.DeleteSSC
-  fromAccount: AccountSDK
   appId: number
-  payFlags: TxParams
-}
+};
 
 export interface AnyMap {
   [key: string]: any // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -326,8 +371,8 @@ export type ASADefs = z.infer<typeof ASADefsSchema>;
 // reserve, freeze and reserve accounts can be changed.
 // All other parameters are locked for the life of the asset.
 export interface AssetModFields {
-  manager: string
-  reserve: string
-  freeze: string
-  clawback: string
+  manager?: string
+  reserve?: string
+  freeze?: string
+  clawback?: string
 }

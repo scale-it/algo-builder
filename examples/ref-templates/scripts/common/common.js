@@ -13,7 +13,7 @@ exports.mkTxnParams = function (senderAccount, receiverAddr, amount, lsig, payFl
   return {
     type: types.TransactionType.TransferAlgo,
     sign: types.SignType.LogicSignature,
-    fromAccount: senderAccount,
+    fromAccountAddr: senderAccount.addr,
     toAccountAddr: receiverAddr,
     amountMicroAlgos: amount,
     lsig: lsig,

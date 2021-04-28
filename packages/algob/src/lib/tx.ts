@@ -1,9 +1,11 @@
 import { encodeNote, mkTransaction, types as rtypes } from "@algo-builder/runtime";
+import { AssetModFields, TransactionType, TxField } from "@algo-builder/runtime/build/types";
 import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
 import { Deployer } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
 import { loadSignedTxnFromFile } from "./files";
+import { registerCheckpoints } from "./script-checkpoints";
 
 /**
  * Returns blockchain transaction suggested parameters
@@ -117,11 +119,7 @@ function signTransaction (txn: Transaction, execParams: rtypes.ExecParams): Uint
       return txn.signTxn(execParams.fromAccount.sk);
     }
     case rtypes.SignType.LogicSignature: {
-      const logicsig = execParams.lsig;
-      if (logicsig === undefined) {
-        throw new Error("logic signature for this transaction was not passed or - is not defined");
-      }
-      return algosdk.signLogicSigTransactionObject(txn, logicsig).blob;
+      return algosdk.signLogicSigTransactionObject(txn, execParams.lsig).blob;
     }
     default: {
       throw new Error("Unknown type of signature");
@@ -142,6 +140,73 @@ async function sendAndWait (
 }
 
 /**
+ * Make transaction parameters and update deployASA, deploySSC & ModifyAsset params
+ * @param deployer Deployer object
+ * @param txn Execution parameters
+ * @param index index of current execParam
+ * @param txIdxMap Map for index to name
+ */
+/* eslint-disable sonarjs/cognitive-complexity */
+async function mkTx (
+  deployer: Deployer,
+  txn: rtypes.ExecParams,
+  index: number,
+  txIdxMap: Map<number, [string, rtypes.ASADef]>
+): Promise<Transaction> {
+  switch (txn.type) {
+    case TransactionType.DeployASA: {
+      deployer.assertNoAsset(txn.asaName);
+      const asaDef = deployer.getASADef(txn.asaName, txn.asaDef);
+      txn.asaDef = asaDef;
+      if (txn.asaDef) txIdxMap.set(index, [txn.asaName, asaDef]);
+      break;
+    }
+    case TransactionType.DeploySSC: {
+      const name = txn.approvalProgram + "-" + txn.clearProgram;
+      deployer.assertNoAsset(name);
+      const approval = await deployer.ensureCompiled(txn.approvalProgram);
+      const clear = await deployer.ensureCompiled(txn.clearProgram);
+      txn.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
+      txn.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
+      txIdxMap.set(index, [name, { total: 1, decimals: 1, unitName: "MOCK" }]);
+      break;
+    }
+    case TransactionType.UpdateSSC: {
+      const name = txn.newApprovalProgram + "-" + txn.newClearProgram;
+      deployer.assertNoAsset(name);
+      const approval = await deployer.ensureCompiled(txn.newApprovalProgram);
+      const clear = await deployer.ensureCompiled(txn.newClearProgram);
+      txn.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
+      txn.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
+      txIdxMap.set(index, [name, { total: 1, decimals: 1, unitName: "MOCK" }]);
+      break;
+    }
+    case TransactionType.ModifyAsset: {
+      // fetch asset mutable properties from network and set them (if they are not passed)
+      // before modifying asset
+      const assetInfo = await deployer.getAssetByID(txn.assetID);
+      if (txn.fields.manager === "") txn.fields.manager = undefined;
+      else txn.fields.manager = txn.fields.manager ?? assetInfo.params.manager;
+
+      if (txn.fields.freeze === "") txn.fields.freeze = undefined;
+      else txn.fields.freeze = txn.fields.freeze ?? assetInfo.params.freeze;
+
+      if (txn.fields.clawback === "") txn.fields.clawback = undefined;
+      else txn.fields.clawback = txn.fields.clawback ?? assetInfo.params.clawback;
+
+      if (txn.fields.reserve === "") txn.fields.reserve = undefined;
+      else txn.fields.reserve = txn.fields.reserve ?? assetInfo.params.reserve;
+
+      break;
+    }
+  }
+
+  const suggestedParams = await getSuggestedParams(deployer.algodClient);
+  return mkTransaction(txn,
+    await mkTxParams(deployer.algodClient, txn.payFlags, Object.assign({}, suggestedParams)));
+}
+
+/**
  * Execute single transactions or group of transactions (atomic transaction)
  * @param deployer Deployer
  * @param execParams transaction parameters or atomic transaction parameters
@@ -149,31 +214,38 @@ async function sendAndWait (
 export async function executeTransaction (
   deployer: Deployer,
   execParams: rtypes.ExecParams | rtypes.ExecParams[]): Promise<algosdk.ConfirmedTxInfo> {
-  const suggestedParams = await getSuggestedParams(deployer.algodClient);
-  const mkTx = async (p: rtypes.ExecParams): Promise<Transaction> =>
-    mkTransaction(p,
-      await mkTxParams(deployer.algodClient, p.payFlags, Object.assign({}, suggestedParams)));
+  try {
+    let signedTxn;
+    let txns: Transaction[] = [];
+    const txIdxMap = new Map<number, [string, rtypes.ASADef]>();
+    if (Array.isArray(execParams)) {
+      if (execParams.length > 16) { throw new Error("Maximum size of an atomic transfer group is 16"); }
 
-  let signedTxn;
-  if (Array.isArray(execParams)) {
-    if (execParams.length > 16) { throw new Error("Maximum size of an atomic transfer group is 16"); }
+      for (const [idx, txn] of execParams.entries()) {
+        txns.push(await mkTx(deployer, txn, idx, txIdxMap));
+      }
 
-    let txns = [];
-    for (const t of execParams) { txns.push(await mkTx(t)); }
-    txns = algosdk.assignGroupID(txns);
-    signedTxn = txns.map((txn: Transaction, index: number) => {
-      const signed = signTransaction(txn, execParams[index]);
-      deployer.log(`Signed transaction ${index}`, signed);
-      return signed;
-    });
-  } else {
-    const txn = await mkTx(execParams);
-    signedTxn = signTransaction(txn, execParams);
-    deployer.log(`Signed transaction:`, signedTxn);
+      txns = algosdk.assignGroupID(txns);
+      signedTxn = txns.map((txn: Transaction, index: number) => {
+        const signed = signTransaction(txn, execParams[index]);
+        deployer.log(`Signed transaction ${index}`, signed);
+        return signed;
+      });
+    } else {
+      const txn = await mkTx(deployer, execParams, 0, txIdxMap);
+      signedTxn = signTransaction(txn, execParams);
+      deployer.log(`Signed transaction:`, signedTxn);
+      txns = [txn];
+    }
+    const confirmedTx = await sendAndWait(deployer, signedTxn);
+    console.log(confirmedTx);
+    await registerCheckpoints(deployer, txns, txIdxMap);
+    return confirmedTx;
+  } catch (error) {
+    if (deployer.isDeployMode) { deployer.persistCP(); }
+
+    throw error;
   }
-  const confirmedTx = await sendAndWait(deployer, signedTxn);
-  console.log(confirmedTx);
-  return confirmedTx;
 }
 
 /**

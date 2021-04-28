@@ -8,8 +8,11 @@ async function run (runtimeEnv, deployer) {
 
   // let's make sure john account is active and it has enough balance
   const txnParams = mkTxnParams(masterAccount, john.addr, 4e6, {}, { note: 'funding account' });
-  txnParams.sign = types.SignType.SecretKey;
-  await executeTransaction(deployer, txnParams);
+  await executeTransaction(deployer, {
+    ...txnParams,
+    sign: types.SignType.SecretKey,
+    fromAccount: masterAccount
+  });
 
   const secret = 'hero wisdom green split loop element vote belt';
   const wrongSecret = 'hero wisdom red split loop element vote belt';
@@ -26,7 +29,7 @@ async function run (runtimeEnv, deployer) {
   let contract = await deployer.loadLogic('htlc.py', [stringToBytes(wrongSecret)]);
   let contractAddress = contract.address();
 
-  txnParams.fromAccount = { addr: contractAddress };
+  txnParams.fromAccountAddr = contractAddress;
   txnParams.sign = types.SignType.LogicSignature;
   txnParams.toAccountAddr = globalZeroAddress;
   txnParams.amountMicroAlgos = 0;

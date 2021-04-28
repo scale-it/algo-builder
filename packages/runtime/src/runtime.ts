@@ -9,7 +9,7 @@ import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { Interpreter, loadASAFile } from "./index";
 import { convertToString, parseSSCAppArgs } from "./lib/parsing";
-import { encodeNote, mkTransaction } from "./lib/txn";
+import { encodeNote, getFromAddress, mkTransaction } from "./lib/txn";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import type {
@@ -123,16 +123,6 @@ export class Runtime {
         { assetId: assetId, line: lineNumber });
     }
     return assetDef;
-  }
-
-  /**
-   * Asserts if correct transaction parameters are passed
-   * @param txnParams Transaction Parameters
-   */
-  assertAmbiguousTxnParams (txnParams: ExecParams): void {
-    if (txnParams.sign === SignType.SecretKey && txnParams.lsig) {
-      throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INVALID_TRANSACTION_PARAMS);
-    }
   }
 
   /**
@@ -589,23 +579,25 @@ export class Runtime {
   validateLsigAndRun (txnParam: ExecParams): void {
     // check if transaction is signed by logic signature,
     // if yes verify signature and run logic
-    if (txnParam.lsig === undefined) {
+    if (txnParam.sign === SignType.LogicSignature && txnParam.lsig) {
+      this.ctx.args = txnParam.lsig.args;
+
+      // signature validation
+      const fromAccountAddr = getFromAddress(txnParam);
+      const result = txnParam.lsig.verify(decodeAddress(fromAccountAddr).publicKey);
+      if (!result) {
+        throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_VALIDATION_FAILED,
+          { address: fromAccountAddr });
+      }
+      // logic validation
+      const program = convertToString(txnParam.lsig.logic);
+      if (program === "") {
+        throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
+      }
+      this.run(program, ExecutionMode.STATELESS);
+    } else {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_NOT_FOUND);
     }
-    this.ctx.args = txnParam.lsig.args;
-
-    // signature validation
-    const result = txnParam.lsig.verify(decodeAddress(txnParam.fromAccount.addr).publicKey);
-    if (!result) {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_VALIDATION_FAILED,
-        { address: txnParam.fromAccount.addr });
-    }
-    // logic validation
-    const program = convertToString(txnParam.lsig.logic);
-    if (program === "") {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
-    }
-    this.run(program, ExecutionMode.STATELESS);
   }
 
   /**

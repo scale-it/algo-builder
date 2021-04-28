@@ -1,6 +1,6 @@
 import { AssetDef } from "algosdk";
 
-import { Runtime } from ".";
+import { getFromAddress, Runtime } from ".";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import {
@@ -115,7 +115,7 @@ export class Ctx implements Context {
 
   // transfer ALGO as per transaction parameters
   transferAlgo (txnParam: AlgoTransferParam): void {
-    const fromAccount = this.getAccount(txnParam.fromAccount.addr);
+    const fromAccount = this.getAccount(getFromAddress(txnParam));
     const toAccount = this.getAccount(txnParam.toAccountAddr);
     txnParam.amountMicroAlgos = BigInt(txnParam.amountMicroAlgos);
 
@@ -145,16 +145,17 @@ export class Ctx implements Context {
 
   // transfer ASSET as per transaction parameters
   transferAsset (txnParam: AssetTransferParam): void {
-    const fromAssetHolding = this.getAssetHolding(txnParam.assetID, txnParam.fromAccount.addr);
+    const fromAccountAddr = getFromAddress(txnParam);
+    const fromAssetHolding = this.getAssetHolding(txnParam.assetID, fromAccountAddr);
     const toAssetHolding = this.getAssetHolding(txnParam.assetID, txnParam.toAccountAddr);
     txnParam.amount = BigInt(txnParam.amount);
 
-    this.assertAssetNotFrozen(txnParam.assetID, txnParam.fromAccount.addr);
+    this.assertAssetNotFrozen(txnParam.assetID, fromAccountAddr);
     this.assertAssetNotFrozen(txnParam.assetID, txnParam.toAccountAddr);
     if (fromAssetHolding.amount - txnParam.amount < 0) {
       throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS, {
         amount: txnParam.amount,
-        address: txnParam.fromAccount.addr
+        address: fromAccountAddr
       });
     }
     fromAssetHolding.amount -= txnParam.amount;
@@ -283,8 +284,8 @@ export class Ctx implements Context {
   /* eslint-disable sonarjs/cognitive-complexity */
   processTransactions (txnParams: ExecParams[]): void {
     txnParams.forEach((txnParam, idx) => {
-      this.deductFee(txnParam.fromAccount.addr, idx);
-      this.runtime.assertAmbiguousTxnParams(txnParam);
+      const fromAccountAddr = getFromAddress(txnParam);
+      this.deductFee(fromAccountAddr, idx);
 
       if (txnParam.sign === SignType.LogicSignature) {
         this.tx = this.gtxs[idx]; // update current tx to index of stateless
@@ -310,7 +311,7 @@ export class Ctx implements Context {
         case TransactionType.CloseSSC: {
           const appParams = this.getApp(txnParam.appId);
           this.runtime.run(appParams[approvalProgram], ExecutionMode.STATEFUL);
-          this.closeApp(txnParam.fromAccount.addr, txnParam.appId);
+          this.closeApp(fromAccountAddr, txnParam.appId);
           break;
         }
         case TransactionType.ClearSSC: {
@@ -323,7 +324,7 @@ export class Ctx implements Context {
             // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
           }
 
-          this.closeApp(txnParam.fromAccount.addr, txnParam.appId); // remove app from local state
+          this.closeApp(fromAccountAddr, txnParam.appId); // remove app from local state
           break;
         }
         case TransactionType.DeleteSSC: {
@@ -334,7 +335,7 @@ export class Ctx implements Context {
         }
         case TransactionType.ModifyAsset: {
           const asset = this.getAssetDef(txnParam.assetID);
-          if (asset.manager !== txnParam.fromAccount.addr) {
+          if (asset.manager !== fromAccountAddr) {
             throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
           }
           // modify asset in ctx.
@@ -343,7 +344,7 @@ export class Ctx implements Context {
         }
         case TransactionType.FreezeAsset: {
           const asset = this.getAssetDef(txnParam.assetID);
-          if (asset.freeze !== txnParam.fromAccount.addr) {
+          if (asset.freeze !== fromAccountAddr) {
             throw new RuntimeError(RUNTIME_ERRORS.ASA.FREEZE_ERROR, { address: asset.freeze });
           }
           this.freezeAsset(txnParam.assetID, txnParam.freezeTarget, txnParam.freezeState);
@@ -351,7 +352,7 @@ export class Ctx implements Context {
         }
         case TransactionType.RevokeAsset: {
           const asset = this.getAssetDef(txnParam.assetID);
-          if (asset.clawback !== txnParam.fromAccount.addr) {
+          if (asset.clawback !== fromAccountAddr) {
             throw new RuntimeError(RUNTIME_ERRORS.ASA.CLAWBACK_ERROR, { address: asset.clawback });
           }
           this.revokeAsset(
@@ -362,7 +363,7 @@ export class Ctx implements Context {
         }
         case TransactionType.DestroyAsset: {
           const asset = this.getAssetDef(txnParam.assetID);
-          if (asset.manager !== txnParam.fromAccount.addr) {
+          if (asset.manager !== fromAccountAddr) {
             throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
           }
           this.destroyAsset(txnParam.assetID);

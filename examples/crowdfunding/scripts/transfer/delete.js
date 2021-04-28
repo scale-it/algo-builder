@@ -32,7 +32,7 @@ async function run (runtimeEnv, deployer) {
     {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.LogicSignature,
-      fromAccount: { addr: escrowAccountAddress },
+      fromAccountAddr: escrowAccountAddress,
       toAccountAddr: creatorAccount.addr,
       amountMicroAlgos: 0,
       lsig: lsig,
