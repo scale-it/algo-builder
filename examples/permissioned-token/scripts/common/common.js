@@ -1,4 +1,4 @@
-const { executeTransaction } = require('@algo-builder/algob');
+const { executeTransaction, balanceOf } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/runtime');
 
 exports.executeTransaction = async function (deployer, txnParams) {
@@ -41,7 +41,9 @@ exports.optInToSSC = async function (deployer, account, appId, payflags, sscOpti
   }
 };
 
-exports.totalSupply = async function (deployer, account) {
-  // TODO: use deployer.loadASA to get assest total
-  // asa.total - asa.balanceOf(reserve)
+// returns totalSupply of asset (0 after deployment, will increase will each issuance transaction)
+exports.totalSupply = async function (deployer, assetIndex) {
+  const asaDef = (await deployer.getAssetByID(assetIndex)).params;
+  const reserveAssetHolding = await balanceOf(deployer, asaDef.reserve, assetIndex);
+  return BigInt(asaDef.total) - BigInt(reserveAssetHolding.amount);
 };

@@ -2,7 +2,7 @@ const {
   balanceOf
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/runtime');
-const { executeTransaction, fundAccount } = require('../common/common');
+const { executeTransaction, fundAccount, totalSupply } = require('../common/common');
 
 /**
  * NOTE: this function is for demonstration purpose only (if ASA creator, manager are single accounts)
@@ -62,6 +62,9 @@ async function issue (deployer, account, amount) {
 
   console.log(`* ${account.name} asset holding: *`);
   await balanceOf(deployer, account.addr, asaInfo.assetIndex); // print asset holding
+
+  const supply = await totalSupply(deployer, asaInfo.assetIndex);
+  console.log(`Total Supply of token 'gold': ${supply}`);
 }
 
 async function run (runtimeEnv, deployer) {

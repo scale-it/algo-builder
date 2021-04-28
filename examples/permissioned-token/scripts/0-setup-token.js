@@ -1,4 +1,4 @@
-const { fundAccount } = require('./common/common');
+const { fundAccount, totalSupply } = require('./common/common');
 
 /**
  * NOTE: this function is for demonstration purpose only (if ASA creator, manager are single accounts)
@@ -19,6 +19,7 @@ async function run (runtimeEnv, deployer) {
   // just for tutorial purpose (use `executeSignedTxnFromFile` if using multisig account)
   const asaInfo = await setupASA(deployer);
   console.log(asaInfo);
+  console.log('total Supply: ', await totalSupply(deployer, asaInfo.assetIndex));
 
   /**
    * If using msig address as asa creator or manager, then realistically user will receive a signed tx
