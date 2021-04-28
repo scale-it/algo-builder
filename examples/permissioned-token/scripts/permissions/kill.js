@@ -10,7 +10,7 @@ const { executeTransaction, fundAccount } = require('../common/common');
 *  - Use below function of asa.manager is single account
 */
 async function kill (deployer) {
-  // TODO: use deployer.loadASA() to retreive asset manager
+  // alice is set as asset manager during deploy
   const asaManager = deployer.accountsByName.get('alice');
   await fundAccount(deployer, asaManager);
 
@@ -50,6 +50,7 @@ async function run (runtimeEnv, deployer) {
   // executeSignedTxnFromFile(deployer, 'asa_kill_out.tx');
 
   // transaction pass (issue 15 tokens to elon)
+  await deployer.optInAcountToASA('gold', elon.name, {});
   await issue(deployer, elon, 15);
 
   /**

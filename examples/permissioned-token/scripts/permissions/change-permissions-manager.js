@@ -1,4 +1,4 @@
-const { fundAccount, executeTransaction } = require('../common/common');
+const { fundAccount, executeTransaction, optInToSSC } = require('../common/common');
 const { whitelist } = require('./whitelist');
 const { types } = require('@algo-builder/runtime');
 
@@ -37,23 +37,31 @@ async function run (runtimeEnv, deployer) {
   const john = deployer.accountsByName.get('john');
   const elon = deployer.accountsByName.get('elon-musk');
 
-  await fundAccount(deployer, assetManager); // fund asa.manager
+  // fund accounts
+  await Promise.all([
+    fundAccount(deployer, assetManager),
+    fundAccount(deployer, elon)
+  ]);
+
+  console.log('* Opt-In to permissions(rules) smart contract *');
+  const permissionSSCInfo = deployer.getSSC('permissions.py', 'clear_state_program.py');
+  await optInToSSC(deployer, elon, permissionSSCInfo.appID, {}, {});
 
   // tx FAIL: as john is not the permissions manager
   try {
-    await whitelist(deployer, john, elon); // fails
+    await whitelist(deployer, john, elon.addr); // fails
   } catch (e) {
     console.log('[Expected (john !== permissions_manager)]', e.response?.error.text);
   }
 
   /**
-   * Use below function to update permission manager address in controller
-   * Only asset manager can do that
+   * Use below function to update permission manager address in controllerSSC
+   * Only asset manager can change permission manager
    */
   await changePermissionsManager(deployer, assetManager, john.addr);
 
   // tx PASS: as we updated permissions manager to john
-  await whitelist(deployer, john, elon);
+  await whitelist(deployer, john, elon.addr);
 }
 
 module.exports = { default: run, changePermissionsManager: changePermissionsManager };

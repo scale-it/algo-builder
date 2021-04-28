@@ -40,13 +40,6 @@ async function run (runtimeEnv, deployer) {
   const escrowLsig = await deployer.loadLogic('clawback.py', [], escrowParams);
   const escrowAddress = escrowLsig.address();
 
-  const assetModFields = {
-    manager: alice.addr,
-    reserve: alice.addr,
-    freeze: '',
-    clawback: escrowAddress
-  };
-
   /** Update clawback address to escrow **/
   console.log('* Updating asset clawback to escrow *');
   const assetConfigParams = {
@@ -54,7 +47,7 @@ async function run (runtimeEnv, deployer) {
     sign: types.SignType.SecretKey,
     fromAccount: alice,
     assetID: assetInfo.assetIndex,
-    fields: assetModFields,
+    fields: { clawback: escrowAddress },
     payFlags: { totalFee: 1000 }
   };
   await executeTransaction(deployer, assetConfigParams);

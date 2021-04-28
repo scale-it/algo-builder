@@ -5,7 +5,7 @@ const { types } = require('@algo-builder/runtime');
 const { issue } = require('../issuance/issue');
 const { whitelist } = require('../permissions/whitelist');
 
-const { fundAccount } = require('../common/common');
+const { fundAccount, optInToSSC } = require('../common/common');
 const clearStateProgram = 'clear_state_program.py';
 
 /**
@@ -59,7 +59,7 @@ async function transfer (deployer, from, to, amount) {
     {
       type: types.TransactionType.RevokeAsset,
       sign: types.SignType.LogicSignature,
-      fromAccount: { addr: escrowAddress },
+      fromAccountAddr: escrowAddress,
       recipient: to.addr,
       assetID: asaInfo.assetIndex,
       revocationTarget: from.addr,
@@ -100,7 +100,7 @@ async function transfer (deployer, from, to, amount) {
     [${from.name}:${from.addr}] to [${to.name}:${to.addr}] *`);
   await executeTransaction(deployer, txGroup);
 
-  console.log(`* ${to.name} asset holding: *`);
+  console.log(`* ${to.name}(receiver) asset holding: *`);
   await balanceOf(deployer, to.addr, asaInfo.assetIndex);
 
   console.log('* Transfer Successful *');
@@ -109,6 +109,8 @@ async function transfer (deployer, from, to, amount) {
 async function run (runtimeEnv, deployer) {
   // alice is set-up as the permissions manager during deploy
   const permissionsManager = deployer.accountsByName.get('alice');
+  const permissionsSSCInfo = deployer.getSSC('permissions.py', clearStateProgram);
+
   /**
    * Transfer some tokens b/w 2 non-reserve accounts
    * - Account A - bob
@@ -130,15 +132,28 @@ async function run (runtimeEnv, deployer) {
     fundAccount(deployer, elon)
   ]);
 
+  // opt-in accounts to permissions smart contract
+  // comment this code if already opted-in
+  await optInToSSC(deployer, elon, permissionsSSCInfo.appID, {}, {});
+  await optInToSSC(deployer, bob, permissionsSSCInfo.appID, {}, {});
+  await optInToSSC(deployer, john, permissionsSSCInfo.appID, {}, {});
+
   /**
-   * use below function to whitelist accounts (which opts in these accounts to permissions_ssc as well)
+   * use below function to whitelist accounts
    * check ../permissions/whitelist.js to see whitelisting accounts
    * comment below code if [from, to] accounts are already whitelisted
    * NOTE: whitelist() transaction will be executed by the permissionsManager,
    * current_user (a non reserve account) will not control permissionsManager account.
    */
-  await whitelist(deployer, permissionsManager, bob);
-  await whitelist(deployer, permissionsManager, john);
+  await whitelist(deployer, permissionsManager, bob.addr);
+  await whitelist(deployer, permissionsManager, john.addr);
+
+  // opt-in accounts to asa 'gold' (so they can receive it)
+  await Promise.all([
+    deployer.optInAcountToASA('gold', elon.name, {}),
+    deployer.optInAcountToASA('gold', bob.name, {}),
+    deployer.optInAcountToASA('gold', john.name, {})
+  ]);
 
   // note: if reserve is multisig, then user will use executeSignedTxnFromFile function
   await issue(deployer, bob, 300); // issue(mint) 300 tokens to bob from reserve
@@ -154,10 +169,6 @@ async function run (runtimeEnv, deployer) {
   }
 
   try {
-    // opt-in elon to permissions first
-    const permissionsSSCInfo = deployer.getSSC('permissions.py', clearStateProgram);
-    await deployer.optInToSSC(elon, permissionsSSCInfo.appID, {}, {});
-
     // transaction FAIL: amount is good but elon is not whitelisted
     await transfer(deployer, bob, elon, 10);
   } catch (e) {

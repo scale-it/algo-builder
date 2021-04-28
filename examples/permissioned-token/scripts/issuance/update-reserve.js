@@ -4,6 +4,28 @@ const {
 const { types } = require('@algo-builder/runtime');
 const { executeTransaction, fundAccount } = require('../common/common');
 
+// here instead of updating the asset reserve by modifyAsset tx,
+// we just rekey old reserve account to new reserve
+async function updateReserveByRekeying (deployer, newReserve) {
+  // note: update reserve account below if not alice
+  const asaReserve = deployer.accountsByName.get('alice');
+  await fundAccount(deployer, asaReserve);
+
+  // Rekey oldReserve to newReserve
+  const rekeyReserveParam = {
+    type: types.TransactionType.TransferAlgo,
+    sign: types.SignType.SecretKey,
+    fromAccount: asaReserve,
+    toAccountAddr: asaReserve.addr,
+    amountMicroAlgos: 0,
+    payFlags: { totalFee: 1000, rekeyTo: newReserve.addr }
+  };
+
+  console.log(`* Rekeying reserve address from: ${asaReserve.addr} to: ${newReserve.addr} *`);
+  await executeTransaction(deployer, rekeyReserveParam);
+  console.log('* Rekeying Successful *');
+}
+
 /**
 * NOTE: this function is for demonstration purpose only (if ASA manager is a single account)
 * If asset manager is a multisig address, then user will receive a signed tx file, decoded tx fetched
@@ -11,13 +33,13 @@ const { executeTransaction, fundAccount } = require('../common/common');
 *  - Use `algob.executeSignedTxnFromFile` to execute tx from file
 *  - Use below function if asa.manager is single account
 */
-async function updateReserve (deployer, newReserve) {
-  // TODO: use deployer.loadASA() to retreive asset manager, reserve
+async function updateReserveByAssetConfig (deployer, newReserve) {
   const asaManager = deployer.accountsByName.get('alice');
-  const asaReserve = asaManager; // both reserve & manager are set to alice during deploy
   await fundAccount(deployer, asaManager);
 
+  // fetch old asset reserve from network by assetId
   const asaInfo = deployer.asa.get('gold');
+  const asaReserveAddr = (await deployer.getAssetByID(asaInfo.assetIndex)).params.reserve;
   const controllerSSCInfo = deployer.getSSC('controller.py', 'clear_state_program.py');
 
   const escrowParams = {
@@ -27,17 +49,9 @@ async function updateReserve (deployer, newReserve) {
 
   const escrowLsig = await deployer.loadLogic('clawback.py', [], escrowParams);
   const escrowAddress = escrowLsig.address();
+  const reserveAssetHolding = await balanceOf(deployer, asaReserveAddr, asaInfo.assetIndex);
 
-  // TODO: update assetConfig tx to only take fields to be modified
-  // (we don't need to pass manager, freeze, clawback here)
-  const assetModFields = {
-    manager: asaManager.addr,
-    reserve: newReserve.addr,
-    freeze: '',
-    clawback: escrowAddress
-  };
-
-  const reserveAssetHolding = await balanceOf(deployer, asaReserve.addr, asaInfo.assetIndex);
+  console.log('Asset reserve address before: ', asaReserveAddr);
 
   /**
    * NOTE: Another way to execute tx is using close_remainder_to property.
@@ -55,10 +69,10 @@ async function updateReserve (deployer, newReserve) {
     {
       type: types.TransactionType.RevokeAsset,
       sign: types.SignType.LogicSignature,
-      fromAccount: { addr: escrowAddress },
+      fromAccountAddr: escrowAddress,
       recipient: newReserve.addr,
       assetID: asaInfo.assetIndex,
-      revocationTarget: asaReserve.addr,
+      revocationTarget: asaReserveAddr,
       amount: reserveAssetHolding.amount, // moving all tokens to new reserve
       lsig: escrowLsig,
       payFlags: { totalFee: 1000 }
@@ -72,7 +86,7 @@ async function updateReserve (deployer, newReserve) {
       sign: types.SignType.SecretKey,
       fromAccount: asaManager,
       assetID: asaInfo.assetIndex,
-      fields: assetModFields,
+      fields: { reserve: newReserve.addr },
       payFlags: { totalFee: 1000 }
     }
   ];
@@ -81,12 +95,13 @@ async function updateReserve (deployer, newReserve) {
   await executeTransaction(deployer, updateReserveParams);
   console.log('* Update Successful *');
 
-  // TODO: print ASADef.reserve after updating reserve
+  console.log('Asset reserve address after updating reserve: ',
+    (await deployer.getAssetByID(asaInfo.assetIndex)).params.reserve);
 }
 
 async function run (runtimeEnv, deployer) {
-  const newReserve = deployer.accountsByName.get('bob');
-  await fundAccount(deployer, newReserve);
+  const newReserve = deployer.accountsByName.get('elon-musk');
+  // await fundAccount(deployer, newReserve);
 
   // opt-in to ASA by new-reserve account
   try {
@@ -97,9 +112,18 @@ async function run (runtimeEnv, deployer) {
   }
 
   /**
-   * Below function updates token reserve (if asa.manager is a single account)
+   * Approach 1 (group of 2 tx):
+   * - tx0: Move all tokens from oldReserve to newReserve
+   * - tx1: Update the asset reserve to new reserve address
    */
-  await updateReserve(deployer, newReserve); // kill token 'gold'
+  // await updateReserveByAssetConfig(deployer, newReserve);
+
+  /**
+   * Approach 2: rekey old reserve to new reserve
+   * NOTE: now for issuance transaction, fromAccountAddr will be old reserve,
+   * but fromAccount (signing authority) will be the new reserve account
+   */
+  await updateReserveByRekeying(deployer, newReserve);
 
   /**
    * Use below function if asa.manager is a multisig account (as user receive a signed
@@ -108,4 +132,8 @@ async function run (runtimeEnv, deployer) {
   // executeSignedTxnFromFile(deployer, 'new_reserve_out.tx');
 }
 
-module.exports = { default: run, updateReserve: updateReserve };
+module.exports = {
+  default: run,
+  updateReserveByAssetConfig: updateReserveByAssetConfig,
+  updateReserveByRekeying: updateReserveByRekeying
+};

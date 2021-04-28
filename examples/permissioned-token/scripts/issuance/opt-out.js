@@ -3,7 +3,7 @@ const {
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/runtime');
 const { issue } = require('../issuance/issue');
-const { executeTransaction } = require('../common/common');
+const { executeTransaction, fundAccount } = require('../common/common');
 
 /**
  * To opt-out of the token, do an asset transfer transaction with
@@ -12,10 +12,6 @@ const { executeTransaction } = require('../common/common');
  * @param {*} account account to opt-out of the token from
  */
 async function optOut (deployer, account) {
-  const alice = deployer.accountsByName.get('alice');
-
-  // TODO: use deployer.loadASA() to retreive asset reserve
-  const asaCreator = alice; // asset reserve is the issuer
   const asaInfo = deployer.asa.get('gold');
 
   /**
@@ -27,10 +23,10 @@ async function optOut (deployer, account) {
     type: types.TransactionType.TransferAsset,
     sign: types.SignType.SecretKey,
     fromAccount: account,
-    toAccountAddr: asaCreator.addr,
+    toAccountAddr: account.addr,
     assetID: asaInfo.assetIndex,
     amount: 0,
-    payFlags: { totalFee: 1000, closeRemainderTo: asaCreator.addr }
+    payFlags: { totalFee: 1000, closeRemainderTo: asaInfo.creator }
   };
 
   console.log(`* Opting out [${account.name}:${account.addr}] from token 'gold' *`);
@@ -40,6 +36,12 @@ async function optOut (deployer, account) {
 async function run (runtimeEnv, deployer) {
   const elon = deployer.accountsByName.get('elon-musk');
   const asaInfo = deployer.asa.get('gold');
+
+  // fund elon
+  await fundAccount(deployer, elon);
+
+  // opt in elon to gold first
+  await deployer.optInAcountToASA('gold', elon.name, {});
 
   // first issue few tokens to elon
   await issue(deployer, elon, 15); // issue(mint) 15 tokens to elon from reserve

@@ -12,10 +12,8 @@ const { executeTransaction, fundAccount } = require('../common/common');
  *  - In below function we assume creator & reserve is a single account (alice)
  */
 async function issue (deployer, account, amount) {
-  const alice = deployer.accountsByName.get('alice');
+  const asaReserve = deployer.accountsByName.get('alice'); // asset reserve is the issuer
 
-  // TODO: use deployer.loadASA() to retreive asset reserve
-  const asaReserve = alice; // asset reserve is the issuer
   const asaInfo = deployer.asa.get('gold');
   const controllerSSCInfo = deployer.getSSC('controller.py', 'clear_state_program.py');
 
@@ -26,11 +24,6 @@ async function issue (deployer, account, amount) {
 
   const escrowLsig = await deployer.loadLogic('clawback.py', [], escrowParams);
   const escrowAddress = escrowLsig.address();
-
-  // opt-in asa to account first (skip if opted-in already)
-  console.log(`* Opt-In ASA gold for ${account.name} *`);
-  await deployer.optInAcountToASA('gold', account.name, {});
-  console.log('* Opt-In Successful *');
 
   const issuanceParams = [
     /**
@@ -55,7 +48,7 @@ async function issue (deployer, account, amount) {
     {
       type: types.TransactionType.RevokeAsset,
       sign: types.SignType.LogicSignature,
-      fromAccount: { addr: escrowAddress },
+      fromAccountAddr: escrowAddress,
       recipient: account.addr,
       assetID: asaInfo.assetIndex,
       revocationTarget: asaReserve.addr, // tx will fail if assetSender is not token reserve address
@@ -75,6 +68,11 @@ async function run (runtimeEnv, deployer) {
   const elon = deployer.accountsByName.get('elon-musk');
   await fundAccount(deployer, elon); // fund elon
 
+  // opt-in asa to account first (skip if opted-in already)
+  console.log(`* Opt-In ASA gold for ${elon.name} *`);
+  await deployer.optInAcountToASA('gold', elon.name, {});
+  console.log('* Opt-In Successful *');
+
   /**
    * If using msig address as asa token reserve, then realistically user will receive a tx
    * file signed by accounts <= threshold in a multisig group.
@@ -84,8 +82,8 @@ async function run (runtimeEnv, deployer) {
    */
   // executeSignedTxnFromFile(deployer, 'asa_file_out.tx');
 
-  // use below function to whitelist elon first (which opts in as well)
-  // await whitelist(elon, deployer);
+  // use below function to whitelist elon
+  // await whitelist(deployer, alice, elon.addr);
 
   /**
    * - just for tutorial purpose. Below function issues new token from reserve account (which is a single
