@@ -58,7 +58,7 @@ We don't need additional rule checks as issuer sets the rules himself.
 
 2. *Update Asset Reserve* (`/scripts/issuance/update-reserve.js`): If the _reserve account_ is a multisig address and we want to kick out one address from the multisig, then we will need to update the asset reserve address. One approach is we update the asset reserve using *ModifyAsset* transaction, and move all tokens from previous reserve -> new reserve. This can be done in an atomic transaction group of 2 txns:
 a) Asset transfer transaction using clawback escrow where we move all tokens from previous reserve to new one.
-b) Asset Modification where we update the asset reserve address to new one.
+b) Asset Modification transaction where we update the asset reserve address to new one.
 Another approach is to *rekey* ASA's Reserve account to the newReserve. This way you won't need to move all tokens from old reserve to new reserve. Now for transactions related to the asset reserve (eg. issuance), `fromAccountAddr` will be the old reserve address, but signing authority will be new reserve account.
 
 3. *OptOut* (`/scripts/issuance/opt-out.js`): User can optOut from the token if he wants to. This could be a simple asset transfer transaction from user -> creator (using user's sk) where asset_amount = 0 & close_remainder_to is asset creator. This tx will opt out a user from the token and transfer all his tokens to the asset creator.
