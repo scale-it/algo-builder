@@ -132,7 +132,7 @@ function signTransaction (txn: Transaction, execParams: rtypes.ExecParams): Uint
  * @param deployer Deployer
  * @param rawTxns Signed Transaction(s)
  */
-async function sendAndWait (
+export async function sendAndWait (
   deployer: Deployer,
   rawTxns: Uint8Array | Uint8Array[]): Promise<algosdk.ConfirmedTxInfo> {
   const txInfo = await deployer.algodClient.sendRawTransaction(rawTxns).do();
