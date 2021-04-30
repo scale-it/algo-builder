@@ -49,7 +49,7 @@ def contract_owned_asa():
     # Change owner of the contract if called by current owner
     change_owner = Seq([
         Assert(And(
-            Txn.application_args[0] == Bytes("changeowner"),
+            Txn.application_args[0] == Bytes("change_owner"),
             App.globalGet(Bytes("Creator")) == Txn.sender()
         )),
         App.globalPut(Bytes("Creator"), Txn.application_args[1]),

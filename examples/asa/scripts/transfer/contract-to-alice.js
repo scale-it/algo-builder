@@ -16,8 +16,8 @@ async function run (runtimeEnv, deployer) {
   const bob = deployer.accountsByName.get('bob');
 
   // Get AppInfo and AssetID from checkpoints.
-  const appInfo = deployer.getSSC('5-contract-owned-asa-approval.py', '5-clear.py');
-  const lsig = await deployer.loadLogic('5-contract-owned-asa.py', [], { APP_ID: appInfo.appID });
+  const appInfo = deployer.getSSC('5-contract-asa-stateful.py', '5-clear.py');
+  const lsig = await deployer.loadLogic('5-contract-asa-stateless.py', [], { APP_ID: appInfo.appID });
 
   /* Transfer ASA 'gold' from contract account to user account */
   const assetID = deployer.asa.get('platinum').assetIndex;

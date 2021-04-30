@@ -1,4 +1,4 @@
-# Escrow Account Contract
+# Account Contract
 
 # Add parent directory to path so that algobpy can be imported
 import sys
@@ -8,7 +8,13 @@ from algobpy.parse import parseArgs
 from pyteal import *
 
 def contract_asa(app_id):
-
+    '''
+    This program is stateless part of conotract owned asa, ASA owned is associated
+    with this contract address, This program checks if:
+    - Creation: Stateful program is always called
+    - Payment: Stateful program is always called, Payment type is AssetTransfer,
+               Amount is <= 100 and fee is <= 10000
+    '''
     # verify neither transaction
     # contains a rekey
     rekey_check = And(
