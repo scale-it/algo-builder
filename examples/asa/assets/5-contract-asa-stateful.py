@@ -51,7 +51,7 @@ def contract_owned_asa():
     # Change owner of the contract if called by current owner
     change_owner = Seq([
         Assert(And(
-            Txn.application_args.length() == Int(2),
+            Txn.application_args[0] == Bytes("change_owner"),
             App.globalGet(Bytes("Creator")) == Txn.sender()
         )),
         App.globalPut(Bytes("Creator"), Txn.application_args[1]),
@@ -66,7 +66,7 @@ def contract_owned_asa():
 
     program = Cond(
         [Txn.application_id() == Int(0), on_creation],
-        [Txn.application_args[0] == Bytes("change_owner"), change_owner],
+        [Txn.application_args.length() == Int(2), change_owner],
         # Block delete application
         [Txn.on_completion() == OnComplete.DeleteApplication, Return(Int(0))],
         # Block update application
