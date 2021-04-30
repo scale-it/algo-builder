@@ -47,7 +47,7 @@ async function run (runtimeEnv, deployer) {
     {
       type: types.TransactionType.DeployASA,
       sign: types.SignType.LogicSignature,
-      fromAccount: { addr: statelessAccount.address() },
+      fromAccountAddr: statelessAccount.address(),
       asaName: 'platinum',
       lsig: statelessAccount,
       payFlags: {}

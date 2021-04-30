@@ -36,7 +36,7 @@ async function run (runtimeEnv, deployer) {
     {
       type: types.TransactionType.TransferAsset,
       sign: types.SignType.LogicSignature,
-      fromAccount: { addr: lsig.address() },
+      fromAccountAddr: lsig.address(),
       toAccountAddr: alice.addr,
       amount: 20n,
       assetID: assetID,
@@ -62,7 +62,7 @@ async function run (runtimeEnv, deployer) {
     await executeTransaction(deployer, {
       type: types.TransactionType.TransferAsset,
       sign: types.SignType.LogicSignature,
-      fromAccount: { addr: lsig.address() },
+      fromAccountAddr: lsig.address(),
       toAccountAddr: alice.addr,
       amount: 20n,
       assetID: assetID,
