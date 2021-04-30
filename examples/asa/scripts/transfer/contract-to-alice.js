@@ -50,8 +50,7 @@ async function run (runtimeEnv, deployer) {
   await balanceOf(deployer, alice.addr, assetID);
 
   try {
-    // try to receice asset from another account
-    // It should fail
+    // tx FAIL: trying to receive asset from another account
     txGroup[0].fromAccount = bob;
     await executeTransaction(deployer, txGroup);
   } catch (e) {
@@ -59,8 +58,7 @@ async function run (runtimeEnv, deployer) {
   }
 
   try {
-    // try to send asset directly without calling stateful
-    // It should fail
+    // tx FAIL: trying to send asset directly without calling stateful smart contract
     await executeTransaction(deployer, {
       type: types.TransactionType.TransferAsset,
       sign: types.SignType.LogicSignature,

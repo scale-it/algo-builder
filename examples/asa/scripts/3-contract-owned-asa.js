@@ -58,7 +58,7 @@ async function run (runtimeEnv, deployer) {
       sign: types.SignType.SecretKey,
       fromAccount: alice,
       toAccountAddr: statelessAccount.address(),
-      amountMicroAlgos: 1000000,
+      amountMicroAlgos: 1e6,
       payFlags: {}
     }
   ];
