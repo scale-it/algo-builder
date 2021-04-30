@@ -85,7 +85,7 @@ You can learn more about Stateful Smart Contracts [here](https://developer.algor
 
   Use `mkDelegatedLsig` function to compile and sign a logic signature & save it to checkpoint.
   ```javascript
-  const ascInfoGoldDelegated = await deployer.mkDelegatedLsig('4-gold-asa.teal', goldOwner, []);
+  const ascInfoGoldDelegated = await deployer.mkDelegatedLsig('4-gold-asa.teal', goldOwner);
   console.log(ascInfoGoldDelegated);
   ```
 

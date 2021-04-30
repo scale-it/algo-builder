@@ -39,7 +39,7 @@ To use this feature, you can pass an external parameter object in a deployment s
         TMPL_AMT: 700000,
         TMPL_CLS: masterAccount.addr
       }
-      await deployer.loadLogic("dynamic-fee.py", [], scInitParam);
+      await deployer.loadLogic("dynamic-fee.py", scInitParam);
 
 - PyTeal code uses `algobpy` module to parse and use external parameter.
 - Example below shows how you can use external paramters in PyTeal code
