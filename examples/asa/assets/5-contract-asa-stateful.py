@@ -25,7 +25,9 @@ def contract_owned_asa():
     on_asa_create = Seq([
         Assert(And(
             App.globalGet(Bytes("Creator")) == Txn.sender(),
-            App.globalGet(Bytes("ASACounter")) == Int(0), # limit no of asa from here: currently set to max 1 ASA.
+            # limit no of asa from here: currently set to max 1 ASA, It is set to 0 because
+            # it indicates already deployed ASA
+            App.globalGet(Bytes("ASACounter")) <= Int(0),
             Global.group_size() == Int(3),
             Gtxn[1].type_enum() == TxnType.AssetConfig,
             Gtxn[2].type_enum() == TxnType.Payment,
@@ -33,7 +35,7 @@ def contract_owned_asa():
             Gtxn[2].rekey_to() == Global.zero_address(),
             Gtxn[2].amount() == Int(1000000)
         )),
-        App.globalPut(Bytes("ASACounter"), Int(1)),
+        App.globalPut(Bytes("ASACounter"), App.globalGet(Bytes("ASACounter")) + Int(1)),
         Return(Int(1))
     ])
 
@@ -49,7 +51,7 @@ def contract_owned_asa():
     # Change owner of the contract if called by current owner
     change_owner = Seq([
         Assert(And(
-            Txn.application_args[0] == Bytes("change_owner"),
+            Txn.application_args.length() == Int(2),
             App.globalGet(Bytes("Creator")) == Txn.sender()
         )),
         App.globalPut(Bytes("Creator"), Txn.application_args[1]),
@@ -64,7 +66,7 @@ def contract_owned_asa():
 
     program = Cond(
         [Txn.application_id() == Int(0), on_creation],
-        [Txn.application_args.length() == Int(2), change_owner],
+        [Txn.application_args[0] == Bytes("change_owner"), change_owner],
         # Block delete application
         [Txn.on_completion() == OnComplete.DeleteApplication, Return(Int(0))],
         # Block update application
