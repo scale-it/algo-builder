@@ -6,7 +6,7 @@ import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
 import { TxFieldDefaults, TxnFields } from "../lib/constants";
 import { parseSSCAppArgs, stringToBytes } from "../lib/parsing";
-import { ExecParams, StackElem, TransactionType, TxField, Txn, TxnType } from "../types";
+import { AccountAddress, ExecParams, SignType, StackElem, TransactionType, TxField, Txn, TxnType } from "../types";
 
 const assetTxnFields = new Set([
   'ConfigAssetTotal',
@@ -126,6 +126,17 @@ export function encodeNote (note: string | undefined, noteb64: string| undefined
 }
 
 /**
+ * Returns from address from the transaction params depending on SignType
+ * @param execParams transaction execution params passed by user
+ */
+export function getFromAddress (execParams: ExecParams): AccountAddress {
+  if (execParams.sign === SignType.SecretKey) {
+    return execParams.fromAccountAddr ?? execParams.fromAccount.addr;
+  }
+  return execParams.fromAccountAddr;
+}
+
+/**
  * Returns unsigned transaction as per ExecParams
  * ExecParams can be of following types:
  *  + AlgoTransferParam used for transferring algo
@@ -140,10 +151,11 @@ export function encodeNote (note: string | undefined, noteb64: string| undefined
 export function mkTransaction (execParams: ExecParams, suggestedParams: SuggestedParams): Transaction {
   const note = encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64);
   const transactionType = execParams.type;
+  const fromAccountAddr = getFromAddress(execParams);
   switch (execParams.type) {
     case TransactionType.TransferAsset: {
       return algosdk.makeAssetTransferTxnWithSuggestedParams(
-        execParams.fromAccount.addr,
+        fromAccountAddr,
         execParams.toAccountAddr,
         execParams.payFlags.closeRemainderTo,
         undefined,
@@ -154,7 +166,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
     }
     case TransactionType.ModifyAsset: {
       return algosdk.makeAssetConfigTxnWithSuggestedParams(
-        execParams.fromAccount.addr,
+        fromAccountAddr,
         encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64),
         execParams.assetID,
         execParams.fields.manager !== "" ? execParams.fields.manager : undefined,
@@ -167,7 +179,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
     }
     case TransactionType.FreezeAsset: {
       return algosdk.makeAssetFreezeTxnWithSuggestedParams(
-        execParams.fromAccount.addr,
+        fromAccountAddr,
         encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64),
         execParams.assetID,
         execParams.freezeTarget,
@@ -177,7 +189,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
     }
     case TransactionType.RevokeAsset: {
       return algosdk.makeAssetTransferTxnWithSuggestedParams(
-        execParams.fromAccount.addr,
+        fromAccountAddr,
         execParams.recipient,
         execParams.payFlags.closeRemainderTo,
         execParams.revocationTarget,
@@ -189,7 +201,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
     }
     case TransactionType.DestroyAsset: {
       return algosdk.makeAssetDestroyTxnWithSuggestedParams(
-        execParams.fromAccount.addr,
+        fromAccountAddr,
         encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64),
         execParams.assetID,
         suggestedParams
@@ -197,7 +209,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
     }
     case TransactionType.TransferAlgo: {
       return algosdk.makePaymentTxnWithSuggestedParams(
-        execParams.fromAccount.addr,
+        fromAccountAddr,
         execParams.toAccountAddr,
         execParams.amountMicroAlgos,
         execParams.payFlags.closeRemainderTo,
@@ -207,7 +219,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
     }
     case TransactionType.ClearSSC: {
       return algosdk.makeApplicationClearStateTxn(
-        execParams.fromAccount.addr,
+        fromAccountAddr,
         suggestedParams,
         execParams.appId,
         parseSSCAppArgs(execParams.appArgs),
@@ -221,7 +233,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
     }
     case TransactionType.DeleteSSC: {
       return algosdk.makeApplicationDeleteTxn(
-        execParams.fromAccount.addr,
+        fromAccountAddr,
         suggestedParams,
         execParams.appId,
         parseSSCAppArgs(execParams.appArgs),
@@ -235,7 +247,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
     }
     case TransactionType.CallNoOpSSC: {
       return algosdk.makeApplicationNoOpTxn(
-        execParams.fromAccount.addr,
+        fromAccountAddr,
         suggestedParams,
         execParams.appId,
         parseSSCAppArgs(execParams.appArgs),
@@ -248,7 +260,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
     }
     case TransactionType.CloseSSC: {
       return algosdk.makeApplicationCloseOutTxn(
-        execParams.fromAccount.addr,
+        fromAccountAddr,
         suggestedParams,
         execParams.appId,
         parseSSCAppArgs(execParams.appArgs),
@@ -264,7 +276,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
       if (execParams.asaDef) {
         // https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js#L104
         return algosdk.makeAssetCreateTxnWithSuggestedParams(
-          execParams.fromAccount.addr,
+          fromAccountAddr,
           note,
           BigInt(execParams.asaDef.total),
           execParams.asaDef.decimals,
@@ -291,7 +303,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
       const onComplete = algosdk.OnApplicationComplete.NoOpOC;
 
       return algosdk.makeApplicationCreateTxn(
-        execParams.fromAccount.addr,
+        fromAccountAddr,
         suggestedParams,
         onComplete,
         execParams.approvalProg,
@@ -311,7 +323,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
     }
     case TransactionType.UpdateSSC: {
       return algosdk.makeApplicationUpdateTxn(
-        execParams.fromAccount.addr,
+        fromAccountAddr,
         suggestedParams,
         execParams.appID,
         execParams.approvalProg,
@@ -326,7 +338,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
     }
     case TransactionType.OptInSSC: {
       return algosdk.makeApplicationOptInTxn(
-        execParams.fromAccount.addr,
+        fromAccountAddr,
         suggestedParams,
         execParams.appID,
         parseSSCAppArgs(execParams.appArgs),
@@ -339,8 +351,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
     }
     case TransactionType.OptInASA: {
       return algosdk.makeAssetTransferTxnWithSuggestedParams(
-        execParams.fromAccount.addr,
-        execParams.fromAccount.addr,
+        fromAccountAddr,
+        fromAccountAddr,
         undefined,
         undefined,
         0,

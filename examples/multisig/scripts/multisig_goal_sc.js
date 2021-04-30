@@ -44,7 +44,7 @@ async function run (runtimeEnv, deployer) {
   txnParams = {
     type: types.TransactionType.TransferAlgo,
     sign: types.SignType.LogicSignature,
-    fromAccount: { addr: multsigaddr },
+    fromAccountAddr: multsigaddr,
     toAccountAddr: bob.addr,
     amountMicroAlgos: 20,
     lsig: lsig,

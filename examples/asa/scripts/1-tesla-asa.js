@@ -12,9 +12,11 @@ async function run (runtimeEnv, deployer) {
 
   const masterAccount = deployer.accountsByName.get('master-account');
   const elon = deployer.accountsByName.get('elon-musk');
+  const john = deployer.accountsByName.get('john');
 
   // activate elon account
-  await executeTransaction(deployer, mkParam(masterAccount, elon.addr, 401e6, { note: 'funding account' }));
+  await executeTransaction(deployer, mkParam(masterAccount, elon.addr, 40e6, { note: 'funding account' }));
+  await executeTransaction(deployer, mkParam(masterAccount, john.addr, 40e6, { note: 'funding account' }));
 
   const asaInfo = await deployer.deployASA('tesla', { creator: elon });
   console.log(asaInfo);

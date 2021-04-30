@@ -494,6 +494,10 @@ export interface Deployer {
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
 
   /**
+   * Queries blockchain using algodv2 for asset information by index  */
+  getAssetByID: (assetIndex: number | bigint) => Promise<algosdk.AssetInfo>
+
+  /**
    * Creates an opt-in transaction for given ASA name, which must be defined in
    * `/assets/asa.yaml` file. The opt-in transaction is signed by the account secret key */
   optInAcountToASA: (name: string, accountName: string,

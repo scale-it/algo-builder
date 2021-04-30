@@ -18,7 +18,7 @@ async function run (runtimeEnv, deployer) {
   let txnParam = {
     type: types.TransactionType.TransferAsset,
     sign: types.SignType.LogicSignature,
-    fromAccount: goldOwner,
+    fromAccountAddr: goldOwner.addr,
     toAccountAddr: john.addr,
     amount: 500,
     assetID: assetID,
@@ -36,7 +36,7 @@ async function run (runtimeEnv, deployer) {
   // Transaction FAIL - rejected by lsig because sender must be the delegator i.e
   // account which signed the lsig (goldOwner in this case)
   txnParam.amount = 100;
-  txnParam.fromAccount = bob;
+  txnParam.fromAccountAddr = bob.addr;
   await executeTransaction(deployer, txnParam);
 
   // Transaction for ALGO - Contract : '3-gold-delegated-asc.teal'  (Delegated Approval Mode)
@@ -45,7 +45,7 @@ async function run (runtimeEnv, deployer) {
   txnParam = {
     type: types.TransactionType.TransferAlgo,
     sign: types.SignType.LogicSignature,
-    fromAccount: goldOwner,
+    fromAccountAddr: goldOwner.addr,
     toAccountAddr: bob.addr,
     amountMicroAlgos: 58,
     lsig: logicSignature,

@@ -1,5 +1,5 @@
 import { encodeNote, mkTransaction, types as rtypes } from "@algo-builder/runtime";
-import { TransactionType } from "@algo-builder/runtime/build/types";
+import { AssetModFields, TransactionType, TxField } from "@algo-builder/runtime/build/types";
 import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
 import { Deployer } from "../types";
@@ -119,11 +119,7 @@ function signTransaction (txn: Transaction, execParams: rtypes.ExecParams): Uint
       return txn.signTxn(execParams.fromAccount.sk);
     }
     case rtypes.SignType.LogicSignature: {
-      const logicsig = execParams.lsig;
-      if (logicsig === undefined) {
-        throw new Error("logic signature for this transaction was not passed or - is not defined");
-      }
-      return algosdk.signLogicSigTransactionObject(txn, logicsig).blob;
+      return algosdk.signLogicSigTransactionObject(txn, execParams.lsig).blob;
     }
     default: {
       throw new Error("Unknown type of signature");
@@ -136,7 +132,7 @@ function signTransaction (txn: Transaction, execParams: rtypes.ExecParams): Uint
  * @param deployer Deployer
  * @param rawTxns Signed Transaction(s)
  */
-async function sendAndWait (
+export async function sendAndWait (
   deployer: Deployer,
   rawTxns: Uint8Array | Uint8Array[]): Promise<algosdk.ConfirmedTxInfo> {
   const txInfo = await deployer.algodClient.sendRawTransaction(rawTxns).do();
@@ -144,12 +140,13 @@ async function sendAndWait (
 }
 
 /**
- * Make transaction parameters and update ASA and SSC params
+ * Make transaction parameters and update deployASA, deploySSC & ModifyAsset params
  * @param deployer Deployer object
  * @param txn Execution parameters
  * @param index index of current execParam
  * @param txIdxMap Map for index to name
  */
+/* eslint-disable sonarjs/cognitive-complexity */
 async function mkTx (
   deployer: Deployer,
   txn: rtypes.ExecParams,
@@ -184,7 +181,26 @@ async function mkTx (
       txIdxMap.set(index, [name, { total: 1, decimals: 1, unitName: "MOCK" }]);
       break;
     }
+    case TransactionType.ModifyAsset: {
+      // fetch asset mutable properties from network and set them (if they are not passed)
+      // before modifying asset
+      const assetInfo = await deployer.getAssetByID(txn.assetID);
+      if (txn.fields.manager === "") txn.fields.manager = undefined;
+      else txn.fields.manager = txn.fields.manager ?? assetInfo.params.manager;
+
+      if (txn.fields.freeze === "") txn.fields.freeze = undefined;
+      else txn.fields.freeze = txn.fields.freeze ?? assetInfo.params.freeze;
+
+      if (txn.fields.clawback === "") txn.fields.clawback = undefined;
+      else txn.fields.clawback = txn.fields.clawback ?? assetInfo.params.clawback;
+
+      if (txn.fields.reserve === "") txn.fields.reserve = undefined;
+      else txn.fields.reserve = txn.fields.reserve ?? assetInfo.params.reserve;
+
+      break;
+    }
   }
+
   const suggestedParams = await getSuggestedParams(deployer.algodClient);
   return mkTransaction(txn,
     await mkTxParams(deployer.algodClient, txn.payFlags, Object.assign({}, suggestedParams)));
@@ -226,13 +242,8 @@ export async function executeTransaction (
     await registerCheckpoints(deployer, txns, txIdxMap);
     return confirmedTx;
   } catch (error) {
-    try {
-      deployer.persistCP();
-    } catch (e) {
+    if (deployer.isDeployMode) { deployer.persistCP(); }
 
-    }
-
-    console.log(error);
     throw error;
   }
 }
