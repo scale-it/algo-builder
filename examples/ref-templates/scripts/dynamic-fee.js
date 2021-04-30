@@ -17,12 +17,12 @@ async function run (runtimeEnv, deployer) {
   // setup a contract account and send 1 ALGO from master
   await deployer.fundLsig(contractName,
     { funder: masterAccount, fundingMicroAlgo: 100000000 },
-    { closeRemainderTo: masterAccount.addr }, [], scInitParam);
+    { closeRemainderTo: masterAccount.addr }, scInitParam);
 
-  const contract = await deployer.loadLogic(contractName, [], scInitParam);
+  const contract = await deployer.loadLogic(contractName, scInitParam);
   const escrow = contract.address(); // contract account
 
-  await deployer.mkDelegatedLsig(contractName, masterAccount, [], scInitParam); // sign contract
+  await deployer.mkDelegatedLsig(contractName, masterAccount, scInitParam); // sign contract
   const signedContract = await deployer.getDelegatedLsig(contractName);
   console.log('SIGn1 ', signedContract);
 

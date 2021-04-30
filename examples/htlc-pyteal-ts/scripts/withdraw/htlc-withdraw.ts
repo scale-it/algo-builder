@@ -17,8 +17,8 @@ async function run (
   const { alice, scTmplParams, secret } = prepareParameters(deployer);
   const wrongSecret = 'hero wisdom red split loop element vote belt';
 
-  let lsig = await deployer.loadLogic('htlc.py', [stringToBytes(wrongSecret)], scTmplParams);
-  let sender = lsig.address();
+  const lsig = await deployer.loadLogic('htlc.py', scTmplParams);
+  const sender = lsig.address();
 
   const txnParams: rtypes.AlgoTransferParam = {
     type: rtypes.TransactionType.TransferAlgo,
@@ -27,17 +27,14 @@ async function run (
     toAccountAddr: alice.addr,
     amountMicroAlgos: 200,
     lsig: lsig,
+    args: [stringToBytes(wrongSecret)],
     payFlags: { totalFee: 1000 }
   };
   // Transaction Fails : as wrong secret value is used
   await executeTx(deployer, txnParams);
 
-  lsig = await deployer.loadLogic('htlc.py', [stringToBytes(secret)], scTmplParams);
-  sender = lsig.address();
-
   // Transaction Passes : as right secret value is used
-  txnParams.fromAccountAddr = sender;
-  txnParams.lsig = lsig;
+  txnParams.args = [stringToBytes(secret)];
   await executeTx(deployer, txnParams);
 }
 

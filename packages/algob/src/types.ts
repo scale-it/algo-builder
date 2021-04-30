@@ -437,7 +437,6 @@ export interface Deployer {
    * Funds logic signature account (Contract Account).
    * @name  Stateless Smart Contract filename (must be present in assets folder)
    * @payFlags  Transaction Parameters
-   * @scParams  Smart contract parameters (used while calling smart contract)
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
@@ -445,7 +444,6 @@ export interface Deployer {
     name: string,
     flags: FundASCFlags,
     payFlags: rtypes.TxParams,
-    scParams: LogicSigArgs,
     scTmplParams?: SCParams
   ) => void
 
@@ -453,14 +451,12 @@ export interface Deployer {
    * Makes delegated logic signature signed by the `signer`.
    * @name  Stateless Smart Contract filename (must be present in assets folder)
    * @signer  Signer Account which will sign the smart contract
-   * @scParams  Smart contract parameters (used while calling smart contract)
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
   mkDelegatedLsig: (
     name: string,
     signer: rtypes.Account,
-    scParams: LogicSigArgs,
     scTmplParams?: SCParams
   ) => Promise<LsigInfo>
 
@@ -523,7 +519,7 @@ export interface Deployer {
 
   /**
    * Extracts multi signed logic signature file from `assets/`. */
-  loadMultiSig: (name: string, scParams: LogicSigArgs) => Promise<LogicSig>
+  loadMultiSig: (name: string) => Promise<LogicSig>
 
   /**
    * Appends signer's signature to multi-signed lsig. If multisig is not found
@@ -541,11 +537,10 @@ export interface Deployer {
   /**
    * Loads contract mode logic signature (TEAL or PyTEAL)
    * @name   Smart Contract filename (must be present in assets folder)
-   * @scParams  Smart contract parameters (Used while calling smart contract)
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  loadLogic: (name: string, scParams: LogicSigArgs, scTmplParams?: SCParams) => Promise<LogicSig>
+  loadLogic: (name: string, scTmplParams?: SCParams) => Promise<LogicSig>
 
   /**
    * Returns ASCCache (with compiled code)

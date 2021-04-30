@@ -36,7 +36,7 @@ async function run (
   // hash: QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=
 
   await deployer.fundLsig('htlc.py',
-    { funder: bob, fundingMicroAlgo: 2e6 }, {}, [], scTmplParams);
+    { funder: bob, fundingMicroAlgo: 2e6 }, {}, scTmplParams);
 
   // Add user checkpoint
   deployer.addCheckpointKV('User Checkpoint', 'Fund Contract Account');
