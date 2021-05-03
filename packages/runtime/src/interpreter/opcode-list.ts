@@ -2023,6 +2023,7 @@ export class GetAssetDef extends Op {
 
     const assetId = this.interpreter.runtime.ctx.tx.apas[Number(foreignAssetsIdx)];
     const AssetDefinition = this.interpreter.getAssetDef(assetId);
+    let addr: string;
 
     if (AssetDefinition === undefined) {
       stack.push(0n);
@@ -2042,10 +2043,11 @@ export class GetAssetDef extends Op {
           value = AssetDefinition["default-frozen"] ? 1n : 0n;
           break;
         default:
-          if (typeof AssetDefinition[s] === "string" && isValidAddress(AssetDefinition[s] as string)) {
-            value = decodeAddress(AssetDefinition[s] as string).publicKey;
+          addr = AssetDefinition[s] as string;
+          if (isValidAddress(addr)) {
+            value = decodeAddress(addr).publicKey;
           } else {
-            value = stringToBytes(AssetDefinition[s] as string);
+            value = stringToBytes(addr);
           }
           break;
       }
