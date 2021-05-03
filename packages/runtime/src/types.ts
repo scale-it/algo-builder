@@ -258,7 +258,7 @@ interface SignWithLsig {
   sign: SignType.LogicSignature
   fromAccountAddr: AccountAddress
   lsig: LogicSig
-  args?: LogicSigArgs // state smart contract args (used when calling smart contract)
+  args?: LogicSigArgs // stateless smart contract args
 }
 
 export type Sign = SignWithSk | SignWithLsig;
