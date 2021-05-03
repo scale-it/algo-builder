@@ -10,12 +10,12 @@ async function run (runtimeEnv, deployer) {
     sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
     toAccountAddr: creatorAccount.addr,
-    amountMicroAlgos: 5000000,
+    amountMicroAlgos: 5e6,
     payFlags: {}
   });
 
   const appInfo = deployer.getSSC('crowdFundApproval.teal', 'crowdFundClear.teal');
-  const lsig = await deployer.loadLogic('crowdFundEscrow.py', [], { APP_ID: appInfo.appID });
+  const lsig = await deployer.loadLogic('crowdFundEscrow.py', { APP_ID: appInfo.appID });
   const escrowAccountAddress = lsig.address();
 
   // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)

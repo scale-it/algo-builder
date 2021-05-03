@@ -60,11 +60,11 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  async loadLogic (name: string, scParams: LogicSigArgs, scInitParam?: unknown): Promise<LogicSig> {
+  async loadLogic (name: string, scInitParam?: unknown): Promise<LogicSig> {
     throw new Error("Not implemented");
   }
 
-  loadMultiSig (name: string, scParams: Object): Promise<LogicSig> {
+  loadMultiSig (name: string): Promise<LogicSig> {
     throw new Error("Not implemented");
   }
 
@@ -88,12 +88,12 @@ export class FakeDeployer implements Deployer {
   }
 
   async fundLsig (name: string, flags: FundASCFlags,
-    payFlags: rtypes.TxParams, scParams: LogicSigArgs, scInitParam?: unknown): Promise<void> {
+    payFlags: rtypes.TxParams, scInitParam?: unknown): Promise<void> {
     throw new Error("Not implemented");
   }
 
   async mkDelegatedLsig (name: string, signer: rtypes.Account,
-    scParams: LogicSigArgs, scInitParam?: unknown): Promise<LsigInfo> {
+    scInitParam?: unknown): Promise<LsigInfo> {
     throw new Error("Not implemented");
   }
 

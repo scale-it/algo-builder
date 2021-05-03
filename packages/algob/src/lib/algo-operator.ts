@@ -35,7 +35,7 @@ export interface AlgoOperator {
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap, txWriter: txWriter
   ) => Promise<ASAInfo>
   fundLsig: (name: string, flags: FundASCFlags, payFlags: rtypes.TxParams,
-    txWriter: txWriter, scParams: LogicSigArgs, scTmplParams?: SCParams) => Promise<LsigInfo>
+    txWriter: txWriter, scTmplParams?: SCParams) => Promise<LsigInfo>
   deploySSC: (
     approvalProgram: string,
     clearProgram: string,
@@ -228,7 +228,6 @@ export class AlgoOperatorImpl implements AlgoOperator {
    * @param flags    - FundASC flags (as per SPEC)
    * @param payFlags - as per SPEC
    * @param txWriter - transaction log writer
-   * @param scParams: Smart contract Parameters(Used while calling smart contract)
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
   async fundLsig (
@@ -236,9 +235,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
     flags: FundASCFlags,
     payFlags: rtypes.TxParams,
     txWriter: txWriter,
-    scParams: LogicSigArgs,
     scTmplParams?: SCParams): Promise<LsigInfo> {
-    const lsig = await getLsig(name, this.algodClient, scParams, scTmplParams);
+    const lsig = await getLsig(name, this.algodClient, scTmplParams);
     const contractAddress = lsig.address();
 
     const params = await tx.mkTxParams(this.algodClient, payFlags);

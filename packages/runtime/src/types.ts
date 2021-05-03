@@ -2,6 +2,7 @@ import {
   Account as AccountSDK,
   AssetDef,
   LogicSig,
+  LogicSigArgs,
   SSCSchemaConfig,
   TxnEncodedObj
 } from "algosdk";
@@ -257,6 +258,7 @@ interface SignWithLsig {
   sign: SignType.LogicSignature
   fromAccountAddr: AccountAddress
   lsig: LogicSig
+  args?: LogicSigArgs // stateless smart contract args
 }
 
 export type Sign = SignWithSk | SignWithLsig;

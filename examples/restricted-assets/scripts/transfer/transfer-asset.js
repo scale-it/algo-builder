@@ -13,7 +13,7 @@ async function run (runtimeEnv, deployer) {
     ASSET_ID: assetInfo.assetIndex,
     APP_ID: appInfo.appID
   };
-  const escrowLsig = await deployer.loadLogic('clawback-escrow.py', [], escrowParams);
+  const escrowLsig = await deployer.loadLogic('clawback-escrow.py', escrowParams);
   const escrowAddress = escrowLsig.address();
 
   const txGroup = [
