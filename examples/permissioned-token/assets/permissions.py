@@ -36,12 +36,12 @@ def approval_program():
     ])
 
     # fetch permissions manager, token_id from controller's global state (using foreignApps)
-    permission_manager = App.globalGetEx(Int(1), Bytes("permissions_manager"))
+    permissions_manager = App.globalGetEx(Int(1), Bytes("permissions_manager"))
     token_id = App.globalGetEx(Int(1), Bytes("token_id"))
 
     # whitelist an account
     add_whitelist = Seq([
-        permission_manager,
+        permissions_manager,
         token_id,
         Assert(And(
     		Txn.application_args.length() == Int(2),
@@ -58,8 +58,8 @@ def approval_program():
     		# Txn.assets[0] == token_id.value(), [TEALv3]
 
     		# then verify txn sender is the token manager
-    		permission_manager.hasValue(),
-    		Txn.sender() == permission_manager.value(),
+    		permissions_manager.hasValue(),
+    		Txn.sender() == permissions_manager.value(),
         )),
 
         If(
