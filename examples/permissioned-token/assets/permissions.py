@@ -22,8 +22,7 @@ def approval_program():
 
 		# Always verify that the RekeyTo property of any transaction is set to the ZeroAddress
 		# unless the contract is specifically involved ina rekeying operation.
-		Txn.rekey_to() == Global.zero_address()
-        )),
+		Txn.rekey_to() == Global.zero_address())),
 
         # Save max_tokens count in global state (default = 100, during ssc deploy)
         App.globalPut(max_tokens, Int(100)),
@@ -45,22 +44,22 @@ def approval_program():
         permission_manager,
         token_id,
         Assert(And(
-		Txn.application_args.length() == Int(2),
-		Txn.accounts.length() == Int(1),
-		Txn.rekey_to() == Global.zero_address(),
-		#Txn.applications.length() ==  Int(1), [TEALv3]
+    		Txn.application_args.length() == Int(2),
+    		Txn.accounts.length() == Int(1),
+    		Txn.rekey_to() == Global.zero_address(),
+    		#Txn.applications.length() ==  Int(1), [TEALv3]
 
-		# verify from global state whether controller application passed is the valid one
-		# note: with tealv3 we can just use txn.applications[0] instead of passing an an appArg
-		Btoi(Txn.application_args[1]) == App.globalGet(controller_app_id),
+    		# verify from global state whether controller application passed is the valid one
+    		# note: with tealv3 we can just use txn.applications[0] instead of passing an an appArg
+    		Btoi(Txn.application_args[1]) == App.globalGet(controller_app_id),
 
-		# first verify correct token value is passed
-		# token_id.hasValue(),
-			# Txn.assets[0] == token_id.value(), [TEALv3]
+    		# first verify correct token value is passed
+    		# token_id.hasValue(),
+    		# Txn.assets[0] == token_id.value(), [TEALv3]
 
-		# then verify txn sender is the token manager
-		permission_manager.hasValue(),
-		Txn.sender() == permission_manager.value(),
+    		# then verify txn sender is the token manager
+    		permission_manager.hasValue(),
+    		Txn.sender() == permission_manager.value(),
         )),
 
         If(
@@ -79,21 +78,21 @@ def approval_program():
     transfer_token = Seq([
         asset_balance, # load asset_balance of asset_receiver from store
         Assert(And(
-		Txn.application_args.length() == Int(1),
-		Global.group_size() >= Int(3),
-		Txn.sender() == Gtxn[1].asset_sender(),
+    		Txn.application_args.length() == Int(1),
+    		Global.group_size() >= Int(3),
+    		Txn.sender() == Gtxn[1].asset_sender(),
 
-		# verify tx.accounts[1] of current_tx should be same as asset receiver
-		Txn.accounts[1] == Gtxn[1].asset_receiver(),
+    		# verify tx.accounts[1] of current_tx should be same as asset receiver
+    		Txn.accounts[1] == Gtxn[1].asset_receiver(),
 
-		# rule 1 - check balance of receiver after receiving token <= 100(max_tokens)
-		asset_balance.hasValue(),
-		asset_balance.value() <= App.globalGet(max_tokens),
+    		# rule 1 - check balance of receiver after receiving token <= 100(max_tokens)
+    		asset_balance.hasValue(),
+    		asset_balance.value() <= App.globalGet(max_tokens),
 
-		# rule 2 - [from, to] accounts must be whitelisted
-		# NOTE: Int(0) == Txn.Sender(), Int(1) == Txn.accounts[1]
-		App.localGet(Int(0), Bytes("whitelisted")) == true, # from account must be whitelisted
-		App.localGet(Int(1), Bytes("whitelisted")) == true  # to account must be whitelisted
+    		# rule 2 - [from, to] accounts must be whitelisted
+    		# NOTE: Int(0) == Txn.Sender(), Int(1) == Txn.accounts[1]
+    		App.localGet(Int(0), Bytes("whitelisted")) == true, # from account must be whitelisted
+    		App.localGet(Int(1), Bytes("whitelisted")) == true  # to account must be whitelisted
         )),
         Return(Int(1))
     ])
@@ -126,4 +125,4 @@ def approval_program():
     return program
 
 if __name__ == "__main__":
-    print(compileTeal(approval_program(), Mode.Application))
+    print(compileTeal(approval_program(), Mode.Application, version=2))
