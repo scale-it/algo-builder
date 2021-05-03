@@ -88,8 +88,8 @@ In this template we have a new contract - `controller.py` which essentially "con
 ### Links
 
 Developer hour links:
-- *video:* [https://www.youtube.com/watch?v=aMDZamxtR14](https://www.youtube.com/watch?v=aMDZamxtR14)
-- *article:* [https://developer.algorand.org/solutions/assets-and-custom-transfer-logic](https://developer.algorand.org/solutions/assets-and-custom-transfer-logic/)
+- Developer Office Hours | Assets and Custom Transfer Logic Using Algorand Smart Contracts: [video](https://www.youtube.com/watch?v=aMDZamxtR14)
+- [Assets and Custom Transfer Logic](https://developer.algorand.org/solutions/assets-and-custom-transfer-logic/)
 - *implementation of the solution above using algob*: [examples/restricted-assets](/examples/restricted-assets)
 
 Link to spec of current template: [https://paper.dropbox.com/doc/Algob-Security-Token-Template-FR2LXhVg3edevYPBQZw6F](https://paper.dropbox.com/doc/Algob-Security-Token-Template-FR2LXhVg3edevYPBQZw6F)

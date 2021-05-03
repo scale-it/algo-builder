@@ -36,7 +36,7 @@ def approval_program():
     ])
 
     # fetch permissions manager, token_id from controller's global state (using foreignApps)
-    permissions_manager = App.globalGetEx(Int(1), Bytes("permissions_manager"))
+    permissions_manager = App.globalGetEx(Int(1), Bytes("manager"))
     token_id = App.globalGetEx(Int(1), Bytes("token_id"))
 
     # whitelist an account

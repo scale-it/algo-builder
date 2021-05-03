@@ -4,7 +4,7 @@ def approval_program():
     """
     This smart contract acts as a controller of the token. It
     ensures that the permissions smart contract (which defines transfer rules)
-    is called with each token transfer transaction between non-reserve accounts. 
+    is called with each token transfer transaction between non-reserve accounts.
     Controller application id is part of the clawback logic sig (template parameter),
     to ensure there is a call to controller during a token-transfer.
     We separate the Controller smart contract from clawback to be able to update
@@ -27,15 +27,15 @@ def approval_program():
     assetManager = AssetParam.manager(Int(0))
 
     on_deployment = Seq([
-    assetManager, # load asset manager from store
-	Assert(And(
-        Txn.application_args.length() == Int(1),
-		# Txn.assets.length() == Int(1), [TEALv3]
-		no_rekey_addr,
+        assetManager, # load asset manager from store
+    	Assert(And(
+    		Txn.application_args.length() == Int(1),
+    		# Txn.assets.length() == Int(1), [TEALv3]
+    		no_rekey_addr,
 
-        # Controller should be deployed by ASA.manager
-		assetManager.hasValue(),
-		Txn.sender() == assetManager.value()
+           	# Controller should be deployed by ASA.manager
+    		assetManager.hasValue(),
+    		Txn.sender() == assetManager.value()
         )),
 
         # total permission contracts during deploy is set to 0.
@@ -60,8 +60,8 @@ def approval_program():
     		Gtxn[1].xfer_asset() == App.globalGet(token_id), # verify if token index is correct
 
     		# Issue should only be done by token reserve
-            assetReserve.hasValue(),
-            Gtxn[0].sender() == assetReserve.value(),
+    		assetReserve.hasValue(),
+    		Gtxn[0].sender() == assetReserve.value(),
     		Gtxn[1].asset_sender() == assetReserve.value(),
 
     		# only allow issue if token is not killed
@@ -220,4 +220,4 @@ def approval_program():
     return program
 
 if __name__ == "__main__":
-    print(compileTeal(approval_program(), Mode.Application, version=2))
+    print(compileTeal(approval_program(), Mode.Application))
