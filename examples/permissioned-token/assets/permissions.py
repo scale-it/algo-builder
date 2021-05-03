@@ -2,13 +2,13 @@ from pyteal import *
 
 def approval_program():
     """
-    This smart contract is the permissions or rules smart contract.
-    If configured in controller, then this sc will ensure 2 rules are
-    followed during a token transfer:
+    Th Permissions smart contract defines transfer rules.
+    Here, we implement two rules:
         a) receiver asset balance should be <=100 after transfer
         b) both [from, to] accounts must be whitelisted
-    Permissions manager manages the contract permission.
-    It can be changed by the asset manager
+    The Permissions smart contract must be called with the Controller to validate
+    transfers. The Controller smart contract defines a manager account, which
+    is used here to update user attributes and smart contract state.
     """
 
     true = Int(1)
@@ -39,7 +39,7 @@ def approval_program():
     permission_manager = App.globalGetEx(Int(1), Bytes("permissions_manager"))
     token_id = App.globalGetEx(Int(1), Bytes("token_id"))
 
-    # add an account to be whitelisted (token transfer is rejected if account is not whitelisted)
+    # whitelist an account
     add_whitelist = Seq([
         permission_manager,
         token_id,

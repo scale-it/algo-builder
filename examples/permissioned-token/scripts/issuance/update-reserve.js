@@ -28,8 +28,8 @@ async function updateReserveByRekeying (deployer, newReserve) {
 
 /**
 * NOTE: this function is for demonstration purpose only (if ASA manager is a single account)
-* If asset manager is a multisig address, then user will receive a signed tx file, decoded tx fetched
-* from that file, append his own signature & send it to network.
+* If asset manager is a multisig address, then user will receive a valid tx file, 
+* add his own signature, by using CLI command `algob sign-multisig` or exported function `signMultiSig`, & send it to network.
 *  - Use `algob.executeSignedTxnFromFile` to execute tx from file
 *  - Use below function if asa.manager is single account
 */

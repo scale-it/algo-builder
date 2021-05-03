@@ -4,6 +4,7 @@ const { fundAccount, totalSupply } = require('./common/common');
  * NOTE: this function is for demonstration purpose only (if ASA creator, manager are single accounts)
  * If asset creator is a multisig address, then user should have a signed tx file, decoded tx fetched
  * from that file, append his own signature & send it to network.
+ *  - Use `algob.signMultiSig` or cli command `sign-multisig` to add the signature to multi-sig transaction file
  *  - Use `algob.executeSignedTxnFromFile` to execute tx from file
  *  - In below function we assume creator is a single account (alice)
  */

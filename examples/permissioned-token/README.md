@@ -1,11 +1,12 @@
 # Permissioned token
 
-In permissioned tokens carry additional requirements and permission mechanism on who, when and how can use that tokens. Securities may use the permissioned token mechanism to define complex compliance requirements, such as investor whitelisting and transfer restrictions. For example, only a verified, KYCed users can exchange tokens.
+Permissioned tokens have a mechanism deciding who can use and hold tokens based on additional requirements. Securities may use the permissioned token mechanism to define complex compliance requirements, such as investor whitelisting and transfer restrictions. For example, only a verified, KYCed users can exchange tokens.
 
 ## Permissioned Token Motivation
 Specifically, for Permissioned Tokens, we want to:
 - Control the number of tokens minted for distribution and also allow flexibility for the administrator to issue more tokens in the future.
-- Create whitelists of individuals who are approved to buy/hold the tokens and segregated sublists, as needed, to support transfer restrictions (e.g., U.S. vs international).
+- Create whitelists of accounts who are approved to buy/hold the tokens.
+- Support transfer restrictions (e.g., U.S. vs international).
 - Manage lock-ups as needed to ensure there are not transfers before allowed.
 - Process requirements or needs that come up post-issuance, such as adding or removing investors to the whitelists or creating additional whitelists for new restrictions.
 - Take confidence in the ability to remove restrictions in the future if transfers become open or unlimited.
@@ -19,8 +20,8 @@ We implement a Permissioned Token template, which executes the following steps:
 1. Create ASA
 2. Distribute to initial users
 3. Freeze all assets OR create the asset default-frozen (clawback can still move frozen tokens).
-4. Create following smart contracts:
-    +  stateful contract (`P`) with rules and permission checks
+4. Create following stateful smart contracts:
+    + permissions (`P`) with rules and permission checks
     + controller (`C`) - which stores the `P` address.
 5. Create a stateless teal (`clawback`) which will check that the C and P is called as well.
 6. Update the clawback address to the contract `clawback`.
@@ -30,9 +31,9 @@ We implement a Permissioned Token template, which executes the following steps:
 ### Specification
 
 Smart contracts (in `/assets`):
-- *clawback.py*: The asset clawback is a contract account represent by this smart contract. It's logic ensures that during token transfer between non-reserve accounts, `controller` smart contract is called. It also handles issuance transaction & update reserve account transaction.
-- *controller.py*: This smart contract acts as a controller of the token. It ensures that during a token transfer smart contract `P` (with rules and permissions) is called. If there are multiple rules contract, then controller must ensure that all those contracts are called (it must store the app ids). Controller smart contract can also be used to kill the token.
-- *permissions.py*: This is the rules smart contract. In this template we have two rules:
+- *clawback.py*: a stateless smart contract which will be responsible to dispatch permission checks and execute the payments. It's set to be the asset clawback address. Clawback logic ensures that during a token transfer between accounts, `controller` smart contract is called. `reserve` account is always allowed to transfer tokens to anyone (bypassing all permission checks). It also handles issuance transaction & update reserve account transaction.
+- *controller.py*: This stateful smart contract acts as a controller of the token. It ensures that during a token transfer, smart contract `P` (with rules and permissions) is called. If there are multiple rules contracts, then the controller must ensure that all those contracts are called (it must store the app ids). This smart contract can also be used to kill the token.
+- *permissions.py*: This is the rules stateful smart contract. In this template we have two rules:
   - An account cannot hold more than 100 tokens
   - Both `from` and `to` accounts must be whitelisted
 - *clear_state_program.py*: clears app state (returns 1)
@@ -43,7 +44,7 @@ Smart contracts (in `/assets`):
 
 Deployment scripts are placed directly in `/scripts`:
 
-**NOTE:** In a real world scenario, transactions involving a multisig account (eg. token can be created and issued by a multisig) will involve an interaction of many users. A user will receive a signed transaction i.e a signed `deployASA` tx by for a multisig accounts. User can append his/her signature using `algob sign-multisg` command & then use `executeSignedTxFromFile` function to successfully send transaction to network (eg. deploy token).
+**NOTE:** In a real world scenario, transactions involving a multisig account (eg. token can be created and issued by a multisig) will involve an interaction of many users. A user will receive a signed transaction or can create an unsigned transaction. User can sign the transaction using `algob sign-multisig` command or by using the `signMultiSig` function in a script. Once transaction is signed, we can use `executeSignedTxFromFile` function to successfully send transaction to network (eg. deploy token).
 
 1. *0-setup-token.js*: In this script we deploy the token (as an Algorand Standard Asset) using `deployer.deployASA(..)` function. Check note above if creator is a multisig address.
 2. *1-setup-apps.js*: In this script we first deploy `controller.py` smart contract (which saves the token_id & sets kill_status to false by default). Only token manager can deploy this contract. Secondly, we deploy the `permissions.py` smart contract, which has the rules. During permisssions deployment, we save the controller_app_id in it's global state.
@@ -82,13 +83,13 @@ For executing this tx, permissions manager calls the permissions smart contract 
 ### Other Solution
 
 The solution in this template extends [Algorand Dev Office Hour](https://register.gotowebinar.com/recording/recordingView?webinarKey=1651582324861824270&registrantEmail=ratikjindal21%40gmail.com) idea presented by Jason - using asset clawback as escrow for permissioned token.
-In this template we add a new contract - `controller.py` which essentially "controls" the asset/token. This controls the general properties of the asset and also ensures that rule(s) smart contract(s) are called.
+In this template we have a new contract - `controller.py` which essentially "controls" the asset/token. This controls the general properties of the asset and also ensures that rule(s) smart contract(s) are called.
 
 ### Links
 
 Developer hour links:
 - *video:* [https://www.youtube.com/watch?v=aMDZamxtR14](https://www.youtube.com/watch?v=aMDZamxtR14)
 - *article:* [https://developer.algorand.org/solutions/assets-and-custom-transfer-logic](https://developer.algorand.org/solutions/assets-and-custom-transfer-logic/)
-- *implementation of above solution using algob*: [examples/restricted-assets](/examples/restricted-assets)
+- *implementation of the solution above using algob*: [examples/restricted-assets](/examples/restricted-assets)
 
 Link to spec of current template: [https://paper.dropbox.com/doc/Algob-Security-Token-Template-FR2LXhVg3edevYPBQZw6F](https://paper.dropbox.com/doc/Algob-Security-Token-Template-FR2LXhVg3edevYPBQZw6F)

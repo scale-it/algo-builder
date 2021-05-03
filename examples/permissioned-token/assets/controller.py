@@ -3,11 +3,12 @@ from pyteal import *
 def approval_program():
     """
     This smart contract acts as a controller of the token. It
-    ensures that the permissions smart contract is called upon each
-    token transfer between non-reserve accounts. The permissions smart contract
-    validates the transfer with some rule checks (eg. asset_amount <= 100).
-    Controller application id is set in clawback (as a template parameter),
+    ensures that the permissions smart contract (which defines transfer rules)
+    is called with each token transfer transaction between non-reserve accounts. 
+    Controller application id is part of the clawback logic sig (template parameter),
     to ensure there is a call to controller during a token-transfer.
+    We separate the Controller smart contract from clawback to be able to update
+    the permissions smart contract (or add a new one) without changing the clawback.
     It also handles kill_status of the token. If token is killed then no token transfers
     are allowed. User can only optOut of the asset.
     """

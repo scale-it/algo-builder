@@ -4,11 +4,11 @@ const {
 const { types } = require('@algo-builder/runtime');
 
 /**
- * Compile clawback and set template parameters
+ * Compile and set clawback logic sig (escrow) with template parameters:
  * - token_id : deployed asa index
- * - controller_app_id: application index of controller smart contract. This makes sure that
+ * - controller_app_id: controller SSC application index. This makes sure that
  *   rules smart contract is called in any token transfer b/w non-reserve accounts
- * - token_reserve: asa.reserve address (stores all unminted tokens). Clawback checks during
+ * - token_reserve: asa.reserve address (owner of all non-minted tokens). Clawback checks during
  *   Issuance tx that from account is the asset reserve
  */
 async function run (runtimeEnv, deployer) {
