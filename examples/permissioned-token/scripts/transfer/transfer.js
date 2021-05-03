@@ -53,7 +53,7 @@ async function transfer (deployer, from, to, amount) {
     /**
      * tx 1 - Asset transfer transaction from sender -> receiver. This tx is executed
      * and approved by the escrow account (clawback.teal). The escrow account address is
-     * also the clawback address which transfers the frozen asset (amount = 1000) from Alice to Bob.
+     * also the clawback address which transfers the frozen asset (amount = amount) from Alice to Bob.
      * clawback ensures a call to controller smart contract during token transfer.
      */
     {

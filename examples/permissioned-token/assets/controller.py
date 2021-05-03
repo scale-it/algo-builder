@@ -54,11 +54,6 @@ def approval_program():
     issue_token = Seq([
         assetReserve,
         Assert(And(
-    		Txn.application_args.length() == Int(1),
-    		# Txn.assets.length() == Int(1), [TEALv3]
-    		Gtxn[1].type_enum() == TxnType.AssetTransfer,
-    		Gtxn[1].xfer_asset() == App.globalGet(token_id), # verify if token index is correct
-
     		# Issue should only be done by token reserve
     		assetReserve.hasValue(),
     		Gtxn[0].sender() == assetReserve.value(),
@@ -70,12 +65,10 @@ def approval_program():
         Return(Int(1))
     ])
 
-    # kill a token, after verifying transaction set is_killed to true(Int(1))
-    assetManager = AssetParam.manager(Int(0))
+
     kill_token = Seq([
-        assetManager, # load asset_manager of Txn.ForeignAssets[0]
+        assetManager, # load asset_manager (from Store) of Txn.ForeignAssets[0]
         Assert(And(
-    		Txn.application_args.length() == Int(1),
     		# Txn.assets.length() == Int(1), [TEALv3],
     		# Txn.assets[0] == App.globalGet(token_id), [TEALv3] # verify if token index is correct
     		Txn.type_enum() == TxnType.ApplicationCall,
@@ -91,7 +84,7 @@ def approval_program():
     ])
 
     add_new_permission = Seq([
-        assetManager,
+        assetManager, # load asset_manager (from Store) of Txn.ForeignAssets[0]
         Assert(And(
     		Txn.application_args.length() == Int(3),
     		# Txn.assets[0] == App.globalGet(token_id), [TEALv3]
@@ -130,37 +123,15 @@ def approval_program():
     group_tx_checks = And(
         # Ensure 3 basic calls + 1 rules contract call is present in group
         Global.group_size() == Add(Int(3), App.globalGet(var_total)),
-        Gtxn[0].type_enum() == TxnType.ApplicationCall, # call to controller smart contract
-        Gtxn[1].type_enum() == TxnType.AssetTransfer,
-        Gtxn[2].type_enum() == TxnType.Payment, # paying fees of escrow
+        Gtxn[1].type_enum() == TxnType.AssetTransfer, # this should be clawback call (to transfer asset)
         Gtxn[3].type_enum() == TxnType.ApplicationCall, # call to permissions contract
-        # this tx should be 1st in group
-        Txn.group_index() == Int(0)
-    )
-
-    # check no rekeying etc
-    common_fields = And(
-        Gtxn[0].rekey_to() == Global.zero_address(),
-        Gtxn[1].rekey_to() == Global.zero_address(),
-        Gtxn[2].rekey_to() == Global.zero_address(),
-        Gtxn[3].rekey_to() == Global.zero_address(),
-        Gtxn[0].close_remainder_to() == Global.zero_address(),
-        Gtxn[1].close_remainder_to() == Global.zero_address(),
-        Gtxn[2].close_remainder_to() == Global.zero_address(),
-        Gtxn[3].close_remainder_to() == Global.zero_address(),
-        Gtxn[0].asset_close_to() == Global.zero_address(),
-        Gtxn[1].asset_close_to() == Global.zero_address(),
-        Gtxn[2].asset_close_to() == Global.zero_address(),
-        Gtxn[3].asset_close_to() == Global.zero_address()
+        Txn.group_index() == Int(0) # this tx should be 1st in group
     )
 
     all_transaction_checks = And(
         # verify first transaction
         # call to controller smart contract - signed by asset sender
         Gtxn[0].application_id() == Global.current_application_id(),
-        Gtxn[0].sender() == Gtxn[2].sender(),
-        Gtxn[0].sender() == Gtxn[3].sender(),
-        Gtxn[0].sender() == Gtxn[1].asset_sender(),
 
         # verify 2nd tx - check asset_id passed through params
         Gtxn[1].xfer_asset() == App.globalGet(token_id),
@@ -177,9 +148,7 @@ def approval_program():
     # transfer token from A -> B. Both A, B are non-reserve accounts
     transfer_token = Seq([
         Assert(And(
-            Txn.application_args.length() == Int(1),
             App.globalGet(var_is_killed) == Int(0), # check token is not killed
-            common_fields,
             group_tx_checks,
             all_transaction_checks
         )),

@@ -16,13 +16,15 @@ def approval_program():
     whitelist_count = Bytes("whitelist_count") # whitelisted accounts counter
     controller_app_id = Bytes("controller_app_id") # token's controller application index
 
-    on_deployment = Seq([
-	Assert(And(
-		Txn.application_args.length() == Int(1),
+    # Always verify that the RekeyTo property of any transaction is set to the ZeroAddress
+    # unless the contract is specifically involved ina rekeying operation.
+    rekey_check = Txn.rekey_to() == Global.zero_address()
 
-		# Always verify that the RekeyTo property of any transaction is set to the ZeroAddress
-		# unless the contract is specifically involved ina rekeying operation.
-		Txn.rekey_to() == Global.zero_address())),
+    on_deployment = Seq([
+    	Assert(And(
+    		Txn.application_args.length() == Int(1),
+            rekey_check
+    	)),
 
         # Save max_tokens count in global state (default = 100, during ssc deploy)
         App.globalPut(max_tokens, Int(100)),
@@ -46,8 +48,8 @@ def approval_program():
         Assert(And(
     		Txn.application_args.length() == Int(2),
     		Txn.accounts.length() == Int(1),
-    		Txn.rekey_to() == Global.zero_address(),
-    		#Txn.applications.length() ==  Int(1), [TEALv3]
+    		rekey_check,
+    		# Txn.applications.length() ==  Int(1), [TEALv3]
 
     		# verify from global state whether controller application passed is the valid one
     		# note: with tealv3 we can just use txn.applications[0] instead of passing an an appArg
@@ -58,7 +60,7 @@ def approval_program():
     		# Txn.assets[0] == token_id.value(), [TEALv3]
 
     		# then verify txn sender is the token manager
-    		permissions_manager.hasValue(),
+    		# permissions_manager.hasValue(),
     		Txn.sender() == permissions_manager.value(),
         )),
 
@@ -78,9 +80,7 @@ def approval_program():
     transfer_token = Seq([
         asset_balance, # load asset_balance of asset_receiver from store
         Assert(And(
-    		Txn.application_args.length() == Int(1),
-    		Global.group_size() >= Int(3),
-    		Txn.sender() == Gtxn[1].asset_sender(),
+            Gtxn[1].type_enum() == TxnType.AssetTransfer, # this should be clawback call
 
     		# verify tx.accounts[1] of current_tx should be same as asset receiver
     		Txn.accounts[1] == Gtxn[1].asset_receiver(),
