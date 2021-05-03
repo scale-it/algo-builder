@@ -2023,6 +2023,7 @@ export class GetAssetDef extends Op {
 
     const assetId = this.interpreter.runtime.ctx.tx.apas[Number(foreignAssetsIdx)];
     const AssetDefinition = this.interpreter.getAssetDef(assetId);
+    let addr;
 
     if (AssetDefinition === undefined) {
       stack.push(0n);
@@ -2043,6 +2044,10 @@ export class GetAssetDef extends Op {
           break;
         default:
           value = stringToBytes(AssetDefinition[s] as string);
+          addr = Buffer.from(value as any).toString("utf-8");
+          if (isValidAddress(addr)) {
+            value = decodeAddress(addr).publicKey;
+          }
           break;
       }
 
