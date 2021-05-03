@@ -2018,8 +2018,8 @@ export class GetAssetDef extends Op {
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
-    let foreignAssetsIdx = this.assertBigInt(stack.pop(), this.line);
-    this.checkIndexBound(Number(--foreignAssetsIdx), this.interpreter.runtime.ctx.tx.apas, this.line);
+    const foreignAssetsIdx = this.assertBigInt(stack.pop(), this.line);
+    this.checkIndexBound(Number(foreignAssetsIdx), this.interpreter.runtime.ctx.tx.apas, this.line);
 
     const assetId = this.interpreter.runtime.ctx.tx.apas[Number(foreignAssetsIdx)];
     const AssetDefinition = this.interpreter.getAssetDef(assetId);
