@@ -13,11 +13,11 @@ def approval_program():
     are allowed. User can only optOut of the asset.
     """
 
-    var_is_killed = Bytes("is_token_killed")
+    var_is_killed = Bytes("killed")
     var_total = Bytes("total_rules")
     token_id = Bytes("token_id")
-    permissions_manager = Bytes("permissions_manager")	# permissions manager (asa.manager by default)
-    permission_id = Bytes("permissions_sc_app_id") # permissions smart contract application index
+    permissions_manager = Bytes("manager")	# permissions manager (asa.manager by default)
+    permission_id = Bytes("perm_app") # permissions smart contract application index
 
     # Always verify that the RekeyTo property of any transaction is set to the ZeroAddress
     # unless the contract is specifically involved in a rekeying operation.
