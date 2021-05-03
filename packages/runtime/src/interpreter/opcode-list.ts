@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
-import { AssetDef, decodeAddress, encodeAddress, isValidAddress, verifyBytes } from "algosdk";
+import { AssetDef, AssetInfo, decodeAddress, encodeAddress, isValidAddress, verifyBytes } from "algosdk";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
 import { Keccak } from 'sha3';
@@ -2042,9 +2042,8 @@ export class GetAssetDef extends Op {
           value = AssetDefinition["default-frozen"] ? 1n : 0n;
           break;
         default:
-          value = AssetDefinition[s] as StackElem;
-          if (typeof value === "string" && isValidAddress(value)) {
-            value = decodeAddress(value).publicKey;
+          if (typeof AssetDefinition[s] === "string" && isValidAddress(AssetDefinition[s] as string)) {
+            value = decodeAddress(AssetDefinition[s] as string).publicKey;
           } else {
             value = stringToBytes(AssetDefinition[s] as string);
           }
