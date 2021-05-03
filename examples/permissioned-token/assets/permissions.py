@@ -59,8 +59,8 @@ def approval_program():
     		# token_id.hasValue(),
     		# Txn.assets[0] == token_id.value(), [TEALv3]
 
-    		# then verify txn sender is the token manager
-    		# permissions_manager.hasValue(),
+    		# then verify txn sender is the permissions manager
+    		permissions_manager.hasValue(),
     		Txn.sender() == permissions_manager.value(),
         )),
 
@@ -105,16 +105,27 @@ def approval_program():
         Return(Int(1))
     ])
 
+    # permissions_manager can update this smart contract to update/add to
+    # existing set of rule(s)
+    handle_update = Seq([
+        permissions_manager,
+        Assert(And(
+            Btoi(Txn.application_args[1]) == App.globalGet(controller_app_id), # verify controller_app_id
+    		Txn.sender() == permissions_manager.value(),
+        )),
+        Return(Int(1))
+    ])
+
     # Verfies that the application_id is 0, jumps to on_deployment.
     # Verifies that DeleteApplication is used and blocks that call
-    # Verifies that UpdateApplication is used and blocks that call (unsafe for production use).
+    # Verifies that UpdateApplication is used and jumps to handle_update.
     # Verifies that closeOut is used and approves the tx.
     # Verifies that OptInApplication is used and jumps to handle_optin
     # Verifies that first argument is "add_whitelist" and jumps to add_whitelist.
     # Verifies that first argument is "transfer" and jumps to transfer_token.
     program = Cond(
         [Txn.application_id() == Int(0), on_deployment],
-        [Txn.on_completion() == OnComplete.UpdateApplication, Return(Int(0))], # block update
+        [Txn.on_completion() == OnComplete.UpdateApplication, handle_update],
         [Txn.on_completion() == OnComplete.DeleteApplication, Return(Int(0))], # block delete
         [Txn.on_completion() == OnComplete.CloseOut, Return(Int(1))],
         [Txn.on_completion() == OnComplete.OptIn, handle_optin],
