@@ -304,7 +304,7 @@ export class Ctx implements Context {
           break;
         }
         case TransactionType.CallNoOpSSC: {
-          this.tx = this.gtxs[idx]; // update current tx to index of stateful
+          this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appId);
           this.runtime.run(appParams[approvalProgram], ExecutionMode.STATEFUL);
           break;
