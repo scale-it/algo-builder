@@ -22,15 +22,16 @@ async function run (runtimeEnv, deployer) {
     funder: masterAccount,
     fundingMicroAlgo: 1e6 // 1 Algo
   },
-  { closeRemainderTo: john.addr }, []);
+  { closeRemainderTo: john.addr });
 
   await deployer.addCheckpointKV('User Checkpoint', 'Fund Contract Account');
 
-  let contract = await deployer.loadLogic('htlc.py', [stringToBytes(wrongSecret)]);
-  let contractAddress = contract.address();
+  const contract = await deployer.loadLogic('htlc.py');
+  const contractAddress = contract.address();
 
   txnParams.fromAccountAddr = contractAddress;
   txnParams.sign = types.SignType.LogicSignature;
+  txnParams.args = [stringToBytes(wrongSecret)];
   txnParams.toAccountAddr = globalZeroAddress;
   txnParams.amountMicroAlgos = 0;
   txnParams.lsig = contract;
@@ -39,11 +40,8 @@ async function run (runtimeEnv, deployer) {
   // Fails because wrong secret is provided
   await executeTransaction(deployer, txnParams);
 
-  contract = await deployer.loadLogic('htlc.py', [stringToBytes(secret)]);
-  contractAddress = contract.address();
-
   // Passes because right secret is provided
-  txnParams.lsig = contract;
+  txnParams.args = [stringToBytes(secret)];
   await executeTransaction(deployer, txnParams);
 }
 

@@ -151,24 +151,22 @@ class DeployerBasicMode {
   /**
    * Loads logic signature for contract mode
    * @param name ASC name
-   * @param scParams: Smart contract parameters used for calling smart contract
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    * @returns loaded logic signature from assets/<file_name>.teal
    */
-  async loadLogic (name: string, scParams: LogicSigArgs, scTmplParams?: SCParams): Promise<LogicSig> {
-    return await getLsig(name, this.algoOp.algodClient, scParams, scTmplParams);
+  async loadLogic (name: string, scTmplParams?: SCParams): Promise<LogicSig> {
+    return await getLsig(name, this.algoOp.algodClient, scTmplParams);
   }
 
   /**
    * Loads multisigned logic signature from .lsig or .blsig file
    * @param name filename
-   * @param scParams parameters
    * @returns multi signed logic signature from assets/<file_name>.(b)lsig
    */
-  async loadMultiSig (name: string, scParams: LogicSigArgs): Promise<LogicSig> {
+  async loadMultiSig (name: string): Promise<LogicSig> {
     if (name.endsWith(blsigExt)) { return await loadBinaryMultiSig(name); }
 
-    const lsig = await getLsig(name, this.algoOp.algodClient, scParams); // get lsig from .teal (getting logic part from lsig)
+    const lsig = await getLsig(name, this.algoOp.algodClient); // get lsig from .teal (getting logic part from lsig)
     const msig = await readMsigFromFile(name); // Get decoded Msig object from .msig
     Object.assign(lsig.msig = {} as MultiSig, msig);
     return lsig;
@@ -363,13 +361,12 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * @param name     - ASC filename
    * @param flags    - Deployments flags (as per SPEC)
    * @param payFlags - as per SPEC
-   * @param scParams: Smart contract parameters (used while calling smart contract)
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
   async fundLsig (name: string, flags: FundASCFlags,
-    payFlags: rtypes.TxParams, scParams: LogicSigArgs, scTmplParams?: SCParams): Promise<void> {
+    payFlags: rtypes.TxParams, scTmplParams?: SCParams): Promise<void> {
     try {
-      await this.algoOp.fundLsig(name, flags, payFlags, this.txWriter, scParams, scTmplParams);
+      await this.algoOp.fundLsig(name, flags, payFlags, this.txWriter, scTmplParams);
     } catch (error) {
       console.log(error);
       throw error;
@@ -382,17 +379,16 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * https://developer.algorand.org/docs/features/asc1/stateless/sdks/#account-delegation-sdk-usage
    * @param name: Stateless Smart Contract filename (must be present in assets folder)
    * @param signer: Signer Account which will sign the smart contract
-   * @param scParams: Smart contract Parameters(Used while calling smart contract)
    * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
   async mkDelegatedLsig (
     name: string, signer: rtypes.Account,
-    scParams: LogicSigArgs, scTmplParams?: SCParams): Promise<LsigInfo> {
+    scTmplParams?: SCParams): Promise<LsigInfo> {
     this.assertNoAsset(name);
     let lsigInfo = {} as any;
     try {
-      const lsig = await getLsig(name, this.algoOp.algodClient, scParams, scTmplParams);
+      const lsig = await getLsig(name, this.algoOp.algodClient, scTmplParams);
       lsig.sign(signer.sk);
       lsigInfo = {
         creator: signer.addr,
@@ -494,14 +490,14 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
   }
 
   async fundLsig (_name: string, _flags: FundASCFlags,
-    _payFlags: rtypes.TxParams, _scParams: LogicSigArgs, _scInitParams?: unknown): Promise<LsigInfo> {
+    _payFlags: rtypes.TxParams, _scInitParams?: unknown): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "fundLsig"
     });
   }
 
   async mkDelegatedLsig (_name: string, _signer: rtypes.Account,
-    _scParams: LogicSigArgs, _scInitParams?: unknown): Promise<LsigInfo> {
+    _scInitParams?: unknown): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "delegatedLsig"
     });

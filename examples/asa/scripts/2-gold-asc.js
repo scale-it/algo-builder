@@ -9,18 +9,16 @@ async function run (runtimeEnv, deployer) {
   await executeTransaction(deployer, mkParam(masterAccount, goldOwner.addr, 200e6, { note: 'funding account' }));
 
   await deployer.fundLsig('2-gold-contract-asc.teal',
-    { funder: goldOwner, fundingMicroAlgo: 1e6 }, {}, []); // funding with 1 Algo
+    { funder: goldOwner, fundingMicroAlgo: 1e6 }, {}); // funding with 1 Algo
 
-  const ascInfoAlgoDelegated = await deployer.mkDelegatedLsig('3-gold-delegated-asc.teal',
-    goldOwner, []);
-  const ascInfoGoldDelegated = await deployer.mkDelegatedLsig('4-gold-asa.teal',
-    goldOwner, []);
+  const ascInfoAlgoDelegated = await deployer.mkDelegatedLsig('3-gold-delegated-asc.teal', goldOwner);
+  const ascInfoGoldDelegated = await deployer.mkDelegatedLsig('4-gold-asa.teal', goldOwner);
 
   console.log(ascInfoAlgoDelegated);
   console.log(ascInfoGoldDelegated);
 
   /* Contract opt-in for ASA gold + fund contract with ASA gold */
-  const lsig = await deployer.loadLogic('2-gold-contract-asc.teal', []);
+  const lsig = await deployer.loadLogic('2-gold-contract-asc.teal');
   const goldAsset = deployer.asa.get('gold');
   const goldAssetID = goldAsset.assetIndex;
 

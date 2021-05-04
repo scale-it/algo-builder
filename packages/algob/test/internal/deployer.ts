@@ -279,7 +279,7 @@ describe("DeployerDeployMode", () => {
 
   it("Should not crash when same ASC Contract Mode name is tried to fund second time", async () => {
     const deployer = new DeployerDeployMode(deployerCfg);
-    await deployer.fundLsig("Lsig", { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {}, []);
+    await deployer.fundLsig("Lsig", { funder: deployer.accounts[1], fundingMicroAlgo: 1000 }, {});
   });
 
   it("Should return empty ASA map on no CP", async () => {

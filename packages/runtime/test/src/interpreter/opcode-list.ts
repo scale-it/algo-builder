@@ -2926,7 +2926,7 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset Total", () => {
       const op = new GetAssetDef(["AssetTotal"], 1, interpreter);
 
-      stack.push(1n); // asset index
+      stack.push(0n); // asset index
 
       op.execute(stack);
       const last = stack.pop();
@@ -2939,7 +2939,7 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset Decimals", () => {
       const op = new GetAssetDef(["AssetDecimals"], 1, interpreter);
 
-      stack.push(1n); // asset index
+      stack.push(0n); // asset index
 
       op.execute(stack);
       const last = stack.pop();
@@ -2952,7 +2952,7 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset Default Frozen", () => {
       const op = new GetAssetDef(["AssetDefaultFrozen"], 1, interpreter);
 
-      stack.push(1n); // asset index
+      stack.push(0n); // asset index
 
       op.execute(stack);
       const last = stack.pop();
@@ -2965,7 +2965,7 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset Unit Name", () => {
       const op = new GetAssetDef(["AssetUnitName"], 1, interpreter);
 
-      stack.push(1n); // asset index
+      stack.push(0n); // asset index
 
       op.execute(stack);
       const last = stack.pop();
@@ -2978,7 +2978,7 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset Name", () => {
       const op = new GetAssetDef(["AssetName"], 1, interpreter);
 
-      stack.push(1n); // asset index
+      stack.push(0n); // asset index
 
       op.execute(stack);
       const last = stack.pop();
@@ -2991,7 +2991,7 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset URL", () => {
       const op = new GetAssetDef(["AssetURL"], 1, interpreter);
 
-      stack.push(1n); // asset index
+      stack.push(0n); // asset index
 
       op.execute(stack);
       const last = stack.pop();
@@ -3004,7 +3004,7 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset MetaData Hash", () => {
       const op = new GetAssetDef(["AssetMetadataHash"], 1, interpreter);
 
-      stack.push(1n); // asset index
+      stack.push(0n); // asset index
 
       op.execute(stack);
       const last = stack.pop();
@@ -3017,7 +3017,7 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset Manager", () => {
       const op = new GetAssetDef(["AssetManager"], 1, interpreter);
 
-      stack.push(1n); // asset index
+      stack.push(0n); // asset index
 
       op.execute(stack);
       const last = stack.pop();
@@ -3030,7 +3030,7 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset Reserve", () => {
       const op = new GetAssetDef(["AssetReserve"], 1, interpreter);
 
-      stack.push(1n); // asset index
+      stack.push(0n); // asset index
 
       op.execute(stack);
       const last = stack.pop();
@@ -3043,7 +3043,7 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset Freeze", () => {
       const op = new GetAssetDef(["AssetFreeze"], 1, interpreter);
 
-      stack.push(1n); // asset index
+      stack.push(0n); // asset index
 
       op.execute(stack);
       const last = stack.pop();
@@ -3056,7 +3056,7 @@ describe("Teal Opcodes", function () {
     it("should push correct Asset Clawback", () => {
       const op = new GetAssetDef(["AssetClawback"], 1, interpreter);
 
-      stack.push(1n); // asset index
+      stack.push(0n); // asset index
 
       op.execute(stack);
       const last = stack.pop();
@@ -3069,7 +3069,7 @@ describe("Teal Opcodes", function () {
     it("should push 0 if Asset not defined", () => {
       const op = new GetAssetDef(["AssetFreeze"], 1, interpreter);
 
-      stack.push(2n); // account index
+      stack.push(1n); // account index
 
       op.execute(stack);
 

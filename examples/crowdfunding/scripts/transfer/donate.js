@@ -10,7 +10,7 @@ async function run (runtimeEnv, deployer) {
     sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
     toAccountAddr: donorAccount.addr,
-    amountMicroAlgos: 20000000,
+    amountMicroAlgos: 20e6,
     payFlags: {}
   });
 
@@ -21,7 +21,7 @@ async function run (runtimeEnv, deployer) {
   const appInfo = deployer.getSSC('crowdFundApproval.teal', 'crowdFundClear.teal');
 
   // Get Escrow Account Address
-  const escrowAccount = await deployer.loadLogic('crowdFundEscrow.py', [], { APP_ID: appInfo.appID });
+  const escrowAccount = await deployer.loadLogic('crowdFundEscrow.py', { APP_ID: appInfo.appID });
   console.log('Escrow Address: ', escrowAccount.address());
 
   const txGroup = [

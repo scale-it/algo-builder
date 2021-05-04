@@ -17,7 +17,7 @@ import { getProgram } from "./lib/load-program";
 import { signMultiSig } from "./lib/msig";
 import { updateSSC } from "./lib/ssc";
 import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC, readGlobalStateSSC, readLocalStateSSC } from "./lib/status";
-import { executeSignedTxnFromFile, executeTransaction, getSuggestedParams, mkTxParams } from "./lib/tx";
+import { executeSignedTxnFromFile, executeTransaction, getSuggestedParams, mkTxParams, sendAndWait } from "./lib/tx";
 import * as types from "./types";
 
 export {
@@ -47,5 +47,6 @@ export {
   addressToPk,
   getProgram,
   types,
-  signMultiSig
+  signMultiSig,
+  sendAndWait
 };

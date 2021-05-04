@@ -18,12 +18,12 @@ async function run (runtimeEnv, deployer) {
   // Transactions for Transaction for ALGO - Contract : '2-gold-contract-asc.teal'  (Contract Mode)
   // sender is contract account
   const lsig = await deployer.loadLogic('2-gold-contract-asc.teal', []);
-  const sender = lsig.address();
+  const senderAddress = lsig.address();
 
   const algoTxParam = {
     type: types.TransactionType.TransferAlgo,
     sign: types.SignType.LogicSignature,
-    fromAccountAddr: sender,
+    fromAccountAddr: senderAddress,
     toAccountAddr: john.addr,
     amountMicroAlgos: 20n, // bigint is also supported
     lsig: lsig,
@@ -42,7 +42,7 @@ async function run (runtimeEnv, deployer) {
   const assetTxParam = {
     type: types.TransactionType.TransferAsset,
     sign: types.SignType.LogicSignature,
-    fromAccountAddr: sender,
+    fromAccountAddr: senderAddress,
     toAccountAddr: bob.addr,
     amount: 10,
     assetID: assetID,
