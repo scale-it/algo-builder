@@ -32,23 +32,14 @@ def clawback_escrow(TOKEN_ID, CONTROLLER_APP_ID):
         Gtxn[2].asset_close_to() == Global.zero_address()
     )
 
-    # verify first transaction
-    # check level smart contract call - signed by asset sender
-    first_transaction_checks = And(
-        # check app_id passed through params
-        Gtxn[0].application_id() == Int(CONTROLLER_APP_ID),
-        Gtxn[0].sender() == Gtxn[2].sender(),
-        Gtxn[0].sender() == Gtxn[1].asset_sender()
-    )
+    # verify first transaction - signed by asset sender
+    # check app_id passed through params
+    first_transaction_check = Gtxn[0].application_id() == Int(CONTROLLER_APP_ID)
 
     # verify second transaction
     # tx 1 - clawback transactions that moves the frozen asset from sender to receiver - signed by clawback
-    # verify the account sent in the accounts array is
-    # actually the receiver of the asset in asset xfer
-    second_transaction_checks = (
-        # check asset_id passed through params
-        Gtxn[1].xfer_asset() == Int(TOKEN_ID)
-    )
+    # check asset_id passed through params
+    second_transaction_check = Gtxn[1].xfer_asset() == Int(TOKEN_ID)
 
     # verify third transaction
     # tx 2 - payment transaction from sender to clawback to pay for the fee of the clawback
@@ -63,8 +54,8 @@ def clawback_escrow(TOKEN_ID, CONTROLLER_APP_ID):
     token_transfer = And(
         group_tx_checks,
         common_fields,
-        first_transaction_checks,
-        second_transaction_checks,
+        first_transaction_check,
+        second_transaction_check,
         third_transaction_checks
     )
 
@@ -81,25 +72,9 @@ def clawback_escrow(TOKEN_ID, CONTROLLER_APP_ID):
         Gtxn[1].rekey_to() == Global.zero_address(),
     )
 
-    update_reserve = And(
-        # in 1st tx we move all funds to new asset reserve
-        Gtxn[0].type_enum() == TxnType.AssetTransfer,
-        Gtxn[0].xfer_asset() == Int(TOKEN_ID), # verify token index for asset_transfer
-
-        # imp: check asset receiver first tx (move funds) is the new reserve
-        Gtxn[0].asset_receiver() == Gtxn[1].config_asset_reserve(),
-
-        Gtxn[1].type_enum() == TxnType.AssetConfig,
-        Gtxn[1].config_asset() == Int(TOKEN_ID), # verify token index for asset_config
-
-        # ensure no rekeying
-        Gtxn[0].rekey_to() == Global.zero_address(),
-        Gtxn[1].rekey_to() == Global.zero_address()
-    )
-
     return If(
         Global.group_size() == Int(2),
-        Or(issuance_tx, update_reserve),
+        issuance_tx,
         token_transfer
     )
 

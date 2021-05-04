@@ -28,8 +28,9 @@ async function updateReserveByRekeying (deployer, newReserve) {
 
 /**
 * NOTE: this function is for demonstration purpose only (if ASA manager is a single account)
-* If asset manager is a multisig address, then user will receive a valid tx file, 
-* add his own signature, by using CLI command `algob sign-multisig` or exported function `signMultiSig`, & send it to network.
+* If asset manager is a multisig address, then user will receive a valid tx file,
+* add his own signature, by using CLI command `algob sign-multisig`
+* or exported function `signMultiSig`, & send it to network.
 *  - Use `algob.executeSignedTxnFromFile` to execute tx from file
 *  - Use below function if asa.manager is single account
 */
@@ -62,7 +63,22 @@ async function updateReserveByAssetConfig (deployer, newReserve) {
    */
   const updateReserveParams = [
     /**
-     * tx 0 - Asset transfer transaction from current Reserve -> newReserve.
+     * tx 0 - Call to controller stateful smart contract with application arg: 'transfer'
+     * The contract ensures that there is a call to permissions smart contract in the txGroup,
+     * so that rules are checked during token transfer. The smart contract also checks each transaction
+     * params in the txGroup (eg. sender(tx1) === receiver(tx2) === escrowAddress)
+     */
+    {
+      type: types.TransactionType.CallNoOpSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: asaManager,
+      appId: controllerSSCInfo.appID,
+      payFlags: { totalFee: 1000 },
+      appArgs: ['str:force_transfer'],
+      foreignAssets: [asaInfo.assetIndex] // to verify token reserve, manager
+    },
+    /**
+     * tx 1 - Asset transfer transaction from current Reserve -> newReserve.
      * The amount is equal to entire asset holding of reserve, i.e we move all asset holdings
      * to the new reserve address.
      */
@@ -78,7 +94,19 @@ async function updateReserveByAssetConfig (deployer, newReserve) {
       payFlags: { totalFee: 1000 }
     },
     /**
-     * tx 1 - Asset config transaction to update token reserve to new address. Can only be executed
+     * tx 2 - Payment transaction of 1000 microAlgo from "from account" to escrow Account. This tx is used to
+     * cover the fee of tx1 (clawback).
+     */
+    {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: asaManager,
+      toAccountAddr: escrowAddress,
+      amountMicroAlgos: 1000,
+      payFlags: { totalFee: 1000 }
+    },
+    /**
+     * tx 3 (last tx) - Asset config transaction to update token reserve to new address. Can only be executed
      * by the asset manager.
      */
     {
@@ -113,17 +141,17 @@ async function run (runtimeEnv, deployer) {
 
   /**
    * Approach 1 (group of 2 tx):
-   * - tx0: Move all tokens from oldReserve to newReserve
-   * - tx1: Update the asset reserve to new reserve address
+   * a): Move all tokens from oldReserve to newReserve (by force_transfer)
+   * b): Update the asset reserve to new reserve address
    */
-  // await updateReserveByAssetConfig(deployer, newReserve);
+  await updateReserveByAssetConfig(deployer, newReserve);
 
   /**
    * Approach 2: rekey old reserve to new reserve
    * NOTE: now for issuance transaction, fromAccountAddr will be old reserve,
    * but fromAccount (signing authority) will be the new reserve account
    */
-  await updateReserveByRekeying(deployer, newReserve);
+  // await updateReserveByRekeying(deployer, newReserve);
 
   /**
    * Use below function if asa.manager is a multisig account (as user receive a signed

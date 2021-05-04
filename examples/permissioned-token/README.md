@@ -7,7 +7,7 @@ Specifically, for Permissioned Tokens, we want to:
 - Control the number of tokens minted for distribution and also allow flexibility for the administrator to issue more tokens in the future.
 - Create whitelists of accounts who are approved to buy/hold the tokens.
 - Support transfer restrictions (e.g., U.S. vs international).
-- Manage lock-ups as needed to ensure there are not transfers before allowed.
+- Manage lock-ups as needed to ensure there are no transfers before they're allowed.
 - Process requirements or needs that come up post-issuance, such as adding or removing investors to the whitelists or creating additional whitelists for new restrictions.
 - Take confidence in the ability to remove restrictions in the future if transfers become open or unlimited.
 The permissioned token Template outlines a design of permissioned tokens with emphasis for shares and equity.
@@ -19,14 +19,15 @@ We implement a Permissioned Token template, which executes the following steps:
 
 1. Create ASA
 2. Distribute to initial users
-3. Freeze all assets OR create the asset default-frozen (clawback can still move frozen tokens).
-4. Create following stateful smart contracts:
+3. Move remaining assets to `reserve` account to properly signal future asset issuance.
+4. Freeze all assets OR create the asset default-frozen (clawback can still move frozen tokens).
+5. Create following stateful smart contracts:
     + permissions (`P`) with rules and permission checks
     + controller (`C`) - which stores the `P` address.
-5. Create a stateless teal (`clawback`) which will check that the C and P is called as well.
-6. Update the clawback address to the contract `clawback`.
-7. Whenever user A want's to transfer some tokens to B, he will need to combine this transaction with a clawback asset transfer transaction.
-8. Clawback transfer ensures a call to the controller smart contract (`C`). Controller has the application id of permissions/rules smart contract (`P`), and hence ensures `P` is called as well.
+6. Create a stateless teal (`clawback`) which will check that the C and P is called as well.
+7. Update the clawback address to the contract `clawback`.
+8. Whenever user A want's to transfer some tokens to B, he will need to combine this transaction with a clawback asset transfer transaction.
+9. Clawback transfer ensures a call to the controller smart contract (`C`). Controller has the application id of permissions/rules smart contract (`P`), and hence ensures `P` is called as well.
 
 ### Specification
 
@@ -71,14 +72,16 @@ b) token transfer transaction from sender -> receiver using clawback (clawback c
 c) payment transaction from sender -> clawback (to cover tx fee of above transaction)
 d) call to permissions smart contract (to check rules: max token holding by receiver < 100, both from & to are whitelisted)
 
-5. *Kill Token* (`scripts/permissions/kill.js`): Token manager can kill the token. If the token is killed then all issuance and token transfer transactions are rejected. User can only opt-out from the token to remove his holding and decrease his account's minimum balance.
+5. *Forced Asset transfer* (`scripts/transfer/force-transfer.js`): This is similar to asset transfer, but in this case the assets are being moved by asset manager, rather than the from account itself (fails otherwise). The transaction group is also similar to above, difference being that call to controller, permissions ssc & paying fees of escrow is done by asset manager. Asset manager essentially represents clawback here (revoking tokens from an account).
+
+6. *Kill Token* (`scripts/permissions/kill.js`): Token manager can kill the token. If the token is killed then all issuance and token transfer transactions are rejected. User can only opt-out from the token to remove his holding and decrease his account's minimum balance.
 
     a) To kill the token, execute an application call tx to the controller smart contract with appArg: 'kill'. Only ASA mangager can do that. Controller updates the global state key (*is_token_killed*) to true.
 
-6. *Whitelist User* (`scripts/permissions/whitelist.js`): Only a permissions manager (whose address is stored in the controller smart contract) can add a new user to the whitelist which enables that user to receive or send tokens.
+7. *Whitelist User* (`scripts/permissions/whitelist.js`): Only a permissions manager (whose address is stored in the controller smart contract) can add a new user to the whitelist which enables that user to receive or send tokens.
 For executing this tx, permissions manager calls the permissions smart contract with application arg "add_whitelist", and passes the account he wishes to whitelist in AppAccount array. `token_id` is also passed in the ForeignAsset array to verify token. If tx is successful, then permission smart contract updates the local state of `Txn.accounts[1]` & set *whitelisted = true (Int(1))*.
 
-7. *Change Permissions Manager* (`scripts/permissions/change-manager.js`): Token manager can change the permissions manager via an application call to the controller smart contract. If the parameters are correct, tx is accepted and controller smart contract updates the `permission_manager` in it's global state.
+8. *Change Permissions Manager* (`scripts/permissions/change-manager.js`): Token manager can change the permissions manager via an application call to the controller smart contract. If the parameters are correct, tx is accepted and controller smart contract updates the `permission_manager` in it's global state.
 
 ### Other Solution
 

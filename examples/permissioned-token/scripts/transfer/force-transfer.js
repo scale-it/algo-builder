@@ -9,12 +9,13 @@ const { fundAccount, optInToSSC } = require('../common/common');
 const clearStateProgram = 'clear_state_program.py';
 
 /**
- * Transfer token between non-reserve accounts
- * @param from fromAccount
- * @param toAddr toAccountAddress
+ * Force transfer tokens between 2 accounts by (signed by token manager)
+ * @param from fromAccountAddress
+ * @param to toAccountAddress
  * @param {number} amount units of token to transfer
  */
-async function transfer (deployer, from, toAddr, amount) {
+async function forceTransfer (deployer, fromAddr, toAddr, amount) {
+  const asaManager = deployer.accountsByName.get('alice'); // alice is set as the permissions_manager during deploy
   const asaInfo = deployer.asa.get('gold');
   const controllerSSCInfo = deployer.getSSC('controller.py', clearStateProgram);
   const permissionsSSCInfo = deployer.getSSC('permissions.py', clearStateProgram);
@@ -27,7 +28,9 @@ async function transfer (deployer, from, toAddr, amount) {
   const escrowLsig = await deployer.loadLogic('clawback.py', [], escrowParams);
   const escrowAddress = escrowLsig.address();
 
-  const txGroup = [
+  // notice the difference in calls here: stateful calls are done by token manager here
+  // and from, to address are only used in asset transfer tx
+  const forceTxGroup = [
     /**
      * tx 0 - Call to controller stateful smart contract with application arg: 'transfer'
      * The contract ensures that there is a call to permissions smart contract in the txGroup,
@@ -37,10 +40,11 @@ async function transfer (deployer, from, toAddr, amount) {
     {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
-      fromAccount: from,
+      fromAccount: asaManager,
       appId: controllerSSCInfo.appID,
       payFlags: { totalFee: 1000 },
-      appArgs: ['str:transfer']
+      appArgs: ['str:force_transfer'],
+      foreignAssets: [asaInfo.assetIndex] // to verify token reserve, manager
     },
     /**
      * tx 1 - Asset transfer transaction from sender -> receiver. This tx is executed
@@ -54,7 +58,7 @@ async function transfer (deployer, from, toAddr, amount) {
       fromAccountAddr: escrowAddress,
       recipient: toAddr,
       assetID: asaInfo.assetIndex,
-      revocationTarget: from.addr,
+      revocationTarget: fromAddr,
       amount: amount,
       lsig: escrowLsig,
       payFlags: { totalFee: 1000 }
@@ -66,21 +70,18 @@ async function transfer (deployer, from, toAddr, amount) {
     {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
-      fromAccount: from,
+      fromAccount: asaManager,
       toAccountAddr: escrowAddress,
       amountMicroAlgos: 1000,
       payFlags: { totalFee: 1000 }
     },
     /**
      * tx 3 - Call to permissions stateful smart contract with application arg: 'transfer'
-     * The contract ensures that alice and bob have a minimum level (accred-level) set
-     * and only then the tx will be approved. The smart contract also checks each transaction
-     * params in the txGroup (eg. sender(tx1) === receiver(tx2) === escrowAddress)
      */
     {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
-      fromAccount: from,
+      fromAccount: asaManager,
       appId: permissionsSSCInfo.appID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:transfer'],
@@ -89,8 +90,8 @@ async function transfer (deployer, from, toAddr, amount) {
   ];
 
   console.log(`* Transferring ${amount} tokens from
-    [${from.name}:${from.addr}] to [${toAddr}] *`);
-  await executeTransaction(deployer, txGroup);
+    [${fromAddr}] to [${toAddr}] *`);
+  await executeTransaction(deployer, forceTxGroup);
 
   console.log(`* ${toAddr}(receiver) asset holding: *`);
   await balanceOf(deployer, toAddr, asaInfo.assetIndex);
@@ -98,19 +99,15 @@ async function transfer (deployer, from, toAddr, amount) {
   console.log('* Transfer Successful *');
 }
 
+// similar to transfer.js, but tokens are transferred by the token manager in this case
 async function run (runtimeEnv, deployer) {
-  // alice is set-up as the permissions manager during deploy
+  // alice is set-up as the manager(s) during deploy
+  const asaManager = deployer.accountsByName.get('alice');
   const permissionsManager = deployer.accountsByName.get('alice');
   const permissionsSSCInfo = deployer.getSSC('permissions.py', clearStateProgram);
 
   /**
-   * Transfer some tokens b/w 2 non-reserve accounts
-   * - Account A - bob
-   * - Account B - john
-   * - First whitelist bob & john account
-   * - Second, issue few tokens from ASA Reserve to bob
-   * - Finally, do token transfer tx from [bob -> john]
-   * Both bob & john are non reserve accounts
+   * Force transfer some tokens b/w 2 accounts
    */
   const bob = deployer.accountsByName.get('bob');
   const john = deployer.accountsByName.get('john');
@@ -118,7 +115,7 @@ async function run (runtimeEnv, deployer) {
 
   /** Fund john, bob, permissionsManager accounts by master **/
   await Promise.all([
-    fundAccount(deployer, permissionsManager),
+    fundAccount(deployer, asaManager),
     fundAccount(deployer, john),
     fundAccount(deployer, bob),
     fundAccount(deployer, elon)
@@ -126,6 +123,7 @@ async function run (runtimeEnv, deployer) {
 
   // opt-in accounts to permissions smart contract
   // comment this code if already opted-in
+  await optInToSSC(deployer, asaManager, permissionsSSCInfo.appID, {}, {});
   await optInToSSC(deployer, elon, permissionsSSCInfo.appID, {}, {});
   await optInToSSC(deployer, bob, permissionsSSCInfo.appID, {}, {});
   await optInToSSC(deployer, john, permissionsSSCInfo.appID, {}, {});
@@ -137,10 +135,11 @@ async function run (runtimeEnv, deployer) {
    * NOTE: whitelist() transaction will be executed by the permissionsManager,
    * current_user (a non reserve account) will not control permissionsManager account.
    */
+  await whitelist(deployer, permissionsManager, asaManager.addr);
   await whitelist(deployer, permissionsManager, bob.addr);
   await whitelist(deployer, permissionsManager, john.addr);
 
-  // opt-in accounts to asa 'gold' (so they can receive it)
+  // opt-in accounts to asa 'gold' (so they can receive the asset)
   await Promise.all([
     deployer.optInAcountToASA('gold', elon.name, {}),
     deployer.optInAcountToASA('gold', bob.name, {}),
@@ -148,24 +147,24 @@ async function run (runtimeEnv, deployer) {
   ]);
 
   // note: if reserve is multisig, then user will use executeSignedTxnFromFile function
-  await issue(deployer, bob, 300); // issue(mint) 300 tokens to bob from reserve
+  await issue(deployer, bob, 100); // issue(mint) 100 tokens to bob from reserve
 
-  // transaction PASS: both bob & john are whitelisted & receiver balance <= 100)
-  await transfer(deployer, bob, john.addr, 15);
+  // transaction PASS: both bob & john are whitelisted & receiver balance <= 100
+  await forceTransfer(deployer, bob.addr, john.addr, 15);
 
   try {
-    // transaction FAIL: as receiver will have balance of 105 now(> 100)
-    await transfer(deployer, bob, john.addr, 90);
+    // transaction FAIL: as receiver will have balance > 100 now
+    await forceTransfer(deployer, bob.addr, john.addr, 80);
   } catch (e) {
     console.log('[Expected (receiver asset_balance > 100)]', e.response ? e.response.error.text : e);
   }
 
   try {
     // transaction FAIL: amount is good but elon is not whitelisted
-    await transfer(deployer, bob, elon.addr, 10);
+    await forceTransfer(deployer, bob.addr, elon.addr, 10);
   } catch (e) {
     console.log('[Expected (elon-musk is not whitelisted)]', e.response ? e.response.error.text : e);
   }
 }
 
-module.exports = { default: run, transfer: transfer };
+module.exports = { default: run, forceTransfer: forceTransfer };

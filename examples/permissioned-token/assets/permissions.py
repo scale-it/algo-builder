@@ -20,6 +20,14 @@ def approval_program():
     # unless the contract is specifically involved ina rekeying operation.
     rekey_check = Txn.rekey_to() == Global.zero_address()
 
+    """
+    Handles Permissions SSC deployment. Expectes 1 argument
+    * controller_app_id: controller application index
+    During deployment
+    * max_tokens is set to 100
+    * whitelist_counter is intialized to 0
+    * controller application index is saved in global state
+    """
     on_deployment = Seq([
     	Assert(And(
     		Txn.application_args.length() == Int(1),
@@ -41,7 +49,13 @@ def approval_program():
     permissions_manager = App.globalGetEx(Int(1), Bytes("manager"))
     token_id = App.globalGetEx(Int(1), Bytes("token_id"))
 
-    # whitelist an account
+    """
+    Whitelist an account. If a non-reserve account is whitelisted then it can receive tokens.
+    Only accepted if txn sender is the permissions manager.
+    1 expected argument:
+    * controller_app_id: controller application index
+    NOTE: controller_app_id is also passed in txn.ForeignApps (to load perm_id, manager from controller's global state)
+    """
     add_whitelist = Seq([
         permissions_manager,
         token_id,
@@ -56,11 +70,9 @@ def approval_program():
     		Btoi(Txn.application_args[1]) == App.globalGet(controller_app_id),
 
     		# first verify correct token value is passed
-    		# token_id.hasValue(),
     		# Txn.assets[0] == token_id.value(), [TEALv3]
 
     		# then verify txn sender is the permissions manager
-    		permissions_manager.hasValue(),
     		Txn.sender() == permissions_manager.value(),
         )),
 
@@ -72,11 +84,17 @@ def approval_program():
         ),
 
         # finally update txn.accounts[1] local state to set whitelisted status as true(1)
-        App.localPut(Int(1), Bytes("whitelisted"), Int(1)),
+        App.localPut(Int(1), Bytes("whitelisted"), true),
         Return(Int(1))
     ])
 
     asset_balance = AssetHolding.balance(Int(1), Gtxn[1].xfer_asset())
+
+    """
+    Transfer token from accA -> accB. Both A, B are non-reserve accounts.
+    Expected arguments:
+    * toAccountAddress (fetched from Txn.ForeignApps[0])
+    """
     transfer_token = Seq([
         asset_balance, # load asset_balance of asset_receiver from store
         Assert(And(
@@ -86,7 +104,6 @@ def approval_program():
     		Txn.accounts[1] == Gtxn[1].asset_receiver(),
 
     		# rule 1 - check balance of receiver after receiving token <= 100(max_tokens)
-    		asset_balance.hasValue(),
     		asset_balance.value() <= App.globalGet(max_tokens),
 
     		# rule 2 - [from, to] accounts must be whitelisted
