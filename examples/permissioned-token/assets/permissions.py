@@ -16,13 +16,23 @@ def approval_program():
     whitelist_count = Bytes("whitelist_count") # whitelisted accounts counter
     controller_app_id = Bytes("controller_app_id") # token's controller application index
 
-    on_deployment = Seq([
-	Assert(And(
-		Txn.application_args.length() == Int(1),
+    # Always verify that the RekeyTo property of any transaction is set to the ZeroAddress
+    # unless the contract is specifically involved ina rekeying operation.
+    rekey_check = Txn.rekey_to() == Global.zero_address()
 
-		# Always verify that the RekeyTo property of any transaction is set to the ZeroAddress
-		# unless the contract is specifically involved ina rekeying operation.
-		Txn.rekey_to() == Global.zero_address())),
+    """
+    Handles Permissions SSC deployment. Expectes 1 argument
+    * controller_app_id: controller application index
+    During deployment
+    * max_tokens is set to 100
+    * whitelist_counter is intialized to 0
+    * controller application index is saved in global state
+    """
+    on_deployment = Seq([
+    	Assert(And(
+    		Txn.application_args.length() == Int(1),
+            rekey_check
+    	)),
 
         # Save max_tokens count in global state (default = 100, during ssc deploy)
         App.globalPut(max_tokens, Int(100)),
@@ -39,26 +49,30 @@ def approval_program():
     permissions_manager = App.globalGetEx(Int(1), Bytes("manager"))
     token_id = App.globalGetEx(Int(1), Bytes("token_id"))
 
-    # whitelist an account
+    """
+    Whitelist an account. If a non-reserve account is whitelisted then it can receive tokens.
+    Only accepted if txn sender is the permissions manager.
+    1 expected argument:
+    * controller_app_id: controller application index
+    NOTE: controller_app_id is also passed in txn.ForeignApps (to load perm_id, manager from controller's global state)
+    """
     add_whitelist = Seq([
         permissions_manager,
         token_id,
         Assert(And(
     		Txn.application_args.length() == Int(2),
     		Txn.accounts.length() == Int(1),
-    		Txn.rekey_to() == Global.zero_address(),
-    		#Txn.applications.length() ==  Int(1), [TEALv3]
+    		rekey_check,
+    		# Txn.applications.length() ==  Int(1), [TEALv3]
 
     		# verify from global state whether controller application passed is the valid one
     		# note: with tealv3 we can just use txn.applications[0] instead of passing an an appArg
     		Btoi(Txn.application_args[1]) == App.globalGet(controller_app_id),
 
     		# first verify correct token value is passed
-    		# token_id.hasValue(),
     		# Txn.assets[0] == token_id.value(), [TEALv3]
 
-    		# then verify txn sender is the token manager
-    		permissions_manager.hasValue(),
+    		# then verify txn sender is the permissions manager
     		Txn.sender() == permissions_manager.value(),
         )),
 
@@ -70,23 +84,26 @@ def approval_program():
         ),
 
         # finally update txn.accounts[1] local state to set whitelisted status as true(1)
-        App.localPut(Int(1), Bytes("whitelisted"), Int(1)),
+        App.localPut(Int(1), Bytes("whitelisted"), true),
         Return(Int(1))
     ])
 
     asset_balance = AssetHolding.balance(Int(1), Gtxn[1].xfer_asset())
+
+    """
+    Transfer token from accA -> accB. Both A, B are non-reserve accounts.
+    Expected arguments:
+    * toAccountAddress (fetched from Txn.ForeignApps[0])
+    """
     transfer_token = Seq([
         asset_balance, # load asset_balance of asset_receiver from store
         Assert(And(
-    		Txn.application_args.length() == Int(1),
-    		Global.group_size() >= Int(3),
-    		Txn.sender() == Gtxn[1].asset_sender(),
+            Gtxn[1].type_enum() == TxnType.AssetTransfer, # this should be clawback call
 
     		# verify tx.accounts[1] of current_tx should be same as asset receiver
     		Txn.accounts[1] == Gtxn[1].asset_receiver(),
 
     		# rule 1 - check balance of receiver after receiving token <= 100(max_tokens)
-    		asset_balance.hasValue(),
     		asset_balance.value() <= App.globalGet(max_tokens),
 
     		# rule 2 - [from, to] accounts must be whitelisted
@@ -105,16 +122,27 @@ def approval_program():
         Return(Int(1))
     ])
 
+    # permissions_manager can update this smart contract to update/add to
+    # existing set of rule(s)
+    handle_update = Seq([
+        permissions_manager,
+        Assert(And(
+            Btoi(Txn.application_args[1]) == App.globalGet(controller_app_id), # verify controller_app_id
+    		Txn.sender() == permissions_manager.value(),
+        )),
+        Return(Int(1))
+    ])
+
     # Verfies that the application_id is 0, jumps to on_deployment.
     # Verifies that DeleteApplication is used and blocks that call
-    # Verifies that UpdateApplication is used and blocks that call (unsafe for production use).
+    # Verifies that UpdateApplication is used and jumps to handle_update.
     # Verifies that closeOut is used and approves the tx.
     # Verifies that OptInApplication is used and jumps to handle_optin
     # Verifies that first argument is "add_whitelist" and jumps to add_whitelist.
     # Verifies that first argument is "transfer" and jumps to transfer_token.
     program = Cond(
         [Txn.application_id() == Int(0), on_deployment],
-        [Txn.on_completion() == OnComplete.UpdateApplication, Return(Int(0))], # block update
+        [Txn.on_completion() == OnComplete.UpdateApplication, handle_update],
         [Txn.on_completion() == OnComplete.DeleteApplication, Return(Int(0))], # block delete
         [Txn.on_completion() == OnComplete.CloseOut, Return(Int(1))],
         [Txn.on_completion() == OnComplete.OptIn, handle_optin],

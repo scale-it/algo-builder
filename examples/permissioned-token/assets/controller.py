@@ -26,6 +26,11 @@ def approval_program():
     # retreive asset manager from Txn.ForeignAssets[0]
     assetManager = AssetParam.manager(Int(0))
 
+    """
+    Handles Controller SSC deployment. Expects 1 argument:
+    * token_id : token index (passed via txn.application_args)
+    NOTE: token_id is also passed in txn.ForeignAssets (to load it's asset manager)
+    """
     on_deployment = Seq([
         assetManager, # load asset manager from store
     	Assert(And(
@@ -34,7 +39,6 @@ def approval_program():
     		no_rekey_addr,
 
            	# Controller should be deployed by ASA.manager
-    		assetManager.hasValue(),
     		Txn.sender() == assetManager.value()
         )),
 
@@ -51,16 +55,14 @@ def approval_program():
 
     # retreive asset reserve from Txn.ForeignAssets[0]
     assetReserve = AssetParam.reserve(Int(0))
+
+    """
+    Issues/mint new token. Only accepted if sender is the asset reserve.
+    """
     issue_token = Seq([
         assetReserve,
         Assert(And(
-    		Txn.application_args.length() == Int(1),
-    		# Txn.assets.length() == Int(1), [TEALv3]
-    		Gtxn[1].type_enum() == TxnType.AssetTransfer,
-    		Gtxn[1].xfer_asset() == App.globalGet(token_id), # verify if token index is correct
-
     		# Issue should only be done by token reserve
-    		assetReserve.hasValue(),
     		Gtxn[0].sender() == assetReserve.value(),
     		Gtxn[1].asset_sender() == assetReserve.value(),
 
@@ -70,18 +72,17 @@ def approval_program():
         Return(Int(1))
     ])
 
-    # kill a token, after verifying transaction set is_killed to true(Int(1))
-    assetManager = AssetParam.manager(Int(0))
+    """
+    Kills the token (updates global state). Only accepted if sender is asset manager.
+    """
     kill_token = Seq([
-        assetManager, # load asset_manager of Txn.ForeignAssets[0]
+        assetManager, # load asset_manager (from Store) of Txn.ForeignAssets[0]
         Assert(And(
-    		Txn.application_args.length() == Int(1),
     		# Txn.assets.length() == Int(1), [TEALv3],
     		# Txn.assets[0] == App.globalGet(token_id), [TEALv3] # verify if token index is correct
     		Txn.type_enum() == TxnType.ApplicationCall,
 
     		# Only asset manager can kill the token
-    		assetManager.hasValue(),
     		Txn.sender() == assetManager.value(),
         )),
 
@@ -90,13 +91,21 @@ def approval_program():
         Return(Int(1))
     ])
 
+    """
+    Adds a new permissions contract to the controller. Only accepted if sender is asset manager.
+    Expects 3 arguments:
+    * add_permission : name of the branch
+    * permission_id : permissions smart contract application index
+    * permissions_manager : premissions manager address
+    NOTE: token_id is also passed in txn.ForeignAssets (to load it's asset manager)
+    """
     add_new_permission = Seq([
-        assetManager,
+        assetManager, # load asset_manager (from Store) of Txn.ForeignAssets[0]
         Assert(And(
     		Txn.application_args.length() == Int(3),
+            # Txn.assets.length() == Int(1), [TEALv3]
     		# Txn.assets[0] == App.globalGet(token_id), [TEALv3]
 
-    		assetManager.hasValue(),
     		Txn.sender() == assetManager.value(),
         )),
 
@@ -110,14 +119,17 @@ def approval_program():
         Return(Int(1))
     ])
 
-    # Token manager can update permissions manager to a different address
+    """
+    Change permissions manager of permissions ssc. Only accepted if sender is asset manager.
+    Expects 1 argument in Txn.accounts[n] array:
+    * addr : address of the new permissions manager
+    """
     change_permissions_manager = Seq([
         assetManager,
         Assert(And(
     		Txn.application_args.length() == Int(1),
     		# Txn.assets[0] == App.globalGet(token_id), [TEALv3]
 
-    		assetManager.hasValue(),
     		Txn.sender() == assetManager.value(),
         )),
 
@@ -126,64 +138,81 @@ def approval_program():
         Return(Int(1))
     ])
 
-	# check properties of txGroup passed
-    group_tx_checks = And(
-        # Ensure 3 basic calls + 1 rules contract call is present in group
-        Global.group_size() == Add(Int(3), App.globalGet(var_total)),
-        Gtxn[0].type_enum() == TxnType.ApplicationCall, # call to controller smart contract
-        Gtxn[1].type_enum() == TxnType.AssetTransfer,
-        Gtxn[2].type_enum() == TxnType.Payment, # paying fees of escrow
-        Gtxn[3].type_enum() == TxnType.ApplicationCall, # call to permissions contract
-        # this tx should be 1st in group
-        Txn.group_index() == Int(0)
-    )
-
-    # check no rekeying etc
-    common_fields = And(
-        Gtxn[0].rekey_to() == Global.zero_address(),
-        Gtxn[1].rekey_to() == Global.zero_address(),
-        Gtxn[2].rekey_to() == Global.zero_address(),
-        Gtxn[3].rekey_to() == Global.zero_address(),
-        Gtxn[0].close_remainder_to() == Global.zero_address(),
-        Gtxn[1].close_remainder_to() == Global.zero_address(),
-        Gtxn[2].close_remainder_to() == Global.zero_address(),
-        Gtxn[3].close_remainder_to() == Global.zero_address(),
-        Gtxn[0].asset_close_to() == Global.zero_address(),
-        Gtxn[1].asset_close_to() == Global.zero_address(),
-        Gtxn[2].asset_close_to() == Global.zero_address(),
-        Gtxn[3].asset_close_to() == Global.zero_address()
-    )
-
-    all_transaction_checks = And(
+    # Check basic tx (call to controller, clawback tx)
+    verify_basic_calls = And(
         # verify first transaction
         # call to controller smart contract - signed by asset sender
+        Txn.group_index() == Int(0), # this tx (call to controller) should be 1st in group
         Gtxn[0].application_id() == Global.current_application_id(),
-        Gtxn[0].sender() == Gtxn[2].sender(),
-        Gtxn[0].sender() == Gtxn[3].sender(),
-        Gtxn[0].sender() == Gtxn[1].asset_sender(),
 
-        # verify 2nd tx - check asset_id passed through params
-        Gtxn[1].xfer_asset() == App.globalGet(token_id),
+        # verify 2nd tx
+        Gtxn[1].type_enum() == TxnType.AssetTransfer, # this should be clawback call (to transfer asset)
+        Gtxn[1].xfer_asset() == App.globalGet(token_id), # check asset_id passed through params
+    )
 
-        # verify 3rd tx checks
-        Gtxn[1].sender() == Gtxn[2].receiver(),
-        Gtxn[2].amount() >= Gtxn[1].fee(), # verify the fee amount is good
-
-        # verify rules call (Ensure permissions smart contract is being called in 4th tx)
+    # Check permissions smart contract is called and it's application index is correct
+    verify_perm_call = And(
+        # verify rules call (ensure permissions smart contract is being called in 4th tx)
+        Gtxn[3].type_enum() == TxnType.ApplicationCall,
         Gtxn[3].application_id() == App.globalGet(permission_id),
+    )
+
+    # verifies that asset sender in 2nd tx
+    # - calls the controller smart contract
+    # - is also the sender of the payment tx (to pay fees of clawback escrow)
+    # - calls the permissions smart contract (ensures rules check)
+    verify_sender = And(
+        Gtxn[0].sender() == Gtxn[2].sender(),
+        Gtxn[0].sender() == Gtxn[1].asset_sender(),
         Gtxn[3].sender() == Gtxn[1].asset_sender()
     )
 
-    # transfer token from A -> B. Both A, B are non-reserve accounts
+    """
+    Transfer token from accA -> accB. Both A, B are non-reserve accounts.
+    Only accepted if token is not killed.
+    """
     transfer_token = Seq([
         Assert(And(
-            Txn.application_args.length() == Int(1),
             App.globalGet(var_is_killed) == Int(0), # check token is not killed
-            common_fields,
-            group_tx_checks,
-            all_transaction_checks
+
+            # Ensure 3 basic calls + 1 rules contract call is present in group
+            Global.group_size() == Add(Int(3), App.globalGet(var_total)),
+            verify_basic_calls,
+            verify_perm_call,
+            verify_sender
         )),
         Return(Int(1))
+    ])
+
+    """
+    Force transfer (clawback) some tokens between two accounts.
+    Only accepted if token is not killed and sender is asset manager.
+    """
+    force_transfer = Seq([
+        assetManager,
+        assetReserve,
+        Assert(And(
+            App.globalGet(var_is_killed) == Int(0), # check token is not killed
+
+            verify_basic_calls,
+            Txn.sender() == assetManager.value(), # force_transfer is only allowed by asset manager
+        )),
+        Return(
+            If(
+                Or(
+                    # If the receiver is the reserve address - old, or the new one being updated in the assset config tx (Gtxn[3]),
+                    # then it can bypass permission checks
+                    Gtxn[1].asset_receiver() == assetReserve.value(),
+                    Gtxn[1].asset_receiver() == Gtxn[3].config_asset_reserve()
+                ),
+                Int(1),
+                And (
+                    # else permissions ssc should be called by asset manager
+                    verify_perm_call,
+                    Gtxn[3].sender() == assetManager.value()
+                )
+            )
+        )
     ])
 
     handle_optin = Seq([
@@ -204,6 +233,7 @@ def approval_program():
     # Verifies that first argument is "issue" and jumps to issue.
     # Verifies that first argument is "kill" and jumps to kill.
     # Verifies that first argument is "transfer" and jumps to transfer.
+    # Verifies that first argument is "force_transfer" and jumps to force_transfer.
     program = Cond(
         [Txn.application_id() == Int(0), on_deployment],
         [Txn.on_completion() == OnComplete.UpdateApplication, Return(Int(0))], # block update
@@ -214,7 +244,8 @@ def approval_program():
         [Txn.application_args[0] == Bytes("change_permissions_manager"), change_permissions_manager],
         [Txn.application_args[0] == Bytes("issue"), issue_token],
         [Txn.application_args[0] == Bytes("kill"), kill_token],
-        [Txn.application_args[0] == Bytes("transfer"), transfer_token]
+        [Txn.application_args[0] == Bytes("transfer"), transfer_token],
+        [Txn.application_args[0] == Bytes("force_transfer"), force_transfer]
     )
 
     return program
