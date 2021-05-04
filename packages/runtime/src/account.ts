@@ -24,6 +24,20 @@ const StateMap = "key-value";
 const globalState = "global-state";
 const localStateSchema = "local-state-schema";
 
+function checkAndSetAssetFields (fields: AssetModFields, asset: AssetDef): void {
+  if (!(fields.manager !== "" && asset.manager === "") && fields.manager !== undefined) asset.manager = fields.manager;
+  else if (fields.manager !== undefined) throw new RuntimeError(RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR);
+
+  if (!(fields.reserve !== "" && asset.reserve === "") && fields.reserve !== undefined) asset.reserve = fields.reserve;
+  else if (fields.reserve !== undefined) throw new RuntimeError(RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR);
+
+  if (!(fields.freeze !== "" && asset.freeze === "") && fields.freeze !== undefined) asset.freeze = fields.freeze;
+  else if (fields.freeze !== undefined) throw new RuntimeError(RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR);
+
+  if (!(fields.clawback !== "" && asset.clawback === "") && fields.clawback !== undefined) asset.clawback = fields.clawback;
+  else if (fields.clawback !== undefined) throw new RuntimeError(RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR);
+}
+
 export class AccountStore implements AccountStoreI {
   readonly account: Account;
   readonly address: string;
@@ -195,15 +209,7 @@ export class AccountStore implements AccountStoreI {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
     }
     // check for blank fields
-    if ((fields.reserve !== "" && asset.reserve === "") || (fields.freeze !== "" && asset.freeze === "") ||
-      (fields.clawback !== "" && asset.clawback === "")) {
-      throw new RuntimeError(RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR);
-    }
-
-    asset.manager = fields.manager;
-    asset.reserve = fields.reserve;
-    asset.freeze = fields.freeze;
-    asset.clawback = fields.clawback;
+    checkAndSetAssetFields(fields, asset);
   }
 
   /**
