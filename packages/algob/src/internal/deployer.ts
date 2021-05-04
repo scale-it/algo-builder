@@ -184,7 +184,7 @@ class DeployerBasicMode {
   /**
    * Opt-In to ASA for a single account. The opt-in transaction is
    * signed by account secret key
-   * @param asa ASA (name/ID)
+   * @param asa ASA (name/ID) Note: ID can be used for assets not existing in checkpoints.
    * @param accountName
    * @param flags Transaction flags
    */
@@ -197,7 +197,7 @@ class DeployerBasicMode {
         this._getAccount(accountName),
         flags);
     } catch (error) {
-      console.log(error);
+      console.log("Asset no found in checkpoints. Proceeding to check as Asset ID.");
       if (!Number(asa)) {
         throw Error("Please provide a valid Number to be used as ASA ID");
       }
@@ -213,7 +213,7 @@ class DeployerBasicMode {
   /**
    * Description: Opt-In to ASA for a contract account (represented by logic signture).
    * The opt-in transaction is signed by the logic signature
-   * @param asa ASA (name/ID)
+   * @param asa ASA (name/ID) Note: ID can be used for assets not existing in checkpoints.
    * @param lsig logic signature
    * @param flags Transaction flags
    */
@@ -222,7 +222,7 @@ class DeployerBasicMode {
       const asaId = this._getASAInfo(asa).assetIndex;
       await this.algoOp.optInLsigToASA(asa, asaId, lsig, flags);
     } catch (error) {
-      console.log(error);
+      console.log("Asset no found in checkpoints. Proceeding to check as Asset ID.");
       if (!Number(asa)) {
         throw Error("Please provide a valid Number to be used as ASA ID");
       }
