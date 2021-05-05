@@ -29,7 +29,7 @@ def approval_program(CONTROLLER_APP_ID):
     # * whitelist_counter is intialized to 0
     # * controller application index is saved in global state
     on_deployment = Seq([
-    	Assert(rekey_check),
+        Assert(rekey_check),
 
         # Save max_tokens count in global state (default = 100, during ssc deploy)
         App.globalPut(max_tokens, Int(100)),
@@ -50,17 +50,17 @@ def approval_program(CONTROLLER_APP_ID):
     add_whitelist = Seq([
         permissions_manager,
         Assert(And(
-    		Txn.application_args.length() == Int(2),
-    		Txn.accounts.length() == Int(1),
-    		rekey_check,
-    		# Txn.applications.length() ==  Int(1), [TEALv3]
+            Txn.application_args.length() == Int(2),
+            Txn.accounts.length() == Int(1),
+            rekey_check,
+            # Txn.applications.length() ==  Int(1), [TEALv3]
 
-    		# verify from global state whether controller application passed is the valid one
-    		# note: with tealv3 we can just use txn.applications[0] instead of passing an an appArg
-    		Btoi(Txn.application_args[1]) == Int(CONTROLLER_APP_ID),
+            # verify from global state whether controller application passed is the valid one
+            # note: with tealv3 we can just use txn.applications[0] instead of passing an an appArg
+            Btoi(Txn.application_args[1]) == Int(CONTROLLER_APP_ID),
 
-    		# then verify txn sender is the permissions manager
-    		Txn.sender() == permissions_manager.value(),
+            # then verify txn sender is the permissions manager
+            Txn.sender() == permissions_manager.value(),
         )),
 
         If(
@@ -85,16 +85,16 @@ def approval_program(CONTROLLER_APP_ID):
         Assert(And(
             Gtxn[1].type_enum() == TxnType.AssetTransfer, # this should be clawback call
 
-    		# verify tx.accounts[1] of current_tx should be same as asset receiver
-    		Txn.accounts[1] == Gtxn[1].asset_receiver(),
+            # verify tx.accounts[1] of current_tx should be same as asset receiver
+            Txn.accounts[1] == Gtxn[1].asset_receiver(),
 
-    		# rule 1 - check balance of receiver after receiving token <= 100(max_tokens)
-    		asset_balance.value() <= App.globalGet(max_tokens),
+            # rule 1 - check balance of receiver after receiving token <= 100(max_tokens)
+            asset_balance.value() <= App.globalGet(max_tokens),
 
-    		# rule 2 - [from, to] accounts must be whitelisted
-    		# NOTE: Int(0) == Txn.Sender(), Int(1) == Txn.accounts[1]
-    		App.localGet(Int(0), Bytes("whitelisted")) == true, # from account must be whitelisted
-    		App.localGet(Int(1), Bytes("whitelisted")) == true  # to account must be whitelisted
+            # rule 2 - [from, to] accounts must be whitelisted
+            # NOTE: Int(0) == Txn.Sender(), Int(1) == Txn.accounts[1]
+            App.localGet(Int(0), Bytes("whitelisted")) == true, # from account must be whitelisted
+            App.localGet(Int(1), Bytes("whitelisted")) == true  # to account must be whitelisted
         )),
         Return(Int(1))
     ])
@@ -113,7 +113,7 @@ def approval_program(CONTROLLER_APP_ID):
         permissions_manager,
         Assert(And(
             Btoi(Txn.application_args[1]) == Int(CONTROLLER_APP_ID), # verify controller_app_id
-    		Txn.sender() == permissions_manager.value(),
+            Txn.sender() == permissions_manager.value(),
         )),
         Return(Int(1))
     ])
