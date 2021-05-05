@@ -1,6 +1,10 @@
+import sys
+sys.path.insert(0,'..')
+
+from algobpy.parse import parseArgs
 from pyteal import *
 
-def approval_program():
+def approval_program(CONTROLLER_APP_ID):
     """
     Th Permissions smart contract defines transfer rules.
     Here, we implement two rules:
@@ -14,51 +18,37 @@ def approval_program():
     true = Int(1)
     max_tokens = Bytes("max_tokens") # maximum token transfer rule
     whitelist_count = Bytes("whitelist_count") # whitelisted accounts counter
-    controller_app_id = Bytes("controller_app_id") # token's controller application index
 
     # Always verify that the RekeyTo property of any transaction is set to the ZeroAddress
     # unless the contract is specifically involved ina rekeying operation.
     rekey_check = Txn.rekey_to() == Global.zero_address()
 
-    """
-    Handles Permissions SSC deployment. Expectes 1 argument
-    * controller_app_id: controller application index
-    During deployment
-    * max_tokens is set to 100
-    * whitelist_counter is intialized to 0
-    * controller application index is saved in global state
-    """
+    # Handles Permissions SSC deployment.
+    # During deployment
+    # * max_tokens is set to 100
+    # * whitelist_counter is intialized to 0
+    # * controller application index is saved in global state
     on_deployment = Seq([
-    	Assert(And(
-    		Txn.application_args.length() == Int(1),
-            rekey_check
-    	)),
+    	Assert(rekey_check),
 
         # Save max_tokens count in global state (default = 100, during ssc deploy)
         App.globalPut(max_tokens, Int(100)),
 
         # Initialize whitelisted accounts counter to 0
         App.globalPut(whitelist_count, Int(0)),
-
-        # Save controller application index in global state
-        App.globalPut(controller_app_id, Btoi(Txn.application_args[0])),
         Return(Int(1))
     ])
 
-    # fetch permissions manager, token_id from controller's global state (using foreignApps)
+    # fetch permissions manager from controller's global state (using foreignApps)
     permissions_manager = App.globalGetEx(Int(1), Bytes("manager"))
-    token_id = App.globalGetEx(Int(1), Bytes("token_id"))
 
-    """
-    Whitelist an account. If a non-reserve account is whitelisted then it can receive tokens.
-    Only accepted if txn sender is the permissions manager.
-    1 expected argument:
-    * controller_app_id: controller application index
-    NOTE: controller_app_id is also passed in txn.ForeignApps (to load perm_id, manager from controller's global state)
-    """
+    # Whitelist an account. If a non-reserve account is whitelisted then it can receive tokens.
+    # Only accepted if txn sender is the permissions manager.
+    # 1 expected argument:
+    # * controller_app_id: controller application index
+    # NOTE: controller_app_id is also passed in txn.ForeignApps (to load perm_id, manager from controller's global state)
     add_whitelist = Seq([
         permissions_manager,
-        token_id,
         Assert(And(
     		Txn.application_args.length() == Int(2),
     		Txn.accounts.length() == Int(1),
@@ -67,10 +57,7 @@ def approval_program():
 
     		# verify from global state whether controller application passed is the valid one
     		# note: with tealv3 we can just use txn.applications[0] instead of passing an an appArg
-    		Btoi(Txn.application_args[1]) == App.globalGet(controller_app_id),
-
-    		# first verify correct token value is passed
-    		# Txn.assets[0] == token_id.value(), [TEALv3]
+    		Btoi(Txn.application_args[1]) == Int(CONTROLLER_APP_ID),
 
     		# then verify txn sender is the permissions manager
     		Txn.sender() == permissions_manager.value(),
@@ -90,11 +77,9 @@ def approval_program():
 
     asset_balance = AssetHolding.balance(Int(1), Gtxn[1].xfer_asset())
 
-    """
-    Transfer token from accA -> accB. Both A, B are non-reserve accounts.
-    Expected arguments:
-    * toAccountAddress (fetched from Txn.ForeignApps[0])
-    """
+    # Transfer token from accA -> accB. Both A, B are non-reserve accounts.
+    # Expected arguments:
+    # * toAccountAddress (fetched from Txn.ForeignApps[0])
     transfer_token = Seq([
         asset_balance, # load asset_balance of asset_receiver from store
         Assert(And(
@@ -127,7 +112,7 @@ def approval_program():
     handle_update = Seq([
         permissions_manager,
         Assert(And(
-            Btoi(Txn.application_args[1]) == App.globalGet(controller_app_id), # verify controller_app_id
+            Btoi(Txn.application_args[1]) == Int(CONTROLLER_APP_ID), # verify controller_app_id
     		Txn.sender() == permissions_manager.value(),
         )),
         Return(Int(1))
@@ -153,4 +138,12 @@ def approval_program():
     return program
 
 if __name__ == "__main__":
-    print(compileTeal(approval_program(), Mode.Application, version=2))
+    params = {
+        "CONTROLLER_APP_ID": 11,
+    }
+
+    # Overwrite params if sys.argv[1] is passed
+    if(len(sys.argv) > 1):
+        params = parseArgs(sys.argv[1], params)
+
+    print(compileTeal(approval_program(params["CONTROLLER_APP_ID"]), Mode.Application, version=2))

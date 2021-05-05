@@ -19,9 +19,9 @@ async function setupASA (deployer) {
 
 async function run (runtimeEnv, deployer) {
   // just for tutorial purpose (use `executeSignedTxnFromFile` if using multisig account)
-  const asaInfo = await setupASA(deployer);
-  console.log(asaInfo);
-  console.log('total Supply: ', await totalSupply(deployer, asaInfo.assetIndex));
+  const gold = await setupASA(deployer);
+  console.log(gold);
+  console.log('total Supply: ', await totalSupply(deployer, gold.assetIndex));
 
   /**
    * If using msig address as asa creator or manager, then realistically user will receive a signed tx

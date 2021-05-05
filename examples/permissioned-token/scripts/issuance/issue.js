@@ -14,11 +14,11 @@ const { executeTransaction, fundAccount, totalSupply } = require('../common/comm
 async function issue (deployer, account, amount) {
   const asaReserve = deployer.accountsByName.get('alice'); // asset reserve is the issuer
 
-  const asaInfo = deployer.asa.get('gold');
+  const gold = deployer.asa.get('gold');
   const controllerSSCInfo = deployer.getSSC('controller.py', 'clear_state_program.py');
 
   const escrowParams = {
-    TOKEN_ID: asaInfo.assetIndex,
+    TOKEN_ID: gold.assetIndex,
     CONTROLLER_APP_ID: controllerSSCInfo.appID
   };
 
@@ -38,7 +38,7 @@ async function issue (deployer, account, amount) {
       appId: controllerSSCInfo.appID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:issue'],
-      foreignAssets: [asaInfo.assetIndex]
+      foreignAssets: [gold.assetIndex]
     },
     /**
      * tx 1 - Asset transfer transaction from Token Reserve -> account. This tx is executed
@@ -50,7 +50,7 @@ async function issue (deployer, account, amount) {
       sign: types.SignType.LogicSignature,
       fromAccountAddr: escrowAddress,
       recipient: account.addr,
-      assetID: asaInfo.assetIndex,
+      assetID: gold.assetIndex,
       revocationTarget: asaReserve.addr, // tx will fail if assetSender is not token reserve address
       amount: amount,
       lsig: escrowLsig,
@@ -61,9 +61,9 @@ async function issue (deployer, account, amount) {
   await executeTransaction(deployer, issuanceParams);
 
   console.log(`* ${account.name} asset holding: *`);
-  await balanceOf(deployer, account.addr, asaInfo.assetIndex); // print asset holding
+  await balanceOf(deployer, account.addr, gold.assetIndex); // print asset holding
 
-  const supply = await totalSupply(deployer, asaInfo.assetIndex);
+  const supply = await totalSupply(deployer, gold.assetIndex);
   console.log(`Total Supply of token 'gold': ${supply}`);
 }
 

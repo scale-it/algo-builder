@@ -17,7 +17,6 @@ const clearStateProgram = 'clear_state_program.py';
  */
 async function whitelist (deployer, permissionsManager, address) {
   // asset, controller & permission app info
-  const asaInfo = deployer.asa.get('gold');
   const controllerSSCInfo = deployer.getSSC('controller.py', clearStateProgram);
   const permissionSSCInfo = deployer.getSSC('permissions.py', clearStateProgram);
 
@@ -37,7 +36,6 @@ async function whitelist (deployer, permissionsManager, address) {
     payFlags: { totalFee: 1000 },
     appArgs: ['str:add_whitelist', `int:${controllerSSCInfo.appID}`], // note: don't need to pass appID in appArg with tealv3 (just use foreignApps)
     accounts: [address], // pass address to add to whitelisted addresses
-    foreignAssets: [asaInfo.assetIndex], // to verify token_id
     foreignApps: [controllerSSCInfo.appID]
   };
   console.log(`* Adding [${address}] to whitelisted accounts *`);

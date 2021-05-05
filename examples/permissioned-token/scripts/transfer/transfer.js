@@ -15,12 +15,12 @@ const clearStateProgram = 'clear_state_program.py';
  * @param {number} amount units of token to transfer
  */
 async function transfer (deployer, from, toAddr, amount) {
-  const asaInfo = deployer.asa.get('gold');
+  const gold = deployer.asa.get('gold');
   const controllerSSCInfo = deployer.getSSC('controller.py', clearStateProgram);
   const permissionsSSCInfo = deployer.getSSC('permissions.py', clearStateProgram);
 
   const escrowParams = {
-    TOKEN_ID: asaInfo.assetIndex,
+    TOKEN_ID: gold.assetIndex,
     CONTROLLER_APP_ID: controllerSSCInfo.appID
   };
 
@@ -53,7 +53,7 @@ async function transfer (deployer, from, toAddr, amount) {
       sign: types.SignType.LogicSignature,
       fromAccountAddr: escrowAddress,
       recipient: toAddr,
-      assetID: asaInfo.assetIndex,
+      assetID: gold.assetIndex,
       revocationTarget: from.addr,
       amount: amount,
       lsig: escrowLsig,
@@ -93,7 +93,7 @@ async function transfer (deployer, from, toAddr, amount) {
   await executeTransaction(deployer, txGroup);
 
   console.log(`* ${toAddr}(receiver) asset holding: *`);
-  await balanceOf(deployer, toAddr, asaInfo.assetIndex);
+  await balanceOf(deployer, toAddr, gold.assetIndex);
 
   console.log('* Transfer Successful *');
 }

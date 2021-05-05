@@ -11,7 +11,7 @@ const { types } = require('@algo-builder/runtime');
  * @param address account address to change permissions_manager to
  */
 async function changePermissionsManager (deployer, assetManager, address) {
-  const asaInfo = deployer.asa.get('gold');
+  const gold = deployer.asa.get('gold');
   const controllerSSCInfo = deployer.getSSC('controller.py', 'clear_state_program.py');
 
   /**
@@ -25,7 +25,7 @@ async function changePermissionsManager (deployer, assetManager, address) {
     payFlags: { totalFee: 1000 },
     appArgs: ['str:change_permissions_manager'],
     accounts: [address],
-    foreignAssets: [asaInfo.assetIndex] // to verify token_id & token_manager
+    foreignAssets: [gold.assetIndex] // to verify token_id & token_manager
   };
 
   console.log(`* Updating permissions manager to: ${address} *`);

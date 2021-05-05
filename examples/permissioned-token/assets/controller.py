@@ -1,6 +1,10 @@
+import sys
+sys.path.insert(0,'..')
+
+from algobpy.parse import parseArgs
 from pyteal import *
 
-def approval_program():
+def approval_program(TOKEN_ID):
     """
     This smart contract acts as a controller of the token. It
     ensures that the permissions smart contract (which defines transfer rules)
@@ -14,8 +18,6 @@ def approval_program():
     """
 
     var_is_killed = Bytes("killed")
-    var_total = Bytes("total_rules")
-    token_id = Bytes("token_id")
     permissions_manager = Bytes("manager")	# permissions manager (asa.manager by default)
     permission_id = Bytes("perm_app") # permissions smart contract application index
 
@@ -26,13 +28,10 @@ def approval_program():
     # retreive asset manager from Txn.ForeignAssets[0]
     assetManager = AssetParam.manager(Int(0))
 
-    # Handles Controller SSC deployment. Expects 1 argument:
-    # * token_id : token index (passed via txn.application_args)
-    # NOTE: token_id is also passed in txn.ForeignAssets (to load it's asset manager)
+    # Handles Controller SSC deployment. Only accepted if sender is asset manager.
     on_deployment = Seq([
         assetManager, # load asset manager from store
     	Assert(And(
-    		Txn.application_args.length() == Int(1),
     		# Txn.assets.length() == Int(1), [TEALv3]
     		no_rekey_addr,
 
@@ -40,23 +39,15 @@ def approval_program():
     		Txn.sender() == assetManager.value()
         )),
 
-        # total permission contracts during deploy is set to 0.
-        App.globalPut(var_total, Int(0)),
-
         # set kill_status to false(0) during deploy
         App.globalPut(var_is_killed, Int(0)),
-
-        # Save asset ID in controller's global state
-        App.globalPut(token_id, Btoi(Txn.application_args[0])), # or maybe use App.globalPut(token_id, Btoi(Txn.assets[0])) with TEALv3
         Return(Int(1))
     ])
 
     # retreive asset reserve address from Txn.ForeignAssets[0]
     assetReserve = AssetParam.reserve(Int(0))
 
-    """
-    Issues/mint new token. Only accepted if sender is the asset reserve.
-    """
+    # Issues/mint new token. Only accepted if sender is the asset reserve.
     issue_token = Seq([
         assetReserve,
         Assert(And(
@@ -70,14 +61,12 @@ def approval_program():
         Return(Int(1))
     ])
 
-    """
-    Kills the token (updates global state). Only accepted if sender is asset manager.
-    """
+    # Kills the token (updates global state). Only accepted if sender is asset manager.
     kill_token = Seq([
         assetManager, # load asset_manager (from Store) of Txn.ForeignAssets[0]
         Assert(And(
     		# Txn.assets.length() == Int(1), [TEALv3],
-    		# Txn.assets[0] == App.globalGet(token_id), [TEALv3] # verify if token index is correct
+    		# Txn.assets[0] == Int(TOKEN_ID), [TEALv3] # verify if token index is correct
     		Txn.type_enum() == TxnType.ApplicationCall,
 
     		# Only asset manager can kill the token
@@ -89,27 +78,21 @@ def approval_program():
         Return(Int(1))
     ])
 
-    """
-    Adds a new permissions contract to the controller. Only accepted if sender is asset manager.
-    Expects 3 arguments:
-    * add_permission : name of the branch
-    * permission_id : permissions smart contract application index
-    * permissions_manager : premissions manager address
-    NOTE: token_id is also passed in txn.ForeignAssets (to load it's asset manager)
-    """
+    # Adds a new permissions contract to the controller. Only accepted if sender is asset manager.
+    # Expects 3 arguments:
+    # * add_permission : name of the branch
+    # * permission_id : permissions smart contract application index
+    # * permissions_manager : premissions manager address
+    # NOTE: token_id is also passed in txn.ForeignAssets (to load it's asset manager)
     add_new_permission = Seq([
         assetManager, # load asset_manager (from Store) of Txn.ForeignAssets[0]
         Assert(And(
     		Txn.application_args.length() == Int(3),
             # Txn.assets.length() == Int(1), [TEALv3]
-    		# Txn.assets[0] == App.globalGet(token_id), [TEALv3]
+    		# Txn.assets[0] == Int(TOKEN_ID), [TEALv3]
 
     		Txn.sender() == assetManager.value(),
         )),
-
-        # Update total rules counter (= 1 in this case) as we only have a single
-        # permissions contract
-        App.globalPut(var_total, App.globalGet(var_total) + Int(1)),
 
         # Add permissions(rules) smart contract config in global state (permission_id, permissions_manager)
         App.globalPut(permission_id, Btoi(Txn.application_args[1])),
@@ -124,7 +107,7 @@ def approval_program():
         assetManager,
         Assert(And(
     		Txn.application_args.length() == Int(1),
-    		# Txn.assets[0] == App.globalGet(token_id), [TEALv3]
+    		# Txn.assets[0] == Int(TOKEN_ID), [TEALv3]
 
     		Txn.sender() == assetManager.value(),
         )),
@@ -142,7 +125,7 @@ def approval_program():
 
         # verify 2nd tx
         Gtxn[1].type_enum() == TxnType.AssetTransfer, # this should be clawback call (to transfer asset)
-        Gtxn[1].xfer_asset() == App.globalGet(token_id), # check asset_id passed through params
+        Gtxn[1].xfer_asset() == Int(TOKEN_ID), # check asset_id passed through params
     )
 
     # Check permissions smart contract is called and it's application index is correct
@@ -169,8 +152,8 @@ def approval_program():
         Assert(And(
             App.globalGet(var_is_killed) == Int(0), # check token is not killed
 
-            # Ensure 3 basic calls + 1 rules contract call is present in group
-            Global.group_size() == Add(Int(3), App.globalGet(var_total)),
+            # Ensure atleast 3 basic calls, verify_perm_call verifies rule(s) is called
+            Global.group_size() >= Int(3),
             verify_basic_calls,
             verify_perm_call,
             verify_sender
@@ -178,10 +161,8 @@ def approval_program():
         Return(Int(1))
     ])
 
-    """
-    Force transfer (clawback) some tokens between two accounts.
-    Only accepted if token is not killed and sender is asset manager.
-    """
+    # Force transfer (clawback) some tokens between two accounts.
+    # Only accepted if token is not killed and sender is asset manager.
     force_transfer = Seq([
         assetManager,
         assetReserve,
@@ -245,4 +226,12 @@ def approval_program():
     return program
 
 if __name__ == "__main__":
-    print(compileTeal(approval_program(), Mode.Application))
+    params = {
+        "TOKEN_ID": 11,
+    }
+
+    # Overwrite params if sys.argv[1] is passed
+    if(len(sys.argv) > 1):
+        params = parseArgs(sys.argv[1], params)
+
+    print(compileTeal(approval_program(params["TOKEN_ID"]), Mode.Application))

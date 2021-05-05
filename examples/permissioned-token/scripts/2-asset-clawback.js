@@ -14,8 +14,8 @@ const { types } = require('@algo-builder/runtime');
 async function run (runtimeEnv, deployer) {
   const alice = deployer.accountsByName.get('alice');
 
-  // NOTE: make sure to deploy asset, controller & permissions sc first
-  const assetInfo = deployer.asa.get('gold');
+  // NOTE: make sure to deploy asset, controller ssc first
+  const gold = deployer.asa.get('gold');
   const controllerInfo = deployer.getSSC('controller.py', 'clear_state_program.py');
 
   /*
@@ -30,7 +30,7 @@ async function run (runtimeEnv, deployer) {
 
   /** Compile and fund escrow **/
   const escrowParams = {
-    TOKEN_ID: assetInfo.assetIndex,
+    TOKEN_ID: gold.assetIndex,
     CONTROLLER_APP_ID: controllerInfo.appID
   };
 
@@ -46,7 +46,7 @@ async function run (runtimeEnv, deployer) {
     type: types.TransactionType.ModifyAsset,
     sign: types.SignType.SecretKey,
     fromAccount: alice,
-    assetID: assetInfo.assetIndex,
+    assetID: gold.assetIndex,
     fields: { clawback: escrowAddress },
     payFlags: { totalFee: 1000 }
   };
