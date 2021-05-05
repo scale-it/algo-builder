@@ -14,8 +14,8 @@ def clawback_escrow(TOKEN_ID, CONTROLLER_APP_ID):
         Global.group_size() >= Int(3), # following 3 transactions must exist in every group
         Gtxn[0].type_enum() == TxnType.ApplicationCall, # call to controller smart contract
         Gtxn[1].type_enum() == TxnType.AssetTransfer,
-        Gtxn[2].type_enum() == TxnType.Payment, # paying fees of escrow
-        # this tx should be 2nd in group
+        Gtxn[2].type_enum() == TxnType.Payment, # paying fees for escrow
+        # this tx should be 2nd in the group
         Txn.group_index() == Int(1)
     )
 
@@ -33,16 +33,16 @@ def clawback_escrow(TOKEN_ID, CONTROLLER_APP_ID):
     )
 
     # verify first transaction - signed by asset sender
-    # check app_id passed through params
+    # tx 1 - check app_id passed through params
     first_transaction_check = Gtxn[0].application_id() == Int(CONTROLLER_APP_ID)
 
     # verify second transaction
-    # tx 1 - clawback transactions that moves the frozen asset from sender to receiver - signed by clawback
+    # tx 2 - clawback transactions that moves the frozen asset from sender to receiver - signed by clawback
     # check asset_id passed through params
     second_transaction_check = Gtxn[1].xfer_asset() == Int(TOKEN_ID)
 
     # verify third transaction
-    # tx 2 - payment transaction from sender to clawback to pay for the fee of the clawback
+    # tx 3 - payment transaction from sender to clawback to pay for the fee of the clawback
     third_transaction_checks = And(
         Gtxn[1].sender() == Gtxn[2].receiver(),
         # verify the fee amount is good

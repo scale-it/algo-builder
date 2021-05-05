@@ -66,13 +66,13 @@ Another approach is to *rekey* ASA's Reserve account to the newReserve. This way
 3. *OptOut* (`/scripts/issuance/opt-out.js`): User can optOut from the token if he wants to. This could be a simple asset transfer transaction from user -> creator (using user's sk) where asset_amount = 0 & close_remainder_to is asset creator. This tx will opt out a user from the token and transfer all his tokens to the asset creator.
 NOTE: If asset creator and reserve are different address, then we will need to transfer all tokens from creator to reserve as well (to take those tokens out of circulation/increase total supply).
 
-4. *Asset transfer* (`scripts/transfer/transfer.js`): A non-reserve account can hold few tokens (via issuance) and may wish to transfer some tokens to another non-reserve account. This should be in complaince with rules checks (`permissions.py`). For token transfer we need a group of at least 4 transactions (and more if there are more than 1 rules contracts):
+4. *Asset transfer* (`scripts/transfer/transfer.js`): A non-reserve account can hold few tokens (via issuance) and may wish to transfer some tokens to another non-reserve account. This should be in compliance with the permission smart contract `P` (`permissions.py`). For token transfer we need a group of at least 4 transactions (and more if there are more than 1 permissions contract):
 a) call to controller smart contract (this ensures all rules are checked)
 b) token transfer transaction from sender -> receiver using clawback (clawback contract ensures controller smart contract is called).
-c) payment transaction from sender -> clawback (to cover tx fee of above transaction)
+c) payment transaction from sender -> clawback (to cover tx fee of the transaction above)
 d) call to permissions smart contract (to check rules: max token holding by receiver < 100, both from & to are whitelisted)
 
-5. *Forced Asset transfer* (`scripts/transfer/force-transfer.js`): This is similar to asset transfer, but in this case the assets are being moved by asset manager, rather than the from account itself (fails otherwise). The transaction group is also similar to above, difference being that call to controller, permissions ssc & paying fees of escrow is done by asset manager. Asset manager essentially represents clawback here (revoking tokens from an account).
+5. *Forced Asset transfer* (`scripts/transfer/force-transfer.js`): This is similar to asset transfer, but in this case the assets are being moved by asset manager, rather than a token holder. The transaction group is also similar to the one above. Difference is that a call to `C`, `P` and paying fees of escrow is done by asset manager. Asset manager essentially represents clawback here (revoking tokens from an account).
 
 6. *Kill Token* (`scripts/permissions/kill.js`): Token manager can kill the token. If the token is killed then all issuance and token transfer transactions are rejected. User can only opt-out from the token to remove his holding and decrease his account's minimum balance.
 

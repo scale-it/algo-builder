@@ -12,7 +12,7 @@ const { executeTransaction, fundAccount } = require('../common/common');
  * @param {*} account account to opt-out of the token from
  */
 async function optOut (deployer, account) {
-  const asaInfo = deployer.asa.get('gold');
+  const gold = deployer.asa.get('gold');
 
   /**
    * NOTE: User can only optOut asset to asset-creator account. If reserve account
@@ -24,9 +24,9 @@ async function optOut (deployer, account) {
     sign: types.SignType.SecretKey,
     fromAccount: account,
     toAccountAddr: account.addr,
-    assetID: asaInfo.assetIndex,
+    assetID: gold.assetIndex,
     amount: 0,
-    payFlags: { totalFee: 1000, closeRemainderTo: asaInfo.creator }
+    payFlags: { totalFee: 1000, closeRemainderTo: gold.creator }
   };
 
   console.log(`* Opting out [${account.name}:${account.addr}] from token 'gold' *`);
@@ -35,7 +35,7 @@ async function optOut (deployer, account) {
 
 async function run (runtimeEnv, deployer) {
   const elon = deployer.accountsByName.get('elon-musk');
-  const asaInfo = deployer.asa.get('gold');
+  const gold = deployer.asa.get('gold');
 
   // fund elon
   await fundAccount(deployer, elon);
@@ -51,7 +51,7 @@ async function run (runtimeEnv, deployer) {
    */
   await optOut(deployer, elon);
 
-  await balanceOf(deployer, elon.addr, asaInfo.assetIndex); // prints nothing
+  await balanceOf(deployer, elon.addr, gold.assetIndex); // prints nothing
 }
 
 module.exports = { default: run, optOut: optOut };

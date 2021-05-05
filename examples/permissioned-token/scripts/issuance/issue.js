@@ -5,20 +5,20 @@ const { types } = require('@algo-builder/runtime');
 const { executeTransaction, fundAccount, totalSupply } = require('../common/common');
 
 /**
- * NOTE: this function is for demonstration purpose only (if ASA creator, manager are single accounts)
+ * NOTE: this function is for demonstration purpose only.
  * If asset creator is a multisig address, then user should have a signed tx file, decoded tx fetched
  * from that file, append his own signature & send it to network.
  *  - Use `algob.executeSignedTxnFromFile` to execute tx from file
- *  - In below function we assume creator & reserve is a single account (alice)
+ *  - In the function below we assume creator & reserve is a single account (alice)
  */
 async function issue (deployer, account, amount) {
   const asaReserve = deployer.accountsByName.get('alice'); // asset reserve is the issuer
 
-  const asaInfo = deployer.asa.get('gold');
+  const gold = deployer.asa.get('gold');
   const controllerSSCInfo = deployer.getSSC('controller.py', 'clear_state_program.py');
 
   const escrowParams = {
-    TOKEN_ID: asaInfo.assetIndex,
+    TOKEN_ID: gold.assetIndex,
     CONTROLLER_APP_ID: controllerSSCInfo.appID
   };
 
@@ -38,7 +38,7 @@ async function issue (deployer, account, amount) {
       appId: controllerSSCInfo.appID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:issue'],
-      foreignAssets: [asaInfo.assetIndex]
+      foreignAssets: [gold.assetIndex]
     },
     /**
      * tx 1 - Asset transfer transaction from Token Reserve -> account. This tx is executed
@@ -50,7 +50,7 @@ async function issue (deployer, account, amount) {
       sign: types.SignType.LogicSignature,
       fromAccountAddr: escrowAddress,
       recipient: account.addr,
-      assetID: asaInfo.assetIndex,
+      assetID: gold.assetIndex,
       revocationTarget: asaReserve.addr, // tx will fail if assetSender is not token reserve address
       amount: amount,
       lsig: escrowLsig,
@@ -61,9 +61,9 @@ async function issue (deployer, account, amount) {
   await executeTransaction(deployer, issuanceParams);
 
   console.log(`* ${account.name} asset holding: *`);
-  await balanceOf(deployer, account.addr, asaInfo.assetIndex); // print asset holding
+  await balanceOf(deployer, account.addr, gold.assetIndex); // print asset holding
 
-  const supply = await totalSupply(deployer, asaInfo.assetIndex);
+  const supply = await totalSupply(deployer, gold.assetIndex);
   console.log(`Total Supply of token 'gold': ${supply}`);
 }
 
@@ -81,7 +81,7 @@ async function run (runtimeEnv, deployer) {
    * file signed by accounts <= threshold in a multisig group.
    * - After receiving file, place it in /assets
    * - Use `algob sign-multisig <account>` to append signature of your account
-   * - Then use below function to issue new tokens (send tx to network)
+   * - Then use the function below to issue new tokens and send tx to a network
    */
   // executeSignedTxnFromFile(deployer, 'asa_file_out.tx');
 

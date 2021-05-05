@@ -39,18 +39,18 @@ async function updateReserveByAssetConfig (deployer, newReserve) {
   await fundAccount(deployer, asaManager);
 
   // fetch old asset reserve from network by assetId
-  const asaInfo = deployer.asa.get('gold');
-  const asaReserveAddr = (await deployer.getAssetByID(asaInfo.assetIndex)).params.reserve;
+  const gold = deployer.asa.get('gold');
+  const asaReserveAddr = (await deployer.getAssetByID(gold.assetIndex)).params.reserve;
   const controllerSSCInfo = deployer.getSSC('controller.py', 'clear_state_program.py');
 
   const escrowParams = {
-    TOKEN_ID: asaInfo.assetIndex,
+    TOKEN_ID: gold.assetIndex,
     CONTROLLER_APP_ID: controllerSSCInfo.appID
   };
 
   const escrowLsig = await deployer.loadLogic('clawback.py', [], escrowParams);
   const escrowAddress = escrowLsig.address();
-  const reserveAssetHolding = await balanceOf(deployer, asaReserveAddr, asaInfo.assetIndex);
+  const reserveAssetHolding = await balanceOf(deployer, asaReserveAddr, gold.assetIndex);
 
   console.log('Asset reserve address before: ', asaReserveAddr);
 
@@ -75,7 +75,7 @@ async function updateReserveByAssetConfig (deployer, newReserve) {
       appId: controllerSSCInfo.appID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:force_transfer'],
-      foreignAssets: [asaInfo.assetIndex] // to verify token reserve, manager
+      foreignAssets: [gold.assetIndex] // to verify token reserve, manager
     },
     /**
      * tx 1 - Asset transfer transaction from current Reserve -> newReserve.
@@ -87,7 +87,7 @@ async function updateReserveByAssetConfig (deployer, newReserve) {
       sign: types.SignType.LogicSignature,
       fromAccountAddr: escrowAddress,
       recipient: newReserve.addr,
-      assetID: asaInfo.assetIndex,
+      assetID: gold.assetIndex,
       revocationTarget: asaReserveAddr,
       amount: reserveAssetHolding.amount, // moving all tokens to new reserve
       lsig: escrowLsig,
@@ -113,7 +113,7 @@ async function updateReserveByAssetConfig (deployer, newReserve) {
       type: types.TransactionType.ModifyAsset,
       sign: types.SignType.SecretKey,
       fromAccount: asaManager,
-      assetID: asaInfo.assetIndex,
+      assetID: gold.assetIndex,
       fields: { reserve: newReserve.addr },
       payFlags: { totalFee: 1000 }
     }
@@ -124,7 +124,7 @@ async function updateReserveByAssetConfig (deployer, newReserve) {
   console.log('* Update Successful *');
 
   console.log('Asset reserve address after updating reserve: ',
-    (await deployer.getAssetByID(asaInfo.assetIndex)).params.reserve);
+    (await deployer.getAssetByID(gold.assetIndex)).params.reserve);
 }
 
 async function run (runtimeEnv, deployer) {

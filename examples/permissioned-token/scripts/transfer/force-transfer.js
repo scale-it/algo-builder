@@ -16,12 +16,12 @@ const clearStateProgram = 'clear_state_program.py';
  */
 async function forceTransfer (deployer, fromAddr, toAddr, amount) {
   const asaManager = deployer.accountsByName.get('alice'); // alice is set as the permissions_manager during deploy
-  const asaInfo = deployer.asa.get('gold');
+  const gold = deployer.asa.get('gold');
   const controllerSSCInfo = deployer.getSSC('controller.py', clearStateProgram);
   const permissionsSSCInfo = deployer.getSSC('permissions.py', clearStateProgram);
 
   const escrowParams = {
-    TOKEN_ID: asaInfo.assetIndex,
+    TOKEN_ID: gold.assetIndex,
     CONTROLLER_APP_ID: controllerSSCInfo.appID
   };
 
@@ -44,7 +44,7 @@ async function forceTransfer (deployer, fromAddr, toAddr, amount) {
       appId: controllerSSCInfo.appID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:force_transfer'],
-      foreignAssets: [asaInfo.assetIndex] // to verify token reserve, manager
+      foreignAssets: [gold.assetIndex] // to verify token reserve, manager
     },
     /**
      * tx 1 - Asset transfer transaction from sender -> receiver. This tx is executed
@@ -57,7 +57,7 @@ async function forceTransfer (deployer, fromAddr, toAddr, amount) {
       sign: types.SignType.LogicSignature,
       fromAccountAddr: escrowAddress,
       recipient: toAddr,
-      assetID: asaInfo.assetIndex,
+      assetID: gold.assetIndex,
       revocationTarget: fromAddr,
       amount: amount,
       lsig: escrowLsig,
@@ -94,7 +94,7 @@ async function forceTransfer (deployer, fromAddr, toAddr, amount) {
   await executeTransaction(deployer, forceTxGroup);
 
   console.log(`* ${toAddr}(receiver) asset holding: *`);
-  await balanceOf(deployer, toAddr, asaInfo.assetIndex);
+  await balanceOf(deployer, toAddr, gold.assetIndex);
 
   console.log('* Transfer Successful *');
 }

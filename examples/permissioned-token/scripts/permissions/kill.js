@@ -20,7 +20,7 @@ async function kill (deployer) {
    * (eg. issue, transfer(a, b)) are rejected. Token holder can only do opt-out txn after
    * token is killed.
    */
-  const asaInfo = deployer.asa.get('gold');
+  const gold = deployer.asa.get('gold');
   const controllerSSCInfo = deployer.getSSC('controller.py', 'clear_state_program.py');
   const killParams = {
     type: types.TransactionType.CallNoOpSSC,
@@ -29,7 +29,7 @@ async function kill (deployer) {
     appId: controllerSSCInfo.appID,
     payFlags: { totalFee: 1000 },
     appArgs: ['str:kill'],
-    foreignAssets: [asaInfo.assetIndex]
+    foreignAssets: [gold.assetIndex]
   };
 
   console.log('* Kill Token: Gold *');
