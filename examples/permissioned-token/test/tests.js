@@ -68,6 +68,7 @@ describe('Permissioned Token Tests', function () {
       }
     ];
     runtime.executeTx(txns);
+    syncInfo();
   }
 
   function killToken () {
@@ -80,6 +81,7 @@ describe('Permissioned Token Tests', function () {
       appArgs: ['str:kill'],
       foreignAssets: [assetIndex]
     });
+    syncInfo();
   }
 
   function whitelist (address) {
@@ -95,6 +97,63 @@ describe('Permissioned Token Tests', function () {
       foreignAssets: [assetIndex],
       foreignApps: [controllerAppID]
     });
+    syncInfo();
+  }
+
+  function fund (address) {
+    runtime.executeTx({
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: master.account,
+      toAccountAddr: address,
+      amountMicroAlgos: minBalance,
+      payFlags: {}
+    });
+    syncInfo();
+  }
+
+  function transfer (from, to, amount) {
+    const txGroup = [
+      {
+        type: types.TransactionType.CallNoOpSSC,
+        sign: types.SignType.SecretKey,
+        fromAccount: from.account,
+        appId: controllerAppID,
+        payFlags: { totalFee: 1000 },
+        appArgs: ['str:transfer'],
+        accounts: [elon.address]
+      },
+      {
+        type: types.TransactionType.RevokeAsset,
+        sign: types.SignType.LogicSignature,
+        fromAccountAddr: clawbackAddress,
+        recipient: to.address,
+        assetID: assetIndex,
+        revocationTarget: from.address,
+        amount: amount,
+        lsig: lsig,
+        payFlags: { totalFee: 1000 }
+      },
+      {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
+        fromAccount: from.account,
+        toAccountAddr: clawbackAddress,
+        amountMicroAlgos: 1000,
+        payFlags: { totalFee: 1000 }
+      },
+      {
+        type: types.TransactionType.CallNoOpSSC,
+        sign: types.SignType.SecretKey,
+        fromAccount: from.account,
+        appId: permissionsAppId,
+        payFlags: { totalFee: 1000 },
+        appArgs: ['str:transfer'],
+        accounts: [to.address]
+      }
+    ];
+    runtime.executeTx(txGroup);
+    syncInfo();
   }
 
   this.beforeEach(async function () {
@@ -160,14 +219,7 @@ describe('Permissioned Token Tests', function () {
     });
     lsig = runtime.getLogicSig(CLAWBACK_PROGRAM, []);
     clawbackAddress = lsig.address();
-    runtime.executeTx({
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.SecretKey,
-      fromAccount: master.account,
-      toAccountAddr: clawbackAddress,
-      amountMicroAlgos: minBalance,
-      payFlags: {}
-    });
+    fund(clawbackAddress);
     runtime.executeTx({
       type: types.TransactionType.ModifyAsset,
       sign: types.SignType.SecretKey,
@@ -182,6 +234,8 @@ describe('Permissioned Token Tests', function () {
       payFlags: { totalFee: 1000 }
     });
     runtime.optIntoASA(assetIndex, clawbackAddress, {});
+
+    // Refresh Accounts
     syncInfo();
   });
 
@@ -200,14 +254,43 @@ describe('Permissioned Token Tests', function () {
     assert.throws(() => issue(elon, 20), 'RUNTIME_ERR1009');
   });
 
+  it('WhiteListing', () => {
+    // Only asset manager can whitelist
+    const address = elon.address;
+    optInToPermissions(address);
+    assert.isDefined(elon.getAppFromLocal(permissionsAppId));
+
+    assert.throws(() => runtime.executeTx({
+      type: types.TransactionType.CallNoOpSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: bob.account, // Bob is not the asset manager
+      appId: permissionsAppId,
+      payFlags: { totalFee: 1000 },
+      appArgs: ['str:add_whitelist', `int:${controllerAppID}`],
+      accounts: [address],
+      foreignAssets: [assetIndex],
+      foreignApps: [controllerAppID]
+    }), 'RUNTIME_ERR1009');
+
+    whitelist(address);
+    assert.equal(
+      Number(elon.getLocalState(permissionsAppId, 'whitelisted')),
+      1
+    );
+  });
+
   it('Token Transfer', () => {
+    fund(elon.address);
+    fund(bob.address);
+    fund(alice.address);
+    fund(clawbackAddress);
+    const amount = 20;
+
     // Issue some tokens to Bob and Elon
     optInToASA(elon);
     optInToASA(bob);
-    issue(elon, 80);
-    issue(bob, 100);
-
-    const amount = 5;
+    issue(elon, 50);
+    issue(bob, 50);
 
     // Cannot transfer directly
     assert.throws(() => runtime.executeTx({
@@ -220,56 +303,25 @@ describe('Permissioned Token Tests', function () {
       payFlags: {}
     }), 'RUNTIME_ERR1505');
 
-    // // Cannot transfer before being whitelisted
-    const Gtxn = [
-      {
-        type: types.TransactionType.CallNoOpSSC,
-        sign: types.SignType.SecretKey,
-        fromAccount: bob.account,
-        appId: controllerAppID,
-        payFlags: { totalFee: 1000 },
-        appArgs: ['str:transfer'],
-        accounts: [elon.address]
-      },
-      {
-        type: types.TransactionType.RevokeAsset,
-        sign: types.SignType.LogicSignature,
-        fromAccountAddr: clawbackAddress,
-        recipient: elon.address,
-        assetID: assetIndex,
-        revocationTarget: bob.address,
-        amount: amount,
-        lsig: lsig,
-        payFlags: { totalFee: 1000 }
-      },
-      {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.SecretKey,
-        fromAccount: bob.account,
-        toAccountAddr: clawbackAddress,
-        amountMicroAlgos: 1000,
-        payFlags: { totalFee: 1000 }
-      },
-      {
-        type: types.TransactionType.CallNoOpSSC,
-        sign: types.SignType.SecretKey,
-        fromAccount: bob.account,
-        appId: permissionsAppId,
-        payFlags: { totalFee: 1000 },
-        appArgs: ['str:transfer'],
-        accounts: [elon.address]
-      }
-    ];
-    assert.throws(() => runtime.executeTx(Gtxn), 'RUNTIME_ERR1009');
+    // Cannot transfer before being whitelisted
+    assert.throws(() => transfer(bob, elon, amount), 'RUNTIME_ERR1009');
 
     // Can transfer after being whitelisted
     whitelist(elon.address);
     whitelist(bob.address);
+    assert.isDefined(elon.getAppFromLocal(permissionsAppId));
+    assert.isDefined(bob.getAppFromLocal(permissionsAppId));
+    assert.equal(
+      Number(elon.getLocalState(permissionsAppId, 'whitelisted')),
+      1
+    );
+    assert.equal(
+      Number(bob.getLocalState(permissionsAppId, 'whitelisted')),
+      1
+    );
     const elonBalance = runtime.getAssetHolding(assetIndex, elon.address).amount;
-    console.log(runtime.getAssetHolding(assetIndex, elon.address));
-    console.log(runtime.getAssetHolding(assetIndex, bob.address));
     const bobBalance = runtime.getAssetHolding(assetIndex, elon.address).amount;
-    runtime.executeTx(Gtxn);
+    transfer(bob, elon, amount);
     assert.equal(
       Number(runtime.getAssetHolding(assetIndex, elon.address).amount),
       Number(elonBalance) + amount
