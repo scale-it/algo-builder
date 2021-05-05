@@ -266,7 +266,7 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
   }
 
   if (opCodeMap[tealVersion][opCode] === undefined) {
-    throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKOWN_OPCODE,
+    throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKNOWN_OPCODE,
       { opcode: opCode, version: tealVersion, line: counter });
   }
 

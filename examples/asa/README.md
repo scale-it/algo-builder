@@ -12,6 +12,12 @@ These scripts contain logic to transfer assets to `john-account` but other accou
 
 Balances can be queried by executing `algob run scripts/query/john-balances.js`.
 
+This example also includes creation of ASA owned by contract with following features:
+- Maximum number of ASA creation limit is 1.
+- Transaction must be signed by owner to get ASA out from contract
+- Only owner can call - update smart contract to set a new owner
+- Only owner can transfer ASA out from the smart contract and maximum payment is 100 ASA.
+
 ## Usage
 
 Please follow the [setup](../README.md) instructions to install dependencies and update the config.
