@@ -1,0 +1,5951 @@
+config file:  ../algob.config-template.js
+Test files: [ 'test/tests.js' ]
+
+
+  Permissioned Token Tests
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l39
+txn OnCompletion
+int UpdateApplication
+==
+bnz l38
+txn OnCompletion
+int DeleteApplication
+==
+bnz l37
+txn OnCompletion
+int CloseOut
+==
+bnz l36
+txn OnCompletion
+int OptIn
+==
+bnz l33
+txna ApplicationArgs 0
+byte "add_permission"
+==
+bnz l30
+txna ApplicationArgs 0
+byte "change_permissions_manager"
+==
+bnz l27
+txna ApplicationArgs 0
+byte "issue"
+==
+bnz l24
+txna ApplicationArgs 0
+byte "kill"
+==
+bnz l21
+txna ApplicationArgs 0
+byte "transfer"
+==
+bnz l18
+txna ApplicationArgs 0
+byte "force_transfer"
+==
+bnz l12
+err
+l12:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+byte "killed"
+app_global_get
+int 0
+==
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+txn Sender
+load 1
+==
+&&
+bnz l14
+err
+l14:
+gtxn 1 AssetReceiver
+load 3
+==
+gtxn 1 AssetReceiver
+gtxn 3 ConfigAssetReserve
+==
+||
+bnz l16
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+gtxn 3 Sender
+load 1
+==
+&&
+b l17
+l16:
+int 1
+l17:
+return
+l18:
+byte "killed"
+app_global_get
+int 0
+==
+global GroupSize
+int 3
+byte "total_rules"
+app_global_get
++
+==
+&&
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+&&
+gtxn 0 Sender
+gtxn 2 Sender
+==
+gtxn 0 Sender
+gtxn 1 AssetSender
+==
+&&
+gtxn 3 Sender
+gtxn 1 AssetSender
+==
+&&
+&&
+bnz l20
+err
+l20:
+int 1
+return
+l21:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn TypeEnum
+int appl
+==
+txn Sender
+load 1
+==
+&&
+bnz l23
+err
+l23:
+byte "killed"
+int 1
+app_global_put
+int 1
+return
+l24:
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+gtxn 0 Sender
+load 3
+==
+gtxn 1 AssetSender
+load 3
+==
+&&
+byte "killed"
+app_global_get
+int 0
+==
+&&
+bnz l26
+err
+l26:
+int 1
+return
+l27:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn Sender
+load 1
+==
+&&
+bnz l29
+err
+l29:
+byte "manager"
+txna Accounts 1
+app_global_put
+int 1
+return
+l30:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 3
+==
+txn Sender
+load 1
+==
+&&
+bnz l32
+err
+l32:
+byte "total_rules"
+byte "total_rules"
+app_global_get
+int 1
++
+app_global_put
+byte "perm_app"
+txna ApplicationArgs 1
+btoi
+app_global_put
+byte "manager"
+txna ApplicationArgs 2
+app_global_put
+int 1
+return
+l33:
+txn NumAppArgs
+int 0
+==
+txn GroupIndex
+int 0
+==
+&&
+bnz l35
+err
+l35:
+int 1
+return
+l36:
+int 1
+return
+l37:
+int 0
+return
+l38:
+int 0
+return
+l39:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txn Sender
+load 1
+==
+&&
+bnz l41
+err
+l41:
+byte "total_rules"
+int 0
+app_global_put
+byte "killed"
+int 0
+app_global_put
+byte "token_id"
+txna ApplicationArgs 0
+btoi
+app_global_put
+int 1
+return
+
+Program Line  297 total_rules
+Program Line  300 killed
+Program Line  303 token_id
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l25
+txn OnCompletion
+int UpdateApplication
+==
+bnz l22
+txn OnCompletion
+int DeleteApplication
+==
+bnz l21
+txn OnCompletion
+int CloseOut
+==
+bnz l20
+txn OnCompletion
+int OptIn
+==
+bnz l17
+txna ApplicationArgs 0
+byte "add_whitelist"
+==
+bnz l11
+txna ApplicationArgs 0
+byte "transfer"
+==
+bnz l8
+err
+l8:
+int 1
+gtxn 1 XferAsset
+asset_holding_get AssetBalance
+store 4
+store 5
+gtxn 1 TypeEnum
+int axfer
+==
+txna Accounts 1
+gtxn 1 AssetReceiver
+==
+&&
+load 5
+byte "max_tokens"
+app_global_get
+<=
+&&
+int 0
+byte "whitelisted"
+app_local_get
+int 1
+==
+&&
+int 1
+byte "whitelisted"
+app_local_get
+int 1
+==
+&&
+bnz l10
+err
+l10:
+int 1
+return
+l11:
+int 1
+byte "manager"
+app_global_get_ex
+store 0
+store 1
+int 1
+byte "token_id"
+app_global_get_ex
+store 2
+store 3
+txn NumAppArgs
+int 2
+==
+txn NumAccounts
+int 1
+==
+&&
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txna ApplicationArgs 1
+btoi
+byte "controller_app_id"
+app_global_get
+==
+&&
+txn Sender
+load 1
+==
+&&
+bnz l13
+err
+l13:
+int 1
+byte "whitelisted"
+app_local_get
+int 0
+==
+bnz l15
+int 1
+return
+l15:
+byte "whitelist_count"
+byte "whitelist_count"
+app_global_get
+int 1
++
+app_global_put
+int 1
+byte "whitelisted"
+int 1
+app_local_put
+int 1
+return
+l17:
+txn NumAppArgs
+int 0
+==
+txn GroupIndex
+int 0
+==
+&&
+bnz l19
+err
+l19:
+int 1
+return
+l20:
+int 1
+return
+l21:
+int 0
+return
+l22:
+int 1
+byte "manager"
+app_global_get_ex
+store 0
+store 1
+txna ApplicationArgs 1
+btoi
+byte "controller_app_id"
+app_global_get
+==
+txn Sender
+load 1
+==
+&&
+bnz l24
+err
+l24:
+int 1
+return
+l25:
+txn NumAppArgs
+int 1
+==
+txn RekeyTo
+global ZeroAddress
+==
+&&
+bnz l27
+err
+l27:
+byte "max_tokens"
+int 100
+app_global_put
+byte "whitelist_count"
+int 0
+app_global_put
+byte "controller_app_id"
+txna ApplicationArgs 0
+btoi
+app_global_put
+int 1
+return
+
+Program Line  172 max_tokens
+Program Line  175 whitelist_count
+Program Line  178 controller_app_id
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l39
+txn OnCompletion
+int UpdateApplication
+==
+bnz l38
+txn OnCompletion
+int DeleteApplication
+==
+bnz l37
+txn OnCompletion
+int CloseOut
+==
+bnz l36
+txn OnCompletion
+int OptIn
+==
+bnz l33
+txna ApplicationArgs 0
+byte "add_permission"
+==
+bnz l30
+txna ApplicationArgs 0
+byte "change_permissions_manager"
+==
+bnz l27
+txna ApplicationArgs 0
+byte "issue"
+==
+bnz l24
+txna ApplicationArgs 0
+byte "kill"
+==
+bnz l21
+txna ApplicationArgs 0
+byte "transfer"
+==
+bnz l18
+txna ApplicationArgs 0
+byte "force_transfer"
+==
+bnz l12
+err
+l12:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+byte "killed"
+app_global_get
+int 0
+==
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+txn Sender
+load 1
+==
+&&
+bnz l14
+err
+l14:
+gtxn 1 AssetReceiver
+load 3
+==
+gtxn 1 AssetReceiver
+gtxn 3 ConfigAssetReserve
+==
+||
+bnz l16
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+gtxn 3 Sender
+load 1
+==
+&&
+b l17
+l16:
+int 1
+l17:
+return
+l18:
+byte "killed"
+app_global_get
+int 0
+==
+global GroupSize
+int 3
+byte "total_rules"
+app_global_get
++
+==
+&&
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+&&
+gtxn 0 Sender
+gtxn 2 Sender
+==
+gtxn 0 Sender
+gtxn 1 AssetSender
+==
+&&
+gtxn 3 Sender
+gtxn 1 AssetSender
+==
+&&
+&&
+bnz l20
+err
+l20:
+int 1
+return
+l21:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn TypeEnum
+int appl
+==
+txn Sender
+load 1
+==
+&&
+bnz l23
+err
+l23:
+byte "killed"
+int 1
+app_global_put
+int 1
+return
+l24:
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+gtxn 0 Sender
+load 3
+==
+gtxn 1 AssetSender
+load 3
+==
+&&
+byte "killed"
+app_global_get
+int 0
+==
+&&
+bnz l26
+err
+l26:
+int 1
+return
+l27:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn Sender
+load 1
+==
+&&
+bnz l29
+err
+l29:
+byte "manager"
+txna Accounts 1
+app_global_put
+int 1
+return
+l30:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 3
+==
+txn Sender
+load 1
+==
+&&
+bnz l32
+err
+l32:
+byte "total_rules"
+byte "total_rules"
+app_global_get
+int 1
++
+app_global_put
+byte "perm_app"
+txna ApplicationArgs 1
+btoi
+app_global_put
+byte "manager"
+txna ApplicationArgs 2
+app_global_put
+int 1
+return
+l33:
+txn NumAppArgs
+int 0
+==
+txn GroupIndex
+int 0
+==
+&&
+bnz l35
+err
+l35:
+int 1
+return
+l36:
+int 1
+return
+l37:
+int 0
+return
+l38:
+int 0
+return
+l39:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txn Sender
+load 1
+==
+&&
+bnz l41
+err
+l41:
+byte "total_rules"
+int 0
+app_global_put
+byte "killed"
+int 0
+app_global_put
+byte "token_id"
+txna ApplicationArgs 0
+btoi
+app_global_put
+int 1
+return
+
+Program Line  23 add_permission
+Program Line  241 total_rules
+Program Line  242 total_rules
+Program Line  247 perm_app
+Program Line  251 manager
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l39
+txn OnCompletion
+int UpdateApplication
+==
+bnz l38
+txn OnCompletion
+int DeleteApplication
+==
+bnz l37
+txn OnCompletion
+int CloseOut
+==
+bnz l36
+txn OnCompletion
+int OptIn
+==
+bnz l33
+txna ApplicationArgs 0
+byte "add_permission"
+==
+bnz l30
+txna ApplicationArgs 0
+byte "change_permissions_manager"
+==
+bnz l27
+txna ApplicationArgs 0
+byte "issue"
+==
+bnz l24
+txna ApplicationArgs 0
+byte "kill"
+==
+bnz l21
+txna ApplicationArgs 0
+byte "transfer"
+==
+bnz l18
+txna ApplicationArgs 0
+byte "force_transfer"
+==
+bnz l12
+err
+l12:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+byte "killed"
+app_global_get
+int 0
+==
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+txn Sender
+load 1
+==
+&&
+bnz l14
+err
+l14:
+gtxn 1 AssetReceiver
+load 3
+==
+gtxn 1 AssetReceiver
+gtxn 3 ConfigAssetReserve
+==
+||
+bnz l16
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+gtxn 3 Sender
+load 1
+==
+&&
+b l17
+l16:
+int 1
+l17:
+return
+l18:
+byte "killed"
+app_global_get
+int 0
+==
+global GroupSize
+int 3
+byte "total_rules"
+app_global_get
++
+==
+&&
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+&&
+gtxn 0 Sender
+gtxn 2 Sender
+==
+gtxn 0 Sender
+gtxn 1 AssetSender
+==
+&&
+gtxn 3 Sender
+gtxn 1 AssetSender
+==
+&&
+&&
+bnz l20
+err
+l20:
+int 1
+return
+l21:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn TypeEnum
+int appl
+==
+txn Sender
+load 1
+==
+&&
+bnz l23
+err
+l23:
+byte "killed"
+int 1
+app_global_put
+int 1
+return
+l24:
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+gtxn 0 Sender
+load 3
+==
+gtxn 1 AssetSender
+load 3
+==
+&&
+byte "killed"
+app_global_get
+int 0
+==
+&&
+bnz l26
+err
+l26:
+int 1
+return
+l27:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn Sender
+load 1
+==
+&&
+bnz l29
+err
+l29:
+byte "manager"
+txna Accounts 1
+app_global_put
+int 1
+return
+l30:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 3
+==
+txn Sender
+load 1
+==
+&&
+bnz l32
+err
+l32:
+byte "total_rules"
+byte "total_rules"
+app_global_get
+int 1
++
+app_global_put
+byte "perm_app"
+txna ApplicationArgs 1
+btoi
+app_global_put
+byte "manager"
+txna ApplicationArgs 2
+app_global_put
+int 1
+return
+l33:
+txn NumAppArgs
+int 0
+==
+txn GroupIndex
+int 0
+==
+&&
+bnz l35
+err
+l35:
+int 1
+return
+l36:
+int 1
+return
+l37:
+int 0
+return
+l38:
+int 0
+return
+l39:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txn Sender
+load 1
+==
+&&
+bnz l41
+err
+l41:
+byte "total_rules"
+int 0
+app_global_put
+byte "killed"
+int 0
+app_global_put
+byte "token_id"
+txna ApplicationArgs 0
+btoi
+app_global_put
+int 1
+return
+
+Program Line  23 add_permission
+Program Line  27 change_permissions_manager
+Program Line  31 issue
+Program Line  196 killed
+#pragma version 2
+global GroupSize
+int 2
+==
+bnz l2
+global GroupSize
+int 3
+>=
+gtxn 0 TypeEnum
+int appl
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 2 TypeEnum
+int pay
+==
+&&
+txn GroupIndex
+int 1
+==
+&&
+gtxn 0 RekeyTo
+global ZeroAddress
+==
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 2 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 0 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 1 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 2 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 0 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 1 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 2 AssetCloseTo
+global ZeroAddress
+==
+&&
+&&
+gtxn 0 ApplicationID
+int 1
+==
+&&
+gtxn 1 XferAsset
+int 1
+==
+&&
+gtxn 1 Sender
+gtxn 2 Receiver
+==
+gtxn 2 Amount
+gtxn 1 Fee
+>=
+&&
+&&
+b l3
+l2:
+gtxn 0 TypeEnum
+int appl
+==
+gtxn 0 ApplicationID
+int 1
+==
+&&
+gtxn 0 Sender
+gtxn 1 AssetSender
+==
+&&
+gtxn 0 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+int 1
+==
+&&
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+l3:
+
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l39
+txn OnCompletion
+int UpdateApplication
+==
+bnz l38
+txn OnCompletion
+int DeleteApplication
+==
+bnz l37
+txn OnCompletion
+int CloseOut
+==
+bnz l36
+txn OnCompletion
+int OptIn
+==
+bnz l33
+txna ApplicationArgs 0
+byte "add_permission"
+==
+bnz l30
+txna ApplicationArgs 0
+byte "change_permissions_manager"
+==
+bnz l27
+txna ApplicationArgs 0
+byte "issue"
+==
+bnz l24
+txna ApplicationArgs 0
+byte "kill"
+==
+bnz l21
+txna ApplicationArgs 0
+byte "transfer"
+==
+bnz l18
+txna ApplicationArgs 0
+byte "force_transfer"
+==
+bnz l12
+err
+l12:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+byte "killed"
+app_global_get
+int 0
+==
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+txn Sender
+load 1
+==
+&&
+bnz l14
+err
+l14:
+gtxn 1 AssetReceiver
+load 3
+==
+gtxn 1 AssetReceiver
+gtxn 3 ConfigAssetReserve
+==
+||
+bnz l16
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+gtxn 3 Sender
+load 1
+==
+&&
+b l17
+l16:
+int 1
+l17:
+return
+l18:
+byte "killed"
+app_global_get
+int 0
+==
+global GroupSize
+int 3
+byte "total_rules"
+app_global_get
++
+==
+&&
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+&&
+gtxn 0 Sender
+gtxn 2 Sender
+==
+gtxn 0 Sender
+gtxn 1 AssetSender
+==
+&&
+gtxn 3 Sender
+gtxn 1 AssetSender
+==
+&&
+&&
+bnz l20
+err
+l20:
+int 1
+return
+l21:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn TypeEnum
+int appl
+==
+txn Sender
+load 1
+==
+&&
+bnz l23
+err
+l23:
+byte "killed"
+int 1
+app_global_put
+int 1
+return
+l24:
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+gtxn 0 Sender
+load 3
+==
+gtxn 1 AssetSender
+load 3
+==
+&&
+byte "killed"
+app_global_get
+int 0
+==
+&&
+bnz l26
+err
+l26:
+int 1
+return
+l27:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn Sender
+load 1
+==
+&&
+bnz l29
+err
+l29:
+byte "manager"
+txna Accounts 1
+app_global_put
+int 1
+return
+l30:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 3
+==
+txn Sender
+load 1
+==
+&&
+bnz l32
+err
+l32:
+byte "total_rules"
+byte "total_rules"
+app_global_get
+int 1
++
+app_global_put
+byte "perm_app"
+txna ApplicationArgs 1
+btoi
+app_global_put
+byte "manager"
+txna ApplicationArgs 2
+app_global_put
+int 1
+return
+l33:
+txn NumAppArgs
+int 0
+==
+txn GroupIndex
+int 0
+==
+&&
+bnz l35
+err
+l35:
+int 1
+return
+l36:
+int 1
+return
+l37:
+int 0
+return
+l38:
+int 0
+return
+l39:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txn Sender
+load 1
+==
+&&
+bnz l41
+err
+l41:
+byte "total_rules"
+int 0
+app_global_put
+byte "killed"
+int 0
+app_global_put
+byte "token_id"
+txna ApplicationArgs 0
+btoi
+app_global_put
+int 1
+return
+
+Program Line  23 add_permission
+Program Line  27 change_permissions_manager
+Program Line  31 issue
+Program Line  196 killed
+#pragma version 2
+global GroupSize
+int 2
+==
+bnz l2
+global GroupSize
+int 3
+>=
+gtxn 0 TypeEnum
+int appl
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 2 TypeEnum
+int pay
+==
+&&
+txn GroupIndex
+int 1
+==
+&&
+gtxn 0 RekeyTo
+global ZeroAddress
+==
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 2 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 0 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 1 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 2 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 0 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 1 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 2 AssetCloseTo
+global ZeroAddress
+==
+&&
+&&
+gtxn 0 ApplicationID
+int 1
+==
+&&
+gtxn 1 XferAsset
+int 1
+==
+&&
+gtxn 1 Sender
+gtxn 2 Receiver
+==
+gtxn 2 Amount
+gtxn 1 Fee
+>=
+&&
+&&
+b l3
+l2:
+gtxn 0 TypeEnum
+int appl
+==
+gtxn 0 ApplicationID
+int 1
+==
+&&
+gtxn 0 Sender
+gtxn 1 AssetSender
+==
+&&
+gtxn 0 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+int 1
+==
+&&
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+l3:
+
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l39
+txn OnCompletion
+int UpdateApplication
+==
+bnz l38
+txn OnCompletion
+int DeleteApplication
+==
+bnz l37
+txn OnCompletion
+int CloseOut
+==
+bnz l36
+txn OnCompletion
+int OptIn
+==
+bnz l33
+txna ApplicationArgs 0
+byte "add_permission"
+==
+bnz l30
+txna ApplicationArgs 0
+byte "change_permissions_manager"
+==
+bnz l27
+txna ApplicationArgs 0
+byte "issue"
+==
+bnz l24
+txna ApplicationArgs 0
+byte "kill"
+==
+bnz l21
+txna ApplicationArgs 0
+byte "transfer"
+==
+bnz l18
+txna ApplicationArgs 0
+byte "force_transfer"
+==
+bnz l12
+err
+l12:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+byte "killed"
+app_global_get
+int 0
+==
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+txn Sender
+load 1
+==
+&&
+bnz l14
+err
+l14:
+gtxn 1 AssetReceiver
+load 3
+==
+gtxn 1 AssetReceiver
+gtxn 3 ConfigAssetReserve
+==
+||
+bnz l16
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+gtxn 3 Sender
+load 1
+==
+&&
+b l17
+l16:
+int 1
+l17:
+return
+l18:
+byte "killed"
+app_global_get
+int 0
+==
+global GroupSize
+int 3
+byte "total_rules"
+app_global_get
++
+==
+&&
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+&&
+gtxn 0 Sender
+gtxn 2 Sender
+==
+gtxn 0 Sender
+gtxn 1 AssetSender
+==
+&&
+gtxn 3 Sender
+gtxn 1 AssetSender
+==
+&&
+&&
+bnz l20
+err
+l20:
+int 1
+return
+l21:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn TypeEnum
+int appl
+==
+txn Sender
+load 1
+==
+&&
+bnz l23
+err
+l23:
+byte "killed"
+int 1
+app_global_put
+int 1
+return
+l24:
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+gtxn 0 Sender
+load 3
+==
+gtxn 1 AssetSender
+load 3
+==
+&&
+byte "killed"
+app_global_get
+int 0
+==
+&&
+bnz l26
+err
+l26:
+int 1
+return
+l27:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn Sender
+load 1
+==
+&&
+bnz l29
+err
+l29:
+byte "manager"
+txna Accounts 1
+app_global_put
+int 1
+return
+l30:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 3
+==
+txn Sender
+load 1
+==
+&&
+bnz l32
+err
+l32:
+byte "total_rules"
+byte "total_rules"
+app_global_get
+int 1
++
+app_global_put
+byte "perm_app"
+txna ApplicationArgs 1
+btoi
+app_global_put
+byte "manager"
+txna ApplicationArgs 2
+app_global_put
+int 1
+return
+l33:
+txn NumAppArgs
+int 0
+==
+txn GroupIndex
+int 0
+==
+&&
+bnz l35
+err
+l35:
+int 1
+return
+l36:
+int 1
+return
+l37:
+int 0
+return
+l38:
+int 0
+return
+l39:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txn Sender
+load 1
+==
+&&
+bnz l41
+err
+l41:
+byte "total_rules"
+int 0
+app_global_put
+byte "killed"
+int 0
+app_global_put
+byte "token_id"
+txna ApplicationArgs 0
+btoi
+app_global_put
+int 1
+return
+
+Program Line  23 add_permission
+Program Line  27 change_permissions_manager
+Program Line  31 issue
+Program Line  35 kill
+Program Line  179 killed
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l39
+txn OnCompletion
+int UpdateApplication
+==
+bnz l38
+txn OnCompletion
+int DeleteApplication
+==
+bnz l37
+txn OnCompletion
+int CloseOut
+==
+bnz l36
+txn OnCompletion
+int OptIn
+==
+bnz l33
+txna ApplicationArgs 0
+byte "add_permission"
+==
+bnz l30
+txna ApplicationArgs 0
+byte "change_permissions_manager"
+==
+bnz l27
+txna ApplicationArgs 0
+byte "issue"
+==
+bnz l24
+txna ApplicationArgs 0
+byte "kill"
+==
+bnz l21
+txna ApplicationArgs 0
+byte "transfer"
+==
+bnz l18
+txna ApplicationArgs 0
+byte "force_transfer"
+==
+bnz l12
+err
+l12:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+byte "killed"
+app_global_get
+int 0
+==
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+txn Sender
+load 1
+==
+&&
+bnz l14
+err
+l14:
+gtxn 1 AssetReceiver
+load 3
+==
+gtxn 1 AssetReceiver
+gtxn 3 ConfigAssetReserve
+==
+||
+bnz l16
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+gtxn 3 Sender
+load 1
+==
+&&
+b l17
+l16:
+int 1
+l17:
+return
+l18:
+byte "killed"
+app_global_get
+int 0
+==
+global GroupSize
+int 3
+byte "total_rules"
+app_global_get
++
+==
+&&
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+&&
+gtxn 0 Sender
+gtxn 2 Sender
+==
+gtxn 0 Sender
+gtxn 1 AssetSender
+==
+&&
+gtxn 3 Sender
+gtxn 1 AssetSender
+==
+&&
+&&
+bnz l20
+err
+l20:
+int 1
+return
+l21:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn TypeEnum
+int appl
+==
+txn Sender
+load 1
+==
+&&
+bnz l23
+err
+l23:
+byte "killed"
+int 1
+app_global_put
+int 1
+return
+l24:
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+gtxn 0 Sender
+load 3
+==
+gtxn 1 AssetSender
+load 3
+==
+&&
+byte "killed"
+app_global_get
+int 0
+==
+&&
+bnz l26
+err
+l26:
+int 1
+return
+l27:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn Sender
+load 1
+==
+&&
+bnz l29
+err
+l29:
+byte "manager"
+txna Accounts 1
+app_global_put
+int 1
+return
+l30:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 3
+==
+txn Sender
+load 1
+==
+&&
+bnz l32
+err
+l32:
+byte "total_rules"
+byte "total_rules"
+app_global_get
+int 1
++
+app_global_put
+byte "perm_app"
+txna ApplicationArgs 1
+btoi
+app_global_put
+byte "manager"
+txna ApplicationArgs 2
+app_global_put
+int 1
+return
+l33:
+txn NumAppArgs
+int 0
+==
+txn GroupIndex
+int 0
+==
+&&
+bnz l35
+err
+l35:
+int 1
+return
+l36:
+int 1
+return
+l37:
+int 0
+return
+l38:
+int 0
+return
+l39:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txn Sender
+load 1
+==
+&&
+bnz l41
+err
+l41:
+byte "total_rules"
+int 0
+app_global_put
+byte "killed"
+int 0
+app_global_put
+byte "token_id"
+txna ApplicationArgs 0
+btoi
+app_global_put
+int 1
+return
+
+Program Line  23 add_permission
+Program Line  27 change_permissions_manager
+Program Line  31 issue
+Program Line  196 killed
+    ✓ Token Issuance (47ms)
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l39
+txn OnCompletion
+int UpdateApplication
+==
+bnz l38
+txn OnCompletion
+int DeleteApplication
+==
+bnz l37
+txn OnCompletion
+int CloseOut
+==
+bnz l36
+txn OnCompletion
+int OptIn
+==
+bnz l33
+txna ApplicationArgs 0
+byte "add_permission"
+==
+bnz l30
+txna ApplicationArgs 0
+byte "change_permissions_manager"
+==
+bnz l27
+txna ApplicationArgs 0
+byte "issue"
+==
+bnz l24
+txna ApplicationArgs 0
+byte "kill"
+==
+bnz l21
+txna ApplicationArgs 0
+byte "transfer"
+==
+bnz l18
+txna ApplicationArgs 0
+byte "force_transfer"
+==
+bnz l12
+err
+l12:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+byte "killed"
+app_global_get
+int 0
+==
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+txn Sender
+load 1
+==
+&&
+bnz l14
+err
+l14:
+gtxn 1 AssetReceiver
+load 3
+==
+gtxn 1 AssetReceiver
+gtxn 3 ConfigAssetReserve
+==
+||
+bnz l16
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+gtxn 3 Sender
+load 1
+==
+&&
+b l17
+l16:
+int 1
+l17:
+return
+l18:
+byte "killed"
+app_global_get
+int 0
+==
+global GroupSize
+int 3
+byte "total_rules"
+app_global_get
++
+==
+&&
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+&&
+gtxn 0 Sender
+gtxn 2 Sender
+==
+gtxn 0 Sender
+gtxn 1 AssetSender
+==
+&&
+gtxn 3 Sender
+gtxn 1 AssetSender
+==
+&&
+&&
+bnz l20
+err
+l20:
+int 1
+return
+l21:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn TypeEnum
+int appl
+==
+txn Sender
+load 1
+==
+&&
+bnz l23
+err
+l23:
+byte "killed"
+int 1
+app_global_put
+int 1
+return
+l24:
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+gtxn 0 Sender
+load 3
+==
+gtxn 1 AssetSender
+load 3
+==
+&&
+byte "killed"
+app_global_get
+int 0
+==
+&&
+bnz l26
+err
+l26:
+int 1
+return
+l27:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn Sender
+load 1
+==
+&&
+bnz l29
+err
+l29:
+byte "manager"
+txna Accounts 1
+app_global_put
+int 1
+return
+l30:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 3
+==
+txn Sender
+load 1
+==
+&&
+bnz l32
+err
+l32:
+byte "total_rules"
+byte "total_rules"
+app_global_get
+int 1
++
+app_global_put
+byte "perm_app"
+txna ApplicationArgs 1
+btoi
+app_global_put
+byte "manager"
+txna ApplicationArgs 2
+app_global_put
+int 1
+return
+l33:
+txn NumAppArgs
+int 0
+==
+txn GroupIndex
+int 0
+==
+&&
+bnz l35
+err
+l35:
+int 1
+return
+l36:
+int 1
+return
+l37:
+int 0
+return
+l38:
+int 0
+return
+l39:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txn Sender
+load 1
+==
+&&
+bnz l41
+err
+l41:
+byte "total_rules"
+int 0
+app_global_put
+byte "killed"
+int 0
+app_global_put
+byte "token_id"
+txna ApplicationArgs 0
+btoi
+app_global_put
+int 1
+return
+
+Program Line  297 total_rules
+Program Line  300 killed
+Program Line  303 token_id
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l25
+txn OnCompletion
+int UpdateApplication
+==
+bnz l22
+txn OnCompletion
+int DeleteApplication
+==
+bnz l21
+txn OnCompletion
+int CloseOut
+==
+bnz l20
+txn OnCompletion
+int OptIn
+==
+bnz l17
+txna ApplicationArgs 0
+byte "add_whitelist"
+==
+bnz l11
+txna ApplicationArgs 0
+byte "transfer"
+==
+bnz l8
+err
+l8:
+int 1
+gtxn 1 XferAsset
+asset_holding_get AssetBalance
+store 4
+store 5
+gtxn 1 TypeEnum
+int axfer
+==
+txna Accounts 1
+gtxn 1 AssetReceiver
+==
+&&
+load 5
+byte "max_tokens"
+app_global_get
+<=
+&&
+int 0
+byte "whitelisted"
+app_local_get
+int 1
+==
+&&
+int 1
+byte "whitelisted"
+app_local_get
+int 1
+==
+&&
+bnz l10
+err
+l10:
+int 1
+return
+l11:
+int 1
+byte "manager"
+app_global_get_ex
+store 0
+store 1
+int 1
+byte "token_id"
+app_global_get_ex
+store 2
+store 3
+txn NumAppArgs
+int 2
+==
+txn NumAccounts
+int 1
+==
+&&
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txna ApplicationArgs 1
+btoi
+byte "controller_app_id"
+app_global_get
+==
+&&
+txn Sender
+load 1
+==
+&&
+bnz l13
+err
+l13:
+int 1
+byte "whitelisted"
+app_local_get
+int 0
+==
+bnz l15
+int 1
+return
+l15:
+byte "whitelist_count"
+byte "whitelist_count"
+app_global_get
+int 1
++
+app_global_put
+int 1
+byte "whitelisted"
+int 1
+app_local_put
+int 1
+return
+l17:
+txn NumAppArgs
+int 0
+==
+txn GroupIndex
+int 0
+==
+&&
+bnz l19
+err
+l19:
+int 1
+return
+l20:
+int 1
+return
+l21:
+int 0
+return
+l22:
+int 1
+byte "manager"
+app_global_get_ex
+store 0
+store 1
+txna ApplicationArgs 1
+btoi
+byte "controller_app_id"
+app_global_get
+==
+txn Sender
+load 1
+==
+&&
+bnz l24
+err
+l24:
+int 1
+return
+l25:
+txn NumAppArgs
+int 1
+==
+txn RekeyTo
+global ZeroAddress
+==
+&&
+bnz l27
+err
+l27:
+byte "max_tokens"
+int 100
+app_global_put
+byte "whitelist_count"
+int 0
+app_global_put
+byte "controller_app_id"
+txna ApplicationArgs 0
+btoi
+app_global_put
+int 1
+return
+
+Program Line  172 max_tokens
+Program Line  175 whitelist_count
+Program Line  178 controller_app_id
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l39
+txn OnCompletion
+int UpdateApplication
+==
+bnz l38
+txn OnCompletion
+int DeleteApplication
+==
+bnz l37
+txn OnCompletion
+int CloseOut
+==
+bnz l36
+txn OnCompletion
+int OptIn
+==
+bnz l33
+txna ApplicationArgs 0
+byte "add_permission"
+==
+bnz l30
+txna ApplicationArgs 0
+byte "change_permissions_manager"
+==
+bnz l27
+txna ApplicationArgs 0
+byte "issue"
+==
+bnz l24
+txna ApplicationArgs 0
+byte "kill"
+==
+bnz l21
+txna ApplicationArgs 0
+byte "transfer"
+==
+bnz l18
+txna ApplicationArgs 0
+byte "force_transfer"
+==
+bnz l12
+err
+l12:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+byte "killed"
+app_global_get
+int 0
+==
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+txn Sender
+load 1
+==
+&&
+bnz l14
+err
+l14:
+gtxn 1 AssetReceiver
+load 3
+==
+gtxn 1 AssetReceiver
+gtxn 3 ConfigAssetReserve
+==
+||
+bnz l16
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+gtxn 3 Sender
+load 1
+==
+&&
+b l17
+l16:
+int 1
+l17:
+return
+l18:
+byte "killed"
+app_global_get
+int 0
+==
+global GroupSize
+int 3
+byte "total_rules"
+app_global_get
++
+==
+&&
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+&&
+gtxn 0 Sender
+gtxn 2 Sender
+==
+gtxn 0 Sender
+gtxn 1 AssetSender
+==
+&&
+gtxn 3 Sender
+gtxn 1 AssetSender
+==
+&&
+&&
+bnz l20
+err
+l20:
+int 1
+return
+l21:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn TypeEnum
+int appl
+==
+txn Sender
+load 1
+==
+&&
+bnz l23
+err
+l23:
+byte "killed"
+int 1
+app_global_put
+int 1
+return
+l24:
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+gtxn 0 Sender
+load 3
+==
+gtxn 1 AssetSender
+load 3
+==
+&&
+byte "killed"
+app_global_get
+int 0
+==
+&&
+bnz l26
+err
+l26:
+int 1
+return
+l27:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn Sender
+load 1
+==
+&&
+bnz l29
+err
+l29:
+byte "manager"
+txna Accounts 1
+app_global_put
+int 1
+return
+l30:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 3
+==
+txn Sender
+load 1
+==
+&&
+bnz l32
+err
+l32:
+byte "total_rules"
+byte "total_rules"
+app_global_get
+int 1
++
+app_global_put
+byte "perm_app"
+txna ApplicationArgs 1
+btoi
+app_global_put
+byte "manager"
+txna ApplicationArgs 2
+app_global_put
+int 1
+return
+l33:
+txn NumAppArgs
+int 0
+==
+txn GroupIndex
+int 0
+==
+&&
+bnz l35
+err
+l35:
+int 1
+return
+l36:
+int 1
+return
+l37:
+int 0
+return
+l38:
+int 0
+return
+l39:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txn Sender
+load 1
+==
+&&
+bnz l41
+err
+l41:
+byte "total_rules"
+int 0
+app_global_put
+byte "killed"
+int 0
+app_global_put
+byte "token_id"
+txna ApplicationArgs 0
+btoi
+app_global_put
+int 1
+return
+
+Program Line  23 add_permission
+Program Line  241 total_rules
+Program Line  242 total_rules
+Program Line  247 perm_app
+Program Line  251 manager
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l39
+txn OnCompletion
+int UpdateApplication
+==
+bnz l38
+txn OnCompletion
+int DeleteApplication
+==
+bnz l37
+txn OnCompletion
+int CloseOut
+==
+bnz l36
+txn OnCompletion
+int OptIn
+==
+bnz l33
+txna ApplicationArgs 0
+byte "add_permission"
+==
+bnz l30
+txna ApplicationArgs 0
+byte "change_permissions_manager"
+==
+bnz l27
+txna ApplicationArgs 0
+byte "issue"
+==
+bnz l24
+txna ApplicationArgs 0
+byte "kill"
+==
+bnz l21
+txna ApplicationArgs 0
+byte "transfer"
+==
+bnz l18
+txna ApplicationArgs 0
+byte "force_transfer"
+==
+bnz l12
+err
+l12:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+byte "killed"
+app_global_get
+int 0
+==
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+txn Sender
+load 1
+==
+&&
+bnz l14
+err
+l14:
+gtxn 1 AssetReceiver
+load 3
+==
+gtxn 1 AssetReceiver
+gtxn 3 ConfigAssetReserve
+==
+||
+bnz l16
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+gtxn 3 Sender
+load 1
+==
+&&
+b l17
+l16:
+int 1
+l17:
+return
+l18:
+byte "killed"
+app_global_get
+int 0
+==
+global GroupSize
+int 3
+byte "total_rules"
+app_global_get
++
+==
+&&
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+&&
+gtxn 0 Sender
+gtxn 2 Sender
+==
+gtxn 0 Sender
+gtxn 1 AssetSender
+==
+&&
+gtxn 3 Sender
+gtxn 1 AssetSender
+==
+&&
+&&
+bnz l20
+err
+l20:
+int 1
+return
+l21:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn TypeEnum
+int appl
+==
+txn Sender
+load 1
+==
+&&
+bnz l23
+err
+l23:
+byte "killed"
+int 1
+app_global_put
+int 1
+return
+l24:
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+gtxn 0 Sender
+load 3
+==
+gtxn 1 AssetSender
+load 3
+==
+&&
+byte "killed"
+app_global_get
+int 0
+==
+&&
+bnz l26
+err
+l26:
+int 1
+return
+l27:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn Sender
+load 1
+==
+&&
+bnz l29
+err
+l29:
+byte "manager"
+txna Accounts 1
+app_global_put
+int 1
+return
+l30:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 3
+==
+txn Sender
+load 1
+==
+&&
+bnz l32
+err
+l32:
+byte "total_rules"
+byte "total_rules"
+app_global_get
+int 1
++
+app_global_put
+byte "perm_app"
+txna ApplicationArgs 1
+btoi
+app_global_put
+byte "manager"
+txna ApplicationArgs 2
+app_global_put
+int 1
+return
+l33:
+txn NumAppArgs
+int 0
+==
+txn GroupIndex
+int 0
+==
+&&
+bnz l35
+err
+l35:
+int 1
+return
+l36:
+int 1
+return
+l37:
+int 0
+return
+l38:
+int 0
+return
+l39:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txn Sender
+load 1
+==
+&&
+bnz l41
+err
+l41:
+byte "total_rules"
+int 0
+app_global_put
+byte "killed"
+int 0
+app_global_put
+byte "token_id"
+txna ApplicationArgs 0
+btoi
+app_global_put
+int 1
+return
+
+Program Line  23 add_permission
+Program Line  27 change_permissions_manager
+Program Line  31 issue
+Program Line  196 killed
+#pragma version 2
+global GroupSize
+int 2
+==
+bnz l2
+global GroupSize
+int 3
+>=
+gtxn 0 TypeEnum
+int appl
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 2 TypeEnum
+int pay
+==
+&&
+txn GroupIndex
+int 1
+==
+&&
+gtxn 0 RekeyTo
+global ZeroAddress
+==
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 2 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 0 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 1 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 2 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 0 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 1 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 2 AssetCloseTo
+global ZeroAddress
+==
+&&
+&&
+gtxn 0 ApplicationID
+int 1
+==
+&&
+gtxn 1 XferAsset
+int 1
+==
+&&
+gtxn 1 Sender
+gtxn 2 Receiver
+==
+gtxn 2 Amount
+gtxn 1 Fee
+>=
+&&
+&&
+b l3
+l2:
+gtxn 0 TypeEnum
+int appl
+==
+gtxn 0 ApplicationID
+int 1
+==
+&&
+gtxn 0 Sender
+gtxn 1 AssetSender
+==
+&&
+gtxn 0 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+int 1
+==
+&&
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+l3:
+
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l39
+txn OnCompletion
+int UpdateApplication
+==
+bnz l38
+txn OnCompletion
+int DeleteApplication
+==
+bnz l37
+txn OnCompletion
+int CloseOut
+==
+bnz l36
+txn OnCompletion
+int OptIn
+==
+bnz l33
+txna ApplicationArgs 0
+byte "add_permission"
+==
+bnz l30
+txna ApplicationArgs 0
+byte "change_permissions_manager"
+==
+bnz l27
+txna ApplicationArgs 0
+byte "issue"
+==
+bnz l24
+txna ApplicationArgs 0
+byte "kill"
+==
+bnz l21
+txna ApplicationArgs 0
+byte "transfer"
+==
+bnz l18
+txna ApplicationArgs 0
+byte "force_transfer"
+==
+bnz l12
+err
+l12:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+byte "killed"
+app_global_get
+int 0
+==
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+txn Sender
+load 1
+==
+&&
+bnz l14
+err
+l14:
+gtxn 1 AssetReceiver
+load 3
+==
+gtxn 1 AssetReceiver
+gtxn 3 ConfigAssetReserve
+==
+||
+bnz l16
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+gtxn 3 Sender
+load 1
+==
+&&
+b l17
+l16:
+int 1
+l17:
+return
+l18:
+byte "killed"
+app_global_get
+int 0
+==
+global GroupSize
+int 3
+byte "total_rules"
+app_global_get
++
+==
+&&
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+&&
+gtxn 0 Sender
+gtxn 2 Sender
+==
+gtxn 0 Sender
+gtxn 1 AssetSender
+==
+&&
+gtxn 3 Sender
+gtxn 1 AssetSender
+==
+&&
+&&
+bnz l20
+err
+l20:
+int 1
+return
+l21:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn TypeEnum
+int appl
+==
+txn Sender
+load 1
+==
+&&
+bnz l23
+err
+l23:
+byte "killed"
+int 1
+app_global_put
+int 1
+return
+l24:
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+gtxn 0 Sender
+load 3
+==
+gtxn 1 AssetSender
+load 3
+==
+&&
+byte "killed"
+app_global_get
+int 0
+==
+&&
+bnz l26
+err
+l26:
+int 1
+return
+l27:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn Sender
+load 1
+==
+&&
+bnz l29
+err
+l29:
+byte "manager"
+txna Accounts 1
+app_global_put
+int 1
+return
+l30:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 3
+==
+txn Sender
+load 1
+==
+&&
+bnz l32
+err
+l32:
+byte "total_rules"
+byte "total_rules"
+app_global_get
+int 1
++
+app_global_put
+byte "perm_app"
+txna ApplicationArgs 1
+btoi
+app_global_put
+byte "manager"
+txna ApplicationArgs 2
+app_global_put
+int 1
+return
+l33:
+txn NumAppArgs
+int 0
+==
+txn GroupIndex
+int 0
+==
+&&
+bnz l35
+err
+l35:
+int 1
+return
+l36:
+int 1
+return
+l37:
+int 0
+return
+l38:
+int 0
+return
+l39:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txn Sender
+load 1
+==
+&&
+bnz l41
+err
+l41:
+byte "total_rules"
+int 0
+app_global_put
+byte "killed"
+int 0
+app_global_put
+byte "token_id"
+txna ApplicationArgs 0
+btoi
+app_global_put
+int 1
+return
+
+Program Line  23 add_permission
+Program Line  27 change_permissions_manager
+Program Line  31 issue
+Program Line  196 killed
+#pragma version 2
+global GroupSize
+int 2
+==
+bnz l2
+global GroupSize
+int 3
+>=
+gtxn 0 TypeEnum
+int appl
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 2 TypeEnum
+int pay
+==
+&&
+txn GroupIndex
+int 1
+==
+&&
+gtxn 0 RekeyTo
+global ZeroAddress
+==
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 2 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 0 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 1 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 2 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 0 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 1 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 2 AssetCloseTo
+global ZeroAddress
+==
+&&
+&&
+gtxn 0 ApplicationID
+int 1
+==
+&&
+gtxn 1 XferAsset
+int 1
+==
+&&
+gtxn 1 Sender
+gtxn 2 Receiver
+==
+gtxn 2 Amount
+gtxn 1 Fee
+>=
+&&
+&&
+b l3
+l2:
+gtxn 0 TypeEnum
+int appl
+==
+gtxn 0 ApplicationID
+int 1
+==
+&&
+gtxn 0 Sender
+gtxn 1 AssetSender
+==
+&&
+gtxn 0 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+int 1
+==
+&&
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+l3:
+
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l39
+txn OnCompletion
+int UpdateApplication
+==
+bnz l38
+txn OnCompletion
+int DeleteApplication
+==
+bnz l37
+txn OnCompletion
+int CloseOut
+==
+bnz l36
+txn OnCompletion
+int OptIn
+==
+bnz l33
+txna ApplicationArgs 0
+byte "add_permission"
+==
+bnz l30
+txna ApplicationArgs 0
+byte "change_permissions_manager"
+==
+bnz l27
+txna ApplicationArgs 0
+byte "issue"
+==
+bnz l24
+txna ApplicationArgs 0
+byte "kill"
+==
+bnz l21
+txna ApplicationArgs 0
+byte "transfer"
+==
+bnz l18
+txna ApplicationArgs 0
+byte "force_transfer"
+==
+bnz l12
+err
+l12:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+byte "killed"
+app_global_get
+int 0
+==
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+txn Sender
+load 1
+==
+&&
+bnz l14
+err
+l14:
+gtxn 1 AssetReceiver
+load 3
+==
+gtxn 1 AssetReceiver
+gtxn 3 ConfigAssetReserve
+==
+||
+bnz l16
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+gtxn 3 Sender
+load 1
+==
+&&
+b l17
+l16:
+int 1
+l17:
+return
+l18:
+byte "killed"
+app_global_get
+int 0
+==
+global GroupSize
+int 3
+byte "total_rules"
+app_global_get
++
+==
+&&
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+&&
+gtxn 0 Sender
+gtxn 2 Sender
+==
+gtxn 0 Sender
+gtxn 1 AssetSender
+==
+&&
+gtxn 3 Sender
+gtxn 1 AssetSender
+==
+&&
+&&
+bnz l20
+err
+l20:
+int 1
+return
+l21:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn TypeEnum
+int appl
+==
+txn Sender
+load 1
+==
+&&
+bnz l23
+err
+l23:
+byte "killed"
+int 1
+app_global_put
+int 1
+return
+l24:
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+gtxn 0 Sender
+load 3
+==
+gtxn 1 AssetSender
+load 3
+==
+&&
+byte "killed"
+app_global_get
+int 0
+==
+&&
+bnz l26
+err
+l26:
+int 1
+return
+l27:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn Sender
+load 1
+==
+&&
+bnz l29
+err
+l29:
+byte "manager"
+txna Accounts 1
+app_global_put
+int 1
+return
+l30:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 3
+==
+txn Sender
+load 1
+==
+&&
+bnz l32
+err
+l32:
+byte "total_rules"
+byte "total_rules"
+app_global_get
+int 1
++
+app_global_put
+byte "perm_app"
+txna ApplicationArgs 1
+btoi
+app_global_put
+byte "manager"
+txna ApplicationArgs 2
+app_global_put
+int 1
+return
+l33:
+txn NumAppArgs
+int 0
+==
+txn GroupIndex
+int 0
+==
+&&
+bnz l35
+err
+l35:
+int 1
+return
+l36:
+int 1
+return
+l37:
+int 0
+return
+l38:
+int 0
+return
+l39:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txn Sender
+load 1
+==
+&&
+bnz l41
+err
+l41:
+byte "total_rules"
+int 0
+app_global_put
+byte "killed"
+int 0
+app_global_put
+byte "token_id"
+txna ApplicationArgs 0
+btoi
+app_global_put
+int 1
+return
+
+Program Line  23 add_permission
+Program Line  27 change_permissions_manager
+Program Line  31 issue
+Program Line  35 kill
+Program Line  39 transfer
+Program Line  110 killed
+Program Line  116 total_rules
+Program Line  133 token_id
+Program Line  142 perm_app
+#pragma version 2
+global GroupSize
+int 2
+==
+bnz l2
+global GroupSize
+int 3
+>=
+gtxn 0 TypeEnum
+int appl
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 2 TypeEnum
+int pay
+==
+&&
+txn GroupIndex
+int 1
+==
+&&
+gtxn 0 RekeyTo
+global ZeroAddress
+==
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 2 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 0 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 1 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 2 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 0 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 1 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 2 AssetCloseTo
+global ZeroAddress
+==
+&&
+&&
+gtxn 0 ApplicationID
+int 1
+==
+&&
+gtxn 1 XferAsset
+int 1
+==
+&&
+gtxn 1 Sender
+gtxn 2 Receiver
+==
+gtxn 2 Amount
+gtxn 1 Fee
+>=
+&&
+&&
+b l3
+l2:
+gtxn 0 TypeEnum
+int appl
+==
+gtxn 0 ApplicationID
+int 1
+==
+&&
+gtxn 0 Sender
+gtxn 1 AssetSender
+==
+&&
+gtxn 0 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+int 1
+==
+&&
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+l3:
+
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l25
+txn OnCompletion
+int UpdateApplication
+==
+bnz l22
+txn OnCompletion
+int DeleteApplication
+==
+bnz l21
+txn OnCompletion
+int CloseOut
+==
+bnz l20
+txn OnCompletion
+int OptIn
+==
+bnz l17
+txna ApplicationArgs 0
+byte "add_whitelist"
+==
+bnz l11
+txna ApplicationArgs 0
+byte "transfer"
+==
+bnz l8
+err
+l8:
+int 1
+gtxn 1 XferAsset
+asset_holding_get AssetBalance
+store 4
+store 5
+gtxn 1 TypeEnum
+int axfer
+==
+txna Accounts 1
+gtxn 1 AssetReceiver
+==
+&&
+load 5
+byte "max_tokens"
+app_global_get
+<=
+&&
+int 0
+byte "whitelisted"
+app_local_get
+int 1
+==
+&&
+int 1
+byte "whitelisted"
+app_local_get
+int 1
+==
+&&
+bnz l10
+err
+l10:
+int 1
+return
+l11:
+int 1
+byte "manager"
+app_global_get_ex
+store 0
+store 1
+int 1
+byte "token_id"
+app_global_get_ex
+store 2
+store 3
+txn NumAppArgs
+int 2
+==
+txn NumAccounts
+int 1
+==
+&&
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txna ApplicationArgs 1
+btoi
+byte "controller_app_id"
+app_global_get
+==
+&&
+txn Sender
+load 1
+==
+&&
+bnz l13
+err
+l13:
+int 1
+byte "whitelisted"
+app_local_get
+int 0
+==
+bnz l15
+int 1
+return
+l15:
+byte "whitelist_count"
+byte "whitelist_count"
+app_global_get
+int 1
++
+app_global_put
+int 1
+byte "whitelisted"
+int 1
+app_local_put
+int 1
+return
+l17:
+txn NumAppArgs
+int 0
+==
+txn GroupIndex
+int 0
+==
+&&
+bnz l19
+err
+l19:
+int 1
+return
+l20:
+int 1
+return
+l21:
+int 0
+return
+l22:
+int 1
+byte "manager"
+app_global_get_ex
+store 0
+store 1
+txna ApplicationArgs 1
+btoi
+byte "controller_app_id"
+app_global_get
+==
+txn Sender
+load 1
+==
+&&
+bnz l24
+err
+l24:
+int 1
+return
+l25:
+txn NumAppArgs
+int 1
+==
+txn RekeyTo
+global ZeroAddress
+==
+&&
+bnz l27
+err
+l27:
+byte "max_tokens"
+int 100
+app_global_put
+byte "whitelist_count"
+int 0
+app_global_put
+byte "controller_app_id"
+txna ApplicationArgs 0
+btoi
+app_global_put
+int 1
+return
+
+Program Line  23 add_whitelist
+Program Line  27 transfer
+Program Line  45 max_tokens
+Program Line  50 whitelisted
+Program Line  56 whitelisted
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l25
+txn OnCompletion
+int UpdateApplication
+==
+bnz l22
+txn OnCompletion
+int DeleteApplication
+==
+bnz l21
+txn OnCompletion
+int CloseOut
+==
+bnz l20
+txn OnCompletion
+int OptIn
+==
+bnz l17
+txna ApplicationArgs 0
+byte "add_whitelist"
+==
+bnz l11
+txna ApplicationArgs 0
+byte "transfer"
+==
+bnz l8
+err
+l8:
+int 1
+gtxn 1 XferAsset
+asset_holding_get AssetBalance
+store 4
+store 5
+gtxn 1 TypeEnum
+int axfer
+==
+txna Accounts 1
+gtxn 1 AssetReceiver
+==
+&&
+load 5
+byte "max_tokens"
+app_global_get
+<=
+&&
+int 0
+byte "whitelisted"
+app_local_get
+int 1
+==
+&&
+int 1
+byte "whitelisted"
+app_local_get
+int 1
+==
+&&
+bnz l10
+err
+l10:
+int 1
+return
+l11:
+int 1
+byte "manager"
+app_global_get_ex
+store 0
+store 1
+int 1
+byte "token_id"
+app_global_get_ex
+store 2
+store 3
+txn NumAppArgs
+int 2
+==
+txn NumAccounts
+int 1
+==
+&&
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txna ApplicationArgs 1
+btoi
+byte "controller_app_id"
+app_global_get
+==
+&&
+txn Sender
+load 1
+==
+&&
+bnz l13
+err
+l13:
+int 1
+byte "whitelisted"
+app_local_get
+int 0
+==
+bnz l15
+int 1
+return
+l15:
+byte "whitelist_count"
+byte "whitelist_count"
+app_global_get
+int 1
++
+app_global_put
+int 1
+byte "whitelisted"
+int 1
+app_local_put
+int 1
+return
+l17:
+txn NumAppArgs
+int 0
+==
+txn GroupIndex
+int 0
+==
+&&
+bnz l19
+err
+l19:
+int 1
+return
+l20:
+int 1
+return
+l21:
+int 0
+return
+l22:
+int 1
+byte "manager"
+app_global_get_ex
+store 0
+store 1
+txna ApplicationArgs 1
+btoi
+byte "controller_app_id"
+app_global_get
+==
+txn Sender
+load 1
+==
+&&
+bnz l24
+err
+l24:
+int 1
+return
+l25:
+txn NumAppArgs
+int 1
+==
+txn RekeyTo
+global ZeroAddress
+==
+&&
+bnz l27
+err
+l27:
+byte "max_tokens"
+int 100
+app_global_put
+byte "whitelist_count"
+int 0
+app_global_put
+byte "controller_app_id"
+txna ApplicationArgs 0
+btoi
+app_global_put
+int 1
+return
+
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l25
+txn OnCompletion
+int UpdateApplication
+==
+bnz l22
+txn OnCompletion
+int DeleteApplication
+==
+bnz l21
+txn OnCompletion
+int CloseOut
+==
+bnz l20
+txn OnCompletion
+int OptIn
+==
+bnz l17
+txna ApplicationArgs 0
+byte "add_whitelist"
+==
+bnz l11
+txna ApplicationArgs 0
+byte "transfer"
+==
+bnz l8
+err
+l8:
+int 1
+gtxn 1 XferAsset
+asset_holding_get AssetBalance
+store 4
+store 5
+gtxn 1 TypeEnum
+int axfer
+==
+txna Accounts 1
+gtxn 1 AssetReceiver
+==
+&&
+load 5
+byte "max_tokens"
+app_global_get
+<=
+&&
+int 0
+byte "whitelisted"
+app_local_get
+int 1
+==
+&&
+int 1
+byte "whitelisted"
+app_local_get
+int 1
+==
+&&
+bnz l10
+err
+l10:
+int 1
+return
+l11:
+int 1
+byte "manager"
+app_global_get_ex
+store 0
+store 1
+int 1
+byte "token_id"
+app_global_get_ex
+store 2
+store 3
+txn NumAppArgs
+int 2
+==
+txn NumAccounts
+int 1
+==
+&&
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txna ApplicationArgs 1
+btoi
+byte "controller_app_id"
+app_global_get
+==
+&&
+txn Sender
+load 1
+==
+&&
+bnz l13
+err
+l13:
+int 1
+byte "whitelisted"
+app_local_get
+int 0
+==
+bnz l15
+int 1
+return
+l15:
+byte "whitelist_count"
+byte "whitelist_count"
+app_global_get
+int 1
++
+app_global_put
+int 1
+byte "whitelisted"
+int 1
+app_local_put
+int 1
+return
+l17:
+txn NumAppArgs
+int 0
+==
+txn GroupIndex
+int 0
+==
+&&
+bnz l19
+err
+l19:
+int 1
+return
+l20:
+int 1
+return
+l21:
+int 0
+return
+l22:
+int 1
+byte "manager"
+app_global_get_ex
+store 0
+store 1
+txna ApplicationArgs 1
+btoi
+byte "controller_app_id"
+app_global_get
+==
+txn Sender
+load 1
+==
+&&
+bnz l24
+err
+l24:
+int 1
+return
+l25:
+txn NumAppArgs
+int 1
+==
+txn RekeyTo
+global ZeroAddress
+==
+&&
+bnz l27
+err
+l27:
+byte "max_tokens"
+int 100
+app_global_put
+byte "whitelist_count"
+int 0
+app_global_put
+byte "controller_app_id"
+txna ApplicationArgs 0
+btoi
+app_global_put
+int 1
+return
+
+Program Line  23 add_whitelist
+Program Line  68 manager
+Program Line  73 token_id
+Program Line  90 controller_app_id
+Program Line  102 whitelisted
+Program Line  110 whitelist_count
+Program Line  111 whitelist_count
+Program Line  117 whitelisted
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l25
+txn OnCompletion
+int UpdateApplication
+==
+bnz l22
+txn OnCompletion
+int DeleteApplication
+==
+bnz l21
+txn OnCompletion
+int CloseOut
+==
+bnz l20
+txn OnCompletion
+int OptIn
+==
+bnz l17
+txna ApplicationArgs 0
+byte "add_whitelist"
+==
+bnz l11
+txna ApplicationArgs 0
+byte "transfer"
+==
+bnz l8
+err
+l8:
+int 1
+gtxn 1 XferAsset
+asset_holding_get AssetBalance
+store 4
+store 5
+gtxn 1 TypeEnum
+int axfer
+==
+txna Accounts 1
+gtxn 1 AssetReceiver
+==
+&&
+load 5
+byte "max_tokens"
+app_global_get
+<=
+&&
+int 0
+byte "whitelisted"
+app_local_get
+int 1
+==
+&&
+int 1
+byte "whitelisted"
+app_local_get
+int 1
+==
+&&
+bnz l10
+err
+l10:
+int 1
+return
+l11:
+int 1
+byte "manager"
+app_global_get_ex
+store 0
+store 1
+int 1
+byte "token_id"
+app_global_get_ex
+store 2
+store 3
+txn NumAppArgs
+int 2
+==
+txn NumAccounts
+int 1
+==
+&&
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txna ApplicationArgs 1
+btoi
+byte "controller_app_id"
+app_global_get
+==
+&&
+txn Sender
+load 1
+==
+&&
+bnz l13
+err
+l13:
+int 1
+byte "whitelisted"
+app_local_get
+int 0
+==
+bnz l15
+int 1
+return
+l15:
+byte "whitelist_count"
+byte "whitelist_count"
+app_global_get
+int 1
++
+app_global_put
+int 1
+byte "whitelisted"
+int 1
+app_local_put
+int 1
+return
+l17:
+txn NumAppArgs
+int 0
+==
+txn GroupIndex
+int 0
+==
+&&
+bnz l19
+err
+l19:
+int 1
+return
+l20:
+int 1
+return
+l21:
+int 0
+return
+l22:
+int 1
+byte "manager"
+app_global_get_ex
+store 0
+store 1
+txna ApplicationArgs 1
+btoi
+byte "controller_app_id"
+app_global_get
+==
+txn Sender
+load 1
+==
+&&
+bnz l24
+err
+l24:
+int 1
+return
+l25:
+txn NumAppArgs
+int 1
+==
+txn RekeyTo
+global ZeroAddress
+==
+&&
+bnz l27
+err
+l27:
+byte "max_tokens"
+int 100
+app_global_put
+byte "whitelist_count"
+int 0
+app_global_put
+byte "controller_app_id"
+txna ApplicationArgs 0
+btoi
+app_global_put
+int 1
+return
+
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l25
+txn OnCompletion
+int UpdateApplication
+==
+bnz l22
+txn OnCompletion
+int DeleteApplication
+==
+bnz l21
+txn OnCompletion
+int CloseOut
+==
+bnz l20
+txn OnCompletion
+int OptIn
+==
+bnz l17
+txna ApplicationArgs 0
+byte "add_whitelist"
+==
+bnz l11
+txna ApplicationArgs 0
+byte "transfer"
+==
+bnz l8
+err
+l8:
+int 1
+gtxn 1 XferAsset
+asset_holding_get AssetBalance
+store 4
+store 5
+gtxn 1 TypeEnum
+int axfer
+==
+txna Accounts 1
+gtxn 1 AssetReceiver
+==
+&&
+load 5
+byte "max_tokens"
+app_global_get
+<=
+&&
+int 0
+byte "whitelisted"
+app_local_get
+int 1
+==
+&&
+int 1
+byte "whitelisted"
+app_local_get
+int 1
+==
+&&
+bnz l10
+err
+l10:
+int 1
+return
+l11:
+int 1
+byte "manager"
+app_global_get_ex
+store 0
+store 1
+int 1
+byte "token_id"
+app_global_get_ex
+store 2
+store 3
+txn NumAppArgs
+int 2
+==
+txn NumAccounts
+int 1
+==
+&&
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txna ApplicationArgs 1
+btoi
+byte "controller_app_id"
+app_global_get
+==
+&&
+txn Sender
+load 1
+==
+&&
+bnz l13
+err
+l13:
+int 1
+byte "whitelisted"
+app_local_get
+int 0
+==
+bnz l15
+int 1
+return
+l15:
+byte "whitelist_count"
+byte "whitelist_count"
+app_global_get
+int 1
++
+app_global_put
+int 1
+byte "whitelisted"
+int 1
+app_local_put
+int 1
+return
+l17:
+txn NumAppArgs
+int 0
+==
+txn GroupIndex
+int 0
+==
+&&
+bnz l19
+err
+l19:
+int 1
+return
+l20:
+int 1
+return
+l21:
+int 0
+return
+l22:
+int 1
+byte "manager"
+app_global_get_ex
+store 0
+store 1
+txna ApplicationArgs 1
+btoi
+byte "controller_app_id"
+app_global_get
+==
+txn Sender
+load 1
+==
+&&
+bnz l24
+err
+l24:
+int 1
+return
+l25:
+txn NumAppArgs
+int 1
+==
+txn RekeyTo
+global ZeroAddress
+==
+&&
+bnz l27
+err
+l27:
+byte "max_tokens"
+int 100
+app_global_put
+byte "whitelist_count"
+int 0
+app_global_put
+byte "controller_app_id"
+txna ApplicationArgs 0
+btoi
+app_global_put
+int 1
+return
+
+Program Line  23 add_whitelist
+Program Line  68 manager
+Program Line  73 token_id
+Program Line  90 controller_app_id
+Program Line  102 whitelisted
+Program Line  110 whitelist_count
+Program Line  111 whitelist_count
+Program Line  117 whitelisted
+{
+  amount: 80n,
+  'asset-id': 1,
+  creator: 'EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY',
+  'is-frozen': true
+}
+{
+  amount: 100n,
+  'asset-id': 1,
+  creator: 'EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY',
+  'is-frozen': true
+}
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l39
+txn OnCompletion
+int UpdateApplication
+==
+bnz l38
+txn OnCompletion
+int DeleteApplication
+==
+bnz l37
+txn OnCompletion
+int CloseOut
+==
+bnz l36
+txn OnCompletion
+int OptIn
+==
+bnz l33
+txna ApplicationArgs 0
+byte "add_permission"
+==
+bnz l30
+txna ApplicationArgs 0
+byte "change_permissions_manager"
+==
+bnz l27
+txna ApplicationArgs 0
+byte "issue"
+==
+bnz l24
+txna ApplicationArgs 0
+byte "kill"
+==
+bnz l21
+txna ApplicationArgs 0
+byte "transfer"
+==
+bnz l18
+txna ApplicationArgs 0
+byte "force_transfer"
+==
+bnz l12
+err
+l12:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+byte "killed"
+app_global_get
+int 0
+==
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+txn Sender
+load 1
+==
+&&
+bnz l14
+err
+l14:
+gtxn 1 AssetReceiver
+load 3
+==
+gtxn 1 AssetReceiver
+gtxn 3 ConfigAssetReserve
+==
+||
+bnz l16
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+gtxn 3 Sender
+load 1
+==
+&&
+b l17
+l16:
+int 1
+l17:
+return
+l18:
+byte "killed"
+app_global_get
+int 0
+==
+global GroupSize
+int 3
+byte "total_rules"
+app_global_get
++
+==
+&&
+txn GroupIndex
+int 0
+==
+gtxn 0 ApplicationID
+global CurrentApplicationID
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+byte "token_id"
+app_global_get
+==
+&&
+&&
+gtxn 3 TypeEnum
+int appl
+==
+gtxn 3 ApplicationID
+byte "perm_app"
+app_global_get
+==
+&&
+&&
+gtxn 0 Sender
+gtxn 2 Sender
+==
+gtxn 0 Sender
+gtxn 1 AssetSender
+==
+&&
+gtxn 3 Sender
+gtxn 1 AssetSender
+==
+&&
+&&
+bnz l20
+err
+l20:
+int 1
+return
+l21:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn TypeEnum
+int appl
+==
+txn Sender
+load 1
+==
+&&
+bnz l23
+err
+l23:
+byte "killed"
+int 1
+app_global_put
+int 1
+return
+l24:
+int 0
+asset_params_get AssetReserve
+store 2
+store 3
+gtxn 0 Sender
+load 3
+==
+gtxn 1 AssetSender
+load 3
+==
+&&
+byte "killed"
+app_global_get
+int 0
+==
+&&
+bnz l26
+err
+l26:
+int 1
+return
+l27:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn Sender
+load 1
+==
+&&
+bnz l29
+err
+l29:
+byte "manager"
+txna Accounts 1
+app_global_put
+int 1
+return
+l30:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 3
+==
+txn Sender
+load 1
+==
+&&
+bnz l32
+err
+l32:
+byte "total_rules"
+byte "total_rules"
+app_global_get
+int 1
++
+app_global_put
+byte "perm_app"
+txna ApplicationArgs 1
+btoi
+app_global_put
+byte "manager"
+txna ApplicationArgs 2
+app_global_put
+int 1
+return
+l33:
+txn NumAppArgs
+int 0
+==
+txn GroupIndex
+int 0
+==
+&&
+bnz l35
+err
+l35:
+int 1
+return
+l36:
+int 1
+return
+l37:
+int 0
+return
+l38:
+int 0
+return
+l39:
+int 0
+asset_params_get AssetManager
+store 0
+store 1
+txn NumAppArgs
+int 1
+==
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txn Sender
+load 1
+==
+&&
+bnz l41
+err
+l41:
+byte "total_rules"
+int 0
+app_global_put
+byte "killed"
+int 0
+app_global_put
+byte "token_id"
+txna ApplicationArgs 0
+btoi
+app_global_put
+int 1
+return
+
+Program Line  23 add_permission
+Program Line  27 change_permissions_manager
+Program Line  31 issue
+Program Line  35 kill
+Program Line  39 transfer
+Program Line  110 killed
+Program Line  116 total_rules
+Program Line  133 token_id
+Program Line  142 perm_app
+#pragma version 2
+global GroupSize
+int 2
+==
+bnz l2
+global GroupSize
+int 3
+>=
+gtxn 0 TypeEnum
+int appl
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 2 TypeEnum
+int pay
+==
+&&
+txn GroupIndex
+int 1
+==
+&&
+gtxn 0 RekeyTo
+global ZeroAddress
+==
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 2 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 0 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 1 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 2 CloseRemainderTo
+global ZeroAddress
+==
+&&
+gtxn 0 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 1 AssetCloseTo
+global ZeroAddress
+==
+&&
+gtxn 2 AssetCloseTo
+global ZeroAddress
+==
+&&
+&&
+gtxn 0 ApplicationID
+int 1
+==
+&&
+gtxn 1 XferAsset
+int 1
+==
+&&
+gtxn 1 Sender
+gtxn 2 Receiver
+==
+gtxn 2 Amount
+gtxn 1 Fee
+>=
+&&
+&&
+b l3
+l2:
+gtxn 0 TypeEnum
+int appl
+==
+gtxn 0 ApplicationID
+int 1
+==
+&&
+gtxn 0 Sender
+gtxn 1 AssetSender
+==
+&&
+gtxn 0 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 1 TypeEnum
+int axfer
+==
+&&
+gtxn 1 XferAsset
+int 1
+==
+&&
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+l3:
+
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l25
+txn OnCompletion
+int UpdateApplication
+==
+bnz l22
+txn OnCompletion
+int DeleteApplication
+==
+bnz l21
+txn OnCompletion
+int CloseOut
+==
+bnz l20
+txn OnCompletion
+int OptIn
+==
+bnz l17
+txna ApplicationArgs 0
+byte "add_whitelist"
+==
+bnz l11
+txna ApplicationArgs 0
+byte "transfer"
+==
+bnz l8
+err
+l8:
+int 1
+gtxn 1 XferAsset
+asset_holding_get AssetBalance
+store 4
+store 5
+gtxn 1 TypeEnum
+int axfer
+==
+txna Accounts 1
+gtxn 1 AssetReceiver
+==
+&&
+load 5
+byte "max_tokens"
+app_global_get
+<=
+&&
+int 0
+byte "whitelisted"
+app_local_get
+int 1
+==
+&&
+int 1
+byte "whitelisted"
+app_local_get
+int 1
+==
+&&
+bnz l10
+err
+l10:
+int 1
+return
+l11:
+int 1
+byte "manager"
+app_global_get_ex
+store 0
+store 1
+int 1
+byte "token_id"
+app_global_get_ex
+store 2
+store 3
+txn NumAppArgs
+int 2
+==
+txn NumAccounts
+int 1
+==
+&&
+txn RekeyTo
+global ZeroAddress
+==
+&&
+txna ApplicationArgs 1
+btoi
+byte "controller_app_id"
+app_global_get
+==
+&&
+txn Sender
+load 1
+==
+&&
+bnz l13
+err
+l13:
+int 1
+byte "whitelisted"
+app_local_get
+int 0
+==
+bnz l15
+int 1
+return
+l15:
+byte "whitelist_count"
+byte "whitelist_count"
+app_global_get
+int 1
++
+app_global_put
+int 1
+byte "whitelisted"
+int 1
+app_local_put
+int 1
+return
+l17:
+txn NumAppArgs
+int 0
+==
+txn GroupIndex
+int 0
+==
+&&
+bnz l19
+err
+l19:
+int 1
+return
+l20:
+int 1
+return
+l21:
+int 0
+return
+l22:
+int 1
+byte "manager"
+app_global_get_ex
+store 0
+store 1
+txna ApplicationArgs 1
+btoi
+byte "controller_app_id"
+app_global_get
+==
+txn Sender
+load 1
+==
+&&
+bnz l24
+err
+l24:
+int 1
+return
+l25:
+txn NumAppArgs
+int 1
+==
+txn RekeyTo
+global ZeroAddress
+==
+&&
+bnz l27
+err
+l27:
+byte "max_tokens"
+int 100
+app_global_put
+byte "whitelist_count"
+int 0
+app_global_put
+byte "controller_app_id"
+txna ApplicationArgs 0
+btoi
+app_global_put
+int 1
+return
+
+Program Line  23 add_whitelist
+Program Line  27 transfer
+Program Line  45 max_tokens
+Program Line  50 whitelisted
+Program Line  56 whitelisted
+    1) Token Transfer
+
+
+  1 passing (746ms)
+  1 failing
+
+  1) Permissioned Token Tests
+       Token Transfer:
+     Error: RUNTIME_ERR1009: TEAL runtime encountered err opcode at line 62
+      at Err.execute (/home/manofcode/scale-it/algo-builder/packages/runtime/src/interpreter/opcode-list.ts:530:11)
+      at Interpreter.execute (/home/manofcode/scale-it/algo-builder/packages/runtime/src/interpreter/interpreter.ts:156:19)
+      at Runtime.run (/home/manofcode/scale-it/algo-builder/packages/runtime/src/runtime.ts:637:17)
+      at /home/manofcode/scale-it/algo-builder/packages/runtime/src/ctx.ts:308:24
+      at Array.forEach (<anonymous>)
+      at Ctx.processTransactions (/home/manofcode/scale-it/algo-builder/packages/runtime/src/ctx.ts:286:15)
+      at Runtime.executeTx (/home/manofcode/scale-it/algo-builder/packages/runtime/src/runtime.ts:622:14)
+      at Context.<anonymous> (test/tests.js:270:13)
+
+
+
