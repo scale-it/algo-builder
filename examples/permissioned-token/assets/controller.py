@@ -119,11 +119,9 @@ def approval_program():
         Return(Int(1))
     ])
 
-    """
-    Change permissions manager of permissions ssc. Only accepted if sender is asset manager.
-    Expects 1 argument in Txn.accounts[n] array:
-    * addr : address of the new permissions manager
-    """
+    # Change permissions manager of permissions ssc. Only accepted if sender is asset manager.
+    # Expects 1 argument in Txn.accounts[n] array:
+    # * addr : address of the new permissions manager
     change_permissions_manager = Seq([
         assetManager,
         Assert(And(
@@ -143,7 +141,6 @@ def approval_program():
         # verify first transaction
         # call to controller smart contract - signed by asset sender
         Txn.group_index() == Int(0), # this tx (call to controller) should be 1st in group
-        Gtxn[0].application_id() == Global.current_application_id(),
 
         # verify 2nd tx
         Gtxn[1].type_enum() == TxnType.AssetTransfer, # this should be clawback call (to transfer asset)
@@ -157,20 +154,20 @@ def approval_program():
         Gtxn[3].application_id() == App.globalGet(permission_id),
     )
 
-    # verifies that asset sender in 2nd tx
-    # - calls the controller smart contract
-    # - is also the sender of the payment tx (to pay fees of clawback escrow)
-    # - calls the permissions smart contract (ensures rules check)
     verify_sender = And(
+        # caller of controller is also the payment tx sender (to pay fees of clawback escrow)
         Gtxn[0].sender() == Gtxn[2].sender(),
+
+        # caller of controller is also the asset sender
         Gtxn[0].sender() == Gtxn[1].asset_sender(),
+
+        # verify asset sender also calls the permissions (rules) smart contract
         Gtxn[3].sender() == Gtxn[1].asset_sender()
     )
 
-    """
-    Transfer token from accA -> accB. Both A, B are non-reserve accounts.
-    Only accepted if token is not killed.
-    """
+
+    # Transfer token from accA -> accB. Both A, B are non-reserve accounts.
+    # Only accepted if token is not killed.
     transfer_token = Seq([
         Assert(And(
             App.globalGet(var_is_killed) == Int(0), # check token is not killed
