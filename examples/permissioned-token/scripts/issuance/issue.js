@@ -5,11 +5,11 @@ const { types } = require('@algo-builder/runtime');
 const { executeTransaction, fundAccount, totalSupply } = require('../common/common');
 
 /**
- * NOTE: this function is for demonstration purpose only (if ASA creator, manager are single accounts)
+ * NOTE: this function is for demonstration purpose only.
  * If asset creator is a multisig address, then user should have a signed tx file, decoded tx fetched
  * from that file, append his own signature & send it to network.
  *  - Use `algob.executeSignedTxnFromFile` to execute tx from file
- *  - In below function we assume creator & reserve is a single account (alice)
+ *  - In the function below we assume creator & reserve is a single account (alice)
  */
 async function issue (deployer, account, amount) {
   const asaReserve = deployer.accountsByName.get('alice'); // asset reserve is the issuer
@@ -81,7 +81,7 @@ async function run (runtimeEnv, deployer) {
    * file signed by accounts <= threshold in a multisig group.
    * - After receiving file, place it in /assets
    * - Use `algob sign-multisig <account>` to append signature of your account
-   * - Then use below function to issue new tokens (send tx to network)
+   * - Then use the function below to issue new tokens and send tx to a network
    */
   // executeSignedTxnFromFile(deployer, 'asa_file_out.tx');
 

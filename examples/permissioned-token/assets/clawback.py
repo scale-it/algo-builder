@@ -14,8 +14,8 @@ def clawback_escrow(TOKEN_ID, CONTROLLER_APP_ID):
         Global.group_size() >= Int(3), # following 3 transactions must exist in every group
         Gtxn[0].type_enum() == TxnType.ApplicationCall, # call to controller smart contract
         Gtxn[1].type_enum() == TxnType.AssetTransfer,
-        Gtxn[2].type_enum() == TxnType.Payment, # paying fees of escrow
-        # this tx should be 2nd in group
+        Gtxn[2].type_enum() == TxnType.Payment, # paying fees for escrow
+        # this tx should be 2nd in the group
         Txn.group_index() == Int(1)
     )
 
