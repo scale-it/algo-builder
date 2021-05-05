@@ -22,8 +22,8 @@ describe('Permissioned Token Tests', function () {
   let controllerAppID, permissionsAppId;
 
   let CLAWBACK_PROGRAM;
-  const CONTROLLER_PROGRAM = getProgram(CONTROLLER);
-  const PERMISSIONS_PROGRAM = getProgram(PERMISSIONS);
+  let CONTROLLER_PROGRAM;
+  let PERMISSIONS_PROGRAM;
   const CLEAR_STATE_PROGRAM = getProgram(CLEAR_STATE);
 
   function syncInfo () {
@@ -118,11 +118,13 @@ describe('Permissioned Token Tests', function () {
       appArgs: [`int:${assetIndex}`],
       foreignAssets: [assetIndex]
     };
+    CONTROLLER_PROGRAM = getProgram(CONTROLLER, { TOKEN_ID: assetIndex });
     controllerAppID = runtime.addApp(
       sscFlags, {}, CONTROLLER_PROGRAM, CLEAR_STATE_PROGRAM
     );
 
     // Setup Permissions SSC
+    PERMISSIONS_PROGRAM = getProgram(PERMISSIONS, { CONTROLLER_APP_ID: controllerAppID });
     sscFlags = {
       sender: alice.account,
       localInts: 1,
@@ -218,7 +220,7 @@ describe('Permissioned Token Tests', function () {
       payFlags: {}
     }), 'RUNTIME_ERR1505');
 
-    // Cannot transfer before being whitelisted
+    // // Cannot transfer before being whitelisted
     const Gtxn = [
       {
         type: types.TransactionType.CallNoOpSSC,
