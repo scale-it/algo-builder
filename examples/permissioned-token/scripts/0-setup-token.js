@@ -26,7 +26,7 @@ async function run (runtimeEnv, deployer) {
    * If using msig address as asa creator or manager, then realistically user will receive a signed tx
    * file from accounts <= threshold in a multisig group.
    * - After receiving file, place it in /assets
-   * - Use `algob sign-multisig <account>` to append signature of your account
+   * - Use `algob sign-multisig <account> filename` to append signature of your account
    * - Then use below function to deploy asset (send tx to network + wait for confirmation)
    */
   // executeSignedTxnFromFile(deployer, 'asa_file_out.tx');

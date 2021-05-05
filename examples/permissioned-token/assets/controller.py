@@ -26,11 +26,9 @@ def approval_program():
     # retreive asset manager from Txn.ForeignAssets[0]
     assetManager = AssetParam.manager(Int(0))
 
-    """
-    Handles Controller SSC deployment. Expects 1 argument:
-    * token_id : token index (passed via txn.application_args)
-    NOTE: token_id is also passed in txn.ForeignAssets (to load it's asset manager)
-    """
+    # Handles Controller SSC deployment. Expects 1 argument:
+    # * token_id : token index (passed via txn.application_args)
+    # NOTE: token_id is also passed in txn.ForeignAssets (to load it's asset manager)
     on_deployment = Seq([
         assetManager, # load asset manager from store
     	Assert(And(
@@ -48,12 +46,12 @@ def approval_program():
         # set kill_status to false(0) during deploy
         App.globalPut(var_is_killed, Int(0)),
 
-        # Save token index in controller's global state
+        # Save asset ID in controller's global state
         App.globalPut(token_id, Btoi(Txn.application_args[0])), # or maybe use App.globalPut(token_id, Btoi(Txn.assets[0])) with TEALv3
         Return(Int(1))
     ])
 
-    # retreive asset reserve from Txn.ForeignAssets[0]
+    # retreive asset reserve address from Txn.ForeignAssets[0]
     assetReserve = AssetParam.reserve(Int(0))
 
     """
@@ -157,7 +155,7 @@ def approval_program():
         Gtxn[3].application_id() == App.globalGet(permission_id),
     )
 
-    # verifies that asset sender in 2nd tx
+    # verifies that asset sender:
     # - calls the controller smart contract
     # - is also the sender of the payment tx (to pay fees of clawback escrow)
     # - calls the permissions smart contract (ensures rules check)
