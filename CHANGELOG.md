@@ -2,7 +2,7 @@
 
 ## unreleased
 
-General:
+### Improvements
 * Added more tests for the [crowdfunding example project](/examples/crowdfunding) using `@algo-builder/runtime`- Happy paths and Failing paths.
 * Added new command `algob test` (runs mocha in project root).
 * [breaking] Rename project `algorand-builder` to `algo-builder`.
@@ -28,15 +28,21 @@ General:
         await executeTransaction(deployer, txnParams);
         ```
 
-[Dapp templates](https://github.com/scale-it/algo-builder-templates):
-* [/default](https://github.com/scale-it/algo-builder-templates/tree/master/default) template (with ASA transfer functionality)
-* [/htlc](https://github.com/scale-it/algo-builder-templates/tree/master/htlc) template - dapp implementing hash time locked contract.
-
 
 @algorand-builder/runtime:
 * fixed bugs in group tx flow, *asset_params_get* and *txn GroupIndex* Op
 
-Infrastructure:
+
+### Dapp templates.
+
+We created a new [repository](https://github.com/scale-it/algo-builder-templates) with dapp templates. It's a new project line of Algo Builder. Dapp Templates are webapps operating with Algorand blockchain with `algob` support. For the moment we only have React templates. Anyone can contribute a new template by creating a pull request. 
+
+* [/default](https://github.com/scale-it/algo-builder-templates/tree/master/default) template (with ASA transfer functionality)
+* [/htlc](https://github.com/scale-it/algo-builder-templates/tree/master/htlc) template - dapp implementing hash time locked contract.
+
+
+
+### Infrastructure
 * Added new make commands:
     * `setup-private-net` - create network, start network, setup master account and show network status
     * `recreate-private-net` - stop the current instance, remove all data and re-setup
