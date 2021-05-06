@@ -24,18 +24,35 @@ const StateMap = "key-value";
 const globalState = "global-state";
 const localStateSchema = "local-state-schema";
 
+function isSetOrDefined (value: string | undefined): boolean {
+  if (value !== undefined && value !== "") return true;
+  return false;
+}
+
 function checkAndSetAssetFields (fields: AssetModFields, asset: AssetDef): void {
-  if (!(fields.manager !== "" && asset.manager === "") && fields.manager !== undefined) asset.manager = fields.manager;
-  else if (fields.manager !== undefined) throw new RuntimeError(RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR);
+  if (isSetOrDefined(fields.manager) && !isSetOrDefined(asset.manager)) {
+    throw new RuntimeError(RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR);
+  } else if (fields.manager !== undefined && isSetOrDefined(asset.manager)) {
+    asset.manager = fields.manager;
+  }
 
-  if (!(fields.reserve !== "" && asset.reserve === "") && fields.reserve !== undefined) asset.reserve = fields.reserve;
-  else if (fields.reserve !== undefined) throw new RuntimeError(RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR);
+  if (isSetOrDefined(fields.reserve) && !isSetOrDefined(asset.reserve)) {
+    throw new RuntimeError(RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR);
+  } else if (fields.reserve !== undefined && isSetOrDefined(asset.reserve)) {
+    asset.reserve = fields.reserve;
+  }
 
-  if (!(fields.freeze !== "" && asset.freeze === "") && fields.freeze !== undefined) asset.freeze = fields.freeze;
-  else if (fields.freeze !== undefined) throw new RuntimeError(RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR);
+  if (isSetOrDefined(fields.freeze) && !isSetOrDefined(asset.freeze)) {
+    throw new RuntimeError(RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR);
+  } else if (fields.freeze !== undefined && isSetOrDefined(asset.freeze)) {
+    asset.freeze = fields.freeze;
+  }
 
-  if (!(fields.clawback !== "" && asset.clawback === "") && fields.clawback !== undefined) asset.clawback = fields.clawback;
-  else if (fields.clawback !== undefined) throw new RuntimeError(RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR);
+  if (isSetOrDefined(fields.clawback) && !isSetOrDefined(asset.clawback)) {
+    throw new RuntimeError(RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR);
+  } else if (fields.clawback !== undefined && isSetOrDefined(asset.clawback)) {
+    asset.clawback = fields.clawback;
+  }
 }
 
 export class AccountStore implements AccountStoreI {
