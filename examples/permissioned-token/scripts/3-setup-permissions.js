@@ -13,7 +13,7 @@ async function setupPermissionsSSC (controllerSSCInfo, deployer) {
   const controllerAppId = controllerSSCInfo.appID;
 
   const templateParam = {
-    CONTROLLER_APP_ID: controllerAppId
+    PERM_MANAGER: alice.addr
   };
 
   /** Deploy Permissions(rules) smart contract **/
@@ -26,8 +26,8 @@ async function setupPermissionsSSC (controllerSSCInfo, deployer) {
       localInts: 1, // 1 to store whitelisted status in local state
       localBytes: 0,
       globalInts: 2, // 1 to store max_tokens, 1 for storing total whitelisted accounts
-      globalBytes: 0
-    }, {}, templateParam); // pass controller_app_id as a template param
+      globalBytes: 1 // to store permissions manager
+    }, {}, templateParam); // pass perm_manager as a template param (to set during deploy)
   console.log(permissionSSCInfo);
 
   /**
@@ -38,13 +38,11 @@ async function setupPermissionsSSC (controllerSSCInfo, deployer) {
    * + Could be used in RUN mode as well (as adding rules could be dynamic)
    * + Currently only 1 rules smart contract is supported
    */
-  console.log('** Adding permissions smart contract config(id, address) to controller **');
+  console.log('** Adding permissions smart contract config(app_id) to controller **');
   try {
     const appArgs = [
-      'str:add_permission',
-      `int:${permissionSSCInfo.appID}`,
-      // setting permission asc creator as the permissions manager by default(but asset manager can change it)
-      `addr:${permissionSSCInfo.creator}`
+      'str:set_permission',
+      `int:${permissionSSCInfo.appID}`
     ];
 
     await executeTransaction(deployer, {

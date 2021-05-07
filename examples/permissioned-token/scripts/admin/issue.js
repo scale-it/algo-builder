@@ -22,7 +22,7 @@ async function issue (deployer, account, amount) {
     CONTROLLER_APP_ID: controllerSSCInfo.appID
   };
 
-  const escrowLsig = await deployer.loadLogic('clawback.py', [], escrowParams);
+  const escrowLsig = await deployer.loadLogic('clawback.py', escrowParams);
   const escrowAddress = escrowLsig.address();
 
   const issuanceParams = [

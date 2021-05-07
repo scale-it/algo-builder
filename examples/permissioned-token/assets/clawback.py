@@ -1,4 +1,4 @@
-# Escrow Clawback for security-token in pyTeal
+# Escrow Clawback for permissioned-token in pyTeal
 
 # Add parent directory to path so that algobpy can be imported
 import sys
@@ -23,13 +23,10 @@ def clawback_escrow(TOKEN_ID, CONTROLLER_APP_ID):
     common_fields = And(
         Gtxn[0].rekey_to() == Global.zero_address(),
         Gtxn[1].rekey_to() == Global.zero_address(),
-        Gtxn[2].rekey_to() == Global.zero_address(),
         Gtxn[0].close_remainder_to() == Global.zero_address(),
         Gtxn[1].close_remainder_to() == Global.zero_address(),
-        Gtxn[2].close_remainder_to() == Global.zero_address(),
         Gtxn[0].asset_close_to() == Global.zero_address(),
         Gtxn[1].asset_close_to() == Global.zero_address(),
-        Gtxn[2].asset_close_to() == Global.zero_address()
     )
 
     # verify first transaction - signed by asset sender
@@ -44,9 +41,16 @@ def clawback_escrow(TOKEN_ID, CONTROLLER_APP_ID):
     # verify third transaction
     # tx 3 - payment transaction from sender to clawback to pay for the fee of the clawback
     third_transaction_checks = And(
+        # verify sender of asset transfer is the receiver of payment tx
         Gtxn[1].sender() == Gtxn[2].receiver(),
+
         # verify the fee amount is good
-        Gtxn[2].amount() >= Gtxn[1].fee()
+        Gtxn[2].amount() >= Gtxn[1].fee(),
+
+        # common checks
+        Gtxn[2].rekey_to() == Global.zero_address(),
+        Gtxn[2].close_remainder_to() == Global.zero_address(),
+        Gtxn[2].asset_close_to() == Global.zero_address()
     )
 
     # transfer of token between non-reserve accounts
@@ -60,16 +64,17 @@ def clawback_escrow(TOKEN_ID, CONTROLLER_APP_ID):
     )
 
     # issue new token (asset transfer tx from asset reserve to receiver)
-    # since issuer creates the rules, this can be a simple asset transfer transaction (without rule checks)
+    # since issuer creates the rules, this transaction can bypass rule(s) checks
+    # NOTE: Controller needs to be called to make sure that asset_sender is the
+    # asset_reserve and to check that token is not killed.
     issuance_tx = And(
+        common_fields,
         Gtxn[0].type_enum() == TxnType.ApplicationCall,
         Gtxn[0].application_id() == Int(CONTROLLER_APP_ID),
         Gtxn[0].sender() == Gtxn[1].asset_sender(),
-        Gtxn[0].rekey_to() == Global.zero_address(),
 
         Gtxn[1].type_enum() == TxnType.AssetTransfer,
         Gtxn[1].xfer_asset() == Int(TOKEN_ID), # verify token index
-        Gtxn[1].rekey_to() == Global.zero_address(),
     )
 
     return If(

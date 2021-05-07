@@ -16,16 +16,12 @@ const clearStateProgram = 'clear_state_program.py';
  * @param address account address to whitelist
  */
 async function whitelist (deployer, permissionsManager, address) {
-  // asset, controller & permission app info
-  const controllerSSCInfo = deployer.getSSC('controller.py', clearStateProgram);
+  // permission app info
   const permissionSSCInfo = deployer.getSSC('permissions.py', clearStateProgram);
 
   /**
    * - Only permissions manager can add accounts to whitelist. Which is set to alice(during deploy).
-   * - If incorrect token index is passed in foreignAssets then tx is rejected
    * - If address is already whitelisted then tx is accepted (with no change)
-   * - controller app id must be passed in foreignapps, as permissions smart contract reads controller's
-   *   global state to get & verify if permissions_manager is the sender or not
    * - Pass the address you wish to whitelist in Txn.accounts[1] to add to whitelist
    */
   const whiteListParams = {
@@ -34,9 +30,8 @@ async function whitelist (deployer, permissionsManager, address) {
     fromAccount: permissionsManager, // permissions manager account (fails otherwise)
     appId: permissionSSCInfo.appID,
     payFlags: { totalFee: 1000 },
-    appArgs: ['str:add_whitelist', `int:${controllerSSCInfo.appID}`], // note: don't need to pass appID in appArg with tealv3 (just use foreignApps)
-    accounts: [address], // pass address to add to whitelisted addresses
-    foreignApps: [controllerSSCInfo.appID]
+    appArgs: ['str:add_whitelist'],
+    accounts: [address] // pass address to add to whitelisted addresses
   };
   console.log(`* Adding [${address}] to whitelisted accounts *`);
   await executeTransaction(deployer, whiteListParams);

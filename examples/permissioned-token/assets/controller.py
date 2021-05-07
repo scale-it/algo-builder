@@ -18,7 +18,6 @@ def approval_program(TOKEN_ID):
     """
 
     var_is_killed = Bytes("killed")
-    permissions_manager = Bytes("manager")	# permissions manager (asa.manager by default)
     permission_id = Bytes("perm_app") # permissions smart contract application index
 
     # Always verify that the RekeyTo property of any transaction is set to the ZeroAddress
@@ -29,11 +28,14 @@ def approval_program(TOKEN_ID):
     assetManager = AssetParam.manager(Int(0))
 
     # Handles Controller SSC deployment. Only accepted if sender is asset manager.
+    # Must be called with the TOKEN_ID asset.
     on_deployment = Seq([
         assetManager, # load asset manager from store
         Assert(And(
-            # Txn.assets.length() == Int(1), [TEALv3]
             no_rekey_addr,
+
+            # Txn.assets.length() == Int(1), [TEALv3]
+            # Txn.assets[0] == Int(TOKEN_ID), [TEALv3]
 
             # Controller should be deployed by ASA.manager
             Txn.sender() == assetManager.value()
@@ -52,7 +54,9 @@ def approval_program(TOKEN_ID):
         assetReserve,
         Assert(And(
             # Issue should only be done by token reserve
-            Gtxn[0].sender() == assetReserve.value(),
+            # NOTE: if we want to limit this call only to TOKEN_ID, then we need to check:
+            # Txn.assets[0] == Int(TOKEN_ID)
+            Txn.sender() == assetReserve.value(),
             Gtxn[1].asset_sender() == assetReserve.value(),
 
             # only allow issue if token is not killed
@@ -78,42 +82,23 @@ def approval_program(TOKEN_ID):
         Return(Int(1))
     ])
 
-    # Adds a new permissions contract to the controller. Only accepted if sender is asset manager.
-    # Expects 3 arguments:
-    # * add_permission : name of the branch
+    # Sets a permissions contract to the controller. Only accepted if sender is asset manager.
+    # Expects 2 arguments:
+    # * str 'add_permission' : name of the branch
     # * permission_id : permissions smart contract application index
-    # * permissions_manager : premissions manager address
-    # NOTE: token_id is also passed in txn.ForeignAssets (to load it's asset manager)
-    add_new_permission = Seq([
+    # NOTE: token_id is passed in txn.ForeignAssets (to load it's asset manager)
+    set_permission_contract = Seq([
         assetManager, # load asset_manager (from Store) of Txn.ForeignAssets[0]
         Assert(And(
-            Txn.application_args.length() == Int(3),
+            Txn.application_args.length() == Int(2),
             # Txn.assets.length() == Int(1), [TEALv3]
             # Txn.assets[0] == Int(TOKEN_ID), [TEALv3]
 
             Txn.sender() == assetManager.value(),
         )),
 
-        # Add permissions(rules) smart contract config in global state (permission_id, permissions_manager)
+        # Add permissions(rules) smart contract app_id in global state
         App.globalPut(permission_id, Btoi(Txn.application_args[1])),
-        App.globalPut(permissions_manager, Txn.application_args[2]),
-        Return(Int(1))
-    ])
-
-    # Change permissions manager of permissions ssc. Only accepted if sender is asset manager.
-    # Expects 1 argument in Txn.accounts[n] array:
-    # * addr : address of the new permissions manager
-    change_permissions_manager = Seq([
-        assetManager,
-        Assert(And(
-            Txn.application_args.length() == Int(1),
-            # Txn.assets[0] == Int(TOKEN_ID), [TEALv3]
-
-            Txn.sender() == assetManager.value(),
-        )),
-
-        # update permissions manager address to the first account address passed in appAccounts
-        App.globalPut(permissions_manager, Txn.accounts[1]),
         Return(Int(1))
     ])
 
@@ -125,44 +110,41 @@ def approval_program(TOKEN_ID):
 
         # verify 2nd tx
         Gtxn[1].type_enum() == TxnType.AssetTransfer, # this should be clawback call (to transfer asset)
-        Gtxn[1].xfer_asset() == Int(TOKEN_ID), # check asset_id passed through params
+        Gtxn[1].xfer_asset() == Int(TOKEN_ID), # verify asset_id of the asset transfer(clawback) txn
     )
 
     # Check permissions smart contract is called and it's application index is correct
-    verify_perm_call = And(
+    verify_perm_is_called = And(
         # verify rules call (ensure permissions smart contract is being called in 4th tx)
         Gtxn[3].type_enum() == TxnType.ApplicationCall,
         Gtxn[3].application_id() == App.globalGet(permission_id),
     )
 
-    verify_sender = And(
-        # caller of controller is also the payment tx sender (to pay fees of clawback escrow)
-        Gtxn[0].sender() == Gtxn[2].sender(),
-
-        # caller of controller is also the asset sender
-        Gtxn[0].sender() == Gtxn[1].asset_sender(),
-
-        # verify asset sender also calls the permissions (rules) smart contract
-        Gtxn[3].sender() == Gtxn[1].asset_sender()
-    )
-
     # Transfer token from accA -> accB. Both A, B are non-reserve accounts.
     # Only accepted if token is not killed.
+    # NOTE: We only ensure that the asset_sender also calls the controller(this) smart contract.
+    # For payment txn (paying fees of escrow) and call to the permissions smart contract,
+    # they can be signed by any account - we just ensure that they are present in group.
     transfer_token = Seq([
         Assert(And(
             App.globalGet(var_is_killed) == Int(0), # check token is not killed
 
-            # Ensure atleast 3 basic calls, verify_perm_call verifies rule(s) is called
+            # verify caller of controller is also the asset sender
+            Txn.sender() == Gtxn[1].asset_sender(),
+
+            # Ensure atleast 3 basic calls, and verify rule(s) smart contract is called
             Global.group_size() >= Int(3),
             verify_basic_calls,
-            verify_perm_call,
-            verify_sender
+            verify_perm_is_called,
         )),
         Return(Int(1))
     ])
 
     # Force transfer (clawback) some tokens between two accounts.
     # Only accepted if token is not killed and sender is asset manager.
+    # NOTE: If the asset_receiver is the reserve address (current one, or the new one being set
+    # in the asset config txn in group while updating reserve), then we don't need to verify
+    # permissions is called - it can bypass rule(s) checks.
     force_transfer = Seq([
         assetManager,
         assetReserve,
@@ -181,11 +163,8 @@ def approval_program(TOKEN_ID):
                     Gtxn[1].asset_receiver() == Gtxn[3].config_asset_reserve()
                 ),
                 Int(1),
-                And (
-                    # else permissions ssc should be called by asset manager
-                    verify_perm_call,
-                    Gtxn[3].sender() == assetManager.value()
-                )
+                # else verify that permissions ssc is called
+                verify_perm_is_called
             )
         )
     ])
@@ -203,8 +182,7 @@ def approval_program(TOKEN_ID):
     # Verifies that UpdateApplication is used and blocks that call (unsafe for production use).
     # Verifies that closeOut is used and approves the tx.
     # Verifies that OptInApplication is used and jumps to handle_optin
-    # Verifies that first argument is "add_permission" and jumps to add_new_permission.
-    # Verifies that first argument is "change_permissions_manager" and jumps to change_permissions_manager.
+    # Verifies that first argument is "set_permission" and jumps to set_permission_contract.
     # Verifies that first argument is "issue" and jumps to issue.
     # Verifies that first argument is "kill" and jumps to kill.
     # Verifies that first argument is "transfer" and jumps to transfer.
@@ -215,8 +193,7 @@ def approval_program(TOKEN_ID):
         [Txn.on_completion() == OnComplete.DeleteApplication, Return(Int(0))], # block delete
         [Txn.on_completion() == OnComplete.CloseOut, Return(Int(1))],
         [Txn.on_completion() == OnComplete.OptIn, handle_optin],
-        [Txn.application_args[0] == Bytes("add_permission"), add_new_permission],
-        [Txn.application_args[0] == Bytes("change_permissions_manager"), change_permissions_manager],
+        [Txn.application_args[0] == Bytes("set_permission"), set_permission_contract],
         [Txn.application_args[0] == Bytes("issue"), issue_token],
         [Txn.application_args[0] == Bytes("kill"), kill_token],
         [Txn.application_args[0] == Bytes("transfer"), transfer_token],

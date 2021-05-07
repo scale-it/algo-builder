@@ -35,9 +35,9 @@ async function run (runtimeEnv, deployer) {
   };
 
   await deployer.fundLsig('clawback.py',
-    { funder: alice, fundingMicroAlgo: 5e6 }, {}, [], escrowParams); // sending 5 Algo
+    { funder: alice, fundingMicroAlgo: 5e6 }, {}, escrowParams); // sending 5 Algo
 
-  const escrowLsig = await deployer.loadLogic('clawback.py', [], escrowParams);
+  const escrowLsig = await deployer.loadLogic('clawback.py', escrowParams);
   const escrowAddress = escrowLsig.address();
 
   /** Update clawback address to escrow **/

@@ -2,7 +2,7 @@ const {
   balanceOf, executeTransaction
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/runtime');
-const { issue } = require('../issuance/issue');
+const { issue } = require('./issue');
 const { whitelist } = require('../permissions/whitelist');
 
 const { fundAccount, optInToSSC } = require('../common/common');
@@ -25,17 +25,17 @@ async function forceTransfer (deployer, fromAddr, toAddr, amount) {
     CONTROLLER_APP_ID: controllerSSCInfo.appID
   };
 
-  const escrowLsig = await deployer.loadLogic('clawback.py', [], escrowParams);
+  const escrowLsig = await deployer.loadLogic('clawback.py', escrowParams);
   const escrowAddress = escrowLsig.address();
 
   // notice the difference in calls here: stateful calls are done by token manager here
   // and from, to address are only used in asset transfer tx
   const forceTxGroup = [
     /**
-     * tx 0 - Call to controller stateful smart contract with application arg: 'transfer'
-     * The contract ensures that there is a call to permissions smart contract in the txGroup,
-     * so that rules are checked during token transfer. The smart contract also checks each transaction
-     * params in the txGroup (eg. sender(tx1) === receiver(tx2) === escrowAddress)
+     * tx 0 - Call to controller stateful smart contract (by ASA.manager)
+     * with application arg: 'force_transfer'. The contract ensures that there
+     * is a call to permissions smart contract in the txGroup, so that rules
+     * are checked during token transfer.
      */
     {
       type: types.TransactionType.CallNoOpSSC,
@@ -49,8 +49,8 @@ async function forceTransfer (deployer, fromAddr, toAddr, amount) {
     /**
      * tx 1 - Asset transfer transaction from sender -> receiver. This tx is executed
      * and approved by the escrow account (clawback.teal). The escrow account address is
-     * also the clawback address which transfers the frozen asset (amount = amount) from Alice to Bob.
-     * clawback ensures a call to controller smart contract during token transfer.
+     * also the clawback address which transfers the frozen asset (amount = amount) from accA to accB.
+     * Clawback ensures a call to controller smart contract during token transfer.
      */
     {
       type: types.TransactionType.RevokeAsset,
@@ -64,8 +64,8 @@ async function forceTransfer (deployer, fromAddr, toAddr, amount) {
       payFlags: { totalFee: 1000 }
     },
     /**
-     * tx 2 - Payment transaction of 1000 microAlgo from "from account" to escrow Account. This tx is used to
-     * cover the fee of tx1 (clawback).
+     * tx 2 - Payment transaction of 1000 microAlgo. This tx is used to cover the fee of tx1 (clawback).
+     * NOTE: It can be signed by any account, but it should be present in group.
      */
     {
       type: types.TransactionType.TransferAlgo,
@@ -85,7 +85,7 @@ async function forceTransfer (deployer, fromAddr, toAddr, amount) {
       appId: permissionsSSCInfo.appID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:transfer'],
-      accounts: [toAddr] //  AppAccounts
+      accounts: [fromAddr, toAddr] //  AppAccounts (pass asset sender & receiver address)
     }
   ];
 

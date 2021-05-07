@@ -18,7 +18,7 @@ async function setupControllerSSC (asaInfo, deployer) {
       localInts: 0,
       localBytes: 0,
       globalInts: 2, // 1 to store kill_status, 1 for storing permissions_app_id
-      globalBytes: 1, // 1 to store permissions manager (currently only 1 rules contract is supported)
+      globalBytes: 0,
       foreignAssets: [gold.assetIndex] // pass token_id in foreign assets array
     }, {}, templateParam); // pass token_id as a template paramenter
   console.log(controllerSSCInfo);

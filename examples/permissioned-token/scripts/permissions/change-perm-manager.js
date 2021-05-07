@@ -3,29 +3,28 @@ const { whitelist } = require('./whitelist');
 const { types } = require('@algo-builder/runtime');
 
 /**
- * If asset manager is a multisig address, then user should have a signed tx file, decoded tx fetched
+ * If permissionsManager is a multisig address, then user should have a signed tx file, decoded tx fetched
  * from that file, append his own signature & send it to network.
  *  - Use `algob.executeSignedTxnFromFile` to execute tx from file (if using multisig account)
- *  - In below function we assume token manager is a single account (alice)
+ *  - In below function we assume permissionsManager is a single account (alice)
  * @param deployer algobDeployer
  * @param address account address to change permissions_manager to
  */
-async function changePermissionsManager (deployer, assetManager, address) {
-  const gold = deployer.asa.get('gold');
-  const controllerSSCInfo = deployer.getSSC('controller.py', 'clear_state_program.py');
+async function changePermissionsManager (deployer, permissionsManager, address) {
+  const permissionSSCInfo = deployer.getSSC('permissions.py', 'clear_state_program.py');
 
   /**
-   * - Only asset manager can update permissions_manager. Which is set to alice(during deploy).
+   * Only current perm_manager can update permissions_manager to a new address.
+   * Which is set to alice(during deploy).
    */
   const changePerManagerParams = {
     type: types.TransactionType.CallNoOpSSC,
     sign: types.SignType.SecretKey,
-    fromAccount: assetManager, // asset manager account (fails otherwise)
-    appId: controllerSSCInfo.appID,
+    fromAccount: permissionsManager, // asset manager account (fails otherwise)
+    appId: permissionSSCInfo.appID,
     payFlags: { totalFee: 1000 },
     appArgs: ['str:change_permissions_manager'],
-    accounts: [address],
-    foreignAssets: [gold.assetIndex] // to verify token_id & token_manager
+    accounts: [address]
   };
 
   console.log(`* Updating permissions manager to: ${address} *`);
@@ -33,13 +32,13 @@ async function changePermissionsManager (deployer, assetManager, address) {
 }
 
 async function run (runtimeEnv, deployer) {
-  const assetManager = deployer.accountsByName.get('alice');
+  const permissionsManager = deployer.accountsByName.get('alice');
   const john = deployer.accountsByName.get('john');
   const elon = deployer.accountsByName.get('elon-musk');
 
   // fund accounts
   await Promise.all([
-    fundAccount(deployer, assetManager),
+    fundAccount(deployer, permissionsManager),
     fundAccount(deployer, elon)
   ]);
 
@@ -58,7 +57,7 @@ async function run (runtimeEnv, deployer) {
    * Use below function to update permission manager address in controllerSSC
    * Only asset manager can change permission manager
    */
-  await changePermissionsManager(deployer, assetManager, john.addr);
+  await changePermissionsManager(deployer, permissionsManager, john.addr);
 
   // tx PASS: as we updated permissions manager to john
   await whitelist(deployer, john, elon.addr);

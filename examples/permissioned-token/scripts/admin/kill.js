@@ -1,5 +1,5 @@
 const { types } = require('@algo-builder/runtime');
-const { issue } = require('../issuance/issue');
+const { issue } = require('./issue');
 const { executeTransaction, fundAccount } = require('../common/common');
 
 /**
