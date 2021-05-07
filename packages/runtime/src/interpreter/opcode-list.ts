@@ -1227,8 +1227,6 @@ export class Txn extends Op {
         this.interpreter.runtime.ctx.gtxs,
         this.interpreter.tealVersion);
     }
-    // console.log(`Txn[arg at line ${this.line}] = `, this.field);
-    // console.log('Pushing ', result, '\n');
     stack.push(result);
   }
 }
@@ -1325,10 +1323,6 @@ export class Txna extends Op {
   execute (stack: TEALStack): void {
     const result = txAppArg(this.field, this.interpreter.runtime.ctx.tx, this.idx, this,
       this.interpreter.tealVersion, this.line);
-
-    console.log(`Txn[arg at line ${this.line}] = `, this.field);
-    console.log('Pushing ', result, '\n');
-
     stack.push(result);
   }
 }
