@@ -304,17 +304,20 @@ export class Ctx implements Context {
           break;
         }
         case TransactionType.CallNoOpSSC: {
+          this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appId);
           this.runtime.run(appParams[approvalProgram], ExecutionMode.STATEFUL);
           break;
         }
         case TransactionType.CloseSSC: {
+          this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appId);
           this.runtime.run(appParams[approvalProgram], ExecutionMode.STATEFUL);
           this.closeApp(fromAccountAddr, txnParam.appId);
           break;
         }
         case TransactionType.ClearSSC: {
+          this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.runtime.assertAppDefined(txnParam.appId, this.getApp(txnParam.appId));
           try {
             this.runtime.run(appParams["clear-state-program"], ExecutionMode.STATEFUL);
@@ -328,6 +331,7 @@ export class Ctx implements Context {
           break;
         }
         case TransactionType.DeleteSSC: {
+          this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appId);
           this.runtime.run(appParams[approvalProgram], ExecutionMode.STATEFUL);
           this.deleteApp(txnParam.appId);
