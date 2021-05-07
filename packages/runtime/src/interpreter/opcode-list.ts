@@ -1105,8 +1105,8 @@ export class Concat extends Op {
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2, this.line);
-    const valueB = this.assertBytes(stack.pop(), this.line);
     const valueA = this.assertBytes(stack.pop(), this.line);
+    const valueB = this.assertBytes(stack.pop(), this.line);
 
     if (valueA.length + valueB.length > MAX_CONCAT_SIZE) {
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.CONCAT_ERROR, { line: this.line });
