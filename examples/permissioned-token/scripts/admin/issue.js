@@ -11,7 +11,7 @@ const { executeTransaction, fundAccount, totalSupply } = require('../common/comm
  *  - Use `algob.executeSignedTxnFromFile` to execute tx from file
  *  - In the function below we assume creator & reserve is a single account (alice)
  */
-async function issue (deployer, account, amount) {
+async function issue (deployer, address, amount) {
   const asaReserve = deployer.accountsByName.get('alice'); // asset reserve is the issuer
 
   const gold = deployer.asa.get('gold');
@@ -41,7 +41,7 @@ async function issue (deployer, account, amount) {
       foreignAssets: [gold.assetIndex]
     },
     /**
-     * tx 1 - Asset transfer transaction from Token Reserve -> account. This tx is executed
+     * tx 1 - Asset transfer transaction from Token Reserve -> address. This tx is executed
      * and approved by the clawback escrow (since the asset is default frozen only clawback can move funds).
      * This tx doesn't need rule checks (as this is an issuance txn)
      */
@@ -49,7 +49,7 @@ async function issue (deployer, account, amount) {
       type: types.TransactionType.RevokeAsset,
       sign: types.SignType.LogicSignature,
       fromAccountAddr: escrowAddress,
-      recipient: account.addr,
+      recipient: address,
       assetID: gold.assetIndex,
       revocationTarget: asaReserve.addr, // tx will fail if assetSender is not token reserve address
       amount: amount,
@@ -57,11 +57,11 @@ async function issue (deployer, account, amount) {
       payFlags: { totalFee: 1000 }
     }
   ];
-  console.log(`* Issuing ${amount} tokens to ${account.name}:${account.addr} *`);
+  console.log(`* Issuing ${amount} tokens to [${address}] *`);
   await executeTransaction(deployer, issuanceParams);
 
-  console.log(`* ${account.name} asset holding: *`);
-  await balanceOf(deployer, account.addr, gold.assetIndex); // print asset holding
+  console.log(`* ${address} asset holding: *`);
+  await balanceOf(deployer, address, gold.assetIndex); // print asset holding
 
   const supply = await totalSupply(deployer, gold.assetIndex);
   console.log(`Total Supply of token 'gold': ${supply}`);
@@ -93,7 +93,7 @@ async function run (runtimeEnv, deployer) {
    *   account - alice).
    * - Note: We don't need to add rules check for issuer, as the issuer creates the rules itself
    */
-  await issue(deployer, elon, 15); // issue(mint) 15 tokens to elon from reserve
+  await issue(deployer, elon.addr, 15); // issue(mint) 15 tokens to elon from reserve
 }
 
 module.exports = { default: run, issue: issue };

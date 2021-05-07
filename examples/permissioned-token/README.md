@@ -48,38 +48,38 @@ Deployment scripts are placed directly in `/scripts`:
 **NOTE:** In a real world scenario, transactions involving a multisig account (eg. token can be created and issued by a multisig) will involve an interaction of many users. A user will receive a signed transaction or can create an unsigned transaction. User can sign the transaction using `algob sign-multisig` command or by using the `signMultiSig` function in a script. Once transaction is signed, we can use `executeSignedTxFromFile` function to successfully send transaction to network (eg. deploy token).
 
 1. *0-setup-token.js*: In this script we deploy the token (as an Algorand Standard Asset) using `deployer.deployASA(..)` function. Check note above if creator is a multisig address.
-2. *1-setup-apps.js*: In this script we first deploy `controller.py` smart contract (which saves the token_id & sets kill_status to false by default). Only token manager can deploy this contract. Secondly, we deploy the `permissions.py` smart contract, which has the rules. During permisssions deployment, we save the controller_app_id in it's global state.
+2. *1-setup-controller.js*: In this script we deploy `controller.py` smart contract (which saves the hardcoded token_id as a template paramteter & sets kill_status to false by default). Only token manager can deploy this contract.
 3. *2-asset-clawback.js*: Here we deploy the contract `clawback.py` and add some funds to it. In contract we save token_id, controller_app_id. After that we update the asset clawback to the address of the contract account (using algob ModifyAsset transaction)
+4. *3-setup-permissions.js*: Here, we deploy the `permissions.py` smart contract, which has the rules. During permisssions deployment, we save the perm_manager in the global state (while deploying it's passed as a template parameter, but it can be updated by the current permissions manager to another address as well)
 
 ### Execution
 
-1. *Issuance* (`/scripts/issuance/issue.js`): Issuer can issue/mint tokens. Receiver will need to opt-in to the token before the issuance. For issuance tx, we need a transaction group of:
-a) Call to the controller smart contract - it checks if token is not killed (as issuance is not allowed if token is killed).
-b) Asset transfer transaction from issuer -> receiver using clawback. `clawback.py` does the basic sanity checks for issuance_tx.
-We don't need additional rule checks as issuer sets the rules himself.
-
-2. *Update Asset Reserve* (`/scripts/issuance/update-reserve.js`): If the _reserve account_ is a multisig address and we want to kick out one address from the multisig, then we will need to update the asset reserve address. One approach is we update the asset reserve using *ModifyAsset* transaction, and move all tokens from previous reserve -> new reserve. This can be done in an atomic transaction group:
-a) Force transfer all assets from previous reserve to new reserve - signed by asset manager (requires 3 txns, check Forced Asset Transfer below for more details)
-b) Asset Modification transaction where we update the asset reserve address to new one. (requires 1 tx)
-Another approach is to *rekey* ASA's Reserve account to the newReserve. This way you won't need to move all tokens from old reserve to new reserve. Now for transactions related to the asset reserve (eg. issuance), `fromAccountAddr` will be the old reserve address, but signing authority will be new reserve account.
-
-3. *OptOut* (`/scripts/issuance/opt-out.js`): User can optOut from the token if he wants to. This could be a simple asset transfer transaction from user -> creator (using user's sk) where asset_amount = 0 & close_remainder_to is asset creator. This tx will opt out a user from the token and transfer all his tokens to the asset creator.
-NOTE: If asset creator and reserve are different address, then we will need to transfer all tokens from creator to reserve as well (to take those tokens out of circulation/increase total supply).
-
-4. *Asset transfer* (`scripts/transfer/transfer.js`): A non-reserve account can hold few tokens (via issuance) and may wish to transfer some tokens to another non-reserve account. This should be in compliance with the permission smart contract `P` (`permissions.py`). For token transfer we need a group of at least 4 transactions (and more if there are more than 1 permissions contract):
-a) call to controller smart contract (this ensures all rules are checked)
+1. *Asset transfer* (`scripts/user/transfer.js`): A non-reserve account can hold few tokens (via issuance) and may wish to transfer some tokens to another non-reserve account. This should be in compliance with the permission smart contract `P` (`permissions.py`). For token transfer we need a group of at least 4 transactions (and more if there are more than 1 permissions contract):
+a) call to controller smart contract (this ensures all rules are checked) - signed by asset_sender.
 b) token transfer transaction from sender -> receiver using clawback (clawback contract ensures controller smart contract is called).
 c) payment transaction from sender -> clawback (to cover tx fee of the transaction above)
 d) call to permissions smart contract (to check rules: max token holding by receiver < 100, both from & to are whitelisted)
 
-5. *Forced Asset transfer* (`scripts/transfer/force-transfer.js`): This is similar to asset transfer, but in this case the assets are being moved by asset manager, rather than a token holder. The transaction group is also similar to the one above. Difference is that a call to `C`, `P` and paying fees of escrow is done by asset manager. Asset manager essentially represents clawback here (revoking tokens from an account).
+2. *Issuance* (`/scripts/admin/issue.js`): Issuer can issue/mint tokens. Receiver will need to opt-in to the token before the issuance. For issuance tx, we need a transaction group of:
+a) Call to the controller smart contract - it checks if token is not killed (as issuance is not allowed if token is killed). It also verifies that the sender is the token reserve.
+b) Asset transfer transaction from issuer -> receiver using clawback. `clawback.py` does the basic sanity checks for issuance_tx.
+We don't need additional rule checks as issuer sets the rules himself.
 
-6. *Kill Token* (`scripts/permissions/kill.js`): Token manager can kill the token. If the token is killed then all issuance and token transfer transactions are rejected. User can only opt-out from the token to remove his holding and decrease his account's minimum balance.
+3. *Forced Asset transfer* (`scripts/admin/force-transfer.js`): This is similar to asset transfer, but in this case the assets are being moved by asset manager, rather than a token holder. The transaction group is also similar to the one above. Difference is that a call to `C`, `P` and paying fees of escrow is done by asset manager. Asset manager essentially represents clawback here (revoking tokens from an account).
 
-    a) To kill the token, execute an application call tx to the controller smart contract with appArg: 'kill'. Only ASA mangager can do that. Controller updates the global state key (*is_token_killed*) to true.
+4. *Update Asset Reserve* (`/scripts/admin/update-reserve.js`): If the _reserve account_ is a multisig address and we want to kick out one address from the multisig, then we will need to update the asset reserve address. One approach is we update the asset reserve using *ModifyAsset* transaction, and move all tokens from previous reserve -> new reserve. This can be done in an atomic transaction group:
+a) Force transfer all assets from previous reserve to new reserve - signed by asset manager (requires 3 txns, check Forced Asset Transfer above for more details)
+b) Asset Modification transaction where we update the asset reserve address to new one. (requires 1 tx)
+Another approach is to *rekey* ASA's Reserve account to the newReserve. This way you won't need to move all tokens from old reserve to new reserve. Now for transactions related to the asset reserve (eg. issuance), `fromAccountAddr` will be the old reserve address, but signing authority will be new reserve account.
 
-7. *Whitelist User* (`scripts/permissions/whitelist.js`): Only a permissions manager (whose address is stored in the controller smart contract) can add a new user to the whitelist which enables that user to receive or send tokens.
-For executing this tx, permissions manager calls the permissions smart contract with application arg "add_whitelist", and passes the account he wishes to whitelist in AppAccount array. `token_id` is also passed in the ForeignAsset array to verify token. If tx is successful, then permission smart contract updates the local state of `Txn.accounts[1]` & set *whitelisted = true (Int(1))*.
+5. *OptOut* (`/scripts/admin/opt-out.js`): User can optOut from the token if he wants to. This could be a simple asset transfer transaction from user -> creator (using user's sk) where asset_amount = 0 & close_remainder_to is asset creator. This tx will opt out a user from the token and transfer all his tokens to the asset creator.
+NOTE: If asset creator and reserve are different address, then we will need to transfer all tokens from creator to reserve as well (to take those tokens out of circulation/increase total supply).
+
+6. *Kill Token* (`scripts/admin/kill.js`): Token manager can kill the token. If the token is killed then all issuance and token transfer transactions are rejected. User can only opt-out from the token to remove his holding and decrease his account's minimum balance.
+a) To kill the token, execute an application call tx to the controller smart contract with appArg: 'kill'. Only ASA mangager can do that. Controller updates the global state key (*is_token_killed*) to true.
+
+7. *Whitelist User* (`scripts/permissions/whitelist.js`): Only a permissions manager (whose address is stored in the permissions smart contract's global state) can add a new user to the whitelist which enables that user to receive or send tokens.
+For executing this tx, permissions manager calls the permissions smart contract with application arg "add_whitelist", and passes the account he wishes to whitelist in AppAccount array. If tx is successful, then permission smart contract updates the local state of `Txn.accounts[1]` & set *whitelisted = true (Int(1))*.
 
 8. *Change Permissions Manager* (`scripts/permissions/change-manager.js`): Token manager can change the permissions manager via an application call to the controller smart contract. If the parameters are correct, tx is accepted and controller smart contract updates the `permission_manager` in it's global state.
 

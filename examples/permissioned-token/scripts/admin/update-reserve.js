@@ -6,7 +6,7 @@ const { executeTransaction, fundAccount } = require('../common/common');
 
 // here instead of updating the asset reserve by modifyAsset tx,
 // we just rekey old reserve account to new reserve
-async function updateReserveByRekeying (deployer, newReserve) {
+async function updateReserveByRekeying (deployer, address) {
   // note: update reserve account below if not alice
   const asaReserve = deployer.accountsByName.get('alice');
   await fundAccount(deployer, asaReserve);
@@ -18,10 +18,10 @@ async function updateReserveByRekeying (deployer, newReserve) {
     fromAccount: asaReserve,
     toAccountAddr: asaReserve.addr,
     amountMicroAlgos: 0,
-    payFlags: { totalFee: 1000, rekeyTo: newReserve.addr }
+    payFlags: { totalFee: 1000, rekeyTo: address }
   };
 
-  console.log(`* Rekeying reserve address from: ${asaReserve.addr} to: ${newReserve.addr} *`);
+  console.log(`* Rekeying reserve address from: ${asaReserve.addr} to: ${address} *`);
   await executeTransaction(deployer, rekeyReserveParam);
   console.log('* Rekeying Successful *');
 }
@@ -34,7 +34,7 @@ async function updateReserveByRekeying (deployer, newReserve) {
 *  - Use `algob.executeSignedTxnFromFile` to execute tx from file
 *  - Use below function if asa.manager is single account
 */
-async function updateReserveByAssetConfig (deployer, newReserve) {
+async function updateReserveByAssetConfig (deployer, address) {
   const asaManager = deployer.accountsByName.get('alice');
   await fundAccount(deployer, asaManager);
 
@@ -78,7 +78,7 @@ async function updateReserveByAssetConfig (deployer, newReserve) {
       foreignAssets: [gold.assetIndex] // to verify token reserve, manager
     },
     /**
-     * tx 1 - Asset transfer transaction from current Reserve -> newReserve.
+     * tx 1 - Asset transfer transaction from current Reserve -> address.
      * The amount is equal to entire asset holding of reserve, i.e we move all asset holdings
      * to the new reserve address.
      */
@@ -86,7 +86,7 @@ async function updateReserveByAssetConfig (deployer, newReserve) {
       type: types.TransactionType.RevokeAsset,
       sign: types.SignType.LogicSignature,
       fromAccountAddr: escrowAddress,
-      recipient: newReserve.addr,
+      recipient: address,
       assetID: gold.assetIndex,
       revocationTarget: asaReserveAddr,
       amount: reserveAssetHolding.amount, // moving all tokens to new reserve
@@ -114,12 +114,12 @@ async function updateReserveByAssetConfig (deployer, newReserve) {
       sign: types.SignType.SecretKey,
       fromAccount: asaManager,
       assetID: gold.assetIndex,
-      fields: { reserve: newReserve.addr },
+      fields: { reserve: address },
       payFlags: { totalFee: 1000 }
     }
   ];
 
-  console.log(`* Updating reserve address to: ${newReserve.addr} *`);
+  console.log(`* Updating reserve address to: ${address} *`);
   await executeTransaction(deployer, updateReserveParams);
   console.log('* Update Successful *');
 
@@ -144,14 +144,14 @@ async function run (runtimeEnv, deployer) {
    * a): Move all tokens from oldReserve to newReserve (by force_transfer)
    * b): Update the asset reserve to new reserve address
    */
-  await updateReserveByAssetConfig(deployer, newReserve);
+  await updateReserveByAssetConfig(deployer, newReserve.addr);
 
   /**
    * Approach 2: rekey old reserve to new reserve
    * NOTE: now for issuance transaction, fromAccountAddr will be old reserve,
    * but fromAccount (signing authority) will be the new reserve account
    */
-  // await updateReserveByRekeying(deployer, newReserve);
+  // await updateReserveByRekeying(deployer, newReserve.addr);
 
   /**
    * Use below function if asa.manager is a multisig account (as user receive a signed

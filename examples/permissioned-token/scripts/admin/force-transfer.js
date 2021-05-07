@@ -147,14 +147,14 @@ async function run (runtimeEnv, deployer) {
   ]);
 
   // note: if reserve is multisig, then user will use executeSignedTxnFromFile function
-  await issue(deployer, bob, 100); // issue(mint) 100 tokens to bob from reserve
+  await issue(deployer, bob.addr, 200); // issue(mint) 100 tokens to bob from reserve
 
   // transaction PASS: both bob & john are whitelisted & receiver balance <= 100
   await forceTransfer(deployer, bob.addr, john.addr, 15);
 
   try {
     // transaction FAIL: as receiver will have balance > 100 now
-    await forceTransfer(deployer, bob.addr, john.addr, 80);
+    await forceTransfer(deployer, bob.addr, john.addr, 90);
   } catch (e) {
     console.log('[Expected (receiver asset_balance > 100)]', e.response ? e.response.error.text : e);
   }

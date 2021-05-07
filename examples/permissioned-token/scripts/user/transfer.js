@@ -146,14 +146,10 @@ async function run (runtimeEnv, deployer) {
   ]);
 
   // note: if reserve is multisig, then user will use executeSignedTxnFromFile function
-  await issue(deployer, bob, 300); // issue(mint) 300 tokens to bob from reserve
+  await issue(deployer, bob.addr, 300); // issue(mint) 300 tokens to bob from reserve
 
   // transaction PASS: both bob & john are whitelisted & receiver balance <= 100)
-  try {
-    await transfer(deployer, bob, john.addr, 15);
-  } catch (error) {
-    console.log('CCC ', error.response.error);
-  }
+  await transfer(deployer, bob, john.addr, 15);
 
   try {
     // transaction FAIL: as receiver will have balance of 105 now(> 100)

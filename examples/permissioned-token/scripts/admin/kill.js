@@ -51,7 +51,7 @@ async function run (runtimeEnv, deployer) {
 
   // transaction pass (issue 15 tokens to elon)
   await deployer.optInAcountToASA('gold', elon.name, {});
-  await issue(deployer, elon, 15);
+  await issue(deployer, elon.addr, 15);
 
   /**
    * Below function kills token gold (if asa.manager is a single account)
@@ -59,7 +59,7 @@ async function run (runtimeEnv, deployer) {
   await kill(deployer); // kill token 'gold'
 
   // transaction FAIL: as token is killed
-  await issue(deployer, elon, 15);
+  await issue(deployer, elon.addr, 15);
 }
 
 module.exports = { default: run, kill: kill };
