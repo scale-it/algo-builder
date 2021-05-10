@@ -52,7 +52,8 @@ export function txnSpecbyField (txField: string, tx: Txn, gtxns: Txn[], tealVers
   if (assetTxnFields.has(txField)) {
     const s = TxnFields[tealVersion][txField];
     const assetMetaData = tx.apar;
-    result = assetMetaData[s as keyof AssetDefEnc];
+    if (assetMetaData === undefined) result = undefined;
+    else result = assetMetaData[s as keyof AssetDefEnc];
     return parseToStackElem(result, txField);
   }
 
