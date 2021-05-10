@@ -45,7 +45,10 @@ We created a new [repository](https://github.com/scale-it/algo-builder-templates
     * `recreate-private-net` - stop the current instance, remove all data and re-setup
 
 ### @algorand-builder/runtime:
-* fixed bugs in group tx flow, *asset_params_get* and *txn GroupIndex* Op
+* fixed bugs
+    * in group tx flow
+    * in opcodes: *asset_params_get*, *txn GroupIndex*, *concat*
+    * closing asset using clawback should be denied
 
 ## v0.5.4 2021-03-15
 
