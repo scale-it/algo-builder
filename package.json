@@ -39,7 +39,8 @@
     "test": "yarn workspaces run test",
     "lint": "yarn workspaces -p run lint",
     "lint:fix": "yarn workspaces -p run lint:fix",
-    "coverage": "yarn workspaces -p run coverage"
+    "coverage": "yarn workspaces -p run coverage",
+    "prepare": "husky install"
   },
   "peerDependencies": {
     "lodash": "^4.17.19"
