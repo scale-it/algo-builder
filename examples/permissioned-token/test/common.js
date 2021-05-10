@@ -157,14 +157,14 @@ function transfer (runtime, from, to, amount, assetIndex, controllerAppID, permi
 }
 
 // Performs Opt-Out operation
-function optOut (runtime, manager, acc, amount = 0, assetIndex) {
+function optOut (runtime, manager, acc, assetIndex) {
   const optOutParams = {
     type: types.TransactionType.TransferAsset,
     sign: types.SignType.SecretKey,
     fromAccount: acc.account,
     toAccountAddr: acc.address,
     assetID: assetIndex,
-    amount: amount,
+    amount: 0,
     payFlags: { totalFee: 1000, closeRemainderTo: manager.address }
   };
   runtime.executeTx(optOutParams);

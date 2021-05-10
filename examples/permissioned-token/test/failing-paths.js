@@ -81,7 +81,7 @@ describe('Permissioned Token Tests -- Failing Paths', function () {
 
   it('Opt Out', () => {
     // Opt-out wont work without opting in
-    assert.throws(() => optOut(runtime, alice, elon, 20, assetIndex), 'RUNTIME_ERR1404');
+    assert.throws(() => optOut(runtime, alice, elon, assetIndex), 'RUNTIME_ERR1404');
   });
 
   it('Change Permissions SSC Manager', () => {

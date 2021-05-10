@@ -150,7 +150,10 @@ export class Ctx implements Context {
     const toAssetHolding = this.getAssetHolding(txnParam.assetID, txnParam.toAccountAddr);
     txnParam.amount = BigInt(txnParam.amount);
 
-    if (fromAccountAddr !== txnParam.toAccountAddr) {
+    if (txnParam.payFlags.closeRemainderTo !== undefined) {
+      this.assertAssetNotFrozen(txnParam.assetID, txnParam.payFlags.closeRemainderTo);
+    }
+    if (txnParam.amount > 0) {
       this.assertAssetNotFrozen(txnParam.assetID, fromAccountAddr);
       this.assertAssetNotFrozen(txnParam.assetID, txnParam.toAccountAddr);
     }

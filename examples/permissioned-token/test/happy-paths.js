@@ -83,7 +83,7 @@ describe('Permissioned Token Tests -- Happy Paths', function () {
     );
 
     // Works because opted-in
-    optOut(runtime, alice, elon, 20, assetIndex);
+    optOut(runtime, alice, elon, assetIndex);
     syncAccounts();
     assert.equal(
       Number(runtime.getAssetHolding(assetIndex, elon.address).amount),
