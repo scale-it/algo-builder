@@ -228,15 +228,17 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should warn if account already is already opted-into asset", () => {
-    const spy = sinon.spy(console, 'warn');
+    // console is mocked in package.json mocha options
+    let stub = console.warn as sinon.SinonStub;
+    stub.reset();
+
     const res = runtime.getAssetDef(assetId);
     assert.isDefined(res);
 
     // executing same opt-in tx again
-    const warnMsg = `${john.address} is already opted in to asset ${assetId}`;
     runtime.optIntoASA(assetId, john.address, {});
-    assert(spy.calledWith(warnMsg));
-    spy.restore();
+    assert(stub.calledWith(
+      `${john.address} is already opted in to asset ${assetId}`));
   });
 
   it("should transfer asset between two accounts", () => {
