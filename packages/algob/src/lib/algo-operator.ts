@@ -341,7 +341,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
   /**
    * Opt-In to stateful smart contract
-   * signed by account secret key
+   *  - signed by account's secret key
    * @param sender: Account for which opt-in is required
    * @param appId: Application Index: (ID of the application)
    * @param payFlags: Transaction Params
