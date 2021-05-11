@@ -71,11 +71,5 @@
     "**/{src,test,scripts}/**/*.{ts,js}": [
       "eslint --format stylish --fix"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "yarn workspaces run lint-staged",
-      "pre-push": "yarn test"
-    }
   }
 }
