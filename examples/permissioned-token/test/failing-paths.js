@@ -167,5 +167,12 @@ describe('Permissioned Token Tests -- Failing Paths', function () {
       transfer(runtime, bob, elon, amount, assetIndex, controllerAppID, permissionsAppId, lsig),
     'RUNTIME_ERR1009'
     );
+
+    // Both sender and receiver needs to be whitelisted before transferring tokens
+    whitelist(runtime, alice, bob.address, assetIndex, controllerAppID, permissionsAppId);
+    assert.throws(() =>
+      transfer(runtime, bob, elon, amount, assetIndex, controllerAppID, permissionsAppId, lsig),
+    'RUNTIME_ERR1009'
+    );
   });
 });

@@ -130,16 +130,33 @@ describe('Permissioned Token Tests -- Happy Paths', function () {
 
     // Successful transfer
     const elonBalance = runtime.getAssetHolding(assetIndex, elon.address).amount;
-    const bobBalance = runtime.getAssetHolding(assetIndex, elon.address).amount;
+    const bobBalance = runtime.getAssetHolding(assetIndex, bob.address).amount;
     forceTransfer(runtime, bob, elon, 20, assetIndex, controllerAppID, permissionsAppId, lsig, alice);
     assert.equal(
       Number(runtime.getAssetHolding(assetIndex, elon.address).amount),
       Number(elonBalance) + 20
     );
     assert.equal(
-      Number(runtime.getAssetHolding(assetIndex, elon.address).amount),
-      Number(bobBalance) + 20
+      Number(runtime.getAssetHolding(assetIndex, bob.address).amount),
+      Number(bobBalance) - 20
     );
+
+    // Succesful transfer if Receiver is Asset Reserver Account
+    // const asaDef = runtime.getAssetDef(assetIndex);
+    // console.log(asaDef);
+    // bobBalance = runtime.getAssetHolding(assetIndex, bob.address).amount;
+    // let aliceBalance = runtime.getAssetHolding(assetIndex, alice.address).amount;
+    // console.log(bobBalance);
+    // console.log(aliceBalance);
+    // forceTransfer(runtime, bob, alice, 20, assetIndex, controllerAppID, permissionsAppId, lsig, alice);
+    // assert.equal(
+    //   Number(runtime.getAssetHolding(assetIndex, alice.address).amount),
+    //   Number(aliceBalance) + 20
+    // );
+    // assert.equal(
+    //   Number(runtime.getAssetHolding(assetIndex, bob.address).amount),
+    //   Number(bobBalance) - 20
+    // );
   });
 
   it('Token Transfer', () => {
@@ -173,7 +190,7 @@ describe('Permissioned Token Tests -- Happy Paths', function () {
       1
     );
     const elonBalance = runtime.getAssetHolding(assetIndex, elon.address).amount;
-    const bobBalance = runtime.getAssetHolding(assetIndex, elon.address).amount;
+    const bobBalance = runtime.getAssetHolding(assetIndex, bob.address).amount;
     transfer(runtime, bob, elon, amount, assetIndex, controllerAppID, permissionsAppId, lsig);
     syncAccounts();
     assert.equal(
@@ -181,8 +198,8 @@ describe('Permissioned Token Tests -- Happy Paths', function () {
       Number(elonBalance) + amount
     );
     assert.equal(
-      Number(runtime.getAssetHolding(assetIndex, elon.address).amount),
-      Number(bobBalance) + amount
+      Number(runtime.getAssetHolding(assetIndex, bob.address).amount),
+      Number(bobBalance) - amount
     );
   });
 });

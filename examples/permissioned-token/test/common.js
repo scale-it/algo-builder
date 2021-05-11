@@ -44,8 +44,17 @@ function optInToPermissions (runtime, address, permissionsAppId) {
   runtime.optInToApp(address, permissionsAppId, {}, {});
 }
 
-// Issue some tokens to the passed account
-function issue (runtime, manager, acc, amount, controllerAppID, assetIndex, lsig) {
+/**
+ * Issue some tokens to the passed account
+ * @param runtime RuntimeEnv Instance
+ * @param manager ASA Manager Account
+ * @param receiver Receiver Account
+ * @param amount Amount
+ * @param controllerAppID Controller App ID
+ * @param assetIndex ASA ID (Token ID)
+ * @param lsig (Clawback LSig)
+ */
+function issue (runtime, manager, receiver, amount, controllerAppID, assetIndex, lsig) {
   const txns = [
     {
       type: types.TransactionType.CallNoOpSSC,
@@ -60,7 +69,7 @@ function issue (runtime, manager, acc, amount, controllerAppID, assetIndex, lsig
       type: types.TransactionType.RevokeAsset,
       sign: types.SignType.LogicSignature,
       fromAccountAddr: lsig.address(),
-      recipient: acc.address,
+      recipient: receiver.address,
       assetID: assetIndex,
       revocationTarget: manager.address,
       amount: amount,
@@ -71,6 +80,12 @@ function issue (runtime, manager, acc, amount, controllerAppID, assetIndex, lsig
   runtime.executeTx(txns);
 }
 
+/**
+ * Kill the token
+ * @param runtime RuntimeEnv Instance
+ * @param manager ASA Manager Account
+ * @param controllerAppID Controller App ID
+ */
 function killToken (runtime, manager, controllerAppID) {
   runtime.executeTx({
     type: types.TransactionType.CallNoOpSSC,
@@ -83,7 +98,15 @@ function killToken (runtime, manager, controllerAppID) {
   });
 }
 
-// Whitelists the passed address for allowing token transfer
+/**
+ * Whitelists the passed address for allowing token transfer
+ * @param runtime RuntimeEnv Instance
+ * @param manager ASA Manager Account
+ * @param address Address to be whitelisted
+ * @param assetIndex ASA ID
+ * @param controllerAppID Controller App ID
+ * @param permissionsAppId Permissions App ID
+ */
 function whitelist (runtime, manager, address, assetIndex, controllerAppID, permissionsAppId) {
   optInToPermissions(runtime, address, permissionsAppId);
   runtime.executeTx({
@@ -99,7 +122,12 @@ function whitelist (runtime, manager, address, assetIndex, controllerAppID, perm
   });
 }
 
-// Fund the address with min ALGOs(20)
+/**
+ * Fund the address with min ALGOs(20)
+ * @param runtime RuntimeEnv Instance
+ * @param master Master Account
+ * @param address Receiver Account Address
+ */
 function fund (runtime, master, address) {
   runtime.executeTx({
     type: types.TransactionType.TransferAlgo,
@@ -111,7 +139,17 @@ function fund (runtime, master, address) {
   });
 }
 
-// Transfer some token from `from` account to `to` account
+/**
+ * Transfer ASA
+ * @param runtime RuntimeEnv Instance
+ * @param from Sender Account
+ * @param to Receiver Account
+ * @param amount Amount
+ * @param assetIndex ASA ID
+ * @param controllerAppID Controller App ID
+ * @param permissionsAppId Permissions App ID
+ * @param lsig Clawback LSig
+ */
 function transfer (runtime, from, to, amount, assetIndex, controllerAppID, permissionsAppId, lsig) {
   const txGroup = [
     {
@@ -156,13 +194,19 @@ function transfer (runtime, from, to, amount, assetIndex, controllerAppID, permi
   runtime.executeTx(txGroup);
 }
 
-// Performs Opt-Out operation
-function optOut (runtime, manager, acc, assetIndex) {
+/**
+ * Performs Opt-Out operation
+ * @param runtime RuntimeEnv
+ * @param manager ASA Manager Account
+ * @param opAccount Account to be Opted-Out
+ * @param assetIndex ASA ID
+ */
+function optOut (runtime, manager, opAccount, assetIndex) {
   const optOutParams = {
     type: types.TransactionType.TransferAsset,
     sign: types.SignType.SecretKey,
-    fromAccount: acc.account,
-    toAccountAddr: acc.address,
+    fromAccount: opAccount.account,
+    toAccountAddr: opAccount.address,
     assetID: assetIndex,
     amount: 0,
     payFlags: { totalFee: 1000, closeRemainderTo: manager.address }
@@ -170,7 +214,18 @@ function optOut (runtime, manager, acc, assetIndex) {
   runtime.executeTx(optOutParams);
 }
 
-// Performs force transfer of token using ASA manager account
+/**
+ * Force Transfer Tokens
+ * @param runtime RuntimeEnv Instance
+ * @param from Sender Account
+ * @param to Receiver Account
+ * @param amount Amount
+ * @param assetIndex ASA ID
+ * @param controllerAppID Controller App ID
+ * @param permissionsAppId Permissions App ID
+ * @param lsig Clawback LSig
+ * @param manager ASA Manager Account
+ */
 function forceTransfer (
   runtime, from, to, amount, assetIndex, controllerAppID, permissionsAppId, lsig, manager) {
   const txGroup = [
