@@ -14,5 +14,8 @@
     "build:docs": "echo ok",
     "build": "tsc --build .",
     "build:watch": "tsc -w -p ."
+  },
+  "mocha": {
+    "file": "../../test/setup.js"
   }
 }
