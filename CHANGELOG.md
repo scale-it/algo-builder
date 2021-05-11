@@ -17,10 +17,10 @@
 
 ### Improvements
 * Added more tests for the [crowdfunding example project](/examples/crowdfunding) using `@algo-builder/runtime`- Happy paths and Failing paths.
-* Added new command `algob test` (runs mocha in project root).
 * Integrate user documentation with `jekyll`.
 * Moved OptIn methods from *DEPLOY* mode to *RUN* mode.
 * Added new algob commands:
+    * `algob test` (runs mocha in project root).
     * `algob unbox-template <name> <destination>` to quickly unbox a dapp template from `scale-it/algo-builder-templates`.
     * `algob sign-multisig --account-name <acc> --file <input> --out <out-file>` to append user's signature to signed multisig file.
 * Added new function `signLogicSigMultiSig` to sign logic signature by multisig.
