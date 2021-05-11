@@ -96,3 +96,49 @@ Developer hour links:
 - *implementation of the solution above using algob*: [examples/restricted-assets](/examples/restricted-assets)
 
 Link to spec of current template: [https://paper.dropbox.com/doc/Algob-Security-Token-Template-FR2LXhVg3edevYPBQZw6F](https://paper.dropbox.com/doc/Algob-Security-Token-Template-FR2LXhVg3edevYPBQZw6F)
+
+### API Doc
+
+#### Common
+
+1. *totalSupply(assetIndex)*: returns total supply of the asset (*asset.total* - *asaReserveHolding.amount*).
+
+#### Admin
+1. *issue(address, amount)*: Group of 2 transactions
+   - *tx1*: Call to controller smart contract with a) application arg `str:issue` b) foreign Asset: `assetIndex` - signed by asset reserve (issuer).
+   - *tx2*: Asset clawback transaction from asset reserve to address = `address`, amount = `amount`.
+
+2. *kill()*: Application call to controller with a) appArg `str:kill` and b) foreignAsset `assetIndex`- signed by asset manager.
+
+3. *forceTransfer (fromAddress, toAddress, amount)*: Group of 4 transactions
+   - *tx1*: Call to controller smart contract with a) application arg `str:force_transfer` b) foreign Asset: `assetIndex` - signed by asset manager.
+   - *tx2*: Asset clawback transaction from `fromAddress` to `toAddress`, amount = `amount`.
+   - *tx3*: Payment transaction to clawback (contract account) with amount >= fee of *tx2*
+   - *tx4*: Call to permissions smart contract with a) application arg `str:transfer` b) app accounts: [`fromAddress`, `toAddress`].
+
+    **NOTE**: *tx3*, *tx4* can be signed by anyone but they should be present in group. If receiver of `forceTransfer` is the current asset reserve OR if *tx4* is asset config txn (to update reserve address), then it can bypass permission checks.
+
+4. *updateReserveByAssetConfig (newReserveAddress)*: Group of 4 transactions
+   - *tx1*: Call to controller smart contract with a) application arg `str:force_transfer` b) foreign Asset: `assetIndex` - signed by asset manager.
+   - *tx2*: Asset clawback transaction from `oldReserveAddress` to `newReserveAddress`, amount = `oldReserveHolding.amount` (moving all tokens to new reserve address).
+   - *tx3*: Payment transaction to clawback (contract account) with amount >= fee of *tx2*
+   - *tx4*: Asset Config transaction updating reserve address to `newReserveAddress` - signed by asset manager.
+
+5. *updateReserveByRekeying (newReserveAddress)*: Transaction rekeying oldReserve account to `newReserveAddress` - signed by old reserve account.
+
+### User
+
+1. *transfer (fromAccount, toAddress, amount)*: Group of 4 transactions
+   - *tx1*: Call to controller smart contract with application arg `str:transfer` - signed by *fromAccount*.
+   - *tx2*: Asset clawback transaction from `fromAccount.address` to `toAddress`, amount = `amount`.
+   - *tx3*: Payment transaction to clawback (contract account) with amount >= fee of *tx2*
+   - *tx4*: Call to permissions smart contract with a) application arg `str:transfer` b) app accounts: [`fromAccount.address`, `toAddress`].
+
+2.  *optOut (account)*: Asset transfer transaction from `account.address` to `account.address`, amount = 0, **closeRemainderTo** = asset.creator.
+    **NOTE**: User opts out of the asset to creator (transferring account's asset holdings to the creator's account), so if creator is not the asset reserve, then the tokens from which user opted-out will still be in circulation.
+
+### Management
+
+1. *whitelist (permissionsManager, address)*: NoOp call to the permissions smart contract with a) application arg `str:add_whitelist` b) app accounts: [`address`] - signed by *permissionsManager*.
+
+2. *changePermissionsManager (permissionsManager, newManagerAddress)*: NoOp call to the permissions smart contract with a) application arg `str:change_permissions_manager` b) app accounts: [`newManagerAddress`] - signed by *permissionsManager* (current permissions manager).
