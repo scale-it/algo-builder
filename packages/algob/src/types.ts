@@ -505,13 +505,32 @@ export interface Deployer {
   optInLsigToASA: (asaName: string, lsig: LogicSig, flags: rtypes.TxParams) => Promise<void>
 
   /**
-   * Creates an opt-in transaction for given Stateful Smart Contract (SSC). The SSC must be
-   * already deployed.
-   * @sender Account for which opt-in is required
-   * @appId Application Index (ID of the application)
+   * Opt-In to stateful smart contract (SSC) for a single account
+   * signed by account secret key
+   * @param sender sender account
+   * @param appID application index
+   * @param payFlags Transaction flags
+   * @param flags Optional parameters to SSC (accounts, args..)
    */
-  optInToSSC: (sender: rtypes.Account, index: number,
-    payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags) => Promise<void>
+  optInAccountToSSC: (
+    sender: rtypes.Account,
+    appId: number,
+    payFlags: rtypes.TxParams,
+    flags: rtypes.SSCOptionalFlags) => Promise<void>
+
+  /**
+   * Opt-In to stateful smart contract (SSC) for a contract account
+   * The opt-in transaction is signed by the logic signature
+   * @param sender sender account
+   * @param appID application index
+   * @param payFlags Transaction flags
+   * @param flags Optional parameters to SSC (accounts, args..)
+   */
+  optInLsigToSSC: (
+    appId: number,
+    lsig: LogicSig,
+    payFlags: rtypes.TxParams,
+    flags: rtypes.SSCOptionalFlags) => Promise<void>
 
   /**
    * Create an entry in a script log (stored in artifacts/scripts/<script_name>.log) file. */

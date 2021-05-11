@@ -1,5 +1,5 @@
 import { encodeNote, mkTransaction, types as rtypes } from "@algo-builder/runtime";
-import { AssetModFields, TransactionType, TxField } from "@algo-builder/runtime/build/types";
+import { ExecParams, SignType, TransactionType, TxParams } from "@algo-builder/runtime/build/types";
 import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
 import { Deployer } from "../types";
@@ -91,21 +91,17 @@ export function makeAssetCreateTxn (
 export function makeASAOptInTx (
   addr: string,
   assetID: number,
-  params: SuggestedParams
+  params: SuggestedParams,
+  payFlags: TxParams
 ): Transaction {
-  const closeRemainderTo = undefined;
-  const revocationTarget = undefined;
-  const amount = 0;
-  const note = undefined;
-  return algosdk.makeAssetTransferTxnWithSuggestedParams(
-    addr,
-    addr,
-    closeRemainderTo,
-    revocationTarget,
-    amount,
-    note,
-    assetID,
-    params);
+  const execParam: ExecParams = {
+    type: TransactionType.OptInASA,
+    sign: SignType.SecretKey,
+    fromAccount: { addr: addr, sk: new Uint8Array(0) },
+    assetID: assetID,
+    payFlags: payFlags
+  };
+  return mkTransaction(execParam, params);
 }
 
 /**

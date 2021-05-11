@@ -221,17 +221,34 @@ class DeployerBasicMode {
 
   /**
    * Opt-In to stateful smart contract (SSC) for a single account
+   * signed by account secret key
    * @param sender sender account
    * @param appID application index
    * @param payFlags Transaction flags
    * @param flags Optional parameters to SSC (accounts, args..)
    */
-  async optInToSSC (
+  async optInAccountToSSC (
     sender: rtypes.Account,
     appId: number,
     payFlags: rtypes.TxParams,
     flags: rtypes.SSCOptionalFlags): Promise<void> {
-    await this.algoOp.optInToSSC(sender, appId, payFlags, flags);
+    await this.algoOp.optInAccountToSSC(sender, appId, payFlags, flags);
+  }
+
+  /**
+   * Opt-In to stateful smart contract (SSC) for a contract account
+   * The opt-in transaction is signed by the logic signature
+   * @param sender sender account
+   * @param appID application index
+   * @param payFlags Transaction flags
+   * @param flags Optional parameters to SSC (accounts, args..)
+   */
+  async optInLsigToSSC (
+    appId: number,
+    lsig: LogicSig,
+    payFlags: rtypes.TxParams,
+    flags: rtypes.SSCOptionalFlags): Promise<void> {
+    await this.algoOp.optInLsigToSSC(appId, lsig, payFlags, flags);
   }
 
   /**

@@ -90,8 +90,14 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     throw new Error("Method not implemented.");
   }
 
-  optInToSSC (
+  optInAccountToSSC (
     sender: rtypes.Account, index: number,
+    payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+
+  optInLsigToSSC (
+    appId: number, lsig: LogicSig,
     payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags): Promise<void> {
     throw new Error("Method not implemented.");
   }
