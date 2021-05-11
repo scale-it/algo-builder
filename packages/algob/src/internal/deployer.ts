@@ -238,8 +238,8 @@ class DeployerBasicMode {
   /**
    * Opt-In to stateful smart contract (SSC) for a contract account
    * The opt-in transaction is signed by the logic signature
-   * @param sender sender account
    * @param appID application index
+   * @param lsig logic signature
    * @param payFlags Transaction flags
    * @param flags Optional parameters to SSC (accounts, args..)
    */

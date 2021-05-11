@@ -1,5 +1,4 @@
-import { encodeNote, mkTransaction, parseSSCAppArgs, types as rtypes } from "@algo-builder/runtime";
-import { ExecParams, SignType, TransactionType, TxParams } from "@algo-builder/runtime/build/types";
+import { encodeNote, mkTransaction, types as rtypes } from "@algo-builder/runtime";
 import algosdk, { LogicSig } from "algosdk";
 
 import { BuilderError } from "../internal/core/errors";
@@ -109,7 +108,10 @@ export class AlgoOperatorImpl implements AlgoOperator {
     return BigInt(accoutInfo.amount) - BigInt((accoutInfo.assets.length + 1) * ALGORAND_ASA_OWNERSHIP_COST);
   }
 
-  getOptInTxSize (params: algosdk.SuggestedParams, accounts: rtypes.AccountMap, flags: TxParams): number {
+  getOptInTxSize (
+    params: algosdk.SuggestedParams, accounts: rtypes.AccountMap,
+    flags: rtypes.TxParams
+  ): number {
     const randomAccount = accounts.values().next().value;
     // assetID can't be known before ASA creation
     // it shouldn't be easy to find out the latest asset ID
@@ -124,7 +126,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   async _optInAcountToASA (
     asaName: string, assetIndex: number,
     account: rtypes.Account, params: algosdk.SuggestedParams,
-    flags: TxParams
+    flags: rtypes.TxParams
   ): Promise<void> {
     console.log(`ASA ${account.name} opt-in for ASA ${asaName}`);
     const sampleASAOptInTX = tx.makeASAOptInTx(account.addr, assetIndex, params, flags);
@@ -172,7 +174,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   async checkBalanceForOptInTx (
     name: string, params: algosdk.SuggestedParams,
     asaDef: rtypes.ASADef, accounts: rtypes.AccountMap,
-    creator: rtypes.Account, flags: TxParams
+    creator: rtypes.Account, flags: rtypes.TxParams
   ): Promise<rtypes.Account[]> {
     if (!asaDef.optInAccNames || asaDef.optInAccNames.length === 0) {
       return [];
@@ -295,9 +297,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const clear = await this.ensureCompiled(clearProgram, false, scTmplParams);
     const clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
 
-    const execParam: ExecParams = {
-      type: TransactionType.DeploySSC,
-      sign: SignType.SecretKey,
+    const execParam: rtypes.ExecParams = {
+      type: rtypes.TransactionType.DeploySSC,
+      sign: rtypes.SignType.SecretKey,
       fromAccount: flags.sender,
       approvalProgram: approvalProgram,
       clearProgram: clearProgram,
@@ -351,9 +353,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
     payFlags: rtypes.TxParams,
     flags: rtypes.SSCOptionalFlags): Promise<void> {
     const params = await tx.mkTxParams(this.algodClient, payFlags);
-    const execParam: ExecParams = {
-      type: TransactionType.OptInSSC,
-      sign: SignType.SecretKey,
+    const execParam: rtypes.ExecParams = {
+      type: rtypes.TransactionType.OptInSSC,
+      sign: rtypes.SignType.SecretKey,
       fromAccount: sender,
       appID: appID,
       payFlags: payFlags,
@@ -374,8 +376,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
   /**
    * Opt-In to stateful smart contract (SSC) for a contract account
    * The opt-in transaction is signed by the logic signature
-   * @param sender sender account
    * @param appID application index
+   * @param lsig logic signature
    * @param payFlags Transaction flags
    * @param flags Optional parameters to SSC (accounts, args..)
    */
@@ -386,9 +388,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
   ): Promise<void> {
     console.log(`Contract ${lsig.address()} opt-in for SSC ID ${appID}`);
     const params = await tx.mkTxParams(this.algodClient, payFlags);
-    const execParam: ExecParams = {
-      type: TransactionType.OptInSSC,
-      sign: SignType.LogicSignature,
+    const execParam: rtypes.ExecParams = {
+      type: rtypes.TransactionType.OptInSSC,
+      sign: rtypes.SignType.LogicSignature,
       fromAccountAddr: lsig.address(),
       lsig: lsig,
       appID: appID,
