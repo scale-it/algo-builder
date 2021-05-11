@@ -7,7 +7,7 @@
 * Updated `execParams` structure & typings (input parameters for `executeTransaction`)
     * Migration: If `SignType` is `LogicSignature` then change `fromAccount` to `fromAccountAddr` and just pass from address instead of complete account.
 * [breaking] Changed the way we pass arguments to stateless smart contract - moved assignment from when we load smart contract (using `loadLogic`, `mkDelegatedLsig`, `fundLsig`) to when we create transaction execution parameters.
-    * Migration: assign stateless args in txParams to `executeTransactin`. Eg
+    * Migration: assign stateless args in txParams to `executeTransaction`. Eg
         ```js
         await deployer.loadLogic('htlc.py', [arg1]); // remove scTmplParams from here
         const txnParams: rtypes.AlgoTransferParam = { .. }
@@ -34,7 +34,7 @@
 * Updated [`examples/asa`](/examples/asa): added new use-case to deploy and control ASA by a smart contract.
 
 ### Dapp templates.
-We created a new [repository](https://github.com/scale-it/algo-builder-templates) with dapp templates. It's a new project line of Algo Builder. Dapp Templates are webapps operating with Algorand blockchain with `algob` support. For the moment we only have React templates. Anyone can contribute a new template by creating a pull request.
+We created a new [repository](https://github.com/scale-it/algo-builder-templates) with dapp templates. It's a new project line of Algo Builder. Dapp Templates are webapps operating with Algorand blockchain with `algob` support. For the moment we only have React templates. Anyone can contribute with a new template or by improving the pre-existing ones by creating a pull request.
 
 * [/default](https://github.com/scale-it/algo-builder-templates/tree/master/default) template (with ASA transfer functionality)
 * [/htlc](https://github.com/scale-it/algo-builder-templates/tree/master/htlc) template - dapp implementing hash time locked contract.
