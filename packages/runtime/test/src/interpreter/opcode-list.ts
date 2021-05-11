@@ -1286,11 +1286,19 @@ describe("Teal Opcodes", function () {
     it("should concat two byte strings", () => {
       stack.push(new Uint8Array([3, 2, 1]));
       stack.push(new Uint8Array([1, 2, 3]));
-      const op = new Concat([], 1);
+      let op = new Concat([], 1);
       op.execute(stack);
 
-      const top = stack.pop();
-      assert.deepEqual(top, new Uint8Array([1, 2, 3, 3, 2, 1]));
+      let top = stack.pop();
+      assert.deepEqual(top, new Uint8Array([3, 2, 1, 1, 2, 3]));
+
+      stack.push(stringToBytes("Hello"));
+      stack.push(stringToBytes("Friend"));
+      op = new Concat([], 1);
+      op.execute(stack);
+
+      top = stack.pop();
+      assert.deepEqual(top, stringToBytes("HelloFriend"));
     });
 
     it("should throw error as byte strings too long", () => {

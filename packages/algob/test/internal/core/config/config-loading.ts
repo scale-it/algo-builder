@@ -205,14 +205,15 @@ describe("config loading", function () {
     });
 
     it("should detect conflict of account names", async function () {
-      const spy = sinon.spy(console, 'warn');
+      // console is mocked in package.json mocha options
+      let stub = console.warn as sinon.SinonStub;
+      stub.reset();
 
       kmdOp.addKmdAccount({ name: net.accounts[0].name, addr: "some-addr-1", sk: new Uint8Array(kmdOp.skArray) });
       await loadKMDAccounts(net, kmdOp);
 
-      const warnMsg = "KMD account name conflict: KmdConfig and network.accounts both define an account with same name: ";
-      assert(spy.calledWith(warnMsg));
-      spy.restore();
+      assert(stub.calledWith(
+        "KMD account name conflict: KmdConfig and network.accounts both define an account with same name: "));
     });
 
     it("network accounts should take precedence over KMD accounts", async function () {
