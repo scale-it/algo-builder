@@ -13,5 +13,8 @@
     "test": "echo ok",
     "build:docs": "echo ok",
     "build": "echo ok"
+  },
+  "mocha": {
+    "file": "../../test/setup.js"
   }
 }
