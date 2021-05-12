@@ -130,13 +130,15 @@ function signTransaction (txn: Transaction, execParams: rtypes.ExecParams): Uint
  * @param txn Execution parameters
  * @param index index of current execParam
  * @param txIdxMap Map for index to name
+ * @param asaName ASA Name (deployed by Deployer) for fetching ASA ID (optional)
  */
 /* eslint-disable sonarjs/cognitive-complexity */
 async function mkTx (
   deployer: Deployer,
   txn: rtypes.ExecParams,
   index: number,
-  txIdxMap: Map<number, [string, rtypes.ASADef]>
+  txIdxMap: Map<number, [string, rtypes.ASADef]>,
+  asaName?: string
 ): Promise<Transaction> {
   switch (txn.type) {
     case TransactionType.DeployASA: {
@@ -186,6 +188,22 @@ async function mkTx (
     }
   }
 
+  if (asaName !== undefined) {
+    switch (txn.type) {
+      case TransactionType.OptInASA :
+      case TransactionType.TransferAsset :
+      case TransactionType.ModifyAsset :
+      case TransactionType.FreezeAsset :
+      case TransactionType.RevokeAsset :
+      case TransactionType.DestroyAsset : {
+        const asa = deployer.asa.get(asaName);
+        if (asa === undefined) throw new Error(`No ASA found with name ${asaName}`);
+        txn.assetID = asa.assetIndex;
+        break;
+      }
+    }
+  }
+
   const suggestedParams = await getSuggestedParams(deployer.algodClient);
   return mkTransaction(txn,
     await mkTxParams(deployer.algodClient, txn.payFlags, Object.assign({}, suggestedParams)));
@@ -195,10 +213,12 @@ async function mkTx (
  * Execute single transactions or group of transactions (atomic transaction)
  * @param deployer Deployer
  * @param execParams transaction parameters or atomic transaction parameters
+ * @param asaName ASA Name (deployed by Deployer) for fetching ASA ID (optional)
  */
 export async function executeTransaction (
   deployer: Deployer,
-  execParams: rtypes.ExecParams | rtypes.ExecParams[]): Promise<algosdk.ConfirmedTxInfo> {
+  execParams: rtypes.ExecParams | rtypes.ExecParams[],
+  asaName?: string): Promise<algosdk.ConfirmedTxInfo> {
   try {
     let signedTxn;
     let txns: Transaction[] = [];
@@ -217,7 +237,7 @@ export async function executeTransaction (
         return signed;
       });
     } else {
-      const txn = await mkTx(deployer, execParams, 0, txIdxMap);
+      const txn = await mkTx(deployer, execParams, 0, txIdxMap, asaName);
       signedTxn = signTransaction(txn, execParams);
       deployer.log(`Signed transaction:`, signedTxn);
       txns = [txn];
