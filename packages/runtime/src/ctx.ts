@@ -150,9 +150,11 @@ export class Ctx implements Context {
     const toAssetHolding = this.getAssetHolding(txnParam.assetID, txnParam.toAccountAddr);
     txnParam.amount = BigInt(txnParam.amount);
 
+    // Check if `closeRemainderTo` is set then if it's ASA holding isn't frozen
     if (txnParam.payFlags.closeRemainderTo !== undefined) {
       this.assertAssetNotFrozen(txnParam.assetID, txnParam.payFlags.closeRemainderTo);
     }
+    // Bypass frozen ASA holding checks if amount is not greater than 0
     if (txnParam.amount > 0) {
       this.assertAssetNotFrozen(txnParam.assetID, fromAccountAddr);
       this.assertAssetNotFrozen(txnParam.assetID, txnParam.toAccountAddr);
