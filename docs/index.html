@@ -90,7 +90,7 @@
             <div class="col-md-9 mx-auto">
                 <h3>Example Code</h3>
                 <p>Check <a style="text-decoration: underline;" href="https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js">
-                    this </a> for the original implementaion (using SDK takes approx. ~450 LOC). Below snippet demonstrates the same using algob in <b>15x less code</b>:
+                    this </a> for the original implementaion (using SDK takes approx. ~450 LOC). Below snippet demonstrates the same using algob in <b>18x less code</b>:
                 </p>
                 <div class="code-window">
                     <div class="dots">
@@ -98,11 +98,8 @@
                         <div class="orange"></div>
                         <div class="green"></div>
                     </div>
-                    <pre class="language-javascript line-numbers"><code class="language-javascript">/*
-    Transfer some algo from master to account
-    Create "gold" Algorand Standard Asset (ASA). // definition in `/assets`
-    optIn to ASA "gold"
-*/
+                    <pre class="language-javascript line-numbers"><code class="language-javascript">// Transfer Algo, create "gold" ASA and opt-in
+
 import { executeTransaction, balanceOf } from '@algorand-builder/algob';
 import { rtypes } from '@algorand-builder/runtime';
 
@@ -121,10 +118,8 @@ async function run (runtimeEnv, deployer) {
     payFlags: { note: 'funding account' }
   })
 
-  // deploy ASA
   await deployer.deployASA('gold', { creator: goldOwner, totalFee: 1001 });
 
-  // optIn to ASA (by bob-account)
   await deployer.optInAcountToASA('gold', 'bob', {});
 }</code></pre>
             </div>
