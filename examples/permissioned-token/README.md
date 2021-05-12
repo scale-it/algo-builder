@@ -117,7 +117,7 @@ Below we describe different use cases. We describe a use case using a function n
    - *tx3*: Payment transaction to clawback (contract account) with amount >= fee of *tx2*
    - *tx4*: Call to permissions smart contract with a) application arg `str:transfer` b) app accounts: [`fromAddress`, `toAddress`].
 
-    **NOTE**: *tx3*, *tx4* can be signed by anyone but they should be present in group. If receiver of `forceTransfer` is the current asset reserve OR if *tx4* is asset config txn (to update reserve address), then it can bypass permission checks.
+    **NOTE**: *tx3*, *tx4* can be signed by anyone but they must be present in group (they validate conditions). The signer will pay transaction fees. If receiver of `forceTransfer` is the current asset reserve OR if *tx4* is asset config txn (to update reserve address), then a permissions smart contract call is not required.
 
 4. *updateReserveByAssetConfig (newReserveAddress)*: Group of 4 transactions
    - *tx1*: Call to controller smart contract with a) application arg `str:force_transfer` b) foreign Asset: `assetIndex` - signed by asset manager.
@@ -136,10 +136,10 @@ Below we describe different use cases. We describe a use case using a function n
    - *tx4*: Call to permissions smart contract with a) application arg `str:transfer` b) app accounts: [`fromAccount.address`, `toAddress`].
 
 2.  [*optOut (account)*](examples/permissioned-token/scripts/user/opt-out.js): Asset transfer transaction from `account.address` to `account.address`, amount = 0, **closeRemainderTo** = asset.creator.
-    **NOTE**: User opts out of the asset to creator (transferring account's asset holdings to the creator's account), so if creator is not the asset reserve, then the tokens from which user opted-out will still be in circulation.
+    **NOTE**: User opts out from the permissioned token. Algorand will transfer all his tokens to the ASA creator not the ASA reserve account (by definition of Algorand opt-out transaction).
 
 ### Permissions
 
-1. [*whitelist (permissionsManager, address)*](examples/permissioned-token/scripts/permissions/whitelist.js): NoOp call to the permissions smart contract with a) application arg `str:add_whitelist` b) app accounts: [`address`] - signed by *permissionsManager*.
+1. [*whitelist (permissionsManager, address)*](examples/permissioned-token/scripts/permissions/whitelist.js): NoOp call to the permissions smart contract with a) application arg `str:add_whitelist` b) app accounts: [`address`] - must signed by *permissionsManager*.
 
 2. [*changePermissionsManager (permissionsManager, newManagerAddress)*](examples/permissioned-token/scripts/permissions/change-perm-manager.js): NoOp call to the permissions smart contract with a) application arg `str:change_permissions_manager` b) app accounts: [`newManagerAddress`] - signed by *permissionsManager* (current permissions manager).
