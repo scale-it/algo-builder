@@ -98,19 +98,20 @@ Developer hour links:
 Link to spec of current template: [https://paper.dropbox.com/doc/Algob-Security-Token-Template-FR2LXhVg3edevYPBQZw6F](https://paper.dropbox.com/doc/Algob-Security-Token-Template-FR2LXhVg3edevYPBQZw6F)
 
 ### API Doc
+Below we describe different use cases. We describe a use case using a function notation (along with transaction group structure). We implement that function in scripts, but for direct integration in smart contracts, you need to construct transactions as described below.
 
 #### Common
 
-1. *totalSupply(assetIndex)*: returns total supply of the asset (*asset.total* - *asaReserveHolding.amount*).
+1. [*totalSupply(assetIndex)*](examples/permissioned-token/scripts/common/common.js): returns total supply of the asset (*asset.total* - *asaReserveHolding.amount*).
 
 #### Admin
-1. *issue(address, amount)*: Group of 2 transactions
+1. [*issue(address, amount)*](examples/permissioned-token/scripts/admin/issue.js): Group of 2 transactions
    - *tx1*: Call to controller smart contract with a) application arg `str:issue` b) foreign Asset: `assetIndex` - signed by asset reserve (issuer).
    - *tx2*: Asset clawback transaction from asset reserve to address = `address`, amount = `amount`.
 
-2. *kill()*: Application call to controller with a) appArg `str:kill` and b) foreignAsset `assetIndex`- signed by asset manager.
+2. [*kill()*](examples/permissioned-token/scripts/admin/kill.js): Application call to controller with a) appArg `str:kill` and b) foreignAsset `assetIndex`- signed by asset manager.
 
-3. *forceTransfer (fromAddress, toAddress, amount)*: Group of 4 transactions
+3. [*forceTransfer (fromAddress, toAddress, amount)*](examples/permissioned-token/scripts/admin/force-transfer.js): Group of 4 transactions
    - *tx1*: Call to controller smart contract with a) application arg `str:force_transfer` b) foreign Asset: `assetIndex` - signed by asset manager.
    - *tx2*: Asset clawback transaction from `fromAddress` to `toAddress`, amount = `amount`.
    - *tx3*: Payment transaction to clawback (contract account) with amount >= fee of *tx2*
@@ -124,21 +125,21 @@ Link to spec of current template: [https://paper.dropbox.com/doc/Algob-Security-
    - *tx3*: Payment transaction to clawback (contract account) with amount >= fee of *tx2*
    - *tx4*: Asset Config transaction updating reserve address to `newReserveAddress` - signed by asset manager.
 
-5. *updateReserveByRekeying (newReserveAddress)*: Transaction rekeying oldReserve account to `newReserveAddress` - signed by old reserve account.
+5. [*updateReserveByRekeying (newReserveAddress)*](examples/permissioned-token/scripts/admin/update-reserve.js): Transaction rekeying oldReserve account to `newReserveAddress` - signed by old reserve account.
 
 ### User
 
-1. *transfer (fromAccount, toAddress, amount)*: Group of 4 transactions
+1. [*transfer (fromAccount, toAddress, amount)*](examples/permissioned-token/scripts/user/transfer.js): Group of 4 transactions
    - *tx1*: Call to controller smart contract with application arg `str:transfer` - signed by *fromAccount*.
    - *tx2*: Asset clawback transaction from `fromAccount.address` to `toAddress`, amount = `amount`.
    - *tx3*: Payment transaction to clawback (contract account) with amount >= fee of *tx2*
    - *tx4*: Call to permissions smart contract with a) application arg `str:transfer` b) app accounts: [`fromAccount.address`, `toAddress`].
 
-2.  *optOut (account)*: Asset transfer transaction from `account.address` to `account.address`, amount = 0, **closeRemainderTo** = asset.creator.
+2.  [*optOut (account)*](examples/permissioned-token/scripts/user/opt-out.js): Asset transfer transaction from `account.address` to `account.address`, amount = 0, **closeRemainderTo** = asset.creator.
     **NOTE**: User opts out of the asset to creator (transferring account's asset holdings to the creator's account), so if creator is not the asset reserve, then the tokens from which user opted-out will still be in circulation.
 
-### Management
+### Permissions
 
-1. *whitelist (permissionsManager, address)*: NoOp call to the permissions smart contract with a) application arg `str:add_whitelist` b) app accounts: [`address`] - signed by *permissionsManager*.
+1. [*whitelist (permissionsManager, address)*](examples/permissioned-token/scripts/permissions/whitelist.js): NoOp call to the permissions smart contract with a) application arg `str:add_whitelist` b) app accounts: [`address`] - signed by *permissionsManager*.
 
-2. *changePermissionsManager (permissionsManager, newManagerAddress)*: NoOp call to the permissions smart contract with a) application arg `str:change_permissions_manager` b) app accounts: [`newManagerAddress`] - signed by *permissionsManager* (current permissions manager).
+2. [*changePermissionsManager (permissionsManager, newManagerAddress)*](examples/permissioned-token/scripts/permissions/change-perm-manager.js): NoOp call to the permissions smart contract with a) application arg `str:change_permissions_manager` b) app accounts: [`newManagerAddress`] - signed by *permissionsManager* (current permissions manager).
