@@ -385,6 +385,12 @@ const runtimeAsaErrors = {
     message: "All of the created assets should be in creator's account",
     title: "Asset Total Error",
     description: "Asset Total Error"
+  },
+  CANNOT_CLOSE_ASSET_BY_CLAWBACK: {
+    number: 1509,
+    message: `Assetholding of account cannot be closed by clawback`,
+    title: "Close asset by clawback error",
+    description: "Cannot close asset by clawback"
   }
 };
 
