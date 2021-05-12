@@ -72,7 +72,7 @@ See one of our examples for more details (eg: `examples/crowdfunding/test`).
 
 Let's try to execute a transaction where a user (say `john`) can withdraw funds from an `escrow` account based on a stateless smart contract logic. In the example below, we will use a TEAL code from our [escrow account test](../packages/runtime/test/fixtures/escrow-account/assets/escrow.teal).
 - First let's prepare the runtime and state: initialize accounts, get a logic signature for escrow and set up runtime:
-  ```
+  ```js
   const john = new StoreAccount(initialJohnHolding);
   const runtime = new Runtime([john]); // setup runtime
   const lsig = runtime.getLogicSig(getProgram('escrow.teal'), []);
@@ -80,7 +80,7 @@ Let's try to execute a transaction where a user (say `john`) can withdraw funds 
   ```
 
 - Execute transaction (using `runtime.executeTx()`) with valid txnParams.
-  ```
+  ```ts
   // set up transaction paramenters
   const txnParams: ExecParams = {
     type: TransactionType.TransferAlgo, // payment
@@ -108,7 +108,7 @@ Let's try to execute a transaction where a user (say `john`) can withdraw funds 
   In this test, at the beginning, we  check the initial balance which - it shouldn't change (must be the same as during initialization). Then we execute transaction using `txnParams`. After execution, we are verify the account balances to check if the funds are withdrawn from `escrow`.
 
 - Executing transaction with invalid txnParams results in failure.
-  ```
+  ```js
   it("should reject transaction if amount > 100", async function () {
     const invalidParams = Object.assign({}, txnParams);
     invalidParams.amountMicroAlgos = 500;
@@ -127,7 +127,7 @@ Full mocha test with more transactions can be found [here](../packages/runtime/t
 
 Let's try to execute a transaction where a user (say `john`) will use delegated signature based on a stateless smart contract logic. We will use a TEAL code from our [asset test](../packages/runtime/test/fixtures/basic-teal/assets/basic.teal).
   - As before we start with preparing the runtime. We use `runtime.getLogicSig(getProgram('escrow.teal'), [])` to create a logic signature.
-    ```
+    ```js
     const john = new StoreAccount(initialHolding);
     const bob = new StoreAccount(initialHolding)
     const runtime = new Runtime([john, bob]); // setup runtime
@@ -136,7 +136,7 @@ Let's try to execute a transaction where a user (say `john`) will use delegated 
     ```
 
   - Execute transaction:
-    ```
+    ```js
     // set up transaction paramenters
     const txnParams: ExecParams = {
       type: TransactionType.TransferAlgo, // payment
@@ -168,7 +168,7 @@ Let's try to execute a transaction where a user (say `john`) will use delegated 
     In the test, we start with validating the initial balances. After executing the transactions, we are verifying the account balances to check if funds are withdrawn from `john` account.
 
   - Executing transaction with logic rejecting teal file results in failure.
-    ```
+    ```js
     it("should throw error if logic is incorrect", function () {
       // initial balance
       const johnBal = john.balance();
@@ -196,7 +196,7 @@ Let's try to execute a transaction where a user (say `john`) will use delegated 
 Now, we will execute a transaction with stateful TEAL (which increments a global and local "counter" by on each application call). Teal code can be found [here](../packages/runtime/test/fixtures/stateful/assets/counter-approval.teal)
 
 - Similar to the previous test, we need to setup accounts and initialize runtime. Now, for stateful smart contract, we also need to create a new application in user account and opt-in (to call the stateful smart contract later). User can use `runtime.addApp()` and `runtime.optInToApp()` for app setup.
-  ```
+  ```js
   const john = new StoreAccountImpl(1000);
 
   let runtime: Runtime;
@@ -220,7 +220,7 @@ Now, we will execute a transaction with stateful TEAL (which increments a global
   ```
 
 - After set up, let's call the stateful smart contract and check the updated global state
-  ```
+  ```js
   const key = "counter";
   it("should initialize global and local counter to 1 on first call", async function () {
     // execute transaction

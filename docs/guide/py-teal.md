@@ -45,22 +45,24 @@ To use this feature, you can pass an external parameter object in a deployment s
 - Example below shows how you can use external paramters in PyTeal code
 - `parseArgs` function overwrites the `scParam` object with `external parameters` object in below example.
 
-      from algobpy.parse import parseArgs
+  ```py
+  from algobpy.parse import parseArgs
 
-      if __name__ == "__main__":
+  if __name__ == "__main__":
 
-        #replace these values with your customized values or pass an external parameter
-        scParam = {
-        "TMPL_TO": "2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA",
-        "TMPL_AMT": 700000,
-        "TMPL_CLS": "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
-        }
+    #replace these values with your customized values or pass an external parameter
+    scParam = {
+    "TMPL_TO": "2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA",
+    "TMPL_AMT": 700000,
+    "TMPL_CLS": "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
+    }
 
-        # Overwrite scParam if sys.argv[1] is passed
-        if(len(sys.argv) > 1):
-          scParam = parseArgs(sys.argv[1], scParam)
+    # Overwrite scParam if sys.argv[1] is passed
+    if(len(sys.argv) > 1):
+      scParam = parseArgs(sys.argv[1], scParam)
 
-        print(compileTeal(dynamic_fee(
-          Addr(scParam["TMPL_TO"]),
-          scParam["TMPL_AMT"],
-          Addr(scParam["TMPL_CLS"]), Mode.Signature))
+    print(compileTeal(dynamic_fee(
+      Addr(scParam["TMPL_TO"]),
+      scParam["TMPL_AMT"],
+      Addr(scParam["TMPL_CLS"]), Mode.Signature))
+  ```
