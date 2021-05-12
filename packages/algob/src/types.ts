@@ -434,6 +434,12 @@ export interface Deployer {
   logTx: (message: string, txConfirmation: algosdk.ConfirmedTxInfo) => void
 
   /**
+   * Send signed transaction to network and wait for confirmation
+   * @param rawTxns Signed Transaction(s)
+   */
+  sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<algosdk.ConfirmedTxInfo>
+
+  /**
    * Funds logic signature account (Contract Account).
    * @name  Stateless Smart Contract filename (must be present in assets folder)
    * @payFlags  Transaction Parameters

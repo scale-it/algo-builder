@@ -194,6 +194,14 @@ class DeployerBasicMode {
   }
 
   /**
+   * Send signed transaction to network and wait for confirmation
+   * @param rawTxns Signed Transaction(s)
+   */
+  async sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<algosdk.ConfirmedTxInfo> {
+    return await this.algoOp.sendAndWait(rawTxns);
+  }
+
+  /**
    * Opt-In to ASA for a single account. The opt-in transaction is
    * signed by account secret key
    * @param asaName ASA name

@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import type { LogicSig } from "algosdk";
-import { Algodv2, LogicSigArgs } from "algosdk";
+import { Algodv2, ConfirmedTxInfo, LogicSigArgs } from "algosdk";
 
 import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";
@@ -22,6 +22,10 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   getAssetByID (assetIndex: number | bigint): Promise<import("algosdk").AssetInfo> {
+    throw new Error("Not implemented");
+  }
+
+  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
     throw new Error("Not implemented");
   }
 

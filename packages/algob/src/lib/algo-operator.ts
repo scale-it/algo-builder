@@ -62,6 +62,7 @@ export interface AlgoOperator {
     appId: number, lsig: LogicSig,
     payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags) => Promise<void>
   ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>
+  sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<algosdk.ConfirmedTxInfo>
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -70,6 +71,15 @@ export class AlgoOperatorImpl implements AlgoOperator {
   constructor (algocl: algosdk.Algodv2) {
     this.algodClient = algocl;
     this.compileOp = new CompileOp(this.algodClient);
+  }
+
+  /**
+   * Send signed transaction to network and wait for confirmation
+   * @param rawTxns Signed Transaction(s)
+   */
+  async sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<algosdk.ConfirmedTxInfo> {
+    const txInfo = await this.algodClient.sendRawTransaction(rawTxns).do();
+    return await this.waitForConfirmation(txInfo.txId);
   }
 
   // Source:
@@ -131,8 +141,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     console.log(`ASA ${account.name} opt-in for ASA ${asaName}`);
     const sampleASAOptInTX = tx.makeASAOptInTx(account.addr, assetIndex, params, flags);
     const rawSignedTxn = sampleASAOptInTX.signTxn(account.sk);
-    const txInfo = await this.algodClient.sendRawTransaction(rawSignedTxn).do();
-    await this.waitForConfirmation(txInfo.txId);
+    await this.sendAndWait(rawSignedTxn);
   }
 
   async optInAcountToASA (
@@ -369,8 +378,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const txId = txn.txID().toString();
     const signedTxn = txn.signTxn(sender.sk);
 
-    await this.algodClient.sendRawTransaction(signedTxn).do();
-    await this.waitForConfirmation(txId);
+    await this.sendAndWait(signedTxn);
   }
 
   /**
@@ -403,8 +411,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const optInLsigToSSCTx = mkTransaction(execParam, params);
 
     const rawLsigSignedTx = algosdk.signLogicSigTransactionObject(optInLsigToSSCTx, lsig).blob;
-    const txInfo = await this.algodClient.sendRawTransaction(rawLsigSignedTx).do();
-    await this.waitForConfirmation(txInfo.txId);
+    await this.sendAndWait(rawLsigSignedTx);
   }
 
   async ensureCompiled (name: string, force?: boolean, scTmplParams?: SCParams): Promise<ASCCache> {

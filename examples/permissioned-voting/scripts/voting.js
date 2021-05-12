@@ -73,7 +73,7 @@ async function run (runtimeEnv, deployer) {
 
   console.log('Opting-In for Alice in voting application');
   try {
-    await deployer.optInToSSC(alice, res.appID, {}, { appArgs: reg });
+    await deployer.optInAccountToSSC(alice, res.appID, {}, { appArgs: reg });
   } catch (e) {
     console.log(e);
     throw new Error(e);

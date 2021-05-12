@@ -34,7 +34,7 @@ async function run (runtimeEnv, deployer) {
   console.log(sscInfo);
 
   // Opt-In for creator
-  await deployer.optInToSSC(creatorAccount, sscInfo.appID, {}, {});
+  await deployer.optInAccountToSSC(creatorAccount, sscInfo.appID, {}, {});
 }
 
 module.exports = { default: run };

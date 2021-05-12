@@ -1,7 +1,7 @@
 const {
   executeTransaction
 } = require('@algo-builder/algob');
-const { fundAccount, optInToSSC } = require('../common/common');
+const { fundAccount, optInAccountToSSC } = require('../common/common');
 const { types } = require('@algo-builder/runtime');
 
 const clearStateProgram = 'clear_state_program.py';
@@ -51,7 +51,7 @@ async function run (runtimeEnv, deployer) {
   ]);
 
   console.log('* Opt-In to permissions(rules) smart contract *');
-  await optInToSSC(deployer, elon, permissionSSCInfo.appID, {}, {});
+  await optInAccountToSSC(deployer, elon, permissionSSCInfo.appID, {}, {});
 
   /**
    * Add elon address to a list of whitelisted account addresses

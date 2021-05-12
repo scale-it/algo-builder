@@ -36,6 +36,10 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
+  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<algosdk.ConfirmedTxInfo> {
+    throw new Error("Not implemented");
+  }
+
   registerASAInfo (name: string, asaInfo: ASAInfo): void {
     throw new Error("Not implemented");
   }

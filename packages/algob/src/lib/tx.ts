@@ -125,18 +125,6 @@ function signTransaction (txn: Transaction, execParams: rtypes.ExecParams): Uint
 }
 
 /**
- * Send signed transaction to network and wait for confirmation
- * @param deployer Deployer
- * @param rawTxns Signed Transaction(s)
- */
-export async function sendAndWait (
-  deployer: Deployer,
-  rawTxns: Uint8Array | Uint8Array[]): Promise<algosdk.ConfirmedTxInfo> {
-  const txInfo = await deployer.algodClient.sendRawTransaction(rawTxns).do();
-  return await deployer.waitForConfirmation(txInfo.txId);
-}
-
-/**
  * Make transaction parameters and update deployASA, deploySSC & ModifyAsset params
  * @param deployer Deployer object
  * @param txn Execution parameters
@@ -234,7 +222,7 @@ export async function executeTransaction (
       deployer.log(`Signed transaction:`, signedTxn);
       txns = [txn];
     }
-    const confirmedTx = await sendAndWait(deployer, signedTxn);
+    const confirmedTx = await deployer.sendAndWait(signedTxn);
     console.log(confirmedTx);
     await registerCheckpoints(deployer, txns, txIdxMap);
     return confirmedTx;
@@ -260,7 +248,7 @@ export async function executeSignedTxnFromFile (
   if (signedTxn === undefined) { throw new Error(`File ${fileName} does not exist`); }
 
   console.debug("Decoded txn from %s: %O", fileName, algosdk.decodeSignedTransaction(signedTxn));
-  const confirmedTx = await sendAndWait(deployer, signedTxn);
+  const confirmedTx = await deployer.sendAndWait(signedTxn);
   console.log(confirmedTx);
   return confirmedTx;
 }
