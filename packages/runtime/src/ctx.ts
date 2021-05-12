@@ -150,8 +150,10 @@ export class Ctx implements Context {
     const toAssetHolding = this.getAssetHolding(txnParam.assetID, txnParam.toAccountAddr);
     txnParam.amount = BigInt(txnParam.amount);
 
-    this.assertAssetNotFrozen(txnParam.assetID, fromAccountAddr);
-    this.assertAssetNotFrozen(txnParam.assetID, txnParam.toAccountAddr);
+    if (txnParam.amount !== 0n) {
+      this.assertAssetNotFrozen(txnParam.assetID, fromAccountAddr);
+      this.assertAssetNotFrozen(txnParam.assetID, txnParam.toAccountAddr);
+    }
     if (fromAssetHolding.amount - txnParam.amount < 0) {
       throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS, {
         amount: txnParam.amount,
@@ -358,6 +360,9 @@ export class Ctx implements Context {
           const asset = this.getAssetDef(txnParam.assetID);
           if (asset.clawback !== fromAccountAddr) {
             throw new RuntimeError(RUNTIME_ERRORS.ASA.CLAWBACK_ERROR, { address: asset.clawback });
+          }
+          if (txnParam.payFlags.closeRemainderTo) {
+            throw new RuntimeError(RUNTIME_ERRORS.ASA.CANNOT_CLOSE_ASSET_BY_CLAWBACK);
           }
           this.revokeAsset(
             txnParam.recipient, txnParam.assetID,
