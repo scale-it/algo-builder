@@ -9,5 +9,6 @@
   "watch-files": ["src/**/*.js", "test/**/*.js", "src/**/*.ts", "test/**/*.ts"],
   "require": ["ts-node/register", "source-map-support/register"],
   "recursive": true,
-  "ignore": ["test/fixture-projects/**/*"]
+  "ignore": ["test/fixture-projects/**/*"],
+  "file": "../../test/setup.js"
 }

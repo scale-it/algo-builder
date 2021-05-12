@@ -2,6 +2,54 @@
 
 ## unreleased
 
+### Breaking
+* Removed Algob prefix in deployer (eg. renamed `AlgobDeployer` to `Deployer`)
+* Updated `execParams` structure & typings (input parameters for `executeTransaction`)
+    * Migration: If `SignType` is `LogicSignature` then change `fromAccount` to `fromAccountAddr` and just pass from address instead of complete account.
+* [breaking] Changed the way we pass arguments to stateless smart contract - moved assignment from when we load smart contract (using `loadLogic`, `mkDelegatedLsig`, `fundLsig`) to when we create transaction execution parameters.
+    * Migration: assign stateless args in txParams to `executeTransaction`. Eg
+        ```js
+        await deployer.loadLogic('htlc.py', [arg1]); // remove scTmplParams from here
+        const txnParams: rtypes.AlgoTransferParam = { .. }
+        txnParams.args = [arg1]; // assign here now
+        await executeTransaction(deployer, txnParams);
+        ```
+
+### Improvements
+* Added more tests for the [crowdfunding example project](/examples/crowdfunding) using `@algo-builder/runtime`- Happy paths and Failing paths.
+* Integrate user documentation with `jekyll`.
+* Moved OptIn methods from *DEPLOY* mode to *RUN* mode.
+* Added new algob commands:
+    * `algob test` (runs mocha in project root).
+    * `algob unbox-template <name> <destination>` to quickly unbox a dapp template from `scale-it/algo-builder-templates`.
+    * `algob sign-multisig --account-name <acc> --file <input> --out <out-file>` to append user's signature to signed multisig file.
+* Added new function `signLogicSigMultiSig` to sign logic signature by multisig.
+* Updated ASA deployment (`deployASA` function) to pass custom params and save deployed asset definition in checkpoint.
+* Support deployment and optIn methods in a transaction group (along with all other methods, using `executeTransaction`)
+
+### Examples
+* Added new templates:
+    * [Permissioned Token](/examples/permissioned-token)
+    * [stateful counter](/examples/stateful-counter)
+* Updated [`examples/asa`](/examples/asa): added new use-case to deploy and control ASA by a smart contract.
+
+### Dapp templates.
+We created a new [repository](https://github.com/scale-it/algo-builder-templates) with dapp templates. It's a new project line of Algo Builder. Dapp Templates are webapps operating with Algorand blockchain with `algob` support. For the moment we only have React templates. Anyone can contribute with a new template or by improving the pre-existing ones by creating a pull request.
+
+* [/default](https://github.com/scale-it/algo-builder-templates/tree/master/default) template (with ASA transfer functionality)
+* [/htlc](https://github.com/scale-it/algo-builder-templates/tree/master/htlc) template - dapp implementing hash time locked contract.
+
+### Infrastructure
+* Added new make commands:
+    * `setup-private-net` - create network, start network, setup master account and show network status
+    * `recreate-private-net` - stop the current instance, remove all data and re-setup
+
+### @algorand-builder/runtime:
+* fixed bugs
+    * in group tx flow
+    * in opcodes: *asset_params_get*, *txn GroupIndex*, *concat*
+    * closing asset using clawback should be denied
+
 ## v0.5.4 2021-03-15
 
 Renaming the organization and package names to `@algo-builder`.
