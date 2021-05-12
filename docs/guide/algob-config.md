@@ -17,7 +17,7 @@ A network object can specify following entries:
 
 A special network named `algobchain` can specify the `AlgobChain` configuration:
 
-```
+```ts
 accounts_file?: string;
 throwOnTransactionFailures?: boolean;
 throwOnCallFailures?: boolean;
@@ -159,10 +159,10 @@ You can also construct different accounts for different networks.
 
 ## Example
 
-```
+```js
 
 const { loadAccountsFromFileSync } = require("@algo-builder/algob");
-const {privateNet} = require("algo-builder/config")
+const { privateNet } = require("algo-builder/config")
 
 const accounts = loadAccountsFromFileSync("assets/accounts_generated.yaml");
 const mainnetAccounts = loadAccountsFromFileSync("private/accounts/mainnet.yaml");

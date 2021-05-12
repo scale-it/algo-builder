@@ -4,9 +4,9 @@ layout: splash
 
 # Algo Builder docs
 
-+ [API documentation](https://scale-it.github.io/algo-builder/)
++ [API documentation](../api/algob/index.html)
 
-+ Installation: [main README](/README.md#installation) file.
++ Installation: [main README](https://github.com/scale-it/algo-builder#installation) file.
 + Project initialization → read below.
 + [Configuration](./algob-config.md).
 + [Private Net](/infrastructure/README.md) creation.
@@ -26,15 +26,15 @@ For more in-depth description you can look at the [project specification](https:
 ## Help
 
 Help prints information about top-level tasks:
-```
+```bash
 algob help
 ```
 Help with additional arguments prints information about a specific task:
-```
+```bash
 algob help deploy
 ```
 or
-```
+```bash
 algob -h deploy
 ```
 
@@ -42,7 +42,7 @@ algob -h deploy
 ## Project initialization
 To start using `algob` you must first create a project similar to what `yarn` and `npm` would do.
 It can be done using this command:
-```
+```bash
 algob init my-project
 ```
 This will create a directory `my-project` and put multiple files into it.

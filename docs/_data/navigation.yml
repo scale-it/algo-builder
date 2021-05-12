@@ -6,4 +6,4 @@ main:
   - title: "Guide"
     url: /guide/README
   - title: "API"
-    url: https://scale-it.github.io/algo-builder/ # TODO: Update to custom api readme link
+    url: https://scale-it.github.io/algo-builder/api/algob/index.html

@@ -15,7 +15,7 @@ The best way to find a type, function or something related to a use case is by u
 
 + [Home Page](https://scale-it.github.io/algo-builder)
 + [Runtime API Docs](../runtime/index.html)
-+ [User Docs](../../guide/README.md)
++ [User Docs](../../guide/README)
 
 ## Using algob
 
