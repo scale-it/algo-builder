@@ -112,11 +112,10 @@ export function checkAndSetASAFields (fields: AssetModFields, asset: AssetDef): 
   for (const x of ['manager', 'reserve', 'freeze', 'clawback']) {
     const customField = fields[x as keyof AssetModFields];
     const asaField = asset[x as keyof AssetModFields];
+    // Check if custom field is set and defined and ASA field is blank field
     if (isDefined(customField) && !isDefined(asaField)) {
-      // Check if custom field is set and defined and ASA field is blank field
       throw new RuntimeError(RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR);
-    } else if (customField !== undefined && isDefined(asaField)) {
-      // Change if ASA field and custom field is defined
+    } else if (customField !== undefined && isDefined(asaField)) { // Change if ASA field and custom field is defined
       asset[x as keyof AssetModFields] = customField;
     }
   }
