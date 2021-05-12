@@ -97,10 +97,11 @@ Developer hour links:
 
 Link to spec of current template: [https://paper.dropbox.com/doc/Algob-Security-Token-Template-FR2LXhVg3edevYPBQZw6F](https://paper.dropbox.com/doc/Algob-Security-Token-Template-FR2LXhVg3edevYPBQZw6F)
 
-### API Doc
-Below we describe different use cases. We describe a use case using a function notation (along with transaction group structure). We implement that function in scripts, but for direct integration in smart contracts, you need to construct transactions as described below.
+### Use Case API
 
-#### Common
+Below we describe different use cases implemented by the smart contract suite. We use a function notation for a use-case, along with description of transaction group which has to be created. We implemented that use cases using functions in `scripts` directory. For direct integration in smart contracts, you need to construct transactions as described below.
+
+#### Query
 
 1. [*totalSupply(assetIndex)*](examples/permissioned-token/scripts/common/common.js): returns total supply of the asset (*asset.total* - *asaReserveHolding.amount*).
 
