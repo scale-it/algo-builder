@@ -129,11 +129,11 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  optInAcountToASA (name: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
+  optInAcountToASA (asa: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
     throw new Error("Not implemented");
   }
 
-  optInLsigToASA (asaName: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
+  optInLsigToASA (asa: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
     throw new Error("Not implemented");
   }
 

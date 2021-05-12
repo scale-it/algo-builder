@@ -204,27 +204,51 @@ class DeployerBasicMode {
   /**
    * Opt-In to ASA for a single account. The opt-in transaction is
    * signed by account secret key
-   * @param asaName ASA name
+   * @param asa ASA (name/ID) Note: ID can be used for assets not existing in checkpoints.
    * @param accountName
    * @param flags Transaction flags
    */
-  async optInAcountToASA (asaName: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
-    await this.algoOp.optInAcountToASA(
-      asaName,
-      this._getASAInfo(asaName).assetIndex,
-      this._getAccount(accountName),
-      flags);
+  async optInAcountToASA (asa: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
+    try {
+      const asaId = this._getASAInfo(asa).assetIndex;
+      await this.algoOp.optInAcountToASA(
+        asa,
+        asaId,
+        this._getAccount(accountName),
+        flags);
+    } catch (error) {
+      console.log("Asset no found in checkpoints. Proceeding to check as Asset ID.");
+      if (!Number(asa)) {
+        throw Error("Please provide a valid Number to be used as ASA ID");
+      }
+      const asaId = Number(asa);
+      await this.algoOp.optInAcountToASA(
+        asa,
+        asaId,
+        this._getAccount(accountName),
+        flags);
+    }
   }
 
   /**
    * Description: Opt-In to ASA for a contract account (represented by logic signture).
    * The opt-in transaction is signed by the logic signature
-   * @param asaName ASA name
+   * @param asa ASA (name/ID) Note: ID can be used for assets not existing in checkpoints.
    * @param lsig logic signature
    * @param flags Transaction flags
    */
-  async optInLsigToASA (asaName: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
-    await this.algoOp.optInLsigToASA(asaName, this._getASAInfo(asaName).assetIndex, lsig, flags);
+  async optInLsigToASA (asa: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
+    try {
+      const asaId = this._getASAInfo(asa).assetIndex;
+      await this.algoOp.optInLsigToASA(asa, asaId, lsig, flags);
+    } catch (error) {
+      console.log("Asset no found in checkpoints. Proceeding to check as Asset ID.");
+      if (!Number(asa)) {
+        throw Error("Please provide a valid Number to be used as ASA ID");
+      }
+      const asaId = Number(asa);
+      await this.algoOp.optInLsigToASA(asa, asaId, lsig, flags);
+    }
   }
 
   /**
