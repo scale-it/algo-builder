@@ -103,7 +103,7 @@ Below we describe different use cases implemented by the smart contract suite. W
 
 #### Query
 
-1. [*totalSupply(assetIndex)*](examples/permissioned-token/scripts/common/common.js): returns total supply of the asset (*asset.total* - *asaReserveHolding.amount*).
+1. [*totalSupply(assetIndex)*](examples/permissioned-token/scripts/common/common.js): returns total supply of the asset (*asset.total* - *asaReserveHolding.amount*). To retreive the asset holding of an account, use algob  [*balanceOf*](https://scale-it.github.io/algo-builder/api/algob/modules.html#balanceof) function in `algob`.
 
 #### Admin
 1. [*issue(address, amount)*](examples/permissioned-token/scripts/admin/issue.js): Group of 2 transactions
@@ -118,13 +118,15 @@ Below we describe different use cases implemented by the smart contract suite. W
    - *tx3*: Payment transaction to clawback (contract account) with amount >= fee of *tx2*
    - *tx4*: Call to permissions smart contract with a) application arg `str:transfer` b) app accounts: [`fromAddress`, `toAddress`].
 
-    **NOTE**: *tx3*, *tx4* can be signed by anyone but they must be present in group (they validate conditions). The signer will pay transaction fees. If receiver of `forceTransfer` is the current asset reserve OR if *tx4* is asset config txn (to update reserve address), then a permissions smart contract call is not required.
+    **NOTE**: *tx3*, *tx4* can be signed by anyone but they must be present in group (they validate conditions). The signer will pay transaction fees. If receiver of `forceTransfer` is the current asset reserve then a permissions smart contract call is not required.
 
 4. *updateReserveByAssetConfig (newReserveAddress)*: Group of 4 transactions
    - *tx1*: Call to controller smart contract with a) application arg `str:force_transfer` b) foreign Asset: `assetIndex` - signed by asset manager.
    - *tx2*: Asset clawback transaction from `oldReserveAddress` to `newReserveAddress`, amount = `oldReserveHolding.amount` (moving all tokens to new reserve address).
    - *tx3*: Payment transaction to clawback (contract account) with amount >= fee of *tx2*
    - *tx4*: Asset Config transaction updating reserve address to `newReserveAddress` - signed by asset manager.
+
+    **NOTE**: If *tx4* is asset config transaction (updating reserve address to *newReserveAddress*) in `forceTransfer` group, then a permissions smart contract call is not required (as we're moving all tokens in *tx2* from old reserve to new one).
 
 5. [*updateReserveByRekeying (newReserveAddress)*](examples/permissioned-token/scripts/admin/update-reserve.js): Transaction rekeying oldReserve account to `newReserveAddress` - signed by old reserve account.
 
