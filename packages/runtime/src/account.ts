@@ -7,6 +7,7 @@ import { generateAccount } from "algosdk";
 
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
+import { checkAndSetASAFields } from "./lib/asa";
 import {
   ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE, ASSET_CREATION_FEE, MAX_ALGORAND_ACCOUNT_APPS,
   MAX_ALGORAND_ACCOUNT_ASSETS,
@@ -23,37 +24,6 @@ import {
 const StateMap = "key-value";
 const globalState = "global-state";
 const localStateSchema = "local-state-schema";
-
-function isSetOrDefined (value: string | undefined): boolean {
-  if (value !== undefined && value !== "") return true;
-  return false;
-}
-
-function checkAndSetAssetFields (fields: AssetModFields, asset: AssetDef): void {
-  if (isSetOrDefined(fields.manager) && !isSetOrDefined(asset.manager)) {
-    throw new RuntimeError(RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR);
-  } else if (fields.manager !== undefined && isSetOrDefined(asset.manager)) {
-    asset.manager = fields.manager;
-  }
-
-  if (isSetOrDefined(fields.reserve) && !isSetOrDefined(asset.reserve)) {
-    throw new RuntimeError(RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR);
-  } else if (fields.reserve !== undefined && isSetOrDefined(asset.reserve)) {
-    asset.reserve = fields.reserve;
-  }
-
-  if (isSetOrDefined(fields.freeze) && !isSetOrDefined(asset.freeze)) {
-    throw new RuntimeError(RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR);
-  } else if (fields.freeze !== undefined && isSetOrDefined(asset.freeze)) {
-    asset.freeze = fields.freeze;
-  }
-
-  if (isSetOrDefined(fields.clawback) && !isSetOrDefined(asset.clawback)) {
-    throw new RuntimeError(RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR);
-  } else if (fields.clawback !== undefined && isSetOrDefined(asset.clawback)) {
-    asset.clawback = fields.clawback;
-  }
-}
 
 export class AccountStore implements AccountStoreI {
   readonly account: Account;
@@ -226,7 +196,7 @@ export class AccountStore implements AccountStoreI {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
     }
     // check for blank fields
-    checkAndSetAssetFields(fields, asset);
+    checkAndSetASAFields(fields, asset);
   }
 
   /**
