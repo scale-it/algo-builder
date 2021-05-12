@@ -47,6 +47,8 @@ For opting in to ASA, `deployer` supports two methods :-
 - `optInAcountToASA` to opt-in to a single account signed by secret key of sender.
 - `optInLsigToASA` to opt-in to a contract account (say escrow) where the account is represented by the logic signature address (`lsig.address()`).
 
+NOTE: The above mentioned functions accept the param `asa` as both either the name of the ASA deployed by `Deployer` or the Asset Index for which the ASA must exist on the network whether it is deployed by the `Deployer` or not.
+
 ### Smart contracts
 
 You can deploy Stateful/Stateless Smart Contracts (SSC).
