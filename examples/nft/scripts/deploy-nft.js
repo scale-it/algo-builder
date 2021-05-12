@@ -32,8 +32,8 @@ async function run (runtimeEnv, deployer) {
   console.log(sscInfo);
 
   try {
-    await deployer.optInToSSC(masterAccount, appId, {}, {}); // opt-in to asc by master
-    await deployer.optInToSSC(john, appId, {}, {}); // opt-in to asc by john
+    await deployer.optInAccountToSSC(masterAccount, appId, {}, {}); // opt-in to asc by master
+    await deployer.optInAccountToSSC(john, appId, {}, {}); // opt-in to asc by john
   } catch (e) {
     console.log(e);
     throw new Error(e);

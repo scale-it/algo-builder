@@ -36,6 +36,10 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
+  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<algosdk.ConfirmedTxInfo> {
+    throw new Error("Not implemented");
+  }
+
   registerASAInfo (name: string, asaInfo: ASAInfo): void {
     throw new Error("Not implemented");
   }
@@ -133,9 +137,15 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  optInToSSC (
+  optInAccountToSSC (
     sender: rtypes.Account, index: number, payFlags: rtypes.TxParams,
     flags: rtypes.SSCOptionalFlags): Promise<void> {
     throw new Error("Not implemented");
+  }
+
+  optInLsigToSSC (
+    appId: number, lsig: LogicSig,
+    payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags): Promise<void> {
+    throw new Error("not implemented.");
   }
 }

@@ -32,12 +32,12 @@ exports.fundAccount = async function (deployer, account) {
   }
 };
 
-exports.optInToSSC = async function (deployer, account, appId, payflags, sscOptionalFlags) {
+exports.optInAccountToSSC = async function (deployer, account, appId, payflags, sscOptionalFlags) {
   try {
     console.log(`* Opting In: ${account.name} to SSC with application index: ${appId} *`);
-    await deployer.optInToSSC(account, appId, payflags, sscOptionalFlags);
+    await deployer.optInAccountToSSC(account, appId, payflags, sscOptionalFlags);
   } catch (e) {
-    console.error('OptInToSSC failed', e.response?.error); // probably app already optedIn
+    console.error('optInAccountToSSC failed', e.response?.error); // probably app already optedIn
   }
 };
 
