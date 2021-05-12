@@ -12,44 +12,56 @@ layout: splash
 
 `@algo-builder/runtime` (JavaScript Algorand runtime) executes transactions and processes TEAL in 3 parts :-
 
-- [Runtime](../packages/runtime/src/runtime.ts): For a transaction or txn group, the state management is handled by the `Runtime`. User can use `Runtime` object to set up accounts, create applications, opt-in to app, update app, etc...
-- [StoreAccount](../packages/runtime/src/account.ts): User can create new accounts using the `StoreAccount` object. All information about account (`apps`, `assets`, `localState`, `globalState` etc..) is stored in `StoreAccount`.
-- [Parser](../packages/runtime/src/parser): Reads TEAL code and converts it to a list of opcodes which are executable by the interpreter. If any opcode/data in teal code is invalid, parser will throw an error.
-- [Interpreter](../packages/runtime/src/interpreter): Executes the list of opcodes returned by parser and updates stack after each execution. At the end of execution, if the stack contains a single non-zero uint64 element then the teal code is approved, and transaction can be executed.
+- [Runtime](https://scale-it.github.io/algo-builder/api/runtime/classes/runtime.html): process transaction or txn group, and manages state. `algob` user interacts directly with `Runtime` to set up accounts and post transactions (create applications, upate application, opt-in to app, ASA ...).
+- [AccountStore](https://scale-it.github.io/algo-builder/api/runtime/classes/accountstore.html): `AccountStore` object represents an Alogrand compatible account, which stores all account related information (`apps`, `assets`, `localState`, `globalState` etc..).
+- [Parser](https://scale-it.github.io/algo-builder/api/runtime/modules.html#parser): parses TEAL code and returns a list of opcodes which are executable by the `Interpreter`. If any opcode/data in teal code is invalid, parser will throw an error.
+- [Interpreter](https://scale-it.github.io/algo-builder/api/runtime/classes/interpreter.html): Executes the list of opcodes returned by the parser and updates `Runtime` current transaction context after each opcode execution. At the end of execution, if the execution stack contains a single non-zero uint64 element then the teal code is approved, and and current transaction context is committed. If transaction is executed in a group context, then the state commit only happens if all transactions in the group pass.
+
 
 ## Block Rounds/Height
-In Algorand blockchain, the time is divided into rounds. Specifically, one round represents a a time to propose, validate and confirm a block.
-In Alogrand Builder Runtime, we don't have blocks. All transactions are processed immediately.
-However, we keep the notion of rounds and timestamps because it is needed for transaction and smart contract validation.
 
-The default Runtime block round is set to `2` and timestamp to `1`. Runtime doesn't change the block round or timestamp - it's up to the user and the test flow to manage the block. To change the block round and timestamp we need to call `runtime.setRoundAndTimestamp(round, timestamp)`. We can retrieve the current block round by using `runtime.getRound()` function and current timestamp by using `runtime.getTimestamp()`. <br />
+In Algorand blockchain, transaction processing divided into rounds. At each round blocchain creates a block with transactions which update the state. All transactions in the same block has the same transaction time and block height.
+In Alogrand Builder Runtime, we don't have blocks. All transactions are processed immediately.
+However, we keep the notion of rounds and timestamps because it is needed for transaction and smart contract processing.
+
+The default Runtime block round is set to `2` and timestamp to `1`. Runtime doesn't change the block round or timestamp - it's up to the user to set in when designing a test flow. To change the block round and timestamp we need to call `runtime.setRoundAndTimestamp(round, timestamp)`. We can retrieve the current block round and timestamp using `runtime.getRound()` and `runtime.getTimestamp()` respectively. <br />
 Example:
 
     runtime.setRoundAndTimestamp(5, 10); // set current block round to 5 and timestamp to 10
 
 This means that current block round is set to 5 and transaction will pass only if its' first valid round is less or equal 5 and the last valid round is greater than 5.
-Note: Block round and timestamp remains same until user changes it by calling `runtime.setRoundAndTimestamp(round, timestamp)`.
+Note: Block round and timestamp remains same until user will change it again.
+
 
 ## Test structure
+
 In this section we will describe the flow of testing smart contracts in runtime:
-- Prepare Accounts: First of all we will create accounts using `StoreAccount`.
 
-      const john = new StoreAccount(initialAlgo);
-      const bob = new StoreAccount(initialAlgo);
-  `initialAlgo`: To set up accounts we can pass the initial amount of algos we want to have in it. It's recommended to have some initial algos (to cover transaction fees and to maintain minimum balance for an account)
-- Prepare Runtime: After creating accounts we will create a runtime object with those accounts.
+- **Prepare Accounts**. First of all we need to create accounts which we will use in transactions:
 
+  ```javascript
+      const john = new AccountStore(initialMicroAlgo);
+      const bob = new AccountStore(initialMicroAlgo);
+  ```
+  `initialAlgo` is the amount of ALGO set for the created account. It's recommended to have at least 1 ALGO (1000000 micro ALGO) to cover transaction fees and to maintain minimum account balance.
+
+- **Prepare Runtime**. Next we create a runtime with those accounts.
+
+  ```javascript
       const runtime = new Runtime([john, bob]);
+  ```
 
-- Set Rounds and timestamps: Now we will set the rounds and timestamp for that round according to our requirement.
+- **Set block round and timestamp**.
 
+  ```javascript
       runtime.setRoundAndTimestamp(20, 100);
+  ```
 
-- Create Apps/Assets: At this point our runtime is ready. Now we can create apps and/or assets and begin testing our smart contracts (present in your current directory's `asset` folder). For creating a stateful application, use `runtime.addApp()` funtion. Similarly for creating a new asset we can use `runtime.addAsset()` function.
-- Create and Execute Transactions: we can create transactions to test our smart contracts. Use `runtime.executeTx()` funtion to execute transaction (Payment Transaction, Atomic Transfers, Asset Transfer etc...).
-- Update/Refresh State: Please note that after a transaction is executed the state of an account will be updated. In order to inspect a new state of accounts we need to re-query them from the runtime. We usually create a `syncAccounts()` closure function which will reassign accounts to their latest state.
-- Verify State: Now, we can verify our state, we will assert if updated state is correct.
-  we can verify if the `global state` and `local state` is updated. we can use `runtime.getGlobalState()` and `runtime.getLocalState()` to check state.
+- **Create Apps/Assets**. At this point our runtime is ready. Now we can create apps and assets, and begin testing our smart contracts (present in your current directory's `asset` folder). To create a stateful application (smart contract), use `runtime.addApp()` funtcion. Similarly to create a new asset use `runtime.addAsset()` function.
+- **Create and Execute Transactions**. We can create transactions to test our smart contracts. You create a tranaction (Payment Transaction, Atomic Transfers, Asset Transfer etc...) as you would do it in algob: either using the JS SDK, or one of the high level algob functions. To execute tranasction use `runtime.executeTx()` funtion.
+- **Update/Refresh State**. After a transaction is executed the state of an account will be updated. In order to inspect a new state of accounts we need to re-query them from the runtime. In algob examples we use `syncAccounts()` closure (see [example](https://github.com/scale-it/algo-builder/blob/6743acd/examples/restricted-assets/test/asset-txfer-test.js#L80)) closure which will reassign accounts to their latest state.
+- **Verify State**: Now, we can verify if the `global state` and `local state` as well as accounts are correctly updated. We use `runtime.getGlobalState()` and `runtime.getLocalState()` to check the state and directly inspect account objects (after the `syncAccounts` is made).
+
 
 
 ## Run tests
