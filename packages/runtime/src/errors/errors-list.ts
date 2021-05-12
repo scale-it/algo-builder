@@ -390,7 +390,7 @@ const runtimeAsaErrors = {
     number: 1509,
     message: `Assetholding of account cannot be closed by clawback`,
     title: "Close asset by clawback error",
-    description: "Cannot close asset by clawback"
+    description: "Clawback cannot close asset holding from an algorand account. Only the actual owner of that account can. Read more about asset parameters at https://developer.algorand.org/docs/features/asa/#asset-parameters"
   }
 };
 
