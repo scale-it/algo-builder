@@ -80,7 +80,6 @@ In this section we will describe the flow of testing smart contracts in runtime:
 
 
 ## Run tests
-In this section we will demonstrate executing transactions with stateless and stateful teal.
 
 TL;DR: Write tests in `/test` directory and then call `mocha`:
 
@@ -124,7 +123,7 @@ The logic signature accepts only ALGO payment transaction where amount is <= 100
   ```
 
 - Execute transaction (using `runtime.executeTx()`) with valid txnParams.
-  ```ts
+  ```typescript
   // set up transaction paramenters
   let paymentTxParams: AlgoTransferParam = {
     type: TransactionType.TransferAlgo,
@@ -190,7 +189,7 @@ Let's try to execute a transaction where a user (`john`) will use delegated sign
 
   - We will create a test with valid delegated signature check and try to use it to send ALGO from the delegator account.
 
-    ```javascript
+  ```typescript
   const txnParams: ExecParams = {
     type: TransactionType.TransferAlgo, // payment
     sign: SignType.LogicSignature,
@@ -217,10 +216,11 @@ Let's try to execute a transaction where a user (`john`) will use delegated sign
     assert.equal(john.balance(), initialJohnHolding - 100n - BigInt(fee));
     assert.equal(bob.balance(), initialBobHolding + 100n);
   });
-    ```
+  ```
 
-  -     In the next test, create a delegated signature which verification will fail. We check that the transfer was not done and the balances didn't change.
-    ```javascript
+  - In the next test, create a delegated signature which verification will fail. We check that the transfer was not done and the balances didn't change.
+
+  ```javascript
   it("should fail if delegated logic check doesn't pass", function () {
     const johnBal = john.balance();
     const bobBal = bob.balance();
@@ -239,9 +239,10 @@ Let's try to execute a transaction where a user (`john`) will use delegated sign
     assert.equal(john.balance(), johnBal);
     assert.equal(bob.balance(), bobBal);
   });
-    ```
+  ```
 
   Full example the test above is available in our [basic-teal](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/basic-teal.ts) integration test suite.
+
 
 ### Stateful TEAL
 
@@ -274,7 +275,7 @@ Now, we will execute a transaction with an app call (stateful TEAL). The app is 
       localInts: 8
     }, {}, program);
 
-    // opt-in to app
+    // opt-in to the app
     await runtime.optInToApp(txnParams.appId, john.address, {}, {}, program);
   });
   ```
@@ -285,8 +286,7 @@ Now, we will execute a transaction with an app call (stateful TEAL). The app is 
   it("should set global and local counter to 1 on first call", function () {
     runtime.executeTx(txnParams);
 
-    const globalCounter = runtime.getGlobalState(txnParams.appId, base64ToBytes(key));
-    assert.isDefined(globalCounter); // there should be a value present with key "counter"
+    const globalCounter = runtime.getGlobalState(txnParams.appId, key);
     assert.equal(globalCounter, 1n);
 
     const localCounter = runtime.getAccount(john.address).getLocalState(txnParams.appId, key); // get local value from john account
@@ -295,12 +295,16 @@ Now, we will execute a transaction with an app call (stateful TEAL). The app is 
   ```
   In this test, after executing a transaction with stateful smart contract call, we are verifying if the `global state` and `local state` are updated correctly. User can use `runtime.getGlobalState()` and `runtime.getLocalState()` to check state.
 
+Complete test can be found in [stateful-counter.ts](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/stateful-counter.ts). integration test.
+
+
 ## Best Practices
+
 - Follow the Test Structure section to setup your tests.
 - Structure tests using AAA pattern: Arrange, Act & Assert (AAA). The first part includes the test setup, then the execution of the unit under test, and finally the assertion phase. Following this structure guarantees that the reader will quickly understand the test plan.
 - To prevent test coupling and easily reason about the test flow, each test should add and act on its own set of states.
-- Use `beforeEach`, `afterEach`, `beforeAll`, `afterAll` functions to set clear boundaries while testing.
-- Sync your accounts's state after execution of each transaction.
+- Use `beforeEach`, `afterEach`, `beforeAll`, `afterAll` functions to setup and clean shared resources in your tests.
+- Sync your accounts' before checking their state.
 
 ## What we support now
 
@@ -336,4 +340,4 @@ Teal files used for the below tests can be found in `/test/fixtures` in `runtime
 + [Boilerplate Stateless Teal](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/basic-teal.ts)
 + [Escrow Account Test](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/escrow-account.ts)
 + [Boilerplate Stateful Teal](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/stateful-counter.ts)
-+ Complex Teal (Stateless + Stateful + Atomic transactions) - [Crowdfunding application](https://github.com/scale-it/algo-builder/tree/master/examples/crowdfunding/test)
++ Complex TEAK test suite (Stateless + Stateful + Atomic transactions) - [Crowdfunding application](https://github.com/scale-it/algo-builder/tree/master/examples/crowdfunding/test)
