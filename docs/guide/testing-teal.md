@@ -54,7 +54,7 @@ Tests are typically done using [Mocha](https://mochajs.org/) framework, while as
 
 ```
 describe("use-case", function() {
-  let variabl1;
+  let variable1;
   // ...
 
   this.beforeAll(() => { ... });
@@ -184,7 +184,7 @@ The logic signature accepts only ALGO payment transaction where amount is <= 100
     assert.equal(john.balance(), initialJohnHolding + 100n);
   });
   ```
-  In the first test above, we fund the escrow using the admin account. John already has an initial balance set - we initialized runtime with Johns' account. In the second test we execute payment transaction from escrow to john and validate that the balances are correct.
+  In the first test above, we fund the escrow using the admin account. John already has an initial balance set - we initialized runtime with John's account. In the second test we execute payment transaction from escrow to john and validate that the balances are correct.
 
 - Executing transaction with invalid transaction.
   ```javascript
@@ -242,7 +242,7 @@ Let's try to execute a transaction where a user (`john`) will use delegated sign
   });
   ```
 
-  - In the next test, create a delegated signature which verification will fail. We check that the transfer was not done and the balances didn't change.
+  - In the next test, create a delegated signature whose verification will fail. We check that the transfer was not done and the balances didn't change.
 
   ```javascript
   it("should fail if delegated logic check doesn't pass", function () {
@@ -364,6 +364,6 @@ TEAL files used for the below tests can be found in `/test/fixtures` in [runtime
 + [Boilerplate Stateless Teal](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/basic-teal.ts)
 + [Escrow Account Test](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/escrow-account.ts)
 + [Boilerplate Stateful Teal](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/stateful-counter.ts)
-+ Complex TEAK test suite (Stateless + Stateful + Atomic transactions) - [Crowdfunding application](https://github.com/scale-it/algo-builder/tree/master/examples/crowdfunding/test)
++ Complex TEAL test suite (Stateless + Stateful + Atomic transactions) - [Crowdfunding application](https://github.com/scale-it/algo-builder/tree/master/examples/crowdfunding/test)
 
 See our [examples](https://github.com/scale-it/algo-builder/tree/master/examples) for more interesting test suites.
