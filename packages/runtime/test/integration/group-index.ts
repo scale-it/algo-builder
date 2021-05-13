@@ -28,7 +28,7 @@ describe('Current Transaction Tests', function () {
     creator = new AccountStore(initialCreatorBalance);
 
     runtime = new Runtime([master, creator]);
-    approvalProgram = getProgram('test1.py');
+    approvalProgram = getProgram('test1.teal');
     clearProgram = getProgram('clear.teal');
   });
 
@@ -41,7 +41,7 @@ describe('Current Transaction Tests', function () {
 
     // create second application
     applicationId2 = runtime.addApp(
-      { ...creationFlags, sender: creator.account }, {}, getProgram('test2.py'), clearProgram);
+      { ...creationFlags, sender: creator.account }, {}, getProgram('test2.teal'), clearProgram);
   }
 
   it('Group Index Check', () => {
