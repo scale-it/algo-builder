@@ -49,6 +49,30 @@ algob project:
 ├── package.json
 ```
 
+All our test files should be stored in `test` directory. You can import `algob` library as well as `scripts`.
+Tests are typically done using [Mocha](https://mochajs.org/) framework, while assertions using [Chai](https://www.chaijs.com/) a BDD / TDD assertion library. Your test file is usually organized as follows:
+
+```
+describe("use-case", function() {
+  let variabl1;
+  // ...
+
+  this.beforeAll(() => { ... });
+  this.afterAll(() => { ... });
+
+  it("test case 1", () => {
+    // preparation
+    // execution
+    // checks
+  });
+
+  it("test case 2", () => { ... });
+});
+```
+
+Please read more about  [Mocha](https://mochajs.org/) and [Chai](https://www.chaijs.com/) if you are not familiar with them.
+
+
 ## Test structure
 
 In this section we will describe the flow of testing smart contracts in runtime:
@@ -56,21 +80,21 @@ In this section we will describe the flow of testing smart contracts in runtime:
 - **Prepare Accounts**. First of all we need to create accounts which we will use in transactions:
 
   ```javascript
-      const john = new AccountStore(initialMicroAlgo);
-      const bob = new AccountStore(initialMicroAlgo);
+  const john = new AccountStore(initialMicroAlgo);
+  const bob = new AccountStore(initialMicroAlgo);
   ```
   `initialAlgo` is the amount of ALGO set for the created account. It's recommended to have at least 1 ALGO (1000000 micro ALGO) to cover transaction fees and to maintain minimum account balance.
 
 - **Prepare Runtime**. Next we create a runtime with those accounts.
 
   ```javascript
-      const runtime = new Runtime([john, bob]);
+  const runtime = new Runtime([john, bob]);
   ```
 
 - **Set block round and timestamp**.
 
   ```javascript
-      runtime.setRoundAndTimestamp(20, 100);
+  runtime.setRoundAndTimestamp(20, 100);
   ```
 
 - **Create Apps/Assets**. At this point our runtime is ready. Now we can create apps and assets, and begin testing our smart contracts (present in your current directory's `asset` folder). To create a stateful application (smart contract), use `runtime.addApp()` funtcion. Similarly to create a new asset use `runtime.addAsset()` function.
@@ -175,7 +199,7 @@ The logic signature accepts only ALGO payment transaction where amount is <= 100
 Full example with above tests is available in our [escrow-account.ts](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/escrow-account.ts) integration test suite.
 
 
-#### Delegated Signuature Account
+#### Delegated Signature Account
 
 Let's try to execute a transaction where a user (`john`) will use delegated signature based on a stateless smart contract logic. We will use a TEAL code from our [asset test](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/fixtures/basic-teal/assets/basic.teal) suite.
 
@@ -241,7 +265,7 @@ Let's try to execute a transaction where a user (`john`) will use delegated sign
   });
   ```
 
-Full example with the tests above is available in our [basic-teal](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/basic-teal.ts) integration test suite.
+Full example with the above tests is available in our [basic-teal](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/basic-teal.ts) integration test suite.
 
 
 ### Stateful TEAL
@@ -335,9 +359,11 @@ Currently, `runtime` supports:
 
 ## Examples
 
-Teal files used for the below tests can be found in `/test/fixtures` in `runtime`.
+TEAL files used for the below tests can be found in `/test/fixtures` in [runtime](https://github.com/scale-it/algo-builder/tree/master/packages/runtime/test/fixtures) package.
 
 + [Boilerplate Stateless Teal](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/basic-teal.ts)
 + [Escrow Account Test](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/escrow-account.ts)
 + [Boilerplate Stateful Teal](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/stateful-counter.ts)
 + Complex TEAK test suite (Stateless + Stateful + Atomic transactions) - [Crowdfunding application](https://github.com/scale-it/algo-builder/tree/master/examples/crowdfunding/test)
+
+See our [examples](https://github.com/scale-it/algo-builder/tree/master/examples) for more interesting test suites.
