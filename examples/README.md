@@ -53,6 +53,7 @@ the following positions in the latter file:
 - [JS] [nft](./nft) - Non-Fungible-Token using stateful TEAL.
 - [JS] [permissioned voting](./permissioned-voting) -  This project demonstrates how to create a Permissioned Voting Stateful Smart Contract Application.
   Original tutorial can be found [here](https://developer.algorand.org/solutions/example-permissioned-voting-stateful-smart-contract-application/)
+- [JS] [permissioned token - approach with unfreezing](./permissioned-token-freezing) -  template for creating a Permissioned Tokens based on a freeze and unfreeze logic to transfer assets.
 - [JS] [permissioned token](./permissioned-token) -  template for creating Permissioned Tokens.
 - [JS] [ref-templates](./ref-templates) - best practices and templates using the Algorand reference templates.
 - [JS] [signed-txn](./signed-txn) - demonstrates loading a serialized transaction from a file. A user can create a transaction and sign it (using `goal`) and send it to someone else to execute it in `algob`.
