@@ -301,18 +301,18 @@ export type OptInSSCParam = BasicParams & SSCOptionalFlags & {
 
 export type OptInASAParam = BasicParams & {
   type: TransactionType.OptInASA
-  assetID: number
+  assetID: number | string
 };
 
 export type ModifyAssetParam = BasicParams & {
   type: TransactionType.ModifyAsset
-  assetID: number
+  assetID: number | string
   fields: AssetModFields
 };
 
 export type FreezeAssetParam = BasicParams & {
   type: TransactionType.FreezeAsset
-  assetID: number
+  assetID: number | string
   freezeTarget: AccountAddress
   freezeState: boolean
 };
@@ -320,14 +320,14 @@ export type FreezeAssetParam = BasicParams & {
 export type RevokeAssetParam = BasicParams & {
   type: TransactionType.RevokeAsset
   recipient: AccountAddress // Revoked assets are sent to this address
-  assetID: number
+  assetID: number | string
   revocationTarget: AccountAddress // Revocation target is the account from which the clawback revokes asset.
   amount: number | bigint
 };
 
 export type DestroyAssetParam = BasicParams & {
   type: TransactionType.DestroyAsset
-  assetID: number
+  assetID: number | string
 };
 
 export type AlgoTransferParam = BasicParams & {
@@ -340,7 +340,7 @@ export type AssetTransferParam = BasicParams & {
   type: TransactionType.TransferAsset
   toAccountAddr: AccountAddress
   amount: number | bigint
-  assetID: number
+  assetID: number | string
 };
 
 export type SSCCallsParam = BasicParams & SSCOptionalFlags & {
