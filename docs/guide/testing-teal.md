@@ -20,7 +20,7 @@ The `@algo-builder/runtime` (JavaScript Algorand runtime) package has 4 major co
 
 ## Block Rounds/Height
 
-In Algorand blockchain, transaction processing divided into rounds. At each round blocchain creates a block with transactions which update the state. All transactions in the same block has the same transaction time and block height.
+In Algorand blockchain, transaction processing divided into rounds. At each round blockchain creates a block with transactions which updates the state. All transactions in the same block has the same transaction time and block height.
 In Alogrand Builder Runtime, we don't have blocks. All transactions are processed immediately.
 However, we keep the notion of rounds and timestamps because it is needed for transaction and smart contract processing.
 
