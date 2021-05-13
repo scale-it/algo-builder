@@ -10,7 +10,7 @@ This package implements a light version of Algorand runtime. It allows to execut
 ## Documentation
 
 + [Home Page](https://scale-it.github.io/algo-builder)
-+ [Algob API Docs](../algob/README)
++ [Algob API Docs](../algob/index.html)
 + [User Docs](../../guide/README)
 
 ## Usage

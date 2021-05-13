@@ -42,7 +42,6 @@ def contract_owned_asa():
     on_pay = Seq([
         Assert(And(
             App.globalGet(Bytes("Creator")) == Txn.sender(),
-            App.globalGet(Bytes("Creator")) == Gtxn[1].asset_receiver(),
             rekey_check,
         )),
         Return(Int(1))
