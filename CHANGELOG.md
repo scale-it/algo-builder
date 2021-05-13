@@ -19,13 +19,15 @@
 * Added more tests for the [crowdfunding example project](/examples/crowdfunding) using `@algo-builder/runtime`- Happy paths and Failing paths.
 * Integrate user documentation with `jekyll`.
 * Moved OptIn methods from *DEPLOY* mode to *RUN* mode.
-* Added new algob commands:
-    * `algob test` (runs mocha in project root).
-    * `algob unbox-template <name> <destination>` to quickly unbox a dapp template from `scale-it/algo-builder-templates`.
-    * `algob sign-multisig --account-name <acc> --file <input> --out <out-file>` to append user's signature to signed multisig file.
 * Added new function `signLogicSigMultiSig` to sign logic signature by multisig.
 * Updated ASA deployment (`deployASA` function) to pass custom params and save deployed asset definition in checkpoint.
 * Support deployment and optIn methods in a transaction group (along with all other methods, using `executeTransaction`)
+
+### Commands
+* `algob test` (runs mocha in project root).
+* `algob unbox-template <name> <destination>` to quickly unbox a dapp template from `scale-it/algo-builder-templates`.
+* `algob sign-multisig --account <acc> --file <input> --out <out-file>` to append user's signature to signed multisig file.
+* `algob sign-lsig --account <acc> --file <input> --out <out-file>` to sign logic signature.
 
 ### Examples
 * Added new templates:
