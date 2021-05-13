@@ -4,13 +4,13 @@ layout: splash
 
 # Testing TEAL
 
-[TEAL](https://developer.algorand.org/docs/reference/teal/specification/) is a stack based language that executes inside Algorand transactions to program logic signatures and smart contracts. `@algo-builder/runtime` provides a JavaScript, lightweight runtime and TEAL interpreter to test Algorand transactions, ASA and Smart Contracts.
+[TEAL](https://developer.algorand.org/docs/reference/teal/specification/) is a stack based language that executes inside Algorand transactions to program logic signatures and smart contracts. `@algo-builder/runtime` provides a TypeScript and JavaScript, lightweight runtime and TEAL interpreter to test Algorand transactions, ASA and Smart Contracts.
 
 **NOTE:** TEAL can not modify nor create transactions.
 
 ## How it works
 
-The `@algo-builder/runtime` (JavaScript Algorand runtime) package has 4 major components:
+The `@algo-builder/runtime` (TypeScript Algorand runtime) package has 4 major components:
 
 - [Runtime](https://scale-it.github.io/algo-builder/api/runtime/classes/runtime.html): process transaction or txn group, and manages state. `algob` user interacts directly with `Runtime` to set up accounts and post transactions (create applications, upate application, opt-in to app, ASA ...).
 - [AccountStore](https://scale-it.github.io/algo-builder/api/runtime/classes/accountstore.html): `AccountStore` object represents an Alogrand compatible account, which stores all account related information (`apps`, `assets`, `localState`, `globalState` etc..).
