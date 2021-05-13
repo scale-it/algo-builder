@@ -172,7 +172,7 @@ The logic signature accepts only ALGO payment transaction where amount is <= 100
   });
   ```
 
-Full example of the tests above is available in our [escrow-account.ts](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/escrow-account.ts) integration test suite.
+Full example with above tests is available in our [escrow-account.ts](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/escrow-account.ts) integration test suite.
 
 
 #### Delegated Signuature Account
@@ -241,7 +241,7 @@ Let's try to execute a transaction where a user (`john`) will use delegated sign
   });
   ```
 
-  Full example the test above is available in our [basic-teal](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/basic-teal.ts) integration test suite.
+Full example with the tests above is available in our [basic-teal](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/basic-teal.ts) integration test suite.
 
 
 ### Stateful TEAL
@@ -295,7 +295,7 @@ Now, we will execute a transaction with an app call (stateful TEAL). The app is 
   ```
   In this test, after executing a transaction with stateful smart contract call, we are verifying if the `global state` and `local state` are updated correctly. User can use `runtime.getGlobalState()` and `runtime.getLocalState()` to check state.
 
-Complete test can be found in [stateful-counter.ts](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/stateful-counter.ts). integration test.
+Please look at [stateful-counter.ts](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/stateful-counter.ts) to see the complete integration test suite.
 
 
 ## Best Practices
