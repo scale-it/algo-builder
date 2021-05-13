@@ -35,6 +35,7 @@
     "cleanup": "./cleanup.sh",
     "build": "yarn workspaces run build",
     "build:apidocs": "yarn workspaces run build:docs",
+    "build:apidocs-push": "yarn workspaces run build:docs; git add docs; git ci -am 'generating api docs' -n; HUSKY=0 git push -f",
     "watch": "tsc --build --watch packages/runtime packages/algob",
     "test": "yarn workspaces run test",
     "lint": "yarn workspaces -p run lint",
