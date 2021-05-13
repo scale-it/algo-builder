@@ -15,7 +15,7 @@ const initialEscrowHolding = minBalance + BigInt(1000e6);
 const initialJohnHolding = minBalance + 500n;
 const fee = 1000;
 
-// The following test cases are used in Testiong TEAL guide,
+// The following test cases are used in Testing TEAL guide,
 // and in tutorial 4 at developer.algorand.org. This is a simplified version of the
 // test above.
 // NOTE: when updating this test, you must update /docs/guide/testing-teal.md
@@ -27,7 +27,7 @@ describe("Logic Signature: Escrow Account", function () {
   const runtime = new Runtime([john, admin]); // setup runtime
 
   // we can't load teal code and create an escrow, because in this test we are loading a
-  // a fixture environment, which happens in `beforeAll`. So, consequently we need to move
+  // fixture environment, which happens in `beforeAll`. So, consequently we need to move
   // initialization of lsig and escrow to beforeAll
   let lsig: LogicSig;
   let escrow: AccountStore;
@@ -87,7 +87,7 @@ describe("Logic Signature: Escrow Account", function () {
 
   it("should reject transaction if Fee > 10000", function () {
     expectRuntimeError(
-      () => runtime.executeTx({ ...paymentTxParams, payFlags: { totalFee: 100000 } }),
+      () => runtime.executeTx({ ...paymentTxParams, payFlags: { totalFee: 0.1e6 } }),
       RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
   });

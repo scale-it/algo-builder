@@ -41,7 +41,7 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
     assert.equal(john.balance(), initialJohnHolding);
     assert.equal(bob.balance(), initialBobHolding);
 
-    // get delegated logic signature
+    // make delegated logic signature
     const lsig = runtime.getLogicSig(getProgram('basic.teal'), []);
     lsig.sign(john.account.sk);
     txnParams.lsig = lsig;
