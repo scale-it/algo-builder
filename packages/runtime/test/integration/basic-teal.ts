@@ -12,76 +12,63 @@ import { expectRuntimeError } from "../helpers/runtime-errors";
 const minBalance = BigInt(ALGORAND_ACCOUNT_MIN_BALANCE + 1000); ; // 1000 to cover fee
 const initialJohnHolding = minBalance + 2000n;
 const initialBobHolding = minBalance + 500n;
+const fee = 1000;
 
 describe("Stateless Algorand Smart Contracts delegated signature mode", function () {
   useFixture("basic-teal");
   let john = new AccountStore(initialJohnHolding);
   let bob = new AccountStore(initialBobHolding);
+  const runtime = new Runtime([john, bob]);
 
-  // set up transaction paramenters
   const txnParams: ExecParams = {
     type: TransactionType.TransferAlgo, // payment
     sign: SignType.LogicSignature,
     fromAccountAddr: john.account.addr,
     toAccountAddr: bob.address,
     amountMicroAlgos: 100n,
-    lsig: {} as LogicSig, // populated below
-    payFlags: { totalFee: 1000 }
+    lsig: {} as LogicSig, // will be set below
+    payFlags: { totalFee: fee }
   };
 
-  let runtime: Runtime;
-  this.beforeAll(function () {
-    runtime = new Runtime([john, bob]); // setup test
-  });
-
-  // update account state after each execution
-  afterEach(function () {
+  // helper function
+  function syncAccounts (): void {
     john = runtime.getAccount(john.address);
     bob = runtime.getAccount(bob.address);
-  });
+  }
 
-  it("should send algo's from john to bob if stateless teal logic is correct", function () {
+  it("should send algo's from john to bob if delegated logic check passes", function () {
     // check initial balance
     assert.equal(john.balance(), initialJohnHolding);
     assert.equal(bob.balance(), initialBobHolding);
-    // get logic signature
+
+    // make delegated logic signature
     const lsig = runtime.getLogicSig(getProgram('basic.teal'), []);
     lsig.sign(john.account.sk);
     txnParams.lsig = lsig;
 
     runtime.executeTx(txnParams);
 
-    // get final state (updated accounts)
-    const johnAcc = runtime.getAccount(john.address);
-    const bobAcc = runtime.getAccount(bob.address);
-    assert.equal(johnAcc.balance(), initialJohnHolding - 1100n); // check if (100 microAlgo's + fee of 1000) are withdrawn
-    assert.equal(bobAcc.balance(), initialBobHolding + 100n);
+    syncAccounts();
+    assert.equal(john.balance(), initialJohnHolding - 100n - BigInt(fee));
+    assert.equal(bob.balance(), initialBobHolding + 100n);
   });
 
-  it("should throw error if logic is incorrect", function () {
-    // initial balance
+  it("should fail if delegated logic check doesn't pass", function () {
     const johnBal = john.balance();
     const bobBal = bob.balance();
-    // get logic signature
     const lsig = runtime.getLogicSig(getProgram('incorrect-logic.teal'), []);
     lsig.sign(john.account.sk);
     txnParams.lsig = lsig;
 
-    const invalidParams = Object.assign({}, txnParams);
-    invalidParams.amountMicroAlgos = 50n;
-
-    // execute transaction (should fail is logic is incorrect)
+    // should fail because logic check fails
     expectRuntimeError(
-      () => runtime.executeTx(invalidParams),
+      () => runtime.executeTx({ ...txnParams, amountMicroAlgos: 50n }),
       RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 
-    // get final state (updated accounts)
-    const johnAcc = runtime.getAccount(john.address);
-    const bobAcc = runtime.getAccount(bob.address);
-
-    // verify account balance in updated state remains unchanged
-    assert.equal(johnAcc.balance(), johnBal);
-    assert.equal(bobAcc.balance(), bobBal);
+    // accounts balance shouldn't be changed
+    syncAccounts();
+    assert.equal(john.balance(), johnBal);
+    assert.equal(bob.balance(), bobBal);
   });
 });
