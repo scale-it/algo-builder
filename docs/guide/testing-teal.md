@@ -49,7 +49,7 @@ algob project:
 ├── package.json
 ```
 
-All our test files should be stored in `test` directory. You can import `algob` library as well as `scripts`.
+All our test files should be stored in `test` directory. In the test files, you can import `algob` as a library as well as functions from `scripts`.
 Tests are typically done using [Mocha](https://mochajs.org/) framework, while assertions using [Chai](https://www.chaijs.com/) a BDD / TDD assertion library. Your test file is usually organized as follows:
 
 ```
