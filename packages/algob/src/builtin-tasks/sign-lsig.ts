@@ -32,7 +32,7 @@ async function multiSignLsig (
   const outFileName = taskArgs.out ?? (name + "_out." + ext);
   const outFilePath = path.join(ASSETS_DIR, outFileName);
 
-  // TODO: update to lsig.toByte() after confirming on discord
+  // if lsig.args = [] (empty array), then delete that key
   if (lsig.args?.length === 0) {
     lsig.args = undefined as any;
   }
