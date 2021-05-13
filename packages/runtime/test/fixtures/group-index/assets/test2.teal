@@ -1,0 +1,47 @@
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l12
+txn OnCompletion
+int DeleteApplication
+==
+bnz l11
+txn OnCompletion
+int UpdateApplication
+==
+bnz l10
+txn OnCompletion
+int CloseOut
+==
+bnz l9
+txn OnCompletion
+int OptIn
+==
+bnz l8
+txn OnCompletion
+int NoOp
+==
+bnz l7
+err
+l7:
+txn GroupIndex
+int 1
+==
+b l13
+l8:
+int 0
+b l13
+l9:
+int 0
+b l13
+l10:
+int 0
+b l13
+l11:
+int 0
+b l13
+l12:
+int 1
+l13:
+
