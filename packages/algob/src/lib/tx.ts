@@ -138,8 +138,8 @@ async function mkTx (
   index: number,
   txIdxMap: Map<number, [string, rtypes.ASADef]>
 ): Promise<Transaction> {
-  // if execParams is for ASA related transaction have asaName,
-  // then set to asaId using info from checkpoint
+  // if execParams for ASA related transaction have assetID as asaName,
+  // then set to assetIndex using info from checkpoint
   switch (txn.type) {
     case TransactionType.OptInASA :
     case TransactionType.TransferAsset :
