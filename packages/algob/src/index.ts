@@ -14,6 +14,7 @@ import {
 import { globalZeroAddress } from "./lib/constants";
 import { algodCredentialsFromEnv, KMDCredentialsFromEnv } from "./lib/credentials";
 import { getProgram } from "./lib/load-program";
+import { signLogicSigMultiSig } from "./lib/lsig";
 import { signMultiSig } from "./lib/msig";
 import { updateSSC } from "./lib/ssc";
 import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC, readGlobalStateSSC, readLocalStateSSC } from "./lib/status";
@@ -47,5 +48,6 @@ export {
   addressToPk,
   getProgram,
   types,
-  signMultiSig
+  signMultiSig,
+  signLogicSigMultiSig
 };

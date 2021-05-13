@@ -1,5 +1,5 @@
 import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
-import type { LogicSig, LogicSigArgs, MultiSig, MultisigMetadata } from "algosdk";
+import type { LogicSig, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
@@ -169,27 +169,6 @@ class DeployerBasicMode {
     const lsig = await getLsig(name, this.algoOp.algodClient); // get lsig from .teal (getting logic part from lsig)
     const msig = await readMsigFromFile(name); // Get decoded Msig object from .msig
     Object.assign(lsig.msig = {} as MultiSig, msig);
-    return lsig;
-  }
-
-  /**
-   * Appends signature (using signer's sk) to multi-signed logic signature. If multisig is not found
-   * then new multisig is created
-   * eg. appending own signature to a signed lsig (received from multisignature account address network)
-   * @param lsig Logic Sig object
-   * @param signer: Signer Account which will sign the smart contract
-   * @param mparams: passed when signing a new multisig
-   * @returns multi signed logic signature (with appended signature from signer's sk)
-   */
-  signLogicSigMultiSig (lsig: LogicSig, signer: rtypes.Account, mparams?: MultisigMetadata): LogicSig {
-    if (lsig.msig === undefined) { // if multisig not found, create new msig
-      if (mparams === undefined) {
-        throw new Error('MultiSig Metadata is undefined, which is required for single sign multisig');
-      }
-      lsig.sign(signer.sk, mparams);
-    } else {
-      lsig.appendToMultisig(signer.sk); // else append signature to msig
-    }
     return lsig;
   }
 

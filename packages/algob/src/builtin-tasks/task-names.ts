@@ -12,3 +12,4 @@ export const TASK_COMPILE = "compile";
 export const TASK_UNBOX_TEMPLATE = "unbox-template";
 export const TASK_TEST = "test";
 export const TASK_SIGN_MULTISIG = "sign-multisig";
+export const TASK_SIGN_LSIG = "sign-lsig";
