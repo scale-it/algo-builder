@@ -189,6 +189,7 @@ Let's try to execute a transaction where a user (`john`) will use delegated sign
   ```
 
   - We will create a test with valid delegated signature check and try to use it to send ALGO from the delegator account.
+
     ```javascript
   const txnParams: ExecParams = {
     type: TransactionType.TransferAlgo, // payment
