@@ -46,7 +46,7 @@ class DeployerBasicMode {
     return this.runtimeEnv.network.name;
   }
 
-  private _getASAInfo (name: string): ASAInfo {
+  getASAInfo (name: string): ASAInfo {
     const found = this.asa.get(name);
     if (!found) {
       throw new BuilderError(
@@ -210,7 +210,7 @@ class DeployerBasicMode {
    */
   async optInAcountToASA (asa: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
     try {
-      const asaId = this._getASAInfo(asa).assetIndex;
+      const asaId = this.getASAInfo(asa).assetIndex;
       await this.algoOp.optInAcountToASA(
         asa,
         asaId,
@@ -239,7 +239,7 @@ class DeployerBasicMode {
    */
   async optInLsigToASA (asa: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
     try {
-      const asaId = this._getASAInfo(asa).assetIndex;
+      const asaId = this.getASAInfo(asa).assetIndex;
       await this.algoOp.optInLsigToASA(asa, asaId, lsig, flags);
     } catch (error) {
       console.log("Asset no found in checkpoints. Proceeding to check as Asset ID.");

@@ -146,13 +146,13 @@ export class Ctx implements Context {
   // transfer ASSET as per transaction parameters
   transferAsset (txnParam: AssetTransferParam): void {
     const fromAccountAddr = getFromAddress(txnParam);
-    const fromAssetHolding = this.getAssetHolding(txnParam.assetID, fromAccountAddr);
-    const toAssetHolding = this.getAssetHolding(txnParam.assetID, txnParam.toAccountAddr);
+    const fromAssetHolding = this.getAssetHolding(txnParam.assetID as number, fromAccountAddr);
+    const toAssetHolding = this.getAssetHolding(txnParam.assetID as number, txnParam.toAccountAddr);
     txnParam.amount = BigInt(txnParam.amount);
 
     if (txnParam.amount !== 0n) {
-      this.assertAssetNotFrozen(txnParam.assetID, fromAccountAddr);
-      this.assertAssetNotFrozen(txnParam.assetID, txnParam.toAccountAddr);
+      this.assertAssetNotFrozen(txnParam.assetID as number, fromAccountAddr);
+      this.assertAssetNotFrozen(txnParam.assetID as number, txnParam.toAccountAddr);
     }
     if (fromAssetHolding.amount - txnParam.amount < 0) {
       throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS, {
@@ -165,7 +165,7 @@ export class Ctx implements Context {
 
     if (txnParam.payFlags.closeRemainderTo) {
       const closeRemToAssetHolding = this.getAssetHolding(
-        txnParam.assetID, txnParam.payFlags.closeRemainderTo);
+        txnParam.assetID as number, txnParam.payFlags.closeRemainderTo);
 
       closeRemToAssetHolding.amount += fromAssetHolding.amount; // transfer assets of sender to closeRemTo account
       fromAssetHolding.amount = 0n; // close sender's account
@@ -340,24 +340,24 @@ export class Ctx implements Context {
           break;
         }
         case TransactionType.ModifyAsset: {
-          const asset = this.getAssetDef(txnParam.assetID);
+          const asset = this.getAssetDef(txnParam.assetID as number);
           if (asset.manager !== fromAccountAddr) {
             throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
           }
           // modify asset in ctx.
-          this.modifyAsset(txnParam.assetID, txnParam.fields);
+          this.modifyAsset(txnParam.assetID as number, txnParam.fields);
           break;
         }
         case TransactionType.FreezeAsset: {
-          const asset = this.getAssetDef(txnParam.assetID);
+          const asset = this.getAssetDef(txnParam.assetID as number);
           if (asset.freeze !== fromAccountAddr) {
             throw new RuntimeError(RUNTIME_ERRORS.ASA.FREEZE_ERROR, { address: asset.freeze });
           }
-          this.freezeAsset(txnParam.assetID, txnParam.freezeTarget, txnParam.freezeState);
+          this.freezeAsset(txnParam.assetID as number, txnParam.freezeTarget, txnParam.freezeState);
           break;
         }
         case TransactionType.RevokeAsset: {
-          const asset = this.getAssetDef(txnParam.assetID);
+          const asset = this.getAssetDef(txnParam.assetID as number);
           if (asset.clawback !== fromAccountAddr) {
             throw new RuntimeError(RUNTIME_ERRORS.ASA.CLAWBACK_ERROR, { address: asset.clawback });
           }
@@ -365,17 +365,17 @@ export class Ctx implements Context {
             throw new RuntimeError(RUNTIME_ERRORS.ASA.CANNOT_CLOSE_ASSET_BY_CLAWBACK);
           }
           this.revokeAsset(
-            txnParam.recipient, txnParam.assetID,
+            txnParam.recipient, txnParam.assetID as number,
             txnParam.revocationTarget, BigInt(txnParam.amount)
           );
           break;
         }
         case TransactionType.DestroyAsset: {
-          const asset = this.getAssetDef(txnParam.assetID);
+          const asset = this.getAssetDef(txnParam.assetID as number);
           if (asset.manager !== fromAccountAddr) {
             throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
           }
-          this.destroyAsset(txnParam.assetID);
+          this.destroyAsset(txnParam.assetID as number);
           break;
         }
       }

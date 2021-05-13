@@ -396,6 +396,8 @@ export interface Deployer {
    * Mapping of ASA name to deployment log */
   asa: Map<string, ASAInfo>
 
+  getASAInfo: (name: string) => ASAInfo
+
   /**
    * Sets metadata key value for a current network in the chckpoint file based on the
    * current deployment script. If run in a non deployment mode (eg `algob run script_name.js`)

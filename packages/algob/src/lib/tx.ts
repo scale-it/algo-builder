@@ -130,16 +130,31 @@ function signTransaction (txn: Transaction, execParams: rtypes.ExecParams): Uint
  * @param txn Execution parameters
  * @param index index of current execParam
  * @param txIdxMap Map for index to name
- * @param asaName ASA Name (deployed by Deployer) for fetching ASA ID (optional)
  */
 /* eslint-disable sonarjs/cognitive-complexity */
 async function mkTx (
   deployer: Deployer,
   txn: rtypes.ExecParams,
   index: number,
-  txIdxMap: Map<number, [string, rtypes.ASADef]>,
-  asaName?: string
+  txIdxMap: Map<number, [string, rtypes.ASADef]>
 ): Promise<Transaction> {
+  // if execParams is for ASA related transaction have asaName,
+  // then set to asaId using info from checkpoint
+  switch (txn.type) {
+    case TransactionType.OptInASA :
+    case TransactionType.TransferAsset :
+    case TransactionType.ModifyAsset :
+    case TransactionType.FreezeAsset :
+    case TransactionType.RevokeAsset :
+    case TransactionType.DestroyAsset : {
+      if (typeof txn.assetID === "string") {
+        const asaInfo = deployer.getASAInfo(txn.assetID);
+        txn.assetID = asaInfo.assetIndex;
+      }
+      break;
+    }
+  }
+
   switch (txn.type) {
     case TransactionType.DeployASA: {
       deployer.assertNoAsset(txn.asaName);
@@ -171,7 +186,7 @@ async function mkTx (
     case TransactionType.ModifyAsset: {
       // fetch asset mutable properties from network and set them (if they are not passed)
       // before modifying asset
-      const assetInfo = await deployer.getAssetByID(txn.assetID);
+      const assetInfo = await deployer.getAssetByID(txn.assetID as number);
       if (txn.fields.manager === "") txn.fields.manager = undefined;
       else txn.fields.manager = txn.fields.manager ?? assetInfo.params.manager;
 
@@ -188,22 +203,6 @@ async function mkTx (
     }
   }
 
-  if (asaName !== undefined) {
-    switch (txn.type) {
-      case TransactionType.OptInASA :
-      case TransactionType.TransferAsset :
-      case TransactionType.ModifyAsset :
-      case TransactionType.FreezeAsset :
-      case TransactionType.RevokeAsset :
-      case TransactionType.DestroyAsset : {
-        const asa = deployer.asa.get(asaName);
-        if (asa === undefined) throw new Error(`No ASA found with name ${asaName}`);
-        txn.assetID = asa.assetIndex;
-        break;
-      }
-    }
-  }
-
   const suggestedParams = await getSuggestedParams(deployer.algodClient);
   return mkTransaction(txn,
     await mkTxParams(deployer.algodClient, txn.payFlags, Object.assign({}, suggestedParams)));
@@ -217,8 +216,8 @@ async function mkTx (
  */
 export async function executeTransaction (
   deployer: Deployer,
-  execParams: rtypes.ExecParams | rtypes.ExecParams[],
-  asaName?: string): Promise<algosdk.ConfirmedTxInfo> {
+  execParams: rtypes.ExecParams | rtypes.ExecParams[]):
+  Promise<algosdk.ConfirmedTxInfo> {
   try {
     let signedTxn;
     let txns: Transaction[] = [];
@@ -237,7 +236,7 @@ export async function executeTransaction (
         return signed;
       });
     } else {
-      const txn = await mkTx(deployer, execParams, 0, txIdxMap, asaName);
+      const txn = await mkTx(deployer, execParams, 0, txIdxMap);
       signedTxn = signTransaction(txn, execParams);
       deployer.log(`Signed transaction:`, signedTxn);
       txns = [txn];
