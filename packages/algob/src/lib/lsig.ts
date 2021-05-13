@@ -41,7 +41,7 @@ export function getDummyLsig (): LogicSig {
  * @param lsig Logic Sig object
  * @param signer: Signer Account which will sign the smart contract
  * @param mparams: passed when signing a new multisig
- * @returns multi signed logic signature (with appended signature from signer's sk)
+ * @returns multi signed logic signature (with appended signature using signer's sk)
  */
 export function signLogicSigMultiSig (lsig: LogicSig, signer: rtypes.Account,
   mparams?: MultisigMetadata): LogicSig {
