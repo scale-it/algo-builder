@@ -76,10 +76,6 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  signLogicSigMultiSig (lsig: LogicSig, signer: rtypes.Account): LogicSig {
-    throw new Error("Not implemented");
-  }
-
   addCheckpointKV (key: string, value: string): void {
   };
 

@@ -206,7 +206,7 @@ describe("config loading", function () {
 
     it("should detect conflict of account names", async function () {
       // console is mocked in package.json mocha options
-      let stub = console.warn as sinon.SinonStub;
+      const stub = console.warn as sinon.SinonStub;
       stub.reset();
 
       kmdOp.addKmdAccount({ name: net.accounts[0].name, addr: "some-addr-1", sk: new Uint8Array(kmdOp.skArray) });
