@@ -6,7 +6,7 @@
 * Removed Algob prefix in deployer (eg. renamed `AlgobDeployer` to `Deployer`)
 * Updated `execParams` structure & typings (input parameters for `executeTransaction`)
     * Migration: If `SignType` is `LogicSignature` then change `fromAccount` to `fromAccountAddr` and just pass from address instead of complete account.
-* [breaking] Changed the way we pass arguments to stateless smart contract - moved assignment from when we load smart contract (using `loadLogic`, `mkDelegatedLsig`, `fundLsig`) to when we create transaction execution parameters.
+* Changed the way we pass arguments to stateless smart contract - moved assignment from when we load smart contract (using `loadLogic`, `mkDelegatedLsig`, `fundLsig`) to when we create transaction execution parameters.
     * Migration: assign stateless args in txParams to `executeTransaction`. Eg
         ```js
         await deployer.loadLogic('htlc.py', [arg1]); // remove scTmplParams from here
@@ -22,6 +22,7 @@
 * Added new function `signLogicSigMultiSig` to sign logic signature by multisig.
 * Updated ASA deployment (`deployASA` function) to pass custom params and save deployed asset definition in checkpoint.
 * Support deployment and optIn methods in a transaction group (along with all other methods, using `executeTransaction`)
+* Renamed `loadBinaryMultiSig` to `loadBinaryLsig` (load signed logic signature from file in scripts)
 
 ### Commands
 * `algob test` (runs mocha in project root).

@@ -5,7 +5,7 @@ import * as algosdk from "algosdk";
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
 import { getDummyLsig, getLsig } from "../lib/lsig";
-import { blsigExt, loadBinaryMultiSig, readMsigFromFile } from "../lib/msig";
+import { blsigExt, loadBinaryLsig, readMsigFromFile } from "../lib/msig";
 import { persistCheckpoint } from "../lib/script-checkpoints";
 import type {
   ASAInfo,
@@ -164,7 +164,7 @@ class DeployerBasicMode {
    * @returns multi signed logic signature from assets/<file_name>.(b)lsig
    */
   async loadMultiSig (name: string): Promise<LogicSig> {
-    if (name.endsWith(blsigExt)) { return await loadBinaryMultiSig(name); }
+    if (name.endsWith(blsigExt)) { return await loadBinaryLsig(name); }
 
     const lsig = await getLsig(name, this.algoOp.algodClient); // get lsig from .teal (getting logic part from lsig)
     const msig = await readMsigFromFile(name); // Get decoded Msig object from .msig

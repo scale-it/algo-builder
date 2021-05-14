@@ -3,7 +3,7 @@ import path from "path";
 
 import { task } from "../internal/core/config/config-env";
 import { ASSETS_DIR } from "../internal/core/project-structure";
-import { loadBinaryMultiSig } from "../lib/msig";
+import { loadBinaryLsig } from "../lib/msig";
 import { RuntimeEnv } from "../types";
 import { writeToFile } from "./gen-accounts";
 import { TaskArgs } from "./sign-multisig";
@@ -21,14 +21,14 @@ async function multiSignLsig (
     return;
   }
 
-  const lsig = await loadBinaryMultiSig(taskArgs.file);
+  const lsig = await loadBinaryLsig(taskArgs.file);
   if (lsig.msig) {
     lsig.appendToMultisig(signerAccount.sk); // if msig is present then append signature to multisig
   } else {
     lsig.sign(signerAccount.sk); // else create single signed lsig
   }
 
-  const [name, ext] = taskArgs.file.split(".")[0];
+  const [name, ext] = taskArgs.file.split(".");
   const outFileName = taskArgs.out ?? (name + "_out." + ext);
   const outFilePath = path.join(ASSETS_DIR, outFileName);
 
