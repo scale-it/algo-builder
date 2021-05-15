@@ -24,6 +24,10 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
+  getASAInfo (name: string): ASAInfo {
+    throw new Error("Not implemented");
+  }
+
   getASADef (name: string): rtypes.ASADef {
     throw new Error("Not implemented");
   }
@@ -69,10 +73,6 @@ export class FakeDeployer implements Deployer {
   }
 
   loadMultiSig (name: string): Promise<LogicSig> {
-    throw new Error("Not implemented");
-  }
-
-  signLogicSigMultiSig (lsig: LogicSig, signer: rtypes.Account): LogicSig {
     throw new Error("Not implemented");
   }
 

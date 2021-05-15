@@ -1,6 +1,6 @@
 {
   "name": "@algo-builder/types-algosdk",
-  "version": "0.2.3",
+  "version": "1.0.0",
   "description": "Algorand SDK TypeScript Declaration File",
   "main": "",
   "typings": "index.d.ts",

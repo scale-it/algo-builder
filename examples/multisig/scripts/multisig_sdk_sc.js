@@ -4,7 +4,7 @@
    - create a signed lsig using sdk and use that lsig to validate transactions
 */
 const { executeTransaction } = require('./common/common');
-const { createMsigAddress } = require('@algo-builder/algob');
+const { createMsigAddress, signLogicSigMultiSig } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
@@ -24,8 +24,8 @@ async function run (runtimeEnv, deployer) {
    * NOTE: this is just for example purpose, in a realistic use-case user does
    * not control multiple secret keys of the multisignature account
    */
-  deployer.signLogicSigMultiSig(lsig, alice, mparams); // lsig signed by alice's secret_key (creates a new multisig)
-  deployer.signLogicSigMultiSig(lsig, john); // lsig signed again (threshold = 2) by john secret_key (appends signature to newly created msig)
+  signLogicSigMultiSig(lsig, alice, mparams); // lsig signed by alice's secret_key (creates a new multisig)
+  signLogicSigMultiSig(lsig, john); // lsig signed again (threshold = 2) by john secret_key (appends signature to newly created msig)
 
   const txnParams = {
     type: types.TransactionType.TransferAlgo,

@@ -39,7 +39,7 @@ async function run (runtimeEnv, deployer) {
 
   // use below line to append bob signature to loaded multisig from file.
   // note: not required in this case as loaded lsig has 2 signtatures & msig threshold is also 2
-  // deployer.signLogicSigMultiSig(lsig, john);
+  // signLogicSigMultiSig(lsig, john);
 
   txnParams = {
     type: types.TransactionType.TransferAlgo,

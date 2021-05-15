@@ -396,6 +396,8 @@ export interface Deployer {
    * Mapping of ASA name to deployment log */
   asa: Map<string, ASAInfo>
 
+  getASAInfo: (name: string) => ASAInfo
+
   /**
    * Sets metadata key value for a current network in the chckpoint file based on the
    * current deployment script. If run in a non deployment mode (eg `algob run script_name.js`)
@@ -545,11 +547,6 @@ export interface Deployer {
   /**
    * Extracts multi signed logic signature file from `assets/`. */
   loadMultiSig: (name: string) => Promise<LogicSig>
-
-  /**
-   * Appends signer's signature to multi-signed lsig. If multisig is not found
-   * then new multisig is created. */
-  signLogicSigMultiSig: (lsig: LogicSig, signer: rtypes.Account) => LogicSig
 
   /**
    * Queries a stateful smart contract info from checkpoint. */

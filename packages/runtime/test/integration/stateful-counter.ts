@@ -8,15 +8,16 @@ import { useFixture } from "../helpers/integration";
 
 describe("Algorand Smart Contracts - Stateful Counter example", function () {
   useFixture("stateful");
-  const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE * 10 + 1000; // 1000 to cover fee
-  const john = new AccountStore(minBalance + 1000);
+  const fee = 1000;
+  const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE * 10 + fee;
+  const john = new AccountStore(minBalance + fee);
 
   const txnParams: ExecParams = {
     type: TransactionType.CallNoOpSSC,
     sign: SignType.SecretKey,
     fromAccount: john.account,
     appId: 0,
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: fee }
   };
 
   let runtime: Runtime;
@@ -36,7 +37,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
       localInts: 8
     }, {}, approvalProgram, clearProgram);
 
-    // opt-in to app
+    // opt-in to the app
     runtime.optInToApp(john.address, txnParams.appId, {}, {});
   });
 
@@ -48,15 +49,13 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
     assert.equal(localCounter, 0n);
   });
 
-  it("should initialize global and local counter to 1 on first call", function () {
+  it("should set global and local counter to 1 on first call", function () {
     runtime.executeTx(txnParams);
 
     const globalCounter = runtime.getGlobalState(txnParams.appId, key);
-    assert.isDefined(globalCounter); // there should be a value present with key "counter"
     assert.equal(globalCounter, 1n);
 
     const localCounter = runtime.getAccount(john.address).getLocalState(txnParams.appId, key); // get local value from john account
-    assert.isDefined(localCounter); // there should be a value present in local state with key "counter"
     assert.equal(localCounter, 1n);
   });
 

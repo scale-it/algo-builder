@@ -1,10 +1,10 @@
 # Algo Builder
 
-Framework to automate development of Algorand Assets and Smart Contracts:
+The Algo Builder project is composed from the following packages:
 
-+ `algob`: tool
-+ `types/algosdk`: TypeScript typings for algosdk-js
-+ `runtime`: light algorand runtime and TEAL interpreter
++ `algob`: framework to automate development of Algorand Assets and Smart Contracts.
++ `types/algosdk`: TypeScript typings for algosdk-js.
++ `runtime`: light algorand runtime and TEAL interpreter.
 
 ## Objectives
 
@@ -14,14 +14,16 @@ Algo Builder is an trustworthy framework for Algorand dapps (Decentralized Appli
 + integrated testing framework,
 + helpful boilerplates allowing developers to focus on use-cases rather than code organization, examples
 + algorand private net
-+ tutorials to easy onramp process.
++ templates/examples and guides to easily onboard developers
 
 To attract more web developers we plan to build a JavaScript DSL for TEAL with TypeScript bindings (for TEAL inputs). Furthermore we would like to collaborate with SDKs teams to improve the overall development experience and make it ready for enterprise projects. Finally we want to collaborate with Algorand Wallet team to ensure a smooth wallet integration.
 
 
-### Documentation
+## Documentation
 
-User documentation is available in [/docs/guide](docs/guide/README) and [API docs](https://scale-it.github.io/algo-builder/).
+* [Landing Page](https://scale-it.github.io/algo-builder)
+* [User Guide](/docs/guide/README)
+* [API docs](https://scale-it.github.io/algo-builder/).
 
 The project specification is [published here](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
 
@@ -149,9 +151,9 @@ TIP: Use `tsc --watch` to update the build in a realtime while you develop the p
 
 TODO: we are planning to provide a template for TS projects. [task](https://www.pivotaltracker.com/n/projects/2452320).
 
-## Templates
+## dApp Templates
 
-In the `Algo-Builder-Templates` [repository](https://github.com/scale-it/algo-builder-templates), several templates can be found to use as a base for implementing dApps.
+In the `Algo Builder dApp Templates` [repository](https://github.com/scale-it/algo-builder-templates), several templates can be found to use as a base for implementing dApps.
 
 Using the `algob unbox-template` command, the developers can get a pre-built dApp project containing scripts to deploy assets and smart contracts with react.js interactive frontend. The templates use [AlgoSigner](https://github.com/PureStake/algosigner) to securely sign and send transactions to an Algorand Blockchain Network.
 
