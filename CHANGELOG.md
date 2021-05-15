@@ -2,6 +2,10 @@
 
 ## unreleased
 
+### Improvements
+* Update how error is displayed to a user
+* Add Update stateful smart contracts using execute transaction in runtime
+
 ## v1.0 2021-05-14
 
 New website: https://scale-it.github.io/algo-builder
@@ -32,7 +36,6 @@ New website: https://scale-it.github.io/algo-builder
   * Added [`deployer.optInLsigToSSC`](https://scale-it.github.io/algo-builder/api/algob/interfaces/types.deployer.html#optinlsigtossc) and [`deployer.optInLsigToASA`](https://scale-it.github.io/algo-builder/api/algob/interfaces/types.deployer.html#optinlsigtoasa) to easily opt-in stateless smart contract (lsig) account to stateful smart contract and ASA.
 * Asset related `execParams` (transaction parameters for [`executeTransaction`](https://scale-it.github.io/algo-builder/api/algob/modules.html#executetransaction)) support ASA by name and by ID (previously only ASA ID was supported). [Example](https://github.com/scale-it/algo-builder/blob/master/examples/asa/scripts/transfer/gold-delegated-lsig.js#L22).
 * cleaned test suite log (when developing Algo Builder itself). Our test suite has 884 tests.
-
 
 ### Commands
 We added new commands:
