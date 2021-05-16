@@ -10,7 +10,7 @@
     "algob": "algob",
     "lint": "eslint --ext .js,.ts scripts",
     "lint:fix": "eslint --fix --ext .js,.ts scripts",
-    "test": "algob test",
+    "test": "mocha",
     "build:docs": "echo ok",
     "build": "echo ok"
   }

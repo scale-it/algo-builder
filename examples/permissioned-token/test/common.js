@@ -24,7 +24,7 @@ let CONTROLLER_PROGRAM;
 let PERMISSIONS_PROGRAM;
 const CLEAR_STATE_PROGRAM = getProgram(CLEAR_STATE);
 
-const TRANSFER = 'str:transfer';
+const TRANSFER_ARG = 'str:transfer';
 
 // Sync Accounts
 function syncAccounts (runtime) {
@@ -116,9 +116,7 @@ function whitelist (runtime, manager, address, assetIndex, controllerAppID, perm
     appId: permissionsAppId,
     payFlags: { totalFee: 1000 },
     appArgs: ['str:add_whitelist'],
-    accounts: [address],
-    foreignAssets: [assetIndex],
-    foreignApps: [controllerAppID]
+    accounts: [address]
   });
 }
 
@@ -158,9 +156,8 @@ function transfer (runtime, from, to, amount, assetIndex, controllerAppID, permi
       fromAccount: from.account,
       appId: controllerAppID,
       payFlags: { totalFee: 1000 },
-      appArgs: [TRANSFER],
+      appArgs: [TRANSFER_ARG],
       accounts: [to.address]
-
     },
     {
       type: types.TransactionType.RevokeAsset,
@@ -187,7 +184,7 @@ function transfer (runtime, from, to, amount, assetIndex, controllerAppID, permi
       fromAccount: from.account,
       appId: permissionsAppId,
       payFlags: { totalFee: 1000 },
-      appArgs: [TRANSFER],
+      appArgs: [TRANSFER_ARG],
       accounts: [from.address, to.address]
     }
   ];
@@ -264,7 +261,7 @@ function forceTransfer (
       fromAccount: manager.account,
       appId: permissionsAppId,
       payFlags: { totalFee: 1000 },
-      appArgs: [TRANSFER],
+      appArgs: [TRANSFER_ARG],
       accounts: [from.address, to.address]
     }
   ];
@@ -289,7 +286,6 @@ function setupEnv () {
     localBytes: 0,
     globalInts: 2,
     globalBytes: 0,
-    appArgs: [`int:${assetIndex}`],
     foreignAssets: [assetIndex]
   };
   CONTROLLER_PROGRAM = getProgram(CONTROLLER, { TOKEN_ID: assetIndex });

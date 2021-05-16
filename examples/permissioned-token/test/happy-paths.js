@@ -13,7 +13,7 @@ const {
   setupEnv
 } = require('./common');
 
-describe('Permissioned Token Tests -- Happy Paths', function () {
+describe('Permissioned Token Tests - Happy Paths', function () {
   let runtime, master, alice, bob, elon;
   let lsig, assetIndex, controllerAppID, permissionsAppId;
 
@@ -57,13 +57,15 @@ describe('Permissioned Token Tests -- Happy Paths', function () {
 
   it('WhiteListing', () => {
     // Only asset manager can whitelist
-    const address = elon.address;
-    optInToPermissions(runtime, address, permissionsAppId);
+    const elonAddr = elon.address;
+    optInToPermissions(runtime, elonAddr, permissionsAppId);
     syncAccounts();
     assert.isDefined(elon.getAppFromLocal(permissionsAppId));
 
     // Works with correct ASA manager
-    whitelist(runtime, alice, address, assetIndex, controllerAppID, permissionsAppId);
+    const asaDef = runtime.getAssetDef(assetIndex);
+    assert.equal(asaDef.manager, alice.address);
+    whitelist(runtime, alice, elonAddr, assetIndex, controllerAppID, permissionsAppId);
     syncAccounts();
     assert.equal(
       Number(elon.getLocalState(permissionsAppId, 'whitelisted')),
@@ -78,7 +80,7 @@ describe('Permissioned Token Tests -- Happy Paths', function () {
     issue(runtime, alice, elon, 20, controllerAppID, assetIndex, lsig);
     syncAccounts();
     assert.equal(
-      Number(runtime.getAssetHolding(assetIndex, elon.address).amount),
+      runtime.getAssetHolding(assetIndex, elon.address).amount,
       20
     );
 
@@ -86,7 +88,7 @@ describe('Permissioned Token Tests -- Happy Paths', function () {
     optOut(runtime, alice, elon, assetIndex);
     syncAccounts();
     assert.equal(
-      Number(runtime.getAssetHolding(assetIndex, elon.address).amount),
+      runtime.getAssetHolding(assetIndex, elon.address).amount,
       0
     );
   });
