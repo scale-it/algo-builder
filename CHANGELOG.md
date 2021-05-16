@@ -2,6 +2,12 @@
 
 ## unreleased
 
+
+## v1.0.1 2021-05-16
+
+* Fixed dependency for `@algo-builder/algob`.
+
+
 ## v1.0 2021-05-14
 
 New website: https://scale-it.github.io/algo-builder
