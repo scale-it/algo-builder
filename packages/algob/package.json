@@ -80,7 +80,7 @@
     "time-require": "^0.1.2"
   },
   "dependencies": {
-    "@algo-builder/runtime": "^0.1.3",
+    "@algo-builder/runtime": "^1.0.0",
     "algosdk": "algorand/js-algorand-sdk.git#9a5824782511dff1f521c68fe54d562b3872d1ae",
     "chalk": "^4.1.0",
     "debug": "^4.1.1",
