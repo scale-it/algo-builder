@@ -2,15 +2,26 @@
 
 ## unreleased
 
+### API breaking
+
 ### Improvements
 * Update how error is displayed to a user
 * Add Update stateful smart contracts using execute transaction in runtime
+
+
+### Bug fixes
+
+
+## v1.0.1 2021-05-16
+
+* Fixed dependency for `@algo-builder/algob`.
+
 
 ## v1.0 2021-05-14
 
 New website: https://scale-it.github.io/algo-builder
 
-### Breaking
+### API breaking
 * Removed Algob prefix in deployer (eg. renamed `AlgobDeployer` to `Deployer`)
 * Updated `execParams` structure & typings (input parameters for `executeTransaction`)
     * Migration: If `SignType` is `LogicSignature` then change `fromAccount` to `fromAccountAddr` and just pass from address instead of complete account.
