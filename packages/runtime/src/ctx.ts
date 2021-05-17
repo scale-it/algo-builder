@@ -275,6 +275,18 @@ export class Ctx implements Context {
   }
 
   /**
+   * Update Apps
+   * @param appID  Application index
+   * @param approvalProgram new approval program
+   * @param clearProgram new clear program
+   */
+  updateApp (appID: number, approvalProgram: string, clearProgram: string): void {
+    const updatedApp = this.getApp(appID); // get app after updating store
+    updatedApp["approval-program"] = approvalProgram;
+    updatedApp["clear-state-program"] = clearProgram;
+  }
+
+  /**
    * Process transactions in ctx
    * - Runs TEAL code if associated with transaction
    * - Executes the transaction on ctx
@@ -316,6 +328,13 @@ export class Ctx implements Context {
           const appParams = this.getApp(txnParam.appId);
           this.runtime.run(appParams[approvalProgram], ExecutionMode.STATEFUL);
           this.closeApp(fromAccountAddr, txnParam.appId);
+          break;
+        }
+        case TransactionType.UpdateSSC: {
+          this.tx = this.gtxs[idx]; // update current tx to the requested index
+          const appParams = this.getApp(txnParam.appID);
+          this.runtime.run(appParams[approvalProgram], ExecutionMode.STATEFUL);
+          this.updateApp(txnParam.appID, txnParam.newApprovalProgram, txnParam.newClearProgram);
           break;
         }
         case TransactionType.ClearSSC: {
