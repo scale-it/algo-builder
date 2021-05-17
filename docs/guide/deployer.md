@@ -49,28 +49,28 @@ For opting in to ASA, `deployer` supports two methods :-
     To opt in to ASA you can use either `Asset Index` or `name of the ASA`. Using Asset Index is useful when asset is not deployed using deployer.
 
 - There is one more method which you can use to opt-in, It can be used with group transactions also
-- `executeTransaction` to opt-in single account or contract account to ASA.
-- Ex: To opt-in a single account, Params will look like this:
-```js
-   const execParam: ExecParams = {
-    type: TransactionType.OptInASA,
-    sign: SignType.SecretKey,
-    fromAccount: user.account,
-    assetID: assetID,
-    payFlags: payFlags
-  };
-```
-- Ex: To opt-in to a contract account
-```js
-   const execParam: ExecParams = {
-    type: TransactionType.OptInASA,
-    sign: SignType.LogicSignature,
-    fromAccountAddr: lsig.address(),
-    assetID: assetID,
-    payFlags: payFlags
-    lsig: lsig
-  };
-```
+  - `executeTransaction` to opt-in single account or contract account to ASA.
+  - Ex: To opt-in a single account, Params will look like this:
+  ```js
+    const execParam: ExecParams = {
+      type: TransactionType.OptInASA,
+      sign: SignType.SecretKey,
+      fromAccount: user.account,
+      assetID: assetID,
+      payFlags: payFlags
+    };
+  ```
+  - Ex: To opt-in to a contract account
+  ```js
+    const execParam: ExecParams = {
+      type: TransactionType.OptInASA,
+      sign: SignType.LogicSignature,
+      fromAccountAddr: lsig.address(),
+      assetID: assetID,
+      payFlags: payFlags
+      lsig: lsig
+    };
+  ```
 
 ### Smart contracts
 
@@ -90,34 +90,34 @@ You can learn more about Stateful Smart Contracts [here](https://developer.algor
 
 #### OptIn to SSC
 
-For opting in to SSC, `deployer` supports two methods :-
+For opting in to SSC, `deployer` supports following methods :-
 - `optInAcountToSSC` to opt-in to a single account signed by secret key of sender.
 - `optInLsigToSSC` to opt-in to a contract account (say escrow) where the account is represented by the logic signature address (`lsig.address()`).
-  - To opt in to SSC you can use `Application Index`.
+  - To opt in to SSC you can use `Application Index`.[When the smart contract is created the network will return a unique ApplicationID. This ID can then be used to make ApplicationCall transactions to the smart contract. ](https://developer.algorand.org/docs/features/asc1/stateful/#call-the-stateful-smart-contract)
 
-- There is one more method which you can use to opt-in, It can be used with group transactions also
-- `executeTransaction` to opt-in single account or contract account to SSC.
-- Ex: To opt-in a single account, Params will look like this:
-```js
-   const execParam: ExecParams = {
-    type: TransactionType.OptInSSC,
-    sign: SignType.SecretKey,
-    fromAccount: user.account,
-    appID: appID,
-    payFlags: payFlags
-  };
-```
-- Ex: To opt-in to a contract account
-```js
-   const execParam: ExecParams = {
-    type: TransactionType.OptInSSC,
-    sign: SignType.LogicSignature,
-    fromAccountAddr: lsig.address(),
-    appID: appID,
-    payFlags: payFlags
-    lsig: lsig
-  };
-```
+- Like with ASA, we can also use `executeTransaction` to opt-in a single account or contract account to SSC.
+  - `executeTransaction` to opt-in single account or contract account to SSC.
+  - Ex: To opt-in a single account, Params will look like this:
+  ```js
+    const execParam: ExecParams = {
+      type: TransactionType.OptInSSC,
+      sign: SignType.SecretKey,
+      fromAccount: user.account,
+      appID: appID,
+      payFlags: payFlags
+    };
+  ```
+  - Ex: To opt-in to a contract account
+  ```js
+    const execParam: ExecParams = {
+      type: TransactionType.OptInSSC,
+      sign: SignType.LogicSignature,
+      fromAccountAddr: lsig.address(),
+      appID: appID,
+      payFlags: payFlags
+      lsig: lsig
+    };
+  ```
 
 #### Stateless Smart Contracts
 
