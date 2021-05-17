@@ -1,0 +1,119 @@
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l21
+txn OnCompletion
+int DeleteApplication
+==
+bnz l20
+txn OnCompletion
+int UpdateApplication
+==
+bnz l10
+txn OnCompletion
+int CloseOut
+==
+bnz l9
+txn OnCompletion
+int OptIn
+==
+bnz l8
+txn OnCompletion
+int NoOp
+==
+bnz l7
+err
+l7:
+int 1
+return
+l8:
+int 1
+return
+l9:
+int 1
+return
+l10:
+byte "counter"
+app_global_get
+int 2
+%
+int 0
+==
+bnz l16
+byte "counter"
+app_global_get
+int 2
+%
+int 0
+!=
+bnz l13
+err
+l13:
+byte "total"
+byte "total"
+app_global_get
+txna ApplicationArgs 0
+btoi
+-
+app_global_put
+byte "counter"
+byte "counter"
+app_global_get
+int 1
++
+app_global_put
+txn NumAppArgs
+int 1
+==
+txna ApplicationArgs 0
+btoi
+int 1
+>=
+&&
+bnz l15
+err
+l15:
+int 1
+return
+l16:
+byte "total"
+byte "total"
+app_global_get
+txna ApplicationArgs 0
+btoi
++
+app_global_put
+byte "counter"
+byte "counter"
+app_global_get
+int 1
++
+app_global_put
+txn NumAppArgs
+int 1
+==
+txna ApplicationArgs 0
+btoi
+int 1
+>=
+&&
+bnz l18
+err
+l18:
+int 1
+return
+b l22
+l20:
+int 1
+return
+l21:
+byte "counter"
+int 0
+app_global_put
+byte "total"
+int 10
+app_global_put
+int 1
+return
+l22:
