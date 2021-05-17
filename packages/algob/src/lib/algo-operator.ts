@@ -1,4 +1,5 @@
 import { encodeNote, mkTransaction, types as rtypes } from "@algo-builder/runtime";
+import { ExecParams } from "@algo-builder/runtime/build/types";
 import algosdk, { LogicSig } from "algosdk";
 
 import { BuilderError } from "../internal/core/errors";
@@ -43,6 +44,15 @@ export interface AlgoOperator {
     payFlags: rtypes.TxParams,
     txWriter: txWriter,
     scTmplParams?: SCParams) => Promise<SSCInfo>
+  updateSSC: (
+    sender: algosdk.Account,
+    payFlags: rtypes.TxParams,
+    appId: number,
+    newApprovalProgram: string,
+    newClearProgram: string,
+    flags: rtypes.SSCOptionalFlags,
+    txWriter: txWriter
+  ) => Promise<SSCInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
   getAssetByID: (assetIndex: number | bigint) => Promise<algosdk.AssetInfo>
   optInAcountToASA: (
@@ -342,6 +352,70 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
     return {
       creator: flags.sender.addr,
+      txId: txInfo.txId,
+      confirmedRound: confirmedTxInfo[confirmedRound],
+      appID: appId
+    };
+  }
+
+  /**
+   * Update programs for a contract.
+   * @param sender Account from which call needs to be made
+   * @param payFlags Transaction Flags
+   * @param appId ID of the application being configured or empty if creating
+   * @param newApprovalProgram New Approval Program filename
+   * @param newClearProgram New Clear Program filename
+   * @param flags Optional parameters to SSC (accounts, args..)
+   */
+  async updateSSC (
+    sender: algosdk.Account,
+    payFlags: rtypes.TxParams,
+    appID: number,
+    newApprovalProgram: string,
+    newClearProgram: string,
+    flags: rtypes.SSCOptionalFlags,
+    txWriter: txWriter
+  ): Promise<SSCInfo> {
+    const params = await tx.mkTxParams(this.algodClient, payFlags);
+
+    const app = await this.ensureCompiled(newApprovalProgram, false);
+    const approvalProg = new Uint8Array(Buffer.from(app.compiled, "base64"));
+    const clear = await this.ensureCompiled(newClearProgram, false);
+    const clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
+
+    const execParam: ExecParams = {
+      type: rtypes.TransactionType.UpdateSSC,
+      sign: rtypes.SignType.SecretKey,
+      fromAccount: sender,
+      appID: appID,
+      newApprovalProgram: newApprovalProgram,
+      newClearProgram: newClearProgram,
+      approvalProg: approvalProg,
+      clearProg: clearProg,
+      payFlags: payFlags,
+      accounts: flags.accounts,
+      foreignApps: flags.foreignApps,
+      foreignAssets: flags.foreignAssets,
+      appArgs: flags.appArgs,
+      note: flags.note,
+      lease: flags.lease
+    };
+
+    const txn = mkTransaction(execParam, params);
+    const txId = txn.txID().toString();
+    const signedTxn = txn.signTxn(sender.sk);
+
+    const txInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
+    const confirmedTxInfo = await this.waitForConfirmation(txId);
+
+    const appId = confirmedTxInfo['application-index'];
+    const message = `Signed transaction with txID: ${txId}\nCreated new app-id: ${appId}`; // eslint-disable-line @typescript-eslint/restrict-template-expressions
+
+    console.log(message);
+    txWriter.push(message, confirmedTxInfo);
+
+    return {
+      creator: sender.addr,
       txId: txInfo.txId,
       confirmedRound: confirmedTxInfo[confirmedRound],
       appID: appId

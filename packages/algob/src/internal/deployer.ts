@@ -1,4 +1,4 @@
-import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
+import { overrideASADef, parseSSCAppArgs, types as rtypes } from "@algo-builder/runtime";
 import type { LogicSig, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
 
@@ -450,7 +450,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     scTmplParams?: SCParams): Promise<SSCInfo> {
     const name = approvalProgram + "-" + clearProgram;
     this.assertNoAsset(name);
-    let sscInfo = {} as any;
+    let sscInfo = {} as SSCInfo;
     try {
       sscInfo = await this.algoOp.deploySSC(
         approvalProgram, clearProgram, flags, payFlags, this.txWriter, scTmplParams);
@@ -461,6 +461,43 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
       throw error;
     }
 
+    // TODO: register update ssc checkpoints in a nested way with timestamp
+    this.registerSSCInfo(name, sscInfo);
+
+    return sscInfo;
+  }
+
+  /**
+   * Update programs for a contract.
+   * @param sender Account from which call needs to be made
+   * @param payFlags Transaction Flags
+   * @param appId ID of the application being configured or empty if creating
+   * @param newApprovalProgram New Approval Program filename
+   * @param newClearProgram New Clear Program filename
+   * @param flags Optional parameters to SSC (accounts, args..)
+   */
+  async updateSSC (
+    sender: algosdk.Account,
+    payFlags: rtypes.TxParams,
+    appID: number,
+    newApprovalProgram: string,
+    newClearProgram: string,
+    flags: rtypes.SSCOptionalFlags
+  ): Promise<SSCInfo> {
+    const name = newApprovalProgram + "-" + newClearProgram;
+
+    let sscInfo = {} as SSCInfo;
+    try {
+      sscInfo = await this.algoOp.updateSSC(sender, payFlags, appID,
+        newApprovalProgram, newClearProgram, flags, this.txWriter);
+    } catch (error) {
+      this.persistCP();
+
+      console.log(error);
+      throw error;
+    }
+
+    // TODO: register update ssc checkpoints in a nested way with timestamp
     this.registerSSCInfo(name, sscInfo);
 
     return sscInfo;
@@ -539,6 +576,19 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     scInitParam?: unknown): Promise<SSCInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deploySSC"
+    });
+  }
+
+  async updateSSC (
+    sender: algosdk.Account,
+    payFlags: rtypes.TxParams,
+    appId: number,
+    newApprovalProgram: string,
+    newClearProgram: string,
+    flags: rtypes.SSCOptionalFlags
+  ): Promise<SSCInfo> {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "updateSSC"
     });
   }
 }

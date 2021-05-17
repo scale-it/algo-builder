@@ -1,5 +1,5 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import type { LogicSig, LogicSigArgs } from "algosdk";
+import type { LogicSig } from "algosdk";
 import * as algosdk from "algosdk";
 
 import * as types from "./internal/core/params/argument-types";
@@ -483,6 +483,24 @@ export interface Deployer {
     flags: rtypes.SSCDeploymentFlags,
     payFlags: rtypes.TxParams,
     scTmplParams?: SCParams) => Promise<SSCInfo>
+
+  /**
+   * Update programs for a contract.
+   * @param sender Account from which call needs to be made
+   * @param payFlags Transaction Flags
+   * @param appId ID of the application being configured or empty if creating
+   * @param newApprovalProgram New Approval Program filename
+   * @param newClearProgram New Clear Program filename
+   * @param flags Optional parameters to SSC (accounts, args..)
+   */
+  updateSSC: (
+    sender: algosdk.Account,
+    payFlags: rtypes.TxParams,
+    appId: number,
+    newApprovalProgram: string,
+    newClearProgram: string,
+    flags: rtypes.SSCOptionalFlags
+  ) => Promise<SSCInfo>
 
   /**
    * Returns true if ASA or DelegatedLsig or SSC were deployed in any script.
