@@ -46,8 +46,7 @@ await deployer.deployASA("ASA-2", {...}, { reserve: multsigaddr }); // this will
 For opting in to ASA, `deployer` supports two methods :-
 - `optInAcountToASA` to opt-in to a single account signed by secret key of sender.
 - `optInLsigToASA` to opt-in to a contract account (say escrow) where the account is represented by the logic signature address (`lsig.address()`).
-    - To opt in to ASA you can use either `Asset Index` or `name of the ASA`.
-    - Using Asset Index is useful when asset is not deployed using deployer.
+    To opt in to ASA you can use either `Asset Index` or `name of the ASA`. Using Asset Index is useful when asset is not deployed using deployer.
 
 - There is one more method which you can use to opt-in, It can be used with group transactions also
 - `executeTransaction` to opt-in single account or contract account to ASA.
