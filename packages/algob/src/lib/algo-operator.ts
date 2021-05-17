@@ -354,7 +354,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
       creator: flags.sender.addr,
       txId: txInfo.txId,
       confirmedRound: confirmedTxInfo[confirmedRound],
-      appID: appId
+      appID: appId,
+      timestamp: Math.round(+new Date() / 1000)
     };
   }
 
@@ -409,7 +410,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const confirmedTxInfo = await this.waitForConfirmation(txId);
 
     const appId = confirmedTxInfo['application-index'];
-    const message = `Signed transaction with txID: ${txId}\nCreated new app-id: ${appId}`; // eslint-disable-line @typescript-eslint/restrict-template-expressions
+    const message = `Signed transaction with txID: ${txId}\nUpdated app-id: ${appId}`; // eslint-disable-line @typescript-eslint/restrict-template-expressions
 
     console.log(message);
     txWriter.push(message, confirmedTxInfo);
@@ -418,7 +419,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
       creator: sender.addr,
       txId: txInfo.txId,
       confirmedRound: confirmedTxInfo[confirmedRound],
-      appID: appId
+      appID: appId,
+      timestamp: Math.round(+new Date() / 1000)
     };
   }
 

@@ -320,6 +320,7 @@ export interface ASAInfo extends DeployedAssetInfo {
 // Stateful smart contract deployment information (log)
 export interface SSCInfo extends DeployedAssetInfo {
   appID: number
+  timestamp: number
 }
 
 // stateless smart contract deployment information (log)
