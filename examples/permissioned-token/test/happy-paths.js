@@ -2,7 +2,7 @@ const { types } = require('@algo-builder/runtime');
 const { assert } = require('chai');
 const {
   optInToASA,
-  optInToPermissions,
+  optInToPermissionsSSC,
   issue,
   whitelist,
   fund,
@@ -44,28 +44,28 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     // Can issue after opting-in
     optInToASA(runtime, elon.address, assetIndex);
     syncAccounts();
-    issue(runtime, alice, elon, 20, controllerAppID, assetIndex, lsig);
+    issue(runtime, alice.account, elon, 20, controllerAppID, assetIndex, lsig);
     syncAccounts();
     assert.equal(20, runtime.getAssetHolding(assetIndex, elon.address).amount);
   });
 
   it('Kill Token', () => {
     // Works as correct ASA manager is passed
-    killToken(runtime, alice, controllerAppID);
-    assert.throws(() => issue(runtime, alice, elon, 20, controllerAppID, assetIndex, lsig), 'RUNTIME_ERR1009');
+    killToken(runtime, alice.account, controllerAppID);
+    assert.throws(() => issue(runtime, alice.account, elon, 20, controllerAppID, assetIndex, lsig), 'RUNTIME_ERR1009');
   });
 
   it('WhiteListing', () => {
     // Only asset manager can whitelist
     const elonAddr = elon.address;
-    optInToPermissions(runtime, elonAddr, permissionsAppId);
+    optInToPermissionsSSC(runtime, elonAddr, permissionsAppId);
     syncAccounts();
     assert.isDefined(elon.getAppFromLocal(permissionsAppId));
 
     // Works with correct ASA manager
     const asaDef = runtime.getAssetDef(assetIndex);
     assert.equal(asaDef.manager, alice.address);
-    whitelist(runtime, alice, elonAddr, assetIndex, controllerAppID, permissionsAppId);
+    whitelist(runtime, alice.account, elonAddr, permissionsAppId);
     syncAccounts();
     assert.equal(
       Number(elon.getLocalState(permissionsAppId, 'whitelisted')),
@@ -77,7 +77,7 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     // Opt-In
     optInToASA(runtime, elon.address, assetIndex);
     syncAccounts();
-    issue(runtime, alice, elon, 20, controllerAppID, assetIndex, lsig);
+    issue(runtime, alice.account, elon, 20, controllerAppID, assetIndex, lsig);
     syncAccounts();
     assert.equal(
       runtime.getAssetHolding(assetIndex, elon.address).amount,
@@ -85,7 +85,7 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     );
 
     // Works because opted-in
-    optOut(runtime, alice, elon, assetIndex);
+    optOut(runtime, alice.address, elon.account, assetIndex);
     syncAccounts();
     assert.equal(
       runtime.getAssetHolding(assetIndex, elon.address).amount,
@@ -95,7 +95,7 @@ describe('Permissioned Token Tests - Happy Paths', function () {
 
   it('Change Permissions SSC Manager', () => {
     // Optin In new SSC manager to the SSC
-    optInToPermissions(runtime, elon.address, permissionsAppId);
+    optInToPermissionsSSC(runtime, elon.address, permissionsAppId);
     syncAccounts();
 
     const txn = {
@@ -111,14 +111,14 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     // works as fromAccount is the current SSC manager
     runtime.executeTx(txn);
     syncAccounts();
-    whitelist(runtime, elon, bob.address, assetIndex, controllerAppID, permissionsAppId);
+    whitelist(runtime, elon.account, bob.address, permissionsAppId);
   });
 
   it('Force Transfer', () => {
     // Opt-In to permissions SSC & Whitelist
-    whitelist(runtime, alice, alice.address, assetIndex, controllerAppID, permissionsAppId);
-    whitelist(runtime, alice, elon.address, assetIndex, controllerAppID, permissionsAppId);
-    whitelist(runtime, alice, bob.address, assetIndex, controllerAppID, permissionsAppId);
+    whitelist(runtime, alice.account, alice.address, permissionsAppId);
+    whitelist(runtime, alice.account, elon.address, permissionsAppId);
+    whitelist(runtime, alice.account, bob.address, permissionsAppId);
     syncAccounts();
 
     // Opt-In to ASA
@@ -127,7 +127,7 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     syncAccounts();
 
     // Issue some tokens to sender
-    issue(runtime, alice, bob, 150, controllerAppID, assetIndex, lsig);
+    issue(runtime, alice.account, bob, 150, controllerAppID, assetIndex, lsig);
     syncAccounts();
 
     // Successful transfer
@@ -173,13 +173,13 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     optInToASA(runtime, elon.address, assetIndex);
     optInToASA(runtime, bob.address, assetIndex);
     syncAccounts();
-    issue(runtime, alice, elon, 50, controllerAppID, assetIndex, lsig);
-    issue(runtime, alice, bob, 50, controllerAppID, assetIndex, lsig);
+    issue(runtime, alice.account, elon, 50, controllerAppID, assetIndex, lsig);
+    issue(runtime, alice.account, bob, 50, controllerAppID, assetIndex, lsig);
     syncAccounts();
 
     // Successful transfer after being whitelisted
-    whitelist(runtime, alice, elon.address, assetIndex, controllerAppID, permissionsAppId);
-    whitelist(runtime, alice, bob.address, assetIndex, controllerAppID, permissionsAppId);
+    whitelist(runtime, alice.account, elon.address, permissionsAppId);
+    whitelist(runtime, alice.account, bob.address, permissionsAppId);
     syncAccounts();
     assert.isDefined(elon.getAppFromLocal(permissionsAppId));
     assert.isDefined(bob.getAppFromLocal(permissionsAppId));

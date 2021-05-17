@@ -2,7 +2,7 @@ const { types } = require('@algo-builder/runtime');
 const { assert } = require('chai');
 const {
   optInToASA,
-  optInToPermissions,
+  optInToPermissionsSSC,
   issue,
   whitelist,
   fund,
@@ -13,6 +13,7 @@ const {
   setupEnv
 } = require('./common');
 
+const STR_TRANSFER = 'str:transfer';
 describe('Permissioned Token Tests - Failing Paths', function () {
   let runtime, master, alice, bob, elon;
   let lsig, assetIndex, controllerAppID, permissionsAppId;
@@ -43,27 +44,27 @@ describe('Permissioned Token Tests - Failing Paths', function () {
   it('Token Issuance - Cannot issue before opt-in or after token is killed', () => {
     // Cannot issue before opt-in to ASA by receiver
     // RUNTIME_ERR1404 : Account doesn't hold asset index
-    assert.throws(() => issue(runtime, alice, elon, 20, controllerAppID, assetIndex, lsig), 'RUNTIME_ERR1404');
+    assert.throws(() => issue(runtime, alice.account, elon, 20, controllerAppID, assetIndex, lsig), 'RUNTIME_ERR1404');
 
     // Opting-in
     optInToASA(runtime, elon.address, assetIndex);
     syncAccounts();
 
     // Cannot issue after killing token
-    killToken(runtime, alice, controllerAppID);
+    killToken(runtime, alice.account, controllerAppID);
     // RUNTIME_ERR1009 : TEAL encountered err opcode
-    assert.throws(() => issue(runtime, alice, elon, 20, controllerAppID, assetIndex, lsig), 'RUNTIME_ERR1009');
+    assert.throws(() => issue(runtime, alice.account, elon, 20, controllerAppID, assetIndex, lsig), 'RUNTIME_ERR1009');
   });
 
   it('Kill Token - Only ASA manager or Permissions Manager can kill', () => {
     // RUNTIME_ERR1009 : TEAL encountered err opcode
-    assert.throws(() => killToken(runtime, bob, controllerAppID), 'RUNTIME_ERR1009');
+    assert.throws(() => killToken(runtime, bob.account, controllerAppID), 'RUNTIME_ERR1009');
   });
 
   it('WhiteListing - Only ASA/Permissions manager can perform whitelist', () => {
     // Only asset manager/permissions manager can whitelist
     const address = elon.address;
-    optInToPermissions(runtime, address, permissionsAppId);
+    optInToPermissionsSSC(runtime, address, permissionsAppId);
     syncAccounts();
     assert.isDefined(elon.getAppFromLocal(permissionsAppId));
 
@@ -83,17 +84,17 @@ describe('Permissioned Token Tests - Failing Paths', function () {
   it('Opt Out - User should be opted-in first', () => {
     // Opt-out wont work without opting in
     // RUNTIME_ERR1404 : Account doesn't hold asset index
-    assert.throws(() => optOut(runtime, alice, elon, assetIndex), 'RUNTIME_ERR1404');
+    assert.throws(() => optOut(runtime, alice.address, elon.account, assetIndex), 'RUNTIME_ERR1404');
   });
 
   it('Change Permissions SSC Manager - Only current Permissions manager can perform this', () => {
     // Optin In new SSC manager to the SSC
-    optInToPermissions(runtime, elon.address, permissionsAppId);
+    optInToPermissionsSSC(runtime, elon.address, permissionsAppId);
     syncAccounts();
 
     // whitelist operation can only be performed by permissions SSC manager
     // RUNTIME_ERR1009 : TEAL encountered err opcode
-    assert.throws(() => whitelist(runtime, elon, bob.address, assetIndex, controllerAppID, permissionsAppId), 'RUNTIME_ERR1009');
+    assert.throws(() => whitelist(runtime, elon.account, bob.address, permissionsAppId), 'RUNTIME_ERR1009');
 
     const txn = {
       type: types.TransactionType.CallNoOpSSC,
@@ -112,9 +113,9 @@ describe('Permissioned Token Tests - Failing Paths', function () {
 
   it('Force Transfer - Only Permissions manager can perform this', () => {
     // Opt-In to permissions SSC & Whitelist
-    whitelist(runtime, alice, alice.address, assetIndex, controllerAppID, permissionsAppId);
-    whitelist(runtime, alice, elon.address, assetIndex, controllerAppID, permissionsAppId);
-    whitelist(runtime, alice, bob.address, assetIndex, controllerAppID, permissionsAppId);
+    whitelist(runtime, alice.account, alice.address, permissionsAppId);
+    whitelist(runtime, alice.account, elon.address, permissionsAppId);
+    whitelist(runtime, alice.account, bob.address, permissionsAppId);
     syncAccounts();
 
     // Opt-In to ASA
@@ -123,7 +124,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
     syncAccounts();
 
     // Issue some tokens to sender
-    issue(runtime, alice, bob, 150, controllerAppID, assetIndex, lsig);
+    issue(runtime, alice.account, bob, 150, controllerAppID, assetIndex, lsig);
     syncAccounts();
 
     // Fails as only manager(alice) can perform force transfer
@@ -153,8 +154,8 @@ describe('Permissioned Token Tests - Failing Paths', function () {
     optInToASA(runtime, elon.address, assetIndex);
     optInToASA(runtime, bob.address, assetIndex);
     syncAccounts();
-    issue(runtime, alice, elon, 60, controllerAppID, assetIndex, lsig);
-    issue(runtime, alice, bob, 50, controllerAppID, assetIndex, lsig);
+    issue(runtime, alice.account, elon, 60, controllerAppID, assetIndex, lsig);
+    issue(runtime, alice.account, bob, 50, controllerAppID, assetIndex, lsig);
     syncAccounts();
 
     // Cannot transfer directly, must call clawback
@@ -173,27 +174,27 @@ describe('Permissioned Token Tests - Failing Paths', function () {
     assert.isUndefined(elon.getAppFromLocal(permissionsAppId));
     assert.throws(() =>
       transfer(runtime, bob, elon, amount, assetIndex, controllerAppID, permissionsAppId, lsig),
-      'RUNTIME_ERR1009'
+    'RUNTIME_ERR1009'
     );
 
     // Both sender and receiver needs to be whitelisted before transferring tokens
     // RUNTIME_ERR1009 : TEAL encountered err opcode
-    whitelist(runtime, alice, bob.address, assetIndex, controllerAppID, permissionsAppId);
+    whitelist(runtime, alice.account, bob.address, permissionsAppId);
     syncAccounts();
     assert.isDefined(bob.getAppFromLocal(permissionsAppId));
     assert.throws(() =>
       transfer(runtime, bob, elon, amount, assetIndex, controllerAppID, permissionsAppId, lsig),
-      'RUNTIME_ERR1009'
+    'RUNTIME_ERR1009'
     );
 
-    // Cannot transfer as receiver will have more than 100 Tokens 
+    // Cannot transfer as receiver will have more than 100 Tokens
     // RUNTIME_ERR1009 : TEAL encountered err opcode
-    whitelist(runtime, alice, elon.address, assetIndex, controllerAppID, permissionsAppId);
+    whitelist(runtime, alice.account, elon.address, permissionsAppId);
     syncAccounts();
     assert.isDefined(elon.getAppFromLocal(permissionsAppId));
     assert.throws(() =>
       transfer(runtime, bob, elon, 50, assetIndex, controllerAppID, permissionsAppId, lsig),
-      'RUNTIME_ERR1009'
+    'RUNTIME_ERR1009'
     );
 
     // Call to the Controller App is necessary
@@ -224,13 +225,13 @@ describe('Permissioned Token Tests - Failing Paths', function () {
         fromAccount: bob.account,
         appId: permissionsAppId,
         payFlags: { totalFee: 1000 },
-        appArgs: ['str:transfer'],
+        appArgs: [STR_TRANSFER],
         accounts: [bob.address, elon.address]
       }
     ];
     assert.throws(() =>
       runtime.executeTx(txGroup),
-      'RUNTIME_ERR1007'
+    'RUNTIME_ERR1007'
     );
 
     // Call to the Permissions App is necessary
@@ -242,7 +243,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
         fromAccount: bob.account,
         appId: controllerAppID,
         payFlags: { totalFee: 1000 },
-        appArgs: ['str:transfer'],
+        appArgs: [STR_TRANSFER],
         accounts: [elon.address]
       },
       {
@@ -267,7 +268,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
     ];
     assert.throws(() =>
       runtime.executeTx(txGroup),
-      'RUNTIME_ERR1008'
+    'RUNTIME_ERR1008'
     );
 
     // Call to Controller and Clawback should be made by sender
@@ -279,7 +280,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
         fromAccount: elon.account,
         appId: controllerAppID,
         payFlags: { totalFee: 1000 },
-        appArgs: ['str:transfer'],
+        appArgs: [STR_TRANSFER],
         accounts: [elon.address]
       },
       {
@@ -307,13 +308,13 @@ describe('Permissioned Token Tests - Failing Paths', function () {
         fromAccount: bob.account,
         appId: permissionsAppId,
         payFlags: { totalFee: 1000 },
-        appArgs: ['str:transfer'],
+        appArgs: [STR_TRANSFER],
         accounts: [bob.address, elon.address]
       }
     ];
     assert.throws(() =>
       runtime.executeTx(txGroup),
-      'RUNTIME_ERR1009'
+    'RUNTIME_ERR1009'
     );
   });
 });

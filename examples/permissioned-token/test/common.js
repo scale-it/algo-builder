@@ -34,240 +34,13 @@ function syncAccounts (runtime) {
   elon = runtime.getAccount(elon.address);
 }
 
-// Opt-In account to ASA
-function optInToASA (runtime, address, assetIndex) {
-  runtime.optIntoASA(assetIndex, address, {});
-}
-
-// Opt-In address to Permissions SSC
-function optInToPermissions (runtime, address, permissionsAppId) {
-  runtime.optInToApp(address, permissionsAppId, {}, {});
-}
-
 /**
- * Issue some tokens to the passed account
- * @param runtime RuntimeEnv Instance
- * @param manager ASA Manager Account
- * @param receiver Receiver Account
- * @param amount Amount
- * @param controllerAppID Controller App ID
- * @param assetIndex ASA ID (Token ID)
- * @param lsig (Clawback LSig)
+ * - Setup token (ASA gold)
+ * - Setup Controller asc
+ * - Setup asset clawback + update asset clawback to escrow contract
+ * - Setup permissions smart contract
+ * NOTE: During setup - ASA.reserve, ASA.manager & current_permissions_manager is set as alice.address
  */
-function issue (runtime, manager, receiver, amount, controllerAppID, assetIndex, lsig) {
-  const txns = [
-    {
-      type: types.TransactionType.CallNoOpSSC,
-      sign: types.SignType.SecretKey,
-      fromAccount: manager.account,
-      appId: controllerAppID,
-      payFlags: { totalFee: 1000 },
-      appArgs: ['str:issue'],
-      foreignAssets: [assetIndex]
-    },
-    {
-      type: types.TransactionType.RevokeAsset,
-      sign: types.SignType.LogicSignature,
-      fromAccountAddr: lsig.address(),
-      recipient: receiver.address,
-      assetID: assetIndex,
-      revocationTarget: manager.address,
-      amount: amount,
-      lsig: lsig,
-      payFlags: { totalFee: 1000 }
-    }
-  ];
-  runtime.executeTx(txns);
-}
-
-/**
- * Kill the token
- * @param runtime RuntimeEnv Instance
- * @param manager ASA Manager Account
- * @param controllerAppID Controller App ID
- */
-function killToken (runtime, manager, controllerAppID) {
-  runtime.executeTx({
-    type: types.TransactionType.CallNoOpSSC,
-    sign: types.SignType.SecretKey,
-    fromAccount: manager.account,
-    appId: controllerAppID,
-    payFlags: { totalFee: 1000 },
-    appArgs: ['str:kill'],
-    foreignAssets: [assetIndex]
-  });
-}
-
-/**
- * Whitelists the passed address for allowing token transfer
- * @param runtime RuntimeEnv Instance
- * @param manager ASA Manager Account
- * @param address Address to be whitelisted
- * @param assetIndex ASA ID
- * @param controllerAppID Controller App ID
- * @param permissionsAppId Permissions App ID
- */
-function whitelist (runtime, manager, address, assetIndex, controllerAppID, permissionsAppId) {
-  optInToPermissions(runtime, address, permissionsAppId);
-  runtime.executeTx({
-    type: types.TransactionType.CallNoOpSSC,
-    sign: types.SignType.SecretKey,
-    fromAccount: manager.account,
-    appId: permissionsAppId,
-    payFlags: { totalFee: 1000 },
-    appArgs: ['str:add_whitelist'],
-    accounts: [address]
-  });
-}
-
-/**
- * Fund the address with min ALGOs(20)
- * @param runtime RuntimeEnv Instance
- * @param master Master Account
- * @param address Receiver Account Address
- */
-function fund (runtime, master, address) {
-  runtime.executeTx({
-    type: types.TransactionType.TransferAlgo,
-    sign: types.SignType.SecretKey,
-    fromAccount: master.account,
-    toAccountAddr: address,
-    amountMicroAlgos: minBalance,
-    payFlags: {}
-  });
-}
-
-/**
- * Transfer ASA
- * @param runtime RuntimeEnv Instance
- * @param from Sender Account
- * @param to Receiver Account
- * @param amount Amount
- * @param assetIndex ASA ID
- * @param controllerAppID Controller App ID
- * @param permissionsAppId Permissions App ID
- * @param lsig Clawback LSig
- */
-function transfer (runtime, from, to, amount, assetIndex, controllerAppID, permissionsAppId, lsig) {
-  const txGroup = [
-    {
-      type: types.TransactionType.CallNoOpSSC,
-      sign: types.SignType.SecretKey,
-      fromAccount: from.account,
-      appId: controllerAppID,
-      payFlags: { totalFee: 1000 },
-      appArgs: [TRANSFER_ARG],
-      accounts: [to.address]
-    },
-    {
-      type: types.TransactionType.RevokeAsset,
-      sign: types.SignType.LogicSignature,
-      fromAccountAddr: lsig.address(),
-      recipient: to.address,
-      assetID: assetIndex,
-      revocationTarget: from.address,
-      amount: amount,
-      lsig: lsig,
-      payFlags: { totalFee: 1000 }
-    },
-    {
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.SecretKey,
-      fromAccount: from.account,
-      toAccountAddr: lsig.address(),
-      amountMicroAlgos: 1000,
-      payFlags: { totalFee: 1000 }
-    },
-    {
-      type: types.TransactionType.CallNoOpSSC,
-      sign: types.SignType.SecretKey,
-      fromAccount: from.account,
-      appId: permissionsAppId,
-      payFlags: { totalFee: 1000 },
-      appArgs: [TRANSFER_ARG],
-      accounts: [from.address, to.address]
-    }
-  ];
-  runtime.executeTx(txGroup);
-}
-
-/**
- * Performs Opt-Out operation
- * @param runtime RuntimeEnv
- * @param manager ASA Manager Account
- * @param opAccount Account to be Opted-Out
- * @param assetIndex ASA ID
- */
-function optOut (runtime, manager, opAccount, assetIndex) {
-  const optOutParams = {
-    type: types.TransactionType.TransferAsset,
-    sign: types.SignType.SecretKey,
-    fromAccount: opAccount.account,
-    toAccountAddr: opAccount.address,
-    assetID: assetIndex,
-    amount: 0,
-    payFlags: { totalFee: 1000, closeRemainderTo: manager.address }
-  };
-  runtime.executeTx(optOutParams);
-}
-
-/**
- * Force Transfer Tokens
- * @param runtime RuntimeEnv Instance
- * @param from Sender Account
- * @param to Receiver Account
- * @param amount Amount
- * @param assetIndex ASA ID
- * @param controllerAppID Controller App ID
- * @param permissionsAppId Permissions App ID
- * @param lsig Clawback LSig
- * @param manager ASA Manager Account
- */
-function forceTransfer (
-  runtime, from, to, amount, assetIndex, controllerAppID, permissionsAppId, lsig, manager) {
-  const txGroup = [
-    {
-      type: types.TransactionType.CallNoOpSSC,
-      sign: types.SignType.SecretKey,
-      fromAccount: manager.account,
-      appId: controllerAppID,
-      payFlags: { totalFee: 1000 },
-      appArgs: ['str:force_transfer'],
-      accounts: [to.address],
-      foreignAssets: [assetIndex]
-    },
-    {
-      type: types.TransactionType.RevokeAsset,
-      sign: types.SignType.LogicSignature,
-      fromAccountAddr: lsig.address(),
-      recipient: to.address,
-      assetID: assetIndex,
-      revocationTarget: from.address,
-      amount: amount,
-      lsig: lsig,
-      payFlags: { totalFee: 1000 }
-    },
-    {
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.SecretKey,
-      fromAccount: manager.account,
-      toAccountAddr: lsig.address(),
-      amountMicroAlgos: 1000,
-      payFlags: { totalFee: 1000 }
-    },
-    {
-      type: types.TransactionType.CallNoOpSSC,
-      sign: types.SignType.SecretKey,
-      fromAccount: manager.account,
-      appId: permissionsAppId,
-      payFlags: { totalFee: 1000 },
-      appArgs: [TRANSFER_ARG],
-      accounts: [from.address, to.address]
-    }
-  ];
-  runtime.executeTx(txGroup);
-}
-
 function setupEnv () {
   // Create Accounts and Env
   alice = new AccountStore(minBalance, { addr: ALICE_ADDRESS, sk: new Uint8Array(0) });
@@ -362,9 +135,240 @@ function setupEnv () {
   ];
 };
 
+// Opt-In account to ASA
+function optInToASA (runtime, address, assetIndex) {
+  runtime.optIntoASA(assetIndex, address, {});
+}
+
+// Opt-In address to Permissions SSC
+function optInToPermissionsSSC (runtime, address, permissionsAppId) {
+  runtime.optInToApp(address, permissionsAppId, {}, {});
+}
+
+/**
+ * Issue some tokens to the passed account
+ * @param runtime RuntimeEnv Instance
+ * @param asaReserve ASA Reserve Account
+ * @param receiver Receiver Account
+ * @param amount Amount
+ * @param controllerAppID Controller App ID
+ * @param assetIndex ASA ID (Token ID)
+ * @param lsig (Clawback LSig)
+ */
+function issue (runtime, asaReserve, receiver, amount, controllerAppID, assetIndex, lsig) {
+  const txns = [
+    {
+      type: types.TransactionType.CallNoOpSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: asaReserve,
+      appId: controllerAppID,
+      payFlags: { totalFee: 1000 },
+      appArgs: ['str:issue'],
+      foreignAssets: [assetIndex]
+    },
+    {
+      type: types.TransactionType.RevokeAsset,
+      sign: types.SignType.LogicSignature,
+      fromAccountAddr: lsig.address(),
+      recipient: receiver.address,
+      assetID: assetIndex,
+      revocationTarget: asaReserve.addr,
+      amount: amount,
+      lsig: lsig,
+      payFlags: { totalFee: 1000 }
+    }
+  ];
+  runtime.executeTx(txns);
+}
+
+/**
+ * Kill the token
+ * @param runtime RuntimeEnv Instance
+ * @param asaManager ASA Manager Account
+ * @param controllerAppID Controller App ID
+ */
+function killToken (runtime, asaManager, controllerAppID) {
+  runtime.executeTx({
+    type: types.TransactionType.CallNoOpSSC,
+    sign: types.SignType.SecretKey,
+    fromAccount: asaManager,
+    appId: controllerAppID,
+    payFlags: { totalFee: 1000 },
+    appArgs: ['str:kill'],
+    foreignAssets: [assetIndex]
+  });
+}
+
+/**
+ * Whitelists the passed address for allowing token transfer
+ * @param runtime RuntimeEnv Instance
+ * @param permManager Permissions Manager Account
+ * @param addrToWhitelist Address to be whitelisted
+ * @param permissionsAppId Permissions App ID
+ */
+function whitelist (runtime, permManager, addrToWhitelist, permissionsAppId) {
+  optInToPermissionsSSC(runtime, addrToWhitelist, permissionsAppId);
+  runtime.executeTx({
+    type: types.TransactionType.CallNoOpSSC,
+    sign: types.SignType.SecretKey,
+    fromAccount: permManager,
+    appId: permissionsAppId,
+    payFlags: { totalFee: 1000 },
+    appArgs: ['str:add_whitelist'],
+    accounts: [addrToWhitelist]
+  });
+}
+
+/**
+ * Fund the address with min ALGOs(20)
+ * @param runtime RuntimeEnv Instance
+ * @param master Master Account
+ * @param address Receiver Account Address
+ */
+/// ///////////////////////////////////////////////////////
+function fund (runtime, master, address) {
+  runtime.executeTx({
+    type: types.TransactionType.TransferAlgo,
+    sign: types.SignType.SecretKey,
+    fromAccount: master.account,
+    toAccountAddr: address,
+    amountMicroAlgos: minBalance,
+    payFlags: {}
+  });
+}
+
+/**
+ * Transfer ASA
+ * @param runtime RuntimeEnv Instance
+ * @param from Sender Account
+ * @param to Receiver Account
+ * @param amount Amount
+ * @param assetIndex ASA ID
+ * @param controllerAppID Controller App ID
+ * @param permissionsAppId Permissions App ID
+ * @param lsig Clawback LSig
+ */
+function transfer (runtime, from, to, amount, assetIndex, controllerAppID, permissionsAppId, lsig) {
+  const txGroup = [
+    {
+      type: types.TransactionType.CallNoOpSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: from.account,
+      appId: controllerAppID,
+      payFlags: { totalFee: 1000 },
+      appArgs: [TRANSFER_ARG]
+    },
+    {
+      type: types.TransactionType.RevokeAsset,
+      sign: types.SignType.LogicSignature,
+      fromAccountAddr: lsig.address(),
+      recipient: to.address,
+      assetID: assetIndex,
+      revocationTarget: from.address,
+      amount: amount,
+      lsig: lsig,
+      payFlags: { totalFee: 1000 }
+    },
+    {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: from.account,
+      toAccountAddr: lsig.address(),
+      amountMicroAlgos: 1000,
+      payFlags: { totalFee: 1000 }
+    },
+    {
+      type: types.TransactionType.CallNoOpSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: from.account,
+      appId: permissionsAppId,
+      payFlags: { totalFee: 1000 },
+      appArgs: [TRANSFER_ARG],
+      accounts: [from.address, to.address]
+    }
+  ];
+  runtime.executeTx(txGroup);
+}
+
+/**
+ * Performs Opt-Out operation
+ * @param runtime RuntimeEnv
+ * @param asaCreatorAddr ASA Creator Address
+ * @param account Account to be Opted-Out
+ * @param assetIndex ASA ID
+ */
+function optOut (runtime, asaCreatorAddr, account, assetIndex) {
+  const optOutParams = {
+    type: types.TransactionType.TransferAsset,
+    sign: types.SignType.SecretKey,
+    fromAccount: account,
+    toAccountAddr: account.addr,
+    assetID: assetIndex,
+    amount: 0,
+    payFlags: { totalFee: 1000, closeRemainderTo: asaCreatorAddr }
+  };
+  runtime.executeTx(optOutParams);
+}
+
+/**
+ * Force Transfer Tokens
+ * @param runtime RuntimeEnv Instance
+ * @param from Sender Account
+ * @param to Receiver Account
+ * @param amount Amount
+ * @param assetIndex ASA ID
+ * @param controllerAppID Controller App ID
+ * @param permissionsAppId Permissions App ID
+ * @param lsig Clawback LSig
+ * @param manager ASA Manager Account
+ */
+function forceTransfer (
+  runtime, from, to, amount, assetIndex, controllerAppID, permissionsAppId, lsig, manager) {
+  const txGroup = [
+    {
+      type: types.TransactionType.CallNoOpSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: manager.account,
+      appId: controllerAppID,
+      payFlags: { totalFee: 1000 },
+      appArgs: ['str:force_transfer'],
+      foreignAssets: [assetIndex]
+    },
+    {
+      type: types.TransactionType.RevokeAsset,
+      sign: types.SignType.LogicSignature,
+      fromAccountAddr: lsig.address(),
+      recipient: to.address,
+      assetID: assetIndex,
+      revocationTarget: from.address,
+      amount: amount,
+      lsig: lsig,
+      payFlags: { totalFee: 1000 }
+    },
+    {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: manager.account,
+      toAccountAddr: lsig.address(),
+      amountMicroAlgos: 1000,
+      payFlags: { totalFee: 1000 }
+    },
+    {
+      type: types.TransactionType.CallNoOpSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: manager.account,
+      appId: permissionsAppId,
+      payFlags: { totalFee: 1000 },
+      appArgs: [TRANSFER_ARG],
+      accounts: [from.address, to.address]
+    }
+  ];
+  runtime.executeTx(txGroup);
+}
+
 module.exports = {
   optInToASA: optInToASA,
-  optInToPermissions: optInToPermissions,
+  optInToPermissionsSSC: optInToPermissionsSSC,
   issue: issue,
   killToken: killToken,
   whitelist: whitelist,
