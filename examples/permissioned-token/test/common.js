@@ -225,7 +225,6 @@ function whitelist (runtime, permManager, addrToWhitelist, permissionsAppId) {
  * @param master Master Account
  * @param address Receiver Account Address
  */
-/// ///////////////////////////////////////////////////////
 function fund (runtime, master, address) {
   runtime.executeTx({
     type: types.TransactionType.TransferAlgo,
@@ -320,15 +319,15 @@ function optOut (runtime, asaCreatorAddr, account, assetIndex) {
  * @param controllerAppID Controller App ID
  * @param permissionsAppId Permissions App ID
  * @param lsig Clawback LSig
- * @param manager ASA Manager Account
+ * @param asaManager ASA Manager Account
  */
 function forceTransfer (
-  runtime, from, to, amount, assetIndex, controllerAppID, permissionsAppId, lsig, manager) {
+  runtime, from, to, amount, assetIndex, controllerAppID, permissionsAppId, lsig, asaManager) {
   const txGroup = [
     {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
-      fromAccount: manager.account,
+      fromAccount: asaManager,
       appId: controllerAppID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:force_transfer'],
@@ -348,7 +347,7 @@ function forceTransfer (
     {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
-      fromAccount: manager.account,
+      fromAccount: asaManager,
       toAccountAddr: lsig.address(),
       amountMicroAlgos: 1000,
       payFlags: { totalFee: 1000 }
@@ -356,7 +355,7 @@ function forceTransfer (
     {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
-      fromAccount: manager.account,
+      fromAccount: asaManager,
       appId: permissionsAppId,
       payFlags: { totalFee: 1000 },
       appArgs: [TRANSFER_ARG],
