@@ -12,12 +12,12 @@ import { expectRuntimeError } from "../helpers/runtime-errors";
 /**
  * Test cases, (on each test case re-create the app - setup)
 1. Create 2 transactions in a group: `app_update(n=2), app_update(n=5)`.
-   Check the expected `app.counter == 1, app.total=7`
+   Check the expected `app.counter == 2, app.total=7`
    (we need to verify if this is what the Algorand node will do, maybe it will panic?).
 2. Create 2 transactions in a group: `app_update(n=5), app_update(n=2)`.
-   Check the expected `app.counter == 1, app.total=13`
+   Check the expected `app.counter == 2, app.total=13`
 3. Run tx group: `app_update(n=2), app_update(n=5)` in a loop 1000 times.
-   The expected state should be: `app.counter == 1000`, `app.total = 10 + 500*2 - 500*5`
+   The expected state should be: `app.counter == 2000`, `app.total = 10 + 500*2 - 500*5`
  */
 describe("App Update Test", function () {
   useFixture("app-update");
