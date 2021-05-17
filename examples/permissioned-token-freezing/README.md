@@ -1,6 +1,6 @@
-# Asset Transfer using custom logic
+# Asset Transfer using freeze and unfreeze mechanism
 
-This example demonstrates authorizing asset transfer transactions based on custom logic by smart contract.
+This example demonstrates how to create a permissioned ASA using smart contracts to control ASA transfers.
 
 ## Overview
 

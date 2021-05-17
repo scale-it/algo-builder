@@ -385,6 +385,12 @@ const runtimeAsaErrors = {
     message: "All of the created assets should be in creator's account",
     title: "Asset Total Error",
     description: "Asset Total Error"
+  },
+  CANNOT_CLOSE_ASSET_BY_CLAWBACK: {
+    number: 1509,
+    message: `Assetholding of account cannot be closed by clawback`,
+    title: "Close asset by clawback error",
+    description: "Clawback cannot close asset holding from an algorand account. Only the actual owner of that account can. Read more about asset parameters at https://developer.algorand.org/docs/features/asa/#asset-parameters"
   }
 };
 

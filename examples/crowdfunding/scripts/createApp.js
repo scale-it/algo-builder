@@ -79,8 +79,8 @@ async function run (runtimeEnv, deployer) {
 
   console.log('Opting-In for Creator and Donor.');
   try {
-    await deployer.optInToSSC(creatorAccount, applicationID, {}, {});
-    await deployer.optInToSSC(donorAccount, applicationID, {}, {});
+    await deployer.optInAccountToSSC(creatorAccount, applicationID, {}, {});
+    await deployer.optInAccountToSSC(donorAccount, applicationID, {}, {});
   } catch (e) {
     console.log(e);
     throw new Error(e);

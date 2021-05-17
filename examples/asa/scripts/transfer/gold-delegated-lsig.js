@@ -13,15 +13,13 @@ async function run (runtimeEnv, deployer) {
 
   // Transactions for GOLD ASA contract : '4-gold-asa.teal'  (Delegated Approval Mode)
   const lsigGoldOwner = deployer.getDelegatedLsig('4-gold-asa.teal');
-
-  const assetID = deployer.asa.get('gold').assetIndex;
   let txnParam = {
     type: types.TransactionType.TransferAsset,
     sign: types.SignType.LogicSignature,
     fromAccountAddr: goldOwner.addr,
     toAccountAddr: john.addr,
     amount: 500,
-    assetID: assetID,
+    assetID: 'gold', // passing asa name is also supported
     lsig: lsigGoldOwner,
     payFlags: { totalFee: 1000 }
   };

@@ -7,6 +7,7 @@ import { generateAccount } from "algosdk";
 
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
+import { checkAndSetASAFields } from "./lib/asa";
 import {
   ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE, ASSET_CREATION_FEE, MAX_ALGORAND_ACCOUNT_APPS,
   MAX_ALGORAND_ACCOUNT_ASSETS,
@@ -195,15 +196,7 @@ export class AccountStore implements AccountStoreI {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
     }
     // check for blank fields
-    if ((fields.reserve !== "" && asset.reserve === "") || (fields.freeze !== "" && asset.freeze === "") ||
-      (fields.clawback !== "" && asset.clawback === "")) {
-      throw new RuntimeError(RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR);
-    }
-
-    asset.manager = fields.manager;
-    asset.reserve = fields.reserve;
-    asset.freeze = fields.freeze;
-    asset.clawback = fields.clawback;
+    checkAndSetASAFields(fields, asset);
   }
 
   /**

@@ -1,11 +1,11 @@
 import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
-import type { LogicSig, LogicSigArgs, MultiSig, MultisigMetadata } from "algosdk";
+import type { LogicSig, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
 import { getDummyLsig, getLsig } from "../lib/lsig";
-import { blsigExt, loadBinaryMultiSig, readMsigFromFile } from "../lib/msig";
+import { blsigExt, loadBinaryLsig, readMsigFromFile } from "../lib/msig";
 import { persistCheckpoint } from "../lib/script-checkpoints";
 import type {
   ASAInfo,
@@ -46,7 +46,7 @@ class DeployerBasicMode {
     return this.runtimeEnv.network.name;
   }
 
-  private _getASAInfo (name: string): ASAInfo {
+  getASAInfo (name: string): ASAInfo {
     const found = this.asa.get(name);
     if (!found) {
       throw new BuilderError(
@@ -164,7 +164,7 @@ class DeployerBasicMode {
    * @returns multi signed logic signature from assets/<file_name>.(b)lsig
    */
   async loadMultiSig (name: string): Promise<LogicSig> {
-    if (name.endsWith(blsigExt)) { return await loadBinaryMultiSig(name); }
+    if (name.endsWith(blsigExt)) { return await loadBinaryLsig(name); }
 
     const lsig = await getLsig(name, this.algoOp.algodClient); // get lsig from .teal (getting logic part from lsig)
     const msig = await readMsigFromFile(name); // Get decoded Msig object from .msig
@@ -173,65 +173,93 @@ class DeployerBasicMode {
   }
 
   /**
-   * Appends signature (using signer's sk) to multi-signed logic signature. If multisig is not found
-   * then new multisig is created
-   * eg. appending own signature to a signed lsig (received from multisignature account address network)
-   * @param lsig Logic Sig object
-   * @param signer: Signer Account which will sign the smart contract
-   * @param mparams: passed when signing a new multisig
-   * @returns multi signed logic signature (with appended signature from signer's sk)
+   * Send signed transaction to network and wait for confirmation
+   * @param rawTxns Signed Transaction(s)
    */
-  signLogicSigMultiSig (lsig: LogicSig, signer: rtypes.Account, mparams?: MultisigMetadata): LogicSig {
-    if (lsig.msig === undefined) { // if multisig not found, create new msig
-      if (mparams === undefined) {
-        throw new Error('MultiSig Metadata is undefined, which is required for single sign multisig');
-      }
-      lsig.sign(signer.sk, mparams);
-    } else {
-      lsig.appendToMultisig(signer.sk); // else append signature to msig
-    }
-    return lsig;
+  async sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<algosdk.ConfirmedTxInfo> {
+    return await this.algoOp.sendAndWait(rawTxns);
   }
 
   /**
    * Opt-In to ASA for a single account. The opt-in transaction is
    * signed by account secret key
-   * @param asaName ASA name
+   * @param asa ASA (name/ID) Note: ID can be used for assets not existing in checkpoints.
    * @param accountName
    * @param flags Transaction flags
    */
-  async optInAcountToASA (asaName: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
-    await this.algoOp.optInAcountToASA(
-      asaName,
-      this._getASAInfo(asaName).assetIndex,
-      this._getAccount(accountName),
-      flags);
+  async optInAcountToASA (asa: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
+    try {
+      const asaId = this.getASAInfo(asa).assetIndex;
+      await this.algoOp.optInAcountToASA(
+        asa,
+        asaId,
+        this._getAccount(accountName),
+        flags);
+    } catch (error) {
+      console.log("Asset no found in checkpoints. Proceeding to check as Asset ID.");
+      if (!Number(asa)) {
+        throw Error("Please provide a valid Number to be used as ASA ID");
+      }
+      const asaId = Number(asa);
+      await this.algoOp.optInAcountToASA(
+        asa,
+        asaId,
+        this._getAccount(accountName),
+        flags);
+    }
   }
 
   /**
    * Description: Opt-In to ASA for a contract account (represented by logic signture).
    * The opt-in transaction is signed by the logic signature
-   * @param asaName ASA name
+   * @param asa ASA (name/ID) Note: ID can be used for assets not existing in checkpoints.
    * @param lsig logic signature
    * @param flags Transaction flags
    */
-  async optInLsigToASA (asaName: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
-    await this.algoOp.optInLsigToASA(asaName, this._getASAInfo(asaName).assetIndex, lsig, flags);
+  async optInLsigToASA (asa: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
+    try {
+      const asaId = this.getASAInfo(asa).assetIndex;
+      await this.algoOp.optInLsigToASA(asa, asaId, lsig, flags);
+    } catch (error) {
+      console.log("Asset no found in checkpoints. Proceeding to check as Asset ID.");
+      if (!Number(asa)) {
+        throw Error("Please provide a valid Number to be used as ASA ID");
+      }
+      const asaId = Number(asa);
+      await this.algoOp.optInLsigToASA(asa, asaId, lsig, flags);
+    }
   }
 
   /**
    * Opt-In to stateful smart contract (SSC) for a single account
+   * signed by account secret key
    * @param sender sender account
    * @param appID application index
    * @param payFlags Transaction flags
    * @param flags Optional parameters to SSC (accounts, args..)
    */
-  async optInToSSC (
+  async optInAccountToSSC (
     sender: rtypes.Account,
     appId: number,
     payFlags: rtypes.TxParams,
     flags: rtypes.SSCOptionalFlags): Promise<void> {
-    await this.algoOp.optInToSSC(sender, appId, payFlags, flags);
+    await this.algoOp.optInAccountToSSC(sender, appId, payFlags, flags);
+  }
+
+  /**
+   * Opt-In to stateful smart contract (SSC) for a contract account
+   * The opt-in transaction is signed by the logic signature
+   * @param appID application index
+   * @param lsig logic signature
+   * @param payFlags Transaction flags
+   * @param flags Optional parameters to SSC (accounts, args..)
+   */
+  async optInLsigToSSC (
+    appId: number,
+    lsig: LogicSig,
+    payFlags: rtypes.TxParams,
+    flags: rtypes.SSCOptionalFlags): Promise<void> {
+    await this.algoOp.optInLsigToSSC(appId, lsig, payFlags, flags);
   }
 
   /**

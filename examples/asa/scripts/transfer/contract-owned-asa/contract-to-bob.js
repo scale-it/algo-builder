@@ -1,39 +1,34 @@
 /**
  * Description:
  * This file demonstrates the example to transfer contract owned ASA
- * from a contract account (lsig) to an owner account.
- * The logic assures that:
- *  + tx is asset transfer and amount is <= 100 and receiver is `alice`
- *  + fee is <= 1000
- *  + we don't do any rekey, closeRemainderTo
+ * from a contract account (lsig) to an changed owner account.
+ * Note: This transfer will only work if owner is changed to bob
 */
 const { types } = require('@algo-builder/runtime');
 const { balanceOf } = require('@algo-builder/algob');
-const { executeTransaction, mkParam } = require('./common');
+const { executeTransaction, mkParam } = require('../common');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
   const alice = deployer.accountsByName.get('alice');
   const bob = deployer.accountsByName.get('bob');
 
-  await executeTransaction(deployer, mkParam(masterAccount, alice.addr, 5e6, { note: 'Funding' }));
-
+  await executeTransaction(deployer, mkParam(masterAccount, bob.addr, 5e6, { note: 'Funding' }));
   // Get AppInfo and AssetID from checkpoints.
   const appInfo = deployer.getSSC('5-contract-asa-stateful.py', '5-clear.py');
-  const lsig = await deployer.loadLogic('5-contract-asa-stateless.py', [], { APP_ID: appInfo.appID });
+  const lsig = await deployer.loadLogic('5-contract-asa-stateless.py', { APP_ID: appInfo.appID });
 
   /* Transfer ASA 'gold' from contract account to user account */
   const assetID = deployer.asa.get('platinum').assetIndex;
   console.log('Asset Index: ', assetID);
-
-  await deployer.optInAcountToASA('platinum', 'alice', {});
+  await deployer.optInAcountToASA('platinum', 'bob', {});
 
   const txGroup = [
     // Stateful call
     {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
-      fromAccount: alice,
+      fromAccount: bob,
       appId: appInfo.appID,
       payFlags: {}
     },
@@ -41,7 +36,7 @@ async function run (runtimeEnv, deployer) {
       type: types.TransactionType.TransferAsset,
       sign: types.SignType.LogicSignature,
       fromAccountAddr: lsig.address(),
-      toAccountAddr: alice.addr,
+      toAccountAddr: bob.addr,
       amount: 20n,
       assetID: assetID,
       lsig: lsig,
@@ -54,27 +49,11 @@ async function run (runtimeEnv, deployer) {
   await balanceOf(deployer, alice.addr, assetID);
 
   try {
-    // tx FAIL: trying to receive asset from another account
-    txGroup[0].fromAccount = bob;
+    // tx FAIL: trying to receive asset from initial owner account
+    txGroup[0].fromAccount = alice;
     await executeTransaction(deployer, txGroup);
   } catch (e) {
-    console.log(e);
-  }
-
-  try {
-    // tx FAIL: trying to send asset directly without calling stateful smart contract
-    await executeTransaction(deployer, {
-      type: types.TransactionType.TransferAsset,
-      sign: types.SignType.LogicSignature,
-      fromAccountAddr: lsig.address(),
-      toAccountAddr: alice.addr,
-      amount: 20n,
-      assetID: assetID,
-      lsig: lsig,
-      payFlags: { totalFee: 1000 }
-    });
-  } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 

@@ -34,13 +34,6 @@ module.exports = {
     "semi": "off",  // required for a proper work
     "@typescript-eslint/semi": ["error", "always"],
     "@typescript-eslint/strict-boolean-expressions": "off",
-    "@typescript-eslint/naming-convention": [
-      "error",
-      {
-        selector: "variable",
-        format: ["camelCase", "UPPER_CASE", "PascalCase"]
-      }
-    ],
     "sonarjs/cognitive-complexity": ["error", 16]
   }
 }

@@ -10,7 +10,7 @@ import { TASK_SIGN_MULTISIG } from "./task-names";
 
 export interface TaskArgs {
   file: string
-  accountName: string
+  account: string
   out?: string
   force: boolean
 }
@@ -19,9 +19,9 @@ async function multiSignTx (
   taskArgs: TaskArgs,
   runtimeEnv: RuntimeEnv
 ): Promise<void> {
-  const signerAccount = runtimeEnv.network.config.accounts.find(acc => acc.name === taskArgs.accountName);
+  const signerAccount = runtimeEnv.network.config.accounts.find(acc => acc.name === taskArgs.account);
   if (signerAccount === undefined) {
-    console.error("No account with the name \"%s\" exists in the config file.", taskArgs.accountName);
+    console.error("No account with the name \"%s\" exists in the config file.", taskArgs.account);
     return;
   }
   const rawTxn = loadSignedTxnFromFile(taskArgs.file);
@@ -38,7 +38,7 @@ async function multiSignTx (
 export default function (): void {
   task(TASK_SIGN_MULTISIG, "Signs a transaction object from a file using Multi Signature")
     .addParam(
-      "accountName",
+      "account",
       "Name of the account (present in `algob.config.js`) to be used for signing the transaction."
     )
     .addParam(

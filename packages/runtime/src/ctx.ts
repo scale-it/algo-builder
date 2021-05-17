@@ -146,16 +146,14 @@ export class Ctx implements Context {
   // transfer ASSET as per transaction parameters
   transferAsset (txnParam: AssetTransferParam): void {
     const fromAccountAddr = getFromAddress(txnParam);
-    const fromAssetHolding = this.getAssetHolding(txnParam.assetID, fromAccountAddr);
-    const toAssetHolding = this.getAssetHolding(txnParam.assetID, txnParam.toAccountAddr);
+    const fromAssetHolding = this.getAssetHolding(txnParam.assetID as number, fromAccountAddr);
+    const toAssetHolding = this.getAssetHolding(txnParam.assetID as number, txnParam.toAccountAddr);
     txnParam.amount = BigInt(txnParam.amount);
 
-    // Bypass frozen ASA holding checks if amount is not greater than 0
-    if (txnParam.amount > 0) {
-      this.assertAssetNotFrozen(txnParam.assetID, fromAccountAddr);
-      this.assertAssetNotFrozen(txnParam.assetID, txnParam.toAccountAddr);
+    if (txnParam.amount !== 0n) {
+      this.assertAssetNotFrozen(txnParam.assetID as number, fromAccountAddr);
+      this.assertAssetNotFrozen(txnParam.assetID as number, txnParam.toAccountAddr);
     }
-
     if (fromAssetHolding.amount - txnParam.amount < 0) {
       throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS, {
         amount: txnParam.amount,
@@ -167,10 +165,10 @@ export class Ctx implements Context {
 
     if (txnParam.payFlags.closeRemainderTo) {
       // Check if ASA holding isn't frozen
-      this.assertAssetNotFrozen(txnParam.assetID, txnParam.payFlags.closeRemainderTo);
+      this.assertAssetNotFrozen(txnParam.assetID as number, txnParam.payFlags.closeRemainderTo);
 
       const closeRemToAssetHolding = this.getAssetHolding(
-        txnParam.assetID, txnParam.payFlags.closeRemainderTo);
+        txnParam.assetID as number, txnParam.payFlags.closeRemainderTo);
 
       closeRemToAssetHolding.amount += fromAssetHolding.amount; // transfer assets of sender to closeRemTo account
       fromAssetHolding.amount = 0n; // close sender's account
@@ -280,6 +278,18 @@ export class Ctx implements Context {
   }
 
   /**
+   * Update Apps
+   * @param appID  Application index
+   * @param approvalProgram new approval program
+   * @param clearProgram new clear program
+   */
+  updateApp (appID: number, approvalProgram: string, clearProgram: string): void {
+    const updatedApp = this.getApp(appID); // get app after updating store
+    updatedApp["approval-program"] = approvalProgram;
+    updatedApp["clear-state-program"] = clearProgram;
+  }
+
+  /**
    * Process transactions in ctx
    * - Runs TEAL code if associated with transaction
    * - Executes the transaction on ctx
@@ -323,6 +333,13 @@ export class Ctx implements Context {
           this.closeApp(fromAccountAddr, txnParam.appId);
           break;
         }
+        case TransactionType.UpdateSSC: {
+          this.tx = this.gtxs[idx]; // update current tx to the requested index
+          const appParams = this.getApp(txnParam.appID);
+          this.runtime.run(appParams[approvalProgram], ExecutionMode.STATEFUL);
+          this.updateApp(txnParam.appID, txnParam.newApprovalProgram, txnParam.newClearProgram);
+          break;
+        }
         case TransactionType.ClearSSC: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.runtime.assertAppDefined(txnParam.appId, this.getApp(txnParam.appId));
@@ -345,39 +362,42 @@ export class Ctx implements Context {
           break;
         }
         case TransactionType.ModifyAsset: {
-          const asset = this.getAssetDef(txnParam.assetID);
+          const asset = this.getAssetDef(txnParam.assetID as number);
           if (asset.manager !== fromAccountAddr) {
             throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
           }
           // modify asset in ctx.
-          this.modifyAsset(txnParam.assetID, txnParam.fields);
+          this.modifyAsset(txnParam.assetID as number, txnParam.fields);
           break;
         }
         case TransactionType.FreezeAsset: {
-          const asset = this.getAssetDef(txnParam.assetID);
+          const asset = this.getAssetDef(txnParam.assetID as number);
           if (asset.freeze !== fromAccountAddr) {
             throw new RuntimeError(RUNTIME_ERRORS.ASA.FREEZE_ERROR, { address: asset.freeze });
           }
-          this.freezeAsset(txnParam.assetID, txnParam.freezeTarget, txnParam.freezeState);
+          this.freezeAsset(txnParam.assetID as number, txnParam.freezeTarget, txnParam.freezeState);
           break;
         }
         case TransactionType.RevokeAsset: {
-          const asset = this.getAssetDef(txnParam.assetID);
+          const asset = this.getAssetDef(txnParam.assetID as number);
           if (asset.clawback !== fromAccountAddr) {
             throw new RuntimeError(RUNTIME_ERRORS.ASA.CLAWBACK_ERROR, { address: asset.clawback });
           }
+          if (txnParam.payFlags.closeRemainderTo) {
+            throw new RuntimeError(RUNTIME_ERRORS.ASA.CANNOT_CLOSE_ASSET_BY_CLAWBACK);
+          }
           this.revokeAsset(
-            txnParam.recipient, txnParam.assetID,
+            txnParam.recipient, txnParam.assetID as number,
             txnParam.revocationTarget, BigInt(txnParam.amount)
           );
           break;
         }
         case TransactionType.DestroyAsset: {
-          const asset = this.getAssetDef(txnParam.assetID);
+          const asset = this.getAssetDef(txnParam.assetID as number);
           if (asset.manager !== fromAccountAddr) {
             throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
           }
-          this.destroyAsset(txnParam.assetID);
+          this.destroyAsset(txnParam.assetID as number);
           break;
         }
       }

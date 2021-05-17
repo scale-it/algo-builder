@@ -228,15 +228,17 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should warn if account already is already opted-into asset", () => {
-    const spy = sinon.spy(console, 'warn');
+    // console is mocked in package.json mocha options
+    const stub = console.warn as sinon.SinonStub;
+    stub.reset();
+
     const res = runtime.getAssetDef(assetId);
     assert.isDefined(res);
 
     // executing same opt-in tx again
-    const warnMsg = `${john.address} is already opted in to asset ${assetId}`;
     runtime.optIntoASA(assetId, john.address, {});
-    assert(spy.calledWith(warnMsg));
-    spy.restore();
+    assert(stub.calledWith(
+      `${john.address} is already opted in to asset ${assetId}`));
   });
 
   it("should transfer asset between two accounts", () => {
@@ -258,7 +260,7 @@ describe("Algorand Standard Assets", function () {
     assert.equal(alice.getAssetHolding(assetId)?.amount, initialAliceAssets + 100n);
   });
 
-  it("should throw error on transfer asset if asset is frozen", () => {
+  it("should throw error on transfer asset if asset is frozen and amount > 0", () => {
     const freezeParam: FreezeAssetParam = {
       type: TransactionType.FreezeAsset,
       sign: SignType.SecretKey,
@@ -279,6 +281,12 @@ describe("Algorand Standard Assets", function () {
     expectRuntimeError(
       () => runtime.executeTx(assetTransferParam),
       RUNTIME_ERRORS.TRANSACTION.ACCOUNT_ASSET_FROZEN
+    );
+
+    assetTransferParam.amount = 0n;
+    assert.doesNotThrow(
+      () => runtime.executeTx(assetTransferParam), // should pass successfully
+      `RUNTIME_ERR1505: Asset index 7 frozen for account ${john.address}`
     );
   });
 
@@ -456,6 +464,43 @@ describe("Algorand Standard Assets", function () {
     bobHolding = runtime.getAssetHolding(assetId, bob.address);
     assert.equal(beforeRevokeJohn + 15n, johnHolding.amount);
     assert.equal(bobHolding.amount, 5n);
+  });
+
+  it("should fail because only clawback account can revoke assets", () => {
+    const revokeParam: RevokeAssetParam = {
+      type: TransactionType.RevokeAsset,
+      sign: SignType.SecretKey,
+      fromAccount: alice.account,
+      recipient: john.address,
+      assetID: assetId,
+      revocationTarget: bob.address,
+      amount: 1n,
+      payFlags: {}
+    };
+    expectRuntimeError(
+      () => runtime.executeTx(revokeParam),
+      RUNTIME_ERRORS.ASA.CLAWBACK_ERROR
+    );
+  });
+
+  it("should throw error if trying to close asset holding by clawback", () => { /* eslint sonarjs/no-identical-functions: "off" */
+    const closebyClawbackParam: RevokeAssetParam = {
+      type: TransactionType.RevokeAsset,
+      sign: SignType.SecretKey,
+      fromAccount: elon.account,
+      recipient: john.address,
+      assetID: assetId,
+      revocationTarget: john.address,
+      amount: 0n,
+      payFlags: { closeRemainderTo: alice.address } // closing to alice using clawback
+    };
+
+    // opt-in to asset by alice
+    runtime.optIntoASA(assetId, alice.address, {});
+    expectRuntimeError(
+      () => runtime.executeTx(closebyClawbackParam),
+      RUNTIME_ERRORS.ASA.CANNOT_CLOSE_ASSET_BY_CLAWBACK
+    );
   });
 
   it("should revoke if asset is frozen", () => {

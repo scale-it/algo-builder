@@ -67,11 +67,11 @@ export async function readBinaryMultiSig (filename: string): Promise<string | un
 }
 
 /**
- * Loads multisigned logic signature directly from .blsig file
+ * Loads signed logic signature directly from .blsig file
  * @param {string} name filename
- * @returns {LogicSig} multi signed logic signature from assets/<file_name>.blsig
+ * @returns {LogicSig} signed logic signature from assets/<file_name>.blsig
  */
-export async function loadBinaryMultiSig (name: string): Promise<LogicSig> {
+export async function loadBinaryLsig (name: string): Promise<LogicSig> {
   const data = await readBinaryMultiSig(name);
   if (data === undefined) {
     throw new Error(`File ${name} does not exist`);

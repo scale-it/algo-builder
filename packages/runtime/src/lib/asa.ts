@@ -1,10 +1,11 @@
+import type { AssetDef } from "algosdk";
 import path from "path";
 import * as z from 'zod';
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { parseZodError } from "../errors/validation-errors";
-import { AccountMap, ASADef, ASADefs, RuntimeAccountMap } from "../types";
+import { AccountMap, ASADef, ASADefs, AssetModFields, RuntimeAccountMap } from "../types";
 import { ASADefSchema } from "../types-input";
 import { loadFromYamlFileSilentWithMessage } from "./files";
 
@@ -95,4 +96,27 @@ export function loadASAFile (accounts: AccountMap | RuntimeAccountMap): ASADefs 
     loadFromYamlFileSilentWithMessage(filename, "ASA file not defined"),
     accounts,
     filename);
+}
+
+function isDefined (value: string | undefined): boolean {
+  if (value !== undefined && value !== "") return true;
+  return false;
+}
+
+/**
+ * Check and Change ASA fields
+ * @param fields Custom ASA fields
+ * @param asset Defined ASA fields
+ */
+export function checkAndSetASAFields (fields: AssetModFields, asset: AssetDef): void {
+  for (const x of ['manager', 'reserve', 'freeze', 'clawback']) {
+    const customField = fields[x as keyof AssetModFields];
+    const asaField = asset[x as keyof AssetModFields];
+    // Check if custom field is set and defined and ASA field is blank field
+    if (isDefined(customField) && !isDefined(asaField)) {
+      throw new RuntimeError(RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR);
+    } else if (customField !== undefined && isDefined(asaField)) { // Change if ASA field and custom field is defined
+      asset[x as keyof AssetModFields] = customField;
+    }
+  }
 }

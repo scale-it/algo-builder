@@ -1,5 +1,5 @@
 import { encodeNote, mkTransaction, types as rtypes } from "@algo-builder/runtime";
-import { AssetModFields, TransactionType, TxField } from "@algo-builder/runtime/build/types";
+import { ExecParams, SignType, TransactionType, TxParams } from "@algo-builder/runtime/build/types";
 import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
 import { Deployer } from "../types";
@@ -91,21 +91,17 @@ export function makeAssetCreateTxn (
 export function makeASAOptInTx (
   addr: string,
   assetID: number,
-  params: SuggestedParams
+  params: SuggestedParams,
+  payFlags: TxParams
 ): Transaction {
-  const closeRemainderTo = undefined;
-  const revocationTarget = undefined;
-  const amount = 0;
-  const note = undefined;
-  return algosdk.makeAssetTransferTxnWithSuggestedParams(
-    addr,
-    addr,
-    closeRemainderTo,
-    revocationTarget,
-    amount,
-    note,
-    assetID,
-    params);
+  const execParam: ExecParams = {
+    type: TransactionType.OptInASA,
+    sign: SignType.SecretKey,
+    fromAccount: { addr: addr, sk: new Uint8Array(0) },
+    assetID: assetID,
+    payFlags: payFlags
+  };
+  return mkTransaction(execParam, params);
 }
 
 /**
@@ -129,18 +125,6 @@ function signTransaction (txn: Transaction, execParams: rtypes.ExecParams): Uint
 }
 
 /**
- * Send signed transaction to network and wait for confirmation
- * @param deployer Deployer
- * @param rawTxns Signed Transaction(s)
- */
-export async function sendAndWait (
-  deployer: Deployer,
-  rawTxns: Uint8Array | Uint8Array[]): Promise<algosdk.ConfirmedTxInfo> {
-  const txInfo = await deployer.algodClient.sendRawTransaction(rawTxns).do();
-  return await deployer.waitForConfirmation(txInfo.txId);
-}
-
-/**
  * Make transaction parameters and update deployASA, deploySSC & ModifyAsset params
  * @param deployer Deployer object
  * @param txn Execution parameters
@@ -154,6 +138,23 @@ async function mkTx (
   index: number,
   txIdxMap: Map<number, [string, rtypes.ASADef]>
 ): Promise<Transaction> {
+  // if execParams for ASA related transaction have assetID as asaName,
+  // then set to assetIndex using info from checkpoint
+  switch (txn.type) {
+    case TransactionType.OptInASA :
+    case TransactionType.TransferAsset :
+    case TransactionType.ModifyAsset :
+    case TransactionType.FreezeAsset :
+    case TransactionType.RevokeAsset :
+    case TransactionType.DestroyAsset : {
+      if (typeof txn.assetID === "string") {
+        const asaInfo = deployer.getASAInfo(txn.assetID);
+        txn.assetID = asaInfo.assetIndex;
+      }
+      break;
+    }
+  }
+
   switch (txn.type) {
     case TransactionType.DeployASA: {
       deployer.assertNoAsset(txn.asaName);
@@ -173,19 +174,16 @@ async function mkTx (
       break;
     }
     case TransactionType.UpdateSSC: {
-      const name = txn.newApprovalProgram + "-" + txn.newClearProgram;
-      deployer.assertNoAsset(name);
       const approval = await deployer.ensureCompiled(txn.newApprovalProgram);
       const clear = await deployer.ensureCompiled(txn.newClearProgram);
       txn.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
       txn.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
-      txIdxMap.set(index, [name, { total: 1, decimals: 1, unitName: "MOCK" }]);
       break;
     }
     case TransactionType.ModifyAsset: {
       // fetch asset mutable properties from network and set them (if they are not passed)
       // before modifying asset
-      const assetInfo = await deployer.getAssetByID(txn.assetID);
+      const assetInfo = await deployer.getAssetByID(txn.assetID as number);
       if (txn.fields.manager === "") txn.fields.manager = undefined;
       else txn.fields.manager = txn.fields.manager ?? assetInfo.params.manager;
 
@@ -211,10 +209,12 @@ async function mkTx (
  * Execute single transactions or group of transactions (atomic transaction)
  * @param deployer Deployer
  * @param execParams transaction parameters or atomic transaction parameters
+ * @param asaName ASA Name (deployed by Deployer) for fetching ASA ID (optional)
  */
 export async function executeTransaction (
   deployer: Deployer,
-  execParams: rtypes.ExecParams | rtypes.ExecParams[]): Promise<algosdk.ConfirmedTxInfo> {
+  execParams: rtypes.ExecParams | rtypes.ExecParams[]):
+  Promise<algosdk.ConfirmedTxInfo> {
   try {
     let signedTxn;
     let txns: Transaction[] = [];
@@ -238,7 +238,7 @@ export async function executeTransaction (
       deployer.log(`Signed transaction:`, signedTxn);
       txns = [txn];
     }
-    const confirmedTx = await sendAndWait(deployer, signedTxn);
+    const confirmedTx = await deployer.sendAndWait(signedTxn);
     console.log(confirmedTx);
     await registerCheckpoints(deployer, txns, txIdxMap);
     return confirmedTx;
@@ -264,7 +264,7 @@ export async function executeSignedTxnFromFile (
   if (signedTxn === undefined) { throw new Error(`File ${fileName} does not exist`); }
 
   console.debug("Decoded txn from %s: %O", fileName, algosdk.decodeSignedTransaction(signedTxn));
-  const confirmedTx = await sendAndWait(deployer, signedTxn);
+  const confirmedTx = await deployer.sendAndWait(signedTxn);
   console.log(confirmedTx);
   return confirmedTx;
 }

@@ -1,3 +1,5 @@
+/* eslint-disable  @typescript-eslint/naming-convention */
+
 // Type definitions for algosdk 1.8.0
 // Project: https://github.com/algorand/js-algorand-sdk
 // Definitions by: Robert Zaremba <https://github.com/robert-zaremba>
