@@ -1,5 +1,4 @@
 import { assert } from "chai";
-import { delay } from "lodash";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
