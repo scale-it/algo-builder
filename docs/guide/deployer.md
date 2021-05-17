@@ -43,7 +43,7 @@ await deployer.deployASA("ASA-2", {...}, { reserve: multsigaddr }); // this will
 
 #### OptIn to ASA
 
-For opting in to ASA, `deployer` supports following methods :-
+For opting in to ASA, `deployer` supports following methods:
 - `optInAcountToASA` to opt-in to a single account signed by secret key of sender.
 - `optInLsigToASA` to opt-in to a contract account (say escrow) where the account is represented by the logic signature address (`lsig.address()`).
     To opt in to ASA you can use either `Asset Index` or `name of the ASA`. Using Asset Index is useful when asset is not deployed using deployer.
@@ -90,7 +90,7 @@ You can learn more about Stateful Smart Contracts [here](https://developer.algor
 
 #### OptIn to SSC
 
-For opting in to SSC, `deployer` supports the following methods :-
+For opting in to SSC, `deployer` supports the following methods:
 - `optInAcountToSSC` to opt-in to a single account signed by secret key of sender.
 - `optInLsigToSSC` to opt-in to a contract account (say escrow) where the account is represented by the logic signature address (`lsig.address()`).
   - To opt in to SSC you can use `Application Index`.[When the smart contract is created the network will return a unique ApplicationID. This ID can then be used to make ApplicationCall transactions to the smart contract. ](https://developer.algorand.org/docs/features/asc1/stateful/#call-the-stateful-smart-contract)
