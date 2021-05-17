@@ -90,7 +90,7 @@ You can learn more about Stateful Smart Contracts [here](https://developer.algor
 
 #### OptIn to SSC
 
-For opting in to SSC, `deployer` supports two methods :-
+For opting in to SSC, `deployer` supports the following methods :-
 - `optInAcountToSSC` to opt-in to a single account signed by secret key of sender.
 - `optInLsigToSSC` to opt-in to a contract account (say escrow) where the account is represented by the logic signature address (`lsig.address()`).
   - To opt in to SSC you can use `Application Index`.
