@@ -206,10 +206,18 @@ describe("Checkpoint", () => {
       appID: -1,
       timestamp: 1
     });
+    const nestedMap1 = new Map<number, SSCInfo>();
+    nestedMap1.set(2, {
+      creator: "123",
+      txId: "",
+      confirmedRound: 0,
+      appID: -1,
+      timestamp: 2
+    });
     cp1.ssc.set("SSC1", nestedMap);
     appendToCheckpoint(checkpoints, "network12345", cp1);
     const cp2: Checkpoint = cleanupMutableData(new CheckpointImpl(), 53521);
-    cp2.ssc.set("SSC1", nestedMap);
+    cp2.ssc.set("SSC1", nestedMap1);
     expectBuilderError(
       () => appendToCheckpoint(checkpoints, "network12345", cp2),
       ERRORS.BUILTIN_TASKS.CHECKPOINT_ERROR_DUPLICATE_ASSET_DEFINITION,
@@ -590,7 +598,7 @@ describe("CheckpointRepoImpl", () => {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, ASAInfo>(),
-        ssc: new Map([["SSC key1", nestedMap]]),
+        ssc: new Map([["SSC key1", nestedMap1]]),
         dLsig: new Map<string, LsigInfo>()
       }
     };
