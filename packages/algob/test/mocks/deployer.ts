@@ -1,5 +1,5 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import type { LogicSig, LogicSigArgs } from "algosdk";
+import type { LogicSig } from "algosdk";
 import * as algosdk from "algosdk";
 
 import type {
