@@ -127,7 +127,7 @@ Below we describe different use cases implemented by the smart contract suite. W
 
 #### Permissions
 
-1. (*whitelist(permissionsManager, userAddress)*)(/examples/permissioned-token/scripts/permissions/whitelist.js) -
+1. [*whitelist(permissionsManager, userAddress)*](/examples/permissioned-token/scripts/permissions/whitelist.js) -
    Add a new user to the whitelist. Required to allow the user to receive or send tokens.
 
    * NoOp call to the permissions smart contract with `app-arg = str:add_whitelist` and `app-accounts = [userAddress]`. Must signed by *permissionsManager*.  If tx is successful, then permission smart contract updates `Txn.accounts[1]` (the `userAddress`) local state by setting `whitelisted = 1`.

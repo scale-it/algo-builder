@@ -22,10 +22,15 @@ To attract more web developers we plan to build a JavaScript DSL for TEAL with T
 ## Documentation
 
 * [Landing Page](https://scale-it.github.io/algo-builder)
-* [User Guide](/docs/guide/README)
-* [API docs](https://scale-it.github.io/algo-builder/).
+* [User Guide](/https://scale-it.github.io/algo-builder/guide/README)
+* [API docs](https://scale-it.github.io/algo-builder/api/algob/index.html)
+* [Runtime API docs](https://scale-it.github.io/algo-builder/api/runtime/index.html)
 
-The project specification is [published here](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
+
+### Templates
+
+* [Smart Contracts](https://github.com/scale-it/algo-builder/tree/master/examples)
+* [dapps](https://github.com/scale-it/algo-builder-templates)  (webapps integrated with smart contracts)
 
 
 ## Requirements
