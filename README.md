@@ -22,7 +22,7 @@ To attract more web developers we plan to build a JavaScript DSL for TEAL with T
 ## Documentation
 
 * [Landing Page](https://scale-it.github.io/algo-builder)
-* [User Guide](/https://scale-it.github.io/algo-builder/guide/README)
+* [User Guide](https://scale-it.github.io/algo-builder/guide/README)
 * [API docs](https://scale-it.github.io/algo-builder/api/algob/index.html)
 * [Runtime API docs](https://scale-it.github.io/algo-builder/api/runtime/index.html)
 
