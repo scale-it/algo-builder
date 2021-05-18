@@ -1,5 +1,3 @@
-const { updateSSC } = require('@algo-builder/algob');
-
 async function run (runtimeEnv, deployer) {
   const creatorAccount = deployer.accountsByName.get('alice');
 
@@ -8,8 +6,7 @@ async function run (runtimeEnv, deployer) {
   const applicationID = appInfo.appID;
   console.log('Application Id ', applicationID);
 
-  const updatedRes = await updateSSC(
-    deployer,
+  const updatedRes = await deployer.updateSSC(
     creatorAccount,
     {}, // pay flags
     applicationID,

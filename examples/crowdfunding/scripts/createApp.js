@@ -1,6 +1,5 @@
 const {
   executeTransaction,
-  updateSSC,
   uint64ToBigEndian,
   addressToPk
 } = require('@algo-builder/algob');
@@ -66,8 +65,7 @@ async function run (runtimeEnv, deployer) {
 
   appArgs = [addressToPk(escrowAccount.address())];
 
-  const updatedRes = await updateSSC(
-    deployer,
+  const updatedRes = await deployer.updateSSC(
     creatorAccount,
     {}, // pay flags
     applicationID,
