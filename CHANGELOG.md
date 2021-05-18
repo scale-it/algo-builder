@@ -3,11 +3,13 @@
 ## unreleased
 
 ### API breaking
+* Move `updateSSC` function to `deployer`
 
 ### Improvements
 * Update how error is displayed to a user
 * Add Update stateful smart contracts using execute transaction in runtime
-
+* Store checkpoints in nested form for SSC
+* Add tests for checkpoints
 
 ### Bug fixes
 
