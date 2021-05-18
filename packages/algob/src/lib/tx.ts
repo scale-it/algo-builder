@@ -185,7 +185,7 @@ async function mkTx (
     case TransactionType.ModifyAsset: {
       // fetch asset mutable properties from network and set them (if they are not passed)
       // before modifying asset
-      const assetInfo = await deployer.getAssetByID(txn.assetID);
+      const assetInfo = await deployer.getAssetByID(BigInt(txn.assetID));
       if (txn.fields.manager === "") txn.fields.manager = undefined;
       else txn.fields.manager = txn.fields.manager ?? assetInfo.params.manager;
 

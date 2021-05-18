@@ -16,7 +16,6 @@ import { algodCredentialsFromEnv, KMDCredentialsFromEnv } from "./lib/credential
 import { getProgram } from "./lib/load-program";
 import { signLogicSigMultiSig } from "./lib/lsig";
 import { signMultiSig } from "./lib/msig";
-import { updateSSC } from "./lib/ssc";
 import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC, readGlobalStateSSC, readLocalStateSSC } from "./lib/status";
 import { executeSignedTxnFromFile, executeTransaction, getSuggestedParams, mkTxParams } from "./lib/tx";
 import * as types from "./types";
@@ -40,7 +39,6 @@ export {
   printGlobalStateSSC,
   readGlobalStateSSC,
   readLocalStateSSC,
-  updateSSC,
   stringToBytes,
   parseSSCAppArgs,
   globalZeroAddress,
