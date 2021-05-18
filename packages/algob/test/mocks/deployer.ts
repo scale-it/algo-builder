@@ -52,6 +52,10 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
+  registerUpdatedSSCInfo (sscName: string, sscInfo: SSCInfo): void {
+    throw new Error("Not implemented");
+  }
+
   setScriptName (name: string): void {
     this.scriptName = name;
   }
@@ -61,6 +65,10 @@ export class FakeDeployer implements Deployer {
   }
 
   getSSC (nameApproval: string, nameClear: string): SSCInfo | undefined {
+    throw new Error("Not implemented");
+  }
+
+  getSSCFromKey (key: string): SSCInfo | undefined {
     throw new Error("Not implemented");
   }
 
@@ -106,6 +114,17 @@ export class FakeDeployer implements Deployer {
     clearProgram: string,
     flags: rtypes.SSCDeploymentFlags,
     payFlags: rtypes.TxParams): Promise<SSCInfo> {
+    throw new Error("Not implemented");
+  }
+
+  async updateSSC (
+    sender: algosdk.Account,
+    payFlags: rtypes.TxParams,
+    appID: number,
+    newApprovalProgram: string,
+    newClearProgram: string,
+    flags: rtypes.SSCOptionalFlags
+  ): Promise<SSCInfo> {
     throw new Error("Not implemented");
   }
 
