@@ -21,8 +21,8 @@ import { ERRORS } from "../core/errors-list";
  *
  * An example of this can be:
  *
- *    import findUpT from "find-up";
- *    export const findUp = lazyFunction<typeof findUpT>(() => require("find-up"));
+ *    import findupSync from "findup-sync";
+ *    export const findUp = lazyFunction<typeof findUpT>(() => require("findup-sync"));
  *
  * You can also use it with named exports:
  *
