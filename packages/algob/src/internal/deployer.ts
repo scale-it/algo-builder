@@ -132,7 +132,26 @@ class DeployerBasicMode {
    */
   getSSC (nameApproval: string, nameClear: string): SSCInfo | undefined {
     const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
-    return resultMap.get(nameApproval + "-" + nameClear);
+    const nestedMap = resultMap.get(nameApproval + "-" + nameClear);
+    if (nestedMap) {
+      // return last pushed element in the map(latest timestamp value)
+      return [...nestedMap][nestedMap.size - 1][1];
+    } else {
+      return undefined;
+    }
+  }
+
+  /**
+   * Queries a stateful smart contract info from checkpoint using key. */
+  getSSCFromKey (key: string): SSCInfo | undefined {
+    const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
+    const nestedMap = resultMap.get(key);
+    if (nestedMap) {
+      // return last pushed element in the map(latest timestamp value)
+      return [...nestedMap][nestedMap.size - 1][1];
+    } else {
+      return undefined;
+    }
   }
 
   /**
@@ -332,6 +351,13 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   }
 
   /**
+   * Register UpdatedSSC Info in checkpoints
+   */
+  registerUpdatedSSCInfo (sscName: string, sscInfo: SSCInfo): void {
+    this.cpData.registerUpdatedSSC(this.networkName, sscName, sscInfo);
+  }
+
+  /**
    * Log transaction with message using txwriter
    */
   logTx (message: string, txConfirmation: algosdk.ConfirmedTxInfo): void {
@@ -461,7 +487,6 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
       throw error;
     }
 
-    // TODO: register update ssc checkpoints in a nested way with timestamp
     this.registerSSCInfo(name, sscInfo);
 
     return sscInfo;
@@ -497,8 +522,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
       throw error;
     }
 
-    // TODO: register update ssc checkpoints in a nested way with timestamp
-    this.registerSSCInfo(name, sscInfo);
+    this.registerUpdatedSSCInfo(name, sscInfo);
 
     return sscInfo;
   }
@@ -533,6 +557,12 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
   registerSSCInfo (name: string, sscInfo: SSCInfo): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "registerSSCInfo"
+    });
+  }
+
+  registerUpdatedSSCInfo (sscName: string, sscInfo: SSCInfo): void {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "registerUpdatedSSCInfo"
     });
   }
 
