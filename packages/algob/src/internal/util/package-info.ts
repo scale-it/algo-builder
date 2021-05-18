@@ -1,4 +1,4 @@
-import * as findup from "find-up";
+import findupSync from "findup-sync";
 import { readJSON } from "fs-extra";
 import * as path from "path";
 
@@ -22,7 +22,7 @@ export interface PackageJson {
 }
 
 function findClosestPackageJson (file: string): string | null {
-  return findup.sync("package.json", { cwd: path.dirname(file) }) ?? null;
+  return findupSync("package.json", { cwd: path.dirname(file) }) ?? null;
 }
 
 export async function getPackageJson (): Promise<PackageJson> {

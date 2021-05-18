@@ -5,6 +5,7 @@
 ### API breaking
 
 ### Improvements
++ Replaced dependency `find-up` with `findup-sync` in `algob`.
 
 ### Bug fixes
 
