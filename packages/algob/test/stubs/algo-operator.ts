@@ -86,7 +86,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
       txId: "tx-id-dry-run",
       confirmedRound: -1,
       appID: -1,
-      timestamp: 1
+      timestamp: 2
     };
   }
 

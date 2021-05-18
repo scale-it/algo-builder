@@ -136,6 +136,77 @@ describe("DeployerDeployMode", () => {
     });
   });
 
+  it("Should save info to checkpoint after SSC deployment", async () => {
+    const env = mkEnv("network1");
+    const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
+    const deployer = new DeployerDeployMode(deployerCfg);
+    const nestedMap = new Map<number, SSCInfo>();
+    nestedMap.set(1, {
+      creator: "addr-1-get-address-dry-run",
+      txId: "tx-id-dry-run",
+      confirmedRound: -1,
+      appID: -1,
+      timestamp: 1
+    });
+
+    const sscFlags = {
+      sender: deployer.accounts[0],
+      localInts: 1,
+      globalInts: 1,
+      localBytes: 1,
+      globalBytes: 1
+    };
+    const sscInfo = await deployer.deploySSC("app", "clear", sscFlags, {});
+    assert.deepEqual(sscInfo,
+      {
+        creator: "addr-1-get-address-dry-run",
+        txId: "tx-id-dry-run",
+        confirmedRound: -1,
+        appID: -1,
+        timestamp: 1
+      });
+
+    deployerCfg.cpData.precedingCP.network1.timestamp = 515236;
+    assert.deepEqual(deployerCfg.cpData.precedingCP, {
+      network1: {
+        asa: new Map(),
+        ssc: new Map([["app-clear", nestedMap]]),
+        dLsig: new Map(),
+        metadata: new Map<string, string>(),
+        timestamp: 515236
+      }
+    });
+
+    nestedMap.set(2, {
+      creator: "addr-1-get-address-dry-run",
+      txId: "tx-id-dry-run",
+      confirmedRound: -1,
+      appID: -1,
+      timestamp: 2
+    });
+
+    const updatedInfo = await deployer.updateSSC(deployer.accounts[0], {}, -1, "app", "clear", {});
+    assert.deepEqual(updatedInfo,
+      {
+        creator: "addr-1-get-address-dry-run",
+        txId: "tx-id-dry-run",
+        confirmedRound: -1,
+        appID: -1,
+        timestamp: 2
+      });
+
+    // should create a nested checkpoint if name is same after update
+    assert.deepEqual(deployerCfg.cpData.precedingCP, {
+      network1: {
+        asa: new Map(),
+        ssc: new Map([["app-clear", nestedMap]]),
+        dLsig: new Map(),
+        metadata: new Map<string, string>(),
+        timestamp: 515236
+      }
+    });
+  });
+
   it("Should save overriden asaDef to checkpoint after asset deployment if custom ASA params are passed", async () => {
     const env = mkEnv("network1");
     const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
