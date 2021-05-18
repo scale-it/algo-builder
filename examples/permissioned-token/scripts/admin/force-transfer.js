@@ -123,7 +123,6 @@ async function run (runtimeEnv, deployer) {
 
   // opt-in accounts to permissions smart contract
   // comment this code if already opted-in
-  await optInAccountToSSC(deployer, asaManager, permissionsSSCInfo.appID, {}, {});
   await optInAccountToSSC(deployer, elon, permissionsSSCInfo.appID, {}, {});
   await optInAccountToSSC(deployer, bob, permissionsSSCInfo.appID, {}, {});
   await optInAccountToSSC(deployer, john, permissionsSSCInfo.appID, {}, {});
@@ -135,7 +134,6 @@ async function run (runtimeEnv, deployer) {
    * NOTE: whitelist() transaction will be executed by the permissionsManager,
    * current_user (a non reserve account) will not control permissionsManager account.
    */
-  await whitelist(deployer, permissionsManager, asaManager.addr);
   await whitelist(deployer, permissionsManager, bob.addr);
   await whitelist(deployer, permissionsManager, john.addr);
 
