@@ -1,5 +1,5 @@
 import debug from "debug";
-import * as findUp from "find-up";
+import findupSync from "findup-sync";
 import * as path from "path";
 
 const log = debug("algob:core:execution-mode");
@@ -62,7 +62,7 @@ function alternativeIsLocalInstallation (): boolean {
   let cwd = workingDirectoryOnLoad;
 
   while (true) {
-    const nodeModules = findUp.sync("node_modules", { cwd });
+    const nodeModules = findupSync("node_modules", { cwd });
 
     if (nodeModules === null || nodeModules === undefined) {
       return false;
