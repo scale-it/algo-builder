@@ -38,17 +38,19 @@ To attract more web developers we plan to build a JavaScript DSL for TEAL with T
 + Node 12+
 + Connection to an Algorand node. TEAL compilation requires Developer API to be enabled (`"EnableDeveloperAPI": true` in the node config.json).
 + Python 3.7+ (for PyTeal) with [pyteal](https://pypi.org/project/pyteal). Please read below how to install it.
-+ Yarn `v1.22+` or NPM `v6.0+`
++ Yarn `v1.22+` or NPM `v6.0+**
 
 ### Installation
 
-To install `algob` globally in your system you can use:
+#### Pre requirements
 
-+ Using Yarn: `yarn global add @algo-builder/algob`
-+ Using NPM: `npm install -g @algo-builder/algob`
+Make sure your `yarn global bin` directory is in your `$PATH**.
 
 
-**Recommended**: Installation from source (if you want to use `algob` with latest, not released version):
+#### Installation from master
+
+We recommend installation from GitHub _master_ branch if you want to play with templates and examples (all our example smart contracts are tested against _master_) or you want to use the latest features.
+Don't forget to pull the latest changes - if you don't want to miss updates.
 
 ```
 git clone https://github.com/scale-it/algo-builder.git
@@ -58,8 +60,13 @@ yarn build
 cd packages/algob
 yarn link
 ```
-Finally, make sure your `yarn global bin` directory is in your `$PATH`.
 
+#### Installation from released version
+
+To install `algob` globally in your system you can use:
+
++ Using Yarn: `yarn global add @algo-builder/algob`
++ Using NPM: `npm install -g @algo-builder/algob`
 
 
 ### Algorand Node requirements
