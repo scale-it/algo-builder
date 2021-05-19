@@ -1,5 +1,4 @@
 import { encodeNote, mkTransaction, types as rtypes } from "@algo-builder/runtime";
-import { ExecParams, SignType, TransactionType, TxParams } from "@algo-builder/runtime/build/types";
 import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
 import { Deployer } from "../types";
@@ -92,11 +91,11 @@ export function makeASAOptInTx (
   addr: string,
   assetID: number,
   params: SuggestedParams,
-  payFlags: TxParams
+  payFlags: rtypes.TxParams
 ): Transaction {
-  const execParam: ExecParams = {
-    type: TransactionType.OptInASA,
-    sign: SignType.SecretKey,
+  const execParam: rtypes.ExecParams = {
+    type: rtypes.TransactionType.OptInASA,
+    sign: rtypes.SignType.SecretKey,
     fromAccount: { addr: addr, sk: new Uint8Array(0) },
     assetID: assetID,
     payFlags: payFlags
@@ -125,28 +124,25 @@ function signTransaction (txn: Transaction, execParams: rtypes.ExecParams): Uint
 }
 
 /**
- * Make transaction parameters and update deployASA, deploySSC & ModifyAsset params
+ * Parses transaction parameters and updates the attributes values
  * @param deployer Deployer object
- * @param txn Execution parameters
- * @param index index of current execParam
- * @param txIdxMap Map for index to name
+ * @param txn transaction parameters
  */
 /* eslint-disable sonarjs/cognitive-complexity */
-async function mkTx (
-  deployer: Deployer,
-  txn: rtypes.ExecParams,
+export async function parseExecParams (
+  deployer: Deployer, txn: rtypes.ExecParams,
   index: number,
   txIdxMap: Map<number, [string, rtypes.ASADef]>
-): Promise<Transaction> {
+): Promise<rtypes.ExecParams> {
   // if execParams for ASA related transaction have assetID as asaName,
   // then set to assetIndex using info from checkpoint
   switch (txn.type) {
-    case TransactionType.OptInASA :
-    case TransactionType.TransferAsset :
-    case TransactionType.ModifyAsset :
-    case TransactionType.FreezeAsset :
-    case TransactionType.RevokeAsset :
-    case TransactionType.DestroyAsset : {
+    case rtypes.TransactionType.OptInASA :
+    case rtypes.TransactionType.TransferAsset :
+    case rtypes.TransactionType.ModifyAsset :
+    case rtypes.TransactionType.FreezeAsset :
+    case rtypes.TransactionType.RevokeAsset :
+    case rtypes.TransactionType.DestroyAsset : {
       if (typeof txn.assetID === "string") {
         const asaInfo = deployer.getASAInfo(txn.assetID);
         txn.assetID = asaInfo.assetIndex;
@@ -156,14 +152,14 @@ async function mkTx (
   }
 
   switch (txn.type) {
-    case TransactionType.DeployASA: {
+    case rtypes.TransactionType.DeployASA: {
       deployer.assertNoAsset(txn.asaName);
       const asaDef = deployer.getASADef(txn.asaName, txn.asaDef);
       txn.asaDef = asaDef;
       if (txn.asaDef) txIdxMap.set(index, [txn.asaName, asaDef]);
       break;
     }
-    case TransactionType.DeploySSC: {
+    case rtypes.TransactionType.DeploySSC: {
       const name = txn.approvalProgram + "-" + txn.clearProgram;
       deployer.assertNoAsset(name);
       const approval = await deployer.ensureCompiled(txn.approvalProgram);
@@ -173,14 +169,14 @@ async function mkTx (
       txIdxMap.set(index, [name, { total: 1, decimals: 1, unitName: "MOCK" }]);
       break;
     }
-    case TransactionType.UpdateSSC: {
+    case rtypes.TransactionType.UpdateSSC: {
       const approval = await deployer.ensureCompiled(txn.newApprovalProgram);
       const clear = await deployer.ensureCompiled(txn.newClearProgram);
       txn.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
       txn.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
       break;
     }
-    case TransactionType.ModifyAsset: {
+    case rtypes.TransactionType.ModifyAsset: {
       // fetch asset mutable properties from network and set them (if they are not passed)
       // before modifying asset
       const assetInfo = await deployer.getAssetByID(txn.assetID as number);
@@ -199,10 +195,27 @@ async function mkTx (
       break;
     }
   }
+  return txn;
+}
+
+/**
+ * Make transaction parameters and update deployASA, deploySSC & ModifyAsset params
+ * @param deployer Deployer object
+ * @param txn Execution parameters
+ * @param index index of current execParam
+ * @param txIdxMap Map for index to name
+ */
+async function mkTx (
+  deployer: Deployer,
+  txn: rtypes.ExecParams,
+  index: number,
+  txIdxMap: Map<number, [string, rtypes.ASADef]>
+): Promise<Transaction> {
+  const parsedTx = await parseExecParams(deployer, txn, index, txIdxMap);
 
   const suggestedParams = await getSuggestedParams(deployer.algodClient);
-  return mkTransaction(txn,
-    await mkTxParams(deployer.algodClient, txn.payFlags, Object.assign({}, suggestedParams)));
+  return mkTransaction(parsedTx,
+    await mkTxParams(deployer.algodClient, parsedTx.payFlags, Object.assign({}, suggestedParams)));
 }
 
 /**

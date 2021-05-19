@@ -14,7 +14,7 @@ import {
 
 export class AlgoOperatorDryRunImpl implements AlgoOperator {
   get algodClient (): Algodv2 {
-    throw new Error("Not implemented");
+    return new Algodv2("dummyToken", "dummyNetwork", 8080);
   };
 
   getDelegatedLsig (lsig: string): Object | undefined {
