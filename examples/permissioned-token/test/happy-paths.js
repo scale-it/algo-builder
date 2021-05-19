@@ -1,191 +1,166 @@
-const { types } = require('@algo-builder/runtime');
+const { types, AccountStore } = require('@algo-builder/runtime');
 const { encodeAddress } = require('algosdk');
 const { assert } = require('chai');
-const {
-  optInToASA,
-  optInToPermissionsSSC,
-  issue,
-  whitelist,
-  fund,
-  killToken,
-  transfer,
-  optOut,
-  forceTransfer,
-  setupEnv
-} = require('./common');
+const { Context } = require('./common');
+
+const minBalance = 20e6; // 20 ALGOs
+const ALICE_ADDRESS = 'EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY';
 
 describe('Permissioned Token Tests - Happy Paths', function () {
-  let runtime, master, alice, bob, elon;
-  let lsig, assetIndex, controllerAppID, permissionsAppId;
+  let master, alice, bob, elon;
   let asaDef, asaReserve, asaManager, asaCreator;
-
-  function syncAccounts () {
-    master = runtime.getAccount(master.address);
-    alice = runtime.getAccount(alice.address);
-    bob = runtime.getAccount(bob.address);
-    elon = runtime.getAccount(elon.address);
-  }
-
-  // Create Accounts and Env
-  function _setupEnv () {
-    [
-      runtime,
-      master,
-      alice,
-      bob,
-      elon,
-      assetIndex,
-      controllerAppID,
-      lsig,
-      permissionsAppId
-    ] = setupEnv();
-  }
+  let ctx;
 
   this.beforeEach(async function () {
-    _setupEnv();
-    asaDef = runtime.getAssetDef(assetIndex);
-    asaReserve = runtime.getAccount(asaDef.reserve);
-    asaManager = runtime.getAccount(asaDef.manager);
-    asaCreator = runtime.getAccount(asaDef.creator);
+    master = new AccountStore(10000e6);
+    alice = new AccountStore(minBalance, { addr: ALICE_ADDRESS, sk: new Uint8Array(0) });
+    bob = new AccountStore(minBalance);
+    elon = new AccountStore(minBalance);
+
+    ctx = new Context(master, alice, bob, elon);
+    asaDef = ctx.getAssetDef();
+    asaReserve = ctx.getAccount(asaDef.reserve);
+    asaManager = ctx.getAccount(asaDef.manager);
+    asaCreator = ctx.getAccount(asaDef.creator);
   });
 
   it('should issue token if sender is token reserve', () => {
     // Can issue after opting-in
-    optInToASA(runtime, elon.address, assetIndex);
-    const prevElonAssetHolding = runtime.getAssetHolding(assetIndex, elon.address);
+    ctx.optInToASA(elon.address);
+
+    const prevElonAssetHolding = ctx.getAssetHolding(elon.address);
     assert.equal(prevElonAssetHolding.amount, 0n);
 
-    issue(runtime, asaReserve.account, elon, 20, controllerAppID, assetIndex, lsig);
-    syncAccounts();
+    ctx.issue(asaReserve.account, elon, 20);
+    ctx.syncAccounts();
 
     assert.equal(
-      runtime.getAssetHolding(assetIndex, elon.address).amount,
+      ctx.getAssetHolding(elon.address).amount,
       prevElonAssetHolding.amount + 20n
     );
   });
 
   it('should kill token if sender is token manager', () => {
-    assert.equal(runtime.getGlobalState(controllerAppID, 'killed'), 0n); // token not killed
+    assert.equal(ctx.runtime.getGlobalState(ctx.controllerAppID, 'killed'), 0n); // token not killed
 
     // kill token
-    killToken(runtime, asaManager.account, controllerAppID);
-    syncAccounts();
+    ctx.killToken(asaManager.account);
+    ctx.syncAccounts();
 
-    assert.equal(runtime.getGlobalState(controllerAppID, 'killed'), 1n); // verify token is killed
+    assert.equal(ctx.runtime.getGlobalState(ctx.controllerAppID, 'killed'), 1n); // verify token is killed
     // issuance fails now (as token is killed)
     assert.throws(() =>
-      issue(runtime, asaReserve.account, elon, 20, controllerAppID, assetIndex, lsig),
+      ctx.issue(asaReserve.account, elon, 20),
     'RUNTIME_ERR1009: TEAL runtime encountered err opcode');
   });
 
   it('should whitelist account if sender is permissions manager', () => {
     // opt-in to permissions ssc by elon
-    optInToPermissionsSSC(runtime, elon.address, permissionsAppId);
-    syncAccounts();
-    assert.isDefined(elon.getAppFromLocal(permissionsAppId)); // verify opt-in
+    ctx.optInToPermissionsSSC(elon.address);
+    ctx.syncAccounts();
+    assert.isDefined(ctx.elon.getAppFromLocal(ctx.permissionsAppId)); // verify opt-in
 
-    const permManagerAddr = encodeAddress(runtime.getGlobalState(permissionsAppId, 'manager'));
-    const permManager = runtime.getAccount(permManagerAddr);
-    whitelist(runtime, permManager.account, elon.address, permissionsAppId); // whitelist elon
-    syncAccounts();
-    assert.equal(elon.getLocalState(permissionsAppId, 'whitelisted'), 1n);
+    const permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsAppId, 'manager'));
+    const permManager = ctx.getAccount(permManagerAddr);
+    ctx.whitelist(permManager.account, elon.address); // whitelist elon
+    ctx.syncAccounts();
+    assert.equal(ctx.elon.getLocalState(ctx.permissionsAppId, 'whitelisted'), 1n);
   });
 
   it('should opt-out of token successfully (using closeRemainderTo)', () => {
     // Opt-In
-    optInToASA(runtime, elon.address, assetIndex);
-    issue(runtime, asaReserve.account, elon, 20, controllerAppID, assetIndex, lsig);
-    syncAccounts();
+    ctx.optInToASA(elon.address);
+    ctx.issue(asaReserve.account, elon, 20);
+    ctx.syncAccounts();
+
     // verify issuance
     assert.equal(
-      runtime.getAssetHolding(assetIndex, elon.address).amount,
+      ctx.getAssetHolding(elon.address).amount,
       20n
     );
 
     // opt-out issued tokens to creator
-    const initialCreatorHolding = runtime.getAssetHolding(assetIndex, asaCreator.address);
-    optOut(runtime, asaCreator.address, elon.account, assetIndex);
-    syncAccounts();
+    const initialCreatorHolding = ctx.getAssetHolding(asaCreator.address);
+    ctx.optOut(asaCreator.address, elon.account);
+    ctx.syncAccounts();
 
     // verify elon and creator's asset holding (after opting out)
-    assert.equal(runtime.getAssetHolding(assetIndex, elon.address).amount, 0n);
+    assert.equal(ctx.getAssetHolding(elon.address).amount, 0n);
     assert.equal(
-      runtime.getAssetHolding(assetIndex, asaCreator.address).amount,
+      ctx.getAssetHolding(asaCreator.address).amount,
       initialCreatorHolding.amount + 20n);
   });
 
   it('should change Permissions SSC Manager if sender is current_permissions_manager', () => {
     // throws error as elon is not permissions manager
     assert.throws(() =>
-      whitelist(runtime, elon.account, bob.address, permissionsAppId),
+      ctx.whitelist(elon.account, bob.address),
     'RUNTIME_ERR1009: TEAL runtime encountered err opcode');
 
-    const permManagerAddr = encodeAddress(runtime.getGlobalState(permissionsAppId, 'manager'));
-    const currentPermManager = runtime.getAccount(permManagerAddr);
+    const permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsAppId, 'manager'));
+    const currentPermManager = ctx.getAccount(permManagerAddr);
     assert.notEqual(elon.address, currentPermManager.address); // verify elon is not current_perm_manager
     const txn = {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: currentPermManager.account, // perm_manager account
-      appId: permissionsAppId,
+      appId: ctx.permissionsAppId,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:change_permissions_manager'],
       accounts: [elon.address]
     };
 
     // works as fromAccount is the current permissions manager
-    runtime.executeTx(txn);
-    syncAccounts();
+    ctx.runtime.executeTx(txn);
+    ctx.syncAccounts();
 
-    const newPermManager = encodeAddress(runtime.getGlobalState(permissionsAppId, 'manager'));
+    const newPermManager = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsAppId, 'manager'));
     assert.equal(newPermManager, elon.address); // verify new perm manager is elon
-    whitelist(runtime, elon.account, bob.address, permissionsAppId); // passes now
+    ctx.whitelist(elon.account, bob.address); // passes now
 
-    syncAccounts();
-    assert.equal(bob.getLocalState(permissionsAppId, 'whitelisted'), 1n);
+    ctx.syncAccounts();
+    assert.equal(ctx.bob.getLocalState(ctx.permissionsAppId, 'whitelisted'), 1n);
   });
 
   it('should force transfer tokens between non reserve accounts successfully if sender is token manager', () => {
-    const permManagerAddr = encodeAddress(runtime.getGlobalState(permissionsAppId, 'manager'));
-    const permManager = runtime.getAccount(permManagerAddr);
-    whitelist(runtime, permManager.account, elon.address, permissionsAppId);
-    whitelist(runtime, permManager.account, bob.address, permissionsAppId);
-    syncAccounts();
+    const permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsAppId, 'manager'));
+    const permManager = ctx.getAccount(permManagerAddr);
+    ctx.whitelist(permManager.account, elon.address);
+    ctx.whitelist(permManager.account, bob.address);
+    ctx.syncAccounts();
 
     // Opt-In to ASA
-    optInToASA(runtime, bob.address, assetIndex);
-    optInToASA(runtime, elon.address, assetIndex);
-    syncAccounts();
+    ctx.optInToASA(bob.address);
+    ctx.optInToASA(elon.address);
 
     // Issue some tokens to sender
-    issue(runtime, asaReserve.account, bob, 150, controllerAppID, assetIndex, lsig);
-    syncAccounts();
+    ctx.issue(asaReserve.account, bob, 150);
+    ctx.syncAccounts();
 
     // Successful transfer
-    const initialElonBalance = runtime.getAssetHolding(assetIndex, elon.address).amount;
-    const initialBobBalance = runtime.getAssetHolding(assetIndex, bob.address).amount;
-    forceTransfer(runtime, bob, elon, 20, assetIndex,
-      controllerAppID, permissionsAppId, lsig, asaManager.account);
+    const initialElonBalance = ctx.getAssetHolding(elon.address).amount;
+    const initialBobBalance = ctx.getAssetHolding(bob.address).amount;
+    ctx.forceTransfer(asaManager.account, bob, elon, 20);
     // verify transfer
     assert.equal(
-      runtime.getAssetHolding(assetIndex, bob.address).amount,
+      ctx.getAssetHolding(bob.address).amount,
       initialBobBalance - 20n
     );
     assert.equal(
-      runtime.getAssetHolding(assetIndex, elon.address).amount,
+      ctx.getAssetHolding(elon.address).amount,
       initialElonBalance + 20n
     );
   });
 
   it('should force transfer tokens without permission checks if receiver is asset reserve', () => {
     // Opt-In to ASA
-    optInToASA(runtime, bob.address, assetIndex);
-    optInToASA(runtime, elon.address, assetIndex);
-    syncAccounts();
+    ctx.optInToASA(bob.address);
+    ctx.optInToASA(elon.address);
+    ctx.syncAccounts();
 
     // Issue few tokens to sender
-    issue(runtime, asaReserve.account, bob, 150, controllerAppID, assetIndex, lsig);
-    syncAccounts();
+    ctx.issue(asaReserve.account, bob, 150);
+    ctx.syncAccounts();
 
     // note that call to permissions is not there
     const forceTxParams = [
@@ -193,87 +168,84 @@ describe('Permissioned Token Tests - Happy Paths', function () {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
         fromAccount: asaManager.account,
-        appId: controllerAppID,
+        appId: ctx.controllerAppID,
         payFlags: { totalFee: 1000 },
         appArgs: ['str:force_transfer'],
-        foreignAssets: [assetIndex]
+        foreignAssets: [ctx.assetIndex]
       },
       {
         type: types.TransactionType.RevokeAsset,
         sign: types.SignType.LogicSignature,
-        fromAccountAddr: lsig.address(),
+        fromAccountAddr: ctx.lsig.address(),
         recipient: asaReserve.address,
-        assetID: assetIndex,
+        assetID: ctx.assetIndex,
         revocationTarget: bob.address,
         amount: 20n,
-        lsig: lsig,
+        lsig: ctx.lsig,
         payFlags: { totalFee: 1000 }
       },
       {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.SecretKey,
         fromAccount: asaManager.account,
-        toAccountAddr: lsig.address(),
+        toAccountAddr: ctx.lsig.address(),
         amountMicroAlgos: 1000,
         payFlags: { totalFee: 1000 }
       }
     ];
     // Successful transfer
-    const initialBobBalance = runtime.getAssetHolding(assetIndex, bob.address).amount;
-    const initialReserveBalance = runtime.getAssetHolding(assetIndex, asaReserve.address).amount;
-    runtime.executeTx(forceTxParams);
+    const initialBobBalance = ctx.getAssetHolding(bob.address).amount;
+    const initialReserveBalance = ctx.getAssetHolding(asaReserve.address).amount;
+    ctx.runtime.executeTx(forceTxParams);
     // verify transfer
     assert.equal(
-      runtime.getAssetHolding(assetIndex, bob.address).amount,
+      ctx.getAssetHolding(bob.address).amount,
       initialBobBalance - 20n
     );
     assert.equal(
-      runtime.getAssetHolding(assetIndex, asaReserve.address).amount,
+      ctx.getAssetHolding(asaReserve.address).amount,
       initialReserveBalance + 20n
     );
   });
 
   it('should transfer tokens between non reserve accounts successfully', () => {
-    fund(runtime, master, lsig.address());
-    syncAccounts();
+    ctx.syncAccounts();
     const amount = 20n;
 
     // Issue some tokens to Bob and Elon
-    optInToASA(runtime, elon.address, assetIndex);
-    optInToASA(runtime, bob.address, assetIndex);
-    syncAccounts();
-
-    issue(runtime, asaReserve.account, elon, 50, controllerAppID, assetIndex, lsig);
-    issue(runtime, asaReserve.account, bob, 50, controllerAppID, assetIndex, lsig);
-    syncAccounts();
+    ctx.optInToASA(elon.address);
+    ctx.optInToASA(bob.address);
+    ctx.issue(asaReserve.account, elon, 50);
+    ctx.issue(asaReserve.account, bob, 50);
+    ctx.syncAccounts();
 
     // whitelisted both accounts
-    const permManagerAddr = encodeAddress(runtime.getGlobalState(permissionsAppId, 'manager'));
-    const permManager = runtime.getAccount(permManagerAddr);
-    whitelist(runtime, permManager.account, elon.address, permissionsAppId);
-    whitelist(runtime, permManager.account, bob.address, permissionsAppId);
-    syncAccounts();
+    const permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsAppId, 'manager'));
+    const permManager = ctx.getAccount(permManagerAddr);
+    ctx.whitelist(permManager.account, elon.address);
+    ctx.whitelist(permManager.account, bob.address);
+    ctx.syncAccounts();
     // verify accounts are whitelisted
-    assert.equal(elon.getLocalState(permissionsAppId, 'whitelisted'), 1n);
-    assert.equal(bob.getLocalState(permissionsAppId, 'whitelisted'), 1n);
+    assert.equal(ctx.elon.getLocalState(ctx.permissionsAppId, 'whitelisted'), 1n);
+    assert.equal(ctx.bob.getLocalState(ctx.permissionsAppId, 'whitelisted'), 1n);
 
     // transfer 20 tokens from bob -> elon
-    const initialElonBalance = runtime.getAssetHolding(assetIndex, elon.address).amount;
-    const initialBobBalance = runtime.getAssetHolding(assetIndex, bob.address).amount;
-    transfer(runtime, bob, elon, amount, assetIndex, controllerAppID, permissionsAppId, lsig);
-    syncAccounts();
+    const initialElonBalance = ctx.getAssetHolding(elon.address).amount;
+    const initialBobBalance = ctx.getAssetHolding(bob.address).amount;
+    ctx.transfer(bob, elon, amount);
+    ctx.syncAccounts();
     assert.equal(
-      runtime.getAssetHolding(assetIndex, bob.address).amount,
+      ctx.getAssetHolding(bob.address).amount,
       initialBobBalance - amount
     );
     assert.equal(
-      runtime.getAssetHolding(assetIndex, elon.address).amount,
+      ctx.getAssetHolding(elon.address).amount,
       initialElonBalance + amount
     );
   });
 
   it('should update asset reserve account to another address if sender is asset manager', () => {
-    const oldReserveAssetHolding = runtime.getAssetHolding(assetIndex, asaReserve.address);
+    const oldReserveAssetHolding = ctx.getAssetHolding(asaReserve.address);
     const newReserveAddr = elon.address;
     assert.notEqual(asaReserve.address, newReserveAddr); // verify old reserve is not elon.addr
 
@@ -282,27 +254,27 @@ describe('Permissioned Token Tests - Happy Paths', function () {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
         fromAccount: asaManager.account,
-        appId: controllerAppID,
+        appId: ctx.controllerAppID,
         payFlags: { totalFee: 1000 },
         appArgs: ['str:force_transfer'],
-        foreignAssets: [assetIndex]
+        foreignAssets: [ctx.assetIndex]
       },
       {
         type: types.TransactionType.RevokeAsset,
         sign: types.SignType.LogicSignature,
-        fromAccountAddr: lsig.address(),
+        fromAccountAddr: ctx.lsig.address(),
         recipient: newReserveAddr,
-        assetID: assetIndex,
+        assetID: ctx.assetIndex,
         revocationTarget: asaReserve.address,
         amount: oldReserveAssetHolding.amount, // moving all tokens to new reserve
-        lsig: lsig,
+        lsig: ctx.lsig,
         payFlags: { totalFee: 1000 }
       },
       {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.SecretKey,
         fromAccount: asaManager.account,
-        toAccountAddr: lsig.address(),
+        toAccountAddr: ctx.lsig.address(),
         amountMicroAlgos: 1000,
         payFlags: { totalFee: 1000 }
       },
@@ -310,29 +282,29 @@ describe('Permissioned Token Tests - Happy Paths', function () {
         type: types.TransactionType.ModifyAsset,
         sign: types.SignType.SecretKey,
         fromAccount: asaManager.account,
-        assetID: assetIndex,
+        assetID: ctx.assetIndex,
         fields: {
           manager: asaDef.manager,
           reserve: newReserveAddr,
           freeze: asaDef.freeze,
-          clawback: lsig.address()
+          clawback: ctx.lsig.address()
         },
         payFlags: { totalFee: 1000 }
       }
     ];
 
-    optInToASA(runtime, newReserveAddr, assetIndex); // opt-in to ASA by new reserve
-    const intialElonHolding = runtime.getAssetHolding(assetIndex, newReserveAddr);
+    ctx.optInToASA(newReserveAddr); // opt-in to ASA by new reserve
+    const intialElonHolding = ctx.getAssetHolding(newReserveAddr);
 
     // execute update tx
-    runtime.executeTx(updateReserveParams);
-    syncAccounts();
+    ctx.runtime.executeTx(updateReserveParams);
+    ctx.syncAccounts();
 
     // verify asa.reserve is updated & old reserve amount is transferred to new reserve
-    const newASADef = runtime.getAssetDef(assetIndex);
+    const newASADef = ctx.getAssetDef();
     assert.equal(newASADef.reserve, elon.address);
     assert.equal(
-      runtime.getAssetHolding(assetIndex, elon.address).amount,
+      ctx.getAssetHolding(elon.address).amount,
       intialElonHolding.amount + oldReserveAssetHolding.amount
     );
   });
