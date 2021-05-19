@@ -156,7 +156,6 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     // Opt-In to ASA
     ctx.optInToASA(bob.address);
     ctx.optInToASA(elon.address);
-    ctx.syncAccounts();
 
     // Issue few tokens to sender
     ctx.issue(asaReserve.account, bob, 150);

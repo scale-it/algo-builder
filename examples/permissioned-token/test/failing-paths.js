@@ -37,7 +37,6 @@ describe('Permissioned Token Tests - Failing Paths', function () {
     it('should not issue if token is killed', () => {
       // Opt-in to ASA by receiver
       ctx.optInToASA(elon.address);
-      ctx.syncAccounts();
 
       ctx.killToken(asaManager.account);
       assert.throws(() =>
@@ -48,15 +47,12 @@ describe('Permissioned Token Tests - Failing Paths', function () {
     it('should reject issuance tx if sender is not token reserve', () => {
       // Opt-in to ASA by receiver
       ctx.optInToASA(elon.address);
-      ctx.syncAccounts();
-
       assert.throws(() => ctx.issue(bob.account, elon, 20), RUNTIME_ERR1009);
     });
 
     it('should reject issuance tx if trying to send asset using secret key instead of clawback', () => {
       // Opt-in to ASA by receiver
       ctx.optInToASA(elon.address);
-      ctx.syncAccounts();
 
       const txParams = {
         type: types.TransactionType.TransferAsset,
@@ -335,7 +331,6 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       // Opt-In to ASA by bob and elon (accA, accB)
       ctx.optInToASA(bob.address);
       ctx.optInToASA(elon.address);
-      ctx.syncAccounts();
 
       // transaction group for token transfer between two non-reserve accounts
       tokenTransferGroup = [
