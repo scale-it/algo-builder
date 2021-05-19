@@ -12,9 +12,11 @@ import {
   SSCInfo
 } from "../../src/types";
 
+const mockAlgod = new Algodv2("dummyToken", "dummyNetwork", 8080);
+
 export class AlgoOperatorDryRunImpl implements AlgoOperator {
   get algodClient (): Algodv2 {
-    throw new Error("Not implemented");
+    return mockAlgod;
   };
 
   getDelegatedLsig (lsig: string): Object | undefined {
@@ -26,7 +28,16 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
-    throw new Error("Not implemented");
+    const res: ConfirmedTxInfo = {
+      'confirmed-round': 1,
+      "asset-index": 1,
+      'application-index': 1,
+      'global-state-delta': "string",
+      'local-state-delta': "string"
+    };
+    return new Promise((resolve, reject) => {
+      resolve(res);
+    });
   }
 
   waitForConfirmation (txId: string): Promise<import("algosdk").ConfirmedTxInfo> {
@@ -40,7 +51,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     return {
       creator: flags.creator.addr + "-get-address-dry-run",
       txId: "tx-id-dry-run",
-      assetIndex: -1,
+      assetIndex: 1,
       confirmedRound: -1,
       assetDef: asaDef
     };
