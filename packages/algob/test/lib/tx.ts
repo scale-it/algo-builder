@@ -1,5 +1,5 @@
 import { encodeNote, types } from "@algo-builder/runtime";
-import { SuggestedParams } from "algosdk";
+import { ConfirmedTxInfo, SuggestedParams } from "algosdk";
 import { assert } from "chai";
 import sinon from 'sinon';
 import { TextEncoder } from "util";
@@ -64,6 +64,8 @@ describe("Opt-In to ASA", () => {
   let deployer: Deployer;
   let execParams: types.OptInASAParam;
   let algod: AlgoOperatorDryRunImpl;
+  let fn: any;
+  let expected: ConfirmedTxInfo;
   beforeEach(async () => {
     const env = mkEnv("network1");
     algod = new AlgoOperatorDryRunImpl();
@@ -78,20 +80,28 @@ describe("Opt-In to ASA", () => {
       fromAccount: account,
       assetID: 1
     };
+    fn = sinon.stub(algod.algodClient, "getTransactionParams")
+      .returns({ do: async () => s });
+    expected = {
+      'confirmed-round': 1,
+      "asset-index": 1,
+      'application-index': 1,
+      'global-state-delta': "string",
+      'local-state-delta': "string"
+    };
   });
 
-  it("should opt-in to asa using asset id as number", async () => {
-    const fn = sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => s });
-
-    await executeTransaction(deployer, execParams);
-
+  afterEach(() => {
     fn.restore();
   });
 
+  it("should opt-in to asa using asset id as number", async () => {
+    const res = await executeTransaction(deployer, execParams);
+
+    assert.deepEqual(res, expected);
+  });
+
   it("Should fail if asset name is passed but not found in checkpoints", async () => {
-    const fn = sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => s });
     execParams.assetID = "gold";
 
     await expectBuilderErrorAsync(
@@ -99,17 +109,13 @@ describe("Opt-In to ASA", () => {
       ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_NOT_DEFINED,
       "gold"
     );
-
-    fn.restore();
   });
 
   it("Should set asset id to asset id of asset name passed", async () => {
-    const fn = sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => s });
     execParams.assetID = "silver";
 
-    await executeTransaction(deployer, execParams);
+    const res = await executeTransaction(deployer, execParams);
 
-    fn.restore();
+    assert.deepEqual(res, expected);
   });
 });
