@@ -8,16 +8,6 @@ import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 
-/**
- * Test cases, (on each test case re-create the app - setup)
-1. Create 2 transactions in a group: `app_update(n=2), app_update(n=5)`.
-   Check the expected `app.counter == 2, app.total=7`
-   (we need to verify if this is what the Algorand node will do, maybe it will panic?).
-2. Create 2 transactions in a group: `app_update(n=5), app_update(n=2)`.
-   Check the expected `app.counter == 2, app.total=13`
-3. Run tx group: `app_update(n=2), app_update(n=5)` in a loop 1000 times.
-   The expected state should be: `app.counter == 2000`, `app.total = 10 + 500*2 - 500*5`
- */
 describe("App Update Test", function () {
   useFixture("app-update");
   const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE * 10 + 1000; // 1000 to cover fee
@@ -68,6 +58,10 @@ describe("App Update Test", function () {
     ];
   });
 
+  /**
+   * Create 2 transactions in a group: `app_update(n=2), app_update(n=5)`.
+   * Check the expected `app.counter == 2, app.total=7`
+   */
   it("First case", function () {
     runtime.executeTx(groupTx);
 
@@ -77,6 +71,10 @@ describe("App Update Test", function () {
     assert(total === 7n, "failed total");
   });
 
+  /**
+   * Create 2 transactions in a group: `app_update(n=5), app_update(n=2)`.
+   * Check the expected `app.counter == 2, app.total=13`
+   */
   it("Second case", function () {
     groupTx[0].appArgs = ['int:5'];
     groupTx[1].appArgs = ['int:2'];
@@ -89,10 +87,12 @@ describe("App Update Test", function () {
     assert(total === 13n, "failed total");
   });
 
+  /**
+   * Run tx group: `app_update(n=2), app_update(n=5)` in a loop 1000 times.
+   * This should fail because TEAL doesn't support negative numbers, and while looping
+   * negative number is encountered
+   */
   it("Third case", function () {
-    groupTx[0].appArgs = ['int:2'];
-    groupTx[1].appArgs = ['int:5'];
-
     expectRuntimeError(
       function () {
         for (let i = 0; i < 1000; ++i) {
@@ -103,6 +103,10 @@ describe("App Update Test", function () {
     );
   });
 
+  /**
+   * Run tx group: `app_update(n=5), app_update(n=2)` in a loop 1000 times.
+   * The expected state should be: `app.counter == 2000`, `app.total = 3010
+   */
   it("Fourth case", async function () {
     groupTx[0].appArgs = ['int:5'];
     groupTx[1].appArgs = ['int:2'];
