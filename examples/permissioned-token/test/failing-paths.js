@@ -97,7 +97,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       };
     });
 
-    it('should reject whitelist if account is not opted in to permissions', () => {
+    it('should reject account whitelist if the account doesn't opt-in to permissions app', () => {
       // verify account not opted in
       assert.isUndefined(ctx.elon.getAppFromLocal(ctx.permissionsAppId));
 
