@@ -1,13 +1,13 @@
 import { encodeNote, types } from "@algo-builder/runtime";
-import { Action, SuggestedParams } from "algosdk";
 import { assert } from "chai";
-import sinon from 'sinon';
 import { TextEncoder } from "util";
 
-import { executeTransaction, getSuggestedParams } from "../../src";
+import { ERRORS } from "../../src/internal/core/errors";
 import { DeployerDeployMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
-import * as tx from "../../src/lib/tx";
+import { parseExecParams } from "../../src/lib/tx";
+import { Deployer } from "../../src/types";
+import { expectBuilderErrorAsync } from "../helpers/errors";
 import { mkEnv } from "../helpers/params";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
@@ -33,33 +33,54 @@ describe("Note in TxParams", () => {
 });
 
 describe("Opt-In to ASA", () => {
-  const s: SuggestedParams = {
-    flatFee: false,
-    fee: 100,
-    firstRound: 0,
-    lastRound: 100,
-    genesisID: 'testnet-v1.0',
-    genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI='
-  };
-  it("should opt-in to asa using asset id as number", async () => {
+  function mkASA (): types.ASADef {
+    return {
+      total: 1,
+      decimals: 1,
+      unitName: 'ASA',
+      defaultFrozen: false
+    };
+  }
+
+  let deployer: Deployer;
+  let execParams: types.OptInASAParam;
+  beforeEach(async () => {
     const env = mkEnv("network1");
     const algod = new AlgoOperatorDryRunImpl();
     const deployerCfg = new DeployerConfig(env, algod);
-    // deployerCfg.asaDefs = { MY_ASA: mkASA() };
-    const deployer = new DeployerDeployMode(deployerCfg);
-    const execParams: types.ExecParams = {
+    deployerCfg.asaDefs = { silver: mkASA() };
+    deployer = new DeployerDeployMode(deployerCfg);
+    await deployer.deployASA("silver", { creator: deployer.accounts[0] });
+    execParams = {
       type: types.TransactionType.OptInASA,
       sign: types.SignType.SecretKey,
       payFlags: {},
       fromAccount: { addr: "", sk: new Uint8Array(0) },
       assetID: 1
     };
-    // const fn = sinon.stub(tx, "getSuggestedParams").resolves(s);
-    /* const fn = sinon.stub(algod.algodClient, "getTransactionParams").returns(
-      function do(): Promise<SuggestedParams> {return s});
-    //algod.algodClient.getTransactionParams. */
-    await executeTransaction(deployer, execParams);
+  });
 
-    // fn.restore();
+  it("should parse asset id as number while opt-in", async () => {
+    const result = await parseExecParams(deployer, execParams, 0, new Map<number, [string, types.ASADef]>());
+    if (result.type === types.TransactionType.OptInASA) {
+      assert.equal(result.assetID, execParams.assetID);
+    }
+  });
+
+  it("Should fail if asset name is passed but not found in checkpoints", async () => {
+    execParams.assetID = "gold";
+    await expectBuilderErrorAsync(
+      async () => await parseExecParams(deployer, execParams, 0, new Map<number, [string, types.ASADef]>()),
+      ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_NOT_DEFINED,
+      "gold"
+    );
+  });
+
+  it("Should set asset id to asset id of asset name passed", async () => {
+    execParams.assetID = "silver";
+    const result = await parseExecParams(deployer, execParams, 0, new Map<number, [string, types.ASADef]>());
+    if (result.type === types.TransactionType.OptInASA) {
+      assert.equal(result.assetID, -1);
+    }
   });
 });
