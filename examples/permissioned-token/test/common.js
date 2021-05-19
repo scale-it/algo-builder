@@ -40,11 +40,7 @@ class Context {
     this.runtime = new Runtime([master, alice, bob, elon]);
     this.deployASA('gold', { ...alice.account, name: 'alice' });
     this.deployController(alice, CONTROLLER_APPROVAL_PROGRAM, CLEAR_STATE_PROGRAM);
-    this.syncAccounts();
-
     this.deployClawback(alice, CLAWBACK_STATELESS_PROGRAM);
-    this.syncAccounts();
-
     this.deployPermissions(alice, PERMISSIONS_APPROVAL_PROGRAM, CLEAR_STATE_PROGRAM);
     this.syncAccounts();
   }
@@ -56,8 +52,8 @@ class Context {
     this.elon = this.getAccount(this.elon.address);
   }
 
-  deployASA (name, account) {
-    this.assetIndex = this.runtime.addAsset(name, { creator: account });
+  deployASA (name, creator) {
+    this.assetIndex = this.runtime.addAsset(name, { creator: creator });
   }
 
   deployController (sender, approvalProgram, clearStateProgram) {
