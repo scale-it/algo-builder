@@ -74,7 +74,7 @@ async function run (runtimeEnv, deployer) {
     txGroup[1].asaName = 'alu';
     await executeTransaction(deployer, txGroup);
   } catch (e) {
-    console.log(e);
+    console.log(e.response?.error);
   }
 }
 
