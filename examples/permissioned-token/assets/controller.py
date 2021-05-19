@@ -160,7 +160,7 @@ def approval_program(TOKEN_ID):
                     # If the receiver is the reserve address - old, or the new one being updated in the assset config tx (Gtxn[3]),
                     # then it can bypass permission checks
                     Gtxn[1].asset_receiver() == assetReserve.value(),
-                    Gtxn[1].asset_receiver() == Gtxn[3].config_asset_reserve()
+                    If(Global.group_size() > Int(3), Gtxn[1].asset_receiver() == Gtxn[3].config_asset_reserve(), Int(0))
                 ),
                 Int(1),
                 # else verify that permissions ssc is called
