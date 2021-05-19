@@ -81,6 +81,14 @@ export function overrideASADef (
   return origDef;
 }
 
+/**
+ * Parses and validates asset defs fetched from yaml file
+ * @param asaDefs asset definitions to validate
+ * @param accounts map of string => account. AccountMap is the SDK account type,
+ * used in builder. RuntimeAccountMap is for AccountStore used in runtime
+ * (where we use maps instead of arrays in sdk structures).
+ * @param filename asa filename
+ */
 export function validateASADefs (
   asaDefs: ASADefs, accounts: AccountMap | RuntimeAccountMap, filename: string): ASADefs {
   for (const name in asaDefs) {
@@ -90,6 +98,12 @@ export function validateASADefs (
   return asaDefs;
 }
 
+/**
+ * Loads, validates and returns asset definition from asa.yaml file
+ * @param accounts map of string => account. AccountMap is the SDK account type,
+ * used in builder. RuntimeAccountMap is for AccountStore used in runtime
+ * (where we use maps instead of arrays in sdk structures).
+ */
 export function loadASAFile (accounts: AccountMap | RuntimeAccountMap): ASADefs {
   const filename = path.join(ASSETS_DIR, "asa.yaml");
   return validateASADefs(
