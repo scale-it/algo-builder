@@ -82,7 +82,8 @@ export function overrideASADef (
 }
 
 /**
- * Parses and validates asset defs fetched from yaml file
+ * Parses, overrides and validates asset defs map. Filaname parameter is used to
+   indicate an ASA definition source when reporting errors.  
  * @param asaDefs asset definitions to validate
  * @param accounts map of string => account. AccountMap is the SDK account type,
  * used in builder. RuntimeAccountMap is for AccountStore used in runtime
@@ -99,7 +100,7 @@ export function validateASADefs (
 }
 
 /**
- * Loads, validates and returns asset definition from asa.yaml file
+ * Loads, validates and returns asset definitions from the assets/asa.yaml file
  * @param accounts map of string => account. AccountMap is the SDK account type,
  * used in builder. RuntimeAccountMap is for AccountStore used in runtime
  * (where we use maps instead of arrays in sdk structures).

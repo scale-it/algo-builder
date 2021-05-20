@@ -59,7 +59,7 @@ export async function readLocalStateSSC (
 }
 
 /**
- * Prints asset holding and balance(in microalgos) of an algorand account
+ * Prints account asset holdings and ALGO balance (in microalgos)
  * @param deployer algob deployer object
  * @param account account whose asset holding to print
  */

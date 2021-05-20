@@ -118,7 +118,7 @@ export function loadAccountsFromEnv (): rtypes.Account[] {
  * @param version version of msig
  * @param threshold represents min no. of signatures for a tx to be approved
  * @param accountList account address of multisig (note: order is important)
- * @returns multisig metadata ({v: .., thr: .., addr: ..}), multisig hash of account addresses
+ * @returns multisig metadata ({v: .., thr: .., addr: ..}) and the multisig addresses
  */
 export function createMsigAddress (
   version: number,

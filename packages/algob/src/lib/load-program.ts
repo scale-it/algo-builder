@@ -7,7 +7,7 @@ import { CompileOp, PyCompileOp, pyExt, tealExt } from "./compile";
 import { mockAlgod } from "./constants";
 
 /**
- * returns program (raw TEAL code, not compiled) as string.
+ * returns program TEAL code.
  * @param fileName filename in /assets. Must end with .teal OR .py
  * @param scInitParam smart contract template parameters, used to set hardcoded values in .py smart contract.
  * (used only when compiling PyTEAL to TEAL)
