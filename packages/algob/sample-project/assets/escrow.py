@@ -12,7 +12,6 @@ def escrow_contract(RECEIVER_ADDRESS):
     This contract represents an escrow account which only approves transfer to
     address "RECEIVER_ADDRESS"
     '''
-
     # verify neither transaction
     # contains a rekey
     commons_checks = And(
@@ -26,7 +25,6 @@ def escrow_contract(RECEIVER_ADDRESS):
     )
 
     return program
-
 
 if __name__ == "__main__":
     # this is the default value (globalZeroAddress) of RECEIVER_ADDRESS. If template parameter

@@ -12,7 +12,7 @@ async function run (runtimeEnv, deployer) {
     RECEIVER_ADDRESS: 'WHVQXVVCQAD7WX3HHFKNVUL3MOANX3BYXXMEEJEJWOZNRXJNTN7LTNPSTY'
   };
   await deployer.fundLsig('escrow.py',
-    { funder: deployer.accounts[0], fundingMicroAlgo: 20e6 }, {}, templateParams);
+    { funder: deployer.accounts[0], fundingMicroAlgo: 20e6 }, {fee: 1000}, templateParams);
 
   await deployer.addCheckpointKV('User Checkpoint Escrow', 'Fund Escrow Account');
   console.log('Sample script for escrow account has finished execution!');
