@@ -115,7 +115,7 @@ describe("DeployerDeployMode", () => {
 
     const asaInfo = await deployer.deployASA("MY_ASA", { creator: deployer.accounts[0] });
     assert.deepEqual(asaInfo,
-      { creator: "addr-1-get-address-dry-run", txId: "tx-id-dry-run", confirmedRound: -1, assetIndex: -1, assetDef: mkASA() });
+      { creator: "addr-1-get-address-dry-run", txId: "tx-id-dry-run", confirmedRound: -1, assetIndex: 1, assetDef: mkASA() });
 
     deployerCfg.cpData.precedingCP.network1.timestamp = 515236;
     assert.deepEqual(deployerCfg.cpData.precedingCP, {
@@ -124,7 +124,7 @@ describe("DeployerDeployMode", () => {
           creator: "addr-1-get-address-dry-run",
           txId: "tx-id-dry-run",
           confirmedRound: -1,
-          assetIndex: -1,
+          assetIndex: 1,
           assetDef: mkASA()
         }]]),
         ssc: new Map(),
@@ -171,7 +171,7 @@ describe("DeployerDeployMode", () => {
       creator: "addr-1-get-address-dry-run",
       txId: "tx-id-dry-run",
       confirmedRound: -1,
-      assetIndex: -1,
+      assetIndex: 1,
       assetDef: expectedASADef
     });
 
@@ -182,7 +182,7 @@ describe("DeployerDeployMode", () => {
           creator: "addr-1-get-address-dry-run",
           txId: "tx-id-dry-run",
           confirmedRound: -1,
-          assetIndex: -1,
+          assetIndex: 1,
           assetDef: expectedASADef
         }]]),
         ssc: new Map(),
@@ -306,7 +306,7 @@ describe("DeployerDeployMode", () => {
     assert.deepEqual(deployer.asa, new Map([["ASA_key", {
       creator: 'addr-1-get-address-dry-run',
       txId: 'tx-id-dry-run',
-      assetIndex: -1,
+      assetIndex: 1,
       confirmedRound: -1,
       assetDef: mkASA()
     }]]));
