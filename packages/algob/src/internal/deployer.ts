@@ -523,7 +523,6 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     }
 
     this.registerUpdatedSSCInfo(name, sscInfo);
-
     return sscInfo;
   }
 }
