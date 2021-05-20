@@ -62,7 +62,7 @@ describe("App Update Test", function () {
    * Create 2 transactions in a group: `app_update(n=2), app_update(n=5)`.
    * Check the expected `app.counter == 2, app.total=7`
    */
-  it("First case", function () {
+  it("First case: (app_update(n=2) + app_update(n=5))", function () {
     runtime.executeTx(groupTx);
 
     const globalCounter = runtime.getGlobalState(appId, "counter");
@@ -75,7 +75,7 @@ describe("App Update Test", function () {
    * Create 2 transactions in a group: `app_update(n=5), app_update(n=2)`.
    * Check the expected `app.counter == 2, app.total=13`
    */
-  it("Second case", function () {
+  it("Second case: (app_update(n=5) + app_update(n=2))", function () {
     groupTx[0].appArgs = ['int:5'];
     groupTx[1].appArgs = ['int:2'];
 
@@ -92,7 +92,7 @@ describe("App Update Test", function () {
    * This should fail because TEAL doesn't support negative numbers, and while looping
    * negative number is encountered
    */
-  it("Third case", function () {
+  it("Third case: (app_update(n=2) + app_update(n=5)) * 1000", function () {
     expectRuntimeError(
       function () {
         for (let i = 0; i < 1000; ++i) {
@@ -107,7 +107,7 @@ describe("App Update Test", function () {
    * Run tx group: `app_update(n=5), app_update(n=2)` in a loop 1000 times.
    * The expected state should be: `app.counter == 2000`, `app.total = 3010
    */
-  it("Fourth case", async function () {
+  it("Fourth case: (app_update(n=5) + app_update(n=2)) * 1000", async function () {
     groupTx[0].appArgs = ['int:5'];
     groupTx[1].appArgs = ['int:2'];
 
