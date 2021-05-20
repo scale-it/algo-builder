@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import type { LogicSig } from "algosdk";
-import { Algodv2, ConfirmedTxInfo, LogicSigArgs } from "algosdk";
+import { Algodv2, ConfirmedTxInfo } from "algosdk";
 
 import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";
@@ -11,8 +11,7 @@ import {
   LsigInfo,
   SSCInfo
 } from "../../src/types";
-
-const mockAlgod = new Algodv2("dummyToken", "dummyNetwork", 8080);
+import { mockAlgod } from "../mocks/tx";
 
 export class AlgoOperatorDryRunImpl implements AlgoOperator {
   get algodClient (): Algodv2 {
