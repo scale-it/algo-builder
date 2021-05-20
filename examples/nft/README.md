@@ -18,7 +18,7 @@ NOTES:
 
 ## Setup
 
-Please follow the [setup](https://github.com/scale-it/algo-builder/blob/master/examples/README.md) instructions to install dependencies and update the config.
+Please follow the [setup](../README.md) instructions to install dependencies and update the config.
 This example is using PyTEAL, so make sure to follow the Python3 setup described above.
 
 ## Run

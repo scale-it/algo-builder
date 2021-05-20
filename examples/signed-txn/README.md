@@ -7,7 +7,7 @@ This example demonstrates executing a serialized transaction loaded directly fro
 
 ### Setup
 
-Please follow the [setup](https://github.com/scale-it/algo-builder/blob/master/examples/README.md) instructions to install dependencies and update the config.
+Please follow the [setup](../README.md) instructions to install dependencies and update the config.
 
 
 ### Creating serialized transaction file

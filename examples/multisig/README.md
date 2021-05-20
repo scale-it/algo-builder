@@ -21,7 +21,7 @@ To follow this example you have to firstly create a multisig.
 
 ### Setup
 
-Please follow the [setup](https://github.com/scale-it/algo-builder/blob/master/examples/README.md) instructions to install dependencies and update the config.
+Please follow the [setup](../README.md) instructions to install dependencies and update the config.
 
 
 ### Creating multisig file
