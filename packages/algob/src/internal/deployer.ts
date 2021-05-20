@@ -509,7 +509,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     newClearProgram: string,
     flags: rtypes.SSCOptionalFlags
   ): Promise<SSCInfo> {
-    const name = newApprovalProgram + "-" + newClearProgram;
+    const cpKey = newApprovalProgram + "-" + newClearProgram;
 
     let sscInfo = {} as SSCInfo;
     try {
