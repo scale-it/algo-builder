@@ -10,7 +10,7 @@ layout: splash
 + Project initialization → read below
 + [Quick Start](https://github.com/scale-it/algo-builder#quick-start)
 + [Configuration](./algob-config.md)
-+ [Private Net](/infrastructure/README.md) creation
++ [Private Net](https://github.com/scale-it/algo-builder/tree/master/infrastructure/README.md) creation
 + [Script execution](./user-script-execution.md)
 + [Deployer](./deployer.md)
 + [Script Checkpoints](./execution-checkpoints.md)

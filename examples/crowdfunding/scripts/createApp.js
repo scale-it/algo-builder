@@ -1,9 +1,7 @@
 const {
-  executeTransaction,
-  uint64ToBigEndian,
-  addressToPk
+  executeTransaction
 } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types, uint64ToBigEndian, addressToPk } = require('@algo-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');

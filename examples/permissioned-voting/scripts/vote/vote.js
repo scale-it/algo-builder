@@ -1,5 +1,4 @@
-const { stringToBytes } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types, stringToBytes } = require('@algo-builder/runtime');
 const { executeTransaction } = require('./common');
 
 async function run (runtimeEnv, deployer) {

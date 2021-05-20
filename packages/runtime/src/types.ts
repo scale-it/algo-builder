@@ -66,6 +66,9 @@ export interface AccountsMap {
   [addr: string]: AccountStoreI
 }
 
+/**
+ * RuntimeAccountMap is for AccountStore used in runtime
+ * (where we use maps instead of arrays in sdk structures). */
 export type RuntimeAccountMap = Map<string, AccountStoreI>;
 
 export interface State {
@@ -163,7 +166,8 @@ export interface AccountStoreI {
   setGlobalState: (appId: number, key: Uint8Array | string, value: StackElem, line?: number) => void
 }
 
-// https://developer.algorand.org/docs/reference/teal/specification/#oncomplete
+/**
+ * https://developer.algorand.org/docs/reference/teal/specification/#oncomplete */
 export enum TxnOnComplete {
   NoOp = '0',
   OptIn = '1',
@@ -173,12 +177,15 @@ export enum TxnOnComplete {
   DeleteApplication = '5'
 }
 
-// https://developer.algorand.org/docs/reference/teal/specification/#execution-modes
+/**
+ * https://developer.algorand.org/docs/reference/teal/specification/#execution-modes */
 export enum ExecutionMode {
   STATELESS, // stateless TEAL
   STATEFUL // application call (NoOp, CloseOut..)
 }
 
+/**
+ * Common transaction parameters (fees, note..) */
 export interface TxParams {
   /**
    * feePerByte or totalFee is used to set the appropriate transaction fee parameter.
@@ -218,6 +225,8 @@ export interface SSCOptionalFlags {
   lease?: Uint8Array
 }
 
+/**
+ * Transaction execution parameters (on blockchain OR runtime) */
 export type ExecParams = AlgoTransferParam | AssetTransferParam | SSCCallsParam |
 ModifyAssetParam | FreezeAssetParam | RevokeAssetParam |
 DestroyAssetParam | DeployASAParam | DeploySSCParam |
@@ -249,8 +258,9 @@ export enum TransactionType {
 interface SignWithSk {
   sign: SignType.SecretKey
   fromAccount: AccountSDK
-  // if passed then it will be used as the from account address, but tx will be signed
-  // by fromAcount's sk. This is used if an account address is rekeyed to another account.
+  /**
+   * if passed then it will be used as the from account address, but tx will be signed
+   * by fromAcount's sk. This is used if an account address is rekeyed to another account. */
   fromAccountAddr?: AccountAddress
 }
 
@@ -258,7 +268,8 @@ interface SignWithLsig {
   sign: SignType.LogicSignature
   fromAccountAddr: AccountAddress
   lsig: LogicSig
-  args?: LogicSigArgs // stateless smart contract args
+  /** stateless smart contract args */
+  args?: LogicSigArgs
 }
 
 export type Sign = SignWithSk | SignWithLsig;
@@ -319,9 +330,13 @@ export type FreezeAssetParam = BasicParams & {
 
 export type RevokeAssetParam = BasicParams & {
   type: TransactionType.RevokeAsset
-  recipient: AccountAddress // Revoked assets are sent to this address
+  /**
+   * Revoked assets are sent to this address
+   */
+  recipient: AccountAddress
   assetID: number | string
-  revocationTarget: AccountAddress // Revocation target is the account from which the clawback revokes asset.
+  /** Revocation target is the account from which the clawback revokes asset. */
+  revocationTarget: AccountAddress
   amount: number | bigint
 };
 
@@ -363,15 +378,19 @@ export interface ASADeploymentFlags extends TxParams {
   creator: Account
 }
 
+/**
+ * SDK account type, used in algob */
 export type AccountMap = Map<string, Account>;
 
 export type ASADef = z.infer<typeof ASADefSchema>;
 
 export type ASADefs = z.infer<typeof ASADefsSchema>;
 
-// After an asset has been created only the manager,
-// reserve, freeze and reserve accounts can be changed.
-// All other parameters are locked for the life of the asset.
+/**
+ * After an asset has been created only the manager,
+ * reserve, freeze and reserve accounts can be changed.
+ * All other parameters are locked for the life of the asset.
+ */
 export interface AssetModFields {
   manager?: string
   reserve?: string

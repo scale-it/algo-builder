@@ -8,6 +8,8 @@ import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import type { Account, AccountDef, HDAccount, KmdCfg, KmdWallet, MnemonicAccount, StrMap } from "../types";
 
+/**
+ * Returns an array of SDK accounts (addr, sk) */
 export function mkAccounts (input: AccountDef[]): rtypes.Account[] {
   const accounts: rtypes.Account[] = [];
   const errs = new CfgErrors("");
@@ -50,13 +52,19 @@ function _loadAccounts (content: string): rtypes.Account[] {
   return mkAccounts(parsed);
 }
 
-// Loads accounts from `filename`. The file should be a YAML file with list of objects
-// which is either `HDAccount`, `MnemonicAccount` or an `Account`.
+/**
+ * Loads accounts from `filename`. The file should be a YAML file with list of objects
+ * which is either `HDAccount`, `MnemonicAccount` or an `Account`.
+ * @param filename file to load accounts from
+ */
 export async function loadAccountsFromFile (filename: string): Promise<rtypes.Account[]> {
   return _loadAccounts(await fs.promises.readFile(filename, 'utf8'));
 }
 
-// Same as `loadAccountsFromFile` but uses sync method instead of async
+/**
+ * Same as `loadAccountsFromFile` but uses sync method instead of async
+ * @param filename file to load accounts from
+ */
 export function loadAccountsFromFileSync (filename: string): rtypes.Account[] {
   return _loadAccounts(fs.readFileSync(filename, 'utf8'));
 }
@@ -77,6 +85,9 @@ export function mkAccountIndex (accountList: rtypes.Account[]): rtypes.AccountMa
   return out;
 }
 
+/**
+ * load accounts from environment in node.js (set in process.ENV)
+ */
 export function loadAccountsFromEnv (): rtypes.Account[] {
   var algobAccountsString = process.env.ALGOB_ACCOUNTS;
   if (algobAccountsString) {
@@ -102,7 +113,13 @@ export function loadAccountsFromEnv (): rtypes.Account[] {
   return [];
 }
 
-// returns multisignature account address
+/**
+ * returns multisignature account address
+ * @param version version of msig
+ * @param threshold represents min no. of signatures for a tx to be approved
+ * @param accountList account address of multisig (note: order is important)
+ * @returns multisig metadata ({v: .., thr: .., addr: ..}) and the multisig addresses
+ */
 export function createMsigAddress (
   version: number,
   threshold: number,

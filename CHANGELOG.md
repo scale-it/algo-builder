@@ -6,12 +6,25 @@
 * Move `updateSSC` function to `deployer`
 
 ### Improvements
++ Replaced dependency `find-up` with `findup-sync` in `algob`.
+
+### Bug fixes
+
+
+## v1.0.2 2021-05-18
+
+### Improvements
 * Update how error is displayed to a user
 * Add Update stateful smart contracts using execute transaction in runtime
 * Store checkpoints in nested form for SSC
 * Add tests for checkpoints
 
+Runtime:
++ added `updateApp` method.
+
 ### Bug fixes
+
++ Added missing dependency: `find-up`
 
 
 ## v1.0.1 2021-05-16

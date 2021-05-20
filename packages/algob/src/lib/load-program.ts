@@ -6,7 +6,12 @@ import { ASSETS_DIR } from "../internal/core/project-structure";
 import { CompileOp, PyCompileOp, pyExt, tealExt } from "./compile";
 import { mockAlgod } from "./constants";
 
-// takes file name as input and returns program as string
+/**
+ * returns program TEAL code.
+ * @param fileName filename in /assets. Must end with .teal OR .py
+ * @param scInitParam smart contract template parameters, used to set hardcoded values in .py smart contract.
+ * (used only when compiling PyTEAL to TEAL)
+ */
 export function getProgram (fileName: string, scInitParam?: unknown): string {
   const filePath = path.join(process.cwd(), ASSETS_DIR, fileName);
   const program = fs.readFileSync(filePath, 'utf8');

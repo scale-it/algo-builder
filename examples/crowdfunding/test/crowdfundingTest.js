@@ -1,10 +1,8 @@
+const { getProgram } = require('@algo-builder/algob');
 const {
-  addressToPk,
-  getProgram,
-  stringToBytes,
-  uint64ToBigEndian
-} = require('@algo-builder/algob');
-const { Runtime, AccountStore, types } = require('@algo-builder/runtime');
+  Runtime, AccountStore, types,
+  uint64ToBigEndian, stringToBytes, addressToPk
+} = require('@algo-builder/runtime');
 const { assert } = require('chai');
 
 const minBalance = 10e6; // 10 ALGO's
