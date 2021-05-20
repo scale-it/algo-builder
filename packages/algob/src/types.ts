@@ -489,7 +489,7 @@ export interface Deployer {
     scTmplParams?: SCParams) => Promise<SSCInfo>
 
   /**
-   * Update programs for a contract.
+   * Update programs(approval, clear) for a stateful smart contract.
    * @param sender Account from which call needs to be made
    * @param payFlags Transaction Flags
    * @param appId ID of the application being configured or empty if creating
