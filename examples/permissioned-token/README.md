@@ -143,6 +143,6 @@ Below we describe different use cases implemented by the smart contract suite. W
 Developer hour links:
 - Developer Office Hours | Assets and Custom Transfer Logic Using Algorand Smart Contracts: [video](https://www.youtube.com/watch?v=aMDZamxtR14)
 - [Assets and Custom Transfer Logic](https://developer.algorand.org/solutions/assets-and-custom-transfer-logic/)
-- *implementation of the solution above using algob*: [examples/restricted-assets](/examples/restricted-assets)
+- *implementation of the solution above using algob*: [examples/permissioned-token-freezing](https://github.com/scale-it/algo-builder/tree/master/examples/permissioned-token-freezing)
 
 Link to spec of current template: [https://paper.dropbox.com/doc/Algob-Security-Token-Template-FR2LXhVg3edevYPBQZw6F](https://paper.dropbox.com/doc/Algob-Security-Token-Template-FR2LXhVg3edevYPBQZw6F)

@@ -35,7 +35,7 @@ The examples are already initialized. So we don't need to run `yarn run algob in
 
 #### PyTEAL
 
-Many examples are using PyTEAL. Please follow our [PyTEAL setup](../README.md#pyteal).
+Many examples are using PyTEAL. Please follow our [PyTEAL setup](https://github.com/scale-it/algo-builder/blob/master/examples/README.md#pyteal).
 
 ### Update config
 

@@ -28,7 +28,7 @@ To implement this solution, three basic operations are required in the stateful 
 
 ### Setup
 
-Please follow the [setup](../README.md) instructions to install dependencies and update the config. Then we can deploy the asset and smart contracts.
+Please follow the [setup](https://github.com/scale-it/algo-builder/blob/master/examples/README.md) instructions to install dependencies and update the config. Then we can deploy the asset and smart contracts.
 
 ```
 yarn run algob deploy
