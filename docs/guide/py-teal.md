@@ -15,7 +15,7 @@ PyTeal is a Python language binding for Algorand Smart Contracts (ASC1s).
 - Install `Python3`
 - Install PyTeal `pip3 install pyteal`
 
-Please follow the main [README#PyTeal](../README.md#pyteal) file for setup instructions.
+Please follow the main [README#PyTeal](https://github.com/scale-it/algo-builder#pyteal) file for setup instructions.
 
 
 # Usage
@@ -30,6 +30,7 @@ If the address is loaded dynamically (eg from KMD), we can't use PyTEAL code pri
 - To solve this problem we have introduced a support for passing `external parameters`.
 - Deployer functions(`loadLogic`, `fundLsig`, `deploySSC`) take one extra optional argument: a smart contract parameters object(`scInitParam`). This argument is passed to PyTEAL script.
 - Changing parameters will change a generated TEAL code. Hence it the Delegated Signature or Smart Contract address will be different and we may need to redeploy it.
+
 ### Usage
 
 To use this feature, you can pass an external parameter object in a deployment script:

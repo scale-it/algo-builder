@@ -7,7 +7,7 @@ layout: splash
 Since blockchain data is immutable (can't be changed) attempts to rewrite its contents are dismissed by the network.
 To circumvent this we implemented a file-based checkpoint mechanism to version the contents of the Algorand assets/contracts.
 
-[Scripts](/docs/user-script-execution.md) produce various information about assets/contracts and it has to be preserved.
+[Scripts](./user-script-execution.md) produce various information about assets/contracts and it has to be preserved.
 This deployment information (transaction IDs, asset indexes, etc.) is persisted into checkpoint files for later use (in future scripts).
 
 The checkpoint files are saved in `artifacts/scripts/` in a human-readable YAML format.

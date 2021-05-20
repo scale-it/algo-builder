@@ -77,7 +77,7 @@ For opting in to ASA, `deployer` supports following methods:
 You can deploy Stateful/Stateless Smart Contracts (SSC).
 
 #### Stateful Smart Contracts
-Check our [examples/permissioned-voting](../examples/permissioned-voting) project. Open the `scripts/voting.js` file, you will find there:
+Check our [examples/permissioned-voting](https://github.com/scale-it/algo-builder/tree/master/examples/permissioned-voting) project. Open the `scripts/voting.js` file, you will find there:
 
     await deployer.deploySSC("approval.teal", "clear.teal", {...});
 
@@ -85,7 +85,7 @@ Smart contracts must be stored in `assets` folder.
 
 The main difference between deploying an ASA and SSC is that ASA takes `asset-name` and `ASADeploymentFlags` as input and SSC takes `smart-contract-names` and `SSCDeploymentFlags` as input.
 
-You can learn more about the flags from [Deployer API](https://scale-it.github.io/algo-builder/);
+You can learn more about the flags from [Deployer API](https://scale-it.github.io/algo-builder/api/algob/interfaces/types.deployer.html);
 You can learn more about Stateful Smart Contracts [here](https://developer.algorand.org/docs/features/asc1/stateful/).
 
 #### OptIn to SSC
@@ -127,7 +127,7 @@ For opting in to SSC, `deployer` supports the following methods:
 
   Contract accounts can be also be used to deploy ASAs.
 
-   Check our [examples/htlc-pyteal-ts](../examples/htlc-pyteal-ts) project to explore how to deploy Stateless Smart Contracts(lsig). In the file `scripts/deploy.ts`, you will find:
+   Check our [examples/htlc-pyteal-ts](https://github.com/scale-it/algo-builder/tree/master/examples/htlc-pyteal-ts) project to explore how to deploy Stateless Smart Contracts(lsig). In the file `scripts/deploy.ts`, you will find:
 
   ```
   await deployer.fundLsig('htlc.py',

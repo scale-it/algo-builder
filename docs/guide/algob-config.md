@@ -115,7 +115,7 @@ Each network configuration requires a list of accounts. These accounts are then 
    account with same name is already listed in given `network.accounts` then KMD loader will
    ignore that account. Similarly, account will be ignored if KMD wallet doesn't have a
    specified address.
-   Please see the [KmdCfg type](https://scale-it.github.io/algo-builder/interfaces/_types_.kmdcfg.html) documentation for details.
+   Please see the [KmdCfg type](https://scale-it.github.io/algo-builder/api/algob/interfaces/types.kmdcfg.html) documentation for details.
 
         // KMD credentials
         let kmdCfg = {

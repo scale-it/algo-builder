@@ -27,8 +27,9 @@ Useful to query the current state of blockchain.
 Example:
 
     algob run scripts/script1.js
+
 #### Deploy
-Runs scripts and creates execution [checkpoints](/docs/execution-checkpoints.md).
+Runs scripts and creates execution [checkpoints](https://scale-it.github.io/algo-builder/guide/execution-checkpoints.html).
 If a script throws an exception it will stop the execution and script checkpoint won't be created/updated.
 During next execution previous scripts will be skipped (results will be cached) and the task will start from the failed script.
 
