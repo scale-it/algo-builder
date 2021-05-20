@@ -7,6 +7,8 @@ import * as types from "./internal/core/params/argument-types";
 
 // IMPORTANT: This t.types MUST be kept in sync with the actual types.
 
+export type Timestamp = number;
+
 export interface Account {
   name: string
   mnemonic: string
@@ -374,7 +376,7 @@ export interface Checkpoint {
   timestamp: number
   metadata: Map<string, string>
   asa: Map<string, ASAInfo>
-  ssc: Map<string, Map<number, SSCInfo>>
+  ssc: Map<string, Map<Timestamp, SSCInfo>>
   dLsig: Map<string, LsigInfo>
 };
 

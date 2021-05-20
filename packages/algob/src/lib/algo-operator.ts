@@ -1,5 +1,4 @@
 import { encodeNote, mkTransaction, types as rtypes } from "@algo-builder/runtime";
-import { ExecParams } from "@algo-builder/runtime/build/types";
 import algosdk, { LogicSig } from "algosdk";
 
 import { BuilderError } from "../internal/core/errors";
@@ -363,7 +362,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
    * Update programs (approval, clear) for a stateful smart contract.
    * @param sender Account from which call needs to be made
    * @param payFlags Transaction Flags
-   * @param appId ID of the application being configured or empty if creating
+   * @param appId index of the application being configured
    * @param newApprovalProgram New Approval Program filename
    * @param newClearProgram New Clear Program filename
    * @param flags Optional parameters to SSC (accounts, args..)
@@ -384,7 +383,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const clear = await this.ensureCompiled(newClearProgram, false);
     const clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
 
-    const execParam: ExecParams = {
+    const execParam: rtypes.ExecParams = {
       type: rtypes.TransactionType.UpdateSSC,
       sign: rtypes.SignType.SecretKey,
       fromAccount: sender,

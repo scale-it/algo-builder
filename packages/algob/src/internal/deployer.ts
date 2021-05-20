@@ -131,18 +131,14 @@ class DeployerBasicMode {
    * @param nameClear clear program name
    */
   getSSC (nameApproval: string, nameClear: string): SSCInfo | undefined {
-    const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
-    const nestedMap = resultMap.get(nameApproval + "-" + nameClear);
-    if (nestedMap) {
-      // return last pushed element in the map(latest timestamp value)
-      return [...nestedMap][nestedMap.size - 1][1];
-    } else {
-      return undefined;
-    }
+    return this.getSSCFromKey(nameApproval + "-" + nameClear);
   }
 
   /**
-   * Queries a stateful smart contract info from checkpoint using key. */
+   * Queries a stateful smart contract info from checkpoint using key.
+   * @param key Key here is clear program name appended to approval program name
+   * with hypen("-") in between (approvalProgramName-clearProgramName)
+   */
   getSSCFromKey (key: string): SSCInfo | undefined {
     const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
     const nestedMap = resultMap.get(key);
@@ -522,7 +518,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
       throw error;
     }
 
-    this.registerUpdatedSSCInfo(name, sscInfo);
+    this.registerUpdatedSSCInfo(cpKey, sscInfo);
     return sscInfo;
   }
 }

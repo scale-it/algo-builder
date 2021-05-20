@@ -16,7 +16,8 @@ import {
   Checkpoints,
   Deployer,
   LsigInfo,
-  SSCInfo
+  SSCInfo,
+  Timestamp
 } from "../types";
 
 export const scriptsDirectory = "scripts";
@@ -38,14 +39,14 @@ export class CheckpointImpl implements Checkpoint {
   timestamp: number;
   metadata: Map<string, string>;
   asa: Map<string, ASAInfo>;
-  ssc: Map<string, Map<number, SSCInfo>>;
+  ssc: Map<string, Map<Timestamp, SSCInfo>>;
   dLsig: Map<string, LsigInfo>;
 
   constructor (metadata?: Map<string, string>) {
     this.timestamp = +new Date();
     this.metadata = (metadata === undefined ? new Map<string, string>() : metadata);
     this.asa = new Map<string, ASAInfo>();
-    const mp = new Map<number, SSCInfo>();
+    const mp = new Map<Timestamp, SSCInfo>();
     this.ssc = new Map<string, typeof mp>();
     this.dLsig = new Map<string, LsigInfo>();
   }
