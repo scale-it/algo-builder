@@ -102,7 +102,7 @@ describe("Opt-In to ASA", () => {
   });
 
   it("Should fail if asset name is passed but not found in checkpoints", async () => {
-    execParams.assetID = "gold";
+    execParams.assetID = "unknown";
 
     await expectBuilderErrorAsync(
       async () => await executeTransaction(deployer, execParams),
