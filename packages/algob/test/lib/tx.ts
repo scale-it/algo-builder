@@ -107,7 +107,7 @@ describe("Opt-In to ASA", () => {
     await expectBuilderErrorAsync(
       async () => await executeTransaction(deployer, execParams),
       ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_NOT_DEFINED,
-      "gold"
+      "unknown"
     );
   });
 
