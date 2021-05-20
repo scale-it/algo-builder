@@ -30,7 +30,7 @@ def escrow_contract(RECEIVER_ADDRESS):
 
 if __name__ == "__main__":
     # this is the default value (globalZeroAddress) of RECEIVER_ADDRESS. If template parameter
-    # via /script is not passed then this value will be used.
+    # via scripts is not passed then this value will be used.
     params = {
         "RECEIVER_ADDRESS": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ"
     }
