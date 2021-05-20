@@ -49,7 +49,6 @@ describe("Opt-In to ASA", () => {
   let deployer: Deployer;
   let execParams: types.OptInASAParam;
   let algod: AlgoOperatorDryRunImpl;
-  let fn: any;
   let expected: ConfirmedTxInfo;
   beforeEach(async () => {
     const env = mkEnv("network1");
@@ -65,7 +64,7 @@ describe("Opt-In to ASA", () => {
       fromAccount: bobAcc,
       assetID: 1
     };
-    fn = sinon.stub(algod.algodClient, "getTransactionParams")
+    sinon.stub(algod.algodClient, "getTransactionParams")
       .returns({ do: async () => mockSuggestedParam });
     expected = {
       'confirmed-round': 1,
@@ -77,7 +76,7 @@ describe("Opt-In to ASA", () => {
   });
 
   afterEach(() => {
-    fn.restore();
+    (algod.algodClient.getTransactionParams as sinon.SinonStub).restore();
   });
 
   it("should opt-in to asa using asset id as number", async () => {
