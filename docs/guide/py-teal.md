@@ -15,7 +15,7 @@ PyTeal is a Python language binding for Algorand Smart Contracts (ASC1s).
 - Install `Python3`
 - Install PyTeal `pip3 install pyteal`
 
-Please follow the main [README#PyTeal](../README.md#pyteal) file for setup instructions.
+Please follow the main [README#PyTeal](https://github.com/scale-it/algo-builder#pyteal) file for setup instructions.
 
 
 # Usage

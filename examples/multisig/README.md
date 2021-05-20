@@ -10,7 +10,7 @@ Let's say `john`, `bob` and `gold` create a multisignature account with threshol
 
 You can find the example code in `/scripts`
 1. `/multisig_goal_sc.js` - Loading a multi signed logic (either `raw` or `disassembled`) from a file (`/assets/sample-text-asc.lsig` or `sample-raw-asc.blsig`) and using that lsig for validating transactions.
-2. `/multisig_sdk_sc.js` - Compile a smart-contract code from `/assets/sample-asc.teal`, load it, sign it and use in transactions.   
+2. `/multisig_sdk_sc.js` - Compile a smart-contract code from `/assets/sample-asc.teal`, load it, sign it and use in transactions.
 
 
 ## Usage

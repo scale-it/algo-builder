@@ -414,7 +414,11 @@ export interface Deployer {
    * Creates and deploys ASA.
    * @name  ASA name - deployer will search for the ASA in the /assets/asa.yaml file
    * @flags  deployment flags */
-  deployASA: (name: string, flags: rtypes.ASADeploymentFlags, asaParams: rtypes.ASADef) => Promise<ASAInfo>
+  deployASA: (
+    name: string,
+    flags: rtypes.ASADeploymentFlags,
+    asaParams?: Partial<rtypes.ASADef>
+  ) => Promise<ASAInfo>
 
   /**
    * Loads deployed asset definition from checkpoint.
