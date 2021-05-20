@@ -126,7 +126,7 @@ export function encodeNote (note: string | undefined, noteb64: string| undefined
 }
 
 /**
- * Returns from address from the transaction params depending on SignType
+ * Returns from address from the transaction params depending on @SignType
  * @param execParams transaction execution params passed by user
  */
 export function getFromAddress (execParams: ExecParams): AccountAddress {
@@ -141,11 +141,17 @@ export function getFromAddress (execParams: ExecParams): AccountAddress {
  * ExecParams can be of following types:
  *  + AlgoTransferParam used for transferring algo
  *  + AssetTransferParam used for transferring asset
- *  + SSCCallsParam used for calling stateful smart contracts.
+ *  + ModifyAssetParam used to modify asset mutable properties
+ *  + FreezeAssetParam used to freeze asset (only permitted by asa freeze account)
+ *  + RevokeAssetParam used to revoke assets (by asset clawback)
+ *  + DestroyAssetParam used to delete asset (by asset manager)
+ *  + Deploy Params - deploy ASA, deploy SSC
+ *  + OptIn Params - optInToASA, optInToSSC
+ *  + SSCCallsParam (NoOp, Clear, Delete..)used for calling stateful smart contracts.
  For more advanced use-cases, please use `algosdk.tx` directly.
  NOTE: parseSSCAppArgs is used to handle case when user passes appArgs similar to goal
  * @param execParams ExecParams
- * @param suggestedParams Suggested params
+ * @param suggestedParams blockchain transaction suggested parameters (firstRound, lastRound, fee..)
  * @returns SDK Transaction object
  */
 export function mkTransaction (execParams: ExecParams, suggestedParams: SuggestedParams): Transaction {

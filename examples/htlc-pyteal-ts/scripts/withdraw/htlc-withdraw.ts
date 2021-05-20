@@ -6,9 +6,8 @@
  * the TEAL program. The TEAL program will transfer its balance to the seller
  * if the seller is able to provide the secret value that corresponds to the hash in the program.
 */
-import { stringToBytes } from "@algo-builder/algob";
 import * as algob from "@algo-builder/algob";
-import { types as rtypes } from "@algo-builder/runtime";
+import { stringToBytes, types as rtypes } from "@algo-builder/runtime";
 
 import { executeTx, prepareParameters } from "./common";
 

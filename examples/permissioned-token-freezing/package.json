@@ -1,5 +1,5 @@
 {
-  "name": "restricted-assets",
+  "name": "permissioned-token-freezing",
   "version": "0.0.1",
   "main": "index.js",
   "license": "Apache-2.0",

@@ -1,10 +1,4 @@
 import {
-  addressToPk, mkTransaction,
-  parseSSCAppArgs, stringToBytes,
-  uint64ToBigEndian
-} from "@algo-builder/runtime";
-
-import {
   createMsigAddress,
   loadAccountsFromEnv,
   loadAccountsFromFile,
@@ -19,11 +13,11 @@ import { signMultiSig } from "./lib/msig";
 import { updateSSC } from "./lib/ssc";
 import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC, readGlobalStateSSC, readLocalStateSSC } from "./lib/status";
 import { executeSignedTxnFromFile, executeTransaction, getSuggestedParams, mkTxParams } from "./lib/tx";
+import * as runtime from "./runtime";
 import * as types from "./types";
 
 export {
   mkAccounts,
-  mkTransaction,
   createMsigAddress,
   loadAccountsFromFile,
   loadAccountsFromFileSync,
@@ -40,14 +34,11 @@ export {
   printGlobalStateSSC,
   readGlobalStateSSC,
   readLocalStateSSC,
-  updateSSC,
-  stringToBytes,
-  parseSSCAppArgs,
   globalZeroAddress,
-  uint64ToBigEndian,
-  addressToPk,
+  updateSSC,
   getProgram,
   types,
   signMultiSig,
-  signLogicSigMultiSig
+  signLogicSigMultiSig,
+  runtime
 };

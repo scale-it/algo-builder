@@ -1,5 +1,4 @@
 import { encodeNote, mkTransaction, types as rtypes } from "@algo-builder/runtime";
-import { ExecParams, SignType, TransactionType, TxParams } from "@algo-builder/runtime/build/types";
 import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
 import { Deployer } from "../types";
@@ -8,7 +7,7 @@ import { loadSignedTxnFromFile } from "./files";
 import { registerCheckpoints } from "./script-checkpoints";
 
 /**
- * Returns blockchain transaction suggested parameters
+ * Returns blockchain transaction suggested parameters (firstRound, lastRound, fee..)
  * @param algocl an Algorand client, instance of Algodv2, used to communicate with a blockchain node.
  */
 export async function getSuggestedParams (algocl: Algodv2): Promise<SuggestedParams> {
@@ -92,11 +91,11 @@ export function makeASAOptInTx (
   addr: string,
   assetID: number,
   params: SuggestedParams,
-  payFlags: TxParams
+  payFlags: rtypes.TxParams
 ): Transaction {
-  const execParam: ExecParams = {
-    type: TransactionType.OptInASA,
-    sign: SignType.SecretKey,
+  const execParam: rtypes.ExecParams = {
+    type: rtypes.TransactionType.OptInASA,
+    sign: rtypes.SignType.SecretKey,
     fromAccount: { addr: addr, sk: new Uint8Array(0) },
     assetID: assetID,
     payFlags: payFlags
@@ -141,12 +140,12 @@ async function mkTx (
   // if execParams for ASA related transaction have assetID as asaName,
   // then set to assetIndex using info from checkpoint
   switch (txn.type) {
-    case TransactionType.OptInASA :
-    case TransactionType.TransferAsset :
-    case TransactionType.ModifyAsset :
-    case TransactionType.FreezeAsset :
-    case TransactionType.RevokeAsset :
-    case TransactionType.DestroyAsset : {
+    case rtypes.TransactionType.OptInASA :
+    case rtypes.TransactionType.TransferAsset :
+    case rtypes.TransactionType.ModifyAsset :
+    case rtypes.TransactionType.FreezeAsset :
+    case rtypes.TransactionType.RevokeAsset :
+    case rtypes.TransactionType.DestroyAsset : {
       if (typeof txn.assetID === "string") {
         const asaInfo = deployer.getASAInfo(txn.assetID);
         txn.assetID = asaInfo.assetIndex;
@@ -156,14 +155,14 @@ async function mkTx (
   }
 
   switch (txn.type) {
-    case TransactionType.DeployASA: {
+    case rtypes.TransactionType.DeployASA: {
       deployer.assertNoAsset(txn.asaName);
       const asaDef = deployer.getASADef(txn.asaName, txn.asaDef);
       txn.asaDef = asaDef;
       if (txn.asaDef) txIdxMap.set(index, [txn.asaName, asaDef]);
       break;
     }
-    case TransactionType.DeploySSC: {
+    case rtypes.TransactionType.DeploySSC: {
       const name = txn.approvalProgram + "-" + txn.clearProgram;
       deployer.assertNoAsset(name);
       const approval = await deployer.ensureCompiled(txn.approvalProgram);
@@ -173,14 +172,14 @@ async function mkTx (
       txIdxMap.set(index, [name, { total: 1, decimals: 1, unitName: "MOCK" }]);
       break;
     }
-    case TransactionType.UpdateSSC: {
+    case rtypes.TransactionType.UpdateSSC: {
       const approval = await deployer.ensureCompiled(txn.newApprovalProgram);
       const clear = await deployer.ensureCompiled(txn.newClearProgram);
       txn.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
       txn.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
       break;
     }
-    case TransactionType.ModifyAsset: {
+    case rtypes.TransactionType.ModifyAsset: {
       // fetch asset mutable properties from network and set them (if they are not passed)
       // before modifying asset
       const assetInfo = await deployer.getAssetByID(txn.assetID as number);
@@ -206,10 +205,9 @@ async function mkTx (
 }
 
 /**
- * Execute single transactions or group of transactions (atomic transaction)
+ * Execute single transaction or group of transactions (atomic transaction)
  * @param deployer Deployer
  * @param execParams transaction parameters or atomic transaction parameters
- * @param asaName ASA Name (deployed by Deployer) for fetching ASA ID (optional)
  */
 export async function executeTransaction (
   deployer: Deployer,
