@@ -85,7 +85,7 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     ctx.syncAccounts();
 
     // verify elon and creator's asset holding (after opting out)
-    assert.equal(ctx.getAssetHolding(elon.address).amount, 0n);
+    assert.isUndefined(ctx.elon.getAssetHolding(ctx.assetIndex)); // verify asset closed from elon account
     assert.equal(
       ctx.getAssetHolding(asaCreator.address).amount,
       initialCreatorHolding.amount + 20n);
