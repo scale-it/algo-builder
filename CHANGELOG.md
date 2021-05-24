@@ -3,6 +3,7 @@
 ## unreleased
 
 ### API breaking
++ Rename `parseArgs` to `parse_params`
 
 ### Improvements
 + Replaced dependency `find-up` with `findup-sync` in `algob`.

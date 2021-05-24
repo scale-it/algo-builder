@@ -45,14 +45,14 @@ sys.path.insert(0, path) # replace path with path to algobpy in your project
 #### In Smart Contract
 
 - Example below shows how you can use external paramters in PyTeal code
-- `parseArgs` function overwrites the `scParam` object with `external parameters` object in below example.
+- `parse_params` function overwrites the `scParam` object with `external parameters` object in below example.
 
   ```py
   # Add directory to path so that algobpy can be imported
   import sys
   sys.path.insert(0,'.') # "." represent current directory
 
-  from algobpy.parse import parseArgs
+  from algobpy.parse import parse_params
 
   if __name__ == "__main__":
 
@@ -65,7 +65,7 @@ sys.path.insert(0, path) # replace path with path to algobpy in your project
 
     # Overwrite scParam if sys.argv[1] is passed
     if(len(sys.argv) > 1):
-      scParam = parseArgs(sys.argv[1], scParam)
+      scParam = parse_params(sys.argv[1], scParam)
 
     print(compileTeal(dynamic_fee(
       Addr(scParam["TMPL_TO"]),

@@ -4,7 +4,7 @@
 import sys
 sys.path.insert(0,'..')
 
-from algobpy.parse import parseArgs
+from algobpy.parse import parse_params
 from pyteal import *
 
 
@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     # Overwrite params if sys.argv[1] is passed
     if(len(sys.argv) > 1):
-        params = parseArgs(sys.argv[1], params)
+        params = parse_params(sys.argv[1], params)
 
     print(compileTeal(htlc(
         Addr(params["bob"]),
