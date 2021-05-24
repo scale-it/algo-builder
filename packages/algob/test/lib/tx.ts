@@ -136,8 +136,8 @@ describe("ASA modify fields", () => {
     } else {
       const tx: Transaction = decodeSignedTransaction(rawTxns).txn;
       // Verify if fields are set correctly
-      assert.equal(tx.assetManager, undefined);
-      assert.equal(tx.assetReserve, undefined);
+      assert.isUndefined(tx.assetManager);
+      assert.isUndefined(tx.assetReserve);
       assert.equal(encodeAddress(tx.assetFreeze.publicKey), bobAcc.addr);
       assert.equal(encodeAddress(tx.assetClawback.publicKey), bobAcc.addr);
     }

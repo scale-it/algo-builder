@@ -51,14 +51,14 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _) => {
       resolve(mockConfirmedTx);
     });
   }
 
   /* eslint-disable sonarjs/no-identical-functions */
   waitForConfirmation (txId: string): Promise<import("algosdk").ConfirmedTxInfo> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _) => {
       resolve(mockConfirmedTx);
     });
   }
