@@ -7,6 +7,7 @@
 
 ### Improvements
 + Replaced dependency `find-up` with `findup-sync` in `algob`.
++ Added `algopy` in `@algo-builder/algob/sample-project`, which enables users to pass template parameters to PyTEAL contracts. Updated docs.
 
 ### Bug fixes
 

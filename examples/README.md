@@ -35,7 +35,8 @@ The examples are already initialized. So we don't need to run `yarn run algob in
 
 #### PyTEAL
 
-Many examples are using PyTEAL. Please follow our [PyTEAL setup](https://github.com/scale-it/algo-builder/blob/master/examples/README.md#pyteal).
+* Many examples are using PyTEAL. Please follow our [PyTEAL setup](https://github.com/scale-it/algo-builder/blob/master/examples/README.md#pyteal).
+* For passing template parameters dynamically in PyTEAL contract you will need to add [`algobpy`](https://github.com/scale-it/algo-builder/tree/master/examples/algobpy) in your project directory. Read more about usage of `algoby` and passing template parameters in /scripts [here](https://github.com/scale-it/algo-builder/blob/master/docs/guide/py-teal.md#external-parameters-support)
 
 ### Update config
 

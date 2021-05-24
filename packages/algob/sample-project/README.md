@@ -1,4 +1,4 @@
-This is a boilerplate `algob` project with ASA deployment and funding a smart contract
+This is a boilerplate `algob` project with ASA deployment and funding a smart contract (in TEAL & PyTEAL)
 
 To run the `sample-project`:
 
@@ -40,14 +40,22 @@ In the `sample-project` folder you'll have following items:
     - `accounts_user.yaml` : It has a sample account
     - `asa.yaml` : It has sample specifications for Algorand Standard Assets (ASA)
     - `fee-check.teal` : It is a smart contract file. It checks the provided fee is at least  10,000 microalgos
+    - `escrow.py`: Smart contract (in PyTEAL), only approves transfer to a specific address (hardcoded in the contract).
     - You can change or add ASA, Smart Contracts in this folder.
 
 * `scripts/`: Directory for scripts to deploy and run your assets and contracts:
     - `0-sampleScript.js` : This script shows how to deploy ASA.
     - `1-sampleScript.js` : This script shows how to deploy ASC.
+    - `2-escrow-account.js`: This script funds an escrow contract with a hardcoded template parameter (passed in script)
 
 * `test/`: Directory for test files for testing your assets and smart contracts:
     - `sample-test.js` : This is a basic example of how tests should be and how they work.
     - You can add tests for your scripts here.
 
 * `algob.config.js`: Algob configuration file
+
+Before writing smart contracts in PyTEAL:
+
+* Please follow standard instuctions about [PyTEAL Setup](https://github.com/scale-it/algo-builder/blob/master/README.md#pyteal)
+* For passing template parameters dynamically in PyTEAL contract you will need to add [`algobpy`](https://github.com/scale-it/algo-builder/tree/master/examples/algobpy) in your project directory.
+    - Read more about usage of `algoby` and passing template parameters in /scripts [here](https://github.com/scale-it/algo-builder/blob/master/docs/guide/py-teal.md#external-parameters-support)
