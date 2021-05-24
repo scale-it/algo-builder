@@ -37,4 +37,4 @@ To Cast a Vote:
 
 To see the results and delete the application:
 
-        yarn run algob run scripts/vote/result.js
+    yarn run algob run scripts/vote/result.js

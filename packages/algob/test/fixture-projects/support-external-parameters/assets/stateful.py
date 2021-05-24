@@ -1,6 +1,6 @@
 # This example is provided for informational purposes only
 import sys
-from algobpy.parse import parseArgs
+from algobpy.parse import parse_params
 
 from pyteal import *
 
@@ -35,7 +35,7 @@ if __name__ == "__main__":
 
   # Overwrite scParam if sys.argv[1] is passed
   if(len(sys.argv) > 1):
-    scParam = parseArgs(sys.argv[1], scParam)
+    scParam = parse_params(sys.argv[1], scParam)
   
   print(compileTeal(approval_program(scParam["ASSET_AMT"], Addr(scParam["TMPL_SENDER"])), Mode.Application))
     

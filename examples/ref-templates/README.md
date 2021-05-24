@@ -3,7 +3,7 @@
 The goal of this project is to present how to work with ASC in `algob` using the best practices and templates using the Algorand reference templates:
 
 + [dynamic Fee](https://developer.algorand.org/docs/reference/teal/templates/dynamic_fee/) - using PyTEAL
-+ [hash time lock contract](https://developer.algorand.org/docs/reference/teal/templates/htlc/) - using PyTEAL. For more advanced example using HTLC with PyTEAL please check our [htlc-pyteal](../htlc-pyteal) example.
++ [hash time lock contract](https://developer.algorand.org/docs/reference/teal/templates/htlc/) - using PyTEAL. For more advanced example using HTLC with PyTEAL please check our [htlc-pyteal](https://github.com/scale-it/algo-builder/tree/master/examples/htlc-pyteal-ts) example.
 + [limit order](https://developer.algorand.org/docs/reference/teal/templates/limit_ordera/) - we ported the code to PyTEAL.
 
 ## Setup

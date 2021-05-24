@@ -184,6 +184,7 @@ describe("Algorand Standard Assets", function () {
   this.beforeEach(() => {
     assetId = runtime.addAsset('gold',
       { creator: { ...john.account, name: "john" } });
+    assetTransferParam.assetID = assetId;
   });
 
   const syncAccounts = (): void => {
@@ -251,7 +252,6 @@ describe("Algorand Standard Assets", function () {
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 
-    assetTransferParam.assetID = assetId;
     assetTransferParam.amount = 100n;
     runtime.executeTx(assetTransferParam);
     syncAccounts();
@@ -277,7 +277,6 @@ describe("Algorand Standard Assets", function () {
     // freezing asset holding for john
     runtime.executeTx(freezeParam);
 
-    assetTransferParam.assetID = assetId;
     expectRuntimeError(
       () => runtime.executeTx(assetTransferParam),
       RUNTIME_ERRORS.TRANSACTION.ACCOUNT_ASSET_FROZEN
@@ -290,10 +289,17 @@ describe("Algorand Standard Assets", function () {
     );
   });
 
-  it("should close john account for transfer asset if close remainder to is specified", () => {
+  it("should close alice account for transfer asset if close remainder to is specified", () => {
     const res = runtime.getAssetDef(assetId);
     assert.isDefined(res);
     runtime.optIntoASA(assetId, alice.address, {});
+
+    // transfer few assets to alice
+    runtime.executeTx({
+      ...assetTransferParam,
+      toAccountAddr: alice.address,
+      amount: 30n
+    });
 
     syncAccounts();
     const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
@@ -301,14 +307,31 @@ describe("Algorand Standard Assets", function () {
     assert.isDefined(initialJohnAssets);
     assert.isDefined(initialAliceAssets);
 
-    assetTransferParam.assetID = assetId;
-    assetTransferParam.amount = 0n;
-    assetTransferParam.payFlags = { totalFee: 1000, closeRemainderTo: alice.address };
-    runtime.executeTx(assetTransferParam); // transfer all assets of john => alice (using closeRemTo)
+    runtime.executeTx({
+      ...assetTransferParam,
+      sign: SignType.SecretKey,
+      fromAccount: alice.account,
+      toAccountAddr: alice.address,
+      payFlags: { totalFee: 1000, closeRemainderTo: john.address } // transfer all assets of alice => john (using closeRemTo)
+    });
     syncAccounts();
 
-    assert.equal(john.getAssetHolding(assetId)?.amount, 0n);
-    assert.equal(alice.getAssetHolding(assetId)?.amount, initialAliceAssets + initialJohnAssets);
+    assert.isUndefined(alice.getAssetHolding(assetId));
+    assert.equal(john.getAssetHolding(assetId)?.amount, initialJohnAssets + initialAliceAssets);
+  });
+
+  it("should throw error if trying to close asset holding of asset creator account", () => {
+    const res = runtime.getAssetDef(assetId);
+    assert.isDefined(res);
+    runtime.optIntoASA(assetId, alice.address, {});
+
+    expectRuntimeError(
+      () => runtime.executeTx({
+        ...assetTransferParam,
+        payFlags: { totalFee: 1000, closeRemainderTo: alice.address } // creator of ASA trying to close asset holding to alice
+      }),
+      RUNTIME_ERRORS.ASA.CANNOT_CLOSE_ASSET_BY_CREATOR
+    );
   });
 
   it("should throw error if asset is not found while modifying", () => {
@@ -449,7 +472,6 @@ describe("Algorand Standard Assets", function () {
 
     assetTransferParam.toAccountAddr = bob.address;
     assetTransferParam.amount = 20n;
-    assetTransferParam.assetID = assetId;
     assetTransferParam.payFlags = {};
 
     runtime.executeTx(assetTransferParam);
@@ -527,7 +549,6 @@ describe("Algorand Standard Assets", function () {
 
     assetTransferParam.toAccountAddr = bob.address;
     assetTransferParam.amount = 20n;
-    assetTransferParam.assetID = assetId;
     assetTransferParam.payFlags = {};
     runtime.executeTx(assetTransferParam);
     runtime.executeTx(freezeParam);
@@ -586,7 +607,6 @@ describe("Algorand Standard Assets", function () {
 
     assetTransferParam.toAccountAddr = bob.address;
     assetTransferParam.amount = 20n;
-    assetTransferParam.assetID = assetId;
     assetTransferParam.payFlags = {};
     runtime.executeTx(assetTransferParam);
 

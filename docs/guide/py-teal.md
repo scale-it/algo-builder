@@ -15,7 +15,7 @@ PyTeal is a Python language binding for Algorand Smart Contracts (ASC1s).
 - Install `Python3`
 - Install PyTeal `pip3 install pyteal`
 
-Please follow the main [README#PyTeal](../README.md#pyteal) file for setup instructions.
+Please follow the main [README#PyTeal](https://github.com/scale-it/algo-builder#pyteal) file for setup instructions.
 
 
 # Usage
@@ -30,39 +30,57 @@ If the address is loaded dynamically (eg from KMD), we can't use PyTEAL code pri
 - To solve this problem we have introduced a support for passing `external parameters`.
 - Deployer functions(`loadLogic`, `fundLsig`, `deploySSC`) take one extra optional argument: a smart contract parameters object(`scInitParam`). This argument is passed to PyTEAL script.
 - Changing parameters will change a generated TEAL code. Hence it the Delegated Signature or Smart Contract address will be different and we may need to redeploy it.
+
 ### Usage
 
-To use this feature, you can pass an external parameter object in a deployment script:
+PyTEAL code uses [`algobpy`](https://github.com/scale-it/algo-builder/tree/master/examples/algobpy) module to parse and use external parameters. You can copy this module into your project directory to use it.
 
-      scInitParam = {
-        TMPL_TO: john.addr,
-        TMPL_AMT: 700000,
-        TMPL_CLS: masterAccount.addr
-      }
-      await deployer.loadLogic("dynamic-fee.py", scInitParam);
+**NOTE**: In the `.py` contract, make sure to insert `algobpy` module in path.
+```py
+# Add directory to path so that algobpy can be imported
+import sys
+sys.path.insert(0, path) # replace path with path to algobpy in your project
+```
 
-- PyTeal code uses `algobpy` module to parse and use external parameter.
+#### In Smart Contract
+
 - Example below shows how you can use external paramters in PyTeal code
-- `parseArgs` function overwrites the `scParam` object with `external parameters` object in below example.
+- `parse_params` function overwrites the `scParam` object with `external parameters` object in below example.
 
   ```py
-  from algobpy.parse import parseArgs
+  # Add directory to path so that algobpy can be imported
+  import sys
+  sys.path.insert(0,'.') # "." represent current directory
+
+  from algobpy.parse import parse_params
 
   if __name__ == "__main__":
 
-    #replace these values with your customized values or pass an external parameter
+    # replace these values with your customized values or pass an external parameter
     scParam = {
-    "TMPL_TO": "2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA",
-    "TMPL_AMT": 700000,
-    "TMPL_CLS": "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
+      "TMPL_TO": "2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA",
+      "TMPL_AMT": 700000,
+      "TMPL_CLS": "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
     }
 
     # Overwrite scParam if sys.argv[1] is passed
     if(len(sys.argv) > 1):
-      scParam = parseArgs(sys.argv[1], scParam)
+      scParam = parse_params(sys.argv[1], scParam)
 
     print(compileTeal(dynamic_fee(
       Addr(scParam["TMPL_TO"]),
       scParam["TMPL_AMT"],
       Addr(scParam["TMPL_CLS"]), Mode.Signature))
   ```
+
+#### In scripts
+
+To use this feature in scripts, you can pass an external parameter object (using `loadLogic`, `fundLsig`..):
+   ```js
+    scInitParam = {
+      TMPL_TO: john.addr,
+      TMPL_AMT: 700000,
+      TMPL_CLS: masterAccount.addr
+    }
+    await deployer.loadLogic("dynamic-fee.py", scInitParam);
+   ```

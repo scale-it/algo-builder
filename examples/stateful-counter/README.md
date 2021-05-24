@@ -131,7 +131,6 @@ Created new app-id: 189
   confirmedRound: 13899,
   appID: 189
 }
-
 ```
 
 # 4. Opt-In to Application

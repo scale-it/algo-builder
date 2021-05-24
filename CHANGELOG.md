@@ -4,12 +4,17 @@
 
 ### API breaking
 * Move `updateSSC` function to `deployer`
++ Rename `parseArgs` to `parse_params`
 
 ### Improvements
 + Replaced dependency `find-up` with `findup-sync` in `algob`.
++ Added `algopy` in `@algo-builder/algob/sample-project`, which enables users to pass template parameters to PyTEAL contracts. Updated docs.
 
 ### Bug fixes
 
+`@algorand-builder/runtime`
+    * Remove asset holding from account if `closeRemainderTo` is specified.
+    * Asset creator should not be able to close it's holding to another account.
 
 ## v1.0.2 2021-05-18
 

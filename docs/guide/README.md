@@ -4,9 +4,9 @@ layout: splash
 
 # Algo Builder docs
 
-+ [API documentation](../api/algob/index.html)
++ [API documentation](https://scale-it.github.io/algo-builder/api/algob/index.html)
 
-+ [Setup](#Setup)
++ [Setup](#setup)
 + Project initialization → read below
 + [Quick Start](https://github.com/scale-it/algo-builder#quick-start)
 + [Configuration](./algob-config.md)
@@ -116,7 +116,7 @@ In the `my-project` folder you'll have following items:
 
 A `sample-project` is provided for your reference.
 
-Further information about the `sample-project` can be found [here](/packages/algob/sample-project/README.md)
+Further information about the `sample-project` can be found [here](https://github.com/scale-it/algo-builder/blob/master/packages/algob/sample-project/README.md)
 
 
 ### Checkpoints
@@ -137,4 +137,4 @@ To develop in `typescript`, please remember these points:
 - Transpiled js files should be present in `build` folder, therefore `outDir` in tsconfig.json should be set as:
 
     "outDir": "./build/scripts"
-- Typescript example [htlc-pyteal-ts](../examples/htlc-pyteal-ts). This example project shows how to build with typescript in algob.
+- Typescript example [htlc-pyteal-ts](https://github.com/scale-it/algo-builder/tree/master/examples/htlc-pyteal-ts). This example project shows how to build with typescript in algob.
