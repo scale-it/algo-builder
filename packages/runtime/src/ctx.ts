@@ -164,13 +164,17 @@ export class Ctx implements Context {
     toAssetHolding.amount += txnParam.amount;
 
     if (txnParam.payFlags.closeRemainderTo) {
-      this.assertAssetNotFrozen(txnParam.assetID as number, txnParam.payFlags.closeRemainderTo);
+      const closeToAddr = txnParam.payFlags.closeRemainderTo;
+      if (fromAccountAddr === fromAssetHolding.creator) {
+        throw new RuntimeError(RUNTIME_ERRORS.ASA.CANNOT_CLOSE_ASSET_BY_CREATOR);
+      }
+      this.assertAssetNotFrozen(txnParam.assetID as number, closeToAddr);
 
       const closeRemToAssetHolding = this.getAssetHolding(
-        txnParam.assetID as number, txnParam.payFlags.closeRemainderTo);
+        txnParam.assetID as number, closeToAddr);
 
       closeRemToAssetHolding.amount += fromAssetHolding.amount; // transfer assets of sender to closeRemTo account
-      fromAssetHolding.amount = 0n; // close sender's account
+      this.getAccount(fromAccountAddr).assets.delete(txnParam.assetID as number); // remove asset holding from sender account
     }
   }
 
