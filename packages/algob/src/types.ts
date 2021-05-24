@@ -362,7 +362,6 @@ export interface CheckpointRepo {
   registerASA: (networkName: string, name: string, info: ASAInfo) => CheckpointRepo
   registerSSC: (networkName: string, name: string, info: SSCInfo) => CheckpointRepo
   registerLsig: (networkName: string, name: string, info: LsigInfo) => CheckpointRepo
-  registerUpdatedSSC: (networkName: string, name: string, info: SSCInfo) => CheckpointRepo
 
   isDefined: (networkName: string, name: string) => boolean
   networkExistsInCurrentCP: (networkName: string) => boolean
@@ -436,8 +435,6 @@ export interface Deployer {
   registerASAInfo: (name: string, asaInfo: ASAInfo) => void
 
   registerSSCInfo: (name: string, sscInfo: SSCInfo) => void
-
-  registerUpdatedSSCInfo: (sscName: string, sscInfo: SSCInfo) => void
 
   logTx: (message: string, txConfirmation: algosdk.ConfirmedTxInfo) => void
 
@@ -578,7 +575,7 @@ export interface Deployer {
 
   /**
    * Queries a stateful smart contract info from checkpoint using key. */
-  getSSCFromKey: (key: string) => SSCInfo | undefined
+  getSSCfromCPKey: (key: string) => SSCInfo | undefined
 
   /**
    * Queries a delegated logic signature from checkpoint. */

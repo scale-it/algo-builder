@@ -52,10 +52,6 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  registerUpdatedSSCInfo (sscName: string, sscInfo: SSCInfo): void {
-    throw new Error("Not implemented");
-  }
-
   setScriptName (name: string): void {
     this.scriptName = name;
   }
@@ -68,7 +64,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  getSSCFromKey (key: string): SSCInfo | undefined {
+  getSSCfromCPKey (key: string): SSCInfo | undefined {
     throw new Error("Not implemented");
   }
 

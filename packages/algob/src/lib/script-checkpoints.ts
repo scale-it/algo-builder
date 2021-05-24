@@ -145,15 +145,6 @@ export class CheckpointRepoImpl implements CheckpointRepo {
     return this;
   }
 
-  registerSSC (networkName: string, name: string, info: SSCInfo): CheckpointRepo {
-    const nestedMap = new Map<number, SSCInfo>();
-    nestedMap.set(info.timestamp, info);
-    this._ensureNet(this.precedingCP, networkName).ssc.set(name, nestedMap);
-    this._ensureNet(this.strippedCP, networkName).ssc.set(name, nestedMap);
-    this._ensureNet(this.allCPs, networkName).ssc.set(name, nestedMap);
-    return this;
-  }
-
   private _ensureRegister (map: Map<string, Map<number, SSCInfo>>, name: string, info: SSCInfo): void {
     const nestedMap = map.get(name);
     if (nestedMap) {
@@ -165,7 +156,7 @@ export class CheckpointRepoImpl implements CheckpointRepo {
     }
   }
 
-  registerUpdatedSSC (networkName: string, name: string, info: SSCInfo): CheckpointRepo {
+  registerSSC (networkName: string, name: string, info: SSCInfo): CheckpointRepo {
     this._ensureRegister(this._ensureNet(this.precedingCP, networkName).ssc, name, info);
     this._ensureRegister(this._ensureNet(this.strippedCP, networkName).ssc, name, info);
     this._ensureRegister(this._ensureNet(this.allCPs, networkName).ssc, name, info);
@@ -241,14 +232,13 @@ export async function registerCheckpoints (
           timestamp: Math.round(+new Date() / 1000)
         };
         if (res) {
-          const val = deployer.getSSCFromKey(res[0]);
+          const val = deployer.getSSCfromCPKey(res[0]);
           if (val?.appID === sscInfo.appID) {
-            deployer.registerUpdatedSSCInfo(res[0], sscInfo);
             deployer.logTx("Updating SSC: " + res[0], txConfirmation);
           } else {
-            deployer.registerSSCInfo(res[0], sscInfo);
             deployer.logTx("Deploying SSC: " + res[0], txConfirmation);
           }
+          deployer.registerSSCInfo(res[0], sscInfo);
         }
         break;
       }

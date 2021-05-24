@@ -1,4 +1,4 @@
-import { overrideASADef, parseSSCAppArgs, types as rtypes } from "@algo-builder/runtime";
+import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
 import type { LogicSig, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
 
@@ -131,7 +131,7 @@ class DeployerBasicMode {
    * @param nameClear clear program name
    */
   getSSC (nameApproval: string, nameClear: string): SSCInfo | undefined {
-    return this.getSSCFromKey(nameApproval + "-" + nameClear);
+    return this.getSSCfromCPKey(nameApproval + "-" + nameClear);
   }
 
   /**
@@ -139,7 +139,7 @@ class DeployerBasicMode {
    * @param key Key here is clear program name appended to approval program name
    * with hypen("-") in between (approvalProgramName-clearProgramName)
    */
-  getSSCFromKey (key: string): SSCInfo | undefined {
+  getSSCfromCPKey (key: string): SSCInfo | undefined {
     const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
     const nestedMap = resultMap.get(key);
     if (nestedMap) {
@@ -347,13 +347,6 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   }
 
   /**
-   * Register UpdatedSSC Info in checkpoints
-   */
-  registerUpdatedSSCInfo (sscName: string, sscInfo: SSCInfo): void {
-    this.cpData.registerUpdatedSSC(this.networkName, sscName, sscInfo);
-  }
-
-  /**
    * Log transaction with message using txwriter
    */
   logTx (message: string, txConfirmation: algosdk.ConfirmedTxInfo): void {
@@ -518,7 +511,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
       throw error;
     }
 
-    this.registerUpdatedSSCInfo(cpKey, sscInfo);
+    this.registerSSCInfo(cpKey, sscInfo);
     return sscInfo;
   }
 }
@@ -552,12 +545,6 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
   registerSSCInfo (name: string, sscInfo: SSCInfo): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "registerSSCInfo"
-    });
-  }
-
-  registerUpdatedSSCInfo (sscName: string, sscInfo: SSCInfo): void {
-    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      methodName: "registerUpdatedSSCInfo"
     });
   }
 
@@ -604,16 +591,28 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     });
   }
 
+  /**
+   * This functions updates SSC in the network.
+   * Note: UpdateSSC when ran in RunMode it doesn't store checkpoints
+   * @param sender Sender account
+   * @param payFlags transaction parameters
+   * @param appID application index
+   * @param newApprovalProgram new approval program name
+   * @param newClearProgram new clear program name
+   * @param flags SSC optional flags
+   */
   async updateSSC (
     sender: algosdk.Account,
     payFlags: rtypes.TxParams,
-    appId: number,
+    appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
     flags: rtypes.SSCOptionalFlags
   ): Promise<SSCInfo> {
-    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      methodName: "updateSSC"
-    });
+    return await this.algoOp.updateSSC(
+      sender, payFlags, appID,
+      newApprovalProgram, newClearProgram,
+      flags, this.txWriter
+    );
   }
 }
