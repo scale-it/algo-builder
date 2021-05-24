@@ -13,7 +13,7 @@ import { Deployer } from "../../src/types";
 import { expectBuilderErrorAsync } from "../helpers/errors";
 import { mkEnv } from "../helpers/params";
 import { bobAcc } from "../mocks/account";
-import { mockSuggestedParam } from "../mocks/tx";
+import { mockAssetInfo, mockSuggestedParam } from "../mocks/tx";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
 describe("Note in TxParams", () => {
@@ -109,18 +109,23 @@ describe("ASA modify fields", () => {
   let deployer: Deployer;
   let execParams: types.ModifyAssetParam;
   let algod: AlgoOperatorDryRunImpl;
+  let assetFields: types.AssetModFields;
   beforeEach(async () => {
     const env = mkEnv("network1");
     algod = new AlgoOperatorDryRunImpl();
     const deployerCfg = new DeployerConfig(env, algod);
     deployer = new DeployerDeployMode(deployerCfg);
+    assetFields = {
+      manager: "",
+      clawback: bobAcc.addr
+    };
     execParams = {
       type: types.TransactionType.ModifyAsset,
       sign: types.SignType.SecretKey,
       payFlags: {},
       fromAccount: bobAcc,
       assetID: 1,
-      fields: {}
+      fields: assetFields
     };
     sinon.stub(algod.algodClient, "getTransactionParams")
       .returns({ do: async () => mockSuggestedParam });
@@ -138,8 +143,8 @@ describe("ASA modify fields", () => {
       // Verify if fields are set correctly
       assert.isUndefined(tx.assetManager);
       assert.isUndefined(tx.assetReserve);
-      assert.equal(encodeAddress(tx.assetFreeze.publicKey), bobAcc.addr);
-      assert.equal(encodeAddress(tx.assetClawback.publicKey), bobAcc.addr);
+      assert.equal(encodeAddress(tx.assetFreeze.publicKey), mockAssetInfo.params.freeze);
+      assert.equal(encodeAddress(tx.assetClawback.publicKey), assetFields.clawback);
     }
     (algod.sendAndWait as sinon.SinonStub).restore();
     return algod.sendAndWait(rawTxns);
@@ -148,10 +153,6 @@ describe("ASA modify fields", () => {
   it("Should set fields, freeze is not sent, therefore it should be picked from assetInfo", async () => {
     // Manager should be set to ""(sent as undefined to network)
     // Clawback should be updated
-    execParams.fields = {
-      manager: "",
-      clawback: bobAcc.addr
-    };
     sinon.stub(algod, "sendAndWait").callsFake(checkTx);
 
     await executeTransaction(deployer, execParams);

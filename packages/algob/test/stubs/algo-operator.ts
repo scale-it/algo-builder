@@ -11,8 +11,7 @@ import {
   LsigInfo,
   SSCInfo
 } from "../../src/types";
-import { bobAcc } from "../mocks/account";
-import { mockAlgod, mockConfirmedTx } from "../mocks/tx";
+import { mockAlgod, mockAssetInfo, mockConfirmedTx } from "../mocks/tx";
 
 export class AlgoOperatorDryRunImpl implements AlgoOperator {
   get algodClient (): Algodv2 {
@@ -24,41 +23,20 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   getAssetByID (assetIndex: number | bigint): Promise<AssetInfo> {
-    if (assetIndex === 1) {
-      const res: AssetInfo = {
-        index: 1,
-        params: {
-          creator: "addr-1",
-          total: 1000,
-          decimals: 8,
-          'default-frozen': false,
-          'unit-name': "TKN",
-          name: "ASA-1",
-          url: "link",
-          'metadata-hash': "12312442142141241244444411111133",
-          manager: bobAcc.addr,
-          reserve: undefined,
-          freeze: bobAcc.addr,
-          clawback: undefined
-        }
-      };
-      return new Promise((resolve, reject) => {
-        resolve(res);
-      });
-    } else {
-      throw new Error("Not implemented");
-    }
+    return new Promise((resolve, reject) => {
+      assetIndex === 1 ? resolve(mockAssetInfo) : reject(new Error("Not implemented"));
+    });
   }
 
   sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
-    return new Promise((resolve, _) => {
+    return new Promise((resolve, reject) => {
       resolve(mockConfirmedTx);
     });
   }
 
   /* eslint-disable sonarjs/no-identical-functions */
   waitForConfirmation (txId: string): Promise<import("algosdk").ConfirmedTxInfo> {
-    return new Promise((resolve, _) => {
+    return new Promise((resolve, reject) => {
       resolve(mockConfirmedTx);
     });
   }
