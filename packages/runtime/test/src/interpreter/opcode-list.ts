@@ -217,11 +217,14 @@ describe("Teal Opcodes", function () {
 
   describe("Arg[N]", function () {
     const stack = new Stack<StackElem>();
-    const runtime = new Runtime([]);
-    const interpreter = new Interpreter();
+    let interpreter: Interpreter;
     const args = ["Arg0", "Arg1", "Arg2", "Arg3"].map(stringToBytes);
-    interpreter.runtime = runtime;
-    interpreter.runtime.ctx.args = args;
+
+    this.beforeAll(() => {
+      interpreter = new Interpreter();
+      interpreter.runtime = new Runtime([]);
+      interpreter.runtime.ctx.args = args;
+    });
 
     it("should push arg_0 from argument array to stack", function () {
       const op = new Arg(["0"], 1, interpreter);
@@ -1565,10 +1568,13 @@ describe("Teal Opcodes", function () {
 
   describe("Transaction opcodes", function () {
     const stack = new Stack<StackElem>();
-    const interpreter = new Interpreter();
-    interpreter.runtime = new Runtime([]);
-    interpreter.runtime.ctx.tx = TXN_OBJ;
-    interpreter.tealVersion = 2; // set tealversion to latest (to support all tx fields)
+    let interpreter: Interpreter;
+    this.beforeAll(() => {
+      interpreter = new Interpreter();
+      interpreter.runtime = new Runtime([]);
+      interpreter.runtime.ctx.tx = TXN_OBJ;
+      interpreter.tealVersion = 2; // set tealversion to latest (to support all tx fields)
+    });
 
     describe("Txn: Common Fields", function () {
       it("should push txn fee to stack", function () {
@@ -1643,14 +1649,14 @@ describe("Teal Opcodes", function () {
         assert.deepEqual(TXN_OBJ.rekey, stack.pop());
       });
 
-      it("should throw error on FirstValidTime",
+      it("should throw error on FirstValidTime", () => {
         execExpectError(
           stack,
           [],
           new Txn(["FirstValidTime"], 1, interpreter),
           RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
-        )
-      );
+        );
+      });
 
       it("should push txn NumAppArgs to stack", function () {
         const op = new Txn(["NumAppArgs"], 1, interpreter);
@@ -2163,17 +2169,19 @@ describe("Teal Opcodes", function () {
 
   describe("Global Opcode", function () {
     const stack = new Stack<StackElem>();
-    const interpreter = new Interpreter();
+    let interpreter: Interpreter;
+    this.beforeAll(() => {
+      // setup 1st account (to be used as sender)
+      const acc1: AccountStoreI = new AccountStore(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
+      setDummyAccInfo(acc1);
 
-    // setup 1st account (to be used as sender)
-    const acc1: AccountStoreI = new AccountStore(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
-    setDummyAccInfo(acc1);
-
-    interpreter.runtime = new Runtime([acc1]);
-    interpreter.runtime.ctx.tx = TXN_OBJ;
-    interpreter.runtime.ctx.gtxs = [TXN_OBJ];
-    interpreter.runtime.ctx.tx.apid = 1828;
-    interpreter.tealVersion = 2; // set tealversion to latest (to support all global fields)
+      interpreter = new Interpreter();
+      interpreter.runtime = new Runtime([acc1]);
+      interpreter.runtime.ctx.tx = TXN_OBJ;
+      interpreter.runtime.ctx.gtxs = [TXN_OBJ];
+      interpreter.runtime.ctx.tx.apid = 1828;
+      interpreter.tealVersion = 2; // set tealversion to latest (to support all global fields)
+    });
 
     it("should push MinTxnFee to stack", function () {
       const op = new Global(['MinTxnFee'], 1, interpreter);
@@ -2276,7 +2284,6 @@ describe("Teal Opcodes", function () {
 
   describe("StateFul Opcodes", function () {
     const stack = new Stack<StackElem>();
-    const interpreter = new Interpreter();
     const lineNumber = 0;
 
     // setup 1st account (to be used as sender)
@@ -2287,14 +2294,17 @@ describe("Teal Opcodes", function () {
     const acc2 = new AccountStore(123, { addr: johnAddr, sk: new Uint8Array(0) });
     setDummyAccInfo(acc2);
 
-    const runtime = new Runtime([acc1, acc2]);
-    interpreter.runtime = runtime; // setup runtime
+    let interpreter: Interpreter;
+    this.beforeAll(() => {
+      interpreter = new Interpreter();
+      interpreter.runtime = new Runtime([acc1, acc2]);
 
-    // setting txn object and sender's addr
-    interpreter.runtime.ctx.tx = {
-      ...TXN_OBJ,
-      snd: Buffer.from(decodeAddress(elonAddr).publicKey)
-    };
+      // setting txn object and sender's addr
+      interpreter.runtime.ctx.tx = {
+        ...TXN_OBJ,
+        snd: Buffer.from(decodeAddress(elonAddr).publicKey)
+      };
+    });
 
     describe("AppOptedIn", function () {
       it("should push 1 to stack if app is opted in", function () {
@@ -2829,23 +2839,25 @@ describe("Teal Opcodes", function () {
 
   describe("Balance", () => {
     const stack = new Stack<StackElem>();
-    const interpreter = new Interpreter();
 
     // setup 1st account
     const acc1: AccountStoreI = new AccountStore(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
     setDummyAccInfo(acc1);
 
-    const runtime = new Runtime([acc1]);
-    interpreter.runtime = runtime; // setup runtime
+    let interpreter: Interpreter;
+    this.beforeAll(() => {
+      interpreter = new Interpreter();
+      interpreter.runtime = new Runtime([acc1]);
 
-    // setting txn object
-    interpreter.runtime.ctx.tx = TXN_OBJ;
-    interpreter.runtime.ctx.tx.snd = Buffer.from(decodeAddress(elonAddr).publicKey);
-    interpreter.runtime.ctx.tx.apat = [
-      Buffer.from(decodeAddress(elonAddr).publicKey),
-      Buffer.from(decodeAddress(johnAddr).publicKey)
-    ];
-    interpreter.runtime.ctx.tx.apas = [3, 112];
+      // setting txn object
+      interpreter.runtime.ctx.tx = TXN_OBJ;
+      interpreter.runtime.ctx.tx.snd = Buffer.from(decodeAddress(elonAddr).publicKey);
+      interpreter.runtime.ctx.tx.apat = [
+        Buffer.from(decodeAddress(elonAddr).publicKey),
+        Buffer.from(decodeAddress(johnAddr).publicKey)
+      ];
+      interpreter.runtime.ctx.tx.apas = [3, 112];
+    });
 
     it("should push correct account balance", () => {
       const op = new Balance([], 1, interpreter);
