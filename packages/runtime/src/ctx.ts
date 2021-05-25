@@ -444,6 +444,7 @@ export class Ctx implements Context {
           };
           this.runtime.mkAssetCreateTx(name, flags, asset);
           this.state.assetDefs.set(this.state.assetCounter, senderAcc.address);
+          this.state.assetNameId.set(name, this.state.assetCounter);
 
           this.optIntoASA(this.state.assetCounter, senderAcc.address, {}); // opt-in for creator
           break;
@@ -484,6 +485,10 @@ export class Ctx implements Context {
           senderAcc.createdApps.delete(0); // remove zero app from sender's account
           this.state.globalApps.delete(0); // remove zero app from context
           senderAcc.createdApps.set(this.state.appCounter, attributes);
+          this.state.appNameId.set(
+            txnParam.approvalProgram + "-" + txnParam.clearProgram,
+            this.state.appCounter
+          );
           break;
         }
         case TransactionType.OptInSSC: {

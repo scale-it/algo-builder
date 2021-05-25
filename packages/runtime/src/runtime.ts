@@ -39,6 +39,8 @@ export class Runtime {
       accounts: new Map<AccountAddress, AccountStoreI>(), // string represents account address
       globalApps: new Map<number, AccountAddress>(), // map of {appId: accountAddress}
       assetDefs: new Map<number, AccountAddress>(), // number represents assetId
+      assetNameId: new Map<string, number>(),
+      appNameId: new Map<string, number>(),
       appCounter: 0, // initialize app counter with 0
       assetCounter: 0 // initialize asset counter with 0
     };
@@ -232,6 +234,25 @@ export class Runtime {
   }
 
   /**
+   * Queries asset id by asset name from global state.
+   * Returns undefined if asset is not found.
+   * @param name Asset name
+   */
+  getAssetIdFromName (name: string): number | undefined {
+    return this.store.assetNameId.get(name);
+  }
+
+  /**
+   * Queries app id by app name from global state.
+   * Returns undefined if app is not found.
+   * @param approval
+   * @param clear
+   */
+  getAppIdFromName (approval: string, clear: string): number | undefined {
+    return this.store.appNameId.get(approval + "-" + clear);
+  }
+
+  /**
    * Setup initial accounts as {address: SDKAccount}. This should be called only when initializing Runtime.
    * @param accounts: array of account info's
    */
@@ -317,6 +338,7 @@ export class Runtime {
     const asset = senderAcc.addAsset(++this.store.assetCounter, name, this.loadedAssetsDefs[name]);
     this.mkAssetCreateTx(name, flags, asset);
     this.store.assetDefs.set(this.store.assetCounter, sender.addr);
+    this.store.assetNameId.set(name, this.store.assetCounter);
 
     this.optIntoASA(this.store.assetCounter, sender.addr, {}); // opt-in for creator
     return this.store.assetCounter;
@@ -432,6 +454,7 @@ export class Runtime {
     const attributes = this.assertAppDefined(0, senderAcc.createdApps.get(0));
     senderAcc.createdApps.delete(0); // remove zero app from sender's account
     senderAcc.createdApps.set(this.store.appCounter, attributes);
+    this.store.appNameId.set(approvalProgram + "-" + clearProgram, this.store.appCounter);
 
     return this.store.appCounter;
   }

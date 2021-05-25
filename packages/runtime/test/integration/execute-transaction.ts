@@ -23,11 +23,19 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
     john = new AccountStore(initialBalance, elonMuskAccount);
     alice = new AccountStore(initialBalance);
     runtime = new Runtime([john, alice]); // setup test
+    approvalProgram = getProgram('counter-approval.teal');
+    clearProgram = getProgram('clear.teal');
   });
 
   function syncAccounts (): void {
     john = runtime.getAccount(john.address);
     alice = runtime.getAccount(alice.address);
+  }
+
+  function setupAsset (): void {
+    // create asset
+    assetId = runtime.addAsset('gold',
+      { creator: { ...john.account, name: "john" } });
   }
 
   it("should execute group of (payment + asset creation) successfully", () => {
@@ -84,5 +92,88 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
     syncAccounts();
     assert.equal(john.balance(), initialBalance);
     assert.equal(alice.balance(), initialBalance);
+  });
+
+  it("Should opt-in to asset, through execute transaction", () => {
+    setupAsset();
+    syncAccounts();
+    const asset = runtime.getAssetIdFromName('gold');
+    if (asset) {
+      const tx: ExecParams[] = [
+        {
+          type: TransactionType.OptInASA,
+          sign: SignType.SecretKey,
+          fromAccount: alice.account,
+          assetID: asset,
+          payFlags: { totalFee: 1000 }
+        }
+      ];
+
+      runtime.executeTx(tx);
+    }
+  });
+
+  it("should execute group of (payment + app creation) successfully", () => {
+    const txGroup: ExecParams[] = [
+      {
+        type: TransactionType.TransferAlgo,
+        sign: SignType.SecretKey,
+        fromAccount: john.account,
+        toAccountAddr: alice.address,
+        amountMicroAlgos: 100,
+        payFlags: { totalFee: 1000 }
+      },
+      {
+        type: TransactionType.DeploySSC,
+        sign: SignType.SecretKey,
+        fromAccount: john.account,
+        approvalProgram: approvalProgram,
+        clearProgram: clearProgram,
+        localInts: 1,
+        localBytes: 1,
+        globalInts: 1,
+        globalBytes: 1,
+        payFlags: { totalFee: 1000 }
+      }
+    ];
+    runtime.executeTx(txGroup);
+
+    syncAccounts();
+    assert.equal(john.balance(), initialBalance - 2100n);
+    assert.equal(alice.balance(), initialBalance + 100n);
+  });
+
+  it("should fail execution group (payment + asset creation), if not enough balance", () => {
+    const txGroup: ExecParams[] = [
+      {
+        type: TransactionType.TransferAlgo,
+        sign: SignType.SecretKey,
+        fromAccount: john.account,
+        toAccountAddr: alice.address,
+        amountMicroAlgos: 1e9,
+        payFlags: { totalFee: 1000 }
+      },
+      {
+        type: TransactionType.DeploySSC,
+        sign: SignType.SecretKey,
+        fromAccount: john.account,
+        approvalProgram: approvalProgram,
+        clearProgram: clearProgram,
+        localInts: 1,
+        localBytes: 1,
+        globalInts: 1,
+        globalBytes: 1,
+        payFlags: {}
+      }
+    ];
+
+    expectRuntimeError(
+      () => runtime.executeTx(txGroup),
+      RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE
+    );
+
+    // verify app doesn't exist in map
+    const res = runtime.getAppIdFromName(approvalProgram, clearProgram);
+    assert.isUndefined(res);
   });
 });
