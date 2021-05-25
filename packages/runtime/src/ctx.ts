@@ -7,7 +7,8 @@ import { mockSuggestedParams } from "./mock/tx";
 import {
   AccountAddress, AccountStoreI, AlgoTransferParam, ASADeploymentFlags, AssetHoldingM, AssetModFields,
   AssetTransferParam, Context, ExecParams, ExecutionMode,
-  SignType, SSCAttributesM, State, TransactionType, Txn, TxParams
+  SignType, SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
+  State, TransactionType, Txn, TxParams
 } from "./types";
 
 const approvalProgram = "approval-program";
@@ -449,6 +450,56 @@ export class Ctx implements Context {
         case TransactionType.OptInASA: {
           const senderAcc = this.getAccount(fromAccountAddr);
           this.optIntoASA(this.state.assetCounter, senderAcc.address, txnParam.payFlags);
+          break;
+        }
+        case TransactionType.DeploySSC: {
+          const senderAcc = this.getAccount(fromAccountAddr);
+
+          if (txnParam.approvalProgram === "") {
+            throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
+          }
+          if (txnParam.clearProgram === "") {
+            throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
+          }
+          const flags: SSCDeploymentFlags = {
+            sender: senderAcc.account,
+            localInts: txnParam.localInts,
+            localBytes: txnParam.localBytes,
+            globalInts: txnParam.globalInts,
+            globalBytes: txnParam.globalBytes
+          };
+          // create app with id = 0 in globalApps for teal execution
+          const app = senderAcc.addApp(0, flags, txnParam.approvalProgram, txnParam.clearProgram);
+          this.state.accounts.set(senderAcc.address, senderAcc);
+          this.state.globalApps.set(app.id, senderAcc.address);
+
+          this.runtime.addCtxAppCreateTxn(flags, txnParam.payFlags);
+          this.runtime.run(txnParam.approvalProgram, ExecutionMode.STATEFUL); // execute TEAL code with appId = 0
+
+          // create new application in globalApps map
+          this.state.globalApps.set(++this.state.appCounter, senderAcc.address);
+
+          const attributes = this.getApp(0);
+          senderAcc.createdApps.delete(0); // remove zero app from sender's account
+          this.state.globalApps.delete(0); // remove zero app from context
+          senderAcc.createdApps.set(this.state.appCounter, attributes);
+          break;
+        }
+        case TransactionType.OptInSSC: {
+          const appParams = this.getApp(txnParam.appID);
+          const flags: SSCOptionalFlags = {
+            appArgs: txnParam.appArgs,
+            accounts: txnParam.accounts,
+            foreignApps: txnParam.foreignApps,
+            foreignAssets: txnParam.foreignAssets,
+            note: txnParam.note,
+            lease: txnParam.lease
+          };
+          this.runtime.addCtxOptInTx(fromAccountAddr, txnParam.appID, txnParam.payFlags, flags);
+          const account = this.getAccount(fromAccountAddr);
+          account.optInToApp(txnParam.appID, appParams);
+
+          this.runtime.run(appParams[approvalProgram], ExecutionMode.STATEFUL);
           break;
         }
       }
