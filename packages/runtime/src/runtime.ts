@@ -12,12 +12,11 @@ import { convertToString, parseSSCAppArgs } from "./lib/parsing";
 import { encodeNote, getFromAddress, mkTransaction } from "./lib/txn";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
-import type {
+import {
   AccountAddress, AccountStoreI, ASADefs, ASADeploymentFlags, AssetHoldingM, Context, ExecParams,
-  SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
-  StackElem, State, Txn, TxParams
+  ExecutionMode, SignType, SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
+  StackElem, State, TransactionType, Txn, TxParams
 } from "./types";
-import { ExecutionMode, SignType } from "./types";
 
 export class Runtime {
   /**
@@ -606,7 +605,21 @@ export class Runtime {
    * @param args : external arguments to smart contract
    */
   executeTx (txnParams: ExecParams | ExecParams[]): void {
-    const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
+    const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
+    for (const txn of txnParameters) {
+      switch (txn.type) {
+        case TransactionType.DeployASA: {
+          txn.asaDef = this.loadedAssetsDefs[txn.asaName];
+          break;
+        }
+        case TransactionType.DeploySSC: {
+          txn.approvalProg = new Uint8Array(32); // mock approval program
+          txn.clearProg = new Uint8Array(32); // mock clear program
+          break;
+        }
+      }
+    }
+    const [tx, gtxs] = this.createTxnContext(txnParameters); // get current txn and txn group (as encoded obj)
     // validate first and last rounds
     this.validateTxRound(gtxs);
 
@@ -614,7 +627,6 @@ export class Runtime {
     // state is a deep copy of store
     this.ctx = new Ctx(cloneDeep(this.store), tx, gtxs, [], this);
 
-    const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
     // Run TEAL program associated with each transaction and
     // then execute the transaction without interacting with store.
     this.ctx.processTransactions(txnParameters);

@@ -431,6 +431,7 @@ export class Ctx implements Context {
         }
         case TransactionType.DeployASA: {
           const senderAcc = this.getAccount(fromAccountAddr);
+          const name = txnParam.asaName;
 
           // create asset
           const asset = senderAcc.addAsset(
