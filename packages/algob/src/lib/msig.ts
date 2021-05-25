@@ -2,7 +2,6 @@ import { getPathFromDirRecursive } from "@algo-builder/runtime";
 import type { Account, LogicSig, MultiSig, TxSig } from "algosdk";
 import { appendSignMultisigTransaction, decodeAddress, decodeSignedTransaction, encodeAddress, logicSigFromByte } from "algosdk";
 import fs from "fs";
-import path from "path";
 
 import { ASSETS_DIR } from "../internal/core/project-structure";
 

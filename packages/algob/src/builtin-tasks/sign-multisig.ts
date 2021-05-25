@@ -26,13 +26,14 @@ async function multiSignTx (
     return;
   }
   const rawTxn = loadSignedTxnFromFile(taskArgs.file);
+  const sourceFilePath = getPathFromDirRecursive(ASSETS_DIR, taskArgs.file) as string;
   if (rawTxn === undefined) {
     console.error("Error loading transaction from the file.");
     return;
   }
   const signedTxn = signMultiSig(signerAccount, rawTxn);
   const outFileName = taskArgs.out ?? taskArgs.file.split(".")[0] + "_out.txn";
-  const outFilePath = getPathFromDirRecursive(ASSETS_DIR, outFileName) as string;
+  const outFilePath = path.join(path.dirname(sourceFilePath), outFileName);
   await writeToFile(signedTxn.blob, taskArgs.force, outFilePath);
 }
 

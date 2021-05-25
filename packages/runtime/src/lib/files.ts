@@ -5,7 +5,6 @@ import YAML from "yaml";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
-import { ASSETS_DIR } from "./asa";
 
 function readYAML (filePath: string, options?: YAML.Options): any {
   return YAML.parse(fs.readFileSync(filePath).toString(), options);
