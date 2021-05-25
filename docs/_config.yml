@@ -20,8 +20,8 @@
 
 title: "Algo Builder"
 name: "Algo Builder"
-baseurl: "/algo-builder" # the subpath of your site, e.g. /blog
-url: "https://scale-it.github.io/algo-builder/" # the base hostname & protocol for your site, e.g. http://example.com
+baseurl: "/" # the subpath of your site, e.g. /blog
+url: "https://algobuilder.dev" # the base hostname & protocol for your site, e.g. http://example.com
 repository: "scale-it/algo-builder"
 
 minimal_mistakes_skin: "air" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum" "sunrise"
