@@ -38,6 +38,17 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
       { creator: { ...john.account, name: "john" } });
   }
 
+  function setupApp (): void {
+    // create new app
+    appId = runtime.addApp({
+      sender: john.account,
+      globalBytes: 32,
+      globalInts: 32,
+      localBytes: 8,
+      localInts: 8
+    }, {}, approvalProgram, clearProgram);
+  }
+
   it("should execute group of (payment + asset creation) successfully", () => {
     const txGroup: ExecParams[] = [
       {
@@ -175,5 +186,24 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
     // verify app doesn't exist in map
     const res = runtime.getAppIdFromName(approvalProgram, clearProgram);
     assert.isUndefined(res);
+  });
+
+  it("Should opt-in to app, through execute transaction", () => {
+    setupApp();
+    syncAccounts();
+    const appId = runtime.getAppIdFromName(approvalProgram, clearProgram);
+    if (appId) {
+      const tx: ExecParams[] = [
+        {
+          type: TransactionType.OptInSSC,
+          sign: SignType.SecretKey,
+          fromAccount: alice.account,
+          appID: appId,
+          payFlags: { totalFee: 1000 }
+        }
+      ];
+
+      runtime.executeTx(tx);
+    }
   });
 });
