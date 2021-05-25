@@ -75,6 +75,8 @@ export interface State {
   accounts: Map<string, AccountStoreI>
   globalApps: Map<number, string>
   assetDefs: Map<number, AccountAddress>
+  appCounter: number
+  assetCounter: number
 }
 
 // describes interpreter's local context (state + txns)

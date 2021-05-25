@@ -1,12 +1,13 @@
-import { AssetDef } from "algosdk";
+import { AssetDef, makeAssetTransferTxnWithSuggestedParams } from "algosdk";
 
 import { getFromAddress, Runtime } from ".";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
+import { mockSuggestedParams } from "./mock/tx";
 import {
-  AccountAddress, AccountStoreI, AlgoTransferParam, AssetHoldingM, AssetModFields,
+  AccountAddress, AccountStoreI, AlgoTransferParam, ASADeploymentFlags, AssetHoldingM, AssetModFields,
   AssetTransferParam, Context, ExecParams, ExecutionMode,
-  SignType, SSCAttributesM, State, TransactionType, Txn
+  SignType, SSCAttributesM, State, TransactionType, Txn, TxParams
 } from "./types";
 
 const approvalProgram = "approval-program";
@@ -129,6 +130,30 @@ export class Ctx implements Context {
       closeRemToAcc.amount += fromAccount.amount; // transfer funds of sender to closeRemTo account
       fromAccount.amount = 0n; // close sender's account
     }
+  }
+
+  /**
+   * Asset Opt-In for account in context
+   * @param assetIndex Asset Index
+   * @param address Account address to opt-into asset
+   * @param flags Transaction Parameters
+   */
+  optIntoASA (assetIndex: number, address: AccountAddress, flags: TxParams): void {
+    const assetDef = this.getAssetDef(assetIndex);
+    const creatorAddr = assetDef.creator;
+    makeAssetTransferTxnWithSuggestedParams(
+      address, address, undefined, undefined, 0, undefined, assetIndex,
+      mockSuggestedParams(flags, this.runtime.getRound()));
+
+    const assetHolding: AssetHoldingM = {
+      amount: address === creatorAddr ? BigInt(assetDef.total) : 0n, // for creator opt-in amount is total assets
+      'asset-id': assetIndex,
+      creator: creatorAddr,
+      'is-frozen': address === creatorAddr ? false : assetDef["default-frozen"]
+    };
+
+    const account = this.getAccount(address);
+    account.optInToASA(assetIndex, assetHolding);
   }
 
   /**
@@ -401,6 +426,29 @@ export class Ctx implements Context {
             throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
           }
           this.destroyAsset(txnParam.assetID as number);
+          break;
+        }
+        case TransactionType.DeployASA: {
+          const senderAcc = this.getAccount(fromAccountAddr);
+
+          // create asset
+          const asset = senderAcc.addAsset(
+            ++this.state.assetCounter, name,
+            this.runtime.loadedAssetsDefs[name]
+          );
+          const flags: ASADeploymentFlags = {
+            ...txnParam.payFlags,
+            creator: { ...senderAcc.account, name: senderAcc.address }
+          };
+          this.runtime.mkAssetCreateTx(name, flags, asset);
+          this.state.assetDefs.set(this.state.assetCounter, senderAcc.address);
+
+          this.optIntoASA(this.state.assetCounter, senderAcc.address, {}); // opt-in for creator
+          break;
+        }
+        case TransactionType.OptInASA: {
+          const senderAcc = this.getAccount(fromAccountAddr);
+          this.optIntoASA(this.state.assetCounter, senderAcc.address, txnParam.payFlags);
           break;
         }
       }

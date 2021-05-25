@@ -29,19 +29,19 @@ export class Runtime {
    */
   private store: State;
   ctx: Context;
-  private appCounter: number;
-  private assetCounter: number;
+  loadedAssetsDefs: ASADefs;
   // https://developer.algorand.org/docs/features/transactions/?query=round
   private round: number;
   private timestamp: number;
-  private readonly loadedAssetsDefs: ASADefs;
 
   constructor (accounts: AccountStoreI[]) {
     // runtime store
     this.store = {
       accounts: new Map<AccountAddress, AccountStoreI>(), // string represents account address
       globalApps: new Map<number, AccountAddress>(), // map of {appId: accountAddress}
-      assetDefs: new Map<number, AccountAddress>() // number represents assetId
+      assetDefs: new Map<number, AccountAddress>(), // number represents assetId
+      appCounter: 0, // initialize app counter with 0
+      assetCounter: 0 // initialize asset counter with 0
     };
 
     // intialize accounts (should be done during runtime initialization)
@@ -53,8 +53,6 @@ export class Runtime {
     // context for interpreter
     this.ctx = new Ctx(cloneDeep(this.store), <Txn>{}, [], [], this);
 
-    this.appCounter = 0;
-    this.assetCounter = 0;
     this.round = 2;
     this.timestamp = 1;
   }
@@ -317,12 +315,12 @@ export class Runtime {
     const senderAcc = this.assertAccountDefined(sender.addr, this.store.accounts.get(sender.addr));
 
     // create asset
-    const asset = senderAcc.addAsset(++this.assetCounter, name, this.loadedAssetsDefs[name]);
+    const asset = senderAcc.addAsset(++this.store.assetCounter, name, this.loadedAssetsDefs[name]);
     this.mkAssetCreateTx(name, flags, asset);
-    this.store.assetDefs.set(this.assetCounter, sender.addr);
+    this.store.assetDefs.set(this.store.assetCounter, sender.addr);
 
-    this.optIntoASA(this.assetCounter, sender.addr, {}); // opt-in for creator
-    return this.assetCounter;
+    this.optIntoASA(this.store.assetCounter, sender.addr, {}); // opt-in for creator
+    return this.store.assetCounter;
   }
 
   /**
@@ -430,13 +428,13 @@ export class Runtime {
     this.run(approvalProgram, ExecutionMode.STATEFUL); // execute TEAL code with appId = 0
 
     // create new application in globalApps map
-    this.store.globalApps.set(++this.appCounter, senderAcc.address);
+    this.store.globalApps.set(++this.store.appCounter, senderAcc.address);
 
     const attributes = this.assertAppDefined(0, senderAcc.createdApps.get(0));
     senderAcc.createdApps.delete(0); // remove zero app from sender's account
-    senderAcc.createdApps.set(this.appCounter, attributes);
+    senderAcc.createdApps.set(this.store.appCounter, attributes);
 
-    return this.appCounter;
+    return this.store.appCounter;
   }
 
   // creates new OptIn transaction object and update context
