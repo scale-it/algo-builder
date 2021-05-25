@@ -1,5 +1,5 @@
+import { getPathFromDirRecursive } from "@algo-builder/runtime";
 import { encodeObj } from "algosdk";
-import path from "path";
 
 import { task } from "../internal/core/config/config-env";
 import { ASSETS_DIR } from "../internal/core/project-structure";
@@ -30,7 +30,7 @@ async function multiSignLsig (
 
   const [name, ext] = taskArgs.file.split(".");
   const outFileName = taskArgs.out ?? (name + "_out." + ext);
-  const outFilePath = path.join(ASSETS_DIR, outFileName);
+  const outFilePath = getPathFromDirRecursive(ASSETS_DIR, outFileName) as string;
 
   // if lsig.args = [] (empty array), then delete that key
   if (lsig.args?.length === 0) {

@@ -1,3 +1,4 @@
+import { getPathFromDirRecursive } from "@algo-builder/runtime";
 import type { Account, LogicSig, MultiSig, TxSig } from "algosdk";
 import { appendSignMultisigTransaction, decodeAddress, decodeSignedTransaction, encodeAddress, logicSigFromByte } from "algosdk";
 import fs from "fs";
@@ -38,7 +39,7 @@ export async function readMsigFromFile (filename: string): Promise<MultiSig | un
     throw new Error(`filename "${filename}" must end with "${lsigExt}"`);
   }
   try {
-    const p = path.join(ASSETS_DIR, filename);
+    const p = getPathFromDirRecursive(ASSETS_DIR, filename) as string;
     const msig = fs.readFileSync(p, 'utf8').split("LogicSig: ")[1];
     return await decodeMsigObj(msig);
   } catch (e) {
@@ -58,7 +59,7 @@ export async function readBinaryMultiSig (filename: string): Promise<string | un
     throw new Error(`filename "${filename}" must end with "${blsigExt}"`);
   }
   try {
-    const p = path.join(ASSETS_DIR, filename);
+    const p = getPathFromDirRecursive(ASSETS_DIR, filename) as string;
     return fs.readFileSync(p, 'base64');
   } catch (e) {
     if (e?.errno === -2) return undefined; // handling a not existing file

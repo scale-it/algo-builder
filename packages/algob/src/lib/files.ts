@@ -1,3 +1,4 @@
+import { getPathFromDirRecursive } from "@algo-builder/runtime";
 import fs from "fs-extra";
 import path from "path";
 
@@ -40,7 +41,7 @@ export function assertDirectDirChildren (dir: string, scriptNames: string[]): st
  */
 export function loadSignedTxnFromFile (fileName: string): Uint8Array | undefined {
   try {
-    const p = path.join(ASSETS_DIR, fileName);
+    const p = getPathFromDirRecursive(ASSETS_DIR, fileName) as string;
     const buffer = fs.readFileSync(p);
     return Uint8Array.from(buffer);
   } catch (e) {

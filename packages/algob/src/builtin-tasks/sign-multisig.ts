@@ -1,3 +1,4 @@
+import { getPathFromDirRecursive } from "@algo-builder/runtime";
 import path from "path";
 
 import { task } from "../internal/core/config/config-env";
@@ -31,7 +32,7 @@ async function multiSignTx (
   }
   const signedTxn = signMultiSig(signerAccount, rawTxn);
   const outFileName = taskArgs.out ?? taskArgs.file.split(".")[0] + "_out.txn";
-  const outFilePath = path.join(ASSETS_DIR, outFileName);
+  const outFilePath = getPathFromDirRecursive(ASSETS_DIR, outFileName) as string;
   await writeToFile(signedTxn.blob, taskArgs.force, outFilePath);
 }
 
