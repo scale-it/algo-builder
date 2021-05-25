@@ -282,6 +282,18 @@ const runtimeGeneralErrors = {
     message: "Program is empty",
     title: "Invalid program",
     description: `Invalid program`
+  },
+  MULTIPLE_FILES_WITH_SAME_NAME_IN_DIR: {
+    number: 1310,
+    message: "Directory %directory% has same file \"%file%\" in multiple paths: %path1%, %path2%",
+    title: "Multiple files with same fileName present in directory %directory%",
+    description: `Directory %directory% has same file in multiple paths: %path1%, %path2%`
+  },
+  FILE_NOT_FOUND_IN_DIR: {
+    number: 1311,
+    message: "File name \"%file%\" does not exist in directory \"%directory%\"",
+    title: "File \"%file%\" does not exist in directory \"%directory%\"",
+    description: `File "%file%" does not exist in directory "%directory%"`
   }
 };
 
