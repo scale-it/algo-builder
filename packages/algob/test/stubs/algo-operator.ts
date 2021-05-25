@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import type { LogicSig } from "algosdk";
-import { Algodv2, ConfirmedTxInfo } from "algosdk";
+import { Algodv2, AssetInfo, ConfirmedTxInfo } from "algosdk";
 
 import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";
@@ -11,7 +11,7 @@ import {
   LsigInfo,
   SSCInfo
 } from "../../src/types";
-import { mockAlgod } from "../mocks/tx";
+import { mockAlgod, mockAssetInfo, mockConfirmedTx } from "../mocks/tx";
 
 export class AlgoOperatorDryRunImpl implements AlgoOperator {
   get algodClient (): Algodv2 {
@@ -22,25 +22,23 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     throw new Error("Not implemented");
   }
 
-  getAssetByID (assetIndex: number | bigint): Promise<import("algosdk").AssetInfo> {
-    throw new Error("Not implemented");
-  }
-
-  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
-    const res: ConfirmedTxInfo = {
-      'confirmed-round': 1,
-      "asset-index": 1,
-      'application-index': 1,
-      'global-state-delta': "string",
-      'local-state-delta': "string"
-    };
+  getAssetByID (assetIndex: number | bigint): Promise<AssetInfo> {
     return new Promise((resolve, reject) => {
-      resolve(res);
+      assetIndex === 1 ? resolve(mockAssetInfo) : reject(new Error("Not implemented"));
     });
   }
 
+  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
+    return new Promise((resolve, reject) => {
+      resolve(mockConfirmedTx);
+    });
+  }
+
+  /* eslint-disable sonarjs/no-identical-functions */
   waitForConfirmation (txId: string): Promise<import("algosdk").ConfirmedTxInfo> {
-    throw new Error("Not implemented");
+    return new Promise((resolve, reject) => {
+      resolve(mockConfirmedTx);
+    });
   }
 
   async deployASA (
