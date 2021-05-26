@@ -408,7 +408,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const txInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
     const confirmedTxInfo = await this.waitForConfirmation(txId);
 
-    const appId = confirmedTxInfo['application-index'];
+    const appId = appID;
     const message = `Signed transaction with txID: ${txId}\nUpdated app-id: ${appId}`; // eslint-disable-line @typescript-eslint/restrict-template-expressions
 
     console.log(message);

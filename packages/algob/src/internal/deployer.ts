@@ -1,6 +1,8 @@
 import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
 import type { LogicSig, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
+import { result } from "lodash";
+import { number } from "zod";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
@@ -141,10 +143,15 @@ class DeployerBasicMode {
    */
   getSSCfromCPKey (key: string): SSCInfo | undefined {
     const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
-    const nestedMap = resultMap.get(key);
+    const nestedMap: any = resultMap.get(key);
     if (nestedMap) {
-      // return last pushed element in the map(latest timestamp value)
-      return [...nestedMap][nestedMap.size - 1][1];
+      let res;
+      // check why map of maps doesn't work
+      // map.get function doesn't returns map object
+      for (const k in nestedMap) {
+        res = nestedMap[Number(k)];
+      }
+      return res;
     } else {
       return undefined;
     }
