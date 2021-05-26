@@ -189,8 +189,7 @@ here key 'Y291bnRlcg==' is base64 encoded form of `counter`.
 To update an application with (new_approval.teal, new_clear.teal), you can use:
 
 ```javascript
-const updatedRes = await updateSSC(
-  deployer,
+const updatedRes = await deployer.updateSSC(
   creatorAccount,
   {}, // pay flags
   applicationID,

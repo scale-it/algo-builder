@@ -1,11 +1,13 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import type { LogicSig, LogicSigArgs } from "algosdk";
+import type { LogicSig } from "algosdk";
 import * as algosdk from "algosdk";
 
 import * as types from "./internal/core/params/argument-types";
 // Begin config types
 
 // IMPORTANT: This t.types MUST be kept in sync with the actual types.
+
+export type Timestamp = number;
 
 export interface Account {
   name: string
@@ -320,6 +322,7 @@ export interface ASAInfo extends DeployedAssetInfo {
 // Stateful smart contract deployment information (log)
 export interface SSCInfo extends DeployedAssetInfo {
   appID: number
+  timestamp: number
 }
 
 // stateless smart contract deployment information (log)
@@ -372,7 +375,7 @@ export interface Checkpoint {
   timestamp: number
   metadata: Map<string, string>
   asa: Map<string, ASAInfo>
-  ssc: Map<string, SSCInfo>
+  ssc: Map<string, Map<Timestamp, SSCInfo>>
   dLsig: Map<string, LsigInfo>
 };
 
@@ -489,6 +492,24 @@ export interface Deployer {
     scTmplParams?: SCParams) => Promise<SSCInfo>
 
   /**
+   * Update programs(approval, clear) for a stateful smart contract.
+   * @param sender Account from which call needs to be made
+   * @param payFlags Transaction Flags
+   * @param appId ID of the application being configured or empty if creating
+   * @param newApprovalProgram New Approval Program filename
+   * @param newClearProgram New Clear Program filename
+   * @param flags Optional parameters to SSC (accounts, args..)
+   */
+  updateSSC: (
+    sender: algosdk.Account,
+    payFlags: rtypes.TxParams,
+    appId: number,
+    newApprovalProgram: string,
+    newClearProgram: string,
+    flags: rtypes.SSCOptionalFlags
+  ) => Promise<SSCInfo>
+
+  /**
    * Returns true if ASA or DelegatedLsig or SSC were deployed in any script.
    * Checks even for checkpoints which are out of scope from the execution
    * session and are not obtainable using get methods.
@@ -555,6 +576,10 @@ export interface Deployer {
   /**
    * Queries a stateful smart contract info from checkpoint. */
   getSSC: (nameApproval: string, nameClear: string) => SSCInfo | undefined
+
+  /**
+   * Queries a stateful smart contract info from checkpoint using key. */
+  getSSCfromCPKey: (key: string) => SSCInfo | undefined
 
   /**
    * Queries a delegated logic signature from checkpoint. */
