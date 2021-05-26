@@ -1,8 +1,6 @@
 import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
 import type { LogicSig, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
-import { result } from "lodash";
-import { number } from "zod";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
@@ -148,6 +146,7 @@ class DeployerBasicMode {
       let res;
       // check why map of maps doesn't work
       // map.get function doesn't returns map object
+      // store last pushed element in the map(latest timestamp value)
       for (const k in nestedMap) {
         res = nestedMap[Number(k)];
       }
