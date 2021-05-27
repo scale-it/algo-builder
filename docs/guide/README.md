@@ -118,6 +118,9 @@ A `sample-project` is provided for your reference.
 
 Further information about the `sample-project` can be found [here](https://github.com/scale-it/algo-builder/blob/master/packages/algob/sample-project/README.md)
 
+**NOTE**:
+a) Subdirectories are also supported while placing smart contract files in `/assets`. For example, you can place your pyTEAL files in `assets/pyteal/<file.py>`.
+b) If `algobpy` package is placed directly in `/assets` folder, then all it's files during compilation are ignored. Read more about usage of `algobpy` [here](https://github.com/scale-it/algo-builder/blob/master/docs/guide/py-teal.md#external-parameters-support).
 
 ### Checkpoints
 
