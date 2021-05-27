@@ -4,4 +4,4 @@ export const globalZeroAddress = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 export const MIN_UINT64 = 0n;
 export const MAX_UINT64 = 0xFFFFFFFFFFFFFFFFn;
 // mock algod credentials
-export const mockAlgod = new Algodv2("dummyToken", "dummyNetwork", 8080);
+export const mockAlgod = new Algodv2("dummyToken", "https://dummyNetwork", 8080);
