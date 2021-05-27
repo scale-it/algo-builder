@@ -142,7 +142,6 @@ class DeployerBasicMode {
   getSSCfromCPKey (key: string): SSCInfo | undefined {
     const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
     const nestedMap = resultMap.get(key);
-    // console.log(nestedMap);
     if (nestedMap) {
       return [...nestedMap][nestedMap.size - 1][1];
     } else {
