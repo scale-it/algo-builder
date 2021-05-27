@@ -300,6 +300,11 @@
   resolved "https://registry.yarnpkg.com/@types/chai/-/chai-4.2.18.tgz#0c8e298dbff8205e2266606c1ea5fbdba29b46e4"
   integrity sha512-rS27+EkB/RE1Iz3u0XtVL5q36MGDWbgYe7zWiodyKNUnthxY0rukK5V36eiUCtCisB7NN8zKYH6DO2M37qxFEQ==
 
+"@types/cookiejar@*":
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/@types/cookiejar/-/cookiejar-2.1.2.tgz#66ad9331f63fe8a3d3d9d8c6e3906dd10f6446e8"
+  integrity sha512-t73xJJrvdTjXrn4jLS9VSGRbz0nUY3cl2DMGDU48lKl+HR9dbbjW2A9r3g40VA++mQpy6uuHg33gy7du2BKpog==
+
 "@types/debug@^4.1.5":
   version "4.1.5"
   resolved "https://registry.yarnpkg.com/@types/debug/-/debug-4.1.5.tgz#b14efa8852b7768d898906613c23f688713e02cd"
@@ -412,6 +417,14 @@
   version "6.0.2"
   resolved "https://registry.yarnpkg.com/@types/sinonjs__fake-timers/-/sinonjs__fake-timers-6.0.2.tgz#3a84cf5ec3249439015e14049bd3161419bf9eae"
   integrity sha512-dIPoZ3g5gcx9zZEszaxLSVTvMReD3xxyyDnQUjA6IYDG9Ba2AV0otMPs+77sG9ojB4Qr2N2Vk5RnKeuA0X/0bg==
+
+"@types/superagent@^4.1.11":
+  version "4.1.11"
+  resolved "https://registry.yarnpkg.com/@types/superagent/-/superagent-4.1.11.tgz#4822bc64a82a0f579261a77097dbca276556c20e"
+  integrity sha512-cZkWBXZI+jESnUTp8RDGBmk1Zn2MkScP4V5bjD7DyqB7L0WNWpblh4KX5K/6aTqxFZMhfo1bhi2cwoAEDVBBJw==
+  dependencies:
+    "@types/cookiejar" "*"
+    "@types/node" "*"
 
 "@types/tmp@^0.2.0":
   version "0.2.0"
@@ -584,9 +597,10 @@ algo-msgpack-with-bigint@^2.1.0:
   resolved "https://registry.yarnpkg.com/algo-msgpack-with-bigint/-/algo-msgpack-with-bigint-2.1.1.tgz#38bb717220525b3ff42232eefdcd9efb9ad405d6"
   integrity sha512-F1tGh056XczEaEAqu7s+hlZUDWwOBT70Eq0lfMpBP2YguSQVyxRbprLq5rELXKQOyOaixTWYhMeMQMzP0U5FoQ==
 
-algosdk@algorand/js-algorand-sdk.git#9a5824782511dff1f521c68fe54d562b3872d1ae:
-  version "1.8.1"
-  resolved "https://codeload.github.com/algorand/js-algorand-sdk/tar.gz/9a5824782511dff1f521c68fe54d562b3872d1ae"
+algosdk@^1.9.1:
+  version "1.9.1"
+  resolved "https://registry.yarnpkg.com/algosdk/-/algosdk-1.9.1.tgz#bc1ba4c0f763ac2bf50b3d9da3964b43496cac80"
+  integrity sha512-sKTnovuGI5R1S2qmXSpPTS/wjgGj0+DQ0nyIui5R0TV9dPK0FBr+CL5jfjnEr0HX2QTAKUPa6bd+TgkjYMFH0A==
   dependencies:
     algo-msgpack-with-bigint "^2.1.0"
     buffer "^6.0.2"
@@ -597,6 +611,7 @@ algosdk@algorand/js-algorand-sdk.git#9a5824782511dff1f521c68fe54d562b3872d1ae:
     json-bigint "^1.0.0"
     superagent "^6.1.0"
     tweetnacl "^1.0.3"
+    url-parse "^1.5.1"
 
 ansi-colors@4.1.1, ansi-colors@^4.1.1:
   version "4.1.1"
@@ -3475,6 +3490,11 @@ query-string@^5.0.1:
     object-assign "^4.1.0"
     strict-uri-encode "^1.0.0"
 
+querystringify@^2.1.1:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/querystringify/-/querystringify-2.2.0.tgz#3345941b4153cb9d082d8eee4cda2016a9aef7f6"
+  integrity sha512-FIqgj2EUvTa7R50u0rGsyTftzjYmv/a3hO345bZNrqabNqjtgiDMgmo4mkUjd+nzU5oF3dClKqFIPUKybUyqoQ==
+
 queue-microtask@^1.2.2:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/queue-microtask/-/queue-microtask-1.2.3.tgz#4929228bbc724dfac43e0efb058caf7b6cfb6243"
@@ -3574,6 +3594,11 @@ require-main-filename@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/require-main-filename/-/require-main-filename-2.0.0.tgz#d0b329ecc7cc0f61649f62215be69af54aa8989b"
   integrity sha512-NKN5kMDylKuldxYLSUfrbo5Tuzh4hd+2E8NPPX02mZtn1VuREQToYe/ZdlJy+J3uCpfaiGF05e7B8W0iXbQHmg==
+
+requires-port@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/requires-port/-/requires-port-1.0.0.tgz#925d2601d39ac485e091cf0da5c6e694dc3dcaff"
+  integrity sha1-kl0mAdOaxIXgkc8NpcbmlNw9yv8=
 
 resolve-dir@^1.0.0, resolve-dir@^1.0.1:
   version "1.0.1"
@@ -4267,6 +4292,14 @@ url-parse-lax@^3.0.0:
   integrity sha1-FrXK/Afb42dsGxmZF3gj1lA6yww=
   dependencies:
     prepend-http "^2.0.0"
+
+url-parse@^1.5.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/url-parse/-/url-parse-1.5.1.tgz#d5fa9890af8a5e1f274a2c98376510f6425f6e3b"
+  integrity sha512-HOfCOUJt7iSYzEx/UqgtwKRMC6EU91NFhsCHMv9oM03VJcVo2Qrp8T8kI9D7amFf1cu+/3CEhgb3rF9zL7k85Q==
+  dependencies:
+    querystringify "^2.1.1"
+    requires-port "^1.0.0"
 
 url-to-options@^1.0.1:
   version "1.0.1"
