@@ -131,8 +131,29 @@ class DeployerBasicMode {
    * @param nameClear clear program name
    */
   getSSC (nameApproval: string, nameClear: string): SSCInfo | undefined {
+    return this.getSSCfromCPKey(nameApproval + "-" + nameClear);
+  }
+
+  /**
+   * Queries a stateful smart contract info from checkpoint using key.
+   * @param key Key here is clear program name appended to approval program name
+   * with hypen("-") in between (approvalProgramName-clearProgramName)
+   */
+  getSSCfromCPKey (key: string): SSCInfo | undefined {
     const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
-    return resultMap.get(nameApproval + "-" + nameClear);
+    const nestedMap: any = resultMap.get(key);
+    if (nestedMap) {
+      let res;
+      // check why map of maps doesn't work
+      // map.get function doesn't returns map object
+      // store last pushed element in the map(latest timestamp value)
+      for (const k in nestedMap) {
+        res = nestedMap[Number(k)];
+      }
+      return res;
+    } else {
+      return undefined;
+    }
   }
 
   /**
@@ -450,7 +471,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     scTmplParams?: SCParams): Promise<SSCInfo> {
     const name = approvalProgram + "-" + clearProgram;
     this.assertNoAsset(name);
-    let sscInfo = {} as any;
+    let sscInfo = {} as SSCInfo;
     try {
       sscInfo = await this.algoOp.deploySSC(
         approvalProgram, clearProgram, flags, payFlags, this.txWriter, scTmplParams);
@@ -463,6 +484,40 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 
     this.registerSSCInfo(name, sscInfo);
 
+    return sscInfo;
+  }
+
+  /**
+   * Update programs for a contract.
+   * @param sender Account from which call needs to be made
+   * @param payFlags Transaction Flags
+   * @param appId ID of the application being configured or empty if creating
+   * @param newApprovalProgram New Approval Program filename
+   * @param newClearProgram New Clear Program filename
+   * @param flags Optional parameters to SSC (accounts, args..)
+   */
+  async updateSSC (
+    sender: algosdk.Account,
+    payFlags: rtypes.TxParams,
+    appID: number,
+    newApprovalProgram: string,
+    newClearProgram: string,
+    flags: rtypes.SSCOptionalFlags
+  ): Promise<SSCInfo> {
+    const cpKey = newApprovalProgram + "-" + newClearProgram;
+
+    let sscInfo = {} as SSCInfo;
+    try {
+      sscInfo = await this.algoOp.updateSSC(sender, payFlags, appID,
+        newApprovalProgram, newClearProgram, flags, this.txWriter);
+    } catch (error) {
+      this.persistCP();
+
+      console.log(error);
+      throw error;
+    }
+
+    this.registerSSCInfo(cpKey, sscInfo);
     return sscInfo;
   }
 }
@@ -540,5 +595,30 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deploySSC"
     });
+  }
+
+  /**
+   * This functions updates SSC in the network.
+   * Note: UpdateSSC when ran in RunMode it doesn't store checkpoints
+   * @param sender Sender account
+   * @param payFlags transaction parameters
+   * @param appID application index
+   * @param newApprovalProgram new approval program name
+   * @param newClearProgram new clear program name
+   * @param flags SSC optional flags
+   */
+  async updateSSC (
+    sender: algosdk.Account,
+    payFlags: rtypes.TxParams,
+    appID: number,
+    newApprovalProgram: string,
+    newClearProgram: string,
+    flags: rtypes.SSCOptionalFlags
+  ): Promise<SSCInfo> {
+    return await this.algoOp.updateSSC(
+      sender, payFlags, appID,
+      newApprovalProgram, newClearProgram,
+      flags, this.txWriter
+    );
   }
 }

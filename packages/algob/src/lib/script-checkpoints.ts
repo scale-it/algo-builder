@@ -16,7 +16,8 @@ import {
   Checkpoints,
   Deployer,
   LsigInfo,
-  SSCInfo
+  SSCInfo,
+  Timestamp
 } from "../types";
 
 export const scriptsDirectory = "scripts";
@@ -38,14 +39,15 @@ export class CheckpointImpl implements Checkpoint {
   timestamp: number;
   metadata: Map<string, string>;
   asa: Map<string, ASAInfo>;
-  ssc: Map<string, SSCInfo>;
+  ssc: Map<string, Map<Timestamp, SSCInfo>>;
   dLsig: Map<string, LsigInfo>;
 
   constructor (metadata?: Map<string, string>) {
     this.timestamp = +new Date();
     this.metadata = (metadata === undefined ? new Map<string, string>() : metadata);
     this.asa = new Map<string, ASAInfo>();
-    this.ssc = new Map<string, SSCInfo>();
+    const mp = new Map<Timestamp, SSCInfo>();
+    this.ssc = new Map<string, typeof mp>();
     this.dLsig = new Map<string, LsigInfo>();
   }
 }
@@ -143,10 +145,21 @@ export class CheckpointRepoImpl implements CheckpointRepo {
     return this;
   }
 
+  private _ensureRegister (map: Map<string, Map<number, SSCInfo>>, name: string, info: SSCInfo): void {
+    const nestedMap = map.get(name);
+    if (nestedMap) {
+      nestedMap.set(info.timestamp, info);
+    } else {
+      const newMap = new Map<number, SSCInfo>();
+      newMap.set(info.timestamp, info);
+      map.set(name, newMap);
+    }
+  }
+
   registerSSC (networkName: string, name: string, info: SSCInfo): CheckpointRepo {
-    this._ensureNet(this.precedingCP, networkName).ssc.set(name, info);
-    this._ensureNet(this.strippedCP, networkName).ssc.set(name, info);
-    this._ensureNet(this.allCPs, networkName).ssc.set(name, info);
+    this._ensureRegister(this._ensureNet(this.precedingCP, networkName).ssc, name, info);
+    this._ensureRegister(this._ensureNet(this.strippedCP, networkName).ssc, name, info);
+    this._ensureRegister(this._ensureNet(this.allCPs, networkName).ssc, name, info);
     return this;
   }
 
@@ -215,11 +228,17 @@ export async function registerCheckpoints (
           creator: encodeAddress(txn.from.publicKey),
           txId: txn.txID(),
           appID: txConfirmation['application-index'],
-          confirmedRound: txConfirmation['confirmed-round']
+          confirmedRound: txConfirmation['confirmed-round'],
+          timestamp: Math.round(+new Date() / 1000)
         };
         if (res) {
+          const val = deployer.getSSCfromCPKey(res[0]);
+          if (val?.appID === sscInfo.appID) {
+            deployer.logTx("Updating SSC: " + res[0], txConfirmation);
+          } else {
+            deployer.logTx("Deploying SSC: " + res[0], txConfirmation);
+          }
           deployer.registerSSCInfo(res[0], sscInfo);
-          deployer.logTx("Deploying SSC: " + res[0], txConfirmation);
         }
         break;
       }

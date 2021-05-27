@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import type { LogicSig } from "algosdk";
-import { Algodv2, AssetInfo, ConfirmedTxInfo } from "algosdk";
+import { Account, Algodv2, AssetInfo, ConfirmedTxInfo } from "algosdk";
 
 import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";
@@ -24,7 +24,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 
   getAssetByID (assetIndex: number | bigint): Promise<AssetInfo> {
     return new Promise((resolve, reject) => {
-      assetIndex === 1 ? resolve(mockAssetInfo) : reject(new Error("Not implemented"));
+      assetIndex === 1n ? resolve(mockAssetInfo) : reject(new Error("Not implemented"));
     });
   }
 
@@ -75,7 +75,26 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
       creator: flags.sender.addr + "-get-address-dry-run",
       txId: "tx-id-dry-run",
       confirmedRound: -1,
-      appID: -1
+      appID: -1,
+      timestamp: 1
+    };
+  }
+
+  async updateSSC (
+    sender: Account,
+    payFlags: rtypes.TxParams,
+    appID: number,
+    newApprovalProgram: string,
+    newClearProgram: string,
+    flags: rtypes.SSCOptionalFlags,
+    txWriter: txWriter
+  ): Promise<SSCInfo> {
+    return {
+      creator: sender.addr + "-get-address-dry-run",
+      txId: "tx-id-dry-run",
+      confirmedRound: -1,
+      appID: -1,
+      timestamp: 2
     };
   }
 

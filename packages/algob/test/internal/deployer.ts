@@ -25,6 +25,7 @@ function mkASA (): rtypes.ASADef {
 
 describe("DeployerDeployMode", () => {
   let deployerCfg: DeployerConfig, env;
+  const mp = new Map<number, SSCInfo>();
 
   beforeEach(function () {
     env = mkEnv("network 123");
@@ -40,7 +41,7 @@ describe("DeployerDeployMode", () => {
       timestamp: 12345,
       metadata: new Map([["k", "v"]]),
       asa: new Map<string, ASAInfo>(),
-      ssc: new Map<string, SSCInfo>(),
+      ssc: new Map<string, typeof mp>(),
       dLsig: new Map<string, LsigInfo>()
     });
   });
@@ -62,7 +63,7 @@ describe("DeployerDeployMode", () => {
       metadata: new Map([["key 1", "val 1"],
         ["key 2", "val 2"]]),
       asa: new Map<string, ASAInfo>(),
-      ssc: new Map<string, SSCInfo>(),
+      ssc: new Map<string, typeof mp>(),
       dLsig: new Map<string, LsigInfo>()
     });
   });
@@ -73,7 +74,7 @@ describe("DeployerDeployMode", () => {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, ASAInfo>(),
-        ssc: new Map<string, SSCInfo>(),
+        ssc: new Map<string, typeof mp>(),
         dLsig: new Map<string, LsigInfo>()
       }
     };
@@ -82,7 +83,7 @@ describe("DeployerDeployMode", () => {
         timestamp: 2,
         metadata: new Map([["key 2", "data 2"]]),
         asa: new Map<string, ASAInfo>(),
-        ssc: new Map<string, SSCInfo>(),
+        ssc: new Map<string, typeof mp>(),
         dLsig: new Map<string, LsigInfo>()
       }
     };
@@ -94,14 +95,14 @@ describe("DeployerDeployMode", () => {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, ASAInfo>(),
-        ssc: new Map<string, SSCInfo>(),
+        ssc: new Map<string, typeof mp>(),
         dLsig: new Map<string, LsigInfo>()
       },
       network2: {
         timestamp: 2,
         metadata: new Map([["key 2", "data 2"]]),
         asa: new Map<string, ASAInfo>(),
-        ssc: new Map<string, SSCInfo>(),
+        ssc: new Map<string, typeof mp>(),
         dLsig: new Map<string, LsigInfo>()
       }
     });
@@ -128,6 +129,77 @@ describe("DeployerDeployMode", () => {
           assetDef: mkASA()
         }]]),
         ssc: new Map(),
+        dLsig: new Map(),
+        metadata: new Map<string, string>(),
+        timestamp: 515236
+      }
+    });
+  });
+
+  it("Should save info to checkpoint after SSC deployment", async () => {
+    const env = mkEnv("network1");
+    const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
+    const deployer = new DeployerDeployMode(deployerCfg);
+    const nestedMap = new Map<number, SSCInfo>();
+    nestedMap.set(1, {
+      creator: "addr-1-get-address-dry-run",
+      txId: "tx-id-dry-run",
+      confirmedRound: -1,
+      appID: -1,
+      timestamp: 1
+    });
+
+    const sscFlags = {
+      sender: deployer.accounts[0],
+      localInts: 1,
+      globalInts: 1,
+      localBytes: 1,
+      globalBytes: 1
+    };
+    const sscInfo = await deployer.deploySSC("app", "clear", sscFlags, {});
+    assert.deepEqual(sscInfo,
+      {
+        creator: "addr-1-get-address-dry-run",
+        txId: "tx-id-dry-run",
+        confirmedRound: -1,
+        appID: -1,
+        timestamp: 1
+      });
+
+    deployerCfg.cpData.precedingCP.network1.timestamp = 515236;
+    assert.deepEqual(deployerCfg.cpData.precedingCP, {
+      network1: {
+        asa: new Map(),
+        ssc: new Map([["app-clear", nestedMap]]),
+        dLsig: new Map(),
+        metadata: new Map<string, string>(),
+        timestamp: 515236
+      }
+    });
+
+    nestedMap.set(2, {
+      creator: "addr-1-get-address-dry-run",
+      txId: "tx-id-dry-run",
+      confirmedRound: -1,
+      appID: -1,
+      timestamp: 2
+    });
+
+    const updatedInfo = await deployer.updateSSC(deployer.accounts[0], {}, -1, "app", "clear", {});
+    assert.deepEqual(updatedInfo,
+      {
+        creator: "addr-1-get-address-dry-run",
+        txId: "tx-id-dry-run",
+        confirmedRound: -1,
+        appID: -1,
+        timestamp: 2
+      });
+
+    // should create a nested checkpoint if name is same after update
+    assert.deepEqual(deployerCfg.cpData.precedingCP, {
+      network1: {
+        asa: new Map(),
+        ssc: new Map([["app-clear", nestedMap]]),
         dLsig: new Map(),
         metadata: new Map<string, string>(),
         timestamp: 515236
@@ -210,7 +282,7 @@ describe("DeployerDeployMode", () => {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
         asa: new Map<string, ASAInfo>(),
-        ssc: new Map<string, SSCInfo>(),
+        ssc: new Map<string, typeof mp>(),
         dLsig: new Map<string, LsigInfo>([["MY_LSIG", {
           creator: "addr-1-get-address-dry-run",
           contractAddress: "ASDFGDDSSS12A",
@@ -229,7 +301,7 @@ describe("DeployerDeployMode", () => {
     const env = mkEnv(networkName);
     const cpData = new CheckpointRepoImpl()
       .registerASA(networkName, "ASA name", { creator: "ASA creator 123", txId: "", confirmedRound: 0, assetIndex: 0, assetDef: {} as rtypes.ASADef })
-      .registerSSC(networkName, "ASC name", { creator: "ASC creator 951", txId: "", confirmedRound: 0, appID: -1 })
+      .registerSSC(networkName, "ASC name", { creator: "ASC creator 951", txId: "", confirmedRound: 0, appID: -1, timestamp: 1 })
       .registerLsig(networkName, "Lsig name", { creator: "Lsig creator", contractAddress: "addr-1", lsig: {} as LogicSig })
       .putMetadata(networkName, "k", "v");
     const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
