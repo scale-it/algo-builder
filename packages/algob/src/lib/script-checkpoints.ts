@@ -254,7 +254,7 @@ export function toMap <T> (obj: {[name: string]: T}): Map<string, T> {
 };
 
 // converts objects loaded from yaml file to nested map
-export function toSSCMap <T> (obj: {[name: string]: {[timestamp: string]: T}}): Map<string, Map<number, T>> {
+export function toSSCMap <T> (obj: {[name: string]: {[timestamp: string]: T}}): Map<string, Map<Timestamp, T>> {
   const mp = new Map<string, Map<Timestamp, T>>();
   Object.keys(obj).forEach(k => {
     const nestedMp = new Map();
