@@ -3,6 +3,7 @@
 ## unreleased
 
 ### API breaking
+* Move `updateSSC` function to `deployer`
 + Rename `parseArgs` to `parse_params`
 
 ### Improvements
@@ -20,6 +21,7 @@
 ### Improvements
 * Update how error is displayed to a user
 * Add Update stateful smart contracts using execute transaction in runtime
+* Store checkpoints in nested form for SSC, added tests.
 
 Runtime:
 + added `updateApp` method.

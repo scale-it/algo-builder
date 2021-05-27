@@ -73,6 +73,7 @@
     "@types/murmurhash": "0.0.1",
     "@types/semver": "^7.2.0",
     "@types/sinon": "^9.0.4",
+    "@types/superagent": "^4.1.11",
     "@types/tmp": "^0.2.0",
     "chai": "^4.2.0",
     "glob": "^7.1.6",
@@ -81,7 +82,7 @@
   },
   "dependencies": {
     "@algo-builder/runtime": "^1.0.2",
-    "algosdk": "algorand/js-algorand-sdk.git#9a5824782511dff1f521c68fe54d562b3872d1ae",
+    "algosdk": "^1.9.1",
     "chalk": "^4.1.0",
     "debug": "^4.1.1",
     "deep-equal": "^2.0.3",
