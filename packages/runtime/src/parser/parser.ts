@@ -120,6 +120,37 @@ opCodeMap[2] = {
   asset_params_get: GetAssetDef
 };
 
+/**
+ * TEALv3 opcodes: https://developer.algorand.org/articles/introducing-teal-version-3/
+ */
+opCodeMap[3] = {
+  ...opCodeMap[2]
+
+  /*
+  assert: Assert,
+  dig: Dig,
+  swap: Swap,
+  select: Select,
+
+  // txn ops in tealv3
+  gtxnsf: Gtxnsf,
+  gtxnsa: Gtxnsa,
+
+  // bit & byte opcodes
+  getbit: Getbit,
+  setbit: Setbit,
+  getbyte: Getbyte,
+  setbyte: Setbyte,
+
+  // optimized opcodes for pushing uint64s and byte slices to the stack
+  pushint: Pushint,
+  pushbytes: Pushbytes,
+
+  // stateful op (mode = application)
+  min_balance: MinBalance
+  */
+};
+
 // list of opcodes that require one extra parameter than others: `interpreter`.
 const interpreterReqList = new Set([
   "#pragma", "arg", "bytecblock", "bytec", "intcblock", "intc", "store",
