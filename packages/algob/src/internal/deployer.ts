@@ -143,14 +143,7 @@ class DeployerBasicMode {
     const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
     const nestedMap: any = resultMap.get(key);
     if (nestedMap) {
-      let res;
-      // check why map of maps doesn't work
-      // map.get function doesn't returns map object
-      // store last pushed element in the map(latest timestamp value)
-      for (const k in nestedMap) {
-        res = nestedMap[Number(k)];
-      }
-      return res;
+      return [...nestedMap][nestedMap.size - 1][1];
     } else {
       return undefined;
     }

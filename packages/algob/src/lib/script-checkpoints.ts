@@ -253,9 +253,23 @@ export function toMap <T> (obj: {[name: string]: T}): Map<string, T> {
   return mp;
 };
 
+// converts objects loaded from yaml file to nested map
+export function toSSCMap <T> (obj: {[name: string]: {[timestamp: string]: T}}): Map<string, Map<Timestamp, T>> {
+  const mp = new Map<string, Map<Timestamp, T>>();
+  Object.keys(obj).forEach(k => {
+    const nestedMp = new Map();
+    const nestedVal = obj[k];
+    Object.keys(nestedVal).forEach(l => {
+      nestedMp.set(l, nestedVal[l]);
+    });
+    mp.set(k, nestedMp);
+  });
+  return mp;
+};
+
 function convertCPValsToMaps (cpWithObjects: Checkpoint): Checkpoint {
   cpWithObjects.asa = toMap(cpWithObjects.asa as any);
-  cpWithObjects.ssc = toMap(cpWithObjects.ssc as any);
+  cpWithObjects.ssc = toSSCMap(cpWithObjects.ssc as any);
   cpWithObjects.dLsig = toMap(cpWithObjects.dLsig as any);
   cpWithObjects.metadata = toMap(cpWithObjects.metadata as any);
   return cpWithObjects;
