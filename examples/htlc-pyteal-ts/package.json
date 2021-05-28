@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "algosdk": "algorand/js-algorand-sdk.git#9a5824782511dff1f521c68fe54d562b3872d1ae"
+    "algosdk": "^1.9.1"
   },
   "scripts": {
     "algob": "algob",
