@@ -69,6 +69,11 @@ describe("Multi-Signature Test", () => {
   let mparams: MultisigMetadata;
   let multsigaddr: string;
 
+  // note: it's better to do intializations in before, beforeAll.. hooks
+  // because cwd path (after loading env in fixture-project) is correctly
+  // initialized in these hooks
+  // eg. during new Runtime([..]).loadASAFile, path(cwd) to fetch asa.yaml file
+  // is correct.
   before(() => {
     alice = new AccountStore(10);
     john = new AccountStore(100);
