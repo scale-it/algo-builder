@@ -1,6 +1,5 @@
 # This example is provided for informational purposes only
 import sys
-sys.path.insert(0,'.')
 from algobpy.parse import parse_params
 
 from pyteal import *
