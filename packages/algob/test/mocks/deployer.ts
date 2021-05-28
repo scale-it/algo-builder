@@ -1,5 +1,5 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import type { LogicSig, LogicSigArgs } from "algosdk";
+import type { LogicSig } from "algosdk";
 import * as algosdk from "algosdk";
 
 import type {
@@ -62,6 +62,10 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
+  getSSCfromCPKey (key: string): rtypes.SSCInfo | undefined {
+    throw new Error("Not implemented");
+  }
+
   getDelegatedLsig (lsig: string): object | undefined {
     throw new Error("Not implemented");
   }
@@ -104,6 +108,17 @@ export class FakeDeployer implements Deployer {
     clearProgram: string,
     flags: rtypes.SSCDeploymentFlags,
     payFlags: rtypes.TxParams): Promise<rtypes.SSCInfo> {
+    throw new Error("Not implemented");
+  }
+
+  async updateSSC (
+    sender: algosdk.Account,
+    payFlags: rtypes.TxParams,
+    appID: number,
+    newApprovalProgram: string,
+    newClearProgram: string,
+    flags: rtypes.SSCOptionalFlags
+  ): Promise<rtypes.SSCInfo> {
     throw new Error("Not implemented");
   }
 

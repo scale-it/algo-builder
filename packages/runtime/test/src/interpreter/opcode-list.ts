@@ -19,7 +19,7 @@ import {
   Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, Return,
   Sha256, Sha512_256, Store, Sub, Substring, Substring3, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
-import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MIN_UINT8 } from "../../../src/lib/constants";
+import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8 } from "../../../src/lib/constants";
 import { convertToBuffer, stringToBytes } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
@@ -2220,7 +2220,7 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
 
       const top = stack.pop();
-      assert.equal(2n, top);
+      assert.equal(BigInt(MaxTEALVersion), top);
     });
 
     it("should push Round to stack", function () {

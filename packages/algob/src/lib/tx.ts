@@ -173,16 +173,18 @@ async function mkTx (
       break;
     }
     case rtypes.TransactionType.UpdateSSC: {
+      const cpKey = txn.newApprovalProgram + "-" + txn.newClearProgram;
       const approval = await deployer.ensureCompiled(txn.newApprovalProgram);
       const clear = await deployer.ensureCompiled(txn.newClearProgram);
       txn.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
       txn.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
+      txIdxMap.set(index, [cpKey, { total: 1, decimals: 1, unitName: "MOCK" }]);
       break;
     }
     case rtypes.TransactionType.ModifyAsset: {
       // fetch asset mutable properties from network and set them (if they are not passed)
       // before modifying asset
-      const assetInfo = await deployer.getAssetByID(txn.assetID as number);
+      const assetInfo = await deployer.getAssetByID(BigInt(txn.assetID));
       if (txn.fields.manager === "") txn.fields.manager = undefined;
       else txn.fields.manager = txn.fields.manager ?? assetInfo.params.manager;
 

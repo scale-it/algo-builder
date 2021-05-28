@@ -8,7 +8,7 @@ import { Keccak } from 'sha3';
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { compareArray } from "../lib/compare";
-import { AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
+import { AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64, MaxTEALVersion } from "../lib/constants";
 import {
   assertLen, assertOnlyDigits, convertToBuffer,
   convertToString, getEncoding, stringToBytes
@@ -38,7 +38,7 @@ export class Pragma extends Op {
     if (this.line > 1) {
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.PRAGMA_NOT_AT_FIRST_LINE, { line: line });
     }
-    if (args[0] === "version" && (args[1] === '1' || args[1] === '2')) {
+    if (args[0] === "version" && Number(args[1]) <= MaxTEALVersion) {
       this.version = Number(args[1]);
       interpreter.tealVersion = this.version;
     } else {

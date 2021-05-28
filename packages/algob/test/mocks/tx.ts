@@ -2,7 +2,7 @@ import { Algodv2, AssetInfo, ConfirmedTxInfo, SuggestedParams } from "algosdk";
 
 import { bobAcc } from "./account";
 
-export const mockAlgod = new Algodv2("dummyToken", "dummyNetwork", 8080);
+export const mockAlgod = new Algodv2("dummyToken", "https://dummyNetwork", 8080);
 
 export const mockSuggestedParam: SuggestedParams = {
   flatFee: false,

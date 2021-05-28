@@ -62,3 +62,12 @@ Currently it's possible to edit these files by hand but it may be decided to dis
 
 For more details on checkpoint parameters and their specific types please refer to `Checkpoint` type in [types.ts](https://github.com/scale-it/algo-builder/blob/master/packages/algob/src/types.ts).
 Make sure that your local `algob` version matches the version from the link.
+
+## Checkpoint storage structure for Stateful Smart Contracts(SSC)
+
+We can update SSC on algorand blockchain, therefore we store checkpoints for SSC in a nested form.
+structure for the same is:
+        `program-name-key` -> `timestamp` -> `SSCInfo`.
+Consider a case when SSC is updated with same programs, this is the case where we append to checkpoint with different timestamp, txConfirmation but same `program-name-key`.
+
+While retreiving sscInfo from checkpoints only the lastest timestamp SSCInfo is used.

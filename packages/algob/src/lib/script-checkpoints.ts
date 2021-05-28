@@ -14,7 +14,8 @@ import {
   CheckpointRepo,
   Checkpoints,
   Deployer,
-  LsigInfo
+  LsigInfo,
+  Timestamp
 } from "../types";
 
 export const scriptsDirectory = "scripts";
@@ -36,14 +37,15 @@ export class CheckpointImpl implements Checkpoint {
   timestamp: number;
   metadata: Map<string, string>;
   asa: Map<string, rtypes.ASAInfo>;
-  ssc: Map<string, rtypes.SSCInfo>;
+  ssc: Map<string, Map<Timestamp, rtypes.SSCInfo>>;
   dLsig: Map<string, LsigInfo>;
 
   constructor (metadata?: Map<string, string>) {
     this.timestamp = +new Date();
     this.metadata = (metadata === undefined ? new Map<string, string>() : metadata);
     this.asa = new Map<string, rtypes.ASAInfo>();
-    this.ssc = new Map<string, rtypes.SSCInfo>();
+    const mp = new Map<Timestamp, rtypes.SSCInfo>();
+    this.ssc = new Map<string, typeof mp>();
     this.dLsig = new Map<string, LsigInfo>();
   }
 }
@@ -141,10 +143,23 @@ export class CheckpointRepoImpl implements CheckpointRepo {
     return this;
   }
 
+  private _ensureRegister (
+    map: Map<string, Map<number, rtypes.SSCInfo>>, name: string, info: rtypes.SSCInfo
+  ): void {
+    const nestedMap = map.get(name);
+    if (nestedMap) {
+      nestedMap.set(info.timestamp, info);
+    } else {
+      const newMap = new Map<number, rtypes.SSCInfo>();
+      newMap.set(info.timestamp, info);
+      map.set(name, newMap);
+    }
+  }
+
   registerSSC (networkName: string, name: string, info: rtypes.SSCInfo): CheckpointRepo {
-    this._ensureNet(this.precedingCP, networkName).ssc.set(name, info);
-    this._ensureNet(this.strippedCP, networkName).ssc.set(name, info);
-    this._ensureNet(this.allCPs, networkName).ssc.set(name, info);
+    this._ensureRegister(this._ensureNet(this.precedingCP, networkName).ssc, name, info);
+    this._ensureRegister(this._ensureNet(this.strippedCP, networkName).ssc, name, info);
+    this._ensureRegister(this._ensureNet(this.allCPs, networkName).ssc, name, info);
     return this;
   }
 
@@ -213,11 +228,17 @@ export async function registerCheckpoints (
           creator: encodeAddress(txn.from.publicKey),
           txId: txn.txID(),
           appID: txConfirmation['application-index'],
-          confirmedRound: txConfirmation['confirmed-round']
+          confirmedRound: txConfirmation['confirmed-round'],
+          timestamp: Math.round(+new Date() / 1000)
         };
         if (res) {
+          const val = deployer.getSSCfromCPKey(res[0]);
+          if (val?.appID === sscInfo.appID) {
+            deployer.logTx("Updating SSC: " + res[0], txConfirmation);
+          } else {
+            deployer.logTx("Deploying SSC: " + res[0], txConfirmation);
+          }
           deployer.registerSSCInfo(res[0], sscInfo);
-          deployer.logTx("Deploying SSC: " + res[0], txConfirmation);
         }
         break;
       }
@@ -232,9 +253,25 @@ export function toMap <T> (obj: {[name: string]: T}): Map<string, T> {
   return mp;
 };
 
+// converts objects loaded from yaml file to nested map
+export function toSSCMap <T> (
+  obj: {[name: string]: {[timestamp: string]: T}}
+): Map<string, Map<Timestamp, T>> {
+  const mp = new Map<string, Map<Timestamp, T>>();
+  Object.keys(obj).forEach(k => {
+    const nestedMp = new Map();
+    const nestedVal = obj[k];
+    Object.keys(nestedVal).forEach(l => {
+      nestedMp.set(l, nestedVal[l]);
+    });
+    mp.set(k, nestedMp);
+  });
+  return mp;
+};
+
 function convertCPValsToMaps (cpWithObjects: Checkpoint): Checkpoint {
   cpWithObjects.asa = toMap(cpWithObjects.asa as any);
-  cpWithObjects.ssc = toMap(cpWithObjects.ssc as any);
+  cpWithObjects.ssc = toSSCMap(cpWithObjects.ssc as any);
   cpWithObjects.dLsig = toMap(cpWithObjects.dLsig as any);
   cpWithObjects.metadata = toMap(cpWithObjects.metadata as any);
   return cpWithObjects;

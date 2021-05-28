@@ -1004,6 +1004,31 @@ describe("Parser", function () {
       assert.equal(interpreter.gas, 2110); // 35 + 130 + 45 + 1900
     });
 
+    // note: cost for cryto ops for teal version 2, 3 are same
+    it("Should return correct gas cost for 'Crypto opcodes' for tealversion 3", async () => {
+      interpreter.tealVersion = 3;
+
+      let op = opcodeFromSentence(["sha256"], 1, interpreter);
+      assert.equal(interpreter.gas, 35);
+
+      interpreter.gas = 0;
+      op = opcodeFromSentence(["keccak256"], 2, interpreter);
+      assert.equal(interpreter.gas, 130);
+
+      interpreter.gas = 0;
+      op = opcodeFromSentence(["sha512_256"], 3, interpreter);
+      assert.equal(interpreter.gas, 45);
+
+      interpreter.gas = 0;
+      // eslint-disable-next-line
+      op = opcodeFromSentence(["ed25519verify"], 4, interpreter);
+      assert.equal(interpreter.gas, 1900);
+
+      interpreter.gas = 0;
+      parser(getProgram(cryptoFile), ExecutionMode.STATELESS, interpreter);
+      assert.equal(interpreter.gas, 2110); // 35 + 130 + 45 + 1900
+    });
+
     it("Should return correct gas cost for mix opcodes from teal files", async () => {
       let file = "test-file-1.teal";
       const mode = ExecutionMode.STATELESS;
