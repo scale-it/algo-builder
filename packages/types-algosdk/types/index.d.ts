@@ -594,11 +594,11 @@ declare module 'algosdk' {
     creator: string;
     total: number | bigint;
     decimals: number;
-    'default-frozen': boolean;
-    'unit-name': string;
+    defaultFrozen: boolean;
+    unitName: string;
     name: string;
     url: string;
-    'metadata-hash': string;
+    metadataHash: string;
     manager: string | undefined;
     reserve: string | undefined;
     freeze: string | undefined;

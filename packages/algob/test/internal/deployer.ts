@@ -8,7 +8,7 @@ import { DeployerDeployMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
 import { getDummyLsig } from "../../src/lib/lsig";
 import { CheckpointRepoImpl } from "../../src/lib/script-checkpoints";
-import { ASAInfo, Checkpoints, LsigInfo, SSCInfo } from "../../src/types";
+import { Checkpoints, LsigInfo } from "../../src/types";
 import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkEnv } from "../helpers/params";
 import { cleanupMutableData } from "../lib/script-checkpoints";
@@ -39,8 +39,8 @@ describe("DeployerDeployMode", () => {
     assert.deepEqual(cleanupMutableData(cpData.precedingCP["network 123"], 12345), {
       timestamp: 12345,
       metadata: new Map([["k", "v"]]),
-      asa: new Map<string, ASAInfo>(),
-      ssc: new Map<string, SSCInfo>(),
+      asa: new Map<string, rtypes.ASAInfo>(),
+      ssc: new Map<string, rtypes.SSCInfo>(),
       dLsig: new Map<string, LsigInfo>()
     });
   });
@@ -61,8 +61,8 @@ describe("DeployerDeployMode", () => {
       timestamp: 12345,
       metadata: new Map([["key 1", "val 1"],
         ["key 2", "val 2"]]),
-      asa: new Map<string, ASAInfo>(),
-      ssc: new Map<string, SSCInfo>(),
+      asa: new Map<string, rtypes.ASAInfo>(),
+      ssc: new Map<string, rtypes.SSCInfo>(),
       dLsig: new Map<string, LsigInfo>()
     });
   });
@@ -72,8 +72,8 @@ describe("DeployerDeployMode", () => {
       network1: {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
-        asa: new Map<string, ASAInfo>(),
-        ssc: new Map<string, SSCInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       }
     };
@@ -81,8 +81,8 @@ describe("DeployerDeployMode", () => {
       network2: {
         timestamp: 2,
         metadata: new Map([["key 2", "data 2"]]),
-        asa: new Map<string, ASAInfo>(),
-        ssc: new Map<string, SSCInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       }
     };
@@ -93,15 +93,15 @@ describe("DeployerDeployMode", () => {
       network1: {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
-        asa: new Map<string, ASAInfo>(),
-        ssc: new Map<string, SSCInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       },
       network2: {
         timestamp: 2,
         metadata: new Map([["key 2", "data 2"]]),
-        asa: new Map<string, ASAInfo>(),
-        ssc: new Map<string, SSCInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       }
     });
@@ -209,8 +209,8 @@ describe("DeployerDeployMode", () => {
       network1: {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
-        asa: new Map<string, ASAInfo>(),
-        ssc: new Map<string, SSCInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>([["MY_LSIG", {
           creator: "addr-1-get-address-dry-run",
           contractAddress: "ASDFGDDSSS12A",

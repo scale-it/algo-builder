@@ -39,8 +39,8 @@ export class Runtime {
       accounts: new Map<AccountAddress, AccountStoreI>(), // string represents account address
       globalApps: new Map<number, AccountAddress>(), // map of {appId: accountAddress}
       assetDefs: new Map<number, AccountAddress>(), // number represents assetId
-      assetNameId: new Map<string, ASAInfo>(),
-      appNameId: new Map<string, SSCInfo>(),
+      assetNameInfo: new Map<string, ASAInfo>(),
+      appNameInfo: new Map<string, SSCInfo>(),
       appCounter: 0, // initialize app counter with 0
       assetCounter: 0 // initialize asset counter with 0
     };
@@ -239,7 +239,7 @@ export class Runtime {
    * @param name Asset name
    */
   getAssetInfoFromName (name: string): ASAInfo | undefined {
-    return this.store.assetNameId.get(name);
+    return this.store.assetNameInfo.get(name);
   }
 
   /**
@@ -249,7 +249,7 @@ export class Runtime {
    * @param clear
    */
   getAppInfoFromName (approval: string, clear: string): SSCInfo | undefined {
-    return this.store.appNameId.get(approval + "-" + clear);
+    return this.store.appNameInfo.get(approval + "-" + clear);
   }
 
   /**
@@ -338,7 +338,7 @@ export class Runtime {
     const asset = senderAcc.addAsset(++this.store.assetCounter, name, this.loadedAssetsDefs[name]);
     this.mkAssetCreateTx(name, flags, asset);
     this.store.assetDefs.set(this.store.assetCounter, sender.addr);
-    this.store.assetNameId.set(name, {
+    this.store.assetNameInfo.set(name, {
       creator: senderAcc.address,
       assetIndex: this.store.assetCounter,
       assetDef: asset,
@@ -460,7 +460,7 @@ export class Runtime {
     const attributes = this.assertAppDefined(0, senderAcc.createdApps.get(0));
     senderAcc.createdApps.delete(0); // remove zero app from sender's account
     senderAcc.createdApps.set(this.store.appCounter, attributes);
-    this.store.appNameId.set(approvalProgram + "-" + clearProgram, {
+    this.store.appNameInfo.set(approvalProgram + "-" + clearProgram, {
       creator: senderAcc.address,
       appID: this.store.appCounter,
       txId: "tx-id",

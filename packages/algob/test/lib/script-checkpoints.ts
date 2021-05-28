@@ -13,7 +13,7 @@ import {
   toCheckpointFileName,
   toScriptFileName
 } from "../../src/lib/script-checkpoints";
-import { ASAInfo, Checkpoint, Checkpoints, LsigInfo, SSCInfo } from "../../src/types";
+import { Checkpoint, Checkpoints, LsigInfo } from "../../src/types";
 import { expectBuilderError } from "../helpers/errors";
 
 export function cleanupMutableData (netCheckpoint: Checkpoint, n: number): Checkpoint {
@@ -26,8 +26,8 @@ function createNetwork (timestamp: number): Checkpoint {
   return {
     timestamp: timestamp,
     metadata: new Map<string, string>(),
-    asa: new Map<string, ASAInfo>(),
-    ssc: new Map<string, SSCInfo>(),
+    asa: new Map<string, rtypes.ASAInfo>(),
+    ssc: new Map<string, rtypes.SSCInfo>(),
     dLsig: new Map<string, LsigInfo>()
   };
 }
@@ -319,7 +319,7 @@ describe("CheckpointRepoImpl", () => {
           confirmedRound: 0,
           assetDef: {} as rtypes.ASADef
         }]]),
-        ssc: new Map<string, SSCInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       }
     };
@@ -334,7 +334,7 @@ describe("CheckpointRepoImpl", () => {
           confirmedRound: 0,
           assetDef: {} as rtypes.ASADef
         }]]),
-        ssc: new Map<string, SSCInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       }
     };
@@ -357,8 +357,8 @@ describe("CheckpointRepoImpl", () => {
       myNetworkName: {
         timestamp: 951,
         metadata: new Map([["key", "data"]]),
-        asa: new Map<string, ASAInfo>(),
-        ssc: new Map<string, SSCInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       }
     });
@@ -376,15 +376,15 @@ describe("CheckpointRepoImpl", () => {
       myNetworkName: {
         timestamp: 531,
         metadata: new Map([["key", "data"]]),
-        asa: new Map<string, ASAInfo>(),
-        ssc: new Map<string, SSCInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       },
       myNetworkName2: {
         timestamp: 201,
         metadata: new Map([["key2", "data2"]]),
-        asa: new Map<string, ASAInfo>(),
-        ssc: new Map<string, SSCInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       }
     });
@@ -412,7 +412,7 @@ describe("CheckpointRepoImpl", () => {
           confirmedRound: 0,
           assetDef: {} as rtypes.ASADef
         }]]),
-        ssc: new Map<string, SSCInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       }
     });
@@ -433,7 +433,7 @@ describe("CheckpointRepoImpl", () => {
       network1: {
         timestamp: 123,
         metadata: new Map<string, string>(),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map([["SSC name", {
           creator: "SSC creator 951",
           txId: "",
@@ -445,8 +445,8 @@ describe("CheckpointRepoImpl", () => {
       "net 0195": {
         timestamp: 123,
         metadata: new Map([["1241 key", "345 value"]]),
-        asa: new Map<string, ASAInfo>(),
-        ssc: new Map<string, SSCInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       }
     });
@@ -457,8 +457,8 @@ describe("CheckpointRepoImpl", () => {
       network1: {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
-        asa: new Map<string, ASAInfo>(),
-        ssc: new Map<string, SSCInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       }
     };
@@ -466,8 +466,8 @@ describe("CheckpointRepoImpl", () => {
       network2: {
         timestamp: 2,
         metadata: new Map([["key 2", "data 2"]]),
-        asa: new Map<string, ASAInfo>(),
-        ssc: new Map<string, SSCInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       }
     };
@@ -479,15 +479,15 @@ describe("CheckpointRepoImpl", () => {
       network1: {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
-        asa: new Map<string, ASAInfo>(),
-        ssc: new Map<string, SSCInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       },
       network2: {
         timestamp: 2,
         metadata: new Map([["key 2", "data 2"]]),
-        asa: new Map<string, ASAInfo>(),
-        ssc: new Map<string, SSCInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       }
     });
@@ -498,8 +498,8 @@ describe("CheckpointRepoImpl", () => {
       network1: {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
-        asa: new Map<string, ASAInfo>(),
-        ssc: new Map<string, SSCInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       }
     };
@@ -514,7 +514,7 @@ describe("CheckpointRepoImpl", () => {
           confirmedRound: 0,
           assetDef: {} as rtypes.ASADef
         }]]),
-        ssc: new Map<string, SSCInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       }
     };
@@ -535,7 +535,7 @@ describe("CheckpointRepoImpl", () => {
           confirmedRound: 0,
           assetDef: {} as rtypes.ASADef
         }]]),
-        ssc: new Map<string, SSCInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       }
     });
@@ -551,7 +551,7 @@ describe("CheckpointRepoImpl", () => {
           assetDef: {} as rtypes.ASADef
         }
         ]]),
-        ssc: new Map<string, SSCInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       }
     });
@@ -566,7 +566,7 @@ describe("CheckpointRepoImpl", () => {
           confirmedRound: 0,
           assetDef: {} as rtypes.ASADef
         }]]),
-        ssc: new Map<string, SSCInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       }
     });
@@ -577,7 +577,7 @@ describe("CheckpointRepoImpl", () => {
       network1: {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map([["SSC key1", {
           creator: "SSC creator1",
           txId: "",
@@ -595,7 +595,7 @@ describe("CheckpointRepoImpl", () => {
       network1: {
         timestamp: 8,
         metadata: new Map<string, string>(),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map([["SSC key", {
           creator: "SSC creator",
           txId: "",
@@ -614,7 +614,7 @@ describe("CheckpointRepoImpl", () => {
       network1: {
         timestamp: 8,
         metadata: new Map([["key 1", "data 1"]]),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map([["SSC key", {
           creator: "SSC creator",
           txId: "",
@@ -633,7 +633,7 @@ describe("CheckpointRepoImpl", () => {
     cpData.precedingCP.network1.timestamp = 124;
     assert.deepEqual(cpData.precedingCP, {
       network1: {
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map([["SSC key", {
           creator: "SSC creator",
           txId: "",
@@ -648,7 +648,7 @@ describe("CheckpointRepoImpl", () => {
     cpData.strippedCP.network1.timestamp = 124;
     assert.deepEqual(cpData.strippedCP, {
       network1: {
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map([["SSC key", {
           creator: "SSC creator",
           txId: "",
@@ -667,8 +667,8 @@ describe("CheckpointRepoImpl", () => {
       network1: {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
-        asa: new Map<string, ASAInfo>(),
-        ssc: new Map<string, SSCInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       }
     };
@@ -676,8 +676,8 @@ describe("CheckpointRepoImpl", () => {
       network4: {
         timestamp: 4,
         metadata: new Map([["metadata 4 key", "metadata value"]]),
-        asa: new Map<string, ASAInfo>(),
-        ssc: new Map<string, SSCInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
+        ssc: new Map<string, rtypes.SSCInfo>(),
         dLsig: new Map<string, LsigInfo>()
       }
     };
@@ -737,15 +737,15 @@ describe("CheckpointRepoImpl", () => {
         network4: {
           timestamp: 4,
           metadata: new Map([["metadata 4 key", "metadata value"]]),
-          asa: new Map<string, ASAInfo>(),
-          ssc: new Map<string, SSCInfo>(),
+          asa: new Map<string, rtypes.ASAInfo>(),
+          ssc: new Map<string, rtypes.SSCInfo>(),
           dLsig: new Map<string, LsigInfo>()
         },
         "net 0195": {
           timestamp: 195,
           metadata: new Map([["1241 key", "345 value"]]),
-          asa: new Map<string, ASAInfo>(),
-          ssc: new Map<string, SSCInfo>(),
+          asa: new Map<string, rtypes.ASAInfo>(),
+          ssc: new Map<string, rtypes.SSCInfo>(),
           dLsig: new Map<string, LsigInfo>()
         }
       });
@@ -773,8 +773,8 @@ describe("CheckpointRepoImpl", () => {
         "net 0195": {
           timestamp: 195,
           metadata: new Map([["1241 key", "345 value"]]),
-          asa: new Map<string, ASAInfo>(),
-          ssc: new Map<string, SSCInfo>(),
+          asa: new Map<string, rtypes.ASAInfo>(),
+          ssc: new Map<string, rtypes.SSCInfo>(),
           dLsig: new Map<string, LsigInfo>()
         }
       });
@@ -802,8 +802,8 @@ describe("CheckpointRepoImpl", () => {
         "net 0195": {
           timestamp: 195,
           metadata: new Map([["1241 key", "345 value"]]),
-          asa: new Map<string, ASAInfo>(),
-          ssc: new Map<string, SSCInfo>(),
+          asa: new Map<string, rtypes.ASAInfo>(),
+          ssc: new Map<string, rtypes.SSCInfo>(),
           dLsig: new Map<string, LsigInfo>()
         }
       });

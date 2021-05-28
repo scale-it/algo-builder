@@ -3,17 +3,15 @@ import type { LogicSig, LogicSigArgs } from "algosdk";
 import * as algosdk from "algosdk";
 
 import type {
-  ASAInfo,
   ASCCache,
   Deployer,
   FundASCFlags,
-  LsigInfo,
-  SSCInfo
+  LsigInfo
 } from "../../src/types";
 
 export class FakeDeployer implements Deployer {
-  asa = new Map<string, ASAInfo>();
-  ssc = new Map<string, SSCInfo>();
+  asa = new Map<string, rtypes. ASAInfo>();
+  ssc = new Map<string, rtypes.SSCInfo>();
   lsig = new Map<string, LsigInfo>();
   isDeployMode = false;
   accounts = [];
@@ -24,7 +22,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  getASAInfo (name: string): ASAInfo {
+  getASAInfo (name: string): rtypes.ASAInfo {
     throw new Error("Not implemented");
   }
 
@@ -44,11 +42,11 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  registerASAInfo (name: string, asaInfo: ASAInfo): void {
+  registerASAInfo (name: string, asaInfo: rtypes.ASAInfo): void {
     throw new Error("Not implemented");
   }
 
-  registerSSCInfo (name: string, sscInfo: SSCInfo): void {
+  registerSSCInfo (name: string, sscInfo: rtypes.SSCInfo): void {
     throw new Error("Not implemented");
   }
 
@@ -60,7 +58,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  getSSC (nameApproval: string, nameClear: string): SSCInfo | undefined {
+  getSSC (nameApproval: string, nameClear: string): rtypes.SSCInfo | undefined {
     throw new Error("Not implemented");
   }
 
@@ -83,7 +81,7 @@ export class FakeDeployer implements Deployer {
     return "metadata";
   };
 
-  async deployASA (name: string, flags: rtypes.ASADeploymentFlags): Promise<ASAInfo> {
+  async deployASA (name: string, flags: rtypes.ASADeploymentFlags): Promise<rtypes.ASAInfo> {
     throw new Error("Not implemented");
   };
 
@@ -105,7 +103,7 @@ export class FakeDeployer implements Deployer {
     approvalProgram: string,
     clearProgram: string,
     flags: rtypes.SSCDeploymentFlags,
-    payFlags: rtypes.TxParams): Promise<SSCInfo> {
+    payFlags: rtypes.TxParams): Promise<rtypes.SSCInfo> {
     throw new Error("Not implemented");
   }
 

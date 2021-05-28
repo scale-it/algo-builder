@@ -75,8 +75,8 @@ export interface State {
   accounts: Map<string, AccountStoreI>
   globalApps: Map<number, string>
   assetDefs: Map<number, AccountAddress>
-  assetNameId: Map<string, ASAInfo>
-  appNameId: Map<string, SSCInfo>
+  assetNameInfo: Map<string, ASAInfo>
+  appNameInfo: Map<string, SSCInfo>
   appCounter: number
   assetCounter: number
 }

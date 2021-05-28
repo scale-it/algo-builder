@@ -444,7 +444,7 @@ export class Ctx implements Context {
           };
           this.runtime.mkAssetCreateTx(name, flags, asset);
           this.state.assetDefs.set(this.state.assetCounter, senderAcc.address);
-          this.state.assetNameId.set(name, {
+          this.state.assetNameInfo.set(name, {
             creator: senderAcc.address,
             assetIndex: this.state.assetCounter,
             assetDef: asset,
@@ -491,7 +491,7 @@ export class Ctx implements Context {
           senderAcc.createdApps.delete(0); // remove zero app from sender's account
           this.state.globalApps.delete(0); // remove zero app from context
           senderAcc.createdApps.set(this.state.appCounter, attributes);
-          this.state.appNameId.set(
+          this.state.appNameInfo.set(
             txnParam.approvalProgram + "-" + txnParam.clearProgram,
             {
               creator: senderAcc.address,

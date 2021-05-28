@@ -9,14 +9,12 @@ import YAML from "yaml";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import {
-  ASAInfo,
   AssetScriptMap,
   Checkpoint,
   CheckpointRepo,
   Checkpoints,
   Deployer,
-  LsigInfo,
-  SSCInfo
+  LsigInfo
 } from "../types";
 
 export const scriptsDirectory = "scripts";
@@ -37,15 +35,15 @@ export function toScriptFileName (filename: string): string {
 export class CheckpointImpl implements Checkpoint {
   timestamp: number;
   metadata: Map<string, string>;
-  asa: Map<string, ASAInfo>;
-  ssc: Map<string, SSCInfo>;
+  asa: Map<string, rtypes.ASAInfo>;
+  ssc: Map<string, rtypes.SSCInfo>;
   dLsig: Map<string, LsigInfo>;
 
   constructor (metadata?: Map<string, string>) {
     this.timestamp = +new Date();
     this.metadata = (metadata === undefined ? new Map<string, string>() : metadata);
-    this.asa = new Map<string, ASAInfo>();
-    this.ssc = new Map<string, SSCInfo>();
+    this.asa = new Map<string, rtypes.ASAInfo>();
+    this.ssc = new Map<string, rtypes.SSCInfo>();
     this.dLsig = new Map<string, LsigInfo>();
   }
 }
@@ -136,14 +134,14 @@ export class CheckpointRepoImpl implements CheckpointRepo {
     return undefined;
   }
 
-  registerASA (networkName: string, name: string, info: ASAInfo): CheckpointRepo {
+  registerASA (networkName: string, name: string, info: rtypes.ASAInfo): CheckpointRepo {
     this._ensureNet(this.precedingCP, networkName).asa.set(name, info);
     this._ensureNet(this.strippedCP, networkName).asa.set(name, info);
     this._ensureNet(this.allCPs, networkName).asa.set(name, info);
     return this;
   }
 
-  registerSSC (networkName: string, name: string, info: SSCInfo): CheckpointRepo {
+  registerSSC (networkName: string, name: string, info: rtypes.SSCInfo): CheckpointRepo {
     this._ensureNet(this.precedingCP, networkName).ssc.set(name, info);
     this._ensureNet(this.strippedCP, networkName).ssc.set(name, info);
     this._ensureNet(this.allCPs, networkName).ssc.set(name, info);
@@ -197,7 +195,7 @@ export async function registerCheckpoints (
       case 'acfg': {
         txConfirmation = await deployer.waitForConfirmation(txn.txID());
         if (res) {
-          const asaInfo: ASAInfo = {
+          const asaInfo: rtypes.ASAInfo = {
             creator: encodeAddress(txn.from.publicKey),
             txId: txn.txID(),
             assetIndex: txConfirmation["asset-index"],
@@ -211,7 +209,7 @@ export async function registerCheckpoints (
       }
       case 'appl': {
         txConfirmation = await deployer.waitForConfirmation(txn.txID());
-        const sscInfo: SSCInfo = {
+        const sscInfo: rtypes.SSCInfo = {
           creator: encodeAddress(txn.from.publicKey),
           txId: txn.txID(),
           appID: txConfirmation['application-index'],
