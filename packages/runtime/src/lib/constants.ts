@@ -1,3 +1,5 @@
+import { AssetDefEnc, StateSchemaEnc, TxnEncodedObj } from "algosdk";
+
 export const MIN_UINT64 = 0n;
 export const MAX_UINT64 = 0xFFFFFFFFFFFFFFFFn;
 export const MAX_UINT8 = 255;
@@ -6,6 +8,7 @@ export const DEFAULT_STACK_ELEM = 0n;
 export const MAX_CONCAT_SIZE = 4096;
 export const ALGORAND_MIN_TX_FEE = 1000;
 export const ALGORAND_ACCOUNT_MIN_BALANCE = 1e6; // 1 ALGO
+export const MaxTEALVersion = 3;
 
 // values taken from: https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
 // minimum balance costs (in microalgos) for ssc schema
@@ -28,14 +31,18 @@ const zeroAddress = new Uint8Array(32);
 const zeroUint64 = 0n;
 const zeroByte = new Uint8Array(0);
 
+// keys with value as null does not represent a txn/global field, these are handled explicitly
+// in txn.ts using switch
+type keyOfEncTx = keyof TxnEncodedObj | keyof AssetDefEnc | keyof StateSchemaEnc;
+
 // https://developer.algorand.org/docs/reference/teal/opcodes/#txn
 // transaction fields supported by teal v1
-export const TxnFields: {[key: number]: {[key: string]: any}} = {
+export const TxnFields: {[key: number]: {[key: string]: keyOfEncTx | null }} = {
   1: {
     Sender: 'snd',
     Fee: 'fee',
     FirstValid: 'fv',
-    FirstValidTime: '',
+    FirstValidTime: null,
     LastValid: 'lv',
     Note: 'note',
     Lease: 'lx',
@@ -48,14 +55,14 @@ export const TxnFields: {[key: number]: {[key: string]: any}} = {
     VoteLast: 'votelst',
     VoteKeyDilution: 'votekd',
     Type: 'type',
-    TypeEnum: '',
+    TypeEnum: null,
     XferAsset: 'xaid',
     AssetAmount: 'aamt',
     AssetSender: 'asnd',
     AssetReceiver: 'arcv',
     AssetCloseTo: 'aclose',
-    GroupIndex: '',
-    TxID: ''
+    GroupIndex: null,
+    TxID: null
   }
 };
 
@@ -65,9 +72,9 @@ TxnFields[2] = {
   ApplicationID: 'apid',
   OnCompletion: 'apan',
   ApplicationArgs: 'apaa',
-  NumAppArgs: '',
+  NumAppArgs: null,
   Accounts: 'apat',
-  NumAccounts: '',
+  NumAccounts: null,
   ApprovalProgram: 'apap',
   ClearStateProgram: 'apsu',
   RekeyTo: 'rekey',
@@ -86,6 +93,18 @@ TxnFields[2] = {
   FreezeAsset: 'faid',
   FreezeAssetAccount: 'fadd',
   FreezeAssetFrozen: 'afrz'
+};
+
+TxnFields[3] = {
+  ...TxnFields[2],
+  Assets: 'apas',
+  NumAssets: null,
+  Applications: 'apfa',
+  NumApplications: null,
+  GlobalNumUint: 'nui',
+  GlobalNumByteSlice: 'nbs',
+  LocalNumUint: 'nui',
+  LocalNumByteSlice: 'nbs'
 };
 
 export const TxFieldDefaults: {[key: string]: any} = {
@@ -134,7 +153,15 @@ export const TxFieldDefaults: {[key: string]: any} = {
   ConfigAssetClawback: zeroAddress,
   FreezeAsset: zeroUint64,
   FreezeAssetAccount: zeroAddress,
-  FreezeAssetFrozen: zeroUint64
+  FreezeAssetFrozen: zeroUint64,
+  Assets: zeroByte,
+  NumAssets: zeroUint64,
+  Applications: zeroByte,
+  NumApplications: zeroUint64,
+  GlobalNumUint: zeroUint64,
+  GlobalNumByteSlice: zeroUint64,
+  LocalNumUint: zeroUint64,
+  LocalNumByteSlice: zeroUint64
 };
 
 export const AssetParamMap: {[key: string]: string} = {
@@ -154,7 +181,7 @@ export const AssetParamMap: {[key: string]: string} = {
 export const reDigit = /^\d+$/;
 
 /** is Base64 regex
- * * ^                          # Start of input
+ * ^                          # Start of input
  * ([0-9a-zA-Z+/]{4})*        # Groups of 4 valid characters decode
  *                            # to 24 bits of data for each group
  * (                          # Either ending with:
@@ -178,7 +205,7 @@ export const GlobalFields: {[key: number]: {[key: string]: any}} = { // teal ver
     MinBalance: 10000,
     MaxTxnLife: 1000,
     ZeroAddress: zeroAddress,
-    GroupSize: ''
+    GroupSize: null
   }
 };
 
@@ -187,10 +214,16 @@ export const GlobalFields: {[key: number]: {[key: string]: any}} = { // teal ver
 // round and timestamp
 GlobalFields[2] = {
   ...GlobalFields[1],
-  LogicSigVersion: 2, // LogicSigVersion >= 2
+  LogicSigVersion: MaxTEALVersion,
   Round: 1,
   LatestTimestamp: 1,
-  CurrentApplicationID: ''
+  CurrentApplicationID: null
+};
+
+// global fields supported by tealv3
+GlobalFields[3] = {
+  ...GlobalFields[2],
+  CreatorAddress: null
 };
 
 // creating map for opcodes whose cost is other than 1
@@ -203,6 +236,7 @@ export const OpGasCost: {[key: number]: {[key: string]: number}} = { // version 
     ed25519verify: 1900
   }
 };
+
 // v2 opcodes cost
 OpGasCost[2] = {
   ...OpGasCost[1], // includes all v1 opcodes
@@ -210,3 +244,9 @@ OpGasCost[2] = {
   sha512_256: 45,
   keccak256: 130
 };
+
+/**
+ * In tealv3, cost of crypto opcodes are same as v2.
+ * All other opcodes have cost 1
+ */
+OpGasCost[3] = { ...OpGasCost[2] };
