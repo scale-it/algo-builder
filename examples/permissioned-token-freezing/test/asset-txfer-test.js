@@ -39,9 +39,9 @@ describe('Test for transferring asset using custom logic', function () {
     assetDef = runtime.getAssetDef(assetId);
 
     assert.equal(assetDef.creator, alice.address);
-    assert.equal(assetDef['default-frozen'], true);
+    assert.equal(assetDef.defaultFrozen, true);
     assert.equal(assetDef.total, 1000000);
-    assert.equal(assetDef['unit-name'], 'GLD');
+    assert.equal(assetDef.unitName, 'GLD');
     assert.equal(assetDef.manager, alice.address);
     assert.equal(assetDef.clawback, alice.address);
 

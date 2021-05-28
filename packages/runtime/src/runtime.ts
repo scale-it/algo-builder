@@ -464,7 +464,8 @@ export class Runtime {
       creator: senderAcc.address,
       appID: this.store.appCounter,
       txId: "tx-id",
-      confirmedRound: this.round
+      confirmedRound: this.round,
+      timestamp: Math.round(+new Date() / 1000)
     });
 
     return this.store.appCounter;

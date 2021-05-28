@@ -497,7 +497,8 @@ export class Ctx implements Context {
               creator: senderAcc.address,
               appID: this.state.appCounter,
               txId: "tx-id",
-              confirmedRound: this.runtime.getRound()
+              confirmedRound: this.runtime.getRound(),
+              timestamp: Math.round(+new Date() / 1000)
             }
           );
           break;
