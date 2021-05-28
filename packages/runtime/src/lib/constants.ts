@@ -181,7 +181,7 @@ export const AssetParamMap: {[key: string]: string} = {
 export const reDigit = /^\d+$/;
 
 /** is Base64 regex
- * * ^                        # Start of input
+ * ^                          # Start of input
  * ([0-9a-zA-Z+/]{4})*        # Groups of 4 valid characters decode
  *                            # to 24 bits of data for each group
  * (                          # Either ending with:
@@ -214,7 +214,7 @@ export const GlobalFields: {[key: number]: {[key: string]: any}} = { // teal ver
 // round and timestamp
 GlobalFields[2] = {
   ...GlobalFields[1],
-  LogicSigVersion: MaxLogicSigVersion, // LogicSigVersion >= 2
+  LogicSigVersion: MaxLogicSigVersion,
   Round: 1,
   LatestTimestamp: 1,
   CurrentApplicationID: null
