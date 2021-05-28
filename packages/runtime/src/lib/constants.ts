@@ -8,7 +8,7 @@ export const DEFAULT_STACK_ELEM = 0n;
 export const MAX_CONCAT_SIZE = 4096;
 export const ALGORAND_MIN_TX_FEE = 1000;
 export const ALGORAND_ACCOUNT_MIN_BALANCE = 1e6; // 1 ALGO
-export const MaxLogicSigVersion = 3;
+export const MaxTEALVersion = 3;
 
 // values taken from: https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
 // minimum balance costs (in microalgos) for ssc schema
@@ -214,7 +214,7 @@ export const GlobalFields: {[key: number]: {[key: string]: any}} = { // teal ver
 // round and timestamp
 GlobalFields[2] = {
   ...GlobalFields[1],
-  LogicSigVersion: MaxLogicSigVersion,
+  LogicSigVersion: MaxTEALVersion,
   Round: 1,
   LatestTimestamp: 1,
   CurrentApplicationID: null
