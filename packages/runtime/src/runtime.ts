@@ -13,8 +13,8 @@ import { encodeNote, getFromAddress, mkTransaction } from "./lib/txn";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import {
-  AccountAddress, AccountStoreI, ASADefs, ASADeploymentFlags, AssetHoldingM, Context, ExecParams,
-  ExecutionMode, SignType, SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
+  AccountAddress, AccountStoreI, ASADefs, ASADeploymentFlags, ASAInfo, AssetHoldingM, Context, ExecParams,
+  ExecutionMode, SignType, SSCAttributesM, SSCDeploymentFlags, SSCInfo, SSCOptionalFlags,
   StackElem, State, TransactionType, Txn, TxParams
 } from "./types";
 
@@ -39,8 +39,8 @@ export class Runtime {
       accounts: new Map<AccountAddress, AccountStoreI>(), // string represents account address
       globalApps: new Map<number, AccountAddress>(), // map of {appId: accountAddress}
       assetDefs: new Map<number, AccountAddress>(), // number represents assetId
-      assetNameId: new Map<string, number>(),
-      appNameId: new Map<string, number>(),
+      assetNameId: new Map<string, ASAInfo>(),
+      appNameId: new Map<string, SSCInfo>(),
       appCounter: 0, // initialize app counter with 0
       assetCounter: 0 // initialize asset counter with 0
     };
@@ -238,7 +238,7 @@ export class Runtime {
    * Returns undefined if asset is not found.
    * @param name Asset name
    */
-  getAssetIdFromName (name: string): number | undefined {
+  getAssetInfoFromName (name: string): ASAInfo | undefined {
     return this.store.assetNameId.get(name);
   }
 
@@ -248,7 +248,7 @@ export class Runtime {
    * @param approval
    * @param clear
    */
-  getAppIdFromName (approval: string, clear: string): number | undefined {
+  getAppInfoFromName (approval: string, clear: string): SSCInfo | undefined {
     return this.store.appNameId.get(approval + "-" + clear);
   }
 
@@ -312,15 +312,15 @@ export class Runtime {
       encodeNote(flags.note, flags.noteb64),
       asaDef.total,
       asaDef.decimals,
-      asaDef["default-frozen"],
+      asaDef.defaultFrozen,
       asaDef.manager !== "" ? asaDef.manager : undefined,
       asaDef.reserve !== "" ? asaDef.reserve : undefined,
       asaDef.freeze !== "" ? asaDef.freeze : undefined,
       asaDef.clawback !== "" ? asaDef.clawback : undefined,
-      asaDef["unit-name"],
+      asaDef.unitName,
       name,
       asaDef.url,
-      asaDef["metadata-hash"],
+      asaDef.metadataHash,
       mockSuggestedParams(flags, this.round)
     );
   }
@@ -338,7 +338,13 @@ export class Runtime {
     const asset = senderAcc.addAsset(++this.store.assetCounter, name, this.loadedAssetsDefs[name]);
     this.mkAssetCreateTx(name, flags, asset);
     this.store.assetDefs.set(this.store.assetCounter, sender.addr);
-    this.store.assetNameId.set(name, this.store.assetCounter);
+    this.store.assetNameId.set(name, {
+      creator: senderAcc.address,
+      assetIndex: this.store.assetCounter,
+      assetDef: asset,
+      txId: "tx-id",
+      confirmedRound: this.round
+    });
 
     this.optIntoASA(this.store.assetCounter, sender.addr, {}); // opt-in for creator
     return this.store.assetCounter;
@@ -361,7 +367,7 @@ export class Runtime {
       amount: address === creatorAddr ? BigInt(assetDef.total) : 0n, // for creator opt-in amount is total assets
       'asset-id': assetIndex,
       creator: creatorAddr,
-      'is-frozen': address === creatorAddr ? false : assetDef["default-frozen"]
+      'is-frozen': address === creatorAddr ? false : assetDef.defaultFrozen
     };
 
     const account = this.getAccount(address);
@@ -454,7 +460,12 @@ export class Runtime {
     const attributes = this.assertAppDefined(0, senderAcc.createdApps.get(0));
     senderAcc.createdApps.delete(0); // remove zero app from sender's account
     senderAcc.createdApps.set(this.store.appCounter, attributes);
-    this.store.appNameId.set(approvalProgram + "-" + clearProgram, this.store.appCounter);
+    this.store.appNameId.set(approvalProgram + "-" + clearProgram, {
+      creator: senderAcc.address,
+      appID: this.store.appCounter,
+      txId: "tx-id",
+      confirmedRound: this.round
+    });
 
     return this.store.appCounter;
   }

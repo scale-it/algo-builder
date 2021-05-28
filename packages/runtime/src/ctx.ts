@@ -150,7 +150,7 @@ export class Ctx implements Context {
       amount: address === creatorAddr ? BigInt(assetDef.total) : 0n, // for creator opt-in amount is total assets
       'asset-id': assetIndex,
       creator: creatorAddr,
-      'is-frozen': address === creatorAddr ? false : assetDef["default-frozen"]
+      'is-frozen': address === creatorAddr ? false : assetDef.defaultFrozen
     };
 
     const account = this.getAccount(address);
@@ -444,7 +444,13 @@ export class Ctx implements Context {
           };
           this.runtime.mkAssetCreateTx(name, flags, asset);
           this.state.assetDefs.set(this.state.assetCounter, senderAcc.address);
-          this.state.assetNameId.set(name, this.state.assetCounter);
+          this.state.assetNameId.set(name, {
+            creator: senderAcc.address,
+            assetIndex: this.state.assetCounter,
+            assetDef: asset,
+            txId: "tx-id",
+            confirmedRound: this.runtime.getRound()
+          });
 
           this.optIntoASA(this.state.assetCounter, senderAcc.address, {}); // opt-in for creator
           break;
@@ -487,7 +493,12 @@ export class Ctx implements Context {
           senderAcc.createdApps.set(this.state.appCounter, attributes);
           this.state.appNameId.set(
             txnParam.approvalProgram + "-" + txnParam.clearProgram,
-            this.state.appCounter
+            {
+              creator: senderAcc.address,
+              appID: this.state.appCounter,
+              txId: "tx-id",
+              confirmedRound: this.runtime.getRound()
+            }
           );
           break;
         }

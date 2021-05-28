@@ -108,20 +108,19 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
   it("Should opt-in to asset, through execute transaction", () => {
     setupAsset();
     syncAccounts();
-    const asset = runtime.getAssetIdFromName('gold');
-    if (asset) {
-      const tx: ExecParams[] = [
-        {
-          type: TransactionType.OptInASA,
-          sign: SignType.SecretKey,
-          fromAccount: alice.account,
-          assetID: asset,
-          payFlags: { totalFee: 1000 }
-        }
-      ];
+    const assetInfo = runtime.getAssetInfoFromName('gold');
+    assert.isDefined(assetInfo);
+    const tx: ExecParams[] = [
+      {
+        type: TransactionType.OptInASA,
+        sign: SignType.SecretKey,
+        fromAccount: alice.account,
+        assetID: assetInfo?.assetIndex as number,
+        payFlags: { totalFee: 1000 }
+      }
+    ];
 
-      runtime.executeTx(tx);
-    }
+    runtime.executeTx(tx);
   });
 
   it("should execute group of (payment + app creation) successfully", () => {
@@ -184,26 +183,25 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
     );
 
     // verify app doesn't exist in map
-    const res = runtime.getAppIdFromName(approvalProgram, clearProgram);
+    const res = runtime.getAppInfoFromName(approvalProgram, clearProgram);
     assert.isUndefined(res);
   });
 
   it("Should opt-in to app, through execute transaction", () => {
     setupApp();
     syncAccounts();
-    const appId = runtime.getAppIdFromName(approvalProgram, clearProgram);
-    if (appId) {
-      const tx: ExecParams[] = [
-        {
-          type: TransactionType.OptInSSC,
-          sign: SignType.SecretKey,
-          fromAccount: alice.account,
-          appID: appId,
-          payFlags: { totalFee: 1000 }
-        }
-      ];
+    const appInfo = runtime.getAppInfoFromName(approvalProgram, clearProgram);
+    assert.isDefined(appInfo);
+    const tx: ExecParams[] = [
+      {
+        type: TransactionType.OptInSSC,
+        sign: SignType.SecretKey,
+        fromAccount: alice.account,
+        appID: appInfo?.appID as number,
+        payFlags: { totalFee: 1000 }
+      }
+    ];
 
-      runtime.executeTx(tx);
-    }
+    runtime.executeTx(tx);
   });
 });
