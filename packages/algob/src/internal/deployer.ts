@@ -8,15 +8,13 @@ import { getDummyLsig, getLsig } from "../lib/lsig";
 import { blsigExt, loadBinaryLsig, readMsigFromFile } from "../lib/msig";
 import { persistCheckpoint } from "../lib/script-checkpoints";
 import type {
-  ASAInfo,
   ASCCache,
   CheckpointRepo,
   Deployer,
   FundASCFlags,
   LsigInfo,
   RuntimeEnv,
-  SCParams,
-  SSCInfo
+  SCParams
 } from "../types";
 import { BuilderError } from "./core/errors";
 import { ERRORS } from "./core/errors-list";
@@ -46,7 +44,7 @@ class DeployerBasicMode {
     return this.runtimeEnv.network.name;
   }
 
-  getASAInfo (name: string): ASAInfo {
+  getASAInfo (name: string): rtypes.ASAInfo {
     const found = this.asa.get(name);
     if (!found) {
       throw new BuilderError(
@@ -89,7 +87,7 @@ class DeployerBasicMode {
     return this.cpData.isDefined(this.networkName, name);
   }
 
-  get asa (): Map<string, ASAInfo> {
+  get asa (): Map<string, rtypes.ASAInfo> {
     return this.cpData.precedingCP[this.networkName]?.asa ?? new Map();
   }
 
@@ -130,7 +128,7 @@ class DeployerBasicMode {
    * @param nameApproval Approval program name
    * @param nameClear clear program name
    */
-  getSSC (nameApproval: string, nameClear: string): SSCInfo | undefined {
+  getSSC (nameApproval: string, nameClear: string): rtypes.SSCInfo | undefined {
     return this.getSSCfromCPKey(nameApproval + "-" + nameClear);
   }
 
@@ -139,7 +137,7 @@ class DeployerBasicMode {
    * @param key Key here is clear program name appended to approval program name
    * with hypen("-") in between (approvalProgramName-clearProgramName)
    */
-  getSSCfromCPKey (key: string): SSCInfo | undefined {
+  getSSCfromCPKey (key: string): rtypes.SSCInfo | undefined {
     const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
     const nestedMap: any = resultMap.get(key);
     if (nestedMap) {
@@ -334,14 +332,14 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   /**
    * Register ASA Info in checkpoints
    */
-  registerASAInfo (asaName: string, asaInfo: ASAInfo): void {
+  registerASAInfo (asaName: string, asaInfo: rtypes.ASAInfo): void {
     this.cpData.registerASA(this.networkName, asaName, asaInfo);
   }
 
   /**
    * Register SSC Info in checkpoints
    */
-  registerSSCInfo (sscName: string, sscInfo: SSCInfo): void {
+  registerSSCInfo (sscName: string, sscInfo: rtypes.SSCInfo): void {
     this.cpData.registerSSC(this.networkName, sscName, sscInfo);
   }
 
@@ -356,7 +354,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     name: string,
     flags: rtypes.ASADeploymentFlags,
     asaParams?: Partial<rtypes.ASADef>
-  ): Promise<ASAInfo> {
+  ): Promise<rtypes.ASAInfo> {
     const asaDef = overrideASADef(this.accountsByName, this.loadedAsaDefs[name], asaParams);
 
     if (asaDef === undefined) {
@@ -368,7 +366,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
         });
     }
     this.assertNoAsset(name);
-    let asaInfo = {} as ASAInfo;
+    let asaInfo = {} as rtypes.ASAInfo;
     try {
       asaInfo = await this.algoOp.deployASA(
         name, asaDef, flags, this.accountsByName, this.txWriter);
@@ -461,10 +459,10 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     clearProgram: string,
     flags: rtypes.SSCDeploymentFlags,
     payFlags: rtypes.TxParams,
-    scTmplParams?: SCParams): Promise<SSCInfo> {
+    scTmplParams?: SCParams): Promise<rtypes.SSCInfo> {
     const name = approvalProgram + "-" + clearProgram;
     this.assertNoAsset(name);
-    let sscInfo = {} as SSCInfo;
+    let sscInfo = {} as rtypes.SSCInfo;
     try {
       sscInfo = await this.algoOp.deploySSC(
         approvalProgram, clearProgram, flags, payFlags, this.txWriter, scTmplParams);
@@ -496,10 +494,10 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     newApprovalProgram: string,
     newClearProgram: string,
     flags: rtypes.SSCOptionalFlags
-  ): Promise<SSCInfo> {
+  ): Promise<rtypes.SSCInfo> {
     const cpKey = newApprovalProgram + "-" + newClearProgram;
 
-    let sscInfo = {} as SSCInfo;
+    let sscInfo = {} as rtypes.SSCInfo;
     try {
       sscInfo = await this.algoOp.updateSSC(sender, payFlags, appID,
         newApprovalProgram, newClearProgram, flags, this.txWriter);
@@ -535,13 +533,13 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     });
   }
 
-  registerASAInfo (name: string, asaInfo: ASAInfo): void {
+  registerASAInfo (name: string, asaInfo: rtypes.ASAInfo): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "registerASAInfo"
     });
   }
 
-  registerSSCInfo (name: string, sscInfo: SSCInfo): void {
+  registerSSCInfo (name: string, sscInfo: rtypes.SSCInfo): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "registerSSCInfo"
     });
@@ -559,7 +557,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     });
   }
 
-  async deployASA (_name: string, _flags: rtypes.ASADeploymentFlags): Promise<ASAInfo> {
+  async deployASA (_name: string, _flags: rtypes.ASADeploymentFlags): Promise<rtypes.ASAInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployASA"
     });
@@ -584,7 +582,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     clearProgram: string,
     flags: rtypes.SSCDeploymentFlags,
     payFlags: rtypes.TxParams,
-    scInitParam?: unknown): Promise<SSCInfo> {
+    scInitParam?: unknown): Promise<rtypes.SSCInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deploySSC"
     });
@@ -607,7 +605,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     newApprovalProgram: string,
     newClearProgram: string,
     flags: rtypes.SSCOptionalFlags
-  ): Promise<SSCInfo> {
+  ): Promise<rtypes.SSCInfo> {
     return await this.algoOp.updateSSC(
       sender, payFlags, appID,
       newApprovalProgram, newClearProgram,

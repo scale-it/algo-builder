@@ -2040,7 +2040,7 @@ export class GetAssetDef extends Op {
           value = BigInt(AssetDefinition.decimals);
           break;
         case "AssetDefaultFrozen":
-          value = AssetDefinition["default-frozen"] ? 1n : 0n;
+          value = AssetDefinition.defaultFrozen ? 1n : 0n;
           break;
         default:
           def = AssetDefinition[s] as string;

@@ -167,11 +167,11 @@ export const TxFieldDefaults: {[key: string]: any} = {
 export const AssetParamMap: {[key: string]: string} = {
   AssetTotal: 'total', // Total number of units of this asset
   AssetDecimals: 'decimals', // See AssetDef.Decimals
-  AssetDefaultFrozen: 'default-frozen', // Frozen by default or not
-  AssetUnitName: 'unit-name', // Asset unit name
+  AssetDefaultFrozen: 'defaultFrozen', // Frozen by default or not
+  AssetUnitName: 'unitName', // Asset unit name
   AssetName: 'name', // Asset name
   AssetURL: 'url', // URL with additional info about the asset
-  AssetMetadataHash: 'metadata-hash', // Arbitrary commitment
+  AssetMetadataHash: 'metadataHash', // Arbitrary commitment
   AssetManager: 'manager', // Manager commitment
   AssetReserve: 'reserve', // Reserve address
   AssetFreeze: 'freeze', // Freeze address
