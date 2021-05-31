@@ -1,3 +1,5 @@
+import { BuilderError } from "../../errors/errors";
+import { ERRORS } from "../../errors/errors-list";
 import { cmpStr } from "../../lib/comparators";
 import {
   ParamDefinition,
@@ -6,8 +8,6 @@ import {
   ParamDefinitionsMap,
   TasksMap
 } from "../../types";
-import { BuilderError } from "../core/errors";
-import { ERRORS } from "../core/errors-list";
 import { ArgumentsParser } from "./arguments-parser";
 
 const getMax = (a: number, b: number): number => Math.max(a, b);

@@ -33,7 +33,7 @@ export const ERROR_RANGES = {
   SCRIPT: { min: 900, max: 999, title: "Script related errors" }
 };
 
-const generalErrors = {
+export const generalErrors = {
   NOT_INSIDE_PROJECT: {
     number: 1,
     message: "You are not inside an algob project.",
@@ -152,7 +152,7 @@ Please check algob output for more details.`
   }
 };
 
-const networkErrors = {
+export const networkErrors = {
   CONFIG_NOT_FOUND: {
     number: 100,
     message: "Network %network% doesn't exist",
@@ -245,7 +245,7 @@ Try using another mnemonic or deriving less keys.`
   }
 };
 
-const taskDefErrors = {
+export const taskDefErrors = {
   PARAM_AFTER_VARIADIC: {
     number: 200,
     message:
@@ -373,7 +373,7 @@ Please double check your task definitions.`
   }
 };
 
-const argumentErrors = {
+export const argumentErrors = {
   INVALID_ENV_VAR_VALUE: {
     number: 300,
     message: "Invalid environment variable %varName%'s value: %value%",
@@ -473,7 +473,7 @@ Please double check how you invoked algob or run your task.`
   }
 };
 
-const taskErrors = {
+export const taskErrors = {
   RUN_FILES_NOT_FOUND: {
     number: 601,
     message: "Scripts don't exist: %scripts%.",
@@ -598,7 +598,7 @@ Please check your directory`
   }
 };
 
-const pluginErrors = {
+export const pluginErrors = {
   NOT_INSTALLED: {
     number: 800,
     message: `Plugin %plugin% is not installed.
@@ -638,7 +638,7 @@ Please use \`usePlugin(npm-plugin-package)\` instead.`
   }
 };
 
-const accountErrors = {
+export const accountErrors = {
   MNEMONIC_ADDR_MISSMATCH: {
     number: 400,
     message: `Please use same address as the one specified in the mnemonic account (name: "%name%", addr: "%addr%", mnemonic: "%mnemonic%").`,
@@ -672,7 +672,7 @@ const accountErrors = {
 
 };
 
-const algorandNode = {
+export const algorandNode = {
   BAD_REQUEST: {
     number: 410,
     message: `status_code=%status%,
@@ -689,7 +689,7 @@ context=%ctx%`,
   }
 };
 
-const kmdNode = {
+export const kmdNode = {
   CONNECTION: {
     number: 440,
     message: `Cannot connect to the KMD, context: %ctx%.
@@ -708,7 +708,7 @@ Context: %ctx%`,
   }
 };
 
-const scriptErrors = {
+export const scriptErrors = {
   ASA_OPT_IN_ACCOUNT_INSUFFICIENT_BALANCE: {
     number: 900,
     message: `Account '%accountName%' has insufficient usable balance (%balance% out of %requiredBalance%) to opt-in to ASA '%asaName%'.`,
@@ -732,7 +732,7 @@ Remove the account from the optInAccNames in asa.yaml`
   }
 };
 
-const pyTealErrors = {
+export const pyTealErrors = {
   PYTEAL_FILE_ERROR: {
     number: 450,
     message: `PYTEAL PARSE ERROR: '%filename%'.

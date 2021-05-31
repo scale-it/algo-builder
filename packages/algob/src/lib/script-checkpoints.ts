@@ -6,8 +6,8 @@ import * as fs from "fs";
 import path from "path";
 import YAML from "yaml";
 
-import { BuilderError } from "../internal/core/errors";
-import { ERRORS } from "../internal/core/errors-list";
+import { BuilderError } from "../errors/errors";
+import { ERRORS } from "../errors/errors-list";
 import {
   ASAInfo,
   AssetScriptMap,
@@ -254,7 +254,8 @@ export function toMap <T> (obj: {[name: string]: T}): Map<string, T> {
 };
 
 // converts objects loaded from yaml file to nested map
-export function toSSCMap <T> (obj: {[name: string]: {[timestamp: string]: T}}): Map<string, Map<Timestamp, T>> {
+export function toSSCMap <T> (obj: {[name: string]: {[timestamp: string]: T}}):
+Map<string, Map<Timestamp, T>> {
   const mp = new Map<string, Map<Timestamp, T>>();
   Object.keys(obj).forEach(k => {
     const nestedMp = new Map();

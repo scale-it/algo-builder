@@ -1,12 +1,12 @@
 import { parseZodError } from "@algo-builder/runtime";
 import * as z from 'zod';
 
+import { BuilderError } from "../../../errors/errors";
+import { ERRORS } from "../../../errors/errors-list";
 import { validateAccount } from "../../../lib/account";
 // import { Account } from "algosdk";
 import type { ChainCfg, HttpNetworkConfig, NetworkConfig } from "../../../types";
 import { ALGOB_CHAIN_NAME } from "../../constants";
-import { BuilderError } from "../errors";
-import { ERRORS } from "../errors-list";
 import CfgErrors from "./config-errors";
 
 const AccountType = z.object({

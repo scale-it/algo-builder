@@ -1,3 +1,4 @@
+import * as ERRORS from "./errors/errors-list";
 import {
   createMsigAddress,
   loadAccountsFromEnv,
@@ -16,6 +17,7 @@ import * as runtime from "./runtime";
 import * as types from "./types";
 
 export {
+  ERRORS,
   mkAccounts,
   createMsigAddress,
   loadAccountsFromFile,

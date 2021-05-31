@@ -1,8 +1,8 @@
 import { assert } from "chai";
 import path from "path";
 
+import { ERRORS } from "../../../src/errors/errors-list";
 import { BuilderContext } from "../../../src/internal/context";
-import { ERRORS } from "../../../src/internal/core/errors-list";
 import {
   loadPluginFile,
   readPackageJson,

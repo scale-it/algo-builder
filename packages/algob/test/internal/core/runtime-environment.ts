@@ -3,8 +3,8 @@ import * as path from "path";
 import * as sinon from "sinon";
 
 import { types } from "../../../src/config";
+import { ERRORS } from "../../../src/errors/errors-list";
 import { BuilderContext } from "../../../src/internal/context";
-import { ERRORS } from "../../../src/internal/core/errors-list";
 import { Environment } from "../../../src/internal/core/runtime-environment";
 import { TasksDSL } from "../../../src/internal/core/tasks/dsl";
 import { resetBuilderContext } from "../../../src/internal/reset";
