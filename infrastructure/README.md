@@ -12,10 +12,10 @@ If you want to create a local network without using our scripts then you can fol
 
 ## Quick start
 
-**TL;DR**: Make sure you have Algorand Node (`algod` and `goal`) and `make` installed. Then `cd infrastructure; make recreate-private-net`.
+**TL;DR**: Make sure you have Algorand Node (`algod` and `goal`) and `make` installed. Then `cd infrastructure; make setup-private-net`. To reset use `recreate-private-net`.
 
-1. Install latest Algorand node. Use on of the options described in [algorand run-a-node](https://developer.algorand.org/docs/run-a-node/setup/install/)  documentation.
-1. Make sure the algorand node is installed correctly and disable algorand service if you installed algorand node using a package:
+1. Install the latest Algorand node. Use one of the options described in the [Algorand installation](https://developer.algorand.org/docs/run-a-node/setup/install/)  documentation.
+1. Make sure the algorand node is installed correctly. You can disable algorand service if you installed algorand node using a package:
 
         algod -v
         [optional] systemctl stop algod
@@ -26,7 +26,7 @@ If you want to create a local network without using our scripts then you can fol
         cd infrastructure
         make create-private-net
 
-1. Check the access token and network address. You will need them in your config file to correctly connect to a node. The network configuration (PrimaryNode/config.json) and token created using the `make create-private-net` command is fixed and shared in this repository, to match the one used in examples and default `algob.config`. Don't expose the node externally. Otherwise you will need to setup a firewall and generate a new token. You can see the network and a port by opening the following files:
+1. Check the access token and network address. You will need them in your config file to correctly connect to a node. When using `make create-private-net` the script will set the network configuration (PrimaryNode/config.json) and token for you to match the `algob.config` used in all our examples. Don't expose the node externally - otherwise you will need to setup a firewall and generate a new token. You can see the network and a port by opening the following files:
 
         cat node_data/PrimaryNode/algod.net
         cat node_data/PrimaryNode/algod.token
@@ -41,7 +41,7 @@ If you want to create a local network without using our scripts then you can fol
         make setup-master-account
 
 
-The command below will combine all the steps above(create network, start network, setup master account and show network status):
+The command below will combine all the steps above (create network, start network, setup master account and show network status):
 
     make setup-private-net
 

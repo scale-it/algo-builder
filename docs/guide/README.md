@@ -29,11 +29,11 @@ For more in-depth description you can look at the [project specification](https:
 ### Requirements
 
 + Node 12+
-+ Connection to an Algorand node.
-  + For private network, you have to have `algod` and `goal` installed. Check [Algorand setup](https://developer.algorand.org/docs/run-a-node/setup/install/#installation-overview) instructions for details. If you create private network using our [infrastructure scripts](https://github.com/scale-it/algo-builder/tree/master/infrastructure/README.md) then you it will set the correct configuration for you. Otherwise you need to enable `"EnableDeveloperAPI": true` in the node config.json (TEAL compilation requires Developer API).
-  + For docker based setup you need to have docker and docker-compose installed. Then follow the [Sandbox 2.0 notes](https://github.com/scale-it/algo-builder/blob/master/infrastructure/README.md#using-sandbox-20).
++ Connection to an Algorand node. Follow our [infrastructure README](https://github.com/scale-it/algo-builder/tree/master/infrastructure/README.md) for instructions how to setup a private network (using Algorand node binaries or docker based setup).
+    NOTE: TEAL compilation requires Developer API to be enabled (`"EnableDeveloperAPI": true` in the node config.json).
 + Python 3.7+ (for PyTeal) with [pyteal](https://pypi.org/project/pyteal). Please read below how to install it.
 + Yarn `v1.22+` or NPM `v6.0+`
+
 
 ### Installation
 
