@@ -13,7 +13,7 @@ import {
   toCheckpointFileName,
   toScriptFileName
 } from "../../src/lib/script-checkpoints";
-import { ASAInfo, Checkpoint, Checkpoints, LsigInfo, SSCInfo } from "../../src/types";
+import { Checkpoint, Checkpoints, LsigInfo } from "../../src/types";
 import nested from "../fixture-projects/scripts-dir-recursive-cp/scripts/nested/nested";
 import { expectBuilderError } from "../helpers/errors";
 
@@ -24,11 +24,11 @@ export function cleanupMutableData (netCheckpoint: Checkpoint, n: number): Check
 }
 
 function createNetwork (timestamp: number): Checkpoint {
-  const mp = new Map<number, SSCInfo>();
+  const mp = new Map<number, rtypes.SSCInfo>();
   return {
     timestamp: timestamp,
     metadata: new Map<string, string>(),
-    asa: new Map<string, ASAInfo>(),
+    asa: new Map<string, rtypes.ASAInfo>(),
     ssc: new Map<string, typeof mp>(),
     dLsig: new Map<string, LsigInfo>()
   };
@@ -77,7 +77,7 @@ describe("Checkpoint", () => {
     const netCheckpoint: Checkpoint = cleanupMutableData(
       new CheckpointImpl(new Map([["key", "data"],
         ["key3", "data3"]])), 34251);
-    const nestedMap = new Map<number, SSCInfo>();
+    const nestedMap = new Map<number, rtypes.SSCInfo>();
     nestedMap.set(1, {
       creator: "536",
       txId: "",
@@ -198,7 +198,7 @@ describe("Checkpoint", () => {
     const cp1: Checkpoint = cleanupMutableData(
       new CheckpointImpl(new Map([["key", "data"],
         ["key3", "data3"]])), 34251);
-    const nestedMap = new Map<number, SSCInfo>();
+    const nestedMap = new Map<number, rtypes.SSCInfo>();
     nestedMap.set(1, {
       creator: "123",
       txId: "",
@@ -206,7 +206,7 @@ describe("Checkpoint", () => {
       appID: -1,
       timestamp: 1
     });
-    const nestedMap1 = new Map<number, SSCInfo>();
+    const nestedMap1 = new Map<number, rtypes.SSCInfo>();
     nestedMap1.set(2, {
       creator: "123",
       txId: "",
@@ -244,7 +244,7 @@ describe("Checkpoint", () => {
     var cp: CheckpointImpl = new CheckpointImpl();
     cp.timestamp = 12345;
     assert.deepEqual(cp, createNetwork(12345));
-    const nestedMap = new Map<number, SSCInfo>();
+    const nestedMap = new Map<number, rtypes.SSCInfo>();
     nestedMap.set(1, {
       creator: "SSC deployer address",
       txId: "",
@@ -306,7 +306,7 @@ describe("Checkpoint with cleanup", () => {
 });
 
 describe("CheckpointRepoImpl", () => {
-  const nestedMap = new Map<number, SSCInfo>();
+  const nestedMap = new Map<number, rtypes.SSCInfo>();
   it('Should crash if duplication is detected between scripts', async () => {
     const cp1: Checkpoints = {
       network1: {
@@ -357,7 +357,7 @@ describe("CheckpointRepoImpl", () => {
       myNetworkName: {
         timestamp: 951,
         metadata: new Map([["key", "data"]]),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map<string, typeof nestedMap>(),
         dLsig: new Map<string, LsigInfo>()
       }
@@ -376,14 +376,14 @@ describe("CheckpointRepoImpl", () => {
       myNetworkName: {
         timestamp: 531,
         metadata: new Map([["key", "data"]]),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map<string, typeof nestedMap>(),
         dLsig: new Map<string, LsigInfo>()
       },
       myNetworkName2: {
         timestamp: 201,
         metadata: new Map([["key2", "data2"]]),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map<string, typeof nestedMap>(),
         dLsig: new Map<string, LsigInfo>()
       }
@@ -419,7 +419,7 @@ describe("CheckpointRepoImpl", () => {
   });
 
   it("Should allow placing state; two networks", () => {
-    const nestedMap = new Map<number, SSCInfo>();
+    const nestedMap = new Map<number, rtypes.SSCInfo>();
     nestedMap.set(1, {
       creator: "SSC creator 951",
       txId: "",
@@ -442,14 +442,14 @@ describe("CheckpointRepoImpl", () => {
       network1: {
         timestamp: 123,
         metadata: new Map<string, string>(),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map([["SSC name", nestedMap]]),
         dLsig: new Map<string, LsigInfo>()
       },
       "net 0195": {
         timestamp: 123,
         metadata: new Map([["1241 key", "345 value"]]),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map<string, typeof nestedMap>(),
         dLsig: new Map<string, LsigInfo>()
       }
@@ -461,7 +461,7 @@ describe("CheckpointRepoImpl", () => {
       network1: {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map<string, typeof nestedMap>(),
         dLsig: new Map<string, LsigInfo>()
       }
@@ -470,7 +470,7 @@ describe("CheckpointRepoImpl", () => {
       network2: {
         timestamp: 2,
         metadata: new Map([["key 2", "data 2"]]),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map<string, typeof nestedMap>(),
         dLsig: new Map<string, LsigInfo>()
       }
@@ -483,14 +483,14 @@ describe("CheckpointRepoImpl", () => {
       network1: {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map<string, typeof nestedMap>(),
         dLsig: new Map<string, LsigInfo>()
       },
       network2: {
         timestamp: 2,
         metadata: new Map([["key 2", "data 2"]]),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map<string, typeof nestedMap>(),
         dLsig: new Map<string, LsigInfo>()
       }
@@ -502,7 +502,7 @@ describe("CheckpointRepoImpl", () => {
       network1: {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map<string, typeof nestedMap>(),
         dLsig: new Map<string, LsigInfo>()
       }
@@ -577,8 +577,8 @@ describe("CheckpointRepoImpl", () => {
   });
 
   it("Should deeply merge global checkpoints", async () => {
-    const nestedMap = new Map<number, SSCInfo>();
-    const nestedMap1 = new Map<number, SSCInfo>();
+    const nestedMap = new Map<number, rtypes.SSCInfo>();
+    const nestedMap1 = new Map<number, rtypes.SSCInfo>();
     nestedMap.set(1, {
       creator: "SSC creator",
       txId: "",
@@ -597,7 +597,7 @@ describe("CheckpointRepoImpl", () => {
       network1: {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map([["SSC key1", nestedMap1]]),
         dLsig: new Map<string, LsigInfo>()
       }
@@ -609,7 +609,7 @@ describe("CheckpointRepoImpl", () => {
       network1: {
         timestamp: 8,
         metadata: new Map<string, string>(),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map([["SSC key", nestedMap]]),
         dLsig: new Map<string, LsigInfo>()
       }
@@ -622,7 +622,7 @@ describe("CheckpointRepoImpl", () => {
       network1: {
         timestamp: 8,
         metadata: new Map([["key 1", "data 1"]]),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map([["SSC key", nestedMap],
           ["SSC key1", nestedMap1]]),
         dLsig: new Map<string, LsigInfo>()
@@ -631,7 +631,7 @@ describe("CheckpointRepoImpl", () => {
     cpData.precedingCP.network1.timestamp = 124;
     assert.deepEqual(cpData.precedingCP, {
       network1: {
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map([["SSC key", nestedMap]]),
         dLsig: new Map<string, LsigInfo>(),
         metadata: new Map<string, string>(),
@@ -641,7 +641,7 @@ describe("CheckpointRepoImpl", () => {
     cpData.strippedCP.network1.timestamp = 124;
     assert.deepEqual(cpData.strippedCP, {
       network1: {
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map([["SSC key", nestedMap]]),
         dLsig: new Map<string, LsigInfo>(),
         metadata: new Map<string, string>(),
@@ -655,7 +655,7 @@ describe("CheckpointRepoImpl", () => {
       network1: {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map<string, typeof nestedMap>(),
         dLsig: new Map<string, LsigInfo>()
       }
@@ -664,7 +664,7 @@ describe("CheckpointRepoImpl", () => {
       network4: {
         timestamp: 4,
         metadata: new Map([["metadata 4 key", "metadata value"]]),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map<string, typeof nestedMap>(),
         dLsig: new Map<string, LsigInfo>()
       }
@@ -701,7 +701,7 @@ describe("CheckpointRepoImpl", () => {
     cpData.strippedCP["net 0195"].timestamp = 195;
 
     it("Should contain factory methods for ASA anc SSC asset registration", () => {
-      const nestedMap = new Map<number, SSCInfo>();
+      const nestedMap = new Map<number, rtypes.SSCInfo>();
       nestedMap.set(1, {
         creator: "SSC creator 951",
         txId: "",
@@ -728,14 +728,14 @@ describe("CheckpointRepoImpl", () => {
         network4: {
           timestamp: 4,
           metadata: new Map([["metadata 4 key", "metadata value"]]),
-          asa: new Map<string, ASAInfo>(),
+          asa: new Map<string, rtypes.ASAInfo>(),
           ssc: new Map<string, typeof nestedMap>(),
           dLsig: new Map<string, LsigInfo>()
         },
         "net 0195": {
           timestamp: 195,
           metadata: new Map([["1241 key", "345 value"]]),
-          asa: new Map<string, ASAInfo>(),
+          asa: new Map<string, rtypes.ASAInfo>(),
           ssc: new Map<string, typeof nestedMap>(),
           dLsig: new Map<string, LsigInfo>()
         }
@@ -758,7 +758,7 @@ describe("CheckpointRepoImpl", () => {
         "net 0195": {
           timestamp: 195,
           metadata: new Map([["1241 key", "345 value"]]),
-          asa: new Map<string, ASAInfo>(),
+          asa: new Map<string, rtypes.ASAInfo>(),
           ssc: new Map<string, typeof nestedMap>(),
           dLsig: new Map<string, LsigInfo>()
         }
@@ -782,7 +782,7 @@ describe("CheckpointRepoImpl", () => {
         "net 0195": {
           timestamp: 195,
           metadata: new Map([["1241 key", "345 value"]]),
-          asa: new Map<string, ASAInfo>(),
+          asa: new Map<string, rtypes.ASAInfo>(),
           ssc: new Map<string, typeof nestedMap>(),
           dLsig: new Map<string, LsigInfo>()
         }

@@ -307,24 +307,6 @@ export interface LinkReferences {
 
 export type AccountAddress = string;
 
-export interface DeployedAssetInfo {
-  creator: AccountAddress
-  txId: string
-  confirmedRound: number
-}
-
-// ASA deployment information (log)
-export interface ASAInfo extends DeployedAssetInfo {
-  assetIndex: number
-  assetDef: rtypes.ASADef
-}
-
-// Stateful smart contract deployment information (log)
-export interface SSCInfo extends DeployedAssetInfo {
-  appID: number
-  timestamp: number
-}
-
 // stateless smart contract deployment information (log)
 export interface LsigInfo {
   creator: AccountAddress
@@ -359,8 +341,8 @@ export interface CheckpointRepo {
    * Gets metadata key-value for a specified network. */
   getMetadata: (networkName: string, key: string) => string | undefined
 
-  registerASA: (networkName: string, name: string, info: ASAInfo) => CheckpointRepo
-  registerSSC: (networkName: string, name: string, info: SSCInfo) => CheckpointRepo
+  registerASA: (networkName: string, name: string, info: rtypes.ASAInfo) => CheckpointRepo
+  registerSSC: (networkName: string, name: string, info: rtypes.SSCInfo) => CheckpointRepo
   registerLsig: (networkName: string, name: string, info: LsigInfo) => CheckpointRepo
 
   isDefined: (networkName: string, name: string) => boolean
@@ -374,8 +356,8 @@ export interface Checkpoints {
 export interface Checkpoint {
   timestamp: number
   metadata: Map<string, string>
-  asa: Map<string, ASAInfo>
-  ssc: Map<string, Map<Timestamp, SSCInfo>>
+  asa: Map<string, rtypes.ASAInfo>
+  ssc: Map<string, Map<Timestamp, rtypes.SSCInfo>>
   dLsig: Map<string, LsigInfo>
 };
 
@@ -397,9 +379,9 @@ export interface Deployer {
 
   /**
    * Mapping of ASA name to deployment log */
-  asa: Map<string, ASAInfo>
+  asa: Map<string, rtypes.ASAInfo>
 
-  getASAInfo: (name: string) => ASAInfo
+  getASAInfo: (name: string) => rtypes.ASAInfo
 
   /**
    * Sets metadata key value for a current network in the chckpoint file based on the
@@ -421,7 +403,7 @@ export interface Deployer {
     name: string,
     flags: rtypes.ASADeploymentFlags,
     asaParams?: Partial<rtypes.ASADef>
-  ) => Promise<ASAInfo>
+  ) => Promise<rtypes.ASAInfo>
 
   /**
    * Loads deployed asset definition from checkpoint.
@@ -436,9 +418,9 @@ export interface Deployer {
 
   persistCP: () => void
 
-  registerASAInfo: (name: string, asaInfo: ASAInfo) => void
+  registerASAInfo: (name: string, asaInfo: rtypes.ASAInfo) => void
 
-  registerSSCInfo: (name: string, sscInfo: SSCInfo) => void
+  registerSSCInfo: (name: string, sscInfo: rtypes.SSCInfo) => void
 
   logTx: (message: string, txConfirmation: algosdk.ConfirmedTxInfo) => void
 
@@ -489,7 +471,7 @@ export interface Deployer {
     clearProgram: string,
     flags: rtypes.SSCDeploymentFlags,
     payFlags: rtypes.TxParams,
-    scTmplParams?: SCParams) => Promise<SSCInfo>
+    scTmplParams?: SCParams) => Promise<rtypes.SSCInfo>
 
   /**
    * Update programs(approval, clear) for a stateful smart contract.
@@ -507,7 +489,7 @@ export interface Deployer {
     newApprovalProgram: string,
     newClearProgram: string,
     flags: rtypes.SSCOptionalFlags
-  ) => Promise<SSCInfo>
+  ) => Promise<rtypes.SSCInfo>
 
   /**
    * Returns true if ASA or DelegatedLsig or SSC were deployed in any script.
@@ -575,11 +557,11 @@ export interface Deployer {
 
   /**
    * Queries a stateful smart contract info from checkpoint. */
-  getSSC: (nameApproval: string, nameClear: string) => SSCInfo | undefined
+  getSSC: (nameApproval: string, nameClear: string) => rtypes.SSCInfo | undefined
 
   /**
    * Queries a stateful smart contract info from checkpoint using key. */
-  getSSCfromCPKey: (key: string) => SSCInfo | undefined
+  getSSCfromCPKey: (key: string) => rtypes.SSCInfo | undefined
 
   /**
    * Queries a delegated logic signature from checkpoint. */
