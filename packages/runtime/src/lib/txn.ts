@@ -301,7 +301,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         throw new RuntimeError(
           RUNTIME_ERRORS.ASA.PARAM_PARSE_ERROR, {
             reason: "ASA Definition not found",
-            filename: execParams.asaName
+            source: execParams.asaName
           });
       }
     }

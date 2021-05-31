@@ -12,12 +12,11 @@ import { convertToString, parseSSCAppArgs } from "./lib/parsing";
 import { encodeNote, getFromAddress, mkTransaction } from "./lib/txn";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
-import type {
-  AccountAddress, AccountStoreI, ASADefs, ASADeploymentFlags, AssetHoldingM, Context, ExecParams,
-  SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
-  StackElem, State, Txn, TxParams
+import {
+  AccountAddress, AccountStoreI, ASADefs, ASADeploymentFlags, ASAInfo, AssetHoldingM, Context, ExecParams,
+  ExecutionMode, SignType, SSCAttributesM, SSCDeploymentFlags, SSCInfo, SSCOptionalFlags,
+  StackElem, State, TransactionType, Txn, TxParams
 } from "./types";
-import { ExecutionMode, SignType } from "./types";
 
 export class Runtime {
   /**
@@ -29,19 +28,21 @@ export class Runtime {
    */
   private store: State;
   ctx: Context;
-  private appCounter: number;
-  private assetCounter: number;
+  loadedAssetsDefs: ASADefs;
   // https://developer.algorand.org/docs/features/transactions/?query=round
   private round: number;
   private timestamp: number;
-  private readonly loadedAssetsDefs: ASADefs;
 
   constructor (accounts: AccountStoreI[]) {
     // runtime store
     this.store = {
       accounts: new Map<AccountAddress, AccountStoreI>(), // string represents account address
       globalApps: new Map<number, AccountAddress>(), // map of {appId: accountAddress}
-      assetDefs: new Map<number, AccountAddress>() // number represents assetId
+      assetDefs: new Map<number, AccountAddress>(), // number represents assetId
+      assetNameInfo: new Map<string, ASAInfo>(),
+      appNameInfo: new Map<string, SSCInfo>(),
+      appCounter: 0, // initialize app counter with 0
+      assetCounter: 0 // initialize asset counter with 0
     };
 
     // intialize accounts (should be done during runtime initialization)
@@ -53,8 +54,6 @@ export class Runtime {
     // context for interpreter
     this.ctx = new Ctx(cloneDeep(this.store), <Txn>{}, [], [], this);
 
-    this.appCounter = 0;
-    this.assetCounter = 0;
     this.round = 2;
     this.timestamp = 1;
   }
@@ -235,6 +234,25 @@ export class Runtime {
   }
 
   /**
+   * Queries asset id by asset name from global state.
+   * Returns undefined if asset is not found.
+   * @param name Asset name
+   */
+  getAssetInfoFromName (name: string): ASAInfo | undefined {
+    return this.store.assetNameInfo.get(name);
+  }
+
+  /**
+   * Queries app id by app name from global state.
+   * Returns undefined if app is not found.
+   * @param approval
+   * @param clear
+   */
+  getAppInfoFromName (approval: string, clear: string): SSCInfo | undefined {
+    return this.store.appNameInfo.get(approval + "-" + clear);
+  }
+
+  /**
    * Setup initial accounts as {address: SDKAccount}. This should be called only when initializing Runtime.
    * @param accounts: array of account info's
    */
@@ -294,19 +312,20 @@ export class Runtime {
       encodeNote(flags.note, flags.noteb64),
       asaDef.total,
       asaDef.decimals,
-      asaDef["default-frozen"],
+      asaDef.defaultFrozen,
       asaDef.manager !== "" ? asaDef.manager : undefined,
       asaDef.reserve !== "" ? asaDef.reserve : undefined,
       asaDef.freeze !== "" ? asaDef.freeze : undefined,
       asaDef.clawback !== "" ? asaDef.clawback : undefined,
-      asaDef["unit-name"],
+      asaDef.unitName,
       name,
       asaDef.url,
-      asaDef["metadata-hash"],
+      asaDef.metadataHash,
       mockSuggestedParams(flags, this.round)
     );
   }
 
+  // TODO move to code ctx
   /**
    * Add Asset in Runtime
    * @param name ASA name
@@ -317,14 +336,22 @@ export class Runtime {
     const senderAcc = this.assertAccountDefined(sender.addr, this.store.accounts.get(sender.addr));
 
     // create asset
-    const asset = senderAcc.addAsset(++this.assetCounter, name, this.loadedAssetsDefs[name]);
+    const asset = senderAcc.addAsset(++this.store.assetCounter, name, this.loadedAssetsDefs[name]);
     this.mkAssetCreateTx(name, flags, asset);
-    this.store.assetDefs.set(this.assetCounter, sender.addr);
+    this.store.assetDefs.set(this.store.assetCounter, sender.addr);
+    this.store.assetNameInfo.set(name, {
+      creator: senderAcc.address,
+      assetIndex: this.store.assetCounter,
+      assetDef: asset,
+      txId: "tx-id",
+      confirmedRound: this.round
+    });
 
-    this.optIntoASA(this.assetCounter, sender.addr, {}); // opt-in for creator
-    return this.assetCounter;
+    this.optIntoASA(this.store.assetCounter, sender.addr, {}); // opt-in for creator
+    return this.store.assetCounter;
   }
 
+  // TODO move to code ctx
   /**
    * Asset Opt-In for account in Runtime
    * @param assetIndex Asset Index
@@ -342,7 +369,7 @@ export class Runtime {
       amount: address === creatorAddr ? BigInt(assetDef.total) : 0n, // for creator opt-in amount is total assets
       'asset-id': assetIndex,
       creator: creatorAddr,
-      'is-frozen': address === creatorAddr ? false : assetDef["default-frozen"]
+      'is-frozen': address === creatorAddr ? false : assetDef.defaultFrozen
     };
 
     const account = this.getAccount(address);
@@ -392,6 +419,7 @@ export class Runtime {
     this.ctx.gtxs = [encTx];
   }
 
+  // TODO move to code ctx
   /**
    * creates new application and returns application id
    * Note: In this function we are operating on ctx to ensure that
@@ -430,13 +458,20 @@ export class Runtime {
     this.run(approvalProgram, ExecutionMode.STATEFUL); // execute TEAL code with appId = 0
 
     // create new application in globalApps map
-    this.store.globalApps.set(++this.appCounter, senderAcc.address);
+    this.store.globalApps.set(++this.store.appCounter, senderAcc.address);
 
     const attributes = this.assertAppDefined(0, senderAcc.createdApps.get(0));
     senderAcc.createdApps.delete(0); // remove zero app from sender's account
-    senderAcc.createdApps.set(this.appCounter, attributes);
+    senderAcc.createdApps.set(this.store.appCounter, attributes);
+    this.store.appNameInfo.set(approvalProgram + "-" + clearProgram, {
+      creator: senderAcc.address,
+      appID: this.store.appCounter,
+      txId: "tx-id",
+      confirmedRound: this.round,
+      timestamp: Math.round(+new Date() / 1000)
+    });
 
-    return this.appCounter;
+    return this.store.appCounter;
   }
 
   // creates new OptIn transaction object and update context
@@ -463,6 +498,7 @@ export class Runtime {
     this.ctx.gtxs = [encTx];
   }
 
+  // TODO move to code ctx
   /**
    * Account address opt-in for application Id
    * @param accountAddr Account address
@@ -608,7 +644,21 @@ export class Runtime {
    * @param args : external arguments to smart contract
    */
   executeTx (txnParams: ExecParams | ExecParams[]): void {
-    const [tx, gtxs] = this.createTxnContext(txnParams); // get current txn and txn group (as encoded obj)
+    const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
+    for (const txn of txnParameters) {
+      switch (txn.type) {
+        case TransactionType.DeployASA: {
+          txn.asaDef = this.loadedAssetsDefs[txn.asaName];
+          break;
+        }
+        case TransactionType.DeploySSC: {
+          txn.approvalProg = new Uint8Array(32); // mock approval program
+          txn.clearProg = new Uint8Array(32); // mock clear program
+          break;
+        }
+      }
+    }
+    const [tx, gtxs] = this.createTxnContext(txnParameters); // get current txn and txn group (as encoded obj)
     // validate first and last rounds
     this.validateTxRound(gtxs);
 
@@ -616,7 +666,6 @@ export class Runtime {
     // state is a deep copy of store
     this.ctx = new Ctx(cloneDeep(this.store), tx, gtxs, [], this);
 
-    const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
     // Run TEAL program associated with each transaction and
     // then execute the transaction without interacting with store.
     this.ctx.processTransactions(txnParameters);

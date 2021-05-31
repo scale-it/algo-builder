@@ -195,11 +195,11 @@ describe("Algorand Standard Assets", function () {
   it("should create asset using asa.yaml file", () => {
     const res = runtime.getAssetDef(assetId);
     assert.equal(res.decimals, 0);
-    assert.equal(res["default-frozen"], false);
+    assert.equal(res.defaultFrozen, false);
     assert.equal(res.total, 5912599999515n);
-    assert.equal(res["unit-name"], "GLD");
+    assert.equal(res.unitName, "GLD");
     assert.equal(res.url, "url");
-    assert.equal(res["metadata-hash"], "12312442142141241244444411111133");
+    assert.equal(res.metadataHash, "12312442142141241244444411111133");
     assert.equal(res.manager, elon.address);
     assert.equal(res.reserve, elon.address);
     assert.equal(res.freeze, elon.address);
