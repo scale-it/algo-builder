@@ -325,6 +325,7 @@ export class Runtime {
     );
   }
 
+  // TODO move to code ctx
   /**
    * Add Asset in Runtime
    * @param name ASA name
@@ -350,6 +351,7 @@ export class Runtime {
     return this.store.assetCounter;
   }
 
+  // TODO move to code ctx
   /**
    * Asset Opt-In for account in Runtime
    * @param assetIndex Asset Index
@@ -417,6 +419,7 @@ export class Runtime {
     this.ctx.gtxs = [encTx];
   }
 
+  // TODO move to code ctx
   /**
    * creates new application and returns application id
    * Note: In this function we are operating on ctx to ensure that
@@ -495,6 +498,7 @@ export class Runtime {
     this.ctx.gtxs = [encTx];
   }
 
+  // TODO move to code ctx
   /**
    * Account address opt-in for application Id
    * @param accountAddr Account address
