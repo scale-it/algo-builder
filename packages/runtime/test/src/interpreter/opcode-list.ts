@@ -2784,46 +2784,46 @@ describe("Teal Opcodes", function () {
 
     it("Byte: should push parsed base64 string as bytes to stack", function () {
       const base64Str = "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=";
-      const bytes = new Uint8Array(Buffer.from(base64Str, 'base64'));
+      const expectedBytes = new Uint8Array(Buffer.from(base64Str, 'base64'));
 
       const op = new Byte(["base64", base64Str], 1);
       op.execute(stack);
 
       assert.equal(1, stack.length());
-      assert.deepEqual(bytes, stack.pop());
+      assert.deepEqual(expectedBytes, stack.pop());
     });
 
     it("Byte: should push parsed base32 string as bytes to stack", function () {
       const base32Str = "MFRGGZDFMY======";
-      const bytes = new Uint8Array(convertToBuffer(base32Str, EncodingType.BASE32));
+      const expectedBytes = new Uint8Array(convertToBuffer(base32Str, EncodingType.BASE32));
 
       const op = new Byte(["base32", base32Str], 1);
       op.execute(stack);
 
       assert.equal(1, stack.length());
-      assert.deepEqual(bytes, stack.pop());
+      assert.deepEqual(expectedBytes, stack.pop());
     });
 
     it("Byte: should push parsed hex string as bytes to stack", function () {
       const hexStr = "0x250001000192CD0000002F6D6E742F72";
-      const bytes = new Uint8Array(Buffer.from(hexStr.slice(2), 'hex'));
+      const expectedBytes = new Uint8Array(Buffer.from(hexStr.slice(2), 'hex'));
 
       const op = new Byte([hexStr], 1);
       op.execute(stack);
 
       assert.equal(1, stack.length());
-      assert.deepEqual(bytes, stack.pop());
+      assert.deepEqual(expectedBytes, stack.pop());
     });
 
     it("Byte: should push string literal as bytes to stack", function () {
       const str = "\"Algorand\"";
-      const bytes = new Uint8Array(Buffer.from("Algorand"));
+      const expectedBytes = new Uint8Array(Buffer.from("Algorand"));
 
       const op = new Byte([str], 1);
       op.execute(stack);
 
       assert.equal(1, stack.length());
-      assert.deepEqual(bytes, stack.pop());
+      assert.deepEqual(expectedBytes, stack.pop());
     });
   });
 
@@ -3118,13 +3118,13 @@ describe("Teal Opcodes", function () {
 
     it("should push bytes to stack", () => {
       const str = "\"Algorand\"";
-      const bytes = new Uint8Array(Buffer.from("Algorand"));
+      const expectedBytes = new Uint8Array(Buffer.from("Algorand"));
 
       const op = new PushBytes([str], 1);
       op.execute(stack);
 
       assert.equal(1, stack.length());
-      assert.deepEqual(bytes, stack.pop());
+      assert.deepEqual(expectedBytes, stack.pop());
     });
   });
 
