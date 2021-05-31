@@ -3138,7 +3138,7 @@ describe("Teal Opcodes", function () {
       assert.doesNotThrow(() => { op.execute(stack); });
     });
 
-    it("should panic if top of stack is not valid", () => {
+    it("should panic if top of stack is zero or bytes", () => {
       const op = new Assert([], 0);
       stack.push(0n);
 

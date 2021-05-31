@@ -658,7 +658,7 @@ describe("Parser", function () {
     });
 
     describe("should return correct opcodes for tealv3 ops", () => {
-      it("assert op", () => {
+      it("assert", () => {
         const res = opcodeFromSentence(["assert"], 1, interpreter);
         const expected = new Assert([], 1);
         assert.deepEqual(res, expected);
@@ -669,7 +669,7 @@ describe("Parser", function () {
         );
       });
 
-      it("pushint op", () => {
+      it("pushint", () => {
         const res = opcodeFromSentence(["pushint", "345"], 1, interpreter);
         const expected = new PushInt(["345"], 1);
         assert.deepEqual(res, expected);
@@ -690,7 +690,7 @@ describe("Parser", function () {
         );
       });
 
-      it("pushbytes op", () => {
+      it("pushbytes", () => {
         const res = opcodeFromSentence(["pushbytes", `"Algorand"`], 1, interpreter);
         const expected = new PushBytes([`"Algorand"`], 1);
         assert.deepEqual(res, expected);
@@ -706,7 +706,7 @@ describe("Parser", function () {
         );
       });
 
-      it("swap op", () => {
+      it("swap", () => {
         const res = opcodeFromSentence(["swap"], 1, interpreter);
         const expected = new Swap([], 1);
         assert.deepEqual(res, expected);

@@ -2167,7 +2167,7 @@ export class Assert extends Op {
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
     const top = this.assertBigInt(stack.pop(), this.line);
-    if (top <= 0n) {
+    if (top == 0n) {
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.TEAL_ENCOUNTERED_ERR, { line: this.line });
     }
   }
