@@ -7,9 +7,12 @@ This directory (`/infrastructure`) provides an example setup for a private-net, 
 
 Use `make` to run tasks to `create`, `start-private-net`, `stop-private-net`.
 
-If you want to create a local network by your own, you can use a private net [tutorial](https://developer.algorand.org/tutorials/create-private-network/).
+If you want to create a local network without using our scripts then you can follow this [tutorial](https://developer.algorand.org/tutorials/create-private-network/**.
+
 
 ## Quick start
+
+**TL;DR**: Make sure you have Algorand Node (`algod` and `goal`) and `make` installed. Then `cd infrastructure; make recreate-private-net`.
 
 1. Install latest Algorand node. Use on of the options described in [algorand run-a-node](https://developer.algorand.org/docs/run-a-node/setup/install/)  documentation.
 1. Make sure the algorand node is installed correctly and disable algorand service if you installed algorand node using a package:
@@ -59,6 +62,7 @@ To connect from SDK or REST we need to know the network address and authorizatio
     cat $ALGORAND_DATA/algod.net
     cat $ALGORAND_DATA/algod.token
 
+
 ## Using Sandbox 2.0
 
 Algorand Sandbox is a fast way to create and configure an Algorand development environment with [Algod](https://github.com/algorand/go-algorand) and [Indexer](https://github.com/algorand/indexer). To quickly bring up a private network with algorand sandbox and use it within algob, following jobs are provided (in `/infrastructure`) :-
@@ -79,6 +83,7 @@ Algorand Sandbox is a fast way to create and configure an Algorand development e
 2. Algod port is set to `8081` and kmd port is set to `8082`. Make sure to update the port in `algob.config` before running the examples.
 
 To learn more about sandbox, click [here](https://github.com/algorand/sandbox#algorand-sandbox).
+
 ### Example REST requests
 
 Private Net
@@ -88,6 +93,7 @@ Private Net
 Purestake:
 
     curl -X GET "https://testnet-algorand.api.purestake.io/ps1/versions" -H "x-api-key:<api-key>"
+
 
 ## KMD
 
