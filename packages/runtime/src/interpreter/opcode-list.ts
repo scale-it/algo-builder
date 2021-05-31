@@ -2321,3 +2321,43 @@ export class Setbit extends Op {
     stack.push(target);
   }
 }
+
+// pop a target A (integer or byte-array), and index B. Push the Bth bit of A.
+export class GetBit extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    const index = stack.pop();
+    const target = stack.pop();
+
+    this.assertBigInt(index, this.line);
+    if (typeof target === "bigint") {
+      if (index > 63n) {
+        throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_ERROR, { line: this.line });
+      }
+      const binaryStr = target.toString(2);
+      const size = binaryStr.length;
+      stack.push(BigInt(binaryStr[size - Number(index) - 1]));
+    } else {
+      const byteIndex = Number(index) / 8;
+      if (byteIndex >= target.length) {
+        throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_BYTES_ERROR, { line: this.line });
+      }
+
+      const targetBit = byteIndex % 8;
+      const binary = target[byteIndex].toString(2);
+      stack.push(BigInt(binary[binary.length - Number(targetBit) - 1]));
+    }
+  }
+}
