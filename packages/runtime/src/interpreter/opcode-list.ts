@@ -2259,3 +2259,65 @@ export class Swap extends Op {
     stack.push(b);
   }
 }
+
+/**
+ * bit indexing begins with low-order bits in integers.
+ * Setting bit 4 to 1 on the integer 0 yields 16 (int 0x0010, or 2^4).
+ * Indexing begins in the first bytes of a byte-string
+ * (as seen in getbyte and substring). Setting bits 0 through 11 to 1
+ * in a 4 byte-array of 0s yields byte 0xfff00000
+ */
+export class Setbit extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 3, this.line);
+    const bit = stack.pop();
+    const index = stack.pop();
+    const target = stack.pop();
+
+    this.assertBigInt(bit, this.line);
+    this.assertBigInt(index, this.line);
+    if (bit > 1n) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_VALUE_ERROR, { line: this.line });
+    }
+
+    if (typeof target === "bigint") {
+      if (index > 63n) {
+        throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_ERROR, { line: this.line });
+      }
+      const binaryStr = target.toString(2);
+      const binaryArr = [...binaryStr];
+      const size = binaryStr.length;
+      binaryArr[size - Number(index) - 1] = bit.toString();
+      stack.push(this.parseToBigInt(binaryArr));
+    } else {
+      const byteIndex = Number(index) / 8;
+      if (byteIndex >= target.length) {
+        throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_BYTES_ERROR, { line: this.line });
+      }
+
+      const targetBit = byteIndex % 8;
+      const mask = 1 << targetBit;
+      if (bit === 1n) {
+        // set bit
+        target[byteIndex] |= mask;
+      } else {
+        // clear bit
+        const mask = ~(1 << targetBit);
+        target[byteIndex] &= mask;
+      }
+    }
+    stack.push(target);
+  }
+}

@@ -176,4 +176,19 @@ export class Op {
     }
     return stack;
   }
+
+  /**
+   * Parses binary string into bigint
+   * @param binary Binary string
+   */
+  parseToBigInt (binary: string[]): bigint {
+    let res = 0n;
+    for (let i = 0; i < binary.length; ++i) {
+      if (binary[i] === '1') {
+        const val = binary.length - 1 - i;
+        res += 2n ** BigInt(val);
+      }
+    }
+    return res;
+  }
 }
