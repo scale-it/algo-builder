@@ -3369,4 +3369,13 @@ describe("Teal Opcodes", function () {
       );
     });
   });
+
+  describe("GetBit", () => {
+    let stack: Stack<StackElem>;
+    this.beforeEach(() => { stack = new Stack<StackElem>(); });
+
+    it("should push correct bit to stack(uint64)", () => {
+
+    });
+  });
 });

@@ -7,10 +7,10 @@ import {
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
   Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2, Ed25519verify,
-  EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, GetBytes, Global, GreaterThan,
+  EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, Global, GreaterThan,
   GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc, Intcblock, Itob,
   Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, Mod,
-  Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, SetBit, SetBytes, Sha256,
+  Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, SetBit, Sha256,
   Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../interpreter/opcode-list";
 import { LogicSigMaxCost, LogicSigMaxSize, MaxAppProgramCost, MaxAppProgramLen, OpGasCost } from "../lib/constants";
@@ -135,9 +135,9 @@ opCodeMap[3] = {
 
   // bit & byte opcodes
   getbit: GetBit,
-  setbit: SetBit,
-  getbyte: GetBytes,
-  setbyte: SetBytes
+  setbit: SetBit
+  // getbyte: GetBytes,
+  // setbyte: SetBytes
 
   /*
   dig: Dig,
