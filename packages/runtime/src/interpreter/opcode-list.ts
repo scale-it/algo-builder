@@ -1561,6 +1561,12 @@ export class Global extends Op {
         result = this.interpreter.runtime.getTimestamp();
         break;
       }
+      case 'CreatorAddress': {
+        const appId = this.interpreter.runtime.ctx.tx.apid;
+        const app = this.interpreter.getApp(appId, this.line);
+        result = decodeAddress(app.creator).publicKey;
+        break;
+      }
       default: {
         result = GlobalFields[this.interpreter.tealVersion][this.field];
       }

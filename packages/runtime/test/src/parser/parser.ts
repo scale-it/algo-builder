@@ -524,6 +524,10 @@ describe("Parser", function () {
       expected = new Global(["CurrentApplicationID"], 1, interpreter);
       assert.deepEqual(res, expected);
 
+      res = opcodeFromSentence(["global", "CreatorAddress"], 1, interpreter);
+      expected = new Global(["CreatorAddress"], 1, interpreter);
+      assert.deepEqual(res, expected);
+
       expectRuntimeError(
         () => opcodeFromSentence(["global", "MinTxnFee", "MinTxnFee"], 1, interpreter),
         RUNTIME_ERRORS.TEAL.ASSERT_LENGTH

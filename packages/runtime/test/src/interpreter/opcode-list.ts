@@ -2287,7 +2287,7 @@ describe("Teal Opcodes", function () {
       interpreter.runtime.ctx.tx = TXN_OBJ;
       interpreter.runtime.ctx.gtxs = [TXN_OBJ];
       interpreter.runtime.ctx.tx.apid = 1828;
-      interpreter.tealVersion = 2; // set tealversion to latest (to support all global fields)
+      interpreter.tealVersion = MaxTEALVersion; // set tealversion to latest (to support all global fields)
     });
 
     it("should push MinTxnFee to stack", function () {
@@ -2364,6 +2364,14 @@ describe("Teal Opcodes", function () {
       assert.equal(1828n, top);
     });
 
+    it("should push CreatorAddress to stack", function () {
+      const op = new Global(['CreatorAddress'], 1, interpreter);
+      op.execute(stack);
+
+      // creator of app (id = 1848) is set as elonAddr in ../mock/stateful
+      assert.deepEqual(decodeAddress(elonAddr).publicKey, stack.pop());
+    });
+
     it("should throw error if global field is not present in teal version", function () {
       interpreter.tealVersion = 1;
 
@@ -2384,6 +2392,12 @@ describe("Teal Opcodes", function () {
 
       expectRuntimeError(
         () => new Global(['CurrentApplicationID'], 1, interpreter),
+        RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
+      );
+
+      interpreter.tealVersion = 2;
+      expectRuntimeError(
+        () => new Global(['CreatorAddress'], 1, interpreter),
         RUNTIME_ERRORS.TEAL.UNKNOWN_GLOBAL_FIELD
       );
     });
