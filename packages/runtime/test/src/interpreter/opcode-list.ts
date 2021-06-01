@@ -1565,10 +1565,13 @@ describe("Teal Opcodes", function () {
 
   describe("Transaction opcodes", function () {
     const stack = new Stack<StackElem>();
-    const interpreter = new Interpreter();
-    interpreter.runtime = new Runtime([]);
-    interpreter.runtime.ctx.tx = TXN_OBJ;
-    interpreter.tealVersion = 2; // set tealversion to latest (to support all tx fields)
+    let interpreter: Interpreter;
+    before(() => {
+      interpreter = new Interpreter();
+      interpreter.runtime = new Runtime([]);
+      interpreter.runtime.ctx.tx = TXN_OBJ;
+      interpreter.tealVersion = MaxTEALVersion; // set tealversion to latest (to support all tx fields)
+    });
 
     describe("Txn: Common Fields", function () {
       it("should push txn fee to stack", function () {
@@ -1643,14 +1646,14 @@ describe("Teal Opcodes", function () {
         assert.deepEqual(TXN_OBJ.rekey, stack.pop());
       });
 
-      it("should throw error on FirstValidTime",
+      it("should throw error on FirstValidTime", () => {
         execExpectError(
           stack,
           [],
           new Txn(["FirstValidTime"], 1, interpreter),
           RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
-        )
-      );
+        );
+      });
 
       it("should push txn NumAppArgs to stack", function () {
         const op = new Txn(["NumAppArgs"], 1, interpreter);
@@ -1926,6 +1929,7 @@ describe("Teal Opcodes", function () {
     describe("Txn: Application Call Transaction", function () {
       before(function () {
         interpreter.runtime.ctx.tx.type = 'appl';
+        interpreter.runtime.ctx.tx.apid = 1847;
       });
 
       it("should push txn ApplicationID to stack", function () {
@@ -1988,12 +1992,87 @@ describe("Teal Opcodes", function () {
         assert.equal(1, stack.length());
         assert.deepEqual(TXN_OBJ.apaa[0], stack.pop());
       });
+
+      // introduced in TEALv3
+      it("should push value from foreign assets array and push NumAssets", function () {
+        // should push Accounts[0] to stack
+        let op = new Txn(["Assets", "0"], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1, stack.length());
+        assert.equal(BigInt(TXN_OBJ.apas[0]), stack.pop());
+
+        // should push Accounts[1] to stack
+        op = new Txn(["Assets", "1"], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1, stack.length());
+        assert.equal(BigInt(TXN_OBJ.apas[1]), stack.pop());
+
+        // index 10 should be out_of_bound
+        op = new Txn(["Assets", "10"], 1, interpreter);
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+        );
+
+        op = new Txn(["NumAssets"], 1, interpreter);
+        op.execute(stack);
+        assert.equal(BigInt(TXN_OBJ.apas.length), stack.pop());
+      });
+
+      it("should push value from foreign applications array and push NumApplications", function () {
+        // special case: Txn.Applications[0] represents current_applications_id
+        let op = new Txn(["Applications", "0"], 1, interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.equal(BigInt(TXN_OBJ.apid), stack.pop());
+
+        // Txn.Applications[1] should push "1st" app_id from foreign Apps (Txn.ForeignApps[0])
+        op = new Txn(["Applications", "1"], 1, interpreter);
+        op.execute(stack);
+
+        assert.equal(1, stack.length());
+        assert.equal(BigInt(TXN_OBJ.apfa[0]), stack.pop());
+
+        // index 10 should be out_of_bound
+        op = new Txn(["Applications", "10"], 1, interpreter);
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+        );
+
+        op = new Txn(["NumApplications"], 1, interpreter);
+        op.execute(stack);
+        assert.equal(BigInt(TXN_OBJ.apfa.length), stack.pop());
+      });
+
+      it("should push local, global uint and byte slices from state schema to stack", function () {
+        let op = new Txn(["GlobalNumUint"], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1, stack.length());
+        assert.equal(BigInt(TXN_OBJ.apgs.nui), stack.pop());
+
+        op = new Txn(["GlobalNumByteSlice"], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1, stack.length());
+        assert.equal(BigInt(TXN_OBJ.apgs.nbs), stack.pop());
+
+        op = new Txn(["LocalNumUint"], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1, stack.length());
+        assert.equal(BigInt(TXN_OBJ.apls.nui), stack.pop());
+
+        op = new Txn(["LocalNumByteSlice"], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1, stack.length());
+        assert.equal(BigInt(TXN_OBJ.apls.nbs), stack.pop());
+      });
     });
 
     describe("Gtxn", function () {
       before(function () {
         const tx = interpreter.runtime.ctx.tx;
-        const tx2 = { ...tx, fee: 2222 };
+        const tx2 = { ...tx, fee: 2222, apas: [3033, 4044], apfa: [5005, 6006, 7077] };
         interpreter.runtime.ctx.gtxs = [tx, tx2];
       });
 
@@ -2032,6 +2111,39 @@ describe("Teal Opcodes", function () {
 
         assert.equal(1, stack.length());
         assert.deepEqual(TXN_OBJ.apaa[0], stack.pop());
+      });
+
+      it("should push value from assets or applications array by index from tx group", function () {
+        let op = new Gtxn(["1", "Assets", "0"], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1, stack.length());
+        assert.deepEqual(3033n, stack.pop()); // first asset from 2nd tx in group
+
+        op = new Gtxn(["0", "Assets", "0"], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1, stack.length());
+        assert.deepEqual(BigInt(TXN_OBJ.apas[0]), stack.pop()); // first asset from 1st tx
+
+        op = new Gtxn(["1", "NumAssets"], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1, stack.length());
+        assert.deepEqual(2n, stack.pop());
+
+        op = new Gtxn(["1", "NumApplications"], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1, stack.length());
+        assert.deepEqual(3n, stack.pop());
+
+        // index 0 represent tx.apid (current application id)
+        op = new Gtxn(["1", "Applications", "0"], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1, stack.length());
+        assert.deepEqual(BigInt(interpreter.runtime.ctx.tx.apid), stack.pop());
+
+        op = new Gtxn(["0", "Applications", "2"], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1, stack.length());
+        assert.deepEqual(BigInt(TXN_OBJ.apfa[1]), stack.pop());
       });
     });
 
@@ -2163,17 +2275,20 @@ describe("Teal Opcodes", function () {
 
   describe("Global Opcode", function () {
     const stack = new Stack<StackElem>();
-    const interpreter = new Interpreter();
+    let interpreter: Interpreter;
 
     // setup 1st account (to be used as sender)
     const acc1: AccountStoreI = new AccountStore(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
     setDummyAccInfo(acc1);
 
-    interpreter.runtime = new Runtime([acc1]);
-    interpreter.runtime.ctx.tx = TXN_OBJ;
-    interpreter.runtime.ctx.gtxs = [TXN_OBJ];
-    interpreter.runtime.ctx.tx.apid = 1828;
-    interpreter.tealVersion = 2; // set tealversion to latest (to support all global fields)
+    before(() => {
+      interpreter = new Interpreter();
+      interpreter.runtime = new Runtime([acc1]);
+      interpreter.runtime.ctx.tx = TXN_OBJ;
+      interpreter.runtime.ctx.gtxs = [TXN_OBJ];
+      interpreter.runtime.ctx.tx.apid = 1828;
+      interpreter.tealVersion = 2; // set tealversion to latest (to support all global fields)
+    });
 
     it("should push MinTxnFee to stack", function () {
       const op = new Global(['MinTxnFee'], 1, interpreter);
@@ -2829,23 +2944,26 @@ describe("Teal Opcodes", function () {
 
   describe("Balance", () => {
     const stack = new Stack<StackElem>();
-    const interpreter = new Interpreter();
+    let interpreter: Interpreter;
 
     // setup 1st account
     const acc1: AccountStoreI = new AccountStore(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
     setDummyAccInfo(acc1);
 
-    const runtime = new Runtime([acc1]);
-    interpreter.runtime = runtime; // setup runtime
+    this.beforeAll(() => {
+      interpreter = new Interpreter();
+      const runtime = new Runtime([acc1]);
+      interpreter.runtime = runtime; // setup runtime
 
-    // setting txn object
-    interpreter.runtime.ctx.tx = TXN_OBJ;
-    interpreter.runtime.ctx.tx.snd = Buffer.from(decodeAddress(elonAddr).publicKey);
-    interpreter.runtime.ctx.tx.apat = [
-      Buffer.from(decodeAddress(elonAddr).publicKey),
-      Buffer.from(decodeAddress(johnAddr).publicKey)
-    ];
-    interpreter.runtime.ctx.tx.apas = [3, 112];
+      // setting txn object
+      interpreter.runtime.ctx.tx = TXN_OBJ;
+      interpreter.runtime.ctx.tx.snd = Buffer.from(decodeAddress(elonAddr).publicKey);
+      interpreter.runtime.ctx.tx.apat = [
+        Buffer.from(decodeAddress(elonAddr).publicKey),
+        Buffer.from(decodeAddress(johnAddr).publicKey)
+      ];
+      interpreter.runtime.ctx.tx.apas = [3, 112];
+    });
 
     it("should push correct account balance", () => {
       const op = new Balance([], 1, interpreter);

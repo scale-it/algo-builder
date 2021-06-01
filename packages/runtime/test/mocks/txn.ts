@@ -60,12 +60,12 @@ export const TXN_OBJ = {
   apas: [2001, 2002, 2003],
   type: 'pay',
   apls: {
-    nui: 2,
+    nui: 1,
     nbs: 2
   },
   apgs: {
-    nui: 2,
-    nbs: 2
+    nui: 3,
+    nbs: 4
   },
   txID: 'transaction-id',
   rekey: Buffer.from(addr.publicKey),
