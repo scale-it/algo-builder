@@ -2295,28 +2295,30 @@ export class SetBit extends Op {
         throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_ERROR, { line: this.line });
       }
       const binaryStr = target.toString(2);
-      const binaryArr = [...binaryStr];
-      const size = binaryStr.length;
-      binaryArr[size - Number(index) - 1] = bit.toString();
+      const binaryArr = [...(binaryStr.padStart(65 - binaryStr.length, "0"))];
+      const size = binaryArr.length;
+      binaryArr[size - Number(index) - 1] = bit === 0n ? "0" : "1";
       stack.push(this.parseToBigInt(binaryArr));
     } else {
-      const byteIndex = Number(index) / 8;
+      const byteIndex = Math.floor(Number(index) / 8);
       if (byteIndex >= target.length) {
         throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_BYTES_ERROR, { line: this.line });
       }
 
-      const targetBit = byteIndex % 8;
-      const mask = 1 << targetBit;
+      const targetBit = Number(index) % 8;
+      // 8th bit in a bytes array will be highest order bit in second element
+      // that's why mask is reversed
+      const mask = 1 << (7 - targetBit);
       if (bit === 1n) {
         // set bit
         target[byteIndex] |= mask;
       } else {
         // clear bit
-        const mask = ~(1 << targetBit);
+        const mask = ~(1 << ((7 - targetBit)));
         target[byteIndex] &= mask;
       }
+      stack.push(target);
     }
-    stack.push(target);
   }
 }
 

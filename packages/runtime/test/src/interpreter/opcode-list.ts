@@ -3217,10 +3217,156 @@ describe("Teal Opcodes", function () {
     let stack: Stack<StackElem>;
     this.beforeEach(() => { stack = new Stack<StackElem>(); });
 
-    it("should set bit", () => {
+    it("should set bit for uint64", () => {
       const op = new SetBit([], 0);
-      stack.push(5n);
-      stack.push(10n);
+      stack.push(0n); // target
+      stack.push(4n); // index
+      stack.push(1n); // bit
+
+      op.execute(stack);
+
+      assert.equal(stack.length(), 1);
+      assert.equal(stack.pop(), 16n);
+
+      stack.push(16n);
+      stack.push(0n);
+      stack.push(1n);
+
+      op.execute(stack);
+
+      assert.equal(stack.length(), 1);
+      assert.equal(stack.pop(), 17n);
+
+      stack.push(15n);
+      stack.push(0n);
+      stack.push(0n);
+
+      op.execute(stack);
+
+      assert.equal(stack.length(), 1);
+      assert.equal(stack.pop(), 14n);
+
+      stack.push(0n);
+      stack.push(63n);
+      stack.push(1n);
+
+      op.execute(stack);
+
+      assert.equal(stack.length(), 1);
+      assert.equal(stack.pop(), 2n ** 63n);
+    });
+
+    it("should panic if index bit is not uint64", () => {
+      const op = new SetBit([], 0);
+      stack.push(0n); // target
+      stack.push(new Uint8Array([1, 2])); // index
+      stack.push(1n); // bit
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
+      );
+    });
+
+    it("should panic if set bit is not uint64", () => {
+      const op = new SetBit([], 0);
+      stack.push(0n); // target
+      stack.push(4n); // index
+      stack.push(new Uint8Array([1, 2])); // bit
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
+      );
+    });
+
+    it("should panic if stack length is less than 3", () => {
+      const op = new SetBit([], 0);
+      stack.push(0n);
+      stack.push(4n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
+    });
+
+    it("should panic if set bit is greater than 1", () => {
+      const op = new SetBit([], 0);
+      stack.push(0n);
+      stack.push(4n);
+      stack.push(20n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SET_BIT_VALUE_ERROR
+      );
+    });
+
+    it("should panic if set bit index is greater than 63", () => {
+      const op = new SetBit([], 0);
+      stack.push(0n);
+      stack.push(400n);
+      stack.push(1n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_ERROR
+      );
+    });
+
+    it("should set bit in bytes array", () => {
+      const op = new SetBit([], 0);
+      stack.push(new Uint8Array([0, 0, 0])); // target
+      stack.push(8n); // index
+      stack.push(1n); // bit
+
+      // set 8 th bit of bytes to 1 i.e 8th bit will be highest order bit of second byte
+      // so second byte will become 2 ** 7 = 128
+      op.execute(stack);
+
+      assert.equal(stack.length(), 1);
+      assert.deepEqual(stack.pop(), new Uint8Array([0, 2 ** 7, 0]));
+
+      // set bit again to 0
+      stack.push(new Uint8Array([0, 2 ** 7, 0])); // target
+      stack.push(8n); // index
+      stack.push(0n); // bit
+
+      op.execute(stack);
+
+      assert.equal(stack.length(), 1);
+      assert.deepEqual(stack.pop(), new Uint8Array([0, 0, 0]));
+
+      stack.push(new Uint8Array([0, 2 ** 7, 0])); // target
+      stack.push(0n); // index
+      stack.push(1n); // bit
+
+      op.execute(stack);
+
+      assert.equal(stack.length(), 1);
+      assert.deepEqual(stack.pop(), new Uint8Array([2 ** 7, 2 ** 7, 0]));
+
+      stack.push(new Uint8Array([0, 2 ** 7, 0])); // target
+      stack.push(7n); // index
+      stack.push(1n); // bit
+
+      op.execute(stack);
+
+      assert.equal(stack.length(), 1);
+      assert.deepEqual(stack.pop(), new Uint8Array([1, 2 ** 7, 0]));
+    });
+
+    it("should panic if index bit in out of bytes array", () => {
+      const op = new SetBit([], 0);
+      stack.push(new Uint8Array([0, 0, 0])); // target
+      stack.push(80n); // index
+      stack.push(1n); // bit
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_BYTES_ERROR
+      );
     });
   });
 });

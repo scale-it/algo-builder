@@ -179,7 +179,7 @@ export class Op {
 
   /**
    * Parses binary string into bigint
-   * @param binary Binary string
+   * @param binary Binary string array
    */
   parseToBigInt (binary: string[]): bigint {
     let res = 0n;
