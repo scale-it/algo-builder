@@ -2291,9 +2291,7 @@ export class SetBit extends Op {
     }
 
     if (typeof target === "bigint") {
-      if (index > 63n) {
-        throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_ERROR, { line: this.line });
-      }
+      this.assert64BitIndex(index, this.line);
       const binaryStr = target.toString(2);
       const binaryArr = [...(binaryStr.padStart(64, "0"))];
       const size = binaryArr.length;
@@ -2301,9 +2299,7 @@ export class SetBit extends Op {
       stack.push(this.parseToBigInt(binaryArr));
     } else {
       const byteIndex = Math.floor(Number(index) / 8);
-      if (byteIndex >= target.length) {
-        throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_BYTES_ERROR, { line: this.line });
-      }
+      this.assertBytesIndex(byteIndex, target.length, this.line);
 
       const targetBit = Number(index) % 8;
       // 8th bit in a bytes array will be highest order bit in second element
@@ -2342,17 +2338,13 @@ export class GetBit extends Op {
     const target = stack.pop();
 
     if (typeof target === "bigint") {
-      if (index > 63n) {
-        throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_ERROR, { line: this.line });
-      }
+      this.assert64BitIndex(index, this.line);
       const binaryStr = target.toString(2);
       const size = binaryStr.length;
       stack.push(BigInt(binaryStr[size - Number(index) - 1]));
     } else {
       const byteIndex = Math.floor(Number(index) / 8);
-      if (byteIndex >= target.length) {
-        throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_BYTES_ERROR, { line: this.line });
-      }
+      this.assertBytesIndex(byteIndex, target.length, this.line);
 
       const targetBit = Number(index) % 8;
       const binary = target[byteIndex].toString(2);

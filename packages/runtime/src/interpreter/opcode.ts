@@ -107,6 +107,28 @@ export class Op {
   }
 
   /**
+   * asserts if given index lies in 64 bit unsigned integer
+   * @param index Index
+   * @param line line number in TEAL file
+   */
+  assert64BitIndex (index: bigint, line: number): void {
+    if (index > 63n) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_ERROR, { line: line });
+    }
+  }
+
+  /**
+   * asserts if given index lies in bytes array
+   * @param index Index
+   * @param line line number in TEAL file
+   */
+  assertBytesIndex (index: number, max: number, line: number): void {
+    if (index >= max) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_BYTES_ERROR, { line: line });
+    }
+  }
+
+  /**
    * Returns substring from given string (if it exists)
    * @param start starting index
    * @param end ending index
