@@ -2295,7 +2295,7 @@ export class SetBit extends Op {
         throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_ERROR, { line: this.line });
       }
       const binaryStr = target.toString(2);
-      const binaryArr = [...(binaryStr.padStart(65 - binaryStr.length, "0"))];
+      const binaryArr = [...(binaryStr.padStart(64, "0"))];
       const size = binaryArr.length;
       binaryArr[size - Number(index) - 1] = bit === 0n ? "0" : "1";
       stack.push(this.parseToBigInt(binaryArr));
@@ -2349,14 +2349,15 @@ export class GetBit extends Op {
       const size = binaryStr.length;
       stack.push(BigInt(binaryStr[size - Number(index) - 1]));
     } else {
-      const byteIndex = Number(index) / 8;
+      const byteIndex = Math.floor(Number(index) / 8);
       if (byteIndex >= target.length) {
         throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_BYTES_ERROR, { line: this.line });
       }
 
-      const targetBit = byteIndex % 8;
+      const targetBit = Number(index) % 8;
       const binary = target[byteIndex].toString(2);
-      stack.push(BigInt(binary[binary.length - Number(targetBit) - 1]));
+      const str = binary.padStart(8, "0");
+      stack.push(BigInt(str[targetBit]));
     }
   }
 }
