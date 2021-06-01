@@ -2282,12 +2282,10 @@ export class Setbit extends Op {
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 3, this.line);
-    const bit = stack.pop();
-    const index = stack.pop();
+    const bit = this.assertBigInt(stack.pop(), this.line);
+    const index = this.assertBigInt(stack.pop(), this.line);
     const target = stack.pop();
 
-    this.assertBigInt(bit, this.line);
-    this.assertBigInt(index, this.line);
     if (bit > 1n) {
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_VALUE_ERROR, { line: this.line });
     }
@@ -2338,10 +2336,9 @@ export class GetBit extends Op {
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2, this.line);
-    const index = stack.pop();
+    const index = this.assertBigInt(stack.pop(), this.line);
     const target = stack.pop();
 
-    this.assertBigInt(index, this.line);
     if (typeof target === "bigint") {
       if (index > 63n) {
         throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_ERROR, { line: this.line });
@@ -2359,5 +2356,62 @@ export class GetBit extends Op {
       const binary = target[byteIndex].toString(2);
       stack.push(BigInt(binary[binary.length - Number(targetBit) - 1]));
     }
+  }
+}
+
+// pop a byte-array A, integer B, and
+// small integer C (between 0..255). Set the Bth byte of A to C, and push the result
+export class SetBytes extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 3, this.line);
+    const smallInteger = this.assertBigInt(stack.pop(), this.line);
+    const index = this.assertBigInt(stack.pop(), this.line);
+    const target = this.assertBytes(stack.pop(), this.line);
+    this.assertUint8(smallInteger, this.line);
+
+    if (Number(index) >= target.length) {
+      // error "setbyte index > byte length"
+    }
+
+    target[Number(index)] = Number(smallInteger);
+    stack.push(target);
+  }
+}
+
+// pop a byte-array A and integer B. Extract the Bth byte of A and push it as an integer
+export class GetBytes extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    const index = this.assertBigInt(stack.pop(), this.line);
+    const target = this.assertBytes(stack.pop(), this.line);
+
+    if (Number(index) >= target.length) {
+      // error "setbyte index > byte length" ? >=
+    }
+    stack.push(BigInt(target[Number(index)]));
   }
 }
