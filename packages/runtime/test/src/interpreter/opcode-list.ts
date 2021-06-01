@@ -17,6 +17,7 @@ import {
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
   Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, PushBytes, PushInt, Return,
+  SetBit,
   Sha256, Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8 } from "../../../src/lib/constants";
@@ -3209,6 +3210,17 @@ describe("Teal Opcodes", function () {
         () => op.execute(stack),
         RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
       );
+    });
+  });
+
+  describe("SetBit", () => {
+    let stack: Stack<StackElem>;
+    this.beforeEach(() => { stack = new Stack<StackElem>(); });
+
+    it("should set bit", () => {
+      const op = new SetBit([], 0);
+      stack.push(5n);
+      stack.push(10n);
     });
   });
 });

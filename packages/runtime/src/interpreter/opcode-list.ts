@@ -2267,7 +2267,7 @@ export class Swap extends Op {
  * (as seen in getbyte and substring). Setting bits 0 through 11 to 1
  * in a 4 byte-array of 0s yields byte 0xfff00000
  */
-export class Setbit extends Op {
+export class SetBit extends Op {
   readonly line: number;
   /**
    * Asserts 0 arguments are passed.
