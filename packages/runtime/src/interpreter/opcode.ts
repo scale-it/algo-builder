@@ -1,7 +1,7 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
-import { GlobalFields, MAX_UINT8, MAX_UINT64, MIN_UINT8, MIN_UINT64, TxnFields } from "../lib/constants";
+import { GlobalFields, MAX_UINT8, MAX_UINT64, MIN_UINT8, MIN_UINT64, TxArrFields, TxnFields } from "../lib/constants";
 import type { TEALStack } from "../types";
 
 export class Op {
@@ -144,7 +144,7 @@ export class Op {
    * @param line line number in TEAL file
    */
   assertTxArrFieldDefined (str: string, tealVersion: number, line: number): void {
-    if (!(tealVersion >= 2 && (str === 'Accounts' || str === 'ApplicationArgs'))) {
+    if (!TxArrFields[tealVersion].has(str)) {
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_OP_ARG,
         { opcode: "txna or gtxna", version: tealVersion, line: line });
     }
