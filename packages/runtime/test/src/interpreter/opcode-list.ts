@@ -2072,6 +2072,8 @@ describe("Teal Opcodes", function () {
     describe("Gtxn", function () {
       before(function () {
         const tx = interpreter.runtime.ctx.tx;
+        // a) 'apas' represents 'foreignAssets', b) 'apfa' represents 'foreignApps' (id's of foreign apps)
+        // https://developer.algorand.org/docs/reference/transactions/
         const tx2 = { ...tx, fee: 2222, apas: [3033, 4044], apfa: [5005, 6006, 7077] };
         interpreter.runtime.ctx.gtxs = [tx, tx2];
       });
