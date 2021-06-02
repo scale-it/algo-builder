@@ -3,8 +3,8 @@
  * This file demonstrates how to change owner of ASA owned by
  * smart contract account(stateless).
  */
-const { executeTransaction } = require('@algo-builder/algob');
-const { types, stringToBytes, addressToPk } = require('@algo-builder/runtime');
+const { executeTransaction, convert } = require('@algo-builder/algob');
+const { types } = require('@algo-builder/runtime');
 const { mkParam } = require('../common');
 
 async function run (runtimeEnv, deployer) {
@@ -18,7 +18,7 @@ async function run (runtimeEnv, deployer) {
   const appInfo = deployer.getSSC('5-contract-asa-stateful.py', '5-clear.py');
 
   // App argument to change_owner.
-  const appArgs = [stringToBytes('change_owner'), addressToPk(bob.addr)];
+  const appArgs = [convert.stringToBytes('change_owner'), convert.addressToPk(bob.addr)];
 
   const tx = {
     type: types.TransactionType.CallNoOpSSC,
