@@ -169,7 +169,6 @@ export class Ctx implements Context {
       rekeyTo: flags.rekeyTo
     };
     this.optIntoASA(this.state.assetCounter, senderAcc.address, payFlags); // opt-in for creator
-
     return this.state.assetCounter;
   }
 
@@ -258,7 +257,6 @@ export class Ctx implements Context {
 
     const account = this.getAccount(accountAddr);
     account.optInToApp(appID, appParams);
-
     this.runtime.run(appParams[approvalProgramConst], ExecutionMode.STATEFUL);
   }
 
@@ -588,7 +586,7 @@ export class Ctx implements Context {
           break;
         }
         case TransactionType.OptInSSC: {
-          this.tx = this.gtxs[idx]; // update current tx to the requested index
+          this.tx = this.gtxs[idx]; // update current tx to txn being exectuted in group
 
           this.optInToApp(fromAccountAddr, txnParam.appID);
           break;
