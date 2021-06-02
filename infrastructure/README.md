@@ -7,12 +7,15 @@ This directory (`/infrastructure`) provides an example setup for a private-net, 
 
 Use `make` to run tasks to `create`, `start-private-net`, `stop-private-net`.
 
-If you want to create a local network by your own, you can use a private net [tutorial](https://developer.algorand.org/tutorials/create-private-network/).
+If you want to create a local network without using our scripts then you can follow this [tutorial](https://developer.algorand.org/tutorials/create-private-network/**.
+
 
 ## Quick start
 
-1. Install latest Algorand node. Use on of the options described in [algorand run-a-node](https://developer.algorand.org/docs/run-a-node/setup/install/)  documentation.
-1. Make sure the algorand node is installed correctly and disable algorand service if you installed algorand node using a package:
+**TL;DR**: Make sure you have Algorand Node (`algod` and `goal`) and `make` installed. Then `cd infrastructure; make setup-private-net`. To reset use `recreate-private-net`.
+
+1. Install the latest Algorand node. Use one of the options described in the [Algorand installation](https://developer.algorand.org/docs/run-a-node/setup/install/)  documentation.
+1. Make sure the algorand node is installed correctly. You can disable algorand service if you installed algorand node using a package:
 
         algod -v
         [optional] systemctl stop algod
@@ -23,7 +26,7 @@ If you want to create a local network by your own, you can use a private net [tu
         cd infrastructure
         make create-private-net
 
-1. Check the access token and network address. You will need them in your config file to correctly connect to a node. The network configuration (PrimaryNode/config.json) and token created using the `make create-private-net` command is fixed and shared in this repository, to match the one used in examples and default `algob.config`. Don't expose the node externally. Otherwise you will need to setup a firewall and generate a new token. You can see the network and a port by opening the following files:
+1. Check the access token and network address. You will need them in your config file to correctly connect to a node. When using `make create-private-net` the script will set the network configuration (PrimaryNode/config.json) and token for you to match the `algob.config` used in all our examples. Don't expose the node externally - otherwise you will need to setup a firewall and generate a new token. You can see the network and a port by opening the following files:
 
         cat node_data/PrimaryNode/algod.net
         cat node_data/PrimaryNode/algod.token
@@ -38,7 +41,7 @@ If you want to create a local network by your own, you can use a private net [tu
         make setup-master-account
 
 
-The command below will combine all the steps above(create network, start network, setup master account and show network status):
+The command below will combine all the steps above (create network, start network, setup master account and show network status):
 
     make setup-private-net
 
@@ -58,6 +61,7 @@ To connect from SDK or REST we need to know the network address and authorizatio
 
     cat $ALGORAND_DATA/algod.net
     cat $ALGORAND_DATA/algod.token
+
 
 ## Using Sandbox 2.0
 
@@ -79,6 +83,7 @@ Algorand Sandbox is a fast way to create and configure an Algorand development e
 2. Algod port is set to `8081` and kmd port is set to `8082`. Make sure to update the port in `algob.config` before running the examples.
 
 To learn more about sandbox, click [here](https://github.com/algorand/sandbox#algorand-sandbox).
+
 ### Example REST requests
 
 Private Net
@@ -88,6 +93,7 @@ Private Net
 Purestake:
 
     curl -X GET "https://testnet-algorand.api.purestake.io/ps1/versions" -H "x-api-key:<api-key>"
+
 
 ## KMD
 
