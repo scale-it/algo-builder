@@ -121,6 +121,12 @@ export interface Context {
   deleteApp: (appId: number) => void
   closeApp: (sender: AccountAddress, appId: number) => void
   processTransactions: (txnParams: ExecParams[]) => void
+  addAsset: (name: string, fromAccountAddr: string, flags: ASADeploymentFlags) => number
+  optIntoASA: (assetIndex: number, address: AccountAddress, flags: TxParams) => void
+  addApp: (
+    fromAccountAddr: string, flags: SSCDeploymentFlags, payFlags: TxParams,
+    approvalProgram: string, clearProgram: string
+  ) => number
 }
 
 // custom AssetHolding for AccountStore (using bigint in amount instead of number)
