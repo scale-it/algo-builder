@@ -1,8 +1,9 @@
-import { AssetDef } from "algosdk";
+import { AssetDef, makeAssetTransferTxnWithSuggestedParams } from "algosdk";
 
 import { getFromAddress, Runtime } from ".";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
+import { mockSuggestedParams } from "./mock/tx";
 import {
   AccountAddress, AccountStoreI, AlgoTransferParam, ASADeploymentFlags, AssetHoldingM, AssetModFields,
   AssetTransferParam, Context, ExecParams, ExecutionMode,
@@ -137,7 +138,7 @@ export class Ctx implements Context {
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  addAsset (name: string, fromAccountAddr: string): number {
+  addAsset (name: string, fromAccountAddr: string, flags: ASADeploymentFlags): number {
     const senderAcc = this.getAccount(fromAccountAddr);
 
     // create asset
@@ -145,6 +146,7 @@ export class Ctx implements Context {
       ++this.state.assetCounter, name,
       this.runtime.loadedAssetsDefs[name]
     );
+    this.runtime.mkAssetCreateTx(name, flags, asset);
 
     this.state.assetDefs.set(this.state.assetCounter, senderAcc.address);
     this.state.assetNameInfo.set(name, {
@@ -155,7 +157,18 @@ export class Ctx implements Context {
       confirmedRound: this.runtime.getRound()
     });
 
-    this.optIntoASA(this.state.assetCounter, senderAcc.address); // opt-in for creator
+    const payFlags: TxParams = {
+      feePerByte: flags.feePerByte,
+      totalFee: flags.totalFee,
+      firstValid: flags.firstValid,
+      validRounds: flags.validRounds,
+      lease: flags.lease,
+      note: flags.note,
+      noteb64: flags.noteb64,
+      closeRemainderTo: flags.closeRemainderTo,
+      rekeyTo: flags.rekeyTo
+    };
+    this.optIntoASA(this.state.assetCounter, senderAcc.address, payFlags); // opt-in for creator
 
     return this.state.assetCounter;
   }
@@ -166,9 +179,12 @@ export class Ctx implements Context {
    * @param address Account address to opt-into asset
    * @param flags Transaction Parameters
    */
-  optIntoASA (assetIndex: number, address: AccountAddress): void {
+  optIntoASA (assetIndex: number, address: AccountAddress, flags: TxParams): void {
     const assetDef = this.getAssetDef(assetIndex);
     const creatorAddr = assetDef.creator;
+    makeAssetTransferTxnWithSuggestedParams(
+      address, address, undefined, undefined, 0, undefined, assetIndex,
+      mockSuggestedParams(flags, this.runtime.getRound()));
 
     const assetHolding: AssetHoldingM = {
       amount: address === creatorAddr ? BigInt(assetDef.total) : 0n, // for creator opt-in amount is total assets
@@ -539,13 +555,18 @@ export class Ctx implements Context {
         }
         case TransactionType.DeployASA: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
+          const senderAcc = this.getAccount(fromAccountAddr);
+          const name = txnParam.asaName;
+          const flags: ASADeploymentFlags = {
+            ...txnParam.payFlags,
+            creator: { ...senderAcc.account, name: senderAcc.address }
+          };
 
-          this.addAsset(txnParam.asaName, fromAccountAddr);
+          this.addAsset(name, fromAccountAddr, flags);
           break;
         }
         case TransactionType.OptInASA: {
-          const senderAcc = this.getAccount(fromAccountAddr);
-          this.optIntoASA(this.state.assetCounter, senderAcc.address);
+          this.optIntoASA(txnParam.assetID as number, fromAccountAddr, txnParam.payFlags);
           break;
         }
         case TransactionType.DeploySSC: {
