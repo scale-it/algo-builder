@@ -6,11 +6,11 @@ import {
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
-  Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2, Ed25519verify,
+  Byte, Bytec, Bytecblock, Concat, Dig, Div, Dup, Dup2, Ed25519verify,
   EqualTo, Err, GetAssetDef, GetAssetHolding, Global, GreaterThan,
-  GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc, Intcblock, Itob,
+  GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Intcblock, Itob,
   Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, Mod,
-  Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, Sha256,
+  Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, Select, Sha256,
   Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../interpreter/opcode-list";
 import { LogicSigMaxCost, LogicSigMaxSize, MaxAppProgramCost, MaxAppProgramLen, OpGasCost } from "../lib/constants";
@@ -128,19 +128,18 @@ opCodeMap[3] = {
 
   assert: Assert,
   swap: Swap,
+  dig: Dig,
+  select: Select,
+
+  // txn ops in tealv3
+  gtxns: Gtxns,
+  gtxnsa: Gtxnsa,
 
   // optimized opcodes for pushing uint64s and byte slices to the stack
   pushint: PushInt,
   pushbytes: PushBytes
 
   /*
-  dig: Dig,
-  select: Select,
-
-  // txn ops in tealv3
-  gtxnsf: Gtxnsf,
-  gtxnsa: Gtxnsa,
-
   // bit & byte opcodes
   getbit: Getbit,
   setbit: Setbit,
@@ -158,7 +157,8 @@ const interpreterReqList = new Set([
   "load", "b", "bz", "bnz", "return", "txn", "gtxn", "txna", "gtxna", "global",
   "balance", "asset_holding_get", "asset_params_get", "app_opted_in",
   "app_local_get", "app_local_get_ex", "app_global_get", "app_global_get_ex",
-  "app_local_put", "app_global_put", "app_local_del", "app_global_del"
+  "app_local_put", "app_global_put", "app_local_del", "app_global_del",
+  "gtxns", "gtxnsa"
 ]);
 
 /**

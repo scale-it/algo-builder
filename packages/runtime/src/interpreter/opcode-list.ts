@@ -13,6 +13,7 @@ import {
   assertLen, assertOnlyDigits, convertToBuffer,
   convertToString, getEncoding, stringToBytes
 } from "../lib/parsing";
+import { Stack } from "../lib/stack";
 import { txAppArg, txnSpecbyField } from "../lib/txn";
 import { EncodingType, StackElem, TEALStack, TxnOnComplete, TxnType } from "../types";
 import { Interpreter } from "./interpreter";
@@ -1236,10 +1237,10 @@ export class Txn extends Op {
 // push to stack [...stack, transaction field]
 export class Gtxn extends Op {
   readonly field: string;
-  readonly txIdx: number;
   readonly txFieldIdx: number | undefined;
   readonly interpreter: Interpreter;
   readonly line: number;
+  protected txIdx: number;
 
   /**
    * Sets `field`, `txIdx` values according to arguments passed.
@@ -1336,10 +1337,10 @@ export class Txna extends Op {
  */
 export class Gtxna extends Op {
   readonly field: string;
-  readonly txIdx: number; // transaction group index
   readonly idx: number; // array index
   readonly interpreter: Interpreter;
   readonly line: number;
+  protected txIdx: number; // transaction group index
 
   /**
    * Sets `field`(Transaction Field), `idx`(Array Index) and
@@ -1367,7 +1368,7 @@ export class Gtxna extends Op {
 
   execute (stack: TEALStack): void {
     this.assertUint8(BigInt(this.txIdx), this.line);
-
+    this.checkIndexBound(this.txIdx, this.interpreter.runtime.ctx.gtxs, this.line);
     const tx = this.interpreter.runtime.ctx.gtxs[this.txIdx];
     const result = txAppArg(this.field, tx, this.idx, this, this.interpreter.tealVersion, this.line);
     stack.push(result);
@@ -2257,5 +2258,125 @@ export class Swap extends Op {
     const b = stack.pop();
     stack.push(a);
     stack.push(b);
+  }
+}
+
+// push the Nth value (0 indexed) from the top of the stack.
+// pops from stack: [...stack]
+// pushes to stack: [...stack, any (nth slot from top of stack)]
+// NOTE: dig 0 is same as dup
+export class Dig extends Op {
+  readonly line: number;
+  readonly depth: number;
+
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [ depth ] // slot to duplicate
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 1, line);
+    assertOnlyDigits(args[0], line);
+
+    this.assertUint8(BigInt(args[0]), line);
+    this.depth = Number(args[0]);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, this.depth + 1, this.line);
+    const tempStack = new Stack<StackElem>(this.depth + 1); // depth = 2 means 3rd slot from top of stack
+    let copy;
+    for (let i = 0; i <= this.depth; i++) {
+      const top = stack.pop();
+      tempStack.push(top);
+      if (i === this.depth) { copy = top; }
+    }
+    while (tempStack.length()) { stack.push(tempStack.pop()); }
+    stack.push(copy as StackElem);
+  }
+}
+
+// selects one of two values based on top-of-stack: A, B, C -> (if C != 0 then B else A)
+// pops from stack: [...stack, {any A}, {any B}, {uint64 C}]
+// pushes to stack: [...stack, any (A or B)]
+export class Select extends Op {
+  readonly line: number;
+
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 3, this.line);
+    const toCheck = this.assertBigInt(stack.pop(), this.line);
+    const notZeroSelection = stack.pop();
+    const isZeroSelection = stack.pop();
+
+    if (toCheck !== 0n) { stack.push(notZeroSelection); } else { stack.push(isZeroSelection); }
+  }
+}
+
+/**
+ * push field F of the Ath transaction (A = top of stack) in the current group
+ * pops from stack: [...stack, uint64]
+ * pushes to stack: [...stack, transaction field]
+ * NOTE: "gtxns field" is equivalent to "gtxn _i_ field" (where _i_ is fetched from stack).
+ * gtxns exists so that i can be calculated, often based on the index of the current transaction.
+ */
+export class Gtxns extends Gtxn {
+  /**
+   * Sets `field`, `txIdx` values according to arguments passed.
+   * @param args Expected arguments: [transaction field]
+   * // Note: Transaction field is expected as string instead of number.
+   * For ex: `Fee` is expected and `0` is not expected.
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super(["100", ...args], line, interpreter);
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const top = this.assertBigInt(stack.pop(), this.line);
+    this.assertUint8(top, this.line);
+    this.txIdx = Number(top);
+    super.execute(stack);
+  }
+}
+
+/**
+ * push Ith value of the array field F from the Ath (A = top of stack) transaction in the current group
+ * pops from stack: [...stack, uint64]
+ * push to stack [...stack, value of field]
+ */
+export class Gtxnsa extends Gtxna {
+  /**
+   * Sets `field`(Transaction Field), `idx`(Array Index) values according to arguments passed.
+   * @param args Expected arguments: [transaction field(F), transaction field array index(I)]
+   * // Note: Transaction field is expected as string instead of number.
+   * For ex: `Fee` is expected and `0` is not expected.
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super(["100", ...args], line, interpreter);
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const top = this.assertBigInt(stack.pop(), this.line);
+    this.assertUint8(top, this.line);
+    this.txIdx = Number(top);
+    super.execute(stack);
   }
 }

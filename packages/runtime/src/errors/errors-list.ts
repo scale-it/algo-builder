@@ -38,7 +38,7 @@ permissible range of 1 to 256`
   },
   INVALID_OP_ARG: {
     number: 1002,
-    message: "Error encountered while executing teal with opcode %opcode% for teal version #%version% at line %line%",
+    message: "Opcode \"%opcode%\" is invalid or does not exist for teal version #%version% at line %line%",
     title: "Invalid Operation",
     description: `Error encountered in stack while executing teal opcode %opcode%`
   },
