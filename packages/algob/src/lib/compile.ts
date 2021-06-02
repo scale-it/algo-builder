@@ -9,7 +9,7 @@ import { BuilderError, parseAlgorandError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import { assertDir, ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
 import { timestampNow } from "../lib/time";
-import type { ASCCache, PyASCCache, SCParams } from "../types";
+import type { ASCCache, PyASCCache, ReplaceParams, SCParams } from "../types";
 
 export const tealExt = ".teal";
 export const pyExt = ".py";
@@ -130,14 +130,28 @@ export class PyCompileOp {
       throw new Error(`filename "${filename}" must end with "${pyExt}"`);
     }
 
-    console.log("PyTEAL template parameters:", scTmplParams);
-    let param: string | undefined = YAML.stringify(scTmplParams);
-    if (scTmplParams === undefined) { param = undefined; }
+    let param: string | undefined;
+    const replaceParams: ReplaceParams = {};
+    if (scTmplParams === undefined) {
+      param = undefined;
+    } else {
+      const tmp: SCParams = {};
+      for (const i in scTmplParams) {
+        if (i.startsWith("TMPL_") || i.startsWith("tmpl_")) {
+          replaceParams[i] = scTmplParams[i].toString();
+        } else {
+          tmp[i] = scTmplParams[i];
+        }
+      }
+      console.log("PyTEAL template parameters:", tmp);
+      param = YAML.stringify(tmp);
+    }
+    console.log("TEAL replacement parameters:", replaceParams);
 
-    const content = this.compilePyTeal(filename, param);
-
-    // replace values here
-
+    let content = this.compilePyTeal(filename, param);
+    if (YAML.stringify({}) !== YAML.stringify(replaceParams)) {
+      content = this.replaceTempValues(content, replaceParams);
+    }
     const [teal, thash] = [content, murmurhash.v3(content)];
 
     const a = await this.readArtifact(filename);
@@ -162,6 +176,18 @@ export class PyCompileOp {
     const cacheFilename = path.join(CACHE_DIR, filename + ".yaml");
     this.compileOp.writeFile(cacheFilename, YAML.stringify(pyCompiled));
     return pyCompiled;
+  }
+
+  /**
+   * Replaces parameters with the values passed
+   * @param program Teal program
+   * @param replaceParams params that needs to be replaced in program
+   */
+  replaceTempValues (program: string, replaceParams: ReplaceParams): string {
+    for (const param in replaceParams) {
+      program.replaceAll(param, replaceParams[param]);
+    }
+    return program;
   }
 
   async readArtifact (filename: string): Promise<PyASCCache | undefined> {
