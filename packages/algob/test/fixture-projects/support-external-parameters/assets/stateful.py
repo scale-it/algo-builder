@@ -4,10 +4,10 @@ from algobpy.parse import parse_params
 
 from pyteal import *
 
-def approval_program(asset_amt, tmpl_sender):
+def approval_program(asset_amt, ARG_sender):
   on_creation = Seq([
     Assert(Txn.asset_amount() <= asset_amt),
-    Assert(Txn.sender() == tmpl_sender),
+    Assert(Txn.sender() == ARG_sender),
     App.localPut(Int(0), Bytes("admin"), Int(1)),
     App.localPut(Int(0), Bytes("balance"), Int(0)),
     Return(Int(1))
@@ -29,7 +29,7 @@ if __name__ == "__main__":
 
   #replace these values with your customized values or pass an external parameter
   scParam = {
-    "TMPL_SENDER": "M7VR2MGHI35EG2NMYOF3X337636PIOFVSP2HNIFUKAG7WW6BDWDCA3E2DA",
+    "ARG_SENDER": "M7VR2MGHI35EG2NMYOF3X337636PIOFVSP2HNIFUKAG7WW6BDWDCA3E2DA",
     "ASSET_AMT": Int(1000)
   }
 
@@ -37,5 +37,5 @@ if __name__ == "__main__":
   if(len(sys.argv) > 1):
     scParam = parse_params(sys.argv[1], scParam)
   
-  print(compileTeal(approval_program(scParam["ASSET_AMT"], Addr(scParam["TMPL_SENDER"])), Mode.Application))
+  print(compileTeal(approval_program(scParam["ASSET_AMT"], Addr(scParam["ARG_SENDER"])), Mode.Application))
     

@@ -135,6 +135,9 @@ export class PyCompileOp {
     if (scTmplParams === undefined) { param = undefined; }
 
     const content = this.compilePyTeal(filename, param);
+
+    // replace values here
+
     const [teal, thash] = [content, murmurhash.v3(content)];
 
     const a = await this.readArtifact(filename);
