@@ -5,15 +5,15 @@ import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
   Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx,
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
-  AppOptedIn, Arg, Balance, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
+  AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
   Branch, BranchIfNotZero, BranchIfZero, Btoi, Byte, Bytec, Concat, Div,
   Dup, Dup2, Ed25519verify, EqualTo, Err, GetAssetDef, GetAssetHolding,
   Global, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc, Itob,
   Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, Mod, Mul, Mulw,
-  Not, NotEqualTo, Or, Pop, Pragma, Return, Sha256, Sha512_256, Store,
-  Sub, Substring, Substring3, Txn, Txna
+  Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, Sha256, Sha512_256, Store,
+  Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
-import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
+import { MAX_UINT64, MaxTEALVersion, MIN_UINT64 } from "../../../src/lib/constants";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
 import { Runtime } from "../../../src/runtime";
 import { ExecutionMode } from "../../../src/types";
@@ -266,7 +266,7 @@ describe("Parser", function () {
     let interpreter: Interpreter;
     beforeEach(function () {
       interpreter = new Interpreter();
-      interpreter.tealVersion = 2;
+      interpreter.tealVersion = MaxTEALVersion;
     });
 
     it("should return correct opcode object for '+'", () => {
@@ -656,6 +656,67 @@ describe("Parser", function () {
         RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
       );
     });
+
+    describe("should return correct opcodes for tealv3 ops", () => {
+      it("assert", () => {
+        const res = opcodeFromSentence(["assert"], 1, interpreter);
+        const expected = new Assert([], 1);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["assert", "1234"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("pushint", () => {
+        const res = opcodeFromSentence(["pushint", "345"], 1, interpreter);
+        const expected = new PushInt(["345"], 1);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["pushint", "345", "456"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+
+        expectRuntimeError( // Int Constants(eg. NoOp) works with int x
+          () => opcodeFromSentence(["pushint", "NoOp"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.INVALID_TYPE
+        );
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["pushint", (MAX_UINT64 + 10n).toString()], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
+        );
+      });
+
+      it("pushbytes", () => {
+        const res = opcodeFromSentence(["pushbytes", `"Algorand"`], 1, interpreter);
+        const expected = new PushBytes([`"Algorand"`], 1);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["pushbytes", `"Algorand"`, `"Blockchain"`], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["pushbytes", `0x250001000192CD0000002F6D6E742F72`], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.UNKOWN_DECODE_TYPE
+        );
+      });
+
+      it("swap", () => {
+        const res = opcodeFromSentence(["swap"], 1, interpreter);
+        const expected = new Swap([], 1);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["swap", "xyz"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+    });
   });
 
   const cryptoFile = "test-crypto.teal";
@@ -982,6 +1043,31 @@ describe("Parser", function () {
 
     it("Should return correct gas cost for 'Crypto opcodes' for tealversion 2", async () => {
       interpreter.tealVersion = 2;
+
+      let op = opcodeFromSentence(["sha256"], 1, interpreter);
+      assert.equal(interpreter.gas, 35);
+
+      interpreter.gas = 0;
+      op = opcodeFromSentence(["keccak256"], 2, interpreter);
+      assert.equal(interpreter.gas, 130);
+
+      interpreter.gas = 0;
+      op = opcodeFromSentence(["sha512_256"], 3, interpreter);
+      assert.equal(interpreter.gas, 45);
+
+      interpreter.gas = 0;
+      // eslint-disable-next-line
+      op = opcodeFromSentence(["ed25519verify"], 4, interpreter);
+      assert.equal(interpreter.gas, 1900);
+
+      interpreter.gas = 0;
+      parser(getProgram(cryptoFile), ExecutionMode.STATELESS, interpreter);
+      assert.equal(interpreter.gas, 2110); // 35 + 130 + 45 + 1900
+    });
+
+    // note: cost for cryto ops for teal version 2, 3 are same
+    it("Should return correct gas cost for 'Crypto opcodes' for tealversion 3", async () => {
+      interpreter.tealVersion = 3;
 
       let op = opcodeFromSentence(["sha256"], 1, interpreter);
       assert.equal(interpreter.gas, 35);

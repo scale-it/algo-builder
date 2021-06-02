@@ -8,7 +8,7 @@ import { DeployerDeployMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
 import { getDummyLsig } from "../../src/lib/lsig";
 import { CheckpointRepoImpl } from "../../src/lib/script-checkpoints";
-import { ASAInfo, Checkpoints, LsigInfo, SSCInfo } from "../../src/types";
+import { Checkpoints, LsigInfo } from "../../src/types";
 import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkEnv } from "../helpers/params";
 import { cleanupMutableData } from "../lib/script-checkpoints";
@@ -25,7 +25,7 @@ function mkASA (): rtypes.ASADef {
 
 describe("DeployerDeployMode", () => {
   let deployerCfg: DeployerConfig, env;
-  const mp = new Map<number, SSCInfo>();
+  const mp = new Map<number, rtypes.SSCInfo>();
 
   beforeEach(function () {
     env = mkEnv("network 123");
@@ -40,7 +40,7 @@ describe("DeployerDeployMode", () => {
     assert.deepEqual(cleanupMutableData(cpData.precedingCP["network 123"], 12345), {
       timestamp: 12345,
       metadata: new Map([["k", "v"]]),
-      asa: new Map<string, ASAInfo>(),
+      asa: new Map<string, rtypes.ASAInfo>(),
       ssc: new Map<string, typeof mp>(),
       dLsig: new Map<string, LsigInfo>()
     });
@@ -62,7 +62,7 @@ describe("DeployerDeployMode", () => {
       timestamp: 12345,
       metadata: new Map([["key 1", "val 1"],
         ["key 2", "val 2"]]),
-      asa: new Map<string, ASAInfo>(),
+      asa: new Map<string, rtypes.ASAInfo>(),
       ssc: new Map<string, typeof mp>(),
       dLsig: new Map<string, LsigInfo>()
     });
@@ -73,7 +73,7 @@ describe("DeployerDeployMode", () => {
       network1: {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map<string, typeof mp>(),
         dLsig: new Map<string, LsigInfo>()
       }
@@ -82,7 +82,7 @@ describe("DeployerDeployMode", () => {
       network2: {
         timestamp: 2,
         metadata: new Map([["key 2", "data 2"]]),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map<string, typeof mp>(),
         dLsig: new Map<string, LsigInfo>()
       }
@@ -94,14 +94,14 @@ describe("DeployerDeployMode", () => {
       network1: {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map<string, typeof mp>(),
         dLsig: new Map<string, LsigInfo>()
       },
       network2: {
         timestamp: 2,
         metadata: new Map([["key 2", "data 2"]]),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map<string, typeof mp>(),
         dLsig: new Map<string, LsigInfo>()
       }
@@ -140,7 +140,7 @@ describe("DeployerDeployMode", () => {
     const env = mkEnv("network1");
     const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
     const deployer = new DeployerDeployMode(deployerCfg);
-    const nestedMap = new Map<number, SSCInfo>();
+    const nestedMap = new Map<number, rtypes.SSCInfo>();
     nestedMap.set(1, {
       creator: "addr-1-get-address-dry-run",
       txId: "tx-id-dry-run",
@@ -281,7 +281,7 @@ describe("DeployerDeployMode", () => {
       network1: {
         timestamp: 1,
         metadata: new Map([["key 1", "data 1"]]),
-        asa: new Map<string, ASAInfo>(),
+        asa: new Map<string, rtypes.ASAInfo>(),
         ssc: new Map<string, typeof mp>(),
         dLsig: new Map<string, LsigInfo>([["MY_LSIG", {
           creator: "addr-1-get-address-dry-run",

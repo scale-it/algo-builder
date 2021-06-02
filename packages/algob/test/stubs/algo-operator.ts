@@ -5,11 +5,9 @@ import { Account, Algodv2, AssetInfo, ConfirmedTxInfo } from "algosdk";
 import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";
 import {
-  ASAInfo,
   ASCCache,
   FundASCFlags,
-  LsigInfo,
-  SSCInfo
+  LsigInfo
 } from "../../src/types";
 import { mockAlgod, mockAssetInfo, mockConfirmedTx } from "../mocks/tx";
 
@@ -44,7 +42,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   async deployASA (
     name: string, asaDef: rtypes.ASADef,
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap,
-    txnWriter: txWriter): Promise<ASAInfo> {
+    txnWriter: txWriter): Promise<rtypes.ASAInfo> {
     return {
       creator: flags.creator.addr + "-get-address-dry-run",
       txId: "tx-id-dry-run",
@@ -70,7 +68,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     flags: rtypes.SSCDeploymentFlags,
     payFlags: rtypes.TxParams,
     txWriter: txWriter,
-    scInitParam?: unknown): Promise<SSCInfo> {
+    scInitParam?: unknown): Promise<rtypes.SSCInfo> {
     return {
       creator: flags.sender.addr + "-get-address-dry-run",
       txId: "tx-id-dry-run",
@@ -88,7 +86,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     newClearProgram: string,
     flags: rtypes.SSCOptionalFlags,
     txWriter: txWriter
-  ): Promise<SSCInfo> {
+  ): Promise<rtypes.SSCInfo> {
     return {
       creator: sender.addr + "-get-address-dry-run",
       txId: "tx-id-dry-run",

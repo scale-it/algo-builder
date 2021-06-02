@@ -9,14 +9,12 @@ import YAML from "yaml";
 import { BuilderError } from "../internal/core/errors";
 import { ERRORS } from "../internal/core/errors-list";
 import {
-  ASAInfo,
   AssetScriptMap,
   Checkpoint,
   CheckpointRepo,
   Checkpoints,
   Deployer,
   LsigInfo,
-  SSCInfo,
   Timestamp
 } from "../types";
 
@@ -38,15 +36,15 @@ export function toScriptFileName (filename: string): string {
 export class CheckpointImpl implements Checkpoint {
   timestamp: number;
   metadata: Map<string, string>;
-  asa: Map<string, ASAInfo>;
-  ssc: Map<string, Map<Timestamp, SSCInfo>>;
+  asa: Map<string, rtypes.ASAInfo>;
+  ssc: Map<string, Map<Timestamp, rtypes.SSCInfo>>;
   dLsig: Map<string, LsigInfo>;
 
   constructor (metadata?: Map<string, string>) {
     this.timestamp = +new Date();
     this.metadata = (metadata === undefined ? new Map<string, string>() : metadata);
-    this.asa = new Map<string, ASAInfo>();
-    const mp = new Map<Timestamp, SSCInfo>();
+    this.asa = new Map<string, rtypes.ASAInfo>();
+    const mp = new Map<Timestamp, rtypes.SSCInfo>();
     this.ssc = new Map<string, typeof mp>();
     this.dLsig = new Map<string, LsigInfo>();
   }
@@ -138,25 +136,27 @@ export class CheckpointRepoImpl implements CheckpointRepo {
     return undefined;
   }
 
-  registerASA (networkName: string, name: string, info: ASAInfo): CheckpointRepo {
+  registerASA (networkName: string, name: string, info: rtypes.ASAInfo): CheckpointRepo {
     this._ensureNet(this.precedingCP, networkName).asa.set(name, info);
     this._ensureNet(this.strippedCP, networkName).asa.set(name, info);
     this._ensureNet(this.allCPs, networkName).asa.set(name, info);
     return this;
   }
 
-  private _ensureRegister (map: Map<string, Map<number, SSCInfo>>, name: string, info: SSCInfo): void {
+  private _ensureRegister (
+    map: Map<string, Map<number, rtypes.SSCInfo>>, name: string, info: rtypes.SSCInfo
+  ): void {
     const nestedMap = map.get(name);
     if (nestedMap) {
       nestedMap.set(info.timestamp, info);
     } else {
-      const newMap = new Map<number, SSCInfo>();
+      const newMap = new Map<number, rtypes.SSCInfo>();
       newMap.set(info.timestamp, info);
       map.set(name, newMap);
     }
   }
 
-  registerSSC (networkName: string, name: string, info: SSCInfo): CheckpointRepo {
+  registerSSC (networkName: string, name: string, info: rtypes.SSCInfo): CheckpointRepo {
     this._ensureRegister(this._ensureNet(this.precedingCP, networkName).ssc, name, info);
     this._ensureRegister(this._ensureNet(this.strippedCP, networkName).ssc, name, info);
     this._ensureRegister(this._ensureNet(this.allCPs, networkName).ssc, name, info);
@@ -210,7 +210,7 @@ export async function registerCheckpoints (
       case 'acfg': {
         txConfirmation = await deployer.waitForConfirmation(txn.txID());
         if (res) {
-          const asaInfo: ASAInfo = {
+          const asaInfo: rtypes.ASAInfo = {
             creator: encodeAddress(txn.from.publicKey),
             txId: txn.txID(),
             assetIndex: txConfirmation["asset-index"],
@@ -224,7 +224,7 @@ export async function registerCheckpoints (
       }
       case 'appl': {
         txConfirmation = await deployer.waitForConfirmation(txn.txID());
-        const sscInfo: SSCInfo = {
+        const sscInfo: rtypes.SSCInfo = {
           creator: encodeAddress(txn.from.publicKey),
           txId: txn.txID(),
           appID: txConfirmation['application-index'],
@@ -254,7 +254,9 @@ export function toMap <T> (obj: {[name: string]: T}): Map<string, T> {
 };
 
 // converts objects loaded from yaml file to nested map
-export function toSSCMap <T> (obj: {[name: string]: {[timestamp: string]: T}}): Map<string, Map<Timestamp, T>> {
+export function toSSCMap <T> (
+  obj: {[name: string]: {[timestamp: string]: T}}
+): Map<string, Map<Timestamp, T>> {
   const mp = new Map<string, Map<Timestamp, T>>();
   Object.keys(obj).forEach(k => {
     const nestedMp = new Map();

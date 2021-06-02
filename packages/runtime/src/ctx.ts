@@ -1,12 +1,14 @@
-import { AssetDef } from "algosdk";
+import { AssetDef, makeAssetTransferTxnWithSuggestedParams } from "algosdk";
 
 import { getFromAddress, Runtime } from ".";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
+import { mockSuggestedParams } from "./mock/tx";
 import {
-  AccountAddress, AccountStoreI, AlgoTransferParam, AssetHoldingM, AssetModFields,
+  AccountAddress, AccountStoreI, AlgoTransferParam, ASADeploymentFlags, AssetHoldingM, AssetModFields,
   AssetTransferParam, Context, ExecParams, ExecutionMode,
-  SignType, SSCAttributesM, State, TransactionType, Txn
+  SignType, SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
+  State, TransactionType, Txn, TxParams
 } from "./types";
 
 const approvalProgram = "approval-program";
@@ -129,6 +131,30 @@ export class Ctx implements Context {
       closeRemToAcc.amount += fromAccount.amount; // transfer funds of sender to closeRemTo account
       fromAccount.amount = 0n; // close sender's account
     }
+  }
+
+  /**
+   * Asset Opt-In for account in context
+   * @param assetIndex Asset Index
+   * @param address Account address to opt-into asset
+   * @param flags Transaction Parameters
+   */
+  optIntoASA (assetIndex: number, address: AccountAddress, flags: TxParams): void {
+    const assetDef = this.getAssetDef(assetIndex);
+    const creatorAddr = assetDef.creator;
+    makeAssetTransferTxnWithSuggestedParams(
+      address, address, undefined, undefined, 0, undefined, assetIndex,
+      mockSuggestedParams(flags, this.runtime.getRound()));
+
+    const assetHolding: AssetHoldingM = {
+      amount: address === creatorAddr ? BigInt(assetDef.total) : 0n, // for creator opt-in amount is total assets
+      'asset-id': assetIndex,
+      creator: creatorAddr,
+      'is-frozen': address === creatorAddr ? false : assetDef.defaultFrozen
+    };
+
+    const account = this.getAccount(address);
+    account.optInToASA(assetIndex, assetHolding);
   }
 
   /**
@@ -401,6 +427,97 @@ export class Ctx implements Context {
             throw new RuntimeError(RUNTIME_ERRORS.ASA.MANAGER_ERROR, { address: asset.manager });
           }
           this.destroyAsset(txnParam.assetID as number);
+          break;
+        }
+        case TransactionType.DeployASA: {
+          const senderAcc = this.getAccount(fromAccountAddr);
+          const name = txnParam.asaName;
+
+          // create asset
+          const asset = senderAcc.addAsset(
+            ++this.state.assetCounter, name,
+            this.runtime.loadedAssetsDefs[name]
+          );
+          const flags: ASADeploymentFlags = {
+            ...txnParam.payFlags,
+            creator: { ...senderAcc.account, name: senderAcc.address }
+          };
+          this.runtime.mkAssetCreateTx(name, flags, asset);
+          this.state.assetDefs.set(this.state.assetCounter, senderAcc.address);
+          this.state.assetNameInfo.set(name, {
+            creator: senderAcc.address,
+            assetIndex: this.state.assetCounter,
+            assetDef: asset,
+            txId: "tx-id",
+            confirmedRound: this.runtime.getRound()
+          });
+
+          this.optIntoASA(this.state.assetCounter, senderAcc.address, {}); // opt-in for creator
+          break;
+        }
+        case TransactionType.OptInASA: {
+          const senderAcc = this.getAccount(fromAccountAddr);
+          this.optIntoASA(this.state.assetCounter, senderAcc.address, txnParam.payFlags);
+          break;
+        }
+        case TransactionType.DeploySSC: {
+          const senderAcc = this.getAccount(fromAccountAddr);
+
+          if (txnParam.approvalProgram === "") {
+            throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
+          }
+          if (txnParam.clearProgram === "") {
+            throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
+          }
+          const flags: SSCDeploymentFlags = {
+            sender: senderAcc.account,
+            localInts: txnParam.localInts,
+            localBytes: txnParam.localBytes,
+            globalInts: txnParam.globalInts,
+            globalBytes: txnParam.globalBytes
+          };
+          // create app with id = 0 in globalApps for teal execution
+          const app = senderAcc.addApp(0, flags, txnParam.approvalProgram, txnParam.clearProgram);
+          this.state.accounts.set(senderAcc.address, senderAcc);
+          this.state.globalApps.set(app.id, senderAcc.address);
+
+          this.runtime.addCtxAppCreateTxn(flags, txnParam.payFlags);
+          this.runtime.run(txnParam.approvalProgram, ExecutionMode.STATEFUL); // execute TEAL code with appId = 0
+
+          // create new application in globalApps map
+          this.state.globalApps.set(++this.state.appCounter, senderAcc.address);
+
+          const attributes = this.getApp(0);
+          senderAcc.createdApps.delete(0); // remove zero app from sender's account
+          this.state.globalApps.delete(0); // remove zero app from context
+          senderAcc.createdApps.set(this.state.appCounter, attributes);
+          this.state.appNameInfo.set(
+            txnParam.approvalProgram + "-" + txnParam.clearProgram,
+            {
+              creator: senderAcc.address,
+              appID: this.state.appCounter,
+              txId: "tx-id",
+              confirmedRound: this.runtime.getRound(),
+              timestamp: Math.round(+new Date() / 1000)
+            }
+          );
+          break;
+        }
+        case TransactionType.OptInSSC: {
+          const appParams = this.getApp(txnParam.appID);
+          const flags: SSCOptionalFlags = {
+            appArgs: txnParam.appArgs,
+            accounts: txnParam.accounts,
+            foreignApps: txnParam.foreignApps,
+            foreignAssets: txnParam.foreignAssets,
+            note: txnParam.note,
+            lease: txnParam.lease
+          };
+          this.runtime.addCtxOptInTx(fromAccountAddr, txnParam.appID, txnParam.payFlags, flags);
+          const account = this.getAccount(fromAccountAddr);
+          account.optInToApp(txnParam.appID, appParams);
+
+          this.runtime.run(appParams[approvalProgram], ExecutionMode.STATEFUL);
           break;
         }
       }

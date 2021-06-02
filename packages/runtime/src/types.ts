@@ -75,6 +75,28 @@ export interface State {
   accounts: Map<string, AccountStoreI>
   globalApps: Map<number, string>
   assetDefs: Map<number, AccountAddress>
+  assetNameInfo: Map<string, ASAInfo>
+  appNameInfo: Map<string, SSCInfo>
+  appCounter: number
+  assetCounter: number
+}
+
+export interface DeployedAssetInfo {
+  creator: AccountAddress
+  txId: string
+  confirmedRound: number
+}
+
+// ASA deployment information (log)
+export interface ASAInfo extends DeployedAssetInfo {
+  assetIndex: number
+  assetDef: ASADef
+}
+
+// Stateful smart contract deployment information (log)
+export interface SSCInfo extends DeployedAssetInfo {
+  appID: number
+  timestamp: number
 }
 
 // describes interpreter's local context (state + txns)

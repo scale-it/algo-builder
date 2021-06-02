@@ -11,6 +11,8 @@
 + Added `algopy` in `@algo-builder/algob/sample-project`, which enables users to pass template parameters to PyTEAL contracts. Updated docs.
 + Store checkpoints in nested form for SSC, added tests.
 + Added support for sub directories in assets folder, with tests.
++ TEALv3 support in `@algo-builder/runtime`: `assert`, `pushint`, `pushbytes`, `swap` opcodes.
++ Update runtime to process execParams.deployASA, deploySSC, OptInToASA, OptIntoSSC
 
 ### Bug fixes
 

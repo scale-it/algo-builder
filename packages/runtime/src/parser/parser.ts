@@ -4,14 +4,14 @@ import { Interpreter } from "../interpreter/interpreter";
 import {
   Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx,
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
-  AppOptedIn, Arg, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
+  AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
   Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2, Ed25519verify,
   EqualTo, Err, GetAssetDef, GetAssetHolding, Global, GreaterThan,
   GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc, Intcblock, Itob,
   Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, Mod,
-  Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, Return, Sha256,
-  Sha512_256, Store, Sub, Substring, Substring3, Txn, Txna
+  Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, Sha256,
+  Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../interpreter/opcode-list";
 import { LogicSigMaxCost, LogicSigMaxSize, MaxAppProgramCost, MaxAppProgramLen, OpGasCost } from "../lib/constants";
 import { assertLen } from "../lib/parsing";
@@ -118,6 +118,38 @@ opCodeMap[2] = {
   balance: Balance,
   asset_holding_get: GetAssetHolding,
   asset_params_get: GetAssetDef
+};
+
+/**
+ * TEALv3 opcodes: https://developer.algorand.org/articles/introducing-teal-version-3/
+ */
+opCodeMap[3] = {
+  ...opCodeMap[2],
+
+  assert: Assert,
+  swap: Swap,
+
+  // optimized opcodes for pushing uint64s and byte slices to the stack
+  pushint: PushInt,
+  pushbytes: PushBytes
+
+  /*
+  dig: Dig,
+  select: Select,
+
+  // txn ops in tealv3
+  gtxnsf: Gtxnsf,
+  gtxnsa: Gtxnsa,
+
+  // bit & byte opcodes
+  getbit: Getbit,
+  setbit: Setbit,
+  getbyte: Getbyte,
+  setbyte: Setbyte,
+
+  // stateful op (mode = application)
+  min_balance: MinBalance
+  */
 };
 
 // list of opcodes that require one extra parameter than others: `interpreter`.

@@ -8,7 +8,7 @@ import { Keccak } from 'sha3';
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { compareArray } from "../lib/compare";
-import { AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64 } from "../lib/constants";
+import { AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64, MaxTEALVersion } from "../lib/constants";
 import {
   assertLen, assertOnlyDigits, convertToBuffer,
   convertToString, getEncoding, stringToBytes
@@ -38,7 +38,7 @@ export class Pragma extends Op {
     if (this.line > 1) {
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.PRAGMA_NOT_AT_FIRST_LINE, { line: line });
     }
-    if (args[0] === "version" && (args[1] === '1' || args[1] === '2')) {
+    if (args[0] === "version" && Number(args[1]) <= MaxTEALVersion) {
       this.version = Number(args[1]);
       interpreter.tealVersion = this.version;
     } else {
@@ -2040,7 +2040,7 @@ export class GetAssetDef extends Op {
           value = BigInt(AssetDefinition.decimals);
           break;
         case "AssetDefaultFrozen":
-          value = AssetDefinition["default-frozen"] ? 1n : 0n;
+          value = AssetDefinition.defaultFrozen ? 1n : 0n;
           break;
         default:
           def = AssetDefinition[s] as string;
@@ -2144,5 +2144,118 @@ export class Addr extends Op {
   execute (stack: TEALStack): void {
     const addr = decodeAddress(this.addr);
     stack.push(addr.publicKey);
+  }
+}
+
+/* TEALv3 Ops */
+
+// immediately fail unless value top is a non-zero number
+// pops from stack: [...stack, uint64]
+export class Assert extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const top = this.assertBigInt(stack.pop(), this.line);
+    if (top === 0n) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.TEAL_ENCOUNTERED_ERR, { line: this.line });
+    }
+  }
+}
+
+// push immediate UINT to the stack as an integer
+// push to stack: [...stack, uint64]
+export class PushInt extends Op {
+  /**
+   * NOTE: in runtime this class is similar to Int, but from tealv3 perspective this is optimized
+   * because pushint args are not added to the intcblock during assembly processes
+   */
+  readonly uint64: bigint;
+  readonly line: number;
+
+  /**
+   * Sets uint64 variable according to arguments passed.
+   * @param args Expected arguments: [number]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 1, line);
+    assertOnlyDigits(args[0], line);
+
+    this.checkOverflow(BigInt(args[0]), line);
+    this.uint64 = BigInt(args[0]);
+  }
+
+  execute (stack: TEALStack): void {
+    stack.push(this.uint64);
+  }
+}
+
+// push bytes to stack
+// push to stack [...stack, converted data]
+export class PushBytes extends Op {
+  /**
+   * NOTE: in runtime this class is similar to Byte, but from tealv3 perspective this is optimized
+   * because pushbytes args are not added to the bytecblock during assembly processes
+   */
+  readonly str: string;
+  readonly encoding: EncodingType;
+  readonly line: number;
+
+  /**
+   * Sets `str` and  `encoding` values according to arguments passed.
+   * @param args Expected arguments: [data string]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 1, line);
+    [this.str, this.encoding] = getEncoding(args, line);
+    if (this.encoding !== EncodingType.UTF8) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKOWN_DECODE_TYPE, { val: args[0], line: line });
+    }
+  }
+
+  execute (stack: TEALStack): void {
+    const buffer = convertToBuffer(this.str, this.encoding);
+    stack.push(new Uint8Array(buffer));
+  }
+}
+
+// swaps two last values on stack: A, B -> B, A (A,B = any)
+// pops from stack: [...stack, A, B]
+// pushes to stack: [...stack, B, A]
+export class Swap extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    const a = stack.pop();
+    const b = stack.pop();
+    stack.push(a);
+    stack.push(b);
   }
 }
