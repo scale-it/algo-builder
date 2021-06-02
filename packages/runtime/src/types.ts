@@ -124,11 +124,11 @@ export interface Context {
   addAsset: (name: string, fromAccountAddr: string, flags: ASADeploymentFlags) => number
   optIntoASA: (assetIndex: number, address: AccountAddress, flags: TxParams) => void
   addApp: (
-    fromAccountAddr: string, flags: SSCDeploymentFlags, payFlags: TxParams,
+    fromAccountAddr: string, flags: SSCDeploymentFlags,
     approvalProgram: string, clearProgram: string
   ) => number
-  optInToApp: (accountAddr: string, appID: number,
-    flags: SSCOptionalFlags, payFlags: TxParams) => void
+  optInToApp: (accountAddr: string, appID: number) => void
+  updateApp: (appID: number, approvalProgram: string, clearProgram: string) => void
 }
 
 // custom AssetHolding for AccountStore (using bigint in amount instead of number)

@@ -331,6 +331,21 @@ export class Runtime {
    * @param flags ASA Deployment Flags
    */
   addAsset (name: string, flags: ASADeploymentFlags): number {
+    const assetDef: AssetDef = {
+      creator: flags.creator.addr,
+      total: BigInt(this.loadedAssetsDefs[name].total),
+      decimals: this.loadedAssetsDefs[name].decimals,
+      defaultFrozen: this.loadedAssetsDefs[name].defaultFrozen as boolean,
+      unitName: this.loadedAssetsDefs[name].unitName,
+      name: name,
+      url: this.loadedAssetsDefs[name].url as string,
+      metadataHash: this.loadedAssetsDefs[name].metadataHash as string,
+      manager: this.loadedAssetsDefs[name].manager,
+      reserve: this.loadedAssetsDefs[name].reserve,
+      freeze: this.loadedAssetsDefs[name].freeze,
+      clawback: this.loadedAssetsDefs[name].clawback
+    };
+    this.mkAssetCreateTx(name, flags, assetDef);
     this.ctx.addAsset(name, flags.creator.addr, flags);
 
     this.store = this.ctx.state;
@@ -404,7 +419,8 @@ export class Runtime {
     flags: SSCDeploymentFlags, payFlags: TxParams,
     approvalProgram: string, clearProgram: string
   ): number {
-    this.ctx.addApp(flags.sender.addr, flags, payFlags, approvalProgram, clearProgram);
+    this.addCtxAppCreateTxn(flags, payFlags);
+    this.ctx.addApp(flags.sender.addr, flags, approvalProgram, clearProgram);
 
     this.store = this.ctx.state;
     return this.store.appCounter;
@@ -443,7 +459,8 @@ export class Runtime {
    */
   optInToApp (accountAddr: string, appId: number,
     flags: SSCOptionalFlags, payFlags: TxParams): void {
-    this.ctx.optInToApp(accountAddr, appId, flags, payFlags);
+    this.addCtxOptInTx(accountAddr, appId, payFlags, flags);
+    this.ctx.optInToApp(accountAddr, appId);
 
     this.store = this.ctx.state;
   }
@@ -492,24 +509,11 @@ export class Runtime {
     payFlags: TxParams,
     flags: SSCOptionalFlags
   ): void {
-    if (approvalProgram === "") {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
-    }
-    if (clearProgram === "") {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
-    }
-
-    const appParams = this.getApp(appId);
     this.addCtxAppUpdateTx(senderAddr, appId, payFlags, flags);
-    this.ctx.state = cloneDeep(this.store);
-
-    this.run(appParams["approval-program"], ExecutionMode.STATEFUL);
+    this.ctx.updateApp(appId, approvalProgram, clearProgram);
 
     // If successful, Update programs and state
     this.store = this.ctx.state;
-    const updatedApp = this.getApp(appId); // get app after updating store
-    updatedApp["approval-program"] = approvalProgram;
-    updatedApp["clear-state-program"] = clearProgram;
   }
 
   // verify 'amt' microalgos can be withdrawn from account

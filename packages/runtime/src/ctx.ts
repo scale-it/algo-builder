@@ -1,17 +1,16 @@
-import { AssetDef, makeAssetTransferTxnWithSuggestedParams } from "algosdk";
+import { AssetDef } from "algosdk";
 
 import { getFromAddress, Runtime } from ".";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
-import { mockSuggestedParams } from "./mock/tx";
 import {
   AccountAddress, AccountStoreI, AlgoTransferParam, ASADeploymentFlags, AssetHoldingM, AssetModFields,
   AssetTransferParam, Context, ExecParams, ExecutionMode,
   SignType, SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
-  State, TransactionType, Txn, TxParams
+  State, TransactionType, Txn, TxParams, UpdateSSCParam
 } from "./types";
 
-const approvalProgram = "approval-program";
+const approvalProgramConst = "approval-program";
 
 export class Ctx implements Context {
   state: State;
@@ -138,7 +137,7 @@ export class Ctx implements Context {
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  addAsset (name: string, fromAccountAddr: string, flags: ASADeploymentFlags): number {
+  addAsset (name: string, fromAccountAddr: string): number {
     const senderAcc = this.getAccount(fromAccountAddr);
 
     // create asset
@@ -147,7 +146,6 @@ export class Ctx implements Context {
       this.runtime.loadedAssetsDefs[name]
     );
 
-    this.runtime.mkAssetCreateTx(name, flags, asset);
     this.state.assetDefs.set(this.state.assetCounter, senderAcc.address);
     this.state.assetNameInfo.set(name, {
       creator: senderAcc.address,
@@ -157,7 +155,7 @@ export class Ctx implements Context {
       confirmedRound: this.runtime.getRound()
     });
 
-    this.optIntoASA(this.state.assetCounter, senderAcc.address, {}); // opt-in for creator
+    this.optIntoASA(this.state.assetCounter, senderAcc.address); // opt-in for creator
 
     return this.state.assetCounter;
   }
@@ -168,12 +166,9 @@ export class Ctx implements Context {
    * @param address Account address to opt-into asset
    * @param flags Transaction Parameters
    */
-  optIntoASA (assetIndex: number, address: AccountAddress, flags: TxParams): void {
+  optIntoASA (assetIndex: number, address: AccountAddress): void {
     const assetDef = this.getAssetDef(assetIndex);
     const creatorAddr = assetDef.creator;
-    makeAssetTransferTxnWithSuggestedParams(
-      address, address, undefined, undefined, 0, undefined, assetIndex,
-      mockSuggestedParams(flags, this.runtime.getRound()));
 
     const assetHolding: AssetHoldingM = {
       amount: address === creatorAddr ? BigInt(assetDef.total) : 0n, // for creator opt-in amount is total assets
@@ -195,7 +190,7 @@ export class Ctx implements Context {
    * NOTE - approval and clear program must be the TEAL code as string (not compiled code)
    */
   addApp (
-    fromAccountAddr: string, flags: SSCDeploymentFlags, payFlags: TxParams,
+    fromAccountAddr: string, flags: SSCDeploymentFlags,
     approvalProgram: string, clearProgram: string
   ): number {
     const senderAcc = this.getAccount(fromAccountAddr);
@@ -212,7 +207,6 @@ export class Ctx implements Context {
     this.state.accounts.set(senderAcc.address, senderAcc);
     this.state.globalApps.set(app.id, senderAcc.address);
 
-    this.runtime.addCtxAppCreateTxn(flags, payFlags);
     this.runtime.run(approvalProgram, ExecutionMode.STATEFUL); // execute TEAL code with appId = 0
 
     // create new application in globalApps map
@@ -243,15 +237,13 @@ export class Ctx implements Context {
    * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
    * @param payFlags Transaction Parameters
    */
-  optInToApp (accountAddr: string, appID: number,
-    flags: SSCOptionalFlags, payFlags: TxParams): void {
+  optInToApp (accountAddr: string, appID: number): void {
     const appParams = this.getApp(appID);
 
-    this.runtime.addCtxOptInTx(accountAddr, appID, payFlags, flags);
     const account = this.getAccount(accountAddr);
     account.optInToApp(appID, appParams);
 
-    this.runtime.run(appParams[approvalProgram], ExecutionMode.STATEFUL);
+    this.runtime.run(appParams[approvalProgramConst], ExecutionMode.STATEFUL);
   }
 
   /**
@@ -404,14 +396,32 @@ export class Ctx implements Context {
   }
 
   /**
-   * Update Apps
-   * @param appID  Application index
+   * Update application
+   * @param senderAddr sender address
+   * @param appId application Id
    * @param approvalProgram new approval program
    * @param clearProgram new clear program
+   * @param payFlags Transaction parameters
+   * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
+   * NOTE - approval and clear program must be the TEAL code as string
    */
-  updateApp (appID: number, approvalProgram: string, clearProgram: string): void {
-    const updatedApp = this.getApp(appID); // get app after updating store
-    updatedApp["approval-program"] = approvalProgram;
+  updateApp (
+    appID: number,
+    approvalProgram: string,
+    clearProgram: string
+  ): void {
+    if (approvalProgram === "") {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
+    }
+    if (clearProgram === "") {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
+    }
+
+    const appParams = this.getApp(appID);
+    this.runtime.run(appParams[approvalProgramConst], ExecutionMode.STATEFUL);
+
+    const updatedApp = this.getApp(appID);
+    updatedApp[approvalProgramConst] = approvalProgram;
     updatedApp["clear-state-program"] = clearProgram;
   }
 
@@ -449,21 +459,22 @@ export class Ctx implements Context {
         case TransactionType.CallNoOpSSC: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appId);
-          this.runtime.run(appParams[approvalProgram], ExecutionMode.STATEFUL);
+          this.runtime.run(appParams[approvalProgramConst], ExecutionMode.STATEFUL);
           break;
         }
         case TransactionType.CloseSSC: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appId);
-          this.runtime.run(appParams[approvalProgram], ExecutionMode.STATEFUL);
+          this.runtime.run(appParams[approvalProgramConst], ExecutionMode.STATEFUL);
           this.closeApp(fromAccountAddr, txnParam.appId);
           break;
         }
         case TransactionType.UpdateSSC: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
-          const appParams = this.getApp(txnParam.appID);
-          this.runtime.run(appParams[approvalProgram], ExecutionMode.STATEFUL);
-          this.updateApp(txnParam.appID, txnParam.newApprovalProgram, txnParam.newClearProgram);
+
+          this.updateApp(
+            txnParam.appID, txnParam.newApprovalProgram, txnParam.newClearProgram
+          );
           break;
         }
         case TransactionType.ClearSSC: {
@@ -483,7 +494,7 @@ export class Ctx implements Context {
         case TransactionType.DeleteSSC: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appId);
-          this.runtime.run(appParams[approvalProgram], ExecutionMode.STATEFUL);
+          this.runtime.run(appParams[approvalProgramConst], ExecutionMode.STATEFUL);
           this.deleteApp(txnParam.appId);
           break;
         }
@@ -527,18 +538,14 @@ export class Ctx implements Context {
           break;
         }
         case TransactionType.DeployASA: {
-          const senderAcc = this.getAccount(fromAccountAddr);
-          const flags: ASADeploymentFlags = {
-            ...txnParam.payFlags,
-            creator: { ...senderAcc.account, name: senderAcc.address }
-          };
+          this.tx = this.gtxs[idx]; // update current tx to the requested index
 
-          this.addAsset(txnParam.asaName, fromAccountAddr, flags);
+          this.addAsset(txnParam.asaName, fromAccountAddr);
           break;
         }
         case TransactionType.OptInASA: {
           const senderAcc = this.getAccount(fromAccountAddr);
-          this.optIntoASA(this.state.assetCounter, senderAcc.address, txnParam.payFlags);
+          this.optIntoASA(this.state.assetCounter, senderAcc.address);
           break;
         }
         case TransactionType.DeploySSC: {
@@ -550,25 +557,19 @@ export class Ctx implements Context {
             globalInts: txnParam.globalInts,
             globalBytes: txnParam.globalBytes
           };
+          this.tx = this.gtxs[idx]; // update current tx to the requested index
 
           this.addApp(
             fromAccountAddr, flags,
-            txnParam.payFlags, txnParam.approvalProgram,
+            txnParam.approvalProgram,
             txnParam.approvalProgram
           );
           break;
         }
         case TransactionType.OptInSSC: {
-          const flags: SSCOptionalFlags = {
-            appArgs: txnParam.appArgs,
-            accounts: txnParam.accounts,
-            foreignApps: txnParam.foreignApps,
-            foreignAssets: txnParam.foreignAssets,
-            note: txnParam.note,
-            lease: txnParam.lease
-          };
+          this.tx = this.gtxs[idx]; // update current tx to the requested index
 
-          this.optInToApp(fromAccountAddr, txnParam.appID, flags, txnParam.payFlags);
+          this.optInToApp(fromAccountAddr, txnParam.appID);
           break;
         }
       }
