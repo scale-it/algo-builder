@@ -127,6 +127,8 @@ export interface Context {
     fromAccountAddr: string, flags: SSCDeploymentFlags, payFlags: TxParams,
     approvalProgram: string, clearProgram: string
   ) => number
+  optInToApp: (accountAddr: string, appID: number,
+    flags: SSCOptionalFlags, payFlags: TxParams) => void
 }
 
 // custom AssetHolding for AccountStore (using bigint in amount instead of number)

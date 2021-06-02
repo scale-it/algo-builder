@@ -443,13 +443,8 @@ export class Runtime {
    */
   optInToApp (accountAddr: string, appId: number,
     flags: SSCOptionalFlags, payFlags: TxParams): void {
-    const appParams = this.getApp(appId);
-    this.addCtxOptInTx(accountAddr, appId, payFlags, flags);
-    this.ctx.state = cloneDeep(this.store);
-    const account = this.assertAccountDefined(accountAddr, this.ctx.state.accounts.get(accountAddr));
-    account.optInToApp(appId, appParams);
+    this.ctx.optInToApp(accountAddr, appId, flags, payFlags);
 
-    this.run(appParams["approval-program"], ExecutionMode.STATEFUL);
     this.store = this.ctx.state;
   }
 

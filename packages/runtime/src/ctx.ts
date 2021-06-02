@@ -237,6 +237,24 @@ export class Ctx implements Context {
   }
 
   /**
+   * Account address opt-in for application Id
+   * @param accountAddr Account address
+   * @param appId Application Id
+   * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
+   * @param payFlags Transaction Parameters
+   */
+  optInToApp (accountAddr: string, appID: number,
+    flags: SSCOptionalFlags, payFlags: TxParams): void {
+    const appParams = this.getApp(appID);
+
+    this.runtime.addCtxOptInTx(accountAddr, appID, payFlags, flags);
+    const account = this.getAccount(accountAddr);
+    account.optInToApp(appID, appParams);
+
+    this.runtime.run(appParams[approvalProgram], ExecutionMode.STATEFUL);
+  }
+
+  /**
    * Deduct transaction fee from sender account.
    * @param sender Sender address
    * @param index Index of current tx being processed in tx group
@@ -541,7 +559,6 @@ export class Ctx implements Context {
           break;
         }
         case TransactionType.OptInSSC: {
-          const appParams = this.getApp(txnParam.appID);
           const flags: SSCOptionalFlags = {
             appArgs: txnParam.appArgs,
             accounts: txnParam.accounts,
@@ -550,11 +567,8 @@ export class Ctx implements Context {
             note: txnParam.note,
             lease: txnParam.lease
           };
-          this.runtime.addCtxOptInTx(fromAccountAddr, txnParam.appID, txnParam.payFlags, flags);
-          const account = this.getAccount(fromAccountAddr);
-          account.optInToApp(txnParam.appID, appParams);
 
-          this.runtime.run(appParams[approvalProgram], ExecutionMode.STATEFUL);
+          this.optInToApp(fromAccountAddr, txnParam.appID, flags, txnParam.payFlags);
           break;
         }
       }
