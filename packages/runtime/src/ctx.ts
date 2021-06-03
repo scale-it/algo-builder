@@ -11,7 +11,7 @@ import {
   State, TransactionType, Txn, TxParams, UpdateSSCParam
 } from "./types";
 
-const approvalProgramConst = "approval-program";
+const APPROVAL_PROGRAM = "approval-program";
 
 export class Ctx implements Context {
   state: State;
@@ -136,9 +136,10 @@ export class Ctx implements Context {
   /**
    * Add Asset
    * @param name ASA name
+   * @param fromAccountAddr account address of creator
    * @param flags ASA Deployment Flags
    */
-  addAsset (name: string, fromAccountAddr: string, flags: ASADeploymentFlags): number {
+  addAsset (name: string, fromAccountAddr: AccountAddress, flags: ASADeploymentFlags): number {
     const senderAcc = this.getAccount(fromAccountAddr);
 
     // create asset
@@ -153,7 +154,7 @@ export class Ctx implements Context {
       creator: senderAcc.address,
       assetIndex: this.state.assetCounter,
       assetDef: asset,
-      txId: "tx-id",
+      txId: this.tx.txID,
       confirmedRound: this.runtime.getRound()
     });
 
@@ -198,14 +199,14 @@ export class Ctx implements Context {
 
   /**
    * creates new application and returns application id
+   * @param fromAccountAddr creator account address
    * @param flags SSCDeployment flags
-   * @param payFlags Transaction parameters
    * @param approvalProgram application approval program
    * @param clearProgram application clear program
    * NOTE - approval and clear program must be the TEAL code as string (not compiled code)
    */
   addApp (
-    fromAccountAddr: string, flags: SSCDeploymentFlags,
+    fromAccountAddr: AccountAddress, flags: SSCDeploymentFlags,
     approvalProgram: string, clearProgram: string
   ): number {
     const senderAcc = this.getAccount(fromAccountAddr);
@@ -236,7 +237,7 @@ export class Ctx implements Context {
       {
         creator: senderAcc.address,
         appID: this.state.appCounter,
-        txId: "tx-id",
+        txId: this.tx.txID,
         confirmedRound: this.runtime.getRound(),
         timestamp: Math.round(+new Date() / 1000)
       }
@@ -249,15 +250,13 @@ export class Ctx implements Context {
    * Account address opt-in for application Id
    * @param accountAddr Account address
    * @param appId Application Id
-   * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
-   * @param payFlags Transaction Parameters
    */
-  optInToApp (accountAddr: string, appID: number): void {
+  optInToApp (accountAddr: AccountAddress, appID: number): void {
     const appParams = this.getApp(appID);
 
     const account = this.getAccount(accountAddr);
     account.optInToApp(appID, appParams);
-    this.runtime.run(appParams[approvalProgramConst], ExecutionMode.STATEFUL);
+    this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL);
   }
 
   /**
@@ -411,12 +410,9 @@ export class Ctx implements Context {
 
   /**
    * Update application
-   * @param senderAddr sender address
    * @param appId application Id
    * @param approvalProgram new approval program
    * @param clearProgram new clear program
-   * @param payFlags Transaction parameters
-   * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
    * NOTE - approval and clear program must be the TEAL code as string
    */
   updateApp (
@@ -432,10 +428,10 @@ export class Ctx implements Context {
     }
 
     const appParams = this.getApp(appID);
-    this.runtime.run(appParams[approvalProgramConst], ExecutionMode.STATEFUL);
+    this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL);
 
     const updatedApp = this.getApp(appID);
-    updatedApp[approvalProgramConst] = approvalProgram;
+    updatedApp[APPROVAL_PROGRAM] = approvalProgram;
     updatedApp["clear-state-program"] = clearProgram;
   }
 
@@ -473,13 +469,13 @@ export class Ctx implements Context {
         case TransactionType.CallNoOpSSC: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appId);
-          this.runtime.run(appParams[approvalProgramConst], ExecutionMode.STATEFUL);
+          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL);
           break;
         }
         case TransactionType.CloseSSC: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appId);
-          this.runtime.run(appParams[approvalProgramConst], ExecutionMode.STATEFUL);
+          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL);
           this.closeApp(fromAccountAddr, txnParam.appId);
           break;
         }
@@ -508,7 +504,7 @@ export class Ctx implements Context {
         case TransactionType.DeleteSSC: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appId);
-          this.runtime.run(appParams[approvalProgramConst], ExecutionMode.STATEFUL);
+          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL);
           this.deleteApp(txnParam.appId);
           break;
         }
