@@ -2,8 +2,8 @@ import { getPathFromDirRecursive } from "@algo-builder/runtime";
 import fs from "fs-extra";
 import path from "path";
 
-import { BuilderError } from "../internal/core/errors";
-import { ERRORS } from "../internal/core/errors-list";
+import { BuilderError } from "../errors/errors";
+import { ERRORS } from "../errors/errors-list";
 import { ASSETS_DIR } from "../internal/core/project-structure";
 
 function normalizePaths (mainPath: string, paths: string[]): string[] {

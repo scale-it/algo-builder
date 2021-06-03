@@ -19,9 +19,9 @@ export const RUNTIME_ERROR_RANGES = {
   ASA: { min: 1500, max: 1599, title: "ASA Error" }
 };
 
-const PARSE_ERROR = "Parse Error";
+export const PARSE_ERROR = "Parse Error";
 
-const tealErrors = {
+export const tealErrors = {
   ASSERT_STACK_LENGTH: {
     number: 1000,
     message: "Length of stack is less than min length required for current op at line %line%",
@@ -222,7 +222,7 @@ by an index that does not exist.`
   }
 };
 
-const runtimeGeneralErrors = {
+export const runtimeGeneralErrors = {
   LOGIC_SIGNATURE_NOT_FOUND: {
     number: 1300,
     message: "logic signature not found",
@@ -297,7 +297,7 @@ const runtimeGeneralErrors = {
   }
 };
 
-const transactionErrors = {
+export const transactionErrors = {
   TRANSACTION_TYPE_ERROR: {
     number: 1400,
     message: "Error. Transaction Type %transaction% is Unknown",
@@ -337,7 +337,7 @@ const transactionErrors = {
   }
 };
 
-const runtimeAsaErrors = {
+export const runtimeAsaErrors = {
   PARAM_PARSE_ERROR: {
     number: 1500,
     message: `Invalid ASA definition: '%source%'.

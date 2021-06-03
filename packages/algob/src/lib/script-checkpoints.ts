@@ -6,8 +6,8 @@ import * as fs from "fs";
 import path from "path";
 import YAML from "yaml";
 
-import { BuilderError } from "../internal/core/errors";
-import { ERRORS } from "../internal/core/errors-list";
+import { BuilderError } from "../errors/errors";
+import { ERRORS } from "../errors/errors-list";
 import {
   AssetScriptMap,
   Checkpoint,

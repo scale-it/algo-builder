@@ -1,4 +1,5 @@
 import { AccountStore } from "./account";
+import * as ERRORS from "./errors/errors-list";
 import { applyErrorMessageTemplate } from "./errors/runtime-errors";
 import { parseZodError } from "./errors/validation-errors";
 import { Interpreter } from "./interpreter/interpreter";
@@ -11,6 +12,7 @@ import { Runtime } from "./runtime";
 import * as types from "./types";
 
 export {
+  ERRORS,
   Interpreter,
   Runtime,
   AccountStore,

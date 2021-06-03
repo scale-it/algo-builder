@@ -12,9 +12,9 @@ import {
   TASK_RUN,
   TASK_TEST
 } from "../../../../src/builtin-tasks/task-names";
+import { ERRORS } from "../../../../src/errors/errors-list";
 import { BuilderContext } from "../../../../src/internal/context";
 import { loadConfigAndTasks, loadKMDAccounts } from "../../../../src/internal/core/config/config-loading";
-import { ERRORS } from "../../../../src/internal/core/errors-list";
 import { resetBuilderContext } from "../../../../src/internal/reset";
 import { KMDOperator } from "../../../../src/lib/account";
 import { createKmdClient } from "../../../../src/lib/driver";

@@ -6,8 +6,8 @@ import * as murmurhash from 'murmurhash';
 import * as path from 'path';
 import YAML from "yaml";
 
-import { BuilderError, parseAlgorandError } from "../internal/core/errors";
-import { ERRORS } from "../internal/core/errors-list";
+import { BuilderError, parseAlgorandError } from "../errors/errors";
+import { ERRORS } from "../errors/errors-list";
 import { assertDir, ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
 import { timestampNow } from "../lib/time";
 import type { ASCCache, PyASCCache, SCParams } from "../types";

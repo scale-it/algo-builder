@@ -1,8 +1,8 @@
 /* tslint:disable:no-string-literal */ // TODO this is for unit testing priv methods. We shouldn't test these at all?
 import { assert } from "chai";
 
+import { ErrorDescriptor, ERRORS } from "../../../src/errors/errors-list";
 import { ArgumentsParser } from "../../../src/internal/cli/arguments-parser";
-import { ErrorDescriptor, ERRORS } from "../../../src/internal/core/errors-list";
 import {
   boolean,
   int,

@@ -1,8 +1,8 @@
 import { applyErrorMessageTemplate } from "@algo-builder/runtime";
 import type { RequestError } from 'algosdk';
 
-import type { AnyMap } from "../../types";
-import { getClosestCallerPackage } from "../util/caller-package";
+import { getClosestCallerPackage } from "../internal/util/caller-package";
+import type { AnyMap } from "../types";
 import { ErrorDescriptor, ERRORS, getErrorCode } from "./errors-list";
 
 export { ERRORS }; // re-export errors-list

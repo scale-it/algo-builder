@@ -2,12 +2,12 @@ import { assert } from "chai";
 
 import {
   BuilderError, BuilderPluginError
-} from "../../../src/internal/core/errors";
+} from "../../../src/errors/errors";
 import {
   ERROR_RANGES,
   ErrorDescriptor,
   ERRORS
-} from "../../../src/internal/core/errors-list";
+} from "../../../src/errors/errors-list";
 import { unsafeObjectKeys } from "../../../src/internal/util/unsafe";
 // import { expectBuilderError } from "../../helpers/errors";
 

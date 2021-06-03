@@ -2,6 +2,8 @@ import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
 import type { LogicSig, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
 
+import { BuilderError } from "../errors/errors";
+import { ERRORS } from "../errors/errors-list";
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
 import { getDummyLsig, getLsig } from "../lib/lsig";
@@ -16,8 +18,6 @@ import type {
   RuntimeEnv,
   SCParams
 } from "../types";
-import { BuilderError } from "./core/errors";
-import { ERRORS } from "./core/errors-list";
 import { DeployerConfig } from "./deployer_cfg";
 
 // Base class for deployer Run Mode (read access) and Deploy Mode (read and write access)
