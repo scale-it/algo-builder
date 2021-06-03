@@ -37,7 +37,8 @@ describe('Test for transferring asset using custom logic', function () {
     /* Create asset + optIn to asset */
     assetId = runtime.addAsset('gold', { creator: { ...alice.account, name: 'alice' } });
     assetDef = runtime.getAssetDef(assetId);
-
+    escrow = undefined;
+    syncAccounts();
     assert.equal(assetDef.creator, alice.address);
     assert.equal(assetDef.defaultFrozen, true);
     assert.equal(assetDef.total, 1000000);
@@ -46,8 +47,6 @@ describe('Test for transferring asset using custom logic', function () {
     assert.equal(assetDef.clawback, alice.address);
 
     runtime.optIntoASA(assetId, bob.address, {});
-    escrow = undefined;
-    syncAccounts();
     const aliceAssetHolding = runtime.getAssetHolding(assetId, aliceAddr);
     const bobAssetHolding = runtime.getAssetHolding(assetId, bobAddr);
     assert.isDefined(aliceAssetHolding);
