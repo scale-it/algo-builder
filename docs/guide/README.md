@@ -122,7 +122,7 @@ Further information about the `sample-project` can be found [here](https://githu
 
 **NOTE**:
 a) You can put smart contracts directly in `/assets` directory as well as in `/assets` subdirectory. For example, you can store your PyTEAL files in `assets/pyteal/<file.py>`.
-b) By default `algobpy` package (a helper package to pass compilation parameters to PyTEAL programs) is  stored in `/assets/algobpy` folder. `algob` is looking for all `.py` and `.teal` files when loading smart contracts, except files stored in `/assets/algobpy`. You can use store more custom Python modules in `/assets/algobpy` to avoid name conflicts. Read more about usage of `algobpy` [here](https://github.com/scale-it/algo-builder/blob/master/docs/guide/py-teal.md#external-parameters-support).
+b) By default `algobpy` package (a helper package to pass compilation parameters to PyTEAL programs) is  stored in `/assets/algobpy` folder. `algob` is looking for all `.py` and `.teal` files when loading smart contracts, except files stored in `/assets/algobpy`. You can use the `/assets/algobpy` directory to store custom Python modules and conflicts when loading TEAL smart contracts. Read more about usage of `algobpy` [here](https://github.com/scale-it/algo-builder/blob/master/docs/guide/py-teal.md#external-parameters-support).
 
 ### Checkpoints
 
