@@ -6,7 +6,7 @@ async function run (runtimeEnv, deployer) {
   const bob = deployer.accountsByName.get('bob');
 
   const scInitParam = {
-    ARG_TO: john.addr,
+    TMPL_TO: john.addr,
     ARG_AMT: 700000,
     ARG_CLS: masterAccount.addr,
     ARG_FV: 10,

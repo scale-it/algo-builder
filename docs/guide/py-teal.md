@@ -58,7 +58,6 @@ sys.path.insert(0, path) # replace path with path to algobpy in your project
 
     # replace these values with your customized values or pass an external parameter
     scParam = {
-      "ARG_TO": "2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA",
       "ARG_AMT": 700000,
       "ARG_CLS": "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
     }
@@ -68,7 +67,6 @@ sys.path.insert(0, path) # replace path with path to algobpy in your project
       scParam = parse_params(sys.argv[1], scParam)
 
     print(compileTeal(dynamic_fee(
-      Addr(scParam["ARG_TO"]),
       scParam["ARG_AMT"],
       Addr(scParam["ARG_CLS"]), Mode.Signature))
   ```
@@ -78,7 +76,6 @@ sys.path.insert(0, path) # replace path with path to algobpy in your project
 To use this feature in scripts, you can pass an external parameter object (using `loadLogic`, `fundLsig`..):
    ```js
     scInitParam = {
-      ARG_TO: john.addr,
       ARG_AMT: 700000,
       ARG_CLS: masterAccount.addr
     }

@@ -185,7 +185,7 @@ export class PyCompileOp {
    */
   replaceTempValues (program: string, replaceParams: ReplaceParams): string {
     for (const param in replaceParams) {
-      program.replaceAll(param, replaceParams[param]);
+      program = program.split(param).join(replaceParams[param]);
     }
     return program;
   }
