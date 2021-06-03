@@ -24,6 +24,9 @@ import {
 const StateMap = "key-value";
 const globalState = "global-state";
 const localStateSchema = "local-state-schema";
+const globalStateSchema = "global-state-schema";
+const numUint = 'num-uint';
+const numByteSlice = 'num-byte-slice';
 
 export class AccountStore implements AccountStoreI {
   readonly account: Account;
@@ -131,7 +134,7 @@ export class AccountStore implements AccountStoreI {
     appGlobalState.set(globalKey.toString(), value); // set new value in global state
     app[globalState] = appGlobalState; // save updated state
 
-    assertValidSchema(app[globalState], app["global-state-schema"]); // verify if updated schema is valid by config
+    assertValidSchema(app[globalState], app[globalStateSchema]); // verify if updated schema is valid by config
   }
 
   /**
@@ -182,6 +185,15 @@ export class AccountStore implements AccountStoreI {
     this.minBalance += ASSET_CREATION_FEE;
     const asset = new Asset(assetId, asaDef, this.address, name);
     this.createdAssets.set(asset.id, asset.definitions);
+
+    // set holding in creator account
+    const assetHolding: AssetHoldingM = {
+      amount: BigInt(asaDef.total), // for creator opt-in amount is total assets
+      'asset-id': assetId,
+      creator: this.address,
+      'is-frozen': false
+    };
+    this.assets.set(assetId, assetHolding);
     return asset.definitions;
   }
 
@@ -226,6 +238,7 @@ export class AccountStore implements AccountStoreI {
     if (holding.amount !== asset.total) {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.ASSET_TOTAL_ERROR);
     }
+    this.minBalance -= ASSET_CREATION_FEE;
     this.createdAssets.delete(assetId);
     this.assets.delete(assetId);
   }
@@ -274,7 +287,7 @@ export class AccountStore implements AccountStoreI {
       this.minBalance += (
         APPLICATION_BASE_FEE +
         (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * appParams[localStateSchema]["num-uint"] +
-        (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * appParams[localStateSchema]["num-byte-slice"]
+        (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * appParams[localStateSchema][numByteSlice]
       );
 
       // create new local app attribute
@@ -305,17 +318,33 @@ export class AccountStore implements AccountStoreI {
 
   // delete application from account's global state (createdApps)
   deleteApp (appId: number): void {
-    if (!this.createdApps.has(appId)) {
+    const app = this.createdApps.get(appId);
+    if (!app) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
+
+    // reduce minimum balance
+    this.minBalance -= (
+      APPLICATION_BASE_FEE +
+      (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * app[globalStateSchema]["num-uint"] +
+      (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * app[globalStateSchema][numByteSlice]
+    );
     this.createdApps.delete(appId);
   }
 
   // close(delete) application from account's local state (appsLocalState)
   closeApp (appId: number): void {
-    if (!this.appsLocalState.has(appId)) {
+    const localApp = this.appsLocalState.get(appId);
+    if (!localApp) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
     }
+
+    // decrease min balance
+    this.minBalance -= (
+      APPLICATION_BASE_FEE +
+      (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * localApp.schema['num-uint'] +
+      (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * localApp.schema[numByteSlice]
+    );
     this.appsLocalState.delete(appId);
   }
 }

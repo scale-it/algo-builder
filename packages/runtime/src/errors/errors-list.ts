@@ -307,9 +307,9 @@ export const transactionErrors = {
   },
   INSUFFICIENT_ACCOUNT_BALANCE: {
     number: 1401,
-    message: "Cannot withdraw %amount% microalgos from account %address%: resulting balance would be insufficient",
+    message: "account %address% balance %amount% below minimum required balance: %minbalance%",
     title: 'Insufficient account balance',
-    description: `Withdrawing %amount% microalgos will lead to insufficient balance`
+    description: `Algorand account balance below minimum required balance`
   },
   INSUFFICIENT_ACCOUNT_ASSETS: {
     number: 1402,

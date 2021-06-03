@@ -3,6 +3,7 @@ import { AssetDef, makeAssetTransferTxnWithSuggestedParams } from "algosdk";
 import { getFromAddress, Runtime } from ".";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
+import { ASSET_CREATION_FEE } from "./lib/constants";
 import { mockSuggestedParams } from "./mock/tx";
 import {
   AccountAddress, AccountStoreI, AlgoTransferParam, ASADeploymentFlags, AssetHoldingM, AssetModFields,
@@ -34,7 +35,8 @@ export class Ctx implements Context {
     if ((account.amount - amt) < account.minBalance) {
       throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE, {
         amount: amt,
-        address: address
+        address: address,
+        minbalance: account.minBalance
       });
     }
   }
@@ -141,11 +143,12 @@ export class Ctx implements Context {
   addAsset (name: string, fromAccountAddr: string, flags: ASADeploymentFlags): number {
     const senderAcc = this.getAccount(fromAccountAddr);
 
-    // create asset
+    // create asset(with holding) in sender account
     const asset = senderAcc.addAsset(
       ++this.state.assetCounter, name,
       this.runtime.loadedAssetsDefs[name]
     );
+    this.assertMinBalance(0n, fromAccountAddr);
     this.runtime.mkAssetCreateTx(name, flags, asset);
 
     this.state.assetDefs.set(this.state.assetCounter, senderAcc.address);
@@ -156,19 +159,6 @@ export class Ctx implements Context {
       txId: "tx-id",
       confirmedRound: this.runtime.getRound()
     });
-
-    const payFlags: TxParams = {
-      feePerByte: flags.feePerByte,
-      totalFee: flags.totalFee,
-      firstValid: flags.firstValid,
-      validRounds: flags.validRounds,
-      lease: flags.lease,
-      note: flags.note,
-      noteb64: flags.noteb64,
-      closeRemainderTo: flags.closeRemainderTo,
-      rekeyTo: flags.rekeyTo
-    };
-    this.optIntoASA(this.state.assetCounter, senderAcc.address, payFlags); // opt-in for creator
     return this.state.assetCounter;
   }
 
@@ -180,20 +170,20 @@ export class Ctx implements Context {
    */
   optIntoASA (assetIndex: number, address: AccountAddress, flags: TxParams): void {
     const assetDef = this.getAssetDef(assetIndex);
-    const creatorAddr = assetDef.creator;
     makeAssetTransferTxnWithSuggestedParams(
       address, address, undefined, undefined, 0, undefined, assetIndex,
       mockSuggestedParams(flags, this.runtime.getRound()));
 
     const assetHolding: AssetHoldingM = {
-      amount: address === creatorAddr ? BigInt(assetDef.total) : 0n, // for creator opt-in amount is total assets
+      amount: 0n,
       'asset-id': assetIndex,
-      creator: creatorAddr,
-      'is-frozen': address === creatorAddr ? false : assetDef.defaultFrozen
+      creator: assetDef.creator,
+      'is-frozen': assetDef.defaultFrozen
     };
 
     const account = this.getAccount(address);
     account.optInToASA(assetIndex, assetHolding);
+    this.assertMinBalance(0n, address);
   }
 
   /**
@@ -219,6 +209,7 @@ export class Ctx implements Context {
 
     // create app with id = 0 in globalApps for teal execution
     const app = senderAcc.addApp(0, flags, approvalProgram, clearProgram);
+    this.assertMinBalance(0n, senderAcc.address);
     this.state.accounts.set(senderAcc.address, senderAcc);
     this.state.globalApps.set(app.id, senderAcc.address);
 
@@ -257,6 +248,7 @@ export class Ctx implements Context {
 
     const account = this.getAccount(accountAddr);
     account.optInToApp(appID, appParams);
+    this.assertMinBalance(0n, accountAddr);
     this.runtime.run(appParams[approvalProgramConst], ExecutionMode.STATEFUL);
   }
 
@@ -279,7 +271,9 @@ export class Ctx implements Context {
     const toAssetHolding = this.getAssetHolding(txnParam.assetID as number, txnParam.toAccountAddr);
     txnParam.amount = BigInt(txnParam.amount);
 
-    if (txnParam.amount !== 0n) {
+    if (txnParam.amount === 0n && fromAccountAddr === txnParam.toAccountAddr) {
+      this.optIntoASA(txnParam.assetID as number, fromAccountAddr, txnParam.payFlags);
+    } else if (txnParam.amount !== 0n) {
       this.assertAssetNotFrozen(txnParam.assetID as number, fromAccountAddr);
       this.assertAssetNotFrozen(txnParam.assetID as number, txnParam.toAccountAddr);
     }
@@ -303,7 +297,9 @@ export class Ctx implements Context {
         txnParam.assetID as number, closeToAddr);
 
       closeRemToAssetHolding.amount += fromAssetHolding.amount; // transfer assets of sender to closeRemTo account
-      this.getAccount(fromAccountAddr).assets.delete(txnParam.assetID as number); // remove asset holding from sender account
+      const fromAccount = this.getAccount(fromAccountAddr);
+      fromAccount.minBalance -= ASSET_CREATION_FEE;
+      fromAccount.assets.delete(txnParam.assetID as number); // remove asset holding from sender account
     }
   }
 
