@@ -82,7 +82,7 @@ To use this feature in scripts, you can pass an external parameter object (using
     await deployer.loadLogic("dynamic-fee.py", scInitParam);
    ```
 
-# TMPL Parameters Support
+# TMPL Placeholder Support
 
 - PyTEAL supports `Tmpl` fuction which can replace value with a constant.
   For ex: `Tmpl.Addr("TMPL_ADDR")`
