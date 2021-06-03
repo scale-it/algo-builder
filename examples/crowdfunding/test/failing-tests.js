@@ -153,7 +153,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
       }
     ];
 
-    assert.throws(() => runtime.executeTx(txGroup), 'RUNTIME_ERR1401: Cannot withdraw');
+    assert.throws(() => runtime.executeTx(txGroup), 'RUNTIME_ERR1401');
   });
 
   it('should fail donation if timestamp is after endDate', () => {

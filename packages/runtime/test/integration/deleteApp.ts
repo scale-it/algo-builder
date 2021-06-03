@@ -48,20 +48,28 @@ describe("Algorand Smart Contracts - Delete Application", function () {
   });
 
   it("should delete application", function () {
+    const initialMinBalance = john.minBalance;
     const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram);
-    deleteParams.appId = appId;
-    runtime.executeTx(deleteParams);
+    assert.isAbove(runtime.getAccount(john.address).minBalance, initialMinBalance);
+
+    runtime.executeTx({ ...deleteParams, appId: appId });
 
     // verify app is deleted
     expectRuntimeError(
       () => runtime.getApp(appId),
       RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND
     );
+    // minbalance should reduce to initial value after app is deleted
+    assert.equal(john.minBalance, initialMinBalance);
   });
 
   it("should not delete application if logic is rejected", function () {
-    // create app
-    const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram);
+    const initialMinBalance = john.minBalance;
+    const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram); // create app
+
+    const minBalanceAfterAddApp = runtime.getAccount(john.address).minBalance;
+    assert.isAbove(minBalanceAfterAddApp, initialMinBalance); // min balance should increase
+
     const deleteParams: SSCCallsParam = {
       type: TransactionType.DeleteSSC,
       sign: SignType.SecretKey,
@@ -79,5 +87,8 @@ describe("Algorand Smart Contracts - Delete Application", function () {
     // verify app is not deleted - using getApp function
     const res = runtime.getApp(appId);
     assert.isDefined(res);
+
+    // min balance should remain the same (as after adding app), since app deletion wasn't successfull
+    assert.equal(runtime.getAccount(john.address).minBalance, minBalanceAfterAddApp);
   });
 });

@@ -4,6 +4,7 @@ import sinon from "sinon";
 
 import { AccountStore } from "../../src/account";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
+import { ASSET_CREATION_FEE } from "../../src/lib/constants";
 import { Runtime } from "../../src/runtime";
 import type { AlgoTransferParam, AssetModFields, AssetTransferParam, DestroyAssetParam, ExecParams, FreezeAssetParam, ModifyAssetParam, RevokeAssetParam } from "../../src/types";
 import { SignType, TransactionType } from "../../src/types";
@@ -193,7 +194,11 @@ describe("Algorand Standard Assets", function () {
     alice = runtime.getAccount(alice.address);
   };
 
-  it("should create asset using asa.yaml file", () => {
+  it("should create asset using asa.yaml file and raise account minimum balance", () => {
+    const initialMinBalance = john.minBalance;
+    assetId = runtime.addAsset('gold', { creator: { ...john.account, name: "john" } });
+    syncAccounts();
+
     const res = runtime.getAssetDef(assetId);
     assert.equal(res.decimals, 0);
     assert.equal(res.defaultFrozen, false);
@@ -205,6 +210,7 @@ describe("Algorand Standard Assets", function () {
     assert.equal(res.reserve, elon.address);
     assert.equal(res.freeze, elon.address);
     assert.equal(res.clawback, elon.address);
+    assert.equal(john.minBalance, initialMinBalance + ASSET_CREATION_FEE);
   });
 
   it("should opt-in to asset", () => {
@@ -291,6 +297,7 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should close alice account for transfer asset if close remainder to is specified", () => {
+    const initialAliceMinBalance = alice.minBalance;
     const res = runtime.getAssetDef(assetId);
     assert.isDefined(res);
     runtime.optIntoASA(assetId, alice.address, {});
@@ -303,6 +310,7 @@ describe("Algorand Standard Assets", function () {
     });
 
     syncAccounts();
+    assert.equal(alice.minBalance, initialAliceMinBalance + ASSET_CREATION_FEE); // alice min balance raised after opt-in
     const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
     const initialAliceAssets = alice.getAssetHolding(assetId)?.amount as bigint;
     assert.isDefined(initialJohnAssets);
@@ -319,6 +327,7 @@ describe("Algorand Standard Assets", function () {
 
     assert.isUndefined(alice.getAssetHolding(assetId));
     assert.equal(john.getAssetHolding(assetId)?.amount, initialJohnAssets + initialAliceAssets);
+    assert.equal(alice.minBalance, initialAliceMinBalance); // min balance should decrease to initial value after opt-out
   });
 
   it("should throw error if trying to close asset holding of asset creator account", () => {
@@ -580,6 +589,7 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("Should destroy asset", () => {
+    const initialCreatorMinBalance = john.minBalance;
     const destroyParam: DestroyAssetParam = {
       type: TransactionType.DestroyAsset,
       sign: SignType.SecretKey,
@@ -589,11 +599,14 @@ describe("Algorand Standard Assets", function () {
     };
 
     runtime.executeTx(destroyParam);
+    syncAccounts();
 
     expectRuntimeError(
       () => runtime.getAssetDef(assetId),
       RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND
     );
+    // verify min balance of creator decreased after deleting app (by asa.manager)
+    assert.equal(john.minBalance, initialCreatorMinBalance - ASSET_CREATION_FEE);
   });
 
   it("Should not destroy asset if total assets are not in creator's account", () => {

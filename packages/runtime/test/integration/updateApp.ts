@@ -11,7 +11,7 @@ import { expectRuntimeError } from "../helpers/runtime-errors";
 const approvalStr = "approval-program";
 describe("Algorand Smart Contracts - Update Application", function () {
   useFixture("stateful-update");
-  const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE * 10 + 1000; // 1000 to cover fee
+  const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE * 20 + 1000; // 1000 to cover fee
   let creator = new AccountStore(minBalance + 1000);
   const alice = new AccountStore(minBalance + 1000);
 

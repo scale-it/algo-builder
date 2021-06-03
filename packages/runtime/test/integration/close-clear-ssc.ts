@@ -11,7 +11,7 @@ import { expectRuntimeError } from "../helpers/runtime-errors";
 
 describe("ASC - CloseOut from Application and Clear State", function () {
   useFixture("stateful");
-  const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE * 10 + 1000; // 1000 to cover fee
+  const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE * 20 + 1000; // 1000 to cover fee
   let john = new AccountStore(minBalance + 1000);
   let alice = new AccountStore(minBalance + 1000);
 
@@ -54,12 +54,15 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 
   it("should successfully closeOut from app and update state according to asc", function () {
     const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram); // create app
-    closeOutParams.appId = appId;
+    const initialJohnMinBalance = runtime.getAccount(john.address).minBalance;
+
     runtime.optInToApp(john.address, appId, {}, {}); // opt-in to app (set new local state)
-
-    runtime.executeTx(closeOutParams);
-
     syncAccount();
+    assert.isAbove(john.minBalance, initialJohnMinBalance); // verify minimum balance raised after optIn
+
+    runtime.executeTx({ ...closeOutParams, appId: appId });
+    syncAccount();
+
     // verify app is deleted from local state
     const localApp = john.getAppFromLocal(appId);
     assert.isUndefined(localApp);
@@ -75,6 +78,9 @@ describe("ASC - CloseOut from Application and Clear State", function () {
     // since app is not deleted from global, global state should be updated by smart contract
     const globalVal = runtime.getGlobalState(appId, 'global-key');
     assert.deepEqual(globalVal, stringToBytes('global-val'));
+
+    // minimum balance should decrease to initial balance after closing out
+    assert.equal(john.minBalance, initialJohnMinBalance);
   });
 
   it("should throw error if user is not opted-in for closeOut call", function () {
@@ -90,10 +96,13 @@ describe("ASC - CloseOut from Application and Clear State", function () {
   });
 
   it("should not delete application on CloseOut call if logic is rejected", function () {
-    // create app
     const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram);
+    const initialJohnMinBalance = runtime.getAccount(john.address).minBalance;
+
     runtime.optInToApp(john.address, appId, {}, {}); // opt-in to app (set new local state)
     syncAccount();
+    const minBalanceAfterOptIn = john.minBalance;
+    assert.isAbove(minBalanceAfterOptIn, initialJohnMinBalance); // verify minimum balance raised after optIn
 
     const invalidParams: SSCCallsParam = {
       type: TransactionType.CloseSSC,
@@ -111,6 +120,10 @@ describe("ASC - CloseOut from Application and Clear State", function () {
     // verify app is not deleted from account's local state (as tx is rejected)
     const res = john.getAppFromLocal(appId);
     assert.isDefined(res);
+
+    // minimum balance should remain the same as closeOutSSC failed
+    assert.notEqual(john.minBalance, initialJohnMinBalance);
+    assert.equal(john.minBalance, minBalanceAfterOptIn);
   });
 
   // clearState call is different from closeOut call as in clear call, app is deleted from account
@@ -119,6 +132,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
     // create app
     const rejectClearProgram = getProgram('rejectClear.teal');
     const appId = runtime.addApp(flags, {}, approvalProgram, rejectClearProgram);
+    const initialJohnMinBalance = runtime.getAccount(john.address).minBalance;
     const clearAppParams: SSCCallsParam = {
       type: TransactionType.ClearSSC,
       sign: SignType.SecretKey,
@@ -142,5 +156,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 
     // verify global state is not deleted
     assert.isDefined(runtime.getApp(appId));
+    // minimum balance should decrease to initial balance after clearing local state
+    assert.equal(john.minBalance, initialJohnMinBalance);
   });
 });
