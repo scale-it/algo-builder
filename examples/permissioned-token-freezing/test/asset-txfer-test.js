@@ -46,6 +46,8 @@ describe('Test for transferring asset using custom logic', function () {
     assert.equal(assetDef.clawback, alice.address);
 
     runtime.optIntoASA(assetId, bob.address, {});
+    escrow = undefined;
+    syncAccounts();
     const aliceAssetHolding = runtime.getAssetHolding(assetId, aliceAddr);
     const bobAssetHolding = runtime.getAssetHolding(assetId, bobAddr);
     assert.isDefined(aliceAssetHolding);
