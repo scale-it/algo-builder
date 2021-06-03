@@ -81,3 +81,28 @@ To use this feature in scripts, you can pass an external parameter object (using
     }
     await deployer.loadLogic("dynamic-fee.py", scInitParam);
    ```
+
+# TMPL Parameters Support
+
+- PyTEAL supports `Tmpl` fuction which can replace value with a constant.
+  For ex: `Tmpl.Addr("TMPL_ADDR")`
+  when converted to TEAL it will look like this `addr TMPL_ADDR`. now you can replace this constant to value of your choice.
+- Algob supports these replacements. Ex:
+   ```js
+    scInitParam = {
+      TMPL_TO: "ADDR"
+    }
+    await deployer.loadLogic("dynamic-fee.py", scInitParam);
+   ```
+   you can simply pass an object with replacement values, algob will replace them for you at the time of compilation.
+
+- You can also use this feature with external support parameters: Ex:
+   ```js
+    scInitParam = {
+      TMPL_TO: "ADDR",
+      ARG_AMT: 700000,
+      ARG_CLS: masterAccount.addr
+    }
+    await deployer.loadLogic("dynamic-fee.py", scInitParam);
+   ```
+  Keys starting with `TMPL_` or `tmpl_` will be used with TMPL function and other keys will be used as mentioned in `External Parameters Support` section.
