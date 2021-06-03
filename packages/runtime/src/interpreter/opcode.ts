@@ -1,7 +1,7 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
-import { GlobalFields, MAX_UINT8, MAX_UINT64, MIN_UINT8, MIN_UINT64, TxnFields } from "../lib/constants";
+import { GlobalFields, MAX_UINT6, MAX_UINT8, MAX_UINT64, MIN_UINT8, MIN_UINT64, TxnFields } from "../lib/constants";
 import type { TEALStack } from "../types";
 
 export class Op {
@@ -112,7 +112,7 @@ export class Op {
    * @param line line number in TEAL file
    */
   assert64BitIndex (index: bigint, line: number): void {
-    if (index > 63n) {
+    if (index > MAX_UINT6) {
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_ERROR, { line: line });
     }
   }
@@ -197,20 +197,5 @@ export class Op {
       stack.push(0n);
     }
     return stack;
-  }
-
-  /**
-   * Parses binary string into bigint
-   * @param binary Binary string array
-   */
-  parseToBigInt (binary: string[]): bigint {
-    let res = 0n;
-    for (let i = 0; i < binary.length; ++i) {
-      if (binary[i] === '1') {
-        const val = binary.length - 1 - i;
-        res += 2n ** BigInt(val);
-      }
-    }
-    return res;
   }
 }

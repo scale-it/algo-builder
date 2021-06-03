@@ -4,6 +4,7 @@ export const MIN_UINT64 = 0n;
 export const MAX_UINT64 = 0xFFFFFFFFFFFFFFFFn;
 export const MAX_UINT8 = 255;
 export const MIN_UINT8 = 0;
+export const MAX_UINT6 = 63n;
 export const DEFAULT_STACK_ELEM = 0n;
 export const MAX_CONCAT_SIZE = 4096;
 export const ALGORAND_MIN_TX_FEE = 1000;

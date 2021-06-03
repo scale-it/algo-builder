@@ -1,5 +1,3 @@
-import { assert } from "chai";
-
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Op } from "../../../src/interpreter/opcode";
 import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
@@ -44,20 +42,5 @@ describe("Teal Opcodes basic assertions", function () {
       () => op.assertMinStackLen(stack, stackLen, lineNumber),
       RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
     );
-  });
-});
-
-describe("parseToBigint", () => {
-  const op = new Op();
-
-  it("should parse to bigint", () => {
-    let res = op.parseToBigInt(["0"]);
-    assert.equal(res, 0n);
-
-    res = op.parseToBigInt(["0", "1", "0"]);
-    assert.equal(res, 2n);
-
-    res = op.parseToBigInt(["1", "0", "0", "0", "0"]);
-    assert.equal(res, 16n);
   });
 });

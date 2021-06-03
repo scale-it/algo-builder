@@ -11,7 +11,7 @@ import { compareArray } from "../lib/compare";
 import { AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64, MaxTEALVersion } from "../lib/constants";
 import {
   assertLen, assertOnlyDigits, convertToBuffer,
-  convertToString, getEncoding, stringToBytes
+  convertToString, getEncoding, parseBinaryStrToBigInt, stringToBytes
 } from "../lib/parsing";
 import { txAppArg, txnSpecbyField } from "../lib/txn";
 import { EncodingType, StackElem, TEALStack, TxnOnComplete, TxnType } from "../types";
@@ -2266,6 +2266,9 @@ export class Swap extends Op {
  * Indexing begins in the first bytes of a byte-string
  * (as seen in getbyte and substring). Setting bits 0 through 11 to 1
  * in a 4 byte-array of 0s yields byte 0xfff00000
+ * Pops: ... stack, {any A}, {uint64 B}, {uint64 C}
+ * Pushes: uint64
+ * pop a target A, index B, and bit C. Set the Bth bit of A to C, and push the result
  */
 export class SetBit extends Op {
   readonly line: number;
@@ -2296,7 +2299,7 @@ export class SetBit extends Op {
       const binaryArr = [...(binaryStr.padStart(64, "0"))];
       const size = binaryArr.length;
       binaryArr[size - Number(index) - 1] = (bit === 0n ? "0" : "1");
-      stack.push(this.parseToBigInt(binaryArr));
+      stack.push(parseBinaryStrToBigInt(binaryArr));
     } else {
       const byteIndex = Math.floor(Number(index) / 8);
       this.assertBytesIndex(byteIndex, target.length, this.line);
@@ -2318,7 +2321,11 @@ export class SetBit extends Op {
   }
 }
 
-// pop a target A (integer or byte-array), and index B. Push the Bth bit of A.
+/**
+ * Pops: ... stack, {any A}, {uint64 B}
+ * Pushes: uint64
+ * pop a target A (integer or byte-array), and index B. Push the Bth bit of A.
+ */
 export class GetBit extends Op {
   readonly line: number;
   /**
