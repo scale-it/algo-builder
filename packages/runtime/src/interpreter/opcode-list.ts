@@ -2295,7 +2295,7 @@ export class SetBit extends Op {
       const binaryStr = target.toString(2);
       const binaryArr = [...(binaryStr.padStart(64, "0"))];
       const size = binaryArr.length;
-      binaryArr[size - Number(index) - 1] = bit === 0n ? "0" : "1";
+      binaryArr[size - Number(index) - 1] = (bit === 0n ? "0" : "1");
       stack.push(this.parseToBigInt(binaryArr));
     } else {
       const byteIndex = Math.floor(Number(index) / 8);

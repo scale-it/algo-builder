@@ -52,15 +52,12 @@ describe("parseToBigint", () => {
 
   it("should parse to bigint", () => {
     let res = op.parseToBigInt(["0"]);
-
     assert.equal(res, 0n);
 
     res = op.parseToBigInt(["0", "1", "0"]);
-
     assert.equal(res, 2n);
 
     res = op.parseToBigInt(["1", "0", "0", "0", "0"]);
-
     assert.equal(res, 16n);
   });
 });

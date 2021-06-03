@@ -3380,14 +3380,12 @@ describe("Teal Opcodes", function () {
       stack.push(3n); // index
 
       op.execute(stack);
-
       assert.equal(stack.pop(), 1n);
 
       stack.push(8n); // target
       stack.push(0n); // index
 
       op.execute(stack);
-
       assert.equal(stack.pop(), 0n);
     });
 
@@ -3395,23 +3393,17 @@ describe("Teal Opcodes", function () {
       const op = new GetBit([], 0);
       stack.push(new Uint8Array([0, 128, 1])); // target
       stack.push(8n); // index
-
       op.execute(stack);
-
       assert.equal(stack.pop(), 1n);
 
       stack.push(new Uint8Array([1, 4, 1])); // target
       stack.push(23n); // index
-
       op.execute(stack);
-
       assert.equal(stack.pop(), 1n);
 
       stack.push(new Uint8Array([4, 0, 1])); // target
       stack.push(6n); // index
-
       op.execute(stack);
-
       assert.equal(stack.pop(), 0n);
     });
 
