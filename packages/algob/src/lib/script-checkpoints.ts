@@ -1,5 +1,5 @@
 
-import { loadFromYamlFileSilent, types as rtypes } from "@algo-builder/runtime";
+import { loadFromYamlFileSilent, lsTreeWalk, types as rtypes } from "@algo-builder/runtime";
 import { encodeAddress, Transaction } from "algosdk";
 import deepEqual from "deep-equal";
 import * as fs from "fs";
@@ -289,20 +289,6 @@ export function loadCheckpointByCPName (checkpointName: string): Checkpoints {
 export function loadCheckpoint (scriptName: string): Checkpoints {
   return loadCheckpointByCPName(toCheckpointFileName(scriptName));
 }
-
-function lsTreeWalk (directoryName: string): string[] {
-  var list: string[] = [];
-  fs.readdirSync(directoryName).forEach(file => {
-    var fullPath = path.join(directoryName, file);
-    const f = fs.statSync(fullPath);
-    if (f.isDirectory()) {
-      list = list.concat(lsTreeWalk(fullPath));
-    } else {
-      list.push(fullPath);
-    }
-  });
-  return list;
-};
 
 function lsFiles (directoryName: string): string[] {
   var list: string[] = [];

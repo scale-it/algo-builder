@@ -1,3 +1,5 @@
+import { addressToPk, stringToBytes, uint64ToBigEndian } from "@algo-builder/runtime";
+
 import {
   createMsigAddress,
   loadAccountsFromEnv,
@@ -14,7 +16,7 @@ import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC, readGl
 import { executeSignedTxnFromFile, executeTransaction, getSuggestedParams, mkTxParams } from "./lib/tx";
 import * as runtime from "./runtime";
 import * as types from "./types";
-
+const convert = { uint64ToBigEndian, addressToPk, stringToBytes };
 export {
   mkAccounts,
   createMsigAddress,
@@ -38,5 +40,6 @@ export {
   types,
   signMultiSig,
   signLogicSigMultiSig,
-  runtime
+  runtime,
+  convert
 };
