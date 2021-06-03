@@ -4,7 +4,7 @@ import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { LogicSig } from "../../src/logicsig";
-import { ExecParams, SignType, TransactionType } from "../../src/types";
+import { AlgoTransferParam, ExecParams, SignType, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
@@ -16,19 +16,26 @@ const fee = 1000;
 
 describe("Stateless Algorand Smart Contracts delegated signature mode", function () {
   useFixture("basic-teal");
-  let john = new AccountStore(initialJohnHolding);
-  let bob = new AccountStore(initialBobHolding);
-  const runtime = new Runtime([john, bob]);
+  let john: AccountStore;
+  let bob: AccountStore;
+  let runtime: Runtime;
+  let txnParams: AlgoTransferParam;
 
-  const txnParams: ExecParams = {
-    type: TransactionType.TransferAlgo, // payment
-    sign: SignType.LogicSignature,
-    fromAccountAddr: john.account.addr,
-    toAccountAddr: bob.address,
-    amountMicroAlgos: 100n,
-    lsig: {} as LogicSig, // will be set below
-    payFlags: { totalFee: fee }
-  };
+  this.beforeAll(async function () {
+    john = new AccountStore(initialJohnHolding);
+    bob = new AccountStore(initialBobHolding);
+    runtime = new Runtime([john, bob]);
+
+    txnParams = {
+      type: TransactionType.TransferAlgo, // payment
+      sign: SignType.LogicSignature,
+      fromAccountAddr: john.account.addr,
+      toAccountAddr: bob.address,
+      amountMicroAlgos: 100n,
+      lsig: {} as LogicSig, // will be set below
+      payFlags: { totalFee: fee }
+    };
+  });
 
   // helper function
   function syncAccounts (): void {
@@ -44,9 +51,13 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
     // make delegated logic signature
     const lsig = runtime.getLogicSig(getProgram('basic.teal'), []);
     lsig.sign(john.account.sk);
-    txnParams.lsig = lsig;
 
-    runtime.executeTx(txnParams);
+    runtime.executeTx({
+      ...txnParams,
+      sign: SignType.LogicSignature,
+      fromAccountAddr: john.address,
+      lsig: lsig
+    });
 
     syncAccounts();
     assert.equal(john.balance(), initialJohnHolding - 100n - BigInt(fee));
@@ -58,11 +69,16 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
     const bobBal = bob.balance();
     const lsig = runtime.getLogicSig(getProgram('incorrect-logic.teal'), []);
     lsig.sign(john.account.sk);
-    txnParams.lsig = lsig;
+
+    const invalidParam = {
+      ...txnParams,
+      lsig: lsig,
+      amountMicroAlgos: 50n
+    };
 
     // should fail because logic check fails
     expectRuntimeError(
-      () => runtime.executeTx({ ...txnParams, amountMicroAlgos: 50n }),
+      () => runtime.executeTx(invalidParam),
       RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 

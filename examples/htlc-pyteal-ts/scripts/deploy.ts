@@ -2,7 +2,6 @@
  * Description:
  * This file demonstrates the PyTeal Example for HTLC(Hash Time Lock Contract)
 */
-import { executeTransaction } from "@algo-builder/algob";
 import * as algob from "@algo-builder/algob";
 import { types as rtypes } from "@algo-builder/runtime";
 
@@ -27,8 +26,8 @@ async function run (
   aliceFunding.toAccountAddr = alice.addr;
   aliceFunding.amountMicroAlgos = 0.1e6; // 0.1 Algo
   await Promise.all([
-    executeTransaction(deployer, bobFunding),
-    executeTransaction(deployer, aliceFunding)
+    algob.executeTransaction(deployer, bobFunding),
+    algob.executeTransaction(deployer, aliceFunding)
   ]);
 
   /** ** now bob creates and deploys the escrow account ****/

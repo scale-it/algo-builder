@@ -6,7 +6,7 @@ import sinon from 'sinon';
 import { TextEncoder } from "util";
 
 import { executeTransaction } from "../../src";
-import { ERRORS } from "../../src/internal/core/errors";
+import { ERRORS } from "../../src/errors/errors";
 import { DeployerDeployMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
 import { Deployer } from "../../src/types";

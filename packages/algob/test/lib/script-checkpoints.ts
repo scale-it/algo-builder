@@ -3,7 +3,7 @@ import type { LogicSig } from "algosdk";
 import { assert } from "chai";
 import * as fs from "fs";
 
-import { ERRORS } from "../../src/internal/core/errors-list";
+import { ERRORS } from "../../src/errors/errors-list";
 import {
   appendToCheckpoint,
   CheckpointImpl,

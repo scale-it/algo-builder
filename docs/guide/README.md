@@ -29,9 +29,11 @@ For more in-depth description you can look at the [project specification](https:
 ### Requirements
 
 + Node 12+
-+ Connection to an Algorand node. TEAL compilation requires Developer API to be enabled (`"EnableDeveloperAPI": true` in the node config.json).
++ Connection to an Algorand node. Follow our [infrastructure README](https://github.com/scale-it/algo-builder/tree/master/infrastructure/README.md) for instructions how to setup a private network (using Algorand node binaries or docker based setup).
+    NOTE: TEAL compilation requires Developer API to be enabled (`"EnableDeveloperAPI": true` in the node config.json).
 + Python 3.7+ (for PyTeal) with [pyteal](https://pypi.org/project/pyteal). Please read below how to install it.
 + Yarn `v1.22+` or NPM `v6.0+`
+
 
 ### Installation
 
@@ -118,6 +120,9 @@ A `sample-project` is provided for your reference.
 
 Further information about the `sample-project` can be found [here](https://github.com/scale-it/algo-builder/blob/master/packages/algob/sample-project/README.md)
 
+**NOTE**:
+a) You can put smart contracts directly in `/assets` directory as well as in `/assets` subdirectory. For example, you can store your PyTEAL files in `assets/pyteal/<file.py>`.
+b) By default `algobpy` package (a helper package to pass compilation parameters to PyTEAL programs) is  stored in `/assets/algobpy` folder. `algob` is looking for all `.py` and `.teal` files when loading smart contracts, except files stored in `/assets/algobpy`. You can use the `/assets/algobpy` directory to store custom Python modules and conflicts when loading TEAL smart contracts. Read more about usage of `algobpy` [here](https://github.com/scale-it/algo-builder/blob/master/docs/guide/py-teal.md#external-parameters-support).
 
 ### Checkpoints
 

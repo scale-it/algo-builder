@@ -3,10 +3,10 @@ import fsExtra from "fs-extra";
 import os from "os";
 import path from "path";
 
+import { BuilderError } from "../../errors/errors";
+import { ERRORS } from "../../errors/errors-list";
 import type { PromiseAny } from "../../types";
 import { ALGOB_NAME } from "../constants";
-import { BuilderError } from "../core/errors";
-import { ERRORS } from "../core/errors-list";
 import { ExecutionMode, getExecutionMode } from "../core/execution-mode";
 import { getPackageJson, getPackageRoot } from "../util/package-info";
 

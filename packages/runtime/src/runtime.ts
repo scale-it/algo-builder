@@ -325,33 +325,18 @@ export class Runtime {
     );
   }
 
-  // TODO move to code ctx
   /**
    * Add Asset in Runtime
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
   addAsset (name: string, flags: ASADeploymentFlags): number {
-    const sender = flags.creator;
-    const senderAcc = this.assertAccountDefined(sender.addr, this.store.accounts.get(sender.addr));
+    this.ctx.addAsset(name, flags.creator.addr, flags);
 
-    // create asset
-    const asset = senderAcc.addAsset(++this.store.assetCounter, name, this.loadedAssetsDefs[name]);
-    this.mkAssetCreateTx(name, flags, asset);
-    this.store.assetDefs.set(this.store.assetCounter, sender.addr);
-    this.store.assetNameInfo.set(name, {
-      creator: senderAcc.address,
-      assetIndex: this.store.assetCounter,
-      assetDef: asset,
-      txId: "tx-id",
-      confirmedRound: this.round
-    });
-
-    this.optIntoASA(this.store.assetCounter, sender.addr, {}); // opt-in for creator
+    this.store = this.ctx.state;
     return this.store.assetCounter;
   }
 
-  // TODO move to code ctx
   /**
    * Asset Opt-In for account in Runtime
    * @param assetIndex Asset Index
@@ -359,21 +344,9 @@ export class Runtime {
    * @param flags Transaction Parameters
    */
   optIntoASA (assetIndex: number, address: AccountAddress, flags: TxParams): void {
-    const assetDef = this.getAssetDef(assetIndex);
-    const creatorAddr = assetDef.creator;
-    makeAssetTransferTxnWithSuggestedParams(
-      address, address, undefined, undefined, 0, undefined, assetIndex,
-      mockSuggestedParams(flags, this.round));
+    this.ctx.optIntoASA(assetIndex, address, flags);
 
-    const assetHolding: AssetHoldingM = {
-      amount: address === creatorAddr ? BigInt(assetDef.total) : 0n, // for creator opt-in amount is total assets
-      'asset-id': assetIndex,
-      creator: creatorAddr,
-      'is-frozen': address === creatorAddr ? false : assetDef.defaultFrozen
-    };
-
-    const account = this.getAccount(address);
-    account.optInToASA(assetIndex, assetHolding);
+    this.store = this.ctx.state;
   }
 
   /**
@@ -419,14 +392,8 @@ export class Runtime {
     this.ctx.gtxs = [encTx];
   }
 
-  // TODO move to code ctx
   /**
    * creates new application and returns application id
-   * Note: In this function we are operating on ctx to ensure that
-   * the states are updated correctly
-   * - First we are setting ctx according to application
-   * - Second we run the TEAL code
-   * - Finally if run is successful we update the store.
    * @param flags SSCDeployment flags
    * @param payFlags Transaction parameters
    * @param approvalProgram application approval program
@@ -437,40 +404,10 @@ export class Runtime {
     flags: SSCDeploymentFlags, payFlags: TxParams,
     approvalProgram: string, clearProgram: string
   ): number {
-    const sender = flags.sender;
-    const senderAcc = this.assertAccountDefined(sender.addr, this.store.accounts.get(sender.addr));
-
-    if (approvalProgram === "") {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
-    }
-    if (clearProgram === "") {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
-    }
-
-    // prepare context
-    this.ctx.state = cloneDeep(this.store);
-    // create app with id = 0 in globalApps for teal execution
-    const app = senderAcc.addApp(0, flags, approvalProgram, clearProgram);
-    this.ctx.state.accounts.set(senderAcc.address, senderAcc);
-    this.ctx.state.globalApps.set(app.id, senderAcc.address);
-
     this.addCtxAppCreateTxn(flags, payFlags);
-    this.run(approvalProgram, ExecutionMode.STATEFUL); // execute TEAL code with appId = 0
+    this.ctx.addApp(flags.sender.addr, flags, approvalProgram, clearProgram);
 
-    // create new application in globalApps map
-    this.store.globalApps.set(++this.store.appCounter, senderAcc.address);
-
-    const attributes = this.assertAppDefined(0, senderAcc.createdApps.get(0));
-    senderAcc.createdApps.delete(0); // remove zero app from sender's account
-    senderAcc.createdApps.set(this.store.appCounter, attributes);
-    this.store.appNameInfo.set(approvalProgram + "-" + clearProgram, {
-      creator: senderAcc.address,
-      appID: this.store.appCounter,
-      txId: "tx-id",
-      confirmedRound: this.round,
-      timestamp: Math.round(+new Date() / 1000)
-    });
-
+    this.store = this.ctx.state;
     return this.store.appCounter;
   }
 
@@ -498,7 +435,6 @@ export class Runtime {
     this.ctx.gtxs = [encTx];
   }
 
-  // TODO move to code ctx
   /**
    * Account address opt-in for application Id
    * @param accountAddr Account address
@@ -508,13 +444,9 @@ export class Runtime {
    */
   optInToApp (accountAddr: string, appId: number,
     flags: SSCOptionalFlags, payFlags: TxParams): void {
-    const appParams = this.getApp(appId);
     this.addCtxOptInTx(accountAddr, appId, payFlags, flags);
-    this.ctx.state = cloneDeep(this.store);
-    const account = this.assertAccountDefined(accountAddr, this.ctx.state.accounts.get(accountAddr));
-    account.optInToApp(appId, appParams);
+    this.ctx.optInToApp(accountAddr, appId);
 
-    this.run(appParams["approval-program"], ExecutionMode.STATEFUL);
     this.store = this.ctx.state;
   }
 
@@ -562,24 +494,11 @@ export class Runtime {
     payFlags: TxParams,
     flags: SSCOptionalFlags
   ): void {
-    if (approvalProgram === "") {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
-    }
-    if (clearProgram === "") {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
-    }
-
-    const appParams = this.getApp(appId);
     this.addCtxAppUpdateTx(senderAddr, appId, payFlags, flags);
-    this.ctx.state = cloneDeep(this.store);
-
-    this.run(appParams["approval-program"], ExecutionMode.STATEFUL);
+    this.ctx.updateApp(appId, approvalProgram, clearProgram);
 
     // If successful, Update programs and state
     this.store = this.ctx.state;
-    const updatedApp = this.getApp(appId); // get app after updating store
-    updatedApp["approval-program"] = approvalProgram;
-    updatedApp["clear-state-program"] = clearProgram;
   }
 
   // verify 'amt' microalgos can be withdrawn from account

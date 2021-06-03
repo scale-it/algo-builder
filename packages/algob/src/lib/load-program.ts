@@ -1,5 +1,5 @@
+import { getPathFromDirRecursive } from "@algo-builder/runtime";
 import fs from "fs";
-import path from "path";
 import YAML from "yaml";
 
 import { ASSETS_DIR } from "../internal/core/project-structure";
@@ -13,7 +13,7 @@ import { mockAlgod } from "./constants";
  * (used only when compiling PyTEAL to TEAL)
  */
 export function getProgram (fileName: string, scInitParam?: unknown): string {
-  const filePath = path.join(process.cwd(), ASSETS_DIR, fileName);
+  const filePath = getPathFromDirRecursive(ASSETS_DIR, fileName) as string;
   const program = fs.readFileSync(filePath, 'utf8');
 
   if (!fileName.endsWith(pyExt) && !fileName.endsWith(tealExt)) {

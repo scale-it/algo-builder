@@ -25,7 +25,7 @@ describe("Logic Signature: Escrow Account", function () {
 
   let john = new AccountStore(initialJohnHolding, johnAccount); // 0.005 ALGO
   const admin = new AccountStore(1e12);
-  const runtime = new Runtime([john, admin]); // setup runtime
+  let runtime: Runtime;
 
   // we can't load teal code and create an escrow, because in this test we are loading a
   // fixture environment, which happens in `beforeAll`. So, consequently we need to move
@@ -35,6 +35,7 @@ describe("Logic Signature: Escrow Account", function () {
   let paymentTxParams: AlgoTransferParam;
 
   this.beforeAll(function () {
+    runtime = new Runtime([john, admin]); // setup runtime
     lsig = runtime.getLogicSig(getProgram('escrow.teal'), []);
     escrow = runtime.getAccount(lsig.address());
     paymentTxParams = {

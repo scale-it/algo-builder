@@ -1,7 +1,7 @@
 import * as util from "util";
 
-import { BuilderError } from "../core/errors";
-import { ERRORS } from "../core/errors-list";
+import { BuilderError } from "../../errors/errors";
+import { ERRORS } from "../../errors/errors-list";
 
 /**
  * This module provides function to implement proxy-based object, functions, and

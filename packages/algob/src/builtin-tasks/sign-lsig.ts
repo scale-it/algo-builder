@@ -1,3 +1,4 @@
+import { getPathFromDirRecursive } from "@algo-builder/runtime";
 import { encodeObj } from "algosdk";
 import path from "path";
 
@@ -22,6 +23,7 @@ async function multiSignLsig (
   }
 
   const lsig = await loadBinaryLsig(taskArgs.file);
+  const sourceFilePath = getPathFromDirRecursive(ASSETS_DIR, taskArgs.file) as string;
   if (lsig.msig) {
     lsig.appendToMultisig(signerAccount.sk); // if msig is present then append signature to multisig
   } else {
@@ -30,7 +32,7 @@ async function multiSignLsig (
 
   const [name, ext] = taskArgs.file.split(".");
   const outFileName = taskArgs.out ?? (name + "_out." + ext);
-  const outFilePath = path.join(ASSETS_DIR, outFileName);
+  const outFilePath = path.join(path.dirname(sourceFilePath), outFileName);
 
   // if lsig.args = [] (empty array), then delete that key
   if (lsig.args?.length === 0) {
