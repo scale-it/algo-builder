@@ -20,10 +20,10 @@ describe("Algorand Smart Contracts - Delete Application", function () {
   let deleteParams: SSCCallsParam;
   const flags = {
     sender: john.account,
-    globalBytes: 32,
-    globalInts: 32,
-    localBytes: 8,
-    localInts: 8
+    globalBytes: 2,
+    globalInts: 2,
+    localBytes: 3,
+    localInts: 3
   };
   this.beforeAll(async function () {
     runtime = new Runtime([john, alice]); // setup test

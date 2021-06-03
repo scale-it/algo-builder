@@ -22,10 +22,10 @@ describe("Algorand Smart Contracts - Update Application", function () {
   let appId: number;
   const flags = {
     sender: creator.account,
-    globalBytes: 32,
-    globalInts: 32,
-    localBytes: 8,
-    localInts: 8
+    globalBytes: 4,
+    globalInts: 4,
+    localBytes: 2,
+    localInts: 2
   };
   this.beforeAll(async function () {
     runtime = new Runtime([creator, alice]);
