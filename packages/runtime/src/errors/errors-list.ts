@@ -19,9 +19,9 @@ export const RUNTIME_ERROR_RANGES = {
   ASA: { min: 1500, max: 1599, title: "ASA Error" }
 };
 
-const PARSE_ERROR = "Parse Error";
+export const PARSE_ERROR = "Parse Error";
 
-const tealErrors = {
+export const tealErrors = {
   ASSERT_STACK_LENGTH: {
     number: 1000,
     message: "Length of stack is less than min length required for current op at line %line%",
@@ -222,7 +222,7 @@ by an index that does not exist.`
   }
 };
 
-const runtimeGeneralErrors = {
+export const runtimeGeneralErrors = {
   LOGIC_SIGNATURE_NOT_FOUND: {
     number: 1300,
     message: "logic signature not found",
@@ -282,10 +282,22 @@ const runtimeGeneralErrors = {
     message: "Program is empty",
     title: "Invalid program",
     description: `Invalid program`
+  },
+  MULTIPLE_FILES_WITH_SAME_NAME_IN_DIR: {
+    number: 1310,
+    message: "Directory %directory% has same file \"%file%\" in multiple paths: %path1%, %path2%",
+    title: "Multiple files with same fileName present in directory %directory%",
+    description: `Directory %directory% has same file in multiple paths: %path1%, %path2%`
+  },
+  FILE_NOT_FOUND_IN_DIR: {
+    number: 1311,
+    message: "File name \"%file%\" does not exist in directory \"%directory%\"",
+    title: "File \"%file%\" does not exist in directory \"%directory%\"",
+    description: `File "%file%" does not exist in directory "%directory%"`
   }
 };
 
-const transactionErrors = {
+export const transactionErrors = {
   TRANSACTION_TYPE_ERROR: {
     number: 1400,
     message: "Error. Transaction Type %transaction% is Unknown",
@@ -325,7 +337,7 @@ const transactionErrors = {
   }
 };
 
-const runtimeAsaErrors = {
+export const runtimeAsaErrors = {
   PARAM_PARSE_ERROR: {
     number: 1500,
     message: `Invalid ASA definition: '%source%'.

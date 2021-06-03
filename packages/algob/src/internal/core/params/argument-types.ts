@@ -1,7 +1,7 @@
 import * as fs from "fs";
 
-import { BuilderError } from "../errors";
-import { ERRORS } from "../errors-list";
+import { BuilderError } from "../../../errors/errors";
+import { ERRORS } from "../../../errors/errors-list";
 
 /**
  * Provides an interface for every valid task argument type.

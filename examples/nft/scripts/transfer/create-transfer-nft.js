@@ -3,7 +3,7 @@
  * This file creates a new NFT and transfers 1 NFT from A to B
 */
 const { executeTransaction, printGlobalNFT, printLocalNFT } = require('./common');
-const { stringToBytes } = require('@algo-builder/algob');
+const { convert } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
@@ -19,7 +19,7 @@ async function run (runtimeEnv, deployer) {
   const nftRef = 'https://new-nft.com';
 
   // arguments: "create", nft_data_ref, data_hash
-  let appArgs = ['create', nftRef, '1234'].map(stringToBytes);
+  let appArgs = ['create', nftRef, '1234'].map(convert.stringToBytes);
 
   let txnParam = {
     type: types.TransactionType.CallNoOpSSC,

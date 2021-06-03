@@ -2,10 +2,10 @@ import debug from "debug";
 import * as path from "path";
 import * as semver from "semver";
 
+import { BuilderError } from "../../errors/errors";
+import { ERRORS } from "../../errors/errors-list";
 import { StrMap } from "../../types";
 import { BuilderContext } from "../context";
-import { BuilderError } from "./errors";
-import { ERRORS } from "./errors-list";
 import { ExecutionMode, getExecutionMode } from "./execution-mode";
 
 const log = debug("algob:core:plugins");

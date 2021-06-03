@@ -1,3 +1,5 @@
+import { BuilderError } from "../../errors/errors";
+import { ERRORS } from "../../errors/errors-list";
 import {
   ParamDefinition,
   ParamDefinitions,
@@ -7,8 +9,6 @@ import {
   TaskArguments,
   TaskDefinition
 } from "../../types";
-import { BuilderError } from "../core/errors";
-import { ERRORS } from "../core/errors-list";
 
 export class ArgumentsParser {
   public static readonly PARAM_PREFIX = "--";

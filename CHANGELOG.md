@@ -12,7 +12,10 @@
 + TEALv3 support in `@algo-builder/runtime`:
     * `assert`, `pushint`, `pushbytes`, `swap` opcodes.
     * new `Txn` fields and `Global` field.
++ Store checkpoints in nested form for SSC, added tests.
++ Added support for sub directories in assets folder, with tests.
 + Update runtime to process execParams.deployASA, deploySSC, OptInToASA, OptIntoSSC
++ Exported `@algorand-builder/algob`, `@algorand-builder/runtime` error types and make it accessible for API documentation.
 
 ### Bug fixes
 
@@ -25,7 +28,6 @@
 ### Improvements
 * Update how error is displayed to a user
 * Add Update stateful smart contracts using execute transaction in runtime
-* Store checkpoints in nested form for SSC, added tests.
 
 Runtime:
 + added `updateApp` method.
