@@ -2281,17 +2281,18 @@ describe("Teal Opcodes", function () {
   describe("Global Opcode", function () {
     const stack = new Stack<StackElem>();
     let interpreter: Interpreter;
-    this.beforeAll(() => {
-      // setup 1st account (to be used as sender)
-      const acc1: AccountStoreI = new AccountStore(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
-      setDummyAccInfo(acc1);
 
+    // setup 1st account (to be used as sender)
+    const acc1: AccountStoreI = new AccountStore(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
+    setDummyAccInfo(acc1);
+
+    before(() => {
       interpreter = new Interpreter();
       interpreter.runtime = new Runtime([acc1]);
       interpreter.runtime.ctx.tx = TXN_OBJ;
       interpreter.runtime.ctx.gtxs = [TXN_OBJ];
       interpreter.runtime.ctx.tx.apid = 1828;
-      interpreter.tealVersion = 2; // set tealversion to latest (to support all global fields)
+      interpreter.tealVersion = MaxTEALVersion; // set tealversion to latest (to support all global fields)
     });
 
     it("should push MinTxnFee to stack", function () {
