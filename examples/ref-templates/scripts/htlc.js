@@ -1,6 +1,6 @@
 const { executeTransaction, mkTxnParams } = require('./common/common');
-const { globalZeroAddress } = require('@algo-builder/algob');
-const { types, stringToBytes } = require('@algo-builder/runtime');
+const { globalZeroAddress, convert } = require('@algo-builder/algob');
+const { types } = require('@algo-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -31,7 +31,7 @@ async function run (runtimeEnv, deployer) {
 
   txnParams.fromAccountAddr = contractAddress;
   txnParams.sign = types.SignType.LogicSignature;
-  txnParams.args = [stringToBytes(wrongSecret)];
+  txnParams.args = [convert.stringToBytes(wrongSecret)];
   txnParams.toAccountAddr = globalZeroAddress;
   txnParams.amountMicroAlgos = 0;
   txnParams.lsig = contract;
@@ -41,7 +41,7 @@ async function run (runtimeEnv, deployer) {
   await executeTransaction(deployer, txnParams);
 
   // Passes because right secret is provided
-  txnParams.args = [stringToBytes(secret)];
+  txnParams.args = [convert.stringToBytes(secret)];
   await executeTransaction(deployer, txnParams);
 }
 

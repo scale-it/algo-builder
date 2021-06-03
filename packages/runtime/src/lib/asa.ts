@@ -1,4 +1,5 @@
 import type { AssetDef } from "algosdk";
+import { existsSync } from "fs";
 import path from "path";
 import * as z from 'zod';
 
@@ -7,9 +8,9 @@ import { RuntimeError } from "../errors/runtime-errors";
 import { parseZodError } from "../errors/validation-errors";
 import { AccountMap, ASADef, ASADefs, AssetModFields, RuntimeAccountMap } from "../types";
 import { ASADefSchema } from "../types-input";
-import { loadFromYamlFileSilentWithMessage } from "./files";
+import { getPathFromDirRecursive, loadFromYamlFileSilent } from "./files";
 
-const ASSETS_DIR = "assets";
+export const ASSETS_DIR = "assets";
 /**
  * Validates asset definitions and checks if opt-in acc names are present in network
  * @param accounts AccountMap is the SDK account type, used in builder. RuntimeAccountMap is
@@ -106,11 +107,17 @@ export function validateASADefs (
  * (where we use maps instead of arrays in sdk structures).
  */
 export function loadASAFile (accounts: AccountMap | RuntimeAccountMap): ASADefs {
-  const filename = path.join(ASSETS_DIR, "asa.yaml");
+  let filePath;
+  if (!existsSync(ASSETS_DIR)) { // to handle tests
+    filePath = path.join(ASSETS_DIR, "asa.yaml");
+  } else {
+    filePath = getPathFromDirRecursive(ASSETS_DIR, "asa.yaml", "ASA file not defined") as string;
+  }
+
   return validateASADefs(
-    loadFromYamlFileSilentWithMessage(filename, "ASA file not defined"),
+    loadFromYamlFileSilent(filePath),
     accounts,
-    filename);
+    filePath);
 }
 
 function isDefined (value: string | undefined): boolean {

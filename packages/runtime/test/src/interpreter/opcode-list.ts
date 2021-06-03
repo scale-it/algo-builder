@@ -10,14 +10,14 @@ import { Interpreter } from "../../../src/interpreter/interpreter";
 import {
   Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx,
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
-  AppOptedIn, Arg, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
+  AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
   Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2, Ed25519verify,
   EqualTo, Err, GetAssetDef, GetAssetHolding, Global,
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
-  Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, Return,
-  Sha256, Sha512_256, Store, Sub, Substring, Substring3, Txn, Txna
+  Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, PushBytes, PushInt, Return,
+  Sha256, Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8 } from "../../../src/lib/constants";
 import { convertToBuffer, stringToBytes } from "../../../src/lib/parsing";
@@ -217,11 +217,14 @@ describe("Teal Opcodes", function () {
 
   describe("Arg[N]", function () {
     const stack = new Stack<StackElem>();
-    const runtime = new Runtime([]);
-    const interpreter = new Interpreter();
+    let interpreter: Interpreter;
     const args = ["Arg0", "Arg1", "Arg2", "Arg3"].map(stringToBytes);
-    interpreter.runtime = runtime;
-    interpreter.runtime.ctx.args = args;
+
+    this.beforeAll(() => {
+      interpreter = new Interpreter();
+      interpreter.runtime = new Runtime([]);
+      interpreter.runtime.ctx.args = args;
+    });
 
     it("should push arg_0 from argument array to stack", function () {
       const op = new Arg(["0"], 1, interpreter);
@@ -1565,10 +1568,13 @@ describe("Teal Opcodes", function () {
 
   describe("Transaction opcodes", function () {
     const stack = new Stack<StackElem>();
-    const interpreter = new Interpreter();
-    interpreter.runtime = new Runtime([]);
-    interpreter.runtime.ctx.tx = TXN_OBJ;
-    interpreter.tealVersion = 2; // set tealversion to latest (to support all tx fields)
+    let interpreter: Interpreter;
+    this.beforeAll(() => {
+      interpreter = new Interpreter();
+      interpreter.runtime = new Runtime([]);
+      interpreter.runtime.ctx.tx = TXN_OBJ;
+      interpreter.tealVersion = 2; // set tealversion to latest (to support all tx fields)
+    });
 
     describe("Txn: Common Fields", function () {
       it("should push txn fee to stack", function () {
@@ -1643,14 +1649,14 @@ describe("Teal Opcodes", function () {
         assert.deepEqual(TXN_OBJ.rekey, stack.pop());
       });
 
-      it("should throw error on FirstValidTime",
+      it("should throw error on FirstValidTime", () => {
         execExpectError(
           stack,
           [],
           new Txn(["FirstValidTime"], 1, interpreter),
           RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
-        )
-      );
+        );
+      });
 
       it("should push txn NumAppArgs to stack", function () {
         const op = new Txn(["NumAppArgs"], 1, interpreter);
@@ -2163,17 +2169,19 @@ describe("Teal Opcodes", function () {
 
   describe("Global Opcode", function () {
     const stack = new Stack<StackElem>();
-    const interpreter = new Interpreter();
+    let interpreter: Interpreter;
+    this.beforeAll(() => {
+      // setup 1st account (to be used as sender)
+      const acc1: AccountStoreI = new AccountStore(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
+      setDummyAccInfo(acc1);
 
-    // setup 1st account (to be used as sender)
-    const acc1: AccountStoreI = new AccountStore(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
-    setDummyAccInfo(acc1);
-
-    interpreter.runtime = new Runtime([acc1]);
-    interpreter.runtime.ctx.tx = TXN_OBJ;
-    interpreter.runtime.ctx.gtxs = [TXN_OBJ];
-    interpreter.runtime.ctx.tx.apid = 1828;
-    interpreter.tealVersion = 2; // set tealversion to latest (to support all global fields)
+      interpreter = new Interpreter();
+      interpreter.runtime = new Runtime([acc1]);
+      interpreter.runtime.ctx.tx = TXN_OBJ;
+      interpreter.runtime.ctx.gtxs = [TXN_OBJ];
+      interpreter.runtime.ctx.tx.apid = 1828;
+      interpreter.tealVersion = 2; // set tealversion to latest (to support all global fields)
+    });
 
     it("should push MinTxnFee to stack", function () {
       const op = new Global(['MinTxnFee'], 1, interpreter);
@@ -2276,7 +2284,6 @@ describe("Teal Opcodes", function () {
 
   describe("StateFul Opcodes", function () {
     const stack = new Stack<StackElem>();
-    const interpreter = new Interpreter();
     const lineNumber = 0;
 
     // setup 1st account (to be used as sender)
@@ -2287,14 +2294,17 @@ describe("Teal Opcodes", function () {
     const acc2 = new AccountStore(123, { addr: johnAddr, sk: new Uint8Array(0) });
     setDummyAccInfo(acc2);
 
-    const runtime = new Runtime([acc1, acc2]);
-    interpreter.runtime = runtime; // setup runtime
+    let interpreter: Interpreter;
+    this.beforeAll(() => {
+      interpreter = new Interpreter();
+      interpreter.runtime = new Runtime([acc1, acc2]);
 
-    // setting txn object and sender's addr
-    interpreter.runtime.ctx.tx = {
-      ...TXN_OBJ,
-      snd: Buffer.from(decodeAddress(elonAddr).publicKey)
-    };
+      // setting txn object and sender's addr
+      interpreter.runtime.ctx.tx = {
+        ...TXN_OBJ,
+        snd: Buffer.from(decodeAddress(elonAddr).publicKey)
+      };
+    });
 
     describe("AppOptedIn", function () {
       it("should push 1 to stack if app is opted in", function () {
@@ -2784,68 +2794,70 @@ describe("Teal Opcodes", function () {
 
     it("Byte: should push parsed base64 string as bytes to stack", function () {
       const base64Str = "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=";
-      const bytes = new Uint8Array(Buffer.from(base64Str, 'base64'));
+      const expectedBytes = new Uint8Array(Buffer.from(base64Str, 'base64'));
 
       const op = new Byte(["base64", base64Str], 1);
       op.execute(stack);
 
       assert.equal(1, stack.length());
-      assert.deepEqual(bytes, stack.pop());
+      assert.deepEqual(expectedBytes, stack.pop());
     });
 
     it("Byte: should push parsed base32 string as bytes to stack", function () {
       const base32Str = "MFRGGZDFMY======";
-      const bytes = new Uint8Array(convertToBuffer(base32Str, EncodingType.BASE32));
+      const expectedBytes = new Uint8Array(convertToBuffer(base32Str, EncodingType.BASE32));
 
       const op = new Byte(["base32", base32Str], 1);
       op.execute(stack);
 
       assert.equal(1, stack.length());
-      assert.deepEqual(bytes, stack.pop());
+      assert.deepEqual(expectedBytes, stack.pop());
     });
 
     it("Byte: should push parsed hex string as bytes to stack", function () {
       const hexStr = "0x250001000192CD0000002F6D6E742F72";
-      const bytes = new Uint8Array(Buffer.from(hexStr.slice(2), 'hex'));
+      const expectedBytes = new Uint8Array(Buffer.from(hexStr.slice(2), 'hex'));
 
       const op = new Byte([hexStr], 1);
       op.execute(stack);
 
       assert.equal(1, stack.length());
-      assert.deepEqual(bytes, stack.pop());
+      assert.deepEqual(expectedBytes, stack.pop());
     });
 
     it("Byte: should push string literal as bytes to stack", function () {
       const str = "\"Algorand\"";
-      const bytes = new Uint8Array(Buffer.from("Algorand"));
+      const expectedBytes = new Uint8Array(Buffer.from("Algorand"));
 
       const op = new Byte([str], 1);
       op.execute(stack);
 
       assert.equal(1, stack.length());
-      assert.deepEqual(bytes, stack.pop());
+      assert.deepEqual(expectedBytes, stack.pop());
     });
   });
 
   describe("Balance", () => {
     const stack = new Stack<StackElem>();
-    const interpreter = new Interpreter();
 
     // setup 1st account
     const acc1: AccountStoreI = new AccountStore(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
     setDummyAccInfo(acc1);
 
-    const runtime = new Runtime([acc1]);
-    interpreter.runtime = runtime; // setup runtime
+    let interpreter: Interpreter;
+    this.beforeAll(() => {
+      interpreter = new Interpreter();
+      interpreter.runtime = new Runtime([acc1]);
 
-    // setting txn object
-    interpreter.runtime.ctx.tx = TXN_OBJ;
-    interpreter.runtime.ctx.tx.snd = Buffer.from(decodeAddress(elonAddr).publicKey);
-    interpreter.runtime.ctx.tx.apat = [
-      Buffer.from(decodeAddress(elonAddr).publicKey),
-      Buffer.from(decodeAddress(johnAddr).publicKey)
-    ];
-    interpreter.runtime.ctx.tx.apas = [3, 112];
+      // setting txn object
+      interpreter.runtime.ctx.tx = TXN_OBJ;
+      interpreter.runtime.ctx.tx.snd = Buffer.from(decodeAddress(elonAddr).publicKey);
+      interpreter.runtime.ctx.tx.apat = [
+        Buffer.from(decodeAddress(elonAddr).publicKey),
+        Buffer.from(decodeAddress(johnAddr).publicKey)
+      ];
+      interpreter.runtime.ctx.tx.apas = [3, 112];
+    });
 
     it("should push correct account balance", () => {
       const op = new Balance([], 1, interpreter);
@@ -3095,6 +3107,119 @@ describe("Teal Opcodes", function () {
       expectRuntimeError(
         () => op.execute(stack),
         RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
+    });
+  });
+
+  describe("PushInt", () => {
+    let stack: Stack<StackElem>;
+    this.beforeEach(() => { stack = new Stack<StackElem>(); });
+
+    it("should push uint64 to stack", () => {
+      const op = new PushInt([MAX_UINT64.toString()], 0);
+      op.execute(stack);
+
+      assert.equal(1, stack.length());
+      assert.equal(MAX_UINT64, stack.pop());
+    });
+  });
+
+  describe("PushBytes", () => {
+    let stack: Stack<StackElem>;
+    this.beforeEach(() => { stack = new Stack<StackElem>(); });
+
+    it("should push bytes to stack", () => {
+      const str = "\"Algorand\"";
+      const expectedBytes = new Uint8Array(Buffer.from("Algorand"));
+
+      const op = new PushBytes([str], 1);
+      op.execute(stack);
+
+      assert.equal(1, stack.length());
+      assert.deepEqual(expectedBytes, stack.pop());
+    });
+  });
+
+  describe("Assert", () => {
+    let stack: Stack<StackElem>;
+    this.beforeEach(() => { stack = new Stack<StackElem>(); });
+
+    it("should not panic if top of stack is non zero uint64", () => {
+      const op = new Assert([], 0);
+      stack.push(55n);
+      assert.doesNotThrow(() => { op.execute(stack); });
+    });
+
+    it("should panic if top of stack is zero or bytes", () => {
+      const op = new Assert([], 0);
+      stack.push(0n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.TEAL_ENCOUNTERED_ERR
+      );
+
+      stack.push(stringToBytes("HelloWorld"));
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
+      );
+    });
+
+    it("should throw error if stack is empty", () => {
+      const op = new Assert([], 0);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
+    });
+  });
+
+  describe("Swap", () => {
+    let stack: Stack<StackElem>;
+    this.beforeEach(() => { stack = new Stack<StackElem>(); });
+
+    it("should not panic if top of stack is non zero uint64", () => {
+      let op = new Swap([], 0);
+      stack.push(5n);
+      stack.push(10n);
+
+      op.execute(stack);
+      assert.equal(stack.length(), 2);
+      assert.equal(stack.pop(), 5n);
+      assert.equal(stack.pop(), 10n);
+
+      op = new Swap([], 0);
+      stack.push(stringToBytes("hello"));
+      stack.push(stringToBytes("world"));
+
+      op.execute(stack);
+      assert.equal(stack.length(), 2);
+      assert.deepEqual(stack.pop(), stringToBytes("hello"));
+      assert.deepEqual(stack.pop(), stringToBytes("world"));
+
+      op = new Swap([], 0);
+      stack.push(5n);
+      stack.push(stringToBytes("a"));
+
+      op.execute(stack);
+      assert.equal(stack.length(), 2);
+      assert.deepEqual(stack.pop(), 5n);
+      assert.deepEqual(stack.pop(), stringToBytes("a"));
+    });
+
+    it("should throw error if length of stack < 2", () => {
+      const op = new Swap([], 0);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
+
+      stack.push(1n);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
       );
     });
   });

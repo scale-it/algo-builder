@@ -5,7 +5,7 @@ from algobpy.parse import parse_params
 from pyteal import *
 
 """GOLD Transfer"""
-''' Accepts only if (transaction type is OPT-IN OR (transaction type is asset transfer, 
+''' Accepts only if (transaction type is OPT-IN OR (transaction type is asset transfer,
     sender is goldOwnerAccount and asset transfer amount is less than equal to 1000 ))'''
 
 def gold_asc(asset_amt, tmpl_sender):
@@ -20,7 +20,7 @@ def gold_asc(asset_amt, tmpl_sender):
 	pay_gold = And(
 		Txn.type_enum() == Int(4),
 		Txn.sender() == tmpl_sender,
-		Txn.asset_amount() <= asset_amt 
+		Txn.asset_amount() <= asset_amt
 	)
 
 	combine = Or(asa_opt_in, pay_gold)
@@ -38,5 +38,5 @@ if __name__ == "__main__":
   # Overwrite scParam if sys.argv[1] is passed
   if(len(sys.argv) > 1):
     scParam = parse_params(sys.argv[1], scParam)
-  
+
   print(compileTeal(gold_asc(scParam["ASSET_AMT"], Addr(scParam["TMPL_SENDER"])), Mode.Signature))

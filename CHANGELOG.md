@@ -9,6 +9,9 @@
 ### Improvements
 + Replaced dependency `find-up` with `findup-sync` in `algob`.
 + Added `algopy` in `@algo-builder/algob/sample-project`, which enables users to pass template parameters to PyTEAL contracts. Updated docs.
++ Store checkpoints in nested form for SSC, added tests.
++ Added support for sub directories in assets folder, with tests.
++ TEALv3 support in `@algo-builder/runtime`: `assert`, `pushint`, `pushbytes`, `swap` opcodes.
 + Update runtime to process execParams.deployASA, deploySSC, OptInToASA, OptIntoSSC
 + Exported `@algorand-builder/algob`, `@algorand-builder/runtime` ERRORS in API docs
 
@@ -23,7 +26,6 @@
 ### Improvements
 * Update how error is displayed to a user
 * Add Update stateful smart contracts using execute transaction in runtime
-* Store checkpoints in nested form for SSC, added tests.
 
 Runtime:
 + added `updateApp` method.
