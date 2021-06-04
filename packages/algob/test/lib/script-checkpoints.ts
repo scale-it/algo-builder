@@ -14,7 +14,6 @@ import {
   toScriptFileName
 } from "../../src/lib/script-checkpoints";
 import { Checkpoint, Checkpoints, LsigInfo } from "../../src/types";
-import nested from "../fixture-projects/scripts-dir-recursive-cp/scripts/nested/nested";
 import { expectBuilderError } from "../helpers/errors";
 
 export function cleanupMutableData (netCheckpoint: Checkpoint, n: number): Checkpoint {
@@ -83,20 +82,23 @@ describe("Checkpoint", () => {
       txId: "",
       confirmedRound: 0,
       appID: -1,
-      timestamp: 1
+      timestamp: 1,
+      deleted: false
     });
     netCheckpoint.asa.set("asa1", {
       creator: "123",
       txId: "",
       assetIndex: 0,
       confirmedRound: 0,
-      assetDef: {} as rtypes.ASADef
+      assetDef: {} as rtypes.ASADef,
+      deleted: false
     });
     netCheckpoint.ssc.set("SSC1", nestedMap);
     netCheckpoint.dLsig.set("lsig", {
       creator: "536",
       contractAddress: "addr-3",
-      lsig: {} as LogicSig
+      lsig: {} as LogicSig,
+      deleted: false
     });
     appendToCheckpoint(checkpoints, "network12345", netCheckpoint);
     assert.deepEqual(checkpoints, {
@@ -109,13 +111,15 @@ describe("Checkpoint", () => {
           txId: "",
           assetIndex: 0,
           confirmedRound: 0,
-          assetDef: {} as rtypes.ASADef
+          assetDef: {} as rtypes.ASADef,
+          deleted: false
         }]]),
         ssc: new Map([["SSC1", nestedMap]]),
         dLsig: new Map([["lsig", {
           creator: "536",
           contractAddress: "addr-3",
-          lsig: {} as LogicSig
+          lsig: {} as LogicSig,
+          deleted: false
         }]])
       }
     });
@@ -130,7 +134,8 @@ describe("Checkpoint", () => {
         txId: "",
         assetIndex: 0,
         confirmedRound: 0,
-        assetDef: {} as rtypes.ASADef
+        assetDef: {} as rtypes.ASADef,
+        deleted: false
       });
     checkpoints = appendToCheckpoint(checkpoints, "network12345", netCheckpoint2);
     assert.deepEqual(checkpoints, {
@@ -145,20 +150,23 @@ describe("Checkpoint", () => {
             txId: "",
             assetIndex: 0,
             confirmedRound: 0,
-            assetDef: {} as rtypes.ASADef
+            assetDef: {} as rtypes.ASADef,
+            deleted: false
           }],
           ["my asa 2", {
             creator: "creator",
             txId: "",
             assetIndex: 0,
             confirmedRound: 0,
-            assetDef: {} as rtypes.ASADef
+            assetDef: {} as rtypes.ASADef,
+            deleted: false
           }]]),
         ssc: new Map([["SSC1", nestedMap]]),
         dLsig: new Map([["lsig", {
           creator: "536",
           contractAddress: "addr-3",
-          lsig: {} as LogicSig
+          lsig: {} as LogicSig,
+          deleted: false
         }]])
       }
     });
@@ -175,7 +183,8 @@ describe("Checkpoint", () => {
       txId: "",
       assetIndex: 0,
       confirmedRound: 0,
-      assetDef: {} as rtypes.ASADef
+      assetDef: {} as rtypes.ASADef,
+      deleted: false
     });
     appendToCheckpoint(checkpoints, "network12345", cp1);
     const cp2: Checkpoint = cleanupMutableData(new CheckpointImpl(), 53521);
@@ -184,7 +193,8 @@ describe("Checkpoint", () => {
       txId: "",
       assetIndex: 0,
       confirmedRound: 0,
-      assetDef: {} as rtypes.ASADef
+      assetDef: {} as rtypes.ASADef,
+      deleted: false
     });
     expectBuilderError(
       () => appendToCheckpoint(checkpoints, "network12345", cp2),
@@ -204,7 +214,8 @@ describe("Checkpoint", () => {
       txId: "",
       confirmedRound: 0,
       appID: -1,
-      timestamp: 1
+      timestamp: 1,
+      deleted: false
     });
     const nestedMap1 = new Map<number, rtypes.SSCInfo>();
     nestedMap1.set(2, {
@@ -212,7 +223,8 @@ describe("Checkpoint", () => {
       txId: "",
       confirmedRound: 0,
       appID: -1,
-      timestamp: 2
+      timestamp: 2,
+      deleted: false
     });
     cp1.ssc.set("SSC1", nestedMap);
     appendToCheckpoint(checkpoints, "network12345", cp1);
@@ -250,7 +262,8 @@ describe("Checkpoint", () => {
       txId: "",
       confirmedRound: 0,
       appID: -1,
-      timestamp: 1
+      timestamp: 1,
+      deleted: false
     });
     cp.asa.set(
       "My ASA",
@@ -259,7 +272,8 @@ describe("Checkpoint", () => {
         txId: "",
         assetIndex: 0,
         confirmedRound: 0,
-        assetDef: {} as rtypes.ASADef
+        assetDef: {} as rtypes.ASADef,
+        deleted: false
       });
     cp.ssc.set(
       "My SSC",
@@ -272,7 +286,8 @@ describe("Checkpoint", () => {
         txId: "",
         assetIndex: 0,
         confirmedRound: 0,
-        assetDef: {} as rtypes.ASADef
+        assetDef: {} as rtypes.ASADef,
+        deleted: false
       }]]),
       ssc: new Map([["My SSC", nestedMap]]),
       dLsig: new Map()
@@ -317,7 +332,8 @@ describe("CheckpointRepoImpl", () => {
           txId: "",
           assetIndex: 0,
           confirmedRound: 0,
-          assetDef: {} as rtypes.ASADef
+          assetDef: {} as rtypes.ASADef,
+          deleted: false
         }]]),
         ssc: new Map<string, typeof nestedMap>(),
         dLsig: new Map<string, LsigInfo>()
@@ -332,7 +348,8 @@ describe("CheckpointRepoImpl", () => {
           txId: "",
           assetIndex: 0,
           confirmedRound: 0,
-          assetDef: {} as rtypes.ASADef
+          assetDef: {} as rtypes.ASADef,
+          deleted: false
         }]]),
         ssc: new Map<string, typeof nestedMap>(),
         dLsig: new Map<string, LsigInfo>()
@@ -397,7 +414,8 @@ describe("CheckpointRepoImpl", () => {
         txId: "",
         assetIndex: 0,
         confirmedRound: 0,
-        assetDef: {} as rtypes.ASADef
+        assetDef: {} as rtypes.ASADef,
+        deleted: false
       })
       .putMetadata("network1", "metadata key", "metadata value");
     cpData.precedingCP.network1.timestamp = 123;
@@ -410,7 +428,8 @@ describe("CheckpointRepoImpl", () => {
           txId: "",
           assetIndex: 0,
           confirmedRound: 0,
-          assetDef: {} as rtypes.ASADef
+          assetDef: {} as rtypes.ASADef,
+          deleted: false
         }]]),
         ssc: new Map<string, typeof nestedMap>(),
         dLsig: new Map<string, LsigInfo>()
@@ -425,7 +444,8 @@ describe("CheckpointRepoImpl", () => {
       txId: "",
       confirmedRound: 0,
       appID: -1,
-      timestamp: 1
+      timestamp: 1,
+      deleted: false
     });
     const cpData = new CheckpointRepoImpl()
       .registerSSC("network1", "SSC name", {
@@ -433,7 +453,8 @@ describe("CheckpointRepoImpl", () => {
         txId: "",
         confirmedRound: 0,
         appID: -1,
-        timestamp: 1
+        timestamp: 1,
+        deleted: false
       })
       .putMetadata("net 0195", "1241 key", "345 value");
     cpData.precedingCP.network1.timestamp = 123;
@@ -516,7 +537,8 @@ describe("CheckpointRepoImpl", () => {
           txId: "",
           assetIndex: 0,
           confirmedRound: 0,
-          assetDef: {} as rtypes.ASADef
+          assetDef: {} as rtypes.ASADef,
+          deleted: false
         }]]),
         ssc: new Map<string, typeof nestedMap>(),
         dLsig: new Map<string, LsigInfo>()
@@ -537,7 +559,8 @@ describe("CheckpointRepoImpl", () => {
           txId: "",
           assetIndex: 0,
           confirmedRound: 0,
-          assetDef: {} as rtypes.ASADef
+          assetDef: {} as rtypes.ASADef,
+          deleted: false
         }]]),
         ssc: new Map<string, typeof nestedMap>(),
         dLsig: new Map<string, LsigInfo>()
@@ -552,7 +575,8 @@ describe("CheckpointRepoImpl", () => {
           txId: "",
           assetIndex: 0,
           confirmedRound: 0,
-          assetDef: {} as rtypes.ASADef
+          assetDef: {} as rtypes.ASADef,
+          deleted: false
         }
         ]]),
         ssc: new Map<string, typeof nestedMap>(),
@@ -568,7 +592,8 @@ describe("CheckpointRepoImpl", () => {
           txId: "",
           assetIndex: 0,
           confirmedRound: 0,
-          assetDef: {} as rtypes.ASADef
+          assetDef: {} as rtypes.ASADef,
+          deleted: false
         }]]),
         ssc: new Map<string, typeof nestedMap>(),
         dLsig: new Map<string, LsigInfo>()
@@ -584,14 +609,16 @@ describe("CheckpointRepoImpl", () => {
       txId: "",
       confirmedRound: 0,
       appID: -1,
-      timestamp: 1
+      timestamp: 1,
+      deleted: false
     });
     nestedMap1.set(1, {
       creator: "SSC creator1",
       txId: "",
       confirmedRound: 0,
       appID: -1,
-      timestamp: 1
+      timestamp: 1,
+      deleted: false
     });
     const cp1: Checkpoints = {
       network1: {
@@ -679,14 +706,16 @@ describe("CheckpointRepoImpl", () => {
         txId: "",
         assetIndex: 0,
         confirmedRound: 0,
-        assetDef: {} as rtypes.ASADef
+        assetDef: {} as rtypes.ASADef,
+        deleted: false
       })
       .registerSSC("network1", "SSC name", {
         creator: "SSC creator 951",
         txId: "",
         confirmedRound: 0,
         appID: -1,
-        timestamp: 1
+        timestamp: 1,
+        deleted: false
       });
     cpData.allCPs.network1.timestamp = 1111;
     cpData.allCPs.network4.timestamp = 4;
@@ -707,7 +736,8 @@ describe("CheckpointRepoImpl", () => {
         txId: "",
         confirmedRound: 0,
         appID: -1,
-        timestamp: 1
+        timestamp: 1,
+        deleted: false
       });
       assert.deepEqual(cpData.allCPs, {
         network1: {
@@ -719,7 +749,8 @@ describe("CheckpointRepoImpl", () => {
             txId: "",
             assetIndex: 0,
             confirmedRound: 0,
-            assetDef: {} as rtypes.ASADef
+            assetDef: {} as rtypes.ASADef,
+            deleted: false
           }
           ]]),
           ssc: new Map([["SSC name", nestedMap]]),
@@ -750,7 +781,8 @@ describe("CheckpointRepoImpl", () => {
             txId: "",
             assetIndex: 0,
             confirmedRound: 0,
-            assetDef: {} as rtypes.ASADef
+            assetDef: {} as rtypes.ASADef,
+            deleted: false
           }]]),
           ssc: new Map([["SSC name", nestedMap]]),
           dLsig: new Map()
@@ -774,7 +806,8 @@ describe("CheckpointRepoImpl", () => {
             txId: "",
             assetIndex: 0,
             confirmedRound: 0,
-            assetDef: {} as rtypes.ASADef
+            assetDef: {} as rtypes.ASADef,
+            deleted: false
           }]]),
           ssc: new Map([["SSC name", nestedMap]]),
           dLsig: new Map()
@@ -805,14 +838,16 @@ describe("CheckpointRepoImpl", () => {
       txId: "",
       assetIndex: 0,
       confirmedRound: 0,
-      assetDef: {} as rtypes.ASADef
+      assetDef: {} as rtypes.ASADef,
+      deleted: false
     })
       .registerSSC("network1", "SSC name", {
         creator: "SSC creator 951",
         txId: "",
         confirmedRound: 0,
         appID: -1,
-        timestamp: 1
+        timestamp: 1,
+        deleted: false
       });
     assert.isTrue(cpData.isDefined("network1", "ASA name"));
     assert.isTrue(cpData.isDefined("network1", "SSC name"));

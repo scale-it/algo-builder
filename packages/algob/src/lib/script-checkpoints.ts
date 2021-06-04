@@ -193,11 +193,28 @@ export function persistCheckpoint (scriptName: string, checkpoint: Checkpoints):
 }
 
 /**
+ * Check if given transaction is asset deletion
+ * @param txn Txn Object
+ * Logic:
+ * https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction
+ * https://github.com/algorand/js-algorand-sdk/blob/e07d99a2b6bd91c4c19704f107cfca398aeb9619/src/transaction.ts#L528
+ */
+function checkAssetDeletionTx (txn: Transaction): boolean {
+  if (txn.assetClawback || txn.assetFreeze || txn.assetManager || txn.assetReserve) {
+    return false;
+  } else if (txn.assetIndex) {
+    return true;
+  }
+  return false;
+}
+
+/**
  * Register checkpoints for ASA and SSC
  * @param deployer Deployer object
  * @param txns transaction array
  * @param txIdxMap transaction map index to name
  */
+/* eslint-disable sonarjs/cognitive-complexity */
 export async function registerCheckpoints (
   deployer: Deployer,
   txns: Transaction[],
@@ -210,12 +227,19 @@ export async function registerCheckpoints (
       case 'acfg': {
         txConfirmation = await deployer.waitForConfirmation(txn.txID());
         if (res) {
+          if (checkAssetDeletionTx(txn)) {
+            const temp: rtypes.ASAInfo = deployer.getASAInfo(res[0]);
+            temp.deleted = true;
+            deployer.registerASAInfo(res[0], temp);
+            break;
+          }
           const asaInfo: rtypes.ASAInfo = {
             creator: encodeAddress(txn.from.publicKey),
             txId: txn.txID(),
             assetIndex: txConfirmation["asset-index"],
             confirmedRound: txConfirmation['confirmed-round'],
-            assetDef: res[1]
+            assetDef: res[1],
+            deleted: false
           };
           deployer.registerASAInfo(res[0], asaInfo);
           deployer.logTx("Deploying ASA: " + res[0], txConfirmation);
@@ -224,14 +248,21 @@ export async function registerCheckpoints (
       }
       case 'appl': {
         txConfirmation = await deployer.waitForConfirmation(txn.txID());
-        const sscInfo: rtypes.SSCInfo = {
-          creator: encodeAddress(txn.from.publicKey),
-          txId: txn.txID(),
-          appID: txConfirmation['application-index'],
-          confirmedRound: txConfirmation['confirmed-round'],
-          timestamp: Math.round(+new Date() / 1000)
-        };
         if (res) {
+          const temp: rtypes.SSCInfo | undefined = deployer.getSSCfromCPKey(res[0]);
+          if (txn.appOnComplete === 5 && temp) {
+            temp.deleted = true;
+            deployer.registerSSCInfo(res[0], temp);
+            break;
+          }
+          const sscInfo: rtypes.SSCInfo = {
+            creator: encodeAddress(txn.from.publicKey),
+            txId: txn.txID(),
+            appID: txConfirmation['application-index'],
+            confirmedRound: txConfirmation['confirmed-round'],
+            timestamp: Math.round(+new Date() / 1000),
+            deleted: false
+          };
           const val = deployer.getSSCfromCPKey(res[0]);
           if (val?.appID === sscInfo.appID) {
             deployer.logTx("Updating SSC: " + res[0], txConfirmation);

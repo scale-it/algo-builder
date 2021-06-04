@@ -48,7 +48,8 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
       txId: "tx-id-dry-run",
       assetIndex: 1,
       confirmedRound: -1,
-      assetDef: asaDef
+      assetDef: asaDef,
+      deleted: false
     };
   }
 
@@ -58,7 +59,8 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     return {
       creator: flags.funder.addr + "-get-address-dry-run",
       contractAddress: "dfssdfsd",
-      lsig: {} as LogicSig
+      lsig: {} as LogicSig,
+      deleted: false
     };
   }
 
@@ -74,7 +76,8 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
       txId: "tx-id-dry-run",
       confirmedRound: -1,
       appID: -1,
-      timestamp: 1
+      timestamp: 1,
+      deleted: false
     };
   }
 
@@ -92,7 +95,8 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
       txId: "tx-id-dry-run",
       confirmedRound: -1,
       appID: -1,
-      timestamp: 2
+      timestamp: 2,
+      deleted: false
     };
   }
 

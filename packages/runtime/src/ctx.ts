@@ -155,7 +155,8 @@ export class Ctx implements Context {
       assetIndex: this.state.assetCounter,
       assetDef: asset,
       txId: this.tx.txID,
-      confirmedRound: this.runtime.getRound()
+      confirmedRound: this.runtime.getRound(),
+      deleted: false
     });
 
     const payFlags: TxParams = {
@@ -239,7 +240,8 @@ export class Ctx implements Context {
         appID: this.state.appCounter,
         txId: this.tx.txID,
         confirmedRound: this.runtime.getRound(),
-        timestamp: Math.round(+new Date() / 1000)
+        timestamp: Math.round(+new Date() / 1000),
+        deleted: false
       }
     );
 

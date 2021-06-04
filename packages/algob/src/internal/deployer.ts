@@ -44,6 +44,10 @@ class DeployerBasicMode {
     return this.runtimeEnv.network.name;
   }
 
+  /**
+   * Queries ASA Info from asset name
+   * @param name asset name
+   */
   getASAInfo (name: string): rtypes.ASAInfo {
     const found = this.asa.get(name);
     if (!found) {

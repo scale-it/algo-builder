@@ -85,6 +85,7 @@ export interface DeployedAssetInfo {
   creator: AccountAddress
   txId: string
   confirmedRound: number
+  deleted: boolean
 }
 
 // ASA deployment information (log)

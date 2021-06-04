@@ -312,6 +312,7 @@ export interface LsigInfo {
   creator: AccountAddress
   contractAddress: string
   lsig: LogicSig
+  deleted: boolean
 }
 
 /**

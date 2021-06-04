@@ -244,7 +244,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
       txId: txInfo.txId,
       assetIndex: assetIndex,
       confirmedRound: txConfirmation[confirmedRound],
-      assetDef: asaDef
+      assetDef: asaDef,
+      deleted: false
     };
   }
 
@@ -283,7 +284,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
     return {
       creator: flags.funder.addr,
       contractAddress: contractAddress,
-      lsig: lsig
+      lsig: lsig,
+      deleted: false
     };
   }
 
@@ -352,7 +354,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
       txId: txInfo.txId,
       confirmedRound: confirmedTxInfo[confirmedRound],
       appID: appId,
-      timestamp: Math.round(+new Date() / 1000)
+      timestamp: Math.round(+new Date() / 1000),
+      deleted: false
     };
   }
 
@@ -417,7 +420,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
       txId: txInfo.txId,
       confirmedRound: confirmedTxInfo[confirmedRound],
       appID: appId,
-      timestamp: Math.round(+new Date() / 1000)
+      timestamp: Math.round(+new Date() / 1000),
+      deleted: false
     };
   }
 
