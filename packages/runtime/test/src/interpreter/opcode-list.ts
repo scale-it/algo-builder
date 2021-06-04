@@ -13,11 +13,12 @@ import {
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
   Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2, Ed25519verify,
-  EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, Global,
+  EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, GetByte, Global,
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
   Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, PushBytes, PushInt, Return,
   SetBit,
+  SetByte,
   Sha256, Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8 } from "../../../src/lib/constants";
@@ -3600,6 +3601,149 @@ describe("Teal Opcodes", function () {
       const op = new GetBit([], 0);
       stack.push(new Uint8Array(0)); // target
       stack.push(500n); // index
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_BYTES_ERROR
+      );
+    });
+  });
+
+  describe("GetByte", () => {
+    let stack: Stack<StackElem>;
+    this.beforeEach(() => { stack = new Stack<StackElem>(); });
+
+    it("should get correct bytes from stack", () => {
+      const op = new GetByte([], 0);
+      stack.push(new Uint8Array([8, 2, 1, 9])); // target
+      stack.push(0n); // index
+
+      op.execute(stack);
+      assert.equal(stack.pop(), 8n);
+
+      stack.push(new Uint8Array([8, 2, 1, 9])); // target
+      stack.push(3n); // index
+
+      op.execute(stack);
+      assert.equal(stack.pop(), 9n);
+
+      stack.push(new Uint8Array([1, 2, 3, 4, 5])); // target
+      stack.push(2n); // index
+
+      op.execute(stack);
+      assert.equal(stack.pop(), 3n);
+    });
+
+    it("should panic if target is not bytes", () => {
+      const op = new GetByte([], 0);
+      stack.push(10n); // target
+      stack.push(0n); // index
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
+      );
+    });
+
+    it("should panic if index is not uint", () => {
+      const op = new GetByte([], 0);
+      stack.push(new Uint8Array(0)); // target
+      stack.push(new Uint8Array(0)); // index
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
+      );
+    });
+
+    it("should panic if index bit in out of bytes array", () => {
+      const op = new GetByte([], 0);
+      stack.push(new Uint8Array(0)); // target
+      stack.push(500n); // index
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_BYTES_ERROR
+      );
+
+      stack.push(new Uint8Array(5).fill(0)); // target
+      stack.push(64n * 5n + 1n); // index
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_BYTES_ERROR
+      );
+    });
+  });
+
+  describe("SetByte", () => {
+    let stack: Stack<StackElem>;
+    this.beforeEach(() => { stack = new Stack<StackElem>(); });
+
+    it("should set correct bytes in stack", () => {
+      const op = new SetByte([], 0);
+      stack.push(new Uint8Array([8, 2, 1, 9])); // target
+      stack.push(0n); // index
+      stack.push(5n); // small integer
+
+      op.execute(stack);
+      assert.deepEqual(stack.pop(), new Uint8Array([5, 2, 1, 9]));
+
+      stack.push(new Uint8Array([8, 2, 1, 9])); // target
+      stack.push(3n); // index
+      stack.push(0n); // small integer
+
+      op.execute(stack);
+      assert.deepEqual(stack.pop(), new Uint8Array([8, 2, 1, 0]));
+    });
+
+    it("should panic if target is not bytes", () => {
+      const op = new SetByte([], 0);
+      stack.push(1n); // target
+      stack.push(0n); // index
+      stack.push(12n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
+      );
+    });
+
+    it("should panic if index of small integer is not uint", () => {
+      const op = new SetByte([], 0);
+      stack.push(new Uint8Array(0)); // target
+      stack.push(new Uint8Array(0)); // index
+      stack.push(12n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
+      );
+
+      stack.push(new Uint8Array(0)); // target
+      stack.push(1n); // index
+      stack.push(new Uint8Array(0));
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
+      );
+    });
+
+    it("should panic if index bit in out of bytes array", () => {
+      const op = new SetByte([], 0);
+      stack.push(new Uint8Array(0)); // target
+      stack.push(500n); // index
+      stack.push(12n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_BYTES_ERROR
+      );
+
+      stack.push(new Uint8Array(5).fill(0)); // target
+      stack.push(64n * 5n + 1n); // index
+      stack.push(1n);
 
       expectRuntimeError(
         () => op.execute(stack),
