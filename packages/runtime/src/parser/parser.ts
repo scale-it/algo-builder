@@ -9,7 +9,7 @@ import {
   Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2, Ed25519verify,
   EqualTo, Err, GetAssetDef, GetAssetHolding, Global, GreaterThan,
   GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc, Intcblock, Itob,
-  Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, Mod,
+  Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, MinBalance, Mod,
   Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, Sha256,
   Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../interpreter/opcode-list";
@@ -131,7 +131,10 @@ opCodeMap[3] = {
 
   // optimized opcodes for pushing uint64s and byte slices to the stack
   pushint: PushInt,
-  pushbytes: PushBytes
+  pushbytes: PushBytes,
+
+  // stateful op (mode = application)
+  min_balance: MinBalance
 
   /*
   dig: Dig,
@@ -146,9 +149,6 @@ opCodeMap[3] = {
   setbit: Setbit,
   getbyte: Getbyte,
   setbyte: Setbyte,
-
-  // stateful op (mode = application)
-  min_balance: MinBalance
   */
 };
 
@@ -158,7 +158,8 @@ const interpreterReqList = new Set([
   "load", "b", "bz", "bnz", "return", "txn", "gtxn", "txna", "gtxna", "global",
   "balance", "asset_holding_get", "asset_params_get", "app_opted_in",
   "app_local_get", "app_local_get_ex", "app_global_get", "app_global_get_ex",
-  "app_local_put", "app_global_put", "app_local_del", "app_global_del"
+  "app_local_put", "app_global_put", "app_local_del", "app_global_del",
+  "min_balance"
 ]);
 
 /**

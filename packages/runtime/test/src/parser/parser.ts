@@ -9,7 +9,7 @@ import {
   Branch, BranchIfNotZero, BranchIfZero, Btoi, Byte, Bytec, Concat, Div,
   Dup, Dup2, Ed25519verify, EqualTo, Err, GetAssetDef, GetAssetHolding,
   Global, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc, Itob,
-  Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, Mod, Mul, Mulw,
+  Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, MinBalance, Mod, Mul, Mulw,
   Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, Sha256, Sha512_256, Store,
   Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
@@ -713,6 +713,17 @@ describe("Parser", function () {
 
         expectRuntimeError(
           () => opcodeFromSentence(["swap", "xyz"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("min_balance", () => {
+        const res = opcodeFromSentence(["min_balance"], 1, interpreter);
+        const expected = new MinBalance([], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["min_balance", "xyz"], 1, interpreter),
           RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
         );
       });

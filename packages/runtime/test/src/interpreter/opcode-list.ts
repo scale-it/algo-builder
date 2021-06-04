@@ -16,14 +16,15 @@ import {
   EqualTo, Err, GetAssetDef, GetAssetHolding, Global,
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
-  Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, PushBytes, PushInt, Return,
+  Load, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, PushBytes, PushInt, Return,
   Sha256, Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
-import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8 } from "../../../src/lib/constants";
+import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE, DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8 } from "../../../src/lib/constants";
 import { convertToBuffer, stringToBytes } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
 import { AccountStoreI, EncodingType, StackElem } from "../../../src/types";
+import { useFixture } from "../../helpers/integration";
 import { execExpectError, expectRuntimeError } from "../../helpers/runtime-errors";
 import { accInfo } from "../../mocks/stateful";
 import { elonAddr, johnAddr, TXN_OBJ } from "../../mocks/txn";
@@ -2838,6 +2839,7 @@ describe("Teal Opcodes", function () {
   });
 
   describe("Balance", () => {
+    useFixture('asa-check');
     const stack = new Stack<StackElem>();
 
     // setup 1st account
@@ -3220,6 +3222,81 @@ describe("Teal Opcodes", function () {
       expectRuntimeError(
         () => op.execute(stack),
         RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
+    });
+  });
+
+  describe("min_balance", () => {
+    useFixture('asa-check');
+    const stack = new Stack<StackElem>();
+
+    // setup 1st account
+    let elon: AccountStoreI = new AccountStore(5e6, { addr: elonAddr, sk: new Uint8Array(0) });
+    setDummyAccInfo(elon);
+
+    // setup 2nd account (to be used as Txn.Accounts[A])
+    const john = new AccountStore(5e6, { addr: johnAddr, sk: new Uint8Array(0) });
+    setDummyAccInfo(john);
+
+    let interpreter: Interpreter;
+    before(() => {
+      interpreter = new Interpreter();
+      interpreter.runtime = new Runtime([elon, john]);
+      interpreter.runtime.ctx.tx.snd = Buffer.from(decodeAddress(elonAddr).publicKey);
+
+      // 'apat': app accounts array
+      interpreter.runtime.ctx.tx.apat = [
+        decodeAddress(johnAddr).publicKey,
+        decodeAddress(generateAccount().addr).publicKey // random account
+      ].map(Buffer.from);
+    });
+
+    it("should push correct account minimum balance", () => {
+      let op = new MinBalance([], 1, interpreter);
+      stack.push(0n); // push sender id
+
+      op.execute(stack);
+      let top = stack.pop();
+      assert.equal(top, BigInt(ALGORAND_ACCOUNT_MIN_BALANCE));
+
+      op = new MinBalance([], 1, interpreter);
+      stack.push(1n); // push sender id
+
+      op.execute(stack);
+      top = stack.pop();
+      assert.equal(top, BigInt(ALGORAND_ACCOUNT_MIN_BALANCE));
+    });
+
+    it("should push raised min_balance to stack after creating asset", () => {
+      interpreter.runtime.addAsset('gold',
+        { creator: { ...elon.account, name: "elon" } }); // create asset
+      elon = interpreter.runtime.getAccount(elon.address); // sync
+
+      const op = new MinBalance([], 1, interpreter);
+      stack.push(0n); // push sender index
+
+      op.execute(stack);
+      const top = stack.pop();
+      assert.equal(top, BigInt(ALGORAND_ACCOUNT_MIN_BALANCE + ASSET_CREATION_FEE));
+    });
+
+    it("should panic if account does not exist", () => {
+      const op = new MinBalance([], 1, interpreter);
+      stack.push(2n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.GENERAL.ACCOUNT_DOES_NOT_EXIST
+      );
+    });
+
+    it("should throw index out of bound error", () => {
+      const op = new Balance([], 1, interpreter);
+      stack.push(8n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
       );
     });
   });
