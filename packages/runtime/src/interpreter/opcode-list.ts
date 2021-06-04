@@ -2266,8 +2266,8 @@ export class Swap extends Op {
  * Indexing begins in the first bytes of a byte-string
  * (as seen in getbyte and substring). Setting bits 0 through 11 to 1
  * in a 4 byte-array of 0s yields byte 0xfff00000
- * Pops: ... stack, {any A}, {uint64 B}, {uint64 C}
- * Pushes: uint64
+ * Pops from stack: [ ... stack, {any A}, {uint64 B}, {uint64 C} ] 
+ * Pushes to stack: [ ...stack, uint64 ]
  * pop a target A, index B, and bit C. Set the Bth bit of A to C, and push the result
  */
 export class SetBit extends Op {
