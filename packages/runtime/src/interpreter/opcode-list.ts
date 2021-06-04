@@ -8,7 +8,7 @@ import { Keccak } from 'sha3';
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { compareArray } from "../lib/compare";
-import { AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64, MaxTEALVersion } from "../lib/constants";
+import { AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64, MaxTEALVersion, TxArrFields } from "../lib/constants";
 import {
   assertLen, assertOnlyDigits, convertToBuffer,
   convertToString, getEncoding, stringToBytes
@@ -1202,7 +1202,9 @@ export class Txn extends Op {
     super();
     this.line = line;
     this.idx = undefined;
-    if (args[0] === "ApplicationArgs" || args[0] === "Accounts") { // eg. txn Accounts 1
+
+    this.assertTxFieldDefined(args[0], interpreter.tealVersion, line);
+    if (TxArrFields[interpreter.tealVersion].has(args[0])) { // eg. txn Accounts 1
       assertLen(args.length, 2, line);
       assertOnlyDigits(args[1], line);
       this.idx = Number(args[1]);
@@ -1217,7 +1219,7 @@ export class Txn extends Op {
 
   execute (stack: TEALStack): void {
     let result;
-    if (this.idx !== undefined) { // if field is an array use txAppArg (with "Accounts"/"ApplicationArgs")
+    if (this.idx !== undefined) { // if field is an array use txAppArg (with "Accounts"/"ApplicationArgs"/'Assets'..)
       result = txAppArg(this.field, this.interpreter.runtime.ctx.tx, this.idx, this,
         this.interpreter.tealVersion, this.line);
     } else {
@@ -1253,7 +1255,7 @@ export class Gtxn extends Op {
     super();
     this.line = line;
     this.txFieldIdx = undefined;
-    if (args[1] === "ApplicationArgs" || args[1] === "Accounts") {
+    if (TxArrFields[interpreter.tealVersion].has(args[1])) {
       assertLen(args.length, 3, line); // eg. gtxn 0 Accounts 1
       assertOnlyDigits(args[2], line);
       this.txFieldIdx = Number(args[2]);
@@ -1557,6 +1559,12 @@ export class Global extends Op {
       }
       case 'LatestTimestamp': {
         result = this.interpreter.runtime.getTimestamp();
+        break;
+      }
+      case 'CreatorAddress': {
+        const appId = this.interpreter.runtime.ctx.tx.apid;
+        const app = this.interpreter.getApp(appId, this.line);
+        result = decodeAddress(app.creator).publicKey;
         break;
       }
       default: {

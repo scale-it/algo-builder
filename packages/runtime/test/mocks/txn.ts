@@ -1,6 +1,6 @@
 import { decodeAddress, generateAccount } from "algosdk";
 
-import { bobAccount, elonMuskAccount, johnAccount } from "../mocks/account";
+import { bobAccount, elonMuskAccount, johnAccount } from "./account";
 
 export const ALGORAND_MIN_TX_FEE = 1000;
 
@@ -10,6 +10,11 @@ const addr = decodeAddress(account.addr);
 export const elonAddr = elonMuskAccount.addr;
 export const johnAddr = johnAccount.addr;
 
+/**
+ * Mock (encoded)transaction object used in tests
+ * reference for these fields: https://developer.algorand.org/docs/reference/transactions/
+ * Or check TxnFields map in ../lib/constants
+ */
 export const TXN_OBJ = {
   snd: Buffer.from(addr.publicKey),
   rcv: Buffer.from(addr.publicKey),
@@ -60,12 +65,12 @@ export const TXN_OBJ = {
   apas: [2001, 2002, 2003],
   type: 'pay',
   apls: {
-    nui: 2,
+    nui: 1,
     nbs: 2
   },
   apgs: {
-    nui: 2,
-    nbs: 2
+    nui: 3,
+    nbs: 4
   },
   txID: 'transaction-id',
   rekey: Buffer.from(addr.publicKey),

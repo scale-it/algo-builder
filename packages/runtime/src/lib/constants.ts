@@ -107,6 +107,13 @@ TxnFields[3] = {
   LocalNumByteSlice: 'nbs'
 };
 
+// transaction fields of type array
+export const TxArrFields: {[key: number]: Set<string>} = {
+  1: new Set(),
+  2: new Set(['Accounts', 'ApplicationArgs'])
+};
+TxArrFields[3] = new Set([...TxArrFields[2], 'Assets', 'Applications']);
+
 export const TxFieldDefaults: {[key: string]: any} = {
   Sender: zeroAddress,
   Fee: zeroUint64,
