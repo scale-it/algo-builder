@@ -2322,9 +2322,9 @@ export class SetBit extends Op {
 }
 
 /**
- * Pops: ... stack, {any A}, {uint64 B}
- * Pushes: uint64
  * pop a target A (integer or byte-array), and index B. Push the Bth bit of A.
+ * Pops from stack: [ ... stack, {any A}, {uint64 B}]
+ * Pushes to stack: [ ...stack, uint64]
  */
 export class GetBit extends Op {
   readonly line: number;

@@ -3315,7 +3315,7 @@ describe("Teal Opcodes", function () {
       );
     });
 
-    it("should panic if set bit index is greater than 63", () => {
+    it("should panic if set bit index is greater than 63 and target is uint64", () => {
       const op = new SetBit([], 0);
       stack.push(0n);
       stack.push(400n);
