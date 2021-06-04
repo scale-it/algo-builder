@@ -246,7 +246,7 @@ export function getEncoding (args: string[], line: number): [string, EncodingTyp
 }
 
 /**
- * Parses binary string into bigint
+ * Parses binary string into bigint. Eg '101' OR ['1', '0', '1'] => 5n
  * @param binary Binary string array or a string
  */
 export function parseBinaryStrToBigInt (binary: string[] | string): bigint {
