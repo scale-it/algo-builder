@@ -193,7 +193,9 @@ export class Ctx implements Context {
    * @param payFlags Transaction parameters
    * @param approvalProgram application approval program
    * @param clearProgram application clear program
-   * NOTE - approval and clear program must be the TEAL code as string (not compiled code)
+   * NOTE:
+   * - approval and clear program must be the TEAL code as string (not compiled code)
+   * - When creating or opting into an app, the minimum balance grows before the app code runs
    */
   addApp (
     fromAccountAddr: string, flags: SSCDeploymentFlags,
@@ -243,6 +245,7 @@ export class Ctx implements Context {
    * @param appId Application Id
    * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
    * @param payFlags Transaction Parameters
+   * NOTE: When creating or opting into an app, the minimum balance grows before the app code runs
    */
   optInToApp (accountAddr: string, appID: number): void {
     const appParams = this.getApp(appID);
