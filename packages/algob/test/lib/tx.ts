@@ -37,16 +37,16 @@ describe("Note in TxParams", () => {
   });
 });
 
-describe("Opt-In to ASA", () => {
-  function mkASA (): types.ASADef {
-    return {
-      total: 1,
-      decimals: 1,
-      unitName: 'ASA',
-      defaultFrozen: false
-    };
-  }
+function mkASA (): types.ASADef {
+  return {
+    total: 1,
+    decimals: 1,
+    unitName: 'ASA',
+    defaultFrozen: false
+  };
+}
 
+describe("Opt-In to ASA", () => {
   let deployer: Deployer;
   let execParams: types.OptInASAParam;
   let algod: AlgoOperatorDryRunImpl;
@@ -131,6 +131,10 @@ describe("ASA modify fields", () => {
       .returns({ do: async () => mockSuggestedParam });
   });
 
+  afterEach(async () => {
+    (algod.algodClient.getTransactionParams as sinon.SinonStub).restore();
+  });
+
   /**
    * Verifies correct asset fields are sent to network
    * @param rawTxns rawTxns Signed transactions in Uint8Array
@@ -156,5 +160,38 @@ describe("ASA modify fields", () => {
     sinon.stub(algod, "sendAndWait").callsFake(checkTx);
 
     await executeTransaction(deployer, execParams);
+  });
+});
+
+describe("Delete ASA and SSC", () => {
+  let deployer: Deployer;
+  let algod: AlgoOperatorDryRunImpl;
+  beforeEach(async () => {
+    const env = mkEnv("network1");
+    algod = new AlgoOperatorDryRunImpl();
+    const deployerCfg = new DeployerConfig(env, algod);
+    deployerCfg.asaDefs = { silver: mkASA() };
+    deployer = new DeployerDeployMode(deployerCfg);
+    await deployer.deployASA("silver", { creator: deployer.accounts[0] });
+    sinon.stub(algod.algodClient, "getTransactionParams")
+      .returns({ do: async () => mockSuggestedParam });
+  });
+
+  afterEach(async () => {
+    (algod.algodClient.getTransactionParams as sinon.SinonStub).restore();
+  });
+
+  it("Should delete ASA, and set delete boolean in ASAInfo", async () => {
+    const execParams: types.DestroyAssetParam = {
+      type: types.TransactionType.DestroyAsset,
+      sign: types.SignType.SecretKey,
+      payFlags: {},
+      fromAccount: bobAcc,
+      assetID: "silver"
+    };
+    await executeTransaction(deployer, execParams);
+
+    const res = deployer.getASAInfo("silver");
+    assert.equal(res.deleted, true);
   });
 });
