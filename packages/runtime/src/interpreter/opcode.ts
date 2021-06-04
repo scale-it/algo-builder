@@ -113,18 +113,21 @@ export class Op {
    */
   assert64BitIndex (index: bigint, line: number): void {
     if (index > MAX_UINT6) {
-      throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_ERROR, { line: line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_ERROR,
+        { index: index, line: line });
     }
   }
 
   /**
    * asserts if given index lies in bytes array
    * @param index Index
+   * @param array bytes array
    * @param line line number in TEAL file
    */
-  assertBytesIndex (index: number, max: number, line: number): void {
-    if (index >= max) {
-      throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_BYTES_ERROR, { line: line });
+  assertBytesIndex (index: number, array: Uint8Array, line: number): void {
+    if (index >= array.length) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_BYTES_ERROR,
+        { index: index, line: line });
     }
   }
 

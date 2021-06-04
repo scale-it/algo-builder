@@ -2302,7 +2302,7 @@ export class SetBit extends Op {
       stack.push(parseBinaryStrToBigInt(binaryArr));
     } else {
       const byteIndex = Math.floor(Number(index) / 8);
-      this.assertBytesIndex(byteIndex, target.length, this.line);
+      this.assertBytesIndex(byteIndex, target, this.line);
 
       const targetBit = Number(index) % 8;
       // 8th bit in a bytes array will be highest order bit in second element
@@ -2351,7 +2351,7 @@ export class GetBit extends Op {
       stack.push(BigInt(binaryStr[size - Number(index) - 1]));
     } else {
       const byteIndex = Math.floor(Number(index) / 8);
-      this.assertBytesIndex(byteIndex, target.length, this.line);
+      this.assertBytesIndex(byteIndex, target, this.line);
 
       const targetBit = Number(index) % 8;
       const binary = target[byteIndex].toString(2);

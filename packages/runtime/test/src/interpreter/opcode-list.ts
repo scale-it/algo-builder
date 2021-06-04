@@ -3266,6 +3266,15 @@ describe("Teal Opcodes", function () {
 
       assert.equal(stack.length(), 1);
       assert.equal(stack.pop(), 2n ** 63n);
+
+      stack.push(MAX_UINT64);
+      stack.push(1n);
+      stack.push(0n);
+
+      op.execute(stack);
+
+      assert.equal(stack.length(), 1);
+      assert.equal(stack.pop(), MAX_UINT64 - 2n);
     });
 
     it("should panic if index bit is not uint64", () => {
@@ -3373,6 +3382,15 @@ describe("Teal Opcodes", function () {
       const op = new SetBit([], 0);
       stack.push(new Uint8Array([0, 0, 0])); // target
       stack.push(80n); // index
+      stack.push(1n); // bit
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_BYTES_ERROR
+      );
+
+      stack.push(new Uint8Array(8).fill(0)); // target
+      stack.push(64n * 8n + 1n); // index
       stack.push(1n); // bit
 
       expectRuntimeError(

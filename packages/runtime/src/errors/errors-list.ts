@@ -228,13 +228,13 @@ by an index that does not exist.`
   },
   SET_BIT_INDEX_ERROR: {
     number: 1033,
-    message: "set bit index is greater than 63 with Uint. [error-line: %line%]",
+    message: "set bit index %index% is greater than 63 with Uint. [error-line: %line%]",
     title: 'set bit index error',
     description: `set bit index error`
   },
   SET_BIT_INDEX_BYTES_ERROR: {
     number: 1034,
-    message: "set bit index is beyond bytes length. [error-line: %line%]",
+    message: "set bit index %index% is beyond bytes length. [error-line: %line%]",
     title: 'set bit index error',
     description: `set bit index error`
   }
