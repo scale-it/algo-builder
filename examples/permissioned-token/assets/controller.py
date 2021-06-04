@@ -34,8 +34,8 @@ def approval_program(TOKEN_ID):
         Assert(And(
             no_rekey_addr,
 
-            # Txn.assets.length() == Int(1), [TEALv3]
-            # Txn.assets[0] == Int(TOKEN_ID), [TEALv3]
+            Txn.assets.length() == Int(1),
+            Txn.assets[0] == Int(TOKEN_ID),
 
             # Controller should be deployed by ASA.manager
             Txn.sender() == assetManager.value()
@@ -55,7 +55,7 @@ def approval_program(TOKEN_ID):
         Assert(And(
             # Issue should only be done by token reserve
             # NOTE: if we want to limit this call only to TOKEN_ID, then we need to check:
-            # Txn.assets[0] == Int(TOKEN_ID)
+            Txn.assets[0] == Int(TOKEN_ID),
             Txn.sender() == assetReserve.value(),
             Gtxn[1].asset_sender() == assetReserve.value(),
 
@@ -69,8 +69,8 @@ def approval_program(TOKEN_ID):
     kill_token = Seq([
         assetManager, # load asset_manager (from Store) of Txn.ForeignAssets[0]
         Assert(And(
-            # Txn.assets.length() == Int(1), [TEALv3],
-            # Txn.assets[0] == Int(TOKEN_ID), [TEALv3] # verify if token index is correct
+            Txn.assets.length() == Int(1),
+            Txn.assets[0] == Int(TOKEN_ID), # verify if token index is correct
             Txn.type_enum() == TxnType.ApplicationCall,
 
             # Only asset manager can kill the token
@@ -91,8 +91,8 @@ def approval_program(TOKEN_ID):
         assetManager, # load asset_manager (from Store) of Txn.ForeignAssets[0]
         Assert(And(
             Txn.application_args.length() == Int(2),
-            # Txn.assets.length() == Int(1), [TEALv3]
-            # Txn.assets[0] == Int(TOKEN_ID), [TEALv3]
+            Txn.assets.length() == Int(1),
+            Txn.assets[0] == Int(TOKEN_ID),
 
             Txn.sender() == assetManager.value(),
         )),
@@ -211,4 +211,4 @@ if __name__ == "__main__":
     if(len(sys.argv) > 1):
         params = parse_params(sys.argv[1], params)
 
-    print(compileTeal(approval_program(params["TOKEN_ID"]), Mode.Application))
+    print(compileTeal(approval_program(params["TOKEN_ID"]), Mode.Application, version = 3))
