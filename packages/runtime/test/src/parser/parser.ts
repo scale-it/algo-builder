@@ -524,6 +524,10 @@ describe("Parser", function () {
       expected = new Global(["CurrentApplicationID"], 1, interpreter);
       assert.deepEqual(res, expected);
 
+      res = opcodeFromSentence(["global", "CreatorAddress"], 1, interpreter);
+      expected = new Global(["CreatorAddress"], 1, interpreter);
+      assert.deepEqual(res, expected);
+
       expectRuntimeError(
         () => opcodeFromSentence(["global", "MinTxnFee", "MinTxnFee"], 1, interpreter),
         RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
@@ -713,6 +717,54 @@ describe("Parser", function () {
 
         expectRuntimeError(
           () => opcodeFromSentence(["swap", "xyz"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("txn fields", () => {
+        let res = opcodeFromSentence(["txn", "Assets", "1"], 1, interpreter);
+        let expected = new Txn(["Assets", "1"], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["txn", "Assets", "0", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["txn", "Assets", "random-string"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.INVALID_TYPE
+        );
+
+        res = opcodeFromSentence(["txn", "Applications", "0"], 1, interpreter);
+        expected = new Txn(["Applications", "0"], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["txn", "Applications", "0", "11"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["txn", "Applications", "random-string"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.INVALID_TYPE
+        );
+
+        res = opcodeFromSentence(["txn", "NumAssets"], 1, interpreter);
+        expected = new Txn(["NumAssets"], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        res = opcodeFromSentence(["txn", "GlobalNumUint"], 1, interpreter);
+        expected = new Txn(["GlobalNumUint"], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["txn", "NumAssets", "0"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["txn", "GlobalNumUint", "0"], 1, interpreter),
           RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
         );
       });
