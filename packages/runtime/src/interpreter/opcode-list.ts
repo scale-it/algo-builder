@@ -2368,3 +2368,63 @@ export class GetBit extends Op {
     }
   }
 }
+
+/**
+ * pop a byte-array A, integer B, and
+ * small integer C (between 0..255). Set the Bth byte of A to C, and push the result
+ * Pops from stack: [ ...stack, {[]byte A}, {uint64 B}, {uint64 C}]
+ * Pushes to stack: [ ...stack, []byte]
+ */
+export class SetByte extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 3, this.line);
+    const smallInteger = this.assertBigInt(stack.pop(), this.line);
+    const index = this.assertBigInt(stack.pop(), this.line);
+    const target = this.assertBytes(stack.pop(), this.line);
+    this.assertUint8(smallInteger, this.line);
+    this.assertBytesIndex(Number(index), target, this.line);
+
+    target[Number(index)] = Number(smallInteger);
+    stack.push(target);
+  }
+}
+
+/**
+ * pop a byte-array A and integer B. Extract the Bth byte of A and push it as an integer
+ * Pops from stack: ... stack, {[]byte A}, {uint64 B}
+ * Pushes to stack: uint64
+ */
+export class GetByte extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    const index = this.assertBigInt(stack.pop(), this.line);
+    const target = this.assertBytes(stack.pop(), this.line);
+    this.assertBytesIndex(Number(index), target, this.line);
+
+    stack.push(BigInt(target[Number(index)]));
+  }
+}
