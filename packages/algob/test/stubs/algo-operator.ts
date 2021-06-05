@@ -44,7 +44,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap,
     txnWriter: txWriter): Promise<rtypes.ASAInfo> {
     return {
-      creator: flags.creator.addr + "-get-address-dry-run",
+      creator: flags.creator.addr + '-get-address-dry-run',
       txId: "tx-id-dry-run",
       assetIndex: 1,
       confirmedRound: -1,
@@ -56,7 +56,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     name: string, flags: FundASCFlags, payFlags: rtypes.TxParams,
     txnWriter: txWriter, scInitParam?: unknown): Promise<LsigInfo> {
     return {
-      creator: flags.funder.addr + "-get-address-dry-run",
+      creator: flags.funder.addr + '-get-address-dry-run',
       contractAddress: "dfssdfsd",
       lsig: {} as LogicSig
     };
@@ -70,7 +70,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     txWriter: txWriter,
     scInitParam?: unknown): Promise<rtypes.SSCInfo> {
     return {
-      creator: flags.sender.addr + "-get-address-dry-run",
+      creator: flags.sender.addr + '-get-address-dry-run',
       txId: "tx-id-dry-run",
       confirmedRound: -1,
       appID: -1,
