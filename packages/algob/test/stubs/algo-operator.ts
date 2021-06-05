@@ -44,7 +44,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap,
     txnWriter: txWriter): Promise<rtypes.ASAInfo> {
     return {
-      creator: flags.creator.addr + "-get-address-dry-run",
+      creator: String(flags.creator.addr) + "-get-address-dry-run",
       txId: "tx-id-dry-run",
       assetIndex: 1,
       confirmedRound: -1,
