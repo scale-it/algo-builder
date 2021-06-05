@@ -99,7 +99,10 @@ export function getValidationErrors(config: any): CfgErrors {  // eslint-disable
         const a = ncfg.accounts[i];
         const p = errors.putter(net + ".accounts", i.toString());
         validateAccount(a, p);
-        if ((j = accountsMap.get(a.name)) !== undefined) { p.push('name', `Account name ${a.name} already exists at index ${j}`, 'string'); } else { accountsMap.set(a.name, i); }
+        if ((j = accountsMap.get(a.name)) !== undefined) {
+          const errorMessage: string = `Account name ${String(a.name)} already exists at index ${String(j)}`;
+          p.push('name', errorMessage, 'string');
+        } else { accountsMap.set(a.name, i); }
       }
 
       // ONLY Chain network can be of type ChainCfg

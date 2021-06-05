@@ -145,7 +145,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     account: rtypes.Account, params: algosdk.SuggestedParams,
     flags: rtypes.TxParams
   ): Promise<void> {
-    console.log(String(`ASA ${account.name} opt-in for ASA ${asaName}`));
+    console.log(`ASA ${String(account.name)} opt-in for ASA ${String(asaName)}`);
     const sampleASAOptInTX = tx.makeASAOptInTx(account.addr, assetIndex, params, flags);
     const rawSignedTxn = sampleASAOptInTX.signTxn(account.sk);
     await this.sendAndWait(rawSignedTxn);
