@@ -49,8 +49,8 @@ jobs:
 
       - name: Install dependencies
         run: yarn install
-        run: pipenv sync
-        run: pipenv shell
+      - run: pipenv sync
+      - run: pipenv shell
       - name: Execute lint
         run: yarn lint
       - run: yarn build
