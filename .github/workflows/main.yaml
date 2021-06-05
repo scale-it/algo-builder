@@ -38,7 +38,7 @@ jobs:
         run: |
         python -m pip install --upgrade pip
         pip install pyteal
-        pip install pyyaml
+      - run: pip install pyyaml
 
       - name: Install dependencies
         run: yarn install
