@@ -321,6 +321,13 @@ Now, we will execute a transaction with an app call (stateful TEAL). The app is 
 
 Please look at [stateful-counter.ts](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/stateful-counter.ts) to see the complete integration test suite.
 
+## Debugging
+Based upon input from the community, we have introduced an optional parameter `debugStack` to pass with `runtime.executeTx()`. Since setting up teal debugger(start tealdbg instance, creating a dry-run dump.json) could be a lengthy process, this param is helpful to quickly  inspect the state of stack while executing TEAL code (for each opcode in smart contract in test).
+If `debugStack` parameter is passed in `executeTx(..)`, then the TEALStack is printed to console (upto max_depth = `debugStack`) after each opcode execution in TEAL file.
+ ```js
+ // prints top 2 elements of stack (with opcode, line no.) after each opcode execution
+ runtime.executeTx(txParams, 2);
+ ```
 
 ## Best Practices
 
