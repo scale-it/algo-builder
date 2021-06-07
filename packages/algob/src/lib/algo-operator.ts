@@ -1,8 +1,8 @@
 import { encodeNote, mkTransaction, types as rtypes } from "@algo-builder/runtime";
 import algosdk, { LogicSig } from "algosdk";
 
-import { BuilderError } from "../internal/core/errors";
-import { ERRORS } from "../internal/core/errors-list";
+import { BuilderError } from "../errors/errors";
+import { ERRORS } from "../errors/errors-list";
 import { txWriter } from "../internal/tx-log-writer";
 import { createClient } from "../lib/driver";
 import { getLsig } from "../lib/lsig";

@@ -1,5 +1,7 @@
 import debug from "debug";
 
+import { BuilderError } from "../../errors/errors";
+import { ERRORS } from "../../errors/errors-list";
 import type {
   EnvironmentExtender,
   Network,
@@ -13,8 +15,6 @@ import type {
   TaskDefinition,
   TasksMap
 } from "../../types";
-import { BuilderError } from "./errors";
-import { ERRORS } from "./errors-list";
 import { OverriddenTaskDefinition } from "./tasks/task-definitions";
 
 const log = debug("algob:core:bre");

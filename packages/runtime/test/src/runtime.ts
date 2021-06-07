@@ -185,6 +185,7 @@ describe("Algorand Standard Assets", function () {
     assetId = runtime.addAsset('gold',
       { creator: { ...john.account, name: "john" } });
     assetTransferParam.assetID = assetId;
+    syncAccounts();
   });
 
   const syncAccounts = (): void => {

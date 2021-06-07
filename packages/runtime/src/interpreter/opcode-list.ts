@@ -8,10 +8,10 @@ import { Keccak } from 'sha3';
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { compareArray } from "../lib/compare";
-import { AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64, MaxTEALVersion } from "../lib/constants";
+import { AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64, MaxTEALVersion, TxArrFields } from "../lib/constants";
 import {
   assertLen, assertOnlyDigits, convertToBuffer,
-  convertToString, getEncoding, stringToBytes
+  convertToString, getEncoding, parseBinaryStrToBigInt, stringToBytes
 } from "../lib/parsing";
 import { Stack } from "../lib/stack";
 import { txAppArg, txnSpecbyField } from "../lib/txn";
@@ -1203,7 +1203,9 @@ export class Txn extends Op {
     super();
     this.line = line;
     this.idx = undefined;
-    if (args[0] === "ApplicationArgs" || args[0] === "Accounts") { // eg. txn Accounts 1
+
+    this.assertTxFieldDefined(args[0], interpreter.tealVersion, line);
+    if (TxArrFields[interpreter.tealVersion].has(args[0])) { // eg. txn Accounts 1
       assertLen(args.length, 2, line);
       assertOnlyDigits(args[1], line);
       this.idx = Number(args[1]);
@@ -1218,7 +1220,7 @@ export class Txn extends Op {
 
   execute (stack: TEALStack): void {
     let result;
-    if (this.idx !== undefined) { // if field is an array use txAppArg (with "Accounts"/"ApplicationArgs")
+    if (this.idx !== undefined) { // if field is an array use txAppArg (with "Accounts"/"ApplicationArgs"/'Assets'..)
       result = txAppArg(this.field, this.interpreter.runtime.ctx.tx, this.idx, this,
         this.interpreter.tealVersion, this.line);
     } else {
@@ -1254,7 +1256,7 @@ export class Gtxn extends Op {
     super();
     this.line = line;
     this.txFieldIdx = undefined;
-    if (args[1] === "ApplicationArgs" || args[1] === "Accounts") {
+    if (TxArrFields[interpreter.tealVersion].has(args[1])) {
       assertLen(args.length, 3, line); // eg. gtxn 0 Accounts 1
       assertOnlyDigits(args[2], line);
       this.txFieldIdx = Number(args[2]);
@@ -1558,6 +1560,12 @@ export class Global extends Op {
       }
       case 'LatestTimestamp': {
         result = this.interpreter.runtime.getTimestamp();
+        break;
+      }
+      case 'CreatorAddress': {
+        const appId = this.interpreter.runtime.ctx.tx.apid;
+        const app = this.interpreter.getApp(appId, this.line);
+        result = decodeAddress(app.creator).publicKey;
         break;
       }
       default: {
@@ -2258,6 +2266,107 @@ export class Swap extends Op {
     const b = stack.pop();
     stack.push(a);
     stack.push(b);
+  }
+}
+
+/**
+ * bit indexing begins with low-order bits in integers.
+ * Setting bit 4 to 1 on the integer 0 yields 16 (int 0x0010, or 2^4).
+ * Indexing begins in the first bytes of a byte-string
+ * (as seen in getbyte and substring). Setting bits 0 through 11 to 1
+ * in a 4 byte-array of 0s yields byte 0xfff00000
+ * Pops from stack: [ ... stack, {any A}, {uint64 B}, {uint64 C} ]
+ * Pushes to stack: [ ...stack, uint64 ]
+ * pop a target A, index B, and bit C. Set the Bth bit of A to C, and push the result
+ */
+export class SetBit extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 3, this.line);
+    const bit = this.assertBigInt(stack.pop(), this.line);
+    const index = this.assertBigInt(stack.pop(), this.line);
+    const target = stack.pop();
+
+    if (bit > 1n) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_VALUE_ERROR, { line: this.line });
+    }
+
+    if (typeof target === "bigint") {
+      this.assert64BitIndex(index, this.line);
+      const binaryStr = target.toString(2);
+      const binaryArr = [...(binaryStr.padStart(64, "0"))];
+      const size = binaryArr.length;
+      binaryArr[size - Number(index) - 1] = (bit === 0n ? "0" : "1");
+      stack.push(parseBinaryStrToBigInt(binaryArr));
+    } else {
+      const byteIndex = Math.floor(Number(index) / 8);
+      this.assertBytesIndex(byteIndex, target, this.line);
+
+      const targetBit = Number(index) % 8;
+      // 8th bit in a bytes array will be highest order bit in second element
+      // that's why mask is reversed
+      const mask = 1 << (7 - targetBit);
+      if (bit === 1n) {
+        // set bit
+        target[byteIndex] |= mask;
+      } else {
+        // clear bit
+        const mask = ~(1 << ((7 - targetBit)));
+        target[byteIndex] &= mask;
+      }
+      stack.push(target);
+    }
+  }
+}
+
+/**
+ * pop a target A (integer or byte-array), and index B. Push the Bth bit of A.
+ * Pops from stack: [ ... stack, {any A}, {uint64 B}]
+ * Pushes to stack: [ ...stack, uint64]
+ */
+export class GetBit extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    const index = this.assertBigInt(stack.pop(), this.line);
+    const target = stack.pop();
+
+    if (typeof target === "bigint") {
+      this.assert64BitIndex(index, this.line);
+      const binaryStr = target.toString(2);
+      const size = binaryStr.length;
+      stack.push(BigInt(binaryStr[size - Number(index) - 1]));
+    } else {
+      const byteIndex = Math.floor(Number(index) / 8);
+      this.assertBytesIndex(byteIndex, target, this.line);
+
+      const targetBit = Number(index) % 8;
+      const binary = target[byteIndex].toString(2);
+      const str = binary.padStart(8, "0");
+      stack.push(BigInt(str[targetBit]));
+    }
   }
 }
 

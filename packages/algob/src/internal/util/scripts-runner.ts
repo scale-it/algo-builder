@@ -1,7 +1,7 @@
 import debug from "debug";
 import * as path from "path";
 
-import { BuilderError, ERRORS, parseAlgorandError } from "../../internal/core/errors";
+import { BuilderError, ERRORS, parseAlgorandError } from "../../errors/errors";
 import { Deployer, RuntimeEnv } from "../../types";
 
 const log = debug("algob:core:scripts-runner");

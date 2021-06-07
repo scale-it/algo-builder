@@ -1,8 +1,8 @@
+import { BuilderError } from "../../../errors/errors";
+import { ERRORS } from "../../../errors/errors-list";
 import { ParamDefinitions, RuntimeArgs } from "../../../types";
 import { ArgumentsParser } from "../../cli/arguments-parser";
 import { unsafeObjectKeys } from "../../util/unsafe";
-import { BuilderError } from "../errors";
-import { ERRORS } from "../errors-list";
 
 import ProcessEnv = NodeJS.ProcessEnv;
 

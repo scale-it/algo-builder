@@ -1,7 +1,7 @@
+import { BuilderError } from "../errors/errors";
+import { ERRORS } from "../errors/errors-list";
 import { ConfigExtender, RuntimeEnv } from "../types";
 import { ExtenderManager } from "./core/config/extenders";
-import { BuilderError } from "./core/errors";
-import { ERRORS } from "./core/errors-list";
 import { TasksDSL } from "./core/tasks/dsl";
 
 export type GlobalWithBuilderContext = NodeJS.Global & {

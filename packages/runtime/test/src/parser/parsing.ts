@@ -1,7 +1,7 @@
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
-import { getEncoding } from "../../../src/lib/parsing";
+import { getEncoding, parseBinaryStrToBigInt } from "../../../src/lib/parsing";
 import { EncodingType } from "../../../src/types";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 
@@ -81,5 +81,36 @@ describe("Get Encoding for Byte Data", () => {
       () => getEncoding(["base32", "AJSHKJ-#"], 1),
       RUNTIME_ERRORS.TEAL.INVALID_BASE32
     );
+  });
+});
+
+describe("Parse Binary string to BigInt", () => {
+  it("should parse to bigint", () => {
+    let res = parseBinaryStrToBigInt(["0"]);
+    assert.equal(res, 0n);
+
+    res = parseBinaryStrToBigInt(["0", "1", "0"]);
+    assert.equal(res, 2n);
+
+    res = parseBinaryStrToBigInt(["1", "0", "0", "0", "0"]);
+    assert.equal(res, 16n);
+
+    res = parseBinaryStrToBigInt(["1"]);
+    assert.equal(res, 1n);
+
+    res = parseBinaryStrToBigInt(["0", "0"]);
+    assert.equal(res, 0n);
+
+    res = parseBinaryStrToBigInt("101");
+    assert.equal(res, 5n);
+
+    res = parseBinaryStrToBigInt("00000");
+    assert.equal(res, 0n);
+
+    res = parseBinaryStrToBigInt("1111");
+    assert.equal(res, 15n);
+
+    res = parseBinaryStrToBigInt("100");
+    assert.equal(res, 4n);
   });
 });

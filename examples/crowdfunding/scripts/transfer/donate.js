@@ -1,5 +1,5 @@
-const { executeTransaction } = require('@algo-builder/algob');
-const { types, stringToBytes } = require('@algo-builder/runtime');
+const { executeTransaction, convert } = require('@algo-builder/algob');
+const { types } = require('@algo-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -15,7 +15,7 @@ async function run (runtimeEnv, deployer) {
   });
 
   // App argument to donate.
-  const appArgs = [stringToBytes('donate')];
+  const appArgs = [convert.stringToBytes('donate')];
 
   // Get AppInfo and AssetID from checkpoints.
   const appInfo = deployer.getSSC('crowdFundApproval.teal', 'crowdFundClear.teal');

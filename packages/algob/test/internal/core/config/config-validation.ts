@@ -1,12 +1,12 @@
 import { assert } from "chai";
 import deepmerge from "deepmerge";
 
+import { ERRORS } from "../../../../src/errors/errors-list";
 import { ALGOB_CHAIN_NAME } from "../../../../src/internal/constants";
 import {
   getValidationErrors,
   validateConfig
 } from "../../../../src/internal/core/config/config-validation";
-import { ERRORS } from "../../../../src/internal/core/errors-list";
 import { expectBuilderError } from "../../../helpers/errors";
 import { account1 } from "../../../mocks/account";
 

@@ -3,8 +3,8 @@ import * as _fs from "fs";
 import * as path from "path";
 import YAML from "yaml";
 
+import { BuilderError, ERRORS } from "../errors/errors";
 import { task } from "../internal/core/config/config-env";
-import { BuilderError, ERRORS } from "../internal/core/errors";
 import * as types from "../internal/core/params/argument-types";
 import { assertAllDirs, ASSETS_DIR } from "../internal/core/project-structure";
 import { MnemonicAccount, RuntimeEnv, TaskArguments } from "../types";
