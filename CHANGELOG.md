@@ -16,7 +16,7 @@
 + Added support for sub directories in assets folder, with tests.
 + Update runtime to process execParams.deployASA, deploySSC, OptInToASA, OptIntoSSC
 + Exported `@algorand-builder/algob`, `@algorand-builder/runtime` error types and make it accessible for API documentation.
-+ Add `debugStack` option in `runtime.executeTx()` to print stack (upto depth = debugStack) after each opcode execution.
++ Added `debugStack` option in `runtime.executeTx()` to print stack (upto depth = debugStack) after each opcode execution.
 
 ### Bug fixes
 
