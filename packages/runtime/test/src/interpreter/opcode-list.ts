@@ -3680,7 +3680,7 @@ describe("Teal Opcodes", function () {
     let stack: Stack<StackElem>;
     this.beforeEach(() => { stack = new Stack<StackElem>(); });
 
-    it("should set correct bytes in stack", () => {
+    it("should set correct bytes and push to stack", () => {
       const op = new SetByte([], 0);
       stack.push(new Uint8Array([8, 2, 1, 9])); // target
       stack.push(0n); // index
@@ -3697,7 +3697,7 @@ describe("Teal Opcodes", function () {
       assert.deepEqual(stack.pop(), new Uint8Array([8, 2, 1, 0]));
     });
 
-    it("should panic if target is not bytes", () => {
+    it("should panic if target is not bytes(Uint8Array)", () => {
       const op = new SetByte([], 0);
       stack.push(1n); // target
       stack.push(0n); // index
