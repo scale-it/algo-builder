@@ -36,12 +36,11 @@ jobs:
           python-version: "3.8"
       - name: Install python dependencies
         run: python -m pip install --upgrade pip
-      - run: pip install -r requirements.txt
-
+      - run: pipenv sync
       - name: Install dependencies
-        run: yarn install
+        run: pipenv run yarn install
       - name: Execute lint
-        run: yarn lint
-      - run: yarn build
+        run: pipenv run yarn lint
+      - run: pipenv run yarn build
       - name: Execute tests
-        run: yarn test
+        run: pipenv run yarn test
