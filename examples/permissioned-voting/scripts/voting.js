@@ -1,5 +1,5 @@
-const { executeTransaction } = require('@algo-builder/algob');
-const { types, uint64ToBigEndian, stringToBytes } = require('@algo-builder/runtime');
+const { executeTransaction, convert } = require('@algo-builder/algob');
+const { types } = require('@algo-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -51,7 +51,7 @@ async function run (runtimeEnv, deployer) {
     voteBegin,
     voteEnd,
     assetID
-  ].map(uint64ToBigEndian);
+  ].map(convert.uint64ToBigEndian);
 
   // Create Application
   // Note: An Account can have maximum of 10 Applications.
@@ -69,7 +69,7 @@ async function run (runtimeEnv, deployer) {
   console.log(res);
 
   // Register Alice in voting application
-  const reg = [stringToBytes('register')];
+  const reg = [convert.stringToBytes('register')];
 
   console.log('Opting-In for Alice in voting application');
   try {

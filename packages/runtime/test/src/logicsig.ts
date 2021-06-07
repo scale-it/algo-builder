@@ -1,4 +1,4 @@
-import { decodeAddress, multisigAddress } from "algosdk";
+import { decodeAddress, multisigAddress, MultisigMetadata } from "algosdk";
 import { assert } from "chai";
 
 import { AccountStore } from "../../src/account";
@@ -13,10 +13,17 @@ const multiSigProg = "sample-asc.teal";
 
 describe("Logic Signature", () => {
   useFixture("escrow-account");
-  const john = new AccountStore(10);
-  const bob = new AccountStore(100);
-  const runtime = new Runtime([john, bob]);
-  const johnPk = decodeAddress(john.address).publicKey;
+  let john: AccountStore;
+  let bob: AccountStore;
+  let runtime: Runtime;
+  let johnPk: Uint8Array;
+
+  before(() => {
+    john = new AccountStore(10);
+    bob = new AccountStore(100);
+    runtime = new Runtime([john, bob]);
+    johnPk = decodeAddress(john.address).publicKey;
+  });
 
   it("john should be able to create a delegated signature", () => {
     const lsig = runtime.getLogicSig(getProgram(programName), []);
@@ -54,20 +61,36 @@ describe("Logic Signature", () => {
 
 describe("Multi-Signature Test", () => {
   useFixture("multi-signature");
-  const alice = new AccountStore(10);
-  const john = new AccountStore(100);
-  const bob = new AccountStore(1000);
-  const bobPk = decodeAddress(bob.address).publicKey;
+  let alice: AccountStore;
+  let john: AccountStore;
+  let bob: AccountStore;
+  let runtime: Runtime;
+  let bobPk: Uint8Array;
+  let mparams: MultisigMetadata;
+  let multsigaddr: string;
 
-  const runtime = new Runtime([alice, john, bob]);
-  // Generate multi signature account hash
-  const addrs = [alice.address, john.address, bob.address];
-  const mparams = {
-    version: 1,
-    threshold: 2,
-    addrs: addrs
-  };
-  const multsigaddr = multisigAddress(mparams);
+  // note: it's better to do intializations in before, beforeAll.. hooks
+  // because cwd path (after loading env in fixture-project) is correctly
+  // initialized in these hooks
+  // eg. during new Runtime([..]).loadASAFile, path(cwd) to fetch asa.yaml file
+  // is correct.
+  before(() => {
+    alice = new AccountStore(10);
+    john = new AccountStore(100);
+    bob = new AccountStore(1000);
+    bobPk = decodeAddress(bob.address).publicKey;
+
+    runtime = new Runtime([alice, john, bob]);
+
+    // Generate multi signature account hash
+    const addrs = [alice.address, john.address, bob.address];
+    mparams = {
+      version: 1,
+      threshold: 2,
+      addrs: addrs
+    };
+    multsigaddr = multisigAddress(mparams);
+  });
 
   it("should verify if threshold is verified and sender is multisigAddr", () => {
     const lsig = runtime.getLogicSig(getProgram(multiSigProg), []);

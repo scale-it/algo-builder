@@ -1,7 +1,7 @@
 import { assert, AssertionError } from "chai";
 
-import { BuilderError } from "../../src/internal/core/errors";
-import { ErrorDescriptor } from "../../src/internal/core/errors-list";
+import { BuilderError } from "../../src/errors/errors";
+import { ErrorDescriptor } from "../../src/errors/errors-list";
 
 export async function expectErrorAsync (
   f: () => Promise<any>,

@@ -2,9 +2,9 @@ import fs from "fs";
 import glob from "glob";
 import path from "path";
 
+import { BuilderError } from "../errors/errors";
+import { ERRORS } from "../errors/errors-list";
 import { task } from "../internal/core/config/config-env";
-import { BuilderError } from "../internal/core/errors";
-import { ERRORS } from "../internal/core/errors-list";
 import { AlgoOperator, createAlgoOperator } from "../lib/algo-operator";
 import { cmpStr } from "../lib/comparators";
 import { assertDirectDirChildren } from "../lib/files";

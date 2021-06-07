@@ -1,6 +1,6 @@
 import { assert } from "chai";
 
-import { ERRORS } from "../../src/internal/core/errors-list";
+import { ERRORS } from "../../src/errors/errors-list";
 import { assertDirChildren, assertDirectDirChildren } from "../../src/lib/files";
 import { expectBuilderError } from "../helpers/errors";
 

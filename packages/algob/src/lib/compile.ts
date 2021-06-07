@@ -1,3 +1,4 @@
+import { getPathFromDirRecursive, lsTreeWalk } from "@algo-builder/runtime";
 import type { Algodv2, CompileOut } from "algosdk";
 import { spawnSync, SpawnSyncReturns } from "child_process";
 import * as fs from 'fs';
@@ -5,8 +6,8 @@ import * as murmurhash from 'murmurhash';
 import * as path from 'path';
 import YAML from "yaml";
 
-import { BuilderError, parseAlgorandError } from "../internal/core/errors";
-import { ERRORS } from "../internal/core/errors-list";
+import { BuilderError, parseAlgorandError } from "../errors/errors";
+import { ERRORS } from "../errors/errors-list";
 import { assertDir, ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
 import { timestampNow } from "../lib/time";
 import type { ASCCache, PyASCCache, ReplaceParams, SCParams } from "../types";
@@ -34,6 +35,8 @@ export class CompileOp {
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
   async ensureCompiled (filename: string, force?: boolean, scTmplParams?: SCParams): Promise<ASCCache> {
+    const filePath = getPathFromDirRecursive(ASSETS_DIR, filename) as string;
+
     if (force === undefined) {
       force = false;
     }
@@ -46,7 +49,7 @@ export class CompileOp {
       throw new Error(`filename "${filename}" must end with "${tealExt}" or "${lsigExt}"`); // TODO: convert to buildererror
     }
 
-    const [teal, thash] = this.readTealAndHash(path.join(ASSETS_DIR, filename));
+    const [teal, thash] = this.readTealAndHash(filePath);
     let a = await this.readArtifact(filename);
     if (!force && a !== undefined && a.srcHash === thash) {
       // '\x1b[33m%s\x1b[0m' for yellow color warning
@@ -215,17 +218,18 @@ export class PyCompileOp {
    * @param scInitParam : Smart contract initialization parameters.
    */
   private runPythonScript (filename: string, scInitParam?: string): SpawnSyncReturns<string> {
+    const filePath = getPathFromDirRecursive(ASSETS_DIR, filename) as string;
     // used spawnSync instead of spawn, as it is synchronous
     if (scInitParam === undefined) {
       return spawnSync(
         'python3', [
-          path.join(ASSETS_DIR, filename)
+          filePath
         ], { encoding: 'utf8' }
       );
     }
 
     return spawnSync('python3', [
-      path.join(ASSETS_DIR, filename),
+      filePath,
       scInitParam
     ], { encoding: 'utf8' }
     );

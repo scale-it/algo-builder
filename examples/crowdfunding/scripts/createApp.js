@@ -1,7 +1,7 @@
 const {
-  executeTransaction
+  executeTransaction, convert
 } = require('@algo-builder/algob');
-const { types, uint64ToBigEndian, addressToPk } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/runtime');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -29,11 +29,11 @@ async function run (runtimeEnv, deployer) {
 
   // initialize app arguments
   let appArgs = [
-    uint64ToBigEndian(beginDate),
-    uint64ToBigEndian(endDate),
+    convert.uint64ToBigEndian(beginDate),
+    convert.uint64ToBigEndian(endDate),
     'int:7000000', // args similar to `goal --app-arg ..` are also supported
-    addressToPk(creatorAccount.addr),
-    uint64ToBigEndian(fundCloseDate)
+    convert.addressToPk(creatorAccount.addr),
+    convert.uint64ToBigEndian(fundCloseDate)
   ];
 
   // Create Application
@@ -61,7 +61,7 @@ async function run (runtimeEnv, deployer) {
   // The update operation links the two contracts.
   const applicationID = sscInfo.appID;
 
-  appArgs = [addressToPk(escrowAccount.address())];
+  appArgs = [convert.addressToPk(escrowAccount.address())];
 
   const updatedRes = await deployer.updateSSC(
     creatorAccount,

@@ -325,33 +325,18 @@ export class Runtime {
     );
   }
 
-  // TODO move to code ctx
   /**
    * Add Asset in Runtime
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
   addAsset (name: string, flags: ASADeploymentFlags): number {
-    const sender = flags.creator;
-    const senderAcc = this.assertAccountDefined(sender.addr, this.store.accounts.get(sender.addr));
+    this.ctx.addAsset(name, flags.creator.addr, flags);
 
-    // create asset
-    const asset = senderAcc.addAsset(++this.store.assetCounter, name, this.loadedAssetsDefs[name]);
-    this.mkAssetCreateTx(name, flags, asset);
-    this.store.assetDefs.set(this.store.assetCounter, sender.addr);
-    this.store.assetNameInfo.set(name, {
-      creator: senderAcc.address,
-      assetIndex: this.store.assetCounter,
-      assetDef: asset,
-      txId: "tx-id",
-      confirmedRound: this.round
-    });
-
-    this.optIntoASA(this.store.assetCounter, sender.addr, {}); // opt-in for creator
+    this.store = this.ctx.state;
     return this.store.assetCounter;
   }
 
-  // TODO move to code ctx
   /**
    * Asset Opt-In for account in Runtime
    * @param assetIndex Asset Index
@@ -359,21 +344,9 @@ export class Runtime {
    * @param flags Transaction Parameters
    */
   optIntoASA (assetIndex: number, address: AccountAddress, flags: TxParams): void {
-    const assetDef = this.getAssetDef(assetIndex);
-    const creatorAddr = assetDef.creator;
-    makeAssetTransferTxnWithSuggestedParams(
-      address, address, undefined, undefined, 0, undefined, assetIndex,
-      mockSuggestedParams(flags, this.round));
+    this.ctx.optIntoASA(assetIndex, address, flags);
 
-    const assetHolding: AssetHoldingM = {
-      amount: address === creatorAddr ? BigInt(assetDef.total) : 0n, // for creator opt-in amount is total assets
-      'asset-id': assetIndex,
-      creator: creatorAddr,
-      'is-frozen': address === creatorAddr ? false : assetDef.defaultFrozen
-    };
-
-    const account = this.getAccount(address);
-    account.optInToASA(assetIndex, assetHolding);
+    this.store = this.ctx.state;
   }
 
   /**
@@ -419,58 +392,26 @@ export class Runtime {
     this.ctx.gtxs = [encTx];
   }
 
-  // TODO move to code ctx
   /**
    * creates new application and returns application id
-   * Note: In this function we are operating on ctx to ensure that
-   * the states are updated correctly
-   * - First we are setting ctx according to application
-   * - Second we run the TEAL code
-   * - Finally if run is successful we update the store.
    * @param flags SSCDeployment flags
    * @param payFlags Transaction parameters
    * @param approvalProgram application approval program
    * @param clearProgram application clear program
+   * @param debugStack: if passed then TEAL Stack is logged to console after
+   * each opcode execution (upto depth = debugStack)
    * NOTE - approval and clear program must be the TEAL code as string (not compiled code)
    */
   addApp (
     flags: SSCDeploymentFlags, payFlags: TxParams,
-    approvalProgram: string, clearProgram: string
+    approvalProgram: string, clearProgram: string,
+    debugStack?: number
   ): number {
-    const sender = flags.sender;
-    const senderAcc = this.assertAccountDefined(sender.addr, this.store.accounts.get(sender.addr));
-
-    if (approvalProgram === "") {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
-    }
-    if (clearProgram === "") {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
-    }
-
-    // prepare context
-    this.ctx.state = cloneDeep(this.store);
-    // create app with id = 0 in globalApps for teal execution
-    const app = senderAcc.addApp(0, flags, approvalProgram, clearProgram);
-    this.ctx.state.accounts.set(senderAcc.address, senderAcc);
-    this.ctx.state.globalApps.set(app.id, senderAcc.address);
-
     this.addCtxAppCreateTxn(flags, payFlags);
-    this.run(approvalProgram, ExecutionMode.STATEFUL); // execute TEAL code with appId = 0
+    this.ctx.debugStack = debugStack;
+    this.ctx.addApp(flags.sender.addr, flags, approvalProgram, clearProgram);
 
-    // create new application in globalApps map
-    this.store.globalApps.set(++this.store.appCounter, senderAcc.address);
-
-    const attributes = this.assertAppDefined(0, senderAcc.createdApps.get(0));
-    senderAcc.createdApps.delete(0); // remove zero app from sender's account
-    senderAcc.createdApps.set(this.store.appCounter, attributes);
-    this.store.appNameInfo.set(approvalProgram + "-" + clearProgram, {
-      creator: senderAcc.address,
-      appID: this.store.appCounter,
-      txId: "tx-id",
-      confirmedRound: this.round,
-      timestamp: Math.round(+new Date() / 1000)
-    });
-
+    this.store = this.ctx.state;
     return this.store.appCounter;
   }
 
@@ -498,23 +439,21 @@ export class Runtime {
     this.ctx.gtxs = [encTx];
   }
 
-  // TODO move to code ctx
   /**
    * Account address opt-in for application Id
    * @param accountAddr Account address
    * @param appId Application Id
    * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
    * @param payFlags Transaction Parameters
+   * @param debugStack: if passed then TEAL Stack is logged to console after
+   * each opcode execution (upto depth = debugStack)
    */
   optInToApp (accountAddr: string, appId: number,
-    flags: SSCOptionalFlags, payFlags: TxParams): void {
-    const appParams = this.getApp(appId);
+    flags: SSCOptionalFlags, payFlags: TxParams, debugStack?: number): void {
     this.addCtxOptInTx(accountAddr, appId, payFlags, flags);
-    this.ctx.state = cloneDeep(this.store);
-    const account = this.assertAccountDefined(accountAddr, this.ctx.state.accounts.get(accountAddr));
-    account.optInToApp(appId, appParams);
+    this.ctx.debugStack = debugStack;
+    this.ctx.optInToApp(accountAddr, appId);
 
-    this.run(appParams["approval-program"], ExecutionMode.STATEFUL);
     this.store = this.ctx.state;
   }
 
@@ -552,6 +491,8 @@ export class Runtime {
    * @param clearProgram new clear program
    * @param payFlags Transaction parameters
    * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
+   * @param debugStack: if passed then TEAL Stack is logged to console after
+   * each opcode execution (upto depth = debugStack)
    * NOTE - approval and clear program must be the TEAL code as string
    */
   updateApp (
@@ -560,26 +501,15 @@ export class Runtime {
     approvalProgram: string,
     clearProgram: string,
     payFlags: TxParams,
-    flags: SSCOptionalFlags
+    flags: SSCOptionalFlags,
+    debugStack?: number
   ): void {
-    if (approvalProgram === "") {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
-    }
-    if (clearProgram === "") {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM);
-    }
-
-    const appParams = this.getApp(appId);
     this.addCtxAppUpdateTx(senderAddr, appId, payFlags, flags);
-    this.ctx.state = cloneDeep(this.store);
-
-    this.run(appParams["approval-program"], ExecutionMode.STATEFUL);
+    this.ctx.debugStack = debugStack;
+    this.ctx.updateApp(appId, approvalProgram, clearProgram);
 
     // If successful, Update programs and state
     this.store = this.ctx.state;
-    const updatedApp = this.getApp(appId); // get app after updating store
-    updatedApp["approval-program"] = approvalProgram;
-    updatedApp["clear-state-program"] = clearProgram;
   }
 
   // verify 'amt' microalgos can be withdrawn from account
@@ -611,8 +541,10 @@ export class Runtime {
   /**
    * validate logic signature and teal logic
    * @param txnParam Transaction Parameters
+   * @param debugStack: if passed then TEAL Stack is logged to console after
+   * each opcode execution (upto depth = debugStack)
    */
-  validateLsigAndRun (txnParam: ExecParams): void {
+  validateLsigAndRun (txnParam: ExecParams, debugStack?: number): void {
     // check if transaction is signed by logic signature,
     // if yes verify signature and run logic
     if (txnParam.sign === SignType.LogicSignature && txnParam.lsig) {
@@ -630,7 +562,7 @@ export class Runtime {
       if (program === "") {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
       }
-      this.run(program, ExecutionMode.STATELESS);
+      this.run(program, ExecutionMode.STATELESS, debugStack);
     } else {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_NOT_FOUND);
     }
@@ -640,10 +572,10 @@ export class Runtime {
    * This function executes a transaction based on a smart
    * contract logic and updates state afterwards
    * @param txnParams : Transaction parameters
-   * @param program : teal code as a string
-   * @param args : external arguments to smart contract
+   * @param debugStack: if passed then TEAL Stack is logged to console after
+   * each opcode execution (upto depth = debugStack)
    */
-  executeTx (txnParams: ExecParams | ExecParams[]): void {
+  executeTx (txnParams: ExecParams | ExecParams[], debugStack?: number): void {
     const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
     for (const txn of txnParameters) {
       switch (txn.type) {
@@ -664,7 +596,7 @@ export class Runtime {
 
     // initialize context before each execution
     // state is a deep copy of store
-    this.ctx = new Ctx(cloneDeep(this.store), tx, gtxs, [], this);
+    this.ctx = new Ctx(cloneDeep(this.store), tx, gtxs, [], this, debugStack);
 
     // Run TEAL program associated with each transaction and
     // then execute the transaction without interacting with store.
@@ -678,10 +610,12 @@ export class Runtime {
    * This function executes TEAL code line by line
    * @param program : teal code as string
    * @param executionMode : execution Mode (Stateless or Stateful)
-   * NOTE: Application mode is only supported in TEAL v2
+   * @param debugStack: if passed then TEAL Stack is logged to console after
+   * each opcode execution (upto depth = debugStack)
+   * NOTE: Application mode is only supported in TEALv > 1
    */
-  run (program: string, executionMode: ExecutionMode): void {
+  run (program: string, executionMode: ExecutionMode, debugStack?: number): void {
     const interpreter = new Interpreter();
-    interpreter.execute(program, executionMode, this);
+    interpreter.execute(program, executionMode, this, debugStack);
   }
 }

@@ -7,7 +7,7 @@
  * if the seller is able to provide the secret value that corresponds to the hash in the program.
 */
 import * as algob from "@algo-builder/algob";
-import { stringToBytes, types as rtypes } from "@algo-builder/runtime";
+import { types as rtypes } from "@algo-builder/runtime";
 
 import { executeTx, prepareParameters } from "./common";
 
@@ -26,14 +26,14 @@ async function run (
     toAccountAddr: alice.addr,
     amountMicroAlgos: 200,
     lsig: lsig,
-    args: [stringToBytes(wrongSecret)],
+    args: [algob.convert.stringToBytes(wrongSecret)],
     payFlags: { totalFee: 1000 }
   };
   // Transaction Fails : as wrong secret value is used
   await executeTx(deployer, txnParams);
 
   // Transaction Passes : as right secret value is used
-  txnParams.args = [stringToBytes(secret)];
+  txnParams.args = [algob.convert.stringToBytes(secret)];
   await executeTx(deployer, txnParams);
 }
 

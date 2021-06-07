@@ -1,6 +1,6 @@
 import { assert } from "chai";
 
-import { ERRORS } from "../../../src/internal/core/errors-list";
+import { ERRORS } from "../../../src/errors/errors-list";
 import { lazyFunction, lazyObject } from "../../../src/internal/util/lazy";
 import { expectBuilderError } from "../../helpers/errors";
 

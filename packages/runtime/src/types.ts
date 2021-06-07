@@ -105,6 +105,7 @@ export interface Context {
   tx: Txn // current txn
   gtxs: Txn[] // all transactions
   args: Uint8Array[]
+  debugStack?: number //  max number of top elements from the stack to print after each opcode execution.
   getAccount: (address: string) => AccountStoreI
   getAssetAccount: (assetId: number) => AccountStoreI
   getApp: (appId: number, line?: number) => SSCAttributesM
@@ -121,6 +122,14 @@ export interface Context {
   deleteApp: (appId: number) => void
   closeApp: (sender: AccountAddress, appId: number) => void
   processTransactions: (txnParams: ExecParams[]) => void
+  addAsset: (name: string, fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => number
+  optIntoASA: (assetIndex: number, address: AccountAddress, flags: TxParams) => void
+  addApp: (
+    fromAccountAddr: string, flags: SSCDeploymentFlags,
+    approvalProgram: string, clearProgram: string
+  ) => number
+  optInToApp: (accountAddr: string, appID: number) => void
+  updateApp: (appID: number, approvalProgram: string, clearProgram: string) => void
 }
 
 // custom AssetHolding for AccountStore (using bigint in amount instead of number)

@@ -37,7 +37,8 @@ describe('Test for transferring asset using custom logic', function () {
     /* Create asset + optIn to asset */
     assetId = runtime.addAsset('gold', { creator: { ...alice.account, name: 'alice' } });
     assetDef = runtime.getAssetDef(assetId);
-
+    escrow = undefined;
+    syncAccounts();
     assert.equal(assetDef.creator, alice.address);
     assert.equal(assetDef.defaultFrozen, true);
     assert.equal(assetDef.total, 1000000);

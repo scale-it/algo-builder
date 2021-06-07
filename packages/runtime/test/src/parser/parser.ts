@@ -8,9 +8,11 @@ import {
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
   Branch, BranchIfNotZero, BranchIfZero, Btoi, Byte, Bytec, Concat, Div,
   Dup, Dup2, Ed25519verify, EqualTo, Err, GetAssetDef, GetAssetHolding,
+  GetBit,
+  GetByte,
   Global, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc, Itob,
   Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, Mod, Mul, Mulw,
-  Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, Sha256, Sha512_256, Store,
+  Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, SetBit, SetByte, Sha256, Sha512_256, Store,
   Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { MAX_UINT64, MaxTEALVersion, MIN_UINT64 } from "../../../src/lib/constants";
@@ -524,6 +526,10 @@ describe("Parser", function () {
       expected = new Global(["CurrentApplicationID"], 1, interpreter);
       assert.deepEqual(res, expected);
 
+      res = opcodeFromSentence(["global", "CreatorAddress"], 1, interpreter);
+      expected = new Global(["CreatorAddress"], 1, interpreter);
+      assert.deepEqual(res, expected);
+
       expectRuntimeError(
         () => opcodeFromSentence(["global", "MinTxnFee", "MinTxnFee"], 1, interpreter),
         RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
@@ -713,6 +719,98 @@ describe("Parser", function () {
 
         expectRuntimeError(
           () => opcodeFromSentence(["swap", "xyz"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("txn fields", () => {
+        let res = opcodeFromSentence(["txn", "Assets", "1"], 1, interpreter);
+        let expected = new Txn(["Assets", "1"], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["txn", "Assets", "0", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["txn", "Assets", "random-string"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.INVALID_TYPE
+        );
+
+        res = opcodeFromSentence(["txn", "Applications", "0"], 1, interpreter);
+        expected = new Txn(["Applications", "0"], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["txn", "Applications", "0", "11"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["txn", "Applications", "random-string"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.INVALID_TYPE
+        );
+
+        res = opcodeFromSentence(["txn", "NumAssets"], 1, interpreter);
+        expected = new Txn(["NumAssets"], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        res = opcodeFromSentence(["txn", "GlobalNumUint"], 1, interpreter);
+        expected = new Txn(["GlobalNumUint"], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["txn", "NumAssets", "0"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["txn", "GlobalNumUint", "0"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("getbit", () => {
+        const res = opcodeFromSentence(["getbit"], 1, interpreter);
+        const expected = new GetBit([], 1);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["getbit", "1234"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("setbit", () => {
+        const res = opcodeFromSentence(["setbit"], 1, interpreter);
+        const expected = new SetBit([], 1);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["setbit", "1234"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("getbyte", () => {
+        const res = opcodeFromSentence(["getbyte"], 1, interpreter);
+        const expected = new GetByte([], 1);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["getbyte", "1234"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("setbyte", () => {
+        const res = opcodeFromSentence(["setbyte"], 1, interpreter);
+        const expected = new SetByte([], 1);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["setbyte", "1234"], 1, interpreter),
           RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
         );
       });
