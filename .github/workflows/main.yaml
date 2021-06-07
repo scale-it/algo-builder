@@ -37,7 +37,6 @@ jobs:
       - name: Install python dependencies
         run: python -m pip install pipenv
       - run: pipenv sync
-      - run: pipenv shell
 
       - name: Install dependencies
         run: yarn install
