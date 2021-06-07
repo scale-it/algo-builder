@@ -62,7 +62,6 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 
     runtime.executeTx({ ...closeOutParams, appId: appId });
     syncAccount();
-
     // verify app is deleted from local state
     const localApp = john.getAppFromLocal(appId);
     assert.isUndefined(localApp);
@@ -98,7 +97,6 @@ describe("ASC - CloseOut from Application and Clear State", function () {
   it("should not delete application on CloseOut call if logic is rejected", function () {
     const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram);
     const initialJohnMinBalance = runtime.getAccount(john.address).minBalance;
-
     runtime.optInToApp(john.address, appId, {}, {}); // opt-in to app (set new local state)
     syncAccount();
     const minBalanceAfterOptIn = john.minBalance;
@@ -120,7 +118,6 @@ describe("ASC - CloseOut from Application and Clear State", function () {
     // verify app is not deleted from account's local state (as tx is rejected)
     const res = john.getAppFromLocal(appId);
     assert.isDefined(res);
-
     // minimum balance should remain the same as closeOutSSC failed
     assert.notEqual(john.minBalance, initialJohnMinBalance);
     assert.equal(john.minBalance, minBalanceAfterOptIn);

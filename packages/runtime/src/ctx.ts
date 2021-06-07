@@ -198,7 +198,7 @@ export class Ctx implements Context {
    * - When creating or opting into an app, the minimum balance grows before the app code runs
    */
   addApp (
-    fromAccountAddr: string, flags: SSCDeploymentFlags,
+    fromAccountAddr: AccountAddress, flags: SSCDeploymentFlags,
     approvalProgram: string, clearProgram: string
   ): number {
     const senderAcc = this.getAccount(fromAccountAddr);
@@ -247,7 +247,7 @@ export class Ctx implements Context {
    * @param payFlags Transaction Parameters
    * NOTE: When creating or opting into an app, the minimum balance grows before the app code runs
    */
-  optInToApp (accountAddr: string, appID: number): void {
+  optInToApp (accountAddr: AccountAddress, appID: number): void {
     const appParams = this.getApp(appID);
 
     const account = this.getAccount(accountAddr);
