@@ -19,7 +19,7 @@ def gold_asc(asset_amt, arg_sender):
 
 	pay_gold = And(
 		Txn.type_enum() == Int(4),
-		Txn.sender() == tmpl_sender,
+		Txn.sender() == arg_sender,
 		Txn.asset_amount() <= asset_amt
 	)
 
