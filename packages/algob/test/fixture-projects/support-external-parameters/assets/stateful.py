@@ -37,4 +37,4 @@ if __name__ == "__main__":
   if(len(sys.argv) > 1):
     scParam = parse_params(sys.argv[1], scParam)
 
-  print(compileTeal(approval_program(scParam["ASSET_AMT"], Addr(scParam["TMPL_SENDER"])), Mode.Application))
+  print(compileTeal(approval_program(scParam["ASSET_AMT"], Addr(scParam["ARG_SENDER"])), Mode.Application))
