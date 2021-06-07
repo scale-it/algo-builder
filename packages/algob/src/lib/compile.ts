@@ -118,6 +118,31 @@ export class PyCompileOp {
   }
 
   /**
+   * Parses scTmplParams and returns ReplaceParams and stringify object
+   * @param scTmplParams smart contract template parameters
+   */
+  parseScTmplParam (scTmplParams?: SCParams): [ReplaceParams, string | undefined] {
+    let param: string | undefined;
+    const replaceParams: ReplaceParams = {};
+    if (scTmplParams === undefined) {
+      param = undefined;
+    } else {
+      const tmp: SCParams = {};
+      for (const key in scTmplParams) {
+        if (key.startsWith("TMPL_") || key.startsWith("tmpl_")) {
+          replaceParams[key] = scTmplParams[key].toString();
+        } else {
+          tmp[key] = scTmplParams[key];
+        }
+      }
+      console.log("PyTEAL template parameters:", tmp);
+      param = YAML.stringify(tmp);
+    }
+    console.log("TEAL replacement parameters:", replaceParams);
+    return [replaceParams, param];
+  }
+
+  /**
    * Description : returns compiled teal code from pyTeal file
    * @param filename : name of the PyTeal code in `/assets` directory.
    *                   Examples : [ gold.py, asa.py]
@@ -130,24 +155,7 @@ export class PyCompileOp {
       throw new Error(`filename "${filename}" must end with "${pyExt}"`);
     }
 
-    let param: string | undefined;
-    const replaceParams: ReplaceParams = {};
-    if (scTmplParams === undefined) {
-      param = undefined;
-    } else {
-      const tmp: SCParams = {};
-      for (const i in scTmplParams) {
-        if (i.startsWith("TMPL_") || i.startsWith("tmpl_")) {
-          replaceParams[i] = scTmplParams[i].toString();
-        } else {
-          tmp[i] = scTmplParams[i];
-        }
-      }
-      console.log("PyTEAL template parameters:", tmp);
-      param = YAML.stringify(tmp);
-    }
-    console.log("TEAL replacement parameters:", replaceParams);
-
+    const [replaceParams, param] = this.parseScTmplParam(scTmplParams);
     let content = this.compilePyTeal(filename, param);
     if (YAML.stringify({}) !== YAML.stringify(replaceParams)) {
       content = this.replaceTempValues(content, replaceParams);
@@ -179,8 +187,8 @@ export class PyCompileOp {
   }
 
   /**
-   * Replaces parameters with the values passed
-   * @param program Teal program
+   * Replaces keys with the values in program using replaceParams
+   * @param program Teal program in string
    * @param replaceParams params that needs to be replaced in program
    */
   replaceTempValues (program: string, replaceParams: ReplaceParams): string {
