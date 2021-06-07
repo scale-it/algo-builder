@@ -105,6 +105,7 @@ export interface Context {
   tx: Txn // current txn
   gtxs: Txn[] // all transactions
   args: Uint8Array[]
+  debugStack?: number //  max number of top elements from the stack to print after each opcode execution.
   getAccount: (address: string) => AccountStoreI
   getAssetAccount: (assetId: number) => AccountStoreI
   getApp: (appId: number, line?: number) => SSCAttributesM
