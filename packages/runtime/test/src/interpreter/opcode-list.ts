@@ -3656,7 +3656,7 @@ describe("Teal Opcodes", function () {
       );
     });
 
-    it("should panic if index bit in out of bytes array", () => {
+    it("should panic if index bit is out of bytes array", () => {
       const op = new GetByte([], 0);
       stack.push(new Uint8Array(0)); // target
       stack.push(500n); // index
@@ -3730,7 +3730,7 @@ describe("Teal Opcodes", function () {
       );
     });
 
-    it("should panic if index bit in out of bytes array", () => {
+    it("should panic if index bit is out of bytes array", () => {
       const op = new SetByte([], 0);
       stack.push(new Uint8Array(0)); // target
       stack.push(500n); // index
