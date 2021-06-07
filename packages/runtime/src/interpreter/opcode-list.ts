@@ -2403,8 +2403,8 @@ export class SetByte extends Op {
 
 /**
  * pop a byte-array A and integer B. Extract the Bth byte of A and push it as an integer
- * Pops from stack: ... stack, {[]byte A}, {uint64 B}
- * Pushes to stack: uint64
+ * Pops from stack: [ ...stack, {[]byte A}, {uint64 B} ]
+ * Pushes to stack: [ ...stack, uint64 ]
  */
 export class GetByte extends Op {
   readonly line: number;
