@@ -106,3 +106,8 @@ To use this feature in scripts, you can pass an external parameter object (using
     await deployer.loadLogic("dynamic-fee.py", scInitParam);
    ```
   Keys starting with `TMPL_` or `tmpl_` will be used with TMPL function and other keys will be used as mentioned in `External Parameters Support` section.
+
+  ### Difference between External Parameters Support and TMPL Placeholder Support
+
+  - To understand the difference you need to know how TMPL works, you can learn from [here](https://pyteal.readthedocs.io/en/stable/api.html?highlight=TMPL#pyteal.Tmpl).
+  - The main difference is, In TMPL placehlder support TMPL placeholders are replaced with given values after transpiling pyTEAL to TEAL language, but in case of external parameters, replacment of values is done in pyTEAL file only.
