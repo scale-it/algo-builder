@@ -39,4 +39,4 @@ if __name__ == "__main__":
   if(len(sys.argv) > 1):
     scParam = parse_params(sys.argv[1], scParam)
 
-  print(compileTeal(gold_asc(scParam["ASSET_AMT"], Addr(scParam["TMPL_SENDER"])), Mode.Signature))
+  print(compileTeal(gold_asc(scParam["ASSET_AMT"], Addr(scParam["ARG_SENDER"])), Mode.Signature))
