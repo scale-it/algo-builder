@@ -2396,14 +2396,13 @@ export class Dig extends Op {
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, this.depth + 1, this.line);
     const tempStack = new Stack<StackElem>(this.depth + 1); // depth = 2 means 3rd slot from top of stack
-    let copy;
-    for (let i = 0; i <= this.depth; i++) {
-      const top = stack.pop();
-      tempStack.push(top);
-      if (i === this.depth) { copy = top; }
+    let target;
+    for (let i = 0; i <= this.depth; ++i) {
+      target = stack.pop();
+      tempStack.push(target);
     }
     while (tempStack.length()) { stack.push(tempStack.pop()); }
-    stack.push(copy as StackElem);
+    stack.push(target as StackElem);
   }
 }
 
@@ -2438,7 +2437,8 @@ export class Select extends Op {
  * push field F of the Ath transaction (A = top of stack) in the current group
  * pops from stack: [...stack, uint64]
  * pushes to stack: [...stack, transaction field]
- * NOTE: "gtxns field" is equivalent to "gtxn _i_ field" (where _i_ is fetched from stack).
+ * NOTE: "gtxns field" is equivalent to "gtxn _i_ field" (where _i_ is the index
+ * of transaction in group, fetched from stack).
  * gtxns exists so that i can be calculated, often based on the index of the current transaction.
  */
 export class Gtxns extends Gtxn {
@@ -2451,6 +2451,8 @@ export class Gtxns extends Gtxn {
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
+    // NOTE: 100 is a mock value (max no of txns in group can be 16 atmost).
+    // In gtxns & gtxnsa opcodes, index is fetched from top of stack.
     super(["100", ...args], line, interpreter);
   }
 
@@ -2478,6 +2480,8 @@ export class Gtxnsa extends Gtxna {
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
+    // NOTE: 100 is a mock value (max no of txns in group can be 16 atmost).
+    // In gtxns & gtxnsa opcodes, index is fetched from top of stack.
     super(["100", ...args], line, interpreter);
   }
 
