@@ -219,6 +219,24 @@ by an index that does not exist.`
     message: "#pragma statement must be at 1st line. [error-line: %line%]",
     title: '#pragma error',
     description: `#pragma error`
+  },
+  SET_BIT_VALUE_ERROR: {
+    number: 1032,
+    message: "set bit value is greater than 1. [error-line: %line%]",
+    title: 'Bit value error',
+    description: `Bit value error`
+  },
+  SET_BIT_INDEX_ERROR: {
+    number: 1033,
+    message: "set bit index %index% is greater than 63 with Uint. [error-line: %line%]",
+    title: 'set bit index error',
+    description: `set bit index error`
+  },
+  SET_BIT_INDEX_BYTES_ERROR: {
+    number: 1034,
+    message: "set bit index %index% is beyond bytes length. [error-line: %line%]",
+    title: 'set bit index error',
+    description: `set bit index error`
   }
 };
 

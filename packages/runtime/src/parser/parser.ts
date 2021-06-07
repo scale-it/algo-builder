@@ -7,10 +7,10 @@ import {
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
   Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2, Ed25519verify,
-  EqualTo, Err, GetAssetDef, GetAssetHolding, Global, GreaterThan,
+  EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, Global, GreaterThan,
   GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc, Intcblock, Itob,
   Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, Mod,
-  Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, Sha256,
+  Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, SetBit, Sha256,
   Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../interpreter/opcode-list";
 import { LogicSigMaxCost, LogicSigMaxSize, MaxAppProgramCost, MaxAppProgramLen, OpGasCost } from "../lib/constants";
@@ -131,7 +131,13 @@ opCodeMap[3] = {
 
   // optimized opcodes for pushing uint64s and byte slices to the stack
   pushint: PushInt,
-  pushbytes: PushBytes
+  pushbytes: PushBytes,
+
+  // bit & byte opcodes
+  getbit: GetBit,
+  setbit: SetBit
+  // getbyte: GetBytes,
+  // setbyte: SetBytes
 
   /*
   dig: Dig,
@@ -140,12 +146,6 @@ opCodeMap[3] = {
   // txn ops in tealv3
   gtxnsf: Gtxnsf,
   gtxnsa: Gtxnsa,
-
-  // bit & byte opcodes
-  getbit: Getbit,
-  setbit: Setbit,
-  getbyte: Getbyte,
-  setbyte: Setbyte,
 
   // stateful op (mode = application)
   min_balance: MinBalance
