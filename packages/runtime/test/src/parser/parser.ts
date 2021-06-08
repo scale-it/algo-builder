@@ -8,9 +8,12 @@ import {
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
   Branch, BranchIfNotZero, BranchIfZero, Btoi, Byte, Bytec, Concat, Dig, Div,
   Dup, Dup2, Ed25519verify, EqualTo, Err, GetAssetDef, GetAssetHolding,
+  GetBit,
+  GetByte,
   Global, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Itob,
   Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, Mod, Mul, Mulw,
-  Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, Select, Sha256, Sha512_256, Store,
+  Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, Select, SetBit,
+  SetByte, Sha256, Sha512_256, Store,
   Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { MAX_UINT64, MaxTEALVersion, MIN_UINT64 } from "../../../src/lib/constants";
@@ -765,6 +768,50 @@ describe("Parser", function () {
 
         expectRuntimeError(
           () => opcodeFromSentence(["txn", "GlobalNumUint", "0"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("getbit", () => {
+        const res = opcodeFromSentence(["getbit"], 1, interpreter);
+        const expected = new GetBit([], 1);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["getbit", "1234"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("setbit", () => {
+        const res = opcodeFromSentence(["setbit"], 1, interpreter);
+        const expected = new SetBit([], 1);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["setbit", "1234"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("getbyte", () => {
+        const res = opcodeFromSentence(["getbyte"], 1, interpreter);
+        const expected = new GetByte([], 1);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["getbyte", "1234"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("setbyte", () => {
+        const res = opcodeFromSentence(["setbyte"], 1, interpreter);
+        const expected = new SetByte([], 1);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["setbyte", "1234"], 1, interpreter),
           RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
         );
       });
