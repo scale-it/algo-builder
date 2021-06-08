@@ -10,7 +10,7 @@ import { BuilderError, parseAlgorandError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
 import { assertDir, ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
 import { timestampNow } from "../lib/time";
-import type { ASCCache, PyASCCache, SCParams } from "../types";
+import type { ASCCache, PyASCCache, ReplaceParams, SCParams } from "../types";
 
 export const tealExt = ".teal";
 export const pyExt = ".py";
@@ -121,6 +121,31 @@ export class PyCompileOp {
   }
 
   /**
+   * Parses scTmplParams and returns ReplaceParams and stringify object
+   * @param scTmplParams smart contract template parameters
+   */
+  parseScTmplParam (scTmplParams?: SCParams): [ReplaceParams, string | undefined] {
+    let param: string | undefined;
+    const replaceParams: ReplaceParams = {};
+    if (scTmplParams === undefined) {
+      param = undefined;
+    } else {
+      const tmp: SCParams = {};
+      for (const key in scTmplParams) {
+        if (key.startsWith("TMPL_") || key.startsWith("tmpl_")) {
+          replaceParams[key] = scTmplParams[key].toString();
+        } else {
+          tmp[key] = scTmplParams[key];
+        }
+      }
+      console.log("PyTEAL template parameters:", tmp);
+      param = YAML.stringify(tmp);
+    }
+    console.log("TEAL replacement parameters:", replaceParams);
+    return [replaceParams, param];
+  }
+
+  /**
    * Description : returns compiled teal code from pyTeal file
    * @param filename : name of the PyTeal code in `/assets` directory.
    *                   Examples : [ gold.py, asa.py]
@@ -133,11 +158,11 @@ export class PyCompileOp {
       throw new Error(`filename "${filename}" must end with "${pyExt}"`);
     }
 
-    console.log("PyTEAL template parameters:", scTmplParams);
-    let param: string | undefined = YAML.stringify(scTmplParams);
-    if (scTmplParams === undefined) { param = undefined; }
-
-    const content = this.compilePyTeal(filename, param);
+    const [replaceParams, param] = this.parseScTmplParam(scTmplParams);
+    let content = this.compilePyTeal(filename, param);
+    if (YAML.stringify({}) !== YAML.stringify(replaceParams)) {
+      content = this.replaceTempValues(content, replaceParams);
+    }
     const [teal, thash] = [content, murmurhash.v3(content)];
 
     const a = await this.readArtifact(filename);
@@ -162,6 +187,18 @@ export class PyCompileOp {
     const cacheFilename = path.join(CACHE_DIR, filename + ".yaml");
     this.compileOp.writeFile(cacheFilename, YAML.stringify(pyCompiled));
     return pyCompiled;
+  }
+
+  /**
+   * Replaces keys with the values in program using replaceParams
+   * @param program Teal program in string
+   * @param replaceParams params that needs to be replaced in program
+   */
+  replaceTempValues (program: string, replaceParams: ReplaceParams): string {
+    for (const param in replaceParams) {
+      program = program.split(param).join(replaceParams[param]);
+    }
+    return program;
   }
 
   async readArtifact (filename: string): Promise<PyASCCache | undefined> {

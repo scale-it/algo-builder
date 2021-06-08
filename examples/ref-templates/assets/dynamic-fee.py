@@ -6,7 +6,7 @@ from algobpy.parse import parse_params
 
 from pyteal import *
 
-def dynamic_fee(TMPL_TO, TMPL_AMT, TMPL_CLS, TMPL_FV, TMPL_LV, TMPL_LEASE):
+def dynamic_fee(ARG_AMT, ARG_CLS, ARG_FV, ARG_LV, ARG_LEASE):
     """
     The contract works by approving a group of two transactions (meaning the two transactions will occur together or not at all).
 
@@ -19,12 +19,11 @@ def dynamic_fee(TMPL_TO, TMPL_AMT, TMPL_CLS, TMPL_FV, TMPL_LV, TMPL_LEASE):
     must be the specified payment transaction from account A to account TMPL_TO.
 
     Parameters:
-    TMPL_TO: the recipient of the payment from account A
-    TMPL_AMT: the amount to send from account A to TMPL_TO in microAlgos
-    TMPL_CLS: the account to close out the remainder of account A's funds to after paying TMPL_AMT to TMPL_TO
-    TMPL_FV: the required first valid round of the payment from account A
-    TMPL_LV: the required last valid round of the payment from account A
-    TMPL_LEASE: the string to use for the transaction lease in the payment from account A (to avoid replay attacks)
+    ARG_AMT: the amount to send from account A to TMPL_TO in microAlgos
+    ARG_CLS: the account to close out the remainder of account A's funds to after paying ARG_AMT to TMPL_TO
+    ARG_FV: the required first valid round of the payment from account A
+    ARG_LV: the required last valid round of the payment from account A
+    ARG_LEASE: the string to use for the transaction lease in the payment from account A (to avoid replay attacks)
     """
 
     # First, check that the transaction group contains exactly two transactions.
@@ -60,22 +59,22 @@ def dynamic_fee(TMPL_TO, TMPL_AMT, TMPL_CLS, TMPL_FV, TMPL_LV, TMPL_LEASE):
 
     # Finally, check that all of the fields in the second transaction are equal to their corresponding contract parameters.
     # Check that the Receiver field is set to be the TMPL_TO address.
-    recv_field_check = Gtxn[1].receiver() == TMPL_TO
+    recv_field_check = Gtxn[1].receiver() == Tmpl.Addr("TMPL_TO")
 
-    # Check that the CloseRemainderTo field is set to be the TMPL_CLS address.
-    cls_field_check = Gtxn[1].close_remainder_to() == TMPL_CLS
+    # Check that the CloseRemainderTo field is set to be the ARG_CLS address.
+    cls_field_check = Gtxn[1].close_remainder_to() == ARG_CLS
 
     # Check that the Amount field is set to be the TMPL_TO address.
-    amount_field_check = Gtxn[1].amount() == Int(TMPL_AMT)
+    amount_field_check = Gtxn[1].amount() == Int(ARG_AMT)
 
-    # Check that the FirstValid field is set to be the TMPL_FV.
-    fv_field_check = Gtxn[1].first_valid() == Int(TMPL_FV)
+    # Check that the FirstValid field is set to be the ARG_FV.
+    fv_field_check = Gtxn[1].first_valid() == Int(ARG_FV)
 
-    # Check that the LastValid field is set to be the TMPL_LV.
-    lv_field_check = Gtxn[1].last_valid() == Int(TMPL_LV)
+    # Check that the LastValid field is set to be the ARG_LV.
+    lv_field_check = Gtxn[1].last_valid() == Int(ARG_LV)
 
-    # check that the lease field is exactly TMPL_LEASE.
-    lease_field_check = Gtxn[1].lease() == TMPL_LEASE
+    # check that the lease field is exactly ARG_LEASE.
+    lease_field_check = Gtxn[1].lease() == ARG_LEASE
 
     params_condition = And(
         common_fields,
@@ -94,12 +93,11 @@ if __name__ == "__main__":
 
     #replace these values with your customized values or pass an external parameter
     params = {
-        "TMPL_TO": "2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA",
-        "TMPL_AMT": 700000,
-        "TMPL_CLS": "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
-        "TMPL_FV": 10,
-        "TMPL_LV": 1000000,
-        "TMPL_LEASE": "023sdDE2"
+        "ARG_AMT": 700000,
+        "ARG_CLS": "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
+        "ARG_FV": 10,
+        "ARG_LV": 1000000,
+        "ARG_LEASE": "023sdDE2"
     }
 
     # Overwrite params if sys.argv[1] is passed
@@ -107,9 +105,8 @@ if __name__ == "__main__":
         params = parse_params(sys.argv[1], params)
 
     print(compileTeal(dynamic_fee(
-        Addr(params["TMPL_TO"]),
-        params["TMPL_AMT"],
-        Addr(params["TMPL_CLS"]),
-        params["TMPL_FV"],
-        params["TMPL_LV"],
-        Bytes("base64", params["TMPL_LEASE"])), Mode.Signature))
+        params["ARG_AMT"],
+        Addr(params["ARG_CLS"]),
+        params["ARG_FV"],
+        params["ARG_LV"],
+        Bytes("base64", params["ARG_LEASE"])), Mode.Signature))

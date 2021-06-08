@@ -7,11 +7,11 @@ async function run (runtimeEnv, deployer) {
 
   const scInitParam = {
     TMPL_TO: john.addr,
-    TMPL_AMT: 700000,
-    TMPL_CLS: masterAccount.addr,
-    TMPL_FV: 10,
-    TMPL_LV: 1000000,
-    TMPL_LEASE: '023sdDE2'
+    ARG_AMT: 700000,
+    ARG_CLS: masterAccount.addr,
+    ARG_FV: 10,
+    ARG_LV: 1000000,
+    ARG_LEASE: '023sdDE2'
   };
   const contractName = 'dynamic-fee.py';
   // setup a contract account and send 1 ALGO from master

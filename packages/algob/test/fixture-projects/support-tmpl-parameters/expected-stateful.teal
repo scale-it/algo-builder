@@ -1,0 +1,40 @@
+#pragma version 2
+txn ApplicationID
+int 0
+==
+bnz l4
+txn OnCompletion
+int OptIn
+==
+bnz l3
+err
+l3:
+int 0
+byte "balance"
+int 0
+app_local_put
+int 1
+return
+l4:
+txn AssetAmount
+int 100
+<=
+bnz l6
+err
+l6:
+txn Sender
+addr KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY
+==
+bnz l8
+err
+l8:
+int 0
+byte "admin"
+int 1
+app_local_put
+int 0
+byte "balance"
+int 0
+app_local_put
+int 1
+return

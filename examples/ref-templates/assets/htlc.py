@@ -6,34 +6,34 @@ fee = 10000
 hash_image = "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc="
 timeout = 2000
 
-def htlc(TMPL_RCV,
-        TMPL_OWN,
-        TMPL_FEE,
-        TMPL_HASHIMG,
-        TMPL_HASHFN,
-        TMPL_TIMEOUT):
+def htlc(ARG_RCV,
+        ARG_OWN,
+        ARG_FEE,
+        ARG_HASHIMG,
+        ARG_HASHFN,
+        ARG_TIMEOUT):
     """This contract implements a "hash time lock".
     The contract will approve transactions spending algos from itself under two circumstances:
 
-    - If an argument arg_0 is passed to the script such that TMPL_HASHFN(arg_0) is equal to TMPL_HASHIMG,
-    then funds may be closed out to TMPL_RCV.
-    - If txn.FirstValid is greater than TMPL_TIMEOUT, then funds may be closed out to TMPL_OWN.
+    - If an argument arg_0 is passed to the script such that ARG_HASHFN(arg_0) is equal to ARG_HASHIMG,
+    then funds may be closed out to ARG_RCV.
+    - If txn.FirstValid is greater than ARG_TIMEOUT, then funds may be closed out to ARG_OWN.
 
-    The idea is that by knowing the preimage to TMPL_HASHIMG, funds may be released to
-    TMPL_RCV (Scenario 1). Alternatively, after some timeout round TMPL_TIMEOUT,
-    funds may be closed back to their original owner, TMPL_OWN (Scenario 2).
-    Note that Scenario 1 may occur up until Scenario 2 occurs, even if TMPL_TIMEOUT has already passed.
+    The idea is that by knowing the preimage to ARG_HASHIMG, funds may be released to
+    ARG_RCV (Scenario 1). Alternatively, after some timeout round ARG_TIMEOUT,
+    funds may be closed back to their original owner, ARG_OWN (Scenario 2).
+    Note that Scenario 1 may occur up until Scenario 2 occurs, even if ARG_TIMEOUT has already passed.
 
     Parameters:
-    TMPL_RCV: the address to send funds to when the preimage is supplied
-    TMPL_HASHFN: the specific hash function (sha256 or keccak256) to use (sha256 in this example)
-    TMPL_HASHIMG: the image of the hash function for which knowing the preimage under TMPL_HASHFN will release funds
-    TMPL_TIMEOUT: the round after which funds may be closed out to TMPL_OWN
-    TMPL_OWN: the address to refund funds to on timeout
-    TMPL_FEE: maximum fee of any transactions approved by this contract """
+    ARG_RCV: the address to send funds to when the preimage is supplied
+    ARG_HASHFN: the specific hash function (sha256 or keccak256) to use (sha256 in this example)
+    ARG_HASHIMG: the image of the hash function for which knowing the preimage under ARG_HASHFN will release funds
+    ARG_TIMEOUT: the round after which funds may be closed out to ARG_OWN
+    ARG_OWN: the address to refund funds to on timeout
+    ARG_FEE: maximum fee of any transactions approved by this contract """
 
-    # First, check that the fee of this transaction is less than or equal to TMPL_FEE
-    fee_check = Txn.fee() < Int(TMPL_FEE)
+    # First, check that the fee of this transaction is less than or equal to ARG_FEE
+    fee_check = Txn.fee() < Int(ARG_FEE)
 
     # Next, check that this is a payment transaction.
     pay_check = Txn.type_enum() == TxnType.Payment
@@ -67,23 +67,23 @@ def htlc(TMPL_RCV,
     # are in one of the two payment scenarios described in the functionality section."""
 
     # Scenario 1: Hash preimage has been revealed
-    # First, check that the CloseRemainderTo field is set to be the TMPL_RCV address.
-    recv_field_check = Txn.close_remainder_to() == TMPL_RCV
+    # First, check that the CloseRemainderTo field is set to be the ARG_RCV address.
+    recv_field_check = Txn.close_remainder_to() == ARG_RCV
 
-    # Next, we will check that arg_0 is the correct preimage for TMPL_HASHIMG under TMPL_HASHFN.
-    preimage_check = TMPL_HASHFN(Arg(0)) == Bytes("base64", TMPL_HASHIMG)
+    # Next, we will check that arg_0 is the correct preimage for ARG_HASHIMG under ARG_HASHFN.
+    preimage_check = ARG_HASHFN(Arg(0)) == Bytes("base64", ARG_HASHIMG)
 
     #Fold the "Scenario 1" checks into a single boolean.
     scenario_1 = And(recv_field_check, preimage_check)
 
 
     # Scenario 2: Contract has timed out
-    # First, check that the CloseRemainderTo field is set to be the TMPL_OWN address
+    # First, check that the CloseRemainderTo field is set to be the ARG_OWN address
     # (presumably initialized to be the original owner of the funds).
-    owner_field_check = Txn.close_remainder_to() == TMPL_OWN
+    owner_field_check = Txn.close_remainder_to() == ARG_OWN
 
-    # Next, check that this transaction has only occurred after the TMPL_TIMEOUT round.
-    timeout_check = Txn.first_valid() > Int(TMPL_TIMEOUT)
+    # Next, check that this transaction has only occurred after the ARG_TIMEOUT round.
+    timeout_check = Txn.first_valid() > Int(ARG_TIMEOUT)
 
     #Fold the "Scenario 2" checks into a single boolean.
     scenario_2 = And(owner_field_check, timeout_check)
