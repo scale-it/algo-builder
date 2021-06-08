@@ -40,7 +40,7 @@ jobs:
       - name: Install dependencies
         run: pipenv run yarn install
       - name: Execute lint
-        run: pipenv run yarn lint
-      - run: pipenv run yarn build
+        run: yarn lint
+      - run: yarn build
       - name: Execute tests
         run: pipenv run yarn test
