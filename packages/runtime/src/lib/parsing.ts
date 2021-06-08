@@ -244,3 +244,18 @@ export function getEncoding (args: string[], line: number): [string, EncodingTyp
     throw new RuntimeError(RUNTIME_ERRORS.TEAL.UNKOWN_DECODE_TYPE, { val: args[0], line: line });
   }
 }
+
+/**
+ * Parses binary string into bigint. Eg '101' OR ['1', '0', '1'] => 5n
+ * @param binary Binary string array or a string
+ */
+export function parseBinaryStrToBigInt (binary: string[] | string): bigint {
+  let res = 0n;
+  for (let i = 0; i < binary.length; ++i) {
+    if (binary[i] === '1') {
+      const val = binary.length - 1 - i;
+      res += 2n ** BigInt(val);
+    }
+  }
+  return res;
+}

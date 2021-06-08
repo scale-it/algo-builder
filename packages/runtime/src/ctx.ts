@@ -8,8 +8,8 @@ import { mockSuggestedParams } from "./mock/tx";
 import {
   AccountAddress, AccountStoreI, AlgoTransferParam, ASADeploymentFlags, AssetHoldingM, AssetModFields,
   AssetTransferParam, Context, ExecParams, ExecutionMode,
-  SignType, SSCAttributesM, SSCDeploymentFlags, SSCOptionalFlags,
-  State, TransactionType, Txn, TxParams, UpdateSSCParam
+  SignType, SSCAttributesM, SSCDeploymentFlags,
+  State, TransactionType, Txn, TxParams
 } from "./types";
 
 const APPROVAL_PROGRAM = "approval-program";
@@ -20,13 +20,16 @@ export class Ctx implements Context {
   gtxs: Txn[];
   args: Uint8Array[];
   runtime: Runtime;
+  debugStack?: number; //  max number of top elements from the stack to print after each opcode execution.
 
-  constructor (state: State, tx: Txn, gtxs: Txn[], args: Uint8Array[], runtime: Runtime) {
+  constructor (state: State, tx: Txn, gtxs: Txn[], args: Uint8Array[],
+    runtime: Runtime, debugStack?: number) {
     this.state = state;
     this.tx = tx;
     this.gtxs = gtxs;
     this.args = args;
     this.runtime = runtime;
+    this.debugStack = debugStack;
   }
 
   // verify 'amt' microalgos can be withdrawn from account
@@ -216,7 +219,7 @@ export class Ctx implements Context {
     this.state.accounts.set(senderAcc.address, senderAcc);
     this.state.globalApps.set(app.id, senderAcc.address);
 
-    this.runtime.run(approvalProgram, ExecutionMode.STATEFUL); // execute TEAL code with appId = 0
+    this.runtime.run(approvalProgram, ExecutionMode.STATEFUL, this.debugStack); // execute TEAL code with appId = 0
 
     // create new application in globalApps map
     this.state.globalApps.set(++this.state.appCounter, senderAcc.address);
@@ -253,7 +256,7 @@ export class Ctx implements Context {
     const account = this.getAccount(accountAddr);
     account.optInToApp(appID, appParams);
     this.assertMinBalance(0n, accountAddr);
-    this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL);
+    this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL, this.debugStack);
   }
 
   /**
@@ -429,7 +432,7 @@ export class Ctx implements Context {
     }
 
     const appParams = this.getApp(appID);
-    this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL);
+    this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL, this.debugStack);
 
     const updatedApp = this.getApp(appID);
     updatedApp[APPROVAL_PROGRAM] = approvalProgram;
@@ -453,7 +456,7 @@ export class Ctx implements Context {
 
       if (txnParam.sign === SignType.LogicSignature) {
         this.tx = this.gtxs[idx]; // update current tx to index of stateless
-        this.runtime.validateLsigAndRun(txnParam);
+        this.runtime.validateLsigAndRun(txnParam, this.debugStack);
         this.tx = this.gtxs[0]; // after executing stateless tx updating current tx to default (index 0)
       }
 
@@ -470,13 +473,13 @@ export class Ctx implements Context {
         case TransactionType.CallNoOpSSC: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appId);
-          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL);
+          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL, this.debugStack);
           break;
         }
         case TransactionType.CloseSSC: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appId);
-          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL);
+          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL, this.debugStack);
           this.closeApp(fromAccountAddr, txnParam.appId);
           break;
         }
@@ -492,7 +495,7 @@ export class Ctx implements Context {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.runtime.assertAppDefined(txnParam.appId, this.getApp(txnParam.appId));
           try {
-            this.runtime.run(appParams["clear-state-program"], ExecutionMode.STATEFUL);
+            this.runtime.run(appParams["clear-state-program"], ExecutionMode.STATEFUL, this.debugStack);
           } catch (error) {
             // if transaction type is Clear Call, remove the app without throwing error (rejecting tx)
             // tested by running on algorand network
@@ -505,7 +508,7 @@ export class Ctx implements Context {
         case TransactionType.DeleteSSC: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appId);
-          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL);
+          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL, this.debugStack);
           this.deleteApp(txnParam.appId);
           break;
         }

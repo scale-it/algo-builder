@@ -1,4 +1,4 @@
-import type { AssetDefEnc, SuggestedParams, Transaction } from "algosdk";
+import type { AssetDefEnc, StateSchemaEnc, SuggestedParams, Transaction } from "algosdk";
 import algosdk from "algosdk";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
@@ -20,6 +20,11 @@ const assetTxnFields = new Set([
   'ConfigAssetReserve',
   'ConfigAssetFreeze',
   'ConfigAssetClawback'
+]);
+
+const globalAndLocalNumTxnFields = new Set([
+  'GlobalNumUint', 'GlobalNumByteSlice',
+  'LocalNumUint', 'LocalNumByteSlice'
 ]);
 
 // return default value of txField if undefined,
@@ -48,11 +53,17 @@ export function parseToStackElem (a: unknown, field: TxField): StackElem {
 export function txnSpecbyField (txField: string, tx: Txn, gtxns: Txn[], tealVersion: number): StackElem {
   let result; // store raw result, parse and return
 
-  // handle nested encoded obj (for AssetDef)
+  // handle nested encoded obj (for AssetDef, AppGlobalNumFields, AppLocalNumFields)
   if (assetTxnFields.has(txField)) {
     const s = TxnFields[tealVersion][txField];
     const assetMetaData = tx.apar;
     result = assetMetaData?.[s as keyof AssetDefEnc];
+    return parseToStackElem(result, txField);
+  }
+  if (globalAndLocalNumTxnFields.has(txField)) {
+    const encAppGlobalSchema = txField.includes('Global') ? tx.apgs : tx.apls;
+    const s = TxnFields[tealVersion][txField];
+    result = encAppGlobalSchema?.[s as keyof StateSchemaEnc];
     return parseToStackElem(result, txField);
   }
 
@@ -84,6 +95,18 @@ export function txnSpecbyField (txField: string, tx: Txn, gtxns: Txn[], tealVers
       result = appAccounts?.length;
       break;
     }
+    case 'NumAssets': {
+      const encAppAsset = TxnFields[tealVersion].Assets as keyof Txn; // 'apas'
+      const foreignAssetsArr = tx[encAppAsset] as Buffer[];
+      result = foreignAssetsArr?.length;
+      break;
+    }
+    case 'NumApplications': {
+      const encApp = TxnFields[tealVersion].Applications as keyof Txn; // 'apfa'
+      const foreignAppsArr = tx[encApp] as Buffer[];
+      result = foreignAppsArr?.length;
+      break;
+    }
     default: {
       const s = TxnFields[tealVersion][txField]; // eg: rcv = TxnFields["Receiver"]
       result = tx[s as keyof Txn]; // pk_buffer = tx['rcv']
@@ -104,19 +127,28 @@ export function txnSpecbyField (txField: string, tx: Txn, gtxns: Txn[], tealVers
  * @param line line number in TEAL file
  */
 export function txAppArg (txField: TxField, tx: Txn, idx: number, op: Op,
-  tealVersion: number, line: number): Uint8Array {
+  tealVersion: number, line: number): StackElem {
   const s = TxnFields[tealVersion][txField]; // 'apaa' or 'apat'
   const result = tx[s as keyof Txn] as Buffer[]; // array of pk buffers (accounts or appArgs)
   if (!result) { // handle defaults
     return TxFieldDefaults[txField];
   }
 
+  /**
+   * handle special case of accounts and applications:
+   * + Txn.Accounts[0] represents sender's account
+   * + Txn.Applications[0] represents current_application_id
+   * https://pyteal.readthedocs.io/en/stable/accessing_transaction_field.html#special-case-txn-accounts-and-txn-applications
+   */
   if (txField === 'Accounts') {
-    if (idx === 0) { return parseToStackElem(tx.snd, txField) as Uint8Array; }
+    if (idx === 0) { return parseToStackElem(tx.snd, txField); }
     idx--; // if not sender, then reduce index by 1
+  } else if (txField === 'Applications') {
+    if (idx === 0) { return parseToStackElem(tx.apid ?? 0n, txField); } // during ssc deploy tx.app_id is 0
+    idx--;
   }
   op.checkIndexBound(idx, result, line);
-  return parseToStackElem(result[idx], txField) as Uint8Array;
+  return parseToStackElem(result[idx], txField);
 }
 
 export function encodeNote (note: string | undefined, noteb64: string| undefined): Uint8Array | undefined {

@@ -398,13 +398,17 @@ export class Runtime {
    * @param payFlags Transaction parameters
    * @param approvalProgram application approval program
    * @param clearProgram application clear program
+   * @param debugStack: if passed then TEAL Stack is logged to console after
+   * each opcode execution (upto depth = debugStack)
    * NOTE - approval and clear program must be the TEAL code as string (not compiled code)
    */
   addApp (
     flags: SSCDeploymentFlags, payFlags: TxParams,
-    approvalProgram: string, clearProgram: string
+    approvalProgram: string, clearProgram: string,
+    debugStack?: number
   ): number {
     this.addCtxAppCreateTxn(flags, payFlags);
+    this.ctx.debugStack = debugStack;
     this.ctx.addApp(flags.sender.addr, flags, approvalProgram, clearProgram);
 
     this.store = this.ctx.state;
@@ -441,10 +445,13 @@ export class Runtime {
    * @param appId Application Id
    * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
    * @param payFlags Transaction Parameters
+   * @param debugStack: if passed then TEAL Stack is logged to console after
+   * each opcode execution (upto depth = debugStack)
    */
   optInToApp (accountAddr: string, appId: number,
-    flags: SSCOptionalFlags, payFlags: TxParams): void {
+    flags: SSCOptionalFlags, payFlags: TxParams, debugStack?: number): void {
     this.addCtxOptInTx(accountAddr, appId, payFlags, flags);
+    this.ctx.debugStack = debugStack;
     this.ctx.optInToApp(accountAddr, appId);
 
     this.store = this.ctx.state;
@@ -484,6 +491,8 @@ export class Runtime {
    * @param clearProgram new clear program
    * @param payFlags Transaction parameters
    * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
+   * @param debugStack: if passed then TEAL Stack is logged to console after
+   * each opcode execution (upto depth = debugStack)
    * NOTE - approval and clear program must be the TEAL code as string
    */
   updateApp (
@@ -492,9 +501,11 @@ export class Runtime {
     approvalProgram: string,
     clearProgram: string,
     payFlags: TxParams,
-    flags: SSCOptionalFlags
+    flags: SSCOptionalFlags,
+    debugStack?: number
   ): void {
     this.addCtxAppUpdateTx(senderAddr, appId, payFlags, flags);
+    this.ctx.debugStack = debugStack;
     this.ctx.updateApp(appId, approvalProgram, clearProgram);
 
     // If successful, Update programs and state
@@ -530,8 +541,10 @@ export class Runtime {
   /**
    * validate logic signature and teal logic
    * @param txnParam Transaction Parameters
+   * @param debugStack: if passed then TEAL Stack is logged to console after
+   * each opcode execution (upto depth = debugStack)
    */
-  validateLsigAndRun (txnParam: ExecParams): void {
+  validateLsigAndRun (txnParam: ExecParams, debugStack?: number): void {
     // check if transaction is signed by logic signature,
     // if yes verify signature and run logic
     if (txnParam.sign === SignType.LogicSignature && txnParam.lsig) {
@@ -549,7 +562,7 @@ export class Runtime {
       if (program === "") {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
       }
-      this.run(program, ExecutionMode.STATELESS);
+      this.run(program, ExecutionMode.STATELESS, debugStack);
     } else {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_NOT_FOUND);
     }
@@ -559,10 +572,10 @@ export class Runtime {
    * This function executes a transaction based on a smart
    * contract logic and updates state afterwards
    * @param txnParams : Transaction parameters
-   * @param program : teal code as a string
-   * @param args : external arguments to smart contract
+   * @param debugStack: if passed then TEAL Stack is logged to console after
+   * each opcode execution (upto depth = debugStack)
    */
-  executeTx (txnParams: ExecParams | ExecParams[]): void {
+  executeTx (txnParams: ExecParams | ExecParams[], debugStack?: number): void {
     const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
     for (const txn of txnParameters) {
       switch (txn.type) {
@@ -583,7 +596,7 @@ export class Runtime {
 
     // initialize context before each execution
     // state is a deep copy of store
-    this.ctx = new Ctx(cloneDeep(this.store), tx, gtxs, [], this);
+    this.ctx = new Ctx(cloneDeep(this.store), tx, gtxs, [], this, debugStack);
 
     // Run TEAL program associated with each transaction and
     // then execute the transaction without interacting with store.
@@ -597,10 +610,12 @@ export class Runtime {
    * This function executes TEAL code line by line
    * @param program : teal code as string
    * @param executionMode : execution Mode (Stateless or Stateful)
-   * NOTE: Application mode is only supported in TEAL v2
+   * @param debugStack: if passed then TEAL Stack is logged to console after
+   * each opcode execution (upto depth = debugStack)
+   * NOTE: Application mode is only supported in TEALv > 1
    */
-  run (program: string, executionMode: ExecutionMode): void {
+  run (program: string, executionMode: ExecutionMode, debugStack?: number): void {
     const interpreter = new Interpreter();
-    interpreter.execute(program, executionMode, this);
+    interpreter.execute(program, executionMode, this, debugStack);
   }
 }
