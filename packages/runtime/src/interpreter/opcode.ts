@@ -171,7 +171,7 @@ export class Op {
   assertTxArrFieldDefined (str: string, tealVersion: number, line: number): void {
     if (!TxArrFields[tealVersion].has(str)) {
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_OP_ARG,
-        { opcode: "txna or gtxna", version: tealVersion, line: line });
+        { opcode: str, version: tealVersion, line: line });
     }
   }
 

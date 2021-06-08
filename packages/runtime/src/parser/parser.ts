@@ -6,11 +6,11 @@ import {
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
-  Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2, Ed25519verify,
+  Byte, Bytec, Bytecblock, Concat, Dig, Div, Dup, Dup2, Ed25519verify,
   EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, GetByte, Global, GreaterThan,
-  GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc, Intcblock, Itob,
+  GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Intcblock, Itob,
   Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, Mod,
-  Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, SetBit, SetByte, Sha256,
+  Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, Select, SetBit, SetByte, Sha256,
   Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../interpreter/opcode-list";
 import { LogicSigMaxCost, LogicSigMaxSize, MaxAppProgramCost, MaxAppProgramLen, OpGasCost } from "../lib/constants";
@@ -137,16 +137,16 @@ opCodeMap[3] = {
   getbit: GetBit,
   setbit: SetBit,
   getbyte: GetByte,
-  setbyte: SetByte
+  setbyte: SetByte,
 
-  /*
   dig: Dig,
   select: Select,
 
   // txn ops in tealv3
-  gtxnsf: Gtxnsf,
-  gtxnsa: Gtxnsa,
+  gtxns: Gtxns,
+  gtxnsa: Gtxnsa
 
+  /*
   // stateful op (mode = application)
   min_balance: MinBalance
   */
@@ -158,7 +158,8 @@ const interpreterReqList = new Set([
   "load", "b", "bz", "bnz", "return", "txn", "gtxn", "txna", "gtxna", "global",
   "balance", "asset_holding_get", "asset_params_get", "app_opted_in",
   "app_local_get", "app_local_get_ex", "app_global_get", "app_global_get_ex",
-  "app_local_put", "app_global_put", "app_local_del", "app_global_del"
+  "app_local_put", "app_global_put", "app_local_del", "app_global_del",
+  "gtxns", "gtxnsa"
 ]);
 
 /**

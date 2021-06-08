@@ -6,13 +6,14 @@ import {
   Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx,
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
-  Branch, BranchIfNotZero, BranchIfZero, Btoi, Byte, Bytec, Concat, Div,
+  Branch, BranchIfNotZero, BranchIfZero, Btoi, Byte, Bytec, Concat, Dig, Div,
   Dup, Dup2, Ed25519verify, EqualTo, Err, GetAssetDef, GetAssetHolding,
   GetBit,
   GetByte,
-  Global, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc, Itob,
+  Global, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Itob,
   Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, Mod, Mul, Mulw,
-  Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, SetBit, SetByte, Sha256, Sha512_256, Store,
+  Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, Select, SetBit,
+  SetByte, Sha256, Sha512_256, Store,
   Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { MAX_UINT64, MaxTEALVersion, MIN_UINT64 } from "../../../src/lib/constants";
@@ -811,6 +812,67 @@ describe("Parser", function () {
 
         expectRuntimeError(
           () => opcodeFromSentence(["setbyte", "1234"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("dig", () => {
+        const res = opcodeFromSentence(["dig", "2"], 1, interpreter);
+        const expected = new Dig(["2"], 1);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["dig", "xyz"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.INVALID_TYPE
+        );
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["dig", "2", "3"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("select", () => {
+        const res = opcodeFromSentence(["select"], 1, interpreter);
+        const expected = new Select([], 1);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["select", "xyz"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("gtxns", () => {
+        const res = opcodeFromSentence(["gtxns", "Amount"], 1, interpreter);
+        const expected = new Gtxns(["Amount"], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["gtxns", "amount"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.UNKNOWN_TRANSACTION_FIELD
+        );
+
+        // invalid because index 0 is fetched from top of stack
+        expectRuntimeError(
+          () => opcodeFromSentence(["gtxns", "0", "Amount"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("gtxnsa", () => {
+        const res = opcodeFromSentence(["gtxnsa", "ApplicationArgs", "0"], 1, interpreter);
+        const expected = new Gtxnsa(["ApplicationArgs", "0"], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["gtxnsa", "applicationargs", "0"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.INVALID_OP_ARG
+        );
+
+        // invalid because index 0 is fetched from top of stack
+        expectRuntimeError(
+          () => opcodeFromSentence(["gtxnsa", "0", "ApplicationArgs", "0"], 1, interpreter),
           RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
         );
       });
