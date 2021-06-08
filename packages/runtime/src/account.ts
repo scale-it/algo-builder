@@ -186,7 +186,8 @@ export class AccountStore implements AccountStoreI {
     const asset = new Asset(assetId, asaDef, this.address, name);
     this.createdAssets.set(asset.id, asset.definitions);
 
-    // set holding in creator account
+    // set holding in creator account. note: for creator default-frozen is always false
+    // https://developer.algorand.org/docs/reference/rest-apis/algod/v2/#assetparams
     const assetHolding: AssetHoldingM = {
       amount: BigInt(asaDef.total), // for creator opt-in amount is total assets
       'asset-id': assetId,
@@ -209,6 +210,18 @@ export class AccountStore implements AccountStoreI {
     }
     // check for blank fields
     checkAndSetASAFields(fields, asset);
+  }
+
+  /**
+   * removes asset holding from account
+   * @param assetId asset index
+   */
+  closeAsset (assetId: number): void {
+    if (this.assets.has(assetId)) {
+      this.minBalance -= ASSET_CREATION_FEE;
+      // https://developer.algorand.org/docs/reference/transactions/#asset-transfer-transaction
+      this.assets.delete(assetId); // remove asset holding from account
+    }
   }
 
   /**

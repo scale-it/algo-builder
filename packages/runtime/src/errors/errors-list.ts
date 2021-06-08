@@ -325,7 +325,7 @@ export const transactionErrors = {
   },
   INSUFFICIENT_ACCOUNT_BALANCE: {
     number: 1401,
-    message: "account %address% balance %amount% below minimum required balance: %minbalance%",
+    message: "account %address% balance %accBalance% below minimum required balance: %minbalance%",
     title: 'Insufficient account balance',
     description: `Algorand account balance below minimum required balance`
   },

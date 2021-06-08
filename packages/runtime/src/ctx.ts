@@ -32,12 +32,12 @@ export class Ctx implements Context {
     this.debugStack = debugStack;
   }
 
-  // verify 'amt' microalgos can be withdrawn from account
-  assertMinBalance (amt: bigint, address: string): void {
+  // verify account's balance is above minimum required balance
+  assertAccBalAboveMin (address: string): void {
     const account = this.getAccount(address);
-    if ((account.amount - amt) < account.minBalance) {
+    if (account.balance() < account.minBalance) {
       throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE, {
-        amount: amt,
+        accBalance: account.balance(),
         address: address,
         minbalance: account.minBalance
       });
@@ -126,9 +126,9 @@ export class Ctx implements Context {
     const toAccount = this.getAccount(txnParam.toAccountAddr);
     txnParam.amountMicroAlgos = BigInt(txnParam.amountMicroAlgos);
 
-    this.assertMinBalance(txnParam.amountMicroAlgos, fromAccount.address);
     fromAccount.amount -= txnParam.amountMicroAlgos; // remove 'x' algo from sender
     toAccount.amount += txnParam.amountMicroAlgos; // add 'x' algo to receiver
+    this.assertAccBalAboveMin(fromAccount.address);
 
     if (txnParam.payFlags.closeRemainderTo) {
       const closeRemToAcc = this.getAccount(txnParam.payFlags.closeRemainderTo);
@@ -152,7 +152,7 @@ export class Ctx implements Context {
       ++this.state.assetCounter, name,
       this.runtime.loadedAssetsDefs[name]
     );
-    this.assertMinBalance(0n, fromAccountAddr);
+    this.assertAccBalAboveMin(fromAccountAddr);
     this.runtime.mkAssetCreateTx(name, flags, asset);
 
     this.state.assetDefs.set(this.state.assetCounter, senderAcc.address);
@@ -187,7 +187,7 @@ export class Ctx implements Context {
 
     const account = this.getAccount(address);
     account.optInToASA(assetIndex, assetHolding);
-    this.assertMinBalance(0n, address);
+    this.assertAccBalAboveMin(address);
   }
 
   /**
@@ -215,7 +215,7 @@ export class Ctx implements Context {
 
     // create app with id = 0 in globalApps for teal execution
     const app = senderAcc.addApp(0, flags, approvalProgram, clearProgram);
-    this.assertMinBalance(0n, senderAcc.address);
+    this.assertAccBalAboveMin(senderAcc.address);
     this.state.accounts.set(senderAcc.address, senderAcc);
     this.state.globalApps.set(app.id, senderAcc.address);
 
@@ -233,7 +233,7 @@ export class Ctx implements Context {
       {
         creator: senderAcc.address,
         appID: this.state.appCounter,
-        txId: "tx-id",
+        txId: this.tx.txID,
         confirmedRound: this.runtime.getRound(),
         timestamp: Math.round(+new Date() / 1000)
       }
@@ -255,7 +255,7 @@ export class Ctx implements Context {
 
     const account = this.getAccount(accountAddr);
     account.optInToApp(appID, appParams);
-    this.assertMinBalance(0n, accountAddr);
+    this.assertAccBalAboveMin(accountAddr);
     this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL, this.debugStack);
   }
 
@@ -267,8 +267,8 @@ export class Ctx implements Context {
   deductFee (sender: AccountAddress, index: number): void {
     const fromAccount = this.getAccount(sender);
     const fee = BigInt(this.gtxs[index].fee);
-    this.assertMinBalance(fee, sender);
     fromAccount.amount -= fee; // remove tx fee from Sender's account
+    this.assertAccBalAboveMin(fromAccount.address);
   }
 
   // transfer ASSET as per transaction parameters
@@ -305,8 +305,7 @@ export class Ctx implements Context {
 
       closeRemToAssetHolding.amount += fromAssetHolding.amount; // transfer assets of sender to closeRemTo account
       const fromAccount = this.getAccount(fromAccountAddr);
-      fromAccount.minBalance -= ASSET_CREATION_FEE;
-      fromAccount.assets.delete(txnParam.assetID as number); // remove asset holding from sender account
+      fromAccount.closeAsset(txnParam.assetID as number);
     }
   }
 
