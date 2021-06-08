@@ -6,6 +6,8 @@
 * Move `updateSSC` function to `deployer`
 + Rename `parseArgs` to `parse_params`
 
++ For External support of parameters user should replace TMPL_ prefix in their smart contracts, and only use it when using pyteal.tmpl(..)
+
 ### Improvements
 + Replaced dependency `find-up` with `findup-sync` in `algob`.
 + Added `algopy` in `@algo-builder/algob/sample-project`, which enables users to pass template parameters to PyTEAL contracts. Updated docs.

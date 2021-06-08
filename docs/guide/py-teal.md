@@ -105,7 +105,7 @@ To use this feature in scripts, you can pass an external parameter object (using
     }
     await deployer.loadLogic("dynamic-fee.py", scInitParam);
    ```
-  Keys starting with `TMPL_` or `tmpl_` will be used with TMPL function and other keys will be used as mentioned in `External Parameters Support` section.
+  Note: Keys starting with `TMPL_` or `tmpl_` will be used with TMPL function and other keys will be used as mentioned in `External Parameters Support` section.
 
   ### Difference between External Parameters Support and TMPL Placeholder Support
 
