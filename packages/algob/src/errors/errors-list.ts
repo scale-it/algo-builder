@@ -10,7 +10,7 @@ export interface ErrorDescriptor {
 }
 
 export function getErrorCode (error: ErrorDescriptor): string {
-  return `${ERROR_PREFIX}${error.number}`;
+  return `${ERROR_PREFIX}${String(error.number)}`;
 }
 
 export const ERROR_RANGES = {

@@ -6,10 +6,10 @@ name: Run tests on push
 on:
   push:
     branches:
-    - main
+    - master
   pull_request:
     branches:
-    - main
+    - master
 
 jobs:
   tests:
@@ -20,7 +20,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v2-beta
         with:
-          node-version: '12'
+          node-version: '14.15.4'
       - name: Cache Node.js modules
         uses: actions/cache@v2
         with:
@@ -30,10 +30,17 @@ jobs:
           restore-keys: |
             ${{ runner.OS }}-node-
             ${{ runner.OS }}-
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+      - name: Install python dependencies
+        run: python -m pip install pipenv
+      - run: pipenv sync
       - name: Install dependencies
-        run: yarn install
+        run: pipenv run yarn install
       - name: Execute lint
         run: yarn lint
       - run: yarn build
       - name: Execute tests
-        run: yarn test
+        run: pipenv run yarn test
