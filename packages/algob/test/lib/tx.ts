@@ -198,6 +198,17 @@ describe("Delete ASA and SSC", () => {
     assert.equal(res.deleted, true);
   });
 
+  it("Should not fail if ASA is not in checkpoints", async () => {
+    const execParams: types.DestroyAssetParam = {
+      type: types.TransactionType.DestroyAsset,
+      sign: types.SignType.SecretKey,
+      payFlags: {},
+      fromAccount: bobAcc,
+      assetID: 2
+    };
+    await executeTransaction(deployer, execParams);
+  });
+
   it("Should delete SSC, set delete boolean in latest SSCInfo", async () => {
     const flags: SSCDeploymentFlags = {
       sender: bobAcc,
@@ -220,5 +231,16 @@ describe("Delete ASA and SSC", () => {
     const res = deployer.getSSC("approval.teal", "clear.teal");
     assert.isDefined(res);
     if (res) assert.equal(res.deleted, true);
+  });
+
+  it("Should not fail if SSC is not in checkpoints", async () => {
+    const execParams: types.SSCCallsParam = {
+      type: types.TransactionType.DeleteSSC,
+      sign: types.SignType.SecretKey,
+      payFlags: {},
+      fromAccount: bobAcc,
+      appId: 23
+    };
+    await executeTransaction(deployer, execParams);
   });
 });
