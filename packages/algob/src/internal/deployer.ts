@@ -234,6 +234,13 @@ class DeployerBasicMode {
    * @param flags Transaction flags
    */
   async optInAcountToASA (asa: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
+    this.checkForDeletedCP({
+      type: rtypes.TransactionType.OptInASA,
+      sign: rtypes.SignType.SecretKey,
+      fromAccount: this._getAccount(accountName),
+      assetID: asa,
+      payFlags: {}
+    });
     try {
       const asaId = this.getASAInfo(asa).assetIndex;
       await this.algoOp.optInAcountToASA(
@@ -263,6 +270,14 @@ class DeployerBasicMode {
    * @param flags Transaction flags
    */
   async optInLsigToASA (asa: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
+    this.checkForDeletedCP({
+      type: rtypes.TransactionType.OptInASA,
+      sign: rtypes.SignType.LogicSignature,
+      fromAccountAddr: lsig.address(),
+      lsig: lsig,
+      assetID: asa,
+      payFlags: {}
+    });
     try {
       const asaId = this.getASAInfo(asa).assetIndex;
       await this.algoOp.optInLsigToASA(asa, asaId, lsig, flags);
@@ -289,6 +304,13 @@ class DeployerBasicMode {
     appID: number,
     payFlags: rtypes.TxParams,
     flags: rtypes.SSCOptionalFlags): Promise<void> {
+    this.checkForDeletedCP({
+      type: rtypes.TransactionType.OptInSSC,
+      sign: rtypes.SignType.SecretKey,
+      fromAccount: sender,
+      appID: appID,
+      payFlags: {}
+    });
     await this.algoOp.optInAccountToSSC(sender, appID, payFlags, flags);
   }
 
@@ -305,6 +327,14 @@ class DeployerBasicMode {
     lsig: LogicSig,
     payFlags: rtypes.TxParams,
     flags: rtypes.SSCOptionalFlags): Promise<void> {
+    this.checkForDeletedCP({
+      type: rtypes.TransactionType.OptInSSC,
+      sign: rtypes.SignType.LogicSignature,
+      fromAccountAddr: lsig.address(),
+      lsig: lsig,
+      appID: appID,
+      payFlags: {}
+    });
     await this.algoOp.optInLsigToSSC(appID, lsig, payFlags, flags);
   }
 
@@ -615,6 +645,15 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     newClearProgram: string,
     flags: rtypes.SSCOptionalFlags
   ): Promise<rtypes.SSCInfo> {
+    this.checkForDeletedCP({
+      type: rtypes.TransactionType.UpdateSSC,
+      sign: rtypes.SignType.SecretKey,
+      fromAccount: sender,
+      newApprovalProgram: newApprovalProgram,
+      newClearProgram: newClearProgram,
+      appID: appID,
+      payFlags: {}
+    });
     const cpKey = newApprovalProgram + "-" + newClearProgram;
 
     let sscInfo = {} as rtypes.SSCInfo;
@@ -726,6 +765,15 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     newClearProgram: string,
     flags: rtypes.SSCOptionalFlags
   ): Promise<rtypes.SSCInfo> {
+    this.checkForDeletedCP({
+      type: rtypes.TransactionType.UpdateSSC,
+      sign: rtypes.SignType.SecretKey,
+      fromAccount: sender,
+      newApprovalProgram: newApprovalProgram,
+      newClearProgram: newClearProgram,
+      appID: appID,
+      payFlags: {}
+    });
     return await this.algoOp.updateSSC(
       sender, payFlags, appID,
       newApprovalProgram, newClearProgram,
