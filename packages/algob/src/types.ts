@@ -572,6 +572,13 @@ export interface Deployer {
   getSSCCPKeyFromId: (index: number) => string | undefined
 
   /**
+   * Returns ASA checkpoint key using asset index,
+   * returns undefined if it doesn't exist
+   * @param index Asset Index
+   */
+  getASAKeyFromId: (index: number) => string | undefined
+
+  /**
    * Queries a delegated logic signature from checkpoint. */
   getDelegatedLsig: (lsigName: string) => Object | undefined
 

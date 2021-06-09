@@ -167,6 +167,21 @@ class DeployerBasicMode {
   }
 
   /**
+   * Returns ASA checkpoint key using asset index,
+   * returns undefined if it doesn't exist
+   * @param index Asset Index
+   */
+  getASAKeyFromId (index: number): string | undefined {
+    const resultMap = this.cpData.precedingCP[this.networkName]?.asa ?? new Map();
+    for (const [key, value] of resultMap) {
+      if (value.assetIndex === index) {
+        return key;
+      }
+    }
+    return undefined;
+  }
+
+  /**
    * Loads a single signed delegated logic signature from checkpoint
    */
   getDelegatedLsig (lsigName: string): LogicSig | undefined {
@@ -304,8 +319,17 @@ class DeployerBasicMode {
     return await this.algoOp.ensureCompiled(name, force, scTmplParams);
   }
 
-  handleOperations (): void {
+  /**
+   * Checks if checkpoint is deleted for a particular transaction
+   * if checkpoint exist and is marked as deleted,
+   * throw error(except for opt-out transactions), else pass
+   * @param execParams Transaction execution parameters
+   */
+  checkForDeletedCP (execParams: rtypes.ExecParams | rtypes.ExecParams[]): void {
+    /* if (Array.isArray(execParams)) {
+    } else {
 
+    } */
   }
 }
 

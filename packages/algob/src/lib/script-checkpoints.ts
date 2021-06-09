@@ -226,13 +226,14 @@ export async function registerCheckpoints (
     switch (txn.type) {
       case 'acfg': {
         txConfirmation = await deployer.waitForConfirmation(txn.txID());
+        const key = deployer.getASAKeyFromId(txn.assetIndex);
+        if (key && checkAssetDeletionTx(txn)) {
+          const temp: rtypes.ASAInfo = deployer.getASAInfo(key);
+          temp.deleted = true;
+          deployer.registerASAInfo(key, temp);
+          break;
+        }
         if (res) {
-          if (checkAssetDeletionTx(txn)) {
-            const temp: rtypes.ASAInfo = deployer.getASAInfo(res[0]);
-            temp.deleted = true;
-            deployer.registerASAInfo(res[0], temp);
-            break;
-          }
           const asaInfo: rtypes.ASAInfo = {
             creator: encodeAddress(txn.from.publicKey),
             txId: txn.txID(),

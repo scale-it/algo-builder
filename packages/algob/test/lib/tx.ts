@@ -198,6 +198,20 @@ describe("Delete ASA and SSC", () => {
     assert.equal(res.deleted, true);
   });
 
+  it("Should delete ASA If asset index is used, instead of asset name", async () => {
+    const execParams: types.DestroyAssetParam = {
+      type: types.TransactionType.DestroyAsset,
+      sign: types.SignType.SecretKey,
+      payFlags: {},
+      fromAccount: bobAcc,
+      assetID: 1
+    };
+    await executeTransaction(deployer, execParams);
+
+    const res = deployer.getASAInfo("silver");
+    assert.equal(res.deleted, true);
+  });
+
   it("Should not fail if ASA is not in checkpoints", async () => {
     const execParams: types.DestroyAssetParam = {
       type: types.TransactionType.DestroyAsset,
