@@ -470,15 +470,15 @@ export class Ctx implements Context {
         }
         case TransactionType.CallNoOpSSC: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
-          const appParams = this.getApp(txnParam.appId);
+          const appParams = this.getApp(txnParam.appID);
           this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL);
           break;
         }
         case TransactionType.CloseSSC: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
-          const appParams = this.getApp(txnParam.appId);
+          const appParams = this.getApp(txnParam.appID);
           this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL);
-          this.closeApp(fromAccountAddr, txnParam.appId);
+          this.closeApp(fromAccountAddr, txnParam.appID);
           break;
         }
         case TransactionType.UpdateSSC: {
@@ -491,7 +491,7 @@ export class Ctx implements Context {
         }
         case TransactionType.ClearSSC: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
-          const appParams = this.runtime.assertAppDefined(txnParam.appId, this.getApp(txnParam.appId));
+          const appParams = this.runtime.assertAppDefined(txnParam.appID, this.getApp(txnParam.appID));
           try {
             this.runtime.run(appParams["clear-state-program"], ExecutionMode.STATEFUL);
           } catch (error) {
@@ -500,14 +500,14 @@ export class Ctx implements Context {
             // https://developer.algorand.org/docs/features/asc1/stateful/#the-lifecycle-of-a-stateful-smart-contract
           }
 
-          this.closeApp(fromAccountAddr, txnParam.appId); // remove app from local state
+          this.closeApp(fromAccountAddr, txnParam.appID); // remove app from local state
           break;
         }
         case TransactionType.DeleteSSC: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
-          const appParams = this.getApp(txnParam.appId);
+          const appParams = this.getApp(txnParam.appID);
           this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL);
-          this.deleteApp(txnParam.appId);
+          this.deleteApp(txnParam.appID);
           break;
         }
         case TransactionType.ModifyAsset: {

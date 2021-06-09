@@ -259,7 +259,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
       return algosdk.makeApplicationClearStateTxn(
         fromAccountAddr,
         suggestedParams,
-        execParams.appId,
+        execParams.appID,
         parseSSCAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
@@ -273,7 +273,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
       return algosdk.makeApplicationDeleteTxn(
         fromAccountAddr,
         suggestedParams,
-        execParams.appId,
+        execParams.appID,
         parseSSCAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
@@ -287,7 +287,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
       return algosdk.makeApplicationNoOpTxn(
         fromAccountAddr,
         suggestedParams,
-        execParams.appId,
+        execParams.appID,
         parseSSCAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
@@ -300,7 +300,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
       return algosdk.makeApplicationCloseOutTxn(
         fromAccountAddr,
         suggestedParams,
-        execParams.appId,
+        execParams.appID,
         parseSSCAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,

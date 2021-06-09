@@ -392,7 +392,7 @@ export type AssetTransferParam = BasicParams & {
 export type SSCCallsParam = BasicParams & SSCOptionalFlags & {
   type: TransactionType.CallNoOpSSC | TransactionType.ClearSSC |
   TransactionType.CloseSSC | TransactionType.DeleteSSC
-  appId: number
+  appID: number
 };
 
 export interface AnyMap {

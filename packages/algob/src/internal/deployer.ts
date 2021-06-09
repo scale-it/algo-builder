@@ -320,16 +320,89 @@ class DeployerBasicMode {
   }
 
   /**
+   * Check if ASA info exist for asset,
+   * if it exists check for delete param,
+   * throw error if it is deleted
+   * @param asset asset index or asset name
+   */
+  private checkIfASAExist (asset: string | number): void {
+    let key, res;
+    if (typeof asset === "string") {
+      res = this.asa.get(asset);
+    } else if (typeof asset === "number") {
+      key = this.getASAKeyFromId(asset);
+      res = key ? this.asa.get(key) : undefined;
+    }
+    if (res?.deleted === true) {
+      throw new BuilderError(
+        ERRORS.GENERAL.ASSET_DELETED, {
+          asset: asset
+        });
+    }
+  }
+
+  /**
+   * Check if SSC info exist for app id,
+   * if it exists check for delete param,
+   * throw error if it is deleted
+   * @param appID Application index
+   */
+  private checkIfAppExist (appID: number): void {
+    const key = this.getSSCCPKeyFromId(appID);
+    const res = key ? this.getSSCfromCPKey(key) : undefined;
+    if (res?.deleted === true) {
+      throw new BuilderError(
+        ERRORS.GENERAL.APP_DELETED, {
+          app: appID
+        });
+    }
+  }
+
+  /**
+   * Group transactions into asa and app, check for cp deletion
+   * @param txn Transaction execution parameter
+   */
+  private _internalDeletedCPCheck (txn: rtypes.ExecParams): void {
+    switch (txn.type) {
+      case rtypes.TransactionType.ModifyAsset:
+      case rtypes.TransactionType.FreezeAsset:
+      case rtypes.TransactionType.RevokeAsset:
+      case rtypes.TransactionType.OptInASA:
+      case rtypes.TransactionType.DestroyAsset: {
+        this.checkIfASAExist(txn.assetID);
+        break;
+      }
+      case rtypes.TransactionType.TransferAsset: {
+        // If transaction is not opt-out check for CP deletion
+        if (txn.payFlags.closeRemainderTo === undefined) {
+          this.checkIfASAExist(txn.assetID);
+        }
+        break;
+      }
+      case rtypes.TransactionType.DeleteSSC:
+      case rtypes.TransactionType.OptInSSC:
+      case rtypes.TransactionType.UpdateSSC:
+      case rtypes.TransactionType.CallNoOpSSC: {
+        this.checkIfAppExist(txn.appID);
+        break;
+      }
+    }
+  }
+
+  /**
    * Checks if checkpoint is deleted for a particular transaction
    * if checkpoint exist and is marked as deleted,
    * throw error(except for opt-out transactions), else pass
    * @param execParams Transaction execution parameters
    */
   checkForDeletedCP (execParams: rtypes.ExecParams | rtypes.ExecParams[]): void {
-    /* if (Array.isArray(execParams)) {
+    if (Array.isArray(execParams)) {
+      for (const txn of execParams) {
+        this._internalDeletedCPCheck(txn);
+      }
     } else {
-
-    } */
+      this._internalDeletedCPCheck(execParams);
+    }
   }
 }
 

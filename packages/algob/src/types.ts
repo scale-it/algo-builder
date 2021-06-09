@@ -598,6 +598,14 @@ export interface Deployer {
    *     (used only when compiling PyTEAL to TEAL)
    */
   ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>
+
+  /**
+   * Checks if checkpoint is deleted for a particular transaction
+   * if checkpoint exist and is marked as deleted,
+   * throw error(except for opt-out transactions), else pass
+   * @param execParams Transaction execution parameters
+   */
+  checkForDeletedCP: (execParams: rtypes.ExecParams | rtypes.ExecParams[]) => void
 }
 
 // ************************
