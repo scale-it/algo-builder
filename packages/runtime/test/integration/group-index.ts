@@ -52,14 +52,14 @@ describe('Current Transaction Tests', function () {
         type: TransactionType.CallNoOpSSC,
         sign: SignType.SecretKey,
         fromAccount: creator.account,
-        appId: applicationId1,
+        appID: applicationId1,
         payFlags: { totalFee: 1000 }
       },
       {
         type: TransactionType.CallNoOpSSC,
         sign: SignType.SecretKey,
         fromAccount: creator.account,
-        appId: applicationId2,
+        appID: applicationId2,
         payFlags: { totalFee: 1000 }
       }
     ];
@@ -75,14 +75,14 @@ describe('Current Transaction Tests', function () {
         type: TransactionType.CallNoOpSSC,
         sign: SignType.SecretKey,
         fromAccount: creator.account,
-        appId: applicationId2,
+        appID: applicationId2,
         payFlags: { totalFee: 1000 }
       },
       {
         type: TransactionType.CallNoOpSSC,
         sign: SignType.SecretKey,
         fromAccount: creator.account,
-        appId: applicationId1,
+        appID: applicationId1,
         payFlags: { totalFee: 1000 }
       }
     ];

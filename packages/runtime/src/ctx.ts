@@ -100,19 +100,19 @@ export class Ctx implements Context {
 
   /**
    * Fetches app from `ctx state`
-   * @param appId Application Index'
+   * @param appID Application Index'
    * @param line Line number in teal file
    */
-  getApp (appId: number, line?: number): SSCAttributesM {
+  getApp (appID: number, line?: number): SSCAttributesM {
     const lineNumber = line ?? 'unknown';
-    if (!this.state.globalApps.has(appId)) {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: lineNumber });
+    if (!this.state.globalApps.has(appID)) {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appID: appID, line: lineNumber });
     }
-    const accAddress = this.runtime.assertAddressDefined(this.state.globalApps.get(appId));
+    const accAddress = this.runtime.assertAddressDefined(this.state.globalApps.get(appID));
     const account = this.runtime.assertAccountDefined(
       accAddress, this.state.accounts.get(accAddress)
     );
-    return this.runtime.assertAppDefined(appId, account.getApp(appId));
+    return this.runtime.assertAppDefined(appID, account.getApp(appID));
   }
 
   // transfer ALGO as per transaction parameters
@@ -224,7 +224,7 @@ export class Ctx implements Context {
     this.state.accounts.set(senderAcc.address, senderAcc);
     this.state.globalApps.set(app.id, senderAcc.address);
 
-    this.runtime.run(approvalProgram, ExecutionMode.STATEFUL); // execute TEAL code with appId = 0
+    this.runtime.run(approvalProgram, ExecutionMode.STATEFUL); // execute TEAL code with appID = 0
 
     // create new application in globalApps map
     this.state.globalApps.set(++this.state.appCounter, senderAcc.address);
@@ -251,7 +251,7 @@ export class Ctx implements Context {
   /**
    * Account address opt-in for application Id
    * @param accountAddr Account address
-   * @param appId Application Id
+   * @param appID Application Id
    */
   optInToApp (accountAddr: AccountAddress, appID: number): void {
     const appParams = this.getApp(appID);
@@ -380,13 +380,13 @@ export class Ctx implements Context {
 
   /**
    * Delete application from account's state and global state
-   * @param appId Application Index
+   * @param appID Application Index
    */
-  deleteApp (appId: number): void {
-    if (!this.state.globalApps.has(appId)) {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
+  deleteApp (appID: number): void {
+    if (!this.state.globalApps.has(appID)) {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appID: appID, line: 'unknown' });
     }
-    const accountAddr = this.runtime.assertAddressDefined(this.state.globalApps.get(appId));
+    const accountAddr = this.runtime.assertAddressDefined(this.state.globalApps.get(appID));
     if (accountAddr === undefined) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.ACCOUNT_DOES_NOT_EXIST);
     }
@@ -394,25 +394,25 @@ export class Ctx implements Context {
       accountAddr, this.state.accounts.get(accountAddr)
     );
 
-    account.deleteApp(appId);
-    this.state.globalApps.delete(appId);
+    account.deleteApp(appID);
+    this.state.globalApps.delete(appID);
   }
 
   /**
    * Closes application from account's state
    * @param sender Sender address
-   * @param appId application index
+   * @param appID application index
    */
-  closeApp (sender: AccountAddress, appId: number): void {
+  closeApp (sender: AccountAddress, appID: number): void {
     const fromAccount = this.getAccount(sender);
     // https://developer.algorand.org/docs/reference/cli/goal/app/closeout/#search-overlay
-    this.runtime.assertAppDefined(appId, this.getApp(appId));
-    fromAccount.closeApp(appId); // remove app from local state
+    this.runtime.assertAppDefined(appID, this.getApp(appID));
+    fromAccount.closeApp(appID); // remove app from local state
   }
 
   /**
    * Update application
-   * @param appId application Id
+   * @param appID application Id
    * @param approvalProgram new approval program
    * @param clearProgram new clear program
    * NOTE - approval and clear program must be the TEAL code as string

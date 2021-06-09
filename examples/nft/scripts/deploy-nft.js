@@ -28,12 +28,12 @@ async function run (runtimeEnv, deployer) {
   }, {});
 
   const sscInfo = await deployer.getSSC('nft_approval.py', 'nft_clear_state.py');
-  const appId = sscInfo.appID;
+  const appID = sscInfo.appID;
   console.log(sscInfo);
 
   try {
-    await deployer.optInAccountToSSC(masterAccount, appId, {}, {}); // opt-in to asc by master
-    await deployer.optInAccountToSSC(john, appId, {}, {}); // opt-in to asc by john
+    await deployer.optInAccountToSSC(masterAccount, appID, {}, {}); // opt-in to asc by master
+    await deployer.optInAccountToSSC(john, appID, {}, {}); // opt-in to asc by john
   } catch (e) {
     console.log(e);
     throw new Error(e);

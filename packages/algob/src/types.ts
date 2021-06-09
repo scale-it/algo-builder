@@ -478,7 +478,7 @@ export interface Deployer {
    * Update programs(approval, clear) for a stateful smart contract.
    * @param sender Account from which call needs to be made
    * @param payFlags Transaction Flags
-   * @param appId ID of the application being configured or empty if creating
+   * @param appID ID of the application being configured or empty if creating
    * @param newApprovalProgram New Approval Program filename
    * @param newClearProgram New Clear Program filename
    * @param flags Optional parameters to SSC (accounts, args..)
@@ -486,7 +486,7 @@ export interface Deployer {
   updateSSC: (
     sender: algosdk.Account,
     payFlags: rtypes.TxParams,
-    appId: number,
+    appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
     flags: rtypes.SSCOptionalFlags
@@ -530,7 +530,7 @@ export interface Deployer {
    */
   optInAccountToSSC: (
     sender: rtypes.Account,
-    appId: number,
+    appID: number,
     payFlags: rtypes.TxParams,
     flags: rtypes.SSCOptionalFlags) => Promise<void>
 
@@ -543,7 +543,7 @@ export interface Deployer {
    * @param flags Optional parameters to SSC (accounts, args..)
    */
   optInLsigToSSC: (
-    appId: number,
+    appID: number,
     lsig: LogicSig,
     payFlags: rtypes.TxParams,
     flags: rtypes.SSCOptionalFlags) => Promise<void>

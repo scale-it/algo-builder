@@ -34,7 +34,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
       type: TransactionType.DeleteSSC,
       sign: SignType.SecretKey,
       fromAccount: john.account,
-      appId: 10,
+      appID: 10,
       payFlags: { totalFee: 1000 },
       appArgs: []
     };
@@ -48,25 +48,25 @@ describe("Algorand Smart Contracts - Delete Application", function () {
   });
 
   it("should delete application", function () {
-    const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram);
-    deleteParams.appId = appId;
+    const appID = runtime.addApp(flags, {}, approvalProgram, clearProgram);
+    deleteParams.appID = appID;
     runtime.executeTx(deleteParams);
 
     // verify app is deleted
     expectRuntimeError(
-      () => runtime.getApp(appId),
+      () => runtime.getApp(appID),
       RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND
     );
   });
 
   it("should not delete application if logic is rejected", function () {
     // create app
-    const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram);
+    const appID = runtime.addApp(flags, {}, approvalProgram, clearProgram);
     const deleteParams: SSCCallsParam = {
       type: TransactionType.DeleteSSC,
       sign: SignType.SecretKey,
       fromAccount: alice.account,
-      appId: appId,
+      appID: appID,
       payFlags: { totalFee: 1000 },
       appArgs: []
     };
@@ -77,7 +77,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
     );
 
     // verify app is not deleted - using getApp function
-    const res = runtime.getApp(appId);
+    const res = runtime.getApp(appID);
     assert.isDefined(res);
   });
 });

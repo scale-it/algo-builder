@@ -44,7 +44,7 @@ async function run (runtimeEnv, deployer) {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: alice,
-      appId: sscInfo.appID,
+      appID: sscInfo.appID,
       payFlags: {}
     },
     // Asset creation

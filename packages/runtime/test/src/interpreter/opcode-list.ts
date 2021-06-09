@@ -2533,7 +2533,7 @@ describe("Teal Opcodes", function () {
         interpreter.runtime.ctx.tx.apid = 1847;
       });
 
-      it("should push the value to stack if key is present in local state from given appId", function () {
+      it("should push the value to stack if key is present in local state from given appID", function () {
         // for Sender
         stack.push(0n);
         stack.push(1847n);
@@ -2561,7 +2561,7 @@ describe("Teal Opcodes", function () {
         assert.deepEqual(stringToBytes('Local-val'), value);
       });
 
-      it("should push uint 0 to stack if key is not present in local state from given appId", function () {
+      it("should push uint 0 to stack if key is not present in local state from given appID", function () {
         // for Sender
         stack.push(0n);
         stack.push(1847n);
@@ -2689,10 +2689,10 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        const appId = interpreter.runtime.ctx.tx.apid;
+        const appID = interpreter.runtime.ctx.tx.apid;
         const acc = interpreter.runtime.ctx.state.accounts.get(elonAddr) as AccountStoreI;
 
-        value = acc.getLocalState(appId, 'New-Key');
+        value = acc.getLocalState(appID, 'New-Key');
         assert.isDefined(value);
         assert.deepEqual(value, stringToBytes('New-Val'));
 
@@ -2704,7 +2704,7 @@ describe("Teal Opcodes", function () {
         op = new AppLocalPut([], 1, interpreter);
         op.execute(stack);
 
-        value = acc.getLocalState(appId, 'New-Key-1');
+        value = acc.getLocalState(appID, 'New-Key-1');
         assert.isDefined(value);
         assert.deepEqual(value, 2222n);
       });
@@ -2735,7 +2735,7 @@ describe("Teal Opcodes", function () {
       before(function () {
         interpreter.runtime.ctx.tx.apid = 1828;
       });
-      const appId = 1828;
+      const appID = 1828;
 
       it("should put the value in global storage", function () {
         // value as byte
@@ -2745,7 +2745,7 @@ describe("Teal Opcodes", function () {
         let op = new AppGlobalPut([], 1, interpreter);
         op.execute(stack);
 
-        let value = interpreter.getGlobalState(appId, 'New-Global-Key', lineNumber);
+        let value = interpreter.getGlobalState(appID, 'New-Global-Key', lineNumber);
         assert.isDefined(value); // idx should not be -1
         assert.deepEqual(value, stringToBytes('New-Global-Val'));
 
@@ -2756,7 +2756,7 @@ describe("Teal Opcodes", function () {
         op = new AppGlobalPut([], 1, interpreter);
         op.execute(stack);
 
-        value = interpreter.getGlobalState(appId, 'Key', lineNumber);
+        value = interpreter.getGlobalState(appID, 'Key', lineNumber);
         assert.isDefined(value); // idx should not be -1
         assert.deepEqual(value, 1000n);
       });
@@ -2794,9 +2794,9 @@ describe("Teal Opcodes", function () {
         let op = new AppLocalDel([], 1, interpreter);
         op.execute(stack);
 
-        const appId = interpreter.runtime.ctx.tx.apid;
+        const appID = interpreter.runtime.ctx.tx.apid;
         let acc = interpreter.runtime.ctx.state.accounts.get(elonAddr) as AccountStoreI;
-        let value = acc.getLocalState(appId, 'Local-Key');
+        let value = acc.getLocalState(appID, 'Local-Key');
         assert.isUndefined(value); // value should be undefined
 
         // for Txn.Accounts[A]
@@ -2807,7 +2807,7 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
 
         acc = interpreter.runtime.ctx.state.accounts.get(johnAddr) as AccountStoreI;
-        value = acc.getLocalState(appId, 'Local-Key');
+        value = acc.getLocalState(appID, 'Local-Key');
         assert.isUndefined(value); // value should be undefined
       });
     });

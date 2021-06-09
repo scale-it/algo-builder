@@ -46,11 +46,11 @@ async function run (runtimeEnv, deployer) {
 
   console.log(sscInfo);
 
-  const appId = sscInfo.appID;
+  const appID = sscInfo.appID;
   console.log('Opting-In for Creator(Alice) and Bob.');
   try {
-    await deployer.optInAccountToSSC(creator, appId, {}, {});
-    await deployer.optInAccountToSSC(bob, appId, {}, {});
+    await deployer.optInAccountToSSC(creator, appID, {}, {});
+    await deployer.optInAccountToSSC(bob, appID, {}, {});
   } catch (e) {
     console.log(e);
     throw new Error(e);

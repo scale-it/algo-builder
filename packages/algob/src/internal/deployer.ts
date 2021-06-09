@@ -286,10 +286,10 @@ class DeployerBasicMode {
    */
   async optInAccountToSSC (
     sender: rtypes.Account,
-    appId: number,
+    appID: number,
     payFlags: rtypes.TxParams,
     flags: rtypes.SSCOptionalFlags): Promise<void> {
-    await this.algoOp.optInAccountToSSC(sender, appId, payFlags, flags);
+    await this.algoOp.optInAccountToSSC(sender, appID, payFlags, flags);
   }
 
   /**
@@ -301,11 +301,11 @@ class DeployerBasicMode {
    * @param flags Optional parameters to SSC (accounts, args..)
    */
   async optInLsigToSSC (
-    appId: number,
+    appID: number,
     lsig: LogicSig,
     payFlags: rtypes.TxParams,
     flags: rtypes.SSCOptionalFlags): Promise<void> {
-    await this.algoOp.optInLsigToSSC(appId, lsig, payFlags, flags);
+    await this.algoOp.optInLsigToSSC(appID, lsig, payFlags, flags);
   }
 
   /**
@@ -602,7 +602,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * Update programs for a contract.
    * @param sender Account from which call needs to be made
    * @param payFlags Transaction Flags
-   * @param appId ID of the application being configured or empty if creating
+   * @param appID ID of the application being configured or empty if creating
    * @param newApprovalProgram New Approval Program filename
    * @param newClearProgram New Clear Program filename
    * @param flags Optional parameters to SSC (accounts, args..)

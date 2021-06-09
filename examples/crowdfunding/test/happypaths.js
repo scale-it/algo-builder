@@ -179,7 +179,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
-        appId: applicationId,
+        appID: applicationId,
         payFlags: { totalFee: 1000 },
         appArgs: [stringToBytes('donate')]
       },
@@ -233,7 +233,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
-        appId: applicationId,
+        appID: applicationId,
         payFlags: { totalFee: 1000 },
         appArgs: [stringToBytes('claim')]
       },
@@ -287,7 +287,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
-        appId: applicationId,
+        appID: applicationId,
         payFlags: { totalFee: 1000 },
         appArgs: [stringToBytes('reclaim')],
         accounts: [escrow.address] //  AppAccounts
@@ -339,7 +339,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
       type: types.TransactionType.DeleteSSC,
       sign: types.SignType.SecretKey,
       fromAccount: creator.account,
-      appId: applicationId,
+      appID: applicationId,
       payFlags: { totalFee: 1000 },
       appArgs: [],
       accounts: [escrow.address] //  AppAccounts
@@ -377,7 +377,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
         type: types.TransactionType.DeleteSSC,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
-        appId: applicationId,
+        appID: applicationId,
         payFlags: { totalFee: 1000 },
         appArgs: [],
         accounts: [escrow.address] //  AppAccounts

@@ -130,7 +130,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   optInLsigToSSC (
-    appId: number, lsig: LogicSig,
+    appID: number, lsig: LogicSig,
     payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags): Promise<void> {
     throw new Error("Method not implemented.");
   }

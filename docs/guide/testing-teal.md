@@ -282,7 +282,7 @@ Now, we will execute a transaction with an app call (stateful TEAL). The app is 
     type: TransactionType.CallNoOpSSC,
     sign: SignType.SecretKey,
     fromAccount: john.account,
-    appId: 0,
+    appID: 0,
     payFlags: { totalFee: fee }
   };
 
@@ -291,7 +291,7 @@ Now, we will execute a transaction with an app call (stateful TEAL). The app is 
     program = getProgram('counter-approval.teal');
 
     // create new app
-    txnParams.appId = await runtime.addApp({
+    txnParams.appID = await runtime.addApp({
       sender: john.account,
       globalBytes: 32,
       globalInts: 32,
@@ -300,7 +300,7 @@ Now, we will execute a transaction with an app call (stateful TEAL). The app is 
     }, {}, program);
 
     // opt-in to the app
-    await runtime.optInToApp(txnParams.appId, john.address, {}, {}, program);
+    await runtime.optInToApp(txnParams.appID, john.address, {}, {}, program);
   });
   ```
 
@@ -310,10 +310,10 @@ Now, we will execute a transaction with an app call (stateful TEAL). The app is 
   it("should set global and local counter to 1 on first call", function () {
     runtime.executeTx(txnParams);
 
-    const globalCounter = runtime.getGlobalState(txnParams.appId, key);
+    const globalCounter = runtime.getGlobalState(txnParams.appID, key);
     assert.equal(globalCounter, 1n);
 
-    const localCounter = runtime.getAccount(john.address).getLocalState(txnParams.appId, key); // get local value from john account
+    const localCounter = runtime.getAccount(john.address).getLocalState(txnParams.appID, key); // get local value from john account
     assert.equal(localCounter, 1n);
   });
   ```

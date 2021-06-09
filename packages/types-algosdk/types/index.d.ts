@@ -229,7 +229,7 @@ declare module 'algosdk' {
     };
   }
 
-  // total byte slices and uint for account or unique appId
+  // total byte slices and uint for account or unique appID
   export interface SSCSchemaConfig {
     'num-byte-slice': number;
     'num-uint': number;

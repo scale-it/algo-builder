@@ -16,7 +16,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
     type: TransactionType.CallNoOpSSC,
     sign: SignType.SecretKey,
     fromAccount: john.account,
-    appId: 0,
+    appID: 0,
     payFlags: { totalFee: fee }
   };
 
@@ -29,7 +29,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
     clearProgram = getProgram('clear.teal');
 
     // create new app
-    txnParams.appId = runtime.addApp({
+    txnParams.appID = runtime.addApp({
       sender: john.account,
       globalBytes: 32,
       globalInts: 32,
@@ -38,13 +38,13 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
     }, {}, approvalProgram, clearProgram);
 
     // opt-in to the app
-    runtime.optInToApp(john.address, txnParams.appId, {}, {});
+    runtime.optInToApp(john.address, txnParams.appID, {}, {});
   });
 
   const key = "counter";
 
   it("should initialize local counter to 0 after opt-in", function () {
-    const localCounter = runtime.getAccount(john.address).getLocalState(txnParams.appId, key); // get local value from john account
+    const localCounter = runtime.getAccount(john.address).getLocalState(txnParams.appID, key); // get local value from john account
     assert.isDefined(localCounter); // there should be a value present in local state with key "counter"
     assert.equal(localCounter, 0n);
   });
@@ -52,16 +52,16 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
   it("should set global and local counter to 1 on first call", function () {
     runtime.executeTx(txnParams);
 
-    const globalCounter = runtime.getGlobalState(txnParams.appId, key);
+    const globalCounter = runtime.getGlobalState(txnParams.appID, key);
     assert.equal(globalCounter, 1n);
 
-    const localCounter = runtime.getAccount(john.address).getLocalState(txnParams.appId, key); // get local value from john account
+    const localCounter = runtime.getAccount(john.address).getLocalState(txnParams.appID, key); // get local value from john account
     assert.equal(localCounter, 1n);
   });
 
   it("should update counter by +1 for both global and local states on second call", function () {
-    const globalCounter = runtime.getGlobalState(txnParams.appId, key) as bigint;
-    const localCounter = runtime.getAccount(john.address).getLocalState(txnParams.appId, key) as bigint;
+    const globalCounter = runtime.getGlobalState(txnParams.appID, key) as bigint;
+    const localCounter = runtime.getAccount(john.address).getLocalState(txnParams.appID, key) as bigint;
 
     // verfify that both counters are set to 1 (by the previous test)
     assert.equal(globalCounter, 1n);
@@ -70,8 +70,8 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
     runtime.executeTx(txnParams);
 
     // after execution the counters should be updated by +1
-    const newGlobalCounter = runtime.getGlobalState(txnParams.appId, key);
-    const newLocalCounter = runtime.getAccount(john.address).getLocalState(txnParams.appId, key);
+    const newGlobalCounter = runtime.getGlobalState(txnParams.appID, key);
+    const newLocalCounter = runtime.getAccount(john.address).getLocalState(txnParams.appID, key);
 
     assert.equal(newGlobalCounter, globalCounter + 1n);
     assert.equal(newLocalCounter, localCounter + 1n);

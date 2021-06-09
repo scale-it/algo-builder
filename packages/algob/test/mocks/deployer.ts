@@ -134,6 +134,10 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
+  checkForDeletedCP (execParams: rtypes.ExecParams | rtypes.ExecParams[]): void {
+    throw new Error("Not implemented");
+  }
+
   isDefined (name: string): boolean {
     return false;
   };
@@ -165,7 +169,7 @@ export class FakeDeployer implements Deployer {
   }
 
   optInLsigToSSC (
-    appId: number, lsig: LogicSig,
+    appID: number, lsig: LogicSig,
     payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags): Promise<void> {
     throw new Error("not implemented.");
   }

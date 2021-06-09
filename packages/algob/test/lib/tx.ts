@@ -237,7 +237,7 @@ describe("Delete ASA and SSC", () => {
       sign: types.SignType.SecretKey,
       payFlags: {},
       fromAccount: bobAcc,
-      appId: info.appID
+      appID: info.appID
     };
 
     await executeTransaction(deployer, execParams);
@@ -253,7 +253,7 @@ describe("Delete ASA and SSC", () => {
       sign: types.SignType.SecretKey,
       payFlags: {},
       fromAccount: bobAcc,
-      appId: 23
+      appID: 23
     };
     await executeTransaction(deployer, execParams);
   });
