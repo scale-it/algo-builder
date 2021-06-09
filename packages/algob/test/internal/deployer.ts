@@ -153,7 +153,7 @@ describe("DeployerDeployMode", () => {
       creator: "addr-1-get-address-dry-run",
       txId: "tx-id-dry-run",
       confirmedRound: -1,
-      appID: -1,
+      appID: 33,
       timestamp: 1,
       deleted: false
     });
@@ -171,7 +171,7 @@ describe("DeployerDeployMode", () => {
         creator: "addr-1-get-address-dry-run",
         txId: "tx-id-dry-run",
         confirmedRound: -1,
-        appID: -1,
+        appID: 33,
         timestamp: 1,
         deleted: false
       });
@@ -191,18 +191,18 @@ describe("DeployerDeployMode", () => {
       creator: "addr-1-get-address-dry-run",
       txId: "tx-id-dry-run",
       confirmedRound: -1,
-      appID: -1,
+      appID: 33,
       timestamp: 2,
       deleted: false
     });
 
-    const updatedInfo = await deployer.updateSSC(deployer.accounts[0], {}, -1, "app", "clear", {});
+    const updatedInfo = await deployer.updateSSC(deployer.accounts[0], {}, 33, "app", "clear", {});
     assert.deepEqual(updatedInfo,
       {
         creator: "addr-1-get-address-dry-run",
         txId: "tx-id-dry-run",
         confirmedRound: -1,
-        appID: -1,
+        appID: 33,
         timestamp: 2,
         deleted: false
       });

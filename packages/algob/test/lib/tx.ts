@@ -1,4 +1,5 @@
 import { encodeNote, types } from "@algo-builder/runtime";
+import { SSCDeploymentFlags } from "@algo-builder/runtime/build/types";
 import { ConfirmedTxInfo, decodeSignedTransaction, encodeAddress, Transaction } from "algosdk";
 import { assert } from "chai";
 import { isArray } from "lodash";
@@ -12,6 +13,7 @@ import { DeployerConfig } from "../../src/internal/deployer_cfg";
 import { Deployer } from "../../src/types";
 import { expectBuilderErrorAsync } from "../helpers/errors";
 import { mkEnv } from "../helpers/params";
+import { useFixtureProjectCopy } from "../helpers/project";
 import { bobAcc } from "../mocks/account";
 import { mockAssetInfo, mockSuggestedParam } from "../mocks/tx";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
@@ -164,6 +166,7 @@ describe("ASA modify fields", () => {
 });
 
 describe("Delete ASA and SSC", () => {
+  useFixtureProjectCopy("stateful");
   let deployer: Deployer;
   let algod: AlgoOperatorDryRunImpl;
   beforeEach(async () => {
@@ -193,5 +196,29 @@ describe("Delete ASA and SSC", () => {
 
     const res = deployer.getASAInfo("silver");
     assert.equal(res.deleted, true);
+  });
+
+  it("Should delete SSC, set delete boolean in latest SSCInfo", async () => {
+    const flags: SSCDeploymentFlags = {
+      sender: bobAcc,
+      localBytes: 1,
+      localInts: 1,
+      globalBytes: 1,
+      globalInts: 1
+    };
+    const info = await deployer.deploySSC("approval.teal", "clear.teal", flags, {});
+    const execParams: types.SSCCallsParam = {
+      type: types.TransactionType.DeleteSSC,
+      sign: types.SignType.SecretKey,
+      payFlags: {},
+      fromAccount: bobAcc,
+      appId: info.appID
+    };
+
+    await executeTransaction(deployer, execParams);
+
+    const res = deployer.getSSC("approval.teal", "clear.teal");
+    assert.isDefined(res);
+    if (res) assert.equal(res.deleted, true);
   });
 });

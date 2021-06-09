@@ -66,6 +66,10 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
+  getSSCCPKeyFromId (index: number): string | undefined {
+    throw new Error("Not implemented");
+  }
+
   getDelegatedLsig (lsig: string): object | undefined {
     throw new Error("Not implemented");
   }

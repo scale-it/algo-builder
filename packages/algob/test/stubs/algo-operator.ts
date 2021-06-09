@@ -75,7 +75,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
       creator: flags.sender.addr + "-get-address-dry-run",
       txId: "tx-id-dry-run",
       confirmedRound: -1,
-      appID: -1,
+      appID: 33,
       timestamp: 1,
       deleted: false
     };
@@ -94,7 +94,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
       creator: sender.addr + "-get-address-dry-run",
       txId: "tx-id-dry-run",
       confirmedRound: -1,
-      appID: -1,
+      appID: 33,
       timestamp: 2,
       deleted: false
     };
