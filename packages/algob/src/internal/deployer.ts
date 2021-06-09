@@ -152,6 +152,21 @@ class DeployerBasicMode {
   }
 
   /**
+   * Returns SSC checkpoint key using application index,
+   * returns undefined if it doesn't exist
+   * @param index Application index
+   */
+  getSSCCPKeyFromId (index: number): string | undefined {
+    const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
+    for (const [key, nestedMap] of resultMap) {
+      if ([...nestedMap][nestedMap.size - 1][1].appID === index) {
+        return key;
+      }
+    }
+    return undefined;
+  }
+
+  /**
    * Loads a single signed delegated logic signature from checkpoint
    */
   getDelegatedLsig (lsigName: string): LogicSig | undefined {
@@ -287,6 +302,10 @@ class DeployerBasicMode {
    */
   async ensureCompiled (name: string, force?: boolean, scTmplParams?: SCParams): Promise<ASCCache> {
     return await this.algoOp.ensureCompiled(name, force, scTmplParams);
+  }
+
+  handleOperations (): void {
+
   }
 }
 

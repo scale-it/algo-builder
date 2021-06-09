@@ -565,6 +565,13 @@ export interface Deployer {
   getSSCfromCPKey: (key: string) => rtypes.SSCInfo | undefined
 
   /**
+   * Returns SSC checkpoint key using application index,
+   * returns undefined if it doesn't exist
+   * @param index Application index
+   */
+  getSSCCPKeyFromId: (index: number) => string | undefined
+
+  /**
    * Queries a delegated logic signature from checkpoint. */
   getDelegatedLsig: (lsigName: string) => Object | undefined
 

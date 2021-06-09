@@ -248,13 +248,16 @@ export async function registerCheckpoints (
       }
       case 'appl': {
         txConfirmation = await deployer.waitForConfirmation(txn.txID());
-        if (res) {
-          const temp: rtypes.SSCInfo | undefined = deployer.getSSCfromCPKey(res[0]);
+        const key = deployer.getSSCCPKeyFromId(txn.appIndex);
+        if (key) {
+          const temp: rtypes.SSCInfo | undefined = deployer.getSSCfromCPKey(key);
           if (txn.appOnComplete === 5 && temp) {
             temp.deleted = true;
-            deployer.registerSSCInfo(res[0], temp);
+            deployer.registerSSCInfo(key, temp);
             break;
           }
+        }
+        if (res) {
           const sscInfo: rtypes.SSCInfo = {
             creator: encodeAddress(txn.from.publicKey),
             txId: txn.txID(),
