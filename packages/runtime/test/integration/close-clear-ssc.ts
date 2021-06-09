@@ -2,7 +2,7 @@ import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
-import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
+import { ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE } from "../../src/lib/constants";
 import { stringToBytes } from "../../src/lib/parsing";
 import { SignType, SSCCallsParam, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";
@@ -58,7 +58,10 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 
     runtime.optInToApp(john.address, appId, {}, {}); // opt-in to app (set new local state)
     syncAccount();
-    assert.isAbove(john.minBalance, initialJohnMinBalance); // verify minimum balance raised after optIn
+    assert.equal(john.minBalance,
+      initialJohnMinBalance +
+      (APPLICATION_BASE_FEE + ((25000 + 3500) * 3 + (25000 + 25000) * 3)) // optInToApp increase
+    ); // verify minimum balance raised after optIn
 
     runtime.executeTx({ ...closeOutParams, appId: appId });
     syncAccount();
@@ -100,7 +103,9 @@ describe("ASC - CloseOut from Application and Clear State", function () {
     runtime.optInToApp(john.address, appId, {}, {}); // opt-in to app (set new local state)
     syncAccount();
     const minBalanceAfterOptIn = john.minBalance;
-    assert.isAbove(minBalanceAfterOptIn, initialJohnMinBalance); // verify minimum balance raised after optIn
+    assert.equal(minBalanceAfterOptIn,
+      initialJohnMinBalance + (APPLICATION_BASE_FEE + ((25000 + 3500) * 3 + (25000 + 25000) * 3)) // optInToApp increase
+    ); // verify minimum balance raised after optIn
 
     const invalidParams: SSCCallsParam = {
       type: TransactionType.CloseSSC,

@@ -217,6 +217,11 @@ export class AccountStore implements AccountStoreI {
    * @param assetId asset index
    */
   closeAsset (assetId: number): void {
+    /**
+     * NOTE: We don't throw error/warning here if asset holding is not found, because this code
+     * will not be executed if asset holding doesn't exist (as need to empty this.account to closeRemTo
+     * in runtime via ctx.transferAsset before removing asset holding)
+     */
     if (this.assets.has(assetId)) {
       this.minBalance -= ASSET_CREATION_FEE;
       // https://developer.algorand.org/docs/reference/transactions/#asset-transfer-transaction

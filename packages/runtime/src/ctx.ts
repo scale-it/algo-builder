@@ -191,6 +191,7 @@ export class Ctx implements Context {
 
   /**
    * creates new application and returns application id
+   * @param fromAccountAddr creator account address
    * @param flags SSCDeployment flags
    * @param payFlags Transaction parameters
    * @param approvalProgram application approval program
@@ -243,10 +244,8 @@ export class Ctx implements Context {
 
   /**
    * Account address opt-in for application Id
-   * @param accountAddr Account address
-   * @param appId Application Id
-   * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
-   * @param payFlags Transaction Parameters
+   * @param accountAddr Account address to opt into application
+   * @param appID Application index
    * NOTE: When creating or opting into an app, the minimum balance grows before the app code runs
    */
   optInToApp (accountAddr: AccountAddress, appID: number): void {

@@ -2,7 +2,7 @@ import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
-import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
+import { ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE } from "../../src/lib/constants";
 import { SignType, SSCCallsParam, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
@@ -50,7 +50,8 @@ describe("Algorand Smart Contracts - Delete Application", function () {
   it("should delete application", function () {
     const initialMinBalance = john.minBalance;
     const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram);
-    assert.isAbove(runtime.getAccount(john.address).minBalance, initialMinBalance);
+    assert.equal(runtime.getAccount(john.address).minBalance,
+      initialMinBalance + (APPLICATION_BASE_FEE + ((25000 + 3500) * 2 + (25000 + 25000) * 2)));
 
     runtime.executeTx({ ...deleteParams, appId: appId });
 
@@ -68,7 +69,10 @@ describe("Algorand Smart Contracts - Delete Application", function () {
     const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram); // create app
 
     const minBalanceAfterAddApp = runtime.getAccount(john.address).minBalance;
-    assert.isAbove(minBalanceAfterAddApp, initialMinBalance); // min balance should increase
+    assert.equal(minBalanceAfterAddApp,
+      initialMinBalance +
+        (APPLICATION_BASE_FEE + ((25000 + 3500) * 2 + (25000 + 25000) * 2)) // min balance should increase
+    );
 
     const deleteParams: SSCCallsParam = {
       type: TransactionType.DeleteSSC,
