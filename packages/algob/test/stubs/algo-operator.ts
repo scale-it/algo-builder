@@ -114,25 +114,25 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   optInAcountToASA (
     asaName: string, assetIndex: number, account: rtypes.Account,
     params: rtypes.TxParams): Promise<void> {
-    throw new Error("Method not implemented.");
+    return new Promise((resolve, reject) => { resolve(); });
   }
 
   optInLsigToASA (
     asaName: string, assetIndex: number, lsig: LogicSig, flags: rtypes.TxParams
   ): Promise<void> {
-    throw new Error("Method not implemented.");
+    return new Promise((resolve, reject) => { resolve(); });
   }
 
   optInAccountToSSC (
     sender: rtypes.Account, index: number,
     payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags): Promise<void> {
-    throw new Error("Method not implemented.");
+    return new Promise((resolve, reject) => { resolve(); });
   }
 
   optInLsigToSSC (
     appID: number, lsig: LogicSig,
     payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags): Promise<void> {
-    throw new Error("Method not implemented.");
+    return new Promise((resolve, reject) => { resolve(); });
   }
 
   optInToASAMultiple (

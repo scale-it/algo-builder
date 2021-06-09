@@ -7,15 +7,16 @@ import sinon from 'sinon';
 import { TextEncoder } from "util";
 
 import { executeTransaction } from "../../src";
+import deploy from "../../src/builtin-tasks/deploy";
 import { ERRORS } from "../../src/errors/errors";
 import { DeployerDeployMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
 import { Deployer } from "../../src/types";
 import { expectBuilderErrorAsync } from "../helpers/errors";
 import { mkEnv } from "../helpers/params";
-import { useFixtureProjectCopy } from "../helpers/project";
+import { useFixtureProject, useFixtureProjectCopy } from "../helpers/project";
 import { bobAcc } from "../mocks/account";
-import { mockAssetInfo, mockSuggestedParam } from "../mocks/tx";
+import { mockAssetInfo, mockLsig, mockSuggestedParam } from "../mocks/tx";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
 describe("Note in TxParams", () => {
@@ -256,5 +257,102 @@ describe("Delete ASA and SSC", () => {
       appID: 23
     };
     await executeTransaction(deployer, execParams);
+  });
+});
+
+describe("Delete ASA and SSC transaction flow(with functions and executeTransaction)", () => {
+  useFixtureProject("stateful");
+  let deployer: Deployer;
+  let algod: AlgoOperatorDryRunImpl;
+  let appID: number;
+  let assetID: number;
+  const assetName = "silver";
+  beforeEach(async () => {
+    const env = mkEnv("network1");
+    algod = new AlgoOperatorDryRunImpl();
+    const deployerCfg = new DeployerConfig(env, algod);
+    deployerCfg.asaDefs = { silver: mkASA() };
+    deployer = new DeployerDeployMode(deployerCfg);
+    sinon.stub(algod.algodClient, "getTransactionParams")
+      .returns({ do: async () => mockSuggestedParam });
+
+    // deploy  and delete asset
+    const asaInfo = await deployer.deployASA(assetName, { creator: deployer.accounts[0] });
+    assetID = asaInfo.assetIndex;
+    const execParams: types.DestroyAssetParam = {
+      type: types.TransactionType.DestroyAsset,
+      sign: types.SignType.SecretKey,
+      payFlags: {},
+      fromAccount: bobAcc,
+      assetID: 1
+    };
+    await executeTransaction(deployer, execParams);
+
+    // deploy and delete app
+    const flags: SSCDeploymentFlags = {
+      sender: bobAcc,
+      localBytes: 1,
+      localInts: 1,
+      globalBytes: 1,
+      globalInts: 1
+    };
+    const info = await deployer.deploySSC("approval.teal", "clear.teal", flags, {});
+    appID = info.appID;
+    const execParam: types.SSCCallsParam = {
+      type: types.TransactionType.DeleteSSC,
+      sign: types.SignType.SecretKey,
+      payFlags: {},
+      fromAccount: bobAcc,
+      appID: info.appID
+    };
+    await executeTransaction(deployer, execParam);
+  });
+
+  afterEach(async () => {
+    (algod.algodClient.getTransactionParams as sinon.SinonStub).restore();
+  });
+
+  it("should throw error with opt-in asa functions, if asa exist and deleted", async () => {
+    await expectBuilderErrorAsync(
+      async () => await deployer.optInAcountToASA(assetName, 'acc-name-1', {}),
+      ERRORS.GENERAL.ASSET_DELETED
+    );
+
+    await expectBuilderErrorAsync(
+      async () => await deployer.optInLsigToASA(assetName, mockLsig, {}),
+      ERRORS.GENERAL.ASSET_DELETED
+    );
+  });
+
+  it("should pass with opt-in asa functions, if asa doesn't exist in checkpoint", async () => {
+    await deployer.optInAcountToASA('23', 'acc-name-1', {});
+
+    await deployer.optInLsigToASA('233212', mockLsig, {});
+  });
+
+  it("should throw error with opt-in ssc functions, if ssc exist and deleted", async () => {
+    await expectBuilderErrorAsync(
+      async () => await deployer.optInAccountToSSC(bobAcc, appID, {}, {}),
+      ERRORS.GENERAL.APP_DELETED
+    );
+
+    await expectBuilderErrorAsync(
+      async () => await deployer.optInLsigToSSC(appID, mockLsig, {}, {}),
+      ERRORS.GENERAL.APP_DELETED
+    );
+  });
+
+  it("should pass with opt-in ssc functions, if ssc doesn't exist in checkpoint", async () => {
+    await deployer.optInAccountToSSC(bobAcc, 122, {}, {});
+
+    await deployer.optInLsigToSSC(12223, mockLsig, {}, {});
+  });
+
+  it("should throw error with update ssc function, if ssc exist and deleted", () => {
+
+  });
+
+  it("should pass with update ssc functions, if ssc doesn't exist in checkpoint", () => {
+
   });
 });

@@ -513,7 +513,7 @@ export interface Deployer {
    * Creates an opt-in transaction for given ASA name, which must be defined in
    * `/assets/asa.yaml` file. The opt-in transaction is signed by the account secret key */
   optInAcountToASA: (asa: string, accountName: string,
-    flags: rtypes.TxParams, sign: rtypes.Sign) => Promise<void>
+    flags: rtypes.TxParams) => Promise<void>
 
   /**
    * Creates an opt-in transaction for given ASA name, which must be defined in
