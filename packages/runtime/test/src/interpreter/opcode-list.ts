@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
-import { decodeAddress, generateAccount, signBytes } from "algosdk";
+import { decodeAddress, generateAccount, signBytes, TxnEncodedObj } from "algosdk";
 import { assert } from "chai";
 
 import { AccountStore } from "../../../src/account";
@@ -12,18 +12,18 @@ import {
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
-  Byte, Bytec, Bytecblock, Concat, Div, Dup, Dup2, Ed25519verify,
-  EqualTo, Err, GetAssetDef, GetAssetHolding, Global,
-  GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Int, Intc,
+  Byte, Bytec, Bytecblock, Concat, Dig, Div, Dup, Dup2, Ed25519verify,
+  EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, GetByte, Global,
+  GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
   Load, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, PushBytes, PushInt, Return,
-  Sha256, Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
+  Select, SetBit, SetByte, Sha256, Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8 } from "../../../src/lib/constants";
 import { convertToBuffer, stringToBytes } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
-import { AccountStoreI, EncodingType, StackElem } from "../../../src/types";
+import { AccountStoreI, EncodingType, StackElem, Txn as EncodedTx } from "../../../src/types";
 import { execExpectError, expectRuntimeError } from "../../helpers/runtime-errors";
 import { accInfo } from "../../mocks/stateful";
 import { elonAddr, johnAddr, TXN_OBJ } from "../../mocks/txn";
@@ -3347,6 +3347,648 @@ describe("Teal Opcodes", function () {
       expectRuntimeError(
         () => op.execute(stack),
         RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
+    });
+  });
+
+  describe("SetBit", () => {
+    let stack: Stack<StackElem>;
+    this.beforeEach(() => { stack = new Stack<StackElem>(); });
+
+    it("should set bit for uint64", () => {
+      const op = new SetBit([], 0);
+      stack.push(0n); // target
+      stack.push(4n); // index
+      stack.push(1n); // bit
+
+      op.execute(stack);
+
+      assert.equal(stack.length(), 1);
+      assert.equal(stack.pop(), 16n);
+
+      stack.push(16n);
+      stack.push(0n);
+      stack.push(1n);
+
+      op.execute(stack);
+
+      assert.equal(stack.length(), 1);
+      assert.equal(stack.pop(), 17n);
+
+      stack.push(15n);
+      stack.push(0n);
+      stack.push(0n);
+
+      op.execute(stack);
+
+      assert.equal(stack.length(), 1);
+      assert.equal(stack.pop(), 14n);
+
+      stack.push(0n);
+      stack.push(63n);
+      stack.push(1n);
+
+      op.execute(stack);
+
+      assert.equal(stack.length(), 1);
+      assert.equal(stack.pop(), 2n ** 63n);
+
+      stack.push(MAX_UINT64);
+      stack.push(1n);
+      stack.push(0n);
+
+      op.execute(stack);
+
+      assert.equal(stack.length(), 1);
+      assert.equal(stack.pop(), MAX_UINT64 - 2n);
+    });
+
+    it("should panic if index bit is not uint64", () => {
+      const op = new SetBit([], 0);
+      stack.push(0n); // target
+      stack.push(new Uint8Array([1, 2])); // index
+      stack.push(1n); // bit
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
+      );
+    });
+
+    it("should panic if set bit is not uint64", () => {
+      const op = new SetBit([], 0);
+      stack.push(0n); // target
+      stack.push(4n); // index
+      stack.push(new Uint8Array([1, 2])); // bit
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
+      );
+    });
+
+    it("should panic if stack length is less than 3", () => {
+      const op = new SetBit([], 0);
+      stack.push(0n);
+      stack.push(4n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
+    });
+
+    it("should panic if set bit is greater than 1", () => {
+      const op = new SetBit([], 0);
+      stack.push(0n);
+      stack.push(4n);
+      stack.push(20n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SET_BIT_VALUE_ERROR
+      );
+    });
+
+    it("should panic if set bit index is greater than 63 and target is uint64", () => {
+      const op = new SetBit([], 0);
+      stack.push(0n);
+      stack.push(400n);
+      stack.push(1n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_ERROR
+      );
+    });
+
+    it("should set bit in bytes array", () => {
+      const op = new SetBit([], 0);
+      stack.push(new Uint8Array([0, 0, 0])); // target
+      stack.push(8n); // index
+      stack.push(1n); // bit
+
+      // set 8 th bit of bytes to 1 i.e 8th bit will be highest order bit of second byte
+      // so second byte will become 2 ** 7 = 128
+      op.execute(stack);
+
+      assert.equal(stack.length(), 1);
+      assert.deepEqual(stack.pop(), new Uint8Array([0, 2 ** 7, 0]));
+
+      // set bit again to 0
+      stack.push(new Uint8Array([0, 2 ** 7, 0])); // target
+      stack.push(8n); // index
+      stack.push(0n); // bit
+
+      op.execute(stack);
+
+      assert.equal(stack.length(), 1);
+      assert.deepEqual(stack.pop(), new Uint8Array([0, 0, 0]));
+
+      stack.push(new Uint8Array([0, 2 ** 7, 0])); // target
+      stack.push(0n); // index
+      stack.push(1n); // bit
+
+      op.execute(stack);
+
+      assert.equal(stack.length(), 1);
+      assert.deepEqual(stack.pop(), new Uint8Array([2 ** 7, 2 ** 7, 0]));
+
+      stack.push(new Uint8Array([0, 2 ** 7, 0])); // target
+      stack.push(7n); // index
+      stack.push(1n); // bit
+
+      op.execute(stack);
+
+      assert.equal(stack.length(), 1);
+      assert.deepEqual(stack.pop(), new Uint8Array([1, 2 ** 7, 0]));
+    });
+
+    it("should panic if index bit in out of bytes array", () => {
+      const op = new SetBit([], 0);
+      stack.push(new Uint8Array([0, 0, 0])); // target
+      stack.push(80n); // index
+      stack.push(1n); // bit
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_BYTES_ERROR
+      );
+
+      stack.push(new Uint8Array(8).fill(0)); // target
+      stack.push(64n * 8n + 1n); // index
+      stack.push(1n); // bit
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_BYTES_ERROR
+      );
+    });
+  });
+
+  describe("GetBit", () => {
+    let stack: Stack<StackElem>;
+    this.beforeEach(() => { stack = new Stack<StackElem>(); });
+
+    it("should push correct bit to stack(uint64)", () => {
+      const op = new GetBit([], 0);
+      stack.push(8n); // target
+      stack.push(3n); // index
+
+      op.execute(stack);
+      assert.equal(stack.pop(), 1n);
+
+      stack.push(8n); // target
+      stack.push(0n); // index
+
+      op.execute(stack);
+      assert.equal(stack.pop(), 0n);
+    });
+
+    it("should push correct bit to stack(bytes array)", () => {
+      const op = new GetBit([], 0);
+      stack.push(new Uint8Array([0, 128, 1])); // target
+      stack.push(8n); // index
+      op.execute(stack);
+      assert.equal(stack.pop(), 1n);
+
+      stack.push(new Uint8Array([1, 4, 1])); // target
+      stack.push(23n); // index
+      op.execute(stack);
+      assert.equal(stack.pop(), 1n);
+
+      stack.push(new Uint8Array([4, 0, 1])); // target
+      stack.push(6n); // index
+      op.execute(stack);
+      assert.equal(stack.pop(), 0n);
+    });
+
+    it("should panic if stack length is less than 2", () => {
+      const op = new GetBit([], 0);
+      stack.push(0n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
+    });
+
+    it("should panic if index bit is not uint64", () => {
+      const op = new GetBit([], 0);
+      stack.push(8n); // target
+      stack.push(new Uint8Array(0)); // index
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
+      );
+    });
+
+    it("should panic if index bit in out of uint64 bits", () => {
+      const op = new GetBit([], 0);
+      stack.push(8n); // target
+      stack.push(500n); // index
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_ERROR
+      );
+    });
+
+    it("should panic if index bit in out of bytes array", () => {
+      const op = new GetBit([], 0);
+      stack.push(new Uint8Array(0)); // target
+      stack.push(500n); // index
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_BYTES_ERROR
+      );
+    });
+  });
+
+  describe("GetByte", () => {
+    let stack: Stack<StackElem>;
+    this.beforeEach(() => { stack = new Stack<StackElem>(); });
+
+    it("should get correct bytes from stack", () => {
+      const op = new GetByte([], 0);
+      stack.push(new Uint8Array([8, 2, 1, 9])); // target
+      stack.push(0n); // index
+
+      op.execute(stack);
+      assert.equal(stack.pop(), 8n);
+
+      stack.push(new Uint8Array([8, 2, 1, 9])); // target
+      stack.push(3n); // index
+
+      op.execute(stack);
+      assert.equal(stack.pop(), 9n);
+
+      stack.push(new Uint8Array([1, 2, 3, 4, 5])); // target
+      stack.push(2n); // index
+
+      op.execute(stack);
+      assert.equal(stack.pop(), 3n);
+    });
+
+    it("should panic if target is not bytes", () => {
+      const op = new GetByte([], 0);
+      stack.push(10n); // target
+      stack.push(0n); // index
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
+      );
+    });
+
+    it("should panic if index is not uint", () => {
+      const op = new GetByte([], 0);
+      stack.push(new Uint8Array(0)); // target
+      stack.push(new Uint8Array(0)); // index
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
+      );
+    });
+
+    it("should panic if index bit is out of bytes array", () => {
+      const op = new GetByte([], 0);
+      stack.push(new Uint8Array(0)); // target
+      stack.push(500n); // index
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_BYTES_ERROR
+      );
+
+      stack.push(new Uint8Array(5).fill(0)); // target
+      stack.push(64n * 5n + 1n); // index
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_BYTES_ERROR
+      );
+    });
+  });
+
+  describe("SetByte", () => {
+    let stack: Stack<StackElem>;
+    this.beforeEach(() => { stack = new Stack<StackElem>(); });
+
+    it("should set correct bytes and push to stack", () => {
+      const op = new SetByte([], 0);
+      stack.push(new Uint8Array([8, 2, 1, 9])); // target
+      stack.push(0n); // index
+      stack.push(5n); // small integer
+
+      op.execute(stack);
+      assert.deepEqual(stack.pop(), new Uint8Array([5, 2, 1, 9]));
+
+      stack.push(new Uint8Array([8, 2, 1, 9])); // target
+      stack.push(3n); // index
+      stack.push(0n); // small integer
+
+      op.execute(stack);
+      assert.deepEqual(stack.pop(), new Uint8Array([8, 2, 1, 0]));
+    });
+
+    it("should panic if target is not bytes(Uint8Array)", () => {
+      const op = new SetByte([], 0);
+      stack.push(1n); // target
+      stack.push(0n); // index
+      stack.push(12n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
+      );
+    });
+
+    it("should panic if index of small integer is not uint", () => {
+      const op = new SetByte([], 0);
+      stack.push(new Uint8Array(0)); // target
+      stack.push(new Uint8Array(0)); // index
+      stack.push(12n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
+      );
+
+      stack.push(new Uint8Array(0)); // target
+      stack.push(1n); // index
+      stack.push(new Uint8Array(0));
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
+      );
+    });
+
+    it("should panic if index bit is out of bytes array", () => {
+      const op = new SetByte([], 0);
+      stack.push(new Uint8Array(0)); // target
+      stack.push(500n); // index
+      stack.push(12n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_BYTES_ERROR
+      );
+
+      stack.push(new Uint8Array(5).fill(0)); // target
+      stack.push(64n * 5n + 1n); // index
+      stack.push(1n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SET_BIT_INDEX_BYTES_ERROR
+      );
+    });
+  });
+
+  describe("Dig", () => {
+    let stack: Stack<StackElem>;
+    this.beforeEach(() => { stack = new Stack<StackElem>(); });
+
+    it("should duplicate nth slot from top of stack (with uint64 and bytes)", () => {
+      let op = new Dig(["1"], 0);
+      stack.push(5n);
+      stack.push(10n);
+
+      op.execute(stack);
+      assert.equal(stack.length(), 3);
+      assert.equal(stack.pop(), 5n);
+      assert.equal(stack.pop(), 10n);
+      assert.equal(stack.pop(), 5n);
+
+      op = new Dig(["1"], 0);
+      stack.push(stringToBytes("hello"));
+      stack.push(stringToBytes("world"));
+
+      op.execute(stack);
+      assert.equal(stack.length(), 3);
+      assert.deepEqual(stack.pop(), stringToBytes("hello"));
+    });
+
+    it("should duplicate nth slot from top of stack (mixed cases)", () => {
+      stack.push(5n);
+      stack.push(10n);
+      stack.push(stringToBytes("hello"));
+      stack.push(stringToBytes("world"));
+      stack.push(0n);
+      stack.push(stringToBytes("Algorand"));
+      stack.push(0n);
+
+      // stack looks like: [...stack, 5n, 10n, "hello", "world", 0n, "Algorand", 0n]
+      const len = stack.length();
+      let op = new Dig(["4"], 0);
+      op.execute(stack);
+      assert.equal(stack.length(), len + 1);
+      assert.deepEqual(stack.pop(), stringToBytes("hello"));
+
+      op = new Dig(["6"], 0);
+      op.execute(stack);
+      assert.equal(stack.length(), len + 1);
+      assert.deepEqual(stack.pop(), 5n);
+
+      op = new Dig(["3"], 0);
+      op.execute(stack);
+      assert.equal(stack.length(), len + 1);
+      assert.deepEqual(stack.pop(), stringToBytes("world"));
+
+      op = new Dig(["1"], 0);
+      op.execute(stack);
+      assert.equal(stack.length(), len + 1);
+      assert.deepEqual(stack.pop(), stringToBytes("Algorand"));
+    });
+
+    it("should panic if depth of stack is insufficient", () => {
+      const op = new Dig(["4"], 0);
+      stack.push(5n);
+      stack.push(10n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
+    });
+  });
+
+  describe("Select", () => {
+    let stack: Stack<StackElem>;
+    this.beforeEach(() => { stack = new Stack<StackElem>(); });
+
+    it("should push '2nd element from top of stack' to stack if top is not zero", () => {
+      let op = new Select([], 0);
+      stack.push(stringToBytes("lionel"));
+      stack.push(stringToBytes("messi"));
+      stack.push(7n); // top is non-zero element
+
+      op.execute(stack);
+      assert.equal(stack.length(), 1);
+      assert.deepEqual(stack.pop(), stringToBytes("messi"));
+
+      op = new Select([], 0);
+      stack.push(stringToBytes("lionel"));
+      stack.push(100n);
+      stack.push(7n);
+
+      op.execute(stack);
+      assert.equal(stack.length(), 1);
+      assert.equal(stack.pop(), 100n);
+    });
+
+    it("should push '3rd element from top of stack' to stack if top is zero", () => {
+      let op = new Select([], 0);
+      stack.push(stringToBytes("lionel"));
+      stack.push(stringToBytes("messi"));
+      stack.push(0n); // top is zero
+
+      op.execute(stack);
+      assert.equal(stack.length(), 1);
+      assert.deepEqual(stack.pop(), stringToBytes("lionel"));
+
+      op = new Select([], 0);
+      stack.push(100n);
+      stack.push(stringToBytes("messi"));
+      stack.push(0n);
+
+      op.execute(stack);
+      assert.equal(stack.length(), 1);
+      assert.equal(stack.pop(), 100n);
+    });
+
+    it("should panic if length of stack is < 3", () => {
+      const op = new Select([], 0);
+      stack.push(stringToBytes("lionel"));
+      stack.push(0n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
+    });
+
+    it("should panic if top of stack is not uint64", () => {
+      const op = new Select([], 0);
+      stack.push(stringToBytes("lionel"));
+      stack.push(stringToBytes("andres"));
+      stack.push(stringToBytes("messi"));
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INVALID_TYPE
+      );
+    });
+  });
+
+  describe("Gtxns and Gtxnsa", () => {
+    let stack: Stack<StackElem>;
+    let interpreter: Interpreter;
+    let tx0: EncodedTx, tx1: EncodedTx;
+
+    this.beforeAll(() => {
+      interpreter = new Interpreter();
+      interpreter.runtime = new Runtime([]);
+      interpreter.tealVersion = MaxTEALVersion;
+      tx0 = TXN_OBJ;
+      tx1 = { ...tx0, fee: 1011, amt: 2300, apaa: ["argA", "argB", "argC"].map(Buffer.from) };
+      interpreter.runtime.ctx.gtxs = [tx0, tx1];
+    });
+
+    this.beforeEach(() => { stack = new Stack<StackElem>(); });
+
+    it("Gtxns: should push value of txfield from tx in group", () => {
+      stack.push(0n); // tx to fetch "fee" of (set as first)
+      let op = new Gtxns(["Fee"], 1, interpreter);
+      op.execute(stack);
+      assert.equal(1, stack.length());
+      assert.equal(BigInt(tx0.fee), stack.pop());
+
+      stack.push(0n);
+      op = new Gtxns(["Amount"], 1, interpreter);
+      op.execute(stack);
+      assert.equal(1, stack.length());
+      assert.equal(BigInt(tx0.amt), stack.pop());
+
+      stack.push(1n); // should fetch data from 2nd tx in group
+      op = new Gtxns(["Fee"], 1, interpreter);
+      op.execute(stack);
+      assert.equal(1, stack.length());
+      assert.equal(BigInt(tx1.fee), stack.pop());
+
+      stack.push(1n);
+      op = new Gtxns(["Amount"], 1, interpreter);
+      op.execute(stack);
+      assert.equal(1, stack.length());
+      assert.equal(BigInt(tx1.amt), stack.pop());
+
+      // gtxn, gtxns also accepts array fields
+      stack.push(1n);
+      op = new Gtxns(["ApplicationArgs", "2"], 1, interpreter);
+      op.execute(stack);
+      assert.equal(1, stack.length());
+      assert.deepEqual(stringToBytes("argC"), stack.pop());
+    });
+
+    it("Gtxns: should panic if length of stack is < 1", () => {
+      const op = new Gtxns(["Fee"], 1, interpreter);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+      );
+    });
+
+    it("Gtxns: should panic if transaction index is out of bounds", () => {
+      stack.push(5n); // we only have 2 transactions in group
+      const op = new Gtxns(["Fee"], 1, interpreter);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
+    });
+
+    it("Gtxnsa: should push value of txfieldArr[index] from tx in group", () => {
+      stack.push(0n);
+      let op = new Gtxnsa(["ApplicationArgs", "1"], 1, interpreter);
+      op.execute(stack);
+      assert.equal(1, stack.length());
+      assert.deepEqual(stringToBytes("arg2"), stack.pop()); // args from tx0
+
+      stack.push(1n);
+      op = new Gtxnsa(["ApplicationArgs", "0"], 1, interpreter);
+      op.execute(stack);
+      assert.equal(1, stack.length());
+      assert.deepEqual(stringToBytes("argA"), stack.pop()); // args from tx1
+    });
+
+    it("Gtxnsa: should panic if index is out of bounds for txFieldArr", () => {
+      // should throw error as appArgs[10] is undefined
+      stack.push(0n);
+      let op = new Gtxnsa(["ApplicationArgs", "10"], 1, interpreter);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
+
+      stack.push(1n);
+      op = new Gtxnsa(["ApplicationArgs", "10"], 1, interpreter);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
+    });
+
+    it("Gtxns: should panic if transaction index is out of bounds", () => {
+      stack.push(5n); // we only have 2 transactions in group
+      const op = new Gtxnsa(["ApplicationArgs", "1"], 1, interpreter);
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
       );
     });
   });

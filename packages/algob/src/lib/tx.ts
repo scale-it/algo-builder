@@ -37,7 +37,7 @@ export async function mkTxParams (
   s.firstRound = userParams.firstValid ?? s.firstRound;
   s.lastRound = userParams.firstValid === undefined || userParams.validRounds === undefined
     ? s.lastRound
-    : userParams.firstValid + userParams.validRounds;
+    : Number(userParams.firstValid) + Number(userParams.validRounds);
   return s;
 }
 
@@ -170,7 +170,7 @@ async function mkTx (
       break;
     }
     case rtypes.TransactionType.DeploySSC: {
-      const name = txn.approvalProgram + "-" + txn.clearProgram;
+      const name = String(txn.approvalProgram) + "-" + String(txn.clearProgram);
       deployer.assertNoAsset(name);
       const approval = await deployer.ensureCompiled(txn.approvalProgram);
       const clear = await deployer.ensureCompiled(txn.clearProgram);
@@ -180,7 +180,7 @@ async function mkTx (
       break;
     }
     case rtypes.TransactionType.UpdateSSC: {
-      const cpKey = txn.newApprovalProgram + "-" + txn.newClearProgram;
+      const cpKey = String(txn.newApprovalProgram) + "-" + String(txn.newClearProgram);
       const approval = await deployer.ensureCompiled(txn.newApprovalProgram);
       const clear = await deployer.ensureCompiled(txn.newClearProgram);
       txn.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));

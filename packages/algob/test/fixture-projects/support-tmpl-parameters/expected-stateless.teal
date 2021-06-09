@@ -1,0 +1,28 @@
+#pragma version 2
+global GroupSize
+int 1
+==
+txn GroupIndex
+int 0
+==
+&&
+txn TypeEnum
+int 4
+==
+&&
+txn AssetAmount
+int 0
+==
+&&
+txn TypeEnum
+int 4
+==
+txn Sender
+addr KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY
+==
+&&
+txn AssetAmount
+int 1000
+<=
+&&
+||

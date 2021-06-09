@@ -8,7 +8,7 @@ from algobpy.parse import parse_params
 from pyteal import *
 
 
-def htlc(tmpl_bob, tmpl_alice, tmpl_secret, tmpl_timeout):
+def htlc(arg_bob, arg_alice, arg_secret, arg_timeout):
 
     common_fields = And(
         Txn.type_enum() == TxnType.Payment,
@@ -18,13 +18,13 @@ def htlc(tmpl_bob, tmpl_alice, tmpl_secret, tmpl_timeout):
     )
 
     recv_cond = And(
-        Txn.receiver() == tmpl_alice,
-        Sha256(Arg(0)) == Bytes("base64", tmpl_secret)
+        Txn.receiver() == arg_alice,
+        Sha256(Arg(0)) == Bytes("base64", arg_secret)
     )
 
     esc_cond = And(
-        Txn.receiver() == tmpl_bob,
-        Txn.first_valid() > Int(tmpl_timeout)
+        Txn.receiver() == arg_bob,
+        Txn.first_valid() > Int(arg_timeout)
     )
 
     return And(

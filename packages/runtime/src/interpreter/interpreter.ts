@@ -142,18 +142,39 @@ export class Interpreter {
   }
 
   /**
+   * logs TEALStack upto depth = debugStack to console
+   * @param instruction interpreter opcode instance
+   * @param debugStack max no. of elements to print from top of stack
+   */
+  printStack (instruction: Operator, debugStack?: number): void {
+    if (!debugStack) { return; }
+    console.info("stack(depth = %s) for opcode %s at line %s:",
+      debugStack,
+      instruction.constructor.name,
+      instruction.line
+    );
+    const stack = this.stack.debug(debugStack);
+    for (const top of stack) { console.log(" %O", top); }
+    console.log("\n");
+  }
+
+  /**
    * This function executes TEAL code after parsing
    * @param program: teal code
    * @param mode : execution mode of TEAL code (Stateless or Stateful)
    * @param runtime : runtime object
+   * @param debugStack: if passed then TEAL Stack is logged to console after
+   * each opcode execution (upto depth = debugStack)
    */
-  execute (program: string, mode: ExecutionMode, runtime: Runtime): void {
+  execute (program: string, mode: ExecutionMode, runtime: Runtime, debugStack?: number): void {
     this.runtime = runtime;
     this.instructions = parser(program, mode, this);
 
     while (this.instructionIndex < this.instructions.length) {
       const instruction = this.instructions[this.instructionIndex];
       instruction.execute(this.stack);
+
+      this.printStack(instruction, debugStack);
       this.instructionIndex++;
     }
 

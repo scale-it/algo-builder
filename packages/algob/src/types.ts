@@ -635,6 +635,10 @@ export interface SCParams {
   [key: string]: string | bigint
 }
 
+export interface ReplaceParams {
+  [key: string]: string
+}
+
 export interface AnyMap {
   [key: string]: any // eslint-disable-line @typescript-eslint/no-explicit-any
 }

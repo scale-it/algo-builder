@@ -11,8 +11,9 @@ import { compareArray } from "../lib/compare";
 import { AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64, MaxTEALVersion, TxArrFields } from "../lib/constants";
 import {
   assertLen, assertOnlyDigits, convertToBuffer,
-  convertToString, getEncoding, stringToBytes
+  convertToString, getEncoding, parseBinaryStrToBigInt, stringToBytes
 } from "../lib/parsing";
+import { Stack } from "../lib/stack";
 import { txAppArg, txnSpecbyField } from "../lib/txn";
 import { EncodingType, StackElem, TEALStack, TxnOnComplete, TxnType } from "../types";
 import { Interpreter } from "./interpreter";
@@ -1238,10 +1239,10 @@ export class Txn extends Op {
 // push to stack [...stack, transaction field]
 export class Gtxn extends Op {
   readonly field: string;
-  readonly txIdx: number;
   readonly txFieldIdx: number | undefined;
   readonly interpreter: Interpreter;
   readonly line: number;
+  protected txIdx: number;
 
   /**
    * Sets `field`, `txIdx` values according to arguments passed.
@@ -1338,10 +1339,10 @@ export class Txna extends Op {
  */
 export class Gtxna extends Op {
   readonly field: string;
-  readonly txIdx: number; // transaction group index
   readonly idx: number; // array index
   readonly interpreter: Interpreter;
   readonly line: number;
+  protected txIdx: number; // transaction group index
 
   /**
    * Sets `field`(Transaction Field), `idx`(Array Index) and
@@ -1369,7 +1370,7 @@ export class Gtxna extends Op {
 
   execute (stack: TEALStack): void {
     this.assertUint8(BigInt(this.txIdx), this.line);
-
+    this.checkIndexBound(this.txIdx, this.interpreter.runtime.ctx.gtxs, this.line);
     const tx = this.interpreter.runtime.ctx.gtxs[this.txIdx];
     const result = txAppArg(this.field, tx, this.idx, this, this.interpreter.tealVersion, this.line);
     stack.push(result);
@@ -2265,5 +2266,290 @@ export class Swap extends Op {
     const b = stack.pop();
     stack.push(a);
     stack.push(b);
+  }
+}
+
+/**
+ * bit indexing begins with low-order bits in integers.
+ * Setting bit 4 to 1 on the integer 0 yields 16 (int 0x0010, or 2^4).
+ * Indexing begins in the first bytes of a byte-string
+ * (as seen in getbyte and substring). Setting bits 0 through 11 to 1
+ * in a 4 byte-array of 0s yields byte 0xfff00000
+ * Pops from stack: [ ... stack, {any A}, {uint64 B}, {uint64 C} ]
+ * Pushes to stack: [ ...stack, uint64 ]
+ * pop a target A, index B, and bit C. Set the Bth bit of A to C, and push the result
+ */
+export class SetBit extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 3, this.line);
+    const bit = this.assertBigInt(stack.pop(), this.line);
+    const index = this.assertBigInt(stack.pop(), this.line);
+    const target = stack.pop();
+
+    if (bit > 1n) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.SET_BIT_VALUE_ERROR, { line: this.line });
+    }
+
+    if (typeof target === "bigint") {
+      this.assert64BitIndex(index, this.line);
+      const binaryStr = target.toString(2);
+      const binaryArr = [...(binaryStr.padStart(64, "0"))];
+      const size = binaryArr.length;
+      binaryArr[size - Number(index) - 1] = (bit === 0n ? "0" : "1");
+      stack.push(parseBinaryStrToBigInt(binaryArr));
+    } else {
+      const byteIndex = Math.floor(Number(index) / 8);
+      this.assertBytesIndex(byteIndex, target, this.line);
+
+      const targetBit = Number(index) % 8;
+      // 8th bit in a bytes array will be highest order bit in second element
+      // that's why mask is reversed
+      const mask = 1 << (7 - targetBit);
+      if (bit === 1n) {
+        // set bit
+        target[byteIndex] |= mask;
+      } else {
+        // clear bit
+        const mask = ~(1 << ((7 - targetBit)));
+        target[byteIndex] &= mask;
+      }
+      stack.push(target);
+    }
+  }
+}
+
+/**
+ * pop a target A (integer or byte-array), and index B. Push the Bth bit of A.
+ * Pops from stack: [ ... stack, {any A}, {uint64 B}]
+ * Pushes to stack: [ ...stack, uint64]
+ */
+export class GetBit extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    const index = this.assertBigInt(stack.pop(), this.line);
+    const target = stack.pop();
+
+    if (typeof target === "bigint") {
+      this.assert64BitIndex(index, this.line);
+      const binaryStr = target.toString(2);
+      const size = binaryStr.length;
+      stack.push(BigInt(binaryStr[size - Number(index) - 1]));
+    } else {
+      const byteIndex = Math.floor(Number(index) / 8);
+      this.assertBytesIndex(byteIndex, target, this.line);
+
+      const targetBit = Number(index) % 8;
+      const binary = target[byteIndex].toString(2);
+      const str = binary.padStart(8, "0");
+      stack.push(BigInt(str[targetBit]));
+    }
+  }
+}
+
+/**
+ * pop a byte-array A, integer B, and
+ * small integer C (between 0..255). Set the Bth byte of A to C, and push the result
+ * Pops from stack: [ ...stack, {[]byte A}, {uint64 B}, {uint64 C}]
+ * Pushes to stack: [ ...stack, []byte]
+ */
+export class SetByte extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 3, this.line);
+    const smallInteger = this.assertBigInt(stack.pop(), this.line);
+    const index = this.assertBigInt(stack.pop(), this.line);
+    const target = this.assertBytes(stack.pop(), this.line);
+    this.assertUint8(smallInteger, this.line);
+    this.assertBytesIndex(Number(index), target, this.line);
+
+    target[Number(index)] = Number(smallInteger);
+    stack.push(target);
+  }
+}
+
+/**
+ * pop a byte-array A and integer B. Extract the Bth byte of A and push it as an integer
+ * Pops from stack: [ ...stack, {[]byte A}, {uint64 B} ]
+ * Pushes to stack: [ ...stack, uint64 ]
+ */
+export class GetByte extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    const index = this.assertBigInt(stack.pop(), this.line);
+    const target = this.assertBytes(stack.pop(), this.line);
+    this.assertBytesIndex(Number(index), target, this.line);
+
+    stack.push(BigInt(target[Number(index)]));
+  }
+}
+
+// push the Nth value (0 indexed) from the top of the stack.
+// pops from stack: [...stack]
+// pushes to stack: [...stack, any (nth slot from top of stack)]
+// NOTE: dig 0 is same as dup
+export class Dig extends Op {
+  readonly line: number;
+  readonly depth: number;
+
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [ depth ] // slot to duplicate
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 1, line);
+    assertOnlyDigits(args[0], line);
+
+    this.assertUint8(BigInt(args[0]), line);
+    this.depth = Number(args[0]);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, this.depth + 1, this.line);
+    const tempStack = new Stack<StackElem>(this.depth + 1); // depth = 2 means 3rd slot from top of stack
+    let target;
+    for (let i = 0; i <= this.depth; ++i) {
+      target = stack.pop();
+      tempStack.push(target);
+    }
+    while (tempStack.length()) { stack.push(tempStack.pop()); }
+    stack.push(target as StackElem);
+  }
+}
+
+// selects one of two values based on top-of-stack: A, B, C -> (if C != 0 then B else A)
+// pops from stack: [...stack, {any A}, {any B}, {uint64 C}]
+// pushes to stack: [...stack, any (A or B)]
+export class Select extends Op {
+  readonly line: number;
+
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 3, this.line);
+    const toCheck = this.assertBigInt(stack.pop(), this.line);
+    const notZeroSelection = stack.pop();
+    const isZeroSelection = stack.pop();
+
+    if (toCheck !== 0n) { stack.push(notZeroSelection); } else { stack.push(isZeroSelection); }
+  }
+}
+
+/**
+ * push field F of the Ath transaction (A = top of stack) in the current group
+ * pops from stack: [...stack, uint64]
+ * pushes to stack: [...stack, transaction field]
+ * NOTE: "gtxns field" is equivalent to "gtxn _i_ field" (where _i_ is the index
+ * of transaction in group, fetched from stack).
+ * gtxns exists so that i can be calculated, often based on the index of the current transaction.
+ */
+export class Gtxns extends Gtxn {
+  /**
+   * Sets `field`, `txIdx` values according to arguments passed.
+   * @param args Expected arguments: [transaction field]
+   * // Note: Transaction field is expected as string instead of number.
+   * For ex: `Fee` is expected and `0` is not expected.
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    // NOTE: 100 is a mock value (max no of txns in group can be 16 atmost).
+    // In gtxns & gtxnsa opcodes, index is fetched from top of stack.
+    super(["100", ...args], line, interpreter);
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const top = this.assertBigInt(stack.pop(), this.line);
+    this.assertUint8(top, this.line);
+    this.txIdx = Number(top);
+    super.execute(stack);
+  }
+}
+
+/**
+ * push Ith value of the array field F from the Ath (A = top of stack) transaction in the current group
+ * pops from stack: [...stack, uint64]
+ * push to stack [...stack, value of field]
+ */
+export class Gtxnsa extends Gtxna {
+  /**
+   * Sets `field`(Transaction Field), `idx`(Array Index) values according to arguments passed.
+   * @param args Expected arguments: [transaction field(F), transaction field array index(I)]
+   * // Note: Transaction field is expected as string instead of number.
+   * For ex: `Fee` is expected and `0` is not expected.
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    // NOTE: 100 is a mock value (max no of txns in group can be 16 atmost).
+    // In gtxns & gtxnsa opcodes, index is fetched from top of stack.
+    super(["100", ...args], line, interpreter);
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const top = this.assertBigInt(stack.pop(), this.line);
+    this.assertUint8(top, this.line);
+    this.txIdx = Number(top);
+    super.execute(stack);
   }
 }
