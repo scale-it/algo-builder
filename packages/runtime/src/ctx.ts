@@ -184,7 +184,6 @@ export class Ctx implements Context {
       creator: assetDef.creator,
       'is-frozen': assetDef.defaultFrozen
     };
-
     const account = this.getAccount(address);
     account.optInToASA(assetIndex, assetHolding);
     this.assertAccBalAboveMin(address);
