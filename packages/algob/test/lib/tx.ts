@@ -15,7 +15,7 @@ import { Deployer } from "../../src/types";
 import { expectBuilderErrorAsync } from "../helpers/errors";
 import { mkEnv } from "../helpers/params";
 import { useFixtureProject, useFixtureProjectCopy } from "../helpers/project";
-import { bobAcc } from "../mocks/account";
+import { aliceAcc, bobAcc } from "../mocks/account";
 import { mockAssetInfo, mockLsig, mockSuggestedParam } from "../mocks/tx";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
@@ -348,11 +348,119 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
     await deployer.optInLsigToSSC(12223, mockLsig, {}, {});
   });
 
-  it("should throw error with update ssc function, if ssc exist and deleted", () => {
-
+  it("should throw error with update ssc function, if ssc exist and deleted", async () => {
+    await expectBuilderErrorAsync(
+      async () => await deployer.updateSSC(bobAcc, {}, appID, "approval.teal", "clear.teal", {}),
+      ERRORS.GENERAL.APP_DELETED
+    );
   });
 
-  it("should pass with update ssc functions, if ssc doesn't exist in checkpoint", () => {
+  it("should pass with update ssc functions, if ssc doesn't exist in checkpoint", async () => {
+    await deployer.updateSSC(bobAcc, {}, 123, "approval.teal", "clear.teal", {});
+  });
 
+  it("should fail if user tries to opt-in through execute tx", async () => {
+    const execParam: types.OptInASAParam = {
+      type: types.TransactionType.OptInASA,
+      sign: types.SignType.SecretKey,
+      fromAccount: bobAcc,
+      payFlags: {},
+      assetID: assetID
+    };
+    await expectBuilderErrorAsync(
+      async () => await executeTransaction(deployer, execParam),
+      ERRORS.GENERAL.ASSET_DELETED
+    );
+  });
+
+  it("should fail if user tries to modify through execute tx", async () => {
+    const execParam: types.ModifyAssetParam = {
+      type: types.TransactionType.ModifyAsset,
+      sign: types.SignType.SecretKey,
+      fromAccount: bobAcc,
+      payFlags: {},
+      assetID: assetID,
+      fields: {}
+    };
+    await expectBuilderErrorAsync(
+      async () => await executeTransaction(deployer, execParam),
+      ERRORS.GENERAL.ASSET_DELETED
+    );
+  });
+
+  it("should fail if user tries to freeze through execute tx", async () => {
+    const execParam: types.FreezeAssetParam = {
+      type: types.TransactionType.FreezeAsset,
+      sign: types.SignType.SecretKey,
+      fromAccount: bobAcc,
+      payFlags: {},
+      assetID: assetID,
+      freezeTarget: "acc-name-1",
+      freezeState: true
+    };
+    await expectBuilderErrorAsync(
+      async () => await executeTransaction(deployer, execParam),
+      ERRORS.GENERAL.ASSET_DELETED
+    );
+  });
+
+  it("should fail if user tries to revoke through execute tx", async () => {
+    const execParam: types.RevokeAssetParam = {
+      type: types.TransactionType.RevokeAsset,
+      sign: types.SignType.SecretKey,
+      fromAccount: bobAcc,
+      payFlags: {},
+      assetID: assetID,
+      recipient: bobAcc.addr,
+      revocationTarget: "target",
+      amount: 1000
+    };
+    await expectBuilderErrorAsync(
+      async () => await executeTransaction(deployer, execParam),
+      ERRORS.GENERAL.ASSET_DELETED
+    );
+  });
+
+  it("should fail if user tries to destroy through execute tx", async () => {
+    const execParam: types.DestroyAssetParam = {
+      type: types.TransactionType.DestroyAsset,
+      sign: types.SignType.SecretKey,
+      fromAccount: bobAcc,
+      payFlags: {},
+      assetID: assetID
+    };
+    await expectBuilderErrorAsync(
+      async () => await executeTransaction(deployer, execParam),
+      ERRORS.GENERAL.ASSET_DELETED
+    );
+  });
+
+  it("should fail if user tries to transfer asa through execute tx", async () => {
+    const execParam: types.AssetTransferParam = {
+      type: types.TransactionType.TransferAsset,
+      sign: types.SignType.SecretKey,
+      fromAccount: bobAcc,
+      payFlags: {},
+      assetID: assetID,
+      toAccountAddr: aliceAcc.addr,
+      amount: 12
+    };
+    await expectBuilderErrorAsync(
+      async () => await executeTransaction(deployer, execParam),
+      ERRORS.GENERAL.ASSET_DELETED
+    );
+  });
+
+  it("should pass if user tries to opt-out through execute tx", async () => {
+    const execParam: types.AssetTransferParam = {
+      type: types.TransactionType.TransferAsset,
+      sign: types.SignType.SecretKey,
+      fromAccount: bobAcc,
+      payFlags: { closeRemainderTo: bobAcc.addr },
+      assetID: assetID,
+      toAccountAddr: aliceAcc.addr,
+      amount: 12
+    };
+    await executeTransaction(deployer, execParam);
   });
 });
