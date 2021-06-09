@@ -463,4 +463,82 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
     };
     await executeTransaction(deployer, execParam);
   });
+
+  it("should throw error if user tries to delete deleted app", async () => {
+    const execParam: types.SSCCallsParam = {
+      type: types.TransactionType.DeleteSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: bobAcc,
+      payFlags: {},
+      appID: appID
+    };
+    await expectBuilderErrorAsync(
+      async () => await executeTransaction(deployer, execParam),
+      ERRORS.GENERAL.APP_DELETED
+    );
+  });
+
+  it("should throw error if user tries to update deleted app", async () => {
+    const execParam: types.UpdateSSCParam = {
+      type: types.TransactionType.UpdateSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: bobAcc,
+      payFlags: {},
+      appID: appID,
+      newApprovalProgram: "approval.teal",
+      newClearProgram: "clear.teal"
+    };
+    await expectBuilderErrorAsync(
+      async () => await executeTransaction(deployer, execParam),
+      ERRORS.GENERAL.APP_DELETED
+    );
+  });
+
+  it("should throw error if user tries to call deleted app", async () => {
+    const execParam: types.SSCCallsParam = {
+      type: types.TransactionType.CallNoOpSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: bobAcc,
+      payFlags: {},
+      appID: appID
+    };
+    await expectBuilderErrorAsync(
+      async () => await executeTransaction(deployer, execParam),
+      ERRORS.GENERAL.APP_DELETED
+    );
+  });
+
+  it("should throw error if user tries to opt-in deleted app", async () => {
+    const execParam: types.OptInSSCParam = {
+      type: types.TransactionType.OptInSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: bobAcc,
+      payFlags: {},
+      appID: appID
+    };
+    await expectBuilderErrorAsync(
+      async () => await executeTransaction(deployer, execParam),
+      ERRORS.GENERAL.APP_DELETED
+    );
+  });
+
+  it("should pass if user tries to opt-out deleted app", async () => {
+    const execParam: types.SSCCallsParam = {
+      type: types.TransactionType.CloseSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: bobAcc,
+      payFlags: {},
+      appID: appID
+    };
+    await executeTransaction(deployer, execParam);
+
+    const execParams: types.SSCCallsParam = {
+      type: types.TransactionType.ClearSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: bobAcc,
+      payFlags: {},
+      appID: appID
+    };
+    await executeTransaction(deployer, execParams);
+  });
 });
