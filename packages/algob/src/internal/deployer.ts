@@ -350,12 +350,15 @@ class DeployerBasicMode {
   }
 
   /**
-   * Check if ASA info exist for asset,
-   * if it exists check for delete param,
-   * throw error if it is deleted
+   * Check if ASA info exist for asset id / string,
+   * First: search for ASAInfo in checkpoints
+   * Case 1: If it exist check if that info is deleted or not by checking deleted boolean
+   * If deleted boolean is true throw error
+   * else, pass
+   * Case 2: If it doesn't exist, pass
    * @param asset asset index or asset name
    */
-  private checkIfASAExist (asset: string | number): void {
+  private assertIfASAExist (asset: string | number): void {
     let key, res;
     if (typeof asset === "string") {
       res = this.asa.get(asset);
@@ -373,11 +376,14 @@ class DeployerBasicMode {
 
   /**
    * Check if SSC info exist for app id,
-   * if it exists check for delete param,
-   * throw error if it is deleted
+   * First: search for SSCInfo in checkpoints
+   * Case 1: If it exist check if that info is deleted or not by checking deleted boolean
+   * If deleted boolean is true throw error
+   * else, pass
+   * Case 2: If it doesn't exist, pass
    * @param appID Application index
    */
-  private checkIfAppExist (appID: number): void {
+  private assertIfAppExist (appID: number): void {
     const key = this.getSSCCPKeyFromId(appID);
     const res = key ? this.getSSCfromCPKey(key) : undefined;
     if (res?.deleted === true) {
@@ -399,13 +405,13 @@ class DeployerBasicMode {
       case rtypes.TransactionType.RevokeAsset:
       case rtypes.TransactionType.OptInASA:
       case rtypes.TransactionType.DestroyAsset: {
-        this.checkIfASAExist(txn.assetID);
+        this.assertIfASAExist(txn.assetID);
         break;
       }
       case rtypes.TransactionType.TransferAsset: {
         // If transaction is not opt-out check for CP deletion
         if (txn.payFlags.closeRemainderTo === undefined) {
-          this.checkIfASAExist(txn.assetID);
+          this.assertIfASAExist(txn.assetID);
         }
         break;
       }
@@ -413,7 +419,7 @@ class DeployerBasicMode {
       case rtypes.TransactionType.OptInSSC:
       case rtypes.TransactionType.UpdateSSC:
       case rtypes.TransactionType.CallNoOpSSC: {
-        this.checkIfAppExist(txn.appID);
+        this.assertIfAppExist(txn.appID);
         break;
       }
     }
