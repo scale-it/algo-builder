@@ -66,11 +66,11 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  getSSCCPKeyFromId (index: number): string | undefined {
+  getAppCheckpointKeyFromIndex (index: number): string | undefined {
     throw new Error("Not implemented");
   }
 
-  getASAKeyFromId (index: number): string | undefined {
+  getAssetCheckpointKeyFromIndex (index: number): string | undefined {
     throw new Error("Not implemented");
   }
 

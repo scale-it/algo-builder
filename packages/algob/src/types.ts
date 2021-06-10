@@ -569,14 +569,14 @@ export interface Deployer {
    * returns undefined if it doesn't exist
    * @param index Application index
    */
-  getSSCCPKeyFromId: (index: number) => string | undefined
+  getAppCheckpointKeyFromIndex: (index: number) => string | undefined
 
   /**
    * Returns ASA checkpoint key using asset index,
    * returns undefined if it doesn't exist
    * @param index Asset Index
    */
-  getASAKeyFromId: (index: number) => string | undefined
+  getAssetCheckpointKeyFromIndex: (index: number) => string | undefined
 
   /**
    * Queries a delegated logic signature from checkpoint. */

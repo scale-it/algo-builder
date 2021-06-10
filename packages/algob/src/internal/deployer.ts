@@ -156,7 +156,7 @@ class DeployerBasicMode {
    * returns undefined if it doesn't exist
    * @param index Application index
    */
-  getSSCCPKeyFromId (index: number): string | undefined {
+  getAppCheckpointKeyFromIndex (index: number): string | undefined {
     const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
     for (const [key, nestedMap] of resultMap) {
       if ([...nestedMap][nestedMap.size - 1][1].appID === index) {
@@ -171,7 +171,7 @@ class DeployerBasicMode {
    * returns undefined if it doesn't exist
    * @param index Asset Index
    */
-  getASAKeyFromId (index: number): string | undefined {
+  getAssetCheckpointKeyFromIndex (index: number): string | undefined {
     const resultMap = this.cpData.precedingCP[this.networkName]?.asa ?? new Map();
     for (const [key, value] of resultMap) {
       if (value.assetIndex === index) {
@@ -363,7 +363,7 @@ class DeployerBasicMode {
     if (typeof asset === "string") {
       res = this.asa.get(asset);
     } else if (typeof asset === "number") {
-      key = this.getASAKeyFromId(asset);
+      key = this.getAssetCheckpointKeyFromIndex(asset);
       res = key ? this.asa.get(key) : undefined;
     }
     if (res?.deleted === true) {
@@ -384,7 +384,7 @@ class DeployerBasicMode {
    * @param appID Application index
    */
   private assertIfAppExist (appID: number): void {
-    const key = this.getSSCCPKeyFromId(appID);
+    const key = this.getAppCheckpointKeyFromIndex(appID);
     const res = key ? this.getSSCfromCPKey(key) : undefined;
     if (res?.deleted === true) {
       throw new BuilderError(

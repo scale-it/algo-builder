@@ -226,7 +226,7 @@ export async function registerCheckpoints (
     switch (txn.type) {
       case 'acfg': {
         txConfirmation = await deployer.waitForConfirmation(txn.txID());
-        const key = deployer.getASAKeyFromId(txn.assetIndex);
+        const key = deployer.getAssetCheckpointKeyFromIndex(txn.assetIndex);
         if (key && checkAssetDeletionTx(txn)) {
           const temp: rtypes.ASAInfo = deployer.getASAInfo(key);
           temp.deleted = true;
@@ -249,7 +249,7 @@ export async function registerCheckpoints (
       }
       case 'appl': {
         txConfirmation = await deployer.waitForConfirmation(txn.txID());
-        const key = deployer.getSSCCPKeyFromId(txn.appIndex);
+        const key = deployer.getAppCheckpointKeyFromIndex(txn.appIndex);
         if (key) {
           const temp: rtypes.SSCInfo | undefined = deployer.getSSCfromCPKey(key);
           if (txn.appOnComplete === 5 && temp) {
