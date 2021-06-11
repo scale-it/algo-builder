@@ -370,6 +370,37 @@ export interface AssetScriptMap {
   [assetName: string]: string
 }
 
+export interface AlgoSignerTx {
+  "consensus-version": string
+  "fee": number
+  "genesis-hash": string
+  "genesis-id": string
+  "last-round": number
+  "min-fee": number
+}
+
+export interface AlgoSignerSignedTx {
+  "txID": string
+  "blob": string
+}
+
+export interface AlgoSignerSendTx {
+  "txId": string
+}
+
+export interface AlgoSigner {
+  // algod, sign, send, signTxn, accounts
+  // Create an Algod client to get suggested transaction params
+  // let client = new algosdk.Algodv2(token, server, port, headers);
+  accounts: (param: unknown) => unknown[]
+
+  algod: (paran: unknown) => AlgoSignerTx | algosdk.CompileOut
+
+  signTxn: (param: unknown[]) => AlgoSignerSignedTx
+
+  send: (param: unknown) => AlgoSignerSendTx
+}
+
 export interface Deployer {
   /**
    * Allows user to know whether a script is running in a `deploy` or `run` mode. */
