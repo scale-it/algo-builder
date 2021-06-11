@@ -8,8 +8,7 @@ module.exports = {
   plugins: ["simple-import-sort", "sonarjs"],
   extends: [
     "standard-with-typescript",
-    "plugin:sonarjs/recommended",
-    //"plugin:@typescript-eslint/recommended"
+    "plugin:sonarjs/recommended"
   ],
   parserOptions: {
     project: "./tsconfig.json",
