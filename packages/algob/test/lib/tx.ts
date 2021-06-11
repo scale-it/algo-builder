@@ -12,6 +12,7 @@ import { DeployerConfig } from "../../src/internal/deployer_cfg";
 import { Deployer } from "../../src/types";
 import { expectBuilderErrorAsync } from "../helpers/errors";
 import { mkEnv } from "../helpers/params";
+import { useFixtureProject } from "../helpers/project";
 import { bobAcc } from "../mocks/account";
 import { mockAssetInfo, mockSuggestedParam } from "../mocks/tx";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
@@ -38,6 +39,7 @@ describe("Note in TxParams", () => {
 });
 
 describe("Opt-In to ASA", () => {
+  useFixtureProject("config-project");
   function mkASA (): types.ASADef {
     return {
       total: 1,
@@ -106,6 +108,7 @@ describe("Opt-In to ASA", () => {
 });
 
 describe("ASA modify fields", () => {
+  useFixtureProject("config-project");
   let deployer: Deployer;
   let execParams: types.ModifyAssetParam;
   let algod: AlgoOperatorDryRunImpl;
