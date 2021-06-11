@@ -8,7 +8,8 @@ export const MAX_UINT6 = 63n;
 export const DEFAULT_STACK_ELEM = 0n;
 export const MAX_CONCAT_SIZE = 4096;
 export const ALGORAND_MIN_TX_FEE = 1000;
-export const ALGORAND_ACCOUNT_MIN_BALANCE = 1e6; // 1 ALGO
+// https://github.com/algorand/go-algorand/blob/master/config/consensus.go#L659
+export const ALGORAND_ACCOUNT_MIN_BALANCE = 0.1e6; // 0.1 ALGO
 export const MaxTEALVersion = 3;
 
 // values taken from: https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
