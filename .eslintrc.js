@@ -8,7 +8,8 @@ module.exports = {
   plugins: ["simple-import-sort", "sonarjs"],
   extends: [
     "standard-with-typescript",
-    "plugin:sonarjs/recommended"
+    "plugin:sonarjs/recommended",
+    //"plugin:@typescript-eslint/recommended"
   ],
   parserOptions: {
     project: "./tsconfig.json",
@@ -25,6 +26,7 @@ module.exports = {
     "no-underscore-dangle": 0,
     "simple-import-sort/sort": "warn",
     "sort-imports": "off",
+    "no-unused-vars": "off",
 
     "@typescript-eslint/consistent-type-assertions": "off",
     "@typescript-eslint/promise-function-async": "off",
