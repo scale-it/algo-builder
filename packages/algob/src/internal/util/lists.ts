@@ -16,7 +16,7 @@ export function partitionByFn<T> (
   if (input.length === 0) {
     return [];
   }
-  var out = [[input[0]]];
+  const out = [[input[0]]];
   for (const current of input.slice(1)) {
     const last = getLastDeepChild(out);
     if (f(last, current)) {

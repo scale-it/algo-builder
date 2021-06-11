@@ -46,7 +46,7 @@ describe("Checkpoint", () => {
   });
 
   it("Should append to a checkpoint map", async () => {
-    var checkpoints: Checkpoints = {};
+    let checkpoints: Checkpoints = {};
     const netCheckpoint: Checkpoint = cleanupMutableData(new CheckpointImpl(), 34251);
     const checkpoint = appendToCheckpoint(checkpoints, "network213", netCheckpoint);
     assert.deepEqual(checkpoint, { network213: createNetwork(34251) });
@@ -59,7 +59,7 @@ describe("Checkpoint", () => {
   });
 
   it("Should replace in checkpoint map", async () => {
-    var checkpoints: Checkpoints = {};
+    let checkpoints: Checkpoints = {};
     const netCheckpoint: Checkpoint = cleanupMutableData(new CheckpointImpl(), 34251);
     checkpoints = appendToCheckpoint(checkpoints, "network525", netCheckpoint);
     assert.deepEqual(checkpoints, {
@@ -73,7 +73,7 @@ describe("Checkpoint", () => {
   });
 
   it("Should merge metadata maps", async () => {
-    var checkpoints: Checkpoints = {};
+    let checkpoints: Checkpoints = {};
     const netCheckpoint: Checkpoint = cleanupMutableData(
       new CheckpointImpl(new Map([["key", "data"],
         ["key3", "data3"]])), 34251);
@@ -241,7 +241,7 @@ describe("Checkpoint", () => {
   });
 
   it("Should allow registration of an asset", async () => {
-    var cp: CheckpointImpl = new CheckpointImpl();
+    const cp: CheckpointImpl = new CheckpointImpl();
     cp.timestamp = 12345;
     assert.deepEqual(cp, createNetwork(12345));
     const nestedMap = new Map<number, rtypes.SSCInfo>();

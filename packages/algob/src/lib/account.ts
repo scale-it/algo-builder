@@ -89,16 +89,16 @@ export function mkAccountIndex (accountList: rtypes.Account[]): rtypes.AccountMa
  * load accounts from environment in node.js (set in process.ENV)
  */
 export function loadAccountsFromEnv (): rtypes.Account[] {
-  var algobAccountsString = process.env.ALGOB_ACCOUNTS;
+  const algobAccountsString = process.env.ALGOB_ACCOUNTS;
   if (algobAccountsString) {
-    var accounts: Account[] = [];
+    let accounts: Account[] = [];
     try {
       accounts = JSON.parse(algobAccountsString);
     } catch (error) {
       throw new BuilderError(ERRORS.ACCOUNT.MALFORMED, { errors: 'Some accounts are malformed or have missing fields' });
     }
     validateAccounts(accounts);
-    var algobAccounts: rtypes.Account[] = [];
+    const algobAccounts: rtypes.Account[] = [];
     for (const account of accounts) {
       try {
         const accountSDK = mnemonicToSecretKey(account.mnemonic);

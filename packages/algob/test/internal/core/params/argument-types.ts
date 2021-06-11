@@ -234,7 +234,7 @@ describe("argumentTypes", () => {
     });
 
     it("Should throw if the file isn't readable", function () {
-      var isRoot = process.getuid && process.getuid() === 0;
+      const isRoot = process.getuid && process.getuid() === 0;
       if (os.type() === "Windows_NT" || isRoot) {
         console.warn(chalk.yellowBright("Skipping test: either OS is windows or tests are being run as root"));
         this.skip();
