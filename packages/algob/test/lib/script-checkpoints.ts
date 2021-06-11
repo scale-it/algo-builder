@@ -14,7 +14,6 @@ import {
   toScriptFileName
 } from "../../src/lib/script-checkpoints";
 import { Checkpoint, Checkpoints, LsigInfo } from "../../src/types";
-import nested from "../fixture-projects/scripts-dir-recursive-cp/scripts/nested/nested";
 import { expectBuilderError } from "../helpers/errors";
 
 export function cleanupMutableData (netCheckpoint: Checkpoint, n: number): Checkpoint {

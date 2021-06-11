@@ -303,10 +303,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     payFlags: rtypes.TxParams,
     txWriter: txWriter,
     scTmplParams?: SCParams): Promise<rtypes.SSCInfo> {
-    const sender = flags.sender.addr;
     const params = await tx.mkTxParams(this.algodClient, payFlags);
-
-    const onComplete = algosdk.OnApplicationComplete.NoOpOC;
 
     const app = await this.ensureCompiled(approvalProgram, false, scTmplParams);
     const approvalProg = new Uint8Array(Buffer.from(app.compiled, "base64"));
@@ -448,9 +445,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     };
 
     const txn = mkTransaction(execParam, params);
-    const txId = txn.txID().toString();
     const signedTxn = txn.signTxn(sender.sk);
-
     await this.sendAndWait(signedTxn);
   }
 
