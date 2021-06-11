@@ -8,7 +8,7 @@ from pyteal import *
 ''' Accepts only if (transaction type is OPT-IN OR (transaction type is asset transfer,
     sender is goldOwnerAccount and asset transfer amount is less than equal to 1000 ))'''
 
-def gold_asc(asset_amt, arg_sender):
+def gold_asc():
 
 	asa_opt_in = And(
 		Global.group_size() == Int(1),
@@ -19,8 +19,8 @@ def gold_asc(asset_amt, arg_sender):
 
 	pay_gold = And(
 		Txn.type_enum() == Int(4),
-		Txn.sender() == arg_sender,
-		Txn.asset_amount() <= asset_amt
+		Txn.sender() == Tmpl.Addr("TMPL_SENDER"),
+		Txn.asset_amount() <= Tmpl.Int("TMPL_AMOUNT")
 	)
 
 	combine = Or(asa_opt_in, pay_gold)
@@ -28,15 +28,4 @@ def gold_asc(asset_amt, arg_sender):
 	return combine
 
 if __name__ == "__main__":
-
-  #replace these values with your customized values or pass an external parameter
-  scParam = {
-    "ARG_SENDER": "M7VR2MGHI35EG2NMYOF3X337636PIOFVSP2HNIFUKAG7WW6BDWDCA3E2DA",
-    "ASSET_AMT": Int(1000)
-  }
-
-  # Overwrite scParam if sys.argv[1] is passed
-  if(len(sys.argv) > 1):
-    scParam = parse_params(sys.argv[1], scParam)
-
-  print(compileTeal(gold_asc(scParam["ASSET_AMT"], Addr(scParam["ARG_SENDER"])), Mode.Signature))
+  print(compileTeal(gold_asc(), Mode.Signature))

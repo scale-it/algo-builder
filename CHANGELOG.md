@@ -6,6 +6,8 @@
 * Move `updateSSC` function to `deployer`
 + Rename `parseArgs` to `parse_params`
 
++ For External support of parameters user should replace TMPL_ prefix in their smart contracts, and only use it when using pyteal.tmpl(..)
+
 ### Improvements
 + Replaced dependency `find-up` with `findup-sync` in `algob`.
 + Added `algopy` in `@algo-builder/algob/sample-project`, which enables users to pass template parameters to PyTEAL contracts. Updated docs.
@@ -15,6 +17,7 @@
 + Exported `@algorand-builder/algob`, `@algorand-builder/runtime` error types and make it accessible for API documentation.
 + Added `debugStack` option in `runtime.executeTx()` to print stack (upto depth = debugStack) after each opcode execution.
 + TEALv3 support in `@algo-builder/runtime`.
++ Transpile TEAL code to substitute the TMPL placeholders
 
 ### Bug fixes
 

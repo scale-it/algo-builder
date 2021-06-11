@@ -149,7 +149,7 @@ describe("Support External Parameters in PyTEAL program", () => {
   let statefulHash = 0;
 
   const scInitParam = {
-    TMPL_SENDER: 'KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY',
+    ARG_SENDER: 'KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY',
     ASSET_AMOUNT: 1000n
   };
 
@@ -200,5 +200,39 @@ describe("Support External Parameters in PyTEAL program", () => {
     // new hash should be different than initial hash
     assert.notEqual(statelessHash, newStatelessHash);
     assert.notEqual(statefulHash, result.srcHash);
+  });
+});
+
+describe("Support TMPL Placeholder Parameters in PyTEAL program", () => {
+  useFixtureProjectCopy("support-tmpl-parameters");
+  const fakeAlgod: Algodv2 = {} as Algodv2; // eslint-disable-line @typescript-eslint/consistent-type-assertions
+  const op = new CompileOpMock(fakeAlgod);
+  const pyOp = new PyCompileOp(op);
+
+  const stateless = "stateless.py";
+  const stateful = "stateful.py";
+
+  it("Should replace TMPL_ placeholders in TEAL file", async () => {
+    const scTmplParam = {
+      TMPL_SENDER: 'KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY',
+      TMPL_AMOUNT: 1000n
+    };
+
+    const result = await pyOp.ensureCompiled(stateless, false, scTmplParam);
+
+    const expected = fs.readFileSync('expected-stateless.teal', 'utf-8');
+    assert.equal(result.tealCode, expected);
+  });
+
+  it("PyTEAL TMPL + External parameters test", async () => {
+    const scTmplParam = {
+      ARG_SENDER: 'KFMPC5QWM3SC54X7UWUW6OSDOIT3H3YA5UOCUAE2ABERXYSKZS5Q3X5IZY',
+      TMPL_AMOUNT: 100n
+    };
+
+    const result = await pyOp.ensureCompiled(stateful, false, scTmplParam);
+
+    const expected = fs.readFileSync('expected-stateful.teal', 'utf-8');
+    assert.equal(result.tealCode, expected);
   });
 });

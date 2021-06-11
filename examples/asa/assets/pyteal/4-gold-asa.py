@@ -5,9 +5,9 @@ from pyteal import *
     sender is goldOwnerAccount and asset transfer amount is less than equal to 1000 ))'''
 
 asset_amt = Int(1000)
-tmpl_sen = Addr("EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY")
+arg_sen = Addr("EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY")
 
-def gold_asc(asset_amt=asset_amt, tmpl_sen=tmpl_sen):
+def gold_asc(asset_amt=asset_amt, arg_sen=arg_sen):
 
 	common_fields = And(
 		Txn.type_enum() == Int(4),
@@ -24,7 +24,7 @@ def gold_asc(asset_amt=asset_amt, tmpl_sen=tmpl_sen):
 
 	pay_gold = And(
 		Txn.type_enum() == Int(4),
-		Txn.sender() == tmpl_sen,
+		Txn.sender() == arg_sen,
 		Txn.asset_amount() <= asset_amt 
 	)
 

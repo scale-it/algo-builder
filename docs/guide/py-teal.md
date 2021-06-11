@@ -58,9 +58,8 @@ sys.path.insert(0, path) # replace path with path to algobpy in your project
 
     # replace these values with your customized values or pass an external parameter
     scParam = {
-      "TMPL_TO": "2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA",
-      "TMPL_AMT": 700000,
-      "TMPL_CLS": "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
+      "ARG_AMT": 700000,
+      "ARG_CLS": "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE",
     }
 
     # Overwrite scParam if sys.argv[1] is passed
@@ -68,9 +67,8 @@ sys.path.insert(0, path) # replace path with path to algobpy in your project
       scParam = parse_params(sys.argv[1], scParam)
 
     print(compileTeal(dynamic_fee(
-      Addr(scParam["TMPL_TO"]),
-      scParam["TMPL_AMT"],
-      Addr(scParam["TMPL_CLS"]), Mode.Signature))
+      scParam["ARG_AMT"],
+      Addr(scParam["ARG_CLS"]), Mode.Signature))
   ```
 
 #### In scripts
@@ -78,9 +76,38 @@ sys.path.insert(0, path) # replace path with path to algobpy in your project
 To use this feature in scripts, you can pass an external parameter object (using `loadLogic`, `fundLsig`..):
    ```js
     scInitParam = {
-      TMPL_TO: john.addr,
-      TMPL_AMT: 700000,
-      TMPL_CLS: masterAccount.addr
+      ARG_AMT: 700000,
+      ARG_CLS: masterAccount.addr
     }
     await deployer.loadLogic("dynamic-fee.py", scInitParam);
    ```
+
+# TMPL Placeholder Support
+
+- PyTEAL supports `Tmpl` fuction which can replace value with a constant.
+  For ex: `Tmpl.Addr("TMPL_ADDR")`
+  when converted to TEAL it will look like this `addr TMPL_ADDR`. now you can replace this constant to value of your choice.
+- Algob supports these replacements. Ex:
+   ```js
+    scInitParam = {
+      TMPL_TO: "ADDR"
+    }
+    await deployer.loadLogic("dynamic-fee.py", scInitParam);
+   ```
+   you can simply pass an object with replacement values, algob will replace them for you at the time of compilation.
+
+- You can also use this feature with external support parameters: Ex:
+   ```js
+    scInitParam = {
+      TMPL_TO: "ADDR",
+      ARG_AMT: 700000,
+      ARG_CLS: masterAccount.addr
+    }
+    await deployer.loadLogic("dynamic-fee.py", scInitParam);
+   ```
+  Note: Keys starting with `TMPL_` or `tmpl_` will be used with TMPL function and other keys will be used as mentioned in `External Parameters Support` section.
+
+  ### Difference between External Parameters Support and TMPL Placeholder Support
+
+  - To understand the difference you need to know how TMPL works, you can learn from [here](https://pyteal.readthedocs.io/en/stable/api.html?highlight=TMPL#pyteal.Tmpl).
+  - The main difference is, In TMPL placehlder support TMPL placeholders are replaced with given values after transpiling pyTEAL to TEAL language, but in case of external parameters, replacment of values is done in pyTEAL file only.
