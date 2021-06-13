@@ -388,17 +388,21 @@ export interface AlgoSignerSendTx {
   "txId": string
 }
 
+export interface AlgoSignerToBeSignedTx {
+  txn: string
+}
+
 export interface AlgoSigner {
   // algod, sign, send, signTxn, accounts
   // Create an Algod client to get suggested transaction params
   // let client = new algosdk.Algodv2(token, server, port, headers);
   accounts: (param: unknown) => unknown[]
 
-  algod: (paran: unknown) => AlgoSignerTx | algosdk.CompileOut
+  algod: (param: unknown) => any
 
   signTxn: (param: unknown[]) => AlgoSignerSignedTx
 
-  send: (param: unknown) => AlgoSignerSendTx
+  send: (param: any) => AlgoSignerSendTx
 }
 
 export interface Deployer {
