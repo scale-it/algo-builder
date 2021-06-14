@@ -47,7 +47,7 @@ setup-master-account:
 sandbox-up:
 # clone sandbox git repo: https://github.com/algorand/sandbox.git and pull
 	[ -d $(SANDBOX_PATH) ] || git clone $(REMOTE_REPO) $(SANDBOX_PATH)
-	(cd $(SANDBOX_PATH); git pull $(REMOTE_REPO))
+	(cd $(SANDBOX_PATH); git reset --hard; git pull;)
 # override .yml with custom config (custom token and port for private network)
 	cat ./sandbox-docker-compose.yml > $(SANDBOX_PATH)/docker-compose.yml
 	$(SANDBOX_PATH)/sandbox up -v

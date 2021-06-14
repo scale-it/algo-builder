@@ -9,7 +9,7 @@ import {
   Byte, Bytec, Bytecblock, Concat, Dig, Div, Dup, Dup2, Ed25519verify,
   EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, GetByte, Global, GreaterThan,
   GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Intcblock, Itob,
-  Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, Mod,
+  Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, MinBalance, Mod,
   Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, Select, SetBit, SetByte, Sha256,
   Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../interpreter/opcode-list";
@@ -144,12 +144,10 @@ opCodeMap[3] = {
 
   // txn ops in tealv3
   gtxns: Gtxns,
-  gtxnsa: Gtxnsa
+  gtxnsa: Gtxnsa,
 
-  /*
   // stateful op (mode = application)
   min_balance: MinBalance
-  */
 };
 
 // list of opcodes that require one extra parameter than others: `interpreter`.
@@ -159,7 +157,7 @@ const interpreterReqList = new Set([
   "balance", "asset_holding_get", "asset_params_get", "app_opted_in",
   "app_local_get", "app_local_get_ex", "app_global_get", "app_global_get_ex",
   "app_local_put", "app_global_put", "app_local_del", "app_global_del",
-  "gtxns", "gtxnsa"
+  "gtxns", "gtxnsa", "min_balance"
 ]);
 
 /**

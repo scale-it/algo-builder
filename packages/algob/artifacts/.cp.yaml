@@ -1,0 +1,17 @@
+network1:
+    timestamp: 1623664114451
+    metadata: {}
+    asa:
+        silver:
+            creator: addr-1-get-address-dry-run
+            txId: tx-id-dry-run
+            assetIndex: 1
+            confirmedRound: -1
+            assetDef:
+                total: 1
+                decimals: 1
+                unitName: ASA
+                defaultFrozen: false
+            deleted: false
+    ssc: {}
+    dLsig: {}

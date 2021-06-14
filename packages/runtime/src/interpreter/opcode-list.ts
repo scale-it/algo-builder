@@ -2553,3 +2553,38 @@ export class Gtxnsa extends Gtxna {
     super.execute(stack);
   }
 }
+
+/**
+ * get minimum required balance for the requested account specified by Txn.Accounts[A] in microalgos.
+ * NOTE: A = 0 represents tx.sender account. Required balance is affected by ASA and App usage. When creating
+ * or opting into an app, the minimum balance grows before the app code runs, therefore the increase
+ * is visible there. When deleting or closing out, the minimum balance decreases after the app executes.
+ * pops from stack: [...stack, uint64(account index)]
+ * push to stack [...stack, uint64(min balance in microalgos)]
+ */
+export class MinBalance extends Op {
+  readonly interpreter: Interpreter;
+  readonly line: number;
+
+  /**
+   * Asserts if arguments length is zero
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   * @param interpreter Interpreter Object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.interpreter = interpreter;
+    this.line = line;
+
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const accountIndex = this.assertBigInt(stack.pop(), this.line);
+    const acc = this.interpreter.getAccount(accountIndex, this.line);
+
+    stack.push(BigInt(acc.minBalance));
+  }
+}

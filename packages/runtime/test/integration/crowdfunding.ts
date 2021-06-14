@@ -10,7 +10,7 @@ import { expectRuntimeError } from "../helpers/runtime-errors";
 
 describe("Crowdfunding basic tests", function () {
   useFixture("stateful");
-  const john = new AccountStore(1000);
+  const john = new AccountStore(10e6);
 
   let runtime: Runtime;
   let approvalProgram: string;
@@ -61,8 +61,12 @@ describe("Crowdfunding basic tests", function () {
       uint64ToBigEndian(fundCloseDate.getTime())
     ];
 
+    const johnMinBalance = john.minBalance;
     const appID = runtime.addApp(
       { ...validFlags, appArgs: appArgs }, {}, approvalProgram, clearProgram);
+    // verify sender's min balance increased after creating application
+    assert.isAbove(runtime.getAccount(john.address).minBalance, johnMinBalance);
+
     const getGlobal = (key: string):
     StackElem |undefined => runtime.getGlobalState(appID, key);
     const johnPk = addressToPk(john.address);

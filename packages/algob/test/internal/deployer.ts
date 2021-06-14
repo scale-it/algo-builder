@@ -11,6 +11,7 @@ import { CheckpointRepoImpl } from "../../src/lib/script-checkpoints";
 import { Checkpoints, LsigInfo } from "../../src/types";
 import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkEnv } from "../helpers/params";
+import { useFixtureProject } from "../helpers/project";
 import { cleanupMutableData } from "../lib/script-checkpoints";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
@@ -24,6 +25,7 @@ function mkASA (): rtypes.ASADef {
 }
 
 describe("DeployerDeployMode", () => {
+  useFixtureProject("config-project");
   let deployerCfg: DeployerConfig, env;
   const mp = new Map<number, rtypes.SSCInfo>();
 

@@ -186,6 +186,7 @@ export interface AccountStoreI {
   getAssetHolding: (assetId: number) => AssetHoldingM | undefined
   addAsset: (assetId: number, name: string, asadef: ASADef) => AssetDef
   modifyAsset: (assetId: number, fields: AssetModFields) => void
+  closeAsset: (assetId: number) => void
   setFreezeState: (assetId: number, state: boolean) => void
   destroyAsset: (assetId: number) => void
   optInToApp: (appID: number, appParams: SSCAttributesM) => void

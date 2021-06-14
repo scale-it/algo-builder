@@ -11,7 +11,7 @@ import {
   GetBit,
   GetByte,
   Global, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Itob,
-  Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, Mod, Mul, Mulw,
+  Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, MinBalance, Mod, Mul, Mulw,
   Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, Select, SetBit,
   SetByte, Sha256, Sha512_256, Store,
   Sub, Substring, Substring3, Swap, Txn, Txna
@@ -873,6 +873,17 @@ describe("Parser", function () {
         // invalid because index 0 is fetched from top of stack
         expectRuntimeError(
           () => opcodeFromSentence(["gtxnsa", "0", "ApplicationArgs", "0"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("min_balance", () => {
+        const res = opcodeFromSentence(["min_balance"], 1, interpreter);
+        const expected = new MinBalance([], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["min_balance", "xyz"], 1, interpreter),
           RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
         );
       });

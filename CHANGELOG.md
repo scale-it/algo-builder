@@ -7,20 +7,17 @@
 + Rename `parseArgs` to `parse_params`
 
 + For External support of parameters user should replace TMPL_ prefix in their smart contracts, and only use it when using pyteal.tmpl(..)
-+ Rename `appId` to `appID` in all places. 
++ Rename `appID` to `appID` in all places. 
 
 ### Improvements
 + Replaced dependency `find-up` with `findup-sync` in `algob`.
 + Added `algopy` in `@algo-builder/algob/sample-project`, which enables users to pass template parameters to PyTEAL contracts. Updated docs.
-+ TEALv3 support in `@algo-builder/runtime`:
-    * `assert`, `pushint`, `pushbytes`, `swap` opcodes.
-    * new `Txn` fields and `Global` field.
 + Store checkpoints in nested form for SSC, added tests.
 + Added support for sub directories in assets folder, with tests.
 + Update runtime to process execParams.deployASA, deploySSC, OptInToASA, OptIntoSSC
 + Exported `@algorand-builder/algob`, `@algorand-builder/runtime` error types and make it accessible for API documentation.
 + Added `debugStack` option in `runtime.executeTx()` to print stack (upto depth = debugStack) after each opcode execution.
-+ Tealv3 support in `@algo-builder/runtime`: `getBit`, `setBit`
++ TEALv3 support in `@algo-builder/runtime`.
 + Transpile TEAL code to substitute the TMPL placeholders
 + Mark not valid checkpoints using `deleted` boolean
  

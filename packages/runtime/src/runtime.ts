@@ -448,11 +448,11 @@ export class Runtime {
    * @param debugStack: if passed then TEAL Stack is logged to console after
    * each opcode execution (upto depth = debugStack)
    */
-  optInToApp (accountAddr: string, appId: number,
+  optInToApp (accountAddr: string, appID: number,
     flags: SSCOptionalFlags, payFlags: TxParams, debugStack?: number): void {
-    this.addCtxOptInTx(accountAddr, appId, payFlags, flags);
+    this.addCtxOptInTx(accountAddr, appID, payFlags, flags);
     this.ctx.debugStack = debugStack;
-    this.ctx.optInToApp(accountAddr, appId);
+    this.ctx.optInToApp(accountAddr, appID);
 
     this.store = this.ctx.state;
   }

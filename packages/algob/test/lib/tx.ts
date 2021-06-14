@@ -7,7 +7,6 @@ import sinon from 'sinon';
 import { TextEncoder } from "util";
 
 import { executeTransaction } from "../../src";
-import deploy from "../../src/builtin-tasks/deploy";
 import { ERRORS } from "../../src/errors/errors";
 import { DeployerDeployMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
@@ -50,6 +49,8 @@ function mkASA (): types.ASADef {
 }
 
 describe("Opt-In to ASA", () => {
+  useFixtureProject("config-project");
+
   let deployer: Deployer;
   let execParams: types.OptInASAParam;
   let algod: AlgoOperatorDryRunImpl;
@@ -109,6 +110,7 @@ describe("Opt-In to ASA", () => {
 });
 
 describe("ASA modify fields", () => {
+  useFixtureProject("config-project");
   let deployer: Deployer;
   let execParams: types.ModifyAssetParam;
   let algod: AlgoOperatorDryRunImpl;

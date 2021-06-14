@@ -31,10 +31,10 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
     // create new app
     txnParams.appID = runtime.addApp({
       sender: john.account,
-      globalBytes: 32,
-      globalInts: 32,
-      localBytes: 8,
-      localInts: 8
+      globalBytes: 2,
+      globalInts: 2,
+      localBytes: 3,
+      localInts: 3
     }, {}, approvalProgram, clearProgram);
 
     // opt-in to the app
