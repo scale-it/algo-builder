@@ -74,4 +74,4 @@ While retreiving sscInfo from checkpoints only the lastest timestamp SSCInfo is 
 
 ## Checkpoint storage `delete` boolean
 
-- Checkpoint structure have a additional flag `deleted` - if it's true, that means the respective asa/ssc is deleted from network, If this is the case, then the deployer will throw an error when trying to use that in other operation than `optOut`.
+- Checkpoint structure has an additional flag `deleted` - if it's true, that means the respective asa/ssc is deleted from network. If this is the case, then the deployer will throw an error when trying to use that in any operation other than `optOut`.
