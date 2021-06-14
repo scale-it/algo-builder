@@ -56,10 +56,9 @@ describe("Convert integer to big endian", () => {
   });
 
   it("should throw error if value is not uint64", () => {
-    let errMsg = "Invalid uint64 -5";
-    assert.throws(() => uint64ToBigEndian(MIN_UINT64 - 5n), errMsg);
+    const errMsg = "Input is not a 64-bit unsigned integer";
 
-    errMsg = "Invalid uint64 18446744073709551620";
+    assert.throws(() => uint64ToBigEndian(MIN_UINT64 - 5n), errMsg);
     assert.throws(() => uint64ToBigEndian(MAX_UINT64 + 5n), errMsg);
   });
 });
@@ -118,7 +117,7 @@ describe("Parse appArgs to SSC to bytes", () => {
     assert.throws(() => parseSSCAppArgs(['STR:abc']), errMsg('STR:abc'));
     assert.throws(() => parseSSCAppArgs(['ADRR:XYZ']), errMsg('ADRR:XYZ'));
 
-    const errorMsg = 'Invalid uint64 18446744073709551625';
+    const errorMsg = 'Input is not a 64-bit unsigned integer';
     assert.throws(() => parseSSCAppArgs([`int:${MAX_UINT64 + 10n}`]), errorMsg);
   });
 });

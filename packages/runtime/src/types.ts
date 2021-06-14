@@ -429,3 +429,13 @@ export interface AssetModFields {
   freeze?: string
   clawback?: string
 }
+
+/**
+ * SDK decoding types (Configure how the integer will be decoded)
+ * https://github.com/algorand/js-algorand-sdk/blob/develop/src/encoding/uint64.ts#L29
+ */
+export enum DecodingMode {
+  SAFE = 'safe',
+  MIXED = 'mixed',
+  BIGINT = 'bigint'
+}
