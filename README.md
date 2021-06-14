@@ -175,9 +175,16 @@ Detailed description about the templates can be found [here](https://github.com/
 
 # Contributing
 
-## Development
+### Development
 
 The project development is open and you can observer a progress through [Pivotal tracker board](https://www.pivotaltracker.com/n/projects/2452320).
+
+### Branch policy
+
++ The active branch is `develop` - all ongoing work is merged into the `develop` branch.
++ `master` is the release branch - `develop` is merged into `master` during the release.
++ Hot fixes are cherry picked to `master`.
+
 
 ## Working with monorepo
 
