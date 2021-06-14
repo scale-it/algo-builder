@@ -429,6 +429,8 @@ class DeployerBasicMode {
         this.assertIfASAExist(txn.assetID);
         break;
       }
+      // https://developer.algorand.org/articles/algos-asas/#opting-in-and-out-of-asas
+      // https://developer.algorand.org/docs/reference/transactions/#asset-transfer-transaction
       case rtypes.TransactionType.TransferAsset: {
         // If transaction is not opt-out check for CP deletion
         if (txn.payFlags.closeRemainderTo === undefined) {
@@ -437,6 +439,7 @@ class DeployerBasicMode {
         break;
       }
       case rtypes.TransactionType.DeleteSSC:
+      case rtypes.TransactionType.CloseSSC:
       case rtypes.TransactionType.OptInSSC:
       case rtypes.TransactionType.UpdateSSC:
       case rtypes.TransactionType.CallNoOpSSC: {

@@ -532,7 +532,10 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
       payFlags: {},
       appID: appID
     };
-    await executeTransaction(deployer, execParam);
+    await expectBuilderErrorAsync(
+      async () => await executeTransaction(deployer, execParam),
+      ERRORS.GENERAL.APP_DELETED
+    );
 
     const execParams: types.SSCCallsParam = {
       type: types.TransactionType.ClearSSC,
