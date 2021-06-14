@@ -392,6 +392,12 @@ export interface AlgoSignerToBeSignedTx {
   txn: string
 }
 
+export interface encoding {
+  msgpackToBase64: (txn: Uint8Array) => string
+
+  base64ToMsgpack: (txn: string) => Uint8Array
+}
+
 export interface AlgoSigner {
   // algod, sign, send, signTxn, accounts
   // Create an Algod client to get suggested transaction params
@@ -403,6 +409,8 @@ export interface AlgoSigner {
   signTxn: (param: unknown[]) => AlgoSignerSignedTx
 
   send: (param: any) => AlgoSignerSendTx
+
+  encoding: encoding
 }
 
 export interface Deployer {

@@ -1,4 +1,5 @@
-import { ConfirmedTxInfo } from "algosdk";
+import { mkTransaction, types as rtypes } from "@algo-builder/runtime";
+import { ConfirmedTxInfo, SuggestedParams, Transaction } from "algosdk";
 
 import { AlgoSigner, AlgoSignerSendTx, AlgoSignerSignedTx, AlgoSignerToBeSignedTx } from "../types";
 
@@ -61,5 +62,34 @@ export class WebMode {
    */
   async signTransaction (txns: AlgoSignerToBeSignedTx[]): Promise<AlgoSignerSignedTx> {
     return this.algoSigner.signTxn(txns);
+  }
+
+  /**
+   * Returns suggested transaction parameters using algosigner
+   * @param userParams Transaction parameters
+   */
+  async getSuggestedParams (userParams: rtypes.TxParams): Promise<SuggestedParams> {
+    const txParams = await this.algoSigner.algod({
+      ledger: this.chainName,
+      path: '/v2/transactions/params'
+    });
+    const s: SuggestedParams = {
+      fee: txParams.fee,
+      genesisHash: txParams["genesis-hash"],
+      genesisID: txParams["genesis-id"],
+      firstRound: txParams[LAST_ROUND],
+      lastRound: Number(txParams[LAST_ROUND]) + 1000,
+      flatFee: false
+    };
+
+    s.flatFee = userParams.totalFee !== undefined;
+    s.fee = userParams.totalFee ?? userParams.feePerByte ?? txParams["min-fee"];
+    if (s.flatFee) s.fee = Math.max(s.fee, txParams["min-fee"]);
+
+    s.firstRound = userParams.firstValid ?? s.firstRound;
+    s.lastRound = userParams.firstValid === undefined || userParams.validRounds === undefined
+      ? s.lastRound : Number(userParams.firstValid) + Number(userParams.validRounds);
+
+    return s;
   }
 }
