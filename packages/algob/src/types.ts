@@ -600,7 +600,7 @@ export interface Deployer {
 
   /**
    * Checks if checkpoint is deleted for a particular transaction
-   * if checkpoint exist and is marked as deleted,
+   * if checkpoint exists and is marked as deleted,
    * throw error(except for opt-out transactions), else pass
    * @param execParams Transaction execution parameters
    */
