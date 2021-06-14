@@ -227,6 +227,7 @@ export async function registerCheckpoints (
             assetDef: res[1],
             deleted: false
           };
+          // res[0] -> asset name, res[1] -> ASADef
           deployer.registerASAInfo(res[0], asaInfo);
           deployer.logTx("Deploying ASA: " + res[0], txConfirmation);
         }

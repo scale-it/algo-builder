@@ -541,4 +541,16 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
     };
     await executeTransaction(deployer, execParams);
   });
+
+  it("should pass if user tries delete app that doesn't exist in checkpoint", async () => {
+    const execParam: types.DestroyAssetParam = {
+      type: types.TransactionType.DestroyAsset,
+      sign: types.SignType.SecretKey,
+      fromAccount: bobAcc,
+      payFlags: {},
+      assetID: 123
+    };
+
+    await executeTransaction(deployer, execParam);
+  });
 });
