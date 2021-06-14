@@ -1,6 +1,7 @@
 import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
 import type { LogicSig, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
+import { values } from "lodash";
 
 import { BuilderError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
@@ -152,6 +153,21 @@ class DeployerBasicMode {
   }
 
   /**
+   * Returns latest timestamp value from map
+   * @param map Map
+   */
+  getLatestTimestampValue (map: Map<number, rtypes.SSCInfo>): number {
+    let res: number = -1;
+    const cmpValue: number = -1;
+    map.forEach((value, key) => {
+      if (key >= cmpValue) {
+        res = value.appID;
+      }
+    });
+    return res;
+  }
+
+  /**
    * Returns SSC checkpoint key using application index,
    * returns undefined if it doesn't exist
    * @param index Application index
@@ -159,7 +175,7 @@ class DeployerBasicMode {
   getAppCheckpointKeyFromIndex (index: number): string | undefined {
     const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
     for (const [key, nestedMap] of resultMap) {
-      if ([...nestedMap][nestedMap.size - 1][1].appID === index) {
+      if (this.getLatestTimestampValue(nestedMap) === index) {
         return key;
       }
     }
