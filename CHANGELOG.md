@@ -7,7 +7,7 @@
 + Rename `parseArgs` to `parse_params`
 
 + For External support of parameters user should replace TMPL_ prefix in their smart contracts, and only use it when using pyteal.tmpl(..)
-+ Rename `appID` to `appID` in all places. 
++ Rename `appId` to `appID` in all places. (previously some of SSC params were taking `appId` and other were taking `appID`, this was inconsistent)
 
 ### Improvements
 + Replaced dependency `find-up` with `findup-sync` in `algob`.
