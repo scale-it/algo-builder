@@ -19,7 +19,7 @@
 + Added `debugStack` option in `runtime.executeTx()` to print stack (upto depth = debugStack) after each opcode execution.
 + TEALv3 support in `@algo-builder/runtime`.
 + Transpile TEAL code to substitute the TMPL placeholders
-+ Mark not valid checkpoints using `deleted` boolean
++ Mark not valid checkpoints (in case of `DeleteSSC`/`DestroyAsset`) using `deleted` boolean
  
 ### Bug fixes
 
