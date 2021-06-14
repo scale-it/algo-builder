@@ -6,7 +6,7 @@ import { Interpreter } from "./interpreter/interpreter";
 import { loadASAFile, overrideASADef, validateASADefs } from "./lib/asa";
 import { getPathFromDirRecursive, loadFromYamlFileSilent, loadFromYamlFileSilentWithMessage, lsTreeWalk } from "./lib/files";
 import { addressToPk, parseSSCAppArgs, stringToBytes, uint64ToBigEndian } from "./lib/parsing";
-import { encodeNote, getFromAddress, mkTransaction } from "./lib/txn";
+import { checkAssetDeletionTx, encodeNote, getFromAddress, mkTransaction } from "./lib/txn";
 import { parser } from "./parser/parser";
 import { Runtime } from "./runtime";
 import * as types from "./types";
@@ -17,6 +17,7 @@ export {
   Runtime,
   AccountStore,
   mkTransaction,
+  checkAssetDeletionTx,
   getFromAddress,
   applyErrorMessageTemplate,
   parseSSCAppArgs,

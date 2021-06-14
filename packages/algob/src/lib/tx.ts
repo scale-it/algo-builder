@@ -222,7 +222,7 @@ export async function executeTransaction (
   deployer: Deployer,
   execParams: rtypes.ExecParams | rtypes.ExecParams[]):
   Promise<algosdk.ConfirmedTxInfo> {
-  deployer.checkForDeletedCP(execParams);
+  deployer.assertCPNotDeleted(execParams);
   try {
     let signedTxn;
     let txns: Transaction[] = [];

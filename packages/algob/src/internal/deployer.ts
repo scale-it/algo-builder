@@ -250,7 +250,7 @@ class DeployerBasicMode {
    * @param flags Transaction flags
    */
   async optInAcountToASA (asa: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
-    this.checkForDeletedCP({
+    this.assertCPNotDeleted({
       type: rtypes.TransactionType.OptInASA,
       sign: rtypes.SignType.SecretKey,
       fromAccount: this._getAccount(accountName),
@@ -286,7 +286,7 @@ class DeployerBasicMode {
    * @param flags Transaction flags
    */
   async optInLsigToASA (asa: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
-    this.checkForDeletedCP({
+    this.assertCPNotDeleted({
       type: rtypes.TransactionType.OptInASA,
       sign: rtypes.SignType.LogicSignature,
       fromAccountAddr: lsig.address(),
@@ -320,7 +320,7 @@ class DeployerBasicMode {
     appID: number,
     payFlags: rtypes.TxParams,
     flags: rtypes.SSCOptionalFlags): Promise<void> {
-    this.checkForDeletedCP({
+    this.assertCPNotDeleted({
       type: rtypes.TransactionType.OptInSSC,
       sign: rtypes.SignType.SecretKey,
       fromAccount: sender,
@@ -343,7 +343,7 @@ class DeployerBasicMode {
     lsig: LogicSig,
     payFlags: rtypes.TxParams,
     flags: rtypes.SSCOptionalFlags): Promise<void> {
-    this.checkForDeletedCP({
+    this.assertCPNotDeleted({
       type: rtypes.TransactionType.OptInSSC,
       sign: rtypes.SignType.LogicSignature,
       fromAccountAddr: lsig.address(),
@@ -447,7 +447,7 @@ class DeployerBasicMode {
    * throw error(except for opt-out transactions), else pass
    * @param execParams Transaction execution parameters
    */
-  checkForDeletedCP (execParams: rtypes.ExecParams | rtypes.ExecParams[]): void {
+  assertCPNotDeleted (execParams: rtypes.ExecParams | rtypes.ExecParams[]): void {
     if (Array.isArray(execParams)) {
       for (const txn of execParams) {
         this._internalDeletedCPCheck(txn);
@@ -667,7 +667,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     newClearProgram: string,
     flags: rtypes.SSCOptionalFlags
   ): Promise<rtypes.SSCInfo> {
-    this.checkForDeletedCP({
+    this.assertCPNotDeleted({
       type: rtypes.TransactionType.UpdateSSC,
       sign: rtypes.SignType.SecretKey,
       fromAccount: sender,
@@ -787,7 +787,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     newClearProgram: string,
     flags: rtypes.SSCOptionalFlags
   ): Promise<rtypes.SSCInfo> {
-    this.checkForDeletedCP({
+    this.assertCPNotDeleted({
       type: rtypes.TransactionType.UpdateSSC,
       sign: rtypes.SignType.SecretKey,
       fromAccount: sender,

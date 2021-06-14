@@ -1,5 +1,5 @@
 
-import { loadFromYamlFileSilent, lsTreeWalk, types as rtypes } from "@algo-builder/runtime";
+import { checkAssetDeletionTx, loadFromYamlFileSilent, lsTreeWalk, types as rtypes } from "@algo-builder/runtime";
 import { encodeAddress, Transaction } from "algosdk";
 import deepEqual from "deep-equal";
 import * as fs from "fs";
@@ -193,26 +193,11 @@ export function persistCheckpoint (scriptName: string, checkpoint: Checkpoints):
 }
 
 /**
- * Check if given transaction is asset deletion
- * @param txn Txn Object
- * Logic:
- * https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction
- * https://github.com/algorand/js-algorand-sdk/blob/e07d99a2b6bd91c4c19704f107cfca398aeb9619/src/transaction.ts#L528
- */
-function checkAssetDeletionTx (txn: Transaction): boolean {
-  if (txn.assetClawback || txn.assetFreeze || txn.assetManager || txn.assetReserve) {
-    return false;
-  } else if (txn.assetIndex) {
-    return true;
-  }
-  return false;
-}
-
-/**
  * Register checkpoints for ASA and SSC
  * @param deployer Deployer object
  * @param txns transaction array
- * @param txIdxMap transaction map index to name
+ * @param txIdxMap transaction map: to match transaction order
+ * transaction index mapped to [asset name, asset definition]
  */
 /* eslint-disable sonarjs/cognitive-complexity */
 export async function registerCheckpoints (

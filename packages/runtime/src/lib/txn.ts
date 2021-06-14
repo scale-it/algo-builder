@@ -44,6 +44,22 @@ export function parseToStackElem (a: unknown, field: TxField): StackElem {
 }
 
 /**
+ * Check if given transaction is asset deletion
+ * @param txn Txn Object
+ * Logic:
+ * https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction
+ * https://github.com/algorand/js-algorand-sdk/blob/e07d99a2b6bd91c4c19704f107cfca398aeb9619/src/transaction.ts#L528
+ */
+export function checkAssetDeletionTx (txn: Transaction): boolean {
+  if (txn.assetClawback || txn.assetFreeze || txn.assetManager || txn.assetReserve) {
+    return false;
+  } else if (txn.assetIndex) {
+    return true;
+  }
+  return false;
+}
+
+/**
  * Description: returns specific transaction field value from tx object
  * @param txField: transaction field
  * @param tx Current transaction
