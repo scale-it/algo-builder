@@ -10,9 +10,8 @@ Use `make` to run tasks to `create`, `start-private-net`, `stop-private-net`.
 If you want to create a local network without using our scripts then you can follow this [tutorial](https://developer.algorand.org/tutorials/create-private-network/**.
 
 
-## Quick start
-
-**TL;DR**: Make sure you have Algorand Node (`algod` and `goal`) and `make` installed. Then `cd infrastructure; make setup-private-net`. To reset use `recreate-private-net`.
+## Quick start (local development network)
+**TL;DR**: **Make sure you have Algorand Node (`algod` and `goal`) and `make` installed**. Then `cd infrastructure; make setup-private-net`. To reset use `recreate-private-net`.
 
 1. Install the latest Algorand node. Use one of the options described in the [Algorand installation](https://developer.algorand.org/docs/run-a-node/setup/install/)  documentation.
 1. Make sure the algorand node is installed correctly. You can disable algorand service if you installed algorand node using a package:
@@ -50,6 +49,14 @@ To recreate the private net (stop the current instance, remove all data and re-s
 
     make recreate-private-net
 
+## Quick start (using Sandbox)
+Algorand sandbox is a popular tool among developers to quickly setup up an algorand environment (`algod`, `indexer`, `indexer-db`) using docker. Here user don't need to explicitly setup an algorand node.
+Note: make sure to have [Docker](https://docs.docker.com/compose/install/) installed (with non root privilages). Steps:
++ `cd /infrastructure`
++ `make sandbox-up`
++ `make sandbox-setup-master-account`
+
+Read more about sandbox in [Using Sandbox 2.0](https://github.com/scale-it/algo-builder/blob/master/infrastructure/README.md#using-sandbox-20) section.
 
 ## Connecting to algob
 
@@ -77,10 +84,8 @@ Algorand Sandbox is a fast way to create and configure an Algorand development e
 
 5. `sandbox-clean` - Clean up the env by removing stopped container and unused images.
 
-**Few Points to be noted :**
-1. To use goal commands within sandbox environment, we need to use the sandbox executable file (present in ~/.algorand-sandbox). eg. To list accounts using goal, use `~/.algorand-sandbox/sandbox goal account list` (where `~/.algorand-sandbox` is the directory and `~/.algorand-sandbox/sandbox` is the executable file). If you want to use `goal` directly, you can execute these commands from within the algod's container. To enter use `sandbox-algod`.
-
-2. Algod port is set to `8081` and kmd port is set to `8082`. Make sure to update the port in `algob.config` before running the examples.
+**To be noted :**
+- To use goal commands within sandbox environment, we need to use the sandbox executable file (present in ~/.algorand-sandbox). eg. To list accounts using goal, use `~/.algorand-sandbox/sandbox goal account list` (where `~/.algorand-sandbox` is the directory and `~/.algorand-sandbox/sandbox` is the executable file). If you want to use `goal` directly, you can execute these commands from within the algod's container. To enter use `sandbox-algod`.
 
 To learn more about sandbox, click [here](https://github.com/algorand/sandbox#algorand-sandbox).
 
