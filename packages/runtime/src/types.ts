@@ -212,8 +212,8 @@ export enum TxnOnComplete {
 /**
  * https://developer.algorand.org/docs/reference/teal/specification/#execution-modes */
 export enum ExecutionMode {
-  STATELESS, // stateless TEAL
-  STATEFUL // application call (NoOp, CloseOut..)
+  SIGNATURE, // stateless TEAL
+  APPLICATION // application call (NoOp, CloseOut..)
 }
 
 /**

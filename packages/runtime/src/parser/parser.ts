@@ -313,7 +313,7 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
 
 // verify max cost of TEAL code is within consensus parameters
 function assertMaxCost (gas: number, mode: ExecutionMode): void {
-  if (mode === ExecutionMode.STATELESS) {
+  if (mode === ExecutionMode.SIGNATURE) {
     // check max cost (for stateless)
     if (gas > LogicSigMaxCost) {
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED, {
@@ -336,7 +336,7 @@ function assertMaxCost (gas: number, mode: ExecutionMode): void {
 
 // verify max length of TEAL code is within consensus parameters
 function assertMaxLen (len: number, mode: ExecutionMode): void {
-  if (mode === ExecutionMode.STATELESS) {
+  if (mode === ExecutionMode.SIGNATURE) {
     // check max program cost (for stateless)
     if (len > LogicSigMaxSize) {
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.MAX_LEN_EXCEEDED, {
