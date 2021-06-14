@@ -414,7 +414,7 @@ class DeployerBasicMode {
    * Group transactions into asa and app, check for cp deletion
    * @param txn Transaction execution parameter
    */
-  private _internalDeletedCPCheck (txn: rtypes.ExecParams): void {
+  private _assertCpNotDeleted (txn: rtypes.ExecParams): void {
     switch (txn.type) {
       case rtypes.TransactionType.ModifyAsset:
       case rtypes.TransactionType.FreezeAsset:
@@ -450,10 +450,10 @@ class DeployerBasicMode {
   assertCPNotDeleted (execParams: rtypes.ExecParams | rtypes.ExecParams[]): void {
     if (Array.isArray(execParams)) {
       for (const txn of execParams) {
-        this._internalDeletedCPCheck(txn);
+        this._assertCpNotDeleted(txn);
       }
     } else {
-      this._internalDeletedCPCheck(execParams);
+      this._assertCpNotDeleted(execParams);
     }
   }
 }
