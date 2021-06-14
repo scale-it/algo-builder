@@ -109,6 +109,7 @@ function assertUint64 (n: bigint): void {
  * Converts 64 bit unsigned integer to bytes in big endian.
  */
 export function uint64ToBigEndian (x: number | bigint): Uint8Array {
+  assertUint64(BigInt(x));
   return encodeUint64(x);
 }
 
