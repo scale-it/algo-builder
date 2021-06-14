@@ -1,7 +1,6 @@
 import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
 import type { LogicSig, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
-import { values } from "lodash";
 
 import { BuilderError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
@@ -12,6 +11,7 @@ import { blsigExt, loadBinaryLsig, readMsigFromFile } from "../lib/msig";
 import { persistCheckpoint } from "../lib/script-checkpoints";
 import type {
   ASCCache,
+  CheckpointFunctions,
   CheckpointRepo,
   Deployer,
   FundASCFlags,
@@ -30,6 +30,7 @@ class DeployerBasicMode {
   protected readonly txWriter: txWriter;
   readonly accounts: rtypes.Account[];
   readonly accountsByName: rtypes.AccountMap;
+  checkpoint: CheckpointFunctions;
 
   constructor (deployerCfg: DeployerConfig) {
     this.runtimeEnv = deployerCfg.runtimeEnv;
@@ -39,6 +40,70 @@ class DeployerBasicMode {
     this.accounts = deployerCfg.runtimeEnv.network.config.accounts;
     this.accountsByName = deployerCfg.accounts;
     this.txWriter = deployerCfg.txWriter;
+    this.checkpoint = {
+      /**
+       * Queries a stateful smart contract info from checkpoint using key.
+       * @param key Key here is clear program name appended to approval program name
+       * with hypen("-") in between (approvalProgramName-clearProgramName)
+       */
+      getSSCfromCPKey (key: string): rtypes.SSCInfo | undefined {
+        const resultMap = deployerCfg.cpData.precedingCP[deployerCfg.runtimeEnv.network.name]?.ssc ??
+                            new Map();
+        const nestedMap: any = resultMap.get(key);
+        if (nestedMap) {
+          return [...nestedMap][nestedMap.size - 1][1];
+        } else {
+          return undefined;
+        }
+      },
+
+      /**
+       * Returns SSC checkpoint key using application index,
+       * returns undefined if it doesn't exist
+       * @param index Application index
+       */
+      getAppCheckpointKeyFromIndex (index: number): string | undefined {
+        const resultMap = deployerCfg.cpData.precedingCP[deployerCfg.runtimeEnv.network.name]?.ssc ??
+                            new Map();
+        for (const [key, nestedMap] of resultMap) {
+          if (this.getLatestTimestampValue(nestedMap) === index) {
+            return key;
+          }
+        }
+        return undefined;
+      },
+
+      /**
+       * Returns ASA checkpoint key using asset index,
+       * returns undefined if it doesn't exist
+       * @param index Asset Index
+       */
+      getAssetCheckpointKeyFromIndex (index: number): string | undefined {
+        const resultMap = deployerCfg.cpData.precedingCP[deployerCfg.runtimeEnv.network.name]?.asa ??
+                            new Map();
+        for (const [key, value] of resultMap) {
+          if (value.assetIndex === index) {
+            return key;
+          }
+        }
+        return undefined;
+      },
+
+      /**
+       * Returns latest timestamp value from map
+       * @param map Map
+       */
+      getLatestTimestampValue (map: Map<number, rtypes.SSCInfo>): number {
+        let res: number = -1;
+        const cmpValue: number = -1;
+        map.forEach((value, key) => {
+          if (key >= cmpValue) {
+            res = value.appID;
+          }
+        });
+        return res;
+      }
+    };
   }
 
   protected get networkName (): string {
@@ -134,67 +199,7 @@ class DeployerBasicMode {
    * @param nameClear clear program name
    */
   getSSC (nameApproval: string, nameClear: string): rtypes.SSCInfo | undefined {
-    return this.getSSCfromCPKey(nameApproval + "-" + nameClear);
-  }
-
-  /**
-   * Queries a stateful smart contract info from checkpoint using key.
-   * @param key Key here is clear program name appended to approval program name
-   * with hypen("-") in between (approvalProgramName-clearProgramName)
-   */
-  getSSCfromCPKey (key: string): rtypes.SSCInfo | undefined {
-    const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
-    const nestedMap: any = resultMap.get(key);
-    if (nestedMap) {
-      return [...nestedMap][nestedMap.size - 1][1];
-    } else {
-      return undefined;
-    }
-  }
-
-  /**
-   * Returns latest timestamp value from map
-   * @param map Map
-   */
-  getLatestTimestampValue (map: Map<number, rtypes.SSCInfo>): number {
-    let res: number = -1;
-    const cmpValue: number = -1;
-    map.forEach((value, key) => {
-      if (key >= cmpValue) {
-        res = value.appID;
-      }
-    });
-    return res;
-  }
-
-  /**
-   * Returns SSC checkpoint key using application index,
-   * returns undefined if it doesn't exist
-   * @param index Application index
-   */
-  getAppCheckpointKeyFromIndex (index: number): string | undefined {
-    const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
-    for (const [key, nestedMap] of resultMap) {
-      if (this.getLatestTimestampValue(nestedMap) === index) {
-        return key;
-      }
-    }
-    return undefined;
-  }
-
-  /**
-   * Returns ASA checkpoint key using asset index,
-   * returns undefined if it doesn't exist
-   * @param index Asset Index
-   */
-  getAssetCheckpointKeyFromIndex (index: number): string | undefined {
-    const resultMap = this.cpData.precedingCP[this.networkName]?.asa ?? new Map();
-    for (const [key, value] of resultMap) {
-      if (value.assetIndex === index) {
-        return key;
-      }
-    }
-    return undefined;
+    return this.checkpoint.getSSCfromCPKey(nameApproval + "-" + nameClear);
   }
 
   /**
@@ -379,7 +384,7 @@ class DeployerBasicMode {
     if (typeof asset === "string") {
       res = this.asa.get(asset);
     } else if (typeof asset === "number") {
-      key = this.getAssetCheckpointKeyFromIndex(asset);
+      key = this.checkpoint.getAssetCheckpointKeyFromIndex(asset);
       res = key ? this.asa.get(key) : undefined;
     }
     if (res?.deleted === true) {
@@ -400,8 +405,8 @@ class DeployerBasicMode {
    * @param appID Application index
    */
   private assertIfAppExist (appID: number): void {
-    const key = this.getAppCheckpointKeyFromIndex(appID);
-    const res = key ? this.getSSCfromCPKey(key) : undefined;
+    const key = this.checkpoint.getAppCheckpointKeyFromIndex(appID);
+    const res = key ? this.checkpoint.getSSCfromCPKey(key) : undefined;
     if (res?.deleted === true) {
       throw new BuilderError(
         ERRORS.GENERAL.APP_DELETED, {

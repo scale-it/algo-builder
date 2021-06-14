@@ -370,6 +370,28 @@ export interface AssetScriptMap {
   [assetName: string]: string
 }
 
+export interface CheckpointFunctions {
+  /**
+   * Queries a stateful smart contract info from checkpoint using key. */
+  getSSCfromCPKey: (key: string) => rtypes.SSCInfo | undefined
+
+  /**
+   * Returns SSC checkpoint key using application index,
+   * returns undefined if it doesn't exist
+   * @param index Application index
+   */
+  getAppCheckpointKeyFromIndex: (index: number) => string | undefined
+
+  /**
+   * Returns ASA checkpoint key using asset index,
+   * returns undefined if it doesn't exist
+   * @param index Asset Index
+   */
+  getAssetCheckpointKeyFromIndex: (index: number) => string | undefined
+
+  getLatestTimestampValue: (map: Map<number, rtypes.SSCInfo>) => number
+}
+
 export interface Deployer {
   /**
    * Allows user to know whether a script is running in a `deploy` or `run` mode. */
@@ -380,6 +402,8 @@ export interface Deployer {
   /**
    * Mapping of ASA name to deployment log */
   asa: Map<string, rtypes.ASAInfo>
+
+  checkpoint: CheckpointFunctions
 
   getASAInfo: (name: string) => rtypes.ASAInfo
 
@@ -558,24 +582,6 @@ export interface Deployer {
   /**
    * Queries a stateful smart contract info from checkpoint. */
   getSSC: (nameApproval: string, nameClear: string) => rtypes.SSCInfo | undefined
-
-  /**
-   * Queries a stateful smart contract info from checkpoint using key. */
-  getSSCfromCPKey: (key: string) => rtypes.SSCInfo | undefined
-
-  /**
-   * Returns SSC checkpoint key using application index,
-   * returns undefined if it doesn't exist
-   * @param index Application index
-   */
-  getAppCheckpointKeyFromIndex: (index: number) => string | undefined
-
-  /**
-   * Returns ASA checkpoint key using asset index,
-   * returns undefined if it doesn't exist
-   * @param index Asset Index
-   */
-  getAssetCheckpointKeyFromIndex: (index: number) => string | undefined
 
   /**
    * Queries a delegated logic signature from checkpoint. */

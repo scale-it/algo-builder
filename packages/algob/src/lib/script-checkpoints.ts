@@ -211,7 +211,7 @@ export async function registerCheckpoints (
     switch (txn.type) {
       case 'acfg': {
         txConfirmation = await deployer.waitForConfirmation(txn.txID());
-        const key = deployer.getAssetCheckpointKeyFromIndex(txn.assetIndex);
+        const key = deployer.checkpoint.getAssetCheckpointKeyFromIndex(txn.assetIndex);
         if (key && checkAssetDeletionTx(txn)) {
           const temp: rtypes.ASAInfo = deployer.getASAInfo(key);
           temp.deleted = true;
@@ -236,9 +236,9 @@ export async function registerCheckpoints (
       }
       case 'appl': {
         txConfirmation = await deployer.waitForConfirmation(txn.txID());
-        const key = deployer.getAppCheckpointKeyFromIndex(txn.appIndex);
+        const key = deployer.checkpoint.getAppCheckpointKeyFromIndex(txn.appIndex);
         if (key) {
-          const temp: rtypes.SSCInfo | undefined = deployer.getSSCfromCPKey(key);
+          const temp: rtypes.SSCInfo | undefined = deployer.checkpoint.getSSCfromCPKey(key);
           if (txn.appOnComplete === 5 && temp) {
             temp.deleted = true;
             deployer.registerSSCInfo(key, temp);
@@ -255,7 +255,7 @@ export async function registerCheckpoints (
             timestamp: Math.round(+new Date() / 1000),
             deleted: false
           };
-          const val = deployer.getSSCfromCPKey(res[0]);
+          const val = deployer.checkpoint.getSSCfromCPKey(res[0]);
           if (val?.appID === sscInfo.appID) {
             deployer.logTx("Updating SSC: " + res[0], txConfirmation);
           } else {
