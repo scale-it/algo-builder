@@ -97,8 +97,7 @@ describe("Checkpoint", () => {
     netCheckpoint.dLsig.set("lsig", {
       creator: "536",
       contractAddress: "addr-3",
-      lsig: {} as LogicSig,
-      deleted: false
+      lsig: {} as LogicSig
     });
     appendToCheckpoint(checkpoints, "network12345", netCheckpoint);
     assert.deepEqual(checkpoints, {

@@ -300,8 +300,7 @@ describe("DeployerDeployMode", () => {
         dLsig: new Map<string, LsigInfo>([["MY_LSIG", {
           creator: "addr-1-get-address-dry-run",
           contractAddress: "ASDFGDDSSS12A",
-          lsig: logicSig,
-          deleted: false
+          lsig: logicSig
         }]])
       }
     };
@@ -334,8 +333,7 @@ describe("DeployerDeployMode", () => {
       .registerLsig(networkName, "Lsig name", {
         creator: "Lsig creator",
         contractAddress: "addr-1",
-        lsig: {} as LogicSig,
-        deleted: false
+        lsig: {} as LogicSig
       })
       .putMetadata(networkName, "k", "v");
     const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());

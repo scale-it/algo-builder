@@ -216,6 +216,7 @@ export async function registerCheckpoints (
           const temp: rtypes.ASAInfo = deployer.getASAInfo(key);
           temp.deleted = true;
           deployer.registerASAInfo(key, temp);
+          deployer.logTx("Deleting ASA: " + String(txn.assetIndex), txConfirmation);
           break;
         }
         if (res) {
@@ -241,6 +242,7 @@ export async function registerCheckpoints (
           if (txn.appOnComplete === 5 && temp) {
             temp.deleted = true;
             deployer.registerSSCInfo(key, temp);
+            deployer.logTx("Deleting SSC: " + String(txn.appIndex), txConfirmation);
             break;
           }
         }

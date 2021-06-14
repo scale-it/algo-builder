@@ -284,8 +284,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     return {
       creator: flags.funder.addr,
       contractAddress: contractAddress,
-      lsig: lsig,
-      deleted: false
+      lsig: lsig
     };
   }
 
