@@ -50,7 +50,7 @@ export function parseToStackElem (a: unknown, field: TxField): StackElem {
  * https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction
  * https://github.com/algorand/js-algorand-sdk/blob/e07d99a2b6bd91c4c19704f107cfca398aeb9619/src/transaction.ts#L528
  */
-export function checkAssetDeletionTx (txn: Transaction): boolean {
+export function checkIfAssetDeletionTx (txn: Transaction): boolean {
   if (txn.assetClawback || txn.assetFreeze || txn.assetManager || txn.assetReserve) {
     return false;
   } else if (txn.assetIndex) {

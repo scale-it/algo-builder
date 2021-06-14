@@ -1,5 +1,5 @@
 
-import { checkAssetDeletionTx, loadFromYamlFileSilent, lsTreeWalk, types as rtypes } from "@algo-builder/runtime";
+import { checkIfAssetDeletionTx, loadFromYamlFileSilent, lsTreeWalk, types as rtypes } from "@algo-builder/runtime";
 import { encodeAddress, Transaction } from "algosdk";
 import deepEqual from "deep-equal";
 import * as fs from "fs";
@@ -212,7 +212,7 @@ export async function registerCheckpoints (
       case 'acfg': {
         txConfirmation = await deployer.waitForConfirmation(txn.txID());
         const key = deployer.checkpoint.getAssetCheckpointKeyFromIndex(txn.assetIndex);
-        if (key && checkAssetDeletionTx(txn)) {
+        if (key && checkIfAssetDeletionTx(txn)) {
           const temp: rtypes.ASAInfo = deployer.getASAInfo(key);
           temp.deleted = true;
           deployer.registerASAInfo(key, temp);
