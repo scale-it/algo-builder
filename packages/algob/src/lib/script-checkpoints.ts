@@ -194,7 +194,7 @@ export function persistCheckpoint (scriptName: string, checkpoint: Checkpoints):
 
 /**
  * Check if given transaction is asset deletion
- * @param txn Txn Object
+ * @param txn SDK Txn Object
  * Logic:
  * https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction
  * https://github.com/algorand/js-algorand-sdk/blob/e07d99a2b6bd91c4c19704f107cfca398aeb9619/src/transaction.ts#L528
