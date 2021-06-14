@@ -219,7 +219,7 @@ export class Ctx implements Context {
     this.state.accounts.set(senderAcc.address, senderAcc);
     this.state.globalApps.set(app.id, senderAcc.address);
 
-    this.runtime.run(approvalProgram, ExecutionMode.STATEFUL, this.debugStack); // execute TEAL code with appId = 0
+    this.runtime.run(approvalProgram, ExecutionMode.APPLICATION, this.debugStack); // execute TEAL code with appId = 0
 
     // create new application in globalApps map
     this.state.globalApps.set(++this.state.appCounter, senderAcc.address);
@@ -254,7 +254,7 @@ export class Ctx implements Context {
     const account = this.getAccount(accountAddr);
     account.optInToApp(appID, appParams);
     this.assertAccBalAboveMin(accountAddr);
-    this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL, this.debugStack);
+    this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, this.debugStack);
   }
 
   /**
@@ -429,7 +429,7 @@ export class Ctx implements Context {
     }
 
     const appParams = this.getApp(appID);
-    this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL, this.debugStack);
+    this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, this.debugStack);
 
     const updatedApp = this.getApp(appID);
     updatedApp[APPROVAL_PROGRAM] = approvalProgram;
@@ -470,13 +470,13 @@ export class Ctx implements Context {
         case TransactionType.CallNoOpSSC: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appId);
-          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL, this.debugStack);
+          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, this.debugStack);
           break;
         }
         case TransactionType.CloseSSC: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appId);
-          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL, this.debugStack);
+          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, this.debugStack);
           this.closeApp(fromAccountAddr, txnParam.appId);
           break;
         }
@@ -492,7 +492,7 @@ export class Ctx implements Context {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.runtime.assertAppDefined(txnParam.appId, this.getApp(txnParam.appId));
           try {
-            this.runtime.run(appParams["clear-state-program"], ExecutionMode.STATEFUL, this.debugStack);
+            this.runtime.run(appParams["clear-state-program"], ExecutionMode.APPLICATION, this.debugStack);
           } catch (error) {
             // if transaction type is Clear Call, remove the app without throwing error (rejecting tx)
             // tested by running on algorand network
@@ -505,7 +505,7 @@ export class Ctx implements Context {
         case TransactionType.DeleteSSC: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appId);
-          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.STATEFUL, this.debugStack);
+          this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, this.debugStack);
           this.deleteApp(txnParam.appId);
           break;
         }

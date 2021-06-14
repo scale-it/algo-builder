@@ -902,14 +902,14 @@ describe("Parser", function () {
 
     it("Should return correct opcode list for '+'", async () => {
       const file1 = "test-file-1.teal";
-      let res = parser(getProgram(file1), ExecutionMode.STATELESS, interpreter);
+      let res = parser(getProgram(file1), ExecutionMode.SIGNATURE, interpreter);
       const expected = [new Int(["1"], 1), new Int(["3"], 2), new Add([], 3)];
 
       assert.deepEqual(res, expected);
 
       const expect = [new Pragma(["version", "2"], 1, interpreter), new Int(["1"], 2),
         new Int(["3"], 3), new Add([], 4)];
-      res = parser(getProgram("test-file-2.teal"), ExecutionMode.STATELESS, interpreter);
+      res = parser(getProgram("test-file-2.teal"), ExecutionMode.SIGNATURE, interpreter);
 
       assert.deepEqual(res, expect);
     });
@@ -917,20 +917,20 @@ describe("Parser", function () {
     it("Should throw error if #pragma is not on 1st line", async () => {
       let file = "test-pragma-1.teal";
       expectRuntimeError(
-        () => parser(getProgram(file), ExecutionMode.STATELESS, interpreter),
+        () => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter),
         RUNTIME_ERRORS.TEAL.PRAGMA_NOT_AT_FIRST_LINE
       );
 
       file = "test-pragma-2.teal";
       expectRuntimeError(
-        () => parser(getProgram(file), ExecutionMode.STATELESS, interpreter),
+        () => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter),
         RUNTIME_ERRORS.TEAL.PRAGMA_NOT_AT_FIRST_LINE
       );
     });
 
     it("Should return correct opcode list for '-'", async () => {
       const file = "test-file-3.teal";
-      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
+      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [
         new Pragma(["version", "2"], 1, interpreter),
         new Int(["5"], 2),
@@ -943,7 +943,7 @@ describe("Parser", function () {
 
     it("Should return correct opcode list for '/'", async () => {
       const file = "test-file-4.teal";
-      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
+      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [
         new Pragma(["version", "2"], 1, interpreter),
         new Int(["6"], 2),
@@ -956,7 +956,7 @@ describe("Parser", function () {
 
     it("Should return correct opcode list for '*'", async () => {
       const file = "test-file-5.teal";
-      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
+      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [
         new Pragma(["version", "2"], 1, interpreter),
         new Int(["5"], 4),
@@ -969,7 +969,7 @@ describe("Parser", function () {
 
     it("Should return correct opcode list for 'addr'", async () => {
       const file = "test-addr.teal";
-      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
+      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [
         new Pragma(["version", "2"], 1, interpreter),
         new Addr(["WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"], 2)
@@ -980,7 +980,7 @@ describe("Parser", function () {
 
     it("Should return correct opcode list for 'byte'", async () => {
       const file = "test-byte.teal";
-      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
+      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const byte64 = "QzYhq9JlYbn2QdOMrhyxVlNtNjeyvyJc/I8d8VAGfGc=";
       const byte32 = "MFRGGZDFMY======";
 
@@ -996,7 +996,7 @@ describe("Parser", function () {
 
     it("Should return correct opcode list for 'Len and Err'", async () => {
       const file = "test-len-err.teal";
-      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
+      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [new Len([], 1), new Err([], 2)];
 
       assert.deepEqual(res, expected);
@@ -1004,7 +1004,7 @@ describe("Parser", function () {
 
     it("Should return correct opcode list for 'Bitwise'", async () => {
       const file = "test-bitwise.teal";
-      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
+      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [
         new BitwiseOr([], 2),
         new BitwiseAnd([], 4),
@@ -1017,7 +1017,7 @@ describe("Parser", function () {
 
     it("Should return correct opcode list for 'Mod'", async () => {
       const file = "test-mod.teal";
-      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
+      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [new Int(["6"], 1), new Int(["3"], 2), new Mod([], 3)];
 
       assert.deepEqual(res, expected);
@@ -1028,7 +1028,7 @@ describe("Parser", function () {
       interpreter.runtime = new Runtime([]);
       interpreter.runtime.ctx.args = [new Uint8Array(0)];
 
-      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
+      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [new Arg(["0"], 1, interpreter)];
 
       assert.deepEqual(res, expected);
@@ -1039,7 +1039,7 @@ describe("Parser", function () {
       interpreter.intcblock = [1n];
       interpreter.bytecblock = [new Uint8Array(0)];
 
-      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
+      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [new Intc(["0"], 1, interpreter), new Bytec(["0"], 2, interpreter)];
 
       assert.deepEqual(res, expected);
@@ -1049,14 +1049,14 @@ describe("Parser", function () {
       const file = "test-store-load.teal";
       interpreter.scratch = [1n];
 
-      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
+      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [new Store(["0"], 1, interpreter), new Load(["0"], 2, interpreter)];
 
       assert.deepEqual(res, expected);
     });
 
     it("Should return correct opcode list for 'Crypto opcodes'", async () => {
-      const res = parser(getProgram(cryptoFile), ExecutionMode.STATELESS, interpreter);
+      const res = parser(getProgram(cryptoFile), ExecutionMode.SIGNATURE, interpreter);
       const expected = [
         new Sha256([], 1),
         new Keccak256([], 2),
@@ -1069,7 +1069,7 @@ describe("Parser", function () {
     it("Should return correct opcode list for 'comparsions'", async () => {
       const file = "test-compare.teal";
 
-      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
+      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [
         new LessThan([], 1),
         new GreaterThan([], 2),
@@ -1088,7 +1088,7 @@ describe("Parser", function () {
     it("Should return correct opcode list for 'all others'", async () => {
       const file = "test-others.teal";
 
-      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
+      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [
         new Pragma(["version", "2"], 1, interpreter),
         new Itob([], 2),
@@ -1109,7 +1109,7 @@ describe("Parser", function () {
     it("should return correct opcode list for 'b, bz, bnz'", async () => {
       const file = "test-branch.teal";
 
-      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
+      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [
         new Branch(["label1"], 2, interpreter),
         new BranchIfZero(["label2"], 3, interpreter),
@@ -1122,7 +1122,7 @@ describe("Parser", function () {
     it("should return correct opcode list for 'return'", async () => {
       const file = "test-return.teal";
 
-      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
+      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [new Return([], 2, interpreter)];
 
       assert.deepEqual(res, expected);
@@ -1131,7 +1131,7 @@ describe("Parser", function () {
     it("should return correct opcode list for 'Label'", async () => {
       const file = "test-label.teal";
 
-      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
+      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [new Label(["label:"], 2)];
 
       assert.deepEqual(res, expected);
@@ -1140,7 +1140,7 @@ describe("Parser", function () {
     it("should return correct opcode list for 'global'", async () => {
       const file = "test-global.teal";
 
-      const res = parser(getProgram(file), ExecutionMode.STATELESS, interpreter);
+      const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [
         new Global(["MinTxnFee"], 3, interpreter),
         new Global(["MinBalance"], 4, interpreter),
@@ -1159,7 +1159,7 @@ describe("Parser", function () {
     it("should return correct opcode list for `Stateful`", async () => {
       const file = "test-stateful.teal";
 
-      const res = parser(getProgram(file), ExecutionMode.STATEFUL, interpreter);
+      const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
       const expected = [
         new Pragma(["version", "2"], 1, interpreter),
         new Balance([], 4, interpreter),
@@ -1208,7 +1208,7 @@ describe("Parser", function () {
       assert.equal(interpreter.gas, 1900);
 
       interpreter.gas = 0;
-      parser(getProgram(cryptoFile), ExecutionMode.STATELESS, interpreter);
+      parser(getProgram(cryptoFile), ExecutionMode.SIGNATURE, interpreter);
       assert.equal(interpreter.gas, 1942); // 7 + 26 + 9 + 1900
     });
 
@@ -1232,7 +1232,7 @@ describe("Parser", function () {
       assert.equal(interpreter.gas, 1900);
 
       interpreter.gas = 0;
-      parser(getProgram(cryptoFile), ExecutionMode.STATELESS, interpreter);
+      parser(getProgram(cryptoFile), ExecutionMode.SIGNATURE, interpreter);
       assert.equal(interpreter.gas, 2110); // 35 + 130 + 45 + 1900
     });
 
@@ -1257,13 +1257,13 @@ describe("Parser", function () {
       assert.equal(interpreter.gas, 1900);
 
       interpreter.gas = 0;
-      parser(getProgram(cryptoFile), ExecutionMode.STATELESS, interpreter);
+      parser(getProgram(cryptoFile), ExecutionMode.SIGNATURE, interpreter);
       assert.equal(interpreter.gas, 2110); // 35 + 130 + 45 + 1900
     });
 
     it("Should return correct gas cost for mix opcodes from teal files", async () => {
       let file = "test-file-1.teal";
-      const mode = ExecutionMode.STATELESS;
+      const mode = ExecutionMode.SIGNATURE;
       parser(getProgram(file), mode, interpreter);
       assert.equal(interpreter.gas, 3);
 
@@ -1289,14 +1289,14 @@ describe("Parser", function () {
 
       interpreter.gas = 0;
       file = "test-stateful.teal";
-      parser(getProgram(file), ExecutionMode.STATEFUL, interpreter);
+      parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
       assert.equal(interpreter.gas, 12);
     });
 
     it("Should throw error if total cost exceeds 20000", async () => {
       const file = "test-max-opcost.teal"; // has cost 22800
       expectRuntimeError(
-        () => parser(getProgram(file), ExecutionMode.STATELESS, interpreter),
+        () => parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter),
         RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED
       );
     });

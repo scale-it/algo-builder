@@ -562,7 +562,7 @@ export class Runtime {
       if (program === "") {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
       }
-      this.run(program, ExecutionMode.STATELESS, debugStack);
+      this.run(program, ExecutionMode.SIGNATURE, debugStack);
     } else {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_NOT_FOUND);
     }
