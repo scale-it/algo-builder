@@ -1,5 +1,4 @@
 import { encodeNote, types } from "@algo-builder/runtime";
-import { ExecParams, SSCDeploymentFlags } from "@algo-builder/runtime/build/types";
 import { ConfirmedTxInfo, decodeSignedTransaction, encodeAddress, Transaction } from "algosdk";
 import { assert } from "chai";
 import { isArray } from "lodash";
@@ -227,7 +226,7 @@ describe("Delete ASA and SSC", () => {
   });
 
   it("Should delete SSC, set delete boolean in latest SSCInfo", async () => {
-    const flags: SSCDeploymentFlags = {
+    const flags: types.SSCDeploymentFlags = {
       sender: bobAcc,
       localBytes: 1,
       localInts: 1,
@@ -291,7 +290,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
     await executeTransaction(deployer, execParams);
 
     // deploy and delete app
-    const flags: SSCDeploymentFlags = {
+    const flags: types.SSCDeploymentFlags = {
       sender: bobAcc,
       localBytes: 1,
       localInts: 1,
@@ -560,7 +559,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
   });
 
   it("should pass if user tries delete app that doesn't exist in checkpoint", async () => {
-    const txGroup: ExecParams[] = [
+    const txGroup: types.ExecParams[] = [
       {
         type: types.TransactionType.DestroyAsset,
         sign: types.SignType.SecretKey,
