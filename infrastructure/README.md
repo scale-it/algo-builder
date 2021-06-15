@@ -11,6 +11,7 @@ If you want to create a local network without using our scripts then you can fol
 
 
 ## Quick start (local development network)
+
 **TL;DR**: **Make sure you have Algorand Node (`algod` and `goal`) and `make` installed**. Then `cd infrastructure; make setup-private-net`. To reset use `recreate-private-net`.
 
 1. Install the latest Algorand node. Use one of the options described in the [Algorand installation](https://developer.algorand.org/docs/run-a-node/setup/install/)  documentation.
