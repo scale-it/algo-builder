@@ -11,6 +11,7 @@ import { ERRORS } from "../errors/errors-list";
 import {
   AssetScriptMap,
   Checkpoint,
+  CheckpointFunctions,
   CheckpointRepo,
   Checkpoints,
   Deployer,
@@ -354,4 +355,75 @@ export function loadCheckpointsIntoCPData (cpData: CheckpointRepo, scriptPaths: 
     checkpointData = cpData.merge(loadCheckpoint(s), s);
   }
   return checkpointData;
+}
+
+export class CheckpointFunctionsImpl implements CheckpointFunctions {
+  protected readonly cpData: CheckpointRepo;
+  protected readonly networkName: string;
+
+  constructor (cpData: CheckpointRepo, networkName: string) {
+    this.cpData = cpData;
+    this.networkName = networkName;
+  }
+
+  /**
+   * Queries a stateful smart contract info from checkpoint using key.
+   * @param key Key here is clear program name appended to approval program name
+   * with hypen("-") in between (approvalProgramName-clearProgramName)
+   */
+  getSSCfromCPKey (key: string): rtypes.SSCInfo | undefined {
+    const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ??
+                        new Map();
+    const nestedMap: any = resultMap.get(key);
+    if (nestedMap) {
+      return [...nestedMap][nestedMap.size - 1][1];
+    } else {
+      return undefined;
+    }
+  }
+
+  /**
+   * Returns SSC checkpoint key using application index,
+   * returns undefined if it doesn't exist
+   * @param index Application index
+   */
+  getAppCheckpointKeyFromIndex (index: number): string | undefined {
+    const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
+    for (const [key, nestedMap] of resultMap) {
+      if (this.getLatestTimestampValue(nestedMap) === index) {
+        return key;
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Returns ASA checkpoint key using asset index,
+   * returns undefined if it doesn't exist
+   * @param index Asset Index
+   */
+  getAssetCheckpointKeyFromIndex (index: number): string | undefined {
+    const resultMap = this.cpData.precedingCP[this.networkName]?.asa ?? new Map();
+    for (const [key, value] of resultMap) {
+      if (value.assetIndex === index) {
+        return key;
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Returns latest timestamp value from map
+   * @param map Map
+   */
+  getLatestTimestampValue (map: Map<number, rtypes.SSCInfo>): number {
+    let res: number = -1;
+    const cmpValue: number = -1;
+    map.forEach((value, key) => {
+      if (key >= cmpValue) {
+        res = value.appID;
+      }
+    });
+    return res;
+  }
 }

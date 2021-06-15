@@ -8,7 +8,7 @@ import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
 import { getDummyLsig, getLsig } from "../lib/lsig";
 import { blsigExt, loadBinaryLsig, readMsigFromFile } from "../lib/msig";
-import { persistCheckpoint } from "../lib/script-checkpoints";
+import { CheckpointFunctionsImpl, persistCheckpoint } from "../lib/script-checkpoints";
 import type {
   ASCCache,
   CheckpointFunctions,
@@ -40,70 +40,7 @@ class DeployerBasicMode {
     this.accounts = deployerCfg.runtimeEnv.network.config.accounts;
     this.accountsByName = deployerCfg.accounts;
     this.txWriter = deployerCfg.txWriter;
-    this.checkpoint = {
-      /**
-       * Queries a stateful smart contract info from checkpoint using key.
-       * @param key Key here is clear program name appended to approval program name
-       * with hypen("-") in between (approvalProgramName-clearProgramName)
-       */
-      getSSCfromCPKey (key: string): rtypes.SSCInfo | undefined {
-        const resultMap = deployerCfg.cpData.precedingCP[deployerCfg.runtimeEnv.network.name]?.ssc ??
-                            new Map();
-        const nestedMap: any = resultMap.get(key);
-        if (nestedMap) {
-          return [...nestedMap][nestedMap.size - 1][1];
-        } else {
-          return undefined;
-        }
-      },
-
-      /**
-       * Returns SSC checkpoint key using application index,
-       * returns undefined if it doesn't exist
-       * @param index Application index
-       */
-      getAppCheckpointKeyFromIndex (index: number): string | undefined {
-        const resultMap = deployerCfg.cpData.precedingCP[deployerCfg.runtimeEnv.network.name]?.ssc ??
-                            new Map();
-        for (const [key, nestedMap] of resultMap) {
-          if (this.getLatestTimestampValue(nestedMap) === index) {
-            return key;
-          }
-        }
-        return undefined;
-      },
-
-      /**
-       * Returns ASA checkpoint key using asset index,
-       * returns undefined if it doesn't exist
-       * @param index Asset Index
-       */
-      getAssetCheckpointKeyFromIndex (index: number): string | undefined {
-        const resultMap = deployerCfg.cpData.precedingCP[deployerCfg.runtimeEnv.network.name]?.asa ??
-                            new Map();
-        for (const [key, value] of resultMap) {
-          if (value.assetIndex === index) {
-            return key;
-          }
-        }
-        return undefined;
-      },
-
-      /**
-       * Returns latest timestamp value from map
-       * @param map Map
-       */
-      getLatestTimestampValue (map: Map<number, rtypes.SSCInfo>): number {
-        let res: number = -1;
-        const cmpValue: number = -1;
-        map.forEach((value, key) => {
-          if (key >= cmpValue) {
-            res = value.appID;
-          }
-        });
-        return res;
-      }
-    };
+    this.checkpoint = new CheckpointFunctionsImpl(deployerCfg.cpData, deployerCfg.runtimeEnv.network.name);
   }
 
   protected get networkName (): string {

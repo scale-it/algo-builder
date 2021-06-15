@@ -558,7 +558,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
     await executeTransaction(deployer, execParam);
   });
 
-  it("should pass if user tries delete app that doesn't exist in checkpoint", async () => {
+  it("should pass if user tries delete (asset + app) that doesn't exist in checkpoint", async () => {
     const txGroup: types.ExecParams[] = [
       {
         type: types.TransactionType.DestroyAsset,
