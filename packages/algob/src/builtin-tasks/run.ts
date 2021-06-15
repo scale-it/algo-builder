@@ -35,7 +35,7 @@ export function splitAfter (
   scriptsFromScriptsDir: string[],
   splitAfterScript: string
 ): string[] {
-  for (var i = 0; i < scriptsFromScriptsDir.length; i++) {
+  for (let i = 0; i < scriptsFromScriptsDir.length; i++) {
     const scriptName = scriptsFromScriptsDir[i];
     if (scriptName === splitAfterScript) {
       return scriptsFromScriptsDir.splice(0, i + 1);

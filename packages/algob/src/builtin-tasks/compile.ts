@@ -1,5 +1,4 @@
 import { lsTreeWalk } from '@algo-builder/runtime';
-import { readdirSync } from 'fs';
 import path from "path";
 
 import { task } from "../internal/core/config/config-env";

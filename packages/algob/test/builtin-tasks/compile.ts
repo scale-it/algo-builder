@@ -60,7 +60,7 @@ describe("Compile task", () => {
   const fhash = 2374470440; // murmur3 hash for f1 file
 
   before(function () {
-    var isRoot = process.getuid && process.getuid() === 0;
+    const isRoot = process.getuid && process.getuid() === 0;
     if (isRoot) {
       const warnMsg = chalk.yellowBright(`*** If running tests as root, make sure to have pyteal installed in sudo env (or install pyteal as root).
       Otherwise below tests will fail ***`);

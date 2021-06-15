@@ -202,12 +202,13 @@ export function wordsFromLine (line: string): string[] {
           }
           break;
         // is base64( seq?
-        case '(':
-          var prefix = line.substr(start, i - start);
+        case '(': {
+          const prefix = line.substr(start, i - start);
           if (prefix === "base64" || prefix === "b64") {
             inBase64 = true;
           }
           break;
+        }
         // is ) as base64( completion
         case ')':
           if (inBase64) {

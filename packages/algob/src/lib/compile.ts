@@ -1,4 +1,4 @@
-import { getPathFromDirRecursive, lsTreeWalk } from "@algo-builder/runtime";
+import { getPathFromDirRecursive } from "@algo-builder/runtime";
 import type { Algodv2, CompileOut } from "algosdk";
 import { spawnSync, SpawnSyncReturns } from "child_process";
 import * as fs from 'fs';
