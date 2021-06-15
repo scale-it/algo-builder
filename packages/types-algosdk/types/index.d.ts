@@ -358,6 +358,7 @@ declare module 'algosdk' {
    *   2^64.
    * @returns An 8-byte typed array containing the big-endian encoding of the input
    *   integer.
+   * https://github.com/algorand/js-algorand-sdk/blob/develop/src/encoding/uint64.ts
    */
   export function encodeUint64(num: number | bigint): Uint8Array;
 
@@ -378,6 +379,7 @@ declare module 'algosdk' {
    *   Defaults to "safe" if not included.
    * @returns The integer that was encoded in the input data. The return type will
    *   be determined by the parameter decodingMode.
+   * https://github.com/algorand/js-algorand-sdk/blob/develop/src/encoding/uint64.ts
    */
   export function decodeUint64(data: Uint8Array, decodingMode: string): bigint;
 
