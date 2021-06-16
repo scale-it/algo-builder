@@ -1,8 +1,10 @@
-import { parseSSCAppArgs, stringToBytes, uint64ToBigEndian } from "@algo-builder/runtime";
-import { decodeAddress } from "algosdk";
+import { decodeAddress, decodeUint64 } from "algosdk";
 import { assert } from "chai";
 
-import { MAX_UINT64, MIN_UINT64 } from "../../src/lib/constants";
+import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
+import { convertToString, parseSSCAppArgs, stringToBytes, uint64ToBigEndian } from "../../../src/lib/parsing";
+import { DecodingMode } from "../../../src/types";
+;
 
 describe("Convert integer to big endian", () => {
   /**
@@ -61,6 +63,21 @@ describe("Convert integer to big endian", () => {
 
     errMsg = "Invalid uint64 18446744073709551620";
     assert.throws(() => uint64ToBigEndian(MAX_UINT64 + 5n), errMsg);
+  });
+});
+
+describe("Parse string and integer, with bytes", () => {
+  it("should be equal when string in bytes is passed to uint decoder", () => {
+    const initialString = "50";
+    const first = stringToBytes(initialString);
+    const second = decodeUint64(first, DecodingMode.BIGINT);
+    const third = uint64ToBigEndian(second);
+    const final = convertToString(third);
+
+    // These two are not exactly equal
+    // actual - '\u0000\u0000\u0000\u0000\u0000\u000050'
+    // expected - '50'
+    assert.notEqual(final, initialString);
   });
 });
 
