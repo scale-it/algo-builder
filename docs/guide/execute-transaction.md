@@ -107,6 +107,18 @@ Examples of parameter(`ExecParams`):
   }
 ```
 
+# Call SSC
+
+```js
+  {
+    type: TransactionType.CallNoOpSSC,
+    sign: SignType.SecretKey,
+    fromAccount: john,
+    appId: 0,
+    payFlags: { totalFee: fee }
+  }
+```
+
 # Update SSC
 
 ```js
@@ -127,7 +139,7 @@ Examples of parameter(`ExecParams`):
   {
     type: TransactionType.DeleteSSC,
     sign: SignType.SecretKey,
-    fromAccount: john.account,
+    fromAccount: john,
     appId: 10,
     payFlags: { totalFee: 1000 },
     appArgs: []
