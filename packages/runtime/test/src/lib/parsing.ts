@@ -68,16 +68,25 @@ describe("Convert integer to big endian", () => {
 
 describe("Parse string and integer, with bytes", () => {
   it("should be equal when string in bytes is passed to uint decoder", () => {
-    const initialString = "50";
-    const first = stringToBytes(initialString);
-    const second = decodeUint64(first, DecodingMode.BIGINT);
-    const third = uint64ToBigEndian(second);
-    const final = convertToString(third);
+    let initialString = "50";
+    let first = stringToBytes(initialString);
+    let second = decodeUint64(first, DecodingMode.BIGINT);
+    let third = uint64ToBigEndian(second);
+    let final = convertToString(third);
 
     // These two are not exactly equal
     // actual - '\u0000\u0000\u0000\u0000\u0000\u000050'
     // expected - '50'
     assert.notEqual(final, initialString);
+
+    // opposite case
+    initialString = '\u0000\u0000\u0000\u0000\u0000\u000050';
+    first = stringToBytes(initialString);
+    second = decodeUint64(first, DecodingMode.BIGINT);
+    third = uint64ToBigEndian(second);
+    final = convertToString(third);
+
+    assert.equal(final, initialString);
   });
 });
 
