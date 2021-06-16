@@ -4,7 +4,7 @@ layout: splash
 
 # Execute Transaction
 
-`executeTransaction` function can be used to perform many transactions. It supports every transaction which is possible in algorand network. Ex: Deploy ASA/SSC, Opt-In, Transfers, Delete, Destroy etc. `executeTransaction` takes `ExecParams` or `ExecParams[]` as parameter.
+`executeTransaction` is a high level function which can be used to perform transactions on Algorand Network. It supports every transaction (atomic or single) which is possible in network. Ex: Deploy ASA/SSC, Opt-In, Transfers, Delete, Destroy etc. `executeTransaction` takes `ExecParams` or `ExecParams[]` as parameter.
 If you pass an array of `ExecParams`, it will be considered as `atomic transaction`.
 In below sections we will demonstrate how to pass these parameters.
 
