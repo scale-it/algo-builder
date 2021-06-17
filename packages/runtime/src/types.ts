@@ -212,8 +212,8 @@ export enum TxnOnComplete {
 /**
  * https://developer.algorand.org/docs/reference/teal/specification/#execution-modes */
 export enum ExecutionMode {
-  STATELESS, // stateless TEAL
-  STATEFUL // application call (NoOp, CloseOut..)
+  SIGNATURE, // stateless TEAL
+  APPLICATION // application call (NoOp, CloseOut..)
 }
 
 /**
@@ -428,4 +428,14 @@ export interface AssetModFields {
   reserve?: string
   freeze?: string
   clawback?: string
+}
+
+/**
+ * SDK decoding types (Configure how the integer will be decoded)
+ * https://github.com/algorand/js-algorand-sdk/blob/develop/src/encoding/uint64.ts#L29
+ */
+export enum DecodingMode {
+  SAFE = 'safe',
+  MIXED = 'mixed',
+  BIGINT = 'bigint'
 }

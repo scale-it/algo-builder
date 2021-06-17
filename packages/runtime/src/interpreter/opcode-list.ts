@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
-import { AssetDef, decodeAddress, encodeAddress, isValidAddress, verifyBytes } from "algosdk";
+import { AssetDef, decodeAddress, decodeUint64, encodeAddress, encodeUint64, isValidAddress, verifyBytes } from "algosdk";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
 import { Keccak } from 'sha3';
@@ -15,7 +15,7 @@ import {
 } from "../lib/parsing";
 import { Stack } from "../lib/stack";
 import { txAppArg, txnSpecbyField } from "../lib/txn";
-import { EncodingType, StackElem, TEALStack, TxnOnComplete, TxnType } from "../types";
+import { DecodingMode, EncodingType, StackElem, TEALStack, TxnOnComplete, TxnType } from "../types";
 import { Interpreter } from "./interpreter";
 import { Op } from "./opcode";
 
@@ -918,10 +918,8 @@ export class Itob extends Op {
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
-    const stackValue = this.assertBigInt(stack.pop(), this.line);
-    const buff = Buffer.alloc(8);
-    buff.writeBigUInt64BE(stackValue);
-    stack.push(Uint8Array.from(buff));
+    const uint64 = this.assertBigInt(stack.pop(), this.line);
+    stack.push(encodeUint64(uint64));
   }
 }
 
@@ -944,10 +942,7 @@ export class Btoi extends Op {
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
     const bytes = this.assertBytes(stack.pop(), this.line);
-    if (bytes.length > 8) {
-      throw new RuntimeError(RUNTIME_ERRORS.TEAL.LONG_INPUT_ERROR, { line: this.line });
-    }
-    const uint64 = Buffer.from(bytes).readBigUInt64BE();
+    const uint64 = decodeUint64(bytes, DecodingMode.BIGINT);
     stack.push(uint64);
   }
 }

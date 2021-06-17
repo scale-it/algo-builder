@@ -1140,10 +1140,14 @@ describe("Teal Opcodes", function () {
       assert.equal(top, 1n);
     });
 
-    it("should throw invalid type error",
-      execExpectError(stack, [new Uint8Array([0, 1, 1, 1, 1, 1, 1, 1, 0])],
-        new Btoi([], 1), RUNTIME_ERRORS.TEAL.LONG_INPUT_ERROR)
-    );
+    it("should throw invalid type error", () => {
+      stack.push(new Uint8Array([0, 1, 1, 1, 1, 1, 1, 1, 0]));
+      const op = new Btoi([], 1);
+      assert.throws(
+        () => op.execute(stack),
+        'Data has unacceptable length. Expected length is between 1 and 8, got 9'
+      );
+    });
   });
 
   describe("Addw", () => {

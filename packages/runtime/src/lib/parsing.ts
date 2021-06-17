@@ -1,4 +1,4 @@
-import { decodeAddress } from "algosdk";
+import { decodeAddress, encodeUint64 } from "algosdk";
 import * as base32 from "hi-base32";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
@@ -109,11 +109,8 @@ function assertUint64 (n: bigint): void {
  * Converts 64 bit unsigned integer to bytes in big endian.
  */
 export function uint64ToBigEndian (x: number | bigint): Uint8Array {
-  x = BigInt(x); // use x as bigint internally to support upto uint64
-  assertUint64(x);
-  const buff = Buffer.alloc(8);
-  buff.writeBigUInt64BE(x);
-  return Uint8Array.from(buff);
+  assertUint64(BigInt(x));
+  return encodeUint64(x);
 }
 
 /**
