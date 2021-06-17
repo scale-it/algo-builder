@@ -333,7 +333,7 @@ class DeployerBasicMode {
   }
 
   /**
-   * Check if SSC info exist for app id,
+   * Asserts App is defined in a checkpoint by app id.
    * First: search for SSCInfo in checkpoints
    * Case 1: If it exist check if that info is deleted or not by checking deleted boolean
    * If deleted boolean is true throw error
