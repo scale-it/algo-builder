@@ -12,8 +12,8 @@ Note: For each parameter `type` and `sign` fields are mandatory.
   - `type`: type of transaction
   - `sign`: sign type
 
-Examples of parameter(`ExecParams`):
-### Transfer Algo using secret key
+Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/runtime.types.html#execparams):
+### [Transfer Algo using secret key](https://algobuilder.dev/api/algob/modules/runtime.types.html#algotransferparam)
 
 ```js
   {
@@ -25,8 +25,9 @@ Examples of parameter(`ExecParams`):
     payFlags: { totalFee: 1000 }
   }
 ```
+- payFlags: [TxParams](https://algobuilder.dev/api/algob/interfaces/runtime.types.txparams.html)
 
-# Transfer Algo using logic signature
+### [Transfer Algo using logic signature](https://algobuilder.dev/api/algob/modules/runtime.types.html#algotransferparam)
 
 ```js
   {
@@ -40,7 +41,7 @@ Examples of parameter(`ExecParams`):
   }
 ```
 
-# Deploy ASA
+### [Deploy ASA](https://algobuilder.dev/api/algob/modules/runtime.types.html#deployasaparam)
 
 ```js
   {
@@ -52,7 +53,7 @@ Examples of parameter(`ExecParams`):
   }
 ```
 
-# Opt-In to ASA
+### [Opt-In to ASA](https://algobuilder.dev/api/algob/modules/runtime.types.html#optinasaparam)
 
 ```js
   {
@@ -64,7 +65,7 @@ Examples of parameter(`ExecParams`):
   }
 ```
 
-# Transfer Asset
+### [Transfer Asset](https://algobuilder.dev/api/algob/modules/runtime.types.html#assettransferparam)
 
 ```js
   {
@@ -78,7 +79,7 @@ Examples of parameter(`ExecParams`):
   }
 ```
 
-# Deploy SSC
+### [Deploy SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#deploysscparam)
 
 ```js
   {
@@ -94,8 +95,9 @@ Examples of parameter(`ExecParams`):
     payFlags: {}
   }
 ```
+- To learn about more parameters like (account, appArgs, ForeignApps, ForeignAssets etc).Please check [SSCOptionalFlags](https://algobuilder.dev/api/algob/interfaces/runtime.types.sscoptionalflags.html)
 
-# Opt-In to SSC
+### [Opt-In to SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#optinsscparam)
 
 ```js
   {
@@ -107,7 +109,7 @@ Examples of parameter(`ExecParams`):
   }
 ```
 
-# Call SSC
+### [Call SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#ssccallsparam)
 
 ```js
   {
@@ -119,7 +121,7 @@ Examples of parameter(`ExecParams`):
   }
 ```
 
-# Update SSC
+### [Update SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#updatesscparam)
 
 ```js
   {
@@ -133,7 +135,7 @@ Examples of parameter(`ExecParams`):
   }
 ```
 
-# Delete SSC
+### [Delete SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#ssccallsparam)
 
 ```js
   {

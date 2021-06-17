@@ -227,13 +227,22 @@ export interface TxParams {
    * parameters. We think that this is more explicit. */
   feePerByte?: number
   totalFee?: number
+  // The first round for when the transaction is valid.
   firstValid?: number
+  // firstValid + validRounds will give us the ending round for which the transaction is valid.
   validRounds?: number
+  // A lease enforces mutual exclusion of transactions.
   lease?: Uint8Array
+  // Any data up to 1000 bytes.
   note?: string
   noteb64?: string
+  // When set, it indicates that the transaction is requesting
+  // that the Sender account should be closed, and all remaining
+  // funds, after the fee and amount are paid, be transferred to this address.
   closeRemainderTo?: AccountAddress
+  // Specifies the authorized address.
   rekeyTo?: AccountAddress
+  // you can learn more about these parameters here.(https://developer.algorand.org/docs/reference/transactions/#common-fields-header-and-type)
 }
 
 /**
@@ -249,12 +258,33 @@ export interface SSCDeploymentFlags extends SSCOptionalFlags {
 /**
  * Stateful smart contract transaction optional parameters (accounts, args..). */
 export interface SSCOptionalFlags {
+  /**
+   * Transaction specific arguments accessed from
+   * the application's approval-program and clear-state-program.
+   */
   appArgs?: Array<Uint8Array | string>
+  /**
+   * List of accounts in addition to the sender that may
+   * be accessed from the application's approval-program and clear-state-program.
+   */
   accounts?: string[]
+  /**
+   * Lists the applications in addition to the application-id
+   * whose global states may be accessed by this
+   * application's approval-program and clear-state-program. The access is read-only.
+   */
   foreignApps?: number[]
+  /**
+   * Lists the assets whose AssetParams may be accessed by
+   * this application's approval-program and clear-state-program.
+   * The access is read-only.
+   */
   foreignAssets?: number[]
+  // Any data up to 1000 bytes.
   note?: Uint8Array
+  // A lease enforces mutual exclusion of transactions.
   lease?: Uint8Array
+  // you can learn more about these parameters from here.(https://developer.algorand.org/docs/reference/transactions/#application-call-transaction)
 }
 
 /**
