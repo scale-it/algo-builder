@@ -316,7 +316,7 @@ class DeployerBasicMode {
    * Case 2: If it doesn't exist, pass
    * @param asset asset index or asset name
    */
-  private assertIfASAExist (asset: string | number): void {
+  private assertASAExist (asset: string | number): void {
     let key, res;
     if (typeof asset === "string") {
       res = this.asa.get(asset);
@@ -341,7 +341,7 @@ class DeployerBasicMode {
    * Case 2: If it doesn't exist, pass
    * @param appID Application index
    */
-  private assertIfAppExist (appID: number): void {
+  private assertAppExist (appID: number): void {
     const key = this.checkpoint.getAppCheckpointKeyFromIndex(appID);
     const res = key ? this.checkpoint.getSSCfromCPKey(key) : undefined;
     if (res?.deleted === true) {
@@ -363,7 +363,7 @@ class DeployerBasicMode {
       case rtypes.TransactionType.RevokeAsset:
       case rtypes.TransactionType.OptInASA:
       case rtypes.TransactionType.DestroyAsset: {
-        this.assertIfASAExist(txn.assetID);
+        this.assertASAExist(txn.assetID);
         break;
       }
       // https://developer.algorand.org/articles/algos-asas/#opting-in-and-out-of-asas
@@ -371,7 +371,7 @@ class DeployerBasicMode {
       case rtypes.TransactionType.TransferAsset: {
         // If transaction is not opt-out check for CP deletion
         if (txn.payFlags.closeRemainderTo === undefined) {
-          this.assertIfASAExist(txn.assetID);
+          this.assertASAExist(txn.assetID);
         }
         break;
       }
@@ -380,7 +380,7 @@ class DeployerBasicMode {
       case rtypes.TransactionType.OptInSSC:
       case rtypes.TransactionType.UpdateSSC:
       case rtypes.TransactionType.CallNoOpSSC: {
-        this.assertIfAppExist(txn.appID);
+        this.assertAppExist(txn.appID);
         break;
       }
     }
