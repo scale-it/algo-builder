@@ -25,7 +25,7 @@ export class TxWriterImpl implements txWriter {
   }
 
   ensureDirectoryExistence (filePath: string): void {
-    var dirname = path.dirname(filePath);
+    const dirname = path.dirname(filePath);
     if (fs.existsSync(dirname)) {
       return;
     }
@@ -40,10 +40,10 @@ export class TxWriterImpl implements txWriter {
     (this.timestamp).toString() + '.log';
 
     this.ensureDirectoryExistence(filePath);
-    var map = new Map();
+    const map = new Map();
     map.set(msg, obj);
     YAML.defaultOptions.indent = 4;
-    var file = YAML.stringify(map);
+    const file = YAML.stringify(map);
     fs.appendFileSync(filePath, file);
   }
 }

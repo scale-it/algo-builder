@@ -180,7 +180,7 @@ async function main (): Promise<void> {
   //  config.paths.root,
   //  config.analytics.enabled
   // );
-  var showStackTraces = false;
+  let showStackTraces = false;
   try {
     const {
       runtimeArgs,

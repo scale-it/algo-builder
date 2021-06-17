@@ -25,7 +25,6 @@ const StateMap = "key-value";
 const globalState = "global-state";
 const localStateSchema = "local-state-schema";
 const globalStateSchema = "global-state-schema";
-const numUint = 'num-uint';
 const numByteSlice = 'num-byte-slice';
 
 export class AccountStore implements AccountStoreI {

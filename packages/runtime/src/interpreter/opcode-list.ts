@@ -553,7 +553,7 @@ export class Sha256 extends Op {
     const val = this.assertBytes(stack.pop(), this.line) as Message;
     hash.update(val);
     const hashedOutput = Buffer.from(hash.hex(), 'hex');
-    var arrByte = Uint8Array.from(hashedOutput);
+    const arrByte = Uint8Array.from(hashedOutput);
     stack.push(arrByte);
   }
 }
@@ -579,7 +579,7 @@ export class Sha512_256 extends Op {
     const val = this.assertBytes(stack.pop(), this.line) as Message;
     hash.update(val);
     const hashedOutput = Buffer.from(hash.hex(), 'hex');
-    var arrByte = Uint8Array.from(hashedOutput);
+    const arrByte = Uint8Array.from(hashedOutput);
     stack.push(arrByte);
   }
 }
@@ -606,7 +606,7 @@ export class Keccak256 extends Op {
 
     const hash = new Keccak(256);
     hash.update(convertToString(top));
-    var arrByte = Uint8Array.from(hash.digest());
+    const arrByte = Uint8Array.from(hash.digest());
     stack.push(arrByte);
   }
 }
@@ -1107,7 +1107,7 @@ export class Concat extends Op {
     if (valueA.length + valueB.length > MAX_CONCAT_SIZE) {
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.CONCAT_ERROR, { line: this.line });
     }
-    var c = new Uint8Array(valueB.length + valueA.length);
+    const c = new Uint8Array(valueB.length + valueA.length);
     c.set(valueB);
     c.set(valueA, valueB.length);
     stack.push(c);

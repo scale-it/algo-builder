@@ -210,6 +210,7 @@ async function mkTx (
  * Execute single transaction or group of transactions (atomic transaction)
  * @param deployer Deployer
  * @param execParams transaction parameters or atomic transaction parameters
+ * https://github.com/scale-it/algo-builder/blob/docs/docs/guide/execute-transaction.md
  */
 export async function executeTransaction (
   deployer: Deployer,

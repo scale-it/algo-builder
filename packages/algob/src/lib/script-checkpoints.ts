@@ -291,9 +291,9 @@ export function loadCheckpoint (scriptName: string): Checkpoints {
 }
 
 function lsFiles (directoryName: string): string[] {
-  var list: string[] = [];
+  const list: string[] = [];
   fs.readdirSync(directoryName).forEach(file => {
-    var fullPath = path.join(directoryName, file);
+    const fullPath = path.join(directoryName, file);
     const f = fs.statSync(fullPath);
     if (f.isFile()) {
       list.push(fullPath);
@@ -326,7 +326,7 @@ export function loadCheckpointsRecursive (): CheckpointRepo {
 }
 
 export function loadCheckpointsIntoCPData (cpData: CheckpointRepo, scriptPaths: string[]): CheckpointRepo {
-  var checkpointData = cpData;
+  let checkpointData = cpData;
   for (const s of scriptPaths) {
     checkpointData = cpData.merge(loadCheckpoint(s), s);
   }

@@ -65,7 +65,7 @@ describe("Loading accounts", () => {
     process.env.ALGOB_ACCOUNTS = JSON.stringify([{ name: "master", mnemonic: goodMnemonic }]);
     const accountSDK = mnemonicToSecretKey(goodMnemonic);
     const accounts = [{ name: "master", addr: accountSDK.addr, sk: accountSDK.sk }];
-    var algobAccounts = loadAccountsFromEnv();
+    let algobAccounts = loadAccountsFromEnv();
     assert.deepEqual(algobAccounts, accounts, "Loaded accounts mismatch");
 
     delete process.env.ALGOB_ACCOUNTS;
@@ -80,7 +80,7 @@ describe("Loading accounts", () => {
 
     // fails when account name is empty
     process.env.ALGOB_ACCOUNTS = JSON.stringify([{ name: "", mnemonic: goodMnemonic }]);
-    var errmsg = 'ABLDR404: Field account name must be defined and not empty in ' + JSON.stringify({ name: "", mnemonic: goodMnemonic });
+    let errmsg = 'ABLDR404: Field account name must be defined and not empty in ' + JSON.stringify({ name: "", mnemonic: goodMnemonic });
     assert.throws(() => loadAccountsFromEnv(), errmsg);
 
     // fails when account name is missing
