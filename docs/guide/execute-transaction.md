@@ -13,7 +13,7 @@ Note: For each parameter `type` and `sign` fields are mandatory.
   - `sign`: sign type
 
 Examples of parameter(`ExecParams`):
-# Transfer Algo using secret key
+### Transfer Algo using secret key
 
 ```js
   {
