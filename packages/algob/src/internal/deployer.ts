@@ -308,7 +308,7 @@ class DeployerBasicMode {
   }
 
   /**
-   * Check if ASA info exist for asset id / string,
+   * Asserts ASA is defined in a checkpoint by asset id / string,
    * First: search for ASAInfo in checkpoints
    * Case 1: If it exist check if that info is deleted or not by checking deleted boolean
    * If deleted boolean is true throw error
