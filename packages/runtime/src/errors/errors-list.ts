@@ -279,9 +279,9 @@ export const runtimeGeneralErrors = {
   },
   APP_NOT_FOUND: {
     number: 1306,
-    message: "Application Index %appId% not found or is invalid at line %line%",
-    title: "Application index %appId% is not found line at %line%",
-    description: `Application index %appId% is not found`
+    message: "Application Index %appID% not found or is invalid at line %line%",
+    title: "Application index %appID% is not found line at %line%",
+    description: `Application index %appID% is not found`
   },
   INVALID_APPROVAL_PROGRAM: {
     number: 1307,

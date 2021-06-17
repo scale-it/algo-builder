@@ -10,7 +10,7 @@ const { types } = require('@algo-builder/runtime');
 async function setupPermissionsSSC (controllerSSCInfo, deployer) {
   const gold = deployer.asa.get('gold');
   const alice = deployer.accountsByName.get('alice');
-  const controllerAppId = controllerSSCInfo.appID;
+  const controllerappID = controllerSSCInfo.appID;
 
   const templateParam = {
     PERM_MANAGER: alice.addr
@@ -49,7 +49,7 @@ async function setupPermissionsSSC (controllerSSCInfo, deployer) {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: alice, // asa manager account
-      appId: controllerAppId,
+      appID: controllerappID,
       payFlags: { totalFee: 1000 },
       appArgs: appArgs,
       foreignAssets: [gold.assetIndex] // controller sc verifies if correct token is being used + asa.manager is correct one

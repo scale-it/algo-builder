@@ -83,14 +83,14 @@ describe('Permissioned Token Tests - Failing Paths', function () {
   describe('WhiteListing', function () {
     let permManagerAddr, permManager, whitelistParams;
     this.beforeEach(() => {
-      permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsAppId, 'manager'));
+      permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager'));
       permManager = ctx.getAccount(permManagerAddr);
 
       whitelistParams = {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
         fromAccount: permManager.account,
-        appId: ctx.permissionsAppId,
+        appID: ctx.permissionsappID,
         payFlags: { totalFee: 1000 },
         appArgs: ['str:add_whitelist'],
         accounts: [elon.address]
@@ -99,19 +99,19 @@ describe('Permissioned Token Tests - Failing Paths', function () {
 
     it('should reject account whitelist if the account doesn\'t opt-in to permissions app', () => {
       // verify account not opted in
-      assert.isUndefined(ctx.elon.getAppFromLocal(ctx.permissionsAppId));
+      assert.isUndefined(ctx.elon.getAppFromLocal(ctx.permissionsappID));
 
       // Fails because elon is not opted in
       assert.throws(() =>
         ctx.runtime.executeTx({ ...whitelistParams }),
-        `RUNTIME_ERR1306: Application Index ${ctx.permissionsAppId} not found or is invalid`);
+        `RUNTIME_ERR1306: Application Index ${ctx.permissionsappID} not found or is invalid`);
     });
 
     it('should not whitelist account if sender is not current permissions manager', () => {
       // opt-in to permissions by elon
       ctx.optInToPermissionsSSC(elon.address);
       ctx.syncAccounts();
-      assert.isDefined(ctx.elon.getAppFromLocal(ctx.permissionsAppId));
+      assert.isDefined(ctx.elon.getAppFromLocal(ctx.permissionsappID));
 
       // Fails because Bob is not the manager
       assert.notEqual(permManager.address, bob.address); // verify bob is not permissions manager
@@ -133,7 +133,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
 
   describe('Change Permissions Manager', function () {
     it('should fail if sender is not current permissions manager', () => {
-      const permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsAppId, 'manager'));
+      const permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager'));
       const permManager = ctx.getAccount(permManagerAddr);
       assert.notEqual(permManager.address, bob.address); // verify bob is not current permissions manager
 
@@ -141,7 +141,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
         fromAccount: bob.account,
-        appId: ctx.permissionsAppId,
+        appID: ctx.permissionsappID,
         payFlags: { totalFee: 1000 },
         appArgs: ['str:change_permissions_manager'],
         accounts: [elon.address]
@@ -155,7 +155,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
   describe('Force Transfer(Clawback)', function () {
     let permManagerAddr, permManager, forceTransferGroup;
     this.beforeEach(() => {
-      permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsAppId, 'manager'));
+      permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager'));
       permManager = ctx.getAccount(permManagerAddr);
 
       // Opt-In to ASA by bob and elon (accA, accB)
@@ -169,7 +169,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           type: types.TransactionType.CallNoOpSSC,
           sign: types.SignType.SecretKey,
           fromAccount: asaManager.account,
-          appId: ctx.controllerAppID,
+          appID: ctx.controllerappID,
           payFlags: { totalFee: 1000 },
           appArgs: ['str:force_transfer'],
           foreignAssets: [ctx.assetIndex]
@@ -197,7 +197,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           type: types.TransactionType.CallNoOpSSC,
           sign: types.SignType.SecretKey,
           fromAccount: asaManager.account,
-          appId: ctx.permissionsAppId,
+          appID: ctx.permissionsappID,
           payFlags: { totalFee: 1000 },
           appArgs: [STR_TRANSFER],
           accounts: [bob.address, elon.address]
@@ -325,7 +325,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
   describe('Token Transfer', function () {
     let permManagerAddr, permManager, tokenTransferGroup;
     this.beforeEach(() => {
-      permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsAppId, 'manager'));
+      permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager'));
       permManager = ctx.getAccount(permManagerAddr);
 
       // Opt-In to ASA by bob and elon (accA, accB)
@@ -338,7 +338,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           type: types.TransactionType.CallNoOpSSC,
           sign: types.SignType.SecretKey,
           fromAccount: bob.account,
-          appId: ctx.controllerAppID,
+          appID: ctx.controllerappID,
           payFlags: { totalFee: 1000 },
           appArgs: [STR_TRANSFER],
           foreignAssets: [ctx.assetIndex]
@@ -366,7 +366,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           type: types.TransactionType.CallNoOpSSC,
           sign: types.SignType.SecretKey,
           fromAccount: bob.account,
-          appId: ctx.permissionsAppId,
+          appID: ctx.permissionsappID,
           payFlags: { totalFee: 1000 },
           appArgs: [STR_TRANSFER],
           accounts: [bob.address, elon.address]
@@ -491,7 +491,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           type: types.TransactionType.CallNoOpSSC,
           sign: types.SignType.SecretKey,
           fromAccount: asaManager.account,
-          appId: ctx.controllerAppID,
+          appID: ctx.controllerappID,
           payFlags: { totalFee: 1000 },
           appArgs: ['str:force_transfer'],
           foreignAssets: [ctx.assetIndex]

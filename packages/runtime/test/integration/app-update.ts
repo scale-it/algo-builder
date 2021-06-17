@@ -17,7 +17,7 @@ describe("App Update Test", function () {
   let runtime: Runtime;
   let approvalProgram: string;
   let clearProgram: string;
-  let appId: number;
+  let appID: number;
   let groupTx: UpdateSSCParam[];
 
   this.beforeEach(async function () {
@@ -32,14 +32,14 @@ describe("App Update Test", function () {
       localInts: 5
     };
 
-    appId = runtime.addApp(flags, {}, approvalProgram, clearProgram);
+    appID = runtime.addApp(flags, {}, approvalProgram, clearProgram);
 
     groupTx = [
       {
         type: TransactionType.UpdateSSC,
         sign: SignType.SecretKey,
         fromAccount: john.account,
-        appID: appId,
+        appID: appID,
         newApprovalProgram: approvalProgram,
         newClearProgram: clearProgram,
         payFlags: {},
@@ -49,7 +49,7 @@ describe("App Update Test", function () {
         type: TransactionType.UpdateSSC,
         sign: SignType.SecretKey,
         fromAccount: john.account,
-        appID: appId,
+        appID: appID,
         newApprovalProgram: approvalProgram,
         newClearProgram: clearProgram,
         payFlags: {},
@@ -65,8 +65,8 @@ describe("App Update Test", function () {
   it("First case: (app_update(n=2) + app_update(n=5))", function () {
     runtime.executeTx(groupTx);
 
-    const globalCounter = runtime.getGlobalState(appId, "counter");
-    const total = runtime.getGlobalState(appId, "total");
+    const globalCounter = runtime.getGlobalState(appID, "counter");
+    const total = runtime.getGlobalState(appID, "total");
     assert(globalCounter === 2n, "failed counter");
     assert(total === 7n, "failed total");
   });
@@ -81,8 +81,8 @@ describe("App Update Test", function () {
 
     runtime.executeTx(groupTx);
 
-    const globalCounter = runtime.getGlobalState(appId, "counter");
-    const total = runtime.getGlobalState(appId, "total");
+    const globalCounter = runtime.getGlobalState(appID, "counter");
+    const total = runtime.getGlobalState(appID, "total");
     assert(globalCounter === 2n, "failed counter");
     assert(total === 13n, "failed total");
   });
@@ -115,8 +115,8 @@ describe("App Update Test", function () {
       runtime.executeTx(groupTx);
     }
 
-    const globalCounter = runtime.getGlobalState(appId, "counter");
-    const total = runtime.getGlobalState(appId, "total");
+    const globalCounter = runtime.getGlobalState(appID, "counter");
+    const total = runtime.getGlobalState(appID, "total");
     assert.equal(globalCounter, 2000n, "counter mismatch");
     assert.equal(total, 3010n, "total mismatch");
   });

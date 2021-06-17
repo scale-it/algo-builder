@@ -44,6 +44,19 @@ export function parseToStackElem (a: unknown, field: TxField): StackElem {
 }
 
 /**
+ * Check if given transaction is asset deletion
+ * @param txn Txn Object
+ * Logic:
+ * https://developer.algorand.org/docs/reference/transactions/#asset-configuration-transaction
+ * https://github.com/algorand/js-algorand-sdk/blob/e07d99a2b6bd91c4c19704f107cfca398aeb9619/src/transaction.ts#L528
+ */
+export function checkIfAssetDeletionTx (txn: Transaction): boolean {
+  return txn.type === 'acfg' && // type should be asset config
+  (txn.assetIndex > 0) && // assetIndex should not be 0
+  !(txn.assetClawback || txn.assetFreeze || txn.assetManager || txn.assetReserve); // fields should be empty
+}
+
+/**
  * Description: returns specific transaction field value from tx object
  * @param txField: transaction field
  * @param tx Current transaction
@@ -259,7 +272,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
       return algosdk.makeApplicationClearStateTxn(
         fromAccountAddr,
         suggestedParams,
-        execParams.appId,
+        execParams.appID,
         parseSSCAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
@@ -273,7 +286,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
       return algosdk.makeApplicationDeleteTxn(
         fromAccountAddr,
         suggestedParams,
-        execParams.appId,
+        execParams.appID,
         parseSSCAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
@@ -287,7 +300,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
       return algosdk.makeApplicationNoOpTxn(
         fromAccountAddr,
         suggestedParams,
-        execParams.appId,
+        execParams.appID,
         parseSSCAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
@@ -300,7 +313,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
       return algosdk.makeApplicationCloseOutTxn(
         fromAccountAddr,
         suggestedParams,
-        execParams.appId,
+        execParams.appID,
         parseSSCAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,

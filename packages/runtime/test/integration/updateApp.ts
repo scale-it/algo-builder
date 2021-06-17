@@ -19,7 +19,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
   let oldApprovalProgram: string;
   let newApprovalProgram: string;
   let clearProgram: string;
-  let appId: number;
+  let appID: number;
   const flags = {
     sender: creator.account,
     globalBytes: 4,
@@ -42,22 +42,22 @@ describe("Algorand Smart Contracts - Update Application", function () {
   });
 
   it("should update application", function () {
-    appId = runtime.addApp(flags, {}, oldApprovalProgram, clearProgram);
-    runtime.optInToApp(creator.address, appId, {}, {});
+    appID = runtime.addApp(flags, {}, oldApprovalProgram, clearProgram);
+    runtime.optInToApp(creator.address, appID, {}, {});
 
     // check created app params
-    let app = runtime.getApp(appId);
+    let app = runtime.getApp(appID);
     assert.isDefined(app);
     assert.deepEqual(app[approvalStr], oldApprovalProgram);
     assert.deepEqual(app["clear-state-program"], clearProgram);
 
-    runtime.updateApp(creator.address, appId, newApprovalProgram, clearProgram, {}, {});
-    app = runtime.getApp(appId);
+    runtime.updateApp(creator.address, appID, newApprovalProgram, clearProgram, {}, {});
+    app = runtime.getApp(appID);
 
     // check if program & state is updated after tx execution
     assert.deepEqual(app[approvalStr], newApprovalProgram);
-    assert.deepEqual(runtime.getGlobalState(appId, "global-key"), stringToBytes("global-val"));
-    assert.deepEqual(runtime.getLocalState(appId, creator.address, "local-key"), stringToBytes("local-val"));
+    assert.deepEqual(runtime.getGlobalState(appID, "global-key"), stringToBytes("global-val"));
+    assert.deepEqual(runtime.getLocalState(appID, creator.address, "local-key"), stringToBytes("local-val"));
 
     // now call the smart contract after updating approval program which checks for
     // global-key and local-key in state (which was set during the update from oldApprovalProgram)
@@ -65,36 +65,36 @@ describe("Algorand Smart Contracts - Update Application", function () {
       type: TransactionType.CallNoOpSSC,
       sign: SignType.SecretKey,
       fromAccount: creator.account,
-      appId: appId,
+      appID: appID,
       payFlags: { totalFee: 1000 }
     };
     runtime.executeTx(noOpParams);
     creator = runtime.getAccount(creator.address);
 
     // check state set by the 'new' approval program
-    assert.deepEqual(runtime.getGlobalState(appId, "new-global-key"), stringToBytes("new-global-val"));
-    assert.deepEqual(runtime.getLocalState(appId, creator.address, "new-local-key"), stringToBytes("new-local-val"));
+    assert.deepEqual(runtime.getGlobalState(appID, "new-global-key"), stringToBytes("new-global-val"));
+    assert.deepEqual(runtime.getLocalState(appID, creator.address, "new-local-key"), stringToBytes("new-local-val"));
   });
 
   it("should not update application if logic is rejected", function () {
     // create app
-    appId = runtime.addApp(flags, {}, oldApprovalProgram, clearProgram);
-    runtime.optInToApp(creator.address, appId, {}, {});
+    appID = runtime.addApp(flags, {}, oldApprovalProgram, clearProgram);
+    runtime.optInToApp(creator.address, appID, {}, {});
 
-    let app = runtime.getApp(appId);
+    let app = runtime.getApp(appID);
     assert.isDefined(app);
     assert.deepEqual(app[approvalStr], oldApprovalProgram);
 
     // update should be rejected because sender is not creator
     expectRuntimeError(
-      () => runtime.updateApp(alice.address, appId, newApprovalProgram, clearProgram, {}, {}),
+      () => runtime.updateApp(alice.address, appID, newApprovalProgram, clearProgram, {}, {}),
       RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
     );
 
     // verify approval program & state is not updated as tx is rejected
-    app = runtime.getApp(appId);
+    app = runtime.getApp(appID);
     assert.deepEqual(app[approvalStr], oldApprovalProgram);
-    assert.deepEqual(runtime.getGlobalState(appId, "global-key"), undefined);
-    assert.deepEqual(runtime.getLocalState(appId, creator.address, "local-key"), undefined);
+    assert.deepEqual(runtime.getGlobalState(appID, "global-key"), undefined);
+    assert.deepEqual(runtime.getLocalState(appID, creator.address, "local-key"), undefined);
   });
 });

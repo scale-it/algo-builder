@@ -8,9 +8,10 @@ import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
 import { getDummyLsig, getLsig } from "../lib/lsig";
 import { blsigExt, loadBinaryLsig, readMsigFromFile } from "../lib/msig";
-import { persistCheckpoint } from "../lib/script-checkpoints";
+import { CheckpointFunctionsImpl, persistCheckpoint } from "../lib/script-checkpoints";
 import type {
   ASCCache,
+  CheckpointFunctions,
   CheckpointRepo,
   Deployer,
   FundASCFlags,
@@ -29,6 +30,7 @@ class DeployerBasicMode {
   protected readonly txWriter: txWriter;
   readonly accounts: rtypes.Account[];
   readonly accountsByName: rtypes.AccountMap;
+  checkpoint: CheckpointFunctions;
 
   constructor (deployerCfg: DeployerConfig) {
     this.runtimeEnv = deployerCfg.runtimeEnv;
@@ -38,12 +40,17 @@ class DeployerBasicMode {
     this.accounts = deployerCfg.runtimeEnv.network.config.accounts;
     this.accountsByName = deployerCfg.accounts;
     this.txWriter = deployerCfg.txWriter;
+    this.checkpoint = new CheckpointFunctionsImpl(deployerCfg.cpData, deployerCfg.runtimeEnv.network.name);
   }
 
   protected get networkName (): string {
     return this.runtimeEnv.network.name;
   }
 
+  /**
+   * Queries ASA Info from asset name
+   * @param name asset name
+   */
   getASAInfo (name: string): rtypes.ASAInfo {
     const found = this.asa.get(name);
     if (!found) {
@@ -129,22 +136,7 @@ class DeployerBasicMode {
    * @param nameClear clear program name
    */
   getSSC (nameApproval: string, nameClear: string): rtypes.SSCInfo | undefined {
-    return this.getSSCfromCPKey(nameApproval + "-" + nameClear);
-  }
-
-  /**
-   * Queries a stateful smart contract info from checkpoint using key.
-   * @param key Key here is clear program name appended to approval program name
-   * with hypen("-") in between (approvalProgramName-clearProgramName)
-   */
-  getSSCfromCPKey (key: string): rtypes.SSCInfo | undefined {
-    const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
-    const nestedMap: any = resultMap.get(key);
-    if (nestedMap) {
-      return [...nestedMap][nestedMap.size - 1][1];
-    } else {
-      return undefined;
-    }
+    return this.checkpoint.getSSCfromCPKey(nameApproval + "-" + nameClear);
   }
 
   /**
@@ -200,6 +192,13 @@ class DeployerBasicMode {
    * @param flags Transaction flags
    */
   async optInAcountToASA (asa: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
+    this.assertCPNotDeleted({
+      type: rtypes.TransactionType.OptInASA,
+      sign: rtypes.SignType.SecretKey,
+      fromAccount: this._getAccount(accountName),
+      assetID: asa,
+      payFlags: {}
+    });
     try {
       const asaId = this.getASAInfo(asa).assetIndex;
       await this.algoOp.optInAcountToASA(
@@ -229,6 +228,14 @@ class DeployerBasicMode {
    * @param flags Transaction flags
    */
   async optInLsigToASA (asa: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
+    this.assertCPNotDeleted({
+      type: rtypes.TransactionType.OptInASA,
+      sign: rtypes.SignType.LogicSignature,
+      fromAccountAddr: lsig.address(),
+      lsig: lsig,
+      assetID: asa,
+      payFlags: {}
+    });
     try {
       const asaId = this.getASAInfo(asa).assetIndex;
       await this.algoOp.optInLsigToASA(asa, asaId, lsig, flags);
@@ -252,10 +259,17 @@ class DeployerBasicMode {
    */
   async optInAccountToSSC (
     sender: rtypes.Account,
-    appId: number,
+    appID: number,
     payFlags: rtypes.TxParams,
     flags: rtypes.SSCOptionalFlags): Promise<void> {
-    await this.algoOp.optInAccountToSSC(sender, appId, payFlags, flags);
+    this.assertCPNotDeleted({
+      type: rtypes.TransactionType.OptInSSC,
+      sign: rtypes.SignType.SecretKey,
+      fromAccount: sender,
+      appID: appID,
+      payFlags: {}
+    });
+    await this.algoOp.optInAccountToSSC(sender, appID, payFlags, flags);
   }
 
   /**
@@ -267,11 +281,19 @@ class DeployerBasicMode {
    * @param flags Optional parameters to SSC (accounts, args..)
    */
   async optInLsigToSSC (
-    appId: number,
+    appID: number,
     lsig: LogicSig,
     payFlags: rtypes.TxParams,
     flags: rtypes.SSCOptionalFlags): Promise<void> {
-    await this.algoOp.optInLsigToSSC(appId, lsig, payFlags, flags);
+    this.assertCPNotDeleted({
+      type: rtypes.TransactionType.OptInSSC,
+      sign: rtypes.SignType.LogicSignature,
+      fromAccountAddr: lsig.address(),
+      lsig: lsig,
+      appID: appID,
+      payFlags: {}
+    });
+    await this.algoOp.optInLsigToSSC(appID, lsig, payFlags, flags);
   }
 
   /**
@@ -283,6 +305,101 @@ class DeployerBasicMode {
    */
   async ensureCompiled (name: string, force?: boolean, scTmplParams?: SCParams): Promise<ASCCache> {
     return await this.algoOp.ensureCompiled(name, force, scTmplParams);
+  }
+
+  /**
+   * Asserts ASA is defined in a checkpoint by asset id / string,
+   * First: search for ASAInfo in checkpoints
+   * Case 1: If it exist check if that info is deleted or not by checking deleted boolean
+   * If deleted boolean is true throw error
+   * else, pass
+   * Case 2: If it doesn't exist, pass
+   * @param asset asset index or asset name
+   */
+  private assertASAExist (asset: string | number): void {
+    let key, res;
+    if (typeof asset === "string") {
+      res = this.asa.get(asset);
+    } else if (typeof asset === "number") {
+      key = this.checkpoint.getAssetCheckpointKeyFromIndex(asset);
+      res = key ? this.asa.get(key) : undefined;
+    }
+    if (res?.deleted === true) {
+      throw new BuilderError(
+        ERRORS.GENERAL.ASSET_DELETED, {
+          asset: asset
+        });
+    }
+  }
+
+  /**
+   * Asserts App is defined in a checkpoint by app id.
+   * First: search for SSCInfo in checkpoints
+   * Case 1: If it exist check if that info is deleted or not by checking deleted boolean
+   * If deleted boolean is true throw error
+   * else, pass
+   * Case 2: If it doesn't exist, pass
+   * @param appID Application index
+   */
+  private assertAppExist (appID: number): void {
+    const key = this.checkpoint.getAppCheckpointKeyFromIndex(appID);
+    const res = key ? this.checkpoint.getSSCfromCPKey(key) : undefined;
+    if (res?.deleted === true) {
+      throw new BuilderError(
+        ERRORS.GENERAL.APP_DELETED, {
+          app: appID
+        });
+    }
+  }
+
+  /**
+   * Group transactions into asa and app, check for cp deletion
+   * @param txn Transaction execution parameter
+   */
+  private _assertCpNotDeleted (txn: rtypes.ExecParams): void {
+    switch (txn.type) {
+      case rtypes.TransactionType.ModifyAsset:
+      case rtypes.TransactionType.FreezeAsset:
+      case rtypes.TransactionType.RevokeAsset:
+      case rtypes.TransactionType.OptInASA:
+      case rtypes.TransactionType.DestroyAsset: {
+        this.assertASAExist(txn.assetID);
+        break;
+      }
+      // https://developer.algorand.org/articles/algos-asas/#opting-in-and-out-of-asas
+      // https://developer.algorand.org/docs/reference/transactions/#asset-transfer-transaction
+      case rtypes.TransactionType.TransferAsset: {
+        // If transaction is not opt-out check for CP deletion
+        if (txn.payFlags.closeRemainderTo === undefined) {
+          this.assertASAExist(txn.assetID);
+        }
+        break;
+      }
+      case rtypes.TransactionType.DeleteSSC:
+      case rtypes.TransactionType.CloseSSC:
+      case rtypes.TransactionType.OptInSSC:
+      case rtypes.TransactionType.UpdateSSC:
+      case rtypes.TransactionType.CallNoOpSSC: {
+        this.assertAppExist(txn.appID);
+        break;
+      }
+    }
+  }
+
+  /**
+   * Checks if checkpoint is deleted for a particular transaction
+   * if checkpoint exist and is marked as deleted,
+   * throw error(except for opt-out transactions), else pass
+   * @param execParams Transaction execution parameters
+   */
+  assertCPNotDeleted (execParams: rtypes.ExecParams | rtypes.ExecParams[]): void {
+    if (Array.isArray(execParams)) {
+      for (const txn of execParams) {
+        this._assertCpNotDeleted(txn);
+      }
+    } else {
+      this._assertCpNotDeleted(execParams);
+    }
   }
 }
 
@@ -482,7 +599,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * Update programs for a contract.
    * @param sender Account from which call needs to be made
    * @param payFlags Transaction Flags
-   * @param appId ID of the application being configured or empty if creating
+   * @param appID ID of the application being configured or empty if creating
    * @param newApprovalProgram New Approval Program filename
    * @param newClearProgram New Clear Program filename
    * @param flags Optional parameters to SSC (accounts, args..)
@@ -495,6 +612,15 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     newClearProgram: string,
     flags: rtypes.SSCOptionalFlags
   ): Promise<rtypes.SSCInfo> {
+    this.assertCPNotDeleted({
+      type: rtypes.TransactionType.UpdateSSC,
+      sign: rtypes.SignType.SecretKey,
+      fromAccount: sender,
+      newApprovalProgram: newApprovalProgram,
+      newClearProgram: newClearProgram,
+      appID: appID,
+      payFlags: {}
+    });
     const cpKey = newApprovalProgram + "-" + newClearProgram;
 
     let sscInfo = {} as rtypes.SSCInfo;
@@ -606,6 +732,15 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     newClearProgram: string,
     flags: rtypes.SSCOptionalFlags
   ): Promise<rtypes.SSCInfo> {
+    this.assertCPNotDeleted({
+      type: rtypes.TransactionType.UpdateSSC,
+      sign: rtypes.SignType.SecretKey,
+      fromAccount: sender,
+      newApprovalProgram: newApprovalProgram,
+      newClearProgram: newClearProgram,
+      appID: appID,
+      payFlags: {}
+    });
     return await this.algoOp.updateSSC(
       sender, payFlags, appID,
       newApprovalProgram, newClearProgram,

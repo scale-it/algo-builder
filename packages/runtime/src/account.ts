@@ -66,29 +66,29 @@ export class AccountStore implements AccountStoreI {
   /**
    * Fetches local state value for key present in account
    * returns undefined otherwise
-   * @param appId: current application id
+   * @param appID: current application id
    * @param key: key to fetch value of from local state
    */
-  getLocalState (appId: number, key: Uint8Array | string): StackElem | undefined {
+  getLocalState (appID: number, key: Uint8Array | string): StackElem | undefined {
     const localState = this.appsLocalState;
-    const data = localState.get(appId)?.[StateMap]; // can be undefined (eg. app opted in)
+    const data = localState.get(appID)?.[StateMap]; // can be undefined (eg. app opted in)
     const localKey = keyToBytes(key);
     return data?.get(localKey.toString());
   }
 
   /**
    * Set new key-value pair or update pair with existing key in account
-   * for application id: appId, throw error otherwise
-   * @param appId: current application id
+   * for application id: appID, throw error otherwise
+   * @param appID: current application id
    * @param key: key to fetch value of from local state
    * @param value: value of key to put in local state
    * @param line line number in TEAL file
    * Note: if user is accessing this function directly through runtime,
    * then line number is unknown
    */
-  setLocalState (appId: number, key: Uint8Array | string, value: StackElem, line?: number): AppLocalStateM {
+  setLocalState (appID: number, key: Uint8Array | string, value: StackElem, line?: number): AppLocalStateM {
     const lineNumber = line ?? 'unknown';
-    const localState = this.appsLocalState.get(appId);
+    const localState = this.appsLocalState.get(appID);
     const localApp = localState?.[StateMap];
     if (localState && localApp) {
       const localKey = keyToBytes(key);
@@ -100,18 +100,18 @@ export class AccountStore implements AccountStoreI {
     }
 
     throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, {
-      appId: appId,
+      appID: appID,
       line: lineNumber
     });
   }
 
   /**
    * Queries app global state value. Returns `undefined` if the key is not present.
-   * @param appId: current application id
+   * @param appID: current application id
    * @param key: key to fetch value of from local state
    */
-  getGlobalState (appId: number, key: Uint8Array | string): StackElem | undefined {
-    const app = this.getApp(appId);
+  getGlobalState (appID: number, key: Uint8Array | string): StackElem | undefined {
+    const app = this.getApp(appID);
     if (!app) return undefined;
     const appGlobalState = app[globalState];
     const globalKey = keyToBytes(key);
@@ -121,13 +121,13 @@ export class AccountStore implements AccountStoreI {
   /**
    * Updates app global state.
    * Throws error if app is not found.
-   * @param appId: application id
+   * @param appID: application id
    * @param key: app global state key
    * @param value: value associated with a key
    */
-  setGlobalState (appId: number, key: Uint8Array | string, value: StackElem, line?: number): void {
-    const app = this.getApp(appId);
-    if (app === undefined) throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: line ?? 'unknown' });
+  setGlobalState (appID: number, key: Uint8Array | string, value: StackElem, line?: number): void {
+    const app = this.getApp(appID);
+    if (app === undefined) throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appID: appID, line: line ?? 'unknown' });
     const appGlobalState = app[globalState];
     const globalKey = keyToBytes(key);
     appGlobalState.set(globalKey.toString(), value); // set new value in global state
@@ -139,19 +139,19 @@ export class AccountStore implements AccountStoreI {
   /**
    * Queries application by application index from account's global state.
    * Returns undefined if app is not found.
-   * @param appId application index
+   * @param appID application index
    */
-  getApp (appId: number): SSCAttributesM | undefined {
-    return this.createdApps.get(appId);
+  getApp (appID: number): SSCAttributesM | undefined {
+    return this.createdApps.get(appID);
   }
 
   /**
    * Queries application by application index from account's local state.
    * Returns undefined if app is not found.
-   * @param appId application index
+   * @param appID application index
    */
-  getAppFromLocal (appId: number): AppLocalStateM | undefined {
-    return this.appsLocalState.get(appId);
+  getAppFromLocal (appID: number): AppLocalStateM | undefined {
+    return this.appsLocalState.get(appID);
   }
 
   /**
@@ -263,13 +263,13 @@ export class AccountStore implements AccountStoreI {
   /**
    * Add application in account's state
    * check maximum account creation limit
-   * @param appId application index
+   * @param appID application index
    * @param params SSCDeployment Flags
    * @param approvalProgram application approval program
    * @param clearProgram application clear program
    * NOTE - approval and clear program must be the TEAL code as string
    */
-  addApp (appId: number, params: SSCDeploymentFlags,
+  addApp (appID: number, params: SSCDeploymentFlags,
     approvalProgram: string, clearProgram: string): CreatedAppM {
     if (this.createdApps.size === MAX_ALGORAND_ACCOUNT_APPS) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.MAX_LIMIT_APPS, {
@@ -285,16 +285,16 @@ export class AccountStore implements AccountStoreI {
       (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * params.globalInts +
       (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * params.globalBytes
     );
-    const app = new App(appId, params, approvalProgram, clearProgram);
+    const app = new App(appID, params, approvalProgram, clearProgram);
     this.createdApps.set(app.id, app.attributes);
     return app;
   }
 
   // opt in to application
-  optInToApp (appId: number, appParams: SSCAttributesM): void {
-    const localState = this.appsLocalState.get(appId); // fetch local state from account
+  optInToApp (appID: number, appParams: SSCAttributesM): void {
+    const localState = this.appsLocalState.get(appID); // fetch local state from account
     if (localState) {
-      console.warn(`${this.address} is already opted in to app ${appId}`);
+      console.warn(`${this.address} is already opted in to app ${appID}`);
     } else {
       if (this.appsLocalState.size === 10) {
         throw new Error('Maximum Opt In applications per account is 10');
@@ -309,11 +309,11 @@ export class AccountStore implements AccountStoreI {
 
       // create new local app attribute
       const localParams: AppLocalStateM = {
-        id: appId,
+        id: appID,
         "key-value": new Map<string, StackElem>(),
         schema: appParams[localStateSchema]
       };
-      this.appsLocalState.set(appId, localParams);
+      this.appsLocalState.set(appID, localParams);
     }
   }
 
@@ -334,10 +334,10 @@ export class AccountStore implements AccountStoreI {
   }
 
   // delete application from account's global state (createdApps)
-  deleteApp (appId: number): void {
-    const app = this.createdApps.get(appId);
+  deleteApp (appID: number): void {
+    const app = this.createdApps.get(appID);
     if (!app) {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appID: appID, line: 'unknown' });
     }
 
     // reduce minimum balance
@@ -346,14 +346,14 @@ export class AccountStore implements AccountStoreI {
       (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * app[globalStateSchema]["num-uint"] +
       (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * app[globalStateSchema][numByteSlice]
     );
-    this.createdApps.delete(appId);
+    this.createdApps.delete(appID);
   }
 
   // close(delete) application from account's local state (appsLocalState)
-  closeApp (appId: number): void {
-    const localApp = this.appsLocalState.get(appId);
+  closeApp (appID: number): void {
+    const localApp = this.appsLocalState.get(appID);
     if (!localApp) {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appID: appID, line: 'unknown' });
     }
 
     // decrease min balance
@@ -362,7 +362,7 @@ export class AccountStore implements AccountStoreI {
       (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * localApp.schema['num-uint'] +
       (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * localApp.schema[numByteSlice]
     );
-    this.appsLocalState.delete(appId);
+    this.appsLocalState.delete(appID);
   }
 }
 
@@ -372,9 +372,9 @@ class App {
   readonly attributes: SSCAttributesM;
 
   // NOTE - approval and clear program must be the TEAL code as string
-  constructor (appId: number, params: SSCDeploymentFlags,
+  constructor (appID: number, params: SSCDeploymentFlags,
     approvalProgram: string, clearProgram: string) {
-    this.id = appId;
+    this.id = appID;
     this.attributes = {
       'approval-program': approvalProgram,
       'clear-state-program': clearProgram,

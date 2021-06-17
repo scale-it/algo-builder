@@ -41,7 +41,7 @@ async function forceTransfer (deployer, fromAddr, toAddr, amount) {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: asaManager,
-      appId: controllerSSCInfo.appID,
+      appID: controllerSSCInfo.appID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:force_transfer'],
       foreignAssets: [gold.assetIndex] // to verify token reserve, manager
@@ -82,7 +82,7 @@ async function forceTransfer (deployer, fromAddr, toAddr, amount) {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: asaManager,
-      appId: permissionsSSCInfo.appID,
+      appID: permissionsSSCInfo.appID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:transfer'],
       accounts: [fromAddr, toAddr] //  AppAccounts (pass asset sender & receiver address)

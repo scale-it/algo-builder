@@ -144,9 +144,16 @@ async function mkTx (
     case rtypes.TransactionType.TransferAsset :
     case rtypes.TransactionType.ModifyAsset :
     case rtypes.TransactionType.FreezeAsset :
-    case rtypes.TransactionType.RevokeAsset :
+    case rtypes.TransactionType.RevokeAsset : {
+      if (typeof txn.assetID === "string") {
+        const asaInfo = deployer.getASAInfo(txn.assetID);
+        txn.assetID = asaInfo.assetIndex;
+      }
+      break;
+    }
     case rtypes.TransactionType.DestroyAsset : {
       if (typeof txn.assetID === "string") {
+        txIdxMap.set(index, [txn.assetID, deployer.getASADef(txn.assetID, {})]);
         const asaInfo = deployer.getASAInfo(txn.assetID);
         txn.assetID = asaInfo.assetIndex;
       }
@@ -215,6 +222,7 @@ export async function executeTransaction (
   deployer: Deployer,
   execParams: rtypes.ExecParams | rtypes.ExecParams[]):
   Promise<algosdk.ConfirmedTxInfo> {
+  deployer.assertCPNotDeleted(execParams);
   try {
     let signedTxn;
     let txns: Transaction[] = [];
