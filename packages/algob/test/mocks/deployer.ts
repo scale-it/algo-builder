@@ -17,6 +17,23 @@ export class FakeDeployer implements Deployer {
   accounts = [];
   accountsByName = new Map<string, rtypes.Account>();
   scriptName = '';
+  checkpoint = {
+    getSSCfromCPKey (key: string): rtypes.SSCInfo | undefined {
+      throw new Error("Not implemented");
+    },
+
+    getAppCheckpointKeyFromIndex (index: number): string | undefined {
+      throw new Error("Not implemented");
+    },
+
+    getAssetCheckpointKeyFromIndex (index: number): string | undefined {
+      throw new Error("Not implemented");
+    },
+
+    getLatestTimestampValue (map: Map<number, rtypes.SSCInfo>): number {
+      throw new Error("Not implemented");
+    }
+  };
 
   assertNoAsset (name: string): void {
     throw new Error("Not implemented");
@@ -63,6 +80,14 @@ export class FakeDeployer implements Deployer {
   }
 
   getSSCfromCPKey (key: string): rtypes.SSCInfo | undefined {
+    throw new Error("Not implemented");
+  }
+
+  getAppCheckpointKeyFromIndex (index: number): string | undefined {
+    throw new Error("Not implemented");
+  }
+
+  getAssetCheckpointKeyFromIndex (index: number): string | undefined {
     throw new Error("Not implemented");
   }
 
@@ -126,6 +151,10 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
+  assertCPNotDeleted (execParams: rtypes.ExecParams | rtypes.ExecParams[]): void {
+    throw new Error("Not implemented");
+  }
+
   isDefined (name: string): boolean {
     return false;
   };
@@ -157,7 +186,7 @@ export class FakeDeployer implements Deployer {
   }
 
   optInLsigToSSC (
-    appId: number, lsig: LogicSig,
+    appID: number, lsig: LogicSig,
     payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags): Promise<void> {
     throw new Error("not implemented.");
   }

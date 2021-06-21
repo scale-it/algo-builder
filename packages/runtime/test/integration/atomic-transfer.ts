@@ -17,7 +17,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
   let approvalProgram: string;
   let clearProgram: string;
   let assetId: number;
-  let appId: number;
+  let appID: number;
 
   this.beforeEach(() => {
     john = new AccountStore(initialBalance, elonMuskAccount);
@@ -30,7 +30,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     clearProgram = getProgram('clear.teal');
 
     // create new app
-    appId = runtime.addApp({
+    appID = runtime.addApp({
       sender: john.account,
       globalBytes: 32,
       globalInts: 32,
@@ -38,7 +38,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
       localInts: 8
     }, {}, approvalProgram, clearProgram);
     // opt-in to app
-    runtime.optInToApp(john.address, appId, {}, {});
+    runtime.optInToApp(john.address, appID, {}, {});
     // opt-in for alice
     runtime.optIntoASA(assetId, alice.address, {});
     syncAccounts();
@@ -129,7 +129,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         type: TransactionType.CallNoOpSSC,
         sign: SignType.SecretKey,
         fromAccount: john.account,
-        appId: appId,
+        appID: appID,
         payFlags: { totalFee: 1000 }
       },
       {
@@ -143,11 +143,11 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     ];
     runtime.executeTx(txGroup);
 
-    const globalCounter = runtime.getGlobalState(appId, key);
+    const globalCounter = runtime.getGlobalState(appID, key);
     assert.isDefined(globalCounter); // there should be a value present with key "counter"
     assert.equal(globalCounter, 1n);
 
-    const localCounter = runtime.getAccount(john.address).getLocalState(appId, key); // get local value from john account
+    const localCounter = runtime.getAccount(john.address).getLocalState(appID, key); // get local value from john account
     assert.isDefined(localCounter); // there should be a value present in local state with key "counter"
     assert.equal(localCounter, 1n);
 
@@ -162,7 +162,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         type: TransactionType.CallNoOpSSC,
         sign: SignType.SecretKey,
         fromAccount: john.account,
-        appId: appId,
+        appID: appID,
         payFlags: { totalFee: 1000 }
       },
       {
@@ -179,10 +179,10 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
       RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_BALANCE
     );
 
-    const localCounter = runtime.getAccount(john.address).getLocalState(appId, key);
+    const localCounter = runtime.getAccount(john.address).getLocalState(appID, key);
     assert.isDefined(localCounter);
     assert.equal(localCounter, 0n);
-    const globalCounter = runtime.getGlobalState(appId, key);
+    const globalCounter = runtime.getGlobalState(appID, key);
     assert.isUndefined(globalCounter);
 
     syncAccounts();
@@ -333,7 +333,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         type: TransactionType.CloseSSC,
         sign: SignType.SecretKey,
         fromAccount: john.account,
-        appId: appId,
+        appID: appID,
         payFlags: { totalFee: 1000 }
       },
       {
@@ -352,7 +352,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     );
 
     syncAccounts();
-    assert.isDefined(john.getLocalState(appId, key));
+    assert.isDefined(john.getLocalState(appID, key));
   });
 
   it("should fail clear app if payment transaction fails", () => {
@@ -361,7 +361,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         type: TransactionType.ClearSSC,
         sign: SignType.SecretKey,
         fromAccount: john.account,
-        appId: appId,
+        appID: appID,
         payFlags: { totalFee: 1000 }
       },
       {
@@ -380,7 +380,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     );
 
     syncAccounts();
-    assert.isDefined(john.getLocalState(appId, key));
+    assert.isDefined(john.getLocalState(appID, key));
   });
 
   it("should fail asset payment, and algo payment if ssc call fails", () => {
@@ -389,7 +389,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
       type: TransactionType.ClearSSC,
       sign: SignType.SecretKey,
       fromAccount: john.account,
-      appId: appId,
+      appID: appID,
       payFlags: { totalFee: 1000 }
     });
     syncAccounts();
@@ -398,7 +398,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         type: TransactionType.ClearSSC,
         sign: SignType.SecretKey,
         fromAccount: john.account,
-        appId: appId,
+        appID: appID,
         payFlags: { totalFee: 1000 }
       },
       {

@@ -21,7 +21,7 @@ async function changePermissionsManager (deployer, permissionsManager, address) 
     type: types.TransactionType.CallNoOpSSC,
     sign: types.SignType.SecretKey,
     fromAccount: permissionsManager, // asset manager account (fails otherwise)
-    appId: permissionSSCInfo.appID,
+    appID: permissionSSCInfo.appID,
     payFlags: { totalFee: 1000 },
     appArgs: ['str:change_permissions_manager'],
     accounts: [address]

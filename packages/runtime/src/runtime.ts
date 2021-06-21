@@ -37,7 +37,7 @@ export class Runtime {
     // runtime store
     this.store = {
       accounts: new Map<AccountAddress, AccountStoreI>(), // string represents account address
-      globalApps: new Map<number, AccountAddress>(), // map of {appId: accountAddress}
+      globalApps: new Map<number, AccountAddress>(), // map of {appID: accountAddress}
       assetDefs: new Map<number, AccountAddress>(), // number represents assetId
       assetNameInfo: new Map<string, ASAInfo>(),
       appNameInfo: new Map<string, SSCInfo>(),
@@ -93,16 +93,16 @@ export class Runtime {
   /**
    * asserts if application exists in state
    * @param app application
-   * @param appId application index
+   * @param appID application index
    * @param line line number in TEAL file
    * Note: if user is accessing this function directly through runtime,
    * the line number is unknown
    */
-  assertAppDefined (appId: number, app?: SSCAttributesM, line?: number): SSCAttributesM {
+  assertAppDefined (appID: number, app?: SSCAttributesM, line?: number): SSCAttributesM {
     const lineNumber = line ?? 'unknown';
     if (app === undefined) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND,
-        { appId: appId, line: lineNumber });
+        { appID: appID, line: lineNumber });
     }
     return app;
   }
@@ -164,15 +164,15 @@ export class Runtime {
 
   /**
    * Fetches app from `this.store`
-   * @param appId Application Index
+   * @param appID Application Index
    */
-  getApp (appId: number): SSCAttributesM {
-    if (!this.store.globalApps.has(appId)) {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
+  getApp (appID: number): SSCAttributesM {
+    if (!this.store.globalApps.has(appID)) {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appID: appID, line: 'unknown' });
     }
-    const accAddress = this.assertAddressDefined(this.store.globalApps.get(appId));
+    const accAddress = this.assertAddressDefined(this.store.globalApps.get(appID));
     const account = this.assertAccountDefined(accAddress, this.store.accounts.get(accAddress));
-    return this.assertAppDefined(appId, account.getApp(appId));
+    return this.assertAppDefined(appID, account.getApp(appID));
   }
 
   /**
@@ -186,29 +186,29 @@ export class Runtime {
 
   /**
    * Fetches global state value for key present in creator's global state
-   * for given appId, returns undefined otherwise
-   * @param appId: current application id
+   * for given appID, returns undefined otherwise
+   * @param appID: current application id
    * @param key: key to fetch value of from local state
    */
-  getGlobalState (appId: number, key: Uint8Array | string): StackElem | undefined {
-    if (!this.store.globalApps.has(appId)) {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: 'unknown' });
+  getGlobalState (appID: number, key: Uint8Array | string): StackElem | undefined {
+    if (!this.store.globalApps.has(appID)) {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appID: appID, line: 'unknown' });
     }
-    const accAddress = this.assertAddressDefined(this.store.globalApps.get(appId));
+    const accAddress = this.assertAddressDefined(this.store.globalApps.get(appID));
     const account = this.assertAccountDefined(accAddress, this.store.accounts.get(accAddress));
-    return account.getGlobalState(appId, key);
+    return account.getGlobalState(appID, key);
   }
 
   /**
    * Fetches local state for account address and application index
-   * @param appId application index
+   * @param appID application index
    * @param accountAddr address for which local state needs to be retrieved
    * @param key: key to fetch value of from local state
    */
-  getLocalState (appId: number, accountAddr: string, key: Uint8Array | string): StackElem | undefined {
+  getLocalState (appID: number, accountAddr: string, key: Uint8Array | string): StackElem | undefined {
     accountAddr = this.assertAddressDefined(accountAddr);
     const account = this.assertAccountDefined(accountAddr, this.store.accounts.get(accountAddr));
-    return account.getLocalState(appId, key);
+    return account.getLocalState(appID, key);
   }
 
   /**
@@ -260,8 +260,8 @@ export class Runtime {
     for (const acc of accounts) {
       this.store.accounts.set(acc.address, acc);
 
-      for (const appId of acc.createdApps.keys()) {
-        this.store.globalApps.set(appId, acc.address);
+      for (const appID of acc.createdApps.keys()) {
+        this.store.globalApps.set(appID, acc.address);
       }
 
       for (const assetId of acc.createdAssets.keys()) {
@@ -418,13 +418,13 @@ export class Runtime {
   // creates new OptIn transaction object and update context
   addCtxOptInTx (
     senderAddr: string,
-    appId: number,
+    appID: number,
     payFlags: TxParams,
     flags: SSCOptionalFlags): void {
     const txn = algosdk.makeApplicationOptInTxn(
       senderAddr,
       mockSuggestedParams(payFlags, this.round),
-      appId,
+      appID,
       parseSSCAppArgs(flags.appArgs),
       flags.accounts,
       flags.foreignApps,
@@ -442,17 +442,17 @@ export class Runtime {
   /**
    * Account address opt-in for application Id
    * @param accountAddr Account address
-   * @param appId Application Id
+   * @param appID Application Id
    * @param flags Stateful smart contract transaction optional parameters (accounts, args..)
    * @param payFlags Transaction Parameters
    * @param debugStack: if passed then TEAL Stack is logged to console after
    * each opcode execution (upto depth = debugStack)
    */
-  optInToApp (accountAddr: string, appId: number,
+  optInToApp (accountAddr: string, appID: number,
     flags: SSCOptionalFlags, payFlags: TxParams, debugStack?: number): void {
-    this.addCtxOptInTx(accountAddr, appId, payFlags, flags);
+    this.addCtxOptInTx(accountAddr, appID, payFlags, flags);
     this.ctx.debugStack = debugStack;
-    this.ctx.optInToApp(accountAddr, appId);
+    this.ctx.optInToApp(accountAddr, appID);
 
     this.store = this.ctx.state;
   }
@@ -460,13 +460,13 @@ export class Runtime {
   // creates new Update transaction object and update context
   addCtxAppUpdateTx (
     senderAddr: string,
-    appId: number,
+    appID: number,
     payFlags: TxParams,
     flags: SSCOptionalFlags): void {
     const txn = algosdk.makeApplicationUpdateTxn(
       senderAddr,
       mockSuggestedParams(payFlags, this.round),
-      appId,
+      appID,
       new Uint8Array(32), // mock approval program
       new Uint8Array(32), // mock clear progam
       parseSSCAppArgs(flags.appArgs),
@@ -486,7 +486,7 @@ export class Runtime {
   /**
    * Update application
    * @param senderAddr sender address
-   * @param appId application Id
+   * @param appID application Id
    * @param approvalProgram new approval program
    * @param clearProgram new clear program
    * @param payFlags Transaction parameters
@@ -497,16 +497,16 @@ export class Runtime {
    */
   updateApp (
     senderAddr: string,
-    appId: number,
+    appID: number,
     approvalProgram: string,
     clearProgram: string,
     payFlags: TxParams,
     flags: SSCOptionalFlags,
     debugStack?: number
   ): void {
-    this.addCtxAppUpdateTx(senderAddr, appId, payFlags, flags);
+    this.addCtxAppUpdateTx(senderAddr, appID, payFlags, flags);
     this.ctx.debugStack = debugStack;
-    this.ctx.updateApp(appId, approvalProgram, clearProgram);
+    this.ctx.updateApp(appID, approvalProgram, clearProgram);
 
     // If successful, Update programs and state
     this.store = this.ctx.state;

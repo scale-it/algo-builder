@@ -27,7 +27,7 @@ async function run (runtimeEnv, deployer) {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: creator,
-      appId: appInfo.appID,
+      appID: appInfo.appID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:check-level'],
       accounts: [bob.addr] //  AppAccounts

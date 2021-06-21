@@ -149,6 +149,18 @@ Please check algob output for more details.`
     title: "Script can't load",
     description: `Script failed during load.
 Please check algob output for more details.`
+  },
+  ASSET_DELETED: {
+    number: 14,
+    message: "Asset %asset% is already deleted from network",
+    title: "Asset deleted",
+    description: `asset already deleted error`
+  },
+  APP_DELETED: {
+    number: 15,
+    message: "App %app% is already deleted from network",
+    title: "App deleted",
+    description: `app already deleted error`
   }
 };
 

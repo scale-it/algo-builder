@@ -14,7 +14,7 @@ async function run (runtimeEnv, deployer) {
     type: types.TransactionType.CallNoOpSSC,
     sign: types.SignType.SecretKey,
     fromAccount: creator,
-    appId: appInfo.appID,
+    appID: appInfo.appID,
     payFlags: {},
     appArgs: ['str:set-level', 'int:2'],
     accounts: [creator.addr] //  AppAccounts
@@ -32,7 +32,7 @@ async function run (runtimeEnv, deployer) {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: creator,
-      appId: appInfo.appID,
+      appID: appInfo.appID,
       payFlags: {},
       appArgs: [ "str:clear" ]
     };

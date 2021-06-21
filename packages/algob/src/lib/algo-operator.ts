@@ -44,7 +44,7 @@ export interface AlgoOperator {
   updateSSC: (
     sender: algosdk.Account,
     payFlags: rtypes.TxParams,
-    appId: number,
+    appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
     flags: rtypes.SSCOptionalFlags,
@@ -63,10 +63,10 @@ export interface AlgoOperator {
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap, assetIndex: number
   ) => Promise<void>
   optInAccountToSSC: (
-    sender: rtypes.Account, appId: number,
+    sender: rtypes.Account, appID: number,
     payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags) => Promise<void>
   optInLsigToSSC: (
-    appId: number, lsig: LogicSig,
+    appID: number, lsig: LogicSig,
     payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags) => Promise<void>
   ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>
   sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<algosdk.ConfirmedTxInfo>
@@ -244,7 +244,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
       txId: txInfo.txId,
       assetIndex: assetIndex,
       confirmedRound: txConfirmation[confirmedRound],
-      assetDef: asaDef
+      assetDef: asaDef,
+      deleted: false
     };
   }
 
@@ -338,8 +339,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const txInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
     const confirmedTxInfo = await this.waitForConfirmation(txId);
 
-    const appId = confirmedTxInfo['application-index'];
-    const message = `Signed transaction with txID: ${txId}\nCreated new app-id: ${appId}`; // eslint-disable-line @typescript-eslint/restrict-template-expressions
+    const appID = confirmedTxInfo['application-index'];
+    const message = `Signed transaction with txID: ${txId}\nCreated new app-id: ${appID}`; // eslint-disable-line @typescript-eslint/restrict-template-expressions
 
     console.log(message);
     txWriter.push(message, confirmedTxInfo);
@@ -348,8 +349,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
       creator: flags.sender.addr,
       txId: txInfo.txId,
       confirmedRound: confirmedTxInfo[confirmedRound],
-      appID: appId,
-      timestamp: Math.round(+new Date() / 1000)
+      appID: appID,
+      timestamp: Math.round(+new Date() / 1000),
+      deleted: false
     };
   }
 
@@ -357,7 +359,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
    * Update programs (approval, clear) for a stateful smart contract.
    * @param sender Account from which call needs to be made
    * @param payFlags Transaction Flags
-   * @param appId index of the application being configured
+   * @param appID index of the application being configured
    * @param newApprovalProgram New Approval Program filename
    * @param newClearProgram New Clear Program filename
    * @param flags Optional parameters to SSC (accounts, args..)
@@ -403,8 +405,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const txInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
     const confirmedTxInfo = await this.waitForConfirmation(txId);
 
-    const appId = appID;
-    const message = `Signed transaction with txID: ${txId}\nUpdated app-id: ${appId}`; // eslint-disable-line @typescript-eslint/restrict-template-expressions
+    const message = `Signed transaction with txID: ${txId}\nUpdated app-id: ${appID}`; // eslint-disable-line @typescript-eslint/restrict-template-expressions
 
     console.log(message);
     txWriter.push(message, confirmedTxInfo);
@@ -413,8 +414,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
       creator: sender.addr,
       txId: txInfo.txId,
       confirmedRound: confirmedTxInfo[confirmedRound],
-      appID: appId,
-      timestamp: Math.round(+new Date() / 1000)
+      appID: appID,
+      timestamp: Math.round(+new Date() / 1000),
+      deleted: false
     };
   }
 
@@ -422,7 +424,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
    * Opt-In to stateful smart contract
    *  - signed by account's secret key
    * @param sender: Account for which opt-in is required
-   * @param appId: Application Index: (ID of the application)
+   * @param appID: Application Index: (ID of the application)
    * @param payFlags: Transaction Params
    * @param flags Optional parameters to SSC (accounts, args..)
    */

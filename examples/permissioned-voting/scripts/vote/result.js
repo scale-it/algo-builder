@@ -40,7 +40,7 @@ async function run (runtimeEnv, deployer) {
     type: types.TransactionType.DeleteSSC,
     sign: types.SignType.SecretKey,
     fromAccount: votingAdminAccount,
-    appId: appInfo.appID,
+    appID: appInfo.appID,
     payFlags: {}
   };
 

@@ -92,7 +92,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
-        appId: applicationId,
+        appID: applicationId,
         payFlags: { totalFee: 1000 },
         appArgs: appArgs
       },
@@ -139,7 +139,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
-        appId: applicationId,
+        appID: applicationId,
         payFlags: { totalFee: 1000 },
         appArgs: appArgs
       },
@@ -186,7 +186,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
-        appId: applicationId,
+        appID: applicationId,
         payFlags: { totalFee: 1000 },
         appArgs: appArgs,
         accounts: [escrow.address] //  AppAccounts
@@ -216,7 +216,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
-        appId: applicationId,
+        appID: applicationId,
         payFlags: { totalFee: 1000 },
         appArgs: appArgs,
         accounts: [escrow.address] //  AppAccounts
@@ -246,7 +246,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
-        appId: applicationId,
+        appID: applicationId,
         payFlags: { totalFee: 1000 },
         appArgs: appArgs
       },
@@ -272,7 +272,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
-        appId: applicationId,
+        appID: applicationId,
         payFlags: { totalFee: 1000 },
         appArgs: appArgs
       }
@@ -295,7 +295,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
-        appId: applicationId,
+        appID: applicationId,
         payFlags: { totalFee: 1000 },
         appArgs: appArgs
       },
@@ -335,7 +335,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
-        appId: applicationId,
+        appID: applicationId,
         payFlags: { totalFee: 1000 },
         appArgs: appArgs
       },
@@ -359,7 +359,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
       type: types.TransactionType.DeleteSSC,
       sign: types.SignType.SecretKey,
       fromAccount: creator.account,
-      appId: applicationId,
+      appID: applicationId,
       payFlags: { totalFee: 1000 },
       appArgs: [],
       accounts: [escrow.address] //  AppAccounts
@@ -395,7 +395,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
-        appId: applicationId,
+        appID: applicationId,
         payFlags: { totalFee: 1000 },
         appArgs: appArgs
       },
@@ -428,7 +428,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
-        appId: applicationId,
+        appID: applicationId,
         payFlags: { totalFee: 1000, ReKeyTo: donor.address },
         appArgs: appArgs
       },

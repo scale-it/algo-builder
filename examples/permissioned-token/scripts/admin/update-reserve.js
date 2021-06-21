@@ -72,7 +72,7 @@ async function updateReserveByAssetConfig (deployer, address) {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: asaManager,
-      appId: controllerSSCInfo.appID,
+      appID: controllerSSCInfo.appID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:force_transfer'],
       foreignAssets: [gold.assetIndex] // to verify token reserve, manager

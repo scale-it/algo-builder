@@ -29,7 +29,7 @@ async function run (runtimeEnv, deployer) {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: donorAccount,
-      appId: appInfo.appID,
+      appID: appInfo.appID,
       payFlags: {},
       appArgs: appArgs
     },
