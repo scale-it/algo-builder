@@ -1,10 +1,8 @@
-import { decodeAddress, decodeUint64 } from "algosdk";
+import { decodeAddress } from "algosdk";
 import { assert } from "chai";
 
 import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
 import { convertToString, parseSSCAppArgs, stringToBytes, uint64ToBigEndian } from "../../../src/lib/parsing";
-import { DecodingMode } from "../../../src/types";
-;
 
 describe("Convert integer to big endian", () => {
   /**
@@ -67,7 +65,7 @@ describe("Convert integer to big endian", () => {
 });
 
 describe("Parse string and integer, with bytes", () => {
-  it("sstring identity should be equal ", () => {
+  it("string identity should be equal ", () => {
     let initialString = "50";
     let stringInBytes = stringToBytes(initialString);
     let backToString = convertToString(stringInBytes);
