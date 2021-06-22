@@ -584,10 +584,11 @@ describe("Deploy, Delete transactions test in run mode", () => {
   useFixtureProject("stateful");
   let deployer: Deployer;
   let algod: AlgoOperatorDryRunImpl;
+  let deployerCfg: DeployerConfig;
   beforeEach(async () => {
     const env = mkEnv("network1");
     algod = new AlgoOperatorDryRunImpl();
-    const deployerCfg = new DeployerConfig(env, algod);
+    deployerCfg = new DeployerConfig(env, algod);
     deployerCfg.asaDefs = { silver: mkASA() };
     deployer = new DeployerRunMode(deployerCfg);
     sinon.stub(algod.algodClient, "getTransactionParams")
@@ -636,6 +637,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
   });
 
   it("should delete application in run mode", async () => {
+    deployer = new DeployerDeployMode(deployerCfg);
     let execParams: types.ExecParams = {
       type: types.TransactionType.DeploySSC,
       sign: types.SignType.SecretKey,
@@ -649,6 +651,8 @@ describe("Deploy, Delete transactions test in run mode", () => {
       payFlags: {}
     };
     const appInfo = await executeTransaction(deployer, execParams);
+
+    deployer = new DeployerRunMode(deployerCfg);
     execParams = {
       type: types.TransactionType.DeleteSSC,
       sign: types.SignType.SecretKey,
@@ -658,5 +662,9 @@ describe("Deploy, Delete transactions test in run mode", () => {
     };
 
     await executeTransaction(deployer, execParams);
+
+    const res = deployer.getSSC("approval.teal", "clear.teal");
+    assert.isDefined(res);
+    assert.equal(res?.deleted, false);
   });
 });
