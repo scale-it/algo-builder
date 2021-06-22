@@ -34,7 +34,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
       type: TransactionType.DeleteSSC,
       sign: SignType.SecretKey,
       fromAccount: john.account,
-      appId: 10,
+      appID: 10,
       payFlags: { totalFee: 1000 },
       appArgs: []
     };
@@ -49,15 +49,15 @@ describe("Algorand Smart Contracts - Delete Application", function () {
 
   it("should delete application", function () {
     const initialMinBalance = john.minBalance;
-    const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram);
+    const appID = runtime.addApp(flags, {}, approvalProgram, clearProgram);
     assert.equal(runtime.getAccount(john.address).minBalance,
       initialMinBalance + (APPLICATION_BASE_FEE + ((25000 + 3500) * 2 + (25000 + 25000) * 2)));
 
-    runtime.executeTx({ ...deleteParams, appId: appId });
+    runtime.executeTx({ ...deleteParams, appID: appID });
 
     // verify app is deleted
     expectRuntimeError(
-      () => runtime.getApp(appId),
+      () => runtime.getApp(appID),
       RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND
     );
     // minbalance should reduce to initial value after app is deleted
@@ -66,7 +66,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
 
   it("should not delete application if logic is rejected", function () {
     const initialMinBalance = john.minBalance;
-    const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram); // create app
+    const appID = runtime.addApp(flags, {}, approvalProgram, clearProgram); // create app
 
     const minBalanceAfterAddApp = runtime.getAccount(john.address).minBalance;
     assert.equal(minBalanceAfterAddApp,
@@ -78,7 +78,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
       type: TransactionType.DeleteSSC,
       sign: SignType.SecretKey,
       fromAccount: alice.account,
-      appId: appId,
+      appID: appID,
       payFlags: { totalFee: 1000 },
       appArgs: []
     };
@@ -89,7 +89,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
     );
 
     // verify app is not deleted - using getApp function
-    const res = runtime.getApp(appId);
+    const res = runtime.getApp(appID);
     assert.isDefined(res);
 
     // min balance should remain the same (as after adding app), since app deletion wasn't successfull

@@ -11,10 +11,10 @@ async function run (runtimeEnv, deployer) {
   const john = deployer.accountsByName.get('john');
 
   const sscInfo = await deployer.getSSC('nft_approval.py', 'nft_clear_state.py');
-  const appId = sscInfo.appID;
+  const appID = sscInfo.appID;
   console.log(sscInfo);
 
-  await printGlobalNFT(deployer, masterAccount.addr, appId); // Global Count before creation
+  await printGlobalNFT(deployer, masterAccount.addr, appID); // Global Count before creation
 
   const nftRef = 'https://new-nft.com';
 
@@ -25,19 +25,19 @@ async function run (runtimeEnv, deployer) {
     type: types.TransactionType.CallNoOpSSC,
     sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
-    appId: appId,
+    appID: appID,
     payFlags: {},
     appArgs
   };
   await executeTransaction(deployer, txnParam); // creates new nft (with id = 1)
 
   // print Global Count after creation
-  await printGlobalNFT(deployer, masterAccount.addr, appId);
+  await printGlobalNFT(deployer, masterAccount.addr, appID);
 
   // *** Transfer NFT from master to john ***
 
-  await printLocalNFT(deployer, masterAccount.addr, appId);
-  await printLocalNFT(deployer, john.addr, appId);
+  await printLocalNFT(deployer, masterAccount.addr, appID);
+  await printLocalNFT(deployer, john.addr, appID);
 
   const nftID = new Uint8Array(8).fill(1, 7); // [0, 0, 0, 0, 0, 0, 0, 1] = uint64(1)
   appArgs = [
@@ -51,15 +51,15 @@ async function run (runtimeEnv, deployer) {
     type: types.TransactionType.CallNoOpSSC,
     sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
-    appId: appId,
+    appID: appID,
     payFlags: {},
     accounts: [masterAccount.addr, john.addr],
     appArgs
   };
   await executeTransaction(deployer, txnParam);
 
-  await printLocalNFT(deployer, masterAccount.addr, appId);
-  await printLocalNFT(deployer, john.addr, appId);
+  await printLocalNFT(deployer, masterAccount.addr, appID);
+  await printLocalNFT(deployer, john.addr, appID);
 }
 
 module.exports = { default: run };

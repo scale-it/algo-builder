@@ -41,13 +41,13 @@ describe('Permissioned Token Tests - Happy Paths', function () {
   });
 
   it('should kill token if sender is token manager', () => {
-    assert.equal(ctx.runtime.getGlobalState(ctx.controllerAppID, 'killed'), 0n); // token not killed
+    assert.equal(ctx.runtime.getGlobalState(ctx.controllerappID, 'killed'), 0n); // token not killed
 
     // kill token
     ctx.killToken(asaManager.account);
     ctx.syncAccounts();
 
-    assert.equal(ctx.runtime.getGlobalState(ctx.controllerAppID, 'killed'), 1n); // verify token is killed
+    assert.equal(ctx.runtime.getGlobalState(ctx.controllerappID, 'killed'), 1n); // verify token is killed
     // issuance fails now (as token is killed)
     assert.throws(() =>
       ctx.issue(asaReserve.account, elon, 20),
@@ -58,13 +58,13 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     // opt-in to permissions ssc by elon
     ctx.optInToPermissionsSSC(elon.address);
     ctx.syncAccounts();
-    assert.isDefined(ctx.elon.getAppFromLocal(ctx.permissionsAppId)); // verify opt-in
+    assert.isDefined(ctx.elon.getAppFromLocal(ctx.permissionsappID)); // verify opt-in
 
-    const permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsAppId, 'manager'));
+    const permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager'));
     const permManager = ctx.getAccount(permManagerAddr);
     ctx.whitelist(permManager.account, elon.address); // whitelist elon
     ctx.syncAccounts();
-    assert.equal(ctx.elon.getLocalState(ctx.permissionsAppId, 'whitelisted'), 1n);
+    assert.equal(ctx.elon.getLocalState(ctx.permissionsappID, 'whitelisted'), 1n);
   });
 
   it('should opt-out of token successfully (using closeRemainderTo)', () => {
@@ -97,14 +97,14 @@ describe('Permissioned Token Tests - Happy Paths', function () {
       ctx.whitelist(elon.account, bob.address),
     'RUNTIME_ERR1009: TEAL runtime encountered err opcode');
 
-    const permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsAppId, 'manager'));
+    const permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager'));
     const currentPermManager = ctx.getAccount(permManagerAddr);
     assert.notEqual(elon.address, currentPermManager.address); // verify elon is not current_perm_manager
     const txn = {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: currentPermManager.account, // perm_manager account
-      appId: ctx.permissionsAppId,
+      appID: ctx.permissionsappID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:change_permissions_manager'],
       accounts: [elon.address]
@@ -114,16 +114,16 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     ctx.runtime.executeTx(txn);
     ctx.syncAccounts();
 
-    const newPermManager = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsAppId, 'manager'));
+    const newPermManager = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager'));
     assert.equal(newPermManager, elon.address); // verify new perm manager is elon
     ctx.whitelist(elon.account, bob.address); // passes now
 
     ctx.syncAccounts();
-    assert.equal(ctx.bob.getLocalState(ctx.permissionsAppId, 'whitelisted'), 1n);
+    assert.equal(ctx.bob.getLocalState(ctx.permissionsappID, 'whitelisted'), 1n);
   });
 
   it('should force transfer tokens between non reserve accounts successfully if sender is token manager', () => {
-    const permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsAppId, 'manager'));
+    const permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager'));
     const permManager = ctx.getAccount(permManagerAddr);
     ctx.whitelist(permManager.account, elon.address);
     ctx.whitelist(permManager.account, bob.address);
@@ -167,7 +167,7 @@ describe('Permissioned Token Tests - Happy Paths', function () {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
         fromAccount: asaManager.account,
-        appId: ctx.controllerAppID,
+        appID: ctx.controllerappID,
         payFlags: { totalFee: 1000 },
         appArgs: ['str:force_transfer'],
         foreignAssets: [ctx.assetIndex]
@@ -219,14 +219,14 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     ctx.syncAccounts();
 
     // whitelisted both accounts
-    const permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsAppId, 'manager'));
+    const permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager'));
     const permManager = ctx.getAccount(permManagerAddr);
     ctx.whitelist(permManager.account, elon.address);
     ctx.whitelist(permManager.account, bob.address);
     ctx.syncAccounts();
     // verify accounts are whitelisted
-    assert.equal(ctx.elon.getLocalState(ctx.permissionsAppId, 'whitelisted'), 1n);
-    assert.equal(ctx.bob.getLocalState(ctx.permissionsAppId, 'whitelisted'), 1n);
+    assert.equal(ctx.elon.getLocalState(ctx.permissionsappID, 'whitelisted'), 1n);
+    assert.equal(ctx.bob.getLocalState(ctx.permissionsappID, 'whitelisted'), 1n);
 
     // transfer 20 tokens from bob -> elon
     const initialElonBalance = ctx.getAssetHolding(elon.address).amount;
@@ -253,7 +253,7 @@ describe('Permissioned Token Tests - Happy Paths', function () {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
         fromAccount: asaManager.account,
-        appId: ctx.controllerAppID,
+        appID: ctx.controllerappID,
         payFlags: { totalFee: 1000 },
         appArgs: ['str:force_transfer'],
         foreignAssets: [ctx.assetIndex]

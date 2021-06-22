@@ -152,7 +152,7 @@ const tx = {
   type: types.TransactionType.CallNoOpSSC,
   sign: types.SignType.SecretKey,
   fromAccount: creatorAccount,
-  appId: applicationID,
+  appID: applicationID,
   payFlags: {}
 }
 
@@ -209,7 +209,7 @@ const tx = {
   type: types.TransactionType.DeleteSSC,
   sign: types.SignType.SecretKey,
   fromAccount: creatorAccount,
-  appId: applicationID,
+  appID: applicationID,
   payFlags: {},
   appArgs: []
 }

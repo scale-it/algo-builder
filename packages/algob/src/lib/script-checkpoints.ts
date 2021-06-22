@@ -1,5 +1,5 @@
 
-import { loadFromYamlFileSilent, lsTreeWalk, types as rtypes } from "@algo-builder/runtime";
+import { checkIfAssetDeletionTx, loadFromYamlFileSilent, lsTreeWalk, types as rtypes } from "@algo-builder/runtime";
 import { encodeAddress, Transaction } from "algosdk";
 import deepEqual from "deep-equal";
 import * as fs from "fs";
@@ -11,6 +11,7 @@ import { ERRORS } from "../errors/errors-list";
 import {
   AssetScriptMap,
   Checkpoint,
+  CheckpointFunctions,
   CheckpointRepo,
   Checkpoints,
   Deployer,
@@ -196,8 +197,10 @@ export function persistCheckpoint (scriptName: string, checkpoint: Checkpoints):
  * Register checkpoints for ASA and SSC
  * @param deployer Deployer object
  * @param txns transaction array
- * @param txIdxMap transaction map index to name
+ * @param txIdxMap transaction map: to match transaction order
+ * transaction index mapped to [asset name, asset definition]
  */
+/* eslint-disable sonarjs/cognitive-complexity */
 export async function registerCheckpoints (
   deployer: Deployer,
   txns: Transaction[],
@@ -209,14 +212,24 @@ export async function registerCheckpoints (
     switch (txn.type) {
       case 'acfg': {
         txConfirmation = await deployer.waitForConfirmation(txn.txID());
+        const key = deployer.checkpoint.getAssetCheckpointKeyFromIndex(txn.assetIndex);
+        if (key && checkIfAssetDeletionTx(txn)) {
+          const temp: rtypes.ASAInfo = deployer.getASAInfo(key);
+          temp.deleted = true;
+          deployer.registerASAInfo(key, temp);
+          deployer.logTx("Deleting ASA: " + String(txn.assetIndex), txConfirmation);
+          break;
+        }
         if (res) {
           const asaInfo: rtypes.ASAInfo = {
             creator: encodeAddress(txn.from.publicKey),
             txId: txn.txID(),
             assetIndex: txConfirmation["asset-index"],
             confirmedRound: txConfirmation['confirmed-round'],
-            assetDef: res[1]
+            assetDef: res[1],
+            deleted: false
           };
+          // res[0] -> asset name, res[1] -> ASADef
           deployer.registerASAInfo(res[0], asaInfo);
           deployer.logTx("Deploying ASA: " + res[0], txConfirmation);
         }
@@ -224,15 +237,26 @@ export async function registerCheckpoints (
       }
       case 'appl': {
         txConfirmation = await deployer.waitForConfirmation(txn.txID());
-        const sscInfo: rtypes.SSCInfo = {
-          creator: encodeAddress(txn.from.publicKey),
-          txId: txn.txID(),
-          appID: txConfirmation['application-index'],
-          confirmedRound: txConfirmation['confirmed-round'],
-          timestamp: Math.round(+new Date() / 1000)
-        };
+        const key = deployer.checkpoint.getAppCheckpointKeyFromIndex(txn.appIndex);
+        if (key) {
+          const temp: rtypes.SSCInfo | undefined = deployer.checkpoint.getSSCfromCPKey(key);
+          if (txn.appOnComplete === Number(rtypes.TxnOnComplete.DeleteApplication) && temp) {
+            temp.deleted = true;
+            deployer.registerSSCInfo(key, temp);
+            deployer.logTx("Deleting SSC: " + String(txn.appIndex), txConfirmation);
+            break;
+          }
+        }
         if (res) {
-          const val = deployer.getSSCfromCPKey(res[0]);
+          const sscInfo: rtypes.SSCInfo = {
+            creator: encodeAddress(txn.from.publicKey),
+            txId: txn.txID(),
+            appID: txConfirmation['application-index'],
+            confirmedRound: txConfirmation['confirmed-round'],
+            timestamp: Math.round(+new Date() / 1000),
+            deleted: false
+          };
+          const val = deployer.checkpoint.getSSCfromCPKey(res[0]);
           if (val?.appID === sscInfo.appID) {
             deployer.logTx("Updating SSC: " + res[0], txConfirmation);
           } else {
@@ -331,4 +355,75 @@ export function loadCheckpointsIntoCPData (cpData: CheckpointRepo, scriptPaths: 
     checkpointData = cpData.merge(loadCheckpoint(s), s);
   }
   return checkpointData;
+}
+
+export class CheckpointFunctionsImpl implements CheckpointFunctions {
+  protected readonly cpData: CheckpointRepo;
+  protected readonly networkName: string;
+
+  constructor (cpData: CheckpointRepo, networkName: string) {
+    this.cpData = cpData;
+    this.networkName = networkName;
+  }
+
+  /**
+   * Queries a stateful smart contract info from checkpoint using key.
+   * @param key Key here is clear program name appended to approval program name
+   * with hypen("-") in between (approvalProgramName-clearProgramName)
+   */
+  getSSCfromCPKey (key: string): rtypes.SSCInfo | undefined {
+    const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ??
+                        new Map();
+    const nestedMap: any = resultMap.get(key);
+    if (nestedMap) {
+      return [...nestedMap][nestedMap.size - 1][1];
+    } else {
+      return undefined;
+    }
+  }
+
+  /**
+   * Returns SSC checkpoint key using application index,
+   * returns undefined if it doesn't exist
+   * @param index Application index
+   */
+  getAppCheckpointKeyFromIndex (index: number): string | undefined {
+    const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ?? new Map();
+    for (const [key, nestedMap] of resultMap) {
+      if (this.getLatestTimestampValue(nestedMap) === index) {
+        return key;
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Returns ASA checkpoint key using asset index,
+   * returns undefined if it doesn't exist
+   * @param index Asset Index
+   */
+  getAssetCheckpointKeyFromIndex (index: number): string | undefined {
+    const resultMap = this.cpData.precedingCP[this.networkName]?.asa ?? new Map();
+    for (const [key, value] of resultMap) {
+      if (value.assetIndex === index) {
+        return key;
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Returns latest timestamp value from map
+   * @param map Map
+   */
+  getLatestTimestampValue (map: Map<number, rtypes.SSCInfo>): number {
+    let res: number = -1;
+    const cmpValue: number = -1;
+    map.forEach((value, key) => {
+      if (key >= cmpValue) {
+        res = value.appID;
+      }
+    });
+    return res;
+  }
 }

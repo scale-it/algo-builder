@@ -669,22 +669,22 @@ describe("Stateful Smart Contracts", function () {
   });
 
   it("Should create application", () => {
-    const appId = runtime.addApp(creationFlags, {}, approvalProgram, clearProgram);
+    const appID = runtime.addApp(creationFlags, {}, approvalProgram, clearProgram);
 
-    const app = runtime.getApp(appId);
+    const app = runtime.getApp(appID);
     assert.isDefined(app);
   });
 
   it("Should not update application if approval or clear program is empty", () => {
-    const appId = runtime.addApp(creationFlags, {}, approvalProgram, clearProgram);
+    const appID = runtime.addApp(creationFlags, {}, approvalProgram, clearProgram);
 
     expectRuntimeError(
-      () => runtime.updateApp(john.address, appId, "", clearProgram, {}, {}),
+      () => runtime.updateApp(john.address, appID, "", clearProgram, {}, {}),
       RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM
     );
 
     expectRuntimeError(
-      () => runtime.updateApp(john.address, appId, approvalProgram, "", {}, {}),
+      () => runtime.updateApp(john.address, appID, approvalProgram, "", {}, {}),
       RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM
     );
   });

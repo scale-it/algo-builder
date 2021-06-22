@@ -35,7 +35,7 @@ async function issue (deployer, address, amount) {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: asaReserve,
-      appId: controllerSSCInfo.appID,
+      appID: controllerSSCInfo.appID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:issue'],
       foreignAssets: [gold.assetIndex]

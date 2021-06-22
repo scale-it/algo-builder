@@ -7,6 +7,7 @@
 + Rename `parseArgs` to `parse_params`
 
 + For External support of parameters user should replace TMPL_ prefix in their smart contracts, and only use it when using pyteal.tmpl(..)
++ Rename `appId` to `appID` in all places. (previously some of SSC params were taking `appId` and other were taking `appID`, this was inconsistent)
 
 ### Improvements
 + Replaced dependency `find-up` with `findup-sync` in `algob`.
@@ -18,7 +19,8 @@
 + Added `debugStack` option in `runtime.executeTx()` to print stack (upto depth = debugStack) after each opcode execution.
 + TEALv3 support in `@algo-builder/runtime`.
 + Transpile TEAL code to substitute the TMPL placeholders
-
++ Mark not valid checkpoints (in case of `DeleteSSC`/`DestroyAsset`) using `deleted` boolean
+ 
 ### Bug fixes
 
 `@algorand-builder/runtime`

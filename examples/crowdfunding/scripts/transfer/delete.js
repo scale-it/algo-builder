@@ -24,7 +24,7 @@ async function run (runtimeEnv, deployer) {
       type: types.TransactionType.DeleteSSC,
       sign: types.SignType.SecretKey,
       fromAccount: creatorAccount,
-      appId: appInfo.appID,
+      appID: appInfo.appID,
       payFlags: {},
       appArgs: [],
       accounts: [escrowAccountAddress] //  AppAccounts

@@ -85,6 +85,7 @@ export interface DeployedAssetInfo {
   creator: AccountAddress
   txId: string
   confirmedRound: number
+  deleted: boolean
 }
 
 // ASA deployment information (log)
@@ -108,7 +109,7 @@ export interface Context {
   debugStack?: number //  max number of top elements from the stack to print after each opcode execution.
   getAccount: (address: string) => AccountStoreI
   getAssetAccount: (assetId: number) => AccountStoreI
-  getApp: (appId: number, line?: number) => SSCAttributesM
+  getApp: (appID: number, line?: number) => SSCAttributesM
   transferAlgo: (txnParam: AlgoTransferParam) => void
   deductFee: (sender: AccountAddress, index: number) => void
   transferAsset: (txnParam: AssetTransferParam) => void
@@ -119,8 +120,8 @@ export interface Context {
     revocationTarget: string, amount: bigint
   ) => void
   destroyAsset: (assetId: number) => void
-  deleteApp: (appId: number) => void
-  closeApp: (sender: AccountAddress, appId: number) => void
+  deleteApp: (appID: number) => void
+  closeApp: (sender: AccountAddress, appID: number) => void
   processTransactions: (txnParams: ExecParams[]) => void
   addAsset: (name: string, fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => number
   optIntoASA: (assetIndex: number, address: AccountAddress, flags: TxParams) => void
@@ -177,9 +178,9 @@ export interface AccountStoreI {
   account: AccountSDK
 
   balance: () => bigint
-  getApp: (appId: number) => SSCAttributesM | undefined
-  getAppFromLocal: (appId: number) => AppLocalStateM | undefined
-  addApp: (appId: number, params: SSCDeploymentFlags,
+  getApp: (appID: number) => SSCAttributesM | undefined
+  getAppFromLocal: (appID: number) => AppLocalStateM | undefined
+  addApp: (appID: number, params: SSCDeploymentFlags,
     approvalProgram: string, clearProgram: string) => CreatedAppM
   getAssetDef: (assetId: number) => AssetDef | undefined
   getAssetHolding: (assetId: number) => AssetHoldingM | undefined
@@ -188,14 +189,14 @@ export interface AccountStoreI {
   closeAsset: (assetId: number) => void
   setFreezeState: (assetId: number, state: boolean) => void
   destroyAsset: (assetId: number) => void
-  optInToApp: (appId: number, appParams: SSCAttributesM) => void
+  optInToApp: (appID: number, appParams: SSCAttributesM) => void
   optInToASA: (assetIndex: number, assetHolding: AssetHoldingM) => void
-  deleteApp: (appId: number) => void
-  closeApp: (appId: number) => void
-  getLocalState: (appId: number, key: Uint8Array | string) => StackElem | undefined
-  setLocalState: (appId: number, key: Uint8Array | string, value: StackElem, line?: number) => AppLocalStateM
-  getGlobalState: (appId: number, key: Uint8Array | string) => StackElem | undefined
-  setGlobalState: (appId: number, key: Uint8Array | string, value: StackElem, line?: number) => void
+  deleteApp: (appID: number) => void
+  closeApp: (appID: number) => void
+  getLocalState: (appID: number, key: Uint8Array | string) => StackElem | undefined
+  setLocalState: (appID: number, key: Uint8Array | string, value: StackElem, line?: number) => AppLocalStateM
+  getGlobalState: (appID: number, key: Uint8Array | string) => StackElem | undefined
+  setGlobalState: (appID: number, key: Uint8Array | string, value: StackElem, line?: number) => void
 }
 
 /**
@@ -423,7 +424,7 @@ export type AssetTransferParam = BasicParams & {
 export type SSCCallsParam = BasicParams & SSCOptionalFlags & {
   type: TransactionType.CallNoOpSSC | TransactionType.ClearSSC |
   TransactionType.CloseSSC | TransactionType.DeleteSSC
-  appId: number
+  appID: number
 };
 
 export interface AnyMap {

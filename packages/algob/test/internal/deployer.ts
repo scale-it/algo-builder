@@ -118,7 +118,14 @@ describe("DeployerDeployMode", () => {
 
     const asaInfo = await deployer.deployASA("MY_ASA", { creator: deployer.accounts[0] });
     assert.deepEqual(asaInfo,
-      { creator: "addr-1-get-address-dry-run", txId: "tx-id-dry-run", confirmedRound: -1, assetIndex: 1, assetDef: mkASA() });
+      {
+        creator: "addr-1-get-address-dry-run",
+        txId: "tx-id-dry-run",
+        confirmedRound: -1,
+        assetIndex: 1,
+        assetDef: mkASA(),
+        deleted: false
+      });
 
     deployerCfg.cpData.precedingCP.network1.timestamp = 515236;
     assert.deepEqual(deployerCfg.cpData.precedingCP, {
@@ -128,7 +135,8 @@ describe("DeployerDeployMode", () => {
           txId: "tx-id-dry-run",
           confirmedRound: -1,
           assetIndex: 1,
-          assetDef: mkASA()
+          assetDef: mkASA(),
+          deleted: false
         }]]),
         ssc: new Map(),
         dLsig: new Map(),
@@ -147,8 +155,9 @@ describe("DeployerDeployMode", () => {
       creator: "addr-1-get-address-dry-run",
       txId: "tx-id-dry-run",
       confirmedRound: -1,
-      appID: -1,
-      timestamp: 1
+      appID: 33,
+      timestamp: 1,
+      deleted: false
     });
 
     const sscFlags = {
@@ -164,8 +173,9 @@ describe("DeployerDeployMode", () => {
         creator: "addr-1-get-address-dry-run",
         txId: "tx-id-dry-run",
         confirmedRound: -1,
-        appID: -1,
-        timestamp: 1
+        appID: 33,
+        timestamp: 1,
+        deleted: false
       });
 
     deployerCfg.cpData.precedingCP.network1.timestamp = 515236;
@@ -183,18 +193,20 @@ describe("DeployerDeployMode", () => {
       creator: "addr-1-get-address-dry-run",
       txId: "tx-id-dry-run",
       confirmedRound: -1,
-      appID: -1,
-      timestamp: 2
+      appID: 33,
+      timestamp: 2,
+      deleted: false
     });
 
-    const updatedInfo = await deployer.updateSSC(deployer.accounts[0], {}, -1, "app", "clear", {});
+    const updatedInfo = await deployer.updateSSC(deployer.accounts[0], {}, 33, "app", "clear", {});
     assert.deepEqual(updatedInfo,
       {
         creator: "addr-1-get-address-dry-run",
         txId: "tx-id-dry-run",
         confirmedRound: -1,
-        appID: -1,
-        timestamp: 2
+        appID: 33,
+        timestamp: 2,
+        deleted: false
       });
 
     // should create a nested checkpoint if name is same after update
@@ -246,7 +258,8 @@ describe("DeployerDeployMode", () => {
       txId: "tx-id-dry-run",
       confirmedRound: -1,
       assetIndex: 1,
-      assetDef: expectedASADef
+      assetDef: expectedASADef,
+      deleted: false
     });
 
     deployerCfg.cpData.precedingCP.network1.timestamp = 515236;
@@ -257,7 +270,8 @@ describe("DeployerDeployMode", () => {
           txId: "tx-id-dry-run",
           confirmedRound: -1,
           assetIndex: 1,
-          assetDef: expectedASADef
+          assetDef: expectedASADef,
+          deleted: false
         }]]),
         ssc: new Map(),
         dLsig: new Map(),
@@ -302,9 +316,27 @@ describe("DeployerDeployMode", () => {
     const networkName = "network1";
     const env = mkEnv(networkName);
     const cpData = new CheckpointRepoImpl()
-      .registerASA(networkName, "ASA name", { creator: "ASA creator 123", txId: "", confirmedRound: 0, assetIndex: 0, assetDef: {} as rtypes.ASADef })
-      .registerSSC(networkName, "ASC name", { creator: "ASC creator 951", txId: "", confirmedRound: 0, appID: -1, timestamp: 1 })
-      .registerLsig(networkName, "Lsig name", { creator: "Lsig creator", contractAddress: "addr-1", lsig: {} as LogicSig })
+      .registerASA(networkName, "ASA name", {
+        creator: "ASA creator 123",
+        txId: "",
+        confirmedRound: 0,
+        assetIndex: 0,
+        assetDef: {} as rtypes.ASADef,
+        deleted: false
+      })
+      .registerSSC(networkName, "ASC name", {
+        creator: "ASC creator 951",
+        txId: "",
+        confirmedRound: 0,
+        appID: -1,
+        timestamp: 1,
+        deleted: false
+      })
+      .registerLsig(networkName, "Lsig name", {
+        creator: "Lsig creator",
+        contractAddress: "addr-1",
+        lsig: {} as LogicSig
+      })
       .putMetadata(networkName, "k", "v");
     const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
     deployerCfg.cpData = cpData;
@@ -368,7 +400,8 @@ describe("DeployerDeployMode", () => {
       txId: "",
       confirmedRound: 0,
       assetIndex: 1337,
-      assetDef: {} as rtypes.ASADef
+      assetDef: {} as rtypes.ASADef,
+      deleted: false
     });
     assert.deepEqual(deployer.asa, new Map());
   });
@@ -382,7 +415,8 @@ describe("DeployerDeployMode", () => {
       txId: 'tx-id-dry-run',
       assetIndex: 1,
       confirmedRound: -1,
-      assetDef: mkASA()
+      assetDef: mkASA(),
+      deleted: false
     }]]));
   });
 });

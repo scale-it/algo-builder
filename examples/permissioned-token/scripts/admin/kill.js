@@ -26,7 +26,7 @@ async function kill (deployer) {
     type: types.TransactionType.CallNoOpSSC,
     sign: types.SignType.SecretKey,
     fromAccount: asaManager,
-    appId: controllerSSCInfo.appID,
+    appID: controllerSSCInfo.appID,
     payFlags: { totalFee: 1000 },
     appArgs: ['str:kill'],
     foreignAssets: [gold.assetIndex]

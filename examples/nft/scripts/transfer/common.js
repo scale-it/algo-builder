@@ -8,9 +8,9 @@ exports.executeTransaction = async function (deployer, txnParams) {
   }
 };
 
-exports.printGlobalNFT = async function (deployer, creator, appId) {
+exports.printGlobalNFT = async function (deployer, creator, appID) {
   try {
-    const globalState = await readGlobalStateSSC(deployer, creator, appId);
+    const globalState = await readGlobalStateSSC(deployer, creator, appID);
     for (const g of globalState) {
       const key = Buffer.from(g.key, 'base64').toString();
       if (key === 'total') {
@@ -22,9 +22,9 @@ exports.printGlobalNFT = async function (deployer, creator, appId) {
   }
 };
 
-exports.printLocalNFT = async function (deployer, account, appId) {
+exports.printLocalNFT = async function (deployer, account, appID) {
   try {
-    const localState = await readLocalStateSSC(deployer, account, appId);
+    const localState = await readLocalStateSSC(deployer, account, appID);
     // each nft is stored as a one record in user store
     let holdings = [];
     if (localState === undefined) {
@@ -36,7 +36,7 @@ exports.printLocalNFT = async function (deployer, account, appId) {
       }
       holdings = holdings.join(' ');
     }
-    console.log('%s account holds app(%s) NFTs: ', account, appId, holdings);
+    console.log('%s account holds app(%s) NFTs: ', account, appID, holdings);
   } catch (e) {
     console.error('Error Occurred', e);
   }

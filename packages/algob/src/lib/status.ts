@@ -28,15 +28,15 @@ export async function balanceOf (
  * fetches and returns the global state of application.
  * @param deployer Deployer
  * @param creator Account from which call needs to be made
- * @param appId ID of the application being configured or empty if creating
+ * @param appID ID of the application being configured or empty if creating
  */
 export async function readGlobalStateSSC (
   deployer: Deployer,
   creator: AccountAddress,
-  appId: number): Promise<SSCStateSchema[] | undefined> {
+  appID: number): Promise<SSCStateSchema[] | undefined> {
   const accountInfoResponse = await deployer.algodClient.accountInformation(creator).do();
   for (const app of accountInfoResponse['created-apps']) {
-    if (app.id === appId) { return app.params['global-state']; }
+    if (app.id === appID) { return app.params['global-state']; }
   }
   return undefined;
 }
@@ -45,15 +45,15 @@ export async function readGlobalStateSSC (
  * Read and return the local state of application from an account.
  * @param deployer Deployer
  * @param account account from the which the local state has to be read
- * @param appId ID of the application being configured or empty if creating
+ * @param appID ID of the application being configured or empty if creating
  */
 export async function readLocalStateSSC (
   deployer: Deployer,
   account: AccountAddress,
-  appId: number): Promise<SSCStateSchema[] | undefined> {
+  appID: number): Promise<SSCStateSchema[] | undefined> {
   const accountInfoResponse = await deployer.algodClient.accountInformation(account).do();
   for (const app of accountInfoResponse['apps-local-state']) {
-    if (app.id === appId) { return app[`key-value`]; }
+    if (app.id === appID) { return app[`key-value`]; }
   }
   return undefined;
 }
@@ -73,13 +73,13 @@ export async function printAssets (deployer: Deployer, account: string): Promise
  * print account's local state of a stateful smart contract
  * @param deployer algob deployer
  * @param accountAddr account address to print local state
- * @param appId application index of smart contract
+ * @param appID application index of smart contract
  */
 export async function printLocalStateSSC (
   deployer: Deployer,
   accountAddr: AccountAddress,
-  appId: number): Promise<void> {
-  const localState = await readLocalStateSSC(deployer, accountAddr, appId);
+  appID: number): Promise<void> {
+  const localState = await readLocalStateSSC(deployer, accountAddr, appID);
   if (localState === undefined) { return; }
   console.log("User's local state:");
   for (let n = 0; n < localState.length; n++) {
@@ -91,13 +91,13 @@ export async function printLocalStateSSC (
  * print global state of a stateful smart contract
  * @param deployer algob deployer
  * @param creatorAddr creator address of stateful smart contract
- * @param appId application index of smart contract
+ * @param appID application index of smart contract
  */
 export async function printGlobalStateSSC (
   deployer: Deployer,
   creatorAddr: AccountAddress,
-  appId: number): Promise<void> {
-  const globalState = await readGlobalStateSSC(deployer, creatorAddr, appId);
+  appID: number): Promise<void> {
+  const globalState = await readGlobalStateSSC(deployer, creatorAddr, appID);
   if (globalState === undefined) { return; }
   console.log("Application's global state:");
   for (let n = 0; n < globalState.length; n++) {

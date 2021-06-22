@@ -37,7 +37,7 @@ async function transfer (deployer, from, toAddr, amount) {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: from,
-      appId: controllerSSCInfo.appID,
+      appID: controllerSSCInfo.appID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:transfer']
     },
@@ -79,7 +79,7 @@ async function transfer (deployer, from, toAddr, amount) {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: from,
-      appId: permissionsSSCInfo.appID,
+      appID: permissionsSSCInfo.appID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:transfer'],
       accounts: [from.addr, toAddr] //  AppAccounts (pass asset sender & receiver address)
