@@ -2,7 +2,7 @@
 layout: splash
 ---
 
-# Deployer
+# [Deployer](https://algobuilder.dev/api/algob/interfaces/types.deployer.html)
 
 Deployer wraps an SDK `AlgodV2` client and provides a higher level functionality to deploy [Algorand Standard Assets(ASA)](https://developer.algorand.org/docs/features/asa/) and [Stateful Smart Contracts(SSC)](https://developer.algorand.org/docs/features/asc1/stateful/) to the Algorand network:
 * load ASA definition files
@@ -16,7 +16,7 @@ Deployer class has the following modes:
 
 - Run Mode: In run mode user can access checkpoints, create logs but cannot write/modify checkpoints. Files placed in nested folders of `scripts/` folder are considered to be run in this mode. Ex: `scripts/transfer/run-script.js`.
 
-  Note: In run mode user can `deploy`, `update`, `delete` or perform all these operations in a group transaction using `executeTransaction` function but the `checkpoints will not be created/modified when using run mode.`
+  Note: In run mode user can `deploy`, `update`, `delete` or perform all these operations in a group transaction using [`executeTransaction`](https://algobuilder.dev/api/algob/modules.html#executetransaction) function but the `checkpoints will not be created when using run mode.`
 
 Read more about deployment and scripts in our [spec](https://paper.dropbox.com/doc/Algorand-builder-specs--A_yfjbGmtkx5BYMOy8Ha50~uAg-Vcdp0XNngizChyUWvFXfs#:uid=213683005476107006060621&h2=Scripts).
 
