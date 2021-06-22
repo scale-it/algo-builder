@@ -1,5 +1,4 @@
 import { encodeNote, types } from "@algo-builder/runtime";
-import { ExecParams } from "@algo-builder/runtime/build/types";
 import { ConfirmedTxInfo, decodeSignedTransaction, encodeAddress, Transaction } from "algosdk";
 import { assert } from "chai";
 import { isArray } from "lodash";
@@ -600,7 +599,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
   });
 
   it("should deploy asa in run mode", async () => {
-    const execParams: ExecParams = {
+    const execParams: types.ExecParams = {
       type: types.TransactionType.DeployASA,
       sign: types.SignType.SecretKey,
       fromAccount: bobAcc,
@@ -618,7 +617,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
   });
 
   it("should deploy application in run mode", async () => {
-    const execParams: ExecParams = {
+    const execParams: types.ExecParams = {
       type: types.TransactionType.DeploySSC,
       sign: types.SignType.SecretKey,
       fromAccount: bobAcc,
@@ -637,7 +636,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
   });
 
   it("should delete application in run mode", async () => {
-    let execParams: ExecParams = {
+    let execParams: types.ExecParams = {
       type: types.TransactionType.DeploySSC,
       sign: types.SignType.SecretKey,
       fromAccount: bobAcc,
