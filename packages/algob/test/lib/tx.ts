@@ -1,4 +1,5 @@
 import { encodeNote, types } from "@algo-builder/runtime";
+import { ExecParams } from "@algo-builder/runtime/build/types";
 import { ConfirmedTxInfo, decodeSignedTransaction, encodeAddress, Transaction } from "algosdk";
 import { assert } from "chai";
 import { isArray } from "lodash";
@@ -7,10 +8,10 @@ import { TextEncoder } from "util";
 
 import { executeTransaction } from "../../src";
 import { ERRORS } from "../../src/errors/errors";
-import { DeployerDeployMode } from "../../src/internal/deployer";
+import { DeployerDeployMode, DeployerRunMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
 import { Deployer } from "../../src/types";
-import { expectBuilderErrorAsync } from "../helpers/errors";
+import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkEnv } from "../helpers/params";
 import { useFixtureProject, useFixtureProjectCopy } from "../helpers/project";
 import { aliceAcc, bobAcc } from "../mocks/account";
@@ -577,5 +578,86 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
     ];
 
     await executeTransaction(deployer, txGroup);
+  });
+});
+
+describe("Deploy, Delete transactions test in run mode", () => {
+  useFixtureProject("stateful");
+  let deployer: Deployer;
+  let algod: AlgoOperatorDryRunImpl;
+  beforeEach(async () => {
+    const env = mkEnv("network1");
+    algod = new AlgoOperatorDryRunImpl();
+    const deployerCfg = new DeployerConfig(env, algod);
+    deployerCfg.asaDefs = { silver: mkASA() };
+    deployer = new DeployerRunMode(deployerCfg);
+    sinon.stub(algod.algodClient, "getTransactionParams")
+      .returns({ do: async () => mockSuggestedParam });
+  });
+
+  afterEach(async () => {
+    (algod.algodClient.getTransactionParams as sinon.SinonStub).restore();
+  });
+
+  it("should deploy asa in run mode", async () => {
+    const execParams: ExecParams = {
+      type: types.TransactionType.DeployASA,
+      sign: types.SignType.SecretKey,
+      fromAccount: bobAcc,
+      asaName: 'silver',
+      payFlags: {}
+    };
+
+    await executeTransaction(deployer, execParams);
+
+    // should not be stored in checkpoint if in run mode
+    expectBuilderError(
+      () => deployer.getASAInfo('silver'),
+      ERRORS.BUILTIN_TASKS.DEPLOYER_ASA_NOT_DEFINED
+    );
+  });
+
+  it("should deploy application in run mode", async () => {
+    const execParams: ExecParams = {
+      type: types.TransactionType.DeploySSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: bobAcc,
+      approvalProgram: "approval.teal",
+      clearProgram: "clear.teal",
+      localInts: 1,
+      localBytes: 1,
+      globalInts: 1,
+      globalBytes: 1,
+      payFlags: {}
+    };
+    await executeTransaction(deployer, execParams);
+
+    // should not be stored in checkpoint if in run mode
+    assert.isUndefined(deployer.getSSC("approval.teal", "clear.teal"));
+  });
+
+  it("should delete application in run mode", async () => {
+    let execParams: ExecParams = {
+      type: types.TransactionType.DeploySSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: bobAcc,
+      approvalProgram: "approval.teal",
+      clearProgram: "clear.teal",
+      localInts: 1,
+      localBytes: 1,
+      globalInts: 1,
+      globalBytes: 1,
+      payFlags: {}
+    };
+    const appInfo = await executeTransaction(deployer, execParams);
+    execParams = {
+      type: types.TransactionType.DeleteSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: bobAcc,
+      appID: appInfo["application-index"],
+      payFlags: {}
+    };
+
+    await executeTransaction(deployer, execParams);
   });
 });
