@@ -10,7 +10,7 @@ Sometimes it's nice to work with your contracts interactively for testing and de
 
 ## Usage
 
-**NOTE:** Make sure you have [installed](https://github.com/scale-it/algo-builder#installation) and configured `algob` in your project. For creating and setting up a new project, click [here](https://github.com/scale-it/algo-builder#create-an-algob-project).
+**NOTE:** Make sure you have installed [algob](https://github.com/scale-it/algo-builder#installation) and configured `algob` in your project. For creating and setting up a new project, click [here](https://github.com/scale-it/algo-builder#create-an-algob-project).
 
 * To open console session run `algob console` in your project root.
 * To select network add `--network networkName` in command.(eg. `algob console --network localhost`)
@@ -18,7 +18,7 @@ Sometimes it's nice to work with your contracts interactively for testing and de
 * To clear repl console, use `ctrl + L`.
 * To break from a multiline expression, use `.break`.
 
-After opening console, you should get something like:
+After opening console, you should get the following:
 ![image](https://user-images.githubusercontent.com/33264364/122463488-48b80280-cfd3-11eb-91dc-81d628a52bc0.png)
 
 ## Globals
@@ -31,7 +31,7 @@ Following globals are available in an `algob console` REPL:
 
 # Example Walkthrough
 
-For demonstration purposes, we will be using [`examples/asa`](https://github.com/scale-it/algo-builder/tree/master/examples/asa) project where user is able to setup scripts and accounts, transfer algo's (in microalgos) & ASA between accounts, interact with stateless smart contracts (contract account and delegation signature mode) using `algob console`.
+For demonstration purpose, we will be using [`examples/asa`](https://github.com/scale-it/algo-builder/tree/master/examples/asa) project where user will be able to setup scripts and accounts, transfer algo's (in microalgos) & ASA between accounts, interact with stateless smart contracts (contract account and delegation signature mode) using `algob console`.
 
 + [Setup](./algob-console.md#setup)
 + [Transfer Algos](./algob-console.md#transfer-algos)
@@ -43,24 +43,24 @@ For demonstration purposes, we will be using [`examples/asa`](https://github.com
 
 In the  `examples/asa` directory:
 1. Follow the README file
-2. deploy the assets and smart contracts using `algob deploy`
+2. deploy assets and smart contracts using `algob deploy`
 
 This will deploy your assets (`gold` and `tesla` in this case) and store asc1 `logic signature` in checkpoint for delegated approval mode. Also, let's initialize some of the accounts which we will use in further transactions.
 
-Open a console session and initialize `master account` using `deployer` object
+Open a console session using `algob console` and initialize `master account` using `deployer` object
 ```bash
 algob> masterAccount = deployer.accountsByName.get("master-account")
 ```
 ![image](https://user-images.githubusercontent.com/33264364/97816308-735e8080-1cba-11eb-970d-50f8e3217d8f.png)
 
-Similarly, initialize few more accounts as well (check `algob.config.js` for more info regarding these example accounts)
+Similarly, initialize few more accounts (check `algob.config.js` for more info regarding these example accounts)
 ```bash
 goldOwner = deployer.accountsByName.get("alice");
 john = deployer.accountsByName.get("john");
 bob = deployer.accountsByName.get("bob");
 ```
 
-You can also retreive asset information from checkpoint. Eg.
+You can also retreive asset information from checkpoints. Eg.
 ```bash
 algob> deployer.asa
 Map(1) {
@@ -96,7 +96,7 @@ Let us now execute some transactions. We will use [`algob.executeTransaction`](h
 
 Here, we will transfer `1 Algo` from `masterAccount` to `john`. Code can be found in `/scrips/transfer/master-fund-john.js`.
 
-Transaction params looks like :-
+Transaction params looks like :
 
 ```bash
 algob> rtypes = algob.runtime.types
@@ -131,7 +131,7 @@ algob> algoTransferParams = {
 
 ![image](https://user-images.githubusercontent.com/33264364/122477861-09df7800-cfe6-11eb-9aa9-c99c04011d06.png)
 
-Executing the above transaction looks like:
+Executing the above transaction gives the following result:
 ```bash
 algob> await algob.executeTransaction(deployer, algoTransferParams);
 {
@@ -200,17 +200,17 @@ Similar example can be found in `/scrips/transfer/tesla-to-john.js` (tesla ASA).
 
 ## Transfer Algos according to ASC logic (Contract Account)
 
-Here we will transfer some `algos` from an algorand smart contract ([`/assets/teal/2-gold-contract-asc.teal`](https://github.com/scale-it/algo-builder/blob/develop/examples/asa/assets/teal/2-gold-contract-asc.teal)) to `john`.
+Here we will transfer some `algos` from a stateless smart contract ([`/assets/teal/2-gold-contract-asc.teal`](https://github.com/scale-it/algo-builder/blob/develop/examples/asa/assets/teal/2-gold-contract-asc.teal)) to `john`.
 + We will first load the logic signature (using `deployer.loadLogic(<file_name>.teal)` and get it's address(`lsig.address()`).
-+ This address will act as the sender(contract account mode) and receiver is `john`.
-+ Finally, we transfer some algos using `algob.executeTransaction(..)` function. Transaction will pass/fail according to asc logic.
++ This address will be the sender(contract account mode) and receiver will be `john`.
++ Finally, we will transfer some algos using `algob.executeTransaction(..)` function. Transaction will pass/fail according to asc logic.
 ```
 lsig = await deployer.loadLogic("2-gold-contract-asc.teal");
 sender = lsig.address();
 ```
 ![image](https://user-images.githubusercontent.com/33264364/97818537-e3740300-1cc8-11eb-81cd-a64e80106cf7.png)
 
-The contract ensures that amount in microalgos must be >=100, otherwise the transaction will be rejected.
+The contract ensures that amount in microalgos must be <=100, otherwise the transaction will be rejected.
 
 Transaction Pass:
 ```bash
@@ -223,7 +223,7 @@ const algoTxParam = {
   sign: rtypes.SignType.LogicSignature,
   fromAccountAddr: lsig.address(),
   toAccountAddr: john.addr,
-  amountMicroAlgos: 20n, // amt < 100
+  amountMicroAlgos: 20n, // amt <= 100
   lsig: lsig,
   payFlags: { totalFee: 1000 }
 };
