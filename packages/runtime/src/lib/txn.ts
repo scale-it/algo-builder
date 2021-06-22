@@ -329,7 +329,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         return algosdk.makeAssetCreateTxnWithSuggestedParams(
           fromAccountAddr,
           note,
-          BigInt(execParams.asaDef.total),
+          BigInt(execParams.asaDef.total ?? 0),
           execParams.asaDef.decimals,
           execParams.asaDef.defaultFrozen,
           execParams.asaDef.manager,
