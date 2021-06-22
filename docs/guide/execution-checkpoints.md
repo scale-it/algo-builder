@@ -58,6 +58,8 @@ The keys of these maps are strings which should be unique per network inside of 
 Editing them by hand is not encouraged (but if it's needed their names must not match any asset in the same network).
 Currently it's possible to edit these files by hand but it may be decided to disallow this in the future.
 
+Note: Checkpoints will not be created or modified when script is running in run mode.
+
 ## Parameters
 
 For more details on checkpoint parameters and their specific types please refer to `Checkpoint` type in [types.ts](https://github.com/scale-it/algo-builder/blob/master/packages/algob/src/types.ts).

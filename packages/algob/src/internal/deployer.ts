@@ -654,9 +654,12 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
   }
 
   assertNoAsset (name: string): void {
-    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      methodName: "assertNoAsset"
-    });
+    if (this.isDefined(name)) {
+      throw new BuilderError(
+        ERRORS.BUILTIN_TASKS.DEPLOYER_ASSET_ALREADY_PRESENT, {
+          assetName: name
+        });
+    }
   }
 
   registerASAInfo (name: string, asaInfo: rtypes.ASAInfo): void {
