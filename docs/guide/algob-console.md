@@ -33,8 +33,8 @@ Following globals are available in an `algob console` REPL:
 
 For demonstration purposes, we will be using [`examples/asa`](https://github.com/scale-it/algo-builder/tree/master/examples/asa) project where user is able to setup scripts and accounts, transfer algo's (in microalgos) & ASA between accounts, interact with stateless smart contracts (contract account and delegation signature mode) using `algob console`.
 
-+ [Setup](./#setup)
-+ [Transfer Algos](./#transfer-algos)
++ [Setup](./algob-console.md#setup)
++ [Transfer Algos](./algob-console.md#transfer-algos)
 + Transfer Assets
 + Transfer Algos according to ASC logic (Contract Account)
 + Transfer Assets according to ASC (Delegated Approval)
