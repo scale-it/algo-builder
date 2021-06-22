@@ -35,9 +35,9 @@ For demonstration purposes, we will be using [`examples/asa`](https://github.com
 
 + [Setup](./algob-console.md#setup)
 + [Transfer Algos](./algob-console.md#transfer-algos)
-+ Transfer Assets
-+ Transfer Algos according to ASC logic (Contract Account)
-+ Transfer Assets according to ASC (Delegated Approval)
++ [Transfer Assets](./algob-console.md#transfer-assets)
++ [Transfer Algos according to ASC logic (Contract Account)](./algob-console.md#transfer-algos-according-to-asc-logic-contract-account)
++ [Transfer Assets according to ASC (Delegated Approval)](./algob-console.md#transfer-assets-according-to-asc-delegated-approval)
 
 ## Setup
 
