@@ -249,7 +249,7 @@ export async function executeTransaction (
     }
     const confirmedTx = await deployer.sendAndWait(signedTxn);
     console.log(confirmedTx);
-    await registerCheckpoints(deployer, txns, txIdxMap);
+    if (deployer.isDeployMode) { await registerCheckpoints(deployer, txns, txIdxMap); }
     return confirmedTx;
   } catch (error) {
     if (deployer.isDeployMode) { deployer.persistCP(); }
