@@ -12,11 +12,11 @@ Deployer wraps an SDK `AlgodV2` client and provides a higher level functionality
 It will protect you from deploying same ASA or stateful smart contract twice. It will store transaction log in a checkpoint and allow you to reference later (in other scripts or in REPL) deployed ASA.
 
 Deployer class has the following modes:
-- Deploy Mode: In deploy mode user can write or read the checkpoints, create logs. Files that are directly placed in `scripts/` folder are considered to be run in this mode. Ex: `scripts/deploy.js`
+- Deploy Mode: In deploy mode user can write, modify or read the checkpoints, create logs. Files that are directly placed in `scripts/` folder are considered to be run in this mode. Ex: `scripts/deploy.js`
 
-- Run Mode: In run mode user can access checkpoints, create log but cannot write/modify in checkpoints. Files placed in nested folders of `scripts/` folder are considered to be run in this mode. Ex: `scripts/transfer/run-script.js`.
+- Run Mode: In run mode user can access checkpoints, create logs but cannot write/modify checkpoints. Files placed in nested folders of `scripts/` folder are considered to be run in this mode. Ex: `scripts/transfer/run-script.js`.
 
-  Note: In run mode user can `deploy`, `update`, `delete` or perform all these operations in a group transaction using `executeTransaction` function but the checkpoints will not be written/modified when using run mode.
+  Note: In run mode user can `deploy`, `update`, `delete` or perform all these operations in a group transaction using `executeTransaction` function but the `checkpoints will not be created/modified when using run mode.`
 
 Read more about deployment and scripts in our [spec](https://paper.dropbox.com/doc/Algorand-builder-specs--A_yfjbGmtkx5BYMOy8Ha50~uAg-Vcdp0XNngizChyUWvFXfs#:uid=213683005476107006060621&h2=Scripts).
 
