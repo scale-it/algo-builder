@@ -13,10 +13,10 @@ Sometimes it's nice to work with your contracts interactively for testing and de
 **NOTE:** Make sure you have installed [algob](https://github.com/scale-it/algo-builder#installation) and configured `algob` in your project. For creating and setting up a new project, click [here](https://github.com/scale-it/algo-builder#create-an-algob-project).
 
 * To open console session run `algob console` in your project root.
-* To select network add `--network networkName` in command.(eg. `algob console --network localhost`)
+* To select network add `--network networkName` to the command.(eg. `algob console --network localhost`)
 * To exit `algob console` type `.exit`, `ctrl + D` or `ctrl + C` (twice).
-* To clear repl console, use `ctrl + L`.
-* To break from a multiline expression, use `.break`.
+* To clear REPL console, use `ctrl + L`.
+* To enter multi-line mode type: `.break`.
 
 After opening console, you should get the following:
 ![image](https://user-images.githubusercontent.com/33264364/122463488-48b80280-cfd3-11eb-91dc-81d628a52bc0.png)
@@ -53,11 +53,11 @@ algob> masterAccount = deployer.accountsByName.get("master-account")
 ```
 ![image](https://user-images.githubusercontent.com/33264364/97816308-735e8080-1cba-11eb-970d-50f8e3217d8f.png)
 
-Similarly, initialize few more accounts (check `algob.config.js` for more info regarding these example accounts)
+Similarly, initialize few more accounts (check `algob.config.js` for more details about accounts used in ASA template)
 ```bash
-goldOwner = deployer.accountsByName.get("alice");
-john = deployer.accountsByName.get("john");
-bob = deployer.accountsByName.get("bob");
+let goldOwner = deployer.accountsByName.get("alice");
+let john = deployer.accountsByName.get("john");
+let bob = deployer.accountsByName.get("bob");
 ```
 
 You can also retreive asset information from checkpoints. Eg.
@@ -90,7 +90,7 @@ algob>
 ```
 ![image](https://user-images.githubusercontent.com/33264364/122483007-45cb0b00-cfef-11eb-887b-0514be84579c.png)
 
-Let us now execute some transactions. We will use [`algob.executeTransaction`](https://github.com/scale-it/algo-builder/blob/develop/docs/guide/execute-transaction.md) for executing transactions on the Algorand Network.
+Now, we show how to use [`algob.executeTransaction`](https://github.com/scale-it/algo-builder/blob/develop/docs/guide/execute-transaction.md) to execute transactions in an Algorand Network.
 
 ## Transfer Algos
 
@@ -131,7 +131,7 @@ algob> algoTransferParams = {
 
 ![image](https://user-images.githubusercontent.com/33264364/122477861-09df7800-cfe6-11eb-9aa9-c99c04011d06.png)
 
-Executing the above transaction gives the following result:
+Executing the transaction above gives the following result:
 ```bash
 algob> await algob.executeTransaction(deployer, algoTransferParams);
 {
@@ -168,7 +168,7 @@ algob> await algob.executeTransaction(deployer, algoTransferParams);
 
 ## Transfer Assets
 
-We will transfer a single unit of Algorand Standard Asset `gold`(which we deployed during setup) from `goldOwner` to `john`. Relevant code can be found in `/scrips/transfer/gold-to-john.js`.
+We will transfer a single unit of `gold` ASA (which we deployed during the setup) from `goldOwner` to `john`. Relevant code can be found in `/scrips/transfer/gold-to-john.js`.
 
 Let's use `.editor` mode of REPL to write & execute multiple lines of code at once:-
 ```bash
@@ -267,7 +267,7 @@ const invalidTxnParams = {
   payFlags: { totalFee: 1000 }
 };
 
-// Transaction FAIL - Gets rejected by logic - As according to .teal logic, amount should be <= 100
+// Transaction FAIL - rejected by logic. According to .teal logic, amount should be <= 100
 algob.executeTransaction(deployer, invalidTxnParams);
 
 // rejected by logic
