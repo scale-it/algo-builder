@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
-import { AssetDef, decodeAddress, decodeUint64, encodeAddress, encodeUint64, isValidAddress, verifyBytes } from "algosdk";
+import { AssetParams, decodeAddress, decodeUint64, encodeAddress, encodeUint64, isValidAddress, verifyBytes } from "algosdk";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
 import { Keccak } from 'sha3';
@@ -185,7 +185,7 @@ export class Mul extends Op {
 // pushes argument[N] from argument array to stack
 // push to stack [...stack, bytes]
 export class Arg extends Op {
-  readonly _arg: Uint8Array;
+  readonly _arg?: Uint8Array;
   readonly line: number;
 
   /**
@@ -202,9 +202,9 @@ export class Arg extends Op {
     assertOnlyDigits(args[0], this.line);
 
     const index = Number(args[0]);
-    this.checkIndexBound(index, interpreter.runtime.ctx.args, this.line);
+    this.checkIndexBound(index, interpreter.runtime.ctx.args as Uint8Array[], this.line);
 
-    this._arg = interpreter.runtime.ctx.args[index];
+    this._arg = interpreter.runtime.ctx.args? interpreter.runtime.ctx.args[index]: undefined;
   }
 
   execute (stack: TEALStack): void {
@@ -1544,8 +1544,8 @@ export class Global extends Op {
       case 'CurrentApplicationID': {
         result = this.interpreter.runtime.ctx.tx.apid;
         this.interpreter.runtime.assertAppDefined(
-          result,
-          this.interpreter.getApp(result, this.line),
+          result as number,
+          this.interpreter.getApp(result as number, this.line),
           this.line);
         break;
       }
@@ -1559,7 +1559,7 @@ export class Global extends Op {
       }
       case 'CreatorAddress': {
         const appId = this.interpreter.runtime.ctx.tx.apid;
-        const app = this.interpreter.getApp(appId, this.line);
+        const app = this.interpreter.getApp(appId as number, this.line);
         result = decodeAddress(app.creator).publicKey;
         break;
       }
@@ -1753,11 +1753,11 @@ export class AppGlobalGetEx extends Op {
     if (appIndex === 0n) {
       appId = this.interpreter.runtime.ctx.tx.apid; // zero index means current app
     } else {
-      this.checkIndexBound(Number(--appIndex), foreignApps, this.line);
-      appId = foreignApps[Number(appIndex)];
+      this.checkIndexBound(Number(--appIndex), foreignApps as number[], this.line);
+      appId = foreignApps? foreignApps[Number(appIndex)]: undefined;
     }
 
-    const val = this.interpreter.getGlobalState(appId, key, this.line);
+    const val = this.interpreter.getGlobalState(appId as number, key, this.line);
     if (val) {
       stack.push(val);
       stack.push(1n);
@@ -2023,9 +2023,14 @@ export class GetAssetDef extends Op {
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
     const foreignAssetsIdx = this.assertBigInt(stack.pop(), this.line);
-    this.checkIndexBound(Number(foreignAssetsIdx), this.interpreter.runtime.ctx.tx.apas, this.line);
+    this.checkIndexBound(Number(foreignAssetsIdx), this.interpreter.runtime.ctx.tx.apas as number[], this.line);
 
-    const assetId = this.interpreter.runtime.ctx.tx.apas[Number(foreignAssetsIdx)];
+    let assetId;
+    if(this.interpreter.runtime.ctx.tx.apas) {
+      assetId = this.interpreter.runtime.ctx.tx.apas[Number(foreignAssetsIdx)];
+    } else {
+      throw new Error("foreign asset id not found");
+    }
     const AssetDefinition = this.interpreter.getAssetDef(assetId);
     let def: string;
 
@@ -2034,7 +2039,7 @@ export class GetAssetDef extends Op {
       stack.push(0n);
     } else {
       let value: StackElem;
-      const s = AssetParamMap[this.field] as keyof AssetDef;
+      const s = AssetParamMap[this.field] as keyof AssetParams;
 
       switch (this.field) {
         case "AssetTotal":

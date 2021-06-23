@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
-import algosdk, { AssetDef, decodeAddress } from "algosdk";
+import algosdk, { AssetParams, decodeAddress } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
 import { AccountStore } from "./account";
@@ -115,7 +115,7 @@ export class Runtime {
    * Note: if user is accessing this function directly through runtime,
    * the line number is unknown
    */
-  assertAssetDefined (assetId: number, assetDef?: AssetDef, line?: number): AssetDef {
+  assertAssetDefined (assetId: number, assetDef?: AssetParams, line?: number): AssetParams {
     const lineNumber = line ?? 'unknown';
     if (assetDef === undefined) {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND,
@@ -227,7 +227,7 @@ export class Runtime {
    * Returns Asset Definitions
    * @param assetId Asset Index
    */
-  getAssetDef (assetId: number): AssetDef {
+  getAssetDef (assetId: number): AssetParams {
     const creatorAcc = this.getAssetAccount(assetId);
     const assetDef = creatorAcc.getAssetDef(assetId);
     return this.assertAssetDefined(assetId, assetDef);
@@ -305,21 +305,21 @@ export class Runtime {
 
   // creates new asset creation transaction object.
   mkAssetCreateTx (
-    name: string, flags: ASADeploymentFlags, asaDef: AssetDef): void {
+    name: string, flags: ASADeploymentFlags, asaDef: AssetParams): void {
     // this funtion is called only for validation of parameters passed
     algosdk.makeAssetCreateTxnWithSuggestedParams(
       flags.creator.addr,
       encodeNote(flags.note, flags.noteb64),
       asaDef.total,
-      asaDef.decimals,
-      asaDef.defaultFrozen,
-      asaDef.manager !== "" ? asaDef.manager : undefined,
-      asaDef.reserve !== "" ? asaDef.reserve : undefined,
-      asaDef.freeze !== "" ? asaDef.freeze : undefined,
-      asaDef.clawback !== "" ? asaDef.clawback : undefined,
-      asaDef.unitName,
+      Number(asaDef.decimals),
+      asaDef.defaultFrozen? asaDef.defaultFrozen: false,
+      asaDef.manager ? asaDef.manager : "",
+      asaDef.reserve ? asaDef.reserve : "",
+      asaDef.freeze ? asaDef.freeze : "",
+      asaDef.clawback ? asaDef.clawback : "",
+      asaDef.unitName as string,
       name,
-      asaDef.url,
+      asaDef.url as string,
       asaDef.metadataHash,
       mockSuggestedParams(flags, this.round)
     );
@@ -386,8 +386,7 @@ export class Runtime {
       flags.lease,
       payFlags.rekeyTo);
 
-    const encTx = txn.get_obj_for_encoding();
-    encTx.txID = txn.txID();
+    const encTx = {...txn.get_obj_for_encoding(), txID: txn.txID()};
     this.ctx.tx = encTx;
     this.ctx.gtxs = [encTx];
   }
@@ -433,8 +432,7 @@ export class Runtime {
       flags.lease,
       payFlags.rekeyTo);
 
-    const encTx = txn.get_obj_for_encoding();
-    encTx.txID = txn.txID();
+    const encTx = {...txn.get_obj_for_encoding(), txID: txn.txID()};
     this.ctx.tx = encTx;
     this.ctx.gtxs = [encTx];
   }
@@ -477,8 +475,7 @@ export class Runtime {
       flags.lease,
       payFlags.rekeyTo);
 
-    const encTx = txn.get_obj_for_encoding();
-    encTx.txID = txn.txID();
+    const encTx = {...txn.get_obj_for_encoding(), txID: txn.txID()};
     this.ctx.tx = encTx;
     this.ctx.gtxs = [encTx];
   }
@@ -548,7 +545,7 @@ export class Runtime {
     // check if transaction is signed by logic signature,
     // if yes verify signature and run logic
     if (txnParam.sign === SignType.LogicSignature && txnParam.lsig) {
-      this.ctx.args = txnParam.args ?? txnParam.lsig.args;
+      this.ctx.args = txnParam.args ?? txnParam.lsig.arg;
 
       // signature validation
       const fromAccountAddr = getFromAddress(txnParam);
@@ -558,7 +555,7 @@ export class Runtime {
           { address: fromAccountAddr });
       }
       // logic validation
-      const program = convertToString(txnParam.lsig.logic);
+      const program = convertToString(txnParam.lsig.l);
       if (program === "") {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
       }

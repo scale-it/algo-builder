@@ -1,4 +1,4 @@
-import type { AssetDefEnc, StateSchemaEnc, SuggestedParams, Transaction } from "algosdk";
+import type { EncodedAssetParams, EncodedGlobalStateSchema, EncodedLocalStateSchema, SuggestedParams, Transaction } from "algosdk";
 import algosdk from "algosdk";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
@@ -57,13 +57,13 @@ export function txnSpecbyField (txField: string, tx: Txn, gtxns: Txn[], tealVers
   if (assetTxnFields.has(txField)) {
     const s = TxnFields[tealVersion][txField];
     const assetMetaData = tx.apar;
-    result = assetMetaData?.[s as keyof AssetDefEnc];
+    result = assetMetaData?.[s as keyof EncodedAssetParams];
     return parseToStackElem(result, txField);
   }
   if (globalAndLocalNumTxnFields.has(txField)) {
     const encAppGlobalSchema = txField.includes('Global') ? tx.apgs : tx.apls;
     const s = TxnFields[tealVersion][txField];
-    result = encAppGlobalSchema?.[s as keyof StateSchemaEnc];
+    result = encAppGlobalSchema?.[s as keyof EncodedGlobalStateSchema];
     return parseToStackElem(result, txField);
   }
 
@@ -199,18 +199,18 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         undefined,
         execParams.amount,
         note,
-        execParams.assetID,
+        Number(execParams.assetID),
         suggestedParams);
     }
     case TransactionType.ModifyAsset: {
       return algosdk.makeAssetConfigTxnWithSuggestedParams(
         fromAccountAddr,
         encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64),
-        execParams.assetID,
-        execParams.fields.manager !== "" ? execParams.fields.manager : undefined,
-        execParams.fields.reserve !== "" ? execParams.fields.reserve : undefined,
-        execParams.fields.freeze !== "" ? execParams.fields.freeze : undefined,
-        execParams.fields.clawback !== "" ? execParams.fields.clawback : undefined,
+        Number(execParams.assetID),
+        execParams.fields.manager ? execParams.fields.manager : "",
+        execParams.fields.reserve ? execParams.fields.reserve : "",
+        execParams.fields.freeze ? execParams.fields.freeze : "",
+        execParams.fields.clawback ? execParams.fields.clawback : "",
         suggestedParams,
         false
       );
@@ -219,7 +219,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
       return algosdk.makeAssetFreezeTxnWithSuggestedParams(
         fromAccountAddr,
         encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64),
-        execParams.assetID,
+        Number(execParams.assetID),
         execParams.freezeTarget,
         execParams.freezeState,
         suggestedParams
@@ -233,7 +233,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.revocationTarget,
         execParams.amount,
         encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64),
-        execParams.assetID,
+        Number(execParams.assetID),
         suggestedParams
       );
     }
@@ -241,7 +241,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
       return algosdk.makeAssetDestroyTxnWithSuggestedParams(
         fromAccountAddr,
         encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64),
-        execParams.assetID,
+        Number(execParams.assetID),
         suggestedParams
       );
     }
@@ -317,15 +317,15 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
           fromAccountAddr,
           note,
           BigInt(execParams.asaDef.total),
-          execParams.asaDef.decimals,
-          execParams.asaDef.defaultFrozen,
-          execParams.asaDef.manager,
-          execParams.asaDef.reserve,
-          execParams.asaDef.freeze,
-          execParams.asaDef.clawback,
-          execParams.asaDef.unitName,
+          execParams.asaDef.decimals as number,
+          execParams.asaDef.defaultFrozen as boolean,
+          execParams.asaDef.manager as string,
+          execParams.asaDef.reserve as string,
+          execParams.asaDef.freeze as string,
+          execParams.asaDef.clawback as string,
+          execParams.asaDef.unitName as string,
           execParams.asaName,
-          execParams.asaDef.url,
+          execParams.asaDef.url as string,
           execParams.asaDef.metadataHash,
           suggestedParams
         );
@@ -344,8 +344,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         fromAccountAddr,
         suggestedParams,
         onComplete,
-        execParams.approvalProg,
-        execParams.clearProg,
+        execParams.approvalProg as Uint8Array,
+        execParams.clearProg as Uint8Array,
         execParams.localInts,
         execParams.localBytes,
         execParams.globalInts,
@@ -364,8 +364,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         fromAccountAddr,
         suggestedParams,
         execParams.appID,
-        execParams.approvalProg,
-        execParams.clearProg,
+        execParams.approvalProg as Uint8Array,
+        execParams.clearProg as Uint8Array,
         parseSSCAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
@@ -395,7 +395,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         undefined,
         0,
         note,
-        execParams.assetID,
+        Number(execParams.assetID),
         suggestedParams
       );
     }
