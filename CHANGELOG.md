@@ -2,6 +2,15 @@
 
 ## unreleased
 
+
+## v1.1.0 2021-06-23
+
+Highlights:
++ TEALv3 support
++ improved documentation and guide
++ better handling in `executeTransaction`
++ checkpoint can be market invalid if they are substituted (eg by redeploying same asset).
+
 ### API breaking
 * Move `updateSSC` function to `deployer`
 + Rename `parseArgs` to `parse_params`
@@ -20,12 +29,13 @@
 + TEALv3 support in `@algo-builder/runtime`.
 + Transpile TEAL code to substitute the TMPL placeholders
 + Mark not valid checkpoints (in case of `DeleteSSC`/`DestroyAsset`) using `deleted` boolean
- 
+
 ### Bug fixes
 
 `@algorand-builder/runtime`
     * Remove asset holding from account if `closeRemainderTo` is specified.
     * Asset creator should not be able to close it's holding to another account.
++ fixed temporal files handling.
 
 ## v1.0.2 2021-05-18
 
