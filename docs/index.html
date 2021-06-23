@@ -15,26 +15,29 @@
 
     <!-- Bootstrap CSS / Color Scheme -->
     <link rel="stylesheet" href="_css/bootstrap.css">
+    <link rel="stylesheet" href="_css/main.css">
 </head>
 <body>
 
 <!--Header Section-->
 <section class="bg-gradient pt-4 pb-6">
     <div class="container">
-        <div class="row">
-            <div class="col-12 d-flex flex-row align-items-center justify-content-between">
-                <div class="heading-brand"><img style="width: 30%; height: 40%;" src="http://gitcdn.link/repo/scale-it/algo-builder/master/media/logo.svg" /></div>
+        <div class="row" id="header">
+            <div class="col-12 align-items-center">
+                <!-- <div class="heading-brand"><img style="width: 30%; height: 40%;" src="http://gitcdn.link/repo/scale-it/algo-builder/master/media/logo.svg" /></div> -->
+                <div class="heading-brand"><img src="../media/logo-website.png" /></div>
                 <a href="https://github.com/scale-it/algo-builder" class="btn btn-success svg-icon">
                     <em class="mr-2" data-feather="github"></em>
                     Github
                 </a>
             </div>
         </div>
-        <div class="row mt-5" style="margin-bottom: 50px;">
+        <div class="row mt-5 first-section">
             <div class="col-md-10 mx-auto text-center">
-                <h1>Framework to automate development of Algorand Standard Assets, Tokens and Smart Contracts</h1>
-            <p class="col-md-12 mx-auto mb-2 text-center" style="font-size: x-large;">Algo Builder is an trustworthy framework for Algorand dapps (Decentralized Applications).
-                    Its main goal is to make Algorand applications development simple, efficient, and scalable. Available packages:
+								<h2>Algo Builder is an trustworthy framework for Algorand dapps (Decentralized Applications), Algorand Standard Assets, Tokens and Smart Contracts.
+									Its main goal is to make Algorand applications development simple, efficient, and scalable.</h2>
+
+								<p class="text-left"> Available packages:</p>
                 <div style="font-size:x-large; margin-left: 40px;">
                     <ul>
                         <li>
@@ -58,8 +61,9 @@
                         </li>
                     </ul>
                 </div>
-            </p>
-                <div style="margin-top: 35px;">
+
+
+                <div style="margin-top: 35px;" class="doc-links">
                     <a href="./guide/README" class="btn btn-success svg-icon" style="margin-right: 20px;">
                       <em class="mr-2" data-feather="book"></em>
                       User Guide
