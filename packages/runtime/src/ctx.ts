@@ -6,7 +6,7 @@ import { RuntimeError } from "./errors/runtime-errors";
 import { ASSET_CREATION_FEE } from "./lib/constants";
 import { mockSuggestedParams } from "./mock/tx";
 import {
-  AccountAddress, AccountStoreI, AlgoTransferParam, ASADeploymentFlags, AssetHoldingM, AssetModFields,
+  AccountAddress, AccountStoreI, AlgoTransferParam, ASADef, ASADeploymentFlags, AssetHoldingM, AssetModFields,
   AssetTransferParam, Context, ExecParams, ExecutionMode,
   SignType, SSCAttributesM, SSCDeploymentFlags,
   State, TransactionType, Txn, TxParams

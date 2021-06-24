@@ -400,7 +400,6 @@ class Asset {
       decimals: def.decimals,
       defaultFrozen: def.defaultFrozen ?? false,
       unitName: def.unitName,
-      name: assetName,
       url: def.url ?? '',
       metadataHash: def.metadataHash ?? '',
       manager: def.manager ?? '',

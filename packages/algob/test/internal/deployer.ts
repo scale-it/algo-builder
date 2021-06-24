@@ -1,5 +1,5 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import { generateAccount, LogicSig } from "algosdk";
+import algosdk, { generateAccount } from "algosdk";
 import { assert } from "chai";
 
 import { genAccounts } from "../../src/builtin-tasks/gen-accounts";
@@ -15,13 +15,13 @@ import { useFixtureProject } from "../helpers/project";
 import { cleanupMutableData } from "../lib/script-checkpoints";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
-function mkASA (): rtypes.ASADef {
+function mkASA (): algosdk.AssetParams {
   return {
     total: 1,
     decimals: 1,
     unitName: 'ASA',
     defaultFrozen: false
-  };
+  } as algosdk.AssetParams;
 }
 
 describe("DeployerDeployMode", () => {

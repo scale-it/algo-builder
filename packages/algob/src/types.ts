@@ -622,3 +622,15 @@ export interface AnyMap {
 export type PromiseAny = Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 //  LocalWords:  configFile
+
+export interface RequestError extends Error {
+  response?: {
+    statusCode: number;
+    text: string;
+    body: {
+      message: string;
+    };
+    error?: Error;
+  };
+  error?: Error;
+}

@@ -1,5 +1,4 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import type { LogicSig } from "algosdk";
 import { assert } from "chai";
 import * as fs from "fs";
 

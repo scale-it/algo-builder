@@ -13,7 +13,7 @@ import { encodeNote, getFromAddress, mkTransaction } from "./lib/txn";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import {
-  AccountAddress, AccountStoreI, ASADefs, ASADeploymentFlags, ASAInfo, AssetHoldingM, Context, ExecParams,
+  AccountAddress, AccountStoreI, ASADef, ASADefs, ASADeploymentFlags, ASAInfo, AssetHoldingM, Context, ExecParams,
   ExecutionMode, SignType, SSCAttributesM, SSCDeploymentFlags, SSCInfo, SSCOptionalFlags,
   StackElem, State, TransactionType, Txn, TxParams
 } from "./types";
@@ -310,7 +310,7 @@ export class Runtime {
     algosdk.makeAssetCreateTxnWithSuggestedParams(
       flags.creator.addr,
       encodeNote(flags.note, flags.noteb64),
-      asaDef.total,
+      BigInt(asaDef.total),
       Number(asaDef.decimals),
       asaDef.defaultFrozen? asaDef.defaultFrozen: false,
       asaDef.manager ? asaDef.manager : "",
