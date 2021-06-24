@@ -27,7 +27,7 @@ async function run (runtimeEnv, deployer) {
   signLogicSigMultiSig(lsig, alice, mparams); // lsig signed by alice's secret_key (creates a new multisig)
   signLogicSigMultiSig(lsig, john); // lsig signed again (threshold = 2) by john secret_key (appends signature to newly created msig)
 
-  const txnParams = {
+  let txnParams = {
     type: types.TransactionType.TransferAlgo,
     sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
@@ -38,6 +38,8 @@ async function run (runtimeEnv, deployer) {
   };
   // Funding multisignature account
   await executeTransaction(deployer, txnParams);
+  txnParams = bob.addr;
+  await executeTransaction(deployer, txnParams); // fund bob
 
   await deployer.addCheckpointKV('User Checkpoint', 'Fund Multisignature Account');
 

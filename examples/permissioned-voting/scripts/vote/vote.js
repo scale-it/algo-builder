@@ -15,6 +15,14 @@ async function run (runtimeEnv, deployer) {
     amountMicroAlgos: 200000000,
     payFlags: {}
   });
+  await executeTransaction(deployer, {
+    type: types.TransactionType.TransferAlgo,
+    sign: types.SignType.SecretKey,
+    fromAccount: masterAccount,
+    toAccountAddr: bob.addr,
+    amountMicroAlgos: 200000000,
+    payFlags: {}
+  });
 
   // Get last round.
   const status = await deployer.algodClient.status().do();
