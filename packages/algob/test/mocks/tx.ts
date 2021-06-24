@@ -1,4 +1,4 @@
-import { Algodv2, AssetInfo, ConfirmedTxInfo, SuggestedParams } from "algosdk";
+import algosdk, { Algodv2, AssetParams, PendingTransactionResponse, SuggestedParams } from "algosdk";
 
 import { bobAcc } from "./account";
 
@@ -13,15 +13,13 @@ export const mockSuggestedParam: SuggestedParams = {
   genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI='
 };
 
-export const mockConfirmedTx: ConfirmedTxInfo = {
-  'confirmed-round': 1,
-  "asset-index": 1,
-  'application-index': 1,
-  'global-state-delta': "string",
-  'local-state-delta': "string"
-};
+export const mockConfirmedTx: PendingTransactionResponse = {
+  confirmedRound: 1,
+  assetIndex: 1,
+  applicationIndex: 1
+} as PendingTransactionResponse;
 
-export const mockAssetInfo: AssetInfo = {
+export const mockAssetInfo: algosdk.modelsv2.Asset = {
   index: 1,
   params: {
     creator: "addr-1",
@@ -36,5 +34,5 @@ export const mockAssetInfo: AssetInfo = {
     reserve: undefined,
     freeze: bobAcc.addr,
     clawback: undefined
-  }
-};
+  } as AssetParams
+} as algosdk.modelsv2.Asset;

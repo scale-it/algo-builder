@@ -94,7 +94,7 @@ describe("Checkpoint", () => {
     netCheckpoint.dLsig.set("lsig", {
       creator: "536",
       contractAddress: "addr-3",
-      lsig: {} as LogicSig
+      lsig: {} as rtypes.LogicSig
     });
     appendToCheckpoint(checkpoints, "network12345", netCheckpoint);
     assert.deepEqual(checkpoints, {
@@ -113,7 +113,7 @@ describe("Checkpoint", () => {
         dLsig: new Map([["lsig", {
           creator: "536",
           contractAddress: "addr-3",
-          lsig: {} as LogicSig
+          lsig: {} as rtypes.LogicSig
         }]])
       }
     });
@@ -156,7 +156,7 @@ describe("Checkpoint", () => {
         dLsig: new Map([["lsig", {
           creator: "536",
           contractAddress: "addr-3",
-          lsig: {} as LogicSig
+          lsig: {} as rtypes.LogicSig
         }]])
       }
     });

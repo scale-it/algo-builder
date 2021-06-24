@@ -51,7 +51,7 @@ export interface AlgoOperator {
     txWriter: txWriter
   ) => Promise<rtypes.SSCInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.PendingTransactionResponse>
-  getAssetByID: (assetIndex: number | bigint) => Promise<algosdk.AssetParams>
+  getAssetByID: (assetIndex: number | bigint) => Promise<algosdk.modelsv2.Asset>
   optInAcountToASA: (
     asaName: string, assetIndex: number, account: rtypes.Account, params: rtypes.TxParams
   ) => Promise<void>
@@ -107,8 +107,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
   /**
    * Queries blockchain using algodClient for asset information by index */
-  async getAssetByID (assetIndex: number | bigint): Promise<algosdk.AssetParams> {
-    return await this.algodClient.getAssetByID(Number(assetIndex)).do() as algosdk.AssetParams;
+  async getAssetByID (assetIndex: number | bigint): Promise<algosdk.modelsv2.Asset> {
+    return await this.algodClient.getAssetByID(Number(assetIndex)).do() as algosdk.modelsv2.Asset;
   }
 
   getTxFee (params: algosdk.SuggestedParams, txSize: number): number {
@@ -122,7 +122,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     // Extracted from interacting with Algorand node:
     // 7 opted-in assets require to have 800000 micro algos (frozen in account).
     // 11 assets require 1200000.
-    let assetValue = accoutInfo.assets ? accoutInfo.assets.length + 1: 1;
+    const assetValue = accoutInfo.assets ? Number(accoutInfo.assets.length) + 1 : 1;
     return BigInt(accoutInfo.amount) - BigInt(assetValue * ALGORAND_ASA_OWNERSHIP_COST);
   }
 
@@ -210,7 +210,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
       if (account.addr === creator.addr) {
         throw new BuilderError(ERRORS.SCRIPT.ASA_TRIED_TO_OPT_IN_CREATOR);
       }
-      const accountInfo = await this.algodClient.accountInformation(account.addr).do() as algosdk.modelsv2.Account;
+      const accountInfo = await
+      this.algodClient.accountInformation(account.addr).do() as algosdk.modelsv2.Account;
       const requiredAmount = optInTxFee + ALGORAND_ASA_OWNERSHIP_COST;
       const usableAmount = this.getUsableAccBalance(accountInfo);
       if (usableAmount < requiredAmount) {
@@ -237,16 +238,15 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const rawSignedTxn = assetTX.signTxn(flags.creator.sk);
     const txInfo = await this.algodClient.sendRawTransaction(rawSignedTxn).do();
     const txConfirmation = await this.waitForConfirmation(txInfo.txId);
-    const assetIndex = txConfirmation["assetIndex"];
-    const assetParams = await this.getAssetByID(Number(assetIndex));
+    const assetIndex = txConfirmation.assetIndex;
 
     txWriter.push(message, txConfirmation);
     return {
       creator: flags.creator.addr,
       txId: txInfo.txId,
       assetIndex: Number(assetIndex),
-      confirmedRound: Number(txConfirmation["confirmedRound"]),
-      assetDef: assetParams
+      confirmedRound: Number(txConfirmation.confirmedRound),
+      assetDef: asaDef
     };
   }
 
@@ -340,7 +340,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const txInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
     const confirmedTxInfo = await this.waitForConfirmation(txId);
 
-    const appId = confirmedTxInfo['applicationIndex'];
+    const appId = confirmedTxInfo.applicationIndex;
     const message = `Signed transaction with txID: ${txId}\nCreated new app-id: ${appId}`; // eslint-disable-line @typescript-eslint/restrict-template-expressions
 
     console.log(message);
@@ -349,7 +349,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     return {
       creator: flags.sender.addr,
       txId: txInfo.txId,
-      confirmedRound: Number(confirmedTxInfo["confirmedRound"]),
+      confirmedRound: Number(confirmedTxInfo.confirmedRound),
       appID: Number(appId),
       timestamp: Math.round(+new Date() / 1000)
     };
@@ -414,7 +414,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     return {
       creator: sender.addr,
       txId: txInfo.txId,
-      confirmedRound: Number(confirmedTxInfo["confirmedRound"]),
+      confirmedRound: Number(confirmedTxInfo.confirmedRound),
       appID: appId,
       timestamp: Math.round(+new Date() / 1000)
     };

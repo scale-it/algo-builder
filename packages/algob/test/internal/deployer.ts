@@ -1,4 +1,5 @@
 import { types as rtypes } from "@algo-builder/runtime";
+import { ASADef } from "@algo-builder/runtime/build/types";
 import algosdk, { generateAccount } from "algosdk";
 import { assert } from "chai";
 
@@ -15,13 +16,13 @@ import { useFixtureProject } from "../helpers/project";
 import { cleanupMutableData } from "../lib/script-checkpoints";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
-function mkASA (): algosdk.AssetParams {
+function mkASA (): ASADef {
   return {
     total: 1,
     decimals: 1,
     unitName: 'ASA',
     defaultFrozen: false
-  } as algosdk.AssetParams;
+  };
 }
 
 describe("DeployerDeployMode", () => {
@@ -304,7 +305,7 @@ describe("DeployerDeployMode", () => {
     const cpData = new CheckpointRepoImpl()
       .registerASA(networkName, "ASA name", { creator: "ASA creator 123", txId: "", confirmedRound: 0, assetIndex: 0, assetDef: {} as rtypes.ASADef })
       .registerSSC(networkName, "ASC name", { creator: "ASC creator 951", txId: "", confirmedRound: 0, appID: -1, timestamp: 1 })
-      .registerLsig(networkName, "Lsig name", { creator: "Lsig creator", contractAddress: "addr-1", lsig: {} as LogicSig })
+      .registerLsig(networkName, "Lsig name", { creator: "Lsig creator", contractAddress: "addr-1", lsig: {} as rtypes.LogicSig })
       .putMetadata(networkName, "k", "v");
     const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
     deployerCfg.cpData = cpData;

@@ -1,5 +1,5 @@
 import { encodeNote, types } from "@algo-builder/runtime";
-import { ConfirmedTxInfo, decodeSignedTransaction, encodeAddress, Transaction } from "algosdk";
+import algosdk, { decodeSignedTransaction, encodeAddress, PendingTransactionResponse } from "algosdk";
 import { assert } from "chai";
 import { isArray } from "lodash";
 import sinon from 'sinon';
@@ -52,7 +52,7 @@ describe("Opt-In to ASA", () => {
   let deployer: Deployer;
   let execParams: types.OptInASAParam;
   let algod: AlgoOperatorDryRunImpl;
-  let expected: ConfirmedTxInfo;
+  let expected: PendingTransactionResponse;
   beforeEach(async () => {
     const env = mkEnv("network1");
     algod = new AlgoOperatorDryRunImpl();
@@ -68,14 +68,12 @@ describe("Opt-In to ASA", () => {
       assetID: 1
     };
     sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam });
+      .returns({ do: async () => mockSuggestedParam as algosdk.SuggestedParamsRequest });
     expected = {
-      'confirmed-round': 1,
-      "asset-index": 1,
-      'application-index': 1,
-      'global-state-delta': "string",
-      'local-state-delta': "string"
-    };
+      confirmedRound: 1,
+      assetIndex: 1,
+      applicationIndex: 1
+    } as PendingTransactionResponse;
   });
 
   afterEach(() => {
@@ -138,11 +136,11 @@ describe("ASA modify fields", () => {
    * Verifies correct asset fields are sent to network
    * @param rawTxns rawTxns Signed transactions in Uint8Array
    */
-  function checkTx (rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
+  function checkTx (rawTxns: Uint8Array | Uint8Array[]): Promise<PendingTransactionResponse> {
     if (isArray(rawTxns)) {
       // verify here if group tx
     } else {
-      const tx: Transaction = decodeSignedTransaction(rawTxns).txn;
+      const tx: any = decodeSignedTransaction(rawTxns).txn;
       // Verify if fields are set correctly
       assert.isUndefined(tx.assetManager);
       assert.isUndefined(tx.assetReserve);

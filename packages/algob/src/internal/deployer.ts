@@ -1,4 +1,5 @@
 import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
+import { ASADef } from "@algo-builder/runtime/build/types";
 import type { AssetParams, EncodedMultisig } from "algosdk";
 import * as algosdk from "algosdk";
 
@@ -104,7 +105,7 @@ class DeployerBasicMode {
    * @param assetIndex asset index
    * @returns asset info from network
    */
-  async getAssetByID (assetIndex: number | bigint): Promise<algosdk.AssetParams> {
+  async getAssetByID (assetIndex: number | bigint): Promise<algosdk.modelsv2.Asset> {
     return await this.algoOp.getAssetByID(assetIndex);
   }
 
@@ -118,7 +119,7 @@ class DeployerBasicMode {
    * of asaDef could be updated during tx execution (eg. update asset clawback)
    * @param asaName asset name in asa.yaml
    */
-  loadASADef (asaName: string): AssetParams | undefined {
+  loadASADef (asaName: string): ASADef | undefined {
     const asaMap = this.cpData.precedingCP[this.networkName]?.asa ?? new Map();
     return asaMap.get(asaName)?.assetDef;
   }

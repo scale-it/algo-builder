@@ -67,13 +67,13 @@ export function makeAssetCreateTxn (
     flags.creator.addr,
     note,
     BigInt(asaDef.total),
-    asaDef.decimals,
-    asaDef.defaultFrozen,
+    Number(asaDef.decimals),
+    asaDef.defaultFrozen ? asaDef.defaultFrozen : false,
     asaDef.manager ? asaDef.manager : "",
     asaDef.reserve ? asaDef.reserve : "",
     asaDef.freeze ? asaDef.freeze : "",
     asaDef.clawback ? asaDef.clawback : "",
-    asaDef.unitName,
+    asaDef.unitName ? asaDef.unitName : "",
     name,
     asaDef.url ? asaDef.url : "",
     asaDef.metadataHash,
@@ -186,16 +186,16 @@ async function mkTx (
       // before modifying asset
       const assetInfo = await deployer.getAssetByID(BigInt(txn.assetID));
       if (txn.fields.manager === "") txn.fields.manager = undefined;
-      else txn.fields.manager = txn.fields.manager ?? assetInfo.manager;
+      else txn.fields.manager = txn.fields.manager ?? assetInfo.params.manager;
 
       if (txn.fields.freeze === "") txn.fields.freeze = undefined;
-      else txn.fields.freeze = txn.fields.freeze ?? assetInfo.freeze;
+      else txn.fields.freeze = txn.fields.freeze ?? assetInfo.params.freeze;
 
       if (txn.fields.clawback === "") txn.fields.clawback = undefined;
-      else txn.fields.clawback = txn.fields.clawback ?? assetInfo.clawback;
+      else txn.fields.clawback = txn.fields.clawback ?? assetInfo.params.clawback;
 
       if (txn.fields.reserve === "") txn.fields.reserve = undefined;
-      else txn.fields.reserve = txn.fields.reserve ?? assetInfo.reserve;
+      else txn.fields.reserve = txn.fields.reserve ?? assetInfo.params.reserve;
 
       break;
     }

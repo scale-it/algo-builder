@@ -1,11 +1,11 @@
 import {
   Account as AccountSDK,
+  ApplicationStateSchema,
   AssetParams,
   EncodedLogicSig,
-  ApplicationStateSchema,
+  EncodedMultisig,
   EncodedTransaction,
-  MultisigMetadata,
-  EncodedMultisig
+  MultisigMetadata
 } from "algosdk";
 import * as z from 'zod';
 
@@ -91,7 +91,7 @@ export interface DeployedAssetInfo {
 // ASA deployment information (log)
 export interface ASAInfo extends DeployedAssetInfo {
   assetIndex: number
-  assetDef: AssetParams
+  assetDef: ASADef
 }
 
 // Stateful smart contract deployment information (log)
@@ -472,32 +472,32 @@ export enum DecodingMode {
 }
 
 interface LogicSigStorageStructure {
-  tag: Buffer;
-  logic: Uint8Array;
-  args: Uint8Array[];
-  sig?: Uint8Array;
-  msig?: EncodedMultisig;
+  tag: Buffer
+  logic: Uint8Array
+  args: Uint8Array[]
+  sig?: Uint8Array
+  msig?: EncodedMultisig
 }
 
 /** Algosdk types */
 export interface LogicSig extends LogicSigStorageStructure {
 
-  get_obj_for_encoding(): EncodedLogicSig;
-  from_obj_for_encoding(encoded: EncodedLogicSig): LogicSig;
+  get_obj_for_encoding: () => EncodedLogicSig
+  from_obj_for_encoding: (encoded: EncodedLogicSig) => LogicSig
 
   // Performs signature verification
-  verify(msg: Uint8Array): boolean;
+  verify: (msg: Uint8Array) => boolean
   // Compute hash of the logic sig program (that is the same as escrow account address) as string address
-  address(): string;
+  address: () => string
   // Creates signature (if no msig provided) or multi signature otherwise
-  sign(secretKey?: Uint8Array, msig?: MultisigMetadata): void;
+  sign: (secretKey?: Uint8Array, msig?: MultisigMetadata) => void
   // Signs and appends a signature
-  appendToMultisig(secretKey: Uint8Array): void;
+  appendToMultisig: (secretKey: Uint8Array) => void
   // signs and returns program signature, without appending it to this object
-  signProgram(secretKey: Uint8Array): Uint8Array;
-  singleSignMultisig(secretKey: Uint8Array, msig: EncodedMultisig): [Uint8Array, number];
+  signProgram: (secretKey: Uint8Array) => Uint8Array
+  singleSignMultisig: (secretKey: Uint8Array, msig: EncodedMultisig) => [Uint8Array, number]
   // serializes and encodes the LogicSig
-  toByte(): Uint8Array;
+  toByte: () => Uint8Array
   // deserializes a LogicSig which was serialized using toByte()
-  fromByte(encoded: Uint8Array): LogicSig;
+  fromByte: (encoded: Uint8Array) => LogicSig
 }

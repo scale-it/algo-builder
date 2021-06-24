@@ -1,4 +1,5 @@
 import { types as rtypes } from "@algo-builder/runtime";
+import { ASADef } from "@algo-builder/runtime/build/types";
 import * as algosdk from "algosdk";
 
 import * as types from "./internal/core/params/argument-types";
@@ -409,7 +410,7 @@ export interface Deployer {
    * NOTE: This function returns "deployed" ASADef, as immutable properties
    * of asaDef could be updated during tx execution (eg. update asset clawback)
    * @name  ASA name - name of ASA in the /assets/asa.yaml file */
-  loadASADef: (asaName: string) => algosdk.AssetParams | undefined
+  loadASADef: (asaName: string) => ASADef | undefined
 
   assertNoAsset: (name: string) => void
 
@@ -505,7 +506,7 @@ export interface Deployer {
 
   /**
    * Queries blockchain using algodv2 for asset information by index  */
-  getAssetByID: (assetIndex: number | bigint) => Promise<algosdk.AssetParams>
+  getAssetByID: (assetIndex: number | bigint) => Promise<algosdk.modelsv2.Asset>
 
   /**
    * Creates an opt-in transaction for given ASA name, which must be defined in
@@ -625,12 +626,12 @@ export type PromiseAny = Promise<any>; // eslint-disable-line @typescript-eslint
 
 export interface RequestError extends Error {
   response?: {
-    statusCode: number;
-    text: string;
+    statusCode: number
+    text: string
     body: {
-      message: string;
-    };
-    error?: Error;
-  };
-  error?: Error;
+      message: string
+    }
+    error?: Error
+  }
+  error?: Error
 }
