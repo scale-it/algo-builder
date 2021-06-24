@@ -1,5 +1,5 @@
 import { encodeNote, mkTransaction, types as rtypes } from "@algo-builder/runtime";
-import algosdk, { LogicSig } from "algosdk";
+import algosdk from "algosdk";
 
 import { BuilderError } from "../errors/errors";
 import { ERRORS } from "../errors/errors-list";
@@ -50,13 +50,13 @@ export interface AlgoOperator {
     flags: rtypes.SSCOptionalFlags,
     txWriter: txWriter
   ) => Promise<rtypes.SSCInfo>
-  waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
-  getAssetByID: (assetIndex: number | bigint) => Promise<algosdk.AssetInfo>
+  waitForConfirmation: (txId: string) => Promise<algosdk.PendingTransactionResponse>
+  getAssetByID: (assetIndex: number | bigint) => Promise<algosdk.AssetParams>
   optInAcountToASA: (
     asaName: string, assetIndex: number, account: rtypes.Account, params: rtypes.TxParams
   ) => Promise<void>
   optInLsigToASA: (
-    asaName: string, assetIndex: number, lsig: algosdk.LogicSig, params: rtypes.TxParams
+    asaName: string, assetIndex: number, lsig: rtypes.LogicSig, params: rtypes.TxParams
   ) => Promise<void>
   optInToASAMultiple: (
     asaName: string, asaDef: rtypes.ASADef,
@@ -66,10 +66,10 @@ export interface AlgoOperator {
     sender: rtypes.Account, appId: number,
     payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags) => Promise<void>
   optInLsigToSSC: (
-    appId: number, lsig: LogicSig,
+    appId: number, lsig: rtypes.LogicSig,
     payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags) => Promise<void>
   ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>
-  sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<algosdk.ConfirmedTxInfo>
+  sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<algosdk.PendingTransactionResponse>
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -84,7 +84,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
    * Send signed transaction to network and wait for confirmation
    * @param rawTxns Signed Transaction(s)
    */
-  async sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<algosdk.ConfirmedTxInfo> {
+  async sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<algosdk.PendingTransactionResponse> {
     const txInfo = await this.algodClient.sendRawTransaction(rawTxns).do();
     return await this.waitForConfirmation(txInfo.txId);
   }
@@ -92,13 +92,13 @@ export class AlgoOperatorImpl implements AlgoOperator {
   // Source:
   // https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js#L21
   // Function used to wait for a tx confirmation
-  async waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
+  async waitForConfirmation (txId: string): Promise<algosdk.PendingTransactionResponse> {
     const response = await this.algodClient.status().do();
     let lastround = response["last-round"];
     while (true) {
       const pendingInfo = await this.algodClient.pendingTransactionInformation(txId).do();
       if (pendingInfo[confirmedRound] !== null && pendingInfo[confirmedRound] > 0) {
-        return pendingInfo;
+        return pendingInfo as algosdk.PendingTransactionResponse;
       }
       lastround++;
       await this.algodClient.statusAfterBlock(lastround).do();
@@ -107,8 +107,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
   /**
    * Queries blockchain using algodClient for asset information by index */
-  async getAssetByID (assetIndex: number | bigint): Promise<algosdk.AssetInfo> {
-    return await this.algodClient.getAssetByID(assetIndex).do();
+  async getAssetByID (assetIndex: number | bigint): Promise<algosdk.AssetParams> {
+    return await this.algodClient.getAssetByID(Number(assetIndex)).do() as algosdk.AssetParams;
   }
 
   getTxFee (params: algosdk.SuggestedParams, txSize: number): number {
@@ -122,7 +122,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
     // Extracted from interacting with Algorand node:
     // 7 opted-in assets require to have 800000 micro algos (frozen in account).
     // 11 assets require 1200000.
-    return BigInt(accoutInfo.amount) - BigInt((accoutInfo.assets.length + 1) * ALGORAND_ASA_OWNERSHIP_COST);
+    let assetValue = accoutInfo.assets ? accoutInfo.assets.length + 1: 1;
+    return BigInt(accoutInfo.amount) - BigInt(assetValue * ALGORAND_ASA_OWNERSHIP_COST);
   }
 
   getOptInTxSize (
@@ -159,7 +160,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   }
 
   async optInLsigToASA (
-    asaName: string, assetIndex: number, lsig: algosdk.LogicSig, flags: rtypes.TxParams
+    asaName: string, assetIndex: number, lsig: rtypes.LogicSig, flags: rtypes.TxParams
   ): Promise<void> {
     console.log(`Contract ${lsig.address()} opt-in for ASA ${asaName}`);
     const txParams = await tx.mkTxParams(this.algodClient, flags);
@@ -209,7 +210,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       if (account.addr === creator.addr) {
         throw new BuilderError(ERRORS.SCRIPT.ASA_TRIED_TO_OPT_IN_CREATOR);
       }
-      const accountInfo = await this.algodClient.accountInformation(account.addr).do();
+      const accountInfo = await this.algodClient.accountInformation(account.addr).do() as algosdk.modelsv2.Account;
       const requiredAmount = optInTxFee + ALGORAND_ASA_OWNERSHIP_COST;
       const usableAmount = this.getUsableAccBalance(accountInfo);
       if (usableAmount < requiredAmount) {
@@ -236,15 +237,16 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const rawSignedTxn = assetTX.signTxn(flags.creator.sk);
     const txInfo = await this.algodClient.sendRawTransaction(rawSignedTxn).do();
     const txConfirmation = await this.waitForConfirmation(txInfo.txId);
-    const assetIndex = txConfirmation["asset-index"];
+    const assetIndex = txConfirmation["assetIndex"];
+    const assetParams = await this.getAssetByID(Number(assetIndex));
 
     txWriter.push(message, txConfirmation);
     return {
       creator: flags.creator.addr,
       txId: txInfo.txId,
-      assetIndex: assetIndex,
-      confirmedRound: txConfirmation[confirmedRound],
-      assetDef: asaDef
+      assetIndex: Number(assetIndex),
+      confirmedRound: Number(txConfirmation["confirmedRound"]),
+      assetDef: assetParams
     };
   }
 
@@ -338,7 +340,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const txInfo = await this.algodClient.sendRawTransaction(signedTxn).do();
     const confirmedTxInfo = await this.waitForConfirmation(txId);
 
-    const appId = confirmedTxInfo['application-index'];
+    const appId = confirmedTxInfo['applicationIndex'];
     const message = `Signed transaction with txID: ${txId}\nCreated new app-id: ${appId}`; // eslint-disable-line @typescript-eslint/restrict-template-expressions
 
     console.log(message);
@@ -347,8 +349,8 @@ export class AlgoOperatorImpl implements AlgoOperator {
     return {
       creator: flags.sender.addr,
       txId: txInfo.txId,
-      confirmedRound: confirmedTxInfo[confirmedRound],
-      appID: appId,
+      confirmedRound: Number(confirmedTxInfo["confirmedRound"]),
+      appID: Number(appId),
       timestamp: Math.round(+new Date() / 1000)
     };
   }
@@ -412,7 +414,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     return {
       creator: sender.addr,
       txId: txInfo.txId,
-      confirmedRound: confirmedTxInfo[confirmedRound],
+      confirmedRound: Number(confirmedTxInfo["confirmedRound"]),
       appID: appId,
       timestamp: Math.round(+new Date() / 1000)
     };
@@ -458,7 +460,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
    * @param flags Optional parameters to SSC (accounts, args..)
    */
   async optInLsigToSSC (
-    appID: number, lsig: LogicSig,
+    appID: number, lsig: rtypes.LogicSig,
     payFlags: rtypes.TxParams,
     flags: rtypes.SSCOptionalFlags
   ): Promise<void> {

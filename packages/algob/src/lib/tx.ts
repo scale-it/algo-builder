@@ -69,13 +69,13 @@ export function makeAssetCreateTxn (
     BigInt(asaDef.total),
     asaDef.decimals,
     asaDef.defaultFrozen,
-    asaDef.manager,
-    asaDef.reserve,
-    asaDef.freeze,
-    asaDef.clawback,
+    asaDef.manager ? asaDef.manager : "",
+    asaDef.reserve ? asaDef.reserve : "",
+    asaDef.freeze ? asaDef.freeze : "",
+    asaDef.clawback ? asaDef.clawback : "",
     asaDef.unitName,
     name,
-    asaDef.url,
+    asaDef.url ? asaDef.url : "",
     asaDef.metadataHash,
     txSuggestedParams
   );
@@ -169,7 +169,7 @@ async function mkTx (
       const clear = await deployer.ensureCompiled(txn.clearProgram);
       txn.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
       txn.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
-      txIdxMap.set(index, [name, { total: 1, decimals: 1, unitName: "MOCK" }]);
+      txIdxMap.set(index, [name, { total: 1, decimals: 1, unitName: "MOCK", defaultFrozen: false }]);
       break;
     }
     case rtypes.TransactionType.UpdateSSC: {
@@ -178,7 +178,7 @@ async function mkTx (
       const clear = await deployer.ensureCompiled(txn.newClearProgram);
       txn.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
       txn.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
-      txIdxMap.set(index, [cpKey, { total: 1, decimals: 1, unitName: "MOCK" }]);
+      txIdxMap.set(index, [cpKey, { total: 1, decimals: 1, unitName: "MOCK", defaultFrozen: false }]);
       break;
     }
     case rtypes.TransactionType.ModifyAsset: {
@@ -186,16 +186,16 @@ async function mkTx (
       // before modifying asset
       const assetInfo = await deployer.getAssetByID(BigInt(txn.assetID));
       if (txn.fields.manager === "") txn.fields.manager = undefined;
-      else txn.fields.manager = txn.fields.manager ?? assetInfo.params.manager;
+      else txn.fields.manager = txn.fields.manager ?? assetInfo.manager;
 
       if (txn.fields.freeze === "") txn.fields.freeze = undefined;
-      else txn.fields.freeze = txn.fields.freeze ?? assetInfo.params.freeze;
+      else txn.fields.freeze = txn.fields.freeze ?? assetInfo.freeze;
 
       if (txn.fields.clawback === "") txn.fields.clawback = undefined;
-      else txn.fields.clawback = txn.fields.clawback ?? assetInfo.params.clawback;
+      else txn.fields.clawback = txn.fields.clawback ?? assetInfo.clawback;
 
       if (txn.fields.reserve === "") txn.fields.reserve = undefined;
-      else txn.fields.reserve = txn.fields.reserve ?? assetInfo.params.reserve;
+      else txn.fields.reserve = txn.fields.reserve ?? assetInfo.reserve;
 
       break;
     }
@@ -215,7 +215,7 @@ async function mkTx (
 export async function executeTransaction (
   deployer: Deployer,
   execParams: rtypes.ExecParams | rtypes.ExecParams[]):
-  Promise<algosdk.ConfirmedTxInfo> {
+  Promise<algosdk.PendingTransactionResponse> {
   try {
     let signedTxn;
     let txns: Transaction[] = [];
@@ -260,7 +260,7 @@ export async function executeTransaction (
  */
 export async function executeSignedTxnFromFile (
   deployer: Deployer,
-  fileName: string): Promise<algosdk.ConfirmedTxInfo> {
+  fileName: string): Promise<algosdk.PendingTransactionResponse> {
   const signedTxn = loadSignedTxnFromFile(fileName);
   if (signedTxn === undefined) { throw new Error(`File ${fileName} does not exist`); }
 

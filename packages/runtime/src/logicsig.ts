@@ -17,18 +17,20 @@ import { convertToString, stringToBytes } from "./lib/parsing";
  * We are using raw TEAL code as program.(by converting string into bytes)
  */
 export class LogicSig {
-  l: Uint8Array;
-  arg: Uint8Array[];
+  logic: Uint8Array;
+  args: Uint8Array[];
   sig: Uint8Array;
   msig: EncodedMultisig | undefined;
   lsigAddress: string;
+  tag: Buffer;
 
   constructor (program: string, args: Uint8Array[]) {
-    this.l = stringToBytes(program);
-    this.arg = args;
+    this.logic = stringToBytes(program);
+    this.args = args;
     this.sig = new Uint8Array(0);
     this.msig = undefined;
     this.lsigAddress = generateAccount().addr;
+    this.tag = Buffer.from('Program');
   }
 
   /**
@@ -103,7 +105,7 @@ export class LogicSig {
     }
 
     if (!compareArray(this.sig, new Uint8Array(0))) {
-      return verifyBytes(this.l, this.sig, accAddr);
+      return verifyBytes(this.logic, this.sig, accAddr);
     }
 
     if (this.msig) {
@@ -159,7 +161,7 @@ export class LogicSig {
     let verifiedCounter = 0;
     for (const subsig of subsigs) {
       const subsigAddr = encodeAddress(subsig.pk);
-      if (!compareArray(subsig.s, new Uint8Array(0)) && verifyBytes(this.l, subsig.s as Uint8Array, subsigAddr)) {
+      if (!compareArray(subsig.s, new Uint8Array(0)) && verifyBytes(this.logic, subsig.s as Uint8Array, subsigAddr)) {
         verifiedCounter += 1;
       }
     }
@@ -176,7 +178,7 @@ export class LogicSig {
    * @param secretKey: account's secret key
    */
   signProgram (secretKey: Uint8Array): Uint8Array {
-    return signBytes(this.l, secretKey);
+    return signBytes(this.logic, secretKey);
   }
 
   /**
@@ -190,7 +192,7 @@ export class LogicSig {
    * Returns program associated with logic signature
    */
   program (): string {
-    return convertToString(this.l);
+    return convertToString(this.logic);
   }
 
   /**
@@ -200,7 +202,7 @@ export class LogicSig {
    */
 
   toByte (): Uint8Array {
-    return this.l;
+    return this.logic;
   }
 
   fromByte (val: Uint8Array): LogicSig {
@@ -209,8 +211,8 @@ export class LogicSig {
 
   get_obj_for_encoding (): EncodedLogicSig {
     return {
-      l: this.l,
-      arg: this.arg,
+      l: this.logic,
+      arg: this.args,
       sig: this.sig,
       msig: this.msig
     };

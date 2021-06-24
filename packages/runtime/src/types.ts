@@ -471,8 +471,16 @@ export enum DecodingMode {
   BIGINT = 'bigint'
 }
 
+interface LogicSigStorageStructure {
+  tag: Buffer;
+  logic: Uint8Array;
+  args: Uint8Array[];
+  sig?: Uint8Array;
+  msig?: EncodedMultisig;
+}
+
 /** Algosdk types */
-export interface LogicSig extends EncodedLogicSig {
+export interface LogicSig extends LogicSigStorageStructure {
 
   get_obj_for_encoding(): EncodedLogicSig;
   from_obj_for_encoding(encoded: EncodedLogicSig): LogicSig;

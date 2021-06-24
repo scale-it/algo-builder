@@ -545,7 +545,7 @@ export class Runtime {
     // check if transaction is signed by logic signature,
     // if yes verify signature and run logic
     if (txnParam.sign === SignType.LogicSignature && txnParam.lsig) {
-      this.ctx.args = txnParam.args ?? txnParam.lsig.arg;
+      this.ctx.args = txnParam.args ?? txnParam.lsig.args;
 
       // signature validation
       const fromAccountAddr = getFromAddress(txnParam);
@@ -555,7 +555,7 @@ export class Runtime {
           { address: fromAccountAddr });
       }
       // logic validation
-      const program = convertToString(txnParam.lsig.l);
+      const program = convertToString(txnParam.lsig.logic);
       if (program === "") {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
       }

@@ -63,7 +63,6 @@
     "sample-project/"
   ],
   "devDependencies": {
-    "@algo-builder/types-algosdk": "^0.2.0",
     "@types/chai": "^4.2.12",
     "@types/debug": "^4.1.5",
     "@types/deep-equal": "^1.0.1",
@@ -83,7 +82,7 @@
   },
   "dependencies": {
     "@algo-builder/runtime": "^1.0.2",
-    "algosdk": "^1.9.1",
+    "algosdk": "scale-it/js-algorand-sdk.git#exportTypes",
     "chalk": "^4.1.0",
     "debug": "^4.1.1",
     "deep-equal": "^2.0.3",
