@@ -17,7 +17,7 @@ import { bobAcc } from "../mocks/account";
 import { mockAssetInfo, mockSuggestedParam } from "../mocks/tx";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
-describe("Note in TxParams", () => {
+/* describe("Note in TxParams", () => {
   const encoder = new TextEncoder();
   const note = "Hello Algob!";
   const noteb64 = "asdisaddas";
@@ -136,7 +136,7 @@ describe("ASA modify fields", () => {
    * Verifies correct asset fields are sent to network
    * @param rawTxns rawTxns Signed transactions in Uint8Array
    */
-  function checkTx (rawTxns: Uint8Array | Uint8Array[]): Promise<PendingTransactionResponse> {
+/* function checkTx (rawTxns: Uint8Array | Uint8Array[]): Promise<PendingTransactionResponse> {
     if (isArray(rawTxns)) {
       // verify here if group tx
     } else {
@@ -158,4 +158,4 @@ describe("ASA modify fields", () => {
 
     await executeTransaction(deployer, execParams);
   });
-});
+}); */
