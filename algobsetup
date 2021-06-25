@@ -12,7 +12,7 @@ function err () {
 function check_dir_and_delete(){
     if [[ -d $1 ]]
     then
-        echo "$1 already exists in this project, deleting in now..."
+        echo "$1 already exists in this project, deleting it now..."
         rm -rf $1    
     fi
 }
