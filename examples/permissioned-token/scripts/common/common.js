@@ -22,7 +22,7 @@ exports.fundAccount = async function (deployer, account) {
   }
   for (const a of account) {
     console.log(`* Funding Account: ${a.name} *`);
-    account.push({
+    params.push({
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
       fromAccount: master,
