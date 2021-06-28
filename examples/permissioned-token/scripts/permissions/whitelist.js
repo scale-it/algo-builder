@@ -3,8 +3,10 @@ const {
 } = require('@algo-builder/algob');
 const { fundAccount, optInAccountToSSC } = require('../common/common');
 const { types } = require('@algo-builder/runtime');
+const accounts = require('./common/accounts');
 
 const clearStateProgram = 'clear_state_program.py';
+
 /**
  * If permissions manager is a multisig address, then user should have a signed tx file, decoded tx fetched
  * from that file, append his own signature & send it to network.
@@ -16,7 +18,6 @@ const clearStateProgram = 'clear_state_program.py';
  * @param address account address to whitelist
  */
 async function whitelist (deployer, permissionsManager, address) {
-  // permission app info
   const permissionSSCInfo = deployer.getSSC('permissions.py', clearStateProgram);
 
   /**
@@ -37,33 +38,28 @@ async function whitelist (deployer, permissionsManager, address) {
   await executeTransaction(deployer, whiteListParams);
 }
 
+/**
+ * + Fund accounts (manager, account_to_whitelist)
+ * + Opt-In to permissions by elon (skip this code if already opted-in)
+ * + call permissions smart contract with `add_whitelist` arg
+*/
 async function run (runtimeEnv, deployer) {
-  const alice = deployer.accountsByName.get('alice'); // alice is set as the permissions_manager during deploy
+  const owner = deployer.accountsByName.get(accounts.owner); // alice is set as the permissions_manager during deploy
   const elon = deployer.accountsByName.get('elon-musk');
   const john = deployer.accountsByName.get('john');
   const permissionSSCInfo = deployer.getSSC('permissions.py', clearStateProgram);
 
-  /** Fund permissions manager & accounts_to_whitelist by master **/
-  await Promise.all([
-    fundAccount(deployer, alice),
-    fundAccount(deployer, elon),
-    fundAccount(deployer, john)
-  ]);
+  /** Fund all accounts with ALGO **/
+  await fundAccount(deployer, [owner, elon, john]);
 
-  console.log('* Opt-In to permissions(rules) smart contract *');
+  console.log('* Opt-In and whitelist Elon *');
   await optInAccountToSSC(deployer, elon, permissionSSCInfo.appID, {}, {});
+  await whitelist(deployer, owner, elon.addr);
 
-  /**
-   * Add elon address to a list of whitelisted account addresses
-   * + Fund accounts (manager, account_to_whitelist)
-   * + Opt-In to permissions by elon (skip this code if already opted-in)
-   * + call permissions smart contract with `add_whitelist` arg
-   */
-  await whitelist(deployer, alice, elon.addr);
-
-  // Transaction FAIL: sender !== permissions manager
+  // Example of invalid transaction: sender !== permissions manager
   try {
-    await whitelist(deployer, john, elon.addr); // fails as john is not the permissions manager
+    // fails as john is not the permissions manager and can't whitelist elon
+    await whitelist(deployer, john, elon.addr);
   } catch (e) {
     console.log('[Expected (sender !== permissions manager)]', e.response?.error);
   }

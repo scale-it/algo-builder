@@ -1,12 +1,21 @@
+const accounts = require('./common/accounts');
+
 /**
- * Deploy Controller Smart Contract (only asa manager can do that)
+ * Deploy Controller Smart Contract (only ASA manager can do that)
+ *
+ * For tutorial purpose. We deploy permissions smart contract using a single
+ * account: owner (which is the ASA manager).
+ *
+ * NOTE: If asa manager is a multisig account (eg. [alice, john]), then you should use
+ * transaction exported to a file, signed by required signers and use
+ * `executeSignedTxnFromFile` to execute the transaction.
  */
-async function setupControllerSSC (asaInfo, deployer) {
-  const alice = deployer.accountsByName.get('alice');
-  const gold = deployer.asa.get('gold');
+async function setupControllerSSC (runtimeEnv, deployer) {
+  const tesla = deployer.asa.get('tesla');
+  const owner = deployer.accountsByName.get(accounts.owner);
 
   const templateParam = {
-    TOKEN_ID: gold.assetIndex
+    TOKEN_ID: tesla.assetIndex
   };
 
   console.log('** Deploying smart contract: controller **');
@@ -14,29 +23,17 @@ async function setupControllerSSC (asaInfo, deployer) {
     'controller.py', // approval program
     'clear_state_program.py', // clear program
     {
-      sender: alice,
+      sender: owner,
       localInts: 0,
       localBytes: 0,
       globalInts: 2, // 1 to store kill_status, 1 for storing permissions_app_id
       globalBytes: 0,
-      foreignAssets: [gold.assetIndex] // pass token_id in foreign assets array
+      foreignAssets: [tesla.assetIndex] // pass token_id in foreign assets array
     }, {}, templateParam); // pass token_id as a template paramenter
   console.log(controllerSSCInfo);
-}
 
-async function run (runtimeEnv, deployer) {
-  /**
-   * - just for tutorial purpose. Below functions deploys permissions and controller smart contracts
-   * from a single account: alice (which is the ASA manager). After deploying the two, we add permissioned
-   * asc in controller smart contract.
-   * - If asa manager is a multisig account (eg. [alice, john]), then user will receive a signed txn
-   * file, and then we can use `executeSignedTxnFromFile` to execute the txn
-   */
-  const gold = deployer.asa.get('gold');
-  await setupControllerSSC(gold, deployer);
-
-  /* Use below function to deploy SSC's if you receive a txn file from a shared network */
+  // Use executeSignedTxnFromFile function to execute deployment transaction from a signed file:
   // executeSignedTxnFromFile(deployer, 'ssc_file_out.tx');
 }
 
-module.exports = { default: run };
+module.exports = { default: setupControllerSSC };

@@ -2,18 +2,21 @@ const {
   executeTransaction
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/runtime');
+const accounts = require('./common/accounts');
 
 /**
- * - Deploy Permissions(rules) smart contract
- * - After deploying rules contract, add it to controller (using add_permission argument)
+ * Deploy Permissions smart contract
+ * and link it to the controller (using the controller  add_permission argument)
  */
-async function setupPermissionsSSC (controllerSSCInfo, deployer) {
-  const gold = deployer.asa.get('gold');
-  const alice = deployer.accountsByName.get('alice');
+async function setupPermissionsApp (runtimeEnv, deployer) {
+  const controllerSSCInfo = deployer.getSSC('controller.py', 'clear_state_program.py');
+
+  const tesla = deployer.asa.get('tesla');
+  const owner = deployer.accountsByName.get(accounts.owner);
   const controllerappID = controllerSSCInfo.appID;
 
   const templateParam = {
-    PERM_MANAGER: alice.addr
+    PERM_MANAGER: owner.addr // setting permission manager to the owner account
   };
 
   /** Deploy Permissions(rules) smart contract **/
@@ -22,7 +25,7 @@ async function setupPermissionsSSC (controllerSSCInfo, deployer) {
     'permissions.py', // approval program
     'clear_state_program.py', // clear program
     {
-      sender: alice,
+      sender: owner,
       localInts: 1, // 1 to store whitelisted status in local state
       localBytes: 0,
       globalInts: 2, // 1 to store max_tokens, 1 for storing total whitelisted accounts
@@ -33,12 +36,14 @@ async function setupPermissionsSSC (controllerSSCInfo, deployer) {
   /**
    * After deploying rules, we need to add it's config (app_id & manager) to controller,
    * to ensure these rules are followed during transfer of the token
-   * Note:
-   * + Only ASA can add a new rule contract
-   * + Could be used in RUN mode as well (as adding rules could be dynamic)
-   * + Currently only 1 rules smart contract is supported
+   * Notes:
+   * + Only ASA owner can set a permissions contract (this is enforced by the controller smart
+       contract code).
+   * + We can update controller settings (eg changing the permissions contract) in RUN mode
+   *   as well.
+   * + Currently only 1 permissions app is supported.
    */
-  console.log('** Adding permissions smart contract config(app_id) to controller **');
+  console.log('** Linking permissions smart contract to the controller **');
   try {
     const appArgs = [
       'str:set_permission',
@@ -48,23 +53,15 @@ async function setupPermissionsSSC (controllerSSCInfo, deployer) {
     await executeTransaction(deployer, {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
-      fromAccount: alice, // asa manager account
+      fromAccount: owner, // asa manager account
       appID: controllerappID,
       payFlags: { totalFee: 1000 },
       appArgs: appArgs,
-      foreignAssets: [gold.assetIndex] // controller sc verifies if correct token is being used + asa.manager is correct one
+      foreignAssets: [tesla.assetIndex] // controller sc verifies if correct token is being used + asa.manager is correct one
     });
   } catch (e) {
     console.log('Error occurred', e.response.error);
   }
 }
 
-async function run (runtimeEnv, deployer) {
-  const controllerSSCInfo = deployer.getSSC('controller.py', 'clear_state_program.py');
-  await setupPermissionsSSC(controllerSSCInfo, deployer);
-
-  /* Use below function to deploy SSC's if you receive a txn file from a shared network */
-  // executeSignedTxnFromFile(deployer, 'ssc_file_out.tx');
-}
-
-module.exports = { default: run };
+module.exports = { default: setupPermissionsApp };

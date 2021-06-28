@@ -1,27 +1,24 @@
 const { fundAccount, totalSupply } = require('./common/common');
+const accounts = require('./common/accounts');
 
 /**
- * NOTE: this function is for demonstration purpose only (if ASA creator, manager are single accounts)
- * If asset creator is a multisig address, then user should have a signed tx file, decoded tx fetched
+ * NOTE: this function is for demonstration purpose only
+ * Below, we use a single account creator.
+ * If asset creator is a multisig address, then user should use a signed tx file, decoded tx
  * from that file, append his own signature & send it to network.
- *  - Use `algob.signMultiSig` or cli command `sign-multisig` to
+ *  - Use `algob.signMultiSig` or cli command `algob sign-multisig` to
  *  add the signature to multi-sig transaction file
- *  - Use `algob.executeSignedTxnFromFile` to execute tx from file
- *  - In below function we assume creator is a single account (alice)
+ *  - Use `algob.executeSignedTxnFromFile` to execute tx from a signed file
  */
-async function setupASA (deployer) {
-  const alice = deployer.accountsByName.get('alice');
+async function setupASA (runtimeEnv, deployer) {
+  const owner = deployer.accountsByName.get(accounts.owner);
 
-  /** Fund Creator account by master **/
-  await fundAccount(deployer, alice);
-  return await deployer.deployASA('gold', { creator: alice });
-}
+  /** Fund account with ALGO to provide enough balance to create the Tesla shares **/
+  await fundAccount(deployer, owner);
+  const tesla = await deployer.deployASA('tesla', { creator: owner });
 
-async function run (runtimeEnv, deployer) {
-  // just for tutorial purpose (use `executeSignedTxnFromFile` if using multisig account)
-  const gold = await setupASA(deployer);
-  console.log(gold);
-  console.log('total Supply: ', await totalSupply(deployer, gold.assetIndex));
+  console.log(tesla);
+  console.log('total Supply: ', await totalSupply(deployer, tesla.assetIndex));
 
   /**
    * If using msig address as asa creator or manager, then realistically user will receive a signed tx
@@ -33,4 +30,4 @@ async function run (runtimeEnv, deployer) {
   // executeSignedTxnFromFile(deployer, 'asa_file_out.tx');
 }
 
-module.exports = { default: run };
+module.exports = { default: setupASA };
