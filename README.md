@@ -50,7 +50,7 @@ Make sure your `yarn global bin` directory is in your `$PATH**.
 
 #### Installation from master
 
-We recommend installation from GitHub _master_ branch if you want to play with templates and examples (all our example smart contracts are tested against _master_). The master branch corresponds to the latest released version.
+We recommend installation from GitHub _master_ branch if you want to play with [templates](https://github.com/scale-it/algo-builder-templates) and [examples](https://github.com/scale-it/algo-builder/tree/master/examples) (all our example smart contracts are tested against _master_). The master branch corresponds to the latest released version.
 
 ```
 git clone https://github.com/scale-it/algo-builder.git
