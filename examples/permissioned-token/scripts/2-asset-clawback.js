@@ -42,7 +42,7 @@ async function setupClawback (runtimeEnv, deployer) {
   const escrowAddress = escrowLsig.address();
 
   /** Update clawback address to escrow **/
-  console.log('* Updating asset clawback to escrow *');
+  console.log('\n** Updating asset clawback to escrow **');
   const assetConfigParams = {
     type: types.TransactionType.ModifyAsset,
     sign: types.SignType.SecretKey,

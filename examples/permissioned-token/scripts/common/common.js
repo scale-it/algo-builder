@@ -35,7 +35,7 @@ exports.fundAccount = async function (deployer, account) {
   try {
     await executeTransaction(deployer, params);
   } catch (e) {
-    console.error('Transaction Failed', e.response ? e.response.error : e);
+    console.error('Transaction Failed', e.response ? e.response.error.text : e);
   }
 };
 

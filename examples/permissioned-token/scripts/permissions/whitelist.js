@@ -3,7 +3,7 @@ const {
 } = require('@algo-builder/algob');
 const { fundAccount, optInAccountToSSC } = require('../common/common');
 const { types } = require('@algo-builder/runtime');
-const accounts = require('./common/accounts');
+const accounts = require('../common/accounts');
 
 const clearStateProgram = 'clear_state_program.py';
 
@@ -61,7 +61,7 @@ async function run (runtimeEnv, deployer) {
     // fails as john is not the permissions manager and can't whitelist elon
     await whitelist(deployer, john, elon.addr);
   } catch (e) {
-    console.log('[Expected (sender !== permissions manager)]', e.response?.error);
+    console.log('[Expected error (sender !== permissions manager)]:', e.response?.error.text);
   }
 }
 

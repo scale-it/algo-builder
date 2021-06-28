@@ -20,7 +20,7 @@ async function setupPermissionsApp (runtimeEnv, deployer) {
   };
 
   /** Deploy Permissions(rules) smart contract **/
-  console.log('** Deploying smart contract: permissions **');
+  console.log('\n** Deploying smart contract: permissions **');
   const permissionSSCInfo = await deployer.deploySSC(
     'permissions.py', // approval program
     'clear_state_program.py', // clear program
@@ -43,7 +43,7 @@ async function setupPermissionsApp (runtimeEnv, deployer) {
    *   as well.
    * + Currently only 1 permissions app is supported.
    */
-  console.log('** Linking permissions smart contract to the controller **');
+  console.log('\n** Linking permissions smart contract to the controller **');
   try {
     const appArgs = [
       'str:set_permission',

@@ -3,7 +3,7 @@ const {
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/runtime');
 const { executeTransaction, fundAccount, totalSupply } = require('../common/common');
-const accounts = require('./common/accounts');
+const accounts = require('../common/accounts');
 
 /**
  * Issue tokens using the issuer account.

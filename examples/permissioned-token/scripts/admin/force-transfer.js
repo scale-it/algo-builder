@@ -3,7 +3,7 @@ const {
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/runtime');
 
-const accounts = require('./common/accounts');
+const accounts = require('../common/accounts');
 const { fundAccount, optInAccountToSSC } = require('../common/common');
 const { issue } = require('./issue');
 const { whitelist } = require('../permissions/whitelist');
@@ -118,9 +118,11 @@ async function run (runtimeEnv, deployer) {
 
   // opt-in accounts to permissions smart contract
   // comment this code if already opted-in
-  await optInAccountToSSC(deployer, elon, permissionsSSCInfo.appID, {}, {});
-  await optInAccountToSSC(deployer, bob, permissionsSSCInfo.appID, {}, {});
-  await optInAccountToSSC(deployer, john, permissionsSSCInfo.appID, {}, {});
+  await Promise.all([
+    optInAccountToSSC(deployer, elon, permissionsSSCInfo.appID, {}, {}),
+    optInAccountToSSC(deployer, bob, permissionsSSCInfo.appID, {}, {}),
+    optInAccountToSSC(deployer, john, permissionsSSCInfo.appID, {}, {}),
+  ]);
 
   /*
    * use below function to whitelist accounts

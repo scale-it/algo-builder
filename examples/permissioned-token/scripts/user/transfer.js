@@ -119,9 +119,11 @@ async function run (runtimeEnv, deployer) {
 
   // opt-in accounts to permissions smart contract
   // comment this code if already opted-in
-  await optInAccountToSSC(deployer, elon, permissionsSSCInfo.appID, {}, {});
-  await optInAccountToSSC(deployer, bob, permissionsSSCInfo.appID, {}, {});
-  await optInAccountToSSC(deployer, john, permissionsSSCInfo.appID, {}, {});
+  await Promis.all([
+    optInAccountToSSC(deployer, elon, permissionsSSCInfo.appID, {}, {}),
+    optInAccountToSSC(deployer, bob, permissionsSSCInfo.appID, {}, {}),
+    optInAccountToSSC(deployer, john, permissionsSSCInfo.appID, {}, {}),
+  ]);
 
   /*
    * use below function to whitelist accounts
@@ -130,8 +132,9 @@ async function run (runtimeEnv, deployer) {
    * NOTE: whitelist() transaction will be executed by the permissionsManager,
    * current_user (a non reserve account) will not control permissionsManager account.
    */
-  await whitelist(deployer, permissionsManager, bob.addr);
-  await whitelist(deployer, permissionsManager, john.addr);
+  await Promise.all([
+    whitelist(deployer, permissionsManager, bob.addr),
+    whitelist(deployer, permissionsManager, john.addr)]);
 
   // opt-in accounts to asa 'tesla' (so they can receive it)
   await Promise.all([

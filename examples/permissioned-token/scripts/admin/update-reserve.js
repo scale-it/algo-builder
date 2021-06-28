@@ -3,7 +3,7 @@ const {
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/runtime');
 const { executeTransaction, fundAccount } = require('../common/common');
-const accounts = require('./common/accounts');
+const accounts = require('../common/accounts');
 
 // here instead of updating the asset reserve by modifyAsset tx,
 // we use rekey transaction for the reserve account.

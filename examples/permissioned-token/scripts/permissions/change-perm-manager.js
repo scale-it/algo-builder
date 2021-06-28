@@ -1,7 +1,7 @@
 const { fundAccount, executeTransaction, optInAccountToSSC } = require('../common/common');
 const { whitelist } = require('./whitelist');
 const { types } = require('@algo-builder/runtime');
-const accounts = require('./common/accounts');
+const accounts = require('../common/accounts');
 
 /**
  * Only current perm_manager can update permissions_manager to a new address.
@@ -21,7 +21,7 @@ async function changePermissionsManager (deployer, permissionsManager, address) 
     accounts: [address]
   };
 
-  console.log(`* Updating permissions manager to: ${address} *`);
+  console.log(`\n* Updating permissions manager to: ${address} *`);
   await executeTransaction(deployer, changePerManagerParams);
 }
 
@@ -42,7 +42,7 @@ async function run (runtimeEnv, deployer) {
   try {
     await whitelist(deployer, john, elon.addr); // fails
   } catch (e) {
-    console.log('[Expected (john !== permissions_manager)]', e.response?.error.text);
+    console.log('[Expected error (john !== permissions_manager)]:', e.response?.error.text);
   }
 
   await changePermissionsManager(deployer, permissionsManager, john.addr);
