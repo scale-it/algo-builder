@@ -415,9 +415,11 @@ export interface BaseModel {
   attribute_map: Record<string, string>
   _is_primitive: (val: any) => val is string | boolean | number | bigint
   _is_address: (val: any) => val is Address
-  /* eslint-disable max-len */
-  _get_obj_for_encoding: ((val: Function) => Record<string, any>) & ((val: any[]) => any[]) & ((val: Record<string, any>) => Record<string, any>)
-  get_obj_for_encoding: () => Record<string, any>
+  /* eslint-disable*/
+  _get_obj_for_encoding(val: Function): Record<string, any>;
+  _get_obj_for_encoding(val: any[]): any[];
+  _get_obj_for_encoding(val: Record<string, any>): Record<string, any>;
+  get_obj_for_encoding(): Record<string, any>;
 }
 
 export class BaseModelI implements BaseModel {
@@ -426,22 +428,21 @@ export class BaseModelI implements BaseModel {
   public constructor () {
     this.attribute_map = {};
   }
-
-  _is_primitive (val: any): val is string | boolean | number | bigint {
+  _is_primitive(val: any): val is string | boolean | number | bigint { 
     return true;
   }
 
-  _is_address (val: any): val is Address {
+  _is_address(val: any): val is Address {
     throw new Error("_is_address Not Implemented");
   }
 
-  _get_obj_for_encoding (val: Function): Record<string, any>;
-  _get_obj_for_encoding (val: any[]): any[];
-  _get_obj_for_encoding (val: Record<string, any>): Record<string, any> {
+  _get_obj_for_encoding(val: Function): Record<string, any>;
+  _get_obj_for_encoding(val: any[]): any[];
+  _get_obj_for_encoding(val: Record<string, any>): Record<string, any> {
     throw new Error("_get_obj_for_encoding Not Implemented");
   }
-
-  get_obj_for_encoding (): Record<string, any> {
+  
+  get_obj_for_encoding(): Record<string, any> {
     throw new Error("get_obj_for_encoding Not Implemented");
   }
 }
