@@ -43,7 +43,7 @@ To install `algob` globally in your system you can use:
 + Using NPM: `npm install -g @algo-builder/algob`
 
 
-**Recommended**: Installation from source (if you want to use `algob` with latest, not released version):
+Installation from source:
 
 ```
 git clone https://github.com/scale-it/algo-builder.git
@@ -55,6 +55,15 @@ yarn link
 ```
 Finally, make sure your `yarn global bin` directory is in your `$PATH`.
 
+##### Upgrading
+
+If you use installation from source (_master_), don't forget to **pull the latest changes** to not to miss the updates:
+```
+cd path/to/algo-builder
+git pull -p
+yarn install
+yarn build
+```
 
 
 ### Algorand Node requirements
