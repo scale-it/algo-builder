@@ -58,6 +58,8 @@ The keys of these maps are strings which should be unique per network inside of 
 Editing them by hand is not encouraged (but if it's needed their names must not match any asset in the same network).
 Currently it's possible to edit these files by hand but it may be decided to disallow this in the future.
 
+Note: Checkpoints will not be created or modified when script is running in run mode.
+
 ## Parameters
 
 For more details on checkpoint parameters and their specific types please refer to `Checkpoint` type in [types.ts](https://github.com/scale-it/algo-builder/blob/master/packages/algob/src/types.ts).
@@ -71,3 +73,7 @@ structure for the same is:
 Consider a case when SSC is updated with same programs, this is the case where we append to checkpoint with different timestamp, txConfirmation but same `program-name-key`.
 
 While retreiving sscInfo from checkpoints only the lastest timestamp SSCInfo is used.
+
+## Checkpoint storage `delete` boolean
+
+- Checkpoint structure has an additional flag `deleted` - if it's true, that means the respective asa/ssc is deleted from network. If this is the case, then the deployer will throw an error when trying to use that in any operation other than `optOut`.

@@ -62,17 +62,17 @@ describe("Crowdfunding basic tests", function () {
     ];
 
     const johnMinBalance = john.minBalance;
-    const appId = runtime.addApp(
+    const appID = runtime.addApp(
       { ...validFlags, appArgs: appArgs }, {}, approvalProgram, clearProgram);
     // verify sender's min balance increased after creating application
     assert.isAbove(runtime.getAccount(john.address).minBalance, johnMinBalance);
 
     const getGlobal = (key: string):
-    StackElem |undefined => runtime.getGlobalState(appId, key);
+    StackElem |undefined => runtime.getGlobalState(appID, key);
     const johnPk = addressToPk(john.address);
 
     // verify global state
-    assert.isDefined(appId);
+    assert.isDefined(appID);
     assert.deepEqual(getGlobal('Creator'), johnPk);
     assert.deepEqual(getGlobal('StartDate'), BigInt(beginDate.getTime()));
     assert.deepEqual(getGlobal('EndDate'), BigInt(endDate.getTime()));

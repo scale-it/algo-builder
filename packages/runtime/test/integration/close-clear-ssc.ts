@@ -35,7 +35,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
       type: TransactionType.CloseSSC,
       sign: SignType.SecretKey,
       fromAccount: john.account,
-      appId: 11,
+      appID: 11,
       payFlags: { totalFee: 1000 }
     };
   });
@@ -53,32 +53,32 @@ describe("ASC - CloseOut from Application and Clear State", function () {
   });
 
   it("should successfully closeOut from app and update state according to asc", function () {
-    const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram); // create app
+    const appID = runtime.addApp(flags, {}, approvalProgram, clearProgram); // create app
     const initialJohnMinBalance = runtime.getAccount(john.address).minBalance;
 
-    runtime.optInToApp(john.address, appId, {}, {}); // opt-in to app (set new local state)
+    runtime.optInToApp(john.address, appID, {}, {}); // opt-in to app (set new local state)
     syncAccount();
     assert.equal(john.minBalance,
       initialJohnMinBalance +
       (APPLICATION_BASE_FEE + ((25000 + 3500) * 3 + (25000 + 25000) * 3)) // optInToApp increase
     ); // verify minimum balance raised after optIn
 
-    runtime.executeTx({ ...closeOutParams, appId: appId });
+    runtime.executeTx({ ...closeOutParams, appID: appID });
     syncAccount();
     // verify app is deleted from local state
-    const localApp = john.getAppFromLocal(appId);
+    const localApp = john.getAppFromLocal(appID);
     assert.isUndefined(localApp);
 
     // verify app is NOT deleted from global state
-    const globalApp = runtime.getApp(appId);
+    const globalApp = runtime.getApp(appID);
     assert.isDefined(globalApp);
 
     // since app is deleted from local, local state should be undefined
-    const localVal = runtime.getLocalState(appId, john.address, 'local-key');
+    const localVal = runtime.getLocalState(appID, john.address, 'local-key');
     assert.isUndefined(localVal);
 
     // since app is not deleted from global, global state should be updated by smart contract
-    const globalVal = runtime.getGlobalState(appId, 'global-key');
+    const globalVal = runtime.getGlobalState(appID, 'global-key');
     assert.deepEqual(globalVal, stringToBytes('global-val'));
 
     // minimum balance should decrease to initial balance after closing out
@@ -87,8 +87,8 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 
   it("should throw error if user is not opted-in for closeOut call", function () {
     // create app
-    const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram);
-    closeOutParams.appId = appId;
+    const appID = runtime.addApp(flags, {}, approvalProgram, clearProgram);
+    closeOutParams.appID = appID;
 
     expectRuntimeError(
       () => runtime.executeTx(closeOutParams),
@@ -98,9 +98,9 @@ describe("ASC - CloseOut from Application and Clear State", function () {
   });
 
   it("should not delete application on CloseOut call if logic is rejected", function () {
-    const appId = runtime.addApp(flags, {}, approvalProgram, clearProgram);
+    const appID = runtime.addApp(flags, {}, approvalProgram, clearProgram);
     const initialJohnMinBalance = runtime.getAccount(john.address).minBalance;
-    runtime.optInToApp(john.address, appId, {}, {}); // opt-in to app (set new local state)
+    runtime.optInToApp(john.address, appID, {}, {}); // opt-in to app (set new local state)
     syncAccount();
     const minBalanceAfterOptIn = john.minBalance;
     assert.equal(minBalanceAfterOptIn,
@@ -111,7 +111,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
       type: TransactionType.CloseSSC,
       sign: SignType.SecretKey,
       fromAccount: alice.account, // sending txn sender other than creator (john), so txn should be rejected
-      appId: appId,
+      appID: appID,
       payFlags: {}
     };
 
@@ -121,7 +121,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
     );
 
     // verify app is not deleted from account's local state (as tx is rejected)
-    const res = john.getAppFromLocal(appId);
+    const res = john.getAppFromLocal(appID);
     assert.isDefined(res);
     // minimum balance should remain the same as closeOutSSC failed
     assert.notEqual(john.minBalance, initialJohnMinBalance);
@@ -133,31 +133,31 @@ describe("ASC - CloseOut from Application and Clear State", function () {
   it("should delete application on clearState call even if logic is rejected", function () {
     // create app
     const rejectClearProgram = getProgram('rejectClear.teal');
-    const appId = runtime.addApp(flags, {}, approvalProgram, rejectClearProgram);
+    const appID = runtime.addApp(flags, {}, approvalProgram, rejectClearProgram);
     const initialJohnMinBalance = runtime.getAccount(john.address).minBalance;
     const clearAppParams: SSCCallsParam = {
       type: TransactionType.ClearSSC,
       sign: SignType.SecretKey,
       fromAccount: alice.account, // sending txn sender other than creator (john), so txn should be rejected
-      appId: appId,
+      appID: appID,
       payFlags: {}
     };
-    runtime.optInToApp(alice.address, appId, {}, {}); // opt-in to app (set new local state)
+    runtime.optInToApp(alice.address, appID, {}, {}); // opt-in to app (set new local state)
     syncAccount();
 
     // verify before tx execution that local state is present
-    let res = alice.getAppFromLocal(appId);
+    let res = alice.getAppFromLocal(appID);
     assert.isDefined(res);
 
     runtime.executeTx(clearAppParams);
 
     syncAccount();
     // verify app is deleted from account's local state even if tx is rejected after execution
-    res = alice.getAppFromLocal(appId);
+    res = alice.getAppFromLocal(appID);
     assert.isUndefined(res);
 
     // verify global state is not deleted
-    assert.isDefined(runtime.getApp(appId));
+    assert.isDefined(runtime.getApp(appID));
     // minimum balance should decrease to initial balance after clearing local state
     assert.equal(john.minBalance, initialJohnMinBalance);
   });

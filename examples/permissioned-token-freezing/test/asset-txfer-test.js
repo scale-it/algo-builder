@@ -71,8 +71,8 @@ describe('Test for transferring asset using custom logic', function () {
   });
 
   const getGlobal = (key) => runtime.getGlobalState(applicationId, key);
-  const getEscrowProg = (assetId, appId) =>
-    getProgram('clawback-escrow.py', { ASSET_ID: assetId, APP_ID: appId });
+  const getEscrowProg = (assetId, appID) =>
+    getProgram('clawback-escrow.py', { ASSET_ID: assetId, APP_ID: appID });
 
   // Update account state
   function syncAccounts () {
@@ -169,7 +169,7 @@ describe('Test for transferring asset using custom logic', function () {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: alice.account,
-      appId: applicationId,
+      appID: applicationId,
       payFlags: {},
       appArgs: ['str:set-level', 'int:2'],
       accounts: [alice.address] //  AppAccounts
@@ -191,7 +191,7 @@ describe('Test for transferring asset using custom logic', function () {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
         fromAccount: alice.account,
-        appId: applicationId,
+        appID: applicationId,
         payFlags: { totalFee: 1000 },
         appArgs: ['str:check-level'],
         accounts: [bob.address] //  AppAccounts
@@ -244,7 +244,7 @@ describe('Test for transferring asset using custom logic', function () {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: bob.account,
-      appId: applicationId,
+      appID: applicationId,
       payFlags: {},
       appArgs: ['str:set-level', 'int:2'],
       accounts: [alice.address] //  AppAccounts
@@ -294,7 +294,7 @@ describe('Test for transferring asset using custom logic', function () {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
         fromAccount: alice.account,
-        appId: applicationId,
+        appID: applicationId,
         payFlags: { totalFee: 1000 },
         appArgs: ['str:check-level'],
         accounts: [bob.address] //  AppAccounts

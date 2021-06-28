@@ -370,6 +370,28 @@ export interface AssetScriptMap {
   [assetName: string]: string
 }
 
+export interface CheckpointFunctions {
+  /**
+   * Queries a stateful smart contract info from checkpoint using key. */
+  getSSCfromCPKey: (key: string) => rtypes.SSCInfo | undefined
+
+  /**
+   * Returns SSC checkpoint key using application index,
+   * returns undefined if it doesn't exist
+   * @param index Application index
+   */
+  getAppCheckpointKeyFromIndex: (index: number) => string | undefined
+
+  /**
+   * Returns ASA checkpoint key using asset index,
+   * returns undefined if it doesn't exist
+   * @param index Asset Index
+   */
+  getAssetCheckpointKeyFromIndex: (index: number) => string | undefined
+
+  getLatestTimestampValue: (map: Map<number, rtypes.SSCInfo>) => number
+}
+
 export interface Deployer {
   /**
    * Allows user to know whether a script is running in a `deploy` or `run` mode. */
@@ -380,6 +402,8 @@ export interface Deployer {
   /**
    * Mapping of ASA name to deployment log */
   asa: Map<string, rtypes.ASAInfo>
+
+  checkpoint: CheckpointFunctions
 
   getASAInfo: (name: string) => rtypes.ASAInfo
 
@@ -477,7 +501,7 @@ export interface Deployer {
    * Update programs(approval, clear) for a stateful smart contract.
    * @param sender Account from which call needs to be made
    * @param payFlags Transaction Flags
-   * @param appId ID of the application being configured or empty if creating
+   * @param appID ID of the application being configured or empty if creating
    * @param newApprovalProgram New Approval Program filename
    * @param newClearProgram New Clear Program filename
    * @param flags Optional parameters to SSC (accounts, args..)
@@ -485,7 +509,7 @@ export interface Deployer {
   updateSSC: (
     sender: algosdk.Account,
     payFlags: rtypes.TxParams,
-    appId: number,
+    appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
     flags: rtypes.SSCOptionalFlags
@@ -512,7 +536,7 @@ export interface Deployer {
    * Creates an opt-in transaction for given ASA name, which must be defined in
    * `/assets/asa.yaml` file. The opt-in transaction is signed by the account secret key */
   optInAcountToASA: (asa: string, accountName: string,
-    flags: rtypes.TxParams, sign: rtypes.Sign) => Promise<void>
+    flags: rtypes.TxParams) => Promise<void>
 
   /**
    * Creates an opt-in transaction for given ASA name, which must be defined in
@@ -529,7 +553,7 @@ export interface Deployer {
    */
   optInAccountToSSC: (
     sender: rtypes.Account,
-    appId: number,
+    appID: number,
     payFlags: rtypes.TxParams,
     flags: rtypes.SSCOptionalFlags) => Promise<void>
 
@@ -542,7 +566,7 @@ export interface Deployer {
    * @param flags Optional parameters to SSC (accounts, args..)
    */
   optInLsigToSSC: (
-    appId: number,
+    appID: number,
     lsig: rtypes.LogicSig,
     payFlags: rtypes.TxParams,
     flags: rtypes.SSCOptionalFlags) => Promise<void>
@@ -558,10 +582,6 @@ export interface Deployer {
   /**
    * Queries a stateful smart contract info from checkpoint. */
   getSSC: (nameApproval: string, nameClear: string) => rtypes.SSCInfo | undefined
-
-  /**
-   * Queries a stateful smart contract info from checkpoint using key. */
-  getSSCfromCPKey: (key: string) => rtypes.SSCInfo | undefined
 
   /**
    * Queries a delegated logic signature from checkpoint. */
@@ -583,6 +603,14 @@ export interface Deployer {
    *     (used only when compiling PyTEAL to TEAL)
    */
   ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>
+
+  /**
+   * Checks if checkpoint is deleted for a particular transaction
+   * if checkpoint exists and is marked as deleted,
+   * throw error(except for opt-out transactions), else pass
+   * @param execParams Transaction execution parameters
+   */
+  assertCPNotDeleted: (execParams: rtypes.ExecParams | rtypes.ExecParams[]) => void
 }
 
 // ************************

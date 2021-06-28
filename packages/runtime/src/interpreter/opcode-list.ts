@@ -204,7 +204,7 @@ export class Arg extends Op {
     const index = Number(args[0]);
     this.checkIndexBound(index, interpreter.runtime.ctx.args as Uint8Array[], this.line);
 
-    this._arg = interpreter.runtime.ctx.args? interpreter.runtime.ctx.args[index]: undefined;
+    this._arg = interpreter.runtime.ctx.args ? interpreter.runtime.ctx.args[index] : undefined;
   }
 
   execute (stack: TEALStack): void {
@@ -1558,8 +1558,8 @@ export class Global extends Op {
         break;
       }
       case 'CreatorAddress': {
-        const appId = this.interpreter.runtime.ctx.tx.apid;
-        const app = this.interpreter.getApp(appId as number, this.line);
+        const appID = this.interpreter.runtime.ctx.tx.apid;
+        const app = this.interpreter.getApp(appID as number, this.line);
         result = decodeAddress(app.creator).publicKey;
         break;
       }
@@ -1599,13 +1599,13 @@ export class AppOptedIn extends Op {
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2, this.line);
-    const appId = this.assertBigInt(stack.pop(), this.line);
+    const appID = this.assertBigInt(stack.pop(), this.line);
     const accountIndex = this.assertBigInt(stack.pop(), this.line);
 
     const account = this.interpreter.getAccount(accountIndex, this.line);
     const localState = account.appsLocalState;
 
-    const isOptedIn = localState.get(Number(appId));
+    const isOptedIn = localState.get(Number(appID));
     if (isOptedIn) {
       stack.push(1n);
     } else {
@@ -1640,9 +1640,9 @@ export class AppLocalGet extends Op {
     const accountIndex = this.assertBigInt(stack.pop(), this.line);
 
     const account = this.interpreter.getAccount(accountIndex, this.line);
-    const appId = this.interpreter.runtime.ctx.tx.apid || 0;
+    const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
 
-    const val = account.getLocalState(appId, key);
+    const val = account.getLocalState(appID, key);
     if (val) {
       stack.push(val);
     } else {
@@ -1673,11 +1673,11 @@ export class AppLocalGetEx extends Op {
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 3, this.line);
     const key = this.assertBytes(stack.pop(), this.line);
-    const appId = this.assertBigInt(stack.pop(), this.line);
+    const appID = this.assertBigInt(stack.pop(), this.line);
     const accountIndex = this.assertBigInt(stack.pop(), this.line);
 
     const account = this.interpreter.getAccount(accountIndex, this.line);
-    const val = account.getLocalState(Number(appId), key);
+    const val = account.getLocalState(Number(appID), key);
     if (val) {
       stack.push(val);
       stack.push(1n);
@@ -1712,8 +1712,8 @@ export class AppGlobalGet extends Op {
     this.assertMinStackLen(stack, 1, this.line);
     const key = this.assertBytes(stack.pop(), this.line);
 
-    const appId = this.interpreter.runtime.ctx.tx.apid || 0;
-    const val = this.interpreter.getGlobalState(appId, key, this.line);
+    const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
+    const val = this.interpreter.getGlobalState(appID, key, this.line);
     if (val) {
       stack.push(val);
     } else {
@@ -1749,15 +1749,15 @@ export class AppGlobalGetEx extends Op {
     let appIndex = this.assertBigInt(stack.pop(), this.line);
 
     const foreignApps = this.interpreter.runtime.ctx.tx.apfa;
-    let appId;
+    let appID;
     if (appIndex === 0n) {
-      appId = this.interpreter.runtime.ctx.tx.apid; // zero index means current app
+      appID = this.interpreter.runtime.ctx.tx.apid; // zero index means current app
     } else {
       this.checkIndexBound(Number(--appIndex), foreignApps as number[], this.line);
-      appId = foreignApps? foreignApps[Number(appIndex)]: undefined;
+      appID = foreignApps ? foreignApps[Number(appIndex)] : undefined;
     }
 
-    const val = this.interpreter.getGlobalState(appId as number, key, this.line);
+    const val = this.interpreter.getGlobalState(appID as number, key, this.line);
     if (val) {
       stack.push(val);
       stack.push(1n);
@@ -1795,13 +1795,13 @@ export class AppLocalPut extends Op {
     const accountIndex = this.assertBigInt(stack.pop(), this.line);
 
     const account = this.interpreter.getAccount(accountIndex, this.line);
-    const appId = this.interpreter.runtime.ctx.tx.apid || 0;
+    const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
 
     // get updated local state for account
-    const localState = account.setLocalState(appId, key, value, this.line);
+    const localState = account.setLocalState(appID, key, value, this.line);
     const acc = this.interpreter.runtime.assertAccountDefined(account.address,
       this.interpreter.runtime.ctx.state.accounts.get(account.address), this.line);
-    acc.appsLocalState.set(appId, localState);
+    acc.appsLocalState.set(appID, localState);
   }
 }
 
@@ -1829,8 +1829,8 @@ export class AppGlobalPut extends Op {
     const value = stack.pop();
     const key = this.assertBytes(stack.pop(), this.line);
 
-    const appId = this.interpreter.runtime.ctx.tx.apid || 0; // if undefined use 0 as default
-    this.interpreter.setGlobalState(appId, key, value, this.line);
+    const appID = this.interpreter.runtime.ctx.tx.apid ?? 0; // if undefined use 0 as default
+    this.interpreter.setGlobalState(appID, key, value, this.line);
   }
 }
 
@@ -1858,16 +1858,16 @@ export class AppLocalDel extends Op {
     const key = this.assertBytes(stack.pop(), this.line);
     const accountIndex = this.assertBigInt(stack.pop(), this.line);
 
-    const appId = this.interpreter.runtime.ctx.tx.apid || 0;
+    const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
     const account = this.interpreter.getAccount(accountIndex, this.line);
 
-    const localState = account.appsLocalState.get(appId);
+    const localState = account.appsLocalState.get(appID);
     if (localState) {
       localState["key-value"].delete(key.toString()); // delete from local state
 
       let acc = this.interpreter.runtime.ctx.state.accounts.get(account.address);
       acc = this.interpreter.runtime.assertAccountDefined(account.address, acc, this.line);
-      acc.appsLocalState.set(appId, localState);
+      acc.appsLocalState.set(appID, localState);
     }
   }
 }
@@ -1895,9 +1895,9 @@ export class AppGlobalDel extends Op {
     this.assertMinStackLen(stack, 1, this.line);
     const key = this.assertBytes(stack.pop(), this.line);
 
-    const appId = this.interpreter.runtime.ctx.tx.apid || 0;
+    const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
 
-    const app = this.interpreter.getApp(appId, this.line);
+    const app = this.interpreter.getApp(appID, this.line);
     if (app) {
       const globalState = app["global-state"];
       globalState.delete(key.toString());
@@ -2023,10 +2023,12 @@ export class GetAssetDef extends Op {
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
     const foreignAssetsIdx = this.assertBigInt(stack.pop(), this.line);
-    this.checkIndexBound(Number(foreignAssetsIdx), this.interpreter.runtime.ctx.tx.apas as number[], this.line);
+    this.checkIndexBound(
+      Number(foreignAssetsIdx),
+      this.interpreter.runtime.ctx.tx.apas as number[], this.line);
 
     let assetId;
-    if(this.interpreter.runtime.ctx.tx.apas) {
+    if (this.interpreter.runtime.ctx.tx.apas) {
       assetId = this.interpreter.runtime.ctx.tx.apas[Number(foreignAssetsIdx)];
     } else {
       throw new Error("foreign asset id not found");

@@ -28,7 +28,7 @@ async function whitelist (deployer, permissionsManager, address) {
     type: types.TransactionType.CallNoOpSSC,
     sign: types.SignType.SecretKey,
     fromAccount: permissionsManager, // permissions manager account (fails otherwise)
-    appId: permissionSSCInfo.appID,
+    appID: permissionSSCInfo.appID,
     payFlags: { totalFee: 1000 },
     appArgs: ['str:add_whitelist'],
     accounts: [address] // pass address to add to whitelisted addresses

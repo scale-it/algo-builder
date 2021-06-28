@@ -1,3 +1,4 @@
+import { types as rtypes } from "@algo-builder/runtime";
 import algosdk, { Algodv2, AssetParams, PendingTransactionResponse, SuggestedParams } from "algosdk";
 
 import { bobAcc } from "./account";
@@ -36,3 +37,13 @@ export const mockAssetInfo: algosdk.modelsv2.Asset = {
     clawback: undefined
   } as AssetParams
 } as algosdk.modelsv2.Asset;
+
+const mockProgram = new Uint8Array([
+  2, 32, 4, 1, 4, 100, 144, 78, 49, 16,
+  34, 18, 49, 16, 35, 18, 17, 49, 8, 36,
+  14, 16, 49, 18, 36, 14, 16, 49, 32, 50,
+  3, 18, 16, 49, 9, 50, 3, 18, 16, 49,
+  1, 37, 14, 16
+]);
+
+export const mockLsig: rtypes.LogicSig = algosdk.makeLogicSig(mockProgram, []) as rtypes.LogicSig;

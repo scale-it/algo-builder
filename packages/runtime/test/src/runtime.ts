@@ -6,7 +6,7 @@ import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { ASSET_CREATION_FEE } from "../../src/lib/constants";
 import { Runtime } from "../../src/runtime";
 import type { AlgoTransferParam, AssetModFields, AssetTransferParam, DestroyAssetParam, ExecParams, FreezeAssetParam, ModifyAssetParam, RevokeAssetParam } from "../../src/types";
-import { SignType, TransactionType, LogicSig } from "../../src/types";
+import { LogicSig, SignType, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
@@ -668,22 +668,22 @@ describe("Stateful Smart Contracts", function () {
   });
 
   it("Should create application", () => {
-    const appId = runtime.addApp(creationFlags, {}, approvalProgram, clearProgram);
+    const appID = runtime.addApp(creationFlags, {}, approvalProgram, clearProgram);
 
-    const app = runtime.getApp(appId);
+    const app = runtime.getApp(appID);
     assert.isDefined(app);
   });
 
   it("Should not update application if approval or clear program is empty", () => {
-    const appId = runtime.addApp(creationFlags, {}, approvalProgram, clearProgram);
+    const appID = runtime.addApp(creationFlags, {}, approvalProgram, clearProgram);
 
     expectRuntimeError(
-      () => runtime.updateApp(john.address, appId, "", clearProgram, {}, {}),
+      () => runtime.updateApp(john.address, appID, "", clearProgram, {}, {}),
       RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM
     );
 
     expectRuntimeError(
-      () => runtime.updateApp(john.address, appId, approvalProgram, "", {}, {}),
+      () => runtime.updateApp(john.address, appID, approvalProgram, "", {}, {}),
       RUNTIME_ERRORS.GENERAL.INVALID_CLEAR_PROGRAM
     );
   });

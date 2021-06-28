@@ -47,7 +47,8 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
       txId: "tx-id-dry-run",
       assetIndex: 1,
       confirmedRound: -1,
-      assetDef: asaDef
+      assetDef: asaDef,
+      deleted: false
     };
   }
 
@@ -72,8 +73,9 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
       creator: String(flags.sender.addr) + "-get-address-dry-run",
       txId: "tx-id-dry-run",
       confirmedRound: -1,
-      appID: -1,
-      timestamp: 1
+      appID: 33,
+      timestamp: 1,
+      deleted: false
     };
   }
 
@@ -90,8 +92,9 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
       creator: String(sender.addr) + "-get-address-dry-run",
       txId: "tx-id-dry-run",
       confirmedRound: -1,
-      appID: -1,
-      timestamp: 2
+      appID: 33,
+      timestamp: 2,
+      deleted: false
     };
   }
 
@@ -109,25 +112,25 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   optInAcountToASA (
     asaName: string, assetIndex: number, account: rtypes.Account,
     params: rtypes.TxParams): Promise<void> {
-    throw new Error("Method not implemented.");
+    return new Promise((resolve, reject) => { resolve(); });
   }
 
   optInLsigToASA (
     asaName: string, assetIndex: number, lsig: rtypes.LogicSig, flags: rtypes.TxParams
   ): Promise<void> {
-    throw new Error("Method not implemented.");
+    return new Promise((resolve, reject) => { resolve(); });
   }
 
   optInAccountToSSC (
     sender: rtypes.Account, index: number,
     payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags): Promise<void> {
-    throw new Error("Method not implemented.");
+    return new Promise((resolve, reject) => { resolve(); });
   }
 
   optInLsigToSSC (
     appId: number, lsig: rtypes.LogicSig,
     payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags): Promise<void> {
-    throw new Error("Method not implemented.");
+    return new Promise((resolve, reject) => { resolve(); });
   }
 
   optInToASAMultiple (

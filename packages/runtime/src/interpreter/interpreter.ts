@@ -59,10 +59,10 @@ export class Interpreter {
 
   /**
    * Queries app (SSCAttributesM) from state. Throws TEAL.APP_NOT_FOUND if app is not found.
-   * @param appId Application Index
+   * @param appID Application Index
    */
-  getApp (appId: number, line: number): SSCAttributesM {
-    return this.runtime.ctx.getApp(appId, line);
+  getApp (appID: number, line: number): SSCAttributesM {
+    return this.runtime.ctx.getApp(appID, line);
   }
 
   /**
@@ -82,7 +82,7 @@ export class Interpreter {
       const accIndex = accountIndex - 1n;
       checkIndexBound(Number(accIndex), this.runtime.ctx.tx.apat as Buffer[], line);
       let pkBuffer;
-      if(this.runtime.ctx.tx.apat) {
+      if (this.runtime.ctx.tx.apat) {
         pkBuffer = this.runtime.ctx.tx.apat[Number(accIndex)];
       } else {
         throw new Error("pk Buffer not found");
@@ -95,11 +95,11 @@ export class Interpreter {
 
   /**
    * Queries application by application index. Returns undefined if app is not found.
-   * @param appId: current application id
+   * @param appID: current application id
    * @param key: key to fetch value of from local state
    */
-  getGlobalState (appId: number, key: Uint8Array | string, line: number): StackElem | undefined {
-    const app = this.runtime.assertAppDefined(appId, this.getApp(appId, line), line);
+  getGlobalState (appID: number, key: Uint8Array | string, line: number): StackElem | undefined {
+    const app = this.runtime.assertAppDefined(appID, this.getApp(appID, line), line);
     const appGlobalState = app["global-state"];
     const globalKey = keyToBytes(key);
     return appGlobalState.get(globalKey.toString());
@@ -108,20 +108,20 @@ export class Interpreter {
   /**
    * Updates app global state.
    * Throws error if app is not found.
-   * @param appId: application id
+   * @param appID: application id
    * @param key: app global state key
    * @param value: value associated with a key
    */
-  setGlobalState (appId: number, key: Uint8Array | string, value: StackElem, line: number): void {
-    if (!this.runtime.ctx.state.globalApps.has(appId)) {
-      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appId: appId, line: line });
+  setGlobalState (appID: number, key: Uint8Array | string, value: StackElem, line: number): void {
+    if (!this.runtime.ctx.state.globalApps.has(appID)) {
+      throw new RuntimeError(RUNTIME_ERRORS.GENERAL.APP_NOT_FOUND, { appID: appID, line: line });
     }
     const accAddress = this.runtime.assertAddressDefined(
-      this.runtime.ctx.state.globalApps.get(appId));
+      this.runtime.ctx.state.globalApps.get(appID));
     let account = this.runtime.ctx.state.accounts.get(accAddress);
     account = this.runtime.assertAccountDefined(accAddress, account);
 
-    account.setGlobalState(appId, key, value, line);
+    account.setGlobalState(appID, key, value, line);
   }
 
   /**

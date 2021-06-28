@@ -1,8 +1,8 @@
-import { parseSSCAppArgs, stringToBytes, uint64ToBigEndian } from "@algo-builder/runtime";
 import { decodeAddress } from "algosdk";
 import { assert } from "chai";
 
-import { MAX_UINT64, MIN_UINT64 } from "../../src/lib/constants";
+import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
+import { convertToString, parseSSCAppArgs, stringToBytes, uint64ToBigEndian } from "../../../src/lib/parsing";
 
 describe("Convert integer to big endian", () => {
   /**
@@ -61,6 +61,22 @@ describe("Convert integer to big endian", () => {
 
     errMsg = "Invalid uint64 18446744073709551620";
     assert.throws(() => uint64ToBigEndian(MAX_UINT64 + 5n), errMsg);
+  });
+});
+
+describe("Parse string and integer, with bytes", () => {
+  it("string identity should be equal ", () => {
+    let initialString = "50";
+    let stringInBytes = stringToBytes(initialString);
+    let backToString = convertToString(stringInBytes);
+
+    assert.equal(backToString, initialString);
+
+    initialString = "TEAL_CODE";
+    stringInBytes = stringToBytes(initialString);
+    backToString = convertToString(stringInBytes);
+
+    assert.equal(backToString, initialString);
   });
 });
 
