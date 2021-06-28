@@ -56,7 +56,7 @@ Deployment scripts are placed directly in `/scripts`:
 
 ### Other Solution
 
-The solution in this template extends [Algorand Dev Office Hour](https://www.youtube.com/watch?v=aMDZamxtR14) idea presented by Jason - using asset clawback as escrow for permissioned token.
+The solution in this template extends [Algorand Dev Office Hour](https://www.youtube.com/watch?v=aMDZamxtR14) idea presented by Jason - using asset clawback as logic signature for permissioned token.
 In this template we have a new contract - `controller.py` which essentially "controls" the asset/token. This controls the general properties of the asset and also ensures that rule(s) smart contract(s) are called.
 
 

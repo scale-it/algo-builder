@@ -54,3 +54,17 @@ exports.totalSupply = async function (deployer, assetIndex) {
   const reserveAssetHolding = await balanceOf(deployer, asaDef.reserve, assetIndex);
   return BigInt(asaDef.total) - BigInt(reserveAssetHolding.amount);
 };
+
+function getClawbackParams (deployer) {
+  const tesla = deployer.asa.get('tesla');
+  const controllerInfo = deployer.getSSC('controller.py', 'clear_state_program.py');
+  return {
+    TOKEN_ID: tesla.assetIndex,
+    CONTROLLER_APP_ID: controllerInfo.appID
+  };
+}
+
+exports.getClawbackParams = getClawbackParams;
+
+exports.getClawback = async (deployer) =>
+  deployer.loadLogic('clawback.py', getClawbackParams(deployer));

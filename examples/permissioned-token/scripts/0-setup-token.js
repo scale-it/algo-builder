@@ -13,14 +13,14 @@ const accounts = require('./common/accounts');
 async function setupASA (runtimeEnv, deployer) {
   const owner = deployer.accountsByName.get(accounts.owner);
 
-  /** Fund account with ALGO to provide enough balance to create the Tesla shares **/
+  // Fund account with ALGO to provide enough balance to create the Tesla shares
   await fundAccount(deployer, owner);
   const tesla = await deployer.deployASA('tesla', { creator: owner });
 
   console.log(tesla);
   console.log('total Supply: ', await totalSupply(deployer, tesla.assetIndex));
 
-  /**
+  /*
    * If using msig address as asa creator or manager, then realistically user will receive a signed tx
    * file from accounts <= threshold in a multisig group.
    * - After receiving file, place it in /assets

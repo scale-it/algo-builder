@@ -28,7 +28,7 @@ class Context {
   /**
    * - Setup token (tesla ASA)
    * - Setup Controller asc
-   * - Setup asset clawback + update asset clawback to escrow contract
+   * - Setup asset clawback + update asset clawback to lsig
    * - Setup permissions smart contract
    * NOTE: During setup - ASA.reserve, ASA.manager & current_permissions_manager is set as alice.address
    */

@@ -2,7 +2,7 @@ const {
   balanceOf
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/runtime');
-const { executeTransaction, fundAccount, totalSupply } = require('../common/common');
+const { getClawback, executeTransaction, fundAccount, totalSupply } = require('../common/common');
 const accounts = require('../common/accounts');
 
 /**
@@ -13,13 +13,8 @@ async function issue (deployer, address, amount) {
   const tesla = deployer.asa.get('tesla');
   const controllerSSCInfo = deployer.getSSC('controller.py', 'clear_state_program.py');
 
-  const escrowParams = {
-    TOKEN_ID: tesla.assetIndex,
-    CONTROLLER_APP_ID: controllerSSCInfo.appID
-  };
-
-  const escrowLsig = await deployer.loadLogic('clawback.py', escrowParams);
-  const escrowAddress = escrowLsig.address();
+  const clawbackLsig = await getClawback(deployer);
+  const clawbackAddress = clawbackLsig.address();
 
   const issuanceParams = [
     /*
@@ -38,18 +33,18 @@ async function issue (deployer, address, amount) {
     },
     /*
      * tx 1 - Asset transfer transaction from Token Reserve -> address. This tx is executed
-     * and approved by the clawback escrow (since the asset is default frozen only clawback can move funds).
+     * and approved by the clawback lsig (since the asset is default frozen only clawback can move funds).
      * This tx doesn't need rule checks (as this is an issuance txn)
      */
     {
       type: types.TransactionType.RevokeAsset,
       sign: types.SignType.LogicSignature,
-      fromAccountAddr: escrowAddress,
+      fromAccountAddr: clawbackAddress,
       recipient: address,
       assetID: tesla.assetIndex,
       revocationTarget: issuer.addr, // tx will fail if assetSender is not token reserve address
       amount: amount,
-      lsig: escrowLsig,
+      lsig: clawbackLsig,
       payFlags: { totalFee: 1000 }
     }
   ];

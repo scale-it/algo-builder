@@ -4,7 +4,7 @@ const {
 const { types } = require('@algo-builder/runtime');
 
 const accounts = require('../common/accounts');
-const { fundAccount, optInAccountToSSC } = require('../common/common');
+const { getClawback, fundAccount, optInAccountToSSC } = require('../common/common');
 const { issue } = require('./issue');
 const { whitelist } = require('../permissions/whitelist');
 
@@ -22,13 +22,8 @@ async function forceTransfer (deployer, fromAddr, toAddr, amount) {
   const controllerSSCInfo = deployer.getSSC('controller.py', clearStateProgram);
   const permissionsSSCInfo = deployer.getSSC('permissions.py', clearStateProgram);
 
-  const escrowParams = {
-    TOKEN_ID: tesla.assetIndex,
-    CONTROLLER_APP_ID: controllerSSCInfo.appID
-  };
-
-  const escrowLsig = await deployer.loadLogic('clawback.py', escrowParams);
-  const escrowAddress = escrowLsig.address();
+  const clawbackLsig = await getClawback(deployer);
+  const clawbackAddress = clawbackLsig.address();
 
   // notice the difference in calls here: stateful calls are done by token manager here
   // and from, to address are only used in asset transfer tx
@@ -37,8 +32,7 @@ async function forceTransfer (deployer, fromAddr, toAddr, amount) {
      * tx 0 - Call to controller stateful smart contract (by ASA.manager)
      * with application arg: 'force_transfer'. The contract ensures that there
      * is a call to permissions smart contract in the txGroup, so that rules
-     * are checked during token transfer.
-     */
+     * are checked during token transfer. */
     {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
@@ -50,36 +44,33 @@ async function forceTransfer (deployer, fromAddr, toAddr, amount) {
     },
     /*
      * tx 1 - Asset transfer transaction from sender -> receiver. This tx is executed
-     * and approved by the escrow account (clawback.teal). The escrow account address is
-     * also the clawback address which transfers the frozen asset (amount = amount) from accA to accB.
-     * Clawback ensures a call to controller smart contract during token transfer.
-     */
+     * and approved by the clawback lsig (clawback.teal). The clawback lsig address is the
+     * address which transfers the frozen asset (amount = amount) from accA to accB.
+     * Clawback ensures a call to controller smart contract during token transfer. */
     {
       type: types.TransactionType.RevokeAsset,
       sign: types.SignType.LogicSignature,
-      fromAccountAddr: escrowAddress,
+      fromAccountAddr: clawbackAddress,
       recipient: toAddr,
       assetID: tesla.assetIndex,
       revocationTarget: fromAddr,
       amount: amount,
-      lsig: escrowLsig,
+      lsig: clawbackLsig,
       payFlags: { totalFee: 1000 }
     },
     /*
-     * tx 2 - Payment transaction of 1000 microAlgo. This tx is used to cover the fee of tx1 (clawback).
-     * NOTE: It can be signed by any account, but it should be present in group.
-     */
+     * tx 2 - Payment transaction of 1000 microAlgo to cover clawback transaction cost (tx 1).
+     * NOTE: It can be signed by any account, but it should be present in group. */
     {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
       fromAccount: owner,
-      toAccountAddr: escrowAddress,
+      toAccountAddr: clawbackAddress,
       amountMicroAlgos: 1000,
       payFlags: { totalFee: 1000 }
     },
     /*
-     * tx 3 - Call to permissions stateful smart contract with application arg: 'transfer'
-     */
+     * tx 3 - Call to permissions stateful smart contract with application arg: 'transfer' */
     {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
@@ -121,7 +112,7 @@ async function run (runtimeEnv, deployer) {
   await Promise.all([
     optInAccountToSSC(deployer, elon, permissionsSSCInfo.appID, {}, {}),
     optInAccountToSSC(deployer, bob, permissionsSSCInfo.appID, {}, {}),
-    optInAccountToSSC(deployer, john, permissionsSSCInfo.appID, {}, {}),
+    optInAccountToSSC(deployer, john, permissionsSSCInfo.appID, {}, {})
   ]);
 
   /*

@@ -2,7 +2,7 @@ const {
   balanceOf
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/runtime');
-const { executeTransaction, fundAccount } = require('../common/common');
+const { getClawback, executeTransaction, fundAccount } = require('../common/common');
 const accounts = require('../common/accounts');
 
 // here instead of updating the asset reserve by modifyAsset tx,
@@ -33,13 +33,8 @@ async function updateReserveByAssetConfig (deployer, address) {
   const asaReserveAddr = (await deployer.getAssetByID(tesla.assetIndex)).params.reserve;
   const controllerSSCInfo = deployer.getSSC('controller.py', 'clear_state_program.py');
 
-  const escrowParams = {
-    TOKEN_ID: tesla.assetIndex,
-    CONTROLLER_APP_ID: controllerSSCInfo.appID
-  };
-
-  const escrowLsig = await deployer.loadLogic('clawback.py', escrowParams);
-  const escrowAddress = escrowLsig.address();
+  const clawbackLsig = await getClawback(deployer);
+  const clawbackAddress = clawbackLsig.address();
   const reserveAssetHolding = await balanceOf(deployer, asaReserveAddr, tesla.assetIndex);
 
   console.log('Asset reserve address before: ', asaReserveAddr);
@@ -56,7 +51,7 @@ async function updateReserveByAssetConfig (deployer, address) {
      * tx 0 - Call to controller stateful smart contract with application arg: 'transfer'
      * The contract ensures that there is a call to permissions smart contract in the txGroup,
      * so that rules are checked during token transfer. The smart contract also checks each transaction
-     * params in the txGroup (eg. sender(tx1) === receiver(tx2) === escrowAddress)
+     * params in the txGroup (eg. sender(tx1) === receiver(tx2) === clawbackAddress)
      */
     {
       type: types.TransactionType.CallNoOpSSC,
@@ -75,23 +70,22 @@ async function updateReserveByAssetConfig (deployer, address) {
     {
       type: types.TransactionType.RevokeAsset,
       sign: types.SignType.LogicSignature,
-      fromAccountAddr: escrowAddress,
+      fromAccountAddr: clawbackAddress,
       recipient: address,
       assetID: tesla.assetIndex,
       revocationTarget: asaReserveAddr,
       amount: reserveAssetHolding.amount, // moving all tokens to new reserve
-      lsig: escrowLsig,
+      lsig: clawbackLsig,
       payFlags: { totalFee: 1000 }
     },
     /*
-     * tx 2 - Payment transaction of 1000 microAlgo from "from account" to escrow Account. This tx is used to
-     * cover the fee of tx1 (clawback).
+     * tx 2 - Payment transaction of 1000 microAlgo to cover clawback transaction cost (tx 1).
      */
     {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
       fromAccount: owner,
-      toAccountAddr: escrowAddress,
+      toAccountAddr: clawbackAddress,
       amountMicroAlgos: 1000,
       payFlags: { totalFee: 1000 }
     },

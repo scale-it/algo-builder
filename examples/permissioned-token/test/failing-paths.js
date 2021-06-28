@@ -220,7 +220,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       INDEX_OUT_OF_BOUND_ERR
       );
 
-      // fails as paying fees of clawback-escrow is skipped
+      // fails as paying fees of clawback-lsig is skipped
       assert.throws(() =>
         ctx.runtime.executeTx([forceTxGroup[0], forceTxGroup[1], forceTxGroup[3]]),
       INDEX_OUT_OF_BOUND_ERR
@@ -389,7 +389,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       INDEX_OUT_OF_BOUND_ERR
       );
 
-      // fails as paying fees of clawback-escrow is skipped
+      // fails as paying fees of clawback-lsig is skipped
       assert.throws(() =>
         ctx.runtime.executeTx([txGroup[0], txGroup[1], txGroup[3]]),
       INDEX_OUT_OF_BOUND_ERR
@@ -534,7 +534,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
     it('Should fail if transaction group is not valid', () => {
       const txGroup = [...updateReserveParams];
 
-      // fails as paying fees of clawback-escrow is skipped
+      // fails as paying fees of clawback-lsig is skipped
       assert.throws(() =>
         ctx.runtime.executeTx([txGroup[0], txGroup[1], txGroup[3]]),
       INDEX_OUT_OF_BOUND_ERR
