@@ -1,4 +1,4 @@
-import algosdk, { Algodv2, AssetInfo, ConfirmedTxInfo, LogicSig, SuggestedParams } from "algosdk";
+import algosdk, { Algodv2, AssetInfo, ConfirmedTxInfo, SuggestedParams } from "algosdk";
 
 import { bobAcc } from "./account";
 
