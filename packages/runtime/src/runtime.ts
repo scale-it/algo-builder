@@ -1,5 +1,6 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
+import { encodeNote, getFromAddress, mkTransaction, parseSSCAppArgs, types } from "@algo-builder/algob-web";
 import algosdk, { AssetDef, decodeAddress } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
@@ -8,12 +9,11 @@ import { Ctx } from "./ctx";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { Interpreter, loadASAFile } from "./index";
-import { convertToString, parseSSCAppArgs } from "./lib/parsing";
-import { encodeNote, getFromAddress, mkTransaction } from "./lib/txn";
+import { convertToString } from "./lib/parsing";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import {
-  AccountAddress, AccountStoreI, ASADefs, ASADeploymentFlags, ASAInfo, AssetHoldingM, Context, ExecParams,
+  AccountAddress, AccountStoreI, ASADeploymentFlags, ASAInfo, AssetHoldingM, Context, ExecParams,
   ExecutionMode, SignType, SSCAttributesM, SSCDeploymentFlags, SSCInfo, SSCOptionalFlags,
   StackElem, State, TransactionType, Txn, TxParams
 } from "./types";
@@ -28,7 +28,7 @@ export class Runtime {
    */
   private store: State;
   ctx: Context;
-  loadedAssetsDefs: ASADefs;
+  loadedAssetsDefs: types.ASADefs;
   // https://developer.algorand.org/docs/features/transactions/?query=round
   private round: number;
   private timestamp: number;

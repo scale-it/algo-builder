@@ -1,14 +1,15 @@
+import { getFromAddress, types } from "@algo-builder/algob-web";
 import { AssetDef, makeAssetTransferTxnWithSuggestedParams } from "algosdk";
 
-import { getFromAddress, Runtime } from ".";
+import { Runtime } from ".";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
-import { ASSET_CREATION_FEE } from "./lib/constants";
 import { mockSuggestedParams } from "./mock/tx";
 import {
-  AccountAddress, AccountStoreI, AlgoTransferParam, ASADeploymentFlags, AssetHoldingM, AssetModFields,
-  AssetTransferParam, Context, ExecParams, ExecutionMode,
-  SignType, SSCAttributesM, SSCDeploymentFlags,
+  AccountAddress, AccountStoreI, AlgoTransferParam,
+  ASADeploymentFlags, AssetHoldingM, AssetTransferParam,
+  Context, ExecParams, ExecutionMode, SignType,
+  SSCAttributesM, SSCDeploymentFlags,
   State, TransactionType, Txn, TxParams
 } from "./types";
 
@@ -315,7 +316,7 @@ export class Ctx implements Context {
    * @param assetId Asset Index
    * @param fields Asset modifying fields
    */
-  modifyAsset (assetId: number, fields: AssetModFields): void {
+  modifyAsset (assetId: number, fields: types.AssetModFields): void {
     const creatorAcc = this.getAssetAccount(assetId);
     creatorAcc.modifyAsset(assetId, fields);
   }

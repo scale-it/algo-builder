@@ -1,3 +1,4 @@
+import { types } from "@algo-builder/algob-web";
 import type {
   Account,
   AssetDef,
@@ -17,7 +18,7 @@ import { keyToBytes } from "./lib/parsing";
 import { assertValidSchema } from "./lib/stateful";
 import {
   AccountStoreI,
-  AppLocalStateM, ASADef, AssetHoldingM, AssetModFields, CreatedAppM, SSCAttributesM,
+  AppLocalStateM, AssetHoldingM, CreatedAppM, SSCAttributesM,
   SSCDeploymentFlags, StackElem
 } from "./types";
 
@@ -175,7 +176,7 @@ export class AccountStore implements AccountStoreI {
    * @param name Asset Name
    * @param asaDef Asset Definitions
    */
-  addAsset (assetId: number, name: string, asaDef: ASADef): AssetDef {
+  addAsset (assetId: number, name: string, asaDef: types.ASADef): AssetDef {
     if (this.createdAssets.size === MAX_ALGORAND_ACCOUNT_ASSETS) {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.MAX_LIMIT_ASSETS,
         { name: name, address: this.address, max: MAX_ALGORAND_ACCOUNT_ASSETS });
@@ -202,7 +203,7 @@ export class AccountStore implements AccountStoreI {
    * @param assetId Asset Index
    * @param fields Fields for modification
    */
-  modifyAsset (assetId: number, fields: AssetModFields): void {
+  modifyAsset (assetId: number, fields: types.AssetModFields): void {
     const asset = this.getAssetDef(assetId);
     if (asset === undefined) {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
@@ -391,7 +392,7 @@ class Asset {
   readonly id: number;
   readonly definitions: AssetDef;
 
-  constructor (assetId: number, def: ASADef, creator: string, assetName: string) {
+  constructor (assetId: number, def: types.ASADef, creator: string, assetName: string) {
     this.id = assetId;
     this.definitions = {
       creator: creator,

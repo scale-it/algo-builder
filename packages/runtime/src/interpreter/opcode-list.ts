@@ -1,5 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
+import { stringToBytes } from "@algo-builder/algob-web";
 import { AssetDef, decodeAddress, decodeUint64, encodeAddress, encodeUint64, isValidAddress, verifyBytes } from "algosdk";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
@@ -11,7 +12,7 @@ import { compareArray } from "../lib/compare";
 import { AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64, MaxTEALVersion, TxArrFields } from "../lib/constants";
 import {
   assertLen, assertOnlyDigits, convertToBuffer,
-  convertToString, getEncoding, parseBinaryStrToBigInt, stringToBytes
+  convertToString, getEncoding, parseBinaryStrToBigInt
 } from "../lib/parsing";
 import { Stack } from "../lib/stack";
 import { txAppArg, txnSpecbyField } from "../lib/txn";

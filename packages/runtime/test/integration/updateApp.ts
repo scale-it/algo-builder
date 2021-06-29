@@ -1,7 +1,8 @@
+import { stringToBytes } from "@algo-builder/algob-web";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
-import { AccountStore, Runtime, stringToBytes } from "../../src/index";
+import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { SignType, SSCCallsParam, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";

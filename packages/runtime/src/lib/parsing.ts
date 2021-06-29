@@ -1,3 +1,4 @@
+import { stringToBytes } from "@algo-builder/algob-web";
 import * as base32 from "hi-base32";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";

@@ -1,5 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
+import { stringToBytes } from "@algo-builder/algob-web";
 import { decodeAddress, generateAccount, signBytes } from "algosdk";
 import { assert } from "chai";
 
@@ -20,7 +21,7 @@ import {
   Select, SetBit, SetByte, Sha256, Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE, DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8 } from "../../../src/lib/constants";
-import { convertToBuffer, stringToBytes } from "../../../src/lib/parsing";
+import { convertToBuffer } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
 import { AccountStoreI, EncodingType, StackElem, Txn as EncodedTx } from "../../../src/types";

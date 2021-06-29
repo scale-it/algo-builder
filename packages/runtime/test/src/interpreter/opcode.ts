@@ -1,7 +1,8 @@
+import { stringToBytes } from "@algo-builder/algob-web";
+
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Op } from "../../../src/interpreter/opcode";
 import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
-import { stringToBytes } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import type { StackElem } from "../../../src/types";
 import { expectRuntimeError } from "../../helpers/runtime-errors";

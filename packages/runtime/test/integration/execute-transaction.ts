@@ -94,10 +94,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
     ];
     const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
     assert.isUndefined(initialJohnAssets);
-    expectRuntimeError(
-      () => runtime.executeTx(txGroup),
-      RUNTIME_ERRORS.ASA.PARAM_PARSE_ERROR
-    );
+    assert.throws(() => { runtime.executeTx(txGroup); }, "ALGOB_WEB_ERR400");
 
     // should not update algo balance
     syncAccounts();

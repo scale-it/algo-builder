@@ -1,8 +1,8 @@
+import { addressToPk, uint64ToBigEndian } from "@algo-builder/algob-web";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
-import { addressToPk, uint64ToBigEndian } from "../../src/lib/parsing";
 import { SSCDeploymentFlags, StackElem } from "../../src/types";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";

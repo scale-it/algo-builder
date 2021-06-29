@@ -1,10 +1,10 @@
+import { stringToBytes } from "@algo-builder/algob-web";
 import type { AssetDefEnc, StateSchemaEnc, Transaction } from "algosdk";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { Op } from "../interpreter/opcode";
 import { TxFieldDefaults, TxnFields } from "../lib/constants";
-import { stringToBytes } from "../lib/parsing";
 import { StackElem, TxField, Txn, TxnType } from "../types";
 
 const assetTxnFields = new Set([
@@ -162,4 +162,3 @@ export function txAppArg (txField: TxField, tx: Txn, idx: number, op: Op,
   op.checkIndexBound(idx, result, line);
   return parseToStackElem(result[idx], txField);
 }
-

@@ -1,3 +1,4 @@
+import { types } from "@algo-builder/algob-web";
 import {
   Account as AccountSDK,
   AssetDef,
@@ -89,7 +90,7 @@ export interface DeployedAssetInfo {
 // ASA deployment information (log)
 export interface ASAInfo extends DeployedAssetInfo {
   assetIndex: number
-  assetDef: ASADef
+  assetDef: types.ASADef
 }
 
 // Stateful smart contract deployment information (log)
@@ -111,7 +112,7 @@ export interface Context {
   transferAlgo: (txnParam: AlgoTransferParam) => void
   deductFee: (sender: AccountAddress, index: number) => void
   transferAsset: (txnParam: AssetTransferParam) => void
-  modifyAsset: (assetId: number, fields: AssetModFields) => void
+  modifyAsset: (assetId: number, fields: types.AssetModFields) => void
   freezeAsset: (assetId: number, freezeTarget: string, freezeState: boolean) => void
   revokeAsset: (
     recipient: string, assetID: number,
@@ -182,8 +183,8 @@ export interface AccountStoreI {
     approvalProgram: string, clearProgram: string) => CreatedAppM
   getAssetDef: (assetId: number) => AssetDef | undefined
   getAssetHolding: (assetId: number) => AssetHoldingM | undefined
-  addAsset: (assetId: number, name: string, asadef: ASADef) => AssetDef
-  modifyAsset: (assetId: number, fields: AssetModFields) => void
+  addAsset: (assetId: number, name: string, asadef: types.ASADef) => AssetDef
+  modifyAsset: (assetId: number, fields: types.AssetModFields) => void
   closeAsset: (assetId: number) => void
   setFreezeState: (assetId: number, state: boolean) => void
   destroyAsset: (assetId: number) => void
@@ -342,7 +343,7 @@ export type BasicParams = Sign & {
 export type DeployASAParam = BasicParams & {
   type: TransactionType.DeployASA
   asaName: string
-  asaDef?: Partial<ASADef>
+  asaDef?: Partial<types.ASADef>
 };
 
 export type DeploySSCParam = BasicParams & SSCOptionalFlags & {
@@ -379,7 +380,7 @@ export type OptInASAParam = BasicParams & {
 export type ModifyAssetParam = BasicParams & {
   type: TransactionType.ModifyAsset
   assetID: number | string
-  fields: AssetModFields
+  fields: types.AssetModFields
 };
 
 export type FreezeAssetParam = BasicParams & {

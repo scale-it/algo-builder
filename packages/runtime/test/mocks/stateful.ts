@@ -1,6 +1,6 @@
+import { stringToBytes } from "@algo-builder/algob-web";
 import { AssetDef } from "algosdk";
 
-import { stringToBytes } from "../../src/lib/parsing";
 import { AppLocalStateM, AssetHoldingM, SSCAttributesM, StackElem } from "../../src/types";
 import { elonAddr } from "./txn";
 

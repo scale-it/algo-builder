@@ -1,3 +1,4 @@
+import { stringToBytes } from "@algo-builder/algob-web";
 import {
   decodeAddress, encodeAddress,
   generateAccount, LogicSigBase, MultiSig, multisigAddress, MultisigMetadata,
@@ -8,7 +9,7 @@ import * as tweet from "tweetnacl-ts";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { compareArray } from "./lib/compare";
-import { convertToString, stringToBytes } from "./lib/parsing";
+import { convertToString } from "./lib/parsing";
 
 /**
  * Note: We cannot use algosdk LogicSig class here,

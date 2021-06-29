@@ -1,3 +1,4 @@
+import { types } from "@algo-builder/algob-web";
 import { LogicSig } from "algosdk";
 import { assert } from "chai";
 import sinon from "sinon";
@@ -6,7 +7,7 @@ import { AccountStore } from "../../src/account";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { ASSET_CREATION_FEE } from "../../src/lib/constants";
 import { Runtime } from "../../src/runtime";
-import type { AlgoTransferParam, AssetModFields, AssetTransferParam, DestroyAssetParam, ExecParams, FreezeAssetParam, ModifyAssetParam, RevokeAssetParam } from "../../src/types";
+import type { AlgoTransferParam, AssetTransferParam, DestroyAssetParam, ExecParams, FreezeAssetParam, ModifyAssetParam, RevokeAssetParam } from "../../src/types";
 import { SignType, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
@@ -160,7 +161,7 @@ describe("Algorand Standard Assets", function () {
   let alice = new AccountStore(minBalance);
   const elon = new AccountStore(minBalance, elonMuskAccount);
   let runtime: Runtime;
-  let modFields: AssetModFields;
+  let modFields: types.AssetModFields;
   let assetTransferParam: AssetTransferParam;
   let assetId: number;
   this.beforeAll(() => {
@@ -381,7 +382,7 @@ describe("Algorand Standard Assets", function () {
     const assetId = runtime.addAsset('silver',
       { creator: { ...john.account, name: "john" } });
 
-    const modFields: AssetModFields = {
+    const modFields: types.AssetModFields = {
       manager: bob.address,
       reserve: bob.address,
       clawback: john.address,

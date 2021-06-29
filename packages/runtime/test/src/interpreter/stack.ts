@@ -1,6 +1,6 @@
+import { stringToBytes } from "@algo-builder/algob-web";
 import { assert } from "chai";
 
-import { stringToBytes } from "../../../src";
 import { Stack } from "../../../src/lib/stack";
 import { StackElem } from "../../../src/types";
 
