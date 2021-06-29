@@ -1,3 +1,4 @@
+import { types as wtypes } from "@algo-builder/algob-web";
 import { loadASAFile, types as rtypes } from "@algo-builder/runtime";
 
 import { mkAccountIndex } from "../lib/account";
@@ -25,7 +26,7 @@ export function mkDeployer (
 export class DeployerConfig {
   runtimeEnv: RuntimeEnv;
   cpData: CheckpointRepo;
-  asaDefs: rtypes.ASADefs;
+  asaDefs: wtypes.ASADefs;
   algoOp: AlgoOperator;
   txWriter: txWriter;
   accounts: rtypes.AccountMap;

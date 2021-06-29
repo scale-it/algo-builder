@@ -1,3 +1,4 @@
+import { types as wtypes } from "@algo-builder/algob-web";
 import { types as rtypes } from "@algo-builder/runtime";
 import { generateAccount, LogicSig } from "algosdk";
 import { assert } from "chai";
@@ -15,7 +16,7 @@ import { useFixtureProject } from "../helpers/project";
 import { cleanupMutableData } from "../lib/script-checkpoints";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
-function mkASA (): rtypes.ASADef {
+function mkASA (): wtypes.ASADef {
   return {
     total: 1,
     decimals: 1,
@@ -321,7 +322,7 @@ describe("DeployerDeployMode", () => {
         txId: "",
         confirmedRound: 0,
         assetIndex: 0,
-        assetDef: {} as rtypes.ASADef,
+        assetDef: {} as wtypes.ASADef,
         deleted: false
       })
       .registerSSC(networkName, "ASC name", {
@@ -400,7 +401,7 @@ describe("DeployerDeployMode", () => {
       txId: "",
       confirmedRound: 0,
       assetIndex: 1337,
-      assetDef: {} as rtypes.ASADef,
+      assetDef: {} as wtypes.ASADef,
       deleted: false
     });
     assert.deepEqual(deployer.asa, new Map());

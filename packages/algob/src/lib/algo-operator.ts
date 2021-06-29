@@ -1,4 +1,5 @@
-import { encodeNote, mkTransaction, types as rtypes } from "@algo-builder/runtime";
+import { encodeNote, mkTransaction, types as wtypes } from "@algo-builder/algob-web";
+import { types as rtypes } from "@algo-builder/runtime";
 import algosdk, { LogicSig } from "algosdk";
 
 import { BuilderError } from "../errors/errors";
@@ -29,7 +30,7 @@ export function createAlgoOperator (network: Network): AlgoOperator {
 export interface AlgoOperator {
   algodClient: algosdk.Algodv2
   deployASA: (
-    name: string, asaDef: rtypes.ASADef,
+    name: string, asaDef: wtypes.ASADef,
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap, txWriter: txWriter
   ) => Promise<rtypes.ASAInfo>
   fundLsig: (name: string, flags: FundASCFlags, payFlags: rtypes.TxParams,
@@ -59,7 +60,7 @@ export interface AlgoOperator {
     asaName: string, assetIndex: number, lsig: algosdk.LogicSig, params: rtypes.TxParams
   ) => Promise<void>
   optInToASAMultiple: (
-    asaName: string, asaDef: rtypes.ASADef,
+    asaName: string, asaDef: wtypes.ASADef,
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap, assetIndex: number
   ) => Promise<void>
   optInAccountToSSC: (
@@ -171,7 +172,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   }
 
   async optInToASAMultiple (
-    asaName: string, asaDef: rtypes.ASADef,
+    asaName: string, asaDef: wtypes.ASADef,
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap, assetIndex: number
   ): Promise<void> {
     const txParams = await tx.mkTxParams(this.algodClient, flags);
@@ -189,7 +190,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
   async checkBalanceForOptInTx (
     name: string, params: algosdk.SuggestedParams,
-    asaDef: rtypes.ASADef, accounts: rtypes.AccountMap,
+    asaDef: wtypes.ASADef, accounts: rtypes.AccountMap,
     creator: rtypes.Account, flags: rtypes.TxParams
   ): Promise<rtypes.Account[]> {
     if (!asaDef.optInAccNames || asaDef.optInAccNames.length === 0) {
@@ -226,7 +227,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   }
 
   async deployASA (
-    name: string, asaDef: rtypes.ASADef,
+    name: string, asaDef: wtypes.ASADef,
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap,
     txWriter: txWriter): Promise<rtypes.ASAInfo> {
     const message = 'Deploying ASA: ' + name;

@@ -1,3 +1,4 @@
+import { types as wtypes } from "@algo-builder/algob-web";
 import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
 import type { LogicSig, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
@@ -25,7 +26,7 @@ import { DeployerConfig } from "./deployer_cfg";
 class DeployerBasicMode {
   protected readonly runtimeEnv: RuntimeEnv;
   protected readonly cpData: CheckpointRepo;
-  protected readonly loadedAsaDefs: rtypes.ASADefs;
+  protected readonly loadedAsaDefs: wtypes.ASADefs;
   protected readonly algoOp: AlgoOperator;
   protected readonly txWriter: txWriter;
   readonly accounts: rtypes.Account[];
@@ -78,7 +79,7 @@ class DeployerBasicMode {
    * @param name Asset name
    * @param asaParams Asa parameters if user wants to override existing asa definition
    */
-  getASADef (name: string, asaParams?: Partial<rtypes.ASADef>): rtypes.ASADef {
+  getASADef (name: string, asaParams?: Partial<wtypes.ASADef>): wtypes.ASADef {
     return overrideASADef(this.accountsByName, this.loadedAsaDefs[name], asaParams);
   }
 
@@ -125,7 +126,7 @@ class DeployerBasicMode {
    * of asaDef could be updated during tx execution (eg. update asset clawback)
    * @param asaName asset name in asa.yaml
    */
-  loadASADef (asaName: string): rtypes.ASADef | undefined {
+  loadASADef (asaName: string): wtypes.ASADef | undefined {
     const asaMap = this.cpData.precedingCP[this.networkName]?.asa ?? new Map();
     return asaMap.get(asaName)?.assetDef;
   }
@@ -470,7 +471,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   async deployASA (
     name: string,
     flags: rtypes.ASADeploymentFlags,
-    asaParams?: Partial<rtypes.ASADef>
+    asaParams?: Partial<wtypes.ASADef>
   ): Promise<rtypes.ASAInfo> {
     const asaDef = overrideASADef(this.accountsByName, this.loadedAsaDefs[name], asaParams);
 

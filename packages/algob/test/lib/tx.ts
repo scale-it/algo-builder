@@ -1,4 +1,5 @@
-import { encodeNote, types } from "@algo-builder/runtime";
+import { encodeNote, types as wtypes } from "@algo-builder/algob-web";
+import { types } from "@algo-builder/runtime";
 import { ConfirmedTxInfo, decodeSignedTransaction, encodeAddress, Transaction } from "algosdk";
 import { assert } from "chai";
 import { isArray } from "lodash";
@@ -38,7 +39,7 @@ describe("Note in TxParams", () => {
   });
 });
 
-function mkASA (): types.ASADef {
+function mkASA (): wtypes.ASADef {
   return {
     total: 1,
     decimals: 1,
@@ -113,7 +114,7 @@ describe("ASA modify fields", () => {
   let deployer: Deployer;
   let execParams: types.ModifyAssetParam;
   let algod: AlgoOperatorDryRunImpl;
-  let assetFields: types.AssetModFields;
+  let assetFields: wtypes.AssetModFields;
   beforeEach(async () => {
     const env = mkEnv("network1");
     algod = new AlgoOperatorDryRunImpl();

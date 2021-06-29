@@ -26,10 +26,10 @@
     "javascript",
     "tooling"
   ],
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
+  "main": "build/runtime/src/index.js",
+  "types": "build/runtime/src/index.d.ts",
   "bin": {
-    "algod-js": "build/algod.js"
+    "algod-js": "build/runtime/src/algod.js"
   },
   "engines": {
     "node": ">=14.11.0"

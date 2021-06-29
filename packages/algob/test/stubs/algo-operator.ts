@@ -1,3 +1,4 @@
+import { types as wtypes } from "@algo-builder/algob-web";
 import { types as rtypes } from "@algo-builder/runtime";
 import type { LogicSig } from "algosdk";
 import { Account, Algodv2, AssetInfo, ConfirmedTxInfo } from "algosdk";
@@ -40,7 +41,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   async deployASA (
-    name: string, asaDef: rtypes.ASADef,
+    name: string, asaDef: wtypes.ASADef,
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap,
     txnWriter: txWriter): Promise<rtypes.ASAInfo> {
     return {
@@ -135,7 +136,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   optInToASAMultiple (
-    asaName: string, asaDef: rtypes.ASADef,
+    asaName: string, asaDef: wtypes.ASADef,
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap, assetIndex: number
   ): Promise<void> {
     return Promise.resolve();

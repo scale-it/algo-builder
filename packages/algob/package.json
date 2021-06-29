@@ -63,6 +63,7 @@
     "sample-project/"
   ],
   "devDependencies": {
+    "@algo-builder/algob-web": "file:../algob-web",
     "@algo-builder/types-algosdk": "^1.1.0",
     "@types/chai": "^4.2.12",
     "@types/debug": "^4.1.5",

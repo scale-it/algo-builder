@@ -1,4 +1,4 @@
-import { addressToPk, stringToBytes, uint64ToBigEndian } from "@algo-builder/runtime";
+import { addressToPk, stringToBytes, uint64ToBigEndian } from "@algo-builder/algob-web";
 
 import * as ERRORS from "./errors/errors-list";
 import {

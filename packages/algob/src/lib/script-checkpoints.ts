@@ -1,4 +1,5 @@
 
+import { types as wtypes } from "@algo-builder/algob-web";
 import { checkIfAssetDeletionTx, loadFromYamlFileSilent, lsTreeWalk, types as rtypes } from "@algo-builder/runtime";
 import { encodeAddress, Transaction } from "algosdk";
 import deepEqual from "deep-equal";
@@ -204,7 +205,7 @@ export function persistCheckpoint (scriptName: string, checkpoint: Checkpoints):
 export async function registerCheckpoints (
   deployer: Deployer,
   txns: Transaction[],
-  txIdxMap: Map<number, [string, rtypes.ASADef]>
+  txIdxMap: Map<number, [string, wtypes.ASADef]>
 ): Promise<void> {
   for (const [idx, txn] of txns.entries()) {
     let txConfirmation;

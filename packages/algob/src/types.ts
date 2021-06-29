@@ -1,3 +1,4 @@
+import { types as wtypes } from "@algo-builder/algob-web";
 import { types as rtypes } from "@algo-builder/runtime";
 import type { LogicSig } from "algosdk";
 import * as algosdk from "algosdk";
@@ -426,7 +427,7 @@ export interface Deployer {
   deployASA: (
     name: string,
     flags: rtypes.ASADeploymentFlags,
-    asaParams?: Partial<rtypes.ASADef>
+    asaParams?: Partial<wtypes.ASADef>
   ) => Promise<rtypes.ASAInfo>
 
   /**
@@ -434,11 +435,11 @@ export interface Deployer {
    * NOTE: This function returns "deployed" ASADef, as immutable properties
    * of asaDef could be updated during tx execution (eg. update asset clawback)
    * @name  ASA name - name of ASA in the /assets/asa.yaml file */
-  loadASADef: (asaName: string) => rtypes.ASADef | undefined
+  loadASADef: (asaName: string) => wtypes.ASADef | undefined
 
   assertNoAsset: (name: string) => void
 
-  getASADef: (name: string, asaParams?: Partial<rtypes.ASADef>) => rtypes.ASADef
+  getASADef: (name: string, asaParams?: Partial<wtypes.ASADef>) => wtypes.ASADef
 
   persistCP: () => void
 

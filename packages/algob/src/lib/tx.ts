@@ -1,4 +1,5 @@
-import { encodeNote, mkTransaction, types as rtypes } from "@algo-builder/runtime";
+import { encodeNote, mkTransaction, types as wtypes } from "@algo-builder/algob-web";
+import { types as rtypes } from "@algo-builder/runtime";
 import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
 import { Deployer } from "../types";
@@ -49,7 +50,7 @@ export async function mkTxParams (
  * @param txSuggestedParams suggested transaction params
  */
 export function makeAssetCreateTxn (
-  name: string, asaDef: rtypes.ASADef,
+  name: string, asaDef: wtypes.ASADef,
   flags: rtypes.ASADeploymentFlags, txSuggestedParams: SuggestedParams
 ): Transaction {
   // If TxParams has noteb64 or note , it gets precedence
@@ -135,7 +136,7 @@ async function mkTx (
   deployer: Deployer,
   txn: rtypes.ExecParams,
   index: number,
-  txIdxMap: Map<number, [string, rtypes.ASADef]>
+  txIdxMap: Map<number, [string, wtypes.ASADef]>
 ): Promise<Transaction> {
   // if execParams for ASA related transaction have assetID as asaName,
   // then set to assetIndex using info from checkpoint
@@ -227,7 +228,7 @@ export async function executeTransaction (
   try {
     let signedTxn;
     let txns: Transaction[] = [];
-    const txIdxMap = new Map<number, [string, rtypes.ASADef]>();
+    const txIdxMap = new Map<number, [string, wtypes.ASADef]>();
     if (Array.isArray(execParams)) {
       if (execParams.length > 16) { throw new Error("Maximum size of an atomic transfer group is 16"); }
 

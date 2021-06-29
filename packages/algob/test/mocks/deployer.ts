@@ -1,3 +1,4 @@
+import { types as wtypes } from "@algo-builder/algob-web";
 import { types as rtypes } from "@algo-builder/runtime";
 import type { LogicSig } from "algosdk";
 import * as algosdk from "algosdk";
@@ -43,7 +44,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  getASADef (name: string): rtypes.ASADef {
+  getASADef (name: string): wtypes.ASADef {
     throw new Error("Not implemented");
   }
 
@@ -114,7 +115,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   };
 
-  loadASADef (asaName: string): rtypes.ASADef | undefined {
+  loadASADef (asaName: string): wtypes.ASADef | undefined {
     throw new Error("Not implemented");
   }
 
