@@ -1,23 +1,9 @@
 {
-  "name": "@algo-builder/runtime",
-  "version": "1.1.0",
-  "contributors": [
-    {
-      "name": "Robert Zaremba",
-      "url": "https://github.com/robert-zaremba"
-    },
-    {
-      "name": "Amit Yadav",
-      "url": "https://github.com/amityadav0"
-    },
-    {
-      "name": "Ratik Jindal",
-      "url": "https://github.com/ratik21"
-    }
-  ],
+  "name": "@algo-builder/algob-web",
+  "version": "0.0.1",
   "license": "Apache-2.0",
   "repository": "https://github.com/scale-it/algo-builder.git",
-  "description": "JavaScript implementation of Algorand runtime (transaction execution + TEAL interpreter)",
+  "description": "package for the web",
   "keywords": [
     "smart-contracts",
     "blockchain",
@@ -42,8 +28,6 @@
     "coverage": "nyc ../../node_modules/mocha/bin/mocha",
     "build": "tsc --build .",
     "build:watch": "tsc -w -p .",
-    "build:docs": "typedoc --out ../../docs/api/runtime --excludePrivate --exclude \"internal/**\" src/index.ts",
-    "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.ts buildinfo build",
     "prepublish": "yarn build",
     "publish": "yarn publish --access public"
   },
@@ -63,7 +47,6 @@
     "sinon": "^9.0.2"
   },
   "dependencies": {
-    "@algob-builder/algob-web": "0.0.1",
     "@types/lodash.clonedeep": "^4.5.6",
     "algosdk": "^1.9.1",
     "glob": "^7.1.6",

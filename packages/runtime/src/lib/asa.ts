@@ -7,7 +7,7 @@ import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { parseZodError } from "../errors/validation-errors";
 import { AccountMap, ASADef, ASADefs, AssetModFields, RuntimeAccountMap } from "../types";
-import { ASADefSchema } from "../types-input";
+import { ASADefSchema } from "../../../algob-web/src/types-input";
 import { getPathFromDirRecursive, loadFromYamlFileSilent } from "./files";
 
 export const ASSETS_DIR = "assets";

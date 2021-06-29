@@ -6,7 +6,6 @@ import {
   SSCSchemaConfig,
   TxnEncodedObj
 } from "algosdk";
-import * as z from 'zod';
 
 import {
   Add, Addr, Arg, Byte, Bytec,
@@ -15,7 +14,6 @@ import {
 } from "./interpreter/opcode-list";
 import { TxnFields } from "./lib/constants";
 import type { IStack } from "./lib/stack";
-import type { ASADefSchema, ASADefsSchema } from "./types-input";
 
 export type Operator = Len | Add | Sub |
 Mul | Div | Arg | Bytecblock | Bytec | Addr | Int | Byte | Pragma;
@@ -444,22 +442,6 @@ export interface ASADeploymentFlags extends TxParams {
 /**
  * SDK account type, used in algob */
 export type AccountMap = Map<string, Account>;
-
-export type ASADef = z.infer<typeof ASADefSchema>;
-
-export type ASADefs = z.infer<typeof ASADefsSchema>;
-
-/**
- * After an asset has been created only the manager,
- * reserve, freeze and reserve accounts can be changed.
- * All other parameters are locked for the life of the asset.
- */
-export interface AssetModFields {
-  manager?: string
-  reserve?: string
-  freeze?: string
-  clawback?: string
-}
 
 /**
  * SDK decoding types (Configure how the integer will be decoded)
