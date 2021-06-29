@@ -5,6 +5,10 @@ import type { ASADefSchema, ASADefsSchema } from "../../algob-web/src/types-inpu
 
 export type AccountAddress = string;
 
+export interface AnyMap {
+  [key: string]: any // eslint-disable-line @typescript-eslint/no-explicit-any
+}
+
 /**
  * After an asset has been created only the manager,
  * reserve, freeze and reserve accounts can be changed.

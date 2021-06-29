@@ -1,5 +1,4 @@
-import type { AssetDefEnc, StateSchemaEnc, SuggestedParams, Transaction } from "algosdk";
-import algosdk from "algosdk";
+import type { AssetDefEnc, StateSchemaEnc, Transaction } from "algosdk";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
