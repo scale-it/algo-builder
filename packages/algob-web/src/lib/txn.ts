@@ -1,8 +1,8 @@
-import algosdk, { Transaction, SuggestedParams } from 'algosdk';
+import algosdk, { SuggestedParams, Transaction } from 'algosdk';
+
 import { AlgobWebError } from '../errors/algob-web-errors';
 import { ALGOB_WEB_ERRORS } from '../errors/errors-list';
-
-import { ExecParams, AccountAddress, SignType, TransactionType } from "../types";
+import { AccountAddress, ExecParams, SignType, TransactionType } from "../types";
 import { parseSSCAppArgs } from "./parsing";
 
 export function encodeNote (note: string | undefined, noteb64: string| undefined): Uint8Array | undefined {

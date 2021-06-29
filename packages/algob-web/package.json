@@ -21,9 +21,9 @@
     "node": ">=14.11.0"
   },
   "scripts": {
-    "lint": "eslint --ext .js,.ts src test",
-    "lint:fix": "eslint --fix --ext .js,.ts src test",
-    "lint:unix": "eslint --format unix --ext .js,.ts src test",
+    "lint": "eslint --ext .js,.ts src",
+    "lint:fix": "eslint --fix --ext .js,.ts src",
+    "lint:unix": "eslint --format unix --ext .js,.ts src",
     "test": "mocha",
     "coverage": "nyc ../../node_modules/mocha/bin/mocha",
     "build": "tsc --build .",

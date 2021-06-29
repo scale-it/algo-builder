@@ -24,8 +24,8 @@ export const transactionErrors = {
     title: "Unknown Transaction type",
     description: `Provided transaction type is unknown
     Please double check your transaction type`
-  },
-}
+  }
+};
 
 export const asaErrors = {
   PARAM_PARSE_ERROR: {
@@ -36,8 +36,8 @@ export const asaErrors = {
     description: `Invalid ASA definition: '%source%'.
     Reason: %reason%
     Please check your ASA file`
-  },
-}
+  }
+};
 
 export const ALGOB_WEB_ERRORS: {
   [category in keyof typeof ALGOB_WEB_ERROR_RANGES]: {
