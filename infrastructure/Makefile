@@ -3,6 +3,7 @@
 export ALGORAND_DATA=`pwd`/node_data/PrimaryNode
 export SANDBOX_PATH = ~/.algorand-sandbox
 export REMOTE_REPO = https://github.com/algorand/sandbox.git
+export REACH_PATH = ~/.algo-reach
 
 setup-private-net: create-private-net start-private-net setup-master-account status-private-net
 recreate-private-net: stop-private-net delete-private-net setup-private-net
@@ -73,3 +74,21 @@ sandbox-setup-master-account:
 
 # Extracting mnemonic:
 # goal -d $(ALGORAND_DATA) account export -a <account address>
+
+# https://docs.reach.sh/tut-1.html
+setup-reach:
+	mkdir -p $(REACH_PATH)
+	curl https://raw.githubusercontent.com/reach-sh/reach-lang/master/reach -o $(REACH_PATH)/reach
+	chmod +x $(REACH_PATH)/reach
+# download/update docker images from https://hub.docker.com/u/reachsh
+	$(REACH_PATH)/reach update
+# echo reach version
+	$(REACH_PATH)/reach --version
+
+remove-reach:
+	if ! [ -f $(REACH_PATH)/reach ]; then	\
+		echo "Error reach not found: $(REACH_PATH)/reach does not exist."; exit 1; fi
+# halt any dockerized devnets, docker kill and rm all images
+	$(REACH_PATH)/reach down
+	$(REACH_PATH)/reach docker-reset
+	rm -r $(REACH_PATH)
