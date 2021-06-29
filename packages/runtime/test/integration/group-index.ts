@@ -1,4 +1,4 @@
-import { RUNTIME_ERRORS } from '../../build/errors/errors-list';
+import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from '../../src/index';
 import { ExecParams, SignType, TransactionType } from '../../src/types';
 import { getProgram } from "../helpers/files";
