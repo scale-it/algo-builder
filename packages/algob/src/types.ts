@@ -374,7 +374,7 @@ export interface AssetScriptMap {
 export interface CheckpointFunctions {
   /**
    * Queries a stateful smart contract info from checkpoint using key. */
-  getSSCfromCPKey: (key: string) => rtypes.SSCInfo | undefined
+  getAppfromCPKey: (key: string) => rtypes.SSCInfo | undefined
 
   /**
    * Returns SSC checkpoint key using application index,
@@ -582,7 +582,7 @@ export interface Deployer {
 
   /**
    * Queries a stateful smart contract info from checkpoint. */
-  getSSC: (nameApproval: string, nameClear: string) => rtypes.SSCInfo | undefined
+  getApp: (nameApproval: string, nameClear: string) => rtypes.SSCInfo | undefined
 
   /**
    * Queries a delegated logic signature from checkpoint. */

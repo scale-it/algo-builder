@@ -97,7 +97,7 @@ export interface SSCOptionalFlags {
 export type ExecParams = AlgoTransferParam | AssetTransferParam | SSCCallsParam |
 ModifyAssetParam | FreezeAssetParam | RevokeAssetParam |
 DestroyAssetParam | DeployASAParam | DeployAppParam |
-OptInSSCParam | OptInASAParam | updateAppParam;
+OptInSSCParam | OptInASAParam | UpdateAppParam;
 
 export enum SignType {
   SecretKey,
@@ -119,7 +119,7 @@ export enum TransactionType {
   DeployApp,
   OptInASA,
   OptInSSC,
-  updateApp
+  UpdateApp
 }
 
 interface SignWithSk {
@@ -163,8 +163,8 @@ export type DeployAppParam = BasicParams & SSCOptionalFlags & {
   clearProg?: Uint8Array
 };
 
-export type updateAppParam = BasicParams & SSCOptionalFlags & {
-  type: TransactionType.updateApp
+export type UpdateAppParam = BasicParams & SSCOptionalFlags & {
+  type: TransactionType.UpdateApp
   appID: number
   newApprovalProgram: string
   newClearProgram: string

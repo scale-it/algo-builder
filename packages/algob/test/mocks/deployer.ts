@@ -19,7 +19,7 @@ export class FakeDeployer implements Deployer {
   accountsByName = new Map<string, rtypes.Account>();
   scriptName = '';
   checkpoint = {
-    getSSCfromCPKey (key: string): rtypes.SSCInfo | undefined {
+    getAppfromCPKey (key: string): rtypes.SSCInfo | undefined {
       throw new Error("Not implemented");
     },
 
@@ -76,11 +76,11 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  getSSC (nameApproval: string, nameClear: string): rtypes.SSCInfo | undefined {
+  getApp (nameApproval: string, nameClear: string): rtypes.SSCInfo | undefined {
     throw new Error("Not implemented");
   }
 
-  getSSCfromCPKey (key: string): rtypes.SSCInfo | undefined {
+  getAppfromCPKey (key: string): rtypes.SSCInfo | undefined {
     throw new Error("Not implemented");
   }
 

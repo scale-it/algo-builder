@@ -245,7 +245,7 @@ describe("Delete ASA and SSC", () => {
 
     await executeTransaction(deployer, execParams);
 
-    const res = deployer.getSSC("approval.teal", "clear.teal");
+    const res = deployer.getApp("approval.teal", "clear.teal");
     assert.isDefined(res);
     if (res) assert.equal(res.deleted, true);
   });
@@ -620,7 +620,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
 
   it("should deploy application in run mode", async () => {
     const execParams: types.ExecParams = {
-      type: types.TransactionType.deployApp,
+      type: types.TransactionType.DeployApp,
       sign: types.SignType.SecretKey,
       fromAccount: bobAcc,
       approvalProgram: "approval.teal",
@@ -634,13 +634,13 @@ describe("Deploy, Delete transactions test in run mode", () => {
     await executeTransaction(deployer, execParams);
 
     // should not be stored in checkpoint if in run mode
-    assert.isUndefined(deployer.getSSC("approval.teal", "clear.teal"));
+    assert.isUndefined(deployer.getApp("approval.teal", "clear.teal"));
   });
 
   it("should delete application in run mode", async () => {
     deployer = new DeployerDeployMode(deployerCfg);
     let execParams: types.ExecParams = {
-      type: types.TransactionType.deployApp,
+      type: types.TransactionType.DeployApp,
       sign: types.SignType.SecretKey,
       fromAccount: bobAcc,
       approvalProgram: "approval.teal",
@@ -664,7 +664,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
 
     await executeTransaction(deployer, execParams);
 
-    const res = deployer.getSSC("approval.teal", "clear.teal");
+    const res = deployer.getApp("approval.teal", "clear.teal");
     assert.isDefined(res);
     assert.equal(res?.deleted, false);
   });

@@ -213,7 +213,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.payFlags.rekeyTo
       );
     }
-    case TransactionType.updateApp: {
+    case TransactionType.UpdateApp: {
       return algosdk.makeApplicationUpdateTxn(
         fromAccountAddr,
         suggestedParams,

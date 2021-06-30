@@ -136,8 +136,8 @@ class DeployerBasicMode {
    * @param nameApproval Approval program name
    * @param nameClear clear program name
    */
-  getSSC (nameApproval: string, nameClear: string): rtypes.SSCInfo | undefined {
-    return this.checkpoint.getSSCfromCPKey(nameApproval + "-" + nameClear);
+  getApp (nameApproval: string, nameClear: string): rtypes.SSCInfo | undefined {
+    return this.checkpoint.getAppfromCPKey(nameApproval + "-" + nameClear);
   }
 
   /**
@@ -344,7 +344,7 @@ class DeployerBasicMode {
    */
   private assertAppExist (appID: number): void {
     const key = this.checkpoint.getAppCheckpointKeyFromIndex(appID);
-    const res = key ? this.checkpoint.getSSCfromCPKey(key) : undefined;
+    const res = key ? this.checkpoint.getAppfromCPKey(key) : undefined;
     if (res?.deleted === true) {
       throw new BuilderError(
         ERRORS.GENERAL.APP_DELETED, {
