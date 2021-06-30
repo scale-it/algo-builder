@@ -112,7 +112,7 @@ KMD is not started by default (with `make start-private`). You need to run it se
 ## Reach
 
 [Reach](https://reach.sh/us/) is a domain-specific language for building decentralized applications (DApps). To quickly set up/use reach within algob, we provide the following make jobs:
-**NOTE:** Before execution, make sure you have make, docker and [Docker Compose](https://docs.docker.com/compose/install/) installed.
+**NOTE:** Before execution, make sure you have docker and [Docker Compose](https://docs.docker.com/compose/install/) installed.
 
 1. `setup-reach`: sets up reach executable file in `~/.algo-reach` directory, pulls/update reach docker images from [https://hub.docker.com/u/reachsh](https://hub.docker.com/u/reachsh).
 
