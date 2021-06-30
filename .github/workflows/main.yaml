@@ -43,7 +43,11 @@ jobs:
         run: pipenv run yarn install
             
       - name: Setup Network
-        run: cd infrastructure && make sandbox-up && make sandbox-setup-master-account
+        run: sudo apt-get update && sudo apt-get install -y gnupg2 curl software-properties-common
+      - run: curl -O https://releases.algorand.com/key.pub && sudo apt-key add key.pub
+      - run: sudo add-apt-repository "deb [arch=amd64] https://releases.algorand.com/deb/ stable main"
+      - run: sudo apt-get update && sudo apt-get install -y algorand
+      - run: cd infrastructure && make create-private-net
       - name: Execute lint
         run: yarn lint
       - run: yarn build
