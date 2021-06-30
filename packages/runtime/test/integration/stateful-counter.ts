@@ -1,8 +1,8 @@
+import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
-import { ExecParams, SignType, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 
@@ -12,9 +12,9 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
   const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE * 10 + fee;
   const john = new AccountStore(minBalance + fee);
 
-  const txnParams: ExecParams = {
-    type: TransactionType.CallNoOpSSC,
-    sign: SignType.SecretKey,
+  const txnParams: types.ExecParams = {
+    type: types.TransactionType.CallNoOpSSC,
+    sign: types.SignType.SecretKey,
     fromAccount: john.account,
     appID: 0,
     payFlags: { totalFee: fee }

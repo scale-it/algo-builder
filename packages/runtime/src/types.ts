@@ -2,8 +2,6 @@ import { types } from "@algo-builder/web";
 import {
   Account as AccountSDK,
   AssetDef,
-  LogicSig,
-  LogicSigArgs,
   SSCSchemaConfig,
   TxnEncodedObj
 } from "algosdk";
@@ -109,9 +107,9 @@ export interface Context {
   getAccount: (address: string) => AccountStoreI
   getAssetAccount: (assetId: number) => AccountStoreI
   getApp: (appID: number, line?: number) => SSCAttributesM
-  transferAlgo: (txnParam: AlgoTransferParam) => void
+  transferAlgo: (txnParam: types.AlgoTransferParam) => void
   deductFee: (sender: AccountAddress, index: number) => void
-  transferAsset: (txnParam: AssetTransferParam) => void
+  transferAsset: (txnParam: types.AssetTransferParam) => void
   modifyAsset: (assetId: number, fields: types.AssetModFields) => void
   freezeAsset: (assetId: number, freezeTarget: string, freezeState: boolean) => void
   revokeAsset: (
@@ -121,7 +119,7 @@ export interface Context {
   destroyAsset: (assetId: number) => void
   deleteApp: (appID: number) => void
   closeApp: (sender: AccountAddress, appID: number) => void
-  processTransactions: (txnParams: ExecParams[]) => void
+  processTransactions: (txnParams: types.ExecParams[]) => void
   addAsset: (name: string, fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => number
   optIntoASA: (assetIndex: number, address: AccountAddress, flags: TxParams) => void
   addApp: (
@@ -286,145 +284,6 @@ export interface SSCOptionalFlags {
   lease?: Uint8Array
   // you can learn more about these parameters from here.(https://developer.algorand.org/docs/reference/transactions/#application-call-transaction)
 }
-
-/**
- * Transaction execution parameters (on blockchain OR runtime) */
-export type ExecParams = AlgoTransferParam | AssetTransferParam | SSCCallsParam |
-ModifyAssetParam | FreezeAssetParam | RevokeAssetParam |
-DestroyAssetParam | DeployASAParam | deployAppParam |
-OptInSSCParam | OptInASAParam | updateAppParam;
-
-export enum SignType {
-  SecretKey,
-  LogicSignature
-}
-
-export enum TransactionType {
-  TransferAlgo,
-  TransferAsset,
-  ModifyAsset,
-  FreezeAsset,
-  RevokeAsset,
-  DestroyAsset,
-  CallNoOpSSC,
-  ClearApp,
-  CloseApp,
-  DeleteApp,
-  DeployASA,
-  deployApp,
-  OptInASA,
-  OptInSSC,
-  updateApp
-}
-
-interface SignWithSk {
-  sign: SignType.SecretKey
-  fromAccount: AccountSDK
-  /**
-   * if passed then it will be used as the from account address, but tx will be signed
-   * by fromAcount's sk. This is used if an account address is rekeyed to another account. */
-  fromAccountAddr?: AccountAddress
-}
-
-interface SignWithLsig {
-  sign: SignType.LogicSignature
-  fromAccountAddr: AccountAddress
-  lsig: LogicSig
-  /** stateless smart contract args */
-  args?: LogicSigArgs
-}
-
-export type Sign = SignWithSk | SignWithLsig;
-
-export type BasicParams = Sign & {
-  payFlags: TxParams
-};
-
-export type DeployASAParam = BasicParams & {
-  type: TransactionType.DeployASA
-  asaName: string
-  asaDef?: Partial<types.ASADef>
-};
-
-export type deployAppParam = BasicParams & SSCOptionalFlags & {
-  type: TransactionType.deployApp
-  approvalProgram: string
-  clearProgram: string
-  localInts: number
-  localBytes: number
-  globalInts: number
-  globalBytes: number
-  approvalProg?: Uint8Array
-  clearProg?: Uint8Array
-};
-
-export type updateAppParam = BasicParams & SSCOptionalFlags & {
-  type: TransactionType.updateApp
-  appID: number
-  newApprovalProgram: string
-  newClearProgram: string
-  approvalProg?: Uint8Array
-  clearProg?: Uint8Array
-};
-
-export type OptInSSCParam = BasicParams & SSCOptionalFlags & {
-  type: TransactionType.OptInSSC
-  appID: number
-};
-
-export type OptInASAParam = BasicParams & {
-  type: TransactionType.OptInASA
-  assetID: number | string
-};
-
-export type ModifyAssetParam = BasicParams & {
-  type: TransactionType.ModifyAsset
-  assetID: number | string
-  fields: types.AssetModFields
-};
-
-export type FreezeAssetParam = BasicParams & {
-  type: TransactionType.FreezeAsset
-  assetID: number | string
-  freezeTarget: AccountAddress
-  freezeState: boolean
-};
-
-export type RevokeAssetParam = BasicParams & {
-  type: TransactionType.RevokeAsset
-  /**
-   * Revoked assets are sent to this address
-   */
-  recipient: AccountAddress
-  assetID: number | string
-  /** Revocation target is the account from which the clawback revokes asset. */
-  revocationTarget: AccountAddress
-  amount: number | bigint
-};
-
-export type DestroyAssetParam = BasicParams & {
-  type: TransactionType.DestroyAsset
-  assetID: number | string
-};
-
-export type AlgoTransferParam = BasicParams & {
-  type: TransactionType.TransferAlgo
-  toAccountAddr: AccountAddress
-  amountMicroAlgos: number | bigint
-};
-
-export type AssetTransferParam = BasicParams & {
-  type: TransactionType.TransferAsset
-  toAccountAddr: AccountAddress
-  amount: number | bigint
-  assetID: number | string
-};
-
-export type SSCCallsParam = BasicParams & SSCOptionalFlags & {
-  type: TransactionType.CallNoOpSSC | TransactionType.ClearApp |
-  TransactionType.CloseApp | TransactionType.deleteApp
-  appID: number
-};
 
 export interface AnyMap {
   [key: string]: any // eslint-disable-line @typescript-eslint/no-explicit-any

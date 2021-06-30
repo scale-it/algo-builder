@@ -1,8 +1,8 @@
+import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
-import { ExecParams, SignType, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
@@ -50,18 +50,18 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
   }
 
   it("should execute group of (payment + asset creation) successfully", () => {
-    const txGroup: ExecParams[] = [
+    const txGroup: types.ExecParams[] = [
       {
-        type: TransactionType.TransferAlgo,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         toAccountAddr: alice.address,
         amountMicroAlgos: 100,
         payFlags: { totalFee: 1000 }
       },
       {
-        type: TransactionType.DeployASA,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.DeployASA,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         asaName: 'gold',
         payFlags: { totalFee: 1000 }
@@ -75,18 +75,18 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
   });
 
   it("should fail execution group (payment + asset creation), if asset def is not found", () => {
-    const txGroup: ExecParams[] = [
+    const txGroup: types.ExecParams[] = [
       {
-        type: TransactionType.TransferAlgo,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         toAccountAddr: alice.address,
         amountMicroAlgos: 100,
         payFlags: { totalFee: 1000 }
       },
       {
-        type: TransactionType.DeployASA,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.DeployASA,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         asaName: 'doge',
         payFlags: { totalFee: 1000 }
@@ -107,10 +107,10 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
     syncAccounts();
     const assetInfo = runtime.getAssetInfoFromName('gold');
     assert.isDefined(assetInfo);
-    const tx: ExecParams[] = [
+    const tx: types.ExecParams[] = [
       {
-        type: TransactionType.OptInASA,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.OptInASA,
+        sign: types.SignType.SecretKey,
         fromAccount: alice.account,
         assetID: assetInfo?.assetIndex as number,
         payFlags: { totalFee: 1000 }
@@ -121,18 +121,18 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
   });
 
   it("should execute group of (payment + app creation) successfully", () => {
-    const txGroup: ExecParams[] = [
+    const txGroup: types.ExecParams[] = [
       {
-        type: TransactionType.TransferAlgo,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         toAccountAddr: alice.address,
         amountMicroAlgos: 100,
         payFlags: { totalFee: 1000 }
       },
       {
-        type: TransactionType.deployApp,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.DeployApp,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         approvalProgram: approvalProgram,
         clearProgram: clearProgram,
@@ -151,18 +151,18 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
   });
 
   it("should fail execution group (payment + asset creation), if not enough balance", () => {
-    const txGroup: ExecParams[] = [
+    const txGroup: types.ExecParams[] = [
       {
-        type: TransactionType.TransferAlgo,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         toAccountAddr: alice.address,
         amountMicroAlgos: 1e9,
         payFlags: { totalFee: 1000 }
       },
       {
-        type: TransactionType.deployApp,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.DeployApp,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         approvalProgram: approvalProgram,
         clearProgram: clearProgram,
@@ -189,10 +189,10 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
     syncAccounts();
     const appInfo = runtime.getAppInfoFromName(approvalProgram, clearProgram);
     assert.isDefined(appInfo);
-    const tx: ExecParams[] = [
+    const tx: types.ExecParams[] = [
       {
-        type: TransactionType.OptInSSC,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.OptInSSC,
+        sign: types.SignType.SecretKey,
         fromAccount: alice.account,
         appID: appInfo?.appID as number,
         payFlags: { totalFee: 1000 }

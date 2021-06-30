@@ -13,9 +13,9 @@ import { convertToString } from "./lib/parsing";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import {
-  AccountAddress, AccountStoreI, ASADeploymentFlags, ASAInfo, AssetHoldingM, Context, ExecParams,
-  ExecutionMode, SignType, SSCAttributesM, SSCDeploymentFlags, SSCInfo, SSCOptionalFlags,
-  StackElem, State, TransactionType, Txn, TxParams
+  AccountAddress, AccountStoreI, ASADeploymentFlags, ASAInfo, AssetHoldingM, Context,
+  ExecutionMode, SSCAttributesM, SSCDeploymentFlags, SSCInfo, SSCOptionalFlags,
+  StackElem, State, Txn, TxParams
 } from "./types";
 
 export class Runtime {
@@ -275,7 +275,7 @@ export class Runtime {
    * @param txnParams : Transaction parameters for current txn or txn Group
    * @returns: [current transaction, transaction group]
    */
-  createTxnContext (txnParams: ExecParams | ExecParams[]): [Txn, Txn[]] {
+  createTxnContext (txnParams: types.ExecParams | types.ExecParams[]): [Txn, Txn[]] {
     // if txnParams is array, then user is requesting for a group txn
     if (Array.isArray(txnParams)) {
       if (txnParams.length > 16) {
@@ -544,10 +544,10 @@ export class Runtime {
    * @param debugStack: if passed then TEAL Stack is logged to console after
    * each opcode execution (upto depth = debugStack)
    */
-  validateLsigAndRun (txnParam: ExecParams, debugStack?: number): void {
+  validateLsigAndRun (txnParam: types.ExecParams, debugStack?: number): void {
     // check if transaction is signed by logic signature,
     // if yes verify signature and run logic
-    if (txnParam.sign === SignType.LogicSignature && txnParam.lsig) {
+    if (txnParam.sign === types.SignType.LogicSignature && txnParam.lsig) {
       this.ctx.args = txnParam.args ?? txnParam.lsig.args;
 
       // signature validation
@@ -575,15 +575,15 @@ export class Runtime {
    * @param debugStack: if passed then TEAL Stack is logged to console after
    * each opcode execution (upto depth = debugStack)
    */
-  executeTx (txnParams: ExecParams | ExecParams[], debugStack?: number): void {
+  executeTx (txnParams: types.ExecParams | types.ExecParams[], debugStack?: number): void {
     const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
     for (const txn of txnParameters) {
       switch (txn.type) {
-        case TransactionType.DeployASA: {
+        case types.TransactionType.DeployASA: {
           txn.asaDef = this.loadedAssetsDefs[txn.asaName];
           break;
         }
-        case TransactionType.deployApp: {
+        case types.TransactionType.DeployApp: {
           txn.approvalProg = new Uint8Array(32); // mock approval program
           txn.clearProg = new Uint8Array(32); // mock clear program
           break;

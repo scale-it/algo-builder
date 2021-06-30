@@ -1,10 +1,9 @@
-import { parsing } from "@algo-builder/web";
+import { parsing, types } from "@algo-builder/web";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
-import { SignType, SSCCallsParam, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
@@ -62,9 +61,9 @@ describe("Algorand Smart Contracts - Update Application", function () {
 
     // now call the smart contract after updating approval program which checks for
     // global-key and local-key in state (which was set during the update from oldApprovalProgram)
-    const noOpParams: SSCCallsParam = {
-      type: TransactionType.CallNoOpSSC,
-      sign: SignType.SecretKey,
+    const noOpParams: types.SSCCallsParam = {
+      type: types.TransactionType.CallNoOpSSC,
+      sign: types.SignType.SecretKey,
       fromAccount: creator.account,
       appID: appID,
       payFlags: { totalFee: 1000 }
