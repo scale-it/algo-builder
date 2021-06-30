@@ -52,7 +52,6 @@ jobs:
 
       - name: Example ASA
         run: yarn link @algo-builder/algob  && cd ~/.yarn/bin && chmod +x algob
-      - run: ls
       - run: cd examples/asa && pipenv run yarn algob deploy
 
       - name: Example crowdfunding
@@ -78,3 +77,6 @@ jobs:
 
       - name: Example ref-templates
         run: cd examples/ref-templates && pipenv run yarn algob deploy
+
+      - name: Example stateful-counter
+        run: cd examples/stateful-counter && pipenv run yarn algob deploy
