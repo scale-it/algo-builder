@@ -168,7 +168,7 @@ describe("DeployerDeployMode", () => {
       localBytes: 1,
       globalBytes: 1
     };
-    const sscInfo = await deployer.deploySSC("app", "clear", sscFlags, {});
+    const sscInfo = await deployer.deployApp("app", "clear", sscFlags, {});
     assert.deepEqual(sscInfo,
       {
         creator: "addr-1-get-address-dry-run",
@@ -199,7 +199,7 @@ describe("DeployerDeployMode", () => {
       deleted: false
     });
 
-    const updatedInfo = await deployer.updateSSC(deployer.accounts[0], {}, 33, "app", "clear", {});
+    const updatedInfo = await deployer.updateApp(deployer.accounts[0], {}, 33, "app", "clear", {});
     assert.deepEqual(updatedInfo,
       {
         creator: "addr-1-get-address-dry-run",

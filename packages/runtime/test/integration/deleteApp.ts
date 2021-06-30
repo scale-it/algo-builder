@@ -31,7 +31,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
     clearProgram = getProgram('clear.teal');
 
     deleteParams = {
-      type: TransactionType.DeleteSSC,
+      type: TransactionType.DeleteApp,
       sign: SignType.SecretKey,
       fromAccount: john.account,
       appID: 10,
@@ -75,7 +75,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
     );
 
     const deleteParams: SSCCallsParam = {
-      type: TransactionType.DeleteSSC,
+      type: TransactionType.DeleteApp,
       sign: SignType.SecretKey,
       fromAccount: alice.account,
       appID: appID,

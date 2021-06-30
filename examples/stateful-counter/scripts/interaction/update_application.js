@@ -6,7 +6,7 @@ async function run (runtimeEnv, deployer) {
   const applicationID = appInfo.appID;
   console.log('Application Id ', applicationID);
 
-  const updatedRes = await deployer.updateSSC(
+  const updatedRes = await deployer.updateApp(
     creatorAccount,
     {}, // pay flags
     applicationID,

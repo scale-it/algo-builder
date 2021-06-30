@@ -38,11 +38,11 @@ const throwFmtError = (appArg: string): void => {
  * Parses appArgs to bytes if arguments passed to SSC are similar to goal ('int:1', 'str:hello'..)
  * https://developer.algorand.org/docs/features/asc1/stateful/#passing-arguments-to-stateful-smart-contracts
  * eg. "int:1" => new Uint8Aarray([0, 0, 0, 0, 0, 0, 0, 1])
- * NOTE: parseSSCAppArgs returns undefined to handle the case when application args passed to
+ * NOTE: parseAppArgs returns undefined to handle the case when application args passed to
  * stateful smart contract is undefined
  * @param appArgs : arguments to stateful smart contract
  */
-export function parseSSCAppArgs (appArgs?: Array<Uint8Array | string>): Uint8Array[] | undefined {
+export function parseAppArgs (appArgs?: Array<Uint8Array | string>): Uint8Array[] | undefined {
   if (appArgs === undefined) { return undefined; }
   const args = [];
 

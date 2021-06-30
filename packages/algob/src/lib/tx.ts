@@ -125,7 +125,7 @@ function signTransaction (txn: Transaction, execParams: rtypes.ExecParams): Uint
 }
 
 /**
- * Make transaction parameters and update deployASA, deploySSC & ModifyAsset params
+ * Make transaction parameters and update deployASA, deployApp & ModifyAsset params
  * @param deployer Deployer object
  * @param txn Execution parameters
  * @param index index of current execParam
@@ -170,7 +170,7 @@ async function mkTx (
       if (txn.asaDef) txIdxMap.set(index, [txn.asaName, asaDef]);
       break;
     }
-    case rtypes.TransactionType.DeploySSC: {
+    case rtypes.TransactionType.DeployApp: {
       const name = String(txn.approvalProgram) + "-" + String(txn.clearProgram);
       deployer.assertNoAsset(name);
       const approval = await deployer.ensureCompiled(txn.approvalProgram);
@@ -180,7 +180,7 @@ async function mkTx (
       txIdxMap.set(index, [name, { total: 1, decimals: 1, unitName: "MOCK" }]);
       break;
     }
-    case rtypes.TransactionType.UpdateSSC: {
+    case rtypes.TransactionType.updateApp: {
       const cpKey = String(txn.newApprovalProgram) + "-" + String(txn.newClearProgram);
       const approval = await deployer.ensureCompiled(txn.newApprovalProgram);
       const clear = await deployer.ensureCompiled(txn.newClearProgram);

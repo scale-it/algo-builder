@@ -291,8 +291,8 @@ export interface SSCOptionalFlags {
  * Transaction execution parameters (on blockchain OR runtime) */
 export type ExecParams = AlgoTransferParam | AssetTransferParam | SSCCallsParam |
 ModifyAssetParam | FreezeAssetParam | RevokeAssetParam |
-DestroyAssetParam | DeployASAParam | DeploySSCParam |
-OptInSSCParam | OptInASAParam | UpdateSSCParam;
+DestroyAssetParam | DeployASAParam | deployAppParam |
+OptInSSCParam | OptInASAParam | updateAppParam;
 
 export enum SignType {
   SecretKey,
@@ -307,14 +307,14 @@ export enum TransactionType {
   RevokeAsset,
   DestroyAsset,
   CallNoOpSSC,
-  ClearSSC,
-  CloseSSC,
-  DeleteSSC,
+  ClearApp,
+  CloseApp,
+  DeleteApp,
   DeployASA,
-  DeploySSC,
+  deployApp,
   OptInASA,
   OptInSSC,
-  UpdateSSC
+  updateApp
 }
 
 interface SignWithSk {
@@ -346,8 +346,8 @@ export type DeployASAParam = BasicParams & {
   asaDef?: Partial<types.ASADef>
 };
 
-export type DeploySSCParam = BasicParams & SSCOptionalFlags & {
-  type: TransactionType.DeploySSC
+export type deployAppParam = BasicParams & SSCOptionalFlags & {
+  type: TransactionType.deployApp
   approvalProgram: string
   clearProgram: string
   localInts: number
@@ -358,8 +358,8 @@ export type DeploySSCParam = BasicParams & SSCOptionalFlags & {
   clearProg?: Uint8Array
 };
 
-export type UpdateSSCParam = BasicParams & SSCOptionalFlags & {
-  type: TransactionType.UpdateSSC
+export type updateAppParam = BasicParams & SSCOptionalFlags & {
+  type: TransactionType.updateApp
   appID: number
   newApprovalProgram: string
   newClearProgram: string
@@ -421,8 +421,8 @@ export type AssetTransferParam = BasicParams & {
 };
 
 export type SSCCallsParam = BasicParams & SSCOptionalFlags & {
-  type: TransactionType.CallNoOpSSC | TransactionType.ClearSSC |
-  TransactionType.CloseSSC | TransactionType.DeleteSSC
+  type: TransactionType.CallNoOpSSC | TransactionType.ClearApp |
+  TransactionType.CloseApp | TransactionType.deleteApp
   appID: number
 };
 

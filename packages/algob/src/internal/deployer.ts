@@ -258,7 +258,7 @@ class DeployerBasicMode {
    * @param payFlags Transaction flags
    * @param flags Optional parameters to SSC (accounts, args..)
    */
-  async optInAccountToSSC (
+  async optInAccountToApp (
     sender: rtypes.Account,
     appID: number,
     payFlags: rtypes.TxParams,
@@ -270,7 +270,7 @@ class DeployerBasicMode {
       appID: appID,
       payFlags: {}
     });
-    await this.algoOp.optInAccountToSSC(sender, appID, payFlags, flags);
+    await this.algoOp.optInAccountToApp(sender, appID, payFlags, flags);
   }
 
   /**
@@ -281,7 +281,7 @@ class DeployerBasicMode {
    * @param payFlags Transaction flags
    * @param flags Optional parameters to SSC (accounts, args..)
    */
-  async optInLsigToSSC (
+  async optInLsigToApp (
     appID: number,
     lsig: LogicSig,
     payFlags: rtypes.TxParams,
@@ -294,7 +294,7 @@ class DeployerBasicMode {
       appID: appID,
       payFlags: {}
     });
-    await this.algoOp.optInLsigToSSC(appID, lsig, payFlags, flags);
+    await this.algoOp.optInLsigToApp(appID, lsig, payFlags, flags);
   }
 
   /**
@@ -376,10 +376,10 @@ class DeployerBasicMode {
         }
         break;
       }
-      case rtypes.TransactionType.DeleteSSC:
-      case rtypes.TransactionType.CloseSSC:
+      case rtypes.TransactionType.DeleteApp:
+      case rtypes.TransactionType.CloseApp:
       case rtypes.TransactionType.OptInSSC:
-      case rtypes.TransactionType.UpdateSSC:
+      case rtypes.TransactionType.updateApp:
       case rtypes.TransactionType.CallNoOpSSC: {
         this.assertAppExist(txn.appID);
         break;
@@ -572,7 +572,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  async deploySSC (
+  async deployApp (
     approvalProgram: string,
     clearProgram: string,
     flags: rtypes.SSCDeploymentFlags,
@@ -582,7 +582,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     this.assertNoAsset(name);
     let sscInfo = {} as rtypes.SSCInfo;
     try {
-      sscInfo = await this.algoOp.deploySSC(
+      sscInfo = await this.algoOp.deployApp(
         approvalProgram, clearProgram, flags, payFlags, this.txWriter, scTmplParams);
     } catch (error) {
       this.persistCP();
@@ -605,7 +605,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * @param newClearProgram New Clear Program filename
    * @param flags Optional parameters to SSC (accounts, args..)
    */
-  async updateSSC (
+  async updateApp (
     sender: algosdk.Account,
     payFlags: rtypes.TxParams,
     appID: number,
@@ -614,7 +614,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     flags: rtypes.SSCOptionalFlags
   ): Promise<rtypes.SSCInfo> {
     this.assertCPNotDeleted({
-      type: rtypes.TransactionType.UpdateSSC,
+      type: rtypes.TransactionType.updateApp,
       sign: rtypes.SignType.SecretKey,
       fromAccount: sender,
       newApprovalProgram: newApprovalProgram,
@@ -626,7 +626,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 
     let sscInfo = {} as rtypes.SSCInfo;
     try {
-      sscInfo = await this.algoOp.updateSSC(sender, payFlags, appID,
+      sscInfo = await this.algoOp.updateApp(sender, payFlags, appID,
         newApprovalProgram, newClearProgram, flags, this.txWriter);
     } catch (error) {
       this.persistCP();
@@ -707,20 +707,20 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     });
   }
 
-  async deploySSC (
+  async deployApp (
     approvalProgram: string,
     clearProgram: string,
     flags: rtypes.SSCDeploymentFlags,
     payFlags: rtypes.TxParams,
     scInitParam?: unknown): Promise<rtypes.SSCInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      methodName: "deploySSC"
+      methodName: "deployApp"
     });
   }
 
   /**
    * This functions updates SSC in the network.
-   * Note: UpdateSSC when ran in RunMode it doesn't store checkpoints
+   * Note: updateApp when ran in RunMode it doesn't store checkpoints
    * @param sender Sender account
    * @param payFlags transaction parameters
    * @param appID application index
@@ -728,7 +728,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
    * @param newClearProgram new clear program name
    * @param flags SSC optional flags
    */
-  async updateSSC (
+  async updateApp (
     sender: algosdk.Account,
     payFlags: rtypes.TxParams,
     appID: number,
@@ -737,7 +737,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     flags: rtypes.SSCOptionalFlags
   ): Promise<rtypes.SSCInfo> {
     this.assertCPNotDeleted({
-      type: rtypes.TransactionType.UpdateSSC,
+      type: rtypes.TransactionType.updateApp,
       sign: rtypes.SignType.SecretKey,
       fromAccount: sender,
       newApprovalProgram: newApprovalProgram,
@@ -745,7 +745,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
       appID: appID,
       payFlags: {}
     });
-    return await this.algoOp.updateSSC(
+    return await this.algoOp.updateApp(
       sender, payFlags, appID,
       newApprovalProgram, newClearProgram,
       flags, this.txWriter

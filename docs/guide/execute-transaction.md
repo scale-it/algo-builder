@@ -79,11 +79,11 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
   }
 ```
 
-### [Deploy SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#deploysscparam)
+### [Deploy SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#deployAppParam)
 
 ```js
   {
-    type: TransactionType.DeploySSC,
+    type: TransactionType.DeployApp,
     sign: SignType.SecretKey,
     fromAccount: john,
     approvalProgram: approvalProgram,
@@ -121,11 +121,11 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
   }
 ```
 
-### [Update SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#updatesscparam)
+### [Update SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#updateAppparam)
 
 ```js
   {
-    type: TransactionType.UpdateSSC,
+    type: TransactionType.updateApp,
     sign: SignType.SecretKey,
     fromAccount: john,
     appID: appId,
@@ -139,7 +139,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
 
 ```js
   {
-    type: TransactionType.DeleteSSC,
+    type: TransactionType.DeleteApp,
     sign: SignType.SecretKey,
     fromAccount: john,
     appId: 10,

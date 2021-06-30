@@ -234,9 +234,9 @@ describe("Delete ASA and SSC", () => {
       globalBytes: 1,
       globalInts: 1
     };
-    const info = await deployer.deploySSC("approval.teal", "clear.teal", flags, {});
+    const info = await deployer.deployApp("approval.teal", "clear.teal", flags, {});
     const execParams: types.SSCCallsParam = {
-      type: types.TransactionType.DeleteSSC,
+      type: types.TransactionType.DeleteApp,
       sign: types.SignType.SecretKey,
       payFlags: {},
       fromAccount: bobAcc,
@@ -252,7 +252,7 @@ describe("Delete ASA and SSC", () => {
 
   it("Should not fail if SSC is not in checkpoints", async () => {
     const execParams: types.SSCCallsParam = {
-      type: types.TransactionType.DeleteSSC,
+      type: types.TransactionType.DeleteApp,
       sign: types.SignType.SecretKey,
       payFlags: {},
       fromAccount: bobAcc,
@@ -298,10 +298,10 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
       globalBytes: 1,
       globalInts: 1
     };
-    const info = await deployer.deploySSC("approval.teal", "clear.teal", flags, {});
+    const info = await deployer.deployApp("approval.teal", "clear.teal", flags, {});
     appID = info.appID;
     const execParam: types.SSCCallsParam = {
-      type: types.TransactionType.DeleteSSC,
+      type: types.TransactionType.DeleteApp,
       sign: types.SignType.SecretKey,
       payFlags: {},
       fromAccount: bobAcc,
@@ -334,31 +334,31 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 
   it("should throw error with opt-in ssc functions, if ssc exist and deleted", async () => {
     await expectBuilderErrorAsync(
-      async () => await deployer.optInAccountToSSC(bobAcc, appID, {}, {}),
+      async () => await deployer.optInAccountToApp(bobAcc, appID, {}, {}),
       ERRORS.GENERAL.APP_DELETED
     );
 
     await expectBuilderErrorAsync(
-      async () => await deployer.optInLsigToSSC(appID, mockLsig, {}, {}),
+      async () => await deployer.optInLsigToApp(appID, mockLsig, {}, {}),
       ERRORS.GENERAL.APP_DELETED
     );
   });
 
   it("should pass with opt-in ssc functions, if ssc doesn't exist in checkpoint", async () => {
-    await deployer.optInAccountToSSC(bobAcc, 122, {}, {});
+    await deployer.optInAccountToApp(bobAcc, 122, {}, {});
 
-    await deployer.optInLsigToSSC(12223, mockLsig, {}, {});
+    await deployer.optInLsigToApp(12223, mockLsig, {}, {});
   });
 
   it("should throw error with update ssc function, if ssc exist and deleted", async () => {
     await expectBuilderErrorAsync(
-      async () => await deployer.updateSSC(bobAcc, {}, appID, "approval.teal", "clear.teal", {}),
+      async () => await deployer.updateApp(bobAcc, {}, appID, "approval.teal", "clear.teal", {}),
       ERRORS.GENERAL.APP_DELETED
     );
   });
 
   it("should pass with update ssc functions, if ssc doesn't exist in checkpoint", async () => {
-    await deployer.updateSSC(bobAcc, {}, 123, "approval.teal", "clear.teal", {});
+    await deployer.updateApp(bobAcc, {}, 123, "approval.teal", "clear.teal", {});
   });
 
   it("should fail if user tries to opt-in through execute tx", async () => {
@@ -468,7 +468,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 
   it("should throw error if user tries to delete deleted app", async () => {
     const execParam: types.SSCCallsParam = {
-      type: types.TransactionType.DeleteSSC,
+      type: types.TransactionType.DeleteApp,
       sign: types.SignType.SecretKey,
       fromAccount: bobAcc,
       payFlags: {},
@@ -481,8 +481,8 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
   });
 
   it("should throw error if user tries to update deleted app", async () => {
-    const execParam: types.UpdateSSCParam = {
-      type: types.TransactionType.UpdateSSC,
+    const execParam: types.updateAppParam = {
+      type: types.TransactionType.updateApp,
       sign: types.SignType.SecretKey,
       fromAccount: bobAcc,
       payFlags: {},
@@ -526,7 +526,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 
   it("should pass if user tries to opt-out deleted app", async () => {
     const execParam: types.SSCCallsParam = {
-      type: types.TransactionType.CloseSSC,
+      type: types.TransactionType.CloseApp,
       sign: types.SignType.SecretKey,
       fromAccount: bobAcc,
       payFlags: {},
@@ -538,7 +538,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
     );
 
     const execParams: types.SSCCallsParam = {
-      type: types.TransactionType.ClearSSC,
+      type: types.TransactionType.ClearApp,
       sign: types.SignType.SecretKey,
       fromAccount: bobAcc,
       payFlags: {},
@@ -569,7 +569,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
         assetID: 123
       },
       {
-        type: types.TransactionType.DeleteSSC,
+        type: types.TransactionType.DeleteApp,
         sign: types.SignType.SecretKey,
         fromAccount: bobAcc,
         payFlags: {},
@@ -620,7 +620,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
 
   it("should deploy application in run mode", async () => {
     const execParams: types.ExecParams = {
-      type: types.TransactionType.DeploySSC,
+      type: types.TransactionType.deployApp,
       sign: types.SignType.SecretKey,
       fromAccount: bobAcc,
       approvalProgram: "approval.teal",
@@ -640,7 +640,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
   it("should delete application in run mode", async () => {
     deployer = new DeployerDeployMode(deployerCfg);
     let execParams: types.ExecParams = {
-      type: types.TransactionType.DeploySSC,
+      type: types.TransactionType.deployApp,
       sign: types.SignType.SecretKey,
       fromAccount: bobAcc,
       approvalProgram: "approval.teal",
@@ -655,7 +655,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
 
     deployer = new DeployerRunMode(deployerCfg);
     execParams = {
-      type: types.TransactionType.DeleteSSC,
+      type: types.TransactionType.DeleteApp,
       sign: types.SignType.SecretKey,
       fromAccount: bobAcc,
       appID: appInfo["application-index"],

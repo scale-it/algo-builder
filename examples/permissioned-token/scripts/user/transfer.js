@@ -5,7 +5,7 @@ const { types } = require('@algo-builder/runtime');
 const { issue } = require('../admin/issue');
 const { whitelist } = require('../permissions/whitelist');
 
-const { getClawback, fundAccount, optInAccountToSSC } = require('../common/common');
+const { getClawback, fundAccount, optInAccountToApp } = require('../common/common');
 const clearStateProgram = 'clear_state_program.py';
 
 /**
@@ -111,9 +111,9 @@ async function run (runtimeEnv, deployer) {
   // opt-in accounts to permissions smart contract
   // comment this code if already opted-in
   await Promise.all([
-    optInAccountToSSC(deployer, elon, permissionsSSCInfo.appID, {}, {}),
-    optInAccountToSSC(deployer, bob, permissionsSSCInfo.appID, {}, {}),
-    optInAccountToSSC(deployer, john, permissionsSSCInfo.appID, {}, {})
+    optInAccountToApp(deployer, elon, permissionsSSCInfo.appID, {}, {}),
+    optInAccountToApp(deployer, bob, permissionsSSCInfo.appID, {}, {}),
+    optInAccountToApp(deployer, john, permissionsSSCInfo.appID, {}, {})
   ]);
 
   /*

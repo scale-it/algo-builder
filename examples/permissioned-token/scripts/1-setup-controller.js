@@ -19,7 +19,7 @@ async function setupControllerSSC (runtimeEnv, deployer) {
   };
 
   console.log('\n** Deploying smart contract: controller **');
-  const controllerSSCInfo = await deployer.deploySSC(
+  const controllerSSCInfo = await deployer.deployApp(
     'controller.py', // approval program
     'clear_state_program.py', // clear program
     {

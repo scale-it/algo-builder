@@ -491,7 +491,7 @@ export interface Deployer {
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  deploySSC: (
+  deployApp: (
     approvalProgram: string,
     clearProgram: string,
     flags: rtypes.SSCDeploymentFlags,
@@ -507,7 +507,7 @@ export interface Deployer {
    * @param newClearProgram New Clear Program filename
    * @param flags Optional parameters to SSC (accounts, args..)
    */
-  updateSSC: (
+  updateApp: (
     sender: algosdk.Account,
     payFlags: rtypes.TxParams,
     appID: number,
@@ -552,7 +552,7 @@ export interface Deployer {
    * @param payFlags Transaction flags
    * @param flags Optional parameters to SSC (accounts, args..)
    */
-  optInAccountToSSC: (
+  optInAccountToApp: (
     sender: rtypes.Account,
     appID: number,
     payFlags: rtypes.TxParams,
@@ -566,7 +566,7 @@ export interface Deployer {
    * @param payFlags Transaction flags
    * @param flags Optional parameters to SSC (accounts, args..)
    */
-  optInLsigToSSC: (
+  optInLsigToApp: (
     appID: number,
     lsig: LogicSig,
     payFlags: rtypes.TxParams,

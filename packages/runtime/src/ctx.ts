@@ -476,14 +476,14 @@ export class Ctx implements Context {
           this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, this.debugStack);
           break;
         }
-        case TransactionType.CloseSSC: {
+        case TransactionType.CloseApp: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appID);
           this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, this.debugStack);
           this.closeApp(fromAccountAddr, txnParam.appID);
           break;
         }
-        case TransactionType.UpdateSSC: {
+        case TransactionType.updateApp: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
 
           this.updateApp(
@@ -491,7 +491,7 @@ export class Ctx implements Context {
           );
           break;
         }
-        case TransactionType.ClearSSC: {
+        case TransactionType.ClearApp: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.runtime.assertAppDefined(txnParam.appID, this.getApp(txnParam.appID));
           try {
@@ -505,7 +505,7 @@ export class Ctx implements Context {
           this.closeApp(fromAccountAddr, txnParam.appID); // remove app from local state
           break;
         }
-        case TransactionType.DeleteSSC: {
+        case TransactionType.DeleteApp: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appID);
           this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, this.debugStack);
@@ -567,7 +567,7 @@ export class Ctx implements Context {
           this.optIntoASA(txnParam.assetID as number, fromAccountAddr, txnParam.payFlags);
           break;
         }
-        case TransactionType.DeploySSC: {
+        case TransactionType.deployApp: {
           const senderAcc = this.getAccount(fromAccountAddr);
           const flags: SSCDeploymentFlags = {
             sender: senderAcc.account,

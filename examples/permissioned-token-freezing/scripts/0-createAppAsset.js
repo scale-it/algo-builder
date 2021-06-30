@@ -32,7 +32,7 @@ async function run (runtimeEnv, deployer) {
     'int:2' // set min user level(2) for asset transfer ("Accred-level")
   ];
 
-  const sscInfo = await deployer.deploySSC(
+  const sscInfo = await deployer.deployApp(
     'poi-approval.teal', // approval program
     'poi-clear.teal', // clear program
     {
@@ -49,8 +49,8 @@ async function run (runtimeEnv, deployer) {
   const appID = sscInfo.appID;
   console.log('Opting-In for Creator(Alice) and Bob.');
   try {
-    await deployer.optInAccountToSSC(creator, appID, {}, {});
-    await deployer.optInAccountToSSC(bob, appID, {}, {});
+    await deployer.optInAccountToApp(creator, appID, {}, {});
+    await deployer.optInAccountToApp(bob, appID, {}, {});
   } catch (e) {
     console.log(e);
     throw new Error(e);

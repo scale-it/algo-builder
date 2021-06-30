@@ -336,7 +336,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
 
     // escrow is already empty so we don't need a tx group
     const deleteTx = {
-      type: types.TransactionType.DeleteSSC,
+      type: types.TransactionType.DeleteApp,
       sign: types.SignType.SecretKey,
       fromAccount: creator.account,
       appID: applicationId,
@@ -374,7 +374,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     // where in the second tx, we empty the escrow account to receiver using closeRemainderTo
     const deleteTxGroup = [
       {
-        type: types.TransactionType.DeleteSSC,
+        type: types.TransactionType.DeleteApp,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId,

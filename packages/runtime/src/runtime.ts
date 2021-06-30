@@ -378,7 +378,7 @@ export class Runtime {
       flags.localBytes,
       flags.globalInts,
       flags.globalBytes,
-      parsing.parseSSCAppArgs(flags.appArgs),
+      parsing.parseAppArgs(flags.appArgs),
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
@@ -425,7 +425,7 @@ export class Runtime {
       senderAddr,
       mockSuggestedParams(payFlags, this.round),
       appID,
-      parsing.parseSSCAppArgs(flags.appArgs),
+      parsing.parseAppArgs(flags.appArgs),
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
@@ -469,7 +469,7 @@ export class Runtime {
       appID,
       new Uint8Array(32), // mock approval program
       new Uint8Array(32), // mock clear progam
-      parsing.parseSSCAppArgs(flags.appArgs),
+      parsing.parseAppArgs(flags.appArgs),
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
@@ -583,7 +583,7 @@ export class Runtime {
           txn.asaDef = this.loadedAssetsDefs[txn.asaName];
           break;
         }
-        case TransactionType.DeploySSC: {
+        case TransactionType.deployApp: {
           txn.approvalProg = new Uint8Array(32); // mock approval program
           txn.clearProg = new Uint8Array(32); // mock clear program
           break;

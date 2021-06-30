@@ -38,7 +38,7 @@ async function run (runtimeEnv, deployer) {
 
   // Create Application
   // Note: An Account can have maximum of 10 Applications.
-  const sscInfo = await deployer.deploySSC(
+  const sscInfo = await deployer.deployApp(
     'crowdFundApproval.teal', // approval program
     'crowdFundClear.teal', // clear program
     {
@@ -63,7 +63,7 @@ async function run (runtimeEnv, deployer) {
 
   appArgs = [convert.addressToPk(escrowAccount.address())];
 
-  const updatedRes = await deployer.updateSSC(
+  const updatedRes = await deployer.updateApp(
     creatorAccount,
     {}, // pay flags
     applicationID,
@@ -75,8 +75,8 @@ async function run (runtimeEnv, deployer) {
 
   console.log('Opting-In for Creator and Donor.');
   try {
-    await deployer.optInAccountToSSC(creatorAccount, applicationID, {}, {});
-    await deployer.optInAccountToSSC(donorAccount, applicationID, {}, {});
+    await deployer.optInAccountToApp(creatorAccount, applicationID, {}, {});
+    await deployer.optInAccountToApp(donorAccount, applicationID, {}, {});
   } catch (e) {
     console.log(e);
     throw new Error(e);

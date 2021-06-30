@@ -3,7 +3,7 @@ import algosdk, { SuggestedParams, Transaction } from 'algosdk';
 import { ALGOB_WEB_ERRORS } from '../errors/errors-list';
 import { AlgobWebError } from '../errors/web-errors';
 import { AccountAddress, ExecParams, SignType, TransactionType } from "../types";
-import { parseSSCAppArgs } from "./parsing";
+import { parseAppArgs } from "./parsing";
 
 export function encodeNote (note: string | undefined, noteb64: string| undefined): Uint8Array | undefined {
   if (note === undefined && noteb64 === undefined) { return undefined; }
@@ -35,7 +35,7 @@ export function getFromAddress (execParams: ExecParams): AccountAddress {
  *  + OptIn Params - optInToASA, optInToSSC
  *  + SSCCallsParam (NoOp, Clear, Delete..)used for calling stateful smart contracts.
  For more advanced use-cases, please use `algosdk.tx` directly.
- NOTE: parseSSCAppArgs is used to handle case when user passes appArgs similar to goal
+ NOTE: parseAppArgs is used to handle case when user passes appArgs similar to goal
  * @param execParams ExecParams
  * @param suggestedParams blockchain transaction suggested parameters (firstRound, lastRound, fee..)
  * @returns SDK Transaction object
@@ -109,12 +109,12 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         suggestedParams,
         execParams.payFlags.rekeyTo);
     }
-    case TransactionType.ClearSSC: {
+    case TransactionType.ClearApp: {
       return algosdk.makeApplicationClearStateTxn(
         fromAccountAddr,
         suggestedParams,
         execParams.appID,
-        parseSSCAppArgs(execParams.appArgs),
+        parseAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
         execParams.foreignAssets,
@@ -123,12 +123,12 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.payFlags.rekeyTo
       );
     }
-    case TransactionType.DeleteSSC: {
+    case TransactionType.DeleteApp: {
       return algosdk.makeApplicationDeleteTxn(
         fromAccountAddr,
         suggestedParams,
         execParams.appID,
-        parseSSCAppArgs(execParams.appArgs),
+        parseAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
         execParams.foreignAssets,
@@ -142,7 +142,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         fromAccountAddr,
         suggestedParams,
         execParams.appID,
-        parseSSCAppArgs(execParams.appArgs),
+        parseAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
         execParams.foreignAssets,
@@ -150,12 +150,12 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.lease,
         execParams.payFlags.rekeyTo);
     }
-    case TransactionType.CloseSSC: {
+    case TransactionType.CloseApp: {
       return algosdk.makeApplicationCloseOutTxn(
         fromAccountAddr,
         suggestedParams,
         execParams.appID,
-        parseSSCAppArgs(execParams.appArgs),
+        parseAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
         execParams.foreignAssets,
@@ -191,7 +191,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
           });
       }
     }
-    case TransactionType.DeploySSC: {
+    case TransactionType.DeployApp: {
       const onComplete = algosdk.OnApplicationComplete.NoOpOC;
 
       return algosdk.makeApplicationCreateTxn(
@@ -204,7 +204,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.localBytes,
         execParams.globalInts,
         execParams.globalBytes,
-        parseSSCAppArgs(execParams.appArgs),
+        parseAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
         execParams.foreignAssets,
@@ -213,14 +213,14 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.payFlags.rekeyTo
       );
     }
-    case TransactionType.UpdateSSC: {
+    case TransactionType.updateApp: {
       return algosdk.makeApplicationUpdateTxn(
         fromAccountAddr,
         suggestedParams,
         execParams.appID,
         execParams.approvalProg,
         execParams.clearProg,
-        parseSSCAppArgs(execParams.appArgs),
+        parseAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
         execParams.foreignAssets,
@@ -233,7 +233,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         fromAccountAddr,
         suggestedParams,
         execParams.appID,
-        parseSSCAppArgs(execParams.appArgs),
+        parseAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
         execParams.foreignAssets,

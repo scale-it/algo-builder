@@ -10,7 +10,7 @@ async function run (runtimeEnv, deployer) {
   console.log('Application Id ', applicationID);
 
   const tx = {
-    type: types.TransactionType.DeleteSSC,
+    type: types.TransactionType.DeleteApp,
     sign: types.SignType.SecretKey,
     fromAccount: creatorAccount,
     appID: applicationID,

@@ -20,7 +20,7 @@ async function run (runtimeEnv, deployer) {
 
   await executeTransaction(deployer, algoTxnParams); // fund john
 
-  await deployer.deploySSC('nft_approval.py', 'nft_clear_state.py', {
+  await deployer.deployApp('nft_approval.py', 'nft_clear_state.py', {
     sender: masterAccount,
     localInts: 16,
     globalInts: 1,
@@ -32,8 +32,8 @@ async function run (runtimeEnv, deployer) {
   console.log(sscInfo);
 
   try {
-    await deployer.optInAccountToSSC(masterAccount, appID, {}, {}); // opt-in to asc by master
-    await deployer.optInAccountToSSC(john, appID, {}, {}); // opt-in to asc by john
+    await deployer.optInAccountToApp(masterAccount, appID, {}, {}); // opt-in to asc by master
+    await deployer.optInAccountToApp(john, appID, {}, {}); // opt-in to asc by john
   } catch (e) {
     console.log(e);
     throw new Error(e);

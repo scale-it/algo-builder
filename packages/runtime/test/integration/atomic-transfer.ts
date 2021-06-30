@@ -330,7 +330,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
   it("should fail close app if payment transaction fails", () => {
     const txGroup: ExecParams[] = [
       {
-        type: TransactionType.CloseSSC,
+        type: TransactionType.CloseApp,
         sign: SignType.SecretKey,
         fromAccount: john.account,
         appID: appID,
@@ -358,7 +358,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
   it("should fail clear app if payment transaction fails", () => {
     const txGroup: ExecParams[] = [
       {
-        type: TransactionType.ClearSSC,
+        type: TransactionType.ClearApp,
         sign: SignType.SecretKey,
         fromAccount: john.account,
         appID: appID,
@@ -386,7 +386,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
   it("should fail asset payment, and algo payment if ssc call fails", () => {
     // close out from app
     runtime.executeTx({
-      type: TransactionType.ClearSSC,
+      type: TransactionType.ClearApp,
       sign: SignType.SecretKey,
       fromAccount: john.account,
       appID: appID,
@@ -395,7 +395,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
     syncAccounts();
     const txGroup: ExecParams[] = [
       {
-        type: TransactionType.ClearSSC,
+        type: TransactionType.ClearApp,
         sign: SignType.SecretKey,
         fromAccount: john.account,
         appID: appID,

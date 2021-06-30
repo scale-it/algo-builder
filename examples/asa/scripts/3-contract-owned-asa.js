@@ -19,7 +19,7 @@ async function run (runtimeEnv, deployer) {
 
   // Create Application
   // Note: An Account can have maximum of 10 Applications.
-  const sscInfo = await deployer.deploySSC(
+  const sscInfo = await deployer.deployApp(
     '5-contract-asa-stateful.py', // approval program
     '5-clear.py', // clear program
     {

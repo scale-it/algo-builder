@@ -12,7 +12,7 @@ Highlights:
 + checkpoint can be market invalid if they are substituted (eg by redeploying same asset).
 
 ### API breaking
-* Move `updateSSC` function to `deployer`
+* Move `updateApp` function to `deployer`
 + Rename `parseArgs` to `parse_params`
 
 + For External support of parameters user should replace TMPL_ prefix in their smart contracts, and only use it when using pyteal.tmpl(..)
@@ -23,12 +23,12 @@ Highlights:
 + Added `algopy` in `@algo-builder/algob/sample-project`, which enables users to pass template parameters to PyTEAL contracts. Updated docs.
 + Store checkpoints in nested form for SSC, added tests.
 + Added support for sub directories in assets folder, with tests.
-+ Update runtime to process execParams.deployASA, deploySSC, OptInToASA, OptIntoSSC
++ Update runtime to process execParams.deployASA, deployApp, OptInToASA, OptIntoSSC
 + Exported `@algorand-builder/algob`, `@algorand-builder/runtime` error types and make it accessible for API documentation.
 + Added `debugStack` option in `runtime.executeTx()` to print stack (upto depth = debugStack) after each opcode execution.
 + TEALv3 support in `@algo-builder/runtime`.
 + Transpile TEAL code to substitute the TMPL placeholders
-+ Mark not valid checkpoints (in case of `DeleteSSC`/`DestroyAsset`) using `deleted` boolean
++ Mark not valid checkpoints (in case of `deleteApp`/`DestroyAsset`) using `deleted` boolean
 
 ### Bug fixes
 
@@ -83,7 +83,7 @@ New website: https://scale-it.github.io/algo-builder
 * New opt-in functions and updates. Check the [deployer API](https://scale-it.github.io/algo-builder/api/algob/interfaces/types.deployer.html) for information about all opt-in functions.
   * `deployer.optIn` are now available both in *DEPLOY* mode to *RUN* mode.
   * Extended `deployer.optIn*` functions to support ASA by ID. Previously we only accepted ASA by name (based on the name in `assets/asa.yaml` file).
-  * Added [`deployer.optInLsigToSSC`](https://scale-it.github.io/algo-builder/api/algob/interfaces/types.deployer.html#optinlsigtossc) and [`deployer.optInLsigToASA`](https://scale-it.github.io/algo-builder/api/algob/interfaces/types.deployer.html#optinlsigtoasa) to easily opt-in stateless smart contract (lsig) account to stateful smart contract and ASA.
+  * Added [`deployer.optInLsigToApp`](https://scale-it.github.io/algo-builder/api/algob/interfaces/types.deployer.html#optInLsigToApp) and [`deployer.optInLsigToASA`](https://scale-it.github.io/algo-builder/api/algob/interfaces/types.deployer.html#optinlsigtoasa) to easily opt-in stateless smart contract (lsig) account to stateful smart contract and ASA.
 * Asset related `execParams` (transaction parameters for [`executeTransaction`](https://scale-it.github.io/algo-builder/api/algob/modules.html#executetransaction)) support ASA by name and by ID (previously only ASA ID was supported). [Example](https://github.com/scale-it/algo-builder/blob/master/examples/asa/scripts/transfer/gold-delegated-lsig.js#L22).
 * cleaned test suite log (when developing Algo Builder itself). Our test suite has 884 tests.
 

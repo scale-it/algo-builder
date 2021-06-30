@@ -83,18 +83,18 @@ describe("Parse string and integer, with bytes", () => {
 
 describe("Parse appArgs to SSC to bytes", () => {
   it("should return undefined if app Args are not defined", () => {
-    const res = parsing.parseSSCAppArgs(undefined);
+    const res = parsing.parseAppArgs(undefined);
     assert.isUndefined(res);
   });
 
   it("should return same bytes if all bytes are passed", () => {
-    const res = parsing.parseSSCAppArgs(['a', 'b', 'c'].map(parsing.stringToBytes));
+    const res = parsing.parseAppArgs(['a', 'b', 'c'].map(parsing.stringToBytes));
     const expected = [[97], [98], [99]].map(z => new Uint8Array(z));
     assert.deepEqual(res, expected);
   });
 
   it("should return correct bytes if args are passed similar to goal", () => {
-    let res = parsing.parseSSCAppArgs(['int:700000000', 'int:3', `int:${MAX_UINT64}`]);
+    let res = parsing.parseAppArgs(['int:700000000', 'int:3', `int:${MAX_UINT64}`]);
     let expected = [
       [0, 0, 0, 0, 41, 185, 39, 0],
       [0, 0, 0, 0, 0, 0, 0, 3],
@@ -102,7 +102,7 @@ describe("Parse appArgs to SSC to bytes", () => {
     ].map(z => new Uint8Array(z));
     assert.deepEqual(res, expected);
 
-    res = parsing.parseSSCAppArgs(['str:hello', 'str:world']);
+    res = parsing.parseAppArgs(['str:hello', 'str:world']);
     expected = [
       [104, 101, 108, 108, 111], // 'hello'
       [119, 111, 114, 108, 100] // 'world'
@@ -111,11 +111,11 @@ describe("Parse appArgs to SSC to bytes", () => {
 
     const elon = 'WHVQXVVCQAD7WX3HHFKNVUL3MOANX3BYXXMEEJEJWOZNRXJNTN7LTNPSTY';
     const john = '2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA';
-    res = parsing.parseSSCAppArgs([`addr:${elon}`, `addr:${john}`]);
+    res = parsing.parseAppArgs([`addr:${elon}`, `addr:${john}`]);
     expected = [elon, john].map(s => decodeAddress(s).publicKey);
     assert.deepEqual(res, expected);
 
-    res = parsing.parseSSCAppArgs(['b64:a2F0cmluYQ==', 'b64:YmVubmV0']);
+    res = parsing.parseAppArgs(['b64:a2F0cmluYQ==', 'b64:YmVubmV0']);
     expected = [
       'katrina', // 'katrina' encoded as b64 is a2F0cmluYQ==
       'bennet' // 'bennet' encoded as b64 is YmVubmV0
@@ -126,16 +126,16 @@ describe("Parse appArgs to SSC to bytes", () => {
   it("should throw error if passed args are invalid", () => {
     const errMsg = (str: string): string => { return `Format of arguments passed to stateful smart is invalid for ${str}`; };
 
-    assert.throws(() => parsing.parseSSCAppArgs(['INT:12']), errMsg('INT:12'));
-    assert.throws(() => parsing.parseSSCAppArgs(['intt:1']), errMsg('intt:1'));
-    assert.throws(() => parsing.parseSSCAppArgs(['int:abcd']), errMsg('int:abcd')); // type is correct but value is string
-    assert.throws(() => parsing.parseSSCAppArgs(['string:hello']), errMsg('string:hello'));
-    assert.throws(() => parsing.parseSSCAppArgs(['address:ABCD']), errMsg('address:ABCD'));
-    assert.throws(() => parsing.parseSSCAppArgs(['base64:===']), errMsg('base64:==='));
-    assert.throws(() => parsing.parseSSCAppArgs(['STR:abc']), errMsg('STR:abc'));
-    assert.throws(() => parsing.parseSSCAppArgs(['ADRR:XYZ']), errMsg('ADRR:XYZ'));
+    assert.throws(() => parsing.parseAppArgs(['INT:12']), errMsg('INT:12'));
+    assert.throws(() => parsing.parseAppArgs(['intt:1']), errMsg('intt:1'));
+    assert.throws(() => parsing.parseAppArgs(['int:abcd']), errMsg('int:abcd')); // type is correct but value is string
+    assert.throws(() => parsing.parseAppArgs(['string:hello']), errMsg('string:hello'));
+    assert.throws(() => parsing.parseAppArgs(['address:ABCD']), errMsg('address:ABCD'));
+    assert.throws(() => parsing.parseAppArgs(['base64:===']), errMsg('base64:==='));
+    assert.throws(() => parsing.parseAppArgs(['STR:abc']), errMsg('STR:abc'));
+    assert.throws(() => parsing.parseAppArgs(['ADRR:XYZ']), errMsg('ADRR:XYZ'));
 
     const errorMsg = 'Invalid uint64 18446744073709551625';
-    assert.throws(() => parsing.parseSSCAppArgs([`int:${MAX_UINT64 + 10n}`]), errorMsg);
+    assert.throws(() => parsing.parseAppArgs([`int:${MAX_UINT64 + 10n}`]), errorMsg);
   });
 });

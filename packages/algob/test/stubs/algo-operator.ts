@@ -64,7 +64,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     };
   }
 
-  async deploySSC (
+  async deployApp (
     approvalProgram: string,
     clearProgram: string,
     flags: rtypes.SSCDeploymentFlags,
@@ -81,7 +81,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     };
   }
 
-  async updateSSC (
+  async updateApp (
     sender: Account,
     payFlags: rtypes.TxParams,
     appID: number,
@@ -123,13 +123,13 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     return new Promise((resolve, reject) => { resolve(); });
   }
 
-  optInAccountToSSC (
+  optInAccountToApp (
     sender: rtypes.Account, index: number,
     payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags): Promise<void> {
     return new Promise((resolve, reject) => { resolve(); });
   }
 
-  optInLsigToSSC (
+  optInLsigToApp (
     appID: number, lsig: LogicSig,
     payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags): Promise<void> {
     return new Promise((resolve, reject) => { resolve(); });

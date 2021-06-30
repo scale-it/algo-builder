@@ -279,7 +279,7 @@ describe('Crowdfunding Tests', function () {
     // after claiming, creator of the crowdfunding application should be able to delete the application
     // NOTE: we don't need a txGroup here as escrow is already empty
     const deleteTx = {
-      type: types.TransactionType.DeleteSSC,
+      type: types.TransactionType.DeleteApp,
       sign: types.SignType.SecretKey,
       fromAccount: creator.account,
       appID: applicationId,

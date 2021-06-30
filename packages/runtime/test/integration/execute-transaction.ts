@@ -131,7 +131,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
         payFlags: { totalFee: 1000 }
       },
       {
-        type: TransactionType.DeploySSC,
+        type: TransactionType.deployApp,
         sign: SignType.SecretKey,
         fromAccount: john.account,
         approvalProgram: approvalProgram,
@@ -161,7 +161,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
         payFlags: { totalFee: 1000 }
       },
       {
-        type: TransactionType.DeploySSC,
+        type: TransactionType.deployApp,
         sign: SignType.SecretKey,
         fromAccount: john.account,
         approvalProgram: approvalProgram,

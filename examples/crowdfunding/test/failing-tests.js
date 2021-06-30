@@ -356,7 +356,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     updateAndOptIn();
     runtime.setRoundAndTimestamp(5, fundCloseDate.getTime() + 12);
     const deleteTx = {
-      type: types.TransactionType.DeleteSSC,
+      type: types.TransactionType.DeleteApp,
       sign: types.SignType.SecretKey,
       fromAccount: creator.account,
       appID: applicationId,

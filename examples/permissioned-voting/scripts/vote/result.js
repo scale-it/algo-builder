@@ -37,7 +37,7 @@ async function run (runtimeEnv, deployer) {
   }
 
   const txnParam = {
-    type: types.TransactionType.DeleteSSC,
+    type: types.TransactionType.DeleteApp,
     sign: types.SignType.SecretKey,
     fromAccount: votingAdminAccount,
     appID: appInfo.appID,
@@ -49,7 +49,7 @@ async function run (runtimeEnv, deployer) {
   await executeTransaction(deployer, txnParam);
 
   txnParam.fromAccount = alice;
-  txnParam.type = types.TransactionType.ClearSSC;
+  txnParam.type = types.TransactionType.ClearApp;
 
   // Clear voter's account
   console.log("Clearing Alice's Account");

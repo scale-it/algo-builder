@@ -1,4 +1,4 @@
-const { fundAccount, executeTransaction, optInAccountToSSC } = require('../common/common');
+const { fundAccount, executeTransaction, optInAccountToApp } = require('../common/common');
 const { whitelist } = require('./whitelist');
 const { types } = require('@algo-builder/runtime');
 const accounts = require('../common/accounts');
@@ -36,7 +36,7 @@ async function run (runtimeEnv, deployer) {
 
   console.log('* Opt-In to permissions(rules) smart contract *');
   const permissionSSCInfo = deployer.getSSC('permissions.py', 'clear_state_program.py');
-  await optInAccountToSSC(deployer, elon, permissionSSCInfo.appID, {}, {});
+  await optInAccountToApp(deployer, elon, permissionSSCInfo.appID, {}, {});
 
   // tx FAIL because john is not a permissions manager
   try {

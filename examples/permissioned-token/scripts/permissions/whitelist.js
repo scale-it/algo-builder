@@ -1,7 +1,7 @@
 const {
   executeTransaction
 } = require('@algo-builder/algob');
-const { fundAccount, optInAccountToSSC } = require('../common/common');
+const { fundAccount, optInAccountToApp } = require('../common/common');
 const { types } = require('@algo-builder/runtime');
 const accounts = require('../common/accounts');
 
@@ -53,7 +53,7 @@ async function run (runtimeEnv, deployer) {
   await fundAccount(deployer, [owner, elon, john]);
 
   console.log('* Opt-In and whitelist Elon *');
-  await optInAccountToSSC(deployer, elon, permissionSSCInfo.appID, {}, {});
+  await optInAccountToApp(deployer, elon, permissionSSCInfo.appID, {}, {});
   await whitelist(deployer, owner, elon.addr);
 
   // Example of invalid transaction: sender !== permissions manager
