@@ -11,7 +11,7 @@ on:
     - develop
 
 jobs:
-  tests:
+  run-examples:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
@@ -41,6 +41,7 @@ jobs:
       - name: Execute lint
         run: yarn lint
       - run: yarn build
+      - run: cd packages/algob && yarn link && cd .. && cd ..
 
       - name: Setup Network
         run: sudo apt-get update && sudo apt-get install -y gnupg2 curl software-properties-common
@@ -50,7 +51,8 @@ jobs:
       - run: cd infrastructure && make setup-private-net
 
       - name: Example ASA
-        run: cd examples/asa && yarn run algob deploy
+        run: yarn link @algo-builder/algob  
+      - run: cd examples/asa && yarn algob deploy
 
       - name: Example crowdfunding
         run: cd .. && cd crowdfunding && yarn run algob deploy
