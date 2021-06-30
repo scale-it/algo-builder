@@ -611,7 +611,7 @@ export interface Deployer {
    * throw error(except for opt-out transactions), else pass
    * @param execParams Transaction execution parameters
    */
-  assertCPNotDeleted: (execParams: rtypes.ExecParams | rtypes.ExecParams[]) => void
+  assertCPNotDeleted: (execParams: wtypes.ExecParams | wtypes.ExecParams[]) => void
 }
 
 // ************************

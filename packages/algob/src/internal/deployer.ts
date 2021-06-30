@@ -194,8 +194,8 @@ class DeployerBasicMode {
    */
   async optInAcountToASA (asa: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
     this.assertCPNotDeleted({
-      type: rtypes.TransactionType.OptInASA,
-      sign: rtypes.SignType.SecretKey,
+      type: wtypes.TransactionType.OptInASA,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: this._getAccount(accountName),
       assetID: asa,
       payFlags: {}
@@ -230,8 +230,8 @@ class DeployerBasicMode {
    */
   async optInLsigToASA (asa: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
     this.assertCPNotDeleted({
-      type: rtypes.TransactionType.OptInASA,
-      sign: rtypes.SignType.LogicSignature,
+      type: wtypes.TransactionType.OptInASA,
+      sign: wtypes.SignType.LogicSignature,
       fromAccountAddr: lsig.address(),
       lsig: lsig,
       assetID: asa,
@@ -264,8 +264,8 @@ class DeployerBasicMode {
     payFlags: rtypes.TxParams,
     flags: rtypes.SSCOptionalFlags): Promise<void> {
     this.assertCPNotDeleted({
-      type: rtypes.TransactionType.OptInSSC,
-      sign: rtypes.SignType.SecretKey,
+      type: wtypes.TransactionType.OptInSSC,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: sender,
       appID: appID,
       payFlags: {}
@@ -287,8 +287,8 @@ class DeployerBasicMode {
     payFlags: rtypes.TxParams,
     flags: rtypes.SSCOptionalFlags): Promise<void> {
     this.assertCPNotDeleted({
-      type: rtypes.TransactionType.OptInSSC,
-      sign: rtypes.SignType.LogicSignature,
+      type: wtypes.TransactionType.OptInSSC,
+      sign: wtypes.SignType.LogicSignature,
       fromAccountAddr: lsig.address(),
       lsig: lsig,
       appID: appID,
@@ -357,30 +357,30 @@ class DeployerBasicMode {
    * Group transactions into asa and app, check for cp deletion
    * @param txn Transaction execution parameter
    */
-  private _assertCpNotDeleted (txn: rtypes.ExecParams): void {
+  private _assertCpNotDeleted (txn: wtypes.ExecParams): void {
     switch (txn.type) {
-      case rtypes.TransactionType.ModifyAsset:
-      case rtypes.TransactionType.FreezeAsset:
-      case rtypes.TransactionType.RevokeAsset:
-      case rtypes.TransactionType.OptInASA:
-      case rtypes.TransactionType.DestroyAsset: {
+      case wtypes.TransactionType.ModifyAsset:
+      case wtypes.TransactionType.FreezeAsset:
+      case wtypes.TransactionType.RevokeAsset:
+      case wtypes.TransactionType.OptInASA:
+      case wtypes.TransactionType.DestroyAsset: {
         this.assertASAExist(txn.assetID);
         break;
       }
       // https://developer.algorand.org/articles/algos-asas/#opting-in-and-out-of-asas
       // https://developer.algorand.org/docs/reference/transactions/#asset-transfer-transaction
-      case rtypes.TransactionType.TransferAsset: {
+      case wtypes.TransactionType.TransferAsset: {
         // If transaction is not opt-out check for CP deletion
         if (txn.payFlags.closeRemainderTo === undefined) {
           this.assertASAExist(txn.assetID);
         }
         break;
       }
-      case rtypes.TransactionType.DeleteApp:
-      case rtypes.TransactionType.CloseApp:
-      case rtypes.TransactionType.OptInSSC:
-      case rtypes.TransactionType.updateApp:
-      case rtypes.TransactionType.CallNoOpSSC: {
+      case wtypes.TransactionType.DeleteApp:
+      case wtypes.TransactionType.CloseApp:
+      case wtypes.TransactionType.OptInSSC:
+      case wtypes.TransactionType.UpdateApp:
+      case wtypes.TransactionType.CallNoOpSSC: {
         this.assertAppExist(txn.appID);
         break;
       }
@@ -393,7 +393,7 @@ class DeployerBasicMode {
    * throw error(except for opt-out transactions), else pass
    * @param execParams Transaction execution parameters
    */
-  assertCPNotDeleted (execParams: rtypes.ExecParams | rtypes.ExecParams[]): void {
+  assertCPNotDeleted (execParams: wtypes.ExecParams | wtypes.ExecParams[]): void {
     if (Array.isArray(execParams)) {
       for (const txn of execParams) {
         this._assertCpNotDeleted(txn);
@@ -614,8 +614,8 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     flags: rtypes.SSCOptionalFlags
   ): Promise<rtypes.SSCInfo> {
     this.assertCPNotDeleted({
-      type: rtypes.TransactionType.updateApp,
-      sign: rtypes.SignType.SecretKey,
+      type: wtypes.TransactionType.UpdateApp,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: sender,
       newApprovalProgram: newApprovalProgram,
       newClearProgram: newClearProgram,
@@ -737,8 +737,8 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     flags: rtypes.SSCOptionalFlags
   ): Promise<rtypes.SSCInfo> {
     this.assertCPNotDeleted({
-      type: rtypes.TransactionType.updateApp,
-      sign: rtypes.SignType.SecretKey,
+      type: wtypes.TransactionType.UpdateApp,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: sender,
       newApprovalProgram: newApprovalProgram,
       newClearProgram: newClearProgram,

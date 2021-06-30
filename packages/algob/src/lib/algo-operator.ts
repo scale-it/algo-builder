@@ -312,9 +312,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const clear = await this.ensureCompiled(clearProgram, false, scTmplParams);
     const clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
 
-    const execParam: rtypes.ExecParams = {
-      type: rtypes.TransactionType.DeployApp,
-      sign: rtypes.SignType.SecretKey,
+    const execParam: wtypes.ExecParams = {
+      type: wtypes.TransactionType.DeployApp,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: flags.sender,
       approvalProgram: approvalProgram,
       clearProgram: clearProgram,
@@ -381,9 +381,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const clear = await this.ensureCompiled(newClearProgram, false);
     const clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
 
-    const execParam: rtypes.ExecParams = {
-      type: rtypes.TransactionType.updateApp,
-      sign: rtypes.SignType.SecretKey,
+    const execParam: wtypes.ExecParams = {
+      type: wtypes.TransactionType.UpdateApp,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: sender,
       appID: appID,
       newApprovalProgram: newApprovalProgram,
@@ -435,9 +435,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
     payFlags: rtypes.TxParams,
     flags: rtypes.SSCOptionalFlags): Promise<void> {
     const params = await tx.mkTxParams(this.algodClient, payFlags);
-    const execParam: rtypes.ExecParams = {
-      type: rtypes.TransactionType.OptInSSC,
-      sign: rtypes.SignType.SecretKey,
+    const execParam: wtypes.ExecParams = {
+      type: wtypes.TransactionType.OptInSSC,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: sender,
       appID: appID,
       payFlags: payFlags,
@@ -467,9 +467,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
   ): Promise<void> {
     console.log(`Contract ${lsig.address()} opt-in for SSC ID ${appID}`);
     const params = await tx.mkTxParams(this.algodClient, payFlags);
-    const execParam: rtypes.ExecParams = {
-      type: rtypes.TransactionType.OptInSSC,
-      sign: rtypes.SignType.LogicSignature,
+    const execParam: wtypes.ExecParams = {
+      type: wtypes.TransactionType.OptInSSC,
+      sign: wtypes.SignType.LogicSignature,
       fromAccountAddr: lsig.address(),
       lsig: lsig,
       appID: appID,
