@@ -62,16 +62,16 @@ jobs:
         run: cd .. && cd multisig && yarn run algob deploy
       
       - name: Example nft
-      run: cd .. && cd nft && yarn run algob deploy
+        run: cd .. && cd nft && yarn run algob deploy
 
       - name: Example permissioned-token
-      run: cd .. && cd permissioned-token && yarn run algob deploy
+        run: cd .. && cd permissioned-token && yarn run algob deploy
 
       - name: Example permissioned-token-freezing
-      run: cd .. && cd permissioned-token-freezing && yarn run algob deploy
+        run: cd .. && cd permissioned-token-freezing && yarn run algob deploy
 
       - name: Example permissioned-voting
-      run: cd .. && cd permissioned-voting && yarn run algob deploy
+        run: cd .. && cd permissioned-voting && yarn run algob deploy
 
       - name: Example ref-templates
-      run: cd .. && cd ref-templates && yarn run algob deploy
+        run: cd .. && cd ref-templates && yarn run algob deploy
