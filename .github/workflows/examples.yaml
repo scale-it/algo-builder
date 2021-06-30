@@ -52,7 +52,7 @@ jobs:
 
       - name: Example ASA
         run: yarn link @algo-builder/algob  && cd ~/.yarn/bin && chmod +x algob
-      - run: cd && cd algo-builder && ls
+      - run: ls
       - run: cd ~/algo-builder/algo-builder/examples/asa && yarn algob deploy
 
       - name: Example crowdfunding
