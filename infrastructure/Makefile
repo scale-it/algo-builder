@@ -3,7 +3,7 @@
 export ALGORAND_DATA=`pwd`/node_data/PrimaryNode
 export SANDBOX_PATH = ~/.algorand-sandbox
 export REMOTE_REPO = https://github.com/algorand/sandbox.git
-export REACH_PATH = ~/.algo-reach
+export REACH_PATH = ~/.algorand-reach
 
 setup-private-net: create-private-net start-private-net setup-master-account status-private-net
 recreate-private-net: stop-private-net delete-private-net setup-private-net
