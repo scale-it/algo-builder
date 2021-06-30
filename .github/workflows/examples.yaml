@@ -1,0 +1,77 @@
+name: Run examples on push
+
+on:
+  push:
+    branches:
+    - master
+    - develop
+  pull_request:
+    branches:
+    - master
+    - develop
+
+jobs:
+  tests:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v2-beta
+        with:
+          node-version: '14.15.4'
+      - name: Cache Node.js modules
+        uses: actions/cache@v2
+        with:
+          # npm cache files are stored in `~/.npm` on Linux/macOS
+          path: ~/.npm
+          key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-node-
+            ${{ runner.OS }}-
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+      - name: Install python dependencies
+        run: python -m pip install pipenv
+      - run: pipenv sync
+      - name: Install dependencies
+        run: pipenv run yarn install
+      - name: Execute lint
+        run: yarn lint
+      - run: yarn build
+
+      - name: Setup Network
+        run: sudo apt-get update && sudo apt-get install -y gnupg2 curl software-properties-common
+      - run: curl -O https://releases.algorand.com/key.pub && sudo apt-key add key.pub
+      - run: sudo add-apt-repository "deb [arch=amd64] https://releases.algorand.com/deb/ stable main"
+      - run: sudo apt-get update && sudo apt-get install -y algorand
+      - run: cd infrastructure && make setup-private-net
+
+      - name: Example ASA
+        run: cd examples/asa && yarn run algob deploy
+
+      - name: Example crowdfunding
+        run: cd .. && cd crowdfunding && yarn run algob deploy
+      
+      - name: Example htlc-pyteal-ts
+        run: cd .. && cd htlc-pyteal-ts && yarn run algob deploy
+      
+      - name: Example multisig
+        run: cd .. && cd multisig && yarn run algob deploy
+      
+      - name: Example nft
+      run: cd .. && cd nft && yarn run algob deploy
+
+      - name: Example permissioned-token
+      run: cd .. && cd permissioned-token && yarn run algob deploy
+
+      - name: Example permissioned-token-freezing
+      run: cd .. && cd permissioned-token-freezing && yarn run algob deploy
+
+      - name: Example permissioned-voting
+      run: cd .. && cd permissioned-voting && yarn run algob deploy
+
+      - name: Example ref-templates
+      run: cd .. && cd ref-templates && yarn run algob deploy
