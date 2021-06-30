@@ -2,6 +2,10 @@
 
 ## unreleased
 
+### Infrastructure
+* Added new make commands:
+    * `setup-reach` - sets up reach executable file in `~/.algo-reach` directory
+    * `remove-reach` - halts any dockerized devnets, kills & removes docker instances and containers, remove reach bash file from `/home/user/algo-reach`.
 
 ## v1.1.0 2021-06-23
 
