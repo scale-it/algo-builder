@@ -41,11 +41,11 @@ jobs:
       - run: pipenv sync
       - name: Install dependencies
         run: pipenv run yarn install
+            
+      - name: Setup Network
+        run: cd infrastructure && make sandbox-up && make sandbox-setup-master-account
       - name: Execute lint
         run: yarn lint
       - run: yarn build
       - name: Execute tests
         run: pipenv run yarn test
-      
-      - name: Setup Network
-        run: cd infrastructure && make sandbox-up && make sandbox-setup-master-account
