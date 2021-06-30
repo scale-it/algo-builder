@@ -1,4 +1,4 @@
-import { stringToBytes } from "@algo-builder/algob-web";
+import { parsing } from "@algo-builder/web";
 import * as base32 from "hi-base32";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
@@ -60,7 +60,7 @@ export function assertBase32 (str: string, line: number): void {
  * @param key : key in a stateful key-value pair
  */
 export function keyToBytes (key: Uint8Array | string): Uint8Array {
-  return typeof key === 'string' ? stringToBytes(key) : key;
+  return typeof key === 'string' ? parsing.stringToBytes(key) : key;
 }
 
 // parse Uint8Array to string

@@ -1,5 +1,5 @@
-import { encodeNote, mkTransaction, types as wtypes } from "@algo-builder/algob-web";
 import { types as rtypes } from "@algo-builder/runtime";
+import { encodeNote, mkTransaction, types as wtypes } from "@algo-builder/web";
 import algosdk, { LogicSig } from "algosdk";
 
 import { BuilderError } from "../errors/errors";

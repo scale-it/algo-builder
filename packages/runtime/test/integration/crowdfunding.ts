@@ -1,4 +1,4 @@
-import { addressToPk, uint64ToBigEndian } from "@algo-builder/algob-web";
+import { parsing } from "@algo-builder/web";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
@@ -54,11 +54,11 @@ describe("Crowdfunding basic tests", function () {
     fundCloseDate.setSeconds(fundCloseDate.getSeconds() + 120000);
 
     const appArgs = [
-      uint64ToBigEndian(beginDate.getTime()),
-      uint64ToBigEndian(endDate.getTime()),
-      uint64ToBigEndian(7000000),
-      addressToPk(john.address),
-      uint64ToBigEndian(fundCloseDate.getTime())
+      parsing.uint64ToBigEndian(beginDate.getTime()),
+      parsing.uint64ToBigEndian(endDate.getTime()),
+      parsing.uint64ToBigEndian(7000000),
+      parsing.addressToPk(john.address),
+      parsing.uint64ToBigEndian(fundCloseDate.getTime())
     ];
 
     const johnMinBalance = john.minBalance;
@@ -69,7 +69,7 @@ describe("Crowdfunding basic tests", function () {
 
     const getGlobal = (key: string):
     StackElem |undefined => runtime.getGlobalState(appID, key);
-    const johnPk = addressToPk(john.address);
+    const johnPk = parsing.addressToPk(john.address);
 
     // verify global state
     assert.isDefined(appID);

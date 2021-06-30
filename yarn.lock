@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@algo-builder/algob-web@file:packages/algob-web":
+"@algo-builder/web@file:packages/web":
   version "0.0.1"
   dependencies:
     "@types/lodash.clonedeep" "^4.5.6"

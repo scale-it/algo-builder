@@ -1,5 +1,5 @@
-import { types as wtypes } from "@algo-builder/algob-web";
 import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
+import { types as wtypes } from "@algo-builder/web";
 import type { LogicSig, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
 

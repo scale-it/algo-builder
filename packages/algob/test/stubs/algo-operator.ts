@@ -1,5 +1,5 @@
-import { types as wtypes } from "@algo-builder/algob-web";
 import { types as rtypes } from "@algo-builder/runtime";
+import { types as wtypes } from "@algo-builder/web";
 import type { LogicSig } from "algosdk";
 import { Account, Algodv2, AssetInfo, ConfirmedTxInfo } from "algosdk";
 

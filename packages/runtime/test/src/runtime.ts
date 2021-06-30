@@ -1,4 +1,4 @@
-import { types } from "@algo-builder/algob-web";
+import { types } from "@algo-builder/web";
 import { LogicSig } from "algosdk";
 import { assert } from "chai";
 import sinon from "sinon";

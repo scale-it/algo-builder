@@ -1,5 +1,5 @@
-import { types as wtypes } from "@algo-builder/algob-web";
 import { loadASAFile, types as rtypes } from "@algo-builder/runtime";
+import { types as wtypes } from "@algo-builder/web";
 
 import { mkAccountIndex } from "../lib/account";
 import { AlgoOperator } from "../lib/algo-operator";

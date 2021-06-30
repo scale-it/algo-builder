@@ -1,4 +1,4 @@
-import { stringToBytes } from "@algo-builder/algob-web";
+import { parsing } from "@algo-builder/web";
 
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { Op } from "../../../src/interpreter/opcode";
@@ -36,7 +36,7 @@ describe("Teal Opcodes basic assertions", function () {
     let lineNumber = 1;
     op.assertMinStackLen(stack, stackLen, lineNumber);
 
-    stack.push(stringToBytes("arg_0"));
+    stack.push(parsing.stringToBytes("arg_0"));
     stackLen = 2;
     lineNumber = 1;
     expectRuntimeError(

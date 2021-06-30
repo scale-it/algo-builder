@@ -1,9 +1,9 @@
+import { types as rtypes } from "@algo-builder/runtime";
 import {
   mkTransaction,
   parseSSCAppArgs,
   types
-} from "@algo-builder/algob-web";
-import { types as rtypes } from "@algo-builder/runtime";
+} from "@algo-builder/web";
 
 export {
   mkTransaction,

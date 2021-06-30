@@ -1,4 +1,4 @@
-import { getFromAddress, types } from "@algo-builder/algob-web";
+import { tx as webTx, types } from "@algo-builder/web";
 import { AssetDef, makeAssetTransferTxnWithSuggestedParams } from "algosdk";
 
 import { Runtime } from ".";
@@ -123,7 +123,7 @@ export class Ctx implements Context {
 
   // transfer ALGO as per transaction parameters
   transferAlgo (txnParam: AlgoTransferParam): void {
-    const fromAccount = this.getAccount(getFromAddress(txnParam));
+    const fromAccount = this.getAccount(webTx.getFromAddress(txnParam));
     const toAccount = this.getAccount(txnParam.toAccountAddr);
     txnParam.amountMicroAlgos = BigInt(txnParam.amountMicroAlgos);
 
@@ -274,7 +274,7 @@ export class Ctx implements Context {
 
   // transfer ASSET as per transaction parameters
   transferAsset (txnParam: AssetTransferParam): void {
-    const fromAccountAddr = getFromAddress(txnParam);
+    const fromAccountAddr = webTx.getFromAddress(txnParam);
     const fromAssetHolding = this.getAssetHolding(txnParam.assetID as number, fromAccountAddr);
     const toAssetHolding = this.getAssetHolding(txnParam.assetID as number, txnParam.toAccountAddr);
     txnParam.amount = BigInt(txnParam.amount);
@@ -451,7 +451,7 @@ export class Ctx implements Context {
   /* eslint-disable sonarjs/cognitive-complexity */
   processTransactions (txnParams: ExecParams[]): void {
     txnParams.forEach((txnParam, idx) => {
-      const fromAccountAddr = getFromAddress(txnParam);
+      const fromAccountAddr = webTx.getFromAddress(txnParam);
       this.deductFee(fromAccountAddr, idx);
 
       if (txnParam.sign === SignType.LogicSignature) {

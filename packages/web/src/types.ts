@@ -1,7 +1,7 @@
 import { Account as AccountSDK, LogicSig, LogicSigArgs } from 'algosdk';
 import * as z from 'zod';
 
-import type { ASADefSchema, ASADefsSchema } from "../../algob-web/src/types-input";
+import type { ASADefSchema, ASADefsSchema } from "./types-input";
 
 export type AccountAddress = string;
 

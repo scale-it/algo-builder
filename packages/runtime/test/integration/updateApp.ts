@@ -1,4 +1,4 @@
-import { stringToBytes } from "@algo-builder/algob-web";
+import { parsing } from "@algo-builder/web";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
@@ -57,8 +57,8 @@ describe("Algorand Smart Contracts - Update Application", function () {
 
     // check if program & state is updated after tx execution
     assert.deepEqual(app[approvalStr], newApprovalProgram);
-    assert.deepEqual(runtime.getGlobalState(appID, "global-key"), stringToBytes("global-val"));
-    assert.deepEqual(runtime.getLocalState(appID, creator.address, "local-key"), stringToBytes("local-val"));
+    assert.deepEqual(runtime.getGlobalState(appID, "global-key"), parsing.stringToBytes("global-val"));
+    assert.deepEqual(runtime.getLocalState(appID, creator.address, "local-key"), parsing.stringToBytes("local-val"));
 
     // now call the smart contract after updating approval program which checks for
     // global-key and local-key in state (which was set during the update from oldApprovalProgram)
@@ -73,8 +73,8 @@ describe("Algorand Smart Contracts - Update Application", function () {
     creator = runtime.getAccount(creator.address);
 
     // check state set by the 'new' approval program
-    assert.deepEqual(runtime.getGlobalState(appID, "new-global-key"), stringToBytes("new-global-val"));
-    assert.deepEqual(runtime.getLocalState(appID, creator.address, "new-local-key"), stringToBytes("new-local-val"));
+    assert.deepEqual(runtime.getGlobalState(appID, "new-global-key"), parsing.stringToBytes("new-global-val"));
+    assert.deepEqual(runtime.getLocalState(appID, creator.address, "new-local-key"), parsing.stringToBytes("new-local-val"));
   });
 
   it("should not update application if logic is rejected", function () {

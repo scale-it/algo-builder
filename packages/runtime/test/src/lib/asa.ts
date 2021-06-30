@@ -1,4 +1,4 @@
-import { types } from "@algo-builder/algob-web";
+import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";

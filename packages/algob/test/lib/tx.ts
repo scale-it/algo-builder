@@ -1,5 +1,5 @@
-import { encodeNote, types as wtypes } from "@algo-builder/algob-web";
 import { types } from "@algo-builder/runtime";
+import { encodeNote, types as wtypes } from "@algo-builder/web";
 import { ConfirmedTxInfo, decodeSignedTransaction, encodeAddress, Transaction } from "algosdk";
 import { assert } from "chai";
 import { isArray } from "lodash";

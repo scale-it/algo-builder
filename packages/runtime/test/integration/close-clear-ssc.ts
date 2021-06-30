@@ -1,4 +1,4 @@
-import { stringToBytes } from "@algo-builder/algob-web";
+import { parsing } from "@algo-builder/web";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
@@ -79,7 +79,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
 
     // since app is not deleted from global, global state should be updated by smart contract
     const globalVal = runtime.getGlobalState(appID, 'global-key');
-    assert.deepEqual(globalVal, stringToBytes('global-val'));
+    assert.deepEqual(globalVal, parsing.stringToBytes('global-val'));
 
     // minimum balance should decrease to initial balance after closing out
     assert.equal(john.minBalance, initialJohnMinBalance);

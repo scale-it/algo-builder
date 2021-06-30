@@ -1,4 +1,4 @@
-import { stringToBytes } from "@algo-builder/algob-web";
+import { parsing } from "@algo-builder/web";
 import type { AssetDefEnc, StateSchemaEnc, Transaction } from "algosdk";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
@@ -36,7 +36,7 @@ export function parseToStackElem (a: unknown, field: TxField): StackElem {
     return BigInt(a);
   }
   if (typeof a === "string") {
-    return stringToBytes(a);
+    return parsing.stringToBytes(a);
   }
 
   return TxFieldDefaults[field];
@@ -89,7 +89,7 @@ export function txnSpecbyField (txField: string, tx: Txn, gtxns: Txn[], tealVers
       break;
     }
     case 'TxID': {
-      return stringToBytes(tx.txID);
+      return parsing.stringToBytes(tx.txID);
     }
     case 'GroupIndex': {
       result = gtxns.indexOf(tx);

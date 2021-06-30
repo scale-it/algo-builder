@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
-import { encodeNote, getFromAddress, mkTransaction, parseSSCAppArgs, types } from "@algo-builder/algob-web";
+import { parsing, tx as webTx, types } from "@algo-builder/web";
 import algosdk, { AssetDef, decodeAddress } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
@@ -285,7 +285,7 @@ export class Runtime {
       const txns = [];
       for (const txnParam of txnParams) { // create encoded_obj for each txn in group
         const mockParams = mockSuggestedParams(txnParam.payFlags, this.round);
-        const tx = mkTransaction(txnParam, mockParams);
+        const tx = webTx.mkTransaction(txnParam, mockParams);
         // convert to encoded obj for compatibility
         const encodedTxnObj = tx.get_obj_for_encoding() as Txn;
         encodedTxnObj.txID = tx.txID();
@@ -295,7 +295,7 @@ export class Runtime {
     } else {
       // if not array, then create a single transaction
       const mockParams = mockSuggestedParams(txnParams.payFlags, this.round);
-      const tx = mkTransaction(txnParams, mockParams);
+      const tx = webTx.mkTransaction(txnParams, mockParams);
 
       const encodedTxnObj = tx.get_obj_for_encoding() as Txn;
       encodedTxnObj.txID = tx.txID();
@@ -309,7 +309,7 @@ export class Runtime {
     // this funtion is called only for validation of parameters passed
     algosdk.makeAssetCreateTxnWithSuggestedParams(
       flags.creator.addr,
-      encodeNote(flags.note, flags.noteb64),
+      webTx.encodeNote(flags.note, flags.noteb64),
       asaDef.total,
       asaDef.decimals,
       asaDef.defaultFrozen,
@@ -378,7 +378,7 @@ export class Runtime {
       flags.localBytes,
       flags.globalInts,
       flags.globalBytes,
-      parseSSCAppArgs(flags.appArgs),
+      parsing.parseSSCAppArgs(flags.appArgs),
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
@@ -425,7 +425,7 @@ export class Runtime {
       senderAddr,
       mockSuggestedParams(payFlags, this.round),
       appID,
-      parseSSCAppArgs(flags.appArgs),
+      parsing.parseSSCAppArgs(flags.appArgs),
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
@@ -469,7 +469,7 @@ export class Runtime {
       appID,
       new Uint8Array(32), // mock approval program
       new Uint8Array(32), // mock clear progam
-      parseSSCAppArgs(flags.appArgs),
+      parsing.parseSSCAppArgs(flags.appArgs),
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
@@ -551,7 +551,7 @@ export class Runtime {
       this.ctx.args = txnParam.args ?? txnParam.lsig.args;
 
       // signature validation
-      const fromAccountAddr = getFromAddress(txnParam);
+      const fromAccountAddr = webTx.getFromAddress(txnParam);
       const result = txnParam.lsig.verify(decodeAddress(fromAccountAddr).publicKey);
       if (!result) {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_VALIDATION_FAILED,

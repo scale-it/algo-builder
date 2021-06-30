@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
-import { stringToBytes } from "@algo-builder/algob-web";
+import { parsing } from "@algo-builder/web";
 import { AssetDef, decodeAddress, decodeUint64, encodeAddress, encodeUint64, isValidAddress, verifyBytes } from "algosdk";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
@@ -232,7 +232,7 @@ export class Bytecblock extends Op {
     this.line = line;
     const bytecblock: Uint8Array[] = [];
     for (const val of args) {
-      bytecblock.push(stringToBytes(val));
+      bytecblock.push(parsing.stringToBytes(val));
     }
 
     this.interpreter = interpreter;
@@ -2052,7 +2052,7 @@ export class GetAssetDef extends Op {
           if (isValidAddress(def)) {
             value = decodeAddress(def).publicKey;
           } else {
-            value = stringToBytes(def);
+            value = parsing.stringToBytes(def);
           }
           break;
       }

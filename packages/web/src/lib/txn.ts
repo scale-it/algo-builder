@@ -1,7 +1,7 @@
 import algosdk, { SuggestedParams, Transaction } from 'algosdk';
 
-import { AlgobWebError } from '../errors/algob-web-errors';
 import { ALGOB_WEB_ERRORS } from '../errors/errors-list';
+import { AlgobWebError } from '../errors/web-errors';
 import { AccountAddress, ExecParams, SignType, TransactionType } from "../types";
 import { parseSSCAppArgs } from "./parsing";
 

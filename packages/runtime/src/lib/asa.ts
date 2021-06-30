@@ -1,10 +1,10 @@
-import { types } from "@algo-builder/algob-web";
+import { types } from "@algo-builder/web";
 import type { AssetDef } from "algosdk";
 import { existsSync } from "fs";
 import path from "path";
 import * as z from 'zod';
 
-import { ASADefSchema } from "../../../algob-web/src/types-input";
+import { ASADefSchema } from "../../../web/src/types-input";
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { parseZodError } from "../errors/validation-errors";

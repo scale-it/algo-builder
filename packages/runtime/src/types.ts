@@ -1,4 +1,4 @@
-import { types } from "@algo-builder/algob-web";
+import { types } from "@algo-builder/web";
 import {
   Account as AccountSDK,
   AssetDef,
