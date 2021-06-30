@@ -51,29 +51,29 @@ jobs:
       - run: cd infrastructure && make setup-private-net
 
       - name: Example ASA
-        run: yarn link @algo-builder/algob  
-      - run: cd examples/asa && yarn algob deploy
+        run: yarn link @algo-builder/algob  && cd ~/.yarn/bin && chmod +x algob
+      - run: cd ~/algo-builder/examples/asa && yarn algob deploy
 
       - name: Example crowdfunding
-        run: cd .. && cd crowdfunding && yarn run algob deploy
+        run: cd ~/algo-builder/examples/crowdfunding && yarn run algob deploy
       
       - name: Example htlc-pyteal-ts
-        run: cd .. && cd htlc-pyteal-ts && yarn run algob deploy
+        run: cd ~/algo-builder/examples/htlc-pyteal-ts && yarn run algob deploy
       
       - name: Example multisig
-        run: cd .. && cd multisig && yarn run algob deploy
+        run: cd ~/algo-builder/examples/multisig && yarn run algob deploy
       
       - name: Example nft
-        run: cd .. && cd nft && yarn run algob deploy
+        run: cd ~/algo-builder/examples/nft && yarn run algob deploy
 
       - name: Example permissioned-token
-        run: cd .. && cd permissioned-token && yarn run algob deploy
+        run: cd ~/algo-builder/examples/permissioned-token && yarn run algob deploy
 
       - name: Example permissioned-token-freezing
-        run: cd .. && cd permissioned-token-freezing && yarn run algob deploy
+        run: cd ~/algo-builder/examples/permissioned-token-freezing && yarn run algob deploy
 
       - name: Example permissioned-voting
-        run: cd .. && cd permissioned-voting && yarn run algob deploy
+        run: cd ~/algo-builder/examples/permissioned-voting && yarn run algob deploy
 
       - name: Example ref-templates
-        run: cd .. && cd ref-templates && yarn run algob deploy
+        run: cd ~/algo-builder/examples/ref-templates && yarn run algob deploy
