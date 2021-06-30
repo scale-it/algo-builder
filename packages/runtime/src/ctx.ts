@@ -128,7 +128,7 @@ export class Ctx implements Context {
     txnParam.amountMicroAlgos = BigInt(txnParam.amountMicroAlgos);
 
     fromAccount.amount -= txnParam.amountMicroAlgos; // remove 'x' algo from sender
-    toAccount.amount += txnParam.amountMicroAlgos; // add 'x' algo to receiver
+    toAccount.amount += BigInt(txnParam.amountMicroAlgos); // add 'x' algo to receiver
     this.assertAccBalAboveMin(fromAccount.address);
 
     if (txnParam.payFlags.closeRemainderTo) {
@@ -292,7 +292,7 @@ export class Ctx implements Context {
       });
     }
     fromAssetHolding.amount -= txnParam.amount;
-    toAssetHolding.amount += txnParam.amount;
+    toAssetHolding.amount += BigInt(txnParam.amount);
 
     if (txnParam.payFlags.closeRemainderTo) {
       const closeToAddr = txnParam.payFlags.closeRemainderTo;
