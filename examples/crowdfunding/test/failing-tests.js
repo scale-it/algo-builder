@@ -1,8 +1,8 @@
-const { getProgram } = require('@algo-builder/algob');
+const { getProgram, convert } = require('@algo-builder/algob');
 const {
-  Runtime, AccountStore, types,
-  uint64ToBigEndian, stringToBytes, addressToPk
+  Runtime, AccountStore
 } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const { assert } = require('chai');
 
 const minBalance = 10e6; // 10 ALGO's
@@ -49,11 +49,11 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     runtime.setRoundAndTimestamp(5, beginDate.getTime() + 100);
 
     const creationArgs = [
-      uint64ToBigEndian(beginDate.getTime()),
-      uint64ToBigEndian(endDate.getTime()),
+      convert.uint64ToBigEndian(beginDate.getTime()),
+      convert.uint64ToBigEndian(endDate.getTime()),
       `int:${goal}`, // args similar to `goal --app-arg ..` are also supported
-      addressToPk(creator.address),
-      uint64ToBigEndian(fundCloseDate.getTime())
+      convert.addressToPk(creator.address),
+      convert.uint64ToBigEndian(fundCloseDate.getTime())
     ];
     const creationFlags = {
       sender: creator.account,
@@ -86,7 +86,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
       payFlags: {}
     });
 
-    appArgs = [stringToBytes('donate')];
+    appArgs = [convert.stringToBytes('donate')];
     donateTxGroup = [
       {
         type: types.TransactionType.CallNoOpSSC,
@@ -109,7 +109,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
 
   function updateAndOptIn () {
     // update application with correct escrow account address
-    appArgs = [addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
+    appArgs = [convert.addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
 
     runtime.updateApp(
       creator.address,
@@ -131,7 +131,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
 
   it('should fail donation if donor has insufficient balance', () => {
     updateAndOptIn();
-    appArgs = [stringToBytes('donate')];
+    appArgs = [convert.stringToBytes('donate')];
     const donationAmount = initialDonorBalance + 1000;
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     const txGroup = [
@@ -179,7 +179,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     runtime.executeTx(donateTxGroup);
     runtime.setRoundAndTimestamp(5, endDate.getTime() + 100); // end date is passed
 
-    appArgs = [stringToBytes('reclaim')];
+    appArgs = [convert.stringToBytes('reclaim')];
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     const txGroup = [
       {
@@ -209,7 +209,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     updateAndOptIn();
     runtime.executeTx(donateTxGroup);
 
-    appArgs = [stringToBytes('reclaim')];
+    appArgs = [convert.stringToBytes('reclaim')];
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     const txGroup = [
       {
@@ -240,7 +240,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     // set donation to greater than goal
     donateTxGroup[1].amountMicroAlgos = goal + 1000;
     runtime.executeTx(donateTxGroup);
-    appArgs = [stringToBytes('claim')];
+    appArgs = [convert.stringToBytes('claim')];
     const txGroup = [
       {
         type: types.TransactionType.CallNoOpSSC,
@@ -266,7 +266,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
 
   it('should fail if a transaction is missing in group transaction while donating', () => {
     updateAndOptIn();
-    appArgs = [stringToBytes('donate')];
+    appArgs = [convert.stringToBytes('donate')];
     const txGroup = [
       {
         type: types.TransactionType.CallNoOpSSC,
@@ -289,7 +289,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     const escrowProg = getProgram('wrongEscrow.teal', { APP_ID: applicationId });
     const wrongLsig = runtime.getLogicSig(escrowProg, []);
     runtime.setRoundAndTimestamp(5, endDate.getTime() + 11);
-    appArgs = [stringToBytes('claim')];
+    appArgs = [convert.stringToBytes('claim')];
     const txGroup = [
       {
         type: types.TransactionType.CallNoOpSSC,
@@ -329,7 +329,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     donateTxGroup[1].amountMicroAlgos = goal + 1000;
     runtime.executeTx(donateTxGroup);
     runtime.setRoundAndTimestamp(5, endDate.getTime() + 11);
-    appArgs = [stringToBytes('claim')];
+    appArgs = [convert.stringToBytes('claim')];
     const txGroup = [
       {
         type: types.TransactionType.CallNoOpSSC,
@@ -369,7 +369,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
   });
 
   it('should fail on trying to update application where sender is not creator', () => {
-    appArgs = [addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
+    appArgs = [convert.addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
 
     assert.throws(() =>
       runtime.updateApp(
@@ -389,7 +389,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     donateTxGroup[1].amountMicroAlgos = goal + 1000;
     runtime.executeTx(donateTxGroup);
     runtime.setRoundAndTimestamp(5, endDate.getTime() + 122);
-    appArgs = [stringToBytes('claim')];
+    appArgs = [convert.stringToBytes('claim')];
     const txGroup = [
       {
         type: types.TransactionType.CallNoOpSSC,
@@ -422,7 +422,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     donateTxGroup[1].amountMicroAlgos = goal + 1000;
     runtime.executeTx(donateTxGroup);
     runtime.setRoundAndTimestamp(5, endDate.getTime() + 122);
-    appArgs = [stringToBytes('claim')];
+    appArgs = [convert.stringToBytes('claim')];
     const txGroup = [
       {
         type: types.TransactionType.CallNoOpSSC,
