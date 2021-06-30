@@ -1,5 +1,5 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import { encodeNote, mkTransaction, types as wtypes } from "@algo-builder/web";
+import { tx as webTx, types as wtypes } from "@algo-builder/web";
 import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
 import { Deployer } from "../types";
@@ -57,10 +57,10 @@ export function makeAssetCreateTxn (
   let note;
   if (flags.noteb64 ?? flags.note) {
     // TxParams note
-    note = encodeNote(flags.note, flags.noteb64);
+    note = webTx.encodeNote(flags.note, flags.noteb64);
   } else if (asaDef.noteb64 ?? asaDef.note) {
     // ASA definition note
-    note = encodeNote(asaDef.note, asaDef.noteb64);
+    note = webTx.encodeNote(asaDef.note, asaDef.noteb64);
   }
 
   // https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js#L104
@@ -101,7 +101,7 @@ export function makeASAOptInTx (
     assetID: assetID,
     payFlags: payFlags
   };
-  return mkTransaction(execParam, params);
+  return webTx.mkTransaction(execParam, params);
 }
 
 /**
@@ -210,7 +210,7 @@ async function mkTx (
   }
 
   const suggestedParams = await getSuggestedParams(deployer.algodClient);
-  return mkTransaction(txn,
+  return webTx.mkTransaction(txn,
     await mkTxParams(deployer.algodClient, txn.payFlags, Object.assign({}, suggestedParams)));
 }
 

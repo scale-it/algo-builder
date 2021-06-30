@@ -1,5 +1,5 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import { encodeNote, mkTransaction, types as wtypes } from "@algo-builder/web";
+import { tx as webTx, types as wtypes } from "@algo-builder/web";
 import algosdk, { LogicSig } from "algosdk";
 
 import { BuilderError } from "../errors/errors";
@@ -272,7 +272,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     console.log(message);
 
     const closeToRemainder = undefined;
-    const note = encodeNote(payFlags.note, payFlags.noteb64);
+    const note = webTx.encodeNote(payFlags.note, payFlags.noteb64);
     const t = algosdk.makePaymentTxnWithSuggestedParams(flags.funder.addr, contractAddress,
       flags.fundingMicroAlgo, closeToRemainder,
       note,
@@ -333,7 +333,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       lease: flags.lease
     };
 
-    const txn = mkTransaction(execParam, params);
+    const txn = webTx.mkTransaction(execParam, params);
     const txId = txn.txID().toString();
     const signedTxn = txn.signTxn(flags.sender.sk);
 
@@ -399,7 +399,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       lease: flags.lease
     };
 
-    const txn = mkTransaction(execParam, params);
+    const txn = webTx.mkTransaction(execParam, params);
     const txId = txn.txID().toString();
     const signedTxn = txn.signTxn(sender.sk);
 
@@ -447,7 +447,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       foreignAssets: flags.foreignAssets
     };
 
-    const txn = mkTransaction(execParam, params);
+    const txn = webTx.mkTransaction(execParam, params);
     const signedTxn = txn.signTxn(sender.sk);
     await this.sendAndWait(signedTxn);
   }
@@ -479,7 +479,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       foreignApps: flags.foreignApps,
       foreignAssets: flags.foreignAssets
     };
-    const optInLsigToSSCTx = mkTransaction(execParam, params);
+    const optInLsigToSSCTx = webTx.mkTransaction(execParam, params);
 
     const rawLsigSignedTx = algosdk.signLogicSigTransactionObject(optInLsigToSSCTx, lsig).blob;
     await this.sendAndWait(rawLsigSignedTx);

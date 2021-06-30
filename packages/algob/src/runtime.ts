@@ -1,13 +1,11 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import {
-  mkTransaction,
-  parseSSCAppArgs,
+  tx as webTx,
   types
 } from "@algo-builder/web";
 
 export {
-  mkTransaction,
-  parseSSCAppArgs,
+  webTx,
   types,
   rtypes
 };

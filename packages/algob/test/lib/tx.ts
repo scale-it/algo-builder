@@ -1,5 +1,5 @@
 import { types } from "@algo-builder/runtime";
-import { encodeNote, types as wtypes } from "@algo-builder/web";
+import { tx as webTx, types as wtypes } from "@algo-builder/web";
 import { ConfirmedTxInfo, decodeSignedTransaction, encodeAddress, Transaction } from "algosdk";
 import { assert } from "chai";
 import { isArray } from "lodash";
@@ -24,17 +24,17 @@ describe("Note in TxParams", () => {
   const noteb64 = "asdisaddas";
 
   it("Both notes given", () => {
-    const result = encodeNote(note, noteb64);
+    const result = webTx.encodeNote(note, noteb64);
     assert.deepEqual(result, encoder.encode(noteb64), "noteb64 not encoded");
   });
 
   it("Only note given", () => {
-    const result = encodeNote(note, undefined);
+    const result = webTx.encodeNote(note, undefined);
     assert.deepEqual(result, encoder.encode(note), "note not encoded");
   });
 
   it("Only noteb64 given", () => {
-    const result = encodeNote(undefined, noteb64);
+    const result = webTx.encodeNote(undefined, noteb64);
     assert.deepEqual(result, encoder.encode(noteb64), "noteb64 not encoded");
   });
 });
