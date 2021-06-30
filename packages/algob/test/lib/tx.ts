@@ -52,7 +52,7 @@ describe("Opt-In to ASA", () => {
   useFixtureProject("config-project");
 
   let deployer: Deployer;
-  let execParams: types.OptInASAParam;
+  let execParams: wtypes.OptInASAParam;
   let algod: AlgoOperatorDryRunImpl;
   let expected: ConfirmedTxInfo;
   beforeEach(async () => {
@@ -63,8 +63,8 @@ describe("Opt-In to ASA", () => {
     deployer = new DeployerDeployMode(deployerCfg);
     await deployer.deployASA("silver", { creator: deployer.accounts[0] });
     execParams = {
-      type: types.TransactionType.OptInASA,
-      sign: types.SignType.SecretKey,
+      type: wtypes.TransactionType.OptInASA,
+      sign: wtypes.SignType.SecretKey,
       payFlags: {},
       fromAccount: bobAcc,
       assetID: 1
@@ -112,7 +112,7 @@ describe("Opt-In to ASA", () => {
 describe("ASA modify fields", () => {
   useFixtureProject("config-project");
   let deployer: Deployer;
-  let execParams: types.ModifyAssetParam;
+  let execParams: wtypes.ModifyAssetParam;
   let algod: AlgoOperatorDryRunImpl;
   let assetFields: wtypes.AssetModFields;
   beforeEach(async () => {
@@ -125,8 +125,8 @@ describe("ASA modify fields", () => {
       clawback: bobAcc.addr
     };
     execParams = {
-      type: types.TransactionType.ModifyAsset,
-      sign: types.SignType.SecretKey,
+      type: wtypes.TransactionType.ModifyAsset,
+      sign: wtypes.SignType.SecretKey,
       payFlags: {},
       fromAccount: bobAcc,
       assetID: 1,
@@ -188,9 +188,9 @@ describe("Delete ASA and SSC", () => {
   });
 
   it("Should delete ASA, and set delete boolean in ASAInfo", async () => {
-    const execParams: types.DestroyAssetParam = {
-      type: types.TransactionType.DestroyAsset,
-      sign: types.SignType.SecretKey,
+    const execParams: wtypes.DestroyAssetParam = {
+      type: wtypes.TransactionType.DestroyAsset,
+      sign: wtypes.SignType.SecretKey,
       payFlags: {},
       fromAccount: bobAcc,
       assetID: "silver"
@@ -202,9 +202,9 @@ describe("Delete ASA and SSC", () => {
   });
 
   it("Should delete ASA If asset index is used, instead of asset name", async () => {
-    const execParams: types.DestroyAssetParam = {
-      type: types.TransactionType.DestroyAsset,
-      sign: types.SignType.SecretKey,
+    const execParams: wtypes.DestroyAssetParam = {
+      type: wtypes.TransactionType.DestroyAsset,
+      sign: wtypes.SignType.SecretKey,
       payFlags: {},
       fromAccount: bobAcc,
       assetID: 1
@@ -216,9 +216,9 @@ describe("Delete ASA and SSC", () => {
   });
 
   it("Should not fail if ASA is not in checkpoints", async () => {
-    const execParams: types.DestroyAssetParam = {
-      type: types.TransactionType.DestroyAsset,
-      sign: types.SignType.SecretKey,
+    const execParams: wtypes.DestroyAssetParam = {
+      type: wtypes.TransactionType.DestroyAsset,
+      sign: wtypes.SignType.SecretKey,
       payFlags: {},
       fromAccount: bobAcc,
       assetID: 2
@@ -235,9 +235,9 @@ describe("Delete ASA and SSC", () => {
       globalInts: 1
     };
     const info = await deployer.deployApp("approval.teal", "clear.teal", flags, {});
-    const execParams: types.SSCCallsParam = {
-      type: types.TransactionType.DeleteApp,
-      sign: types.SignType.SecretKey,
+    const execParams: wtypes.SSCCallsParam = {
+      type: wtypes.TransactionType.DeleteApp,
+      sign: wtypes.SignType.SecretKey,
       payFlags: {},
       fromAccount: bobAcc,
       appID: info.appID
@@ -251,9 +251,9 @@ describe("Delete ASA and SSC", () => {
   });
 
   it("Should not fail if SSC is not in checkpoints", async () => {
-    const execParams: types.SSCCallsParam = {
-      type: types.TransactionType.DeleteApp,
-      sign: types.SignType.SecretKey,
+    const execParams: wtypes.SSCCallsParam = {
+      type: wtypes.TransactionType.DeleteApp,
+      sign: wtypes.SignType.SecretKey,
       payFlags: {},
       fromAccount: bobAcc,
       appID: 23
@@ -281,9 +281,9 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
     // deploy  and delete asset
     const asaInfo = await deployer.deployASA(assetName, { creator: deployer.accounts[0] });
     assetID = asaInfo.assetIndex;
-    const execParams: types.DestroyAssetParam = {
-      type: types.TransactionType.DestroyAsset,
-      sign: types.SignType.SecretKey,
+    const execParams: wtypes.DestroyAssetParam = {
+      type: wtypes.TransactionType.DestroyAsset,
+      sign: wtypes.SignType.SecretKey,
       payFlags: {},
       fromAccount: bobAcc,
       assetID: 1
@@ -300,9 +300,9 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
     };
     const info = await deployer.deployApp("approval.teal", "clear.teal", flags, {});
     appID = info.appID;
-    const execParam: types.SSCCallsParam = {
-      type: types.TransactionType.DeleteApp,
-      sign: types.SignType.SecretKey,
+    const execParam: wtypes.SSCCallsParam = {
+      type: wtypes.TransactionType.DeleteApp,
+      sign: wtypes.SignType.SecretKey,
       payFlags: {},
       fromAccount: bobAcc,
       appID: info.appID
@@ -362,9 +362,9 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
   });
 
   it("should fail if user tries to opt-in through execute tx", async () => {
-    const execParam: types.OptInASAParam = {
-      type: types.TransactionType.OptInASA,
-      sign: types.SignType.SecretKey,
+    const execParam: wtypes.OptInASAParam = {
+      type: wtypes.TransactionType.OptInASA,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       payFlags: {},
       assetID: assetID
@@ -376,9 +376,9 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
   });
 
   it("should fail if user tries to modify through execute tx", async () => {
-    const execParam: types.ModifyAssetParam = {
-      type: types.TransactionType.ModifyAsset,
-      sign: types.SignType.SecretKey,
+    const execParam: wtypes.ModifyAssetParam = {
+      type: wtypes.TransactionType.ModifyAsset,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       payFlags: {},
       assetID: assetID,
@@ -391,9 +391,9 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
   });
 
   it("should fail if user tries to freeze through execute tx", async () => {
-    const execParam: types.FreezeAssetParam = {
-      type: types.TransactionType.FreezeAsset,
-      sign: types.SignType.SecretKey,
+    const execParam: wtypes.FreezeAssetParam = {
+      type: wtypes.TransactionType.FreezeAsset,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       payFlags: {},
       assetID: assetID,
@@ -407,9 +407,9 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
   });
 
   it("should fail if user tries to revoke through execute tx", async () => {
-    const execParam: types.RevokeAssetParam = {
-      type: types.TransactionType.RevokeAsset,
-      sign: types.SignType.SecretKey,
+    const execParam: wtypes.RevokeAssetParam = {
+      type: wtypes.TransactionType.RevokeAsset,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       payFlags: {},
       assetID: assetID,
@@ -424,9 +424,9 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
   });
 
   it("should fail if user tries to destroy through execute tx", async () => {
-    const execParam: types.DestroyAssetParam = {
-      type: types.TransactionType.DestroyAsset,
-      sign: types.SignType.SecretKey,
+    const execParam: wtypes.DestroyAssetParam = {
+      type: wtypes.TransactionType.DestroyAsset,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       payFlags: {},
       assetID: assetID
@@ -438,9 +438,9 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
   });
 
   it("should fail if user tries to transfer asa through execute tx", async () => {
-    const execParam: types.AssetTransferParam = {
-      type: types.TransactionType.TransferAsset,
-      sign: types.SignType.SecretKey,
+    const execParam: wtypes.AssetTransferParam = {
+      type: wtypes.TransactionType.TransferAsset,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       payFlags: {},
       assetID: assetID,
@@ -454,9 +454,9 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
   });
 
   it("should pass if user tries to opt-out through execute tx", async () => {
-    const execParam: types.AssetTransferParam = {
-      type: types.TransactionType.TransferAsset,
-      sign: types.SignType.SecretKey,
+    const execParam: wtypes.AssetTransferParam = {
+      type: wtypes.TransactionType.TransferAsset,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       payFlags: { closeRemainderTo: bobAcc.addr },
       assetID: assetID,
@@ -467,9 +467,9 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
   });
 
   it("should throw error if user tries to delete deleted app", async () => {
-    const execParam: types.SSCCallsParam = {
-      type: types.TransactionType.DeleteApp,
-      sign: types.SignType.SecretKey,
+    const execParam: wtypes.SSCCallsParam = {
+      type: wtypes.TransactionType.DeleteApp,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       payFlags: {},
       appID: appID
@@ -481,9 +481,9 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
   });
 
   it("should throw error if user tries to update deleted app", async () => {
-    const execParam: types.updateAppParam = {
-      type: types.TransactionType.updateApp,
-      sign: types.SignType.SecretKey,
+    const execParam: wtypes.UpdateAppParam = {
+      type: wtypes.TransactionType.UpdateApp,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       payFlags: {},
       appID: appID,
@@ -497,9 +497,9 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
   });
 
   it("should throw error if user tries to call deleted app", async () => {
-    const execParam: types.SSCCallsParam = {
-      type: types.TransactionType.CallNoOpSSC,
-      sign: types.SignType.SecretKey,
+    const execParam: wtypes.SSCCallsParam = {
+      type: wtypes.TransactionType.CallNoOpSSC,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       payFlags: {},
       appID: appID
@@ -511,9 +511,9 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
   });
 
   it("should throw error if user tries to opt-in deleted app", async () => {
-    const execParam: types.OptInSSCParam = {
-      type: types.TransactionType.OptInSSC,
-      sign: types.SignType.SecretKey,
+    const execParam: wtypes.OptInSSCParam = {
+      type: wtypes.TransactionType.OptInSSC,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       payFlags: {},
       appID: appID
@@ -525,9 +525,9 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
   });
 
   it("should pass if user tries to opt-out deleted app", async () => {
-    const execParam: types.SSCCallsParam = {
-      type: types.TransactionType.CloseApp,
-      sign: types.SignType.SecretKey,
+    const execParam: wtypes.SSCCallsParam = {
+      type: wtypes.TransactionType.CloseApp,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       payFlags: {},
       appID: appID
@@ -537,9 +537,9 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
       ERRORS.GENERAL.APP_DELETED
     );
 
-    const execParams: types.SSCCallsParam = {
-      type: types.TransactionType.ClearApp,
-      sign: types.SignType.SecretKey,
+    const execParams: wtypes.SSCCallsParam = {
+      type: wtypes.TransactionType.ClearApp,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       payFlags: {},
       appID: appID
@@ -548,9 +548,9 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
   });
 
   it("should pass if user tries delete app that doesn't exist in checkpoint", async () => {
-    const execParam: types.DestroyAssetParam = {
-      type: types.TransactionType.DestroyAsset,
-      sign: types.SignType.SecretKey,
+    const execParam: wtypes.DestroyAssetParam = {
+      type: wtypes.TransactionType.DestroyAsset,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       payFlags: {},
       assetID: 123
@@ -560,17 +560,17 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
   });
 
   it("should pass if user tries delete (asset + app) that doesn't exist in checkpoint", async () => {
-    const txGroup: types.ExecParams[] = [
+    const txGroup: wtypes.ExecParams[] = [
       {
-        type: types.TransactionType.DestroyAsset,
-        sign: types.SignType.SecretKey,
+        type: wtypes.TransactionType.DestroyAsset,
+        sign: wtypes.SignType.SecretKey,
         fromAccount: bobAcc,
         payFlags: {},
         assetID: 123
       },
       {
-        type: types.TransactionType.DeleteApp,
-        sign: types.SignType.SecretKey,
+        type: wtypes.TransactionType.DeleteApp,
+        sign: wtypes.SignType.SecretKey,
         fromAccount: bobAcc,
         payFlags: {},
         appID: 12213
@@ -601,9 +601,9 @@ describe("Deploy, Delete transactions test in run mode", () => {
   });
 
   it("should deploy asa in run mode", async () => {
-    const execParams: types.ExecParams = {
-      type: types.TransactionType.DeployASA,
-      sign: types.SignType.SecretKey,
+    const execParams: wtypes.ExecParams = {
+      type: wtypes.TransactionType.DeployASA,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       asaName: 'silver',
       payFlags: {}
@@ -619,9 +619,9 @@ describe("Deploy, Delete transactions test in run mode", () => {
   });
 
   it("should deploy application in run mode", async () => {
-    const execParams: types.ExecParams = {
-      type: types.TransactionType.DeployApp,
-      sign: types.SignType.SecretKey,
+    const execParams: wtypes.ExecParams = {
+      type: wtypes.TransactionType.DeployApp,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       approvalProgram: "approval.teal",
       clearProgram: "clear.teal",
@@ -639,9 +639,9 @@ describe("Deploy, Delete transactions test in run mode", () => {
 
   it("should delete application in run mode", async () => {
     deployer = new DeployerDeployMode(deployerCfg);
-    let execParams: types.ExecParams = {
-      type: types.TransactionType.DeployApp,
-      sign: types.SignType.SecretKey,
+    let execParams: wtypes.ExecParams = {
+      type: wtypes.TransactionType.DeployApp,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       approvalProgram: "approval.teal",
       clearProgram: "clear.teal",
@@ -655,8 +655,8 @@ describe("Deploy, Delete transactions test in run mode", () => {
 
     deployer = new DeployerRunMode(deployerCfg);
     execParams = {
-      type: types.TransactionType.DeleteApp,
-      sign: types.SignType.SecretKey,
+      type: wtypes.TransactionType.DeleteApp,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       appID: appInfo["application-index"],
       payFlags: {}

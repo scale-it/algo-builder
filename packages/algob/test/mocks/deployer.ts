@@ -152,7 +152,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  assertCPNotDeleted (execParams: rtypes.ExecParams | rtypes.ExecParams[]): void {
+  assertCPNotDeleted (execParams: wtypes.ExecParams | wtypes.ExecParams[]): void {
     throw new Error("Not implemented");
   }
 
