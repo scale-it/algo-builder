@@ -31,9 +31,9 @@ export function getFromAddress (execParams: ExecParams): AccountAddress {
  *  + FreezeAssetParam used to freeze asset (only permitted by asa freeze account)
  *  + RevokeAssetParam used to revoke assets (by asset clawback)
  *  + DestroyAssetParam used to delete asset (by asset manager)
- *  + Deploy Params - deploy ASA, deploy SSC
- *  + OptIn Params - optInToASA, optInToSSC
- *  + SSCCallsParam (NoOp, Clear, Delete..)used for calling stateful smart contracts.
+ *  + Deploy Params - deploy ASA, deploy App
+ *  + OptIn Params - optInToASA, optInToApp
+ *  + AppCallsParam (NoOp, Clear, Delete..)used for calling stateful smart contracts.
  For more advanced use-cases, please use `algosdk.tx` directly.
  NOTE: parseAppArgs is used to handle case when user passes appArgs similar to goal
  * @param execParams ExecParams
@@ -228,7 +228,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.lease,
         execParams.payFlags.rekeyTo);
     }
-    case TransactionType.OptInSSC: {
+    case TransactionType.OptInApp: {
       return algosdk.makeApplicationOptInTxn(
         fromAccountAddr,
         suggestedParams,

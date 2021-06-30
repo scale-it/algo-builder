@@ -61,7 +61,7 @@ describe("Algorand Smart Contracts - Update Application", function () {
 
     // now call the smart contract after updating approval program which checks for
     // global-key and local-key in state (which was set during the update from oldApprovalProgram)
-    const noOpParams: types.SSCCallsParam = {
+    const noOpParams: types.AppCallsParam = {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: creator.account,

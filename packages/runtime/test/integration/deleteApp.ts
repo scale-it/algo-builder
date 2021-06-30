@@ -17,7 +17,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
   let runtime: Runtime;
   let approvalProgram: string;
   let clearProgram: string;
-  let deleteParams: types.SSCCallsParam;
+  let deleteParams: types.AppCallsParam;
   const flags = {
     sender: john.account,
     globalBytes: 2,
@@ -74,7 +74,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
         (APPLICATION_BASE_FEE + ((25000 + 3500) * 2 + (25000 + 25000) * 2)) // min balance should increase
     );
 
-    const deleteParams: types.SSCCallsParam = {
+    const deleteParams: types.AppCallsParam = {
       type: types.TransactionType.DeleteApp,
       sign: types.SignType.SecretKey,
       fromAccount: alice.account,

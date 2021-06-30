@@ -17,7 +17,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
   let runtime: Runtime;
   let approvalProgram: string;
   let clearProgram: string;
-  let closeOutParams: types.SSCCallsParam;
+  let closeOutParams: types.AppCallsParam;
   const flags = {
     sender: john.account,
     globalBytes: 2,
@@ -106,7 +106,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
       initialJohnMinBalance + (APPLICATION_BASE_FEE + ((25000 + 3500) * 3 + (25000 + 25000) * 3)) // optInToApp increase
     ); // verify minimum balance raised after optIn
 
-    const invalidParams: types.SSCCallsParam = {
+    const invalidParams: types.AppCallsParam = {
       type: types.TransactionType.CloseApp,
       sign: types.SignType.SecretKey,
       fromAccount: alice.account, // sending txn sender other than creator (john), so txn should be rejected
@@ -134,7 +134,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
     const rejectClearProgram = getProgram('rejectClear.teal');
     const appID = runtime.addApp(flags, {}, approvalProgram, rejectClearProgram);
     const initialJohnMinBalance = runtime.getAccount(john.address).minBalance;
-    const clearAppParams: types.SSCCallsParam = {
+    const clearAppParams: types.AppCallsParam = {
       type: types.TransactionType.ClearApp,
       sign: types.SignType.SecretKey,
       fromAccount: alice.account, // sending txn sender other than creator (john), so txn should be rejected

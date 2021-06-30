@@ -67,7 +67,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   async deployApp (
     approvalProgram: string,
     clearProgram: string,
-    flags: rtypes.SSCDeploymentFlags,
+    flags: rtypes.AppDeploymentFlags,
     payFlags: rtypes.TxParams,
     txWriter: txWriter,
     scInitParam?: unknown): Promise<rtypes.SSCInfo> {
@@ -87,7 +87,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
-    flags: rtypes.SSCOptionalFlags,
+    flags: rtypes.AppOptionalFlags,
     txWriter: txWriter
   ): Promise<rtypes.SSCInfo> {
     return {
@@ -125,13 +125,13 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 
   optInAccountToApp (
     sender: rtypes.Account, index: number,
-    payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags): Promise<void> {
+    payFlags: rtypes.TxParams, flags: rtypes.AppOptionalFlags): Promise<void> {
     return new Promise((resolve, reject) => { resolve(); });
   }
 
   optInLsigToApp (
     appID: number, lsig: LogicSig,
-    payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags): Promise<void> {
+    payFlags: rtypes.TxParams, flags: rtypes.AppOptionalFlags): Promise<void> {
     return new Promise((resolve, reject) => { resolve(); });
   }
 

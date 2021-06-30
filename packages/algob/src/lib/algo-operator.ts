@@ -38,7 +38,7 @@ export interface AlgoOperator {
   deployApp: (
     approvalProgram: string,
     clearProgram: string,
-    flags: rtypes.SSCDeploymentFlags,
+    flags: rtypes.AppDeploymentFlags,
     payFlags: rtypes.TxParams,
     txWriter: txWriter,
     scTmplParams?: SCParams) => Promise<rtypes.SSCInfo>
@@ -48,7 +48,7 @@ export interface AlgoOperator {
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
-    flags: rtypes.SSCOptionalFlags,
+    flags: rtypes.AppOptionalFlags,
     txWriter: txWriter
   ) => Promise<rtypes.SSCInfo>
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
@@ -65,10 +65,10 @@ export interface AlgoOperator {
   ) => Promise<void>
   optInAccountToApp: (
     sender: rtypes.Account, appID: number,
-    payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags) => Promise<void>
+    payFlags: rtypes.TxParams, flags: rtypes.AppOptionalFlags) => Promise<void>
   optInLsigToApp: (
     appID: number, lsig: LogicSig,
-    payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags) => Promise<void>
+    payFlags: rtypes.TxParams, flags: rtypes.AppOptionalFlags) => Promise<void>
   ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>
   sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<algosdk.ConfirmedTxInfo>
 }
@@ -293,7 +293,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
    * Function to deploy Stateful Smart Contract
    * @param approvalProgram name of file in which approval program is stored
    * @param clearProgram name of file in which clear program is stored
-   * @param flags         SSCDeploymentFlags
+   * @param flags         AppDeploymentFlags
    * @param payFlags      TxParams
    * @param txWriter
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
@@ -301,7 +301,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   async deployApp (
     approvalProgram: string,
     clearProgram: string,
-    flags: rtypes.SSCDeploymentFlags,
+    flags: rtypes.AppDeploymentFlags,
     payFlags: rtypes.TxParams,
     txWriter: txWriter,
     scTmplParams?: SCParams): Promise<rtypes.SSCInfo> {
@@ -371,7 +371,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
-    flags: rtypes.SSCOptionalFlags,
+    flags: rtypes.AppOptionalFlags,
     txWriter: txWriter
   ): Promise<rtypes.SSCInfo> {
     const params = await tx.mkTxParams(this.algodClient, payFlags);
@@ -433,10 +433,10 @@ export class AlgoOperatorImpl implements AlgoOperator {
     sender: rtypes.Account,
     appID: number,
     payFlags: rtypes.TxParams,
-    flags: rtypes.SSCOptionalFlags): Promise<void> {
+    flags: rtypes.AppOptionalFlags): Promise<void> {
     const params = await tx.mkTxParams(this.algodClient, payFlags);
     const execParam: wtypes.ExecParams = {
-      type: wtypes.TransactionType.OptInSSC,
+      type: wtypes.TransactionType.OptInApp,
       sign: wtypes.SignType.SecretKey,
       fromAccount: sender,
       appID: appID,
@@ -463,12 +463,12 @@ export class AlgoOperatorImpl implements AlgoOperator {
   async optInLsigToApp (
     appID: number, lsig: LogicSig,
     payFlags: rtypes.TxParams,
-    flags: rtypes.SSCOptionalFlags
+    flags: rtypes.AppOptionalFlags
   ): Promise<void> {
     console.log(`Contract ${lsig.address()} opt-in for SSC ID ${appID}`);
     const params = await tx.mkTxParams(this.algodClient, payFlags);
     const execParam: wtypes.ExecParams = {
-      type: wtypes.TransactionType.OptInSSC,
+      type: wtypes.TransactionType.OptInApp,
       sign: wtypes.SignType.LogicSignature,
       fromAccountAddr: lsig.address(),
       lsig: lsig,

@@ -262,9 +262,9 @@ class DeployerBasicMode {
     sender: rtypes.Account,
     appID: number,
     payFlags: rtypes.TxParams,
-    flags: rtypes.SSCOptionalFlags): Promise<void> {
+    flags: rtypes.AppOptionalFlags): Promise<void> {
     this.assertCPNotDeleted({
-      type: wtypes.TransactionType.OptInSSC,
+      type: wtypes.TransactionType.OptInApp,
       sign: wtypes.SignType.SecretKey,
       fromAccount: sender,
       appID: appID,
@@ -285,9 +285,9 @@ class DeployerBasicMode {
     appID: number,
     lsig: LogicSig,
     payFlags: rtypes.TxParams,
-    flags: rtypes.SSCOptionalFlags): Promise<void> {
+    flags: rtypes.AppOptionalFlags): Promise<void> {
     this.assertCPNotDeleted({
-      type: wtypes.TransactionType.OptInSSC,
+      type: wtypes.TransactionType.OptInApp,
       sign: wtypes.SignType.LogicSignature,
       fromAccountAddr: lsig.address(),
       lsig: lsig,
@@ -378,7 +378,7 @@ class DeployerBasicMode {
       }
       case wtypes.TransactionType.DeleteApp:
       case wtypes.TransactionType.CloseApp:
-      case wtypes.TransactionType.OptInSSC:
+      case wtypes.TransactionType.OptInApp:
       case wtypes.TransactionType.UpdateApp:
       case wtypes.TransactionType.CallNoOpSSC: {
         this.assertAppExist(txn.appID);
@@ -567,7 +567,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * Deploys Algorand Stateful Smart Contract
    * @param approvalProgram filename which has approval program
    * @param clearProgram filename which has clear program
-   * @param flags SSCDeploymentFlags
+   * @param flags AppDeploymentFlags
    * @param payFlags Transaction Params
    * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
@@ -575,7 +575,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   async deployApp (
     approvalProgram: string,
     clearProgram: string,
-    flags: rtypes.SSCDeploymentFlags,
+    flags: rtypes.AppDeploymentFlags,
     payFlags: rtypes.TxParams,
     scTmplParams?: SCParams): Promise<rtypes.SSCInfo> {
     const name = approvalProgram + "-" + clearProgram;
@@ -611,7 +611,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
-    flags: rtypes.SSCOptionalFlags
+    flags: rtypes.AppOptionalFlags
   ): Promise<rtypes.SSCInfo> {
     this.assertCPNotDeleted({
       type: wtypes.TransactionType.UpdateApp,
@@ -710,7 +710,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
   async deployApp (
     approvalProgram: string,
     clearProgram: string,
-    flags: rtypes.SSCDeploymentFlags,
+    flags: rtypes.AppDeploymentFlags,
     payFlags: rtypes.TxParams,
     scInitParam?: unknown): Promise<rtypes.SSCInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
@@ -734,7 +734,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
-    flags: rtypes.SSCOptionalFlags
+    flags: rtypes.AppOptionalFlags
   ): Promise<rtypes.SSCInfo> {
     this.assertCPNotDeleted({
       type: wtypes.TransactionType.UpdateApp,

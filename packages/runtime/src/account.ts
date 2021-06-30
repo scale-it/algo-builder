@@ -18,8 +18,8 @@ import { keyToBytes } from "./lib/parsing";
 import { assertValidSchema } from "./lib/stateful";
 import {
   AccountStoreI,
-  AppLocalStateM, AssetHoldingM, CreatedAppM, SSCAttributesM,
-  SSCDeploymentFlags, StackElem
+  AppDeploymentFlags, AppLocalStateM, AssetHoldingM, CreatedAppM, SSCAttributesM,
+  StackElem
 } from "./types";
 
 const StateMap = "key-value";
@@ -270,7 +270,7 @@ export class AccountStore implements AccountStoreI {
    * @param clearProgram application clear program
    * NOTE - approval and clear program must be the TEAL code as string
    */
-  addApp (appID: number, params: SSCDeploymentFlags,
+  addApp (appID: number, params: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string): CreatedAppM {
     if (this.createdApps.size === MAX_ALGORAND_ACCOUNT_APPS) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.MAX_LIMIT_APPS, {
@@ -373,7 +373,7 @@ class App {
   readonly attributes: SSCAttributesM;
 
   // NOTE - approval and clear program must be the TEAL code as string
-  constructor (appID: number, params: SSCDeploymentFlags,
+  constructor (appID: number, params: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string) {
     this.id = appID;
     this.attributes = {

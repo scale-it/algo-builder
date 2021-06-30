@@ -486,7 +486,7 @@ export interface Deployer {
    * Deploys stateful smart contract.
    * @approvalProgram  approval program filename (must be present in assets folder)
    * @clearProgram  clear program filename (must be present in assets folder)
-   * @flags  SSCDeploymentFlags
+   * @flags  AppDeploymentFlags
    * @payFlags  Transaction Parameters
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
@@ -494,7 +494,7 @@ export interface Deployer {
   deployApp: (
     approvalProgram: string,
     clearProgram: string,
-    flags: rtypes.SSCDeploymentFlags,
+    flags: rtypes.AppDeploymentFlags,
     payFlags: rtypes.TxParams,
     scTmplParams?: SCParams) => Promise<rtypes.SSCInfo>
 
@@ -513,7 +513,7 @@ export interface Deployer {
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
-    flags: rtypes.SSCOptionalFlags
+    flags: rtypes.AppOptionalFlags
   ) => Promise<rtypes.SSCInfo>
 
   /**
@@ -556,7 +556,7 @@ export interface Deployer {
     sender: rtypes.Account,
     appID: number,
     payFlags: rtypes.TxParams,
-    flags: rtypes.SSCOptionalFlags) => Promise<void>
+    flags: rtypes.AppOptionalFlags) => Promise<void>
 
   /**
    * Opt-In to stateful smart contract (SSC) for a contract account
@@ -570,7 +570,7 @@ export interface Deployer {
     appID: number,
     lsig: LogicSig,
     payFlags: rtypes.TxParams,
-    flags: rtypes.SSCOptionalFlags) => Promise<void>
+    flags: rtypes.AppOptionalFlags) => Promise<void>
 
   /**
    * Create an entry in a script log (stored in artifacts/scripts/<script_name>.log) file. */

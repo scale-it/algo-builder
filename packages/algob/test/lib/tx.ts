@@ -227,7 +227,7 @@ describe("Delete ASA and SSC", () => {
   });
 
   it("Should delete SSC, set delete boolean in latest SSCInfo", async () => {
-    const flags: types.SSCDeploymentFlags = {
+    const flags: types.AppDeploymentFlags = {
       sender: bobAcc,
       localBytes: 1,
       localInts: 1,
@@ -235,7 +235,7 @@ describe("Delete ASA and SSC", () => {
       globalInts: 1
     };
     const info = await deployer.deployApp("approval.teal", "clear.teal", flags, {});
-    const execParams: wtypes.SSCCallsParam = {
+    const execParams: wtypes.AppCallsParam = {
       type: wtypes.TransactionType.DeleteApp,
       sign: wtypes.SignType.SecretKey,
       payFlags: {},
@@ -251,7 +251,7 @@ describe("Delete ASA and SSC", () => {
   });
 
   it("Should not fail if SSC is not in checkpoints", async () => {
-    const execParams: wtypes.SSCCallsParam = {
+    const execParams: wtypes.AppCallsParam = {
       type: wtypes.TransactionType.DeleteApp,
       sign: wtypes.SignType.SecretKey,
       payFlags: {},
@@ -291,7 +291,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
     await executeTransaction(deployer, execParams);
 
     // deploy and delete app
-    const flags: types.SSCDeploymentFlags = {
+    const flags: types.AppDeploymentFlags = {
       sender: bobAcc,
       localBytes: 1,
       localInts: 1,
@@ -300,7 +300,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
     };
     const info = await deployer.deployApp("approval.teal", "clear.teal", flags, {});
     appID = info.appID;
-    const execParam: wtypes.SSCCallsParam = {
+    const execParam: wtypes.AppCallsParam = {
       type: wtypes.TransactionType.DeleteApp,
       sign: wtypes.SignType.SecretKey,
       payFlags: {},
@@ -467,7 +467,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
   });
 
   it("should throw error if user tries to delete deleted app", async () => {
-    const execParam: wtypes.SSCCallsParam = {
+    const execParam: wtypes.AppCallsParam = {
       type: wtypes.TransactionType.DeleteApp,
       sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
@@ -497,7 +497,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
   });
 
   it("should throw error if user tries to call deleted app", async () => {
-    const execParam: wtypes.SSCCallsParam = {
+    const execParam: wtypes.AppCallsParam = {
       type: wtypes.TransactionType.CallNoOpSSC,
       sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
@@ -511,8 +511,8 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
   });
 
   it("should throw error if user tries to opt-in deleted app", async () => {
-    const execParam: wtypes.OptInSSCParam = {
-      type: wtypes.TransactionType.OptInSSC,
+    const execParam: wtypes.OptInAppParam = {
+      type: wtypes.TransactionType.OptInApp,
       sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       payFlags: {},
@@ -525,7 +525,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
   });
 
   it("should pass if user tries to opt-out deleted app", async () => {
-    const execParam: wtypes.SSCCallsParam = {
+    const execParam: wtypes.AppCallsParam = {
       type: wtypes.TransactionType.CloseApp,
       sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
@@ -537,7 +537,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
       ERRORS.GENERAL.APP_DELETED
     );
 
-    const execParams: wtypes.SSCCallsParam = {
+    const execParams: wtypes.AppCallsParam = {
       type: wtypes.TransactionType.ClearApp,
       sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,

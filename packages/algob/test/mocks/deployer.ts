@@ -132,7 +132,7 @@ export class FakeDeployer implements Deployer {
   async deployApp (
     approvalProgram: string,
     clearProgram: string,
-    flags: rtypes.SSCDeploymentFlags,
+    flags: rtypes.AppDeploymentFlags,
     payFlags: rtypes.TxParams): Promise<rtypes.SSCInfo> {
     throw new Error("Not implemented");
   }
@@ -143,7 +143,7 @@ export class FakeDeployer implements Deployer {
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
-    flags: rtypes.SSCOptionalFlags
+    flags: rtypes.AppOptionalFlags
   ): Promise<rtypes.SSCInfo> {
     throw new Error("Not implemented");
   }
@@ -182,13 +182,13 @@ export class FakeDeployer implements Deployer {
 
   optInAccountToApp (
     sender: rtypes.Account, index: number, payFlags: rtypes.TxParams,
-    flags: rtypes.SSCOptionalFlags): Promise<void> {
+    flags: rtypes.AppOptionalFlags): Promise<void> {
     throw new Error("Not implemented");
   }
 
   optInLsigToApp (
     appID: number, lsig: LogicSig,
-    payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags): Promise<void> {
+    payFlags: rtypes.TxParams, flags: rtypes.AppOptionalFlags): Promise<void> {
     throw new Error("not implemented.");
   }
 }

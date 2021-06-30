@@ -13,9 +13,9 @@ import { convertToString } from "./lib/parsing";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import {
-  AccountAddress, AccountStoreI, ASADeploymentFlags, ASAInfo, AssetHoldingM, Context,
-  ExecutionMode, SSCAttributesM, SSCDeploymentFlags, SSCInfo, SSCOptionalFlags,
-  StackElem, State, Txn, TxParams
+  AccountAddress, AccountStoreI, AppDeploymentFlags, AppOptionalFlags,
+  ASADeploymentFlags, ASAInfo, AssetHoldingM, Context,
+  ExecutionMode, SSCAttributesM, SSCInfo, StackElem, State, Txn, TxParams
 } from "./types";
 
 export class Runtime {
@@ -367,7 +367,7 @@ export class Runtime {
   }
 
   // creates new application transaction object and update context
-  addCtxAppCreateTxn (flags: SSCDeploymentFlags, payFlags: TxParams): void {
+  addCtxAppCreateTxn (flags: AppDeploymentFlags, payFlags: TxParams): void {
     const txn = algosdk.makeApplicationCreateTxn(
       flags.sender.addr,
       mockSuggestedParams(payFlags, this.round),
@@ -403,7 +403,7 @@ export class Runtime {
    * NOTE - approval and clear program must be the TEAL code as string (not compiled code)
    */
   addApp (
-    flags: SSCDeploymentFlags, payFlags: TxParams,
+    flags: AppDeploymentFlags, payFlags: TxParams,
     approvalProgram: string, clearProgram: string,
     debugStack?: number
   ): number {
@@ -420,7 +420,7 @@ export class Runtime {
     senderAddr: string,
     appID: number,
     payFlags: TxParams,
-    flags: SSCOptionalFlags): void {
+    flags: AppOptionalFlags): void {
     const txn = algosdk.makeApplicationOptInTxn(
       senderAddr,
       mockSuggestedParams(payFlags, this.round),
@@ -449,7 +449,7 @@ export class Runtime {
    * each opcode execution (upto depth = debugStack)
    */
   optInToApp (accountAddr: string, appID: number,
-    flags: SSCOptionalFlags, payFlags: TxParams, debugStack?: number): void {
+    flags: AppOptionalFlags, payFlags: TxParams, debugStack?: number): void {
     this.addCtxOptInTx(accountAddr, appID, payFlags, flags);
     this.ctx.debugStack = debugStack;
     this.ctx.optInToApp(accountAddr, appID);
@@ -462,7 +462,7 @@ export class Runtime {
     senderAddr: string,
     appID: number,
     payFlags: TxParams,
-    flags: SSCOptionalFlags): void {
+    flags: AppOptionalFlags): void {
     const txn = algosdk.makeApplicationUpdateTxn(
       senderAddr,
       mockSuggestedParams(payFlags, this.round),
@@ -501,7 +501,7 @@ export class Runtime {
     approvalProgram: string,
     clearProgram: string,
     payFlags: TxParams,
-    flags: SSCOptionalFlags,
+    flags: AppOptionalFlags,
     debugStack?: number
   ): void {
     this.addCtxAppUpdateTx(senderAddr, appID, payFlags, flags);

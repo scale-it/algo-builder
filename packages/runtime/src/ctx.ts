@@ -7,10 +7,10 @@ import { RuntimeError } from "./errors/runtime-errors";
 import { mockSuggestedParams } from "./mock/tx";
 import {
   AccountAddress, AccountStoreI,
+  AppDeploymentFlags,
   ASADeploymentFlags, AssetHoldingM,
   Context, ExecutionMode,
-  SSCAttributesM, SSCDeploymentFlags,
-  State, Txn, TxParams
+  SSCAttributesM, State, Txn, TxParams
 } from "./types";
 
 const APPROVAL_PROGRAM = "approval-program";
@@ -203,7 +203,7 @@ export class Ctx implements Context {
    * - When creating or opting into an app, the minimum balance grows before the app code runs
    */
   addApp (
-    fromAccountAddr: AccountAddress, flags: SSCDeploymentFlags,
+    fromAccountAddr: AccountAddress, flags: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string
   ): number {
     const senderAcc = this.getAccount(fromAccountAddr);
@@ -569,7 +569,7 @@ export class Ctx implements Context {
         }
         case types.TransactionType.DeployApp: {
           const senderAcc = this.getAccount(fromAccountAddr);
-          const flags: SSCDeploymentFlags = {
+          const flags: AppDeploymentFlags = {
             sender: senderAcc.account,
             localInts: txnParam.localInts,
             localBytes: txnParam.localBytes,
@@ -585,7 +585,7 @@ export class Ctx implements Context {
           );
           break;
         }
-        case types.TransactionType.OptInSSC: {
+        case types.TransactionType.OptInApp: {
           this.tx = this.gtxs[idx]; // update current tx to txn being exectuted in group
 
           this.optInToApp(fromAccountAddr, txnParam.appID);

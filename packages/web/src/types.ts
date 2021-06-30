@@ -52,7 +52,7 @@ export interface TxParams {
 
 /**
  * Stateful Smart contract flags for specifying sender and schema */
-export interface SSCDeploymentFlags extends SSCOptionalFlags {
+export interface AppDeploymentFlags extends AppOptionalFlags {
   sender: AccountSDK
   localInts: number
   localBytes: number
@@ -62,7 +62,7 @@ export interface SSCDeploymentFlags extends SSCOptionalFlags {
 
 /**
  * Stateful smart contract transaction optional parameters (accounts, args..). */
-export interface SSCOptionalFlags {
+export interface AppOptionalFlags {
   /**
    * Transaction specific arguments accessed from
    * the application's approval-program and clear-state-program.
@@ -94,10 +94,10 @@ export interface SSCOptionalFlags {
 
 /**
  * Transaction execution parameters (on blockchain OR runtime) */
-export type ExecParams = AlgoTransferParam | AssetTransferParam | SSCCallsParam |
+export type ExecParams = AlgoTransferParam | AssetTransferParam | AppCallsParam |
 ModifyAssetParam | FreezeAssetParam | RevokeAssetParam |
 DestroyAssetParam | DeployASAParam | DeployAppParam |
-OptInSSCParam | OptInASAParam | UpdateAppParam;
+OptInAppParam | OptInASAParam | UpdateAppParam;
 
 export enum SignType {
   SecretKey,
@@ -118,7 +118,7 @@ export enum TransactionType {
   DeployASA,
   DeployApp,
   OptInASA,
-  OptInSSC,
+  OptInApp,
   UpdateApp
 }
 
@@ -151,7 +151,7 @@ export type DeployASAParam = BasicParams & {
   asaDef?: Partial<ASADef>
 };
 
-export type DeployAppParam = BasicParams & SSCOptionalFlags & {
+export type DeployAppParam = BasicParams & AppOptionalFlags & {
   type: TransactionType.DeployApp
   approvalProgram: string
   clearProgram: string
@@ -163,7 +163,7 @@ export type DeployAppParam = BasicParams & SSCOptionalFlags & {
   clearProg?: Uint8Array
 };
 
-export type UpdateAppParam = BasicParams & SSCOptionalFlags & {
+export type UpdateAppParam = BasicParams & AppOptionalFlags & {
   type: TransactionType.UpdateApp
   appID: number
   newApprovalProgram: string
@@ -172,8 +172,8 @@ export type UpdateAppParam = BasicParams & SSCOptionalFlags & {
   clearProg?: Uint8Array
 };
 
-export type OptInSSCParam = BasicParams & SSCOptionalFlags & {
-  type: TransactionType.OptInSSC
+export type OptInAppParam = BasicParams & AppOptionalFlags & {
+  type: TransactionType.OptInApp
   appID: number
 };
 
@@ -225,7 +225,7 @@ export type AssetTransferParam = BasicParams & {
   assetID: number | string
 };
 
-export type SSCCallsParam = BasicParams & SSCOptionalFlags & {
+export type AppCallsParam = BasicParams & AppOptionalFlags & {
   type: TransactionType.CallNoOpSSC | TransactionType.ClearApp |
   TransactionType.CloseApp | TransactionType.DeleteApp
   appID: number

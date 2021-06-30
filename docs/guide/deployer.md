@@ -90,7 +90,7 @@ Check our [examples/permissioned-voting](https://github.com/scale-it/algo-builde
 
 Smart contracts must be stored in `assets` folder.
 
-The main difference between deploying an ASA and SSC is that ASA takes `asset-name` and `ASADeploymentFlags` as input and SSC takes `smart-contract-names` and `SSCDeploymentFlags` as input.
+The main difference between deploying an ASA and SSC is that ASA takes `asset-name` and `ASADeploymentFlags` as input and SSC takes `smart-contract-names` and `AppDeploymentFlags` as input.
 
 You can learn more about the flags from [Deployer API](https://scale-it.github.io/algo-builder/api/algob/interfaces/types.deployer.html);
 You can learn more about Stateful Smart Contracts [here](https://developer.algorand.org/docs/features/asc1/stateful/).
@@ -107,7 +107,7 @@ For opting in to SSC, `deployer` supports the following methods:
   - Ex: To opt-in a single account, Params will look like this:
   ```js
     const execParam: ExecParams = {
-      type: TransactionType.OptInSSC,
+      type: TransactionType.OptInApp,
       sign: SignType.SecretKey,
       fromAccount: user.account,
       appID: appID,
@@ -117,7 +117,7 @@ For opting in to SSC, `deployer` supports the following methods:
   - Ex: To opt-in to a contract account
   ```js
     const execParam: ExecParams = {
-      type: TransactionType.OptInSSC,
+      type: TransactionType.OptInApp,
       sign: SignType.LogicSignature,
       fromAccountAddr: lsig.address(),
       appID: appID,

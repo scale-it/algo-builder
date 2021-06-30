@@ -123,7 +123,7 @@ export interface Context {
   addAsset: (name: string, fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => number
   optIntoASA: (assetIndex: number, address: AccountAddress, flags: TxParams) => void
   addApp: (
-    fromAccountAddr: string, flags: SSCDeploymentFlags,
+    fromAccountAddr: string, flags: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string
   ) => number
   optInToApp: (accountAddr: string, appID: number) => void
@@ -177,7 +177,7 @@ export interface AccountStoreI {
   balance: () => bigint
   getApp: (appID: number) => SSCAttributesM | undefined
   getAppFromLocal: (appID: number) => AppLocalStateM | undefined
-  addApp: (appID: number, params: SSCDeploymentFlags,
+  addApp: (appID: number, params: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string) => CreatedAppM
   getAssetDef: (assetId: number) => AssetDef | undefined
   getAssetHolding: (assetId: number) => AssetHoldingM | undefined
@@ -245,7 +245,7 @@ export interface TxParams {
 
 /**
  * Stateful Smart contract flags for specifying sender and schema */
-export interface SSCDeploymentFlags extends SSCOptionalFlags {
+export interface AppDeploymentFlags extends AppOptionalFlags {
   sender: AccountSDK
   localInts: number
   localBytes: number
@@ -255,7 +255,7 @@ export interface SSCDeploymentFlags extends SSCOptionalFlags {
 
 /**
  * Stateful smart contract transaction optional parameters (accounts, args..). */
-export interface SSCOptionalFlags {
+export interface AppOptionalFlags {
   /**
    * Transaction specific arguments accessed from
    * the application's approval-program and clear-state-program.

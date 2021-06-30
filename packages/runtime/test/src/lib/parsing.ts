@@ -81,7 +81,7 @@ describe("Parse string and integer, with bytes", () => {
   });
 });
 
-describe("Parse appArgs to SSC to bytes", () => {
+describe("Parse appArgs to App to bytes", () => {
   it("should return undefined if app Args are not defined", () => {
     const res = parsing.parseAppArgs(undefined);
     assert.isUndefined(res);
