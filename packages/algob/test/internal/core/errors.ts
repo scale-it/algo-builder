@@ -60,7 +60,7 @@ describe("BuilderError", () => {
 
     it("should have the right error message", () => {
       const error = new BuilderError(mockErrorDescriptor);
-      assert.equal(error.message, `ABLDR123: ${mockErrorDescriptor.message}`);
+      assert.equal(error.message, `ABLDR123: ${mockErrorDescriptor.message}`); // eslint-disable-line @typescript-eslint/restrict-template-expressions
     });
 
     it("should format the error message with the template params", () => {

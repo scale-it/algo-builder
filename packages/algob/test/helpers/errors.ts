@@ -61,7 +61,7 @@ export function expectBuilderError (
   }
   throw new AssertionError( // eslint-disable-line @typescript-eslint/no-throw-literal
     `BuilderError number ${errorDescriptor.number} expected, but no Error was thrown`
-  );
+  ); // eslint-disable-line @typescript-eslint/restrict-template-expressions
 }
 
 export async function expectBuilderErrorAsync (
@@ -74,7 +74,7 @@ export async function expectBuilderErrorAsync (
   // traces. This may change in the near-ish future.
   const error = new AssertionError(
     `BuilderError number ${errorDescriptor.number} expected, but no Error was thrown`
-  );
+  ); // eslint-disable-line @typescript-eslint/restrict-template-expressions
 
   const match = String(matchMessage);
   const notExactMatch = new AssertionError(

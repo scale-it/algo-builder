@@ -224,10 +224,10 @@ async function main (): Promise<void> {
     log(`Quitting algob after successfully running task ${taskName}`);
   } catch (error) {
     if (BuilderError.isBuilderError(error)) {
-      console.error(chalk.red(`Error ${error.message}`));
+      console.error(chalk.red(`Error ${error.message}`)); // eslint-disable-line @typescript-eslint/restrict-template-expressions
     } else if (BuilderPluginError.isBuilderPluginError(error)) {
       console.error(
-        chalk.red(`Error in plugin ${error.pluginName ?? ""}: ${error.message}`)
+        chalk.red(`Error in plugin ${error.pluginName ?? ""}: ${error.message}`) // eslint-disable-line @typescript-eslint/restrict-template-expressions
       );
     } else if (error instanceof Error) {
       console.error(chalk.red("An unexpected error occurred:"), error.message);
