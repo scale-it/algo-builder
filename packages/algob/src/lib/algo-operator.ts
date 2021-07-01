@@ -1,9 +1,7 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import { tx as webTx, types as wtypes } from "@algo-builder/web";
+import { BuilderError, ERRORS, tx as webTx, types as wtypes } from "@algo-builder/web";
 import algosdk, { LogicSig } from "algosdk";
 
-import { BuilderError } from "../errors/errors";
-import { ERRORS } from "../errors/errors-list";
 import { txWriter } from "../internal/tx-log-writer";
 import { createClient } from "../lib/driver";
 import { getLsig } from "../lib/lsig";

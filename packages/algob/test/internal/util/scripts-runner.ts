@@ -1,7 +1,7 @@
+import { ERRORS } from "@algo-builder/web";
 import { assert } from "chai";
 import fs from "fs";
 
-import { ERRORS } from "../../../src/errors/errors-list";
 import { DeployerRunMode } from "../../../src/internal/deployer";
 import { DeployerConfig } from "../../../src/internal/deployer_cfg";
 import {

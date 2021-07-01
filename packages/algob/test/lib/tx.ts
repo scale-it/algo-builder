@@ -1,5 +1,5 @@
 import { types } from "@algo-builder/runtime";
-import { tx as webTx, types as wtypes } from "@algo-builder/web";
+import { ERRORS, tx as webTx, types as wtypes } from "@algo-builder/web";
 import { ConfirmedTxInfo, decodeSignedTransaction, encodeAddress, Transaction } from "algosdk";
 import { assert } from "chai";
 import { isArray } from "lodash";
@@ -7,7 +7,6 @@ import sinon from 'sinon';
 import { TextEncoder } from "util";
 
 import { executeTransaction } from "../../src";
-import { ERRORS } from "../../src/errors/errors";
 import { DeployerDeployMode, DeployerRunMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
 import { Deployer } from "../../src/types";

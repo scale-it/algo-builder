@@ -1,10 +1,9 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import { types as wtypes } from "@algo-builder/web";
+import { ERRORS, types as wtypes } from "@algo-builder/web";
 import { generateAccount, LogicSig } from "algosdk";
 import { assert } from "chai";
 
 import { genAccounts } from "../../src/builtin-tasks/gen-accounts";
-import { ERRORS } from "../../src/errors/errors-list";
 import { DeployerDeployMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
 import { getDummyLsig } from "../../src/lib/lsig";

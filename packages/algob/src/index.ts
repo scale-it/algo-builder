@@ -1,6 +1,5 @@
-import { parsing as convert } from "@algo-builder/web";
+import { ERRORS, parsing as convert } from "@algo-builder/web";
 
-import * as ERRORS from "./errors/errors-list";
 import {
   createMsigAddress,
   loadAccountsFromEnv,

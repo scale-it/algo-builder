@@ -1,10 +1,9 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import { types as wtypes } from "@algo-builder/web";
+import { ERRORS, types as wtypes } from "@algo-builder/web";
 import type { LogicSig } from "algosdk";
 import { assert } from "chai";
 import * as fs from "fs";
 
-import { ERRORS } from "../../src/errors/errors-list";
 import {
   appendToCheckpoint,
   CheckpointImpl,

@@ -1,10 +1,8 @@
 import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
-import { types as wtypes } from "@algo-builder/web";
+import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
 import type { LogicSig, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
 
-import { BuilderError } from "../errors/errors";
-import { ERRORS } from "../errors/errors-list";
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
 import { getDummyLsig, getLsig } from "../lib/lsig";

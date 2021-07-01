@@ -1,7 +1,5 @@
+import { BuilderError, ErrorDescriptor } from "@algo-builder/web";
 import { assert, AssertionError } from "chai";
-
-import { BuilderError } from "../../src/errors/errors";
-import { ErrorDescriptor } from "../../src/errors/errors-list";
 
 export async function expectErrorAsync (
   f: () => Promise<any>,

@@ -1,13 +1,11 @@
-import { assert } from "chai";
-
 import {
-  BuilderError, BuilderPluginError
-} from "../../../src/errors/errors";
-import {
+  BuilderError, BuilderPluginError,
   ERROR_RANGES,
   ErrorDescriptor,
   ERRORS
-} from "../../../src/errors/errors-list";
+} from "@algo-builder/web";
+import { assert } from "chai";
+
 import { unsafeObjectKeys } from "../../../src/internal/util/unsafe";
 // import { expectBuilderError } from "../../helpers/errors";
 
@@ -249,8 +247,8 @@ describe("BuilderPluginError", () => {
 
         const error = new BuilderPluginError(message, parent);
 
-        // This is being called from mocha, so that would be used as plugin name
-        assert.equal(error.pluginName, "mocha");
+        // This is being called from @algo-builder/algob, so that would be used as plugin name
+        assert.equal(error.pluginName, "@algo-builder/algob");
       });
 
       it("Should work with instanceof", () => {

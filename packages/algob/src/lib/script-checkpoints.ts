@@ -1,14 +1,12 @@
 
 import { checkIfAssetDeletionTx, loadFromYamlFileSilent, lsTreeWalk, types as rtypes } from "@algo-builder/runtime";
-import { types as wtypes } from "@algo-builder/web";
+import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
 import { encodeAddress, Transaction } from "algosdk";
 import deepEqual from "deep-equal";
 import * as fs from "fs";
 import path from "path";
 import YAML from "yaml";
 
-import { BuilderError } from "../errors/errors";
-import { ERRORS } from "../errors/errors-list";
 import {
   AssetScriptMap,
   Checkpoint,

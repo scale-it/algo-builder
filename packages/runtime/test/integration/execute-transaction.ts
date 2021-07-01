@@ -94,7 +94,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
     ];
     const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
     assert.isUndefined(initialJohnAssets);
-    assert.throws(() => { runtime.executeTx(txGroup); }, "ALGOB_WEB_ERR400");
+    assert.throws(() => { runtime.executeTx(txGroup); }, "ABLDR17");
 
     // should not update algo balance
     syncAccounts();

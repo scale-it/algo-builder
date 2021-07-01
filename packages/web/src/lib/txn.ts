@@ -1,7 +1,7 @@
 import algosdk, { SuggestedParams, Transaction } from 'algosdk';
 
-import { ALGOB_WEB_ERRORS } from '../errors/errors-list';
-import { AlgobWebError } from '../errors/web-errors';
+import { BuilderError } from '../errors/errors';
+import { ERRORS } from '../errors/errors-list';
 import { AccountAddress, ExecParams, SignType, TransactionType } from "../types";
 import { parseAppArgs } from "./parsing";
 
@@ -184,8 +184,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
           suggestedParams
         );
       } else {
-        throw new AlgobWebError(
-          ALGOB_WEB_ERRORS.ASA.PARAM_PARSE_ERROR, {
+        throw new BuilderError(
+          ERRORS.GENERAL.PARAM_PARSE_ERROR, {
             reason: "ASA Definition not found",
             source: execParams.asaName
           });
@@ -254,7 +254,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
       );
     }
     default: {
-      throw new AlgobWebError(ALGOB_WEB_ERRORS.TRANSACTION.TRANSACTION_TYPE_ERROR,
+      throw new BuilderError(ERRORS.GENERAL.TRANSACTION_TYPE_ERROR,
         { transaction: transactionType });
     }
   }

@@ -1,7 +1,6 @@
+import { BuilderError, ERRORS } from "@algo-builder/web";
 import debug from "debug";
 
-import { BuilderError } from "../../errors/errors";
-import { ERRORS } from "../../errors/errors-list";
 import type {
   EnvironmentExtender,
   Network,
