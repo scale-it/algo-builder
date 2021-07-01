@@ -181,7 +181,7 @@ def approval_program(TOKEN_ID):
     # Verifies that DeleteApplication is used and blocks that call
     # Verifies that UpdateApplication is used and blocks that call (unsafe for production use).
     # Verifies that closeOut is used and approves the tx.
-    # Verifies that OptInApplication is used and jumps to handle_optin
+    # Verifies that OptInToApplication is used and jumps to handle_optin
     # Verifies that first argument is "set_permission" and jumps to set_permission_contract.
     # Verifies that first argument is "issue" and jumps to issue.
     # Verifies that first argument is "kill" and jumps to kill.

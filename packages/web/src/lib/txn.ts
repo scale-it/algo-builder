@@ -228,7 +228,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.lease,
         execParams.payFlags.rekeyTo);
     }
-    case TransactionType.OptInApp: {
+    case TransactionType.OptInToApp: {
       return algosdk.makeApplicationOptInTxn(
         fromAccountAddr,
         suggestedParams,

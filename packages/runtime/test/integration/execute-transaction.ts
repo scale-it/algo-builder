@@ -191,7 +191,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
     assert.isDefined(appInfo);
     const tx: types.ExecParams[] = [
       {
-        type: types.TransactionType.OptInApp,
+        type: types.TransactionType.OptInToApp,
         sign: types.SignType.SecretKey,
         fromAccount: alice.account,
         appID: appInfo?.appID as number,

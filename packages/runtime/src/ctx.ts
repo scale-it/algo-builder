@@ -585,7 +585,7 @@ export class Ctx implements Context {
           );
           break;
         }
-        case types.TransactionType.OptInApp: {
+        case types.TransactionType.OptInToApp: {
           this.tx = this.gtxs[idx]; // update current tx to txn being exectuted in group
 
           this.optInToApp(fromAccountAddr, txnParam.appID);

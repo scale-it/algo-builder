@@ -79,7 +79,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
   }
 ```
 
-### [Deploy SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#deployAppParam)
+### [Deploy SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#deployappparam)
 
 ```js
   {
@@ -97,11 +97,11 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
 ```
 - To learn about more parameters like (account, appArgs, ForeignApps, ForeignAssets etc).Please check [AppOptionalFlags](https://algobuilder.dev/api/algob/interfaces/runtime.types.AppOptionalFlags.html)
 
-### [Opt-In to SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#OptInAppparam)
+### [Opt-In to SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#optintoappparam)
 
 ```js
   {
-    type: TransactionType.OptInApp,
+    type: TransactionType.OptInToApp,
     sign: SignType.SecretKey,
     fromAccount: alice,
     appID: appID,
@@ -109,7 +109,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
   }
 ```
 
-### [Call SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#AppCallsParam)
+### [Call SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#appcallsparam)
 
 ```js
   {
@@ -121,7 +121,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
   }
 ```
 
-### [Update SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#updateAppparam)
+### [Update SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#updateappparam)
 
 ```js
   {
@@ -135,7 +135,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
   }
 ```
 
-### [Delete SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#AppCallsParam)
+### [Delete SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#appcallsparam)
 
 ```js
   {

@@ -511,8 +511,8 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
   });
 
   it("should throw error if user tries to opt-in deleted app", async () => {
-    const execParam: wtypes.OptInAppParam = {
-      type: wtypes.TransactionType.OptInApp,
+    const execParam: wtypes.OptInToAppParam = {
+      type: wtypes.TransactionType.OptInToApp,
       sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       payFlags: {},

@@ -436,7 +436,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     flags: rtypes.AppOptionalFlags): Promise<void> {
     const params = await tx.mkTxParams(this.algodClient, payFlags);
     const execParam: wtypes.ExecParams = {
-      type: wtypes.TransactionType.OptInApp,
+      type: wtypes.TransactionType.OptInToApp,
       sign: wtypes.SignType.SecretKey,
       fromAccount: sender,
       appID: appID,
@@ -468,7 +468,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     console.log(`Contract ${lsig.address()} opt-in for SSC ID ${appID}`);
     const params = await tx.mkTxParams(this.algodClient, payFlags);
     const execParam: wtypes.ExecParams = {
-      type: wtypes.TransactionType.OptInApp,
+      type: wtypes.TransactionType.OptInToApp,
       sign: wtypes.SignType.LogicSignature,
       fromAccountAddr: lsig.address(),
       lsig: lsig,

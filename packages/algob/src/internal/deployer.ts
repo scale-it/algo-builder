@@ -264,7 +264,7 @@ class DeployerBasicMode {
     payFlags: rtypes.TxParams,
     flags: rtypes.AppOptionalFlags): Promise<void> {
     this.assertCPNotDeleted({
-      type: wtypes.TransactionType.OptInApp,
+      type: wtypes.TransactionType.OptInToApp,
       sign: wtypes.SignType.SecretKey,
       fromAccount: sender,
       appID: appID,
@@ -287,7 +287,7 @@ class DeployerBasicMode {
     payFlags: rtypes.TxParams,
     flags: rtypes.AppOptionalFlags): Promise<void> {
     this.assertCPNotDeleted({
-      type: wtypes.TransactionType.OptInApp,
+      type: wtypes.TransactionType.OptInToApp,
       sign: wtypes.SignType.LogicSignature,
       fromAccountAddr: lsig.address(),
       lsig: lsig,
@@ -378,7 +378,7 @@ class DeployerBasicMode {
       }
       case wtypes.TransactionType.DeleteApp:
       case wtypes.TransactionType.CloseApp:
-      case wtypes.TransactionType.OptInApp:
+      case wtypes.TransactionType.OptInToApp:
       case wtypes.TransactionType.UpdateApp:
       case wtypes.TransactionType.CallNoOpSSC: {
         this.assertAppExist(txn.appID);

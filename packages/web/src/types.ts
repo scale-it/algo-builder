@@ -97,7 +97,7 @@ export interface AppOptionalFlags {
 export type ExecParams = AlgoTransferParam | AssetTransferParam | AppCallsParam |
 ModifyAssetParam | FreezeAssetParam | RevokeAssetParam |
 DestroyAssetParam | DeployASAParam | DeployAppParam |
-OptInAppParam | OptInASAParam | UpdateAppParam;
+OptInToAppParam | OptInASAParam | UpdateAppParam;
 
 export enum SignType {
   SecretKey,
@@ -118,7 +118,7 @@ export enum TransactionType {
   DeployASA,
   DeployApp,
   OptInASA,
-  OptInApp,
+  OptInToApp,
   UpdateApp
 }
 
@@ -172,8 +172,8 @@ export type UpdateAppParam = BasicParams & AppOptionalFlags & {
   clearProg?: Uint8Array
 };
 
-export type OptInAppParam = BasicParams & AppOptionalFlags & {
-  type: TransactionType.OptInApp
+export type OptInToAppParam = BasicParams & AppOptionalFlags & {
+  type: TransactionType.OptInToApp
   appID: number
 };
 

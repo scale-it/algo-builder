@@ -107,7 +107,7 @@ For opting in to SSC, `deployer` supports the following methods:
   - Ex: To opt-in a single account, Params will look like this:
   ```js
     const execParam: ExecParams = {
-      type: TransactionType.OptInApp,
+      type: TransactionType.OptInToApp,
       sign: SignType.SecretKey,
       fromAccount: user.account,
       appID: appID,
@@ -117,7 +117,7 @@ For opting in to SSC, `deployer` supports the following methods:
   - Ex: To opt-in to a contract account
   ```js
     const execParam: ExecParams = {
-      type: TransactionType.OptInApp,
+      type: TransactionType.OptInToApp,
       sign: SignType.LogicSignature,
       fromAccountAddr: lsig.address(),
       appID: appID,
