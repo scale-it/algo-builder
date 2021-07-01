@@ -2,6 +2,11 @@
 
 ## unreleased
 
+### Infrastructure
+* Added new make commands:
+    * `setup-reach` - sets up reach executable file in `~/.algorand-reach` directory
+    * `remove-reach` - halts any dockerized devnets, kills & removes docker instances and containers, remove reach bash file from `~/.algorand-reach`.
+
 ### Improvements
 + updated `algob test` command to run mocha in typescript project as well.
 
