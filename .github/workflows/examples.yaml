@@ -52,7 +52,7 @@ jobs:
         run: yarn link @algo-builder/algob  && chmod +x ~/.yarn/bin/algob
 
       - name: Example ASA 
-      - run: cd examples/asa && pipenv run yarn algob deploy
+        run: cd examples/asa && pipenv run yarn algob deploy
       - run: pipenv run yarn algob run scripts/transfer/gold-contract-sc.js
       - run: pipenv run yarn algob run scripts/transfer/gold-delegated-lsig.js
       - run: pipenv run yarn algob run scripts/transfer/gold-to-john.js
