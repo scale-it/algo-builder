@@ -61,35 +61,35 @@ jobs:
 
       - name: Example crowdfunding
         run: cd examples/crowdfunding && pipenv run yarn algob deploy
-      - run: pipenv run yarn algob run scripts/transfer/donate.js
+      - run: cd examples/crowdfunding && pipenv run yarn algob run scripts/transfer/donate.js
       
       - name: Example htlc-pyteal-ts
         run: cd examples/htlc-pyteal-ts && pipenv run yarn algob deploy
-      - run: pipenv run yarn algob run scripts/withdraw/htlc-withdraw.ts
+      - run: cd examples/htlc-pyteal-ts && pipenv run yarn algob run scripts/withdraw/htlc-withdraw.ts
       
       - name: Example multisig
         run: cd examples/multisig && pipenv run yarn algob deploy
       
       - name: Example nft
         run: cd examples/nft && pipenv run yarn algob deploy
-      - run: pipenv run yarn algob run scripts/transfer/create-transfer-nft.js
+      - run: cd examples/nft && pipenv run yarn algob run scripts/transfer/create-transfer-nft.js
 
       - name: Example permissioned-token
         run: cd examples/permissioned-token && pipenv run yarn algob deploy
 
       - name: Example permissioned-token-freezing
         run: cd examples/permissioned-token-freezing && pipenv run yarn algob deploy
-      - run: pipenv run yarn algob run scripts/transfer/set-clear-level.js
-      - run: pipenv run yarn algob run scripts/transfer/transfer-asset.js
+      - run: cd examples/permissioned-token-freezing && pipenv run yarn algob run scripts/transfer/set-clear-level.js
+      - run: cd examples/permissioned-token-freezing && pipenv run yarn algob run scripts/transfer/transfer-asset.js
 
       - name: Example permissioned-voting
         run: cd examples/permissioned-voting && pipenv run yarn algob deploy
-      - run: pipenv run yarn algob run scripts/vote/vote.js
-      - run: pipenv run yarn algob run scripts/vote/result.js
+      - run: cd examples/permissioned-voting && pipenv run yarn algob run scripts/vote/vote.js
+      - run: cd examples/permissioned-voting && pipenv run yarn algob run scripts/vote/result.js
 
       - name: Example ref-templates
         run: cd examples/ref-templates && pipenv run yarn algob deploy
 
       - name: Example stateful-counter
         run: cd examples/stateful-counter && pipenv run yarn algob deploy
-      - run: pipenv run yarn algob run scripts/interaction/call_application.js
+      - run: cd examples/stateful-counter && pipenv run yarn algob run scripts/interaction/call_application.js
