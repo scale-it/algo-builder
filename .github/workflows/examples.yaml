@@ -38,8 +38,6 @@ jobs:
       - run: pipenv sync
       - name: Install dependencies
         run: pipenv run yarn install
-      - name: Execute lint
-        run: yarn lint
       - run: yarn build
       - run: cd packages/algob && yarn link && cd .. && cd ..
 
@@ -50,33 +48,48 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y algorand
       - run: cd infrastructure && make setup-private-net
 
-      - name: Example ASA
+      - name: Setup algob
         run: yarn link @algo-builder/algob  && chmod +x ~/.yarn/bin/algob
+
+      - name: Example ASA 
       - run: cd examples/asa && pipenv run yarn algob deploy
+      - run: pipenv run yarn algob run scripts/transfer/gold-contract-sc.js
+      - run: pipenv run yarn algob run scripts/transfer/gold-delegated-lsig.js
+      - run: pipenv run yarn algob run scripts/transfer/gold-to-john.js
+      - run: pipenv run yarn algob run scripts/transfer/master-fund-john.js
+      - run: pipenv run yarn algob run scripts/transfer/tesla-to-john.js
 
       - name: Example crowdfunding
         run: cd examples/crowdfunding && pipenv run yarn algob deploy
+      - run: pipenv run yarn algob run scripts/transfer/donate.js
       
       - name: Example htlc-pyteal-ts
         run: cd examples/htlc-pyteal-ts && pipenv run yarn algob deploy
+      - run: pipenv run yarn algob run scripts/withdraw/htlc-withdraw.ts
       
       - name: Example multisig
         run: cd examples/multisig && pipenv run yarn algob deploy
       
       - name: Example nft
         run: cd examples/nft && pipenv run yarn algob deploy
+      - run: pipenv run yarn algob run scripts/transfer/create-transfer-nft.js
 
       - name: Example permissioned-token
         run: cd examples/permissioned-token && pipenv run yarn algob deploy
 
       - name: Example permissioned-token-freezing
         run: cd examples/permissioned-token-freezing && pipenv run yarn algob deploy
+      - run: pipenv run yarn algob run scripts/transfer/set-clear-level.js
+      - run: pipenv run yarn algob run scripts/transfer/transfer-asset.js
 
       - name: Example permissioned-voting
         run: cd examples/permissioned-voting && pipenv run yarn algob deploy
+      - run: pipenv run yarn algob run scripts/vote/vote.js
+      - run: pipenv run yarn algob run scripts/vote/result.js
 
       - name: Example ref-templates
         run: cd examples/ref-templates && pipenv run yarn algob deploy
 
       - name: Example stateful-counter
         run: cd examples/stateful-counter && pipenv run yarn algob deploy
+      - run: pipenv run yarn algob run scripts/interaction/call_application.js
