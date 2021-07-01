@@ -60,8 +60,8 @@ export function expectBuilderError (
     return;
   }
   throw new AssertionError( // eslint-disable-line @typescript-eslint/no-throw-literal
-    `BuilderError number ${errorDescriptor.number} expected, but no Error was thrown`
-  ); // eslint-disable-line @typescript-eslint/restrict-template-expressions
+    `BuilderError number ${errorDescriptor.number} expected, but no Error was thrown` // eslint-disable-line @typescript-eslint/restrict-template-expressions
+  );
 }
 
 export async function expectBuilderErrorAsync (
