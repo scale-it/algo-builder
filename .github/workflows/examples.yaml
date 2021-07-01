@@ -77,7 +77,7 @@ jobs:
         run: cd examples/multisig && pipenv run yarn algob deploy
       
       - name: Example nft
-        working-directory: ./examples/crowdfunding
+        working-directory: ./examples/nft
         run: |
           pipenv run yarn algob deploy
           pipenv run yarn algob run scripts/transfer/create-transfer-nft.js
