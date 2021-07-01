@@ -51,7 +51,7 @@ jobs:
       - run: cd infrastructure && make setup-private-net
 
       - name: Example ASA
-        run: yarn link @algo-builder/algob  && cd ~/.yarn/bin && chmod +x algob
+        run: yarn link @algo-builder/algob  && chmod +x ~/.yarn/bin/algob
       - run: cd examples/asa && pipenv run yarn algob deploy
 
       - name: Example crowdfunding
