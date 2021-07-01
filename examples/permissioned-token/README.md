@@ -125,6 +125,13 @@ Below we describe different use cases implemented by the smart contract suite. W
 5. [*updateReserveByRekeying(newReserveAddress)*](/examples/permissioned-token/scripts/admin/update-reserve.js) -
    Standard rekey transaction for oldReserve account to `newReserveAddress` - signed by old reserve account. This way you won't need to move all tokens from old reserve to new reserve.
 
+6. [*cease(address, amount)*](/examples/permissioned-token/scripts/admin/cease.js) -
+   If there is a crime evidence, we will need to be able to cease assets back to the issuer. This is similar to the `force-transfer` use-case, but in this case the assets being moved by asset manager are moved to asset reserve. Call to permissions smart contract is not required as well.
+   Group of 3 transactions is required:
+   - *tx1*: Call to controller smart contract with  `app-arg = str:force_transfer` and `foreign-asset = assetIndex`, signed by asset manager (asset sender).
+   - *tx2*: Asset clawback transaction from `fromAddress` to asset reserve, amount = `amount`. The clawback contract ensures right contract composition.
+   - *tx3*: ALGO payment transaction to clawback to cover tx2 fee (`tx3.amount >= tx2.fee`). Anyone can make a payment
+
 #### Permissions
 
 1. [*whitelist(permissionsManager, userAddress)*](/examples/permissioned-token/scripts/permissions/whitelist.js) -
@@ -137,6 +144,12 @@ Below we describe different use cases implemented by the smart contract suite. W
 
     * NoOp call to the smart contract with `app-arg = str:change_permissions_manager` and `app-accounts = [newManagerAddress]`. Must be signed by the *old* permissions manager.
 
+3. [*set permissions app id*](/examples/permissioned-token/scripts/permissions/set-permission-appid.js) -
+    Token manager can change the existing permissions application id via an application call to the controller smart contract (stored as `perm_app` global variable).
+
+    * NoOp call to the smart contract with `app-args = [str:set_permission, int:<app_id>]` and `foreign-assets = [assetIndex]`. Must be signed by the *asset manager*.
+
+    Note: In current version *controller.manager* is *asset manager*.
 
 ## References
 
