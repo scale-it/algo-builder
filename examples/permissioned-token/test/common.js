@@ -26,9 +26,9 @@ class Context {
    */
 
   /**
-   * - Setup token (ASA gold)
+   * - Setup token (tesla ASA)
    * - Setup Controller asc
-   * - Setup asset clawback + update asset clawback to escrow contract
+   * - Setup asset clawback + update asset clawback to lsig
    * - Setup permissions smart contract
    * NOTE: During setup - ASA.reserve, ASA.manager & current_permissions_manager is set as alice.address
    */
@@ -38,7 +38,7 @@ class Context {
     this.bob = bob;
     this.elon = elon;
     this.runtime = new Runtime([master, alice, bob, elon]);
-    this.deployASA('gold', { ...alice.account, name: 'alice' });
+    this.deployASA('tesla', { ...alice.account, name: 'alice' });
     this.deployController(alice, CONTROLLER_APPROVAL_PROGRAM, CLEAR_STATE_PROGRAM);
     this.deployClawback(alice, CLAWBACK_STATELESS_PROGRAM);
     this.deployPermissions(alice, PERMISSIONS_APPROVAL_PROGRAM, CLEAR_STATE_PROGRAM);
