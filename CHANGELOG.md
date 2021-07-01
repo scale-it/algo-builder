@@ -2,6 +2,24 @@
 
 ## unreleased
 
+### Improvements
++ New package `Web`, It can be used in Dapps to interact with ASAs and Apps
+    + Compatible with `algosigner`.
+    + Support `executeTransaction` function with web package
++ Move Error lists, BuilderError, mkTransaction to web package
++ Reuse mkTransaction, Errors in algob and runtime
+
+### API breaking
++ Rename `SSC` to `App` - This will affect deployment and all calls made to stateful smart contracts(SSC) or `App`
+    + OptInSSC -> OptInToASA
+    + DeleteSSC -> DeleteApp
+    + DeploySSC -> DeployApp
+    + SSCDeploymentFlags -> AppDeploymentFlags
+    + SSCOptionalFlags -> AppOptionalFlags
++ Import are changed to scoped imports
+    + instead of stringToBytes, yuo can import a `convert` scope, and then use `convert.stringToBytes`
++ Types imports for `ExecParams`, `TransactionTypes`, `SignType` moved to new package `@algo-builder/web`
+
 
 ## v1.1.0 2021-06-23
 

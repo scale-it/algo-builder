@@ -28,7 +28,7 @@ export class RuntimeError extends Error {
       messageArguments
     );
 
-    super(prefix + formattedMessage);
+    super(String(prefix) + String(formattedMessage));
     this.errorDescriptor = errorDescriptor;
     this.number = errorDescriptor.number;
 
