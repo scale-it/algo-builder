@@ -1,3 +1,4 @@
+import findupSync from "findup-sync";
 import Mocha from "mocha";
 
 import { task } from "../internal/core/config/config-env";
@@ -6,10 +7,17 @@ import type { Config } from "../types";
 import { loadFilenames } from "./deploy";
 import { TASK_TEST } from "./task-names";
 
+const TEST_DIR = 'test';
 async function runTests (config: Config): Promise<void> {
   try {
-    const testFiles = loadFilenames(testsDirectory, "test");
-    console.log("Test files:", testFiles);
+    const tsPath = findupSync("tsconfig.json", { cwd: process.cwd() });
+    if (tsPath) {
+      // run tests via ts-mocha, if project is in typescript
+      process.env.TS_NODE_PROJECT = tsPath;
+      require('ts-mocha');
+    }
+
+    const testFiles = loadFilenames(testsDirectory, TEST_DIR);
     const mocha = new Mocha(config.mocha);
     // Adding test files to mocha object
     testFiles.forEach((file) => mocha.addFile(file));
