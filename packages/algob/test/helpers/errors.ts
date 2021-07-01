@@ -73,8 +73,8 @@ export async function expectBuilderErrorAsync (
   // This makes things easier, at least as long as we don't have async stack
   // traces. This may change in the near-ish future.
   const error = new AssertionError(
-    `BuilderError number ${errorDescriptor.number} expected, but no Error was thrown`
-  ); // eslint-disable-line @typescript-eslint/restrict-template-expressions
+    `BuilderError number ${errorDescriptor.number} expected, but no Error was thrown` // eslint-disable-line @typescript-eslint/restrict-template-expressions
+  );
 
   const match = String(matchMessage);
   const notExactMatch = new AssertionError(
