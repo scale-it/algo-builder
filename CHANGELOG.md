@@ -11,6 +11,9 @@
 + updated `algob test` command to run mocha in typescript project as well.
 + Add workflow for examples
 
+### Examples
++ Added `cease` function and a script to change permissions app_id in [Permissioned Token](/examples/permissioned-token) example. Added tests using `@algorand-builder/runtime` as well.
+
 ## v1.1.0 2021-06-23
 
 Highlights:
