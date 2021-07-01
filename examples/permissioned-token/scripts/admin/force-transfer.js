@@ -98,7 +98,7 @@ async function run (runtimeEnv, deployer) {
   const permissionsManager = owner;
   const permissionsSSCInfo = deployer.getSSC('permissions.py', clearStateProgram);
 
-  /**
+  /*
    * Force transfer some tokens b/w 2 accounts
    */
   const bob = deployer.accountsByName.get('bob');

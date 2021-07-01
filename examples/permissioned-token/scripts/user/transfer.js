@@ -23,7 +23,7 @@ async function transfer (deployer, from, toAddr, amount) {
   const clawbackAddress = clawbackLsig.address();
 
   const txGroup = [
-    /**
+    /*
      * tx 0 - Call to controller stateful smart contract with application arg: 'transfer'
      * The contract ensures that there is a call to permissions smart contract in the txGroup,
      * so that rules are checked during token transfer.

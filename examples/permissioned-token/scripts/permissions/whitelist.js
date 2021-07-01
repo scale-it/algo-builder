@@ -20,7 +20,7 @@ const clearStateProgram = 'clear_state_program.py';
 async function whitelist (deployer, permissionsManager, address) {
   const permissionSSCInfo = deployer.getSSC('permissions.py', clearStateProgram);
 
-  /**
+  /*
    * - Only permissions manager can add accounts to whitelist. Which is set to alice(during deploy).
    * - If address is already whitelisted then tx is accepted (with no change)
    * - Pass the address you wish to whitelist in Txn.accounts[1] to add to whitelist
