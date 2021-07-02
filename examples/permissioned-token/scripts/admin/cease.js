@@ -1,12 +1,11 @@
 const {
   balanceOf, executeTransaction
 } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 
 const accounts = require('../common/accounts');
-const { getClawback, fundAccount, optInAccountToSSC } = require('../common/common');
+const { getClawback, fundAccount, optInAccountToApp } = require('../common/common');
 const { issue } = require('./issue');
-const { forceTransfer } = require('./force-transfer');
 const { whitelist } = require('../permissions/whitelist');
 
 const clearStateProgram = 'clear_state_program.py';
@@ -20,7 +19,7 @@ const clearStateProgram = 'clear_state_program.py';
 async function cease (deployer, address, amount) {
   const owner = deployer.accountsByName.get(accounts.owner);
   const tesla = deployer.asa.get('tesla');
-  const controllerSSCInfo = deployer.getSSC('controller.py', clearStateProgram);
+  const controllerAppInfo = deployer.getApp('controller.py', clearStateProgram);
 
   const clawbackLsig = await getClawback(deployer);
   const clawbackAddress = clawbackLsig.address();
@@ -36,7 +35,7 @@ async function cease (deployer, address, amount) {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: owner,
-      appID: controllerSSCInfo.appID,
+      appID: controllerAppInfo.appID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:force_transfer'],
       foreignAssets: [tesla.assetIndex] // to verify token reserve, manager
@@ -78,14 +77,14 @@ async function cease (deployer, address, amount) {
 async function run (runtimeEnv, deployer) {
   const owner = deployer.accountsByName.get(accounts.owner);
   const permissionsManager = owner;
-  const permissionsSSCInfo = deployer.getSSC('permissions.py', clearStateProgram);
+  const permissionsAppInfo = deployer.getApp('permissions.py', clearStateProgram);
 
   // fund owner and bob
   const bob = deployer.accountsByName.get('bob');
   await fundAccount(deployer, [owner, bob]);
 
   // whitelist bob
-  optInAccountToSSC(deployer, bob, permissionsSSCInfo.appID, {}, {});
+  optInAccountToApp(deployer, bob, permissionsAppInfo.appID, {}, {});
   await whitelist(deployer, permissionsManager, bob.addr);
 
   // let's issue few tokens to bob

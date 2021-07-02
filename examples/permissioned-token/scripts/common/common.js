@@ -41,7 +41,7 @@ exports.fundAccount = async function (deployer, account) {
 
 exports.optInAccountToApp = async function (deployer, account, appID, payflags, AppOptionalFlags) {
   try {
-    console.log(`* Opting In: ${account.name} to SSC with application index: ${appID} *`);
+    console.log(`* Opting In: ${account.name} to App with application index: ${appID} *`);
     await deployer.optInAccountToApp(account, appID, payflags, AppOptionalFlags);
   } catch (e) {
     console.error('optInAccountToApp failed', e.response?.error); // probably app already optedIn

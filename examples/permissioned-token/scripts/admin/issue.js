@@ -11,7 +11,7 @@ const accounts = require('../common/accounts');
 async function issue (deployer, address, amount) {
   const issuer = deployer.accountsByName.get(accounts.issuer);
   const tesla = deployer.asa.get('tesla');
-  const controllerSSCInfo = deployer.getApp('controller.py', 'clear_state_program.py');
+  const controllerAppInfo = deployer.getApp('controller.py', 'clear_state_program.py');
 
   const clawbackLsig = await getClawback(deployer);
   const clawbackAddress = clawbackLsig.address();
@@ -26,7 +26,7 @@ async function issue (deployer, address, amount) {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: issuer,
-      appID: controllerSSCInfo.appID,
+      appID: controllerAppInfo.appID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:issue'],
       foreignAssets: [tesla.assetIndex]

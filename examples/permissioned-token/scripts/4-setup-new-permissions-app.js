@@ -11,7 +11,7 @@ async function setupNewPermissionsApp (runtimeEnv, deployer) {
   await fundAccount(deployer, owner);
 
   // deploy new permissions smart contract
-  const newPermissionsAppInfo = await deployer.deploySSC(
+  const newPermissionsAppInfo = await deployer.deployApp(
     'permissions_new.py', // new permissions contract
     'clear_state_program.py',
     {

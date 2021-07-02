@@ -16,8 +16,8 @@ const clearStateProgram = 'clear_state_program.py';
  */
 async function transfer (deployer, from, toAddr, amount) {
   const tesla = deployer.asa.get('tesla');
-  const controllerSSCInfo = deployer.getApp('controller.py', clearStateProgram);
-  const permissionsSSCInfo = deployer.getApp('permissions.py', clearStateProgram);
+  const controllerAppInfo = deployer.getApp('controller.py', clearStateProgram);
+  const permissionsAppInfo = deployer.getApp('permissions.py', clearStateProgram);
 
   const clawbackLsig = await getClawback(deployer);
   const clawbackAddress = clawbackLsig.address();
@@ -32,7 +32,7 @@ async function transfer (deployer, from, toAddr, amount) {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: from,
-      appID: controllerSSCInfo.appID,
+      appID: controllerAppInfo.appID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:transfer']
     },
@@ -70,7 +70,7 @@ async function transfer (deployer, from, toAddr, amount) {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: from,
-      appID: permissionsSSCInfo.appID,
+      appID: permissionsAppInfo.appID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:transfer'],
       accounts: [from.addr, toAddr] //  AppAccounts (pass asset sender & receiver address)
@@ -90,7 +90,7 @@ async function transfer (deployer, from, toAddr, amount) {
 async function run (runtimeEnv, deployer) {
   // alice is set-up as the permissions manager during deploy
   const permissionsManager = deployer.accountsByName.get('alice');
-  const permissionsSSCInfo = deployer.getApp('permissions.py', clearStateProgram);
+  const permissionsAppInfo = deployer.getApp('permissions.py', clearStateProgram);
 
   /*
    * Transfer some tokens b/w 2 non-reserve accounts
@@ -111,9 +111,9 @@ async function run (runtimeEnv, deployer) {
   // opt-in accounts to permissions smart contract
   // comment this code if already opted-in
   await Promise.all([
-    optInAccountToApp(deployer, elon, permissionsSSCInfo.appID, {}, {}),
-    optInAccountToApp(deployer, bob, permissionsSSCInfo.appID, {}, {}),
-    optInAccountToApp(deployer, john, permissionsSSCInfo.appID, {}, {})
+    optInAccountToApp(deployer, elon, permissionsAppInfo.appID, {}, {}),
+    optInAccountToApp(deployer, bob, permissionsAppInfo.appID, {}, {}),
+    optInAccountToApp(deployer, john, permissionsAppInfo.appID, {}, {})
   ]);
 
   /*
