@@ -17,7 +17,7 @@
     + SSCDeploymentFlags -> AppDeploymentFlags
     + SSCOptionalFlags -> AppOptionalFlags
 + Import are changed to scoped imports
-    + instead of stringToBytes, yuo can import a `convert` scope, and then use `convert.stringToBytes`
+    + instead of stringToBytes, you can import a `convert` namespace, and then use `convert.stringToBytes`
 + Types imports for `ExecParams`, `TransactionTypes`, `SignType` moved to new package `@algo-builder/web`
 
 
