@@ -1,8 +1,8 @@
 const {
   executeTransaction
 } = require('@algo-builder/algob');
-const { fundAccount, optInAccountToSSC } = require('../common/common');
-const { types } = require('@algo-builder/runtime');
+const { fundAccount, optInAccountToApp } = require('../common/common');
+const { types } = require('@algo-builder/web');
 const accounts = require('../common/accounts');
 
 const clearStateProgram = 'clear_state_program.py';
@@ -18,7 +18,7 @@ const clearStateProgram = 'clear_state_program.py';
  * @param address account address to whitelist
  */
 async function whitelist (deployer, permissionsManager, address) {
-  const permissionSSCInfo = deployer.getSSC('permissions.py', clearStateProgram);
+  const permissionSSCInfo = deployer.getApp('permissions.py', clearStateProgram);
 
   /*
    * - Only permissions manager can add accounts to whitelist. Which is set to alice(during deploy).
@@ -47,13 +47,13 @@ async function run (runtimeEnv, deployer) {
   const owner = deployer.accountsByName.get(accounts.owner); // alice is set as the permissions_manager during deploy
   const elon = deployer.accountsByName.get('elon-musk');
   const john = deployer.accountsByName.get('john');
-  const permissionSSCInfo = deployer.getSSC('permissions.py', clearStateProgram);
+  const permissionSSCInfo = deployer.getApp('permissions.py', clearStateProgram);
 
   /** Fund all accounts with ALGO **/
   await fundAccount(deployer, [owner, elon, john]);
 
   console.log('* Opt-In and whitelist Elon *');
-  await optInAccountToSSC(deployer, elon, permissionSSCInfo.appID, {}, {});
+  await optInAccountToApp(deployer, elon, permissionSSCInfo.appID, {}, {});
   await whitelist(deployer, owner, elon.addr);
 
   // Example of invalid transaction: sender !== permissions manager

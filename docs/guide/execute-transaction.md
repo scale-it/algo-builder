@@ -4,7 +4,7 @@ layout: splash
 
 # Execute Transaction
 
-`executeTransaction` is a high level function which can be used to perform transactions on Algorand Network. It supports every transaction (atomic or single) which is possible in network. Ex: Deploy ASA/SSC, Opt-In, Transfers, Delete, Destroy etc. `executeTransaction` takes `ExecParams` or `ExecParams[]` as parameter.
+`executeTransaction` is a high level function which can be used to perform transactions on Algorand Network. It supports every transaction (atomic or single) which is possible in network. Ex: Deploy ASA/App, Opt-In, Transfers, Delete, Destroy etc. `executeTransaction` takes `ExecParams` or `ExecParams[]` as parameter.
 If you pass an array of `ExecParams`, it will be considered as `atomic transaction`.
 In below sections we will demonstrate how to pass these parameters.
 
@@ -79,11 +79,11 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
   }
 ```
 
-### [Deploy SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#deploysscparam)
+### [Deploy App](https://algobuilder.dev/api/algob/modules/runtime.types.html#deployappparam)
 
 ```js
   {
-    type: TransactionType.DeploySSC,
+    type: TransactionType.DeployApp,
     sign: SignType.SecretKey,
     fromAccount: john,
     approvalProgram: approvalProgram,
@@ -95,13 +95,13 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     payFlags: {}
   }
 ```
-- To learn about more parameters like (account, appArgs, ForeignApps, ForeignAssets etc).Please check [SSCOptionalFlags](https://algobuilder.dev/api/algob/interfaces/runtime.types.sscoptionalflags.html)
+- To learn about more parameters like (account, appArgs, ForeignApps, ForeignAssets etc).Please check [AppOptionalFlags](https://algobuilder.dev/api/algob/interfaces/runtime.types.AppOptionalFlags.html)
 
-### [Opt-In to SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#optinsscparam)
+### [Opt-In to App](https://algobuilder.dev/api/algob/modules/runtime.types.html#optintoappparam)
 
 ```js
   {
-    type: TransactionType.OptInSSC,
+    type: TransactionType.OptInToApp,
     sign: SignType.SecretKey,
     fromAccount: alice,
     appID: appID,
@@ -109,11 +109,11 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
   }
 ```
 
-### [Call SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#ssccallsparam)
+### [Call App](https://algobuilder.dev/api/algob/modules/runtime.types.html#appcallsparam)
 
 ```js
   {
-    type: TransactionType.CallNoOpSSC,
+    type: TransactionType.CallNoOpApp,
     sign: SignType.SecretKey,
     fromAccount: john,
     appId: 0,
@@ -121,11 +121,11 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
   }
 ```
 
-### [Update SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#updatesscparam)
+### [Update App](https://algobuilder.dev/api/algob/modules/runtime.types.html#updateappparam)
 
 ```js
   {
-    type: TransactionType.UpdateSSC,
+    type: TransactionType.updateApp,
     sign: SignType.SecretKey,
     fromAccount: john,
     appID: appId,
@@ -135,11 +135,11 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
   }
 ```
 
-### [Delete SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#ssccallsparam)
+### [Delete App](https://algobuilder.dev/api/algob/modules/runtime.types.html#appcallsparam)
 
 ```js
   {
-    type: TransactionType.DeleteSSC,
+    type: TransactionType.DeleteApp,
     sign: SignType.SecretKey,
     fromAccount: john,
     appId: 10,

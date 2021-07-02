@@ -1,5 +1,5 @@
 const { executeTransaction, convert } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -18,7 +18,7 @@ async function run (runtimeEnv, deployer) {
   const appArgs = [convert.stringToBytes('donate')];
 
   // Get AppInfo and AssetID from checkpoints.
-  const appInfo = deployer.getSSC('crowdFundApproval.teal', 'crowdFundClear.teal');
+  const appInfo = deployer.getApp('crowdFundApproval.teal', 'crowdFundClear.teal');
 
   // Get Escrow Account Address
   const escrowAccount = await deployer.loadLogic('crowdFundEscrow.py', { APP_ID: appInfo.appID });

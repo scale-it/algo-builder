@@ -1,9 +1,9 @@
 import { types as rtypes } from "@algo-builder/runtime";
+import { ERRORS, types as wtypes } from "@algo-builder/web";
 import type { LogicSig } from "algosdk";
 import { assert } from "chai";
 import * as fs from "fs";
 
-import { ERRORS } from "../../src/errors/errors-list";
 import {
   appendToCheckpoint,
   CheckpointImpl,
@@ -90,7 +90,7 @@ describe("Checkpoint", () => {
       txId: "",
       assetIndex: 0,
       confirmedRound: 0,
-      assetDef: {} as rtypes.ASADef,
+      assetDef: {} as wtypes.ASADef,
       deleted: false
     });
     netCheckpoint.ssc.set("SSC1", nestedMap);
@@ -110,7 +110,7 @@ describe("Checkpoint", () => {
           txId: "",
           assetIndex: 0,
           confirmedRound: 0,
-          assetDef: {} as rtypes.ASADef,
+          assetDef: {} as wtypes.ASADef,
           deleted: false
         }]]),
         ssc: new Map([["SSC1", nestedMap]]),
@@ -132,7 +132,7 @@ describe("Checkpoint", () => {
         txId: "",
         assetIndex: 0,
         confirmedRound: 0,
-        assetDef: {} as rtypes.ASADef,
+        assetDef: {} as wtypes.ASADef,
         deleted: false
       });
     checkpoints = appendToCheckpoint(checkpoints, "network12345", netCheckpoint2);
@@ -148,7 +148,7 @@ describe("Checkpoint", () => {
             txId: "",
             assetIndex: 0,
             confirmedRound: 0,
-            assetDef: {} as rtypes.ASADef,
+            assetDef: {} as wtypes.ASADef,
             deleted: false
           }],
           ["my asa 2", {
@@ -156,7 +156,7 @@ describe("Checkpoint", () => {
             txId: "",
             assetIndex: 0,
             confirmedRound: 0,
-            assetDef: {} as rtypes.ASADef,
+            assetDef: {} as wtypes.ASADef,
             deleted: false
           }]]),
         ssc: new Map([["SSC1", nestedMap]]),
@@ -180,7 +180,7 @@ describe("Checkpoint", () => {
       txId: "",
       assetIndex: 0,
       confirmedRound: 0,
-      assetDef: {} as rtypes.ASADef,
+      assetDef: {} as wtypes.ASADef,
       deleted: false
     });
     appendToCheckpoint(checkpoints, "network12345", cp1);
@@ -190,7 +190,7 @@ describe("Checkpoint", () => {
       txId: "",
       assetIndex: 0,
       confirmedRound: 0,
-      assetDef: {} as rtypes.ASADef,
+      assetDef: {} as wtypes.ASADef,
       deleted: false
     });
     expectBuilderError(
@@ -269,7 +269,7 @@ describe("Checkpoint", () => {
         txId: "",
         assetIndex: 0,
         confirmedRound: 0,
-        assetDef: {} as rtypes.ASADef,
+        assetDef: {} as wtypes.ASADef,
         deleted: false
       });
     cp.ssc.set(
@@ -283,7 +283,7 @@ describe("Checkpoint", () => {
         txId: "",
         assetIndex: 0,
         confirmedRound: 0,
-        assetDef: {} as rtypes.ASADef,
+        assetDef: {} as wtypes.ASADef,
         deleted: false
       }]]),
       ssc: new Map([["My SSC", nestedMap]]),
@@ -329,7 +329,7 @@ describe("CheckpointRepoImpl", () => {
           txId: "",
           assetIndex: 0,
           confirmedRound: 0,
-          assetDef: {} as rtypes.ASADef,
+          assetDef: {} as wtypes.ASADef,
           deleted: false
         }]]),
         ssc: new Map<string, typeof nestedMap>(),
@@ -345,7 +345,7 @@ describe("CheckpointRepoImpl", () => {
           txId: "",
           assetIndex: 0,
           confirmedRound: 0,
-          assetDef: {} as rtypes.ASADef,
+          assetDef: {} as wtypes.ASADef,
           deleted: false
         }]]),
         ssc: new Map<string, typeof nestedMap>(),
@@ -411,7 +411,7 @@ describe("CheckpointRepoImpl", () => {
         txId: "",
         assetIndex: 0,
         confirmedRound: 0,
-        assetDef: {} as rtypes.ASADef,
+        assetDef: {} as wtypes.ASADef,
         deleted: false
       })
       .putMetadata("network1", "metadata key", "metadata value");
@@ -425,7 +425,7 @@ describe("CheckpointRepoImpl", () => {
           txId: "",
           assetIndex: 0,
           confirmedRound: 0,
-          assetDef: {} as rtypes.ASADef,
+          assetDef: {} as wtypes.ASADef,
           deleted: false
         }]]),
         ssc: new Map<string, typeof nestedMap>(),
@@ -534,7 +534,7 @@ describe("CheckpointRepoImpl", () => {
           txId: "",
           assetIndex: 0,
           confirmedRound: 0,
-          assetDef: {} as rtypes.ASADef,
+          assetDef: {} as wtypes.ASADef,
           deleted: false
         }]]),
         ssc: new Map<string, typeof nestedMap>(),
@@ -556,7 +556,7 @@ describe("CheckpointRepoImpl", () => {
           txId: "",
           assetIndex: 0,
           confirmedRound: 0,
-          assetDef: {} as rtypes.ASADef,
+          assetDef: {} as wtypes.ASADef,
           deleted: false
         }]]),
         ssc: new Map<string, typeof nestedMap>(),
@@ -572,7 +572,7 @@ describe("CheckpointRepoImpl", () => {
           txId: "",
           assetIndex: 0,
           confirmedRound: 0,
-          assetDef: {} as rtypes.ASADef,
+          assetDef: {} as wtypes.ASADef,
           deleted: false
         }
         ]]),
@@ -589,7 +589,7 @@ describe("CheckpointRepoImpl", () => {
           txId: "",
           assetIndex: 0,
           confirmedRound: 0,
-          assetDef: {} as rtypes.ASADef,
+          assetDef: {} as wtypes.ASADef,
           deleted: false
         }]]),
         ssc: new Map<string, typeof nestedMap>(),
@@ -703,7 +703,7 @@ describe("CheckpointRepoImpl", () => {
         txId: "",
         assetIndex: 0,
         confirmedRound: 0,
-        assetDef: {} as rtypes.ASADef,
+        assetDef: {} as wtypes.ASADef,
         deleted: false
       })
       .registerSSC("network1", "SSC name", {
@@ -746,7 +746,7 @@ describe("CheckpointRepoImpl", () => {
             txId: "",
             assetIndex: 0,
             confirmedRound: 0,
-            assetDef: {} as rtypes.ASADef,
+            assetDef: {} as wtypes.ASADef,
             deleted: false
           }
           ]]),
@@ -778,7 +778,7 @@ describe("CheckpointRepoImpl", () => {
             txId: "",
             assetIndex: 0,
             confirmedRound: 0,
-            assetDef: {} as rtypes.ASADef,
+            assetDef: {} as wtypes.ASADef,
             deleted: false
           }]]),
           ssc: new Map([["SSC name", nestedMap]]),
@@ -803,7 +803,7 @@ describe("CheckpointRepoImpl", () => {
             txId: "",
             assetIndex: 0,
             confirmedRound: 0,
-            assetDef: {} as rtypes.ASADef,
+            assetDef: {} as wtypes.ASADef,
             deleted: false
           }]]),
           ssc: new Map([["SSC name", nestedMap]]),
@@ -835,7 +835,7 @@ describe("CheckpointRepoImpl", () => {
       txId: "",
       assetIndex: 0,
       confirmedRound: 0,
-      assetDef: {} as rtypes.ASADef,
+      assetDef: {} as wtypes.ASADef,
       deleted: false
     })
       .registerSSC("network1", "SSC name", {

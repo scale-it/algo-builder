@@ -1,7 +1,7 @@
 const {
   balanceOf
 } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const { getClawback, executeTransaction, fundAccount } = require('../common/common');
 const accounts = require('../common/accounts');
 
@@ -31,7 +31,7 @@ async function updateReserveByAssetConfig (deployer, address) {
   // fetch old asset reserve from network by assetId
   const tesla = deployer.asa.get('tesla');
   const asaReserveAddr = (await deployer.getAssetByID(tesla.assetIndex)).params.reserve;
-  const controllerSSCInfo = deployer.getSSC('controller.py', 'clear_state_program.py');
+  const controllerSSCInfo = deployer.getApp('controller.py', 'clear_state_program.py');
 
   const clawbackLsig = await getClawback(deployer);
   const clawbackAddress = clawbackLsig.address();

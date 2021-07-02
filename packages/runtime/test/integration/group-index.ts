@@ -1,6 +1,7 @@
-import { RUNTIME_ERRORS } from '../../build/errors/errors-list';
+import { types } from "@algo-builder/web";
+
+import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from '../../src/index';
-import { ExecParams, SignType, TransactionType } from '../../src/types';
 import { getProgram } from "../helpers/files";
 import { useFixture } from '../helpers/integration';
 import { expectRuntimeError } from '../helpers/runtime-errors';
@@ -47,17 +48,17 @@ describe('Current Transaction Tests', function () {
   it('Group Index Check', () => {
     setupApps();
 
-    const txGroup: ExecParams[] = [
+    const txGroup: types.ExecParams[] = [
       {
-        type: TransactionType.CallNoOpSSC,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.CallNoOpSSC,
+        sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId1,
         payFlags: { totalFee: 1000 }
       },
       {
-        type: TransactionType.CallNoOpSSC,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.CallNoOpSSC,
+        sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId2,
         payFlags: { totalFee: 1000 }
@@ -70,17 +71,17 @@ describe('Current Transaction Tests', function () {
   it('Failure test for group index', () => {
     setupApps();
 
-    const txGroup: ExecParams[] = [
+    const txGroup: types.ExecParams[] = [
       {
-        type: TransactionType.CallNoOpSSC,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.CallNoOpSSC,
+        sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId2,
         payFlags: { totalFee: 1000 }
       },
       {
-        type: TransactionType.CallNoOpSSC,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.CallNoOpSSC,
+        sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId1,
         payFlags: { totalFee: 1000 }

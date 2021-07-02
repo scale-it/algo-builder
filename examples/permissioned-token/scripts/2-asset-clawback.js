@@ -1,7 +1,7 @@
 const {
   executeTransaction
 } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const accounts = require('./common/accounts');
 const { getClawbackParams, getClawback } = require('./common/common');
 

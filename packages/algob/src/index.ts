@@ -1,6 +1,5 @@
-import { addressToPk, stringToBytes, uint64ToBigEndian } from "@algo-builder/runtime";
+import { ERRORS, parsing as convert } from "@algo-builder/web";
 
-import * as ERRORS from "./errors/errors-list";
 import {
   createMsigAddress,
   loadAccountsFromEnv,
@@ -17,7 +16,6 @@ import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC, readGl
 import { executeSignedTxnFromFile, executeTransaction, getSuggestedParams, mkTxParams } from "./lib/tx";
 import * as runtime from "./runtime";
 import * as types from "./types";
-const convert = { uint64ToBigEndian, addressToPk, stringToBytes };
 export {
   ERRORS,
   mkAccounts,

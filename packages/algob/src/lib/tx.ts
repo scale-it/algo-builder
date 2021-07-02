@@ -1,4 +1,5 @@
-import { encodeNote, mkTransaction, types as rtypes } from "@algo-builder/runtime";
+import { types as rtypes } from "@algo-builder/runtime";
+import { tx as webTx, types as wtypes } from "@algo-builder/web";
 import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
 import { Deployer } from "../types";
@@ -49,17 +50,17 @@ export async function mkTxParams (
  * @param txSuggestedParams suggested transaction params
  */
 export function makeAssetCreateTxn (
-  name: string, asaDef: rtypes.ASADef,
+  name: string, asaDef: wtypes.ASADef,
   flags: rtypes.ASADeploymentFlags, txSuggestedParams: SuggestedParams
 ): Transaction {
   // If TxParams has noteb64 or note , it gets precedence
   let note;
   if (flags.noteb64 ?? flags.note) {
     // TxParams note
-    note = encodeNote(flags.note, flags.noteb64);
+    note = webTx.encodeNote(flags.note, flags.noteb64);
   } else if (asaDef.noteb64 ?? asaDef.note) {
     // ASA definition note
-    note = encodeNote(asaDef.note, asaDef.noteb64);
+    note = webTx.encodeNote(asaDef.note, asaDef.noteb64);
   }
 
   // https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js#L104
@@ -93,14 +94,14 @@ export function makeASAOptInTx (
   params: SuggestedParams,
   payFlags: rtypes.TxParams
 ): Transaction {
-  const execParam: rtypes.ExecParams = {
-    type: rtypes.TransactionType.OptInASA,
-    sign: rtypes.SignType.SecretKey,
+  const execParam: wtypes.ExecParams = {
+    type: wtypes.TransactionType.OptInASA,
+    sign: wtypes.SignType.SecretKey,
     fromAccount: { addr: addr, sk: new Uint8Array(0) },
     assetID: assetID,
     payFlags: payFlags
   };
-  return mkTransaction(execParam, params);
+  return webTx.mkTransaction(execParam, params);
 }
 
 /**
@@ -108,12 +109,12 @@ export function makeASAOptInTx (
  * @param txn unsigned transaction
  * @param execParams transaction execution parametrs
  */
-function signTransaction (txn: Transaction, execParams: rtypes.ExecParams): Uint8Array {
+function signTransaction (txn: Transaction, execParams: wtypes.ExecParams): Uint8Array {
   switch (execParams.sign) {
-    case rtypes.SignType.SecretKey: {
+    case wtypes.SignType.SecretKey: {
       return txn.signTxn(execParams.fromAccount.sk);
     }
-    case rtypes.SignType.LogicSignature: {
+    case wtypes.SignType.LogicSignature: {
       execParams.lsig.args = execParams.args ?? [];
       return algosdk.signLogicSigTransactionObject(txn, execParams.lsig).blob;
     }
@@ -124,7 +125,7 @@ function signTransaction (txn: Transaction, execParams: rtypes.ExecParams): Uint
 }
 
 /**
- * Make transaction parameters and update deployASA, deploySSC & ModifyAsset params
+ * Make transaction parameters and update deployASA, deployApp & ModifyAsset params
  * @param deployer Deployer object
  * @param txn Execution parameters
  * @param index index of current execParam
@@ -133,25 +134,25 @@ function signTransaction (txn: Transaction, execParams: rtypes.ExecParams): Uint
 /* eslint-disable sonarjs/cognitive-complexity */
 async function mkTx (
   deployer: Deployer,
-  txn: rtypes.ExecParams,
+  txn: wtypes.ExecParams,
   index: number,
-  txIdxMap: Map<number, [string, rtypes.ASADef]>
+  txIdxMap: Map<number, [string, wtypes.ASADef]>
 ): Promise<Transaction> {
   // if execParams for ASA related transaction have assetID as asaName,
   // then set to assetIndex using info from checkpoint
   switch (txn.type) {
-    case rtypes.TransactionType.OptInASA :
-    case rtypes.TransactionType.TransferAsset :
-    case rtypes.TransactionType.ModifyAsset :
-    case rtypes.TransactionType.FreezeAsset :
-    case rtypes.TransactionType.RevokeAsset : {
+    case wtypes.TransactionType.OptInASA :
+    case wtypes.TransactionType.TransferAsset :
+    case wtypes.TransactionType.ModifyAsset :
+    case wtypes.TransactionType.FreezeAsset :
+    case wtypes.TransactionType.RevokeAsset : {
       if (typeof txn.assetID === "string") {
         const asaInfo = deployer.getASAInfo(txn.assetID);
         txn.assetID = asaInfo.assetIndex;
       }
       break;
     }
-    case rtypes.TransactionType.DestroyAsset : {
+    case wtypes.TransactionType.DestroyAsset : {
       if (typeof txn.assetID === "string") {
         txIdxMap.set(index, [txn.assetID, deployer.getASADef(txn.assetID, {})]);
         const asaInfo = deployer.getASAInfo(txn.assetID);
@@ -162,14 +163,14 @@ async function mkTx (
   }
 
   switch (txn.type) {
-    case rtypes.TransactionType.DeployASA: {
+    case wtypes.TransactionType.DeployASA: {
       deployer.assertNoAsset(txn.asaName);
       const asaDef = deployer.getASADef(txn.asaName, txn.asaDef);
       txn.asaDef = asaDef;
       if (txn.asaDef) txIdxMap.set(index, [txn.asaName, asaDef]);
       break;
     }
-    case rtypes.TransactionType.DeploySSC: {
+    case wtypes.TransactionType.DeployApp: {
       const name = String(txn.approvalProgram) + "-" + String(txn.clearProgram);
       deployer.assertNoAsset(name);
       const approval = await deployer.ensureCompiled(txn.approvalProgram);
@@ -179,7 +180,7 @@ async function mkTx (
       txIdxMap.set(index, [name, { total: 1, decimals: 1, unitName: "MOCK" }]);
       break;
     }
-    case rtypes.TransactionType.UpdateSSC: {
+    case wtypes.TransactionType.UpdateApp: {
       const cpKey = String(txn.newApprovalProgram) + "-" + String(txn.newClearProgram);
       const approval = await deployer.ensureCompiled(txn.newApprovalProgram);
       const clear = await deployer.ensureCompiled(txn.newClearProgram);
@@ -188,7 +189,7 @@ async function mkTx (
       txIdxMap.set(index, [cpKey, { total: 1, decimals: 1, unitName: "MOCK" }]);
       break;
     }
-    case rtypes.TransactionType.ModifyAsset: {
+    case wtypes.TransactionType.ModifyAsset: {
       // fetch asset mutable properties from network and set them (if they are not passed)
       // before modifying asset
       const assetInfo = await deployer.getAssetByID(BigInt(txn.assetID));
@@ -209,7 +210,7 @@ async function mkTx (
   }
 
   const suggestedParams = await getSuggestedParams(deployer.algodClient);
-  return mkTransaction(txn,
+  return webTx.mkTransaction(txn,
     await mkTxParams(deployer.algodClient, txn.payFlags, Object.assign({}, suggestedParams)));
 }
 
@@ -221,13 +222,13 @@ async function mkTx (
  */
 export async function executeTransaction (
   deployer: Deployer,
-  execParams: rtypes.ExecParams | rtypes.ExecParams[]):
+  execParams: wtypes.ExecParams | wtypes.ExecParams[]):
   Promise<algosdk.ConfirmedTxInfo> {
   deployer.assertCPNotDeleted(execParams);
   try {
     let signedTxn;
     let txns: Transaction[] = [];
-    const txIdxMap = new Map<number, [string, rtypes.ASADef]>();
+    const txIdxMap = new Map<number, [string, wtypes.ASADef]>();
     if (Array.isArray(execParams)) {
       if (execParams.length > 16) { throw new Error("Maximum size of an atomic transfer group is 16"); }
 

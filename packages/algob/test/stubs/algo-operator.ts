@@ -1,4 +1,5 @@
 import { types as rtypes } from "@algo-builder/runtime";
+import { types as wtypes } from "@algo-builder/web";
 import type { LogicSig } from "algosdk";
 import { Account, Algodv2, AssetInfo, ConfirmedTxInfo } from "algosdk";
 
@@ -40,7 +41,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   async deployASA (
-    name: string, asaDef: rtypes.ASADef,
+    name: string, asaDef: wtypes.ASADef,
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap,
     txnWriter: txWriter): Promise<rtypes.ASAInfo> {
     return {
@@ -63,10 +64,10 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     };
   }
 
-  async deploySSC (
+  async deployApp (
     approvalProgram: string,
     clearProgram: string,
-    flags: rtypes.SSCDeploymentFlags,
+    flags: rtypes.AppDeploymentFlags,
     payFlags: rtypes.TxParams,
     txWriter: txWriter,
     scInitParam?: unknown): Promise<rtypes.SSCInfo> {
@@ -80,13 +81,13 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     };
   }
 
-  async updateSSC (
+  async updateApp (
     sender: Account,
     payFlags: rtypes.TxParams,
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
-    flags: rtypes.SSCOptionalFlags,
+    flags: rtypes.AppOptionalFlags,
     txWriter: txWriter
   ): Promise<rtypes.SSCInfo> {
     return {
@@ -122,20 +123,20 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     return new Promise((resolve, reject) => { resolve(); });
   }
 
-  optInAccountToSSC (
+  optInAccountToApp (
     sender: rtypes.Account, index: number,
-    payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags): Promise<void> {
+    payFlags: rtypes.TxParams, flags: rtypes.AppOptionalFlags): Promise<void> {
     return new Promise((resolve, reject) => { resolve(); });
   }
 
-  optInLsigToSSC (
+  optInLsigToApp (
     appID: number, lsig: LogicSig,
-    payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags): Promise<void> {
+    payFlags: rtypes.TxParams, flags: rtypes.AppOptionalFlags): Promise<void> {
     return new Promise((resolve, reject) => { resolve(); });
   }
 
   optInToASAMultiple (
-    asaName: string, asaDef: rtypes.ASADef,
+    asaName: string, asaDef: wtypes.ASADef,
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap, assetIndex: number
   ): Promise<void> {
     return Promise.resolve();

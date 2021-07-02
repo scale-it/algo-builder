@@ -9,7 +9,7 @@
  */
 const { executeTransaction } = require('@algo-builder/algob');
 const { mkParam } = require('./transfer/common');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -19,7 +19,7 @@ async function run (runtimeEnv, deployer) {
 
   // Create Application
   // Note: An Account can have maximum of 10 Applications.
-  const sscInfo = await deployer.deploySSC(
+  const appInfo = await deployer.deployApp(
     '5-contract-asa-stateful.py', // approval program
     '5-clear.py', // clear program
     {
@@ -30,10 +30,10 @@ async function run (runtimeEnv, deployer) {
       globalBytes: 1
     }, {});
 
-  console.log(sscInfo);
+  console.log(appInfo);
 
   // Get Statless Account Address
-  const statelessAccount = await deployer.loadLogic('5-contract-asa-stateless.py', { APP_ID: sscInfo.appID });
+  const statelessAccount = await deployer.loadLogic('5-contract-asa-stateless.py', { APP_ID: appInfo.appID });
   console.log('stateless Account Address:', statelessAccount.address());
 
   await executeTransaction(deployer, mkParam(masterAccount, statelessAccount.address(), 200e6, { note: 'funding account' }));
@@ -44,7 +44,7 @@ async function run (runtimeEnv, deployer) {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: alice,
-      appID: sscInfo.appID,
+      appID: appInfo.appID,
       payFlags: {}
     },
     // Asset creation

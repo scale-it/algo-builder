@@ -1,4 +1,5 @@
 import { types as rtypes } from "@algo-builder/runtime";
+import { ERRORS } from "@algo-builder/web";
 import { Kmd } from "algosdk";
 import { assert } from "chai";
 import path from "path";
@@ -12,7 +13,6 @@ import {
   TASK_RUN,
   TASK_TEST
 } from "../../../../src/builtin-tasks/task-names";
-import { ERRORS } from "../../../../src/errors/errors-list";
 import { BuilderContext } from "../../../../src/internal/context";
 import { loadConfigAndTasks, loadKMDAccounts } from "../../../../src/internal/core/config/config-loading";
 import { resetBuilderContext } from "../../../../src/internal/reset";

@@ -1,9 +1,9 @@
+import { ERRORS } from "@algo-builder/web";
 import { assert } from "chai";
 import * as path from "path";
 import * as sinon from "sinon";
 
 import { types } from "../../../src/config";
-import { ERRORS } from "../../../src/errors/errors-list";
 import { BuilderContext } from "../../../src/internal/context";
 import { Environment } from "../../../src/internal/core/runtime-environment";
 import { TasksDSL } from "../../../src/internal/core/tasks/dsl";

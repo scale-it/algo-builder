@@ -1,10 +1,10 @@
+import { ERRORS } from "@algo-builder/web";
 import { assert } from "chai";
 import chalk from "chalk";
 import * as fsExtra from "fs-extra";
 import * as os from "os";
 import * as path from "path";
 
-import { ERRORS } from "../../../../src/errors/errors-list";
 import * as types from "../../../../src/internal/core/params/argument-types";
 import { expectBuilderError } from "../../../helpers/errors";
 

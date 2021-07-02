@@ -1,7 +1,5 @@
+import { BuilderError, ERRORS } from "@algo-builder/web";
 import * as fs from "fs";
-
-import { BuilderError } from "../../../errors/errors";
-import { ERRORS } from "../../../errors/errors-list";
 
 /**
  * Provides an interface for every valid task argument type.

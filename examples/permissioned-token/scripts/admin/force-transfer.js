@@ -1,10 +1,10 @@
 const {
   balanceOf, executeTransaction
 } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 
 const accounts = require('../common/accounts');
-const { getClawback, fundAccount, optInAccountToSSC } = require('../common/common');
+const { getClawback, fundAccount, optInAccountToApp } = require('../common/common');
 const { issue } = require('./issue');
 const { whitelist } = require('../permissions/whitelist');
 
@@ -19,8 +19,8 @@ const clearStateProgram = 'clear_state_program.py';
 async function forceTransfer (deployer, fromAddr, toAddr, amount) {
   const owner = deployer.accountsByName.get(accounts.owner);
   const tesla = deployer.asa.get('tesla');
-  const controllerSSCInfo = deployer.getSSC('controller.py', clearStateProgram);
-  const permissionsSSCInfo = deployer.getSSC('permissions.py', clearStateProgram);
+  const controllerSSCInfo = deployer.getApp('controller.py', clearStateProgram);
+  const permissionsSSCInfo = deployer.getApp('permissions.py', clearStateProgram);
 
   const clawbackLsig = await getClawback(deployer);
   const clawbackAddress = clawbackLsig.address();
@@ -96,7 +96,7 @@ async function forceTransfer (deployer, fromAddr, toAddr, amount) {
 async function run (runtimeEnv, deployer) {
   const owner = deployer.accountsByName.get(accounts.owner);
   const permissionsManager = owner;
-  const permissionsSSCInfo = deployer.getSSC('permissions.py', clearStateProgram);
+  const permissionsSSCInfo = deployer.getApp('permissions.py', clearStateProgram);
 
   /*
    * Force transfer some tokens b/w 2 accounts
@@ -110,9 +110,9 @@ async function run (runtimeEnv, deployer) {
   // opt-in accounts to permissions smart contract
   // comment this code if already opted-in
   await Promise.all([
-    optInAccountToSSC(deployer, elon, permissionsSSCInfo.appID, {}, {}),
-    optInAccountToSSC(deployer, bob, permissionsSSCInfo.appID, {}, {}),
-    optInAccountToSSC(deployer, john, permissionsSSCInfo.appID, {}, {})
+    optInAccountToApp(deployer, elon, permissionsSSCInfo.appID, {}, {}),
+    optInAccountToApp(deployer, bob, permissionsSSCInfo.appID, {}, {}),
+    optInAccountToApp(deployer, john, permissionsSSCInfo.appID, {}, {})
   ]);
 
   /*

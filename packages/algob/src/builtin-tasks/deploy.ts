@@ -1,9 +1,8 @@
+import { BuilderError, ERRORS } from "@algo-builder/web";
 import fs from "fs";
 import glob from "glob";
 import path from "path";
 
-import { BuilderError } from "../errors/errors";
-import { ERRORS } from "../errors/errors-list";
 import { task } from "../internal/core/config/config-env";
 import { AlgoOperator, createAlgoOperator } from "../lib/algo-operator";
 import { cmpStr } from "../lib/comparators";

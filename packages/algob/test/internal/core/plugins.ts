@@ -1,7 +1,7 @@
+import { ERRORS } from "@algo-builder/web";
 import { assert } from "chai";
 import path from "path";
 
-import { ERRORS } from "../../../src/errors/errors-list";
 import { BuilderContext } from "../../../src/internal/context";
 import {
   loadPluginFile,

@@ -1,5 +1,5 @@
-import { BuilderError } from "../../errors/errors";
-import { ERRORS } from "../../errors/errors-list";
+import { BuilderError, ERRORS } from "@algo-builder/web";
+
 import { cmpStr } from "../../lib/comparators";
 import {
   ParamDefinition,

@@ -1,4 +1,5 @@
-const { types, AccountStore } = require('@algo-builder/runtime');
+const { AccountStore } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const { encodeAddress } = require('algosdk');
 const { assert } = require('chai');
 const { Context } = require('./common');

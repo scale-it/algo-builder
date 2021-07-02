@@ -1,10 +1,10 @@
+import { ERRORS } from "@algo-builder/web";
 import { assert } from "chai";
 import fs from "fs";
 
 import { splitAfter } from "../../src/builtin-tasks/run";
 // import * as fsExtra from "fs-extra";
 import { TASK_DEPLOY, TASK_RUN } from "../../src/builtin-tasks/task-names";
-import { ERRORS } from "../../src/errors/errors-list";
 import { loadCheckpoint } from "../../src/lib/script-checkpoints";
 import { useEnvironment } from "../helpers/environment";
 import { expectBuilderErrorAsync } from "../helpers/errors";
