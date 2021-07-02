@@ -4,7 +4,7 @@ const { fundAccount } = require('./common/common');
 /**
  * Deploy a second Permissions smart contract.
  * note: this is an empty contract, to demonstrate how to replace/set a new app
- * in `/scripts/permissions/set-permissions-appid.js`
+ * using `/scripts/permissions/set-permissions-appid.js`
  */
 async function setupNewPermissionsApp (runtimeEnv, deployer) {
   const owner = deployer.accountsByName.get(accounts.owner);

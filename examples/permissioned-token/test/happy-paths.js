@@ -312,7 +312,6 @@ describe('Permissioned Token Tests - Happy Paths', function () {
   it('should cease tokens from bob', () => {
     // Opt-In to ASA
     ctx.optInToASA(bob.address);
-
     // Issue few tokens to sender
     ctx.issue(asaReserve.account, bob, 150);
     ctx.syncAccounts();
@@ -386,7 +385,7 @@ describe('Permissioned Token Tests - Happy Paths', function () {
       foreignAssets: [ctx.assetIndex]
     };
 
-    // works as fromAccount is the current permissions manager
+    // works because fromAccount is the current permissions manager
     ctx.runtime.executeTx(setPermTx);
     ctx.syncAccounts();
 

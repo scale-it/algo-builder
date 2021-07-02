@@ -581,7 +581,6 @@ describe('Permissioned Token Tests - Failing Paths', function () {
 
       // Opt-In to ASA by bob
       ctx.optInToASA(bob.address);
-
       ceaseTxGroup = [
         {
           type: types.TransactionType.CallNoOpSSC,
@@ -617,24 +616,24 @@ describe('Permissioned Token Tests - Failing Paths', function () {
     it('Should fail if transaction group is invalid', () => {
       const txGroup = [...ceaseTxGroup];
 
-      // fails as paying fees of clawback-lsig is skipped
+      // fails because paying fees of clawback-lsig is skipped
       assert.throws(() =>
         ctx.runtime.executeTx([txGroup[0], txGroup[1]]),
       REJECTED_BY_LOGIC
       );
 
-      // fails as controller is not called (rejected by clawback)
+      // fails because controller is not called (rejected by clawback)
       assert.throws(() =>
         ctx.runtime.executeTx([txGroup[1], txGroup[2]]),
       REJECTED_BY_LOGIC
       );
     });
 
-    it('should reject cease if call to controller not signed by asset manager', () => {
+    it('should reject cease if call to controller is not signed by asset manager', () => {
       const txGroup = [...ceaseTxGroup];
       txGroup[0].fromAccount = bob.account;
 
-      // fails as controller's sender is not asset manager
+      // fails because controller's sender is not asset manager
       assert.notEqual(asaManager.address, bob.address);
       assert.throws(() =>
         ctx.runtime.executeTx(txGroup),
@@ -689,7 +688,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       ctx.killToken(asaManager.account); // kill token
       ctx.syncAccounts();
 
-      // fails as accounts are whitelisted, amount is good but token is killed
+      // fails because accounts are whitelisted, amount condition is satisfied but token is killed
       assert.throws(() =>
         ctx.runtime.executeTx(txGroup),
       RUNTIME_ERR1009
@@ -736,7 +735,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
     });
 
     /*
-     * imp test: here we deploy a new asset(with same manager as the original one),
+     * Important test: here we deploy a new asset(with same manager as the original one),
      * but since token index will be different, tx is rejected. Means that we cannot bypass
      * the contract even if manager (OR other asset params) are same as the original. */
     it('should reject if asset index is incorrect even if manager is same', () => {

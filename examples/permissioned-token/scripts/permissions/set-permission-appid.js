@@ -29,7 +29,7 @@ async function run (runtimeEnv, deployer) {
       appID: controllerappID,
       payFlags: { totalFee: 1000 },
       appArgs: appArgs,
-      foreignAssets: [tesla.assetIndex] // controller sc verifies if correct token is being used + asa.manager is correct one
+      foreignAssets: [tesla.assetIndex] // controller smart contract verifies if correct token is being used + asa.manager is correct one
     });
   } catch (e) {
     console.log('Error occurred', e.response.error);

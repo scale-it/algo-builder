@@ -145,7 +145,7 @@ Below we describe different use cases implemented by the smart contract suite. W
     * NoOp call to the smart contract with `app-arg = str:change_permissions_manager` and `app-accounts = [newManagerAddress]`. Must be signed by the *old* permissions manager.
 
 3. [*set permissions app id*](/examples/permissioned-token/scripts/permissions/set-permission-appid.js) -
-    Token manager can change the existing permissions application id via an application call to the controller smart contract (stored as `perm_app` global variable).
+    Token manager can change the existing permissions contract application id via an application call to the controller smart contract (stored as `perm_app` global variable).
 
     * NoOp call to the smart contract with `app-args = [str:set_permission, int:<app_id>]` and `foreign-assets = [assetIndex]`. Must be signed by the *asset manager*.
 
