@@ -668,3 +668,53 @@ describe("Deploy, Delete transactions test in run mode", () => {
     assert.equal(res?.deleted, false);
   });
 });
+
+describe("Update transaction test in run mode", () => {
+  useFixtureProject("stateful");
+  let deployer: Deployer;
+  let algod: AlgoOperatorDryRunImpl;
+  let deployerCfg: DeployerConfig;
+  beforeEach(async () => {
+    const env = mkEnv("network1");
+    algod = new AlgoOperatorDryRunImpl();
+    deployerCfg = new DeployerConfig(env, algod);
+    deployer = new DeployerRunMode(deployerCfg);
+    sinon.stub(algod.algodClient, "getTransactionParams")
+      .returns({ do: async () => mockSuggestedParam });
+  });
+
+  afterEach(async () => {
+    (algod.algodClient.getTransactionParams as sinon.SinonStub).restore();
+  });
+
+  it("should update in run mode", async () => {
+    let execParams: types.ExecParams = {
+      type: types.TransactionType.DeploySSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: bobAcc,
+      approvalProgram: "approval.teal",
+      clearProgram: "clear.teal",
+      localInts: 1,
+      localBytes: 1,
+      globalInts: 1,
+      globalBytes: 1,
+      payFlags: {}
+    };
+    const appInfo = await executeTransaction(deployer, execParams);
+
+    // should not be stored in checkpoint if in run mode
+    assert.isUndefined(deployer.getSSC("approval.teal", "clear.teal"));
+
+    execParams = {
+      type: types.TransactionType.UpdateSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: bobAcc,
+      appID: appInfo["application-index"],
+      newApprovalProgram: "approval.teal",
+      newClearProgram: "clear.teal",
+      payFlags: {}
+    };
+
+    await executeTransaction(deployer, execParams);
+  });
+});
