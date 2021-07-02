@@ -14,7 +14,7 @@ async function kill (deployer) {
    * token is killed.
    */
   const tesla = deployer.asa.get('tesla');
-  const controllerSSCInfo = deployer.getSSC('controller.py', 'clear_state_program.py');
+  const controllerSSCInfo = deployer.getApp('controller.py', 'clear_state_program.py');
   const killParams = {
     type: types.TransactionType.CallNoOpSSC,
     sign: types.SignType.SecretKey,

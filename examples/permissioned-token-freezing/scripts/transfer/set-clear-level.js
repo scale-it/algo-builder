@@ -9,7 +9,7 @@ async function run (runtimeEnv, deployer) {
    * Set level:2 for Alice and Bob (required by smart-contract for asset transfer)
    * level refers to the minimum required level of user to transfer an asset
    */
-  const appInfo = deployer.getSSC('poi-approval.teal', 'poi-clear.teal');
+  const appInfo = deployer.getApp('poi-approval.teal', 'poi-clear.teal');
   const setLevelParams = {
     type: types.TransactionType.CallNoOpSSC,
     sign: types.SignType.SecretKey,

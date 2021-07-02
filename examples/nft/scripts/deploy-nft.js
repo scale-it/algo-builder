@@ -27,9 +27,9 @@ async function run (runtimeEnv, deployer) {
     globalBytes: 63
   }, {});
 
-  const sscInfo = await deployer.getSSC('nft_approval.py', 'nft_clear_state.py');
-  const appID = sscInfo.appID;
-  console.log(sscInfo);
+  const appInfo = await deployer.getApp('nft_approval.py', 'nft_clear_state.py');
+  const appID = appInfo.appID;
+  console.log(appInfo);
 
   try {
     await deployer.optInAccountToApp(masterAccount, appID, {}, {}); // opt-in to asc by master

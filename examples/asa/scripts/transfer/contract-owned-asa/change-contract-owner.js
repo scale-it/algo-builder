@@ -15,7 +15,7 @@ async function run (runtimeEnv, deployer) {
   await executeTransaction(deployer, mkParam(masterAccount, alice.addr, 5e6, { note: 'Funding' }));
 
   // Get AppInfo from checkpoint.
-  const appInfo = deployer.getSSC('5-contract-asa-stateful.py', '5-clear.py');
+  const appInfo = deployer.getApp('5-contract-asa-stateful.py', '5-clear.py');
 
   // App argument to change_owner.
   const appArgs = [convert.stringToBytes('change_owner'), convert.addressToPk(bob.addr)];

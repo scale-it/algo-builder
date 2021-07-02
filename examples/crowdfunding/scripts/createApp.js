@@ -38,7 +38,7 @@ async function run (runtimeEnv, deployer) {
 
   // Create Application
   // Note: An Account can have maximum of 10 Applications.
-  const sscInfo = await deployer.deployApp(
+  const appInfo = await deployer.deployApp(
     'crowdFundApproval.teal', // approval program
     'crowdFundClear.teal', // clear program
     {
@@ -50,16 +50,16 @@ async function run (runtimeEnv, deployer) {
       appArgs: appArgs
     }, {});
 
-  console.log(sscInfo);
+  console.log(appInfo);
 
   // Get Escrow Account Address
-  const escrowAccount = await deployer.loadLogic('crowdFundEscrow.py', { APP_ID: sscInfo.appID });
+  const escrowAccount = await deployer.loadLogic('crowdFundEscrow.py', { APP_ID: appInfo.appID });
   console.log('Escrow Account Address:', escrowAccount.address());
 
   // Update application with escrow account
   // Note: that the code for the contract will not change.
   // The update operation links the two contracts.
-  const applicationID = sscInfo.appID;
+  const applicationID = appInfo.appID;
 
   appArgs = [convert.addressToPk(escrowAccount.address())];
 

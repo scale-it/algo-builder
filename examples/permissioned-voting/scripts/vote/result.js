@@ -7,7 +7,7 @@ async function run (runtimeEnv, deployer) {
   const alice = deployer.accountsByName.get('alice');
 
   // Retreive AppInfo from checkpoints.
-  const appInfo = deployer.getSSC('permissioned-voting-approval.py', 'permissioned-voting-clear.py');
+  const appInfo = deployer.getApp('permissioned-voting-approval.py', 'permissioned-voting-clear.py');
 
   // Retreive Global State
   const globalState = await readGlobalStateSSC(deployer, votingAdminAccount.addr, appInfo.appID);

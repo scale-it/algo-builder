@@ -19,8 +19,8 @@ const clearStateProgram = 'clear_state_program.py';
 async function forceTransfer (deployer, fromAddr, toAddr, amount) {
   const owner = deployer.accountsByName.get(accounts.owner);
   const tesla = deployer.asa.get('tesla');
-  const controllerSSCInfo = deployer.getSSC('controller.py', clearStateProgram);
-  const permissionsSSCInfo = deployer.getSSC('permissions.py', clearStateProgram);
+  const controllerSSCInfo = deployer.getApp('controller.py', clearStateProgram);
+  const permissionsSSCInfo = deployer.getApp('permissions.py', clearStateProgram);
 
   const clawbackLsig = await getClawback(deployer);
   const clawbackAddress = clawbackLsig.address();
@@ -96,7 +96,7 @@ async function forceTransfer (deployer, fromAddr, toAddr, amount) {
 async function run (runtimeEnv, deployer) {
   const owner = deployer.accountsByName.get(accounts.owner);
   const permissionsManager = owner;
-  const permissionsSSCInfo = deployer.getSSC('permissions.py', clearStateProgram);
+  const permissionsSSCInfo = deployer.getApp('permissions.py', clearStateProgram);
 
   /**
    * Force transfer some tokens b/w 2 accounts
