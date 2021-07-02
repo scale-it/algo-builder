@@ -336,7 +336,7 @@ function assertMaxCost (gas: number, mode: ExecutionMode): void {
 }
 
 // verify max length of TEAL code is within consensus parameters
-function assertMaxLen (len: number, mode: ExecutionMode): void {
+function _assertMaxLen (len: number, mode: ExecutionMode): void {
   if (mode === ExecutionMode.SIGNATURE) {
     // check max program cost (for stateless)
     if (len > LogicSigMaxSize) {

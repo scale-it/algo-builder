@@ -17,7 +17,6 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
   let approvalProgram: string;
   let clearProgram: string;
   let assetId: number;
-  let appID: number;
 
   this.beforeEach(() => {
     john = new AccountStore(initialBalance, elonMuskAccount);
@@ -40,7 +39,7 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
 
   function setupApp (): void {
     // create new app
-    appID = runtime.addApp({
+    runtime.addApp({
       sender: john.account,
       globalBytes: 32,
       globalInts: 32,
