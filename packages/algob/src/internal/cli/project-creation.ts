@@ -13,6 +13,10 @@ const SAMPLE_PROJECT_DEPENDENCIES = [
   "chai"
 ];
 
+const SAMPLE_TS_PROJECT_DEPENDENCIES = [
+  ...SAMPLE_PROJECT_DEPENDENCIES, "@types/chai", "@types/node", "typescript", "ts-node"
+];
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function removeProjectDirIfPresent (projectRoot: string, dirName: string): Promise<void> {
   const dirPath = path.join(projectRoot, dirName);
@@ -28,9 +32,10 @@ export async function printWelcomeMessage (): Promise<void> {
     chalk.cyan(`★ Welcome to ${ALGOB_NAME} v${packageJson.version}`));
 }
 
-function copySampleProject (location: string): void {
+function copySampleProject (location: string, isTSProject: boolean): void {
   const packageRoot = getPackageRoot();
-  const sampleProjDir = path.join(packageRoot, "sample-project");
+  const sampleProjectName = isTSProject ? "sample-project-ts" : "sample-project";
+  const sampleProjDir = path.join(packageRoot, sampleProjectName);
 
   console.log(chalk.greenBright("Initializing new workspace in " + process.cwd() + "."));
 
@@ -81,20 +86,23 @@ async function printPluginInstallationInstructions (): Promise<void> {
   console.log(`  ${cmd.join(" ")}`);
 }
 
-export async function createProject (location: string): PromiseAny {
+export async function createProject (location: string, isTSProject: boolean): PromiseAny {
   await printWelcomeMessage();
 
-  copySampleProject(location);
+  copySampleProject(location, isTSProject);
 
   let shouldShowInstallationInstructions = true;
 
+  const sampleProjectDependencies =
+    isTypeScriptProject() ? SAMPLE_TS_PROJECT_DEPENDENCIES : SAMPLE_PROJECT_DEPENDENCIES;
+
   if (await canInstallPlugin()) {
-    const installedRecommendedDeps = SAMPLE_PROJECT_DEPENDENCIES.filter(
+    const installedRecommendedDeps = sampleProjectDependencies.filter(
       isInstalled
     );
 
     if (
-      installedRecommendedDeps.length === SAMPLE_PROJECT_DEPENDENCIES.length
+      installedRecommendedDeps.length === sampleProjectDependencies.length
     ) {
       shouldShowInstallationInstructions = false;
     } else if (installedRecommendedDeps.length === 0) {
@@ -182,6 +190,10 @@ function isYarnProject (): boolean {
   return fsExtra.pathExistsSync("yarn.lock");
 }
 
+function isTypeScriptProject (): boolean {
+  return fsExtra.pathExistsSync("tsconfig.json");
+}
+
 async function installRecommendedDependencies (): Promise<boolean> {
   console.log("");
   const installCmd = await npmInstallCmd();
@@ -196,12 +208,14 @@ async function confirmPluginInstallation (): Promise<boolean> {
   };
 
   const packageManager = isYarnProject() ? "yarn" : "npm";
+  const sampleProjectDependencies =
+    isTypeScriptProject() ? SAMPLE_TS_PROJECT_DEPENDENCIES : SAMPLE_PROJECT_DEPENDENCIES;
 
   try {
     responses = await enquirer.prompt([
       createConfirmationPrompt(
         "shouldInstallPlugin",
-        `Do you want to install the sample project's dependencies with ${packageManager} (${SAMPLE_PROJECT_DEPENDENCIES.join(
+        `Do you want to install the sample project's dependencies with ${packageManager} (${sampleProjectDependencies.join(
           " "
         )})?`
       )
@@ -253,16 +267,18 @@ export async function installDependencies (
 async function npmInstallCmd (): Promise<string[]> {
   const isGlobal =
     getExecutionMode() === ExecutionMode.EXECUTION_MODE_GLOBAL_INSTALLATION;
+  const sampleProjectDependencies =
+    isTypeScriptProject() ? SAMPLE_TS_PROJECT_DEPENDENCIES : SAMPLE_PROJECT_DEPENDENCIES;
 
   if (isYarnProject()) {
     const cmd = ["yarn"];
     if (isGlobal) { cmd.push("global"); }
-    cmd.push("add", "--dev", ...SAMPLE_PROJECT_DEPENDENCIES);
+    cmd.push("add", "--dev", ...sampleProjectDependencies);
     return cmd;
   }
 
   const npmInstall = ["npm", "install"];
   if (isGlobal) { npmInstall.push("--global"); }
 
-  return [...npmInstall, "--save-dev", ...SAMPLE_PROJECT_DEPENDENCIES];
+  return [...npmInstall, "--save-dev", ...sampleProjectDependencies];
 }
