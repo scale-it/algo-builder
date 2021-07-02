@@ -86,11 +86,11 @@ You can deploy Stateful/Stateless Smart Contracts (SSC).
 #### Stateful Smart Contracts
 Check our [examples/permissioned-voting](https://github.com/scale-it/algo-builder/tree/master/examples/permissioned-voting) project. Open the `scripts/voting.js` file, you will find there:
 
-    await deployer.deploySSC("approval.teal", "clear.teal", {...});
+    await deployer.deployApp("approval.teal", "clear.teal", {...});
 
 Smart contracts must be stored in `assets` folder.
 
-The main difference between deploying an ASA and SSC is that ASA takes `asset-name` and `ASADeploymentFlags` as input and SSC takes `smart-contract-names` and `SSCDeploymentFlags` as input.
+The main difference between deploying an ASA and SSC is that ASA takes `asset-name` and `ASADeploymentFlags` as input and SSC takes `smart-contract-names` and `AppDeploymentFlags` as input.
 
 You can learn more about the flags from [Deployer API](https://scale-it.github.io/algo-builder/api/algob/interfaces/types.deployer.html);
 You can learn more about Stateful Smart Contracts [here](https://developer.algorand.org/docs/features/asc1/stateful/).
@@ -99,7 +99,7 @@ You can learn more about Stateful Smart Contracts [here](https://developer.algor
 
 For opting in to SSC, `deployer` supports the following methods:
 - `optInAcountToSSC` to opt-in to a single account signed by secret key of sender.
-- `optInLsigToSSC` to opt-in to a contract account (say escrow) where the account is represented by the logic signature address (`lsig.address()`).
+- `optInLsigToApp` to opt-in to a contract account (say escrow) where the account is represented by the logic signature address (`lsig.address()`).
   - To opt in to SSC you can use `Application Index`.[When the smart contract is created the network will return a unique ApplicationID. This ID can then be used to make ApplicationCall transactions to the smart contract. ](https://developer.algorand.org/docs/features/asc1/stateful/#call-the-stateful-smart-contract)
 
 - Like with ASA, we can also use `executeTransaction` to opt-in a single account or contract account to SSC.
@@ -107,7 +107,7 @@ For opting in to SSC, `deployer` supports the following methods:
   - Ex: To opt-in a single account, Params will look like this:
   ```js
     const execParam: ExecParams = {
-      type: TransactionType.OptInSSC,
+      type: TransactionType.OptInToApp,
       sign: SignType.SecretKey,
       fromAccount: user.account,
       appID: appID,
@@ -117,7 +117,7 @@ For opting in to SSC, `deployer` supports the following methods:
   - Ex: To opt-in to a contract account
   ```js
     const execParam: ExecParams = {
-      type: TransactionType.OptInSSC,
+      type: TransactionType.OptInToApp,
       sign: SignType.LogicSignature,
       fromAccountAddr: lsig.address(),
       appID: appID,

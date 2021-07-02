@@ -4,7 +4,7 @@
  */
 
 const { executeTransaction, balanceOf } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 
 async function run (runtimeEnv, deployer) {
   // query gold ASA from deployer (using checkpoint information),

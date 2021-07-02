@@ -1,9 +1,8 @@
 import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
+import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
 import type { LogicSig, MultiSig } from "algosdk";
 import * as algosdk from "algosdk";
 
-import { BuilderError } from "../errors/errors";
-import { ERRORS } from "../errors/errors-list";
 import { txWriter } from "../internal/tx-log-writer";
 import { AlgoOperator } from "../lib/algo-operator";
 import { getDummyLsig, getLsig } from "../lib/lsig";
@@ -25,7 +24,7 @@ import { DeployerConfig } from "./deployer_cfg";
 class DeployerBasicMode {
   protected readonly runtimeEnv: RuntimeEnv;
   protected readonly cpData: CheckpointRepo;
-  protected readonly loadedAsaDefs: rtypes.ASADefs;
+  protected readonly loadedAsaDefs: wtypes.ASADefs;
   protected readonly algoOp: AlgoOperator;
   protected readonly txWriter: txWriter;
   readonly accounts: rtypes.Account[];
@@ -78,7 +77,7 @@ class DeployerBasicMode {
    * @param name Asset name
    * @param asaParams Asa parameters if user wants to override existing asa definition
    */
-  getASADef (name: string, asaParams?: Partial<rtypes.ASADef>): rtypes.ASADef {
+  getASADef (name: string, asaParams?: Partial<wtypes.ASADef>): wtypes.ASADef {
     return overrideASADef(this.accountsByName, this.loadedAsaDefs[name], asaParams);
   }
 
@@ -125,7 +124,7 @@ class DeployerBasicMode {
    * of asaDef could be updated during tx execution (eg. update asset clawback)
    * @param asaName asset name in asa.yaml
    */
-  loadASADef (asaName: string): rtypes.ASADef | undefined {
+  loadASADef (asaName: string): wtypes.ASADef | undefined {
     const asaMap = this.cpData.precedingCP[this.networkName]?.asa ?? new Map();
     return asaMap.get(asaName)?.assetDef;
   }
@@ -135,8 +134,8 @@ class DeployerBasicMode {
    * @param nameApproval Approval program name
    * @param nameClear clear program name
    */
-  getSSC (nameApproval: string, nameClear: string): rtypes.SSCInfo | undefined {
-    return this.checkpoint.getSSCfromCPKey(nameApproval + "-" + nameClear);
+  getApp (nameApproval: string, nameClear: string): rtypes.SSCInfo | undefined {
+    return this.checkpoint.getAppfromCPKey(nameApproval + "-" + nameClear);
   }
 
   /**
@@ -193,8 +192,8 @@ class DeployerBasicMode {
    */
   async optInAcountToASA (asa: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
     this.assertCPNotDeleted({
-      type: rtypes.TransactionType.OptInASA,
-      sign: rtypes.SignType.SecretKey,
+      type: wtypes.TransactionType.OptInASA,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: this._getAccount(accountName),
       assetID: asa,
       payFlags: {}
@@ -229,8 +228,8 @@ class DeployerBasicMode {
    */
   async optInLsigToASA (asa: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
     this.assertCPNotDeleted({
-      type: rtypes.TransactionType.OptInASA,
-      sign: rtypes.SignType.LogicSignature,
+      type: wtypes.TransactionType.OptInASA,
+      sign: wtypes.SignType.LogicSignature,
       fromAccountAddr: lsig.address(),
       lsig: lsig,
       assetID: asa,
@@ -257,19 +256,19 @@ class DeployerBasicMode {
    * @param payFlags Transaction flags
    * @param flags Optional parameters to SSC (accounts, args..)
    */
-  async optInAccountToSSC (
+  async optInAccountToApp (
     sender: rtypes.Account,
     appID: number,
     payFlags: rtypes.TxParams,
-    flags: rtypes.SSCOptionalFlags): Promise<void> {
+    flags: rtypes.AppOptionalFlags): Promise<void> {
     this.assertCPNotDeleted({
-      type: rtypes.TransactionType.OptInSSC,
-      sign: rtypes.SignType.SecretKey,
+      type: wtypes.TransactionType.OptInToApp,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: sender,
       appID: appID,
       payFlags: {}
     });
-    await this.algoOp.optInAccountToSSC(sender, appID, payFlags, flags);
+    await this.algoOp.optInAccountToApp(sender, appID, payFlags, flags);
   }
 
   /**
@@ -280,20 +279,20 @@ class DeployerBasicMode {
    * @param payFlags Transaction flags
    * @param flags Optional parameters to SSC (accounts, args..)
    */
-  async optInLsigToSSC (
+  async optInLsigToApp (
     appID: number,
     lsig: LogicSig,
     payFlags: rtypes.TxParams,
-    flags: rtypes.SSCOptionalFlags): Promise<void> {
+    flags: rtypes.AppOptionalFlags): Promise<void> {
     this.assertCPNotDeleted({
-      type: rtypes.TransactionType.OptInSSC,
-      sign: rtypes.SignType.LogicSignature,
+      type: wtypes.TransactionType.OptInToApp,
+      sign: wtypes.SignType.LogicSignature,
       fromAccountAddr: lsig.address(),
       lsig: lsig,
       appID: appID,
       payFlags: {}
     });
-    await this.algoOp.optInLsigToSSC(appID, lsig, payFlags, flags);
+    await this.algoOp.optInLsigToApp(appID, lsig, payFlags, flags);
   }
 
   /**
@@ -343,7 +342,7 @@ class DeployerBasicMode {
    */
   private assertAppExist (appID: number): void {
     const key = this.checkpoint.getAppCheckpointKeyFromIndex(appID);
-    const res = key ? this.checkpoint.getSSCfromCPKey(key) : undefined;
+    const res = key ? this.checkpoint.getAppfromCPKey(key) : undefined;
     if (res?.deleted === true) {
       throw new BuilderError(
         ERRORS.GENERAL.APP_DELETED, {
@@ -356,30 +355,30 @@ class DeployerBasicMode {
    * Group transactions into asa and app, check for cp deletion
    * @param txn Transaction execution parameter
    */
-  private _assertCpNotDeleted (txn: rtypes.ExecParams): void {
+  private _assertCpNotDeleted (txn: wtypes.ExecParams): void {
     switch (txn.type) {
-      case rtypes.TransactionType.ModifyAsset:
-      case rtypes.TransactionType.FreezeAsset:
-      case rtypes.TransactionType.RevokeAsset:
-      case rtypes.TransactionType.OptInASA:
-      case rtypes.TransactionType.DestroyAsset: {
+      case wtypes.TransactionType.ModifyAsset:
+      case wtypes.TransactionType.FreezeAsset:
+      case wtypes.TransactionType.RevokeAsset:
+      case wtypes.TransactionType.OptInASA:
+      case wtypes.TransactionType.DestroyAsset: {
         this.assertASAExist(txn.assetID);
         break;
       }
       // https://developer.algorand.org/articles/algos-asas/#opting-in-and-out-of-asas
       // https://developer.algorand.org/docs/reference/transactions/#asset-transfer-transaction
-      case rtypes.TransactionType.TransferAsset: {
+      case wtypes.TransactionType.TransferAsset: {
         // If transaction is not opt-out check for CP deletion
         if (txn.payFlags.closeRemainderTo === undefined) {
           this.assertASAExist(txn.assetID);
         }
         break;
       }
-      case rtypes.TransactionType.DeleteSSC:
-      case rtypes.TransactionType.CloseSSC:
-      case rtypes.TransactionType.OptInSSC:
-      case rtypes.TransactionType.UpdateSSC:
-      case rtypes.TransactionType.CallNoOpSSC: {
+      case wtypes.TransactionType.DeleteApp:
+      case wtypes.TransactionType.CloseApp:
+      case wtypes.TransactionType.OptInToApp:
+      case wtypes.TransactionType.UpdateApp:
+      case wtypes.TransactionType.CallNoOpSSC: {
         this.assertAppExist(txn.appID);
         break;
       }
@@ -392,7 +391,7 @@ class DeployerBasicMode {
    * throw error(except for opt-out transactions), else pass
    * @param execParams Transaction execution parameters
    */
-  assertCPNotDeleted (execParams: rtypes.ExecParams | rtypes.ExecParams[]): void {
+  assertCPNotDeleted (execParams: wtypes.ExecParams | wtypes.ExecParams[]): void {
     if (Array.isArray(execParams)) {
       for (const txn of execParams) {
         this._assertCpNotDeleted(txn);
@@ -470,7 +469,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   async deployASA (
     name: string,
     flags: rtypes.ASADeploymentFlags,
-    asaParams?: Partial<rtypes.ASADef>
+    asaParams?: Partial<wtypes.ASADef>
   ): Promise<rtypes.ASAInfo> {
     const asaDef = overrideASADef(this.accountsByName, this.loadedAsaDefs[name], asaParams);
 
@@ -566,22 +565,22 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * Deploys Algorand Stateful Smart Contract
    * @param approvalProgram filename which has approval program
    * @param clearProgram filename which has clear program
-   * @param flags SSCDeploymentFlags
+   * @param flags AppDeploymentFlags
    * @param payFlags Transaction Params
    * @param scTmplParams: scTmplParams: Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  async deploySSC (
+  async deployApp (
     approvalProgram: string,
     clearProgram: string,
-    flags: rtypes.SSCDeploymentFlags,
+    flags: rtypes.AppDeploymentFlags,
     payFlags: rtypes.TxParams,
     scTmplParams?: SCParams): Promise<rtypes.SSCInfo> {
     const name = approvalProgram + "-" + clearProgram;
     this.assertNoAsset(name);
     let sscInfo = {} as rtypes.SSCInfo;
     try {
-      sscInfo = await this.algoOp.deploySSC(
+      sscInfo = await this.algoOp.deployApp(
         approvalProgram, clearProgram, flags, payFlags, this.txWriter, scTmplParams);
     } catch (error) {
       this.persistCP();
@@ -604,17 +603,17 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * @param newClearProgram New Clear Program filename
    * @param flags Optional parameters to SSC (accounts, args..)
    */
-  async updateSSC (
+  async updateApp (
     sender: algosdk.Account,
     payFlags: rtypes.TxParams,
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
-    flags: rtypes.SSCOptionalFlags
+    flags: rtypes.AppOptionalFlags
   ): Promise<rtypes.SSCInfo> {
     this.assertCPNotDeleted({
-      type: rtypes.TransactionType.UpdateSSC,
-      sign: rtypes.SignType.SecretKey,
+      type: wtypes.TransactionType.UpdateApp,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: sender,
       newApprovalProgram: newApprovalProgram,
       newClearProgram: newClearProgram,
@@ -625,7 +624,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
 
     let sscInfo = {} as rtypes.SSCInfo;
     try {
-      sscInfo = await this.algoOp.updateSSC(sender, payFlags, appID,
+      sscInfo = await this.algoOp.updateApp(sender, payFlags, appID,
         newApprovalProgram, newClearProgram, flags, this.txWriter);
     } catch (error) {
       this.persistCP();
@@ -706,20 +705,20 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     });
   }
 
-  async deploySSC (
+  async deployApp (
     approvalProgram: string,
     clearProgram: string,
-    flags: rtypes.SSCDeploymentFlags,
+    flags: rtypes.AppDeploymentFlags,
     payFlags: rtypes.TxParams,
     scInitParam?: unknown): Promise<rtypes.SSCInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
-      methodName: "deploySSC"
+      methodName: "deployApp"
     });
   }
 
   /**
    * This functions updates SSC in the network.
-   * Note: UpdateSSC when ran in RunMode it doesn't store checkpoints
+   * Note: updateApp when ran in RunMode it doesn't store checkpoints
    * @param sender Sender account
    * @param payFlags transaction parameters
    * @param appID application index
@@ -727,24 +726,24 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
    * @param newClearProgram new clear program name
    * @param flags SSC optional flags
    */
-  async updateSSC (
+  async updateApp (
     sender: algosdk.Account,
     payFlags: rtypes.TxParams,
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
-    flags: rtypes.SSCOptionalFlags
+    flags: rtypes.AppOptionalFlags
   ): Promise<rtypes.SSCInfo> {
     this.assertCPNotDeleted({
-      type: rtypes.TransactionType.UpdateSSC,
-      sign: rtypes.SignType.SecretKey,
+      type: wtypes.TransactionType.UpdateApp,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: sender,
       newApprovalProgram: newApprovalProgram,
       newClearProgram: newClearProgram,
       appID: appID,
       payFlags: {}
     });
-    return await this.algoOp.updateSSC(
+    return await this.algoOp.updateApp(
       sender, payFlags, appID,
       newApprovalProgram, newClearProgram,
       flags, this.txWriter

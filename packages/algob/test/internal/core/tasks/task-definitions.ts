@@ -1,6 +1,6 @@
+import { ERRORS } from "@algo-builder/web";
 import { assert } from "chai";
 
-import { ERRORS } from "../../../../src/errors/errors-list";
 import * as types from "../../../../src/internal/core/params/argument-types";
 import {
   OverriddenTaskDefinition,

@@ -2,7 +2,7 @@
  * Description:
  * This file deploys the stateful smart contract to create and transfer NFT
 */
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const { executeTransaction } = require('./transfer/common');
 
 async function run (runtimeEnv, deployer) {
@@ -20,20 +20,20 @@ async function run (runtimeEnv, deployer) {
 
   await executeTransaction(deployer, algoTxnParams); // fund john
 
-  await deployer.deploySSC('nft_approval.py', 'nft_clear_state.py', {
+  await deployer.deployApp('nft_approval.py', 'nft_clear_state.py', {
     sender: masterAccount,
     localInts: 16,
     globalInts: 1,
     globalBytes: 63
   }, {});
 
-  const sscInfo = await deployer.getSSC('nft_approval.py', 'nft_clear_state.py');
-  const appID = sscInfo.appID;
-  console.log(sscInfo);
+  const appInfo = await deployer.getApp('nft_approval.py', 'nft_clear_state.py');
+  const appID = appInfo.appID;
+  console.log(appInfo);
 
   try {
-    await deployer.optInAccountToSSC(masterAccount, appID, {}, {}); // opt-in to asc by master
-    await deployer.optInAccountToSSC(john, appID, {}, {}); // opt-in to asc by john
+    await deployer.optInAccountToApp(masterAccount, appID, {}, {}); // opt-in to asc by master
+    await deployer.optInAccountToApp(john, appID, {}, {}); // opt-in to asc by john
   } catch (e) {
     console.log(e);
     throw new Error(e);

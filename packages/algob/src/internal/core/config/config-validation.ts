@@ -1,8 +1,7 @@
 import { parseZodError } from "@algo-builder/runtime";
+import { BuilderError, ERRORS } from "@algo-builder/web";
 import * as z from 'zod';
 
-import { BuilderError } from "../../../errors/errors";
-import { ERRORS } from "../../../errors/errors-list";
 import { validateAccount } from "../../../lib/account";
 // import { Account } from "algosdk";
 import type { ChainCfg, HttpNetworkConfig, NetworkConfig } from "../../../types";

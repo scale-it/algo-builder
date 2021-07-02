@@ -7,7 +7,7 @@
  *  + fee is <= 1000
  *  + we don't do any rekey, closeRemainderTo
 */
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const { balanceOf } = require('@algo-builder/algob');
 const { executeTransaction, mkParam } = require('../common');
 
@@ -19,7 +19,7 @@ async function run (runtimeEnv, deployer) {
   await executeTransaction(deployer, mkParam(masterAccount, alice.addr, 5e6, { note: 'Funding' }));
 
   // Get AppInfo and AssetID from checkpoints.
-  const appInfo = deployer.getSSC('5-contract-asa-stateful.py', '5-clear.py');
+  const appInfo = deployer.getApp('5-contract-asa-stateful.py', '5-clear.py');
   const lsig = await deployer.loadLogic('5-contract-asa-stateless.py', { APP_ID: appInfo.appID });
 
   /* Transfer ASA 'gold' from contract account to user account */

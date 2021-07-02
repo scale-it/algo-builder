@@ -1,7 +1,7 @@
 const {
   executeTransaction
 } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const accounts = require('./common/accounts');
 
 /**
@@ -9,7 +9,7 @@ const accounts = require('./common/accounts');
  * and link it to the controller (using the controller  add_permission argument)
  */
 async function setupPermissionsApp (runtimeEnv, deployer) {
-  const controllerSSCInfo = deployer.getSSC('controller.py', 'clear_state_program.py');
+  const controllerSSCInfo = deployer.getApp('controller.py', 'clear_state_program.py');
 
   const tesla = deployer.asa.get('tesla');
   const owner = deployer.accountsByName.get(accounts.owner);
@@ -21,7 +21,7 @@ async function setupPermissionsApp (runtimeEnv, deployer) {
 
   /** Deploy Permissions(rules) smart contract **/
   console.log('\n** Deploying smart contract: permissions **');
-  const permissionSSCInfo = await deployer.deploySSC(
+  const permissionSSCInfo = await deployer.deployApp(
     'permissions.py', // approval program
     'clear_state_program.py', // clear program
     {

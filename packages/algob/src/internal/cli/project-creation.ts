@@ -1,10 +1,9 @@
+import { BuilderError, ERRORS } from "@algo-builder/web";
 import chalk from "chalk";
 import fsExtra from "fs-extra";
 import os from "os";
 import path from "path";
 
-import { BuilderError } from "../../errors/errors";
-import { ERRORS } from "../../errors/errors-list";
 import type { PromiseAny } from "../../types";
 import { ALGOB_NAME } from "../constants";
 import { ExecutionMode, getExecutionMode } from "../core/execution-mode";

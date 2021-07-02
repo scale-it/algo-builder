@@ -2,13 +2,12 @@
 // -*- mode: typescript -*- // https://github.com/syl20bnr/spacemacs/issues/13715
 import "source-map-support/register";
 
+import { BuilderError, BuilderPluginError, ERRORS } from "@algo-builder/web";
 import chalk from "chalk";
 import debug from "debug";
 import semver from "semver";
 
-import { TASK_HELP, TASK_INIT } from "../../builtin-tasks/task-names";
-import { BuilderError, BuilderPluginError } from "../../errors/errors";
-import { ERRORS } from "../../errors/errors-list";
+import { TASK_HELP } from "../../builtin-tasks/task-names";
 import { checkAlgorandUnauthorized } from "../../lib/exceptions";
 import { RuntimeArgs, RuntimeEnv, TaskArguments } from "../../types";
 import { ALGOB_NAME } from "../constants";
@@ -225,10 +224,10 @@ async function main (): Promise<void> {
     log(`Quitting algob after successfully running task ${taskName}`);
   } catch (error) {
     if (BuilderError.isBuilderError(error)) {
-      console.error(chalk.red(`Error ${error.message}`));
+      console.error(chalk.red(`Error ${error.message}`)); // eslint-disable-line @typescript-eslint/restrict-template-expressions
     } else if (BuilderPluginError.isBuilderPluginError(error)) {
       console.error(
-        chalk.red(`Error in plugin ${error.pluginName ?? ""}: ${error.message}`)
+        chalk.red(`Error in plugin ${error.pluginName ?? ""}: ${error.message}`) // eslint-disable-line @typescript-eslint/restrict-template-expressions
       );
     } else if (error instanceof Error) {
       console.error(chalk.red("An unexpected error occurred:"), error.message);

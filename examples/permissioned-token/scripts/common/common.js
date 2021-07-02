@@ -1,5 +1,5 @@
 const { executeTransaction, balanceOf } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 
 exports.executeTransaction = async function (deployer, txnParams) {
   try {
@@ -39,12 +39,12 @@ exports.fundAccount = async function (deployer, account) {
   }
 };
 
-exports.optInAccountToSSC = async function (deployer, account, appID, payflags, sscOptionalFlags) {
+exports.optInAccountToApp = async function (deployer, account, appID, payflags, AppOptionalFlags) {
   try {
     console.log(`* Opting In: ${account.name} to SSC with application index: ${appID} *`);
-    await deployer.optInAccountToSSC(account, appID, payflags, sscOptionalFlags);
+    await deployer.optInAccountToApp(account, appID, payflags, AppOptionalFlags);
   } catch (e) {
-    console.error('optInAccountToSSC failed', e.response?.error); // probably app already optedIn
+    console.error('optInAccountToApp failed', e.response?.error); // probably app already optedIn
   }
 };
 
@@ -57,7 +57,7 @@ exports.totalSupply = async function (deployer, assetIndex) {
 
 function getClawbackParams (deployer) {
   const tesla = deployer.asa.get('tesla');
-  const controllerInfo = deployer.getSSC('controller.py', 'clear_state_program.py');
+  const controllerInfo = deployer.getApp('controller.py', 'clear_state_program.py');
   return {
     TOKEN_ID: tesla.assetIndex,
     CONTROLLER_APP_ID: controllerInfo.appID

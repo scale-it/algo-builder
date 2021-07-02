@@ -1,8 +1,9 @@
+import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../../src/errors/errors-list";
 import { validateASADefs } from "../../../src/lib/asa";
-import { Account, ASADefs } from "../../../src/types";
+import { Account } from "../../../src/types";
 import { expectRuntimeError } from "../../helpers/runtime-errors";
 
 const namedAccount: Account = {
@@ -13,7 +14,7 @@ const namedAccount: Account = {
 
 describe("ASA parser", () => {
   it("Should validate correct obj", async () => {
-    const valid: ASADefs = {
+    const valid: types.ASADefs = {
       A1: {
         total: 1,
         decimals: 0,

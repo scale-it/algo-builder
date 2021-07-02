@@ -1,3 +1,4 @@
+import { types } from "@algo-builder/web";
 import type {
   Account,
   AssetDef,
@@ -17,8 +18,8 @@ import { keyToBytes } from "./lib/parsing";
 import { assertValidSchema } from "./lib/stateful";
 import {
   AccountStoreI,
-  AppLocalStateM, ASADef, AssetHoldingM, AssetModFields, CreatedAppM, SSCAttributesM,
-  SSCDeploymentFlags, StackElem
+  AppDeploymentFlags, AppLocalStateM, AssetHoldingM, CreatedAppM, SSCAttributesM,
+  StackElem
 } from "./types";
 
 const StateMap = "key-value";
@@ -175,7 +176,7 @@ export class AccountStore implements AccountStoreI {
    * @param name Asset Name
    * @param asaDef Asset Definitions
    */
-  addAsset (assetId: number, name: string, asaDef: ASADef): AssetDef {
+  addAsset (assetId: number, name: string, asaDef: types.ASADef): AssetDef {
     if (this.createdAssets.size === MAX_ALGORAND_ACCOUNT_ASSETS) {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.MAX_LIMIT_ASSETS,
         { name: name, address: this.address, max: MAX_ALGORAND_ACCOUNT_ASSETS });
@@ -202,7 +203,7 @@ export class AccountStore implements AccountStoreI {
    * @param assetId Asset Index
    * @param fields Fields for modification
    */
-  modifyAsset (assetId: number, fields: AssetModFields): void {
+  modifyAsset (assetId: number, fields: types.AssetModFields): void {
     const asset = this.getAssetDef(assetId);
     if (asset === undefined) {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND, { assetId: assetId });
@@ -269,7 +270,7 @@ export class AccountStore implements AccountStoreI {
    * @param clearProgram application clear program
    * NOTE - approval and clear program must be the TEAL code as string
    */
-  addApp (appID: number, params: SSCDeploymentFlags,
+  addApp (appID: number, params: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string): CreatedAppM {
     if (this.createdApps.size === MAX_ALGORAND_ACCOUNT_APPS) {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.MAX_LIMIT_APPS, {
@@ -372,7 +373,7 @@ class App {
   readonly attributes: SSCAttributesM;
 
   // NOTE - approval and clear program must be the TEAL code as string
-  constructor (appID: number, params: SSCDeploymentFlags,
+  constructor (appID: number, params: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string) {
     this.id = appID;
     this.attributes = {
@@ -391,7 +392,7 @@ class Asset {
   readonly id: number;
   readonly definitions: AssetDef;
 
-  constructor (assetId: number, def: ASADef, creator: string, assetName: string) {
+  constructor (assetId: number, def: types.ASADef, creator: string, assetName: string) {
     this.id = assetId;
     this.definitions = {
       creator: creator,

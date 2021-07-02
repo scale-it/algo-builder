@@ -161,6 +161,22 @@ Please check algob output for more details.`
     message: "App %app% is already deleted from network",
     title: "App deleted",
     description: `app already deleted error`
+  },
+  TRANSACTION_TYPE_ERROR: {
+    number: 16,
+    message: "Error. Transaction Type %transaction% is Unknown",
+    title: "Unknown Transaction type",
+    description: `Provided transaction type is unknown
+    Please double check your transaction type`
+  },
+  PARAM_PARSE_ERROR: {
+    number: 17,
+    message: `Invalid ASA definition: '%source%'.
+    Reason: %reason%`,
+    title: "Invalid ASA definition",
+    description: `Invalid ASA definition: '%source%'.
+    Reason: %reason%
+    Please check your ASA file`
   }
 };
 

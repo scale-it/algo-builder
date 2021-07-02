@@ -1,8 +1,7 @@
+import { BuilderError, ERRORS } from "@algo-builder/web";
 import debug from "debug";
 import fsExtra from "fs-extra";
 
-import { BuilderError } from "../errors/errors";
-import { ERRORS } from "../errors/errors-list";
 import { task } from "../internal/core/config/config-env";
 import { DeployerConfig, mkDeployer } from "../internal/deployer_cfg";
 import { TxWriterImpl } from "../internal/tx-log-writer";

@@ -1,7 +1,5 @@
+import { BuilderError, ErrorDescriptor } from "@algo-builder/web";
 import { assert, AssertionError } from "chai";
-
-import { BuilderError } from "../../src/errors/errors";
-import { ErrorDescriptor } from "../../src/errors/errors-list";
 
 export async function expectErrorAsync (
   f: () => Promise<any>,
@@ -62,7 +60,7 @@ export function expectBuilderError (
     return;
   }
   throw new AssertionError( // eslint-disable-line @typescript-eslint/no-throw-literal
-    `BuilderError number ${errorDescriptor.number} expected, but no Error was thrown`
+    `BuilderError number ${errorDescriptor.number} expected, but no Error was thrown` // eslint-disable-line @typescript-eslint/restrict-template-expressions
   );
 }
 
@@ -75,7 +73,7 @@ export async function expectBuilderErrorAsync (
   // This makes things easier, at least as long as we don't have async stack
   // traces. This may change in the near-ish future.
   const error = new AssertionError(
-    `BuilderError number ${errorDescriptor.number} expected, but no Error was thrown`
+    `BuilderError number ${errorDescriptor.number} expected, but no Error was thrown` // eslint-disable-line @typescript-eslint/restrict-template-expressions
   );
 
   const match = String(matchMessage);

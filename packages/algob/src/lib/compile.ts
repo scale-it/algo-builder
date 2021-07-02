@@ -1,4 +1,5 @@
 import { getPathFromDirRecursive } from "@algo-builder/runtime";
+import { BuilderError, ERRORS, parseAlgorandError } from "@algo-builder/web";
 import type { Algodv2, CompileOut } from "algosdk";
 import { spawnSync, SpawnSyncReturns } from "child_process";
 import * as fs from 'fs';
@@ -6,8 +7,6 @@ import * as murmurhash from 'murmurhash';
 import * as path from 'path';
 import YAML from "yaml";
 
-import { BuilderError, parseAlgorandError } from "../errors/errors";
-import { ERRORS } from "../errors/errors-list";
 import { assertDir, ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
 import { timestampNow } from "../lib/time";
 import type { ASCCache, PyASCCache, ReplaceParams, SCParams } from "../types";
