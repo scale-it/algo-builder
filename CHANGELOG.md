@@ -10,7 +10,7 @@
     + SSCDeploymentFlags -> AppDeploymentFlags
     + SSCOptionalFlags -> AppOptionalFlags
 + Import are changed to scoped imports
-    + instead of stringToBytes, yuo can import a `convert` scope, and then use `convert.stringToBytes`
+    + instead of stringToBytes, you can import a `convert` namespace, and then use `convert.stringToBytes`
 + Types imports for `ExecParams`, `TransactionTypes`, `SignType` moved to new package `@algo-builder/web`
 
 
@@ -109,7 +109,7 @@ New website: https://scale-it.github.io/algo-builder
 * New opt-in functions and updates. Check the [deployer API](https://scale-it.github.io/algo-builder/api/algob/interfaces/types.deployer.html) for information about all opt-in functions.
   * `deployer.optIn` are now available both in *DEPLOY* mode to *RUN* mode.
   * Extended `deployer.optIn*` functions to support ASA by ID. Previously we only accepted ASA by name (based on the name in `assets/asa.yaml` file).
-  * Added [`deployer.optInLsigToApp`](https://scale-it.github.io/algo-builder/api/algob/interfaces/types.deployer.html#optInLsigToApp) and [`deployer.optInLsigToASA`](https://scale-it.github.io/algo-builder/api/algob/interfaces/types.deployer.html#optinlsigtoasa) to easily opt-in stateless smart contract (lsig) account to stateful smart contract and ASA.
+  * Added [`deployer.optInLsigToApp`](https://scale-it.github.io/algo-builder/api/algob/interfaces/types.deployer.html#optinlsigtoapp) and [`deployer.optInLsigToASA`](https://scale-it.github.io/algo-builder/api/algob/interfaces/types.deployer.html#optinlsigtoasa) to easily opt-in stateless smart contract (lsig) account to stateful smart contract and ASA.
 * Asset related `execParams` (transaction parameters for [`executeTransaction`](https://scale-it.github.io/algo-builder/api/algob/modules.html#executetransaction)) support ASA by name and by ID (previously only ASA ID was supported). [Example](https://github.com/scale-it/algo-builder/blob/master/examples/asa/scripts/transfer/gold-delegated-lsig.js#L22).
 * cleaned test suite log (when developing Algo Builder itself). Our test suite has 884 tests.
 
