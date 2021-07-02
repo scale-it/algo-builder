@@ -1,5 +1,5 @@
 const { readGlobalStateSSC, executeTransaction } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 
 async function run (runtimeEnv, deployer) {
   const creatorAccount = deployer.accountsByName.get('alice');

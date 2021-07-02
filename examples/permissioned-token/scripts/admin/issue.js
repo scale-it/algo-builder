@@ -1,7 +1,7 @@
 const {
   balanceOf
 } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const { getClawback, executeTransaction, fundAccount, totalSupply } = require('../common/common');
 const accounts = require('../common/accounts');
 

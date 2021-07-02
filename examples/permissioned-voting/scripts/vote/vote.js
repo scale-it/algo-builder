@@ -1,4 +1,5 @@
-const { types, stringToBytes } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
+const { convert } = require('@algo-builder/algob');
 const { executeTransaction } = require('./common');
 
 async function run (runtimeEnv, deployer) {
@@ -30,7 +31,7 @@ async function run (runtimeEnv, deployer) {
 
   // App arguments to vote for "candidatea".
   const appArgs = [
-    stringToBytes('vote'), stringToBytes('candidatea')
+    convert.stringToBytes('vote'), convert.stringToBytes('candidatea')
   ];
 
   // Get AppInfo and AssetID from checkpoints.

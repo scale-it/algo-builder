@@ -4,7 +4,7 @@
  * from a contract account (lsig) to an changed owner account.
  * Note: This transfer will only work if owner is changed to bob
 */
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const { balanceOf } = require('@algo-builder/algob');
 const { executeTransaction, mkParam } = require('../common');
 

@@ -1,7 +1,7 @@
 const {
   balanceOf, executeTransaction
 } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const { issue } = require('../admin/issue');
 const { whitelist } = require('../permissions/whitelist');
 

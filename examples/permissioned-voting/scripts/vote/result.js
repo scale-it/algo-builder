@@ -1,5 +1,5 @@
 const { readGlobalStateSSC } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const { executeTransaction } = require('./common');
 
 async function run (runtimeEnv, deployer) {

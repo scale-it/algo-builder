@@ -2,7 +2,7 @@ const {
   executeTransaction
 } = require('@algo-builder/algob');
 const { fundAccount, optInAccountToApp } = require('../common/common');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const accounts = require('../common/accounts');
 
 const clearStateProgram = 'clear_state_program.py';

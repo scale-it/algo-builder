@@ -7,7 +7,7 @@
  *  + fee is <= 1000
  *  + we don't do any rekey, closeRemainderTo
 */
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const { balanceOf } = require('@algo-builder/algob');
 const { executeTransaction, mkParam } = require('../common');
 

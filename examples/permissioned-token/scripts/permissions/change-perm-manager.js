@@ -1,6 +1,6 @@
 const { fundAccount, executeTransaction, optInAccountToApp } = require('../common/common');
 const { whitelist } = require('./whitelist');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const accounts = require('../common/accounts');
 
 /**
