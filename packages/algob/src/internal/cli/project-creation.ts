@@ -32,14 +32,8 @@ export async function printWelcomeMessage (): Promise<void> {
     chalk.cyan(`★ Welcome to ${ALGOB_NAME} v${packageJson.version}`));
 }
 
-function copySampleProject (location: string, isTSProject: boolean): void {
-  const packageRoot = getPackageRoot();
-  const sampleProjectName = isTSProject ? "sample-project-ts" : "sample-project";
-  const sampleProjDir = path.join(packageRoot, sampleProjectName);
-
-  console.log(chalk.greenBright("Initializing new workspace in " + process.cwd() + "."));
-
-  fsExtra.copySync(sampleProjDir, location, {
+function copy (directory: string, location: string): void {
+  fsExtra.copySync(directory, location, {
     // User doesn't choose the directory so overwrite should be avoided
     overwrite: false,
     filter: (src: string, dest: string) => {
@@ -58,6 +52,22 @@ function copySampleProject (location: string, isTSProject: boolean): void {
       return true;
     }
   });
+}
+
+function copySampleProject (location: string, isTSProject: boolean): void {
+  const packageRoot = getPackageRoot();
+  const sampleProjDir = path.join(packageRoot, "sample-project");
+
+  console.log(chalk.greenBright("Initializing new workspace in " + process.cwd() + "."));
+
+  // copy common files first
+  copy(path.join(sampleProjDir, "common"), location);
+
+  const projectDir =
+    isTSProject ? path.join(sampleProjDir, "ts") : path.join(sampleProjDir, "js");
+
+  // copy JS/TS project files, depending on --typescript flag
+  copy(projectDir, location);
 }
 
 export function printSuggestedCommands (): void {
