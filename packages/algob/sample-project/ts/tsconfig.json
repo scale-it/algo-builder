@@ -24,6 +24,6 @@
     "**/webpack"
   ],
   "include": [
-    "scripts", "test"
+    "scripts"
   ]
 }
