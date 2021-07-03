@@ -44,15 +44,15 @@ In the `sample-project` folder you'll have following items:
     - You can change or add ASA, Smart Contracts in this folder.
 
 * `scripts/`: Directory for scripts to deploy and run your assets and contracts:
-    - `0-sampleScript.js` : This script shows how to deploy ASA.
-    - `1-sampleScript.js` : This script shows how to deploy ASC.
-    - `2-escrow-account.js`: This script funds an escrow contract with a hardcoded template parameter (passed in script)
+    - `0-sampleScript.ts` : This script shows how to deploy ASA.
+    - `1-sampleScript.ts` : This script shows how to deploy ASC.
+    - `2-escrow-account.ts`: This script funds an escrow contract with a hardcoded template parameter (passed in script)
 
 * `test/`: Directory for test files for testing your assets and smart contracts:
-    - `sample-test.js` : This is a basic example of how tests should be and how they work.
+    - `sample-test.ts` : This is a basic example of how tests should be and how they work.
     - You can add tests for your scripts here.
 
-* `algob.config.js`: Algob configuration file
+* `algob.config.ts`: Algob configuration file
 
 Before writing smart contracts in PyTEAL:
 
