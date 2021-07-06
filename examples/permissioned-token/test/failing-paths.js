@@ -126,9 +126,19 @@ describe('Permissioned Token Tests - Failing Paths', function () {
   describe('Opt Out', function () {
     it('should reject tx if user not opted-in', () => {
       const asaCreator = ctx.getAccount(asaDef.creator);
+      const optOutParams = {
+        type: types.TransactionType.TransferAsset,
+        sign: types.SignType.SecretKey,
+        fromAccount: ctx.elon.account,
+        toAccountAddr: asaCreator.address,
+        assetID: ctx.assetIndex,
+        amount: 0,
+        payFlags: { totalFee: 1000, closeRemainderTo: asaCreator.address }
+      };
+
       assert.throws(() =>
-        ctx.optOut(asaCreator.address, elon.account),
-        `RUNTIME_ERR1404: Account ${elon.address} doesn't hold asset index ${ctx.assetIndex}`);
+        ctx.runtime.executeTx(optOutParams),
+        `RUNTIME_ERR1404: Account ${ctx.elon.address} doesn't hold asset index ${ctx.assetIndex}`);
     });
   });
 
