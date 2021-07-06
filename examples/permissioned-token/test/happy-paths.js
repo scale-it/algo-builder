@@ -355,7 +355,7 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     const initialReserveBalance = ctx.getAssetHolding(asaReserve.address).amount;
     ctx.runtime.executeTx(ceaseTxParams);
 
-    // verify cease
+    // verify cease amount
     assert.equal(
       ctx.getAssetHolding(bob.address).amount,
       initialBobBalance - toCeaseAmt
