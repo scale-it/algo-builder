@@ -3,7 +3,6 @@ module.exports = {
     "../../.eslintrc.js"
   ],
   parserOptions: {
-    project: "./test/tsconfig.json",
-    project: "./sample-project/ts/tsconfig.json"
+    project: "./test/tsconfig.json"
   }
 }

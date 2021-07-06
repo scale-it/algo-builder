@@ -2,7 +2,7 @@ const {
   balanceOf
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
-const { getClawback, executeTransaction, fundAccount } = require('../common/common');
+const { getClawback, executeTransaction } = require('../common/common');
 const accounts = require('../common/accounts');
 
 // here instead of updating the asset reserve by modifyAsset tx,
