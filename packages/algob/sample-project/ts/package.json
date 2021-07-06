@@ -8,7 +8,6 @@
   },
   "scripts": {
     "algob": "algob",
-    "test": "mocha",
     "build": "tsc --build .",
     "build:watch": "tsc -w -p ."
   }

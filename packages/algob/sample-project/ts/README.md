@@ -52,10 +52,11 @@ In the `sample-project` folder you'll have following items:
     - `sample-test.ts` : This is a basic example of how tests should be and how they work.
     - You can add tests for your scripts here.
 
-* `algob.config.ts`: Algob configuration file
+* `algob.config.js`: Algob configuration file
 
 Before writing smart contracts in PyTEAL:
 
 * Please follow standard instuctions about [PyTEAL Setup](https://github.com/scale-it/algo-builder/blob/master/README.md#pyteal)
 * For passing template parameters dynamically in PyTEAL contract you will need to add [`algobpy`](https://github.com/scale-it/algo-builder/tree/master/examples/algobpy) in your project directory.
     - Read more about usage of `algobpy` and passing template parameters in /scripts [here](https://github.com/scale-it/algo-builder/blob/master/docs/guide/py-teal.md#external-parameters-support)
+* PyTEAL supports `Tmpl` fuction which can replace value with a constant and `algob` supports these replacements. To read more about TMPL Placeholder Support click [here](https://github.com/scale-it/algo-builder/blob/master/docs/guide/py-teal.md#tmpl-placeholder-support)
