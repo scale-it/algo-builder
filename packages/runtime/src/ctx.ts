@@ -275,16 +275,16 @@ export class Ctx implements Context {
   // transfer ASSET as per transaction parameters
   transferAsset (txnParam: types.AssetTransferParam): void {
     const fromAccountAddr = webTx.getFromAddress(txnParam);
-    const fromAssetHolding = this.getAssetHolding(txnParam.assetID as number, fromAccountAddr);
-    const toAssetHolding = this.getAssetHolding(txnParam.assetID as number, txnParam.toAccountAddr);
     txnParam.amount = BigInt(txnParam.amount);
-
     if (txnParam.amount === 0n && fromAccountAddr === txnParam.toAccountAddr) {
       this.optIntoASA(txnParam.assetID as number, fromAccountAddr, txnParam.payFlags);
     } else if (txnParam.amount !== 0n) {
       this.assertAssetNotFrozen(txnParam.assetID as number, fromAccountAddr);
       this.assertAssetNotFrozen(txnParam.assetID as number, txnParam.toAccountAddr);
     }
+
+    const fromAssetHolding = this.getAssetHolding(txnParam.assetID as number, fromAccountAddr);
+    const toAssetHolding = this.getAssetHolding(txnParam.assetID as number, txnParam.toAccountAddr);
     if (fromAssetHolding.amount - txnParam.amount < 0) {
       throw new RuntimeError(RUNTIME_ERRORS.TRANSACTION.INSUFFICIENT_ACCOUNT_ASSETS, {
         amount: txnParam.amount,

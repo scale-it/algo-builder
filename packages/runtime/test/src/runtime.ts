@@ -227,7 +227,31 @@ describe("Algorand Standard Assets", function () {
     assert.equal(aliceAssetHolding?.amount as bigint, 0n);
   });
 
-  it("should throw error on opt-in of asset does not exist", () => {
+  it("should opt-in to asset using asset transfer transaction", () => {
+    const res = runtime.getAssetDef(assetId);
+    assert.isDefined(res);
+    const prevAliceMinBal = alice.minBalance;
+
+    // opt-in for alice (using asset transfer tx with amount == 0)
+    const optInParams: types.ExecParams = {
+      type: types.TransactionType.TransferAsset,
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account,
+      toAccountAddr: alice.address,
+      amount: 0n,
+      assetID: assetId,
+      payFlags: { totalFee: 1000 }
+    };
+    runtime.executeTx(optInParams);
+    syncAccounts();
+
+    const aliceAssetHolding = alice.getAssetHolding(assetId);
+    assert.equal(aliceAssetHolding?.amount as bigint, 0n);
+    // verfiy min balance is also raised
+    assert.equal(alice.minBalance, prevAliceMinBal + ASSET_CREATION_FEE);
+  });
+
+  it("should throw error on opt-in if asset does not exist", () => {
     expectRuntimeError(
       () => runtime.optIntoASA(1234, john.address, {}),
       RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND
