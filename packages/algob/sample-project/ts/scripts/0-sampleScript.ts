@@ -1,4 +1,3 @@
-
 import * as algob from "@algo-builder/algob";
 
 async function run (
