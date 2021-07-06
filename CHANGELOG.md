@@ -28,6 +28,10 @@
     * `setup-reach` - sets up reach executable file in `~/.algorand-reach` directory
     * `remove-reach` - halts any dockerized devnets, kills & removes docker instances and containers, remove reach bash file from `~/.algorand-reach`.
 
+### Bug fixes
+
+`@algorand-builder/runtime`
+    * `OptInToASA` using asset transfer transaction.
 
 ## v1.1.0 2021-06-23
 
