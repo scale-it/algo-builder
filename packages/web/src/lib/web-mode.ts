@@ -132,6 +132,6 @@ export class WebMode {
     if (typeof txInfo.txId === "string") {
       return await this.waitForConfirmation(txInfo.txId);
     }
-    throw new Error("");
+    throw new Error("Transaction Error");
   }
 }
