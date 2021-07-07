@@ -12,7 +12,7 @@ async function setupNewPermissionsApp (runtimeEnv, deployer) {
 
   // deploy new permissions smart contract
   const newPermissionsAppInfo = await deployer.deployApp(
-    'permissions_new.py', // new permissions contract
+    'permissions_new.teal', // new permissions contract
     'clear_state_program.py',
     {
       sender: owner,

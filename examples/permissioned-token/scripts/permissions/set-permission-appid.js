@@ -11,7 +11,7 @@ async function run (runtimeEnv, deployer) {
   const owner = deployer.accountsByName.get(accounts.owner);
 
   // get new permissions smart contract info
-  const newPermissionsAppInfo = deployer.getApp('permissions_new.py', 'clear_state_program.py');
+  const newPermissionsAppInfo = deployer.getApp('permissions_new.teal', 'clear_state_program.py');
 
   console.log(`\n** Setting new permissions smart contract(id = ${newPermissionsAppInfo.appID}) **`);
   try {
