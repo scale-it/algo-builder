@@ -1,9 +1,16 @@
 # CHANGELOG
 
-## unreleased
+## v1.1.1 2021-07-12
 
 ### Improvements
 + updated `algob test` command to run mocha in typescript project as well.
+
+
+### Bug fixes
+
+`@algorand-builder/runtime`
+    * fixed [bug](https://github.com/scale-it/algo-builder/issues/404) when trying to optIn to asset using asset transfer transaction with amount 0n.
+
 
 ## v1.1.0 2021-06-23
 

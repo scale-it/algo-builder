@@ -338,7 +338,7 @@ function optOut (runtime, asaCreatorAddr, account, assetIndex) {
     type: types.TransactionType.TransferAsset,
     sign: types.SignType.SecretKey,
     fromAccount: account,
-    toAccountAddr: account.addr,
+    toAccountAddr: asaCreatorAddr,
     assetID: assetIndex,
     amount: 0,
     payFlags: { totalFee: 1000, closeRemainderTo: asaCreatorAddr }
