@@ -31,7 +31,7 @@
 ### Bug fixes
 
 `@algorand-builder/runtime`
-    * `OptInToASA` using asset transfer transaction.
+    * fixed [bug](https://github.com/scale-it/algo-builder/issues/404) when trying to optIn to asset using asset transfer transaction with amount 0n.
 
 ## v1.1.0 2021-06-23
 
