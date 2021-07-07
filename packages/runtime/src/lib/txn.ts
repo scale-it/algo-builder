@@ -1,4 +1,4 @@
-import type { EncodedAssetParams, EncodedGlobalStateSchema, EncodedLocalStateSchema, SuggestedParams, Transaction } from "algosdk";
+import type { EncodedAssetParams, EncodedGlobalStateSchema, SuggestedParams, Transaction } from "algosdk";
 import algosdk from "algosdk";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";

@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
-import { AssetParams, decodeAddress, decodeUint64, encodeAddress, encodeUint64, isValidAddress, verifyBytes } from "algosdk";
+import { decodeAddress, decodeUint64, encodeAddress, encodeUint64, isValidAddress, modelsv2, verifyBytes } from "algosdk";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
 import { Keccak } from 'sha3';
@@ -2041,7 +2041,7 @@ export class GetAssetDef extends Op {
       stack.push(0n);
     } else {
       let value: StackElem;
-      const s = AssetParamMap[this.field] as keyof AssetParams;
+      const s = AssetParamMap[this.field] as keyof modelsv2.AssetParams;
 
       switch (this.field) {
         case "AssetTotal":

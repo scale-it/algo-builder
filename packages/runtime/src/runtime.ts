@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
-import algosdk, { AssetParams, decodeAddress } from "algosdk";
+import algosdk, { decodeAddress } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
 import { AccountStore } from "./account";
@@ -116,7 +116,9 @@ export class Runtime {
    * Note: if user is accessing this function directly through runtime,
    * the line number is unknown
    */
-  assertAssetDefined (assetId: number, assetDef?: AssetParams, line?: number): AssetParams {
+  assertAssetDefined (
+    assetId: number, assetDef?: algosdk.modelsv2.AssetParams, line?: number
+  ): algosdk.modelsv2.AssetParams {
     const lineNumber = line ?? 'unknown';
     if (assetDef === undefined) {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND,
@@ -228,7 +230,7 @@ export class Runtime {
    * Returns Asset Definitions
    * @param assetId Asset Index
    */
-  getAssetDef (assetId: number): AssetParams {
+  getAssetDef (assetId: number): algosdk.modelsv2.AssetParams {
     const creatorAcc = this.getAssetAccount(assetId);
     const assetDef = creatorAcc.getAssetDef(assetId);
     return this.assertAssetDefined(assetId, assetDef);
@@ -306,7 +308,7 @@ export class Runtime {
 
   // creates new asset creation transaction object.
   mkAssetCreateTx (
-    name: string, flags: ASADeploymentFlags, asaDef: AssetParams): void {
+    name: string, flags: ASADeploymentFlags, asaDef: algosdk.modelsv2.AssetParams): void {
     // this funtion is called only for validation of parameters passed
     algosdk.makeAssetCreateTxnWithSuggestedParams(
       flags.creator.addr,

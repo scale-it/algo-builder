@@ -1,9 +1,4 @@
-import type {
-  Account,
-  ApplicationStateSchema,
-  AssetParams
-} from "algosdk";
-import { Address, generateAccount } from "algosdk";
+import { Account, Address, generateAccount, modelsv2 } from "algosdk";
 
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
@@ -33,9 +28,9 @@ export class AccountStore implements AccountStoreI {
   assets: Map<number, AssetHoldingM>;
   amount: bigint;
   appsLocalState: Map<number, AppLocalStateM>;
-  appsTotalSchema: ApplicationStateSchema;
+  appsTotalSchema: modelsv2.ApplicationStateSchema;
   createdApps: Map<number, SSCAttributesM>;
-  createdAssets: Map<number, AssetParams>;
+  createdAssets: Map<number, modelsv2.AssetParams>;
 
   constructor (balance: number | bigint, account?: Account) {
     if (account) {
@@ -52,9 +47,9 @@ export class AccountStore implements AccountStoreI {
     this.amount = BigInt(balance);
     this.minBalance = ALGORAND_ACCOUNT_MIN_BALANCE;
     this.appsLocalState = new Map<number, AppLocalStateM>();
-    this.appsTotalSchema = <ApplicationStateSchema>{};
+    this.appsTotalSchema = <modelsv2.ApplicationStateSchema>{};
     this.createdApps = new Map<number, SSCAttributesM>();
-    this.createdAssets = new Map<number, AssetParams>();
+    this.createdAssets = new Map<number, modelsv2.AssetParams>();
   }
 
   // returns account balance in microAlgos
@@ -157,7 +152,7 @@ export class AccountStore implements AccountStoreI {
    * Queries asset definition by assetId
    * @param assetId asset index
    */
-  getAssetDef (assetId: number): AssetParams | undefined {
+  getAssetDef (assetId: number): modelsv2.AssetParams | undefined {
     return this.createdAssets.get(assetId);
   }
 
@@ -174,7 +169,7 @@ export class AccountStore implements AccountStoreI {
    * @param name Asset Name
    * @param asaDef Asset Definitions
    */
-  addAsset (assetId: number, name: string, asaDef: ASADef): AssetParams {
+  addAsset (assetId: number, name: string, asaDef: ASADef): modelsv2.AssetParams {
     if (this.createdAssets.size === MAX_ALGORAND_ACCOUNT_ASSETS) {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.MAX_LIMIT_ASSETS,
         { name: name, address: this.address, max: MAX_ALGORAND_ACCOUNT_ASSETS });
@@ -389,7 +384,7 @@ class App {
 // represents asset
 class Asset {
   readonly id: number;
-  readonly definitions: AssetParams;
+  readonly definitions: modelsv2.AssetParams;
 
   constructor (assetId: number, def: ASADef, creator: string, assetName: string) {
     this.id = assetId;

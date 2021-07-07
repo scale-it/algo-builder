@@ -1,4 +1,4 @@
-import { AssetParams, encodeAddress } from "algosdk";
+import { encodeAddress, modelsv2 } from "algosdk";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
@@ -47,7 +47,7 @@ export class Interpreter {
    * Queries ASA Definitions data by assetID.  Returns undefined if ASA is not deployed.
    * @param assetId Asset Index
    */
-  getAssetDef (assetId: number): AssetParams | undefined {
+  getAssetDef (assetId: number): modelsv2.AssetParams | undefined {
     const accountAddr = this.runtime.ctx.state.assetDefs.get(assetId);
     if (!accountAddr) return undefined;
 

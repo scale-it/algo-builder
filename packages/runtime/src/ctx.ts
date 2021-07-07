@@ -1,9 +1,8 @@
-import { AssetParams, makeAssetTransferTxnWithSuggestedParams } from "algosdk";
+import { makeAssetTransferTxnWithSuggestedParams, modelsv2 } from "algosdk";
 
 import { getFromAddress, Runtime } from ".";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
-import { ASSET_CREATION_FEE } from "./lib/constants";
 import { mockSuggestedParams } from "./mock/tx";
 import {
   AccountAddress, AccountStoreI, AlgoTransferParam, ASADef, ASADeploymentFlags, AssetHoldingM, AssetModFields,
@@ -80,7 +79,7 @@ export class Ctx implements Context {
    * Returns Asset Definitions
    * @param assetId Asset Index
    */
-  getAssetDef (assetId: number): AssetParams {
+  getAssetDef (assetId: number): modelsv2.AssetParams {
     const creatorAcc = this.getAssetAccount(assetId);
     const assetDef = creatorAcc.getAssetDef(assetId);
     return this.runtime.assertAssetDefined(assetId, assetDef);
