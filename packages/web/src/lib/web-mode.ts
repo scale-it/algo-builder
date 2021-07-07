@@ -34,7 +34,7 @@ export class WebMode {
       });
       if (
         pendingInfo[CONFIRMED_ROUND] !== null &&
-        pendingInfo[CONFIRMED_ROUND] > 0
+        pendingInfo[CONFIRMED_ROUND] as number > 0
       ) {
         return pendingInfo;
       }
