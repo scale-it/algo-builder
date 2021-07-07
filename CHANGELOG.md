@@ -29,6 +29,9 @@
     * `remove-reach` - halts any dockerized devnets, kills & removes docker instances and containers, remove reach bash file from `~/.algorand-reach`.
 
 
+### Examples
++ [Permissioned Token](/examples/permissioned-token) Added `cease` function and a script to change permissions app_id. 
+
 ## v1.1.0 2021-06-23
 
 Highlights:

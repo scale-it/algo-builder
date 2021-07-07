@@ -6,6 +6,7 @@ const { Context } = require('./common');
 
 const minBalance = 20e6; // 20 ALGOs
 const ALICE_ADDRESS = 'EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY';
+const FORCE_TRANSFER_APPARG = 'str:force_transfer';
 
 describe('Permissioned Token Tests - Happy Paths', function () {
   let master, alice, bob, elon;
@@ -170,7 +171,7 @@ describe('Permissioned Token Tests - Happy Paths', function () {
         fromAccount: asaManager.account,
         appID: ctx.controllerappID,
         payFlags: { totalFee: 1000 },
-        appArgs: ['str:force_transfer'],
+        appArgs: [FORCE_TRANSFER_APPARG],
         foreignAssets: [ctx.assetIndex]
       },
       {
@@ -256,7 +257,7 @@ describe('Permissioned Token Tests - Happy Paths', function () {
         fromAccount: asaManager.account,
         appID: ctx.controllerappID,
         payFlags: { totalFee: 1000 },
-        appArgs: ['str:force_transfer'],
+        appArgs: [FORCE_TRANSFER_APPARG],
         foreignAssets: [ctx.assetIndex]
       },
       {
@@ -307,5 +308,90 @@ describe('Permissioned Token Tests - Happy Paths', function () {
       ctx.getAssetHolding(elon.address).amount,
       intialElonHolding.amount + oldReserveAssetHolding.amount
     );
+  });
+
+  it('should cease tokens from bob', () => {
+    // Opt-In to ASA
+    ctx.optInToASA(bob.address);
+    // Issue few tokens to sender
+    ctx.issue(asaReserve.account, bob, 150);
+    ctx.syncAccounts();
+
+    const toCeaseAmt = 120n;
+    const ceaseTxParams = [
+      {
+        type: types.TransactionType.CallNoOpSSC,
+        sign: types.SignType.SecretKey,
+        fromAccount: asaManager.account,
+        appID: ctx.controllerappID,
+        payFlags: { totalFee: 1000 },
+        appArgs: [FORCE_TRANSFER_APPARG],
+        foreignAssets: [ctx.assetIndex]
+      },
+      {
+        type: types.TransactionType.RevokeAsset,
+        sign: types.SignType.LogicSignature,
+        fromAccountAddr: ctx.lsig.address(),
+        recipient: asaReserve.address,
+        assetID: ctx.assetIndex,
+        revocationTarget: bob.address,
+        amount: toCeaseAmt,
+        lsig: ctx.lsig,
+        payFlags: { totalFee: 1000 }
+      },
+      {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
+        fromAccount: asaManager.account,
+        toAccountAddr: ctx.lsig.address(),
+        amountMicroAlgos: 1000,
+        payFlags: { totalFee: 1000 }
+      }
+    ];
+
+    const initialBobBalance = ctx.getAssetHolding(bob.address).amount;
+    assert.equal(initialBobBalance, 150n);
+
+    const initialReserveBalance = ctx.getAssetHolding(asaReserve.address).amount;
+    ctx.runtime.executeTx(ceaseTxParams);
+
+    // verify cease amount
+    assert.equal(
+      ctx.getAssetHolding(bob.address).amount,
+      initialBobBalance - toCeaseAmt
+    );
+    assert.equal(
+      ctx.getAssetHolding(asaReserve.address).amount,
+      initialReserveBalance + toCeaseAmt
+    );
+  });
+
+  it('should set new permissions appID in controller', () => {
+    // perm_app_id from controller's global state
+    const currentPermAppID = ctx.runtime.getGlobalState(ctx.controllerappID, 'perm_app');
+    const newPermAppID = 99; // some random value for test
+    assert.notEqual(currentPermAppID, newPermAppID);
+
+    const appArgs = [
+      'str:set_permission',
+      `int:${newPermAppID}`
+    ];
+    const setPermTx = {
+      type: types.TransactionType.CallNoOpSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: asaManager.account,
+      appID: ctx.controllerappID,
+      payFlags: { totalFee: 1000 },
+      appArgs: appArgs,
+      foreignAssets: [ctx.assetIndex]
+    };
+
+    // works because fromAccount is the current permissions manager
+    ctx.runtime.executeTx(setPermTx);
+    ctx.syncAccounts();
+
+    // verify app_id is updated in controller global state
+    const appIDFromControllerGS = ctx.runtime.getGlobalState(ctx.controllerappID, 'perm_app');
+    assert.equal(appIDFromControllerGS, newPermAppID);
   });
 });

@@ -41,14 +41,14 @@ exports.fundAccount = async function (deployer, account) {
 
 exports.optInAccountToApp = async function (deployer, account, appID, payflags, AppOptionalFlags) {
   try {
-    console.log(`* Opting In: ${account.name} to SSC with application index: ${appID} *`);
+    console.log(`* Opting In: ${account.name} to App with application index: ${appID} *`);
     await deployer.optInAccountToApp(account, appID, payflags, AppOptionalFlags);
   } catch (e) {
     console.error('optInAccountToApp failed', e.response?.error); // probably app already optedIn
   }
 };
 
-// returns totalSupply of asset (0 after deployment, will increase will each issuance transaction)
+// returns totalSupply of asset (0 after deployment, will increase with each issuance transaction)
 exports.totalSupply = async function (deployer, assetIndex) {
   const asaDef = (await deployer.getAssetByID(assetIndex)).params;
   const reserveAssetHolding = await balanceOf(deployer, asaDef.reserve, assetIndex);
