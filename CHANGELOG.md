@@ -28,6 +28,10 @@
     * `setup-reach` - sets up reach executable file in `~/.algorand-reach` directory
     * `remove-reach` - halts any dockerized devnets, kills & removes docker instances and containers, remove reach bash file from `~/.algorand-reach`.
 
+### Bug fixes
+
+`@algorand-builder/runtime`
+    * fixed [bug](https://github.com/scale-it/algo-builder/issues/404) when trying to optIn to asset using asset transfer transaction with amount 0n.
 
 ### Examples
 + [Permissioned Token](/examples/permissioned-token) Added `cease` function and a script to change permissions app_id. 

@@ -129,7 +129,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       const asaCreator = ctx.getAccount(asaDef.creator);
       assert.throws(() =>
         ctx.optOut(asaCreator.address, elon.account),
-        `RUNTIME_ERR1404: Account ${elon.address} doesn't hold asset index ${ctx.assetIndex}`);
+        `RUNTIME_ERR1404: Account ${ctx.elon.address} doesn't hold asset index ${ctx.assetIndex}`);
     });
   });
 
