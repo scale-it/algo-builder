@@ -1,3 +1,4 @@
+// https://github.com/PureStake/algosigner/blob/develop/packages/common/src/types.ts
 /* eslint-disable no-unused-vars */
 export enum RequestErrors {
   None,

@@ -84,11 +84,11 @@ export class WebMode {
     };
 
     s.flatFee = userParams.totalFee !== undefined;
-    s.fee = userParams.totalFee ?? userParams.feePerByte ?? txParams["min-fee"] as number;
+    s.fee = userParams.totalFee || userParams.feePerByte || txParams["min-fee"] as number; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
     if (s.flatFee) s.fee = Math.max(Number(s.fee), Number(txParams["min-fee"]));
 
-    s.firstRound = userParams.firstValid ?? s.firstRound;
-    s.lastRound = userParams.firstValid === undefined || userParams.validRounds === undefined
+    s.firstRound = userParams.firstValid || s.firstRound; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+    s.lastRound = userParams.firstValid === undefined || userParams.validRounds === undefined // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
       ? s.lastRound
       : Number(userParams.firstValid) + Number(userParams.validRounds);
 
