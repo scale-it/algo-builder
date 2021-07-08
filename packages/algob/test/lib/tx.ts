@@ -688,9 +688,9 @@ describe("Update transaction test in run mode", () => {
   });
 
   it("should update in run mode", async () => {
-    let execParams: types.ExecParams = {
-      type: types.TransactionType.DeploySSC,
-      sign: types.SignType.SecretKey,
+    let execParams: wtypes.ExecParams = {
+      type: wtypes.TransactionType.DeployApp,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       approvalProgram: "approval.teal",
       clearProgram: "clear.teal",
@@ -703,11 +703,11 @@ describe("Update transaction test in run mode", () => {
     const appInfo = await executeTransaction(deployer, execParams);
 
     // should not be stored in checkpoint if in run mode
-    assert.isUndefined(deployer.getSSC("approval.teal", "clear.teal"));
+    assert.isUndefined(deployer.getApp("approval.teal", "clear.teal"));
 
     execParams = {
-      type: types.TransactionType.UpdateSSC,
-      sign: types.SignType.SecretKey,
+      type: wtypes.TransactionType.UpdateApp,
+      sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       appID: appInfo["application-index"],
       newApprovalProgram: "approval.teal",
