@@ -1,4 +1,4 @@
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const { issue } = require('./issue');
 const { executeTransaction, fundAccount } = require('../common/common');
 const accounts = require('../common/accounts');
@@ -14,12 +14,12 @@ async function kill (deployer) {
    * token is killed.
    */
   const tesla = deployer.asa.get('tesla');
-  const controllerSSCInfo = deployer.getSSC('controller.py', 'clear_state_program.py');
+  const controllerAppInfo = deployer.getApp('controller.py', 'clear_state_program.py');
   const killParams = {
     type: types.TransactionType.CallNoOpSSC,
     sign: types.SignType.SecretKey,
     fromAccount: owner,
-    appID: controllerSSCInfo.appID,
+    appID: controllerAppInfo.appID,
     payFlags: { totalFee: 1000 },
     appArgs: ['str:kill'],
     foreignAssets: [tesla.assetIndex]

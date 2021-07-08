@@ -1,5 +1,5 @@
 const { executeTransaction } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -14,14 +14,14 @@ async function run (runtimeEnv, deployer) {
     payFlags: {}
   });
 
-  const appInfo = deployer.getSSC('crowdFundApproval.teal', 'crowdFundClear.teal');
+  const appInfo = deployer.getApp('crowdFundApproval.teal', 'crowdFundClear.teal');
   const lsig = await deployer.loadLogic('crowdFundEscrow.py', { APP_ID: appInfo.appID });
   const escrowAccountAddress = lsig.address();
 
   // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
   const txGroup = [
     {
-      type: types.TransactionType.DeleteSSC,
+      type: types.TransactionType.DeleteApp,
       sign: types.SignType.SecretKey,
       fromAccount: creatorAccount,
       appID: appInfo.appID,

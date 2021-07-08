@@ -1,5 +1,5 @@
-import { BuilderError } from "../../../errors/errors";
-import { ERRORS } from "../../../errors/errors-list";
+import { BuilderError, ERRORS } from "@algo-builder/web";
+
 import { ParamDefinitions, RuntimeArgs } from "../../../types";
 import { ArgumentsParser } from "../../cli/arguments-parser";
 import { unsafeObjectKeys } from "../../util/unsafe";

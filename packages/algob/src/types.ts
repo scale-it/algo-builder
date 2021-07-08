@@ -1,4 +1,5 @@
 import { types as rtypes } from "@algo-builder/runtime";
+import { types as wtypes } from "@algo-builder/web";
 import type { LogicSig } from "algosdk";
 import * as algosdk from "algosdk";
 
@@ -373,7 +374,7 @@ export interface AssetScriptMap {
 export interface CheckpointFunctions {
   /**
    * Queries a stateful smart contract info from checkpoint using key. */
-  getSSCfromCPKey: (key: string) => rtypes.SSCInfo | undefined
+  getAppfromCPKey: (key: string) => rtypes.SSCInfo | undefined
 
   /**
    * Returns SSC checkpoint key using application index,
@@ -426,7 +427,7 @@ export interface Deployer {
   deployASA: (
     name: string,
     flags: rtypes.ASADeploymentFlags,
-    asaParams?: Partial<rtypes.ASADef>
+    asaParams?: Partial<wtypes.ASADef>
   ) => Promise<rtypes.ASAInfo>
 
   /**
@@ -434,11 +435,11 @@ export interface Deployer {
    * NOTE: This function returns "deployed" ASADef, as immutable properties
    * of asaDef could be updated during tx execution (eg. update asset clawback)
    * @name  ASA name - name of ASA in the /assets/asa.yaml file */
-  loadASADef: (asaName: string) => rtypes.ASADef | undefined
+  loadASADef: (asaName: string) => wtypes.ASADef | undefined
 
   assertNoAsset: (name: string) => void
 
-  getASADef: (name: string, asaParams?: Partial<rtypes.ASADef>) => rtypes.ASADef
+  getASADef: (name: string, asaParams?: Partial<wtypes.ASADef>) => wtypes.ASADef
 
   persistCP: () => void
 
@@ -485,15 +486,15 @@ export interface Deployer {
    * Deploys stateful smart contract.
    * @approvalProgram  approval program filename (must be present in assets folder)
    * @clearProgram  clear program filename (must be present in assets folder)
-   * @flags  SSCDeploymentFlags
+   * @flags  AppDeploymentFlags
    * @payFlags  Transaction Parameters
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  deploySSC: (
+  deployApp: (
     approvalProgram: string,
     clearProgram: string,
-    flags: rtypes.SSCDeploymentFlags,
+    flags: rtypes.AppDeploymentFlags,
     payFlags: rtypes.TxParams,
     scTmplParams?: SCParams) => Promise<rtypes.SSCInfo>
 
@@ -506,13 +507,13 @@ export interface Deployer {
    * @param newClearProgram New Clear Program filename
    * @param flags Optional parameters to SSC (accounts, args..)
    */
-  updateSSC: (
+  updateApp: (
     sender: algosdk.Account,
     payFlags: rtypes.TxParams,
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
-    flags: rtypes.SSCOptionalFlags
+    flags: rtypes.AppOptionalFlags
   ) => Promise<rtypes.SSCInfo>
 
   /**
@@ -551,11 +552,11 @@ export interface Deployer {
    * @param payFlags Transaction flags
    * @param flags Optional parameters to SSC (accounts, args..)
    */
-  optInAccountToSSC: (
+  optInAccountToApp: (
     sender: rtypes.Account,
     appID: number,
     payFlags: rtypes.TxParams,
-    flags: rtypes.SSCOptionalFlags) => Promise<void>
+    flags: rtypes.AppOptionalFlags) => Promise<void>
 
   /**
    * Opt-In to stateful smart contract (SSC) for a contract account
@@ -565,11 +566,11 @@ export interface Deployer {
    * @param payFlags Transaction flags
    * @param flags Optional parameters to SSC (accounts, args..)
    */
-  optInLsigToSSC: (
+  optInLsigToApp: (
     appID: number,
     lsig: LogicSig,
     payFlags: rtypes.TxParams,
-    flags: rtypes.SSCOptionalFlags) => Promise<void>
+    flags: rtypes.AppOptionalFlags) => Promise<void>
 
   /**
    * Create an entry in a script log (stored in artifacts/scripts/<script_name>.log) file. */
@@ -581,7 +582,7 @@ export interface Deployer {
 
   /**
    * Queries a stateful smart contract info from checkpoint. */
-  getSSC: (nameApproval: string, nameClear: string) => rtypes.SSCInfo | undefined
+  getApp: (nameApproval: string, nameClear: string) => rtypes.SSCInfo | undefined
 
   /**
    * Queries a delegated logic signature from checkpoint. */
@@ -610,7 +611,7 @@ export interface Deployer {
    * throw error(except for opt-out transactions), else pass
    * @param execParams Transaction execution parameters
    */
-  assertCPNotDeleted: (execParams: rtypes.ExecParams | rtypes.ExecParams[]) => void
+  assertCPNotDeleted: (execParams: wtypes.ExecParams | wtypes.ExecParams[]) => void
 }
 
 // ************************

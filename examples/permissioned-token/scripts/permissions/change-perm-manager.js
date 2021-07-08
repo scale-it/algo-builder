@@ -1,6 +1,6 @@
-const { fundAccount, executeTransaction, optInAccountToSSC } = require('../common/common');
+const { fundAccount, executeTransaction, optInAccountToApp } = require('../common/common');
 const { whitelist } = require('./whitelist');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const accounts = require('../common/accounts');
 
 /**
@@ -9,7 +9,7 @@ const accounts = require('../common/accounts');
  * @param address account address to change permissions_manager to
  */
 async function changePermissionsManager (deployer, permissionsManager, address) {
-  const permissionSSCInfo = deployer.getSSC('permissions.py', 'clear_state_program.py');
+  const permissionSSCInfo = deployer.getApp('permissions.py', 'clear_state_program.py');
 
   const changePerManagerParams = {
     type: types.TransactionType.CallNoOpSSC,
@@ -35,8 +35,8 @@ async function run (runtimeEnv, deployer) {
   await fundAccount(deployer, [permissionsManager, elon]);
 
   console.log('* Opt-In to permissions(rules) smart contract *');
-  const permissionSSCInfo = deployer.getSSC('permissions.py', 'clear_state_program.py');
-  await optInAccountToSSC(deployer, elon, permissionSSCInfo.appID, {}, {});
+  const permissionSSCInfo = deployer.getApp('permissions.py', 'clear_state_program.py');
+  await optInAccountToApp(deployer, elon, permissionSSCInfo.appID, {}, {});
 
   // tx FAIL because john is not a permissions manager
   try {

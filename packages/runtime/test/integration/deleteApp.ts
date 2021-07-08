@@ -1,9 +1,9 @@
+import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE } from "../../src/lib/constants";
-import { SignType, SSCCallsParam, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
@@ -17,7 +17,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
   let runtime: Runtime;
   let approvalProgram: string;
   let clearProgram: string;
-  let deleteParams: SSCCallsParam;
+  let deleteParams: types.AppCallsParam;
   const flags = {
     sender: john.account,
     globalBytes: 2,
@@ -31,8 +31,8 @@ describe("Algorand Smart Contracts - Delete Application", function () {
     clearProgram = getProgram('clear.teal');
 
     deleteParams = {
-      type: TransactionType.DeleteSSC,
-      sign: SignType.SecretKey,
+      type: types.TransactionType.DeleteApp,
+      sign: types.SignType.SecretKey,
       fromAccount: john.account,
       appID: 10,
       payFlags: { totalFee: 1000 },
@@ -74,9 +74,9 @@ describe("Algorand Smart Contracts - Delete Application", function () {
         (APPLICATION_BASE_FEE + ((25000 + 3500) * 2 + (25000 + 25000) * 2)) // min balance should increase
     );
 
-    const deleteParams: SSCCallsParam = {
-      type: TransactionType.DeleteSSC,
-      sign: SignType.SecretKey,
+    const deleteParams: types.AppCallsParam = {
+      type: types.TransactionType.DeleteApp,
+      sign: types.SignType.SecretKey,
       fromAccount: alice.account,
       appID: appID,
       payFlags: { totalFee: 1000 },

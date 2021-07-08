@@ -1,7 +1,7 @@
+import { ERRORS } from "@algo-builder/web";
 import { assert } from "chai";
 import deepmerge from "deepmerge";
 
-import { ERRORS } from "../../../../src/errors/errors-list";
 import { ALGOB_CHAIN_NAME } from "../../../../src/internal/constants";
 import {
   getValidationErrors,

@@ -1,5 +1,5 @@
 const { readGlobalStateSSC } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const { executeTransaction } = require('./common');
 
 async function run (runtimeEnv, deployer) {
@@ -7,7 +7,7 @@ async function run (runtimeEnv, deployer) {
   const alice = deployer.accountsByName.get('alice');
 
   // Retreive AppInfo from checkpoints.
-  const appInfo = deployer.getSSC('permissioned-voting-approval.py', 'permissioned-voting-clear.py');
+  const appInfo = deployer.getApp('permissioned-voting-approval.py', 'permissioned-voting-clear.py');
 
   // Retreive Global State
   const globalState = await readGlobalStateSSC(deployer, votingAdminAccount.addr, appInfo.appID);
@@ -37,7 +37,7 @@ async function run (runtimeEnv, deployer) {
   }
 
   const txnParam = {
-    type: types.TransactionType.DeleteSSC,
+    type: types.TransactionType.DeleteApp,
     sign: types.SignType.SecretKey,
     fromAccount: votingAdminAccount,
     appID: appInfo.appID,
@@ -49,7 +49,7 @@ async function run (runtimeEnv, deployer) {
   await executeTransaction(deployer, txnParam);
 
   txnParam.fromAccount = alice;
-  txnParam.type = types.TransactionType.ClearSSC;
+  txnParam.type = types.TransactionType.ClearApp;
 
   // Clear voter's account
   console.log("Clearing Alice's Account");

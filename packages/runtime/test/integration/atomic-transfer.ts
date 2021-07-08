@@ -1,8 +1,8 @@
+import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
-import { RUNTIME_ERRORS } from "../../build/errors/errors-list";
+import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
-import { ExecParams, SignType, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
@@ -52,18 +52,18 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
   const key = "counter";
 
   it("should execute group of (payment + asset transaction) successfully", () => {
-    const txGroup: ExecParams[] = [
+    const txGroup: types.ExecParams[] = [
       {
-        type: TransactionType.TransferAlgo,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         toAccountAddr: alice.address,
         amountMicroAlgos: 100,
         payFlags: { totalFee: 1000 }
       },
       {
-        type: TransactionType.TransferAsset,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.TransferAsset,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         toAccountAddr: alice.address,
         amount: 10,
@@ -86,18 +86,18 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
   });
 
   it("should not execute payment transaction (in group) if asset transaction fails", () => {
-    const txGroup: ExecParams[] = [
+    const txGroup: types.ExecParams[] = [
       {
-        type: TransactionType.TransferAlgo,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         toAccountAddr: alice.address,
         amountMicroAlgos: 100,
         payFlags: { totalFee: 1000 }
       },
       {
-        type: TransactionType.TransferAsset,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.TransferAsset,
+        sign: types.SignType.SecretKey,
         fromAccount: alice.account,
         toAccountAddr: john.address,
         amount: 1000,
@@ -124,17 +124,17 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
   });
 
   it("should execute payment and ssc call", () => {
-    const txGroup: ExecParams[] = [
+    const txGroup: types.ExecParams[] = [
       {
-        type: TransactionType.CallNoOpSSC,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.CallNoOpSSC,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         appID: appID,
         payFlags: { totalFee: 1000 }
       },
       {
-        type: TransactionType.TransferAlgo,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         toAccountAddr: alice.address,
         amountMicroAlgos: 100,
@@ -157,17 +157,17 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
   });
 
   it("should fail if payment transaction in group fails", () => {
-    const txGroup: ExecParams[] = [
+    const txGroup: types.ExecParams[] = [
       {
-        type: TransactionType.CallNoOpSSC,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.CallNoOpSSC,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         appID: appID,
         payFlags: { totalFee: 1000 }
       },
       {
-        type: TransactionType.TransferAlgo,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
         fromAccount: alice.account,
         toAccountAddr: john.address,
         amountMicroAlgos: 6e6,
@@ -191,10 +191,10 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
   });
 
   it("should not freeze asset if payment fails", () => {
-    const txGroup: ExecParams[] = [
+    const txGroup: types.ExecParams[] = [
       {
-        type: TransactionType.FreezeAsset,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.FreezeAsset,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         assetID: assetId,
         freezeTarget: alice.address,
@@ -202,8 +202,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         payFlags: {}
       },
       {
-        type: TransactionType.TransferAlgo,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
         fromAccount: alice.account,
         toAccountAddr: john.address,
         amountMicroAlgos: 6e6,
@@ -227,18 +227,18 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
       clawback: john.address,
       freeze: john.address
     };
-    const txGroup: ExecParams[] = [
+    const txGroup: types.ExecParams[] = [
       {
-        type: TransactionType.ModifyAsset,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.ModifyAsset,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         assetID: assetId,
         fields: modFields,
         payFlags: {}
       },
       {
-        type: TransactionType.TransferAlgo,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
         fromAccount: alice.account,
         toAccountAddr: john.address,
         amountMicroAlgos: 6e6,
@@ -259,18 +259,18 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
   it("should not revoke asset if payment fails", () => {
     // transfer asset to alice
     runtime.executeTx({
-      type: TransactionType.TransferAsset,
-      sign: SignType.SecretKey,
+      type: types.TransactionType.TransferAsset,
+      sign: types.SignType.SecretKey,
       fromAccount: john.account,
       toAccountAddr: alice.account.addr,
       amount: 20,
       assetID: assetId,
       payFlags: { totalFee: 1000 }
     });
-    const txGroup: ExecParams[] = [
+    const txGroup: types.ExecParams[] = [
       {
-        type: TransactionType.RevokeAsset,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.RevokeAsset,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         recipient: john.address,
         assetID: assetId,
@@ -279,8 +279,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         payFlags: {}
       },
       {
-        type: TransactionType.TransferAlgo,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
         fromAccount: alice.account,
         toAccountAddr: john.address,
         amountMicroAlgos: 6e6,
@@ -300,17 +300,17 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
   });
 
   it("should not destroy asset if payment fails", () => {
-    const txGroup: ExecParams[] = [
+    const txGroup: types.ExecParams[] = [
       {
-        type: TransactionType.DestroyAsset,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.DestroyAsset,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         assetID: assetId,
         payFlags: {}
       },
       {
-        type: TransactionType.TransferAlgo,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
         fromAccount: alice.account,
         toAccountAddr: john.address,
         amountMicroAlgos: 6e6,
@@ -328,17 +328,17 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
   });
 
   it("should fail close app if payment transaction fails", () => {
-    const txGroup: ExecParams[] = [
+    const txGroup: types.ExecParams[] = [
       {
-        type: TransactionType.CloseSSC,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.CloseApp,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         appID: appID,
         payFlags: { totalFee: 1000 }
       },
       {
-        type: TransactionType.TransferAlgo,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
         fromAccount: alice.account,
         toAccountAddr: john.address,
         amountMicroAlgos: 6e6,
@@ -356,17 +356,17 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
   });
 
   it("should fail clear app if payment transaction fails", () => {
-    const txGroup: ExecParams[] = [
+    const txGroup: types.ExecParams[] = [
       {
-        type: TransactionType.ClearSSC,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.ClearApp,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         appID: appID,
         payFlags: { totalFee: 1000 }
       },
       {
-        type: TransactionType.TransferAlgo,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
         fromAccount: alice.account,
         toAccountAddr: john.address,
         amountMicroAlgos: 6e6,
@@ -386,32 +386,32 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
   it("should fail asset payment, and algo payment if ssc call fails", () => {
     // close out from app
     runtime.executeTx({
-      type: TransactionType.ClearSSC,
-      sign: SignType.SecretKey,
+      type: types.TransactionType.ClearApp,
+      sign: types.SignType.SecretKey,
       fromAccount: john.account,
       appID: appID,
       payFlags: { totalFee: 1000 }
     });
     syncAccounts();
-    const txGroup: ExecParams[] = [
+    const txGroup: types.ExecParams[] = [
       {
-        type: TransactionType.ClearSSC,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.ClearApp,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         appID: appID,
         payFlags: { totalFee: 1000 }
       },
       {
-        type: TransactionType.TransferAlgo,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
         fromAccount: alice.account,
         toAccountAddr: john.address,
         amountMicroAlgos: 100,
         payFlags: { totalFee: 1000 }
       },
       {
-        type: TransactionType.TransferAsset,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.TransferAsset,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         toAccountAddr: alice.account.addr,
         amount: 10,

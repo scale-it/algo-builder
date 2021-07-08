@@ -1,7 +1,6 @@
+import { BuilderError, ERRORS } from "@algo-builder/web";
 import debug from "debug";
 
-import { BuilderError } from "../../src/errors/errors";
-import { ERRORS } from "../../src/errors/errors-list";
 import { BuilderContext } from "../../src/internal/context";
 import { loadConfigAndTasks } from "../../src/internal/core/config/config-loading";
 import { ALGOB_PARAM_DEFINITIONS } from "../../src/internal/core/params/builder-params";

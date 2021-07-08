@@ -1,7 +1,7 @@
 const {
   executeTransaction
 } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -20,7 +20,7 @@ async function run (runtimeEnv, deployer) {
 
   // Create Application
   // Note: An Account can have maximum of 10 Applications.
-  const sscInfo = await deployer.deploySSC(
+  const sscInfo = await deployer.deployApp(
     'approval_program.teal', // approval program
     'clear_program.teal', // clear program
     {
@@ -34,7 +34,7 @@ async function run (runtimeEnv, deployer) {
   console.log(sscInfo);
 
   // Opt-In for creator
-  await deployer.optInAccountToSSC(creatorAccount, sscInfo.appID, {}, {});
+  await deployer.optInAccountToApp(creatorAccount, sscInfo.appID, {}, {});
 }
 
 module.exports = { default: run };

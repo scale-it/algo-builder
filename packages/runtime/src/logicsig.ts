@@ -1,3 +1,4 @@
+import { parsing } from "@algo-builder/web";
 import {
   decodeAddress, encodeAddress,
   generateAccount, LogicSigBase, MultiSig, multisigAddress, MultisigMetadata,
@@ -8,7 +9,7 @@ import * as tweet from "tweetnacl-ts";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { compareArray } from "./lib/compare";
-import { convertToString, stringToBytes } from "./lib/parsing";
+import { convertToString } from "./lib/parsing";
 
 /**
  * Note: We cannot use algosdk LogicSig class here,
@@ -26,7 +27,7 @@ export class LogicSig {
 
   constructor (program: string, args: Uint8Array[]) {
     this.tag = Buffer.from("Program");
-    this.logic = stringToBytes(program);
+    this.logic = parsing.stringToBytes(program);
     this.args = args;
     this.sig = new Uint8Array(0);
     this.msig = undefined;

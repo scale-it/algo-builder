@@ -152,7 +152,7 @@ def approval_program(PERM_MANAGER):
     # Verifies that DeleteApplication is used and blocks that call
     # Verifies that UpdateApplication is used and jumps to handle_update.
     # Verifies that closeOut is used and approves the tx.
-    # Verifies that OptInApplication is used and jumps to handle_optin
+    # Verifies that OptInToApplication is used and jumps to handle_optin
     # Verifies that first argument is "change_permissions_manager" and jumps to change_permissions_manager.
     # Verifies that first argument is "add_whitelist" and jumps to add_whitelist.
     # Verifies that first argument is "transfer" and jumps to transfer_token.

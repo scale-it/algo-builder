@@ -1,8 +1,8 @@
-const { getProgram } = require('@algo-builder/algob');
+const { getProgram, convert } = require('@algo-builder/algob');
 const {
-  Runtime, AccountStore, types,
-  uint64ToBigEndian, stringToBytes, addressToPk
+  Runtime, AccountStore
 } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const { assert } = require('chai');
 
 const minBalance = 10e6; // 10 ALGO's
@@ -69,11 +69,11 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     runtime.store.globalApps.set(applicationId, creator.address);
 
     // set creation args in global state
-    creator.setGlobalState(applicationId, 'Creator', addressToPk(creator.address));
+    creator.setGlobalState(applicationId, 'Creator', convert.addressToPk(creator.address));
     creator.setGlobalState(applicationId, 'StartDate', 1n);
     creator.setGlobalState(applicationId, 'EndDate', 10n);
     creator.setGlobalState(applicationId, 'Goal', BigInt(goal));
-    creator.setGlobalState(applicationId, 'Receiver', addressToPk(fundReceiver.address));
+    creator.setGlobalState(applicationId, 'Receiver', convert.addressToPk(fundReceiver.address));
     creator.setGlobalState(applicationId, 'Total', 0n);
     creator.setGlobalState(applicationId, 'FundCloseDate', 20n);
 
@@ -98,20 +98,20 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     const beginTs = 1n; // fund begin timestamp
     const endTs = 10n; // fund end timestamp
     const fundCloseTs = 20n; // fund close timestamp
-    const fundReceiverPk = addressToPk(fundReceiver.address);
+    const fundReceiverPk = convert.addressToPk(fundReceiver.address);
 
     const creationArgs = [
-      uint64ToBigEndian(beginTs),
-      uint64ToBigEndian(endTs),
+      convert.uint64ToBigEndian(beginTs),
+      convert.uint64ToBigEndian(endTs),
       `int:${goal}`, // args similar to `goal --app-arg ..` are also supported
       fundReceiverPk,
-      uint64ToBigEndian(fundCloseTs)
+      convert.uint64ToBigEndian(fundCloseTs)
     ];
 
     // create application
     applicationId = runtime.addApp(
       { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
-    const creatorPk = addressToPk(creator.address);
+    const creatorPk = convert.addressToPk(creator.address);
 
     assert.isDefined(applicationId);
     assert.deepEqual(getGlobal('Creator'), creatorPk);
@@ -126,7 +126,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
   it('should setup escrow account and update application with escrow address', () => {
     setupAppAndEscrow();
 
-    const escrowPk = addressToPk(escrow.address);
+    const escrowPk = convert.addressToPk(escrow.address);
     runtime.updateApp(
       creator.address,
       applicationId,
@@ -145,7 +145,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     setupAppAndEscrow();
 
     // update global storage to add escrow address
-    const escrowPk = addressToPk(escrow.address);
+    const escrowPk = convert.addressToPk(escrow.address);
     creator.setGlobalState(applicationId, 'Escrow', escrowPk);
 
     runtime.optInToApp(creator.address, applicationId, {}, {});
@@ -162,7 +162,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     runtime.setRoundAndTimestamp(2, 5); // StartTs=1, EndTs=10
 
     // update global storage to add escrow address
-    const escrowPk = addressToPk(escrow.address);
+    const escrowPk = convert.addressToPk(escrow.address);
     runtime.getAccount(creator.address).setGlobalState(applicationId, 'Escrow', escrowPk);
     syncAccounts();
 
@@ -181,7 +181,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
         fromAccount: donor.account,
         appID: applicationId,
         payFlags: { totalFee: 1000 },
-        appArgs: [stringToBytes('donate')]
+        appArgs: [convert.stringToBytes('donate')]
       },
       {
         type: types.TransactionType.TransferAlgo,
@@ -204,7 +204,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     setupAppAndEscrow();
     // fund end date should be passed
     runtime.setRoundAndTimestamp(2, 15); // StartTs=1, EndTs=10
-    runtime.getAccount(creator.address).setGlobalState(applicationId, 'Escrow', addressToPk(escrow.address));
+    runtime.getAccount(creator.address).setGlobalState(applicationId, 'Escrow', convert.addressToPk(escrow.address));
     syncAccounts();
 
     creator.optInToApp(applicationId, runtime.getApp(applicationId));
@@ -235,7 +235,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
         fromAccount: creator.account,
         appID: applicationId,
         payFlags: { totalFee: 1000 },
-        appArgs: [stringToBytes('claim')]
+        appArgs: [convert.stringToBytes('claim')]
       },
       {
         type: types.TransactionType.TransferAlgo,
@@ -258,7 +258,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     setupAppAndEscrow();
     // fund end date should be passed
     runtime.setRoundAndTimestamp(2, 15); // StartTs=1, EndTs=10
-    runtime.getAccount(creator.address).setGlobalState(applicationId, 'Escrow', addressToPk(escrow.address));
+    runtime.getAccount(creator.address).setGlobalState(applicationId, 'Escrow', convert.addressToPk(escrow.address));
     syncAccounts();
 
     creator.optInToApp(applicationId, runtime.getApp(applicationId));
@@ -289,7 +289,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
         fromAccount: donor.account,
         appID: applicationId,
         payFlags: { totalFee: 1000 },
-        appArgs: [stringToBytes('reclaim')],
+        appArgs: [convert.stringToBytes('reclaim')],
         accounts: [escrow.address] //  AppAccounts
       },
       {
@@ -316,7 +316,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     setupAppAndEscrow();
     // fund close date should be passed
     runtime.setRoundAndTimestamp(2, 25); // fundCloseTs=20n
-    runtime.getAccount(creator.address).setGlobalState(applicationId, 'Escrow', addressToPk(escrow.address));
+    runtime.getAccount(creator.address).setGlobalState(applicationId, 'Escrow', convert.addressToPk(escrow.address));
     syncAccounts();
 
     creator.optInToApp(applicationId, runtime.getApp(applicationId));
@@ -336,7 +336,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
 
     // escrow is already empty so we don't need a tx group
     const deleteTx = {
-      type: types.TransactionType.DeleteSSC,
+      type: types.TransactionType.DeleteApp,
       sign: types.SignType.SecretKey,
       fromAccount: creator.account,
       appID: applicationId,
@@ -363,7 +363,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     setupAppAndEscrow();
     // fund close date should be passed
     runtime.setRoundAndTimestamp(2, 25); // fundCloseTs=20n
-    runtime.getAccount(creator.address).setGlobalState(applicationId, 'Escrow', addressToPk(escrow.address));
+    runtime.getAccount(creator.address).setGlobalState(applicationId, 'Escrow', convert.addressToPk(escrow.address));
     syncAccounts();
 
     creator.optInToApp(applicationId, runtime.getApp(applicationId));
@@ -374,7 +374,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     // where in the second tx, we empty the escrow account to receiver using closeRemainderTo
     const deleteTxGroup = [
       {
-        type: types.TransactionType.DeleteSSC,
+        type: types.TransactionType.DeleteApp,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId,

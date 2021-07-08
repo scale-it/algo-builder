@@ -1,7 +1,5 @@
+import { BuilderError, ERRORS } from "@algo-builder/web";
 import * as util from "util";
-
-import { BuilderError } from "../../errors/errors";
-import { ERRORS } from "../../errors/errors-list";
 
 /**
  * This module provides function to implement proxy-based object, functions, and

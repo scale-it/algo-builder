@@ -4,15 +4,15 @@
 */
 const { executeTransaction, printGlobalNFT, printLocalNFT } = require('./common');
 const { convert } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
   const john = deployer.accountsByName.get('john');
 
-  const sscInfo = await deployer.getSSC('nft_approval.py', 'nft_clear_state.py');
-  const appID = sscInfo.appID;
-  console.log(sscInfo);
+  const appInfo = await deployer.getApp('nft_approval.py', 'nft_clear_state.py');
+  const appID = appInfo.appID;
+  console.log(appInfo);
 
   await printGlobalNFT(deployer, masterAccount.addr, appID); // Global Count before creation
 
