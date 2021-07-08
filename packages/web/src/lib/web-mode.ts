@@ -129,7 +129,7 @@ export class WebMode {
     }
 
     const txInfo = await this.sendTransaction(signedTxn);
-    if (typeof txInfo.txId === "string") {
+    if (txInfo && typeof txInfo.txId === "string") {
       return await this.waitForConfirmation(txInfo.txId);
     }
     throw new Error("Transaction Error");
