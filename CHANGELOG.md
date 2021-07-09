@@ -22,6 +22,7 @@
     + Support `executeTransaction` function with web package
 + Move Error lists, BuilderError, mkTransaction to web package
 + Reuse mkTransaction, Errors in algob and runtime
++ Updated `algob init` to initialize a typescript project as well by passing `--typescript` flag. Usage: `algob init <location> --typescript`.
 
 ### Infrastructure
 * Added new make commands:
