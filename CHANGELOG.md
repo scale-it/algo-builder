@@ -23,6 +23,7 @@
 + Move Error lists, BuilderError, mkTransaction to web package
 + Reuse mkTransaction, Errors in algob and runtime
 + Updated `algob init` to initialize a typescript project as well by passing `--typescript` flag. Usage: `algob init <location> --typescript`.
++ Fix Sign type
 
 ### Infrastructure
 * Added new make commands:
