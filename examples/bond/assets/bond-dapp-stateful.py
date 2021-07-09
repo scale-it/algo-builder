@@ -17,6 +17,7 @@ def approval_program():
     epoch = Bytes("epoch")
     total = Bytes("total")
     current_bond = Bytes("current_bond")
+    max_amount = Bytes("max_amount")
 
     # verify rekey_to and close_rem_to are set as zero_address
     basic_checks = And(
@@ -35,6 +36,7 @@ def approval_program():
         App.globalPut(coupon_value, Txn.application_args[4]),
         App.globalPut(epoch, Txn.application_args[5]),
         App.globalPut(current_bond, Txn.application_args[6]),
+         App.globalPut(max_amount, Txn.application_args[7]),
         Return(Int(1))
     ])
 
@@ -46,6 +48,17 @@ def approval_program():
             )
         ),
         App.globalPut(issuer_address, Txn.application_args[1]),
+        Return(Int(1))
+    ])
+
+    on_update_issue_price = Seq([
+        Assert(
+             And(
+                Txn.sender() == App.globalGet(store_manager),
+                basic_checks
+            )
+        ),
+        App.globalPut(issue_price, Txn.application_args[1]),
         Return(Int(1))
     ])
 
@@ -100,8 +113,28 @@ def approval_program():
         Return(Int(1))
     ])
 
+    '''
+    User sends `B_i` to `DEX_i` lsig.
+    `DEX_i` sends `B_{i+1}` to the user.
+    `Dex_i` sends coupon value to user
+    '''
     on_redeem_coupon = Seq([
-        
+        Assert(
+            And(
+                basic_checks,
+                Gtxn[0].type_enum() == TxnType.AssetTransfer,
+                Gtxn[1].type_enum() == TxnType.AssetTransfer,
+                Gtxn[0].asset_amount() == Gtxn[1].asset_amount(),
+                Gtxn[2].type_enum() == TxnType.Payment,
+                Gtxn[2].receiver() == Txn.sender(),
+                Gtxn[2].amount() == Mul(Gtxn[0].asset_amount(), App.globalGet(coupon_value))
+            )
+        ),
+        Return(Int(1))
+    ])
+
+    on_create_dex = Seq([
+
     ])
 
 program = Cond(
@@ -116,6 +149,8 @@ program = Cond(
         [Txn.application_args[0] == Bytes("create_buyback"), create_buyback],
         [Txn.application_args[0] == Bytes("exit"), on_exit],
         [Txn.application_args[0] == Bytes("redeem_coupon"), on_redeem_coupon],
+        [Txn.application_args[0] == Bytes("update_issue_price"), on_update_issue_price],
+        [Txn.application_args[0] == Bytes("create_dex"), on_create_dex],
     )
 
     return program
