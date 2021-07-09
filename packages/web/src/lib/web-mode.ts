@@ -105,7 +105,7 @@ export class WebMode {
     if (Array.isArray(execParams)) {
       if (execParams.length > 16) { throw new Error("Maximum size of an atomic transfer group is 16"); }
 
-      for (const [idx, txn] of execParams.entries()) {
+      for (const [_, txn] of execParams.entries()) {
         txns.push(await mkTransaction(txn, await this.getSuggestedParams(txn.payFlags)));
       }
 
