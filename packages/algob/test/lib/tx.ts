@@ -750,7 +750,6 @@ describe("Update transaction test in run mode", () => {
     };
 
     await executeTransaction(deployer, execParams);
-
     assert.deepEqual(appInfo, deployer.getApp("approval.teal", "clear.teal"));
   });
 
