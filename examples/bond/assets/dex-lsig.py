@@ -1,6 +1,6 @@
 from pyteal import *
 
-def dex_lsig(B_I_TOKEN_ID, B_I1_TOKEN_ID, APPLICATION_ID):
+def dex_lsig():
     # check no rekeying, close remainder to, asset close to
     common_fields = And(
         Gtxn[0].rekey_to() == Global.zero_address(),
