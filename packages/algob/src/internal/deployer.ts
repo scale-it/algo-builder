@@ -1,6 +1,6 @@
 import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
 import { ASADef } from "@algo-builder/runtime/build/types";
-import type { AssetParams, EncodedMultisig } from "algosdk";
+import type { EncodedMultisig } from "algosdk";
 import * as algosdk from "algosdk";
 
 import { BuilderError } from "../errors/errors";
@@ -103,7 +103,7 @@ class DeployerBasicMode {
     return this.algoOp.algodClient;
   }
 
-  async waitForConfirmation (txId: string): Promise<algosdk.PendingTransactionResponse> {
+  async waitForConfirmation (txId: string): Promise<algosdk.modelsv2.PendingTransactionResponse> {
     return await this.algoOp.waitForConfirmation(txId);
   }
 
@@ -181,7 +181,9 @@ class DeployerBasicMode {
    * Send signed transaction to network and wait for confirmation
    * @param rawTxns Signed Transaction(s)
    */
-  async sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<algosdk.PendingTransactionResponse> {
+  async sendAndWait (
+    rawTxns: Uint8Array | Uint8Array[]
+  ): Promise<algosdk.modelsv2.PendingTransactionResponse> {
     return await this.algoOp.sendAndWait(rawTxns);
   }
 
@@ -464,7 +466,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   /**
    * Log transaction with message using txwriter
    */
-  logTx (message: string, txConfirmation: algosdk.PendingTransactionResponse): void {
+  logTx (message: string, txConfirmation: algosdk.modelsv2.PendingTransactionResponse): void {
     this.txWriter.push(message, txConfirmation);
   }
 
@@ -675,7 +677,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     });
   }
 
-  logTx (message: string, txConfirmation: algosdk.PendingTransactionResponse): void {
+  logTx (message: string, txConfirmation: algosdk.modelsv2.PendingTransactionResponse): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "logTx"
     });

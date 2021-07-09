@@ -1,6 +1,6 @@
 
 import { checkIfAssetDeletionTx, loadFromYamlFileSilent, lsTreeWalk, types as rtypes } from "@algo-builder/runtime";
-import { AssetParams, encodeAddress, Transaction } from "algosdk";
+import { encodeAddress, modelsv2, Transaction } from "algosdk";
 import deepEqual from "deep-equal";
 import * as fs from "fs";
 import path from "path";
@@ -226,7 +226,7 @@ export async function registerCheckpoints (
             txId: txn.txID(),
             assetIndex: Number(txConfirmation.assetIndex),
             confirmedRound: Number(txConfirmation.confirmedRound),
-            assetDef: res[1] as AssetParams,
+            assetDef: res[1] as modelsv2.AssetParams,
             deleted: false
           };
           // res[0] -> asset name, res[1] -> ASADef

@@ -1,5 +1,5 @@
 import { encodeNote, types } from "@algo-builder/runtime";
-import algosdk, { decodeSignedTransaction, encodeAddress, PendingTransactionResponse } from "algosdk";
+import algosdk, { decodeSignedTransaction, encodeAddress, modelsv2 } from "algosdk";
 import { assert } from "chai";
 import { isArray } from "lodash";
 import sinon from 'sinon';
@@ -17,7 +17,7 @@ import { aliceAcc, bobAcc } from "../mocks/account";
 import { mockAssetInfo, mockLsig, mockSuggestedParam } from "../mocks/tx";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
-/* describe("Note in TxParams", () => {
+describe("Note in TxParams", () => {
   const encoder = new TextEncoder();
   const note = "Hello Algob!";
   const noteb64 = "asdisaddas";
@@ -53,7 +53,7 @@ describe("Opt-In to ASA", () => {
   let deployer: Deployer;
   let execParams: types.OptInASAParam;
   let algod: AlgoOperatorDryRunImpl;
-  let expected: PendingTransactionResponse;
+  let expected: modelsv2.PendingTransactionResponse;
   beforeEach(async () => {
     const env = mkEnv("network1");
     algod = new AlgoOperatorDryRunImpl();
@@ -69,12 +69,12 @@ describe("Opt-In to ASA", () => {
       assetID: 1
     };
     sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam as algosdk.SuggestedParamsRequest });
+      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
     expected = {
       confirmedRound: 1,
       assetIndex: 1,
       applicationIndex: 1
-    } as PendingTransactionResponse;
+    } as modelsv2.PendingTransactionResponse;
   });
 
   afterEach(() => {
@@ -130,7 +130,7 @@ describe("ASA modify fields", () => {
       fields: assetFields
     };
     sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam });
+      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
   });
 
   afterEach(async () => {
@@ -141,7 +141,7 @@ describe("ASA modify fields", () => {
    * Verifies correct asset fields are sent to network
    * @param rawTxns rawTxns Signed transactions in Uint8Array
    */
-/* function checkTx (rawTxns: Uint8Array | Uint8Array[]): Promise<PendingTransactionResponse> {
+  function checkTx (rawTxns: Uint8Array | Uint8Array[]): Promise<modelsv2.PendingTransactionResponse> {
     if (isArray(rawTxns)) {
       // verify here if group tx
     } else {
@@ -177,7 +177,7 @@ describe("Delete ASA and SSC", () => {
     deployer = new DeployerDeployMode(deployerCfg);
     await deployer.deployASA("silver", { creator: deployer.accounts[0] });
     sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam });
+      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
   });
 
   afterEach(async () => {
@@ -273,7 +273,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
     deployerCfg.asaDefs = { silver: mkASA() };
     deployer = new DeployerDeployMode(deployerCfg);
     sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam });
+      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
 
     // deploy  and delete asset
     const asaInfo = await deployer.deployASA(assetName, { creator: deployer.accounts[0] });
@@ -590,7 +590,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
     deployerCfg.asaDefs = { silver: mkASA() };
     deployer = new DeployerRunMode(deployerCfg);
     sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam });
+      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
   });
 
   afterEach(async () => {
@@ -655,7 +655,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
       type: types.TransactionType.DeleteSSC,
       sign: types.SignType.SecretKey,
       fromAccount: bobAcc,
-      appID: appInfo["application-index"],
+      appID: appInfo.applicationIndex as number,
       payFlags: {}
     };
 
@@ -665,4 +665,4 @@ describe("Deploy, Delete transactions test in run mode", () => {
     assert.isDefined(res);
     assert.equal(res?.deleted, false);
   });
-}); */
+});

@@ -446,13 +446,13 @@ export interface Deployer {
 
   registerSSCInfo: (name: string, sscInfo: rtypes.SSCInfo) => void
 
-  logTx: (message: string, txConfirmation: algosdk.PendingTransactionResponse) => void
+  logTx: (message: string, txConfirmation: algosdk.modelsv2.PendingTransactionResponse) => void
 
   /**
    * Send signed transaction to network and wait for confirmation
    * @param rawTxns Signed Transaction(s)
    */
-  sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<algosdk.PendingTransactionResponse>
+  sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<algosdk.modelsv2.PendingTransactionResponse>
 
   /**
    * Funds logic signature account (Contract Account).
@@ -526,7 +526,7 @@ export interface Deployer {
 
   /**
    * Queries blockchain for a given transaction and waits until it will be processed. */
-  waitForConfirmation: (txId: string) => Promise<algosdk.PendingTransactionResponse>
+  waitForConfirmation: (txId: string) => Promise<algosdk.modelsv2.PendingTransactionResponse>
 
   /**
    * Queries blockchain using algodv2 for asset information by index  */

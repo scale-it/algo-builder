@@ -50,7 +50,7 @@ export interface AlgoOperator {
     flags: rtypes.SSCOptionalFlags,
     txWriter: txWriter
   ) => Promise<rtypes.SSCInfo>
-  waitForConfirmation: (txId: string) => Promise<algosdk.PendingTransactionResponse>
+  waitForConfirmation: (txId: string) => Promise<algosdk.modelsv2.PendingTransactionResponse>
   getAssetByID: (assetIndex: number | bigint) => Promise<algosdk.modelsv2.Asset>
   optInAcountToASA: (
     asaName: string, assetIndex: number, account: rtypes.Account, params: rtypes.TxParams
@@ -69,7 +69,7 @@ export interface AlgoOperator {
     appID: number, lsig: rtypes.LogicSig,
     payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags) => Promise<void>
   ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>
-  sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<algosdk.PendingTransactionResponse>
+  sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<algosdk.modelsv2.PendingTransactionResponse>
 }
 
 export class AlgoOperatorImpl implements AlgoOperator {
@@ -84,7 +84,9 @@ export class AlgoOperatorImpl implements AlgoOperator {
    * Send signed transaction to network and wait for confirmation
    * @param rawTxns Signed Transaction(s)
    */
-  async sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<algosdk.PendingTransactionResponse> {
+  async sendAndWait (
+    rawTxns: Uint8Array | Uint8Array[]
+  ): Promise<algosdk.modelsv2.PendingTransactionResponse> {
     const txInfo = await this.algodClient.sendRawTransaction(rawTxns).do();
     return await this.waitForConfirmation(txInfo.txId);
   }
@@ -92,13 +94,13 @@ export class AlgoOperatorImpl implements AlgoOperator {
   // Source:
   // https://github.com/algorand/docs/blob/master/examples/assets/v2/javascript/AssetExample.js#L21
   // Function used to wait for a tx confirmation
-  async waitForConfirmation (txId: string): Promise<algosdk.PendingTransactionResponse> {
+  async waitForConfirmation (txId: string): Promise<algosdk.modelsv2.PendingTransactionResponse> {
     const response = await this.algodClient.status().do();
     let lastround = response["last-round"];
     while (true) {
       const pendingInfo = await this.algodClient.pendingTransactionInformation(txId).do();
       if (pendingInfo[confirmedRound] !== null && pendingInfo[confirmedRound] > 0) {
-        return pendingInfo as algosdk.PendingTransactionResponse;
+        return pendingInfo as algosdk.modelsv2.PendingTransactionResponse;
       }
       lastround++;
       await this.algodClient.statusAfterBlock(lastround).do();
@@ -118,7 +120,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     return Math.max(ALGORAND_MIN_TX_FEE, txSize);
   }
 
-  getUsableAccBalance (accoutInfo: algosdk.AccountState): bigint {
+  getUsableAccBalance (accoutInfo: algosdk.modelsv2.Account): bigint {
     // Extracted from interacting with Algorand node:
     // 7 opted-in assets require to have 800000 micro algos (frozen in account).
     // 11 assets require 1200000.

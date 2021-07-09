@@ -222,7 +222,7 @@ async function mkTx (
 export async function executeTransaction (
   deployer: Deployer,
   execParams: rtypes.ExecParams | rtypes.ExecParams[]):
-  Promise<algosdk.PendingTransactionResponse> {
+  Promise<algosdk.modelsv2.PendingTransactionResponse> {
   deployer.assertCPNotDeleted(execParams);
   try {
     let signedTxn;
@@ -268,7 +268,7 @@ export async function executeTransaction (
  */
 export async function executeSignedTxnFromFile (
   deployer: Deployer,
-  fileName: string): Promise<algosdk.PendingTransactionResponse> {
+  fileName: string): Promise<algosdk.modelsv2.PendingTransactionResponse> {
   const signedTxn = loadSignedTxnFromFile(fileName);
   if (signedTxn === undefined) { throw new Error(`File ${fileName} does not exist`); }
 

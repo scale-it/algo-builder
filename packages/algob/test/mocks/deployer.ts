@@ -50,11 +50,11 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  logTx (message: string, txConfirmation: algosdk.PendingTransactionResponse): void {
+  logTx (message: string, txConfirmation: algosdk.modelsv2.PendingTransactionResponse): void {
     throw new Error("Not implemented");
   }
 
-  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<algosdk.PendingTransactionResponse> {
+  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<algosdk.modelsv2.PendingTransactionResponse> {
     throw new Error("Not implemented");
   }
 
@@ -166,7 +166,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  waitForConfirmation (txId: string): Promise<algosdk.PendingTransactionResponse> {
+  waitForConfirmation (txId: string): Promise<algosdk.modelsv2.PendingTransactionResponse> {
     throw new Error("Not implemented");
   }
 

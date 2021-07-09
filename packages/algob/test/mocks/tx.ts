@@ -1,5 +1,5 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import algosdk, { Algodv2, AssetParams, PendingTransactionResponse, SuggestedParams } from "algosdk";
+import algosdk, { Algodv2, modelsv2, SuggestedParams } from "algosdk";
 
 import { bobAcc } from "./account";
 
@@ -14,11 +14,11 @@ export const mockSuggestedParam: SuggestedParams = {
   genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI='
 };
 
-export const mockConfirmedTx: PendingTransactionResponse = {
+export const mockConfirmedTx: modelsv2.PendingTransactionResponse = {
   confirmedRound: 1,
   assetIndex: 1,
   applicationIndex: 1
-} as PendingTransactionResponse;
+} as modelsv2.PendingTransactionResponse;
 
 export const mockAssetInfo: algosdk.modelsv2.Asset = {
   index: 1,
@@ -35,7 +35,7 @@ export const mockAssetInfo: algosdk.modelsv2.Asset = {
     reserve: undefined,
     freeze: bobAcc.addr,
     clawback: undefined
-  } as AssetParams
+  } as modelsv2.AssetParams
 } as algosdk.modelsv2.Asset;
 
 const mockProgram = new Uint8Array([

@@ -1,5 +1,5 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import { Account, Algodv2, modelsv2, PendingTransactionResponse } from "algosdk";
+import { Account, Algodv2, modelsv2 } from "algosdk";
 
 import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";
@@ -25,14 +25,14 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     });
   }
 
-  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<PendingTransactionResponse> {
+  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<modelsv2.PendingTransactionResponse> {
     return new Promise((resolve, reject) => {
       resolve(mockConfirmedTx);
     });
   }
 
   /* eslint-disable sonarjs/no-identical-functions */
-  waitForConfirmation (txId: string): Promise<PendingTransactionResponse> {
+  waitForConfirmation (txId: string): Promise<modelsv2.PendingTransactionResponse> {
     return new Promise((resolve, reject) => {
       resolve(mockConfirmedTx);
     });
