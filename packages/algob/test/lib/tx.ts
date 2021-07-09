@@ -668,3 +668,120 @@ describe("Deploy, Delete transactions test in run mode", () => {
     assert.equal(res?.deleted, false);
   });
 });
+
+describe("Update transaction test in run mode", () => {
+  useFixtureProject("stateful");
+  let deployer: Deployer;
+  let algod: AlgoOperatorDryRunImpl;
+  let deployerCfg: DeployerConfig;
+  beforeEach(async () => {
+    const env = mkEnv("network1");
+    algod = new AlgoOperatorDryRunImpl();
+    deployerCfg = new DeployerConfig(env, algod);
+    deployer = new DeployerRunMode(deployerCfg);
+    sinon.stub(algod.algodClient, "getTransactionParams")
+      .returns({ do: async () => mockSuggestedParam });
+  });
+
+  afterEach(async () => {
+    (algod.algodClient.getTransactionParams as sinon.SinonStub).restore();
+  });
+
+  it("should update in run mode", async () => {
+    let execParams: wtypes.ExecParams = {
+      type: wtypes.TransactionType.DeployApp,
+      sign: wtypes.SignType.SecretKey,
+      fromAccount: bobAcc,
+      approvalProgram: "approval.teal",
+      clearProgram: "clear.teal",
+      localInts: 1,
+      localBytes: 1,
+      globalInts: 1,
+      globalBytes: 1,
+      payFlags: {}
+    };
+    const appInfo = await executeTransaction(deployer, execParams);
+
+    // should not be stored in checkpoint if in run mode
+    assert.isUndefined(deployer.getApp("approval.teal", "clear.teal"));
+
+    execParams = {
+      type: wtypes.TransactionType.UpdateApp,
+      sign: wtypes.SignType.SecretKey,
+      fromAccount: bobAcc,
+      appID: appInfo["application-index"],
+      newApprovalProgram: "approval.teal",
+      newClearProgram: "clear.teal",
+      payFlags: {}
+    };
+
+    await executeTransaction(deployer, execParams);
+    // should not be stored in checkpoint if in run mode
+    assert.isUndefined(deployer.getApp("approval.teal", "clear.teal"));
+  });
+
+  it("deploy in deploy mode, update in run mode", async () => {
+    deployer = new DeployerDeployMode(deployerCfg);
+    let execParams: wtypes.ExecParams = {
+      type: wtypes.TransactionType.DeployApp,
+      sign: wtypes.SignType.SecretKey,
+      fromAccount: bobAcc,
+      approvalProgram: "approval.teal",
+      clearProgram: "clear.teal",
+      localInts: 1,
+      localBytes: 1,
+      globalInts: 1,
+      globalBytes: 1,
+      payFlags: {}
+    };
+    await executeTransaction(deployer, execParams);
+    const appInfo = deployer.getApp("approval.teal", "clear.teal");
+    assert.isDefined(appInfo);
+
+    deployer = new DeployerRunMode(deployerCfg);
+    execParams = {
+      type: wtypes.TransactionType.UpdateApp,
+      sign: wtypes.SignType.SecretKey,
+      fromAccount: bobAcc,
+      appID: appInfo?.appID as number,
+      newApprovalProgram: "approval.teal",
+      newClearProgram: "clear.teal",
+      payFlags: {}
+    };
+
+    await executeTransaction(deployer, execParams);
+    assert.deepEqual(appInfo, deployer.getApp("approval.teal", "clear.teal"));
+  });
+
+  it("deploy in run mode, update in deploy mode", async () => {
+    let execParams: wtypes.ExecParams = {
+      type: wtypes.TransactionType.DeployApp,
+      sign: wtypes.SignType.SecretKey,
+      fromAccount: bobAcc,
+      approvalProgram: "approval.teal",
+      clearProgram: "clear.teal",
+      localInts: 1,
+      localBytes: 1,
+      globalInts: 1,
+      globalBytes: 1,
+      payFlags: {}
+    };
+    const appInfo = await executeTransaction(deployer, execParams);
+    assert.isUndefined(deployer.getApp("approval.teal", "clear.teal"));
+
+    deployer = new DeployerDeployMode(deployerCfg);
+    execParams = {
+      type: wtypes.TransactionType.UpdateApp,
+      sign: wtypes.SignType.SecretKey,
+      fromAccount: bobAcc,
+      appID: appInfo["application-index"],
+      newApprovalProgram: "approval.teal",
+      newClearProgram: "clear.teal",
+      payFlags: {}
+    };
+
+    await executeTransaction(deployer, execParams);
+    // checkpoint is stored for the update
+    assert.isDefined(deployer.getApp("approval.teal", "clear.teal"));
+  });
+});
