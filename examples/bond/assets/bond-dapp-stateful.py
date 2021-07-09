@@ -3,7 +3,7 @@ from pyteal import *
 def approval_program():
     """
     A stateful smart contract which will store the bond parameters:
-    issue price, nominal price, maturity date and coupon date.
+    issue price, nominal price, maturity date and coupon value, total amount.
     Additionally, the App will store a reference to the currently
     tradeable bond ASA and the current epoch number.
     """
@@ -36,7 +36,7 @@ def approval_program():
         App.globalPut(coupon_value, Txn.application_args[4]),
         App.globalPut(epoch, Txn.application_args[5]),
         App.globalPut(current_bond, Txn.application_args[6]),
-         App.globalPut(max_amount, Txn.application_args[7]),
+        App.globalPut(max_amount, Txn.application_args[7]),
         Return(Int(1))
     ])
 
@@ -113,20 +113,19 @@ def approval_program():
         Return(Int(1))
     ])
 
-    '''
-    User sends `B_i` to `DEX_i` lsig.
-    `DEX_i` sends `B_{i+1}` to the user.
-    `Dex_i` sends coupon value to user
-    '''
     on_redeem_coupon = Seq([
         Assert(
             And(
                 basic_checks,
+                # User sends `B_i` to `DEX_i` lsig.
                 Gtxn[0].type_enum() == TxnType.AssetTransfer,
+                # `DEX_i` sends `B_{i+1}` to the user.
                 Gtxn[1].type_enum() == TxnType.AssetTransfer,
                 Gtxn[0].asset_amount() == Gtxn[1].asset_amount(),
+                # `Dex_i` sends coupon value to user
                 Gtxn[2].type_enum() == TxnType.Payment,
                 Gtxn[2].receiver() == Txn.sender(),
+                # verify coupon amount
                 Gtxn[2].amount() == Mul(Gtxn[0].asset_amount(), App.globalGet(coupon_value))
             )
         ),
@@ -134,7 +133,20 @@ def approval_program():
     ])
 
     on_create_dex = Seq([
-
+        Assert(
+            And(
+                Txn.sender() == App.globalGet(store_manager),
+                basic_checks
+            ),
+            Gtxn[0].type_enum() == TxnType.AssetTransfer,
+            # transfer `balanceOf(issuer, B_i)`  of `B_{i+1}` from the creator to the `issuer`.
+            # burn `B_i` issuer bonds.
+            # 
+        ),
+        # Increment `BondApp.epoch`
+        App.globalPut(epoch, Add(App.globalGet(epoch), Int(1))),
+        # set `BondApp.current_bond = B_{i+1}`.
+        App.globalPut(current_bond, Bytes(Gtxn[0].xfer_asset()))
     ])
 
 program = Cond(
