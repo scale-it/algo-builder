@@ -767,7 +767,6 @@ describe("Update transaction test in run mode", () => {
       payFlags: {}
     };
     const appInfo = await executeTransaction(deployer, execParams);
-
     assert.isUndefined(deployer.getApp("approval.teal", "clear.teal"));
 
     deployer = new DeployerDeployMode(deployerCfg);
