@@ -66,6 +66,8 @@ async function run (runtimeEnv, deployer) {
   };
   const issuerLsig = await deployer.loadLogic('issuer-lsig.py', scInitParam);
 
+  algoTxnParams.toAccountAddr = issuerLsig.address();
+  await executeTransaction(deployer, algoTxnParams);
   await deployer.optInLsigToASA(asaInfo.assetIndex, issuerLsig, { totalFee: 1000 });
 
   // update issuer address in bond-dapp

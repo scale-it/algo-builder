@@ -16,7 +16,8 @@ def issuer_lsig():
     verify_tx = And(
         Gtxn[0].type_enum() == TxnType.Payment,
         Gtxn[2].application_id() == Tmpl.Int("TMPL_APPLICATION_ID"),
-        Gtxn[2].application_args[0] == Bytes("buy") 
+        Gtxn[2].application_args[0] == Bytes("buy") ,
+        common_fields
     )
 
     # verify owner can take out algos from this account
@@ -31,10 +32,14 @@ def issuer_lsig():
         Txn.asset_amount() == Int(0)
     )
 
-    return Or(
-        opt_in,
-        payout,
+    combine = Or(payout, opt_in)
+
+    program = Cond(
+        [Global.group_size() == Int(3), verify_tx],
+        [Global.group_size() == Int(1), combine],
     )
+
+    return program
 
 if __name__ == "__main__":
     print(compileTeal(issuer_lsig(), Mode.Signature))
