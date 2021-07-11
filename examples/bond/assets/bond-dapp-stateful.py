@@ -65,28 +65,33 @@ def approval_program():
         Return(Int(1))
     ])
 
-    on_issue = And(
-        Gtxn[0].type_enum() == TxnType.AssetTransfer,
-        Gtxn[0].asset_receiver() == App.globalGet(issuer_address),
-        Gtxn[0].xfer_asset() == App.globalGet(current_bond),
-        basic_checks
-    )
+    on_issue = Seq([
+        Assert(
+            And(
+                Gtxn[0].type_enum() == TxnType.AssetTransfer,
+                Gtxn[0].asset_receiver() == App.globalGet(issuer_address),
+                Gtxn[0].xfer_asset() == App.globalGet(current_bond),
+                basic_checks
+            )
+        ),
+        Return(Int(1))
+    ])
 
     on_buy = Seq([
-        And(
-            basic_checks,
-            # verify payment
-            Gtxn[0].type_enum() == TxnType.Payment,
-            # verify buying amount,
-            Gtxn[0].amount >= Add(Mul(Txn.application_args[1], App.globalGet(issue_price)), Gtxn[1].fee()),
-            # verify ASA transfer
-            Gtxn[1].type_enum() == TxnType.AssetTransfer,
-            # verify bond amount
-            Gtxn[1].asset_amount() == Txn.application_args[1],
-            Gtxn[1].xfer_asset() == App.globalGet(current_bond),
-            Gtxn[1].asset_receiver() == Gtxn[0].sender()
+        Assert(
+            And(
+                basic_checks,
+                # verify payment
+                Gtxn[0].type_enum() == TxnType.Payment,
+                # verify buying amount,
+                Gtxn[0].amount() >= Add(Mul(Gtxn[1].asset_amount(), App.globalGet(issue_price)), Gtxn[1].fee()),
+                # verify ASA transfer
+                Gtxn[1].type_enum() == TxnType.AssetTransfer,
+                Gtxn[1].xfer_asset() == App.globalGet(current_bond),
+                Gtxn[1].asset_receiver() == Gtxn[0].sender()
+            )
         ),
-        App.globalPut(total, Add(App.globalGet(total), Gtxn[1].asset_amount()),
+        App.globalPut(total, Add(App.globalGet(total), Gtxn[1].asset_amount())),
         Return(Int(1))
     ])
 
@@ -98,7 +103,8 @@ def approval_program():
                 basic_checks
             )
         ),
-        App.globalPut(Bytes("buyback"), Txn.application_args[1])
+        App.globalPut(Bytes("buyback"), Txn.application_args[1]),
+        Return(Int(1))
     ])
 
     on_exit = Seq([
@@ -112,12 +118,12 @@ def approval_program():
                 # verify sender of first transaction is buyback address
                 Gtxn[1].sender() == App.globalGet(Bytes("buyback")),
                 # verify amount of algo received by buyer
-                Gtxn[1].amount() == Sub(Mul(Gtxn[0].asset_amount(), App.globalGet(nominal_price)), Gtxn[1].fee),
+                Gtxn[1].amount() == Minus(Mul(Gtxn[0].asset_amount(), App.globalGet(nominal_price)), Gtxn[1].fee()),
                 Gtxn[1].receiver() == Txn.sender(),
                 # verify maturity date is passed
                 Global.latest_timestamp() > App.globalGet(maturity_date)
             )
-        )
+        ),
         Return(Int(1))
     ])
 
@@ -140,27 +146,32 @@ def approval_program():
         Return(Int(1))
     ])
 
+    # fetch asset_holding.balance from Txn.accounts[0]
+    asset_balance = AssetHolding.balance(Int(1), Gtxn[1].xfer_asset())
+
     on_create_dex = Seq([
+        asset_balance, # load asset_balance from store
         Assert(
             And(
                 Txn.sender() == App.globalGet(store_manager),
-                basic_checks
+                basic_checks,
+                Gtxn[0].type_enum() == TxnType.AssetTransfer,
+                # transfer `balanceOf(issuer, B_i)`  of `B_{i+1}` from the creator to the `issuer`.
+                # index 1 of Txn.accounts().
+                asset_balance.value() == Gtxn[0].asset_amount(),
+                # burn `B_i` issuer bonds. send to null_address
+                Gtxn[1].type_enum() == TxnType.AssetTransfer,
+                asset_balance.value() == Gtxn[1].asset_amount()
             ),
-            Gtxn[0].type_enum() == TxnType.AssetTransfer,
-            # transfer `balanceOf(issuer, B_i)`  of `B_{i+1}` from the creator to the `issuer`.
-            # index 1 of Txn.accounts().
-            AssetHolding.balance(Int(1), Gtxn[1].xfer_asset()) == Gtxn[0].asset_amount(),
-            # burn `B_i` issuer bonds. send to null_address
-            Gtxn[1].type_enum() == TxnType.AssetTransfer,
-            AssetHolding.balance(Int(1), Gtxn[1].xfer_asset()) == Gtxn[1].asset_amount()
         ),
         # Increment `BondApp.epoch`
         App.globalPut(epoch, Add(App.globalGet(epoch), Int(1))),
         # set `BondApp.current_bond = B_{i+1}`.
-        App.globalPut(current_bond, Bytes(Gtxn[0].xfer_asset()))
+        App.globalPut(current_bond, Gtxn[0].xfer_asset()),
+        Return(Int(1))
     ])
 
-program = Cond(
+    program = Cond(
         # Verfies that the application_id is 0, jumps to on_initialize.
         [Txn.application_id() == Int(0), on_initialize],
         # Verifies Update transaction, rejects it.

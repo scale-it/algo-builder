@@ -25,13 +25,16 @@ def issuer_lsig():
         Txn.receiver() == Tmpl.Addr("TMPL_OWNER")
     )
 
+    # allow opt-in transaction
+    opt_in = And(
+        Txn.type_enum() == TxnType.AssetTransfer,
+        Txn.asset_amount() == Int(0)
+    )
+
     return Or(
-        And(
-            common_fields,
-            verify_tx
-        ),
-        payout
+        opt_in,
+        payout,
     )
 
 if __name__ == "__main__":
-    print(compileTeal(dex_lsig(), Mode.Signature))
+    print(compileTeal(issuer_lsig(), Mode.Signature))
