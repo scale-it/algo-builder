@@ -35,7 +35,7 @@ async function run (runtimeEnv, deployer) {
   const asset = await deployer.getAssetByID(asaInfo.assetIndex);
   const maxAmount = convert.uint64ToBigEndian(asset.params.total);
 
-  const appArgs = [
+  let appArgs = [
     storeManager,
     issuePrice,
     nominalPrice,
@@ -71,6 +71,22 @@ async function run (runtimeEnv, deployer) {
   await deployer.optInLsigToASA(asaInfo.assetIndex, issuerLsig, { totalFee: 1000 });
 
   // update issuer address in bond-dapp
+  appArgs = [
+    'str:update_issuer_address',
+    convert.addressToPk(issuerLsig.address())
+  ];
+
+  const appCallParams = {
+    type: types.TransactionType.CallNoOpSSC,
+    sign: types.SignType.SecretKey,
+    fromAccount: storeManagerAccount,
+    appID: appInfo.appID,
+    payFlags: {},
+    appArgs: appArgs
+  };
+  await executeTransaction(deployer, appCallParams);
+
+  console.log('Issuer address updated!');
 }
 
 module.exports = { default: run };
