@@ -3,13 +3,20 @@ const {
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 
-async function run (runtimeEnv, deployer) {
-  const masterAccount = deployer.accountsByName.get('master-account');
-  const creatorAccount = deployer.accountsByName.get('john');
-  const storeManagerAccount = deployer.accountsByName.get('alice');
+let newAsaInfo;
+let appInfo;
+let asaInfo;
+const assetID = 'asset-index';
 
-  const asaInfo = deployer.getASAInfo('bond-token');
-  const appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
+/**
+ * Creates DEX_i lsig, burn B_i tokens, issue B_i+1 tokens
+ * @param {Account} masterAccount
+ * @param {Account} creatorAccount
+ * @param {Account} storeManagerAccount
+ */
+async function createDex (deployer, masterAccount, creatorAccount, storeManagerAccount) {
+  asaInfo = deployer.getASAInfo('bond-token');
+  appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
   let scInitParam = {
     TMPL_APPLICATION_ID: appInfo.appID,
     TMPL_OWNER: creatorAccount.addr
@@ -24,9 +31,9 @@ async function run (runtimeEnv, deployer) {
     payFlags: {}
   };
   // Create B_[i+1]
-  const newAsaInfo = await executeTransaction(deployer, deployTx);
+  newAsaInfo = await executeTransaction(deployer, deployTx);
   console.log(newAsaInfo);
-  const newIndex = newAsaInfo['asset-index'];
+  const newIndex = newAsaInfo[assetID];
 
   await deployer.optInLsigToASA(newIndex, issuerLsig, { totalFee: 1000 });
 
@@ -47,6 +54,7 @@ async function run (runtimeEnv, deployer) {
   };
   await executeTransaction(deployer, algoTxnParams);
   await deployer.optInLsigToASA(newIndex, dexLsig, { totalFee: 1000 });
+  await deployer.optInLsigToASA(asaInfo.assetIndex, dexLsig, { totalFee: 1000 });
 
   const globalState = await readGlobalStateSSC(deployer, storeManagerAccount.addr, appInfo.appID);
   let total = 0;
@@ -81,7 +89,7 @@ async function run (runtimeEnv, deployer) {
       fromAccount: storeManagerAccount,
       appID: appInfo.appID,
       payFlags: {},
-      appArgs: ['str:create_dex'],
+      appArgs: ['str:createDex'],
       accounts: [issuerLsig.address()]
     },
     // New bond token transfer to issuer's address
@@ -110,6 +118,78 @@ async function run (runtimeEnv, deployer) {
   console.log('Creating dex!');
   await executeTransaction(deployer, groupTx);
   console.log('Dex created!');
+}
+
+/**
+ * Redeem old tokens, get coupon_value + new bond tokens
+ * @param {Account} buyerAccount
+ */
+async function redeem (deployer, buyerAccount) {
+  const scInitParam = {
+    TMPL_OLD_BOND: asaInfo.assetIndex,
+    TMPL_NEW_BOND: newAsaInfo[assetID],
+    TMPL_APPLICATION_ID: appInfo.appID
+  };
+  const dexLsig = await deployer.loadLogic('dex-lsig.py', scInitParam);
+  await deployer.optInAcountToASA(newAsaInfo[assetID], 'bob', {});
+  const groupTx = [
+    // Transfer tokens to dex lsig.
+    {
+      type: types.TransactionType.TransferAsset,
+      sign: types.SignType.SecretKey,
+      fromAccount: buyerAccount,
+      toAccountAddr: dexLsig.address(),
+      amount: 10,
+      assetID: asaInfo.assetIndex,
+      payFlags: { totalFee: 1000 }
+    },
+    // New bond token transfer to buyer's address
+    {
+      type: types.TransactionType.TransferAsset,
+      sign: types.SignType.LogicSignature,
+      fromAccountAddr: dexLsig.address(),
+      lsig: dexLsig,
+      toAccountAddr: buyerAccount.addr,
+      amount: 10,
+      assetID: newAsaInfo[assetID],
+      payFlags: { totalFee: 1000 }
+    },
+    {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.LogicSignature,
+      fromAccountAddr: dexLsig.address(),
+      lsig: dexLsig,
+      toAccountAddr: buyerAccount.addr,
+      amountMicroAlgos: 1000,
+      payFlags: {}
+    },
+    // call to bond-dapp
+    {
+      type: types.TransactionType.CallNoOpSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: buyerAccount,
+      appID: appInfo.appID,
+      payFlags: {},
+      appArgs: ['str:redeem_coupon']
+    }
+  ];
+
+  console.log('Redeeming tokens!');
+  await executeTransaction(deployer, groupTx);
+  console.log('Tokens redeemed!');
+}
+
+async function run (runtimeEnv, deployer) {
+  const masterAccount = deployer.accountsByName.get('master-account');
+  const creatorAccount = deployer.accountsByName.get('john');
+  const storeManagerAccount = deployer.accountsByName.get('alice');
+  const buyerAccount = deployer.accountsByName.get('bob');
+
+  // Create DEX, burn B_0, issue B_1
+  await createDex(deployer, masterAccount, creatorAccount, storeManagerAccount);
+
+  // Redeem coupon_value
+  await redeem(deployer, buyerAccount);
 }
 
 module.exports = { default: run };
