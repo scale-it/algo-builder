@@ -133,6 +133,7 @@ interface SignWithSk {
 
 interface SignWithLsig {
   sign: SignType.LogicSignature
+  fromAccount?: AccountSDK
   fromAccountAddr: AccountAddress
   lsig: LogicSig
   /** stateless smart contract args */
