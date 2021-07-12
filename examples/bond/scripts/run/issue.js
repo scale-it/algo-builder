@@ -2,7 +2,6 @@ const {
   executeTransaction, convert
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
-const { group } = require('console');
 
 async function run (runtimeEnv, deployer) {
   const creatorAccount = deployer.accountsByName.get('john');
