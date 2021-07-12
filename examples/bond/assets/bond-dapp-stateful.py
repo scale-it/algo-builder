@@ -55,7 +55,7 @@ def approval_program():
         Return(Int(1))
     ])
 
-    # only bon app manager can update issue price
+    # only bond app manager can update issue price
     on_update_issue_price = Seq([
         Assert(
              And(
