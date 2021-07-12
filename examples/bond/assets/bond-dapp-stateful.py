@@ -31,13 +31,13 @@ def approval_program():
     # initialize variables
     on_initialize = Seq([
         App.globalPut(store_manager, Txn.application_args[0]),
-        App.globalPut(issue_price, Txn.application_args[1]),
-        App.globalPut(nominal_price, Txn.application_args[2]),
-        App.globalPut(maturity_date, Txn.application_args[3]),
-        App.globalPut(coupon_value, Txn.application_args[4]),
-        App.globalPut(epoch, Txn.application_args[5]),
-        App.globalPut(current_bond, Txn.application_args[6]),
-        App.globalPut(max_amount, Txn.application_args[7]),
+        App.globalPut(issue_price, Btoi(Txn.application_args[1])),
+        App.globalPut(nominal_price, Btoi(Txn.application_args[2])),
+        App.globalPut(maturity_date, Btoi(Txn.application_args[3])),
+        App.globalPut(coupon_value, Btoi(Txn.application_args[4])),
+        App.globalPut(epoch, Btoi(Txn.application_args[5])),
+        App.globalPut(current_bond, Btoi(Txn.application_args[6])),
+        App.globalPut(max_amount, Btoi(Txn.application_args[7])),
         Return(Int(1))
     ])
 
