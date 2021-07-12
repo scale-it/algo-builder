@@ -1,6 +1,7 @@
-import algosdk, { ConfirmedTxInfo, SuggestedParams, Transaction } from "algosdk";
+import algosdk, { SuggestedParams, Transaction } from "algosdk";
 
-import { AlgoSigner, AlgoSignerSendTx, AlgoSignerSignedTx, AlgoSignerToBeSignedTx, ExecParams, TxParams } from "../types";
+import { AlgoSigner, JsonPayload, WalletTransaction } from "../algo-signer-types";
+import { ExecParams, TxParams } from "../types";
 import { mkTransaction } from "./txn";
 
 const CONFIRMED_ROUND = "confirmed-round";
@@ -19,13 +20,13 @@ export class WebMode {
    * wait for confirmation for transaction using transaction id
    * @param txId Transaction id
    */
-  async waitForConfirmation (txId: string): Promise<ConfirmedTxInfo> {
+  async waitForConfirmation (txId: string): Promise<JsonPayload> {
     const response = await this.algoSigner.algod({
       ledger: this.chainName,
       path: '/v2/status'
     });
     console.log(response);
-    let lastround = response[LAST_ROUND];
+    let lastround = response[LAST_ROUND] as number;
     while (true) {
       const pendingInfo = await this.algoSigner.algod({
         ledger: this.chainName,
@@ -33,7 +34,7 @@ export class WebMode {
       });
       if (
         pendingInfo[CONFIRMED_ROUND] !== null &&
-        pendingInfo[CONFIRMED_ROUND] > 0
+        pendingInfo[CONFIRMED_ROUND] as number > 0
       ) {
         return pendingInfo;
       }
@@ -49,8 +50,8 @@ export class WebMode {
    * Sender transaction to network
    * @param signedTxn signed transaction
    */
-  async sendTransaction (signedTxn: any): Promise<AlgoSignerSendTx> {
-    return this.algoSigner.send({
+  async sendTransaction (signedTxn: any): Promise<JsonPayload> {
+    return await this.algoSigner.send({
       ledger: this.chainName,
       tx: signedTxn.blob
     });
@@ -60,8 +61,8 @@ export class WebMode {
    * Sign transaction using algosigner
    * @param txns Array of transactions in base64
    */
-  async signTransaction (txns: AlgoSignerToBeSignedTx[]): Promise<AlgoSignerSignedTx> {
-    return this.algoSigner.signTxn(txns);
+  async signTransaction (txns: WalletTransaction[]): Promise<JsonPayload> {
+    return await this.algoSigner.signTxn(txns);
   }
 
   /**
@@ -74,20 +75,20 @@ export class WebMode {
       path: '/v2/transactions/params'
     });
     const s: SuggestedParams = {
-      fee: txParams.fee,
-      genesisHash: txParams["genesis-hash"],
-      genesisID: txParams["genesis-id"],
-      firstRound: txParams[LAST_ROUND],
+      fee: txParams.fee as number,
+      genesisHash: txParams["genesis-hash"] as string,
+      genesisID: txParams["genesis-id"] as string,
+      firstRound: txParams[LAST_ROUND] as number,
       lastRound: Number(txParams[LAST_ROUND]) + 1000,
       flatFee: false
     };
 
     s.flatFee = userParams.totalFee !== undefined;
-    s.fee = userParams.totalFee ?? userParams.feePerByte ?? txParams["min-fee"];
-    if (s.flatFee) s.fee = Math.max(s.fee, txParams["min-fee"]);
+    s.fee = userParams.totalFee || userParams.feePerByte || txParams["min-fee"] as number; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+    if (s.flatFee) s.fee = Math.max(Number(s.fee), Number(txParams["min-fee"]));
 
-    s.firstRound = userParams.firstValid ?? s.firstRound;
-    s.lastRound = userParams.firstValid === undefined || userParams.validRounds === undefined
+    s.firstRound = userParams.firstValid || s.firstRound; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+    s.lastRound = userParams.firstValid === undefined || userParams.validRounds === undefined // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
       ? s.lastRound
       : Number(userParams.firstValid) + Number(userParams.validRounds);
 
@@ -99,7 +100,7 @@ export class WebMode {
  * @param execParams transaction parameters or atomic transaction parameters
  */
   async executeTransaction (execParams: ExecParams | ExecParams[]):
-  Promise<ConfirmedTxInfo> {
+  Promise<JsonPayload> {
     let signedTxn;
     let txns: Transaction[] = [];
     if (Array.isArray(execParams)) {
@@ -128,6 +129,9 @@ export class WebMode {
     }
 
     const txInfo = await this.sendTransaction(signedTxn);
-    return await this.waitForConfirmation(txInfo.txId);
+    if (txInfo && typeof txInfo.txId === "string") {
+      return await this.waitForConfirmation(txInfo.txId);
+    }
+    throw new Error("Transaction Error");
   }
 }
