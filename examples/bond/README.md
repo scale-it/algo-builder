@@ -23,6 +23,8 @@ Use Cases. We use functional notation to describe use cases we will implement.
 - `exit(amount)`  — after maturity bond holder can send bonds back to the issuer and receive `amount×nominal_price`  back. Issuer must provide enough funds to the issuer account upon the maturity date. Otherwise a legal consequences can be triggered.
 - `redeem_coupon()`  — bond holder can get his interest (in ALGO).
 
+Note: In this example we have constant `coupon_value` for all the epochs, we can make variable by having this value hardcoded in each `DEX_i`.
+
 ## Spec document
 
 - You can find spec document [here](https://paper.dropbox.com/doc/Algorand-Bond-Template--BOU8bTQSnmRNk23KK8McWwxXAg-hzI7C681Soo2sr6iyGFzg)
