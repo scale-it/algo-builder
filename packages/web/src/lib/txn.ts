@@ -17,7 +17,7 @@ export function encodeNote (note: string | undefined, noteb64: string| undefined
  */
 export function getFromAddress (execParams: ExecParams): AccountAddress {
   if (execParams.sign === SignType.SecretKey) {
-    return execParams.fromAccountAddr ?? execParams.fromAccount.addr;
+    return execParams.fromAccountAddr || execParams.fromAccount.addr; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
   }
   return execParams.fromAccountAddr;
 }
