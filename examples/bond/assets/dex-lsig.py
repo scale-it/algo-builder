@@ -17,7 +17,7 @@ def dex_lsig():
     first_tx = And(
         Gtxn[0].type_enum() == TxnType.AssetTransfer,
         Gtxn[0].xfer_asset() == Tmpl.Int("TMPL_OLD_BOND"),
-        Gtxn[0].asset_amount() == Gtxn[1].asset_amount()   
+        Gtxn[0].asset_amount() == Gtxn[1].asset_amount()
     )
 
     # verify dex sends new bond tokens to buyer 

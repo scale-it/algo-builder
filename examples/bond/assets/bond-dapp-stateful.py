@@ -18,6 +18,7 @@ def approval_program():
     total = Bytes("total")
     current_bond = Bytes("current_bond")
     max_amount = Bytes("max_amount")
+    creator = Bytes("creator")
 
     # verify rekey_to and close_rem_to are set as zero_address
     basic_checks = And(
@@ -38,6 +39,7 @@ def approval_program():
         App.globalPut(epoch, Btoi(Txn.application_args[5])),
         App.globalPut(current_bond, Btoi(Txn.application_args[6])),
         App.globalPut(max_amount, Btoi(Txn.application_args[7])),
+        App.globalPut(creator, Txn.application_args[8]),
         Return(Int(1))
     ])
 
@@ -147,7 +149,7 @@ def approval_program():
     ])
 
     # fetch asset_holding.balance from Txn.accounts[0]
-    asset_balance = AssetHolding.balance(Int(1), Gtxn[1].xfer_asset())
+    asset_balance = AssetHolding.balance(Int(1), Gtxn[2].xfer_asset())
 
     on_create_dex = Seq([
         asset_balance, # load asset_balance from store
@@ -155,19 +157,20 @@ def approval_program():
             And(
                 Txn.sender() == App.globalGet(store_manager),
                 basic_checks,
-                Gtxn[0].type_enum() == TxnType.AssetTransfer,
+                Gtxn[1].type_enum() == TxnType.AssetTransfer,
                 # transfer `balanceOf(issuer, B_i)`  of `B_{i+1}` from the creator to the `issuer`.
                 # index 1 of Txn.accounts().
-                asset_balance.value() == Gtxn[0].asset_amount(),
-                # burn `B_i` issuer bonds. send to null_address
-                Gtxn[1].type_enum() == TxnType.AssetTransfer,
-                asset_balance.value() == Gtxn[1].asset_amount()
+                asset_balance.value() == Gtxn[1].asset_amount(),
+                # burn `B_i` issuer bonds. send to creator
+                Gtxn[2].type_enum() == TxnType.AssetTransfer,
+                Gtxn[2].asset_receiver() == App.globalGet(creator),
+                asset_balance.value() == Gtxn[2].asset_amount()
             ),
         ),
         # Increment `BondApp.epoch`
         App.globalPut(epoch, Add(App.globalGet(epoch), Int(1))),
         # set `BondApp.current_bond = B_{i+1}`.
-        App.globalPut(current_bond, Gtxn[0].xfer_asset()),
+        App.globalPut(current_bond, Gtxn[1].xfer_asset()),
         Return(Int(1))
     ])
 

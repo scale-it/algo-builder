@@ -3,8 +3,6 @@ const {
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 
-const zeroAddress = new Uint8Array(32);
-
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
   const creatorAccount = deployer.accountsByName.get('john');
@@ -74,8 +72,18 @@ async function run (runtimeEnv, deployer) {
 
   // balance of old bond tokens in issuer lsig
   const info = await balanceOf(deployer, issuerLsig.address(), asaInfo.assetIndex);
-
+  console.log('Old balance amount ', info.amount);
   const groupTx = [
+    // call to bond-dapp
+    {
+      type: types.TransactionType.CallNoOpSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: storeManagerAccount,
+      appID: appInfo.appID,
+      payFlags: {},
+      appArgs: ['str:create_dex'],
+      accounts: [issuerLsig.address()]
+    },
     // New bond token transfer to issuer's address
     {
       type: types.TransactionType.TransferAsset,
@@ -86,25 +94,16 @@ async function run (runtimeEnv, deployer) {
       assetID: newIndex,
       payFlags: { totalFee: 1000 }
     },
-    // New bond token transfer to issuer's address
+    // burn tokens
     {
       type: types.TransactionType.TransferAsset,
       sign: types.SignType.LogicSignature,
       fromAccountAddr: issuerLsig.address(),
-      toAccountAddr: zeroAddress,
+      lsig: issuerLsig,
+      toAccountAddr: creatorAccount.addr,
       amount: info.amount,
       assetID: asaInfo.assetIndex,
       payFlags: { totalFee: 1000 }
-    },
-    // call to bond-dapp
-    {
-      type: types.TransactionType.CallNoOpSSC,
-      sign: types.SignType.SecretKey,
-      fromAccount: creatorAccount,
-      appID: appInfo.appID,
-      payFlags: {},
-      appArgs: ['str:create_dex'],
-      appAccounts: [convert.addressToPk(issuerLsig.address())]
     }
   ];
 

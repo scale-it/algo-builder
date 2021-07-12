@@ -34,6 +34,7 @@ async function run (runtimeEnv, deployer) {
   const currentBond = convert.uint64ToBigEndian(asaInfo.assetIndex);
   const asset = await deployer.getAssetByID(asaInfo.assetIndex);
   const maxAmount = convert.uint64ToBigEndian(asset.params.total);
+  const creator = convert.addressToPk(creatorAccount.addr);
 
   let appArgs = [
     storeManager,
@@ -43,7 +44,8 @@ async function run (runtimeEnv, deployer) {
     couponValue,
     epoch,
     currentBond,
-    maxAmount
+    maxAmount,
+    creator
   ];
 
   // Create Application

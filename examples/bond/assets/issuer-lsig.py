@@ -16,8 +16,15 @@ def issuer_lsig():
     verify_tx = And(
         Gtxn[0].type_enum() == TxnType.Payment,
         Gtxn[2].application_id() == Tmpl.Int("TMPL_APPLICATION_ID"),
-        Gtxn[2].application_args[0] == Bytes("buy") ,
+        Gtxn[2].application_args[0] == Bytes("buy"),
         common_fields
+    )
+
+    # burn tx
+    burn_tx = And(
+        Gtxn[2].type_enum() == TxnType.AssetTransfer,
+        Gtxn[1].type_enum() == TxnType.AssetTransfer,
+        Gtxn[0].application_id() == Tmpl.Int("TMPL_APPLICATION_ID")
     )
 
     # verify owner can take out algos from this account
@@ -34,8 +41,13 @@ def issuer_lsig():
 
     combine = Or(payout, opt_in)
 
+    transactions = Cond(
+        [Gtxn[0].type_enum() == TxnType.Payment, verify_tx],
+        [Gtxn[1].type_enum() == TxnType.AssetTransfer, burn_tx]
+    )
+
     program = Cond(
-        [Global.group_size() == Int(3), verify_tx],
+        [Global.group_size() == Int(3), transactions],
         [Global.group_size() == Int(1), combine],
     )
 
