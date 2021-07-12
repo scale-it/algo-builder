@@ -27,19 +27,27 @@ def dex_lsig():
     )
 
     # verify dex pays coupon value to buyer
-    third_tx = (
+    third_tx = And(
         Gtxn[2].type_enum() == TxnType.Payment,
         Gtxn[3].type_enum() == TxnType.ApplicationCall,
         Gtxn[3].application_id() == Tmpl.Int("TMPL_APPLICATION_ID"),
         Gtxn[3].application_args[0] == Bytes("redeem_coupon")
     )
 
-    return And(
-        common_fields,
-        first_tx,
-        second_tx,
-        third_tx
+    # allow opt-in transaction
+    opt_in = And(
+        Txn.type_enum() == TxnType.AssetTransfer,
+        Txn.asset_amount() == Int(0)
     )
+
+    combine = And(common_fields, first_tx, second_tx, third_tx)
+
+    program = program = Cond(
+        [Global.group_size() == Int(4), combine],
+        [Global.group_size() == Int(1), opt_in],
+    )
+
+    return program
 
 if __name__ == "__main__":
     print(compileTeal(dex_lsig(), Mode.Signature))
