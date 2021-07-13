@@ -19,7 +19,8 @@ async function createDex (deployer, masterAccount, creatorAccount, storeManagerA
   appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
   let scInitParam = {
     TMPL_APPLICATION_ID: appInfo.appID,
-    TMPL_OWNER: creatorAccount.addr
+    TMPL_OWNER: creatorAccount.addr,
+    TMPL_STORE_MANAGER: storeManagerAccount.addr
   };
   const issuerLsig = await deployer.loadLogic('issuer-lsig.py', scInitParam);
 
@@ -35,12 +36,32 @@ async function createDex (deployer, masterAccount, creatorAccount, storeManagerA
   console.log(newAsaInfo);
   const newIndex = newAsaInfo[assetID];
 
-  await deployer.optInLsigToASA(newIndex, issuerLsig, { totalFee: 1000 });
+  // Only store manager can allow opt-in to ASA for lsig
+  const optInTx = [
+    {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: storeManagerAccount,
+      toAccountAddr: issuerLsig.address(),
+      amountMicroAlgos: 0,
+      payFlags: {}
+    },
+    {
+      types: types.TransactionType.OptInToASA,
+      sign: types.TransactionType.SecretKey,
+      fromAccountAddr: issuerLsig.address(),
+      lsig: issuerLsig,
+      assetID: newIndex,
+      payFlags: {}
+    }
+  ];
+  await executeTransaction(deployer, optInTx);
 
   scInitParam = {
     TMPL_OLD_BOND: asaInfo.assetIndex,
     TMPL_NEW_BOND: newIndex,
-    TMPL_APPLICATION_ID: appInfo.appID
+    TMPL_APPLICATION_ID: appInfo.appID,
+    TMPL_STORE_MANAGER: storeManagerAccount.addr
   };
   const dexLsig = await deployer.loadLogic('dex-lsig.py', scInitParam);
 
@@ -53,8 +74,14 @@ async function createDex (deployer, masterAccount, creatorAccount, storeManagerA
     payFlags: {}
   };
   await executeTransaction(deployer, algoTxnParams);
-  await deployer.optInLsigToASA(newIndex, dexLsig, { totalFee: 1000 });
-  await deployer.optInLsigToASA(asaInfo.assetIndex, dexLsig, { totalFee: 1000 });
+
+  optInTx[0].toAccountAddr = dexLsig.address();
+  optInTx[1].fromAccountAddr = dexLsig.address();
+  optInTx[1].lsig = dexLsig;
+  await executeTransaction(deployer, optInTx);
+
+  optInTx[1].assetID = asaInfo.assetIndex;
+  await executeTransaction(deployer, optInTx);
 
   const globalState = await readGlobalStateSSC(deployer, storeManagerAccount.addr, appInfo.appID);
   let total = 0;
@@ -179,6 +206,12 @@ async function redeem (deployer, buyerAccount) {
   console.log('Tokens redeemed!');
 }
 
+async function createBuyback (deployer, storeManagerAccount) {
+  const buybackTx = {
+
+  };
+}
+
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
   const creatorAccount = deployer.accountsByName.get('john');
@@ -190,6 +223,9 @@ async function run (runtimeEnv, deployer) {
 
   // Redeem coupon_value
   await redeem(deployer, buyerAccount);
+
+  // create buyback
+  await createBuyback(deployer, storeManagerAccount);
 }
 
 module.exports = { default: run };

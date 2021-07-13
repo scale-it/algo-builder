@@ -64,13 +64,34 @@ async function run (runtimeEnv, deployer) {
   // Initialize issuer lsig with bond-app ID
   const scInitParam = {
     TMPL_APPLICATION_ID: appInfo.appID,
-    TMPL_OWNER: creatorAccount.addr
+    TMPL_OWNER: creatorAccount.addr,
+    TMPL_STORE_MANAGER: storeManagerAccount.addr
   };
   const issuerLsig = await deployer.loadLogic('issuer-lsig.py', scInitParam);
 
   algoTxnParams.toAccountAddr = issuerLsig.address();
   await executeTransaction(deployer, algoTxnParams);
-  await deployer.optInLsigToASA(asaInfo.assetIndex, issuerLsig, { totalFee: 1000 });
+
+  // Only store manager can allow opt-in to ASA for lsig
+  const optInTx = [
+    {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: storeManagerAccount,
+      toAccountAddr: issuerLsig.address(),
+      amountMicroAlgos: 0,
+      payFlags: {}
+    },
+    {
+      types: types.TransactionType.OptInASA,
+      sign: types.SignType.LogicSignature,
+      fromAccountAddr: issuerLsig.address(),
+      lsig: issuerLsig,
+      assetID: asaInfo.assetIndex,
+      payFlags: {}
+    }
+  ];
+  await executeTransaction(deployer, optInTx);
 
   // update issuer address in bond-dapp
   appArgs = [

@@ -36,15 +36,18 @@ def dex_lsig():
 
     # allow opt-in transaction
     opt_in = And(
-        Txn.type_enum() == TxnType.AssetTransfer,
-        Txn.asset_amount() == Int(0)
+        Gtxn[0].type_enum() == TxnType.Payment,
+        Gtxn[0].amount() == Int(0),
+        Gtxn[0].sender() == Tmpl.Addr("TMPL_STORE_MANAGER"),
+        Gtxn[1].type_enum() == TxnType.AssetTransfer,
+        Gtxn[1].asset_amount() == Int(0)
     )
 
     combine = And(common_fields, first_tx, second_tx, third_tx)
 
     program = program = Cond(
         [Global.group_size() == Int(4), combine],
-        [Global.group_size() == Int(1), opt_in],
+        [Global.group_size() == Int(2), opt_in],
     )
 
     return program
