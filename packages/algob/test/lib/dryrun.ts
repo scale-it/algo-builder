@@ -18,11 +18,6 @@ import { useFixtureProjectCopy } from "../helpers/project";
 import { mockDryRunResponse, mockLsig, mockSuggestedParam } from "../mocks/tx";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
-interface CompileIn {
-  filename: string
-  tealHash: number
-}
-
 class TealDbgMock extends Tealdbg {
   debugArgs = {};
   writtenFiles = [] as string[];
