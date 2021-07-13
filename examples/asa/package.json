@@ -7,7 +7,7 @@
     "chai": "^4.2.0"
   },
   "dependencies": {
-    "algosdk": "^1.9.1"
+    "algosdk": "algorand/js-algorand-sdk.git#develop"
   },
   "scripts": {
     "algob": "algob",

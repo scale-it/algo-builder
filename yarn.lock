@@ -561,19 +561,18 @@ ajv@^8.0.1:
     require-from-string "^2.0.2"
     uri-js "^4.2.2"
 
-algo-msgpack-with-bigint@^2.1.0:
+algo-msgpack-with-bigint@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/algo-msgpack-with-bigint/-/algo-msgpack-with-bigint-2.1.1.tgz#38bb717220525b3ff42232eefdcd9efb9ad405d6"
   integrity sha512-F1tGh056XczEaEAqu7s+hlZUDWwOBT70Eq0lfMpBP2YguSQVyxRbprLq5rELXKQOyOaixTWYhMeMQMzP0U5FoQ==
 
-algosdk@^1.9.1:
-  version "1.9.1"
-  resolved "https://registry.yarnpkg.com/algosdk/-/algosdk-1.9.1.tgz#bc1ba4c0f763ac2bf50b3d9da3964b43496cac80"
-  integrity sha512-sKTnovuGI5R1S2qmXSpPTS/wjgGj0+DQ0nyIui5R0TV9dPK0FBr+CL5jfjnEr0HX2QTAKUPa6bd+TgkjYMFH0A==
+algosdk@algorand/js-algorand-sdk.git#develop:
+  version "1.10.0"
+  resolved "https://codeload.github.com/algorand/js-algorand-sdk/tar.gz/66f1c5ee9d730cac466d49893d80235f7856a436"
   dependencies:
-    algo-msgpack-with-bigint "^2.1.0"
+    algo-msgpack-with-bigint "^2.1.1"
     buffer "^6.0.2"
-    hi-base32 "^0.5.0"
+    hi-base32 "^0.5.1"
     js-sha256 "^0.9.0"
     js-sha3 "^0.8.0"
     js-sha512 "^0.8.0"
@@ -2158,7 +2157,7 @@ he@1.2.0:
   resolved "https://registry.yarnpkg.com/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
 
-hi-base32@^0.5.0:
+hi-base32@^0.5.1:
   version "0.5.1"
   resolved "https://registry.yarnpkg.com/hi-base32/-/hi-base32-0.5.1.tgz#1279f2ddae2673219ea5870c2121d2a33132857e"
   integrity sha512-EmBBpvdYh/4XxsnUybsPag6VikPYnN30td+vQk+GI3qpahVEG9+gTkG0aXVxTjBqQ5T6ijbWIu77O+C5WFWsnA==
