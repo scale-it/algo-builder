@@ -42,14 +42,22 @@ def issuer_lsig():
         Gtxn[1].asset_amount() == Int(0)
     )
 
+    # issue transaction
+    issue_tx = And(
+        Gtxn[0].type_enum() == TxnType.AssetTransfer,
+        Gtxn[1].application_id() == Tmpl.Int("TMPL_APPLICATION_ID")
+    )
+
     transactions = Cond(
         [Gtxn[0].type_enum() == TxnType.Payment, verify_tx],
         [Gtxn[1].type_enum() == TxnType.AssetTransfer, burn_tx]
     )
 
+    combine = Or(opt_in, issue_tx)
+
     program = Cond(
         [Global.group_size() == Int(3), transactions],
-        [Global.group_size() == Int(2), opt_in],
+        [Global.group_size() == Int(2), combine],
         [Global.group_size() == Int(1), payout],
     )
 

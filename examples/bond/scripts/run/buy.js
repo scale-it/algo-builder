@@ -7,6 +7,7 @@ async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
   const creatorAccount = deployer.accountsByName.get('john');
   const buyerAccount = deployer.accountsByName.get('bob');
+  const storeManagerAccount = deployer.accountsByName.get('alice');
 
   const algoTxnParams = {
     type: types.TransactionType.TransferAlgo,
@@ -21,7 +22,8 @@ async function run (runtimeEnv, deployer) {
   const appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
   const scInitParam = {
     TMPL_APPLICATION_ID: appInfo.appID,
-    TMPL_OWNER: creatorAccount.addr
+    TMPL_OWNER: creatorAccount.addr,
+    TMPL_STORE_MANAGER: storeManagerAccount.addr
   };
   const issuerLsig = await deployer.loadLogic('issuer-lsig.py', scInitParam);
   const asaInfo = deployer.getASAInfo('bond-token');

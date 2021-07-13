@@ -2,12 +2,28 @@ const {
   executeTransaction, convert, readGlobalStateSSC, balanceOf
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
+const { exec } = require('child_process');
+const { exit } = require('process');
 
 let newAsaInfo;
 let appInfo;
 let asaInfo;
+let buybackLsig;
 const assetID = 'asset-index';
 
+// fund account using master account
+async function fundAccount (deployer, accountAddress) {
+  const masterAccount = deployer.accountsByName.get('master-account');
+  const algoTxnParams = {
+    type: types.TransactionType.TransferAlgo,
+    sign: types.SignType.SecretKey,
+    fromAccount: masterAccount,
+    toAccountAddr: accountAddress,
+    amountMicroAlgos: 200000000,
+    payFlags: {}
+  };
+  await executeTransaction(deployer, algoTxnParams);
+}
 /**
  * Creates DEX_i lsig, burn B_i tokens, issue B_i+1 tokens
  * @param {Account} masterAccount
@@ -65,15 +81,7 @@ async function createDex (deployer, masterAccount, creatorAccount, storeManagerA
   };
   const dexLsig = await deployer.loadLogic('dex-lsig.py', scInitParam);
 
-  const algoTxnParams = {
-    type: types.TransactionType.TransferAlgo,
-    sign: types.SignType.SecretKey,
-    fromAccount: masterAccount,
-    toAccountAddr: dexLsig.address(),
-    amountMicroAlgos: 200000000,
-    payFlags: {}
-  };
-  await executeTransaction(deployer, algoTxnParams);
+  await fundAccount(deployer, dexLsig.address());
 
   optInTx[0].toAccountAddr = dexLsig.address();
   optInTx[1].fromAccountAddr = dexLsig.address();
@@ -151,11 +159,12 @@ async function createDex (deployer, masterAccount, creatorAccount, storeManagerA
  * Redeem old tokens, get coupon_value + new bond tokens
  * @param {Account} buyerAccount
  */
-async function redeem (deployer, buyerAccount) {
+async function redeem (deployer, buyerAccount, storeManagerAccount) {
   const scInitParam = {
     TMPL_OLD_BOND: asaInfo.assetIndex,
     TMPL_NEW_BOND: newAsaInfo[assetID],
-    TMPL_APPLICATION_ID: appInfo.appID
+    TMPL_APPLICATION_ID: appInfo.appID,
+    TMPL_STORE_MANAGER: storeManagerAccount.addr
   };
   const dexLsig = await deployer.loadLogic('dex-lsig.py', scInitParam);
   await deployer.optInAcountToASA(newAsaInfo[assetID], 'bob', {});
@@ -206,10 +215,93 @@ async function redeem (deployer, buyerAccount) {
   console.log('Tokens redeemed!');
 }
 
+/**
+ * Create buyback lsig and store it's address in bond-dapp
+ * @param {Deployer object} deployer
+ * @param {Account} storeManagerAccount
+ */
 async function createBuyback (deployer, storeManagerAccount) {
-  const buybackTx = {
-
+  const scInitParam = {
+    TMPL_APPLICATION_ID: appInfo.appID,
+    TMPL_STORE_MANAGER: storeManagerAccount.addr,
+    TMPL_BOND: newAsaInfo[assetID]
   };
+  buybackLsig = await deployer.loadLogic('buyback-lsig.py', scInitParam);
+  await fundAccount(deployer, buybackLsig.address());
+
+  const buybackTx = {
+    type: types.TransactionType.CallNoOpSSC,
+    sign: types.SignType.SecretKey,
+    fromAccount: storeManagerAccount,
+    appID: appInfo.appID,
+    payFlags: {},
+    appArgs: ['str:create_buyback', convert.addressToPk(buybackLsig.address())]
+  };
+
+  // Only store manager can allow opt-in to ASA for lsig
+  const optInTx = [
+    {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: storeManagerAccount,
+      toAccountAddr: buybackLsig.address(),
+      amountMicroAlgos: 0,
+      payFlags: {}
+    },
+    {
+      type: types.TransactionType.OptInASA,
+      sign: types.SignType.LogicSignature,
+      fromAccountAddr: buybackLsig.address(),
+      lsig: buybackLsig,
+      assetID: newAsaInfo[assetID],
+      payFlags: {}
+    }
+  ];
+  await executeTransaction(deployer, optInTx);
+
+  console.log('Storing buyback address!');
+  await executeTransaction(deployer, buybackTx);
+  console.log('Buyback address stored successfully!');
+}
+
+// Buyer's exit from bond
+async function exitBuyer (deployer, buyerAccount, storeManagerAccount) {
+  const exitAmount = 10 * 1000 - 1000;
+  const exitTx = [
+    //  Bond token transfer to buyback address
+    {
+      type: types.TransactionType.TransferAsset,
+      sign: types.SignType.SecretKey,
+      fromAccount: buyerAccount,
+      toAccountAddr: buybackLsig.address(),
+      amount: 10,
+      assetID: newAsaInfo[assetID],
+      payFlags: { totalFee: 1000 }
+    },
+    // Nominal price * amount paid to buyer
+    {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.LogicSignature,
+      fromAccountAddr: buybackLsig.address(),
+      lsig: buybackLsig,
+      toAccountAddr: buyerAccount.addr,
+      amountMicroAlgos: exitAmount,
+      payFlags: { totalFee: 1000 }
+    },
+    // call to bond-dapp
+    {
+      type: types.TransactionType.CallNoOpSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: buyerAccount,
+      appID: appInfo.appID,
+      payFlags: {},
+      appArgs: ['str:exit']
+    }
+  ];
+
+  console.log('Exiting');
+  await executeTransaction(deployer, exitTx);
+  console.log('Exited');
 }
 
 async function run (runtimeEnv, deployer) {
@@ -222,10 +314,14 @@ async function run (runtimeEnv, deployer) {
   await createDex(deployer, masterAccount, creatorAccount, storeManagerAccount);
 
   // Redeem coupon_value
-  await redeem(deployer, buyerAccount);
+  await redeem(deployer, buyerAccount, storeManagerAccount);
 
   // create buyback
   await createBuyback(deployer, storeManagerAccount);
+
+  // exit buyer from bond, buyer can exit only if maturity period is over
+  // currently set to 1000 seconds
+  await exitBuyer(deployer, buyerAccount, storeManagerAccount.addr);
 }
 
 module.exports = { default: run };
