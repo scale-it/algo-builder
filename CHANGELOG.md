@@ -2,6 +2,25 @@
 
 ## unreleased
 
+### Improvements
++ Add workflow for examples
++ New package `Web`, It can be used in Dapps to interact with ASAs and Apps
+    + Compatible with `algosigner`.
+    + Support `executeTransaction` function with web package
++ Move Error lists, BuilderError, mkTransaction to web package
++ Reuse mkTransaction, Errors in algob and runtime
++ Updated `algob init` to initialize a typescript project as well by passing `--typescript` flag. Usage: `algob init <location> --typescript`.
+
+
+### Infrastructure
+* Added new make commands:
+    * `setup-reach` - sets up reach executable file in `~/.algorand-reach` directory
+    * `remove-reach` - halts any dockerized devnets, kills & removes docker instances and containers, remove reach bash file from `~/.algorand-reach`.
+
+### Examples
++ [Permissioned Token](/examples/permissioned-token) Added `cease` function and a script to change permissions app_id.
+
+
 ### API breaking
 + Rename `SSC` to `App` - This will affect deployment and all calls made to stateful smart contracts(SSC) or `App`
     + OptInSSC -> OptInToASA
@@ -14,27 +33,23 @@
 + Types imports for `ExecParams`, `TransactionTypes`, `SignType` moved to new package `@algo-builder/web`
 
 
-### Improvements
-+ updated `algob test` command to run mocha in typescript project as well.
-+ Add workflow for examples
-+ New package `Web`, It can be used in Dapps to interact with ASAs and Apps
-    + Compatible with `algosigner`.
-    + Support `executeTransaction` function with web package
-+ Move Error lists, BuilderError, mkTransaction to web package
-+ Reuse mkTransaction, Errors in algob and runtime
+### Bug fixes
 
-### Infrastructure
-* Added new make commands:
-    * `setup-reach` - sets up reach executable file in `~/.algorand-reach` directory
-    * `remove-reach` - halts any dockerized devnets, kills & removes docker instances and containers, remove reach bash file from `~/.algorand-reach`.
+`web`:
++ Added missing `fromAccount?` attribute to the `Sign` type.
+
+
+## v1.1.1 2021-07-12
+
+### Improvements
++ Updated `algob test` command to run mocha in typescript project as well.
+
 
 ### Bug fixes
 
 `@algorand-builder/runtime`
-    * fixed [bug](https://github.com/scale-it/algo-builder/issues/404) when trying to optIn to asset using asset transfer transaction with amount 0n.
+* fixed [bug](https://github.com/scale-it/algo-builder/issues/404) when trying to optIn to asset using asset transfer transaction with amount 0n.
 
-### Examples
-+ [Permissioned Token](/examples/permissioned-token) Added `cease` function and a script to change permissions app_id. 
 
 ## v1.1.0 2021-06-23
 
