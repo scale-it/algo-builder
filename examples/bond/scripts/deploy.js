@@ -83,7 +83,7 @@ async function run (runtimeEnv, deployer) {
       payFlags: {}
     },
     {
-      types: types.TransactionType.OptInASA,
+      type: types.TransactionType.OptInASA,
       sign: types.SignType.LogicSignature,
       fromAccountAddr: issuerLsig.address(),
       lsig: issuerLsig,

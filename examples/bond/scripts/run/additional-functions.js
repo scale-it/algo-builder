@@ -47,8 +47,8 @@ async function createDex (deployer, masterAccount, creatorAccount, storeManagerA
       payFlags: {}
     },
     {
-      types: types.TransactionType.OptInToASA,
-      sign: types.TransactionType.SecretKey,
+      type: types.TransactionType.OptInASA,
+      sign: types.SignType.LogicSignature,
       fromAccountAddr: issuerLsig.address(),
       lsig: issuerLsig,
       assetID: newIndex,
@@ -116,7 +116,7 @@ async function createDex (deployer, masterAccount, creatorAccount, storeManagerA
       fromAccount: storeManagerAccount,
       appID: appInfo.appID,
       payFlags: {},
-      appArgs: ['str:createDex'],
+      appArgs: ['str:create_dex'],
       accounts: [issuerLsig.address()]
     },
     // New bond token transfer to issuer's address
