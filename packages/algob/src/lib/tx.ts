@@ -215,6 +215,39 @@ async function mkTx (
 }
 
 /**
+ * Create and Sign SDK transaction(s) from transaction execution parameters (passed by user).
+ * @returns [transaction(s), signed transaction(s)]
+ */
+export async function makeAndSignTx (
+  deployer: Deployer,
+  execParams: wtypes.ExecParams | wtypes.ExecParams[],
+  txIdxMap: Map<number, [string, wtypes.ASADef]>
+): Promise<[Transaction[], Uint8Array | Uint8Array[]]> {
+  let signedTxn;
+  let txns: Transaction[] = [];
+  if (Array.isArray(execParams)) {
+    if (execParams.length > 16) { throw new Error("Maximum size of an atomic transfer group is 16"); }
+
+    for (const [idx, txn] of execParams.entries()) {
+      txns.push(await mkTx(deployer, txn, idx, txIdxMap));
+    }
+
+    txns = algosdk.assignGroupID(txns);
+    signedTxn = txns.map((txn: Transaction, index: number) => {
+      const signed = signTransaction(txn, execParams[index]);
+      deployer.log(`Signed transaction ${index}`, signed);
+      return signed;
+    });
+  } else {
+    const txn = await mkTx(deployer, execParams, 0, txIdxMap);
+    signedTxn = signTransaction(txn, execParams);
+    deployer.log(`Signed transaction:`, signedTxn);
+    txns = [txn];
+  }
+  return [txns, signedTxn];
+}
+
+/**
  * Execute single transaction or group of transactions (atomic transaction)
  * @param deployer Deployer
  * @param execParams transaction parameters or atomic transaction parameters
@@ -226,28 +259,8 @@ export async function executeTransaction (
   Promise<algosdk.ConfirmedTxInfo> {
   deployer.assertCPNotDeleted(execParams);
   try {
-    let signedTxn;
-    let txns: Transaction[] = [];
     const txIdxMap = new Map<number, [string, wtypes.ASADef]>();
-    if (Array.isArray(execParams)) {
-      if (execParams.length > 16) { throw new Error("Maximum size of an atomic transfer group is 16"); }
-
-      for (const [idx, txn] of execParams.entries()) {
-        txns.push(await mkTx(deployer, txn, idx, txIdxMap));
-      }
-
-      txns = algosdk.assignGroupID(txns);
-      signedTxn = txns.map((txn: Transaction, index: number) => {
-        const signed = signTransaction(txn, execParams[index]);
-        deployer.log(`Signed transaction ${index}`, signed);
-        return signed;
-      });
-    } else {
-      const txn = await mkTx(deployer, execParams, 0, txIdxMap);
-      signedTxn = signTransaction(txn, execParams);
-      deployer.log(`Signed transaction:`, signedTxn);
-      txns = [txn];
-    }
+    const [txns, signedTxn] = await makeAndSignTx(deployer, execParams, txIdxMap);
     const confirmedTx = await deployer.sendAndWait(signedTxn);
     console.log(confirmedTx);
     if (deployer.isDeployMode) { await registerCheckpoints(deployer, txns, txIdxMap); }
