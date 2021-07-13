@@ -47,7 +47,7 @@ export class Tealdbg {
    * @param outFile name of file to dump the response. Dumped in `assets/<file>`
    * @param force if true, overwrites an existing dryrun response dump
    */
-  async dryRunResponse (outFile?: string, force?: boolean): Promise<JSON> {
+  async dryRunResponse (outFile?: string, force?: boolean): Promise<Object> {
     const dryRunRequest = await this.createDryRunReq();
     const dryRunResponse = await this.deployer.algodClient.dryrun(dryRunRequest).do();
     if (outFile) {
