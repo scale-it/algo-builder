@@ -19,6 +19,7 @@ declare module 'algosdk' {
 
     compile(source: string): Action<CompileOut>;
     status(): Action<any>;
+    dryrun(req: modelsv2.DryrunRequest): Action<any>
 
     sendRawTransaction(rawSignedTxn: TxnBytes | TxnBytes[]): Action<TxResult>;
     getTransactionParams(): Action<SuggestedParams>;
@@ -56,7 +57,27 @@ declare module 'algosdk' {
 
     function AssetDef(...args: any[]): void;
 
-    function DryrunRequest(...args: any[]): void;
+    class DryrunRequest {
+      constructor({
+        accounts,
+        apps,
+        latestTimestamp,
+        protocolVersion,
+        round,
+        sources,
+        txns
+      }: {
+        accounts?: any[];
+        apps?: any[];
+        latestTimestamp?: number | bigint;
+        protocolVersion?: string;
+        round?: number | bigint;
+        sources?: any[];
+        txns: any[];
+      });
+
+      get_obj_for_encoding(val: any): Record<string, any>
+    }
 
     function DryrunSource(...args: any[]): void;
 

@@ -48,3 +48,7 @@ const mockProgram = new Uint8Array([
 ]);
 
 export const mockLsig = algosdk.makeLogicSig(mockProgram, []);
+
+export const mockDryRunResponse = {
+  "logic-sig-message": "PASS"
+};
