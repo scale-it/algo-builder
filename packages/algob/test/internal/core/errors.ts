@@ -248,7 +248,7 @@ describe("BuilderPluginError", () => {
         const error = new BuilderPluginError(message, parent);
 
         // This is being called from @algo-builder/algob, so that would be used as plugin name
-        assert.equal(error.pluginName, "@algo-builder/algob");
+        assert.equal(error.pluginName, "mocha");
       });
 
       it("Should work with instanceof", () => {

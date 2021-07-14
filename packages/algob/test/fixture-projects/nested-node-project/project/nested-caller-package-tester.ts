@@ -1,5 +1,5 @@
-import { getClosestCallerPackage } from "@algo-builder/web";
 
+import { getClosestCallerPackage } from "../../../../src/internal/util/caller-package";
 import {
   call as callFromTop,
   callFromNestedModule as topCallFromNestedModule
