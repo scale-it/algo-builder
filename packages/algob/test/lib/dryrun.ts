@@ -14,7 +14,7 @@ import { DeployerRunMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
 import { Deployer } from "../../src/types";
 import { mkEnv } from "../helpers/params";
-import { useFixtureProjectCopy } from "../helpers/project";
+import { useFixtureProject } from "../helpers/project";
 import { mockDryRunResponse, mockLsig, mockSuggestedParam } from "../mocks/tx";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
@@ -34,7 +34,7 @@ class TealDbgMock extends Tealdbg {
 }
 
 describe("Debugging TEAL code using tealdbg", () => {
-  useFixtureProjectCopy("config-project");
+  useFixtureProject("config-project");
   let deployer: Deployer;
   let algod: AlgoOperatorDryRunImpl;
   let txnParam: ExecParams;
@@ -83,6 +83,8 @@ describe("Debugging TEAL code using tealdbg", () => {
     assert.isTrue(pathExistsSync(outPath));
     const data = fs.readFileSync(outPath);
     assert.deepEqual(JSON.parse(Buffer.from(data).toString()), mockDryRunResponse);
+
+    fs.rmSync(outPath);
   });
 
   it("should warn or overwrite existing dryRunResponse based on --force flag", async () => {
@@ -100,6 +102,8 @@ describe("Debugging TEAL code using tealdbg", () => {
     await tealDebugger.dryRunResponse('response.json', true);
     assert.isTrue((console.log as sinon.SinonStub)
       .calledWith(`Data written succesfully to assets/response.json`));
+
+    fs.rmSync(path.join(process.cwd(), ASSETS_DIR, 'response.json'));
   });
 
   it("should write --dryrun-dump in `cache/dryrun` and run debugger with provided args", async () => {
