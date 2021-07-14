@@ -10,7 +10,7 @@
 + Move Error lists, BuilderError, mkTransaction to web package
 + Reuse mkTransaction, Errors in algob and runtime
 + Updated `algob init` to initialize a typescript project as well by passing `--typescript` flag. Usage: `algob init <location> --typescript`.
-
++ Added support for teal debugger (get dryrun response or start debugger in chrome) in `algob` scripts.
 
 ### Infrastructure
 * Added new make commands:
