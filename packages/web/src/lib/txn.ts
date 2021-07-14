@@ -17,7 +17,7 @@ export function encodeNote (note: string | undefined, noteb64: string| undefined
  */
 export function getFromAddress (execParams: ExecParams): AccountAddress {
   if (execParams.sign === SignType.SecretKey) {
-    return execParams.fromAccountAddr ?? execParams.fromAccount.addr;
+    return execParams.fromAccountAddr || execParams.fromAccount.addr; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
   }
   return execParams.fromAccountAddr;
 }
@@ -170,7 +170,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         return algosdk.makeAssetCreateTxnWithSuggestedParams(
           fromAccountAddr,
           note,
-          BigInt(execParams.asaDef.total ?? 0),
+          BigInt(execParams.asaDef.total || 0), // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
           execParams.asaDef.decimals,
           execParams.asaDef.defaultFrozen,
           execParams.asaDef.manager,
