@@ -1,7 +1,7 @@
 /**
  * Description:
- * This file demonstrates the example to transfer Algorand Standard Assets(ASA) & MicroAlgos
- * using delegated lsig (between 2 user accounts).
+ * This file demonstrates the example to run teal debugger for transfer Algorand
+ * Standard Assets(ASA) & MicroAlgos using delegated lsig (between 2 user accounts).
 */
 const { types } = require('@algo-builder/web');
 const { Tealdbg } = require('@algo-builder/algob');
@@ -31,7 +31,7 @@ async function run (runtimeEnv, deployer) {
   await debug.dryRunResponse('dryrun-pass.json');
 
   /* uncomment below line to start debugger for passing scenario */
-  // await debug.run({ tealFile: "4-gold-asa.teal" });
+  await debug.run({ tealFile: '4-gold-asa.teal' });
 
   // Transaction FAIL - rejected by lsig because amount is not <= 1000
   // (logic-sig-messages = "REJECT" in assets/dry-run-fail.json)
