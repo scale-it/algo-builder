@@ -13,7 +13,7 @@ async function run (runtimeEnv, deployer) {
     sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
     toAccountAddr: storeManagerAccount.addr,
-    amountMicroAlgos: 200000000,
+    amountMicroAlgos: 200e6,
     payFlags: {}
   };
   await executeTransaction(deployer, algoTxnParams);
@@ -49,7 +49,7 @@ async function run (runtimeEnv, deployer) {
   ];
 
   // Create Application
-  const appInfo = await deployer.deployApp(
+  const bondAppInfo = await deployer.deployApp(
     'bond-dapp-stateful.py',
     'bond-dapp-clear.py', {
       sender: storeManagerAccount,
@@ -63,7 +63,7 @@ async function run (runtimeEnv, deployer) {
 
   // Initialize issuer lsig with bond-app ID
   const scInitParam = {
-    TMPL_APPLICATION_ID: appInfo.appID,
+    TMPL_APPLICATION_ID: bondAppInfo.appID,
     TMPL_OWNER: creatorAccount.addr,
     TMPL_STORE_MANAGER: storeManagerAccount.addr
   };

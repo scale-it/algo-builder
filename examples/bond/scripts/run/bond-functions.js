@@ -19,11 +19,12 @@ async function fundAccount (deployer, accountAddress) {
     sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
     toAccountAddr: accountAddress,
-    amountMicroAlgos: 200000000,
+    amountMicroAlgos: 200e6,
     payFlags: {}
   };
   await executeTransaction(deployer, algoTxnParams);
 }
+
 /**
  * Creates DEX_i lsig, burn B_i tokens, issue B_i+1 tokens
  * @param {Account} masterAccount
