@@ -46,7 +46,7 @@ async function run (runtimeEnv, deployer) {
   // first issue few tokens to elon
   await issue(deployer, elon.addr, 15); // issue(mint) 15 tokens to elon from reserve
 
-  /**
+  /*
    * Use below function to opt-out elon from token tesla
    */
   await optOut(deployer, elon);

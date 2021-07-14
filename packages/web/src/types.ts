@@ -133,6 +133,7 @@ interface SignWithSk {
 
 interface SignWithLsig {
   sign: SignType.LogicSignature
+  fromAccount?: AccountSDK
   fromAccountAddr: AccountAddress
   lsig: LogicSig
   /** stateless smart contract args */
@@ -230,51 +231,6 @@ export type AppCallsParam = BasicParams & AppOptionalFlags & {
   TransactionType.CloseApp | TransactionType.DeleteApp
   appID: number
 };
-
-// Algosigner types
-
-export interface AlgoSignerTx {
-  "consensus-version": string
-  "fee": number
-  "genesis-hash": string
-  "genesis-id": string
-  "last-round": number
-  "min-fee": number
-}
-
-export interface AlgoSignerSignedTx {
-  "txID": string
-  "blob": string
-}
-
-export interface AlgoSignerSendTx {
-  "txId": string
-}
-
-export interface AlgoSignerToBeSignedTx {
-  txn: string
-}
-
-export interface encoding {
-  msgpackToBase64: (txn: Uint8Array) => string
-
-  base64ToMsgpack: (txn: string) => Uint8Array
-}
-
-export interface AlgoSigner {
-  // algod, sign, send, signTxn, accounts
-  // Create an Algod client to get suggested transaction params
-  // let client = new algosdk.Algodv2(token, server, port, headers);
-  accounts: (param: unknown) => unknown[]
-
-  algod: (param: unknown) => any
-
-  signTxn: (param: unknown[]) => AlgoSignerSignedTx
-
-  send: (param: any) => AlgoSignerSendTx
-
-  encoding: encoding
-}
 
 export type ASADef = z.infer<typeof ASADefSchema>;
 

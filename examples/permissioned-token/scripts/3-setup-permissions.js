@@ -9,11 +9,11 @@ const accounts = require('./common/accounts');
  * and link it to the controller (using the controller  add_permission argument)
  */
 async function setupPermissionsApp (runtimeEnv, deployer) {
-  const controllerSSCInfo = deployer.getApp('controller.py', 'clear_state_program.py');
+  const controllerAppInfo = deployer.getApp('controller.py', 'clear_state_program.py');
 
   const tesla = deployer.asa.get('tesla');
   const owner = deployer.accountsByName.get(accounts.owner);
-  const controllerappID = controllerSSCInfo.appID;
+  const controllerappID = controllerAppInfo.appID;
 
   const templateParam = {
     PERM_MANAGER: owner.addr // setting permission manager to the owner account

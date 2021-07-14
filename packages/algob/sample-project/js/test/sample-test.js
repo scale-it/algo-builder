@@ -1,5 +1,6 @@
 const { getProgram } = require('@algo-builder/algob');
-const { Runtime, AccountStore, types } = require('@algo-builder/runtime');
+const { Runtime, AccountStore } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const { assert } = require('chai');
 
 const minBalance = BigInt(1e6);

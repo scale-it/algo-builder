@@ -146,6 +146,7 @@ def approval_program(TOKEN_ID):
     # in the asset config txn in group while updating reserve), then we don't need to verify
     # permissions is called - it can bypass rule(s) checks.
     force_transfer = Seq([
+        Assert(Txn.assets[0] == Int(TOKEN_ID)), # verify token index before loading manager, reserve
         assetManager,
         assetReserve,
         Assert(And(
