@@ -53,7 +53,7 @@ export function parseAlgorandError (e: RequestError, ctx: AnyMap): Error {
     if (e.response?.statusCode >= 400 && e.response?.statusCode < 500) {
       return new BuilderError(ERRORS.ALGORAND.BAD_REQUEST, {
         status: e.response?.statusCode,
-        message: e.response?.body?.message ?? e.response?.text ?? e.response?.error,
+        message: e.response?.body?.message || e.response?.text || e.response?.error, // // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
         ctx: JSON.stringify(ctx)
       }, e.error);
     }
