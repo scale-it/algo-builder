@@ -1,13 +1,13 @@
 import {
-  BuilderError, BuilderPluginError,
+  BuilderError,
   ERROR_RANGES,
   ErrorDescriptor,
   ERRORS
 } from "@algo-builder/web";
 import { assert } from "chai";
 
+import { BuilderPluginError } from "../../../src/internal/core/errors/errors";
 import { unsafeObjectKeys } from "../../../src/internal/util/unsafe";
-// import { expectBuilderError } from "../../helpers/errors";
 
 const mockErrorDescriptor: ErrorDescriptor = {
   number: 123,
