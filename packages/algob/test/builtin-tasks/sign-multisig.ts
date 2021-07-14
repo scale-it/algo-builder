@@ -115,7 +115,7 @@ describe("Sign-Multisig task", () => {
      `File assets/${outFile} already exists. Aborting. Use --force flag if you want to overwrite it`));
   });
 
-  it("Should append _out to input file if outfile is not passed", async function () {
+  it("Should append `_out` to input file name if name of outfile is not passed", async function () {
     await this.env.run(TASK_SIGN_MULTISIG, {
       file: inputFile,
       account: 'bob'
