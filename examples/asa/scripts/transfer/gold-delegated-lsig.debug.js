@@ -31,7 +31,7 @@ async function run (runtimeEnv, deployer) {
   await debug.dryRunResponse('dryrun-pass.json');
 
   /* uncomment below line to start debugger for passing scenario */
-  await debug.run({ tealFile: '4-gold-asa.teal' });
+  // await debug.run({ tealFile: '4-gold-asa.teal' });
 
   // Transaction FAIL - rejected by lsig because amount is not <= 1000
   // (logic-sig-messages = "REJECT" in assets/dry-run-fail.json)
