@@ -78,7 +78,7 @@ await debug.dryRunResponse('dryrun-pass.json');
 ```
 
 Content of `assets/dryrun-pass.json` looks like (notice the logic-sig-message is PASS):
-```json
+```
 {
   "error": "",
   "protocol-version": "https://github.com/algorandfoundation/specs/tree/d050b3cade6d5c664df8bd729bf219f179812595",
@@ -159,6 +159,7 @@ Content of `assets/dryrun-pass.json` looks like (notice the logic-sig-message is
             }
           ]
         },
+        ...
 ```
 
 ### Starting a debugging session
@@ -180,7 +181,8 @@ This will start a new debugger session. Console looks like:
 2021/07/16 04:29:12 ------------------------------------------------
 ```
 
-We have a remote target set up in `chrome://inspect`
+We now have a remote target set up in `chrome://inspect`
+
 ![image](https://user-images.githubusercontent.com/33264364/125868310-4e121128-db58-4670-aa5e-99ed492f3b94.png)
 
 Click on **inspect** and start playing with the teal code!
