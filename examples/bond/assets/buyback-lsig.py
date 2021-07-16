@@ -18,6 +18,7 @@ def buyback_lsig():
         Gtxn[0].type_enum() == TxnType.AssetTransfer,
         Gtxn[0].xfer_asset() == Tmpl.Int("TMPL_BOND"),
         Gtxn[1].type_enum() == TxnType.Payment,
+        Gtxn[2].type_enum() == TxnType.NoOp,
         Gtxn[2].application_id() == Tmpl.Int("TMPL_APPLICATION_ID"),
         Gtxn[2].application_args[0] == Bytes("exit"),
         common_fields

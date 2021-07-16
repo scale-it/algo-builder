@@ -30,6 +30,7 @@ def dex_lsig():
     third_tx = And(
         Gtxn[2].type_enum() == TxnType.Payment,
         Gtxn[3].type_enum() == TxnType.ApplicationCall,
+        Gtxn[3].type_enum() == TxnType.NoOp,
         Gtxn[3].application_id() == Tmpl.Int("TMPL_APPLICATION_ID"),
         Gtxn[3].application_args[0] == Bytes("redeem_coupon")
     )

@@ -15,6 +15,7 @@ def issuer_lsig():
     # verify that buyer deposits required algos 
     verify_tx = And(
         Gtxn[0].type_enum() == TxnType.Payment,
+        Gtxn[2].type_enum() == TxnType.NoOp,
         Gtxn[2].application_id() == Tmpl.Int("TMPL_APPLICATION_ID"),
         Gtxn[2].application_args[0] == Bytes("buy"),
         common_fields

@@ -266,7 +266,7 @@ async function createBuyback (deployer, storeManagerAccount) {
 }
 
 // Buyer's exit from bond
-async function exitBuyer (deployer, buyerAccount, storeManagerAccount) {
+async function exitBuyer (deployer, buyerAccount) {
   const exitAmount = 10 * 1000 - 1000;
   const exitTx = [
     //  Bond token transfer to buyback address
@@ -322,7 +322,7 @@ async function run (runtimeEnv, deployer) {
 
   // exit buyer from bond, buyer can exit only if maturity period is over
   // currently set to 1000 seconds
-  await exitBuyer(deployer, buyerAccount, storeManagerAccount.addr);
+  await exitBuyer(deployer, buyerAccount);
 }
 
 module.exports = { default: run };
