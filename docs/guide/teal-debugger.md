@@ -159,7 +159,6 @@ Content of `assets/dryrun-pass.json` looks like (notice the logic-sig-message is
             }
           ]
         },
-        ...
 ```
 
 ### Starting a debugging session
