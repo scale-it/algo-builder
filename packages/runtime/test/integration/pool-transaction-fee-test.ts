@@ -31,9 +31,6 @@ describe("Pooled Transaction Fees Test", function () {
   it("Should pass if second account doesn't pay fees and first account is covering fees", () => {
     const amount = 1e4 + 122;
     const initialBalance = john.balance();
-    console.log("ACCOunts john ", john.address);
-    console.log("ACCOunts alice ", alice.address);
-    console.log("ACCOunts bob ", bob.address);
     // group with fee distribution
     const groupTx: ExecParams[] = [
       {
@@ -59,6 +56,35 @@ describe("Pooled Transaction Fees Test", function () {
     syncAccounts();
     assert.equal(bob.balance(), BigInt(minBalance + amount));
     assert.equal(alice.balance(), BigInt(minBalance));
-    assert.equal(john.balance(), initialBalance - BigInt(amount));
+    assert.equal(john.balance(), initialBalance - BigInt(amount) - 2000n);
+  });
+
+  it("Should fail if fees is not enough", () => {
+    const amount = 1e4 + 122;
+    // group with fee distribution
+    const groupTx: ExecParams[] = [
+      {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
+        fromAccount: john.account,
+        toAccountAddr: alice.address,
+        amountMicroAlgos: amount,
+        payFlags: { totalFee: 1000, flatFee: true }
+      },
+      {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
+        fromAccount: alice.account,
+        toAccountAddr: bob.address,
+        amountMicroAlgos: amount,
+        payFlags: { totalFee: 0, flatFee: true }
+      }
+    ];
+
+    // Fails because groupindex don't match
+    expectRuntimeError(
+      () => runtime.executeTx(groupTx),
+      RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH
+    );
   });
 });

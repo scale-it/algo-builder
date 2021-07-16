@@ -108,7 +108,8 @@ export interface Context {
   getAssetAccount: (assetId: number) => AccountStoreI
   getApp: (appID: number, line?: number) => SSCAttributesM
   transferAlgo: (txnParam: types.AlgoTransferParam) => void
-  deductFee: (sender: AccountAddress, index: number) => void
+  verifyMinimumFees: () => void
+  deductFee: (sender: AccountAddress, index: number, params: types.TxParams) => void
   transferAsset: (txnParam: types.AssetTransferParam) => void
   modifyAsset: (assetId: number, fields: types.AssetModFields) => void
   freezeAsset: (assetId: number, freezeTarget: string, freezeState: boolean) => void

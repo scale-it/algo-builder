@@ -290,7 +290,6 @@ export class Runtime {
         const encodedTxnObj = tx.get_obj_for_encoding() as Txn;
         encodedTxnObj.txID = tx.txID();
         txns.push(encodedTxnObj);
-        if (tx.amount === 10122) console.log(mockParams, encodedTxnObj);
       }
       return [txns[0], txns]; // by default current txn is the first txn (hence txns[0])
     } else {
