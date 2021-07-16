@@ -31,16 +31,13 @@ export async function mkTxParams (
   algocl: Algodv2, userParams: wtypes.TxParams, s?: SuggestedParams): Promise<SuggestedParams> {
   if (s === undefined) { s = await getSuggestedParams(algocl); }
 
-  s.flatFee = userParams.flatFee !== undefined;
+  s.flatFee = userParams.flatFee ?? false;
   s.fee = userParams.totalFee ?? userParams.feePerByte ?? ALGORAND_MIN_TX_FEE;
 
   s.firstRound = userParams.firstValid ?? s.firstRound;
   s.lastRound = userParams.firstValid === undefined || userParams.validRounds === undefined
     ? s.lastRound
     : Number(userParams.firstValid) + Number(userParams.validRounds);
-  if (s.fee === 0) s.flatFee = false;
-  else s.flatFee = true;
-  console.log("HEre: ", s);
   return s;
 }
 
