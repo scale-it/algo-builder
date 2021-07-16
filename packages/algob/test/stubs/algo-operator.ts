@@ -55,7 +55,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   async fundLsig (
-    name: string, flags: FundASCFlags, payFlags: rtypes.TxParams,
+    name: string, flags: FundASCFlags, payFlags: wtypes.TxParams,
     txnWriter: txWriter, scInitParam?: unknown): Promise<LsigInfo> {
     return {
       creator: String(flags.funder.addr) + "-get-address-dry-run",
@@ -68,7 +68,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     approvalProgram: string,
     clearProgram: string,
     flags: rtypes.AppDeploymentFlags,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     txWriter: txWriter,
     scInitParam?: unknown): Promise<rtypes.SSCInfo> {
     return {
@@ -83,7 +83,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 
   async updateApp (
     sender: Account,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
@@ -113,25 +113,25 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 
   optInAcountToASA (
     asaName: string, assetIndex: number, account: rtypes.Account,
-    params: rtypes.TxParams): Promise<void> {
+    params: wtypes.TxParams): Promise<void> {
     return new Promise((resolve, reject) => { resolve(); });
   }
 
   optInLsigToASA (
-    asaName: string, assetIndex: number, lsig: LogicSig, flags: rtypes.TxParams
+    asaName: string, assetIndex: number, lsig: LogicSig, flags: wtypes.TxParams
   ): Promise<void> {
     return new Promise((resolve, reject) => { resolve(); });
   }
 
   optInAccountToApp (
     sender: rtypes.Account, index: number,
-    payFlags: rtypes.TxParams, flags: rtypes.AppOptionalFlags): Promise<void> {
+    payFlags: wtypes.TxParams, flags: rtypes.AppOptionalFlags): Promise<void> {
     return new Promise((resolve, reject) => { resolve(); });
   }
 
   optInLsigToApp (
     appID: number, lsig: LogicSig,
-    payFlags: rtypes.TxParams, flags: rtypes.AppOptionalFlags): Promise<void> {
+    payFlags: wtypes.TxParams, flags: rtypes.AppOptionalFlags): Promise<void> {
     return new Promise((resolve, reject) => { resolve(); });
   }
 

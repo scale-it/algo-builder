@@ -120,7 +120,7 @@ export class FakeDeployer implements Deployer {
   }
 
   async fundLsig (name: string, flags: FundASCFlags,
-    payFlags: rtypes.TxParams, scInitParam?: unknown): Promise<void> {
+    payFlags: wtypes.TxParams, scInitParam?: unknown): Promise<void> {
     throw new Error("Not implemented");
   }
 
@@ -133,13 +133,13 @@ export class FakeDeployer implements Deployer {
     approvalProgram: string,
     clearProgram: string,
     flags: rtypes.AppDeploymentFlags,
-    payFlags: rtypes.TxParams): Promise<rtypes.SSCInfo> {
+    payFlags: wtypes.TxParams): Promise<rtypes.SSCInfo> {
     throw new Error("Not implemented");
   }
 
   async updateApp (
     sender: algosdk.Account,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
@@ -172,23 +172,23 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  optInAcountToASA (asa: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
+  optInAcountToASA (asa: string, accountName: string, flags: wtypes.TxParams): Promise<void> {
     throw new Error("Not implemented");
   }
 
-  optInLsigToASA (asa: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
+  optInLsigToASA (asa: string, lsig: LogicSig, flags: wtypes.TxParams): Promise<void> {
     throw new Error("Not implemented");
   }
 
   optInAccountToApp (
-    sender: rtypes.Account, index: number, payFlags: rtypes.TxParams,
+    sender: rtypes.Account, index: number, payFlags: wtypes.TxParams,
     flags: rtypes.AppOptionalFlags): Promise<void> {
     throw new Error("Not implemented");
   }
 
   optInLsigToApp (
     appID: number, lsig: LogicSig,
-    payFlags: rtypes.TxParams, flags: rtypes.AppOptionalFlags): Promise<void> {
+    payFlags: wtypes.TxParams, flags: rtypes.AppOptionalFlags): Promise<void> {
     throw new Error("not implemented.");
   }
 }
