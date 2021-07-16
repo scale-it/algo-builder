@@ -2,6 +2,14 @@
 
 ## v1.1.1 2021-07-12
 
+### Bug fixes
+
+`@algorand-builder/runtime`
+    * [\#409](https://github.com/scale-it/algo-builder/issues/409) Added missing `fromAccount` attribute to `SignWithLsig` type.
+
+
+## v1.1.1 2021-07-12
+
 ### Improvements
 + updated `algob test` command to run mocha in typescript project as well.
 
