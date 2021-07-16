@@ -33,7 +33,6 @@ export async function mkTxParams (
 
   s.flatFee = userParams.flatFee ?? false;
   s.fee = userParams.totalFee ?? userParams.feePerByte ?? ALGORAND_MIN_TX_FEE;
-  if (!s.flatFee) s.fee = Math.max(s.fee, ALGORAND_MIN_TX_FEE);
 
   s.firstRound = userParams.firstValid ?? s.firstRound;
   s.lastRound = userParams.firstValid === undefined || userParams.validRounds === undefined
