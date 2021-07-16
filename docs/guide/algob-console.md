@@ -225,7 +225,7 @@ const algoTxParam = {
   toAccountAddr: john.addr,
   amountMicroAlgos: 20n, // amt <= 100
   lsig: lsig,
-  payFlags: { totalFee: 1000 }
+  payFlags: { totalFee: 1000, flatFee: true }
 };
 
 // Transaction PASS - As according to .teal logic, amount should be <= 100
@@ -264,7 +264,7 @@ const invalidTxnParams = {
   toAccountAddr: john.addr,
   amountMicroAlgos: 200, // amt > 100
   lsig: lsig,
-  payFlags: { totalFee: 1000 }
+  payFlags: { totalFee: 1000, flatFee: true }
 };
 
 // Transaction FAIL - rejected by logic. According to .teal logic, amount should be <= 100
@@ -336,7 +336,7 @@ let validParams = {
   amount: 500,
   assetID: 'gold', // passing asa name is also supported
   lsig: lsigGoldOwner,
-  payFlags: { totalFee: 1000 }
+  payFlags: { totalFee: 1000, flatFee: true }
 };
 
 // Transaction PASS

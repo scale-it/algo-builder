@@ -95,7 +95,7 @@ class Context {
         freeze: asaDef.freeze,
         clawback: this.lsig.address()
       },
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 1000, flatFee: true }
     });
     this.optInToASA(this.lsig.address());
   }
@@ -126,7 +126,7 @@ class Context {
       sign: types.SignType.SecretKey,
       fromAccount: this.alice.account,
       appID: this.controllerappID,
-      payFlags: { totalFee: 1000 },
+      payFlags: { totalFee: 1000, flatFee: true },
       appArgs: appArgs,
       foreignAssets: [this.assetIndex]
     });
@@ -200,7 +200,7 @@ function issue (runtime, asaReserve, receiver, amount, controllerappID, assetInd
       sign: types.SignType.SecretKey,
       fromAccount: asaReserve,
       appID: controllerappID,
-      payFlags: { totalFee: 1000 },
+      payFlags: { totalFee: 1000, flatFee: true },
       appArgs: ['str:issue'],
       foreignAssets: [assetIndex]
     },
@@ -213,7 +213,7 @@ function issue (runtime, asaReserve, receiver, amount, controllerappID, assetInd
       revocationTarget: asaReserve.addr,
       amount: amount,
       lsig: lsig,
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 1000, flatFee: true }
     }
   ];
   runtime.executeTx(txns);
@@ -232,7 +232,7 @@ function killToken (runtime, asaManager, controllerappID, assetIndex) {
     sign: types.SignType.SecretKey,
     fromAccount: asaManager,
     appID: controllerappID,
-    payFlags: { totalFee: 1000 },
+    payFlags: { totalFee: 1000, flatFee: true },
     appArgs: ['str:kill'],
     foreignAssets: [assetIndex]
   });
@@ -251,7 +251,7 @@ function whitelist (runtime, permManager, addrToWhitelist, permissionsappID) {
     sign: types.SignType.SecretKey,
     fromAccount: permManager,
     appID: permissionsappID,
-    payFlags: { totalFee: 1000 },
+    payFlags: { totalFee: 1000, flatFee: true },
     appArgs: ['str:add_whitelist'],
     accounts: [addrToWhitelist]
   });
@@ -292,7 +292,7 @@ function transfer (runtime, from, to, amount, assetIndex, controllerappID, permi
       sign: types.SignType.SecretKey,
       fromAccount: from.account,
       appID: controllerappID,
-      payFlags: { totalFee: 1000 },
+      payFlags: { totalFee: 1000, flatFee: true },
       appArgs: [TRANSFER_ARG]
     },
     {
@@ -304,7 +304,7 @@ function transfer (runtime, from, to, amount, assetIndex, controllerappID, permi
       revocationTarget: from.address,
       amount: amount,
       lsig: lsig,
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 1000, flatFee: true }
     },
     {
       type: types.TransactionType.TransferAlgo,
@@ -312,14 +312,14 @@ function transfer (runtime, from, to, amount, assetIndex, controllerappID, permi
       fromAccount: from.account,
       toAccountAddr: lsig.address(),
       amountMicroAlgos: 1000,
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 1000, flatFee: true }
     },
     {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: from.account,
       appID: permissionsappID,
-      payFlags: { totalFee: 1000 },
+      payFlags: { totalFee: 1000, flatFee: true },
       appArgs: [TRANSFER_ARG],
       accounts: [from.address, to.address]
     }
@@ -367,7 +367,7 @@ function forceTransfer (
       sign: types.SignType.SecretKey,
       fromAccount: asaManager,
       appID: controllerappID,
-      payFlags: { totalFee: 1000 },
+      payFlags: { totalFee: 1000, flatFee: true },
       appArgs: ['str:force_transfer'],
       foreignAssets: [assetIndex]
     },
@@ -380,7 +380,7 @@ function forceTransfer (
       revocationTarget: from.address,
       amount: amount,
       lsig: lsig,
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 1000, flatFee: true }
     },
     {
       type: types.TransactionType.TransferAlgo,
@@ -388,14 +388,14 @@ function forceTransfer (
       fromAccount: asaManager,
       toAccountAddr: lsig.address(),
       amountMicroAlgos: 1000,
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 1000, flatFee: true }
     },
     {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: asaManager,
       appID: permissionsappID,
-      payFlags: { totalFee: 1000 },
+      payFlags: { totalFee: 1000, flatFee: true },
       appArgs: [TRANSFER_ARG],
       accounts: [from.address, to.address]
     }

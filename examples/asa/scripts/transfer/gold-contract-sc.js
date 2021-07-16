@@ -27,7 +27,7 @@ async function run (runtimeEnv, deployer) {
     toAccountAddr: john.addr,
     amountMicroAlgos: 20n, // bigint is also supported
     lsig: lsig,
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: 1000, flatFee: true }
   };
   // Transaction PASS - As according to .teal logic, amount should be <= 100
   await executeTransaction(deployer, algoTxParam);
@@ -47,7 +47,7 @@ async function run (runtimeEnv, deployer) {
     amount: 10,
     assetID: assetID,
     lsig: lsig,
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: 1000, flatFee: true }
   };
 
   // Transaction PASS - As according to .teal logic, asset amount should be <= 100

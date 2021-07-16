@@ -30,7 +30,7 @@ async function run (runtimeEnv, deployer) {
     fromAccount: creator,
     assetID: assetInfo.assetIndex,
     fields: { clawback: escrowAddress }, // only pass the field you want to update
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: 1000, flatFee: true }
   };
   await executeTransaction(deployer, assetConfigParams);
 

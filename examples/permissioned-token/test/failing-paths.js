@@ -93,7 +93,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
         sign: types.SignType.SecretKey,
         fromAccount: permManager.account,
         appID: ctx.permissionsappID,
-        payFlags: { totalFee: 1000 },
+        payFlags: { totalFee: 1000, flatFee: true },
         appArgs: ['str:add_whitelist'],
         accounts: [elon.address]
       };
@@ -144,7 +144,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
         sign: types.SignType.SecretKey,
         fromAccount: bob.account,
         appID: ctx.permissionsappID,
-        payFlags: { totalFee: 1000 },
+        payFlags: { totalFee: 1000, flatFee: true },
         appArgs: ['str:change_permissions_manager'],
         accounts: [elon.address]
       };
@@ -172,7 +172,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           sign: types.SignType.SecretKey,
           fromAccount: asaManager.account,
           appID: ctx.controllerappID,
-          payFlags: { totalFee: 1000 },
+          payFlags: { totalFee: 1000, flatFee: true },
           appArgs: [FORCE_TRANSFER_APPARG],
           foreignAssets: [ctx.assetIndex]
         },
@@ -185,7 +185,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           revocationTarget: bob.address,
           amount: 20n,
           lsig: ctx.lsig,
-          payFlags: { totalFee: 1000 }
+          payFlags: { totalFee: 1000, flatFee: true }
         },
         {
           type: types.TransactionType.TransferAlgo,
@@ -193,14 +193,14 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           fromAccount: asaManager.account,
           toAccountAddr: ctx.lsig.address(),
           amountMicroAlgos: 1000,
-          payFlags: { totalFee: 1000 }
+          payFlags: { totalFee: 1000, flatFee: true }
         },
         {
           type: types.TransactionType.CallNoOpSSC,
           sign: types.SignType.SecretKey,
           fromAccount: asaManager.account,
           appID: ctx.permissionsappID,
-          payFlags: { totalFee: 1000 },
+          payFlags: { totalFee: 1000, flatFee: true },
           appArgs: [STR_TRANSFER],
           accounts: [bob.address, elon.address]
         }
@@ -341,7 +341,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           sign: types.SignType.SecretKey,
           fromAccount: bob.account,
           appID: ctx.controllerappID,
-          payFlags: { totalFee: 1000 },
+          payFlags: { totalFee: 1000, flatFee: true },
           appArgs: [STR_TRANSFER],
           foreignAssets: [ctx.assetIndex]
         },
@@ -354,7 +354,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           revocationTarget: bob.address,
           amount: 20n,
           lsig: ctx.lsig,
-          payFlags: { totalFee: 1000 }
+          payFlags: { totalFee: 1000, flatFee: true }
         },
         {
           type: types.TransactionType.TransferAlgo,
@@ -362,14 +362,14 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           fromAccount: asaManager.account,
           toAccountAddr: ctx.lsig.address(),
           amountMicroAlgos: 1000,
-          payFlags: { totalFee: 1000 }
+          payFlags: { totalFee: 1000, flatFee: true }
         },
         {
           type: types.TransactionType.CallNoOpSSC,
           sign: types.SignType.SecretKey,
           fromAccount: bob.account,
           appID: ctx.permissionsappID,
-          payFlags: { totalFee: 1000 },
+          payFlags: { totalFee: 1000, flatFee: true },
           appArgs: [STR_TRANSFER],
           accounts: [bob.address, elon.address]
         }
@@ -494,7 +494,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           sign: types.SignType.SecretKey,
           fromAccount: asaManager.account,
           appID: ctx.controllerappID,
-          payFlags: { totalFee: 1000 },
+          payFlags: { totalFee: 1000, flatFee: true },
           appArgs: [FORCE_TRANSFER_APPARG],
           foreignAssets: [ctx.assetIndex]
         },
@@ -507,7 +507,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           revocationTarget: asaReserve.address,
           amount: oldReserveAssetHolding.amount, // moving all tokens to new reserve
           lsig: ctx.lsig,
-          payFlags: { totalFee: 1000 }
+          payFlags: { totalFee: 1000, flatFee: true }
         },
         {
           type: types.TransactionType.TransferAlgo,
@@ -515,7 +515,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           fromAccount: asaManager.account,
           toAccountAddr: ctx.lsig.address(),
           amountMicroAlgos: 1000,
-          payFlags: { totalFee: 1000 }
+          payFlags: { totalFee: 1000, flatFee: true }
         },
         {
           type: types.TransactionType.ModifyAsset,
@@ -528,7 +528,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
             freeze: asaDef.freeze,
             clawback: ctx.lsig.address()
           },
-          payFlags: { totalFee: 1000 }
+          payFlags: { totalFee: 1000, flatFee: true }
         }
       ];
     });
@@ -588,7 +588,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           sign: types.SignType.SecretKey,
           fromAccount: asaManager.account,
           appID: ctx.controllerappID,
-          payFlags: { totalFee: 2000 },
+          payFlags: { totalFee: 2000, flatFee: true },
           appArgs: [FORCE_TRANSFER_APPARG],
           foreignAssets: [ctx.assetIndex]
         },
@@ -601,7 +601,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           revocationTarget: bob.address,
           amount: 20n,
           lsig: ctx.lsig,
-          payFlags: { totalFee: 2000 }
+          payFlags: { totalFee: 2000, flatFee: true }
         },
         {
           type: types.TransactionType.TransferAlgo,
@@ -609,7 +609,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           fromAccount: asaManager.account,
           toAccountAddr: ctx.lsig.address(),
           amountMicroAlgos: 2000,
-          payFlags: { totalFee: 1000 }
+          payFlags: { totalFee: 1000, flatFee: true }
         }
       ];
     });
@@ -709,7 +709,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
         sign: types.SignType.SecretKey,
         fromAccount: ctx.alice.account,
         appID: ctx.controllerappID,
-        payFlags: { totalFee: 1000 },
+        payFlags: { totalFee: 1000, flatFee: true },
         appArgs: appArgs,
         foreignAssets: [ctx.assetIndex]
       };

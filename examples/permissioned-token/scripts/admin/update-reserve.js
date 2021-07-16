@@ -58,7 +58,7 @@ async function updateReserveByAssetConfig (deployer, address) {
       sign: types.SignType.SecretKey,
       fromAccount: owner,
       appID: controllerAppInfo.appID,
-      payFlags: { totalFee: 1000 },
+      payFlags: { totalFee: 1000, flatFee: true },
       appArgs: ['str:force_transfer'],
       foreignAssets: [tesla.assetIndex] // to verify token reserve, manager
     },
@@ -76,7 +76,7 @@ async function updateReserveByAssetConfig (deployer, address) {
       revocationTarget: asaReserveAddr,
       amount: reserveAssetHolding.amount, // moving all tokens to new reserve
       lsig: clawbackLsig,
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 1000, flatFee: true }
     },
     /*
      * tx 2 - Payment transaction of 1000 microAlgo to cover clawback transaction cost (tx 1).
@@ -87,7 +87,7 @@ async function updateReserveByAssetConfig (deployer, address) {
       fromAccount: owner,
       toAccountAddr: clawbackAddress,
       amountMicroAlgos: 1000,
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 1000, flatFee: true }
     },
     /*
      * tx 3 (last tx) - Asset config transaction to update token reserve to new address. Can only be executed
@@ -99,7 +99,7 @@ async function updateReserveByAssetConfig (deployer, address) {
       fromAccount: owner,
       assetID: tesla.assetIndex,
       fields: { reserve: address },
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 1000, flatFee: true }
     }
   ];
 

@@ -32,7 +32,7 @@ async function run (runtimeEnv, deployer) {
     toAccountAddr: lsig.address(),
     amount: 1e5,
     assetID: goldAssetID,
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: 1000, flatFee: true }
   });
   await balanceOf(deployer, lsig.address(), goldAssetID);
 }

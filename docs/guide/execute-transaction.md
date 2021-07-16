@@ -22,8 +22,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     fromAccount: john,
     toAccountAddr: alice.address,
     amountMicroAlgos: 100,
-    payFlags: { totalFee: 1000 }
-  }
+    payFlags: { totalFee: fee, flatFee: true }  }
 ```
 - payFlags: [TxParams](https://algobuilder.dev/api/algob/interfaces/runtime.types.txparams.html)
 
@@ -37,7 +36,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     toAccountAddr: alice.address,
     amountMicroAlgos: 100,
     lsig: lsig,
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: fee, flatFee: true }
   }
 ```
 
@@ -49,7 +48,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     sign: SignType.SecretKey,
     fromAccount: john,
     asaName: 'gold',
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: fee, flatFee: true }
   }
 ```
 
@@ -61,7 +60,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     sign: SignType.SecretKey,
     fromAccount: alice,
     assetID: assetIndex,
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: fee, flatFee: true }
   }
 ```
 
@@ -75,7 +74,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     toAccountAddr: alice.address,
     amount: 10,
     assetID: assetId,
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: fee, flatFee: true }
   }
 ```
 
@@ -105,7 +104,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     sign: SignType.SecretKey,
     fromAccount: alice,
     appID: appID,
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: fee, flatFee: true }
   }
 ```
 
@@ -117,7 +116,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     sign: SignType.SecretKey,
     fromAccount: john,
     appId: 0,
-    payFlags: { totalFee: fee }
+    payFlags: { totalFee: fee, flatFee: true }
   }
 ```
 
@@ -143,7 +142,33 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     sign: SignType.SecretKey,
     fromAccount: john,
     appId: 10,
-    payFlags: { totalFee: 1000 },
+    payFlags: { totalFee: fee, flatFee: true },
     appArgs: []
   }
+```
+
+### Fees
+
+To set fees for a transaction in `ExecParams`, Use:
+```js
+  {
+    type: TransactionType.TransferAlgo,
+    sign: SignType.LogicSignature,
+    fromAccountAddr: contractAddress,
+    toAccountAddr: alice.address,
+    amountMicroAlgos: 100,
+    lsig: lsig,
+    payFlags: { totalFee: fee, flatFee: true }
+  }
+```
+
+Please note here `flatFee` variable needs to be set to `true`, if you don't want to pay more fee than you specify(which can happen while calculating fee at the time of execution).
+
+### Pooled Transaction Fees
+
+With [this](https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/) release, algob also supports pooled transaction fees.
+
+For ex:
+```js
+
 ```

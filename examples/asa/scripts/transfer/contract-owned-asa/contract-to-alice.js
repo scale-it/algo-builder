@@ -45,7 +45,7 @@ async function run (runtimeEnv, deployer) {
       amount: 20n,
       assetID: assetID,
       lsig: lsig,
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 1000, flatFee: true }
     }
   ];
 
@@ -71,7 +71,7 @@ async function run (runtimeEnv, deployer) {
       amount: 20n,
       assetID: assetID,
       lsig: lsig,
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 1000, flatFee: true }
     });
   } catch (e) {
     console.error(e);

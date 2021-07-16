@@ -33,7 +33,7 @@ async function transfer (deployer, from, toAddr, amount) {
       sign: types.SignType.SecretKey,
       fromAccount: from,
       appID: controllerAppInfo.appID,
-      payFlags: { totalFee: 1000 },
+      payFlags: { totalFee: 1000, flatFee: true },
       appArgs: ['str:transfer']
     },
     /*
@@ -49,7 +49,7 @@ async function transfer (deployer, from, toAddr, amount) {
       revocationTarget: from.addr,
       amount: amount,
       lsig: clawbackLsig,
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 1000, flatFee: true }
     },
     /*
      * tx 2 - Payment transaction of 1000 microAlgo to cover clawback transaction cost (tx 1)
@@ -60,7 +60,7 @@ async function transfer (deployer, from, toAddr, amount) {
       fromAccount: from,
       toAccountAddr: clawbackAddress,
       amountMicroAlgos: 1000,
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 1000, flatFee: true }
     },
     /*
      * tx 3 - Call to permissions stateful smart contract with application arg: 'transfer'
@@ -71,7 +71,7 @@ async function transfer (deployer, from, toAddr, amount) {
       sign: types.SignType.SecretKey,
       fromAccount: from,
       appID: permissionsAppInfo.appID,
-      payFlags: { totalFee: 1000 },
+      payFlags: { totalFee: 1000, flatFee: true },
       appArgs: ['str:transfer'],
       accounts: [from.addr, toAddr] //  AppAccounts (pass asset sender & receiver address)
     }

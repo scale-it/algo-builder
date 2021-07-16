@@ -21,7 +21,7 @@ async function run (runtimeEnv, deployer) {
     amount: 500,
     assetID: 'gold', // passing asa name is also supported
     lsig: lsigGoldOwner,
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: 1000, flatFee: true }
   };
 
   // Transaction PASS
@@ -47,7 +47,7 @@ async function run (runtimeEnv, deployer) {
     toAccountAddr: bob.addr,
     amountMicroAlgos: 58,
     lsig: logicSignature,
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: 1000, flatFee: true }
   };
   // Transaction PASS
   await executeTransaction(deployer, txnParam);

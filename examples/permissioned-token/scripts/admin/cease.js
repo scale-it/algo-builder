@@ -36,7 +36,7 @@ async function cease (deployer, address, amount) {
       sign: types.SignType.SecretKey,
       fromAccount: owner,
       appID: controllerAppInfo.appID,
-      payFlags: { totalFee: 1000 },
+      payFlags: { totalFee: 1000, flatFee: true },
       appArgs: ['str:force_transfer'],
       foreignAssets: [tesla.assetIndex] // to verify token reserve, manager
     },
@@ -51,7 +51,7 @@ async function cease (deployer, address, amount) {
       revocationTarget: address,
       amount: amount,
       lsig: clawbackLsig,
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 1000, flatFee: true }
     },
     /*
      * tx 2 - cover fee of tx1 */
@@ -61,7 +61,7 @@ async function cease (deployer, address, amount) {
       fromAccount: owner,
       toAccountAddr: clawbackAddress,
       amountMicroAlgos: 1000,
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 1000, flatFee: true }
     }
   ];
 
