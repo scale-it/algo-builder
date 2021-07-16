@@ -15,16 +15,22 @@ def buyback_lsig():
     # verify that buyer deposits required algos(Not we are checking this in stateful contract)
     # Here we are verifying if the call is made to bond-dapp stateful contract
     verify_tx = And(
+        # verify TMPL_BOND is being transferred
         Gtxn[0].type_enum() == TxnType.AssetTransfer,
         Gtxn[0].xfer_asset() == Tmpl.Int("TMPL_BOND"),
         Gtxn[1].type_enum() == TxnType.Payment,
+        # verify call to bond-dapp
         Gtxn[2].type_enum() == TxnType.ApplicationCall,
         Gtxn[2].application_id() == Tmpl.Int("TMPL_APPLICATION_ID"),
+        # verify first argument is `exit`
         Gtxn[2].application_args[0] == Bytes("exit"),
         common_fields
     )
 
-    # allow opt-in transaction
+    # Opt-in transaction
+    # Note: we are checking that first transaction is payment with amount 0
+    # and sent by store manager, because we don't want another
+    # user to opt-in too many asa/app and block this address
     opt_in = And(
         Gtxn[0].type_enum() == TxnType.Payment,
         Gtxn[0].amount() == Int(0),

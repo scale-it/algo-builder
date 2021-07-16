@@ -62,9 +62,11 @@ def approval_program():
         Return(Int(1))
     ])
 
+    # Update issuer address in this contract
     # only store manager can update issuer
     # Expected arguments: [Bytes("update_issuer_address"), issuer_address]
     update_issuer = Seq([
+        # asserts if sender is store manager
         Assert(
              And(
                 Txn.sender() == App.globalGet(store_manager),
@@ -75,8 +77,11 @@ def approval_program():
         Return(Int(1))
     ])
 
+    # Update issue price
     # only bond app manager can update issue price
+    # expected arguments: [Bytes("update_issue_price"), new_issue_price]
     on_update_issue_price = Seq([
+        # asserts if sender is store manager
         Assert(
              And(
                 Txn.sender() == App.globalGet(store_manager),
@@ -87,11 +92,16 @@ def approval_program():
         Return(Int(1))
     ])
 
+    # Issue bond tokens to issuer
+    # Expected arguments: [Bytes("issue")]
     on_issue = Seq([
+        # assert sender is bond token creator and receiver is issuer address
         Assert(
             And(
                 Gtxn[0].type_enum() == TxnType.AssetTransfer,
+                Gtxn[0].asset_sender() == App.globalGet(bond_token_creator),
                 Gtxn[0].asset_receiver() == App.globalGet(issuer_address),
+                # verify current bond is being transferred
                 Gtxn[0].xfer_asset() == App.globalGet(current_bond),
                 basic_checks
             )
@@ -99,6 +109,8 @@ def approval_program():
         Return(Int(1))
     ])
 
+    # Buy transaction, sent from buyer
+    # Expected arguments: [Bytes("buy")]
     on_buy = Seq([
         Assert(
             And(
@@ -109,6 +121,7 @@ def approval_program():
                 Gtxn[0].amount() >= Add(Mul(Gtxn[1].asset_amount(), App.globalGet(issue_price)), Gtxn[1].fee()),
                 # verify ASA transfer
                 Gtxn[1].type_enum() == TxnType.AssetTransfer,
+                # verify current bond is being transferred
                 Gtxn[1].xfer_asset() == App.globalGet(current_bond),
                 Gtxn[1].asset_receiver() == Gtxn[0].sender()
             )
@@ -117,18 +130,23 @@ def approval_program():
         Return(Int(1))
     ])
 
-    # store buyback address
+    # Create buyback address transaction
+    # Expected arguments: [Bytes("create_buyback"), buyback address]
     create_buyback = Seq([
+        # asserts if sender is store manager
         Assert(
             And(
                 Txn.sender() == App.globalGet(store_manager),
                 basic_checks
             )
         ),
+        # set buyback address
         App.globalPut(Bytes("buyback"), Txn.application_args[1]),
         Return(Int(1))
     ])
 
+    # exit transaction
+    # Expected arguments: [Bytes("exit")]
     on_exit = Seq([
         Assert(
             And(
@@ -149,6 +167,8 @@ def approval_program():
         Return(Int(1))
     ])
 
+    # Redeem transaction
+    # Expected arguments: [Bytes("redeem_coupon")]
     on_redeem_coupon = Seq([
         Assert(
             And(
@@ -171,10 +191,13 @@ def approval_program():
     # fetch asset_holding.balance from Txn.accounts[0]
     asset_balance = AssetHolding.balance(Int(1), Gtxn[2].xfer_asset())
 
+    # Create dex transaction
+    # Expected arguments: [Bytes("create_dex")]
     on_create_dex = Seq([
         asset_balance, # load asset_balance from store
         Assert(
             And(
+                # verify sender is store manager
                 Txn.sender() == App.globalGet(store_manager),
                 basic_checks,
                 Gtxn[1].type_enum() == TxnType.AssetTransfer,

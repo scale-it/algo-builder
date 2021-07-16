@@ -12,19 +12,23 @@ def issuer_lsig():
         Gtxn[1].asset_close_to() == Global.zero_address(),
     )
 
-    # verify that buyer deposits required algos 
+    # Buy transaction.
     verify_tx = And(
+        # verify first transaction is payment
         Gtxn[0].type_enum() == TxnType.Payment,
+        # verify bond-dapp contract is called
         Gtxn[2].type_enum() == TxnType.ApplicationCall,
         Gtxn[2].application_id() == Tmpl.Int("TMPL_APPLICATION_ID"),
+        # verify first argument is `buy`
         Gtxn[2].application_args[0] == Bytes("buy"),
         common_fields
     )
 
-    # burn tx
+    # Burn token transaction
     burn_tx = And(
         Gtxn[2].type_enum() == TxnType.AssetTransfer,
         Gtxn[1].type_enum() == TxnType.AssetTransfer,
+        # verify bond-dapp is called
         Gtxn[0].application_id() == Tmpl.Int("TMPL_APPLICATION_ID")
     )
 
@@ -34,8 +38,12 @@ def issuer_lsig():
         Txn.receiver() == Tmpl.Addr("TMPL_OWNER")
     )
 
-    # allow opt-in transaction
+    # Opt-in transaction
+    # Note: we are checking that first transaction is payment with amount 0
+    # and sent by store manager, because we don't want another
+    # user to opt-in too many asa/app and block this address
     opt_in = And(
+        # verify first transaction is payment
         Gtxn[0].type_enum() == TxnType.Payment,
         Gtxn[0].amount() == Int(0),
         Gtxn[0].sender() == Tmpl.Addr("TMPL_STORE_MANAGER"),
@@ -54,6 +62,7 @@ def issuer_lsig():
         [Gtxn[1].type_enum() == TxnType.AssetTransfer, burn_tx]
     )
 
+    # Verify opt-in or issue transaction
     combine = Or(opt_in, issue_tx)
 
     program = Cond(

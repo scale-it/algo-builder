@@ -34,7 +34,10 @@ def dex_lsig():
         Gtxn[3].application_args[0] == Bytes("redeem_coupon")
     )
 
-    # allow opt-in transaction
+    # Opt-in transaction
+    # Note: we are checking that first transaction is payment with amount 0
+    # and sent by store manager, because we don't want another
+    # user to opt-in too many asa/app and block this address
     opt_in = And(
         Gtxn[0].type_enum() == TxnType.Payment,
         Gtxn[0].amount() == Int(0),
@@ -43,6 +46,10 @@ def dex_lsig():
         Gtxn[1].asset_amount() == Int(0)
     )
 
+    # verify redeem bond token exchange transaction (B_i -> B_i+1)
+    # User sends B_i to DEX_i lsig. 
+    # DEX_i sends B_{i+1} to the user.
+    # Dex pays coupon value
     combine = And(common_fields, first_tx, second_tx, third_tx)
 
     program = program = Cond(
