@@ -1,14 +1,14 @@
+import { types } from "@algo-builder/web";
 import { SuggestedParams } from "algosdk";
 
 import { ALGORAND_MIN_TX_FEE } from "../lib/constants";
-import { TxParams } from "../types";
 
 const GENESIS_ID = 'testnet-v1.0';
 // testnet-v1.0 hash
 const GENESIS_HASH = 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=';
 
 export function mockSuggestedParams (
-  payFlags: TxParams, round: number): SuggestedParams {
+  payFlags: types.TxParams, round: number): SuggestedParams {
   const s = {} as SuggestedParams;
 
   s.flatFee = payFlags.totalFee !== undefined;

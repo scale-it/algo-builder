@@ -32,6 +32,7 @@ export interface TxParams {
    * parameters. We think that this is more explicit. */
   feePerByte?: number
   totalFee?: number
+  flatFee?: boolean
   // The first round for when the transaction is valid.
   firstValid?: number
   // firstValid + validRounds will give us the ending round for which the transaction is valid.

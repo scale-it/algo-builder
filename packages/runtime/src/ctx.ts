@@ -10,7 +10,7 @@ import {
   AppDeploymentFlags,
   ASADeploymentFlags, AssetHoldingM,
   Context, ExecutionMode,
-  SSCAttributesM, State, Txn, TxParams
+  SSCAttributesM, State, Txn
 } from "./types";
 
 const APPROVAL_PROGRAM = "approval-program";
@@ -174,7 +174,7 @@ export class Ctx implements Context {
    * @param address Account address to opt-into asset
    * @param flags Transaction Parameters
    */
-  optIntoASA (assetIndex: number, address: AccountAddress, flags: TxParams): void {
+  optIntoASA (assetIndex: number, address: AccountAddress, flags: types.TxParams): void {
     const assetDef = this.getAssetDef(assetIndex);
     makeAssetTransferTxnWithSuggestedParams(
       address, address, undefined, undefined, 0, undefined, assetIndex,

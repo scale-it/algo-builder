@@ -121,7 +121,7 @@ export interface Context {
   closeApp: (sender: AccountAddress, appID: number) => void
   processTransactions: (txnParams: types.ExecParams[]) => void
   addAsset: (name: string, fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => number
-  optIntoASA: (assetIndex: number, address: AccountAddress, flags: TxParams) => void
+  optIntoASA: (assetIndex: number, address: AccountAddress, flags: types.TxParams) => void
   addApp: (
     fromAccountAddr: string, flags: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string
@@ -215,35 +215,6 @@ export enum ExecutionMode {
 }
 
 /**
- * Common transaction parameters (fees, note..) */
-export interface TxParams {
-  /**
-   * feePerByte or totalFee is used to set the appropriate transaction fee parameter.
-   * If both are set then totalFee takes precedence.
-   * NOTE: SDK expects`fee: number` and boolean `flatFee`. But the API expects only one
-   * on parameter: `fee`. Here, we define feePerByte and totalFee - both as numberic
-   * parameters. We think that this is more explicit. */
-  feePerByte?: number
-  totalFee?: number
-  // The first round for when the transaction is valid.
-  firstValid?: number
-  // firstValid + validRounds will give us the ending round for which the transaction is valid.
-  validRounds?: number
-  // A lease enforces mutual exclusion of transactions.
-  lease?: Uint8Array
-  // Any data up to 1000 bytes.
-  note?: string
-  noteb64?: string
-  // When set, it indicates that the transaction is requesting
-  // that the Sender account should be closed, and all remaining
-  // funds, after the fee and amount are paid, be transferred to this address.
-  closeRemainderTo?: AccountAddress
-  // Specifies the authorized address.
-  rekeyTo?: AccountAddress
-  // you can learn more about these parameters here.(https://developer.algorand.org/docs/reference/transactions/#common-fields-header-and-type)
-}
-
-/**
  * Stateful Smart contract flags for specifying sender and schema */
 export interface AppDeploymentFlags extends AppOptionalFlags {
   sender: AccountSDK
@@ -295,7 +266,7 @@ export interface Account extends AccountSDK {
   name: string
 }
 
-export interface ASADeploymentFlags extends TxParams {
+export interface ASADeploymentFlags extends types.TxParams {
   creator: Account
 }
 

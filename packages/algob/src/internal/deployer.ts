@@ -190,7 +190,7 @@ class DeployerBasicMode {
    * @param accountName
    * @param flags Transaction flags
    */
-  async optInAcountToASA (asa: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
+  async optInAcountToASA (asa: string, accountName: string, flags: wtypes.TxParams): Promise<void> {
     this.assertCPNotDeleted({
       type: wtypes.TransactionType.OptInASA,
       sign: wtypes.SignType.SecretKey,
@@ -226,7 +226,7 @@ class DeployerBasicMode {
    * @param lsig logic signature
    * @param flags Transaction flags
    */
-  async optInLsigToASA (asa: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
+  async optInLsigToASA (asa: string, lsig: LogicSig, flags: wtypes.TxParams): Promise<void> {
     this.assertCPNotDeleted({
       type: wtypes.TransactionType.OptInASA,
       sign: wtypes.SignType.LogicSignature,
@@ -259,7 +259,7 @@ class DeployerBasicMode {
   async optInAccountToApp (
     sender: rtypes.Account,
     appID: number,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     flags: rtypes.AppOptionalFlags): Promise<void> {
     this.assertCPNotDeleted({
       type: wtypes.TransactionType.OptInToApp,
@@ -282,7 +282,7 @@ class DeployerBasicMode {
   async optInLsigToApp (
     appID: number,
     lsig: LogicSig,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     flags: rtypes.AppOptionalFlags): Promise<void> {
     this.assertCPNotDeleted({
       type: wtypes.TransactionType.OptInToApp,
@@ -520,7 +520,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
   async fundLsig (name: string, flags: FundASCFlags,
-    payFlags: rtypes.TxParams, scTmplParams?: SCParams): Promise<void> {
+    payFlags: wtypes.TxParams, scTmplParams?: SCParams): Promise<void> {
     try {
       await this.algoOp.fundLsig(name, flags, payFlags, this.txWriter, scTmplParams);
     } catch (error) {
@@ -574,7 +574,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     approvalProgram: string,
     clearProgram: string,
     flags: rtypes.AppDeploymentFlags,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     scTmplParams?: SCParams): Promise<rtypes.SSCInfo> {
     const name = approvalProgram + "-" + clearProgram;
     this.assertNoAsset(name);
@@ -605,7 +605,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    */
   async updateApp (
     sender: algosdk.Account,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
@@ -692,7 +692,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
   }
 
   async fundLsig (_name: string, _flags: FundASCFlags,
-    _payFlags: rtypes.TxParams, _scInitParams?: unknown): Promise<LsigInfo> {
+    _payFlags: wtypes.TxParams, _scInitParams?: unknown): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "fundLsig"
     });
@@ -709,7 +709,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     approvalProgram: string,
     clearProgram: string,
     flags: rtypes.AppDeploymentFlags,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     scInitParam?: unknown): Promise<rtypes.SSCInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployApp"
@@ -728,7 +728,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
    */
   async updateApp (
     sender: algosdk.Account,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
