@@ -59,7 +59,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         fromAccount: john.account,
         toAccountAddr: alice.address,
         amountMicroAlgos: 100,
-        payFlags: { totalFee: 1000 }
+        payFlags: { totalFee: 1000, flatFee: true }
       },
       {
         type: types.TransactionType.TransferAsset,
@@ -68,7 +68,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         toAccountAddr: alice.address,
         amount: 10,
         assetID: assetId,
-        payFlags: { totalFee: 1000 }
+        payFlags: { totalFee: 1000, flatFee: true }
       }
     ];
     const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
