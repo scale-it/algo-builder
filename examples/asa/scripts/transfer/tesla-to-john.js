@@ -14,7 +14,7 @@ async function run (runtimeEnv, deployer) {
     toAccountAddr: john.addr,
     amount: 184467440737095516n, // use bigint for large transfer amount
     assetID: 'tesla', // passing asa name is also supported
-    payFlags: {}
+    payFlags: { totalFee: 1000, flatFee: true }
   });
 
   await balanceOf(deployer, john.addr, teslaAssetID);

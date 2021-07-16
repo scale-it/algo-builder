@@ -30,7 +30,7 @@ async function run (runtimeEnv, deployer) {
       sign: types.SignType.SecretKey,
       fromAccount: bob,
       appID: appInfo.appID,
-      payFlags: {}
+      payFlags: { totalFee: 1000, flatFee: true }
     },
     {
       type: types.TransactionType.TransferAsset,
