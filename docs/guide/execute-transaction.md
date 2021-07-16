@@ -167,8 +167,25 @@ Please note here `flatFee` variable needs to be set to `true`, if you don't want
 ### Pooled Transaction Fees
 
 With [this](https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/) release, algob also supports pooled transaction fees.
-
-For ex:
+Supports pooled fees where one transaction can pay the fees of other transactions within an atomic group. For atomic transactions, the protocol sums the number of transactions and calculates the total amount of required fees, then calculates the amount of fees submitted by all transactions. If the collected fees are greater than or equal to the required amount, the transaction fee requirement will be met.
+Ex:
 ```js
-
+  {
+    type: TransactionType.TransferAlgo,
+    sign: SignType.SecretKey,
+    fromAccountAddr: john,
+    toAccountAddr: alice.address,
+    amountMicroAlgos: 100,
+    payFlags: { totalFee: 2000, flatFee: true }
+  },
+  {
+    type: TransactionType.TransferAlgo,
+    sign: SignType.SecretKey,
+    fromAccountAddr: alice,
+    toAccountAddr: bob.address,
+    amountMicroAlgos: 100,
+    payFlags: { totalFee: 0, flatFee: true }
+  }
 ```
+
+Even though fee paid by alice is `0`, this transaction will pass because total fees collected is greater then minimum required
