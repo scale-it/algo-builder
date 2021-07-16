@@ -17,7 +17,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
     sign: types.SignType.SecretKey,
     fromAccount: john.account,
     appID: 0,
-    payFlags: { totalFee: fee }
+    payFlags: { totalFee: fee, flatFee: true }
   };
 
   let runtime: Runtime;

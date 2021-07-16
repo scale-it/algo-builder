@@ -33,7 +33,7 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
       toAccountAddr: bob.address,
       amountMicroAlgos: 100n,
       lsig: {} as LogicSig, // will be set below
-      payFlags: { totalFee: fee }
+      payFlags: { totalFee: fee, flatFee: true }
     };
   });
 

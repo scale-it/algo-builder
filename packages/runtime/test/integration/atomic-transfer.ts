@@ -93,7 +93,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         fromAccount: john.account,
         toAccountAddr: alice.address,
         amountMicroAlgos: 100,
-        payFlags: { totalFee: 1000 }
+        payFlags: { totalFee: 1000, flatFee: true }
+
       },
       {
         type: types.TransactionType.TransferAsset,
@@ -102,7 +103,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         toAccountAddr: john.address,
         amount: 1000,
         assetID: 1,
-        payFlags: { totalFee: 1000 }
+        payFlags: { totalFee: 1000, flatFee: true }
+
       }
     ];
     const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
@@ -130,7 +132,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         sign: types.SignType.SecretKey,
         fromAccount: john.account,
         appID: appID,
-        payFlags: { totalFee: 1000 }
+        payFlags: { totalFee: 1000, flatFee: true }
+
       },
       {
         type: types.TransactionType.TransferAlgo,
@@ -138,7 +141,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         fromAccount: john.account,
         toAccountAddr: alice.address,
         amountMicroAlgos: 100,
-        payFlags: { totalFee: 1000 }
+        payFlags: { totalFee: 1000, flatFee: true }
+
       }
     ];
     runtime.executeTx(txGroup);
@@ -163,7 +167,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         sign: types.SignType.SecretKey,
         fromAccount: john.account,
         appID: appID,
-        payFlags: { totalFee: 1000 }
+        payFlags: { totalFee: 1000, flatFee: true }
+
       },
       {
         type: types.TransactionType.TransferAlgo,
@@ -171,7 +176,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         fromAccount: alice.account,
         toAccountAddr: john.address,
         amountMicroAlgos: 6e6,
-        payFlags: { totalFee: 1000 }
+        payFlags: { totalFee: 1000, flatFee: true }
+
       }
     ];
     expectRuntimeError(
@@ -207,7 +213,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         fromAccount: alice.account,
         toAccountAddr: john.address,
         amountMicroAlgos: 6e6,
-        payFlags: { totalFee: 1000 }
+        payFlags: { totalFee: 1000, flatFee: true }
+
       }
     ];
 
@@ -242,7 +249,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         fromAccount: alice.account,
         toAccountAddr: john.address,
         amountMicroAlgos: 6e6,
-        payFlags: { totalFee: 1000 }
+        payFlags: { totalFee: 1000, flatFee: true }
+
       }
     ];
     const assetManagerOrig = runtime.getAssetDef(assetId).manager;
@@ -265,7 +273,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
       toAccountAddr: alice.account.addr,
       amount: 20,
       assetID: assetId,
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 1000, flatFee: true }
+
     });
     const txGroup: types.ExecParams[] = [
       {
@@ -284,7 +293,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         fromAccount: alice.account,
         toAccountAddr: john.address,
         amountMicroAlgos: 6e6,
-        payFlags: { totalFee: 1000 }
+        payFlags: { totalFee: 1000, flatFee: true }
+
       }
     ];
     syncAccounts();
@@ -314,7 +324,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         fromAccount: alice.account,
         toAccountAddr: john.address,
         amountMicroAlgos: 6e6,
-        payFlags: { totalFee: 1000 }
+        payFlags: { totalFee: 1000, flatFee: true }
+
       }
     ];
 
@@ -334,7 +345,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         sign: types.SignType.SecretKey,
         fromAccount: john.account,
         appID: appID,
-        payFlags: { totalFee: 1000 }
+        payFlags: { totalFee: 1000, flatFee: true }
+
       },
       {
         type: types.TransactionType.TransferAlgo,
@@ -342,7 +354,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         fromAccount: alice.account,
         toAccountAddr: john.address,
         amountMicroAlgos: 6e6,
-        payFlags: { totalFee: 1000 }
+        payFlags: { totalFee: 1000, flatFee: true }
+
       }
     ];
 
@@ -362,7 +375,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         sign: types.SignType.SecretKey,
         fromAccount: john.account,
         appID: appID,
-        payFlags: { totalFee: 1000 }
+        payFlags: { totalFee: 1000, flatFee: true }
+
       },
       {
         type: types.TransactionType.TransferAlgo,
@@ -370,7 +384,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         fromAccount: alice.account,
         toAccountAddr: john.address,
         amountMicroAlgos: 6e6,
-        payFlags: { totalFee: 1000 }
+        payFlags: { totalFee: 1000, flatFee: true }
+
       }
     ];
 
@@ -390,7 +405,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
       sign: types.SignType.SecretKey,
       fromAccount: john.account,
       appID: appID,
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 1000, flatFee: true }
+
     });
     syncAccounts();
     const txGroup: types.ExecParams[] = [
@@ -399,7 +415,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         sign: types.SignType.SecretKey,
         fromAccount: john.account,
         appID: appID,
-        payFlags: { totalFee: 1000 }
+        payFlags: { totalFee: 1000, flatFee: true }
+
       },
       {
         type: types.TransactionType.TransferAlgo,
@@ -407,7 +424,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         fromAccount: alice.account,
         toAccountAddr: john.address,
         amountMicroAlgos: 100,
-        payFlags: { totalFee: 1000 }
+        payFlags: { totalFee: 1000, flatFee: true }
+
       },
       {
         type: types.TransactionType.TransferAsset,
@@ -416,7 +434,8 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
         toAccountAddr: alice.account.addr,
         amount: 10,
         assetID: 1,
-        payFlags: { totalFee: 1000 }
+        payFlags: { totalFee: 1000, flatFee: true }
+
       }
     ];
     const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;

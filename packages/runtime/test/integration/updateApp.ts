@@ -66,7 +66,8 @@ describe("Algorand Smart Contracts - Update Application", function () {
       sign: types.SignType.SecretKey,
       fromAccount: creator.account,
       appID: appID,
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 1000, flatFee: true }
+
     };
     runtime.executeTx(noOpParams);
     creator = runtime.getAccount(creator.address);

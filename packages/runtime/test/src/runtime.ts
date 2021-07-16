@@ -34,7 +34,8 @@ describe("Logic Signature Transaction in Runtime", function () {
       toAccountAddr: bob.account.addr,
       amountMicroAlgos: 1000n,
       lsig: lsig,
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 1000, flatFee: true }
+
     };
   });
 
@@ -98,7 +99,7 @@ describe("Rounds Test", function () {
       fromAccount: john.account,
       toAccountAddr: bob.address,
       amountMicroAlgos: 100n,
-      payFlags: { firstValid: 5, validRounds: 200 }
+      payFlags: { firstValid: 5, validRounds: 200, totalFee: 1000, flatFee: true }
     };
   });
 
@@ -120,7 +121,7 @@ describe("Rounds Test", function () {
   }
 
   it("should succeed if current round is between first and last valid", () => {
-    txnParams.payFlags = { totalFee: 1000, firstValid: 5, validRounds: 200 };
+    txnParams.payFlags = { totalFee: 1000, firstValid: 5, validRounds: 200, flatFee: true };
     runtime.setRoundAndTimestamp(20, 20);
 
     runtime.executeTx(txnParams);
@@ -141,7 +142,7 @@ describe("Rounds Test", function () {
   });
 
   it("should succeeded by default (no round requirement is passed)", () => {
-    txnParams.payFlags = { totalFee: 1000 };
+    txnParams.payFlags = { totalFee: 1000, flatFee: true };
 
     runtime.executeTx(txnParams);
 
@@ -177,7 +178,8 @@ describe("Algorand Standard Assets", function () {
       toAccountAddr: alice.account.addr,
       amount: 10n,
       assetID: 1,
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 1000, flatFee: true }
+
     };
   });
 
@@ -240,7 +242,8 @@ describe("Algorand Standard Assets", function () {
       toAccountAddr: alice.address,
       amount: 0n,
       assetID: assetId,
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 1000, flatFee: true }
+
     };
     runtime.executeTx(optInParams);
     syncAccounts();
@@ -298,7 +301,7 @@ describe("Algorand Standard Assets", function () {
       assetID: assetId,
       freezeTarget: john.address,
       freezeState: true,
-      payFlags: {}
+      payFlags: { flatFee: true, totalFee: 1000 }
     };
 
     const res = runtime.getAssetDef(assetId);
@@ -344,7 +347,7 @@ describe("Algorand Standard Assets", function () {
       sign: types.SignType.SecretKey,
       fromAccount: alice.account,
       toAccountAddr: alice.address,
-      payFlags: { totalFee: 1000, closeRemainderTo: john.address } // transfer all assets of alice => john (using closeRemTo)
+      payFlags: { totalFee: 1000, closeRemainderTo: john.address, flatFee: true } // transfer all assets of alice => john (using closeRemTo)
     });
     syncAccounts();
 
@@ -361,7 +364,7 @@ describe("Algorand Standard Assets", function () {
     expectRuntimeError(
       () => runtime.executeTx({
         ...assetTransferParam,
-        payFlags: { totalFee: 1000, closeRemainderTo: alice.address } // creator of ASA trying to close asset holding to alice
+        payFlags: { totalFee: 1000, closeRemainderTo: alice.address, flatFee: true } // creator of ASA trying to close asset holding to alice
       }),
       RUNTIME_ERRORS.ASA.CANNOT_CLOSE_ASSET_BY_CREATOR
     );
