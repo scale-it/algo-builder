@@ -111,6 +111,9 @@ def approval_program():
 
     # Buy transaction, sent from buyer
     # Expected arguments: [Bytes("buy")]
+    # 1. amount×BondApp.issue_price + algo_tx_price
+    # - ALGO payment from buyer to the issuer. algo_tx_price is required to cover the TX2 cost.
+    # 2. B_i ASA transfer from issuer to the buyer.
     on_buy = Seq([
         Assert(
             And(
