@@ -59,7 +59,7 @@ async function run (runtimeEnv, deployer) {
       globalBytes: 15,
       appArgs: appArgs
     }, {});
-  console.log(appInfo);
+  console.log(bondAppInfo);
 
   // Initialize issuer lsig with bond-app ID
   const scInitParam = {
@@ -103,7 +103,7 @@ async function run (runtimeEnv, deployer) {
     type: types.TransactionType.CallNoOpSSC,
     sign: types.SignType.SecretKey,
     fromAccount: storeManagerAccount,
-    appID: appInfo.appID,
+    appID: bondAppInfo.appID,
     payFlags: {},
     appArgs: appArgs
   };

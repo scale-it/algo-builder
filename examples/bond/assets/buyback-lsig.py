@@ -12,7 +12,8 @@ def buyback_lsig():
         Gtxn[1].asset_close_to() == Global.zero_address(),
     )
 
-    # verify that buyer deposits required algos 
+    # verify that buyer deposits required algos(Not we are checking this in stateful contract)
+    # Here we are verifying if the call is made to bond-dapp stateful contract
     verify_tx = And(
         Gtxn[0].type_enum() == TxnType.AssetTransfer,
         Gtxn[0].xfer_asset() == Tmpl.Int("TMPL_BOND"),

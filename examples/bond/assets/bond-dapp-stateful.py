@@ -8,17 +8,33 @@ def approval_program():
     tradeable bond ASA and the current epoch number.
     """
 
+    # Store manager manages bond-dapp contract
     store_manager = Bytes("store_manager")
+    # Price at which bonds are sold by the issuer.
     issue_price = Bytes("issue_price")
+    # Bond nominal price.
     nominal_price = Bytes("nominal_price")
+    # Date when a bond holder can redeem bonds to the issuer.
     maturity_date = Bytes("maturity_date")
+    # interest payed annually to the bond holders, 
+    # equals to `coupon_rate x nominal_price`.
     coupon_value = Bytes("coupon_value")
     issuer_address = Bytes("issuer_address")
+    # stored in the BondApp is the current period for paying the coupon.
+    # For example: When bond coupons are paid every 6 month,
+    # then initially the epoch is 0. After 6 months bond holders
+    # receive a coupon for interest payment and start epoch 1.
+    # After another 6 months bond holders receive a new coupon for
+    # interest payment and we start epoch 2…
     epoch = Bytes("epoch")
+    # Total number of sold bond tokens
     total = Bytes("total")
+    # Current bond token index
     current_bond = Bytes("current_bond")
+    # Maximum amount of supply of bond token
     max_amount = Bytes("max_amount")
-    creator = Bytes("creator")
+    # Bond token creator
+    bond_token_creator = Bytes("bond_token_creator")
 
     # verify rekey_to and close_rem_to are set as zero_address
     basic_checks = And(
@@ -29,7 +45,10 @@ def approval_program():
         Txn.asset_close_to() == Global.zero_address()
     )
 
-    # initialize variables
+    # initialize variables(This branch is called at the time of creation)
+    # Expected arguments:
+    # [store_manager, issue_price,nominal_price, maturity_date,
+    # coupon_value, epoch, current_bond, max_amount, bond_token_creator]
     on_initialize = Seq([
         App.globalPut(store_manager, Txn.application_args[0]),
         App.globalPut(issue_price, Btoi(Txn.application_args[1])),
@@ -39,11 +58,12 @@ def approval_program():
         App.globalPut(epoch, Btoi(Txn.application_args[5])),
         App.globalPut(current_bond, Btoi(Txn.application_args[6])),
         App.globalPut(max_amount, Btoi(Txn.application_args[7])),
-        App.globalPut(creator, Txn.application_args[8]),
+        App.globalPut(bond_token_creator, Txn.application_args[8]),
         Return(Int(1))
     ])
 
     # only store manager can update issuer
+    # Expected arguments: [Bytes("update_issuer_address"), issuer_address]
     update_issuer = Seq([
         Assert(
              And(
@@ -158,12 +178,12 @@ def approval_program():
                 Txn.sender() == App.globalGet(store_manager),
                 basic_checks,
                 Gtxn[1].type_enum() == TxnType.AssetTransfer,
-                # transfer `balanceOf(issuer, B_i)`  of `B_{i+1}` from the creator to the `issuer`.
+                # transfer `balanceOf(issuer, B_i)`  of `B_{i+1}` from the bond_token_creator to the `issuer`.
                 # index 1 of Txn.accounts().
                 asset_balance.value() == Gtxn[1].asset_amount(),
-                # burn `B_i` issuer bonds. send to creator
+                # burn `B_i` issuer bonds. send to bond_token_creator
                 Gtxn[2].type_enum() == TxnType.AssetTransfer,
-                Gtxn[2].asset_receiver() == App.globalGet(creator),
+                Gtxn[2].asset_receiver() == App.globalGet(bond_token_creator),
                 asset_balance.value() == Gtxn[2].asset_amount()
             ),
         ),
