@@ -1,5 +1,4 @@
 import { types } from "@algo-builder/web";
-import { ExecParams } from "@algo-builder/web/build/types";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
@@ -32,7 +31,7 @@ describe("Pooled Transaction Fees Test", function () {
     const amount = 1e4 + 122;
     const initialBalance = john.balance();
     // group with fee distribution
-    const groupTx: ExecParams[] = [
+    const groupTx: types.ExecParams[] = [
       {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.SecretKey,
@@ -62,7 +61,7 @@ describe("Pooled Transaction Fees Test", function () {
   it("Should fail if fees is not enough", () => {
     const amount = 1e4 + 122;
     // group with fee distribution
-    const groupTx: ExecParams[] = [
+    const groupTx: types.ExecParams[] = [
       {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.SecretKey,
@@ -81,7 +80,7 @@ describe("Pooled Transaction Fees Test", function () {
       }
     ];
 
-    // Fails because groupindex don't match
+    // Fails if fees is not enough
     expectRuntimeError(
       () => runtime.executeTx(groupTx),
       RUNTIME_ERRORS.TRANSACTION.FEES_NOT_ENOUGH

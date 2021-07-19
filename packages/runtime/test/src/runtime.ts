@@ -35,7 +35,6 @@ describe("Logic Signature Transaction in Runtime", function () {
       amountMicroAlgos: 1000n,
       lsig: lsig,
       payFlags: { totalFee: 1000 }
-
     };
   });
 
@@ -179,7 +178,6 @@ describe("Algorand Standard Assets", function () {
       amount: 10n,
       assetID: 1,
       payFlags: { totalFee: 1000 }
-
     };
   });
 
@@ -243,7 +241,6 @@ describe("Algorand Standard Assets", function () {
       amount: 0n,
       assetID: assetId,
       payFlags: { totalFee: 1000 }
-
     };
     runtime.executeTx(optInParams);
     syncAccounts();

@@ -125,8 +125,7 @@ describe("Logic Signature: Escrow Account", function () {
       amountMicroAlgos: 0n,
       payFlags: {
         totalFee: 1000,
-        closeRemainderTo: john.address,
-        flatFee: true
+        closeRemainderTo: john.address
       }
     };
     runtime.executeTx(closeParams);

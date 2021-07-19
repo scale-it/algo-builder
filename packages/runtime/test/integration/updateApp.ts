@@ -67,7 +67,6 @@ describe("Algorand Smart Contracts - Update Application", function () {
       fromAccount: creator.account,
       appID: appID,
       payFlags: { totalFee: 1000 }
-
     };
     runtime.executeTx(noOpParams);
     creator = runtime.getAccount(creator.address);

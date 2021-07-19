@@ -57,7 +57,6 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
         toAccountAddr: alice.address,
         amountMicroAlgos: 100,
         payFlags: { totalFee: 1000 }
-
       },
       {
         type: types.TransactionType.DeployASA,
@@ -65,7 +64,6 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
         fromAccount: john.account,
         asaName: 'gold',
         payFlags: { totalFee: 1000 }
-
       }
     ];
     runtime.executeTx(txGroup);
@@ -84,7 +82,6 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
         toAccountAddr: alice.address,
         amountMicroAlgos: 100,
         payFlags: { totalFee: 1000 }
-
       },
       {
         type: types.TransactionType.DeployASA,
@@ -92,7 +89,6 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
         fromAccount: john.account,
         asaName: 'doge',
         payFlags: { totalFee: 1000 }
-
       }
     ];
     const initialJohnAssets = john.getAssetHolding(assetId)?.amount as bigint;
@@ -117,7 +113,6 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
         fromAccount: alice.account,
         assetID: assetInfo?.assetIndex as number,
         payFlags: { totalFee: 1000 }
-
       }
     ];
 
@@ -133,7 +128,6 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
         toAccountAddr: alice.address,
         amountMicroAlgos: 100,
         payFlags: { totalFee: 1000 }
-
       },
       {
         type: types.TransactionType.DeployApp,
@@ -146,7 +140,6 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
         globalInts: 1,
         globalBytes: 1,
         payFlags: { totalFee: 1000 }
-
       }
     ];
     runtime.executeTx(txGroup);
@@ -165,7 +158,6 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
         toAccountAddr: alice.address,
         amountMicroAlgos: 1e9,
         payFlags: { totalFee: 1000 }
-
       },
       {
         type: types.TransactionType.DeployApp,
@@ -203,7 +195,6 @@ describe("Algorand Smart Contracts - Execute transaction", function () {
         fromAccount: alice.account,
         appID: appInfo?.appID as number,
         payFlags: { totalFee: 1000 }
-
       }
     ];
 

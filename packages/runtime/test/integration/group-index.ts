@@ -55,7 +55,6 @@ describe('Current Transaction Tests', function () {
         fromAccount: creator.account,
         appID: applicationId1,
         payFlags: { totalFee: 1000 }
-
       },
       {
         type: types.TransactionType.CallNoOpSSC,
@@ -63,7 +62,6 @@ describe('Current Transaction Tests', function () {
         fromAccount: creator.account,
         appID: applicationId2,
         payFlags: { totalFee: 1000 }
-
       }
     ];
 
@@ -80,7 +78,6 @@ describe('Current Transaction Tests', function () {
         fromAccount: creator.account,
         appID: applicationId2,
         payFlags: { totalFee: 1000 }
-
       },
       {
         type: types.TransactionType.CallNoOpSSC,
@@ -88,7 +85,6 @@ describe('Current Transaction Tests', function () {
         fromAccount: creator.account,
         appID: applicationId1,
         payFlags: { totalFee: 1000 }
-
       }
     ];
 

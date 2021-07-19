@@ -28,7 +28,7 @@ export function getFromAddress (execParams: ExecParams): AccountAddress {
  * @param params Transaction parameters
  * @param tx SDK Transaction object
  */
-export function updateFee (params: TxParams, tx: Transaction): Transaction {
+export function updateTxFee (params: TxParams, tx: Transaction): Transaction {
   if (params.flatFee && params.totalFee !== undefined) {
     tx.fee = params.totalFee;
   }
@@ -68,7 +68,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         note,
         execParams.assetID,
         suggestedParams);
-      return updateFee(execParams.payFlags, tx);
+      return updateTxFee(execParams.payFlags, tx);
     }
     case TransactionType.ModifyAsset: {
       const tx = algosdk.makeAssetConfigTxnWithSuggestedParams(
@@ -82,7 +82,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         suggestedParams,
         false
       );
-      return updateFee(execParams.payFlags, tx);
+      return updateTxFee(execParams.payFlags, tx);
     }
     case TransactionType.FreezeAsset: {
       const tx = algosdk.makeAssetFreezeTxnWithSuggestedParams(
@@ -93,7 +93,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.freezeState,
         suggestedParams
       );
-      return updateFee(execParams.payFlags, tx);
+      return updateTxFee(execParams.payFlags, tx);
     }
     case TransactionType.RevokeAsset: {
       const tx = algosdk.makeAssetTransferTxnWithSuggestedParams(
@@ -106,7 +106,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.assetID,
         suggestedParams
       );
-      return updateFee(execParams.payFlags, tx);
+      return updateTxFee(execParams.payFlags, tx);
     }
     case TransactionType.DestroyAsset: {
       const tx = algosdk.makeAssetDestroyTxnWithSuggestedParams(
@@ -115,7 +115,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.assetID,
         suggestedParams
       );
-      return updateFee(execParams.payFlags, tx);
+      return updateTxFee(execParams.payFlags, tx);
     }
     case TransactionType.TransferAlgo: {
       const tx = algosdk.makePaymentTxnWithSuggestedParams(
@@ -127,7 +127,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         suggestedParams,
         execParams.payFlags.rekeyTo
       );
-      return updateFee(execParams.payFlags, tx);
+      return updateTxFee(execParams.payFlags, tx);
     }
     case TransactionType.ClearApp: {
       const tx = algosdk.makeApplicationClearStateTxn(
@@ -142,7 +142,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.lease,
         execParams.payFlags.rekeyTo
       );
-      return updateFee(execParams.payFlags, tx);
+      return updateTxFee(execParams.payFlags, tx);
     }
     case TransactionType.DeleteApp: {
       const tx = algosdk.makeApplicationDeleteTxn(
@@ -157,7 +157,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.lease,
         execParams.payFlags.rekeyTo
       );
-      return updateFee(execParams.payFlags, tx);
+      return updateTxFee(execParams.payFlags, tx);
     }
     case TransactionType.CallNoOpSSC: {
       const tx = algosdk.makeApplicationNoOpTxn(
@@ -172,7 +172,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.lease,
         execParams.payFlags.rekeyTo
       );
-      return updateFee(execParams.payFlags, tx);
+      return updateTxFee(execParams.payFlags, tx);
     }
     case TransactionType.CloseApp: {
       const tx = algosdk.makeApplicationCloseOutTxn(
@@ -187,7 +187,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.lease,
         execParams.payFlags.rekeyTo
       );
-      return updateFee(execParams.payFlags, tx);
+      return updateTxFee(execParams.payFlags, tx);
     }
     case TransactionType.DeployASA: {
       if (execParams.asaDef) {
@@ -208,7 +208,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
           execParams.asaDef.metadataHash,
           suggestedParams
         );
-        return updateFee(execParams.payFlags, tx);
+        return updateTxFee(execParams.payFlags, tx);
       } else {
         throw new BuilderError(
           ERRORS.GENERAL.PARAM_PARSE_ERROR, {
@@ -238,7 +238,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.lease,
         execParams.payFlags.rekeyTo
       );
-      return updateFee(execParams.payFlags, tx);
+      return updateTxFee(execParams.payFlags, tx);
     }
     case TransactionType.UpdateApp: {
       const tx = algosdk.makeApplicationUpdateTxn(
@@ -255,7 +255,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.lease,
         execParams.payFlags.rekeyTo
       );
-      return updateFee(execParams.payFlags, tx);
+      return updateTxFee(execParams.payFlags, tx);
     }
     case TransactionType.OptInToApp: {
       const tx = algosdk.makeApplicationOptInTxn(
@@ -270,7 +270,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.lease,
         execParams.payFlags.rekeyTo
       );
-      return updateFee(execParams.payFlags, tx);
+      return updateTxFee(execParams.payFlags, tx);
     }
     case TransactionType.OptInASA: {
       const tx = algosdk.makeAssetTransferTxnWithSuggestedParams(
@@ -283,7 +283,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.assetID,
         suggestedParams
       );
-      return updateFee(execParams.payFlags, tx);
+      return updateTxFee(execParams.payFlags, tx);
     }
     default: {
       throw new BuilderError(ERRORS.GENERAL.TRANSACTION_TYPE_ERROR,
