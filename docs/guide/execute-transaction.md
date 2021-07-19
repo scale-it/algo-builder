@@ -171,4 +171,4 @@ Ex:
   }
 ```
 
-Even though fee paid by alice is `0`, this transaction will pass because total fees collected is greater then minimum required
+Even though fee paid by alice is `0`, this transaction will pass because total fees collected is greater than or equal to the required amount.
