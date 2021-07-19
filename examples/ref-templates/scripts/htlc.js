@@ -35,7 +35,7 @@ async function run (runtimeEnv, deployer) {
   txnParams.toAccountAddr = globalZeroAddress;
   txnParams.amountMicroAlgos = 0;
   txnParams.lsig = contract;
-  txnParams.payFlags = { totalFee: 1000, closeRemainderTo: john.addr, flatFee: true };
+  txnParams.payFlags = { totalFee: 1000, closeRemainderTo: john.addr };
 
   // Fails because wrong secret is provided
   await executeTransaction(deployer, txnParams);

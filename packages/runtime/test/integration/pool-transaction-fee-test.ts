@@ -39,7 +39,7 @@ describe("Pooled Transaction Fees Test", function () {
         fromAccount: john.account,
         toAccountAddr: alice.address,
         amountMicroAlgos: amount,
-        payFlags: { totalFee: 2000, flatFee: true }
+        payFlags: { totalFee: 2000 }
       },
       {
         type: types.TransactionType.TransferAlgo,
@@ -47,7 +47,7 @@ describe("Pooled Transaction Fees Test", function () {
         fromAccount: alice.account,
         toAccountAddr: bob.address,
         amountMicroAlgos: amount,
-        payFlags: { totalFee: 0, flatFee: true }
+        payFlags: { totalFee: 0 }
       }
     ];
 
@@ -77,7 +77,7 @@ describe("Pooled Transaction Fees Test", function () {
         fromAccount: alice.account,
         toAccountAddr: bob.address,
         amountMicroAlgos: amount,
-        payFlags: { totalFee: 0, flatFee: true }
+        payFlags: { totalFee: 0 }
       }
     ];
 

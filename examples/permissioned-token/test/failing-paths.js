@@ -588,7 +588,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           sign: types.SignType.SecretKey,
           fromAccount: asaManager.account,
           appID: ctx.controllerappID,
-          payFlags: { totalFee: 2000, flatFee: true },
+          payFlags: { totalFee: 2000 },
           appArgs: [FORCE_TRANSFER_APPARG],
           foreignAssets: [ctx.assetIndex]
         },
@@ -601,7 +601,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           revocationTarget: bob.address,
           amount: 20n,
           lsig: ctx.lsig,
-          payFlags: { totalFee: 2000, flatFee: true }
+          payFlags: { totalFee: 2000 }
         },
         {
           type: types.TransactionType.TransferAlgo,

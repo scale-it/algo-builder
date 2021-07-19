@@ -264,7 +264,7 @@ describe('Crowdfunding Tests', function () {
         toAccountAddr: creator.address,
         amountMicroAlgos: 0,
         lsig: lsig,
-        payFlags: { totalFee: 1000, closeRemainderTo: creator.address, flatFee: true }
+        payFlags: { totalFee: 1000, closeRemainderTo: creator.address }
       }
     ];
     const creatorBal = creator.balance(); // creator's balance before 'claim' tx

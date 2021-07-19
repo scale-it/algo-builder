@@ -99,7 +99,7 @@ describe("Rounds Test", function () {
       fromAccount: john.account,
       toAccountAddr: bob.address,
       amountMicroAlgos: 100n,
-      payFlags: { firstValid: 5, validRounds: 200, totalFee: 1000, flatFee: true }
+      payFlags: { firstValid: 5, validRounds: 200, totalFee: 1000 }
     };
   });
 
@@ -121,7 +121,7 @@ describe("Rounds Test", function () {
   }
 
   it("should succeed if current round is between first and last valid", () => {
-    txnParams.payFlags = { totalFee: 1000, firstValid: 5, validRounds: 200, flatFee: true };
+    txnParams.payFlags = { totalFee: 1000, firstValid: 5, validRounds: 200 };
     runtime.setRoundAndTimestamp(20, 20);
 
     runtime.executeTx(txnParams);
@@ -347,7 +347,7 @@ describe("Algorand Standard Assets", function () {
       sign: types.SignType.SecretKey,
       fromAccount: alice.account,
       toAccountAddr: alice.address,
-      payFlags: { totalFee: 1000, closeRemainderTo: john.address, flatFee: true } // transfer all assets of alice => john (using closeRemTo)
+      payFlags: { totalFee: 1000, closeRemainderTo: john.address } // transfer all assets of alice => john (using closeRemTo)
     });
     syncAccounts();
 
@@ -364,7 +364,7 @@ describe("Algorand Standard Assets", function () {
     expectRuntimeError(
       () => runtime.executeTx({
         ...assetTransferParam,
-        payFlags: { totalFee: 1000, closeRemainderTo: alice.address, flatFee: true } // creator of ASA trying to close asset holding to alice
+        payFlags: { totalFee: 1000, closeRemainderTo: alice.address } // creator of ASA trying to close asset holding to alice
       }),
       RUNTIME_ERRORS.ASA.CANNOT_CLOSE_ASSET_BY_CREATOR
     );

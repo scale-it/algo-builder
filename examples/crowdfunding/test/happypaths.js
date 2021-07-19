@@ -244,7 +244,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
         toAccountAddr: fundReceiver.address,
         amountMicroAlgos: 0,
         lsig: escrowLsig, // initialized in setUpApp
-        payFlags: { totalFee: 1000, closeRemainderTo: fundReceiver.address, flatFee: true }
+        payFlags: { totalFee: 1000, closeRemainderTo: fundReceiver.address }
       }
     ];
     runtime.executeTx(claimTxGroup);
@@ -330,7 +330,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
       fromAccount: escrow.account,
       toAccountAddr: fundReceiver.address,
       amountMicroAlgos: 0,
-      payFlags: { totalFee: 1000, closeRemainderTo: fundReceiver.address, flatFee: true }
+      payFlags: { totalFee: 1000, closeRemainderTo: fundReceiver.address }
     });
     syncAccounts();
 
@@ -389,7 +389,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
         toAccountAddr: donor.address,
         amountMicroAlgos: 0,
         lsig: escrowLsig,
-        payFlags: { totalFee: 1000, closeRemainderTo: fundReceiver.address, flatFee: true }
+        payFlags: { totalFee: 1000, closeRemainderTo: fundReceiver.address }
       }
     ];
     // verify app is present before delete
