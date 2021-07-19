@@ -11,7 +11,10 @@ export function mockSuggestedParams (
   payFlags: types.TxParams, round: number): SuggestedParams {
   const s = {} as SuggestedParams;
 
-  s.flatFee = payFlags.flatFee ?? false;
+  if (payFlags.flatFee === undefined) {
+    if (payFlags.totalFee !== undefined) s.flatFee = true;
+    else s.flatFee = false;
+  }
   s.fee = payFlags.totalFee ?? payFlags.feePerByte ?? ALGORAND_MIN_TX_FEE;
 
   // https://developer.algorand.org/docs/features/transactions/#setting-first-and-last-valid

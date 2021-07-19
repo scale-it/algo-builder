@@ -147,23 +147,6 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
   }
 ```
 
-### Fees
-
-To set fees for a transaction in `ExecParams`, Use:
-```js
-  {
-    type: TransactionType.TransferAlgo,
-    sign: SignType.LogicSignature,
-    fromAccountAddr: contractAddress,
-    toAccountAddr: alice.address,
-    amountMicroAlgos: 100,
-    lsig: lsig,
-    payFlags: { totalFee: fee }
-  }
-```
-
-Please note here `flatFee` variable needs to be set to `true`, if you don't want to pay more fee than you specify(which can happen while calculating fee at the time of execution).
-
 ### Pooled Transaction Fees
 
 With [this](https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/) release, algob also supports pooled transaction fees.
@@ -176,7 +159,7 @@ Ex:
     fromAccountAddr: john,
     toAccountAddr: alice.address,
     amountMicroAlgos: 100,
-    payFlags: { totalFee: 2000, flatFee: true }
+    payFlags: { totalFee: 2000 }
   },
   {
     type: TransactionType.TransferAlgo,
@@ -184,7 +167,7 @@ Ex:
     fromAccountAddr: alice,
     toAccountAddr: bob.address,
     amountMicroAlgos: 100,
-    payFlags: { totalFee: 0, flatFee: true }
+    payFlags: { totalFee: 0 }
   }
 ```
 

@@ -31,7 +31,10 @@ export async function mkTxParams (
   algocl: Algodv2, userParams: wtypes.TxParams, s?: SuggestedParams): Promise<SuggestedParams> {
   if (s === undefined) { s = await getSuggestedParams(algocl); }
 
-  s.flatFee = userParams.flatFee ?? false;
+  if (userParams.flatFee === undefined) {
+    if (userParams.totalFee !== undefined) s.flatFee = true;
+    else s.flatFee = false;
+  }
   s.fee = userParams.totalFee ?? userParams.feePerByte ?? ALGORAND_MIN_TX_FEE;
 
   s.firstRound = userParams.firstValid ?? s.firstRound;
