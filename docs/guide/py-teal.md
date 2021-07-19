@@ -89,6 +89,8 @@ To use this feature in scripts, you can pass an external parameter object (using
   For ex: `Tmpl.Addr("TMPL_ADDR")`, `Tmpl.Int("TMPL_COUNTER")`, `Tmpl.Bytes("TMPL_BYTES")`.
   when converted to TEAL it will look like this `addr TMPL_ADDR`. now you can replace this constant to value of your choice using `algob`.
 
+### Example Walkthrough
+
 - Consider a pyTeal code snippet:
   ```py
     pay_gold = And(
