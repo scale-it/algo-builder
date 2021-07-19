@@ -84,14 +84,14 @@ To use this feature in scripts, you can pass an external parameter object (using
 
 # Using [TMPL](https://pyteal.readthedocs.io/en/stable/api.html?highlight=TMPL#pyteal.Tmpl) expression from pyTeal.
 
-- PyTEAL supports [`Tmpl`](https://pyteal.readthedocs.io/en/stable/api.html?highlight=TMPL#pyteal.Tmpl) which is a template expression for creating placeholder values.
-  The name to use for this template variable. Must start with `TMPL_` and only consist of uppercase alphanumeric characters and underscores.
+PyTEAL supports [`Tmpl`](https://pyteal.readthedocs.io/en/stable/api.html?highlight=TMPL#pyteal.Tmpl) which is a template expression for creating placeholder values.
+  The name to use for this template variable must start with `TMPL_` and only consist of uppercase alphanumeric characters and underscores.
   For ex: `Tmpl.Addr("TMPL_ADDR")`, `Tmpl.Int("TMPL_COUNTER")`, `Tmpl.Bytes("TMPL_BYTES")`.
   when converted to TEAL it will look like this `addr TMPL_ADDR`. now you can replace this constant to value of your choice using `algob`.
 
 ### Example Walkthrough
 
-- Consider a pyTeal code snippet:
+- Consider a pyTeal code snippet `asc.py`:
   ```py
   pay_gold = And(
     Txn.type_enum() == TxnType.AssetTransfer,
@@ -102,7 +102,7 @@ To use this feature in scripts, you can pass an external parameter object (using
   This code will only approve the transaction if sender is "TMPL_SENDER" and
   asset amount is less than "TMPL_AMOUNT". Now you can replace these placeholders using `algob`.
 
-  While using with algob you can replace these placeholder with following:
+  While using with algob you can replace these placeholder with the following:
    ```js
     const scInitParam = {
       TMPL_SENDER: bob.addr // bob address
@@ -110,7 +110,7 @@ To use this feature in scripts, you can pass an external parameter object (using
     }
     await deployer.loadLogic("asc.py", scInitParam);
    ```
-  you can pass an object with replacement values, algob will replace them for you at the time of compilation.
+  You can pass an object with replacement values, algob will replace them for you at the time of compilation.
 
   You can have multiple Tmpl expressions with same placeholder, `algob` will find and replace each of them.
 
