@@ -93,11 +93,11 @@ To use this feature in scripts, you can pass an external parameter object (using
 
 - Consider a pyTeal code snippet:
   ```py
-    pay_gold = And(
-      Txn.type_enum() == TxnType.AssetTransfer,
-      Txn.sender() == Tmpl.Addr("TMPL_SENDER"),
-      Txn.asset_amount() <= Tmpl.Int("TMPL_AMOUNT")
-	  )
+  pay_gold = And(
+    Txn.type_enum() == TxnType.AssetTransfer,
+    Txn.sender() == Tmpl.Addr("TMPL_SENDER"),
+    Txn.asset_amount() <= Tmpl.Int("TMPL_AMOUNT")
+  )
   ```
   This code will only approve the transaction if sender is "TMPL_SENDER" and
   asset amount is less than "TMPL_AMOUNT". Now you can replace these placeholders using `algob`.
