@@ -18,7 +18,7 @@ def gold_asc():
 	)
 
 	pay_gold = And(
-		Txn.type_enum() == Int(4),
+		Txn.type_enum() == TxnType.AssetTransfer,
 		Txn.sender() == Tmpl.Addr("TMPL_SENDER"),
 		Txn.asset_amount() <= Tmpl.Int("TMPL_AMOUNT")
 	)
