@@ -26,7 +26,7 @@ export function getFromAddress (execParams: ExecParams): AccountAddress {
  * Using flatFee, if flatFee is true, set totalFee
  * https://developer.algorand.org/tutorials/setting-transaction-fee-javascript/
  * @param params Transaction parameters
- * @param tx Transaction object
+ * @param tx SDK Transaction object
  */
 export function updateFee (params: TxParams, tx: Transaction): Transaction {
   if (params.flatFee && params.totalFee !== undefined) {

@@ -10,9 +10,8 @@
 + Move Error lists, BuilderError, mkTransaction to web package
 + Reuse mkTransaction, Errors in algob and runtime
 + Updated `algob init` to initialize a typescript project as well by passing `--typescript` flag. Usage: `algob init <location> --typescript`.
-+ Support pooled transaction fees in algob and runtime
++ Support pooled transaction fees in algob and runtime. Added tests
 + Add `flatFee` in `TxParams`
-+ Add pooled transaction fees tests.
 
 
 ### Infrastructure

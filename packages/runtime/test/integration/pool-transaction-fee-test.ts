@@ -10,7 +10,7 @@ import { expectRuntimeError } from "../helpers/runtime-errors";
 
 describe("Pooled Transaction Fees Test", function () {
   useFixture("app-update");
-  const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE; // 1000 to cover fee
+  const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE;
   let john = new AccountStore(1e30);
   let alice = new AccountStore(minBalance);
   let bob = new AccountStore(minBalance);
