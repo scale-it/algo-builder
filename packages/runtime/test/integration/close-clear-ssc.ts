@@ -35,7 +35,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
       sign: types.SignType.SecretKey,
       fromAccount: john.account,
       appID: 11,
-      payFlags: { totalFee: 1000, flatFee: true }
+      payFlags: { totalFee: 1000 }
 
     };
   });

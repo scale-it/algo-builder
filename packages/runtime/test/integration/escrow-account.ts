@@ -45,7 +45,7 @@ describe("Logic Signature: Escrow Account", function () {
       fromAccountAddr: escrow.address,
       toAccountAddr: john.address,
       amountMicroAlgos: 100n,
-      payFlags: { totalFee: fee, flatFee: true }
+      payFlags: { totalFee: fee }
     };
   });
 
@@ -62,7 +62,7 @@ describe("Logic Signature: Escrow Account", function () {
       fromAccount: admin.account,
       toAccountAddr: escrow.address,
       amountMicroAlgos: initialEscrowHolding,
-      payFlags: { totalFee: fee, flatFee: true }
+      payFlags: { totalFee: fee }
     });
 
     // check initial balance

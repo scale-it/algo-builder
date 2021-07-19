@@ -112,7 +112,7 @@ describe('Crowdfunding Tests', function () {
       fromAccount: master.account,
       toAccountAddr: escrowAddress,
       amountMicroAlgos: minBalance,
-      payFlags: { totalFee: 1000, flatFee: true }
+      payFlags: { totalFee: 1000 }
     };
     runtime.executeTx(fundEscrowParam);
 
@@ -163,7 +163,7 @@ describe('Crowdfunding Tests', function () {
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appID: applicationId,
-        payFlags: { totalFee: 1000, flatFee: true },
+        payFlags: { totalFee: 1000 },
         appArgs: appArgs
       },
       {
@@ -172,7 +172,7 @@ describe('Crowdfunding Tests', function () {
         fromAccount: donor.account,
         toAccountAddr: escrow.address,
         amountMicroAlgos: donationAmount,
-        payFlags: { totalFee: 1000, flatFee: true }
+        payFlags: { totalFee: 1000 }
       }
     ];
     runtime.executeTx(txGroup);
@@ -192,7 +192,7 @@ describe('Crowdfunding Tests', function () {
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appID: applicationId,
-        payFlags: { totalFee: 1000, flatFee: true },
+        payFlags: { totalFee: 1000 },
         appArgs: appArgs,
         accounts: [escrow.address] //  AppAccounts
       },
@@ -203,7 +203,7 @@ describe('Crowdfunding Tests', function () {
         toAccountAddr: donor.address,
         amountMicroAlgos: 300000,
         lsig: lsig,
-        payFlags: { totalFee: 1000, flatFee: true }
+        payFlags: { totalFee: 1000 }
       }
     ];
 
@@ -228,7 +228,7 @@ describe('Crowdfunding Tests', function () {
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appID: applicationId,
-        payFlags: { totalFee: 1000, flatFee: true },
+        payFlags: { totalFee: 1000 },
         appArgs: appArgs
       },
       {
@@ -237,7 +237,7 @@ describe('Crowdfunding Tests', function () {
         fromAccount: donor.account,
         toAccountAddr: escrow.address,
         amountMicroAlgos: 7000000,
-        payFlags: { totalFee: 1000, flatFee: true }
+        payFlags: { totalFee: 1000 }
       }
     ];
     const escrowBal = escrow.balance();
@@ -254,7 +254,7 @@ describe('Crowdfunding Tests', function () {
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId,
-        payFlags: { totalFee: 1000, flatFee: true },
+        payFlags: { totalFee: 1000 },
         appArgs: appArgs
       },
       {
@@ -283,7 +283,7 @@ describe('Crowdfunding Tests', function () {
       sign: types.SignType.SecretKey,
       fromAccount: creator.account,
       appID: applicationId,
-      payFlags: { totalFee: 1000, flatFee: true },
+      payFlags: { totalFee: 1000 },
       appArgs: [],
       accounts: [escrow.address] //  AppAccounts
     };

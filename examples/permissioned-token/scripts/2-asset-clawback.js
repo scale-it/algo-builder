@@ -42,7 +42,7 @@ async function setupClawback (runtimeEnv, deployer) {
     fromAccount: owner,
     assetID: tesla.assetIndex,
     fields: { clawback: clawbackAddress },
-    payFlags: { totalFee: 1000, flatFee: true }
+    payFlags: { totalFee: 1000 }
   };
   await executeTransaction(deployer, assetConfigParams);
 }

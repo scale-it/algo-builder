@@ -45,7 +45,7 @@ async function run (runtimeEnv, deployer) {
       sign: types.SignType.SecretKey,
       fromAccount: alice,
       appID: appInfo.appID,
-      payFlags: { totalFee: 1000, flatFee: true }
+      payFlags: { totalFee: 1000 }
     },
     // Asset creation
     {
@@ -54,7 +54,7 @@ async function run (runtimeEnv, deployer) {
       fromAccountAddr: statelessAccount.address(),
       asaName: 'platinum',
       lsig: statelessAccount,
-      payFlags: { totalFee: 1000, flatFee: true }
+      payFlags: { totalFee: 1000 }
     },
     // Payment of 1 algo signed by alice
     {
@@ -63,7 +63,7 @@ async function run (runtimeEnv, deployer) {
       fromAccount: alice,
       toAccountAddr: statelessAccount.address(),
       amountMicroAlgos: 1e6,
-      payFlags: { totalFee: 1000, flatFee: true }
+      payFlags: { totalFee: 1000 }
     }
   ];
 

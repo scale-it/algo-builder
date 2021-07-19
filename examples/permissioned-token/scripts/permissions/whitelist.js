@@ -30,7 +30,7 @@ async function whitelist (deployer, permissionsManager, address) {
     sign: types.SignType.SecretKey,
     fromAccount: permissionsManager, // permissions manager account (fails otherwise)
     appID: permissionSSCInfo.appID,
-    payFlags: { totalFee: 1000, flatFee: true },
+    payFlags: { totalFee: 1000 },
     appArgs: ['str:add_whitelist'],
     accounts: [address] // pass address to add to whitelisted addresses
   };

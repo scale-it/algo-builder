@@ -28,7 +28,7 @@ async function run (runtimeEnv, deployer) {
       sign: types.SignType.SecretKey,
       fromAccount: creator,
       appID: appInfo.appID,
-      payFlags: { totalFee: 1000, flatFee: true },
+      payFlags: { totalFee: 1000 },
       appArgs: ['str:check-level'],
       accounts: [bob.addr] //  AppAccounts
     },
@@ -46,7 +46,7 @@ async function run (runtimeEnv, deployer) {
       revocationTarget: creator.addr,
       amount: 1000,
       lsig: escrowLsig,
-      payFlags: { totalFee: 1000, flatFee: true }
+      payFlags: { totalFee: 1000 }
     },
     /**
      * tx 2 - Payment transaction of 1000 from creator(Alice) to escrow Account. This tx is used to
@@ -58,7 +58,7 @@ async function run (runtimeEnv, deployer) {
       fromAccount: creator,
       toAccountAddr: escrowAddress,
       amountMicroAlgos: 1000,
-      payFlags: { totalFee: 1000, flatFee: true }
+      payFlags: { totalFee: 1000 }
     }
   ];
 

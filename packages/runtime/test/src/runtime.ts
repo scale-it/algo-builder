@@ -34,7 +34,7 @@ describe("Logic Signature Transaction in Runtime", function () {
       toAccountAddr: bob.account.addr,
       amountMicroAlgos: 1000n,
       lsig: lsig,
-      payFlags: { totalFee: 1000, flatFee: true }
+      payFlags: { totalFee: 1000 }
 
     };
   });
@@ -142,7 +142,7 @@ describe("Rounds Test", function () {
   });
 
   it("should succeeded by default (no round requirement is passed)", () => {
-    txnParams.payFlags = { totalFee: 1000, flatFee: true };
+    txnParams.payFlags = { totalFee: 1000 };
 
     runtime.executeTx(txnParams);
 
@@ -178,7 +178,7 @@ describe("Algorand Standard Assets", function () {
       toAccountAddr: alice.account.addr,
       amount: 10n,
       assetID: 1,
-      payFlags: { totalFee: 1000, flatFee: true }
+      payFlags: { totalFee: 1000 }
 
     };
   });
@@ -242,7 +242,7 @@ describe("Algorand Standard Assets", function () {
       toAccountAddr: alice.address,
       amount: 0n,
       assetID: assetId,
-      payFlags: { totalFee: 1000, flatFee: true }
+      payFlags: { totalFee: 1000 }
 
     };
     runtime.executeTx(optInParams);

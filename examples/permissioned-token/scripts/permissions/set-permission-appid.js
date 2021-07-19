@@ -27,7 +27,7 @@ async function run (runtimeEnv, deployer) {
       sign: types.SignType.SecretKey,
       fromAccount: owner, // asa manager account
       appID: controllerappID,
-      payFlags: { totalFee: 1000, flatFee: true },
+      payFlags: { totalFee: 1000 },
       appArgs: appArgs,
       foreignAssets: [tesla.assetIndex] // controller smart contract verifies if correct token is being used + asa.manager is correct one
     });

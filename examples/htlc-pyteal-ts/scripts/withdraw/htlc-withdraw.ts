@@ -27,7 +27,7 @@ async function run (
     amountMicroAlgos: 200,
     lsig: lsig,
     args: [algob.convert.stringToBytes(wrongSecret)],
-    payFlags: { totalFee: 1000, flatFee: true }
+    payFlags: { totalFee: 1000 }
   };
   // Transaction Fails : as wrong secret value is used
   await executeTx(deployer, txnParams);

@@ -69,7 +69,7 @@ describe("Pooled Transaction Fees Test", function () {
         fromAccount: john.account,
         toAccountAddr: alice.address,
         amountMicroAlgos: amount,
-        payFlags: { totalFee: 1000, flatFee: true }
+        payFlags: { totalFee: 1000 }
       },
       {
         type: types.TransactionType.TransferAlgo,

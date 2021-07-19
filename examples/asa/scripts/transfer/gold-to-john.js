@@ -26,7 +26,7 @@ async function run (runtimeEnv, deployer) {
     toAccountAddr: john.addr,
     amount: 1,
     assetID: gold.assetIndex,
-    payFlags: { totalFee: 1000, flatFee: true }
+    payFlags: { totalFee: 1000 }
   });
 
   await balanceOf(deployer, john.addr, gold.assetIndex);

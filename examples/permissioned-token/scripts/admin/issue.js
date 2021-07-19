@@ -27,7 +27,7 @@ async function issue (deployer, address, amount) {
       sign: types.SignType.SecretKey,
       fromAccount: issuer,
       appID: controllerAppInfo.appID,
-      payFlags: { totalFee: 1000, flatFee: true },
+      payFlags: { totalFee: 1000 },
       appArgs: ['str:issue'],
       foreignAssets: [tesla.assetIndex]
     },
@@ -45,7 +45,7 @@ async function issue (deployer, address, amount) {
       revocationTarget: issuer.addr, // tx will fail if assetSender is not token reserve address
       amount: amount,
       lsig: clawbackLsig,
-      payFlags: { totalFee: 1000, flatFee: true }
+      payFlags: { totalFee: 1000 }
     }
   ];
   console.log(`* Issuing ${amount} tokens to [${address}] *`);

@@ -38,7 +38,7 @@ async function forceTransfer (deployer, fromAddr, toAddr, amount) {
       sign: types.SignType.SecretKey,
       fromAccount: owner,
       appID: controllerAppInfo.appID,
-      payFlags: { totalFee: 1000, flatFee: true },
+      payFlags: { totalFee: 1000 },
       appArgs: ['str:force_transfer'],
       foreignAssets: [tesla.assetIndex] // to verify token reserve, manager
     },
@@ -56,7 +56,7 @@ async function forceTransfer (deployer, fromAddr, toAddr, amount) {
       revocationTarget: fromAddr,
       amount: amount,
       lsig: clawbackLsig,
-      payFlags: { totalFee: 1000, flatFee: true }
+      payFlags: { totalFee: 1000 }
     },
     /*
      * tx 2 - Payment transaction of 1000 microAlgo to cover clawback transaction cost (tx 1).
@@ -67,7 +67,7 @@ async function forceTransfer (deployer, fromAddr, toAddr, amount) {
       fromAccount: owner,
       toAccountAddr: clawbackAddress,
       amountMicroAlgos: 1000,
-      payFlags: { totalFee: 1000, flatFee: true }
+      payFlags: { totalFee: 1000 }
     },
     /*
      * tx 3 - Call to permissions stateful smart contract with application arg: 'transfer' */
@@ -76,7 +76,7 @@ async function forceTransfer (deployer, fromAddr, toAddr, amount) {
       sign: types.SignType.SecretKey,
       fromAccount: owner,
       appID: permissionsAppInfo.appID,
-      payFlags: { totalFee: 1000, flatFee: true },
+      payFlags: { totalFee: 1000 },
       appArgs: ['str:transfer'],
       accounts: [fromAddr, toAddr] //  AppAccounts (pass asset sender & receiver address)
     }

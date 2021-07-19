@@ -10,7 +10,7 @@ async function run (runtimeEnv, deployer) {
     fromAccount: john,
     toAccountAddr: bob.addr,
     amountMicroAlgos: 20,
-    payFlags: { totalFee: 1000, flatFee: true }
+    payFlags: { totalFee: 1000 }
   }; */
 
   try {

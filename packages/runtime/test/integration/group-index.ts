@@ -54,7 +54,7 @@ describe('Current Transaction Tests', function () {
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId1,
-        payFlags: { totalFee: 1000, flatFee: true }
+        payFlags: { totalFee: 1000 }
 
       },
       {
@@ -62,7 +62,7 @@ describe('Current Transaction Tests', function () {
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId2,
-        payFlags: { totalFee: 1000, flatFee: true }
+        payFlags: { totalFee: 1000 }
 
       }
     ];
@@ -79,7 +79,7 @@ describe('Current Transaction Tests', function () {
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId2,
-        payFlags: { totalFee: 1000, flatFee: true }
+        payFlags: { totalFee: 1000 }
 
       },
       {
@@ -87,7 +87,7 @@ describe('Current Transaction Tests', function () {
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId1,
-        payFlags: { totalFee: 1000, flatFee: true }
+        payFlags: { totalFee: 1000 }
 
       }
     ];

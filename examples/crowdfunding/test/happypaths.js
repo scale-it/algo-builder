@@ -180,7 +180,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appID: applicationId,
-        payFlags: { totalFee: 1000, flatFee: true },
+        payFlags: { totalFee: 1000 },
         appArgs: [convert.stringToBytes('donate')]
       },
       {
@@ -189,7 +189,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
         fromAccount: donor.account,
         toAccountAddr: escrow.address,
         amountMicroAlgos: 7000000,
-        payFlags: { totalFee: 1000, flatFee: true }
+        payFlags: { totalFee: 1000 }
       }
     ];
 
@@ -234,7 +234,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId,
-        payFlags: { totalFee: 1000, flatFee: true },
+        payFlags: { totalFee: 1000 },
         appArgs: [convert.stringToBytes('claim')]
       },
       {
@@ -288,7 +288,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appID: applicationId,
-        payFlags: { totalFee: 1000, flatFee: true },
+        payFlags: { totalFee: 1000 },
         appArgs: [convert.stringToBytes('reclaim')],
         accounts: [escrow.address] //  AppAccounts
       },
@@ -299,7 +299,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
         toAccountAddr: donor.address,
         amountMicroAlgos: 300000,
         lsig: escrowLsig,
-        payFlags: { totalFee: 1000, flatFee: true }
+        payFlags: { totalFee: 1000 }
       }
     ];
     const donorBalance = donor.balance();
@@ -340,7 +340,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
       sign: types.SignType.SecretKey,
       fromAccount: creator.account,
       appID: applicationId,
-      payFlags: { totalFee: 1000, flatFee: true },
+      payFlags: { totalFee: 1000 },
       appArgs: [],
       accounts: [escrow.address] //  AppAccounts
     };
@@ -378,7 +378,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId,
-        payFlags: { totalFee: 1000, flatFee: true },
+        payFlags: { totalFee: 1000 },
         appArgs: [],
         accounts: [escrow.address] //  AppAccounts
       },

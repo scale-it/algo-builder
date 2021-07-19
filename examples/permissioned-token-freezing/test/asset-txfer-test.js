@@ -138,7 +138,7 @@ describe('Test for transferring asset using custom logic', function () {
       fromAccount: alice.account,
       assetID: assetId,
       fields: assetModFields,
-      payFlags: { totalFee: 1000, flatFee: true }
+      payFlags: { totalFee: 1000 }
     };
     runtime.executeTx(assetConfigParams);
 
@@ -193,7 +193,7 @@ describe('Test for transferring asset using custom logic', function () {
         sign: types.SignType.SecretKey,
         fromAccount: alice.account,
         appID: applicationId,
-        payFlags: { totalFee: 1000, flatFee: true },
+        payFlags: { totalFee: 1000 },
         appArgs: ['str:check-level'],
         accounts: [bob.address] //  AppAccounts
       },
@@ -206,7 +206,7 @@ describe('Test for transferring asset using custom logic', function () {
         revocationTarget: alice.address,
         amount: 1000,
         lsig: escrowLsig,
-        payFlags: { totalFee: 1000, flatFee: true }
+        payFlags: { totalFee: 1000 }
       },
       {
         type: types.TransactionType.TransferAlgo,
@@ -214,7 +214,7 @@ describe('Test for transferring asset using custom logic', function () {
         fromAccount: alice.account,
         toAccountAddr: escrowAddress,
         amountMicroAlgos: 1000,
-        payFlags: { totalFee: 1000, flatFee: true }
+        payFlags: { totalFee: 1000 }
       }
     ];
 
@@ -296,7 +296,7 @@ describe('Test for transferring asset using custom logic', function () {
         sign: types.SignType.SecretKey,
         fromAccount: alice.account,
         appID: applicationId,
-        payFlags: { totalFee: 1000, flatFee: true },
+        payFlags: { totalFee: 1000 },
         appArgs: ['str:check-level'],
         accounts: [bob.address] //  AppAccounts
       },
@@ -309,7 +309,7 @@ describe('Test for transferring asset using custom logic', function () {
         revocationTarget: alice.address,
         amount: 1000,
         lsig: escrowLsig,
-        payFlags: { totalFee: 1000, flatFee: true }
+        payFlags: { totalFee: 1000 }
       },
       {
         type: types.TransactionType.TransferAlgo,
@@ -317,7 +317,7 @@ describe('Test for transferring asset using custom logic', function () {
         fromAccount: alice.account,
         toAccountAddr: escrowAddress,
         amountMicroAlgos: 1000,
-        payFlags: { totalFee: 1000, flatFee: true }
+        payFlags: { totalFee: 1000 }
       }
     ];
 

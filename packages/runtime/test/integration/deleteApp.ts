@@ -35,7 +35,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
       sign: types.SignType.SecretKey,
       fromAccount: john.account,
       appID: 10,
-      payFlags: { totalFee: 1000, flatFee: true },
+      payFlags: { totalFee: 1000 },
       appArgs: []
     };
   });
@@ -79,7 +79,7 @@ describe("Algorand Smart Contracts - Delete Application", function () {
       sign: types.SignType.SecretKey,
       fromAccount: alice.account,
       appID: appID,
-      payFlags: { totalFee: 1000, flatFee: true },
+      payFlags: { totalFee: 1000 },
       appArgs: []
     };
 

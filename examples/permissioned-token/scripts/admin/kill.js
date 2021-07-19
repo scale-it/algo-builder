@@ -20,7 +20,7 @@ async function kill (deployer) {
     sign: types.SignType.SecretKey,
     fromAccount: owner,
     appID: controllerAppInfo.appID,
-    payFlags: { totalFee: 1000, flatFee: true },
+    payFlags: { totalFee: 1000 },
     appArgs: ['str:kill'],
     foreignAssets: [tesla.assetIndex]
   };
