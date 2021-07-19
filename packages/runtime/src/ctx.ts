@@ -297,7 +297,9 @@ export class Ctx implements Context {
   deductFee (sender: AccountAddress, index: number, params: types.TxParams): void {
     let fee;
     // If flatFee boolean is not set, change fee value
-    if (!params.flatFee) fee = Math.max(ALGORAND_MIN_TX_FEE, this.gtxs[index].fee);
+    if (!params.flatFee && params.totalFee === undefined) {
+      fee = Math.max(ALGORAND_MIN_TX_FEE, this.gtxs[index].fee);
+    }
     const fromAccount = this.getAccount(sender);
     fee = BigInt(this.gtxs[index].fee);
     fromAccount.amount -= fee; // remove tx fee from Sender's account

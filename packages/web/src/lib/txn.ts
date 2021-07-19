@@ -29,7 +29,7 @@ export function getFromAddress (execParams: ExecParams): AccountAddress {
  * @param tx SDK Transaction object
  */
 export function updateTxFee (params: TxParams, tx: Transaction): Transaction {
-  if (params.flatFee && params.totalFee !== undefined) {
+  if (params.totalFee !== undefined) {
     tx.fee = params.totalFee;
   }
   return tx;
