@@ -112,7 +112,7 @@ describe('Crowdfunding Tests', function () {
       fromAccount: master.account,
       toAccountAddr: escrowAddress,
       amountMicroAlgos: minBalance,
-      payFlags: {}
+      payFlags: { totalFee: 1000 }
     };
     runtime.executeTx(fundEscrowParam);
 

@@ -31,18 +31,18 @@ export interface AlgoOperator {
     name: string, asaDef: wtypes.ASADef,
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap, txWriter: txWriter
   ) => Promise<rtypes.ASAInfo>
-  fundLsig: (name: string, flags: FundASCFlags, payFlags: rtypes.TxParams,
+  fundLsig: (name: string, flags: FundASCFlags, payFlags: wtypes.TxParams,
     txWriter: txWriter, scTmplParams?: SCParams) => Promise<LsigInfo>
   deployApp: (
     approvalProgram: string,
     clearProgram: string,
     flags: rtypes.AppDeploymentFlags,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     txWriter: txWriter,
     scTmplParams?: SCParams) => Promise<rtypes.SSCInfo>
   updateApp: (
     sender: algosdk.Account,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
@@ -52,10 +52,10 @@ export interface AlgoOperator {
   waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
   getAssetByID: (assetIndex: number | bigint) => Promise<algosdk.AssetInfo>
   optInAcountToASA: (
-    asaName: string, assetIndex: number, account: rtypes.Account, params: rtypes.TxParams
+    asaName: string, assetIndex: number, account: rtypes.Account, params: wtypes.TxParams
   ) => Promise<void>
   optInLsigToASA: (
-    asaName: string, assetIndex: number, lsig: algosdk.LogicSig, params: rtypes.TxParams
+    asaName: string, assetIndex: number, lsig: algosdk.LogicSig, params: wtypes.TxParams
   ) => Promise<void>
   optInToASAMultiple: (
     asaName: string, asaDef: wtypes.ASADef,
@@ -63,10 +63,10 @@ export interface AlgoOperator {
   ) => Promise<void>
   optInAccountToApp: (
     sender: rtypes.Account, appID: number,
-    payFlags: rtypes.TxParams, flags: rtypes.AppOptionalFlags) => Promise<void>
+    payFlags: wtypes.TxParams, flags: rtypes.AppOptionalFlags) => Promise<void>
   optInLsigToApp: (
     appID: number, lsig: LogicSig,
-    payFlags: rtypes.TxParams, flags: rtypes.AppOptionalFlags) => Promise<void>
+    payFlags: wtypes.TxParams, flags: rtypes.AppOptionalFlags) => Promise<void>
   ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>
   sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<algosdk.ConfirmedTxInfo>
 }
@@ -126,7 +126,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
 
   getOptInTxSize (
     params: algosdk.SuggestedParams, accounts: rtypes.AccountMap,
-    flags: rtypes.TxParams
+    flags: wtypes.TxParams
   ): number {
     const randomAccount = accounts.values().next().value;
     // assetID can't be known before ASA creation
@@ -142,7 +142,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   async _optInAcountToASA (
     asaName: string, assetIndex: number,
     account: rtypes.Account, params: algosdk.SuggestedParams,
-    flags: rtypes.TxParams
+    flags: wtypes.TxParams
   ): Promise<void> {
     console.log(`ASA ${String(account.name)} opt-in for ASA ${String(asaName)}`);
     const sampleASAOptInTX = tx.makeASAOptInTx(account.addr, assetIndex, params, flags);
@@ -151,14 +151,14 @@ export class AlgoOperatorImpl implements AlgoOperator {
   }
 
   async optInAcountToASA (
-    asaName: string, assetIndex: number, account: rtypes.Account, flags: rtypes.TxParams
+    asaName: string, assetIndex: number, account: rtypes.Account, flags: wtypes.TxParams
   ): Promise<void> {
     const txParams = await tx.mkTxParams(this.algodClient, flags);
     await this._optInAcountToASA(asaName, assetIndex, account, txParams, flags);
   }
 
   async optInLsigToASA (
-    asaName: string, assetIndex: number, lsig: algosdk.LogicSig, flags: rtypes.TxParams
+    asaName: string, assetIndex: number, lsig: algosdk.LogicSig, flags: wtypes.TxParams
   ): Promise<void> {
     console.log(`Contract ${lsig.address()} opt-in for ASA ${asaName}`);
     const txParams = await tx.mkTxParams(this.algodClient, flags);
@@ -189,7 +189,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   async checkBalanceForOptInTx (
     name: string, params: algosdk.SuggestedParams,
     asaDef: wtypes.ASADef, accounts: rtypes.AccountMap,
-    creator: rtypes.Account, flags: rtypes.TxParams
+    creator: rtypes.Account, flags: wtypes.TxParams
   ): Promise<rtypes.Account[]> {
     if (!asaDef.optInAccNames || asaDef.optInAccNames.length === 0) {
       return [];
@@ -259,7 +259,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   async fundLsig (
     name: string,
     flags: FundASCFlags,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     txWriter: txWriter,
     scTmplParams?: SCParams): Promise<LsigInfo> {
     const lsig = await getLsig(name, this.algodClient, scTmplParams);
@@ -300,7 +300,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     approvalProgram: string,
     clearProgram: string,
     flags: rtypes.AppDeploymentFlags,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     txWriter: txWriter,
     scTmplParams?: SCParams): Promise<rtypes.SSCInfo> {
     const params = await tx.mkTxParams(this.algodClient, payFlags);
@@ -365,7 +365,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
    */
   async updateApp (
     sender: algosdk.Account,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
@@ -430,7 +430,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   async optInAccountToApp (
     sender: rtypes.Account,
     appID: number,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     flags: rtypes.AppOptionalFlags): Promise<void> {
     const params = await tx.mkTxParams(this.algodClient, payFlags);
     const execParam: wtypes.ExecParams = {
@@ -460,7 +460,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
    */
   async optInLsigToApp (
     appID: number, lsig: LogicSig,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     flags: rtypes.AppOptionalFlags
   ): Promise<void> {
     console.log(`Contract ${lsig.address()} opt-in for SSC ID ${appID}`);
