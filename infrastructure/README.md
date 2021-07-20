@@ -164,11 +164,11 @@ dbname=pgdb
 password=indexer
 ```
 
-Please note that this installation is currently compatible with `linux based` distributions only. For other OS, try the installation from [source](https://www.postgresql.org/download/).
+Please note that this installation is currently compatible with Linux based distributions only. For other OS, check [postresql documentation](https://www.postgresql.org/download/).
 
 #### Step2: Start Indexer
 
-**Note:** Make sure you have setup a private network up and running (using `make setup-private-net`). For more instructions check [setting up a local node](./#setting-up-a-local-node) section.
+**Note:** Make sure you have setup a private network up and running (using `make setup-private-net` or Sandbox). For more instructions check [setting up a local node](./#setting-up-a-local-node) section.
 
 After setting up the database, you can use `make setup-indexer` to add local indexer binary (downloaded in `~/indexer`) and start the indexer by connecting to database and your local algod node.
 
