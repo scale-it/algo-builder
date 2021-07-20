@@ -16,6 +16,10 @@
 * Added new make commands:
     * `setup-reach` - sets up reach executable file in `~/.algorand-reach` directory
     * `remove-reach` - halts any dockerized devnets, kills & removes docker instances and containers, remove reach bash file from `~/.algorand-reach`.
+    * `indexer-docker-up`, `indexer-docker-down`: Docker based setup for indexer. Runs in read-only mode, without connecting to local algod node.
+    * `make setup-postgresql`: Install `postgresql` database on a local linux system and setup a new user & database.
+    * `make setup-indexer`: Add local indexer binary (downloaded in `~/indexer`) and start the indexer by connecting to database and local algod node.
+    * `make remove-indexer`: Removes ~/indexer directory from system.
 
 ### Examples
 + [Permissioned Token](/examples/permissioned-token) Added `cease` function and a script to change permissions app_id.

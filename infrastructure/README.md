@@ -170,7 +170,7 @@ Please note that this installation is currently compatible with `linux based` di
 
 **Note:** Make sure you have setup a private network up and running (using `make setup-private-net`). For more instructions check [setting up a local node](./#setting-up-a-local-node) section.
 
-After setting up the database, you can use `make setup-indexer` to install local indexer binary in `~/indexer` and start the indexer by connecting to database and your local algod node.
+After setting up the database, you can use `make setup-indexer` to add local indexer binary (downloaded in `~/indexer`) and start the indexer by connecting to database and your local algod node.
 
 After setting up indexer, open a new terminal and try typing:
 ```bash
