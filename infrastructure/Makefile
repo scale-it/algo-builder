@@ -6,7 +6,7 @@ export REMOTE_REPO = https://github.com/algorand/sandbox.git
 export REACH_PATH = ~/.algorand-reach
 # paths for indexer (for docker setup)
 export INDEXER_REMOTE_REPO = https://github.com/algorand/indexer.git
-export INDEXER_PATH = ~/.algorand-indexer
+export INDEXER_PATH = ~/.algorand-indexer-download
 # path to indexer .tar file (https://github.com/algorand/indexer/releases) for local setup
 export INDEXER_LINUX_TAR_NAME = algorand-indexer_linux_amd64_2.5.0.tar.bz2
 export INDEXER_LINUX_TAR_URL = https://github.com/algorand/indexer/releases/download/2.5.0/$(INDEXER_LINUX_TAR_NAME)
@@ -141,14 +141,15 @@ setup-postgresql:
 setup-indexer:
 	@if ! [ -d ./node_data ] ;  then echo "./node_data directory does not exist - please create a new private network first" ; false; fi
 # https://developer.algorand.org/docs/run-a-node/setup/indexer/#extract-the-binaries-to-a-specific-directory
-	mkdir -p ~/indexer
-	@if ! [ -f ~/indexer/$(INDEXER_LINUX_TAR_NAME) ]; then \
-		wget $(INDEXER_LINUX_TAR_URL) -P ~/indexer; \
-		cd ~/indexer; tar -xf $(INDEXER_LINUX_TAR_NAME) -C ~/indexer; fi
+	mkdir -p $(INDEXER_PATH)
+# download and unzip .tar file
+	@if ! [ -f $(INDEXER_PATH)/$(INDEXER_LINUX_TAR_NAME) ]; then \
+		wget $(INDEXER_LINUX_TAR_URL) -P $(INDEXER_PATH); \
+		cd $(INDEXER_PATH); tar -xf $(INDEXER_LINUX_TAR_NAME) -C $(INDEXER_PATH); fi
 # Start indexer by providing database connection info and path to algod node
-	~/indexer/algorand-indexer_linux_amd64_2.5.0/algorand-indexer daemon -P "host=localhost port=5432 user=$(POSTGRES_UNAME) password=$(POSTGRES_PASS) dbname=$(POSTGRES_DBNAME) sslmode=disable" --algod=./node_data/PrimaryNode
+	$(INDEXER_PATH)/algorand-indexer_linux_amd64_2.5.0/algorand-indexer daemon -P "host=localhost port=5432 user=$(POSTGRES_UNAME) password=$(POSTGRES_PASS) dbname=$(POSTGRES_DBNAME) sslmode=disable" --algod=./node_data/PrimaryNode
 
 
 remove-indexer:
 # remove local indexer directory
-	rm -rf ~/indexer
+	rm -rf $(INDEXER_PATH)

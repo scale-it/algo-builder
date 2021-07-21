@@ -170,7 +170,7 @@ Please note that this installation is currently compatible with `linux based` di
 
 **Note:** Make sure you have setup a private network up and running (using `make setup-private-net`). For more instructions check [setting up a local node](./#setting-up-a-local-node) section.
 
-After setting up the database, you can use `make setup-indexer` to add local indexer binary (downloaded in `~/indexer`) and start the indexer by connecting to database and your local algod node.
+After setting up the database, you can use `make setup-indexer` to add local indexer binary (downloaded in `~/.algorand-indexer-download`) and start the indexer by connecting to database and your local algod node. Note that the initial loading of the Indexer Database could take some time.
 
 After setting up indexer, open a new terminal and try typing:
 ```bash
@@ -178,4 +178,4 @@ curl "localhost:8980/v2/accounts" | json_pp
 ```
 It should list all accounts in your local-network. More examples can be found [here](https://developer.algorand.org/docs/features/indexer/?query=indexer%2520#date-time).
 
-To **remove** local indexer directory from system, use `make remove-indexer` (removes ~/indexer).
+To **remove** local indexer directory from system, use `make remove-indexer` (removes ~/.algorand-indexer-download).
