@@ -14,7 +14,7 @@ Setting up a `--dryrun-dump` of transaction data (via `goal` or SDK) could be a 
 
 Algob provides the functionality to do a test run of a TEAL smart contract. This option is useful to not only capture the transaction in the output file but the associated state of a smart contract. This allows testing of the TEAL logic in a dry run state which shows how the TEAL is processed and approved or rejected.
 
-The dryrun response to this REST API includes disassembly, logic sig messages with PASS/REJECT, a sig trace, app call messages, and an app call trace.
+The dryrun response to this REST API includes disassembly, logic signature messages with PASS/REJECT, a signature trace, app call messages, and an app call trace.
 
 NOTE: The dryrun REST API is only available on a node if it has been enabled in the node's configuration (`EnableDeveloperAPI` = true).
 Example:
