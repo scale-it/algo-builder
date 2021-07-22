@@ -31,6 +31,9 @@ status-private-net:
 start-private-net:
 	goal network start -r ./node_data
 
+restart-private-net:
+	goal network restart -r ./node_data
+
 stop-private-net:
 	goal network stop -r ./node_data
 
