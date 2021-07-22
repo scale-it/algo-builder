@@ -17,7 +17,7 @@ Algob provides the functionality to do a test run of a TEAL smart contract. This
 The dryrun response to this REST API includes disassembly, logic sig messages with PASS/REJECT, a sig trace, app call messages, and an app call trace.
 
 NOTE: The dryrun REST API is only available on a node if it has been enabled in the node's configuration (`EnableDeveloperAPI` = true).
-
+Example:
 ```js
 // txnParams are the input transactions
 const debugger = new Tealdbg(deployer, txnParam);
