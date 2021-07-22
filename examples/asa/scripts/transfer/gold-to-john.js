@@ -4,7 +4,7 @@
  */
 
 const { executeTransaction, balanceOf } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 
 async function run (runtimeEnv, deployer) {
   // query gold ASA from deployer (using checkpoint information),
@@ -26,7 +26,7 @@ async function run (runtimeEnv, deployer) {
     toAccountAddr: john.addr,
     amount: 1,
     assetID: gold.assetIndex,
-    payFlags: {}
+    payFlags: { totalFee: 1000 }
   });
 
   await balanceOf(deployer, john.addr, gold.assetIndex);

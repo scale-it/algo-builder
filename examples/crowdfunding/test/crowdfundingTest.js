@@ -1,8 +1,8 @@
-const { getProgram } = require('@algo-builder/algob');
+const { getProgram, convert } = require('@algo-builder/algob');
 const {
-  Runtime, AccountStore, types,
-  uint64ToBigEndian, stringToBytes, addressToPk
+  Runtime, AccountStore
 } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const { assert } = require('chai');
 
 const minBalance = 10e6; // 10 ALGO's
@@ -70,11 +70,11 @@ describe('Crowdfunding Tests', function () {
   fundCloseDate.setSeconds(fundCloseDate.getSeconds() + 120000);
 
   const creationArgs = [
-    uint64ToBigEndian(beginDate.getTime()),
-    uint64ToBigEndian(endDate.getTime()),
+    convert.uint64ToBigEndian(beginDate.getTime()),
+    convert.uint64ToBigEndian(endDate.getTime()),
     `int:${goal}`, // args similar to `goal --app-arg ..` are also supported
-    addressToPk(creator.address),
-    uint64ToBigEndian(fundCloseDate.getTime())
+    convert.addressToPk(creator.address),
+    convert.uint64ToBigEndian(fundCloseDate.getTime())
   ];
 
   it('crowdfunding application', () => {
@@ -94,7 +94,7 @@ describe('Crowdfunding Tests', function () {
     // create application
     applicationId = runtime.addApp(
       { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
-    const creatorPk = addressToPk(creator.address);
+    const creatorPk = convert.addressToPk(creator.address);
 
     // setup escrow account
     const escrowProg = getProgram('crowdFundEscrow.py', { APP_ID: applicationId });
@@ -112,7 +112,7 @@ describe('Crowdfunding Tests', function () {
       fromAccount: master.account,
       toAccountAddr: escrowAddress,
       amountMicroAlgos: minBalance,
-      payFlags: {}
+      payFlags: { totalFee: 1000 }
     };
     runtime.executeTx(fundEscrowParam);
 
@@ -127,7 +127,7 @@ describe('Crowdfunding Tests', function () {
     assert.deepEqual(getGlobal('FundCloseDate'), BigInt(fundCloseDate.getTime()));
 
     // update application with correct escrow account address
-    let appArgs = [addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
+    let appArgs = [convert.addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
 
     runtime.updateApp(
       creator.address,
@@ -135,7 +135,7 @@ describe('Crowdfunding Tests', function () {
       approvalProgram,
       clearProgram,
       {}, { appArgs: appArgs });
-    const escrowPk = addressToPk(escrowAddress);
+    const escrowPk = convert.addressToPk(escrowAddress);
 
     // verify escrow storage
     assert.isDefined(applicationId);
@@ -154,7 +154,7 @@ describe('Crowdfunding Tests', function () {
 
     // donate correct amount to escrow account
     // App argument to donate.
-    appArgs = [stringToBytes('donate')];
+    appArgs = [convert.stringToBytes('donate')];
     const donationAmount = 600000;
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     let txGroup = [
@@ -184,7 +184,7 @@ describe('Crowdfunding Tests', function () {
 
     runtime.setRoundAndTimestamp(5, endDate.getTime() + 12);
     // donor should be able to reclaim if goal is NOT met and end date is passed
-    appArgs = [stringToBytes('reclaim')];
+    appArgs = [convert.stringToBytes('reclaim')];
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     txGroup = [
       {
@@ -219,7 +219,7 @@ describe('Crowdfunding Tests', function () {
 
     runtime.setRoundAndTimestamp(5, beginDate.getTime() + 12);
     // should claim if goal is reached'
-    appArgs = [stringToBytes('donate')];
+    appArgs = [convert.stringToBytes('donate')];
 
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     txGroup = [
@@ -247,7 +247,7 @@ describe('Crowdfunding Tests', function () {
     assert.equal(escrow.balance(), escrowBal + 7000000n); // verify donation of 7000000
 
     runtime.setRoundAndTimestamp(5, endDate.getTime() + 12);
-    appArgs = [stringToBytes('claim')];
+    appArgs = [convert.stringToBytes('claim')];
     txGroup = [
       {
         type: types.TransactionType.CallNoOpSSC,
@@ -279,7 +279,7 @@ describe('Crowdfunding Tests', function () {
     // after claiming, creator of the crowdfunding application should be able to delete the application
     // NOTE: we don't need a txGroup here as escrow is already empty
     const deleteTx = {
-      type: types.TransactionType.DeleteSSC,
+      type: types.TransactionType.DeleteApp,
       sign: types.SignType.SecretKey,
       fromAccount: creator.account,
       appID: applicationId,
@@ -318,7 +318,7 @@ describe('Crowdfunding Tests', function () {
     syncAccounts();
 
     // update application with correct escrow account address
-    let appArgs = [addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
+    let appArgs = [convert.addressToPk(escrowAddress)]; // converts algorand address to Uint8Array
     runtime.updateApp(
       creator.address,
       applicationId,
@@ -326,7 +326,7 @@ describe('Crowdfunding Tests', function () {
       clearProgram,
       {}, { appArgs: appArgs });
 
-    appArgs = [stringToBytes('claim')];
+    appArgs = [convert.stringToBytes('claim')];
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     const txGroup = [
       {

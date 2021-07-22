@@ -1,32 +1,23 @@
 const {
   balanceOf
 } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
-const { executeTransaction, fundAccount, totalSupply } = require('../common/common');
+const { types } = require('@algo-builder/web');
+const { getClawback, executeTransaction, fundAccount, totalSupply } = require('../common/common');
+const accounts = require('../common/accounts');
 
 /**
- * NOTE: this function is for demonstration purpose only.
- * If asset creator is a multisig address, then user should have a signed tx file, decoded tx fetched
- * from that file, append his own signature & send it to network.
- *  - Use `algob.executeSignedTxnFromFile` to execute tx from file
- *  - In the function below we assume creator & reserve is a single account (alice)
+ * Issue tokens using the issuer account.
  */
 async function issue (deployer, address, amount) {
-  const asaReserve = deployer.accountsByName.get('alice'); // asset reserve is the issuer
+  const issuer = deployer.accountsByName.get(accounts.issuer);
+  const tesla = deployer.asa.get('tesla');
+  const controllerAppInfo = deployer.getApp('controller.py', 'clear_state_program.py');
 
-  const gold = deployer.asa.get('gold');
-  const controllerSSCInfo = deployer.getSSC('controller.py', 'clear_state_program.py');
-
-  const escrowParams = {
-    TOKEN_ID: gold.assetIndex,
-    CONTROLLER_APP_ID: controllerSSCInfo.appID
-  };
-
-  const escrowLsig = await deployer.loadLogic('clawback.py', escrowParams);
-  const escrowAddress = escrowLsig.address();
+  const clawbackLsig = await getClawback(deployer);
+  const clawbackAddress = clawbackLsig.address();
 
   const issuanceParams = [
-    /**
+    /*
      * tx 0 - Call to controller stateful smart contract with application arg: 'issue'
      * The 'issue' branch ensures that sender is the token reserve and token is not killed
      * Issuance tx will be rejected if token has been killed by the manager
@@ -34,26 +25,26 @@ async function issue (deployer, address, amount) {
     {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
-      fromAccount: asaReserve,
-      appID: controllerSSCInfo.appID,
+      fromAccount: issuer,
+      appID: controllerAppInfo.appID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:issue'],
-      foreignAssets: [gold.assetIndex]
+      foreignAssets: [tesla.assetIndex]
     },
-    /**
+    /*
      * tx 1 - Asset transfer transaction from Token Reserve -> address. This tx is executed
-     * and approved by the clawback escrow (since the asset is default frozen only clawback can move funds).
+     * and approved by the clawback lsig (since the asset is default frozen only clawback can move funds).
      * This tx doesn't need rule checks (as this is an issuance txn)
      */
     {
       type: types.TransactionType.RevokeAsset,
       sign: types.SignType.LogicSignature,
-      fromAccountAddr: escrowAddress,
+      fromAccountAddr: clawbackAddress,
       recipient: address,
-      assetID: gold.assetIndex,
-      revocationTarget: asaReserve.addr, // tx will fail if assetSender is not token reserve address
+      assetID: tesla.assetIndex,
+      revocationTarget: issuer.addr, // tx will fail if assetSender is not token reserve address
       amount: amount,
-      lsig: escrowLsig,
+      lsig: clawbackLsig,
       payFlags: { totalFee: 1000 }
     }
   ];
@@ -61,10 +52,10 @@ async function issue (deployer, address, amount) {
   await executeTransaction(deployer, issuanceParams);
 
   console.log(`* ${address} asset holding: *`);
-  await balanceOf(deployer, address, gold.assetIndex); // print asset holding
+  await balanceOf(deployer, address, tesla.assetIndex); // print asset holding
 
-  const supply = await totalSupply(deployer, gold.assetIndex);
-  console.log(`Total Supply of token 'gold': ${supply}`);
+  const supply = await totalSupply(deployer, tesla.assetIndex);
+  console.log(`Total Supply of token 'tesla': ${supply}`);
 }
 
 async function run (runtimeEnv, deployer) {
@@ -72,28 +63,15 @@ async function run (runtimeEnv, deployer) {
   await fundAccount(deployer, elon); // fund elon
 
   // opt-in asa to account first (skip if opted-in already)
-  console.log(`* Opt-In ASA gold for ${elon.name} *`);
-  await deployer.optInAcountToASA('gold', elon.name, {});
+  console.log(`* Opt-In ASA tesla for ${elon.name} *`);
+  await deployer.optInAcountToASA('tesla', elon.name, {});
   console.log('* Opt-In Successful *');
-
-  /**
-   * If using msig address as asa token reserve, then realistically user will receive a tx
-   * file signed by accounts <= threshold in a multisig group.
-   * - After receiving file, place it in /assets
-   * - Use `algob sign-multisig <account>` to append signature of your account
-   * - Then use the function below to issue new tokens and send tx to a network
-   */
-  // executeSignedTxnFromFile(deployer, 'asa_file_out.tx');
 
   // use below function to whitelist elon
   // await whitelist(deployer, alice, elon.addr);
 
-  /**
-   * - just for tutorial purpose. Below function issues new token from reserve account (which is a single
-   *   account - alice).
-   * - Note: We don't need to add rules check for issuer, as the issuer creates the rules itself
-   */
-  await issue(deployer, elon.addr, 15); // issue(mint) 15 tokens to elon from reserve
+  // issue (mint) 15 tokens to elon from reserve
+  await issue(deployer, elon.addr, 15);
 }
 
 module.exports = { default: run, issue: issue };

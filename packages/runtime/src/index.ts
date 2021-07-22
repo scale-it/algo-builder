@@ -1,12 +1,11 @@
 import { AccountStore } from "./account";
 import * as ERRORS from "./errors/errors-list";
-import { applyErrorMessageTemplate } from "./errors/runtime-errors";
 import { parseZodError } from "./errors/validation-errors";
 import { Interpreter } from "./interpreter/interpreter";
 import { loadASAFile, overrideASADef, validateASADefs } from "./lib/asa";
 import { getPathFromDirRecursive, loadFromYamlFileSilent, loadFromYamlFileSilentWithMessage, lsTreeWalk } from "./lib/files";
-import { addressToPk, parseSSCAppArgs, stringToBytes, uint64ToBigEndian } from "./lib/parsing";
-import { checkIfAssetDeletionTx, encodeNote, getFromAddress, mkTransaction } from "./lib/txn";
+import { checkIfAssetDeletionTx } from "./lib/txn";
+import { LogicSig } from "./logicsig";
 import { parser } from "./parser/parser";
 import { Runtime } from "./runtime";
 import * as types from "./types";
@@ -16,15 +15,8 @@ export {
   Interpreter,
   Runtime,
   AccountStore,
-  mkTransaction,
+  LogicSig,
   checkIfAssetDeletionTx,
-  getFromAddress,
-  applyErrorMessageTemplate,
-  parseSSCAppArgs,
-  addressToPk,
-  uint64ToBigEndian,
-  stringToBytes,
-  encodeNote,
   loadFromYamlFileSilent,
   loadFromYamlFileSilentWithMessage,
   loadASAFile,

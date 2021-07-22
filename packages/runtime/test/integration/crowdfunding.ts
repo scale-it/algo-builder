@@ -1,9 +1,9 @@
+import { parsing } from "@algo-builder/web";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
-import { addressToPk, uint64ToBigEndian } from "../../src/lib/parsing";
-import { SSCDeploymentFlags, StackElem } from "../../src/types";
+import { AppDeploymentFlags, StackElem } from "../../src/types";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
@@ -15,7 +15,7 @@ describe("Crowdfunding basic tests", function () {
   let runtime: Runtime;
   let approvalProgram: string;
   let clearProgram: string;
-  let flags: SSCDeploymentFlags;
+  let flags: AppDeploymentFlags;
   this.beforeAll(async function () {
     runtime = new Runtime([john]); // setup test
     approvalProgram = getProgram('crowdfunding.teal');
@@ -39,7 +39,7 @@ describe("Crowdfunding basic tests", function () {
   });
 
   it("should create application and update global state if correct args are passed", function () {
-    const validFlags: SSCDeploymentFlags = Object.assign({}, flags);
+    const validFlags: AppDeploymentFlags = Object.assign({}, flags);
 
     // Get begin date to pass in
     const beginDate = new Date();
@@ -54,11 +54,11 @@ describe("Crowdfunding basic tests", function () {
     fundCloseDate.setSeconds(fundCloseDate.getSeconds() + 120000);
 
     const appArgs = [
-      uint64ToBigEndian(beginDate.getTime()),
-      uint64ToBigEndian(endDate.getTime()),
-      uint64ToBigEndian(7000000),
-      addressToPk(john.address),
-      uint64ToBigEndian(fundCloseDate.getTime())
+      parsing.uint64ToBigEndian(beginDate.getTime()),
+      parsing.uint64ToBigEndian(endDate.getTime()),
+      parsing.uint64ToBigEndian(7000000),
+      parsing.addressToPk(john.address),
+      parsing.uint64ToBigEndian(fundCloseDate.getTime())
     ];
 
     const johnMinBalance = john.minBalance;
@@ -69,7 +69,7 @@ describe("Crowdfunding basic tests", function () {
 
     const getGlobal = (key: string):
     StackElem |undefined => runtime.getGlobalState(appID, key);
-    const johnPk = addressToPk(john.address);
+    const johnPk = parsing.addressToPk(john.address);
 
     // verify global state
     assert.isDefined(appID);

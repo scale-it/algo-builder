@@ -1,9 +1,9 @@
+import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
-import { AlgoTransferParam, SignType, TransactionType, LogicSig } from "../../src/types";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
@@ -18,7 +18,7 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
   let john: AccountStore;
   let bob: AccountStore;
   let runtime: Runtime;
-  let txnParams: AlgoTransferParam;
+  let txnParams: types.AlgoTransferParam;
 
   this.beforeAll(async function () {
     john = new AccountStore(initialJohnHolding);
@@ -26,12 +26,12 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
     runtime = new Runtime([john, bob]);
 
     txnParams = {
-      type: TransactionType.TransferAlgo, // payment
-      sign: SignType.LogicSignature,
+      type: types.TransactionType.TransferAlgo, // payment
+      sign: types.SignType.LogicSignature,
       fromAccountAddr: john.account.addr,
       toAccountAddr: bob.address,
       amountMicroAlgos: 100n,
-      lsig: {} as LogicSig, // will be set below
+      lsig: {} as types.LogicSig, // will be set below
       payFlags: { totalFee: fee }
     };
   });
@@ -53,7 +53,7 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
 
     runtime.executeTx({
       ...txnParams,
-      sign: SignType.LogicSignature,
+      sign: types.SignType.LogicSignature,
       fromAccountAddr: john.address,
       lsig: lsig
     });

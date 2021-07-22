@@ -1,3 +1,4 @@
+import { ASADefSchema, types } from "@algo-builder/web";
 import { modelsv2 } from "algosdk";
 import { existsSync } from "fs";
 import path from "path";
@@ -6,8 +7,7 @@ import * as z from 'zod';
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { parseZodError } from "../errors/validation-errors";
-import { AccountMap, ASADef, ASADefs, AssetModFields, RuntimeAccountMap } from "../types";
-import { ASADefSchema } from "../types-input";
+import { AccountMap, RuntimeAccountMap } from "../types";
 import { getPathFromDirRecursive, loadFromYamlFileSilent } from "./files";
 
 export const ASSETS_DIR = "assets";
@@ -19,7 +19,7 @@ export const ASSETS_DIR = "assets";
  * @param asaDef asset definition
  */
 function validateOptInAccNames (accounts: AccountMap | RuntimeAccountMap,
-  asaDef: ASADef,
+  asaDef: types.ASADef,
   source?: string): void {
   if (!asaDef.optInAccNames || asaDef.optInAccNames.length === 0) {
     return;
@@ -41,7 +41,7 @@ function validateOptInAccNames (accounts: AccountMap | RuntimeAccountMap,
  * @param source source of assetDef: asa.yaml file OR function deployASA
  * @returns parsed asa definition
  */
-function _parseASADef (asaDef: ASADef, source?: string): ASADef {
+function _parseASADef (asaDef: types.ASADef, source?: string): types.ASADef {
   try {
     const parsedDef = ASADefSchema.parse(asaDef);
     parsedDef.manager = parsedDef.manager !== "" ? parsedDef.manager : undefined;
@@ -71,8 +71,8 @@ function _parseASADef (asaDef: ASADef, source?: string): ASADef {
  */
 export function overrideASADef (
   accounts: AccountMap,
-  origDef: ASADef,
-  newDef?: Partial<ASADef>): ASADef {
+  origDef: types.ASADef,
+  newDef?: Partial<types.ASADef>): types.ASADef {
   if (newDef === undefined) { return origDef; }
 
   const source = 'ASA deployment';
@@ -92,7 +92,7 @@ export function overrideASADef (
  * @param filename asa filename
  */
 export function validateASADefs (
-  asaDefs: ASADefs, accounts: AccountMap | RuntimeAccountMap, filename: string): ASADefs {
+  asaDefs: types.ASADefs, accounts: AccountMap | RuntimeAccountMap, filename: string): types.ASADefs {
   for (const name in asaDefs) {
     asaDefs[name] = _parseASADef(asaDefs[name], filename);
     validateOptInAccNames(accounts, asaDefs[name], filename);
@@ -106,7 +106,7 @@ export function validateASADefs (
  * used in builder. RuntimeAccountMap is for AccountStore used in runtime
  * (where we use maps instead of arrays in sdk structures).
  */
-export function loadASAFile (accounts: AccountMap | RuntimeAccountMap): ASADefs {
+export function loadASAFile (accounts: AccountMap | RuntimeAccountMap): types.ASADefs {
   let filePath;
   if (!existsSync(ASSETS_DIR)) { // to handle tests
     filePath = path.join(ASSETS_DIR, "asa.yaml");
@@ -130,15 +130,15 @@ function isDefined (value: string | undefined): boolean {
  * @param fields Custom ASA fields
  * @param asset Defined ASA fields
  */
-export function checkAndSetASAFields (fields: AssetModFields, asset: modelsv2.AssetParams): void {
+export function checkAndSetASAFields (fields: types.AssetModFields, asset: modelsv2.AssetParams): void {
   for (const x of ['manager', 'reserve', 'freeze', 'clawback']) {
-    const customField = fields[x as keyof AssetModFields];
-    const asaField = asset[x as keyof AssetModFields];
+    const customField = fields[x as keyof types.AssetModFields];
+    const asaField = asset[x as keyof types.AssetModFields];
     // Check if custom field is set and defined and ASA field is blank field
     if (isDefined(customField) && !isDefined(asaField)) {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.BLANK_ADDRESS_ERROR);
     } else if (customField !== undefined && isDefined(asaField)) { // Change if ASA field and custom field is defined
-      asset[x as keyof AssetModFields] = customField;
+      asset[x as keyof types.AssetModFields] = customField;
     }
   }
 }

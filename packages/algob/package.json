@@ -63,6 +63,7 @@
     "sample-project/"
   ],
   "devDependencies": {
+    "@algo-builder/web": "0.0.1",
     "@types/chai": "^4.2.12",
     "@types/debug": "^4.1.5",
     "@types/deep-equal": "^1.0.1",
@@ -78,7 +79,8 @@
     "glob": "^7.1.6",
     "normalize-url": "6.0.1",
     "sinon": "^9.0.2",
-    "time-require": "^0.1.2"
+    "time-require": "^0.1.2",
+    "ts-mocha": "^8.0.0"
   },
   "dependencies": {
     "@algo-builder/runtime": "^1.1.0",

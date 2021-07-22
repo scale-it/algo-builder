@@ -1,9 +1,9 @@
+import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
-import { SignType, TransactionType, UpdateSSCParam } from "../../src/types";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
@@ -18,7 +18,7 @@ describe("App Update Test", function () {
   let approvalProgram: string;
   let clearProgram: string;
   let appID: number;
-  let groupTx: UpdateSSCParam[];
+  let groupTx: types.UpdateAppParam[];
 
   this.beforeEach(async function () {
     runtime = new Runtime([john, alice]); // setup test
@@ -36,8 +36,8 @@ describe("App Update Test", function () {
 
     groupTx = [
       {
-        type: TransactionType.UpdateSSC,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.UpdateApp,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         appID: appID,
         newApprovalProgram: approvalProgram,
@@ -46,8 +46,8 @@ describe("App Update Test", function () {
         appArgs: ['int:2']
       },
       {
-        type: TransactionType.UpdateSSC,
-        sign: SignType.SecretKey,
+        type: types.TransactionType.UpdateApp,
+        sign: types.SignType.SecretKey,
         fromAccount: john.account,
         appID: appID,
         newApprovalProgram: approvalProgram,

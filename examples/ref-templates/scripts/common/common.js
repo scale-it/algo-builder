@@ -1,5 +1,5 @@
 const { executeTransaction } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 
 exports.executeTransaction = async function (deployer, txnParams) {
   try {

@@ -1,4 +1,5 @@
 import { types as rtypes } from "@algo-builder/runtime";
+import { types as wtypes } from "@algo-builder/web";
 import algosdk, { Algodv2, modelsv2, SuggestedParams } from "algosdk";
 
 import { bobAcc } from "./account";
@@ -46,4 +47,4 @@ const mockProgram = new Uint8Array([
   1, 37, 14, 16
 ]);
 
-export const mockLsig: rtypes.LogicSig = algosdk.makeLogicSig(mockProgram, []) as rtypes.LogicSig;
+export const mockLsig: wtypes.LogicSig = algosdk.makeLogicSig(mockProgram, []) as wtypes.LogicSig;

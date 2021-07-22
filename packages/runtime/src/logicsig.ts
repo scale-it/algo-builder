@@ -1,6 +1,7 @@
+import { parsing } from "@algo-builder/web";
 import {
   decodeAddress, encodeAddress,
-  generateAccount, EncodedLogicSig, EncodedMultisig, multisigAddress, MultisigMetadata,
+  EncodedLogicSig, EncodedMultisig, generateAccount, multisigAddress, MultisigMetadata,
   signBytes, verifyBytes
 } from "algosdk";
 import * as tweet from "tweetnacl-ts";
@@ -8,7 +9,7 @@ import * as tweet from "tweetnacl-ts";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { compareArray } from "./lib/compare";
-import { convertToString, stringToBytes } from "./lib/parsing";
+import { convertToString } from "./lib/parsing";
 
 /**
  * Note: We cannot use algosdk LogicSig class here,
@@ -25,7 +26,8 @@ export class LogicSig {
   tag: Buffer;
 
   constructor (program: string, args: Uint8Array[]) {
-    this.logic = stringToBytes(program);
+    this.tag = Buffer.from("Program");
+    this.logic = parsing.stringToBytes(program);
     this.args = args;
     this.sig = new Uint8Array(0);
     this.msig = undefined;
@@ -161,7 +163,9 @@ export class LogicSig {
     let verifiedCounter = 0;
     for (const subsig of subsigs) {
       const subsigAddr = encodeAddress(subsig.pk);
-      if (!compareArray(subsig.s, new Uint8Array(0)) && verifyBytes(this.logic, subsig.s as Uint8Array, subsigAddr)) {
+      if (!compareArray(subsig.s, new Uint8Array(0)) &&
+        verifyBytes(this.logic, subsig.s as Uint8Array, subsigAddr
+        )) {
         verifiedCounter += 1;
       }
     }

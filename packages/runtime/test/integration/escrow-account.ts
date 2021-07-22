@@ -1,11 +1,11 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
+import { types } from "@algo-builder/web";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
 import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { LogicSig } from "../../src/logicsig";
-import { AlgoTransferParam, ExecParams, SignType, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
@@ -32,15 +32,15 @@ describe("Logic Signature: Escrow Account", function () {
   // initialization of lsig and escrow to beforeAll
   let lsig: LogicSig;
   let escrow: AccountStore;
-  let paymentTxParams: AlgoTransferParam;
+  let paymentTxParams: types.AlgoTransferParam;
 
   this.beforeAll(function () {
     runtime = new Runtime([john, admin]); // setup runtime
     lsig = runtime.getLogicSig(getProgram('escrow.teal'), []);
     escrow = runtime.getAccount(lsig.address());
     paymentTxParams = {
-      type: TransactionType.TransferAlgo,
-      sign: SignType.LogicSignature,
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.LogicSignature,
       lsig: lsig,
       fromAccountAddr: escrow.address,
       toAccountAddr: john.address,
@@ -57,8 +57,8 @@ describe("Logic Signature: Escrow Account", function () {
 
   it("should fund escrow account", function () {
     runtime.executeTx({
-      type: TransactionType.TransferAlgo, // payment
-      sign: SignType.SecretKey,
+      type: types.TransactionType.TransferAlgo, // payment
+      sign: types.SignType.SecretKey,
       fromAccount: admin.account,
       toAccountAddr: escrow.address,
       amountMicroAlgos: initialEscrowHolding,
@@ -98,7 +98,7 @@ describe("Logic Signature: Escrow Account", function () {
     expectRuntimeError(
       () => runtime.executeTx({
         ...paymentTxParams,
-        type: TransactionType.TransferAsset,
+        type: types.TransactionType.TransferAsset,
         assetID: 1111,
         amount: 10n // asset amount
       }),
@@ -120,7 +120,7 @@ describe("Logic Signature: Escrow Account", function () {
     const johnBal = john.balance();
     assert.isAbove(Number(escrowBal), 0); // escrow balance should be > 0
 
-    const closeParams: ExecParams = {
+    const closeParams: types.ExecParams = {
       ...paymentTxParams,
       amountMicroAlgos: 0n,
       payFlags: {

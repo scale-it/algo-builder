@@ -1,5 +1,5 @@
 const { executeTransaction, balanceOf } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const { mkParam } = require('./transfer/common');
 
 async function run (runtimeEnv, deployer) {

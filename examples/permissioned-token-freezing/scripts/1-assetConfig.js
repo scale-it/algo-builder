@@ -1,13 +1,13 @@
 const {
   executeTransaction
 } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 
 async function run (runtimeEnv, deployer) {
   const creator = deployer.accountsByName.get('alice');
 
   // NOTE: make sure to deploy 0-createAppAsset.js first
-  const appInfo = deployer.getSSC('poi-approval.teal', 'poi-clear.teal');
+  const appInfo = deployer.getApp('poi-approval.teal', 'poi-clear.teal');
   const assetInfo = deployer.asa.get('gold');
 
   /** * Compile and fund escrow***/

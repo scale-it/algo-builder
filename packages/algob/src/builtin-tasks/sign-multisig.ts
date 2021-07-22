@@ -4,7 +4,7 @@ import path from "path";
 import { task } from "../internal/core/config/config-env";
 import { ASSETS_DIR } from "../internal/core/project-structure";
 import { loadSignedTxnFromFile } from "../lib/files";
-//import { signMultiSig } from "../lib/msig";
+import { signMultiSig } from "../lib/msig";
 import { RuntimeEnv } from "../types";
 import { writeToFile } from "./gen-accounts";
 import { TASK_SIGN_MULTISIG } from "./task-names";
@@ -16,13 +16,13 @@ export interface TaskArgs {
   force: boolean
 }
 
-/*async function multiSignTx (
+async function multiSignTx (
   taskArgs: TaskArgs,
   runtimeEnv: RuntimeEnv
 ): Promise<void> {
   const signerAccount = runtimeEnv.network.config.accounts.find(acc => acc.name === taskArgs.account);
   if (signerAccount === undefined) {
-    console.error("No account with the name \"%s\" exists in the config file.", taskArgs.account);
+    console.error(`No account with the name "${taskArgs.account}" exists in the config file.`);
     return;
   }
   const rawTxn = loadSignedTxnFromFile(taskArgs.file);
@@ -53,4 +53,4 @@ export default function (): void {
     )
     .addFlag("force", "Overwrite output transaction file if the file already exists.")
     .setAction((input, env) => multiSignTx(input, env));
-}*/
+}

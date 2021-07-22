@@ -1,10 +1,9 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import { ASADef } from "@algo-builder/runtime/build/types";
-import algosdk, { generateAccount } from "algosdk";
+import { ERRORS, types as wtypes } from "@algo-builder/web";
+import { generateAccount } from "algosdk";
 import { assert } from "chai";
 
 import { genAccounts } from "../../src/builtin-tasks/gen-accounts";
-import { ERRORS } from "../../src/errors/errors-list";
 import { DeployerDeployMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
 import { getDummyLsig } from "../../src/lib/lsig";
@@ -16,7 +15,7 @@ import { useFixtureProject } from "../helpers/project";
 import { cleanupMutableData } from "../lib/script-checkpoints";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
-function mkASA (): ASADef {
+function mkASA (): wtypes.ASADef {
   return {
     total: 1,
     decimals: 1,
@@ -168,7 +167,7 @@ describe("DeployerDeployMode", () => {
       localBytes: 1,
       globalBytes: 1
     };
-    const sscInfo = await deployer.deploySSC("app", "clear", sscFlags, {});
+    const sscInfo = await deployer.deployApp("app", "clear", sscFlags, {});
     assert.deepEqual(sscInfo,
       {
         creator: "addr-1-get-address-dry-run",
@@ -199,7 +198,7 @@ describe("DeployerDeployMode", () => {
       deleted: false
     });
 
-    const updatedInfo = await deployer.updateSSC(deployer.accounts[0], {}, 33, "app", "clear", {});
+    const updatedInfo = await deployer.updateApp(deployer.accounts[0], {}, 33, "app", "clear", {});
     assert.deepEqual(updatedInfo,
       {
         creator: "addr-1-get-address-dry-run",
@@ -322,7 +321,7 @@ describe("DeployerDeployMode", () => {
         txId: "",
         confirmedRound: 0,
         assetIndex: 0,
-        assetDef: {} as rtypes.ASADef,
+        assetDef: {} as wtypes.ASADef,
         deleted: false
       })
       .registerSSC(networkName, "ASC name", {
@@ -336,7 +335,7 @@ describe("DeployerDeployMode", () => {
       .registerLsig(networkName, "Lsig name", {
         creator: "Lsig creator",
         contractAddress: "addr-1",
-        lsig: {} as rtypes.LogicSig
+        lsig: {} as wtypes.LogicSig
       })
       .putMetadata(networkName, "k", "v");
     const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());
@@ -401,7 +400,7 @@ describe("DeployerDeployMode", () => {
       txId: "",
       confirmedRound: 0,
       assetIndex: 1337,
-      assetDef: {} as rtypes.ASADef,
+      assetDef: {} as wtypes.ASADef,
       deleted: false
     });
     assert.deepEqual(deployer.asa, new Map());

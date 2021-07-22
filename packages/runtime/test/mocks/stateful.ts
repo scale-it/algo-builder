@@ -1,11 +1,11 @@
+import { parsing } from "@algo-builder/web";
 import { modelsv2 } from "algosdk";
 
 import { BaseModel, BaseModelI } from '../../src/account';
-import { stringToBytes } from "../../src/lib/parsing";
 import { AppLocalStateM, AssetHoldingM, SSCAttributesM, StackElem } from "../../src/types";
 import { elonAddr } from "./txn";
 
-const convertToKey = (str: string): string => { return stringToBytes(str).toString(); };
+const convertToKey = (str: string): string => { return parsing.stringToBytes(str).toString(); };
 
 const appLocalState = new Map<number, AppLocalStateM>();
 const createdApps = new Map<number, SSCAttributesM>();
@@ -16,11 +16,11 @@ assets.set(3, { 'asset-id': 3, amount: 2n, creator: "string", 'is-frozen': false
 assets.set(32, { 'asset-id': 32, amount: 2n, creator: "AS", 'is-frozen': false });
 
 const globalStateMap = new Map<string, StackElem>();
-globalStateMap.set(convertToKey('Hello'), stringToBytes('World'));
-globalStateMap.set(convertToKey('global-key'), stringToBytes('global-val'));
+globalStateMap.set(convertToKey('Hello'), parsing.stringToBytes('World'));
+globalStateMap.set(convertToKey('global-key'), parsing.stringToBytes('global-val'));
 
 const localStateMap = new Map<string, StackElem>();
-localStateMap.set(convertToKey('Local-key'), stringToBytes('Local-val'));
+localStateMap.set(convertToKey('Local-key'), parsing.stringToBytes('Local-val'));
 
 const base: BaseModel = new BaseModelI();
 export const accInfo = [{
@@ -53,7 +53,7 @@ export const accInfo = [{
     unitName: "AD",
     name: "ASSETAD",
     url: "assetUrl",
-    metadataHash: new Uint8Array(0),
+    metadataHash: "hash",
     manager: "addr-1",
     reserve: "addr-2",
     freeze: "addr-3",

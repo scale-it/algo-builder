@@ -1,4 +1,5 @@
-const { types, AccountStore } = require('@algo-builder/runtime');
+const { AccountStore } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const { assert } = require('chai');
 const { encodeAddress } = require('algosdk');
 const { Context } = require('./common');
@@ -9,6 +10,7 @@ const STR_TRANSFER = 'str:transfer';
 const RUNTIME_ERR1009 = 'RUNTIME_ERR1009: TEAL runtime encountered err opcode';
 const INDEX_OUT_OF_BOUND_ERR = 'RUNTIME_ERR1008: Index out of bound';
 const REJECTED_BY_LOGIC = 'RUNTIME_ERR1007: Teal code rejected by logic';
+const FORCE_TRANSFER_APPARG = 'str:force_transfer';
 
 describe('Permissioned Token Tests - Failing Paths', function () {
   let master, alice, bob, elon;
@@ -127,7 +129,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       const asaCreator = ctx.getAccount(asaDef.creator);
       assert.throws(() =>
         ctx.optOut(asaCreator.address, elon.account),
-        `RUNTIME_ERR1404: Account ${elon.address} doesn't hold asset index ${ctx.assetIndex}`);
+        `RUNTIME_ERR1404: Account ${ctx.elon.address} doesn't hold asset index ${ctx.assetIndex}`);
     });
   });
 
@@ -171,7 +173,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           fromAccount: asaManager.account,
           appID: ctx.controllerappID,
           payFlags: { totalFee: 1000 },
-          appArgs: ['str:force_transfer'],
+          appArgs: [FORCE_TRANSFER_APPARG],
           foreignAssets: [ctx.assetIndex]
         },
         {
@@ -220,7 +222,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       INDEX_OUT_OF_BOUND_ERR
       );
 
-      // fails as paying fees of clawback-escrow is skipped
+      // fails as paying fees of clawback-lsig is skipped
       assert.throws(() =>
         ctx.runtime.executeTx([forceTxGroup[0], forceTxGroup[1], forceTxGroup[3]]),
       INDEX_OUT_OF_BOUND_ERR
@@ -389,7 +391,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       INDEX_OUT_OF_BOUND_ERR
       );
 
-      // fails as paying fees of clawback-escrow is skipped
+      // fails as paying fees of clawback-lsig is skipped
       assert.throws(() =>
         ctx.runtime.executeTx([txGroup[0], txGroup[1], txGroup[3]]),
       INDEX_OUT_OF_BOUND_ERR
@@ -493,7 +495,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           fromAccount: asaManager.account,
           appID: ctx.controllerappID,
           payFlags: { totalFee: 1000 },
-          appArgs: ['str:force_transfer'],
+          appArgs: [FORCE_TRANSFER_APPARG],
           foreignAssets: [ctx.assetIndex]
         },
         {
@@ -534,7 +536,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
     it('Should fail if transaction group is not valid', () => {
       const txGroup = [...updateReserveParams];
 
-      // fails as paying fees of clawback-escrow is skipped
+      // fails as paying fees of clawback-lsig is skipped
       assert.throws(() =>
         ctx.runtime.executeTx([txGroup[0], txGroup[1], txGroup[3]]),
       INDEX_OUT_OF_BOUND_ERR
@@ -568,6 +570,184 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       assert.throws(() =>
         ctx.runtime.executeTx(txGroup),
         `RUNTIME_ERR1504: Only Manager account ${asaManager.address} can modify asset`
+      );
+    });
+  });
+
+  describe('Cease', function () {
+    let permManagerAddr, permManager, ceaseTxGroup;
+    this.beforeEach(() => {
+      permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager'));
+      permManager = ctx.getAccount(permManagerAddr);
+
+      // Opt-In to ASA by bob
+      ctx.optInToASA(bob.address);
+      ceaseTxGroup = [
+        {
+          type: types.TransactionType.CallNoOpSSC,
+          sign: types.SignType.SecretKey,
+          fromAccount: asaManager.account,
+          appID: ctx.controllerappID,
+          payFlags: { totalFee: 2000 },
+          appArgs: [FORCE_TRANSFER_APPARG],
+          foreignAssets: [ctx.assetIndex]
+        },
+        {
+          type: types.TransactionType.RevokeAsset,
+          sign: types.SignType.LogicSignature,
+          fromAccountAddr: ctx.lsig.address(),
+          recipient: asaReserve.address,
+          assetID: ctx.assetIndex,
+          revocationTarget: bob.address,
+          amount: 20n,
+          lsig: ctx.lsig,
+          payFlags: { totalFee: 2000 }
+        },
+        {
+          type: types.TransactionType.TransferAlgo,
+          sign: types.SignType.SecretKey,
+          fromAccount: asaManager.account,
+          toAccountAddr: ctx.lsig.address(),
+          amountMicroAlgos: 2000,
+          payFlags: { totalFee: 1000 }
+        }
+      ];
+    });
+
+    it('Should fail if transaction group is invalid', () => {
+      const txGroup = [...ceaseTxGroup];
+
+      // fails because paying fees of clawback-lsig is skipped
+      assert.throws(() =>
+        ctx.runtime.executeTx([txGroup[0], txGroup[1]]),
+      REJECTED_BY_LOGIC
+      );
+
+      // fails because controller is not called (rejected by clawback)
+      assert.throws(() =>
+        ctx.runtime.executeTx([txGroup[1], txGroup[2]]),
+      REJECTED_BY_LOGIC
+      );
+    });
+
+    it('should reject cease if call to controller is not signed by asset manager', () => {
+      const txGroup = [...ceaseTxGroup];
+      txGroup[0].fromAccount = bob.account;
+
+      // fails because controller's sender is not asset manager
+      assert.notEqual(asaManager.address, bob.address);
+      assert.throws(() =>
+        ctx.runtime.executeTx(txGroup),
+      RUNTIME_ERR1009
+      );
+    });
+
+    it('Should fail if trying to cease more tokens than issued', () => {
+      const txGroup = [...ceaseTxGroup];
+      // Opt-In to permissions SSC & Whitelist
+      ctx.whitelist(permManager.account, bob.address);
+
+      // Issue some tokens to sender
+      ctx.issue(asaReserve.account, bob, 200);
+      ctx.syncAccounts();
+
+      // confirm issuance
+      assert.equal(ctx.bob.getAssetHolding(ctx.assetIndex).amount, 200n);
+
+      // issued 200 tokens but trying to cease 300
+      txGroup[1].amount = 300n;
+      assert.throws(() =>
+        ctx.runtime.executeTx(txGroup),
+        `RUNTIME_ERR1402: Cannot withdraw 300 assets from account ${bob.address}: insufficient balance`
+      );
+    });
+
+    it('Should fail token index is not valid', () => {
+      const txGroup = [...ceaseTxGroup];
+
+      txGroup[0].foreignAssets = [99];
+      assert.throws(() =>
+        ctx.runtime.executeTx(txGroup),
+      RUNTIME_ERR1009
+      );
+    });
+
+    it('Should fail if sufficient fees is not covered in fee payment tx', () => {
+      const txGroup = [...ceaseTxGroup];
+
+      txGroup[2].amountMicroAlgos = txGroup[1].payFlags.totalFee - 100;
+      assert.throws(() =>
+        ctx.runtime.executeTx(txGroup),
+      REJECTED_BY_LOGIC
+      );
+    });
+
+    it('should reject cease if token is killed', () => {
+      const txGroup = [...ceaseTxGroup];
+      ctx.whitelist(permManager.account, bob.address);
+      ctx.issue(asaReserve.account, bob, 200);
+      ctx.killToken(asaManager.account); // kill token
+      ctx.syncAccounts();
+
+      // fails because accounts are whitelisted, amount condition is satisfied but token is killed
+      assert.throws(() =>
+        ctx.runtime.executeTx(txGroup),
+      RUNTIME_ERR1009
+      );
+    });
+  });
+
+  describe('Set permissions app_id in controller', function () {
+    let setPermissionsParams;
+    this.beforeEach(() => {
+      const appArgs = [
+        'str:set_permission',
+        `int:${ctx.permissionsappID}`
+      ];
+      setPermissionsParams = {
+        type: types.TransactionType.CallNoOpSSC,
+        sign: types.SignType.SecretKey,
+        fromAccount: ctx.alice.account,
+        appID: ctx.controllerappID,
+        payFlags: { totalFee: 1000 },
+        appArgs: appArgs,
+        foreignAssets: [ctx.assetIndex]
+      };
+    });
+
+    // note: in current version controller.manager == asa.manager
+    it('should reject if sender of controller is not asa.manager', () => {
+      // verify first elon is not asset manager
+      assert.notEqual(asaManager.address, ctx.elon.address);
+
+      setPermissionsParams.fromAccount = ctx.elon.account;
+      assert.throws(() =>
+        ctx.runtime.executeTx(setPermissionsParams),
+      RUNTIME_ERR1009
+      );
+    });
+
+    it('should reject if application args are incorrect', () => {
+      setPermissionsParams.appArgs = ['str:set_Permission', `int:${ctx.permissionsappID}`];
+      assert.throws(() =>
+        ctx.runtime.executeTx(setPermissionsParams),
+      RUNTIME_ERR1009
+      );
+    });
+
+    /*
+     * Important test: here we deploy a new asset(with same manager as the original one),
+     * but since token index will be different, tx is rejected. Means that we cannot bypass
+     * the contract even if manager (OR other asset params) are same as the original. */
+    it('should reject if asset index is incorrect even if manager is same', () => {
+      // deploy new asset with same manager(alice) as original one
+      const newAssetId =
+        ctx.runtime.addAsset('tesla', { creator: { ...ctx.alice.account, name: 'alice' } });
+
+      setPermissionsParams.foreignAssets = [newAssetId];
+      assert.throws(() =>
+        ctx.runtime.executeTx(setPermissionsParams),
+      RUNTIME_ERR1009
       );
     });
   });

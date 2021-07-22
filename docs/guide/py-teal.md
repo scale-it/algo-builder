@@ -28,7 +28,7 @@ Please follow the main [README#PyTeal](https://github.com/scale-it/algo-builder#
 If the address is loaded dynamically (eg from KMD), we can't use PyTEAL code prior to the address knowledge.
 - If we have to deploy same contract multiple times with only difference of initialization variables, we will have to change the variables in PyTeal code everytime we deploy it.
 - To solve this problem we have introduced a support for passing `external parameters`.
-- Deployer functions(`loadLogic`, `fundLsig`, `deploySSC`) take one extra optional argument: a smart contract parameters object(`scInitParam`). This argument is passed to PyTEAL script.
+- Deployer functions(`loadLogic`, `fundLsig`, `deployApp`) take one extra optional argument: a smart contract parameters object(`scInitParam`). This argument is passed to PyTEAL script.
 - Changing parameters will change a generated TEAL code. Hence it the Delegated Signature or Smart Contract address will be different and we may need to redeploy it.
 
 ### Usage
@@ -82,30 +82,37 @@ To use this feature in scripts, you can pass an external parameter object (using
     await deployer.loadLogic("dynamic-fee.py", scInitParam);
    ```
 
-# TMPL Placeholder Support
+# Using [TMPL](https://pyteal.readthedocs.io/en/stable/api.html?highlight=TMPL#pyteal.Tmpl) expression from pyTeal.
 
-- PyTEAL supports `Tmpl` fuction which can replace value with a constant.
-  For ex: `Tmpl.Addr("TMPL_ADDR")`
-  when converted to TEAL it will look like this `addr TMPL_ADDR`. now you can replace this constant to value of your choice.
-- Algob supports these replacements. Ex:
-   ```js
-    scInitParam = {
-      TMPL_TO: "ADDR"
-    }
-    await deployer.loadLogic("dynamic-fee.py", scInitParam);
-   ```
-   you can simply pass an object with replacement values, algob will replace them for you at the time of compilation.
+PyTEAL supports [`Tmpl`](https://pyteal.readthedocs.io/en/stable/api.html?highlight=TMPL#pyteal.Tmpl) which is a template expression for creating placeholder values.
+  The name to use for this template variable must start with `TMPL_` and only consist of uppercase alphanumeric characters and underscores.
+  For ex: `Tmpl.Addr("TMPL_ADDR")`, `Tmpl.Int("TMPL_COUNTER")`, `Tmpl.Bytes("TMPL_BYTES")`.
+  when converted to TEAL it will look like this `addr TMPL_ADDR`. now you can replace this constant to value of your choice using `algob`.
 
-- You can also use this feature with external support parameters: Ex:
+### Example Walkthrough
+
+- Consider a pyTeal code snippet `asc.py`:
+  ```py
+  pay_gold = And(
+    Txn.type_enum() == TxnType.AssetTransfer,
+    Txn.sender() == Tmpl.Addr("TMPL_SENDER"),
+    Txn.asset_amount() <= Tmpl.Int("TMPL_AMOUNT")
+  )
+  ```
+  This code will only approve the transaction if sender is "TMPL_SENDER" and
+  asset amount is less than "TMPL_AMOUNT". Now you can replace these placeholders using `algob`.
+
+  While using with algob you can replace these placeholder with the following:
    ```js
-    scInitParam = {
-      TMPL_TO: "ADDR",
-      ARG_AMT: 700000,
-      ARG_CLS: masterAccount.addr
+    const scInitParam = {
+      TMPL_SENDER: bob.addr // bob address
+      TMPL_AMOUNT: 100 // this could be any integer
     }
-    await deployer.loadLogic("dynamic-fee.py", scInitParam);
+    await deployer.loadLogic("asc.py", scInitParam);
    ```
-  Note: Keys starting with `TMPL_` or `tmpl_` will be used with TMPL function and other keys will be used as mentioned in `External Parameters Support` section.
+  You can pass an object with replacement values, algob will replace them for you at the time of compilation.
+
+  You can have multiple Tmpl expressions with same placeholder, `algob` will find and replace each of them.
 
   ### Difference between External Parameters Support and TMPL Placeholder Support
 

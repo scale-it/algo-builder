@@ -1,5 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { Account, Algodv2, modelsv2 } from "algosdk";
+import { types as wtypes } from "@algo-builder/web";
 
 import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";
@@ -39,7 +40,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   async deployASA (
-    name: string, asaDef: rtypes.ASADef,
+    name: string, asaDef: wtypes.ASADef,
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap,
     txnWriter: txWriter): Promise<rtypes.ASAInfo> {
     return {
@@ -53,20 +54,20 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   async fundLsig (
-    name: string, flags: FundASCFlags, payFlags: rtypes.TxParams,
+    name: string, flags: FundASCFlags, payFlags: wtypes.TxParams,
     txnWriter: txWriter, scInitParam?: unknown): Promise<LsigInfo> {
     return {
       creator: String(flags.funder.addr) + "-get-address-dry-run",
       contractAddress: "dfssdfsd",
-      lsig: {} as rtypes.LogicSig
+      lsig: {} as wtypes.LogicSig
     };
   }
 
-  async deploySSC (
+  async deployApp (
     approvalProgram: string,
     clearProgram: string,
-    flags: rtypes.SSCDeploymentFlags,
-    payFlags: rtypes.TxParams,
+    flags: rtypes.AppDeploymentFlags,
+    payFlags: wtypes.TxParams,
     txWriter: txWriter,
     scInitParam?: unknown): Promise<rtypes.SSCInfo> {
     return {
@@ -79,13 +80,13 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     };
   }
 
-  async updateSSC (
+  async updateApp (
     sender: Account,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
-    flags: rtypes.SSCOptionalFlags,
+    flags: rtypes.AppOptionalFlags,
     txWriter: txWriter
   ): Promise<rtypes.SSCInfo> {
     return {
@@ -111,30 +112,30 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
 
   optInAcountToASA (
     asaName: string, assetIndex: number, account: rtypes.Account,
-    params: rtypes.TxParams): Promise<void> {
+    params: wtypes.TxParams): Promise<void> {
     return new Promise((resolve, reject) => { resolve(); });
   }
 
   optInLsigToASA (
-    asaName: string, assetIndex: number, lsig: rtypes.LogicSig, flags: rtypes.TxParams
+    asaName: string, assetIndex: number, lsig: wtypes.LogicSig, flags: wtypes.TxParams
   ): Promise<void> {
     return new Promise((resolve, reject) => { resolve(); });
   }
 
-  optInAccountToSSC (
+  optInAccountToApp (
     sender: rtypes.Account, index: number,
-    payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags): Promise<void> {
+    payFlags: wtypes.TxParams, flags: rtypes.AppOptionalFlags): Promise<void> {
     return new Promise((resolve, reject) => { resolve(); });
   }
 
-  optInLsigToSSC (
-    appId: number, lsig: rtypes.LogicSig,
-    payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags): Promise<void> {
+  optInLsigToApp (
+    appID: number, lsig: wtypes.LogicSig,
+    payFlags: wtypes.TxParams, flags: rtypes.AppOptionalFlags): Promise<void> {
     return new Promise((resolve, reject) => { resolve(); });
   }
 
   optInToASAMultiple (
-    asaName: string, asaDef: rtypes.ASADef,
+    asaName: string, asaDef: wtypes.ASADef,
     flags: rtypes.ASADeploymentFlags, accounts: rtypes.AccountMap, assetIndex: number
   ): Promise<void> {
     return Promise.resolve();

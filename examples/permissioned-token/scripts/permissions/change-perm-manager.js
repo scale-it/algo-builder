@@ -1,22 +1,16 @@
-const { fundAccount, executeTransaction, optInAccountToSSC } = require('../common/common');
+const { fundAccount, executeTransaction, optInAccountToApp } = require('../common/common');
 const { whitelist } = require('./whitelist');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
+const accounts = require('../common/accounts');
 
 /**
- * If permissionsManager is a multisig address, then user should have a signed tx file, decoded tx fetched
- * from that file, append his own signature & send it to network.
- *  - Use `algob.executeSignedTxnFromFile` to execute tx from file (if using multisig account)
- *  - In below function we assume permissionsManager is a single account (alice)
+ * Only current perm_manager can update permissions_manager to a new address.
  * @param deployer algobDeployer
  * @param address account address to change permissions_manager to
  */
 async function changePermissionsManager (deployer, permissionsManager, address) {
-  const permissionSSCInfo = deployer.getSSC('permissions.py', 'clear_state_program.py');
+  const permissionSSCInfo = deployer.getApp('permissions.py', 'clear_state_program.py');
 
-  /**
-   * Only current perm_manager can update permissions_manager to a new address.
-   * Which is set to alice(during deploy).
-   */
   const changePerManagerParams = {
     type: types.TransactionType.CallNoOpSSC,
     sign: types.SignType.SecretKey,
@@ -27,36 +21,30 @@ async function changePermissionsManager (deployer, permissionsManager, address) 
     accounts: [address]
   };
 
-  console.log(`* Updating permissions manager to: ${address} *`);
+  console.log(`\n* Updating permissions manager to: ${address} *`);
   await executeTransaction(deployer, changePerManagerParams);
 }
 
 async function run (runtimeEnv, deployer) {
-  const permissionsManager = deployer.accountsByName.get('alice');
+  // by default ASA owner is the permission manager
+  const permissionsManager = deployer.accountsByName.get(accounts.owner);
   const john = deployer.accountsByName.get('john');
   const elon = deployer.accountsByName.get('elon-musk');
 
   // fund accounts
-  await Promise.all([
-    fundAccount(deployer, permissionsManager),
-    fundAccount(deployer, elon)
-  ]);
+  await fundAccount(deployer, [permissionsManager, elon]);
 
   console.log('* Opt-In to permissions(rules) smart contract *');
-  const permissionSSCInfo = deployer.getSSC('permissions.py', 'clear_state_program.py');
-  await optInAccountToSSC(deployer, elon, permissionSSCInfo.appID, {}, {});
+  const permissionSSCInfo = deployer.getApp('permissions.py', 'clear_state_program.py');
+  await optInAccountToApp(deployer, elon, permissionSSCInfo.appID, {}, {});
 
-  // tx FAIL: as john is not the permissions manager
+  // tx FAIL because john is not a permissions manager
   try {
     await whitelist(deployer, john, elon.addr); // fails
   } catch (e) {
-    console.log('[Expected (john !== permissions_manager)]', e.response?.error.text);
+    console.log('[Expected error (john !== permissions_manager)]:', e.response?.error.text);
   }
 
-  /**
-   * Use below function to update permission manager address in controllerSSC
-   * Only asset manager can change permission manager
-   */
   await changePermissionsManager(deployer, permissionsManager, john.addr);
 
   // tx PASS: as we updated permissions manager to john

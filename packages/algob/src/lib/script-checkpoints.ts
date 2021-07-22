@@ -1,13 +1,12 @@
 
 import { checkIfAssetDeletionTx, loadFromYamlFileSilent, lsTreeWalk, types as rtypes } from "@algo-builder/runtime";
-import { encodeAddress, modelsv2, Transaction } from "algosdk";
+import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
+import { encodeAddress, Transaction, modelsv2 } from "algosdk";
 import deepEqual from "deep-equal";
 import * as fs from "fs";
 import path from "path";
 import YAML from "yaml";
 
-import { BuilderError } from "../errors/errors";
-import { ERRORS } from "../errors/errors-list";
 import {
   AssetScriptMap,
   Checkpoint,
@@ -204,7 +203,7 @@ export function persistCheckpoint (scriptName: string, checkpoint: Checkpoints):
 export async function registerCheckpoints (
   deployer: Deployer,
   txns: Transaction[],
-  txIdxMap: Map<number, [string, rtypes.ASADef]>
+  txIdxMap: Map<number, [string, wtypes.ASADef]>
 ): Promise<void> {
   for (const [idx, txn] of txns.entries()) {
     let txConfirmation;
@@ -239,7 +238,7 @@ export async function registerCheckpoints (
         txConfirmation = await deployer.waitForConfirmation(txn.txID());
         const key = deployer.checkpoint.getAppCheckpointKeyFromIndex(txn.appIndex);
         if (key) {
-          const temp: rtypes.SSCInfo | undefined = deployer.checkpoint.getSSCfromCPKey(key);
+          const temp: rtypes.SSCInfo | undefined = deployer.checkpoint.getAppfromCPKey(key);
           if (txn.appOnComplete === Number(rtypes.TxnOnComplete.DeleteApplication) && temp) {
             temp.deleted = true;
             deployer.registerSSCInfo(key, temp);
@@ -256,7 +255,7 @@ export async function registerCheckpoints (
             timestamp: Math.round(+new Date() / 1000),
             deleted: false
           };
-          const val = deployer.checkpoint.getSSCfromCPKey(res[0]);
+          const val = deployer.checkpoint.getAppfromCPKey(res[0]);
           if (val?.appID === sscInfo.appID) {
             deployer.logTx("Updating SSC: " + res[0], txConfirmation);
           } else {
@@ -371,7 +370,7 @@ export class CheckpointFunctionsImpl implements CheckpointFunctions {
    * @param key Key here is clear program name appended to approval program name
    * with hypen("-") in between (approvalProgramName-clearProgramName)
    */
-  getSSCfromCPKey (key: string): rtypes.SSCInfo | undefined {
+  getAppfromCPKey (key: string): rtypes.SSCInfo | undefined {
     const resultMap = this.cpData.precedingCP[this.networkName]?.ssc ??
                         new Map();
     const nestedMap: any = resultMap.get(key);

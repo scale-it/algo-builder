@@ -1,5 +1,6 @@
-import { getPathFromDirRecursive, types as rtypes } from "@algo-builder/runtime";
-import type { Account, EncodedMultisig, EncodedSignedTransaction } from "algosdk";
+import { getPathFromDirRecursive } from "@algo-builder/runtime";
+import { types as wtypes } from "@algo-builder/web";
+import type { Account, EncodedMultisig } from "algosdk";
 import { appendSignMultisigTransaction, decodeAddress, decodeSignedTransaction, encodeAddress, logicSigFromByte } from "algosdk";
 import fs from "fs";
 
@@ -71,13 +72,13 @@ export async function readBinaryMultiSig (filename: string): Promise<string | un
  * @param {string} name filename
  * @returns {LogicSig} signed logic signature from assets/<file_name>.blsig
  */
-export async function loadBinaryLsig (name: string): Promise<rtypes.LogicSig> {
+export async function loadBinaryLsig (name: string): Promise<wtypes.LogicSig> {
   const data = await readBinaryMultiSig(name);
   if (data === undefined) {
     throw new Error(`File ${name} does not exist`);
   }
   const program = new Uint8Array(Buffer.from(data, 'base64'));
-  return logicSigFromByte(program) as rtypes.LogicSig;
+  return logicSigFromByte(program) as wtypes.LogicSig;
 }
 
 /**
@@ -96,19 +97,20 @@ export function validateMsig (msig: EncodedMultisig | undefined): void {
  * @param  rawTxn
  * @returns signed transaction object
  */
-/*export function signMultiSig (signerAccount: Account, rawTxn: Uint8Array):
+export function signMultiSig (signerAccount: Account, rawTxn: Uint8Array):
   { txID: string, blob: Uint8Array} {
   const decodedTxn = decodeSignedTransaction(rawTxn);
   console.debug("Decoded txn before signing: %O", decodedTxn);
   validateMsig(decodedTxn.msig);
+  const decodedMsig = decodedTxn.msig as EncodedMultisig;
   console.log("Msig: %O", decodedTxn.msig);
   const addresses = [];
-  for (const sig of decodedTxn.msig.subsig) {
+  for (const sig of decodedMsig.subsig) {
     addresses.push(encodeAddress(Uint8Array.from(sig.pk)));
   }
   const mparams = {
-    version: decodedTxn.msig.v,
-    threshold: decodedTxn.msig.thr,
+    version: decodedMsig.v,
+    threshold: decodedMsig.thr,
     addrs: addresses
   };
   const signedTxn = appendSignMultisigTransaction(rawTxn, mparams, signerAccount.sk);
@@ -116,4 +118,4 @@ export function validateMsig (msig: EncodedMultisig | undefined): void {
   console.debug("Decoded txn after successfully signing: %O", decodedSignedTxn);
   console.log("Msig: %O", decodedSignedTxn.msig);
   return signedTxn;
-}*/
+}

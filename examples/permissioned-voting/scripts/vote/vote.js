@@ -1,4 +1,5 @@
-const { types, stringToBytes } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
+const { convert } = require('@algo-builder/algob');
 const { executeTransaction } = require('./common');
 
 async function run (runtimeEnv, deployer) {
@@ -15,6 +16,14 @@ async function run (runtimeEnv, deployer) {
     amountMicroAlgos: 200000000,
     payFlags: {}
   });
+  await executeTransaction(deployer, {
+    type: types.TransactionType.TransferAlgo,
+    sign: types.SignType.SecretKey,
+    fromAccount: masterAccount,
+    toAccountAddr: bob.addr,
+    amountMicroAlgos: 200000000,
+    payFlags: {}
+  });
 
   // Get last round.
   const status = await deployer.algodClient.status().do();
@@ -22,11 +31,11 @@ async function run (runtimeEnv, deployer) {
 
   // App arguments to vote for "candidatea".
   const appArgs = [
-    stringToBytes('vote'), stringToBytes('candidatea')
+    convert.stringToBytes('vote'), convert.stringToBytes('candidatea')
   ];
 
   // Get AppInfo and AssetID from checkpoints.
-  const appInfo = deployer.getSSC('permissioned-voting-approval.py', 'permissioned-voting-clear.py');
+  const appInfo = deployer.getApp('permissioned-voting-approval.py', 'permissioned-voting-clear.py');
   const voteAssetID = deployer.asa.get('vote-token').assetIndex;
 
   // Atomic Transaction (Stateful Smart Contract call + Asset Transfer)

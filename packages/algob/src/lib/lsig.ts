@@ -1,5 +1,6 @@
 /* eslint @typescript-eslint/no-var-requires: "off" */
 import { types as rtypes } from "@algo-builder/runtime";
+import { types as wtypes } from "@algo-builder/web";
 import type { MultisigMetadata } from "algosdk";
 import algosdk from "algosdk";
 
@@ -16,11 +17,11 @@ export async function getLsig (
   name: string,
   algodClient: algosdk.Algodv2,
   scTmplParams?: SCParams):
-  Promise<rtypes.LogicSig> {
+  Promise<wtypes.LogicSig> {
   const compileOp = new CompileOp(algodClient);
   const result: ASCCache = await compileOp.ensureCompiled(name, false, scTmplParams);
   const program = result.base64ToBytes;
-  const lsig = algosdk.makeLogicSig(program, []) as rtypes.LogicSig;
+  const lsig = algosdk.makeLogicSig(program, []) as wtypes.LogicSig;
   // below line saves data in cp is {tag: <value>} which we need, otherwise it'll save as
   // { type: 'buffer', data: <value> } and throws error upon running examples
   if (lsig.tag) { lsig.tag = Buffer.from(lsig.tag); }
@@ -30,8 +31,8 @@ export async function getLsig (
 /**
  * Create and return a dummy logic signature
  */
-export function getDummyLsig (): rtypes.LogicSig {
-  return algosdk.makeLogicSig(new Uint8Array(56), []) as rtypes.LogicSig;
+export function getDummyLsig (): wtypes.LogicSig {
+  return algosdk.makeLogicSig(new Uint8Array(56), []) as wtypes.LogicSig;
 }
 
 /**
@@ -43,8 +44,8 @@ export function getDummyLsig (): rtypes.LogicSig {
  * @param mparams: passed when signing a new multisig
  * @returns multi signed logic signature (with appended signature using signer's sk)
  */
-export function signLogicSigMultiSig (lsig: rtypes.LogicSig, signer: rtypes.Account,
-  mparams?: MultisigMetadata): rtypes.LogicSig {
+export function signLogicSigMultiSig (lsig: wtypes.LogicSig, signer: rtypes.Account,
+  mparams?: MultisigMetadata): wtypes.LogicSig {
   if (lsig.msig === undefined) { // if multisig not found, create new msig
     if (mparams === undefined) {
       throw new Error('MultiSig Metadata is undefined, which is required for single sign multisig');

@@ -1,4 +1,4 @@
-# Escrow Clawback for permissioned-token in pyTeal
+# Clawback lsig for permissioned-token in pyTeal
 
 # Add parent directory to path so that algobpy can be imported
 import sys
@@ -7,19 +7,19 @@ sys.path.insert(0,'..')
 from algobpy.parse import parse_params
 from pyteal import *
 
-def clawback_escrow(TOKEN_ID, CONTROLLER_APP_ID):
+def clawback_lsig(TOKEN_ID, CONTROLLER_APP_ID):
 
-	# check properties of txGroup passed
+    # check properties of txGroup passed
     group_tx_checks = And(
         Global.group_size() >= Int(3), # following 3 transactions must exist in every group
         Gtxn[0].type_enum() == TxnType.ApplicationCall, # call to controller smart contract
         Gtxn[1].type_enum() == TxnType.AssetTransfer,
-        Gtxn[2].type_enum() == TxnType.Payment, # paying fees for escrow
+        Gtxn[2].type_enum() == TxnType.Payment, # paying fees for lsig
         # this tx should be 2nd in the group
         Txn.group_index() == Int(1)
     )
 
-	# check no rekeying etc
+    # check no rekeying etc
     common_fields = And(
         Gtxn[0].rekey_to() == Global.zero_address(),
         Gtxn[1].rekey_to() == Global.zero_address(),
@@ -93,4 +93,4 @@ if __name__ == "__main__":
     if(len(sys.argv) > 1):
         params = parse_params(sys.argv[1], params)
 
-    print(compileTeal(clawback_escrow(params["TOKEN_ID"], params["CONTROLLER_APP_ID"]), Mode.Signature))
+    print(compileTeal(clawback_lsig(params["TOKEN_ID"], params["CONTROLLER_APP_ID"]), Mode.Signature))

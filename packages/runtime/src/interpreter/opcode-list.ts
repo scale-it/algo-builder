@@ -1,5 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
+import { parsing } from "@algo-builder/web";
 import { decodeAddress, decodeUint64, encodeAddress, encodeUint64, isValidAddress, modelsv2, verifyBytes } from "algosdk";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
@@ -11,7 +12,7 @@ import { compareArray } from "../lib/compare";
 import { AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64, MaxTEALVersion, TxArrFields } from "../lib/constants";
 import {
   assertLen, assertOnlyDigits, convertToBuffer,
-  convertToString, getEncoding, parseBinaryStrToBigInt, stringToBytes
+  convertToString, getEncoding, parseBinaryStrToBigInt
 } from "../lib/parsing";
 import { Stack } from "../lib/stack";
 import { txAppArg, txnSpecbyField } from "../lib/txn";
@@ -231,7 +232,7 @@ export class Bytecblock extends Op {
     this.line = line;
     const bytecblock: Uint8Array[] = [];
     for (const val of args) {
-      bytecblock.push(stringToBytes(val));
+      bytecblock.push(parsing.stringToBytes(val));
     }
 
     this.interpreter = interpreter;
@@ -2058,7 +2059,7 @@ export class GetAssetDef extends Op {
           if (isValidAddress(def)) {
             value = decodeAddress(def).publicKey;
           } else {
-            value = stringToBytes(def);
+            value = parsing.stringToBytes(def);
           }
           break;
       }

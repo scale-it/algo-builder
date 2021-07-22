@@ -18,8 +18,10 @@ layout: splash
 + [Algob Console](./algob-console.md)
 + [PyTeal](./py-teal.md)
 + [Test TEAL](./testing-teal.md)
-+ [Best Practices](./best-practices.md)
 + [Templates](./templates.md)
++ [Execute Transaction](./execute-transaction.md)
++ [Sign Multisig](./sign-multisig.md)
++ [Best Practices](./best-practices.md)
 
 For more in-depth description you can look at the [project specification](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
 
@@ -43,7 +45,7 @@ To install `algob` globally in your system you can use:
 + Using NPM: `npm install -g @algo-builder/algob`
 
 
-**Recommended**: Installation from source (if you want to use `algob` with latest, not released version):
+Installation from source:
 
 ```
 git clone https://github.com/scale-it/algo-builder.git
@@ -55,6 +57,15 @@ yarn link
 ```
 Finally, make sure your `yarn global bin` directory is in your `$PATH`.
 
+##### Upgrading
+
+If you use installation from source (_master_), don't forget to **pull the latest changes** to not to miss the updates:
+```
+cd path/to/algo-builder
+git pull -p
+yarn install
+yarn build
+```
 
 
 ### Algorand Node requirements

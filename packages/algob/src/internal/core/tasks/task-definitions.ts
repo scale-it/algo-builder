@@ -1,5 +1,5 @@
-import { BuilderError } from "../../../errors/errors";
-import { ErrorDescriptor, ERRORS } from "../../../errors/errors-list";
+import { BuilderError, ErrorDescriptor, ERRORS } from "@algo-builder/web";
+
 import {
   ActionType,
   ParamDefinitionAny,

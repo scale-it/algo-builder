@@ -1,15 +1,13 @@
-import { assert } from "chai";
-
 import {
-  BuilderError, BuilderPluginError
-} from "../../../src/errors/errors";
-import {
+  BuilderError,
   ERROR_RANGES,
   ErrorDescriptor,
   ERRORS
-} from "../../../src/errors/errors-list";
+} from "@algo-builder/web";
+import { assert } from "chai";
+
+import { BuilderPluginError } from "../../../src/internal/core/errors/errors";
 import { unsafeObjectKeys } from "../../../src/internal/util/unsafe";
-// import { expectBuilderError } from "../../helpers/errors";
 
 const mockErrorDescriptor: ErrorDescriptor = {
   number: 123,
@@ -62,7 +60,7 @@ describe("BuilderError", () => {
 
     it("should have the right error message", () => {
       const error = new BuilderError(mockErrorDescriptor);
-      assert.equal(error.message, `ABLDR123: ${mockErrorDescriptor.message}`);
+      assert.equal(error.message, `ABLDR123: ${mockErrorDescriptor.message}`); // eslint-disable-line @typescript-eslint/restrict-template-expressions
     });
 
     it("should format the error message with the template params", () => {
@@ -249,7 +247,7 @@ describe("BuilderPluginError", () => {
 
         const error = new BuilderPluginError(message, parent);
 
-        // This is being called from mocha, so that would be used as plugin name
+        // This is being called from @algo-builder/algob, so that would be used as plugin name
         assert.equal(error.pluginName, "mocha");
       });
 
