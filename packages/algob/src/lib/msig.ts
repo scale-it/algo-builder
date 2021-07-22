@@ -1,9 +1,10 @@
 import { getPathFromDirRecursive } from "@algo-builder/runtime";
-import type { Account, LogicSig, MultiSig, TxSig } from "algosdk";
-import { appendSignMultisigTransaction, decodeAddress, decodeSignedTransaction, encodeAddress, logicSigFromByte } from "algosdk";
+import type { Account, LogicSig, MultiSig, MultisigMetadata, TxSig } from "algosdk";
+import { appendSignMultisigTransaction, decodeAddress, decodeSignedTransaction, decodeUnsignedTransaction, encodeAddress, logicSigFromByte, signMultisigTransaction } from "algosdk";
 import fs from "fs";
 
 import { ASSETS_DIR } from "../internal/core/project-structure";
+import { isSignedTx } from "./tx";
 
 export const blsigExt = ".blsig";
 const lsigExt = ".lsig";
@@ -92,25 +93,41 @@ export function validateMsig (msig: MultiSig | undefined): void {
 
 /**
  * Signs a raw multi-sig transaction object
- * @param signerAccount
- * @param  rawTxn
+ * @param signerAccount account(addr, sk) to sign the transaction
+ * @param  rawTxn encoded transaction fetched from file in /assets
+ * @param mparams multisig metadata. Required if creating a new signed multisig transaction.
  * @returns signed transaction object
  */
-export function signMultiSig (signerAccount: Account, rawTxn: Uint8Array): TxSig {
-  const decodedTxn = decodeSignedTransaction(rawTxn);
-  console.debug("Decoded txn before signing: %O", decodedTxn);
-  validateMsig(decodedTxn.msig);
-  console.log("Msig: %O", decodedTxn.msig);
-  const addresses = [];
-  for (const sig of decodedTxn.msig.subsig) {
-    addresses.push(encodeAddress(Uint8Array.from(sig.pk)));
+export function signMultiSig (signerAccount: Account, rawTxn: Uint8Array, mparams?: MultisigMetadata): TxSig {
+  let decodedTxn, msig;
+  let multisigMetaData: MultisigMetadata; // extracted from existing multisig OR passed by user
+  if (isSignedTx(rawTxn)) {
+    decodedTxn = decodeSignedTransaction(rawTxn);
+    msig = decodedTxn.msig;
+    validateMsig(msig);
+    const addresses = [];
+    for (const sig of msig.subsig) {
+      addresses.push(encodeAddress(Uint8Array.from(sig.pk)));
+    }
+    multisigMetaData = {
+      version: msig.v,
+      threshold: msig.thr,
+      addrs: addresses
+    };
+  } else {
+    if (mparams === undefined) {
+      throw new Error(`Multisig MetaData (version, threshold, addresses) not passed. This is required for creating a new multisig. Aborting`);
+    }
+    decodedTxn = decodeUnsignedTransaction(rawTxn);
+    multisigMetaData = mparams;
   }
-  const mparams = {
-    version: decodedTxn.msig.v,
-    threshold: decodedTxn.msig.thr,
-    addrs: addresses
-  };
-  const signedTxn = appendSignMultisigTransaction(rawTxn, mparams, signerAccount.sk);
+  console.debug("Decoded txn before signing: %O", decodedTxn);
+  console.log("Msig: %O", msig);
+
+  // note: append requires raw(encoded) transaction object, but signMultisig requires decoded tx obj
+  const signedTxn = isSignedTx(rawTxn)
+    ? appendSignMultisigTransaction(rawTxn, multisigMetaData, signerAccount.sk)
+    : signMultisigTransaction(decodedTxn, multisigMetaData, signerAccount.sk);
   const decodedSignedTxn = decodeSignedTransaction(signedTxn.blob);
   console.debug("Decoded txn after successfully signing: %O", decodedSignedTxn);
   console.log("Msig: %O", decodedSignedTxn.msig);

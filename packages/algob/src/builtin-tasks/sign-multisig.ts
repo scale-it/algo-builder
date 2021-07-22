@@ -1,9 +1,10 @@
 import { getPathFromDirRecursive } from "@algo-builder/runtime";
+import { MultisigMetadata } from "algosdk";
 import path from "path";
 
 import { task } from "../internal/core/config/config-env";
 import { ASSETS_DIR } from "../internal/core/project-structure";
-import { loadSignedTxnFromFile } from "../lib/files";
+import { loadEncodedTxFromFile } from "../lib/files";
 import { signMultiSig } from "../lib/msig";
 import { RuntimeEnv } from "../types";
 import { writeToFile } from "./gen-accounts";
@@ -14,6 +15,9 @@ export interface TaskArgs {
   account: string
   out?: string
   force: boolean
+  v: string
+  thr: string
+  addrs: string
 }
 
 async function multiSignTx (
@@ -25,13 +29,19 @@ async function multiSignTx (
     console.error(`No account with the name "${taskArgs.account}" exists in the config file.`);
     return;
   }
-  const rawTxn = loadSignedTxnFromFile(taskArgs.file);
+  const rawTxn = loadEncodedTxFromFile(taskArgs.file);
   const sourceFilePath = getPathFromDirRecursive(ASSETS_DIR, taskArgs.file) as string;
   if (rawTxn === undefined) {
     console.error("Error loading transaction from the file.");
     return;
   }
-  const signedTxn = signMultiSig(signerAccount, rawTxn);
+
+  let mparams: MultisigMetadata | undefined;
+  const { v, thr, addrs } = taskArgs;
+  if (v && thr && addrs) {
+    mparams = { version: Number(v), threshold: Number(thr), addrs: addrs.split(',') };
+  }
+  const signedTxn = signMultiSig(signerAccount, rawTxn, mparams);
   const outFileName = taskArgs.out ?? taskArgs.file.split(".")[0] + "_out.txn";
   const outFilePath = path.join(path.dirname(sourceFilePath), outFileName);
   await writeToFile(signedTxn.blob, taskArgs.force, outFilePath);
@@ -49,7 +59,19 @@ export default function (): void {
     )
     .addOptionalParam(
       "out",
-      "Name of the file to be used for resultant transaction file.\n\t\t        If not provided source transaction file's name will be appended by \"_out\""
+      "Name of the file to be used for resultant transaction file.\n\t\tIf not provided source transaction file's name will be appended by \"_out\"\n"
+    )
+    .addOptionalParam(
+      "v",
+      "Multisig version (required if creating a new signed multisig transaction)"
+    )
+    .addOptionalParam(
+      "thr",
+      "Multisig threshold (required if creating a new signed multisig transaction)"
+    )
+    .addOptionalParam(
+      "addrs",
+      "Comma separated addresses comprising of the multsig (addr1,addr2,..). Order is important. \n\t\t(required if creating a new signed multisig transaction)\n"
     )
     .addFlag("force", "Overwrite output transaction file if the file already exists.")
     .setAction((input, env) => multiSignTx(input, env));

@@ -38,7 +38,7 @@ export function assertDirectDirChildren (dir: string, scriptNames: string[]): st
  * @param fileName : file name
  * @returns signed transaction encoded as Uint8array
  */
-export function loadSignedTxnFromFile (fileName: string): Uint8Array | undefined {
+export function loadEncodedTxFromFile (fileName: string): Uint8Array | undefined {
   try {
     const p = getPathFromDirRecursive(ASSETS_DIR, fileName) as string;
     const buffer = fs.readFileSync(p);
