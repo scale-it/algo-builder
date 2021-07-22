@@ -2,7 +2,7 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
 import type { MultisigMetadata } from "algosdk";
-import algosdk from "algosdk";
+import algosdk, { LogicSig } from "algosdk";
 
 import type { ASCCache, SCParams } from "../types";
 import { CompileOp } from "./compile";
@@ -17,11 +17,11 @@ export async function getLsig (
   name: string,
   algodClient: algosdk.Algodv2,
   scTmplParams?: SCParams):
-  Promise<wtypes.LogicSig> {
+  Promise<LogicSig> {
   const compileOp = new CompileOp(algodClient);
   const result: ASCCache = await compileOp.ensureCompiled(name, false, scTmplParams);
   const program = result.base64ToBytes;
-  const lsig = algosdk.makeLogicSig(program, []) as wtypes.LogicSig;
+  const lsig = algosdk.makeLogicSig(program, []);
   // below line saves data in cp is {tag: <value>} which we need, otherwise it'll save as
   // { type: 'buffer', data: <value> } and throws error upon running examples
   if (lsig.tag) { lsig.tag = Buffer.from(lsig.tag); }
@@ -31,8 +31,8 @@ export async function getLsig (
 /**
  * Create and return a dummy logic signature
  */
-export function getDummyLsig (): wtypes.LogicSig {
-  return algosdk.makeLogicSig(new Uint8Array(56), []) as wtypes.LogicSig;
+export function getDummyLsig (): LogicSig {
+  return algosdk.makeLogicSig(new Uint8Array(56), []);
 }
 
 /**
@@ -44,8 +44,8 @@ export function getDummyLsig (): wtypes.LogicSig {
  * @param mparams: passed when signing a new multisig
  * @returns multi signed logic signature (with appended signature using signer's sk)
  */
-export function signLogicSigMultiSig (lsig: wtypes.LogicSig, signer: rtypes.Account,
-  mparams?: MultisigMetadata): wtypes.LogicSig {
+export function signLogicSigMultiSig (lsig: LogicSig, signer: rtypes.Account,
+  mparams?: MultisigMetadata): LogicSig {
   if (lsig.msig === undefined) { // if multisig not found, create new msig
     if (mparams === undefined) {
       throw new Error('MultiSig Metadata is undefined, which is required for single sign multisig');

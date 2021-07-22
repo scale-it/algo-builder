@@ -1,6 +1,6 @@
 import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
 import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
-import type { EncodedMultisig } from "algosdk";
+import type { EncodedMultisig, LogicSig, modelsv2 } from "algosdk";
 import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
@@ -101,7 +101,7 @@ class DeployerBasicMode {
     return this.algoOp.algodClient;
   }
 
-  async waitForConfirmation (txId: string): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+  async waitForConfirmation (txId: string): Promise<modelsv2.PendingTransactionResponse> {
     return await this.algoOp.waitForConfirmation(txId);
   }
 
@@ -110,7 +110,7 @@ class DeployerBasicMode {
    * @param assetIndex asset index
    * @returns asset info from network
    */
-  async getAssetByID (assetIndex: number | bigint): Promise<algosdk.modelsv2.Asset> {
+  async getAssetByID (assetIndex: number | bigint): Promise<modelsv2.Asset> {
     return await this.algoOp.getAssetByID(assetIndex);
   }
 
@@ -141,7 +141,7 @@ class DeployerBasicMode {
   /**
    * Loads a single signed delegated logic signature from checkpoint
    */
-  getDelegatedLsig (lsigName: string): wtypes.LogicSig | undefined {
+  getDelegatedLsig (lsigName: string): LogicSig | undefined {
     const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map(); ;
     const result = resultMap.get(lsigName)?.lsig;
     if (result === undefined) { return undefined; }
@@ -157,7 +157,7 @@ class DeployerBasicMode {
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    * @returns loaded logic signature from assets/<file_name>.teal
    */
-  async loadLogic (name: string, scTmplParams?: SCParams): Promise<wtypes.LogicSig> {
+  async loadLogic (name: string, scTmplParams?: SCParams): Promise<LogicSig> {
     return await getLsig(name, this.algoOp.algodClient, scTmplParams);
   }
 
@@ -166,7 +166,7 @@ class DeployerBasicMode {
    * @param name filename
    * @returns multi signed logic signature from assets/<file_name>.(b)lsig
    */
-  async loadMultiSig (name: string): Promise<wtypes.LogicSig> {
+  async loadMultiSig (name: string): Promise<LogicSig> {
     if (name.endsWith(blsigExt)) { return await loadBinaryLsig(name); }
 
     const lsig = await getLsig(name, this.algoOp.algodClient); // get lsig from .teal (getting logic part from lsig)
@@ -181,7 +181,7 @@ class DeployerBasicMode {
    */
   async sendAndWait (
     rawTxns: Uint8Array | Uint8Array[]
-  ): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+  ): Promise<modelsv2.PendingTransactionResponse> {
     return await this.algoOp.sendAndWait(rawTxns);
   }
 
@@ -228,7 +228,7 @@ class DeployerBasicMode {
    * @param lsig logic signature
    * @param flags Transaction flags
    */
-  async optInLsigToASA (asa: string, lsig: wtypes.LogicSig, flags: wtypes.TxParams): Promise<void> {
+  async optInLsigToASA (asa: string, lsig: LogicSig, flags: wtypes.TxParams): Promise<void> {
     this.assertCPNotDeleted({
       type: wtypes.TransactionType.OptInASA,
       sign: wtypes.SignType.LogicSignature,
@@ -283,7 +283,7 @@ class DeployerBasicMode {
    */
   async optInLsigToApp (
     appID: number,
-    lsig: wtypes.LogicSig,
+    lsig: LogicSig,
     payFlags: wtypes.TxParams,
     flags: rtypes.AppOptionalFlags): Promise<void> {
     this.assertCPNotDeleted({
@@ -464,7 +464,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   /**
    * Log transaction with message using txwriter
    */
-  logTx (message: string, txConfirmation: algosdk.modelsv2.PendingTransactionResponse): void {
+  logTx (message: string, txConfirmation: modelsv2.PendingTransactionResponse): void {
     this.txWriter.push(message, txConfirmation);
   }
 
@@ -675,7 +675,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     });
   }
 
-  logTx (message: string, txConfirmation: algosdk.modelsv2.PendingTransactionResponse): void {
+  logTx (message: string, txConfirmation: modelsv2.PendingTransactionResponse): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "logTx"
     });

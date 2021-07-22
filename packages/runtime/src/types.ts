@@ -1,7 +1,8 @@
 import { types } from "@algo-builder/web";
-import algosdk, {
+import {
   Account as AccountSDK,
-  EncodedTransaction
+  EncodedTransaction,
+  modelsv2
 } from "algosdk";
 
 import {
@@ -141,7 +142,7 @@ export interface AssetHoldingM {
 export interface AppLocalStateM {
   id: number
   'key-value': Map<string, StackElem> // string represents bytes as string eg. 11,22,34
-  schema: algosdk.modelsv2.ApplicationStateSchema
+  schema: modelsv2.ApplicationStateSchema
 }
 
 // custom SSCAttributes for AccountStore (using maps instead of array in 'global-state')
@@ -150,8 +151,8 @@ export interface SSCAttributesM {
   'clear-state-program': string
   creator: string
   'global-state': Map<string, StackElem>
-  'global-state-schema': algosdk.modelsv2.ApplicationStateSchema
-  'local-state-schema': algosdk.modelsv2.ApplicationStateSchema
+  'global-state-schema': modelsv2.ApplicationStateSchema
+  'local-state-schema': modelsv2.ApplicationStateSchema
 }
 
 // custom CreatedApp for AccountStore
@@ -168,9 +169,9 @@ export interface AccountStoreI {
   amount: bigint
   minBalance: number
   appsLocalState: Map<number, AppLocalStateM>
-  appsTotalSchema: algosdk.modelsv2.ApplicationStateSchema
+  appsTotalSchema: modelsv2.ApplicationStateSchema
   createdApps: Map<number, SSCAttributesM>
-  createdAssets: Map<number, algosdk.modelsv2.AssetParams>
+  createdAssets: Map<number, modelsv2.AssetParams>
   account: AccountSDK
 
   balance: () => bigint
@@ -178,9 +179,9 @@ export interface AccountStoreI {
   getAppFromLocal: (appID: number) => AppLocalStateM | undefined
   addApp: (appID: number, params: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string) => CreatedAppM
-  getAssetDef: (assetId: number) => algosdk.modelsv2.AssetParams | undefined
+  getAssetDef: (assetId: number) => modelsv2.AssetParams | undefined
   getAssetHolding: (assetId: number) => AssetHoldingM | undefined
-  addAsset: (assetId: number, name: string, asadef: types.ASADef) => algosdk.modelsv2.AssetParams
+  addAsset: (assetId: number, name: string, asadef: types.ASADef) => modelsv2.AssetParams
   modifyAsset: (assetId: number, fields: types.AssetModFields) => void
   closeAsset: (assetId: number) => void
   setFreezeState: (assetId: number, state: boolean) => void

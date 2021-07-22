@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
-import * as algosdk from "algosdk";
+import algosdk, { LogicSig, modelsv2 } from "algosdk";
 
 import * as types from "./internal/core/params/argument-types";
 // Begin config types
@@ -311,7 +311,7 @@ export type AccountAddress = string;
 export interface LsigInfo {
   creator: AccountAddress
   contractAddress: string
-  lsig: wtypes.LogicSig
+  lsig: LogicSig
 }
 
 /**
@@ -446,13 +446,13 @@ export interface Deployer {
 
   registerSSCInfo: (name: string, sscInfo: rtypes.SSCInfo) => void
 
-  logTx: (message: string, txConfirmation: algosdk.modelsv2.PendingTransactionResponse) => void
+  logTx: (message: string, txConfirmation: modelsv2.PendingTransactionResponse) => void
 
   /**
    * Send signed transaction to network and wait for confirmation
    * @param rawTxns Signed Transaction(s)
    */
-  sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<algosdk.modelsv2.PendingTransactionResponse>
+  sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<modelsv2.PendingTransactionResponse>
 
   /**
    * Funds logic signature account (Contract Account).
@@ -526,11 +526,11 @@ export interface Deployer {
 
   /**
    * Queries blockchain for a given transaction and waits until it will be processed. */
-  waitForConfirmation: (txId: string) => Promise<algosdk.modelsv2.PendingTransactionResponse>
+  waitForConfirmation: (txId: string) => Promise<modelsv2.PendingTransactionResponse>
 
   /**
    * Queries blockchain using algodv2 for asset information by index  */
-  getAssetByID: (assetIndex: number | bigint) => Promise<algosdk.modelsv2.Asset>
+  getAssetByID: (assetIndex: number | bigint) => Promise<modelsv2.Asset>
 
   /**
    * Creates an opt-in transaction for given ASA name, which must be defined in
@@ -541,7 +541,7 @@ export interface Deployer {
   /**
    * Creates an opt-in transaction for given ASA name, which must be defined in
    * `/assets/asa.yaml` file. The opt-in transaction is signed by the logic signature */
-  optInLsigToASA: (asa: string, lsig: wtypes.LogicSig, flags: wtypes.TxParams) => Promise<void>
+  optInLsigToASA: (asa: string, lsig: LogicSig, flags: wtypes.TxParams) => Promise<void>
 
   /**
    * Opt-In to stateful smart contract (SSC) for a single account
@@ -567,7 +567,7 @@ export interface Deployer {
    */
   optInLsigToApp: (
     appID: number,
-    lsig: wtypes.LogicSig,
+    lsig: LogicSig,
     payFlags: wtypes.TxParams,
     flags: rtypes.AppOptionalFlags) => Promise<void>
 
@@ -577,7 +577,7 @@ export interface Deployer {
 
   /**
    * Extracts multi signed logic signature file from `assets/`. */
-  loadMultiSig: (name: string) => Promise<wtypes.LogicSig>
+  loadMultiSig: (name: string) => Promise<LogicSig>
 
   /**
    * Queries a stateful smart contract info from checkpoint. */
@@ -593,7 +593,7 @@ export interface Deployer {
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  loadLogic: (name: string, scTmplParams?: SCParams) => Promise<wtypes.LogicSig>
+  loadLogic: (name: string, scTmplParams?: SCParams) => Promise<LogicSig>
 
   /**
    * Returns ASCCache (with compiled code)

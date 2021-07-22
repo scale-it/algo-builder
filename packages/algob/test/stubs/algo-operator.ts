@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
-import { Account, Algodv2, modelsv2 } from "algosdk";
+import { Account, Algodv2, LogicSig, modelsv2 } from "algosdk";
 
 import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";
@@ -59,7 +59,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     return {
       creator: String(flags.funder.addr) + "-get-address-dry-run",
       contractAddress: "dfssdfsd",
-      lsig: {} as wtypes.LogicSig
+      lsig: {} as LogicSig
     };
   }
 
@@ -117,7 +117,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   optInLsigToASA (
-    asaName: string, assetIndex: number, lsig: wtypes.LogicSig, flags: wtypes.TxParams
+    asaName: string, assetIndex: number, lsig: LogicSig, flags: wtypes.TxParams
   ): Promise<void> {
     return new Promise((resolve, reject) => { resolve(); });
   }
@@ -129,7 +129,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   optInLsigToApp (
-    appID: number, lsig: wtypes.LogicSig,
+    appID: number, lsig: LogicSig,
     payFlags: wtypes.TxParams, flags: rtypes.AppOptionalFlags): Promise<void> {
     return new Promise((resolve, reject) => { resolve(); });
   }

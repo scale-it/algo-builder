@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { ERRORS, types as wtypes } from "@algo-builder/web";
-import { generateAccount } from "algosdk";
+import { generateAccount, LogicSig } from "algosdk";
 import { assert } from "chai";
 
 import { genAccounts } from "../../src/builtin-tasks/gen-accounts";
@@ -335,7 +335,7 @@ describe("DeployerDeployMode", () => {
       .registerLsig(networkName, "Lsig name", {
         creator: "Lsig creator",
         contractAddress: "addr-1",
-        lsig: {} as wtypes.LogicSig
+        lsig: {} as LogicSig
       })
       .putMetadata(networkName, "k", "v");
     const deployerCfg = new DeployerConfig(env, new AlgoOperatorDryRunImpl());

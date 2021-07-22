@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { tx as webTx, types as wtypes } from "@algo-builder/web";
-import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
+import algosdk, { Algodv2, modelsv2, SuggestedParams, Transaction } from "algosdk";
 
 import { Deployer } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
@@ -72,11 +72,11 @@ export function makeAssetCreateTxn (
     BigInt(asaDef.total),
     Number(asaDef.decimals),
     asaDef.defaultFrozen ? asaDef.defaultFrozen : false,
-    asaDef.manager ? asaDef.manager : "",
-    asaDef.reserve ? asaDef.reserve : "",
-    asaDef.freeze ? asaDef.freeze : "",
-    asaDef.clawback ? asaDef.clawback : "",
-    asaDef.unitName ? asaDef.unitName : "",
+    asaDef.manager !== "" ? asaDef.manager : undefined,
+    asaDef.reserve !== "" ? asaDef.reserve : undefined,
+    asaDef.freeze !== "" ? asaDef.freeze : undefined,
+    asaDef.clawback !== "" ? asaDef.clawback : undefined,
+    asaDef.unitName ? asaDef.unitName : undefined,
     name,
     asaDef.url ? asaDef.url : "",
     asaDef.metadataHash,
@@ -225,7 +225,7 @@ async function mkTx (
 export async function executeTransaction (
   deployer: Deployer,
   execParams: wtypes.ExecParams | wtypes.ExecParams[]):
-  Promise<algosdk.modelsv2.PendingTransactionResponse> {
+  Promise<modelsv2.PendingTransactionResponse> {
   deployer.assertCPNotDeleted(execParams);
   try {
     let signedTxn;
@@ -271,7 +271,7 @@ export async function executeTransaction (
  */
 export async function executeSignedTxnFromFile (
   deployer: Deployer,
-  fileName: string): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+  fileName: string): Promise<modelsv2.PendingTransactionResponse> {
   const signedTxn = loadSignedTxnFromFile(fileName);
   if (signedTxn === undefined) { throw new Error(`File ${fileName} does not exist`); }
 

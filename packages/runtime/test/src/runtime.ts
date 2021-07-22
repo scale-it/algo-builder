@@ -1,4 +1,5 @@
 import { types } from "@algo-builder/web";
+import { LogicSig } from "algosdk";
 import { assert } from "chai";
 import sinon from "sinon";
 
@@ -21,7 +22,7 @@ describe("Logic Signature Transaction in Runtime", function () {
   const alice = new AccountStore(minBalance);
 
   let runtime: Runtime;
-  let lsig: types.LogicSig;
+  let lsig: LogicSig;
   let txnParam: types.ExecParams;
   this.beforeAll(function () {
     runtime = new Runtime([john, bob, alice]);

@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
-import * as algosdk from "algosdk";
+import algosdk, { LogicSig, modelsv2 } from "algosdk";
 
 import type {
   ASCCache,
@@ -51,11 +51,11 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  logTx (message: string, txConfirmation: algosdk.modelsv2.PendingTransactionResponse): void {
+  logTx (message: string, txConfirmation: modelsv2.PendingTransactionResponse): void {
     throw new Error("Not implemented");
   }
 
-  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<modelsv2.PendingTransactionResponse> {
     throw new Error("Not implemented");
   }
 
@@ -95,11 +95,11 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  async loadLogic (name: string, scInitParam?: unknown): Promise<wtypes.LogicSig> {
+  async loadLogic (name: string, scInitParam?: unknown): Promise<LogicSig> {
     throw new Error("Not implemented");
   }
 
-  loadMultiSig (name: string): Promise<wtypes.LogicSig> {
+  loadMultiSig (name: string): Promise<LogicSig> {
     throw new Error("Not implemented");
   }
 
@@ -163,11 +163,11 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   };
 
-  getAssetByID (assetIndex: number | bigint): Promise<algosdk.modelsv2.Asset> {
+  getAssetByID (assetIndex: number | bigint): Promise<modelsv2.Asset> {
     throw new Error("Not implemented");
   }
 
-  waitForConfirmation (txId: string): Promise<algosdk.modelsv2.PendingTransactionResponse> {
+  waitForConfirmation (txId: string): Promise<modelsv2.PendingTransactionResponse> {
     throw new Error("Not implemented");
   }
 
@@ -175,7 +175,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  optInLsigToASA (asa: string, lsig: wtypes.LogicSig, flags: wtypes.TxParams): Promise<void> {
+  optInLsigToASA (asa: string, lsig: LogicSig, flags: wtypes.TxParams): Promise<void> {
     throw new Error("Not implemented");
   }
 
@@ -186,7 +186,7 @@ export class FakeDeployer implements Deployer {
   }
 
   optInLsigToApp (
-    appID: number, lsig: wtypes.LogicSig,
+    appID: number, lsig: LogicSig,
     payFlags: wtypes.TxParams, flags: rtypes.AppOptionalFlags): Promise<void> {
     throw new Error("not implemented.");
   }

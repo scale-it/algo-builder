@@ -1,4 +1,4 @@
-import { Account as AccountSDK, EncodedLogicSig, EncodedMultisig, MultisigMetadata } from 'algosdk';
+import { Account as AccountSDK, LogicSig } from 'algosdk';
 import * as z from 'zod';
 
 import type { ASADefSchema, ASADefsSchema } from "./types-input";
@@ -236,37 +236,6 @@ export type AppCallsParam = BasicParams & AppOptionalFlags & {
 export type ASADef = z.infer<typeof ASADefSchema>;
 
 export type ASADefs = z.infer<typeof ASADefsSchema>;
-
-interface LogicSigStorageStructure {
-  tag: Buffer
-  logic: Uint8Array
-  args: Uint8Array[]
-  sig?: Uint8Array
-  msig?: EncodedMultisig
-}
-
-/** Algosdk types */
-export interface LogicSig extends LogicSigStorageStructure {
-
-  get_obj_for_encoding: () => EncodedLogicSig
-  from_obj_for_encoding: (encoded: EncodedLogicSig) => LogicSig
-
-  // Performs signature verification
-  verify: (msg: Uint8Array) => boolean
-  // Compute hash of the logic sig program (that is the same as escrow account address) as string address
-  address: () => string
-  // Creates signature (if no msig provided) or multi signature otherwise
-  sign: (secretKey: Uint8Array, msig?: MultisigMetadata) => void
-  // Signs and appends a signature
-  appendToMultisig: (secretKey: Uint8Array) => void
-  // signs and returns program signature, without appending it to this object
-  signProgram: (secretKey: Uint8Array) => Uint8Array
-  singleSignMultisig: (secretKey: Uint8Array, msig: EncodedMultisig) => [Uint8Array, number]
-  // serializes and encodes the LogicSig
-  toByte: () => Uint8Array
-  // deserializes a LogicSig which was serialized using toByte()
-  fromByte: (encoded: Uint8Array) => LogicSig
-}
 
 export interface RequestError extends Error {
   response?: {

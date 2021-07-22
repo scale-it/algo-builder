@@ -1,5 +1,4 @@
-import { types as wtypes } from "@algo-builder/web";
-import algosdk, { Algodv2, modelsv2, SuggestedParams } from "algosdk";
+import algosdk, { Algodv2, LogicSig, modelsv2, SuggestedParams } from "algosdk";
 
 import { bobAcc } from "./account";
 
@@ -20,7 +19,7 @@ export const mockConfirmedTx: modelsv2.PendingTransactionResponse = {
   applicationIndex: 1
 } as modelsv2.PendingTransactionResponse;
 
-export const mockAssetInfo: algosdk.modelsv2.Asset = {
+export const mockAssetInfo: modelsv2.Asset = {
   index: 1,
   params: {
     creator: "addr-1",
@@ -36,7 +35,7 @@ export const mockAssetInfo: algosdk.modelsv2.Asset = {
     freeze: bobAcc.addr,
     clawback: undefined
   } as modelsv2.AssetParams
-} as algosdk.modelsv2.Asset;
+} as modelsv2.Asset;
 
 const mockProgram = new Uint8Array([
   2, 32, 4, 1, 4, 100, 144, 78, 49, 16,
@@ -46,4 +45,4 @@ const mockProgram = new Uint8Array([
   1, 37, 14, 16
 ]);
 
-export const mockLsig: wtypes.LogicSig = algosdk.makeLogicSig(mockProgram, []) as wtypes.LogicSig;
+export const mockLsig: LogicSig = algosdk.makeLogicSig(mockProgram, []);

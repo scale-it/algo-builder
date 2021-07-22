@@ -1,5 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { ERRORS, types as wtypes } from "@algo-builder/web";
+import { LogicSig } from "algosdk";
 import { assert } from "chai";
 import * as fs from "fs";
 
@@ -96,7 +97,7 @@ describe("Checkpoint", () => {
     netCheckpoint.dLsig.set("lsig", {
       creator: "536",
       contractAddress: "addr-3",
-      lsig: {} as wtypes.LogicSig
+      lsig: {} as LogicSig
     });
     appendToCheckpoint(checkpoints, "network12345", netCheckpoint);
     assert.deepEqual(checkpoints, {
@@ -116,7 +117,7 @@ describe("Checkpoint", () => {
         dLsig: new Map([["lsig", {
           creator: "536",
           contractAddress: "addr-3",
-          lsig: {} as wtypes.LogicSig
+          lsig: {} as LogicSig
         }]])
       }
     });
@@ -162,7 +163,7 @@ describe("Checkpoint", () => {
         dLsig: new Map([["lsig", {
           creator: "536",
           contractAddress: "addr-3",
-          lsig: {} as wtypes.LogicSig
+          lsig: {} as LogicSig
         }]])
       }
     });
