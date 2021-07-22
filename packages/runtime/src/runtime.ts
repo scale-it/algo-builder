@@ -15,7 +15,7 @@ import { mockSuggestedParams } from "./mock/tx";
 import {
   AccountAddress, AccountStoreI, AppDeploymentFlags, AppOptionalFlags,
   ASADeploymentFlags, ASAInfo, AssetHoldingM, Context,
-  ExecutionMode, SSCAttributesM, SSCInfo, StackElem, State, Txn, TxParams
+  ExecutionMode, SSCAttributesM, SSCInfo, StackElem, State, Txn
 } from "./types";
 
 export class Runtime {
@@ -364,7 +364,7 @@ export class Runtime {
    * @param address Account address to opt-into asset
    * @param flags Transaction Parameters
    */
-  optIntoASA (assetIndex: number, address: AccountAddress, flags: TxParams): void {
+  optIntoASA (assetIndex: number, address: AccountAddress, flags: types.TxParams): void {
     this.ctx.optIntoASA(assetIndex, address, flags);
 
     this.store = this.ctx.state;
@@ -388,7 +388,7 @@ export class Runtime {
   }
 
   // creates new application transaction object and update context
-  addCtxAppCreateTxn (flags: AppDeploymentFlags, payFlags: TxParams): void {
+  addCtxAppCreateTxn (flags: AppDeploymentFlags, payFlags: types.TxParams): void {
     const txn = algosdk.makeApplicationCreateTxn(
       flags.sender.addr,
       mockSuggestedParams(payFlags, this.round),
@@ -424,7 +424,7 @@ export class Runtime {
    * NOTE - approval and clear program must be the TEAL code as string (not compiled code)
    */
   addApp (
-    flags: AppDeploymentFlags, payFlags: TxParams,
+    flags: AppDeploymentFlags, payFlags: types.TxParams,
     approvalProgram: string, clearProgram: string,
     debugStack?: number
   ): number {
@@ -440,7 +440,7 @@ export class Runtime {
   addCtxOptInTx (
     senderAddr: string,
     appID: number,
-    payFlags: TxParams,
+    payFlags: types.TxParams,
     flags: AppOptionalFlags): void {
     const txn = algosdk.makeApplicationOptInTxn(
       senderAddr,
@@ -470,7 +470,7 @@ export class Runtime {
    * each opcode execution (upto depth = debugStack)
    */
   optInToApp (accountAddr: string, appID: number,
-    flags: AppOptionalFlags, payFlags: TxParams, debugStack?: number): void {
+    flags: AppOptionalFlags, payFlags: types.TxParams, debugStack?: number): void {
     this.addCtxOptInTx(accountAddr, appID, payFlags, flags);
     this.ctx.debugStack = debugStack;
     this.ctx.optInToApp(accountAddr, appID);
@@ -482,7 +482,7 @@ export class Runtime {
   addCtxAppUpdateTx (
     senderAddr: string,
     appID: number,
-    payFlags: TxParams,
+    payFlags: types.TxParams,
     flags: AppOptionalFlags): void {
     const txn = algosdk.makeApplicationUpdateTxn(
       senderAddr,
@@ -521,7 +521,7 @@ export class Runtime {
     appID: number,
     approvalProgram: string,
     clearProgram: string,
-    payFlags: TxParams,
+    payFlags: types.TxParams,
     flags: AppOptionalFlags,
     debugStack?: number
   ): void {
