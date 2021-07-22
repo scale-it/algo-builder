@@ -66,7 +66,7 @@ export interface AccountsMap {
 /**
  * RuntimeAccountMap is for AccountStore used in runtime
  * (where we use maps instead of arrays in sdk structures). */
-export type RuntimeAccountMap = Map<string, AccountStoreI>;
+export type RuntimeAccountMap = Map<string, AccountAddress>;
 
 export interface State {
   accounts: Map<string, AccountStoreI>

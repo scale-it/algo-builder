@@ -39,8 +39,12 @@ export class AccountStore implements AccountStoreI {
   createdApps: Map<number, SSCAttributesM>;
   createdAssets: Map<number, AssetDef>;
 
-  constructor (balance: number | bigint, account?: RuntimeAccount) {
-    if (account?.addr && account.sk) {
+  constructor (balance: number | bigint, account?: RuntimeAccount | string) {
+    if (typeof account === 'string') {
+      this.account = generateAccount();
+      this.account.name = account;
+      this.address = this.account.addr;
+    } else if (account) {
       // set config if account is passed by user
       this.account = account;
       this.address = account.addr;
@@ -49,7 +53,6 @@ export class AccountStore implements AccountStoreI {
       this.account = generateAccount();
       this.address = this.account.addr;
     }
-    if (account?.name) this.account.name = account.name;
 
     this.assets = new Map<number, AssetHoldingM>();
     this.amount = BigInt(balance);

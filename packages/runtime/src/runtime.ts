@@ -50,7 +50,7 @@ export class Runtime {
     this.initializeAccounts(accounts);
 
     // load asa yaml files
-    this.loadedAssetsDefs = loadASAFile(this.store.accounts);
+    this.loadedAssetsDefs = loadASAFile(this.store.accountNameAddress);
 
     // context for interpreter
     this.ctx = new Ctx(cloneDeep(this.store), <Txn>{}, [], [], this);
