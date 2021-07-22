@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import { Account, Algodv2, modelsv2 } from "algosdk";
 import { types as wtypes } from "@algo-builder/web";
+import { Account, Algodv2, modelsv2 } from "algosdk";
 
 import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";

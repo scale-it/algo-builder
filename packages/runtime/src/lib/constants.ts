@@ -1,4 +1,4 @@
-import { EncodedAssetParams, EncodedTransaction, EncodedLocalStateSchema } from "algosdk";
+import { EncodedAssetParams, EncodedLocalStateSchema, EncodedTransaction } from "algosdk";
 
 export const MIN_UINT64 = 0n;
 export const MAX_UINT64 = 0xFFFFFFFFFFFFFFFFn;

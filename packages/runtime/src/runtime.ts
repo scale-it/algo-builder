@@ -1,7 +1,7 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
 import { parsing, tx as webTx, types } from "@algo-builder/web";
-import algosdk, { decodeAddress, EncodedTransaction, modelsv2 } from "algosdk";
+import algosdk, { decodeAddress } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
 import { AccountStore } from "./account";

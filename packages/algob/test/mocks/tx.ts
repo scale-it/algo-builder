@@ -1,4 +1,3 @@
-import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
 import algosdk, { Algodv2, modelsv2, SuggestedParams } from "algosdk";
 

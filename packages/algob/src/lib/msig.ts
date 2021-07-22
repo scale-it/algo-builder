@@ -98,7 +98,7 @@ export function validateMsig (msig: EncodedMultisig | undefined): void {
  * @returns signed transaction object
  */
 export function signMultiSig (signerAccount: Account, rawTxn: Uint8Array):
-  { txID: string, blob: Uint8Array} {
+{ txID: string, blob: Uint8Array} {
   const decodedTxn = decodeSignedTransaction(rawTxn);
   console.debug("Decoded txn before signing: %O", decodedTxn);
   validateMsig(decodedTxn.msig);
