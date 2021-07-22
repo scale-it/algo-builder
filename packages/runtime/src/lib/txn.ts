@@ -220,10 +220,10 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         fromAccountAddr,
         encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64),
         Number(execParams.assetID),
-        execParams.fields.manager ? execParams.fields.manager : "",
-        execParams.fields.reserve ? execParams.fields.reserve : "",
-        execParams.fields.freeze ? execParams.fields.freeze : "",
-        execParams.fields.clawback ? execParams.fields.clawback : "",
+        execParams.fields.manager !== "" ? execParams.fields.manager : undefined,
+        execParams.fields.reserve !== "" ? execParams.fields.reserve : undefined,
+        execParams.fields.freeze !== "" ? execParams.fields.freeze : undefined,
+        execParams.fields.clawback !== "" ? execParams.fields.clawback : undefined,
         suggestedParams,
         false
       );

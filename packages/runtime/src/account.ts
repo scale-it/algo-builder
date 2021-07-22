@@ -395,12 +395,12 @@ class Asset {
       decimals: def.decimals,
       defaultFrozen: def.defaultFrozen ?? false,
       unitName: def.unitName,
-      url: def.url ?? '',
-      metadataHash: def.metadataHash ?? '',
-      manager: def.manager ?? '',
-      reserve: def.reserve ?? '',
-      freeze: def.freeze ?? '',
-      clawback: def.clawback ?? '',
+      url: def.url,
+      metadataHash: def.metadataHash,
+      manager: def.manager,
+      reserve: def.reserve,
+      freeze: def.freeze,
+      clawback: def.clawback,
       ...base
     };
   }

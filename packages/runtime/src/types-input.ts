@@ -12,7 +12,7 @@ export const ASADefSchema = z.object({
   defaultFrozen: z.boolean().optional(),
   unitName: z.string().optional(),
   url: z.string().optional(),
-  metadataHash: z.string().optional(),
+  metadataHash: z.any().optional(),
   note: z.string().optional(),
   noteb64: z.string().optional(),
   manager: AddressSchema.optional(),

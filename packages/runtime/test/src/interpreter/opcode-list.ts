@@ -2148,7 +2148,7 @@ describe("Teal Opcodes", function () {
         op = new Gtxn(["1", "Applications", "0"], 1, interpreter);
         op.execute(stack);
         assert.equal(1, stack.length());
-        assert.deepEqual(BigInt(interpreter.runtime.ctx.tx.apid), stack.pop());
+        assert.deepEqual(BigInt(interpreter.runtime.ctx.tx.apid as number), stack.pop());
 
         op = new Gtxn(["0", "Applications", "2"], 1, interpreter);
         op.execute(stack);
@@ -3919,7 +3919,7 @@ describe("Teal Opcodes", function () {
       op = new Gtxns(["Amount"], 1, interpreter);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt(tx0.amt), stack.pop());
+      assert.equal(BigInt(tx0.amt as bigint), stack.pop());
 
       stack.push(1n); // should fetch data from 2nd tx in group
       op = new Gtxns(["Fee"], 1, interpreter);
@@ -3931,7 +3931,7 @@ describe("Teal Opcodes", function () {
       op = new Gtxns(["Amount"], 1, interpreter);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt(tx1.amt), stack.pop());
+      assert.equal(BigInt(tx1.amt as bigint), stack.pop());
 
       // gtxn, gtxns also accepts array fields
       stack.push(1n);

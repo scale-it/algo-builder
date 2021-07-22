@@ -1,15 +1,15 @@
-import { AssetParams } from "algosdk";
+import { modelsv2 } from "algosdk";
 
+import { BaseModel, BaseModelI } from '../../src/account';
 import { stringToBytes } from "../../src/lib/parsing";
 import { AppLocalStateM, AssetHoldingM, SSCAttributesM, StackElem } from "../../src/types";
 import { elonAddr } from "./txn";
-import { BaseModel, BaseModelI } from '../../src/account';
 
 const convertToKey = (str: string): string => { return stringToBytes(str).toString(); };
 
 const appLocalState = new Map<number, AppLocalStateM>();
 const createdApps = new Map<number, SSCAttributesM>();
-const createdAssets = new Map<number, AssetParams>();
+const createdAssets = new Map<number, modelsv2.AssetParams>();
 
 const assets = new Map<number, AssetHoldingM>();
 assets.set(3, { 'asset-id': 3, amount: 2n, creator: "string", 'is-frozen': false });
@@ -22,7 +22,7 @@ globalStateMap.set(convertToKey('global-key'), stringToBytes('global-val'));
 const localStateMap = new Map<string, StackElem>();
 localStateMap.set(convertToKey('Local-key'), stringToBytes('Local-val'));
 
-let base: BaseModel = new BaseModelI();
+const base: BaseModel = new BaseModelI();
 export const accInfo = [{
   address: "addr-1",
   assets: assets,
@@ -36,14 +36,14 @@ export const accInfo = [{
       numUint: 1
     }
   }),
-  appsTotalSchema: { ...base, 'numByteSlice': 583, 'numUint': 105 },
+  appsTotalSchema: { ...base, numByteSlice: 583, numUint: 105 },
   createdApps: createdApps.set(1828, {
     'approval-program': '',
     'clear-state-program': '',
     creator: elonAddr,
     'global-state': globalStateMap,
-    'global-state-schema': { ...base, 'numByteSlice': 3, 'numUint': 1 },
-    'local-state-schema': { ...base, 'numByteSlice': 0, 'numUint': 16 }
+    'global-state-schema': { ...base, numByteSlice: 3, numUint: 1 },
+    'local-state-schema': { ...base, numByteSlice: 0, numUint: 16 }
   }),
   createdAssets: createdAssets.set(3, {
     creator: "addr-1",
@@ -53,7 +53,7 @@ export const accInfo = [{
     unitName: "AD",
     name: "ASSETAD",
     url: "assetUrl",
-    metadataHash: "hash",
+    metadataHash: new Uint8Array(0),
     manager: "addr-1",
     reserve: "addr-2",
     freeze: "addr-3",
