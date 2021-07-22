@@ -16,6 +16,8 @@ In real world scenario, if we're executing transactions using a multisignature a
 
 ## Example Usage
 
+### Appending to an existing multisigned transaction
+
 Say that a multisignature accounts is comprised of [`alice`, `bob`, `john`] with threshold 2 and version 1. `Alice` creates the multisignature transaction file (`file.txn`), and passes this file to `john`. Now john can use `algob sign-multisig` command to append his signature:
 ```bash
 algob sign-multisig --account john --file file.txn
@@ -27,4 +29,18 @@ The above command will append john signature to the transaction file `file.txn` 
 * `--file <name>`: (required). Name of file (should be present in `/assets`) to be used an input transaction file.
 * `--out <name>`: (optional). Name of output file in which signed transaction data is dumped (in `/assets`). Note: if `--out` is not passed, then input file name is appended `_out` and used as output file name (eg. `file_out.txn`).
 
-**NOTE:** Currently, `algob sign-multisig` will append user signature to an existing msig. It cannot create a new multisignature (i.e "creating" a new signed transaction by a multisig).
+### Creating a new multisigned transaction
+
+In case the transaction fetched from file is an unsigned trasaction, you can also create a new multisigned transaction by supplying the multisig metadata as well (version, threshold, addrs) to the `algob sign-multisig` command.
+
+Considering the above scenario, say if `Alice` wants to create a new multisignature transaction file, she can use:
+```bash
+algob sign-multisig --account alice --file unsigned.txn --v 1 --thr 2 --addrs <alice-addr>,<bob-addr>,<john-addr>
+```
+
+Additional flags passed are described below (note that these are required only in case of creating a new multisig transaction):
+* `--v <version>`: Multisig version.
+* `--thr <threshold>`: Multisig threshold.
+* `--addrs <addr1>,<addr2>..<addrN>`: Comma separated addresses comprising of the multsig (addr1,addr2,..). Order is important.
+
+Alternatively, you can also use [`signMultiSig`](https://algobuilder.dev/api/algob/modules.html#signmultisig) function to create a new multisignature transaction, or append a signature to an existing one in a transaction.
