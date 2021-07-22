@@ -163,7 +163,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   async optInLsigToASA (
     asaName: string, assetIndex: number, lsig: LogicSig, flags: wtypes.TxParams
   ): Promise<void> {
-    console.log(`Contract ${lsig.address()} opt-in for ASA ${asaName}`);
+    console.log(`Contract ${lsig.address()} opt-in for ASA ${asaName}`); // eslint-disable-line @typescript-eslint/restrict-template-expressions
     const txParams = await tx.mkTxParams(this.algodClient, flags);
 
     const optInLsigToASATx = tx.makeASAOptInTx(lsig.address(), assetIndex, txParams, flags);
@@ -270,7 +270,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     const contractAddress = lsig.address();
 
     const params = await tx.mkTxParams(this.algodClient, payFlags);
-    let message = "Funding Contract: " + contractAddress;
+    let message = "Funding Contract: " + String(contractAddress);
     console.log(message);
 
     const closeToRemainder = undefined;
@@ -467,7 +467,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     payFlags: wtypes.TxParams,
     flags: rtypes.AppOptionalFlags
   ): Promise<void> {
-    console.log(`Contract ${lsig.address()} opt-in for SSC ID ${appID}`);
+    console.log(`Contract ${lsig.address()} opt-in for SSC ID ${appID}`);// eslint-disable-line @typescript-eslint/restrict-template-expressions
     const params = await tx.mkTxParams(this.algodClient, payFlags);
     const execParam: wtypes.ExecParams = {
       type: wtypes.TransactionType.OptInToApp,
