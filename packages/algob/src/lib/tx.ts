@@ -216,6 +216,9 @@ async function mkTx (
 
 /**
  * Create and Sign SDK transaction(s) from transaction execution parameters (passed by user).
+ * @param deployer Deployer object
+ * @param execParams Execution parameters
+ * @param txIdxMap Map for index to [cpname, asaDef]
  * @returns [transaction(s), signed transaction(s)]
  */
 export async function makeAndSignTx (
