@@ -10,6 +10,8 @@
 + Move Error lists, BuilderError, mkTransaction to web package
 + Reuse mkTransaction, Errors in algob and runtime
 + Updated `algob init` to initialize a typescript project as well by passing `--typescript` flag. Usage: `algob init <location> --typescript`.
++ Support pooled transaction fees in algob and runtime. Added tests
++ Add `flatFee` in `TxParams`
 + Added support for teal debugger (get dryrun response or start debugger in chrome) in `algob` scripts.
 
 ### Infrastructure
@@ -37,6 +39,7 @@
 
 `web`:
 + Added missing `fromAccount?` attribute to the `Sign` type.
++ Remove TxParams type from runtime package(it is duplicated in runtime)
 
 
 ## v1.1.1 2021-07-12

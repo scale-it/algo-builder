@@ -98,7 +98,7 @@ describe("Rounds Test", function () {
       fromAccount: john.account,
       toAccountAddr: bob.address,
       amountMicroAlgos: 100n,
-      payFlags: { firstValid: 5, validRounds: 200 }
+      payFlags: { firstValid: 5, validRounds: 200, totalFee: 1000 }
     };
   });
 
@@ -298,7 +298,7 @@ describe("Algorand Standard Assets", function () {
       assetID: assetId,
       freezeTarget: john.address,
       freezeState: true,
-      payFlags: {}
+      payFlags: { flatFee: true, totalFee: 1000 }
     };
 
     const res = runtime.getAssetDef(assetId);

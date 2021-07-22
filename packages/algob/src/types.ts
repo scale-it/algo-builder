@@ -465,7 +465,7 @@ export interface Deployer {
   fundLsig: (
     name: string,
     flags: FundASCFlags,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     scTmplParams?: SCParams
   ) => void
 
@@ -495,7 +495,7 @@ export interface Deployer {
     approvalProgram: string,
     clearProgram: string,
     flags: rtypes.AppDeploymentFlags,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     scTmplParams?: SCParams) => Promise<rtypes.SSCInfo>
 
   /**
@@ -509,7 +509,7 @@ export interface Deployer {
    */
   updateApp: (
     sender: algosdk.Account,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
@@ -537,12 +537,12 @@ export interface Deployer {
    * Creates an opt-in transaction for given ASA name, which must be defined in
    * `/assets/asa.yaml` file. The opt-in transaction is signed by the account secret key */
   optInAcountToASA: (asa: string, accountName: string,
-    flags: rtypes.TxParams) => Promise<void>
+    flags: wtypes.TxParams) => Promise<void>
 
   /**
    * Creates an opt-in transaction for given ASA name, which must be defined in
    * `/assets/asa.yaml` file. The opt-in transaction is signed by the logic signature */
-  optInLsigToASA: (asa: string, lsig: LogicSig, flags: rtypes.TxParams) => Promise<void>
+  optInLsigToASA: (asa: string, lsig: LogicSig, flags: wtypes.TxParams) => Promise<void>
 
   /**
    * Opt-In to stateful smart contract (SSC) for a single account
@@ -555,7 +555,7 @@ export interface Deployer {
   optInAccountToApp: (
     sender: rtypes.Account,
     appID: number,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     flags: rtypes.AppOptionalFlags) => Promise<void>
 
   /**
@@ -569,7 +569,7 @@ export interface Deployer {
   optInLsigToApp: (
     appID: number,
     lsig: LogicSig,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     flags: rtypes.AppOptionalFlags) => Promise<void>
 
   /**

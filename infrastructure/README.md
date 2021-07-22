@@ -7,10 +7,14 @@ This directory (`/infrastructure`) provides an example setup for a private-net, 
 
 Use `make` to run tasks to `create`, `start-private-net`, `stop-private-net`.
 
-If you want to create a local network without using our scripts then you can follow this [tutorial](https://developer.algorand.org/tutorials/create-private-network/**.
+NOTE: For Windows user, check this StackOverflow [thread](https://stackoverflow.com/questions/32127524/how-to-install-and-use-make-in-windows) on how to install `make`. As a workaround, you can always open Makefile in a text editor and copy paste the commands from required make job, directly to your terminal.
 
 
-## Quick start (local development network)
+## Setting up a local node
+
+### Quick start (local development network)
+
+This is a guide to quickly start a local node using `algod` and make scripts.
 
 **TL;DR**: **Make sure you have Algorand Node (`algod` and `goal`) and `make` installed**. Then `cd infrastructure; make setup-private-net`. To reset use `recreate-private-net`.
 
@@ -50,7 +54,9 @@ To recreate the private net (stop the current instance, remove all data and re-s
 
     make recreate-private-net
 
-## Quick start (using Sandbox)
+### Quick start (using Sandbox)
+
+This is a guide to quickly start a local node using docker using make scripts.
 
 Algorand sandbox is a popular tool among developers to quickly setup up an algorand environment (`algod`, `indexer`, `indexer-db`) using docker. Here user don't need to explicitly setup an algorand node.
 Note: make sure to have [Docker](https://docs.docker.com/compose/install/) installed (with non root privilages). Steps:
@@ -60,19 +66,11 @@ Note: make sure to have [Docker](https://docs.docker.com/compose/install/) insta
 
 Read more about sandbox in [Using Sandbox 2.0](https://github.com/scale-it/algo-builder/blob/master/infrastructure/README.md#using-sandbox-20) section.
 
-## Connecting to algob
+### Custom setup
 
-We can connect to an `algob` node either using `goal` command or REST. `goal` is only able to use a local node (need to have an access to the node data directory). So each use of `goal` will require specifying `--datadir` flag or `ALGORAND_DATA` environment variable. It's useful to define the former one (we are doing it in the Makefile):
+If you want to create a local network without using our scripts then you can follow this [tutorial](https://developer.algorand.org/tutorials/create-private-network/**.
 
-    export ALGORAND_DATA=`pwd`/node_data/PrimaryNode
-
-To connect from SDK or REST we need to know the network address and authorization token. This are stored in:
-
-    cat $ALGORAND_DATA/algod.net
-    cat $ALGORAND_DATA/algod.token
-
-
-## Using Sandbox 2.0
+### Using Sandbox 2.0
 
 Algorand Sandbox is a fast way to create and configure an Algorand development environment with [Algod](https://github.com/algorand/go-algorand) and [Indexer](https://github.com/algorand/indexer). To quickly bring up a private network with algorand sandbox and use it within algob, following jobs are provided (in `/infrastructure`) :-
 *NOTE:* Please make sure to have [Docker Compose](https://docs.docker.com/compose/install/) installed (with non root privilages) before running sandbox.
@@ -91,6 +89,19 @@ Algorand Sandbox is a fast way to create and configure an Algorand development e
 
 To learn more about sandbox, click [here](https://github.com/algorand/sandbox#algorand-sandbox).
 
+
+## Connecting to algob
+
+We can connect to an `algob` node either using `goal` command or REST. `goal` is only able to use a local node (need to have an access to the node data directory). So each use of `goal` will require specifying `--datadir` flag or `ALGORAND_DATA` environment variable. It's useful to define the former one (we are doing it in the Makefile):
+
+    export ALGORAND_DATA=`pwd`/node_data/PrimaryNode
+
+To connect from SDK or REST we need to know the network address and authorization token. This are stored in:
+
+    cat $ALGORAND_DATA/algod.net
+    cat $ALGORAND_DATA/algod.token
+
+
 ### Example REST requests
 
 Private Net
@@ -108,6 +119,7 @@ KMD is not started by default (with `make start-private`). You need to run it se
 
     cat $ALGORAND_DATA/kmd-v<version>/kmd.net
     cat $ALGORAND_DATA/kmd-v<version>/kmd.token
+
 
 ## Reach
 
