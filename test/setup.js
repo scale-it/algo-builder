@@ -7,7 +7,7 @@
    in `.mocharc.json`. All algob packages has this configuration set.
  */
 
-/*import sinon from 'sinon';
+import sinon from 'sinon';
 
 const levels = ['log', 'debug', 'info', 'warn', 'error'];
 
@@ -25,4 +25,4 @@ beforeEach(() => {
 after(() => {
   for (let l of levels)
     console[l].restore();
-})*/
+})
