@@ -70,6 +70,7 @@ export type RuntimeAccountMap = Map<string, AccountStoreI>;
 
 export interface State {
   accounts: Map<string, AccountStoreI>
+  accountNameAddress: Map<string, AccountAddress>
   globalApps: Map<number, string>
   assetDefs: Map<number, AccountAddress>
   assetNameInfo: Map<string, ASAInfo>
@@ -108,7 +109,6 @@ export interface Context {
   getAssetAccount: (assetId: number) => AccountStoreI
   getApp: (appID: number, line?: number) => SSCAttributesM
   transferAlgo: (txnParam: types.AlgoTransferParam) => void
-  verifyMinimumFees: () => void
   deductFee: (sender: AccountAddress, index: number, params: types.TxParams) => void
   transferAsset: (txnParam: types.AssetTransferParam) => void
   modifyAsset: (assetId: number, fields: types.AssetModFields) => void
@@ -122,7 +122,7 @@ export interface Context {
   closeApp: (sender: AccountAddress, appID: number) => void
   processTransactions: (txnParams: types.ExecParams[]) => void
   addAsset: (name: string, fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => number
-  optIntoASA: (assetIndex: number, address: AccountAddress, flags: types.TxParams) => void
+  optIntoASA: (assetIndex: number, address: AccountAddress, flags: TxParams) => void
   addApp: (
     fromAccountAddr: string, flags: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string
@@ -162,6 +162,10 @@ export interface CreatedAppM {
   attributes: SSCAttributesM
 }
 
+export interface RuntimeAccount extends AccountSDK {
+  name?: string
+}
+
 // represent account used in tests and by the context
 // NOTE: custom notations are used rather than SDK AccountState notations
 export interface AccountStoreI {
@@ -173,7 +177,7 @@ export interface AccountStoreI {
   appsTotalSchema: SSCSchemaConfig
   createdApps: Map<number, SSCAttributesM>
   createdAssets: Map<number, AssetDef>
-  account: AccountSDK
+  account: RuntimeAccount
 
   balance: () => bigint
   getApp: (appID: number) => SSCAttributesM | undefined
@@ -213,6 +217,35 @@ export enum TxnOnComplete {
 export enum ExecutionMode {
   SIGNATURE, // stateless TEAL
   APPLICATION // application call (NoOp, CloseOut..)
+}
+
+/**
+ * Common transaction parameters (fees, note..) */
+export interface TxParams {
+  /**
+   * feePerByte or totalFee is used to set the appropriate transaction fee parameter.
+   * If both are set then totalFee takes precedence.
+   * NOTE: SDK expects`fee: number` and boolean `flatFee`. But the API expects only one
+   * on parameter: `fee`. Here, we define feePerByte and totalFee - both as numberic
+   * parameters. We think that this is more explicit. */
+  feePerByte?: number
+  totalFee?: number
+  // The first round for when the transaction is valid.
+  firstValid?: number
+  // firstValid + validRounds will give us the ending round for which the transaction is valid.
+  validRounds?: number
+  // A lease enforces mutual exclusion of transactions.
+  lease?: Uint8Array
+  // Any data up to 1000 bytes.
+  note?: string
+  noteb64?: string
+  // When set, it indicates that the transaction is requesting
+  // that the Sender account should be closed, and all remaining
+  // funds, after the fee and amount are paid, be transferred to this address.
+  closeRemainderTo?: AccountAddress
+  // Specifies the authorized address.
+  rekeyTo?: AccountAddress
+  // you can learn more about these parameters here.(https://developer.algorand.org/docs/reference/transactions/#common-fields-header-and-type)
 }
 
 /**
@@ -267,7 +300,7 @@ export interface Account extends AccountSDK {
   name: string
 }
 
-export interface ASADeploymentFlags extends types.TxParams {
+export interface ASADeploymentFlags extends TxParams {
   creator: Account
 }
 
