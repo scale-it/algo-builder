@@ -44,3 +44,14 @@ Additional flags passed are described below (note that these are required only i
 * `--addrs <addr1>,<addr2>..<addrN>`: Comma separated addresses comprising of the multsig (addr1,addr2,..). Order is important.
 
 Alternatively, you can also use [`signMultiSig`](https://algobuilder.dev/api/algob/modules.html#signmultisig) function to create a new multisignature transaction, or append a signature to an existing one in a transaction.
+
+### Group transaction
+
+In case that the transaction file has a (msgpack encoded) transaction group, you can pass `--group-index` flag with `algob sign-multisig`, to specify the transaction which needs to be signed. Eg.
+```bash
+algob sign-multisig --account john --file group.txn --group-index 1
+```
+
+The above **will sign 2nd transaction** from the transactions in input file, and output the resulting group (with 2nd transaction signed, rest same as original) in `group_out.txn`.
+
+Note: Input file is an msgpack [encoded](https://github.com/algorand/go-algorand/blob/master/cmd/tealdbg/samples/txn_group.msgp) transaction group. For reference, check the decoded transaction group file [here](https://github.com/algorand/go-algorand/blob/master/cmd/tealdbg/samples/txn_group.json).
