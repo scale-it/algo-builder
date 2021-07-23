@@ -1,5 +1,5 @@
 import { compareArray } from "@algo-builder/runtime/src/lib/compare";
-import { decodeAddress, decodeSignedTransaction, decodeUnsignedTransaction } from "algosdk";
+import { decodeAddress, decodeObj, decodeSignedTransaction, decodeUnsignedTransaction } from "algosdk";
 import { assert } from "chai";
 import * as fs from "fs";
 import path from "path";
@@ -193,5 +193,39 @@ describe("Sign-Multisig task", () => {
     } catch (error) {
       assert.equal(error.message, 'Key does not exist');
     }
+  });
+
+  it("Append bob's signature to txn group loaded from file", async function () {
+    const encodedTxGroup = loadEncodedTxFromFile('multisig-group.tx') as Uint8Array;
+    const decodedInputGroup = decodeObj(encodedTxGroup);
+
+    // we will sign 3rd transaction in group here (already signed previously)
+    const tx2 = decodeSignedTransaction(decodedInputGroup[2]);
+    assert.isDefined(tx2.msig);
+    assert.deepInclude(tx2.msig?.subsig, { pk: bobPk } as any); // msig includes bobPk (but without signature i.e "s" field)
+
+    // // append bob signature to txn.msig
+    await this.env.run(TASK_SIGN_MULTISIG, {
+      file: 'multisig-group.tx',
+      account: bobAcc.name,
+      out: outFile,
+      groupIndex: '2' // pass group index
+    });
+
+    // output assertions
+    assert(fs.existsSync(path.join(ASSETS_DIR, outFile))); // outfile exists after commmand
+
+    const outTxGroup = loadEncodedTxFromFile(outFile) as Uint8Array;
+    const decodedOutGroup = decodeObj(outTxGroup);
+
+    // verify first two transactions in group are same (as only 3rd was signed)
+    assert.deepEqual(decodedInputGroup[0], decodedOutGroup[0]);
+    assert.deepEqual(decodedInputGroup[1], decodedOutGroup[1]);
+
+    // now verify signature (3rd tx in group)
+    const outTx3Msig = decodeSignedTransaction(decodedOutGroup[2]).msig;
+    const bobSubsig = outTx3Msig?.subsig.find(s => compareArray(s.pk, bobPk));
+    assert.isDefined(bobSubsig?.pk);
+    assert.isDefined(bobSubsig?.s); // bob "signature" should be present
   });
 });
