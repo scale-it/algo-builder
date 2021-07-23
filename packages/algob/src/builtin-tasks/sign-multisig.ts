@@ -1,5 +1,5 @@
 import { getPathFromDirRecursive } from "@algo-builder/runtime";
-import { MultisigMetadata } from "algosdk";
+import { decodeObj, encodeObj, MultisigMetadata } from "algosdk";
 import path from "path";
 
 import { task } from "../internal/core/config/config-env";
@@ -14,10 +14,11 @@ export interface TaskArgs {
   file: string
   account: string
   out?: string
+  v?: string
+  thr?: string
+  addrs?: string
+  groupIndex?: string
   force: boolean
-  v: string
-  thr: string
-  addrs: string
 }
 
 async function multiSignTx (
@@ -29,7 +30,13 @@ async function multiSignTx (
     console.error(`No account with the name "${taskArgs.account}" exists in the config file.`);
     return;
   }
-  const rawTxn = loadEncodedTxFromFile(taskArgs.file);
+  let rawTxn = loadEncodedTxFromFile(taskArgs.file); // single tx OR tx group
+  const groupIndex = Number(taskArgs.groupIndex) ?? 0;
+  const decodedTx = decodeObj(rawTxn);
+  if (Array.isArray(decodedTx)) {
+    rawTxn = decodedTx[groupIndex]; // set "this" tx for signing in case of txgroup
+  }
+
   const sourceFilePath = getPathFromDirRecursive(ASSETS_DIR, taskArgs.file) as string;
   if (rawTxn === undefined) {
     console.error("Error loading transaction from the file.");
@@ -42,9 +49,19 @@ async function multiSignTx (
     mparams = { version: Number(v), threshold: Number(thr), addrs: addrs.split(',') };
   }
   const signedTxn = signMultiSig(signerAccount, rawTxn, mparams);
-  const outFileName = taskArgs.out ?? taskArgs.file.split(".")[0] + "_out.txn";
+
+  const [name, ext] = taskArgs.file.split(".");
+  const outFileName = taskArgs.out ?? (name + "_out." + ext);
   const outFilePath = path.join(path.dirname(sourceFilePath), outFileName);
-  await writeToFile(signedTxn.blob, taskArgs.force, outFilePath);
+
+  let outData;
+  if (Array.isArray(decodedTx)) {
+    decodedTx[groupIndex] = signedTxn.blob;
+    outData = encodeObj(decodedTx);
+  } else {
+    outData = signedTxn.blob;
+  }
+  await writeToFile(outData, taskArgs.force, outFilePath);
 }
 
 export default function (): void {
@@ -72,6 +89,10 @@ export default function (): void {
     .addOptionalParam(
       "addrs",
       "Comma separated addresses comprising of the multsig (addr1,addr2,..). Order is important. \n\t\t(required if creating a new signed multisig transaction)\n"
+    )
+    .addOptionalParam(
+      "groupIndex",
+      "Index of transaction (0 indexed) to sign if file has an encoded transaction group. Defaults to 0."
     )
     .addFlag("force", "Overwrite output transaction file if the file already exists.")
     .setAction((input, env) => multiSignTx(input, env));
