@@ -37,6 +37,7 @@ export class Runtime {
     // runtime store
     this.store = {
       accounts: new Map<AccountAddress, AccountStoreI>(), // string represents account address
+      accountNameAddress: new Map<string, AccountAddress>(),
       globalApps: new Map<number, AccountAddress>(), // map of {appID: accountAddress}
       assetDefs: new Map<number, AccountAddress>(), // number represents assetId
       assetNameInfo: new Map<string, ASAInfo>(),
@@ -49,7 +50,7 @@ export class Runtime {
     this.initializeAccounts(accounts);
 
     // load asa yaml files
-    this.loadedAssetsDefs = loadASAFile(this.store.accounts);
+    this.loadedAssetsDefs = loadASAFile(this.store.accountNameAddress);
 
     // context for interpreter
     this.ctx = new Ctx(cloneDeep(this.store), <Txn>{}, [], [], this);
@@ -260,6 +261,7 @@ export class Runtime {
    */
   initializeAccounts (accounts: AccountStoreI[]): void {
     for (const acc of accounts) {
+      if (acc.account.name) this.store.accountNameAddress.set(acc.account.name, acc.account.addr);
       this.store.accounts.set(acc.address, acc);
 
       for (const appID of acc.createdApps.keys()) {
@@ -336,7 +338,26 @@ export class Runtime {
     this.ctx.addAsset(name, flags.creator.addr, flags);
 
     this.store = this.ctx.state;
+    this.optInToASAMultiple(name, this.store.assetCounter);
     return this.store.assetCounter;
+  }
+
+  /**
+   * Opt-In to all accounts given in asa.yaml to a specific asset.
+   * @param name Asset name
+   * @param assetID Asset Index
+   */
+  optInToASAMultiple (name: string, assetID: number): void {
+    const accounts = this.loadedAssetsDefs[name].optInAccNames;
+    if (accounts === undefined) {
+      return;
+    }
+    for (const accName of accounts) {
+      const address = this.store.accountNameAddress.get(accName);
+      if (address) {
+        this.optIntoASA(assetID, address, {});
+      }
+    }
   }
 
   /**

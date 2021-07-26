@@ -84,6 +84,11 @@ In this section we will describe the flow of testing smart contracts in runtime:
   const bob = new AccountStore(initialMicroAlgo);
   ```
   `initialAlgo` is the amount of ALGO set for the created account. It's recommended to have at least 1 ALGO (1000000 micro ALGO) to cover transaction fees and to maintain minimum account balance.
+  Note: User can initialize & use accounts by name in runtime, similar to algob.
+  Ex:
+  ```js
+  const john = new AccountStore(initialMicroAlgo, 'john');
+  ```
 
 - **Prepare Runtime**. Next we create a runtime with those accounts.
 

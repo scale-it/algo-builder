@@ -1,20 +1,21 @@
 import { types } from "@algo-builder/web";
-import { Account, Address, generateAccount, modelsv2 } from "algosdk";
+import { Address, generateAccount, modelsv2 } from "algosdk";
 
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { checkAndSetASAFields } from "./lib/asa";
 import {
-  ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE, ASSET_CREATION_FEE, MAX_ALGORAND_ACCOUNT_APPS,
-  MAX_ALGORAND_ACCOUNT_ASSETS,
-  SSC_KEY_BYTE_SLICE, SSC_VALUE_BYTES, SSC_VALUE_UINT
+  ALGORAND_ACCOUNT_MIN_BALANCE, APPLICATION_BASE_FEE,
+  ASSET_CREATION_FEE, MAX_ALGORAND_ACCOUNT_APPS,
+  MAX_ALGORAND_ACCOUNT_ASSETS, SSC_KEY_BYTE_SLICE,
+  SSC_VALUE_BYTES, SSC_VALUE_UINT
 } from "./lib/constants";
 import { keyToBytes } from "./lib/parsing";
 import { assertValidSchema } from "./lib/stateful";
 import {
-  AccountStoreI,
-  AppDeploymentFlags, AppLocalStateM, AssetHoldingM, CreatedAppM, SSCAttributesM,
-  StackElem
+  AccountStoreI, AppDeploymentFlags, AppLocalStateM,
+  AssetHoldingM, CreatedAppM, RuntimeAccount,
+  SSCAttributesM, StackElem
 } from "./types";
 
 const StateMap = "key-value";
@@ -23,7 +24,7 @@ const localStateSchema = "local-state-schema";
 const globalStateSchema = "global-state-schema";
 
 export class AccountStore implements AccountStoreI {
-  readonly account: Account;
+  readonly account: RuntimeAccount;
   readonly address: string;
   minBalance: number; // required minimum balance for account
   assets: Map<number, AssetHoldingM>;
@@ -33,8 +34,12 @@ export class AccountStore implements AccountStoreI {
   createdApps: Map<number, SSCAttributesM>;
   createdAssets: Map<number, modelsv2.AssetParams>;
 
-  constructor (balance: number | bigint, account?: Account) {
-    if (account) {
+  constructor (balance: number | bigint, account?: RuntimeAccount | string) {
+    if (typeof account === 'string') {
+      this.account = generateAccount();
+      this.account.name = account;
+      this.address = this.account.addr;
+    } else if (account) {
       // set config if account is passed by user
       this.account = account;
       this.address = account.addr;
