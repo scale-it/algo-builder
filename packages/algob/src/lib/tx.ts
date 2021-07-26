@@ -76,7 +76,7 @@ export function makeAssetCreateTxn (
     asaDef.reserve !== "" ? asaDef.reserve : undefined,
     asaDef.freeze !== "" ? asaDef.freeze : undefined,
     asaDef.clawback !== "" ? asaDef.clawback : undefined,
-    asaDef.unitName ? asaDef.unitName : undefined,
+    asaDef.unitName,
     name,
     asaDef.url ?? "",
     asaDef.metadataHash,

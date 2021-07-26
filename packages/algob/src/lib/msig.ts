@@ -1,5 +1,4 @@
 import { getPathFromDirRecursive } from "@algo-builder/runtime";
-import { types as wtypes } from "@algo-builder/web";
 import type { Account, EncodedMultisig, LogicSig } from "algosdk";
 import { appendSignMultisigTransaction, decodeAddress, decodeSignedTransaction, encodeAddress, logicSigFromByte } from "algosdk";
 import fs from "fs";

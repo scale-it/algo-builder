@@ -1,6 +1,5 @@
 /* eslint @typescript-eslint/no-var-requires: "off" */
 import { types as rtypes } from "@algo-builder/runtime";
-import { types as wtypes } from "@algo-builder/web";
 import type { MultisigMetadata } from "algosdk";
 import algosdk, { LogicSig } from "algosdk";
 
