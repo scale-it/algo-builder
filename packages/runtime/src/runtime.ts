@@ -133,7 +133,7 @@ export class Runtime {
   validateTxRound (gtxns: Txn[]): void {
     // https://developer.algorand.org/docs/features/transactions/#current-round
     for (const txn of gtxns) {
-      if (txn.fv >= this.round || txn.lv <= this.round) {
+      if (Number(txn.fv) >= this.round || txn.lv <= this.round) {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_ROUND,
           { first: txn.fv, last: txn.lv, round: this.round });
       }

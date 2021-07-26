@@ -294,13 +294,12 @@ export class Ctx implements Context {
    * @param index Index of current tx being processed in tx group
    */
   deductFee (sender: AccountAddress, index: number, params: types.TxParams): void {
-    let fee;
+    let fee: bigint = BigInt(this.gtxs[index].fee as number);
     // If flatFee boolean is not set, change fee value
     if (!params.flatFee && params.totalFee === undefined) {
-      fee = Math.max(ALGORAND_MIN_TX_FEE, this.gtxs[index].fee);
+      fee = BigInt(Math.max(ALGORAND_MIN_TX_FEE, Number(this.gtxs[index].fee)));
     }
     const fromAccount = this.getAccount(sender);
-    fee = BigInt(this.gtxs[index].fee);
     fromAccount.amount -= fee; // remove tx fee from Sender's account
     this.assertAccBalAboveMin(fromAccount.address);
   }
