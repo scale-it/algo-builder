@@ -27,6 +27,6 @@ describe("Deploy ASA with mutiple opt-in accounts", function () {
     bob = new AccountStore(minBalance, 'bob');
     alice = new AccountStore(minBalance, 'alice');
 
-    runtime = new Runtime([elon, bob, alice]);
+    new Runtime([elon, bob, alice]);
   });
 });

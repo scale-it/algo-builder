@@ -12,7 +12,7 @@
 + Updated `algob init` to initialize a typescript project as well by passing `--typescript` flag. Usage: `algob init <location> --typescript`.
 + Support pooled transaction fees in algob and runtime. Added tests
 + Add `flatFee` in `TxParams`
-+ User can use accounts name in runtime(similar to algob)('john', 'bob' etc)
++ User can initialize & use accounts by name in runtime, similar to algob ('john', 'bob' etc)
 
 
 ### Infrastructure
