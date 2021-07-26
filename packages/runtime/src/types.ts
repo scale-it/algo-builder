@@ -66,10 +66,11 @@ export interface AccountsMap {
 /**
  * RuntimeAccountMap is for AccountStore used in runtime
  * (where we use maps instead of arrays in sdk structures). */
-export type RuntimeAccountMap = Map<string, AccountStoreI>;
+export type RuntimeAccountMap = Map<string, AccountAddress>;
 
 export interface State {
   accounts: Map<string, AccountStoreI>
+  accountNameAddress: Map<string, AccountAddress>
   globalApps: Map<number, string>
   assetDefs: Map<number, AccountAddress>
   assetNameInfo: Map<string, ASAInfo>
@@ -162,6 +163,10 @@ export interface CreatedAppM {
   attributes: SSCAttributesM
 }
 
+export interface RuntimeAccount extends AccountSDK {
+  name?: string
+}
+
 // represent account used in tests and by the context
 // NOTE: custom notations are used rather than SDK AccountState notations
 export interface AccountStoreI {
@@ -173,7 +178,7 @@ export interface AccountStoreI {
   appsTotalSchema: SSCSchemaConfig
   createdApps: Map<number, SSCAttributesM>
   createdAssets: Map<number, AssetDef>
-  account: AccountSDK
+  account: RuntimeAccount
 
   balance: () => bigint
   getApp: (appID: number) => SSCAttributesM | undefined
