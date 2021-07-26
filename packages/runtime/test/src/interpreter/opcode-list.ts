@@ -3914,7 +3914,7 @@ describe("Teal Opcodes", function () {
       let op = new Gtxns(["Fee"], 1, interpreter);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt(tx0.fee), stack.pop());
+      assert.equal(BigInt(tx0.fee as number), stack.pop());
 
       stack.push(0n);
       op = new Gtxns(["Amount"], 1, interpreter);
@@ -3926,7 +3926,7 @@ describe("Teal Opcodes", function () {
       op = new Gtxns(["Fee"], 1, interpreter);
       op.execute(stack);
       assert.equal(1, stack.length());
-      assert.equal(BigInt(tx1.fee), stack.pop());
+      assert.equal(BigInt(tx1.fee as number), stack.pop());
 
       stack.push(1n);
       op = new Gtxns(["Amount"], 1, interpreter);
