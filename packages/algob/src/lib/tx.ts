@@ -28,12 +28,14 @@ export async function getSuggestedParams (algocl: Algodv2): Promise<SuggestedPar
  * @param s suggested transaction params
  */
 export async function mkTxParams (
-  algocl: Algodv2, userParams: rtypes.TxParams, s?: SuggestedParams): Promise<SuggestedParams> {
+  algocl: Algodv2, userParams: wtypes.TxParams, s?: SuggestedParams): Promise<SuggestedParams> {
   if (s === undefined) { s = await getSuggestedParams(algocl); }
 
-  s.flatFee = userParams.totalFee !== undefined;
+  if (userParams.flatFee === undefined) {
+    if (userParams.totalFee !== undefined) s.flatFee = true;
+    else s.flatFee = false;
+  }
   s.fee = userParams.totalFee ?? userParams.feePerByte ?? ALGORAND_MIN_TX_FEE;
-  if (s.flatFee) s.fee = Math.max(s.fee, ALGORAND_MIN_TX_FEE);
 
   s.firstRound = userParams.firstValid ?? s.firstRound;
   s.lastRound = userParams.firstValid === undefined || userParams.validRounds === undefined
@@ -92,7 +94,7 @@ export function makeASAOptInTx (
   addr: string,
   assetID: number,
   params: SuggestedParams,
-  payFlags: rtypes.TxParams
+  payFlags: wtypes.TxParams
 ): Transaction {
   const execParam: wtypes.ExecParams = {
     type: wtypes.TransactionType.OptInASA,

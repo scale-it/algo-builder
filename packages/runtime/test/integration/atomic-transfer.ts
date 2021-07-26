@@ -391,6 +391,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
       fromAccount: john.account,
       appID: appID,
       payFlags: { totalFee: 1000 }
+
     });
     syncAccounts();
     const txGroup: types.ExecParams[] = [
