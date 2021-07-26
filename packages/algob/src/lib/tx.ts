@@ -78,7 +78,7 @@ export function makeAssetCreateTxn (
     asaDef.clawback !== "" ? asaDef.clawback : undefined,
     asaDef.unitName ? asaDef.unitName : undefined,
     name,
-    asaDef.url ? asaDef.url : "",
+    asaDef.url ?? "",
     asaDef.metadataHash,
     txSuggestedParams
   );

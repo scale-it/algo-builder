@@ -33,7 +33,7 @@
 + Import are changed to scoped imports
     + instead of stringToBytes, you can import a `convert` namespace, and then use `convert.stringToBytes`
 + Types imports for `ExecParams`, `TransactionTypes`, `SignType` moved to new package `@algo-builder/web`
-+ Migrate to algorand/js-sdk types from types-algosdk.
++ Migrate to algorand/js-sdk types from `@algo-builder/types-algosdk`.
 
 
 ### Bug fixes
