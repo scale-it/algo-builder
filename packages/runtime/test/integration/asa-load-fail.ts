@@ -9,7 +9,6 @@ describe("Deploy ASA with mutiple opt-in accounts", function () {
   useFixture("asa-load-fail");
   let john: AccountStore;
   let bob: AccountStore;
-  let runtime: Runtime;
   let alice: AccountStore;
 
   it("Should not load runtime, because while loading asa.yaml, account doesn't exist", () => {
@@ -27,6 +26,7 @@ describe("Deploy ASA with mutiple opt-in accounts", function () {
     bob = new AccountStore(minBalance, 'bob');
     alice = new AccountStore(minBalance, 'alice');
 
+    /* eslint-disable no-new */
     new Runtime([elon, bob, alice]);
   });
 });
