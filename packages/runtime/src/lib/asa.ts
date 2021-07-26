@@ -7,7 +7,7 @@ import * as z from 'zod';
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { parseZodError } from "../errors/validation-errors";
-import { AccountMap, RuntimeAccount, RuntimeAccountMap } from "../types";
+import { AccountMap, RuntimeAccountMap } from "../types";
 import { getPathFromDirRecursive, loadFromYamlFileSilent } from "./files";
 
 export const ASSETS_DIR = "assets";

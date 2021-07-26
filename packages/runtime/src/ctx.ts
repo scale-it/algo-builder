@@ -4,7 +4,6 @@ import { AssetDef, makeAssetTransferTxnWithSuggestedParams } from "algosdk";
 import { Runtime } from ".";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
-import { Err } from "./interpreter/opcode-list";
 import { ALGORAND_MIN_TX_FEE } from "./lib/constants";
 import { mockSuggestedParams } from "./mock/tx";
 import {
