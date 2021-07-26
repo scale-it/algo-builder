@@ -21,7 +21,7 @@
     * `restart-private-net`: restarts private-net.
     * `indexer-docker-up`, `indexer-docker-down`: Docker based setup for indexer. Runs in read-only mode, without connecting to local algod node.
     * `make setup-postgresql`: Install `postgresql` database on a local linux system and setup a new user & database.
-    * `make setup-indexer`: Add local indexer binary (downloaded in `~/.algorand-indexer-download`) and start the indexer by connecting to database and local algod node.
+    * `make start-indexer`: Add local indexer binary (downloaded in `~/.algorand-indexer-download`) and start the indexer by connecting to database and local algod node.
     * `make remove-indexer`: Removes `~/.algorand-indexer-download` directory from system.
 
 ### Examples

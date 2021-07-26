@@ -141,7 +141,7 @@ setup-postgresql:
 
 
 # Sets up indexer in local mode (to be used with private-net)
-setup-indexer:
+start-indexer:
 	@if ! [ -d ./node_data ] ;  then echo "./node_data directory does not exist - please create a new private network first" ; false; fi
 # https://developer.algorand.org/docs/run-a-node/setup/indexer/#extract-the-binaries-to-a-specific-directory
 	mkdir -p $(INDEXER_PATH)

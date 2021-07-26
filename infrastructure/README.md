@@ -142,7 +142,7 @@ By default the indexer runs on port `8980` and `postgresdb` on port `5432` (on l
 **Prerequisite:** Make sure to have [Docker Compose](https://docs.docker.com/compose/install/) installed (with non root privilages).
 
 Following make jobs are provided:
-1. `indexer-docker-up`: Clones the indexer repo to `~/.algorand-indexer` and runs `docker-compose up` on the [docker-compose.yml](https://github.com/algorand/indexer/blob/develop/docker-compose.yml) file.
+1. `indexer-docker-up`: Clones the indexer repo to `~/.algorand-indexer` and runs `docker-compose up` on the [docker-compose.yml](https://github.com/algorand/indexer/blob/develop/docker-compose.yml) file. Starts two services: [`indexer`](https://github.com/algorand/indexer/blob/develop/docker-compose.yml#L4)(on port `8980`) & [`indexer-db`](https://github.com/algorand/indexer/blob/develop/docker-compose.yml#L17)(on port `5432`).
 2. `indexer-docker-down`: Stops and removes indexer related container and images.
 
 **NOTE:** Docker based setup runs indexer in a "[read-only](https://github.com/algorand/indexer/blob/develop/docker/run.sh#L10)" mode, without connecting to the private-net `algod` node. Read more about this mode [here](https://github.com/algorand/indexer#read-only).
@@ -151,7 +151,7 @@ Following make jobs are provided:
 
 The Indexer primarily provides two services: loading a PostgreSQL database with ledger data and supplying a REST API to search this ledger data. For this purpose, setting up indexer on local consists of two steps:
 1.  `make setup-postgresql`: Setting up [`postgresql`](https://www.postgresql.org/) database on your local machine.
-2. `make setup-indexer`: Start indexer by connecting to local-db and your private-net algod node.
+2. `make start-indexer`: Start indexer by connecting to local-db and your private-net algod node.
 
 #### Step1: Setup postgres-db
 
@@ -170,7 +170,7 @@ Please note that this installation is currently compatible with Linux based dist
 
 **Note:** Make sure you have setup a private network up and running (using `make setup-private-net` or Sandbox). For more instructions check [setting up a local node](./#setting-up-a-local-node) section.
 
-After setting up the database, you can use `make setup-indexer` to add local indexer binary (downloaded in `~/.algorand-indexer-download`) and start the indexer by connecting to database and your local algod node. Note that the initial loading of the Indexer Database could take some time.
+After setting up the database, you can use `make start-indexer` to add local indexer binary (downloaded in `~/.algorand-indexer-download`) and start the indexer by connecting to database and your local algod node. Note that the initial loading of the Indexer Database could take some time.
 
 After setting up indexer, open a new terminal and try typing:
 ```bash
