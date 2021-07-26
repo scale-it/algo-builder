@@ -42,14 +42,16 @@ jobs:
       - run: cd packages/algob && yarn link && cd .. && cd ..
 
       - name: Setup Network
-        run: sudo apt-get update && sudo apt-get install -y gnupg2 curl software-properties-common
-      - run: curl -O https://releases.algorand.com/key.pub && sudo apt-key add key.pub
-      - run: sudo add-apt-repository "deb [arch=amd64] https://releases.algorand.com/deb/ stable main"
-      - run: sudo apt-get update && sudo apt-get install -y algorand
-      - run: cd infrastructure && make setup-private-net
+        run: |
+            sudo apt-get update && sudo apt-get install -y gnupg2 curl software-properties-common
+            curl -O https://releases.algorand.com/key.pub && sudo apt-key add key.pub
+            sudo add-apt-repository "deb [arch=amd64] https://releases.algorand.com/deb/ stable main"
+            sudo apt-get update && sudo apt-get install -y algorand
+            cd infrastructure && make setup-private-net
+
 
       - name: Setup algob
-        run: yarn link @algo-builder/algob  && chmod +x ~/.yarn/bin/algob
+        run: yarn link @algo-builder/algob  && chmod +x /usr/local/bin/algob
 
       - name: Example ASA
         working-directory: ./examples/asa
@@ -66,16 +68,16 @@ jobs:
         run: |
           pipenv run yarn algob deploy
           pipenv run yarn algob run scripts/transfer/donate.js
-      
+
       - name: Example htlc-pyteal-ts
         working-directory: ./examples/htlc-pyteal-ts
         run: |
           pipenv run yarn algob deploy
           pipenv run yarn algob run scripts/withdraw/htlc-withdraw.ts
-      
+
       - name: Example multisig
         run: cd examples/multisig && pipenv run yarn algob deploy
-      
+
       - name: Example nft
         working-directory: ./examples/nft
         run: |
