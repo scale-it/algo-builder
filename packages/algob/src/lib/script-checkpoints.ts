@@ -224,7 +224,7 @@ export async function registerCheckpoints (
             creator: encodeAddress(txn.from.publicKey),
             txId: txn.txID(),
             assetIndex: Number(txConfirmation['asset-index']),
-            confirmedRound: Number(txConfirmation['application-index']),
+            confirmedRound: Number(txConfirmation['confirmed-round']),
             assetDef: res[1] as modelsv2.AssetParams,
             deleted: false
           };

@@ -1,6 +1,6 @@
 import { types } from "@algo-builder/runtime";
 import { ERRORS, tx as webTx, types as wtypes } from "@algo-builder/web";
-import algosdk, { decodeSignedTransaction, encodeAddress } from "algosdk";
+import algosdk, { decodeSignedTransaction, encodeAddress, Transaction } from "algosdk";
 import { assert } from "chai";
 import { isArray } from "lodash";
 import sinon from 'sinon';
@@ -147,7 +147,7 @@ describe("ASA modify fields", () => {
     if (isArray(rawTxns)) {
       // verify here if group tx
     } else {
-      const tx: any = decodeSignedTransaction(rawTxns).txn;
+      const tx: Transaction = decodeSignedTransaction(rawTxns).txn;
       // Verify if fields are set correctly
       assert.isUndefined(tx.assetManager);
       assert.isUndefined(tx.assetReserve);
