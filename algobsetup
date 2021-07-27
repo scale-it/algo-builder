@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+
+# The scripts automates setup from source 
+# It clones the algo-builder repository and uses `yarn link` to link
+# all workspace packages (algob, runtime ...)
+
 BASEDIR=$(pwd)
 ALGO_BUILDER_DIR="algo-builder"
 declare -a PACKAGES=("algob" "runtime" "types-algosdk")
@@ -66,4 +71,3 @@ while true; do
         * ) echo "Please answer yes or no.";;
     esac
 done
-
