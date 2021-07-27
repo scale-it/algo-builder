@@ -8,11 +8,11 @@ const totalRegex = /^\d+$/;
 
 export const ASADefSchema = z.object({
   total: z.union([z.number(), z.bigint(), z.string()]), // 'string' to support bigint from yaml file
-  decimals: z.number(),
+  decimals: z.union([z.number(), z.bigint()]),
   defaultFrozen: z.boolean().optional(),
-  unitName: z.string(),
+  unitName: z.string().optional(),
   url: z.string().optional(),
-  metadataHash: z.string().optional(),
+  metadataHash: z.any().optional(),
   note: z.string().optional(),
   noteb64: z.string().optional(),
   manager: AddressSchema.optional(),

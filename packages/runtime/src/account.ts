@@ -1,9 +1,5 @@
 import { types } from "@algo-builder/web";
-import type {
-  AssetDef,
-  SSCSchemaConfig
-} from "algosdk";
-import { generateAccount } from "algosdk";
+import { Address, generateAccount, modelsv2 } from "algosdk";
 
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
@@ -26,7 +22,6 @@ const StateMap = "key-value";
 const globalState = "global-state";
 const localStateSchema = "local-state-schema";
 const globalStateSchema = "global-state-schema";
-const numByteSlice = 'num-byte-slice';
 
 export class AccountStore implements AccountStoreI {
   readonly account: RuntimeAccount;
@@ -35,9 +30,9 @@ export class AccountStore implements AccountStoreI {
   assets: Map<number, AssetHoldingM>;
   amount: bigint;
   appsLocalState: Map<number, AppLocalStateM>;
-  appsTotalSchema: SSCSchemaConfig;
+  appsTotalSchema: modelsv2.ApplicationStateSchema;
   createdApps: Map<number, SSCAttributesM>;
-  createdAssets: Map<number, AssetDef>;
+  createdAssets: Map<number, modelsv2.AssetParams>;
 
   constructor (balance: number | bigint, account?: RuntimeAccount | string) {
     if (typeof account === 'string') {
@@ -58,9 +53,9 @@ export class AccountStore implements AccountStoreI {
     this.amount = BigInt(balance);
     this.minBalance = ALGORAND_ACCOUNT_MIN_BALANCE;
     this.appsLocalState = new Map<number, AppLocalStateM>();
-    this.appsTotalSchema = <SSCSchemaConfig>{};
+    this.appsTotalSchema = <modelsv2.ApplicationStateSchema>{};
     this.createdApps = new Map<number, SSCAttributesM>();
-    this.createdAssets = new Map<number, AssetDef>();
+    this.createdAssets = new Map<number, modelsv2.AssetParams>();
   }
 
   // returns account balance in microAlgos
@@ -163,7 +158,7 @@ export class AccountStore implements AccountStoreI {
    * Queries asset definition by assetId
    * @param assetId asset index
    */
-  getAssetDef (assetId: number): AssetDef | undefined {
+  getAssetDef (assetId: number): modelsv2.AssetParams | undefined {
     return this.createdAssets.get(assetId);
   }
 
@@ -180,7 +175,7 @@ export class AccountStore implements AccountStoreI {
    * @param name Asset Name
    * @param asaDef Asset Definitions
    */
-  addAsset (assetId: number, name: string, asaDef: types.ASADef): AssetDef {
+  addAsset (assetId: number, name: string, asaDef: types.ASADef): modelsv2.AssetParams {
     if (this.createdAssets.size === MAX_ALGORAND_ACCOUNT_ASSETS) {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.MAX_LIMIT_ASSETS,
         { name: name, address: this.address, max: MAX_ALGORAND_ACCOUNT_ASSETS });
@@ -308,8 +303,8 @@ export class AccountStore implements AccountStoreI {
       // https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
       this.minBalance += (
         APPLICATION_BASE_FEE +
-        (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * appParams[localStateSchema]["num-uint"] +
-        (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * appParams[localStateSchema][numByteSlice]
+        (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * Number(appParams[localStateSchema].numUint) +
+        (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * Number(appParams[localStateSchema].numByteSlice)
       );
 
       // create new local app attribute
@@ -348,8 +343,8 @@ export class AccountStore implements AccountStoreI {
     // reduce minimum balance
     this.minBalance -= (
       APPLICATION_BASE_FEE +
-      (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * app[globalStateSchema]["num-uint"] +
-      (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * app[globalStateSchema][numByteSlice]
+      (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * Number(app[globalStateSchema].numUint) +
+      (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * Number(app[globalStateSchema].numByteSlice)
     );
     this.createdApps.delete(appID);
   }
@@ -364,8 +359,8 @@ export class AccountStore implements AccountStoreI {
     // decrease min balance
     this.minBalance -= (
       APPLICATION_BASE_FEE +
-      (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * localApp.schema['num-uint'] +
-      (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * localApp.schema[numByteSlice]
+      (SSC_KEY_BYTE_SLICE + SSC_VALUE_UINT) * Number(localApp.schema.numUint) +
+      (SSC_KEY_BYTE_SLICE + SSC_VALUE_BYTES) * Number(localApp.schema.numByteSlice)
     );
     this.appsLocalState.delete(appID);
   }
@@ -380,13 +375,14 @@ class App {
   constructor (appID: number, params: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string) {
     this.id = appID;
+    const base: BaseModel = new BaseModelI();
     this.attributes = {
       'approval-program': approvalProgram,
       'clear-state-program': clearProgram,
       creator: params.sender.addr,
       'global-state': new Map<string, StackElem>(),
-      'global-state-schema': { 'num-byte-slice': params.globalBytes, 'num-uint': params.globalInts },
-      'local-state-schema': { 'num-byte-slice': params.localBytes, 'num-uint': params.localInts }
+      'global-state-schema': { ...base, numByteSlice: params.globalBytes, numUint: params.globalInts },
+      'local-state-schema': { ...base, numByteSlice: params.localBytes, numUint: params.localInts }
     };
   }
 }
@@ -394,23 +390,60 @@ class App {
 // represents asset
 class Asset {
   readonly id: number;
-  readonly definitions: AssetDef;
+  readonly definitions: modelsv2.AssetParams;
 
   constructor (assetId: number, def: types.ASADef, creator: string, assetName: string) {
     this.id = assetId;
+    const base: BaseModel = new BaseModelI();
     this.definitions = {
       creator: creator,
       total: BigInt(def.total),
       decimals: def.decimals,
       defaultFrozen: def.defaultFrozen ?? false,
       unitName: def.unitName,
-      name: assetName,
-      url: def.url ?? '',
-      metadataHash: def.metadataHash ?? '',
-      manager: def.manager ?? '',
-      reserve: def.reserve ?? '',
-      freeze: def.freeze ?? '',
-      clawback: def.clawback ?? ''
+      url: def.url,
+      metadataHash: def.metadataHash,
+      manager: def.manager,
+      reserve: def.reserve,
+      freeze: def.freeze,
+      clawback: def.clawback,
+      ...base
     };
+  }
+}
+
+export interface BaseModel {
+  attribute_map: Record<string, string>
+  _is_primitive: (val: any) => val is string | boolean | number | bigint
+  _is_address: (val: any) => val is Address
+  /* eslint-disable*/
+  _get_obj_for_encoding(val: Function): Record<string, any>;
+  _get_obj_for_encoding(val: any[]): any[];
+  _get_obj_for_encoding(val: Record<string, any>): Record<string, any>;
+  get_obj_for_encoding(): Record<string, any>;
+}
+
+export class BaseModelI implements BaseModel {
+  attribute_map: Record<string, string>;
+
+  public constructor () {
+    this.attribute_map = {};
+  }
+  _is_primitive(val: any): val is string | boolean | number | bigint { 
+    return true;
+  }
+
+  _is_address(val: any): val is Address {
+    throw new Error("_is_address Not Implemented");
+  }
+
+  _get_obj_for_encoding(val: Function): Record<string, any>;
+  _get_obj_for_encoding(val: any[]): any[];
+  _get_obj_for_encoding(val: Record<string, any>): Record<string, any> {
+    throw new Error("_get_obj_for_encoding Not Implemented");
+  }
+  
+  get_obj_for_encoding(): Record<string, any> {
+    throw new Error("get_obj_for_encoding Not Implemented");
   }
 }

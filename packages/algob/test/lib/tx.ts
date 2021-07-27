@@ -1,6 +1,6 @@
 import { types } from "@algo-builder/runtime";
 import { ERRORS, tx as webTx, types as wtypes } from "@algo-builder/web";
-import { ConfirmedTxInfo, decodeSignedTransaction, encodeAddress, Transaction } from "algosdk";
+import algosdk, { decodeSignedTransaction, encodeAddress, modelsv2 } from "algosdk";
 import { assert } from "chai";
 import { isArray } from "lodash";
 import sinon from 'sinon';
@@ -53,7 +53,7 @@ describe("Opt-In to ASA", () => {
   let deployer: Deployer;
   let execParams: wtypes.OptInASAParam;
   let algod: AlgoOperatorDryRunImpl;
-  let expected: ConfirmedTxInfo;
+  let expected: modelsv2.PendingTransactionResponse;
   beforeEach(async () => {
     const env = mkEnv("network1");
     algod = new AlgoOperatorDryRunImpl();
@@ -69,14 +69,12 @@ describe("Opt-In to ASA", () => {
       assetID: 1
     };
     sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam });
+      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
     expected = {
-      'confirmed-round': 1,
-      "asset-index": 1,
-      'application-index': 1,
-      'global-state-delta': "string",
-      'local-state-delta': "string"
-    };
+      confirmedRound: 1,
+      assetIndex: 1,
+      applicationIndex: 1
+    } as modelsv2.PendingTransactionResponse;
   });
 
   afterEach(() => {
@@ -132,7 +130,7 @@ describe("ASA modify fields", () => {
       fields: assetFields
     };
     sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam });
+      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
   });
 
   afterEach(async () => {
@@ -143,11 +141,11 @@ describe("ASA modify fields", () => {
    * Verifies correct asset fields are sent to network
    * @param rawTxns rawTxns Signed transactions in Uint8Array
    */
-  function checkTx (rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
+  function checkTx (rawTxns: Uint8Array | Uint8Array[]): Promise<modelsv2.PendingTransactionResponse> {
     if (isArray(rawTxns)) {
       // verify here if group tx
     } else {
-      const tx: Transaction = decodeSignedTransaction(rawTxns).txn;
+      const tx: any = decodeSignedTransaction(rawTxns).txn;
       // Verify if fields are set correctly
       assert.isUndefined(tx.assetManager);
       assert.isUndefined(tx.assetReserve);
@@ -179,7 +177,7 @@ describe("Delete ASA and SSC", () => {
     deployer = new DeployerDeployMode(deployerCfg);
     await deployer.deployASA("silver", { creator: deployer.accounts[0] });
     sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam });
+      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
   });
 
   afterEach(async () => {
@@ -275,7 +273,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
     deployerCfg.asaDefs = { silver: mkASA() };
     deployer = new DeployerDeployMode(deployerCfg);
     sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam });
+      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
 
     // deploy  and delete asset
     const asaInfo = await deployer.deployASA(assetName, { creator: deployer.accounts[0] });
@@ -592,7 +590,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
     deployerCfg.asaDefs = { silver: mkASA() };
     deployer = new DeployerRunMode(deployerCfg);
     sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam });
+      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
   });
 
   afterEach(async () => {
@@ -657,7 +655,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
       type: wtypes.TransactionType.DeleteApp,
       sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
-      appID: appInfo["application-index"],
+      appID: appInfo.applicationIndex as number,
       payFlags: {}
     };
 
@@ -680,7 +678,7 @@ describe("Update transaction test in run mode", () => {
     deployerCfg = new DeployerConfig(env, algod);
     deployer = new DeployerRunMode(deployerCfg);
     sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam });
+      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
   });
 
   afterEach(async () => {
@@ -709,7 +707,7 @@ describe("Update transaction test in run mode", () => {
       type: wtypes.TransactionType.UpdateApp,
       sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
-      appID: appInfo["application-index"],
+      appID: appInfo.applicationIndex as number,
       newApprovalProgram: "approval.teal",
       newClearProgram: "clear.teal",
       payFlags: {}
@@ -774,7 +772,7 @@ describe("Update transaction test in run mode", () => {
       type: wtypes.TransactionType.UpdateApp,
       sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
-      appID: appInfo["application-index"],
+      appID: appInfo.applicationIndex as number,
       newApprovalProgram: "approval.teal",
       newClearProgram: "clear.teal",
       payFlags: {}

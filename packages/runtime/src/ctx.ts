@@ -1,5 +1,5 @@
 import { tx as webTx, types } from "@algo-builder/web";
-import { AssetDef, makeAssetTransferTxnWithSuggestedParams } from "algosdk";
+import { makeAssetTransferTxnWithSuggestedParams, modelsv2 } from "algosdk";
 
 import { Runtime } from ".";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
@@ -82,7 +82,7 @@ export class Ctx implements Context {
    * Returns Asset Definitions
    * @param assetId Asset Index
    */
-  getAssetDef (assetId: number): AssetDef {
+  getAssetDef (assetId: number): modelsv2.AssetParams {
     const creatorAcc = this.getAssetAccount(assetId);
     const assetDef = creatorAcc.getAssetDef(assetId);
     return this.runtime.assertAssetDefined(assetId, assetDef);
@@ -185,7 +185,7 @@ export class Ctx implements Context {
       amount: 0n,
       'asset-id': assetIndex,
       creator: assetDef.creator,
-      'is-frozen': assetDef.defaultFrozen
+      'is-frozen': assetDef.defaultFrozen ? assetDef.defaultFrozen : false
     };
     const account = this.getAccount(address);
     account.optInToASA(assetIndex, assetHolding);
@@ -294,13 +294,12 @@ export class Ctx implements Context {
    * @param index Index of current tx being processed in tx group
    */
   deductFee (sender: AccountAddress, index: number, params: types.TxParams): void {
-    let fee;
+    let fee: bigint = BigInt(this.gtxs[index].fee as number);
     // If flatFee boolean is not set, change fee value
     if (!params.flatFee && params.totalFee === undefined) {
-      fee = Math.max(ALGORAND_MIN_TX_FEE, this.gtxs[index].fee);
+      fee = BigInt(Math.max(ALGORAND_MIN_TX_FEE, Number(this.gtxs[index].fee)));
     }
     const fromAccount = this.getAccount(sender);
-    fee = BigInt(this.gtxs[index].fee);
     fromAccount.amount -= fee; // remove tx fee from Sender's account
     this.assertAccBalAboveMin(fromAccount.address);
   }

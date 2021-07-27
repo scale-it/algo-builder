@@ -202,9 +202,9 @@ describe("Algorand Standard Assets", function () {
     assert.equal(res.decimals, 0);
     assert.equal(res.defaultFrozen, false);
     assert.equal(res.total, 5912599999515n);
+    assert.equal(res.metadataHash, "12312442142141241244444411111133");
     assert.equal(res.unitName, "GLD");
     assert.equal(res.url, "url");
-    assert.equal(res.metadataHash, "12312442142141241244444411111133");
     assert.equal(res.manager, elon.address);
     assert.equal(res.reserve, elon.address);
     assert.equal(res.freeze, elon.address);

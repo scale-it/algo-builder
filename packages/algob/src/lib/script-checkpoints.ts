@@ -1,7 +1,7 @@
 
 import { checkIfAssetDeletionTx, loadFromYamlFileSilent, lsTreeWalk, types as rtypes } from "@algo-builder/runtime";
 import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
-import { encodeAddress, Transaction } from "algosdk";
+import { encodeAddress, modelsv2, Transaction } from "algosdk";
 import deepEqual from "deep-equal";
 import * as fs from "fs";
 import path from "path";
@@ -223,9 +223,9 @@ export async function registerCheckpoints (
           const asaInfo: rtypes.ASAInfo = {
             creator: encodeAddress(txn.from.publicKey),
             txId: txn.txID(),
-            assetIndex: txConfirmation["asset-index"],
-            confirmedRound: txConfirmation['confirmed-round'],
-            assetDef: res[1],
+            assetIndex: Number(txConfirmation.assetIndex),
+            confirmedRound: Number(txConfirmation.confirmedRound),
+            assetDef: res[1] as modelsv2.AssetParams,
             deleted: false
           };
           // res[0] -> asset name, res[1] -> ASADef
@@ -250,8 +250,8 @@ export async function registerCheckpoints (
           const sscInfo: rtypes.SSCInfo = {
             creator: encodeAddress(txn.from.publicKey),
             txId: txn.txID(),
-            appID: txConfirmation['application-index'],
-            confirmedRound: txConfirmation['confirmed-round'],
+            appID: Number(txConfirmation.applicationIndex),
+            confirmedRound: Number(txConfirmation.confirmedRound),
             timestamp: Math.round(+new Date() / 1000),
             deleted: false
           };

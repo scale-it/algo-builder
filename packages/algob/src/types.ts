@@ -1,7 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
-import type { LogicSig } from "algosdk";
-import * as algosdk from "algosdk";
+import algosdk, { LogicSig, modelsv2 } from "algosdk";
 
 import * as types from "./internal/core/params/argument-types";
 // Begin config types
@@ -447,13 +446,13 @@ export interface Deployer {
 
   registerSSCInfo: (name: string, sscInfo: rtypes.SSCInfo) => void
 
-  logTx: (message: string, txConfirmation: algosdk.ConfirmedTxInfo) => void
+  logTx: (message: string, txConfirmation: modelsv2.PendingTransactionResponse) => void
 
   /**
    * Send signed transaction to network and wait for confirmation
    * @param rawTxns Signed Transaction(s)
    */
-  sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<algosdk.ConfirmedTxInfo>
+  sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<modelsv2.PendingTransactionResponse>
 
   /**
    * Funds logic signature account (Contract Account).
@@ -527,11 +526,11 @@ export interface Deployer {
 
   /**
    * Queries blockchain for a given transaction and waits until it will be processed. */
-  waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
+  waitForConfirmation: (txId: string) => Promise<modelsv2.PendingTransactionResponse>
 
   /**
    * Queries blockchain using algodv2 for asset information by index  */
-  getAssetByID: (assetIndex: number | bigint) => Promise<algosdk.AssetInfo>
+  getAssetByID: (assetIndex: number | bigint) => Promise<modelsv2.Asset>
 
   /**
    * Creates an opt-in transaction for given ASA name, which must be defined in

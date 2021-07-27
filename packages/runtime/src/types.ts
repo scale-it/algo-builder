@@ -1,9 +1,8 @@
 import { types } from "@algo-builder/web";
 import {
   Account as AccountSDK,
-  AssetDef,
-  SSCSchemaConfig,
-  TxnEncodedObj
+  EncodedTransaction,
+  modelsv2
 } from "algosdk";
 
 import {
@@ -22,7 +21,7 @@ export type AppArgs = Array<string | number>;
 export type StackElem = bigint | Uint8Array;
 export type TEALStack = IStack<bigint | Uint8Array>;
 
-export interface Txn extends TxnEncodedObj {
+export interface Txn extends EncodedTransaction {
   txID: string
 }
 
@@ -103,7 +102,7 @@ export interface Context {
   state: State
   tx: Txn // current txn
   gtxs: Txn[] // all transactions
-  args: Uint8Array[]
+  args?: Uint8Array[]
   debugStack?: number //  max number of top elements from the stack to print after each opcode execution.
   getAccount: (address: string) => AccountStoreI
   getAssetAccount: (assetId: number) => AccountStoreI
@@ -144,7 +143,7 @@ export interface AssetHoldingM {
 export interface AppLocalStateM {
   id: number
   'key-value': Map<string, StackElem> // string represents bytes as string eg. 11,22,34
-  schema: SSCSchemaConfig
+  schema: modelsv2.ApplicationStateSchema
 }
 
 // custom SSCAttributes for AccountStore (using maps instead of array in 'global-state')
@@ -153,8 +152,8 @@ export interface SSCAttributesM {
   'clear-state-program': string
   creator: string
   'global-state': Map<string, StackElem>
-  'global-state-schema': SSCSchemaConfig
-  'local-state-schema': SSCSchemaConfig
+  'global-state-schema': modelsv2.ApplicationStateSchema
+  'local-state-schema': modelsv2.ApplicationStateSchema
 }
 
 // custom CreatedApp for AccountStore
@@ -175,9 +174,9 @@ export interface AccountStoreI {
   amount: bigint
   minBalance: number
   appsLocalState: Map<number, AppLocalStateM>
-  appsTotalSchema: SSCSchemaConfig
+  appsTotalSchema: modelsv2.ApplicationStateSchema
   createdApps: Map<number, SSCAttributesM>
-  createdAssets: Map<number, AssetDef>
+  createdAssets: Map<number, modelsv2.AssetParams>
   account: RuntimeAccount
 
   balance: () => bigint
@@ -185,9 +184,9 @@ export interface AccountStoreI {
   getAppFromLocal: (appID: number) => AppLocalStateM | undefined
   addApp: (appID: number, params: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string) => CreatedAppM
-  getAssetDef: (assetId: number) => AssetDef | undefined
+  getAssetDef: (assetId: number) => modelsv2.AssetParams | undefined
   getAssetHolding: (assetId: number) => AssetHoldingM | undefined
-  addAsset: (assetId: number, name: string, asadef: types.ASADef) => AssetDef
+  addAsset: (assetId: number, name: string, asadef: types.ASADef) => modelsv2.AssetParams
   modifyAsset: (assetId: number, fields: types.AssetModFields) => void
   closeAsset: (assetId: number) => void
   setFreezeState: (assetId: number, state: boolean) => void

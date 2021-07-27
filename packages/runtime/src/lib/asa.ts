@@ -1,5 +1,5 @@
 import { ASADefSchema, types } from "@algo-builder/web";
-import type { AssetDef } from "algosdk";
+import { modelsv2 } from "algosdk";
 import { existsSync } from "fs";
 import path from "path";
 import * as z from 'zod';
@@ -130,7 +130,7 @@ function isDefined (value: string | undefined): boolean {
  * @param fields Custom ASA fields
  * @param asset Defined ASA fields
  */
-export function checkAndSetASAFields (fields: types.AssetModFields, asset: AssetDef): void {
+export function checkAndSetASAFields (fields: types.AssetModFields, asset: modelsv2.AssetParams): void {
   for (const x of ['manager', 'reserve', 'freeze', 'clawback']) {
     const customField = fields[x as keyof types.AssetModFields];
     const asaField = asset[x as keyof types.AssetModFields];

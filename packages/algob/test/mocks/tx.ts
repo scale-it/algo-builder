@@ -1,4 +1,4 @@
-import algosdk, { Algodv2, AssetInfo, ConfirmedTxInfo, SuggestedParams } from "algosdk";
+import algosdk, { Algodv2, LogicSig, modelsv2, SuggestedParams } from "algosdk";
 
 import { bobAcc } from "./account";
 
@@ -13,15 +13,13 @@ export const mockSuggestedParam: SuggestedParams = {
   genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI='
 };
 
-export const mockConfirmedTx: ConfirmedTxInfo = {
-  'confirmed-round': 1,
-  "asset-index": 1,
-  'application-index': 1,
-  'global-state-delta': "string",
-  'local-state-delta': "string"
-};
+export const mockConfirmedTx: modelsv2.PendingTransactionResponse = {
+  confirmedRound: 1,
+  assetIndex: 1,
+  applicationIndex: 1
+} as modelsv2.PendingTransactionResponse;
 
-export const mockAssetInfo: AssetInfo = {
+export const mockAssetInfo: modelsv2.Asset = {
   index: 1,
   params: {
     creator: "addr-1",
@@ -36,8 +34,8 @@ export const mockAssetInfo: AssetInfo = {
     reserve: undefined,
     freeze: bobAcc.addr,
     clawback: undefined
-  }
-};
+  } as modelsv2.AssetParams
+} as modelsv2.Asset;
 
 const mockProgram = new Uint8Array([
   2, 32, 4, 1, 4, 100, 144, 78, 49, 16,
@@ -47,4 +45,4 @@ const mockProgram = new Uint8Array([
   1, 37, 14, 16
 ]);
 
-export const mockLsig = algosdk.makeLogicSig(mockProgram, []);
+export const mockLsig: LogicSig = algosdk.makeLogicSig(mockProgram, []);

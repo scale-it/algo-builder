@@ -1,7 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
-import type { LogicSig } from "algosdk";
-import * as algosdk from "algosdk";
+import algosdk, { LogicSig, modelsv2 } from "algosdk";
 
 import type {
   ASCCache,
@@ -52,11 +51,11 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  logTx (message: string, txConfirmation: algosdk.ConfirmedTxInfo): void {
+  logTx (message: string, txConfirmation: modelsv2.PendingTransactionResponse): void {
     throw new Error("Not implemented");
   }
 
-  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<algosdk.ConfirmedTxInfo> {
+  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<modelsv2.PendingTransactionResponse> {
     throw new Error("Not implemented");
   }
 
@@ -164,11 +163,11 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   };
 
-  getAssetByID (assetIndex: number | bigint): Promise<algosdk.AssetInfo> {
+  getAssetByID (assetIndex: number | bigint): Promise<modelsv2.Asset> {
     throw new Error("Not implemented");
   }
 
-  waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
+  waitForConfirmation (txId: string): Promise<modelsv2.PendingTransactionResponse> {
     throw new Error("Not implemented");
   }
 

@@ -1,7 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
-import type { LogicSig } from "algosdk";
-import { Account, Algodv2, AssetInfo, ConfirmedTxInfo } from "algosdk";
+import { Account, Algodv2, LogicSig, modelsv2 } from "algosdk";
 
 import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";
@@ -21,20 +20,20 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     throw new Error("Not implemented");
   }
 
-  getAssetByID (assetIndex: number | bigint): Promise<AssetInfo> {
+  getAssetByID (assetIndex: number | bigint): Promise<modelsv2.Asset> {
     return new Promise((resolve, reject) => {
       assetIndex === 1n ? resolve(mockAssetInfo) : reject(new Error("Not implemented"));
     });
   }
 
-  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
+  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<modelsv2.PendingTransactionResponse> {
     return new Promise((resolve, reject) => {
       resolve(mockConfirmedTx);
     });
   }
 
   /* eslint-disable sonarjs/no-identical-functions */
-  waitForConfirmation (txId: string): Promise<import("algosdk").ConfirmedTxInfo> {
+  waitForConfirmation (txId: string): Promise<modelsv2.PendingTransactionResponse> {
     return new Promise((resolve, reject) => {
       resolve(mockConfirmedTx);
     });

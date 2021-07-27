@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { ERRORS, types as wtypes } from "@algo-builder/web";
-import type { LogicSig } from "algosdk";
+import { LogicSig } from "algosdk";
 import { assert } from "chai";
 import * as fs from "fs";
 
