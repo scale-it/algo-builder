@@ -1,8 +1,8 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { tx as webTx, types as wtypes } from "@algo-builder/web";
-import algosdk, { Algodv2, modelsv2, SuggestedParams, Transaction } from "algosdk";
+import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
-import { Deployer } from "../types";
+import { ConfirmedTxInfo, Deployer } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
 import { loadSignedTxnFromFile } from "./files";
 import { registerCheckpoints } from "./script-checkpoints";
@@ -225,7 +225,7 @@ async function mkTx (
 export async function executeTransaction (
   deployer: Deployer,
   execParams: wtypes.ExecParams | wtypes.ExecParams[]):
-  Promise<modelsv2.PendingTransactionResponse> {
+  Promise<ConfirmedTxInfo> {
   deployer.assertCPNotDeleted(execParams);
   try {
     let signedTxn;
@@ -271,7 +271,7 @@ export async function executeTransaction (
  */
 export async function executeSignedTxnFromFile (
   deployer: Deployer,
-  fileName: string): Promise<modelsv2.PendingTransactionResponse> {
+  fileName: string): Promise<ConfirmedTxInfo> {
   const signedTxn = loadSignedTxnFromFile(fileName);
   if (signedTxn === undefined) { throw new Error(`File ${fileName} does not exist`); }
 

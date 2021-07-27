@@ -446,13 +446,13 @@ export interface Deployer {
 
   registerSSCInfo: (name: string, sscInfo: rtypes.SSCInfo) => void
 
-  logTx: (message: string, txConfirmation: modelsv2.PendingTransactionResponse) => void
+  logTx: (message: string, txConfirmation: ConfirmedTxInfo) => void
 
   /**
    * Send signed transaction to network and wait for confirmation
    * @param rawTxns Signed Transaction(s)
    */
-  sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<modelsv2.PendingTransactionResponse>
+  sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<ConfirmedTxInfo>
 
   /**
    * Funds logic signature account (Contract Account).
@@ -526,7 +526,7 @@ export interface Deployer {
 
   /**
    * Queries blockchain for a given transaction and waits until it will be processed. */
-  waitForConfirmation: (txId: string) => Promise<modelsv2.PendingTransactionResponse>
+  waitForConfirmation: (txId: string) => Promise<ConfirmedTxInfo>
 
   /**
    * Queries blockchain using algodv2 for asset information by index  */
@@ -651,3 +651,12 @@ export interface AnyMap {
 export type PromiseAny = Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 //  LocalWords:  configFile
+
+// TODO: Remove when this is resolved https://discord.com/channels/491256308461207573/631209194967531559/869677444242739220
+export interface ConfirmedTxInfo {
+  'confirmed-round': number
+  "asset-index": number
+  'application-index': number
+  'global-state-delta': string
+  'local-state-delta': string
+}
