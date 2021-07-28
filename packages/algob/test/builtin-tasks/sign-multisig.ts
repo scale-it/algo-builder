@@ -197,7 +197,7 @@ describe("Sign-Multisig task", () => {
 
   it("Append bob's signature to txn group loaded from file", async function () {
     const encodedTxGroup = loadEncodedTxFromFile('multisig-group.tx') as Uint8Array;
-    const decodedInputGroup = decodeObj(encodedTxGroup);
+    const decodedInputGroup = decodeObj(encodedTxGroup) as Uint8Array[];
 
     // we will sign 3rd transaction in group here (already signed previously)
     const tx2 = decodeSignedTransaction(decodedInputGroup[2]);
@@ -216,7 +216,7 @@ describe("Sign-Multisig task", () => {
     assert(fs.existsSync(path.join(ASSETS_DIR, outFile))); // outfile exists after commmand
 
     const outTxGroup = loadEncodedTxFromFile(outFile) as Uint8Array;
-    const decodedOutGroup = decodeObj(outTxGroup);
+    const decodedOutGroup = decodeObj(outTxGroup) as Uint8Array[];
 
     // verify first two transactions in group are same (as only 3rd was signed)
     assert.deepEqual(decodedInputGroup[0], decodedOutGroup[0]);
