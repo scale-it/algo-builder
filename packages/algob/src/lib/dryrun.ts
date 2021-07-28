@@ -1,6 +1,6 @@
 import { getPathFromDirRecursive, types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
-import { decodeSignedTransaction, encodeObj, modelsv2 } from "algosdk";
+import { decodeSignedTransaction, EncodedSignedTransaction, encodeObj, modelsv2 } from "algosdk";
 import { spawn } from "child_process";
 import * as fs from 'fs';
 import { ensureDirSync } from "fs-extra";
@@ -35,10 +35,20 @@ export class Tealdbg {
     if (!Array.isArray(signedTxn)) { signedTxn = [signedTxn]; }
 
     const encodedTxns = signedTxn.map(tx => decodeSignedTransaction(tx));
-    return new modelsv2.DryrunRequest({
+    return new (modelsv2 as any).DryrunRequest({
       txns: encodedTxns,
       sources: undefined
     });
+
+    // const encodedSignedTxns: EncodedSignedTransaction[] = [];
+    // for (const s of signedTxn) {
+    //   const decodedTx = decodeSignedTransaction(s);
+    //   encodedSignedTxns.push({ ...decodedTx, txn: decodedTx.txn.get_obj_for_encoding() });
+    // }
+    // return new (modelsv2 as any).DryrunRequest({
+    //   txns: encodedSignedTxns,
+    //   sources: undefined
+    // });
   }
 
   /**
