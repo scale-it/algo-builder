@@ -31,6 +31,11 @@ async function multiSignTx (
     return;
   }
   let rawTxn = loadEncodedTxFromFile(taskArgs.file); // single tx OR tx group
+  if (rawTxn === undefined) {
+    console.error("Error loading transaction from the file.");
+    return;
+  }
+
   const groupIndex = Number(taskArgs.groupIndex) ?? 0;
   const decodedTx = decodeObj(rawTxn);
   if (Array.isArray(decodedTx)) {
@@ -38,17 +43,12 @@ async function multiSignTx (
   }
 
   const sourceFilePath = getPathFromDirRecursive(ASSETS_DIR, taskArgs.file) as string;
-  if (rawTxn === undefined) {
-    console.error("Error loading transaction from the file.");
-    return;
-  }
-
   let mparams: MultisigMetadata | undefined;
   const { v, thr, addrs } = taskArgs;
   if (v && thr && addrs) {
     mparams = { version: Number(v), threshold: Number(thr), addrs: addrs.split(',') };
   }
-  const signedTxn = signMultiSig(signerAccount, rawTxn, mparams);
+  const signedTxn = signMultiSig(signerAccount, rawTxn as Uint8Array, mparams);
 
   const [name, ext] = taskArgs.file.split(".");
   const outFileName = taskArgs.out ?? (name + "_out." + ext);
