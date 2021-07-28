@@ -36,6 +36,6 @@ Now you can use this instance to perform transaction execution
     };
     let response = await web.executeTransaction(txParams);
 
-This code will make the transaction, let the user sign it using algosigner and send to to the network.
+This code will make the transaction, let the user sign it using algosigner and send it to the network.
 
 You can also use `web.sendTransaction()` or `web.signTransaction()` from react app.

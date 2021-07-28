@@ -13,7 +13,8 @@
 + Support pooled transaction fees in algob and runtime. Added tests
 + Add `flatFee` in `TxParams`
 + User can initialize & use accounts by name in runtime, similar to algob ('john', 'bob' etc)
-
++ Add docs for web package
++ Handle group transaction in web package
 
 ### Infrastructure
 * Added new make commands:
