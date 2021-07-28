@@ -1,4 +1,4 @@
-import { Account as AccountSDK, LogicSig, LogicSigArgs } from 'algosdk';
+import { Account as AccountSDK, LogicSig } from 'algosdk';
 import * as z from 'zod';
 
 import type { ASADefSchema, ASADefsSchema } from "./types-input";
@@ -138,7 +138,7 @@ interface SignWithLsig {
   fromAccountAddr: AccountAddress
   lsig: LogicSig
   /** stateless smart contract args */
-  args?: LogicSigArgs
+  args?: Uint8Array[]
 }
 
 export type Sign = SignWithSk | SignWithLsig;
@@ -236,3 +236,15 @@ export type AppCallsParam = BasicParams & AppOptionalFlags & {
 export type ASADef = z.infer<typeof ASADefSchema>;
 
 export type ASADefs = z.infer<typeof ASADefsSchema>;
+
+export interface RequestError extends Error {
+  response?: {
+    statusCode: number
+    text: string
+    body: {
+      message: string
+    }
+    error?: Error
+  }
+  error?: Error
+}

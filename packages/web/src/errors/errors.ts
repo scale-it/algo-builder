@@ -1,6 +1,4 @@
-import type { RequestError } from 'algosdk';
-
-import type { AnyMap } from "../types";
+import type { AnyMap, RequestError } from "../types";
 import { ErrorDescriptor, ERRORS, getErrorCode } from "./errors-list";
 
 export { ERRORS }; // re-export errors-list

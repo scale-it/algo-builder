@@ -1,4 +1,4 @@
-import type { AssetHolding, SSCStateSchema } from "algosdk";
+import type { modelsv2 } from "algosdk";
 
 import { AccountAddress, Deployer } from "../types";
 
@@ -13,7 +13,7 @@ export async function balanceOf (
   deployer: Deployer,
   accountAddress: AccountAddress,
   assetID: number
-): Promise<AssetHolding | undefined> {
+): Promise<modelsv2.AssetHolding | undefined> {
   const accountInfo = await deployer.algodClient.accountInformation(accountAddress).do();
   for (const asset of accountInfo.assets) {
     if (asset['asset-id'] === assetID) {
@@ -33,7 +33,7 @@ export async function balanceOf (
 export async function readGlobalStateSSC (
   deployer: Deployer,
   creator: AccountAddress,
-  appID: number): Promise<SSCStateSchema[] | undefined> {
+  appID: number): Promise<modelsv2.ApplicationStateSchema[] | undefined> {
   const accountInfoResponse = await deployer.algodClient.accountInformation(creator).do();
   for (const app of accountInfoResponse['created-apps']) {
     if (app.id === appID) { return app.params['global-state']; }
@@ -50,7 +50,7 @@ export async function readGlobalStateSSC (
 export async function readLocalStateSSC (
   deployer: Deployer,
   account: AccountAddress,
-  appID: number): Promise<SSCStateSchema[] | undefined> {
+  appID: number): Promise<modelsv2.ApplicationStateSchema[] | undefined> {
   const accountInfoResponse = await deployer.algodClient.accountInformation(account).do();
   for (const app of accountInfoResponse['apps-local-state']) {
     if (app.id === appID) { return app[`key-value`]; }

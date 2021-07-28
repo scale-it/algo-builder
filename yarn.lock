@@ -566,10 +566,9 @@ algo-msgpack-with-bigint@^2.1.1:
   resolved "https://registry.yarnpkg.com/algo-msgpack-with-bigint/-/algo-msgpack-with-bigint-2.1.1.tgz#38bb717220525b3ff42232eefdcd9efb9ad405d6"
   integrity sha512-F1tGh056XczEaEAqu7s+hlZUDWwOBT70Eq0lfMpBP2YguSQVyxRbprLq5rELXKQOyOaixTWYhMeMQMzP0U5FoQ==
 
-algosdk@^1.10.1:
+algosdk@scale-it/js-algorand-sdk.git#0f9d09e8d0bddc37145013e538b3ddfd001d364f:
   version "1.10.1"
-  resolved "https://registry.yarnpkg.com/algosdk/-/algosdk-1.10.1.tgz#2c7384dba8ee9b5bd317c5267412e1aadc8e1787"
-  integrity sha512-QCTMhqV4YGiEZk7J92BZAgLnBbZBgE4aDkRE5ADThyE12iter4NbUeNaNxvd+2JBhaxeUEbLvOi2fkkrOxEYhg==
+  resolved "https://codeload.github.com/scale-it/js-algorand-sdk/tar.gz/0f9d09e8d0bddc37145013e538b3ddfd001d364f"
   dependencies:
     algo-msgpack-with-bigint "^2.1.1"
     buffer "^6.0.2"

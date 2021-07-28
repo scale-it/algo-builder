@@ -1,12 +1,12 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
-import type { LogicSig } from "algosdk";
-import { Account, Algodv2, AssetInfo, ConfirmedTxInfo } from "algosdk";
+import { Account, Algodv2, LogicSig, modelsv2 } from "algosdk";
 
 import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";
 import {
   ASCCache,
+  ConfirmedTxInfo,
   FundASCFlags,
   LsigInfo
 } from "../../src/types";
@@ -21,7 +21,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     throw new Error("Not implemented");
   }
 
-  getAssetByID (assetIndex: number | bigint): Promise<AssetInfo> {
+  getAssetByID (assetIndex: number | bigint): Promise<modelsv2.Asset> {
     return new Promise((resolve, reject) => {
       assetIndex === 1n ? resolve(mockAssetInfo) : reject(new Error("Not implemented"));
     });
@@ -34,7 +34,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
   }
 
   /* eslint-disable sonarjs/no-identical-functions */
-  waitForConfirmation (txId: string): Promise<import("algosdk").ConfirmedTxInfo> {
+  waitForConfirmation (txId: string): Promise<ConfirmedTxInfo> {
     return new Promise((resolve, reject) => {
       resolve(mockConfirmedTx);
     });

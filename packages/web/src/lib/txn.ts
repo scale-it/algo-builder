@@ -66,7 +66,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         undefined,
         execParams.amount,
         note,
-        execParams.assetID,
+        execParams.assetID as number,
         suggestedParams);
       return updateTxFee(execParams.payFlags, tx);
     }
@@ -74,7 +74,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
       const tx = algosdk.makeAssetConfigTxnWithSuggestedParams(
         fromAccountAddr,
         encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64),
-        execParams.assetID,
+        execParams.assetID as number,
         execParams.fields.manager !== "" ? execParams.fields.manager : undefined,
         execParams.fields.reserve !== "" ? execParams.fields.reserve : undefined,
         execParams.fields.freeze !== "" ? execParams.fields.freeze : undefined,
@@ -88,7 +88,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
       const tx = algosdk.makeAssetFreezeTxnWithSuggestedParams(
         fromAccountAddr,
         encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64),
-        execParams.assetID,
+        execParams.assetID as number,
         execParams.freezeTarget,
         execParams.freezeState,
         suggestedParams
@@ -103,7 +103,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         execParams.revocationTarget,
         execParams.amount,
         encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64),
-        execParams.assetID,
+        execParams.assetID as number,
         suggestedParams
       );
       return updateTxFee(execParams.payFlags, tx);
@@ -112,7 +112,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
       const tx = algosdk.makeAssetDestroyTxnWithSuggestedParams(
         fromAccountAddr,
         encodeNote(execParams.payFlags.note, execParams.payFlags.noteb64),
-        execParams.assetID,
+        execParams.assetID as number,
         suggestedParams
       );
       return updateTxFee(execParams.payFlags, tx);
@@ -196,8 +196,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
           fromAccountAddr,
           note,
           BigInt(execParams.asaDef.total || 0), // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
-          execParams.asaDef.decimals,
-          execParams.asaDef.defaultFrozen,
+          execParams.asaDef.decimals as number,
+          execParams.asaDef.defaultFrozen ? execParams.asaDef.defaultFrozen : false,
           execParams.asaDef.manager,
           execParams.asaDef.reserve,
           execParams.asaDef.freeze,
@@ -224,8 +224,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         fromAccountAddr,
         suggestedParams,
         onComplete,
-        execParams.approvalProg,
-        execParams.clearProg,
+        execParams.approvalProg as Uint8Array,
+        execParams.clearProg as Uint8Array,
         execParams.localInts,
         execParams.localBytes,
         execParams.globalInts,
@@ -245,8 +245,8 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         fromAccountAddr,
         suggestedParams,
         execParams.appID,
-        execParams.approvalProg,
-        execParams.clearProg,
+        execParams.approvalProg as Uint8Array,
+        execParams.clearProg as Uint8Array,
         parseAppArgs(execParams.appArgs),
         execParams.accounts,
         execParams.foreignApps,
@@ -280,7 +280,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
         undefined,
         0,
         note,
-        execParams.assetID,
+        execParams.assetID as number,
         suggestedParams
       );
       return updateTxFee(execParams.payFlags, tx);

@@ -80,7 +80,8 @@ describe("ASA parser", () => {
       A1: {
         total: "hi",
         decimals: 0,
-        unitName: 'ASA'
+        unitName: 'ASA',
+        defaultFrozen: false
       }
     };
     expectRuntimeError(
@@ -94,7 +95,8 @@ describe("ASA parser", () => {
     let obj = {
       A1: {
         total: 0xFFFFFFFFFFFFFFFFn + 5n,
-        decimals: 0
+        decimals: 0,
+        defaultFrozen: false
       }
     } as any;
     expectRuntimeError(
@@ -106,7 +108,8 @@ describe("ASA parser", () => {
     obj = {
       A1: {
         total: -5n,
-        decimals: 0
+        decimals: 0,
+        defaultFrozen: false
       }
     };
     expectRuntimeError(
@@ -121,7 +124,8 @@ describe("ASA parser", () => {
       A1: {
         total: "hi",
         decimals: 0,
-        unitName: 'ASA'
+        unitName: 'ASA',
+        defaultFrozen: false
       }
     };
     expectRuntimeError(
@@ -136,7 +140,8 @@ describe("ASA parser", () => {
       A1: {
         total: 1,
         decimals: 20,
-        unitName: 'ASA'
+        unitName: 'ASA',
+        defaultFrozen: false
       }
     };
     expectRuntimeError(
@@ -151,7 +156,8 @@ describe("ASA parser", () => {
       A1: {
         total: 1,
         decimals: 1,
-        unitName: "123456789"
+        unitName: "123456789",
+        defaultFrozen: false
       }
     };
     expectRuntimeError(
@@ -168,7 +174,8 @@ describe("ASA parser", () => {
         decimals: 1,
         // more than 32 bytes:
         url: "1234567890abcdef1234567890abcdef_",
-        unitName: 'ASA'
+        unitName: 'ASA',
+        defaultFrozen: false
       }
     };
     expectRuntimeError(
@@ -185,7 +192,8 @@ describe("ASA parser", () => {
         decimals: 1,
         unitName: 'ASA',
         // more than 32 bytes:
-        metadataHash: "1234567890abcdef1234567890abcdef_"
+        metadataHash: "1234567890abcdef1234567890abcdef_",
+        defaultFrozen: false
       }
     };
     expectRuntimeError(
@@ -201,7 +209,8 @@ describe("ASA parser", () => {
         total: 1,
         decimals: 1,
         unitName: 'ASA',
-        optInAccNames: ["hi"]
+        optInAccNames: ["hi"],
+        defaultFrozen: false
       }
     };
     validateASADefs(obj, new Map<string, Account>([["hi", namedAccount]]), "");
@@ -213,7 +222,8 @@ describe("ASA parser", () => {
         total: 1,
         decimals: 1,
         unitName: 'ASA',
-        optInAccNames: []
+        optInAccNames: [],
+        defaultFrozen: false
       }
     };
     validateASADefs(obj, new Map<string, Account>([["hi", namedAccount]]), "");
@@ -225,7 +235,8 @@ describe("ASA parser", () => {
         total: 1,
         decimals: 1,
         unitName: 'ASA',
-        optInAccNames: ["hi", "hi123"]
+        optInAccNames: ["hi", "hi123"],
+        defaultFrozen: false
       }
     };
     expectRuntimeError(
