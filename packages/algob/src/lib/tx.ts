@@ -2,7 +2,7 @@ import { types as rtypes } from "@algo-builder/runtime";
 import { tx as webTx, types as wtypes } from "@algo-builder/web";
 import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
 
-import { Deployer } from "../types";
+import { ConfirmedTxInfo, Deployer } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
 import { loadSignedTxnFromFile } from "./files";
 import { registerCheckpoints } from "./script-checkpoints";
@@ -28,12 +28,14 @@ export async function getSuggestedParams (algocl: Algodv2): Promise<SuggestedPar
  * @param s suggested transaction params
  */
 export async function mkTxParams (
-  algocl: Algodv2, userParams: rtypes.TxParams, s?: SuggestedParams): Promise<SuggestedParams> {
+  algocl: Algodv2, userParams: wtypes.TxParams, s?: SuggestedParams): Promise<SuggestedParams> {
   if (s === undefined) { s = await getSuggestedParams(algocl); }
 
-  s.flatFee = userParams.totalFee !== undefined;
+  if (userParams.flatFee === undefined) {
+    if (userParams.totalFee !== undefined) s.flatFee = true;
+    else s.flatFee = false;
+  }
   s.fee = userParams.totalFee ?? userParams.feePerByte ?? ALGORAND_MIN_TX_FEE;
-  if (s.flatFee) s.fee = Math.max(s.fee, ALGORAND_MIN_TX_FEE);
 
   s.firstRound = userParams.firstValid ?? s.firstRound;
   s.lastRound = userParams.firstValid === undefined || userParams.validRounds === undefined
@@ -68,15 +70,15 @@ export function makeAssetCreateTxn (
     flags.creator.addr,
     note,
     BigInt(asaDef.total),
-    asaDef.decimals,
-    asaDef.defaultFrozen,
-    asaDef.manager,
-    asaDef.reserve,
-    asaDef.freeze,
-    asaDef.clawback,
+    Number(asaDef.decimals),
+    asaDef.defaultFrozen ? asaDef.defaultFrozen : false,
+    asaDef.manager !== "" ? asaDef.manager : undefined,
+    asaDef.reserve !== "" ? asaDef.reserve : undefined,
+    asaDef.freeze !== "" ? asaDef.freeze : undefined,
+    asaDef.clawback !== "" ? asaDef.clawback : undefined,
     asaDef.unitName,
     name,
-    asaDef.url,
+    asaDef.url ?? "",
     asaDef.metadataHash,
     txSuggestedParams
   );
@@ -92,7 +94,7 @@ export function makeASAOptInTx (
   addr: string,
   assetID: number,
   params: SuggestedParams,
-  payFlags: rtypes.TxParams
+  payFlags: wtypes.TxParams
 ): Transaction {
   const execParam: wtypes.ExecParams = {
     type: wtypes.TransactionType.OptInASA,
@@ -177,7 +179,7 @@ async function mkTx (
       const clear = await deployer.ensureCompiled(txn.clearProgram);
       txn.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
       txn.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
-      txIdxMap.set(index, [name, { total: 1, decimals: 1, unitName: "MOCK" }]);
+      txIdxMap.set(index, [name, { total: 1, decimals: 1, unitName: "MOCK", defaultFrozen: false }]);
       break;
     }
     case wtypes.TransactionType.UpdateApp: {
@@ -186,7 +188,7 @@ async function mkTx (
       const clear = await deployer.ensureCompiled(txn.newClearProgram);
       txn.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
       txn.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
-      txIdxMap.set(index, [cpKey, { total: 1, decimals: 1, unitName: "MOCK" }]);
+      txIdxMap.set(index, [cpKey, { total: 1, decimals: 1, unitName: "MOCK", defaultFrozen: false }]);
       break;
     }
     case wtypes.TransactionType.ModifyAsset: {
@@ -223,7 +225,7 @@ async function mkTx (
 export async function executeTransaction (
   deployer: Deployer,
   execParams: wtypes.ExecParams | wtypes.ExecParams[]):
-  Promise<algosdk.ConfirmedTxInfo> {
+  Promise<ConfirmedTxInfo> {
   deployer.assertCPNotDeleted(execParams);
   try {
     let signedTxn;
@@ -269,7 +271,7 @@ export async function executeTransaction (
  */
 export async function executeSignedTxnFromFile (
   deployer: Deployer,
-  fileName: string): Promise<algosdk.ConfirmedTxInfo> {
+  fileName: string): Promise<ConfirmedTxInfo> {
   const signedTxn = loadSignedTxnFromFile(fileName);
   if (signedTxn === undefined) { throw new Error(`File ${fileName} does not exist`); }
 

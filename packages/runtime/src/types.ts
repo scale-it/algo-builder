@@ -1,9 +1,8 @@
 import { types } from "@algo-builder/web";
 import {
   Account as AccountSDK,
-  AssetDef,
-  SSCSchemaConfig,
-  TxnEncodedObj
+  EncodedTransaction,
+  modelsv2
 } from "algosdk";
 
 import {
@@ -22,7 +21,7 @@ export type AppArgs = Array<string | number>;
 export type StackElem = bigint | Uint8Array;
 export type TEALStack = IStack<bigint | Uint8Array>;
 
-export interface Txn extends TxnEncodedObj {
+export interface Txn extends EncodedTransaction {
   txID: string
 }
 
@@ -66,10 +65,11 @@ export interface AccountsMap {
 /**
  * RuntimeAccountMap is for AccountStore used in runtime
  * (where we use maps instead of arrays in sdk structures). */
-export type RuntimeAccountMap = Map<string, AccountStoreI>;
+export type RuntimeAccountMap = Map<string, AccountAddress>;
 
 export interface State {
   accounts: Map<string, AccountStoreI>
+  accountNameAddress: Map<string, AccountAddress>
   globalApps: Map<number, string>
   assetDefs: Map<number, AccountAddress>
   assetNameInfo: Map<string, ASAInfo>
@@ -102,13 +102,14 @@ export interface Context {
   state: State
   tx: Txn // current txn
   gtxs: Txn[] // all transactions
-  args: Uint8Array[]
+  args?: Uint8Array[]
   debugStack?: number //  max number of top elements from the stack to print after each opcode execution.
   getAccount: (address: string) => AccountStoreI
   getAssetAccount: (assetId: number) => AccountStoreI
   getApp: (appID: number, line?: number) => SSCAttributesM
   transferAlgo: (txnParam: types.AlgoTransferParam) => void
-  deductFee: (sender: AccountAddress, index: number) => void
+  verifyMinimumFees: () => void
+  deductFee: (sender: AccountAddress, index: number, params: types.TxParams) => void
   transferAsset: (txnParam: types.AssetTransferParam) => void
   modifyAsset: (assetId: number, fields: types.AssetModFields) => void
   freezeAsset: (assetId: number, freezeTarget: string, freezeState: boolean) => void
@@ -121,7 +122,7 @@ export interface Context {
   closeApp: (sender: AccountAddress, appID: number) => void
   processTransactions: (txnParams: types.ExecParams[]) => void
   addAsset: (name: string, fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => number
-  optIntoASA: (assetIndex: number, address: AccountAddress, flags: TxParams) => void
+  optIntoASA: (assetIndex: number, address: AccountAddress, flags: types.TxParams) => void
   addApp: (
     fromAccountAddr: string, flags: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string
@@ -142,7 +143,7 @@ export interface AssetHoldingM {
 export interface AppLocalStateM {
   id: number
   'key-value': Map<string, StackElem> // string represents bytes as string eg. 11,22,34
-  schema: SSCSchemaConfig
+  schema: modelsv2.ApplicationStateSchema
 }
 
 // custom SSCAttributes for AccountStore (using maps instead of array in 'global-state')
@@ -151,14 +152,18 @@ export interface SSCAttributesM {
   'clear-state-program': string
   creator: string
   'global-state': Map<string, StackElem>
-  'global-state-schema': SSCSchemaConfig
-  'local-state-schema': SSCSchemaConfig
+  'global-state-schema': modelsv2.ApplicationStateSchema
+  'local-state-schema': modelsv2.ApplicationStateSchema
 }
 
 // custom CreatedApp for AccountStore
 export interface CreatedAppM {
   id: number
   attributes: SSCAttributesM
+}
+
+export interface RuntimeAccount extends AccountSDK {
+  name?: string
 }
 
 // represent account used in tests and by the context
@@ -169,19 +174,19 @@ export interface AccountStoreI {
   amount: bigint
   minBalance: number
   appsLocalState: Map<number, AppLocalStateM>
-  appsTotalSchema: SSCSchemaConfig
+  appsTotalSchema: modelsv2.ApplicationStateSchema
   createdApps: Map<number, SSCAttributesM>
-  createdAssets: Map<number, AssetDef>
-  account: AccountSDK
+  createdAssets: Map<number, modelsv2.AssetParams>
+  account: RuntimeAccount
 
   balance: () => bigint
   getApp: (appID: number) => SSCAttributesM | undefined
   getAppFromLocal: (appID: number) => AppLocalStateM | undefined
   addApp: (appID: number, params: AppDeploymentFlags,
     approvalProgram: string, clearProgram: string) => CreatedAppM
-  getAssetDef: (assetId: number) => AssetDef | undefined
+  getAssetDef: (assetId: number) => modelsv2.AssetParams | undefined
   getAssetHolding: (assetId: number) => AssetHoldingM | undefined
-  addAsset: (assetId: number, name: string, asadef: types.ASADef) => AssetDef
+  addAsset: (assetId: number, name: string, asadef: types.ASADef) => modelsv2.AssetParams
   modifyAsset: (assetId: number, fields: types.AssetModFields) => void
   closeAsset: (assetId: number) => void
   setFreezeState: (assetId: number, state: boolean) => void
@@ -212,35 +217,6 @@ export enum TxnOnComplete {
 export enum ExecutionMode {
   SIGNATURE, // stateless TEAL
   APPLICATION // application call (NoOp, CloseOut..)
-}
-
-/**
- * Common transaction parameters (fees, note..) */
-export interface TxParams {
-  /**
-   * feePerByte or totalFee is used to set the appropriate transaction fee parameter.
-   * If both are set then totalFee takes precedence.
-   * NOTE: SDK expects`fee: number` and boolean `flatFee`. But the API expects only one
-   * on parameter: `fee`. Here, we define feePerByte and totalFee - both as numberic
-   * parameters. We think that this is more explicit. */
-  feePerByte?: number
-  totalFee?: number
-  // The first round for when the transaction is valid.
-  firstValid?: number
-  // firstValid + validRounds will give us the ending round for which the transaction is valid.
-  validRounds?: number
-  // A lease enforces mutual exclusion of transactions.
-  lease?: Uint8Array
-  // Any data up to 1000 bytes.
-  note?: string
-  noteb64?: string
-  // When set, it indicates that the transaction is requesting
-  // that the Sender account should be closed, and all remaining
-  // funds, after the fee and amount are paid, be transferred to this address.
-  closeRemainderTo?: AccountAddress
-  // Specifies the authorized address.
-  rekeyTo?: AccountAddress
-  // you can learn more about these parameters here.(https://developer.algorand.org/docs/reference/transactions/#common-fields-header-and-type)
 }
 
 /**
@@ -295,7 +271,7 @@ export interface Account extends AccountSDK {
   name: string
 }
 
-export interface ASADeploymentFlags extends TxParams {
+export interface ASADeploymentFlags extends types.TxParams {
   creator: Account
 }
 

@@ -1,7 +1,7 @@
 /* eslint @typescript-eslint/no-var-requires: "off" */
 import { types as rtypes } from "@algo-builder/runtime";
-import type { LogicSig, MultisigMetadata } from "algosdk";
-import algosdk from "algosdk";
+import type { MultisigMetadata } from "algosdk";
+import algosdk, { LogicSig } from "algosdk";
 
 import type { ASCCache, SCParams } from "../types";
 import { CompileOp } from "./compile";
@@ -23,7 +23,7 @@ export async function getLsig (
   const lsig = algosdk.makeLogicSig(program, []);
   // below line saves data in cp is {tag: <value>} which we need, otherwise it'll save as
   // { type: 'buffer', data: <value> } and throws error upon running examples
-  if (lsig.tag) { lsig.tag = Uint8Array.from(lsig.tag); }
+  if (lsig.tag) { lsig.tag = Buffer.from(lsig.tag); }
   return lsig;
 }
 

@@ -1,7 +1,7 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
 import { parsing, tx as webTx, types } from "@algo-builder/web";
-import algosdk, { AssetDef, decodeAddress } from "algosdk";
+import algosdk, { decodeAddress, modelsv2 } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
 import { AccountStore } from "./account";
@@ -15,7 +15,7 @@ import { mockSuggestedParams } from "./mock/tx";
 import {
   AccountAddress, AccountStoreI, AppDeploymentFlags, AppOptionalFlags,
   ASADeploymentFlags, ASAInfo, AssetHoldingM, Context,
-  ExecutionMode, SSCAttributesM, SSCInfo, StackElem, State, Txn, TxParams
+  ExecutionMode, SSCAttributesM, SSCInfo, StackElem, State, Txn
 } from "./types";
 
 export class Runtime {
@@ -37,6 +37,7 @@ export class Runtime {
     // runtime store
     this.store = {
       accounts: new Map<AccountAddress, AccountStoreI>(), // string represents account address
+      accountNameAddress: new Map<string, AccountAddress>(),
       globalApps: new Map<number, AccountAddress>(), // map of {appID: accountAddress}
       assetDefs: new Map<number, AccountAddress>(), // number represents assetId
       assetNameInfo: new Map<string, ASAInfo>(),
@@ -49,7 +50,7 @@ export class Runtime {
     this.initializeAccounts(accounts);
 
     // load asa yaml files
-    this.loadedAssetsDefs = loadASAFile(this.store.accounts);
+    this.loadedAssetsDefs = loadASAFile(this.store.accountNameAddress);
 
     // context for interpreter
     this.ctx = new Ctx(cloneDeep(this.store), <Txn>{}, [], [], this);
@@ -115,7 +116,9 @@ export class Runtime {
    * Note: if user is accessing this function directly through runtime,
    * the line number is unknown
    */
-  assertAssetDefined (assetId: number, assetDef?: AssetDef, line?: number): AssetDef {
+  assertAssetDefined (
+    assetId: number, assetDef?: modelsv2.AssetParams, line?: number
+  ): modelsv2.AssetParams {
     const lineNumber = line ?? 'unknown';
     if (assetDef === undefined) {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND,
@@ -131,7 +134,7 @@ export class Runtime {
   validateTxRound (gtxns: Txn[]): void {
     // https://developer.algorand.org/docs/features/transactions/#current-round
     for (const txn of gtxns) {
-      if (txn.fv >= this.round || txn.lv <= this.round) {
+      if (Number(txn.fv) >= this.round || txn.lv <= this.round) {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_ROUND,
           { first: txn.fv, last: txn.lv, round: this.round });
       }
@@ -227,7 +230,7 @@ export class Runtime {
    * Returns Asset Definitions
    * @param assetId Asset Index
    */
-  getAssetDef (assetId: number): AssetDef {
+  getAssetDef (assetId: number): modelsv2.AssetParams {
     const creatorAcc = this.getAssetAccount(assetId);
     const assetDef = creatorAcc.getAssetDef(assetId);
     return this.assertAssetDefined(assetId, assetDef);
@@ -258,6 +261,7 @@ export class Runtime {
    */
   initializeAccounts (accounts: AccountStoreI[]): void {
     for (const acc of accounts) {
+      if (acc.account.name) this.store.accountNameAddress.set(acc.account.name, acc.account.addr);
       this.store.accounts.set(acc.address, acc);
 
       for (const appID of acc.createdApps.keys()) {
@@ -305,21 +309,21 @@ export class Runtime {
 
   // creates new asset creation transaction object.
   mkAssetCreateTx (
-    name: string, flags: ASADeploymentFlags, asaDef: AssetDef): void {
+    name: string, flags: ASADeploymentFlags, asaDef: modelsv2.AssetParams): void {
     // this funtion is called only for validation of parameters passed
     algosdk.makeAssetCreateTxnWithSuggestedParams(
       flags.creator.addr,
       webTx.encodeNote(flags.note, flags.noteb64),
       asaDef.total,
-      asaDef.decimals,
-      asaDef.defaultFrozen,
+      Number(asaDef.decimals),
+      asaDef.defaultFrozen ? asaDef.defaultFrozen : false,
       asaDef.manager !== "" ? asaDef.manager : undefined,
       asaDef.reserve !== "" ? asaDef.reserve : undefined,
       asaDef.freeze !== "" ? asaDef.freeze : undefined,
       asaDef.clawback !== "" ? asaDef.clawback : undefined,
-      asaDef.unitName,
+      asaDef.unitName as string,
       name,
-      asaDef.url,
+      asaDef.url as string,
       asaDef.metadataHash,
       mockSuggestedParams(flags, this.round)
     );
@@ -334,7 +338,26 @@ export class Runtime {
     this.ctx.addAsset(name, flags.creator.addr, flags);
 
     this.store = this.ctx.state;
+    this.optInToASAMultiple(name, this.store.assetCounter);
     return this.store.assetCounter;
+  }
+
+  /**
+   * Opt-In to all accounts given in asa.yaml to a specific asset.
+   * @param name Asset name
+   * @param assetID Asset Index
+   */
+  optInToASAMultiple (name: string, assetID: number): void {
+    const accounts = this.loadedAssetsDefs[name].optInAccNames;
+    if (accounts === undefined) {
+      return;
+    }
+    for (const accName of accounts) {
+      const address = this.store.accountNameAddress.get(accName);
+      if (address) {
+        this.optIntoASA(assetID, address, {});
+      }
+    }
   }
 
   /**
@@ -343,7 +366,7 @@ export class Runtime {
    * @param address Account address to opt-into asset
    * @param flags Transaction Parameters
    */
-  optIntoASA (assetIndex: number, address: AccountAddress, flags: TxParams): void {
+  optIntoASA (assetIndex: number, address: AccountAddress, flags: types.TxParams): void {
     this.ctx.optIntoASA(assetIndex, address, flags);
 
     this.store = this.ctx.state;
@@ -367,7 +390,7 @@ export class Runtime {
   }
 
   // creates new application transaction object and update context
-  addCtxAppCreateTxn (flags: AppDeploymentFlags, payFlags: TxParams): void {
+  addCtxAppCreateTxn (flags: AppDeploymentFlags, payFlags: types.TxParams): void {
     const txn = algosdk.makeApplicationCreateTxn(
       flags.sender.addr,
       mockSuggestedParams(payFlags, this.round),
@@ -386,8 +409,7 @@ export class Runtime {
       flags.lease,
       payFlags.rekeyTo);
 
-    const encTx = txn.get_obj_for_encoding();
-    encTx.txID = txn.txID();
+    const encTx = { ...txn.get_obj_for_encoding(), txID: txn.txID() };
     this.ctx.tx = encTx;
     this.ctx.gtxs = [encTx];
   }
@@ -403,7 +425,7 @@ export class Runtime {
    * NOTE - approval and clear program must be the TEAL code as string (not compiled code)
    */
   addApp (
-    flags: AppDeploymentFlags, payFlags: TxParams,
+    flags: AppDeploymentFlags, payFlags: types.TxParams,
     approvalProgram: string, clearProgram: string,
     debugStack?: number
   ): number {
@@ -419,7 +441,7 @@ export class Runtime {
   addCtxOptInTx (
     senderAddr: string,
     appID: number,
-    payFlags: TxParams,
+    payFlags: types.TxParams,
     flags: AppOptionalFlags): void {
     const txn = algosdk.makeApplicationOptInTxn(
       senderAddr,
@@ -433,8 +455,7 @@ export class Runtime {
       flags.lease,
       payFlags.rekeyTo);
 
-    const encTx = txn.get_obj_for_encoding();
-    encTx.txID = txn.txID();
+    const encTx = { ...txn.get_obj_for_encoding(), txID: txn.txID() };
     this.ctx.tx = encTx;
     this.ctx.gtxs = [encTx];
   }
@@ -449,7 +470,7 @@ export class Runtime {
    * each opcode execution (upto depth = debugStack)
    */
   optInToApp (accountAddr: string, appID: number,
-    flags: AppOptionalFlags, payFlags: TxParams, debugStack?: number): void {
+    flags: AppOptionalFlags, payFlags: types.TxParams, debugStack?: number): void {
     this.addCtxOptInTx(accountAddr, appID, payFlags, flags);
     this.ctx.debugStack = debugStack;
     this.ctx.optInToApp(accountAddr, appID);
@@ -461,7 +482,7 @@ export class Runtime {
   addCtxAppUpdateTx (
     senderAddr: string,
     appID: number,
-    payFlags: TxParams,
+    payFlags: types.TxParams,
     flags: AppOptionalFlags): void {
     const txn = algosdk.makeApplicationUpdateTxn(
       senderAddr,
@@ -477,8 +498,7 @@ export class Runtime {
       flags.lease,
       payFlags.rekeyTo);
 
-    const encTx = txn.get_obj_for_encoding();
-    encTx.txID = txn.txID();
+    const encTx = { ...txn.get_obj_for_encoding(), txID: txn.txID() };
     this.ctx.tx = encTx;
     this.ctx.gtxs = [encTx];
   }
@@ -500,7 +520,7 @@ export class Runtime {
     appID: number,
     approvalProgram: string,
     clearProgram: string,
-    payFlags: TxParams,
+    payFlags: types.TxParams,
     flags: AppOptionalFlags,
     debugStack?: number
   ): void {
