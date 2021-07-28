@@ -223,8 +223,8 @@ export async function registerCheckpoints (
           const asaInfo: rtypes.ASAInfo = {
             creator: encodeAddress(txn.from.publicKey),
             txId: txn.txID(),
-            assetIndex: Number(txConfirmation.assetIndex),
-            confirmedRound: Number(txConfirmation.confirmedRound),
+            assetIndex: Number(txConfirmation['asset-index']),
+            confirmedRound: Number(txConfirmation['confirmed-round']),
             assetDef: res[1] as modelsv2.AssetParams,
             deleted: false
           };
@@ -250,8 +250,8 @@ export async function registerCheckpoints (
           const sscInfo: rtypes.SSCInfo = {
             creator: encodeAddress(txn.from.publicKey),
             txId: txn.txID(),
-            appID: Number(txConfirmation.applicationIndex),
-            confirmedRound: Number(txConfirmation.confirmedRound),
+            appID: Number(txConfirmation['application-index']),
+            confirmedRound: Number(txConfirmation['confirmed-round']),
             timestamp: Math.round(+new Date() / 1000),
             deleted: false
           };

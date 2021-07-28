@@ -6,6 +6,7 @@ import { txWriter } from "../../src/internal/tx-log-writer";
 import { AlgoOperator } from "../../src/lib/algo-operator";
 import {
   ASCCache,
+  ConfirmedTxInfo,
   FundASCFlags,
   LsigInfo
 } from "../../src/types";
@@ -26,14 +27,14 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     });
   }
 
-  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<modelsv2.PendingTransactionResponse> {
+  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
     return new Promise((resolve, reject) => {
       resolve(mockConfirmedTx);
     });
   }
 
   /* eslint-disable sonarjs/no-identical-functions */
-  waitForConfirmation (txId: string): Promise<modelsv2.PendingTransactionResponse> {
+  waitForConfirmation (txId: string): Promise<ConfirmedTxInfo> {
     return new Promise((resolve, reject) => {
       resolve(mockConfirmedTx);
     });

@@ -1,5 +1,6 @@
 import algosdk, { Algodv2, LogicSig, modelsv2, SuggestedParams } from "algosdk";
 
+import { ConfirmedTxInfo } from "../../src/types";
 import { bobAcc } from "./account";
 
 export const mockAlgod = new Algodv2("dummyToken", "https://dummyNetwork", 8080);
@@ -13,11 +14,13 @@ export const mockSuggestedParam: SuggestedParams = {
   genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI='
 };
 
-export const mockConfirmedTx: modelsv2.PendingTransactionResponse = {
-  confirmedRound: 1,
-  assetIndex: 1,
-  applicationIndex: 1
-} as modelsv2.PendingTransactionResponse;
+export const mockConfirmedTx: ConfirmedTxInfo = {
+  'confirmed-round': 1,
+  "asset-index": 1,
+  'application-index': 1,
+  'global-state-delta': "string",
+  'local-state-delta': "string"
+};
 
 export const mockAssetInfo: modelsv2.Asset = {
   index: 1,

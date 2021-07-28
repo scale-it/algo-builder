@@ -4,6 +4,7 @@ import algosdk, { LogicSig, modelsv2 } from "algosdk";
 
 import type {
   ASCCache,
+  ConfirmedTxInfo,
   Deployer,
   FundASCFlags,
   LsigInfo
@@ -51,11 +52,11 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  logTx (message: string, txConfirmation: modelsv2.PendingTransactionResponse): void {
+  logTx (message: string, txConfirmation: ConfirmedTxInfo): void {
     throw new Error("Not implemented");
   }
 
-  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<modelsv2.PendingTransactionResponse> {
+  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
     throw new Error("Not implemented");
   }
 
@@ -167,7 +168,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  waitForConfirmation (txId: string): Promise<modelsv2.PendingTransactionResponse> {
+  waitForConfirmation (txId: string): Promise<ConfirmedTxInfo> {
     throw new Error("Not implemented");
   }
 
