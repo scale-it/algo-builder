@@ -20,4 +20,22 @@ In Web package we pass transaction [parameters](https://github.com/scale-it/algo
 
 ## Example
 
+To use `web` package in your react app, first you need to create an instance of `WebMode` class by passing `AlgoSigner` and `Chain_name`.
 
+    const web = new WebMode(AlgoSigner, CHAIN_NAME);
+
+Now you can use this instance to perform transaction execution
+
+    const txParams = {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccountAddr: fromAddress,
+      toAccountAddr: toAddress,
+      amountMicroAlgos: amount,
+      payFlags: {},
+    };
+    let response = await tx.executeTransaction(txParams);
+
+This code will make the transaction, let the user sign it using algosigner and send to to the network.
+
+You can also use `web.sendTransaction()` or `web.signTransaction()` from react app.
