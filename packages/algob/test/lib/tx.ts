@@ -1,6 +1,6 @@
 import { types } from "@algo-builder/runtime";
 import { ERRORS, tx as webTx, types as wtypes } from "@algo-builder/web";
-import algosdk, { decodeSignedTransaction, encodeAddress, modelsv2 } from "algosdk";
+import algosdk, { decodeSignedTransaction, encodeAddress, Transaction } from "algosdk";
 import { assert } from "chai";
 import { isArray } from "lodash";
 import sinon from 'sinon';
@@ -9,7 +9,7 @@ import { TextEncoder } from "util";
 import { executeTransaction } from "../../src";
 import { DeployerDeployMode, DeployerRunMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
-import { Deployer } from "../../src/types";
+import { ConfirmedTxInfo, Deployer } from "../../src/types";
 import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkEnv } from "../helpers/params";
 import { useFixtureProject, useFixtureProjectCopy } from "../helpers/project";
@@ -53,7 +53,7 @@ describe("Opt-In to ASA", () => {
   let deployer: Deployer;
   let execParams: wtypes.OptInASAParam;
   let algod: AlgoOperatorDryRunImpl;
-  let expected: modelsv2.PendingTransactionResponse;
+  let expected: ConfirmedTxInfo;
   beforeEach(async () => {
     const env = mkEnv("network1");
     algod = new AlgoOperatorDryRunImpl();
@@ -71,10 +71,12 @@ describe("Opt-In to ASA", () => {
     sinon.stub(algod.algodClient, "getTransactionParams")
       .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
     expected = {
-      confirmedRound: 1,
-      assetIndex: 1,
-      applicationIndex: 1
-    } as modelsv2.PendingTransactionResponse;
+      'confirmed-round': 1,
+      'asset-index': 1,
+      'application-index': 1,
+      'global-state-delta': "string",
+      'local-state-delta': "string"
+    };
   });
 
   afterEach(() => {
@@ -141,11 +143,11 @@ describe("ASA modify fields", () => {
    * Verifies correct asset fields are sent to network
    * @param rawTxns rawTxns Signed transactions in Uint8Array
    */
-  function checkTx (rawTxns: Uint8Array | Uint8Array[]): Promise<modelsv2.PendingTransactionResponse> {
+  function checkTx (rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
     if (isArray(rawTxns)) {
       // verify here if group tx
     } else {
-      const tx: any = decodeSignedTransaction(rawTxns).txn;
+      const tx: Transaction = decodeSignedTransaction(rawTxns).txn;
       // Verify if fields are set correctly
       assert.isUndefined(tx.assetManager);
       assert.isUndefined(tx.assetReserve);
@@ -655,7 +657,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
       type: wtypes.TransactionType.DeleteApp,
       sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
-      appID: appInfo.applicationIndex as number,
+      appID: appInfo['application-index'],
       payFlags: {}
     };
 
@@ -707,7 +709,7 @@ describe("Update transaction test in run mode", () => {
       type: wtypes.TransactionType.UpdateApp,
       sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
-      appID: appInfo.applicationIndex as number,
+      appID: appInfo['application-index'],
       newApprovalProgram: "approval.teal",
       newClearProgram: "clear.teal",
       payFlags: {}
@@ -772,7 +774,7 @@ describe("Update transaction test in run mode", () => {
       type: wtypes.TransactionType.UpdateApp,
       sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
-      appID: appInfo.applicationIndex as number,
+      appID: appInfo['application-index'],
       newApprovalProgram: "approval.teal",
       newClearProgram: "clear.teal",
       payFlags: {}

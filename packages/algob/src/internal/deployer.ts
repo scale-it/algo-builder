@@ -12,6 +12,7 @@ import type {
   ASCCache,
   CheckpointFunctions,
   CheckpointRepo,
+  ConfirmedTxInfo,
   Deployer,
   FundASCFlags,
   LsigInfo,
@@ -101,7 +102,7 @@ class DeployerBasicMode {
     return this.algoOp.algodClient;
   }
 
-  async waitForConfirmation (txId: string): Promise<modelsv2.PendingTransactionResponse> {
+  async waitForConfirmation (txId: string): Promise<ConfirmedTxInfo> {
     return await this.algoOp.waitForConfirmation(txId);
   }
 
@@ -181,7 +182,7 @@ class DeployerBasicMode {
    */
   async sendAndWait (
     rawTxns: Uint8Array | Uint8Array[]
-  ): Promise<modelsv2.PendingTransactionResponse> {
+  ): Promise<ConfirmedTxInfo> {
     return await this.algoOp.sendAndWait(rawTxns);
   }
 
@@ -464,7 +465,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   /**
    * Log transaction with message using txwriter
    */
-  logTx (message: string, txConfirmation: modelsv2.PendingTransactionResponse): void {
+  logTx (message: string, txConfirmation: ConfirmedTxInfo): void {
     this.txWriter.push(message, txConfirmation);
   }
 
@@ -675,7 +676,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     });
   }
 
-  logTx (message: string, txConfirmation: modelsv2.PendingTransactionResponse): void {
+  logTx (message: string, txConfirmation: ConfirmedTxInfo): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "logTx"
     });
