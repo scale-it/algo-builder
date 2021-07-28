@@ -49,7 +49,40 @@ const mockProgram = new Uint8Array([
 ]);
 
 export const mockDryRunResponse = {
-  "logic-sig-message": "PASS"
+  error: "",
+  "protocol-version": "https://github.com/algorandfoundation/specs/tree/65b4ab3266c52c56a0fa7d591754887d68faad0a",
+  txns: [
+    {
+      disassembly: [
+        "#pragma version 2",
+        "intcblock 1 0 4 1000 10000",
+        "bytecblock 0x20ee6e18c121cab6dfc0f94d3d97d9dce06453d6ad52d75cd85d5b35d86e1112",
+        "global GroupSize",
+        "intc_0 // 1"
+      ],
+      "logic-sig-messages": [
+        "PASS"
+      ],
+      "logic-sig-trace": [
+        {
+          line: 41,
+          pc: 96,
+          stack: [
+            {
+              bytes: "",
+              type: 2,
+              uint: 1
+            },
+            {
+              bytes: "",
+              type: 2,
+              uint: 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
 };
 
 export const mockLsig: LogicSig = algosdk.makeLogicSig(mockProgram, []);

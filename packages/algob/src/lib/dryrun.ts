@@ -34,21 +34,17 @@ export class Tealdbg {
     let [_, signedTxn] = await makeAndSignTx(this.deployer, this.execParams, new Map());
     if (!Array.isArray(signedTxn)) { signedTxn = [signedTxn]; }
 
-    const encodedTxns = signedTxn.map(tx => decodeSignedTransaction(tx));
+    const encodedSignedTxns: EncodedSignedTransaction[] = [];
+    for (const s of signedTxn) {
+      const decodedTx = decodeSignedTransaction(s);
+      encodedSignedTxns.push({ ...decodedTx, txn: decodedTx.txn.get_obj_for_encoding() });
+    }
+
+    // https://github.com/algorand/js-algorand-sdk/issues/410
     return new (modelsv2 as any).DryrunRequest({
-      txns: encodedTxns,
+      txns: encodedSignedTxns,
       sources: undefined
     });
-
-    // const encodedSignedTxns: EncodedSignedTransaction[] = [];
-    // for (const s of signedTxn) {
-    //   const decodedTx = decodeSignedTransaction(s);
-    //   encodedSignedTxns.push({ ...decodedTx, txn: decodedTx.txn.get_obj_for_encoding() });
-    // }
-    // return new (modelsv2 as any).DryrunRequest({
-    //   txns: encodedSignedTxns,
-    //   sources: undefined
-    // });
   }
 
   /**

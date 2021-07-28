@@ -1,6 +1,6 @@
 import { types } from '@algo-builder/web';
 import { ExecParams } from "@algo-builder/web/src/types";
-import { generateAccount } from "algosdk";
+import algosdk, { generateAccount } from "algosdk";
 import { assert } from "chai";
 import * as fs from "fs";
 import { pathExistsSync } from "fs-extra";
@@ -46,10 +46,10 @@ describe("Debugging TEAL code using tealdbg", () => {
     const deployerCfg = new DeployerConfig(env, algod);
     deployer = new DeployerRunMode(deployerCfg);
     sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam });
+      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
 
-    sinon.stub(algod.algodClient, "dryrun")
-      .returns({ do: async () => mockDryRunResponse });
+    (sinon.stub(algod.algodClient, "dryrun") as any)
+      .returns({ do: async () => mockDryRunResponse }) as ReturnType<algosdk.Algodv2['dryrun']>;
 
     txnParam = {
       type: types.TransactionType.TransferAsset,
