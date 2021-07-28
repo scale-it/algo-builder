@@ -1,6 +1,6 @@
 import { types } from "@algo-builder/runtime";
 import { ERRORS, tx as webTx, types as wtypes } from "@algo-builder/web";
-import { ConfirmedTxInfo, decodeSignedTransaction, encodeAddress, Transaction } from "algosdk";
+import algosdk, { decodeSignedTransaction, encodeAddress, Transaction } from "algosdk";
 import { assert } from "chai";
 import { isArray } from "lodash";
 import sinon from 'sinon';
@@ -9,7 +9,7 @@ import { TextEncoder } from "util";
 import { executeTransaction } from "../../src";
 import { DeployerDeployMode, DeployerRunMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
-import { Deployer } from "../../src/types";
+import { ConfirmedTxInfo, Deployer } from "../../src/types";
 import { expectBuilderError, expectBuilderErrorAsync } from "../helpers/errors";
 import { mkEnv } from "../helpers/params";
 import { useFixtureProject, useFixtureProjectCopy } from "../helpers/project";
@@ -69,10 +69,10 @@ describe("Opt-In to ASA", () => {
       assetID: 1
     };
     sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam });
+      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
     expected = {
       'confirmed-round': 1,
-      "asset-index": 1,
+      'asset-index': 1,
       'application-index': 1,
       'global-state-delta': "string",
       'local-state-delta': "string"
@@ -132,7 +132,7 @@ describe("ASA modify fields", () => {
       fields: assetFields
     };
     sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam });
+      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
   });
 
   afterEach(async () => {
@@ -179,7 +179,7 @@ describe("Delete ASA and SSC", () => {
     deployer = new DeployerDeployMode(deployerCfg);
     await deployer.deployASA("silver", { creator: deployer.accounts[0] });
     sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam });
+      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
   });
 
   afterEach(async () => {
@@ -275,7 +275,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
     deployerCfg.asaDefs = { silver: mkASA() };
     deployer = new DeployerDeployMode(deployerCfg);
     sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam });
+      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
 
     // deploy  and delete asset
     const asaInfo = await deployer.deployASA(assetName, { creator: deployer.accounts[0] });
@@ -592,7 +592,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
     deployerCfg.asaDefs = { silver: mkASA() };
     deployer = new DeployerRunMode(deployerCfg);
     sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam });
+      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
   });
 
   afterEach(async () => {
@@ -657,7 +657,7 @@ describe("Deploy, Delete transactions test in run mode", () => {
       type: wtypes.TransactionType.DeleteApp,
       sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
-      appID: appInfo["application-index"],
+      appID: appInfo['application-index'],
       payFlags: {}
     };
 
@@ -680,7 +680,7 @@ describe("Update transaction test in run mode", () => {
     deployerCfg = new DeployerConfig(env, algod);
     deployer = new DeployerRunMode(deployerCfg);
     sinon.stub(algod.algodClient, "getTransactionParams")
-      .returns({ do: async () => mockSuggestedParam });
+      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
   });
 
   afterEach(async () => {
@@ -709,7 +709,7 @@ describe("Update transaction test in run mode", () => {
       type: wtypes.TransactionType.UpdateApp,
       sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
-      appID: appInfo["application-index"],
+      appID: appInfo['application-index'],
       newApprovalProgram: "approval.teal",
       newClearProgram: "clear.teal",
       payFlags: {}
@@ -774,7 +774,7 @@ describe("Update transaction test in run mode", () => {
       type: wtypes.TransactionType.UpdateApp,
       sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
-      appID: appInfo["application-index"],
+      appID: appInfo['application-index'],
       newApprovalProgram: "approval.teal",
       newClearProgram: "clear.teal",
       payFlags: {}

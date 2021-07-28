@@ -1,5 +1,5 @@
 import { parsing } from "@algo-builder/web";
-import type { AssetDefEnc, StateSchemaEnc, Transaction } from "algosdk";
+import type { EncodedAssetParams, EncodedGlobalStateSchema, Transaction } from "algosdk";
 
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
@@ -69,13 +69,13 @@ export function txnSpecbyField (txField: string, tx: Txn, gtxns: Txn[], tealVers
   if (assetTxnFields.has(txField)) {
     const s = TxnFields[tealVersion][txField];
     const assetMetaData = tx.apar;
-    result = assetMetaData?.[s as keyof AssetDefEnc];
+    result = assetMetaData?.[s as keyof EncodedAssetParams];
     return parseToStackElem(result, txField);
   }
   if (globalAndLocalNumTxnFields.has(txField)) {
     const encAppGlobalSchema = txField.includes('Global') ? tx.apgs : tx.apls;
     const s = TxnFields[tealVersion][txField];
-    result = encAppGlobalSchema?.[s as keyof StateSchemaEnc];
+    result = encAppGlobalSchema?.[s as keyof EncodedGlobalStateSchema];
     return parseToStackElem(result, txField);
   }
 

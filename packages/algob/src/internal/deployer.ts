@@ -1,6 +1,6 @@
 import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
 import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
-import type { LogicSig, MultiSig } from "algosdk";
+import type { EncodedMultisig, LogicSig, modelsv2 } from "algosdk";
 import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
@@ -12,6 +12,7 @@ import type {
   ASCCache,
   CheckpointFunctions,
   CheckpointRepo,
+  ConfirmedTxInfo,
   Deployer,
   FundASCFlags,
   LsigInfo,
@@ -101,7 +102,7 @@ class DeployerBasicMode {
     return this.algoOp.algodClient;
   }
 
-  async waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
+  async waitForConfirmation (txId: string): Promise<ConfirmedTxInfo> {
     return await this.algoOp.waitForConfirmation(txId);
   }
 
@@ -110,7 +111,7 @@ class DeployerBasicMode {
    * @param assetIndex asset index
    * @returns asset info from network
    */
-  async getAssetByID (assetIndex: number | bigint): Promise<algosdk.AssetInfo> {
+  async getAssetByID (assetIndex: number | bigint): Promise<modelsv2.Asset> {
     return await this.algoOp.getAssetByID(assetIndex);
   }
 
@@ -171,7 +172,7 @@ class DeployerBasicMode {
 
     const lsig = await getLsig(name, this.algoOp.algodClient); // get lsig from .teal (getting logic part from lsig)
     const msig = await readMsigFromFile(name); // Get decoded Msig object from .msig
-    Object.assign(lsig.msig = {} as MultiSig, msig);
+    Object.assign(lsig.msig = {} as EncodedMultisig, msig);
     return lsig;
   }
 
@@ -179,7 +180,9 @@ class DeployerBasicMode {
    * Send signed transaction to network and wait for confirmation
    * @param rawTxns Signed Transaction(s)
    */
-  async sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<algosdk.ConfirmedTxInfo> {
+  async sendAndWait (
+    rawTxns: Uint8Array | Uint8Array[]
+  ): Promise<ConfirmedTxInfo> {
     return await this.algoOp.sendAndWait(rawTxns);
   }
 
@@ -462,7 +465,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   /**
    * Log transaction with message using txwriter
    */
-  logTx (message: string, txConfirmation: algosdk.ConfirmedTxInfo): void {
+  logTx (message: string, txConfirmation: ConfirmedTxInfo): void {
     this.txWriter.push(message, txConfirmation);
   }
 
@@ -673,7 +676,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     });
   }
 
-  logTx (message: string, txConfirmation: algosdk.ConfirmedTxInfo): void {
+  logTx (message: string, txConfirmation: ConfirmedTxInfo): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "logTx"
     });
