@@ -23,7 +23,7 @@ export async function getLsig (
   const lsig = algosdk.makeLogicSig(program, []);
   // below line saves data in cp is {tag: <value>} which we need, otherwise it'll save as
   // { type: 'buffer', data: <value> } and throws error upon running examples
-  if (lsig.tag) { lsig.tag = Buffer.from(lsig.tag); }
+  if (lsig.tag) { lsig.tag = new Uint8Array(lsig.tag) as Buffer; }
   return lsig;
 }
 
