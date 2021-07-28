@@ -34,7 +34,7 @@ Now you can use this instance to perform transaction execution
       amountMicroAlgos: amount,
       payFlags: {},
     };
-    let response = await tx.executeTransaction(txParams);
+    let response = await web.executeTransaction(txParams);
 
 This code will make the transaction, let the user sign it using algosigner and send to to the network.
 
