@@ -83,7 +83,6 @@ export class Tealdbg {
           resolve(true);
           return;
         }
-
         reject(new Error("script process returned non 0 status"));
       });
 
