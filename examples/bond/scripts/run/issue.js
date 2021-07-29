@@ -1,5 +1,5 @@
 const {
-  executeTransaction, convert
+  executeTransaction
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 
