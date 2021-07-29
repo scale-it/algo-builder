@@ -52,6 +52,6 @@ In case that the transaction file has a (msgpack encoded) transaction group, you
 algob sign-multisig --account john --file group.txn --group-index 1
 ```
 
-The above **will sign 2nd transaction** from the transactions in input file, and output the resulting group (with 2nd transaction signed, rest same as original) in `group_out.txn`.
+The above **will sign 2nd transaction** in `group.txn` file, and output the updated group (with 2nd transaction signed, rest same as original) in `group_out.txn`.
 
 Note: Input file is an msgpack [encoded](https://github.com/algorand/go-algorand/blob/master/cmd/tealdbg/samples/txn_group.msgp) transaction group. For reference, check the decoded transaction group file [here](https://github.com/algorand/go-algorand/blob/master/cmd/tealdbg/samples/txn_group.json).

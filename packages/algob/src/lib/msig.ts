@@ -97,7 +97,7 @@ export function validateMsig (msig: EncodedMultisig | undefined): void {
 /**
  * Signs a raw multi-sig transaction object
  * @param signerAccount account(addr, sk) to sign the transaction
- * @param  rawTxn encoded transaction fetched from file in /assets
+ * @param rawTxn encoded transaction fetched from file in /assets
  * @param mparams multisig metadata. Required if creating a new signed multisig transaction.
  * @returns signed transaction object
  */
