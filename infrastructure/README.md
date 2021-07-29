@@ -151,7 +151,7 @@ Following make jobs are provided:
 
 The Indexer primarily provides two services: loading a PostgreSQL database with ledger data and supplying a REST API to search this ledger data. For this purpose, setting up indexer on local consists of two steps:
 1.  `make setup-postgresql`: Setting up [`postgresql`](https://www.postgresql.org/) database on your local machine.
-2. `make start-indexer`: Start indexer by connecting to local-db and your private-net algod node.
+2. `make start-indexer`: Start indexer by connecting to local-db and your private-net algod node. Resets(drop & create again) the database before starting.
 
 #### Step1: Setup postgres-db
 
