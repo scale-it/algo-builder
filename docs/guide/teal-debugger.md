@@ -10,6 +10,8 @@ Algorand provides the `tealdbg` command-line tool to launch an interactive sessi
 
 Setting up a `--dryrun-dump` of transaction data (via `goal` or SDK) could be a lengthy process, especially when using a transaction group. `Algob` provides an easy way to use debugger: by simply supplying the transactions as an input to the `TealDbg` method (same transaction parameters that we supply to [executeTransaction](https://algobuilder.dev/api/algob/modules.html#executetransaction) to execute same transaction on network).
 
+NOTE: You use the `TealDbg` method in an algob script, which can be run using `algob deploy`/`algob run` commands.
+
 ## Using Dryrun for Debugging a TEAL Program in an algob script
 
 Algob provides the functionality to do a test run of a TEAL smart contract. This option is useful to not only capture the transaction in the output file but the associated state of a smart contract. This allows testing of the TEAL logic in a dry run state which shows how the TEAL is processed and approved or rejected.
