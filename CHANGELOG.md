@@ -13,7 +13,9 @@
 + Support pooled transaction fees in algob and runtime. Added tests
 + Add `flatFee` in `TxParams`
 + User can initialize & use accounts by name in runtime, similar to algob ('john', 'bob' etc)
-
++ Updated `algob sign-multisig`:
+    * Creating a new multisigned transaction (requires multisig metadata: `v, thr, addrs`)
+    * Support for signing in a group transaction (loaded from file).
 
 ### Infrastructure
 * Added new make commands:
