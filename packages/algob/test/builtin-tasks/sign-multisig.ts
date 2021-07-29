@@ -11,7 +11,7 @@ import { loadEncodedTxFromFile } from "../../src/lib/files";
 import { HttpNetworkConfig } from "../../src/types";
 import { getEnv } from "../helpers/environment";
 import { useFixtureProject } from "../helpers/project";
-import { account1, aliceAcc, bobAcc } from "../mocks/account";
+import { account1, bobAcc } from "../mocks/account";
 
 export const netCfg: HttpNetworkConfig = {
   accounts: [account1, bobAcc],
@@ -21,9 +21,9 @@ export const netCfg: HttpNetworkConfig = {
 };
 
 const [aliceAddr, johnAddr, bobAddr] = [
-  aliceAcc.addr,
+  'EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY',
   '2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA',
-  bobAcc.addr
+  '2ILRL5YU3FZ4JDQZQVXEZUYKEWF7IEIGRRCPCMI36VKSGDMAS6FHSBXZDQ'
 ];
 
 describe("Sign-Multisig task", () => {
