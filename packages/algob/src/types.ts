@@ -652,6 +652,12 @@ export type PromiseAny = Promise<any>; // eslint-disable-line @typescript-eslint
 
 //  LocalWords:  configFile
 
+export interface DebuggerContext {
+  tealFile?: string
+  groupIndex?: number
+  mode?: rtypes.ExecutionMode
+}
+
 // TODO: Remove when this is resolved https://discord.com/channels/491256308461207573/631209194967531559/869677444242739220
 export interface ConfirmedTxInfo {
   'confirmed-round': number
