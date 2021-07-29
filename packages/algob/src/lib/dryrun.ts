@@ -40,7 +40,8 @@ export class Tealdbg {
       encodedSignedTxns.push({ ...decodedTx, txn: decodedTx.txn.get_obj_for_encoding() });
     }
 
-    // https://github.com/algorand/js-algorand-sdk/issues/410
+    // issue: https://github.com/algorand/js-algorand-sdk/issues/410
+    // task: https://www.pivotaltracker.com/story/show/179060295
     return new (modelsv2 as any).DryrunRequest({
       txns: encodedSignedTxns,
       sources: undefined
