@@ -21,7 +21,7 @@ async function run (runtimeEnv, deployer) {
   await executeTransaction(deployer, algoTxnParams);
 
   // Create B_0 - Bond Token
-  const asaInfo = await deployer.deployASA('bond-token', { creator: creatorAccount });
+  const asaInfo = await deployer.deployASA('bond-token-1', { creator: creatorAccount });
   console.log(asaInfo);
 
   // Bond-Dapp initialization parameters

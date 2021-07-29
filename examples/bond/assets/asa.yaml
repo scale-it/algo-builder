@@ -1,4 +1,4 @@
-bond-token:
+bond-token-1:
     total: 1000000
     decimals: 0
     defaultFrozen: false
@@ -11,7 +11,7 @@ bond-token:
     reserve: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"
     freeze: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"
     optInAccNames: ["alice"]
-new-bond-token:
+bond-token-2:
     total: 1000000
     decimals: 0
     defaultFrozen: false

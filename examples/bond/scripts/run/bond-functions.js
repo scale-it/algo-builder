@@ -32,7 +32,7 @@ async function fundAccount (deployer, accountAddress) {
  * @param {Account} storeManagerAccount
  */
 async function createDex (deployer, masterAccount, creatorAccount, storeManagerAccount) {
-  const asaInfo = deployer.getASAInfo('bond-token');
+  const asaInfo = deployer.getASAInfo('bond-token-1');
   const appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
   let scInitParam = {
     TMPL_APPLICATION_ID: appInfo.appID,
@@ -45,7 +45,7 @@ async function createDex (deployer, masterAccount, creatorAccount, storeManagerA
     type: types.TransactionType.DeployASA,
     sign: types.SignType.SecretKey,
     fromAccount: creatorAccount,
-    asaName: 'new-bond-token',
+    asaName: 'bond-token-2',
     payFlags: {}
   };
   // Create B_[i+1]
@@ -236,7 +236,7 @@ async function createBuyback (deployer, storeManagerAccount) {
     fromAccount: storeManagerAccount,
     appID: appInfo.appID,
     payFlags: {},
-    appArgs: ['str:create_buyback', convert.addressToPk(buybackLsig.address())]
+    appArgs: ['str:set_buyback', convert.addressToPk(buybackLsig.address())]
   };
 
   // Only store manager can allow opt-in to ASA for lsig

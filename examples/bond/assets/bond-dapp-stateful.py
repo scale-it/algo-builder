@@ -9,7 +9,7 @@ def approval_program():
     """
 
     # Address of bond smart contract manager
-    store_manager = Bytes("store_manager")
+    app_manager = Bytes("app_manager")
     # Price at which bonds are sold by the issuer.
     issue_price = Bytes("issue_price")
     # Bond nominal price.
@@ -50,7 +50,7 @@ def approval_program():
     # [app_manager, issue_price,nominal_price, maturity_date,
     # coupon_value, epoch, current_bond, max_amount, bond_token_creator]
     on_initialize = Seq([
-        App.globalPut(store_manager, Txn.application_args[0]),
+        App.globalPut(app_manager, Txn.application_args[0]),
         App.globalPut(issue_price, Btoi(Txn.application_args[1])),
         App.globalPut(nominal_price, Btoi(Txn.application_args[2])),
         App.globalPut(maturity_date, Btoi(Txn.application_args[3])),
@@ -69,7 +69,7 @@ def approval_program():
         # asserts if sender is store manager
         Assert(
              And(
-                Txn.sender() == App.globalGet(store_manager),
+                Txn.sender() == App.globalGet(app_manager),
                 basic_checks
             )
         ),
@@ -84,7 +84,7 @@ def approval_program():
         # asserts if sender is store manager
         Assert(
              And(
-                Txn.sender() == App.globalGet(store_manager),
+                Txn.sender() == App.globalGet(app_manager),
                 basic_checks
             )
         ),
@@ -134,12 +134,12 @@ def approval_program():
     ])
 
     # Create buyback address transaction
-    # Expected arguments: [Bytes("create_buyback"), buyback address]
-    create_buyback = Seq([
+    # Expected arguments: [Bytes("set_buyback"), buyback address]
+    set_buyback = Seq([
         # asserts if sender is store manager
         Assert(
             And(
-                Txn.sender() == App.globalGet(store_manager),
+                Txn.sender() == App.globalGet(app_manager),
                 basic_checks
             )
         ),
@@ -198,7 +198,7 @@ def approval_program():
         asset_balance, # load asset_balance from store
         Assert(
             And(
-                Txn.sender() == App.globalGet(store_manager),
+                Txn.sender() == App.globalGet(app_manager),
                 basic_checks,
                 Gtxn[1].type_enum() == TxnType.AssetTransfer,
                 # transfer `balanceOf(issuer, B_i)`  of `B_{i+1}` tokens from the bond_token_creator to the `issuer`.
@@ -234,8 +234,8 @@ def approval_program():
         [Txn.application_args[0] == Bytes("issue"), on_issue],
         # Verifies buy transaction, jumps to on_buy branch.
         [Txn.application_args[0] == Bytes("buy"), on_buy],
-        # Verifies create buyback transaction, jumps to create_buyback branch.
-        [Txn.application_args[0] == Bytes("create_buyback"), create_buyback],
+        # Verifies create buyback transaction, jumps to set_buyback branch.
+        [Txn.application_args[0] == Bytes("set_buyback"), set_buyback],
         # Verifies exit transaction, jumps to on_exit branch.
         [Txn.application_args[0] == Bytes("exit"), on_exit],
         # Verifies redeem coupon transaction, jumps to on_redeem_coupon branch.

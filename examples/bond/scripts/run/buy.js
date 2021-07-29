@@ -26,7 +26,7 @@ async function run (runtimeEnv, deployer) {
     TMPL_STORE_MANAGER: storeManagerAccount.addr
   };
   const issuerLsig = await deployer.loadLogic('issuer-lsig.py', scInitParam);
-  const asaInfo = deployer.getASAInfo('bond-token');
+  const asaInfo = deployer.getASAInfo('bond-token-1');
   await deployer.optInAcountToASA(asaInfo.assetIndex, 'bob', { totalFee: 1000 });
 
   const algoAmount = 10 * 1000 + 1000;
