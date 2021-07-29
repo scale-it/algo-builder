@@ -8,7 +8,7 @@ def approval_program():
     tradeable bond ASA and the current epoch number.
     """
 
-    # Store manager manages bond-dapp contract
+    # Address of bond smart contract manager
     store_manager = Bytes("store_manager")
     # Price at which bonds are sold by the issuer.
     issue_price = Bytes("issue_price")
@@ -16,11 +16,11 @@ def approval_program():
     nominal_price = Bytes("nominal_price")
     # Date when a bond holder can redeem bonds to the issuer.
     maturity_date = Bytes("maturity_date")
-    # interest payed annually to the bond holders, 
+    # interest paid annually to the bond holders, 
     # equals to `coupon_rate x nominal_price`.
     coupon_value = Bytes("coupon_value")
     issuer_address = Bytes("issuer_address")
-    # stored in the BondApp is the current period for paying the coupon.
+    # Epoch is the current period for paying the coupon.
     # For example: When bond coupons are paid every 6 month,
     # then initially the epoch is 0. After 6 months bond holders
     # receive a coupon for interest payment and start epoch 1.
@@ -39,15 +39,15 @@ def approval_program():
     # verify rekey_to and close_rem_to are set as zero_address
     basic_checks = And(
         # Always verify that the RekeyTo property of any transaction is set to the ZeroAddress
-        # unless the contract is specifically involved ina rekeying operation.
+        # unless the contract is specifically involved in a rekeying operation.
         Txn.rekey_to() == Global.zero_address(),
         Txn.close_remainder_to() == Global.zero_address(),
         Txn.asset_close_to() == Global.zero_address()
     )
 
-    # initialize variables(This branch is called at the time of creation)
+    # initialization
     # Expected arguments:
-    # [store_manager, issue_price,nominal_price, maturity_date,
+    # [app_manager, issue_price,nominal_price, maturity_date,
     # coupon_value, epoch, current_bond, max_amount, bond_token_creator]
     on_initialize = Seq([
         App.globalPut(store_manager, Txn.application_args[0]),
@@ -63,7 +63,7 @@ def approval_program():
     ])
 
     # Update issuer address in this contract
-    # only store manager can update issuer
+    # only app manager can update issuer.
     # Expected arguments: [Bytes("update_issuer_address"), issuer_address]
     update_issuer = Seq([
         # asserts if sender is store manager
@@ -92,7 +92,7 @@ def approval_program():
         Return(Int(1))
     ])
 
-    # Issue bond tokens to issuer
+    # Issue bond tokens to the issuer.
     # Expected arguments: [Bytes("issue")]
     on_issue = Seq([
         # assert sender is bond token creator and receiver is issuer address
@@ -109,7 +109,7 @@ def approval_program():
         Return(Int(1))
     ])
 
-    # Buy transaction, sent from buyer
+    # Buy bonds by paying the issue price in ALGO
     # Expected arguments: [Bytes("buy")]
     # 1. amount×BondApp.issue_price + algo_tx_price
     # - ALGO payment from buyer to the issuer. algo_tx_price is required to cover the TX2 cost.
@@ -118,11 +118,11 @@ def approval_program():
         Assert(
             And(
                 basic_checks,
-                # verify payment
+                # verify tx0 is ALGO payment
                 Gtxn[0].type_enum() == TxnType.Payment,
                 # verify buying amount,
                 Gtxn[0].amount() >= Add(Mul(Gtxn[1].asset_amount(), App.globalGet(issue_price)), Gtxn[1].fee()),
-                # verify ASA transfer
+                # verify that tx1 is ASA (bond) transfer to the buyer
                 Gtxn[1].type_enum() == TxnType.AssetTransfer,
                 # verify current bond is being transferred
                 Gtxn[1].xfer_asset() == App.globalGet(current_bond),
@@ -154,15 +154,13 @@ def approval_program():
         Assert(
             And(
                 basic_checks,
-                # verify first transaction is asset transfer
+                # verify tx0 is a bond ASA transfer.
                 Gtxn[0].type_enum() == TxnType.AssetTransfer,
-                # verify second transaction is payment
+                # verify tx1 is ALGO payment from buyback to the bond sender (from tx0)
                 Gtxn[1].type_enum() == TxnType.Payment,
-                # verify sender of first transaction is buyback address
                 Gtxn[1].sender() == App.globalGet(Bytes("buyback")),
-                # verify amount of algo received by buyer
-                Gtxn[1].amount() == Minus(Mul(Gtxn[0].asset_amount(), App.globalGet(nominal_price)), Gtxn[1].fee()),
                 Gtxn[1].receiver() == Txn.sender(),
+                Gtxn[1].amount() == Minus(Mul(Gtxn[0].asset_amount(), App.globalGet(nominal_price)), Gtxn[1].fee()),
                 # verify maturity date is passed
                 Global.latest_timestamp() > App.globalGet(maturity_date)
             )
@@ -200,14 +198,13 @@ def approval_program():
         asset_balance, # load asset_balance from store
         Assert(
             And(
-                # verify sender is store manager
                 Txn.sender() == App.globalGet(store_manager),
                 basic_checks,
                 Gtxn[1].type_enum() == TxnType.AssetTransfer,
-                # transfer `balanceOf(issuer, B_i)`  of `B_{i+1}` from the bond_token_creator to the `issuer`.
+                # transfer `balanceOf(issuer, B_i)`  of `B_{i+1}` tokens from the bond_token_creator to the `issuer`.
                 # index 1 of Txn.accounts().
                 asset_balance.value() == Gtxn[1].asset_amount(),
-                # burn `B_i` issuer bonds. send to bond_token_creator
+                # burn `B_i` issuer bonds: send to the bond_token_creator
                 Gtxn[2].type_enum() == TxnType.AssetTransfer,
                 Gtxn[2].asset_receiver() == App.globalGet(bond_token_creator),
                 asset_balance.value() == Gtxn[2].asset_amount()

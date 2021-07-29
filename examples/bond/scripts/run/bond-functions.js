@@ -32,8 +32,8 @@ async function fundAccount (deployer, accountAddress) {
  * @param {Account} storeManagerAccount
  */
 async function createDex (deployer, masterAccount, creatorAccount, storeManagerAccount) {
-  asaInfo = deployer.getASAInfo('bond-token');
-  appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
+  const asaInfo = deployer.getASAInfo('bond-token');
+  const appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
   let scInitParam = {
     TMPL_APPLICATION_ID: appInfo.appID,
     TMPL_OWNER: creatorAccount.addr,
@@ -260,9 +260,9 @@ async function createBuyback (deployer, storeManagerAccount) {
   ];
   await executeTransaction(deployer, optInTx);
 
-  console.log('Storing buyback address!');
+  console.log('Setting buyback address!');
   await executeTransaction(deployer, buybackTx);
-  console.log('Buyback address stored successfully!');
+  console.log('Buyback address set successfully!');
 }
 
 // Buyer's exit from bond

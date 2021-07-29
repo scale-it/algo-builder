@@ -28,13 +28,13 @@ def dex_lsig():
 
     # verify dex pays coupon value to buyer
     third_tx = And(
-        Gtxn[2].type_enum() == TxnType.Payment,
+        Gtxn[2].type_enum() == TxnType.Payment,  # coupon value payment
         Gtxn[3].type_enum() == TxnType.ApplicationCall,
         Gtxn[3].application_id() == Tmpl.Int("TMPL_APPLICATION_ID"),
         Gtxn[3].application_args[0] == Bytes("redeem_coupon")
     )
 
-    # Opt-in transaction
+    # Opt-in transaction. We need to opt-in to OLD and NEW bond.
     # Note: we are checking that first transaction is payment with amount 0
     # and sent by store manager, because we don't want another
     # user to opt-in too many asa/app and block this address
@@ -50,7 +50,7 @@ def dex_lsig():
     # User sends B_i to DEX_i lsig. 
     # DEX_i sends B_{i+1} to the user.
     # Dex pays coupon value
-    combine = And(common_fields, first_tx, second_tx, third_tx)
+    verify_exchange = And(common_fields, first_tx, second_tx, third_tx)
 
     program = program = Cond(
         [Global.group_size() == Int(4), combine],

@@ -13,7 +13,7 @@ def issuer_lsig():
     )
 
     # Buy transaction.
-    verify_tx = And(
+    verify_purchase = And(
         # verify first transaction is payment
         Gtxn[0].type_enum() == TxnType.Payment,
         # verify bond-dapp contract is called
@@ -24,7 +24,10 @@ def issuer_lsig():
         common_fields
     )
 
-    # Burn token transaction
+    # Burn token transaction when creating a dex.
+    # tx0: app call: "create_dex"
+    # tx1: sending new bonds to the issuer
+    # tx2: burn old tokens
     burn_tx = And(
         Gtxn[2].type_enum() == TxnType.AssetTransfer,
         Gtxn[1].type_enum() == TxnType.AssetTransfer,

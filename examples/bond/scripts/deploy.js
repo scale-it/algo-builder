@@ -72,7 +72,7 @@ async function run (runtimeEnv, deployer) {
   algoTxnParams.toAccountAddr = issuerLsig.address();
   await executeTransaction(deployer, algoTxnParams);
 
-  // Only store manager can allow opt-in to ASA for lsig
+  // Only app manager can opt-in issueer lsig to ASA
   const optInTx = [
     {
       type: types.TransactionType.TransferAlgo,
