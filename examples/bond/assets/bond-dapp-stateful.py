@@ -156,6 +156,7 @@ def approval_program():
                 basic_checks,
                 # verify tx0 is a bond ASA transfer.
                 Gtxn[0].type_enum() == TxnType.AssetTransfer,
+                Gtxn[0].xfer_asset() == App.globalGet(current_bond),
                 # verify tx1 is ALGO payment from buyback to the bond sender (from tx0)
                 Gtxn[1].type_enum() == TxnType.Payment,
                 Gtxn[1].sender() == App.globalGet(Bytes("buyback")),
