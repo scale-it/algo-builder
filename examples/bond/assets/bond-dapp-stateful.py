@@ -189,7 +189,7 @@ def approval_program():
         Return(Int(1))
     ])
 
-    # fetch asset_holding.balance from Txn.accounts[0]
+    # fetch asset_holding.balance from Txn.accounts[0] (Issuer address)
     asset_balance = AssetHolding.balance(Int(1), Gtxn[2].xfer_asset())
 
     # Create dex transaction
@@ -198,9 +198,9 @@ def approval_program():
         asset_balance, # load asset_balance from store
         Assert(
             And(
-                Txn.sender() == App.globalGet(app_manager),
                 basic_checks,
-                Gtxn[1].type_enum() == TxnType.AssetTransfer,
+                Txn.sender() == App.globalGet(app_manager),
+                # Transaction type for first transaction has been checked in lsig
                 # transfer `balanceOf(issuer, B_i)`  of `B_{i+1}` tokens from the bond_token_creator to the `issuer`.
                 # index 1 of Txn.accounts().
                 asset_balance.value() == Gtxn[1].asset_amount(),

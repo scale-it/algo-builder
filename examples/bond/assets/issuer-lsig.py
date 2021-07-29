@@ -49,7 +49,7 @@ def issuer_lsig():
         # verify first transaction is payment
         Gtxn[0].type_enum() == TxnType.Payment,
         Gtxn[0].amount() == Int(0),
-        Gtxn[0].sender() == Tmpl.Addr("TMPL_STORE_MANAGER"),
+        Gtxn[0].sender() == Tmpl.Addr("TMPL_APP_MANAGER"),
         Gtxn[1].type_enum() == TxnType.AssetTransfer,
         Gtxn[1].asset_amount() == Int(0)
     )

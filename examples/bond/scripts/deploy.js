@@ -65,7 +65,7 @@ async function run (runtimeEnv, deployer) {
   const scInitParam = {
     TMPL_APPLICATION_ID: bondAppInfo.appID,
     TMPL_OWNER: creatorAccount.addr,
-    TMPL_STORE_MANAGER: storeManagerAccount.addr
+    TMPL_APP_MANAGER: storeManagerAccount.addr
   };
   const issuerLsig = await deployer.loadLogic('issuer-lsig.py', scInitParam);
 

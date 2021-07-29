@@ -14,7 +14,7 @@ def buyback_lsig():
 
     # verify that buyer deposits required algos(Not we are checking this in stateful contract)
     # Here we are verifying if the call is made to bond-dapp stateful contract
-    verify_tx = And(
+    verify_exit = And(
         # verify TMPL_BOND is being transferred
         Gtxn[0].type_enum() == TxnType.AssetTransfer,
         Gtxn[0].xfer_asset() == Tmpl.Int("TMPL_BOND"),
@@ -34,13 +34,13 @@ def buyback_lsig():
     opt_in = And(
         Gtxn[0].type_enum() == TxnType.Payment,
         Gtxn[0].amount() == Int(0),
-        Gtxn[0].sender() == Tmpl.Addr("TMPL_STORE_MANAGER"),
+        Gtxn[0].sender() == Tmpl.Addr("TMPL_APP_MANAGER"),
         Gtxn[1].type_enum() == TxnType.AssetTransfer,
         Gtxn[1].asset_amount() == Int(0)
     )
 
     program = Cond(
-        [Global.group_size() == Int(3), verify_tx],
+        [Global.group_size() == Int(3), verify_exit],
         [Global.group_size() == Int(2), opt_in],
     )
 

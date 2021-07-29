@@ -27,6 +27,7 @@ def dex_lsig():
     )
 
     # verify dex pays coupon value to buyer
+    # coupon value amount is verified by the app.
     third_tx = And(
         Gtxn[2].type_enum() == TxnType.Payment,  # coupon value payment
         Gtxn[3].type_enum() == TxnType.ApplicationCall,
@@ -41,7 +42,7 @@ def dex_lsig():
     opt_in = And(
         Gtxn[0].type_enum() == TxnType.Payment,
         Gtxn[0].amount() == Int(0),
-        Gtxn[0].sender() == Tmpl.Addr("TMPL_STORE_MANAGER"),
+        Gtxn[0].sender() == Tmpl.Addr("TMPL_APP_MANAGER"),
         Gtxn[1].type_enum() == TxnType.AssetTransfer,
         Gtxn[1].asset_amount() == Int(0)
     )

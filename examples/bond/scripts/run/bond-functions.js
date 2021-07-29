@@ -37,7 +37,7 @@ async function createDex (deployer, masterAccount, creatorAccount, storeManagerA
   let scInitParam = {
     TMPL_APPLICATION_ID: appInfo.appID,
     TMPL_OWNER: creatorAccount.addr,
-    TMPL_STORE_MANAGER: storeManagerAccount.addr
+    TMPL_APP_MANAGER: storeManagerAccount.addr
   };
   const issuerLsig = await deployer.loadLogic('issuer-lsig.py', scInitParam);
 
@@ -78,7 +78,7 @@ async function createDex (deployer, masterAccount, creatorAccount, storeManagerA
     TMPL_OLD_BOND: asaInfo.assetIndex,
     TMPL_NEW_BOND: newIndex,
     TMPL_APPLICATION_ID: appInfo.appID,
-    TMPL_STORE_MANAGER: storeManagerAccount.addr
+    TMPL_APP_MANAGER: storeManagerAccount.addr
   };
   const dexLsig = await deployer.loadLogic('dex-lsig.py', scInitParam);
 
@@ -165,7 +165,7 @@ async function redeem (deployer, buyerAccount, storeManagerAccount) {
     TMPL_OLD_BOND: asaInfo.assetIndex,
     TMPL_NEW_BOND: newAsaInfo[assetID],
     TMPL_APPLICATION_ID: appInfo.appID,
-    TMPL_STORE_MANAGER: storeManagerAccount.addr
+    TMPL_APP_MANAGER: storeManagerAccount.addr
   };
   const dexLsig = await deployer.loadLogic('dex-lsig.py', scInitParam);
   await deployer.optInAcountToASA(newAsaInfo[assetID], 'bob', {});
@@ -224,7 +224,7 @@ async function redeem (deployer, buyerAccount, storeManagerAccount) {
 async function createBuyback (deployer, storeManagerAccount) {
   const scInitParam = {
     TMPL_APPLICATION_ID: appInfo.appID,
-    TMPL_STORE_MANAGER: storeManagerAccount.addr,
+    TMPL_APP_MANAGER: storeManagerAccount.addr,
     TMPL_BOND: newAsaInfo[assetID]
   };
   buybackLsig = await deployer.loadLogic('buyback-lsig.py', scInitParam);
