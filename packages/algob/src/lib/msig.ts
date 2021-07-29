@@ -125,7 +125,6 @@ export function signMultiSig (signerAccount: Account, rawTxn: Uint8Array, mparam
     decodedTxn = decodeUnsignedTransaction(rawTxn);
     multisigMetaData = mparams;
   }
-  console.debug("Decoded txn before signing: %O", decodedTxn);
   console.log("Msig: %O", msig);
 
   // note: append requires raw(encoded) transaction object, but signMultisig requires decoded tx obj
@@ -133,7 +132,6 @@ export function signMultiSig (signerAccount: Account, rawTxn: Uint8Array, mparam
     ? appendSignMultisigTransaction(rawTxn, multisigMetaData, signerAccount.sk)
     : signMultisigTransaction(decodedTxn as Transaction, multisigMetaData, signerAccount.sk);
   const decodedSignedTxn = decodeSignedTransaction(signedTxn.blob);
-  console.debug("Decoded txn after successfully signing: %O", decodedSignedTxn);
   console.log("Msig: %O", decodedSignedTxn.msig);
   return signedTxn;
 }

@@ -21,9 +21,9 @@ export const netCfg: HttpNetworkConfig = {
 };
 
 const [aliceAddr, johnAddr, bobAddr] = [
-  'EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY',
+  aliceAcc.addr,
   '2UBZKFR6RCZL7R24ZG327VKPTPJUPFM6WTG7PJG2ZJLU234F5RGXFLTAKA',
-  '2ILRL5YU3FZ4JDQZQVXEZUYKEWF7IEIGRRCPCMI36VKSGDMAS6FHSBXZDQ'
+  bobAcc.addr
 ];
 
 describe("Sign-Multisig task", () => {
