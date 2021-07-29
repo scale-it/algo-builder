@@ -55,10 +55,10 @@ def approval_program():
         App.globalPut(nominal_price, Btoi(Txn.application_args[2])),
         App.globalPut(maturity_date, Btoi(Txn.application_args[3])),
         App.globalPut(coupon_value, Btoi(Txn.application_args[4])),
-        App.globalPut(epoch, Btoi(Txn.application_args[5])),
-        App.globalPut(current_bond, Btoi(Txn.application_args[6])),
-        App.globalPut(max_amount, Btoi(Txn.application_args[7])),
-        App.globalPut(bond_token_creator, Txn.application_args[8]),
+        App.globalPut(epoch, Int(0)),
+        App.globalPut(current_bond, Btoi(Txn.application_args[5])),
+        App.globalPut(max_amount, Btoi(Txn.application_args[6])),
+        App.globalPut(bond_token_creator, Txn.application_args[7]),
         Return(Int(1))
     ])
 

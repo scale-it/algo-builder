@@ -29,15 +29,15 @@ async function fundAccount (deployer, accountAddress) {
  * Creates DEX_i lsig, burn B_i tokens, issue B_i+1 tokens
  * @param {Account} masterAccount
  * @param {Account} creatorAccount
- * @param {Account} storeManagerAccount
+ * @param {Account} managerAcc
  */
-async function createDex (deployer, masterAccount, creatorAccount, storeManagerAccount) {
+async function createDex (deployer, masterAccount, creatorAccount, managerAcc) {
   const asaInfo = deployer.getASAInfo('bond-token-1');
   const appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
-  let scInitParam = {
+  const scInitParam = {
     TMPL_APPLICATION_ID: appInfo.appID,
     TMPL_OWNER: creatorAccount.addr,
-    TMPL_APP_MANAGER: storeManagerAccount.addr
+    TMPL_APP_MANAGER: managerAcc.addr
   };
   const issuerLsig = await deployer.loadLogic('issuer-lsig.py', scInitParam);
 
@@ -58,7 +58,7 @@ async function createDex (deployer, masterAccount, creatorAccount, storeManagerA
     {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
-      fromAccount: storeManagerAccount,
+      fromAccount: managerAcc,
       toAccountAddr: issuerLsig.address(),
       amountMicroAlgos: 0,
       payFlags: {}
@@ -74,13 +74,13 @@ async function createDex (deployer, masterAccount, creatorAccount, storeManagerA
   ];
   await executeTransaction(deployer, optInTx);
 
-  scInitParam = {
+  const lsigParams = {
     TMPL_OLD_BOND: asaInfo.assetIndex,
     TMPL_NEW_BOND: newIndex,
     TMPL_APPLICATION_ID: appInfo.appID,
-    TMPL_APP_MANAGER: storeManagerAccount.addr
+    TMPL_APP_MANAGER: managerAcc.addr
   };
-  const dexLsig = await deployer.loadLogic('dex-lsig.py', scInitParam);
+  const dexLsig = await deployer.loadLogic('dex-lsig.py', lsigParams);
 
   await fundAccount(deployer, dexLsig.address());
 
@@ -92,7 +92,7 @@ async function createDex (deployer, masterAccount, creatorAccount, storeManagerA
   optInTx[1].assetID = asaInfo.assetIndex;
   await executeTransaction(deployer, optInTx);
 
-  const globalState = await readGlobalStateSSC(deployer, storeManagerAccount.addr, appInfo.appID);
+  const globalState = await readGlobalStateSSC(deployer, managerAcc.addr, appInfo.appID);
   let total = 0;
   for (const l of globalState) {
     const key = Buffer.from(l.key, 'base64').toString();
@@ -102,8 +102,8 @@ async function createDex (deployer, masterAccount, creatorAccount, storeManagerA
     }
   }
 
-  // Transfer total amount to dex lsig
-  const transferTx = {
+  // Transfer app.total amount of new Bonds to dex lsig
+  const issueNewBond = {
     type: types.TransactionType.TransferAsset,
     sign: types.SignType.SecretKey,
     fromAccount: creatorAccount,
@@ -112,7 +112,7 @@ async function createDex (deployer, masterAccount, creatorAccount, storeManagerA
     assetID: newIndex,
     payFlags: { totalFee: 1000 }
   };
-  await executeTransaction(deployer, transferTx);
+  await executeTransaction(deployer, issueNewBond);
 
   // balance of old bond tokens in issuer lsig
   const info = await balanceOf(deployer, issuerLsig.address(), asaInfo.assetIndex);
@@ -122,7 +122,7 @@ async function createDex (deployer, masterAccount, creatorAccount, storeManagerA
     {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
-      fromAccount: storeManagerAccount,
+      fromAccount: managerAcc,
       appID: appInfo.appID,
       payFlags: {},
       appArgs: ['str:create_dex'],
@@ -160,12 +160,12 @@ async function createDex (deployer, masterAccount, creatorAccount, storeManagerA
  * Redeem old tokens, get coupon_value + new bond tokens
  * @param {Account} buyerAccount
  */
-async function redeem (deployer, buyerAccount, storeManagerAccount) {
+async function redeem (deployer, buyerAccount, managerAcc) {
   const scInitParam = {
     TMPL_OLD_BOND: asaInfo.assetIndex,
     TMPL_NEW_BOND: newAsaInfo[assetID],
     TMPL_APPLICATION_ID: appInfo.appID,
-    TMPL_APP_MANAGER: storeManagerAccount.addr
+    TMPL_APP_MANAGER: managerAcc.addr
   };
   const dexLsig = await deployer.loadLogic('dex-lsig.py', scInitParam);
   await deployer.optInAcountToASA(newAsaInfo[assetID], 'bob', {});
@@ -219,12 +219,12 @@ async function redeem (deployer, buyerAccount, storeManagerAccount) {
 /**
  * Create buyback lsig and store it's address in bond-dapp
  * @param {Deployer object} deployer
- * @param {Account} storeManagerAccount
+ * @param {Account} managerAcc
  */
-async function createBuyback (deployer, storeManagerAccount) {
+async function createBuyback (deployer, managerAcc) {
   const scInitParam = {
     TMPL_APPLICATION_ID: appInfo.appID,
-    TMPL_APP_MANAGER: storeManagerAccount.addr,
+    TMPL_APP_MANAGER: managerAcc.addr,
     TMPL_BOND: newAsaInfo[assetID]
   };
   buybackLsig = await deployer.loadLogic('buyback-lsig.py', scInitParam);
@@ -233,7 +233,7 @@ async function createBuyback (deployer, storeManagerAccount) {
   const buybackTx = {
     type: types.TransactionType.CallNoOpSSC,
     sign: types.SignType.SecretKey,
-    fromAccount: storeManagerAccount,
+    fromAccount: managerAcc,
     appID: appInfo.appID,
     payFlags: {},
     appArgs: ['str:set_buyback', convert.addressToPk(buybackLsig.address())]
@@ -244,7 +244,7 @@ async function createBuyback (deployer, storeManagerAccount) {
     {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
-      fromAccount: storeManagerAccount,
+      fromAccount: managerAcc,
       toAccountAddr: buybackLsig.address(),
       amountMicroAlgos: 0,
       payFlags: {}
@@ -308,17 +308,17 @@ async function exitBuyer (deployer, buyerAccount) {
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
   const creatorAccount = deployer.accountsByName.get('john');
-  const storeManagerAccount = deployer.accountsByName.get('alice');
+  const managerAcc = deployer.accountsByName.get('alice');
   const buyerAccount = deployer.accountsByName.get('bob');
 
   // Create DEX, burn B_0, issue B_1
-  await createDex(deployer, masterAccount, creatorAccount, storeManagerAccount);
+  await createDex(deployer, masterAccount, creatorAccount, managerAcc);
 
   // Redeem coupon_value
-  await redeem(deployer, buyerAccount, storeManagerAccount);
+  await redeem(deployer, buyerAccount, managerAcc);
 
   // create buyback
-  await createBuyback(deployer, storeManagerAccount);
+  await createBuyback(deployer, managerAcc);
 
   // exit buyer from bond, buyer can exit only if maturity period is over
   // currently set to 1000 seconds

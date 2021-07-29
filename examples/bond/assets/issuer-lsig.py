@@ -29,10 +29,12 @@ def issuer_lsig():
     # tx1: sending new bonds to the issuer
     # tx2: burn old tokens
     burn_tx = And(
-        Gtxn[2].type_enum() == TxnType.AssetTransfer,
-        Gtxn[1].type_enum() == TxnType.AssetTransfer,
         # verify bond-dapp is called
-        Gtxn[0].application_id() == Tmpl.Int("TMPL_APPLICATION_ID")
+        Gtxn[0].application_id() == Tmpl.Int("TMPL_APPLICATION_ID"),
+        Gtxn[0].application_args[0] == Bytes("create_dex"),
+        Gtxn[0].type_enum() == TxnType.ApplicationCall,
+        Gtxn[1].type_enum() == TxnType.AssetTransfer,
+        Gtxn[2].type_enum() == TxnType.AssetTransfer,
     )
 
     # verify owner can take out algos from this account
@@ -60,17 +62,17 @@ def issuer_lsig():
         Gtxn[1].application_id() == Tmpl.Int("TMPL_APPLICATION_ID")
     )
 
-    transactions = Cond(
+    buy_or_burn = Cond(
         [Gtxn[0].type_enum() == TxnType.Payment, verify_tx],
         [Gtxn[1].type_enum() == TxnType.AssetTransfer, burn_tx]
     )
 
     # Verify opt-in or issue transaction
-    combine = Or(opt_in, issue_tx)
+    opt_in_or_issue = Or(opt_in, issue_tx)
 
     program = Cond(
-        [Global.group_size() == Int(3), transactions],
-        [Global.group_size() == Int(2), combine],
+        [Global.group_size() == Int(3), buy_or_burn],
+        [Global.group_size() == Int(2), opt_in_or_issue],
         [Global.group_size() == Int(1), payout],
     )
 
