@@ -8,7 +8,7 @@ This package provides a class `WebMode` which has variety of high level function
 
 `algob` uses `@algo-builder/web` package. However It is not possible to use `algob` directly in a web app, because `algob` uses nodejs file system. Therefore we created a lightweight `@algo-builder/web` package to provide common functionality and support dapp development.
 
-In Web package we pass transaction [parameters](https://github.com/scale-it/algo-builder/blob/master/docs/guide/execute-transaction.md) same as we do in `algob`.
+In the `@algo-builder/web` package we pass transaction [parameters](https://github.com/scale-it/algo-builder/blob/master/docs/guide/execute-transaction.md) in the same way as we do in `algob`.
 
 ## Important links
 
@@ -18,15 +18,15 @@ In Web package we pass transaction [parameters](https://github.com/scale-it/algo
 
 ## Using Web
 
-`Web` can be included as a library using `yarn add @algo-builder/web` and then import it using `import * from '@algo-builder/web'`.
+`@algo-builder/web` can be included as a library using `yarn add @algo-builder/web` and then import it using `import * from '@algo-builder/web'`.
 
-## Example
+### Example
 
-To use `web` package in your react app, first you need to create an instance of `WebMode` class by passing `AlgoSigner` and `Chain_name`.
+To use `web` package in your react app, first you need to create an instance of the `WebMode` class by passing `AlgoSigner` and the chain name.
 
     const web = new WebMode(AlgoSigner, CHAIN_NAME);
 
-Now you can use this instance to perform transaction execution
+Now you can use it to execute a transaction:
 
     const txParams = {
       type: types.TransactionType.TransferAlgo,
@@ -40,6 +40,6 @@ Now you can use this instance to perform transaction execution
 
 This code will make the transaction, let the user sign it using algosigner and send it to the network.
 
-You can also use `web.sendTransaction()` or `web.signTransaction()` from react app.
+You can also use `web.sendTransaction()` or `web.signTransaction()` in a react app.
 
 Note: we don't support checkpoints yet. currently deployASA, deploySSC functions don't work. User should directly pass assetIndex, appIndex instead of asaName, appName.
