@@ -12,7 +12,11 @@
 + Updated `algob init` to initialize a typescript project as well by passing `--typescript` flag. Usage: `algob init <location> --typescript`.
 + Support pooled transaction fees in algob and runtime. Added tests
 + Add `flatFee` in `TxParams`
++ Added support for teal debugger (get dryrun response or start debugger in chrome) in `algob` scripts.
 + User can initialize & use accounts by name in runtime, similar to algob ('john', 'bob' etc)
++ Updated `algob sign-multisig`:
+    * Creating a new multisigned transaction (requires multisig metadata: `v, thr, addrs`)
+    * Support for signing in a group transaction (loaded from file).
 + Add docs for web package
 + Handle group transaction in web package
 

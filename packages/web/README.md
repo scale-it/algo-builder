@@ -39,3 +39,5 @@ Now you can use this instance to perform transaction execution
 This code will make the transaction, let the user sign it using algosigner and send it to the network.
 
 You can also use `web.sendTransaction()` or `web.signTransaction()` from react app.
+
+Note: we don't support checkpoints yet. currently deployASA, deploySSC functions don't work. User should directly pass assetIndex, appIndex instead of asaName, appName.

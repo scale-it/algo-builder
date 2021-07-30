@@ -9,6 +9,7 @@ import {
 } from "./lib/account";
 import { globalZeroAddress } from "./lib/constants";
 import { algodCredentialsFromEnv, KMDCredentialsFromEnv } from "./lib/credentials";
+import { Tealdbg } from "./lib/dryrun";
 import { getProgram } from "./lib/load-program";
 import { signLogicSigMultiSig } from "./lib/lsig";
 import { signMultiSig } from "./lib/msig";
@@ -16,8 +17,10 @@ import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC, readGl
 import { executeSignedTxnFromFile, executeTransaction, getSuggestedParams, mkTxParams } from "./lib/tx";
 import * as runtime from "./runtime";
 import * as types from "./types";
+
 export {
   ERRORS,
+  Tealdbg,
   mkAccounts,
   createMsigAddress,
   loadAccountsFromFile,

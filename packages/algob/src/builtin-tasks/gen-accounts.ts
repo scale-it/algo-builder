@@ -59,7 +59,7 @@ export async function writeToFile (content: any, force: boolean, fileName: strin
 
   try {
     await fsp.writeFile(fileName, content, 'utf8');
-    console.log("Data written succesfully to %s", fileName);
+    console.log(`Data written succesfully to ${fileName}`);
   } catch (e) {
     const err = e as Error;
     console.log("An error occured while writing to file:", fileName);
