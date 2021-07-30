@@ -12,7 +12,7 @@ Creating transaction data (via `goal --dryrun-dump` or SDK) could be a lengthy p
 
 NOTE: You use the `TealDbg` method in an algob script, which can be run using `algob deploy`/`algob run` commands.
 
-### Using dry run for Debugging a TEAL Program in an algob script
+### Using dry run for debugging a TEAL program in an algob script
 
 Algob provides the functionality to do a test run of a TEAL smart contract. This option is useful to capture a transaction in an output file with associated state of the smart contract. This allows testing the TEAL logic in a dry run which allows to step by step follow the TEAL execution and inspect transaction approval or rejection.
 
