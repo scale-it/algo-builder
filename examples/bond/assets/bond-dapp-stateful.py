@@ -121,9 +121,11 @@ def approval_program():
                 # verify tx0 is ALGO payment
                 Gtxn[0].type_enum() == TxnType.Payment,
                 # verify buying amount,
-                Gtxn[0].amount() >= Add(Mul(Gtxn[1].asset_amount(), App.globalGet(issue_price)), Gtxn[1].fee()),
+                Gtxn[0].amount() >= Mul(Gtxn[1].asset_amount(), App.globalGet(issue_price)),
                 # verify that tx1 is ASA (bond) transfer to the buyer
                 Gtxn[1].type_enum() == TxnType.AssetTransfer,
+                # verify issuer is not paying fees
+                Gtxn[1].fee() == Int(0),
                 # verify current bond is being transferred
                 Gtxn[1].xfer_asset() == App.globalGet(current_bond),
                 Gtxn[1].asset_receiver() == Gtxn[0].sender()
@@ -160,8 +162,10 @@ def approval_program():
                 # verify tx1 is ALGO payment from buyback to the bond sender (from tx0)
                 Gtxn[1].type_enum() == TxnType.Payment,
                 Gtxn[1].sender() == App.globalGet(Bytes("buyback")),
-                Gtxn[1].receiver() == Txn.sender(),
-                Gtxn[1].amount() == Minus(Mul(Gtxn[0].asset_amount(), App.globalGet(nominal_price)), Gtxn[1].fee()),
+                Gtxn[1].receiver() == Gtxn[0].sender(),
+                # verify buyback address is not paying fees
+                Gtxn[1].fee() == Int(0),
+                Gtxn[1].amount() == Mul(Gtxn[0].asset_amount(), App.globalGet(nominal_price)),
                 # verify maturity date is passed
                 Global.latest_timestamp() > App.globalGet(maturity_date)
             )
@@ -177,12 +181,16 @@ def approval_program():
                 basic_checks,
                 # User sends `B_i` to `DEX_i` lsig.
                 Gtxn[0].type_enum() == TxnType.AssetTransfer,
+                Gtxn[0].asset_amount() == Gtxn[1].asset_amount(),
                 # `DEX_i` sends `B_{i+1}` to the user.
                 Gtxn[1].type_enum() == TxnType.AssetTransfer,
-                Gtxn[0].asset_amount() == Gtxn[1].asset_amount(),
+                # verify 'DEX_I' is not paying fees
+                Gtxn[1].fee() == Int(0),
                 # `Dex_i` sends coupon value to user
                 Gtxn[2].type_enum() == TxnType.Payment,
-                Gtxn[2].receiver() == Txn.sender(),
+                Gtxn[2].receiver() == Gtxn[0].sender(),
+                # verify 'DEX_i' is not paying fees
+                Gtxn[2].fee() == Int(0),
                 # verify coupon amount
                 Gtxn[2].amount() == Mul(Gtxn[0].asset_amount(), App.globalGet(coupon_value))
             )
@@ -208,7 +216,13 @@ def approval_program():
                 # burn `B_i` issuer bonds: send to the bond_token_creator
                 Gtxn[2].type_enum() == TxnType.AssetTransfer,
                 Gtxn[2].asset_receiver() == App.globalGet(bond_token_creator),
-                asset_balance.value() == Gtxn[2].asset_amount()
+                asset_balance.value() == Gtxn[2].asset_amount(),
+                Gtxn[3].sender() == App.globalGet(bond_token_creator),
+                Gtxn[3].asset_amount() == App.globalGet(total),
+                Gtxn[3].receiver() == Txn.application_args[1],
+                Gtxn[4].sender() == App.globalGet(bond_token_creator),
+                Gtxn[4].amount() == Mul(App.globalGet(total), App.globalGet(coupon_value)),
+                Gtxn[4].receiver() == Txn.application_args[1]
             ),
         ),
         # Increment `BondApp.epoch`

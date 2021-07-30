@@ -39,7 +39,7 @@ async function run (runtimeEnv, deployer) {
       fromAccount: buyerAccount,
       toAccountAddr: issuerLsig.address(),
       amountMicroAlgos: algoAmount,
-      payFlags: {}
+      payFlags: { totalFee: 2000 }
     },
     // Bond token transfer from issuer's address
     {
@@ -50,7 +50,7 @@ async function run (runtimeEnv, deployer) {
       toAccountAddr: buyerAccount.addr,
       amount: 10,
       assetID: asaInfo.assetIndex,
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 0 }
     },
     // call to bond-dapp
     {
@@ -58,7 +58,7 @@ async function run (runtimeEnv, deployer) {
       sign: types.SignType.SecretKey,
       fromAccount: buyerAccount,
       appID: appInfo.appID,
-      payFlags: {},
+      payFlags: { totalFee: 1000 },
       appArgs: ['str:buy']
     }
   ];

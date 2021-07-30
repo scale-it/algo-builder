@@ -102,18 +102,6 @@ async function createDex (deployer, masterAccount, creatorAccount, managerAcc) {
     }
   }
 
-  // Transfer app.total amount of new Bonds to dex lsig
-  const issueNewBond = {
-    type: types.TransactionType.TransferAsset,
-    sign: types.SignType.SecretKey,
-    fromAccount: creatorAccount,
-    toAccountAddr: dexLsig.address(),
-    amount: total,
-    assetID: newIndex,
-    payFlags: { totalFee: 1000 }
-  };
-  await executeTransaction(deployer, issueNewBond);
-
   // balance of old bond tokens in issuer lsig
   const info = await balanceOf(deployer, issuerLsig.address(), asaInfo.assetIndex);
   console.log('Old balance amount ', info.amount);
@@ -125,7 +113,7 @@ async function createDex (deployer, masterAccount, creatorAccount, managerAcc) {
       fromAccount: managerAcc,
       appID: appInfo.appID,
       payFlags: {},
-      appArgs: ['str:create_dex'],
+      appArgs: ['str:create_dex', convert.addressToPk(dexLsig.address())],
       accounts: [issuerLsig.address()]
     },
     // New bond token transfer to issuer's address
@@ -147,6 +135,25 @@ async function createDex (deployer, masterAccount, creatorAccount, managerAcc) {
       toAccountAddr: creatorAccount.addr,
       amount: info.amount,
       assetID: asaInfo.assetIndex,
+      payFlags: { totalFee: 1000 }
+    },
+    // Transfer app.total amount of new Bonds to dex lsig
+    {
+      type: types.TransactionType.TransferAsset,
+      sign: types.SignType.SecretKey,
+      fromAccount: creatorAccount,
+      toAccountAddr: dexLsig.address(),
+      amount: total,
+      assetID: newIndex,
+      payFlags: { totalFee: 1000 }
+    },
+    // Algo transfer to dex address
+    {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: creatorAccount,
+      toAccountAddr: dexLsig.address(),
+      amount: total * 20,
       payFlags: { totalFee: 1000 }
     }
   ];
@@ -178,7 +185,7 @@ async function redeem (deployer, buyerAccount, managerAcc) {
       toAccountAddr: dexLsig.address(),
       amount: 10,
       assetID: asaInfo.assetIndex,
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 3000 }
     },
     // New bond token transfer to buyer's address
     {
@@ -189,7 +196,7 @@ async function redeem (deployer, buyerAccount, managerAcc) {
       toAccountAddr: buyerAccount.addr,
       amount: 10,
       assetID: newAsaInfo[assetID],
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 0 }
     },
     {
       type: types.TransactionType.TransferAlgo,
@@ -198,7 +205,7 @@ async function redeem (deployer, buyerAccount, managerAcc) {
       lsig: dexLsig,
       toAccountAddr: buyerAccount.addr,
       amountMicroAlgos: 1000,
-      payFlags: {}
+      payFlags: { totalFee: 0 }
     },
     // call to bond-dapp
     {
@@ -206,7 +213,7 @@ async function redeem (deployer, buyerAccount, managerAcc) {
       sign: types.SignType.SecretKey,
       fromAccount: buyerAccount,
       appID: appInfo.appID,
-      payFlags: {},
+      payFlags: { totalFee: 1000 },
       appArgs: ['str:redeem_coupon']
     }
   ];
@@ -277,7 +284,7 @@ async function exitBuyer (deployer, buyerAccount) {
       toAccountAddr: buybackLsig.address(),
       amount: 10,
       assetID: newAsaInfo[assetID],
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 2000 }
     },
     // Nominal price * amount paid to buyer
     {
@@ -287,7 +294,7 @@ async function exitBuyer (deployer, buyerAccount) {
       lsig: buybackLsig,
       toAccountAddr: buyerAccount.addr,
       amountMicroAlgos: exitAmount,
-      payFlags: { totalFee: 1000 }
+      payFlags: { totalFee: 0 }
     },
     // call to bond-dapp
     {
@@ -295,7 +302,7 @@ async function exitBuyer (deployer, buyerAccount) {
       sign: types.SignType.SecretKey,
       fromAccount: buyerAccount,
       appID: appInfo.appID,
-      payFlags: {},
+      payFlags: { totalFee: 1000 },
       appArgs: ['str:exit']
     }
   ];

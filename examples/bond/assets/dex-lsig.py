@@ -54,7 +54,7 @@ def dex_lsig():
     verify_exchange = And(common_fields, first_tx, second_tx, third_tx)
 
     program = program = Cond(
-        [Global.group_size() == Int(4), combine],
+        [Global.group_size() == Int(4), verify_exchange],
         [Global.group_size() == Int(2), opt_in],
     )
 
