@@ -2,7 +2,7 @@
 
 Web allows you to interact with contracts easily. It is designed to be used with web dapps.
 
-This package provides a class `WebMode` which has variety of high level functions like, `waitForConfirmation`, `executeTransaction`, `signTransaction`, etc. These functions help in sending transactions easier when building dapps using react.
+This package provides a class `WebMode` which has variety of high level functions like, [`waitForConfirmation`](algobuilder.dev/api/web/classes/web.html#waitForConfirmation), [`executeTransaction`]((algobuilder.dev/api/web/classes/web.html#executeTransaction)), [`signTransaction`]((algobuilder.dev/api/web/classes/web.html#signTransaction)), etc. These functions help in sending transactions easier when building dapps using react.
 
 It is not possible to use `algob` directly in a react app, because `algob` uses nodejs file system which cannot be used in a react app. Therefore we created a lightweight packake web which can be used to create and send transactions to the network from react app.
 
@@ -40,4 +40,4 @@ This code will make the transaction, let the user sign it using algosigner and s
 
 You can also use `web.sendTransaction()` or `web.signTransaction()` from react app.
 
-Note: we don't support checkpoints yet. currently deployASA, deploySSC functions don't work. User should directly pass assetIndex, appIndex instead of asaName, appName.
+**Note:** We don't support checkpoints yet. Currently `deployASA`, `deploySSC` functions don't work. User should directly pass assetIndex, appIndex instead of asaName, appName.
