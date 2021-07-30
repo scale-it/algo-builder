@@ -30,8 +30,8 @@ async function fundAccount (deployer, accountAddress) {
  * @param {Account} managerAcc
  */
 async function createDex (deployer, masterAccount, creatorAccount, managerAcc) {
-  const asaInfo = deployer.getASAInfo('bond-token-1');
-  const appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
+  asaInfo = deployer.getASAInfo('bond-token-1');
+  appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
   const scInitParam = {
     TMPL_APPLICATION_ID: appInfo.appID,
     TMPL_OWNER: creatorAccount.addr,
@@ -111,8 +111,8 @@ async function createDex (deployer, masterAccount, creatorAccount, managerAcc) {
       fromAccount: managerAcc,
       appID: appInfo.appID,
       payFlags: {},
-      appArgs: ['str:create_dex', convert.addressToPk(dexLsig.address())],
-      accounts: [issuerLsig.address()]
+      appArgs: ['str:create_dex'],
+      accounts: [issuerLsig.address(), dexLsig.address()]
     },
     // New bond token transfer to issuer's address
     {
@@ -202,7 +202,7 @@ async function redeem (deployer, buyerAccount, managerAcc) {
       fromAccountAddr: dexLsig.address(),
       lsig: dexLsig,
       toAccountAddr: buyerAccount.addr,
-      amountMicroAlgos: 1000,
+      amountMicroAlgos: 200,
       payFlags: { totalFee: 0 }
     },
     // call to bond-dapp

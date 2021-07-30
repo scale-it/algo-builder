@@ -1,5 +1,5 @@
 const {
-  executeTransaction
+  executeTransaction, convert, readGlobalStateSSC
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 
@@ -15,7 +15,6 @@ async function run (runtimeEnv, deployer) {
   };
   const issuerLsig = await deployer.loadLogic('issuer-lsig.py', scInitParam);
   const asaInfo = deployer.getASAInfo('bond-token-1');
-
   const groupTx = [
     // Bond asa transfer to issuer's address
     {

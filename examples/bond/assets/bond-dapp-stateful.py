@@ -32,7 +32,7 @@ def approval_program():
     # Current bond token index
     current_bond = Bytes("current_bond")
     # Maximum amount of supply of bond token
-    max_amount = Bytes("max_amount")
+    max_issuance = Bytes("max_issuance")
     # Bond token creator
     bond_token_creator = Bytes("bond_token_creator")
 
@@ -48,17 +48,17 @@ def approval_program():
     # initialization
     # Expected arguments:
     # [app_manager, issue_price,nominal_price, maturity_date,
-    # coupon_value, epoch, current_bond, max_amount, bond_token_creator]
+    # coupon_value, current_bond, max_issuance, bond_token_creator]
     on_initialize = Seq([
         App.globalPut(app_manager, Txn.application_args[0]),
-        App.globalPut(issue_price, Btoi(Txn.application_args[1])),
-        App.globalPut(nominal_price, Btoi(Txn.application_args[2])),
-        App.globalPut(maturity_date, Btoi(Txn.application_args[3])),
-        App.globalPut(coupon_value, Btoi(Txn.application_args[4])),
+        App.globalPut(bond_token_creator, Txn.application_args[1]),
+        App.globalPut(issue_price, Btoi(Txn.application_args[2])),
+        App.globalPut(nominal_price, Btoi(Txn.application_args[3])),
+        App.globalPut(maturity_date, Btoi(Txn.application_args[4])),
+        App.globalPut(coupon_value, Btoi(Txn.application_args[5])),
+        App.globalPut(current_bond, Btoi(Txn.application_args[6])),
+        App.globalPut(max_issuance, Btoi(Txn.application_args[7])),
         App.globalPut(epoch, Int(0)),
-        App.globalPut(current_bond, Btoi(Txn.application_args[5])),
-        App.globalPut(max_amount, Btoi(Txn.application_args[6])),
-        App.globalPut(bond_token_creator, Txn.application_args[7]),
         Return(Int(1))
     ])
 
@@ -99,7 +99,7 @@ def approval_program():
         Assert(
             And(
                 Gtxn[0].type_enum() == TxnType.AssetTransfer,
-                Gtxn[0].asset_sender() == App.globalGet(bond_token_creator),
+                Gtxn[0].sender() == App.globalGet(bond_token_creator),
                 Gtxn[0].asset_receiver() == App.globalGet(issuer_address),
                 # verify current bond is being transferred
                 Gtxn[0].xfer_asset() == App.globalGet(current_bond),
@@ -219,10 +219,10 @@ def approval_program():
                 asset_balance.value() == Gtxn[2].asset_amount(),
                 Gtxn[3].sender() == App.globalGet(bond_token_creator),
                 Gtxn[3].asset_amount() == App.globalGet(total),
-                Gtxn[3].receiver() == Txn.application_args[1],
+                Gtxn[3].asset_receiver() == Txn.accounts[2],
                 Gtxn[4].sender() == App.globalGet(bond_token_creator),
                 Gtxn[4].amount() == Mul(App.globalGet(total), App.globalGet(coupon_value)),
-                Gtxn[4].receiver() == Txn.application_args[1]
+                Gtxn[4].receiver() == Txn.accounts[2]
             ),
         ),
         # Increment `BondApp.epoch`

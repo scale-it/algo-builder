@@ -1,5 +1,5 @@
 const {
-  executeTransaction, convert
+  executeTransaction, convert, readGlobalStateSSC
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 
@@ -25,7 +25,7 @@ async function run (runtimeEnv, deployer) {
   console.log(asaInfo);
 
   // Bond-Dapp initialization parameters
-  const storeManager = convert.addressToPk(managerAcc.addr);
+  const appManager = convert.addressToPk(managerAcc.addr);
   const issuePrice = 'int:1000';
   const nominalPrice = 'int:1000';
   const maturityDate = convert.uint64ToBigEndian(Math.round(new Date().getTime() / 1000) + 1000);
@@ -36,16 +36,15 @@ async function run (runtimeEnv, deployer) {
   const creator = convert.addressToPk(creatorAccount.addr);
 
   let appArgs = [
-    storeManager,
+    appManager,
+    creator,
     issuePrice,
     nominalPrice,
     maturityDate,
     couponValue,
     currentBond,
-    maxIssuance,
-    creator
+    maxIssuance
   ];
-
   // Create Application
   const bondAppInfo = await deployer.deployApp(
     'bond-dapp-stateful.py',

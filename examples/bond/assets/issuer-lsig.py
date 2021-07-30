@@ -62,16 +62,12 @@ def issuer_lsig():
         Gtxn[1].application_id() == Tmpl.Int("TMPL_APPLICATION_ID")
     )
 
-    buy_or_burn = Cond(
-        [Gtxn[0].type_enum() == TxnType.Payment, verify_tx],
-        [Gtxn[1].type_enum() == TxnType.AssetTransfer, burn_tx]
-    )
-
     # Verify opt-in or issue transaction
     opt_in_or_issue = Or(opt_in, issue_tx)
 
     program = Cond(
-        [Global.group_size() == Int(3), buy_or_burn],
+        [Global.group_size() == Int(3), verify_purchase],
+        [Global.group_size() == Int(5), burn_tx],
         [Global.group_size() == Int(2), opt_in_or_issue],
         [Global.group_size() == Int(1), payout],
     )
