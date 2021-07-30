@@ -21,7 +21,7 @@ layout: splash
 + [Templates](./templates.md)
 + [Execute Transaction](./execute-transaction.md)
 + [Sign Multisig](./sign-multisig.md)
-+ [Teal Debugger](./teal-debugger.md)
++ [Debugging TEAL](./debugging-teal.md)
 + [Best Practices](./best-practices.md)
 
 For more in-depth description you can look at the [project specification](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
