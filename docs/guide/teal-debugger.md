@@ -73,7 +73,7 @@ const txnParam = {
   payFlags: { totalFee: 1000 }
 };
 ```
-After setting up the transaction, let's try to execute dryrun transaction:
+After setting up the transaction, let's try to execute dry run by adding the following lines to the script:
 ```
 const debug = new Tealdbg(deployer, txnParam);
 await debug.dryRunResponse('dryrun-pass.json');
