@@ -2,8 +2,6 @@ const {
   executeTransaction, convert, readGlobalStateSSC, balanceOf
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
-const { exec } = require('child_process');
-const { exit } = require('process');
 
 let newAsaInfo;
 let appInfo;
