@@ -17,6 +17,8 @@
 + Updated `algob sign-multisig`:
     * Creating a new multisigned transaction (requires multisig metadata: `v, thr, addrs`)
     * Support for signing in a group transaction (loaded from file).
++ Add docs for web package
++ Handle group transaction in web package
 
 ### Infrastructure
 * Added new make commands:
