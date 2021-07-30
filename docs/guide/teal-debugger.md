@@ -4,21 +4,21 @@ layout: splash
 
 # About TEAL Debugger
 
-Algorand provides the `tealdbg` command-line tool to launch an interactive session where the smart contract can be examined as the contract is being evaluated. The debugger supports both stateful and stateless smart contracts. You can debug individual transactions or atomic transfers that contain multiple, grouped transactions. The debugger supports setting the specific context for debugging purposes, including transactions, round number, latest timestamp, balance records, etc. The debugger runs either local programs or accepts HTTP connections from remote evaluators configured to run with a remote debugger hook.
+Algorand provides the `tealdbg` command-line tool to launch an interactive session where a smart contract can be examined as the contract is being evaluated. The debugger supports both stateful and stateless smart contracts. You can debug individual transactions or group of transaction (eg atomic transfers). The debugger supports setting the specific context for debugging purposes, including transactions, round number, latest timestamp, balance records, etc. The debugger runs either local programs or accepts HTTP connections from remote evaluators configured to run with a remote debugger hook.
 
-# Using teal debugger with algob
+## Using TEAL debugger with algob
 
 Setting up a `--dryrun-dump` of transaction data (via `goal` or SDK) could be a lengthy process, especially when using a transaction group. `Algob` provides an easy way to use debugger: by simply supplying the transactions as an input to the `TealDbg` method (same transaction parameters that we supply to [executeTransaction](https://algobuilder.dev/api/algob/modules.html#executetransaction) to execute same transaction on network).
 
 NOTE: You use the `TealDbg` method in an algob script, which can be run using `algob deploy`/`algob run` commands.
 
-## Using Dryrun for Debugging a TEAL Program in an algob script
+### Using Dryrun for Debugging a TEAL Program in an algob script
 
-Algob provides the functionality to do a test run of a TEAL smart contract. This option is useful to not only capture the transaction in the output file but the associated state of a smart contract. This allows testing of the TEAL logic in a dry run state which shows how the TEAL is processed and approved or rejected.
+Algob provides the functionality to do a test run of a TEAL smart contract. This option is useful to capture a transaction in an output file with associated state of the smart contract. This allows testing the TEAL logic in a dry run which allows to step by step follow the TEAL execution and inspect transaction approval or rejection.
 
-The dryrun response to this REST API includes disassembly, logic signature messages with PASS/REJECT, a signature trace, app call messages, and an app call trace.
+The _dry run_ response from the Algorand REST API includes disassembly, logic signature messages with PASS/REJECT, a signature trace, app call messages, and an app call trace.
 
-NOTE: The dryrun REST API is only available on a node if it has been enabled in the node's configuration (`EnableDeveloperAPI` = true).
+NOTE: The _dry run_ REST API is only available on a node if it has been enabled in the node's configuration (`EnableDeveloperAPI` = true).
 Example:
 ```js
 // txnParams are the input transactions
@@ -55,7 +55,7 @@ The smart contract used is [4-gold-asa.teal](https://github.com/scale-it/algo-bu
 + Transaction type is asset transfer and AssetAmount <= 1000.
 + Sender is `goldOwner` account.
 
-First we need to deploy the contracts using `algob deploy`. We will debug the transaction present in [`scripts/transfer/gold-delegated-lsig.js`](https://github.com/scale-it/algo-builder/blob/master/examples/asa/scripts/transfer/gold-delegated-lsig.js).
+First we need to deploy the contracts using `algob deploy`. We will debug a transaction defined in [`scripts/transfer/gold-delegated-lsig.js`](https://github.com/scale-it/algo-builder/blob/master/examples/asa/scripts/transfer/gold-delegated-lsig.js).
 
 ### DryRun
 Setting up transaction params (note that this is a passing scenario as amount = 500 <= 1000):
@@ -79,7 +79,7 @@ const debug = new Tealdbg(deployer, txnParam);
 await debug.dryRunResponse('dryrun-pass.json');
 ```
 
-Content of `assets/dryrun-pass.json` looks like (notice the logic-sig-message is PASS):
+It will create a `assets/dryrun-pass.json` file, which looks like (notice the logic-sig-message is PASS):
 ```
 {
   "error": "",
@@ -183,7 +183,7 @@ This will start a new debugger session. Console looks like:
 2021/07/16 04:29:12 ------------------------------------------------
 ```
 
-We now have a remote target set up in `chrome://inspect`
+Now, we have a remote target set up in `chrome://inspect`
 
 ![image](https://user-images.githubusercontent.com/33264364/125868310-4e121128-db58-4670-aa5e-99ed492f3b94.png)
 
