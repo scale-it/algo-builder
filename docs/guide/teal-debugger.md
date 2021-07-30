@@ -8,11 +8,11 @@ Algorand provides the `tealdbg` command-line tool to launch an interactive sessi
 
 ## Using TEAL debugger with algob
 
-Setting up a `--dryrun-dump` of transaction data (via `goal` or SDK) could be a lengthy process, especially when using a transaction group. `Algob` provides an easy way to use debugger: by simply supplying the transactions as an input to the `TealDbg` method (same transaction parameters that we supply to [executeTransaction](https://algobuilder.dev/api/algob/modules.html#executetransaction) to execute same transaction on network).
+Creating transaction data (via `goal --dryrun-dump` or SDK) could be a lengthy process, especially when using a transaction group. `Algob` provides an easy way to use debugger: by simply supplying the transactions as an input to the `TealDbg` method (same transaction parameters that we supply to [executeTransaction](https://algobuilder.dev/api/algob/modules.html#executetransaction) to execute same transaction on network).
 
 NOTE: You use the `TealDbg` method in an algob script, which can be run using `algob deploy`/`algob run` commands.
 
-### Using Dryrun for Debugging a TEAL Program in an algob script
+### Using dry run for Debugging a TEAL Program in an algob script
 
 Algob provides the functionality to do a test run of a TEAL smart contract. This option is useful to capture a transaction in an output file with associated state of the smart contract. This allows testing the TEAL logic in a dry run which allows to step by step follow the TEAL execution and inspect transaction approval or rejection.
 
@@ -26,11 +26,11 @@ const debugger = new Tealdbg(deployer, txnParam);
 await debugger.dryRunResponse('dryrun.json');
 ```
 
-The DryRun Response will be dumped to `assets/dryrun.json`.
+The _dry run_ Response will be dumped to `assets/dryrun.json`.
 
-## Starting a debugging session
+### Starting a debugging session
 
-Instead of a dryrun execution, you can also start a debugging session (for example, with Chrome Developer Tools) in an `algob` script. This is helpful for setting up breakpoints in code, inspecting state after line by line execution etc.
+Instead of a _dry run_ execution, you can also start a debugging session (for example, with Chrome Developer Tools) in an `algob` script. This is helpful for setting up breakpoints in code, inspecting state after line by line execution etc.
 
 Following params could be passed to debugger context:
 * `tealFile`: Name of teal file (present in `assets/`) to pass to debugger.
@@ -57,7 +57,7 @@ The smart contract used is [4-gold-asa.teal](https://github.com/scale-it/algo-bu
 
 First we need to deploy the contracts using `algob deploy`. We will debug a transaction defined in [`scripts/transfer/gold-delegated-lsig.js`](https://github.com/scale-it/algo-builder/blob/master/examples/asa/scripts/transfer/gold-delegated-lsig.js).
 
-### DryRun
+### Dry Run
 Setting up transaction params (note that this is a passing scenario as amount = 500 <= 1000):
 ```js
 // load signed lsig from checkpoint
