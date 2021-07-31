@@ -34,7 +34,7 @@ export class Tealdbg {
    */
   private async getAccountsForDryRun (txn: wtypes.ExecParams): Promise<modelsv2.Account[]> {
     // get addresses of Txn.Accounts (in case of stateful tx params) & Txn.Sender
-    const txAccounts = (txn as wtypes.AppCallsParam).accounts ?? [];
+    const txAccounts = (txn as wtypes.AppCallsParam).accounts ?? [];  // eslint-disable-line @typescript-eslint/no-unnecessary-type-assertion
     const addrs = [...txAccounts, getFromAddress(txn)];
 
     const accountsForDryRun = [];
