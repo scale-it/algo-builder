@@ -15,7 +15,7 @@ import { DeployerConfig } from "../../src/internal/deployer_cfg";
 import { Deployer } from "../../src/types";
 import { mkEnv } from "../helpers/params";
 import { useFixtureProject } from "../helpers/project";
-import { mockDryRunResponse, mockLsig, mockSuggestedParam } from "../mocks/tx";
+import { mockAccountInformation, mockApplicationResponse, mockDryRunResponse, mockLsig, mockSuggestedParam } from "../mocks/tx";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
 class TealDbgMock extends Tealdbg {
@@ -51,6 +51,12 @@ describe("Debugging TEAL code using tealdbg", () => {
     (sinon.stub(algod.algodClient, "dryrun") as any)
       .returns({ do: async () => mockDryRunResponse }) as ReturnType<algosdk.Algodv2['dryrun']>;
 
+    (sinon.stub(algod.algodClient, "accountInformation") as any)
+      .returns({ do: async () => mockAccountInformation }) as ReturnType<algosdk.Algodv2['accountInformation']>;
+
+    (sinon.stub(algod.algodClient, "getApplicationByID") as any)
+      .returns({ do: async () => mockApplicationResponse }) as ReturnType<algosdk.Algodv2['getApplicationByID']>;
+
     txnParam = {
       type: types.TransactionType.TransferAsset,
       sign: types.SignType.LogicSignature,
@@ -67,6 +73,8 @@ describe("Debugging TEAL code using tealdbg", () => {
   afterEach(async () => {
     (algod.algodClient.getTransactionParams as sinon.SinonStub).restore();
     (algod.algodClient.dryrun as sinon.SinonStub).restore();
+    (algod.algodClient.accountInformation as sinon.SinonStub).restore();
+    (algod.algodClient.getApplicationByID as sinon.SinonStub).restore();
   });
 
   it("dump dryrunResponse in assets/<file>", async () => {
@@ -125,10 +133,28 @@ describe("Debugging TEAL code using tealdbg", () => {
     assert.include(tealDebugger.debugArgs, 'assets/gold-asa.teal');
 
     // verify mode and groupIndex arg (--mode, --group-index)
-    await tealDebugger.run({ mode: ExecutionMode.APPLICATION, groupIndex: 2 });
+    await tealDebugger.run({ mode: ExecutionMode.APPLICATION, groupIndex: 0 });
     assert.include(tealDebugger.debugArgs, '--mode');
     assert.include(tealDebugger.debugArgs, 'application');
     assert.include(tealDebugger.debugArgs, '--group-index');
-    assert.include(tealDebugger.debugArgs, '2');
+    assert.include(tealDebugger.debugArgs, '0');
+  });
+
+  it("should throw error if groupIndex is greator than txGroup length", async () => {
+    tealDebugger.execParams = [txnParam, { ...txnParam, payFlags: { note: 'Algrand' } }];
+
+    try {
+      await tealDebugger.run({ mode: ExecutionMode.APPLICATION, groupIndex: 5 });
+    } catch (error) {
+      assert.equal(error.message, 'groupIndex(= 5) exceeds transaction group length(= 2)');
+    }
+  });
+
+  it("should run debugger using pyteal files as well", async () => {
+    const writtenFilesBeforeLen = tealDebugger.writtenFiles.length;
+    await tealDebugger.run({ tealFile: 'gold-asa.py' });
+
+    // 2 files should be written: (1. --dryrun-dump and 2. compiled teal code from pyTEAL)
+    assert.equal(tealDebugger.writtenFiles.length, writtenFilesBeforeLen + 2);
   });
 });
