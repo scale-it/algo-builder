@@ -1,4 +1,4 @@
-const { readGlobalStateSSC, executeTransaction, Tealdbg } = require('@algo-builder/algob');
+const { readGlobalStateSSC, executeTransaction } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 
 async function run (runtimeEnv, deployer) {
