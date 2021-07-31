@@ -1,4 +1,8 @@
-const { executeTransaction } = require('@algo-builder/algob');
+/**
+ * In this script we will try to debug a transaction group composed as:
+ * (stateful application call + stateless tx + transfer algo)
+ */
+const { Tealdbg } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 
 async function run (runtimeEnv, deployer) {
@@ -17,12 +21,8 @@ async function run (runtimeEnv, deployer) {
   const escrowAddress = escrowLsig.address();
 
   const txGroup = [
-    /**
-     * tx 0 - Call to stateful smart contract with application arg: 'check-level'
-     * The contract ensures that alice and bob have a minimum level (accred-level) set
-     * and only then the tx will be approved. The smart contract also checks each transaction
-     * params in the txGroup (eg. sender(tx1) === receiver(tx2) === escrowAddress)
-     */
+    // NOTE: tx0 will fail if minimum accred level is not set
+    // (i.e script ./set-clear-level.js is not executed)
     {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
@@ -32,11 +32,6 @@ async function run (runtimeEnv, deployer) {
       appArgs: ['str:check-level'],
       accounts: [bob.addr] //  AppAccounts
     },
-    /**
-     * tx 1 - Asset transfer transaction from Alice -> Bob. This tx is executed
-     * and approved by the escrow account (clawback-escrow.teal). The escrow account address is
-     * also the clawback address which transfers the frozen asset (amount = 1000) from Alice to Bob
-     */
     {
       type: types.TransactionType.RevokeAsset,
       sign: types.SignType.LogicSignature,
@@ -48,10 +43,6 @@ async function run (runtimeEnv, deployer) {
       lsig: escrowLsig,
       payFlags: { totalFee: 1000 }
     },
-    /**
-     * tx 2 - Payment transaction of 1000 from creator(Alice) to escrow Account. This tx is used to
-     * cover the fee of tx1.
-     */
     {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
@@ -62,12 +53,21 @@ async function run (runtimeEnv, deployer) {
     }
   ];
 
-  console.log('* Transferring 1000 Assets from Alice to Bob *');
-  try {
-    await executeTransaction(deployer, txGroup);
-  } catch (error) {
-    console.log('Error Occurred: ', error.response.error);
-  }
+  console.log('* Debug ./transfer-asset.js: Transferring 1000 Assets from Alice to Bob *');
+
+  const debug = new Tealdbg(deployer, txGroup);
+  await debug.dryRunResponse('dryrun.json'); // tx0 message will be "REJECT" if ./set-clear-level.js is not executed (as min level is not set)
+
+  // debug 1st transaction (checking min-level of an account is set)
+  // await debug.run({ tealFile: "poi-approval.teal", groupIndex: 0 });
+
+  /* debug 2nd transaction (transfer asset using clawbackLsig)
+   * uncomment below code after commenting line 61 */
+  await debug.run({
+    tealFile: 'clawback-escrow.py',
+    scInitParam: escrowParams,
+    groupIndex: 1
+  });
 }
 
 module.exports = { default: run };
