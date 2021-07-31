@@ -190,7 +190,7 @@ Now, we have a remote target set up in `chrome://inspect`
 Click on **inspect** and start playing with the teal code!
 ![image](https://user-images.githubusercontent.com/33264364/125868869-b55f8e4e-71e9-4742-91b9-75d56bf333d6.png)
 
-Script used in this walkthrough is `gold-delegated-lsig.debug.js` and can be found [here](https://github.com/scale-it/algo-builder/blob/support-tealdbg/examples/asa/scripts/transfer/gold-delegated-lsig.debug.js).
+Script used in this walkthrough is `gold-delegated-lsig.debug.js` and can be found [here](https://github.com/scale-it/algo-builder/blob/develop/examples/asa/scripts/transfer/gold-delegated-lsig.debug.js).
 
 ## Example Walkthrough (Stateful TEAL)
 
@@ -285,3 +285,5 @@ await debug.run({
 });
 ```
 ![image](https://user-images.githubusercontent.com/33264364/127727690-195c2e5f-c50d-456c-8948-3b076ba119b2.png)
+
+This walkthrough can be found in [`/examples/permissioned-token-freezing/scripts/transfer/transfer-asset.debug.js`](https://github.com/scale-it/algo-builder/blob/develop/examples/permissioned-token-freezing/scripts/transfer/transfer-asset.debug.js)
