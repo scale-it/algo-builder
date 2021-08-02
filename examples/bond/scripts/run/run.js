@@ -1,12 +1,14 @@
 const {
-  executeTransaction, convert, readGlobalStateSSC, balanceOf
+  executeTransaction
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 const { accounts } = require('./common/accounts.js');
 const { fundAccount, getAssetID, tokenMap } = require('./common/common.js');
+const { createBuyback } = require('./createBuyback.js');
 const { createDex } = require('./createDex.js');
 const { epoch0 } = require('./epoch0.js');
 const { epoch1 } = require('./epoch1.js');
+const { exitBuyer } = require('./exit.js');
 const { issue } = require('./issue.js');
 const { redeem } = require('./redeem.js');
 
@@ -38,11 +40,13 @@ async function run (runtimeEnv, deployer) {
   await redeem(deployer, account.bob, account.manager, 2, 2);
 
   // create buyback
-  // await createBuyback(deployer, managerAcc);
+  await createBuyback(deployer, account.manager, 2);
 
   // exit buyer from bond, buyer can exit only if maturity period is over
-  // currently set to 1000 seconds
-  // await exitBuyer(deployer, buyerAccount);
+  // currently set to 240 seconds
+  await exitBuyer(deployer, account.manager, account.elon, 2, 12);
+
+  await exitBuyer(deployer, account.manager, account.bob, 2, 2);
 }
 
 module.exports = { default: run };

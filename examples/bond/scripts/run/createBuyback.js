@@ -1,15 +1,24 @@
+const {
+  executeTransaction, convert
+} = require('@algo-builder/algob');
+const { types } = require('@algo-builder/web');
+const { tokenMap, optInTx, fundAccount } = require('./common/common');
+
 /**
  * Create buyback lsig and store it's address in bond-dapp
- * @param {Deployer object} deployer
- * @param {Account} managerAcc
+ * @param deployer deployer object
+ * @param managerAcc Manager account
+ * @param n nth bond token
  */
-/* async function createBuyback (deployer, managerAcc) {
+exports.createBuyback = async function (deployer, managerAcc, n) {
+  const appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
+  const bondToken = tokenMap.get('bond-token-' + String(n));
   const scInitParam = {
     TMPL_APPLICATION_ID: appInfo.appID,
     TMPL_APP_MANAGER: managerAcc.addr,
-    TMPL_BOND: newAsaInfo[assetID]
+    TMPL_BOND: bondToken
   };
-  buybackLsig = await deployer.loadLogic('buyback-lsig.py', scInitParam);
+  const buybackLsig = await deployer.loadLogic('buyback-lsig.py', scInitParam);
   await fundAccount(deployer, buybackLsig.address());
 
   const buybackTx = {
@@ -22,27 +31,9 @@
   };
 
   // Only store manager can allow opt-in to ASA for lsig
-  const optInTx = [
-    {
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.SecretKey,
-      fromAccount: managerAcc,
-      toAccountAddr: buybackLsig.address(),
-      amountMicroAlgos: 0,
-      payFlags: {}
-    },
-    {
-      type: types.TransactionType.OptInASA,
-      sign: types.SignType.LogicSignature,
-      fromAccountAddr: buybackLsig.address(),
-      lsig: buybackLsig,
-      assetID: newAsaInfo[assetID],
-      payFlags: {}
-    }
-  ];
-  await executeTransaction(deployer, optInTx);
+  await optInTx(deployer, managerAcc, buybackLsig, bondToken);
 
   console.log('Setting buyback address!');
   await executeTransaction(deployer, buybackTx);
   console.log('Buyback address set successfully!');
-} */
+};

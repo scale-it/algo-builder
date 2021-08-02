@@ -123,7 +123,7 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
     }
   ];
 
-  console.log('Creating dex!');
+  console.log(`* Creating dex ${i}! *`);
   await executeTransaction(deployer, groupTx);
   console.log('Dex created!');
   return newIndex;

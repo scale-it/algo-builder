@@ -5,6 +5,7 @@ const { types } = require('@algo-builder/web');
 
 const issuePrice = 1000;
 const couponValue = 20;
+const nominalPrice = 1000;
 
 const asaDef = {
   total: 1000000,
@@ -74,5 +75,6 @@ module.exports = {
   getAssetID,
   tokenMap,
   couponValue,
-  optInTx
+  optInTx,
+  nominalPrice
 };

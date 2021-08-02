@@ -1,6 +1,20 @@
+const {
+  executeTransaction
+} = require('@algo-builder/algob');
+const { types } = require('@algo-builder/web');
+const { tokenMap, nominalPrice } = require('./common/common');
+
 // Buyer's exit from bond
-/* async function exitBuyer (deployer, buyerAccount) {
-  const exitAmount = 10 * 1000 - 1000;
+exports.exitBuyer = async function (deployer, managerAcc, buyerAccount, n, amount) {
+  const appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
+  const bondToken = tokenMap.get('bond-token-' + String(n));
+  const scInitParam = {
+    TMPL_APPLICATION_ID: appInfo.appID,
+    TMPL_APP_MANAGER: managerAcc.addr,
+    TMPL_BOND: bondToken
+  };
+  const buybackLsig = await deployer.loadLogic('buyback-lsig.py', scInitParam);
+  const exitAmount = Number(amount) * Number(nominalPrice);
   const exitTx = [
     //  Bond token transfer to buyback address
     {
@@ -8,8 +22,8 @@
       sign: types.SignType.SecretKey,
       fromAccount: buyerAccount,
       toAccountAddr: buybackLsig.address(),
-      amount: 10,
-      assetID: newAsaInfo[assetID],
+      amount: amount,
+      assetID: bondToken,
       payFlags: { totalFee: 2000 }
     },
     // Nominal price * amount paid to buyer
@@ -36,4 +50,4 @@
   console.log('Exiting');
   await executeTransaction(deployer, exitTx);
   console.log('Exited');
-} */
+};

@@ -9,14 +9,14 @@ const { tokenMap, couponValue } = require('./common/common.js');
  * @param deployer deployer object
  * @param buyerAccount buyer account
  * @param managerAcc manager account
- * @param epoch epoch number for which you want to make a redemption
+ * @param dex dex number from which you want to make a redemption
  * @param amount bond amount
  * For ex: 1 means your 0 bond-tokens will be redeemed from 1st Dex
  */
-exports.redeem = async function (deployer, buyerAccount, managerAcc, epoch, amount) {
+exports.redeem = async function (deployer, buyerAccount, managerAcc, dex, amount) {
   const appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
-  const oldBond = tokenMap.get('bond-token-' + String(epoch - 1));
-  const newBond = tokenMap.get('bond-token-' + String(epoch));
+  const oldBond = tokenMap.get('bond-token-' + String(dex - 1));
+  const newBond = tokenMap.get('bond-token-' + String(dex));
   const scInitParam = {
     TMPL_OLD_BOND: oldBond,
     TMPL_NEW_BOND: newBond,
@@ -67,7 +67,7 @@ exports.redeem = async function (deployer, buyerAccount, managerAcc, epoch, amou
     }
   ];
 
-  console.log('Redeeming tokens!');
+  console.log(`* Redeeming ${amount} tokens for ${buyerAccount.name} from Dex: ${dex}!`);
   await executeTransaction(deployer, groupTx);
   console.log('Tokens redeemed!');
 };
