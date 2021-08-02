@@ -111,10 +111,9 @@ export class Tealdbg {
   /**
    * Create dry run request object using SDK transaction(s) from wtypes.ExecParams
    * User can dump the response (using this.dryRunResponse) or start debugger session
-   * @param txIndex index of transaction if a transaction group is passed. Defaults to 0.
    * @returns SDK dryrun request object
    */
-  private async createDryRunReq (txIndex?: number): Promise<modelsv2.DryrunRequest> {
+  private async createDryRunReq (): Promise<modelsv2.DryrunRequest> {
     let [_, signedTxn] = await makeAndSignTx(this.deployer, this.execParams, new Map());
     if (!Array.isArray(signedTxn)) { signedTxn = [signedTxn]; }
 
