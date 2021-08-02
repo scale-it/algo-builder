@@ -1,7 +1,7 @@
 const {
   executeTransaction, readGlobalStateSSC, balanceOf
 } = require('@algo-builder/algob');
-const { asaDef, fundAccount, tokenMap } = require('./common/common.js');
+const { asaDef, fundAccount, tokenMap, optInTx } = require('./common/common.js');
 const { types } = require('@algo-builder/web');
 
 /**
@@ -41,25 +41,7 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
 
   // move to commmon
   // Only store manager can allow opt-in to ASA for lsig
-  const optInTx = [
-    {
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.SecretKey,
-      fromAccount: managerAcc,
-      toAccountAddr: issuerLsig.address(),
-      amountMicroAlgos: 0,
-      payFlags: {}
-    },
-    {
-      type: types.TransactionType.OptInASA,
-      sign: types.SignType.LogicSignature,
-      fromAccountAddr: issuerLsig.address(),
-      lsig: issuerLsig,
-      assetID: newIndex,
-      payFlags: {}
-    }
-  ];
-  await executeTransaction(deployer, optInTx);
+  await optInTx(deployer, managerAcc, issuerLsig, newIndex);
 
   const lsigParams = {
     TMPL_OLD_BOND: oldBond,
@@ -71,13 +53,8 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
 
   await fundAccount(deployer, dexLsig.address());
 
-  optInTx[0].toAccountAddr = dexLsig.address();
-  optInTx[1].fromAccountAddr = dexLsig.address();
-  optInTx[1].lsig = dexLsig;
-  await executeTransaction(deployer, optInTx);
-
-  optInTx[1].assetID = oldBond;
-  await executeTransaction(deployer, optInTx);
+  await optInTx(deployer, managerAcc, dexLsig, newIndex);
+  await optInTx(deployer, managerAcc, dexLsig, oldBond);
 
   const globalState = await readGlobalStateSSC(deployer, managerAcc.addr, appInfo.appID);
   let total = 0;

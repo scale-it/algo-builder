@@ -44,8 +44,35 @@ async function fundAccount (deployer, accountAddress) {
   await executeTransaction(deployer, algoTxnParams);
 }
 
-function optInTx () {
-
+// Opt-In lsigs to a given asa
+async function optInTx (deployer, managerAcc, lsig, assetIndex) {
+  const optInTx = [
+    {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: managerAcc,
+      toAccountAddr: lsig.address(),
+      amountMicroAlgos: 0,
+      payFlags: {}
+    },
+    {
+      type: types.TransactionType.OptInASA,
+      sign: types.SignType.LogicSignature,
+      fromAccountAddr: lsig.address(),
+      lsig: lsig,
+      assetID: assetIndex,
+      payFlags: {}
+    }
+  ];
+  await executeTransaction(deployer, optInTx);
 }
 
-module.exports = { issuePrice, asaDef, fundAccount, getAssetID, tokenMap, couponValue };
+module.exports = {
+  issuePrice,
+  asaDef,
+  fundAccount,
+  getAssetID,
+  tokenMap,
+  couponValue,
+  optInTx
+};

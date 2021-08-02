@@ -1,7 +1,8 @@
 const {
-  executeTransaction, convert, readGlobalStateSSC
+  executeTransaction, convert
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
+const { optInTx } = require('./run/common/common.js');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -13,7 +14,7 @@ async function run (runtimeEnv, deployer) {
     sign: types.SignType.SecretKey,
     fromAccount: masterAccount,
     toAccountAddr: managerAcc.addr,
-    amountMicroAlgos: 200e6,
+    amountMicroAlgos: 10e6,
     payFlags: {}
   };
   await executeTransaction(deployer, algoTxnParams);
@@ -70,25 +71,7 @@ async function run (runtimeEnv, deployer) {
   await executeTransaction(deployer, algoTxnParams);
 
   // Only app manager can opt-in issueer lsig to ASA
-  const optInTx = [
-    {
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.SecretKey,
-      fromAccount: managerAcc,
-      toAccountAddr: issuerLsig.address(),
-      amountMicroAlgos: 0,
-      payFlags: {}
-    },
-    {
-      type: types.TransactionType.OptInASA,
-      sign: types.SignType.LogicSignature,
-      fromAccountAddr: issuerLsig.address(),
-      lsig: issuerLsig,
-      assetID: asaInfo.assetIndex,
-      payFlags: {}
-    }
-  ];
-  await executeTransaction(deployer, optInTx);
+  await optInTx(deployer, managerAcc, issuerLsig, asaInfo.assetIndex);
 
   // update issuer address in bond-dapp
   appArgs = [

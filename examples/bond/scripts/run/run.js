@@ -13,14 +13,10 @@ const { redeem } = require('./redeem.js');
 async function run (runtimeEnv, deployer) {
   const oldBond = await getAssetID('bond-token-0', deployer);
   tokenMap.set('bond-token-0', oldBond);
-  // tokenMap.set('bond-token-1', 24);
-  // fund buyers and creator, app manager
+  // fund buyers
   const account = await accounts(deployer);
   await fundAccount(deployer, account.bob.addr);
   await fundAccount(deployer, account.elon.addr);
-  await fundAccount(deployer, account.manager.addr);
-  await fundAccount(deployer, account.creator.addr);
-
   // epoch0 -> createDex -> epoch1 -> createDex -> redeem -> createBuyback -> exit
 
   await issue(deployer);
