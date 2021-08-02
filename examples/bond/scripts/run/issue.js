@@ -1,9 +1,9 @@
 const {
-  executeTransaction, convert, readGlobalStateSSC
+  executeTransaction
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 
-async function run (runtimeEnv, deployer) {
+exports.issue = async function (deployer) {
   const creatorAccount = deployer.accountsByName.get('john');
   const managerAcc = deployer.accountsByName.get('alice');
 
@@ -14,7 +14,7 @@ async function run (runtimeEnv, deployer) {
     TMPL_APP_MANAGER: managerAcc.addr
   };
   const issuerLsig = await deployer.loadLogic('issuer-lsig.py', scInitParam);
-  const asaInfo = deployer.getASAInfo('bond-token-1');
+  const asaInfo = deployer.getASAInfo('bond-token-0');
   const groupTx = [
     // Bond asa transfer to issuer's address
     {
@@ -40,6 +40,4 @@ async function run (runtimeEnv, deployer) {
   console.log('Issuing tokens!');
   await executeTransaction(deployer, groupTx);
   console.log('Tokens issued to issuer');
-}
-
-module.exports = { default: run };
+};

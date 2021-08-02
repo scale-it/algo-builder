@@ -1,4 +1,4 @@
-bond-token-1:
+bond-token-0:
     total: 1000000
     decimals: 0
     defaultFrozen: false
@@ -11,15 +11,4 @@ bond-token-1:
     reserve: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"
     freeze: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"
     optInAccNames: ["alice"]
-bond-token-2:
-    total: 1000000
-    decimals: 0
-    defaultFrozen: false
-    unitName: "BOND"
-    url: "url"
-    # User may get "signature validation failed" from node if shorter hash is used.
-    metadataHash: "12312442142141241244444411111133"
-    noteb64: "noteb64"
-    manager: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"
-    reserve: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"
-    freeze: "WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"
+

@@ -1,8 +1,9 @@
-export function accounts (deployer) {
+exports.accounts = async function (deployer) {
   return {
-    masterAccount: deployer.accountsByName.get('master-account'),
-    creatorAccount: deployer.accountsByName.get('john'),
-    buyerAccount: deployer.accountsByName.get('bob'),
-    managerAcc: deployer.accountsByName.get('alice')
+    master: await deployer.accountsByName.get('master-account'),
+    creator: await deployer.accountsByName.get('john'),
+    bob: await deployer.accountsByName.get('bob'),
+    elon: await deployer.accountsByName.get('elon-musk'),
+    manager: await deployer.accountsByName.get('alice')
   };
-}
+};
