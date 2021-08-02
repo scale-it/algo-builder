@@ -419,4 +419,25 @@ describe("DeployerDeployMode", () => {
       deleted: false
     }]]));
   });
+
+  it("Should deploy asa without using asa.yaml", async () => {
+    const deployer = new DeployerDeployMode(deployerCfg);
+    const asa = {
+      name: "silver-122",
+      asaDef: {
+        total: 10000,
+        decimals: 0,
+        defaultFrozen: false,
+        unitName: "SLV",
+        url: "url",
+        metadataHash: "12312442142141241244444411111133",
+        note: "note"
+      }
+    };
+    await deployer.deployASA(asa, { creator: deployer.accounts[0] });
+
+    const res = deployer.getASAInfo("silver-122");
+    assert.isDefined(res);
+    assert.deepEqual(res.assetDef, asa.asaDef);
+  });
 });
