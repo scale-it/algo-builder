@@ -469,20 +469,17 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     this.txWriter.push(message, txConfirmation);
   }
 
+  /**
+   * Creates and deploys ASA using asa.yaml.
+   * @name  ASA name - deployer will search for the ASA in the /assets/asa.yaml file
+   * @flags  deployment flags
+  */
   async deployASA (
-    asa: string | { name: string, asaDef: wtypes.ASADef },
+    name: string,
     flags: rtypes.ASADeploymentFlags,
     asaParams?: Partial<wtypes.ASADef>
   ): Promise<rtypes.ASAInfo> {
-    let asaDef;
-    let name;
-    if (typeof asa === "string") {
-      name = asa;
-      asaDef = overrideASADef(this.accountsByName, this.loadedAsaDefs[name], asaParams);
-    } else {
-      name = asa.name;
-      asaDef = asa.asaDef;
-    }
+    const asaDef = overrideASADef(this.accountsByName, this.loadedAsaDefs[name], asaParams);
 
     if (asaDef === undefined) {
       this.persistCP();
@@ -492,6 +489,20 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
           asaName: name
         });
     }
+    return await this.deployASADef(name, asaDef, flags);
+  }
+
+  /**
+   * Creates and deploys ASA without using asa.yaml.
+   * @name ASA name
+   * @asaDef ASA definitions
+   * @flags deployment flags
+   */
+  async deployASADef (
+    name: string,
+    asaDef: wtypes.ASADef,
+    flags: rtypes.ASADeploymentFlags
+  ): Promise<rtypes.ASAInfo> {
     this.assertNoAsset(name);
     let asaInfo = {} as rtypes.ASAInfo;
     try {
@@ -699,6 +710,16 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
   async deployASA (_name: string, _flags: rtypes.ASADeploymentFlags): Promise<rtypes.ASAInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployASA"
+    });
+  }
+
+  async deployASADef (
+    name: string,
+    asaDef: wtypes.ASADef,
+    flags: rtypes.ASADeploymentFlags
+  ): Promise<rtypes.ASAInfo> {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "deployASADef"
     });
   }
 
