@@ -1,4 +1,4 @@
-import { overrideASADef, types as rtypes, validateASADefs } from "@algo-builder/runtime";
+import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
 import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
 import type { EncodedMultisig, LogicSig, modelsv2 } from "algosdk";
 import * as algosdk from "algosdk";
