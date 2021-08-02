@@ -785,3 +785,45 @@ describe("Update transaction test in run mode", () => {
     assert.isDefined(deployer.getApp("approval.teal", "clear.teal"));
   });
 });
+
+describe("Deploy ASA without asa.yaml", () => {
+  useFixtureProject("config-project");
+
+  let deployer: Deployer;
+  let algod: AlgoOperatorDryRunImpl;
+  beforeEach(async () => {
+    const env = mkEnv("network1");
+    algod = new AlgoOperatorDryRunImpl();
+    const deployerCfg = new DeployerConfig(env, algod);
+    deployerCfg.asaDefs = { silver: mkASA() };
+    deployer = new DeployerDeployMode(deployerCfg);
+    sinon.stub(algod.algodClient, "getTransactionParams")
+      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
+  });
+
+  it("should deploy asa without asa.yaml", async () => {
+    const exp = {
+      total: 10000,
+      decimals: 0,
+      defaultFrozen: false,
+      unitName: "SLV",
+      url: "url",
+      metadataHash: "12312442142141241244444411111133",
+      note: "note"
+    };
+    const execParams: wtypes.ExecParams = {
+      type: wtypes.TransactionType.DeployASA,
+      sign: wtypes.SignType.SecretKey,
+      fromAccount: bobAcc,
+      asaName: 'silver-1',
+      asaDef: exp,
+      payFlags: {}
+    };
+
+    await executeTransaction(deployer, execParams);
+
+    const res = deployer.getASAInfo("silver-1");
+    assert.isDefined(res);
+    assert.deepEqual(res.assetDef, exp);
+  });
+});

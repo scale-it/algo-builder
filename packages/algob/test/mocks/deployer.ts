@@ -115,6 +115,14 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   };
 
+  async deployASADef (
+    name: string,
+    asaDef: wtypes.ASADef,
+    flags: rtypes.ASADeploymentFlags
+  ): Promise<rtypes.ASAInfo> {
+    throw new Error("Not implemented");
+  }
+
   loadASADef (asaName: string): wtypes.ASADef | undefined {
     throw new Error("Not implemented");
   }

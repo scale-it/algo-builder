@@ -1,9 +1,10 @@
 import { tx as webTx, types } from "@algo-builder/web";
 import { makeAssetTransferTxnWithSuggestedParams, modelsv2 } from "algosdk";
 
-import { Runtime } from ".";
+import { parseASADef, Runtime } from ".";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
+import { validateOptInAccNames } from "./lib/asa";
 import { ALGORAND_MIN_TX_FEE } from "./lib/constants";
 import { mockSuggestedParams } from "./mock/tx";
 import {
@@ -141,18 +142,37 @@ export class Ctx implements Context {
   }
 
   /**
-   * Add Asset
+   * Add asset using asa.yaml file
+   * @param name asset name
+   * @param fromAccountAddr account address
+   * @param flags asa deployment flags
+   */
+  addAsset (
+    name: string,
+    fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
+  ): number {
+    return this.addASADef(
+      name, this.runtime.loadedAssetsDefs[name], fromAccountAddr, flags
+    );
+  }
+
+  /**
+   * Add Asset without using asa.yaml file
    * @param name ASA name
+   * @param asaDef asset defitions
    * @param fromAccountAddr account address of creator
    * @param flags ASA Deployment Flags
    */
-  addAsset (name: string, fromAccountAddr: AccountAddress, flags: ASADeploymentFlags): number {
+  addASADef (
+    name: string, asaDef: types.ASADef,
+    fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
+  ): number {
     const senderAcc = this.getAccount(fromAccountAddr);
-
+    parseASADef(asaDef);
+    validateOptInAccNames(this.state.accountNameAddress, asaDef);
     // create asset(with holding) in sender account
     const asset = senderAcc.addAsset(
-      ++this.state.assetCounter, name,
-      this.runtime.loadedAssetsDefs[name]
+      ++this.state.assetCounter, name, asaDef
     );
     this.assertAccBalAboveMin(fromAccountAddr);
     this.runtime.mkAssetCreateTx(name, flags, asset);
@@ -587,13 +607,16 @@ export class Ctx implements Context {
         case types.TransactionType.DeployASA: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const senderAcc = this.getAccount(fromAccountAddr);
-          const name = txnParam.asaName;
           const flags: ASADeploymentFlags = {
             ...txnParam.payFlags,
             creator: { ...senderAcc.account, name: senderAcc.address }
           };
 
-          this.addAsset(name, fromAccountAddr, flags);
+          if (txnParam.asaDef) {
+            this.addASADef(txnParam.asaName, txnParam.asaDef, fromAccountAddr, flags);
+          } else {
+            this.addAsset(txnParam.asaName, fromAccountAddr, flags);
+          }
           break;
         }
         case types.TransactionType.OptInASA: {

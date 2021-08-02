@@ -14,6 +14,7 @@
     * Creating a new multisigned transaction (requires multisig metadata: `v, thr, addrs`)
     * Support for signing in a group transaction (loaded from file).
     * Check usage in our [guide](http://algobuilder.dev/guide/sign-multisig.html)
++ Deploy ASA without using `/assets/asa.yaml`
 
 ### Dapp templates
 + Added new package `@algo-builder/web`. It can be used in Dapps to interact with ASAs and Stateful applications. Main features:

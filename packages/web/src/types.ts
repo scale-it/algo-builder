@@ -150,7 +150,8 @@ export type BasicParams = Sign & {
 export type DeployASAParam = BasicParams & {
   type: TransactionType.DeployASA
   asaName: string
-  asaDef?: Partial<ASADef>
+  asaDef?: ASADef
+  overrideAsaDef?: Partial<ASADef>
 };
 
 export type DeployAppParam = BasicParams & AppOptionalFlags & {
