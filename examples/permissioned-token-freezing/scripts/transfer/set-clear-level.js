@@ -27,6 +27,10 @@ async function run (runtimeEnv, deployer) {
     accounts: [bob.addr]
   });
 
+  /* uncomment below code to debug (start a debugging session) line 24 */
+  // await new Tealdbg(deployer, setLevelParams)
+  // .run({ tealFile: 'poi-approval.teal' });
+
   /* Use below code to clear the min asset level set
     const clearLevelParams = {
       type: types.TransactionType.CallNoOpSSC,

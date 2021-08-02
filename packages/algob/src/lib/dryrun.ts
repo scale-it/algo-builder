@@ -1,5 +1,5 @@
 import { getPathFromDirRecursive, types as rtypes } from "@algo-builder/runtime";
-import { types as wtypes } from "@algo-builder/web";
+import { tx, types as wtypes } from "@algo-builder/web";
 import { decodeSignedTransaction, EncodedSignedTransaction, encodeObj, modelsv2 } from "algosdk";
 import { spawn } from "child_process";
 import * as fs from 'fs';
@@ -10,6 +10,7 @@ import { writeToFile } from "../builtin-tasks/gen-accounts";
 import { ASSETS_DIR, CACHE_DIR } from "../internal/core/project-structure";
 import { timestampNow } from "../lib/time";
 import type { DebuggerContext, Deployer } from "../types";
+import { getProgram } from "./load-program";
 import { makeAndSignTx } from "./tx";
 
 export const tealExt = ".teal";
@@ -23,6 +24,87 @@ export class Tealdbg {
   constructor (deployer: Deployer, execParams: wtypes.ExecParams | wtypes.ExecParams[]) {
     this.deployer = deployer;
     this.execParams = execParams;
+  }
+
+  /**
+   * Get account state(s) (fetched using account address) for dry run.
+   * For eg. app_local_get, app_local_put requires an accounts ledger state to be uploaded.
+   * @param txn transaction parameters
+   */
+  private async getAccountsForDryRun (txn: wtypes.ExecParams): Promise<modelsv2.Account[]> {
+    // get addresses of Txn.Accounts (in case of stateful tx params) & Txn.Sender
+    const txAccounts = (txn as wtypes.AppCallsParam).accounts ?? []; // eslint-disable-line @typescript-eslint/no-unnecessary-type-assertion
+    const addrs = [...txAccounts, tx.getFromAddress(txn)];
+
+    const accountsForDryRun = [];
+    for (const addr of addrs) {
+      const accInfo = await this.deployer.algodClient.accountInformation(addr).do();
+      if (!accInfo) { continue; }
+
+      const acc = new modelsv2.Account({
+        address: accInfo.address,
+        amount: accInfo.amount,
+        amountWithoutPendingRewards: accInfo['amount-without-pending-rewards'],
+        appsLocalState: accInfo['apps-local-state'],
+        appsTotalSchema: accInfo['apps-total-schema'],
+        assets: accInfo.assets,
+        createdApps: accInfo['created-apps'],
+        createdAssets: accInfo['created-assets'],
+        pendingRewards: accInfo['pending-rewards'],
+        rewardBase: accInfo['reward-base'],
+        rewards: accInfo.rewards,
+        round: accInfo.round,
+        status: accInfo.status
+      });
+      accountsForDryRun.push(acc);
+    }
+    return accountsForDryRun;
+  }
+
+  /**
+   * Get application state(s) (fetched by appID) for dry run.
+   * For eg. app_global_get, app_global_put requires app state.
+   * @param txn transaction parameters
+   */
+  private async getAppsForDryRun (txn: wtypes.ExecParams): Promise<modelsv2.Application[]> {
+    if (!(
+      txn.type === wtypes.TransactionType.ClearApp ||
+      txn.type === wtypes.TransactionType.CloseApp ||
+      txn.type === wtypes.TransactionType.DeleteApp ||
+      txn.type === wtypes.TransactionType.UpdateApp ||
+      txn.type === wtypes.TransactionType.OptInToApp ||
+      txn.type === wtypes.TransactionType.CallNoOpSSC
+    )) {
+      return [];
+    }
+
+    // maybe txn.foreignApps won't work: https://github.com/algorand/go-algorand/issues/2609
+    // this would be required with app_global_get_ex ops (access external contract's state)
+    const appIDs = [...(txn.foreignApps ?? []), txn.appID];
+    const appsForDryRun = [];
+    for (const appID of appIDs) {
+      const app = await this.deployer.algodClient.getApplicationByID(appID).do();
+
+      const globalStateSchema = new modelsv2.ApplicationStateSchema(app.params['global-state-schema']['num-uint'], app.params['global-state-schema']['num-byte-slice']);
+      const localStateSchema = new modelsv2.ApplicationStateSchema(app.params['local-state-schema']['num-uint'], app.params['local-state-schema']['num-byte-slice']);
+      const globalState = (app.params['global-state'] || []).map(({ key, value }: { key: string, value: any }) => (
+        new modelsv2.TealKeyValue(key, new modelsv2.TealValue(value.type, value.bytes, value.uint))
+      ));
+
+      const appParams = new modelsv2.ApplicationParams({
+        approvalProgram: app.params['approval-program'],
+        clearStateProgram: app.params['clear-state-program'],
+        creator: app.params.creator,
+        globalState,
+        globalStateSchema,
+        localStateSchema,
+        extraProgramPages: app.params['extra-program-pages']
+      });
+      const appForDryRun = new modelsv2.Application(app.id, appParams);
+      appsForDryRun.push(appForDryRun);
+    }
+
+    return appsForDryRun;
   }
 
   /**
@@ -40,9 +122,20 @@ export class Tealdbg {
       encodedSignedTxns.push({ ...decodedTx, txn: decodedTx.txn.get_obj_for_encoding() });
     }
 
+    // query application and account state and pass them to a debug session
+    const execParamsArr = Array.isArray(this.execParams) ? this.execParams : [this.execParams];
+    const appsForDryRun: modelsv2.Application[] = [];
+    const accountsForDryRun: modelsv2.Account[] = [];
+    for (const e of execParamsArr) {
+      appsForDryRun.push(...(await this.getAppsForDryRun(e)));
+      accountsForDryRun.push(...(await this.getAccountsForDryRun(e)));
+    }
+
     // issue: https://github.com/algorand/js-algorand-sdk/issues/410
     // task: https://www.pivotaltracker.com/story/show/179060295
     return new (modelsv2 as any).DryrunRequest({
+      accounts: accountsForDryRun.length > 0 ? accountsForDryRun : undefined,
+      apps: appsForDryRun.length > 0 ? appsForDryRun : undefined,
       txns: encodedSignedTxns,
       sources: undefined
     });
@@ -105,8 +198,19 @@ export class Tealdbg {
 
     /* Push path of tealfile to debug. If not passed then debugger will use assembled code by default
      * Supplying the program will allow debugging the "original source" and not the decompiled version. */
-    if (debugCtxParams.tealFile) {
-      const pathToFile = getPathFromDirRecursive(ASSETS_DIR, debugCtxParams.tealFile) as string;
+    const file = debugCtxParams.tealFile;
+    if (file) {
+      let pathToFile;
+      if (file.endsWith(pyExt)) {
+        // note: currently tealdbg only accepts "teal" code, so we need to compile pyTEAL to TEAL first
+        // issue: https://github.com/algorand/go-algorand/issues/2538
+        pathToFile = path.join(CACHE_DIR, 'dryrun', path.parse(file).name + '.' + timestampNow().toString() + tealExt);
+        const tealFromPyTEAL = getProgram(file, debugCtxParams.scInitParam);
+        this.writeFile(pathToFile, tealFromPyTEAL);
+      } else {
+        pathToFile = getPathFromDirRecursive(ASSETS_DIR, file) as string;
+      }
+
       tealdbgArgs.push(pathToFile);
     }
 
@@ -121,8 +225,13 @@ export class Tealdbg {
     }
 
     // set groupIndex flag if a transaction group is passed in this.wtypes.ExecParams
-    if (debugCtxParams.groupIndex) {
-      tealdbgArgs.push('--group-index', debugCtxParams.groupIndex.toString());
+    const grpIdx = debugCtxParams.groupIndex;
+    if (grpIdx !== undefined) {
+      const execParamsArr = Array.isArray(this.execParams) ? this.execParams : [this.execParams];
+      if (grpIdx >= execParamsArr.length) {
+        throw new Error(`groupIndex(= ${grpIdx}) exceeds transaction group length(= ${execParamsArr.length})`);
+      }
+      tealdbgArgs.push('--group-index', grpIdx.toString());
     }
 
     return tealdbgArgs;
@@ -152,7 +261,7 @@ export class Tealdbg {
   }
 
   // write (dryrun dump) to file in `cache/dryrun`
-  writeFile (filename: string, content: Uint8Array): void {
+  protected writeFile (filename: string, content: Uint8Array | string): void {
     ensureDirSync(path.dirname(filename));
     fs.writeFileSync(filename, content);
   }
