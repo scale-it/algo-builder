@@ -198,7 +198,7 @@ In this section we will try to debug a stateful transaction (in a group) in [`/e
 
 There are 2 smart contracts (1 stateful & 1 stateless):
   * `poi-approval.teal`: Asserts a minimum level(stored in global state) set of a user. Rejects if assertion is failed.
-  * `clawback-escrow.py`: Asset clawback that is a stateless contract. Transfer assets if transaction is approved.
+  * `clawback-escrow.py`: A clawback account that is a stateless contract (lsig).
 For more details, check the project [README](https://github.com/scale-it/algo-builder/blob/master/examples/permissioned-token-freezing/README.md).
 
 Setting up transaction group:
@@ -248,9 +248,9 @@ const txGroup = [
 ```
 
 In this group:
-  * _tx0_ is an application call tx which checks minimum level set of an account(in local state)
-  * _tx1_ is an asset transfer transaction using a clawbackLsig (contract account)
-  * _tx2_ is an algotransfer transaction to pay fees of _tx1_
+  * _tx0_ is an application call which checks minimum level of an account (in local state)
+  * _tx1_ is an asset transfer transaction using a clawback lsig (_clawback-escrow.py_)
+  * _tx2_ is an algo transfer transaction to pay fees of _tx1_
 
 NOTE: Account's level can be set by executing [/permissioned-token-freezing/scripts/transfer/set-clear-level.js](https://github.com/scale-it/algo-builder/blob/master/examples/permissioned-token-freezing/scripts/transfer/set-clear-level.js). If a min level is set, then the dry run transaction will _PASS_, otherwise the "app-call-messages" would be _REJECT_.
 
@@ -272,7 +272,7 @@ To debug a specific transaction in a group, pass the `groupIndex` parameter. Let
 await debug.run({ tealFile: "poi-approval.teal", groupIndex: 0 });
 ```
 
-That's it, above code will start a live debugging session.
+That's it, the code above will start a live debugging session.
 ![image](https://user-images.githubusercontent.com/33264364/127727303-72f9e91d-1013-46f7-a8ba-e2862e723608.png)
 Notice that in `Scope` we have `appGlobal`, `appLocals` as we upload the applications and ledger state while construcing request for `tealdbg debug`.
 

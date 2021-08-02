@@ -123,7 +123,7 @@ export class Tealdbg {
       encodedSignedTxns.push({ ...decodedTx, txn: decodedTx.txn.get_obj_for_encoding() });
     }
 
-    // get application and accounts data/state to pass to debug session
+    // query application and account state and pass them to a debug session
     const execParamsArr = Array.isArray(this.execParams) ? this.execParams : [this.execParams];
     const appsForDryRun: modelsv2.Application[] = [];
     const accountsForDryRun: modelsv2.Account[] = [];

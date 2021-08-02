@@ -21,7 +21,7 @@ async function run (runtimeEnv, deployer) {
   const escrowAddress = escrowLsig.address();
 
   const txGroup = [
-    // NOTE: tx0 will fail if minimum accred level is not set
+    // NOTE: tx0 will fail if an account level is below level or not set
     // (i.e script ./set-clear-level.js is not executed)
     {
       type: types.TransactionType.CallNoOpSSC,
@@ -56,7 +56,7 @@ async function run (runtimeEnv, deployer) {
   console.log('* Debug ./transfer-asset.js: Transferring 1000 Assets from Alice to Bob *');
 
   const debug = new Tealdbg(deployer, txGroup);
-  await debug.dryRunResponse('dryrun.json'); // tx0 message will be "REJECT" if ./set-clear-level.js is not executed (as min level is not set)
+  await debug.dryRunResponse('dryrun.json'); // tx0 message will be "REJECT" if ./set-clear-level.js is not executed (min level is not set)
 
   // debug 1st transaction (checking min-level of an account is set)
   // await debug.run({ tealFile: "poi-approval.teal", groupIndex: 0 });
