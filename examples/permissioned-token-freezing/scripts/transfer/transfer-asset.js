@@ -62,7 +62,7 @@ async function run (runtimeEnv, deployer) {
     }
   ];
 
-  console.log('* Transferring 1000 Assets from Aice to Bob *');
+  console.log('* Transferring 1000 Assets from Alice to Bob *');
   try {
     await executeTransaction(deployer, txGroup);
   } catch (error) {

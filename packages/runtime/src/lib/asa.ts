@@ -1,5 +1,5 @@
 import { ASADefSchema, types } from "@algo-builder/web";
-import type { AssetDef } from "algosdk";
+import { modelsv2 } from "algosdk";
 import { existsSync } from "fs";
 import path from "path";
 import * as z from 'zod';
@@ -18,7 +18,7 @@ export const ASSETS_DIR = "assets";
  * @param filename asa filename
  * @param asaDef asset definition
  */
-function validateOptInAccNames (accounts: AccountMap | RuntimeAccountMap,
+export function validateOptInAccNames (accounts: AccountMap | RuntimeAccountMap,
   asaDef: types.ASADef,
   source?: string): void {
   if (!asaDef.optInAccNames || asaDef.optInAccNames.length === 0) {
@@ -41,7 +41,7 @@ function validateOptInAccNames (accounts: AccountMap | RuntimeAccountMap,
  * @param source source of assetDef: asa.yaml file OR function deployASA
  * @returns parsed asa definition
  */
-function _parseASADef (asaDef: types.ASADef, source?: string): types.ASADef {
+export function parseASADef (asaDef: types.ASADef, source?: string): types.ASADef {
   try {
     const parsedDef = ASADefSchema.parse(asaDef);
     parsedDef.manager = parsedDef.manager !== "" ? parsedDef.manager : undefined;
@@ -77,7 +77,7 @@ export function overrideASADef (
 
   const source = 'ASA deployment';
   Object.assign(origDef, newDef);
-  origDef = _parseASADef(origDef, source);
+  origDef = parseASADef(origDef, source);
   validateOptInAccNames(accounts, origDef, source);
   return origDef;
 }
@@ -94,7 +94,7 @@ export function overrideASADef (
 export function validateASADefs (
   asaDefs: types.ASADefs, accounts: AccountMap | RuntimeAccountMap, filename: string): types.ASADefs {
   for (const name in asaDefs) {
-    asaDefs[name] = _parseASADef(asaDefs[name], filename);
+    asaDefs[name] = parseASADef(asaDefs[name], filename);
     validateOptInAccNames(accounts, asaDefs[name], filename);
   }
   return asaDefs;
@@ -130,7 +130,7 @@ function isDefined (value: string | undefined): boolean {
  * @param fields Custom ASA fields
  * @param asset Defined ASA fields
  */
-export function checkAndSetASAFields (fields: types.AssetModFields, asset: AssetDef): void {
+export function checkAndSetASAFields (fields: types.AssetModFields, asset: modelsv2.AssetParams): void {
   for (const x of ['manager', 'reserve', 'freeze', 'clawback']) {
     const customField = fields[x as keyof types.AssetModFields];
     const asaField = asset[x as keyof types.AssetModFields];

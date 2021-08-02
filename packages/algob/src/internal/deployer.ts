@@ -1,6 +1,6 @@
-import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
+import { overrideASADef, parseASADef, types as rtypes, validateOptInAccNames } from "@algo-builder/runtime";
 import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
-import type { LogicSig, MultiSig } from "algosdk";
+import type { EncodedMultisig, LogicSig, modelsv2 } from "algosdk";
 import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
@@ -12,6 +12,7 @@ import type {
   ASCCache,
   CheckpointFunctions,
   CheckpointRepo,
+  ConfirmedTxInfo,
   Deployer,
   FundASCFlags,
   LsigInfo,
@@ -101,7 +102,7 @@ class DeployerBasicMode {
     return this.algoOp.algodClient;
   }
 
-  async waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
+  async waitForConfirmation (txId: string): Promise<ConfirmedTxInfo> {
     return await this.algoOp.waitForConfirmation(txId);
   }
 
@@ -110,7 +111,7 @@ class DeployerBasicMode {
    * @param assetIndex asset index
    * @returns asset info from network
    */
-  async getAssetByID (assetIndex: number | bigint): Promise<algosdk.AssetInfo> {
+  async getAssetByID (assetIndex: number | bigint): Promise<modelsv2.Asset> {
     return await this.algoOp.getAssetByID(assetIndex);
   }
 
@@ -171,7 +172,7 @@ class DeployerBasicMode {
 
     const lsig = await getLsig(name, this.algoOp.algodClient); // get lsig from .teal (getting logic part from lsig)
     const msig = await readMsigFromFile(name); // Get decoded Msig object from .msig
-    Object.assign(lsig.msig = {} as MultiSig, msig);
+    Object.assign(lsig.msig = {} as EncodedMultisig, msig);
     return lsig;
   }
 
@@ -179,7 +180,9 @@ class DeployerBasicMode {
    * Send signed transaction to network and wait for confirmation
    * @param rawTxns Signed Transaction(s)
    */
-  async sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<algosdk.ConfirmedTxInfo> {
+  async sendAndWait (
+    rawTxns: Uint8Array | Uint8Array[]
+  ): Promise<ConfirmedTxInfo> {
     return await this.algoOp.sendAndWait(rawTxns);
   }
 
@@ -190,7 +193,7 @@ class DeployerBasicMode {
    * @param accountName
    * @param flags Transaction flags
    */
-  async optInAcountToASA (asa: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
+  async optInAcountToASA (asa: string, accountName: string, flags: wtypes.TxParams): Promise<void> {
     this.assertCPNotDeleted({
       type: wtypes.TransactionType.OptInASA,
       sign: wtypes.SignType.SecretKey,
@@ -226,7 +229,7 @@ class DeployerBasicMode {
    * @param lsig logic signature
    * @param flags Transaction flags
    */
-  async optInLsigToASA (asa: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
+  async optInLsigToASA (asa: string, lsig: LogicSig, flags: wtypes.TxParams): Promise<void> {
     this.assertCPNotDeleted({
       type: wtypes.TransactionType.OptInASA,
       sign: wtypes.SignType.LogicSignature,
@@ -259,7 +262,7 @@ class DeployerBasicMode {
   async optInAccountToApp (
     sender: rtypes.Account,
     appID: number,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     flags: rtypes.AppOptionalFlags): Promise<void> {
     this.assertCPNotDeleted({
       type: wtypes.TransactionType.OptInToApp,
@@ -282,7 +285,7 @@ class DeployerBasicMode {
   async optInLsigToApp (
     appID: number,
     lsig: LogicSig,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     flags: rtypes.AppOptionalFlags): Promise<void> {
     this.assertCPNotDeleted({
       type: wtypes.TransactionType.OptInToApp,
@@ -462,10 +465,15 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   /**
    * Log transaction with message using txwriter
    */
-  logTx (message: string, txConfirmation: algosdk.ConfirmedTxInfo): void {
+  logTx (message: string, txConfirmation: ConfirmedTxInfo): void {
     this.txWriter.push(message, txConfirmation);
   }
 
+  /**
+   * Creates and deploys ASA using asa.yaml.
+   * @name  ASA name - deployer will search for the ASA in the /assets/asa.yaml file
+   * @flags  deployment flags
+   */
   async deployASA (
     name: string,
     flags: rtypes.ASADeploymentFlags,
@@ -481,7 +489,23 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
           asaName: name
         });
     }
+    return await this.deployASADef(name, asaDef, flags);
+  }
+
+  /**
+   * Creates and deploys ASA without using asa.yaml.
+   * @name ASA name
+   * @asaDef ASA definitions
+   * @flags deployment flags
+   */
+  async deployASADef (
+    name: string,
+    asaDef: wtypes.ASADef,
+    flags: rtypes.ASADeploymentFlags
+  ): Promise<rtypes.ASAInfo> {
     this.assertNoAsset(name);
+    parseASADef(asaDef);
+    validateOptInAccNames(this.accountsByName, asaDef);
     let asaInfo = {} as rtypes.ASAInfo;
     try {
       asaInfo = await this.algoOp.deployASA(
@@ -520,7 +544,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    */
   async fundLsig (name: string, flags: FundASCFlags,
-    payFlags: rtypes.TxParams, scTmplParams?: SCParams): Promise<void> {
+    payFlags: wtypes.TxParams, scTmplParams?: SCParams): Promise<void> {
     try {
       await this.algoOp.fundLsig(name, flags, payFlags, this.txWriter, scTmplParams);
     } catch (error) {
@@ -574,7 +598,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     approvalProgram: string,
     clearProgram: string,
     flags: rtypes.AppDeploymentFlags,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     scTmplParams?: SCParams): Promise<rtypes.SSCInfo> {
     const name = approvalProgram + "-" + clearProgram;
     this.assertNoAsset(name);
@@ -605,7 +629,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    */
   async updateApp (
     sender: algosdk.Account,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
@@ -673,7 +697,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     });
   }
 
-  logTx (message: string, txConfirmation: algosdk.ConfirmedTxInfo): void {
+  logTx (message: string, txConfirmation: ConfirmedTxInfo): void {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "logTx"
     });
@@ -691,8 +715,18 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     });
   }
 
+  async deployASADef (
+    name: string,
+    asaDef: wtypes.ASADef,
+    flags: rtypes.ASADeploymentFlags
+  ): Promise<rtypes.ASAInfo> {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "deployASADef"
+    });
+  }
+
   async fundLsig (_name: string, _flags: FundASCFlags,
-    _payFlags: rtypes.TxParams, _scInitParams?: unknown): Promise<LsigInfo> {
+    _payFlags: wtypes.TxParams, _scInitParams?: unknown): Promise<LsigInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "fundLsig"
     });
@@ -709,7 +743,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
     approvalProgram: string,
     clearProgram: string,
     flags: rtypes.AppDeploymentFlags,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     scInitParam?: unknown): Promise<rtypes.SSCInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployApp"
@@ -728,7 +762,7 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
    */
   async updateApp (
     sender: algosdk.Account,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,

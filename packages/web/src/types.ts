@@ -1,4 +1,4 @@
-import { Account as AccountSDK, LogicSig, LogicSigArgs } from 'algosdk';
+import { Account as AccountSDK, LogicSig } from 'algosdk';
 import * as z from 'zod';
 
 import type { ASADefSchema, ASADefsSchema } from "./types-input";
@@ -32,6 +32,7 @@ export interface TxParams {
    * parameters. We think that this is more explicit. */
   feePerByte?: number
   totalFee?: number
+  flatFee?: boolean
   // The first round for when the transaction is valid.
   firstValid?: number
   // firstValid + validRounds will give us the ending round for which the transaction is valid.
@@ -97,7 +98,7 @@ export interface AppOptionalFlags {
 export type ExecParams = AlgoTransferParam | AssetTransferParam | AppCallsParam |
 ModifyAssetParam | FreezeAssetParam | RevokeAssetParam |
 DestroyAssetParam | DeployASAParam | DeployAppParam |
-OptInToAppParam | OptInASAParam | UpdateAppParam;
+OptInASAParam | UpdateAppParam;
 
 export enum SignType {
   SecretKey,
@@ -137,7 +138,7 @@ interface SignWithLsig {
   fromAccountAddr: AccountAddress
   lsig: LogicSig
   /** stateless smart contract args */
-  args?: LogicSigArgs
+  args?: Uint8Array[]
 }
 
 export type Sign = SignWithSk | SignWithLsig;
@@ -149,7 +150,8 @@ export type BasicParams = Sign & {
 export type DeployASAParam = BasicParams & {
   type: TransactionType.DeployASA
   asaName: string
-  asaDef?: Partial<ASADef>
+  asaDef?: ASADef
+  overrideAsaDef?: Partial<ASADef>
 };
 
 export type DeployAppParam = BasicParams & AppOptionalFlags & {
@@ -173,8 +175,9 @@ export type UpdateAppParam = BasicParams & AppOptionalFlags & {
   clearProg?: Uint8Array
 };
 
-export type OptInToAppParam = BasicParams & AppOptionalFlags & {
-  type: TransactionType.OptInToApp
+export type AppCallsParam = BasicParams & AppOptionalFlags & {
+  type: TransactionType.CallNoOpSSC | TransactionType.ClearApp |
+  TransactionType.CloseApp | TransactionType.DeleteApp | TransactionType.OptInToApp
   appID: number
 };
 
@@ -226,12 +229,18 @@ export type AssetTransferParam = BasicParams & {
   assetID: number | string
 };
 
-export type AppCallsParam = BasicParams & AppOptionalFlags & {
-  type: TransactionType.CallNoOpSSC | TransactionType.ClearApp |
-  TransactionType.CloseApp | TransactionType.DeleteApp
-  appID: number
-};
-
 export type ASADef = z.infer<typeof ASADefSchema>;
 
 export type ASADefs = z.infer<typeof ASADefsSchema>;
+
+export interface RequestError extends Error {
+  response?: {
+    statusCode: number
+    text: string
+    body: {
+      message: string
+    }
+    error?: Error
+  }
+  error?: Error
+}

@@ -1,11 +1,23 @@
-import { types as rtypes } from "@algo-builder/runtime";
+import { parseASADef, types as rtypes } from "@algo-builder/runtime";
 import { tx as webTx, types as wtypes } from "@algo-builder/web";
-import algosdk, { Algodv2, SuggestedParams, Transaction } from "algosdk";
+import algosdk, { Algodv2, decodeSignedTransaction, SuggestedParams, Transaction } from "algosdk";
 
-import { Deployer } from "../types";
+import { ConfirmedTxInfo, Deployer } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
-import { loadSignedTxnFromFile } from "./files";
+import { loadEncodedTxFromFile } from "./files";
 import { registerCheckpoints } from "./script-checkpoints";
+
+/**
+ * Returns true if encoded transaction (fetched from file) is already signed
+ * @param encodedTx msgpack encoded transaction */
+export function isSignedTx (encodedTx: Uint8Array): boolean {
+  try {
+    decodeSignedTransaction(encodedTx);
+  } catch (error) {
+    return false;
+  }
+  return true;
+}
 
 /**
  * Returns blockchain transaction suggested parameters (firstRound, lastRound, fee..)
@@ -28,12 +40,14 @@ export async function getSuggestedParams (algocl: Algodv2): Promise<SuggestedPar
  * @param s suggested transaction params
  */
 export async function mkTxParams (
-  algocl: Algodv2, userParams: rtypes.TxParams, s?: SuggestedParams): Promise<SuggestedParams> {
+  algocl: Algodv2, userParams: wtypes.TxParams, s?: SuggestedParams): Promise<SuggestedParams> {
   if (s === undefined) { s = await getSuggestedParams(algocl); }
 
-  s.flatFee = userParams.totalFee !== undefined;
+  if (userParams.flatFee === undefined) {
+    if (userParams.totalFee !== undefined) s.flatFee = true;
+    else s.flatFee = false;
+  }
   s.fee = userParams.totalFee ?? userParams.feePerByte ?? ALGORAND_MIN_TX_FEE;
-  if (s.flatFee) s.fee = Math.max(s.fee, ALGORAND_MIN_TX_FEE);
 
   s.firstRound = userParams.firstValid ?? s.firstRound;
   s.lastRound = userParams.firstValid === undefined || userParams.validRounds === undefined
@@ -68,15 +82,15 @@ export function makeAssetCreateTxn (
     flags.creator.addr,
     note,
     BigInt(asaDef.total),
-    asaDef.decimals,
-    asaDef.defaultFrozen,
-    asaDef.manager,
-    asaDef.reserve,
-    asaDef.freeze,
-    asaDef.clawback,
+    Number(asaDef.decimals),
+    asaDef.defaultFrozen ? asaDef.defaultFrozen : false,
+    asaDef.manager !== "" ? asaDef.manager : undefined,
+    asaDef.reserve !== "" ? asaDef.reserve : undefined,
+    asaDef.freeze !== "" ? asaDef.freeze : undefined,
+    asaDef.clawback !== "" ? asaDef.clawback : undefined,
     asaDef.unitName,
     name,
-    asaDef.url,
+    asaDef.url ?? "",
     asaDef.metadataHash,
     txSuggestedParams
   );
@@ -92,7 +106,7 @@ export function makeASAOptInTx (
   addr: string,
   assetID: number,
   params: SuggestedParams,
-  payFlags: rtypes.TxParams
+  payFlags: wtypes.TxParams
 ): Transaction {
   const execParam: wtypes.ExecParams = {
     type: wtypes.TransactionType.OptInASA,
@@ -164,10 +178,12 @@ async function mkTx (
 
   switch (txn.type) {
     case wtypes.TransactionType.DeployASA: {
+      if (txn.asaDef === undefined) {
+        txn.asaDef = deployer.getASADef(txn.asaName, txn.overrideAsaDef);
+      }
+      parseASADef(txn.asaDef);
       deployer.assertNoAsset(txn.asaName);
-      const asaDef = deployer.getASADef(txn.asaName, txn.asaDef);
-      txn.asaDef = asaDef;
-      if (txn.asaDef) txIdxMap.set(index, [txn.asaName, asaDef]);
+      txIdxMap.set(index, [txn.asaName, txn.asaDef]);
       break;
     }
     case wtypes.TransactionType.DeployApp: {
@@ -177,7 +193,7 @@ async function mkTx (
       const clear = await deployer.ensureCompiled(txn.clearProgram);
       txn.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
       txn.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
-      txIdxMap.set(index, [name, { total: 1, decimals: 1, unitName: "MOCK" }]);
+      txIdxMap.set(index, [name, { total: 1, decimals: 1, unitName: "MOCK", defaultFrozen: false }]);
       break;
     }
     case wtypes.TransactionType.UpdateApp: {
@@ -186,7 +202,7 @@ async function mkTx (
       const clear = await deployer.ensureCompiled(txn.newClearProgram);
       txn.approvalProg = new Uint8Array(Buffer.from(approval.compiled, "base64"));
       txn.clearProg = new Uint8Array(Buffer.from(clear.compiled, "base64"));
-      txIdxMap.set(index, [cpKey, { total: 1, decimals: 1, unitName: "MOCK" }]);
+      txIdxMap.set(index, [cpKey, { total: 1, decimals: 1, unitName: "MOCK", defaultFrozen: false }]);
       break;
     }
     case wtypes.TransactionType.ModifyAsset: {
@@ -215,6 +231,42 @@ async function mkTx (
 }
 
 /**
+ * Create and Sign SDK transaction(s) from transaction execution parameters (passed by user).
+ * @param deployer Deployer object
+ * @param execParams Execution parameters
+ * @param txIdxMap Map for index to [cpname, asaDef]
+ * @returns [transaction(s), signed transaction(s)]
+ */
+export async function makeAndSignTx (
+  deployer: Deployer,
+  execParams: wtypes.ExecParams | wtypes.ExecParams[],
+  txIdxMap: Map<number, [string, wtypes.ASADef]>
+): Promise<[Transaction[], Uint8Array | Uint8Array[]]> {
+  let signedTxn;
+  let txns: Transaction[] = [];
+  if (Array.isArray(execParams)) {
+    if (execParams.length > 16) { throw new Error("Maximum size of an atomic transfer group is 16"); }
+
+    for (const [idx, txn] of execParams.entries()) {
+      txns.push(await mkTx(deployer, txn, idx, txIdxMap));
+    }
+
+    txns = algosdk.assignGroupID(txns);
+    signedTxn = txns.map((txn: Transaction, index: number) => {
+      const signed = signTransaction(txn, execParams[index]);
+      deployer.log(`Signed transaction ${index}`, signed);
+      return signed;
+    });
+  } else {
+    const txn = await mkTx(deployer, execParams, 0, txIdxMap);
+    signedTxn = signTransaction(txn, execParams);
+    deployer.log(`Signed transaction:`, signedTxn);
+    txns = [txn];
+  }
+  return [txns, signedTxn];
+}
+
+/**
  * Execute single transaction or group of transactions (atomic transaction)
  * @param deployer Deployer
  * @param execParams transaction parameters or atomic transaction parameters
@@ -223,31 +275,11 @@ async function mkTx (
 export async function executeTransaction (
   deployer: Deployer,
   execParams: wtypes.ExecParams | wtypes.ExecParams[]):
-  Promise<algosdk.ConfirmedTxInfo> {
+  Promise<ConfirmedTxInfo> {
   deployer.assertCPNotDeleted(execParams);
   try {
-    let signedTxn;
-    let txns: Transaction[] = [];
     const txIdxMap = new Map<number, [string, wtypes.ASADef]>();
-    if (Array.isArray(execParams)) {
-      if (execParams.length > 16) { throw new Error("Maximum size of an atomic transfer group is 16"); }
-
-      for (const [idx, txn] of execParams.entries()) {
-        txns.push(await mkTx(deployer, txn, idx, txIdxMap));
-      }
-
-      txns = algosdk.assignGroupID(txns);
-      signedTxn = txns.map((txn: Transaction, index: number) => {
-        const signed = signTransaction(txn, execParams[index]);
-        deployer.log(`Signed transaction ${index}`, signed);
-        return signed;
-      });
-    } else {
-      const txn = await mkTx(deployer, execParams, 0, txIdxMap);
-      signedTxn = signTransaction(txn, execParams);
-      deployer.log(`Signed transaction:`, signedTxn);
-      txns = [txn];
-    }
+    const [txns, signedTxn] = await makeAndSignTx(deployer, execParams, txIdxMap);
     const confirmedTx = await deployer.sendAndWait(signedTxn);
     console.log(confirmedTx);
     if (deployer.isDeployMode) { await registerCheckpoints(deployer, txns, txIdxMap); }
@@ -269,8 +301,8 @@ export async function executeTransaction (
  */
 export async function executeSignedTxnFromFile (
   deployer: Deployer,
-  fileName: string): Promise<algosdk.ConfirmedTxInfo> {
-  const signedTxn = loadSignedTxnFromFile(fileName);
+  fileName: string): Promise<ConfirmedTxInfo> {
+  const signedTxn = loadEncodedTxFromFile(fileName);
   if (signedTxn === undefined) { throw new Error(`File ${fileName} does not exist`); }
 
   console.debug("Decoded txn from %s: %O", fileName, algosdk.decodeSignedTransaction(signedTxn));

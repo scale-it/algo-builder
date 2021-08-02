@@ -22,8 +22,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     fromAccount: john,
     toAccountAddr: alice.address,
     amountMicroAlgos: 100,
-    payFlags: { totalFee: 1000 }
-  }
+    payFlags: { totalFee: fee }  }
 ```
 - payFlags: [TxParams](https://algobuilder.dev/api/algob/interfaces/runtime.types.txparams.html)
 
@@ -37,20 +36,42 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     toAccountAddr: alice.address,
     amountMicroAlgos: 100,
     lsig: lsig,
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: fee }
   }
 ```
 
 ### [Deploy ASA](https://algobuilder.dev/api/algob/modules/runtime.types.html#deployasaparam)
 
+To deploy an ASA using `asa.yaml`:
 ```js
   {
     type: TransactionType.DeployASA,
     sign: SignType.SecretKey,
     fromAccount: john,
     asaName: 'gold',
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: fee }
   }
+```
+
+To deploy an ASA without using `asa.yaml`:
+
+```js 
+  {
+    type: types.TransactionType.DeployASA,
+    sign: types.SignType.SecretKey,
+    fromAccount: john.account,
+    asaName: 'silver-12',
+    asaDef: {
+      total: 10000,
+      decimals: 0,
+      defaultFrozen: false,
+      unitName: "SLV",
+      url: "url",
+      metadataHash: "12312442142141241244444411111133",
+      note: "note"
+    },
+    payFlags: {}
+  };
 ```
 
 ### [Opt-In to ASA](https://algobuilder.dev/api/algob/modules/runtime.types.html#optinasaparam)
@@ -61,7 +82,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     sign: SignType.SecretKey,
     fromAccount: alice,
     assetID: assetIndex,
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: fee }
   }
 ```
 
@@ -75,7 +96,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     toAccountAddr: alice.address,
     amount: 10,
     assetID: assetId,
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: fee }
   }
 ```
 
@@ -105,7 +126,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     sign: SignType.SecretKey,
     fromAccount: alice,
     appID: appID,
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: fee }
   }
 ```
 
@@ -143,7 +164,33 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     sign: SignType.SecretKey,
     fromAccount: john,
     appId: 10,
-    payFlags: { totalFee: 1000 },
+    payFlags: { totalFee: fee },
     appArgs: []
   }
 ```
+
+### Pooled Transaction Fees
+
+With [this](https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/) release, algob also supports pooled transaction fees.
+Algob now supports pooled fees where one transaction can pay the fees of other transactions within an atomic group. For atomic transactions, the protocol sums the number of transactions and calculates the total amount of required fees, then calculates the amount of fees submitted by all transactions. If the collected fees are greater than or equal to the required amount, the transaction fee requirement will be met.
+Ex:
+```js
+  {
+    type: TransactionType.TransferAlgo,
+    sign: SignType.SecretKey,
+    fromAccountAddr: john,
+    toAccountAddr: alice.address,
+    amountMicroAlgos: 100,
+    payFlags: { totalFee: 2000 }
+  },
+  {
+    type: TransactionType.TransferAlgo,
+    sign: SignType.SecretKey,
+    fromAccountAddr: alice,
+    toAccountAddr: bob.address,
+    amountMicroAlgos: 100,
+    payFlags: { totalFee: 0 }
+  }
+```
+
+Even though fee paid by alice is `0`, this transaction will pass because total fees collected is greater than or equal to the required amount.

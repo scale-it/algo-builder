@@ -98,7 +98,7 @@ describe("Rounds Test", function () {
       fromAccount: john.account,
       toAccountAddr: bob.address,
       amountMicroAlgos: 100n,
-      payFlags: { firstValid: 5, validRounds: 200 }
+      payFlags: { firstValid: 5, validRounds: 200, totalFee: 1000 }
     };
   });
 
@@ -202,14 +202,72 @@ describe("Algorand Standard Assets", function () {
     assert.equal(res.decimals, 0);
     assert.equal(res.defaultFrozen, false);
     assert.equal(res.total, 5912599999515n);
+    assert.equal(res.metadataHash, "12312442142141241244444411111133");
     assert.equal(res.unitName, "GLD");
     assert.equal(res.url, "url");
-    assert.equal(res.metadataHash, "12312442142141241244444411111133");
     assert.equal(res.manager, elon.address);
     assert.equal(res.reserve, elon.address);
     assert.equal(res.freeze, elon.address);
     assert.equal(res.clawback, elon.address);
     assert.equal(john.minBalance, initialMinBalance + ASSET_CREATION_FEE);
+  });
+
+  it("should create asset without using asa.yaml file", () => {
+    const expected = {
+      name: "gold-1221",
+      asaDef: {
+        total: 10000,
+        decimals: 0,
+        defaultFrozen: false,
+        unitName: "SLV",
+        url: "url",
+        metadataHash: "12312442142141241244444411111133",
+        note: "note"
+      }
+    };
+    assetId = runtime.addASADef(
+      expected.name, expected.asaDef, { creator: { ...john.account, name: "john" } }
+    );
+    syncAccounts();
+
+    const res = runtime.getAssetDef(assetId);
+    assert.isDefined(res);
+    assert.equal(res.decimals, 0);
+    assert.equal(res.defaultFrozen, false);
+    assert.equal(res.total, 10000n);
+    assert.equal(res.metadataHash, "12312442142141241244444411111133");
+    assert.equal(res.unitName, "SLV");
+    assert.equal(res.url, "url");
+  });
+
+  it("should create asset without using asa.yaml (execute transaction)", () => {
+    const execParams: types.ExecParams = {
+      type: types.TransactionType.DeployASA,
+      sign: types.SignType.SecretKey,
+      fromAccount: john.account,
+      asaName: 'silver-12',
+      asaDef: {
+        total: 10000,
+        decimals: 0,
+        defaultFrozen: false,
+        unitName: "SLV",
+        url: "url",
+        metadataHash: "12312442142141241244444411111133",
+        note: "note"
+      },
+      payFlags: {}
+    };
+    runtime.executeTx(execParams);
+    syncAccounts();
+
+    const res = runtime.getAssetInfoFromName("silver-12");
+    assert.isDefined(res);
+    assert.equal(res?.assetDef.decimals, 0);
+    assert.equal(res?.assetDef.defaultFrozen, false);
+    assert.equal(res?.assetDef.total, 10000n);
+    assert.equal(res?.assetDef.metadataHash, "12312442142141241244444411111133");
+    assert.equal(res?.assetDef.unitName, "SLV");
+    assert.equal(res?.assetDef.url, "url");
   });
 
   it("should opt-in to asset", () => {
@@ -298,7 +356,7 @@ describe("Algorand Standard Assets", function () {
       assetID: assetId,
       freezeTarget: john.address,
       freezeState: true,
-      payFlags: {}
+      payFlags: { flatFee: true, totalFee: 1000 }
     };
 
     const res = runtime.getAssetDef(assetId);

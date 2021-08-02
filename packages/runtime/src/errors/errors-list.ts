@@ -352,6 +352,12 @@ export const transactionErrors = {
     message: `Asset index %assetId% frozen for account %address%`,
     title: "Asset Frozen",
     description: "Asset Frozen for account"
+  },
+  FEES_NOT_ENOUGH: {
+    number: 1506,
+    message: `Fee required %required% is greater than fee collected %collected%`,
+    title: "Not enough fees",
+    description: "Fees not enough to cover transaction cost"
   }
 };
 

@@ -36,6 +36,7 @@ describe("ASC - CloseOut from Application and Clear State", function () {
       fromAccount: john.account,
       appID: 11,
       payFlags: { totalFee: 1000 }
+
     };
   });
 

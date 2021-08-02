@@ -1,7 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
-import type { LogicSig } from "algosdk";
-import * as algosdk from "algosdk";
+import algosdk, { LogicSig, modelsv2 } from "algosdk";
 
 import * as types from "./internal/core/params/argument-types";
 // Begin config types
@@ -421,13 +420,25 @@ export interface Deployer {
   getCheckpointKV: (key: string) => string | undefined
 
   /**
-   * Creates and deploys ASA.
+   * Creates and deploys ASA defined in asa.yaml.
    * @name  ASA name - deployer will search for the ASA in the /assets/asa.yaml file
    * @flags  deployment flags */
   deployASA: (
     name: string,
     flags: rtypes.ASADeploymentFlags,
     asaParams?: Partial<wtypes.ASADef>
+  ) => Promise<rtypes.ASAInfo>
+
+  /**
+   * Creates and deploys ASA without using asa.yaml.
+   * @name ASA name
+   * @asaDef ASA definitions
+   * @flags deployment flags
+   */
+  deployASADef: (
+    name: string,
+    asaDef: wtypes.ASADef,
+    flags: rtypes.ASADeploymentFlags,
   ) => Promise<rtypes.ASAInfo>
 
   /**
@@ -447,13 +458,13 @@ export interface Deployer {
 
   registerSSCInfo: (name: string, sscInfo: rtypes.SSCInfo) => void
 
-  logTx: (message: string, txConfirmation: algosdk.ConfirmedTxInfo) => void
+  logTx: (message: string, txConfirmation: ConfirmedTxInfo) => void
 
   /**
    * Send signed transaction to network and wait for confirmation
    * @param rawTxns Signed Transaction(s)
    */
-  sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<algosdk.ConfirmedTxInfo>
+  sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<ConfirmedTxInfo>
 
   /**
    * Funds logic signature account (Contract Account).
@@ -465,7 +476,7 @@ export interface Deployer {
   fundLsig: (
     name: string,
     flags: FundASCFlags,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     scTmplParams?: SCParams
   ) => void
 
@@ -495,7 +506,7 @@ export interface Deployer {
     approvalProgram: string,
     clearProgram: string,
     flags: rtypes.AppDeploymentFlags,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     scTmplParams?: SCParams) => Promise<rtypes.SSCInfo>
 
   /**
@@ -509,7 +520,7 @@ export interface Deployer {
    */
   updateApp: (
     sender: algosdk.Account,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
@@ -527,22 +538,22 @@ export interface Deployer {
 
   /**
    * Queries blockchain for a given transaction and waits until it will be processed. */
-  waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
+  waitForConfirmation: (txId: string) => Promise<ConfirmedTxInfo>
 
   /**
    * Queries blockchain using algodv2 for asset information by index  */
-  getAssetByID: (assetIndex: number | bigint) => Promise<algosdk.AssetInfo>
+  getAssetByID: (assetIndex: number | bigint) => Promise<modelsv2.Asset>
 
   /**
    * Creates an opt-in transaction for given ASA name, which must be defined in
    * `/assets/asa.yaml` file. The opt-in transaction is signed by the account secret key */
   optInAcountToASA: (asa: string, accountName: string,
-    flags: rtypes.TxParams) => Promise<void>
+    flags: wtypes.TxParams) => Promise<void>
 
   /**
    * Creates an opt-in transaction for given ASA name, which must be defined in
    * `/assets/asa.yaml` file. The opt-in transaction is signed by the logic signature */
-  optInLsigToASA: (asa: string, lsig: LogicSig, flags: rtypes.TxParams) => Promise<void>
+  optInLsigToASA: (asa: string, lsig: LogicSig, flags: wtypes.TxParams) => Promise<void>
 
   /**
    * Opt-In to stateful smart contract (SSC) for a single account
@@ -555,7 +566,7 @@ export interface Deployer {
   optInAccountToApp: (
     sender: rtypes.Account,
     appID: number,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     flags: rtypes.AppOptionalFlags) => Promise<void>
 
   /**
@@ -569,7 +580,7 @@ export interface Deployer {
   optInLsigToApp: (
     appID: number,
     lsig: LogicSig,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     flags: rtypes.AppOptionalFlags) => Promise<void>
 
   /**
@@ -652,3 +663,19 @@ export interface AnyMap {
 export type PromiseAny = Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 //  LocalWords:  configFile
+
+export interface DebuggerContext {
+  tealFile?: string
+  scInitParam?: unknown // if tealfile is ".py"
+  groupIndex?: number
+  mode?: rtypes.ExecutionMode
+}
+
+// TODO: Remove when this is resolved https://discord.com/channels/491256308461207573/631209194967531559/869677444242739220
+export interface ConfirmedTxInfo {
+  'confirmed-round': number
+  "asset-index": number
+  'application-index': number
+  'global-state-delta': string
+  'local-state-delta': string
+}

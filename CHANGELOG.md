@@ -3,23 +3,42 @@
 ## unreleased
 
 ### Improvements
-+ Add workflow for examples
-+ New package `Web`, It can be used in Dapps to interact with ASAs and Apps
-    + Compatible with `algosigner`.
-    + Support `executeTransaction` function with web package
-+ Move Error lists, BuilderError, mkTransaction to web package
-+ Reuse mkTransaction, Errors in algob and runtime
++ Added github workflows/examples.yaml to execute [`/examples`](https://github.com/scale-it/algo-builder/tree/master/examples) on a private net, on pushing new commit to `develop`/`master` branch OR creating a pull request to these branches as base.
++ Moved [error](http://algobuilder.dev/api/runtime/modules/errors.html) lists, BuilderError, [mkTransaction](http://algobuilder.dev/api/runtime/modules.html#mktransaction) to `@algo-builder/web` package. Re export `mkTransaction`, `errors` in algob and runtime from `@algo-builder/web` for backward compatibility.
 + Updated `algob init` to initialize a typescript project as well by passing `--typescript` flag. Usage: `algob init <location> --typescript`.
++ Support pooled transaction fees in algob and runtime. Added tests.
++ Add `flatFee` in `TxParams`
++ Added support for teal debugger (get dryrun response or start debugger using `tealdbg` in chrome) in `algob` scripts.
++ User can initialize & use accounts by name in `@algo-builder/runtime`, similar to algob ('john', 'bob' etc)
++ Updates to `algob sign-multisig`:
+    * Creating a new multisigned transaction (requires multisig metadata: `v, thr, addrs`)
+    * Support for signing in a group transaction (loaded from file).
+    * Check usage in our [guide](http://algobuilder.dev/guide/sign-multisig.html)
++ Deploy ASA without using `/assets/asa.yaml`
 
+### Dapp templates
++ Added new package `@algo-builder/web`. It can be used in Dapps to interact with ASAs and Stateful applications. Main features:
+    + Compatible with [`algosigner`](https://github.com/PureStake/algosigner).
+    + Support algob's high level function:`executeTransaction` in a webapp as well (note: currently `deployASA` & `deployApp` transactions are not supported, as we don't load data from checkpoints OR `/assets`). Group transactions are also supported.
+    + The `executeTransaction` takes transactions parameters (single/group) as input, triggers an algosigner prompt for signature, sends transaction to network and return it's response. Documentation can be found [here](https://github.com/scale-it/algo-builder/tree/develop/packages/web#algo-builderweb).
++ Added new template [`/shop`](https://github.com/scale-it/algo-builder-templates/tree/master/shop) to demonstrate a react component (payment widget) to make a purchase and trigger `AlgoSigner` for signing a transaction.
 
 ### Infrastructure
 * Added new make commands:
     * `setup-reach` - sets up reach executable file in `~/.algorand-reach` directory
     * `remove-reach` - halts any dockerized devnets, kills & removes docker instances and containers, remove reach bash file from `~/.algorand-reach`.
+    * `restart-private-net`: restarts private-net.
+    * `indexer-docker-up`, `indexer-docker-down`: Docker based setup for indexer. Runs in read-only mode, without connecting to local algod node.
+    * `make setup-postgresql`: Install `postgresql` database on a local linux system and setup a new user & database.
+    * `make start-indexer`: Add local indexer binary (downloaded in `~/.algorand-indexer-download`) and start the indexer by connecting to database and local algod node.
+    * `make remove-indexer`: Removes `~/.algorand-indexer-download` directory from system.
 
 ### Examples
 + [Permissioned Token](/examples/permissioned-token) Added `cease` function and a script to change permissions app_id.
 
+### Tutorials and solutions
++ We published a Securities and Permissioned Tokens solution (implemeted using `algob`): [https://developer.algorand.org/solutions/securities-and-permissioned-tokens/](https://developer.algorand.org/solutions/securities-and-permissioned-tokens/).
++ Published fifth tutorial in the `@algo-builder` series, on how to use `algob console` to quickly and easily interact with ASA and smart contracts: [https://developer.algorand.org/tutorials/algo-builder-tutorial-part-5-algob-console/](https://developer.algorand.org/tutorials/algo-builder-tutorial-part-5-algob-console/).
 
 ### API breaking
 + Rename `SSC` to `App` - This will affect deployment and all calls made to stateful smart contracts(SSC) or `App`
@@ -29,14 +48,16 @@
     + SSCDeploymentFlags -> AppDeploymentFlags
     + SSCOptionalFlags -> AppOptionalFlags
 + Import are changed to scoped imports
-    + instead of stringToBytes, you can import a `convert` namespace, and then use `convert.stringToBytes`
+    + instead of stringToBytes, you can import a `convert` namespace (from `@algo-builder/algob`), and then use `convert.stringToBytes`
 + Types imports for `ExecParams`, `TransactionTypes`, `SignType` moved to new package `@algo-builder/web`
++ Migrate to algorand/js-sdk types from `@algo-builder/types-algosdk`.
 
 
 ### Bug fixes
 
 `web`:
 + Added missing `fromAccount?` attribute to the `Sign` type.
++ Remove TxParams type from runtime package(it is duplicated in runtime)
 
 
 ## v1.1.1 2021-07-12
