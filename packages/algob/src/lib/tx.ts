@@ -178,10 +178,11 @@ async function mkTx (
 
   switch (txn.type) {
     case wtypes.TransactionType.DeployASA: {
+      if (txn.asaDef === undefined) {
+        txn.asaDef = deployer.getASADef(txn.asaName, txn.overrideAsaDef);
+      }
       deployer.assertNoAsset(txn.asaName);
-      const asaDef = deployer.getASADef(txn.asaName, txn.asaDef);
-      txn.asaDef = asaDef;
-      if (txn.asaDef) txIdxMap.set(index, [txn.asaName, asaDef]);
+      txIdxMap.set(index, [txn.asaName, txn.asaDef]);
       break;
     }
     case wtypes.TransactionType.DeployApp: {

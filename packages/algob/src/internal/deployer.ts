@@ -1,4 +1,4 @@
-import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
+import { overrideASADef, types as rtypes, validateASADefs } from "@algo-builder/runtime";
 import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
 import type { EncodedMultisig, LogicSig, modelsv2 } from "algosdk";
 import * as algosdk from "algosdk";
@@ -470,11 +470,19 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   }
 
   async deployASA (
-    name: string,
+    asa: string | { name: string, asaDef: wtypes.ASADef },
     flags: rtypes.ASADeploymentFlags,
     asaParams?: Partial<wtypes.ASADef>
   ): Promise<rtypes.ASAInfo> {
-    const asaDef = overrideASADef(this.accountsByName, this.loadedAsaDefs[name], asaParams);
+    let asaDef;
+    let name;
+    if (typeof asa === "string") {
+      name = asa;
+      asaDef = overrideASADef(this.accountsByName, this.loadedAsaDefs[name], asaParams);
+    } else {
+      name = asa.name;
+      asaDef = asa.asaDef;
+    }
 
     if (asaDef === undefined) {
       this.persistCP();
