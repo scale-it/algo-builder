@@ -1,18 +1,30 @@
+const {
+  executeTransaction
+} = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
+const { tokenMap, couponValue } = require('./common/common.js');
 
 /**
  * Redeem old tokens, get coupon_value + new bond tokens
- * @param {Account} buyerAccount
+ * @param deployer deployer object
+ * @param buyerAccount buyer account
+ * @param managerAcc manager account
+ * @param epoch epoch number for which you want to make a redemption
+ * @param amount bond amount
+ * For ex: 1 means your 0 bond-tokens will be redeemed from 1st Dex
  */
-/* async function redeem (deployer, buyerAccount, managerAcc) {
+exports.redeem = async function (deployer, buyerAccount, managerAcc, epoch, amount) {
+  const appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
+  const oldBond = tokenMap.get('bond-token-' + String(epoch - 1));
+  const newBond = tokenMap.get('bond-token-' + String(epoch));
   const scInitParam = {
-    TMPL_OLD_BOND: asaInfo.assetIndex,
-    TMPL_NEW_BOND: newAsaInfo[assetID],
+    TMPL_OLD_BOND: oldBond,
+    TMPL_NEW_BOND: newBond,
     TMPL_APPLICATION_ID: appInfo.appID,
     TMPL_APP_MANAGER: managerAcc.addr
   };
   const dexLsig = await deployer.loadLogic('dex-lsig.py', scInitParam);
-  await deployer.optInAcountToASA(newAsaInfo[assetID], 'bob', {});
+  await deployer.optInAcountToASA(newBond, buyerAccount.name, {});
   const groupTx = [
     // Transfer tokens to dex lsig.
     {
@@ -20,8 +32,8 @@ const { types } = require('@algo-builder/web');
       sign: types.SignType.SecretKey,
       fromAccount: buyerAccount,
       toAccountAddr: dexLsig.address(),
-      amount: 10,
-      assetID: asaInfo.assetIndex,
+      amount: amount,
+      assetID: oldBond,
       payFlags: { totalFee: 3000 }
     },
     // New bond token transfer to buyer's address
@@ -31,8 +43,8 @@ const { types } = require('@algo-builder/web');
       fromAccountAddr: dexLsig.address(),
       lsig: dexLsig,
       toAccountAddr: buyerAccount.addr,
-      amount: 10,
-      assetID: newAsaInfo[assetID],
+      amount: amount,
+      assetID: newBond,
       payFlags: { totalFee: 0 }
     },
     {
@@ -41,7 +53,7 @@ const { types } = require('@algo-builder/web');
       fromAccountAddr: dexLsig.address(),
       lsig: dexLsig,
       toAccountAddr: buyerAccount.addr,
-      amountMicroAlgos: 200,
+      amountMicroAlgos: Number(amount) * Number(couponValue),
       payFlags: { totalFee: 0 }
     },
     // call to bond-dapp
@@ -58,4 +70,4 @@ const { types } = require('@algo-builder/web');
   console.log('Redeeming tokens!');
   await executeTransaction(deployer, groupTx);
   console.log('Tokens redeemed!');
-} */
+};

@@ -4,6 +4,7 @@ const {
 const { types } = require('@algo-builder/web');
 
 const issuePrice = 1000;
+const couponValue = 20;
 
 const asaDef = {
   total: 1000000,
@@ -17,6 +18,17 @@ const asaDef = {
   reserve: 'WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE',
   freeze: 'WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE'
 };
+
+const tokenMap = new Map();
+
+/**
+ * returns asset id for a given asset name
+ * @param name asset name
+ */
+async function getAssetID (name, deployer) {
+  const asaInfo = await deployer.getASAInfo(name);
+  return asaInfo.assetIndex;
+}
 
 // fund account using master account
 async function fundAccount (deployer, accountAddress) {
@@ -36,4 +48,4 @@ function optInTx () {
 
 }
 
-module.exports = { issuePrice, asaDef, fundAccount };
+module.exports = { issuePrice, asaDef, fundAccount, getAssetID, tokenMap, couponValue };

@@ -1,7 +1,7 @@
 const {
   executeTransaction, readGlobalStateSSC, balanceOf
 } = require('@algo-builder/algob');
-const { asaDef, fundAccount } = require('./common/common.js');
+const { asaDef, fundAccount, tokenMap } = require('./common/common.js');
 const { types } = require('@algo-builder/web');
 
 /**
@@ -15,7 +15,7 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
     throw new Error('i must be greater than equal to 1');
   }
   const previousToken = 'bond-token-' + String(i - 1);
-  const asaInfo = deployer.getASAInfo(previousToken);
+  const oldBond = tokenMap.get(previousToken);
   const appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
   const scInitParam = {
     TMPL_APPLICATION_ID: appInfo.appID,
@@ -25,7 +25,6 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
   const issuerLsig = await deployer.loadLogic('issuer-lsig.py', scInitParam);
   console.log('Issuer address: ', issuerLsig.address());
   const newBondToken = 'bond-token-' + String(i);
-  console.log(asaDef, newBondToken);
   const deployTx = {
     type: types.TransactionType.DeployASA,
     sign: types.SignType.SecretKey,
@@ -38,6 +37,7 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
   const newAsaInfo = await executeTransaction(deployer, deployTx);
   console.log(newAsaInfo);
   const newIndex = newAsaInfo['asset-index'];
+  tokenMap.set(newBondToken, newIndex);
 
   // move to commmon
   // Only store manager can allow opt-in to ASA for lsig
@@ -62,7 +62,7 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
   await executeTransaction(deployer, optInTx);
 
   const lsigParams = {
-    TMPL_OLD_BOND: asaInfo.assetIndex,
+    TMPL_OLD_BOND: oldBond,
     TMPL_NEW_BOND: newIndex,
     TMPL_APPLICATION_ID: appInfo.appID,
     TMPL_APP_MANAGER: managerAcc.addr
@@ -76,7 +76,7 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
   optInTx[1].lsig = dexLsig;
   await executeTransaction(deployer, optInTx);
 
-  optInTx[1].assetID = asaInfo.assetIndex;
+  optInTx[1].assetID = oldBond;
   await executeTransaction(deployer, optInTx);
 
   const globalState = await readGlobalStateSSC(deployer, managerAcc.addr, appInfo.appID);
@@ -91,7 +91,7 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
   console.log('Total issued: ', total);
 
   // balance of old bond tokens in issuer lsig
-  const info = await balanceOf(deployer, issuerLsig.address(), asaInfo.assetIndex);
+  const info = await balanceOf(deployer, issuerLsig.address(), oldBond);
   console.log('Old balance amount ', info.amount);
   const groupTx = [
     // call to bond-dapp
@@ -122,7 +122,7 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
       lsig: issuerLsig,
       toAccountAddr: creatorAccount.addr,
       amount: info.amount,
-      assetID: asaInfo.assetIndex,
+      assetID: oldBond,
       payFlags: { totalFee: 1000 }
     },
     // Transfer app.total amount of new Bonds to dex lsig
@@ -149,4 +149,5 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
   console.log('Creating dex!');
   await executeTransaction(deployer, groupTx);
   console.log('Dex created!');
+  return newIndex;
 };
