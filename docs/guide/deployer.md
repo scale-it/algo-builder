@@ -32,7 +32,20 @@ You can write deployment tasks synchronously and they'll be executed in the corr
     await deployer.deployASA("ASA-1", {...});
     await deployer.deployASA("ASA-2", {...});
 
-To deploy an ASA you must have `asa.yaml` file in `assets` folder. Head to the [ASA Definition File Spec](https://paper.dropbox.com/doc/Algorand-builder-specs-Vcdp0XNngizChyUWvFXfs#:uid=077585002872354521007982&h2=ASA-Definition-File) to learn more.
+To deploy an ASA you may have `asa.yaml` file in `assets` folder. Head to the [ASA Definition File Spec](https://paper.dropbox.com/doc/Algorand-builder-specs-Vcdp0XNngizChyUWvFXfs#:uid=077585002872354521007982&h2=ASA-Definition-File) to learn more.
+
+To deploy an ASA without `asa.yaml`, you can use:
+
+    const asaDef = {
+      total: 10000,
+      decimals: 0,
+      defaultFrozen: false,
+      unitName: "SLV",
+      url: "url",
+      metadataHash: "12312442142141241244444411111133",
+      note: "note"
+    };
+    await deployer.deployASADef("silver-122", asaDef, {...});
 
 #### Deploying ASA with custom parameters
 
