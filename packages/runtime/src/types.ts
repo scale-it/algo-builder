@@ -121,7 +121,8 @@ export interface Context {
   deleteApp: (appID: number) => void
   closeApp: (sender: AccountAddress, appID: number) => void
   processTransactions: (txnParams: types.ExecParams[]) => void
-  addAsset: (name: string, fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => number
+  addAsset: (name: string | { name: string, asaDef: types.ASADef },
+    fromAccountAddr: AccountAddress, flags: ASADeploymentFlags) => number
   optIntoASA: (assetIndex: number, address: AccountAddress, flags: types.TxParams) => void
   addApp: (
     fromAccountAddr: string, flags: AppDeploymentFlags,

@@ -334,11 +334,18 @@ export class Runtime {
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  addAsset (name: string, flags: ASADeploymentFlags): number {
-    this.ctx.addAsset(name, flags.creator.addr, flags);
-
+  addAsset (asa: string | { name: string, asaDef: types.ASADef }, flags: ASADeploymentFlags): number {
+    this.ctx.addAsset(asa, flags.creator.addr, flags);
     this.store = this.ctx.state;
-    this.optInToASAMultiple(name, this.store.assetCounter);
+
+    let accounts;
+    if (typeof asa === "string") {
+      accounts = this.loadedAssetsDefs[asa].optInAccNames;
+      this.optInToASAMultiple(this.store.assetCounter, accounts);
+    } else {
+      accounts = asa.asaDef.optInAccNames;
+    }
+    this.optInToASAMultiple(this.store.assetCounter, accounts);
     return this.store.assetCounter;
   }
 
@@ -347,8 +354,7 @@ export class Runtime {
    * @param name Asset name
    * @param assetID Asset Index
    */
-  optInToASAMultiple (name: string, assetID: number): void {
-    const accounts = this.loadedAssetsDefs[name].optInAccNames;
+  optInToASAMultiple (assetID: number, accounts?: string[]): void {
     if (accounts === undefined) {
       return;
     }
@@ -600,7 +606,7 @@ export class Runtime {
     for (const txn of txnParameters) {
       switch (txn.type) {
         case types.TransactionType.DeployASA: {
-          txn.asaDef = this.loadedAssetsDefs[txn.asaName];
+          if (txn.asaDef === undefined) txn.asaDef = this.loadedAssetsDefs[txn.asaName];
           break;
         }
         case types.TransactionType.DeployApp: {

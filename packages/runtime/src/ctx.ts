@@ -146,13 +146,24 @@ export class Ctx implements Context {
    * @param fromAccountAddr account address of creator
    * @param flags ASA Deployment Flags
    */
-  addAsset (name: string, fromAccountAddr: AccountAddress, flags: ASADeploymentFlags): number {
+  addAsset (
+    asa: string | { name: string, asaDef: types.ASADef },
+    fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
+  ): number {
     const senderAcc = this.getAccount(fromAccountAddr);
 
+    let name;
+    let asaDef;
+    if (typeof asa === "string") {
+      name = asa;
+      asaDef = this.runtime.loadedAssetsDefs[name];
+    } else {
+      name = asa.name;
+      asaDef = asa.asaDef;
+    }
     // create asset(with holding) in sender account
     const asset = senderAcc.addAsset(
-      ++this.state.assetCounter, name,
-      this.runtime.loadedAssetsDefs[name]
+      ++this.state.assetCounter, name, asaDef
     );
     this.assertAccBalAboveMin(fromAccountAddr);
     this.runtime.mkAssetCreateTx(name, flags, asset);
@@ -587,13 +598,21 @@ export class Ctx implements Context {
         case types.TransactionType.DeployASA: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const senderAcc = this.getAccount(fromAccountAddr);
-          const name = txnParam.asaName;
           const flags: ASADeploymentFlags = {
             ...txnParam.payFlags,
             creator: { ...senderAcc.account, name: senderAcc.address }
           };
 
-          this.addAsset(name, fromAccountAddr, flags);
+          let asa;
+          if (txnParam.asaDef) {
+            asa = {
+              name: txnParam.asaName,
+              asaDef: txnParam.asaDef
+            };
+          } else {
+            asa = txnParam.asaName;
+          }
+          this.addAsset(asa, fromAccountAddr, flags);
           break;
         }
         case types.TransactionType.OptInASA: {
