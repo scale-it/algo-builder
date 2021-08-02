@@ -41,7 +41,7 @@ function validateOptInAccNames (accounts: AccountMap | RuntimeAccountMap,
  * @param source source of assetDef: asa.yaml file OR function deployASA
  * @returns parsed asa definition
  */
-function _parseASADef (asaDef: types.ASADef, source?: string): types.ASADef {
+export function parseASADef (asaDef: types.ASADef, source?: string): types.ASADef {
   try {
     const parsedDef = ASADefSchema.parse(asaDef);
     parsedDef.manager = parsedDef.manager !== "" ? parsedDef.manager : undefined;
@@ -77,7 +77,7 @@ export function overrideASADef (
 
   const source = 'ASA deployment';
   Object.assign(origDef, newDef);
-  origDef = _parseASADef(origDef, source);
+  origDef = parseASADef(origDef, source);
   validateOptInAccNames(accounts, origDef, source);
   return origDef;
 }
@@ -94,7 +94,7 @@ export function overrideASADef (
 export function validateASADefs (
   asaDefs: types.ASADefs, accounts: AccountMap | RuntimeAccountMap, filename: string): types.ASADefs {
   for (const name in asaDefs) {
-    asaDefs[name] = _parseASADef(asaDefs[name], filename);
+    asaDefs[name] = parseASADef(asaDefs[name], filename);
     validateOptInAccNames(accounts, asaDefs[name], filename);
   }
   return asaDefs;

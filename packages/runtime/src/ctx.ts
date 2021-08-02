@@ -1,7 +1,7 @@
 import { tx as webTx, types } from "@algo-builder/web";
 import { makeAssetTransferTxnWithSuggestedParams, modelsv2 } from "algosdk";
 
-import { Runtime } from ".";
+import { parseASADef, Runtime } from ".";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { ALGORAND_MIN_TX_FEE } from "./lib/constants";
@@ -167,7 +167,7 @@ export class Ctx implements Context {
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
   ): number {
     const senderAcc = this.getAccount(fromAccountAddr);
-
+    parseASADef(asaDef);
     // create asset(with holding) in sender account
     const asset = senderAcc.addAsset(
       ++this.state.assetCounter, name, asaDef

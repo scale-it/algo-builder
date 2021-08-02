@@ -1,4 +1,4 @@
-import { types as rtypes } from "@algo-builder/runtime";
+import { parseASADef, types as rtypes } from "@algo-builder/runtime";
 import { tx as webTx, types as wtypes } from "@algo-builder/web";
 import algosdk, { Algodv2, decodeSignedTransaction, SuggestedParams, Transaction } from "algosdk";
 
@@ -181,6 +181,7 @@ async function mkTx (
       if (txn.asaDef === undefined) {
         txn.asaDef = deployer.getASADef(txn.asaName, txn.overrideAsaDef);
       }
+      parseASADef(txn.asaDef);
       deployer.assertNoAsset(txn.asaName);
       txIdxMap.set(index, [txn.asaName, txn.asaDef]);
       break;
