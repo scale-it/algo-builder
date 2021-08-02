@@ -19,7 +19,7 @@
     * Support for signing in a group transaction (loaded from file).
 + Add docs for web package
 + Handle group transaction in web package
-+ Deploy ASA without using asa.yaml
++ Deploy ASA without using `/assets/asa.yaml`
 
 ### Infrastructure
 * Added new make commands:
