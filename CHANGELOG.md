@@ -4,7 +4,7 @@
 
 ### Improvements
 + Added github workflows/examples.yaml to execute [`/examples`](https://github.com/scale-it/algo-builder/tree/master/examples) on a private net, on push.
-+ Moved [error](http://algobuilder.dev/api/runtime/modules/errors.html) lists, BuilderError, [mkTransaction](http://algobuilder.dev/api/runtime/modules.html#mktransaction) to `@algo-builder/web` package. Reuse mkTransaction, errors in algob and runtime from `@algo-builder/web`.
++ Moved [error](http://algobuilder.dev/api/runtime/modules/errors.html) lists, BuilderError, [mkTransaction](http://algobuilder.dev/api/runtime/modules.html#mktransaction) to `@algo-builder/web` package. Re export `mkTransaction`, `errors` in algob and runtime from `@algo-builder/web` for backward compatibility.
 + Updated `algob init` to initialize a typescript project as well by passing `--typescript` flag. Usage: `algob init <location> --typescript`.
 + Support pooled transaction fees in algob and runtime. Added tests.
 + Add `flatFee` in `TxParams`
