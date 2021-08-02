@@ -1,6 +1,5 @@
 import { getPathFromDirRecursive, types as rtypes } from "@algo-builder/runtime";
-import { types as wtypes } from "@algo-builder/web";
-import { getFromAddress } from "@algo-builder/web/build/lib/txn";
+import { tx, types as wtypes } from "@algo-builder/web";
 import { decodeSignedTransaction, EncodedSignedTransaction, encodeObj, modelsv2 } from "algosdk";
 import { spawn } from "child_process";
 import * as fs from 'fs';
@@ -35,7 +34,7 @@ export class Tealdbg {
   private async getAccountsForDryRun (txn: wtypes.ExecParams): Promise<modelsv2.Account[]> {
     // get addresses of Txn.Accounts (in case of stateful tx params) & Txn.Sender
     const txAccounts = (txn as wtypes.AppCallsParam).accounts ?? []; // eslint-disable-line @typescript-eslint/no-unnecessary-type-assertion
-    const addrs = [...txAccounts, getFromAddress(txn)];
+    const addrs = [...txAccounts, tx.getFromAddress(txn)];
 
     const accountsForDryRun = [];
     for (const addr of addrs) {
