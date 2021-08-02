@@ -19,6 +19,7 @@
     * Support for signing in a group transaction (loaded from file).
 + Add docs for web package
 + Handle group transaction in web package
++ Added `yarn run test:watch` command. NOTE: it will spawn multiple process in the same terminal session. So if you want to stop the all processes the best solution is to kill the terminal session.
 
 ### Infrastructure
 * Added new make commands:

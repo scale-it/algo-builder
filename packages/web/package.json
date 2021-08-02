@@ -22,6 +22,7 @@
     "lint:fix": "eslint --fix --ext .js,.ts src",
     "lint:unix": "eslint --format unix --ext .js,.ts src",
     "test": "mocha",
+    "test:watch:p": "mocha -w &",
     "coverage": "nyc ../../node_modules/mocha/bin/mocha",
     "build": "tsc --build .",
     "build:docs": "typedoc --out ../../docs/api/web --excludePrivate --exclude \"internal/**\" src/index.ts",

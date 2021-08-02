@@ -207,3 +207,31 @@ We use **yarn workspaces** to manage all sub packages. here is a list of command
 `yarn` does not add dependencies to node_modules directories in either of your packages  –  only at the root level, i.e., yarn hoists all dependencies to the root level. yarn leverages symlinks to point to the different packages. Thereby, yarn includes the dependencies only once in the project.
 
 You have to utilize yarn workspaces’ `noHoist` feature to use otherwise incompatible 3rd party dependencies working in the Mono-Repo environment.
+
+### Testing
+
+Each package has rich test suites. Whenever you add something new make sure you provide a test.
+
+Restarting tests by hand is a bit more time consuming. We are using `mocha` framework to execute tests. It has a very useful feature: `mocha --watch` -- which will monitor for all file changes and re-execute tests when a file changed without adding a time overhead to start node and load all TypeScript modules.
+
+To execute tests in a workspace (eg `packages/runtime`) run:
+```
+cd packages/runtime
+yarn run test
+```
+
+To execute and watch tests in a workspace (eg `packages/runtime`) run:
+```
+cd packages/runtime
+yarn run test -w
+```
+
+To execute tests in all workspaces, run the following from the root directory:
+```
+yarn run test
+```
+
+To execute and watch tests in all workspaces, run the following from the root directory. Note: it will spawn multiple process in the same terminal session. So if you want to stop the all processes the best solution is to kill the terminal session.
+```
+yarn run test:watch
+```
