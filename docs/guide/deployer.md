@@ -34,7 +34,7 @@ You can write deployment tasks synchronously and they'll be executed in the corr
 
 To deploy an ASA you may have `asa.yaml` file in `assets` folder. Head to the [ASA Definition File Spec](https://paper.dropbox.com/doc/Algorand-builder-specs-Vcdp0XNngizChyUWvFXfs#:uid=077585002872354521007982&h2=ASA-Definition-File) to learn more.
 
-To deploy an ASA without `asa.yaml`, you can use:
+To deploy an ASA without declaring it in `asa.yaml`, you can use:
 
     const asaDef = {
       total: 10000,

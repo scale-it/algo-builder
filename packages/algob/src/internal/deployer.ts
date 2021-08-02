@@ -473,7 +473,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
    * Creates and deploys ASA using asa.yaml.
    * @name  ASA name - deployer will search for the ASA in the /assets/asa.yaml file
    * @flags  deployment flags
-  */
+   */
   async deployASA (
     name: string,
     flags: rtypes.ASADeploymentFlags,

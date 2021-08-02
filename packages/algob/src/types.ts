@@ -420,7 +420,7 @@ export interface Deployer {
   getCheckpointKV: (key: string) => string | undefined
 
   /**
-   * Creates and deploys ASA using asa.yaml.
+   * Creates and deploys ASA defined in asa.yaml.
    * @name  ASA name - deployer will search for the ASA in the /assets/asa.yaml file
    * @flags  deployment flags */
   deployASA: (
