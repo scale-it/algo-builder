@@ -2,7 +2,7 @@ import { AccountStore } from "./account";
 import * as ERRORS from "./errors/errors-list";
 import { parseZodError } from "./errors/validation-errors";
 import { Interpreter } from "./interpreter/interpreter";
-import { loadASAFile, overrideASADef, parseASADef, validateASADefs } from "./lib/asa";
+import { loadASAFile, overrideASADef, parseASADef, validateASADefs, validateOptInAccNames } from "./lib/asa";
 import { getPathFromDirRecursive, loadFromYamlFileSilent, loadFromYamlFileSilentWithMessage, lsTreeWalk } from "./lib/files";
 import { checkIfAssetDeletionTx } from "./lib/txn";
 import { LogicSig } from "./logicsig";
@@ -14,6 +14,7 @@ export {
   ERRORS,
   Interpreter,
   parseASADef,
+  validateOptInAccNames,
   Runtime,
   AccountStore,
   LogicSig,

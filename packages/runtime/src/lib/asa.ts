@@ -18,7 +18,7 @@ export const ASSETS_DIR = "assets";
  * @param filename asa filename
  * @param asaDef asset definition
  */
-function validateOptInAccNames (accounts: AccountMap | RuntimeAccountMap,
+export function validateOptInAccNames (accounts: AccountMap | RuntimeAccountMap,
   asaDef: types.ASADef,
   source?: string): void {
   if (!asaDef.optInAccNames || asaDef.optInAccNames.length === 0) {

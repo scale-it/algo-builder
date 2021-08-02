@@ -4,6 +4,7 @@ import { makeAssetTransferTxnWithSuggestedParams, modelsv2 } from "algosdk";
 import { parseASADef, Runtime } from ".";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
+import { validateOptInAccNames } from "./lib/asa";
 import { ALGORAND_MIN_TX_FEE } from "./lib/constants";
 import { mockSuggestedParams } from "./mock/tx";
 import {
@@ -168,6 +169,7 @@ export class Ctx implements Context {
   ): number {
     const senderAcc = this.getAccount(fromAccountAddr);
     parseASADef(asaDef);
+    validateOptInAccNames(this.state.accountNameAddress, asaDef);
     // create asset(with holding) in sender account
     const asset = senderAcc.addAsset(
       ++this.state.assetCounter, name, asaDef

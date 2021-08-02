@@ -20,7 +20,11 @@ function mkASA (): wtypes.ASADef {
     total: 1,
     decimals: 1,
     unitName: 'ASA',
-    defaultFrozen: false
+    defaultFrozen: false,
+    clawback: undefined,
+    freeze: undefined,
+    manager: undefined,
+    reserve: undefined
   };
 }
 

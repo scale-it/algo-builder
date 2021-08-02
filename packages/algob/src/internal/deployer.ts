@@ -1,4 +1,4 @@
-import { overrideASADef, parseASADef, types as rtypes } from "@algo-builder/runtime";
+import { overrideASADef, parseASADef, types as rtypes, validateOptInAccNames } from "@algo-builder/runtime";
 import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
 import type { EncodedMultisig, LogicSig, modelsv2 } from "algosdk";
 import * as algosdk from "algosdk";
@@ -505,6 +505,7 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   ): Promise<rtypes.ASAInfo> {
     this.assertNoAsset(name);
     parseASADef(asaDef);
+    validateOptInAccNames(this.accountsByName, asaDef);
     let asaInfo = {} as rtypes.ASAInfo;
     try {
       asaInfo = await this.algoOp.deployASA(
