@@ -141,26 +141,33 @@ export class Ctx implements Context {
   }
 
   /**
-   * Add Asset
+   * Add asset using asa.yaml file
+   * @param name asset name
+   * @param fromAccountAddr account address
+   * @param flags asa deployment flags
+   */
+  addAsset (
+    name: string,
+    fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
+  ): number {
+    return this.addASADef(
+      name, this.runtime.loadedAssetsDefs[name], fromAccountAddr, flags
+    );
+  }
+
+  /**
+   * Add Asset without using asa.yaml file
    * @param name ASA name
+   * @param asaDef asset defitions
    * @param fromAccountAddr account address of creator
    * @param flags ASA Deployment Flags
    */
-  addAsset (
-    asa: string | { name: string, asaDef: types.ASADef },
+  addASADef (
+    name: string, asaDef: types.ASADef,
     fromAccountAddr: AccountAddress, flags: ASADeploymentFlags
   ): number {
     const senderAcc = this.getAccount(fromAccountAddr);
 
-    let name;
-    let asaDef;
-    if (typeof asa === "string") {
-      name = asa;
-      asaDef = this.runtime.loadedAssetsDefs[name];
-    } else {
-      name = asa.name;
-      asaDef = asa.asaDef;
-    }
     // create asset(with holding) in sender account
     const asset = senderAcc.addAsset(
       ++this.state.assetCounter, name, asaDef
@@ -603,16 +610,11 @@ export class Ctx implements Context {
             creator: { ...senderAcc.account, name: senderAcc.address }
           };
 
-          let asa;
           if (txnParam.asaDef) {
-            asa = {
-              name: txnParam.asaName,
-              asaDef: txnParam.asaDef
-            };
+            this.addASADef(txnParam.asaName, txnParam.asaDef, fromAccountAddr, flags);
           } else {
-            asa = txnParam.asaName;
+            this.addAsset(txnParam.asaName, fromAccountAddr, flags);
           }
-          this.addAsset(asa, fromAccountAddr, flags);
           break;
         }
         case types.TransactionType.OptInASA: {

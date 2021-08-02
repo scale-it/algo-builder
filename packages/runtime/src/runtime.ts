@@ -330,22 +330,28 @@ export class Runtime {
   }
 
   /**
-   * Add Asset in Runtime
+   * Add Asset in Runtime using asa.yaml
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  addAsset (asa: string | { name: string, asaDef: types.ASADef }, flags: ASADeploymentFlags): number {
+  addAsset (asa: string, flags: ASADeploymentFlags): number {
     this.ctx.addAsset(asa, flags.creator.addr, flags);
     this.store = this.ctx.state;
 
-    let accounts;
-    if (typeof asa === "string") {
-      accounts = this.loadedAssetsDefs[asa].optInAccNames;
-      this.optInToASAMultiple(this.store.assetCounter, accounts);
-    } else {
-      accounts = asa.asaDef.optInAccNames;
-    }
-    this.optInToASAMultiple(this.store.assetCounter, accounts);
+    this.optInToASAMultiple(this.store.assetCounter, this.loadedAssetsDefs[asa].optInAccNames);
+    return this.store.assetCounter;
+  }
+
+  /**
+   * Add Asset in Runtime without using asa.yaml
+   * @param name ASA name
+   * @param flags ASA Deployment Flags
+   */
+  addASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): number {
+    this.ctx.addASADef(asa, asaDef, flags.creator.addr, flags);
+    this.store = this.ctx.state;
+
+    this.optInToASAMultiple(this.store.assetCounter, asaDef.optInAccNames);
     return this.store.assetCounter;
   }
 
