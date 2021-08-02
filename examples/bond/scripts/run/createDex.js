@@ -1,7 +1,7 @@
 const {
   executeTransaction, readGlobalStateSSC, balanceOf
 } = require('@algo-builder/algob');
-const { asaDef, fundAccount, tokenMap, optInTx } = require('./common/common.js');
+const { asaDef, fundAccount, tokenMap, optInTx, couponValue } = require('./common/common.js');
 const { types } = require('@algo-builder/web');
 
 /**
@@ -118,7 +118,7 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
       sign: types.SignType.SecretKey,
       fromAccount: creatorAccount,
       toAccountAddr: dexLsig.address(),
-      amount: 200,
+      amountMicroAlgos: Number(total) * Number(couponValue),
       payFlags: { totalFee: 1000 }
     }
   ];

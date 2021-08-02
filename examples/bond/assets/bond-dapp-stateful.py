@@ -215,7 +215,7 @@ def approval_program():
                 Gtxn[3].asset_amount() == App.globalGet(total),
                 Gtxn[3].asset_receiver() == Txn.accounts[2],
                 Gtxn[4].sender() == App.globalGet(bond_token_creator),
-                #Gtxn[4].amount() == Mul(App.globalGet(total), App.globalGet(coupon_value)),
+                Gtxn[4].amount() == Mul(App.globalGet(total), App.globalGet(coupon_value)),
                 Gtxn[4].receiver() == Txn.accounts[2]
             ),
         ),
