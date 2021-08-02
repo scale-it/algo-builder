@@ -47,7 +47,7 @@ await debugger.run({ tealFile: '4-gold-asa.teal' }); // 4-gold-asa.teal present 
 
 NOTE: To configure the chrome listener for a debugging session, read [Configure the Listener](https://github.com/algorand/go-algorand/blob/master/cmd/tealdbg/README.md#configure-the-listener).
 
-## Example Walkthrough
+## Example Walkthrough (Stateless TEAL)
 
 In this section we will try to debug a stateless transaction in [`/examples/asa`](https://github.com/scale-it/algo-builder/tree/master/examples/asa).
 
@@ -190,4 +190,100 @@ Now, we have a remote target set up in `chrome://inspect`
 Click on **inspect** and start playing with the teal code!
 ![image](https://user-images.githubusercontent.com/33264364/125868869-b55f8e4e-71e9-4742-91b9-75d56bf333d6.png)
 
-Script used in this walkthrough is `gold-delegated-lsig.debug.js` and can be found [here](https://github.com/scale-it/algo-builder/blob/support-tealdbg/examples/asa/scripts/transfer/gold-delegated-lsig.debug.js).
+Script used in this walkthrough is `gold-delegated-lsig.debug.js` and can be found [here](https://github.com/scale-it/algo-builder/blob/develop/examples/asa/scripts/transfer/gold-delegated-lsig.debug.js).
+
+## Example Walkthrough (Stateful TEAL)
+
+In this section we will try to debug a stateful transaction (in a group) in [`/examples/permissioned-token-freezing`](https://github.com/scale-it/algo-builder/tree/master/examples/permissioned-token-freezing).
+
+There are 2 smart contracts (1 stateful & 1 stateless):
+  * `poi-approval.teal`: Asserts a minimum level(stored in global state) set of a user. Rejects if assertion is failed.
+  * `clawback-escrow.py`: A clawback account that is a stateless contract (lsig).
+For more details, check the project [README](https://github.com/scale-it/algo-builder/blob/master/examples/permissioned-token-freezing/README.md).
+
+Setting up transaction group:
+```js
+// load app, asset info from checkpoint
+const appInfo = deployer.getApp('poi-approval.teal', 'poi-clear.teal');
+const assetInfo = deployer.asa.get('gold');
+
+// load logic signature
+const escrowParams = {
+  ASSET_ID: assetInfo.assetIndex,
+  APP_ID: appInfo.appID
+};
+const escrowLsig = await deployer.loadLogic('clawback-escrow.py', escrowParams);
+const escrowAddress = escrowLsig.address();
+
+const txGroup = [
+  {
+    type: types.TransactionType.CallNoOpSSC,
+    sign: types.SignType.SecretKey,
+    fromAccount: creator,
+    appID: appInfo.appID,
+    payFlags: { totalFee: 1000 },
+    appArgs: ['str:check-level'],
+    accounts: [bob.addr] //  AppAccounts
+  },
+  {
+    type: types.TransactionType.RevokeAsset,
+    sign: types.SignType.LogicSignature,
+    fromAccountAddr: escrowAddress,
+    recipient: bob.addr,
+    assetID: assetInfo.assetIndex,
+    revocationTarget: creator.addr,
+    amount: 1000,
+    lsig: escrowLsig,
+    payFlags: { totalFee: 1000 }
+  },
+  {
+    type: types.TransactionType.TransferAlgo,
+    sign: types.SignType.SecretKey,
+    fromAccount: creator,
+    toAccountAddr: escrowAddress,
+    amountMicroAlgos: 1000,
+    payFlags: { totalFee: 1000 }
+  }
+];
+```
+
+In this group:
+  * _tx0_ is an application call which checks minimum level of an account (in local state)
+  * _tx1_ is an asset transfer transaction using a clawback lsig (_clawback-escrow.py_)
+  * _tx2_ is an algo transfer transaction to pay fees of _tx1_
+
+NOTE: Account's level can be set by executing [/permissioned-token-freezing/scripts/transfer/set-clear-level.js](https://github.com/scale-it/algo-builder/blob/master/examples/permissioned-token-freezing/scripts/transfer/set-clear-level.js). If a min level is set, then the dry run transaction will _PASS_, otherwise the "app-call-messages" would be _REJECT_.
+
+### Dry Run
+
+To get dry run response of the transaction group, simply do:
+```js
+// reponse is dumped to assets/dryrun.json
+await debug.dryRunResponse('dryrun.json');
+```
+
+The dry run response has all 3 txns, with "app-call-messages"(PASS/REJECT) for _tx0_, and "logic-sig-messages" for _tx1_. Response will be `null` for _tx2_ (as this is a simple algo transfer tx).
+As explained above, the message could be PASS/REJECT depending on the minlevel set.
+
+### Start Debugger
+
+To debug a specific transaction in a group, pass the `groupIndex` parameter. Let's try to start the debugger for _tx0_:
+```js
+await debug.run({ tealFile: "poi-approval.teal", groupIndex: 0 });
+```
+
+That's it, the code above will start a live debugging session.
+![image](https://user-images.githubusercontent.com/33264364/127727303-72f9e91d-1013-46f7-a8ba-e2862e723608.png)
+Notice that in `Scope` we have `appGlobal`, `appLocals` as we upload the applications and ledger state while construcing request for `tealdbg debug`.
+
+To debug 2nd transaction (clawbackLsig) in group, update the `tealFile` & `groupIndex`:
+```js
+await debug.run({
+  tealFile: "clawback-escrow.py",
+  scInitParam: escrowParams, // template paramters to pyTEAL file
+  groupIndex: 1 // pass index of transaction to debug
+});
+```
+![image](https://user-images.githubusercontent.com/33264364/127727690-195c2e5f-c50d-456c-8948-3b076ba119b2.png)
+
+This walkthrough can be found in [`/examples/permissioned-token-freezing/scripts/transfer/transfer-asset.debug.js`](https://github.com/scale-it/algo-builder/blob/develop/examples/permissioned-token-freezing/scripts/transfer/transfer-asset.debug.js)

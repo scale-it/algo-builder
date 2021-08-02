@@ -22,6 +22,11 @@ async function run (runtimeEnv, deployer) {
   };
 
   await executeTransaction(deployer, tx);
+
+  /* Uncomment below code to start debugger  */
+  // await new Tealdbg(deployer, tx)
+  //   .run({ tealFile: "approval_program.teal" });
+
   globalState = await readGlobalStateSSC(deployer, creatorAccount.addr, applicationID);
   console.log(globalState);
 }

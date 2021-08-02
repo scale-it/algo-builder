@@ -40,13 +40,14 @@ async function run (runtimeEnv, deployer) {
   await debug.dryRunResponse('dryrun-fail.json', true); // passing true overwrites existing .json file
 
   /* uncomment below line to start debugger for failing scenario */
-  // await debug.run({ tealFile: "4-gold-asa.teal" });
+  await debug.run({ tealFile: '4-gold-asa.py' });
 
   // setting transaction group in execParams
   // notice that in debugger session Scope.gtxn has 2 transactions
   debug.execParams = [
     mkParam(masterAccount, john.addr, 4e6, {}),
-    txnParam
+    txnParam,
+    { ...txnParam, amount: 1500 }
   ];
   // await debug.run({ tealFile: "4-gold-asa.teal", groupIndex: 1 });
 }

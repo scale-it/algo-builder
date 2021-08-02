@@ -654,6 +654,7 @@ export type PromiseAny = Promise<any>; // eslint-disable-line @typescript-eslint
 
 export interface DebuggerContext {
   tealFile?: string
+  scInitParam?: unknown // if tealfile is ".py"
   groupIndex?: number
   mode?: rtypes.ExecutionMode
 }
