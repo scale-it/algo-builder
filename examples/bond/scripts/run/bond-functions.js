@@ -99,6 +99,7 @@ async function createDex (deployer, masterAccount, creatorAccount, managerAcc) {
       break;
     }
   }
+  console.log('Total issued: ', total);
 
   // balance of old bond tokens in issuer lsig
   const info = await balanceOf(deployer, issuerLsig.address(), asaInfo.assetIndex);
@@ -151,7 +152,7 @@ async function createDex (deployer, masterAccount, creatorAccount, managerAcc) {
       sign: types.SignType.SecretKey,
       fromAccount: creatorAccount,
       toAccountAddr: dexLsig.address(),
-      amount: total * 20,
+      amount: 200,
       payFlags: { totalFee: 1000 }
     }
   ];

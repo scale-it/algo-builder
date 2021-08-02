@@ -3,7 +3,7 @@ from pyteal import *
 def approval_program():
     """
     A stateful smart contract which will store the bond parameters:
-    issue price, nominal price, maturity date and coupon value, total amount.
+    issue price and coupon value, total amount.
     Additionally, the App will store a reference to the currently
     tradeable bond ASA and the current epoch number.
     """
@@ -12,10 +12,6 @@ def approval_program():
     app_manager = Bytes("app_manager")
     # Price at which bonds are sold by the issuer.
     issue_price = Bytes("issue_price")
-    # Bond nominal price.
-    nominal_price = Bytes("nominal_price")
-    # Date when a bond holder can redeem bonds to the issuer.
-    maturity_date = Bytes("maturity_date")
     # interest paid annually to the bond holders, 
     # equals to `coupon_rate x nominal_price`.
     coupon_value = Bytes("coupon_value")
@@ -47,17 +43,15 @@ def approval_program():
 
     # initialization
     # Expected arguments:
-    # [app_manager, issue_price,nominal_price, maturity_date,
+    # [app_manager, issue_price
     # coupon_value, current_bond, max_issuance, bond_token_creator]
     on_initialize = Seq([
         App.globalPut(app_manager, Txn.application_args[0]),
         App.globalPut(bond_token_creator, Txn.application_args[1]),
         App.globalPut(issue_price, Btoi(Txn.application_args[2])),
-        App.globalPut(nominal_price, Btoi(Txn.application_args[3])),
-        App.globalPut(maturity_date, Btoi(Txn.application_args[4])),
-        App.globalPut(coupon_value, Btoi(Txn.application_args[5])),
-        App.globalPut(current_bond, Btoi(Txn.application_args[6])),
-        App.globalPut(max_issuance, Btoi(Txn.application_args[7])),
+        App.globalPut(coupon_value, Btoi(Txn.application_args[3])),
+        App.globalPut(current_bond, Btoi(Txn.application_args[4])),
+        App.globalPut(max_issuance, Btoi(Txn.application_args[5])),
         App.globalPut(epoch, Int(0)),
         Return(Int(1))
     ])
@@ -165,9 +159,9 @@ def approval_program():
                 Gtxn[1].receiver() == Gtxn[0].sender(),
                 # verify buyback address is not paying fees
                 Gtxn[1].fee() == Int(0),
-                Gtxn[1].amount() == Mul(Gtxn[0].asset_amount(), App.globalGet(nominal_price)),
+                Gtxn[1].amount() == Mul(Gtxn[0].asset_amount(), Tmpl.Int("TMPL_NOMINAL_PRICE")),
                 # verify maturity date is passed
-                Global.latest_timestamp() > App.globalGet(maturity_date)
+                Global.latest_timestamp() > Tmpl.Int("TMPL_MATURITY_DATE")
             )
         ),
         Return(Int(1))
@@ -221,7 +215,7 @@ def approval_program():
                 Gtxn[3].asset_amount() == App.globalGet(total),
                 Gtxn[3].asset_receiver() == Txn.accounts[2],
                 Gtxn[4].sender() == App.globalGet(bond_token_creator),
-                Gtxn[4].amount() == Mul(App.globalGet(total), App.globalGet(coupon_value)),
+                #Gtxn[4].amount() == Mul(App.globalGet(total), App.globalGet(coupon_value)),
                 Gtxn[4].receiver() == Txn.accounts[2]
             ),
         ),

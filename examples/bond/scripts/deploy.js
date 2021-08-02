@@ -27,8 +27,6 @@ async function run (runtimeEnv, deployer) {
   // Bond-Dapp initialization parameters
   const appManager = convert.addressToPk(managerAcc.addr);
   const issuePrice = 'int:1000';
-  const nominalPrice = 'int:1000';
-  const maturityDate = convert.uint64ToBigEndian(Math.round(new Date().getTime() / 1000) + 1000);
   const couponValue = 'int:20';
   const currentBond = convert.uint64ToBigEndian(asaInfo.assetIndex);
   const asset = await deployer.getAssetByID(asaInfo.assetIndex);
@@ -39,12 +37,14 @@ async function run (runtimeEnv, deployer) {
     appManager,
     creator,
     issuePrice,
-    nominalPrice,
-    maturityDate,
     couponValue,
     currentBond,
     maxIssuance
   ];
+  const placeholderParam = {
+    TMPL_NOMINAL_PRICE: 1000,
+    TMPL_MATURITY_DATE: Math.round(new Date().getTime() / 1000) + 240
+  };
   // Create Application
   const bondAppInfo = await deployer.deployApp(
     'bond-dapp-stateful.py',
@@ -55,7 +55,7 @@ async function run (runtimeEnv, deployer) {
       globalInts: 8,
       globalBytes: 15,
       appArgs: appArgs
-    }, {});
+    }, {}, placeholderParam);
   console.log(bondAppInfo);
 
   // Initialize issuer lsig with bond-app ID
