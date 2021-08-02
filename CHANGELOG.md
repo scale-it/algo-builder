@@ -3,7 +3,7 @@
 ## unreleased
 
 ### Improvements
-+ Added github workflows/examples.yaml to execute [`/examples`](https://github.com/scale-it/algo-builder/tree/master/examples) on a private net, on push.
++ Added github workflows/examples.yaml to execute [`/examples`](https://github.com/scale-it/algo-builder/tree/master/examples) on a private net, on pushing new commit to `develop`/`master` branch OR creating a pull request to these branches as base.
 + Moved [error](http://algobuilder.dev/api/runtime/modules/errors.html) lists, BuilderError, [mkTransaction](http://algobuilder.dev/api/runtime/modules.html#mktransaction) to `@algo-builder/web` package. Re export `mkTransaction`, `errors` in algob and runtime from `@algo-builder/web` for backward compatibility.
 + Updated `algob init` to initialize a typescript project as well by passing `--typescript` flag. Usage: `algob init <location> --typescript`.
 + Support pooled transaction fees in algob and runtime. Added tests.
@@ -13,8 +13,9 @@
 + Updates to `algob sign-multisig`:
     * Creating a new multisigned transaction (requires multisig metadata: `v, thr, addrs`)
     * Support for signing in a group transaction (loaded from file).
+    * Check usage in our [guide](http://algobuilder.dev/guide/sign-multisig.html)
 
-### Dapp templates.
+### Dapp templates
 + Added new package `@algo-builder/web`. It can be used in Dapps to interact with ASAs and Stateful applications. Main features:
     + Compatible with [`algosigner`](https://github.com/PureStake/algosigner).
     + Support algob's high level function:`executeTransaction` in a webapp as well (note: currently `deployASA` & `deployApp` transactions are not supported, as we don't load data from checkpoints OR `/assets`). Group transactions are also supported.
