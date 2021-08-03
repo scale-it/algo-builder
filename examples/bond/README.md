@@ -30,3 +30,33 @@ Note: In this example we have constant `coupon_value` for all the epochs, we can
 ## Spec document
 
 App template [specification](https://paper.dropbox.com/doc/Algorand-Bond-Template--BOU8bTQSnmRNk23KK8McWwxXAg-hzI7C681Soo2sr6iyGFzg).
+
+## Deploy script
+
+We have deploy script in `scripts/deploy`, This script deploys initial bond token, deploys bond dapp application and updates issuer address in bond-dapp contract.
+
+## Run script
+
+In `scripts/run` folder we have scripts with the following files:
+
+ - `run/run.js`: It controls all the scripts and maintain order of execution.
+ - `run/issue.js`: This is first script, in this script tokens are issued to issuer from token creator.
+ - `run/epoch0.js`: In this script, `elon` buys 10 bond tokens and sell 2 bond tokens to `bob` for 2020 Algos.
+ - `run/createDex.js`: This script creates ith Dex, burn B_i bond tokens, issue B_i+1 bond tokens.
+ - `run/redeem.js`: This script redeems tokens from a given dex id.
+ - `run/epoch1.js`: `elon` redeems 8 bond tokens and buys 4 more from dex.
+ - `run/createBuyback.js`: Creates a buyback logic signature address.
+ - `run/exit.js`: Buyer can exit their bond tokens using this script.
+ - `run/common/accounts.js`: Loads accounts
+ - `run/common/common.js`: contains common functions and constants.
+ 
+ - In run script we have the following scenario:
+    - Issue initial bond tokens to issuer
+    - In epoch_0 elon buys 10 bonds
+    - In epoch 0 elon sells 2 bonds to bob for 2020 ALGO (in a group transaction)
+    - Manager creates dex 1
+    - Elon redeems her bonds(8), Elon buys 4 more bonds (so he will have 12 bonds in total)
+    - Manager creates dex 2
+    - Elon redeems all this bonds.
+    - Bob redeems his bonds_1 and then bonds_2 (so going through the previous dex)
+    - Maturity period is set to 240 seconds(4 min) from the time of deployment of contract. At maturity manager creates and funds buyback and both elon and bob exit all their tokens (12 and 2 respectively).

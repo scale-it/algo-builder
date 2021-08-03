@@ -6,9 +6,11 @@ const { types } = require('@algo-builder/web');
 
 /**
  * Creates DEX_i lsig, burn B_i tokens, issue B_i+1 tokens
- * @param {Account} masterAccount
- * @param {Account} creatorAccount
- * @param {Account} managerAcc
+ * @param  masterAccount
+ * @param  creatorAccount
+ * @param managerAcc
+ * @param i create ith dex
+ * i must be >= 1
  */
 exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
   if (i < 1) {

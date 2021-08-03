@@ -12,6 +12,7 @@ const { exitBuyer } = require('./exit.js');
 const { issue } = require('./issue.js');
 const { redeem } = require('./redeem.js');
 
+// Detailed scenario is described in README.md
 async function run (runtimeEnv, deployer) {
   const oldBond = await getAssetID('bond-token-0', deployer);
   tokenMap.set('bond-token-0', oldBond);
@@ -19,24 +20,28 @@ async function run (runtimeEnv, deployer) {
   const account = await accounts(deployer);
   await fundAccount(deployer, account.bob.addr);
   await fundAccount(deployer, account.elon.addr);
-  // epoch0 -> createDex -> epoch1 -> createDex -> redeem -> createBuyback -> exit
 
+  // Issue tokens to issuer
   await issue(deployer);
 
+  // elon buys 10 bond tokens and sell 2 bond tokens to bob for 2020 Algos
   await epoch0(deployer);
+
   // Create DEX, burn B_0, issue B_1
   await createDex(deployer, account.creator, account.manager, 1);
 
+  // Elon redeems 8 bond tokens and buys 4 more from new dex
   await epoch1(deployer);
 
   // Create DEX, burn B_1, issue B_2
   await createDex(deployer, account.creator, account.manager, 2);
 
-  // Redeem all 12 bonds from elon
+  // Redeem all 12 bonds from elon from dex 2
   await redeem(deployer, account.elon, account.manager, 2, 12);
 
-  // Redeem bob's bonds
+  // Redeem bob's bonds from dex 1
   await redeem(deployer, account.bob, account.manager, 1, 2);
+  // Redeem bob's bonds from dex 2
   await redeem(deployer, account.bob, account.manager, 2, 2);
 
   // create buyback
