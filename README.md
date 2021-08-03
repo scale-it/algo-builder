@@ -236,4 +236,4 @@ To execute and watch tests in all workspaces, run the following from the root di
 yarn run test:watch
 ```
 
-NOTE: for the moment test watching in `packages/algob` not stable because of tear down issues in some test suites. We advise to not use test watcher in `packages/algob`.
+NOTE: For the moment test watching in `packages/algob` is not stable because of tear down issues in some test suites. We advise to **not use** test watcher in `packages/algob`.
