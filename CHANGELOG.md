@@ -15,6 +15,7 @@
     * Support for signing in a group transaction (loaded from file).
     * Check usage in our [guide](http://algobuilder.dev/guide/sign-multisig.html)
 + Deploy ASA without using `/assets/asa.yaml`
++ Added `yarn run test:watch` command. NOTE: it will spawn multiple process in the same terminal session. So if you want to stop the all processes the best solution is to kill the terminal session.
 
 ### Dapp templates
 + Added new package `@algo-builder/web`. It can be used in Dapps to interact with ASAs and Stateful applications. Main features:
