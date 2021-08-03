@@ -1,4 +1,4 @@
-import { overrideASADef, types as rtypes } from "@algo-builder/runtime";
+import { overrideASADef, parseASADef, types as rtypes, validateOptInAccNames } from "@algo-builder/runtime";
 import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
 import type { EncodedMultisig, LogicSig, modelsv2 } from "algosdk";
 import * as algosdk from "algosdk";
@@ -469,6 +469,11 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
     this.txWriter.push(message, txConfirmation);
   }
 
+  /**
+   * Creates and deploys ASA using asa.yaml.
+   * @name  ASA name - deployer will search for the ASA in the /assets/asa.yaml file
+   * @flags  deployment flags
+   */
   async deployASA (
     name: string,
     flags: rtypes.ASADeploymentFlags,
@@ -484,7 +489,23 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
           asaName: name
         });
     }
+    return await this.deployASADef(name, asaDef, flags);
+  }
+
+  /**
+   * Creates and deploys ASA without using asa.yaml.
+   * @name ASA name
+   * @asaDef ASA definitions
+   * @flags deployment flags
+   */
+  async deployASADef (
+    name: string,
+    asaDef: wtypes.ASADef,
+    flags: rtypes.ASADeploymentFlags
+  ): Promise<rtypes.ASAInfo> {
     this.assertNoAsset(name);
+    parseASADef(asaDef);
+    validateOptInAccNames(this.accountsByName, asaDef);
     let asaInfo = {} as rtypes.ASAInfo;
     try {
       asaInfo = await this.algoOp.deployASA(
@@ -691,6 +712,16 @@ export class DeployerRunMode extends DeployerBasicMode implements Deployer {
   async deployASA (_name: string, _flags: rtypes.ASADeploymentFlags): Promise<rtypes.ASAInfo> {
     throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
       methodName: "deployASA"
+    });
+  }
+
+  async deployASADef (
+    name: string,
+    asaDef: wtypes.ASADef,
+    flags: rtypes.ASADeploymentFlags
+  ): Promise<rtypes.ASAInfo> {
+    throw new BuilderError(ERRORS.BUILTIN_TASKS.DEPLOYER_EDIT_OUTSIDE_DEPLOY, {
+      methodName: "deployASADef"
     });
   }
 

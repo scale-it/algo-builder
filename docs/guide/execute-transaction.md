@@ -42,6 +42,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
 
 ### [Deploy ASA](https://algobuilder.dev/api/algob/modules/runtime.types.html#deployasaparam)
 
+To deploy an ASA using `asa.yaml`:
 ```js
   {
     type: TransactionType.DeployASA,
@@ -50,6 +51,27 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     asaName: 'gold',
     payFlags: { totalFee: fee }
   }
+```
+
+To deploy an ASA without using `asa.yaml`:
+
+```js 
+  {
+    type: types.TransactionType.DeployASA,
+    sign: types.SignType.SecretKey,
+    fromAccount: john.account,
+    asaName: 'silver-12',
+    asaDef: {
+      total: 10000,
+      decimals: 0,
+      defaultFrozen: false,
+      unitName: "SLV",
+      url: "url",
+      metadataHash: "12312442142141241244444411111133",
+      note: "note"
+    },
+    payFlags: {}
+  };
 ```
 
 ### [Opt-In to ASA](https://algobuilder.dev/api/algob/modules/runtime.types.html#optinasaparam)

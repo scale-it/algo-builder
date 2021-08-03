@@ -20,7 +20,11 @@ function mkASA (): wtypes.ASADef {
     total: 1,
     decimals: 1,
     unitName: 'ASA',
-    defaultFrozen: false
+    defaultFrozen: false,
+    clawback: undefined,
+    freeze: undefined,
+    manager: undefined,
+    reserve: undefined
   };
 }
 
@@ -418,5 +422,23 @@ describe("DeployerDeployMode", () => {
       assetDef: mkASA(),
       deleted: false
     }]]));
+  });
+
+  it("Should deploy asa without using asa.yaml", async () => {
+    const deployer = new DeployerDeployMode(deployerCfg);
+    const asaDef = {
+      total: 10000,
+      decimals: 0,
+      defaultFrozen: false,
+      unitName: "SLV",
+      url: "url",
+      metadataHash: "12312442142141241244444411111133",
+      note: "note"
+    };
+    await deployer.deployASADef("silver-122", asaDef, { creator: deployer.accounts[0] });
+
+    const res = deployer.getASAInfo("silver-122");
+    assert.isDefined(res);
+    assert.deepEqual(res.assetDef, asaDef);
   });
 });
