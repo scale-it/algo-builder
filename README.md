@@ -231,7 +231,9 @@ To execute tests in all workspaces, run the following from the root directory:
 yarn run test
 ```
 
-To execute and watch tests in all workspaces, run the following from the root directory. Note: it will spawn multiple process in the same terminal session. So if you want to stop the all processes the best solution is to kill the terminal session.
+To execute and watch tests in all workspaces, run the following from the root directory. Note: it will spawn multiple process in the same terminal session. So if you want to stop the all processes you can either call `pkill -f mocha` or kill the terminal session.
 ```
 yarn run test:watch
 ```
+
+NOTE: for the moment test watching in `packages/algob` not stable because of tear down issues in some test suites. We advise to not use test watcher in `packages/algob`.
