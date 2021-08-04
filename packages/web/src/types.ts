@@ -98,7 +98,7 @@ export interface AppOptionalFlags {
 export type ExecParams = AlgoTransferParam | AssetTransferParam | AppCallsParam |
 ModifyAssetParam | FreezeAssetParam | RevokeAssetParam |
 DestroyAssetParam | DeployASAParam | DeployAppParam |
-OptInToAppParam | OptInASAParam | UpdateAppParam;
+OptInASAParam | UpdateAppParam;
 
 export enum SignType {
   SecretKey,
@@ -150,7 +150,8 @@ export type BasicParams = Sign & {
 export type DeployASAParam = BasicParams & {
   type: TransactionType.DeployASA
   asaName: string
-  asaDef?: Partial<ASADef>
+  asaDef?: ASADef
+  overrideAsaDef?: Partial<ASADef>
 };
 
 export type DeployAppParam = BasicParams & AppOptionalFlags & {
@@ -174,8 +175,9 @@ export type UpdateAppParam = BasicParams & AppOptionalFlags & {
   clearProg?: Uint8Array
 };
 
-export type OptInToAppParam = BasicParams & AppOptionalFlags & {
-  type: TransactionType.OptInToApp
+export type AppCallsParam = BasicParams & AppOptionalFlags & {
+  type: TransactionType.CallNoOpSSC | TransactionType.ClearApp |
+  TransactionType.CloseApp | TransactionType.DeleteApp | TransactionType.OptInToApp
   appID: number
 };
 
@@ -225,12 +227,6 @@ export type AssetTransferParam = BasicParams & {
   toAccountAddr: AccountAddress
   amount: number | bigint
   assetID: number | string
-};
-
-export type AppCallsParam = BasicParams & AppOptionalFlags & {
-  type: TransactionType.CallNoOpSSC | TransactionType.ClearApp |
-  TransactionType.CloseApp | TransactionType.DeleteApp
-  appID: number
 };
 
 export type ASADef = z.infer<typeof ASADefSchema>;

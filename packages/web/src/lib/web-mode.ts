@@ -47,13 +47,39 @@ export class WebMode {
   }
 
   /**
-   * Sender transaction to network
+   * Send transaction to network
    * @param signedTxn signed transaction
    */
   async sendTransaction (signedTxn: any): Promise<JsonPayload> {
     return await this.algoSigner.send({
       ledger: this.chainName,
       tx: signedTxn.blob
+    });
+  }
+
+  /**
+   * Send group transaction to network
+   * @param signedTxs signed transaction group
+   */
+  async sendGroupTransaction (signedTxs: any): Promise<JsonPayload> {
+    // The AlgoSigner.signTxn() response would look like '[{ txID, blob }, null]'
+    // Convert first transaction to binary from the response
+    const signedTxBinary: Uint8Array[] = signedTxs.map((txn: {txID: string, blob: string}) => {
+      return this.algoSigner.encoding.base64ToMsgpack(txn.blob);
+    });
+
+    // Merge transaction binaries into a single Uint8Array
+    const flatNumberArray = signedTxBinary.reduce((acc: number[], curr) => {
+      acc.push(...curr);
+      return acc;
+    }, []);
+    const combinedBinaryTxns = new Uint8Array(flatNumberArray);
+
+    // Convert the combined array values back to base64
+    const combinedBase64Txns = this.algoSigner.encoding.msgpackToBase64(combinedBinaryTxns);
+    return await this.algoSigner.send({
+      ledger: this.chainName,
+      tx: combinedBase64Txns
     });
   }
 
@@ -102,6 +128,7 @@ export class WebMode {
   async executeTransaction (execParams: ExecParams | ExecParams[]):
   Promise<JsonPayload> {
     let signedTxn;
+    let txInfo;
     let txns: Transaction[] = [];
     if (Array.isArray(execParams)) {
       if (execParams.length > 16) { throw new Error("Maximum size of an atomic transfer group is 16"); }
@@ -120,15 +147,16 @@ export class WebMode {
       const toBeSignedTxns = base64Txs.map((txn: string) => {
         return { txn: txn };
       });
-      signedTxn = this.signTransaction(toBeSignedTxns);
+      signedTxn = await this.signTransaction(toBeSignedTxns);
+      txInfo = await this.sendGroupTransaction(signedTxn);
     } else {
       const txn = await mkTransaction(execParams, await this.getSuggestedParams(execParams.payFlags));
 
       const toBeSignedTxn = this.algoSigner.encoding.msgpackToBase64(txn.toByte());
-      signedTxn = this.signTransaction([{ txn: toBeSignedTxn }]);
+      signedTxn = await this.signTransaction([{ txn: toBeSignedTxn }]);
+      txInfo = await this.sendTransaction(signedTxn[0]);
     }
 
-    const txInfo = await this.sendTransaction(signedTxn);
     if (txInfo && typeof txInfo.txId === "string") {
       return await this.waitForConfirmation(txInfo.txId);
     }

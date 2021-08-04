@@ -28,9 +28,6 @@
   ],
   "main": "build/index.js",
   "types": "build/index.d.ts",
-  "bin": {
-    "algod-js": "build/algod.js"
-  },
   "engines": {
     "node": ">=14.11.0"
   },
@@ -39,6 +36,7 @@
     "lint:fix": "eslint --fix --ext .js,.ts src test",
     "lint:unix": "eslint --format unix --ext .js,.ts src test",
     "test": "mocha",
+    "test:watch:p": "mocha -w &",
     "coverage": "nyc ../../node_modules/mocha/bin/mocha",
     "build": "tsc --build .",
     "build:watch": "tsc -w -p .",
@@ -64,6 +62,7 @@
   },
   "dependencies": {
     "@algo-builder/web": "0.0.1",
+    "@nodelib/fs.walk": "^1.2.8",
     "@types/lodash.clonedeep": "^4.5.6",
     "algosdk": "scale-it/js-algorand-sdk.git#0f9d09e8d0bddc37145013e538b3ddfd001d364f",
     "glob": "^7.1.6",

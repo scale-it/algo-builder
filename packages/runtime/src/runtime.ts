@@ -330,15 +330,28 @@ export class Runtime {
   }
 
   /**
-   * Add Asset in Runtime
+   * Add Asset in Runtime using asa.yaml
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  addAsset (name: string, flags: ASADeploymentFlags): number {
-    this.ctx.addAsset(name, flags.creator.addr, flags);
-
+  addAsset (asa: string, flags: ASADeploymentFlags): number {
+    this.ctx.addAsset(asa, flags.creator.addr, flags);
     this.store = this.ctx.state;
-    this.optInToASAMultiple(name, this.store.assetCounter);
+
+    this.optInToASAMultiple(this.store.assetCounter, this.loadedAssetsDefs[asa].optInAccNames);
+    return this.store.assetCounter;
+  }
+
+  /**
+   * Add Asset in Runtime without using asa.yaml
+   * @param name ASA name
+   * @param flags ASA Deployment Flags
+   */
+  addASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): number {
+    this.ctx.addASADef(asa, asaDef, flags.creator.addr, flags);
+    this.store = this.ctx.state;
+
+    this.optInToASAMultiple(this.store.assetCounter, asaDef.optInAccNames);
     return this.store.assetCounter;
   }
 
@@ -347,8 +360,7 @@ export class Runtime {
    * @param name Asset name
    * @param assetID Asset Index
    */
-  optInToASAMultiple (name: string, assetID: number): void {
-    const accounts = this.loadedAssetsDefs[name].optInAccNames;
+  optInToASAMultiple (assetID: number, accounts?: string[]): void {
     if (accounts === undefined) {
       return;
     }
@@ -600,7 +612,7 @@ export class Runtime {
     for (const txn of txnParameters) {
       switch (txn.type) {
         case types.TransactionType.DeployASA: {
-          txn.asaDef = this.loadedAssetsDefs[txn.asaName];
+          if (txn.asaDef === undefined) txn.asaDef = this.loadedAssetsDefs[txn.asaName];
           break;
         }
         case types.TransactionType.DeployApp: {

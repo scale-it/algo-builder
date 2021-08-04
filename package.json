@@ -39,6 +39,7 @@
     "build:apidocs-push": "yarn workspaces run build:docs; git add docs; git ci -am 'generating api docs' -n; HUSKY=0 git push -f",
     "watch": "tsc --build --watch packages/runtime packages/algob",
     "test": "yarn workspaces run test",
+    "test:watch": "yarn workspaces run test:watch:p",
     "lint": "yarn workspaces -p run lint",
     "lint:fix": "yarn workspaces -p run lint:fix",
     "coverage": "yarn workspaces -p run coverage",
