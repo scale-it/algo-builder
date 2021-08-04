@@ -55,10 +55,10 @@
 
 
 ### Bug fixes
-
-`web`:
-+ Added missing `fromAccount?` attribute to the `Sign` type.
-+ Remove TxParams type from runtime package(it is duplicated in runtime)
+* Fixed dependency [issues](https://github.com/scale-it/algo-builder/issues/433) while installing algob using `yarn add @algo-builder/algob` & `npm install @algo-builder/algob`.
+* `web`:
+    + Added missing `fromAccount?` attribute to the `Sign` type.
+    + Remove TxParams type from runtime package(it is duplicated in runtime)
 
 
 ## v1.1.1 2021-07-12
