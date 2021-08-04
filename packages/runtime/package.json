@@ -28,9 +28,6 @@
   ],
   "main": "build/index.js",
   "types": "build/index.d.ts",
-  "bin": {
-    "algod-js": "build/algod.js"
-  },
   "engines": {
     "node": ">=14.11.0"
   },
