@@ -145,7 +145,7 @@ recreate-indexer-db:
 	@sudo -u postgres psql -c "grant all privileges on database $(POSTGRES_DBNAME) to $(POSTGRES_UNAME)"
 
 # Sets up indexer in local mode (to be used with private-net)
-start-indexer: recreate-indexer-db
+start-indexer:
 	@if ! [ -d ./node_data ] ;  then echo "./node_data directory does not exist - please create a new private network first" ; false; fi
 # https://developer.algorand.org/docs/run-a-node/setup/indexer/#extract-the-binaries-to-a-specific-directory
 	mkdir -p $(INDEXER_PATH)
@@ -156,6 +156,7 @@ start-indexer: recreate-indexer-db
 # Start indexer by providing database connection info and path to algod node
 	$(INDEXER_PATH)/algorand-indexer_linux_amd64_2.5.0/algorand-indexer daemon -P "host=localhost port=5432 user=$(POSTGRES_UNAME) password=$(POSTGRES_PASS) dbname=$(POSTGRES_DBNAME) sslmode=disable" --algod=./node_data/PrimaryNode
 
+recreate-indexer: recreate-indexer-db start-indexer
 
 remove-indexer:
 # remove local indexer directory
