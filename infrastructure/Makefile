@@ -139,6 +139,10 @@ setup-postgresql:
 # List databases
 	@sudo -u postgres psql -c "\l"
 
+recreate-indexer-db:
+	@sudo -u postgres psql -c "DROP DATABASE IF EXISTS $(POSTGRES_DBNAME);"
+	@sudo -u postgres createdb $(POSTGRES_DBNAME)
+	@sudo -u postgres psql -c "grant all privileges on database $(POSTGRES_DBNAME) to $(POSTGRES_UNAME)"
 
 # Sets up indexer in local mode (to be used with private-net)
 start-indexer:
@@ -152,6 +156,7 @@ start-indexer:
 # Start indexer by providing database connection info and path to algod node
 	$(INDEXER_PATH)/algorand-indexer_linux_amd64_2.5.0/algorand-indexer daemon -P "host=localhost port=5432 user=$(POSTGRES_UNAME) password=$(POSTGRES_PASS) dbname=$(POSTGRES_DBNAME) sslmode=disable" --algod=./node_data/PrimaryNode
 
+recreate-indexer: recreate-indexer-db start-indexer
 
 remove-indexer:
 # remove local indexer directory
