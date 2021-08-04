@@ -139,13 +139,13 @@ setup-postgresql:
 # List databases
 	@sudo -u postgres psql -c "\l"
 
-reset-db:
+recreate-db:
 	@sudo -u postgres psql -c "DROP DATABASE IF EXISTS $(POSTGRES_DBNAME);"
 	@sudo -u postgres createdb $(POSTGRES_DBNAME)
 	@sudo -u postgres psql -c "grant all privileges on database $(POSTGRES_DBNAME) to $(POSTGRES_UNAME)"
 
 # Sets up indexer in local mode (to be used with private-net)
-start-indexer: reset-db
+start-indexer: recreate-db
 	@if ! [ -d ./node_data ] ;  then echo "./node_data directory does not exist - please create a new private network first" ; false; fi
 # https://developer.algorand.org/docs/run-a-node/setup/indexer/#extract-the-binaries-to-a-specific-directory
 	mkdir -p $(INDEXER_PATH)
