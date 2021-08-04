@@ -151,7 +151,7 @@ Following make jobs are provided:
 
 The Indexer primarily provides two services: loading a PostgreSQL database with ledger data and supplying a REST API to search this ledger data. For this purpose, setting up indexer on local consists of two steps:
 1.  `make setup-postgresql`: Setting up [`postgresql`](https://www.postgresql.org/) database on your local machine.
-2. `make start-indexer`: Start indexer by connecting to local-db and your private-net algod node. NOTE: it resets (drop & create again) the database before starting.
+2. `make recreate-indexer`: Start indexer by connecting to local-db and your private-net algod node. NOTE: it resets (drop & create again) the database before starting.
 
 #### Step1: Setup postgres-db
 
@@ -170,7 +170,7 @@ Please note that this installation is currently compatible with Linux based dist
 
 **Note:** Make sure you have setup a private network up and running (using `make setup-private-net` or Sandbox). For more instructions check [setting up a local node](./#setting-up-a-local-node) section.
 
-After setting up the database, you can use `make start-indexer` to add local indexer binary (downloaded in `~/.algorand-indexer-download`) and start the indexer by connecting to database and your local algod node. Note that the initial loading of the Indexer Database could take some time.
+After setting up the database, you can use `make recreate-indexer` to add local indexer binary (downloaded in `~/.algorand-indexer-download`) and start the indexer by connecting to database and your local algod node. Note that the initial loading of the Indexer Database could take some time.
 
 After setting up indexer, open a new terminal and try typing:
 ```bash
