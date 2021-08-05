@@ -18,10 +18,12 @@ def approval_program():
     issuer_address = Bytes("issuer_address")
     # Epoch is the current period for paying the coupon.
     # For example: When bond coupons are paid every 6 month,
-    # then initially the epoch is 0. After 6 months bond holders
-    # receive a coupon for interest payment and start epoch 1.
-    # After another 6 months bond holders receive a new coupon for
-    # interest payment and we start epoch 2…
+    # then initially the epoch is 0. After 6 months epoch 1 starts and
+    # bond holders can redeem their bonds to get a coupon payment 
+    # and receive a bond for the next epoch. We do it to prohibit double
+    # spent of coupons.  a coupon for interest payment and start epoch 1.
+    # After another 6 months bond holders epoch 2 starts and bond holders
+    # can repeat the process.
     epoch = Bytes("epoch")
     # Total number of sold bond tokens
     total = Bytes("total")
@@ -32,7 +34,7 @@ def approval_program():
     # Bond token creator
     bond_token_creator = Bytes("bond_token_creator")
 
-    # verify rekey_to and close_rem_to are set as zero_address
+    # verify rekey_to and close_rem_to are not allowed (set to zero)
     basic_checks = And(
         # Always verify that the RekeyTo property of any transaction is set to the ZeroAddress
         # unless the contract is specifically involved in a rekeying operation.
@@ -86,10 +88,10 @@ def approval_program():
         Return(Int(1))
     ])
 
-    # Issue bond tokens to the issuer.
+    # Issue new bond tokens to provide a supply to the issuer.
     # Expected arguments: [Bytes("issue")]
     on_issue = Seq([
-        # assert sender is bond token creator and receiver is issuer address
+        # assert sender is bond token creator and receiver is the issuer address
         Assert(
             And(
                 Gtxn[0].type_enum() == TxnType.AssetTransfer,

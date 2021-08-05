@@ -17,7 +17,7 @@ When creating a bond the following information must be recorded:
 We use functional notation to describe use cases we will implement.
 
 - `issue(amount)` — issue new bonds to the issuer account.
-- `burn(amount)` — issuer can burn not sold bonds.
+- `burn(amount)` — issuer can burn unsold bonds.
 - `buy(amount)`  — investor will buy bond from the issuer account by paying 
         `amount×issue_price` (in ALGO).
 - `exchange(price, amount)` — group of transactions including a buyer transaction paying amount×price of ALGO to the seller (signed by buyer), and seller transaction sending amount of bonds to the buyer (signed by seller). 
