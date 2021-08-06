@@ -5,7 +5,8 @@ const { asaDef, fundAccount, tokenMap, optInTx, couponValue } = require('./commo
 const { types } = require('@algo-builder/web');
 
 /**
- * Creates DEX_i lsig, burn B_i tokens, issue B_i+1 tokens
+ * This function creates DEX_i lsig, burn B_i tokens, issue B_i+1 tokens.
+ * where i is the ith bond, only app manager is allowed to do this operation
  * @param  masterAccount
  * @param  creatorAccount
  * @param managerAcc

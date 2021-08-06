@@ -12,7 +12,22 @@ const { exitBuyer } = require('./exit.js');
 const { issue } = require('./issue.js');
 const { redeem } = require('./redeem.js');
 
-// Detailed scenario is described in README.md
+/**
+ * In a run script example we present the following scenario:
+ *  - Issue initial bond tokens to the issuer
+ *  - In epoch_0 elon buys 10 bonds
+ *  - In epoch 0 elon sells 2 bonds to bob for 2020 ALGO (in a group transaction)
+ *  - Manager creates dex 1
+ *  - Elon redeems his bonds (8), Elon buys 4 more bonds (so he will have 12 bonds in total)
+ *  - Manager creates dex 2
+ *  - Elon redeems all his bonds.
+ *  - Bob redeems his bonds from epoch 0 and 1
+ *  - Maturity period is set to 240 seconds(4 min) after the contract deployment.
+ *    At maturity, manager creates and funds buyback and both elon and bob
+ *    can exit all their tokens (12 and 2 respectively).
+ * @param runtimeEnv
+ * @param deployer
+ */
 async function run (runtimeEnv, deployer) {
   const oldBond = await getAssetID('bond-token-0', deployer);
   tokenMap.set('bond-token-0', oldBond);

@@ -3,6 +3,10 @@ const {
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 
+/**
+ * In this function tokens are issued to issuer from token creator.
+ * @param deployer deployer
+ */
 exports.issue = async function (deployer) {
   const creatorAccount = deployer.accountsByName.get('john');
   const managerAcc = deployer.accountsByName.get('alice');

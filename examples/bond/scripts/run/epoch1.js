@@ -6,6 +6,11 @@ const { accounts } = require('./common/accounts.js');
 const { issuePrice, tokenMap } = require('./common/common.js');
 const { redeem } = require('./redeem.js');
 
+/**
+ * In this function Elon redeems his 8 bonds, and
+ * Elon buys 4 more bonds (so he will have 12 bonds in total)
+ * @param deployer deployer object
+ */
 exports.epoch1 = async function (deployer) {
   const account = await accounts(deployer);
 

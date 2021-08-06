@@ -1,3 +1,7 @@
+/**
+ * This function loads accounts from deployer
+ * @param deployer deployer object
+ */
 exports.accounts = async function (deployer) {
   return {
     master: await deployer.accountsByName.get('master-account'),

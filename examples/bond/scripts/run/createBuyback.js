@@ -5,7 +5,8 @@ const { types } = require('@algo-builder/web');
 const { tokenMap, optInTx, fundAccount } = require('./common/common');
 
 /**
- * Create buyback lsig and store it's address in bond-dapp
+ * This function creates buyback lsig and store it's address in bond-dapp(stateful contract)
+ * Only app manager is allowed to do this operation
  * @param deployer deployer object
  * @param managerAcc Manager account
  * @param n nth bond token

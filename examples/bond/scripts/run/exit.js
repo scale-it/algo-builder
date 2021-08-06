@@ -4,7 +4,14 @@ const {
 const { types } = require('@algo-builder/web');
 const { tokenMap, nominalPrice } = require('./common/common');
 
-// Buyer's exit from bond
+/**
+ * In this function buyer exits from all their bonds in exchange of algos
+ * @param deployer deployer object
+ * @param managerAcc manager account
+ * @param buyerAccount buyer account
+ * @param n nth bond
+ * @param amount amount of bond tokens
+ */
 exports.exitBuyer = async function (deployer, managerAcc, buyerAccount, n, amount) {
   const appInfo = deployer.getApp('bond-dapp-stateful.py', 'bond-dapp-clear.py');
   const bondToken = tokenMap.get('bond-token-' + String(n));
