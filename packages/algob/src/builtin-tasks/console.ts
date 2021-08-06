@@ -42,7 +42,7 @@ async function startConsole (runtimeEnv: RuntimeEnv): Promise<void> {
   const algodClient = createClient(runtimeEnv.network);
   await new Promise<void>((resolve, reject) => {
     console.log("★", chalk.cyan(" Welcome to algob console"), "★");
-    console.log(chalk.green('Try typing: config'));
+    console.log(chalk.green('Try typing: config\n'));
 
     const server = repl.start({
       prompt: 'algob> ',
