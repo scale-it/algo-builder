@@ -186,7 +186,7 @@ describe('Bond token Tests', function () {
     syncAccounts();
     assert.equal(issuerAddress.getAssetHolding(currentBondIndex)?.amount, 1000000n);
 
-    // epoch_0 elon buys 10 bonds
+    // at epoch_0 elon buys 10 bonds
     runtime.optIntoASA(currentBondIndex, elon.address, {});
     runtime.optInToApp(elon.address, applicationId, {}, {});
     let amount = 10;
