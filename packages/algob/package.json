@@ -1,6 +1,6 @@
 {
   "name": "@algo-builder/algob",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "author": "Robert Zaremba (https://github.com/robert-zaremba)",
   "contributors": [
     {
@@ -64,7 +64,7 @@
     "sample-project/"
   ],
   "devDependencies": {
-    "@algo-builder/web": "0.0.1",
+    "@algo-builder/web": "1.2.0",
     "@types/chai": "^4.2.12",
     "@types/debug": "^4.1.5",
     "@types/deep-equal": "^1.0.1",
@@ -84,7 +84,7 @@
     "ts-mocha": "^8.0.0"
   },
   "dependencies": {
-    "@algo-builder/runtime": "^1.1.0",
+    "@algo-builder/runtime": "^1.2.0",
     "algosdk": "scale-it/js-algorand-sdk.git#0f9d09e8d0bddc37145013e538b3ddfd001d364f",
     "chalk": "^4.1.0",
     "debug": "^4.1.1",

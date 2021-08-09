@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v1.2.0 2021-08-07
+## v1.2.0 2021-08-09
 
 ### Improvements
 + Moved [error](http://algobuilder.dev/api/runtime/modules/errors.html) lists, BuilderError, [mkTransaction](http://algobuilder.dev/api/runtime/modules.html#mktransaction) to `@algo-builder/web` package. Re export `mkTransaction`, `errors` in algob and runtime from `@algo-builder/web` for backward compatibility.

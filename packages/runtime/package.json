@@ -1,6 +1,6 @@
 {
   "name": "@algo-builder/runtime",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "contributors": [
     {
       "name": "Robert Zaremba",
@@ -61,7 +61,7 @@
     "sinon": "^9.0.2"
   },
   "dependencies": {
-    "@algo-builder/web": "0.0.1",
+    "@algo-builder/web": "1.2.0",
     "@nodelib/fs.walk": "^1.2.8",
     "@types/lodash.clonedeep": "^4.5.6",
     "algosdk": "scale-it/js-algorand-sdk.git#0f9d09e8d0bddc37145013e538b3ddfd001d364f",
