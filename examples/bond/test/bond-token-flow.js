@@ -152,7 +152,6 @@ describe('Bond token Tests', function () {
     // opt-in to app
     runtime.optInToApp(appManager.address, applicationId, {}, {});
     runtime.optInToApp(issuerAddress.address, applicationId, {}, {});
-
     syncAccounts();
     assert.isDefined(appManager.appsLocalState.get(applicationId));
     assert.isDefined(issuerAddress.appsLocalState.get(applicationId));
