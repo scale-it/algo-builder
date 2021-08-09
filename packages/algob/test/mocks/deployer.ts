@@ -1,9 +1,10 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import type { LogicSig } from "algosdk";
-import * as algosdk from "algosdk";
+import { types as wtypes } from "@algo-builder/web";
+import algosdk, { LogicSig, modelsv2 } from "algosdk";
 
 import type {
   ASCCache,
+  ConfirmedTxInfo,
   Deployer,
   FundASCFlags,
   LsigInfo
@@ -18,7 +19,7 @@ export class FakeDeployer implements Deployer {
   accountsByName = new Map<string, rtypes.Account>();
   scriptName = '';
   checkpoint = {
-    getSSCfromCPKey (key: string): rtypes.SSCInfo | undefined {
+    getAppfromCPKey (key: string): rtypes.SSCInfo | undefined {
       throw new Error("Not implemented");
     },
 
@@ -43,7 +44,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  getASADef (name: string): rtypes.ASADef {
+  getASADef (name: string): wtypes.ASADef {
     throw new Error("Not implemented");
   }
 
@@ -51,11 +52,11 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  logTx (message: string, txConfirmation: algosdk.ConfirmedTxInfo): void {
+  logTx (message: string, txConfirmation: ConfirmedTxInfo): void {
     throw new Error("Not implemented");
   }
 
-  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<algosdk.ConfirmedTxInfo> {
+  sendAndWait (rawTxns: Uint8Array | Uint8Array[]): Promise<ConfirmedTxInfo> {
     throw new Error("Not implemented");
   }
 
@@ -75,11 +76,11 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  getSSC (nameApproval: string, nameClear: string): rtypes.SSCInfo | undefined {
+  getApp (nameApproval: string, nameClear: string): rtypes.SSCInfo | undefined {
     throw new Error("Not implemented");
   }
 
-  getSSCfromCPKey (key: string): rtypes.SSCInfo | undefined {
+  getAppfromCPKey (key: string): rtypes.SSCInfo | undefined {
     throw new Error("Not implemented");
   }
 
@@ -114,12 +115,20 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   };
 
-  loadASADef (asaName: string): rtypes.ASADef | undefined {
+  async deployASADef (
+    name: string,
+    asaDef: wtypes.ASADef,
+    flags: rtypes.ASADeploymentFlags
+  ): Promise<rtypes.ASAInfo> {
+    throw new Error("Not implemented");
+  }
+
+  loadASADef (asaName: string): wtypes.ASADef | undefined {
     throw new Error("Not implemented");
   }
 
   async fundLsig (name: string, flags: FundASCFlags,
-    payFlags: rtypes.TxParams, scInitParam?: unknown): Promise<void> {
+    payFlags: wtypes.TxParams, scInitParam?: unknown): Promise<void> {
     throw new Error("Not implemented");
   }
 
@@ -128,21 +137,21 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  async deploySSC (
+  async deployApp (
     approvalProgram: string,
     clearProgram: string,
-    flags: rtypes.SSCDeploymentFlags,
-    payFlags: rtypes.TxParams): Promise<rtypes.SSCInfo> {
+    flags: rtypes.AppDeploymentFlags,
+    payFlags: wtypes.TxParams): Promise<rtypes.SSCInfo> {
     throw new Error("Not implemented");
   }
 
-  async updateSSC (
+  async updateApp (
     sender: algosdk.Account,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
-    flags: rtypes.SSCOptionalFlags
+    flags: rtypes.AppOptionalFlags
   ): Promise<rtypes.SSCInfo> {
     throw new Error("Not implemented");
   }
@@ -151,7 +160,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  assertCPNotDeleted (execParams: rtypes.ExecParams | rtypes.ExecParams[]): void {
+  assertCPNotDeleted (execParams: wtypes.ExecParams | wtypes.ExecParams[]): void {
     throw new Error("Not implemented");
   }
 
@@ -163,31 +172,31 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   };
 
-  getAssetByID (assetIndex: number | bigint): Promise<algosdk.AssetInfo> {
+  getAssetByID (assetIndex: number | bigint): Promise<modelsv2.Asset> {
     throw new Error("Not implemented");
   }
 
-  waitForConfirmation (txId: string): Promise<algosdk.ConfirmedTxInfo> {
+  waitForConfirmation (txId: string): Promise<ConfirmedTxInfo> {
     throw new Error("Not implemented");
   }
 
-  optInAcountToASA (asa: string, accountName: string, flags: rtypes.TxParams): Promise<void> {
+  optInAcountToASA (asa: string, accountName: string, flags: wtypes.TxParams): Promise<void> {
     throw new Error("Not implemented");
   }
 
-  optInLsigToASA (asa: string, lsig: LogicSig, flags: rtypes.TxParams): Promise<void> {
+  optInLsigToASA (asa: string, lsig: LogicSig, flags: wtypes.TxParams): Promise<void> {
     throw new Error("Not implemented");
   }
 
-  optInAccountToSSC (
-    sender: rtypes.Account, index: number, payFlags: rtypes.TxParams,
-    flags: rtypes.SSCOptionalFlags): Promise<void> {
+  optInAccountToApp (
+    sender: rtypes.Account, index: number, payFlags: wtypes.TxParams,
+    flags: rtypes.AppOptionalFlags): Promise<void> {
     throw new Error("Not implemented");
   }
 
-  optInLsigToSSC (
+  optInLsigToApp (
     appID: number, lsig: LogicSig,
-    payFlags: rtypes.TxParams, flags: rtypes.SSCOptionalFlags): Promise<void> {
+    payFlags: wtypes.TxParams, flags: rtypes.AppOptionalFlags): Promise<void> {
     throw new Error("not implemented.");
   }
 }

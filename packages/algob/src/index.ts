@@ -1,6 +1,5 @@
-import { addressToPk, stringToBytes, uint64ToBigEndian } from "@algo-builder/runtime";
+import { ERRORS, parsing as convert } from "@algo-builder/web";
 
-import * as ERRORS from "./errors/errors-list";
 import {
   createMsigAddress,
   loadAccountsFromEnv,
@@ -10,6 +9,7 @@ import {
 } from "./lib/account";
 import { globalZeroAddress } from "./lib/constants";
 import { algodCredentialsFromEnv, KMDCredentialsFromEnv } from "./lib/credentials";
+import { Tealdbg } from "./lib/dryrun";
 import { getProgram } from "./lib/load-program";
 import { signLogicSigMultiSig } from "./lib/lsig";
 import { signMultiSig } from "./lib/msig";
@@ -17,9 +17,10 @@ import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC, readGl
 import { executeSignedTxnFromFile, executeTransaction, getSuggestedParams, mkTxParams } from "./lib/tx";
 import * as runtime from "./runtime";
 import * as types from "./types";
-const convert = { uint64ToBigEndian, addressToPk, stringToBytes };
+
 export {
   ERRORS,
+  Tealdbg,
   mkAccounts,
   createMsigAddress,
   loadAccountsFromFile,

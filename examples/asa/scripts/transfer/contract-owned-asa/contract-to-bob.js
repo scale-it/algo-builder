@@ -4,7 +4,7 @@
  * from a contract account (lsig) to an changed owner account.
  * Note: This transfer will only work if owner is changed to bob
 */
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 const { balanceOf } = require('@algo-builder/algob');
 const { executeTransaction, mkParam } = require('../common');
 
@@ -15,7 +15,7 @@ async function run (runtimeEnv, deployer) {
 
   await executeTransaction(deployer, mkParam(masterAccount, bob.addr, 5e6, { note: 'Funding' }));
   // Get AppInfo and AssetID from checkpoints.
-  const appInfo = deployer.getSSC('5-contract-asa-stateful.py', '5-clear.py');
+  const appInfo = deployer.getApp('5-contract-asa-stateful.py', '5-clear.py');
   const lsig = await deployer.loadLogic('5-contract-asa-stateless.py', { APP_ID: appInfo.appID });
 
   /* Transfer ASA 'gold' from contract account to user account */
@@ -30,7 +30,7 @@ async function run (runtimeEnv, deployer) {
       sign: types.SignType.SecretKey,
       fromAccount: bob,
       appID: appInfo.appID,
-      payFlags: {}
+      payFlags: { totalFee: 1000 }
     },
     {
       type: types.TransactionType.TransferAsset,

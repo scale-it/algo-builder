@@ -4,7 +4,7 @@ layout: splash
 
 # Execute Transaction
 
-`executeTransaction` is a high level function which can be used to perform transactions on Algorand Network. It supports every transaction (atomic or single) which is possible in network. Ex: Deploy ASA/SSC, Opt-In, Transfers, Delete, Destroy etc. `executeTransaction` takes `ExecParams` or `ExecParams[]` as parameter.
+`executeTransaction` is a high level function which can be used to perform transactions on Algorand Network. It supports every transaction (atomic or single) which is possible in network. Ex: Deploy ASA/App, Opt-In, Transfers, Delete, Destroy etc. `executeTransaction` takes `ExecParams` or `ExecParams[]` as parameter.
 If you pass an array of `ExecParams`, it will be considered as `atomic transaction`.
 In below sections we will demonstrate how to pass these parameters.
 
@@ -22,8 +22,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     fromAccount: john,
     toAccountAddr: alice.address,
     amountMicroAlgos: 100,
-    payFlags: { totalFee: 1000 }
-  }
+    payFlags: { totalFee: fee }  }
 ```
 - payFlags: [TxParams](https://algobuilder.dev/api/algob/interfaces/runtime.types.txparams.html)
 
@@ -37,20 +36,42 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     toAccountAddr: alice.address,
     amountMicroAlgos: 100,
     lsig: lsig,
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: fee }
   }
 ```
 
 ### [Deploy ASA](https://algobuilder.dev/api/algob/modules/runtime.types.html#deployasaparam)
 
+To deploy an ASA using `asa.yaml`:
 ```js
   {
     type: TransactionType.DeployASA,
     sign: SignType.SecretKey,
     fromAccount: john,
     asaName: 'gold',
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: fee }
   }
+```
+
+To deploy an ASA without using `asa.yaml`:
+
+```js 
+  {
+    type: types.TransactionType.DeployASA,
+    sign: types.SignType.SecretKey,
+    fromAccount: john.account,
+    asaName: 'silver-12',
+    asaDef: {
+      total: 10000,
+      decimals: 0,
+      defaultFrozen: false,
+      unitName: "SLV",
+      url: "url",
+      metadataHash: "12312442142141241244444411111133",
+      note: "note"
+    },
+    payFlags: {}
+  };
 ```
 
 ### [Opt-In to ASA](https://algobuilder.dev/api/algob/modules/runtime.types.html#optinasaparam)
@@ -61,7 +82,7 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     sign: SignType.SecretKey,
     fromAccount: alice,
     assetID: assetIndex,
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: fee }
   }
 ```
 
@@ -75,15 +96,15 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     toAccountAddr: alice.address,
     amount: 10,
     assetID: assetId,
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: fee }
   }
 ```
 
-### [Deploy SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#deploysscparam)
+### [Deploy App](https://algobuilder.dev/api/algob/modules/runtime.types.html#deployappparam)
 
 ```js
   {
-    type: TransactionType.DeploySSC,
+    type: TransactionType.DeployApp,
     sign: SignType.SecretKey,
     fromAccount: john,
     approvalProgram: approvalProgram,
@@ -95,25 +116,25 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
     payFlags: {}
   }
 ```
-- To learn about more parameters like (account, appArgs, ForeignApps, ForeignAssets etc).Please check [SSCOptionalFlags](https://algobuilder.dev/api/algob/interfaces/runtime.types.sscoptionalflags.html)
+- To learn about more parameters like (account, appArgs, ForeignApps, ForeignAssets etc).Please check [AppOptionalFlags](https://algobuilder.dev/api/algob/interfaces/runtime.types.AppOptionalFlags.html)
 
-### [Opt-In to SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#optinsscparam)
+### [Opt-In to App](https://algobuilder.dev/api/algob/modules/runtime.types.html#optintoappparam)
 
 ```js
   {
-    type: TransactionType.OptInSSC,
+    type: TransactionType.OptInToApp,
     sign: SignType.SecretKey,
     fromAccount: alice,
     appID: appID,
-    payFlags: { totalFee: 1000 }
+    payFlags: { totalFee: fee }
   }
 ```
 
-### [Call SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#ssccallsparam)
+### [Call App](https://algobuilder.dev/api/algob/modules/runtime.types.html#appcallsparam)
 
 ```js
   {
-    type: TransactionType.CallNoOpSSC,
+    type: TransactionType.CallNoOpApp,
     sign: SignType.SecretKey,
     fromAccount: john,
     appId: 0,
@@ -121,11 +142,11 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
   }
 ```
 
-### [Update SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#updatesscparam)
+### [Update App](https://algobuilder.dev/api/algob/modules/runtime.types.html#updateappparam)
 
 ```js
   {
-    type: TransactionType.UpdateSSC,
+    type: TransactionType.updateApp,
     sign: SignType.SecretKey,
     fromAccount: john,
     appID: appId,
@@ -135,15 +156,41 @@ Examples of parameter [`ExecParams`](https://algobuilder.dev/api/algob/modules/r
   }
 ```
 
-### [Delete SSC](https://algobuilder.dev/api/algob/modules/runtime.types.html#ssccallsparam)
+### [Delete App](https://algobuilder.dev/api/algob/modules/runtime.types.html#appcallsparam)
 
 ```js
   {
-    type: TransactionType.DeleteSSC,
+    type: TransactionType.DeleteApp,
     sign: SignType.SecretKey,
     fromAccount: john,
     appId: 10,
-    payFlags: { totalFee: 1000 },
+    payFlags: { totalFee: fee },
     appArgs: []
   }
 ```
+
+### Pooled Transaction Fees
+
+With [this](https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/) release, algob also supports pooled transaction fees.
+Algob now supports pooled fees where one transaction can pay the fees of other transactions within an atomic group. For atomic transactions, the protocol sums the number of transactions and calculates the total amount of required fees, then calculates the amount of fees submitted by all transactions. If the collected fees are greater than or equal to the required amount, the transaction fee requirement will be met.
+Ex:
+```js
+  {
+    type: TransactionType.TransferAlgo,
+    sign: SignType.SecretKey,
+    fromAccountAddr: john,
+    toAccountAddr: alice.address,
+    amountMicroAlgos: 100,
+    payFlags: { totalFee: 2000 }
+  },
+  {
+    type: TransactionType.TransferAlgo,
+    sign: SignType.SecretKey,
+    fromAccountAddr: alice,
+    toAccountAddr: bob.address,
+    amountMicroAlgos: 100,
+    payFlags: { totalFee: 0 }
+  }
+```
+
+Even though fee paid by alice is `0`, this transaction will pass because total fees collected is greater than or equal to the required amount.

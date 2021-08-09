@@ -1,10 +1,9 @@
 import { types as rtypes } from "@algo-builder/runtime";
+import { BuilderError, ERRORS } from "@algo-builder/web";
 import { Account as AccountSDK, Kmd, mnemonicToSecretKey, multisigAddress, MultisigMetadata } from "algosdk";
 import * as fs from "fs";
 import YAML from "yaml";
 
-import { BuilderError } from "../errors/errors";
-import { ERRORS } from "../errors/errors-list";
 import CfgErrors, { ErrorPutter } from "../internal/core/config/config-errors";
 import type { Account, AccountDef, HDAccount, KmdCfg, KmdWallet, MnemonicAccount, StrMap } from "../types";
 

@@ -2,11 +2,11 @@ async function run (runtimeEnv, deployer) {
   const creatorAccount = deployer.accountsByName.get('alice');
 
   // Retreive AppInfo from checkpoints.
-  const appInfo = deployer.getSSC('approval_program.teal', 'clear_program.teal');
+  const appInfo = deployer.getApp('approval_program.teal', 'clear_program.teal');
   const applicationID = appInfo.appID;
   console.log('Application Id ', applicationID);
 
-  const updatedRes = await deployer.updateSSC(
+  const updatedRes = await deployer.updateApp(
     creatorAccount,
     {}, // pay flags
     applicationID,

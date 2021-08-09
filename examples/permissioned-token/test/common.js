@@ -1,7 +1,8 @@
 const {
   getProgram
 } = require('@algo-builder/algob');
-const { Runtime, types } = require('@algo-builder/runtime');
+const { Runtime } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 
 const minBalance = 20e6; // 20 ALGOs
 const CLAWBACK_STATELESS_PROGRAM = 'clawback.py';

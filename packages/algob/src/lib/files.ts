@@ -1,9 +1,8 @@
 import { getPathFromDirRecursive } from "@algo-builder/runtime";
+import { BuilderError, ERRORS } from "@algo-builder/web";
 import fs from "fs-extra";
 import path from "path";
 
-import { BuilderError } from "../errors/errors";
-import { ERRORS } from "../errors/errors-list";
 import { ASSETS_DIR } from "../internal/core/project-structure";
 
 function normalizePaths (mainPath: string, paths: string[]): string[] {
@@ -39,7 +38,7 @@ export function assertDirectDirChildren (dir: string, scriptNames: string[]): st
  * @param fileName : file name
  * @returns signed transaction encoded as Uint8array
  */
-export function loadSignedTxnFromFile (fileName: string): Uint8Array | undefined {
+export function loadEncodedTxFromFile (fileName: string): Uint8Array | undefined {
   try {
     const p = getPathFromDirRecursive(ASSETS_DIR, fileName) as string;
     const buffer = fs.readFileSync(p);

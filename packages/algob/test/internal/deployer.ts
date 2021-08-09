@@ -1,9 +1,9 @@
 import { types as rtypes } from "@algo-builder/runtime";
+import { ERRORS, types as wtypes } from "@algo-builder/web";
 import { generateAccount, LogicSig } from "algosdk";
 import { assert } from "chai";
 
 import { genAccounts } from "../../src/builtin-tasks/gen-accounts";
-import { ERRORS } from "../../src/errors/errors-list";
 import { DeployerDeployMode } from "../../src/internal/deployer";
 import { DeployerConfig } from "../../src/internal/deployer_cfg";
 import { getDummyLsig } from "../../src/lib/lsig";
@@ -15,12 +15,16 @@ import { useFixtureProject } from "../helpers/project";
 import { cleanupMutableData } from "../lib/script-checkpoints";
 import { AlgoOperatorDryRunImpl } from "../stubs/algo-operator";
 
-function mkASA (): rtypes.ASADef {
+function mkASA (): wtypes.ASADef {
   return {
     total: 1,
     decimals: 1,
     unitName: 'ASA',
-    defaultFrozen: false
+    defaultFrozen: false,
+    clawback: undefined,
+    freeze: undefined,
+    manager: undefined,
+    reserve: undefined
   };
 }
 
@@ -167,7 +171,7 @@ describe("DeployerDeployMode", () => {
       localBytes: 1,
       globalBytes: 1
     };
-    const sscInfo = await deployer.deploySSC("app", "clear", sscFlags, {});
+    const sscInfo = await deployer.deployApp("app", "clear", sscFlags, {});
     assert.deepEqual(sscInfo,
       {
         creator: "addr-1-get-address-dry-run",
@@ -198,7 +202,7 @@ describe("DeployerDeployMode", () => {
       deleted: false
     });
 
-    const updatedInfo = await deployer.updateSSC(deployer.accounts[0], {}, 33, "app", "clear", {});
+    const updatedInfo = await deployer.updateApp(deployer.accounts[0], {}, 33, "app", "clear", {});
     assert.deepEqual(updatedInfo,
       {
         creator: "addr-1-get-address-dry-run",
@@ -321,7 +325,7 @@ describe("DeployerDeployMode", () => {
         txId: "",
         confirmedRound: 0,
         assetIndex: 0,
-        assetDef: {} as rtypes.ASADef,
+        assetDef: {} as wtypes.ASADef,
         deleted: false
       })
       .registerSSC(networkName, "ASC name", {
@@ -400,7 +404,7 @@ describe("DeployerDeployMode", () => {
       txId: "",
       confirmedRound: 0,
       assetIndex: 1337,
-      assetDef: {} as rtypes.ASADef,
+      assetDef: {} as wtypes.ASADef,
       deleted: false
     });
     assert.deepEqual(deployer.asa, new Map());
@@ -418,5 +422,23 @@ describe("DeployerDeployMode", () => {
       assetDef: mkASA(),
       deleted: false
     }]]));
+  });
+
+  it("Should deploy asa without using asa.yaml", async () => {
+    const deployer = new DeployerDeployMode(deployerCfg);
+    const asaDef = {
+      total: 10000,
+      decimals: 0,
+      defaultFrozen: false,
+      unitName: "SLV",
+      url: "url",
+      metadataHash: "12312442142141241244444411111133",
+      note: "note"
+    };
+    await deployer.deployASADef("silver-122", asaDef, { creator: deployer.accounts[0] });
+
+    const res = deployer.getASAInfo("silver-122");
+    assert.isDefined(res);
+    assert.deepEqual(res.assetDef, asaDef);
   });
 });

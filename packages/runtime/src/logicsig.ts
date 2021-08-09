@@ -1,6 +1,7 @@
+import { parsing } from "@algo-builder/web";
 import {
   decodeAddress, encodeAddress,
-  generateAccount, LogicSigBase, MultiSig, multisigAddress, MultisigMetadata,
+  EncodedLogicSig, EncodedMultisig, generateAccount, multisigAddress, MultisigMetadata,
   signBytes, verifyBytes
 } from "algosdk";
 import * as tweet from "tweetnacl-ts";
@@ -8,7 +9,7 @@ import * as tweet from "tweetnacl-ts";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { compareArray } from "./lib/compare";
-import { convertToString, stringToBytes } from "./lib/parsing";
+import { convertToString } from "./lib/parsing";
 
 /**
  * Note: We cannot use algosdk LogicSig class here,
@@ -17,20 +18,21 @@ import { convertToString, stringToBytes } from "./lib/parsing";
  * We are using raw TEAL code as program.(by converting string into bytes)
  */
 export class LogicSig {
-  tag: Buffer;
   logic: Uint8Array;
   args: Uint8Array[];
   sig: Uint8Array;
-  msig: MultiSig | undefined;
+  msig: EncodedMultisig | undefined;
   lsigAddress: string;
+  tag: Buffer;
 
   constructor (program: string, args: Uint8Array[]) {
     this.tag = Buffer.from("Program");
-    this.logic = stringToBytes(program);
+    this.logic = parsing.stringToBytes(program);
     this.args = args;
     this.sig = new Uint8Array(0);
     this.msig = undefined;
     this.lsigAddress = generateAccount().addr;
+    this.tag = Buffer.from('Program');
   }
 
   /**
@@ -64,7 +66,7 @@ export class LogicSig {
    * @param secretKey Secret key to sign with
    * @param msig Multisignature
    */
-  singleSignMultisig (secretKey: Uint8Array, msig: MultiSig): [Uint8Array, number] {
+  singleSignMultisig (secretKey: Uint8Array, msig: EncodedMultisig): [Uint8Array, number] {
     let index = -1;
     const accountPk = tweet.sign_keyPair_fromSecretKey(secretKey).publicKey;
     for (let i = 0; i < msig.subsig.length; i++) {
@@ -120,7 +122,7 @@ export class LogicSig {
    * @param msig Msig
    * @param accAddr Sender's account address
    */
-  verifyMultisig (msig: MultiSig, accAddr: string): boolean {
+  verifyMultisig (msig: EncodedMultisig, accAddr: string): boolean {
     const version = msig.v;
     const threshold = msig.thr;
     const subsigs = msig.subsig;
@@ -161,7 +163,9 @@ export class LogicSig {
     let verifiedCounter = 0;
     for (const subsig of subsigs) {
       const subsigAddr = encodeAddress(subsig.pk);
-      if (!compareArray(subsig.s, new Uint8Array(0)) && verifyBytes(this.logic, subsig.s, subsigAddr)) {
+      if (!compareArray(subsig.s, new Uint8Array(0)) &&
+        verifyBytes(this.logic, subsig.s as Uint8Array, subsigAddr
+        )) {
         verifiedCounter += 1;
       }
     }
@@ -209,17 +213,16 @@ export class LogicSig {
     return new LogicSig("DUMMY", []);
   }
 
-  get_obj_for_encoding (): LogicSigBase {
+  get_obj_for_encoding (): EncodedLogicSig {
     return {
-      tag: this.tag,
-      logic: this.logic,
-      args: this.args,
+      l: this.logic,
+      arg: this.args,
       sig: this.sig,
       msig: this.msig
     };
   }
 
-  from_obj_for_encoding (lsig: LogicSigBase): LogicSig {
+  from_obj_for_encoding (lsig: EncodedLogicSig): LogicSig {
     return new LogicSig("DUMMY", []);
   }
 }

@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
-import type { LogicSig } from "algosdk";
-import * as algosdk from "algosdk";
+import { types as wtypes } from "@algo-builder/web";
+import algosdk, { LogicSig, modelsv2 } from "algosdk";
 
 import * as types from "./internal/core/params/argument-types";
 // Begin config types
@@ -373,7 +373,7 @@ export interface AssetScriptMap {
 export interface CheckpointFunctions {
   /**
    * Queries a stateful smart contract info from checkpoint using key. */
-  getSSCfromCPKey: (key: string) => rtypes.SSCInfo | undefined
+  getAppfromCPKey: (key: string) => rtypes.SSCInfo | undefined
 
   /**
    * Returns SSC checkpoint key using application index,
@@ -420,13 +420,25 @@ export interface Deployer {
   getCheckpointKV: (key: string) => string | undefined
 
   /**
-   * Creates and deploys ASA.
+   * Creates and deploys ASA defined in asa.yaml.
    * @name  ASA name - deployer will search for the ASA in the /assets/asa.yaml file
    * @flags  deployment flags */
   deployASA: (
     name: string,
     flags: rtypes.ASADeploymentFlags,
-    asaParams?: Partial<rtypes.ASADef>
+    asaParams?: Partial<wtypes.ASADef>
+  ) => Promise<rtypes.ASAInfo>
+
+  /**
+   * Creates and deploys ASA without using asa.yaml.
+   * @name ASA name
+   * @asaDef ASA definitions
+   * @flags deployment flags
+   */
+  deployASADef: (
+    name: string,
+    asaDef: wtypes.ASADef,
+    flags: rtypes.ASADeploymentFlags,
   ) => Promise<rtypes.ASAInfo>
 
   /**
@@ -434,11 +446,11 @@ export interface Deployer {
    * NOTE: This function returns "deployed" ASADef, as immutable properties
    * of asaDef could be updated during tx execution (eg. update asset clawback)
    * @name  ASA name - name of ASA in the /assets/asa.yaml file */
-  loadASADef: (asaName: string) => rtypes.ASADef | undefined
+  loadASADef: (asaName: string) => wtypes.ASADef | undefined
 
   assertNoAsset: (name: string) => void
 
-  getASADef: (name: string, asaParams?: Partial<rtypes.ASADef>) => rtypes.ASADef
+  getASADef: (name: string, asaParams?: Partial<wtypes.ASADef>) => wtypes.ASADef
 
   persistCP: () => void
 
@@ -446,13 +458,13 @@ export interface Deployer {
 
   registerSSCInfo: (name: string, sscInfo: rtypes.SSCInfo) => void
 
-  logTx: (message: string, txConfirmation: algosdk.ConfirmedTxInfo) => void
+  logTx: (message: string, txConfirmation: ConfirmedTxInfo) => void
 
   /**
    * Send signed transaction to network and wait for confirmation
    * @param rawTxns Signed Transaction(s)
    */
-  sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<algosdk.ConfirmedTxInfo>
+  sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<ConfirmedTxInfo>
 
   /**
    * Funds logic signature account (Contract Account).
@@ -464,7 +476,7 @@ export interface Deployer {
   fundLsig: (
     name: string,
     flags: FundASCFlags,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     scTmplParams?: SCParams
   ) => void
 
@@ -485,16 +497,16 @@ export interface Deployer {
    * Deploys stateful smart contract.
    * @approvalProgram  approval program filename (must be present in assets folder)
    * @clearProgram  clear program filename (must be present in assets folder)
-   * @flags  SSCDeploymentFlags
+   * @flags  AppDeploymentFlags
    * @payFlags  Transaction Parameters
    * @scTmplParams  Smart contract template parameters
    *     (used only when compiling PyTEAL to TEAL)
    */
-  deploySSC: (
+  deployApp: (
     approvalProgram: string,
     clearProgram: string,
-    flags: rtypes.SSCDeploymentFlags,
-    payFlags: rtypes.TxParams,
+    flags: rtypes.AppDeploymentFlags,
+    payFlags: wtypes.TxParams,
     scTmplParams?: SCParams) => Promise<rtypes.SSCInfo>
 
   /**
@@ -506,13 +518,13 @@ export interface Deployer {
    * @param newClearProgram New Clear Program filename
    * @param flags Optional parameters to SSC (accounts, args..)
    */
-  updateSSC: (
+  updateApp: (
     sender: algosdk.Account,
-    payFlags: rtypes.TxParams,
+    payFlags: wtypes.TxParams,
     appID: number,
     newApprovalProgram: string,
     newClearProgram: string,
-    flags: rtypes.SSCOptionalFlags
+    flags: rtypes.AppOptionalFlags
   ) => Promise<rtypes.SSCInfo>
 
   /**
@@ -526,22 +538,22 @@ export interface Deployer {
 
   /**
    * Queries blockchain for a given transaction and waits until it will be processed. */
-  waitForConfirmation: (txId: string) => Promise<algosdk.ConfirmedTxInfo>
+  waitForConfirmation: (txId: string) => Promise<ConfirmedTxInfo>
 
   /**
    * Queries blockchain using algodv2 for asset information by index  */
-  getAssetByID: (assetIndex: number | bigint) => Promise<algosdk.AssetInfo>
+  getAssetByID: (assetIndex: number | bigint) => Promise<modelsv2.Asset>
 
   /**
    * Creates an opt-in transaction for given ASA name, which must be defined in
    * `/assets/asa.yaml` file. The opt-in transaction is signed by the account secret key */
   optInAcountToASA: (asa: string, accountName: string,
-    flags: rtypes.TxParams) => Promise<void>
+    flags: wtypes.TxParams) => Promise<void>
 
   /**
    * Creates an opt-in transaction for given ASA name, which must be defined in
    * `/assets/asa.yaml` file. The opt-in transaction is signed by the logic signature */
-  optInLsigToASA: (asa: string, lsig: LogicSig, flags: rtypes.TxParams) => Promise<void>
+  optInLsigToASA: (asa: string, lsig: LogicSig, flags: wtypes.TxParams) => Promise<void>
 
   /**
    * Opt-In to stateful smart contract (SSC) for a single account
@@ -551,11 +563,11 @@ export interface Deployer {
    * @param payFlags Transaction flags
    * @param flags Optional parameters to SSC (accounts, args..)
    */
-  optInAccountToSSC: (
+  optInAccountToApp: (
     sender: rtypes.Account,
     appID: number,
-    payFlags: rtypes.TxParams,
-    flags: rtypes.SSCOptionalFlags) => Promise<void>
+    payFlags: wtypes.TxParams,
+    flags: rtypes.AppOptionalFlags) => Promise<void>
 
   /**
    * Opt-In to stateful smart contract (SSC) for a contract account
@@ -565,11 +577,11 @@ export interface Deployer {
    * @param payFlags Transaction flags
    * @param flags Optional parameters to SSC (accounts, args..)
    */
-  optInLsigToSSC: (
+  optInLsigToApp: (
     appID: number,
     lsig: LogicSig,
-    payFlags: rtypes.TxParams,
-    flags: rtypes.SSCOptionalFlags) => Promise<void>
+    payFlags: wtypes.TxParams,
+    flags: rtypes.AppOptionalFlags) => Promise<void>
 
   /**
    * Create an entry in a script log (stored in artifacts/scripts/<script_name>.log) file. */
@@ -581,7 +593,7 @@ export interface Deployer {
 
   /**
    * Queries a stateful smart contract info from checkpoint. */
-  getSSC: (nameApproval: string, nameClear: string) => rtypes.SSCInfo | undefined
+  getApp: (nameApproval: string, nameClear: string) => rtypes.SSCInfo | undefined
 
   /**
    * Queries a delegated logic signature from checkpoint. */
@@ -610,7 +622,7 @@ export interface Deployer {
    * throw error(except for opt-out transactions), else pass
    * @param execParams Transaction execution parameters
    */
-  assertCPNotDeleted: (execParams: rtypes.ExecParams | rtypes.ExecParams[]) => void
+  assertCPNotDeleted: (execParams: wtypes.ExecParams | wtypes.ExecParams[]) => void
 }
 
 // ************************
@@ -651,3 +663,19 @@ export interface AnyMap {
 export type PromiseAny = Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 //  LocalWords:  configFile
+
+export interface DebuggerContext {
+  tealFile?: string
+  scInitParam?: unknown // if tealfile is ".py"
+  groupIndex?: number
+  mode?: rtypes.ExecutionMode
+}
+
+// TODO: Remove when this is resolved https://discord.com/channels/491256308461207573/631209194967531559/869677444242739220
+export interface ConfirmedTxInfo {
+  'confirmed-round': number
+  "asset-index": number
+  'application-index': number
+  'global-state-delta': string
+  'local-state-delta': string
+}

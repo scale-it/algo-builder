@@ -1,9 +1,13 @@
 import { getPathFromDirRecursive } from "@algo-builder/runtime";
-import type { Account, LogicSig, MultiSig, TxSig } from "algosdk";
-import { appendSignMultisigTransaction, decodeAddress, decodeSignedTransaction, encodeAddress, logicSigFromByte } from "algosdk";
+import type { Account, EncodedMultisig, LogicSig, MultisigMetadata, Transaction } from "algosdk";
+import {
+  appendSignMultisigTransaction, decodeAddress, decodeSignedTransaction,
+  decodeUnsignedTransaction, encodeAddress, logicSigFromByte, signMultisigTransaction
+} from "algosdk";
 import fs from "fs";
 
 import { ASSETS_DIR } from "../internal/core/project-structure";
+import { isSignedTx } from "./tx";
 
 export const blsigExt = ".blsig";
 const lsigExt = ".lsig";
@@ -13,7 +17,7 @@ const lsigExt = ".lsig";
  * @param {String} name : multisig filename
  * @returns {MultiSig} : decoded msig (object with decoded public keys and their signatures)
  */
-export async function decodeMsigObj (msig: string): Promise<MultiSig> {
+export async function decodeMsigObj (msig: string): Promise<EncodedMultisig> {
   const parsedMsig = JSON.parse(msig).msig;
   validateMsig(parsedMsig);
 
@@ -33,7 +37,7 @@ export async function decodeMsigObj (msig: string): Promise<MultiSig> {
  * @param {string} msig : multisigned msig obj
  * @returns {MultiSig} : decoded Msig Object
  */
-export async function readMsigFromFile (filename: string): Promise<MultiSig | undefined> {
+export async function readMsigFromFile (filename: string): Promise<EncodedMultisig | undefined> {
   if (!filename.endsWith(lsigExt)) {
     throw new Error(`filename "${filename}" must end with "${lsigExt}"`);
   }
@@ -84,7 +88,7 @@ export async function loadBinaryLsig (name: string): Promise<LogicSig> {
  * Validates msig by checking for v and thr field
  * @param {MultiSig} msig
  */
-export function validateMsig (msig: MultiSig | undefined): void {
+export function validateMsig (msig: EncodedMultisig | undefined): void {
   if (msig === undefined || msig.v === undefined || msig.thr === undefined) {
     throw new Error("Error fetching multisigned logic signature from file - invalid/undefined msig");
   }
@@ -92,27 +96,42 @@ export function validateMsig (msig: MultiSig | undefined): void {
 
 /**
  * Signs a raw multi-sig transaction object
- * @param signerAccount
- * @param  rawTxn
+ * @param signerAccount account(addr, sk) to sign the transaction
+ * @param rawTxn encoded transaction fetched from file in /assets
+ * @param mparams multisig metadata. Required if creating a new signed multisig transaction.
  * @returns signed transaction object
  */
-export function signMultiSig (signerAccount: Account, rawTxn: Uint8Array): TxSig {
-  const decodedTxn = decodeSignedTransaction(rawTxn);
-  console.debug("Decoded txn before signing: %O", decodedTxn);
-  validateMsig(decodedTxn.msig);
-  console.log("Msig: %O", decodedTxn.msig);
-  const addresses = [];
-  for (const sig of decodedTxn.msig.subsig) {
-    addresses.push(encodeAddress(Uint8Array.from(sig.pk)));
+export function signMultiSig (signerAccount: Account, rawTxn: Uint8Array, mparams?: MultisigMetadata):
+{ txID: string, blob: Uint8Array} {
+  let decodedTxn, msig;
+  let multisigMetaData: MultisigMetadata; // extracted from existing multisig OR passed by user
+  if (isSignedTx(rawTxn)) {
+    decodedTxn = decodeSignedTransaction(rawTxn);
+    msig = decodedTxn.msig as EncodedMultisig;
+    validateMsig(msig);
+    const addresses = [];
+    for (const sig of msig.subsig) {
+      addresses.push(encodeAddress(Uint8Array.from(sig.pk)));
+    }
+    multisigMetaData = {
+      version: msig.v,
+      threshold: msig.thr,
+      addrs: addresses
+    };
+  } else {
+    if (mparams === undefined) {
+      throw new Error(`Multisig MetaData (version, threshold, addresses) not passed. This is required for creating a new multisig. Aborting`);
+    }
+    decodedTxn = decodeUnsignedTransaction(rawTxn);
+    multisigMetaData = mparams;
   }
-  const mparams = {
-    version: decodedTxn.msig.v,
-    threshold: decodedTxn.msig.thr,
-    addrs: addresses
-  };
-  const signedTxn = appendSignMultisigTransaction(rawTxn, mparams, signerAccount.sk);
+  console.log("Msig: %O", msig);
+
+  // note: append requires raw(encoded) transaction object, but signMultisig requires decoded tx obj
+  const signedTxn = isSignedTx(rawTxn)
+    ? appendSignMultisigTransaction(rawTxn, multisigMetaData, signerAccount.sk)
+    : signMultisigTransaction(decodedTxn as Transaction, multisigMetaData, signerAccount.sk);
   const decodedSignedTxn = decodeSignedTransaction(signedTxn.blob);
-  console.debug("Decoded txn after successfully signing: %O", decodedSignedTxn);
   console.log("Msig: %O", decodedSignedTxn.msig);
   return signedTxn;
 }

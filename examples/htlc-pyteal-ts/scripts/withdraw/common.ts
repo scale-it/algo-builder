@@ -1,6 +1,7 @@
 import { executeTransaction } from "@algo-builder/algob";
 import * as algob from "@algo-builder/algob";
 import { types as rtypes } from "@algo-builder/runtime";
+import { types as wtypes } from "@algo-builder/web";
 import { sha256 } from 'js-sha256';
 
 /**
@@ -18,7 +19,7 @@ export function getDeployerAccount (
 }
 
 export async function executeTx (
-  deployer: algob.types.Deployer, txnParams: rtypes.ExecParams): Promise<void> {
+  deployer: algob.types.Deployer, txnParams: wtypes.ExecParams): Promise<void> {
   try {
     await executeTransaction(deployer, txnParams);
   } catch (e) {

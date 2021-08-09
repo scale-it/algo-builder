@@ -1,6 +1,6 @@
+import { ERRORS } from "@algo-builder/web";
 import { assert } from "chai";
 
-import { ERRORS } from "../../../../src/errors/errors-list";
 import { ALGOB_PARAM_DEFINITIONS } from "../../../../src/internal/core/params/builder-params";
 import {
   getEnvRuntimeArgs,

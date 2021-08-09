@@ -3,7 +3,7 @@
  * This file demonstrates the PyTeal Example for HTLC(Hash Time Lock Contract)
 */
 import * as algob from "@algo-builder/algob";
-import { types as rtypes } from "@algo-builder/runtime";
+import { types as rtypes } from "@algo-builder/web";
 
 import { getDeployerAccount, prepareParameters } from "./withdraw/common";
 

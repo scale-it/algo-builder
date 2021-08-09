@@ -6,7 +6,7 @@
 */
 const { executeTransaction } = require('./common/common');
 const { createMsigAddress } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 
 async function run (runtimeEnv, deployer) {
   const masterAccount = deployer.accountsByName.get('master-account');
@@ -27,6 +27,7 @@ async function run (runtimeEnv, deployer) {
     amountMicroAlgos: 10000000,
     payFlags: { note: 'Funding multisig account', totalFee: 500 } // totalFee will be converted to 1000 as it is minimum required transaction fee
   };
+
   // Funding multisignature account
   await executeTransaction(deployer, txnParams);
   txnParams.toAccountAddr = bob.addr;

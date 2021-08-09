@@ -1,6 +1,7 @@
-import { getProgram } from '@algo-builder/algob';
-import { AccountStore, addressToPk, Runtime, types } from '@algo-builder/runtime';
+import { convert, getProgram } from '@algo-builder/algob';
+import { AccountStore, Runtime } from '@algo-builder/runtime';
 import { assert } from 'chai';
+const { types } = require('@algo-builder/web');
 
 const minBalance = 10e6; // 10 ALGO's
 const aliceAddr = 'EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY';
@@ -61,7 +62,7 @@ describe('Test for transferring asset using custom logic', function () {
       { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
 
     const app = alice.getApp(applicationId);
-    const alicePk = addressToPk(alice.address);
+    const alicePk = convert.addressToPk(alice.address);
 
     // verify global state after app creation
     assert.isDefined(app);

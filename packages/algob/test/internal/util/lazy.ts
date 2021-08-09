@@ -1,6 +1,6 @@
+import { ERRORS } from "@algo-builder/web";
 import { assert } from "chai";
 
-import { ERRORS } from "../../../src/errors/errors-list";
 import { lazyFunction, lazyObject } from "../../../src/internal/util/lazy";
 import { expectBuilderError } from "../../helpers/errors";
 

@@ -1,9 +1,9 @@
+import { ERRORS } from "@algo-builder/web";
 import { assert } from "chai";
 import path from "path";
 
 import { TASK_TEST } from "../../build/builtin-tasks/task-names";
 import { loadFilenames } from "../../src/builtin-tasks/deploy";
-import { ERRORS } from "../../src/errors/errors-list";
 import { expectBuilderError } from "../helpers/errors";
 import { useCleanFixtureProject } from "../helpers/project";
 

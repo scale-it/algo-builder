@@ -1,8 +1,8 @@
 const {
   balanceOf
 } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
-const { getClawback, executeTransaction, fundAccount } = require('../common/common');
+const { types } = require('@algo-builder/web');
+const { getClawback, executeTransaction } = require('../common/common');
 const accounts = require('../common/accounts');
 
 // here instead of updating the asset reserve by modifyAsset tx,
@@ -31,7 +31,7 @@ async function updateReserveByAssetConfig (deployer, address) {
   // fetch old asset reserve from network by assetId
   const tesla = deployer.asa.get('tesla');
   const asaReserveAddr = (await deployer.getAssetByID(tesla.assetIndex)).params.reserve;
-  const controllerSSCInfo = deployer.getSSC('controller.py', 'clear_state_program.py');
+  const controllerAppInfo = deployer.getApp('controller.py', 'clear_state_program.py');
 
   const clawbackLsig = await getClawback(deployer);
   const clawbackAddress = clawbackLsig.address();
@@ -57,7 +57,7 @@ async function updateReserveByAssetConfig (deployer, address) {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: owner,
-      appID: controllerSSCInfo.appID,
+      appID: controllerAppInfo.appID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:force_transfer'],
       foreignAssets: [tesla.assetIndex] // to verify token reserve, manager

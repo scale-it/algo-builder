@@ -1,3 +1,4 @@
+import { types } from "@algo-builder/web";
 import { LogicSig } from "algosdk";
 import { assert } from "chai";
 import sinon from "sinon";
@@ -6,8 +7,6 @@ import { AccountStore } from "../../src/account";
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { ASSET_CREATION_FEE } from "../../src/lib/constants";
 import { Runtime } from "../../src/runtime";
-import type { AlgoTransferParam, AssetModFields, AssetTransferParam, DestroyAssetParam, ExecParams, FreezeAssetParam, ModifyAssetParam, RevokeAssetParam } from "../../src/types";
-import { SignType, TransactionType } from "../../src/types";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
@@ -24,13 +23,13 @@ describe("Logic Signature Transaction in Runtime", function () {
 
   let runtime: Runtime;
   let lsig: LogicSig;
-  let txnParam: ExecParams;
+  let txnParam: types.ExecParams;
   this.beforeAll(function () {
     runtime = new Runtime([john, bob, alice]);
     lsig = runtime.getLogicSig(getProgram(programName), []);
     txnParam = {
-      type: TransactionType.TransferAlgo,
-      sign: SignType.LogicSignature,
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.LogicSignature,
       fromAccountAddr: john.account.addr,
       toAccountAddr: bob.account.addr,
       amountMicroAlgos: 1000n,
@@ -49,9 +48,9 @@ describe("Logic Signature Transaction in Runtime", function () {
   });
 
   it("should not verify signature because alice sent it", () => {
-    const invalidParams: ExecParams = {
+    const invalidParams: types.ExecParams = {
       ...txnParam,
-      sign: SignType.LogicSignature,
+      sign: types.SignType.LogicSignature,
       fromAccountAddr: alice.account.addr,
       lsig: lsig
     };
@@ -65,9 +64,9 @@ describe("Logic Signature Transaction in Runtime", function () {
 
   it("should verify signature but reject logic", async () => {
     const logicSig = runtime.getLogicSig(getProgram("reject.teal"), []);
-    const txParams: ExecParams = {
+    const txParams: types.ExecParams = {
       ...txnParam,
-      sign: SignType.LogicSignature,
+      sign: types.SignType.LogicSignature,
       fromAccountAddr: john.account.addr,
       lsig: logicSig
     };
@@ -88,18 +87,18 @@ describe("Rounds Test", function () {
   let john = new AccountStore(minBalance);
   let bob = new AccountStore(minBalance);
   let runtime: Runtime;
-  let txnParams: AlgoTransferParam;
+  let txnParams: types.AlgoTransferParam;
   this.beforeAll(function () {
     runtime = new Runtime([john, bob]); // setup test
 
     // set up transaction paramenters
     txnParams = {
-      type: TransactionType.TransferAlgo, // payment
-      sign: SignType.SecretKey,
+      type: types.TransactionType.TransferAlgo, // payment
+      sign: types.SignType.SecretKey,
       fromAccount: john.account,
       toAccountAddr: bob.address,
       amountMicroAlgos: 100n,
-      payFlags: { firstValid: 5, validRounds: 200 }
+      payFlags: { firstValid: 5, validRounds: 200, totalFee: 1000 }
     };
   });
 
@@ -109,7 +108,7 @@ describe("Rounds Test", function () {
     runtime = new Runtime([john, bob]);
     txnParams = {
       ...txnParams,
-      sign: SignType.SecretKey,
+      sign: types.SignType.SecretKey,
       fromAccount: john.account,
       toAccountAddr: bob.address
     };
@@ -160,8 +159,8 @@ describe("Algorand Standard Assets", function () {
   let alice = new AccountStore(minBalance);
   const elon = new AccountStore(minBalance, elonMuskAccount);
   let runtime: Runtime;
-  let modFields: AssetModFields;
-  let assetTransferParam: AssetTransferParam;
+  let modFields: types.AssetModFields;
+  let assetTransferParam: types.AssetTransferParam;
   let assetId: number;
   this.beforeAll(() => {
     runtime = new Runtime([john, bob, alice, elon]);
@@ -172,8 +171,8 @@ describe("Algorand Standard Assets", function () {
       freeze: john.address
     };
     assetTransferParam = {
-      type: TransactionType.TransferAsset,
-      sign: SignType.SecretKey,
+      type: types.TransactionType.TransferAsset,
+      sign: types.SignType.SecretKey,
       fromAccount: john.account,
       toAccountAddr: alice.account.addr,
       amount: 10n,
@@ -203,14 +202,72 @@ describe("Algorand Standard Assets", function () {
     assert.equal(res.decimals, 0);
     assert.equal(res.defaultFrozen, false);
     assert.equal(res.total, 5912599999515n);
+    assert.equal(res.metadataHash, "12312442142141241244444411111133");
     assert.equal(res.unitName, "GLD");
     assert.equal(res.url, "url");
-    assert.equal(res.metadataHash, "12312442142141241244444411111133");
     assert.equal(res.manager, elon.address);
     assert.equal(res.reserve, elon.address);
     assert.equal(res.freeze, elon.address);
     assert.equal(res.clawback, elon.address);
     assert.equal(john.minBalance, initialMinBalance + ASSET_CREATION_FEE);
+  });
+
+  it("should create asset without using asa.yaml file", () => {
+    const expected = {
+      name: "gold-1221",
+      asaDef: {
+        total: 10000,
+        decimals: 0,
+        defaultFrozen: false,
+        unitName: "SLV",
+        url: "url",
+        metadataHash: "12312442142141241244444411111133",
+        note: "note"
+      }
+    };
+    assetId = runtime.addASADef(
+      expected.name, expected.asaDef, { creator: { ...john.account, name: "john" } }
+    );
+    syncAccounts();
+
+    const res = runtime.getAssetDef(assetId);
+    assert.isDefined(res);
+    assert.equal(res.decimals, 0);
+    assert.equal(res.defaultFrozen, false);
+    assert.equal(res.total, 10000n);
+    assert.equal(res.metadataHash, "12312442142141241244444411111133");
+    assert.equal(res.unitName, "SLV");
+    assert.equal(res.url, "url");
+  });
+
+  it("should create asset without using asa.yaml (execute transaction)", () => {
+    const execParams: types.ExecParams = {
+      type: types.TransactionType.DeployASA,
+      sign: types.SignType.SecretKey,
+      fromAccount: john.account,
+      asaName: 'silver-12',
+      asaDef: {
+        total: 10000,
+        decimals: 0,
+        defaultFrozen: false,
+        unitName: "SLV",
+        url: "url",
+        metadataHash: "12312442142141241244444411111133",
+        note: "note"
+      },
+      payFlags: {}
+    };
+    runtime.executeTx(execParams);
+    syncAccounts();
+
+    const res = runtime.getAssetInfoFromName("silver-12");
+    assert.isDefined(res);
+    assert.equal(res?.assetDef.decimals, 0);
+    assert.equal(res?.assetDef.defaultFrozen, false);
+    assert.equal(res?.assetDef.total, 10000n);
+    assert.equal(res?.assetDef.metadataHash, "12312442142141241244444411111133");
+    assert.equal(res?.assetDef.unitName, "SLV");
+    assert.equal(res?.assetDef.url, "url");
   });
 
   it("should opt-in to asset", () => {
@@ -228,7 +285,31 @@ describe("Algorand Standard Assets", function () {
     assert.equal(aliceAssetHolding?.amount as bigint, 0n);
   });
 
-  it("should throw error on opt-in of asset does not exist", () => {
+  it("should opt-in to asset using asset transfer transaction", () => {
+    const res = runtime.getAssetDef(assetId);
+    assert.isDefined(res);
+    const prevAliceMinBal = alice.minBalance;
+
+    // opt-in for alice (using asset transfer tx with amount == 0)
+    const optInParams: types.ExecParams = {
+      type: types.TransactionType.TransferAsset,
+      sign: types.SignType.SecretKey,
+      fromAccount: alice.account,
+      toAccountAddr: alice.address,
+      amount: 0n,
+      assetID: assetId,
+      payFlags: { totalFee: 1000 }
+    };
+    runtime.executeTx(optInParams);
+    syncAccounts();
+
+    const aliceAssetHolding = alice.getAssetHolding(assetId);
+    assert.equal(aliceAssetHolding?.amount as bigint, 0n);
+    // verfiy min balance is also raised
+    assert.equal(alice.minBalance, prevAliceMinBal + ASSET_CREATION_FEE);
+  });
+
+  it("should throw error on opt-in if asset does not exist", () => {
     expectRuntimeError(
       () => runtime.optIntoASA(1234, john.address, {}),
       RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND
@@ -268,14 +349,14 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should throw error on transfer asset if asset is frozen and amount > 0", () => {
-    const freezeParam: FreezeAssetParam = {
-      type: TransactionType.FreezeAsset,
-      sign: SignType.SecretKey,
+    const freezeParam: types.FreezeAssetParam = {
+      type: types.TransactionType.FreezeAsset,
+      sign: types.SignType.SecretKey,
       fromAccount: elon.account,
       assetID: assetId,
       freezeTarget: john.address,
       freezeState: true,
-      payFlags: {}
+      payFlags: { flatFee: true, totalFee: 1000 }
     };
 
     const res = runtime.getAssetDef(assetId);
@@ -318,7 +399,7 @@ describe("Algorand Standard Assets", function () {
 
     runtime.executeTx({
       ...assetTransferParam,
-      sign: SignType.SecretKey,
+      sign: types.SignType.SecretKey,
       fromAccount: alice.account,
       toAccountAddr: alice.address,
       payFlags: { totalFee: 1000, closeRemainderTo: john.address } // transfer all assets of alice => john (using closeRemTo)
@@ -345,9 +426,9 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should throw error if asset is not found while modifying", () => {
-    const modifyParam: ModifyAssetParam = {
-      type: TransactionType.ModifyAsset,
-      sign: SignType.SecretKey,
+    const modifyParam: types.ModifyAssetParam = {
+      type: types.TransactionType.ModifyAsset,
+      sign: types.SignType.SecretKey,
       fromAccount: john.account,
       assetID: 120,
       fields: modFields,
@@ -360,9 +441,9 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should modify asset", () => {
-    const modifyParam: ModifyAssetParam = {
-      type: TransactionType.ModifyAsset,
-      sign: SignType.SecretKey,
+    const modifyParam: types.ModifyAssetParam = {
+      type: types.TransactionType.ModifyAsset,
+      sign: types.SignType.SecretKey,
       fromAccount: elon.account,
       assetID: assetId,
       fields: modFields,
@@ -381,15 +462,15 @@ describe("Algorand Standard Assets", function () {
     const assetId = runtime.addAsset('silver',
       { creator: { ...john.account, name: "john" } });
 
-    const modFields: AssetModFields = {
+    const modFields: types.AssetModFields = {
       manager: bob.address,
       reserve: bob.address,
       clawback: john.address,
       freeze: alice.address
     };
-    const modifyParam: ModifyAssetParam = {
-      type: TransactionType.ModifyAsset,
-      sign: SignType.SecretKey,
+    const modifyParam: types.ModifyAssetParam = {
+      type: types.TransactionType.ModifyAsset,
+      sign: types.SignType.SecretKey,
       fromAccount: elon.account,
       assetID: assetId,
       fields: modFields,
@@ -403,9 +484,9 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should fail because only manager account can modify asset", () => {
-    const modifyParam: ModifyAssetParam = {
-      type: TransactionType.ModifyAsset,
-      sign: SignType.SecretKey,
+    const modifyParam: types.ModifyAssetParam = {
+      type: types.TransactionType.ModifyAsset,
+      sign: types.SignType.SecretKey,
       fromAccount: bob.account,
       assetID: assetId,
       fields: modFields,
@@ -418,9 +499,9 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should fail because only freeze account can freeze asset", () => {
-    const freezeParam: FreezeAssetParam = {
-      type: TransactionType.FreezeAsset,
-      sign: SignType.SecretKey,
+    const freezeParam: types.FreezeAssetParam = {
+      type: types.TransactionType.FreezeAsset,
+      sign: types.SignType.SecretKey,
       fromAccount: bob.account,
       assetID: assetId,
       freezeTarget: john.address,
@@ -435,9 +516,9 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should freeze asset", () => {
-    const freezeParam: FreezeAssetParam = {
-      type: TransactionType.FreezeAsset,
-      sign: SignType.SecretKey,
+    const freezeParam: types.FreezeAssetParam = {
+      type: types.TransactionType.FreezeAsset,
+      sign: types.SignType.SecretKey,
       fromAccount: elon.account,
       assetID: assetId,
       freezeTarget: john.address,
@@ -451,9 +532,9 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should fail because only clawback account can revoke assets", () => {
-    const revokeParam: RevokeAssetParam = {
-      type: TransactionType.RevokeAsset,
-      sign: SignType.SecretKey,
+    const revokeParam: types.RevokeAssetParam = {
+      type: types.TransactionType.RevokeAsset,
+      sign: types.SignType.SecretKey,
       fromAccount: alice.account,
       recipient: john.address,
       assetID: assetId,
@@ -468,9 +549,9 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should revoke assets", () => {
-    const revokeParam: RevokeAssetParam = {
-      type: TransactionType.RevokeAsset,
-      sign: SignType.SecretKey,
+    const revokeParam: types.RevokeAssetParam = {
+      type: types.TransactionType.RevokeAsset,
+      sign: types.SignType.SecretKey,
       fromAccount: elon.account,
       recipient: john.address,
       assetID: assetId,
@@ -499,9 +580,9 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should fail because only clawback account can revoke assets", () => {
-    const revokeParam: RevokeAssetParam = {
-      type: TransactionType.RevokeAsset,
-      sign: SignType.SecretKey,
+    const revokeParam: types.RevokeAssetParam = {
+      type: types.TransactionType.RevokeAsset,
+      sign: types.SignType.SecretKey,
       fromAccount: alice.account,
       recipient: john.address,
       assetID: assetId,
@@ -516,9 +597,9 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should throw error if trying to close asset holding by clawback", () => { /* eslint sonarjs/no-identical-functions: "off" */
-    const closebyClawbackParam: RevokeAssetParam = {
-      type: TransactionType.RevokeAsset,
-      sign: SignType.SecretKey,
+    const closebyClawbackParam: types.RevokeAssetParam = {
+      type: types.TransactionType.RevokeAsset,
+      sign: types.SignType.SecretKey,
       fromAccount: elon.account,
       recipient: john.address,
       assetID: assetId,
@@ -536,18 +617,18 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("should revoke if asset is frozen", () => {
-    const freezeParam: FreezeAssetParam = {
-      type: TransactionType.FreezeAsset,
-      sign: SignType.SecretKey,
+    const freezeParam: types.FreezeAssetParam = {
+      type: types.TransactionType.FreezeAsset,
+      sign: types.SignType.SecretKey,
       fromAccount: elon.account,
       assetID: assetId,
       freezeTarget: bob.address,
       freezeState: true,
       payFlags: {}
     };
-    const revokeParam: RevokeAssetParam = {
-      type: TransactionType.RevokeAsset,
-      sign: SignType.SecretKey,
+    const revokeParam: types.RevokeAssetParam = {
+      type: types.TransactionType.RevokeAsset,
+      sign: types.SignType.SecretKey,
       fromAccount: elon.account,
       recipient: john.address,
       assetID: assetId,
@@ -575,9 +656,9 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("Should fail because only manager can destroy assets", () => {
-    const destroyParam: DestroyAssetParam = {
-      type: TransactionType.DestroyAsset,
-      sign: SignType.SecretKey,
+    const destroyParam: types.DestroyAssetParam = {
+      type: types.TransactionType.DestroyAsset,
+      sign: types.SignType.SecretKey,
       fromAccount: alice.account,
       assetID: assetId,
       payFlags: {}
@@ -590,9 +671,9 @@ describe("Algorand Standard Assets", function () {
 
   it("Should destroy asset", () => {
     const initialCreatorMinBalance = john.minBalance;
-    const destroyParam: DestroyAssetParam = {
-      type: TransactionType.DestroyAsset,
-      sign: SignType.SecretKey,
+    const destroyParam: types.DestroyAssetParam = {
+      type: types.TransactionType.DestroyAsset,
+      sign: types.SignType.SecretKey,
       fromAccount: elon.account,
       assetID: assetId,
       payFlags: {}
@@ -610,9 +691,9 @@ describe("Algorand Standard Assets", function () {
   });
 
   it("Should not destroy asset if total assets are not in creator's account", () => {
-    const destroyParam: DestroyAssetParam = {
-      type: TransactionType.DestroyAsset,
-      sign: SignType.SecretKey,
+    const destroyParam: types.DestroyAssetParam = {
+      type: types.TransactionType.DestroyAsset,
+      sign: types.SignType.SecretKey,
       fromAccount: elon.account,
       assetID: assetId,
       payFlags: {}

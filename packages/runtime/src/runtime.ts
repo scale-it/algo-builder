@@ -1,6 +1,7 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
-import algosdk, { AssetDef, decodeAddress } from "algosdk";
+import { parsing, tx as webTx, types } from "@algo-builder/web";
+import algosdk, { decodeAddress, modelsv2 } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
 import { AccountStore } from "./account";
@@ -8,14 +9,13 @@ import { Ctx } from "./ctx";
 import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { Interpreter, loadASAFile } from "./index";
-import { convertToString, parseSSCAppArgs } from "./lib/parsing";
-import { encodeNote, getFromAddress, mkTransaction } from "./lib/txn";
+import { convertToString } from "./lib/parsing";
 import { LogicSig } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import {
-  AccountAddress, AccountStoreI, ASADefs, ASADeploymentFlags, ASAInfo, AssetHoldingM, Context, ExecParams,
-  ExecutionMode, SignType, SSCAttributesM, SSCDeploymentFlags, SSCInfo, SSCOptionalFlags,
-  StackElem, State, TransactionType, Txn, TxParams
+  AccountAddress, AccountStoreI, AppDeploymentFlags, AppOptionalFlags,
+  ASADeploymentFlags, ASAInfo, AssetHoldingM, Context,
+  ExecutionMode, SSCAttributesM, SSCInfo, StackElem, State, Txn
 } from "./types";
 
 export class Runtime {
@@ -28,7 +28,7 @@ export class Runtime {
    */
   private store: State;
   ctx: Context;
-  loadedAssetsDefs: ASADefs;
+  loadedAssetsDefs: types.ASADefs;
   // https://developer.algorand.org/docs/features/transactions/?query=round
   private round: number;
   private timestamp: number;
@@ -37,6 +37,7 @@ export class Runtime {
     // runtime store
     this.store = {
       accounts: new Map<AccountAddress, AccountStoreI>(), // string represents account address
+      accountNameAddress: new Map<string, AccountAddress>(),
       globalApps: new Map<number, AccountAddress>(), // map of {appID: accountAddress}
       assetDefs: new Map<number, AccountAddress>(), // number represents assetId
       assetNameInfo: new Map<string, ASAInfo>(),
@@ -49,7 +50,7 @@ export class Runtime {
     this.initializeAccounts(accounts);
 
     // load asa yaml files
-    this.loadedAssetsDefs = loadASAFile(this.store.accounts);
+    this.loadedAssetsDefs = loadASAFile(this.store.accountNameAddress);
 
     // context for interpreter
     this.ctx = new Ctx(cloneDeep(this.store), <Txn>{}, [], [], this);
@@ -115,7 +116,9 @@ export class Runtime {
    * Note: if user is accessing this function directly through runtime,
    * the line number is unknown
    */
-  assertAssetDefined (assetId: number, assetDef?: AssetDef, line?: number): AssetDef {
+  assertAssetDefined (
+    assetId: number, assetDef?: modelsv2.AssetParams, line?: number
+  ): modelsv2.AssetParams {
     const lineNumber = line ?? 'unknown';
     if (assetDef === undefined) {
       throw new RuntimeError(RUNTIME_ERRORS.ASA.ASSET_NOT_FOUND,
@@ -131,7 +134,7 @@ export class Runtime {
   validateTxRound (gtxns: Txn[]): void {
     // https://developer.algorand.org/docs/features/transactions/#current-round
     for (const txn of gtxns) {
-      if (txn.fv >= this.round || txn.lv <= this.round) {
+      if (Number(txn.fv) >= this.round || txn.lv <= this.round) {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_ROUND,
           { first: txn.fv, last: txn.lv, round: this.round });
       }
@@ -227,7 +230,7 @@ export class Runtime {
    * Returns Asset Definitions
    * @param assetId Asset Index
    */
-  getAssetDef (assetId: number): AssetDef {
+  getAssetDef (assetId: number): modelsv2.AssetParams {
     const creatorAcc = this.getAssetAccount(assetId);
     const assetDef = creatorAcc.getAssetDef(assetId);
     return this.assertAssetDefined(assetId, assetDef);
@@ -258,6 +261,7 @@ export class Runtime {
    */
   initializeAccounts (accounts: AccountStoreI[]): void {
     for (const acc of accounts) {
+      if (acc.account.name) this.store.accountNameAddress.set(acc.account.name, acc.account.addr);
       this.store.accounts.set(acc.address, acc);
 
       for (const appID of acc.createdApps.keys()) {
@@ -275,7 +279,7 @@ export class Runtime {
    * @param txnParams : Transaction parameters for current txn or txn Group
    * @returns: [current transaction, transaction group]
    */
-  createTxnContext (txnParams: ExecParams | ExecParams[]): [Txn, Txn[]] {
+  createTxnContext (txnParams: types.ExecParams | types.ExecParams[]): [Txn, Txn[]] {
     // if txnParams is array, then user is requesting for a group txn
     if (Array.isArray(txnParams)) {
       if (txnParams.length > 16) {
@@ -285,7 +289,7 @@ export class Runtime {
       const txns = [];
       for (const txnParam of txnParams) { // create encoded_obj for each txn in group
         const mockParams = mockSuggestedParams(txnParam.payFlags, this.round);
-        const tx = mkTransaction(txnParam, mockParams);
+        const tx = webTx.mkTransaction(txnParam, mockParams);
         // convert to encoded obj for compatibility
         const encodedTxnObj = tx.get_obj_for_encoding() as Txn;
         encodedTxnObj.txID = tx.txID();
@@ -295,7 +299,7 @@ export class Runtime {
     } else {
       // if not array, then create a single transaction
       const mockParams = mockSuggestedParams(txnParams.payFlags, this.round);
-      const tx = mkTransaction(txnParams, mockParams);
+      const tx = webTx.mkTransaction(txnParams, mockParams);
 
       const encodedTxnObj = tx.get_obj_for_encoding() as Txn;
       encodedTxnObj.txID = tx.txID();
@@ -305,36 +309,67 @@ export class Runtime {
 
   // creates new asset creation transaction object.
   mkAssetCreateTx (
-    name: string, flags: ASADeploymentFlags, asaDef: AssetDef): void {
+    name: string, flags: ASADeploymentFlags, asaDef: modelsv2.AssetParams): void {
     // this funtion is called only for validation of parameters passed
     algosdk.makeAssetCreateTxnWithSuggestedParams(
       flags.creator.addr,
-      encodeNote(flags.note, flags.noteb64),
+      webTx.encodeNote(flags.note, flags.noteb64),
       asaDef.total,
-      asaDef.decimals,
-      asaDef.defaultFrozen,
+      Number(asaDef.decimals),
+      asaDef.defaultFrozen ? asaDef.defaultFrozen : false,
       asaDef.manager !== "" ? asaDef.manager : undefined,
       asaDef.reserve !== "" ? asaDef.reserve : undefined,
       asaDef.freeze !== "" ? asaDef.freeze : undefined,
       asaDef.clawback !== "" ? asaDef.clawback : undefined,
-      asaDef.unitName,
+      asaDef.unitName as string,
       name,
-      asaDef.url,
+      asaDef.url as string,
       asaDef.metadataHash,
       mockSuggestedParams(flags, this.round)
     );
   }
 
   /**
-   * Add Asset in Runtime
+   * Add Asset in Runtime using asa.yaml
    * @param name ASA name
    * @param flags ASA Deployment Flags
    */
-  addAsset (name: string, flags: ASADeploymentFlags): number {
-    this.ctx.addAsset(name, flags.creator.addr, flags);
-
+  addAsset (asa: string, flags: ASADeploymentFlags): number {
+    this.ctx.addAsset(asa, flags.creator.addr, flags);
     this.store = this.ctx.state;
+
+    this.optInToASAMultiple(this.store.assetCounter, this.loadedAssetsDefs[asa].optInAccNames);
     return this.store.assetCounter;
+  }
+
+  /**
+   * Add Asset in Runtime without using asa.yaml
+   * @param name ASA name
+   * @param flags ASA Deployment Flags
+   */
+  addASADef (asa: string, asaDef: types.ASADef, flags: ASADeploymentFlags): number {
+    this.ctx.addASADef(asa, asaDef, flags.creator.addr, flags);
+    this.store = this.ctx.state;
+
+    this.optInToASAMultiple(this.store.assetCounter, asaDef.optInAccNames);
+    return this.store.assetCounter;
+  }
+
+  /**
+   * Opt-In to all accounts given in asa.yaml to a specific asset.
+   * @param name Asset name
+   * @param assetID Asset Index
+   */
+  optInToASAMultiple (assetID: number, accounts?: string[]): void {
+    if (accounts === undefined) {
+      return;
+    }
+    for (const accName of accounts) {
+      const address = this.store.accountNameAddress.get(accName);
+      if (address) {
+        this.optIntoASA(assetID, address, {});
+      }
+    }
   }
 
   /**
@@ -343,7 +378,7 @@ export class Runtime {
    * @param address Account address to opt-into asset
    * @param flags Transaction Parameters
    */
-  optIntoASA (assetIndex: number, address: AccountAddress, flags: TxParams): void {
+  optIntoASA (assetIndex: number, address: AccountAddress, flags: types.TxParams): void {
     this.ctx.optIntoASA(assetIndex, address, flags);
 
     this.store = this.ctx.state;
@@ -367,7 +402,7 @@ export class Runtime {
   }
 
   // creates new application transaction object and update context
-  addCtxAppCreateTxn (flags: SSCDeploymentFlags, payFlags: TxParams): void {
+  addCtxAppCreateTxn (flags: AppDeploymentFlags, payFlags: types.TxParams): void {
     const txn = algosdk.makeApplicationCreateTxn(
       flags.sender.addr,
       mockSuggestedParams(payFlags, this.round),
@@ -378,7 +413,7 @@ export class Runtime {
       flags.localBytes,
       flags.globalInts,
       flags.globalBytes,
-      parseSSCAppArgs(flags.appArgs),
+      parsing.parseAppArgs(flags.appArgs),
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
@@ -386,8 +421,7 @@ export class Runtime {
       flags.lease,
       payFlags.rekeyTo);
 
-    const encTx = txn.get_obj_for_encoding();
-    encTx.txID = txn.txID();
+    const encTx = { ...txn.get_obj_for_encoding(), txID: txn.txID() };
     this.ctx.tx = encTx;
     this.ctx.gtxs = [encTx];
   }
@@ -403,7 +437,7 @@ export class Runtime {
    * NOTE - approval and clear program must be the TEAL code as string (not compiled code)
    */
   addApp (
-    flags: SSCDeploymentFlags, payFlags: TxParams,
+    flags: AppDeploymentFlags, payFlags: types.TxParams,
     approvalProgram: string, clearProgram: string,
     debugStack?: number
   ): number {
@@ -419,13 +453,13 @@ export class Runtime {
   addCtxOptInTx (
     senderAddr: string,
     appID: number,
-    payFlags: TxParams,
-    flags: SSCOptionalFlags): void {
+    payFlags: types.TxParams,
+    flags: AppOptionalFlags): void {
     const txn = algosdk.makeApplicationOptInTxn(
       senderAddr,
       mockSuggestedParams(payFlags, this.round),
       appID,
-      parseSSCAppArgs(flags.appArgs),
+      parsing.parseAppArgs(flags.appArgs),
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
@@ -433,8 +467,7 @@ export class Runtime {
       flags.lease,
       payFlags.rekeyTo);
 
-    const encTx = txn.get_obj_for_encoding();
-    encTx.txID = txn.txID();
+    const encTx = { ...txn.get_obj_for_encoding(), txID: txn.txID() };
     this.ctx.tx = encTx;
     this.ctx.gtxs = [encTx];
   }
@@ -449,7 +482,7 @@ export class Runtime {
    * each opcode execution (upto depth = debugStack)
    */
   optInToApp (accountAddr: string, appID: number,
-    flags: SSCOptionalFlags, payFlags: TxParams, debugStack?: number): void {
+    flags: AppOptionalFlags, payFlags: types.TxParams, debugStack?: number): void {
     this.addCtxOptInTx(accountAddr, appID, payFlags, flags);
     this.ctx.debugStack = debugStack;
     this.ctx.optInToApp(accountAddr, appID);
@@ -461,15 +494,15 @@ export class Runtime {
   addCtxAppUpdateTx (
     senderAddr: string,
     appID: number,
-    payFlags: TxParams,
-    flags: SSCOptionalFlags): void {
+    payFlags: types.TxParams,
+    flags: AppOptionalFlags): void {
     const txn = algosdk.makeApplicationUpdateTxn(
       senderAddr,
       mockSuggestedParams(payFlags, this.round),
       appID,
       new Uint8Array(32), // mock approval program
       new Uint8Array(32), // mock clear progam
-      parseSSCAppArgs(flags.appArgs),
+      parsing.parseAppArgs(flags.appArgs),
       flags.accounts,
       flags.foreignApps,
       flags.foreignAssets,
@@ -477,8 +510,7 @@ export class Runtime {
       flags.lease,
       payFlags.rekeyTo);
 
-    const encTx = txn.get_obj_for_encoding();
-    encTx.txID = txn.txID();
+    const encTx = { ...txn.get_obj_for_encoding(), txID: txn.txID() };
     this.ctx.tx = encTx;
     this.ctx.gtxs = [encTx];
   }
@@ -500,8 +532,8 @@ export class Runtime {
     appID: number,
     approvalProgram: string,
     clearProgram: string,
-    payFlags: TxParams,
-    flags: SSCOptionalFlags,
+    payFlags: types.TxParams,
+    flags: AppOptionalFlags,
     debugStack?: number
   ): void {
     this.addCtxAppUpdateTx(senderAddr, appID, payFlags, flags);
@@ -544,14 +576,14 @@ export class Runtime {
    * @param debugStack: if passed then TEAL Stack is logged to console after
    * each opcode execution (upto depth = debugStack)
    */
-  validateLsigAndRun (txnParam: ExecParams, debugStack?: number): void {
+  validateLsigAndRun (txnParam: types.ExecParams, debugStack?: number): void {
     // check if transaction is signed by logic signature,
     // if yes verify signature and run logic
-    if (txnParam.sign === SignType.LogicSignature && txnParam.lsig) {
+    if (txnParam.sign === types.SignType.LogicSignature && txnParam.lsig) {
       this.ctx.args = txnParam.args ?? txnParam.lsig.args;
 
       // signature validation
-      const fromAccountAddr = getFromAddress(txnParam);
+      const fromAccountAddr = webTx.getFromAddress(txnParam);
       const result = txnParam.lsig.verify(decodeAddress(fromAccountAddr).publicKey);
       if (!result) {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_VALIDATION_FAILED,
@@ -575,15 +607,15 @@ export class Runtime {
    * @param debugStack: if passed then TEAL Stack is logged to console after
    * each opcode execution (upto depth = debugStack)
    */
-  executeTx (txnParams: ExecParams | ExecParams[], debugStack?: number): void {
+  executeTx (txnParams: types.ExecParams | types.ExecParams[], debugStack?: number): void {
     const txnParameters = Array.isArray(txnParams) ? txnParams : [txnParams];
     for (const txn of txnParameters) {
       switch (txn.type) {
-        case TransactionType.DeployASA: {
-          txn.asaDef = this.loadedAssetsDefs[txn.asaName];
+        case types.TransactionType.DeployASA: {
+          if (txn.asaDef === undefined) txn.asaDef = this.loadedAssetsDefs[txn.asaName];
           break;
         }
-        case TransactionType.DeploySSC: {
+        case types.TransactionType.DeployApp: {
           txn.approvalProg = new Uint8Array(32); // mock approval program
           txn.clearProg = new Uint8Array(32); // mock clear program
           break;

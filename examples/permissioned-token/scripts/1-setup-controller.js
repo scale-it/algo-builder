@@ -19,7 +19,7 @@ async function setupControllerSSC (runtimeEnv, deployer) {
   };
 
   console.log('\n** Deploying smart contract: controller **');
-  const controllerSSCInfo = await deployer.deploySSC(
+  const controllerAppInfo = await deployer.deployApp(
     'controller.py', // approval program
     'clear_state_program.py', // clear program
     {
@@ -30,7 +30,7 @@ async function setupControllerSSC (runtimeEnv, deployer) {
       globalBytes: 0,
       foreignAssets: [tesla.assetIndex] // pass token_id in foreign assets array
     }, {}, templateParam); // pass token_id as a template paramenter
-  console.log(controllerSSCInfo);
+  console.log(controllerAppInfo);
 
   // Use executeSignedTxnFromFile function to execute deployment transaction from a signed file:
   // executeSignedTxnFromFile(deployer, 'ssc_file_out.tx');

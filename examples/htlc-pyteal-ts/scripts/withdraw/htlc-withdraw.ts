@@ -7,7 +7,7 @@
  * if the seller is able to provide the secret value that corresponds to the hash in the program.
 */
 import * as algob from "@algo-builder/algob";
-import { types as rtypes } from "@algo-builder/runtime";
+import { types as rtypes } from "@algo-builder/web";
 
 import { executeTx, prepareParameters } from "./common";
 

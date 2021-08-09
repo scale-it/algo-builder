@@ -1,5 +1,5 @@
 const { executeTransaction } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/runtime');
+const { types } = require('@algo-builder/web');
 
 async function run (runtimeEnv, deployer) {
   const creator = deployer.accountsByName.get('alice');
@@ -9,7 +9,7 @@ async function run (runtimeEnv, deployer) {
    * Set level:2 for Alice and Bob (required by smart-contract for asset transfer)
    * level refers to the minimum required level of user to transfer an asset
    */
-  const appInfo = deployer.getSSC('poi-approval.teal', 'poi-clear.teal');
+  const appInfo = deployer.getApp('poi-approval.teal', 'poi-clear.teal');
   const setLevelParams = {
     type: types.TransactionType.CallNoOpSSC,
     sign: types.SignType.SecretKey,
@@ -26,6 +26,10 @@ async function run (runtimeEnv, deployer) {
     ...setLevelParams,
     accounts: [bob.addr]
   });
+
+  /* uncomment below code to debug (start a debugging session) line 24 */
+  // await new Tealdbg(deployer, setLevelParams)
+  // .run({ tealFile: 'poi-approval.teal' });
 
   /* Use below code to clear the min asset level set
     const clearLevelParams = {

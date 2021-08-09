@@ -1,6 +1,6 @@
+import { ERRORS } from "@algo-builder/web";
 import { assert } from "chai";
 
-import { ERRORS } from "../../src/errors/errors-list";
 import { BuilderContext } from "../../src/internal/context";
 import { resetBuilderContext } from "../../src/internal/reset";
 import { useEnvironment } from "../helpers/environment";

@@ -99,7 +99,7 @@ Firstly we need to fund the contract. `master` account will fund it (as it has l
 ```javascript
 // Create Application
 // Note: An Account can have maximum of 10 Applications.
-const sscInfo = await deployer.deploySSC(
+const sscInfo = await deployer.deployApp(
   'approval_program.teal', // approval program
   'clear_program.teal', // clear program
   {
@@ -138,7 +138,7 @@ Created new app-id: 189
 To Opt-In to an application use the following code in one of your scripts (in `./scripts`):
 
 ```javascript
-await deployer.optInAccountToSSC(account, applicationID, {}, {});
+await deployer.optInAccountToApp(account, applicationID, {}, {});
 ```
 
 where `Account` is the account you want to opt-in and applicationID is application index.
@@ -189,7 +189,7 @@ here key 'Y291bnRlcg==' is base64 encoded form of `counter`.
 To update an application with (new_approval.teal, new_clear.teal), you can use:
 
 ```javascript
-const updatedRes = await deployer.updateSSC(
+const updatedRes = await deployer.updateApp(
   creatorAccount,
   {}, // pay flags
   applicationID,
@@ -206,7 +206,7 @@ To delete an existing application you can use:
 
 ```javascript
 const tx = {
-  type: types.TransactionType.DeleteSSC,
+  type: types.TransactionType.DeleteApp,
   sign: types.SignType.SecretKey,
   fromAccount: creatorAccount,
   appID: applicationID,
