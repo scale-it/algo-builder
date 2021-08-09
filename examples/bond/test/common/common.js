@@ -2,6 +2,7 @@ const { getProgram } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 const { assert } = require('chai');
 
+const bondToken = 'bond-token-';
 const asaDef = {
   total: 1000000,
   decimals: 0,
@@ -15,7 +16,7 @@ const asaDef = {
   freeze: 'WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE'
 };
 
-function optIn(runtime, lsig, assetID, appManager) {
+function optIn (runtime, lsig, assetID, appManager) {
   // Only store manager can allow opt-in to ASA for lsig
   const optInTx = [
     {
@@ -67,10 +68,10 @@ function createDex (runtime, creatorAccount, managerAcc, i, master, issuerLsig) 
     throw new Error('i must be greater than equal to 1');
   }
 
-  const previousToken = 'bond-token-' + String(i - 1);
+  const previousToken = bondToken + String(i - 1);
   const oldBond = runtime.getAssetInfoFromName(previousToken).assetIndex;
   const appInfo = runtime.getAppInfoFromName(approvalProgram, clearProgram);
-  const newBondToken = 'bond-token-' + String(i);
+  const newBondToken = bondToken + String(i);
   const getGlobal = (key) => runtime.getGlobalState(appInfo.appID, key);
 
   // Create B_[i+1]
@@ -79,7 +80,7 @@ function createDex (runtime, creatorAccount, managerAcc, i, master, issuerLsig) 
     asaDef,
     { creator: { ...creatorAccount.account, name: 'bond-token-creator' } }
   );
-  
+
   runtime = optIn(runtime, issuerLsig, newBond, managerAcc);
 
   // Create dex
@@ -90,7 +91,7 @@ function createDex (runtime, creatorAccount, managerAcc, i, master, issuerLsig) 
     TMPL_APP_MANAGER: managerAcc.address
   };
   const dexLsigProgram = getProgram('dex-lsig.py', param);
-  let dexLsig = runtime.getLogicSig(dexLsigProgram, []);
+  const dexLsig = runtime.getLogicSig(dexLsigProgram, []);
   const dexLsigAddress = dexLsig.address();
 
   // fund dex with some minimum balance first
@@ -163,7 +164,7 @@ function createDex (runtime, creatorAccount, managerAcc, i, master, issuerLsig) 
   ];
   runtime.executeTx(groupTx);
 
-  let issuer = runtime.getAccount(issuerLsig.address());
+  const issuer = runtime.getAccount(issuerLsig.address());
   assert.equal(runtime.getAccount(dexLsig.address()).getAssetHolding(newBond)?.amount, BigInt(total));
   assert.equal(issuer.getAssetHolding(oldBond)?.amount, 0n);
   assert.equal(issuer.getAssetHolding(newBond)?.amount, BigInt(assetAmount));
@@ -180,14 +181,15 @@ function createDex (runtime, creatorAccount, managerAcc, i, master, issuerLsig) 
  * @param amount bond amount
  * For ex: 1 means your 0 bond-tokens will be redeemed from 1st Dex
  */
-function redeem(runtime, buyerAccount, dex, amount, dexLsig) {
+function redeem (runtime, buyerAccount, dex, amount, dexLsig) {
   const appInfo = runtime.getAppInfoFromName(approvalProgram, clearProgram);
-  const oldBond = runtime.getAssetInfoFromName('bond-token-' + String(dex - 1)).assetIndex;
-  const newBond = runtime.getAssetInfoFromName('bond-token-' + String(dex)).assetIndex;
+  const oldBond = runtime.getAssetInfoFromName(bondToken + String(dex - 1)).assetIndex;
+  const newBond = runtime.getAssetInfoFromName(bondToken + String(dex)).assetIndex;
   const initBond = buyerAccount.getAssetHolding(oldBond)?.amount;
 
   runtime.optIntoASA(newBond, buyerAccount.address, {});
 
+  const balanceBeforeRedeem = buyerAccount.balance();
   const groupTx = [
     // Transfer tokens to dex lsig.
     {
@@ -235,6 +237,10 @@ function redeem(runtime, buyerAccount, dex, amount, dexLsig) {
   buyerAccount = runtime.getAccount(buyerAccount.address);
   assert.equal(buyerAccount.getAssetHolding(oldBond)?.amount, BigInt(initBond) - BigInt(amount));
   assert.equal(buyerAccount.getAssetHolding(newBond)?.amount, BigInt(amount));
+  assert.equal(
+    balanceBeforeRedeem + BigInt(amount) * BigInt(coupon) - 4000n,
+    buyerAccount.balance()
+  );
   return runtime;
 }
 
@@ -248,4 +254,4 @@ module.exports = {
   coupon,
   issue,
   redeem
-}
+};

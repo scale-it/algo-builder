@@ -6,12 +6,12 @@ const { types } = require('@algo-builder/web');
 const { assert } = require('chai');
 const {
   optIn, createDex, approvalProgram,
-  clearProgram, minBalance, initialBalance,
-  issue, redeem
+  clearProgram, minBalance, initialBalance, redeem
 } = require('./common/common');
 
 const RUNTIME_ERR1009 = 'RUNTIME_ERR1009: TEAL runtime encountered err opcode';
 const RUNTIME_ERR1402 = 'Cannot withdraw';
+const RUNTIME_ERR1506 = 'Fee required';
 const REJECTED_BY_LOGIC = 'RUNTIME_ERR1007: Teal code rejected by logic';
 const updateIssuer = 'str:update_issuer_address';
 
@@ -33,7 +33,7 @@ describe('Bond token failing tests', function () {
   let lsig;
   let initialBond;
 
-  this.beforeAll(async function () {
+  this.beforeEach(async function () {
     runtime = new Runtime([
       appManager, bondTokenCreator,
       issuerAddress, master, elon,
@@ -48,8 +48,6 @@ describe('Bond token failing tests', function () {
       globalBytes: 15
     };
   });
-
-  const getGlobal = (key) => runtime.getGlobalState(applicationId, key);
 
   // fetch latest account state
   function syncAccounts () {
@@ -335,7 +333,7 @@ describe('Bond token failing tests', function () {
         fromAccount: elon.account,
         toAccountAddr: issuerLsigAddress,
         amountMicroAlgos: algoAmount - 10,
-        payFlags: {}
+        payFlags: { totalFee: 2000 }
       },
       // Bond token transfer from issuer's address
       {
@@ -346,7 +344,7 @@ describe('Bond token failing tests', function () {
         toAccountAddr: elon.address,
         amount: 10,
         assetID: initialBond,
-        payFlags: { totalFee: 1000 }
+        payFlags: { totalFee: 0 }
       },
       // call to bond-dapp
       {
@@ -354,7 +352,7 @@ describe('Bond token failing tests', function () {
         sign: types.SignType.SecretKey,
         fromAccount: elon.account,
         appID: applicationId,
-        payFlags: {},
+        payFlags: { totalFee: 1000 },
         appArgs: ['str:buy']
       }
     ];
@@ -374,8 +372,6 @@ describe('Bond token failing tests', function () {
   it('Buyer cannot redeem more than they have', () => {
     issue();
     buy();
-    createDex(runtime, bondTokenCreator, appManager, 1, master, lsig);
-
     let dexLsig1;
     // manager starts epoch 1 (create dex)
     [runtime, dexLsig1] = createDex(runtime, bondTokenCreator, appManager, 1, master, lsig);
@@ -385,5 +381,113 @@ describe('Bond token failing tests', function () {
     console.log('Dex 1 Address: ', dexLsig1.address());
 
     assert.throws(() => redeem(runtime, elon, 1, 20, dexLsig1), RUNTIME_ERR1402);
+  });
+
+  it('Buyer tries to buy bonds without paying fees', () => {
+    issue();
+    // Buy tokens from issuer
+    runtime.optIntoASA(initialBond, elon.address, {});
+    runtime.optInToApp(elon.address, applicationId, {}, {});
+    const algoAmount = 10 * 1000;
+
+    const groupTx = [
+      // Algo transfer from buyer to issuer
+      {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
+        fromAccount: elon.account,
+        toAccountAddr: issuerLsigAddress,
+        amountMicroAlgos: algoAmount,
+        payFlags: { totalFee: 1000 }
+      },
+      // Bond token transfer from issuer's address
+      {
+        type: types.TransactionType.TransferAsset,
+        sign: types.SignType.LogicSignature,
+        fromAccountAddr: issuerLsigAddress,
+        lsig: lsig,
+        toAccountAddr: elon.address,
+        amount: 10,
+        assetID: initialBond,
+        payFlags: { totalFee: 1000 }
+      },
+      // call to bond-dapp
+      {
+        type: types.TransactionType.CallNoOpSSC,
+        sign: types.SignType.SecretKey,
+        fromAccount: elon.account,
+        appID: applicationId,
+        payFlags: { totalFee: 1000 },
+        appArgs: ['str:buy']
+      }
+    ];
+
+    assert.throws(() => runtime.executeTx(groupTx), RUNTIME_ERR1009);
+
+    groupTx[1].payFlags = { totalFee: 0 };
+    assert.throws(() => runtime.executeTx(groupTx), RUNTIME_ERR1506);
+  });
+
+  it('Buyer tries to exchange bonds without paying fees', () => {
+    issue();
+    buy();
+    let dexLsig1;
+    // manager starts epoch 1 (create dex)
+    [runtime, dexLsig1] = createDex(runtime, bondTokenCreator, appManager, 1, master, lsig);
+    syncAccounts();
+    // sync dex account
+    dex1 = runtime.getAccount(dexLsig1.address());
+
+    const appInfo = runtime.getAppInfoFromName(approvalProgram, clearProgram);
+    const oldBond = runtime.getAssetInfoFromName('bond-token-0').assetIndex;
+    const newBond = runtime.getAssetInfoFromName('bond-token-1').assetIndex;
+
+    const groupTx = [
+      // Transfer tokens to dex lsig.
+      {
+        type: types.TransactionType.TransferAsset,
+        sign: types.SignType.SecretKey,
+        fromAccount: elon.account,
+        toAccountAddr: dexLsig1.address(),
+        amount: 1,
+        assetID: oldBond,
+        payFlags: { totalFee: 2000 }
+      },
+      // New bond token transfer to buyer's address
+      {
+        type: types.TransactionType.TransferAsset,
+        sign: types.SignType.LogicSignature,
+        fromAccountAddr: dexLsig1.address(),
+        lsig: dexLsig1,
+        toAccountAddr: elon.address,
+        amount: 1,
+        assetID: newBond,
+        payFlags: { totalFee: 1000 }
+      },
+      {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.LogicSignature,
+        fromAccountAddr: dexLsig1.address(),
+        lsig: dexLsig1,
+        toAccountAddr: elon.address,
+        amountMicroAlgos: 20,
+        payFlags: { totalFee: 0 }
+      },
+      // call to bond-dapp
+      {
+        type: types.TransactionType.CallNoOpSSC,
+        sign: types.SignType.SecretKey,
+        fromAccount: elon.account,
+        appID: appInfo.appID,
+        payFlags: { totalFee: 1000 },
+        appArgs: ['str:redeem_coupon']
+      }
+    ];
+
+    assert.throws(() => runtime.executeTx(groupTx), RUNTIME_ERR1009);
+
+    groupTx[1].payFlags = { totalFee: 0 };
+    groupTx[2].payFlags = { totalFee: 1000 };
+    assert.throws(() => runtime.executeTx(groupTx), RUNTIME_ERR1009);
   });
 });

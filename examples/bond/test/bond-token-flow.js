@@ -361,6 +361,11 @@ describe('Bond token Tests', function () {
 
     runtime.setRoundAndTimestamp(3, Math.round(new Date().getTime() / 1000) + 250);
 
+    syncAccounts();
+    // Algo balance before exit
+    const beforeExitElon = elon.balance();
+    const beforeExitBob = bob.balance();
+
     const exitBond = 12;
     const nominalPrice = 1000;
     const exitAmount = Number(exitBond) * Number(nominalPrice);
@@ -408,10 +413,12 @@ describe('Bond token Tests', function () {
 
     runtime.executeTx(exitTx);
     syncAccounts();
+    const feePaid = 3000n;
     assert.equal(bob.getAssetHolding(bond1)?.amount, 0n);
     assert.equal(bob.getAssetHolding(bond2)?.amount, 0n);
     assert.equal(elon.getAssetHolding(bond1)?.amount, 0n);
     assert.equal(elon.getAssetHolding(bond2)?.amount, 0n);
-    // check algo balance
+    assert.equal(beforeExitElon + 12000n - feePaid, elon.balance());
+    assert.equal(beforeExitBob + 2000n - feePaid, bob.balance());
   });
 });
