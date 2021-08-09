@@ -5,10 +5,10 @@ const {
 const { types } = require('@algo-builder/web');
 const { assert } = require('chai');
 
-const { 
+const {
   optIn, createDex, approvalProgram,
-  clearProgram, minBalance, initialBalance ,
-  coupon, issue, redeem
+  clearProgram, minBalance, initialBalance,
+  issue, redeem
 } = require('./common/common');
 
 /**
@@ -29,7 +29,6 @@ describe('Bond token Tests', function () {
   let applicationId;
   let issuerLsigAddress;
   let lsig;
-  let newBondIndex;
 
   this.beforeAll(async function () {
     runtime = new Runtime([
@@ -69,14 +68,18 @@ describe('Bond token Tests', function () {
 
   it('Bond token application', () => {
     /**
-     * This test demonstrates how to create a Bond token Application
-     * and interact with it. there are following operations that are performed:
-     * - Create bond tokens
-     * - Create the application
-     * - Update the application with issuer's address
-     * - Issue bond tokens
-     * - Buy bond tokens
-     */
+    * Issue initial bond tokens to the issuer
+    * In epoch_0 elon buys 10 bonds
+    * In epoch 0 elon sells 2 bonds to bob for 2020 ALGO (in a group transaction)
+    * Manager creates dex 1
+    * Elon redeems his bonds (8), Elon buys 4 more bonds (so he will have 12 bonds in total)
+    * Manager creates dex 2
+    * Elon redeems all his bonds.
+    * Bob redeems his bonds from epoch 0 and 1
+    * Maturity period is set to 240 seconds(4 min) after the contract deployment.
+    * At maturity, manager creates and funds buyback and both elon and
+    * bob can exit all their tokens (12 and 2 respectively).
+    */
 
     const currentBondIndex = runtime.addAsset(
       'bond-token-0', { creator: { ...bondTokenCreator.account, name: 'bond-token-creator' } });
@@ -102,7 +105,7 @@ describe('Bond token Tests', function () {
       TMPL_OWNER: bondTokenCreator.address,
       TMPL_APP_MANAGER: appManager.address
     };
-    let issuerLsigProg = getProgram('issuer-lsig.py', scInitParam);
+    const issuerLsigProg = getProgram('issuer-lsig.py', scInitParam);
     lsig = runtime.getLogicSig(issuerLsigProg, []);
     issuerLsigAddress = lsig.address();
 
@@ -330,7 +333,7 @@ describe('Bond token Tests', function () {
       TMPL_BOND: bond2
     };
     const buyLsigProgram = getProgram('buyback-lsig.py', scParam);
-    let buybackLsig = runtime.getLogicSig(buyLsigProgram, []);
+    const buybackLsig = runtime.getLogicSig(buyLsigProgram, []);
 
     // fund dex with some minimum balance first
     const fundDexParam = {
@@ -358,11 +361,11 @@ describe('Bond token Tests', function () {
 
     runtime.setRoundAndTimestamp(3, Math.round(new Date().getTime() / 1000) + 250);
 
-    let exitBond = 12;
-    let nominalPrice = 1000;
-    let exitAmount = Number(exitBond) * Number(nominalPrice);
+    const exitBond = 12;
+    const nominalPrice = 1000;
+    const exitAmount = Number(exitBond) * Number(nominalPrice);
     // Exit tokens from elon
-    let exitTx = [
+    const exitTx = [
       //  Bond token transfer to buyback address
       {
         type: types.TransactionType.TransferAsset,

@@ -4,78 +4,99 @@ const {
 } = require('@algo-builder/runtime');
 const { types } = require('@algo-builder/web');
 const { assert } = require('chai');
+const {
+  optIn, createDex, approvalProgram,
+  clearProgram, minBalance, initialBalance,
+  issue, redeem
+} = require('./common/common');
 
-const minBalance = 10e6; // 10 ALGO's
-const initialBalance = 200e6;
 const RUNTIME_ERR1009 = 'RUNTIME_ERR1009: TEAL runtime encountered err opcode';
+const RUNTIME_ERR1402 = 'Cannot withdraw';
 const REJECTED_BY_LOGIC = 'RUNTIME_ERR1007: Teal code rejected by logic';
 const updateIssuer = 'str:update_issuer_address';
 
 describe('Bond token failing tests', function () {
   const master = new AccountStore(1000e6);
-  let storeManager = new AccountStore(initialBalance);
+  let appManager = new AccountStore(initialBalance);
   let bondTokenCreator = new AccountStore(initialBalance);
   let issuerAddress = new AccountStore(minBalance);
-  let buyer = new AccountStore(initialBalance);
-  let dex = new AccountStore(initialBalance);
-  const randomUser = new AccountStore(initialBalance);
+  let elon = new AccountStore(initialBalance);
+  let bob = new AccountStore(initialBalance);
+  let dex1 = new AccountStore(initialBalance);
+  let dex2 = new AccountStore(initialBalance);
+  let randomUser = new AccountStore(initialBalance);
 
   let runtime;
   let flags;
   let applicationId;
   let issuerLsigAddress;
   let lsig;
-  let newBondIndex;
-  let currentBondIndex;
-  const approvalProgram = getProgram('bond-dapp-stateful.py');
-  const clearProgram = getProgram('bond-dapp-clear.py');
+  let initialBond;
 
-  this.beforeEach(async function () {
+  this.beforeAll(async function () {
     runtime = new Runtime([
-      storeManager, bondTokenCreator,
-      issuerAddress, master, buyer, dex, randomUser
+      appManager, bondTokenCreator,
+      issuerAddress, master, elon,
+      bob, dex1, dex2, randomUser
     ]);
 
-    // Bond-Dapp initialization parameters
-    const storeManagerPk = convert.addressToPk(storeManager.address);
-    const issuePrice = 'int:1000';
-    const nominalPrice = 'int:1000';
-    const matDate = Math.round(new Date().getTime() / 1000) + 1000;
-    const maturityDate = convert.uint64ToBigEndian(matDate);
-    const couponValue = 'int:100';
-    const epoch = 'int:0';
-    const maxAmount = 'int:1000000';
-    const bondCreator = convert.addressToPk(bondTokenCreator.address);
     flags = {
-      sender: storeManager.account,
+      sender: appManager.account,
       localInts: 1,
       localBytes: 1,
       globalInts: 8,
       globalBytes: 15
     };
-    currentBondIndex = runtime.addAsset(
-      'bond-token', { creator: { ...bondTokenCreator.account, name: 'bond-token-creator' } });
+  });
+
+  const getGlobal = (key) => runtime.getGlobalState(applicationId, key);
+
+  // fetch latest account state
+  function syncAccounts () {
+    appManager = runtime.getAccount(appManager.address);
+    bondTokenCreator = runtime.getAccount(bondTokenCreator.address);
+    issuerAddress = runtime.getAccount(issuerAddress.address);
+    elon = runtime.getAccount(elon.address);
+    dex1 = runtime.getAccount(dex1.address);
+    dex2 = runtime.getAccount(dex2.address);
+    bob = runtime.getAccount(bob.address);
+    randomUser = runtime.getAccount(randomUser.address);
+  }
+
+  // Bond-Dapp initialization parameters
+  const appManagerPk = convert.addressToPk(appManager.address);
+  const issuePrice = 'int:1000';
+  const couponValue = 'int:20';
+  const maxIssuance = 'int:1000000';
+  const bondCreator = convert.addressToPk(bondTokenCreator.address);
+
+  this.beforeEach(async function () {
+    initialBond = runtime.addAsset(
+      'bond-token-0', { creator: { ...bondTokenCreator.account, name: 'bond-token-creator' } });
+
+    const creationFlags = Object.assign({}, flags);
     const creationArgs = [
-      storeManagerPk, issuePrice,
-      nominalPrice, maturityDate,
-      couponValue, epoch,
-      `int:${currentBondIndex}`,
-      maxAmount, bondCreator
+      appManagerPk,
+      bondCreator,
+      issuePrice,
+      couponValue,
+      `int:${initialBond}`,
+      maxIssuance
     ];
 
     // create application
     applicationId = runtime.addApp(
-      { ...flags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
+      { ...creationFlags, appArgs: creationArgs }, {}, approvalProgram, clearProgram);
 
     // setup lsig account
     // Initialize issuer lsig with bond-app ID
     const scInitParam = {
       TMPL_APPLICATION_ID: applicationId,
       TMPL_OWNER: bondTokenCreator.address,
-      TMPL_STORE_MANAGER: storeManager.address
+      TMPL_APP_MANAGER: appManager.address
     };
-    const issuerLsig = getProgram('issuer-lsig.py', scInitParam);
-    lsig = runtime.getLogicSig(issuerLsig, []);
+    const issuerLsigProg = getProgram('issuer-lsig.py', scInitParam);
+    lsig = runtime.getLogicSig(issuerLsigProg, []);
     issuerLsigAddress = lsig.address();
 
     // sync escrow account
@@ -94,22 +115,21 @@ describe('Bond token failing tests', function () {
     runtime.executeTx(fundEscrowParam);
   });
 
-  const getGlobal = (key) => runtime.getGlobalState(applicationId, key);
-
   function issue () {
     const appArgs = [updateIssuer, convert.addressToPk(issuerLsigAddress)];
 
     const appCallParams = {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
-      fromAccount: storeManager.account,
+      fromAccount: appManager.account,
       appID: applicationId,
       payFlags: {},
       appArgs: appArgs
     };
     runtime.executeTx(appCallParams);
-    optIn(issuerLsigAddress, lsig, currentBondIndex);
+    runtime = optIn(runtime, lsig, initialBond, appManager);
 
+    // Issue tokens to issuer from bond token creator
     const groupTx = [
       // Bond asa transfer to issuer's address
       {
@@ -118,7 +138,7 @@ describe('Bond token failing tests', function () {
         fromAccount: bondTokenCreator.account,
         toAccountAddr: issuerLsigAddress,
         amount: 1e6,
-        assetID: currentBondIndex,
+        assetID: initialBond,
         payFlags: { }
       },
       // call to bond-dapp
@@ -135,19 +155,20 @@ describe('Bond token failing tests', function () {
   }
 
   function buy () {
-    runtime.optIntoASA(currentBondIndex, buyer.address, {});
-    runtime.optInToApp(buyer.address, applicationId, {}, {});
-    const algoAmount = 10 * 1000 + 1000;
+    runtime.optIntoASA(initialBond, elon.address, {});
+    runtime.optInToApp(elon.address, applicationId, {}, {});
+    const amount = 10;
+    const algoAmount = amount * 1000;
 
     const groupTx = [
-      // Algo transfer from buyer to issuer
+      // Algo transfer from elon to issuer
       {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.SecretKey,
-        fromAccount: buyer.account,
+        fromAccount: elon.account,
         toAccountAddr: issuerLsigAddress,
         amountMicroAlgos: algoAmount,
-        payFlags: {}
+        payFlags: { totalFee: 2000 }
       },
       // Bond token transfer from issuer's address
       {
@@ -155,108 +176,24 @@ describe('Bond token failing tests', function () {
         sign: types.SignType.LogicSignature,
         fromAccountAddr: issuerLsigAddress,
         lsig: lsig,
-        toAccountAddr: buyer.address,
+        toAccountAddr: elon.address,
         amount: 10,
-        assetID: currentBondIndex,
-        payFlags: { totalFee: 1000 }
+        assetID: initialBond,
+        payFlags: { totalFee: 0 }
       },
       // call to bond-dapp
       {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
-        fromAccount: buyer.account,
+        fromAccount: elon.account,
         appID: applicationId,
-        payFlags: {},
+        payFlags: { totalFee: 1000 },
         appArgs: ['str:buy']
       }
     ];
 
     runtime.executeTx(groupTx);
     syncAccounts();
-  }
-
-  function setupDex () {
-    // Create B_i+1 bond token
-    newBondIndex = runtime.addAsset(
-      'new-bond-token', { creator: { ...bondTokenCreator.account, name: 'bond-token-creator' } });
-
-    optIn(issuerLsigAddress, lsig, newBondIndex);
-
-    // Create dex
-    const param = {
-      TMPL_OLD_BOND: currentBondIndex,
-      TMPL_NEW_BOND: newBondIndex,
-      TMPL_APPLICATION_ID: applicationId,
-      TMPL_STORE_MANAGER: storeManager.address
-    };
-    const dexLsigProgram = getProgram('dex-lsig.py', param);
-    const dexLsig = runtime.getLogicSig(dexLsigProgram, []);
-    const dexLsigAddress = dexLsig.address();
-
-    // sync dex account
-    dex = runtime.getAccount(dexLsigAddress);
-    console.log('Dex Address: ', dexLsigAddress);
-
-    // fund dex with some minimum balance first
-    const fundDexParam = {
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.SecretKey,
-      fromAccount: master.account,
-      toAccountAddr: dexLsigAddress,
-      amountMicroAlgos: 1e6,
-      payFlags: {}
-    };
-    runtime.executeTx(fundDexParam);
-
-    optIn(dexLsigAddress, dexLsig, currentBondIndex);
-    optIn(dexLsigAddress, dexLsig, newBondIndex);
-
-    const total = getGlobal('total');
-
-    // Transfer total amount to dex lsig
-    const transferTx = {
-      type: types.TransactionType.TransferAsset,
-      sign: types.SignType.SecretKey,
-      fromAccount: bondTokenCreator.account,
-      toAccountAddr: dexLsigAddress,
-      amount: total,
-      assetID: newBondIndex,
-      payFlags: { totalFee: 1000 }
-    };
-    runtime.executeTx(transferTx);
-  }
-
-  // fetch latest account state
-  function syncAccounts () {
-    storeManager = runtime.getAccount(storeManager.address);
-    bondTokenCreator = runtime.getAccount(bondTokenCreator.address);
-    issuerAddress = runtime.getAccount(issuerAddress.address);
-    buyer = runtime.getAccount(buyer.address);
-    dex = runtime.getAccount(dex.address);
-  }
-
-  function optIn (lsigAddress, lsig, assetID) {
-    // Only store manager can allow opt-in to ASA for lsig
-    const optInTx = [
-      {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.SecretKey,
-        fromAccount: storeManager.account,
-        toAccountAddr: lsigAddress,
-        amountMicroAlgos: 0,
-        payFlags: {}
-      },
-      {
-        type: types.TransactionType.OptInASA,
-        sign: types.SignType.LogicSignature,
-        fromAccountAddr: lsigAddress,
-        lsig: lsig,
-        assetID: assetID,
-        payFlags: {}
-      }
-    ];
-
-    runtime.executeTx(optInTx);
   }
 
   it("Random user should not be able to update issuer's address", () => {
@@ -281,9 +218,9 @@ describe('Bond token failing tests', function () {
       sign: types.SignType.LogicSignature,
       fromAccountAddr: issuerLsigAddress,
       lsig: lsig,
-      toAccountAddr: buyer.address,
+      toAccountAddr: elon.address,
       amount: 10,
-      assetID: currentBondIndex,
+      assetID: initialBond,
       payFlags: { totalFee: 1000 }
     };
 
@@ -296,7 +233,7 @@ describe('Bond token failing tests', function () {
       sign: types.SignType.LogicSignature,
       fromAccountAddr: issuerLsigAddress,
       lsig: lsig,
-      assetID: currentBondIndex,
+      assetID: initialBond,
       payFlags: {}
     };
 
@@ -319,7 +256,7 @@ describe('Bond token failing tests', function () {
         sign: types.SignType.LogicSignature,
         fromAccountAddr: issuerLsigAddress,
         lsig: lsig,
-        assetID: currentBondIndex,
+        assetID: initialBond,
         payFlags: {}
       }
     ];
@@ -334,7 +271,7 @@ describe('Bond token failing tests', function () {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
       fromAccount: randomUser.account,
-      appID: applicationId,
+      appID: runtime.getAppInfoFromName(approvalProgram, clearProgram).appID,
       payFlags: {},
       appArgs: appArgs
     };
@@ -348,14 +285,14 @@ describe('Bond token failing tests', function () {
     const appCallParams = {
       type: types.TransactionType.CallNoOpSSC,
       sign: types.SignType.SecretKey,
-      fromAccount: storeManager.account,
+      fromAccount: appManager.account,
       appID: applicationId,
       payFlags: {},
       appArgs: appArgs
     };
     runtime.executeTx(appCallParams);
-    optIn(issuerLsigAddress, lsig, currentBondIndex);
-    runtime.optIntoASA(currentBondIndex, buyer.address, {});
+    runtime = optIn(runtime, lsig, initialBond, appManager);
+    runtime.optIntoASA(initialBond, elon.address, {});
 
     const groupTx = [
       // Bond asa transfer to issuer's address
@@ -363,9 +300,9 @@ describe('Bond token failing tests', function () {
         type: types.TransactionType.TransferAsset,
         sign: types.SignType.SecretKey,
         fromAccount: bondTokenCreator.account,
-        toAccountAddr: buyer.address,
+        toAccountAddr: elon.address,
         amount: 1e6,
-        assetID: currentBondIndex,
+        assetID: initialBond,
         payFlags: { }
       },
       // call to bond-dapp
@@ -386,16 +323,16 @@ describe('Bond token failing tests', function () {
     issue();
 
     // Buy tokens from issuer
-    runtime.optIntoASA(currentBondIndex, buyer.address, {});
-    runtime.optInToApp(buyer.address, applicationId, {}, {});
-    const algoAmount = 10 * 1000 + 1000;
+    runtime.optIntoASA(initialBond, elon.address, {});
+    runtime.optInToApp(elon.address, applicationId, {}, {});
+    const algoAmount = 10 * 1000;
 
     const groupTx = [
       // Algo transfer from buyer to issuer
       {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.SecretKey,
-        fromAccount: buyer.account,
+        fromAccount: elon.account,
         toAccountAddr: issuerLsigAddress,
         amountMicroAlgos: algoAmount - 10,
         payFlags: {}
@@ -406,16 +343,16 @@ describe('Bond token failing tests', function () {
         sign: types.SignType.LogicSignature,
         fromAccountAddr: issuerLsigAddress,
         lsig: lsig,
-        toAccountAddr: buyer.address,
+        toAccountAddr: elon.address,
         amount: 10,
-        assetID: currentBondIndex,
+        assetID: initialBond,
         payFlags: { totalFee: 1000 }
       },
       // call to bond-dapp
       {
         type: types.TransactionType.CallNoOpSSC,
         sign: types.SignType.SecretKey,
-        fromAccount: buyer.account,
+        fromAccount: elon.account,
         appID: applicationId,
         payFlags: {},
         appArgs: ['str:buy']
@@ -428,51 +365,25 @@ describe('Bond token failing tests', function () {
   it('Only store manager can create dex', () => {
     issue();
     buy();
-    setupDex();
 
-    const assetAmount = issuerAddress.getAssetHolding(currentBondIndex)?.amount;
+    assert.throws(() => createDex(
+      runtime, bondTokenCreator, elon, 1, master, lsig
+    ), REJECTED_BY_LOGIC);
+  });
 
-    const groupTx = [
-      // call to bond-dapp
-      {
-        type: types.TransactionType.CallNoOpSSC,
-        sign: types.SignType.SecretKey,
-        fromAccount: buyer.account,
-        appID: applicationId,
-        payFlags: {},
-        appArgs: ['str:create_dex'],
-        accounts: [issuerLsigAddress]
-      },
-      // New bond token transfer to issuer's address
-      {
-        type: types.TransactionType.TransferAsset,
-        sign: types.SignType.SecretKey,
-        fromAccount: bondTokenCreator.account,
-        toAccountAddr: issuerLsigAddress,
-        amount: assetAmount,
-        assetID: newBondIndex,
-        payFlags: { totalFee: 1000 }
-      },
-      // burn tokens
-      {
-        type: types.TransactionType.TransferAsset,
-        sign: types.SignType.LogicSignature,
-        fromAccountAddr: issuerLsigAddress,
-        lsig: lsig,
-        toAccountAddr: bondTokenCreator.address,
-        amount: assetAmount,
-        assetID: currentBondIndex,
-        payFlags: { totalFee: 1000 }
-      }
-    ];
+  it('Buyer cannot redeem more than they have', () => {
+    issue();
+    buy();
+    createDex(runtime, bondTokenCreator, appManager, 1, master, lsig);
 
-    assert.throws(() => runtime.executeTx(groupTx), RUNTIME_ERR1009);
+    let dexLsig1;
+    // manager starts epoch 1 (create dex)
+    [runtime, dexLsig1] = createDex(runtime, bondTokenCreator, appManager, 1, master, lsig);
+    syncAccounts();
+    // sync dex account
+    dex1 = runtime.getAccount(dexLsig1.address());
+    console.log('Dex 1 Address: ', dexLsig1.address());
 
-    // asset amount is less than required
-    groupTx[0].fromAccount = storeManager.account;
-    groupTx[1].amount = assetAmount - 100n;
-    groupTx[2].amount = assetAmount - 100n;
-
-    assert.throws(() => runtime.executeTx(groupTx), RUNTIME_ERR1009);
+    assert.throws(() => redeem(runtime, elon, 1, 20, dexLsig1), RUNTIME_ERR1402);
   });
 });
