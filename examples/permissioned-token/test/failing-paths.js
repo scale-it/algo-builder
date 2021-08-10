@@ -280,7 +280,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       ctx.forceTransfer(asaManager.account, bob, elon, 20);
     });
 
-    it('Should reject transfer is sender is not token manager', () => {
+    it('Should reject transfer if sender is not token manager', () => {
       // Opt-In to permissions SSC & Whitelist
       ctx.whitelist(permManager.account, elon.address);
       ctx.whitelist(permManager.account, bob.address);
