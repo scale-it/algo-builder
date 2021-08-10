@@ -16,7 +16,7 @@ const asaDef = {
   freeze: 'WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE'
 };
 
-function optIn (runtime, lsig, assetID, appManager) {
+function optInLsigToBond (runtime, lsig, assetID, appManager) {
   // Only store manager can allow opt-in to ASA for lsig
   const optInTx = [
     {
@@ -79,7 +79,7 @@ function createDex (runtime, creatorAccount, managerAcc, i, master, issuerLsig) 
     { creator: { ...creatorAccount.account, name: 'bond-token-creator' } }
   );
 
-  optIn(runtime, issuerLsig, newBond, managerAcc);
+  optInLsigToBond(runtime, issuerLsig, newBond, managerAcc);
 
   // Create dex
   const param = {
@@ -103,8 +103,8 @@ function createDex (runtime, creatorAccount, managerAcc, i, master, issuerLsig) 
   };
   runtime.executeTx(fundDexParam);
 
-  optIn(runtime, dexLsig, oldBond, managerAcc);
-  optIn(runtime, dexLsig, newBond, managerAcc);
+  optInLsigToBond(runtime, dexLsig, oldBond, managerAcc);
+  optInLsigToBond(runtime, dexLsig, newBond, managerAcc);
 
   const total = getGlobal('total');
   const assetAmount = runtime.getAccount(issuerLsig.address()).getAssetHolding(oldBond)?.amount;
@@ -242,7 +242,7 @@ function redeem (runtime, buyerAccount, dex, amount, dexLsig) {
 }
 
 module.exports = {
-  optIn,
+  optInLsigToBond,
   createDex,
   approvalProgram,
   clearProgram,

@@ -6,7 +6,7 @@ const { types } = require('@algo-builder/web');
 const { assert } = require('chai');
 
 const {
-  optIn, createDex, approvalProgram,
+  optInLsigToBond, createDex, approvalProgram,
   clearProgram, minBalance, initialBalance,
   issue, redeem
 } = require('./common/common');
@@ -157,7 +157,7 @@ describe('Bond token Tests', function () {
     assert.isDefined(appManager.appsLocalState.get(applicationId));
     assert.isDefined(issuerAddress.appsLocalState.get(applicationId));
 
-    optIn(runtime, lsig, currentBondIndex, appManager);
+    optInLsigToBond(runtime, lsig, currentBondIndex, appManager);
 
     // Issue tokens to issuer from bond token creator
     let groupTx = issueTx(bondTokenCreator.account, lsig, applicationId, currentBondIndex);
@@ -275,7 +275,7 @@ describe('Bond token Tests', function () {
       appArgs: ['str:set_buyback', convert.addressToPk(buybackLsig.address())]
     };
 
-    optIn(runtime, buybackLsig, bond2, appManager);
+    optInLsigToBond(runtime, buybackLsig, bond2, appManager);
 
     runtime.executeTx(buybackTx);
 

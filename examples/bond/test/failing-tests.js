@@ -5,7 +5,7 @@ const {
 const { types } = require('@algo-builder/web');
 const { assert } = require('chai');
 const {
-  optIn, createDex, approvalProgram,
+  optInLsigToBond, createDex, approvalProgram,
   clearProgram, minBalance, initialBalance, redeem
 } = require('./common/common');
 const { buyTx, issueTx } = require('../scripts/run/common/common');
@@ -126,7 +126,7 @@ describe('Bond token failing tests', function () {
       appArgs: appArgs
     };
     runtime.executeTx(appCallParams);
-    optIn(runtime, lsig, initialBond, appManager);
+    optInLsigToBond(runtime, lsig, initialBond, appManager);
     // Issue tokens to issuer from bond token creator
     const groupTx = issueTx(bondTokenCreator.account, lsig, applicationId, initialBond);
 
@@ -241,7 +241,7 @@ describe('Bond token failing tests', function () {
       appArgs: appArgs
     };
     runtime.executeTx(appCallParams);
-    optIn(runtime, lsig, initialBond, appManager);
+    optInLsigToBond(runtime, lsig, initialBond, appManager);
     runtime.optIntoASA(initialBond, elon.address, {});
 
     const groupTx = issueTx(bondTokenCreator.account, lsig, applicationId, initialBond);
