@@ -17,7 +17,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
   let asaDef, asaReserve, asaManager;
   let ctx;
 
-  this.beforeEach(async function () {
+  function setUpCtx () {
     master = new AccountStore(10000e6);
     alice = new AccountStore(minBalance, { addr: ALICE_ADDRESS, sk: new Uint8Array(0) });
     bob = new AccountStore(minBalance);
@@ -27,9 +27,11 @@ describe('Permissioned Token Tests - Failing Paths', function () {
     asaDef = ctx.getAssetDef();
     asaReserve = ctx.getAccount(asaDef.reserve);
     asaManager = ctx.getAccount(asaDef.manager);
-  });
+  }
 
   describe('Token Issuance', function () {
+    this.beforeAll(setUpCtx);
+
     it('should not issue token if receiver is not opted in', () => {
       assert.throws(() =>
         ctx.issue(asaReserve.account, elon, 20),
@@ -74,6 +76,8 @@ describe('Permissioned Token Tests - Failing Paths', function () {
   });
 
   describe('Kill Token', function () {
+    this.beforeAll(setUpCtx);
+
     it('should reject tx to kill token if sender is not token manager', () => {
       // verify bob is not token manager
       assert.notEqual(asaManager.address, bob.address);
@@ -83,6 +87,8 @@ describe('Permissioned Token Tests - Failing Paths', function () {
   });
 
   describe('WhiteListing', function () {
+    this.beforeAll(setUpCtx);
+
     let permManagerAddr, permManager, whitelistParams;
     this.beforeEach(() => {
       permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager'));
@@ -134,6 +140,8 @@ describe('Permissioned Token Tests - Failing Paths', function () {
   });
 
   describe('Change Permissions Manager', function () {
+    this.beforeAll(setUpCtx);
+
     it('should fail if sender is not current permissions manager', () => {
       const permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager'));
       const permManager = ctx.getAccount(permManagerAddr);
@@ -155,6 +163,8 @@ describe('Permissioned Token Tests - Failing Paths', function () {
   });
 
   describe('Force Transfer(Clawback)', function () {
+    this.beforeAll(setUpCtx);
+
     let permManagerAddr, permManager, forceTransferGroup;
     this.beforeEach(() => {
       permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager'));
@@ -245,24 +255,6 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       );
     });
 
-    it('Should reject transfer is sender is not token manager', () => {
-      // Opt-In to permissions SSC & Whitelist
-      ctx.whitelist(permManager.account, elon.address);
-      ctx.whitelist(permManager.account, bob.address);
-      ctx.syncAccounts();
-
-      // Issue some tokens to sender
-      ctx.issue(asaReserve.account, bob, 150);
-      ctx.syncAccounts();
-
-      // Fails as only asset manager(alice) can perform force transfer
-      assert.notEqual(asaManager.address, bob.address);
-      assert.throws(() =>
-        ctx.forceTransfer(bob.account, bob, elon, 20),
-      RUNTIME_ERR1009
-      );
-    });
-
     it('Should reject force transfer if accounts are not whitelisted', () => {
       // Issue some tokens to sender
       ctx.issue(asaReserve.account, bob, 150);
@@ -286,6 +278,24 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       ctx.whitelist(permManager.account, elon.address);
       ctx.syncAccounts();
       ctx.forceTransfer(asaManager.account, bob, elon, 20);
+    });
+
+    it('Should reject transfer if sender is not token manager', () => {
+      // Opt-In to permissions SSC & Whitelist
+      ctx.whitelist(permManager.account, elon.address);
+      ctx.whitelist(permManager.account, bob.address);
+      ctx.syncAccounts();
+
+      // Issue some tokens to sender
+      ctx.issue(asaReserve.account, bob, 150);
+      ctx.syncAccounts();
+
+      // Fails as only asset manager(alice) can perform force transfer
+      assert.notEqual(asaManager.address, bob.address);
+      assert.throws(() =>
+        ctx.forceTransfer(bob.account, bob, elon, 20),
+      RUNTIME_ERR1009
+      );
     });
 
     it('Should reject force transfer if accounts are whitelisted but receiver balance becomes > 100', () => {
@@ -325,6 +335,8 @@ describe('Permissioned Token Tests - Failing Paths', function () {
   });
 
   describe('Token Transfer', function () {
+    this.beforeAll(setUpCtx);
+
     let permManagerAddr, permManager, tokenTransferGroup;
     this.beforeEach(() => {
       permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager'));
@@ -481,6 +493,8 @@ describe('Permissioned Token Tests - Failing Paths', function () {
   });
 
   describe('Update token reserve', function () {
+    this.beforeAll(setUpCtx);
+
     let updateReserveParams;
     this.beforeEach(() => {
       const oldReserveAssetHolding = ctx.getAssetHolding(asaReserve.address);
@@ -575,6 +589,8 @@ describe('Permissioned Token Tests - Failing Paths', function () {
   });
 
   describe('Cease', function () {
+    this.beforeAll(setUpCtx);
+
     let permManagerAddr, permManager, ceaseTxGroup;
     this.beforeEach(() => {
       permManagerAddr = encodeAddress(ctx.runtime.getGlobalState(ctx.permissionsappID, 'manager'));
@@ -698,6 +714,8 @@ describe('Permissioned Token Tests - Failing Paths', function () {
   });
 
   describe('Set permissions app_id in controller', function () {
+    this.beforeAll(setUpCtx);
+
     let setPermissionsParams;
     this.beforeEach(() => {
       const appArgs = [
