@@ -68,6 +68,80 @@ async function optInTx (deployer, managerAcc, lsig, assetIndex) {
   await executeTransaction(deployer, optInTx);
 }
 
+/**
+ * Returns group transaction for buy
+ * @param buyer buyer account
+ * @param issuerLsig issuer logic signature
+ * @param amount amount of bonds
+ * @param algoAmount amount of algo
+ * @param appID application index
+ * @param bondID bond index
+ */
+function buyTx (buyer, issuerLsig, amount, algoAmount, appID, bondID) {
+  return [
+    // Algo transfer from buyer to issuer
+    {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: buyer,
+      toAccountAddr: issuerLsig.address(),
+      amountMicroAlgos: algoAmount,
+      payFlags: { totalFee: 2000 }
+    },
+    // Bond token transfer from issuer's address
+    {
+      type: types.TransactionType.TransferAsset,
+      sign: types.SignType.LogicSignature,
+      fromAccountAddr: issuerLsig.address(),
+      lsig: issuerLsig,
+      toAccountAddr: buyer.addr,
+      amount: amount,
+      assetID: bondID,
+      payFlags: { totalFee: 0 }
+    },
+    // call to bond-dapp
+    {
+      type: types.TransactionType.CallNoOpSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: buyer,
+      appID: appID,
+      payFlags: { totalFee: 1000 },
+      appArgs: ['str:buy']
+    }
+  ];
+}
+
+/**
+ * Returns issue group transaction
+ * @param creatorAccount creator acccount
+ * @param issuerLsig issuer logic signature
+ * @param appID application index
+ * @param bondID bond index
+ */
+function issueTx (creatorAccount, issuerLsig, appID, bondID) {
+  return [
+    // Bond asa transfer to issuer's address
+    {
+      type: types.TransactionType.TransferAsset,
+      sign: types.SignType.SecretKey,
+      fromAccount: creatorAccount,
+      toAccountAddr: issuerLsig.address(),
+      amount: 1e6,
+      assetID: bondID,
+      payFlags: { }
+    },
+    // call to bond-dapp
+    {
+      type: types.TransactionType.CallNoOpSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: creatorAccount,
+      appID: appID,
+      payFlags: {},
+      appArgs: ['str:issue']
+    }
+  ];
+}
+
 module.exports = {
   issuePrice,
   asaDef,
@@ -76,5 +150,7 @@ module.exports = {
   tokenMap,
   couponValue,
   optInTx,
-  nominalPrice
+  nominalPrice,
+  buyTx,
+  issueTx
 };

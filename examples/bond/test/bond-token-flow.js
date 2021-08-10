@@ -10,6 +10,7 @@ const {
   clearProgram, minBalance, initialBalance,
   issue, redeem
 } = require('./common/common');
+const { buyTx, issueTx } = require('../scripts/run/common/common');
 
 /**
  * Test for the scenario described in Readme.md
@@ -156,30 +157,10 @@ describe('Bond token Tests', function () {
     assert.isDefined(appManager.appsLocalState.get(applicationId));
     assert.isDefined(issuerAddress.appsLocalState.get(applicationId));
 
-    runtime = optIn(runtime, lsig, currentBondIndex, appManager);
+    optIn(runtime, lsig, currentBondIndex, appManager);
 
     // Issue tokens to issuer from bond token creator
-    let groupTx = [
-      // Bond asa transfer to issuer's address
-      {
-        type: types.TransactionType.TransferAsset,
-        sign: types.SignType.SecretKey,
-        fromAccount: bondTokenCreator.account,
-        toAccountAddr: issuerLsigAddress,
-        amount: 1e6,
-        assetID: currentBondIndex,
-        payFlags: { }
-      },
-      // call to bond-dapp
-      {
-        type: types.TransactionType.CallNoOpSSC,
-        sign: types.SignType.SecretKey,
-        fromAccount: bondTokenCreator.account,
-        appID: applicationId,
-        payFlags: {},
-        appArgs: ['str:issue']
-      }
-    ];
+    let groupTx = issueTx(bondTokenCreator.account, lsig, applicationId, currentBondIndex);
     runtime.executeTx(groupTx);
 
     syncAccounts();
@@ -191,38 +172,9 @@ describe('Bond token Tests', function () {
     let amount = 10;
     let algoAmount = amount * issue;
 
-    groupTx = [
-      // Algo transfer from elon to issuer
-      {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.SecretKey,
-        fromAccount: elon.account,
-        toAccountAddr: issuerLsigAddress,
-        amountMicroAlgos: algoAmount,
-        payFlags: { totalFee: 2000 }
-      },
-      // Bond token transfer from issuer's address
-      {
-        type: types.TransactionType.TransferAsset,
-        sign: types.SignType.LogicSignature,
-        fromAccountAddr: issuerLsigAddress,
-        lsig: lsig,
-        toAccountAddr: elon.address,
-        amount: 10,
-        assetID: currentBondIndex,
-        payFlags: { totalFee: 0 }
-      },
-      // call to bond-dapp
-      {
-        type: types.TransactionType.CallNoOpSSC,
-        sign: types.SignType.SecretKey,
-        fromAccount: elon.account,
-        appID: applicationId,
-        payFlags: { totalFee: 1000 },
-        appArgs: ['str:buy']
-      }
-    ];
-
+    groupTx = buyTx(
+      elon.account, lsig, amount, algoAmount, applicationId, currentBondIndex
+    );
     runtime.executeTx(groupTx);
 
     syncAccounts();
@@ -264,44 +216,15 @@ describe('Bond token Tests', function () {
     console.log('Dex 1 Address: ', dexLsig1.address());
 
     // elon redeems his 8 bonds
-    runtime = redeem(runtime, elon, 1, 8, dexLsig1);
+    redeem(runtime, elon, 1, 8, dexLsig1);
 
     amount = 4;
     algoAmount = amount * issue;
     const bond1 = runtime.getAssetInfoFromName('bond-token-1').assetIndex;
     // elon buys 4 more bonds
-    groupTx = [
-      // Algo transfer from elon to issuer
-      {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.SecretKey,
-        fromAccount: elon.account,
-        toAccountAddr: issuerLsigAddress,
-        amountMicroAlgos: algoAmount,
-        payFlags: { totalFee: 2000 }
-      },
-      // Bond token transfer from issuer's address
-      {
-        type: types.TransactionType.TransferAsset,
-        sign: types.SignType.LogicSignature,
-        fromAccountAddr: issuerLsigAddress,
-        lsig: lsig,
-        toAccountAddr: elon.address,
-        amount: amount,
-        assetID: bond1,
-        payFlags: { totalFee: 0 }
-      },
-      // call to bond-dapp
-      {
-        type: types.TransactionType.CallNoOpSSC,
-        sign: types.SignType.SecretKey,
-        fromAccount: elon.account,
-        appID: applicationId,
-        payFlags: { totalFee: 1000 },
-        appArgs: ['str:buy']
-      }
-    ];
-
+    groupTx = buyTx(
+      elon.account, lsig, amount, algoAmount, applicationId, bond1
+    );
     runtime.executeTx(groupTx);
 
     syncAccounts();
@@ -316,13 +239,13 @@ describe('Bond token Tests', function () {
     console.log('Dex 2 Address: ', dexLsig2.address());
 
     // elon redeems his 12 bonds
-    runtime = redeem(runtime, elon, 2, 12, dexLsig2);
+    redeem(runtime, elon, 2, 12, dexLsig2);
 
     // bob redeems bond_1
-    runtime = redeem(runtime, bob, 1, 2, dexLsig1);
+    redeem(runtime, bob, 1, 2, dexLsig1);
     syncAccounts();
     // bob redeems bond_2
-    runtime = redeem(runtime, bob, 2, 2, dexLsig2);
+    redeem(runtime, bob, 2, 2, dexLsig2);
 
     const bond2 = runtime.getAssetInfoFromName('bond-token-2').assetIndex;
     // create buyback

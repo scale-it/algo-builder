@@ -8,6 +8,7 @@ const {
   optIn, createDex, approvalProgram,
   clearProgram, minBalance, initialBalance, redeem
 } = require('./common/common');
+const { buyTx, issueTx } = require('../scripts/run/common/common');
 
 const RUNTIME_ERR1009 = 'RUNTIME_ERR1009: TEAL runtime encountered err opcode';
 const RUNTIME_ERR1402 = 'Cannot withdraw';
@@ -125,30 +126,10 @@ describe('Bond token failing tests', function () {
       appArgs: appArgs
     };
     runtime.executeTx(appCallParams);
-    runtime = optIn(runtime, lsig, initialBond, appManager);
-
+    optIn(runtime, lsig, initialBond, appManager);
     // Issue tokens to issuer from bond token creator
-    const groupTx = [
-      // Bond asa transfer to issuer's address
-      {
-        type: types.TransactionType.TransferAsset,
-        sign: types.SignType.SecretKey,
-        fromAccount: bondTokenCreator.account,
-        toAccountAddr: issuerLsigAddress,
-        amount: 1e6,
-        assetID: initialBond,
-        payFlags: { }
-      },
-      // call to bond-dapp
-      {
-        type: types.TransactionType.CallNoOpSSC,
-        sign: types.SignType.SecretKey,
-        fromAccount: bondTokenCreator.account,
-        appID: applicationId,
-        payFlags: {},
-        appArgs: ['str:issue']
-      }
-    ];
+    const groupTx = issueTx(bondTokenCreator.account, lsig, applicationId, initialBond);
+
     runtime.executeTx(groupTx);
   }
 
@@ -158,38 +139,9 @@ describe('Bond token failing tests', function () {
     const amount = 10;
     const algoAmount = amount * 1000;
 
-    const groupTx = [
-      // Algo transfer from elon to issuer
-      {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.SecretKey,
-        fromAccount: elon.account,
-        toAccountAddr: issuerLsigAddress,
-        amountMicroAlgos: algoAmount,
-        payFlags: { totalFee: 2000 }
-      },
-      // Bond token transfer from issuer's address
-      {
-        type: types.TransactionType.TransferAsset,
-        sign: types.SignType.LogicSignature,
-        fromAccountAddr: issuerLsigAddress,
-        lsig: lsig,
-        toAccountAddr: elon.address,
-        amount: 10,
-        assetID: initialBond,
-        payFlags: { totalFee: 0 }
-      },
-      // call to bond-dapp
-      {
-        type: types.TransactionType.CallNoOpSSC,
-        sign: types.SignType.SecretKey,
-        fromAccount: elon.account,
-        appID: applicationId,
-        payFlags: { totalFee: 1000 },
-        appArgs: ['str:buy']
-      }
-    ];
-
+    const groupTx = buyTx(
+      elon.account, lsig, amount, algoAmount, applicationId, initialBond
+    );
     runtime.executeTx(groupTx);
     syncAccounts();
   }
@@ -289,30 +241,11 @@ describe('Bond token failing tests', function () {
       appArgs: appArgs
     };
     runtime.executeTx(appCallParams);
-    runtime = optIn(runtime, lsig, initialBond, appManager);
+    optIn(runtime, lsig, initialBond, appManager);
     runtime.optIntoASA(initialBond, elon.address, {});
 
-    const groupTx = [
-      // Bond asa transfer to issuer's address
-      {
-        type: types.TransactionType.TransferAsset,
-        sign: types.SignType.SecretKey,
-        fromAccount: bondTokenCreator.account,
-        toAccountAddr: elon.address,
-        amount: 1e6,
-        assetID: initialBond,
-        payFlags: { }
-      },
-      // call to bond-dapp
-      {
-        type: types.TransactionType.CallNoOpSSC,
-        sign: types.SignType.SecretKey,
-        fromAccount: bondTokenCreator.account,
-        appID: applicationId,
-        payFlags: {},
-        appArgs: ['str:issue']
-      }
-    ];
+    const groupTx = issueTx(bondTokenCreator.account, lsig, applicationId, initialBond);
+    groupTx[0].toAccountAddr = elon.address;
 
     assert.throws(() => runtime.executeTx(groupTx), RUNTIME_ERR1009);
   });
@@ -325,37 +258,9 @@ describe('Bond token failing tests', function () {
     runtime.optInToApp(elon.address, applicationId, {}, {});
     const algoAmount = 10 * 1000;
 
-    const groupTx = [
-      // Algo transfer from buyer to issuer
-      {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.SecretKey,
-        fromAccount: elon.account,
-        toAccountAddr: issuerLsigAddress,
-        amountMicroAlgos: algoAmount - 10,
-        payFlags: { totalFee: 2000 }
-      },
-      // Bond token transfer from issuer's address
-      {
-        type: types.TransactionType.TransferAsset,
-        sign: types.SignType.LogicSignature,
-        fromAccountAddr: issuerLsigAddress,
-        lsig: lsig,
-        toAccountAddr: elon.address,
-        amount: 10,
-        assetID: initialBond,
-        payFlags: { totalFee: 0 }
-      },
-      // call to bond-dapp
-      {
-        type: types.TransactionType.CallNoOpSSC,
-        sign: types.SignType.SecretKey,
-        fromAccount: elon.account,
-        appID: applicationId,
-        payFlags: { totalFee: 1000 },
-        appArgs: ['str:buy']
-      }
-    ];
+    const groupTx = buyTx(
+      elon.account, lsig, 10, algoAmount - 10, applicationId, initialBond
+    );
 
     assert.throws(() => runtime.executeTx(groupTx), RUNTIME_ERR1009);
   });
@@ -390,37 +295,11 @@ describe('Bond token failing tests', function () {
     runtime.optInToApp(elon.address, applicationId, {}, {});
     const algoAmount = 10 * 1000;
 
-    const groupTx = [
-      // Algo transfer from buyer to issuer
-      {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.SecretKey,
-        fromAccount: elon.account,
-        toAccountAddr: issuerLsigAddress,
-        amountMicroAlgos: algoAmount,
-        payFlags: { totalFee: 1000 }
-      },
-      // Bond token transfer from issuer's address
-      {
-        type: types.TransactionType.TransferAsset,
-        sign: types.SignType.LogicSignature,
-        fromAccountAddr: issuerLsigAddress,
-        lsig: lsig,
-        toAccountAddr: elon.address,
-        amount: 10,
-        assetID: initialBond,
-        payFlags: { totalFee: 1000 }
-      },
-      // call to bond-dapp
-      {
-        type: types.TransactionType.CallNoOpSSC,
-        sign: types.SignType.SecretKey,
-        fromAccount: elon.account,
-        appID: applicationId,
-        payFlags: { totalFee: 1000 },
-        appArgs: ['str:buy']
-      }
-    ];
+    const groupTx = buyTx(
+      elon.account, lsig, 10, algoAmount, applicationId, initialBond
+    );
+    groupTx[0].payFlags = { totalFee: 1000 };
+    groupTx[1].payFlags = { totalFee: 1000 };
 
     assert.throws(() => runtime.executeTx(groupTx), RUNTIME_ERR1009);
 
