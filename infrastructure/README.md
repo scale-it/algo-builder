@@ -56,7 +56,7 @@ To recreate the private net (stop the current instance, remove all data and re-s
 
 ### Quick start (using Sandbox)
 
-This is a guide to quickly start a local node using docker using make scripts.
+This is a guide to quickly start a local node using docker and make scripts.
 
 Algorand sandbox is a popular tool among developers to quickly setup up an algorand environment (`algod`, `indexer`, `indexer-db`) using docker. Here user don't need to explicitly setup an algorand node.
 Note: make sure to have [Docker](https://docs.docker.com/compose/install/) installed (with non root privilages). Steps:
