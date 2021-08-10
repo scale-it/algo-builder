@@ -37,8 +37,6 @@ function optIn (runtime, lsig, assetID, appManager) {
     }
   ];
   runtime.executeTx(optInTx);
-
-  return runtime;
 };
 
 const placeholderParam = {
@@ -81,7 +79,7 @@ function createDex (runtime, creatorAccount, managerAcc, i, master, issuerLsig) 
     { creator: { ...creatorAccount.account, name: 'bond-token-creator' } }
   );
 
-  runtime = optIn(runtime, issuerLsig, newBond, managerAcc);
+  optIn(runtime, issuerLsig, newBond, managerAcc);
 
   // Create dex
   const param = {
@@ -105,8 +103,8 @@ function createDex (runtime, creatorAccount, managerAcc, i, master, issuerLsig) 
   };
   runtime.executeTx(fundDexParam);
 
-  runtime = optIn(runtime, dexLsig, oldBond, managerAcc);
-  runtime = optIn(runtime, dexLsig, newBond, managerAcc);
+  optIn(runtime, dexLsig, oldBond, managerAcc);
+  optIn(runtime, dexLsig, newBond, managerAcc);
 
   const total = getGlobal('total');
   const assetAmount = runtime.getAccount(issuerLsig.address()).getAssetHolding(oldBond)?.amount;
@@ -169,7 +167,7 @@ function createDex (runtime, creatorAccount, managerAcc, i, master, issuerLsig) 
   assert.equal(issuer.getAssetHolding(oldBond)?.amount, 0n);
   assert.equal(issuer.getAssetHolding(newBond)?.amount, BigInt(assetAmount));
 
-  return [runtime, dexLsig];
+  return dexLsig;
 }
 
 /**
@@ -241,7 +239,6 @@ function redeem (runtime, buyerAccount, dex, amount, dexLsig) {
     balanceBeforeRedeem + BigInt(amount) * BigInt(coupon) - 4000n,
     buyerAccount.balance()
   );
-  return runtime;
 }
 
 module.exports = {

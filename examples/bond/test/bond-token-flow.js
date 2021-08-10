@@ -207,9 +207,8 @@ describe('Bond token Tests', function () {
     assert.equal(elon.getAssetHolding(currentBondIndex)?.amount, 8n);
     assert.equal(bob.getAssetHolding(currentBondIndex)?.amount, 2n);
 
-    let dexLsig1;
     // manager starts epoch 1 (create dex)
-    [runtime, dexLsig1] = createDex(runtime, bondTokenCreator, appManager, 1, master, lsig);
+    const dexLsig1 = createDex(runtime, bondTokenCreator, appManager, 1, master, lsig);
     syncAccounts();
     // sync dex account
     dex1 = runtime.getAccount(dexLsig1.address());
@@ -231,8 +230,7 @@ describe('Bond token Tests', function () {
     assert.equal(elon.getAssetHolding(bond1)?.amount, 12n);
 
     // manager starts epoch 2 (create dex)
-    let dexLsig2;
-    [runtime, dexLsig2] = createDex(runtime, bondTokenCreator, appManager, 2, master, lsig);
+    const dexLsig2 = createDex(runtime, bondTokenCreator, appManager, 2, master, lsig);
     syncAccounts();
     // sync dex account
     dex2 = runtime.getAccount(dexLsig2.address());

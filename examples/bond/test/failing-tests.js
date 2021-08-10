@@ -277,9 +277,8 @@ describe('Bond token failing tests', function () {
   it('Buyer cannot redeem more than they have', () => {
     issue();
     buy();
-    let dexLsig1;
     // manager starts epoch 1 (create dex)
-    [runtime, dexLsig1] = createDex(runtime, bondTokenCreator, appManager, 1, master, lsig);
+    const dexLsig1 = createDex(runtime, bondTokenCreator, appManager, 1, master, lsig);
     syncAccounts();
     // sync dex account
     dex1 = runtime.getAccount(dexLsig1.address());
@@ -310,9 +309,8 @@ describe('Bond token failing tests', function () {
   it('Buyer tries to exchange bonds without paying fees', () => {
     issue();
     buy();
-    let dexLsig1;
     // manager starts epoch 1 (create dex)
-    [runtime, dexLsig1] = createDex(runtime, bondTokenCreator, appManager, 1, master, lsig);
+    const dexLsig1 = createDex(runtime, bondTokenCreator, appManager, 1, master, lsig);
     syncAccounts();
     // sync dex account
     dex1 = runtime.getAccount(dexLsig1.address());
