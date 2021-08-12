@@ -594,7 +594,7 @@ export class Runtime {
       if (program === "") {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
       }
-      this.run(program, ExecutionMode.SIGNATURE, debugStack);
+      this.run(program, ExecutionMode.SIGNATURE, 0, debugStack);
     } else {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_NOT_FOUND);
     }
@@ -627,6 +627,7 @@ export class Runtime {
     this.validateTxRound(gtxs);
 
     // initialize context before each execution
+    // Prepare shared space at each execution of transaction/s.
     // state is a deep copy of store
     this.ctx = new Ctx(cloneDeep(this.store), tx, gtxs, [], this, debugStack);
 
@@ -646,8 +647,11 @@ export class Runtime {
    * each opcode execution (upto depth = debugStack)
    * NOTE: Application mode is only supported in TEALv > 1
    */
-  run (program: string, executionMode: ExecutionMode, debugStack?: number): void {
+  run (program: string, executionMode: ExecutionMode, indexInGroup: number, debugStack?: number): void {
     const interpreter = new Interpreter();
     interpreter.execute(program, executionMode, this, debugStack);
+    if (executionMode === ExecutionMode.APPLICATION) {
+      this.ctx.sharedScratchSpace.set(indexInGroup, interpreter.scratch);
+    }
   }
 }

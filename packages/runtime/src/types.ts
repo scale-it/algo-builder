@@ -100,6 +100,7 @@ export interface SSCInfo extends DeployedAssetInfo {
 // describes interpreter's local context (state + txns)
 export interface Context {
   state: State
+  sharedScratchSpace: Map<number, StackElem[]>
   tx: Txn // current txn
   gtxs: Txn[] // all transactions
   args?: Uint8Array[]

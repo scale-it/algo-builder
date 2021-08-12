@@ -237,6 +237,12 @@ by an index that does not exist.`
     message: "set bit index %index% is beyond bytes length. [error-line: %line%]",
     title: 'set bit index error',
     description: `set bit index error`
+  },
+  SCRATCH_EXIST_ERROR: {
+    number: 1035,
+    message: "scratch space doesn't exist for index: %index%. [error-line: %line%]",
+    title: 'scratch space error',
+    description: `fails maybe because the requested transaction is an ApplicationCall or T < GroupIndex.`
   }
 };
 
