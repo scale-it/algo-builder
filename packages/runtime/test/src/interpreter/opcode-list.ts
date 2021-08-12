@@ -14,7 +14,7 @@ import {
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
   Byte, Bytec, Bytecblock, Concat, Dig, Div, Dup, Dup2, Ed25519verify,
-  EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, GetByte, Global,
+  EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Global,
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
   Load, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, PushBytes, PushInt, Return,
@@ -4067,6 +4067,57 @@ describe("Teal Opcodes", function () {
     it("should throw index out of bound error", () => {
       const op = new Balance([], 1, interpreter);
       stack.push(8n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
+    });
+  });
+
+  describe("shared data between contracts", () => {
+    let stack: Stack<StackElem>;
+    let interpreter: Interpreter;
+
+    this.beforeAll(() => {
+      interpreter = new Interpreter();
+      interpreter.runtime = new Runtime([]);
+      interpreter.tealVersion = MaxTEALVersion;
+      interpreter.runtime.ctx.tx = TXN_OBJ;
+      interpreter.runtime.ctx.sharedScratchSpace = new Map<number, StackElem[]>();
+      interpreter.runtime.ctx.sharedScratchSpace.set(0, [12n, 2n, 0n]);
+      interpreter.runtime.ctx.sharedScratchSpace.set(2, [12n, 2n, 0n, 1n]);
+    });
+
+    this.beforeEach(() => { stack = new Stack<StackElem>(); });
+
+    it("should push value from ith tx in shared scratch space", () => {
+      const op = new Gload(["0", "1"], 1, interpreter);
+
+      op.execute(stack);
+      const top = stack.pop();
+
+      assert.equal(top, 2n);
+    });
+
+    it("should throw error if tx doesn't exist", () => {
+      let op = new Gload(["1", "1"], 1, interpreter);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR
+      );
+
+      op = new Gload(["1", "3"], 1, interpreter);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR
+      );
+    });
+
+    it("should throw error if value doesn't exist in stack elem array", () => {
+      const op = new Gload(["2", "5"], 1, interpreter);
 
       expectRuntimeError(
         () => op.execute(stack),
