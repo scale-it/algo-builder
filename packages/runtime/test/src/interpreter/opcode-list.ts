@@ -2417,6 +2417,7 @@ describe("Teal Opcodes", function () {
   describe("StateFul Opcodes", function () {
     const stack = new Stack<StackElem>();
     const lineNumber = 0;
+    const elonPk = decodeAddress(elonAddr).publicKey;
 
     // setup 1st account (to be used as sender)
     const acc1: AccountStoreI = new AccountStore(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
@@ -2434,7 +2435,7 @@ describe("Teal Opcodes", function () {
       // setting txn object and sender's addr
       interpreter.runtime.ctx.tx = {
         ...TXN_OBJ,
-        snd: Buffer.from(decodeAddress(elonAddr).publicKey)
+        snd: Buffer.from(elonPk)
       };
     });
 
@@ -2482,10 +2483,75 @@ describe("Teal Opcodes", function () {
         top = stack.pop();
         assert.equal(0n, top);
       });
+
+      it("should throw error if address is passed directly with teal version < 4", function () {
+        execExpectError(
+          stack,
+          [elonPk, 1111n], // passing elonPk directly should throw error
+          new AppOptedIn([], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.PRAGMA_VERSION_ERROR
+        );
+      });
+
+      it("should push 0 to stack if offset to foreign apps is passed with teal version < 4", function () {
+        stack.push(0n);
+        stack.push(2n); // offset (but in prior version, this is treated as appIndex directly)
+
+        const op = new AppOptedIn([], 1, interpreter);
+        op.execute(stack);
+        assert.equal(0n, stack.pop());
+      });
+
+      it("tealv4: should push expected value to stack if address is passed directly", function () {
+        interpreter.tealVersion = 4;
+        interpreter.runtime.ctx.tx.apid = 1847; // set txn.ApplicationID
+
+        // elonPk is the Txn.Sender
+        stack.push(elonPk);
+        stack.push(1847n);
+
+        let op = new AppOptedIn([], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1n, stack.pop());
+
+        // johnAddr is present in Txn.Accounts, so we can pass it directly
+        stack.push(decodeAddress(johnAddr).publicKey);
+        stack.push(1847n);
+        op = new AppOptedIn([], 1, interpreter);
+        assert.doesNotThrow(() => op.execute(stack));
+      });
+
+      it("tealv4: should push expected value to stack if app offset is passed directly", function () {
+        stack.push(0n);
+        stack.push(0n); // 0 offset means current_app_id
+        let op = new AppOptedIn([], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1n, stack.pop());
+
+        interpreter.runtime.ctx.tx.apfa = [11, 1847];
+        stack.push(0n);
+        stack.push(2n); // should push 2nd app_id from Txn.ForeignApps (with TEALv4)
+        op = new AppOptedIn([], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1n, stack.pop());
+      });
+
+      it("tealv4: should throw error if address is passed directly but not present in Txn.Accounts[]", function () {
+        // should throw error as this address is not present in Txn.Accounts[]
+        stack.push(decodeAddress(generateAccount().addr).publicKey); // randomPk
+        stack.push(1847n);
+
+        const op = new AppOptedIn([], 1, interpreter);
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.ADDR_NOT_FOUND_IN_TXN_ACCOUNT
+        );
+      });
     });
 
     describe("AppLocalGet", function () {
       before(function () {
+        interpreter.tealVersion = 3;
         interpreter.runtime.ctx.tx.apid = 1847;
       });
 
@@ -2531,6 +2597,33 @@ describe("Teal Opcodes", function () {
 
         top = stack.pop();
         assert.equal(0n, top);
+      });
+
+      it("tealv4: should accept address directly for app_local_get", function () {
+        interpreter.tealVersion = 4;
+
+        // for Sender
+        stack.push(elonPk);
+        stack.push(parsing.stringToBytes("random-key"));
+        let op = new AppLocalGet([], 1, interpreter);
+        op.execute(stack);
+        assert.equal(0n, stack.pop());
+
+        // for Txn.Accounts[A]
+        stack.push(decodeAddress(johnAddr).publicKey);
+        stack.push(parsing.stringToBytes('random-key'));
+        op = new AppLocalGet([], 1, interpreter);
+        op.execute(stack);
+        assert.equal(0n, stack.pop());
+
+        // random address (not present in accounts should throw error)
+        stack.push(decodeAddress(generateAccount().addr).publicKey); // randomPk
+        stack.push(1847n);
+        op = new AppOptedIn([], 1, interpreter);
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.ADDR_NOT_FOUND_IN_TXN_ACCOUNT
+        );
       });
     });
 
@@ -2599,6 +2692,7 @@ describe("Teal Opcodes", function () {
     describe("AppGlobalGet", function () {
       before(function () {
         interpreter.runtime.ctx.tx.apid = 1828;
+        interpreter.runtime.ctx.tx.apfa = TXN_OBJ.apfa;
       });
 
       it("should push the value to stack if key is present in global state", function () {
@@ -2969,7 +3063,7 @@ describe("Teal Opcodes", function () {
     });
   });
 
-  describe("Balance", () => {
+  describe("Balance, GetAssetHolding, GetAssetDef", () => {
     useFixture('asa-check');
     const stack = new Stack<StackElem>();
     let interpreter: Interpreter;
@@ -3242,6 +3336,42 @@ describe("Teal Opcodes", function () {
         () => op.execute(stack),
         RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
       );
+    });
+
+    it("tealv4: should push correct value accepting offset to foreignAssets", () => {
+      interpreter.tealVersion = 4;
+      // interpreter.runtime.ctx.tx.apas = [1234, 3];
+      const op = new GetAssetHolding(["AssetBalance"], 1, interpreter);
+
+      stack.push(1n); // account index
+      stack.push(0n); // this will push 1st value from Txn.ForeignAssets
+      op.execute(stack);
+      assert.deepEqual(stack.pop().toString(), "1");
+      assert.deepEqual(stack.pop().toString(), "2");
+
+      stack.push(1n); // account index
+      stack.push(3n); // assetId can also be passed directly
+      op.execute(stack);
+      assert.deepEqual(stack.pop().toString(), "1");
+      assert.deepEqual(stack.pop().toString(), "2");
+    });
+
+    it("tealv4: should return value as treating ref as offset, if it represents an index", () => {
+      interpreter.tealVersion = 4;
+      interpreter.runtime.ctx.tx.apas = [1234, 3, 34, 45, 67];
+      const op = new GetAssetHolding(["AssetBalance"], 1, interpreter);
+
+      /*
+       * We wanted to pass assetId directly (3n) here, but since length of
+       * foreignAssets array is 5 (line 3363), "3n" will be treated as an offset, and
+       * the value to pushed to stack is Txn.ForeignApps[3] (i.e 45 in this case).
+       * Since asset 45 does not exist, [did_exist flag, value] will be [0, 0]
+       */
+      stack.push(1n); // account index
+      stack.push(3n); // assetArr.len >= 3, so this is treated as an offset
+      op.execute(stack);
+      assert.deepEqual(stack.pop().toString(), "0");
+      assert.deepEqual(stack.pop().toString(), "0");
     });
   });
 
