@@ -136,9 +136,13 @@ export class Interpreter {
   }
 
   /**
-   * Queries appIndex from Txn.ForeignApps or `ctx.tx.apid` (current app if `appIndex==0`).
-   * If appIndex is passed directly, then verifies that appID is present in foreignApps array.
-   * @param appRef index to foreign apps array OR applicationID
+   * Queries appIndex by app reference (offset to foreignApps array OR index directly)
+   * + Since TEALv4, any reference is supported (but it must be present in foreignApps array)
+   * + For older versions, if foreign === true, reference is treated as offset to foreignApps array,
+   * otherwise it is treated as a direct reference.
+   * @param appRef an offset to foreign app array OR appID
+   * @param foreign for older teal versions(<= 3), foreign bool represent if ref is
+   * treated as an offset/appIndex
    * @param line line number
    * https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/
    */
@@ -178,9 +182,13 @@ export class Interpreter {
   }
 
   /**
-   * Queries assetIndex from Txn.ForeignAssets (note: index 0 means first asset in foreign asset array).
-   * If assetIndex is passed directly, then verifies that assetIndex is present in ForeignAssets array.
+   * Queries assetIndex by asset reference (offset to foreignAssets array OR index directly)
+   * + Since TEALv4, any reference is supported (but it must be present in foreign assets array)
+   * + For older versions, if foreign === true, reference is treated as offset to foreignAssets array,
+   * otherwise it is treated as a direct reference.
    * @param assetRef an offset to foreign assets array OR assetID
+   * @param foreign for older teal versions(<= 3), foreign bool represent if
+   * ref is treated as an offset/assetIndex
    * @param line line number
    * https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/
    */
@@ -284,8 +292,9 @@ export class Interpreter {
 
   /**
    * Assets transaction references (apps, assets, accounts) lengths are valid:
-   * 1. The AVM limits the accounts array to no more than 4
-   * 2. Assets and application arrays combined and totaled with the accounts array can not exceed 8
+   * 1. Application args are limited to max. size of 16.
+   * 2. The AVM limits the accounts array to no more than 4
+   * 3. Assets and application arrays combined and totaled with the accounts array can not exceed 8
    * https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/
    */
   assertValidTxArray (): void {

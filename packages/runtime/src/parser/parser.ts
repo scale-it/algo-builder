@@ -150,6 +150,10 @@ opCodeMap[3] = {
   min_balance: MinBalance
 };
 
+opCodeMap[4] = {
+  ...opCodeMap[3]
+};
+
 // list of opcodes that require one extra parameter than others: `interpreter`.
 const interpreterReqList = new Set([
   "#pragma", "arg", "bytecblock", "bytec", "intcblock", "intc", "store",
