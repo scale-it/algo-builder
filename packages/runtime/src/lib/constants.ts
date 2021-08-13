@@ -10,7 +10,7 @@ export const MAX_CONCAT_SIZE = 4096;
 export const ALGORAND_MIN_TX_FEE = 1000;
 // https://github.com/algorand/go-algorand/blob/master/config/consensus.go#L659
 export const ALGORAND_ACCOUNT_MIN_BALANCE = 0.1e6; // 0.1 ALGO
-export const MaxTEALVersion = 3;
+export const MaxTEALVersion = 4;
 
 // values taken from: https://developer.algorand.org/docs/features/asc1/stateful/#minimum-balance-requirement-for-a-smart-contract
 // minimum balance costs (in microalgos) for ssc schema
@@ -25,6 +25,10 @@ export const LogicSigMaxCost = 20000;
 export const MaxAppProgramCost = 700;
 export const LogicSigMaxSize = 1000;
 export const MaxAppProgramLen = 1024;
+export const ALGORAND_MAX_APP_ARGS_LEN = 16;
+export const ALGORAND_MAX_TX_ACCOUNTS_LEN = 4;
+// the assets and application arrays combined and totaled with the accounts array can not exceed 8
+export const ALGORAND_MAX_TX_ARRAY_LEN = 8;
 
 export const MAX_ALGORAND_ACCOUNT_ASSETS = 1000;
 export const MAX_ALGORAND_ACCOUNT_APPS = 10;
@@ -109,12 +113,18 @@ TxnFields[3] = {
   LocalNumByteSlice: 'nbs'
 };
 
+TxnFields[4] = {
+  ...TxnFields[3]
+};
+
 // transaction fields of type array
 export const TxArrFields: {[key: number]: Set<string>} = {
   1: new Set(),
   2: new Set(['Accounts', 'ApplicationArgs'])
 };
 TxArrFields[3] = new Set([...TxArrFields[2], 'Assets', 'Applications']);
+
+TxArrFields[4] = new Set([...TxArrFields[3]]);
 
 export const TxFieldDefaults: {[key: string]: any} = {
   Sender: zeroAddress,
@@ -235,6 +245,11 @@ GlobalFields[3] = {
   CreatorAddress: null
 };
 
+// global fields supported by tealv4
+GlobalFields[4] = {
+  ...GlobalFields[3]
+};
+
 // creating map for opcodes whose cost is other than 1
 export const OpGasCost: {[key: number]: {[key: string]: number}} = { // version => opcode => cost
   // v1 opcodes cost
@@ -259,3 +274,5 @@ OpGasCost[2] = {
  * All other opcodes have cost 1
  */
 OpGasCost[3] = { ...OpGasCost[2] };
+
+OpGasCost[4] = { ...OpGasCost[2] };
