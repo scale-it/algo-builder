@@ -240,10 +240,9 @@ GlobalFields[3] = {
   CreatorAddress: null
 };
 
-// global fields supported by tealv3
+// global fields supported by tealv4
 GlobalFields[4] = {
-  ...GlobalFields[3],
-  CreatorAddress: null
+  ...GlobalFields[3]
 };
 
 // creating map for opcodes whose cost is other than 1
@@ -271,8 +270,7 @@ OpGasCost[2] = {
  */
 OpGasCost[3] = { ...OpGasCost[2] };
 
-/**
- * In tealv4, cost of crypto opcodes are same as v2.
- * All other opcodes have cost 1
+/*
+ * tealv4
  */
 OpGasCost[4] = { ...OpGasCost[3] };
