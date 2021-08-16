@@ -240,8 +240,8 @@ by an index that does not exist.`
   },
   SCRATCH_EXIST_ERROR: {
     number: 1035,
-    message: "scratch space doesn't exist for index: %index%. [error-line: %line%]",
-    title: 'scratch space error',
+    message: "scratch space doesn't exist for index: %index%. [error-line: %line%], fails maybe because the requested transaction is an ApplicationCall or T < GroupIndex.",
+    title: 'scratch space not found',
     description: `fails maybe because the requested transaction is an ApplicationCall or T < GroupIndex.`
   }
 };

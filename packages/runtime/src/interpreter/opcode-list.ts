@@ -2599,7 +2599,7 @@ export class MinBalance extends Op {
 // {uint8 position in scratch space to load from}(I)]
 export class Gload extends Op {
   readonly scratchIndex: number;
-  readonly txIndex: number;
+  txIndex: number;
   readonly interpreter: Interpreter;
   readonly line: number;
 
@@ -2638,11 +2638,7 @@ export class Gload extends Op {
 // push to stack [...stack, bigint/bytes]
 // Pops uint64(T)
 // Args expected: [{uint8 position in scratch space to load from}(I)]
-export class Gloads extends Op {
-  readonly scratchIndex: number;
-  readonly interpreter: Interpreter;
-  readonly line: number;
-
+export class Gloads extends Gload {
   /**
    * Stores scratch space index number according to argument passed.
    * @param args Expected arguments: [index number]
@@ -2650,25 +2646,12 @@ export class Gloads extends Op {
    * @param interpreter interpreter object
    */
   constructor (args: string[], line: number, interpreter: Interpreter) {
-    super();
-    this.line = line;
-    assertLen(args.length, 1, this.line);
-    assertOnlyDigits(args[0], this.line);
-
-    this.scratchIndex = Number(args[0]);
-    this.interpreter = interpreter;
+    // "11" is mock value, will be updated when poping from stack in execute
+    super(["11", ...args], line, interpreter);
   }
 
   execute (stack: TEALStack): void {
-    const txIndex = Number(this.assertBigInt(stack.pop(), this.line));
-    const scratch = this.interpreter.runtime.ctx.sharedScratchSpace.get(txIndex);
-    if (scratch === undefined) {
-      throw new RuntimeError(
-        RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR,
-        { index: txIndex, line: this.line }
-      );
-    }
-    this.checkIndexBound(this.scratchIndex, scratch, this.line);
-    stack.push(scratch[this.scratchIndex]);
+    this.txIndex = Number(this.assertBigInt(stack.pop(), this.line));
+    super.execute(stack);
   }
 }
