@@ -7,7 +7,7 @@ import {
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
   Byte, Bytec, Bytecblock, Concat, Dig, Div, Dup, Dup2, Ed25519verify,
-  EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, GetByte, Global, GreaterThan,
+  EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global, GreaterThan,
   GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Intcblock, Itob,
   Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, MinBalance, Mod,
   Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, Select, SetBit, SetByte, Sha256,
@@ -150,6 +150,16 @@ opCodeMap[3] = {
   min_balance: MinBalance
 };
 
+/**
+ * TEALv4 opcodes: https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/
+ */
+opCodeMap[4] = {
+  ...opCodeMap[3],
+
+  gload: Gload,
+  gloads: Gloads
+};
+
 // list of opcodes that require one extra parameter than others: `interpreter`.
 const interpreterReqList = new Set([
   "#pragma", "arg", "bytecblock", "bytec", "intcblock", "intc", "store",
@@ -157,7 +167,7 @@ const interpreterReqList = new Set([
   "balance", "asset_holding_get", "asset_params_get", "app_opted_in",
   "app_local_get", "app_local_get_ex", "app_global_get", "app_global_get_ex",
   "app_local_put", "app_global_put", "app_local_del", "app_global_del",
-  "gtxns", "gtxnsa", "min_balance"
+  "gtxns", "gtxnsa", "min_balance", "gload", "gloads"
 ]);
 
 /**

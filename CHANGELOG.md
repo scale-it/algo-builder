@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Improvements
++ Added shared space between contracts
++ Added tealv4 opcodes (`gload` and `gloads`) 
 ### Bug Fixes
 * Fixed `yarn add @algo-builder/web` (was failing because of missing dependency `zod` in packages/web).
 
