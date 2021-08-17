@@ -4075,7 +4075,7 @@ describe("Teal Opcodes", function () {
     });
   });
 
-  describe("shared data between contracts", () => {
+  describe("TEALv4: shared data between contracts", () => {
     let stack: Stack<StackElem>;
     let interpreter: Interpreter;
 
