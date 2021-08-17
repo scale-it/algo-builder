@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Improvements
+* TEALv4 support in `@algo-builder/runtime`:
+    * Dynamic Opcode Cost Evaluation
+
 ### Bug Fixes
 * Fixed `yarn add @algo-builder/web` (was failing because of missing dependency `zod` in packages/web).
 
