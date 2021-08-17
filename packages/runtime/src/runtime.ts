@@ -443,7 +443,7 @@ export class Runtime {
   ): number {
     this.addCtxAppCreateTxn(flags, payFlags);
     this.ctx.debugStack = debugStack;
-    this.ctx.addApp(flags.sender.addr, flags, approvalProgram, clearProgram);
+    this.ctx.addApp(flags.sender.addr, flags, approvalProgram, clearProgram, 0);
 
     this.store = this.ctx.state;
     return this.store.appCounter;
@@ -485,7 +485,7 @@ export class Runtime {
     flags: AppOptionalFlags, payFlags: types.TxParams, debugStack?: number): void {
     this.addCtxOptInTx(accountAddr, appID, payFlags, flags);
     this.ctx.debugStack = debugStack;
-    this.ctx.optInToApp(accountAddr, appID);
+    this.ctx.optInToApp(accountAddr, appID, 0);
 
     this.store = this.ctx.state;
   }
@@ -538,7 +538,7 @@ export class Runtime {
   ): void {
     this.addCtxAppUpdateTx(senderAddr, appID, payFlags, flags);
     this.ctx.debugStack = debugStack;
-    this.ctx.updateApp(appID, approvalProgram, clearProgram);
+    this.ctx.updateApp(appID, approvalProgram, clearProgram, 0);
 
     // If successful, Update programs and state
     this.store = this.ctx.state;

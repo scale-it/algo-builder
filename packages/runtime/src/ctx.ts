@@ -221,13 +221,14 @@ export class Ctx implements Context {
    * @param payFlags Transaction parameters
    * @param approvalProgram application approval program
    * @param clearProgram application clear program
+   * @param idx index of transaction in group
    * NOTE:
    * - approval and clear program must be the TEAL code as string (not compiled code)
    * - When creating or opting into an app, the minimum balance grows before the app code runs
    */
   addApp (
     fromAccountAddr: AccountAddress, flags: AppDeploymentFlags,
-    approvalProgram: string, clearProgram: string, idx?: number
+    approvalProgram: string, clearProgram: string, idx: number
   ): number {
     const senderAcc = this.getAccount(fromAccountAddr);
 
@@ -245,7 +246,7 @@ export class Ctx implements Context {
     this.state.globalApps.set(app.id, senderAcc.address);
 
     this.runtime.run(
-      approvalProgram, ExecutionMode.APPLICATION, idx ?? 0, this.debugStack
+      approvalProgram, ExecutionMode.APPLICATION, idx, this.debugStack
     ); // execute TEAL code with appID = 0
 
     // create new application in globalApps map
@@ -274,15 +275,16 @@ export class Ctx implements Context {
    * Account address opt-in for application Id
    * @param accountAddr Account address to opt into application
    * @param appID Application index
+   * @param idx index of transaction in group
    * NOTE: When creating or opting into an app, the minimum balance grows before the app code runs
    */
-  optInToApp (accountAddr: AccountAddress, appID: number, idx?: number): void {
+  optInToApp (accountAddr: AccountAddress, appID: number, idx: number): void {
     const appParams = this.getApp(appID);
 
     const account = this.getAccount(accountAddr);
     account.optInToApp(appID, appParams);
     this.assertAccBalAboveMin(accountAddr);
-    this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx ?? 0, this.debugStack);
+    this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
   }
 
   /**
@@ -479,7 +481,7 @@ export class Ctx implements Context {
     appID: number,
     approvalProgram: string,
     clearProgram: string,
-    idx?: number
+    idx: number
   ): void {
     if (approvalProgram === "") {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_APPROVAL_PROGRAM);
@@ -489,7 +491,7 @@ export class Ctx implements Context {
     }
 
     const appParams = this.getApp(appID);
-    this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx ?? 0, this.debugStack);
+    this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
 
     const updatedApp = this.getApp(appID);
     updatedApp[APPROVAL_PROGRAM] = approvalProgram;
