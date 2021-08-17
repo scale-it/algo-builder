@@ -24,7 +24,7 @@ export class Ctx implements Context {
   args: Uint8Array[];
   runtime: Runtime;
   debugStack?: number; //  max number of top elements from the stack to print after each opcode execution.
-  sharedScratchSpace: Map<number, StackElem[]>;
+  sharedScratchSpace: Map<number, StackElem[]>; // here number is index of transaction in a group
 
   constructor (state: State, tx: Txn, gtxs: Txn[], args: Uint8Array[],
     runtime: Runtime, debugStack?: number) {
