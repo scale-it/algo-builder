@@ -150,6 +150,10 @@ opCodeMap[3] = {
   min_balance: MinBalance
 };
 
+opCodeMap[4] = {
+  ...opCodeMap[3]
+};
+
 // list of opcodes that require one extra parameter than others: `interpreter`.
 const interpreterReqList = new Set([
   "#pragma", "arg", "bytecblock", "bytec", "intcblock", "intc", "store",
@@ -302,9 +306,13 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
       { opcode: opCode, version: tealVersion, line: counter });
   }
 
-  // increment gas of TEAL code
-  // Add 1 if opCode is not present in OpGasCost map
-  if (opCode !== '#pragma') { interpreter.gas += OpGasCost[tealVersion][opCode] ?? 1; }
+  // store cost for opcodes at each line in `interpreter.lineToCost`
+  if (opCode === '#pragma') {
+    interpreter.lineToCost[counter] = 0;
+  } else {
+    interpreter.lineToCost[counter] = OpGasCost[tealVersion][opCode] ?? 1;
+  }
+  interpreter.gas += interpreter.lineToCost[counter]; // total "static" cost
 
   if (interpreterReqList.has(opCode)) {
     return new opCodeMap[tealVersion][opCode](words, counter, interpreter);
@@ -313,7 +321,7 @@ export function opcodeFromSentence (words: string[], counter: number, interprete
 }
 
 // verify max cost of TEAL code is within consensus parameters
-function assertMaxCost (gas: number, mode: ExecutionMode): void {
+export function assertMaxCost (gas: number, mode: ExecutionMode): void {
   if (mode === ExecutionMode.SIGNATURE) {
     // check max cost (for stateless)
     if (gas > LogicSigMaxCost) {
@@ -383,7 +391,11 @@ export function parser (program: string, mode: ExecutionMode, interpreter: Inter
     }
   }
 
-  assertMaxCost(interpreter.gas, mode);
+  // for versions <= 3, cost is calculated & evaluated statically
+  if (interpreter.tealVersion <= 3) {
+    assertMaxCost(interpreter.gas, mode);
+  }
+
   // TODO: check if we can calculate length in: https://www.pivotaltracker.com/story/show/176623588
   // assertMaxLen(interpreter.length, mode);
   return opCodeList;
