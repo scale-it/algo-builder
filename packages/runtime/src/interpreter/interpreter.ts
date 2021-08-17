@@ -29,6 +29,8 @@ export class Interpreter {
   instructions: Operator[];
   instructionIndex: number;
   runtime: Runtime;
+  savedPoint: number; // saved execution point when callsub is encountered
+  labelMap: Map<string, number>; // label string mapped to their respective indexes in instructions array
 
   constructor () {
     this.stack = new Stack<StackElem>();
@@ -41,6 +43,8 @@ export class Interpreter {
     this.instructions = [];
     this.instructionIndex = 0; // set instruction index to zero
     this.runtime = <Runtime>{};
+    this.savedPoint = -1;
+    this.labelMap = new Map<string, number>();
   }
 
   /**
@@ -127,6 +131,7 @@ export class Interpreter {
   /**
    * Description: moves instruction index to "label", throws error if label not found
    * @param label: branch label
+   * @param line: line number
    */
   jumpForward (label: string, line: number): void {
     while (++this.instructionIndex < this.instructions.length) {
@@ -147,6 +152,30 @@ export class Interpreter {
   }
 
   /**
+   * Description: moves instruction index to "label", throws error if label not found
+   * @param label: branch label
+   * @param line: line number
+   */
+  jumpToLabel (label: string, line: number): void {
+    const toInstructionIndex = this.labelMap.get(label);
+    if (toInstructionIndex === undefined) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.LABEL_NOT_FOUND, {
+        label: label,
+        line: line
+      });
+    }
+    let currentIndex = toInstructionIndex;
+    // if next immediate op is also label, then keep continuing, otherwise return
+    for (; currentIndex < this.instructions.length - 1; ++currentIndex) {
+      const nextInstruction = this.instructions[currentIndex + 1];
+      if (!(nextInstruction instanceof Label)) {
+        this.instructionIndex = currentIndex;
+        break;
+      }
+    }
+  }
+
+  /**
    * logs TEALStack upto depth = debugStack to console
    * @param instruction interpreter opcode instance
    * @param debugStack max no. of elements to print from top of stack
@@ -164,6 +193,17 @@ export class Interpreter {
   }
 
   /**
+   * Maps labels with indexes according to instructions array
+   */
+  mapLabelWithIndexes (): void {
+    this.instructions.forEach((instruction, idx) => {
+      if (instruction instanceof Label) {
+        this.labelMap.set(instruction.label, idx);
+      }
+    });
+  }
+
+  /**
    * This function executes TEAL code after parsing
    * @param program: teal code
    * @param mode : execution mode of TEAL code (Stateless or Stateful)
@@ -174,6 +214,7 @@ export class Interpreter {
   execute (program: string, mode: ExecutionMode, runtime: Runtime, debugStack?: number): void {
     this.runtime = runtime;
     this.instructions = parser(program, mode, this);
+    this.mapLabelWithIndexes();
 
     while (this.instructionIndex < this.instructions.length) {
       const instruction = this.instructions[this.instructionIndex];
