@@ -29,7 +29,9 @@ export class Interpreter {
   instructions: Operator[];
   instructionIndex: number;
   runtime: Runtime;
-  savedPoint: number; // saved execution point when callsub is encountered
+  // The call stack is separate from the data stack. Only callsub and retsub manipulate it.
+  // It is used to provide sub routine functionality
+  callStack: Stack<number>;
   labelMap: Map<string, number>; // label string mapped to their respective indexes in instructions array
 
   constructor () {
@@ -43,7 +45,7 @@ export class Interpreter {
     this.instructions = [];
     this.instructionIndex = 0; // set instruction index to zero
     this.runtime = <Runtime>{};
-    this.savedPoint = -1;
+    this.callStack = new Stack<number>();
     this.labelMap = new Map<string, number>();
   }
 

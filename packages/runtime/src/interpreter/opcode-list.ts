@@ -2,6 +2,7 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 import { parsing } from "@algo-builder/web";
 import { decodeAddress, decodeUint64, encodeAddress, encodeUint64, isValidAddress, modelsv2, verifyBytes } from "algosdk";
+import { throws } from "assert";
 import { Message, sha256 } from "js-sha256";
 import { sha512_256 } from "js-sha512";
 import { Keccak } from 'sha3';
@@ -2589,5 +2590,73 @@ export class MinBalance extends Op {
     const acc = this.interpreter.getAccount(accountIndex, this.line);
 
     stack.push(BigInt(acc.minBalance));
+  }
+}
+
+/**
+ * Provide subroutine functionality. When callsub is called, the current location in
+ * the program is saved and immediately jumps to the label passed to the opcode.
+ * Pops: None
+ * Pushes: None
+ * The call stack is separate from the data stack. Only callsub and retsub manipulate it.
+ * Pops: None
+ * Pushes: Pushes current instruction index in call stack
+ */
+export class Callsub extends Op {
+  readonly interpreter: Interpreter;
+  readonly label: string;
+  readonly line: number;
+
+  /**
+   * Sets `label` according to arguments passed.
+   * @param args Expected arguments: [label of branch]
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    assertLen(args.length, 1, line);
+    this.label = args[0];
+    this.interpreter = interpreter;
+    this.line = line;
+  }
+
+  execute (stack: TEALStack): void {
+    // the current location in the program is saved
+    this.interpreter.callStack.push(this.interpreter.instructionIndex);
+    // immediately jumps to the label passed to the opcode.
+    this.interpreter.jumpToLabel(this.label, this.line);
+  }
+}
+
+/**
+ * When the retsub opcode is called, the AVM will resume
+ * execution at the previous saved point.
+ * Pops: None
+ * Pushes: None
+ * The call stack is separate from the data stack. Only callsub and retsub manipulate it.
+ * Pops: index from call stack
+ * Pushes: None
+ */
+export class Retsub extends Op {
+  readonly interpreter: Interpreter;
+  readonly line: number;
+
+  /**
+   * @param args Expected arguments: []
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    assertLen(args.length, 0, line);
+    this.interpreter = interpreter;
+    this.line = line;
+  }
+
+  execute (stack: TEALStack): void {
+    // get current location from saved point
+    // jump to saved instruction opcode
+    this.interpreter.instructionIndex = this.interpreter.callStack.pop();
   }
 }
