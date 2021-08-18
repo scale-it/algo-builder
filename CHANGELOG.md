@@ -3,8 +3,10 @@
 ## Unreleased
 
 ### Improvements
-+ Added shared space between contracts
-+ Added tealv4 opcodes (`gload` and `gloads`) 
+* TEALv4 support in `@algo-builder/runtime`:
+    * Added shared space between contracts (opcodes `gload` and `gloads`)
+    * Dynamic Opcode Cost Evaluation
+
 ### Bug Fixes
 * Fixed `yarn add @algo-builder/web` (was failing because of missing dependency `zod` in packages/web).
 

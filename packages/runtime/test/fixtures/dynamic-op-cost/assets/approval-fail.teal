@@ -1,0 +1,22 @@
+#pragma version 3
+// this file is same as `approval-pass.teal`, only difference is the teal version.
+// so for this contract cost is calculated before execution
+
+int 0
+txn ApplicationID
+==
+bnz on_creation
+
+keccak256
+keccak256
+keccak256
+keccak256
+keccak256
+keccak256
+
+on_creation:
+int 1
+return
+
+int 1
+return
