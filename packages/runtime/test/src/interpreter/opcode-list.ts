@@ -13,7 +13,7 @@ import {
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
-  Byte, Bytec, Bytecblock, Concat, Dig, Div, Dup, Dup2, Ed25519verify,
+  Byte, ByteAdd, Bytec, Bytecblock, Concat, Dig, Div, Dup, Dup2, Ed25519verify,
   EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global,
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
@@ -21,7 +21,7 @@ import {
   Select, SetBit, SetByte, Sha256, Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE, DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8 } from "../../../src/lib/constants";
-import { convertToBuffer } from "../../../src/lib/parsing";
+import { convertToBuffer, getEncoding } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
 import { AccountStoreI, EncodingType, StackElem, Txn as EncodedTx } from "../../../src/types";
@@ -4160,6 +4160,89 @@ describe("Teal Opcodes", function () {
       expectRuntimeError(
         () => op.execute(stack),
         RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
+    });
+  });
+
+  describe("TEALv4: Byteslice Arithmetic Ops", () => {
+    const hexToByte = (hex: string): Uint8Array => {
+      const [string, encoding] = getEncoding([hex], 0);
+      return Uint8Array.from(convertToBuffer(string, encoding));
+    };
+
+    describe("ByteAdd", () => {
+      const stack = new Stack<StackElem>();
+
+      // hex values are taken from go-algorand tests
+      // https://github.com/algorand/go-algorand/blob/master/data/transactions/logic/eval_test.go
+      it("should return correct addition of two unit64", function () {
+        stack.push(hexToByte('0x01'));
+        stack.push(hexToByte('0x01'));
+        let op = new ByteAdd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x02'));
+
+        stack.push(hexToByte('0x01FF'));
+        stack.push(hexToByte('0x01'));
+        op = new ByteAdd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x0200'));
+
+        stack.push(hexToByte('0x01234576'));
+        stack.push(hexToByte('0x01ffffffffffffff'));
+        op = new ByteAdd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), new Uint8Array([2, 0, 0, 0, 1, 35, 69, 117]));
+
+        // u256 + u256
+        stack.push(hexToByte('0x0123457601234576012345760123457601234576012345760123457601234576'));
+        stack.push(hexToByte('0x01ffffffffffffff01ffffffffffffff01234576012345760123457601234576'));
+        op = new ByteAdd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), new Uint8Array([
+          3, 35, 69, 118, 1, 35, 69, 117, 3,
+          35, 69, 118, 1, 35, 69, 117, 2, 70,
+          138, 236, 2, 70, 138, 236, 2, 70, 138,
+          236, 2, 70, 138, 236
+        ]));
+      });
+
+      it("should accept output of > 64 bytes", function () {
+        let str = '';
+        for (let i = 0; i < 64; i++) { str += 'ff'; } // ff repeated 64 times
+
+        stack.push(hexToByte('0x' + str));
+        stack.push(hexToByte('0x10'));
+        const op = new ByteAdd([], 0);
+        assert.doesNotThrow(() => op.execute(stack));
+        const top = stack.pop() as Uint8Array;
+        assert.isAbove(top.length, 64); // output array is of 65 bytes (because o/p length is limited to 128 bytes)
+      });
+
+      it("should throw error with ByteAdd if input > 64 bytes", () => {
+        let str = '';
+        for (let i = 0; i < 65; i++) { str += 'ff'; } // ff repeated "65" times
+
+        stack.push(hexToByte('0x' + str));
+        stack.push(hexToByte('0x10'));
+        const op = new ByteAdd([], 0);
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.BYTES_LEN_EXCEEDED
+        );
+      });
+
+      it("should throw error with ByteAdd if stack is below min length",
+        execExpectError(
+          stack,
+          [hexToByte('0x10')],
+          new ByteAdd([], 0),
+          RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+        )
+      );
+
+      it("should throw error if ByteAdd is used with int",
+        execExpectError(stack, [1n, 2n], new ByteAdd([], 0), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
       );
     });
   });

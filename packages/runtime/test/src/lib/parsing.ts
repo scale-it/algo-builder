@@ -3,7 +3,7 @@ import { decodeAddress } from "algosdk";
 import { assert } from "chai";
 
 import { MAX_UINT64, MIN_UINT64 } from "../../../src/lib/constants";
-import { convertToString } from "../../../src/lib/parsing";
+import { bigEndianBytesToBigInt, bigintToBigEndianBytes, convertToString } from "../../../src/lib/parsing";
 
 describe("Convert integer to big endian", () => {
   /**
@@ -53,6 +53,63 @@ describe("Convert integer to big endian", () => {
 
     res = parsing.uint64ToBigEndian(MAX_UINT64);
     expected = new Uint8Array([255, 255, 255, 255, 255, 255, 255, 255]);
+    assert.deepEqual(res, expected);
+  });
+
+  /* eslint-disable max-len */
+  it("should return correct big endian bytes from bigint", () => {
+    let res = bigintToBigEndianBytes(MIN_UINT64);
+    let expected = new Uint8Array([0]); // this is not "strict" uintN byte conversion, so 0 is parsed as new Uint8array([0])
+    assert.deepEqual(res, expected);
+
+    res = bigintToBigEndianBytes(MAX_UINT64); // max 8 bytes array
+    expected = new Uint8Array([255, 255, 255, 255, 255, 255, 255, 255]);
+    assert.deepEqual(res, expected);
+
+    // max 16 bytes array
+    res = bigintToBigEndianBytes(340282366920938463463374607431768211455n);
+    expected = new Uint8Array([255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]);
+    assert.deepEqual(res, expected);
+
+    // max 32 bytes array (i.e 256 bit unsigned integer)
+    res = bigintToBigEndianBytes(115792089237316195423570985008687907853269984665640564039457584007913129639935n);
+    expected = new Uint8Array(32).fill(255);
+    assert.deepEqual(res, expected);
+
+    // max 64 bytes array (i.e 512 bit unsigned integer)
+    res = bigintToBigEndianBytes(13407807929942597099574024998205846127479365820592393377723561443721764030073546976801874298166903427690031858186486050853753882811946569946433649006084095n);
+    expected = new Uint8Array(64).fill(255);
+    assert.deepEqual(res, expected);
+
+    // max 128 bytes array (i.e 1024 bit unsigned integer)
+    res = bigintToBigEndianBytes(179769313486231590772930519078902473361797697894230657273430081157732675805500963132708477322407536021120113879871393357658789768814416622492847430639474124377767893424865485276302219601246094119453082952085005768838150682342462881473913110540827237163350510684586298239947245938479716304835356329624224137215n);
+    expected = new Uint8Array(128).fill(255);
+    assert.deepEqual(res, expected);
+  });
+
+  it("should return correct bigint value from big endian bytes", () => {
+    let res = bigEndianBytesToBigInt(new Uint8Array([0]));
+    let expected = 0n;
+    assert.deepEqual(res, expected);
+
+    res = bigEndianBytesToBigInt(new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0]));
+    expected = 0n;
+    assert.deepEqual(res, expected);
+
+    res = bigEndianBytesToBigInt(new Uint8Array(8).fill(255));
+    expected = MAX_UINT64;
+    assert.deepEqual(res, expected);
+
+    res = bigEndianBytesToBigInt(new Uint8Array(16).fill(255));
+    expected = 340282366920938463463374607431768211455n;
+    assert.deepEqual(res, expected);
+
+    res = bigEndianBytesToBigInt(new Uint8Array(32).fill(255));
+    expected = 115792089237316195423570985008687907853269984665640564039457584007913129639935n;
+    assert.deepEqual(res, expected);
+
+    res = bigEndianBytesToBigInt(new Uint8Array(64).fill(255));
+    expected = 13407807929942597099574024998205846127479365820592393377723561443721764030073546976801874298166903427690031858186486050853753882811946569946433649006084095n;
     assert.deepEqual(res, expected);
   });
 
