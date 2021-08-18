@@ -2583,3 +2583,67 @@ export class MinBalance extends Op {
     stack.push(BigInt(acc.minBalance));
   }
 }
+
+// push Ith scratch space index of the Tth transaction in the current group
+// push to stack [...stack, bigint/bytes]
+// Pops nothing
+// Args expected: [{uint8 transaction group index}(T),
+// {uint8 position in scratch space to load from}(I)]
+export class Gload extends Op {
+  readonly scratchIndex: number;
+  txIndex: number;
+  readonly interpreter: Interpreter;
+  readonly line: number;
+
+  /**
+   * Stores scratch space index and transaction index number according to arguments passed.
+   * @param args Expected arguments: [index number]
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.line = line;
+    assertLen(args.length, 2, this.line);
+    assertOnlyDigits(args[0], this.line);
+    assertOnlyDigits(args[1], this.line);
+
+    this.txIndex = Number(args[0]);
+    this.scratchIndex = Number(args[1]);
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    const scratch = this.interpreter.runtime.ctx.sharedScratchSpace.get(this.txIndex);
+    if (scratch === undefined) {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR,
+        { index: this.txIndex, line: this.line }
+      );
+    }
+    this.checkIndexBound(this.scratchIndex, scratch, this.line);
+    stack.push(scratch[this.scratchIndex]);
+  }
+}
+
+// push Ith scratch space index of the Tth transaction in the current group
+// push to stack [...stack, bigint/bytes]
+// Pops uint64(T)
+// Args expected: [{uint8 position in scratch space to load from}(I)]
+export class Gloads extends Gload {
+  /**
+   * Stores scratch space index number according to argument passed.
+   * @param args Expected arguments: [index number]
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    // "11" is mock value, will be updated when poping from stack in execute
+    super(["11", ...args], line, interpreter);
+  }
+
+  execute (stack: TEALStack): void {
+    this.txIndex = Number(this.assertBigInt(stack.pop(), this.line));
+    super.execute(stack);
+  }
+}

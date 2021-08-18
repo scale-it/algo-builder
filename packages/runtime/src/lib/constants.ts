@@ -123,6 +123,7 @@ export const TxArrFields: {[key: number]: Set<string>} = {
   2: new Set(['Accounts', 'ApplicationArgs'])
 };
 TxArrFields[3] = new Set([...TxArrFields[2], 'Assets', 'Applications']);
+TxArrFields[4] = TxArrFields[3];
 
 TxArrFields[4] = new Set([...TxArrFields[3]]);
 
@@ -275,4 +276,7 @@ OpGasCost[2] = {
  */
 OpGasCost[3] = { ...OpGasCost[2] };
 
-OpGasCost[4] = { ...OpGasCost[2] };
+/*
+ * tealv4
+ */
+OpGasCost[4] = { ...OpGasCost[3] };

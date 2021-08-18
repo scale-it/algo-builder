@@ -238,20 +238,26 @@ by an index that does not exist.`
     title: 'set bit index error',
     description: `set bit index error`
   },
-  ADDR_NOT_FOUND_IN_TXN_ACCOUNT: {
+  SCRATCH_EXIST_ERROR: {
     number: 1035,
+    message: "scratch space doesn't exist for index: %index%. [error-line: %line%], fails maybe because the requested transaction is an ApplicationCall or T < GroupIndex.",
+    title: 'scratch space not found',
+    description: `fails maybe because the requested transaction is an ApplicationCall or T < GroupIndex.`
+  },
+  ADDR_NOT_FOUND_IN_TXN_ACCOUNT: {
+    number: 1036,
     message: "address %address% not found in Txn.Accounts AND is not equal to Txn.Sender. [error-line: %line%]",
     title: 'Address not found in Txn',
     description: `Address should be present in Txn.Account OR should be Txn.Sender`
   },
   INVALID_APP_REFERENCE: {
-    number: 1036,
+    number: 1037,
     message: "Application Reference %appRef% not found in Transaction(foreignApps/appID). [error-line: %line%]",
     title: 'Invalid APP Reference',
     description: `Invalid APP Reference: Application index not found in Txn`
   },
   INVALID_ASA_REFERENCE: {
-    number: 1037,
+    number: 1038,
     message: "ASA Reference %assetRef% not found in Transaction(foreignAssets/assetID). [error-line: %line%]",
     title: 'Invalid ASA Reference',
     description: `Invalid ASA Reference: Asset index not found in Txn`

@@ -8,13 +8,11 @@ import {
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
   Branch, BranchIfNotZero, BranchIfZero, Btoi, Byte, Bytec, Concat, Dig, Div,
   Dup, Dup2, Ed25519verify, EqualTo, Err, GetAssetDef, GetAssetHolding,
-  GetBit,
-  GetByte,
-  Global, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Itob,
-  Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, MinBalance, Mod, Mul, Mulw,
-  Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, Select, SetBit,
-  SetByte, Sha256, Sha512_256, Store,
-  Sub, Substring, Substring3, Swap, Txn, Txna
+  GetBit, GetByte, Gload, Gloads, Global, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna,
+  Gtxns, Gtxnsa, Int, Intc, Itob, Keccak256, Label, Len, LessThan,
+  LessThanEqualTo, Load, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo,
+  Or, Pop, Pragma, PushBytes, PushInt, Return, Select, SetBit, SetByte,
+  Sha256, Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { MAX_UINT64, MaxTEALVersion, MIN_UINT64 } from "../../../src/lib/constants";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
@@ -884,6 +882,40 @@ describe("Parser", function () {
 
         expectRuntimeError(
           () => opcodeFromSentence(["min_balance", "xyz"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+    });
+
+    describe("should return correct opcodes for tealv4 ops", () => {
+      it("gload", () => {
+        const res = opcodeFromSentence(["gload", "0", "1"], 1, interpreter);
+        const expected = new Gload(["0", "1"], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["gload", "one", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.INVALID_TYPE
+        );
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["gload", "0"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("gloads", () => {
+        const res = opcodeFromSentence(["gloads", "0"], 1, interpreter);
+        const expected = new Gloads(["0"], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["gloads", "one"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.INVALID_TYPE
+        );
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["gloads", "0", "1"], 1, interpreter),
           RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
         );
       });
