@@ -1610,7 +1610,7 @@ export class AppOptedIn extends Op {
     const account = this.interpreter.getAccount(accountRef, this.line);
     const localState = account.appsLocalState;
 
-    const appID = this.interpreter.getAppID(Number(appRef), false, this.line, this);
+    const appID = this.interpreter.getAppIDByReference(Number(appRef), false, this.line, this);
     const isOptedIn = localState.get(appID);
     if (isOptedIn) {
       stack.push(1n);
@@ -1682,7 +1682,7 @@ export class AppLocalGetEx extends Op {
     const appRef = this.assertBigInt(stack.pop(), this.line);
     const accountRef: StackElem = stack.pop();
 
-    const appID = this.interpreter.getAppID(Number(appRef), false, this.line, this);
+    const appID = this.interpreter.getAppIDByReference(Number(appRef), false, this.line, this);
     const account = this.interpreter.getAccount(accountRef, this.line);
     const val = account.getLocalState(appID, key);
     if (val) {
@@ -1757,7 +1757,7 @@ export class AppGlobalGetEx extends Op {
     // or since v4 an application id that appears in Txn.ForeignApps
     const appRef = this.assertBigInt(stack.pop(), this.line);
 
-    const appID = this.interpreter.getAppID(Number(appRef), true, this.line, this);
+    const appID = this.interpreter.getAppIDByReference(Number(appRef), true, this.line, this);
     const val = this.interpreter.getGlobalState(appID, key, this.line);
     if (val) {
       stack.push(val);
@@ -1969,7 +1969,7 @@ export class GetAssetHolding extends Op {
     const accountRef: StackElem = stack.pop();
 
     const account = this.interpreter.getAccount(accountRef, this.line);
-    const assetID = this.interpreter.getAssetID(Number(assetRef), false, this.line, this);
+    const assetID = this.interpreter.getAssetIDByReference(Number(assetRef), false, this.line, this);
     const assetInfo = account.assets.get(assetID);
     if (assetInfo === undefined) {
       stack.push(0n);
@@ -2025,7 +2025,7 @@ export class GetAssetDef extends Op {
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
     const assetRef = this.assertBigInt(stack.pop(), this.line);
-    const assetID = this.interpreter.getAssetID(Number(assetRef), true, this.line, this);
+    const assetID = this.interpreter.getAssetIDByReference(Number(assetRef), true, this.line, this);
     const AssetDefinition = this.interpreter.getAssetDef(assetID);
     let def: string;
 

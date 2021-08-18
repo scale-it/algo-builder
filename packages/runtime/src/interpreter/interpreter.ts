@@ -148,7 +148,7 @@ export class Interpreter {
    * @param line line number
    * https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/
    */
-  getAppID (appRef: number, foreign: boolean, line: number, op: Op): number {
+  getAppIDByReference (appRef: number, foreign: boolean, line: number, op: Op): number {
     const foreignApps = this.runtime.ctx.tx.apfa ?? [];
     if (this.tealVersion >= 4) {
       // In recent versions (tealv >= 4), accept either kind of Application reference
@@ -194,7 +194,7 @@ export class Interpreter {
    * @param line line number
    * https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/
    */
-  getAssetID (assetRef: number, foreign: boolean, line: number, op: Op): number {
+  getAssetIDByReference (assetRef: number, foreign: boolean, line: number, op: Op): number {
     const appForeignAssets = this.runtime.ctx.tx.apas ?? [];
     if (this.tealVersion >= 4) {
       // In recent versions (tealv >= 4), accept either kind of ASA reference
