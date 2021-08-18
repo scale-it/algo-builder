@@ -6,7 +6,7 @@ import {
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
-  Byte, Bytec, Bytecblock, Concat, Dig, Div, Dup, Dup2, Ed25519verify,
+  Byte, ByteAdd, Bytec, Bytecblock, Concat, Dig, Div, Dup, Dup2, Ed25519verify,
   EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global, GreaterThan,
   GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Intcblock, Itob,
   Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, MinBalance, Mod,
@@ -157,7 +157,10 @@ opCodeMap[4] = {
   ...opCodeMap[3],
 
   gload: Gload,
-  gloads: Gloads
+  gloads: Gloads,
+
+  // byteslice arithmetic ops
+  'b+': ByteAdd
 };
 
 // list of opcodes that require one extra parameter than others: `interpreter`.

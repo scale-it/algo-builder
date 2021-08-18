@@ -29,6 +29,11 @@ export const MaxAppProgramLen = 1024;
 export const MAX_ALGORAND_ACCOUNT_ASSETS = 1000;
 export const MAX_ALGORAND_ACCOUNT_APPS = 10;
 
+// for byteslice arithmetic ops, inputs are limited to 64 bytes,
+// but ouput can be upto 128 bytes (eg. when using b+ OR b*)
+export const MAX_INPUT_BYTE_LEN = 64;
+export const MAX_OUTPUT_BYTE_LEN = 128;
+
 const zeroAddress = new Uint8Array(32);
 const zeroUint64 = 0n;
 const zeroByte = new Uint8Array(0);

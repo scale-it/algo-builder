@@ -171,3 +171,54 @@ export function parseBinaryStrToBigInt (binary: string[] | string): bigint {
   }
   return res;
 }
+
+/**
+ * Parses bigint to big endian bytes (represeted as Uint8array)
+ * NOTE: This is different from decodeUint64, encodeUint64 as it is capable of
+ * handling bigint > 64 bit (8 bytes).
+ * @param b value in bigint to parse
+ */
+export function bigintToBigEndianBytes (b: bigint): Uint8Array {
+  // `toString(base)` works
+  let hex = BigInt(b).toString(16);
+
+  // But it still follows the old behavior of giving
+  // invalid hex strings (due to missing padding),
+  // but we can easily add that back
+  if (hex.length % 2) { hex = '0' + hex; }
+
+  // The byteLength will be half of the hex string length
+  const len = hex.length / 2;
+  const u8 = new Uint8Array(len);
+
+  // And then we can iterate each element by one
+  // and each hex segment by two
+  let i = 0;
+  let j = 0;
+  while (i < len) {
+    u8[i] = parseInt(hex.slice(j, j + 2), 16);
+    i += 1;
+    j += 2;
+  }
+
+  return u8;
+}
+
+/**
+ * Parses unsigned big endian bytes (represented as Uint8array) back to bigint
+ * NOTE: This is different from decodeUint64, encodeUint64 as it is capable of
+ * handling bigint > 64 bit (8 bytes).
+ * @param bytes big endian bytes (buffer or Uint8array)
+ */
+export function bigEndianBytesToBigInt (bytes: Uint8Array | Buffer): bigint {
+  const hex: string[] = [];
+  const u8 = Uint8Array.from(bytes);
+
+  u8.forEach(function (i) {
+    let h = i.toString(16);
+    if (h.length % 2) { h = '0' + h; }
+    hex.push(h);
+  });
+
+  return BigInt('0x' + hex.join(''));
+}
