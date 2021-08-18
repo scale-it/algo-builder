@@ -1417,7 +1417,11 @@ export class Branch extends Op {
   }
 
   execute (stack: TEALStack): void {
-    this.interpreter.jumpForward(this.label, this.line);
+    if (this.interpreter.tealVersion <= 3) {
+      this.interpreter.jumpForward(this.label, this.line);
+    } else {
+      this.interpreter.jumpToLabel(this.label, this.line);
+    }
   }
 }
 
@@ -1447,7 +1451,11 @@ export class BranchIfZero extends Op {
     const last = this.assertBigInt(stack.pop(), this.line);
 
     if (last === 0n) {
-      this.interpreter.jumpForward(this.label, this.line);
+      if (this.interpreter.tealVersion <= 3) {
+        this.interpreter.jumpForward(this.label, this.line);
+      } else {
+        this.interpreter.jumpToLabel(this.label, this.line);
+      }
     }
   }
 }
@@ -1478,7 +1486,11 @@ export class BranchIfNotZero extends Op {
     const last = this.assertBigInt(stack.pop(), this.line);
 
     if (last !== 0n) {
-      this.interpreter.jumpForward(this.label, this.line);
+      if (this.interpreter.tealVersion <= 3) {
+        this.interpreter.jumpForward(this.label, this.line);
+      } else {
+        this.interpreter.jumpToLabel(this.label, this.line);
+      }
     }
   }
 }
