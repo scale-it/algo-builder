@@ -21,7 +21,7 @@ export class Interpreter {
    */
   readonly stack: TEALStack;
   tealVersion: number; // LogicSigVersion
-  lineToCost: { [key: number]: number }; // cost of each instruction by line
+  lineToCost: { [key: number]: number }; // { <lineNo>: <OpCost> } cost of each instruction by line
   gas: number; // total gas cost of TEAL code
   length: number; // total length of 'compiled' TEAL code
   bytecblock: Uint8Array[];
