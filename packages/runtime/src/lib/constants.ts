@@ -270,4 +270,7 @@ OpGasCost[2] = {
  */
 OpGasCost[3] = { ...OpGasCost[2] };
 
+/*
+ * tealv4
+ */
 OpGasCost[4] = { ...OpGasCost[3] };

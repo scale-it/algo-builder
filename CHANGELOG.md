@@ -4,6 +4,7 @@
 
 ### Improvements
 * TEALv4 support in `@algo-builder/runtime`:
+    * Added shared space between contracts (opcodes `gload` and `gloads`)
     * Dynamic Opcode Cost Evaluation
 
 ### Bug Fixes
