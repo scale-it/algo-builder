@@ -1,6 +1,6 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 /* eslint sonarjs/no-duplicate-string: 0 */
-import { parsing } from "@algo-builder/web";
+import { ERRORS, parsing } from "@algo-builder/web";
 import { decodeAddress, decodeUint64, encodeAddress, encodeUint64, isValidAddress, modelsv2, verifyBytes } from "algosdk";
 import { throws } from "assert";
 import { Message, sha256 } from "js-sha256";
@@ -2733,6 +2733,9 @@ export class Retsub extends Op {
   execute (stack: TEALStack): void {
     // get current location from saved point
     // jump to saved instruction opcode
+    if (this.interpreter.callStack.length() === 0) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.CALL_STACK_EMPTY, { line: this.line });
+    }
     this.interpreter.instructionIndex = this.interpreter.callStack.pop();
   }
 }

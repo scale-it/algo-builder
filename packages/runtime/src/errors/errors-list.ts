@@ -243,6 +243,12 @@ by an index that does not exist.`
     message: "scratch space doesn't exist for index: %index%. [error-line: %line%], fails maybe because the requested transaction is an ApplicationCall or T < GroupIndex.",
     title: 'scratch space not found',
     description: `fails maybe because the requested transaction is an ApplicationCall or T < GroupIndex.`
+  },
+  CALL_STACK_EMPTY: {
+    number: 1036,
+    message: "There is no callsub before retsub, call stack is empty. [error-line: %line%]",
+    title: 'call stack error',
+    description: `There is no callsub before retsub, call stack is empty`
   }
 };
 
