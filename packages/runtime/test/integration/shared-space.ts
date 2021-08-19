@@ -1,79 +1,111 @@
 import { types } from "@algo-builder/web";
+import { DeployAppParam, ExecParams } from "@algo-builder/web/build/types";
 import { assert } from "chai";
 
+import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
 import { AccountStore, Runtime } from "../../src/index";
-import { ALGORAND_ACCOUNT_MIN_BALANCE } from "../../src/lib/constants";
 import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
+import { expectRuntimeError } from "../helpers/runtime-errors";
 
-describe("Algorand Smart Contracts - Shared space between contracts", function () {
+describe("TEALv4: Sub routine", function () {
   useFixture("shared-space");
-  const fee = 1000;
-  const minBalance = ALGORAND_ACCOUNT_MIN_BALANCE * 10 + fee;
-  const john = new AccountStore(minBalance + fee);
-
-  const txnParams: types.ExecParams = {
-    type: types.TransactionType.CallNoOpSSC,
-    sign: types.SignType.SecretKey,
-    fromAccount: john.account,
-    appID: 0,
-    payFlags: { totalFee: fee }
-  };
+  const john = new AccountStore(10e6);
+  const alice = new AccountStore(10e6);
 
   let runtime: Runtime;
-  let approvalProgram: string;
+  let approvalProgram1: string;
+  let approvalProgram2: string;
+  let approvalProgramFail1: string;
+  let approvalProgramFail2: string;
   let clearProgram: string;
-  this.beforeAll(function () {
-    runtime = new Runtime([john]); // setup test
-    approvalProgram = getProgram('counter-approval.teal');
+  let groupTx: DeployAppParam[];
+  this.beforeAll(async function () {
+    runtime = new Runtime([john, alice]); // setup test
+    approvalProgram1 = getProgram('approval-program-1.teal');
+    approvalProgram2 = getProgram('approval-program-2.teal');
+    approvalProgramFail1 = getProgram('approval-program-1-fail.teal');
+    approvalProgramFail2 = getProgram('approval-program-2-fail.teal');
     clearProgram = getProgram('clear.teal');
 
-    // create new app
-    txnParams.appID = runtime.addApp({
-      sender: john.account,
-      globalBytes: 2,
-      globalInts: 2,
-      localBytes: 3,
-      localInts: 3
-    }, {}, approvalProgram, clearProgram);
-
-    // opt-in to the app
-    runtime.optInToApp(john.address, txnParams.appID, {}, {});
+    groupTx = [
+      {
+        type: types.TransactionType.DeployApp,
+        sign: types.SignType.SecretKey,
+        fromAccount: john.account,
+        approvalProgram: approvalProgram1,
+        clearProgram: clearProgram,
+        localInts: 1,
+        localBytes: 1,
+        globalInts: 1,
+        globalBytes: 1,
+        payFlags: {}
+      },
+      {
+        type: types.TransactionType.DeployApp,
+        sign: types.SignType.SecretKey,
+        fromAccount: john.account,
+        approvalProgram: approvalProgram2,
+        clearProgram: clearProgram,
+        localInts: 1,
+        localBytes: 1,
+        globalInts: 1,
+        globalBytes: 1,
+        payFlags: {}
+      }
+    ];
   });
 
-  const key = "counter";
-
-  it("should initialize local counter to 0 after opt-in", function () {
-    const localCounter = runtime.getAccount(john.address).getLocalState(txnParams.appID, key); // get local value from john account
-    assert.isDefined(localCounter); // there should be a value present in local state with key "counter"
-    assert.equal(localCounter, 0n);
+  it("should pass during create application", function () {
+    // this code will pass, because shared space values are retreived correctly
+    assert.doesNotThrow(() => runtime.executeTx(groupTx));
   });
 
-  it("should set global and local counter to 1 on first call", function () {
-    runtime.executeTx(txnParams);
-
-    const globalCounter = runtime.getGlobalState(txnParams.appID, key);
-    assert.equal(globalCounter, 1n);
-
-    const localCounter = runtime.getAccount(john.address).getLocalState(txnParams.appID, key); // get local value from john account
-    assert.equal(localCounter, 1n);
+  it("should fail during create application if second program compares wrong values", function () {
+    groupTx[1].approvalProgram = approvalProgramFail2;
+    expectRuntimeError(
+      () => runtime.executeTx(groupTx),
+      RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
+    );
   });
 
-  it("should update counter by +1 for both global and local states on second call", function () {
-    const globalCounter = runtime.getGlobalState(txnParams.appID, key) as bigint;
-    const localCounter = runtime.getAccount(john.address).getLocalState(txnParams.appID, key) as bigint;
+  it("should fail if scratch doesn't have values for first application tx", () => {
+    groupTx[0].approvalProgram = approvalProgramFail1;
+    groupTx[1].approvalProgram = approvalProgram2;
 
-    // verfify that both counters are set to 1 (by the previous test)
-    assert.equal(globalCounter, 1n);
-    assert.equal(localCounter, 1n);
+    expectRuntimeError(
+      () => runtime.executeTx(groupTx),
+      RUNTIME_ERRORS.TEAL.REJECTED_BY_LOGIC
+    );
+  });
 
-    runtime.executeTx(txnParams);
+  it("should fail if given transaction is not application tx", () => {
+    const tx: ExecParams[] = [
+      {
+        type: types.TransactionType.TransferAlgo,
+        sign: types.SignType.SecretKey,
+        fromAccount: john.account,
+        toAccountAddr: alice.address,
+        amountMicroAlgos: 100,
+        payFlags: { totalFee: 1000 }
+      },
+      {
+        type: types.TransactionType.DeployApp,
+        sign: types.SignType.SecretKey,
+        fromAccount: john.account,
+        approvalProgram: approvalProgram2,
+        clearProgram: clearProgram,
+        localInts: 1,
+        localBytes: 1,
+        globalInts: 1,
+        globalBytes: 1,
+        payFlags: {}
+      }
+    ];
 
-    // after execution the counters should be updated by +1
-    const newGlobalCounter = runtime.getGlobalState(txnParams.appID, key);
-    const newLocalCounter = runtime.getAccount(john.address).getLocalState(txnParams.appID, key);
-
-    assert.equal(newGlobalCounter, globalCounter + 1n);
-    assert.equal(newLocalCounter, localCounter + 1n);
+    expectRuntimeError(
+      () => runtime.executeTx(tx),
+      RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR
+    );
   });
 });
