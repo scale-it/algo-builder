@@ -2,6 +2,8 @@ const { getProgram } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 const { assert } = require('chai');
 
+const { createDexTx, redeemTx } = require('../../scripts/run/common/common');
+
 const bondToken = 'bond-token-';
 const asaDef = {
   total: 1000000,
@@ -108,58 +110,12 @@ function createDex (runtime, creatorAccount, managerAcc, i, master, issuerLsig) 
 
   const total = getGlobal('total');
   const assetAmount = runtime.getAccount(issuerLsig.address()).getAssetHolding(oldBond)?.amount;
-  const groupTx = [
-    // call to bond-dapp
-    {
-      type: types.TransactionType.CallNoOpSSC,
-      sign: types.SignType.SecretKey,
-      fromAccount: managerAcc.account,
-      appID: appInfo.appID,
-      payFlags: {},
-      appArgs: ['str:create_dex'],
-      accounts: [issuerLsig.address(), dexLsig.address()]
-    },
-    // New bond token transfer to issuer's address
-    {
-      type: types.TransactionType.TransferAsset,
-      sign: types.SignType.SecretKey,
-      fromAccount: creatorAccount.account,
-      toAccountAddr: issuerLsig.address(),
-      amount: assetAmount,
-      assetID: newBond,
-      payFlags: { totalFee: 1000 }
-    },
-    // burn tokens
-    {
-      type: types.TransactionType.TransferAsset,
-      sign: types.SignType.LogicSignature,
-      fromAccountAddr: issuerLsig.address(),
-      lsig: issuerLsig,
-      toAccountAddr: creatorAccount.address,
-      amount: assetAmount,
-      assetID: oldBond,
-      payFlags: { totalFee: 1000 }
-    },
-    // Transfer app.total amount of new Bonds to dex lsig
-    {
-      type: types.TransactionType.TransferAsset,
-      sign: types.SignType.SecretKey,
-      fromAccount: creatorAccount.account,
-      toAccountAddr: dexLsig.address(),
-      amount: total,
-      assetID: newBond,
-      payFlags: { totalFee: 1000 }
-    },
-    // Algo transfer to dex address
-    {
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.SecretKey,
-      fromAccount: creatorAccount.account,
-      toAccountAddr: dexLsig.address(),
-      amountMicroAlgos: Number(total) * Number(coupon),
-      payFlags: { totalFee: 1000 }
-    }
-  ];
+  const groupTx = createDexTx(
+    managerAcc.account, appInfo.appID, issuerLsig,
+    dexLsig, creatorAccount.account, assetAmount,
+    newBond, oldBond, total, coupon
+  );
+
   runtime.executeTx(groupTx);
 
   const issuer = runtime.getAccount(issuerLsig.address());
@@ -188,47 +144,10 @@ function redeem (runtime, buyerAccount, dex, amount, dexLsig) {
   runtime.optIntoASA(newBond, buyerAccount.address, {});
 
   const balanceBeforeRedeem = buyerAccount.balance();
-  const groupTx = [
-    // Transfer tokens to dex lsig.
-    {
-      type: types.TransactionType.TransferAsset,
-      sign: types.SignType.SecretKey,
-      fromAccount: buyerAccount.account,
-      toAccountAddr: dexLsig.address(),
-      amount: amount,
-      assetID: oldBond,
-      payFlags: { totalFee: 3000 }
-    },
-    // New bond token transfer to buyer's address
-    {
-      type: types.TransactionType.TransferAsset,
-      sign: types.SignType.LogicSignature,
-      fromAccountAddr: dexLsig.address(),
-      lsig: dexLsig,
-      toAccountAddr: buyerAccount.address,
-      amount: amount,
-      assetID: newBond,
-      payFlags: { totalFee: 0 }
-    },
-    {
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.LogicSignature,
-      fromAccountAddr: dexLsig.address(),
-      lsig: dexLsig,
-      toAccountAddr: buyerAccount.address,
-      amountMicroAlgos: Number(amount) * Number(coupon),
-      payFlags: { totalFee: 0 }
-    },
-    // call to bond-dapp
-    {
-      type: types.TransactionType.CallNoOpSSC,
-      sign: types.SignType.SecretKey,
-      fromAccount: buyerAccount.account,
-      appID: appInfo.appID,
-      payFlags: { totalFee: 1000 },
-      appArgs: ['str:redeem_coupon']
-    }
-  ];
+  const groupTx = redeemTx(
+    buyerAccount.account, dexLsig, amount,
+    oldBond, newBond, coupon, appInfo.appID
+  );
 
   runtime.executeTx(groupTx);
 

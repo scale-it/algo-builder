@@ -8,7 +8,7 @@ const {
   optInLsigToBond, createDex, approvalProgram,
   clearProgram, minBalance, initialBalance, redeem
 } = require('./common/common');
-const { buyTx, issueTx } = require('../scripts/run/common/common');
+const { buyTx, issueTx, redeemTx } = require('../scripts/run/common/common');
 
 const RUNTIME_ERR1009 = 'RUNTIME_ERR1009: TEAL runtime encountered err opcode';
 const RUNTIME_ERR1402 = 'Cannot withdraw';
@@ -319,47 +319,11 @@ describe('Bond token failing tests', function () {
     const oldBond = runtime.getAssetInfoFromName('bond-token-0').assetIndex;
     const newBond = runtime.getAssetInfoFromName('bond-token-1').assetIndex;
 
-    const groupTx = [
-      // Transfer tokens to dex lsig.
-      {
-        type: types.TransactionType.TransferAsset,
-        sign: types.SignType.SecretKey,
-        fromAccount: elon.account,
-        toAccountAddr: dexLsig1.address(),
-        amount: 1,
-        assetID: oldBond,
-        payFlags: { totalFee: 2000 }
-      },
-      // New bond token transfer to buyer's address
-      {
-        type: types.TransactionType.TransferAsset,
-        sign: types.SignType.LogicSignature,
-        fromAccountAddr: dexLsig1.address(),
-        lsig: dexLsig1,
-        toAccountAddr: elon.address,
-        amount: 1,
-        assetID: newBond,
-        payFlags: { totalFee: 1000 }
-      },
-      {
-        type: types.TransactionType.TransferAlgo,
-        sign: types.SignType.LogicSignature,
-        fromAccountAddr: dexLsig1.address(),
-        lsig: dexLsig1,
-        toAccountAddr: elon.address,
-        amountMicroAlgos: 20,
-        payFlags: { totalFee: 0 }
-      },
-      // call to bond-dapp
-      {
-        type: types.TransactionType.CallNoOpSSC,
-        sign: types.SignType.SecretKey,
-        fromAccount: elon.account,
-        appID: appInfo.appID,
-        payFlags: { totalFee: 1000 },
-        appArgs: ['str:redeem_coupon']
-      }
-    ];
+    const groupTx = redeemTx(elon.account, dexLsig1, 1, oldBond, newBond, 20, appInfo.appID);
+    groupTx[0].payFlags = { totalFee: 2000 };
+    groupTx[1].payFlags = { totalFee: 1000 };
+    groupTx[2].payFlags = { totalFee: 0 };
+    groupTx[3].payFlags = { totalFee: 1000 };
 
     assert.throws(() => runtime.executeTx(groupTx), RUNTIME_ERR1009);
 

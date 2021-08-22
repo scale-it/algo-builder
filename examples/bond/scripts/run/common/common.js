@@ -142,6 +142,135 @@ function issueTx (creatorAccount, issuerLsig, appID, bondID) {
   ];
 }
 
+/**
+ * Returns create dex transaction
+ * @param managerAccount App manager account
+ * @param appID application index
+ * @param issuerLsig issuer logic signature
+ * @param dexLsig dex logic signature
+ * @param creatorAccount bond token creator account
+ * @param assetAmount balance of oldBond tokens in issuer address
+ * @param newBondID new bond token index
+ * @param oldBondID old bond token index
+ * @param total total number of bonds issued to buyers
+ * @param couponValue value of coupon
+ */
+function createDexTx (
+  managerAccount, appID, issuerLsig,
+  dexLsig, creatorAccount, assetAmount,
+  newBondID, oldBondID, total, couponValue
+) {
+  return [
+    // call to bond-dapp
+    {
+      type: types.TransactionType.CallNoOpSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: managerAccount,
+      appID: appID,
+      payFlags: {},
+      appArgs: ['str:create_dex'],
+      accounts: [issuerLsig.address(), dexLsig.address()]
+    },
+    // New bond token transfer to issuer's address
+    {
+      type: types.TransactionType.TransferAsset,
+      sign: types.SignType.SecretKey,
+      fromAccount: creatorAccount,
+      toAccountAddr: issuerLsig.address(),
+      amount: assetAmount,
+      assetID: newBondID,
+      payFlags: { totalFee: 1000 }
+    },
+    // burn tokens
+    {
+      type: types.TransactionType.TransferAsset,
+      sign: types.SignType.LogicSignature,
+      fromAccountAddr: issuerLsig.address(),
+      lsig: issuerLsig,
+      toAccountAddr: creatorAccount.addr,
+      amount: assetAmount,
+      assetID: oldBondID,
+      payFlags: { totalFee: 1000 }
+    },
+    // Transfer app.total amount of new Bonds to dex lsig
+    {
+      type: types.TransactionType.TransferAsset,
+      sign: types.SignType.SecretKey,
+      fromAccount: creatorAccount,
+      toAccountAddr: dexLsig.address(),
+      amount: total,
+      assetID: newBondID,
+      payFlags: { totalFee: 1000 }
+    },
+    // Algo transfer to dex address
+    {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: creatorAccount,
+      toAccountAddr: dexLsig.address(),
+      amountMicroAlgos: Number(total) * Number(couponValue),
+      payFlags: { totalFee: 1000 }
+    }
+  ];
+}
+
+/**
+ * Returns redeem transaction
+ * @param buyerAccount buyer account
+ * @param dexLsig dex logic signature
+ * @param amount amount of bonds to be redeemed
+ * @param oldBondID old bond token index
+ * @param newBondID new bond token index
+ * @param couponValue value of coupon
+ * @param appID application index
+ */
+function redeemTx (
+  buyerAccount, dexLsig, amount, oldBondID,
+  newBondID, couponValue, appID
+) {
+  return [
+    // Transfer tokens to dex lsig.
+    {
+      type: types.TransactionType.TransferAsset,
+      sign: types.SignType.SecretKey,
+      fromAccount: buyerAccount,
+      toAccountAddr: dexLsig.address(),
+      amount: amount,
+      assetID: oldBondID,
+      payFlags: { totalFee: 3000 }
+    },
+    // New bond token transfer to buyer's address
+    {
+      type: types.TransactionType.TransferAsset,
+      sign: types.SignType.LogicSignature,
+      fromAccountAddr: dexLsig.address(),
+      lsig: dexLsig,
+      toAccountAddr: buyerAccount.addr,
+      amount: amount,
+      assetID: newBondID,
+      payFlags: { totalFee: 0 }
+    },
+    {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.LogicSignature,
+      fromAccountAddr: dexLsig.address(),
+      lsig: dexLsig,
+      toAccountAddr: buyerAccount.addr,
+      amountMicroAlgos: Number(amount) * Number(couponValue),
+      payFlags: { totalFee: 0 }
+    },
+    // call to bond-dapp
+    {
+      type: types.TransactionType.CallNoOpSSC,
+      sign: types.SignType.SecretKey,
+      fromAccount: buyerAccount,
+      appID: appID,
+      payFlags: { totalFee: 1000 },
+      appArgs: ['str:redeem_coupon']
+    }
+  ];
+}
+
 module.exports = {
   issuePrice,
   asaDef,
@@ -152,5 +281,7 @@ module.exports = {
   optInTx,
   nominalPrice,
   buyTx,
-  issueTx
+  issueTx,
+  createDexTx,
+  redeemTx
 };
