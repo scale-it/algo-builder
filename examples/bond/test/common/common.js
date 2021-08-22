@@ -63,7 +63,7 @@ const issue = 1000;
  */
 function createDex (runtime, creatorAccount, managerAcc, i, master, issuerLsig) {
   if (i < 1) {
-    throw new Error('i must be greater than equal to 1');
+    throw new Error('`i` must be greater than equal to 1');
   }
 
   const previousToken = bondToken + String(i - 1);
