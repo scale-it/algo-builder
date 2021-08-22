@@ -49,7 +49,7 @@ exports.epoch0 = async function (deployer) {
     },
     // call to bond-dapp
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: account.elon,
       appID: appInfo.appID,

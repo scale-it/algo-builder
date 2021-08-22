@@ -176,7 +176,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     const escrowBal = escrow.balance();
     const donateTxGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appID: applicationId,
@@ -230,7 +230,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     const escrowFunds = escrow.balance(); //  funds in escrow
     const claimTxGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId,
@@ -284,7 +284,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     // reclaim transaction
     const reclaimTxGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appID: applicationId,

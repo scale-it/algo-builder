@@ -32,7 +32,7 @@ exports.issue = async function (deployer) {
     },
     // call to bond-dapp
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: creatorAccount,
       appID: appInfo.appID,

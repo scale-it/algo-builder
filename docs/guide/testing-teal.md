@@ -284,7 +284,7 @@ Now, we will execute a transaction with an app call (stateful TEAL). The app is 
   let program: string;
 
   const txnParams: ExecParams = {
-    type: TransactionType.CallNoOpSSC,
+    type: TransactionType.CallApp,
     sign: SignType.SecretKey,
     fromAccount: john.account,
     appID: 0,

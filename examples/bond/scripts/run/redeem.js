@@ -58,7 +58,7 @@ exports.redeem = async function (deployer, buyerAccount, managerAcc, dex, amount
     },
     // call to bond-dapp
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: buyerAccount,
       appID: appInfo.appID,

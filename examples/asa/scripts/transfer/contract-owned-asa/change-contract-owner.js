@@ -21,7 +21,7 @@ async function run (runtimeEnv, deployer) {
   const appArgs = [convert.stringToBytes('change_owner'), convert.addressToPk(bob.addr)];
 
   const tx = {
-    type: types.TransactionType.CallNoOpSSC,
+    type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,
     fromAccount: alice,
     appID: appInfo.appID,

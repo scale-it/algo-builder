@@ -95,7 +95,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       permManager = ctx.getAccount(permManagerAddr);
 
       whitelistParams = {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: permManager.account,
         appID: ctx.permissionsappID,
@@ -148,7 +148,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       assert.notEqual(permManager.address, bob.address); // verify bob is not current permissions manager
 
       const txParams = {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: bob.account,
         appID: ctx.permissionsappID,
@@ -178,7 +178,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       // note that sender is asa.manager
       forceTransferGroup = [
         {
-          type: types.TransactionType.CallNoOpSSC,
+          type: types.TransactionType.CallApp,
           sign: types.SignType.SecretKey,
           fromAccount: asaManager.account,
           appID: ctx.controllerappID,
@@ -206,7 +206,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           payFlags: { totalFee: 1000 }
         },
         {
-          type: types.TransactionType.CallNoOpSSC,
+          type: types.TransactionType.CallApp,
           sign: types.SignType.SecretKey,
           fromAccount: asaManager.account,
           appID: ctx.permissionsappID,
@@ -349,7 +349,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       // transaction group for token transfer between two non-reserve accounts
       tokenTransferGroup = [
         {
-          type: types.TransactionType.CallNoOpSSC,
+          type: types.TransactionType.CallApp,
           sign: types.SignType.SecretKey,
           fromAccount: bob.account,
           appID: ctx.controllerappID,
@@ -377,7 +377,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
           payFlags: { totalFee: 1000 }
         },
         {
-          type: types.TransactionType.CallNoOpSSC,
+          type: types.TransactionType.CallApp,
           sign: types.SignType.SecretKey,
           fromAccount: bob.account,
           appID: ctx.permissionsappID,
@@ -504,7 +504,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       // transaction group to update reserve account
       updateReserveParams = [
         {
-          type: types.TransactionType.CallNoOpSSC,
+          type: types.TransactionType.CallApp,
           sign: types.SignType.SecretKey,
           fromAccount: asaManager.account,
           appID: ctx.controllerappID,
@@ -600,7 +600,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
       ctx.optInToASA(bob.address);
       ceaseTxGroup = [
         {
-          type: types.TransactionType.CallNoOpSSC,
+          type: types.TransactionType.CallApp,
           sign: types.SignType.SecretKey,
           fromAccount: asaManager.account,
           appID: ctx.controllerappID,
@@ -723,7 +723,7 @@ describe('Permissioned Token Tests - Failing Paths', function () {
         `int:${ctx.permissionsappID}`
       ];
       setPermissionsParams = {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: ctx.alice.account,
         appID: ctx.controllerappID,

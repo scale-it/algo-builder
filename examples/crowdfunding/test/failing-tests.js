@@ -89,7 +89,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     appArgs = [convert.stringToBytes('donate')];
     donateTxGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appID: applicationId,
@@ -136,7 +136,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     const txGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appID: applicationId,
@@ -183,7 +183,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     const txGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appID: applicationId,
@@ -213,7 +213,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     const txGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appID: applicationId,
@@ -243,7 +243,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     appArgs = [convert.stringToBytes('claim')];
     const txGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId,
@@ -269,7 +269,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     appArgs = [convert.stringToBytes('donate')];
     const txGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appID: applicationId,
@@ -292,7 +292,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     appArgs = [convert.stringToBytes('claim')];
     const txGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId,
@@ -332,7 +332,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     appArgs = [convert.stringToBytes('claim')];
     const txGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId,
@@ -392,7 +392,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     appArgs = [convert.stringToBytes('claim')];
     const txGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId,
@@ -425,7 +425,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     appArgs = [convert.stringToBytes('claim')];
     const txGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId,

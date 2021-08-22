@@ -76,7 +76,7 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
   const groupTx = [
     // call to bond-dapp
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: managerAcc,
       appID: appInfo.appID,

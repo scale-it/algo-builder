@@ -530,7 +530,7 @@ export class Ctx implements Context {
           this.transferAsset(txnParam);
           break;
         }
-        case types.TransactionType.CallNoOpSSC: {
+        case types.TransactionType.CallApp: {
           this.tx = this.gtxs[idx]; // update current tx to the requested index
           const appParams = this.getApp(txnParam.appID);
           this.runtime.run(appParams[APPROVAL_PROGRAM], ExecutionMode.APPLICATION, idx, this.debugStack);
