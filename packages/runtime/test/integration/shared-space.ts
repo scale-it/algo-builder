@@ -18,7 +18,7 @@ describe("TEALv4: shared space between contracts", function () {
   let approvalProgramFail1: string;
   let approvalProgramFail2: string;
   let clearProgram: string;
-  let groupTx: DeployAppParam[];
+  let groupTx: types.DeployAppParam[];
   this.beforeAll(async function () {
     runtime = new Runtime([john, alice]); // setup test
     approvalProgram1 = getProgram('approval-program-1.teal');
@@ -79,7 +79,7 @@ describe("TEALv4: shared space between contracts", function () {
   });
 
   it("should fail if given transaction is not application tx", () => {
-    const tx: ExecParams[] = [
+    const tx: types.ExecParams[] = [
       {
         type: types.TransactionType.TransferAlgo,
         sign: types.SignType.SecretKey,
