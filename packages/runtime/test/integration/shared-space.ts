@@ -1,5 +1,4 @@
 import { types } from "@algo-builder/web";
-import { DeployAppParam, ExecParams } from "@algo-builder/web/build/types";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
@@ -8,7 +7,7 @@ import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 
-describe("TEALv4: Sub routine", function () {
+describe("TEALv4: shared space between contracts", function () {
   useFixture("shared-space");
   const john = new AccountStore(10e6);
   const alice = new AccountStore(10e6);
