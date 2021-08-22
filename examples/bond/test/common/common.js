@@ -171,7 +171,7 @@ function createDex (runtime, creatorAccount, managerAcc, i, master, issuerLsig) 
 }
 
 /**
- * Redeem old tokens, get coupon_value + new bond tokens
+ * Redeem old tokens, get coupon_value (reward) + new bond tokens
  * @param runtime runtime object
  * @param buyerAccount buyer account
  * @param managerAcc manager account
