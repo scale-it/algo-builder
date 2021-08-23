@@ -17,7 +17,7 @@ function err () {
 function check_algob_dir(){
     if [[ -d $1 ]]
     then
-        echo "$1 already exists in this project..."
+        echo "$1 already exists in this project, pulling the latest version"
         cd $ALGO_BUILDER_DIR
         git pull
     else
