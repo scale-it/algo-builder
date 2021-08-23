@@ -14,11 +14,18 @@ function err () {
   exit 1
 }
 
-function check_dir_and_delete(){
+function check_algob_dir(){
     if [[ -d $1 ]]
     then
-        echo "$1 already exists in this project, deleting it now..."
-        rm -rf $1    
+        echo "$1 already exists in this project..."
+        cd $ALGO_BUILDER_DIR
+        git pull
+    else
+      git clone https://github.com/scale-it/algo-builder.git
+      if [ $? -ne 0 ]; then
+        err "Error while cloning algo-builder"
+      fi
+      cd $ALGO_BUILDER_DIR
     fi
 }
 
@@ -49,12 +56,7 @@ function link_all(){
 }
 
 
-check_dir_and_delete $ALGO_BUILDER_DIR
-git clone https://github.com/scale-it/algo-builder.git
-if [ $? -ne 0 ]; then
-    err "Error while cloning algo-builder"
-fi
-cd $ALGO_BUILDER_DIR
+check_algob_dir $ALGO_BUILDER_DIR
 yarn
 yarn build
 rm -rf ~/.config/yarn/link/@algo-builder
