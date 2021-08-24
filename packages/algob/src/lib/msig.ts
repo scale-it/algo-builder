@@ -1,8 +1,8 @@
 import { getPathFromDirRecursive } from "@algo-builder/runtime";
-import type { Account, EncodedMultisig, LogicSig, MultisigMetadata, Transaction } from "algosdk";
+import type { Account, EncodedMultisig, MultisigMetadata, Transaction } from "algosdk";
 import {
   appendSignMultisigTransaction, decodeAddress, decodeSignedTransaction,
-  decodeUnsignedTransaction, encodeAddress, logicSigFromByte, signMultisigTransaction
+  decodeUnsignedTransaction, encodeAddress, LogicSigAccount, signMultisigTransaction
 } from "algosdk";
 import fs from "fs";
 
@@ -73,15 +73,15 @@ export async function readBinaryMultiSig (filename: string): Promise<string | un
 /**
  * Loads signed logic signature directly from .blsig file
  * @param {string} name filename
- * @returns {LogicSig} signed logic signature from assets/<file_name>.blsig
+ * @returns {LogicSigAccount} signed logic signature from assets/<file_name>.blsig
  */
-export async function loadBinaryLsig (name: string): Promise<LogicSig> {
+export async function loadBinaryLsig (name: string): Promise<LogicSigAccount> {
   const data = await readBinaryMultiSig(name);
   if (data === undefined) {
     throw new Error(`File ${name} does not exist`);
   }
   const program = new Uint8Array(Buffer.from(data, 'base64'));
-  return logicSigFromByte(program);
+  return LogicSigAccount.fromByte(program);
 }
 
 /**

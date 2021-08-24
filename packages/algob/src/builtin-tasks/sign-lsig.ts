@@ -22,12 +22,12 @@ async function multiSignLsig (
     return;
   }
 
-  const lsig = await loadBinaryLsig(taskArgs.file);
+  const lsigAccount = await loadBinaryLsig(taskArgs.file);
   const sourceFilePath = getPathFromDirRecursive(ASSETS_DIR, taskArgs.file) as string;
-  if (lsig.msig) {
-    lsig.appendToMultisig(signerAccount.sk); // if msig is present then append signature to multisig
+  if (lsigAccount.lsig.msig) {
+    lsigAccount.appendToMultisig(signerAccount.sk); // if msig is present then append signature to multisig
   } else {
-    lsig.sign(signerAccount.sk); // else create single signed lsig
+    lsigAccount.sign(signerAccount.sk); // else create single signed lsig
   }
 
   const [name, ext] = taskArgs.file.split(".");
@@ -35,10 +35,10 @@ async function multiSignLsig (
   const outFilePath = path.join(path.dirname(sourceFilePath), outFileName);
 
   // if lsig.args = [] (empty array), then delete that key
-  if (lsig.args?.length === 0) {
-    lsig.args = undefined as any;
+  if (lsigAccount.lsig.args?.length === 0) {
+    lsigAccount.lsig.args = undefined as any;
   }
-  const encodedLsig = encodeObj(lsig.get_obj_for_encoding());
+  const encodedLsig = encodeObj(lsigAccount.get_obj_for_encoding());
   await writeToFile(encodedLsig, taskArgs.force, outFilePath);
 }
 

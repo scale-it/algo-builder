@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { BuilderError, ERRORS, tx as webTx, types as wtypes } from "@algo-builder/web";
-import algosdk, { LogicSig, modelsv2 } from "algosdk";
+import algosdk, { LogicSigAccount, modelsv2 } from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
 import { createClient } from "../lib/driver";
@@ -56,7 +56,7 @@ export interface AlgoOperator {
     asaName: string, assetIndex: number, account: rtypes.Account, params: wtypes.TxParams
   ) => Promise<void>
   optInLsigToASA: (
-    asaName: string, assetIndex: number, lsig: LogicSig, params: wtypes.TxParams
+    asaName: string, assetIndex: number, lsig: LogicSigAccount, params: wtypes.TxParams
   ) => Promise<void>
   optInToASAMultiple: (
     asaName: string, asaDef: wtypes.ASADef,
@@ -66,7 +66,7 @@ export interface AlgoOperator {
     sender: rtypes.Account, appID: number,
     payFlags: wtypes.TxParams, flags: rtypes.AppOptionalFlags) => Promise<void>
   optInLsigToApp: (
-    appID: number, lsig: LogicSig,
+    appID: number, lsig: LogicSigAccount,
     payFlags: wtypes.TxParams, flags: rtypes.AppOptionalFlags) => Promise<void>
   ensureCompiled: (name: string, force?: boolean, scTmplParams?: SCParams) => Promise<ASCCache>
   sendAndWait: (rawTxns: Uint8Array | Uint8Array[]) => Promise<ConfirmedTxInfo>
@@ -162,7 +162,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
   }
 
   async optInLsigToASA (
-    asaName: string, assetIndex: number, lsig: LogicSig, flags: wtypes.TxParams
+    asaName: string, assetIndex: number, lsig: LogicSigAccount, flags: wtypes.TxParams
   ): Promise<void> {
     console.log(`Contract ${lsig.address()} opt-in for ASA ${asaName}`); // eslint-disable-line @typescript-eslint/restrict-template-expressions
     const txParams = await tx.mkTxParams(this.algodClient, flags);
@@ -464,7 +464,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
    * @param flags Optional parameters to SSC (accounts, args..)
    */
   async optInLsigToApp (
-    appID: number, lsig: LogicSig,
+    appID: number, lsig: LogicSigAccount,
     payFlags: wtypes.TxParams,
     flags: rtypes.AppOptionalFlags
   ): Promise<void> {
@@ -474,7 +474,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       type: wtypes.TransactionType.OptInToApp,
       sign: wtypes.SignType.LogicSignature,
       fromAccountAddr: lsig.address(),
-      lsig: lsig,
+      lsigAccount: lsig,
       appID: appID,
       payFlags: payFlags,
       appArgs: flags.appArgs,
