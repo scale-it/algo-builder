@@ -1,5 +1,5 @@
 import { types } from "@algo-builder/web";
-import { LogicSig } from "algosdk";
+import { LogicSigAccount } from "algosdk";
 import { assert } from "chai";
 import sinon from "sinon";
 
@@ -22,7 +22,7 @@ describe("Logic Signature Transaction in Runtime", function () {
   const alice = new AccountStore(minBalance);
 
   let runtime: Runtime;
-  let lsig: LogicSig;
+  let lsig: LogicSigAccount;
   let txnParam: types.ExecParams;
   this.beforeAll(function () {
     runtime = new Runtime([john, bob, alice]);
@@ -33,7 +33,7 @@ describe("Logic Signature Transaction in Runtime", function () {
       fromAccountAddr: john.account.addr,
       toAccountAddr: bob.account.addr,
       amountMicroAlgos: 1000n,
-      lsig: lsig,
+      lsigAccount: lsig,
       payFlags: { totalFee: 1000 }
     };
   });
@@ -52,7 +52,7 @@ describe("Logic Signature Transaction in Runtime", function () {
       ...txnParam,
       sign: types.SignType.LogicSignature,
       fromAccountAddr: alice.account.addr,
-      lsig: lsig
+      lsigAccount: lsig
     };
 
     // execute transaction (logic signature validation failed)
@@ -68,7 +68,7 @@ describe("Logic Signature Transaction in Runtime", function () {
       ...txnParam,
       sign: types.SignType.LogicSignature,
       fromAccountAddr: john.account.addr,
-      lsig: logicSig
+      lsigAccount: logicSig
     };
 
     logicSig.sign(john.account.sk);
@@ -202,7 +202,7 @@ describe("Algorand Standard Assets", function () {
     assert.equal(res.decimals, 0);
     assert.equal(res.defaultFrozen, false);
     assert.equal(res.total, 5912599999515n);
-    assert.equal(res.metadataHash, "12312442142141241244444411111133");
+    assert.equal(res.metadataHash, new Uint8Array(Buffer.from("12312442142141241244444411111133", 'base64')));
     assert.equal(res.unitName, "GLD");
     assert.equal(res.url, "url");
     assert.equal(res.manager, elon.address);
@@ -235,7 +235,7 @@ describe("Algorand Standard Assets", function () {
     assert.equal(res.decimals, 0);
     assert.equal(res.defaultFrozen, false);
     assert.equal(res.total, 10000n);
-    assert.equal(res.metadataHash, "12312442142141241244444411111133");
+    assert.equal(res.metadataHash, new Uint8Array(Buffer.from("12312442142141241244444411111133", 'base64')));
     assert.equal(res.unitName, "SLV");
     assert.equal(res.url, "url");
   });

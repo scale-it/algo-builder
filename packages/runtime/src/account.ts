@@ -402,7 +402,9 @@ class Asset {
       defaultFrozen: def.defaultFrozen ?? false,
       unitName: def.unitName,
       url: def.url,
-      metadataHash: def.metadataHash,
+      metadataHash: typeof def.metadataHash === 'string'
+        ? new Uint8Array(Buffer.from(def.metadataHash, 'base64'))
+        : def.metadataHash,
       manager: def.manager,
       reserve: def.reserve,
       freeze: def.freeze,

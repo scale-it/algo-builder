@@ -10,7 +10,7 @@ import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { Interpreter, loadASAFile } from "./index";
 import { convertToString } from "./lib/parsing";
-import { LogicSig } from "./logicsig";
+import { LogicSigAccount } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import {
   AccountAddress, AccountStoreI, AppDeploymentFlags, AppOptionalFlags,
@@ -560,11 +560,11 @@ export class Runtime {
    * @param program TEAL code
    * @param args arguments passed
    */
-  getLogicSig (program: string, args: Uint8Array[]): LogicSig {
+  getLogicSig (program: string, args: Uint8Array[]): LogicSigAccount {
     if (program === "") {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
     }
-    const lsig = new LogicSig(program, args);
+    const lsig = new LogicSigAccount(program, args);
     const acc = new AccountStore(0, { addr: lsig.address(), sk: new Uint8Array(0) });
     this.store.accounts.set(acc.address, acc);
     return lsig;
@@ -579,18 +579,18 @@ export class Runtime {
   validateLsigAndRun (txnParam: types.ExecParams, debugStack?: number): void {
     // check if transaction is signed by logic signature,
     // if yes verify signature and run logic
-    if (txnParam.sign === types.SignType.LogicSignature && txnParam.lsig) {
-      this.ctx.args = txnParam.args ?? txnParam.lsig.args;
+    if (txnParam.sign === types.SignType.LogicSignature && txnParam.lsigAccount) {
+      this.ctx.args = txnParam.args ?? txnParam.lsigAccount.lsig.args;
 
       // signature validation
       const fromAccountAddr = webTx.getFromAddress(txnParam);
-      const result = txnParam.lsig.verify(decodeAddress(fromAccountAddr).publicKey);
+      const result = txnParam.lsigAccount.lsig.verify(decodeAddress(fromAccountAddr).publicKey);
       if (!result) {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_VALIDATION_FAILED,
           { address: fromAccountAddr });
       }
       // logic validation
-      const program = convertToString(txnParam.lsig.logic);
+      const program = convertToString(txnParam.lsigAccount.lsig.logic);
       if (program === "") {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
       }
