@@ -31,6 +31,7 @@ export const MAX_ALGORAND_ACCOUNT_APPS = 10;
 
 // for byteslice arithmetic ops, inputs are limited to 64 bytes,
 // but ouput can be upto 128 bytes (eg. when using b+ OR b*)
+// https://github.com/algorand/go-algorand/blob/bd5a00092c8a63dba8314b97851e46ff247cf7c1/data/transactions/logic/eval.go#L1302
 export const MAX_INPUT_BYTE_LEN = 64;
 export const MAX_OUTPUT_BYTE_LEN = 128;
 
