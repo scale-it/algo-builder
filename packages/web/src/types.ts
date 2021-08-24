@@ -1,4 +1,4 @@
-import { Account as AccountSDK, LogicSig } from 'algosdk';
+import { Account as AccountSDK, LogicSigAccount } from 'algosdk';
 import * as z from 'zod';
 
 import type { ASADefSchema, ASADefsSchema } from "./types-input";
@@ -136,7 +136,7 @@ interface SignWithLsig {
   sign: SignType.LogicSignature
   fromAccount?: AccountSDK
   fromAccountAddr: AccountAddress
-  lsig: LogicSig
+  lsigAccount: LogicSigAccount
   /** stateless smart contract args */
   args?: Uint8Array[]
 }
