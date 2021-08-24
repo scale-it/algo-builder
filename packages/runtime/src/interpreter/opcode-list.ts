@@ -10,7 +10,8 @@ import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { compareArray } from "../lib/compare";
 import {
-  AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_INPUT_BYTE_LEN, MAX_OUTPUT_BYTE_LEN,
+  AssetParamMap, GlobalFields, MathOp,
+  MAX_CONCAT_SIZE, MAX_INPUT_BYTE_LEN, MAX_OUTPUT_BYTE_LEN,
   MAX_UINT64, MaxTEALVersion, TxArrFields
 } from "../lib/constants";
 import {
@@ -2662,11 +2663,9 @@ export class Gloads extends Gload {
   }
 }
 
-// A plus B, where A and B are byte-arrays interpreted as big-endian unsigned integers
-// panics on overflow (result > max_uint1024 i.e 128 byte num)
-// Pops: ... stack, {[]byte A}, {[]byte B}
-// push to stack [...stack, []byte]
-export class ByteAdd extends Op {
+// generic op to execute byteslice arithmetic
+// eg. b+, b-, b*, b/ ..
+export class ByteOp extends Op {
   readonly line: number;
   /**
    * Asserts 0 arguments are passed.
@@ -2679,13 +2678,255 @@ export class ByteAdd extends Op {
     assertLen(args.length, 0, line);
   };
 
-  execute (stack: TEALStack): void {
+  execute (stack: TEALStack, op: MathOp): void {
     this.assertMinStackLen(stack, 2, this.line);
     const byteB = this.assertBytes(stack.pop(), this.line, MAX_INPUT_BYTE_LEN);
     const byteA = this.assertBytes(stack.pop(), this.line, MAX_INPUT_BYTE_LEN);
+    const bigIntB = bigEndianBytesToBigInt(byteB);
+    const bigIntA = bigEndianBytesToBigInt(byteA);
 
-    const result = bigEndianBytesToBigInt(byteA) + bigEndianBytesToBigInt(byteB);
-    const resultAsBytes = bigintToBigEndianBytes(result);
-    stack.push(this.assertBytes(resultAsBytes, this.line, MAX_OUTPUT_BYTE_LEN));
+    let r: bigint | boolean;
+    switch (op) {
+      case MathOp.Add: {
+        r = bigIntA + bigIntB;
+        break;
+      }
+      case MathOp.Sub: {
+        r = bigIntA - bigIntB;
+        this.checkUnderflow(r, this.line);
+        break;
+      }
+      case MathOp.Mul: {
+        r = bigIntA * bigIntB;
+        break;
+      }
+      case MathOp.Div: {
+        if (bigIntB === 0n) {
+          throw new RuntimeError(RUNTIME_ERRORS.TEAL.ZERO_DIV, { line: this.line });
+        }
+        r = bigIntA / bigIntB;
+        break;
+      }
+      case MathOp.Mod: {
+        if (bigIntB === 0n) {
+          throw new RuntimeError(RUNTIME_ERRORS.TEAL.ZERO_DIV, { line: this.line });
+        }
+        r = bigIntA % bigIntB;
+        break;
+      }
+      case MathOp.LessThan: {
+        r = bigIntA < bigIntB;
+        break;
+      }
+      case MathOp.GreaterThan: {
+        r = bigIntA > bigIntB;
+        break;
+      }
+      case MathOp.LessThanEqualTo: {
+        r = bigIntA <= bigIntB;
+        break;
+      }
+      case MathOp.GreaterThanEqualTo: {
+        r = bigIntA >= bigIntB;
+        break;
+      }
+      case MathOp.EqualTo: {
+        r = bigIntA === bigIntB;
+        break;
+      }
+      case MathOp.NotEqualTo: {
+        r = bigIntA !== bigIntB;
+        break;
+      }
+      case MathOp.BitwiseOr: {
+        r = bigIntA | bigIntB;
+        break;
+      }
+      case MathOp.BitwiseAnd: {
+        r = bigIntA & bigIntB;
+        break;
+      }
+      case MathOp.BitwiseXor: {
+        r = bigIntA ^ bigIntB;
+        break;
+      }
+      default: {
+        throw new Error('Operation not supported');
+      }
+    }
+
+    if (typeof r === 'boolean') {
+      stack.push(BigInt(r)); // 0 or 1
+    } else {
+      const resultAsBytes =
+        r === 0n ? new Uint8Array([]) : bigintToBigEndianBytes(r);
+      if (op === MathOp.BitwiseOr || op === MathOp.BitwiseAnd || op === MathOp.BitwiseXor) {
+        // for bitwise ops, zero's are "left" padded upto length.max(byteB, byteA)
+        const maxSize = Math.max(byteA.length, byteB.length);
+
+        const paddedZeroArr = new Uint8Array(Math.max(0, maxSize - resultAsBytes.length)).fill(0);
+        const mergedArr = new Uint8Array(maxSize);
+        mergedArr.set(paddedZeroArr);
+        mergedArr.set(resultAsBytes, paddedZeroArr.length); // total size == Math.max(byteA.length, byteB.length)
+        stack.push(this.assertBytes(mergedArr, this.line, MAX_OUTPUT_BYTE_LEN));
+      } else {
+        stack.push(this.assertBytes(resultAsBytes, this.line, MAX_OUTPUT_BYTE_LEN));
+      }
+    }
+  }
+}
+
+// A plus B, where A and B are byte-arrays interpreted as big-endian unsigned integers
+// panics on overflow (result > max_uint1024 i.e 128 byte num)
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, []byte]
+export class ByteAdd extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.Add);
+  }
+}
+
+// A minus B, where A and B are byte-arrays interpreted as big-endian unsigned integers.
+// Panic on underflow.
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, []byte]
+export class ByteSub extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.Sub);
+  }
+}
+
+// A times B, where A and B are byte-arrays interpreted as big-endian unsigned integers.
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, []byte]
+export class ByteMul extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.Mul);
+  }
+}
+
+// A divided by B, where A and B are byte-arrays interpreted as big-endian unsigned integers.
+// Panic if B is zero.
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, []byte]
+export class ByteDiv extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.Div);
+  }
+}
+
+// A modulo B, where A and B are byte-arrays interpreted as big-endian unsigned integers.
+// Panic if B is zero.
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, []byte]
+export class ByteMod extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.Mod);
+  }
+}
+
+// A is greater than B, where A and B are byte-arrays interpreted as big-endian unsigned integers => { 0 or 1}
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, uint64]
+export class ByteGreatorThan extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.GreaterThan);
+  }
+}
+
+// A is less than B, where A and B are byte-arrays interpreted as big-endian unsigned integers => { 0 or 1}
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, uint64]
+export class ByteLessThan extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.LessThan);
+  }
+}
+
+// A is greater than or equal to B, where A and B are byte-arrays interpreted
+// as big-endian unsigned integers => { 0 or 1}
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, uint64]
+export class ByteGreaterThanEqualTo extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.GreaterThanEqualTo);
+  }
+}
+
+// A is less than or equal to B, where A and B are byte-arrays interpreted as
+// big-endian unsigned integers => { 0 or 1}
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, uint64]
+export class ByteLessThanEqualTo extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.LessThanEqualTo);
+  }
+}
+
+// A is equals to B, where A and B are byte-arrays interpreted as big-endian unsigned integers => { 0 or 1}
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, uint64]
+export class ByteEqualTo extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.EqualTo);
+  }
+}
+
+// A is not equal to B, where A and B are byte-arrays interpreted as big-endian unsigned integers => { 0 or 1}
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, uint64]
+export class ByteNotEqualTo extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.NotEqualTo);
+  }
+}
+
+// A bitwise-or B, where A and B are byte-arrays, zero-left extended to the greater of their lengths
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, uint64]
+export class ByteBitwiseOr extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.BitwiseOr);
+  }
+}
+
+// A bitwise-and B, where A and B are byte-arrays, zero-left extended to the greater of their lengths
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, uint64]
+export class ByteBitwiseAnd extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.BitwiseAnd);
+  }
+}
+
+// A bitwise-xor B, where A and B are byte-arrays, zero-left extended to the greater of their lengths
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, uint64]
+export class ByteBitwiseXor extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.BitwiseXor);
+  }
+}
+
+// X with all bits inverted
+// Pops: ... stack, []byte
+// push to stack [...stack, byte[]]
+export class ByteBitwiseInvert extends ByteOp {
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const byteA = this.assertBytes(stack.pop(), this.line, MAX_INPUT_BYTE_LEN);
+    stack.push(byteA.map(b => (255 - b)));
+  }
+}
+
+// push a byte-array of length X, containing all zero bytes
+// Pops: ... stack, uint64
+// push to stack [...stack, byte[]]
+export class ByteZero extends ByteOp {
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const len = this.assertBigInt(stack.pop(), this.line);
+    const result = new Uint8Array(Number(len)).fill(0);
+    stack.push(this.assertBytes(result, this.line, 4096));
   }
 }

@@ -211,6 +211,8 @@ export function bigintToBigEndianBytes (b: bigint): Uint8Array {
  * @param bytes big endian bytes (buffer or Uint8array)
  */
 export function bigEndianBytesToBigInt (bytes: Uint8Array | Buffer): bigint {
+  if (bytes.length === 0) { return 0n; }
+
   const hex: string[] = [];
   const u8 = Uint8Array.from(bytes);
 

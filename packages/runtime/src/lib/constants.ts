@@ -278,4 +278,36 @@ OpGasCost[3] = { ...OpGasCost[2] };
 /*
  * tealv4
  */
-OpGasCost[4] = { ...OpGasCost[3] };
+OpGasCost[4] = {
+  ...OpGasCost[3],
+  'b+': 10,
+  'b-': 10,
+  'b*': 20,
+  'b/': 20,
+  'b%': 20,
+  'b|': 6,
+  'b&': 6,
+  'b^': 6,
+  'b~': 4
+};
+
+export const enum MathOp {
+  // arithmetic
+  Add,
+  Sub,
+  Mul,
+  Div,
+  Mod,
+  // relational
+  LessThan,
+  GreaterThan,
+  LessThanEqualTo,
+  GreaterThanEqualTo,
+  // logical & bitwise
+  EqualTo,
+  NotEqualTo,
+  BitwiseOr,
+  BitwiseAnd,
+  BitwiseXor,
+  BitwiseInvert
+}
