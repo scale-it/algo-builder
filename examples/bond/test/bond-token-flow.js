@@ -137,7 +137,7 @@ describe('Bond token Tests', function () {
     const appArgs = ['str:update_issuer_address', convert.addressToPk(issuerLsigAddress)]; // converts algorand address to Uint8Array
 
     const appCallParams = {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: appManager.account,
       appID: applicationId,
@@ -267,7 +267,7 @@ describe('Bond token Tests', function () {
     runtime.executeTx(fundDexParam);
 
     const buybackTx = {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: appManager.account,
       appID: applicationId,
@@ -313,7 +313,7 @@ describe('Bond token Tests', function () {
       },
       // call to bond-dapp
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: elon.account,
         appID: applicationId,

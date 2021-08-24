@@ -118,7 +118,7 @@ describe('Bond token failing tests', function () {
     const appArgs = [updateIssuer, convert.addressToPk(issuerLsigAddress)];
 
     const appCallParams = {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: appManager.account,
       appID: applicationId,
@@ -151,7 +151,7 @@ describe('Bond token failing tests', function () {
     const appArgs = [updateIssuer, convert.addressToPk(issuerLsigAddress)]; // converts algorand address to Uint8Array
 
     const appCallParams = {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: randomUser.account,
       appID: applicationId,
@@ -218,7 +218,7 @@ describe('Bond token failing tests', function () {
     const appArgs = ['str:update_issue_price', 'int:0'];
 
     const appCallParams = {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: randomUser.account,
       appID: runtime.getAppInfoFromName(approvalProgram, clearProgram).appID,
@@ -233,7 +233,7 @@ describe('Bond token failing tests', function () {
     const appArgs = [updateIssuer, convert.addressToPk(issuerLsigAddress)];
 
     const appCallParams = {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: appManager.account,
       appID: applicationId,

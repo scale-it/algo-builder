@@ -109,7 +109,7 @@ function buyTx (buyer, issuerLsig, amount, algoAmount, appID, bondID) {
     },
     // call to bond-dapp
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: buyer,
       appID: appID,
@@ -140,7 +140,7 @@ function issueTx (creatorAccount, issuerLsig, appID, bondID) {
     },
     // call to bond-dapp
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: creatorAccount,
       appID: appID,
@@ -171,7 +171,7 @@ function createDexTx (
   return [
     // call to bond-dapp
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: managerAccount,
       appID: appID,
@@ -269,7 +269,7 @@ function redeemCouponTx (
     },
     // call to bond-dapp
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: buyerAccount,
       appID: appID,
