@@ -1,7 +1,7 @@
 const {
   executeTransaction, readGlobalStateSSC, balanceOf
 } = require('@algo-builder/algob');
-const { asaDef, fundAccount, tokenMap, optInTx, couponValue } = require('./common/common.js');
+const { asaDef, fundAccount, tokenMap, optInTx, couponValue, createDexTx } = require('./common/common.js');
 const { types } = require('@algo-builder/web');
 
 /**
@@ -73,58 +73,11 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
   // balance of old bond tokens in issuer lsig
   const info = await balanceOf(deployer, issuerLsig.address(), oldBond);
   console.log('Old balance amount ', info.amount);
-  const groupTx = [
-    // call to bond-dapp
-    {
-      type: types.TransactionType.CallApp,
-      sign: types.SignType.SecretKey,
-      fromAccount: managerAcc,
-      appID: appInfo.appID,
-      payFlags: {},
-      appArgs: ['str:create_dex'],
-      accounts: [issuerLsig.address(), dexLsig.address()]
-    },
-    // New bond token transfer to issuer's address
-    {
-      type: types.TransactionType.TransferAsset,
-      sign: types.SignType.SecretKey,
-      fromAccount: creatorAccount,
-      toAccountAddr: issuerLsig.address(),
-      amount: info.amount,
-      assetID: newIndex,
-      payFlags: { totalFee: 1000 }
-    },
-    // burn tokens
-    {
-      type: types.TransactionType.TransferAsset,
-      sign: types.SignType.LogicSignature,
-      fromAccountAddr: issuerLsig.address(),
-      lsig: issuerLsig,
-      toAccountAddr: creatorAccount.addr,
-      amount: info.amount,
-      assetID: oldBond,
-      payFlags: { totalFee: 1000 }
-    },
-    // Transfer app.total amount of new Bonds to dex lsig
-    {
-      type: types.TransactionType.TransferAsset,
-      sign: types.SignType.SecretKey,
-      fromAccount: creatorAccount,
-      toAccountAddr: dexLsig.address(),
-      amount: total,
-      assetID: newIndex,
-      payFlags: { totalFee: 1000 }
-    },
-    // Algo transfer to dex address
-    {
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.SecretKey,
-      fromAccount: creatorAccount,
-      toAccountAddr: dexLsig.address(),
-      amountMicroAlgos: Number(total) * Number(couponValue),
-      payFlags: { totalFee: 1000 }
-    }
-  ];
+  const groupTx = createDexTx(
+    managerAcc, appInfo.appID, issuerLsig,
+    dexLsig, creatorAccount, info.amount, newIndex, oldBond,
+    total, couponValue
+  );
 
   console.log(`* Creating dex ${i}! *`);
   await executeTransaction(deployer, groupTx);

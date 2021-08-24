@@ -3,7 +3,7 @@ const {
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 const { accounts } = require('./common/accounts.js');
-const { issuePrice } = require('./common/common.js');
+const { issuePrice, buyTx } = require('./common/common.js');
 
 /**
  * In this function: Elon buys 10 bonds and
@@ -26,37 +26,9 @@ exports.epoch0 = async function (deployer) {
   // elon buys 10 bonds
   const algoAmount = 10 * issuePrice;
 
-  const groupTx = [
-    // Algo transfer from buyer to issuer
-    {
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.SecretKey,
-      fromAccount: account.elon,
-      toAccountAddr: issuerLsig.address(),
-      amountMicroAlgos: algoAmount,
-      payFlags: { totalFee: 2000 }
-    },
-    // Bond token transfer from issuer's address
-    {
-      type: types.TransactionType.TransferAsset,
-      sign: types.SignType.LogicSignature,
-      fromAccountAddr: issuerLsig.address(),
-      lsig: issuerLsig,
-      toAccountAddr: account.elon.addr,
-      amount: 10,
-      assetID: asaInfo.assetIndex,
-      payFlags: { totalFee: 0 }
-    },
-    // call to bond-dapp
-    {
-      type: types.TransactionType.CallApp,
-      sign: types.SignType.SecretKey,
-      fromAccount: account.elon,
-      appID: appInfo.appID,
-      payFlags: { totalFee: 1000 },
-      appArgs: ['str:buy']
-    }
-  ];
+  const groupTx = buyTx(
+    account.elon, issuerLsig, 10, algoAmount, appInfo.appID, asaInfo.assetIndex
+  );
 
   console.log('Elon buying 10 bonds!');
   await executeTransaction(deployer, groupTx);
