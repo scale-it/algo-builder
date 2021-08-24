@@ -324,7 +324,9 @@ export class Runtime {
       asaDef.unitName as string,
       name,
       asaDef.url as string,
-      asaDef.metadataHash,
+      typeof asaDef.metadataHash !== 'string'
+        ? Buffer.from(asaDef.metadataHash as Uint8Array).toString('base64')
+        : asaDef.metadataHash,
       mockSuggestedParams(flags, this.round)
     );
   }

@@ -184,7 +184,8 @@ export class AccountStore implements AccountStoreI {
     this.minBalance += ASSET_CREATION_FEE;
     const asset = new Asset(assetId, asaDef, this.address, name);
     this.createdAssets.set(asset.id, asset.definitions);
-
+    console.log(asset.definitions.metadataHash, "safdsafsa");
+    console.log(Buffer.from(asset.definitions.metadataHash as Uint8Array).toString('base64'), "sdfsd");
     // set holding in creator account. note: for creator default-frozen is always false
     // https://developer.algorand.org/docs/reference/rest-apis/algod/v2/#assetparams
     const assetHolding: AssetHoldingM = {
