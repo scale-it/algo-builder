@@ -45,7 +45,15 @@ async function fundAccount (deployer, accountAddress) {
   await executeTransaction(deployer, algoTxnParams);
 }
 
-// Opt-In lsigs to a given asa
+/**
+ * Returns Opt-In lsigs to a given asa transaction
+ * Note: only manager is allowed to opt-in lsigs to asa
+ * This is because, no other user can spam asa opt-in in lsigs
+ * @param deployer deployer object
+ * @param managerAcc manager account
+ * @param lsig logic signature
+ * @param assetIndex asset index
+ */
 async function optInTx (deployer, managerAcc, lsig, assetIndex) {
   const optInTx = [
     {
