@@ -13,7 +13,11 @@ import {
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
-  Byte, ByteAdd, Bytec, Bytecblock, Concat, Dig, Div, Dup, Dup2, Ed25519verify,
+  Byte, ByteAdd, ByteBitwiseAnd,
+  ByteBitwiseInvert, ByteBitwiseOr, ByteBitwiseXor, Bytec, Bytecblock, ByteDiv, ByteEqualTo,
+  ByteGreaterThanEqualTo, ByteGreatorThan, ByteLessThan, ByteLessThanEqualTo, ByteMod, ByteMul,
+  ByteNotEqualTo, ByteSub, ByteZero,
+  Concat, Dig, Div, Dup, Dup2, Ed25519verify,
   EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global,
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
@@ -4205,6 +4209,13 @@ describe("Teal Opcodes", function () {
           138, 236, 2, 70, 138, 236, 2, 70, 138,
           236, 2, 70, 138, 236
         ]));
+
+        // "A" + "" == "A"
+        stack.push(parsing.stringToBytes('A'));
+        stack.push(parsing.stringToBytes(''));
+        op = new ByteAdd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), parsing.stringToBytes('A'));
       });
 
       it("should accept output of > 64 bytes", function () {
@@ -4244,6 +4255,533 @@ describe("Teal Opcodes", function () {
       it("should throw error if ByteAdd is used with int",
         execExpectError(stack, [1n, 2n], new ByteAdd([], 0), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
       );
+    });
+
+    describe("ByteSub", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should return correct subtraction of two byte arrays", function () {
+        stack.push(hexToByte('0x01'));
+        stack.push(hexToByte('0x01'));
+        let op = new ByteSub([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), parsing.stringToBytes("")); // Byte ""
+
+        stack.push(hexToByte('0x0200'));
+        stack.push(hexToByte('0x01'));
+        op = new ByteSub([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x01FF'));
+
+        // returns are smallest possible
+        stack.push(hexToByte('0x0100'));
+        stack.push(hexToByte('0x01'));
+        op = new ByteSub([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0xFF'));
+
+        stack.push(hexToByte('0x0ffff1234576'));
+        stack.push(hexToByte('0x1202'));
+        op = new ByteSub([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), new Uint8Array([15, 255, 241, 35, 51, 116]));
+
+        // big num
+        stack.push(hexToByte('0x0123457601234576012345760123457601234576012345760123457601234576'));
+        stack.push(hexToByte('0xffffff01ffffffffffffff01234576012345760123457601234576'));
+        op = new ByteSub([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), new Uint8Array([
+          1, 35, 69, 118, 0, 35, 69, 118, 255,
+          35, 69, 118, 1, 35, 69, 119, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0
+        ]));
+      });
+
+      it("should panic on underflow", function () {
+        stack.push(hexToByte('0x01'));
+        stack.push(hexToByte('0x02'));
+        const op = new ByteSub([], 0);
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.UINT64_UNDERFLOW
+        );
+      });
+
+      it("should throw error with ByteSub if stack is below min length",
+        execExpectError(
+          stack,
+          [hexToByte('0x10')],
+          new ByteAdd([], 0),
+          RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+        )
+      );
+
+      it("should throw error if ByteSub is used with int",
+        execExpectError(stack, [1n, 2n], new ByteSub([], 0), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
+      );
+    });
+
+    describe("ByteMul", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should return correct multiplication of two byte arrays", function () {
+        stack.push(hexToByte('0x10'));
+        stack.push(hexToByte('0x10'));
+        let op = new ByteMul([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x0100'));
+
+        stack.push(hexToByte('0x100000000000'));
+        stack.push(hexToByte('0x00'));
+        op = new ByteMul([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), parsing.stringToBytes(''));
+
+        // "A" * "" === ""
+        stack.push(parsing.stringToBytes('A'));
+        stack.push(parsing.stringToBytes(''));
+        op = new ByteMul([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), parsing.stringToBytes(''));
+
+        // u256*u256
+        stack.push(hexToByte('0xa123457601234576012345760123457601234576012345760123457601234576'));
+        stack.push(hexToByte('0xf123457601234576012345760123457601234576012345760123457601234576'));
+        op = new ByteMul([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), new Uint8Array([
+          151, 200, 103, 239, 94, 230, 133, 186, 92, 4, 163,
+          133, 89, 34, 193, 80, 86, 64, 223, 27, 83, 94,
+          252, 230, 80, 125, 26, 177, 77, 155, 56, 124, 72,
+          239, 162, 240, 235, 209, 133, 37, 238, 179, 103, 90,
+          241, 149, 73, 143, 244, 119, 43, 196, 247, 89, 13,
+          249, 250, 58, 240, 46, 253, 28, 210, 100
+        ]));
+      });
+
+      // rest of tests for all opcodes are common, which should be covered by b+, b-
+    });
+
+    describe("ByteDiv", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should return correct division of two byte arrays", function () {
+        stack.push(hexToByte('0x01'));
+        stack.push(hexToByte('0x01'));
+        let op = new ByteDiv([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x01'));
+
+        // "A" / "A" === "1"
+        stack.push(parsing.stringToBytes('A'));
+        stack.push(parsing.stringToBytes('A'));
+        op = new ByteDiv([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x01'));
+
+        // u256 / u128
+        stack.push(hexToByte('0xa123457601234576012345760123457601234576012345760123457601234576'));
+        stack.push(hexToByte('0x34576012345760123457601234576312'));
+        op = new ByteDiv([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), new Uint8Array([
+          3, 20, 30, 232, 85, 184,
+          244, 125, 170, 92, 127, 59,
+          140, 137, 168, 211, 37
+        ]));
+      });
+
+      it("should panic if B == 0", function () {
+        stack.push(hexToByte('0x01'));
+        stack.push(hexToByte('0x00'));
+        const op = new ByteDiv([], 0);
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.ZERO_DIV
+        );
+      });
+    });
+
+    describe("ByteMod", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should return correct modulo of two byte arrays", function () {
+        stack.push(hexToByte('0x10'));
+        stack.push(hexToByte('0x07'));
+        let op = new ByteMod([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x02'));
+
+        // "A" % "A" === ""
+        stack.push(parsing.stringToBytes('A'));
+        stack.push(parsing.stringToBytes('A'));
+        op = new ByteMod([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), parsing.stringToBytes(''));
+
+        // u256 % u128
+        stack.push(hexToByte('0xa123457601234576012345760123457601234576012345760123457601234576'));
+        stack.push(hexToByte('0x34576012345760123457601234576312'));
+        op = new ByteMod([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), new Uint8Array([
+          1, 202, 148, 236, 225, 10,
+          151, 2, 64, 208, 240, 122,
+          196, 10, 29, 220
+        ]));
+      });
+
+      it("should panic if B == 0", function () {
+        stack.push(hexToByte('0x01'));
+        stack.push(hexToByte('0x00'));
+        const op = new ByteMod([], 0);
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.ZERO_DIV
+        );
+      });
+    });
+
+    describe("ByteLessThan", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should push 0/1 depending on value of two byte arrays for bytelessthan", function () {
+        // A < B
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("B"));
+        let op = new ByteLessThan([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 1n);
+
+        // B is not less than A
+        stack.push(parsing.stringToBytes("B"));
+        stack.push(parsing.stringToBytes("A"));
+        op = new ByteLessThan([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 0n);
+
+        // A is not less than A
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("A"));
+        op = new ByteLessThan([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 0n);
+      });
+    });
+
+    describe("ByteGreatorThan", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should push 0/1 depending on value of two byte arrays for ByteGreatorThan", function () {
+        // A is not greator B
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("B"));
+        let op = new ByteGreatorThan([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 0n);
+
+        // B > A
+        stack.push(parsing.stringToBytes("B"));
+        stack.push(parsing.stringToBytes("A"));
+        op = new ByteGreatorThan([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 1n);
+
+        // A is not greator than A
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("A"));
+        op = new ByteGreatorThan([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 0n);
+      });
+    });
+
+    describe("ByteLessThanEqualTo", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should push 0/1 depending on value of two byte arrays for ByteLessThanEqualTo", function () {
+        // A is <= B
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("B"));
+        let op = new ByteLessThanEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 1n);
+
+        // B is not lessthan or equal to A
+        stack.push(parsing.stringToBytes("B"));
+        stack.push(parsing.stringToBytes("A"));
+        op = new ByteLessThanEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 0n);
+
+        // A is <= A
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("A"));
+        op = new ByteLessThanEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 1n);
+      });
+    });
+
+    describe("ByteGreaterThanEqualTo", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should push 0/1 depending on value of two byte arrays for ByteGreaterThanEqualTo", function () {
+        // A is not >= B
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("B"));
+        let op = new ByteGreaterThanEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 0n);
+
+        // B is >= A
+        stack.push(parsing.stringToBytes("B"));
+        stack.push(parsing.stringToBytes("A"));
+        op = new ByteGreaterThanEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 1n);
+
+        // A is >= A
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("A"));
+        op = new ByteGreaterThanEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 1n);
+      });
+    });
+
+    describe("ByteEqualTo", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should push 0/1 depending on value of two byte arrays for ByteEqualTo", function () {
+        // A is not == B
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("B"));
+        let op = new ByteEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 0n);
+
+        // A == A
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("A"));
+        op = new ByteEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 1n);
+
+        // "" == ""
+        stack.push(parsing.stringToBytes(""));
+        stack.push(parsing.stringToBytes(""));
+        op = new ByteEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 1n);
+      });
+    });
+
+    describe("ByteNotEqualTo", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should push 0/1 depending on value of two byte arrays for ByteNotEqualTo", function () {
+        // A is not == B
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("B"));
+        let op = new ByteNotEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 1n);
+
+        // A == A
+        stack.push(parsing.stringToBytes("A"));
+        stack.push(parsing.stringToBytes("A"));
+        op = new ByteNotEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 0n);
+
+        // "" !== ""
+        stack.push(parsing.stringToBytes(""));
+        stack.push(parsing.stringToBytes(""));
+        op = new ByteNotEqualTo([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), 0n);
+      });
+    });
+
+    describe("ByteBitwiseOr", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should push OR of two byte arrays for ByteBitwiseOr", function () {
+        stack.push(hexToByte('0x11'));
+        stack.push(hexToByte('0x10'));
+        let op = new ByteBitwiseOr([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x11'));
+
+        stack.push(hexToByte('0x01'));
+        stack.push(hexToByte('0x10'));
+        op = new ByteBitwiseOr([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x11'));
+
+        stack.push(hexToByte('0x0201'));
+        stack.push(hexToByte('0x10f1'));
+        op = new ByteBitwiseOr([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x12f1'));
+
+        stack.push(hexToByte('0x0001'));
+        stack.push(hexToByte('0x00f1'));
+        op = new ByteBitwiseOr([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x00f1'));
+      });
+    });
+
+    describe("ByteBitwiseAnd", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should push AND of two byte arrays for ByteBitwiseAnd", function () {
+        stack.push(hexToByte('0x11'));
+        stack.push(hexToByte('0x10'));
+        let op = new ByteBitwiseAnd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x10'));
+
+        stack.push(hexToByte('0x01'));
+        stack.push(hexToByte('0x10'));
+        op = new ByteBitwiseAnd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x00'));
+
+        stack.push(hexToByte('0x0201'));
+        stack.push(hexToByte('0x10f1'));
+        op = new ByteBitwiseAnd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x0001'));
+
+        stack.push(hexToByte('0x01'));
+        stack.push(hexToByte('0x00f1'));
+        op = new ByteBitwiseAnd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x0001'));
+
+        stack.push(hexToByte('0x0123457601234576012345760123457601234576012345760123457601234576'));
+        stack.push(hexToByte('0x01ffffffffffffff01ffffffffffffff01234576012345760123457601234576'));
+        op = new ByteBitwiseAnd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), new Uint8Array([
+          1, 35, 69, 118, 1, 35, 69, 118, 1,
+          35, 69, 118, 1, 35, 69, 118, 1, 35,
+          69, 118, 1, 35, 69, 118, 1, 35, 69,
+          118, 1, 35, 69, 118
+        ]));
+      });
+    });
+
+    describe("ByteBitwiseXOR", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should push XOR of two byte arrays for ByteBitwiseXOR", function () {
+        stack.push(hexToByte('0x11'));
+        stack.push(hexToByte('0x10'));
+        let op = new ByteBitwiseXor([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x01'));
+
+        stack.push(hexToByte('0x01'));
+        stack.push(hexToByte('0x10'));
+        op = new ByteBitwiseXor([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x11'));
+
+        stack.push(hexToByte('0x0201'));
+        stack.push(hexToByte('0x10f1'));
+        op = new ByteBitwiseXor([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x12f0'));
+
+        stack.push(hexToByte('0x0001'));
+        stack.push(hexToByte('0xf1'));
+        op = new ByteBitwiseXor([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x00f0'));
+
+        stack.push(hexToByte('0x123457601234576012345760123457601234576012345760123457601234576a'));
+        stack.push(hexToByte('0xf123457601234576012345760123457601234576012345760123457601234576'));
+        op = new ByteBitwiseXor([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), new Uint8Array([
+          227, 23, 18, 22, 19, 23, 18, 22, 19,
+          23, 18, 22, 19, 23, 18, 22, 19, 23,
+          18, 22, 19, 23, 18, 22, 19, 23, 18,
+          22, 19, 23, 18, 28
+        ]));
+      });
+    });
+
+    describe("ByteBitwiseInvert", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should push bitwise invert of byte array", function () {
+        stack.push(hexToByte('0x0001'));
+        let op = new ByteBitwiseInvert([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0xfffe'));
+
+        stack.push(hexToByte('0x'));
+        op = new ByteBitwiseInvert([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x'));
+
+        stack.push(hexToByte('0xf001'));
+        op = new ByteBitwiseInvert([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x0ffe'));
+
+        // stack.push(hexToByte('0x0001'));
+        // op = new ByteBitwiseInvert([], 0);
+        // op.execute(stack);
+        // assert.deepEqual(stack.pop(), hexToByte('0x00f0'));
+
+        stack.push(hexToByte('0xa123457601234576012345760123457601234576012345760123457601234576'));
+        op = new ByteBitwiseInvert([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), new Uint8Array([
+          94, 220, 186, 137, 254, 220, 186,
+          137, 254, 220, 186, 137, 254, 220,
+          186, 137, 254, 220, 186, 137, 254,
+          220, 186, 137, 254, 220, 186, 137,
+          254, 220, 186, 137
+        ]));
+      });
+    });
+
+    describe("ByteZero", () => {
+      const stack = new Stack<StackElem>();
+
+      it("should push zero byte array to stack", function () {
+        stack.push(3n);
+        let op = new ByteZero([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x000000'));
+
+        stack.push(33n);
+        op = new ByteZero([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x000000000000000000000000000000000000000000000000000000000000000000'));
+      });
+
+      it("should fail if len > 4096", function () {
+        stack.push(4097n);
+        let op = new ByteZero([], 0);
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.BYTES_LEN_EXCEEDED
+        );
+
+        stack.push(4096n);
+        op = new ByteZero([], 0);
+        assert.doesNotThrow(() => op.execute(stack));
+      });
     });
   });
 });
