@@ -72,7 +72,7 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
 
     const invalidParam = {
       ...txnParams,
-      lsig: lsig,
+      lsigAccount: lsig,
       amountMicroAlgos: 50n
     };
 

@@ -21,16 +21,14 @@ import { convertToString } from "./lib/parsing";
 export class LogicSig {
   logic: Uint8Array;
   args: Uint8Array[];
-  sig: Uint8Array;
-  msig: EncodedMultisig | undefined;
+  sig?: Uint8Array;
+  msig?: EncodedMultisig;
   lsigAddress: string;
   tag: Buffer;
 
   constructor (program: string, programArgs?: Array<Uint8Array | Buffer> | null) {
     this.tag = Buffer.from("Program");
     this.logic = parsing.stringToBytes(program);
-    this.sig = new Uint8Array(0);
-    this.msig = undefined;
     this.lsigAddress = generateAccount().addr;
     this.tag = Buffer.from('Program');
     if (
@@ -115,12 +113,12 @@ export class LogicSig {
    */
   verify (accPk: Uint8Array): boolean {
     const accAddr = encodeAddress(accPk);
-    if (compareArray(this.sig, new Uint8Array(0)) && this.msig === undefined) {
+    if (!this.sig && !this.msig) {
       if (accAddr === this.lsigAddress) return true;
       return false;
     }
 
-    if (!compareArray(this.sig, new Uint8Array(0))) {
+    if (this.sig) {
       return verifyBytes(this.logic, this.sig, accAddr);
     }
 
@@ -295,7 +293,7 @@ export class LogicSigAccount {
    * To verify the delegation signature, use `verify`.
    */
   isDelegated (): boolean {
-    return !!(this.lsig.sig || this.lsig.msig);
+    return !!(this.lsig.sig ?? this.lsig.msig);
   }
 
   /**
@@ -369,6 +367,6 @@ export class LogicSigAccount {
    */
   sign (secretKey: Uint8Array): void {
     this.lsig.sign(secretKey);
-    this.sigkey = tweet.box_keyPair_fromSecretKey(secretKey).publicKey;
+    this.sigkey = tweet.sign_keyPair_fromSecretKey(secretKey).publicKey;
   }
 }
