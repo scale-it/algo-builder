@@ -234,7 +234,7 @@ class DeployerBasicMode {
       type: wtypes.TransactionType.OptInASA,
       sign: wtypes.SignType.LogicSignature,
       fromAccountAddr: lsig.address(),
-      lsigAccount: lsig,
+      lsig: lsig,
       assetID: asa,
       payFlags: {}
     });
@@ -291,7 +291,7 @@ class DeployerBasicMode {
       type: wtypes.TransactionType.OptInToApp,
       sign: wtypes.SignType.LogicSignature,
       fromAccountAddr: lsig.address(),
-      lsigAccount: lsig,
+      lsig: lsig,
       appID: appID,
       payFlags: {}
     });

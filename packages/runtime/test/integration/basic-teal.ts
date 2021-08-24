@@ -32,7 +32,7 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
       fromAccountAddr: john.account.addr,
       toAccountAddr: bob.address,
       amountMicroAlgos: 100n,
-      lsigAccount: {} as LogicSigAccount, // will be set below
+      lsig: {} as LogicSigAccount, // will be set below
       payFlags: { totalFee: fee }
     };
   });
@@ -56,7 +56,7 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
       ...txnParams,
       sign: types.SignType.LogicSignature,
       fromAccountAddr: john.address,
-      lsigAccount: lsig
+      lsig: lsig
     });
 
     syncAccounts();
@@ -72,7 +72,7 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
 
     const invalidParam = {
       ...txnParams,
-      lsigAccount: lsig,
+      lsig: lsig,
       amountMicroAlgos: 50n
     };
 

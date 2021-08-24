@@ -33,7 +33,7 @@ describe("Logic Signature Transaction in Runtime", function () {
       fromAccountAddr: john.account.addr,
       toAccountAddr: bob.account.addr,
       amountMicroAlgos: 1000n,
-      lsigAccount: lsig,
+      lsig: lsig,
       payFlags: { totalFee: 1000 }
     };
   });
@@ -52,7 +52,7 @@ describe("Logic Signature Transaction in Runtime", function () {
       ...txnParam,
       sign: types.SignType.LogicSignature,
       fromAccountAddr: alice.account.addr,
-      lsigAccount: lsig
+      lsig: lsig
     };
 
     // execute transaction (logic signature validation failed)
@@ -68,7 +68,7 @@ describe("Logic Signature Transaction in Runtime", function () {
       ...txnParam,
       sign: types.SignType.LogicSignature,
       fromAccountAddr: john.account.addr,
-      lsigAccount: logicSig
+      lsig: logicSig
     };
 
     logicSig.sign(john.account.sk);

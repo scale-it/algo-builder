@@ -64,7 +64,7 @@ describe("Debugging TEAL code using tealdbg", () => {
       toAccountAddr: generateAccount().addr,
       amount: 500,
       assetID: 1,
-      lsigAccount: mockLsig,
+      lsig: mockLsig,
       payFlags: { totalFee: 1000 }
     };
     tealDebugger = new TealDbgMock(deployer, txnParam);

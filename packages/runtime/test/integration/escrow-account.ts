@@ -41,7 +41,7 @@ describe("Logic Signature: Escrow Account", function () {
     paymentTxParams = {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.LogicSignature,
-      lsigAccount: lsig,
+      lsig: lsig,
       fromAccountAddr: escrow.address,
       toAccountAddr: john.address,
       amountMicroAlgos: 100n,

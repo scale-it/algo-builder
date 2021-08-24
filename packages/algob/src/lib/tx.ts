@@ -129,8 +129,8 @@ function signTransaction (txn: Transaction, execParams: wtypes.ExecParams): Uint
       return txn.signTxn(execParams.fromAccount.sk);
     }
     case wtypes.SignType.LogicSignature: {
-      execParams.lsigAccount.lsig.args = execParams.args ?? [];
-      return algosdk.signLogicSigTransactionObject(txn, execParams.lsigAccount).blob;
+      execParams.lsig.lsig.args = execParams.args ?? [];
+      return algosdk.signLogicSigTransactionObject(txn, execParams.lsig).blob;
     }
     default: {
       throw new Error("Unknown type of signature");

@@ -474,7 +474,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       type: wtypes.TransactionType.OptInToApp,
       sign: wtypes.SignType.LogicSignature,
       fromAccountAddr: lsig.address(),
-      lsigAccount: lsig,
+      lsig: lsig,
       appID: appID,
       payFlags: payFlags,
       appArgs: flags.appArgs,

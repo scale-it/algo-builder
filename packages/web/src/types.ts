@@ -136,7 +136,7 @@ interface SignWithLsig {
   sign: SignType.LogicSignature
   fromAccount?: AccountSDK
   fromAccountAddr: AccountAddress
-  lsigAccount: LogicSigAccount
+  lsig: LogicSigAccount
   /** stateless smart contract args */
   args?: Uint8Array[]
 }

@@ -581,18 +581,18 @@ export class Runtime {
   validateLsigAndRun (txnParam: types.ExecParams, debugStack?: number): void {
     // check if transaction is signed by logic signature,
     // if yes verify signature and run logic
-    if (txnParam.sign === types.SignType.LogicSignature && txnParam.lsigAccount) {
-      this.ctx.args = txnParam.args ?? txnParam.lsigAccount.lsig.args;
+    if (txnParam.sign === types.SignType.LogicSignature && txnParam.lsig) {
+      this.ctx.args = txnParam.args ?? txnParam.lsig.lsig.args;
 
       // signature validation
       const fromAccountAddr = webTx.getFromAddress(txnParam);
-      const result = txnParam.lsigAccount.lsig.verify(decodeAddress(fromAccountAddr).publicKey);
+      const result = txnParam.lsig.lsig.verify(decodeAddress(fromAccountAddr).publicKey);
       if (!result) {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_VALIDATION_FAILED,
           { address: fromAccountAddr });
       }
       // logic validation
-      const program = convertToString(txnParam.lsigAccount.lsig.logic);
+      const program = convertToString(txnParam.lsig.lsig.logic);
       if (program === "") {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
       }
