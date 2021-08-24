@@ -8,7 +8,7 @@ const {
   optInLsigToBond, createDex, approvalProgram,
   clearProgram, minBalance, initialBalance, redeem
 } = require('./common/common');
-const { buyTx, issueTx, redeemTx } = require('../scripts/run/common/common');
+const { buyTx, issueTx, redeemCouponTx } = require('../scripts/run/common/common');
 
 const RUNTIME_ERR1009 = 'RUNTIME_ERR1009: TEAL runtime encountered err opcode';
 const RUNTIME_ERR1402 = 'Cannot withdraw';
@@ -319,7 +319,7 @@ describe('Bond token failing tests', function () {
     const oldBond = runtime.getAssetInfoFromName('bond-token-0').assetIndex;
     const newBond = runtime.getAssetInfoFromName('bond-token-1').assetIndex;
 
-    const groupTx = redeemTx(elon.account, dexLsig1, 1, oldBond, newBond, 20, appInfo.appID);
+    const groupTx = redeemCouponTx(elon.account, dexLsig1, 1, oldBond, newBond, 20, appInfo.appID);
     groupTx[0].payFlags = { totalFee: 2000 };
     groupTx[1].payFlags = { totalFee: 1000 };
     groupTx[2].payFlags = { totalFee: 0 };

@@ -1,7 +1,7 @@
 const {
   executeTransaction
 } = require('@algo-builder/algob');
-const { tokenMap, couponValue, redeemTx } = require('./common/common.js');
+const { tokenMap, couponValue, redeemCouponTx } = require('./common/common.js');
 
 /**
  * Redeem old tokens, get coupon_value + new bond tokens
@@ -24,7 +24,7 @@ exports.redeem = async function (deployer, buyerAccount, managerAcc, dex, amount
   };
   const dexLsig = await deployer.loadLogic('dex-lsig.py', scInitParam);
   await deployer.optInAcountToASA(newBond, buyerAccount.name, {});
-  const groupTx = redeemTx(
+  const groupTx = redeemCouponTx(
     buyerAccount, dexLsig, amount,
     oldBond, newBond, couponValue, appInfo.appID
   );

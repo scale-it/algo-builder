@@ -2,7 +2,7 @@ const { getProgram } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 const { assert } = require('chai');
 
-const { createDexTx, redeemTx } = require('../../scripts/run/common/common');
+const { createDexTx, redeemCouponTx } = require('../../scripts/run/common/common');
 
 const bondToken = 'bond-token-';
 const asaDef = {
@@ -144,7 +144,7 @@ function redeem (runtime, buyerAccount, dex, amount, dexLsig) {
   runtime.optIntoASA(newBond, buyerAccount.address, {});
 
   const balanceBeforeRedeem = buyerAccount.balance();
-  const groupTx = redeemTx(
+  const groupTx = redeemCouponTx(
     buyerAccount.account, dexLsig, amount,
     oldBond, newBond, coupon, appInfo.appID
   );

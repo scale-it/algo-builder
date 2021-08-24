@@ -114,9 +114,9 @@ function buyTx (buyer, issuerLsig, amount, algoAmount, appID, bondID) {
 /**
  * Returns issue group transaction
  * @param creatorAccount creator acccount
- * @param issuerLsig issuer logic signature
- * @param appID application index
- * @param bondID bond index
+ * @param issuerLsig Bond issuer logic signature
+ * @param appID Bond application index
+ * @param bondID Bond ASA index
  */
 function issueTx (creatorAccount, issuerLsig, appID, bondID) {
   return [
@@ -145,19 +145,19 @@ function issueTx (creatorAccount, issuerLsig, appID, bondID) {
 /**
  * Returns create dex transaction
  * @param managerAccount App manager account
- * @param appID application index
+ * @param appID Bond application index
  * @param issuerLsig Bond issuer logic signature
  * @param dexLsig Bond dex logic signature
  * @param creatorAccount Bond ASA creator account
  * @param unsoldBonds balance of oldBond tokens hold by the issuer (amount of unsold bonds)
- * @param newBondID new bond ASA
- * @param oldBondID old bond ASA
+ * @param newBondID new bond ASA index
+ * @param oldBondID old bond ASA index
  * @param total total number of bonds issued to buyers
  * @param couponValue value of coupon
  */
 function createDexTx (
   managerAccount, appID, issuerLsig,
-  dexLsig, creatorAccount, assetAmount,
+  dexLsig, creatorAccount, unsoldBonds,
   newBondID, oldBondID, total, couponValue
 ) {
   return [
@@ -177,7 +177,7 @@ function createDexTx (
       sign: types.SignType.SecretKey,
       fromAccount: creatorAccount,
       toAccountAddr: issuerLsig.address(),
-      amount: assetAmount,
+      amount: unsoldBonds,
       assetID: newBondID,
       payFlags: { totalFee: 1000 }
     },
@@ -188,7 +188,7 @@ function createDexTx (
       fromAccountAddr: issuerLsig.address(),
       lsig: issuerLsig,
       toAccountAddr: creatorAccount.addr,
-      amount: assetAmount,
+      amount: unsoldBonds,
       assetID: oldBondID,
       payFlags: { totalFee: 1000 }
     },
@@ -217,14 +217,14 @@ function createDexTx (
 /**
  * Returns redeem transaction
  * @param buyerAccount buyer account
- * @param dexLsig dex logic signature
+ * @param dexLsig Bond dex logic signature
  * @param amount amount of bonds to be redeemed
  * @param oldBondID old bond token index
  * @param newBondID new bond token index
  * @param couponValue value of coupon
- * @param appID application index
+ * @param appID Bond application index
  */
-function redeemTx (
+function redeemCouponTx (
   buyerAccount, dexLsig, amount, oldBondID,
   newBondID, couponValue, appID
 ) {
@@ -283,5 +283,5 @@ module.exports = {
   buyTx,
   issueTx,
   createDexTx,
-  redeemTx
+  redeemCouponTx
 };

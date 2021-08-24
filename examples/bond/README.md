@@ -70,4 +70,4 @@ Following functions are present in this file:
 - `buyTx`: Returns group transaction to buy tokens
 - `issueTx`: Returns group transaction for issuing bonds to issuer
 - `createDexTx`: Returns group transaction for creating dex
-- `redeemTx`: Returns group transaction for redeeming bonds
+- `redeemCouponTx`: Returns group transaction for redeeming bonds
