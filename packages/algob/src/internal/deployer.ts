@@ -147,7 +147,7 @@ class DeployerBasicMode {
     const result = resultMap.get(lsigName)?.lsig;
     if (result === undefined) { return undefined; }
     const lsigAccount = getDummyLsig();
-    Object.assign(lsigAccount.lsig, result);
+    Object.assign(lsigAccount, result);
     if (lsigAccount.lsig.sig) { lsigAccount.lsig.sig = Uint8Array.from(lsigAccount.lsig.sig); };
     return lsigAccount;
   }
