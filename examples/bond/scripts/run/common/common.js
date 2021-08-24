@@ -69,13 +69,13 @@ async function optInTx (deployer, managerAcc, lsig, assetIndex) {
 }
 
 /**
- * Returns group transaction for buy
+ * Creates a group transaction for buying bond tokens.
  * @param buyer buyer account
- * @param issuerLsig issuer logic signature
+ * @param issuerLsig Bond issuer logic signature
  * @param amount amount of bonds
- * @param algoAmount amount of algo
- * @param appID application index
- * @param bondID bond index
+ * @param algoAmount amount of Algo to pay for the bonds
+ * @param appID Bond application index
+ * @param bondID Bond ASA index
  */
 function buyTx (buyer, issuerLsig, amount, algoAmount, appID, bondID) {
   return [
@@ -146,12 +146,12 @@ function issueTx (creatorAccount, issuerLsig, appID, bondID) {
  * Returns create dex transaction
  * @param managerAccount App manager account
  * @param appID application index
- * @param issuerLsig issuer logic signature
- * @param dexLsig dex logic signature
- * @param creatorAccount bond token creator account
- * @param assetAmount balance of oldBond tokens in issuer address
- * @param newBondID new bond token index
- * @param oldBondID old bond token index
+ * @param issuerLsig Bond issuer logic signature
+ * @param dexLsig Bond dex logic signature
+ * @param creatorAccount Bond ASA creator account
+ * @param unsoldBonds balance of oldBond tokens hold by the issuer (amount of unsold bonds)
+ * @param newBondID new bond ASA
+ * @param oldBondID old bond ASA
  * @param total total number of bonds issued to buyers
  * @param couponValue value of coupon
  */
