@@ -663,6 +663,7 @@ export interface AnyMap {
 export type PromiseAny = Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 //  LocalWords:  configFile
+export type LogicSig = LogicSigAccount['lsig'];
 
 export interface DebuggerContext {
   tealFile?: string

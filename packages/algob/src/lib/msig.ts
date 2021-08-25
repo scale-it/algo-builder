@@ -1,12 +1,15 @@
 import { getPathFromDirRecursive } from "@algo-builder/runtime";
-import type { Account, EncodedMultisig, MultisigMetadata, Transaction } from "algosdk";
 import {
-  appendSignMultisigTransaction, decodeAddress, decodeSignedTransaction,
-  decodeUnsignedTransaction, encodeAddress, LogicSigAccount, signMultisigTransaction
+  Account, appendSignMultisigTransaction, decodeAddress,
+  decodeSignedTransaction, decodeUnsignedTransaction,
+  encodeAddress, EncodedMultisig,
+  logicSigFromByte, MultisigMetadata, signMultisigTransaction,
+  Transaction
 } from "algosdk";
 import fs from "fs";
 
 import { ASSETS_DIR } from "../internal/core/project-structure";
+import { LogicSig } from "../types";
 import { isSignedTx } from "./tx";
 
 export const blsigExt = ".blsig";
@@ -73,15 +76,15 @@ export async function readBinaryMultiSig (filename: string): Promise<string | un
 /**
  * Loads signed logic signature directly from .blsig file
  * @param {string} name filename
- * @returns {LogicSigAccount} signed logic signature from assets/<file_name>.blsig
+ * @returns {LogicSig} signed logic signature from assets/<file_name>.blsig
  */
-export async function loadBinaryLsig (name: string): Promise<LogicSigAccount> {
+export async function loadBinaryLsig (name: string): Promise<LogicSig> {
   const data = await readBinaryMultiSig(name);
   if (data === undefined) {
     throw new Error(`File ${name} does not exist`);
   }
   const program = new Uint8Array(Buffer.from(data, 'base64'));
-  return LogicSigAccount.fromByte(program);
+  return logicSigFromByte(program);
 }
 
 /**

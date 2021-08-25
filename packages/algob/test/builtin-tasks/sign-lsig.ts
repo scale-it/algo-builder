@@ -35,8 +35,8 @@ describe("Sign-lsig task", () => {
   });
 
   it("Append bob's signature to multisigned lsig loaded from file", async function () {
-    const lsigAccount = await loadBinaryLsig('multi-signed-lsig.blsig');
-    const msig = lsigAccount.lsig.msig;
+    const lsig = await loadBinaryLsig('multi-signed-lsig.blsig');
+    const msig = lsig.msig;
 
     // input assertions
     assert.isDefined(msig);
@@ -52,20 +52,20 @@ describe("Sign-lsig task", () => {
     // output assertions
     assert(fs.existsSync(path.join(ASSETS_DIR, outFile))); // outfile exists
 
-    const outLsigAccount = await loadBinaryLsig(outFile);
-    const singleSubsig = outLsigAccount.lsig.msig?.subsig.find(s => compareArray(s.pk, bobPk));
+    const outLsig = await loadBinaryLsig(outFile);
+    const singleSubsig = outLsig.msig?.subsig.find(s => compareArray(s.pk, bobPk));
     assert.isDefined(singleSubsig?.pk);
     assert.isDefined(singleSubsig?.s); // bob signature should be present
 
-    lsigAccount.lsig.appendToMultisig(bobAcc.sk);
+    lsig.appendToMultisig(bobAcc.sk);
     assert.deepEqual(
       singleSubsig?.s,
-      lsigAccount.lsig.msig?.subsig.find(s => compareArray(s.pk, bobPk))?.s); // verify signature
+      lsig.msig?.subsig.find(s => compareArray(s.pk, bobPk))?.s); // verify signature
   });
 
   it("Create a single signature logic sig if msig not found", async function () {
-    const lsigAccount = await loadBinaryLsig('single-signed-lsig.blsig');
-    assert.isUndefined(lsigAccount.lsig.msig); // msig not present
+    const lsig = await loadBinaryLsig('single-signed-lsig.blsig');
+    assert.isUndefined(lsig.msig); // msig not present
 
     // force: boolean
     await this.env.run(TASK_SIGN_LSIG, {
@@ -74,11 +74,11 @@ describe("Sign-lsig task", () => {
       out: outFile
     });
 
-    const outLsigAccount = await loadBinaryLsig(outFile);
-    assert.isDefined(outLsigAccount.lsig.sig); // single signature should be present
+    const outLsig = await loadBinaryLsig(outFile);
+    assert.isDefined(outLsig.sig); // single signature should be present
 
-    lsigAccount.lsig.sign(bobAcc.sk);
-    assert.deepEqual(outLsigAccount.lsig.sig, lsigAccount.lsig.sig); // verify signature
+    lsig.sign(bobAcc.sk);
+    assert.deepEqual(outLsig.sig, lsig.sig); // verify signature
   });
 
   it("Should log error if account name is not present in algob config", async function () {
