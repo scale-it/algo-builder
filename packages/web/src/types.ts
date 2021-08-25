@@ -112,7 +112,7 @@ export enum TransactionType {
   FreezeAsset,
   RevokeAsset,
   DestroyAsset,
-  CallNoOpSSC,
+  CallApp,
   ClearApp,
   CloseApp,
   DeleteApp,
@@ -176,7 +176,7 @@ export type UpdateAppParam = BasicParams & AppOptionalFlags & {
 };
 
 export type AppCallsParam = BasicParams & AppOptionalFlags & {
-  type: TransactionType.CallNoOpSSC | TransactionType.ClearApp |
+  type: TransactionType.CallApp | TransactionType.ClearApp |
   TransactionType.CloseApp | TransactionType.DeleteApp | TransactionType.OptInToApp
   appID: number
 };

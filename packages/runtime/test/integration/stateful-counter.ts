@@ -13,7 +13,7 @@ describe("Algorand Smart Contracts - Stateful Counter example", function () {
   const john = new AccountStore(minBalance + fee);
 
   const txnParams: types.ExecParams = {
-    type: types.TransactionType.CallNoOpSSC,
+    type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,
     fromAccount: john.account,
     appID: 0,

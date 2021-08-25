@@ -34,7 +34,7 @@ async function forceTransfer (deployer, fromAddr, toAddr, amount) {
      * is a call to permissions smart contract in the txGroup, so that rules
      * are checked during token transfer. */
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: owner,
       appID: controllerAppInfo.appID,
@@ -72,7 +72,7 @@ async function forceTransfer (deployer, fromAddr, toAddr, amount) {
     /*
      * tx 3 - Call to permissions stateful smart contract with application arg: 'transfer' */
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: owner,
       appID: permissionsAppInfo.appID,

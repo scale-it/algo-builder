@@ -23,7 +23,7 @@ async function run (runtimeEnv, deployer) {
     // set new permissions app id in controller smart contract
     // note: in current version, this replaces the previous appID in controller
     await executeTransaction(deployer, {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: owner, // asa manager account
       appID: controllerappID,

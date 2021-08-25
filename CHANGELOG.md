@@ -13,6 +13,9 @@
 ### Bug Fixes
 * Fixed `yarn add @algo-builder/web` (was failing because of missing dependency `zod` in packages/web).
 
+### API breaking
+* Rename `CallNoOpSSC` to `CallApp`.
+
 ## v1.2.0 2021-08-09
 
 ### Improvements

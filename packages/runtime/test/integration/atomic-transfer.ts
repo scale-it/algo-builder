@@ -126,7 +126,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
   it("should execute payment and ssc call", () => {
     const txGroup: types.ExecParams[] = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: john.account,
         appID: appID,
@@ -159,7 +159,7 @@ describe("Algorand Smart Contracts - Atomic Transfers", function () {
   it("should fail if payment transaction in group fails", () => {
     const txGroup: types.ExecParams[] = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: john.account,
         appID: appID,
