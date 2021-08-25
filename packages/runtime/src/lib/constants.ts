@@ -125,8 +125,6 @@ export const TxArrFields: {[key: number]: Set<string>} = {
 TxArrFields[3] = new Set([...TxArrFields[2], 'Assets', 'Applications']);
 TxArrFields[4] = TxArrFields[3];
 
-TxArrFields[4] = new Set([...TxArrFields[3]]);
-
 export const TxFieldDefaults: {[key: string]: any} = {
   Sender: zeroAddress,
   Fee: zeroUint64,
