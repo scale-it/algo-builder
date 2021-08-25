@@ -18,7 +18,7 @@ describe("Algorand Stateful Smart Contracts - Consensus Params", function () {
   const john = new AccountStore(minBalance + fee);
 
   const txnParams: types.ExecParams = {
-    type: types.TransactionType.CallNoOpSSC,
+    type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,
     fromAccount: john.account,
     appID: 0,
