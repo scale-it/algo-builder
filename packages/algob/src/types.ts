@@ -589,7 +589,7 @@ export interface Deployer {
 
   /**
    * Extracts multi signed logic signature file from `assets/`. */
-  loadMultiSig: (name: string) => Promise<LogicSigAccount>
+  loadMultiSig: (name: string) => Promise<LogicSig>
 
   /**
    * Queries a stateful smart contract info from checkpoint. */

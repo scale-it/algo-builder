@@ -15,6 +15,7 @@ import type {
   ConfirmedTxInfo,
   Deployer,
   FundASCFlags,
+  LogicSig,
   LsigInfo,
   RuntimeEnv,
   SCParams
@@ -167,13 +168,13 @@ class DeployerBasicMode {
    * @param name filename
    * @returns multi signed logic signature from assets/<file_name>.(b)lsig
    */
-  async loadMultiSig (name: string): Promise<LogicSigAccount> {
+  async loadMultiSig (name: string): Promise<LogicSig> {
     if (name.endsWith(blsigExt)) { return await loadBinaryLsig(name); }
 
-    const lsigAccount = await getLsig(name, this.algoOp.algodClient); // get lsig from .teal (getting logic part from lsig)
+    const lsig = (await getLsig(name, this.algoOp.algodClient)).lsig; // get lsig from .teal (getting logic part from lsig)
     const msig = await readMsigFromFile(name); // Get decoded Msig object from .msig
-    Object.assign(lsigAccount.lsig.msig = {} as EncodedMultisig, msig);
-    return lsigAccount;
+    Object.assign(lsig.msig = {} as EncodedMultisig, msig);
+    return lsig;
   }
 
   /**
