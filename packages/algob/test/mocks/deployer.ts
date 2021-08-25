@@ -7,6 +7,7 @@ import type {
   ConfirmedTxInfo,
   Deployer,
   FundASCFlags,
+  LogicSig,
   LsigInfo
 } from "../../src/types";
 
@@ -100,7 +101,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  loadMultiSig (name: string): Promise<LogicSigAccount> {
+  loadMultiSig (name: string): Promise<LogicSig> {
     throw new Error("Not implemented");
   }
 
