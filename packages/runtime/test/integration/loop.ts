@@ -53,4 +53,10 @@ describe("TEALv4: Sub routine", function () {
       RUNTIME_ERRORS.TEAL.LABEL_NOT_FOUND
     );
   });
+
+  it("should skip b1 & b2 (continuous labels)", () => {
+    approvalProgramPass = getProgram('continuous-labels.teal');
+    // this code will pass, because at the end we check if counter is incremented 10 times
+    assert.doesNotThrow(() => runtime.addApp(flags, {}, approvalProgramPass, clearProgram));
+  });
 });
