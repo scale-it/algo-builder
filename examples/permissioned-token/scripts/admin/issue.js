@@ -23,7 +23,7 @@ async function issue (deployer, address, amount) {
      * Issuance tx will be rejected if token has been killed by the manager
      */
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: issuer,
       appID: controllerAppInfo.appID,

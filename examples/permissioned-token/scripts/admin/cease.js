@@ -32,7 +32,7 @@ async function cease (deployer, address, amount) {
      * tx 0 - Call to controller stateful smart contract (by ASA.manager)
      * with application arg: 'force_transfer' */
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: owner,
       appID: controllerAppInfo.appID,

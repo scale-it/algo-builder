@@ -29,7 +29,7 @@ async function transfer (deployer, from, toAddr, amount) {
      * so that rules are checked during token transfer.
      */
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: from,
       appID: controllerAppInfo.appID,
@@ -67,7 +67,7 @@ async function transfer (deployer, from, toAddr, amount) {
      * The contract ensures that both accA & accB are whitelisted and asset_receiver does not hold
      * more than 100 tokens. */
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: from,
       appID: permissionsAppInfo.appID,

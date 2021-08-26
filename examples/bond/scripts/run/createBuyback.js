@@ -23,7 +23,7 @@ exports.createBuyback = async function (deployer, managerAcc, n) {
   await fundAccount(deployer, buybackLsig.address());
 
   const buybackTx = {
-    type: types.TransactionType.CallNoOpSSC,
+    type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,
     fromAccount: managerAcc,
     appID: appInfo.appID,

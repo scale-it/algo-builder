@@ -11,7 +11,7 @@ async function run (runtimeEnv, deployer) {
    */
   const appInfo = deployer.getApp('poi-approval.teal', 'poi-clear.teal');
   const setLevelParams = {
-    type: types.TransactionType.CallNoOpSSC,
+    type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,
     fromAccount: creator,
     appID: appInfo.appID,
@@ -33,7 +33,7 @@ async function run (runtimeEnv, deployer) {
 
   /* Use below code to clear the min asset level set
     const clearLevelParams = {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: creator,
       appID: appInfo.appID,

@@ -159,7 +159,7 @@ describe('Crowdfunding Tests', function () {
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     let txGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appID: applicationId,
@@ -188,7 +188,7 @@ describe('Crowdfunding Tests', function () {
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     txGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appID: applicationId,
@@ -224,7 +224,7 @@ describe('Crowdfunding Tests', function () {
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     txGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appID: applicationId,
@@ -250,7 +250,7 @@ describe('Crowdfunding Tests', function () {
     appArgs = [convert.stringToBytes('claim')];
     txGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId,
@@ -330,7 +330,7 @@ describe('Crowdfunding Tests', function () {
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     const txGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId,

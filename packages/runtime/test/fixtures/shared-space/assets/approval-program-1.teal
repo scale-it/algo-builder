@@ -1,0 +1,23 @@
+#pragma version 4
+
+int 0
+txn ApplicationID
+==
+bnz on_creation
+
+int OptIn
+txn OnCompletion
+==
+bnz on_optin
+
+on_creation:
+int 5
+store 1
+int 6
+store 2
+int 1
+return
+
+on_optin:
+int 1
+return

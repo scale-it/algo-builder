@@ -7,7 +7,7 @@ import { checkIndexBound } from "../lib/compare";
 import { DEFAULT_STACK_ELEM } from "../lib/constants";
 import { keyToBytes } from "../lib/parsing";
 import { Stack } from "../lib/stack";
-import { parser } from "../parser/parser";
+import { assertMaxCost, parser } from "../parser/parser";
 import type {
   AccountStoreI, ExecutionMode, Operator, SSCAttributesM,
   StackElem, TEALStack
@@ -21,6 +21,7 @@ export class Interpreter {
    */
   readonly stack: TEALStack;
   tealVersion: number; // LogicSigVersion
+  lineToCost: { [key: number]: number }; // { <lineNo>: <OpCost> } cost of each instruction by line
   gas: number; // total gas cost of TEAL code
   length: number; // total length of 'compiled' TEAL code
   bytecblock: Uint8Array[];
@@ -38,6 +39,7 @@ export class Interpreter {
     this.stack = new Stack<StackElem>();
     this.tealVersion = 1; // LogicSigVersion = 1 by default (if not specified by pragma)
     this.gas = 0; // initial cost
+    this.lineToCost = {};
     this.length = 0; // initial length
     this.bytecblock = [];
     this.intcblock = [];
@@ -218,9 +220,14 @@ export class Interpreter {
     this.instructions = parser(program, mode, this);
     this.mapLabelWithIndexes();
 
+    let dynamicCost = 0;
     while (this.instructionIndex < this.instructions.length) {
       const instruction = this.instructions[this.instructionIndex];
       instruction.execute(this.stack);
+
+      // for teal version >= 4, cost is calculated dynamically at the time of execution
+      dynamicCost += this.lineToCost[instruction.line];
+      if (this.tealVersion >= 4) { assertMaxCost(dynamicCost, mode); }
 
       this.printStack(instruction, debugStack);
       this.instructionIndex++;

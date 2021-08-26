@@ -1,0 +1,30 @@
+#pragma version 4
+
+int 0
+txn ApplicationID
+==
+bnz on_creation
+
+int OptIn
+txn OnCompletion
+==
+bnz on_optin
+
+on_creation:
+// push 1st value from scratch space of 0th transaction
+gload 0 1
+// verify if value is correct
+int 5
+==
+int 0
+// push 2nd value from scratch space of 0th transaction
+gloads 2
+// verify if value is correct
+int 6
+==
+&&
+return
+
+on_optin:
+int 1
+return
