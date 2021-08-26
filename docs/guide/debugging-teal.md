@@ -217,7 +217,7 @@ const escrowAddress = escrowLsig.address();
 
 const txGroup = [
   {
-    type: types.TransactionType.CallNoOpSSC,
+    type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,
     fromAccount: creator,
     appID: appInfo.appID,

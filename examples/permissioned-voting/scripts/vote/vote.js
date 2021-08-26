@@ -41,7 +41,7 @@ async function run (runtimeEnv, deployer) {
   // Atomic Transaction (Stateful Smart Contract call + Asset Transfer)
   const transactions = [
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: alice,
       appID: appInfo.appID,

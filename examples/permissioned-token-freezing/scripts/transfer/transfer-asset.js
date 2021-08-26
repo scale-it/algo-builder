@@ -24,7 +24,7 @@ async function run (runtimeEnv, deployer) {
      * params in the txGroup (eg. sender(tx1) === receiver(tx2) === escrowAddress)
      */
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: creator,
       appID: appInfo.appID,

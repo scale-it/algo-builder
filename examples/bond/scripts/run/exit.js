@@ -45,7 +45,7 @@ exports.exitBuyer = async function (deployer, managerAcc, buyerAccount, n, amoun
     },
     // call to bond-dapp
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: buyerAccount,
       appID: appInfo.appID,

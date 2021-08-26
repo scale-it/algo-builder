@@ -16,7 +16,7 @@ async function kill (deployer) {
   const tesla = deployer.asa.get('tesla');
   const controllerAppInfo = deployer.getApp('controller.py', 'clear_state_program.py');
   const killParams = {
-    type: types.TransactionType.CallNoOpSSC,
+    type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,
     fromAccount: owner,
     appID: controllerAppInfo.appID,
