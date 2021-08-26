@@ -9,9 +9,12 @@ import { Keccak } from 'sha3';
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { compareArray } from "../lib/compare";
-import { ALGORAND_MAX_TX_ARRAY_LEN, AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64, MaxTEALVersion, TxArrFields } from "../lib/constants";
 import {
-  assertLen, assertOnlyDigits, convertToBuffer,
+  AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_INPUT_BYTE_LEN, MAX_OUTPUT_BYTE_LEN,
+  MAX_UINT64, MaxTEALVersion, TxArrFields
+} from "../lib/constants";
+import {
+  assertLen, assertOnlyDigits, bigEndianBytesToBigInt, bigintToBigEndianBytes, convertToBuffer,
   convertToString, getEncoding, parseBinaryStrToBigInt
 } from "../lib/parsing";
 import { Stack } from "../lib/stack";
@@ -2584,6 +2587,8 @@ export class MinBalance extends Op {
   }
 }
 
+/** TEALv4 Ops **/
+
 // push Ith scratch space index of the Tth transaction in the current group
 // push to stack [...stack, bigint/bytes]
 // Pops nothing
@@ -2643,7 +2648,36 @@ export class Gloads extends Gload {
   }
 
   execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
     this.txIndex = Number(this.assertBigInt(stack.pop(), this.line));
     super.execute(stack);
+  }
+}
+
+// A plus B, where A and B are byte-arrays interpreted as big-endian unsigned integers
+// panics on overflow (result > max_uint1024 i.e 128 byte num)
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, []byte]
+export class ByteAdd extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    const byteB = this.assertBytes(stack.pop(), this.line, MAX_INPUT_BYTE_LEN);
+    const byteA = this.assertBytes(stack.pop(), this.line, MAX_INPUT_BYTE_LEN);
+
+    const result = bigEndianBytesToBigInt(byteA) + bigEndianBytesToBigInt(byteB);
+    const resultAsBytes = bigintToBigEndianBytes(result);
+    stack.push(this.assertBytes(resultAsBytes, this.line, MAX_OUTPUT_BYTE_LEN));
   }
 }

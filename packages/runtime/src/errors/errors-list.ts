@@ -244,20 +244,26 @@ by an index that does not exist.`
     title: 'scratch space not found',
     description: `fails maybe because the requested transaction is an ApplicationCall or T < GroupIndex.`
   },
-  ADDR_NOT_FOUND_IN_TXN_ACCOUNT: {
+  BYTES_LEN_EXCEEDED: {
     number: 1036,
+    message: "Byteslice Arithmetic Error: length of input/output bytes(= %len%) exceed max length of %expected%. [error-line: %line%]",
+    title: 'Byteslice Arithmetic Error',
+    description: `length of input/output bytes exceed max length`
+  },
+  ADDR_NOT_FOUND_IN_TXN_ACCOUNT: {
+    number: 1037,
     message: "address %address% not found in Txn.Accounts AND is not equal to Txn.Sender. [error-line: %line%]",
     title: 'Address not found in Txn',
     description: `Address should be present in Txn.Account OR should be Txn.Sender`
   },
   INVALID_APP_REFERENCE: {
-    number: 1037,
+    number: 1038,
     message: "Application Reference %appRef% not found in Transaction(foreignApps/appID). [error-line: %line%]",
     title: 'Invalid APP Reference',
     description: `Invalid APP Reference: Application index not found in Txn`
   },
   INVALID_ASA_REFERENCE: {
-    number: 1038,
+    number: 1039,
     message: "ASA Reference %assetRef% not found in Transaction(foreignAssets/assetID). [error-line: %line%]",
     title: 'Invalid ASA Reference',
     description: `Invalid ASA Reference: Asset index not found in Txn`
