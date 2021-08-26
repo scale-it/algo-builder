@@ -497,7 +497,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 
   it("should throw error if user tries to call deleted app", async () => {
     const execParam: wtypes.AppCallsParam = {
-      type: wtypes.TransactionType.CallNoOpSSC,
+      type: wtypes.TransactionType.CallApp,
       sign: wtypes.SignType.SecretKey,
       fromAccount: bobAcc,
       payFlags: {},

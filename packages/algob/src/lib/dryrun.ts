@@ -73,7 +73,7 @@ export class Tealdbg {
       txn.type === wtypes.TransactionType.DeleteApp ||
       txn.type === wtypes.TransactionType.UpdateApp ||
       txn.type === wtypes.TransactionType.OptInToApp ||
-      txn.type === wtypes.TransactionType.CallNoOpSSC
+      txn.type === wtypes.TransactionType.CallApp
     )) {
       return [];
     }

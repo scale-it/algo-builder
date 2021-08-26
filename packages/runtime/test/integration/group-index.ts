@@ -50,14 +50,14 @@ describe('Current Transaction Tests', function () {
 
     const txGroup: types.ExecParams[] = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId1,
         payFlags: { totalFee: 1000 }
       },
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId2,
@@ -73,14 +73,14 @@ describe('Current Transaction Tests', function () {
 
     const txGroup: types.ExecParams[] = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId2,
         payFlags: { totalFee: 1000 }
       },
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId1,

@@ -14,7 +14,7 @@ async function run (runtimeEnv, deployer) {
   console.log(globalState);
 
   const tx = {
-    type: types.TransactionType.CallNoOpSSC,
+    type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,
     fromAccount: creatorAccount,
     appID: applicationID,

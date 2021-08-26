@@ -47,7 +47,11 @@ export class Pragma extends Op {
       this.version = Number(args[1]);
       interpreter.tealVersion = this.version;
     } else {
-      throw new RuntimeError(RUNTIME_ERRORS.TEAL.PRAGMA_VERSION_ERROR, { got: args.join(' '), line: line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.PRAGMA_VERSION_ERROR, {
+        expected: 'till #4',
+        got: args.join(' '),
+        line: line
+      });
     }
   }
 
@@ -1603,13 +1607,14 @@ export class AppOptedIn extends Op {
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2, this.line);
-    const appID = this.assertBigInt(stack.pop(), this.line);
-    const accountIndex = this.assertBigInt(stack.pop(), this.line);
+    const appRef = this.assertBigInt(stack.pop(), this.line);
+    const accountRef: StackElem = stack.pop(); // index to tx.accounts[] OR an address directly
 
-    const account = this.interpreter.getAccount(accountIndex, this.line);
+    const account = this.interpreter.getAccount(accountRef, this.line);
     const localState = account.appsLocalState;
 
-    const isOptedIn = localState.get(Number(appID));
+    const appID = this.interpreter.getAppIDByReference(Number(appRef), false, this.line, this);
+    const isOptedIn = localState.get(appID);
     if (isOptedIn) {
       stack.push(1n);
     } else {
@@ -1641,9 +1646,9 @@ export class AppLocalGet extends Op {
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2, this.line);
     const key = this.assertBytes(stack.pop(), this.line);
-    const accountIndex = this.assertBigInt(stack.pop(), this.line);
+    const accountRef: StackElem = stack.pop();
 
-    const account = this.interpreter.getAccount(accountIndex, this.line);
+    const account = this.interpreter.getAccount(accountRef, this.line);
     const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
 
     const val = account.getLocalState(appID, key);
@@ -1677,11 +1682,12 @@ export class AppLocalGetEx extends Op {
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 3, this.line);
     const key = this.assertBytes(stack.pop(), this.line);
-    const appID = this.assertBigInt(stack.pop(), this.line);
-    const accountIndex = this.assertBigInt(stack.pop(), this.line);
+    const appRef = this.assertBigInt(stack.pop(), this.line);
+    const accountRef: StackElem = stack.pop();
 
-    const account = this.interpreter.getAccount(accountIndex, this.line);
-    const val = account.getLocalState(Number(appID), key);
+    const appID = this.interpreter.getAppIDByReference(Number(appRef), false, this.line, this);
+    const account = this.interpreter.getAccount(accountRef, this.line);
+    const val = account.getLocalState(appID, key);
     if (val) {
       stack.push(val);
       stack.push(1n);
@@ -1750,18 +1756,12 @@ export class AppGlobalGetEx extends Op {
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2, this.line);
     const key = this.assertBytes(stack.pop(), this.line);
-    let appIndex = this.assertBigInt(stack.pop(), this.line);
+    // appRef could be index to foreign apps array,
+    // or since v4 an application id that appears in Txn.ForeignApps
+    const appRef = this.assertBigInt(stack.pop(), this.line);
 
-    const foreignApps = this.interpreter.runtime.ctx.tx.apfa;
-    let appID;
-    if (appIndex === 0n) {
-      appID = this.interpreter.runtime.ctx.tx.apid; // zero index means current app
-    } else {
-      this.checkIndexBound(Number(--appIndex), foreignApps as number[], this.line);
-      appID = foreignApps ? foreignApps[Number(appIndex)] : undefined;
-    }
-
-    const val = this.interpreter.getGlobalState(appID as number, key, this.line);
+    const appID = this.interpreter.getAppIDByReference(Number(appRef), true, this.line, this);
+    const val = this.interpreter.getGlobalState(appID, key, this.line);
     if (val) {
       stack.push(val);
       stack.push(1n);
@@ -1796,9 +1796,9 @@ export class AppLocalPut extends Op {
     this.assertMinStackLen(stack, 3, this.line);
     const value = stack.pop();
     const key = this.assertBytes(stack.pop(), this.line);
-    const accountIndex = this.assertBigInt(stack.pop(), this.line);
+    const accountRef: StackElem = stack.pop();
 
-    const account = this.interpreter.getAccount(accountIndex, this.line);
+    const account = this.interpreter.getAccount(accountRef, this.line);
     const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
 
     // get updated local state for account
@@ -1860,10 +1860,10 @@ export class AppLocalDel extends Op {
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
     const key = this.assertBytes(stack.pop(), this.line);
-    const accountIndex = this.assertBigInt(stack.pop(), this.line);
+    const accountRef: StackElem = stack.pop();
 
     const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
-    const account = this.interpreter.getAccount(accountIndex, this.line);
+    const account = this.interpreter.getAccount(accountRef, this.line);
 
     const localState = account.appsLocalState.get(appID);
     if (localState) {
@@ -1934,8 +1934,8 @@ export class Balance extends Op {
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
-    const accountIndex = this.assertBigInt(stack.pop(), this.line);
-    const acc = this.interpreter.getAccount(accountIndex, this.line);
+    const accountRef: StackElem = stack.pop();
+    const acc = this.interpreter.getAccount(accountRef, this.line);
 
     stack.push(BigInt(acc.balance()));
   }
@@ -1968,11 +1968,12 @@ export class GetAssetHolding extends Op {
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2, this.line);
-    const assetId = this.assertBigInt(stack.pop(), this.line);
-    const accountIndex = this.assertBigInt(stack.pop(), this.line);
+    const assetRef = this.assertBigInt(stack.pop(), this.line);
+    const accountRef: StackElem = stack.pop();
 
-    const account = this.interpreter.getAccount(accountIndex, this.line);
-    const assetInfo = account.assets.get(Number(assetId));
+    const account = this.interpreter.getAccount(accountRef, this.line);
+    const assetID = this.interpreter.getAssetIDByReference(Number(assetRef), false, this.line, this);
+    const assetInfo = account.assets.get(assetID);
     if (assetInfo === undefined) {
       stack.push(0n);
       stack.push(0n);
@@ -2026,18 +2027,9 @@ export class GetAssetDef extends Op {
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
-    const foreignAssetsIdx = this.assertBigInt(stack.pop(), this.line);
-    this.checkIndexBound(
-      Number(foreignAssetsIdx),
-      this.interpreter.runtime.ctx.tx.apas as number[], this.line);
-
-    let assetId;
-    if (this.interpreter.runtime.ctx.tx.apas) {
-      assetId = this.interpreter.runtime.ctx.tx.apas[Number(foreignAssetsIdx)];
-    } else {
-      throw new Error("foreign asset id not found");
-    }
-    const AssetDefinition = this.interpreter.getAssetDef(assetId);
+    const assetRef = this.assertBigInt(stack.pop(), this.line);
+    const assetID = this.interpreter.getAssetIDByReference(Number(assetRef), true, this.line, this);
+    const AssetDefinition = this.interpreter.getAssetDef(assetID);
     let def: string;
 
     if (AssetDefinition === undefined) {
@@ -2588,8 +2580,8 @@ export class MinBalance extends Op {
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
-    const accountIndex = this.assertBigInt(stack.pop(), this.line);
-    const acc = this.interpreter.getAccount(accountIndex, this.line);
+    const accountRef: StackElem = stack.pop();
+    const acc = this.interpreter.getAccount(accountRef, this.line);
 
     stack.push(BigInt(acc.minBalance));
   }

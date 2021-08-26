@@ -132,7 +132,7 @@ by an index that does not exist.`
   },
   PRAGMA_VERSION_ERROR: {
     number: 1017,
-    message: "Pragma version Error - Expected: version, got: %got%, Line: %line%",
+    message: "Pragma version Error - Expected version: %expected%, got: %got%, Line: %line%",
     title: PARSE_ERROR,
     description: ``
   },
@@ -249,6 +249,24 @@ by an index that does not exist.`
     message: "Byteslice Arithmetic Error: length of input/output bytes(= %len%) exceed max length of %expected%. [error-line: %line%]",
     title: 'Byteslice Arithmetic Error',
     description: `length of input/output bytes exceed max length`
+  },
+  ADDR_NOT_FOUND_IN_TXN_ACCOUNT: {
+    number: 1037,
+    message: "address %address% not found in Txn.Accounts AND is not equal to Txn.Sender. [error-line: %line%]",
+    title: 'Address not found in Txn',
+    description: `Address should be present in Txn.Account OR should be Txn.Sender`
+  },
+  INVALID_APP_REFERENCE: {
+    number: 1038,
+    message: "Application Reference %appRef% not found in Transaction(foreignApps/appID). [error-line: %line%]",
+    title: 'Invalid APP Reference',
+    description: `Invalid APP Reference: Application index not found in Txn`
+  },
+  INVALID_ASA_REFERENCE: {
+    number: 1039,
+    message: "ASA Reference %assetRef% not found in Transaction(foreignAssets/assetID). [error-line: %line%]",
+    title: 'Invalid ASA Reference',
+    description: `Invalid ASA Reference: Asset index not found in Txn`
   }
 };
 
@@ -324,6 +342,24 @@ export const runtimeGeneralErrors = {
     message: "File name \"%file%\" does not exist in directory \"%directory%\"",
     title: "File \"%file%\" does not exist in directory \"%directory%\"",
     description: `File "%file%" does not exist in directory "%directory%"`
+  },
+  INVALID_TX_ACCOUNTS_LEN: {
+    number: 1312,
+    message: "tx.Accounts too long, max number of accounts is %max%, got: %len%",
+    title: "Transaction.Accounts exceeds max length",
+    description: `Transaction.Accounts cannot exceed max length of %max%`
+  },
+  INVALID_APP_ARGS_LEN: {
+    number: 1313,
+    message: "tx.AppArgs too long, max number of application args is %max%, got: %len%",
+    title: "Transaction.ApplicationArgs exceeds max length",
+    description: `Transaction.ApplicationArgs cannot exceed max length of %max%`
+  },
+  MAX_REFERENCES_EXCEEDED: {
+    number: 1314,
+    message: "tx has too many references, max is %max%, got: %len%",
+    title: "Transaction references(assets + apps + accounts) exceeds max length of %max%",
+    description: `Transaction references cannot exceed max length of %max%`
   }
 };
 

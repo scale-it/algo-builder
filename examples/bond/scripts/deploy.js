@@ -80,7 +80,7 @@ async function run (runtimeEnv, deployer) {
   ];
 
   const appCallParams = {
-    type: types.TransactionType.CallNoOpSSC,
+    type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,
     fromAccount: managerAcc,
     appID: bondAppInfo.appID,
