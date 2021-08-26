@@ -1394,7 +1394,7 @@ export class Label extends Op {
   execute (stack: TEALStack): void {}
 }
 
-// branch unconditionally to label
+// branch unconditionally to label - Tealv <= 3
 // push to stack [...stack]
 export class Branch extends Op {
   readonly label: string;
@@ -1416,15 +1416,20 @@ export class Branch extends Op {
   }
 
   execute (stack: TEALStack): void {
-    if (this.interpreter.tealVersion <= 3) {
-      this.interpreter.jumpForward(this.label, this.line);
-    } else {
-      this.interpreter.jumpToLabel(this.label, this.line);
-    }
+    this.interpreter.jumpForward(this.label, this.line);
   }
 }
 
-// branch conditionally if top of stack is zero
+// branch unconditionally to label - TEALv4
+// can also jump backward
+// push to stack [...stack]
+export class Branchv4 extends Branch {
+  execute (stack: TEALStack): void {
+    this.interpreter.jumpToLabel(this.label, this.line);
+  }
+}
+
+// branch conditionally if top of stack is zero - Teal version <= 3
 // push to stack [...stack]
 export class BranchIfZero extends Op {
   readonly label: string;
@@ -1450,11 +1455,21 @@ export class BranchIfZero extends Op {
     const last = this.assertBigInt(stack.pop(), this.line);
 
     if (last === 0n) {
-      if (this.interpreter.tealVersion <= 3) {
-        this.interpreter.jumpForward(this.label, this.line);
-      } else {
-        this.interpreter.jumpToLabel(this.label, this.line);
-      }
+      this.interpreter.jumpForward(this.label, this.line);
+    }
+  }
+}
+
+// branch conditionally if top of stack is zero - Tealv4
+// can jump forward also
+// push to stack [...stack]
+export class BranchIfZerov4 extends BranchIfZero {
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const last = this.assertBigInt(stack.pop(), this.line);
+
+    if (last === 0n) {
+      this.interpreter.jumpToLabel(this.label, this.line);
     }
   }
 }
@@ -1485,11 +1500,21 @@ export class BranchIfNotZero extends Op {
     const last = this.assertBigInt(stack.pop(), this.line);
 
     if (last !== 0n) {
-      if (this.interpreter.tealVersion <= 3) {
-        this.interpreter.jumpForward(this.label, this.line);
-      } else {
-        this.interpreter.jumpToLabel(this.label, this.line);
-      }
+      this.interpreter.jumpForward(this.label, this.line);
+    }
+  }
+}
+
+// branch conditionally if top of stack is non zero - Tealv4
+// can jump forward as well
+// push to stack [...stack]
+export class BranchIfNotZerov4 extends BranchIfNotZero {
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const last = this.assertBigInt(stack.pop(), this.line);
+
+    if (last !== 0n) {
+      this.interpreter.jumpToLabel(this.label, this.line);
     }
   }
 }
