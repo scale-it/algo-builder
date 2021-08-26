@@ -51,7 +51,7 @@ async function setupPermissionsApp (runtimeEnv, deployer) {
     ];
 
     await executeTransaction(deployer, {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: owner, // asa manager account
       appID: controllerappID,

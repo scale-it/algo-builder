@@ -26,7 +26,7 @@ async function run (runtimeEnv, deployer) {
 
   const txGroup = [
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: donorAccount,
       appID: appInfo.appID,

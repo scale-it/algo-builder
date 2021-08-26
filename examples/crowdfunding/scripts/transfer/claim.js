@@ -21,7 +21,7 @@ async function run (runtimeEnv, deployer) {
   // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
   const txGroup = [
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: creatorAccount,
       appID: appInfo.appID,

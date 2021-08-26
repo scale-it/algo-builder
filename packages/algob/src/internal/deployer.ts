@@ -381,7 +381,7 @@ class DeployerBasicMode {
       case wtypes.TransactionType.CloseApp:
       case wtypes.TransactionType.OptInToApp:
       case wtypes.TransactionType.UpdateApp:
-      case wtypes.TransactionType.CallNoOpSSC: {
+      case wtypes.TransactionType.CallApp: {
         this.assertAppExist(txn.appID);
         break;
       }
