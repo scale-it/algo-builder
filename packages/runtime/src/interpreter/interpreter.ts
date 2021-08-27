@@ -15,19 +15,25 @@ import {
 import { Op } from "./opcode";
 import { Label } from "./opcode-list";
 
+/**
+ * Interpreter parses and executes a TEAL code. Each transaction is using a new instance of
+ * interpreter and doesn't share the interpreter state. When executing the transaction
+ * we create a Context (`ctx`) and pass it to the interpreter. It encapsulates
+ * runtime state and the transaction group state (eg shared scratch space).
+ * Interpreter must not modify the `runtime` - the latter will be updated during the context
+ * commit phase once all transactions in the groups succeed.
+ */
 export class Interpreter {
-  /**
-   * Note: Interpreter operates on `ctx`, it doesn't operate on `store`.
-   * All the functions query or update only a state copy from the interpreter, not the `runtime.store`.
-   */
   readonly stack: TEALStack;
   tealVersion: number; // LogicSigVersion
   lineToCost: { [key: number]: number }; // { <lineNo>: <OpCost> } cost of each instruction by line
   gas: number; // total gas cost of TEAL code
   length: number; // total length of 'compiled' TEAL code
+  // local stores for a transaction.
   bytecblock: Uint8Array[];
   intcblock: BigInt[];
   scratch: StackElem[];
+  // TEAL parsed code - instantiated during the execution phase.
   instructions: Operator[];
   instructionIndex: number;
   runtime: Runtime;
@@ -35,11 +41,14 @@ export class Interpreter {
   constructor () {
     this.stack = new Stack<StackElem>();
     this.tealVersion = 1; // LogicSigVersion = 1 by default (if not specified by pragma)
-    this.gas = 0; // initial cost
+    // total cost computed during code parsing, used in TEAL <= v3
+    this.gas = 0;
+    // gas cost of each line used in TEAL >=4 (we accumulate gas when executing the code).
     this.lineToCost = {};
-    this.length = 0; // initial length
+    this.length = 0; // code length
     this.bytecblock = [];
     this.intcblock = [];
+    // scratch spece used
     this.scratch = new Array(256).fill(DEFAULT_STACK_ELEM);
     this.instructions = [];
     this.instructionIndex = 0; // set instruction index to zero
