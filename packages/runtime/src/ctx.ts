@@ -34,6 +34,8 @@ export class Ctx implements Context {
     this.args = args;
     this.runtime = runtime;
     this.debugStack = debugStack;
+    // Mapping from the tx index number to the scratch space.
+    // Scratch space is a list of elements.
     this.sharedScratchSpace = new Map<number, StackElem[]>();
   }
 

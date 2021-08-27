@@ -10,10 +10,17 @@
 * TEALv4 support in `@algo-builder/runtime`:
     * Added shared space between contracts (opcodes `gload` and `gloads`)
     * Dynamic Opcode Cost Evaluation
+    * Transaction Array changes
+        a) array length assertions for `tx.ForeignAssets`, `tx.Accounts`, `tx.ForeignApps`,
+        b) User can pass id/offset for app/asset in for array references. For `tx.Accounts` you can pass address directly in teal code.
 
 
 ### Bug Fixes
 * Fixed `yarn add @algo-builder/web` (was failing because of missing dependency `zod` in packages/web).
+* Fix metadatahash type
+
+### API Breaking
+* Migrate from `LogicSig` to `LogicSigAccount`(Note: Loading lsig from file uses `LogicSig`, because `goal` stores it in LogicSig type format)
 
 ### API breaking
 * Rename `CallNoOpSSC` to `CallApp`.

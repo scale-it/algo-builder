@@ -1,12 +1,15 @@
 import { getPathFromDirRecursive } from "@algo-builder/runtime";
-import type { Account, EncodedMultisig, LogicSig, MultisigMetadata, Transaction } from "algosdk";
 import {
-  appendSignMultisigTransaction, decodeAddress, decodeSignedTransaction,
-  decodeUnsignedTransaction, encodeAddress, logicSigFromByte, signMultisigTransaction
+  Account, appendSignMultisigTransaction, decodeAddress,
+  decodeSignedTransaction, decodeUnsignedTransaction,
+  encodeAddress, EncodedMultisig,
+  logicSigFromByte, MultisigMetadata, signMultisigTransaction,
+  Transaction
 } from "algosdk";
 import fs from "fs";
 
 import { ASSETS_DIR } from "../internal/core/project-structure";
+import { LogicSig } from "../types";
 import { isSignedTx } from "./tx";
 
 export const blsigExt = ".blsig";

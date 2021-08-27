@@ -82,12 +82,20 @@ export class Op {
    * asserts if given variable type is bytes
    * @param b variable
    * @param line line number in TEAL file
+   * @param maxlen maximum allowed length of bytes
    */
-  assertBytes (b: unknown, line: number): Uint8Array {
+  assertBytes (b: unknown, line: number, maxlen?: number): Uint8Array {
     if (typeof b === 'undefined' || !(b instanceof Uint8Array)) {
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.INVALID_TYPE, {
         expected: "byte[]",
         actual: typeof b,
+        line: line
+      });
+    }
+    if (maxlen !== undefined && b.length > maxlen) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.BYTES_LEN_EXCEEDED, {
+        len: b.length,
+        expected: maxlen,
         line: line
       });
     }

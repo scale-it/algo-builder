@@ -29,14 +29,14 @@ describe("Logic Signature", () => {
     const lsig = runtime.getLogicSig(getProgram(programName), []);
 
     lsig.sign(john.account.sk);
-    assert.isTrue(lsig.verify(johnPk));
+    assert.isTrue(lsig.lsig.verify(johnPk));
   });
 
   it("should fail to verify delegated signature signed by someone else", () => {
     const lsig = runtime.getLogicSig(getProgram(programName), []);
 
     lsig.sign(bob.account.sk);
-    const result = lsig.verify(johnPk);
+    const result = lsig.lsig.verify(johnPk);
 
     assert.equal(result, false);
   });
@@ -44,10 +44,10 @@ describe("Logic Signature", () => {
   it("should handle contract lsig (escrow account) verification correctly", () => {
     const lsig = runtime.getLogicSig(getProgram(programName), []);
 
-    let result = lsig.verify(decodeAddress(lsig.address()).publicKey);
+    let result = lsig.lsig.verify(decodeAddress(lsig.address()).publicKey);
     assert.equal(result, true);
 
-    result = lsig.verify(johnPk);
+    result = lsig.lsig.verify(johnPk);
     assert.equal(result, false);
   });
 
@@ -95,31 +95,31 @@ describe("Multi-Signature Test", () => {
   it("should verify if threshold is verified and sender is multisigAddr", () => {
     const lsig = runtime.getLogicSig(getProgram(multiSigProg), []);
     // lsig signed by alice
-    lsig.sign(alice.account.sk, mparams);
+    lsig.signMultisig(mparams, alice.account.sk);
     // lsig signed again (threshold = 2) by john
     lsig.appendToMultisig(john.account.sk);
 
-    const result = lsig.verify(decodeAddress(multsigaddr).publicKey);
+    const result = lsig.lsig.verify(decodeAddress(multsigaddr).publicKey);
     assert.equal(result, true);
   });
 
   it("should not verify if threshold is achieved but sender is not multisigAddr", () => {
     const lsig = runtime.getLogicSig(getProgram(multiSigProg), []);
     // lsig signed by alice
-    lsig.sign(alice.account.sk, mparams);
+    lsig.signMultisig(mparams, alice.account.sk);
     // lsig signed again (threshold = 2) by john
     lsig.appendToMultisig(john.account.sk);
 
-    const result = lsig.verify(bobPk);
+    const result = lsig.lsig.verify(bobPk);
     assert.equal(result, false);
   });
 
   it("should not verify if threshold is not achieved but sender is multisigAddr", () => {
     const lsig = runtime.getLogicSig(getProgram(multiSigProg), []);
     // lsig signed by alice
-    lsig.sign(alice.account.sk, mparams);
+    lsig.signMultisig(mparams, alice.account.sk);
 
-    const result = lsig.verify(decodeAddress(multsigaddr).publicKey);
+    const result = lsig.lsig.verify(decodeAddress(multsigaddr).publicKey);
     assert.equal(result, false);
   });
 });

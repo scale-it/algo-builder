@@ -25,9 +25,19 @@ export const LogicSigMaxCost = 20000;
 export const MaxAppProgramCost = 700;
 export const LogicSigMaxSize = 1000;
 export const MaxAppProgramLen = 1024;
+export const ALGORAND_MAX_APP_ARGS_LEN = 16;
+export const ALGORAND_MAX_TX_ACCOUNTS_LEN = 4;
+// the assets and application arrays combined and totaled with the accounts array can not exceed 8
+export const ALGORAND_MAX_TX_ARRAY_LEN = 8;
 
 export const MAX_ALGORAND_ACCOUNT_ASSETS = 1000;
 export const MAX_ALGORAND_ACCOUNT_APPS = 10;
+
+// for byteslice arithmetic ops, inputs are limited to 64 bytes,
+// but ouput can be upto 128 bytes (eg. when using b+ OR b*)
+// https://github.com/algorand/go-algorand/blob/bd5a00092c8a63dba8314b97851e46ff247cf7c1/data/transactions/logic/eval.go#L1302
+export const MAX_INPUT_BYTE_LEN = 64;
+export const MAX_OUTPUT_BYTE_LEN = 128;
 
 const zeroAddress = new Uint8Array(32);
 const zeroUint64 = 0n;
