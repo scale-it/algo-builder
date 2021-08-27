@@ -70,6 +70,13 @@ describe("TEALv4: Sub routine", function () {
 
     assert.equal(result, 8n);
 
+    // 8th fibonacci
+    flags.appArgs = ['int:8'];
+    appID = runtime.addApp(flags, {}, fibProg, clearProgram);
+    result = runtime.getGlobalState(appID, 'result');
+
+    assert.equal(result, 21n);
+
     // 1st fibonacci
     flags.appArgs = ['int:1'];
     appID = runtime.addApp(flags, {}, fibProg, clearProgram);
