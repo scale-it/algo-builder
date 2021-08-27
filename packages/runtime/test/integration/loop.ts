@@ -7,7 +7,7 @@ import { getProgram } from "../helpers/files";
 import { useFixture } from "../helpers/integration";
 import { expectRuntimeError } from "../helpers/runtime-errors";
 
-describe("TEALv4: Sub routine", function () {
+describe("TEALv4: Loops", function () {
   useFixture("loop");
   const john = new AccountStore(10e6);
 

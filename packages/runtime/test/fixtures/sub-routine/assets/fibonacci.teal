@@ -1,0 +1,48 @@
+#pragma version 4
+// This program calculates fibonacci number recursively
+
+b main
+
+fibo:
+// check if nth number is [0,1]
+dup
+int 1
+<=
+bnz finish
+
+// push (n - 1) into stack and call subroutine
+dup
+int 1
+-
+callsub fibo
+
+// push (n - 2) into stack and call subroutine
+int 2
+-
+callsub fibo
+retsub
+
+// base condition
+finish:
+load 0
+int 1
++
+store 0
+pop
+retsub
+
+main:
+// load nth value in stack
+txn ApplicationArgs 0
+btoi
+
+int 1
+-
+
+callsub fibo
+// store Fibonacci number
+byte "result"
+load 0
+app_global_put
+int 1
+return

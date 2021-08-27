@@ -29,7 +29,8 @@ describe("TEALv4: Sub routine", function () {
       globalBytes: 1,
       globalInts: 1,
       localBytes: 1,
-      localInts: 1
+      localInts: 1,
+      appArgs: ['int:5']
     };
   });
 
@@ -51,6 +52,38 @@ describe("TEALv4: Sub routine", function () {
     expectRuntimeError(
       () => runtime.addApp(flags, {}, approvalProgramFail1, clearProgram),
       RUNTIME_ERRORS.TEAL.CALL_STACK_EMPTY
+    );
+  });
+
+  it("should calculate correct fibonacci number", () => {
+    const fibProg = getProgram('fibonacci.teal');
+    let appID = runtime.addApp(flags, {}, fibProg, clearProgram);
+
+    // 5th fibonacci
+    let result = runtime.getGlobalState(appID, 'result');
+    assert.equal(result, 5n);
+
+    // 6th fibonacci
+    flags.appArgs = ['int:6'];
+    appID = runtime.addApp(flags, {}, fibProg, clearProgram);
+    result = runtime.getGlobalState(appID, 'result');
+
+    assert.equal(result, 8n);
+
+    // 1st fibonacci
+    flags.appArgs = ['int:1'];
+    appID = runtime.addApp(flags, {}, fibProg, clearProgram);
+    result = runtime.getGlobalState(appID, 'result');
+
+    assert.equal(result, 1n);
+  });
+
+  it("should throw cost exceed error", () => {
+    flags.appArgs = ['int:9'];
+    const fibProg = getProgram('fibonacci.teal');
+    expectRuntimeError(
+      () => runtime.addApp(flags, {}, fibProg, clearProgram),
+      RUNTIME_ERRORS.TEAL.MAX_COST_EXCEEDED
     );
   });
 });
