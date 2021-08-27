@@ -267,6 +267,12 @@ by an index that does not exist.`
     message: "ASA Reference %assetRef% not found in Transaction(foreignAssets/assetID). [error-line: %line%]",
     title: 'Invalid ASA Reference',
     description: `Invalid ASA Reference: Asset index not found in Txn`
+  },
+  CALL_STACK_EMPTY: {
+    number: 1037,
+    message: "There is no callsub before retsub, call stack is empty. [error-line: %line%]",
+    title: 'call stack error',
+    description: `There is no callsub before retsub, call stack is empty`
   }
 };
 

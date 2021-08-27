@@ -5,12 +5,14 @@ import {
   Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx,
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
-  BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
-  Byte, ByteAdd, Bytec, Bytecblock, Concat, Dig, Div, Dup, Dup2, Ed25519verify,
+  BitwiseXor, Branch, BranchIfNotZero, BranchIfNotZerov4, BranchIfZero, BranchIfZerov4, Branchv4,
+  Btoi, Byte, ByteAdd, Bytec, Bytecblock, Callsub,
+  Concat, Dig, Div, Dup, Dup2, Ed25519verify,
   EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global, GreaterThan,
   GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Intcblock, Itob,
   Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, MinBalance, Mod,
-  Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, Select, SetBit, SetByte, Sha256,
+  Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Retsub,
+  Return, Select, SetBit, SetByte, Sha256,
   Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../interpreter/opcode-list";
 import { LogicSigMaxCost, LogicSigMaxSize, MaxAppProgramCost, MaxAppProgramLen, OpGasCost } from "../lib/constants";
@@ -159,6 +161,12 @@ opCodeMap[4] = {
   gload: Gload,
   gloads: Gloads,
 
+  callsub: Callsub,
+  retsub: Retsub,
+
+  b: Branchv4,
+  bnz: BranchIfNotZerov4,
+  bz: BranchIfZerov4,
   // byteslice arithmetic ops
   'b+': ByteAdd
 };
@@ -170,7 +178,7 @@ const interpreterReqList = new Set([
   "balance", "asset_holding_get", "asset_params_get", "app_opted_in",
   "app_local_get", "app_local_get_ex", "app_global_get", "app_global_get_ex",
   "app_local_put", "app_global_put", "app_local_del", "app_global_del",
-  "gtxns", "gtxnsa", "min_balance", "gload", "gloads"
+  "gtxns", "gtxnsa", "min_balance", "gload", "gloads", "callsub", "retsub"
 ]);
 
 /**
