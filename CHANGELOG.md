@@ -12,6 +12,10 @@
 
 ### Bug Fixes
 * Fixed `yarn add @algo-builder/web` (was failing because of missing dependency `zod` in packages/web).
+* Fix metadatahash type
+
+### API Breaking
+* Migrate from `LogicSig` to `LogicSigAccount`(Note: Loading lsig from file uses `LogicSig`, because `goal` stores it in LogicSig type format)
 
 ### API breaking
 * Rename `CallNoOpSSC` to `CallApp`.

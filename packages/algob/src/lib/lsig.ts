@@ -1,7 +1,6 @@
 /* eslint @typescript-eslint/no-var-requires: "off" */
 import { types as rtypes } from "@algo-builder/runtime";
-import type { MultisigMetadata } from "algosdk";
-import algosdk, { LogicSig } from "algosdk";
+import { Algodv2, LogicSigAccount, MultisigMetadata } from "algosdk";
 
 import type { ASCCache, SCParams } from "../types";
 import { CompileOp } from "./compile";
@@ -14,24 +13,24 @@ import { CompileOp } from "./compile";
  */
 export async function getLsig (
   name: string,
-  algodClient: algosdk.Algodv2,
+  algodClient: Algodv2,
   scTmplParams?: SCParams):
-  Promise<LogicSig> {
+  Promise<LogicSigAccount> {
   const compileOp = new CompileOp(algodClient);
   const result: ASCCache = await compileOp.ensureCompiled(name, false, scTmplParams);
   const program = result.base64ToBytes;
-  const lsig = algosdk.makeLogicSig(program, []);
+  const lsigAccount = new LogicSigAccount(program, []);
   // below line saves data in cp is {tag: <value>} which we need, otherwise it'll save as
   // { type: 'buffer', data: <value> } and throws error upon running examples
-  if (lsig.tag) { lsig.tag = new Uint8Array(lsig.tag) as Buffer; }
-  return lsig;
+  if (lsigAccount.lsig.tag) { lsigAccount.lsig.tag = new Uint8Array(lsigAccount.lsig.tag) as Buffer; }
+  return lsigAccount;
 }
 
 /**
  * Create and return a dummy logic signature
  */
-export function getDummyLsig (): LogicSig {
-  return algosdk.makeLogicSig(new Uint8Array(56), []);
+export function getDummyLsig (): LogicSigAccount {
+  return new LogicSigAccount(new Uint8Array(56), []);
 }
 
 /**
@@ -43,15 +42,15 @@ export function getDummyLsig (): LogicSig {
  * @param mparams: passed when signing a new multisig
  * @returns multi signed logic signature (with appended signature using signer's sk)
  */
-export function signLogicSigMultiSig (lsig: LogicSig, signer: rtypes.Account,
-  mparams?: MultisigMetadata): LogicSig {
-  if (lsig.msig === undefined) { // if multisig not found, create new msig
+export function signLogicSigMultiSig (lsigAccount: LogicSigAccount, signer: rtypes.Account,
+  mparams?: MultisigMetadata): LogicSigAccount {
+  if (lsigAccount.lsig.msig === undefined) { // if multisig not found, create new msig
     if (mparams === undefined) {
       throw new Error('MultiSig Metadata is undefined, which is required for single sign multisig');
     }
-    lsig.sign(signer.sk, mparams);
+    lsigAccount.signMultisig(mparams, signer.sk);
   } else {
-    lsig.appendToMultisig(signer.sk); // else append signature to msig
+    lsigAccount.appendToMultisig(signer.sk); // else append signature to msig
   }
-  return lsig;
+  return lsigAccount;
 }
