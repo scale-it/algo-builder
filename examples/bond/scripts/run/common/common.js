@@ -1,7 +1,8 @@
 const {
-  executeTransaction
+  executeTransaction, readGlobalStateSSC
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
+const { accounts } = require('./accounts');
 
 const issuePrice = 1000;
 const couponValue = 20;
@@ -117,6 +118,42 @@ function buyTx (buyer, issuerLsig, amount, algoAmount, appID, bondID) {
       appArgs: ['str:buy']
     }
   ];
+}
+
+/**
+ * Returns buy transaction for algorand node
+ * @param deployer deployer object
+ * @param buyer buyer account
+ * @param issuerLsig Bond issuer logic signature
+ * @param algoAmount amount of Algo to pay for the bonds
+ * @param appID Bond application index
+ * @param bondID Bond ASA index
+ */
+async function buyTxNode (deployer, buyer, issuerLsig, algoAmount, appID, bondID) {
+  let bondPrice;
+  const account = await accounts(deployer);
+  const globalState = await readGlobalStateSSC(deployer, account.manager.addr, appID);
+  for (const g of globalState) {
+    const key = Buffer.from(g.key, 'base64').toString();
+    if (key === 'issue_price') {
+      bondPrice = g.value.uint;
+    }
+  }
+  return buyTx(buyer, issuerLsig, algoAmount / bondPrice, algoAmount, appID, bondID);
+}
+
+/**
+ * Returns buy transaction for runtime
+ * @param runtime runtime object
+ * @param buyer buyer account
+ * @param issuerLsig Bond issuer logic signature
+ * @param algoAmount amount of Algo to pay for the bonds
+ * @param appID Bond application index
+ * @param bondID Bond ASA index
+ */
+function buyTxRuntime (runtime, buyer, issuerLsig, algoAmount, appID, bondID) {
+  const bondPrice = Number(runtime.getGlobalState(appID, 'issue_price'));
+  return buyTx(buyer, issuerLsig, algoAmount / bondPrice, algoAmount, appID, bondID);
 }
 
 /**
@@ -291,5 +328,7 @@ module.exports = {
   buyTx,
   issueTx,
   createDexTx,
-  redeemCouponTx
+  redeemCouponTx,
+  buyTxNode,
+  buyTxRuntime
 };
