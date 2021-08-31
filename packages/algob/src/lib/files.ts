@@ -43,7 +43,7 @@ export function loadEncodedTxFromFile (fileName: string): Uint8Array | undefined
     const p = getPathFromDirRecursive(ASSETS_DIR, fileName) as string;
     const buffer = fs.readFileSync(p);
     return Uint8Array.from(buffer);
-  } catch (e) {
+  } catch (e: any) {
     if (e?.errno === -2) return undefined; // handling a not existing file
     throw e;
   }

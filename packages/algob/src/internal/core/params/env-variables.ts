@@ -47,7 +47,7 @@ export function getEnvRuntimeArgs (
     if (rawValue !== undefined) {
       try {
         envArgs[paramName] = definition.type.parse(paramName, rawValue);
-      } catch (error) {
+      } catch (error: any) {
         throw new BuilderError(
           ERRORS.ARGUMENTS.INVALID_ENV_VAR_VALUE,
           {

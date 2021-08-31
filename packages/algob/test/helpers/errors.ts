@@ -11,7 +11,7 @@ export async function expectErrorAsync (
   const notRegexpMatch = new AssertionError(message);
   try {
     await f();
-  } catch (err) {
+  } catch (err: any) {
     if (matchMessage === undefined) {
       return;
     }
@@ -42,7 +42,7 @@ export function expectBuilderError (
     if (returnValue instanceof Promise) {
       throw new Error("Please use expectBuilderErrorAsync() when working with async code");
     }
-  } catch (error) {
+  } catch (error: any) {
     assert.instanceOf(error, BuilderError, errorMessage);
     assert.equal(error.number, errorDescriptor.number, errorMessage);
     assert.notMatch(
@@ -87,7 +87,7 @@ export async function expectBuilderErrorAsync (
 
   try {
     await f();
-  } catch (error) {
+  } catch (error: any) {
     assert.instanceOf(error, BuilderError);
     assert.equal(error.number, errorDescriptor.number);
     assert.notMatch(

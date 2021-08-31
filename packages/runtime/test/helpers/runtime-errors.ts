@@ -26,7 +26,7 @@ export function expectRuntimeError (
 ): void {
   try {
     f();
-  } catch (error) {
+  } catch (error: any) {
     assert.instanceOf(error, RuntimeError, errorMessage);
     assert.equal(error.number, errorDescriptor.number, errorMessage);
     assert.notMatch(
@@ -71,7 +71,7 @@ export async function expectRuntimeErrorAsync (
 
   try {
     await f();
-  } catch (error) {
+  } catch (error: any) {
     assert.instanceOf(error, RuntimeError);
     assert.equal(error.number, errorDescriptor.number);
     assert.notMatch(

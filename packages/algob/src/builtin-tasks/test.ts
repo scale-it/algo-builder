@@ -24,7 +24,7 @@ async function runTests (config: Config): Promise<void> {
     await new Promise<number>((resolve) => {
       mocha.run(resolve);
     });
-  } catch (error) {
+  } catch (error: any) {
     console.log(error.message);
   };
 }

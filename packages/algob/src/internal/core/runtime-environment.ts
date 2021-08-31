@@ -220,7 +220,7 @@ export class Environment implements RuntimeEnv {
           if (resolvedArgumentValue !== undefined) {
             values[paramName] = resolvedArgumentValue;
           }
-        } catch (error) {
+        } catch (error: any) {
           errors.push(error);
         }
         return { errors, values };

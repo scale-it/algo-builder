@@ -80,7 +80,7 @@ export class CompileOp {
     try {
       const p = path.join(CACHE_DIR, filename + ".yaml");
       return YAML.parse(await fs.promises.readFile(p, 'utf8')) as ASCCache;
-    } catch (e) {
+    } catch (e: any) {
       if (e?.errno === -2) { return undefined; } // handling a not existing file
       throw e;
     }
@@ -102,7 +102,7 @@ export class CompileOp {
         // compiled base64 converted into bytes
         base64ToBytes: new Uint8Array(Buffer.from(co.result, "base64"))
       };
-    } catch (e) {
+    } catch (e: any) {
       throw parseAlgorandError(e, { filename: filename });
     }
   }
@@ -205,7 +205,7 @@ export class PyCompileOp {
     try {
       const p = path.join(CACHE_DIR, filename + ".yaml");
       return YAML.parse(await fs.promises.readFile(p, 'utf8')) as PyASCCache;
-    } catch (e) {
+    } catch (e: any) {
       if (e?.errno === -2) { return undefined; } // handling a not existing file
       throw e;
     }

@@ -48,7 +48,7 @@ export async function readMsigFromFile (filename: string): Promise<EncodedMultis
     const p = getPathFromDirRecursive(ASSETS_DIR, filename) as string;
     const msig = fs.readFileSync(p, 'utf8').split("LogicSig: ")[1];
     return await decodeMsigObj(msig);
-  } catch (e) {
+  } catch (e: any) {
     if (e?.errno === -2) return undefined; // handling a not existing file
     throw e;
   }
@@ -67,7 +67,7 @@ export async function readBinaryMultiSig (filename: string): Promise<string | un
   try {
     const p = getPathFromDirRecursive(ASSETS_DIR, filename) as string;
     return fs.readFileSync(p, 'base64');
-  } catch (e) {
+  } catch (e: any) {
     if (e?.errno === -2) return undefined; // handling a not existing file
     throw e;
   }
