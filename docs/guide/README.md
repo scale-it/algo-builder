@@ -56,7 +56,10 @@ yarn build
 cd packages/algob
 yarn link
 ```
-Finally, make sure your `yarn global bin` directory is in your `$PATH`.
+
+#### Setting up the system $PATH
+
+Make sure your `yarn global bin` (or `npm bin -g` if you are using NPM) directory is in your `$PATH` ([instructions](https://unix.stackexchange.com/questions/26047/how-to-correctly-add-a-path-to-path) for Linux and MacOS, [instructions1](https://stackoverflow.com/questions/9546324/adding-a-directory-to-the-path-environment-variable-in-windows) and [instructions2](https://www.architectryan.com/2018/03/17/add-to-the-path-on-windows-10/) for Windows).
 
 ##### Upgrading
 
