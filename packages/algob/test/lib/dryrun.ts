@@ -145,8 +145,8 @@ describe("Debugging TEAL code using tealdbg", () => {
 
     try {
       await tealDebugger.run({ mode: ExecutionMode.APPLICATION, groupIndex: 5 });
-    } catch (error: any) {
-      assert.equal(error.message, 'groupIndex(= 5) exceeds transaction group length(= 2)');
+    } catch (error) {
+      if (error instanceof Error) { assert.equal(error.message, 'groupIndex(= 5) exceeds transaction group length(= 2)'); }
     }
   });
 

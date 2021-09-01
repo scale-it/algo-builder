@@ -26,19 +26,21 @@ export function expectRuntimeError (
 ): void {
   try {
     f();
-  } catch (error: any) {
+  } catch (error) {
     assert.instanceOf(error, RuntimeError, errorMessage);
-    assert.equal(error.number, errorDescriptor.number, errorMessage);
-    assert.notMatch(
-      error.message,
-      /%[a-zA-Z][a-zA-Z0-9]*%/,
-      "RuntimeError has an non-replaced variable tag"
-    );
+    if (error instanceof RuntimeError) {
+      assert.equal(error.number, errorDescriptor.number, errorMessage);
+      assert.notMatch(
+        error.message,
+        /%[a-zA-Z][a-zA-Z0-9]*%/,
+        "RuntimeError has an non-replaced variable tag"
+      );
 
-    if (typeof matchMessage === "string") {
-      assert.include(error.message, matchMessage, errorMessage);
-    } else if (matchMessage !== undefined) {
-      assert.match(error.message, matchMessage, errorMessage);
+      if (typeof matchMessage === "string") {
+        assert.include(error.message, matchMessage, errorMessage);
+      } else if (matchMessage !== undefined) {
+        assert.match(error.message, matchMessage, errorMessage);
+      }
     }
 
     return;
@@ -48,6 +50,7 @@ export function expectRuntimeError (
   );
 }
 
+/* eslint-disable sonarjs/cognitive-complexity */
 export async function expectRuntimeErrorAsync (
   f: () => Promise<any>,
   errorDescriptor: ErrorDescriptor,
@@ -71,25 +74,27 @@ export async function expectRuntimeErrorAsync (
 
   try {
     await f();
-  } catch (error: any) {
+  } catch (error) {
     assert.instanceOf(error, RuntimeError);
-    assert.equal(error.number, errorDescriptor.number);
-    assert.notMatch(
-      error.message,
-      /%[a-zA-Z][a-zA-Z0-9]*%/,
-      "RuntimeError has an non-replaced variable tag"
-    );
+    if (error instanceof RuntimeError) {
+      assert.equal(error.number, errorDescriptor.number);
+      assert.notMatch(
+        error.message,
+        /%[a-zA-Z][a-zA-Z0-9]*%/,
+        "RuntimeError has an non-replaced variable tag"
+      );
 
-    if (matchMessage !== undefined) {
-      if (typeof matchMessage === "string") {
-        if (!error.message.includes(matchMessage)) {
-          notExactMatch.message += `${String(error.message)}`;
-          throw notExactMatch; // eslint-disable-line @typescript-eslint/no-throw-literal
-        }
-      } else {
-        if (matchMessage.exec(error.message) === null) {
-          notRegexpMatch.message += `${String(error.message)}`;
-          throw notRegexpMatch; // eslint-disable-line @typescript-eslint/no-throw-literal
+      if (matchMessage !== undefined) {
+        if (typeof matchMessage === "string") {
+          if (!error.message.includes(matchMessage)) {
+            notExactMatch.message += `${String(error.message)}`;
+            throw notExactMatch; // eslint-disable-line @typescript-eslint/no-throw-literal
+          }
+        } else {
+          if (matchMessage.exec(error.message) === null) {
+            notRegexpMatch.message += `${String(error.message)}`;
+            throw notRegexpMatch; // eslint-disable-line @typescript-eslint/no-throw-literal
+          }
         }
       }
     }

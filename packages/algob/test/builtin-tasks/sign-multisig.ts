@@ -85,8 +85,8 @@ describe("Sign-Multisig task", () => {
         account: account1.name,
         out: outFile
       });
-    } catch (error: any) {
-      assert.equal(error.message, 'Key does not exist');
+    } catch (error) {
+      if (error instanceof Error) { assert.equal(error.message, 'Key does not exist'); }
     }
   });
 
@@ -168,8 +168,8 @@ describe("Sign-Multisig task", () => {
         account: bobAcc.name,
         out: outFile
       });
-    } catch (error: any) {
-      assert.equal(error.message, `Multisig MetaData (version, threshold, addresses) not passed. This is required for creating a new multisig. Aborting`);
+    } catch (error) {
+      if (error instanceof Error) { assert.equal(error.message, `Multisig MetaData (version, threshold, addresses) not passed. This is required for creating a new multisig. Aborting`); }
     }
   });
 
@@ -190,8 +190,8 @@ describe("Sign-Multisig task", () => {
         thr: '2',
         addrs: `${aliceAddr},${johnAddr},${bobAddr}`
       });
-    } catch (error: any) {
-      assert.equal(error.message, 'Key does not exist');
+    } catch (error) {
+      if (error instanceof Error) { assert.equal(error.message, 'Key does not exist'); }
     }
   });
 

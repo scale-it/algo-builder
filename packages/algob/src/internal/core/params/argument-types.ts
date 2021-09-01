@@ -212,15 +212,17 @@ export const inputFile: ArgumentType<string> = {
         // tslint:disable-next-line only-algob-error
         throw new Error(`${strValue} is a directory, not a file`);
       }
-    } catch (error: any) {
-      throw new BuilderError(
-        ERRORS.ARGUMENTS.INVALID_INPUT_FILE,
-        {
-          name: argName,
-          value: strValue
-        },
-        error
-      );
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new BuilderError(
+          ERRORS.ARGUMENTS.INVALID_INPUT_FILE,
+          {
+            name: argName,
+            value: strValue
+          },
+          error
+        );
+      }
     }
 
     return strValue;
@@ -237,17 +239,19 @@ export const inputFile: ArgumentType<string> = {
   validate: (argName: string, value: any): void => {  // eslint-disable-line
     try {
       inputFile.parse(argName, value);
-    } catch (error: any) {
+    } catch (error) {
       // the input value is considered invalid, throw error.
-      throw new BuilderError(
-        ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE,
-        {
-          value,
-          name: argName,
-          type: inputFile.name
-        },
-        error
-      );
+      if (error instanceof BuilderError) {
+        throw new BuilderError(
+          ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE,
+          {
+            value,
+            name: argName,
+            type: inputFile.name
+          },
+          error
+        );
+      }
     }
   }
 };
@@ -257,15 +261,17 @@ export const json: ArgumentType<any> = {  // eslint-disable-line
   parse (argName: string, strValue: string): void {
     try {
       return JSON.parse(strValue);
-    } catch (error: any) {
-      throw new BuilderError(
-        ERRORS.ARGUMENTS.INVALID_JSON_ARGUMENT,
-        {
-          param: argName,
-          error: error.message
-        },
-        error
-      );
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new BuilderError(
+          ERRORS.ARGUMENTS.INVALID_JSON_ARGUMENT,
+          {
+            param: argName,
+            error: error.message
+          },
+          error
+        );
+      }
     }
   },
   /**

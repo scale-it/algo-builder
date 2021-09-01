@@ -223,7 +223,7 @@ async function main (): Promise<void> {
     //  abortAnalytics();
     // }
     log(`Quitting algob after successfully running task ${taskName}`);
-  } catch (error: any) {
+  } catch (error) {
     if (BuilderError.isBuilderError(error)) {
       console.error(chalk.red(`Error ${error.message}`)); // eslint-disable-line @typescript-eslint/restrict-template-expressions
     } else if (BuilderPluginError.isBuilderPluginError(error)) {
@@ -240,7 +240,7 @@ async function main (): Promise<void> {
 
     console.log("");
 
-    printStackTraces(showStackTraces, error);
+    if (error instanceof BuilderError) { printStackTraces(showStackTraces, error); }
 
     process.exit(1);
   }

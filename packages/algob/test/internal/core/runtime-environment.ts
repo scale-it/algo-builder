@@ -213,14 +213,16 @@ describe("Environment", () => {
           const argsString = JSON.stringify(taskArguments);
           try {
             await env.run(taskNameToRun, taskArguments);
-          } catch (error: any) {
-            assert.fail(
-              error,
-              undefined,
-              `Should not throw error task ${taskNameToRun} with args ${argsString}. Error message: ${
-                String(error.message || error)
-              }`
-            );
+          } catch (error) {
+            if (error instanceof Error) {
+              assert.fail(
+                error,
+                undefined,
+                `Should not throw error task ${taskNameToRun} with args ${argsString}. Error message: ${
+                  String(error.message || error)
+                }`
+              );
+            }
           }
         };
 
