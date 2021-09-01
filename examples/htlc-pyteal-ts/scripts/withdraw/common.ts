@@ -1,7 +1,7 @@
 import { executeTransaction } from "@algo-builder/algob";
 import * as algob from "@algo-builder/algob";
 import { types as rtypes } from "@algo-builder/runtime";
-import { types as wtypes } from "@algo-builder/web";
+import { BuilderError, types as wtypes } from "@algo-builder/web";
 import { sha256 } from 'js-sha256';
 
 /**
@@ -23,8 +23,8 @@ export async function executeTx (
   try {
     await executeTransaction(deployer, txnParams);
   } catch (e) {
-    if (wtypes.isRequestError(e)) { console.error('Transaction Failed', e.response ? e.response.error : e.error); }
-    throw e;
+    if (wtypes.isRequestError(e)) { console.error('Transaction Failed', e?.response?.error); }
+    if (e instanceof BuilderError) console.error('Transaction Failed', e.message);
   }
 };
 
