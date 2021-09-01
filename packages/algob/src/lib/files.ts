@@ -1,5 +1,5 @@
 import { getPathFromDirRecursive } from "@algo-builder/runtime";
-import { BuilderError, ERRORS } from "@algo-builder/web";
+import { BuilderError, ERRORS, types } from "@algo-builder/web";
 import fs from "fs-extra";
 import path from "path";
 
@@ -43,8 +43,8 @@ export function loadEncodedTxFromFile (fileName: string): Uint8Array | undefined
     const p = getPathFromDirRecursive(ASSETS_DIR, fileName) as string;
     const buffer = fs.readFileSync(p);
     return Uint8Array.from(buffer);
-  } catch (e: any) {
-    if (e?.errno === -2) return undefined; // handling a not existing file
+  } catch (e) {
+    if (types.isFileError(e) && e?.errno === -2) { return undefined; } // handling a not existing file
     throw e;
   }
 }

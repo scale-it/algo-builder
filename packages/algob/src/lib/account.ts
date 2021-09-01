@@ -41,8 +41,13 @@ function fromMnemonic (ia: MnemonicAccount): rtypes.Account {
 function parseMnemonic (mnemonic: string): AccountSDK {
   try {
     return mnemonicToSecretKey(mnemonic);
-  } catch (e: any) {
-    throw new BuilderError(ERRORS.ACCOUNT.WRONG_MNEMONIC, { errmsg: e.message }, e.error);
+  } catch (e) {
+    if (e instanceof Error) {
+      throw new BuilderError(
+        ERRORS.ACCOUNT.WRONG_MNEMONIC, { errmsg: e.message }, e
+      );
+    }
+    throw e;
   }
 }
 
@@ -197,7 +202,8 @@ export class KMDOperator {
       }
     } catch (e: any) {
       if (e.code === 'ECONNREFUSED') { throw new BuilderError(ERRORS.KMD.CONNECTION, { ctx: e }, e); }
-      throw new BuilderError(ERRORS.KMD.ERROR, { ctx: JSON.stringify(e) }, e);
+      if (e instanceof Error) { throw new BuilderError(ERRORS.KMD.ERROR, { ctx: JSON.stringify(e) }, e); }
+      throw e;
     }
 
     return accounts;

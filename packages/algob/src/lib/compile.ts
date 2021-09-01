@@ -1,5 +1,5 @@
 import { getPathFromDirRecursive } from "@algo-builder/runtime";
-import { BuilderError, ERRORS, parseAlgorandError } from "@algo-builder/web";
+import { BuilderError, ERRORS, parseAlgorandError, types } from "@algo-builder/web";
 import type { Algodv2, modelsv2 } from "algosdk";
 import { spawnSync, SpawnSyncReturns } from "child_process";
 import * as fs from 'fs';
@@ -80,8 +80,8 @@ export class CompileOp {
     try {
       const p = path.join(CACHE_DIR, filename + ".yaml");
       return YAML.parse(await fs.promises.readFile(p, 'utf8')) as ASCCache;
-    } catch (e: any) {
-      if (e?.errno === -2) { return undefined; } // handling a not existing file
+    } catch (e) {
+      if (types.isFileError(e) && e?.errno === -2) { return undefined; } // handling a not existing file
       throw e;
     }
   }
@@ -102,8 +102,9 @@ export class CompileOp {
         // compiled base64 converted into bytes
         base64ToBytes: new Uint8Array(Buffer.from(co.result, "base64"))
       };
-    } catch (e: any) {
-      throw parseAlgorandError(e, { filename: filename });
+    } catch (e) {
+      if (types.isRequestError(e)) { throw parseAlgorandError(e, { filename: filename }); }
+      throw e;
     }
   }
 
@@ -205,8 +206,8 @@ export class PyCompileOp {
     try {
       const p = path.join(CACHE_DIR, filename + ".yaml");
       return YAML.parse(await fs.promises.readFile(p, 'utf8')) as PyASCCache;
-    } catch (e: any) {
-      if (e?.errno === -2) { return undefined; } // handling a not existing file
+    } catch (e) {
+      if (types.isFileError(e) && e?.errno === -2) { return undefined; } // handling a not existing file
       throw e;
     }
   }

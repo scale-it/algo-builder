@@ -22,8 +22,9 @@ export async function executeTx (
   deployer: algob.types.Deployer, txnParams: wtypes.ExecParams): Promise<void> {
   try {
     await executeTransaction(deployer, txnParams);
-  } catch (e: any) {
-    console.error('Transaction Failed', e.response ? e.response.error : e.error);
+  } catch (e) {
+    if (wtypes.isRequestError(e)) { console.error('Transaction Failed', e.response ? e.response.error : e.error); }
+    throw e;
   }
 };
 
