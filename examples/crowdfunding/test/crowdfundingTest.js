@@ -106,15 +106,7 @@ describe('Crowdfunding Tests', function () {
     console.log('Escrow Address: ', escrowAddress);
 
     // fund escrow with some minimum balance first
-    const fundEscrowParam = {
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.SecretKey,
-      fromAccount: master.account,
-      toAccountAddr: escrowAddress,
-      amountMicroAlgos: minBalance,
-      payFlags: { totalFee: 1000 }
-    };
-    runtime.executeTx(fundEscrowParam);
+    runtime.fundAccount(master.account, escrowAddress, minBalance);
 
     // verify global state
     assert.isDefined(applicationId);
