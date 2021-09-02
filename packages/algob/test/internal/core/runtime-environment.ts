@@ -214,13 +214,16 @@ describe("Environment", () => {
           try {
             await env.run(taskNameToRun, taskArguments);
           } catch (error) {
-            assert.fail(
-              error,
-              undefined,
-              `Should not throw error task ${taskNameToRun} with args ${argsString}. Error message: ${
-                String(error.message || error)
-              }`
-            );
+            if (error instanceof Error) {
+              assert.fail(
+                error,
+                undefined,
+                `Should not throw error task ${taskNameToRun} with args ${argsString}. Error message: ${
+                  String(error.message || error)
+                }`
+              );
+            }
+            console.error("An unexpected error occurred:", error);
           }
         };
 

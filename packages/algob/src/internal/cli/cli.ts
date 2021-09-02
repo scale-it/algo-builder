@@ -240,7 +240,7 @@ async function main (): Promise<void> {
 
     console.log("");
 
-    printStackTraces(showStackTraces, error);
+    if (error instanceof BuilderError) { printStackTraces(showStackTraces, error); }
 
     process.exit(1);
   }

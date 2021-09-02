@@ -221,7 +221,8 @@ export class Environment implements RuntimeEnv {
             values[paramName] = resolvedArgumentValue;
           }
         } catch (error) {
-          errors.push(error);
+          if (error instanceof BuilderError) { errors.push(error); }
+          console.error("An unexpected error occurred:", error);
         }
         return { errors, values };
       },

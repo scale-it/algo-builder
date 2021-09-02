@@ -11,7 +11,7 @@ export async function expectErrorAsync (
   const notRegexpMatch = new AssertionError(message);
   try {
     await f();
-  } catch (err) {
+  } catch (err: any) {
     if (matchMessage === undefined) {
       return;
     }
@@ -44,17 +44,19 @@ export function expectBuilderError (
     }
   } catch (error) {
     assert.instanceOf(error, BuilderError, errorMessage);
-    assert.equal(error.number, errorDescriptor.number, errorMessage);
-    assert.notMatch(
-      error.message,
-      /%[a-zA-Z][a-zA-Z0-9]*%/,
-      "BuilderError has an non-replaced variable tag"
-    );
+    if (error instanceof BuilderError) {
+      assert.equal(error.number, errorDescriptor.number, errorMessage);
+      assert.notMatch(
+        error.message,
+        /%[a-zA-Z][a-zA-Z0-9]*%/,
+        "BuilderError has an non-replaced variable tag"
+      );
 
-    if (typeof matchMessage === "string") {
-      assert.include(error.message, matchMessage, errorMessage);
-    } else if (matchMessage !== undefined) {
-      assert.match(error.message, matchMessage, errorMessage);
+      if (typeof matchMessage === "string") {
+        assert.include(error.message, matchMessage, errorMessage);
+      } else if (matchMessage !== undefined) {
+        assert.match(error.message, matchMessage, errorMessage);
+      }
     }
 
     return;
@@ -64,6 +66,7 @@ export function expectBuilderError (
   );
 }
 
+/* eslint-disable sonarjs/cognitive-complexity */
 export async function expectBuilderErrorAsync (
   f: () => Promise<any>,
   errorDescriptor: ErrorDescriptor,
@@ -89,23 +92,25 @@ export async function expectBuilderErrorAsync (
     await f();
   } catch (error) {
     assert.instanceOf(error, BuilderError);
-    assert.equal(error.number, errorDescriptor.number);
-    assert.notMatch(
-      error.message,
-      /%[a-zA-Z][a-zA-Z0-9]*%/,
-      "BuilderError has an non-replaced variable tag"
-    );
+    if (error instanceof BuilderError) {
+      assert.equal(error.number, errorDescriptor.number);
+      assert.notMatch(
+        error.message,
+        /%[a-zA-Z][a-zA-Z0-9]*%/,
+        "BuilderError has an non-replaced variable tag"
+      );
 
-    if (matchMessage !== undefined) {
-      if (typeof matchMessage === "string") {
-        if (!error.message.includes(matchMessage)) {
-          notExactMatch.message += `${String(error.message)}`;
-          throw notExactMatch; // eslint-disable-line @typescript-eslint/no-throw-literal
-        }
-      } else {
-        if (matchMessage.exec(error.message) === null) {
-          notRegexpMatch.message += `${String(error.message)}`;
-          throw notRegexpMatch; // eslint-disable-line @typescript-eslint/no-throw-literal
+      if (matchMessage !== undefined) {
+        if (typeof matchMessage === "string") {
+          if (!error.message.includes(matchMessage)) {
+            notExactMatch.message += `${String(error.message)}`;
+            throw notExactMatch; // eslint-disable-line @typescript-eslint/no-throw-literal
+          }
+        } else {
+          if (matchMessage.exec(error.message) === null) {
+            notRegexpMatch.message += `${String(error.message)}`;
+            throw notRegexpMatch; // eslint-disable-line @typescript-eslint/no-throw-literal
+          }
         }
       }
     }
