@@ -223,6 +223,7 @@ describe("Environment", () => {
                 }`
               );
             }
+            console.error("An unexpected error occurred:", error);
           }
         };
 

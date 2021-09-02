@@ -222,6 +222,7 @@ export class Environment implements RuntimeEnv {
           }
         } catch (error) {
           if (error instanceof BuilderError) { errors.push(error); }
+          console.error("An unexpected error occurred:", error);
         }
         return { errors, values };
       },

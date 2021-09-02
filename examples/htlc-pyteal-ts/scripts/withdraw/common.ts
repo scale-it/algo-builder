@@ -25,6 +25,7 @@ export async function executeTx (
   } catch (e) {
     if (wtypes.isRequestError(e)) { console.error('Transaction Failed', e?.response?.error); }
     if (e instanceof BuilderError) console.error('Transaction Failed', e.message);
+    console.error("An unexpected error occurred:", e);
   }
 };
 

@@ -1,6 +1,8 @@
 import { BuilderError, ERRORS } from "@algo-builder/web";
 import * as fs from "fs";
 
+const UNEXPECTED_ERROR = "An unexpected error occurred:";
+
 /**
  * Provides an interface for every valid task argument type.
  */
@@ -223,6 +225,7 @@ export const inputFile: ArgumentType<string> = {
           error
         );
       }
+      console.error(UNEXPECTED_ERROR, error);
     }
 
     return strValue;
@@ -252,6 +255,7 @@ export const inputFile: ArgumentType<string> = {
           error
         );
       }
+      console.error(UNEXPECTED_ERROR, error);
     }
   }
 };
@@ -272,6 +276,7 @@ export const json: ArgumentType<any> = {  // eslint-disable-line
           error
         );
       }
+      console.error(UNEXPECTED_ERROR, error);
     }
   },
   /**

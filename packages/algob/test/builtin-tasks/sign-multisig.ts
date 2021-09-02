@@ -87,6 +87,7 @@ describe("Sign-Multisig task", () => {
       });
     } catch (error) {
       if (error instanceof Error) { assert.equal(error.message, 'Key does not exist'); }
+      console.error("An unexpected error occurred:", error);
     }
   });
 
@@ -170,6 +171,7 @@ describe("Sign-Multisig task", () => {
       });
     } catch (error) {
       if (error instanceof Error) { assert.equal(error.message, `Multisig MetaData (version, threshold, addresses) not passed. This is required for creating a new multisig. Aborting`); }
+      console.error("An unexpected error occurred:", error);
     }
   });
 
@@ -192,6 +194,7 @@ describe("Sign-Multisig task", () => {
       });
     } catch (error) {
       if (error instanceof Error) { assert.equal(error.message, 'Key does not exist'); }
+      console.error("An unexpected error occurred:", error);
     }
   });
 

@@ -26,6 +26,7 @@ async function runTests (config: Config): Promise<void> {
     });
   } catch (error) {
     if (error instanceof Error) { console.log(error.message); }
+    console.error("An unexpected error occurred:", error);
   };
 }
 

@@ -58,6 +58,7 @@ export function getEnvRuntimeArgs (
             error
           );
         }
+        console.error("An unexpected error occurred:", error);
       }
     } else {
       envArgs[paramName] = definition.defaultValue;
