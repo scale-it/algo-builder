@@ -1,11 +1,7 @@
-const {
-  convert
-} = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 const { fundAccount, executeTx } = require('./run/common/common.js');
 
 const { accounts, getDepositLsig, getDAOFundLsig } = require('./run/common/accounts');
-const { executeTransaction } = require('../../../packages/algob/build/lib/tx.js');
 
 async function run (runtimeEnv, deployer) {
   const { creator, proposer, voterA, voterB } = accounts(deployer);
@@ -92,7 +88,7 @@ async function run (runtimeEnv, deployer) {
     assetID: asaInfo.assetIndex,
     payFlags: { totalFee: 1000 }
   };
-  await executeTransaction(deployer, [
+  await executeTx(deployer, [
     { ...fundASAParams, toAccountAddr: proposer.addr },
     { ...fundASAParams, toAccountAddr: voterA.addr },
     { ...fundASAParams, toAccountAddr: voterB.addr }
