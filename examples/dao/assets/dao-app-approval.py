@@ -53,7 +53,7 @@ def approval_program():
     # Computes result of proposal. Saves result in scratch. Args:
     # * idx - index of account where proposal_lsig.address() is passed
     # NOTE: idx == Int(0) means proposalLsig is Txn.sender()
-    def result(idx: Int):
+    def compute_result(idx: Int):
         return Seq([
             Cond(
                 # 1 if voting is over and proposal.yes >= min_support and proposal.yes > proposal.no
@@ -87,7 +87,7 @@ def approval_program():
     # NOTE: idx == Int(0) means proposalLsig is Txn.sender()
     def is_proposal_active(idx: Int):
         return Seq([
-            result(idx),
+            compute_result(idx),
             If(
                 Or(
                     # still in voting (now <= voting_end)
@@ -312,7 +312,7 @@ def approval_program():
     # Executes a proposal (note: anyone can execute a proposal) Args:
     # * proposal : lsig account address with the proposal record (provided as the first external account)
     execute = Seq([
-        result(Int(1)), # save result in scratch
+        compute_result(Int(1)), # save result in scratch
         # Assert that the proposal.result() == 1 and proposal.executed == 0
         Assert(
             And(scratchvar_result.load() == Int(1), executed == Int(0))
@@ -362,7 +362,7 @@ def approval_program():
     # Clears proposal record and returns back the deposit. Arguments:
     # NOTE: proposalLsig is Txn.sender
     clear_proposal = Seq([
-        result(Int(0)), # int(0) as proposal_lsig is txn.sender()
+        compute_result(Int(0)), # int(0) as proposal_lsig is txn.sender()
         proposal_id,
         # assert that there is a recorded proposal
         Assert(proposal_id.hasValue() == Int(1)),
