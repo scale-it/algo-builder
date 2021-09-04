@@ -1,6 +1,7 @@
 const { executeTx } = require('./common/common.js');
 const { types } = require('@algo-builder/web');
 const { getDepositLsig } = require('./common/accounts.js');
+const { Tealdbg } = require('../../../../packages/algob/build/index.js');
 
 async function clearProposal (deployer, proposalLsig, depositAmt) {
   const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
@@ -32,6 +33,11 @@ async function clearProposal (deployer, proposalLsig, depositAmt) {
     }
   ];
 
+  await new Tealdbg(deployer, clearProposalParam).run({
+    tealFile: 'dao-app-approval.py',
+    groupIndex: 0,
+    scInitParam: { TMPL_GOV_TOKEN: govToken.assetIndex }
+  })
   await executeTx(deployer, clearProposalParam);
 }
 
