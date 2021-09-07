@@ -28,7 +28,7 @@ async function evaluate (code: string, context: object, filename: string,
     const result = await runInNewContext(preprocess(code), context);
     callback(null, result);
   } catch (e) {
-    if (isRecoverableError(e)) {
+    if (e instanceof Error && isRecoverableError(e)) {
       callback(new repl.Recoverable(e));
     } else {
       console.error(e);

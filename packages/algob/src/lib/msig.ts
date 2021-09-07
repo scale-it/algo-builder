@@ -1,12 +1,16 @@
 import { getPathFromDirRecursive } from "@algo-builder/runtime";
-import type { Account, EncodedMultisig, LogicSig, MultisigMetadata, Transaction } from "algosdk";
+import { types } from "@algo-builder/web";
 import {
-  appendSignMultisigTransaction, decodeAddress, decodeSignedTransaction,
-  decodeUnsignedTransaction, encodeAddress, logicSigFromByte, signMultisigTransaction
+  Account, appendSignMultisigTransaction, decodeAddress,
+  decodeSignedTransaction, decodeUnsignedTransaction,
+  encodeAddress, EncodedMultisig,
+  logicSigFromByte, MultisigMetadata, signMultisigTransaction,
+  Transaction
 } from "algosdk";
 import fs from "fs";
 
 import { ASSETS_DIR } from "../internal/core/project-structure";
+import { LogicSig } from "../types";
 import { isSignedTx } from "./tx";
 
 export const blsigExt = ".blsig";
@@ -46,7 +50,7 @@ export async function readMsigFromFile (filename: string): Promise<EncodedMultis
     const msig = fs.readFileSync(p, 'utf8').split("LogicSig: ")[1];
     return await decodeMsigObj(msig);
   } catch (e) {
-    if (e?.errno === -2) return undefined; // handling a not existing file
+    if (types.isFileError(e) && e?.errno === -2) { return undefined; } // handling a not existing file
     throw e;
   }
 }
@@ -65,7 +69,7 @@ export async function readBinaryMultiSig (filename: string): Promise<string | un
     const p = getPathFromDirRecursive(ASSETS_DIR, filename) as string;
     return fs.readFileSync(p, 'base64');
   } catch (e) {
-    if (e?.errno === -2) return undefined; // handling a not existing file
+    if (types.isFileError(e) && e?.errno === -2) { return undefined; } // handling a not existing file
     throw e;
   }
 }

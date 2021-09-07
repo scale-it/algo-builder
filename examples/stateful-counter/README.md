@@ -149,7 +149,7 @@ To call an application use the following code in one of your scripts (in `./scri
 
 ```javascript
 const tx = {
-  type: types.TransactionType.CallNoOpSSC,
+  type: types.TransactionType.CallApp,
   sign: types.SignType.SecretKey,
   fromAccount: creatorAccount,
   appID: applicationID,
@@ -160,7 +160,7 @@ await executeTransaction(deployer, tx);
 ```
 
 In `tx` there are following parameters:
-  - we set the type which is `CallNoOpSSC` - Call to stateful smart contract
+  - we set the type which is `CallApp` - Call to stateful smart contract
   - set the sign to SecretKey (tx is signed by creatorAccount's sk)
   - provide fromAccount details
   - provide application index of SSC (retreived from checkpoint)

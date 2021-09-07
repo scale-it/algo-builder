@@ -13,15 +13,15 @@ import {
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
-  Byte, Bytec, Bytecblock, Concat, Dig, Div, Dup, Dup2, Ed25519verify,
-  EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, GetByte, Global,
+  Byte, ByteAdd, Bytec, Bytecblock, Concat, Dig, Div, Dup, Dup2, Ed25519verify,
+  EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global,
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
   Load, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, PushBytes, PushInt, Return,
   Select, SetBit, SetByte, Sha256, Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE, DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8 } from "../../../src/lib/constants";
-import { convertToBuffer } from "../../../src/lib/parsing";
+import { convertToBuffer, getEncoding } from "../../../src/lib/parsing";
 import { Stack } from "../../../src/lib/stack";
 import { parseToStackElem } from "../../../src/lib/txn";
 import { AccountStoreI, EncodingType, StackElem, Txn as EncodedTx } from "../../../src/types";
@@ -2417,6 +2417,7 @@ describe("Teal Opcodes", function () {
   describe("StateFul Opcodes", function () {
     const stack = new Stack<StackElem>();
     const lineNumber = 0;
+    const elonPk = decodeAddress(elonAddr).publicKey;
 
     // setup 1st account (to be used as sender)
     const acc1: AccountStoreI = new AccountStore(123, { addr: elonAddr, sk: new Uint8Array(0) }); // setup test account
@@ -2434,7 +2435,7 @@ describe("Teal Opcodes", function () {
       // setting txn object and sender's addr
       interpreter.runtime.ctx.tx = {
         ...TXN_OBJ,
-        snd: Buffer.from(decodeAddress(elonAddr).publicKey)
+        snd: Buffer.from(elonPk)
       };
     });
 
@@ -2482,10 +2483,75 @@ describe("Teal Opcodes", function () {
         top = stack.pop();
         assert.equal(0n, top);
       });
+
+      it("should throw error if address is passed directly with teal version < 4", function () {
+        execExpectError(
+          stack,
+          [elonPk, 1111n], // passing elonPk directly should throw error
+          new AppOptedIn([], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.PRAGMA_VERSION_ERROR
+        );
+      });
+
+      it("should push 0 to stack if offset to foreign apps is passed with teal version < 4", function () {
+        stack.push(0n);
+        stack.push(2n); // offset (but in prior version, this is treated as appIndex directly)
+
+        const op = new AppOptedIn([], 1, interpreter);
+        op.execute(stack);
+        assert.equal(0n, stack.pop());
+      });
+
+      it("tealv4: should push expected value to stack if address is passed directly", function () {
+        interpreter.tealVersion = 4;
+        interpreter.runtime.ctx.tx.apid = 1847; // set txn.ApplicationID
+
+        // elonPk is the Txn.Sender
+        stack.push(elonPk);
+        stack.push(1847n);
+
+        let op = new AppOptedIn([], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1n, stack.pop());
+
+        // johnAddr is present in Txn.Accounts, so we can pass it directly
+        stack.push(decodeAddress(johnAddr).publicKey);
+        stack.push(1847n);
+        op = new AppOptedIn([], 1, interpreter);
+        assert.doesNotThrow(() => op.execute(stack));
+      });
+
+      it("tealv4: should push expected value to stack if app offset is passed directly", function () {
+        stack.push(0n);
+        stack.push(0n); // 0 offset means current_app_id
+        let op = new AppOptedIn([], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1n, stack.pop());
+
+        interpreter.runtime.ctx.tx.apfa = [11, 1847];
+        stack.push(0n);
+        stack.push(2n); // should push 2nd app_id from Txn.ForeignApps (with TEALv4)
+        op = new AppOptedIn([], 1, interpreter);
+        op.execute(stack);
+        assert.equal(1n, stack.pop());
+      });
+
+      it("tealv4: should throw error if address is passed directly but not present in Txn.Accounts[]", function () {
+        // should throw error as this address is not present in Txn.Accounts[]
+        stack.push(decodeAddress(generateAccount().addr).publicKey); // randomPk
+        stack.push(1847n);
+
+        const op = new AppOptedIn([], 1, interpreter);
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.ADDR_NOT_FOUND_IN_TXN_ACCOUNT
+        );
+      });
     });
 
     describe("AppLocalGet", function () {
       before(function () {
+        interpreter.tealVersion = 3;
         interpreter.runtime.ctx.tx.apid = 1847;
       });
 
@@ -2531,6 +2597,33 @@ describe("Teal Opcodes", function () {
 
         top = stack.pop();
         assert.equal(0n, top);
+      });
+
+      it("tealv4: should accept address directly for app_local_get", function () {
+        interpreter.tealVersion = 4;
+
+        // for Sender
+        stack.push(elonPk);
+        stack.push(parsing.stringToBytes("random-key"));
+        let op = new AppLocalGet([], 1, interpreter);
+        op.execute(stack);
+        assert.equal(0n, stack.pop());
+
+        // for Txn.Accounts[A]
+        stack.push(decodeAddress(johnAddr).publicKey);
+        stack.push(parsing.stringToBytes('random-key'));
+        op = new AppLocalGet([], 1, interpreter);
+        op.execute(stack);
+        assert.equal(0n, stack.pop());
+
+        // random address (not present in accounts should throw error)
+        stack.push(decodeAddress(generateAccount().addr).publicKey); // randomPk
+        stack.push(1847n);
+        op = new AppOptedIn([], 1, interpreter);
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.ADDR_NOT_FOUND_IN_TXN_ACCOUNT
+        );
       });
     });
 
@@ -2599,6 +2692,7 @@ describe("Teal Opcodes", function () {
     describe("AppGlobalGet", function () {
       before(function () {
         interpreter.runtime.ctx.tx.apid = 1828;
+        interpreter.runtime.ctx.tx.apfa = TXN_OBJ.apfa;
       });
 
       it("should push the value to stack if key is present in global state", function () {
@@ -2969,7 +3063,7 @@ describe("Teal Opcodes", function () {
     });
   });
 
-  describe("Balance", () => {
+  describe("Balance, GetAssetHolding, GetAssetDef", () => {
     useFixture('asa-check');
     const stack = new Stack<StackElem>();
     let interpreter: Interpreter;
@@ -3165,7 +3259,7 @@ describe("Teal Opcodes", function () {
       const prev = stack.pop();
 
       assert.deepEqual(last.toString(), "1");
-      assert.deepEqual(prev, convertToBuffer("hash"));
+      assert.deepEqual(prev, convertToBuffer("hash", EncodingType.BASE64));
     });
 
     it("should push correct Asset Manager", () => {
@@ -3242,6 +3336,42 @@ describe("Teal Opcodes", function () {
         () => op.execute(stack),
         RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
       );
+    });
+
+    it("tealv4: should push correct value accepting offset to foreignAssets", () => {
+      interpreter.tealVersion = 4;
+      // interpreter.runtime.ctx.tx.apas = [1234, 3];
+      const op = new GetAssetHolding(["AssetBalance"], 1, interpreter);
+
+      stack.push(1n); // account index
+      stack.push(0n); // this will push 1st value from Txn.ForeignAssets
+      op.execute(stack);
+      assert.deepEqual(stack.pop().toString(), "1");
+      assert.deepEqual(stack.pop().toString(), "2");
+
+      stack.push(1n); // account index
+      stack.push(3n); // assetId can also be passed directly
+      op.execute(stack);
+      assert.deepEqual(stack.pop().toString(), "1");
+      assert.deepEqual(stack.pop().toString(), "2");
+    });
+
+    it("tealv4: should return value as treating ref as offset, if it represents an index", () => {
+      interpreter.tealVersion = 4;
+      interpreter.runtime.ctx.tx.apas = [1234, 3, 34, 45, 67];
+      const op = new GetAssetHolding(["AssetBalance"], 1, interpreter);
+
+      /*
+       * We wanted to pass assetId directly (3n) here, but since length of
+       * foreignAssets array is 5 (line 3363), "3n" will be treated as an offset, and
+       * the value to pushed to stack is Txn.ForeignApps[3] (i.e 45 in this case).
+       * Since asset 45 does not exist, [did_exist flag, value] will be [0, 0]
+       */
+      stack.push(1n); // account index
+      stack.push(3n); // assetArr.len >= 3, so this is treated as an offset
+      op.execute(stack);
+      assert.deepEqual(stack.pop().toString(), "0");
+      assert.deepEqual(stack.pop().toString(), "0");
     });
   });
 
@@ -4071,6 +4201,178 @@ describe("Teal Opcodes", function () {
       expectRuntimeError(
         () => op.execute(stack),
         RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
+    });
+  });
+
+  describe("TEALv4: shared data between contracts", () => {
+    let stack: Stack<StackElem>;
+    let interpreter: Interpreter;
+
+    this.beforeAll(() => {
+      interpreter = new Interpreter();
+      interpreter.runtime = new Runtime([]);
+      interpreter.tealVersion = MaxTEALVersion;
+      interpreter.runtime.ctx.tx = TXN_OBJ;
+      interpreter.runtime.ctx.sharedScratchSpace = new Map<number, StackElem[]>();
+      interpreter.runtime.ctx.sharedScratchSpace.set(0, [12n, 2n, 0n]);
+      interpreter.runtime.ctx.sharedScratchSpace.set(2, [12n, 2n, 0n, 1n]);
+    });
+
+    this.beforeEach(() => { stack = new Stack<StackElem>(); });
+
+    it("should push value from ith tx in shared scratch space(gload)", () => {
+      const op = new Gload(["0", "1"], 1, interpreter);
+
+      op.execute(stack);
+      const top = stack.pop();
+
+      assert.equal(top, 2n);
+    });
+
+    it("should throw error if tx doesn't exist(gload)", () => {
+      let op = new Gload(["1", "1"], 1, interpreter);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR
+      );
+
+      op = new Gload(["1", "3"], 1, interpreter);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR
+      );
+    });
+
+    it("should throw error if value doesn't exist in stack elem array(gload)", () => {
+      const op = new Gload(["2", "5"], 1, interpreter);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
+    });
+
+    it("should push value from ith tx in shared scratch space(gloads)", () => {
+      const op = new Gloads(["1"], 1, interpreter);
+      stack.push(0n);
+
+      op.execute(stack);
+      const top = stack.pop();
+
+      assert.equal(top, 2n);
+    });
+
+    it("should throw error if tx doesn't exist(gloads)", () => {
+      let op = new Gloads(["1"], 1, interpreter);
+      stack.push(1n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR
+      );
+
+      op = new Gloads(["3"], 1, interpreter);
+      stack.push(1n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR
+      );
+    });
+
+    it("should throw error if value doesn't exist in stack elem array(gloads)", () => {
+      const op = new Gloads(["5"], 1, interpreter);
+      stack.push(2n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.INDEX_OUT_OF_BOUND
+      );
+    });
+  });
+
+  describe("TEALv4: Byteslice Arithmetic Ops", () => {
+    const hexToByte = (hex: string): Uint8Array => {
+      const [string, encoding] = getEncoding([hex], 0);
+      return Uint8Array.from(convertToBuffer(string, encoding));
+    };
+
+    describe("ByteAdd", () => {
+      const stack = new Stack<StackElem>();
+
+      // hex values are taken from go-algorand tests
+      // https://github.com/algorand/go-algorand/blob/master/data/transactions/logic/eval_test.go
+      it("should return correct addition of two unit64", function () {
+        stack.push(hexToByte('0x01'));
+        stack.push(hexToByte('0x01'));
+        let op = new ByteAdd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x02'));
+
+        stack.push(hexToByte('0x01FF'));
+        stack.push(hexToByte('0x01'));
+        op = new ByteAdd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), hexToByte('0x0200'));
+
+        stack.push(hexToByte('0x01234576'));
+        stack.push(hexToByte('0x01ffffffffffffff'));
+        op = new ByteAdd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), new Uint8Array([2, 0, 0, 0, 1, 35, 69, 117]));
+
+        // u256 + u256
+        stack.push(hexToByte('0x0123457601234576012345760123457601234576012345760123457601234576'));
+        stack.push(hexToByte('0x01ffffffffffffff01ffffffffffffff01234576012345760123457601234576'));
+        op = new ByteAdd([], 0);
+        op.execute(stack);
+        assert.deepEqual(stack.pop(), new Uint8Array([
+          3, 35, 69, 118, 1, 35, 69, 117, 3,
+          35, 69, 118, 1, 35, 69, 117, 2, 70,
+          138, 236, 2, 70, 138, 236, 2, 70, 138,
+          236, 2, 70, 138, 236
+        ]));
+      });
+
+      it("should accept output of > 64 bytes", function () {
+        let str = '';
+        for (let i = 0; i < 64; i++) { str += 'ff'; } // ff repeated 64 times
+
+        stack.push(hexToByte('0x' + str));
+        stack.push(hexToByte('0x10'));
+        const op = new ByteAdd([], 0);
+        assert.doesNotThrow(() => op.execute(stack));
+        const top = stack.pop() as Uint8Array;
+        assert.isAbove(top.length, 64); // output array is of 65 bytes (because o/p length is limited to 128 bytes)
+      });
+
+      it("should throw error with ByteAdd if input > 64 bytes", () => {
+        let str = '';
+        for (let i = 0; i < 65; i++) { str += 'ff'; } // ff repeated "65" times
+
+        stack.push(hexToByte('0x' + str));
+        stack.push(hexToByte('0x10'));
+        const op = new ByteAdd([], 0);
+        expectRuntimeError(
+          () => op.execute(stack),
+          RUNTIME_ERRORS.TEAL.BYTES_LEN_EXCEEDED
+        );
+      });
+
+      it("should throw error with ByteAdd if stack is below min length",
+        execExpectError(
+          stack,
+          [hexToByte('0x10')],
+          new ByteAdd([], 0),
+          RUNTIME_ERRORS.TEAL.ASSERT_STACK_LENGTH
+        )
+      );
+
+      it("should throw error if ByteAdd is used with int",
+        execExpectError(stack, [1n, 2n], new ByteAdd([], 0), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
       );
     });
   });

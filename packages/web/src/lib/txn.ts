@@ -159,7 +159,7 @@ export function mkTransaction (execParams: ExecParams, suggestedParams: Suggeste
       );
       return updateTxFee(execParams.payFlags, tx);
     }
-    case TransactionType.CallNoOpSSC: {
+    case TransactionType.CallApp: {
       const tx = algosdk.makeApplicationNoOpTxn(
         fromAccountAddr,
         suggestedParams,

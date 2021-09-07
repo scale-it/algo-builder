@@ -1,5 +1,5 @@
 import { types } from "@algo-builder/web";
-import { LogicSig } from "algosdk";
+import { LogicSigAccount } from "algosdk";
 import { assert } from "chai";
 
 import { RUNTIME_ERRORS } from "../../src/errors/errors-list";
@@ -32,7 +32,7 @@ describe("Stateless Algorand Smart Contracts delegated signature mode", function
       fromAccountAddr: john.account.addr,
       toAccountAddr: bob.address,
       amountMicroAlgos: 100n,
-      lsig: {} as LogicSig, // will be set below
+      lsig: {} as LogicSigAccount, // will be set below
       payFlags: { totalFee: fee }
     };
   });

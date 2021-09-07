@@ -13,7 +13,7 @@ describe('Permissioned Token Tests - Happy Paths', function () {
   let asaDef, asaReserve, asaManager, asaCreator;
   let ctx;
 
-  this.beforeEach(async function () {
+  function setUpCtx () {
     master = new AccountStore(10000e6);
     alice = new AccountStore(minBalance, { addr: ALICE_ADDRESS, sk: new Uint8Array(0) });
     bob = new AccountStore(minBalance);
@@ -24,7 +24,9 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     asaReserve = ctx.getAccount(asaDef.reserve);
     asaManager = ctx.getAccount(asaDef.manager);
     asaCreator = ctx.getAccount(asaDef.creator);
-  });
+  }
+
+  this.beforeAll(setUpCtx);
 
   it('should issue token if sender is token reserve', () => {
     // Can issue after opting-in
@@ -70,6 +72,8 @@ describe('Permissioned Token Tests - Happy Paths', function () {
   });
 
   it('should opt-out of token successfully (using closeRemainderTo)', () => {
+    setUpCtx();
+
     // Opt-In
     ctx.optInToASA(elon.address);
     ctx.issue(asaReserve.account, elon, 20);
@@ -103,7 +107,7 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     const currentPermManager = ctx.getAccount(permManagerAddr);
     assert.notEqual(elon.address, currentPermManager.address); // verify elon is not current_perm_manager
     const txn = {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: currentPermManager.account, // perm_manager account
       appID: ctx.permissionsappID,
@@ -166,7 +170,7 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     // note that call to permissions is not there
     const forceTxParams = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: asaManager.account,
         appID: ctx.controllerappID,
@@ -252,7 +256,7 @@ describe('Permissioned Token Tests - Happy Paths', function () {
 
     const updateReserveParams = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: asaManager.account,
         appID: ctx.controllerappID,
@@ -311,6 +315,7 @@ describe('Permissioned Token Tests - Happy Paths', function () {
   });
 
   it('should cease tokens from bob', () => {
+    setUpCtx();
     // Opt-In to ASA
     ctx.optInToASA(bob.address);
     // Issue few tokens to sender
@@ -320,7 +325,7 @@ describe('Permissioned Token Tests - Happy Paths', function () {
     const toCeaseAmt = 120n;
     const ceaseTxParams = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: asaManager.account,
         appID: ctx.controllerappID,
@@ -377,7 +382,7 @@ describe('Permissioned Token Tests - Happy Paths', function () {
       `int:${newPermAppID}`
     ];
     const setPermTx = {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: asaManager.account,
       appID: ctx.controllerappID,

@@ -1,6 +1,6 @@
 import { overrideASADef, parseASADef, types as rtypes, validateOptInAccNames } from "@algo-builder/runtime";
 import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
-import type { EncodedMultisig, LogicSig, modelsv2 } from "algosdk";
+import type { EncodedMultisig, LogicSigAccount, modelsv2 } from "algosdk";
 import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
@@ -15,6 +15,7 @@ import type {
   ConfirmedTxInfo,
   Deployer,
   FundASCFlags,
+  LogicSig,
   LsigInfo,
   RuntimeEnv,
   SCParams
@@ -140,16 +141,16 @@ class DeployerBasicMode {
   }
 
   /**
-   * Loads a single signed delegated logic signature from checkpoint
+   * Loads a single signed delegated logic signature account from checkpoint
    */
-  getDelegatedLsig (lsigName: string): LogicSig | undefined {
+  getDelegatedLsig (lsigName: string): LogicSigAccount | undefined {
     const resultMap = this.cpData.precedingCP[this.networkName]?.dLsig ?? new Map(); ;
     const result = resultMap.get(lsigName)?.lsig;
     if (result === undefined) { return undefined; }
-    const lsig = getDummyLsig();
-    Object.assign(lsig, result);
-    if (lsig.sig) { lsig.sig = Uint8Array.from(lsig.sig); };
-    return lsig;
+    const lsigAccount = getDummyLsig();
+    Object.assign(lsigAccount, result);
+    if (lsigAccount.lsig.sig) { lsigAccount.lsig.sig = Uint8Array.from(lsigAccount.lsig.sig); };
+    return lsigAccount;
   }
 
   /**
@@ -158,19 +159,19 @@ class DeployerBasicMode {
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
    * @returns loaded logic signature from assets/<file_name>.teal
    */
-  async loadLogic (name: string, scTmplParams?: SCParams): Promise<LogicSig> {
+  async loadLogic (name: string, scTmplParams?: SCParams): Promise<LogicSigAccount> {
     return await getLsig(name, this.algoOp.algodClient, scTmplParams);
   }
 
   /**
-   * Loads multisigned logic signature from .lsig or .blsig file
+   * Loads multisigned logic signature account from .lsig or .blsig file
    * @param name filename
    * @returns multi signed logic signature from assets/<file_name>.(b)lsig
    */
   async loadMultiSig (name: string): Promise<LogicSig> {
     if (name.endsWith(blsigExt)) { return await loadBinaryLsig(name); }
 
-    const lsig = await getLsig(name, this.algoOp.algodClient); // get lsig from .teal (getting logic part from lsig)
+    const lsig = (await getLsig(name, this.algoOp.algodClient)).lsig; // get lsig from .teal (getting logic part from lsig)
     const msig = await readMsigFromFile(name); // Get decoded Msig object from .msig
     Object.assign(lsig.msig = {} as EncodedMultisig, msig);
     return lsig;
@@ -229,7 +230,7 @@ class DeployerBasicMode {
    * @param lsig logic signature
    * @param flags Transaction flags
    */
-  async optInLsigToASA (asa: string, lsig: LogicSig, flags: wtypes.TxParams): Promise<void> {
+  async optInLsigToASA (asa: string, lsig: LogicSigAccount, flags: wtypes.TxParams): Promise<void> {
     this.assertCPNotDeleted({
       type: wtypes.TransactionType.OptInASA,
       sign: wtypes.SignType.LogicSignature,
@@ -284,7 +285,7 @@ class DeployerBasicMode {
    */
   async optInLsigToApp (
     appID: number,
-    lsig: LogicSig,
+    lsig: LogicSigAccount,
     payFlags: wtypes.TxParams,
     flags: rtypes.AppOptionalFlags): Promise<void> {
     this.assertCPNotDeleted({
@@ -381,7 +382,7 @@ class DeployerBasicMode {
       case wtypes.TransactionType.CloseApp:
       case wtypes.TransactionType.OptInToApp:
       case wtypes.TransactionType.UpdateApp:
-      case wtypes.TransactionType.CallNoOpSSC: {
+      case wtypes.TransactionType.CallApp: {
         this.assertAppExist(txn.appID);
         break;
       }

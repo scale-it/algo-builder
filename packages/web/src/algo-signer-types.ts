@@ -9,6 +9,7 @@ export enum RequestErrors {
   Undefined = '[RequestErrors.Undefined] An undefined error occurred.',
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type Field<T> = string | number;
 
 export type TAccount = Field<string>;

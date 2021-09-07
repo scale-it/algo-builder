@@ -1,0 +1,24 @@
+#pragma version 4
+// this file is same as `approval-fail.teal`, only difference is the teal version.
+// so for this contract cost is calculated during execution (dynamically)
+// this contract will pass if we deploy a new app
+
+int 0
+txn ApplicationID
+==
+bnz on_creation
+
+// if not_creation, then cost will exceed threshold
+keccak256
+keccak256
+keccak256
+keccak256
+keccak256
+keccak256
+
+on_creation:
+int 1
+return
+
+int 1
+return

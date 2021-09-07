@@ -10,7 +10,7 @@ import { RUNTIME_ERRORS } from "./errors/errors-list";
 import { RuntimeError } from "./errors/runtime-errors";
 import { Interpreter, loadASAFile } from "./index";
 import { convertToString } from "./lib/parsing";
-import { LogicSig } from "./logicsig";
+import { LogicSigAccount } from "./logicsig";
 import { mockSuggestedParams } from "./mock/tx";
 import {
   AccountAddress, AccountStoreI, AppDeploymentFlags, AppOptionalFlags,
@@ -324,7 +324,9 @@ export class Runtime {
       asaDef.unitName as string,
       name,
       asaDef.url as string,
-      asaDef.metadataHash,
+      typeof asaDef.metadataHash !== 'string'
+        ? Buffer.from(asaDef.metadataHash as Uint8Array).toString('base64')
+        : asaDef.metadataHash,
       mockSuggestedParams(flags, this.round)
     );
   }
@@ -443,7 +445,7 @@ export class Runtime {
   ): number {
     this.addCtxAppCreateTxn(flags, payFlags);
     this.ctx.debugStack = debugStack;
-    this.ctx.addApp(flags.sender.addr, flags, approvalProgram, clearProgram);
+    this.ctx.addApp(flags.sender.addr, flags, approvalProgram, clearProgram, 0);
 
     this.store = this.ctx.state;
     return this.store.appCounter;
@@ -485,7 +487,7 @@ export class Runtime {
     flags: AppOptionalFlags, payFlags: types.TxParams, debugStack?: number): void {
     this.addCtxOptInTx(accountAddr, appID, payFlags, flags);
     this.ctx.debugStack = debugStack;
-    this.ctx.optInToApp(accountAddr, appID);
+    this.ctx.optInToApp(accountAddr, appID, 0);
 
     this.store = this.ctx.state;
   }
@@ -538,7 +540,7 @@ export class Runtime {
   ): void {
     this.addCtxAppUpdateTx(senderAddr, appID, payFlags, flags);
     this.ctx.debugStack = debugStack;
-    this.ctx.updateApp(appID, approvalProgram, clearProgram);
+    this.ctx.updateApp(appID, approvalProgram, clearProgram, 0);
 
     // If successful, Update programs and state
     this.store = this.ctx.state;
@@ -560,11 +562,11 @@ export class Runtime {
    * @param program TEAL code
    * @param args arguments passed
    */
-  getLogicSig (program: string, args: Uint8Array[]): LogicSig {
+  getLogicSig (program: string, args: Uint8Array[]): LogicSigAccount {
     if (program === "") {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
     }
-    const lsig = new LogicSig(program, args);
+    const lsig = new LogicSigAccount(program, args);
     const acc = new AccountStore(0, { addr: lsig.address(), sk: new Uint8Array(0) });
     this.store.accounts.set(acc.address, acc);
     return lsig;
@@ -580,21 +582,21 @@ export class Runtime {
     // check if transaction is signed by logic signature,
     // if yes verify signature and run logic
     if (txnParam.sign === types.SignType.LogicSignature && txnParam.lsig) {
-      this.ctx.args = txnParam.args ?? txnParam.lsig.args;
+      this.ctx.args = txnParam.args ?? txnParam.lsig.lsig.args;
 
       // signature validation
       const fromAccountAddr = webTx.getFromAddress(txnParam);
-      const result = txnParam.lsig.verify(decodeAddress(fromAccountAddr).publicKey);
+      const result = txnParam.lsig.lsig.verify(decodeAddress(fromAccountAddr).publicKey);
       if (!result) {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_VALIDATION_FAILED,
           { address: fromAccountAddr });
       }
       // logic validation
-      const program = convertToString(txnParam.lsig.logic);
+      const program = convertToString(txnParam.lsig.lsig.logic);
       if (program === "") {
         throw new RuntimeError(RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM);
       }
-      this.run(program, ExecutionMode.SIGNATURE, debugStack);
+      this.run(program, ExecutionMode.SIGNATURE, 0, debugStack);
     } else {
       throw new RuntimeError(RUNTIME_ERRORS.GENERAL.LOGIC_SIGNATURE_NOT_FOUND);
     }
@@ -627,6 +629,7 @@ export class Runtime {
     this.validateTxRound(gtxs);
 
     // initialize context before each execution
+    // Prepare shared space at each execution of transaction/s.
     // state is a deep copy of store
     this.ctx = new Ctx(cloneDeep(this.store), tx, gtxs, [], this, debugStack);
 
@@ -646,8 +649,11 @@ export class Runtime {
    * each opcode execution (upto depth = debugStack)
    * NOTE: Application mode is only supported in TEALv > 1
    */
-  run (program: string, executionMode: ExecutionMode, debugStack?: number): void {
+  run (program: string, executionMode: ExecutionMode, indexInGroup: number, debugStack?: number): void {
     const interpreter = new Interpreter();
     interpreter.execute(program, executionMode, this, debugStack);
+    if (executionMode === ExecutionMode.APPLICATION) {
+      this.ctx.sharedScratchSpace.set(indexInGroup, interpreter.scratch);
+    }
   }
 }
