@@ -115,7 +115,7 @@ describe('Bond token Tests', function () {
     console.log('Issuer Address: ', issuerLsigAddress);
 
     // fund escrow with some minimum balance first
-    runtime.fundAccount(master.account, issuerLsigAddress, minBalance + 10000);
+    runtime.fundLsig(master.account, issuerLsigAddress, minBalance + 10000);
 
     // verify global state
     assert.isDefined(applicationId);
@@ -248,7 +248,7 @@ describe('Bond token Tests', function () {
     const buybackLsig = runtime.getLogicSig(buyLsigProgram, []);
 
     // fund dex with some minimum balance first
-    runtime.fundAccount(master.account, buybackLsig.address(), minBalance + 10000);
+    runtime.fundLsig(master.account, buybackLsig.address(), minBalance + 10000);
 
     const buybackTx = {
       type: types.TransactionType.CallApp,

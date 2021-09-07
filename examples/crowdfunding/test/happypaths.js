@@ -84,7 +84,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     escrow = runtime.getAccount(escrowAddress);
 
     // fund escrow with some minimum balance
-    runtime.fundAccount(master.account, escrowAddress, minBalance);
+    runtime.fundLsig(master.account, escrowAddress, minBalance);
   }
 
   it('should create crowdfunding stateful application', () => {
@@ -205,7 +205,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     syncAccounts();
 
     // fund escrow with amount = goal
-    runtime.fundAccount(donor.account, escrow.address, goal);
+    runtime.fundLsig(donor.account, escrow.address, goal);
 
     // update Global State
     runtime.getAccount(creator.address).setGlobalState(applicationId, 'Total', BigInt(goal));
@@ -252,7 +252,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     syncAccounts();
 
     // fund escrow with amount < goal
-    runtime.fundAccount(donor.account, escrow.address, goal - 1e6);
+    runtime.fundLsig(donor.account, escrow.address, goal - 1e6);
     syncAccounts();
 
     // update Global State

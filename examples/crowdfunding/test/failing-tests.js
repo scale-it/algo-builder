@@ -77,7 +77,7 @@ describe('Crowdfunding Test - Failing Scenarios', function () {
     console.log('Escrow Address: ', escrowAddress);
 
     // fund escrow with some minimum balance first
-    runtime.fundAccount(master.account, escrowAddress, minBalance);
+    runtime.fundLsig(master.account, escrowAddress, minBalance);
 
     appArgs = [convert.stringToBytes('donate')];
     donateTxGroup = [

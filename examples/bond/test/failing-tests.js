@@ -103,7 +103,7 @@ describe('Bond token failing tests', function () {
     console.log('Issuer Address: ', issuerLsigAddress);
 
     // fund escrow with some minimum balance first
-    runtime.fundAccount(master.account, issuerLsigAddress, minBalance + 10000);
+    runtime.fundLsig(master.account, issuerLsigAddress, minBalance + 10000);
   });
 
   function issue () {

@@ -579,7 +579,7 @@ export class Runtime {
    * @param to to address
    * @param amount amount of algo in microalgos
    */
-  fundAccount (from: RuntimeAccount, to: string, amount: number): void {
+  fundLsig (from: RuntimeAccount, to: string, amount: number): void {
     const fundParam: ExecParams = {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,

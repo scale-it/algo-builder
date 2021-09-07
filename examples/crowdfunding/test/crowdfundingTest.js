@@ -106,7 +106,7 @@ describe('Crowdfunding Tests', function () {
     console.log('Escrow Address: ', escrowAddress);
 
     // fund escrow with some minimum balance first
-    runtime.fundAccount(master.account, escrowAddress, minBalance);
+    runtime.fundLsig(master.account, escrowAddress, minBalance);
 
     // verify global state
     assert.isDefined(applicationId);

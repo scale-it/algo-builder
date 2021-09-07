@@ -115,7 +115,7 @@ describe('Test for transferring asset using custom logic', function () {
     console.log('Escrow Address: ', escrowAddress);
 
     // fund escrow with some minimum balance first
-    runtime.fundAccount(master.account, escrowAddress, minBalance);
+    runtime.fundLsig(master.account, escrowAddress, minBalance);
 
     /** Update clawback address to escrow + Locking the manager and freeze address **/
     const assetModFields = {
