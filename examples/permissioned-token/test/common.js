@@ -321,7 +321,8 @@ function transfer (runtime, from, to, amount, assetIndex, controllerappID, permi
       appID: permissionsappID,
       payFlags: { totalFee: 1000 },
       appArgs: [TRANSFER_ARG],
-      accounts: [from.address, to.address]
+      accounts: [from.address, to.address],
+      foreignAssets: [assetIndex]
     }
   ];
   runtime.executeTx(txGroup);
@@ -397,7 +398,8 @@ function forceTransfer (
       appID: permissionsappID,
       payFlags: { totalFee: 1000 },
       appArgs: [TRANSFER_ARG],
-      accounts: [from.address, to.address]
+      accounts: [from.address, to.address],
+      foreignAssets: [assetIndex]
     }
   ];
   runtime.executeTx(txGroup);
