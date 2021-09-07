@@ -1,7 +1,6 @@
 /* eslint sonarjs/no-duplicate-string: 0 */
 /* eslint sonarjs/no-small-switch: 0 */
 import { parsing, tx as webTx, types } from "@algo-builder/web";
-import { ExecParams } from "@algo-builder/web/build/types";
 import algosdk, { decodeAddress, modelsv2 } from "algosdk";
 import cloneDeep from "lodash.clonedeep";
 
@@ -580,7 +579,7 @@ export class Runtime {
    * @param amount amount of algo in microalgos
    */
   fundLsig (from: RuntimeAccount, to: AccountAddress, amount: number): void {
-    const fundParam: ExecParams = {
+    const fundParam: types.ExecParams = {
       type: types.TransactionType.TransferAlgo,
       sign: types.SignType.SecretKey,
       fromAccount: from,
