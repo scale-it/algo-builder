@@ -50,4 +50,13 @@ describe("Init project", () => {
     assert.isTrue(fs.existsSync(`./${location}/algob.config.js`));
     assert.isTrue(fs.existsSync(`./${location}/scripts/0-sampleScript.ts`));
   });
+
+  it("should not create project if folder already exist with `.`", async () => {
+    await createProject(".", false);
+
+    await expectBuilderErrorAsync(
+      async () => await createProject(".", false),
+      ERRORS.GENERAL.INIT_INSIDE_PROJECT
+    );
+  });
 });
