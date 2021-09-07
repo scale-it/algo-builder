@@ -3,13 +3,11 @@ import fs from "fs-extra";
 
 import { ERRORS } from "../../../src";
 import { createProject } from "../../../src/internal/cli/project-creation";
-import { useEnvironment } from "../../helpers/environment";
 import { expectBuilderErrorAsync } from "../../helpers/errors";
 import { useFixtureProject } from "../../helpers/project";
 
 describe("Init project", () => {
   useFixtureProject('init-task');
-  useEnvironment();
 
   afterEach(() => {
     const paths = fs.readdirSync("./");

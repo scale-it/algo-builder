@@ -18,6 +18,7 @@
 ### Bug Fixes
 * Fixed `yarn add @algo-builder/web` (was failing because of missing dependency `zod` in packages/web).
 * Fix metadatahash type
+* Fix init project-name bug
 
 ### API Breaking
 * Migrate from `LogicSig` to `LogicSigAccount`(Note: Loading lsig from file uses `LogicSig`, because `goal` stores it in LogicSig type format)
