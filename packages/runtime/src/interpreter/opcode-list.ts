@@ -2789,3 +2789,193 @@ export class ByteAdd extends Op {
     stack.push(this.assertBytes(resultAsBytes, this.line, MAX_OUTPUT_BYTE_LEN));
   }
 }
+
+/**
+ * Pop four uint64 values. The deepest two are interpreted
+ * as a uint128 dividend (deepest value is high word),
+ * the top two are interpreted as a uint128 divisor.
+ * Four uint64 values are pushed to the stack.
+ * The deepest two are the quotient (deeper value
+ * is the high uint64). The top two are the remainder, low bits on top.
+ */
+export class DivModw extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    const firstLow = this.assertBigInt(stack.pop(), this.line);
+    const firstHigh = this.assertBigInt(stack.pop(), this.line);
+
+    let divisor = firstHigh << BigInt('64');
+    divisor = divisor + firstLow;
+
+    const secondLow = this.assertBigInt(stack.pop(), this.line);
+    const secondHigh = this.assertBigInt(stack.pop(), this.line);
+
+    let dividend = secondHigh << BigInt('64');
+    dividend = dividend + secondLow;
+
+    const quotient = dividend / divisor;
+    let low = quotient & MAX_UINT64;
+    this.checkOverflow(low, this.line);
+
+    let high = quotient >> BigInt('64');
+    this.checkOverflow(high, this.line);
+
+    stack.push(high);
+    stack.push(low);
+
+    const remainder = dividend % divisor;
+    low = remainder & MAX_UINT64;
+    this.checkOverflow(low, this.line);
+
+    high = remainder >> BigInt('64');
+    this.checkOverflow(high, this.line);
+
+    stack.push(high);
+    stack.push(low);
+  }
+}
+
+export class Exp extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    const b = this.assertBigInt(stack.pop(), this.line);
+    const a = this.assertBigInt(stack.pop(), this.line);
+
+    if (a === 0n && b === 0n) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.EXP_ERROR, { line: this.line });
+    }
+
+    const res = a ** b;
+    this.checkOverflow(res, this.line);
+
+    stack.push(res);
+  }
+}
+
+export class Expw extends Exp {
+  execute (stack: TEALStack): void {
+    const b = this.assertBigInt(stack.pop(), this.line);
+    const a = this.assertBigInt(stack.pop(), this.line);
+
+    if (a === 0n && b === 0n) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.EXP_ERROR, { line: this.line });
+    }
+    const res = a ** b;
+    this.checkOverflowU128(res, this.line);
+
+    const low = res & MAX_UINT64;
+    this.checkOverflow(low, this.line);
+
+    const high = res >> BigInt('64');
+    this.checkOverflow(high, this.line);
+
+    stack.push(high);
+    stack.push(low);
+  }
+}
+
+export class Shl extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    const a = this.assertBigInt(stack.pop(), this.line);
+    const b = this.assertBigInt(stack.pop(), this.line);
+
+    this.assertUint8(b, this.line);
+    const res = (a << b) % (2n ** 64n);
+
+    stack.push(res);
+  }
+}
+
+export class Shr extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    const a = this.assertBigInt(stack.pop(), this.line);
+    const b = this.assertBigInt(stack.pop(), this.line);
+
+    this.assertUint8(b, this.line);
+    const res = a >> b;
+
+    stack.push(res);
+  }
+}
+
+export class Sqrt extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    let last = this.assertBigInt(stack.pop(), this.line);
+    /*
+      go-algorand implementation
+      This algorithm comes from Jack W. Crenshaw's 1998 article in Embedded:
+      http://www.embedded.com/electronics-blogs/programmer-s-toolbox/4219659/Integer-Square-Roots
+    */
+    let rem = 0n;
+    let root = 0n;
+
+    for (let i = 0; i < 32; i++) {
+      root <<= 1n;
+      rem = (rem << 2n) | (last >> (64n - 2n));
+      last <<= 2n;
+      if (root < rem) {
+        rem -= root | 1n;
+        root += 2n;
+      }
+    }
+    stack.push(root >> 1n);
+  }
+}
