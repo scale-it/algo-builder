@@ -18,7 +18,8 @@ import {
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
   Load, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, PushBytes, PushInt, Return,
-  Select, SetBit, SetByte, Sha256, Sha512_256, Shl, Shr, Store, Sub, Substring, Substring3, Swap, Txn, Txna
+  Select, SetBit, SetByte, Sha256, Sha512_256, Shl, Shr, Sqrt, Store,
+  Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE, DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8 } from "../../../src/lib/constants";
 import { convertToBuffer, getEncoding } from "../../../src/lib/parsing";
@@ -4531,7 +4532,21 @@ describe("Teal Opcodes", function () {
     });
 
     it("sqrt", () => {
+      stack.push(5n);
+      const op = new Sqrt([], 1);
+      op.execute(stack);
 
+      assert.equal(stack.pop(), 2n);
+
+      stack.push(1024n);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 32n);
+
+      stack.push(1023n);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 31n);
     });
   });
 });

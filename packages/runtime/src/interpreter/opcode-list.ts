@@ -2975,24 +2975,30 @@ export class Sqrt extends Op {
   };
 
   execute (stack: TEALStack): void {
-    let last = this.assertBigInt(stack.pop(), this.line);
-    /*
-      go-algorand implementation
-      This algorithm comes from Jack W. Crenshaw's 1998 article in Embedded:
-      http://www.embedded.com/electronics-blogs/programmer-s-toolbox/4219659/Integer-Square-Roots
-    */
-    let rem = 0n;
-    let root = 0n;
-
-    for (let i = 0; i < 32; i++) {
-      root <<= 1n;
-      rem = (rem << 2n) | (last >> (64n - 2n));
-      last <<= 2n;
-      if (root < rem) {
-        rem -= root | 1n;
-        root += 2n;
-      }
+    // https://stackoverflow.com/questions/53683995/javascript-big-integer-square-root
+    const value = this.assertBigInt(stack.pop(), this.line);
+    if (value < 2n) {
+      stack.push(value);
+      return;
     }
-    stack.push(root >> 1n);
+
+    if (value < 16n) {
+      stack.push(BigInt(Math.floor(Math.sqrt(Number(value)))));
+      return;
+    }
+    let x1;
+    if (value < (1n << 52n)) {
+      x1 = BigInt(Math.floor(Math.sqrt(Number(value)))) - 3n;
+    } else {
+      x1 = (1n << 52n) - 2n;
+    }
+
+    let x0 = -1n;
+    while ((x0 !== x1 && x0 !== (x1 - 1n))) {
+      x0 = x1;
+      x1 = ((value / x0) + x0) >> 1n;
+    }
+
+    stack.push(x0);
   }
 }

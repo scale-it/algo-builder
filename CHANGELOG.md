@@ -13,6 +13,7 @@
     * Transaction Array changes
         a) array length assertions for `tx.ForeignAssets`, `tx.Accounts`, `tx.ForeignApps`,
         b) User can pass id/offset for app/asset in for array references. For `tx.Accounts` you can pass address directly in teal code.
+    * Additional mathematical opcodes: `divmodw`, `exp`, `expw`, `shl`, `shr`, `sqrt`
 
 
 ### Bug Fixes
