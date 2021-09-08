@@ -13,12 +13,12 @@ import {
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfZero, Btoi,
-  Byte, ByteAdd, Bytec, Bytecblock, Concat, Dig, Div, Dup, Dup2, Ed25519verify,
-  EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global,
+  Byte, ByteAdd, Bytec, Bytecblock, Concat, Dig, Div, DivModw, Dup, Dup2, Ed25519verify,
+  EqualTo, Err, Exp, Expw, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global,
   GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc,
   Intcblock, Itob, Keccak256, Label, Len, LessThan, LessThanEqualTo,
   Load, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo, Or, Pragma, PushBytes, PushInt, Return,
-  Select, SetBit, SetByte, Sha256, Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
+  Select, SetBit, SetByte, Sha256, Sha512_256, Shl, Shr, Store, Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { ALGORAND_ACCOUNT_MIN_BALANCE, ASSET_CREATION_FEE, DEFAULT_STACK_ELEM, MAX_UINT8, MAX_UINT64, MaxTEALVersion, MIN_UINT8 } from "../../../src/lib/constants";
 import { convertToBuffer, getEncoding } from "../../../src/lib/parsing";
@@ -4374,6 +4374,164 @@ describe("Teal Opcodes", function () {
       it("should throw error if ByteAdd is used with int",
         execExpectError(stack, [1n, 2n], new ByteAdd([], 0), RUNTIME_ERRORS.TEAL.INVALID_TYPE)
       );
+    });
+  });
+
+  describe("Tealv4: Additional mathematical opcodes", () => {
+    const stack = new Stack<StackElem>();
+
+    it("divmodw", () => {
+      stack.push(0n);
+      stack.push(500n);
+      stack.push(0n);
+      stack.push(10n);
+
+      const op = new DivModw([], 1);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 0n);
+      assert.equal(stack.pop(), 0n);
+      assert.equal(stack.pop(), 50n);
+      assert.equal(stack.pop(), 0n);
+
+      stack.push(MAX_UINT64);
+      stack.push(MAX_UINT64);
+      stack.push(0n);
+      stack.push(1n);
+
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 0n);
+      assert.equal(stack.pop(), 0n);
+      assert.equal(stack.pop(), MAX_UINT64);
+      assert.equal(stack.pop(), MAX_UINT64);
+
+      stack.push(MAX_UINT64);
+      stack.push(5n);
+      stack.push(MAX_UINT64);
+      stack.push(0n);
+
+      op.execute(stack);
+
+      assert.equal(stack.pop(), 5n);
+      assert.equal(stack.pop(), 0n);
+      assert.equal(stack.pop(), 1n);
+      assert.equal(stack.pop(), 0n);
+    });
+
+    it("exp", () => {
+      stack.push(2n);
+      stack.push(5n);
+      const op = new Exp([], 1);
+
+      op.execute(stack);
+      assert.equal(stack.pop(), 32n);
+
+      stack.push(5n);
+      stack.push(0n);
+
+      op.execute(stack);
+      assert.equal(stack.pop(), 1n);
+
+      stack.push(0n);
+      stack.push(1n);
+
+      op.execute(stack);
+      assert.equal(stack.pop(), 0n);
+
+      stack.push(0n);
+      stack.push(0n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.EXP_ERROR
+      );
+
+      stack.push(2n);
+      stack.push(66n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
+      );
+    });
+
+    it("expw", () => {
+      stack.push(2n);
+      stack.push(66n);
+      const op = new Expw([], 1);
+
+      op.execute(stack);
+      const res = 2n ** 66n;
+      const low = res & MAX_UINT64;
+      const high = res >> BigInt('64');
+
+      assert.equal(stack.pop(), low);
+      assert.equal(stack.pop(), high);
+
+      stack.push(5n);
+      stack.push(0n);
+
+      op.execute(stack);
+      assert.equal(stack.pop(), 1n);
+
+      stack.push(0n);
+      stack.push(0n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.EXP_ERROR
+      );
+
+      stack.push(2n);
+      stack.push(128n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.UINT128_OVERFLOW
+      );
+    });
+
+    it("shl", () => {
+      stack.push(0n);
+      stack.push(20n);
+
+      let exp = 0n << 20n;
+      const op = new Shl([], 1);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), exp);
+
+      stack.push(5n);
+      stack.push(21n);
+
+      exp = 5n << 21n;
+      op.execute(stack);
+
+      assert.equal(stack.pop(), exp);
+    });
+
+    it("shr", () => {
+      stack.push(0n);
+      stack.push(20n);
+
+      let exp = 0n >> 20n;
+      const op = new Shr([], 1);
+      op.execute(stack);
+
+      assert.equal(stack.pop(), exp);
+
+      stack.push(5n);
+      stack.push(21n);
+
+      exp = 5n >> 21n;
+      op.execute(stack);
+
+      assert.equal(stack.pop(), exp);
+    });
+
+    it("sqrt", () => {
+
     });
   });
 });

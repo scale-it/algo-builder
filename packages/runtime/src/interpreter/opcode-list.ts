@@ -2923,10 +2923,9 @@ export class Shl extends Op {
   };
 
   execute (stack: TEALStack): void {
-    const a = this.assertBigInt(stack.pop(), this.line);
     const b = this.assertBigInt(stack.pop(), this.line);
+    const a = this.assertBigInt(stack.pop(), this.line);
 
-    this.assertUint8(b, this.line);
     const res = (a << b) % (2n ** 64n);
 
     stack.push(res);
@@ -2950,10 +2949,9 @@ export class Shr extends Op {
   };
 
   execute (stack: TEALStack): void {
-    const a = this.assertBigInt(stack.pop(), this.line);
     const b = this.assertBigInt(stack.pop(), this.line);
+    const a = this.assertBigInt(stack.pop(), this.line);
 
-    this.assertUint8(b, this.line);
     const res = a >> b;
 
     stack.push(res);
