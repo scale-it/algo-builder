@@ -2656,7 +2656,8 @@ export class Gloads extends Gload {
 }
 
 // generic op to execute byteslice arithmetic
-// eg. b+, b-, b*, b/ ..
+// `b+`, `b-`, `b*`, `b/`, `b%`, `b<`, `b>`, `b<=`,
+// `b>=`, `b==`, `b!=`, `b\`, `b&`, `b^`, `b~`, `bzero`
 export class ByteOp extends Op {
   readonly line: number;
   /**
@@ -2754,6 +2755,7 @@ export class ByteOp extends Op {
         r === 0n ? new Uint8Array([]) : bigintToBigEndianBytes(r);
       if (op === MathOp.BitwiseOr || op === MathOp.BitwiseAnd || op === MathOp.BitwiseXor) {
         // for bitwise ops, zero's are "left" padded upto length.max(byteB, byteA)
+        // https://developer.algorand.org/docs/reference/teal/specification/#arithmetic-logic-and-cryptographic-operations
         const maxSize = Math.max(byteA.length, byteB.length);
 
         const paddedZeroArr = new Uint8Array(Math.max(0, maxSize - resultAsBytes.length)).fill(0);
@@ -2900,7 +2902,7 @@ export class ByteBitwiseXor extends ByteOp {
   }
 }
 
-// X with all bits inverted
+// X (bytes array) with all bits inverted
 // Pops: ... stack, []byte
 // push to stack [...stack, byte[]]
 export class ByteBitwiseInvert extends ByteOp {

@@ -4867,11 +4867,6 @@ describe("Teal Opcodes", function () {
         op.execute(stack);
         assert.deepEqual(stack.pop(), hexToByte('0x0ffe'));
 
-        // stack.push(hexToByte('0x0001'));
-        // op = new ByteBitwiseInvert([], 0);
-        // op.execute(stack);
-        // assert.deepEqual(stack.pop(), hexToByte('0x00f0'));
-
         stack.push(hexToByte('0xa123457601234576012345760123457601234576012345760123457601234576'));
         op = new ByteBitwiseInvert([], 0);
         op.execute(stack);
