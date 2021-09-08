@@ -4467,7 +4467,7 @@ describe("Teal Opcodes", function () {
         stack.push(hexToByte('0x00'));
         op = new ByteMul([], 0);
         op.execute(stack);
-        assert.deepEqual(stack.pop(), hexToByte(0x00));
+        assert.deepEqual(stack.pop(), hexToByte('0x00'));
 
         // "A" * "" === ""
         stack.push(parsing.stringToBytes('A'));
