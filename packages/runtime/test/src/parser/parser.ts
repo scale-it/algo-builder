@@ -8,12 +8,14 @@ import {
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
   Branch, BranchIfNotZero, BranchIfZero, Btoi, Byte, Bytec, Callsub,
   Concat, Dig, Div,
-  Dup, Dup2, Ed25519verify, EqualTo, Err, GetAssetDef, GetAssetHolding,
+  DivModw,
+  Dup, Dup2, Ed25519verify, EqualTo, Err, Exp, Expw, GetAssetDef, GetAssetHolding,
   GetBit, GetByte, Gload, Gloads, Global, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna,
   Gtxns, Gtxnsa, Int, Intc, Itob, Keccak256, Label, Len, LessThan,
   LessThanEqualTo, Load, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo,
   Or, Pop, Pragma, PushBytes, PushInt, Retsub,
-  Return, Select, SetBit, SetByte, Sha256, Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
+  Return, Select, SetBit, SetByte, Sha256, Sha512_256, Shl, Shr, Sqrt,
+  Store, Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { MAX_UINT64, MaxTEALVersion, MIN_UINT64 } from "../../../src/lib/constants";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
@@ -941,6 +943,78 @@ describe("Parser", function () {
 
         expectRuntimeError(
           () => opcodeFromSentence(["retsub", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("divmodw", () => {
+        const res = opcodeFromSentence(["divmodw"], 1, interpreter);
+        const expected = new DivModw([], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["divmodw", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("exp", () => {
+        const res = opcodeFromSentence(["exp"], 1, interpreter);
+        const expected = new Exp([], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["exp", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("expw", () => {
+        const res = opcodeFromSentence(["expw"], 1, interpreter);
+        const expected = new Expw([], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["expw", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("shl", () => {
+        const res = opcodeFromSentence(["shl"], 1, interpreter);
+        const expected = new Shl([], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["shl", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("shr", () => {
+        const res = opcodeFromSentence(["shr"], 1, interpreter);
+        const expected = new Shr([], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["shr", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("sqrt", () => {
+        const res = opcodeFromSentence(["sqrt"], 1, interpreter);
+        const expected = new Sqrt([], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["sqrt", "1"], 1, interpreter),
           RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
         );
       });
