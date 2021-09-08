@@ -15,7 +15,7 @@ import { mockSuggestedParams } from "./mock/tx";
 import {
   AccountAddress, AccountStoreI, AppDeploymentFlags, AppOptionalFlags,
   ASADeploymentFlags, ASAInfo, AssetHoldingM, Context,
-  ExecutionMode, SSCAttributesM, SSCInfo, StackElem, State, Txn
+  ExecutionMode, RuntimeAccount, SSCAttributesM, SSCInfo, StackElem, State, Txn
 } from "./types";
 
 export class Runtime {
@@ -570,6 +570,24 @@ export class Runtime {
     const acc = new AccountStore(0, { addr: lsig.address(), sk: new Uint8Array(0) });
     this.store.accounts.set(acc.address, acc);
     return lsig;
+  }
+
+  /**
+   * Transfers `amount` of microAlgos from `from` address to `to` address
+   * @param from From account
+   * @param to to address
+   * @param amount amount of algo in microalgos
+   */
+  fundLsig (from: RuntimeAccount, to: AccountAddress, amount: number): void {
+    const fundParam: types.ExecParams = {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: from,
+      toAccountAddr: to,
+      amountMicroAlgos: amount,
+      payFlags: { totalFee: 1000 }
+    };
+    this.executeTx(fundParam);
   }
 
   /**

@@ -86,7 +86,8 @@ describe("Sign-Multisig task", () => {
         out: outFile
       });
     } catch (error) {
-      assert.equal(error.message, 'Key does not exist');
+      if (error instanceof Error) { assert.equal(error.message, 'Key does not exist'); }
+      console.error("An unexpected error occurred:", error);
     }
   });
 
@@ -169,7 +170,8 @@ describe("Sign-Multisig task", () => {
         out: outFile
       });
     } catch (error) {
-      assert.equal(error.message, `Multisig MetaData (version, threshold, addresses) not passed. This is required for creating a new multisig. Aborting`);
+      if (error instanceof Error) { assert.equal(error.message, `Multisig MetaData (version, threshold, addresses) not passed. This is required for creating a new multisig. Aborting`); }
+      console.error("An unexpected error occurred:", error);
     }
   });
 
@@ -191,7 +193,8 @@ describe("Sign-Multisig task", () => {
         addrs: `${aliceAddr},${johnAddr},${bobAddr}`
       });
     } catch (error) {
-      assert.equal(error.message, 'Key does not exist');
+      if (error instanceof Error) { assert.equal(error.message, 'Key does not exist'); }
+      console.error("An unexpected error occurred:", error);
     }
   });
 
