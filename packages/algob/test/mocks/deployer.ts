@@ -1,12 +1,13 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
-import algosdk, { LogicSig, modelsv2 } from "algosdk";
+import algosdk, { LogicSigAccount, modelsv2 } from "algosdk";
 
 import type {
   ASCCache,
   ConfirmedTxInfo,
   Deployer,
   FundASCFlags,
+  LogicSig,
   LsigInfo
 } from "../../src/types";
 
@@ -96,7 +97,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  async loadLogic (name: string, scInitParam?: unknown): Promise<LogicSig> {
+  async loadLogic (name: string, scInitParam?: unknown): Promise<LogicSigAccount> {
     throw new Error("Not implemented");
   }
 
@@ -184,7 +185,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  optInLsigToASA (asa: string, lsig: LogicSig, flags: wtypes.TxParams): Promise<void> {
+  optInLsigToASA (asa: string, lsig: LogicSigAccount, flags: wtypes.TxParams): Promise<void> {
     throw new Error("Not implemented");
   }
 
@@ -195,7 +196,7 @@ export class FakeDeployer implements Deployer {
   }
 
   optInLsigToApp (
-    appID: number, lsig: LogicSig,
+    appID: number, lsig: LogicSigAccount,
     payFlags: wtypes.TxParams, flags: rtypes.AppOptionalFlags): Promise<void> {
     throw new Error("not implemented.");
   }

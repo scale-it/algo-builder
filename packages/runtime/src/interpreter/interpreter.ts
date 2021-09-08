@@ -15,35 +15,50 @@ import {
 import { Op } from "./opcode";
 import { Label } from "./opcode-list";
 
+/**
+ * Interpreter parses and executes a TEAL code. Each transaction is using a new instance of
+ * interpreter and doesn't share the interpreter state. When executing the transaction
+ * we create a Context (`ctx`) and pass it to the interpreter. It encapsulates
+ * runtime state and the transaction group state (eg shared scratch space).
+ * Interpreter must not modify the `runtime` - the latter will be updated during the context
+ * commit phase once all transactions in the groups succeed.
+ */
 export class Interpreter {
-  /**
-   * Note: Interpreter operates on `ctx`, it doesn't operate on `store`.
-   * All the functions query or update only a state copy from the interpreter, not the `runtime.store`.
-   */
   readonly stack: TEALStack;
   tealVersion: number; // LogicSigVersion
   lineToCost: { [key: number]: number }; // { <lineNo>: <OpCost> } cost of each instruction by line
   gas: number; // total gas cost of TEAL code
   length: number; // total length of 'compiled' TEAL code
+  // local stores for a transaction.
   bytecblock: Uint8Array[];
   intcblock: BigInt[];
   scratch: StackElem[];
+  // TEAL parsed code - instantiated during the execution phase.
   instructions: Operator[];
   instructionIndex: number;
   runtime: Runtime;
+  // The call stack is separate from the data stack. Only callsub and retsub manipulate it.
+  // It is used to provide sub routine functionality
+  callStack: Stack<number>;
+  labelMap: Map<string, number>; // label string mapped to their respective indexes in instructions array
 
   constructor () {
     this.stack = new Stack<StackElem>();
     this.tealVersion = 1; // LogicSigVersion = 1 by default (if not specified by pragma)
-    this.gas = 0; // initial cost
+    // total cost computed during code parsing, used in TEAL <= v3
+    this.gas = 0;
+    // gas cost of each line used in TEAL >=4 (we accumulate gas when executing the code).
     this.lineToCost = {};
-    this.length = 0; // initial length
+    this.length = 0; // code length
     this.bytecblock = [];
     this.intcblock = [];
+    // scratch spece used
     this.scratch = new Array(256).fill(DEFAULT_STACK_ELEM);
     this.instructions = [];
     this.instructionIndex = 0; // set instruction index to zero
     this.runtime = <Runtime>{};
+    this.callStack = new Stack<number>();
+    this.labelMap = new Map<string, number>();
   }
 
   /**
@@ -256,6 +271,7 @@ export class Interpreter {
   /**
    * Description: moves instruction index to "label", throws error if label not found
    * @param label: branch label
+   * @param line: line number
    */
   jumpForward (label: string, line: number): void {
     while (++this.instructionIndex < this.instructions.length) {
@@ -276,6 +292,30 @@ export class Interpreter {
   }
 
   /**
+   * Description: moves instruction index to "label", throws error if label not found
+   * @param label: branch label
+   * @param line: line number
+   */
+  jumpToLabel (label: string, line: number): void {
+    const toInstructionIndex = this.labelMap.get(label);
+    if (toInstructionIndex === undefined) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.LABEL_NOT_FOUND, {
+        label: label,
+        line: line
+      });
+    }
+    let currentIndex = toInstructionIndex;
+    // if next immediate op is also label, then keep continuing, otherwise return
+    for (; currentIndex < this.instructions.length - 1; ++currentIndex) {
+      const nextInstruction = this.instructions[currentIndex + 1];
+      if (!(nextInstruction instanceof Label)) {
+        this.instructionIndex = currentIndex;
+        break;
+      }
+    }
+  }
+
+  /**
    * logs TEALStack upto depth = debugStack to console
    * @param instruction interpreter opcode instance
    * @param debugStack max no. of elements to print from top of stack
@@ -293,7 +333,17 @@ export class Interpreter {
   }
 
   /**
-   * Assets transaction references (apps, assets, accounts) lengths are valid:
+   * Maps labels with indexes according to instructions array
+   */
+  mapLabelWithIndexes (): void {
+    this.instructions.forEach((instruction, idx) => {
+      if (instruction instanceof Label) {
+        this.labelMap.set(instruction.label, idx);
+      }
+    });
+  }
+
+  /* Assets transaction references (apps, assets, accounts) lengths are valid:
    * 1. Application args are limited to max. size of 16.
    * 2. The AVM limits the accounts array to no more than 4
    * 3. Assets and application arrays combined and totaled with the accounts array can not exceed 8
@@ -339,6 +389,7 @@ export class Interpreter {
   execute (program: string, mode: ExecutionMode, runtime: Runtime, debugStack?: number): void {
     this.runtime = runtime;
     this.instructions = parser(program, mode, this);
+    this.mapLabelWithIndexes();
     if (mode === ExecutionMode.APPLICATION) { this.assertValidTxArray(); }
 
     let dynamicCost = 0;

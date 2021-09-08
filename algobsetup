@@ -6,8 +6,8 @@
 
 BASEDIR=$(pwd)
 ALGO_BUILDER_DIR="algo-builder"
-declare -a PACKAGES=("algob" "runtime" "types-algosdk")
-declare -a LINKED_PACKAGES=("@algo-builder/web" "@algo-builder/algob" "@algo-builder/runtime" "@algo-builder/types-algosdk")
+declare -a PACKAGES=("algob" "runtime" "web")
+declare -a LINKED_PACKAGES=("@algo-builder/algob" "@algo-builder/runtime" "@algo-builder/web")
 
 function err () {
   printf "$1\n"

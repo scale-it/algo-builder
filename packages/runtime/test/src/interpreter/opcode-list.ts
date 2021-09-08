@@ -3263,7 +3263,7 @@ describe("Teal Opcodes", function () {
       const prev = stack.pop();
 
       assert.deepEqual(last.toString(), "1");
-      assert.deepEqual(prev, convertToBuffer("hash"));
+      assert.deepEqual(prev, convertToBuffer("hash", EncodingType.BASE64));
     });
 
     it("should push correct Asset Manager", () => {

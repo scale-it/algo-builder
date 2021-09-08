@@ -1,5 +1,5 @@
 import { types } from "@algo-builder/web";
-import { LogicSig } from "algosdk";
+import { LogicSigAccount } from "algosdk";
 import { assert } from "chai";
 import sinon from "sinon";
 
@@ -22,7 +22,7 @@ describe("Logic Signature Transaction in Runtime", function () {
   const alice = new AccountStore(minBalance);
 
   let runtime: Runtime;
-  let lsig: LogicSig;
+  let lsig: LogicSigAccount;
   let txnParam: types.ExecParams;
   this.beforeAll(function () {
     runtime = new Runtime([john, bob, alice]);
@@ -202,7 +202,7 @@ describe("Algorand Standard Assets", function () {
     assert.equal(res.decimals, 0);
     assert.equal(res.defaultFrozen, false);
     assert.equal(res.total, 5912599999515n);
-    assert.equal(res.metadataHash, "12312442142141241244444411111133");
+    assert.deepEqual(res.metadataHash, new Uint8Array(Buffer.from("12312442142141241244444411111133", 'base64')));
     assert.equal(res.unitName, "GLD");
     assert.equal(res.url, "url");
     assert.equal(res.manager, elon.address);
@@ -235,7 +235,7 @@ describe("Algorand Standard Assets", function () {
     assert.equal(res.decimals, 0);
     assert.equal(res.defaultFrozen, false);
     assert.equal(res.total, 10000n);
-    assert.equal(res.metadataHash, "12312442142141241244444411111133");
+    assert.deepEqual(res.metadataHash, new Uint8Array(Buffer.from("12312442142141241244444411111133", 'base64')));
     assert.equal(res.unitName, "SLV");
     assert.equal(res.url, "url");
   });
@@ -265,7 +265,10 @@ describe("Algorand Standard Assets", function () {
     assert.equal(res?.assetDef.decimals, 0);
     assert.equal(res?.assetDef.defaultFrozen, false);
     assert.equal(res?.assetDef.total, 10000n);
-    assert.equal(res?.assetDef.metadataHash, "12312442142141241244444411111133");
+    assert.deepEqual(
+      res?.assetDef.metadataHash,
+      new Uint8Array(Buffer.from("12312442142141241244444411111133", 'base64'))
+    );
     assert.equal(res?.assetDef.unitName, "SLV");
     assert.equal(res?.assetDef.url, "url");
   });

@@ -1402,7 +1402,7 @@ export class Label extends Op {
   execute (stack: TEALStack): void {}
 }
 
-// branch unconditionally to label
+// branch unconditionally to label - Tealv <= 3
 // push to stack [...stack]
 export class Branch extends Op {
   readonly label: string;
@@ -1428,7 +1428,16 @@ export class Branch extends Op {
   }
 }
 
-// branch conditionally if top of stack is zero
+// branch unconditionally to label - TEALv4
+// can also jump backward
+// push to stack [...stack]
+export class Branchv4 extends Branch {
+  execute (stack: TEALStack): void {
+    this.interpreter.jumpToLabel(this.label, this.line);
+  }
+}
+
+// branch conditionally if top of stack is zero - Teal version <= 3
 // push to stack [...stack]
 export class BranchIfZero extends Op {
   readonly label: string;
@@ -1455,6 +1464,20 @@ export class BranchIfZero extends Op {
 
     if (last === 0n) {
       this.interpreter.jumpForward(this.label, this.line);
+    }
+  }
+}
+
+// branch conditionally if top of stack is zero - Tealv4
+// can jump forward also
+// push to stack [...stack]
+export class BranchIfZerov4 extends BranchIfZero {
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const last = this.assertBigInt(stack.pop(), this.line);
+
+    if (last === 0n) {
+      this.interpreter.jumpToLabel(this.label, this.line);
     }
   }
 }
@@ -1486,6 +1509,20 @@ export class BranchIfNotZero extends Op {
 
     if (last !== 0n) {
       this.interpreter.jumpForward(this.label, this.line);
+    }
+  }
+}
+
+// branch conditionally if top of stack is non zero - Tealv4
+// can jump forward as well
+// push to stack [...stack]
+export class BranchIfNotZerov4 extends BranchIfNotZero {
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const last = this.assertBigInt(stack.pop(), this.line);
+
+    if (last !== 0n) {
+      this.interpreter.jumpToLabel(this.label, this.line);
     }
   }
 }
@@ -2652,6 +2689,77 @@ export class Gloads extends Gload {
     this.assertMinStackLen(stack, 1, this.line);
     this.txIndex = Number(this.assertBigInt(stack.pop(), this.line));
     super.execute(stack);
+  }
+}
+
+/**
+ * Provide subroutine functionality. When callsub is called, the current location in
+ * the program is saved and immediately jumps to the label passed to the opcode.
+ * Pops: None
+ * Pushes: None
+ * The call stack is separate from the data stack. Only callsub and retsub manipulate it.
+ * Pops: None
+ * Pushes: Pushes current instruction index in call stack
+ */
+export class Callsub extends Op {
+  readonly interpreter: Interpreter;
+  readonly label: string;
+  readonly line: number;
+
+  /**
+   * Sets `label` according to arguments passed.
+   * @param args Expected arguments: [label of branch]
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    assertLen(args.length, 1, line);
+    this.label = args[0];
+    this.interpreter = interpreter;
+    this.line = line;
+  }
+
+  execute (stack: TEALStack): void {
+    // the current location in the program is saved
+    this.interpreter.callStack.push(this.interpreter.instructionIndex);
+    // immediately jumps to the label passed to the opcode.
+    this.interpreter.jumpToLabel(this.label, this.line);
+  }
+}
+
+/**
+ * When the retsub opcode is called, the AVM will resume
+ * execution at the previous saved point.
+ * Pops: None
+ * Pushes: None
+ * The call stack is separate from the data stack. Only callsub and retsub manipulate it.
+ * Pops: index from call stack
+ * Pushes: None
+ */
+export class Retsub extends Op {
+  readonly interpreter: Interpreter;
+  readonly line: number;
+
+  /**
+   * @param args Expected arguments: []
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    assertLen(args.length, 0, line);
+    this.interpreter = interpreter;
+    this.line = line;
+  }
+
+  execute (stack: TEALStack): void {
+    // get current location from saved point
+    // jump to saved instruction opcode
+    if (this.interpreter.callStack.length() === 0) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.CALL_STACK_EMPTY, { line: this.line });
+    }
+    this.interpreter.instructionIndex = this.interpreter.callStack.pop();
   }
 }
 
