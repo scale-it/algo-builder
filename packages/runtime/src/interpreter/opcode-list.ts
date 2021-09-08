@@ -2759,7 +2759,7 @@ export class ByteOp extends Op {
         const paddedZeroArr = new Uint8Array(Math.max(0, maxSize - resultAsBytes.length)).fill(0);
         const mergedArr = new Uint8Array(maxSize);
         mergedArr.set(paddedZeroArr);
-        mergedArr.set(resultAsBytes, paddedZeroArr.length); // total size == Math.max(byteA.length, byteB.length)
+        mergedArr.set(resultAsBytes, paddedZeroArr.length);
         stack.push(this.assertBytes(mergedArr, this.line, MAX_OUTPUT_BYTE_LEN));
       } else {
         stack.push(this.assertBytes(resultAsBytes, this.line, MAX_OUTPUT_BYTE_LEN));
