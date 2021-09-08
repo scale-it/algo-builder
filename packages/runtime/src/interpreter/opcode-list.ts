@@ -2797,6 +2797,8 @@ export class ByteAdd extends Op {
  * Four uint64 values are pushed to the stack.
  * The deepest two are the quotient (deeper value
  * is the high uint64). The top two are the remainder, low bits on top.
+ * Pops: ... stack, {uint64 A}, {uint64 B}, {uint64 C}, {uint64 D}
+ * Pushes: ... stack, uint64, uint64, uint64, uint64
  */
 export class DivModw extends Op {
   readonly line: number;
@@ -2846,6 +2848,9 @@ export class DivModw extends Op {
   }
 }
 
+// A raised to the Bth power. Panic if A == B == 0 and on overflow
+// Pops: ... stack, {uint64 A}, {uint64 B}
+// Pushes: uint64
 export class Exp extends Op {
   readonly line: number;
   /**
@@ -2874,6 +2879,11 @@ export class Exp extends Op {
   }
 }
 
+// A raised to the Bth power as a 128-bit long result as
+// low (top) and high uint64 values on the stack.
+// Panic if A == B == 0 or if the results exceeds 2^128-1
+// Pops: ... stack, {uint64 A}, {uint64 B}
+// Pushes: ... stack, uint64, uint64
 export class Expw extends Exp {
   execute (stack: TEALStack): void {
     const b = this.assertBigInt(stack.pop(), this.line);
@@ -2896,6 +2906,9 @@ export class Expw extends Exp {
   }
 }
 
+// Left shift (A times 2^B, modulo 2^64)
+// Pops: ... stack, {uint64 A}, {uint64 B}
+// Pushes: uint64
 export class Shl extends Op {
   readonly line: number;
   /**
@@ -2920,6 +2933,9 @@ export class Shl extends Op {
   }
 }
 
+// Right shift (A divided by 2^B)
+// Pops: ... stack, {uint64 A}, {uint64 B}
+// Pushes: uint64
 export class Shr extends Op {
   readonly line: number;
   /**
@@ -2944,6 +2960,9 @@ export class Shr extends Op {
   }
 }
 
+// The largest integer B such that B^2 <= X
+// Pops: ... stack, uint64
+// Pushes: uint64
 export class Sqrt extends Op {
   readonly line: number;
   /**
