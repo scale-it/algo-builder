@@ -14,7 +14,7 @@ async function depositVote (deployer, voterAcc, amt) {
     console.log(e.message); // already opted in
   }
 
-  console.log(`* Deposit ${amt} votes by ${voterAcc.addr} *`)
+  console.log(`* Deposit ${amt} votes by ${voterAcc.addr} *`);
   const depositVoteParam = [
     // tx0: call to DAO App with arg 'deposit_vote'
     {
@@ -23,7 +23,7 @@ async function depositVote (deployer, voterAcc, amt) {
       fromAccount: voterAcc,
       appID: daoAppInfo.appID,
       payFlags: { totalFee: 1000 },
-      appArgs: [ 'str:deposit_vote' ]
+      appArgs: ['str:deposit_vote']
     },
     // tx1: deposit votes (each token == 1 vote)
     {
@@ -33,7 +33,7 @@ async function depositVote (deployer, voterAcc, amt) {
       toAccountAddr: depositLsig.address(),
       amount: amt,
       assetID: govToken.assetIndex,
-      payFlags: { totalFee: 1000 },
+      payFlags: { totalFee: 1000 }
     }
   ];
 

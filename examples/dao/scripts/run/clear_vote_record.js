@@ -1,6 +1,6 @@
 const { executeTx } = require('./common/common.js');
 const { types } = require('@algo-builder/web');
-const { accounts, getDepositLsig } = require('./common/accounts.js');
+const { accounts } = require('./common/accounts.js');
 
 async function clearVoteRecord (deployer, voterAcc, proposalLsig) {
   const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');

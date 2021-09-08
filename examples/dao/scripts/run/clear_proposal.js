@@ -37,7 +37,7 @@ async function clearProposal (deployer, proposalLsig, depositAmt) {
     tealFile: 'dao-app-approval.py',
     groupIndex: 0,
     scInitParam: { TMPL_GOV_TOKEN: govToken.assetIndex }
-  })
+  });
   await executeTx(deployer, clearProposalParam);
 }
 
