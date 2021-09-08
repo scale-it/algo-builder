@@ -4,7 +4,7 @@
 
 ### Improvements
 + Added shared space between contracts
-+ Added tealv4 opcodes (`gload` and `gloads`) 
++ Added tealv4 opcodes (`gload` and `gloads`)
 + Added Tealv4 opcodes (`callsub` and `retsub`)
 + Added loop support in runtime
 * TEALv4 support in `@algo-builder/runtime`:
@@ -25,6 +25,9 @@
 
 ### API breaking
 * Rename `CallNoOpSSC` to `CallApp`.
+
+### Dependencies
+* Upgraded pyTEAL version [`0.8.0`](https://github.com/algorand/pyteal/releases/tag/v0.8.0) in pipfile.
 
 ## v1.2.0 2021-08-09
 
