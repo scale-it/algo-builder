@@ -2798,6 +2798,8 @@ export class ByteOp extends Op {
         break;
       }
       case MathOp.Mul: {
+        // NOTE: 12n * 0n == 0n, but in bytesclice arithmatic, this is equivalent to
+        // empty bytes (eg. byte "A" * byte "" === byte "")
         r = bigIntA * bigIntB;
         break;
       }
