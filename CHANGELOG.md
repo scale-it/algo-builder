@@ -4,7 +4,7 @@
 
 ### Improvements
 + Added shared space between contracts
-+ Added tealv4 opcodes (`gload` and `gloads`) 
++ Added tealv4 opcodes (`gload` and `gloads`)
 + Added Tealv4 opcodes (`callsub` and `retsub`)
 + Added loop support in runtime
 * TEALv4 support in `@algo-builder/runtime`:
@@ -13,6 +13,8 @@
     * Transaction Array changes
         a) array length assertions for `tx.ForeignAssets`, `tx.Accounts`, `tx.ForeignApps`,
         b) User can pass id/offset for app/asset in for array references. For `tx.Accounts` you can pass address directly in teal code.
+    * More Versatile Global and Local Storage (combination of upto 128 bytes allowed between key-value).
+    * Asset URL change (max size increased till 96 bytes).
 
 
 ### Bug Fixes
