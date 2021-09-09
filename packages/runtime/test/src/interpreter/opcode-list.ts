@@ -4519,15 +4519,12 @@ describe("Teal Opcodes", function () {
       let exp = 0n >> 20n;
       const op = new Shr([], 1);
       op.execute(stack);
-
       assert.equal(stack.pop(), exp);
 
       stack.push(5n);
       stack.push(21n);
-
       exp = 5n >> 21n;
       op.execute(stack);
-
       assert.equal(stack.pop(), exp);
     });
 
