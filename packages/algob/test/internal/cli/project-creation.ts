@@ -16,7 +16,7 @@ describe("Init project", () => {
     }
   });
 
-  it("should init project in a empty folder(javascript)", async () => {
+  it("should init project in an empty folder(javascript)", async () => {
     const location = "test-project";
     await createProject(location, false);
 
@@ -41,7 +41,7 @@ describe("Init project", () => {
     );
   });
 
-  it("should init project in a empty folder(typescript) with `.`", async () => {
+  it("should init project in an empty folder(typescript) with `.`", async () => {
     const location = ".";
     await createProject(location, true);
 
@@ -49,7 +49,7 @@ describe("Init project", () => {
     assert.isTrue(fs.existsSync(`./${location}/scripts/0-sampleScript.ts`));
   });
 
-  it("should not create project if folder already exist with `.`", async () => {
+  it("should not init project if it already exists with `.`", async () => {
     await createProject(".", false);
 
     await expectBuilderErrorAsync(
