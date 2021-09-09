@@ -34,8 +34,9 @@ export const ASADefSchema = z.object({
     message: "Unit name must not be longer than 8 bytes",
     path: ['unitName']
   })
-  .refine(o => (!o.url || (o.url && (o.url.length <= 32))), {
-    message: "URL must not be longer than 32 bytes",
+  // https://developer.algorand.org/articles/introducing-algorand-virtual-machine-avm-09-release/
+  .refine(o => (!o.url || (o.url && (o.url.length <= 96))), {
+    message: "URL must not be longer than 96 bytes",
     path: ['url']
   })
   .refine(o => (!o.metadataHash || (o.metadataHash && (o.metadataHash.length <= 32))), {
