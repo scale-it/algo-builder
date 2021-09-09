@@ -273,6 +273,12 @@ by an index that does not exist.`
     message: "There is no callsub before retsub, call stack is empty. [error-line: %line%]",
     title: 'call stack error',
     description: `There is no callsub before retsub, call stack is empty`
+  },
+  GROUP_INDEX_EXIST_ERROR: {
+    number: 1038,
+    message: "Requested transaction hasn't created an asset or application for index: %index%. [error-line: %line%], requested transaction didn't create an asset or application or T < GroupIndex",
+    title: 'Requested transaction not found',
+    description: `requested transaction didn't creat an asset or application or T < GroupIndex.`
   }
 };
 

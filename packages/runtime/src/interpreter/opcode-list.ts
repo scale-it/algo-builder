@@ -2789,3 +2789,38 @@ export class ByteAdd extends Op {
     stack.push(this.assertBytes(resultAsBytes, this.line, MAX_OUTPUT_BYTE_LEN));
   }
 }
+
+// Pops: None
+// Pushes: uint64
+// push the ID of the asset or application created in the Tth transaction of the current group
+// gaid fails unless the requested transaction created an asset or application and T < GroupIndex.
+export class Gaid extends Op {
+  readonly interpreter: Interpreter;
+  readonly line: number;
+  readonly txIndex: number;
+
+  /**
+   * Asserts 1 arguments are passed.
+   * @param args Expected arguments: [txIndex]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.line = line;
+    this.interpreter = interpreter;
+    assertLen(args.length, 1, line);
+    this.txIndex = Number(args[0]);
+  };
+
+  execute (stack: TEALStack): void {
+    const ID = this.interpreter.runtime.ctx.knowableID.get(this.txIndex);
+    if (ID === undefined) {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.GROUP_INDEX_EXIST_ERROR,
+        { index: this.txIndex, line: this.line }
+      );
+    }
+
+    stack.push(BigInt(ID));
+  }
+}

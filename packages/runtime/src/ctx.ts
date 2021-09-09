@@ -12,7 +12,7 @@ import {
   AppDeploymentFlags,
   ASADeploymentFlags, AssetHoldingM,
   Context, ExecutionMode,
-  SSCAttributesM, StackElem, State, Txn
+  ID, SSCAttributesM, StackElem, State, Txn
 } from "./types";
 
 const APPROVAL_PROGRAM = "approval-program";
@@ -25,6 +25,7 @@ export class Ctx implements Context {
   runtime: Runtime;
   debugStack?: number; //  max number of top elements from the stack to print after each opcode execution.
   sharedScratchSpace: Map<number, StackElem[]>; // here number is index of transaction in a group
+  knowableID: Map<number, ID>; // here number is index of transaction in a group
 
   constructor (state: State, tx: Txn, gtxs: Txn[], args: Uint8Array[],
     runtime: Runtime, debugStack?: number) {
@@ -37,6 +38,7 @@ export class Ctx implements Context {
     // Mapping from the tx index number to the scratch space.
     // Scratch space is a list of elements.
     this.sharedScratchSpace = new Map<number, StackElem[]>();
+    this.knowableID = new Map<number, ID>();
   }
 
   // verify account's balance is above minimum required balance
@@ -620,12 +622,13 @@ export class Ctx implements Context {
             ...txnParam.payFlags,
             creator: { ...senderAcc.account, name: senderAcc.address }
           };
-
+          let assetID: number;
           if (txnParam.asaDef) {
-            this.addASADef(txnParam.asaName, txnParam.asaDef, fromAccountAddr, flags);
+            assetID = this.addASADef(txnParam.asaName, txnParam.asaDef, fromAccountAddr, flags);
           } else {
-            this.addAsset(txnParam.asaName, fromAccountAddr, flags);
+            assetID = this.addAsset(txnParam.asaName, fromAccountAddr, flags);
           }
+          this.knowableID.set(idx, assetID);
           break;
         }
         case types.TransactionType.OptInASA: {
@@ -643,12 +646,13 @@ export class Ctx implements Context {
           };
           this.tx = this.gtxs[idx]; // update current tx to the requested index
 
-          this.addApp(
+          const appID = this.addApp(
             fromAccountAddr, flags,
             txnParam.approvalProgram,
             txnParam.approvalProgram,
             idx
           );
+          this.knowableID.set(idx, appID);
           break;
         }
         case types.TransactionType.OptInToApp: {
