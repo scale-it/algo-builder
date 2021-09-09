@@ -8,7 +8,8 @@ import {
   BitwiseXor, Branch, BranchIfNotZero, BranchIfNotZerov4, BranchIfZero, BranchIfZerov4, Branchv4,
   Btoi, Byte, ByteAdd, Bytec, Bytecblock, Callsub,
   Concat, Dig, Div, Dup, Dup2, Ed25519verify,
-  EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global, GreaterThan,
+  EqualTo, Err, Gaid, Gaids, GetAssetDef, GetAssetHolding, GetBit,
+  GetByte, Gload, Gloads, Global, GreaterThan,
   GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Intcblock, Itob,
   Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, MinBalance, Mod,
   Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Retsub,
@@ -168,7 +169,11 @@ opCodeMap[4] = {
   bnz: BranchIfNotZerov4,
   bz: BranchIfZerov4,
   // byteslice arithmetic ops
-  'b+': ByteAdd
+  'b+': ByteAdd,
+
+  // Knowable creatable asset
+  gaid: Gaid,
+  gaids: Gaids
 };
 
 // list of opcodes that require one extra parameter than others: `interpreter`.
@@ -178,7 +183,8 @@ const interpreterReqList = new Set([
   "balance", "asset_holding_get", "asset_params_get", "app_opted_in",
   "app_local_get", "app_local_get_ex", "app_global_get", "app_global_get_ex",
   "app_local_put", "app_global_put", "app_local_del", "app_global_del",
-  "gtxns", "gtxnsa", "min_balance", "gload", "gloads", "callsub", "retsub"
+  "gtxns", "gtxnsa", "min_balance", "gload", "gloads", "callsub", "retsub",
+  "gaid", "gaids"
 ]);
 
 /**
