@@ -964,7 +964,7 @@ describe("Parser", function () {
 
       assert.deepEqual(res, expected);
 
-      const expect = [new Pragma(["version", "2"], 1, interpreter), new Int(["1"], 2),
+      const expect = [new Pragma(["version", "4"], 1, interpreter), new Int(["1"], 2),
         new Int(["3"], 3), new Add([], 4)];
       res = parser(getProgram("test-file-2.teal"), ExecutionMode.SIGNATURE, interpreter);
 
@@ -989,7 +989,7 @@ describe("Parser", function () {
       const file = "test-file-3.teal";
       const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1, interpreter),
+        new Pragma(["version", "4"], 1, interpreter),
         new Int(["5"], 2),
         new Int(["3"], 3),
         new Sub([], 4)
@@ -1002,7 +1002,7 @@ describe("Parser", function () {
       const file = "test-file-4.teal";
       const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1, interpreter),
+        new Pragma(["version", "4"], 1, interpreter),
         new Int(["6"], 2),
         new Int(["3"], 3),
         new Div([], 6)
@@ -1015,7 +1015,7 @@ describe("Parser", function () {
       const file = "test-file-5.teal";
       const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1, interpreter),
+        new Pragma(["version", "4"], 1, interpreter),
         new Int(["5"], 4),
         new Int(["3"], 6),
         new Mul([], 10)
@@ -1028,7 +1028,7 @@ describe("Parser", function () {
       const file = "test-addr.teal";
       const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1, interpreter),
+        new Pragma(["version", "4"], 1, interpreter),
         new Addr(["WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"], 2)
       ];
 
@@ -1147,7 +1147,7 @@ describe("Parser", function () {
 
       const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1, interpreter),
+        new Pragma(["version", "4"], 1, interpreter),
         new Itob([], 2),
         new Btoi([], 3),
         new Mulw([], 4),
@@ -1218,7 +1218,7 @@ describe("Parser", function () {
 
       const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1, interpreter),
+        new Pragma(["version", "4"], 1, interpreter),
         new Balance([], 4, interpreter),
         new GetAssetHolding(["AssetBalance"], 5, interpreter),
         new GetAssetDef(["AssetTotal"], 6, interpreter),

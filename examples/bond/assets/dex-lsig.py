@@ -13,14 +13,14 @@ def dex_lsig():
         Gtxn[1].asset_close_to() == Global.zero_address(),
     )
 
-    # verify that buyer deposits old tokens 
+    # verify that buyer deposits old tokens
     first_tx = And(
         Gtxn[0].type_enum() == TxnType.AssetTransfer,
         Gtxn[0].xfer_asset() == Tmpl.Int("TMPL_OLD_BOND"),
         Gtxn[0].asset_amount() == Gtxn[1].asset_amount()
     )
 
-    # verify dex sends new bond tokens to buyer 
+    # verify dex sends new bond tokens to buyer
     second_tx = And(
         Gtxn[1].type_enum() == TxnType.AssetTransfer,
         Gtxn[1].xfer_asset() == Tmpl.Int("TMPL_NEW_BOND"),
@@ -48,7 +48,7 @@ def dex_lsig():
     )
 
     # verify redeem bond token exchange transaction (B_i -> B_i+1)
-    # User sends B_i to DEX_i lsig. 
+    # User sends B_i to DEX_i lsig.
     # DEX_i sends B_{i+1} to the user.
     # Dex pays coupon value
     verify_exchange = And(common_fields, first_tx, second_tx, third_tx)
@@ -61,4 +61,4 @@ def dex_lsig():
     return program
 
 if __name__ == "__main__":
-    print(compileTeal(dex_lsig(), Mode.Signature))
+    print(compileTeal(dex_lsig(), Mode.Signature, version = 4))

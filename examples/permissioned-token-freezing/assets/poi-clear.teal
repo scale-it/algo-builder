@@ -1,4 +1,4 @@
-#pragma version 2
+#pragma version 4
 // source: https://github.com/algorand/smart-contracts/blob/master/devrel/poi/poi-clear.teal
 int 1
 return

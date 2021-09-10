@@ -19,7 +19,7 @@ We will create a simple stateful smart contract which will:
 We will create an approval program which has global `counter` and it is incremented by 1 each time we call the application. Put the code below in `/assets/approval_program.teal`:
 
 ```
-#pragma version 2
+#pragma version 4
 
 int NoOp
 txn OnCompletion
@@ -62,7 +62,7 @@ This program has a single global key/value pair to store the number of times the
 Now, we will create clear program. This program does not evaluate any conditions and simply approves the call. Put the code below in `/assets/clear_program.teal`:
 
 ```
-#pragma version 2
+#pragma version 4
 
 int 1
 return
