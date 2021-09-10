@@ -4,7 +4,7 @@ layout: splash
 
 # [Deployer](https://algobuilder.dev/api/algob/interfaces/types.deployer.html)
 
-Deployer wraps an SDK `AlgodV2` client and provides a higher level functionality to deploy [Algorand Standard Assets(ASA)](https://developer.algorand.org/docs/features/asa/) and [Stateful Smart Contracts(SSC)](https://developer.algorand.org/docs/features/asc1/stateful/) to the Algorand network:
+Deployer wraps an SDK `AlgodV2` client and provides a higher level functionality to deploy [Algorand Standard Assets(ASA)](https://developer.algorand.org/docs/features/asa/) and [Stateful Smart Contracts(App)](https://developer.algorand.org/docs/features/asc1/stateful/) to the Algorand network:
 * load ASA definition files
 * load smart-contract files
 * create transaction log and checkpoints.
@@ -103,20 +103,20 @@ Check our [examples/permissioned-voting](https://github.com/scale-it/algo-builde
 
 Smart contracts must be stored in `assets` folder.
 
-The main difference between deploying an ASA and SSC is that ASA takes `asset-name` and `ASADeploymentFlags` as input and SSC takes `smart-contract-names` and `AppDeploymentFlags` as input.
+The main difference between deploying an ASA and App is that ASA takes `asset-name` and `ASADeploymentFlags` as input and App takes `smart-contract-names` and `AppDeploymentFlags` as input.
 
 You can learn more about the flags from [Deployer API](https://scale-it.github.io/algo-builder/api/algob/interfaces/types.deployer.html);
 You can learn more about Stateful Smart Contracts [here](https://developer.algorand.org/docs/features/asc1/stateful/).
 
-#### OptIn to SSC
+#### OptIn to App
 
-For opting in to SSC, `deployer` supports the following methods:
-- `optInAcountToSSC` to opt-in to a single account signed by secret key of sender.
+For opting in to App, `deployer` supports the following methods:
+- `optInAccountToApp` to opt-in to a single account signed by secret key of sender.
 - `optInLsigToApp` to opt-in to a contract account (say escrow) where the account is represented by the logic signature address (`lsig.address()`).
-  - To opt in to SSC you can use `Application Index`.[When the smart contract is created the network will return a unique ApplicationID. This ID can then be used to make ApplicationCall transactions to the smart contract. ](https://developer.algorand.org/docs/features/asc1/stateful/#call-the-stateful-smart-contract)
+  - To opt in to App you can use `Application Index`.[When the smart contract is created the network will return a unique ApplicationID. This ID can then be used to make ApplicationCall transactions to the smart contract. ](https://developer.algorand.org/docs/features/asc1/stateful/#call-the-stateful-smart-contract)
 
-- Like with ASA, we can also use `executeTransaction` to opt-in a single account or contract account to SSC.
-  - `executeTransaction` to opt-in single account or contract account to SSC.
+- Like with ASA, we can also use `executeTransaction` to opt-in a single account or contract account to App.
+  - `executeTransaction` to opt-in single account or contract account to App.
   - Ex: To opt-in a single account, Params will look like this:
   ```js
     const execParam: ExecParams = {
