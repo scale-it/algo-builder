@@ -30,6 +30,7 @@ describe("Init project", () => {
 
     assert.isTrue(fs.existsSync(`./${location}/algob.config.js`));
     assert.isTrue(fs.existsSync(`./${location}/scripts/0-sampleScript.ts`));
+    assert.isTrue(fs.existsSync(`./${location}/tsconfig.json`));
   });
 
   it("should not create project if folder already exist", async () => {
