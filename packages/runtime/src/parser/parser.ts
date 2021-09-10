@@ -6,7 +6,10 @@ import {
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr,
   BitwiseXor, Branch, BranchIfNotZero, BranchIfNotZerov4, BranchIfZero, BranchIfZerov4, Branchv4,
-  Btoi, Byte, ByteAdd, Bytec, Bytecblock, Callsub,
+  Btoi, Byte, ByteAdd, ByteBitwiseAnd, ByteBitwiseInvert, ByteBitwiseOr,
+  ByteBitwiseXor, Bytec, Bytecblock, ByteDiv, ByteEqualTo, ByteGreaterThanEqualTo, ByteGreatorThan,
+  ByteLessThan, ByteLessThanEqualTo, ByteMod, ByteMul, ByteNotEqualTo, ByteSub,
+  ByteZero, Callsub,
   Concat, Dig, Div, Dup, Dup2, Ed25519verify,
   EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global, GreaterThan,
   GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Intcblock, Itob,
@@ -168,7 +171,22 @@ opCodeMap[4] = {
   bnz: BranchIfNotZerov4,
   bz: BranchIfZerov4,
   // byteslice arithmetic ops
-  'b+': ByteAdd
+  'b+': ByteAdd,
+  'b-': ByteSub,
+  'b*': ByteMul,
+  'b/': ByteDiv,
+  'b%': ByteMod,
+  'b<': ByteLessThan,
+  'b>': ByteGreatorThan,
+  'b<=': ByteLessThanEqualTo,
+  'b>=': ByteGreaterThanEqualTo,
+  'b==': ByteEqualTo,
+  'b!=': ByteNotEqualTo,
+  'b|': ByteBitwiseOr,
+  'b&': ByteBitwiseAnd,
+  'b^': ByteBitwiseXor,
+  'b~': ByteBitwiseInvert,
+  bzero: ByteZero
 };
 
 // list of opcodes that require one extra parameter than others: `interpreter`.
