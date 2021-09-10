@@ -649,7 +649,7 @@ export class Ctx implements Context {
           const appID = this.addApp(
             fromAccountAddr, flags,
             txnParam.approvalProgram,
-            txnParam.approvalProgram,
+            txnParam.clearProgram,
             idx
           );
           this.knowableID.set(idx, appID);
