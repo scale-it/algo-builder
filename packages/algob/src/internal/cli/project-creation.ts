@@ -52,13 +52,12 @@ function copy (directory: string, location: string): void {
 function copySampleProject (location: string, isTSProject: boolean): void {
   const packageRoot = getPackageRoot();
   const sampleProjDir = path.join(packageRoot, "sample-project");
-  console.log("Location", location);
   if (fsExtra.pathExistsSync(`./${location}/algob.config.js`)) {
     throw new BuilderError(ERRORS.GENERAL.INIT_INSIDE_PROJECT, {
       clashingFile: location
     });
   }
-  console.log(chalk.greenBright("Initializing new workspace in " + process.cwd() + "."));
+  console.log(chalk.greenBright("Initializing new workspace in " + path.join(process.cwd(), location)));
 
   // copy common files first
   copy(path.join(sampleProjDir, "common"), location);
