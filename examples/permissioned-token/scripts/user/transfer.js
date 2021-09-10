@@ -73,7 +73,8 @@ async function transfer (deployer, from, toAddr, amount) {
       appID: permissionsAppInfo.appID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:transfer'],
-      accounts: [from.addr, toAddr] //  AppAccounts (pass asset sender & receiver address)
+      accounts: [from.addr, toAddr], //  AppAccounts (pass asset sender & receiver address)
+      foreignAssets: [tesla.assetIndex] // from TEALv4 ASA reference must be passed in assets array
     }
   ];
 
