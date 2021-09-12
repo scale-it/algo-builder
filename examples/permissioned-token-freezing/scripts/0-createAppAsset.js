@@ -22,7 +22,7 @@ async function run (runtimeEnv, deployer) {
   await executeTransaction(deployer, algoTxnParams);
 
   const asaInfo = await deployer.deployASA('gold', { creator: creator });
-  await deployer.optInAcountToASA('gold', 'bob', {}); // asa optIn for bob
+  await deployer.optInAccountToASA('gold', 'bob', {}); // asa optIn for bob
   console.log(asaInfo);
 
   /** * Creating Application ***/

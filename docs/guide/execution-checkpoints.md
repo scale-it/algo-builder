@@ -67,13 +67,13 @@ Make sure that your local `algob` version matches the version from the link.
 
 ## Checkpoint storage structure for Stateful Smart Contracts(SSC)
 
-We can update SSC on algorand blockchain, therefore we store checkpoints for SSC in a nested form.
+We can update App on algorand blockchain, therefore we store checkpoints for App in a nested form.
 structure for the same is:
-        `program-name-key` -> `timestamp` -> `SSCInfo`.
-Consider a case when SSC is updated with same programs, this is the case where we append to checkpoint with different timestamp, txConfirmation but same `program-name-key`.
+        `program-name-key` -> `timestamp` -> `AppInfo`.
+Consider a case when App is updated with same programs, this is the case where we append to checkpoint with different timestamp, txConfirmation but same `program-name-key`.
 
-While retreiving sscInfo from checkpoints only the lastest timestamp SSCInfo is used.
+While retreiving AppInfo from checkpoints only the lastest timestamp AppInfo is used.
 
 ## Checkpoint storage `delete` boolean
 
-- Checkpoint structure has an additional flag `deleted` - if it's true, that means the respective asa/ssc is deleted from network. If this is the case, then the deployer will throw an error when trying to use that in any operation other than `optOut`.
+- Checkpoint structure has an additional flag `deleted` - if it's true, that means the respective asa/App is deleted from network. If this is the case, then the deployer will throw an error when trying to use that in any operation other than `optOut`.

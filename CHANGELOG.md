@@ -19,13 +19,15 @@
 ### Bug Fixes
 * Fixed `yarn add @algo-builder/web` (was failing because of missing dependency `zod` in packages/web).
 * Fix metadatahash type
-* Fix init project-name bug(`polar <init project-name>` command was not working)
+* Fix init project-name bug(`algob init <project-name>` command was not working properly)
 
 ### API Breaking
 * Migrate from `LogicSig` to `LogicSigAccount`(Note: Loading lsig from file uses `LogicSig`, because `goal` stores it in LogicSig type format)
 
 ### API breaking
 * Rename `CallNoOpSSC` to `CallApp`.
+* Rename `optInAcountToASA` to `optInAccountToASA` (typo)
+* Rename `readLocalStateSSC` to `readAppLocalState`, `readGlobalStateSSC` to `readAppGlobalState`.
 
 ### Dependencies
 * Upgraded pyTEAL version [`0.8.0`](https://github.com/algorand/pyteal/releases/tag/v0.8.0) in pipfile.
