@@ -4,7 +4,7 @@
 
 ### Improvements
 + Added shared space between contracts
-+ Added tealv4 opcodes (`gload` and `gloads`) 
++ Added tealv4 opcodes (`gload` and `gloads`)
 + Added Tealv4 opcodes (`callsub` and `retsub`)
 + Added loop support in runtime
 * TEALv4 support in `@algo-builder/runtime`:
@@ -13,18 +13,25 @@
     * Transaction Array changes
         a) array length assertions for `tx.ForeignAssets`, `tx.Accounts`, `tx.ForeignApps`,
         b) User can pass id/offset for app/asset in for array references. For `tx.Accounts` you can pass address directly in teal code.
+    * Byteslice arithmetic ops (`b+`, `b-`, `b*`, `b/`, `b%`, `b<`, `b>`, `b<=`, `b>=`, `b==`, `b!=`, `b\`, `b&`, `b^`, `b~`, `bzero`).
     * Additional mathematical opcodes: `divmodw`, `exp`, `expw`, `shl`, `shr`, `sqrt`
 
 
 ### Bug Fixes
 * Fixed `yarn add @algo-builder/web` (was failing because of missing dependency `zod` in packages/web).
 * Fix metadatahash type
+* Fix init project-name bug(`algob init <project-name>` command was not working properly)
 
 ### API Breaking
 * Migrate from `LogicSig` to `LogicSigAccount`(Note: Loading lsig from file uses `LogicSig`, because `goal` stores it in LogicSig type format)
 
 ### API breaking
 * Rename `CallNoOpSSC` to `CallApp`.
+* Rename `optInAcountToASA` to `optInAccountToASA` (typo)
+* Rename `readLocalStateSSC` to `readAppLocalState`, `readGlobalStateSSC` to `readAppGlobalState`.
+
+### Dependencies
+* Upgraded pyTEAL version [`0.8.0`](https://github.com/algorand/pyteal/releases/tag/v0.8.0) in pipfile.
 
 ## v1.2.0 2021-08-09
 

@@ -1,4 +1,4 @@
-const { readGlobalStateSSC } = require('@algo-builder/algob');
+const { readAppGlobalState } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 const { executeTransaction } = require('./common');
 
@@ -10,7 +10,7 @@ async function run (runtimeEnv, deployer) {
   const appInfo = deployer.getApp('permissioned-voting-approval.py', 'permissioned-voting-clear.py');
 
   // Retreive Global State
-  const globalState = await readGlobalStateSSC(deployer, votingAdminAccount.addr, appInfo.appID);
+  const globalState = await readAppGlobalState(deployer, votingAdminAccount.addr, appInfo.appID);
   console.log(globalState);
 
   // Count votes

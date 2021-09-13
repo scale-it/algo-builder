@@ -111,7 +111,7 @@ export class AlgoOperatorDryRunImpl implements AlgoOperator {
     };
   }
 
-  optInAcountToASA (
+  optInAccountToASA (
     asaName: string, assetIndex: number, account: rtypes.Account,
     params: wtypes.TxParams): Promise<void> {
     return new Promise((resolve, reject) => { resolve(); });

@@ -315,7 +315,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
 
   it("should throw error with opt-in asa functions, if asa exist and deleted", async () => {
     await expectBuilderErrorAsync(
-      async () => await deployer.optInAcountToASA(assetName, 'acc-name-1', {}),
+      async () => await deployer.optInAccountToASA(assetName, 'acc-name-1', {}),
       ERRORS.GENERAL.ASSET_DELETED
     );
 
@@ -326,7 +326,7 @@ describe("Delete ASA and SSC transaction flow(with functions and executeTransact
   });
 
   it("should pass with opt-in asa functions, if asa doesn't exist in checkpoint", async () => {
-    await deployer.optInAcountToASA('23', 'acc-name-1', {});
+    await deployer.optInAccountToASA('23', 'acc-name-1', {});
 
     await deployer.optInLsigToASA('233212', mockLsig, {});
   });

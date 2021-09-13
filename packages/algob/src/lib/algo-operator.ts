@@ -52,7 +52,7 @@ export interface AlgoOperator {
   ) => Promise<rtypes.SSCInfo>
   waitForConfirmation: (txId: string) => Promise<ConfirmedTxInfo>
   getAssetByID: (assetIndex: number | bigint) => Promise<modelsv2.Asset>
-  optInAcountToASA: (
+  optInAccountToASA: (
     asaName: string, assetIndex: number, account: rtypes.Account, params: wtypes.TxParams
   ) => Promise<void>
   optInLsigToASA: (
@@ -143,7 +143,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
     return rawSignedTxn.length;
   }
 
-  async _optInAcountToASA (
+  async _optInAccountToASA (
     asaName: string, assetIndex: number,
     account: rtypes.Account, params: algosdk.SuggestedParams,
     flags: wtypes.TxParams
@@ -154,11 +154,11 @@ export class AlgoOperatorImpl implements AlgoOperator {
     await this.sendAndWait(rawSignedTxn);
   }
 
-  async optInAcountToASA (
+  async optInAccountToASA (
     asaName: string, assetIndex: number, account: rtypes.Account, flags: wtypes.TxParams
   ): Promise<void> {
     const txParams = await tx.mkTxParams(this.algodClient, flags);
-    await this._optInAcountToASA(asaName, assetIndex, account, txParams, flags);
+    await this._optInAccountToASA(asaName, assetIndex, account, txParams, flags);
   }
 
   async optInLsigToASA (
@@ -186,7 +186,7 @@ export class AlgoOperatorImpl implements AlgoOperator {
       flags.creator,
       flags);
     for (const account of optInAccounts) {
-      await this._optInAcountToASA(asaName, assetIndex, account, txParams, flags);
+      await this._optInAccountToASA(asaName, assetIndex, account, txParams, flags);
     }
   }
 

@@ -73,7 +73,8 @@ async function transfer (deployer, from, toAddr, amount) {
       appID: permissionsAppInfo.appID,
       payFlags: { totalFee: 1000 },
       appArgs: ['str:transfer'],
-      accounts: [from.addr, toAddr] //  AppAccounts (pass asset sender & receiver address)
+      accounts: [from.addr, toAddr], //  AppAccounts (pass asset sender & receiver address)
+      foreignAssets: [tesla.assetIndex] // from TEALv4 ASA reference must be passed in assets array
     }
   ];
 
@@ -129,9 +130,9 @@ async function run (runtimeEnv, deployer) {
 
   // opt-in accounts to asa 'tesla' (so they can receive it)
   await Promise.all([
-    deployer.optInAcountToASA('tesla', elon.name, {}),
-    deployer.optInAcountToASA('tesla', bob.name, {}),
-    deployer.optInAcountToASA('tesla', john.name, {})
+    deployer.optInAccountToASA('tesla', elon.name, {}),
+    deployer.optInAccountToASA('tesla', bob.name, {}),
+    deployer.optInAccountToASA('tesla', john.name, {})
   ]);
 
   // note: if reserve is multisig, then user will use executeSignedTxnFromFile function
