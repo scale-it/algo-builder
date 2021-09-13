@@ -57,6 +57,15 @@ describe("Logic Signature", () => {
       RUNTIME_ERRORS.GENERAL.INVALID_PROGRAM
     );
   });
+
+  it("should return same address for same program", () => {
+    let lsig = runtime.getLogicSig(getProgram(programName), []);
+
+    const addr = lsig.address();
+    lsig = runtime.getLogicSig(getProgram(programName), []);
+
+    assert.equal(lsig.address(), addr);
+  });
 });
 
 describe("Multi-Signature Test", () => {
