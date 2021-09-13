@@ -26,9 +26,13 @@ export class LogicSig {
   lsigAddress: string;
   tag: Buffer;
 
-  constructor (program: string, programArgs?: Array<Uint8Array | Buffer> | null) {
+  constructor (
+    logicSigAddresses: Map<string, string>, program: string,
+    programArgs?: Array<Uint8Array | Buffer> | null
+  ) {
     this.tag = Buffer.from("Program");
     this.logic = parsing.stringToBytes(program);
+    // update
     this.lsigAddress = generateAccount().addr;
     this.tag = Buffer.from('Program');
     if (
@@ -222,7 +226,7 @@ export class LogicSig {
   }
 
   fromByte (val: Uint8Array): LogicSig {
-    return new LogicSig("DUMMY", []);
+    return new LogicSig(new Map<string, string>(), "DUMMY", []);
   }
 
   get_obj_for_encoding (): EncodedLogicSig {
@@ -235,7 +239,7 @@ export class LogicSig {
   }
 
   static from_obj_for_encoding (lsig: EncodedLogicSig): LogicSig {
-    return new LogicSig("DUMMY", []);
+    return new LogicSig(new Map<string, string>(), "DUMMY", []);
   }
 }
 
@@ -251,8 +255,11 @@ export class LogicSigAccount {
    * @param program - program in TEAL file
    * @param args - An optional array of arguments for the program.
    */
-  constructor (program: string, programArgs?: Array<Uint8Array | Buffer> | null) {
-    this.lsig = new LogicSig(program, programArgs);
+  constructor (
+    logicSigAddresses: Map<string, string>, program: string,
+    programArgs?: Array<Uint8Array | Buffer> | null
+  ) {
+    this.lsig = new LogicSig(logicSigAddresses, program, programArgs);
     this.sigkey = undefined;
   }
 
@@ -271,7 +278,7 @@ export class LogicSigAccount {
 
   // eslint-disable-next-line camelcase
   static from_obj_for_encoding (encoded: EncodedLogicSigAccount): LogicSigAccount {
-    const lsigAccount = new LogicSigAccount("DUMMY", encoded.lsig.arg);
+    const lsigAccount = new LogicSigAccount(new Map<string, string>(), "DUMMY", encoded.lsig.arg);
     lsigAccount.lsig = LogicSig.from_obj_for_encoding(encoded.lsig);
     lsigAccount.sigkey = encoded.sigkey;
     return lsigAccount;
@@ -282,7 +289,7 @@ export class LogicSigAccount {
   }
 
   static fromByte (encoded: ArrayLike<any>): LogicSigAccount {
-    return new LogicSigAccount("DUMMY", []);
+    return new LogicSigAccount(new Map<string, string>(), "DUMMY", []);
   }
 
   /**
