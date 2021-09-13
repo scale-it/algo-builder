@@ -121,7 +121,7 @@ function buyTx (buyer, issuerLsig, amount, algoAmount, appID, bondID) {
 }
 
 /**
- * Returns buy transaction for algorand node
+ * Returns buy transaction using algorand node
  * @param deployer deployer object
  * @param buyer buyer account
  * @param issuerLsig Bond issuer logic signature
@@ -143,7 +143,7 @@ async function buyTxNode (deployer, buyer, issuerLsig, algoAmount, appID, bondID
 }
 
 /**
- * Returns buy transaction for runtime
+ * Returns buy transaction for test/runtime
  * @param runtime runtime object
  * @param buyer buyer account
  * @param issuerLsig Bond issuer logic signature
