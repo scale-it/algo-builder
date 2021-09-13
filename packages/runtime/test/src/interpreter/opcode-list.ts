@@ -4974,6 +4974,20 @@ describe("Teal Opcodes", function () {
       op.execute(stack);
       assert.equal(stack.pop(), 0n);
 
+      stack.push(2n);
+      stack.push(63n);
+
+      op.execute(stack);
+      assert.equal(stack.pop(), 2n ** 63n);
+
+      stack.push(2n);
+      stack.push(64n);
+
+      expectRuntimeError(
+        () => op.execute(stack),
+        RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
+      );
+
       stack.push(0n);
       stack.push(0n);
 

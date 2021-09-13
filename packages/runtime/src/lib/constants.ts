@@ -2,7 +2,7 @@ import { EncodedAssetParams, EncodedLocalStateSchema, EncodedTransaction } from 
 
 export const MIN_UINT64 = 0n;
 export const MAX_UINT64 = 0xFFFFFFFFFFFFFFFFn;
-export const MAX_UINT128 = (2n ** 128n) - 1n;
+export const MAX_UINT128 = 340282366920938463463374607431768211455n;
 export const MAX_UINT8 = 255;
 export const MIN_UINT8 = 0;
 export const MAX_UINT6 = 63n;
