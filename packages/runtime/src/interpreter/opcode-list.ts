@@ -12,7 +12,8 @@ import { compareArray } from "../lib/compare";
 import {
   AssetParamMap, GlobalFields, MathOp,
   MAX_CONCAT_SIZE, MAX_INPUT_BYTE_LEN, MAX_OUTPUT_BYTE_LEN,
-  MAX_UINT64, MaxTEALVersion, TxArrFields
+  MAX_UINT64, MAX_UINT128,
+  MaxTEALVersion, TxArrFields
 } from "../lib/constants";
 import {
   assertLen, assertOnlyDigits, bigEndianBytesToBigInt, bigintToBigEndianBytes, convertToBuffer,
@@ -107,7 +108,7 @@ export class Add extends Op {
     const last = this.assertBigInt(stack.pop(), this.line);
     const prev = this.assertBigInt(stack.pop(), this.line);
     const result = prev + last;
-    this.checkOverflow(result, this.line);
+    this.checkOverflow(result, this.line, MAX_UINT64);
     stack.push(result);
   }
 }
@@ -186,7 +187,7 @@ export class Mul extends Op {
     const last = this.assertBigInt(stack.pop(), this.line);
     const prev = this.assertBigInt(stack.pop(), this.line);
     const result = prev * last;
-    this.checkOverflow(result, this.line);
+    this.checkOverflow(result, this.line, MAX_UINT64);
     stack.push(result);
   }
 }
@@ -1010,10 +1011,10 @@ export class Mulw extends Op {
     const result = valueA * valueB;
 
     const low = result & MAX_UINT64;
-    this.checkOverflow(low, this.line);
+    this.checkOverflow(low, this.line, MAX_UINT64);
 
     const high = result >> BigInt('64');
-    this.checkOverflow(high, this.line);
+    this.checkOverflow(high, this.line, MAX_UINT64);
 
     stack.push(high);
     stack.push(low);
@@ -2132,7 +2133,7 @@ export class Int extends Op {
       uint64 = BigInt(args[0]);
     }
 
-    this.checkOverflow(uint64, line);
+    this.checkOverflow(uint64, line, MAX_UINT64);
     this.uint64 = uint64;
   }
 
@@ -2239,7 +2240,7 @@ export class PushInt extends Op {
     assertLen(args.length, 1, line);
     assertOnlyDigits(args[0], line);
 
-    this.checkOverflow(BigInt(args[0]), line);
+    this.checkOverflow(BigInt(args[0]), line, MAX_UINT64);
     this.uint64 = BigInt(args[0]);
   }
 
@@ -3059,6 +3060,7 @@ export class DivModw extends Op {
   };
 
   execute (stack: TEALStack): void {
+    // Go-algorand implementation: https://github.com/algorand/go-algorand/blob/8f743a98827372bfd8928de3e0b70390ff34f407/data/transactions/logic/eval.go#L927
     const firstLow = this.assertBigInt(stack.pop(), this.line);
     const firstHigh = this.assertBigInt(stack.pop(), this.line);
 
@@ -3073,20 +3075,20 @@ export class DivModw extends Op {
 
     const quotient = dividend / divisor;
     let low = quotient & MAX_UINT64;
-    this.checkOverflow(low, this.line);
+    this.checkOverflow(low, this.line, MAX_UINT64);
 
     let high = quotient >> BigInt('64');
-    this.checkOverflow(high, this.line);
+    this.checkOverflow(high, this.line, MAX_UINT64);
 
     stack.push(high);
     stack.push(low);
 
     const remainder = dividend % divisor;
     low = remainder & MAX_UINT64;
-    this.checkOverflow(low, this.line);
+    this.checkOverflow(low, this.line, MAX_UINT64);
 
     high = remainder >> BigInt('64');
-    this.checkOverflow(high, this.line);
+    this.checkOverflow(high, this.line, MAX_UINT64);
 
     stack.push(high);
     stack.push(low);
@@ -3118,7 +3120,7 @@ export class Exp extends Op {
     }
 
     const res = a ** b;
-    this.checkOverflow(res, this.line);
+    this.checkOverflow(res, this.line, MAX_UINT64);
 
     stack.push(res);
   }
@@ -3138,13 +3140,13 @@ export class Expw extends Exp {
       throw new RuntimeError(RUNTIME_ERRORS.TEAL.EXP_ERROR, { line: this.line });
     }
     const res = a ** b;
-    this.checkOverflowU128(res, this.line);
+    this.checkOverflow(res, this.line, MAX_UINT128);
 
     const low = res & MAX_UINT64;
-    this.checkOverflow(low, this.line);
+    this.checkOverflow(low, this.line, MAX_UINT64);
 
     const high = res >> BigInt('64');
-    this.checkOverflow(high, this.line);
+    this.checkOverflow(high, this.line, MAX_UINT64);
 
     stack.push(high);
     stack.push(low);
