@@ -32,7 +32,7 @@ export class Runtime {
   // https://developer.algorand.org/docs/features/transactions/?query=round
   private round: number;
   private timestamp: number;
-  logicSigAddresses: Map<string, string>; // Program hash string mapped to logicsig address
+  logicSigAddresses: Map<number, string>; // Program hash mapped to logicsig address
 
   constructor (accounts: AccountStoreI[]) {
     // runtime store
@@ -46,7 +46,7 @@ export class Runtime {
       appCounter: 0, // initialize app counter with 0
       assetCounter: 0 // initialize asset counter with 0
     };
-    this.logicSigAddresses = new Map<string, string>();
+    this.logicSigAddresses = new Map<number, string>();
 
     // intialize accounts (should be done during runtime initialization)
     this.initializeAccounts(accounts);
