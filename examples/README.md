@@ -60,3 +60,10 @@ the following positions in the latter file:
 - [JS] [signed-txn](./signed-txn) - demonstrates loading a serialized transaction from a file. A user can create a transaction and sign it (using `goal`) and send it to someone else to execute it in `algob`.
 - [TS] [htlc](./htlc-pyteal-ts) - Hash-Time-Lock-Contract Example using PyTeal.
   In this project we are transpiling the files in `js` and then using them with `algob`.
+
+### Interesting Test Suites
+
+- [Runtime Test] [atomic transfer](../packages/runtime/test/integration/atomic-transfer.ts) - This tests demonstrates how to do atomic transfers.
+- [Runtime Test] [loop](../packages/runtime/test/integration/loop.ts) - demonstrates how to use loop.
+- [Runtime Test] [fibonacci](../packages/runtime/test/integration/sub-routine.ts) - demonstrates fibonacci implementation in teal using sub-routines.
+- [Runtime Test] [shared space](../packages/runtime/test/integration/shared-space.ts) - demonstrates shared space between transactions in a group.
