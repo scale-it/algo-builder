@@ -61,7 +61,7 @@ the following positions in the latter file:
 - [TS] [htlc](./htlc-pyteal-ts) - Hash-Time-Lock-Contract Example using PyTeal.
   In this project we are transpiling the files in `js` and then using them with `algob`.
 
-### Tests Description
+### Interesting Test Suites
 
 - [Runtime Test] [atomic transfer](../packages/runtime/test/integration/atomic-transfer.ts) - This tests demonstrates how to do atomic transfers.
 - [Runtime Test] [loop](../packages/runtime/test/integration/loop.ts) - demonstrates how to use loop.
