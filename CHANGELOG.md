@@ -7,7 +7,7 @@
 + Added tealv4 opcodes (`gload` and `gloads`)
 + Added Tealv4 opcodes (`callsub` and `retsub`)
 + Added loop support in runtime
-* TEALv4 support in `@algo-builder/runtime`:
++ TEALv4 support in `@algo-builder/runtime`:
     * Added shared space between contracts (opcodes `gload` and `gloads`)
     * Dynamic Opcode Cost Evaluation
     * Transaction Array changes
@@ -15,6 +15,7 @@
         b) User can pass id/offset for app/asset in for array references. For `tx.Accounts` you can pass address directly in teal code.
     * Byteslice arithmetic ops (`b+`, `b-`, `b*`, `b/`, `b%`, `b<`, `b>`, `b<=`, `b>=`, `b==`, `b!=`, `b\`, `b&`, `b^`, `b~`, `bzero`).
     * Additional mathematical opcodes: `divmodw`, `exp`, `expw`, `shl`, `shr`, `sqrt`
++ Updated all examples & tests to use TEALv4 (`#pragma version 4`)
 
 
 ### Bug Fixes

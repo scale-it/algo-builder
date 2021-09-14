@@ -1,4 +1,4 @@
-#pragma version 2
+#pragma version 4
 // Check if Transaction type is pay, Amount is <= 100, Receiver is john AND fee <= 10000
 txn TypeEnum
 int 1

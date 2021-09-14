@@ -93,4 +93,4 @@ if __name__ == "__main__":
     if(len(sys.argv) > 1):
         params = parse_params(sys.argv[1], params)
 
-    print(compileTeal(clawback_lsig(params["TOKEN_ID"], params["CONTROLLER_APP_ID"]), Mode.Signature))
+    print(compileTeal(clawback_lsig(params["TOKEN_ID"], params["CONTROLLER_APP_ID"]), Mode.Signature, version = 4))

@@ -109,4 +109,4 @@ if __name__ == "__main__":
         Addr(params["ARG_CLS"]),
         params["ARG_FV"],
         params["ARG_LV"],
-        Bytes("base64", params["ARG_LEASE"])), Mode.Signature))
+        Bytes("base64", params["ARG_LEASE"])), Mode.Signature, version = 4))
