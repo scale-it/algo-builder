@@ -25,8 +25,8 @@ exports.epoch1 = async function (deployer) {
   };
   const issuerLsig = await deployer.loadLogic('issuer-lsig.py', scInitParam);
   const bondToken = tokenMap.get('bond-token-1');
-  await deployer.optInAcountToASA(bondToken, 'bob', { totalFee: 1000 });
-  await deployer.optInAcountToASA(bondToken, 'elon-musk', { totalFee: 1000 });
+  await deployer.optInAccountToASA(bondToken, 'bob', { totalFee: 1000 });
+  await deployer.optInAccountToASA(bondToken, 'elon-musk', { totalFee: 1000 });
 
   // elon buys 4 bonds
   const algoAmount = 4 * issuePrice;

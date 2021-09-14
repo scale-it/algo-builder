@@ -10,13 +10,13 @@ import {
   ByteBitwiseXor, Bytec, Bytecblock, ByteDiv, ByteEqualTo, ByteGreaterThanEqualTo, ByteGreatorThan,
   ByteLessThan, ByteLessThanEqualTo, ByteMod, ByteMul, ByteNotEqualTo, ByteSub,
   ByteZero, Callsub,
-  Concat, Dig, Div, Dup, Dup2, Ed25519verify,
-  EqualTo, Err, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global, GreaterThan,
+  Concat, Dig, Div, DivModw, Dup, Dup2, Ed25519verify,
+  EqualTo, Err, Exp, Expw, GetAssetDef, GetAssetHolding, GetBit, GetByte, Gload, Gloads, Global, GreaterThan,
   GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Intcblock, Itob,
   Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, MinBalance, Mod,
   Mul, Mulw, Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Retsub,
   Return, Select, SetBit, SetByte, Sha256,
-  Sha512_256, Store, Sub, Substring, Substring3, Swap, Txn, Txna
+  Sha512_256, Shl, Shr, Sqrt, Store, Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../interpreter/opcode-list";
 import { LogicSigMaxCost, LogicSigMaxSize, MaxAppProgramCost, MaxAppProgramLen, OpGasCost } from "../lib/constants";
 import { assertLen } from "../lib/parsing";
@@ -186,7 +186,14 @@ opCodeMap[4] = {
   'b&': ByteBitwiseAnd,
   'b^': ByteBitwiseXor,
   'b~': ByteBitwiseInvert,
-  bzero: ByteZero
+  bzero: ByteZero,
+
+  divmodw: DivModw,
+  exp: Exp,
+  expw: Expw,
+  shl: Shl,
+  shr: Shr,
+  sqrt: Sqrt
 };
 
 // list of opcodes that require one extra parameter than others: `interpreter`.

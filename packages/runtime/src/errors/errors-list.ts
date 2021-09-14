@@ -273,6 +273,19 @@ by an index that does not exist.`
     message: "There is no callsub before retsub, call stack is empty. [error-line: %line%]",
     title: 'call stack error',
     description: `There is no callsub before retsub, call stack is empty`
+  },
+  UINT128_OVERFLOW: {
+    number: 1038,
+    message: "Result of current operation caused U128 integer overflow at line %line%",
+    title: "Uint128 Overflow at line %line%",
+    description: `You are tying to perform operation where the result has exceeded
+maximun uint128`
+  },
+  EXP_ERROR: {
+    number: 1039,
+    message: "A == 0 and B == 0 in exponentiation at line %line%",
+    title: "A == B == 0 at line %line%",
+    description: `You are tying to perform operation where A = B = 0`
   }
 };
 

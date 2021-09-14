@@ -128,9 +128,9 @@ async function run (runtimeEnv, deployer) {
 
   // opt-in accounts to asa 'tesla' (so they can receive the asset)
   await Promise.all([
-    deployer.optInAcountToASA('tesla', elon.name, {}),
-    deployer.optInAcountToASA('tesla', bob.name, {}),
-    deployer.optInAcountToASA('tesla', john.name, {})
+    deployer.optInAccountToASA('tesla', elon.name, {}),
+    deployer.optInAccountToASA('tesla', bob.name, {}),
+    deployer.optInAccountToASA('tesla', john.name, {})
   ]);
 
   // note: if reserve is multisig, then user will use executeSignedTxnFromFile function

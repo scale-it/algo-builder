@@ -23,7 +23,7 @@ exports.redeem = async function (deployer, buyerAccount, managerAcc, dex, amount
     TMPL_APP_MANAGER: managerAcc.addr
   };
   const dexLsig = await deployer.loadLogic('dex-lsig.py', scInitParam);
-  await deployer.optInAcountToASA(newBond, buyerAccount.name, {});
+  await deployer.optInAccountToASA(newBond, buyerAccount.name, {});
   const groupTx = redeemCouponTx(
     buyerAccount, dexLsig, amount,
     oldBond, newBond, couponValue, appInfo.appID

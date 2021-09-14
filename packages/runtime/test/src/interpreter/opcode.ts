@@ -15,7 +15,7 @@ describe("Teal Opcodes basic assertions", function () {
     const lineNumber = 1;
 
     expectRuntimeError(
-      () => op.checkOverflow(max, lineNumber),
+      () => op.checkOverflow(max, lineNumber, MAX_UINT64),
       RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW
     );
   });

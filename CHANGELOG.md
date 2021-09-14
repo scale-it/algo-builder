@@ -14,6 +14,7 @@
         a) array length assertions for `tx.ForeignAssets`, `tx.Accounts`, `tx.ForeignApps`,
         b) User can pass id/offset for app/asset in for array references. For `tx.Accounts` you can pass address directly in teal code.
     * Byteslice arithmetic ops (`b+`, `b-`, `b*`, `b/`, `b%`, `b<`, `b>`, `b<=`, `b>=`, `b==`, `b!=`, `b\`, `b&`, `b^`, `b~`, `bzero`).
+    * Additional mathematical opcodes: `divmodw`, `exp`, `expw`, `shl`, `shr`, `sqrt`
 + Updated all examples & tests to use TEALv4 (`#pragma version 4`)
 
 
@@ -21,6 +22,7 @@
 * Fixed `yarn add @algo-builder/web` (was failing because of missing dependency `zod` in packages/web).
 * Fix metadatahash type
 * Fix init project-name bug(`algob init <project-name>` command was not working properly)
+* Fix zod package was missing from runtime(but zod was being used in runtime)
 
 ### API Breaking
 * Migrate from `LogicSig` to `LogicSigAccount`(Note: Loading lsig from file uses `LogicSig`, because `goal` stores it in LogicSig type format)

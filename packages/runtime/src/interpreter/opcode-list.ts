@@ -12,7 +12,8 @@ import { compareArray } from "../lib/compare";
 import {
   AssetParamMap, GlobalFields, MathOp,
   MAX_CONCAT_SIZE, MAX_INPUT_BYTE_LEN, MAX_OUTPUT_BYTE_LEN,
-  MAX_UINT64, MaxTEALVersion, TxArrFields
+  MAX_UINT64, MAX_UINT128,
+  MaxTEALVersion, TxArrFields
 } from "../lib/constants";
 import {
   assertLen, assertOnlyDigits, bigEndianBytesToBigInt, bigintToBigEndianBytes, convertToBuffer,
@@ -107,7 +108,7 @@ export class Add extends Op {
     const last = this.assertBigInt(stack.pop(), this.line);
     const prev = this.assertBigInt(stack.pop(), this.line);
     const result = prev + last;
-    this.checkOverflow(result, this.line);
+    this.checkOverflow(result, this.line, MAX_UINT64);
     stack.push(result);
   }
 }
@@ -186,7 +187,7 @@ export class Mul extends Op {
     const last = this.assertBigInt(stack.pop(), this.line);
     const prev = this.assertBigInt(stack.pop(), this.line);
     const result = prev * last;
-    this.checkOverflow(result, this.line);
+    this.checkOverflow(result, this.line, MAX_UINT64);
     stack.push(result);
   }
 }
@@ -1010,10 +1011,10 @@ export class Mulw extends Op {
     const result = valueA * valueB;
 
     const low = result & MAX_UINT64;
-    this.checkOverflow(low, this.line);
+    this.checkOverflow(low, this.line, MAX_UINT64);
 
     const high = result >> BigInt('64');
-    this.checkOverflow(high, this.line);
+    this.checkOverflow(high, this.line, MAX_UINT64);
 
     stack.push(high);
     stack.push(low);
@@ -2132,7 +2133,7 @@ export class Int extends Op {
       uint64 = BigInt(args[0]);
     }
 
-    this.checkOverflow(uint64, line);
+    this.checkOverflow(uint64, line, MAX_UINT64);
     this.uint64 = uint64;
   }
 
@@ -2239,7 +2240,7 @@ export class PushInt extends Op {
     assertLen(args.length, 1, line);
     assertOnlyDigits(args[0], line);
 
-    this.checkOverflow(BigInt(args[0]), line);
+    this.checkOverflow(BigInt(args[0]), line, MAX_UINT64);
     this.uint64 = BigInt(args[0]);
   }
 
@@ -3032,5 +3033,219 @@ export class ByteZero extends ByteOp {
     const len = this.assertBigInt(stack.pop(), this.line);
     const result = new Uint8Array(Number(len)).fill(0);
     stack.push(this.assertBytes(result, this.line, 4096));
+  }
+}
+
+/**
+ * Pop four uint64 values. The deepest two are interpreted
+ * as a uint128 dividend (deepest value is high word),
+ * the top two are interpreted as a uint128 divisor.
+ * Four uint64 values are pushed to the stack.
+ * The deepest two are the quotient (deeper value
+ * is the high uint64). The top two are the remainder, low bits on top.
+ * Pops: ... stack, {uint64 A}, {uint64 B}, {uint64 C}, {uint64 D}
+ * Pushes: ... stack, uint64, uint64, uint64, uint64
+ */
+export class DivModw extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    // Go-algorand implementation: https://github.com/algorand/go-algorand/blob/8f743a98827372bfd8928de3e0b70390ff34f407/data/transactions/logic/eval.go#L927
+    const firstLow = this.assertBigInt(stack.pop(), this.line);
+    const firstHigh = this.assertBigInt(stack.pop(), this.line);
+
+    let divisor = firstHigh << BigInt('64');
+    divisor = divisor + firstLow;
+
+    const secondLow = this.assertBigInt(stack.pop(), this.line);
+    const secondHigh = this.assertBigInt(stack.pop(), this.line);
+
+    let dividend = secondHigh << BigInt('64');
+    dividend = dividend + secondLow;
+
+    const quotient = dividend / divisor;
+    let low = quotient & MAX_UINT64;
+    this.checkOverflow(low, this.line, MAX_UINT64);
+
+    let high = quotient >> BigInt('64');
+    this.checkOverflow(high, this.line, MAX_UINT64);
+
+    stack.push(high);
+    stack.push(low);
+
+    const remainder = dividend % divisor;
+    low = remainder & MAX_UINT64;
+    this.checkOverflow(low, this.line, MAX_UINT64);
+
+    high = remainder >> BigInt('64');
+    this.checkOverflow(high, this.line, MAX_UINT64);
+
+    stack.push(high);
+    stack.push(low);
+  }
+}
+
+// A raised to the Bth power. Panic if A == B == 0 and on overflow
+// Pops: ... stack, {uint64 A}, {uint64 B}
+// Pushes: uint64
+export class Exp extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    const b = this.assertBigInt(stack.pop(), this.line);
+    const a = this.assertBigInt(stack.pop(), this.line);
+
+    if (a === 0n && b === 0n) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.EXP_ERROR, { line: this.line });
+    }
+
+    const res = a ** b;
+    this.checkOverflow(res, this.line, MAX_UINT64);
+
+    stack.push(res);
+  }
+}
+
+// A raised to the Bth power as a 128-bit long result as
+// low (top) and high uint64 values on the stack.
+// Panic if A == B == 0 or if the results exceeds 2^128-1
+// Pops: ... stack, {uint64 A}, {uint64 B}
+// Pushes: ... stack, uint64, uint64
+export class Expw extends Exp {
+  execute (stack: TEALStack): void {
+    const b = this.assertBigInt(stack.pop(), this.line);
+    const a = this.assertBigInt(stack.pop(), this.line);
+
+    if (a === 0n && b === 0n) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.EXP_ERROR, { line: this.line });
+    }
+    const res = a ** b;
+    this.checkOverflow(res, this.line, MAX_UINT128);
+
+    const low = res & MAX_UINT64;
+    this.checkOverflow(low, this.line, MAX_UINT64);
+
+    const high = res >> BigInt('64');
+    this.checkOverflow(high, this.line, MAX_UINT64);
+
+    stack.push(high);
+    stack.push(low);
+  }
+}
+
+// Left shift (A times 2^B, modulo 2^64)
+// Pops: ... stack, {uint64 A}, {uint64 B}
+// Pushes: uint64
+export class Shl extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    const b = this.assertBigInt(stack.pop(), this.line);
+    const a = this.assertBigInt(stack.pop(), this.line);
+
+    const res = (a << b) % (2n ** 64n);
+
+    stack.push(res);
+  }
+}
+
+// Right shift (A divided by 2^B)
+// Pops: ... stack, {uint64 A}, {uint64 B}
+// Pushes: uint64
+export class Shr extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    const b = this.assertBigInt(stack.pop(), this.line);
+    const a = this.assertBigInt(stack.pop(), this.line);
+
+    const res = a >> b;
+
+    stack.push(res);
+  }
+}
+
+// The largest integer B such that B^2 <= X
+// Pops: ... stack, uint64
+// Pushes: uint64
+export class Sqrt extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    // https://stackoverflow.com/questions/53683995/javascript-big-integer-square-root
+    const value = this.assertBigInt(stack.pop(), this.line);
+    if (value < 2n) {
+      stack.push(value);
+      return;
+    }
+
+    if (value < 16n) {
+      stack.push(BigInt(Math.floor(Math.sqrt(Number(value)))));
+      return;
+    }
+    let x1;
+    if (value < (1n << 52n)) {
+      x1 = BigInt(Math.floor(Math.sqrt(Number(value)))) - 3n;
+    } else {
+      x1 = (1n << 52n) - 2n;
+    }
+
+    let x0 = -1n;
+    while ((x0 !== x1 && x0 !== (x1 - 1n))) {
+      x0 = x1;
+      x1 = ((value / x0) + x0) >> 1n;
+    }
+
+    stack.push(x0);
   }
 }

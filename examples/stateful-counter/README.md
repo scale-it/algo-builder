@@ -171,7 +171,7 @@ To view the global state of the application you can use the following code:
 
 ```
 // Retreive Global State
-let globalState = await readGlobalStateSSC(deployer, creatorAccount.addr, applicationID);
+let globalState = await readAppGlobalState(deployer, creatorAccount.addr, applicationID);
 console.log(globalState);
 ```
 
