@@ -39,9 +39,11 @@ Algo Builder DAO [specification](https://paper.dropbox.com/doc/Algo-Builder-DAO-
 
 ## Deploy script
 
-We have deploy script in `scripts/deploy`, This script deploys initial Gov token, deploys DAO app, fund lsig's, saves deposit_lsig address to DAO app, and does initial distribution of ASA (Gov token).
+We created a deploy script in `scripts/deploy`, This script deploys initial Gov token, deploys DAO app, fund lsig's, saves deposit_lsig address to DAO app, and does initial distribution of ASA (Gov token).
 
 ## Run scripts flow
+
+Please read the spec document (linked above) for more details about each use case. The scripts provide only a sample code to show how to use the template. For you private needs, you will have to modify the scripts directory to adjust the parameters (eg voting time, execution time etc...) and the proposals.
 
 To add proposal (`{voting_start, voting_end}` is set as `{now, now + 2min}`):
 
@@ -51,11 +53,11 @@ To deposit votes:
 
         yarn run algob run scripts/run/deposit_vote.js
 
-To register votes in a proposal (using deposited votes/tokens):
+To vote for a proposal (using deposited tokens):
 
         yarn run algob run scripts/run/vote.js
 
-To execute a proposal (`execute_before` is set as 5min from `now`):
+To execute a proposal (`execute_before` is set as 5min from the time of proposal creation):
 
         yarn run algob run scripts/run/vote.js
 
@@ -63,10 +65,10 @@ To withdraw deposited votes (withdrawn from depositLsig to voter account):
 
         yarn run algob run scripts/run/withdraw_vote_deposit.js
 
-To clear vote record (from voter's account):
+To clear vote record (from voter's account), fails if the proposal is still in progress:
 
         yarn run algob run scripts/run/clear_vote_record.js
 
-To clear proposal record (from proposal_lsig as a sender):
+To clear proposal record (from proposal_lsig as a sender), fails if the proposal is still in progress:
 
         yarn run algob run scripts/run/clear_proposal.js
