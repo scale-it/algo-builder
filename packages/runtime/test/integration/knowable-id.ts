@@ -17,22 +17,12 @@ describe("TEALv4: Knowable creatable ID", function () {
   let approvalProgramPass: string;
   let approvalProgramFail: string;
   let clearProgram: string;
-  let flags: AppDeploymentFlags;
   this.beforeAll(async function () {
     runtime = new Runtime([john]); // setup test
     approvalProgram = getProgram('approval.teal');
     approvalProgramPass = getProgram('approval-pass.teal');
     approvalProgramFail = getProgram('approval-fail.teal');
     clearProgram = getProgram('clear.teal');
-
-    flags = {
-      sender: john.account,
-      globalBytes: 1,
-      globalInts: 2,
-      localBytes: 1,
-      localInts: 1,
-      appArgs: []
-    };
   });
 
   it("should store correct asset/App ID", function () {

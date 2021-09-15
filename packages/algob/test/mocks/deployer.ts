@@ -181,7 +181,7 @@ export class FakeDeployer implements Deployer {
     throw new Error("Not implemented");
   }
 
-  optInAcountToASA (asa: string, accountName: string, flags: wtypes.TxParams): Promise<void> {
+  optInAccountToASA (asa: string, accountName: string, flags: wtypes.TxParams): Promise<void> {
     throw new Error("Not implemented");
   }
 

@@ -100,4 +100,4 @@ def htlc(ARG_RCV,
     return And(Or(scenario_1, scenario_2), common_checks)
 
 if __name__ == "__main__":
-    print(compileTeal(htlc(john, master, fee, hash_image, Sha256, timeout), Mode.Signature))
+    print(compileTeal(htlc(john, master, fee, hash_image, Sha256, timeout), Mode.Signature, version = 4))

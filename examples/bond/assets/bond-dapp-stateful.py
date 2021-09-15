@@ -12,14 +12,14 @@ def approval_program():
     app_manager = Bytes("app_manager")
     # Price at which bonds are sold by the issuer.
     issue_price = Bytes("issue_price")
-    # interest paid annually to the bond holders, 
+    # interest paid annually to the bond holders,
     # equals to `coupon_rate x nominal_price`.
     coupon_value = Bytes("coupon_value")
     issuer_address = Bytes("issuer_address")
     # Epoch is the current period for paying the coupon.
     # For example: When bond coupons are paid every 6 month,
     # then initially the epoch is 0. After 6 months epoch 1 starts and
-    # bond holders can redeem their bonds to get a coupon payment 
+    # bond holders can redeem their bonds to get a coupon payment
     # and receive a bond for the next epoch. We do it to prohibit double
     # spent of coupons.  a coupon for interest payment and start epoch 1.
     # After another 6 months bond holders epoch 2 starts and bond holders
@@ -260,4 +260,4 @@ def approval_program():
     return program
 
 if __name__ == "__main__":
-    print(compileTeal(approval_program(), Mode.Application, version=3))
+    print(compileTeal(approval_program(), Mode.Application, version = 4))

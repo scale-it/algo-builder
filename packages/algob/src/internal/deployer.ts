@@ -194,7 +194,7 @@ class DeployerBasicMode {
    * @param accountName
    * @param flags Transaction flags
    */
-  async optInAcountToASA (asa: string, accountName: string, flags: wtypes.TxParams): Promise<void> {
+  async optInAccountToASA (asa: string, accountName: string, flags: wtypes.TxParams): Promise<void> {
     this.assertCPNotDeleted({
       type: wtypes.TransactionType.OptInASA,
       sign: wtypes.SignType.SecretKey,
@@ -204,7 +204,7 @@ class DeployerBasicMode {
     });
     try {
       const asaId = this.getASAInfo(asa).assetIndex;
-      await this.algoOp.optInAcountToASA(
+      await this.algoOp.optInAccountToASA(
         asa,
         asaId,
         this._getAccount(accountName),
@@ -215,7 +215,7 @@ class DeployerBasicMode {
         throw Error("Please provide a valid Number to be used as ASA ID");
       }
       const asaId = Number(asa);
-      await this.algoOp.optInAcountToASA(
+      await this.algoOp.optInAccountToASA(
         asa,
         asaId,
         this._getAccount(accountName),

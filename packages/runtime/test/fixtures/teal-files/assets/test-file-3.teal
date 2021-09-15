@@ -1,4 +1,4 @@
-#pragma version 2
+#pragma version 4
 int 5
 int 3//comment here
 -//comment here
