@@ -201,6 +201,7 @@ describe('Bond token Tests', function () {
 
     // manager starts epoch 1 (create dex)
     const dexLsig1 = createDex(runtime, bondTokenCreator, appManager, 1, master, lsig);
+
     syncAccounts();
     // sync dex account
     dex1 = runtime.getAccount(dexLsig1.address());

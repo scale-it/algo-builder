@@ -75,4 +75,4 @@ def issuer_lsig():
     return program
 
 if __name__ == "__main__":
-    print(compileTeal(issuer_lsig(), Mode.Signature))
+    print(compileTeal(issuer_lsig(), Mode.Signature, version = 4))

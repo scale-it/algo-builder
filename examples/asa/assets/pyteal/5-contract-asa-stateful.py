@@ -78,4 +78,4 @@ def contract_owned_asa():
     return program
 
 if __name__ == "__main__":
-    print(compileTeal(contract_owned_asa(), Mode.Application))
+    print(compileTeal(contract_owned_asa(), Mode.Application, version = 4))

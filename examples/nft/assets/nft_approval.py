@@ -108,4 +108,4 @@ def approval_program():
     return program
 
 if __name__ == "__main__":
-    print(compileTeal(approval_program(), Mode.Application))
+    print(compileTeal(approval_program(), Mode.Application, version = 4))

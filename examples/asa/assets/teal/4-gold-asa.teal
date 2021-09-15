@@ -1,4 +1,4 @@
-#pragma version 2
+#pragma version 4
 // Accepts only if (transaction type is OPT-IN OR (transaction type is asset transfer,
 // sender is goldOwnerAccount and asset transfer amount is less than equal to 1000 ))
 global GroupSize

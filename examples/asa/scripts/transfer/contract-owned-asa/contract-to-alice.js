@@ -26,7 +26,7 @@ async function run (runtimeEnv, deployer) {
   const assetID = deployer.asa.get('platinum').assetIndex;
   console.log('Asset Index: ', assetID);
 
-  await deployer.optInAcountToASA('platinum', 'alice', {});
+  await deployer.optInAccountToASA('platinum', 'alice', {});
 
   const txGroup = [
     // Stateful call
