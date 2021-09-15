@@ -93,6 +93,9 @@ jobs:
       - name: Example permissioned-token
         run: cd examples/permissioned-token && pipenv run yarn algob deploy
 
+      - name: Recreate Network
+        run: cd infrastructure && make recreate-private-net
+
       - name: Example permissioned-token-freezing
         working-directory: ./examples/permissioned-token-freezing
         run: |
