@@ -16,6 +16,7 @@
     * Byteslice arithmetic ops (`b+`, `b-`, `b*`, `b/`, `b%`, `b<`, `b>`, `b<=`, `b>=`, `b==`, `b!=`, `b\`, `b&`, `b^`, `b~`, `bzero`).
     * Additional mathematical opcodes: `divmodw`, `exp`, `expw`, `shl`, `shr`, `sqrt`
 + Updated all examples & tests to use TEALv4 (`#pragma version 4`)
++ TEALv4: gaid, gaids opcodes
 
 
 ### Bug Fixes
