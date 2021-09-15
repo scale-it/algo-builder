@@ -116,7 +116,7 @@ async function run (runtimeEnv, deployer) {
   // await fundAccount(deployer, newReserve);
 
   try {
-    await deployer.optInAcountToASA('tesla', newReserve.name, {});
+    await deployer.optInAccountToASA('tesla', newReserve.name, {});
   } catch (e) {
     console.log(e);
     throw new Error(e);

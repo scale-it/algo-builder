@@ -20,8 +20,8 @@ exports.epoch0 = async function (deployer) {
   };
   const issuerLsig = await deployer.loadLogic('issuer-lsig.py', scInitParam);
   const asaInfo = deployer.getASAInfo('bond-token-0');
-  await deployer.optInAcountToASA(asaInfo.assetIndex, 'bob', { totalFee: 1000 });
-  await deployer.optInAcountToASA(asaInfo.assetIndex, 'elon-musk', { totalFee: 1000 });
+  await deployer.optInAccountToASA(asaInfo.assetIndex, 'bob', { totalFee: 1000 });
+  await deployer.optInAccountToASA(asaInfo.assetIndex, 'elon-musk', { totalFee: 1000 });
 
   // elon buys 10 bonds
   const algoAmount = 10 * issuePrice;

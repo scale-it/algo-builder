@@ -14,7 +14,7 @@ def escrow(app_id):
         # if two transactions are grouped
         Global.group_size() == Int(2),
 
-        # The first transaction must be 
+        # The first transaction must be
         # an ApplicationCall (ie call stateful smart contract)
         Gtxn[0].type_enum() == TxnType.ApplicationCall,
 
@@ -46,11 +46,11 @@ def escrow(app_id):
 
 if __name__ == "__main__":
     params = {
-        "APP_ID": 1    
+        "APP_ID": 1
     }
 
     # Overwrite params if sys.argv[1] is passed
     if(len(sys.argv) > 1):
         params = parse_params(sys.argv[1], params)
 
-    print(compileTeal(escrow(params["APP_ID"]), Mode.Signature))
+    print(compileTeal(escrow(params["APP_ID"]), Mode.Signature, version = 4))

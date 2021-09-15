@@ -115,15 +115,7 @@ describe('Bond token Tests', function () {
     console.log('Issuer Address: ', issuerLsigAddress);
 
     // fund escrow with some minimum balance first
-    const fundEscrowParam = {
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.SecretKey,
-      fromAccount: master.account,
-      toAccountAddr: issuerLsigAddress,
-      amountMicroAlgos: minBalance + 10000,
-      payFlags: {}
-    };
-    runtime.executeTx(fundEscrowParam);
+    runtime.fundLsig(master.account, issuerLsigAddress, minBalance + 10000);
 
     // verify global state
     assert.isDefined(applicationId);
@@ -209,6 +201,7 @@ describe('Bond token Tests', function () {
 
     // manager starts epoch 1 (create dex)
     const dexLsig1 = createDex(runtime, bondTokenCreator, appManager, 1, master, lsig);
+
     syncAccounts();
     // sync dex account
     dex1 = runtime.getAccount(dexLsig1.address());
@@ -256,15 +249,7 @@ describe('Bond token Tests', function () {
     const buybackLsig = runtime.getLogicSig(buyLsigProgram, []);
 
     // fund dex with some minimum balance first
-    const fundDexParam = {
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.SecretKey,
-      fromAccount: master.account,
-      toAccountAddr: buybackLsig.address(),
-      amountMicroAlgos: minBalance + 10000,
-      payFlags: {}
-    };
-    runtime.executeTx(fundDexParam);
+    runtime.fundLsig(master.account, buybackLsig.address(), minBalance + 10000);
 
     const buybackTx = {
       type: types.TransactionType.CallApp,

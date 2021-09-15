@@ -41,7 +41,7 @@ async function run (runtimeEnv, deployer) {
   await fundAccount(deployer, elon);
 
   // opt in elon to tesla first
-  await deployer.optInAcountToASA('tesla', elon.name, {});
+  await deployer.optInAccountToASA('tesla', elon.name, {});
 
   // first issue few tokens to elon
   await issue(deployer, elon.addr, 15); // issue(mint) 15 tokens to elon from reserve

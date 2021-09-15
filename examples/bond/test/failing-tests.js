@@ -103,15 +103,7 @@ describe('Bond token failing tests', function () {
     console.log('Issuer Address: ', issuerLsigAddress);
 
     // fund escrow with some minimum balance first
-    const fundEscrowParam = {
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.SecretKey,
-      fromAccount: master.account,
-      toAccountAddr: issuerLsigAddress,
-      amountMicroAlgos: minBalance + 10000,
-      payFlags: {}
-    };
-    runtime.executeTx(fundEscrowParam);
+    runtime.fundLsig(master.account, issuerLsigAddress, minBalance + 10000);
   });
 
   function issue () {

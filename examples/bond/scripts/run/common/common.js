@@ -214,7 +214,8 @@ function createDexTx (
       appID: appID,
       payFlags: {},
       appArgs: ['str:create_dex'],
-      accounts: [issuerLsig.address(), dexLsig.address()]
+      accounts: [issuerLsig.address(), dexLsig.address()],
+      foreignAssets: [oldBondID]
     },
     // New bond token transfer to issuer's address
     {

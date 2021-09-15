@@ -30,7 +30,7 @@ export async function balanceOf (
  * @param creator Account from which call needs to be made
  * @param appID ID of the application being configured or empty if creating
  */
-export async function readGlobalStateSSC (
+export async function readAppGlobalState (
   deployer: Deployer,
   creator: AccountAddress,
   appID: number): Promise<modelsv2.ApplicationStateSchema[] | undefined> {
@@ -47,7 +47,7 @@ export async function readGlobalStateSSC (
  * @param account account from the which the local state has to be read
  * @param appID ID of the application being configured or empty if creating
  */
-export async function readLocalStateSSC (
+export async function readAppLocalState (
   deployer: Deployer,
   account: AccountAddress,
   appID: number): Promise<modelsv2.ApplicationStateSchema[] | undefined> {
@@ -79,7 +79,7 @@ export async function printLocalStateSSC (
   deployer: Deployer,
   accountAddr: AccountAddress,
   appID: number): Promise<void> {
-  const localState = await readLocalStateSSC(deployer, accountAddr, appID);
+  const localState = await readAppLocalState(deployer, accountAddr, appID);
   if (localState === undefined) { return; }
   console.log("User's local state:");
   for (let n = 0; n < localState.length; n++) {
@@ -97,7 +97,7 @@ export async function printGlobalStateSSC (
   deployer: Deployer,
   creatorAddr: AccountAddress,
   appID: number): Promise<void> {
-  const globalState = await readGlobalStateSSC(deployer, creatorAddr, appID);
+  const globalState = await readAppGlobalState(deployer, creatorAddr, appID);
   if (globalState === undefined) { return; }
   console.log("Application's global state:");
   for (let n = 0; n < globalState.length; n++) {

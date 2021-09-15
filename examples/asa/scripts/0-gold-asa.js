@@ -43,7 +43,7 @@ async function run (runtimeEnv, deployer) {
 
   // In asa.yaml we only added `john` to opt-in accounts. Let's add `bob` as well using the
   // script;
-  await deployer.optInAcountToASA('gold', 'bob', {});
+  await deployer.optInAccountToASA('gold', 'bob', {});
 
   // to interact with an asset we need asset ID. We can get it from the returned object:
   const assetID = asaInfo.assetIndex;

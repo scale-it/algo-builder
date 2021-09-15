@@ -378,4 +378,4 @@ TEAL files used for the below tests can be found in `/test/fixtures` in [runtime
 + [Boilerplate Stateful Teal](https://github.com/scale-it/algo-builder/blob/master/packages/runtime/test/integration/stateful-counter.ts)
 + Complex TEAL test suite (Stateless + Stateful + Atomic transactions) - [Crowdfunding application](https://github.com/scale-it/algo-builder/tree/master/examples/crowdfunding/test)
 
-See our [examples](https://github.com/scale-it/algo-builder/tree/master/examples) for more interesting test suites.
+See our [examples](https://github.com/scale-it/algo-builder/tree/master/examples) and [Interesting Test Suites](https://github.com/scale-it/algo-builder/blob/master/examples/README.md#interesting-test-suites) for more interesting test suites.

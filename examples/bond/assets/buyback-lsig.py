@@ -47,4 +47,4 @@ def buyback_lsig():
     return program
 
 if __name__ == "__main__":
-    print(compileTeal(buyback_lsig(), Mode.Signature))
+    print(compileTeal(buyback_lsig(), Mode.Signature, version = 4))

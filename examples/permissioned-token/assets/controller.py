@@ -212,4 +212,4 @@ if __name__ == "__main__":
     if(len(sys.argv) > 1):
         params = parse_params(sys.argv[1], params)
 
-    print(compileTeal(approval_program(params["TOKEN_ID"]), Mode.Application, version = 3))
+    print(compileTeal(approval_program(params["TOKEN_ID"]), Mode.Application, version = 4))
