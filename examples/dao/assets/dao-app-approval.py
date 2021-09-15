@@ -6,7 +6,7 @@ from pyteal import *
 
 def approval_program():
     """
-    A stateful app which will encode governance rules. Saves
+    A stateful app with governance rules. Stores
     deposit, min_support, min_duration, max_duration, url.
 
     Commands:
@@ -60,7 +60,7 @@ def approval_program():
                 [
                     And(
                         Global.latest_timestamp() > App.localGet(idx, Bytes("voting_end")),
-                        App.localGet(idx, Bytes("yes")) > App.globalGet(min_support),
+                        App.localGet(idx, Bytes("yes")) >= App.globalGet(min_support),
                         App.localGet(idx, Bytes("yes")) > App.localGet(idx, Bytes("no"))
                     ) == Int(1),
                     scratchvar_result.store(Int(1))
@@ -105,7 +105,7 @@ def approval_program():
             )
         ])
 
-
+    # global DAO parameters
     # minimum deposit in gov_tokens required to make a proposal
     deposit = Bytes("deposit")
     # minimum number of yes power votes to validate the proposal
@@ -140,7 +140,7 @@ def approval_program():
         Return(Int(1))
     ])
 
-    # Saves deposit accounts addresses in app global state
+    # Saves deposit lsig account addresses in app global state
     # Expected arguments: [deposit_lsig]
     add_deposit_accounts = Seq([
         Assert(Global.creator_address() == Txn.sender()),
@@ -154,7 +154,7 @@ def approval_program():
         # When recording a proposal, we fail if there is a proposal recorded in the account
         # User should call close_proposal use-case to remove a not active proposal record and withdraw deposit.
         Assert(App.localGet(Int(0), Bytes("type")) == Int(0)),
-        # Verify deposit (of amount atleast "deposit"), to deposit_lsig account
+        # Verify deposit to deposit_lsig equals global.deposit
         verify_deposit(Int(1), App.globalGet(deposit_lsig)),
         Assert(Gtxn[1].asset_amount() == App.globalGet(deposit)),
 
@@ -221,7 +221,7 @@ def approval_program():
     # sender.deposit
     deposit = App.localGet(Int(0), Bytes("deposit"))
 
-    # Records votes deposited by user by updating sender.deposit
+    # Records gov tokens deposited by user (sender)
     deposit_vote = Seq([
         # Verify deposit of votes to deposit_lsig account (with atleast 1 vote)
         # Ques: do we care if sender is voter here?
@@ -233,7 +233,7 @@ def approval_program():
 
     # This is used to unlock the deposit and withdraw tokens back to the user.
     # To protect against double vote, user can only withdraw the deposit after the
-    # latest voting he participated in ended.
+    # latest voting he participated has ended.
     withdraw_vote_deposit = Seq([
         Assert(And(
             Global.latest_timestamp() > App.localGet(Int(0), Bytes("deposit_lock")),
@@ -246,7 +246,7 @@ def approval_program():
 
     # p_<proposal> is a concatenation of p_ with the proposal address to avoid some weird attacks.
     byte_p_proposal = Concat(Bytes("p_"), Txn.accounts[1])
-    p_proposal = App.localGetEx(Int(0), Int(0), byte_p_proposal)
+    p_proposal = App.localGetEx(Int(0), Int(0), byte_p_proposal)  # value = proposal.id when a user voted or 0
     yes = Bytes("yes")
     no = Bytes("no")
     abstain = Bytes("abstain")
@@ -271,7 +271,9 @@ def approval_program():
             # If Sender.p_<proposal> is not set then set p_<proposal> := proposal.id
             App.localPut(Int(0), byte_p_proposal, proposal_id),
             # if Sender.p_<proposal> != proposal.id then overwrite by setting the new proposal.id, fail otherwise
-            If(p_proposal.value() != proposal_id, App.localPut(Int(0), byte_p_proposal, proposal_id), Err()),
+            If(p_proposal.value() != proposal_id, 
+                App.localPut(Int(0), byte_p_proposal, proposal_id), 
+                Err()),
         ),
         # record vote in proposal_lsig local state (proposal.<counter> += Sender.deposit)
         Cond(
@@ -309,7 +311,7 @@ def approval_program():
         Return(Int(1))
     ])
 
-    # Executes a proposal (note: anyone can execute a proposal) Args:
+    # Executes a proposal (note: anyone can execute a proposal). Args:
     # * proposal : lsig account address with the proposal record (provided as the first external account)
     execute = Seq([
         compute_result(Int(1)), # save result in scratch

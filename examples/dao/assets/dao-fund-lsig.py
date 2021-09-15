@@ -12,7 +12,7 @@ def proposal_lsig():
         txn.asset_close_to() == Global.zero_address()
     )
 
-    # ideally we should retrict the sender here(so that anyone cannot withdraw funds)
+    # ideally we should restrict the sender here (no one can withdraw funds)
     receive_or_send = basic_checks(Txn)
 
     # verify funds are transfered only when paired with DAO app (during execute call)

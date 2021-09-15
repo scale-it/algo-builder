@@ -2,6 +2,7 @@ const { executeTx } = require('./common/common.js');
 const { types } = require('@algo-builder/web');
 const { accounts, getDAOFundLsig } = require('./common/accounts.js');
 
+// Executes a proposal
 async function execute (deployer, account, proposalLsig) {
   const daoFundLsig = await getDAOFundLsig(deployer);
   const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
