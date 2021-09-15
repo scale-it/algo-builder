@@ -80,7 +80,7 @@ async function run (runtimeEnv, deployer) {
     deployer.optInAcountToASA(asaInfo.assetIndex, voterB.name, {})
   ]);
 
-  const fundASAParams = {
+  const distributeGovTokenParams = {
     type: types.TransactionType.TransferAsset,
     sign: types.SignType.SecretKey,
     fromAccount: creator,
