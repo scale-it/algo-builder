@@ -1,8 +1,8 @@
 const { executeTx, Vote } = require('./common/common.js');
 const { types } = require('@algo-builder/web');
-const { accounts } = require('./common/accounts.js');
+const { accounts, getProposalLsig } = require('./common/accounts.js');
 
-async function registerVote (deployer, voterAcc, proposalLsig, voteType) {
+async function registerVote (deployer, voterAcc, proposalAddr, voteType) {
   const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
 
   console.log(`* Register votes by ${voterAcc.addr} *`);
@@ -14,7 +14,7 @@ async function registerVote (deployer, voterAcc, proposalLsig, voteType) {
     appID: daoAppInfo.appID,
     payFlags: { totalFee: 2000 },
     appArgs: ['str:register_vote', `str:${voteType}`],
-    accounts: [proposalLsig.address()]
+    accounts: [proposalAddr]
   };
 
   await executeTx(deployer, registerVoteParam);
@@ -22,14 +22,14 @@ async function registerVote (deployer, voterAcc, proposalLsig, voteType) {
 
 async function run (runtimeEnv, deployer) {
   const { _, __, voterA, voterB } = accounts(deployer);
-  const proposalLsig = await deployer.loadLogic('proposal-lsig.py');
+  const proposalLsig = await getProposalLsig(deployer);
 
   // register votes (deposited in ./deposit_vote.js)
-  await registerVote(deployer, voterA, proposalLsig, Vote.YES);
-  await registerVote(deployer, voterB, proposalLsig, Vote.ABSTAIN);
+  await registerVote(deployer, voterA, proposalLsig.address(), Vote.YES);
+  await registerVote(deployer, voterB, proposalLsig.address(), Vote.ABSTAIN);
 
   // Transaction FAIL: voterA tries to register deposited votes again
-  await registerVote(deployer, voterA, proposalLsig, Vote.YES);
+  await registerVote(deployer, voterA, proposalLsig.address(), Vote.YES);
 }
 
 module.exports = { default: run };

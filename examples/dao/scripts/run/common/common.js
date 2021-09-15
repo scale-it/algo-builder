@@ -14,15 +14,15 @@ async function executeTx (deployer, txnParams) {
 /**
  * Fund accounts from master with 20 Algos
  * @param {*} deployer algobDeployer
- * @param {*} account or list of accounts to fund
+ * @param {*} accounts account or list of accounts to fund
  */
-async function fundAccount (deployer, account) {
+async function fundAccount (deployer, accounts) {
   const master = deployer.accountsByName.get('master-account');
   const params = [];
-  if (!(account instanceof Array)) {
-    account = [account];
+  if (!(accounts instanceof Array)) {
+    accounts = [accounts];
   }
-  for (const a of account) {
+  for (const a of accounts) {
     console.log(`* Funding Account: ${a.name} *`);
     params.push({
       type: types.TransactionType.TransferAlgo,

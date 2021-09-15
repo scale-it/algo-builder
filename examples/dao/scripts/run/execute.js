@@ -1,9 +1,9 @@
 const { executeTx } = require('./common/common.js');
 const { types } = require('@algo-builder/web');
-const { accounts, getDAOFundLsig } = require('./common/accounts.js');
+const { accounts, getDAOFundLsig, getProposalLsig } = require('./common/accounts.js');
 
 // Executes a proposal
-async function execute (deployer, account, proposalLsig) {
+async function execute (deployer, account, proposalAddr) {
   const daoFundLsig = await getDAOFundLsig(deployer);
   const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
 
@@ -16,7 +16,7 @@ async function execute (deployer, account, proposalLsig) {
       appID: daoAppInfo.appID,
       payFlags: { totalFee: 2000 },
       appArgs: ['str:execute'],
-      accounts: [proposalLsig.address()]
+      accounts: [proposalAddr]
     },
     // tx1 as per proposal instructions (set in ./add_proposal.js)
     {
@@ -35,10 +35,10 @@ async function execute (deployer, account, proposalLsig) {
 
 async function run (runtimeEnv, deployer) {
   const { _, proposer } = accounts(deployer);
-  const proposalLsig = await deployer.loadLogic('proposal-lsig.py');
+  const proposalLsig = await getProposalLsig(deployer);
 
   // execute proposal
-  await execute(deployer, proposer, proposalLsig);
+  await execute(deployer, proposer, proposalLsig.address());
 }
 
 module.exports = { default: run };

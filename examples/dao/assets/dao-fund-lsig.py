@@ -1,6 +1,10 @@
+import sys
+sys.path.insert(0,'..')
+
+from algobpy.parse import parse_params
 from pyteal import *
 
-def proposal_lsig():
+def proposal_lsig(ARG_DAO_APP_ID):
     """
     Represents DAO treasury (ALGO/ASA)
     """
@@ -20,7 +24,7 @@ def proposal_lsig():
         # verify first transaction
         basic_checks(Gtxn[0]),
         Gtxn[0].type_enum() == TxnType.ApplicationCall,
-        Gtxn[0].application_id() == Tmpl.Int("TMPL_DAO_APP_ID"),
+        Gtxn[0].application_id() == Int(ARG_DAO_APP_ID),
         Gtxn[0].application_args[0] == Bytes("execute"),
 
         # verify second transaction (either payment in asa or ALGO)
@@ -39,4 +43,12 @@ def proposal_lsig():
     return program
 
 if __name__ == "__main__":
-    print(compileTeal(proposal_lsig(), Mode.Signature, version = 4))
+    params = {
+        "ARG_DAO_APP_ID": 99
+    }
+
+    # Overwrite params if sys.argv[1] is passed
+    if(len(sys.argv) > 1):
+        params = parse_params(sys.argv[1], params)
+
+    print(compileTeal(proposal_lsig(params["ARG_DAO_APP_ID"]), Mode.Signature, version = 4))

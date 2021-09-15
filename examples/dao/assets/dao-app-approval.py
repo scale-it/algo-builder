@@ -4,14 +4,14 @@ sys.path.insert(0,'..')
 from algobpy.parse import parse_params
 from pyteal import *
 
-def approval_program():
+def approval_program(ARG_GOV_TOKEN):
     """
     A stateful app with governance rules. Stores
     deposit, min_support, min_duration, max_duration, url.
 
     Commands:
         add_proposal            Save proposal record in lsig
-        deposit_vote            records deposited votes in voter.account
+        deposit_vote_token            records deposited votes in voter.account
         register_vote           register user votes in proposal_lsig
         execute                 executes a proposal
         withdraw_vote_deposit   unlock the deposit and withdraw tokens back to the user
@@ -26,14 +26,20 @@ def approval_program():
         return Assert(And(
             Global.group_size() >= tx_index,
             Gtxn[tx_index].type_enum() == TxnType.AssetTransfer,
-            Gtxn[tx_index].xfer_asset() == Tmpl.Int("TMPL_GOV_TOKEN"),
+            Gtxn[tx_index].xfer_asset() == Int(ARG_GOV_TOKEN),
             Gtxn[tx_index].asset_receiver() == receiver,
             Gtxn[tx_index].asset_amount() >= Int(0)
         ))
 
-    # scratch vars to save result() & is_proposal_active()
+    # scratch vars to save result() & scratch_proposal_active()
     scratchvar_result = ScratchVar(TealType.uint64)
-    scratchvar_is_proposal_active = ScratchVar(TealType.uint64)
+    scratchvar_proposal_active = ScratchVar(TealType.uint64)
+
+    # scratch vars to store proposal config
+    scratchvar_voting_start = ScratchVar(TealType.uint64)
+    scratchvar_voting_end = ScratchVar(TealType.uint64)
+    scratchvar_execute_before = ScratchVar(TealType.uint64)
+    scratchvar_proposal_type = ScratchVar(TealType.uint64)
 
     # Fetch key(s) from Txn.Accounts[1] (passed as proposalLsig), for current app
     # these are used throughout the application
@@ -56,6 +62,10 @@ def approval_program():
     def compute_result(idx: Int):
         return Seq([
             Cond(
+                # 4 if proposal expired (now > proposal.execute_before())
+                [Global.latest_timestamp() > App.localGet(idx, Bytes("execute_before")), scratchvar_result.store(Int(4))],
+                # 3 if voting is still in progress (now <= voting_end)
+                [Global.latest_timestamp() <= App.localGet(idx, Bytes("voting_end")), scratchvar_result.store(Int(3))],
                 # 1 if voting is over and proposal.yes >= min_support and proposal.yes > proposal.no
                 [
                     And(
@@ -65,27 +75,22 @@ def approval_program():
                     ) == Int(1),
                     scratchvar_result.store(Int(1))
                 ],
-                # 2 if voting is over and proposal.yes < min_support  or proposal.yes <= proposal.no
-                [   And(
-                        Global.latest_timestamp() > voting_end,
-                        Or(
-                            App.localGet(idx, Bytes("yes")) < App.globalGet(min_support),
-                            App.localGet(idx, Bytes("yes")) <= App.localGet(idx, Bytes("no"))
-                        )
-                    ) == Int(1),
-                    scratchvar_result.store(Int(2))
-                ],
-                # 3 if voting is still in progress (now <= voting_end)
-                [Global.latest_timestamp() <= App.localGet(idx, Bytes("voting_end")), scratchvar_result.store(Int(3))],
-                # 4 if proposal expired (now > proposal.execute_before())
-                [Global.latest_timestamp() > App.localGet(idx, Bytes("execute_before")), scratchvar_result.store(Int(4))],
             ),
+            # if proposal is not expired, not in progess, and not passed, then reject (set result == Int(2))
+            If(
+                And(
+                    scratchvar_result.load() != Int(4), # expired
+                    scratchvar_result.load() != Int(3), # in progess
+                    scratchvar_result.load() != Int(1), # passed
+                ),
+                scratchvar_result.store(Int(2))
+            )
         ])
 
-    # Checks if the proposal is active or not. Saves result in scratchvar_is_proposal_active. Args:
+    # Checks if the proposal is active or not. Saves result in scratchvar_proposal_active. Args:
     # * idx - index of account where proposal_lsig.address() is passed
     # NOTE: idx == Int(0) means proposalLsig is Txn.sender()
-    def is_proposal_active(idx: Int):
+    def scratch_proposal_active(idx: Int):
         return Seq([
             compute_result(idx),
             If(
@@ -99,9 +104,9 @@ def approval_program():
                         App.localGet(idx, Bytes("executed")) == Int(0)
                     )
                 ),
-                scratchvar_is_proposal_active.store(Int(1)),
+                scratchvar_proposal_active.store(Int(1)),
                 # NOTE: we store Int(2) as "NO" because Int(0) can also be default value
-                scratchvar_is_proposal_active.store(Int(2)),
+                scratchvar_proposal_active.store(Int(2)),
             )
         ])
 
@@ -149,7 +154,9 @@ def approval_program():
     ])
 
     # A proposal is submitted using an lsig and recorded into that lsig using add_proposal.
-    # Expected arguments: proposal_config (url, url_hash, voting_start ..etc)
+    # Expected arguments: proposal_config
+    # [url, url_hash, voting_start, voting_end, execute_before, type,
+    # ALGO/ASA transfer params or message (according to type)]
     add_proposal = Seq([
         # When recording a proposal, we fail if there is a proposal recorded in the account
         # User should call close_proposal use-case to remove a not active proposal record and withdraw deposit.
@@ -167,29 +174,35 @@ def approval_program():
             App.localPut(Int(0), Bytes("hash_algo"), Bytes("sha256")), # default hash_algo
             App.localPut(Int(0), Bytes("hash_algo"), Txn.application_args[4])
         ),
+        # save some config in scratch first (to reuse later)
+        scratchvar_voting_start.store(Btoi(Txn.application_args[5])),
+        scratchvar_voting_end.store(Btoi(Txn.application_args[6])),
+        scratchvar_execute_before.store(Btoi(Txn.application_args[7])),
+        scratchvar_proposal_type.store(Btoi(Txn.application_args[8])),
+
         # voting_start must be after now
-        Assert(Btoi(Txn.application_args[5]) > Global.latest_timestamp()),
-        App.localPut(Int(0), Bytes("voting_start"), Btoi(Txn.application_args[5])),
+        Assert(scratchvar_voting_start.load() > Global.latest_timestamp()),
+        App.localPut(Int(0), Bytes("voting_start"), scratchvar_voting_start.load()),
         Assert(And(
             # voting_end must be > voting_start
-            Btoi(Txn.application_args[6]) > Btoi(Txn.application_args[5]),
+            scratchvar_voting_end.load() > scratchvar_voting_start.load(),
             # min_duration <= voting_end - voting_start <= max_duration
-            App.globalGet(min_duration) <= Btoi(Txn.application_args[6]) - Btoi(Txn.application_args[5]),
-            App.globalGet(max_duration) >= Btoi(Txn.application_args[6]) - Btoi(Txn.application_args[5])
+            App.globalGet(min_duration) <= scratchvar_voting_end.load() - scratchvar_voting_start.load(),
+            App.globalGet(max_duration) >= scratchvar_voting_end.load() - scratchvar_voting_start.load()
         )),
-        App.localPut(Int(0), Bytes("voting_end"), Btoi(Txn.application_args[6])),
+        App.localPut(Int(0), Bytes("voting_end"), scratchvar_voting_end.load()),
         # execute_before must be after voting_end
-        Assert(Btoi(Txn.application_args[7]) > Btoi(Txn.application_args[6])),
-        App.localPut(Int(0), Bytes("execute_before"), Btoi(Txn.application_args[7])),
+        Assert(scratchvar_execute_before.load() > scratchvar_voting_end.load()),
+        App.localPut(Int(0), Bytes("execute_before"), scratchvar_execute_before.load()),
         # type must be 1, 2 OR 3
         Assert(
             Or(
-                Btoi(Txn.application_args[8]) == Int(1),
-                Btoi(Txn.application_args[8]) == Int(2),
-                Btoi(Txn.application_args[8]) == Int(3)
+                scratchvar_proposal_type.load() == Int(1),
+                scratchvar_proposal_type.load() == Int(2),
+                scratchvar_proposal_type.load() == Int(3)
             )
         ),
-        App.localPut(Int(0), Bytes("type"), Btoi(Txn.application_args[8])),
+        App.localPut(Int(0), Bytes("type"), scratchvar_proposal_type.load()),
 
         # Depending on the type, we will have a variable list of last arguments:
         # 1: ALGO transfer
@@ -222,9 +235,7 @@ def approval_program():
     deposit = App.localGet(Int(0), Bytes("deposit"))
 
     # Records gov tokens deposited by user (sender)
-    deposit_vote = Seq([
-        # Verify deposit of votes to deposit_lsig account (with atleast 1 vote)
-        # Ques: do we care if sender is voter here?
+    deposit_vote_token = Seq([
         verify_deposit(Int(1), App.globalGet(deposit_lsig)),
         # Sender.deposit += amount
         App.localPut(Int(0), Bytes("deposit"), deposit + Gtxn[1].asset_amount()),
@@ -262,7 +273,7 @@ def approval_program():
                 # voting_start <= now <= voting_end
                 # voting_start <= Global.latest_timestamp(),
                 # Global.latest_timestamp() <= voting_end,
-                # Sender.deposit >= 0 (i.e user "deposited" his votes using deposit_vote)
+                # Sender.deposit >= 0 (i.e user "deposited" his votes using deposit_vote_token)
                 App.localGet(Int(0), Bytes("deposit")) > Int(0)
             )
         ),
@@ -271,8 +282,8 @@ def approval_program():
             # If Sender.p_<proposal> is not set then set p_<proposal> := proposal.id
             App.localPut(Int(0), byte_p_proposal, proposal_id),
             # if Sender.p_<proposal> != proposal.id then overwrite by setting the new proposal.id, fail otherwise
-            If(p_proposal.value() != proposal_id, 
-                App.localPut(Int(0), byte_p_proposal, proposal_id), 
+            If(p_proposal.value() != proposal_id,
+                App.localPut(Int(0), byte_p_proposal, proposal_id),
                 Err()),
         ),
         # record vote in proposal_lsig local state (proposal.<counter> += Sender.deposit)
@@ -293,7 +304,7 @@ def approval_program():
     # * proposal : lsig account address with the proposal record (provided as the first external account).
     clear_vote_record = Seq([
         p_proposal,
-        is_proposal_active(Int(1)),
+        scratch_proposal_active(Int(1)),
         Assert(Global.group_size() == Int(1)),
         # fail if proposal is active (can’t remove proposal record of an active proposal)
         If(
@@ -301,7 +312,7 @@ def approval_program():
             If(
                 And(
                     p_proposal.value() == proposal_id,
-                    scratchvar_is_proposal_active.load() == Int(1)
+                    scratchvar_proposal_active.load() == Int(1)
                 ) == Int(1),
                 Err()
             )
@@ -431,8 +442,8 @@ def approval_program():
         [Txn.application_args[0] == Bytes("add_deposit_accounts"), add_deposit_accounts],
         # Verifies add proposal call, jumps to add_proposal branch.
         [Txn.application_args[0] == Bytes("add_proposal"), add_proposal],
-        # Verifies deposit_vote call, jumps to deposit_vote branch.
-        [Txn.application_args[0] == Bytes("deposit_vote"), deposit_vote],
+        # Verifies deposit_vote_token call, jumps to deposit_vote_token branch.
+        [Txn.application_args[0] == Bytes("deposit_vote_token"), deposit_vote_token],
         # Verifies register_vote call, jumps to register_vote branch.
         [Txn.application_args[0] == Bytes("register_vote"), register_vote],
         # Verifies execute call, jumps to execute branch.
@@ -448,4 +459,12 @@ def approval_program():
     return program
 
 if __name__ == "__main__":
-    print(compileTeal(approval_program(), Mode.Application, version = 4))
+    params = {
+        "ARG_GOV_TOKEN": 99
+    }
+
+    # Overwrite params if sys.argv[1] is passed
+    if(len(sys.argv) > 1):
+        params = parse_params(sys.argv[1], params)
+
+    print(compileTeal(approval_program(params["ARG_GOV_TOKEN"]), Mode.Application, version = 4))

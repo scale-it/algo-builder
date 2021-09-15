@@ -1,6 +1,10 @@
+import sys
+sys.path.insert(0,'..')
+
+from algobpy.parse import parse_params
 from pyteal import *
 
-def deposit_lsig():
+def deposit_lsig(ARG_GOV_TOKEN, ARG_DAO_APP_ID):
     """
     A logic signature account which holds:
     - vote token deposits
@@ -19,7 +23,7 @@ def deposit_lsig():
         basic_checks(Txn),
         Txn.type_enum() == TxnType.AssetTransfer,
         Txn.asset_amount() == Int(0),
-        Txn.xfer_asset() == Tmpl.Int("TMPL_GOV_TOKEN")
+        Txn.xfer_asset() == Int(ARG_GOV_TOKEN)
     )
 
     # Verifies transaction group in case of deposting votes or withdrawing them
@@ -29,7 +33,7 @@ def deposit_lsig():
         # verify first transaction
         basic_checks(Gtxn[0]),
         Gtxn[0].type_enum() == TxnType.ApplicationCall,
-        Gtxn[0].application_id() == Tmpl.Int("TMPL_DAO_APP_ID"),
+        Gtxn[0].application_id() == Int(ARG_DAO_APP_ID),
         Or(
             Gtxn[0].application_args[0] == app_arg_1,
             Gtxn[0].application_args[0] == app_arg_2
@@ -38,7 +42,7 @@ def deposit_lsig():
         # verify second transaction
         basic_checks(Gtxn[1]),
         Gtxn[1].type_enum() == TxnType.AssetTransfer,
-        Gtxn[1].xfer_asset() == Tmpl.Int("TMPL_GOV_TOKEN"),
+        Gtxn[1].xfer_asset() == Int(ARG_GOV_TOKEN),
     )
 
     payment = Or(
@@ -56,4 +60,13 @@ def deposit_lsig():
     return program
 
 if __name__ == "__main__":
-    print(compileTeal(deposit_lsig(), Mode.Signature, version = 4))
+    params = {
+        "ARG_GOV_TOKEN": 99,
+        "ARG_DAO_APP_ID": 98
+    }
+
+    # Overwrite params if sys.argv[1] is passed
+    if(len(sys.argv) > 1):
+        params = parse_params(sys.argv[1], params)
+
+    print(compileTeal(deposit_lsig(params["ARG_GOV_TOKEN"], params["ARG_DAO_APP_ID"]), Mode.Signature, version = 4))

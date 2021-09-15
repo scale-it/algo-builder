@@ -2,8 +2,8 @@ const _getScInitParam = (deployer) => {
   const govToken = deployer.asa.get('gov-token');
   const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
   return {
-    TMPL_GOV_TOKEN: govToken.assetIndex,
-    TMPL_DAO_APP_ID: daoAppInfo.appID
+    ARG_GOV_TOKEN: govToken.assetIndex,
+    ARG_DAO_APP_ID: daoAppInfo.appID
   };
 };
 
@@ -15,6 +15,12 @@ async function getDepositLsig (deployer) {
 // returns vote_deposit lsig
 async function getDAOFundLsig (deployer) {
   return await deployer.loadLogic('dao-fund-lsig.py', _getScInitParam(deployer));
+};
+
+// returns proposal lsig
+async function getProposalLsig (deployer) {
+  const proposerAcc = accounts(deployer).proposer;
+  return await deployer.loadLogic('proposal-lsig.py', { ARG_OWNER: proposerAcc.addr });
 };
 
 /**
@@ -33,5 +39,6 @@ function accounts (deployer) {
 module.exports = {
   getDepositLsig,
   getDAOFundLsig,
+  getProposalLsig,
   accounts
 };

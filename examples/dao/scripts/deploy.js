@@ -27,7 +27,7 @@ async function run (runtimeEnv, deployer) {
     `int:${maxDuration}`,
     `str:${url}`
   ];
-  const templateParam = { TMPL_GOV_TOKEN: asaInfo.assetIndex };
+  const templateParam = { ARG_GOV_TOKEN: asaInfo.assetIndex };
   // Create Application
   const daoAppInfo = await deployer.deployApp(
     'dao-app-approval.py',
@@ -45,11 +45,11 @@ async function run (runtimeEnv, deployer) {
   await Promise.all([
     deployer.fundLsig('deposit-lsig.py',
       { funder: creator, fundingMicroAlgo: 2e6 }, {},
-      { TMPL_GOV_TOKEN: asaInfo.assetIndex, TMPL_DAO_APP_ID: daoAppInfo.appID }),
+      { ARG_GOV_TOKEN: asaInfo.assetIndex, ARG_DAO_APP_ID: daoAppInfo.appID }),
 
     deployer.fundLsig('dao-fund-lsig.py',
       { funder: creator, fundingMicroAlgo: 5e6 }, {},
-      { TMPL_GOV_TOKEN: asaInfo.assetIndex, TMPL_DAO_APP_ID: daoAppInfo.appID }),
+      { ARG_GOV_TOKEN: asaInfo.assetIndex, ARG_DAO_APP_ID: daoAppInfo.appID }),
 
     deployer.fundLsig('proposal-lsig.py',
       { funder: creator, fundingMicroAlgo: 5e6 }, {})
@@ -75,9 +75,9 @@ async function run (runtimeEnv, deployer) {
   await Promise.all([
     deployer.optInLsigToASA(asaInfo.assetIndex, depositLsig, { totalFee: 1000 }),
     deployer.optInLsigToASA(asaInfo.assetIndex, daoFundLsig, { totalFee: 1000 }),
-    deployer.optInAcountToASA(asaInfo.assetIndex, proposer.name, {}),
-    deployer.optInAcountToASA(asaInfo.assetIndex, voterA.name, {}),
-    deployer.optInAcountToASA(asaInfo.assetIndex, voterB.name, {})
+    deployer.optInAccountToASA(asaInfo.assetIndex, proposer.name, {}),
+    deployer.optInAccountToASA(asaInfo.assetIndex, voterA.name, {}),
+    deployer.optInAccountToASA(asaInfo.assetIndex, voterB.name, {})
   ]);
 
   const distributeGovTokenParams = {
@@ -89,9 +89,9 @@ async function run (runtimeEnv, deployer) {
     payFlags: { totalFee: 1000 }
   };
   await executeTx(deployer, [
-    { ...fundASAParams, toAccountAddr: proposer.addr },
-    { ...fundASAParams, toAccountAddr: voterA.addr },
-    { ...fundASAParams, toAccountAddr: voterB.addr }
+    { ...distributeGovTokenParams, toAccountAddr: proposer.addr },
+    { ...distributeGovTokenParams, toAccountAddr: voterA.addr },
+    { ...distributeGovTokenParams, toAccountAddr: voterB.addr }
   ]);
 
   console.log('Contracts deployed successfully!');
