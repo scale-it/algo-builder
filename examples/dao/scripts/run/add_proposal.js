@@ -19,7 +19,7 @@ async function addProposal (runtimeEnv, deployer) {
   }
 
   const daoFundLsig = await getDAOFundLsig(deployer);
-  const appArgs = [
+  const daoParams = [
     'str:add_proposal',
     'str:my-custom-proposal', // name
     'str:www.myurl.com', // url
@@ -36,7 +36,7 @@ async function addProposal (runtimeEnv, deployer) {
 
   const depositLsig = await getDepositLsig(deployer);
   const govToken = deployer.asa.get('gov-token');
-  const groupTx = [
+  const addProposalTx = [
     {
       type: types.TransactionType.CallApp,
       sign: types.SignType.LogicSignature,

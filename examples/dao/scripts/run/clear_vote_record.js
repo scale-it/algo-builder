@@ -6,7 +6,7 @@ async function clearVoteRecord (deployer, voterAcc, proposalLsig) {
   const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
 
   console.log(`* Clearing vote record of ${voterAcc.addr} from proposal ${proposalLsig.address()} *`);
-  const withdrawVoteParam = {
+  const clearVoteParams = {
     type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,
     fromAccount: voterAcc,
@@ -16,7 +16,7 @@ async function clearVoteRecord (deployer, voterAcc, proposalLsig) {
     accounts: [proposalLsig.address()]
   };
 
-  await executeTx(deployer, withdrawVoteParam);
+  await executeTx(deployer, clearVoteParams);
 }
 
 async function run (runtimeEnv, deployer) {
