@@ -44,11 +44,6 @@ function copy (directory: string, location: string): void {
       if (path.basename(dest) === ".gitkeep") {
         return false;
       }
-      if (fsExtra.pathExistsSync(dest)) {
-        throw new BuilderError(ERRORS.GENERAL.INIT_INSIDE_PROJECT, {
-          clashingFile: relPath
-        });
-      }
       return true;
     }
   });
@@ -57,8 +52,12 @@ function copy (directory: string, location: string): void {
 function copySampleProject (location: string, isTSProject: boolean): void {
   const packageRoot = getPackageRoot();
   const sampleProjDir = path.join(packageRoot, "sample-project");
-
-  console.log(chalk.greenBright("Initializing new workspace in " + process.cwd() + "."));
+  if (fsExtra.pathExistsSync(`./${location}/algob.config.js`)) {
+    throw new BuilderError(ERRORS.GENERAL.INIT_INSIDE_PROJECT, {
+      clashingFile: location
+    });
+  }
+  console.log(chalk.greenBright("Initializing new workspace in " + path.join(process.cwd(), location)));
 
   // copy common files first
   copy(path.join(sampleProjDir, "common"), location);
