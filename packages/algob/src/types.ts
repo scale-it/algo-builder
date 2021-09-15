@@ -644,6 +644,10 @@ export interface PyASCCache extends ASCCache {
 // ************************
 //     helper types
 
+export type StateValue = string | number | bigint;
+
+export type Key = string;
+
 export interface StrMap {
   [key: string]: string
 }
