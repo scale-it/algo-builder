@@ -1,5 +1,5 @@
 const {
-  executeTransaction, readGlobalStateSSC
+  executeTransaction, readAppGlobalState
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 const { accounts } = require('./accounts');
@@ -130,15 +130,9 @@ function buyTx (buyer, issuerLsig, amount, algoAmount, appID, bondID) {
  * @param bondID Bond ASA index
  */
 async function buyTxNode (deployer, buyer, issuerLsig, algoAmount, appID, bondID) {
-  let bondPrice;
   const account = await accounts(deployer);
-  const globalState = await readGlobalStateSSC(deployer, account.manager.addr, appID);
-  for (const g of globalState) {
-    const key = Buffer.from(g.key, 'base64').toString();
-    if (key === 'issue_price') {
-      bondPrice = g.value.uint;
-    }
-  }
+  const globalState = await readAppGlobalState(deployer, account.manager.addr, appID);
+  const bondPrice = globalState.get('issue_price');
   return buyTx(buyer, issuerLsig, algoAmount / bondPrice, algoAmount, appID, bondID);
 }
 
