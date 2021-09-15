@@ -42,9 +42,13 @@
     "build:watch": "tsc -w -p .",
     "build:docs": "typedoc --out ../../docs/api/runtime --excludePrivate --exclude \"internal/**\" src/index.ts",
     "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.ts buildinfo build",
-    "prepublish": "yarn build",
-    "publish": "yarn publish --access public"
+    "prepublish": "yarn build"
   },
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+
   "files": [
     "build/",
     "LICENSE",
