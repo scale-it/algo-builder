@@ -6,7 +6,8 @@ import { StackElem } from "../types";
 import { MAX_KEY_BYTES, MAX_KEY_VAL_BYTES } from "./constants";
 
 /**
- * Allow the combination of key-value pairs to consume 128 bytes.
+ * Allow the combination of key-value pairs to a max size of 128 bytes.
+ * i.e (key.length + value.length <= 128)
  * NOTE: The key is still restricted to 64 bytes or less.
  * @param key stateful schema key
  * @param value value at key (uint / bytes)
