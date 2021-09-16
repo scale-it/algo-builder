@@ -26,7 +26,7 @@ async function whitelist (deployer, permissionsManager, address) {
    * - Pass the address you wish to whitelist in Txn.accounts[1] to add to whitelist
    */
   const whiteListParams = {
-    type: types.TransactionType.CallNoOpSSC,
+    type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,
     fromAccount: permissionsManager, // permissions manager account (fails otherwise)
     appID: permissionSSCInfo.appID,

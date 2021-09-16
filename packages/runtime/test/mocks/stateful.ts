@@ -53,7 +53,7 @@ export const accInfo = [{
     unitName: "AD",
     name: "ASSETAD",
     url: "assetUrl",
-    metadataHash: "hash",
+    metadataHash: new Uint8Array(Buffer.from("hash", 'base64')),
     manager: "addr-1",
     reserve: "addr-2",
     freeze: "addr-3",

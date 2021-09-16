@@ -122,7 +122,7 @@ class Context {
       `int:${this.permissionsappID}`
     ];
     this.runtime.executeTx({
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: this.alice.account,
       appID: this.controllerappID,
@@ -196,7 +196,7 @@ class Context {
 function issue (runtime, asaReserve, receiver, amount, controllerappID, assetIndex, lsig) {
   const txns = [
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: asaReserve,
       appID: controllerappID,
@@ -228,7 +228,7 @@ function issue (runtime, asaReserve, receiver, amount, controllerappID, assetInd
  */
 function killToken (runtime, asaManager, controllerappID, assetIndex) {
   runtime.executeTx({
-    type: types.TransactionType.CallNoOpSSC,
+    type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,
     fromAccount: asaManager,
     appID: controllerappID,
@@ -247,7 +247,7 @@ function killToken (runtime, asaManager, controllerappID, assetIndex) {
  */
 function whitelist (runtime, permManager, addrToWhitelist, permissionsappID) {
   runtime.executeTx({
-    type: types.TransactionType.CallNoOpSSC,
+    type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,
     fromAccount: permManager,
     appID: permissionsappID,
@@ -288,7 +288,7 @@ function fund (runtime, master, address) {
 function transfer (runtime, from, to, amount, assetIndex, controllerappID, permissionsappID, lsig) {
   const txGroup = [
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: from.account,
       appID: controllerappID,
@@ -315,13 +315,14 @@ function transfer (runtime, from, to, amount, assetIndex, controllerappID, permi
       payFlags: { totalFee: 1000 }
     },
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: from.account,
       appID: permissionsappID,
       payFlags: { totalFee: 1000 },
       appArgs: [TRANSFER_ARG],
-      accounts: [from.address, to.address]
+      accounts: [from.address, to.address],
+      foreignAssets: [assetIndex]
     }
   ];
   runtime.executeTx(txGroup);
@@ -363,7 +364,7 @@ function forceTransfer (
   runtime, asaManager, from, to, amount, assetIndex, controllerappID, permissionsappID, lsig) {
   const txGroup = [
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: asaManager,
       appID: controllerappID,
@@ -391,13 +392,14 @@ function forceTransfer (
       payFlags: { totalFee: 1000 }
     },
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: asaManager,
       appID: permissionsappID,
       payFlags: { totalFee: 1000 },
       appArgs: [TRANSFER_ARG],
-      accounts: [from.address, to.address]
+      accounts: [from.address, to.address],
+      foreignAssets: [assetIndex]
     }
   ];
   runtime.executeTx(txGroup);

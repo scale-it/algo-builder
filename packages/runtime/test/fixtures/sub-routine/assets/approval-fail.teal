@@ -1,0 +1,20 @@
+#pragma version 4
+// This file shows is used to test whether subroutine
+// is working, from tealv4, program can jump to any label
+// instead of only forward.
+// jump to main loop
+b main
+
+// subroutine
+my_subroutine:
+// implement subroutine code
+// with the two args
++
+retsub
+
+main:
+int 1
+int 5
+callsub my_subroutine
+int 5
+==

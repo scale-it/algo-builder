@@ -1,4 +1,4 @@
-const { readGlobalStateSSC, executeTransaction } = require('@algo-builder/algob');
+const { readAppGlobalState, executeTransaction } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 
 async function run (runtimeEnv, deployer) {
@@ -10,11 +10,11 @@ async function run (runtimeEnv, deployer) {
   console.log('Application Id ', applicationID);
 
   // Retreive Global State
-  let globalState = await readGlobalStateSSC(deployer, creatorAccount.addr, applicationID);
+  let globalState = await readAppGlobalState(deployer, creatorAccount.addr, applicationID);
   console.log(globalState);
 
   const tx = {
-    type: types.TransactionType.CallNoOpSSC,
+    type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,
     fromAccount: creatorAccount,
     appID: applicationID,
@@ -27,7 +27,7 @@ async function run (runtimeEnv, deployer) {
   // await new Tealdbg(deployer, tx)
   //   .run({ tealFile: "approval_program.teal" });
 
-  globalState = await readGlobalStateSSC(deployer, creatorAccount.addr, applicationID);
+  globalState = await readAppGlobalState(deployer, creatorAccount.addr, applicationID);
   console.log(globalState);
 }
 

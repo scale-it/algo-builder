@@ -9,9 +9,14 @@ import { Keccak } from 'sha3';
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
 import { compareArray } from "../lib/compare";
-import { AssetParamMap, GlobalFields, MAX_CONCAT_SIZE, MAX_UINT64, MaxTEALVersion, TxArrFields } from "../lib/constants";
 import {
-  assertLen, assertOnlyDigits, convertToBuffer,
+  AssetParamMap, GlobalFields, MathOp,
+  MAX_CONCAT_SIZE, MAX_INPUT_BYTE_LEN, MAX_OUTPUT_BYTE_LEN,
+  MAX_UINT64, MAX_UINT128,
+  MaxTEALVersion, TxArrFields
+} from "../lib/constants";
+import {
+  assertLen, assertOnlyDigits, bigEndianBytesToBigInt, bigintToBigEndianBytes, convertToBuffer,
   convertToString, getEncoding, parseBinaryStrToBigInt
 } from "../lib/parsing";
 import { Stack } from "../lib/stack";
@@ -44,7 +49,11 @@ export class Pragma extends Op {
       this.version = Number(args[1]);
       interpreter.tealVersion = this.version;
     } else {
-      throw new RuntimeError(RUNTIME_ERRORS.TEAL.PRAGMA_VERSION_ERROR, { got: args.join(' '), line: line });
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.PRAGMA_VERSION_ERROR, {
+        expected: 'till #4',
+        got: args.join(' '),
+        line: line
+      });
     }
   }
 
@@ -99,7 +108,7 @@ export class Add extends Op {
     const last = this.assertBigInt(stack.pop(), this.line);
     const prev = this.assertBigInt(stack.pop(), this.line);
     const result = prev + last;
-    this.checkOverflow(result, this.line);
+    this.checkOverflow(result, this.line, MAX_UINT64);
     stack.push(result);
   }
 }
@@ -178,7 +187,7 @@ export class Mul extends Op {
     const last = this.assertBigInt(stack.pop(), this.line);
     const prev = this.assertBigInt(stack.pop(), this.line);
     const result = prev * last;
-    this.checkOverflow(result, this.line);
+    this.checkOverflow(result, this.line, MAX_UINT64);
     stack.push(result);
   }
 }
@@ -1002,10 +1011,10 @@ export class Mulw extends Op {
     const result = valueA * valueB;
 
     const low = result & MAX_UINT64;
-    this.checkOverflow(low, this.line);
+    this.checkOverflow(low, this.line, MAX_UINT64);
 
     const high = result >> BigInt('64');
-    this.checkOverflow(high, this.line);
+    this.checkOverflow(high, this.line, MAX_UINT64);
 
     stack.push(high);
     stack.push(low);
@@ -1394,7 +1403,7 @@ export class Label extends Op {
   execute (stack: TEALStack): void {}
 }
 
-// branch unconditionally to label
+// branch unconditionally to label - Tealv <= 3
 // push to stack [...stack]
 export class Branch extends Op {
   readonly label: string;
@@ -1420,7 +1429,16 @@ export class Branch extends Op {
   }
 }
 
-// branch conditionally if top of stack is zero
+// branch unconditionally to label - TEALv4
+// can also jump backward
+// push to stack [...stack]
+export class Branchv4 extends Branch {
+  execute (stack: TEALStack): void {
+    this.interpreter.jumpToLabel(this.label, this.line);
+  }
+}
+
+// branch conditionally if top of stack is zero - Teal version <= 3
 // push to stack [...stack]
 export class BranchIfZero extends Op {
   readonly label: string;
@@ -1447,6 +1465,20 @@ export class BranchIfZero extends Op {
 
     if (last === 0n) {
       this.interpreter.jumpForward(this.label, this.line);
+    }
+  }
+}
+
+// branch conditionally if top of stack is zero - Tealv4
+// can jump forward also
+// push to stack [...stack]
+export class BranchIfZerov4 extends BranchIfZero {
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const last = this.assertBigInt(stack.pop(), this.line);
+
+    if (last === 0n) {
+      this.interpreter.jumpToLabel(this.label, this.line);
     }
   }
 }
@@ -1478,6 +1510,20 @@ export class BranchIfNotZero extends Op {
 
     if (last !== 0n) {
       this.interpreter.jumpForward(this.label, this.line);
+    }
+  }
+}
+
+// branch conditionally if top of stack is non zero - Tealv4
+// can jump forward as well
+// push to stack [...stack]
+export class BranchIfNotZerov4 extends BranchIfNotZero {
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const last = this.assertBigInt(stack.pop(), this.line);
+
+    if (last !== 0n) {
+      this.interpreter.jumpToLabel(this.label, this.line);
     }
   }
 }
@@ -1600,13 +1646,14 @@ export class AppOptedIn extends Op {
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2, this.line);
-    const appID = this.assertBigInt(stack.pop(), this.line);
-    const accountIndex = this.assertBigInt(stack.pop(), this.line);
+    const appRef = this.assertBigInt(stack.pop(), this.line);
+    const accountRef: StackElem = stack.pop(); // index to tx.accounts[] OR an address directly
 
-    const account = this.interpreter.getAccount(accountIndex, this.line);
+    const account = this.interpreter.getAccount(accountRef, this.line);
     const localState = account.appsLocalState;
 
-    const isOptedIn = localState.get(Number(appID));
+    const appID = this.interpreter.getAppIDByReference(Number(appRef), false, this.line, this);
+    const isOptedIn = localState.get(appID);
     if (isOptedIn) {
       stack.push(1n);
     } else {
@@ -1638,9 +1685,9 @@ export class AppLocalGet extends Op {
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2, this.line);
     const key = this.assertBytes(stack.pop(), this.line);
-    const accountIndex = this.assertBigInt(stack.pop(), this.line);
+    const accountRef: StackElem = stack.pop();
 
-    const account = this.interpreter.getAccount(accountIndex, this.line);
+    const account = this.interpreter.getAccount(accountRef, this.line);
     const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
 
     const val = account.getLocalState(appID, key);
@@ -1674,11 +1721,12 @@ export class AppLocalGetEx extends Op {
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 3, this.line);
     const key = this.assertBytes(stack.pop(), this.line);
-    const appID = this.assertBigInt(stack.pop(), this.line);
-    const accountIndex = this.assertBigInt(stack.pop(), this.line);
+    const appRef = this.assertBigInt(stack.pop(), this.line);
+    const accountRef: StackElem = stack.pop();
 
-    const account = this.interpreter.getAccount(accountIndex, this.line);
-    const val = account.getLocalState(Number(appID), key);
+    const appID = this.interpreter.getAppIDByReference(Number(appRef), false, this.line, this);
+    const account = this.interpreter.getAccount(accountRef, this.line);
+    const val = account.getLocalState(appID, key);
     if (val) {
       stack.push(val);
       stack.push(1n);
@@ -1747,18 +1795,12 @@ export class AppGlobalGetEx extends Op {
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2, this.line);
     const key = this.assertBytes(stack.pop(), this.line);
-    let appIndex = this.assertBigInt(stack.pop(), this.line);
+    // appRef could be index to foreign apps array,
+    // or since v4 an application id that appears in Txn.ForeignApps
+    const appRef = this.assertBigInt(stack.pop(), this.line);
 
-    const foreignApps = this.interpreter.runtime.ctx.tx.apfa;
-    let appID;
-    if (appIndex === 0n) {
-      appID = this.interpreter.runtime.ctx.tx.apid; // zero index means current app
-    } else {
-      this.checkIndexBound(Number(--appIndex), foreignApps as number[], this.line);
-      appID = foreignApps ? foreignApps[Number(appIndex)] : undefined;
-    }
-
-    const val = this.interpreter.getGlobalState(appID as number, key, this.line);
+    const appID = this.interpreter.getAppIDByReference(Number(appRef), true, this.line, this);
+    const val = this.interpreter.getGlobalState(appID, key, this.line);
     if (val) {
       stack.push(val);
       stack.push(1n);
@@ -1793,9 +1835,9 @@ export class AppLocalPut extends Op {
     this.assertMinStackLen(stack, 3, this.line);
     const value = stack.pop();
     const key = this.assertBytes(stack.pop(), this.line);
-    const accountIndex = this.assertBigInt(stack.pop(), this.line);
+    const accountRef: StackElem = stack.pop();
 
-    const account = this.interpreter.getAccount(accountIndex, this.line);
+    const account = this.interpreter.getAccount(accountRef, this.line);
     const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
 
     // get updated local state for account
@@ -1857,10 +1899,10 @@ export class AppLocalDel extends Op {
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
     const key = this.assertBytes(stack.pop(), this.line);
-    const accountIndex = this.assertBigInt(stack.pop(), this.line);
+    const accountRef: StackElem = stack.pop();
 
     const appID = this.interpreter.runtime.ctx.tx.apid ?? 0;
-    const account = this.interpreter.getAccount(accountIndex, this.line);
+    const account = this.interpreter.getAccount(accountRef, this.line);
 
     const localState = account.appsLocalState.get(appID);
     if (localState) {
@@ -1931,8 +1973,8 @@ export class Balance extends Op {
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
-    const accountIndex = this.assertBigInt(stack.pop(), this.line);
-    const acc = this.interpreter.getAccount(accountIndex, this.line);
+    const accountRef: StackElem = stack.pop();
+    const acc = this.interpreter.getAccount(accountRef, this.line);
 
     stack.push(BigInt(acc.balance()));
   }
@@ -1965,11 +2007,12 @@ export class GetAssetHolding extends Op {
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 2, this.line);
-    const assetId = this.assertBigInt(stack.pop(), this.line);
-    const accountIndex = this.assertBigInt(stack.pop(), this.line);
+    const assetRef = this.assertBigInt(stack.pop(), this.line);
+    const accountRef: StackElem = stack.pop();
 
-    const account = this.interpreter.getAccount(accountIndex, this.line);
-    const assetInfo = account.assets.get(Number(assetId));
+    const account = this.interpreter.getAccount(accountRef, this.line);
+    const assetID = this.interpreter.getAssetIDByReference(Number(assetRef), false, this.line, this);
+    const assetInfo = account.assets.get(assetID);
     if (assetInfo === undefined) {
       stack.push(0n);
       stack.push(0n);
@@ -2023,18 +2066,9 @@ export class GetAssetDef extends Op {
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
-    const foreignAssetsIdx = this.assertBigInt(stack.pop(), this.line);
-    this.checkIndexBound(
-      Number(foreignAssetsIdx),
-      this.interpreter.runtime.ctx.tx.apas as number[], this.line);
-
-    let assetId;
-    if (this.interpreter.runtime.ctx.tx.apas) {
-      assetId = this.interpreter.runtime.ctx.tx.apas[Number(foreignAssetsIdx)];
-    } else {
-      throw new Error("foreign asset id not found");
-    }
-    const AssetDefinition = this.interpreter.getAssetDef(assetId);
+    const assetRef = this.assertBigInt(stack.pop(), this.line);
+    const assetID = this.interpreter.getAssetIDByReference(Number(assetRef), true, this.line, this);
+    const AssetDefinition = this.interpreter.getAssetDef(assetID);
     let def: string;
 
     if (AssetDefinition === undefined) {
@@ -2099,7 +2133,7 @@ export class Int extends Op {
       uint64 = BigInt(args[0]);
     }
 
-    this.checkOverflow(uint64, line);
+    this.checkOverflow(uint64, line, MAX_UINT64);
     this.uint64 = uint64;
   }
 
@@ -2206,7 +2240,7 @@ export class PushInt extends Op {
     assertLen(args.length, 1, line);
     assertOnlyDigits(args[0], line);
 
-    this.checkOverflow(BigInt(args[0]), line);
+    this.checkOverflow(BigInt(args[0]), line, MAX_UINT64);
     this.uint64 = BigInt(args[0]);
   }
 
@@ -2585,9 +2619,633 @@ export class MinBalance extends Op {
 
   execute (stack: TEALStack): void {
     this.assertMinStackLen(stack, 1, this.line);
-    const accountIndex = this.assertBigInt(stack.pop(), this.line);
-    const acc = this.interpreter.getAccount(accountIndex, this.line);
+    const accountRef: StackElem = stack.pop();
+    const acc = this.interpreter.getAccount(accountRef, this.line);
 
     stack.push(BigInt(acc.minBalance));
+  }
+}
+
+/** TEALv4 Ops **/
+
+// push Ith scratch space index of the Tth transaction in the current group
+// push to stack [...stack, bigint/bytes]
+// Pops nothing
+// Args expected: [{uint8 transaction group index}(T),
+// {uint8 position in scratch space to load from}(I)]
+export class Gload extends Op {
+  readonly scratchIndex: number;
+  txIndex: number;
+  readonly interpreter: Interpreter;
+  readonly line: number;
+
+  /**
+   * Stores scratch space index and transaction index number according to arguments passed.
+   * @param args Expected arguments: [index number]
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.line = line;
+    assertLen(args.length, 2, this.line);
+    assertOnlyDigits(args[0], this.line);
+    assertOnlyDigits(args[1], this.line);
+
+    this.txIndex = Number(args[0]);
+    this.scratchIndex = Number(args[1]);
+    this.interpreter = interpreter;
+  }
+
+  execute (stack: TEALStack): void {
+    const scratch = this.interpreter.runtime.ctx.sharedScratchSpace.get(this.txIndex);
+    if (scratch === undefined) {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.SCRATCH_EXIST_ERROR,
+        { index: this.txIndex, line: this.line }
+      );
+    }
+    this.checkIndexBound(this.scratchIndex, scratch, this.line);
+    stack.push(scratch[this.scratchIndex]);
+  }
+}
+
+// push Ith scratch space index of the Tth transaction in the current group
+// push to stack [...stack, bigint/bytes]
+// Pops uint64(T)
+// Args expected: [{uint8 position in scratch space to load from}(I)]
+export class Gloads extends Gload {
+  /**
+   * Stores scratch space index number according to argument passed.
+   * @param args Expected arguments: [index number]
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    // "11" is mock value, will be updated when poping from stack in execute
+    super(["11", ...args], line, interpreter);
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    this.txIndex = Number(this.assertBigInt(stack.pop(), this.line));
+    super.execute(stack);
+  }
+}
+
+/**
+ * Provide subroutine functionality. When callsub is called, the current location in
+ * the program is saved and immediately jumps to the label passed to the opcode.
+ * Pops: None
+ * Pushes: None
+ * The call stack is separate from the data stack. Only callsub and retsub manipulate it.
+ * Pops: None
+ * Pushes: Pushes current instruction index in call stack
+ */
+export class Callsub extends Op {
+  readonly interpreter: Interpreter;
+  readonly label: string;
+  readonly line: number;
+
+  /**
+   * Sets `label` according to arguments passed.
+   * @param args Expected arguments: [label of branch]
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    assertLen(args.length, 1, line);
+    this.label = args[0];
+    this.interpreter = interpreter;
+    this.line = line;
+  }
+
+  execute (stack: TEALStack): void {
+    // the current location in the program is saved
+    this.interpreter.callStack.push(this.interpreter.instructionIndex);
+    // immediately jumps to the label passed to the opcode.
+    this.interpreter.jumpToLabel(this.label, this.line);
+  }
+}
+
+/**
+ * When the retsub opcode is called, the AVM will resume
+ * execution at the previous saved point.
+ * Pops: None
+ * Pushes: None
+ * The call stack is separate from the data stack. Only callsub and retsub manipulate it.
+ * Pops: index from call stack
+ * Pushes: None
+ */
+export class Retsub extends Op {
+  readonly interpreter: Interpreter;
+  readonly line: number;
+
+  /**
+   * @param args Expected arguments: []
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    assertLen(args.length, 0, line);
+    this.interpreter = interpreter;
+    this.line = line;
+  }
+
+  execute (stack: TEALStack): void {
+    // get current location from saved point
+    // jump to saved instruction opcode
+    if (this.interpreter.callStack.length() === 0) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.CALL_STACK_EMPTY, { line: this.line });
+    }
+    this.interpreter.instructionIndex = this.interpreter.callStack.pop();
+  }
+}
+
+// generic op to execute byteslice arithmetic
+// `b+`, `b-`, `b*`, `b/`, `b%`, `b<`, `b>`, `b<=`,
+// `b>=`, `b==`, `b!=`, `b\`, `b&`, `b^`, `b~`, `bzero`
+export class ByteOp extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack, op: MathOp): void {
+    this.assertMinStackLen(stack, 2, this.line);
+    const byteB = this.assertBytes(stack.pop(), this.line, MAX_INPUT_BYTE_LEN);
+    const byteA = this.assertBytes(stack.pop(), this.line, MAX_INPUT_BYTE_LEN);
+    const bigIntB = bigEndianBytesToBigInt(byteB);
+    const bigIntA = bigEndianBytesToBigInt(byteA);
+
+    let r: bigint | boolean;
+    switch (op) {
+      case MathOp.Add: {
+        r = bigIntA + bigIntB;
+        break;
+      }
+      case MathOp.Sub: {
+        r = bigIntA - bigIntB;
+        this.checkUnderflow(r, this.line);
+        break;
+      }
+      case MathOp.Mul: {
+        // NOTE: 12n * 0n == 0n, but in bytesclice arithmatic, this is equivalent to
+        // empty bytes (eg. byte "A" * byte "" === byte "")
+        r = bigIntA * bigIntB;
+        break;
+      }
+      case MathOp.Div: {
+        if (bigIntB === 0n) {
+          throw new RuntimeError(RUNTIME_ERRORS.TEAL.ZERO_DIV, { line: this.line });
+        }
+        r = bigIntA / bigIntB;
+        break;
+      }
+      case MathOp.Mod: {
+        if (bigIntB === 0n) {
+          throw new RuntimeError(RUNTIME_ERRORS.TEAL.ZERO_DIV, { line: this.line });
+        }
+        r = bigIntA % bigIntB;
+        break;
+      }
+      case MathOp.LessThan: {
+        r = bigIntA < bigIntB;
+        break;
+      }
+      case MathOp.GreaterThan: {
+        r = bigIntA > bigIntB;
+        break;
+      }
+      case MathOp.LessThanEqualTo: {
+        r = bigIntA <= bigIntB;
+        break;
+      }
+      case MathOp.GreaterThanEqualTo: {
+        r = bigIntA >= bigIntB;
+        break;
+      }
+      case MathOp.EqualTo: {
+        r = bigIntA === bigIntB;
+        break;
+      }
+      case MathOp.NotEqualTo: {
+        r = bigIntA !== bigIntB;
+        break;
+      }
+      case MathOp.BitwiseOr: {
+        r = bigIntA | bigIntB;
+        break;
+      }
+      case MathOp.BitwiseAnd: {
+        r = bigIntA & bigIntB;
+        break;
+      }
+      case MathOp.BitwiseXor: {
+        r = bigIntA ^ bigIntB;
+        break;
+      }
+      default: {
+        throw new Error('Operation not supported');
+      }
+    }
+
+    if (typeof r === 'boolean') {
+      stack.push(BigInt(r)); // 0 or 1
+    } else {
+      const resultAsBytes =
+        r === 0n ? new Uint8Array([]) : bigintToBigEndianBytes(r);
+      if (op === MathOp.BitwiseOr || op === MathOp.BitwiseAnd || op === MathOp.BitwiseXor) {
+        // for bitwise ops, zero's are "left" padded upto length.max(byteB, byteA)
+        // https://developer.algorand.org/docs/reference/teal/specification/#arithmetic-logic-and-cryptographic-operations
+        const maxSize = Math.max(byteA.length, byteB.length);
+
+        const paddedZeroArr = new Uint8Array(Math.max(0, maxSize - resultAsBytes.length)).fill(0);
+        const mergedArr = new Uint8Array(maxSize);
+        mergedArr.set(paddedZeroArr);
+        mergedArr.set(resultAsBytes, paddedZeroArr.length);
+        stack.push(this.assertBytes(mergedArr, this.line, MAX_OUTPUT_BYTE_LEN));
+      } else {
+        stack.push(this.assertBytes(resultAsBytes, this.line, MAX_OUTPUT_BYTE_LEN));
+      }
+    }
+  }
+}
+
+// A plus B, where A and B are byte-arrays interpreted as big-endian unsigned integers
+// panics on overflow (result > max_uint1024 i.e 128 byte num)
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, []byte]
+export class ByteAdd extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.Add);
+  }
+}
+
+// A minus B, where A and B are byte-arrays interpreted as big-endian unsigned integers.
+// Panic on underflow.
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, []byte]
+export class ByteSub extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.Sub);
+  }
+}
+
+// A times B, where A and B are byte-arrays interpreted as big-endian unsigned integers.
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, []byte]
+export class ByteMul extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.Mul);
+  }
+}
+
+// A divided by B, where A and B are byte-arrays interpreted as big-endian unsigned integers.
+// Panic if B is zero.
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, []byte]
+export class ByteDiv extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.Div);
+  }
+}
+
+// A modulo B, where A and B are byte-arrays interpreted as big-endian unsigned integers.
+// Panic if B is zero.
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, []byte]
+export class ByteMod extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.Mod);
+  }
+}
+
+// A is greater than B, where A and B are byte-arrays interpreted as big-endian unsigned integers => { 0 or 1}
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, uint64]
+export class ByteGreatorThan extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.GreaterThan);
+  }
+}
+
+// A is less than B, where A and B are byte-arrays interpreted as big-endian unsigned integers => { 0 or 1}
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, uint64]
+export class ByteLessThan extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.LessThan);
+  }
+}
+
+// A is greater than or equal to B, where A and B are byte-arrays interpreted
+// as big-endian unsigned integers => { 0 or 1}
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, uint64]
+export class ByteGreaterThanEqualTo extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.GreaterThanEqualTo);
+  }
+}
+
+// A is less than or equal to B, where A and B are byte-arrays interpreted as
+// big-endian unsigned integers => { 0 or 1}
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, uint64]
+export class ByteLessThanEqualTo extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.LessThanEqualTo);
+  }
+}
+
+// A is equals to B, where A and B are byte-arrays interpreted as big-endian unsigned integers => { 0 or 1}
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, uint64]
+export class ByteEqualTo extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.EqualTo);
+  }
+}
+
+// A is not equal to B, where A and B are byte-arrays interpreted as big-endian unsigned integers => { 0 or 1}
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, uint64]
+export class ByteNotEqualTo extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.NotEqualTo);
+  }
+}
+
+// A bitwise-or B, where A and B are byte-arrays, zero-left extended to the greater of their lengths
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, uint64]
+export class ByteBitwiseOr extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.BitwiseOr);
+  }
+}
+
+// A bitwise-and B, where A and B are byte-arrays, zero-left extended to the greater of their lengths
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, uint64]
+export class ByteBitwiseAnd extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.BitwiseAnd);
+  }
+}
+
+// A bitwise-xor B, where A and B are byte-arrays, zero-left extended to the greater of their lengths
+// Pops: ... stack, {[]byte A}, {[]byte B}
+// push to stack [...stack, uint64]
+export class ByteBitwiseXor extends ByteOp {
+  execute (stack: TEALStack): void {
+    super.execute(stack, MathOp.BitwiseXor);
+  }
+}
+
+// X (bytes array) with all bits inverted
+// Pops: ... stack, []byte
+// push to stack [...stack, byte[]]
+export class ByteBitwiseInvert extends ByteOp {
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const byteA = this.assertBytes(stack.pop(), this.line, MAX_INPUT_BYTE_LEN);
+    stack.push(byteA.map(b => (255 - b)));
+  }
+}
+
+// push a byte-array of length X, containing all zero bytes
+// Pops: ... stack, uint64
+// push to stack [...stack, byte[]]
+export class ByteZero extends ByteOp {
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    const len = this.assertBigInt(stack.pop(), this.line);
+    const result = new Uint8Array(Number(len)).fill(0);
+    stack.push(this.assertBytes(result, this.line, 4096));
+  }
+}
+
+/**
+ * Pop four uint64 values. The deepest two are interpreted
+ * as a uint128 dividend (deepest value is high word),
+ * the top two are interpreted as a uint128 divisor.
+ * Four uint64 values are pushed to the stack.
+ * The deepest two are the quotient (deeper value
+ * is the high uint64). The top two are the remainder, low bits on top.
+ * Pops: ... stack, {uint64 A}, {uint64 B}, {uint64 C}, {uint64 D}
+ * Pushes: ... stack, uint64, uint64, uint64, uint64
+ */
+export class DivModw extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    // Go-algorand implementation: https://github.com/algorand/go-algorand/blob/8f743a98827372bfd8928de3e0b70390ff34f407/data/transactions/logic/eval.go#L927
+    const firstLow = this.assertBigInt(stack.pop(), this.line);
+    const firstHigh = this.assertBigInt(stack.pop(), this.line);
+
+    let divisor = firstHigh << BigInt('64');
+    divisor = divisor + firstLow;
+
+    const secondLow = this.assertBigInt(stack.pop(), this.line);
+    const secondHigh = this.assertBigInt(stack.pop(), this.line);
+
+    let dividend = secondHigh << BigInt('64');
+    dividend = dividend + secondLow;
+
+    const quotient = dividend / divisor;
+    let low = quotient & MAX_UINT64;
+    this.checkOverflow(low, this.line, MAX_UINT64);
+
+    let high = quotient >> BigInt('64');
+    this.checkOverflow(high, this.line, MAX_UINT64);
+
+    stack.push(high);
+    stack.push(low);
+
+    const remainder = dividend % divisor;
+    low = remainder & MAX_UINT64;
+    this.checkOverflow(low, this.line, MAX_UINT64);
+
+    high = remainder >> BigInt('64');
+    this.checkOverflow(high, this.line, MAX_UINT64);
+
+    stack.push(high);
+    stack.push(low);
+  }
+}
+
+// A raised to the Bth power. Panic if A == B == 0 and on overflow
+// Pops: ... stack, {uint64 A}, {uint64 B}
+// Pushes: uint64
+export class Exp extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    const b = this.assertBigInt(stack.pop(), this.line);
+    const a = this.assertBigInt(stack.pop(), this.line);
+
+    if (a === 0n && b === 0n) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.EXP_ERROR, { line: this.line });
+    }
+
+    const res = a ** b;
+    this.checkOverflow(res, this.line, MAX_UINT64);
+
+    stack.push(res);
+  }
+}
+
+// A raised to the Bth power as a 128-bit long result as
+// low (top) and high uint64 values on the stack.
+// Panic if A == B == 0 or if the results exceeds 2^128-1
+// Pops: ... stack, {uint64 A}, {uint64 B}
+// Pushes: ... stack, uint64, uint64
+export class Expw extends Exp {
+  execute (stack: TEALStack): void {
+    const b = this.assertBigInt(stack.pop(), this.line);
+    const a = this.assertBigInt(stack.pop(), this.line);
+
+    if (a === 0n && b === 0n) {
+      throw new RuntimeError(RUNTIME_ERRORS.TEAL.EXP_ERROR, { line: this.line });
+    }
+    const res = a ** b;
+    this.checkOverflow(res, this.line, MAX_UINT128);
+
+    const low = res & MAX_UINT64;
+    this.checkOverflow(low, this.line, MAX_UINT64);
+
+    const high = res >> BigInt('64');
+    this.checkOverflow(high, this.line, MAX_UINT64);
+
+    stack.push(high);
+    stack.push(low);
+  }
+}
+
+// Left shift (A times 2^B, modulo 2^64)
+// Pops: ... stack, {uint64 A}, {uint64 B}
+// Pushes: uint64
+export class Shl extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    const b = this.assertBigInt(stack.pop(), this.line);
+    const a = this.assertBigInt(stack.pop(), this.line);
+
+    const res = (a << b) % (2n ** 64n);
+
+    stack.push(res);
+  }
+}
+
+// Right shift (A divided by 2^B)
+// Pops: ... stack, {uint64 A}, {uint64 B}
+// Pushes: uint64
+export class Shr extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    const b = this.assertBigInt(stack.pop(), this.line);
+    const a = this.assertBigInt(stack.pop(), this.line);
+
+    const res = a >> b;
+
+    stack.push(res);
+  }
+}
+
+// The largest integer B such that B^2 <= X
+// Pops: ... stack, uint64
+// Pushes: uint64
+export class Sqrt extends Op {
+  readonly line: number;
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: [] // none
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number) {
+    super();
+    this.line = line;
+    assertLen(args.length, 0, line);
+  };
+
+  execute (stack: TEALStack): void {
+    // https://stackoverflow.com/questions/53683995/javascript-big-integer-square-root
+    const value = this.assertBigInt(stack.pop(), this.line);
+    if (value < 2n) {
+      stack.push(value);
+      return;
+    }
+
+    if (value < 16n) {
+      stack.push(BigInt(Math.floor(Math.sqrt(Number(value)))));
+      return;
+    }
+    let x1;
+    if (value < (1n << 52n)) {
+      x1 = BigInt(Math.floor(Math.sqrt(Number(value)))) - 3n;
+    } else {
+      x1 = (1n << 52n) - 2n;
+    }
+
+    let x0 = -1n;
+    while ((x0 !== x1 && x0 !== (x1 - 1n))) {
+      x0 = x1;
+      x1 = ((value / x0) + x0) >> 1n;
+    }
+
+    stack.push(x0);
   }
 }

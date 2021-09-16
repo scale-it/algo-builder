@@ -84,14 +84,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     escrow = runtime.getAccount(escrowAddress);
 
     // fund escrow with some minimum balance
-    runtime.executeTx({
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.SecretKey,
-      fromAccount: master.account,
-      toAccountAddr: escrowAddress,
-      amountMicroAlgos: minBalance,
-      payFlags: {}
-    });
+    runtime.fundLsig(master.account, escrowAddress, minBalance);
   }
 
   it('should create crowdfunding stateful application', () => {
@@ -176,7 +169,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     const escrowBal = escrow.balance();
     const donateTxGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appID: applicationId,
@@ -212,14 +205,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     syncAccounts();
 
     // fund escrow with amount = goal
-    runtime.executeTx({
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.SecretKey,
-      fromAccount: donor.account,
-      toAccountAddr: escrow.address,
-      amountMicroAlgos: goal,
-      payFlags: {}
-    });
+    runtime.fundLsig(donor.account, escrow.address, goal);
 
     // update Global State
     runtime.getAccount(creator.address).setGlobalState(applicationId, 'Total', BigInt(goal));
@@ -230,7 +216,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     const escrowFunds = escrow.balance(); //  funds in escrow
     const claimTxGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId,
@@ -266,14 +252,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     syncAccounts();
 
     // fund escrow with amount < goal
-    runtime.executeTx({
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.SecretKey,
-      fromAccount: donor.account,
-      toAccountAddr: escrow.address,
-      amountMicroAlgos: goal - 1e6,
-      payFlags: {}
-    });
+    runtime.fundLsig(donor.account, escrow.address, goal - 1e6);
     syncAccounts();
 
     // update Global State
@@ -284,7 +263,7 @@ describe('Crowdfunding Tests - Happy Paths', function () {
     // reclaim transaction
     const reclaimTxGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appID: applicationId,

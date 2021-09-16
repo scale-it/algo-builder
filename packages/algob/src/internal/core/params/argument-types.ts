@@ -1,6 +1,8 @@
 import { BuilderError, ERRORS } from "@algo-builder/web";
 import * as fs from "fs";
 
+const UNEXPECTED_ERROR = "An unexpected error occurred:";
+
 /**
  * Provides an interface for every valid task argument type.
  */
@@ -213,14 +215,17 @@ export const inputFile: ArgumentType<string> = {
         throw new Error(`${strValue} is a directory, not a file`);
       }
     } catch (error) {
-      throw new BuilderError(
-        ERRORS.ARGUMENTS.INVALID_INPUT_FILE,
-        {
-          name: argName,
-          value: strValue
-        },
-        error
-      );
+      if (error instanceof Error) {
+        throw new BuilderError(
+          ERRORS.ARGUMENTS.INVALID_INPUT_FILE,
+          {
+            name: argName,
+            value: strValue
+          },
+          error
+        );
+      }
+      console.error(UNEXPECTED_ERROR, error);
     }
 
     return strValue;
@@ -239,15 +244,18 @@ export const inputFile: ArgumentType<string> = {
       inputFile.parse(argName, value);
     } catch (error) {
       // the input value is considered invalid, throw error.
-      throw new BuilderError(
-        ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE,
-        {
-          value,
-          name: argName,
-          type: inputFile.name
-        },
-        error
-      );
+      if (error instanceof BuilderError) {
+        throw new BuilderError(
+          ERRORS.ARGUMENTS.INVALID_VALUE_FOR_TYPE,
+          {
+            value,
+            name: argName,
+            type: inputFile.name
+          },
+          error
+        );
+      }
+      console.error(UNEXPECTED_ERROR, error);
     }
   }
 };
@@ -258,14 +266,17 @@ export const json: ArgumentType<any> = {  // eslint-disable-line
     try {
       return JSON.parse(strValue);
     } catch (error) {
-      throw new BuilderError(
-        ERRORS.ARGUMENTS.INVALID_JSON_ARGUMENT,
-        {
-          param: argName,
-          error: error.message
-        },
-        error
-      );
+      if (error instanceof Error) {
+        throw new BuilderError(
+          ERRORS.ARGUMENTS.INVALID_JSON_ARGUMENT,
+          {
+            param: argName,
+            error: error.message
+          },
+          error
+        );
+      }
+      console.error(UNEXPECTED_ERROR, error);
     }
   },
   /**

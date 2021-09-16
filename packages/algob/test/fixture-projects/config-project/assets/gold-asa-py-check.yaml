@@ -2,7 +2,7 @@ filename: gold-asa.py
 timestamp: 10
 compiled: compiled
 compiledHash: compiledHash
-srcHash: 3867907430
+srcHash: 2014712600
 tealCode: |
   #pragma version 2
   global GroupSize
@@ -32,5 +32,6 @@ tealCode: |
   <=
   &&
   ||
+  return
 base64ToBytes:
   - 0

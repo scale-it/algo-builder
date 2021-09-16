@@ -129,7 +129,7 @@ function signTransaction (txn: Transaction, execParams: wtypes.ExecParams): Uint
       return txn.signTxn(execParams.fromAccount.sk);
     }
     case wtypes.SignType.LogicSignature: {
-      execParams.lsig.args = execParams.args ?? [];
+      execParams.lsig.lsig.args = execParams.args ?? [];
       return algosdk.signLogicSigTransactionObject(txn, execParams.lsig).blob;
     }
     default: {

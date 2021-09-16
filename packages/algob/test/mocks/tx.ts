@@ -1,4 +1,4 @@
-import algosdk, { Algodv2, LogicSig, modelsv2, SuggestedParams } from "algosdk";
+import { Algodv2, LogicSigAccount, modelsv2, SuggestedParams } from "algosdk";
 
 import { ConfirmedTxInfo } from "../../src/types";
 import { bobAcc } from "./account";
@@ -32,7 +32,7 @@ export const mockAssetInfo: modelsv2.Asset = {
     unitName: "TKN",
     name: "ASA-1",
     url: "link",
-    metadataHash: "12312442142141241244444411111133",
+    metadataHash: new Uint8Array(0),
     manager: bobAcc.addr,
     reserve: undefined,
     freeze: bobAcc.addr,
@@ -54,7 +54,7 @@ export const mockDryRunResponse = {
   txns: [
     {
       disassembly: [
-        "#pragma version 2",
+        "#pragma version 4",
         "intcblock 1 0 4 1000 10000",
         "bytecblock 0x20ee6e18c121cab6dfc0f94d3d97d9dce06453d6ad52d75cd85d5b35d86e1112",
         "global GroupSize",
@@ -120,4 +120,4 @@ export const mockApplicationResponse = {
   }
 };
 
-export const mockLsig: LogicSig = algosdk.makeLogicSig(mockProgram, []);
+export const mockLsig: LogicSigAccount = new LogicSigAccount(mockProgram, []);

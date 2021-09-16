@@ -1,4 +1,4 @@
-const { readGlobalStateSSC } = require('@algo-builder/algob');
+const { readAppGlobalState } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 const { executeTransaction } = require('./common');
 
@@ -10,22 +10,12 @@ async function run (runtimeEnv, deployer) {
   const appInfo = deployer.getApp('permissioned-voting-approval.py', 'permissioned-voting-clear.py');
 
   // Retreive Global State
-  const globalState = await readGlobalStateSSC(deployer, votingAdminAccount.addr, appInfo.appID);
+  const globalState = await readAppGlobalState(deployer, votingAdminAccount.addr, appInfo.appID);
   console.log(globalState);
 
   // Count votes
-  let candidateA = 0; let candidateB = 0;
-  let key;
-  for (const l of globalState) {
-    key = Buffer.from(l.key, 'base64').toString();
-    console.log(`"${key}": ${l.value.uint}`);
-    if (key === 'candidatea') {
-      candidateA = l.value.uint;
-    }
-    if (key === 'candidateb') {
-      candidateB = l.value.uint;
-    }
-  }
+  const candidateA = globalState.get('candidatea') ?? 0;
+  const candidateB = globalState.get('candidateb') ?? 0;
 
   // Declare Winner
   if (candidateA > candidateB) {
@@ -36,24 +26,24 @@ async function run (runtimeEnv, deployer) {
     console.log('The Winner is CandidateA!!');
   }
 
-  const txnParam = {
-    type: types.TransactionType.DeleteApp,
-    sign: types.SignType.SecretKey,
-    fromAccount: votingAdminAccount,
-    appID: appInfo.appID,
-    payFlags: {}
-  };
+  // const txnParam = {
+  //   type: types.TransactionType.DeleteApp,
+  //   sign: types.SignType.SecretKey,
+  //   fromAccount: votingAdminAccount,
+  //   appID: appInfo.appID,
+  //   payFlags: {}
+  // };
 
-  // Delete Application
-  console.log('Deleting Application');
-  await executeTransaction(deployer, txnParam);
+  // // Delete Application
+  // console.log('Deleting Application');
+  // await executeTransaction(deployer, txnParam);
 
-  txnParam.fromAccount = alice;
-  txnParam.type = types.TransactionType.ClearApp;
+  // txnParam.fromAccount = alice;
+  // txnParam.type = types.TransactionType.ClearApp;
 
-  // Clear voter's account
-  console.log("Clearing Alice's Account");
-  await executeTransaction(deployer, txnParam);
+  // // Clear voter's account
+  // console.log("Clearing Alice's Account");
+  // await executeTransaction(deployer, txnParam);
 }
 
 module.exports = { default: run };

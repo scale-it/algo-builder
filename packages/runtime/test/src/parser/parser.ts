@@ -6,15 +6,16 @@ import {
   Add, Addr, Addw, And, AppGlobalDel, AppGlobalGet, AppGlobalGetEx,
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
-  Branch, BranchIfNotZero, BranchIfZero, Btoi, Byte, Bytec, Concat, Dig, Div,
-  Dup, Dup2, Ed25519verify, EqualTo, Err, GetAssetDef, GetAssetHolding,
-  GetBit,
-  GetByte,
-  Global, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna, Gtxns, Gtxnsa, Int, Intc, Itob,
-  Keccak256, Label, Len, LessThan, LessThanEqualTo, Load, MinBalance, Mod, Mul, Mulw,
-  Not, NotEqualTo, Or, Pop, Pragma, PushBytes, PushInt, Return, Select, SetBit,
-  SetByte, Sha256, Sha512_256, Store,
-  Sub, Substring, Substring3, Swap, Txn, Txna
+  Branch, BranchIfNotZero, BranchIfZero, Btoi, Byte, Bytec, Callsub,
+  Concat, Dig, Div,
+  DivModw,
+  Dup, Dup2, Ed25519verify, EqualTo, Err, Exp, Expw, GetAssetDef, GetAssetHolding,
+  GetBit, GetByte, Gload, Gloads, Global, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna,
+  Gtxns, Gtxnsa, Int, Intc, Itob, Keccak256, Label, Len, LessThan,
+  LessThanEqualTo, Load, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo,
+  Or, Pop, Pragma, PushBytes, PushInt, Retsub,
+  Return, Select, SetBit, SetByte, Sha256, Sha512_256, Shl, Shr, Sqrt,
+  Store, Sub, Substring, Substring3, Swap, Txn, Txna
 } from "../../../src/interpreter/opcode-list";
 import { MAX_UINT64, MaxTEALVersion, MIN_UINT64 } from "../../../src/lib/constants";
 import { opcodeFromSentence, parser, wordsFromLine } from "../../../src/parser/parser";
@@ -888,6 +889,136 @@ describe("Parser", function () {
         );
       });
     });
+
+    describe("should return correct opcodes for tealv4 ops", () => {
+      it("gload", () => {
+        const res = opcodeFromSentence(["gload", "0", "1"], 1, interpreter);
+        const expected = new Gload(["0", "1"], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["gload", "one", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.INVALID_TYPE
+        );
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["gload", "0"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("gloads", () => {
+        const res = opcodeFromSentence(["gloads", "0"], 1, interpreter);
+        const expected = new Gloads(["0"], 1, interpreter);
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["gloads", "one"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.INVALID_TYPE
+        );
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["gloads", "0", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("callsub", () => {
+        const res = opcodeFromSentence(["callsub", "label"], 1, interpreter);
+        const expected = new Callsub(["label"], 1, interpreter);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["callsub", "label1", "label2"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("retsub", () => {
+        const res = opcodeFromSentence(["retsub"], 1, interpreter);
+        const expected = new Retsub([], 1, interpreter);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["retsub", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("divmodw", () => {
+        const res = opcodeFromSentence(["divmodw"], 1, interpreter);
+        const expected = new DivModw([], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["divmodw", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("exp", () => {
+        const res = opcodeFromSentence(["exp"], 1, interpreter);
+        const expected = new Exp([], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["exp", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("expw", () => {
+        const res = opcodeFromSentence(["expw"], 1, interpreter);
+        const expected = new Expw([], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["expw", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("shl", () => {
+        const res = opcodeFromSentence(["shl"], 1, interpreter);
+        const expected = new Shl([], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["shl", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("shr", () => {
+        const res = opcodeFromSentence(["shr"], 1, interpreter);
+        const expected = new Shr([], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["shr", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("sqrt", () => {
+        const res = opcodeFromSentence(["sqrt"], 1, interpreter);
+        const expected = new Sqrt([], 1);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["sqrt", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+    });
   });
 
   const cryptoFile = "test-crypto.teal";
@@ -907,7 +1038,7 @@ describe("Parser", function () {
 
       assert.deepEqual(res, expected);
 
-      const expect = [new Pragma(["version", "2"], 1, interpreter), new Int(["1"], 2),
+      const expect = [new Pragma(["version", "4"], 1, interpreter), new Int(["1"], 2),
         new Int(["3"], 3), new Add([], 4)];
       res = parser(getProgram("test-file-2.teal"), ExecutionMode.SIGNATURE, interpreter);
 
@@ -932,7 +1063,7 @@ describe("Parser", function () {
       const file = "test-file-3.teal";
       const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1, interpreter),
+        new Pragma(["version", "4"], 1, interpreter),
         new Int(["5"], 2),
         new Int(["3"], 3),
         new Sub([], 4)
@@ -945,7 +1076,7 @@ describe("Parser", function () {
       const file = "test-file-4.teal";
       const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1, interpreter),
+        new Pragma(["version", "4"], 1, interpreter),
         new Int(["6"], 2),
         new Int(["3"], 3),
         new Div([], 6)
@@ -958,7 +1089,7 @@ describe("Parser", function () {
       const file = "test-file-5.teal";
       const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1, interpreter),
+        new Pragma(["version", "4"], 1, interpreter),
         new Int(["5"], 4),
         new Int(["3"], 6),
         new Mul([], 10)
@@ -971,7 +1102,7 @@ describe("Parser", function () {
       const file = "test-addr.teal";
       const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1, interpreter),
+        new Pragma(["version", "4"], 1, interpreter),
         new Addr(["WWYNX3TKQYVEREVSW6QQP3SXSFOCE3SKUSEIVJ7YAGUPEACNI5UGI4DZCE"], 2)
       ];
 
@@ -1090,7 +1221,7 @@ describe("Parser", function () {
 
       const res = parser(getProgram(file), ExecutionMode.SIGNATURE, interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1, interpreter),
+        new Pragma(["version", "4"], 1, interpreter),
         new Itob([], 2),
         new Btoi([], 3),
         new Mulw([], 4),
@@ -1161,7 +1292,7 @@ describe("Parser", function () {
 
       const res = parser(getProgram(file), ExecutionMode.APPLICATION, interpreter);
       const expected = [
-        new Pragma(["version", "2"], 1, interpreter),
+        new Pragma(["version", "4"], 1, interpreter),
         new Balance([], 4, interpreter),
         new GetAssetHolding(["AssetBalance"], 5, interpreter),
         new GetAssetDef(["AssetTotal"], 6, interpreter),

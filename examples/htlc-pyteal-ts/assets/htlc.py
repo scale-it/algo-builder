@@ -49,4 +49,4 @@ if __name__ == "__main__":
         Addr(params["bob"]),
         Addr(params["alice"]),
         params["hash_image"],
-        params["timeout"]), Mode.Signature))
+        params["timeout"]), Mode.Signature, version = 4))

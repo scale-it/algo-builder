@@ -24,7 +24,7 @@ async function run (runtimeEnv, deployer) {
     // NOTE: tx0 will fail if an account level is below level or not set
     // (i.e script ./set-clear-level.js is not executed)
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: creator,
       appID: appInfo.appID,

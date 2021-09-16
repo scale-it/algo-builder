@@ -1,4 +1,4 @@
-#pragma version 2
+#pragma version 4
 // Check if Transaction type is pay or axfer, algo amount AND asset amount is <= 100
 txn TypeEnum
 int 1

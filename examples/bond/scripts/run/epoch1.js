@@ -1,9 +1,8 @@
 const {
   executeTransaction
 } = require('@algo-builder/algob');
-const { types } = require('@algo-builder/web');
 const { accounts } = require('./common/accounts.js');
-const { issuePrice, tokenMap } = require('./common/common.js');
+const { issuePrice, tokenMap, buyTxNode } = require('./common/common.js');
 const { redeem } = require('./redeem.js');
 
 /**
@@ -26,43 +25,15 @@ exports.epoch1 = async function (deployer) {
   };
   const issuerLsig = await deployer.loadLogic('issuer-lsig.py', scInitParam);
   const bondToken = tokenMap.get('bond-token-1');
-  await deployer.optInAcountToASA(bondToken, 'bob', { totalFee: 1000 });
-  await deployer.optInAcountToASA(bondToken, 'elon-musk', { totalFee: 1000 });
+  await deployer.optInAccountToASA(bondToken, 'bob', { totalFee: 1000 });
+  await deployer.optInAccountToASA(bondToken, 'elon-musk', { totalFee: 1000 });
 
   // elon buys 4 bonds
   const algoAmount = 4 * issuePrice;
 
-  const groupTx = [
-    // Algo transfer from buyer to issuer
-    {
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.SecretKey,
-      fromAccount: account.elon,
-      toAccountAddr: issuerLsig.address(),
-      amountMicroAlgos: algoAmount,
-      payFlags: { totalFee: 2000 }
-    },
-    // Bond token transfer from issuer's address
-    {
-      type: types.TransactionType.TransferAsset,
-      sign: types.SignType.LogicSignature,
-      fromAccountAddr: issuerLsig.address(),
-      lsig: issuerLsig,
-      toAccountAddr: account.elon.addr,
-      amount: 4,
-      assetID: bondToken,
-      payFlags: { totalFee: 0 }
-    },
-    // call to bond-dapp
-    {
-      type: types.TransactionType.CallNoOpSSC,
-      sign: types.SignType.SecretKey,
-      fromAccount: account.elon,
-      appID: appInfo.appID,
-      payFlags: { totalFee: 1000 },
-      appArgs: ['str:buy']
-    }
-  ];
+  const groupTx = await buyTxNode(
+    deployer, account.elon, issuerLsig, algoAmount, appInfo.appID, bondToken
+  );
 
   console.log('Elon buying 4 more bonds!');
   await executeTransaction(deployer, groupTx);

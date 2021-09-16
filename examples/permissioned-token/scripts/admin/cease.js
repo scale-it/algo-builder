@@ -32,7 +32,7 @@ async function cease (deployer, address, amount) {
      * tx 0 - Call to controller stateful smart contract (by ASA.manager)
      * with application arg: 'force_transfer' */
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: owner,
       appID: controllerAppInfo.appID,
@@ -88,7 +88,7 @@ async function run (runtimeEnv, deployer) {
   await whitelist(deployer, permissionsManager, bob.addr);
 
   // let's issue few tokens to bob
-  deployer.optInAcountToASA('tesla', bob.name, {});
+  deployer.optInAccountToASA('tesla', bob.name, {});
   await issue(deployer, bob.addr, 300);
 
   // cease 250 tokens as penalty back from bob (eg. bob was fired)

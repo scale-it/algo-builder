@@ -26,12 +26,12 @@ async function run (runtimeEnv, deployer) {
   const assetID = deployer.asa.get('platinum').assetIndex;
   console.log('Asset Index: ', assetID);
 
-  await deployer.optInAcountToASA('platinum', 'alice', {});
+  await deployer.optInAccountToASA('platinum', 'alice', {});
 
   const txGroup = [
     // Stateful call
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: alice,
       appID: appInfo.appID,

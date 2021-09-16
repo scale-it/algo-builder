@@ -42,7 +42,12 @@ function parseMnemonic (mnemonic: string): AccountSDK {
   try {
     return mnemonicToSecretKey(mnemonic);
   } catch (e) {
-    throw new BuilderError(ERRORS.ACCOUNT.WRONG_MNEMONIC, { errmsg: e.message }, e.error);
+    if (e instanceof Error) {
+      throw new BuilderError(
+        ERRORS.ACCOUNT.WRONG_MNEMONIC, { errmsg: e.message }, e
+      );
+    }
+    throw e;
   }
 }
 
@@ -195,9 +200,10 @@ export class KMDOperator {
           accounts.push({ name: n, addr: addr, sk: new Uint8Array(k.private_key) });
         }
       }
-    } catch (e) {
+    } catch (e: any) {
       if (e.code === 'ECONNREFUSED') { throw new BuilderError(ERRORS.KMD.CONNECTION, { ctx: e }, e); }
-      throw new BuilderError(ERRORS.KMD.ERROR, { ctx: JSON.stringify(e) }, e);
+      if (e instanceof Error) { throw new BuilderError(ERRORS.KMD.ERROR, { ctx: JSON.stringify(e) }, e); }
+      throw e;
     }
 
     return accounts;

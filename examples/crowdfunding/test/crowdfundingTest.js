@@ -106,15 +106,7 @@ describe('Crowdfunding Tests', function () {
     console.log('Escrow Address: ', escrowAddress);
 
     // fund escrow with some minimum balance first
-    const fundEscrowParam = {
-      type: types.TransactionType.TransferAlgo,
-      sign: types.SignType.SecretKey,
-      fromAccount: master.account,
-      toAccountAddr: escrowAddress,
-      amountMicroAlgos: minBalance,
-      payFlags: { totalFee: 1000 }
-    };
-    runtime.executeTx(fundEscrowParam);
+    runtime.fundLsig(master.account, escrowAddress, minBalance);
 
     // verify global state
     assert.isDefined(applicationId);
@@ -159,7 +151,7 @@ describe('Crowdfunding Tests', function () {
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     let txGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appID: applicationId,
@@ -188,7 +180,7 @@ describe('Crowdfunding Tests', function () {
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     txGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appID: applicationId,
@@ -224,7 +216,7 @@ describe('Crowdfunding Tests', function () {
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     txGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: donor.account,
         appID: applicationId,
@@ -250,7 +242,7 @@ describe('Crowdfunding Tests', function () {
     appArgs = [convert.stringToBytes('claim')];
     txGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId,
@@ -330,7 +322,7 @@ describe('Crowdfunding Tests', function () {
     // Atomic Transaction (Stateful Smart Contract call + Payment Transaction)
     const txGroup = [
       {
-        type: types.TransactionType.CallNoOpSSC,
+        type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: creator.account,
         appID: applicationId,

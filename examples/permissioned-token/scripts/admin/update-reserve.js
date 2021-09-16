@@ -54,7 +54,7 @@ async function updateReserveByAssetConfig (deployer, address) {
      * params in the txGroup (eg. sender(tx1) === receiver(tx2) === clawbackAddress)
      */
     {
-      type: types.TransactionType.CallNoOpSSC,
+      type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: owner,
       appID: controllerAppInfo.appID,
@@ -116,7 +116,7 @@ async function run (runtimeEnv, deployer) {
   // await fundAccount(deployer, newReserve);
 
   try {
-    await deployer.optInAcountToASA('tesla', newReserve.name, {});
+    await deployer.optInAccountToASA('tesla', newReserve.name, {});
   } catch (e) {
     console.log(e);
     throw new Error(e);
