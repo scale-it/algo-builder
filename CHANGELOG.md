@@ -35,6 +35,11 @@
 ### Dependencies
 * Upgraded pyTEAL version [`0.8.0`](https://github.com/algorand/pyteal/releases/tag/v0.8.0) in pipfile.
 
+## v1.2.1 2021-09-15
+
+### Bug Fixes
+* Fix `algob init <project-name>`.
+
 ## v1.2.0 2021-08-09
 
 ### Improvements
