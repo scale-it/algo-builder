@@ -1,0 +1,11 @@
+#pragma version 4
+
+// Get the created id of the asset created in the first tx
+gaid 0
+store 1
+byte "first"
+load 1
+app_global_put
+
+int 1
+return
