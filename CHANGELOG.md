@@ -26,6 +26,7 @@
 * Fix metadatahash type
 * Fix init project-name bug(`algob init <project-name>` command was not working properly)
 * Fix zod package was missing from runtime(but zod was being used in runtime)
+* Added support for passing http token as an `object` as well. User can now use `{ "X-Algo-API-Token": <token> }` notation for passing token in `algob.config.js`.
 
 ### API Breaking
 * Migrate from `LogicSig` to `LogicSigAccount`(Note: Loading lsig from file uses `LogicSig`, because `goal` stores it in LogicSig type format)
