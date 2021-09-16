@@ -3273,15 +3273,15 @@ export class Gaid extends Op {
   };
 
   execute (stack: TEALStack): void {
-    const ID = this.interpreter.runtime.ctx.knowableID.get(this.txIndex);
-    if (ID === undefined) {
+    const knowableID = this.interpreter.runtime.ctx.knowableID.get(this.txIndex);
+    if (knowableID === undefined) {
       throw new RuntimeError(
         RUNTIME_ERRORS.TEAL.GROUP_INDEX_EXIST_ERROR,
         { index: this.txIndex, line: this.line }
       );
     }
 
-    stack.push(BigInt(ID));
+    stack.push(BigInt(knowableID));
   }
 }
 
