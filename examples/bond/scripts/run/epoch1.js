@@ -2,7 +2,7 @@ const {
   executeTransaction
 } = require('@algo-builder/algob');
 const { accounts } = require('./common/accounts.js');
-const { issuePrice, tokenMap, buyTx } = require('./common/common.js');
+const { issuePrice, tokenMap, buyTxNode } = require('./common/common.js');
 const { redeem } = require('./redeem.js');
 
 /**
@@ -25,14 +25,14 @@ exports.epoch1 = async function (deployer) {
   };
   const issuerLsig = await deployer.loadLogic('issuer-lsig.py', scInitParam);
   const bondToken = tokenMap.get('bond-token-1');
-  await deployer.optInAcountToASA(bondToken, 'bob', { totalFee: 1000 });
-  await deployer.optInAcountToASA(bondToken, 'elon-musk', { totalFee: 1000 });
+  await deployer.optInAccountToASA(bondToken, 'bob', { totalFee: 1000 });
+  await deployer.optInAccountToASA(bondToken, 'elon-musk', { totalFee: 1000 });
 
   // elon buys 4 bonds
   const algoAmount = 4 * issuePrice;
 
-  const groupTx = buyTx(
-    account.elon, issuerLsig, 4, algoAmount, appInfo.appID, bondToken
+  const groupTx = await buyTxNode(
+    deployer, account.elon, issuerLsig, algoAmount, appInfo.appID, bondToken
   );
 
   console.log('Elon buying 4 more bonds!');

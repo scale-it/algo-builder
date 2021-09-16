@@ -1,7 +1,7 @@
 /* eslint sonarjs/no-identical-functions: 0 */
 import { RUNTIME_ERRORS } from "../errors/errors-list";
 import { RuntimeError } from "../errors/runtime-errors";
-import { GlobalFields, MAX_UINT6, MAX_UINT8, MAX_UINT64, MIN_UINT8, MIN_UINT64, TxArrFields, TxnFields } from "../lib/constants";
+import { GlobalFields, MAX_UINT6, MAX_UINT8, MAX_UINT64, MAX_UINT128, MIN_UINT8, MIN_UINT64, TxArrFields, TxnFields } from "../lib/constants";
 import type { TEALStack } from "../types";
 
 export class Op {
@@ -18,13 +18,25 @@ export class Op {
   }
 
   /**
-   * asserts number is less than or equal to MAX_UINT64
+   * asserts number is less than or equal to value(MAX_UINT64, MAX_UINT128)
    * @param num number to check
    * @param line line number in TEAL file
+   * @param value max value
    */
-  checkOverflow (num: bigint, line: number): void {
-    if (num > MAX_UINT64) {
-      throw new RuntimeError(RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW, { line: line });
+  checkOverflow (num: bigint, line: number, value: bigint): void {
+    switch (value) {
+      case MAX_UINT64: {
+        if (num > MAX_UINT64) {
+          throw new RuntimeError(RUNTIME_ERRORS.TEAL.UINT64_OVERFLOW, { line: line });
+        }
+        break;
+      }
+      case MAX_UINT128: {
+        if (num > MAX_UINT128) {
+          throw new RuntimeError(RUNTIME_ERRORS.TEAL.UINT128_OVERFLOW, { line: line });
+        }
+        break;
+      }
     }
   }
 

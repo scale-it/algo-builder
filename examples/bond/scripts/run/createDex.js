@@ -1,5 +1,5 @@
 const {
-  executeTransaction, readGlobalStateSSC, balanceOf
+  executeTransaction, readAppGlobalState, balanceOf
 } = require('@algo-builder/algob');
 const { asaDef, fundAccount, tokenMap, optInTx, couponValue, createDexTx } = require('./common/common.js');
 const { types } = require('@algo-builder/web');
@@ -59,15 +59,8 @@ exports.createDex = async function (deployer, creatorAccount, managerAcc, i) {
   await optInTx(deployer, managerAcc, dexLsig, newIndex);
   await optInTx(deployer, managerAcc, dexLsig, oldBond);
 
-  const globalState = await readGlobalStateSSC(deployer, managerAcc.addr, appInfo.appID);
-  let total = 0;
-  for (const l of globalState) {
-    const key = Buffer.from(l.key, 'base64').toString();
-    if (key === 'total') {
-      total = l.value.uint;
-      break;
-    }
-  }
+  const globalState = await readAppGlobalState(deployer, managerAcc.addr, appInfo.appID);
+  const total = globalState.get('total') ?? 0;
   console.log('Total issued: ', total);
 
   // balance of old bond tokens in issuer lsig

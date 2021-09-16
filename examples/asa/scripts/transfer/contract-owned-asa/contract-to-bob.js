@@ -21,7 +21,7 @@ async function run (runtimeEnv, deployer) {
   /* Transfer ASA 'gold' from contract account to user account */
   const assetID = deployer.asa.get('platinum').assetIndex;
   console.log('Asset Index: ', assetID);
-  await deployer.optInAcountToASA('platinum', 'bob', {});
+  await deployer.optInAccountToASA('platinum', 'bob', {});
 
   const txGroup = [
     // Stateful call

@@ -1,4 +1,4 @@
-const { executeTransaction, readGlobalStateSSC, readLocalStateSSC } = require('@algo-builder/algob');
+const { executeTransaction, readAppGlobalState, readAppLocalState } = require('@algo-builder/algob');
 
 exports.executeTransaction = async function (deployer, txnParams) {
   try {
@@ -10,13 +10,8 @@ exports.executeTransaction = async function (deployer, txnParams) {
 
 exports.printGlobalNFT = async function (deployer, creator, appID) {
   try {
-    const globalState = await readGlobalStateSSC(deployer, creator, appID);
-    for (const g of globalState) {
-      const key = Buffer.from(g.key, 'base64').toString();
-      if (key === 'total') {
-        console.log('Global NFT Count:', g.value.uint);
-      }
-    }
+    const globalState = await readAppGlobalState(deployer, creator, appID);
+    console.log('Global NFT Count:', globalState.get('total'));
   } catch (e) {
     console.error('Error Occurred', e);
   }
@@ -24,14 +19,13 @@ exports.printGlobalNFT = async function (deployer, creator, appID) {
 
 exports.printLocalNFT = async function (deployer, account, appID) {
   try {
-    const localState = await readLocalStateSSC(deployer, account, appID);
+    const localState = await readAppLocalState(deployer, account, appID);
     // each nft is stored as a one record in user store
     let holdings = [];
     if (localState === undefined) {
       holdings = 'none';
     } else {
-      for (const l of localState) {
-        const key = Buffer.from(l.key, 'base64').readBigUInt64BE();
+      for (const [key, _] of localState.entries()) {
         holdings.push(key);
       }
       holdings = holdings.join(' ');

@@ -8,7 +8,7 @@ const {
   optInLsigToBond, createDex, approvalProgram,
   clearProgram, minBalance, initialBalance, redeem
 } = require('./common/common');
-const { buyTx, issueTx, redeemCouponTx } = require('../scripts/run/common/common');
+const { buyTxRuntime, issueTx, redeemCouponTx, buyTx } = require('../scripts/run/common/common');
 
 const RUNTIME_ERR1009 = 'RUNTIME_ERR1009: TEAL runtime encountered err opcode';
 const RUNTIME_ERR1402 = 'Cannot withdraw';
@@ -131,8 +131,8 @@ describe('Bond token failing tests', function () {
     const amount = 10;
     const algoAmount = amount * 1000;
 
-    const groupTx = buyTx(
-      elon.account, lsig, amount, algoAmount, applicationId, initialBond
+    const groupTx = buyTxRuntime(
+      runtime, elon.account, lsig, algoAmount, applicationId, initialBond
     );
     runtime.executeTx(groupTx);
     syncAccounts();
@@ -286,8 +286,8 @@ describe('Bond token failing tests', function () {
     runtime.optInToApp(elon.address, applicationId, {}, {});
     const algoAmount = 10 * 1000;
 
-    const groupTx = buyTx(
-      elon.account, lsig, 10, algoAmount, applicationId, initialBond
+    const groupTx = buyTxRuntime(
+      runtime, elon.account, lsig, algoAmount, applicationId, initialBond
     );
     groupTx[0].payFlags = { totalFee: 1000 };
     groupTx[1].payFlags = { totalFee: 1000 };

@@ -2,6 +2,7 @@ import { EncodedAssetParams, EncodedLocalStateSchema, EncodedTransaction } from 
 
 export const MIN_UINT64 = 0n;
 export const MAX_UINT64 = 0xFFFFFFFFFFFFFFFFn;
+export const MAX_UINT128 = 340282366920938463463374607431768211455n;
 export const MAX_UINT8 = 255;
 export const MIN_UINT8 = 0;
 export const MAX_UINT6 = 63n;
@@ -284,4 +285,36 @@ OpGasCost[3] = { ...OpGasCost[2] };
 /*
  * tealv4
  */
-OpGasCost[4] = { ...OpGasCost[3] };
+OpGasCost[4] = {
+  ...OpGasCost[3],
+  'b+': 10,
+  'b-': 10,
+  'b*': 20,
+  'b/': 20,
+  'b%': 20,
+  'b|': 6,
+  'b&': 6,
+  'b^': 6,
+  'b~': 4
+};
+
+export const enum MathOp {
+  // arithmetic
+  Add,
+  Sub,
+  Mul,
+  Div,
+  Mod,
+  // relational
+  LessThan,
+  GreaterThan,
+  LessThanEqualTo,
+  GreaterThanEqualTo,
+  // logical & bitwise
+  EqualTo,
+  NotEqualTo,
+  BitwiseOr,
+  BitwiseAnd,
+  BitwiseXor,
+  BitwiseInvert
+}

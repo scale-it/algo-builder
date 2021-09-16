@@ -547,7 +547,7 @@ export interface Deployer {
   /**
    * Creates an opt-in transaction for given ASA name, which must be defined in
    * `/assets/asa.yaml` file. The opt-in transaction is signed by the account secret key */
-  optInAcountToASA: (asa: string, accountName: string,
+  optInAccountToASA: (asa: string, accountName: string,
     flags: wtypes.TxParams) => Promise<void>
 
   /**
@@ -643,6 +643,10 @@ export interface PyASCCache extends ASCCache {
 
 // ************************
 //     helper types
+
+export type StateValue = string | number | bigint;
+
+export type Key = string;
 
 export interface StrMap {
   [key: string]: string

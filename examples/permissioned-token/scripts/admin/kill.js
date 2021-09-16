@@ -34,7 +34,7 @@ async function run (runtimeEnv, deployer) {
   await fundAccount(deployer, elon); // fund elon
 
   // transaction pass (issue 15 tokens to elon)
-  await deployer.optInAcountToASA('tesla', elon.name, {});
+  await deployer.optInAccountToASA('tesla', elon.name, {});
   await issue(deployer, elon.addr, 15);
 
   await kill(deployer); // kill token 'tesla'

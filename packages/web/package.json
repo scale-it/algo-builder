@@ -28,8 +28,11 @@
     "build:docs": "typedoc --out ../../docs/api/web --excludePrivate --exclude \"internal/**\" src/index.ts",
     "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.ts buildinfo build",
     "build:watch": "tsc -w -p .",
-    "prepublish": "yarn build",
-    "publish": "yarn publish --access public"
+    "prepublish": "yarn build"
+  },
+  "private": false,
+  "publishConfig": {
+    "access": "public"
   },
   "files": [
     "build/",

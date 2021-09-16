@@ -3,7 +3,7 @@ const {
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 const { accounts } = require('./common/accounts.js');
-const { issuePrice, buyTx } = require('./common/common.js');
+const { issuePrice, buyTxNode } = require('./common/common.js');
 
 /**
  * In this function: Elon buys 10 bonds and
@@ -20,14 +20,14 @@ exports.epoch0 = async function (deployer) {
   };
   const issuerLsig = await deployer.loadLogic('issuer-lsig.py', scInitParam);
   const asaInfo = deployer.getASAInfo('bond-token-0');
-  await deployer.optInAcountToASA(asaInfo.assetIndex, 'bob', { totalFee: 1000 });
-  await deployer.optInAcountToASA(asaInfo.assetIndex, 'elon-musk', { totalFee: 1000 });
+  await deployer.optInAccountToASA(asaInfo.assetIndex, 'bob', { totalFee: 1000 });
+  await deployer.optInAccountToASA(asaInfo.assetIndex, 'elon-musk', { totalFee: 1000 });
 
   // elon buys 10 bonds
   const algoAmount = 10 * issuePrice;
 
-  const groupTx = buyTx(
-    account.elon, issuerLsig, 10, algoAmount, appInfo.appID, asaInfo.assetIndex
+  const groupTx = await buyTxNode(
+    deployer, account.elon, issuerLsig, algoAmount, appInfo.appID, asaInfo.assetIndex
   );
 
   console.log('Elon buying 10 bonds!');
