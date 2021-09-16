@@ -15,7 +15,10 @@
         b) User can pass id/offset for app/asset in for array references. For `tx.Accounts` you can pass address directly in teal code.
     * Byteslice arithmetic ops (`b+`, `b-`, `b*`, `b/`, `b%`, `b<`, `b>`, `b<=`, `b>=`, `b==`, `b!=`, `b\`, `b&`, `b^`, `b~`, `bzero`).
     * Additional mathematical opcodes: `divmodw`, `exp`, `expw`, `shl`, `shr`, `sqrt`
+    * More Versatile Global and Local Storage (combination of upto 128 bytes allowed between key-value).
+    * Asset URL change (max size increased till 96 bytes).
 + Updated all examples & tests to use TEALv4 (`#pragma version 4`)
++ TEALv4: gaid, gaids opcodes (knowable creatable id)
 
 
 ### Bug Fixes

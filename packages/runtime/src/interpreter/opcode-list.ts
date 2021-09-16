@@ -3249,3 +3249,61 @@ export class Sqrt extends Op {
     stack.push(x0);
   }
 }
+
+// Pops: None
+// Pushes: uint64
+// push the ID of the asset or application created in the Tth transaction of the current group
+// gaid fails unless the requested transaction created an asset or application and T < GroupIndex.
+export class Gaid extends Op {
+  readonly interpreter: Interpreter;
+  readonly line: number;
+  txIndex: number;
+
+  /**
+   * Asserts 1 arguments are passed.
+   * @param args Expected arguments: [txIndex]
+   * @param line line number in TEAL file
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    super();
+    this.line = line;
+    this.interpreter = interpreter;
+    assertLen(args.length, 1, line);
+    this.txIndex = Number(args[0]);
+  };
+
+  execute (stack: TEALStack): void {
+    const knowableID = this.interpreter.runtime.ctx.knowableID.get(this.txIndex);
+    if (knowableID === undefined) {
+      throw new RuntimeError(
+        RUNTIME_ERRORS.TEAL.GROUP_INDEX_EXIST_ERROR,
+        { index: this.txIndex, line: this.line }
+      );
+    }
+
+    stack.push(BigInt(knowableID));
+  }
+}
+
+// Pops: ... stack, uint64
+// Pushes: uint64
+// push the ID of the asset or application created in the Xth transaction of the current group
+// gaid fails unless the requested transaction created an asset or application and X < GroupIndex.
+export class Gaids extends Gaid {
+  /**
+   * Asserts 0 arguments are passed.
+   * @param args Expected arguments: []
+   * @param line line number in TEAL file
+   * @param interpreter interpreter object
+   */
+  constructor (args: string[], line: number, interpreter: Interpreter) {
+    // "11" is mock value, will be updated when poping from stack in execute
+    super(["11", ...args], line, interpreter);
+  }
+
+  execute (stack: TEALStack): void {
+    this.assertMinStackLen(stack, 1, this.line);
+    this.txIndex = Number(this.assertBigInt(stack.pop(), this.line));
+    super.execute(stack);
+  }
+}

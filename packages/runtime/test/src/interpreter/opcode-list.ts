@@ -2887,6 +2887,28 @@ describe("Teal Opcodes", function () {
       });
     });
 
+    describe("TEALv4: More Versatile Global and Local Storage", () => {
+      before(function () {
+        interpreter.runtime.ctx.tx.apid = 1828;
+      });
+
+      it("should throw error if schema is invalid", function () {
+        const invalidKey = 's'.repeat(65); // 'sss..65 times'
+
+        // check for byte
+        stack.push(parsing.stringToBytes(invalidKey)); // key length > 64
+        stack.push(parsing.stringToBytes('Valid-Val'));
+        let op = new AppGlobalPut([], 1, interpreter);
+        expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_SCHEMA);
+
+        // key is OK, but total length > 128
+        stack.push(new Uint8Array(40).fill(1));
+        stack.push(new Uint8Array(100).fill(1));
+        op = new AppGlobalPut([], 1, interpreter);
+        expectRuntimeError(() => op.execute(stack), RUNTIME_ERRORS.TEAL.INVALID_SCHEMA);
+      });
+    });
+
     describe("AppLocalDel", function () {
       before(function () {
         interpreter.runtime.ctx.tx.apid = 1847;
