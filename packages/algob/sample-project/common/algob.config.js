@@ -50,6 +50,10 @@ let defaultCfg = {
   // Below is a token created through our script in `/infrastructure`
   // If you use other setup, update it accordignly (eg content of algorand-node-data/algod.token)
   token: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  // you can also pass token as an object
+  // token: {
+  //   "X-Algo-API-Token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  // },
   accounts: accounts,
   // if you want to load accounts from KMD, you need to add the kmdCfg object. Please read
   // algob-config.md documentation for details.

@@ -226,7 +226,7 @@ describe("Config validation", function () {
             assert.isEmpty(errors.errors);
           });
 
-          it("Should fail if not a number ", function () {
+          it("Should not fail if not a number ", function () {
             const errors = getValidationErrors({
               networks: {
                 custom: {
@@ -236,8 +236,21 @@ describe("Config validation", function () {
                 }
               }
             });
+            assert.isEmpty(errors.errors);
+          });
+
+          it("Should fail if not a number or string", function () {
+            const errors = getValidationErrors({
+              networks: {
+                custom: {
+                  host: "http://localhost",
+                  port: { port: 1234 },
+                  token: "somefaketoken"
+                }
+              }
+            });
+
             assert.isNotEmpty(errors.toString());
-            assert.match(errors.toString(), /Expected number, received string/);
           });
         });
 
@@ -251,6 +264,22 @@ describe("Config validation", function () {
               }
             });
             assert.match(errors.toString(), /config.networks.custom.token - Expected a value of type string/);
+          });
+
+          it("should pass with passing X-Algo-API-Token", function () {
+            const errors = getValidationErrors({
+              networks: {
+                custom: {
+                  host: "http://localhost",
+                  port: 1234,
+                  token: {
+                    "X-Algo-API-Token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                  }
+                }
+              }
+            });
+
+            assert.isEmpty(errors.toString());
           });
         });
 
@@ -635,6 +664,23 @@ describe("Config validation", function () {
           localhost: localhost,
           [ALGOB_CHAIN_NAME]: {
             asdasd: "1234"
+          }
+        }
+      });
+      assert.isEmpty(errors.errors, errors.toString());
+    });
+
+    it("Should accept KMD token object", function () {
+      const errors = getValidationErrors({
+        networks: {
+          localhost: {
+            ...localhost,
+            kmdCfg: {
+              ...kmdCfg,
+              token: {
+                "X-KMD-API-Token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            }
           }
         }
       });

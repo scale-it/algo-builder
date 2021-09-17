@@ -15,6 +15,13 @@ A network object can specify following entries:
 + `token` (required, default `none`)
 + `httpHeaders` -- HTTP headers attached to every raw transaction request (optional, default `none`)
 
+*NOTE:* `token` can be passed directly as a `string`, or as an object. Eg
+```js
+token: {
+  "X-Algo-API-Token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}
+```
+
 A special network named `algobchain` can specify the `AlgobChain` configuration:
 
 ```ts
@@ -168,10 +175,10 @@ const accounts = loadAccountsFromFileSync("assets/accounts_generated.yaml");
 const mainnetAccounts = loadAccountsFromFileSync("private/accounts/mainnet.yaml");
 
 var myprivateNet = {
-     host: "http://127.0.0.1",
-     port: 4001,
-     token: "abc",
-     accounts: accounts
+  host: "http://127.0.0.1",
+  port: 4001,
+  token: "abc",
+  accounts: accounts
 }
 
 module.exports = {
