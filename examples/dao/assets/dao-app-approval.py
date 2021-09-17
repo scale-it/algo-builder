@@ -265,7 +265,7 @@ def approval_program(ARG_GOV_TOKEN):
 
     # Register user votes in proposal_lsig by saving Sender.p_<proposal>.
     # * External Accounts: `proposal` : lsig account address with the proposal record (provided as the first external account).
-    # * Call arguments: `vote` (bytes): { abstain, yes, no} 
+    # * Call arguments: `vote` (bytes): { abstain, yes, no}
     register_vote = Seq([
         p_proposal,
         Assert(
@@ -392,9 +392,15 @@ def approval_program(ARG_GOV_TOKEN):
                 # assert that the voting is not active
                 Or(
                     # it’s past execution: proposal.executed == 1  || proposal.execute_before < now
-                    Or(executed == Int(1), execute_before < Global.latest_timestamp()) == Int(1),
+                    Or(
+                        App.localGet(Int(0), Bytes("executed")) == Int(1),
+                        App.localGet(Int(0), Bytes("execute_before")) < Global.latest_timestamp()
+                    ) == Int(1),
                     # OR voting failed result() != 1 && proposal.voting_end < now.
-                    And(scratchvar_result.load() != Int(1), voting_end < Global.latest_timestamp()) == Int(1)
+                    And(
+                        scratchvar_result.load() != Int(1),
+                        App.localGet(Int(0), Bytes("voting_end")) < Global.latest_timestamp()
+                    ) == Int(1)
                 )
             )
         ),
