@@ -9,7 +9,7 @@ def proposal_lsig(ARG_OWNER):
     Represents Proposal Lsig (a contract account owned by the proposer)
     """
 
-    # check no rekeying, close remainder to, asset close to for a txn
+    # check no rekeying and ensure sender is owner
     def basic_owner_checks(txn: Txn): return And(
         txn.rekey_to() == Global.zero_address(),
 
@@ -25,7 +25,7 @@ def proposal_lsig(ARG_OWNER):
 
     # Opt-in transaction.
     opt_in = And(
-        basic_owner_checks(Txn),
+        basic_checks(Txn),
         Txn.type_enum() == TxnType.AssetTransfer,
         Txn.asset_amount() == Int(0),
     )

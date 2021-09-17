@@ -4,7 +4,7 @@ sys.path.insert(0,'..')
 from algobpy.parse import parse_params
 from pyteal import *
 
-def proposal_lsig(ARG_DAO_APP_ID):
+def dao_fund_lsig(ARG_DAO_APP_ID):
     """
     Represents DAO treasury (ALGO/ASA)
     """
@@ -15,9 +15,6 @@ def proposal_lsig(ARG_DAO_APP_ID):
         txn.close_remainder_to() == Global.zero_address(),
         txn.asset_close_to() == Global.zero_address()
     )
-
-    # ideally we should restrict the sender here (no one can withdraw funds)
-    receive_or_send = basic_checks(Txn)
 
     # verify funds are transfered only when paired with DAO app (during execute call)
     payment = And(
@@ -36,7 +33,6 @@ def proposal_lsig(ARG_DAO_APP_ID):
     )
 
     program = program = Cond(
-        [Global.group_size() == Int(1), receive_or_send],
         [Global.group_size() == Int(2), payment]
     )
 
@@ -51,4 +47,4 @@ if __name__ == "__main__":
     if(len(sys.argv) > 1):
         params = parse_params(sys.argv[1], params)
 
-    print(compileTeal(proposal_lsig(params["ARG_DAO_APP_ID"]), Mode.Signature, version = 4))
+    print(compileTeal(dao_fund_lsig(params["ARG_DAO_APP_ID"]), Mode.Signature, version = 4))

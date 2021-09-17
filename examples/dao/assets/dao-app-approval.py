@@ -41,8 +41,9 @@ def approval_program(ARG_GOV_TOKEN):
     scratchvar_execute_before = ScratchVar(TealType.uint64)
     scratchvar_proposal_type = ScratchVar(TealType.uint64)
 
-    # Fetch key(s) from Txn.Accounts[1] (passed as proposalLsig), for current app
+    # Fetch key(s) from Txn.Accounts[1] (passed as proposalLsig during execute), for current app
     # these are used throughout the application
+    # NOTE: during add_proposal, proposalLsig is the sender
     voting_start = App.localGet(Int(1), Bytes("voting_start"))
     voting_end = App.localGet(Int(1), Bytes("voting_end"))
     proposal_id = App.localGet(Int(1), Bytes("id"))

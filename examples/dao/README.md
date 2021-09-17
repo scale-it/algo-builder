@@ -1,31 +1,19 @@
 
 # Algo Builder DAO
 
-
-
 A decentralized autonomous organization (DAO) is an entity with no central leadership. Decisions get made from the bottom-up, governed by a community organized around a specific set of rules enforced on a blockchain. DAOs are internet-native organizations collectively owned and managed by their members. They have built-in treasuries that are only accessible with the approval of their members. Decisions are made via proposals the group votes on during a specified period.
-
 
 
 A DAO is usually implemented using blockchain smart contracts:
 
-
-
 - organization is managed by a defined group
-
 - blockchain and smart contracts is a trustless execution layer where rules and decisions are recorded
-
 - decisions are usually made by voting.
-
-
 
 In this template, We are going to implement a DAO, where the members are defined by ASA holding (1 ASA = 1 voting power): each token holder is a DAO member and can participate equally in the governance.
 
 
-
 Every DAO will have the following parameters:
-
-
 
 -  `deposit` — a deposit amount in `gov_tokens` required to make a proposal.
 
@@ -35,17 +23,12 @@ Every DAO will have the following parameters:
 
 -  `max_duration` — maximum voting time (in number of seconds) for a new proposal.
 
--  `url` — an with more information about the DAO. We don’t need a hash as this document is meant to evolve and provide more details together with the DAO evolution.
-
+-  `url` — a link with more information about the DAO. We don’t need a hash as this document is meant to evolve and provide more details together with the DAO evolution.
 
 
 ### Use Cases
 
-
-
 We use functional notation to describe use cases we will implement.
-
-
 
 -  `initialize(deposit_amount, min_support, min_duration, ..)` — Creates a DAO app and records all above parameters in it’s global state except the gov. Transaction composition:
 	+ *tx0*: `deployer.deployApp` transaction with *appArgs:* [deposit, min_support, min_duration, max_duration, url].
@@ -79,82 +62,42 @@ We use functional notation to describe use cases we will implement.
 	+ *tx0*: Call to DAO App with *appArg* == "execute".
 	+ *tx1*: As per proposal instructions (ALGO transfer/ASA transfer/none)
 
-
-
 ## Spec document
-
-
 
 Algo Builder DAO [specification](https://paper.dropbox.com/doc/Algo-Builder-DAO--BRlh~FwufNzIzk4wNUuAjLTuAg-ncLdytuFa7EJrRerIASSl).
 
-
-
 ## Deploy script
-
-
 
 We created a deploy script in `scripts/deploy`, This script deploys initial Gov token, deploys DAO app, fund lsig's, saves deposit_lsig address to DAO app, and does initial distribution of ASA (Gov token).
 
-
-
 ## Run scripts flow
-
-
 
 Please read the spec document (linked above) for more details about each use case. The scripts provide only a sample code to show how to use the template. For you private needs, you will have to modify the scripts directory to adjust the parameters (eg voting time, execution time etc...) and the proposals.
 
-
-
 To add proposal (`{voting_start, voting_end}` is set as `{now, now + 2min}`):
-
-
 
 	yarn run algob run scripts/run/add_proposal.js
 
-
-
 To deposit votes:
-
-
 
 	yarn run algob run scripts/run/deposit_vote.js
 
-
-
 To vote for a proposal (using deposited tokens):
 
-
-
 	yarn run algob run scripts/run/vote.js
-
-
 
 To execute a proposal (`execute_before` is set as 5min from the time of proposal creation):
 
-
-
 	yarn run algob run scripts/run/vote.js
-
-
 
 To withdraw deposited votes (withdrawn from depositLsig to voter account):
 
-
-
 	yarn run algob run scripts/run/withdraw_vote_deposit.js
-
-
 
 To clear vote record (from voter's account), fails if the proposal is still in progress:
 
-
-
 	yarn run algob run scripts/run/clear_vote_record.js
 
-
-
 To clear proposal record (from proposal_lsig as a sender), fails if the proposal is still in progress:
-
-
 
 	yarn run algob run scripts/run/clear_proposal.js
