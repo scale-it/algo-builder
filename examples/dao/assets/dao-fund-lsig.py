@@ -32,7 +32,15 @@ def dao_fund_lsig(ARG_DAO_APP_ID):
         )
     )
 
+    # Opt-in transaction is allowed
+    opt_in = And(
+        basic_checks(Txn),
+        Txn.type_enum() == TxnType.AssetTransfer,
+        Txn.asset_amount() == Int(0)
+    )
+
     program = program = Cond(
+        [Global.group_size() == Int(1), opt_in],
         [Global.group_size() == Int(2), payment]
     )
 

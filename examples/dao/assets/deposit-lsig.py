@@ -47,7 +47,7 @@ def deposit_lsig(ARG_GOV_TOKEN, ARG_DAO_APP_ID):
 
     payment = Or(
         # verify deposit to lsig (during add proposal or deposit votes)
-        deposit_or_withdraw(Bytes("add_proposal"), Bytes("deposit_vote")),
+        deposit_or_withdraw(Bytes("add_proposal"), Bytes("deposit_vote_token")),
         # withdrawl from lsig (taking back vote_deposit, or clearing proposal record)
         deposit_or_withdraw(Bytes("withdraw_vote_deposit"), Bytes("clear_proposal"))
     )

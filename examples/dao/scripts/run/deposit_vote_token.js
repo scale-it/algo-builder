@@ -1,6 +1,7 @@
 const { executeTx } = require('./common/common.js');
 const { types } = require('@algo-builder/web');
 const { accounts, getDepositLsig } = require('./common/accounts.js');
+const { Tealdbg } = require('../../../../packages/algob/build/index.js');
 
 async function depositVote (deployer, voterAcc, amt) {
   const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
@@ -16,14 +17,14 @@ async function depositVote (deployer, voterAcc, amt) {
 
   console.log(`* Deposit ${amt} votes by ${voterAcc.addr} *`);
   const depositVoteParam = [
-    // tx0: call to DAO App with arg 'deposit_vote'
+    // tx0: call to DAO App with arg 'deposit_vote_token'
     {
       type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: voterAcc,
       appID: daoAppInfo.appID,
       payFlags: { totalFee: 1000 },
-      appArgs: ['str:deposit_vote']
+      appArgs: ['str:deposit_vote_token']
     },
     // tx1: deposit votes (each token == 1 vote)
     {
@@ -37,6 +38,10 @@ async function depositVote (deployer, voterAcc, amt) {
     }
   ];
 
+  // await new Tealdbg(deployer, depositVoteParam).run({
+  //   tealFile: 'dao-app-approval.py',
+  //   groupIndex: 0
+  // })
   await executeTx(deployer, depositVoteParam);
 }
 

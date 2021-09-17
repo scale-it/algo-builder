@@ -41,7 +41,7 @@ async function run (runtimeEnv, deployer) {
   // Transaction FAIL: deposit is not same as app.global("deposit")
   await clearProposal(deployer, proposalLsig, 7);
 
-  // withdraw deposited votes by voterA & voterB (in ./deposit_vote.js)
+  // withdraw deposited votes by voterA & voterB (in ./deposit_vote_token.js)
   await clearProposal(deployer, proposalLsig, 15);
 }
 

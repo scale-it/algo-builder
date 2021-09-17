@@ -24,7 +24,7 @@ async function run (runtimeEnv, deployer) {
   const { _, __, voterA, voterB } = accounts(deployer);
   const proposalLsig = await getProposalLsig(deployer);
 
-  // register votes (deposited in ./deposit_vote.js)
+  // register votes (deposited in ./deposit_vote_token.js)
   await registerVote(deployer, voterA, proposalLsig.address(), Vote.YES);
   await registerVote(deployer, voterB, proposalLsig.address(), Vote.ABSTAIN);
 

@@ -37,7 +37,7 @@ async function withdrawVoteDeposit (deployer, voterAcc, amt) {
 async function run (runtimeEnv, deployer) {
   const { _, __, voterA, voterB } = accounts(deployer);
 
-  // withdraw deposited votes by voterA & voterB (in ./deposit_vote.js)
+  // withdraw deposited votes by voterA & voterB (in ./deposit_vote_token.js)
   await withdrawVoteDeposit(deployer, voterA, 6);
   await withdrawVoteDeposit(deployer, voterB, 8);
 

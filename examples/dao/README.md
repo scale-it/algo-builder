@@ -37,8 +37,8 @@ We use functional notation to describe use cases we will implement.
 	+ *tx0*: Call to DAO App with *daoParams*.
 	+ *tx1*: Deposit *gov_tokens* to *depositLsig*.
 
--  `deposit_vote(amount)` — User can only vote with the deposited tokens (to avoid double voting by sending tokens to someone else). User can vote with the “same” tokens for multiple proposals. Transaction composition:
-	+ *tx0*: Call to DAO App with *appArg* == "deposit_vote".
+-  `deposit_vote_token(amount)` — User can only vote with the deposited tokens (to avoid double voting by sending tokens to someone else). User can vote with the “same” tokens for multiple proposals. Transaction composition:
+	+ *tx0*: Call to DAO App with *appArg* == "deposit_vote_token".
 	+ *tx1*: Deposit *gov_tokens* to *depositLsig* (each token == 1 vote).
 
 -  `withdraw_vote_deposit(amount)` — This is used to unlock the deposit and withdraw tokens back to the user. To protect against double vote, user can only withdraw the deposit after the latest voting he participated in ended. Transaction composition:
@@ -51,16 +51,16 @@ We use functional notation to describe use cases we will implement.
 	**Note1**: User can vote only once for a given proposal and he will vote with all tokens he deposited before casting the vote.
 	**Note2**: User can only vote on 14 active proposals at a time.
 
+-  `execute()` — Executes a proposal. NOTE: anyone is able to execute a proposal (this way we protect from a situation that a proposer will not be satisfied from the result and will not execute it). Transaction composition:
+	+ *tx0*: Call to DAO App with *appArg* == "execute".
+	+ *tx1*: As per proposal instructions (ALGO transfer/ASA transfer/none)
+
 -  `clear_vote_record(proposal_lsig)` — Clears Sender local state by removing a record of vote cast from a not active proposal. Transaction composition:
 	+ *tx0*: Call to DAO App with *appArg* == ["clear_vote_record"]. `proposalLsig.address()` is passed as first external account.
 
 -  `clear_proposal()` — Clears proposal record and returns back the deposit. Sender must be an account with a recorded proposal. Transaction composition:
 	+ *tx0*: Call to DAO App with *appArg* == "clear_proposal".
 	+ *tx1*: Withdraw *gov_tokens* from *depositLsig* back to *proposalLsig* (ASA transfer).
-
--  `execute()` — Executes a proposal. NOTE: anyone is able to execute a proposal (this way we protect from a situation that a proposer will not be satisfied from the result and will not execute it). Transaction composition:
-	+ *tx0*: Call to DAO App with *appArg* == "execute".
-	+ *tx1*: As per proposal instructions (ALGO transfer/ASA transfer/none)
 
 ## Spec document
 
@@ -80,7 +80,7 @@ To add proposal (`{voting_start, voting_end}` is set as `{now, now + 2min}`):
 
 To deposit votes:
 
-	yarn run algob run scripts/run/deposit_vote.js
+	yarn run algob run scripts/run/deposit_vote_token.js
 
 To vote for a proposal (using deposited tokens):
 

@@ -23,7 +23,7 @@ async function run (runtimeEnv, deployer) {
   const { _, __, voterA, voterB } = accounts(deployer);
   const proposalLsig = await getProposalLsig(deployer);
 
-  // withdraw deposited votes by voterA & voterB (in ./deposit_vote.js)
+  // withdraw deposited votes by voterA & voterB (in ./deposit_vote_token.js)
   await clearVoteRecord(deployer, voterA, proposalLsig.address());
   await clearVoteRecord(deployer, voterB, proposalLsig.address());
 }
