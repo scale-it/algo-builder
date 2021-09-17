@@ -11,7 +11,7 @@ def approval_program(ARG_GOV_TOKEN):
 
     Commands:
         add_proposal            Save proposal record in lsig
-        deposit_vote_token            records deposited votes in voter.account
+        deposit_vote_token       records deposited votes in voter.account
         register_vote           register user votes in proposal_lsig
         execute                 executes a proposal
         withdraw_vote_deposit   unlock the deposit and withdraw tokens back to the user
