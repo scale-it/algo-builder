@@ -263,9 +263,9 @@ def approval_program(ARG_GOV_TOKEN):
     no = Bytes("no")
     abstain = Bytes("abstain")
 
-    # Register user votes in proposal_lsig by saving Sender.p_<proposal>. Arguments:
-    # * proposal : lsig account address with the proposal record (provided as the first external account).
-    # * vote (bytes): abstain, yes, no
+    # Register user votes in proposal_lsig by saving Sender.p_<proposal>.
+    # * External Accounts: `proposal` : lsig account address with the proposal record (provided as the first external account).
+    # * Call arguments: `vote` (bytes): { abstain, yes, no} 
     register_vote = Seq([
         p_proposal,
         Assert(
@@ -285,7 +285,7 @@ def approval_program(ARG_GOV_TOKEN):
             # if Sender.p_<proposal> != proposal.id then overwrite by setting the new proposal.id, fail otherwise
             If(p_proposal.value() != proposal_id,
                 App.localPut(Int(0), byte_p_proposal, proposal_id),
-                Err()),
+                Err()),  # double vote
         ),
         # record vote in proposal_lsig local state (proposal.<counter> += Sender.deposit)
         Cond(
