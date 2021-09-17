@@ -1,7 +1,6 @@
 const { executeTx } = require('./common/common.js');
 const { types } = require('@algo-builder/web');
 const { accounts, getDepositLsig } = require('./common/accounts.js');
-const { Tealdbg } = require('../../../../packages/algob/build/index.js');
 
 async function depositVote (deployer, voterAcc, amt) {
   const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
@@ -38,10 +37,6 @@ async function depositVote (deployer, voterAcc, amt) {
     }
   ];
 
-  // await new Tealdbg(deployer, depositVoteParam).run({
-  //   tealFile: 'dao-app-approval.py',
-  //   groupIndex: 0
-  // })
   await executeTx(deployer, depositVoteParam);
 }
 

@@ -233,13 +233,13 @@ def approval_program(ARG_GOV_TOKEN):
     ])
 
     # sender.deposit
-    deposit = App.localGet(Int(0), Bytes("deposit"))
+    sender_deposit = App.localGet(Int(0), Bytes("deposit"))
 
     # Records gov tokens deposited by user (sender)
     deposit_vote_token = Seq([
         verify_deposit(Int(1), App.globalGet(deposit_lsig)),
         # Sender.deposit += amount
-        App.localPut(Int(0), Bytes("deposit"), deposit + Gtxn[1].asset_amount()),
+        App.localPut(Int(0), Bytes("deposit"), sender_deposit + Gtxn[1].asset_amount()),
         Return(Int(1))
     ])
 
@@ -252,7 +252,7 @@ def approval_program(ARG_GOV_TOKEN):
             # fees must be paid by tx0 (voter)
             Gtxn[1].fee() == Int(0)
         )),
-        App.localPut(Int(0), Bytes("deposit"), deposit - Gtxn[1].asset_amount()),
+        App.localPut(Int(0), Bytes("deposit"), sender_deposit - Gtxn[1].asset_amount()),
         Return(Int(1))
     ])
 
@@ -289,9 +289,9 @@ def approval_program(ARG_GOV_TOKEN):
         ),
         # record vote in proposal_lsig local state (proposal.<counter> += Sender.deposit)
         Cond(
-            [Gtxn[0].application_args[1] == yes, App.localPut(Int(1), yes, App.localGet(Int(1), yes) + deposit)],
-            [Gtxn[0].application_args[1] == no, App.localPut(Int(1), no, App.localGet(Int(1), no) + deposit)],
-            [Gtxn[0].application_args[1] == abstain, App.localPut(Int(1), abstain, App.localGet(Int(1), abstain) + deposit)]
+            [Gtxn[0].application_args[1] == yes, App.localPut(Int(1), yes, App.localGet(Int(1), yes) + sender_deposit)],
+            [Gtxn[0].application_args[1] == no, App.localPut(Int(1), no, App.localGet(Int(1), no) + sender_deposit)],
+            [Gtxn[0].application_args[1] == abstain, App.localPut(Int(1), abstain, App.localGet(Int(1), abstain) + sender_deposit)]
         ),
         # Update Sender.deposit_lock := max(Sender.deposit_lock, proposal.voting_end)
         If(
@@ -384,7 +384,7 @@ def approval_program(ARG_GOV_TOKEN):
             And(
                 # Assert amount of withdrawal is proposal.deposit & receiver is sender
                 Global.group_size() == Int(2),
-                Gtxn[1].asset_amount() == App.globalGet(deposit),
+                Gtxn[1].asset_amount() == App.globalGet(Bytes("deposit")),
                 Gtxn[0].sender() == Gtxn[1].asset_receiver(),
                 # fees must be paid by tx0(proposer) and not the deposit_lsig
                 Gtxn[1].fee() == Int(0),
