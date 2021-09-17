@@ -42,7 +42,7 @@ export const accInfo = [{
     'clear-state-program': '',
     creator: elonAddr,
     'global-state': globalStateMap,
-    'global-state-schema': { ...base, numByteSlice: 3, numUint: 1 },
+    'global-state-schema': { ...base, numByteSlice: 10, numUint: 10 },
     'local-state-schema': { ...base, numByteSlice: 0, numUint: 16 }
   }),
   createdAssets: createdAssets.set(3, {

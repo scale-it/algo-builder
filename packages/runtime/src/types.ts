@@ -58,6 +58,8 @@ export enum EncodingType {
 
 export type AccountAddress = string;
 
+export type ID = number; // Asset or Application index
+
 export interface AccountsMap {
   [addr: string]: AccountStoreI
 }
@@ -101,6 +103,7 @@ export interface SSCInfo extends DeployedAssetInfo {
 export interface Context {
   state: State
   sharedScratchSpace: Map<number, StackElem[]>
+  knowableID: Map<number, ID>
   tx: Txn // current txn
   gtxs: Txn[] // all transactions
   args?: Uint8Array[]

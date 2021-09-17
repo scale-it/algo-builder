@@ -7,9 +7,8 @@ import {
   AppGlobalPut, AppLocalDel, AppLocalGet, AppLocalGetEx, AppLocalPut,
   AppOptedIn, Arg, Assert, Balance, BitwiseAnd, BitwiseNot, BitwiseOr, BitwiseXor,
   Branch, BranchIfNotZero, BranchIfZero, Btoi, Byte, Bytec, Callsub,
-  Concat, Dig, Div,
-  DivModw,
-  Dup, Dup2, Ed25519verify, EqualTo, Err, Exp, Expw, GetAssetDef, GetAssetHolding,
+  Concat, Dig, Div, DivModw, Dup, Dup2, Ed25519verify, EqualTo, Err, Exp, Expw, Gaid, Gaids,
+  GetAssetDef, GetAssetHolding,
   GetBit, GetByte, Gload, Gloads, Global, GreaterThan, GreaterThanEqualTo, Gtxn, Gtxna,
   Gtxns, Gtxnsa, Int, Intc, Itob, Keccak256, Label, Len, LessThan,
   LessThanEqualTo, Load, MinBalance, Mod, Mul, Mulw, Not, NotEqualTo,
@@ -943,6 +942,30 @@ describe("Parser", function () {
 
         expectRuntimeError(
           () => opcodeFromSentence(["retsub", "1"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("gaid", () => {
+        const res = opcodeFromSentence(["gaid", "2"], 1, interpreter);
+        const expected = new Gaid(["2"], 1, interpreter);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["gaid", "1", "2"], 1, interpreter),
+          RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
+        );
+      });
+
+      it("gaids", () => {
+        const res = opcodeFromSentence(["gaids"], 1, interpreter);
+        const expected = new Gaids([], 1, interpreter);
+
+        assert.deepEqual(res, expected);
+
+        expectRuntimeError(
+          () => opcodeFromSentence(["gaids", "1", "2"], 1, interpreter),
           RUNTIME_ERRORS.TEAL.ASSERT_LENGTH
         );
       });

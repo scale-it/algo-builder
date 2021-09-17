@@ -17,9 +17,10 @@ export const MaxTEALVersion = 4;
 // minimum balance costs (in microalgos) for ssc schema
 export const APPLICATION_BASE_FEE = 0.1e6; // base fee for creating or opt-in to application
 export const ASSET_CREATION_FEE = 0.1e6; // creation fee for asset
-export const SSC_KEY_BYTE_SLICE = 25000; // cost for 'key' (always in bytes)
-export const SSC_VALUE_UINT = 3500; // cost for value as uint64
-export const SSC_VALUE_BYTES = 25000; // cost for value as bytes
+export const SSC_VALUE_UINT = 28500; // cost for value as uint64
+export const SSC_VALUE_BYTES = 50000; // cost for value as bytes
+export const MAX_KEY_BYTES = 64; // max length of key
+export const MAX_KEY_VAL_BYTES = 128; // max combined length of key-value pair
 
 // values taken from [https://github.com/algorand/go-algorand/blob/master/config/consensus.go#L691]
 export const LogicSigMaxCost = 20000;

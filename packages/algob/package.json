@@ -1,6 +1,6 @@
 {
   "name": "@algo-builder/algob",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "author": "Robert Zaremba (https://github.com/robert-zaremba)",
   "contributors": [
     {
@@ -53,8 +53,11 @@
     "build:watch": "tsc -w -p .",
     "clean": "rimraf builtin-tasks internal *.d.ts *.map *.js tsconfig.ts buildinfo build",
     "prepublish": "yarn build",
-    "publish": "yarn publish --access public",
     "algob:dev": "sh ./setup_dev_project.sh"
+  },
+  "private": false,
+  "publishConfig": {
+    "access": "public"
   },
   "files": [
     "build/",
