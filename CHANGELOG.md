@@ -27,6 +27,8 @@
 * Fix init project-name bug(`algob init <project-name>` command was not working properly)
 * Fix zod package was missing from runtime(but zod was being used in runtime)
 * Added support for passing http token as an `object` as well. User can now use `{ "X-Algo-API-Token": <token> }` notation for passing token in `algob.config.js`.
+
+### Testing framework bug fixes
 * Fix random address for logic sig, creating two times an lsig account from the same TEAL code should return the same address.
 
 ### API Breaking
