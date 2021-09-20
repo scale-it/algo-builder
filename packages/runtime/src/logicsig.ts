@@ -35,7 +35,7 @@ export class LogicSig {
     this.logic = parsing.stringToBytes(program);
 
     const seedBytes = parsing.uint64ToBigEndian(murmurhash.v3(program));
-    const append = new Uint8Array(seedBytes.length + 24);
+    const append = new Uint8Array(Number(seedBytes.length) + Number(24));
     append.set(seedBytes);
     const pair = tweet.sign_keyPair_fromSeed(append);
     this.lsigAddress = encodeAddress(pair.publicKey);
