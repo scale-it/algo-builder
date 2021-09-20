@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
-import algosdk, { LogicSigAccount, modelsv2 } from "algosdk";
+import algosdk, { Algodv2, LogicSigAccount, modelsv2 } from "algosdk";
 
 import * as types from "./internal/core/params/argument-types";
 // Begin config types
@@ -51,8 +51,8 @@ export interface ChainCfg extends CommonNetworkConfig {
 
 export interface HttpNetworkConfig extends CommonNetworkConfig {
   host: string // with optional http o https prefix
-  port: number
-  token: string
+  port: string | number
+  token: string | AlgodTokenHeader | CustomTokenHeader
   httpHeaders?: { [name: string]: string }
 }
 
@@ -70,15 +70,35 @@ export interface KmdWallet {
 
 export interface KmdCfg {
   host: string
-  port: number
-  token: string
+  port: string | number
+  token: string | KMDTokenHeader | CustomTokenHeader
   wallets: KmdWallet[]
 }
 
 export interface NetworkCredentials {
   host: string
-  port: number
+  port: string | number
   token: string
+}
+
+/**
+ * TODO: Use js-sdk types
+ * https://github.com/algorand/js-algorand-sdk/issues/437
+ */
+export interface AlgodTokenHeader {
+  'X-Algo-API-Token': string
+}
+
+export interface IndexerTokenHeader {
+  'X-Indexer-API-Token': string
+}
+
+export interface KMDTokenHeader {
+  'X-KMD-API-Token': string
+}
+
+export interface CustomTokenHeader {
+  [headerName: string]: string
 }
 
 /**
@@ -643,6 +663,10 @@ export interface PyASCCache extends ASCCache {
 
 // ************************
 //     helper types
+
+export type StateValue = string | number | bigint;
+
+export type Key = string;
 
 export interface StrMap {
   [key: string]: string

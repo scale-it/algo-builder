@@ -10,7 +10,7 @@ const {
   clearProgram, minBalance, initialBalance,
   issue, redeem
 } = require('./common/common');
-const { buyTx, issueTx } = require('../scripts/run/common/common');
+const { buyTxRuntime, issueTx } = require('../scripts/run/common/common');
 
 /**
  * Test for the scenario described in Readme.md
@@ -164,8 +164,8 @@ describe('Bond token Tests', function () {
     let amount = 10;
     let algoAmount = amount * issue;
 
-    groupTx = buyTx(
-      elon.account, lsig, amount, algoAmount, applicationId, currentBondIndex
+    groupTx = buyTxRuntime(
+      runtime, elon.account, lsig, algoAmount, applicationId, currentBondIndex
     );
     runtime.executeTx(groupTx);
 
@@ -201,6 +201,7 @@ describe('Bond token Tests', function () {
 
     // manager starts epoch 1 (create dex)
     const dexLsig1 = createDex(runtime, bondTokenCreator, appManager, 1, master, lsig);
+
     syncAccounts();
     // sync dex account
     dex1 = runtime.getAccount(dexLsig1.address());
@@ -213,8 +214,8 @@ describe('Bond token Tests', function () {
     algoAmount = amount * issue;
     const bond1 = runtime.getAssetInfoFromName('bond-token-1').assetIndex;
     // elon buys 4 more bonds
-    groupTx = buyTx(
-      elon.account, lsig, amount, algoAmount, applicationId, bond1
+    groupTx = buyTxRuntime(
+      runtime, elon.account, lsig, algoAmount, applicationId, bond1
     );
     runtime.executeTx(groupTx);
 

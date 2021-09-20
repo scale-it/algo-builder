@@ -14,11 +14,13 @@ const namedAccount: Account = {
 
 describe("ASA parser", () => {
   it("Should validate correct obj", async () => {
+    const asaUrl = 'u'.repeat(96);
     const valid: types.ASADefs = {
       A1: {
         total: 1,
         decimals: 0,
         unitName: 'ASA',
+        url: asaUrl, // url upto 96 bytes is allowed
         defaultFrozen: false,
         manager: "manager",
         reserve: ""
@@ -30,6 +32,7 @@ describe("ASA parser", () => {
         total: 1,
         decimals: 0,
         unitName: 'ASA',
+        url: asaUrl,
         defaultFrozen: false,
         manager: "manager",
         reserve: undefined,
@@ -172,8 +175,8 @@ describe("ASA parser", () => {
       A1: {
         total: 1,
         decimals: 1,
-        // more than 32 bytes:
-        url: "1234567890abcdef1234567890abcdef_",
+        // more than 96 bytes:
+        url: "u".repeat(97),
         unitName: 'ASA',
         defaultFrozen: false
       }

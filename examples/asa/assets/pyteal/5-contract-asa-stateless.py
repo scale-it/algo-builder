@@ -65,4 +65,4 @@ if __name__ == "__main__":
     if(len(sys.argv) > 1):
         params = parse_params(sys.argv[1], params)
 
-    print(compileTeal(contract_asa(params["APP_ID"]), Mode.Signature))
+    print(compileTeal(contract_asa(params["APP_ID"]), Mode.Signature, version = 4))

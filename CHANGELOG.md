@@ -7,20 +7,27 @@
 + Added tealv4 opcodes (`gload` and `gloads`)
 + Added Tealv4 opcodes (`callsub` and `retsub`)
 + Added loop support in runtime
-* TEALv4 support in `@algo-builder/runtime`:
++ TEALv4 support in `@algo-builder/runtime`:
     * Added shared space between contracts (opcodes `gload` and `gloads`)
     * Dynamic Opcode Cost Evaluation
     * Transaction Array changes
         a) array length assertions for `tx.ForeignAssets`, `tx.Accounts`, `tx.ForeignApps`,
         b) User can pass id/offset for app/asset in for array references. For `tx.Accounts` you can pass address directly in teal code.
     * Byteslice arithmetic ops (`b+`, `b-`, `b*`, `b/`, `b%`, `b<`, `b>`, `b<=`, `b>=`, `b==`, `b!=`, `b\`, `b&`, `b^`, `b~`, `bzero`).
+    * Additional mathematical opcodes: `divmodw`, `exp`, `expw`, `shl`, `shr`, `sqrt`
+    * More Versatile Global and Local Storage (combination of upto 128 bytes allowed between key-value).
+    * Asset URL change (max size increased till 96 bytes).
++ Updated all examples & tests to use TEALv4 (`#pragma version 4`)
++ TEALv4: gaid, gaids opcodes (knowable creatable id)
 
 
 ### Bug Fixes
 * Fixed `yarn add @algo-builder/web` (was failing because of missing dependency `zod` in packages/web).
 * Fix metadatahash type
 * Fix init project-name bug(`algob init <project-name>` command was not working properly)
-* Fix random address for logicsig(runtime)
+* Fix zod package was missing from runtime(but zod was being used in runtime)
+* Added support for passing http token as an `object` as well. User can now use `{ "X-Algo-API-Token": <token> }` notation for passing token in `algob.config.js`.
+* Fix random address for logic sig, creating two times an lsig account from the same TEAL code should return the same address.
 
 ### API Breaking
 * Migrate from `LogicSig` to `LogicSigAccount`(Note: Loading lsig from file uses `LogicSig`, because `goal` stores it in LogicSig type format)
@@ -32,6 +39,11 @@
 
 ### Dependencies
 * Upgraded pyTEAL version [`0.8.0`](https://github.com/algorand/pyteal/releases/tag/v0.8.0) in pipfile.
+
+## v1.2.1 2021-09-15
+
+### Bug Fixes
+* Fix `algob init <project-name>`.
 
 ## v1.2.0 2021-08-09
 

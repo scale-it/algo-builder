@@ -11,12 +11,7 @@ exports.executeTransaction = async function (deployer, txnParams) {
 exports.printGlobalNFT = async function (deployer, creator, appID) {
   try {
     const globalState = await readAppGlobalState(deployer, creator, appID);
-    for (const g of globalState) {
-      const key = Buffer.from(g.key, 'base64').toString();
-      if (key === 'total') {
-        console.log('Global NFT Count:', g.value.uint);
-      }
-    }
+    console.log('Global NFT Count:', globalState.get('total'));
   } catch (e) {
     console.error('Error Occurred', e);
   }
@@ -30,8 +25,7 @@ exports.printLocalNFT = async function (deployer, account, appID) {
     if (localState === undefined) {
       holdings = 'none';
     } else {
-      for (const l of localState) {
-        const key = Buffer.from(l.key, 'base64').readBigUInt64BE();
+      for (const [key, _] of localState.entries()) {
         holdings.push(key);
       }
       holdings = holdings.join(' ');

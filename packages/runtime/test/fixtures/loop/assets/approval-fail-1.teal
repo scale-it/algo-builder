@@ -1,7 +1,7 @@
 #pragma version 3
 // loop 1 - 10
 // init loop var
-int 0 
+int 0
 loop:
 int 1
 +

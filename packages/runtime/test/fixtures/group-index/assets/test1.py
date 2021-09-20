@@ -12,4 +12,4 @@ def contract():
     return program
 
 if __name__ == "__main__":
-    print(compileTeal(contract(), Mode.Application))
+    print(compileTeal(contract(), Mode.Application, version = 4))

@@ -269,10 +269,29 @@ by an index that does not exist.`
     description: `Invalid ASA Reference: Asset index not found in Txn`
   },
   CALL_STACK_EMPTY: {
-    number: 1037,
+    number: 1040,
     message: "There is no callsub before retsub, call stack is empty. [error-line: %line%]",
     title: 'call stack error',
     description: `There is no callsub before retsub, call stack is empty`
+  },
+  UINT128_OVERFLOW: {
+    number: 1041,
+    message: "Result of current operation caused U128 integer overflow at line %line%",
+    title: "Uint128 Overflow at line %line%",
+    description: `You are tying to perform operation where the result has exceeded
+maximun uint128`
+  },
+  EXP_ERROR: {
+    number: 1042,
+    message: "A == 0 and B == 0 in exponentiation at line %line%",
+    title: "A == B == 0 at line %line%",
+    description: `You are tying to perform operation where A = B = 0`
+  },
+  GROUP_INDEX_EXIST_ERROR: {
+    number: 1043,
+    message: "Requested transaction hasn't created an asset or application for index: %index%. [error-line: %line%], requested transaction didn't create an asset or application or T < GroupIndex",
+    title: 'Requested transaction not found',
+    description: `requested transaction didn't creat an asset or application or T < GroupIndex.`
   }
 };
 
