@@ -2,7 +2,7 @@ import { parsing } from "@algo-builder/web";
 import {
   decodeAddress, encodeAddress,
   EncodedLogicSig, EncodedLogicSigAccount, EncodedMultisig,
-  generateAccount, multisigAddress, MultisigMetadata,
+  multisigAddress, MultisigMetadata,
   signBytes, verifyBytes
 } from "algosdk";
 import * as murmurhash from 'murmurhash';
@@ -28,21 +28,18 @@ export class LogicSig {
   tag: Buffer;
 
   constructor (
-    logicSigAddresses: Map<number, string>, program: string,
+    program: string,
     programArgs?: Array<Uint8Array | Buffer> | null
   ) {
     this.tag = Buffer.from("Program");
     this.logic = parsing.stringToBytes(program);
 
-    const hash = murmurhash.v3(program);
-    const result = logicSigAddresses.get(hash);
-    if (result === undefined) {
-      const addr = generateAccount().addr;
-      this.lsigAddress = addr;
-      logicSigAddresses.set(hash, addr);
-    } else {
-      this.lsigAddress = result;
-    }
+    const seedBytes = parsing.uint64ToBigEndian(murmurhash.v3(program));
+    const append = new Uint8Array(seedBytes.length + 24);
+    append.set(seedBytes);
+    const pair = tweet.sign_keyPair_fromSeed(append);
+    this.lsigAddress = encodeAddress(pair.publicKey);
+
     this.tag = Buffer.from('Program');
     if (
       programArgs &&
@@ -235,7 +232,7 @@ export class LogicSig {
   }
 
   fromByte (val: Uint8Array): LogicSig {
-    return new LogicSig(new Map<number, string>(), "DUMMY", []);
+    return new LogicSig("DUMMY", []);
   }
 
   get_obj_for_encoding (): EncodedLogicSig {
@@ -248,7 +245,7 @@ export class LogicSig {
   }
 
   static from_obj_for_encoding (lsig: EncodedLogicSig): LogicSig {
-    return new LogicSig(new Map<number, string>(), "DUMMY", []);
+    return new LogicSig("DUMMY", []);
   }
 }
 
@@ -265,10 +262,10 @@ export class LogicSigAccount {
    * @param args - An optional array of arguments for the program.
    */
   constructor (
-    logicSigAddresses: Map<number, string>, program: string,
+    program: string,
     programArgs?: Array<Uint8Array | Buffer> | null
   ) {
-    this.lsig = new LogicSig(logicSigAddresses, program, programArgs);
+    this.lsig = new LogicSig(program, programArgs);
     this.sigkey = undefined;
   }
 
@@ -287,7 +284,7 @@ export class LogicSigAccount {
 
   // eslint-disable-next-line camelcase
   static from_obj_for_encoding (encoded: EncodedLogicSigAccount): LogicSigAccount {
-    const lsigAccount = new LogicSigAccount(new Map<number, string>(), "DUMMY", encoded.lsig.arg);
+    const lsigAccount = new LogicSigAccount("DUMMY", encoded.lsig.arg);
     lsigAccount.lsig = LogicSig.from_obj_for_encoding(encoded.lsig);
     lsigAccount.sigkey = encoded.sigkey;
     return lsigAccount;
@@ -298,7 +295,7 @@ export class LogicSigAccount {
   }
 
   static fromByte (encoded: ArrayLike<any>): LogicSigAccount {
-    return new LogicSigAccount(new Map<number, string>(), "DUMMY", []);
+    return new LogicSigAccount("DUMMY", []);
   }
 
   /**
