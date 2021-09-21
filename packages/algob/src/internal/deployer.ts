@@ -587,6 +587,31 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   }
 
   /**
+   * Stores logic signature info in checkpoint for contract mode
+   * @param name ASC name
+   * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
+   */
+  async addLsigCheckpoint (name: string, scTmplParams?: SCParams): Promise<LsigInfo> {
+    this.assertNoAsset(name);
+    let lsigInfo = {} as any;
+    try {
+      const lsig = await getLsig(name, this.algoOp.algodClient, scTmplParams);
+      lsigInfo = {
+        creator: lsig.address(),
+        contractAddress: lsig.address(),
+        lsig: lsig
+      };
+    } catch (error) {
+      this.persistCP();
+
+      console.log(error);
+      throw error;
+    }
+    this.cpData.registerLsig(this.networkName, name, lsigInfo);
+    return lsigInfo;
+  }
+
+  /**
    * Deploys Algorand Stateful Smart Contract
    * @param approvalProgram filename which has approval program
    * @param clearProgram filename which has clear program
