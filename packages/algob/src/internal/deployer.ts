@@ -154,6 +154,13 @@ class DeployerBasicMode {
   }
 
   /**
+   * Loads a logic signature account from checkpoint
+  */
+  getContractLsig (lsigName: string): LogicSigAccount | undefined {
+    return this.getDelegatedLsig(lsigName);
+  }
+
+  /**
    * Loads logic signature for contract mode
    * @param name ASC name
    * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
