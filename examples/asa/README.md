@@ -12,11 +12,21 @@ These scripts contain logic to transfer assets to `john-account` but other accou
 
 Balances can be queried by executing `algob run scripts/query/john-balances.js`.
 
-This example also includes creation of ASA owned by contract with following features:
-- Maximum number of ASA creation limit is 1.
-- Transaction must be signed by owner to get ASA out from contract
-- Only owner can call - update smart contract to set a new owner
-- Only owner can transfer ASA out from the smart contract and maximum payment is 100 ASA.
+This example also includes stateless smart contracts in (`assets/` directory) that showcase the two different modes of operation (contract & signature delegation):
+- [`2-gold-contract-asc.teal`](https://github.com/scale-it/algo-builder/blob/master/examples/asa/assets/teal/2-gold-contract-asc.teal): A lsig in contract mode which approves the transaction if Transaction type is pay or axfer, algo amount AND asset amount is <= 100.
+- [`3-gold-delegated-asc.teal`](https://github.com/scale-it/algo-builder/blob/master/examples/asa/assets/teal/3-gold-delegated-asc.teal): A delegated lsig which approves the transaction if Transaction type is pay, and amount is <= 100.
+- [`4-gold-asa.teal`](https://github.com/scale-it/algo-builder/blob/master/examples/asa/assets/teal/4-gold-asa.teal): A lsig which approves the transaction if (transaction type is OPT-IN OR (transaction type is asset transfer and sender is `goldOwnerAccount` and asset transfer amount is less than equal to 1000 )).
+- [`5-contract-asa-stateless.py`](https://github.com/scale-it/algo-builder/blob/master/examples/asa/assets/pyteal/5-contract-asa-stateless.py): This program is stateless part of contract owned asa, ASA owned is associated with this contract address, This program checks if:
+    - Creation: Stateful program is always called
+    - Payment: Stateful program is always called, Payment type is AssetTransfer,
+               Amount is <= 100 and fee is <= 10000
+
+This example also includes a stateful contract which is a stateful part of contract owned ASA:
+- [`5-contract-asa-stateful`](https://github.com/scale-it/algo-builder/blob/master/examples/asa/assets/pyteal/5-contract-asa-stateful.py):
+    - Maximum number of ASA creation limit is 1.
+    - Transaction must be signed by owner to get ASA out from contract
+    - Only owner can call - update smart contract to set a new owner
+    - Only owner can transfer ASA out from the smart contract and maximum payment is 100 ASA.
 
 ## Usage
 
