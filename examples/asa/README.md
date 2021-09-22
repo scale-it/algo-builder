@@ -23,7 +23,7 @@ This example also includes stateless smart contracts in (`assets/` directory) th
     - Transaction type is OPT-IN OR Transaction type is asset transfer
     - Sender is `goldOwnerAccount` 
     - Asset transfer amount is less than equal to 1000 )).
-- [`5-contract-asa-stateless.py`](https://github.com/scale-it/algo-builder/blob/master/examples/asa/assets/pyteal/5-contract-asa-stateless.py): This program is stateless part of contract owned asa, ASA owned is associated with this contract address, This program checks if:
+- [`5-contract-asa-stateless.py`](https://github.com/scale-it/algo-builder/blob/master/examples/asa/assets/pyteal/5-contract-asa-stateless.py): This program is stateless part of contract owned asa, ASA owned is associated with this contract address. Commands:
     - Creation: Stateful program is always called
     - Payment: Stateful program is always called, Payment type is AssetTransfer,
                Amount is <= 100 and fee is <= 10000
