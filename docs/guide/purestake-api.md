@@ -26,7 +26,8 @@ let purestakeTestNetCfg = {
   port: '',
   token: {
     'X-API-Key': 'B3SU4KcVKi94Jap2VXkK83xx38bsv95K5UZm2lab' // replace this with your API key
-  }
+  },
+  accounts: [] // accounts can be passed as an empty array as well
 };
 
 module.exports = {
