@@ -2,9 +2,10 @@ import { parsing } from "@algo-builder/web";
 import {
   decodeAddress, encodeAddress,
   EncodedLogicSig, EncodedLogicSigAccount, EncodedMultisig,
-  generateAccount, multisigAddress, MultisigMetadata,
+  multisigAddress, MultisigMetadata,
   signBytes, verifyBytes
 } from "algosdk";
+import * as murmurhash from 'murmurhash';
 import * as tweet from "tweetnacl-ts";
 
 import { RUNTIME_ERRORS } from "./errors/errors-list";
@@ -26,10 +27,19 @@ export class LogicSig {
   lsigAddress: string;
   tag: Buffer;
 
-  constructor (program: string, programArgs?: Array<Uint8Array | Buffer> | null) {
+  constructor (
+    program: string,
+    programArgs?: Array<Uint8Array | Buffer> | null
+  ) {
     this.tag = Buffer.from("Program");
     this.logic = parsing.stringToBytes(program);
-    this.lsigAddress = generateAccount().addr;
+
+    const seedBytes = parsing.uint64ToBigEndian(murmurhash.v3(program));
+    const extendedSeed = new Uint8Array(Number(seedBytes.length) + Number(24));
+    extendedSeed.set(seedBytes);
+    const pair = tweet.sign_keyPair_fromSeed(extendedSeed);
+    this.lsigAddress = encodeAddress(pair.publicKey);
+
     this.tag = Buffer.from('Program');
     if (
       programArgs &&
@@ -251,7 +261,10 @@ export class LogicSigAccount {
    * @param program - program in TEAL file
    * @param args - An optional array of arguments for the program.
    */
-  constructor (program: string, programArgs?: Array<Uint8Array | Buffer> | null) {
+  constructor (
+    program: string,
+    programArgs?: Array<Uint8Array | Buffer> | null
+  ) {
     this.lsig = new LogicSig(program, programArgs);
     this.sigkey = undefined;
   }
