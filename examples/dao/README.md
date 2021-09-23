@@ -74,7 +74,7 @@ We created a deploy script in `scripts/deploy`, This script deploys initial Gov 
 
 Please read the spec document (linked above) for more details about each use case. The scripts provide only a sample code to show how to use the template. For you private needs, you will have to modify the scripts directory to adjust the parameters (eg voting time, execution time etc...) and the proposals.
 
-To add proposal (`{voting_start, voting_end}` is set as `{now, now + 2min}`):
+To add proposal (`{voting_start, voting_end}` is set as `{now + 1min, now + 3min}`):
 
 	yarn run algob run scripts/run/add_proposal.js
 
@@ -86,7 +86,7 @@ To vote for a proposal (using deposited tokens):
 
 	yarn run algob run scripts/run/vote.js
 
-To execute a proposal (`execute_before` is set as 5min from the time of proposal creation):
+To execute a proposal (`execute_before` is set as 7min from the time of proposal creation):
 
 	yarn run algob run scripts/run/vote.js
 

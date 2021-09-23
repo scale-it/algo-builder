@@ -36,12 +36,17 @@ async function clearProposal (deployer, proposalLsig, depositAmt) {
 }
 
 async function run (runtimeEnv, deployer) {
+  const govToken = deployer.asa.get('gov-token');
   const proposalLsig = await getProposalLsig(deployer);
 
-  // Transaction FAIL: deposit is not same as app.global("deposit")
+  // optIn to ASA(GOV_TOKEN) by proposalLsig
+  // we will receive the deposit back into proposalLsig
+  await deployer.optInLsigToASA(govToken.assetIndex, proposalLsig, { totalFee: 1000 });
+
+  // Transaction FAIL: deposit amount is not same as app.global("deposit")
   await clearProposal(deployer, proposalLsig, 7);
 
-  // withdraw deposited votes by voterA & voterB (in ./deposit_vote_token.js)
+  // clear proposal record
   await clearProposal(deployer, proposalLsig, 15);
 }
 

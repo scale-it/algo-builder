@@ -25,9 +25,9 @@ async function addProposal (runtimeEnv, deployer) {
     'str:www.myurl.com', // url
     'str:url-hash', // url_hash
     'str:', // hash_algo (passing null)
-    `int:${now + 10}`, // voting_start (now + 10s)
-    `int:${now + (2 * 60)}`, // voting_end (now + 2min)
-    `int:${now + (5 * 60)}`, // execute_before (now + 5min)
+    `int:${now + (1 * 60)}`, // voting_start (now + 1min)
+    `int:${now + (3 * 60)}`, // voting_end (now + 3min)
+    `int:${now + (7 * 60)}`, // execute_before (now + 7min)
     `int:${ProposalType.ALGO_TRANSFER}`, // type
     `addr:${daoFundLsig.address()}`, // from (DAO treasury)
     `addr:${proposer.addr}`, // recepient

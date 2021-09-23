@@ -272,8 +272,8 @@ def approval_program(ARG_GOV_TOKEN):
             And(
                 Global.group_size() == Int(1),
                 # voting_start <= now <= voting_end
-                # voting_start <= Global.latest_timestamp(),
-                # Global.latest_timestamp() <= voting_end,
+                voting_start <= Global.latest_timestamp(),
+                Global.latest_timestamp() <= voting_end,
                 # Sender.deposit >= 0 (i.e user "deposited" his votes using deposit_vote_token)
                 App.localGet(Int(0), Bytes("deposit")) > Int(0)
             )
@@ -313,6 +313,7 @@ def approval_program(ARG_GOV_TOKEN):
             If(
                 And(
                     p_proposal.value() == proposal_id,
+                    # NOTE: 1 means proposal is still in voting.
                     scratchvar_proposal_active.load() == Int(1)
                 ) == Int(1),
                 Err()
