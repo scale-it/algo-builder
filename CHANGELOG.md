@@ -33,14 +33,13 @@
 
 ### API Breaking
 * Migrate from `LogicSig` to `LogicSigAccount`(Note: Loading lsig from file uses `LogicSig`, because `goal` stores it in LogicSig type format)
-
-### API breaking
 * Rename `CallNoOpSSC` to `CallApp`.
 * Rename `optInAcountToASA` to `optInAccountToASA` (typo)
 * Rename `readLocalStateSSC` to `readAppLocalState`, `readGlobalStateSSC` to `readAppGlobalState`.
 
 ### Dependencies
 * Upgraded pyTEAL version [`0.8.0`](https://github.com/algorand/pyteal/releases/tag/v0.8.0) in pipfile.
+* Upgraded indexer binary version to `2.6.1` in `/infrastructure/Makefile`.
 
 ## v1.2.1 2021-09-15
 
