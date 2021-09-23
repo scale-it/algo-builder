@@ -1,6 +1,7 @@
 import { parseASADef, types as rtypes } from "@algo-builder/runtime";
 import { tx as webTx, types as wtypes } from "@algo-builder/web";
 import algosdk, { Algodv2, decodeSignedTransaction, SuggestedParams, Transaction } from "algosdk";
+import { sign } from "crypto";
 
 import { ConfirmedTxInfo, Deployer } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
@@ -123,7 +124,9 @@ export function makeASAOptInTx (
  * @param txn unsigned transaction
  * @param execParams transaction execution parametrs
  */
-function signTransaction (txn: Transaction, execParams: wtypes.ExecParams): Uint8Array {
+function signTransaction (
+  txn: Transaction, execParams: wtypes.ExecParams | wtypes.Signer
+): Uint8Array {
   switch (execParams.sign) {
     case wtypes.SignType.SecretKey: {
       return txn.signTxn(execParams.fromAccount.sk);
@@ -271,10 +274,28 @@ export async function makeAndSignTx (
  * @param txn Transaction object/s
  * @param signer signer
  */
-export async function signTransactionObject (
-  txn: Transaction | Transaction[], signer: wtypes.Signer | wtypes.Signer[]
+export function signTransactionObject (
+  txns: Transaction | Transaction[], signer: wtypes.Signer | wtypes.Signer[]
 ): Uint8Array | Uint8Array[] {
-
+  if (Array.isArray(txns)) {
+    txns = algosdk.assignGroupID(txns);
+    let signedTxn;
+    if (Array.isArray(signer)) {
+      signedTxn = txns.map((txn: Transaction, index: number) => {
+        return signTransaction(txn, signer[index]);
+      });
+    } else {
+      signedTxn = txns.map((txn: Transaction, index: number) => {
+        return signTransaction(txn, signer);
+      });
+    }
+    return signedTxn;
+  } else {
+    if (Array.isArray(signer)) {
+      throw new Error("cannot sign single transaction with multiple signers");
+    }
+    return signTransaction(txns, signer);
+  }
 }
 
 /**
@@ -302,6 +323,7 @@ export async function executeTransaction (
   execParams = Array.isArray(execParams)
     ? execParams as wtypes.ExecParams[]
     : execParams;
+
   deployer.assertCPNotDeleted(execParams);
   try {
     const txIdxMap = new Map<number, [string, wtypes.ASADef]>();
