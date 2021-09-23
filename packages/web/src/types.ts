@@ -1,9 +1,11 @@
-import { Account as AccountSDK, LogicSigAccount } from 'algosdk';
+import { Account as AccountSDK, LogicSigAccount, Transaction } from 'algosdk';
 import * as z from 'zod';
 
 import type { ASADefSchema, ASADefsSchema } from "./types-input";
 
 export type AccountAddress = string;
+
+export type Signer = SignWithSk | SignWithLsig;
 
 export interface AnyMap {
   [key: string]: any // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -262,4 +264,19 @@ export function isRequestError (object: unknown): object is RequestError {
    Object.prototype.hasOwnProperty.call(object, "response.body.message") &&
    Object.prototype.hasOwnProperty.call(object, "response.error");
   return res && Object.prototype.hasOwnProperty.call(object, "error");
+}
+
+// This function checks if given object implements `Transaction` class
+export function isTransaction (object: unknown): object is Transaction {
+  const props = [
+    "tag", "from", "to", "fee", "amount", "firstRound", "lastRound",
+    "genesisID", "genesisHash", "voteKey", "selectionKey", "voteFirst", "voteLast",
+    "voteKeyDilution", "assetIndex"
+  ];
+  let res = Object.prototype.hasOwnProperty.call(object, "name");
+  for (const prop of props) {
+    res = res && Object.prototype.hasOwnProperty.call(object, prop);
+  }
+
+  return res;
 }

@@ -267,6 +267,17 @@ export async function makeAndSignTx (
 }
 
 /**
+ * Signs transaction object/s and returns raw signed transaction
+ * @param txn Transaction object/s
+ * @param signer signer
+ */
+export async function signTransactionObject (
+  txn: Transaction | Transaction[], signer: wtypes.Signer | wtypes.Signer[]
+): Uint8Array | Uint8Array[] {
+
+}
+
+/**
  * Execute single transaction or group of transactions (atomic transaction)
  * @param deployer Deployer
  * @param execParams transaction parameters or atomic transaction parameters
@@ -274,8 +285,23 @@ export async function makeAndSignTx (
  */
 export async function executeTransaction (
   deployer: Deployer,
-  execParams: wtypes.ExecParams | wtypes.ExecParams[]):
-  Promise<ConfirmedTxInfo> {
+  execParams: (wtypes.ExecParams | Transaction) | (wtypes.ExecParams[] | Transaction[]),
+  signer?: wtypes.Signer | wtypes.Signer[]
+): Promise<ConfirmedTxInfo> {
+  if ((Array.isArray(execParams) && wtypes.isTransaction(execParams)) || wtypes.isTransaction(execParams)) {
+    if (signer === undefined) {
+      throw new Error("Signer is not defined");
+    }
+    const signedTxn = signTransactionObject(execParams, signer);
+    const confirmedTx = await deployer.sendAndWait(signedTxn);
+    console.log(confirmedTx);
+    return confirmedTx;
+  }
+
+  // Update type here because we are sure this is not transaction object type
+  execParams = Array.isArray(execParams)
+    ? execParams as wtypes.ExecParams[]
+    : execParams;
   deployer.assertCPNotDeleted(execParams);
   try {
     const txIdxMap = new Map<number, [string, wtypes.ASADef]>();
