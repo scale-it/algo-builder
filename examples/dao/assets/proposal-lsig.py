@@ -28,7 +28,7 @@ def proposal_lsig(ARG_OWNER):
         basic_checks(Txn),
         Txn.type_enum() == TxnType.AssetTransfer,
         Txn.asset_amount() == Int(0),
-        Txn.sender() == Addr(ARG_OWNER)
+        Txn.asset_sender() == Addr(ARG_OWNER)
     )
 
     # Only owner can withdraw ASA/ALGO
