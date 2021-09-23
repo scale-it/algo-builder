@@ -270,8 +270,8 @@ export async function makeAndSignTx (
 }
 
 /**
- * Signs transaction object/s and returns raw signed transaction
- * @param txn Transaction object/s
+ * Signs transaction object(s) and returns raw signed transaction
+ * @param txn Transaction object(s)
  * @param signer signer
  */
 export function signTransactionObject (
