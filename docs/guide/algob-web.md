@@ -25,7 +25,7 @@ Webapp:
 │   ├── run.ts
 ├── src (react frontend code)
 │   ├── app.js
-│   ├── index.jjs
+│   ├── index.js
 ├── test
 │   ├── JS test files
 │   ├── .mocharc.json (optional)
@@ -37,7 +37,7 @@ Contracts are present in `/assets`, scripts are present in `/scripts` folder, an
 
 ## Checkpoints
 
-In an `algob` project we have persist [checkpoints](./algob-web-checkpoints.md). This is helpful to store deployment information (transaction IDs, asset indexes, etc.) for later use (in future scripts).
+In an `algob` project we persist [checkpoints](./algob-web-checkpoints.md). This is helpful to store deployment information (transaction IDs, asset indexes, etc.) for later use (in future scripts).
 + The checkpoint files are saved in `artifacts/scripts/` in a human-readable YAML format. Contains:
     + Deployed informaton (assetID, appID, creator, txID, etc.)
     + Logic Signatures (Delegated/signed OR unsigned)
