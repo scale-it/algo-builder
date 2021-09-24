@@ -12,7 +12,7 @@ Purestake API's can be easily integrated with `algo-builder` scripts. You just n
 ## AlgodV2
 
 For algodv2, the host urls for mainnet, testnet & betanet are:
-+ *mainnet*: `https://mainnet-algorand.api.purestake.io/idx2`
++ *mainnet*: `https://mainnet-algorand.api.purestake.io/ps2`
 + *testnet*: `https://testnet-algorand.api.purestake.io/ps2`
 + *betanet*:  `https://betanet-algorand.api.purestake.io/ps2`
 
@@ -39,3 +39,29 @@ module.exports = {
 ```
 
 And while running the script, you can simply pass this cfg with the `--network` flag. (eg. `algob run scripts/run.js --network purestake`).
+
+## IndexerV2
+
+For indexer, the host urls for mainnet, testnet & betanet are:
++ *mainnet*: `https://mainnet-algorand.api.purestake.io/idx2`
++ *testnet*: `https://testnet-algorand.api.purestake.io/idx2`
++ *betanet*: `https://betanet-algorand.api.purestake.io/idx2`
+
+Similar to above section, you can add this config in `algob.config.js`, and access the API via `deployer.indexerClient` in an `algob` script.
+
+```js
+let purestakeIndexerCfg = {
+  host: "https://testnet-algorand.api.purestake.io/idx2",
+  port: '',
+  token: {
+    'X-API-Key': 'B3SU4KcVKi94Jap2VXkK83xx38bsv95K5UZm2lab' // replace this with your API key
+  },
+  accounts: [] // accounts can be passed as an empty array as well
+};
+
+module.exports = {
+  networks: {
+    purestake: purestakeIndexerCfg
+  }
+};
+```
