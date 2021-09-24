@@ -267,7 +267,7 @@ export function isRequestError (object: unknown): object is RequestError {
 }
 
 // This function checks if given object implements `Transaction` class
-export function isTransaction (object: unknown): object is Transaction {
+export function isSDKTransaction (object: unknown): object is Transaction {
   const props = [
     "tag", "from", "to", "fee", "amount", "firstRound", "lastRound",
     "genesisID", "genesisHash", "voteKey", "selectionKey", "voteFirst", "voteLast",

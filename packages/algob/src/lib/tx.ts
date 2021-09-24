@@ -1,7 +1,6 @@
 import { parseASADef, types as rtypes } from "@algo-builder/runtime";
 import { tx as webTx, types as wtypes } from "@algo-builder/web";
 import algosdk, { Algodv2, decodeSignedTransaction, SuggestedParams, Transaction } from "algosdk";
-import { sign } from "crypto";
 
 import { ConfirmedTxInfo, Deployer } from "../types";
 import { ALGORAND_MIN_TX_FEE } from "./algo-operator";
@@ -271,6 +270,8 @@ export async function makeAndSignTx (
 
 /**
  * Signs transaction object(s) and returns raw signed transaction
+ * Note: Sign transaction is used to sign single transaction and `signTransactionObject` takes
+ * SDK transaction object, signer and signs it.
  * @param txn Transaction object(s)
  * @param signer signer
  */
@@ -312,7 +313,9 @@ export async function executeTransaction (
   execParams: (wtypes.ExecParams | Transaction) | (wtypes.ExecParams[] | Transaction[]),
   signer?: wtypes.Signer | wtypes.Signer[]
 ): Promise<ConfirmedTxInfo> {
-  if ((Array.isArray(execParams) && wtypes.isTransaction(execParams)) || wtypes.isTransaction(execParams)) {
+  if (
+    (Array.isArray(execParams) && wtypes.isSDKTransaction(execParams)) || wtypes.isSDKTransaction(execParams)
+  ) {
     if (signer === undefined) {
       throw new Error("Signer is not defined");
     }
