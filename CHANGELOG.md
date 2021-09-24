@@ -17,9 +17,9 @@
     * Additional mathematical opcodes: `divmodw`, `exp`, `expw`, `shl`, `shr`, `sqrt`
     * More Versatile Global and Local Storage (combination of upto 128 bytes allowed between key-value).
     * Asset URL change (max size increased till 96 bytes).
+    * gaid, gaids opcodes (knowable creatable id)
 + Updated all examples & tests to use TEALv4 (`#pragma version 4`)
-+ TEALv4: gaid, gaids opcodes (knowable creatable id)
-
++ Added support for querying indexer in an `algob` script (accessable via `deployer.indexerClient`). You can pass `indexerCfg` in your network's config in `algob.config.js`. Added docs.
 
 ### Bug Fixes
 * Fixed `yarn add @algo-builder/web` (was failing because of missing dependency `zod` in packages/web).

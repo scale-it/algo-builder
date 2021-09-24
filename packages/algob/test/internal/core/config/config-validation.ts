@@ -766,4 +766,75 @@ describe("Config validation", function () {
       );
     });
   });
+
+  describe("Indexer config", function () {
+    const indexerCfg = {
+      host: "127.0.0.1",
+      port: 8080,
+      token: "some_indexer_token",
+      otherParam: ""
+    };
+    const localhost = {
+      host: "localhost",
+      port: 8080,
+      token: "somefaketoken",
+      indexerCfg: indexerCfg
+    };
+
+    it("Should work with valid Indexer config", function () {
+      const errors = getValidationErrors({
+        networks: {
+          localhost: localhost
+        }
+      });
+      assert.isEmpty(errors.errors, errors.toString());
+    });
+
+    it("Should accept Indexer token object", function () {
+      const errors = getValidationErrors({
+        networks: {
+          localhost: {
+            ...localhost,
+            indexerCfg: {
+              ...indexerCfg,
+              token: {
+                "X-Indexer-API-Token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            }
+          }
+        }
+      });
+      assert.isEmpty(errors.errors, errors.toString());
+    });
+
+    it("Should work with unrecognized params", function () {
+      const errors = getValidationErrors({
+        networks: {
+          localhost: Object.assign(localhost, localhost.indexerCfg.otherParam = "some_other_detail"),
+          [ALGOB_CHAIN_NAME]: {
+            asdasd: "123"
+          }
+        }
+      });
+      assert.isEmpty(errors.errors, errors.toString());
+    });
+
+    /* eslint-disable sonarjs/no-identical-functions */
+    it("Shouldn't accept invalid types", function () {
+      const cfg: any = deepmerge({}, localhost);
+      cfg.indexerCfg.port = [8080];
+      expectBuilderError(
+        () =>
+          validateConfig({
+            networks: {
+              localhost: Object.assign(localhost, cfg),
+              [ALGOB_CHAIN_NAME]: {
+                asdasd: "1"
+              }
+            }
+          }),
+        ERRORS.GENERAL.INVALID_CONFIG
+      );
+    });
+  });
 });

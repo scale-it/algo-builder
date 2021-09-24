@@ -1,8 +1,10 @@
 import { loadASAFile, types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
+import { Indexer } from "algosdk";
 
 import { mkAccountIndex } from "../lib/account";
 import { AlgoOperator } from "../lib/algo-operator";
+import { createIndexerClient } from "../lib/driver";
 import { loadCheckpointsRecursive } from "../lib/script-checkpoints";
 import type {
   CheckpointRepo,
@@ -28,6 +30,7 @@ export class DeployerConfig {
   cpData: CheckpointRepo;
   asaDefs: wtypes.ASADefs;
   algoOp: AlgoOperator;
+  indexerClient: Indexer | undefined;
   txWriter: txWriter;
   accounts: rtypes.AccountMap;
 
@@ -38,5 +41,6 @@ export class DeployerConfig {
     this.accounts = mkAccountIndex(runtimeEnv.network.config.accounts ?? []);
     this.txWriter = new TxWriterImpl('');
     this.asaDefs = loadASAFile(this.accounts);
+    this.indexerClient = createIndexerClient(runtimeEnv.network.config.indexerCfg);
   }
 }
