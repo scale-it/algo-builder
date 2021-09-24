@@ -74,6 +74,27 @@ Consider a case when App is updated with same programs, this is the case where w
 
 While retreiving AppInfo from checkpoints only the lastest timestamp AppInfo is used.
 
+## Checkpoint storage for logic signature(Lsig)
+
+- For logic signature in contract mode: You may use `addLsigCheckpoint` function to store lsigInfo in checkpoint.
+- To load logic signature in contract mode: You may use `getContractLsig` function.
+- Ex:
+```js
+// store checkpoint
+deployer.mkContractLsig(contractName);
+// load checkpoint
+deployer.getContractLsig(contractName);
+```
+- For delegated logic signature `algob` stores checkpoints automatically.
+- To load delegated logic signature you may use `getDelegatedLsig` function.
+- Ex:
+```js
+// store checkpoint
+deployer.mkDelegatedLsig(contractName);
+// load checkpoint
+deployer.getDelegatedLsig(contractName);
+```
+
 ## Checkpoint storage `delete` boolean
 
 - Checkpoint structure has an additional flag `deleted` - if it's true, that means the respective asa/App is deleted from network. If this is the case, then the deployer will throw an error when trying to use that in any operation other than `optOut`.
