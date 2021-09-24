@@ -1,6 +1,6 @@
 import { overrideASADef, parseASADef, types as rtypes, validateOptInAccNames } from "@algo-builder/runtime";
 import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
-import type { EncodedMultisig, LogicSigAccount, modelsv2 } from "algosdk";
+import type { EncodedMultisig, Indexer, LogicSigAccount, modelsv2 } from "algosdk";
 import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
@@ -31,6 +31,7 @@ class DeployerBasicMode {
   protected readonly txWriter: txWriter;
   readonly accounts: rtypes.Account[];
   readonly accountsByName: rtypes.AccountMap;
+  readonly indexerClient: algosdk.Indexer | undefined;
   checkpoint: CheckpointFunctions;
 
   constructor (deployerCfg: DeployerConfig) {
@@ -42,6 +43,7 @@ class DeployerBasicMode {
     this.accountsByName = deployerCfg.accounts;
     this.txWriter = deployerCfg.txWriter;
     this.checkpoint = new CheckpointFunctionsImpl(deployerCfg.cpData, deployerCfg.runtimeEnv.network.name);
+    this.indexerClient = deployerCfg.indexerClient;
   }
 
   protected get networkName (): string {
