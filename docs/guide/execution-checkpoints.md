@@ -81,7 +81,7 @@ While retreiving AppInfo from checkpoints only the lastest timestamp AppInfo is 
 - Ex:
 ```js
 // store checkpoint
-deployer.addLsigCheckpoint(contractName);
+deployer.mkContractLsig(contractName);
 // load checkpoint
 deployer.getContractLsig(contractName);
 ```
