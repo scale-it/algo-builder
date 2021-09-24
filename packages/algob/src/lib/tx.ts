@@ -123,7 +123,9 @@ export function makeASAOptInTx (
  * @param txn unsigned transaction
  * @param execParams transaction execution parametrs
  */
-function signTransaction (txn: Transaction, execParams: wtypes.ExecParams): Uint8Array {
+function signTransaction (
+  txn: Transaction, execParams: wtypes.ExecParams | wtypes.Signer
+): Uint8Array {
   switch (execParams.sign) {
     case wtypes.SignType.SecretKey: {
       return txn.signTxn(execParams.fromAccount.sk);
@@ -267,15 +269,67 @@ export async function makeAndSignTx (
 }
 
 /**
+ * Signs transaction object(s) and returns raw signed transaction
+ * Note: Sign transaction is used to sign single transaction and `signTransactionObject` takes
+ * SDK transaction object, signer and signs it.
+ * @param txn Transaction object(s)
+ * @param signer signer
+ */
+export function signTransactionObject (
+  txns: Transaction | Transaction[], signer: wtypes.Signer | wtypes.Signer[]
+): Uint8Array | Uint8Array[] {
+  if (Array.isArray(txns)) {
+    txns = algosdk.assignGroupID(txns);
+    let signedTxn;
+    if (Array.isArray(signer)) {
+      signedTxn = txns.map((txn: Transaction, index: number) => {
+        return signTransaction(txn, signer[index]);
+      });
+    } else {
+      signedTxn = txns.map((txn: Transaction, index: number) => {
+        return signTransaction(txn, signer);
+      });
+    }
+    return signedTxn;
+  } else {
+    if (Array.isArray(signer)) {
+      throw new Error("cannot sign single transaction with multiple signers");
+    }
+    return signTransaction(txns, signer);
+  }
+}
+
+/**
  * Execute single transaction or group of transactions (atomic transaction)
+ * executes `ExecParams` or `Transaction` Object, SDK Transaction object passed to this function
+ * will be signed and sent to network. User can use SDK functions to create transactions.
+ * Note: If passing transaction object a signer/s must be provided.
  * @param deployer Deployer
  * @param execParams transaction parameters or atomic transaction parameters
  * https://github.com/scale-it/algo-builder/blob/docs/docs/guide/execute-transaction.md
  */
 export async function executeTransaction (
   deployer: Deployer,
-  execParams: wtypes.ExecParams | wtypes.ExecParams[]):
-  Promise<ConfirmedTxInfo> {
+  execParams: (wtypes.ExecParams | Transaction) | (wtypes.ExecParams[] | Transaction[]),
+  signer?: wtypes.Signer | wtypes.Signer[]
+): Promise<ConfirmedTxInfo> {
+  if (
+    (Array.isArray(execParams) && wtypes.isSDKTransaction(execParams)) || wtypes.isSDKTransaction(execParams)
+  ) {
+    if (signer === undefined) {
+      throw new Error("Signer is not defined");
+    }
+    const signedTxn = signTransactionObject(execParams, signer);
+    const confirmedTx = await deployer.sendAndWait(signedTxn);
+    console.log(confirmedTx);
+    return confirmedTx;
+  }
+
+  // Update type here because we are sure this is not transaction object type
+  execParams = Array.isArray(execParams)
+    ? execParams as wtypes.ExecParams[]
+    : execParams;
+
   deployer.assertCPNotDeleted(execParams);
   try {
     const txIdxMap = new Map<number, [string, wtypes.ASADef]>();
