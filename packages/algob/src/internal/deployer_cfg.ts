@@ -35,7 +35,7 @@ export class DeployerConfig {
     this.runtimeEnv = runtimeEnv;
     this.cpData = loadCheckpointsRecursive();
     this.algoOp = algoOp;
-    this.accounts = mkAccountIndex(runtimeEnv.network.config.accounts);
+    this.accounts = mkAccountIndex(runtimeEnv.network.config.accounts ?? []);
     this.txWriter = new TxWriterImpl('');
     this.asaDefs = loadASAFile(this.accounts);
   }

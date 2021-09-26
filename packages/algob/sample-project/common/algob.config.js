@@ -60,6 +60,15 @@ let defaultCfg = {
   // kmdCfg: kmdCfg,
 };
 
+// purestake testnet config
+let purestakeTestNetCfg = {
+  host: "https://testnet-algorand.api.purestake.io/ps2",
+  port: '',
+  token: {
+    'X-API-Key': 'Xhkn7v7h972hj7Egx3fGr9RFbfXeGuoD6wSLKDyG'
+  }
+};
+
 // You can also use Environment variables to get Algod credentials
 // Please check https://github.com/scale-it/algo-builder/blob/master/docs/algob-config.md#credentials for more details and more methods.
 // Method 1
@@ -79,6 +88,7 @@ let envCfg = {
 module.exports = {
   networks: {
     default: defaultCfg,
-    prod: envCfg
+    prod: envCfg,
+    purestake: purestakeTestNetCfg
   }
 };

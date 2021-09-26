@@ -23,6 +23,7 @@ layout: splash
 + [Sign Multisig](./sign-multisig.md)
 + [Debugging TEAL](./debugging-teal.md)
 + [Using algob with WebApp](./algob-web.md)
++ [PureStake API](./purestake-api.md)
 + [Best Practices](./best-practices.md)
 
 For more in-depth description you can look at the [project specification](https://paper.dropbox.com/published/Algorand-builder-specs--A6Fraxi5VtKhHYbWkTjHfgWyBw-c4ycJtlcmEaRIbptAPqNYS6).
