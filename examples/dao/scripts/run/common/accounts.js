@@ -20,7 +20,9 @@ async function getDAOFundLsig (deployer) {
 // returns proposal lsig
 async function getProposalLsig (deployer) {
   const proposerAcc = accounts(deployer).proposer;
-  return await deployer.loadLogic('proposal-lsig.py', { ARG_OWNER: proposerAcc.addr });
+  const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
+  return await deployer.loadLogic('proposal-lsig.py',
+    { ARG_OWNER: proposerAcc.addr, ARG_DAO_APP_ID: daoAppInfo.appID });
 };
 
 /**

@@ -1,6 +1,6 @@
 const { executeTx } = require('./common/common.js');
 const { types } = require('@algo-builder/web');
-const { getDepositLsig, getProposalLsig } = require('./common/accounts.js');
+const { getDepositLsig, getProposalLsig, accounts } = require('./common/accounts.js');
 
 async function clearProposal (deployer, proposalLsig, depositAmt) {
   const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
@@ -36,12 +36,31 @@ async function clearProposal (deployer, proposalLsig, depositAmt) {
 }
 
 async function run (runtimeEnv, deployer) {
+  const { _, proposer } = accounts(deployer);
   const govToken = deployer.asa.get('gov-token');
   const proposalLsig = await getProposalLsig(deployer);
 
   // optIn to ASA(GOV_TOKEN) by proposalLsig
   // we will receive the deposit back into proposalLsig
-  await deployer.optInLsigToASA(govToken.assetIndex, proposalLsig, { totalFee: 1000 });
+  const optInTx = [
+    {
+      type: types.TransactionType.TransferAlgo,
+      sign: types.SignType.SecretKey,
+      fromAccount: proposer,
+      toAccountAddr: proposalLsig.address(),
+      amountMicroAlgos: 0,
+      payFlags: {}
+    },
+    {
+      type: types.TransactionType.OptInASA,
+      sign: types.SignType.LogicSignature,
+      fromAccountAddr: proposalLsig.address(),
+      lsig: proposalLsig,
+      assetID: govToken.assetIndex,
+      payFlags: {}
+    }
+  ];
+  await executeTx(deployer, optInTx);
 
   // Transaction FAIL: deposit amount is not same as app.global("deposit")
   await clearProposal(deployer, proposalLsig, 7);

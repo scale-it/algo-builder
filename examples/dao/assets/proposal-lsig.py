@@ -4,7 +4,7 @@ sys.path.insert(0,'..')
 from algobpy.parse import parse_params
 from pyteal import *
 
-def proposal_lsig(ARG_OWNER):
+def proposal_lsig(ARG_OWNER, ARG_DAO_APP_ID):
     """
     Represents Proposal Lsig (a contract account owned by the proposer)
     """
@@ -23,12 +23,29 @@ def proposal_lsig(ARG_OWNER):
         txn.asset_close_to() == Global.zero_address()
     )
 
-    # Opt-in transaction.
+    # Opt-in transaction
+    # Note: we are checking that first transaction is payment with amount 0
+    # and sent by proposer account, because we don't want another
+    # user to opt-in too many asa/app and block this address
     opt_in = And(
-        basic_checks(Txn),
-        Txn.type_enum() == TxnType.AssetTransfer,
-        Txn.asset_amount() == Int(0),
-        Txn.sender() == Addr(ARG_OWNER)
+        basic_checks(Gtxn[0]),
+        basic_checks(Gtxn[1]),
+        Gtxn[0].type_enum() == TxnType.Payment,
+        Gtxn[0].amount() == Int(0),
+        Gtxn[0].sender() == Addr(ARG_OWNER),
+        Gtxn[1].type_enum() == TxnType.AssetTransfer,
+        Gtxn[1].asset_amount() == Int(0)
+    )
+
+    # Allow app call to DAO (eg. OptInToApp, add_proposal, etc)
+    allow_app_call = And(
+        Or(
+            Global.group_size() == Int(1),
+            Global.group_size() == Int(2)
+        ),
+        basic_checks(Gtxn[0]),
+        Gtxn[0].type_enum() == TxnType.ApplicationCall,
+        Gtxn[0].application_id() == Int(ARG_DAO_APP_ID)
     )
 
     # Only owner can withdraw ASA/ALGO
@@ -40,18 +57,33 @@ def proposal_lsig(ARG_OWNER):
         )
     )
 
-    deposit = basic_checks(Txn)
+    # we take payment in this lsig only when paired with App call
+    deposit = And(
+        # verify first transaction
+        basic_checks(Gtxn[0]),
+        Gtxn[0].type_enum() == TxnType.ApplicationCall,
+        Gtxn[0].application_id() == Int(ARG_DAO_APP_ID),
 
-    program = Or(opt_in, withdraw, deposit)
+        # verify second transaction (either payment in ASA or ALGO)
+        basic_checks(Gtxn[1]),
+        Gtxn[1].type_enum() == TxnType.AssetTransfer,
+    )
+
+    program = Cond(
+        [Global.group_size() == Int(1), Or(allow_app_call, withdraw)],
+        [Global.group_size() == Int(2), Or(allow_app_call, opt_in, deposit)]
+    )
+
     return program
 
 if __name__ == "__main__":
     params = {
-        "ARG_OWNER": "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY"
+        "ARG_OWNER": "EDXG4GGBEHFLNX6A7FGT3F6Z3TQGIU6WVVJNOXGYLVNTLWDOCEJJ35LWJY",
+        "ARG_DAO_APP_ID": 99
     }
 
     # Overwrite params if sys.argv[1] is passed
     if(len(sys.argv) > 1):
         params = parse_params(sys.argv[1], params)
 
-    print(compileTeal(proposal_lsig(params["ARG_OWNER"]), Mode.Signature, version = 4))
+    print(compileTeal(proposal_lsig(params["ARG_OWNER"], params["ARG_DAO_APP_ID"]), Mode.Signature, version = 4))

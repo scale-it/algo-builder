@@ -52,7 +52,8 @@ async function run (runtimeEnv, deployer) {
       { ARG_GOV_TOKEN: asaInfo.assetIndex, ARG_DAO_APP_ID: daoAppInfo.appID }),
 
     deployer.fundLsig('proposal-lsig.py',
-      { funder: creator, fundingMicroAlgo: 5e6 }, {}, { ARG_OWNER: proposer.addr })
+      { funder: creator, fundingMicroAlgo: 5e6 }, {},
+      { ARG_OWNER: proposer.addr, ARG_DAO_APP_ID: daoAppInfo.appID })
   ]);
 
   console.log('* Adding vote_deposit_lsig to DAO *');
