@@ -47,7 +47,7 @@ Since, `@algo-builder/web` API can't load data from files in your webapp, user e
 + copy these checkpoints from `/artifacts` to your webapp (inside `/src/`), so it can be bundled by webpack and deployed.
 + OR, you can override your react-app config and remove `removeModuleScopePlugin` (this allows imports outside `/src` folder in react-app)
 
-After you're able to import checkpoint files (in `/artifacts/*.yaml`), you can simply add a yaml loader to load files & read data in your react source code. For eg. (reading a logic sig from checkpoints data and getting the contract's address).
+After you're able to import checkpoint files (in `/artifacts/*.yaml`), you can simply add a yaml loader to load files & read data in your react source code. For eg. (reading a logic sig from checkpoints data and getting the contract's address). As a reference, checkout [this](https://github.com/scale-it/algo-builder-templates/blob/master/default/config-overrides.js) file.
 
 ## Reference
 
