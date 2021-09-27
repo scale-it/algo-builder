@@ -121,18 +121,18 @@ export function makeASAOptInTx (
 /**
  * Returns signed transaction
  * @param txn unsigned transaction
- * @param execParams transaction execution parametrs
+ * @param signer sign and secret key parameters
  */
 function signTransaction (
-  txn: Transaction, execParams: wtypes.ExecParams | wtypes.Signer
+  txn: Transaction, signer: wtypes.Sign
 ): Uint8Array {
-  switch (execParams.sign) {
+  switch (signer.sign) {
     case wtypes.SignType.SecretKey: {
-      return txn.signTxn(execParams.fromAccount.sk);
+      return txn.signTxn(signer.fromAccount.sk);
     }
     case wtypes.SignType.LogicSignature: {
-      execParams.lsig.lsig.args = execParams.args ?? [];
-      return algosdk.signLogicSigTransactionObject(txn, execParams.lsig).blob;
+      signer.lsig.lsig.args = signer.args ?? [];
+      return algosdk.signLogicSigTransactionObject(txn, signer.lsig).blob;
     }
     default: {
       throw new Error("Unknown type of signature");
@@ -270,33 +270,25 @@ export async function makeAndSignTx (
 
 /**
  * Signs transaction object(s) and returns raw signed transaction
- * Note: Sign transaction is used to sign single transaction and `signTransactionObject` takes
+ * Note: Sign transaction is used to sign single transaction and `signTransactions` takes
  * SDK transaction object, signer and signs it.
+ *
  * @param txn Transaction object(s)
  * @param signer signer
  */
-export function signTransactionObject (
-  txns: Transaction | Transaction[], signer: wtypes.Signer | wtypes.Signer[]
+export function signTransactions (
+  txnAndSign: wtypes.TransactionAndSign[]
 ): Uint8Array | Uint8Array[] {
-  if (Array.isArray(txns)) {
-    txns = algosdk.assignGroupID(txns);
-    let signedTxn;
-    if (Array.isArray(signer)) {
-      signedTxn = txns.map((txn: Transaction, index: number) => {
-        return signTransaction(txn, signer[index]);
-      });
-    } else {
-      signedTxn = txns.map((txn: Transaction, index: number) => {
-        return signTransaction(txn, signer);
-      });
-    }
-    return signedTxn;
-  } else {
-    if (Array.isArray(signer)) {
-      throw new Error("cannot sign single transaction with multiple signers");
-    }
-    return signTransaction(txns, signer);
-  }
+  let txns: Transaction[] = [];
+  const signers: wtypes.Sign[] = [];
+  txnAndSign.forEach(function (value, idx) {
+    txns[idx] = value.transaction;
+    signers[idx] = value.sign;
+  });
+  txns = algosdk.assignGroupID(txns);
+  return txns.map((txn: Transaction, index: number) => {
+    return signTransaction(txn, signers[index]);
+  });
 }
 
 /**
@@ -310,19 +302,23 @@ export function signTransactionObject (
  */
 export async function executeTransaction (
   deployer: Deployer,
-  execParams: (wtypes.ExecParams | Transaction) | (wtypes.ExecParams[] | Transaction[]),
-  signer?: wtypes.Signer | wtypes.Signer[]
+  execParams: (wtypes.ExecParams | wtypes.TransactionAndSign)
+  | (wtypes.ExecParams[] | wtypes.TransactionAndSign[])
 ): Promise<ConfirmedTxInfo> {
-  if (
-    (Array.isArray(execParams) && wtypes.isSDKTransaction(execParams)) || wtypes.isSDKTransaction(execParams)
-  ) {
-    if (signer === undefined) {
-      throw new Error("Signer is not defined");
+  if (Array.isArray(execParams)) {
+    if (wtypes.isSDKTransactionAndSign(execParams[0])) {
+      const signedTxn = signTransactions(execParams as wtypes.TransactionAndSign[]);
+      const confirmedTx = await deployer.sendAndWait(signedTxn);
+      console.log(confirmedTx);
+      return confirmedTx;
     }
-    const signedTxn = signTransactionObject(execParams, signer);
-    const confirmedTx = await deployer.sendAndWait(signedTxn);
-    console.log(confirmedTx);
-    return confirmedTx;
+  } else {
+    if (wtypes.isSDKTransactionAndSign(execParams)) {
+      const signedTxn = signTransaction(execParams.transaction, execParams.sign);
+      const confirmedTx = await deployer.sendAndWait(signedTxn);
+      console.log(confirmedTx);
+      return confirmedTx;
+    }
   }
 
   // Update type here because we are sure this is not transaction object type
