@@ -269,18 +269,21 @@ export function isRequestError (object: unknown): object is RequestError {
   return res && Object.prototype.hasOwnProperty.call(object, "error");
 }
 
+// This function checks if given object implements `Transaction` class
+export function isSDKTransaction (object: unknown): object is Transaction {
+  const props = [
+    "tag", "from", "fee", "firstRound", "lastRound",
+    "genesisID", "genesisHash"
+  ];
+  let res = Object.prototype.hasOwnProperty.call(object, "name");
+  for (const prop of props) {
+    res = res && Object.prototype.hasOwnProperty.call(object, prop);
+  }
+  return res;
+}
+
 // This function checks if given object implements `Transaction` class and has Sign
 export function isSDKTransactionAndSign (object: unknown): object is TransactionAndSign {
-  const props = [
-    "tag", "from", "to", "fee", "amount", "firstRound", "lastRound",
-    "genesisID", "genesisHash", "voteKey", "selectionKey", "voteFirst", "voteLast",
-    "voteKeyDilution", "assetIndex"
-  ];
-  let res = Object.prototype.hasOwnProperty.call(object, "transaction.name");
-  res = res && Object.prototype.hasOwnProperty.call(object, "sign");
-  for (const prop of props) {
-    res = res && Object.prototype.hasOwnProperty.call(object, "transaction" + prop);
-  }
-
-  return res;
+  const res = isSDKTransaction((object as TransactionAndSign).transaction);
+  return Object.prototype.hasOwnProperty.call(object, "sign") && res;
 }

@@ -272,9 +272,7 @@ export async function makeAndSignTx (
  * Signs transaction object(s) and returns raw signed transaction
  * Note: Sign transaction is used to sign single transaction and `signTransactions` takes
  * SDK transaction object, signer and signs it.
- *
- * @param txn Transaction object(s)
- * @param signer signer
+ * @param txnAndSign Transaction object(s) with signers
  */
 export function signTransactions (
   txnAndSign: wtypes.TransactionAndSign[]
