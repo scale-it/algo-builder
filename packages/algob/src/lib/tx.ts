@@ -1,5 +1,5 @@
 import { parseASADef, types as rtypes } from "@algo-builder/runtime";
-import { tx as webTx, types as wtypes } from "@algo-builder/web";
+import { BuilderError, ERRORS, tx as webTx, types as wtypes } from "@algo-builder/web";
 import algosdk, { Algodv2, decodeSignedTransaction, SuggestedParams, Transaction } from "algosdk";
 
 import { ConfirmedTxInfo, Deployer } from "../types";
@@ -306,6 +306,9 @@ export async function executeTransaction (
   | (wtypes.ExecParams[] | wtypes.TransactionAndSign[])
 ): Promise<ConfirmedTxInfo> {
   if (Array.isArray(execParams)) {
+    if (execParams.length === 0) {
+      throw new BuilderError(ERRORS.GENERAL.EXECPARAMS_LENGTH_ERROR);
+    }
     if (wtypes.isSDKTransactionAndSign(execParams[0])) {
       const signedTxn = signTransactions(execParams as wtypes.TransactionAndSign[]);
       const confirmedTx = await deployer.sendAndWait(signedTxn);
