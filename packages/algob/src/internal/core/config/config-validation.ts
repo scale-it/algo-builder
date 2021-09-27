@@ -16,6 +16,10 @@ const KMDTokenHeaderType = z.object({
   'X-KMD-API-Token': z.string()
 });
 
+const IndexerTokenHeaderType = z.object({
+  'X-Indexer-API-Token': z.string()
+});
+
 const CustomTokenHeaderType = z.record(z.string()); // { [key: string]: string }
 
 const AccountType = z.object({
@@ -53,6 +57,12 @@ const KmdCfg = z.object({
   wallets: z.array(KmdWallet)
 }).nonstrict();
 
+const IndexerCfg = z.object({
+  host: z.string(),
+  port: z.union([z.number(), z.string()]),
+  token: z.union([z.string(), IndexerTokenHeaderType, CustomTokenHeaderType])
+}).nonstrict();
+
 const HttpNetworkType = z.object({
   accounts: z.array(AccountType).optional(),
   chainName: z.string().optional(),
@@ -61,7 +71,8 @@ const HttpNetworkType = z.object({
   port: z.union([z.number(), z.string()]).optional(),
   token: z.union([z.string(), AlgodTokenHeaderType, CustomTokenHeaderType]).optional(),
   httpHeaders: HttpHeaders.optional(),
-  kmdCfg: KmdCfg.optional()
+  kmdCfg: KmdCfg.optional(),
+  indexerCfg: IndexerCfg.optional()
 }).nonstrict();
 
 const NetworkType = z.union([ChainType, HttpNetworkType]);
