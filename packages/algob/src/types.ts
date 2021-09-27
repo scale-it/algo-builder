@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
-import algosdk, { Algodv2, LogicSigAccount, modelsv2 } from "algosdk";
+import algosdk, { LogicSigAccount, modelsv2 } from "algosdk";
 
 import * as types from "./internal/core/params/argument-types";
 // Begin config types
