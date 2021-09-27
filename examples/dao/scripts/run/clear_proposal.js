@@ -62,7 +62,7 @@ async function run (runtimeEnv, deployer) {
   ];
   await executeTx(deployer, optInTx);
 
-  // Transaction FAIL: deposit amount is not same as app.global("deposit")
+  // Transaction FAIL: deposit amount is not the same as app.global("deposit")
   await clearProposal(deployer, proposalLsig, 7);
 
   // clear proposal record

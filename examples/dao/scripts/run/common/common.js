@@ -3,7 +3,7 @@ const {
 } = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 
-async function executeTx (deployer, txnParams) {
+async function tryExecuteTx (deployer, txnParams) {
   try {
     await executeTransaction(deployer, txnParams);
   } catch (e) {

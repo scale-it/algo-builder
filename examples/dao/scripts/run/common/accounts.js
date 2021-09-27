@@ -1,4 +1,4 @@
-const _getScInitParam = (deployer) => {
+const _apInitParams = (deployer) => {
   const govToken = deployer.asa.get('gov-token');
   const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
   return {

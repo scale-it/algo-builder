@@ -19,7 +19,7 @@ async function addProposal (runtimeEnv, deployer) {
   }
 
   const daoFundLsig = await getDAOFundLsig(deployer);
-  const daoParams = [
+  const proposalParams = [
     'str:add_proposal',
     'str:my-custom-proposal', // name
     'str:www.myurl.com', // url
