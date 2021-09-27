@@ -276,7 +276,7 @@ export async function makeAndSignTx (
  */
 export function signTransactions (
   txnAndSign: wtypes.TransactionAndSign[]
-): Uint8Array | Uint8Array[] {
+): Uint8Array[] {
   let txns: Transaction[] = [];
   const signers: wtypes.Sign[] = [];
   txnAndSign.forEach(function (value, idx) {

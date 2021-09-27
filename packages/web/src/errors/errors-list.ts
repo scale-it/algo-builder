@@ -180,9 +180,9 @@ Please check algob output for more details.`
   },
   EXECPARAMS_LENGTH_ERROR: {
     number: 18,
-    message: `Execparams length is zero'.`,
-    title: "Invalid parameters length",
-    description: `Length should be greater than 0'.`
+    message: `Exec params length is zero'.`,
+    title: "Invalid parameter",
+    description: `Empty list is not supported.`
   }
 };
 
