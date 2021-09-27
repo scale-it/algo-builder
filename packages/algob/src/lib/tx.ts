@@ -295,27 +295,28 @@ export function signTransactions (
  * will be signed and sent to network. User can use SDK functions to create transactions.
  * Note: If passing transaction object a signer/s must be provided.
  * @param deployer Deployer
- * @param execParams transaction parameters or atomic transaction parameters
+ * @param transactionParam transaction parameters or atomic transaction parameters
  * https://github.com/scale-it/algo-builder/blob/docs/docs/guide/execute-transaction.md
+ * or TransactionAndSign object(SDK transaction object and signer parameters)
  */
 export async function executeTransaction (
   deployer: Deployer,
-  execParams: (wtypes.ExecParams | wtypes.TransactionAndSign)
+  transactionParam: (wtypes.ExecParams | wtypes.TransactionAndSign)
   | (wtypes.ExecParams[] | wtypes.TransactionAndSign[])
 ): Promise<ConfirmedTxInfo> {
-  if (Array.isArray(execParams)) {
-    if (execParams.length === 0) {
+  if (Array.isArray(transactionParam)) {
+    if (transactionParam.length === 0) {
       throw new BuilderError(ERRORS.GENERAL.EXECPARAMS_LENGTH_ERROR);
     }
-    if (wtypes.isSDKTransactionAndSign(execParams[0])) {
-      const signedTxn = signTransactions(execParams as wtypes.TransactionAndSign[]);
+    if (wtypes.isSDKTransactionAndSign(transactionParam[0])) {
+      const signedTxn = signTransactions(transactionParam as wtypes.TransactionAndSign[]);
       const confirmedTx = await deployer.sendAndWait(signedTxn);
       console.log(confirmedTx);
       return confirmedTx;
     }
   } else {
-    if (wtypes.isSDKTransactionAndSign(execParams)) {
-      const signedTxn = signTransaction(execParams.transaction, execParams.sign);
+    if (wtypes.isSDKTransactionAndSign(transactionParam)) {
+      const signedTxn = signTransaction(transactionParam.transaction, transactionParam.sign);
       const confirmedTx = await deployer.sendAndWait(signedTxn);
       console.log(confirmedTx);
       return confirmedTx;
@@ -323,14 +324,14 @@ export async function executeTransaction (
   }
 
   // Update type here because we are sure this is not transaction object type
-  execParams = Array.isArray(execParams)
-    ? execParams as wtypes.ExecParams[]
-    : execParams;
+  transactionParam = Array.isArray(transactionParam)
+    ? transactionParam as wtypes.ExecParams[]
+    : transactionParam;
 
-  deployer.assertCPNotDeleted(execParams);
+  deployer.assertCPNotDeleted(transactionParam);
   try {
     const txIdxMap = new Map<number, [string, wtypes.ASADef]>();
-    const [txns, signedTxn] = await makeAndSignTx(deployer, execParams, txIdxMap);
+    const [txns, signedTxn] = await makeAndSignTx(deployer, transactionParam, txIdxMap);
     const confirmedTx = await deployer.sendAndWait(signedTxn);
     console.log(confirmedTx);
     if (deployer.isDeployMode) { await registerCheckpoints(deployer, txns, txIdxMap); }
