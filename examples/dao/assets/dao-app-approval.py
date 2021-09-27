@@ -309,6 +309,9 @@ def approval_program(ARG_GOV_TOKEN):
         Assert(Global.group_size() == Int(1)),
         # fail if proposal is active (can’t remove proposal record of an active proposal)
         If(
+            # NOTE: here we're only moving forward if "p_propsal is set" (i.e p_proposal.hasValue() == Int(1)),
+            # otherwise we don't. Because if we don't do it this way, and value does not exist, then p_proposal.value()
+            # will return Int(0) and proposal_id will return Bytes. This will throw a pyTEAL error.
             p_proposal.hasValue() == Int(1),
             If(
                 And(

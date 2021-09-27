@@ -26,8 +26,10 @@ def deposit_lsig(ARG_GOV_TOKEN, ARG_DAO_APP_ID):
         Txn.xfer_asset() == Int(ARG_GOV_TOKEN)
     )
 
-    # Verifies transaction group in case of deposting votes or withdrawing them
-    def deposit_or_withdraw(app_arg_1: Bytes, app_arg_2: Bytes): return And(
+    # Verifies:
+    # 1. deposit to lsig (during add proposal or deposit votes)
+    # 2. (OR) withdrawl from lsig (taking back vote_deposit, or clearing proposal record)
+    deposit_or_withdraw = And(
         Global.group_size() == Int(2),
 
         # verify first transaction
@@ -35,26 +37,23 @@ def deposit_lsig(ARG_GOV_TOKEN, ARG_DAO_APP_ID):
         Gtxn[0].type_enum() == TxnType.ApplicationCall,
         Gtxn[0].application_id() == Int(ARG_DAO_APP_ID),
         Or(
-            Gtxn[0].application_args[0] == app_arg_1,
-            Gtxn[0].application_args[0] == app_arg_2
+            Gtxn[0].application_args[0] == Bytes("add_proposal"),
+            Gtxn[0].application_args[0] == Bytes("deposit_vote_token"),
+            Gtxn[0].application_args[0] == Bytes("withdraw_vote_deposit"),
+            Gtxn[0].application_args[0] == Bytes("clear_proposal"),
         ),
 
         # verify second transaction
+        # NOTE: transfer attributes (sender, recipient, amount) are checked in the DAO App
+        Txn.group_index() == Int(1),
         basic_checks(Gtxn[1]),
         Gtxn[1].type_enum() == TxnType.AssetTransfer,
         Gtxn[1].xfer_asset() == Int(ARG_GOV_TOKEN),
     )
 
-    payment = Or(
-        # verify deposit to lsig (during add proposal or deposit votes)
-        deposit_or_withdraw(Bytes("add_proposal"), Bytes("deposit_vote_token")),
-        # withdrawl from lsig (taking back vote_deposit, or clearing proposal record)
-        deposit_or_withdraw(Bytes("withdraw_vote_deposit"), Bytes("clear_proposal"))
-    )
-
     program = Cond(
         [Global.group_size() == Int(1), opt_in],
-        [Global.group_size() == Int(2), payment],
+        [Global.group_size() == Int(2), deposit_or_withdraw],
     )
 
     return program
