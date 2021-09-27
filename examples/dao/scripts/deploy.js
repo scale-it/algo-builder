@@ -10,7 +10,7 @@ async function run (runtimeEnv, deployer) {
   await fundAccount(deployer, [creator, proposer, voterA, voterB]);
 
   // Create DAO Gov Token
-  const asaInfo = await deployer.deployASA('gov-token', { creator: creator });
+  const govToken = await deployer.deployASA('gov-token', { creator: creator });
   console.log(asaInfo);
 
   // DAO App initialization parameters

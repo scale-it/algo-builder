@@ -13,7 +13,7 @@ A DAO is usually implemented using blockchain smart contracts:
 In this template, We are going to implement a DAO, where the members are defined by ASA holding (1 ASA = 1 voting power): each token holder is a DAO member and can participate equally in the governance.
 
 
-Every DAO will have the following parameters:
+Every DAO has the following parameters:
 
 -  `deposit` — a deposit amount in `gov_tokens` required to make a proposal.
 
@@ -70,7 +70,7 @@ Algo Builder DAO [specification](https://paper.dropbox.com/doc/Algo-Builder-DAO-
 
 We created a deploy script in `scripts/deploy`, This script deploys initial Gov token, deploys DAO app, fund lsig's, saves deposit_lsig address to DAO app, and does initial distribution of ASA (Gov token).
 
-## Run scripts flow
+## Scripts
 
 Please read the spec document (linked above) for more details about each use case. The scripts provide only a sample code to show how to use the template. For you private needs, you will have to modify the scripts directory to adjust the parameters (eg voting time, execution time etc...) and the proposals.
 

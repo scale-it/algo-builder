@@ -39,10 +39,7 @@ def proposal_lsig(ARG_OWNER, ARG_DAO_APP_ID):
 
     # Allow app call to DAO (eg. OptInToApp, add_proposal, etc)
     allow_app_call = And(
-        Or(
-            Global.group_size() == Int(1),
-            Global.group_size() == Int(2)
-        ),
+        Global.group_size() <= Int(2),
         basic_checks(Gtxn[0]),
         Gtxn[0].type_enum() == TxnType.ApplicationCall,
         Gtxn[0].application_id() == Int(ARG_DAO_APP_ID)
