@@ -271,6 +271,7 @@ export function isRequestError (object: unknown): object is RequestError {
 
 // This function checks if given object implements `Transaction` class
 export function isSDKTransaction (object: unknown): object is Transaction {
+  if (object === undefined || object === null) { return false; }
   const props = [
     "tag", "from", "fee", "firstRound", "lastRound",
     "genesisID", "genesisHash"
@@ -284,6 +285,7 @@ export function isSDKTransaction (object: unknown): object is Transaction {
 
 // This function checks if given object implements `Transaction` class and has Sign
 export function isSDKTransactionAndSign (object: unknown): object is TransactionAndSign {
+  if (object === undefined || object === null) { return false; }
   const res = isSDKTransaction((object as TransactionAndSign).transaction);
   return Object.prototype.hasOwnProperty.call(object, "sign") && res;
 }
