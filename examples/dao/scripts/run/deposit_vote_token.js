@@ -1,4 +1,4 @@
-const { executeTx } = require('./common/common.js');
+const { tryExecuteTx } = require('./common/common.js');
 const { types } = require('@algo-builder/web');
 const { accounts, getDepositLsig } = require('./common/accounts.js');
 
@@ -37,7 +37,7 @@ async function depositVote (deployer, voterAcc, amt) {
     }
   ];
 
-  await executeTx(deployer, depositVoteParam);
+  await tryExecuteTx(deployer, depositVoteParam);
 }
 
 async function run (runtimeEnv, deployer) {

@@ -1,4 +1,4 @@
-const { executeTx } = require('./common/common.js');
+const { tryExecuteTx } = require('./common/common.js');
 const { types } = require('@algo-builder/web');
 const { accounts, getProposalLsig } = require('./common/accounts.js');
 
@@ -16,7 +16,7 @@ async function clearVoteRecord (deployer, voterAcc, proposalAddr) {
     accounts: [proposalAddr]
   };
 
-  await executeTx(deployer, clearVoteParams);
+  await tryExecuteTx(deployer, clearVoteParams);
 }
 
 async function run (runtimeEnv, deployer) {

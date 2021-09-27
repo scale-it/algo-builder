@@ -1,4 +1,4 @@
-const { fundAccount, ProposalType, executeTx } = require('./common/common.js');
+const { fundAccount, ProposalType, tryExecuteTx } = require('./common/common.js');
 const { types } = require('@algo-builder/web');
 const { accounts, getDAOFundLsig, getDepositLsig, getProposalLsig } = require('./common/accounts.js');
 
@@ -8,7 +8,7 @@ async function addProposal (runtimeEnv, deployer) {
   const { _, proposer } = accounts(deployer);
 
   // fund account
-  await fundAccount(deployer, proposer);
+  // await fundAccount(deployer, proposer);
 
   const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
   const proposalLsig = await getProposalLsig(deployer);
@@ -44,25 +44,25 @@ async function addProposal (runtimeEnv, deployer) {
       appID: daoAppInfo.appID,
       lsig: proposalLsig,
       payFlags: {},
-      appArgs: daoParams
+      appArgs: proposalParams
     },
     {
       type: types.TransactionType.TransferAsset,
       sign: types.SignType.SecretKey,
       fromAccount: proposer, // note: this can be any account
       toAccountAddr: depositLsig.address(),
-      amount: 15, // deposit is set as 15
+      amount: 10, // (fails) as deposit is set as 15
       assetID: govToken.assetIndex,
       payFlags: { totalFee: 1000 }
     }
   ];
 
-  // Transaction PASS
-  await executeTx(deployer, addProposalTx);
-
   // Transaction FAIL (asset_transfer amount is less than min_deposit)
-  addProposalTx[1].amount = 10;
-  await executeTx(deployer, addProposalTx);
+  await tryExecuteTx(deployer, addProposalTx);
+
+  // Transaction PASS
+  addProposalTx[1].amount = 15; // deposit is set as 15 in DAO App
+  await tryExecuteTx(deployer, addProposalTx);
 }
 
 module.exports = { default: addProposal };

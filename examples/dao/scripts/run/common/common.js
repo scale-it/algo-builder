@@ -57,5 +57,5 @@ module.exports = {
   fundAccount,
   ProposalType,
   Vote,
-  executeTx
+  tryExecuteTx
 };

@@ -1,5 +1,5 @@
 const { types } = require('@algo-builder/web');
-const { fundAccount, executeTx } = require('./run/common/common.js');
+const { fundAccount, tryExecuteTx } = require('./run/common/common.js');
 
 const { accounts, getDepositLsig, getDAOFundLsig } = require('./run/common/accounts');
 
@@ -11,7 +11,7 @@ async function run (runtimeEnv, deployer) {
 
   // Create DAO Gov Token
   const govToken = await deployer.deployASA('gov-token', { creator: creator });
-  console.log(asaInfo);
+  console.log(govToken);
 
   // DAO App initialization parameters
   const deposit = 15; // deposit required to make a proposal
@@ -27,7 +27,7 @@ async function run (runtimeEnv, deployer) {
     `int:${maxDuration}`,
     `str:${url}`
   ];
-  const templateParam = { ARG_GOV_TOKEN: asaInfo.assetIndex };
+  const templateParam = { ARG_GOV_TOKEN: govToken.assetIndex };
   // Create Application
   const daoAppInfo = await deployer.deployApp(
     'dao-app-approval.py',
@@ -44,15 +44,15 @@ async function run (runtimeEnv, deployer) {
   // fund lsig's
   await Promise.all([
     deployer.fundLsig('deposit-lsig.py',
-      { funder: creator, fundingMicroAlgo: 2e6 }, {},
-      { ARG_GOV_TOKEN: asaInfo.assetIndex, ARG_DAO_APP_ID: daoAppInfo.appID }),
+      { funder: creator, fundingMicroAlgo: 1e6 }, {}, // 1 algo
+      { ARG_GOV_TOKEN: govToken.assetIndex, ARG_DAO_APP_ID: daoAppInfo.appID }),
 
     deployer.fundLsig('dao-fund-lsig.py',
-      { funder: creator, fundingMicroAlgo: 5e6 }, {},
-      { ARG_GOV_TOKEN: asaInfo.assetIndex, ARG_DAO_APP_ID: daoAppInfo.appID }),
+      { funder: creator, fundingMicroAlgo: 5e6 }, {}, // 5 algo
+      { ARG_GOV_TOKEN: govToken.assetIndex, ARG_DAO_APP_ID: daoAppInfo.appID }),
 
     deployer.fundLsig('proposal-lsig.py',
-      { funder: creator, fundingMicroAlgo: 5e6 }, {},
+      { funder: creator, fundingMicroAlgo: 5e6 }, {}, // 5 algo
       { ARG_OWNER: proposer.addr, ARG_DAO_APP_ID: daoAppInfo.appID })
   ]);
 
@@ -70,15 +70,15 @@ async function run (runtimeEnv, deployer) {
       `addr:${depositLsig.address()}`
     ]
   };
-  await executeTx(deployer, addAccountsTx);
+  await tryExecuteTx(deployer, addAccountsTx);
 
   console.log('* ASA distribution (Gov tokens) *');
   await Promise.all([
-    deployer.optInLsigToASA(asaInfo.assetIndex, depositLsig, { totalFee: 1000 }),
-    deployer.optInLsigToASA(asaInfo.assetIndex, daoFundLsig, { totalFee: 1000 }),
-    deployer.optInAccountToASA(asaInfo.assetIndex, proposer.name, {}),
-    deployer.optInAccountToASA(asaInfo.assetIndex, voterA.name, {}),
-    deployer.optInAccountToASA(asaInfo.assetIndex, voterB.name, {})
+    deployer.optInLsigToASA(govToken.assetIndex, depositLsig, { totalFee: 1000 }),
+    deployer.optInLsigToASA(govToken.assetIndex, daoFundLsig, { totalFee: 1000 }),
+    deployer.optInAccountToASA(govToken.assetIndex, proposer.name, {}),
+    deployer.optInAccountToASA(govToken.assetIndex, voterA.name, {}),
+    deployer.optInAccountToASA(govToken.assetIndex, voterB.name, {})
   ]);
 
   const distributeGovTokenParams = {
@@ -86,10 +86,10 @@ async function run (runtimeEnv, deployer) {
     sign: types.SignType.SecretKey,
     fromAccount: creator,
     amount: 100,
-    assetID: asaInfo.assetIndex,
+    assetID: govToken.assetIndex,
     payFlags: { totalFee: 1000 }
   };
-  await executeTx(deployer, [
+  await tryExecuteTx(deployer, [
     { ...distributeGovTokenParams, toAccountAddr: proposer.addr },
     { ...distributeGovTokenParams, toAccountAddr: voterA.addr },
     { ...distributeGovTokenParams, toAccountAddr: voterB.addr }

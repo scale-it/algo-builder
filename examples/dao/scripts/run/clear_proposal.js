@@ -1,4 +1,4 @@
-const { executeTx } = require('./common/common.js');
+const { tryExecuteTx } = require('./common/common.js');
 const { types } = require('@algo-builder/web');
 const { getDepositLsig, getProposalLsig, accounts } = require('./common/accounts.js');
 
@@ -32,7 +32,7 @@ async function clearProposal (deployer, proposalLsig, depositAmt) {
     }
   ];
 
-  await executeTx(deployer, clearProposalParam);
+  await tryExecuteTx(deployer, clearProposalParam);
 }
 
 async function run (runtimeEnv, deployer) {
@@ -60,7 +60,7 @@ async function run (runtimeEnv, deployer) {
       payFlags: {}
     }
   ];
-  await executeTx(deployer, optInTx);
+  await tryExecuteTx(deployer, optInTx);
 
   // Transaction FAIL: deposit amount is not the same as app.global("deposit")
   await clearProposal(deployer, proposalLsig, 7);
