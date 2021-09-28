@@ -827,3 +827,7 @@ describe("Deploy ASA without asa.yaml", () => {
     assert.deepEqual(res.assetDef, exp);
   });
 });
+
+describe("SDK Transaction object", () => {
+
+});

@@ -19,7 +19,8 @@
     * Asset URL change (max size increased till 96 bytes).
 + Updated all examples & tests to use TEALv4 (`#pragma version 4`)
 + TEALv4: gaid, gaids opcodes (knowable creatable id)
-
++ Add support for algosdk.Transaction object in executeTranasction
++ Add `signTransactions` functions: It  signs transaction object(s) and returns raw signed transaction.
 
 ### Bug Fixes
 * Fixed `yarn add @algo-builder/web` (was failing because of missing dependency `zod` in packages/web).
