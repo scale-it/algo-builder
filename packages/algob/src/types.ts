@@ -1,6 +1,6 @@
 import { types as rtypes } from "@algo-builder/runtime";
 import { types as wtypes } from "@algo-builder/web";
-import algosdk, { Algodv2, LogicSigAccount, modelsv2 } from "algosdk";
+import algosdk, { LogicSigAccount, modelsv2 } from "algosdk";
 
 import * as types from "./internal/core/params/argument-types";
 // Begin config types
@@ -37,6 +37,7 @@ interface CommonNetworkConfig {
   // optional, when provided KMD accounts will be loaded by the config resolver
   // and merged into the accounts variable (above)
   kmdCfg?: KmdCfg
+  indexerCfg?: IndexerCfg
   chainName?: string
   // from?: string;
   // TODO: timeout?: number;
@@ -73,6 +74,12 @@ export interface KmdCfg {
   port: string | number
   token: string | KMDTokenHeader | CustomTokenHeader
   wallets: KmdWallet[]
+}
+
+export interface IndexerCfg {
+  host: string
+  port: string | number
+  token: string | IndexerTokenHeader | CustomTokenHeader
 }
 
 export interface NetworkCredentials {

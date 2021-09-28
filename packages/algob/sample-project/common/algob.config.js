@@ -44,6 +44,13 @@ let accounts = mkAccounts([{
 // ## Algod Credentials
 // You can set the credentials directly in this file:
 
+// ## config for indexer running on local
+// const indexerCfg = {
+//   host: "http://localhost",
+//   port: 8980,
+//   token: ""
+// };
+
 let defaultCfg = {
   host: "http://localhost",
   port: 4001,
@@ -58,6 +65,17 @@ let defaultCfg = {
   // if you want to load accounts from KMD, you need to add the kmdCfg object. Please read
   // algob-config.md documentation for details.
   // kmdCfg: kmdCfg,
+  // you can pass config of indexer (ideally it should be attached to this network's algod node)
+  // indexerCfg: indexerCfg
+};
+
+// purestake testnet config
+let purestakeTestNetCfg = {
+  host: "https://testnet-algorand.api.purestake.io/ps2",
+  port: '',
+  token: {
+    'X-API-Key': 'Xhkn7v7h972hj7Egx3fGr9RFbfXeGuoD6wSLKDyG'
+  }
 };
 
 // You can also use Environment variables to get Algod credentials
@@ -79,6 +97,7 @@ let envCfg = {
 module.exports = {
   networks: {
     default: defaultCfg,
-    prod: envCfg
+    prod: envCfg,
+    purestake: purestakeTestNetCfg
   }
 };

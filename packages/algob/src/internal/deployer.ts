@@ -1,6 +1,6 @@
 import { overrideASADef, parseASADef, types as rtypes, validateOptInAccNames } from "@algo-builder/runtime";
 import { BuilderError, ERRORS, types as wtypes } from "@algo-builder/web";
-import type { EncodedMultisig, LogicSigAccount, modelsv2 } from "algosdk";
+import type { EncodedMultisig, Indexer, LogicSigAccount, modelsv2 } from "algosdk";
 import * as algosdk from "algosdk";
 
 import { txWriter } from "../internal/tx-log-writer";
@@ -31,6 +31,7 @@ class DeployerBasicMode {
   protected readonly txWriter: txWriter;
   readonly accounts: rtypes.Account[];
   readonly accountsByName: rtypes.AccountMap;
+  readonly indexerClient: algosdk.Indexer | undefined;
   checkpoint: CheckpointFunctions;
 
   constructor (deployerCfg: DeployerConfig) {
@@ -42,6 +43,7 @@ class DeployerBasicMode {
     this.accountsByName = deployerCfg.accounts;
     this.txWriter = deployerCfg.txWriter;
     this.checkpoint = new CheckpointFunctionsImpl(deployerCfg.cpData, deployerCfg.runtimeEnv.network.name);
+    this.indexerClient = deployerCfg.indexerClient;
   }
 
   protected get networkName (): string {
@@ -151,6 +153,14 @@ class DeployerBasicMode {
     Object.assign(lsigAccount, result);
     if (lsigAccount.lsig.sig) { lsigAccount.lsig.sig = Uint8Array.from(lsigAccount.lsig.sig); };
     return lsigAccount;
+  }
+
+  /**
+   * Loads a logic signature account from checkpoint
+   * @param lsigName logic signature name
+  */
+  getContractLsig (lsigName: string): LogicSigAccount | undefined {
+    return this.getDelegatedLsig(lsigName);
   }
 
   /**
@@ -557,6 +567,46 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   /**
    * Create and sign (using signer's sk) a logic signature for "delegated approval". Then save signed lsig
    * info to checkpoints (in /artifacts)
+   * @param name: Stateless Smart Contract filename (must be present in assets folder)
+   * @param scTmplParams: scTmplParams: Smart contract template parameters
+   *     (used only when compiling PyTEAL to TEAL)
+   * @param signer: Signer Account which will sign the smart
+   * contract(optional in case of contract account)
+   */
+  async _mkLsig (
+    name: string, scTmplParams?: SCParams, signer?: rtypes.Account
+  ): Promise<LsigInfo> {
+    this.assertNoAsset(name);
+    let lsigInfo = {} as any;
+    try {
+      const lsig = await getLsig(name, this.algoOp.algodClient, scTmplParams);
+      if (signer) {
+        lsig.sign(signer.sk);
+        lsigInfo = {
+          creator: signer.addr,
+          contractAddress: lsig.address(),
+          lsig: lsig
+        };
+      } else {
+        lsigInfo = {
+          creator: lsig.address(),
+          contractAddress: lsig.address(),
+          lsig: lsig
+        };
+      }
+    } catch (error) {
+      this.persistCP();
+
+      console.log(error);
+      throw error;
+    }
+    this.cpData.registerLsig(this.networkName, name, lsigInfo);
+    return lsigInfo;
+  }
+
+  /**
+   * Create and sign (using signer's sk) a logic signature for "delegated approval". Then save signed lsig
+   * info to checkpoints (in /artifacts)
    * https://developer.algorand.org/docs/features/asc1/stateless/sdks/#account-delegation-sdk-usage
    * @param name: Stateless Smart Contract filename (must be present in assets folder)
    * @param signer: Signer Account which will sign the smart contract
@@ -566,24 +616,16 @@ export class DeployerDeployMode extends DeployerBasicMode implements Deployer {
   async mkDelegatedLsig (
     name: string, signer: rtypes.Account,
     scTmplParams?: SCParams): Promise<LsigInfo> {
-    this.assertNoAsset(name);
-    let lsigInfo = {} as any;
-    try {
-      const lsig = await getLsig(name, this.algoOp.algodClient, scTmplParams);
-      lsig.sign(signer.sk);
-      lsigInfo = {
-        creator: signer.addr,
-        contractAddress: lsig.address(),
-        lsig: lsig
-      };
-    } catch (error) {
-      this.persistCP();
+    return await this._mkLsig(name, scTmplParams, signer);
+  }
 
-      console.log(error);
-      throw error;
-    }
-    this.cpData.registerLsig(this.networkName, name, lsigInfo);
-    return lsigInfo;
+  /**
+   * Stores logic signature info in checkpoint for contract mode
+   * @param name ASC name
+   * @param scTmplParams: Smart contract template parameters (used only when compiling PyTEAL to TEAL)
+   */
+  async mkContractLsig (name: string, scTmplParams?: SCParams): Promise<LsigInfo> {
+    return await this._mkLsig(name, scTmplParams);
   }
 
   /**

@@ -17,8 +17,10 @@
     * Additional mathematical opcodes: `divmodw`, `exp`, `expw`, `shl`, `shr`, `sqrt`
     * More Versatile Global and Local Storage (combination of upto 128 bytes allowed between key-value).
     * Asset URL change (max size increased till 96 bytes).
+    * gaid, gaids opcodes (knowable creatable id)
 + Updated all examples & tests to use TEALv4 (`#pragma version 4`)
-+ TEALv4: gaid, gaids opcodes (knowable creatable id)
++ Added support for querying indexer in an `algob` script (accessable via `deployer.indexerClient`). You can pass `indexerCfg` in your network's config in `algob.config.js`. Added docs.
++ Add function to store checkpoint for contract logic signature (`mkContractLsig`).
 + Add support for algosdk.Transaction object in executeTranasction
 + Add `signTransactions` functions: It  signs transaction object(s) and returns raw signed transaction.
 
@@ -34,14 +36,13 @@
 
 ### API Breaking
 * Migrate from `LogicSig` to `LogicSigAccount`(Note: Loading lsig from file uses `LogicSig`, because `goal` stores it in LogicSig type format)
-
-### API breaking
 * Rename `CallNoOpSSC` to `CallApp`.
 * Rename `optInAcountToASA` to `optInAccountToASA` (typo)
 * Rename `readLocalStateSSC` to `readAppLocalState`, `readGlobalStateSSC` to `readAppGlobalState`.
 
 ### Dependencies
 * Upgraded pyTEAL version [`0.8.0`](https://github.com/algorand/pyteal/releases/tag/v0.8.0) in pipfile.
+* Upgraded indexer binary version to `2.6.1` in `/infrastructure/Makefile`.
 
 ## v1.2.1 2021-09-15
 
