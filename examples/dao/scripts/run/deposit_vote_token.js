@@ -1,5 +1,4 @@
 const { tryExecuteTx } = require('./common/common.js');
-const { types } = require('@algo-builder/web');
 const { accounts, getDepositLsig } = require('./common/accounts.js');
 const { getDepositVoteTokenTx } = require('./common/tx-params.js');
 

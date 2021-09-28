@@ -1,6 +1,3 @@
-const {
-  executeTransaction
-} = require('@algo-builder/algob');
 const { types } = require('@algo-builder/web');
 const { ProposalType } = require('./common');
 

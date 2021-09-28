@@ -1,9 +1,6 @@
-const { fundAccount, ProposalType, tryExecuteTx } = require('./common/common.js');
-const { types } = require('@algo-builder/web');
+const { fundAccount, tryExecuteTx } = require('./common/common.js');
 const { accounts, getDAOFundLsig, getDepositLsig, getProposalLsig } = require('./common/accounts.js');
 const { getAddProposalTx } = require('./common/tx-params.js');
-
-const now = Math.round(new Date().getTime() / 1000);
 
 async function addProposal (runtimeEnv, deployer) {
   const { _, proposer } = accounts(deployer);
