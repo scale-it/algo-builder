@@ -194,3 +194,22 @@ Ex:
 ```
 
 Even though fee paid by alice is `0`, this transaction will pass because total fees collected is greater than or equal to the required amount.
+
+
+## Sign and Send SDK Transaction object using `executeTransaction` function
+
+`executeTransaction` function supports signing and sending sdk transaction objects. To do this you will have to pass an `TransactionAndSign` object which has `transaction` and `sign`. Ex:
+```
+const tx = makeAssetCreateTxn(
+  bobAcc.addr, mockSuggestedParam.fee,
+  mockSuggestedParam.firstRound, mockSuggestedParam.lastRound,
+  undefined, mockSuggestedParam.genesisHash, mockSuggestedParam.genesisID,
+  1e6, 0, false, undefined, undefined, undefined, undefined, "UM", "ASM", undefined
+);
+const transaction: wtypes.TransactionAndSign = {
+  transaction: tx,
+  sign: {sign: wtypes.SignType.SecretKey, fromAccount: bobAcc}
+}
+
+const res = await executeTransaction(deployer, transaction);
+```

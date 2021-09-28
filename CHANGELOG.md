@@ -21,6 +21,8 @@
 + Updated all examples & tests to use TEALv4 (`#pragma version 4`)
 + Added support for querying indexer in an `algob` script (accessable via `deployer.indexerClient`). You can pass `indexerCfg` in your network's config in `algob.config.js`. Added docs.
 + Add function to store checkpoint for contract logic signature (`mkContractLsig`).
++ Add support for algosdk.Transaction object in executeTranasction
++ Add `signTransactions` functions: It  signs transaction object(s) and returns raw signed transaction.
 
 ### Bug Fixes
 * Fixed `yarn add @algo-builder/web` (was failing because of missing dependency `zod` in packages/web).
