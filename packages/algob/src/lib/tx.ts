@@ -279,10 +279,10 @@ export function signTransactions (
 ): Uint8Array[] {
   let txns: Transaction[] = [];
   const signers: wtypes.Sign[] = [];
-  txnAndSign.forEach(function (value, idx) {
+  for (const [idx, value] of txnAndSign.entries()) {
     txns[idx] = value.transaction;
     signers[idx] = value.sign;
-  });
+  }
   txns = algosdk.assignGroupID(txns);
   return txns.map((txn: Transaction, index: number) => {
     return signTransaction(txn, signers[index]);
