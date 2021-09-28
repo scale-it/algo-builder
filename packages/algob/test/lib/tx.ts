@@ -1,6 +1,6 @@
 import { types } from "@algo-builder/runtime";
 import { ERRORS, tx as webTx, types as wtypes } from "@algo-builder/web";
-import algosdk, { decodeSignedTransaction, encodeAddress, Transaction } from "algosdk";
+import algosdk, { decodeSignedTransaction, encodeAddress, makeAssetCreateTxn, Transaction } from "algosdk";
 import { assert } from "chai";
 import { isArray } from "lodash";
 import sinon from 'sinon';
@@ -801,6 +801,10 @@ describe("Deploy ASA without asa.yaml", () => {
       .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
   });
 
+  afterEach(async () => {
+    (algod.algodClient.getTransactionParams as sinon.SinonStub).restore();
+  });
+
   it("should deploy asa without asa.yaml", async () => {
     const exp = {
       total: 10000,
@@ -829,5 +833,34 @@ describe("Deploy ASA without asa.yaml", () => {
 });
 
 describe("SDK Transaction object", () => {
+  useFixtureProject("config-project");
 
+  let deployer: Deployer;
+  let algod: AlgoOperatorDryRunImpl;
+  beforeEach(async () => {
+    const env = mkEnv("network1");
+    algod = new AlgoOperatorDryRunImpl();
+    const deployerCfg = new DeployerConfig(env, algod);
+    deployer = new DeployerDeployMode(deployerCfg);
+    sinon.stub(algod.algodClient, "getTransactionParams")
+      .returns({ do: async () => mockSuggestedParam } as ReturnType<algosdk.Algodv2['getTransactionParams']>);
+  });
+
+  it("should sign and send transaction", async () => {
+    const tx = makeAssetCreateTxn(
+      bobAcc.addr, mockSuggestedParam.fee,
+      mockSuggestedParam.firstRound, mockSuggestedParam.lastRound,
+      undefined, mockSuggestedParam.genesisHash, mockSuggestedParam.genesisID,
+      1e6, 0, false, undefined, undefined, undefined, undefined, "UM", "ASM", undefined
+    );
+    const transaction: wtypes.TransactionAndSign = {
+      transaction: tx,
+      sign: { sign: wtypes.SignType.SecretKey, fromAccount: bobAcc }
+    };
+
+    const res = await executeTransaction(deployer, transaction);
+    assert.isDefined(res);
+    assert.equal(res["confirmed-round"], 1);
+    assert.equal(res["asset-index"], 1);
+  });
 });
