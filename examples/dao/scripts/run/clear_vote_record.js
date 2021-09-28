@@ -1,21 +1,16 @@
 const { tryExecuteTx } = require('./common/common.js');
-const { types } = require('@algo-builder/web');
 const { accounts, getProposalLsig } = require('./common/accounts.js');
+const { getClearVoteRecordTx } = require('./common/tx-params.js');
 
 async function clearVoteRecord (deployer, voterAcc, proposalAddr) {
   const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
 
   console.log(`* Clearing vote record of ${voterAcc.addr} from proposal ${proposalAddr} *`);
-  const clearVoteParams = {
-    type: types.TransactionType.CallApp,
-    sign: types.SignType.SecretKey,
-    fromAccount: voterAcc,
-    appID: daoAppInfo.appID,
-    payFlags: { totalFee: 1000 },
-    appArgs: ['str:clear_vote_record'],
-    accounts: [proposalAddr]
-  };
-
+  const clearVoteParams = getClearVoteRecordTx(
+    daoAppInfo.appID,
+    voterAcc,
+    proposalAddr
+  );
   await tryExecuteTx(deployer, clearVoteParams);
 }
 
