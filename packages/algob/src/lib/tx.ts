@@ -301,37 +301,41 @@ export function signTransactions (
  */
 export async function executeTransaction (
   deployer: Deployer,
-  transactionParam: (wtypes.ExecParams | wtypes.TransactionAndSign)
+  transactions: (wtypes.ExecParams | wtypes.TransactionAndSign)
   | (wtypes.ExecParams[] | wtypes.TransactionAndSign[])
 ): Promise<ConfirmedTxInfo> {
-  if (Array.isArray(transactionParam)) {
-    if (transactionParam.length === 0) {
+  let isSDK = false;
+  let signedTxn;
+  if (Array.isArray(transactions)) {
+    if (transactions.length === 0) {
       throw new BuilderError(ERRORS.GENERAL.EXECPARAMS_LENGTH_ERROR);
     }
-    if (wtypes.isSDKTransactionAndSign(transactionParam[0])) {
-      const signedTxn = signTransactions(transactionParam as wtypes.TransactionAndSign[]);
-      const confirmedTx = await deployer.sendAndWait(signedTxn);
-      console.log(confirmedTx);
-      return confirmedTx;
+    if (wtypes.isSDKTransactionAndSign(transactions[0])) {
+      signedTxn = signTransactions(transactions as wtypes.TransactionAndSign[]);
+      isSDK = true;
     }
   } else {
-    if (wtypes.isSDKTransactionAndSign(transactionParam)) {
-      const signedTxn = signTransaction(transactionParam.transaction, transactionParam.sign);
-      const confirmedTx = await deployer.sendAndWait(signedTxn);
-      console.log(confirmedTx);
-      return confirmedTx;
+    if (wtypes.isSDKTransactionAndSign(transactions)) {
+      signedTxn = signTransaction(transactions.transaction, transactions.sign);
+      isSDK = true;
     }
   }
 
-  // Update type here because we are sure this is not transaction object type
-  transactionParam = Array.isArray(transactionParam)
-    ? transactionParam as wtypes.ExecParams[]
-    : transactionParam;
+  if (isSDK && signedTxn) {
+    const confirmedTx = await deployer.sendAndWait(signedTxn);
+    console.log(confirmedTx);
+    return confirmedTx;
+  }
 
-  deployer.assertCPNotDeleted(transactionParam);
+  // Update type here because we are sure this is not transaction object type
+  transactions = Array.isArray(transactions)
+    ? transactions as wtypes.ExecParams[]
+    : transactions as wtypes.ExecParams;
+
+  deployer.assertCPNotDeleted(transactions);
   try {
     const txIdxMap = new Map<number, [string, wtypes.ASADef]>();
-    const [txns, signedTxn] = await makeAndSignTx(deployer, transactionParam, txIdxMap);
+    const [txns, signedTxn] = await makeAndSignTx(deployer, transactions, txIdxMap);
     const confirmedTx = await deployer.sendAndWait(signedTxn);
     console.log(confirmedTx);
     if (deployer.isDeployMode) { await registerCheckpoints(deployer, txns, txIdxMap); }
