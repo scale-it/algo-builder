@@ -1,4 +1,4 @@
-import { Account as AccountSDK, LogicSigAccount } from 'algosdk';
+import { Account as AccountSDK, LogicSigAccount, Transaction } from 'algosdk';
 import * as z from 'zod';
 
 import type { ASADefSchema, ASADefsSchema } from "./types-input";
@@ -229,6 +229,11 @@ export type AssetTransferParam = BasicParams & {
   assetID: number | string
 };
 
+export interface TransactionAndSign {
+  transaction: Transaction
+  sign: Sign
+}
+
 export type ASADef = z.infer<typeof ASADefSchema>;
 
 export type ASADefs = z.infer<typeof ASADefsSchema>;
@@ -262,4 +267,25 @@ export function isRequestError (object: unknown): object is RequestError {
    Object.prototype.hasOwnProperty.call(object, "response.body.message") &&
    Object.prototype.hasOwnProperty.call(object, "response.error");
   return res && Object.prototype.hasOwnProperty.call(object, "error");
+}
+
+// This function checks if given object implements `Transaction` class
+export function isSDKTransaction (object: unknown): object is Transaction {
+  if (object === undefined || object === null) { return false; }
+  const props = [
+    "tag", "from", "fee", "firstRound", "lastRound",
+    "genesisID", "genesisHash"
+  ];
+  let res = Object.prototype.hasOwnProperty.call(object, "name");
+  for (const prop of props) {
+    res = res && Object.prototype.hasOwnProperty.call(object, prop);
+  }
+  return res;
+}
+
+// This function checks if given object implements `Transaction` class and has Sign
+export function isSDKTransactionAndSign (object: unknown): object is TransactionAndSign {
+  if (object === undefined || object === null) { return false; }
+  const res = isSDKTransaction((object as TransactionAndSign).transaction);
+  return Object.prototype.hasOwnProperty.call(object, "sign") && res;
 }
