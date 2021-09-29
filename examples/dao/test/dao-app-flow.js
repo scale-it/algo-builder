@@ -1,7 +1,5 @@
 const { getProgram, convert } = require('@algo-builder/algob');
-const {
-  Runtime, AccountStore
-} = require('@algo-builder/runtime');
+const { Runtime, AccountStore } = require('@algo-builder/runtime');
 const { types, parsing } = require('@algo-builder/web');
 const { assert } = require('chai');
 const { ProposalType, Vote } = require('../scripts/run/common/common');
@@ -128,7 +126,6 @@ describe('DAO test', function () {
     for (const lsig of [depositLsig, daoFundLsig, proposalLsig]) {
       runtime.fundLsig(master.account, lsig.address(), minBalance + 10000);
     }
-
     syncAccounts();
 
     // verify global state
