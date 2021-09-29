@@ -213,3 +213,17 @@ const transaction: wtypes.TransactionAndSign = {
 
 const res = await executeTransaction(deployer, transaction);
 ```
+
+## SignTransactions function
+
+This function takes array of `TransactionAndSign` objects and returns raw signed transaction
+
+```
+const transaction: wtypes.TransactionAndSign = [{
+  transaction: SDKTx,
+  sign: {sign: wtypes.SignType.SecretKey, fromAccount: bobAcc}
+}]
+const rawSign = signTransactions(transaction)
+```
+
+`rawSign` has array of raw signed transactions.
