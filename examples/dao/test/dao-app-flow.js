@@ -18,9 +18,10 @@ const initialBalance = 200e6;
  *    2. Create DAO App
  *    3. Compile & fund lsig's (deposit, daoFund, proposal)
  *    4. Add depositLsig address to DAO app
+ *    Note: Gov tokens are holded by proposer, voterA, voterB
  * + add proposal
  * + deposit vote tokens
- * + register vote
+ * + register vote (by token holders voterA & voterB)
  * + execute proposal
  * + withdraw vote deposit
  * + clear vote record
@@ -38,7 +39,7 @@ describe('DAO test', function () {
   let proposalLsigAcc = new AccountStore(initialBalance);
 
   let runtime;
-  let flags;
+  let appCreationFlags; // deploy app params (sender, storage schema)
   let applicationID;
   let govTokenID;
   let depositLsig;
@@ -51,7 +52,7 @@ describe('DAO test', function () {
       depositLsigAcc, daoFundLsigAcc, proposalLsigAcc
     ]);
 
-    flags = {
+    appCreationFlags = {
       sender: creator.account,
       localInts: 9,
       localBytes: 7,
@@ -85,6 +86,35 @@ describe('DAO test', function () {
   const url = 'www.my-url.com';
 
   it('DAO flow test', () => {
+    /**
+    * Flow:
+    *
+    * Create Gov Token (ASA used to represent voting power)
+    * Deploy DAO App
+    * Compile & fund lsigs:
+    *   a) depositLsig: holds "vote token deposits" & "Proposal deposits"
+    *   b) proposalLsig: used by proposer account for adding proposal
+    *   c) daoFundLsig: represents DAO treasury
+    * Save deposit lsig address in DAO app (only callable by creator)
+    * Intial distribution of few gov token(s) to accounts (creator, proposer, voters, lsigs)
+    * Add proposal record in proposalLsig(as sender) + make deposit to deposit Lsig
+    * Deposit vote tokens: voterA deposit 6 tokens, voterB deposits 8 tokens.
+    * Voting (note: each token == 1 vote):
+    *   a) move latest time after voting_now & <= voting_end
+    *   b) voterA votes "yes" (== 6 votes)
+    *   c) voterA votes "abstain" (== 8 votes).
+    * Execute:
+    *   a) move latest time after voting_end & <= execute_before
+    *   b) Call to DAO app + Algo transfer tx (as per proposal instruction)
+    * Withdrawing deposit:
+    *   a) Call to DAO app + asset transfer (deposit_lsig => voter)
+    *   b) voterA withdraws his 6 votes, voterB withdraws his 8 votes.
+    * Clear Voting Record (by voterA & voterB)
+    * Clear proposal:
+    *   a) optIn to Gov Token by proposalLsig
+    *   b) Call to DAO app by proposalLsig + asset transfer transaction from depositLsig -> proposalLsig
+    */
+
     govTokenID = runtime.addAsset(
       'gov-token', { creator: { ...creator.account, name: 'dao-creator' } });
 
@@ -101,7 +131,7 @@ describe('DAO test', function () {
 
     // create application
     applicationID = runtime.addApp(
-      { ...flags, appArgs: daoAppArgs }, {}, approvalProgram, clearProgram);
+      { ...appCreationFlags, appArgs: daoAppArgs }, {}, approvalProgram, clearProgram);
 
     // setup lsig account
     // Initialize issuer lsig with bond-app ID
