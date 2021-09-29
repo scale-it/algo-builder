@@ -44,6 +44,9 @@
 * Upgraded pyTEAL version [`0.8.0`](https://github.com/algorand/pyteal/releases/tag/v0.8.0) in pipfile.
 * Upgraded indexer binary version to `2.6.1` in `/infrastructure/Makefile`.
 
+### Examples
+* Added new template [DAO](/examples/dao), with flow tests. Read the specification [here](https://paper.dropbox.com/doc/Algo-DAO--BTR~tKj8P788NMZqnVfKwS7BAg-ncLdytuFa7EJrRerIASSl).
+
 ## v1.2.1 2021-09-15
 
 ### Bug Fixes

@@ -1,6 +1,6 @@
 const { tryExecuteTx } = require('./common/common.js');
-const { types } = require('@algo-builder/web');
 const { accounts, getDepositLsig } = require('./common/accounts.js');
+const { mkDepositVoteTokenTx } = require('./common/tx-params.js');
 
 async function depositVote (deployer, voterAcc, amt) {
   const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
@@ -15,27 +15,13 @@ async function depositVote (deployer, voterAcc, amt) {
   }
 
   console.log(`* Deposit ${amt} votes by ${voterAcc.addr} *`);
-  const depositVoteParam = [
-    // tx0: call to DAO App with arg 'deposit_vote_token'
-    {
-      type: types.TransactionType.CallApp,
-      sign: types.SignType.SecretKey,
-      fromAccount: voterAcc,
-      appID: daoAppInfo.appID,
-      payFlags: { totalFee: 1000 },
-      appArgs: ['str:deposit_vote_token']
-    },
-    // tx1: deposit votes (each token == 1 vote)
-    {
-      type: types.TransactionType.TransferAsset,
-      sign: types.SignType.SecretKey,
-      fromAccount: voterAcc, // note: this can be any account
-      toAccountAddr: depositLsig.address(),
-      amount: amt,
-      assetID: govToken.assetIndex,
-      payFlags: { totalFee: 1000 }
-    }
-  ];
+  const depositVoteParam = mkDepositVoteTokenTx(
+    daoAppInfo.appID,
+    govToken.assetIndex,
+    voterAcc,
+    depositLsig,
+    amt
+  );
 
   await tryExecuteTx(deployer, depositVoteParam);
 }

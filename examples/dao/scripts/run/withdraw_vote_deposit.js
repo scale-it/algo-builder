@@ -1,6 +1,6 @@
 const { tryExecuteTx } = require('./common/common.js');
-const { types } = require('@algo-builder/web');
 const { accounts, getDepositLsig } = require('./common/accounts.js');
+const { mkWithdrawVoteDepositTx } = require('./common/tx-params.js');
 
 async function withdrawVoteDeposit (deployer, voterAcc, amt) {
   const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
@@ -8,29 +8,13 @@ async function withdrawVoteDeposit (deployer, voterAcc, amt) {
   const depositLsig = await getDepositLsig(deployer);
 
   console.log(`* Withrawing ${amt} votes by ${voterAcc.addr} *`);
-  const withdrawVoteParam = [
-    // tx0: call to DAO App with arg 'withdraw_vote_deposits'
-    {
-      type: types.TransactionType.CallApp,
-      sign: types.SignType.SecretKey,
-      fromAccount: voterAcc,
-      appID: daoAppInfo.appID,
-      payFlags: { totalFee: 2000 },
-      appArgs: ['str:withdraw_vote_deposit']
-    },
-    // tx1: withdraw votes from deposit_lsig back to voter
-    {
-      type: types.TransactionType.TransferAsset,
-      sign: types.SignType.LogicSignature,
-      fromAccountAddr: depositLsig.address(),
-      toAccountAddr: voterAcc.addr,
-      amount: amt,
-      lsig: depositLsig,
-      assetID: govToken.assetIndex,
-      payFlags: { totalFee: 0 } // fees paid by voterAcc in tx0
-    }
-  ];
-
+  const withdrawVoteParam = mkWithdrawVoteDepositTx(
+    daoAppInfo.appID,
+    govToken.assetIndex,
+    voterAcc,
+    depositLsig,
+    amt
+  );
   await tryExecuteTx(deployer, withdrawVoteParam);
 }
 
