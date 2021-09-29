@@ -65,10 +65,6 @@ describe('DAO test', function () {
 
   // fetch latest account state
   function syncAccounts () {
-    // [
-    //   creator, proposer, voterA, voterB,
-    //   depositLsigAcc, daoFundLsigAcc, proposalLsigAcc
-    // ].map((acc) => runtime.getAccount(acc.address));
     creator = runtime.getAccount(creator.address);
     proposer = runtime.getAccount(proposer.address);
     voterA = runtime.getAccount(voterA.address);
