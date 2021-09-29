@@ -3,7 +3,7 @@ const { ProposalType } = require('./common');
 
 const now = Math.round(new Date().getTime() / 1000);
 
-function getAddProposalTx (
+function mkProposalTx (
   daoAppID, govTokenID, proposerAcc, depositLsig, proposalLsig, daoFundLsig) {
   const proposerAddr = proposerAcc.addr ?? proposerAcc.address;
   const proposalParams = [
@@ -43,7 +43,7 @@ function getAddProposalTx (
   ];
 };
 
-function getDepositVoteTokenTx (daoAppID, govTokenID, voterAcc, depositLsig, amount) {
+function mkDepositVoteTokenTx (daoAppID, govTokenID, voterAcc, depositLsig, amount) {
   return [
     // tx0: call to DAO App with arg 'deposit_vote_token'
     {
@@ -67,7 +67,7 @@ function getDepositVoteTokenTx (daoAppID, govTokenID, voterAcc, depositLsig, amo
   ];
 };
 
-function getWithdrawVoteDepositTx (daoAppID, govTokenID, voterAcc, depositLsig, amount) {
+function mkWithdrawVoteDepositTx (daoAppID, govTokenID, voterAcc, depositLsig, amount) {
   return [
     // tx0: call to DAO App with arg 'withdraw_vote_deposit'
     {
@@ -92,7 +92,7 @@ function getWithdrawVoteDepositTx (daoAppID, govTokenID, voterAcc, depositLsig, 
   ];
 };
 
-function getClearVoteRecordTx (daoAppID, voterAcc, proposalAddr) {
+function mkClearVoteRecordTx (daoAppID, voterAcc, proposalAddr) {
   return {
     type: types.TransactionType.CallApp,
     sign: types.SignType.SecretKey,
@@ -104,7 +104,7 @@ function getClearVoteRecordTx (daoAppID, voterAcc, proposalAddr) {
   };
 };
 
-function getClearProposalTx (
+function mkClearProposalTx (
   daoAppID, govTokenID, depositLsig, proposalLsig, depositAmt) {
   return [
     // tx0: call to DAO App with arg 'clear_proposal'
@@ -132,10 +132,10 @@ function getClearProposalTx (
 };
 
 module.exports = {
-  getAddProposalTx,
-  getDepositVoteTokenTx,
-  getWithdrawVoteDepositTx,
-  getClearVoteRecordTx,
-  getClearProposalTx,
+  mkProposalTx,
+  mkDepositVoteTokenTx,
+  mkWithdrawVoteDepositTx,
+  mkClearVoteRecordTx,
+  mkClearProposalTx,
   now
 };

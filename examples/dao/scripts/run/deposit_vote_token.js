@@ -1,6 +1,6 @@
 const { tryExecuteTx } = require('./common/common.js');
 const { accounts, getDepositLsig } = require('./common/accounts.js');
-const { getDepositVoteTokenTx } = require('./common/tx-params.js');
+const { mkDepositVoteTokenTx } = require('./common/tx-params.js');
 
 async function depositVote (deployer, voterAcc, amt) {
   const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
@@ -15,7 +15,7 @@ async function depositVote (deployer, voterAcc, amt) {
   }
 
   console.log(`* Deposit ${amt} votes by ${voterAcc.addr} *`);
-  const depositVoteParam = getDepositVoteTokenTx(
+  const depositVoteParam = mkDepositVoteTokenTx(
     daoAppInfo.appID,
     govToken.assetIndex,
     voterAcc,

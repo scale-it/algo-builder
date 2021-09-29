@@ -1,6 +1,6 @@
 const { tryExecuteTx } = require('./common/common.js');
 const { accounts, getDepositLsig } = require('./common/accounts.js');
-const { getWithdrawVoteDepositTx } = require('./common/tx-params.js');
+const { mkWithdrawVoteDepositTx } = require('./common/tx-params.js');
 
 async function withdrawVoteDeposit (deployer, voterAcc, amt) {
   const daoAppInfo = deployer.getApp('dao-app-approval.py', 'dao-app-clear.py');
@@ -8,7 +8,7 @@ async function withdrawVoteDeposit (deployer, voterAcc, amt) {
   const depositLsig = await getDepositLsig(deployer);
 
   console.log(`* Withrawing ${amt} votes by ${voterAcc.addr} *`);
-  const withdrawVoteParam = getWithdrawVoteDepositTx(
+  const withdrawVoteParam = mkWithdrawVoteDepositTx(
     daoAppInfo.appID,
     govToken.assetIndex,
     voterAcc,

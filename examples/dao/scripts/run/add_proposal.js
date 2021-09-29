@@ -1,6 +1,6 @@
 const { fundAccount, tryExecuteTx } = require('./common/common.js');
 const { accounts, getDAOFundLsig, getDepositLsig, getProposalLsig } = require('./common/accounts.js');
-const { getAddProposalTx } = require('./common/tx-params.js');
+const { mkProposalTx } = require('./common/tx-params.js');
 
 async function addProposal (runtimeEnv, deployer) {
   const { _, proposer } = accounts(deployer);
@@ -20,7 +20,7 @@ async function addProposal (runtimeEnv, deployer) {
   const depositLsig = await getDepositLsig(deployer);
   const govToken = deployer.asa.get('gov-token');
 
-  const addProposalTx = getAddProposalTx(
+  const addProposalTx = mkProposalTx(
     daoAppInfo.appID,
     govToken.assetIndex,
     proposer,

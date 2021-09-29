@@ -4,8 +4,8 @@ const { types, parsing } = require('@algo-builder/web');
 const { assert } = require('chai');
 const { ProposalType, Vote } = require('../scripts/run/common/common');
 const {
-  now, getAddProposalTx, getDepositVoteTokenTx, getWithdrawVoteDepositTx,
-  getClearVoteRecordTx, getClearProposalTx
+  now, mkProposalTx, mkDepositVoteTokenTx, mkWithdrawVoteDepositTx,
+  mkClearVoteRecordTx, mkClearProposalTx
 } = require('../scripts/run/common/tx-params');
 
 const minBalance = 10e6; // 10 ALGO's
@@ -40,7 +40,7 @@ describe('DAO test', function () {
 
   let runtime;
   let appCreationFlags; // deploy app params (sender, storage schema)
-  let applicationID;
+  let appID; // DAO app
   let govTokenID;
   let depositLsig;
   let daoFundLsig;
@@ -61,7 +61,7 @@ describe('DAO test', function () {
     };
   });
 
-  const getGlobal = (key) => runtime.getGlobalState(applicationID, key);
+  const getGlobal = (key) => runtime.getGlobalState(appID, key);
 
   // fetch latest account state
   function syncAccounts () {
@@ -130,14 +130,14 @@ describe('DAO test', function () {
     const clearProgram = getProgram('dao-app-clear.py');
 
     // create application
-    applicationID = runtime.addApp(
+    appID = runtime.addApp(
       { ...appCreationFlags, appArgs: daoAppArgs }, {}, approvalProgram, clearProgram);
 
-    // setup lsig account
+    // setup lsig accounts
     // Initialize issuer lsig with bond-app ID
     const scInitParam = {
       ARG_GOV_TOKEN: govTokenID,
-      ARG_DAO_APP_ID: applicationID
+      ARG_DAO_APP_ID: appID
     };
     const depositLsigProg = getProgram('deposit-lsig.py', scInitParam);
     depositLsig = runtime.getLogicSig(depositLsigProg, []);
@@ -148,7 +148,7 @@ describe('DAO test', function () {
     daoFundLsigAcc = runtime.getAccount(daoFundLsig.address());
 
     const proposalLsigProg = getProgram('proposal-lsig.py',
-      { ARG_OWNER: proposer.address, ARG_DAO_APP_ID: applicationID });
+      { ARG_OWNER: proposer.address, ARG_DAO_APP_ID: appID });
     proposalLsig = runtime.getLogicSig(proposalLsigProg, []);
     proposalLsigAcc = runtime.getAccount(proposalLsig.address());
 
@@ -159,7 +159,7 @@ describe('DAO test', function () {
     syncAccounts();
 
     // verify global state
-    assert.isDefined(applicationID);
+    assert.isDefined(appID);
     assert.deepEqual(getGlobal('deposit'), BigInt(deposit));
     assert.deepEqual(getGlobal('min_support'), BigInt(minSupport));
     assert.deepEqual(getGlobal('min_duration'), BigInt(minDuration));
@@ -171,7 +171,7 @@ describe('DAO test', function () {
       type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
       fromAccount: creator.account,
-      appID: applicationID,
+      appID: appID,
       payFlags: {},
       appArgs: [
         'str:add_deposit_accounts',
@@ -218,12 +218,12 @@ describe('DAO test', function () {
     /* --------------------  Add proposal  -------------------- */
 
     // optIn to DAO by proposalLsig
-    runtime.optInToApp(proposalLsig.address(), applicationID, {}, {});
+    runtime.optInToApp(proposalLsig.address(), appID, {}, {});
 
     let beforeBal = depositLsigAcc.getAssetHolding(govTokenID).amount;
 
-    const addProposalTx = getAddProposalTx(
-      applicationID,
+    const addProposalTx = mkProposalTx(
+      appID,
       govTokenID,
       proposer.account,
       depositLsig,
@@ -239,18 +239,18 @@ describe('DAO test', function () {
     syncAccounts();
 
     // assert proposal config is added
-    assert.deepEqual(proposalLsigAcc.getLocalState(applicationID, 'name'), parsing.stringToBytes('my-custom-proposal'));
-    assert.deepEqual(proposalLsigAcc.getLocalState(applicationID, 'url'), parsing.stringToBytes('www.myurl.com'));
-    assert.deepEqual(proposalLsigAcc.getLocalState(applicationID, 'url_hash'), parsing.stringToBytes('url-hash'));
+    assert.deepEqual(proposalLsigAcc.getLocalState(appID, 'name'), parsing.stringToBytes('my-custom-proposal'));
+    assert.deepEqual(proposalLsigAcc.getLocalState(appID, 'url'), parsing.stringToBytes('www.myurl.com'));
+    assert.deepEqual(proposalLsigAcc.getLocalState(appID, 'url_hash'), parsing.stringToBytes('url-hash'));
     // empty hash_algo must save sha256
-    assert.deepEqual(proposalLsigAcc.getLocalState(applicationID, 'hash_algo'), parsing.stringToBytes('sha256'));
-    assert.deepEqual(proposalLsigAcc.getLocalState(applicationID, 'voting_start'), BigInt(now + (1 * 60)));
-    assert.deepEqual(proposalLsigAcc.getLocalState(applicationID, 'voting_end'), BigInt(now + (3 * 60)));
-    assert.deepEqual(proposalLsigAcc.getLocalState(applicationID, 'execute_before'), BigInt(now + (7 * 60)));
-    assert.deepEqual(proposalLsigAcc.getLocalState(applicationID, 'type'), BigInt(ProposalType.ALGO_TRANSFER));
-    assert.deepEqual(proposalLsigAcc.getLocalState(applicationID, 'from'), parsing.addressToPk(daoFundLsig.address()));
-    assert.deepEqual(proposalLsigAcc.getLocalState(applicationID, 'recipient'), parsing.addressToPk(proposer.address));
-    assert.deepEqual(proposalLsigAcc.getLocalState(applicationID, 'amount'), BigInt(2e6));
+    assert.deepEqual(proposalLsigAcc.getLocalState(appID, 'hash_algo'), parsing.stringToBytes('sha256'));
+    assert.deepEqual(proposalLsigAcc.getLocalState(appID, 'voting_start'), BigInt(now + (1 * 60)));
+    assert.deepEqual(proposalLsigAcc.getLocalState(appID, 'voting_end'), BigInt(now + (3 * 60)));
+    assert.deepEqual(proposalLsigAcc.getLocalState(appID, 'execute_before'), BigInt(now + (7 * 60)));
+    assert.deepEqual(proposalLsigAcc.getLocalState(appID, 'type'), BigInt(ProposalType.ALGO_TRANSFER));
+    assert.deepEqual(proposalLsigAcc.getLocalState(appID, 'from'), parsing.addressToPk(daoFundLsig.address()));
+    assert.deepEqual(proposalLsigAcc.getLocalState(appID, 'recipient'), parsing.addressToPk(proposer.address));
+    assert.deepEqual(proposalLsigAcc.getLocalState(appID, 'amount'), BigInt(2e6));
 
     // verify deposit recieved in depositLsig
     assert.deepEqual(depositLsigAcc.getAssetHolding(govTokenID).amount, beforeBal + 15n);
@@ -258,14 +258,14 @@ describe('DAO test', function () {
     /* --------------------  Deposit Vote Token  -------------------- */
 
     // optIn to DAO by voterA & voterB
-    runtime.optInToApp(voterA.address, applicationID, {}, {});
-    runtime.optInToApp(voterB.address, applicationID, {}, {});
+    runtime.optInToApp(voterA.address, appID, {}, {});
+    runtime.optInToApp(voterB.address, appID, {}, {});
 
     beforeBal = depositLsigAcc.getAssetHolding(govTokenID).amount;
 
     // deposit 6 votes by voterA
-    const depositVoteParamA = getDepositVoteTokenTx(
-      applicationID,
+    const depositVoteParamA = mkDepositVoteTokenTx(
+      appID,
       govTokenID,
       voterA.account,
       depositLsig,
@@ -273,8 +273,8 @@ describe('DAO test', function () {
     );
     runtime.executeTx(depositVoteParamA);
 
-    const depositVoteParamB = getDepositVoteTokenTx(
-      applicationID,
+    const depositVoteParamB = mkDepositVoteTokenTx(
+      appID,
       govTokenID,
       voterB.account,
       depositLsig,
@@ -284,8 +284,8 @@ describe('DAO test', function () {
     syncAccounts();
 
     // verify sender.deposit is set
-    assert.deepEqual(voterA.getLocalState(applicationID, 'deposit'), 6n);
-    assert.deepEqual(voterB.getLocalState(applicationID, 'deposit'), 8n);
+    assert.deepEqual(voterA.getLocalState(appID, 'deposit'), 6n);
+    assert.deepEqual(voterB.getLocalState(appID, 'deposit'), 8n);
 
     // verify 7 + 8 votes deposited
     assert.deepEqual(depositLsigAcc.getAssetHolding(govTokenID).amount, beforeBal + 6n + 8n);
@@ -297,7 +297,7 @@ describe('DAO test', function () {
     const registerVoteParam = {
       type: types.TransactionType.CallApp,
       sign: types.SignType.SecretKey,
-      appID: applicationID,
+      appID: appID,
       payFlags: { totalFee: 2000 },
       accounts: [proposalLsig.address()]
     };
@@ -323,22 +323,22 @@ describe('DAO test', function () {
     const key = new Uint8Array([...parsing.stringToBytes('p_'), ...parsing.addressToPk(proposalLsig.address())]);
 
     // verify sender account has p_proposal set
-    assert.isDefined(voterA.getLocalState(applicationID, key));
-    assert.isDefined(voterA.getLocalState(applicationID, key));
+    assert.isDefined(voterA.getLocalState(appID, key));
+    assert.isDefined(voterA.getLocalState(appID, key));
 
     // verify voting count
     // + voterA registered 6 "yes" votes
     // + voterB registered 8 "abstain" votes
-    assert.equal(proposalLsigAcc.getLocalState(applicationID, 'yes'), 6n);
-    assert.equal(proposalLsigAcc.getLocalState(applicationID, 'abstain'), 8n);
-    assert.isUndefined(proposalLsigAcc.getLocalState(applicationID, 'no')); // we didn't vote for "no"
+    assert.equal(proposalLsigAcc.getLocalState(appID, 'yes'), 6n);
+    assert.equal(proposalLsigAcc.getLocalState(appID, 'abstain'), 8n);
+    assert.isUndefined(proposalLsigAcc.getLocalState(appID, 'no')); // we didn't vote for "no"
 
     /* --------------------  Execute  -------------------- */
 
     runtime.setRoundAndTimestamp(15, now + (5 * 60));
 
     // verify proposal not executed before
-    assert.equal(proposalLsigAcc.getLocalState(applicationID, 'executed'), 0n);
+    assert.equal(proposalLsigAcc.getLocalState(appID, 'executed'), 0n);
 
     const beforeProposerBal = proposer.balance();
     const executeParams = [
@@ -346,7 +346,7 @@ describe('DAO test', function () {
         type: types.TransactionType.CallApp,
         sign: types.SignType.SecretKey,
         fromAccount: proposer.account,
-        appID: applicationID,
+        appID: appID,
         payFlags: { totalFee: 2000 },
         appArgs: ['str:execute'],
         accounts: [proposalLsig.address()]
@@ -366,7 +366,7 @@ describe('DAO test', function () {
     syncAccounts();
 
     // verify executed is set to be true
-    assert.equal(proposalLsigAcc.getLocalState(applicationID, 'executed'), 1n);
+    assert.equal(proposalLsigAcc.getLocalState(appID, 'executed'), 1n);
 
     // verify payment recieved from dao fund
     assert.equal(proposer.balance(), beforeProposerBal + BigInt(2e6) - 2000n);
@@ -377,12 +377,12 @@ describe('DAO test', function () {
     const beforeBalVoterA = voterA.getAssetHolding(govTokenID).amount;
     const beforeBalVoterB = voterB.getAssetHolding(govTokenID).amount;
     // before record of sender.deposit
-    const beforeRecordVoterA = voterA.getLocalState(applicationID, 'deposit');
-    const beforeRecordVoterB = voterB.getLocalState(applicationID, 'deposit');
+    const beforeRecordVoterA = voterA.getLocalState(appID, 'deposit');
+    const beforeRecordVoterB = voterB.getLocalState(appID, 'deposit');
 
     // withdraw 6 votes deposited by voterA
-    const withdrawVoteDepositA = getWithdrawVoteDepositTx(
-      applicationID,
+    const withdrawVoteDepositA = mkWithdrawVoteDepositTx(
+      appID,
       govTokenID,
       voterA.account,
       depositLsig,
@@ -391,8 +391,8 @@ describe('DAO test', function () {
     runtime.executeTx(withdrawVoteDepositA);
 
     // withdraw 8 votes deposited by voterB
-    const withdrawVoteDepositB = getWithdrawVoteDepositTx(
-      applicationID,
+    const withdrawVoteDepositB = mkWithdrawVoteDepositTx(
+      appID,
       govTokenID,
       voterB.account,
       depositLsig,
@@ -402,8 +402,8 @@ describe('DAO test', function () {
     syncAccounts();
 
     // verify sender.deposit is set
-    assert.deepEqual(voterA.getLocalState(applicationID, 'deposit'), beforeRecordVoterA - 6n);
-    assert.deepEqual(voterB.getLocalState(applicationID, 'deposit'), beforeRecordVoterB - 8n);
+    assert.deepEqual(voterA.getLocalState(appID, 'deposit'), beforeRecordVoterA - 6n);
+    assert.deepEqual(voterB.getLocalState(appID, 'deposit'), beforeRecordVoterB - 8n);
 
     // verify tokens received by voterA & voterB from depositLsig
     assert.deepEqual(voterA.getAssetHolding(govTokenID).amount, beforeBalVoterA + 6n);
@@ -412,20 +412,20 @@ describe('DAO test', function () {
     /* --------------------  Clear Vote Record  -------------------- */
 
     // verify sender account has p_proposal set (before clear vote record)
-    assert.isDefined(voterA.getLocalState(applicationID, key));
-    assert.isDefined(voterA.getLocalState(applicationID, key));
+    assert.isDefined(voterA.getLocalState(appID, key));
+    assert.isDefined(voterA.getLocalState(appID, key));
 
     // clear voterA record
-    const clearRecordVoterA = getClearVoteRecordTx(
-      applicationID,
+    const clearRecordVoterA = mkClearVoteRecordTx(
+      appID,
       voterA.account,
       proposalLsig.address()
     );
     runtime.executeTx(clearRecordVoterA);
 
     // clear voterB record
-    const clearRecordVoterB = getClearVoteRecordTx(
-      applicationID,
+    const clearRecordVoterB = mkClearVoteRecordTx(
+      appID,
       voterB.account,
       proposalLsig.address()
     );
@@ -433,8 +433,8 @@ describe('DAO test', function () {
     syncAccounts();
 
     // verify sender account has p_proposal removed after clear record
-    assert.isUndefined(voterA.getLocalState(applicationID, key));
-    assert.isUndefined(voterA.getLocalState(applicationID, key));
+    assert.isUndefined(voterA.getLocalState(appID, key));
+    assert.isUndefined(voterA.getLocalState(appID, key));
 
     /* --------------------  Clear Proposal  -------------------- */
 
@@ -462,8 +462,8 @@ describe('DAO test', function () {
 
     assert.isDefined(proposalLsigAcc.getAssetHolding(govTokenID));
 
-    const clearProposalParam = getClearProposalTx(
-      applicationID,
+    const clearProposalParam = mkClearProposalTx(
+      appID,
       govTokenID,
       depositLsig,
       proposalLsig,
@@ -481,7 +481,7 @@ describe('DAO test', function () {
         'voting_end', 'execute_before', 'type', 'from', 'recipient',
         'amount', 'yes', 'no', 'abstain']
     ) {
-      assert.isUndefined(proposalLsigAcc.getLocalState(applicationID, key));
+      assert.isUndefined(proposalLsigAcc.getLocalState(appID, key));
     }
   });
 });
