@@ -39,7 +39,7 @@ describe('DAO test', function () {
 
   let runtime;
   let flags;
-  let applicationID;
+  let appID;  // DAO app
   let govTokenID;
   let depositLsig;
   let daoFundLsig;
@@ -103,7 +103,7 @@ describe('DAO test', function () {
     applicationID = runtime.addApp(
       { ...flags, appArgs: daoAppArgs }, {}, approvalProgram, clearProgram);
 
-    // setup lsig account
+    // setup lsig accounts
     // Initialize issuer lsig with bond-app ID
     const scInitParam = {
       ARG_GOV_TOKEN: govTokenID,
