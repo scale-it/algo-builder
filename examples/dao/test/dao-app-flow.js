@@ -16,6 +16,10 @@ const initialBalance = 200e6;
 /**
  * Test for scripts flow. Steps:
  * + create DAO (setup)
+ *    1. Create Gov Token (ASA)
+ *    2. Create DAO App
+ *    3. Compile & fund lsig's (deposit, daoFund, proposal)
+ *    4. Add depositLsig address to DAO app
  * + add proposal
  * + deposit vote tokens
  * + register vote
@@ -23,6 +27,7 @@ const initialBalance = 200e6;
  * + withdraw vote deposit
  * + clear vote record
  * + clear proposal
+ * https://paper.dropbox.com/doc/Algo-DAO--BTR~tKj8P788NMZqnVfKwS7BAg-ncLdytuFa7EJrRerIASSl
  */
 describe('DAO test', function () {
   const master = new AccountStore(1000e6);
@@ -85,7 +90,6 @@ describe('DAO test', function () {
     govTokenID = runtime.addAsset(
       'gov-token', { creator: { ...creator.account, name: 'dao-creator' } });
 
-    const creationFlags = Object.assign({}, flags);
     const daoAppArgs = [
       `int:${deposit}`,
       `int:${minSupport}`,
@@ -99,7 +103,7 @@ describe('DAO test', function () {
 
     // create application
     applicationID = runtime.addApp(
-      { ...creationFlags, appArgs: daoAppArgs }, {}, approvalProgram, clearProgram);
+      { ...flags, appArgs: daoAppArgs }, {}, approvalProgram, clearProgram);
 
     // setup lsig account
     // Initialize issuer lsig with bond-app ID
