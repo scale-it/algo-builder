@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v2.0.0 2021-09-30
+
 ### Improvements
 + Added shared space between contracts
 + Added tealv4 opcodes (`gload` and `gloads`)
