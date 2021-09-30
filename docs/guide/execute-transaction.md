@@ -198,7 +198,7 @@ Even though fee paid by alice is `0`, this transaction will pass because total f
 
 ## Sign and Send SDK Transaction object using `executeTransaction` function
 
-`executeTransaction` function supports signing and sending sdk transaction objects. To do this you will have to pass an `TransactionAndSign` object which has `transaction` and `sign`. Ex:
+`executeTransaction` function supports signing and sending sdk transaction objects. To do this you will have to pass an [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.transactionandsign.html) object which has `transaction` and `sign`. Ex:
 ```
 const tx = makeAssetCreateTxn(
   bobAcc.addr, mockSuggestedParam.fee,
@@ -216,7 +216,7 @@ const res = await executeTransaction(deployer, transaction);
 
 ## SignTransactions function
 
-This function takes array of `TransactionAndSign` objects and returns raw signed transaction
+This function takes array of [`TransactionAndSign`](https://algobuilder.dev/api/web/interfaces/types.transactionandsign.html) objects and returns raw signed transaction
 
 ```
 const transaction: wtypes.TransactionAndSign = [{
