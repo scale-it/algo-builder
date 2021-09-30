@@ -14,7 +14,7 @@ import { getProgram } from "./lib/load-program";
 import { signLogicSigMultiSig } from "./lib/lsig";
 import { signMultiSig } from "./lib/msig";
 import { balanceOf, printAssets, printGlobalStateSSC, printLocalStateSSC, readAppGlobalState, readAppLocalState } from "./lib/status";
-import { executeSignedTxnFromFile, executeTransaction, getSuggestedParams, mkTxParams } from "./lib/tx";
+import { executeSignedTxnFromFile, executeTransaction, getSuggestedParams, mkTxParams, signTransactions } from "./lib/tx";
 import * as runtime from "./runtime";
 import * as types from "./types";
 
@@ -38,6 +38,7 @@ export {
   printGlobalStateSSC,
   readAppGlobalState,
   readAppLocalState,
+  signTransactions,
   globalZeroAddress,
   getProgram,
   types,
