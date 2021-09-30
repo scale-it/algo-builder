@@ -34,7 +34,7 @@ async function run (runtimeEnv, deployer) {
     1e5,
     undefined,
     goldAssetID,
-    getSuggestedParams(deployer.algodClient)
+    await getSuggestedParams(deployer.algodClient)
   );
   const sign = {
     sign: types.SignType.SecretKey,

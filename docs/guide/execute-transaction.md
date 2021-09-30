@@ -213,6 +213,7 @@ const transaction: wtypes.TransactionAndSign = {
 
 const res = await executeTransaction(deployer, transaction);
 ```
+You can check the implementation in [asa](https://github.com/scale-it/algo-builder/blob/master/examples/asa/scripts/2-gold-asc.js) example.
 
 ## SignTransactions function
 
@@ -227,3 +228,4 @@ const rawSign = signTransactions(transaction)
 ```
 
 `rawSign` has array of raw signed transactions.
+You can check the implementation in [asa](https://github.com/scale-it/algo-builder/blob/master/examples/asa/scripts/2-gold-asc.js) example.
